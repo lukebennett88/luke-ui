@@ -6,7 +6,7 @@ export default () => {
 	const [isSelected, setIsSelected] = useState(false);
 
 	return (
-		<Stack maxInlineSize="20rem" inlineSize="100%">
+		<Stack maxInlineSize="20rem">
 			<Checkbox isSelected={isSelected} onChange={setIsSelected}>
 				{isSelected ? 'Checked' : 'Unchecked'}
 			</Checkbox>

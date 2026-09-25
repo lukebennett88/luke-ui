@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Icon } from '@luke-ui/react/icon';
 import { Track } from '@luke-ui/react/track';
-import { Comparison, ComparisonItem } from '#docs/comparison';
+import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (

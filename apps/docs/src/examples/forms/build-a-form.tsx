@@ -17,7 +17,7 @@ export default () => {
 	}
 
 	return (
-		<Stack gap="sp16" maxInlineSize="22rem" inlineSize="100%">
+		<Stack gap="sp16" maxInlineSize="22rem">
 			<form onReset={() => setSubmittedEmail('')} onSubmit={handleSubmit}>
 				<Stack gap="sp16">
 					<TextField

@@ -5,7 +5,7 @@ test('reads src from a multi-line ExampleBlock tag', () => {
 	expect(
 		exampleBlockSources(`<ExampleBlock
 	src="overview/concentric-radius"
-	title="Token reference — Keep nested corners concentric"
+	title="Token reference: Keep nested corners concentric"
 />`),
 	).toEqual(['overview/concentric-radius']);
 });

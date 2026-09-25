@@ -1,3 +1,5 @@
+import { Box } from '@luke-ui/react/box';
+import type { BoxProps } from '@luke-ui/react/box';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -27,7 +29,9 @@ export function Comparison({ align = 'start', children, direction = 'vertical' }
 	const Element = direction === 'vertical' ? Stack : Cluster;
 	return (
 		<ComparisonAlignContext.Provider value={align}>
-			<Element gap="sp16">{children}</Element>
+			<Element gap="sp16" inlineSize="max-content" marginInline="auto" maxInlineSize="100%">
+				{children}
+			</Element>
 		</ComparisonAlignContext.Provider>
 	);
 }
@@ -42,5 +46,20 @@ export function ComparisonItem({ children, label }: ComparisonItemProps) {
 			</Text>
 			{children}
 		</Stack>
+	);
+}
+
+/** A bordered placeholder for layout examples, so each child's box is visible. */
+export function ExampleItem(props: BoxProps) {
+	return (
+		<Box
+			backgroundColor="surface.floating"
+			borderColor="decorative"
+			borderRadius="detail"
+			borderStyle="solid"
+			borderWidth="thin"
+			padding="sp12"
+			{...props}
+		/>
 	);
 }

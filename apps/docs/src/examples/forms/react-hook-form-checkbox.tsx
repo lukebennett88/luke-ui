@@ -20,7 +20,7 @@ export default () => {
 	});
 
 	return (
-		<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
+		<Stack gap="sp16" maxInlineSize="20rem">
 			<form onSubmit={form.handleSubmit(() => undefined)}>
 				<Stack gap="sp16">
 					<Controller

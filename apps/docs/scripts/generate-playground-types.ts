@@ -23,7 +23,7 @@ const docsPackageJsonPath = resolve(scriptDir, '../package.json');
 const docsExamplesDir = resolve(scriptDir, '../src/examples');
 const reactPackageDir = resolve(scriptDir, '../../../packages/@luke-ui/react');
 const outputPath = resolve(scriptDir, '../src/generated/playground-types.generated.json');
-const docsComparisonVirtualPath = 'file:///docs/comparison.tsx';
+const docsHelpersVirtualPath = 'file:///docs/docs.tsx';
 
 const files: Record<string, string> = {};
 
@@ -142,7 +142,7 @@ for (const [packageName, packageDir] of externalTypePackages) {
 	addTypesPackage(packageName, packageDir);
 }
 
-addDocsFile(docsComparisonVirtualPath, join(docsExamplesDir, 'comparison.tsx'));
+addDocsFile(docsHelpersVirtualPath, join(docsExamplesDir, 'docs.tsx'));
 
 const output = JSON.stringify(files);
 mkdirSync(dirname(outputPath), { recursive: true });

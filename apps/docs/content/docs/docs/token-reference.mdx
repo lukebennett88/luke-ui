@@ -15,7 +15,7 @@ same across bundled and custom themes.
 
 ## Use semantic variables
 
-<ExampleBlock src="theming/semantic-variables" title="Token reference — Use semantic variables" />
+<ExampleBlock src="theming/semantic-variables" title="Token reference: Use semantic variables" />
 
 Choose the token whose name matches the element's role. A card might use `surface.floating`,
 `radius.surface`, and `depth.resting`. A warning message might use the warning role's subtle
@@ -32,7 +32,7 @@ value.
 Spacing provides one scale for `gap`, `padding`, and `margin`. Each key matches its pixel value, so
 `sp16` is 16px.
 
-<ExampleBlock src="overview/spacing-scale" title="Token reference — Spacing scale" />
+<ExampleBlock src="overview/spacing-scale" title="Token reference: Spacing scale" />
 
 Read [Layout](/docs/layout#responsive-values) for breakpoint keys and how spacing values cascade.
 
@@ -41,11 +41,11 @@ Read [Layout](/docs/layout#responsive-values) for breakpoint keys and how spacin
 Radius provides five semantic roles. Choose the role that matches the element being rounded, such as
 `control` for an input or `surface` for a card.
 
-<ExampleBlock src="overview/radius-roles" title="Token reference — Radius roles" />
+<ExampleBlock src="overview/radius-roles" title="Token reference: Radius roles" />
 
 <ExampleBlock
 	src="overview/concentric-radius"
-	title="Token reference — Keep nested corners concentric"
+	title="Token reference: Keep nested corners concentric"
 />
 
 When one rounded surface sits inside another, derive the outer radius from the inner radius and the
@@ -61,7 +61,7 @@ const wrapperRadius = deriveConcentricRadius(vars.radius.control, vars.space.sp8
 
 Depth describes how a surface sits above or within the interface.
 
-<ExampleBlock src="overview/depth" title="Token reference — Depth scale" />
+<ExampleBlock src="overview/depth" title="Token reference: Depth scale" />
 
 Pair each depth role with the matching surface role. For example, a menu can use `surface.floating`
 with `depth.floating`, while a dialog can use `surface.overlay` with `depth.overlay`.

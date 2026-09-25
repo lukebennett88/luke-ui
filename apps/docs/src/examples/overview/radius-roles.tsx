@@ -18,7 +18,6 @@ export default () => {
 			gap="sp16"
 			style={{
 				gridTemplateColumns: 'repeat(auto-fit, minmax(5rem, 1fr))',
-				inlineSize: '100%',
 			}}
 		>
 			{radiusRoles.map((role) => (

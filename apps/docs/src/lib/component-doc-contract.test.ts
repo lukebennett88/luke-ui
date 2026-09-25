@@ -21,7 +21,7 @@ title: Status Badge
 source: packages/@luke-ui/react/src/exports/status-badge.ts
 ---
 
-<ExampleBlock src="status-badge/basic" title="Status Badge — Basic" />
+<ExampleBlock src="status-badge/basic" title="Status Badge: Basic" />
 `,
 	});
 
@@ -38,7 +38,7 @@ source: packages/@luke-ui/react/src/exports/status-badge.ts
 
 \`StatusBadge\` from \`@luke-ui/react/status-badge\`.
 
-<ExampleBlock src="status-badge/tones" title="Status Badge — Tones" />
+<ExampleBlock src="status-badge/tones" title="Status Badge: Tones" />
 
 TODO: Describe accessibility considerations.
 `,

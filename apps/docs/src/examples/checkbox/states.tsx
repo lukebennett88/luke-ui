@@ -1,5 +1,5 @@
 import { Checkbox } from '@luke-ui/react/checkbox';
-import { Comparison, ComparisonItem } from '#docs/comparison';
+import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (

@@ -8,7 +8,7 @@ const rowStyle = {
 
 export default () => {
 	return (
-		<Stack gap="sp8" inlineSize="100%">
+		<Stack gap="sp8">
 			<Text elementType="p" style={rowStyle} textAlign="start">
 				Start aligned
 			</Text>

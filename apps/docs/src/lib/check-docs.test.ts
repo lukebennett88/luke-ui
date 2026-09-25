@@ -48,7 +48,7 @@ title: Button
 source: packages/@luke-ui/react/src/exports/button.ts
 ---
 
-<ExampleBlock src="button/basic" title="Button — Basic" />
+<ExampleBlock src="button/basic" title="Button: Basic" />
 
 ## Best practices
 
@@ -80,7 +80,7 @@ title: Button
 source: packages/@luke-ui/react/src/exports/button.ts
 ---
 
-<ExampleBlock src="button/basic" title="Button — Basic" />
+<ExampleBlock src="button/basic" title="Button: Basic" />
 
 ## Size
 
@@ -103,7 +103,7 @@ title: Icon
 source: packages/@luke-ui/react/src/exports/icon.ts
 ---
 
-<ExampleBlock src="icon/basic" title="Icon — Basic" />
+<ExampleBlock src="icon/basic" title="Icon: Basic" />
 
 ## Anatomy
 
@@ -162,7 +162,7 @@ title: Button
 source: packages/@luke-ui/react/src/exports/button.ts
 ---
 
-<ExampleBlock src="button/basic" title="Button — Basic" />
+<ExampleBlock src="button/basic" title="Button: Basic" />
 
 ## Accessibility
 
@@ -173,7 +173,7 @@ title: Icon Button
 source: packages/@luke-ui/react/src/exports/icon-button.ts
 ---
 
-<ExampleBlock src="icon-button/basic" title="Icon Button — Basic" />
+<ExampleBlock src="icon-button/basic" title="Icon Button: Basic" />
 
 ## API
 
@@ -190,7 +190,7 @@ source: packages/@luke-ui/react/src/exports/link.ts
 
 <component-props-table path="packages/@luke-ui/react/src/core/link/link.tsx" name="LinkProps" />
 
-<ExampleBlock src="link/basic" title="Link — Basic" />
+<ExampleBlock src="link/basic" title="Link: Basic" />
 
 ## Accessibility
 
@@ -240,7 +240,7 @@ test('reports an example referenced from two pages', () => {
 title: Layout
 ---
 
-<ExampleBlock src="box/responsive-layout" title="Layout — Responsive values" />
+<ExampleBlock src="box/responsive-layout" title="Layout: Responsive values" />
 
 ## Continue learning
 
@@ -257,9 +257,9 @@ title: Box
 source: packages/@luke-ui/react/src/exports/box.ts
 ---
 
-<ExampleBlock src="box/basic" title="Box — Basic" />
+<ExampleBlock src="box/basic" title="Box: Basic" />
 
-<ExampleBlock src="box/responsive-layout" title="Box — Responsive layout" />
+<ExampleBlock src="box/responsive-layout" title="Box: Responsive layout" />
 
 ## API
 
@@ -281,9 +281,9 @@ title: Box
 source: packages/@luke-ui/react/src/exports/box.ts
 ---
 
-<ExampleBlock src="box/basic" title="Box — Basic" />
+<ExampleBlock src="box/basic" title="Box: Basic" />
 
-<ExampleBlock src="box/basic" title="Box — Basic again" />
+<ExampleBlock src="box/basic" title="Box: Basic again" />
 
 ## API
 
@@ -329,8 +329,8 @@ title: Settings
 
 <ExampleBlock
 	src="settings/basic"
-	title="Settings — Basic"
-	mode={{ a: 'b' }}
+	title="Settings: Basic"
+	layout={{ a: 'b' }}
 	start={1}
 />
 
@@ -496,7 +496,7 @@ title: Button
 source: packages/@luke-ui/react/src/exports/button.ts
 ---
 
-<ExampleBlock src="button/basic" title="Button — Basic" />
+<ExampleBlock src="button/basic" title="Button: Basic" />
 
 ## Accessibility
 
@@ -622,7 +622,7 @@ title: Link
 source: packages/@luke-ui/react/src/exports/link.ts
 ---
 
-<ExampleBlock src="link/basic" title="Link — Basic" />
+<ExampleBlock src="link/basic" title="Link: Basic" />
 
 ## Accessibility
 

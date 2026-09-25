@@ -13,27 +13,31 @@ AutoGrid owns column sizing and placement. Keep direct children auto-placed and 
 If a child needs to span tracks or use explicit grid placement, use [Grid](/components/layout/grid)
 instead.
 
-<ExampleBlock src="auto-grid/basic" title="AutoGrid — Basic" />
+<ExampleBlock src="auto-grid/basic" title="AutoGrid: Basic" />
 
 ## Minimum column size
 
 Each column uses `min(minColumnInlineSize, 100%)`, so a parent narrower than the requested minimum
 does not force the grid tracks to overflow.
 
-<ExampleBlock src="auto-grid/minimum-column-size" title="AutoGrid — Minimum column size" />
+<ExampleBlock
+	src="auto-grid/minimum-column-size"
+	layout="centered"
+	title="AutoGrid: Minimum column size"
+/>
 
 ## Responsive minimum column size
 
 `minColumnInlineSize` accepts a responsive object with a required `initial` value.
 
-<ExampleBlock src="auto-grid/responsive" title="AutoGrid — Responsive minimum column size" />
+<ExampleBlock src="auto-grid/responsive" title="AutoGrid: Responsive minimum column size" />
 
 ## Choose the rendered element
 
 AutoGrid uses
 [Box's `elementType` and `render` contract](/components/layout/box#choose-the-rendered-element).
 
-<ExampleBlock src="auto-grid/semantic-element" title="AutoGrid — List" />
+<ExampleBlock src="auto-grid/semantic-element" title="AutoGrid: List" />
 
 ## API
 

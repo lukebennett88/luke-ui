@@ -10,7 +10,6 @@ export default () => {
 			padding="sp16"
 			style={{
 				gridTemplateColumns: 'repeat(auto-fit, minmax(6rem, 1fr))',
-				inlineSize: '100%',
 			}}
 		>
 			{Object.entries(vars.depth).map(([name, depth]) => (

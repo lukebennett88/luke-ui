@@ -3,6 +3,7 @@ import mdx from 'fumadocs-mdx/vite';
 import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
 import * as sourceConfig from './source.config.js';
+import { highlightSourcePlugin } from './src/lib/highlight-source-plugin.js';
 
 export default defineConfig({
 	optimizeDeps: {
@@ -13,10 +14,11 @@ export default defineConfig({
 			'react-aria-components/Popover',
 			'react-aria-components/ToggleButton',
 			'react-aria-components/ToggleButtonGroup',
+			'react-dom',
 			'react-resizable-panels',
 		],
 	},
-	plugins: [tailwindcss(), mdx(sourceConfig)],
+	plugins: [highlightSourcePlugin(), tailwindcss(), mdx(sourceConfig)],
 	test: {
 		passWithNoTests: true,
 		projects: [

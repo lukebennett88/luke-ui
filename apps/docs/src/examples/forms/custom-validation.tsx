@@ -21,7 +21,7 @@ export default () => {
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
+			<Stack gap="sp16" maxInlineSize="20rem">
 				<Stack minBlockSize="5.5rem">
 					<TextField
 						defaultValue="admin"

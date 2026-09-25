@@ -1,14 +1,18 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import type { IconName } from '@luke-ui/react/icon';
-import { Icon } from '@luke-ui/react/icon';
+import { createIcon, Icon } from '@luke-ui/react/icon';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+import { ScrollFade } from '@luke-ui/react/scroll-fade';
+import { Text } from '@luke-ui/react/text';
 import { deriveNestedRadius, vars } from '@luke-ui/react/theme';
+import { cx } from '@luke-ui/react/utils';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { ComponentType, JSX, ReactNode } from 'react';
-import { Suspense, use, useId, useState } from 'react';
+import { Suspense, use, useEffect, useId, useRef, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
+import type { GroupImperativeHandle } from 'react-resizable-panels';
 import type { HighlightedSource } from '../lib/highlighted-source.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
 import { DocsLink } from './docs-link.js';
@@ -22,18 +26,18 @@ const INNER_RADIUS = deriveNestedRadius(OUTER_RADIUS, '1px');
 type ExampleBlockProps = {
 	src: string;
 	title: string;
-	mode?: 'inset' | 'full-bleed';
+	layout?: 'flow' | 'centered' | 'full-bleed';
 };
 
 export function ExampleBlock(props: ExampleBlockProps): JSX.Element {
 	return (
-		<Suspense fallback={<ExampleLoadingState mode={props.mode} title={props.title} />}>
+		<Suspense fallback={<ExampleLoadingState layout={props.layout} title={props.title} />}>
 			<ExampleContent {...props} />
 		</Suspense>
 	);
 }
 
-function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
+function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element {
 	const slashIndex = src.indexOf('/');
 	const component = src.slice(0, slashIndex);
 	const name = src.slice(slashIndex + 1);
@@ -54,7 +58,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 	return (
 		<ExampleFrame
 			actions={
-				<Box className="flex items-center gap-1">
+				<Box alignItems="center" display="flex" flexShrink="0" gap="sp4">
 					{highlightedSource.playgroundHash != null ? (
 						<OpenInPlayground hash={highlightedSource.playgroundHash} />
 					) : null}
@@ -67,14 +71,17 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 			}
 			title={title}
 		>
-			<ExamplePreview isCodeShown={showCode} mode={mode} title={title}>
+			<ExamplePreview layout={layout} title={title}>
 				<PreviewComponent />
 			</ExamplePreview>
 			{showCode ? (
 				<Box
-					className="overflow-hidden"
 					id={codeId}
-					style={{ borderEndEndRadius: INNER_RADIUS, borderEndStartRadius: INNER_RADIUS }}
+					overflow="hidden"
+					style={{
+						borderEndEndRadius: INNER_RADIUS,
+						borderEndStartRadius: INNER_RADIUS,
+					}}
 				>
 					<CodeBlock className="my-0 rounded-none border-x-0 border-b-0 shadow-none">
 						{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
@@ -86,13 +93,16 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 	);
 }
 
-export function ExampleLoadingState({ mode, title }: Pick<ExampleBlockProps, 'mode' | 'title'>) {
+export function ExampleLoadingState({
+	layout,
+	title,
+}: Pick<ExampleBlockProps, 'layout' | 'title'>) {
 	const loadingLabel = `Loading ${title} example`;
-	const isFullBleed = mode === 'full-bleed';
+	const isFullBleed = layout === 'full-bleed';
 
 	return (
 		<ExampleFrame actions={<ExampleLoadingActions />} ariaLabel={loadingLabel} title={title}>
-			<StoryWrapper mode={mode}>
+			<StoryWrapper layout={layout}>
 				<Box
 					alignItems="center"
 					display="flex"
@@ -106,55 +116,123 @@ export function ExampleLoadingState({ mode, title }: Pick<ExampleBlockProps, 'mo
 	);
 }
 
+// The Tailwind classes in ExamplePreview repeat these values, so change both together:
+// `md:` is DESKTOP_MEDIA_QUERY, `@[640px]/example-preview-card` is MIN_RESIZABLE_CARD_WIDTH,
+// `pe-6` is RESIZE_GUTTER_WIDTH, and `min-inline-3!` is OUTSIDE_STRIP_WIDTH.
+const MIN_RESIZABLE_CARD_WIDTH = 640;
+const MIN_PREVIEW_WIDTH = 320;
+const RESIZE_GUTTER_WIDTH = 24;
+/** Half the grip's inline size, so the grip stays inside the card at full width. */
+const OUTSIDE_STRIP_WIDTH = 12;
+
+// Larger than the playground's `RESIZE_TARGET_MINIMUM_SIZE` so the grip is easier to hit.
 const EXAMPLE_RESIZE_TARGET_MINIMUM_SIZE = { coarse: 32, fine: 32 };
 
 export function ExamplePreview({
 	children,
-	isCodeShown,
-	mode,
+	layout,
 	title,
 }: {
 	children: ReactNode;
-	isCodeShown: boolean;
-	mode?: ExampleBlockProps['mode'];
+	layout?: ExampleBlockProps['layout'];
 	title: string;
 }) {
 	const isDesktop = useIsDesktop();
+	const groupElement = useRef<HTMLDivElement>(null);
+	const groupHandle = useRef<GroupImperativeHandle>(null);
+	const [cardWidth, setCardWidth] = useState(0);
+	const previewId = useId();
+	const outsideId = useId();
+	const isResizable = isDesktop && cardWidth >= MIN_RESIZABLE_CARD_WIDTH;
+
+	useEffect(() => {
+		const element = groupElement.current;
+		if (!element) return;
+		const observer = new ResizeObserver(() => setCardWidth(element.getBoundingClientRect().width));
+		observer.observe(element);
+		return () => observer.disconnect();
+	}, []);
+
+	useEffect(() => {
+		if (!isResizable) groupHandle.current?.setLayout({ [previewId]: 100, [outsideId]: 0 });
+	}, [isResizable, outsideId, previewId]);
 
 	return (
 		<Group
-			// Isolate so the separator's z-index cannot paint over the sticky page header.
-			className="isolate flex"
+			// The outside panel's minimum is set from here with `!` because the
+			// library puts an inline `min-width: 0` on each panel element.
+			className="@container/example-preview-card isolate flex overflow-hidden md:@[640px]/example-preview-card:[&>[data-panel]:last-child]:min-inline-3!"
+			disabled={!isResizable}
+			elementRef={groupElement}
+			groupRef={groupHandle}
 			orientation="horizontal"
 			resizeTargetMinimumSize={EXAMPLE_RESIZE_TARGET_MINIMUM_SIZE}
-			style={{ overflow: 'visible' }}
 		>
-			<Panel defaultSize="100%" minSize={isDesktop ? 320 : 0}>
+			<Panel
+				defaultSize="100%"
+				id={previewId}
+				minSize={isResizable ? MIN_PREVIEW_WIDTH + RESIZE_GUTTER_WIDTH : 0}
+			>
 				{/*
-					The panel establishes its own inline-size container so a
-					responsive example narrows against the preview width, not
-					the document root — the theme stylesheet's container
-					queries otherwise only ever see the full viewport. Rounding
-					and clipping live here, not on the frame, so the separator's
-					grip can sit outside this panel's edge and still be clickable.
+					This is the nearest inline-size container for a responsive
+					example, so it narrows against the preview width rather than
+					the viewport. The gutter and the separator use container
+					queries, not `isResizable`, so the first paint already has
+					its final width.
 				*/}
 				<div
-					className="overflow-hidden"
-					style={{
-						borderEndEndRadius: isCodeShown ? undefined : INNER_RADIUS,
-						borderEndStartRadius: isCodeShown ? undefined : INNER_RADIUS,
-						containerType: 'inline-size',
-					}}
+					className="example-preview-canvas @container overflow-hidden md:@[640px]/example-preview-card:pe-6"
+					style={{ backgroundColor: vars.color.surface.canvas }}
 				>
-					<StoryWrapper mode={mode}>{children}</StoryWrapper>
+					<StoryWrapper layout={layout}>{children}</StoryWrapper>
 				</div>
 			</Panel>
 			<Separator
 				aria-label={`${title} preview`}
-				className="relative z-10 hidden shrink-0 inline-px after:absolute after:block-16 after:inline-1.5 after:rounded-full after:bg-fd-muted-foreground/50 after:transition-colors after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[calc(100%+0.5rem)] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65 md:block"
+				className={cx(
+					'relative z-10 hidden shrink-0 inline-px cursor-col-resize bg-fd-border md:@[640px]/example-preview-card:block',
+					'data-[separator=hover]:[&>.example-preview-grip]:border-fd-muted-foreground/80',
+					'data-[separator=active]:[&>.example-preview-grip]:border-fd-muted-foreground',
+					'data-[separator=focus]:[&>.example-preview-grip]:ring-2 data-[separator=focus]:[&>.example-preview-grip]:ring-fd-ring',
+				)}
+				disabled={!isResizable}
+				onDoubleClick={() => {
+					groupHandle.current?.setLayout({ [previewId]: 100, [outsideId]: 0 });
+				}}
+			>
+				<ExamplePreviewResizeGrip />
+			</Separator>
+			<Panel
+				className="bg-fd-muted/50"
+				defaultSize={0}
+				id={outsideId}
+				minSize={isResizable ? OUTSIDE_STRIP_WIDTH : 0}
 			/>
-			<Panel defaultSize={0} minSize={0} />
 		</Group>
+	);
+}
+
+const GripIcon = createIcon({
+	path: (
+		<>
+			<path d="M8 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+			<path d="M8 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+			<path d="M8 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+			<path d="M14 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+			<path d="M14 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+			<path d="M14 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+		</>
+	),
+});
+
+function ExamplePreviewResizeGrip() {
+	return (
+		<span
+			aria-hidden
+			className="example-preview-grip pointer-events-none absolute inset-bs-1/2 inset-s-1/2 flex block-15 inline-3 -translate-1/2 items-center justify-center overflow-hidden rounded-full border border-fd-border bg-fd-card text-fd-muted-foreground shadow-sm transition-[box-shadow,border-color]"
+		>
+			<GripIcon className="size-full" />
+		</span>
 	);
 }
 
@@ -210,7 +288,7 @@ function ActionPlaceholder({ children, iconName }: { children: ReactNode; iconNa
 
 function ExampleLoadingActions() {
 	return (
-		<Box aria-hidden className="flex items-center gap-1" inert>
+		<Box aria-hidden alignItems="center" display="flex" flexShrink="0" gap="sp4" inert>
 			<LoadingSkeleton radius="control">
 				<ActionPlaceholder iconName="externalLink">Open in playground</ActionPlaceholder>
 			</LoadingSkeleton>
@@ -229,24 +307,54 @@ type ExampleFrameProps = {
 };
 
 function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps) {
+	const titleId = useId();
 	return (
 		<Box
 			aria-label={ariaLabel}
-			// `overflow-visible` lets the resize grip sit outside the frame.
-			// `isolate` keeps that grip's stacking inside this card so it
-			// cannot paint over the sticky page header.
-			className="not-prose isolate my-4 overflow-visible border border-fd-border"
+			className="not-prose isolate border border-fd-border"
+			marginBlock="sp16"
 			role={ariaLabel ? 'region' : undefined}
 			style={{ borderRadius: OUTER_RADIUS }}
 		>
-			<Box
-				className="flex items-center justify-between gap-2 overflow-hidden border-fd-border border-b bg-fd-card px-4 py-2"
-				style={{ borderStartEndRadius: INNER_RADIUS, borderStartStartRadius: INNER_RADIUS }}
+			<ScrollFade
+				aria-labelledby={titleId}
+				className="border-b border-fd-border bg-fd-card"
+				style={{
+					borderStartEndRadius: INNER_RADIUS,
+					borderStartStartRadius: INNER_RADIUS,
+				}}
 			>
-				<span className="text-fd-muted-foreground text-sm">{title}</span>
-				{actions}
+				<Box
+					alignItems="center"
+					display="flex"
+					gap="sp8"
+					inlineSize="max-content"
+					justifyContent="space-between"
+					minInlineSize="100%"
+					paddingBlock="sp8"
+					paddingInline="sp16"
+				>
+					<Text
+						color="secondary"
+						elementType="span"
+						id={titleId}
+						style={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+						typography="label"
+					>
+						{title}
+					</Text>
+					{actions}
+				</Box>
+			</ScrollFade>
+			<Box
+				overflow="hidden"
+				style={{
+					borderEndEndRadius: INNER_RADIUS,
+					borderEndStartRadius: INNER_RADIUS,
+				}}
+			>
+				{children}
 			</Box>
-			{children}
 		</Box>
 	);
 }
