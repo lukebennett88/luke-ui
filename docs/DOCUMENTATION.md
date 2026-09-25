@@ -348,10 +348,17 @@ Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/
 
 The package README links to the hosted docs. Fumadocs provides:
 
-- `/llms.txt` for the component index.
+- `/llms.txt` for the site index, following the llmstxt.org format: a `# Luke UI` summary, then one
+  `##` section per docs group and one per component group (`## Components: Actions`, etc.), each
+  listing that group's pages, and a closing `## Optional` link to the full documentation. It covers
+  every docs guide and every authored component guide. See `apps/docs/src/lib/llms-index.ts`.
 - `/llms-full.txt` for full docs.
 - Per-page Markdown by appending `.md` to a docs URL, for example `/docs/installation.md` or
-  `/components/actions/button.md`.
+  `/components/actions/button.md`. `/index.md` is the homepage. A request for a page's Markdown that
+  does not exist returns a `text/markdown` 404 body, not HTML.
+- `/sitemap.xml` and `/robots.txt` for search engines and agents. A Netlify edge function
+  content-negotiates `Accept: text/markdown` on any HTML page to its Markdown twin (`/api/*` is
+  excluded and always passes through unchanged). See `apps/docs/src/lib/agent-negotiation.ts`.
 
 ## Component docs
 

@@ -123,6 +123,9 @@ export default defineConfig(async () => {
 					{ path: '/api/search' },
 					{ path: '/llms.txt' },
 					{ path: '/llms-full.txt' },
+					{ path: '/sitemap.xml' },
+					{ path: '/robots.txt' },
+					{ path: '/index.md' },
 					// The preview page is loaded via an iframe src, which the link
 					// crawler does not follow, so it must be prerendered explicitly.
 					{ path: '/playground/preview' },
