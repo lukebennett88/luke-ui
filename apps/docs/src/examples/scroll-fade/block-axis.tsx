@@ -1,10 +1,10 @@
-import { ScrollMask } from '@luke-ui/react/scroll-mask';
+import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<ScrollMask
+		<ScrollFade
 			aria-label="Example items"
 			axis="block"
 			blockSize="8.75rem"
@@ -18,6 +18,6 @@ export default () => {
 					),
 				)}
 			</Stack>
-		</ScrollMask>
+		</ScrollFade>
 	);
 };

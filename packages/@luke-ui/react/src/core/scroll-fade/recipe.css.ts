@@ -6,7 +6,7 @@ import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /**
- * Feature query gating ScrollMask's fade masks and scrollbar hiding. Browsers without scroll-driven
+ * Feature query gating ScrollFade's fade masks and scrollbar hiding. Browsers without scroll-driven
  * animations cannot resolve the fade as scroll position changes, so they get a plain scrollport with
  * the native scrollbar instead of a permanently faded or permanently hidden-scrollbar edge.
  */
@@ -86,10 +86,10 @@ function maskLayers(side: keyof typeof maskAngle): StyleRule {
 }
 
 /**
- * Recipe for ScrollMask layout. Overflow/mask state is not a public recipe variant. Scrollbar hiding
+ * Recipe for ScrollFade layout. Overflow/mask state is not a public recipe variant. Scrollbar hiding
  * only applies where the fade mask can render, so unsupported browsers keep the native scrollbar.
  */
-export const scrollMaskRecipe = recipe({
+export const scrollFadeRecipe = recipe({
 	base: {
 		// Min size 0 so the scrollport can shrink inside flex/grid parents.
 		minBlockSize: 0,
@@ -120,8 +120,8 @@ export const scrollMaskRecipe = recipe({
 	},
 });
 
-/** Variant type for the public `ScrollMask` recipe. */
-export type ScrollMaskRecipeVariants = RecipeSelection<typeof scrollMaskRecipe>;
+/** Variant type for the public `ScrollFade` recipe. */
+export type ScrollFadeRecipeVariants = RecipeSelection<typeof scrollFadeRecipe>;
 
 /** Resting fade amounts before scroll timelines resolve (logical start of the scrollport). */
 const overflowingFadeVars = {
@@ -131,20 +131,20 @@ const overflowingFadeVars = {
 	},
 } as const;
 
-/** Mask-layer selectors keyed by the physical side `data-scroll-mask-end` reports. */
+/** Mask-layer selectors keyed by the physical side `data-scroll-fade-end` reports. */
 const overflowingMaskSelectors = {
-	'&[data-scroll-mask-end="bottom"]': maskLayers('bottom'),
-	'&[data-scroll-mask-end="left"]': maskLayers('left'),
-	'&[data-scroll-mask-end="right"]': maskLayers('right'),
-	'&[data-scroll-mask-end="top"]': maskLayers('top'),
+	'&[data-scroll-fade-end="bottom"]': maskLayers('bottom'),
+	'&[data-scroll-fade-end="left"]': maskLayers('left'),
+	'&[data-scroll-fade-end="right"]': maskLayers('right'),
+	'&[data-scroll-fade-end="top"]': maskLayers('top'),
 } as const satisfies StyleRule['selectors'];
 
 /**
  * Private overflowing styles, gated on `scrollTimelineSupportQuery` so unsupported browsers render no
- * mask at all rather than a fade stuck at rest. Physical mask end comes from `data-scroll-mask-end`,
+ * mask at all rather than a fade stuck at rest. Physical mask end comes from `data-scroll-fade-end`,
  * measured from the element's used writing mode and CSS `direction`.
  */
-export const scrollMaskOverflowingInline = style({
+export const scrollFadeOverflowingInline = style({
 	'@supports': {
 		[scrollTimelineSupportQuery]: {
 			...overflowingFadeVars,
@@ -154,8 +154,8 @@ export const scrollMaskOverflowingInline = style({
 	},
 });
 
-/** Private overflowing styles for `axis="block"`. See {@link scrollMaskOverflowingInline}. */
-export const scrollMaskOverflowingBlock = style({
+/** Private overflowing styles for `axis="block"`. See {@link scrollFadeOverflowingInline}. */
+export const scrollFadeOverflowingBlock = style({
 	'@supports': {
 		[scrollTimelineSupportQuery]: {
 			...overflowingFadeVars,

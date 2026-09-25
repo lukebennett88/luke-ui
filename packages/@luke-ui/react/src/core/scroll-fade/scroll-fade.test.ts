@@ -1,85 +1,85 @@
-import { ScrollMask } from '@luke-ui/react/scroll-mask';
+import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { createElement } from 'react';
 import { renderToString } from 'react-dom/server';
 import { assertType, expect, expectTypeOf, test } from 'vite-plus/test';
-import type { ScrollMaskRecipeVariants } from './recipe.css.js';
-import type { ScrollMaskProps } from './scroll-mask.js';
+import type { ScrollFadeRecipeVariants } from './recipe.css.js';
+import type { ScrollFadeProps } from './scroll-fade.js';
 
-test('ScrollMask requires an accessible name for the div root', () => {
-	assertType<ScrollMaskProps>({
+test('ScrollFade requires an accessible name for the div root', () => {
+	assertType<ScrollFadeProps>({
 		'aria-label': 'Topics',
 		children: 'Content',
 	});
-	assertType<ScrollMaskProps>({
+	assertType<ScrollFadeProps>({
 		'aria-labelledby': 'topics-heading',
 		children: 'Content',
 	});
 	// @ts-expect-error — div requires aria-label or aria-labelledby
-	assertType<ScrollMaskProps>({ children: 'Content' });
+	assertType<ScrollFadeProps>({ children: 'Content' });
 	// @ts-expect-error — aria-label and aria-labelledby are mutually exclusive
-	assertType<ScrollMaskProps>({
+	assertType<ScrollFadeProps>({
 		'aria-label': 'Topics',
 		'aria-labelledby': 'topics-heading',
 		children: 'Content',
 	});
 });
 
-test('ScrollMask rejects owned and polymorphic props', () => {
-	assertType<ScrollMaskProps>({
+test('ScrollFade rejects owned and polymorphic props', () => {
+	assertType<ScrollFadeProps>({
 		'aria-label': 'Topics',
 		children: 'Content',
-		// @ts-expect-error — ScrollMask always renders a div
+		// @ts-expect-error — ScrollFade always renders a div
 		elementType: 'nav',
 	});
-	assertType<ScrollMaskProps>({
+	assertType<ScrollFadeProps>({
 		'aria-label': 'Topics',
 		children: 'Content',
-		// @ts-expect-error — ScrollMask always renders a div
+		// @ts-expect-error — ScrollFade always renders a div
 		elementType: 'span',
 	});
-	assertType<ScrollMaskProps>({
+	assertType<ScrollFadeProps>({
 		'aria-label': 'Topics',
 		children: 'Content',
-		// @ts-expect-error — ScrollMask owns tabIndex from overflow
+		// @ts-expect-error — ScrollFade owns tabIndex from overflow
 		tabIndex: 0,
 	});
-	assertType<ScrollMaskProps>({
+	assertType<ScrollFadeProps>({
 		'aria-label': 'Topics',
 		children: 'Content',
-		// @ts-expect-error — ScrollMask owns overflow
+		// @ts-expect-error — ScrollFade owns overflow
 		overflow: 'auto',
 	});
-	assertType<ScrollMaskProps>({
+	assertType<ScrollFadeProps>({
 		'aria-label': 'Topics',
 		children: 'Content',
-		// @ts-expect-error — ScrollMask does not expose render
+		// @ts-expect-error — ScrollFade does not expose render
 		render: () => null,
 	});
-	assertType<ScrollMaskProps>({
+	assertType<ScrollFadeProps>({
 		'aria-label': 'Topics',
 		children: 'Content',
-		// @ts-expect-error — ScrollMask owns role
+		// @ts-expect-error — ScrollFade owns role
 		role: 'region',
 	});
 });
 
-test('ScrollMask axis is a closed scalar union', () => {
-	expectTypeOf<'inline' | 'block' | undefined>().toEqualTypeOf<ScrollMaskProps['axis']>();
+test('ScrollFade axis is a closed scalar union', () => {
+	expectTypeOf<'inline' | 'block' | undefined>().toEqualTypeOf<ScrollFadeProps['axis']>();
 });
 
-test('ScrollMaskRecipeVariants exposes axis only, not internal overflows state', () => {
-	expectTypeOf<ScrollMaskRecipeVariants>().toEqualTypeOf<{ axis?: 'block' | 'inline' }>();
-	assertType<ScrollMaskRecipeVariants>({ axis: 'inline' });
-	assertType<ScrollMaskRecipeVariants>({ axis: 'block' });
-	assertType<ScrollMaskRecipeVariants>({});
+test('ScrollFadeRecipeVariants exposes axis only, not internal overflows state', () => {
+	expectTypeOf<ScrollFadeRecipeVariants>().toEqualTypeOf<{ axis?: 'block' | 'inline' }>();
+	assertType<ScrollFadeRecipeVariants>({ axis: 'inline' });
+	assertType<ScrollFadeRecipeVariants>({ axis: 'block' });
+	assertType<ScrollFadeRecipeVariants>({});
 	// @ts-expect-error — overflows is internal runtime state, not a public recipe variant
-	assertType<ScrollMaskRecipeVariants>({ overflows: true });
+	assertType<ScrollFadeRecipeVariants>({ overflows: true });
 });
 
 test('SSR markup omits overflowing accessibility state', () => {
 	const markup = renderToString(
 		createElement(
-			ScrollMask,
+			ScrollFade,
 			{
 				'aria-label': 'Hydrated list',
 				inlineSize: '8rem',

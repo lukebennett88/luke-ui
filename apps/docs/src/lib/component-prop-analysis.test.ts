@@ -528,11 +528,11 @@ test(
 );
 
 test(
-	'hides forbidden ScrollMask props without hiding supported props',
+	'hides forbidden ScrollFade props without hiding supported props',
 	async () => {
 		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/scroll-mask/scroll-mask.tsx',
-			'ScrollMaskProps',
+			'packages/@luke-ui/react/src/core/scroll-fade/scroll-fade.tsx',
+			'ScrollFadeProps',
 		);
 		expect(names).toContain('axis');
 		for (const prop of [
@@ -544,7 +544,7 @@ test(
 			'role',
 			'render',
 		] as const) {
-			expect(names, `ScrollMaskProps should hide ${prop}`).not.toContain(prop);
+			expect(names, `ScrollFadeProps should hide ${prop}`).not.toContain(prop);
 		}
 	},
 	TS_MORPH_TEST_TIMEOUT,

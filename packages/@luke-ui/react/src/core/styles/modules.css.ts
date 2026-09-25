@@ -28,4 +28,4 @@ import '../visually-hidden/recipe.css.js';
 import '../track/recipe.css.js';
 import '../grid/recipe.css.js';
 import '../auto-grid/recipe.css.js';
-import '../scroll-mask/recipe.css.js';
+import '../scroll-fade/recipe.css.js';

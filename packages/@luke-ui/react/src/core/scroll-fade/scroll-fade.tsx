@@ -10,25 +10,25 @@ import type { BoxLikeElementProps } from '../types/box-like-props.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import {
-	scrollMaskOverflowingBlock,
-	scrollMaskOverflowingInline,
-	scrollMaskRecipe,
+	scrollFadeOverflowingBlock,
+	scrollFadeOverflowingInline,
+	scrollFadeRecipe,
 } from './recipe.css.js';
 
-/** Props for `ScrollMask`. */
-export type ScrollMaskProps = Prettify<_ScrollMaskProps>;
+/** Props for `ScrollFade`. */
+export type ScrollFadeProps = Prettify<_ScrollFadeProps>;
 
 /**
- * Scroll container that masks the logical start and end edges when more content is available to
+ * Scroll container that fades at the logical start and end while more content is available to
  * scroll. Always renders a `div` scrollport. The scrollport is a keyboard-focusable, named region
  * only while it overflows on the active axis.
  */
-export function ScrollMask({
+export function ScrollFade({
 	axis = 'inline',
 	className,
 	style,
 	...props
-}: ScrollMaskProps): JSX.Element {
+}: ScrollFadeProps): JSX.Element {
 	// `ref` stays on `props` so the compiler can track it through `useObjectRef`.
 	const scrollportRef = useObjectRef(props.ref);
 	const { logicalEnd, overflows } = useScrollOverflow(scrollportRef, axis);
@@ -36,16 +36,16 @@ export function ScrollMask({
 
 	return (
 		<Box
-			{...omitUnsupportedSprinklesProps(domProps, scrollMaskProperties)}
+			{...omitUnsupportedSprinklesProps(domProps, scrollFadeProperties)}
 			className={cx(
-				scrollMaskRecipe({ axis, className }),
+				scrollFadeRecipe({ axis, className }),
 				overflows
 					? axis === 'inline'
-						? scrollMaskOverflowingInline
-						: scrollMaskOverflowingBlock
+						? scrollFadeOverflowingInline
+						: scrollFadeOverflowingBlock
 					: undefined,
 			)}
-			data-scroll-mask-end={logicalEnd}
+			data-scroll-fade-end={logicalEnd}
 			elementType="div"
 			ref={scrollportRef}
 			role={overflows ? 'region' : undefined}
@@ -63,61 +63,61 @@ export function ScrollMask({
 	);
 }
 
-/** Scroll axis `ScrollMask` can mask. */
-export type ScrollMaskAxis = 'inline' | 'block';
+/** Logical axis whose start and end fade while content overflows. */
+export type ScrollFadeAxis = 'inline' | 'block';
 
 /** Physical side that corresponds to the active axis's logical end. */
-export type ScrollMaskPhysicalSide = 'bottom' | 'left' | 'right' | 'top';
+export type ScrollFadePhysicalSide = 'bottom' | 'left' | 'right' | 'top';
 
-type _ScrollMaskOwnedLayoutProperty = 'overflow' | 'overflowX' | 'overflowY';
+type _ScrollFadeOwnedLayoutProperty = 'overflow' | 'overflowX' | 'overflowY';
 
-type _ScrollMaskLayoutOmit = DistributiveOmit<LayoutProps, _ScrollMaskOwnedLayoutProperty>;
+type _ScrollFadeLayoutOmit = DistributiveOmit<LayoutProps, _ScrollFadeOwnedLayoutProperty>;
 
-type _ScrollMaskDomOmit = DistributiveOmit<
+type _ScrollFadeDomOmit = DistributiveOmit<
 	BoxLikeElementProps,
 	'elementType' | 'render' | 'role' | 'tabIndex'
 >;
 
-type _ScrollMaskProps = _ScrollMaskDomOmit &
-	_ScrollMaskLayoutOmit &
+type _ScrollFadeProps = _ScrollFadeDomOmit &
+	_ScrollFadeLayoutOmit &
 	RequiredAccessibleName & {
 		/**
-		 * Axis that scrolls and receives edge masks.
+		 * Logical axis to scroll on and fade at while more content is available.
 		 * @default inline
 		 */
-		axis?: ScrollMaskAxis;
-		/** ScrollMask owns keyboard focusability from overflow. */
+		axis?: ScrollFadeAxis;
+		/** ScrollFade owns keyboard focusability from overflow. */
 		tabIndex?: never;
-		/** ScrollMask owns scrolling on the active axis. */
+		/** ScrollFade owns scrolling on the active axis. */
 		overflow?: never;
-		/** ScrollMask owns scrolling on the active axis. */
+		/** ScrollFade owns scrolling on the active axis. */
 		overflowX?: never;
-		/** ScrollMask owns scrolling on the active axis. */
+		/** ScrollFade owns scrolling on the active axis. */
 		overflowY?: never;
-		/** ScrollMask always renders a `div` scrollport. */
+		/** ScrollFade always renders a `div` scrollport. */
 		elementType?: never;
-		/** ScrollMask owns `role` for the `div` root. */
+		/** ScrollFade owns `role` for the `div` root. */
 		role?: never;
-		/** ScrollMask owns the scrollport element. Compose semantics around or inside it. */
+		/** ScrollFade owns the scrollport element. Compose semantics around or inside it. */
 		render?: never;
 	};
 
-const scrollMaskOwnedProperties: ReadonlySet<PropertyKey> = new Set<_ScrollMaskOwnedLayoutProperty>(
+const scrollFadeOwnedProperties: ReadonlySet<PropertyKey> = new Set<_ScrollFadeOwnedLayoutProperty>(
 	['overflow', 'overflowX', 'overflowY'],
 );
 
-const scrollMaskProperties = new Set(layoutProperties);
-for (const property of scrollMaskOwnedProperties) {
-	scrollMaskProperties.delete(property);
+const scrollFadeProperties = new Set(layoutProperties);
+for (const property of scrollFadeOwnedProperties) {
+	scrollFadeProperties.delete(property);
 }
 
 /** Tracks overflow and the physical side of the active axis's logical end. */
 function useScrollOverflow(
 	scrollportRef: { current: HTMLElement | null },
-	axis: ScrollMaskAxis,
-): { logicalEnd: ScrollMaskPhysicalSide; overflows: boolean } {
+	axis: ScrollFadeAxis,
+): { logicalEnd: ScrollFadePhysicalSide; overflows: boolean } {
 	const [overflows, setOverflows] = useState(false);
-	const [logicalEnd, setLogicalEnd] = useState<ScrollMaskPhysicalSide>(
+	const [logicalEnd, setLogicalEnd] = useState<ScrollFadePhysicalSide>(
 		axis === 'inline' ? 'right' : 'bottom',
 	);
 
@@ -196,7 +196,7 @@ function useScrollOverflow(
 }
 
 /** Whether `element` overflows on the logical `axis` for its writing mode. */
-export function overflowsOnAxis(element: HTMLElement, axis: ScrollMaskAxis): boolean {
+export function overflowsOnAxis(element: HTMLElement, axis: ScrollFadeAxis): boolean {
 	const inlineIsHorizontal = isHorizontalWritingMode(getComputedStyle(element).writingMode);
 	if (axis === 'inline') {
 		return inlineIsHorizontal
@@ -214,14 +214,14 @@ export function overflowsOnAxis(element: HTMLElement, axis: ScrollMaskAxis): boo
  * Measured from used layout (CSS `direction`, writing mode, `text-orientation`, etc.) via a logical
  * inset probe — not from `:dir()`, which ignores `style={{ direction }}`.
  */
-export function logicalEndSide(element: HTMLElement, axis: ScrollMaskAxis): ScrollMaskPhysicalSide {
+export function logicalEndSide(element: HTMLElement, axis: ScrollFadeAxis): ScrollFadePhysicalSide {
 	return physicalSideOfLogicalEnd(element, axis === 'inline' ? 'inline-end' : 'block-end');
 }
 
 function physicalSideOfLogicalEnd(
 	element: HTMLElement,
 	edge: 'block-end' | 'inline-end',
-): ScrollMaskPhysicalSide {
+): ScrollFadePhysicalSide {
 	const style = getComputedStyle(element);
 	// Measure on a detached box so scrollport scroll offset cannot move the probe. Copy the used
 	// writing mode, CSS direction, and text-orientation — not `:dir()`, which ignores CSS direction.

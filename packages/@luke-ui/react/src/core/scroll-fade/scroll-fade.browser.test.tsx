@@ -1,4 +1,4 @@
-import { ScrollMask } from '@luke-ui/react/scroll-mask';
+import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { createRef, useState } from 'react';
@@ -13,7 +13,7 @@ import {
 } from '../test-utils/forwarding.js';
 import { hydrate, render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Grid } from '../test-utils/visual.js';
-import { ScrollMask as ScrollMaskSource, logicalEndSide, overflowsOnAxis } from './scroll-mask.js';
+import { ScrollFade as ScrollFadeSource, logicalEndSide, overflowsOnAxis } from './scroll-fade.js';
 
 /** Standards-based physical gradient angles for logical-end sides. Hard-coded so tests do not share a wrong production mapping. */
 const maskGradientAngle = {
@@ -23,14 +23,14 @@ const maskGradientAngle = {
 	top: 0,
 } as const;
 
-test('ScrollMask forwards className, data attributes, id, and ref to its element', () => {
+test('ScrollFade forwards className, data attributes, id, and ref to its element', () => {
 	const ref = createRef<HTMLElement>();
 	const { container } = render(
-		<ScrollMask {...forwardedDomProps} aria-label="Topics" ref={ref}>
+		<ScrollFade {...forwardedDomProps} aria-label="Topics" ref={ref}>
 			Content
-		</ScrollMask>,
+		</ScrollFade>,
 	);
-	const target = expectHtmlElement(container.firstElementChild, 'Expected ScrollMask element.');
+	const target = expectHtmlElement(container.firstElementChild, 'Expected ScrollFade element.');
 
 	expectForwardsDomProps(target, ref);
 	expect(target.tagName).toBe('DIV');
@@ -38,16 +38,16 @@ test('ScrollMask forwards className, data attributes, id, and ref to its element
 
 test('fitting div has no mask, tab stop, region role, or accessible name', async () => {
 	const { locator } = render(
-		<ScrollMask
+		<ScrollFade
 			aria-label="Short list"
 			blockSize="6rem"
-			data-testid="scroll-mask"
+			data-testid="scroll-fade"
 			inlineSize="12rem"
 		>
 			Fits
-		</ScrollMask>,
+		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element());
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element());
 
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
@@ -58,13 +58,13 @@ test('fitting div has no mask, tab stop, region role, or accessible name', async
 
 test('overflowing div applies accessible name with the automatic region role', async () => {
 	const { locator } = render(
-		<ScrollMask aria-label="Wide list" data-testid="scroll-mask" inlineSize="8rem" padding="sp8">
+		<ScrollFade aria-label="Wide list" data-testid="scroll-fade" inlineSize="8rem" padding="sp8">
 			<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 				Overflowing inline content for the mask
 			</span>
-		</ScrollMask>,
+		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 
 	expect(element.tabIndex).toBe(0);
 	expect(element.getAttribute('role')).toBe('region');
@@ -79,18 +79,18 @@ test('overflowing div applies accessible name with the automatic region role', a
 
 test('overflowing block content is keyboard-focusable with a region role and mask', async () => {
 	const { locator } = render(
-		<ScrollMask
+		<ScrollFade
 			aria-label="Tall list"
 			axis="block"
 			blockSize="6rem"
-			data-testid="scroll-mask"
+			data-testid="scroll-fade"
 			inlineSize="12rem"
 			padding="sp8"
 		>
 			<div style={{ blockSize: '18rem' }}>Overflowing block content for the mask</div>
-		</ScrollMask>,
+		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 
 	expect(element.tabIndex).toBe(0);
 	expect(element.getAttribute('role')).toBe('region');
@@ -113,21 +113,21 @@ test('region role and accessible name appear together when a fitting div overflo
 				<button type="button" onClick={() => setExpanded((value) => !value)}>
 					Toggle
 				</button>
-				<ScrollMask
+				<ScrollFade
 					aria-label="Dynamic list"
 					axis="block"
 					blockSize="6rem"
-					data-testid="scroll-mask"
+					data-testid="scroll-fade"
 					inlineSize="12rem"
 				>
 					<div style={{ blockSize: expanded ? '18rem' : '2rem' }}>Dynamic content</div>
-				</ScrollMask>
+				</ScrollFade>
 			</>
 		);
 	}
 
 	const { locator } = render(<Fixture />);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element());
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element());
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
 	expect(element.hasAttribute('aria-label')).toBe(false);
@@ -157,23 +157,23 @@ test('replacing overflowing content still measures overflow after removal', asyn
 				>
 					Replace
 				</button>
-				<ScrollMask
+				<ScrollFade
 					aria-label="Replaced list"
 					axis="block"
 					blockSize="6rem"
-					data-testid="scroll-mask"
+					data-testid="scroll-fade"
 					inlineSize="12rem"
 				>
 					<div key={generation} style={{ blockSize: '18rem' }}>
 						Generation {generation}
 					</div>
-				</ScrollMask>
+				</ScrollFade>
 			</>
 		);
 	}
 
 	const { locator } = render(<Fixture />);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 	expect(element.getAttribute('role')).toBe('region');
 	expectMaskToward(element, 'bottom');
 
@@ -243,20 +243,20 @@ for (const writingCase of writingModeCases) {
 	test(`inline overflow maps correctly for ${writingCase.label}`, async () => {
 		const { locator } = render(
 			<div dir={writingCase.direction} style={{ writingMode: writingCase.writingMode }}>
-				<ScrollMask
+				<ScrollFade
 					aria-label={`Inline ${writingCase.label}`}
 					blockSize="10rem"
-					data-testid="scroll-mask"
+					data-testid="scroll-fade"
 					inlineSize="5rem"
 					padding="sp8"
 				>
 					<div style={{ inlineSize: '16rem', whiteSpace: 'nowrap' }}>
 						長いインライン内容 for logical overflow
 					</div>
-				</ScrollMask>
+				</ScrollFade>
 			</div>,
 		);
-		const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+		const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 		const styles = getComputedStyle(element);
 
 		expect(styles.writingMode).toBe(writingCase.writingMode);
@@ -267,7 +267,7 @@ for (const writingCase of writingModeCases) {
 		expect(styles.overflowBlock).toBe('hidden');
 		expect(element.tabIndex).toBe(0);
 		expect(element.getAttribute('role')).toBe('region');
-		expect(element.getAttribute('data-scroll-mask-end')).toBe(writingCase.expectedInlineEnd);
+		expect(element.getAttribute('data-scroll-fade-end')).toBe(writingCase.expectedInlineEnd);
 		expect(logicalEndSide(element, 'inline')).toBe(writingCase.expectedInlineEnd);
 		expectMaskToward(element, writingCase.expectedInlineEnd);
 	});
@@ -275,19 +275,19 @@ for (const writingCase of writingModeCases) {
 	test(`block overflow maps correctly for ${writingCase.label}`, async () => {
 		const { locator } = render(
 			<div dir={writingCase.direction} style={{ writingMode: writingCase.writingMode }}>
-				<ScrollMask
+				<ScrollFade
 					aria-label={`Block ${writingCase.label}`}
 					axis="block"
 					blockSize="5rem"
-					data-testid="scroll-mask"
+					data-testid="scroll-fade"
 					inlineSize="10rem"
 					padding="sp8"
 				>
 					<div style={{ blockSize: '16rem' }}>長いブロック内容 for logical overflow</div>
-				</ScrollMask>
+				</ScrollFade>
 			</div>,
 		);
-		const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+		const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 		const styles = getComputedStyle(element);
 
 		expect(styles.writingMode).toBe(writingCase.writingMode);
@@ -298,7 +298,7 @@ for (const writingCase of writingModeCases) {
 		expect(styles.overflowInline).toBe('hidden');
 		expect(element.tabIndex).toBe(0);
 		expect(element.getAttribute('role')).toBe('region');
-		expect(element.getAttribute('data-scroll-mask-end')).toBe(writingCase.expectedBlockEnd);
+		expect(element.getAttribute('data-scroll-fade-end')).toBe(writingCase.expectedBlockEnd);
 		expect(logicalEndSide(element, 'block')).toBe(writingCase.expectedBlockEnd);
 		expectMaskToward(element, writingCase.expectedBlockEnd);
 	});
@@ -306,9 +306,9 @@ for (const writingCase of writingModeCases) {
 
 test('CSS direction rtl on the scrollport flips the inline mask', async () => {
 	const { locator } = render(
-		<ScrollMask
+		<ScrollFade
 			aria-label="CSS direction"
-			data-testid="scroll-mask"
+			data-testid="scroll-fade"
 			inlineSize="8rem"
 			padding="sp8"
 			style={{ direction: 'rtl' }}
@@ -316,12 +316,12 @@ test('CSS direction rtl on the scrollport flips the inline mask', async () => {
 			<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 				Overflowing inline content for CSS direction
 			</span>
-		</ScrollMask>,
+		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 
 	expect(getComputedStyle(element).direction).toBe('rtl');
-	expect(element.getAttribute('data-scroll-mask-end')).toBe('left');
+	expect(element.getAttribute('data-scroll-fade-end')).toBe('left');
 	expect(logicalEndSide(element, 'inline')).toBe('left');
 	expectMaskToward(element, 'left');
 });
@@ -334,29 +334,29 @@ test('inherited CSS direction updates the inline mask without remounting', async
 				<button type="button" onClick={() => setDirection('rtl')}>
 					Switch to RTL
 				</button>
-				<ScrollMask
+				<ScrollFade
 					aria-label="Direction switch"
-					data-testid="scroll-mask"
+					data-testid="scroll-fade"
 					inlineSize="8rem"
 					padding="sp8"
 				>
 					<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 						Overflowing inline content for direction switch
 					</span>
-				</ScrollMask>
+				</ScrollFade>
 			</div>
 		);
 	}
 
 	const { locator } = render(<Fixture />);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 
 	expect(getComputedStyle(element).direction).toBe('ltr');
 	expectMaskToward(element, 'right');
 
 	await userEvent.click(locator.getByRole('button', { name: 'Switch to RTL' }));
 	await expect.poll(() => getComputedStyle(element).direction).toBe('rtl');
-	await expect.poll(() => element.getAttribute('data-scroll-mask-end')).toBe('left');
+	await expect.poll(() => element.getAttribute('data-scroll-fade-end')).toBe('left');
 
 	expect(logicalEndSide(element, 'inline')).toBe('left');
 	expectMaskToward(element, 'left');
@@ -365,18 +365,18 @@ test('inherited CSS direction updates the inline mask without remounting', async
 test('vertical writing mode with RTL and text-orientation upright keeps logical inline end', async () => {
 	const { locator } = render(
 		<div style={{ writingMode: 'vertical-rl', direction: 'rtl', textOrientation: 'upright' }}>
-			<ScrollMask
+			<ScrollFade
 				aria-label="Upright vertical"
 				blockSize="10rem"
-				data-testid="scroll-mask"
+				data-testid="scroll-fade"
 				inlineSize="5rem"
 				padding="sp8"
 			>
 				<div style={{ inlineSize: '16rem', whiteSpace: 'nowrap' }}>長い upright contents</div>
-			</ScrollMask>
+			</ScrollFade>
 		</div>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 	const styles = getComputedStyle(element);
 
 	expect(styles.writingMode).toBe('vertical-rl');
@@ -384,25 +384,25 @@ test('vertical writing mode with RTL and text-orientation upright keeps logical 
 	expect(styles.textOrientation).toBe('upright');
 	expect(overflowsOnAxis(element, 'inline')).toBe(true);
 	expect(element.tabIndex).toBe(0);
-	expect(element.getAttribute('data-scroll-mask-end')).toBe('top');
+	expect(element.getAttribute('data-scroll-fade-end')).toBe('top');
 	expect(logicalEndSide(element, 'inline')).toBe('top');
 	expectMaskToward(element, 'top');
 });
 
 test('inline scroll progression fades start then end across the scroll range', async () => {
 	const { locator } = render(
-		<ScrollMask
+		<ScrollFade
 			aria-label="Inline progression"
-			data-testid="scroll-mask"
+			data-testid="scroll-fade"
 			inlineSize="10rem"
 			padding="sp8"
 		>
 			<span style={{ display: 'inline-block', inlineSize: '40rem', whiteSpace: 'nowrap' }}>
 				Overflowing inline content for scroll progression
 			</span>
-		</ScrollMask>,
+		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 	const maxScroll = element.scrollWidth - element.clientWidth;
 	expect(maxScroll).toBeGreaterThan(96);
 
@@ -411,18 +411,18 @@ test('inline scroll progression fades start then end across the scroll range', a
 
 test('block scroll progression fades start then end across the scroll range', async () => {
 	const { locator } = render(
-		<ScrollMask
+		<ScrollFade
 			aria-label="Block progression"
 			axis="block"
 			blockSize="8rem"
-			data-testid="scroll-mask"
+			data-testid="scroll-fade"
 			inlineSize="12rem"
 			padding="sp8"
 		>
 			<div style={{ blockSize: '40rem' }}>Overflowing block content for scroll progression</div>
-		</ScrollMask>,
+		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 	const maxScroll = element.scrollHeight - element.clientHeight;
 	expect(maxScroll).toBeGreaterThan(96);
 
@@ -431,9 +431,9 @@ test('block scroll progression fades start then end across the scroll range', as
 
 test('scroll progression stays coherent when overflow is shorter than the reveal distance', async () => {
 	const { locator } = render(
-		<ScrollMask
+		<ScrollFade
 			aria-label="Short overflow"
-			data-testid="scroll-mask"
+			data-testid="scroll-fade"
 			inlineSize="10rem"
 			padding="sp8"
 		>
@@ -441,9 +441,9 @@ test('scroll progression stays coherent when overflow is shorter than the reveal
 			<span style={{ display: 'inline-block', inlineSize: '12.5rem', whiteSpace: 'nowrap' }}>
 				Short overflow progression
 			</span>
-		</ScrollMask>,
+		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 	const maxScroll = element.scrollWidth - element.clientWidth;
 	expect(maxScroll).toBeGreaterThan(0);
 	expect(maxScroll).toBeLessThan(96);
@@ -455,19 +455,19 @@ test('focus-visible keeps the mask and a visible focus ring on the scrollport', 
 	const { locator } = render(
 		<>
 			<button type="button">Before</button>
-			<ScrollMask
+			<ScrollFade
 				aria-label="Focusable list"
-				data-testid="scroll-mask"
+				data-testid="scroll-fade"
 				inlineSize="8rem"
 				padding="sp8"
 			>
 				<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 					Overflowing inline content for focus
 				</span>
-			</ScrollMask>
+			</ScrollFade>
 		</>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 	expectMaskToward(element, 'right');
 
 	locator.getByRole('button', { name: 'Before' }).element().focus();
@@ -483,15 +483,15 @@ test('focus-visible keeps the mask and a visible focus ring on the scrollport', 
 
 test('focusing an interactive descendant near a faded edge keeps the mask', async () => {
 	const { locator } = render(
-		<ScrollMask aria-label="Nested focus" data-testid="scroll-mask" inlineSize="8rem" padding="sp8">
+		<ScrollFade aria-label="Nested focus" data-testid="scroll-fade" inlineSize="8rem" padding="sp8">
 			<div style={{ display: 'flex', gap: '1rem', inlineSize: '24rem' }}>
 				<button type="button">Near start</button>
 				<span style={{ flex: 'none', inlineSize: '16rem' }}>Spacer</span>
 				<button type="button">Near end</button>
 			</div>
-		</ScrollMask>,
+		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 	expectMaskToward(element, 'right');
 
 	const nearEnd = locator.getByRole('button', { name: 'Near end' }).element();
@@ -503,7 +503,7 @@ test('focusing an interactive descendant near a faded edge keeps the mask', asyn
 
 test('overflowing scrollport remains a named tab stop with tabbable descendants', async () => {
 	const { locator } = render(
-		<ScrollMask aria-label="Example items" data-testid="scroll-mask" inlineSize="8rem">
+		<ScrollFade aria-label="Example items" data-testid="scroll-fade" inlineSize="8rem">
 			<div style={{ display: 'flex', gap: '1rem' }}>
 				<button style={{ flex: 'none', inlineSize: '6rem' }} type="button">
 					First item
@@ -512,9 +512,9 @@ test('overflowing scrollport remains a named tab stop with tabbable descendants'
 					Second item
 				</button>
 			</div>
-		</ScrollMask>,
+		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 
 	expect(element.tabIndex).toBe(0);
 	expect(element.getAttribute('role')).toBe('region');
@@ -527,19 +527,19 @@ test('nested intrinsic image load updates overflow from fitting to overflowing',
 	const tallSvg = svgDataUri(16, 320);
 
 	const { locator } = render(
-		<ScrollMask
+		<ScrollFade
 			aria-label="Image list"
 			axis="block"
 			blockSize="6rem"
-			data-testid="scroll-mask"
+			data-testid="scroll-fade"
 			inlineSize="8rem"
 		>
 			<div>
 				<img alt="" data-testid="intrinsic" src={tinySvg} />
 			</div>
-		</ScrollMask>,
+		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element());
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element());
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
 	expect(getComputedStyle(element).maskImage).toBe('none');
@@ -569,27 +569,27 @@ test('nested intrinsic image load updates overflow from fitting to overflowing',
 test('SSR markup hydrates without mismatch and then measures overflow', async () => {
 	// Source import so renderToString shares the browser React instance (dist hits invalid hook call).
 	const tree = (
-		<ScrollMaskSource
+		<ScrollFadeSource
 			aria-label="Hydrated list"
-			data-testid="scroll-mask"
+			data-testid="scroll-fade"
 			inlineSize="8rem"
 			padding="sp8"
 		>
 			<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 				Overflowing inline content for hydration
 			</span>
-		</ScrollMaskSource>
+		</ScrollFadeSource>
 	);
 
 	const markup = renderToString(tree);
 	expect(markup).not.toContain('role="region"');
 	expect(markup).not.toMatch(/tabindex=/i);
 	expect(markup).not.toContain('aria-label="Hydrated list"');
-	expect(markup).toContain('data-testid="scroll-mask"');
+	expect(markup).toContain('data-testid="scroll-fade"');
 
 	const { locator, recoverableErrors, unmount } = hydrate(markup, tree);
 	try {
-		const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+		const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 
 		expect(element.tabIndex).toBe(0);
 		expect(element.getAttribute('role')).toBe('region');
@@ -603,9 +603,9 @@ test('SSR markup hydrates without mismatch and then measures overflow', async ()
 
 test('fitting and overflowing default divs have no axe violations', async () => {
 	const { container: fitting, locator: fittingLocator } = render(
-		<ScrollMask aria-label="Fits" blockSize="6rem" data-testid="fitting-axe" inlineSize="12rem">
+		<ScrollFade aria-label="Fits" blockSize="6rem" data-testid="fitting-axe" inlineSize="12rem">
 			Short
-		</ScrollMask>,
+		</ScrollFade>,
 	);
 	const fittingElement = await waitForScrollport(
 		fittingLocator.getByTestId('fitting-axe').element(),
@@ -614,7 +614,7 @@ test('fitting and overflowing default divs have no axe violations', async () => 
 	await expectNoAxeViolations(fitting);
 
 	const { container: overflowing, locator } = render(
-		<ScrollMask
+		<ScrollFade
 			aria-label="Overflows"
 			data-testid="overflowing-axe"
 			inlineSize="8rem"
@@ -623,7 +623,7 @@ test('fitting and overflowing default divs have no axe violations', async () => 
 			<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 				Overflowing content for axe
 			</span>
-		</ScrollMask>,
+		</ScrollFade>,
 	);
 	const overflowingElement = await waitForScrollport(
 		locator.getByTestId('overflowing-axe').element(),
@@ -633,15 +633,15 @@ test('fitting and overflowing default divs have no axe violations', async () => 
 	await expectNoAxeViolations(overflowing);
 });
 
-test('the ScrollMask scene has no axe violations', async () => {
-	const { container } = render(<ScrollMaskScene />);
+test('the ScrollFade scene has no axe violations', async () => {
+	const { container } = render(<ScrollFadeScene />);
 
 	await expectNoAxeViolations(container);
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
-		const { locator } = render(<ScrollMaskScene />, { appearance });
+		const { locator } = render(<ScrollFadeScene />, { appearance });
 		await captureVisualAppearance(locator, 'scroll-mask/kitchen-sink', appearance);
 	}
 });
@@ -649,19 +649,19 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 test('overflowing focus-visible state', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(
-			<ScrollMask
+			<ScrollFade
 				aria-label="Focused overflow"
-				data-testid="scroll-mask"
+				data-testid="scroll-fade"
 				inlineSize="10rem"
 				padding="sp8"
 			>
 				<span style={{ display: 'inline-block', inlineSize: '22rem', whiteSpace: 'nowrap' }}>
 					Design tokens · Layout · Forms · Feedback · Typography
 				</span>
-			</ScrollMask>,
+			</ScrollFade>,
 			{ appearance },
 		);
-		const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+		const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 		element.focus({ focusVisible: true });
 		expect(element.matches(':focus-visible')).toBe(true);
 		expectMaskToward(element, 'right');
@@ -669,15 +669,15 @@ test('overflowing focus-visible state', { tags: ['visual'] }, async () => {
 	}
 });
 
-function ScrollMaskScene() {
+function ScrollFadeScene() {
 	return (
 		<Grid columns={2}>
-			<ScrollMask aria-label="Inline topics" inlineSize="10rem" padding="sp8">
+			<ScrollFade aria-label="Inline topics" inlineSize="10rem" padding="sp8">
 				<span style={{ display: 'inline-block', inlineSize: '22rem', whiteSpace: 'nowrap' }}>
 					Design tokens · Layout · Forms · Feedback · Typography
 				</span>
-			</ScrollMask>
-			<ScrollMask
+			</ScrollFade>
+			<ScrollFade
 				aria-label="Block topics"
 				axis="block"
 				blockSize="8rem"
@@ -689,7 +689,7 @@ function ScrollMaskScene() {
 						<Text key={item}>{item}</Text>
 					))}
 				</div>
-			</ScrollMask>
+			</ScrollFade>
 		</Grid>
 	);
 }
@@ -710,7 +710,7 @@ function loadImageSource(image: HTMLImageElement, src: string): Promise<void> {
 	});
 }
 
-/** Waits for ScrollMask's observer-driven React update, not for size polling. */
+/** Waits for ScrollFade's observer-driven React update, not for size polling. */
 function waitForAttribute(element: HTMLElement, name: string, value: string | null): Promise<void> {
 	if (element.getAttribute(name) === value) return Promise.resolve();
 
@@ -818,7 +818,7 @@ async function assertBlockProgression(element: HTMLElement, maxScroll: number): 
 }
 
 async function waitForScrollport(node: Element, shouldOverflow?: boolean): Promise<HTMLElement> {
-	if (!(node instanceof HTMLElement)) throw new Error('Expected ScrollMask element.');
+	if (!(node instanceof HTMLElement)) throw new Error('Expected ScrollFade element.');
 
 	const deadline = Date.now() + 2000;
 	while (Date.now() < deadline) {
@@ -833,6 +833,6 @@ async function waitForScrollport(node: Element, shouldOverflow?: boolean): Promi
 	}
 
 	throw new Error(
-		`Timed out waiting for ScrollMask overflow=${String(shouldOverflow)} (tabIndex=${node.tabIndex}).`,
+		`Timed out waiting for ScrollFade overflow=${String(shouldOverflow)} (tabIndex=${node.tabIndex}).`,
 	);
 }
