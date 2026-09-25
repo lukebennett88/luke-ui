@@ -22,7 +22,7 @@ const revealDistance = vars.space.sp96;
  * Extra mask coverage beyond the border box so the standard focus outline
  * (`outline-width` 2px + `outline-offset` 2px) stays in an opaque gutter and is not faded.
  */
-const focusRingGutter = '8px';
+const focusRingGutter = vars.space.sp8;
 
 const startFadeVar = createVar({
 	inherits: false,
