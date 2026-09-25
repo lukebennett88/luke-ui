@@ -6,7 +6,7 @@ description: Validate a form field, and write the message that tells someone how
 Every Luke UI form field can report a problem. An invalid field takes the danger border colour and
 renders a message beneath the control.
 
-<ExampleBlock src="forms/validation" title="Validation — Invalid fields" />
+<ExampleBlock src="forms/validation" title="Validation: Invalid fields" />
 
 `errorMessage` means one thing: this field currently has a controlled error. Pass it when you
 already have a message from a form library, your server, or your own state. The field is invalid as
@@ -22,7 +22,7 @@ Pass `type="email"` or `type="url"` to check the value's format.
 Leave out `errorMessage`. The field renders the message the constraint produces. It appears on blur
 or on submit.
 
-<ExampleBlock src="forms/constraint-validation" title="Validation — Constraint validation" />
+<ExampleBlock src="forms/constraint-validation" title="Validation: Constraint validation" />
 
 Pass `validationBehavior="native"` to block submission until every field passes. This is the
 default.
@@ -38,7 +38,7 @@ Pass a `validate` function for a rule the browser cannot check, such as a reserv
 function takes the value and returns the validation message, or `null` when the value is valid.
 Leave out `errorMessage`. The field renders the message `validate` returns.
 
-<ExampleBlock src="forms/custom-validation" title="Validation — Custom rule" />
+<ExampleBlock src="forms/custom-validation" title="Validation: Custom rule" />
 
 Return one actionable message, even when several conditions could fail. Check the most important
 condition first so the next message appears once that one is fixed. You can return an array of

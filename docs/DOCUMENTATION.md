@@ -154,9 +154,9 @@ terms.
 
 **Spelling and punctuation.** Spell words in Australian English. Write headings in sentence case,
 and capitalise only proper nouns and product names. Split a sentence rather than joining two ideas
-with a semicolon. An em dash is fine when it has a space on each side, as in `foo — bar`. The em
-dash inside an `<ExampleBlock title>` already follows that form:
-`<page or component> — <qualifier>`.
+with a semicolon. An em dash is fine when it has a space on each side, as in `foo — bar`. The colon
+inside an `<ExampleBlock title>` follows a different form:
+`<page or component>: <qualifier>`.
 
 **Say it once.** Cut a sentence whose only content restates its heading, a prop name, or the example
 below it. Do not summarise a section at the end of it. When more than one page needs the same rule,
@@ -264,7 +264,7 @@ default-exports an anonymous arrow function, `export default () => {...}`. The m
 identifies the component and variation, so the rendered source repeats no function name.
 
 Reference an example from an MDX page with `<ExampleBlock src="<component>/<name>" title="..." />`.
-Title it `<page or component> — <qualifier>`, for example `Button — Icons`.
+Title it `<page or component>: <qualifier>`, for example `Button: Icons`.
 
 Every component guide opens with a focused `basic.tsx` example as its primary `ExampleBlock`, which
 the generator scaffolds and `component-doc-contract` enforces. An example that no page references

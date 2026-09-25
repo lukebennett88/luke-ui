@@ -186,7 +186,7 @@ source: packages/@luke-ui/react/src/exports/primitives/${input.name}.ts
 
 <ExampleBlock
 	src="${exampleSlug}"
-	title="${input.docsTitle} — Basic"
+	title="${input.docsTitle}: Basic"
 />
 
 ## API

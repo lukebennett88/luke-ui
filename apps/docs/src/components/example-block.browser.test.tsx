@@ -20,7 +20,7 @@ import { DocsThemeRoot } from './theme-controls.js';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
-const exampleTitle = 'Combobox Field — Basic';
+const exampleTitle = 'Combobox Field: Basic';
 const loadingLabel = `Loading ${exampleTitle} example`;
 
 afterEach(() => {
@@ -156,10 +156,10 @@ test('the mobile card header scrolls complete controls without page overflow', a
 	await page.viewport(400, 800);
 	await renderExampleBlock({
 		src: 'button/basic',
-		title: 'Box — Responsive layout with a deliberately long heading',
+		title: 'Box: Responsive layout with a deliberately long heading',
 		width: 360,
 	});
-	const titleText = 'Box — Responsive layout with a deliberately long heading';
+	const titleText = 'Box: Responsive layout with a deliberately long heading';
 	const title = page.getByText(titleText).element();
 	const playground = page.getByText('Open in playground', { exact: true }).element();
 	expect(playground.closest('a, button')).not.toBeNull();
@@ -187,7 +187,7 @@ test('the mobile card header scrolls complete controls without page overflow', a
 
 test('the frame does not clip the scrollable header focus ring', async () => {
 	await page.viewport(400, 800);
-	const titleText = 'Box — Responsive layout with a deliberately long heading';
+	const titleText = 'Box: Responsive layout with a deliberately long heading';
 	await renderExampleBlock({ src: 'button/basic', title: titleText, width: 360 });
 	const headerRegion = page.getByRole('region', { name: titleText });
 	await expect.poll(() => headerRegion.query()).toBeTruthy();
@@ -297,7 +297,7 @@ function renderPreviewHarness({
 
 async function renderExampleBlock({
 	src = 'box/responsive-layout',
-	title = 'Box — Responsive layout',
+	title = 'Box: Responsive layout',
 	width = 800,
 }: { src?: string; title?: string; width?: number } = {}) {
 	const rootRoute = createRootRoute({

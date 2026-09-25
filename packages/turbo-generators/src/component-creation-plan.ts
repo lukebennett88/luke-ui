@@ -283,7 +283,7 @@ source: packages/@luke-ui/react/src/exports/${input.name}.ts
 
 <ExampleBlock
 	src="${input.name}/basic"
-	title="${input.displayName} — Basic"
+	title="${input.displayName}: Basic"
 />
 
 ## API
