@@ -50,15 +50,15 @@ export function ScrollFade(props: ScrollFadeProps): JSX.Element {
 			data-scroll-fade-end={logicalEnd}
 			elementType="div"
 			ref={scrollportRef}
-			role={overflows ? 'region' : undefined}
 			style={style}
-			tabIndex={overflows ? 0 : undefined}
 			{...(overflows
 				? {
 						// Naming is type-required because the div may become a region; apply it only
 						// while that automatic role is active so the div is never a named generic.
 						...(ariaLabel === undefined ? null : { 'aria-label': ariaLabel }),
 						...(ariaLabelledBy === undefined ? null : { 'aria-labelledby': ariaLabelledBy }),
+						role: 'region',
+						tabIndex: 0,
 					}
 				: null)}
 		/>
