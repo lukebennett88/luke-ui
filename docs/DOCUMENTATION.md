@@ -384,7 +384,8 @@ order are unclear.
 4. `## Best practices`, when the component needs explicit guidance.
 5. Feature sections, ordered by importance to a consumer. Primitive guides may include `## Anatomy`.
 6. `## Accessibility`. Required for actions, forms, and feedback. Optional elsewhere.
-7. `## Related components`, when the page needs to point at another component or primitive.
+7. `## Related components`. Required on every component guide. Link the alternatives, primitives,
+   and parts a developer commonly pairs with this component, each with a short reason.
 8. `## API`, the last section on every guide that declares `source:`.
 
 A closed heading vocabulary keeps related content on the same kind of page findable. Feature

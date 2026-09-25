@@ -76,7 +76,7 @@ Use Link for navigation.
 	expect(findDocsIssues(paths)).toEqual([]);
 });
 
-test('reports heading vocabulary, order, and required Accessibility issues', () => {
+test('reports heading vocabulary, order, and required Accessibility and Related components issues', () => {
 	const paths = createDocsFixture({
 		components: {
 			'actions/button.mdx': `---
@@ -124,7 +124,9 @@ Icons reference the spritesheet.
 		'actions/button.mdx: heading "Primitive" is not allowed (use "Related components")',
 		'actions/button.mdx: "Best practices" must come before feature sections',
 		'actions/button.mdx: missing required "Accessibility" heading',
+		'actions/button.mdx: missing required "Related components" heading',
 		'visuals/icon.mdx: "Anatomy" is only allowed on primitive guides',
+		'visuals/icon.mdx: missing required "Related components" heading',
 	]);
 });
 
@@ -178,9 +180,49 @@ The visible label is the accessible name.
 	});
 
 	expect(findDocsIssues(paths)).toEqual([
+		'actions/button.mdx: missing required "Related components" heading',
 		'actions/button.mdx: missing required "API" section with a component-props-table',
 		'actions/icon-button.mdx: "API" must be the last heading',
+		'actions/icon-button.mdx: missing required "Related components" heading',
+		'actions/link.mdx: missing required "Related components" heading',
 		'actions/link.mdx: component-props-table must sit under "API"',
+	]);
+});
+
+test('requires a Related components heading on every component guide, regardless of group', () => {
+	const paths = createDocsFixture({
+		components: {
+			'layout/cluster.mdx': `---
+title: Cluster
+source: packages/@luke-ui/react/src/exports/cluster.ts
+---
+
+<ExampleBlock src="cluster/basic" title="Cluster — Basic" />
+
+## Related components
+
+Use Stack for a vertical column.
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/cluster/cluster.tsx" name="ClusterProps" />
+`,
+			'layout/stack.mdx': `---
+title: Stack
+source: packages/@luke-ui/react/src/exports/stack.ts
+---
+
+<ExampleBlock src="stack/basic" title="Stack — Basic" />
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/stack/stack.tsx" name="StackProps" />
+`,
+		},
+	});
+
+	expect(findDocsIssues(paths)).toEqual([
+		'layout/stack.mdx: missing required "Related components" heading',
 	]);
 });
 
@@ -235,6 +277,10 @@ source: packages/@luke-ui/react/src/exports/box.ts
 
 <ExampleBlock src="box/responsive-layout" title="Box — Responsive layout" />
 
+## Related components
+
+Use Stack for a vertical column.
+
 ## API
 
 <component-props-table path="packages/@luke-ui/react/src/core/box/box.tsx" name="BoxProps" />
@@ -258,6 +304,10 @@ source: packages/@luke-ui/react/src/exports/box.ts
 <ExampleBlock src="box/basic" title="Box — Basic" />
 
 <ExampleBlock src="box/basic" title="Box — Basic again" />
+
+## Related components
+
+Use Stack for a vertical column.
 
 ## API
 
@@ -476,6 +526,10 @@ source: packages/@luke-ui/react/src/exports/button.ts
 
 The visible label is the accessible name.
 
+## Related components
+
+Use Link for navigation.
+
 ## API
 
 <component-props-table path="packages/@luke-ui/react/src/core/button/button.tsx" name="ButtonProps" />
@@ -601,6 +655,10 @@ source: packages/@luke-ui/react/src/exports/link.ts
 ## Accessibility
 
 The visible label is the accessible name.
+
+## Related components
+
+Use Button for an action that is not navigation.
 
 ## API
 

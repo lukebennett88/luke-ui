@@ -247,6 +247,10 @@ function findComponentHeadingIssues(guide: {
 		issues.push(`${guide.relativePath}: missing required "${ACCESSIBILITY}" heading`);
 	}
 
+	if (!headings.includes(RELATED_COMPONENTS)) {
+		issues.push(`${guide.relativePath}: missing required "${RELATED_COMPONENTS}" heading`);
+	}
+
 	issues.push(...findApiSectionIssues(guide));
 
 	return issues;
