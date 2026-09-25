@@ -1,3 +1,7 @@
+/**
+ * Netlify adapter for `agent-negotiation.ts`'s host-agnostic logic. A
+ * different host would need only a similarly small adapter of its own.
+ */
 import { handleRequest } from '../../src/lib/agent-negotiation.ts';
 
 /** Minimal local shape of Netlify's edge function `Context`. */

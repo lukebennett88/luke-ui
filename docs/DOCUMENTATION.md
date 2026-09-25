@@ -346,36 +346,19 @@ mapping page URLs to files each have one owner in `apps/docs/src/lib/`.
 
 Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
 
-The package README links to the hosted docs. Fumadocs provides:
+The package README links to the hosted docs, which also serve agents:
 
-- `/llms.txt` for the site index, following the llmstxt.org format: a `# Luke UI` summary, then one
-  `##` section per docs group and one per component group (`## Components: Actions`, etc.), each
-  listing that group's pages, and a closing `## Optional` link to the full documentation. It covers
-  every docs guide and every authored component guide. See `apps/docs/src/lib/llms-index.ts`.
+- `/llms.txt`, an llmstxt.org index of every docs guide and every component guide.
 - `/llms-full.txt` for full docs.
 - Per-page Markdown by appending `.md` to a docs URL, for example `/docs/installation.md` or
-  `/components/actions/button.md`. `/index.md` is the homepage. A request for a page's Markdown that
-  does not exist returns a `text/markdown` 404 body, not HTML. Each HTML page links to its Markdown
-  with `<link rel="alternate" type="text/markdown">` and to the site index with
-  `<link rel="describedby">`, pointing at `/llms.txt` per the llms.txt v2 proposal. See
-  `apps/docs/src/lib/agent-head-links.ts`.
-- `/sitemap.xml` and `/robots.txt` for search engines and agents.
-
-A Netlify edge function serves a page's Markdown instead of its HTML when the request's `Accept`
-header lists `text/markdown` explicitly, with a q-value at least as high as HTML's. HTML's q-value
-comes from `text/html`, `text/*`, or `*/*`, in that order. Wildcards alone never select Markdown, so
-browsers get HTML. A Markdown request for a missing page gets the Markdown 404 body. `/api` and
-`/api/*` always pass through unchanged (a sibling path like `/apiary` does not). See
-`apps/docs/src/lib/agent-negotiation.ts`.
-
-`.md` responses also carry an HTTP `Link: </llms.txt>; rel="describedby"` header, set on the
-root-path `/*.md` glob in `netlify.toml`. The edge function preserves a fetched `.md` response's
-headers when it re-serves it, so this covers both a direct `.md` request and one reached through
-Accept negotiation.
-
-Absolute URLs in `/llms.txt`, `/sitemap.xml`, `/robots.txt`, and Markdown 404 bodies use the
-`SITE_URL` build-time variable, which `netlify.toml` sets to the deploy's public origin. Local
-builds fall back to `http://localhost:3000`.
+  `/components/actions/button.md`. `/index.md` is a short homepage summary. A missing page's `.md`
+  returns a Markdown 404 body, not HTML.
+- Content negotiation: a request whose `Accept` header prefers `text/markdown` over HTML gets the
+  page's Markdown instead of its HTML. Browsers get HTML as usual.
+- `/sitemap.xml` and `/robots.txt` for search engines and agents, built from the `SITE_URL`
+  build-time variable (falls back to `http://localhost:3000` locally).
+- Each HTML page links to its Markdown twin (`<link rel="alternate" type="text/markdown">`) and to
+  `/llms.txt` (`<link rel="describedby">`).
 
 ## Component docs
 

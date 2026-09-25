@@ -11,10 +11,7 @@ export const Route = createFileRoute('/sitemap.xml')({
 				const pages = [
 					{ url: '/' },
 					{ url: '/playground' },
-					...source.getPages().map((page) => ({
-						lastModified: page.data.lastModified ?? null,
-						url: page.url,
-					})),
+					...source.getPages().map((page) => ({ url: page.url })),
 				];
 
 				return new Response(buildSitemap(origin, pages), {

@@ -16,7 +16,6 @@ import { IconGallery } from '../components/icon-gallery';
 import { PageActions } from '../components/page-actions';
 import type { PageActionsMode } from '../components/page-actions';
 import { SourceCodeBlock } from '../components/source-code-block';
-import { agentHeadLinks } from '../lib/agent-head-links.js';
 import { withBasePath } from '../lib/base-path.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
 import { baseOptions } from '../lib/layout.shared';
@@ -46,7 +45,12 @@ export const Route = createFileRoute('/$')({
 		return data;
 	},
 	head: ({ loaderData, match }) => ({
-		links: loaderData ? agentHeadLinks(loaderData.markdownUrl, import.meta.env.BASE_URL) : [],
+		links: loaderData
+			? [
+					{ href: loaderData.markdownUrl, rel: 'alternate', type: 'text/markdown' },
+					{ href: withBasePath('/llms.txt', import.meta.env.BASE_URL), rel: 'describedby' },
+				]
+			: [],
 		// A thrown `notFound()` leaves `loaderData` undefined, so supply the 404 title directly
 		// instead of falling through to the root route's default title.
 		meta: resolvePageHeadMeta(

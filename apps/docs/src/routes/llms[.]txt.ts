@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import componentsMeta from '../../content/docs/components/meta.json' with { type: 'json' };
 import docsMeta from '../../content/docs/docs/meta.json' with { type: 'json' };
+import { componentIndexGroups } from '../generated/components-index.generated.js';
 import { HOME_INTRO } from '../lib/home-content.js';
 import type { LlmsIndexPage, LlmsIndexSection } from '../lib/llms-index.js';
 import { buildLlmsIndex, parseMetaGroups } from '../lib/llms-index.js';
@@ -24,13 +24,13 @@ export const Route = createFileRoute('/llms.txt')({
 });
 
 /**
- * One `LlmsIndexSection` per docs and component group, in `meta.json` order.
- * The `/components` catalogue index sits between the docs groups and the
- * component groups. Each group's member slugs come from parsing that group's
- * statically imported `meta.json`; each page's title, description, and Markdown
- * URL come from `source.getPages()`. The `meta.json` files are imported rather
- * than read from disk at request time, since a prerendered build's working
- * directory does not contain `content/docs`.
+ * One `LlmsIndexSection` per docs group (in `docs/meta.json` order), then the
+ * `/components` catalogue page, then one section per `componentIndexGroups`
+ * entry — the same generated, sidebar-ordered groups the components landing
+ * page renders from, so the two never drift apart. Docs group membership
+ * still comes from parsing the statically imported `meta.json`, since docs
+ * pages have no generated index of their own; each page's title, description,
+ * and Markdown URL come from `source.getPages()`.
  */
 function buildSections(origin: string): Array<LlmsIndexSection> {
 	const pageBySlug = new Map(
@@ -41,22 +41,14 @@ function buildSections(origin: string): Array<LlmsIndexSection> {
 		...group,
 		slugs: group.slugs.map((slug) => `docs/${slug}`),
 	}));
-	const componentGroups = parseMetaGroups(readMetaPages(componentsMeta)).map((group) => ({
-		...group,
-		slugs: group.slugs.map((slug) => `components/${slug}`),
-		title: `Components: ${group.title}`,
+
+	const docsSections = docsGroups.map((group): LlmsIndexSection => ({
+		pages: group.slugs.flatMap((slug) => {
+			const page = pageBySlug.get(slug);
+			return page ? [toIndexPage(page, origin)] : [];
+		}),
+		title: group.title,
 	}));
-
-	const toSections = (groups: typeof docsGroups): Array<LlmsIndexSection> =>
-		groups.map((group): LlmsIndexSection => ({
-			pages: group.slugs.flatMap((slug) => {
-				const page = pageBySlug.get(slug);
-				return page ? [toIndexPage(page, origin)] : [];
-			}),
-			title: group.title,
-		}));
-
-	const docsSections = toSections(docsGroups);
 
 	const componentsIndexPage = pageBySlug.get('components/index');
 	const componentsIndexSection: LlmsIndexSection = {
@@ -64,7 +56,14 @@ function buildSections(origin: string): Array<LlmsIndexSection> {
 		title: 'Components',
 	};
 
-	const componentSections = toSections(componentGroups);
+	const componentSections = componentIndexGroups.map((group): LlmsIndexSection => ({
+		pages: group.entries.map((entry) => ({
+			description: entry.description,
+			markdownUrl: `${origin}${markdownUrlForPage(entry.url)}`,
+			title: entry.name,
+		})),
+		title: `Components: ${group.title}`,
+	}));
 
 	return [...docsSections, componentsIndexSection, ...componentSections];
 }

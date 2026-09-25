@@ -1,7 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { pageSchema } from 'fumadocs-core/source/schema';
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
-import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import {
 	createFileSystemGeneratorCache,
 	createGenerator,
@@ -48,7 +47,6 @@ const componentPropsGenerator = createComponentPropsGenerator({
 });
 
 export default defineConfig({
-	plugins: [lastModified()],
 	mdxOptions: {
 		// MDX fences and source modules use the same themes.
 		rehypeCodeOptions: {

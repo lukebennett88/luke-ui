@@ -20,16 +20,3 @@ test('escapes XML-significant characters in a loc', () => {
 	const xml = buildSitemap('https://luke-ui.netlify.app', [{ url: "/a&b'c" }]);
 	expect(xml).toContain('<loc>https://luke-ui.netlify.app/a&amp;b&apos;c/</loc>');
 });
-
-test('includes lastmod only when the page has a known last-modified date', () => {
-	const known = new Date('2026-01-01T00:00:00.000Z');
-	const xml = buildSitemap('https://luke-ui.netlify.app', [
-		{ lastModified: known, url: '/docs/installation' },
-		{ url: '/components' },
-	]);
-
-	expect(xml).toContain('<lastmod>2026-01-01T00:00:00.000Z</lastmod>');
-	const componentsEntry = xml.split('<url>').find((entry) => entry.includes('/components/'));
-	expect(componentsEntry).toBeDefined();
-	expect(componentsEntry).not.toContain('<lastmod>');
-});

@@ -8,8 +8,6 @@ import {
 
 const CHROME_ACCEPT =
 	'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7';
-const FIREFOX_ACCEPT = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
-const SAFARI_ACCEPT = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
 
 test.each<[accept: string | null, expected: boolean]>([
 	['text/markdown', true],
@@ -32,8 +30,6 @@ test.each<[accept: string | null, expected: boolean]>([
 	['text/markdown;q=2', false],
 	['text/markdown, text/html;q=nope', true],
 	[CHROME_ACCEPT, false],
-	[FIREFOX_ACCEPT, false],
-	[SAFARI_ACCEPT, false],
 ])('prefersMarkdown(%j) is %s', (accept, expected) => {
 	expect(prefersMarkdown(accept)).toBe(expected);
 });
@@ -301,25 +297,6 @@ test('negotiates Markdown for /apiary, a sibling path that merely starts with "a
 	expect(fetchMock).toHaveBeenCalledWith(new URL('https://luke-ui.netlify.app/apiary.md'));
 	expect(next).not.toHaveBeenCalled();
 	expect(res.status).toBe(200);
-});
-
-test('passes /apiary through to next with a merged Vary under a browser Accept header', async () => {
-	const next = vi.fn<() => Promise<Response>>(async () => {
-		return new Response('<html></html>', {
-			headers: { 'Content-Type': 'text/html' },
-			status: 200,
-		});
-	});
-	const fetchMock = vi.fn<(url: URL) => Promise<Response>>();
-
-	const request = new Request('https://luke-ui.netlify.app/apiary', {
-		headers: { Accept: 'text/html,application/xhtml+xml,*/*;q=0.8' },
-	});
-	const res = await handleRequest(request, { fetch: fetchMock, next });
-
-	expect(fetchMock).not.toHaveBeenCalled();
-	expect(next).toHaveBeenCalledOnce();
-	expect(res.headers.get('Vary')).toBe('Accept');
 });
 
 test('serves an empty body for a HEAD request', async () => {

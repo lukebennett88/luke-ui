@@ -7,9 +7,8 @@ const XML_ESCAPES: Record<string, string> = {
 	'>': '&gt;',
 };
 
-/** A page to list in the sitemap. `lastModified` is omitted when unknown. */
+/** A page to list in the sitemap. */
 export interface SitemapPage {
-	lastModified?: Date | null;
 	url: string;
 }
 
@@ -31,10 +30,7 @@ export function buildSitemap(origin: string, pages: Array<SitemapPage>): string 
 
 function buildUrlEntry(origin: string, page: SitemapPage): string {
 	const loc = escapeXml(`${origin}${sitemapPath(page.url)}`);
-	const lastmod = page.lastModified
-		? `\n    <lastmod>${page.lastModified.toISOString()}</lastmod>`
-		: '';
-	return `  <url>\n    <loc>${loc}</loc>${lastmod}\n  </url>\n`;
+	return `  <url>\n    <loc>${loc}</loc>\n  </url>\n`;
 }
 
 function sitemapPath(url: string): string {

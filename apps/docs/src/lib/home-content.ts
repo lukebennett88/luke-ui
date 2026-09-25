@@ -1,74 +1,36 @@
-/**
- * Markdown copy of the homepage for the `/index.md` agent twin. It mirrors
- * `HomeHero` and `HomeFeatures`, minus the interactive demo panel.
- * `home-markdown.browser.test.tsx` fails when the rendered homepage text drifts
- * from this copy.
- */
+/** A concise agent-facing summary of the homepage for the `/index.md` twin. */
 
 /** The homepage lead sentence, also used as the `/llms.txt` summary. */
 export const HOME_INTRO = 'Luke UI is a React design system built on React Aria Components.';
 
 const INSTALL_COMMAND = 'pnpm add @luke-ui/react react-aria-components';
 
-const LINKS = [
-	{ href: '/docs/installation', title: 'Installation' },
-	{ href: '/components', title: 'Components' },
-] as const;
-
-// Backticks mark inline code, rendered with `<Code>` on the homepage.
 const FEATURES = [
-	{
-		description:
-			'Luke UI includes two themes. To make your own, pass colour, typography, radius, and depth ' +
-			'choices to `defineTheme`, or extend a bundled theme. Each generated theme has light and ' +
-			'dark modes and passes contrast checks.',
-		title: 'Themes',
-	},
-	{
-		description:
-			'Styles are static CSS with no runtime styling. You can apply a theme without a React ' +
-			'provider.',
-		title: 'Static CSS',
-	},
-	{
-		description:
-			'Use composed components, use the exported primitives when you need more control, or use ' +
-			'React Aria Components directly.',
-		title: 'Components and primitives',
-	},
-	{
-		description:
-			'Buttons with async actions manage their own pending state. Skeletons and spinners keep ' +
-			'the size of the content they replace.',
-		title: 'Loading states',
-	},
-	{
-		description:
-			'Validate with browser constraints, custom rules, or controlled and server errors, or hand ' +
-			'validation to a form library.',
-		title: 'Validation',
-	},
-	{
-		description:
-			'Text is trimmed to its visible bounds. Heading levels can follow component structure ' +
-			'automatically.',
-		title: 'Typography',
-	},
-] as const;
+	'Themes: two bundled themes, or make your own with `defineTheme`. Each has light and dark modes and passes contrast checks.',
+	'Static CSS: no runtime styling, and no React provider needed to apply a theme.',
+	'Components and primitives: use composed components, the exported primitives, or React Aria Components directly.',
+	'Loading states: buttons with async actions manage their own pending state, and skeletons and spinners keep the size of the content they replace.',
+	'Validation: browser constraints, custom rules, controlled or server errors, or a form library.',
+	'Typography: text is trimmed to its visible bounds, and heading levels can follow component structure.',
+];
 
-/** Renders the homepage copy as Markdown. */
+/** Renders a short Markdown summary of the homepage. */
 export function homeMarkdown(): string {
-	const lines = ['# Luke UI', '', HOME_INTRO, ''];
-
-	for (const link of LINKS) {
-		lines.push(`- [${link.title}](${link.href})`);
-	}
-	lines.push('', '```sh', INSTALL_COMMAND, '```', '', '## Features');
-
-	for (const feature of FEATURES) {
-		lines.push('', `### ${feature.title}`, '', feature.description);
-	}
-	lines.push('');
-
-	return lines.join('\n');
+	return [
+		'# Luke UI',
+		'',
+		HOME_INTRO,
+		'',
+		'- [Installation](/docs/installation)',
+		'- [Components](/components)',
+		'',
+		'```sh',
+		INSTALL_COMMAND,
+		'```',
+		'',
+		'## Features',
+		'',
+		...FEATURES.map((feature) => `- ${feature}`),
+		'',
+	].join('\n');
 }
