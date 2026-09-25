@@ -7,6 +7,7 @@ import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { Text } from '@luke-ui/react/text';
 import { deriveNestedRadius, vars } from '@luke-ui/react/theme';
+import { cx } from '@luke-ui/react/utils';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { ComponentType, JSX, ReactNode } from 'react';
 import { Suspense, use, useEffect, useId, useRef, useState } from 'react';
@@ -115,17 +116,16 @@ export function ExampleLoadingState({
 	);
 }
 
-// Keep in sync with Tailwind on ExamplePreview: md (768px, DESKTOP_MEDIA_QUERY),
-// @[640px]/example-preview-card (MIN_RESIZABLE_CARD_WIDTH), pe-6 (RESIZE_GUTTER_WIDTH),
-// Group [&>[data-panel]:last-child]:!min-w-3 (OUTSIDE_STRIP_WIDTH).
+// The Tailwind classes in ExamplePreview repeat these values, so change both together:
+// `md:` is DESKTOP_MEDIA_QUERY, `@[640px]/example-preview-card` is MIN_RESIZABLE_CARD_WIDTH,
+// `pe-6` is RESIZE_GUTTER_WIDTH, and `min-inline-3!` is OUTSIDE_STRIP_WIDTH.
 const MIN_RESIZABLE_CARD_WIDTH = 640;
 const MIN_PREVIEW_WIDTH = 320;
 const RESIZE_GUTTER_WIDTH = 24;
-/** Matches grip half-width so the handle stays fully inside the card at full preview. */
+/** Half the grip's inline size, so the grip stays inside the card at full width. */
 const OUTSIDE_STRIP_WIDTH = 12;
 
-// Larger than playground's shared `RESIZE_TARGET_MINIMUM_SIZE` so the
-// example-card grip is easier to hit; keep playground's constant unchanged.
+// Larger than the playground's `RESIZE_TARGET_MINIMUM_SIZE` so the grip is easier to hit.
 const EXAMPLE_RESIZE_TARGET_MINIMUM_SIZE = { coarse: 32, fine: 32 };
 
 export function ExamplePreview({
@@ -159,7 +159,9 @@ export function ExamplePreview({
 
 	return (
 		<Group
-			className="@container/example-preview-card isolate flex overflow-hidden md:@[640px]/example-preview-card:[&>[data-panel]:last-child]:min-w-3!"
+			// The outside panel's minimum is set from here with `!` because the
+			// library puts an inline `min-width: 0` on each panel element.
+			className="@container/example-preview-card isolate flex overflow-hidden md:@[640px]/example-preview-card:[&>[data-panel]:last-child]:min-inline-3!"
 			disabled={!isResizable}
 			elementRef={groupElement}
 			groupRef={groupHandle}
@@ -172,13 +174,11 @@ export function ExamplePreview({
 				minSize={isResizable ? MIN_PREVIEW_WIDTH + RESIZE_GUTTER_WIDTH : 0}
 			>
 				{/*
-					Named card container is on the Group; this unnamed
-					inline-size container is the nearest for responsive
-					examples. Gutter (md:@[640px]/example-preview-card:pe-6)
-					and separator visibility (hidden md:@[640px]/…:block) are
-					Tailwind so first paint already matches final width.
-					Outside strip: Group targets last [data-panel] with !min-w-3
-					(Panel className is nested; library sets inline minWidth:0).
+					This is the nearest inline-size container for a responsive
+					example, so it narrows against the preview width rather than
+					the viewport. The gutter and the separator use container
+					queries, not `isResizable`, so the first paint already has
+					its final width.
 				*/}
 				<div
 					className="example-preview-canvas @container overflow-hidden md:@[640px]/example-preview-card:pe-6"
@@ -189,7 +189,12 @@ export function ExamplePreview({
 			</Panel>
 			<Separator
 				aria-label={`${title} preview`}
-				className="example-preview-separator hidden md:@[640px]/example-preview-card:block relative z-10 shrink-0 inline-px cursor-col-resize bg-fd-border data-[separator=active]:[&>.example-preview-grip]:border-fd-muted-foreground data-[separator=focus]:[&>.example-preview-grip]:ring-2 data-[separator=focus]:[&>.example-preview-grip]:ring-fd-ring data-[separator=hover]:[&>.example-preview-grip]:border-fd-muted-foreground/80"
+				className={cx(
+					'relative z-10 hidden shrink-0 inline-px cursor-col-resize bg-fd-border md:@[640px]/example-preview-card:block',
+					'data-[separator=hover]:[&>.example-preview-grip]:border-fd-muted-foreground/80',
+					'data-[separator=active]:[&>.example-preview-grip]:border-fd-muted-foreground',
+					'data-[separator=focus]:[&>.example-preview-grip]:ring-2 data-[separator=focus]:[&>.example-preview-grip]:ring-fd-ring',
+				)}
 				disabled={!isResizable}
 				onDoubleClick={() => {
 					groupHandle.current?.setLayout({ [previewId]: 100, [outsideId]: 0 });
@@ -224,7 +229,7 @@ function ExamplePreviewResizeGrip() {
 	return (
 		<span
 			aria-hidden
-			className="example-preview-grip pointer-events-none absolute top-1/2 left-1/2 flex h-15 w-3 -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full border border-fd-border bg-fd-card text-fd-muted-foreground shadow-sm transition-[box-shadow,border-color]"
+			className="example-preview-grip pointer-events-none absolute inset-bs-1/2 inset-s-1/2 flex block-15 inline-3 -translate-1/2 items-center justify-center overflow-hidden rounded-full border border-fd-border bg-fd-card text-fd-muted-foreground shadow-sm transition-[box-shadow,border-color]"
 		>
 			<GripIcon className="size-full" />
 		</span>

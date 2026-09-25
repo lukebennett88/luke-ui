@@ -53,7 +53,7 @@ test('flow gives AutoGrid multiple tracks without explicit width', () => {
 test('flow gives an unsized form and nested Stack the available width', () => {
 	const { available, exampleRoot } = renderInWrapper(
 		<form>
-			<Stack gap="sp16" inlineSize="100%">
+			<Stack gap="sp16">
 				<label htmlFor="form-name">Name</label>
 				<input id="form-name" />
 			</Stack>

@@ -154,9 +154,8 @@ terms.
 
 **Spelling and punctuation.** Spell words in Australian English. Write headings in sentence case,
 and capitalise only proper nouns and product names. Split a sentence rather than joining two ideas
-with a semicolon. An em dash is fine when it has a space on each side, as in `foo — bar`. The colon
-inside an `<ExampleBlock title>` follows a different form:
-`<page or component>: <qualifier>`.
+with a semicolon. An em dash is fine when it has a space on each side, as in `foo — bar`. An
+`<ExampleBlock title>` uses a colon instead, in the form `<page or component>: <qualifier>`.
 
 **Say it once.** Cut a sentence whose only content restates its heading, a prop name, or the example
 below it. Do not summarise a section at the end of it. When more than one page needs the same rule,
@@ -211,8 +210,9 @@ the code first.
 - In comparison examples, content may name the value being demonstrated when the content is only a
   specimen label, such as "Small", "Medium", and "Large". Keep those names in a caption beside the
   control, not in the control's own label.
-- Use a docs-only comparison helper when repeated caption and layout markup would hide the component
-  JSX. Keep each demonstrated component and its prop values visible in the example.
+- Use `Comparison` and `ComparisonItem` from `#docs` when repeated caption and layout markup would
+  hide the component JSX. Keep each demonstrated component and its prop values visible in the
+  example.
 - Do not use API terms as labels for interactive controls. When the control's purpose is incidental,
   use a neutral or self-referential label instead.
 - When an example needs extended text, choose a subject that helps explain why the component
@@ -243,8 +243,10 @@ Use layout primitives for structure, not one-off wrappers.
   padding and borders. Do not add an empty `Box` just to group children. If a control needs to keep
   its intrinsic inline size inside a stretching `Stack`, wrap it in `Cluster` instead of stretching
   it.
-- Form-style examples usually sit in a `Stack` with `maxInlineSize="20rem"` (and `inlineSize="100%"`
-  when the control should fill the column).
+- Form-style examples usually sit in a `Stack` with `maxInlineSize="20rem"`.
+- Do not set `inlineSize="100%"` to fill the preview. A block-level example root already fills it.
+- Use `ExampleItem` from `#docs` for placeholder children in a layout example, so each child's box
+  is visible.
 - When validation or status text adds or removes a message and would shift layout, reserve space at
   the example with `minBlockSize` or a fixed status slot so the preview does not jump between
   states.
@@ -265,6 +267,10 @@ identifies the component and variation, so the rendered source repeats no functi
 
 Reference an example from an MDX page with `<ExampleBlock src="<component>/<name>" title="..." />`.
 Title it `<page or component>: <qualifier>`, for example `Button: Icons`.
+
+The preview renders an example in normal document flow, so a block-level example fills the preview
+width. Pass `layout="centered"` for an example with an intrinsic size, such as a button or an icon.
+Pass `layout="full-bleed"` when the example paints its own surface and needs no preview padding.
 
 Every component guide opens with a focused `basic.tsx` example as its primary `ExampleBlock`, which
 the generator scaffolds and `component-doc-contract` enforces. An example that no page references

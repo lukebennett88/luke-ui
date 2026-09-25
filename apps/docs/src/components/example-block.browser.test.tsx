@@ -72,8 +72,8 @@ test('does not change preview content width when resizability becomes establishe
 		},
 	});
 	expect(firstLayoutCanvasWidth).toBeDefined();
-	// Wait until JS enables resize (post-ResizeObserver), not merely until CSS
-	// shows the separator — that is the race that used to inject the gutter.
+	// Wait for the ResizeObserver to enable resizing, not only for CSS to show
+	// the separator, so a late gutter would show up as a width change.
 	await waitForResizeInteraction();
 	expect(previewCanvas().getBoundingClientRect().width).toBeCloseTo(firstLayoutCanvasWidth!, 0);
 });
@@ -111,9 +111,10 @@ test('keyboard resize and double-click reset work without losing width on code e
 	await page.viewport(1000, 800);
 	await renderExampleBlock();
 	await waitForResizeInteraction();
+	const restingShadow = getComputedStyle(resizeGrip()).boxShadow;
 	separator().focus();
 	expect(document.activeElement).toBe(separator());
-	await expect.poll(() => getComputedStyle(resizeGrip()).boxShadow).not.toBe('none');
+	await expect.poll(() => getComputedStyle(resizeGrip()).boxShadow).not.toBe(restingShadow);
 	const before = previewWidth();
 	await userEvent.keyboard('{ArrowLeft}');
 	await expect.poll(previewWidth).toBeLessThan(before);
@@ -370,7 +371,7 @@ function expectGripInsidePreview() {
 	const canvasRight = previewCanvas().getBoundingClientRect().right;
 	const group = getPreviewPanel().parentElement?.getBoundingClientRect();
 	assert(group, 'expected panel group');
-	// Grip is centered on the 1px separator and straddles into the outside strip.
+	// The grip is centred on the 1px separator and straddles into the outside strip.
 	// The outside panel keeps ≥12px so the full grip stays inside the card.
 	expect(grip.left).toBeGreaterThan(canvasRight - 1);
 	expect(grip.left).toBeLessThan(divider.left + 1);
