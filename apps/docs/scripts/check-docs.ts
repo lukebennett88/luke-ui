@@ -39,14 +39,14 @@ const GROUPS_REQUIRING_ACCESSIBILITY = new Set(['actions', 'feedback', 'forms'])
 const BEST_PRACTICES = 'Best practices';
 const ANATOMY = 'Anatomy';
 const ACCESSIBILITY = 'Accessibility';
-const RELATED_COMPONENTS = 'Related components';
 const API = 'API';
 const CONTINUE_LEARNING = 'Continue learning';
 
 const FORBIDDEN_COMPONENT_HEADINGS: Readonly<Record<string, string>> = {
-	Primitive: `use "${RELATED_COMPONENTS}"`,
+	Primitive: 'link to the primitive inline in prose instead',
 	'Continue learning': 'Continue learning belongs on authored guides, not component guides',
-	'Next steps': `use "${RELATED_COMPONENTS}"`,
+	'Next steps': 'link to the next component inline in prose instead',
+	'Related components': 'link to other components inline in prose instead',
 };
 
 const PROSE_PATTERNS: ReadonlyArray<{ label: string; pattern: RegExp }> = [
@@ -180,7 +180,6 @@ function findComponentHeadingIssues(guide: {
 	const isPrimitive = guide.group === 'primitives';
 	let seenFeature = false;
 	let seenAccessibility = false;
-	let seenRelated = false;
 	let seenApi = false;
 
 	for (const heading of headings) {
@@ -204,40 +203,28 @@ function findComponentHeadingIssues(guide: {
 		}
 
 		if (heading === BEST_PRACTICES) {
-			if (seenFeature || seenAccessibility || seenRelated) {
+			if (seenFeature || seenAccessibility) {
 				issues.push(`${guide.relativePath}: "${BEST_PRACTICES}" must come before feature sections`);
 			}
 			continue;
 		}
 
 		if (heading === ANATOMY) {
-			if (seenAccessibility || seenRelated) {
-				issues.push(
-					`${guide.relativePath}: "${ANATOMY}" must come before "${ACCESSIBILITY}" and "${RELATED_COMPONENTS}"`,
-				);
+			if (seenAccessibility) {
+				issues.push(`${guide.relativePath}: "${ANATOMY}" must come before "${ACCESSIBILITY}"`);
 			}
 			seenFeature = true;
 			continue;
 		}
 
 		if (heading === ACCESSIBILITY) {
-			if (seenRelated) {
-				issues.push(
-					`${guide.relativePath}: "${ACCESSIBILITY}" must come before "${RELATED_COMPONENTS}"`,
-				);
-			}
 			seenAccessibility = true;
 			continue;
 		}
 
-		if (heading === RELATED_COMPONENTS) {
-			seenRelated = true;
-			continue;
-		}
-
-		if (seenAccessibility || seenRelated) {
+		if (seenAccessibility) {
 			issues.push(
-				`${guide.relativePath}: feature section "${heading}" must come before "${ACCESSIBILITY}" and "${RELATED_COMPONENTS}"`,
+				`${guide.relativePath}: feature section "${heading}" must come before "${ACCESSIBILITY}"`,
 			);
 		}
 		seenFeature = true;

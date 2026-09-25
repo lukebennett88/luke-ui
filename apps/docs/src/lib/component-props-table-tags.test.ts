@@ -2,7 +2,7 @@ import { expect, test } from 'vite-plus/test';
 import { findComponentPropsTableTags } from './component-props-table-tags.js';
 
 test('reads a single-line component-props-table tag under the API heading', () => {
-	const guide = `## Related components
+	const guide = `## Best practices
 
 See Link.
 
@@ -46,7 +46,7 @@ test('reads multi-line tags in file order under a multi-type API section', () =>
 test('ignores a component-props-table tag outside the API section', () => {
 	const guide = `<component-props-table path="packages/@luke-ui/react/src/core/button/button.tsx" name="ButtonProps" />
 
-## Related components
+## Best practices
 
 See Link.
 `;
@@ -55,7 +55,7 @@ See Link.
 });
 
 test('returns no entries when the guide has no API section', () => {
-	const guide = `## Related components
+	const guide = `## Best practices
 
 See Link.
 `;
