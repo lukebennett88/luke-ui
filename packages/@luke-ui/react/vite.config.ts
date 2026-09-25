@@ -62,9 +62,8 @@ export default defineConfig({
 			// Built for extraction; not consumer subpaths.
 			exclude: ['stylesheet'],
 		},
-		// `generate` writes these to `.generated/` so that no two Turbo tasks share an output directory.
-		// A cache replay restores a task's outputs over whatever is on disk, so a shared `dist/` would let
-		// one task's replay overwrite the other's files.
+		// `generate` writes these to `.generated/`, not `dist/`, so a cache replay of one Turbo task
+		// can't overwrite the other's outputs by restoring over a shared directory.
 		copy: [
 			{ from: '.generated/spritesheet.svg', to: 'dist' },
 			{ from: '.generated/themes/*/stylesheet.css', to: 'dist', flatten: false },

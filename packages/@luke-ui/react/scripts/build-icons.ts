@@ -7,8 +7,7 @@ import { parse } from 'node-html-parser';
 const DEFAULT_VIEWBOX = '0 0 24 24';
 const SPRITE_NAME = 'spritesheet.svg';
 const INPUT_DIR = path.resolve(process.cwd(), 'icons');
-// `vp pack` copies the spritesheet into `dist/`. Writing it there directly would give `generate`
-// and `build` a shared Turbo output, and a cache replay of one would overwrite the other.
+// See `vite.config.ts`'s `copy` config for why this writes to `.generated/` instead of `dist/`.
 const GENERATED_DIR = path.resolve(process.cwd(), '.generated');
 const ICON_DATA_TS_PATH = path.resolve(GENERATED_DIR, 'icon-data.ts');
 const ICON_MASK_DATA_TS_PATH = path.resolve(GENERATED_DIR, 'icon-mask-data.ts');

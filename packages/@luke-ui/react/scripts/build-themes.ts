@@ -9,9 +9,6 @@ import { tactileTheme } from '../src/theme/foundations/tactile.js';
 
 const themes = [tactileTheme, paperTheme];
 
-// `vp pack` copies these into `dist/themes/`. See `scripts/build-icons.ts` for why they are not
-// written there directly.
-
 async function main() {
 	await Promise.all(
 		themes.map(async (theme) => {
