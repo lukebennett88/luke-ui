@@ -31,7 +31,7 @@
 
 ### Verification traps
 
-- A package-local `check:*` run is not what CI runs. Only root `pnpm run check` runs
+- A package-local `check:*` run is not what CI runs. Only the root `pnpm run check` runs
   `check:format-root`, which covers files outside packages such as `docs/*.md`, and knip
   (`check:cycles`, `check:unused`). If `check:format-root` fails on Markdown wrapping, run
   `pnpm run fix:format-root`. Do not re-wrap by hand.
