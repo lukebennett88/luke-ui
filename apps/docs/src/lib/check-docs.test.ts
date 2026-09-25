@@ -76,7 +76,7 @@ Use Link for navigation.
 	expect(findDocsIssues(paths)).toEqual([]);
 });
 
-test('reports heading vocabulary, order, and required Accessibility and Related components issues', () => {
+test('reports heading vocabulary, order, and required-heading issues', () => {
 	const paths = createDocsFixture({
 		components: {
 			'actions/button.mdx': `---
