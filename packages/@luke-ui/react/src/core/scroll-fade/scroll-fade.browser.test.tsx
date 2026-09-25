@@ -566,6 +566,57 @@ test('nested intrinsic image load updates overflow from fitting to overflowing',
 	expect(getComputedStyle(element).maskImage).toBe('none');
 });
 
+// WAAPI changes used size without childList/characterData/class/style mutations.
+// Keeps fit ↔ overflow a11y covered for descendant geometry that MutationObserver
+// attribute/childList signals do not see.
+test('descendant Web Animations size change updates overflow accessibility without DOM mutation', async () => {
+	const { locator } = render(
+		<ScrollFade
+			aria-label="Animated list"
+			axis="block"
+			blockSize="6rem"
+			data-testid="scroll-fade"
+			inlineSize="12rem"
+		>
+			<div data-testid="animated-child" style={{ blockSize: '2rem' }}>
+				Animated content
+			</div>
+		</ScrollFade>,
+	);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element());
+
+	expect(element.tabIndex).toBe(-1);
+	expect(element.hasAttribute('role')).toBe(false);
+	expect(element.hasAttribute('aria-label')).toBe(false);
+
+	const child = expectHtmlElement(
+		locator.getByTestId('animated-child').element(),
+		'Expected animated child.',
+	);
+
+	const grow = child.animate([{ blockSize: '2rem' }, { blockSize: '18rem' }], {
+		duration: 1,
+		fill: 'forwards',
+	});
+	await grow.finished;
+	await waitForAttribute(element, 'role', 'region');
+
+	expect(element.tabIndex).toBe(0);
+	expect(element.getAttribute('role')).toBe('region');
+	expect(element.getAttribute('aria-label')).toBe('Animated list');
+
+	const shrink = child.animate([{ blockSize: '18rem' }, { blockSize: '2rem' }], {
+		duration: 1,
+		fill: 'forwards',
+	});
+	await shrink.finished;
+	await waitForAttribute(element, 'role', null);
+
+	expect(element.tabIndex).toBe(-1);
+	expect(element.hasAttribute('role')).toBe(false);
+	expect(element.hasAttribute('aria-label')).toBe(false);
+});
+
 test('SSR markup hydrates without mismatch and then measures overflow', async () => {
 	// Source import so renderToString shares the browser React instance (dist hits invalid hook call).
 	const tree = (
