@@ -23,16 +23,18 @@ export type ScrollFadeProps = Prettify<_ScrollFadeProps>;
  * scroll. Always renders a `div` scrollport. The scrollport is a keyboard-focusable, named region
  * only while it overflows on the active axis.
  */
-export function ScrollFade({
-	axis = 'inline',
-	className,
-	style,
-	...props
-}: ScrollFadeProps): JSX.Element {
-	// `ref` stays on `props` so the compiler can track it through `useObjectRef`.
-	const scrollportRef = useObjectRef(props.ref);
+export function ScrollFade(props: ScrollFadeProps): JSX.Element {
+	const {
+		'aria-label': ariaLabel,
+		'aria-labelledby': ariaLabelledBy,
+		axis = 'inline',
+		className,
+		ref,
+		style,
+		...domProps
+	} = props;
+	const scrollportRef = useObjectRef(ref);
 	const { logicalEnd, overflows } = useScrollOverflow(scrollportRef, axis);
-	const { 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledBy, ...domProps } = props;
 
 	return (
 		<Box
