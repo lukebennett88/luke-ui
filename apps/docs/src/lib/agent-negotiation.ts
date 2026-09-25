@@ -59,7 +59,7 @@ export function notFoundMarkdown(origin: string, pathname: string): string {
 
 interface HandleRequestDeps {
 	fetch: (url: URL) => Promise<Response>;
-	next: () => Promise<Response>;
+	next: (request?: Request) => Promise<Response>;
 }
 
 const PASSTHROUGH_PREFIXES = ['/.well-known/', '/__tsr/', '/api'];
@@ -107,7 +107,15 @@ async function handleMarkdownRequest(
 		});
 	}
 
-	const res = await deps.next();
+	// The SSR function 406s any request whose Accept isn't HTML-compatible, so
+	// re-request with Accept: text/html before falling through to it. That's
+	// the only way to see whether the path is a real page (200/redirect,
+	// e.g. a page with no Markdown twin) or genuinely missing (404).
+	const htmlHeaders = new Headers(request.headers);
+	htmlHeaders.set('Accept', 'text/html');
+	const htmlRequest = new Request(request.url, { headers: htmlHeaders, method: request.method });
+
+	const res = await deps.next(htmlRequest);
 	if (res.status === 404) {
 		return new Response(bodyForMethod(request.method, notFoundMarkdown(url.origin, url.pathname)), {
 			headers: {

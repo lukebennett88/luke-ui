@@ -92,10 +92,27 @@ test('passes a browser Accept header through and merges Vary', async () => {
 	expect(await res.text()).toBe('<html></html>');
 });
 
+/**
+ * Simulates Netlify's SSR function, which 406s any request whose Accept
+ * isn't HTML-compatible. `next` is called with no request when the edge
+ * function passes the original request through unmodified, so that case
+ * checks the request's own Accept header instead.
+ */
+function makeRealisticNext(originalAccept: string) {
+	return vi.fn<(request?: Request) => Promise<Response>>(async (request) => {
+		const accept = request ? request.headers.get('Accept') : originalAccept;
+		if (!accept || !(accept.includes('text/html') || accept.includes('*/*'))) {
+			return new Response(JSON.stringify({ error: 'Only HTML requests are supported here' }), {
+				headers: { 'Content-Type': 'application/json' },
+				status: 406,
+			});
+		}
+		return new Response('Not found', { headers: { 'Content-Type': 'text/html' }, status: 404 });
+	});
+}
+
 test('returns a Markdown 404 body when a markdown request has no matching page', async () => {
-	const next = vi.fn<() => Promise<Response>>(
-		async () => new Response('Not found', { status: 404 }),
-	);
+	const next = makeRealisticNext('text/markdown');
 	const fetchMock = vi.fn<(url: URL) => Promise<Response>>(
 		async () => new Response('Not found', { status: 404 }),
 	);
@@ -105,15 +122,19 @@ test('returns a Markdown 404 body when a markdown request has no matching page',
 	});
 	const res = await handleRequest(request, { fetch: fetchMock, next });
 
+	expect(next).toHaveBeenCalledOnce();
+	const requestSeenByNext = next.mock.calls[0]?.[0];
+	expect(requestSeenByNext?.headers.get('Accept')).toBe('text/html');
 	expect(res.status).toBe(404);
 	expect(res.headers.get('Content-Type')).toBe('text/markdown; charset=utf-8');
+	expect(res.headers.get('Vary')).toBe('Accept');
 	const body = await res.text();
 	expect(body.length).toBeGreaterThanOrEqual(20);
 	expect(body).toContain('/llms.txt');
 });
 
 test('falls back to HTML with merged Vary when the path has no Markdown twin but the page exists', async () => {
-	const next = vi.fn<() => Promise<Response>>(async () => {
+	const next = vi.fn<(request?: Request) => Promise<Response>>(async () => {
 		return new Response('<html>ok</html>', {
 			headers: { 'Content-Type': 'text/html' },
 			status: 200,
@@ -128,6 +149,9 @@ test('falls back to HTML with merged Vary when the path has no Markdown twin but
 	});
 	const res = await handleRequest(request, { fetch: fetchMock, next });
 
+	expect(next).toHaveBeenCalledOnce();
+	const requestSeenByNext = next.mock.calls[0]?.[0];
+	expect(requestSeenByNext?.headers.get('Accept')).toBe('text/html');
 	expect(res.status).toBe(200);
 	expect(res.headers.get('Content-Type')).toBe('text/html');
 	expect(res.headers.get('Vary')).toBe('Accept');

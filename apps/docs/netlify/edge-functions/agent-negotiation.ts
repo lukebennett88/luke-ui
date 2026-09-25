@@ -2,7 +2,7 @@ import { handleRequest } from '../../src/lib/agent-negotiation.ts';
 
 /** Minimal local shape of Netlify's edge function `Context`. */
 interface Context {
-	next: () => Promise<Response>;
+	next: (request?: Request) => Promise<Response>;
 }
 
 /** Minimal local shape of Netlify's edge function `Config`. */
@@ -19,6 +19,6 @@ export const config: Config = {
 export default (request: Request, context: Context): Promise<Response> => {
 	return handleRequest(request, {
 		fetch: (url) => fetch(url),
-		next: () => context.next(),
+		next: (req) => (req ? context.next(req) : context.next()),
 	});
 };
