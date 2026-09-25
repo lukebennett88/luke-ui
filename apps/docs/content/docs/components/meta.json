@@ -21,6 +21,7 @@
 		"layout/cluster",
 		"layout/container",
 		"layout/grid",
+		"layout/scroll-fade",
 		"layout/stack",
 		"layout/track",
 		"layout/visually-hidden",

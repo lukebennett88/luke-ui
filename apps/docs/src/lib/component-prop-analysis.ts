@@ -30,6 +30,7 @@ interface PropDeclaration extends SyntaxNode {
 interface PropType {
 	getProperties: () => ReadonlyArray<PropSymbol>;
 	getUnionTypes: () => ReadonlyArray<PropType>;
+	isNever: () => boolean;
 	isUnion: () => boolean;
 }
 
@@ -62,6 +63,7 @@ interface SyntaxNode {
 	getStart: () => number;
 	getSymbol?: () => PropSymbol | undefined;
 	getText: () => string;
+	getType?: () => PropType;
 	/** `TypeReference` and `ExpressionWithTypeArguments`: the `<…>` arguments. */
 	getTypeArguments?: () => ReadonlyArray<SyntaxNode>;
 	/** `TypeAliasDeclaration` and `ParenthesizedType`: the type on the right of the `=`. */
@@ -110,11 +112,14 @@ export function filterGeneratedDoc(
 /**
  * True when a prop type still accepts pass-through DOM or ARIA attributes at runtime — that is, when
  * some prop it flattens in reaches it through a generic element attribute bag and so is not
- * documented in its table.
+ * documented in its table. A `never` guard does not count as a forwarded prop.
  */
 export function typeForwardsDomProps(declaration: PropDeclaration, reactSrcDir: string): boolean {
 	const visibleNames = visiblePropNameSet(declaration, reactSrcDir);
-	return flattenedProps(declaration).some((prop) => !visibleNames.has(prop.getName()));
+	const neverOnlyNames = neverOnlyPropNames(declaration);
+	return flattenedProps(declaration).some(
+		(prop) => !neverOnlyNames.has(prop.getName()) && !visibleNames.has(prop.getName()),
+	);
 }
 
 /** Loads an exported prop declaration from a repo-relative TypeScript path. */
@@ -449,6 +454,24 @@ function flattenedProps(declaration: PropDeclaration): ReadonlyArray<PropSymbol>
 	return [...props.values()];
 }
 
+/** A `?: never` guard resolves to `undefined`, so inspect the declared type instead. */
+function neverOnlyPropNames(declaration: PropDeclaration): ReadonlySet<string> {
+	const type = declaration.getType();
+	const constituents = type.isUnion() ? type.getUnionTypes() : [type];
+	const neverOnly = new Map<string, boolean>();
+	for (const constituent of constituents) {
+		for (const prop of constituent.getProperties()) {
+			const declarations = prop.getDeclarations();
+			const isNever =
+				declarations.length > 0 &&
+				declarations.every((member) => member.getTypeNode?.()?.getType?.().isNever() === true);
+			const name = prop.getName();
+			neverOnly.set(name, (neverOnly.get(name) ?? true) && isNever);
+		}
+	}
+	return new Set([...neverOnly].filter(([, isNever]) => isNever).map(([name]) => name));
+}
+
 /**
  * The flattened prop names that belong to the Luke UI contract. A prop is documented when Luke UI
  * declares it, when the type names it deliberately through a `Pick`, or when it is declared directly on
@@ -456,7 +479,7 @@ function flattenedProps(declaration: PropDeclaration): ReadonlyArray<PropSymbol>
  * generic element attribute bag — `HTMLAttributes`, `SVGAttributes`, `AriaAttributes`, `DOMAttributes`,
  * a `ComponentProps<'div'>` expansion, or anything that inherits one of those wholesale — when it is
  * one of the three native pass-through names above, or when it is an external `aria-*`/`form*`
- * long-tail prop Luke UI never redeclared.
+ * long-tail prop Luke UI never redeclared. A prop declared only as `never` is also hidden.
  *
  * The long-tail check exists because structure alone cannot separate it from a legitimate small
  * contract: React Aria interfaces like `AriaBaseButtonProps` declare `aria-pressed`, `formMethod`,
@@ -474,8 +497,10 @@ function computeVisiblePropNameSet(declaration: PropDeclaration, reactSrcDir: st
 	walkOrigins(declaration, false, origins, new Set<string>(), reactSrcDir);
 
 	const visibleNames = new Set<string>();
+	const neverOnlyNames = neverOnlyPropNames(declaration);
 	for (const prop of flattenedProps(declaration)) {
 		const name = prop.getName();
+		if (neverOnlyNames.has(name)) continue;
 		const declarations = prop.getDeclarations();
 
 		const isLukeDeclared = declarations.some((propDeclaration) =>

@@ -1,0 +1,35 @@
+---
+title: Scroll Fade
+description: Indicate overflowing content with a fade.
+source: packages/@luke-ui/react/src/exports/scroll-fade.ts
+---
+
+Use `ScrollFade` when scrollable content should fade to indicate more content instead of showing a
+native scrollbar. When the browser does not support the fade, the native scrollbar remains visible.
+Read [Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
+
+<ExampleBlock src="scroll-fade/basic" title="Scroll Fade — Basic" />
+
+## Block axis
+
+Pass `axis="block"` to scroll on the block axis. The default `axis="inline"` scrolls on the inline
+axis. Both values follow the element's writing mode.
+
+<ExampleBlock src="scroll-fade/block-axis" title="Scroll Fade — Block axis" />
+
+## Accessibility
+
+Pass exactly one of `aria-label` or `aria-labelledby`.
+
+When content overflows, ScrollFade becomes a focusable, named region with a focus-visible treatment.
+
+When the content fits, ScrollFade has no region role, accessible-name attribute, or extra tab stop.
+
+ScrollFade always renders a `div`. Compose semantic structure around or inside it.
+
+## API
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/scroll-fade/scroll-fade.tsx"
+	name="ScrollFadeProps"
+/>

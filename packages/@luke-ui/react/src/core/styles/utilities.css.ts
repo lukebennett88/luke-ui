@@ -20,6 +20,7 @@ const spaceScale = {
 	sp40: vars.space.sp40,
 	sp48: vars.space.sp48,
 	sp64: vars.space.sp64,
+	sp96: vars.space.sp96,
 } as const satisfies Record<SpaceStep | '0', string>;
 
 const marginScale = { ...spaceScale, auto: 'auto' } as const;
