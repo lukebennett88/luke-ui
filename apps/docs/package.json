@@ -78,6 +78,7 @@
 		"@vanilla-extract/vite-plugin": "catalog:",
 		"@vitejs/plugin-react": "catalog:",
 		"@vitest/browser-playwright": "catalog:",
+		"axe-core": "catalog:",
 		"playwright": "catalog:",
 		"serve": "catalog:",
 		"shiki": "catalog:",

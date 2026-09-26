@@ -8,13 +8,13 @@ import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { Text } from '@luke-ui/react/text';
 import { deriveNestedRadius, vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
-import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { ComponentType, JSX, ReactNode } from 'react';
 import { Suspense, use, useEffect, useId, useRef, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import type { GroupImperativeHandle } from 'react-resizable-panels';
 import type { HighlightedSource } from '../lib/highlighted-source.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
+import { CodeBlock } from './code-block/code-block.js';
 import { DocsLink } from './docs-link.js';
 import { useIsDesktop } from './playground/use-is-desktop.js';
 
@@ -83,10 +83,8 @@ function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element 
 						borderEndStartRadius: INNER_RADIUS,
 					}}
 				>
-					<CodeBlock className="my-0 rounded-none border-x-0 border-b-0 shadow-none">
-						{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
-						<Pre dangerouslySetInnerHTML={{ __html: highlightedSource.html }} />
-					</CodeBlock>
+					{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
+					<CodeBlock copyText={highlightedSource.source} flush html={highlightedSource.html} />
 				</Box>
 			) : null}
 		</ExampleFrame>

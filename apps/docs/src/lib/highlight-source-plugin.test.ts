@@ -29,6 +29,7 @@ describe('highlightSourcePlugin', () => {
 			expect(highlighted.html).not.toContain('<pre');
 			expect(highlighted.html).toContain('--shiki-light');
 			expect(highlighted.html).toContain('--shiki-dark');
+			expect(highlighted.source).toBe(source.trim());
 			expect(highlighted.playgroundHash).toBe(encodeCodeHash(source.trim()));
 		} finally {
 			await rm(directory, { force: true, recursive: true });

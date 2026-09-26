@@ -1,0 +1,155 @@
+import { IconButton } from '@luke-ui/react/icon-button';
+import { cx } from '@luke-ui/react/utils';
+import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
+import type { ComponentPropsWithoutRef, ReactNode, Ref } from 'react';
+import { useRef } from 'react';
+import { useCopyButton } from '../../lib/use-copy-button.js';
+import * as styles from './code-block.css.js';
+
+type FigureProps = ComponentPropsWithoutRef<'figure'>;
+
+export interface CodeBlockProps extends Omit<FigureProps, 'children'> {
+	/** Optional caption shown above the code. */
+	title?: string;
+	/**
+	 * Shows the copy control. MDX may pass the string `"true"` / `"false"`.
+	 * @default true
+	 */
+	allowCopy?: boolean | 'true' | 'false';
+	/** Plain source. Prefer this over children when the text is a string constant. */
+	code?: string;
+	/** Shiki `<code>…</code>` markup. Docs CodeBlock owns the outer `<pre>`. */
+	html?: string;
+	/** Exact clipboard payload when rendered markup should not define what is copied. */
+	copyText?: string;
+	/** Drop outer margin and frame chrome so the block can sit flush under an example frame. */
+	flush?: boolean;
+	/** MDX `pre` children or other React nodes rendered inside `<pre>`. */
+	children?: ReactNode;
+	ref?: Ref<HTMLElement>;
+}
+
+/**
+ * Docs-owned code block. Plain `code`, Shiki `html`, or MDX `children` all render through the same
+ * chrome (title, copy, scroll region). Syntax highlighting stays in the docs Shiki pipeline.
+ */
+export function CodeBlock({
+	allowCopy: allowCopyProp = true,
+	children,
+	className,
+	code,
+	copyText,
+	flush = false,
+	html,
+	title,
+	...figureProps
+}: CodeBlockProps) {
+	const allowCopy = allowCopyProp !== false && allowCopyProp !== 'false';
+	const viewportRef = useRef<HTMLDivElement | null>(null);
+	const resizeObserverRef = useRef<ResizeObserver | null>(null);
+
+	const [copied, onCopy] = useCopyButton(async () => {
+		const text = resolveCopyText({
+			code,
+			copyText,
+			viewport: viewportRef.current,
+		});
+		await navigator.clipboard.writeText(text);
+	});
+
+	const showFloatingCopy = allowCopy && title == null;
+	const copyControl = allowCopy ? (
+		<IconButton
+			aria-label={copied ? 'Copied' : 'Copy'}
+			icon={copied ? 'check' : 'copy'}
+			onPress={onCopy}
+			prominence="low"
+			size="small"
+			tone="neutral"
+		/>
+	) : null;
+
+	return (
+		<figure
+			{...figureProps}
+			className={cx(styles.root, flush && styles.flush, className)}
+			dir="ltr"
+		>
+			{title != null ? (
+				<div className={styles.header}>
+					<figcaption className={styles.title}>{title}</figcaption>
+					{copyControl != null ? <div className={styles.actions}>{copyControl}</div> : null}
+				</div>
+			) : null}
+			{showFloatingCopy && copyControl != null ? (
+				<div className={cx(styles.actions, styles.floatingActions)}>{copyControl}</div>
+			) : null}
+			<div
+				className={cx(styles.viewport, showFloatingCopy && styles.viewportWithFloatingCopy)}
+				ref={(node) => {
+					resizeObserverRef.current?.disconnect();
+					resizeObserverRef.current = null;
+					viewportRef.current = node;
+					if (node == null) return;
+
+					const updateTabIndex = () => {
+						const scrollable =
+							node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1;
+						if (scrollable) {
+							node.tabIndex = 0;
+							node.setAttribute('role', 'region');
+							node.setAttribute('aria-label', title ?? 'Code');
+						} else {
+							node.removeAttribute('tabindex');
+							node.removeAttribute('role');
+							node.removeAttribute('aria-label');
+						}
+					};
+
+					updateTabIndex();
+					const observer = new ResizeObserver(updateTabIndex);
+					observer.observe(node);
+					resizeObserverRef.current = observer;
+				}}
+			>
+				{html != null ? (
+					// Shiki escapes source before the highlight plugin emits this markup.
+					<pre className={styles.pre} dangerouslySetInnerHTML={{ __html: html }} />
+				) : (
+					<pre className={styles.pre}>{code != null ? <code>{code}</code> : children}</pre>
+				)}
+			</div>
+			{allowCopy ? (
+				<VisuallyHidden aria-live="polite" elementType="p" role="status">
+					{copied ? 'Copied' : ''}
+				</VisuallyHidden>
+			) : null}
+		</figure>
+	);
+}
+
+function resolveCopyText({
+	code,
+	copyText,
+	viewport,
+}: {
+	code: string | undefined;
+	copyText: string | undefined;
+	viewport: HTMLDivElement | null;
+}): string {
+	if (copyText != null) return copyText;
+	if (code != null) return code;
+
+	const pre = viewport?.querySelector('pre');
+	if (pre == null) return '';
+
+	const clone = pre.cloneNode(true);
+	if (clone instanceof HTMLElement) {
+		for (const ignored of clone.querySelectorAll('.nd-copy-ignore')) {
+			ignored.replaceWith('\n');
+		}
+		return clone.textContent ?? '';
+	}
+
+	return pre.textContent ?? '';
+}
