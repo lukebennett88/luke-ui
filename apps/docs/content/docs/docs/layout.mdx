@@ -83,8 +83,8 @@ content can adapt without a breakpoint.
 ## Spacing and sizing
 
 Padding, gap, and margin accept `0` plus value-based spacing keys such as `sp16` and `sp24`. The
-number in each key names its step on the scale, so `sp24` is one step larger than `sp16`. Margin
-also accepts `auto`. Sizing and grid-placement properties accept their CSS values.
+number in each key reflects its value at the default 16px root and is emitted as `rem`. Margin also
+accepts `auto`. Sizing and grid-placement properties accept their CSS values.
 
 Use logical properties such as `paddingInline`, `marginBlockStart`, and `maxInlineSize`. They work
 in both writing directions without a second layout rule.

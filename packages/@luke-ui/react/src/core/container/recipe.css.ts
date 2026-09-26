@@ -1,14 +1,15 @@
 import { createVar } from '@vanilla-extract/css';
+import { rem } from '../../theme/rem.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
-/** Pixel values for fixed `maxInlineSize` tokens on `Container`. */
+/** Rem values for fixed `maxInlineSize` tokens on `Container`. */
 export const containerMaxInlineSizeTokens = {
-	ct448: '448px',
-	ct672: '672px',
-	ct896: '896px',
-	ct1152: '1152px',
-	ct1280: '1280px',
+	ct448: rem(448),
+	ct672: rem(672),
+	ct896: rem(896),
+	ct1152: rem(1152),
+	ct1280: rem(1280),
 } as const;
 
 /**

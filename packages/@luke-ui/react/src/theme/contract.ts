@@ -1,5 +1,6 @@
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { FontMetricStep } from './font-metric-scale.js';
+import { rem } from './rem.js';
 
 /**
  * Gives all six semantic roles the same contract shape, so a role can never be added to one visual
@@ -115,19 +116,20 @@ const fontStyleContract = Object.fromEntries(
 ) as { readonly [Style in TypeStyle]: typeof typeStyle };
 
 /**
- * Fixed spacing values selected from a 4px scale. Keys encode their pixel value.
+ * Fixed spacing values selected from a 4px scale. Keys encode their step; values are emitted as
+ * `rem` (16 → 1rem).
  */
 export const spaceScale = [
-	['sp4', '4px'],
-	['sp8', '8px'],
-	['sp12', '12px'],
-	['sp16', '16px'],
-	['sp24', '24px'],
-	['sp32', '32px'],
-	['sp40', '40px'],
-	['sp48', '48px'],
-	['sp64', '64px'],
-	['sp96', '96px'],
+	['sp4', rem(4)],
+	['sp8', rem(8)],
+	['sp12', rem(12)],
+	['sp16', rem(16)],
+	['sp24', rem(24)],
+	['sp32', rem(32)],
+	['sp40', rem(40)],
+	['sp48', rem(48)],
+	['sp64', rem(64)],
+	['sp96', rem(96)],
 ] as const;
 
 /** A spacing step key accepted by the layout APIs. */

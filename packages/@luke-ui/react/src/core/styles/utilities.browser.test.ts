@@ -42,7 +42,7 @@ test('applies every retained breakpoint responsively', async () => {
 		// eslint-disable-next-line no-await-in-loop -- viewport changes must be observed in order
 		await page.viewport(viewport.width, 800);
 		const computedStyle = getComputedStyle(element);
-		expect(computedStyle.padding).toBe(computedStyle.getPropertyValue(viewport.property).trim());
+		expect(computedStyle.padding).toBe(resolvedCustomProperty(element, viewport.property));
 	}
 });
 
@@ -58,7 +58,7 @@ test('resolves against a nearer explicit container instead of the root', async (
 	const element = mount(generated, wrapper);
 
 	const computedStyle = getComputedStyle(element);
-	expect(computedStyle.padding).toBe(computedStyle.getPropertyValue('--luke-space-sp4').trim());
+	expect(computedStyle.padding).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
 });
 
 test('resolves against the root content box, not the viewport width', async () => {
@@ -73,7 +73,7 @@ test('resolves against the root content box, not the viewport width', async () =
 	const element = mount(generated);
 
 	const computedStyle = getComputedStyle(element);
-	expect(computedStyle.padding).toBe(computedStyle.getPropertyValue('--luke-space-sp4').trim());
+	expect(computedStyle.padding).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
 	rootStyle.remove();
 });
 
@@ -96,6 +96,18 @@ test('returns class and style output that merges with consumer props', () => {
 	expect(getComputedStyle(element).inlineSize).toBe('400px');
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(1, 2, 3)');
 });
+
+/**
+ * Resolves a custom-property length through used-value computation. `getPropertyValue` returns the
+ * authored token (`0.25rem`); computed padding is always in CSS pixels.
+ */
+function resolvedCustomProperty(host: HTMLElement, property: string): string {
+	const probe = host.appendChild(document.createElement('div'));
+	probe.style.padding = `var(${property})`;
+	const resolved = getComputedStyle(probe).padding;
+	probe.remove();
+	return resolved;
+}
 
 function mount(
 	props: { className?: string; style?: Record<string, unknown> },
