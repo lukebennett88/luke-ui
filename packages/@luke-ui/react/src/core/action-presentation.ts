@@ -20,7 +20,7 @@ export type ButtonPresentationProps =
 			 */
 			prominence?: Prominence;
 			/**
-			 * Control size.
+			 * Sets the control size.
 			 * @default medium
 			 */
 			size?: 'small' | 'medium';
@@ -102,7 +102,7 @@ export type LinkPresentationProps =
 			 */
 			prominence?: Prominence;
 			/**
-			 * Control size.
+			 * Sets the control size.
 			 * @default medium
 			 */
 			size?: 'small' | 'medium';
@@ -116,7 +116,7 @@ export interface IconButtonPresentationProps {
 	 */
 	prominence?: Prominence;
 	/**
-	 * Control size.
+	 * Sets the control size.
 	 * @default medium
 	 */
 	size?: 'small' | 'medium';
@@ -135,7 +135,7 @@ export interface IconLinkPresentationProps {
 	 */
 	prominence?: Prominence;
 	/**
-	 * Control size.
+	 * Sets the control size.
 	 * @default medium
 	 */
 	size?: 'small' | 'medium';
