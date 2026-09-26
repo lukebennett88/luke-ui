@@ -136,8 +136,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'representative recipe class moved to the wrong layer',
 		(css: string) => {
 			return css.replace(
-				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n}',
-				'@layer utilities {\n  .recipe-class { display: inline-flex; }\n}',
+				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
+				'@layer utilities {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
 			);
 		},
 	],
@@ -151,15 +151,19 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		},
 	],
 	[
-		'representative retained-layer content removed',
-		(css: string) => css.replace('  .recipe-class { display: inline-flex; }\n', ''),
+		'representative recipe content removed',
+		(css: string) =>
+			css.replace(
+				'  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n',
+				'',
+			),
 	],
 	[
 		'class-like text in an attribute value',
 		(css: string) => {
 			return css.replace(
-				'.recipe-class { display: inline-flex; }',
-				'[data-class=".recipe-class"] { display: inline-flex; }',
+				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
+				'@layer recipes {\n  [data-class=".recipe-class"] { display: inline-flex; }\n}',
 			);
 		},
 	],
@@ -171,7 +175,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'empty transitional recipes layer',
 		(css: string) =>
 			css.replace(
-				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n}',
+				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
 				'@layer recipes {}',
 			),
 	],
@@ -574,7 +578,7 @@ function assertRecipesLayerHasRules(analysis: StylesheetAnalysis): void {
 	const hasRecipeRule = analysis.styleRules.some(
 		(rule) => rule.owningLayer === 'recipes' && rule.hasDeclarations,
 	);
-	if (!hasRecipeRule) throw new Error('Expected the transitional recipes layer to contain a rule.');
+	if (!hasRecipeRule) throw new Error('Expected the recipes layer to contain a rule.');
 }
 
 function assertStableSelectors(analysis: StylesheetAnalysis): void {
