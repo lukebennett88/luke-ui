@@ -6,31 +6,10 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import react from '@vitejs/plugin-react';
 import mdx from 'fumadocs-mdx/vite';
-import type { Plugin } from 'vite-plus';
 import { defineConfig, lazyPlugins } from 'vite-plus';
-import { isDocsStaticDeploy } from './src/lib/docs-deploy-mode.js';
 import { findMdxFiles } from './src/lib/docs-mdx-files.js';
 import { highlightSourcePlugin } from './src/lib/highlight-source-plugin.js';
 import { getMarkdownPagePath } from './src/lib/markdown-page-path.js';
-
-// staticFunctionMiddleware hardcodes `/__tsr/staticServerFnCache/...` for the
-// client fetch URL with no base-path support. When deployed under a sub-path
-// (e.g. GitHub Pages /luke-ui/), the client requests /__tsr/... and 404s.
-// This patches only the client fetch so the on-disk layout stays unchanged.
-function staticFunctionBasePathPlugin(): Plugin {
-	return {
-		name: 'static-function-base-path',
-		transform(code, id) {
-			if (!id.includes('start-static-server-functions')) return null;
-			if (!id.endsWith('staticFunctionMiddleware.js')) return null;
-			if (!code.includes('fetch(url,')) return null;
-			return code.replace(
-				'fetch(url,',
-				"fetch(import.meta.env.BASE_URL.replace(/\\/$/, '') + url,",
-			);
-		},
-	};
-}
 
 const TRAILING_SLASH_PATTERN = /\/$/;
 
@@ -58,9 +37,6 @@ export default defineConfig(async () => {
 	const markdownPrerenderPages = getMarkdownPrerenderPages();
 	const baseUrl = readBaseUrl();
 	const siteUrl = (process.env.SITE_URL || LOCAL_SITE_URL).replace(TRAILING_SLASH_PATTERN, '');
-	// Netlify (default) keeps docs HTML on runtime SSR. Set DOCS_STATIC=true for a
-	// fully prerendered static host such as GitHub Pages.
-	const docsStatic = isDocsStaticDeploy();
 
 	return {
 		// Allow overriding the base URL for deployments to sub-paths (e.g. GitHub Pages).
@@ -69,7 +45,6 @@ export default defineConfig(async () => {
 		// The public origin for absolute URLs. It is baked in at build time so the
 		// prerendered files and the SSR function agree.
 		define: {
-			'import.meta.env.DOCS_STATIC': JSON.stringify(docsStatic ? 'true' : 'false'),
 			'import.meta.env.SITE_URL': JSON.stringify(siteUrl),
 		},
 		environments: {
@@ -123,34 +98,22 @@ export default defineConfig(async () => {
 				'sucrase',
 			],
 		},
-		// `vp pack` compiles pre-hydration scripts to inline-able IIFE artifacts;
-		// it runs as part of `docs#generate`, not `vp build`. IIFE format needs one
-		// entry per pack config (no code-splitting).
-		pack: [
-			{
-				clean: false,
-				dts: false,
-				// Emitted as `src/generated/<name>.iife.js` — the `.iife` suffix is fixed
-				// by tsdown for this format.
-				entry: ['src/components/playground/editor-skeleton-script.ts'],
-				format: 'iife' as const,
-				// Artifacts are inlined into HTML responses, so strip documentation comments.
-				minify: true,
-				outDir: 'src/generated',
-				platform: 'browser' as const,
-			},
-			{
-				clean: false,
-				dts: false,
-				entry: ['src/lib/theme-prefs-bootstrap-script.ts'],
-				format: 'iife' as const,
-				minify: true,
-				outDir: 'src/generated',
-				platform: 'browser' as const,
-			},
-		],
+		// `vp pack` compiles the pre-hydration skeleton script to an inline-able
+		// IIFE artifact; it runs as part of `docs#generate`, not `vp build`.
+		pack: {
+			clean: false,
+			dts: false,
+			// Emitted as src/generated/editor-skeleton-script.iife.js — the `.iife`
+			// suffix is fixed by tsdown for this format.
+			entry: ['src/components/playground/editor-skeleton-script.ts'],
+			format: 'iife' as const,
+			// The artifact is inlined into every playground HTML response, so
+			// strip the source's documentation comments.
+			minify: true,
+			outDir: 'src/generated',
+			platform: 'browser' as const,
+		},
 		plugins: lazyPlugins(async () => [
-			staticFunctionBasePathPlugin(),
 			highlightSourcePlugin(),
 			mdx(await import('./source.config')),
 			tailwindcss(),
@@ -163,22 +126,16 @@ export default defineConfig(async () => {
 					{ path: '/sitemap.xml' },
 					{ path: '/robots.txt' },
 					{ path: '/index.md' },
-					// The preview page is loaded via an iframe src, which the link
-					// crawler does not follow, so it must be prerendered explicitly.
-					{ path: '/playground/preview' },
 					...markdownPrerenderPages,
 				],
 				prerender: {
 					// Serialize requests to the internal Vite preview server and retry a
-					// transient failure without omitting the iframe preview page.
+					// transient failure.
 					concurrency: 1,
-					// SSR (Netlify): keep agent/static assets from `pages` above, but do not
-					// crawl or auto-discover HTML docs. Netlify `preferStatic` would serve
-					// those files without cookies, so theme toggles could not SSR from prefs.
-					// Static (DOCS_STATIC): crawl and discover HTML so
-					// `staticFunctionMiddleware` can write `__tsr/staticServerFnCache`.
-					autoStaticPathsDiscovery: docsStatic,
-					crawlLinks: docsStatic,
+					// HTML pages render per request so theme cookies decide the first paint.
+					// Netlify's `preferStatic` would serve a prerendered copy without them.
+					autoStaticPathsDiscovery: false,
+					crawlLinks: false,
 					enabled: true,
 					retryCount: 2,
 				},

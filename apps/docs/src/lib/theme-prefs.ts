@@ -1,97 +1,66 @@
+import { getHintUtils } from '@epic-web/client-hints';
+import { clientHint as colorSchemeHint } from '@epic-web/client-hints/color-scheme';
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
-import {
-	COLOR_MODE_COOKIE_NAME,
-	COLOR_MODE_STORAGE_KEY,
-	DEFAULT_COLOR_MODE,
-	DEFAULT_THEME_IDENTITY,
-	THEME_IDENTITY_COOKIE_NAME,
-} from './theme-prefs-constants.js';
-import type { ColorModePreference, ThemeIdentity, ThemePrefs } from './theme-prefs-constants.js';
-import { readPrefsCookie, writePrefsCookie } from './theme-prefs-cookie.js';
 
-export type { ColorModePreference, ThemeIdentity, ThemePrefs };
-export {
-	COLOR_MODE_COOKIE_NAME,
-	COLOR_MODE_STORAGE_KEY,
-	DEFAULT_COLOR_MODE,
-	DEFAULT_THEME_IDENTITY,
-	THEME_IDENTITY_COOKIE_NAME,
-} from './theme-prefs-constants.js';
+export type ThemeIdentity = 'paper' | 'tactile';
+export type ColorMode = 'light' | 'dark';
+export type ColorModePreference = ColorMode | 'system';
 
-export const DEFAULT_THEME_PREFS = {
-	colorMode: DEFAULT_COLOR_MODE,
-	themeIdentity: DEFAULT_THEME_IDENTITY,
-} as const satisfies ThemePrefs;
-
-const THEME_IDENTITY_CLASS_NAMES = {
-	paper: paperThemeClassName,
-	tactile: tactileThemeClassName,
-} as const satisfies Record<ThemeIdentity, string>;
-
-const THEME_IDENTITY_CHANGE_EVENT = 'luke-ui-docs-theme-change';
-const COLOR_MODE_CHANGE_EVENT = 'luke-ui-docs-color-mode-change';
-
-export function parseThemeIdentity(value: string | null | undefined): ThemeIdentity {
-	return value === 'paper' ? 'paper' : DEFAULT_THEME_IDENTITY;
+/** Docs theme preferences, read from cookies by the root loader. */
+export interface ThemePrefs {
+	colorModePreference: ColorModePreference;
+	/** `colorModePreference`, with `system` resolved from the client hint cookie. */
+	resolvedColorMode: ColorMode;
+	themeIdentity: ThemeIdentity;
 }
 
-export function parseColorMode(value: string | null | undefined): ColorModePreference {
-	return value === 'light' || value === 'dark' || value === 'system' ? value : DEFAULT_COLOR_MODE;
+export type ThemePrefsUpdate = Partial<Pick<ThemePrefs, 'colorModePreference' | 'themeIdentity'>>;
+
+export const THEME_IDENTITY_COOKIE_NAME = 'luke-ui-docs-theme';
+/** Absent when the preference is `system`. */
+export const COLOR_MODE_COOKIE_NAME = 'luke-ui-docs-color-mode';
+export const COLOR_SCHEME_HINT_COOKIE_NAME = colorSchemeHint.cookieName;
+
+export const DEFAULT_THEME_PREFS = {
+	colorModePreference: 'system',
+	resolvedColorMode: 'light',
+	themeIdentity: 'tactile',
+} as const satisfies ThemePrefs;
+
+/**
+ * Inline `<head>` script that writes `prefers-color-scheme` to the hint cookie and reloads once
+ * when the cookie was missing or stale, so the server can render `system` correctly.
+ */
+export const clientHintCheckScript = getHintUtils({
+	colorScheme: colorSchemeHint,
+}).getClientHintCheckScript();
+
+export function parseThemePrefs(cookies: {
+	colorMode: string | undefined;
+	colorSchemeHint: string | undefined;
+	themeIdentity: string | undefined;
+}): ThemePrefs {
+	const colorModePreference = parseColorModePreference(cookies.colorMode);
+	return {
+		colorModePreference,
+		resolvedColorMode:
+			colorModePreference === 'system'
+				? colorSchemeHint.transform(cookies.colorSchemeHint ?? colorSchemeHint.fallback)
+				: colorModePreference,
+		themeIdentity: cookies.themeIdentity === 'paper' ? 'paper' : 'tactile',
+	};
 }
 
 export function themeIdentityClassName(themeIdentity: ThemeIdentity): string {
 	return THEME_IDENTITY_CLASS_NAMES[themeIdentity];
 }
 
-export function readThemeIdentityPreference(): ThemeIdentity {
-	// localStorage wins on the client so `storage` events from other tabs are visible.
-	return parseThemeIdentity(
-		localStorage.getItem(THEME_IDENTITY_COOKIE_NAME) ??
-			readPrefsCookie(THEME_IDENTITY_COOKIE_NAME) ??
-			undefined,
-	);
-}
+const THEME_IDENTITY_CLASS_NAMES = {
+	paper: paperThemeClassName,
+	tactile: tactileThemeClassName,
+} as const satisfies Record<ThemeIdentity, string>;
 
-export function readColorModePreference(): ColorModePreference {
-	return parseColorMode(readPrefsCookie(COLOR_MODE_COOKIE_NAME));
-}
-
-export function writeThemeIdentityPreference(themeIdentity: ThemeIdentity) {
-	writePrefsCookie(THEME_IDENTITY_COOKIE_NAME, themeIdentity);
-	// Dual-write for cross-tab sync via the `storage` event (cookies are not observable that way).
-	localStorage.setItem(THEME_IDENTITY_COOKIE_NAME, themeIdentity);
-	window.dispatchEvent(new Event(THEME_IDENTITY_CHANGE_EVENT));
-}
-
-export function writeColorModePreference(colorMode: ColorModePreference) {
-	writePrefsCookie(COLOR_MODE_COOKIE_NAME, colorMode);
-	// Keep next-themes' blocking script aligned with the cookie the server reads.
-	localStorage.setItem(COLOR_MODE_STORAGE_KEY, colorMode);
-	window.dispatchEvent(new Event(COLOR_MODE_CHANGE_EVENT));
-}
-
-export function subscribeToThemeIdentityPreference(onStoreChange: () => void) {
-	const handleStorage = (event: StorageEvent) => {
-		if (event.key !== THEME_IDENTITY_COOKIE_NAME) return;
-		if (event.newValue === 'paper' || event.newValue === 'tactile') {
-			// Keep this tab's SSR cookie aligned with the other tab's preference.
-			writePrefsCookie(THEME_IDENTITY_COOKIE_NAME, event.newValue);
-		}
-		onStoreChange();
-	};
-
-	window.addEventListener('storage', handleStorage);
-	window.addEventListener(THEME_IDENTITY_CHANGE_EVENT, onStoreChange);
-	return () => {
-		window.removeEventListener('storage', handleStorage);
-		window.removeEventListener(THEME_IDENTITY_CHANGE_EVENT, onStoreChange);
-	};
-}
-
-export function subscribeToColorModePreference(onStoreChange: () => void) {
-	window.addEventListener(COLOR_MODE_CHANGE_EVENT, onStoreChange);
-	return () => {
-		window.removeEventListener(COLOR_MODE_CHANGE_EVENT, onStoreChange);
-	};
+function parseColorModePreference(value: string | undefined): ColorModePreference {
+	return value === 'light' || value === 'dark' ? value : 'system';
 }

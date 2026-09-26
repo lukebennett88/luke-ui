@@ -3,7 +3,6 @@ import { ClientOnly, createFileRoute } from '@tanstack/react-router';
 import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { useSpinDoctor } from 'spin-doctor';
-import { useColorModeSelection } from '../../components/playground/color-mode-toggle.js';
 import {
 	EditorSkeleton,
 	EditorSkeletonShapeScript,
@@ -14,7 +13,7 @@ import { RESIZE_TARGET_MINIMUM_SIZE } from '../../components/playground/resize-t
 import { useIsDesktop } from '../../components/playground/use-is-desktop';
 import type { ViewportWidth } from '../../components/playground/viewport-toggle';
 import { SiteNav } from '../../components/site-nav.js';
-import { useDocsThemeIdentity } from '../../components/theme-controls';
+import { useDocsTheme } from '../../components/theme-controls';
 import { withBasePath } from '../../lib/base-path.js';
 import rawDefaultCode from '../../lib/playground-default-code.tsx?raw';
 import { createPlaygroundPageSession } from '../../lib/playground-handshake';
@@ -33,8 +32,7 @@ export const Route = createFileRoute('/playground/')({
 });
 
 function Playground() {
-	const { themeIdentity } = useDocsThemeIdentity();
-	const colorMode = useColorModeSelection();
+	const { colorModePreference, themeIdentity } = useDocsTheme();
 	const [initialCode] = useState(() => {
 		if (typeof window === 'undefined') return rawDefaultCode;
 		return decodeCodeHash(window.location.hash) ?? rawDefaultCode;
@@ -61,10 +59,10 @@ function Playground() {
 		sessionRef.current.postCode(code, ports());
 	}, []);
 	const postAppearance = useCallback(() => {
-		const appearance = { colorMode, themeIdentity };
+		const appearance = { colorMode: colorModePreference, themeIdentity };
 		appearanceRef.current = appearance;
 		sessionRef.current.postAppearance(appearance, ports());
-	}, [colorMode, themeIdentity]);
+	}, [colorModePreference, themeIdentity]);
 
 	useEffect(() => {
 		const session = sessionRef.current;

@@ -1,16 +1,17 @@
 import '../../styles/app.css';
 import '@luke-ui/react/themes/paper/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
-import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
-import { ThemeProvider } from 'next-themes';
+import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
+import { page } from 'vite-plus/test/context';
 import toneSource from '../../examples/button/tones.tsx?raw';
 import type { PlaygroundPreviewMessage } from '../../lib/playground-protocol.js';
 import { isPlaygroundPreviewMessage } from '../../lib/playground-protocol.js';
-import { DocsThemeRoot } from '../theme-controls.js';
+import { DocsThemeProvider, DocsThemeRoot, ThemeControls } from '../theme-controls.js';
 import PreviewRunner from './preview-runner.js';
 
 let container: HTMLElement | undefined;
@@ -22,9 +23,6 @@ afterEach(() => {
 	parentListenController = new AbortController();
 	if (root) act(() => root?.unmount());
 	container?.remove();
-	localStorage.clear();
-	document.documentElement.removeAttribute('class');
-	document.documentElement.removeAttribute('data-color-mode');
 	container = undefined;
 	root = undefined;
 });
@@ -34,11 +32,14 @@ async function mountPreview(): Promise<void> {
 	root = createRoot(container);
 	await act(async () => {
 		root?.render(
-			<ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-				<DocsThemeRoot>
-					<PreviewRunner />
-				</DocsThemeRoot>
-			</ThemeProvider>,
+			<DocsThemeProvider>
+				<IconSpritesheetProvider href={spriteSheetHref}>
+					<DocsThemeRoot>
+						<ThemeControls />
+						<PreviewRunner />
+					</DocsThemeRoot>
+				</IconSpritesheetProvider>
+			</DocsThemeProvider>,
 		);
 	});
 }
@@ -76,7 +77,7 @@ test('applies appearance messages to the playground preview root', async () => {
 	const themeRoot = container?.querySelector<HTMLElement>('[data-color-mode]');
 	if (!themeRoot) throw new Error('Expected a playground theme root');
 	await expect.poll(() => themeRoot.dataset.colorMode).toBe('dark');
-	expect(document.documentElement).toHaveClass(paperThemeClassName);
+	await expect.element(page.getByRole('radio', { name: 'Paper' })).toBeChecked();
 });
 
 test('compiles parent playground code and posts success', async () => {

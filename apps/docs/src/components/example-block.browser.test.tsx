@@ -9,14 +9,13 @@ import {
 	createRouter,
 	RouterProvider,
 } from '@tanstack/react-router';
-import { ThemeProvider } from 'next-themes';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, assert, expect, test } from 'vite-plus/test';
 import { commands, page, userEvent } from 'vite-plus/test/context';
 import { ExampleBlock, ExampleLoadingState, ExamplePreview } from './example-block';
-import { DocsThemeRoot } from './theme-controls.js';
+import { DocsThemeProvider, DocsThemeRoot } from './theme-controls.js';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
@@ -264,34 +263,39 @@ function renderPreviewHarness({
 	root = createRoot(container);
 	act(() => {
 		root?.render(
-			<DocsThemeRoot>
-				<div id={withStickyHeader ? 'nd-notebook-layout' : undefined}>
-					{withStickyHeader ? (
-						<header className="sticky top-0 z-10 bg-fd-background" style={{ blockSize: '3.5rem' }}>
-							Page header
-						</header>
-					) : null}
-					<article
-						style={withStickyHeader ? { inlineSize: '800px', maxInlineSize: 'none' } : undefined}
-					>
-						<div style={withStickyHeader ? { inlineSize: '800px' } : undefined}>
-							<ExamplePreview title="Resize harness">
-								<div
-									ref={(node) => {
-										if (!node || !onFirstLayout) return;
-										const canvas = node.closest('.example-preview-canvas')?.firstElementChild;
-										if (canvas instanceof HTMLElement) {
-											onFirstLayout(canvas.getBoundingClientRect().width);
-										}
-									}}
-									style={{ blockSize: withStickyHeader ? '16rem' : '4rem' }}
-								/>
-							</ExamplePreview>
-						</div>
-					</article>
-					{withStickyHeader ? <div style={{ blockSize: '100vh' }} /> : null}
-				</div>
-			</DocsThemeRoot>,
+			<DocsThemeProvider>
+				<DocsThemeRoot>
+					<div id={withStickyHeader ? 'nd-notebook-layout' : undefined}>
+						{withStickyHeader ? (
+							<header
+								className="sticky top-0 z-10 bg-fd-background"
+								style={{ blockSize: '3.5rem' }}
+							>
+								Page header
+							</header>
+						) : null}
+						<article
+							style={withStickyHeader ? { inlineSize: '800px', maxInlineSize: 'none' } : undefined}
+						>
+							<div style={withStickyHeader ? { inlineSize: '800px' } : undefined}>
+								<ExamplePreview title="Resize harness">
+									<div
+										ref={(node) => {
+											if (!node || !onFirstLayout) return;
+											const canvas = node.closest('.example-preview-canvas')?.firstElementChild;
+											if (canvas instanceof HTMLElement) {
+												onFirstLayout(canvas.getBoundingClientRect().width);
+											}
+										}}
+										style={{ blockSize: withStickyHeader ? '16rem' : '4rem' }}
+									/>
+								</ExamplePreview>
+							</div>
+						</article>
+						{withStickyHeader ? <div style={{ blockSize: '100vh' }} /> : null}
+					</div>
+				</DocsThemeRoot>
+			</DocsThemeProvider>,
 		);
 	});
 }
@@ -303,13 +307,13 @@ async function renderExampleBlock({
 }: { src?: string; title?: string; width?: number } = {}) {
 	const rootRoute = createRootRoute({
 		component: () => (
-			<ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+			<DocsThemeProvider>
 				<IconSpritesheetProvider href={spriteSheetHref}>
 					<DocsThemeRoot>
 						<ExampleBlock src={src} title={title} />
 					</DocsThemeRoot>
 				</IconSpritesheetProvider>
-			</ThemeProvider>
+			</DocsThemeProvider>
 		),
 	});
 	const router = createRouter({

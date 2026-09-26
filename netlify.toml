@@ -8,5 +8,3 @@ edge_functions = "apps/docs/netlify/edge-functions"
 [build.environment]
 # The deploy's public origin, baked into absolute URLs at build time.
 SITE_URL = "https://luke-ui.netlify.app"
-# Leave DOCS_STATIC unset. Netlify serves docs HTML via SSR so theme cookies can
-# vary the first paint. Set DOCS_STATIC=true only for fully static hosts.

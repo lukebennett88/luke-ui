@@ -75,9 +75,3 @@ jobs:
 
       - name: Run docs tests
         run: pnpm --filter docs run test
-
-      - name: Build docs (Netlify SSR mode)
-        run: pnpm run build:docs
-
-      - name: Check SSR client navigation
-        run: pnpm --filter docs run check:ssr-nav

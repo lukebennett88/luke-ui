@@ -7,7 +7,7 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { StoryWrapper } from '../../lib/story-wrapper';
-import { DocsThemeRoot } from '../theme-controls';
+import { DocsThemeProvider, DocsThemeRoot } from '../theme-controls';
 import { PreviewToolbar } from './preview-toolbar';
 import type { ViewportWidth } from './viewport-toggle';
 
@@ -43,11 +43,13 @@ function renderToolbar() {
 
 	act(() => {
 		root?.render(
-			<DocsThemeRoot>
-				<StoryWrapper>
-					<Harness />
-				</StoryWrapper>
-			</DocsThemeRoot>,
+			<DocsThemeProvider>
+				<DocsThemeRoot>
+					<StoryWrapper>
+						<Harness />
+					</StoryWrapper>
+				</DocsThemeRoot>
+			</DocsThemeProvider>,
 		);
 	});
 }
