@@ -85,31 +85,17 @@ export const actions = style({
 	},
 });
 
-export const floatingActions = style({
+/**
+ * Titleless copy overlays the full-width scrollport (no side column).
+ * Block offset centres the control on the first code line (viewport pad + half line − half control).
+ */
+export const overlayActions = style({
 	'@layer': {
 		recipes: {
-			insetBlockStart: vars.space.sp8,
+			insetBlockStart: `calc(${vars.space.sp12} + (${vars.font.caption.lineHeight} / 2) - (${vars.controlSize.small} / 2))`,
 			insetInlineEnd: vars.space.sp8,
 			position: 'absolute',
 			zIndex: 1,
-		},
-	},
-});
-
-/** Inherits figure direction so floating-copy padding mirrors with the button. */
-export const viewportFrame = style({
-	'@layer': {
-		recipes: {
-			minInlineSize: 0,
-		},
-	},
-});
-
-export const viewportFrameWithFloatingCopy = style({
-	'@layer': {
-		recipes: {
-			// Same physical side as floatingActions (insetInlineEnd on the figure).
-			paddingInlineEnd: vars.space.sp48,
 		},
 	},
 });
@@ -118,6 +104,7 @@ export const viewport = style({
 	'@layer': {
 		recipes: {
 			maxBlockSize: '37.5rem',
+			minInlineSize: 0,
 			overflow: 'auto',
 			paddingBlock: vars.space.sp12,
 			paddingInline: vars.space.sp16,
@@ -133,9 +120,23 @@ export const viewport = style({
 	},
 });
 
+/**
+ * Clear the overlay copy without a side column. Padding stays on the full-width
+ * scrollport so the recessed surface continues under the button.
+ */
+export const viewportWithOverlayCopy = style({
+	'@layer': {
+		recipes: {
+			paddingInlineEnd: vars.space.sp48,
+		},
+	},
+});
+
 export const pre = style({
 	'@layer': {
 		recipes: {
+			// max-content so long lines widen the scrollport; min 100% so short blocks fill the frame.
+			inlineSize: 'max-content',
 			margin: 0,
 			minInlineSize: '100%',
 			overflow: 'visible',
@@ -147,10 +148,16 @@ export const pre = style({
 globalStyle(`${pre} code`, {
 	'@layer': {
 		recipes: {
-			display: 'block',
+			// Reset prose inline-code chrome if `not-prose` is missing on an ancestor.
+			backgroundColor: 'transparent',
+			borderRadius: 0,
+			borderWidth: 0,
+			display: 'flex',
+			flexDirection: 'column',
 			fontFamily: 'inherit',
 			fontSize: 'inherit',
 			lineHeight: 'inherit',
+			padding: 0,
 		},
 	},
 });
