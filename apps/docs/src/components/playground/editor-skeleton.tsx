@@ -1,7 +1,7 @@
+import { toSkeletonLines } from '@luke-ui/playground-core';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import shapeScript from '../../generated/editor-skeleton-script.iife.js?raw';
-import { toSkeletonLines } from '../../lib/playground-shape';
 
 /**
  * Placeholder that mirrors the code the editor is about to show: one bar per

@@ -464,15 +464,17 @@ for `@luke-ui/react`, a live preview iframe, and code shared through the `#code=
 (lz-string compressed, plus a `&shape=` param of per-line indent/length pairs so the pre-hydration
 loading skeleton can mirror the shared code before any JavaScript loads). `<ExampleBlock>` renders
 an "Open in playground" button when the example's imports are all in the playground runtime
-specifier list (`playground-runtime-specifiers.ts`). The button opens that source pre-loaded.
-Examples that import a relative module, or anything else the preview cannot `require`, omit the
-button.
+specifier list (built by `@luke-ui/playground-core` with docs host extras in
+`docs-playground-specifiers.ts`). The button opens that source pre-loaded. Examples that import a
+relative module, or anything else the preview cannot `require`, omit the button.
 
 User code compiles in the browser with sucrase and can import `react` and any `@luke-ui/react/*`
 subpath. The import map, editor types, and pre-hydration skeleton are generated as part of
 `generate`. New component subpaths in `@luke-ui/react`'s `exports` map are picked up automatically.
 The preview iframe only accepts messages from its parent. Readiness and replay live in
-`playground-handshake.ts`. Compilation, the URL hash, and debounce stay in the route and runner.
+`@luke-ui/playground-core`'s handshake session. Compilation, the URL hash, and debounce stay in the
+route and runner. The host-independent kernel is the private `packages/@luke-ui/playground-core`
+package.
 
 ## Keeping docs current
 

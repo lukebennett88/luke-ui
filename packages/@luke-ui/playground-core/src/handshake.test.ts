@@ -1,6 +1,6 @@
 import { expect, test } from 'vite-plus/test';
-import { createPlaygroundPageSession, isTrustedParentMessage } from './playground-handshake.js';
-import type { PlaygroundMessageEvent, PlaygroundPagePorts } from './playground-handshake.js';
+import { createPlaygroundPageSession, isTrustedParentMessage } from './handshake.js';
+import type { PlaygroundMessageEvent, PlaygroundPagePorts } from './handshake.js';
 
 const ORIGIN = 'https://docs.test';
 const VALID_CODE = 'export default function Preview() { return null; }';

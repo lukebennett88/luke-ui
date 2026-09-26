@@ -1,10 +1,10 @@
 import '../../styles/app.css';
+import { decodeCodeHash, encodeCodeHash } from '@luke-ui/playground-core';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { decodeCodeHash, encodeCodeHash } from '../../lib/playground-hash';
 
 const PlaygroundEditor = (await import('./editor.js')).default;
 

@@ -1,7 +1,7 @@
 // Default import + destructure because lz-string is CommonJS — named imports
 // fail static analysis in Vite's SSR module runner.
 import lzString from 'lz-string';
-import { encodeShape } from './playground-shape';
+import { encodeShape } from './shape.js';
 
 const { compressToEncodedURIComponent, decompressFromEncodedURIComponent } = lzString;
 
