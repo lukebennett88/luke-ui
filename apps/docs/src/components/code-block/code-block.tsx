@@ -2,11 +2,14 @@ import { IconButton } from '@luke-ui/react/icon-button';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from 'react';
-import { useRef } from 'react';
-import { useCopyButton } from '../../lib/use-copy-button.js';
+import { useEffect, useRef, useState } from 'react';
 import * as styles from './code-block.css.js';
 
 type FigureProps = ComponentPropsWithoutRef<'figure'>;
+
+type CopyStatus = 'idle' | 'copied' | 'error';
+
+const COPY_FEEDBACK_MS = 1500;
 
 export interface CodeBlockProps extends Omit<FigureProps, 'children'> {
 	/** Optional caption shown above the code. */
@@ -47,34 +50,54 @@ export function CodeBlock({
 	const allowCopy = allowCopyProp !== false && allowCopyProp !== 'false';
 	const viewportRef = useRef<HTMLDivElement | null>(null);
 	const resizeObserverRef = useRef<ResizeObserver | null>(null);
+	const copyTimeoutRef = useRef<number | null>(null);
+	const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle');
 
-	const [copied, onCopy] = useCopyButton(async () => {
+	useEffect(() => {
+		return () => {
+			if (copyTimeoutRef.current != null) window.clearTimeout(copyTimeoutRef.current);
+		};
+	}, []);
+
+	async function handleCopy() {
 		const text = resolveCopyText({
 			code,
 			copyText,
 			viewport: viewportRef.current,
 		});
-		await navigator.clipboard.writeText(text);
-	});
+
+		if (copyTimeoutRef.current != null) window.clearTimeout(copyTimeoutRef.current);
+
+		try {
+			await navigator.clipboard.writeText(text);
+			setCopyStatus('copied');
+		} catch {
+			setCopyStatus('error');
+		}
+
+		copyTimeoutRef.current = window.setTimeout(() => {
+			setCopyStatus('idle');
+			copyTimeoutRef.current = null;
+		}, COPY_FEEDBACK_MS);
+	}
 
 	const showFloatingCopy = allowCopy && title == null;
 	const copyControl = allowCopy ? (
 		<IconButton
-			aria-label={copied ? 'Copied' : 'Copy'}
-			icon={copied ? 'check' : 'copy'}
-			onPress={onCopy}
+			aria-label={copyStatus === 'copied' ? 'Copied' : 'Copy'}
+			icon={copyStatus === 'copied' ? 'check' : 'copy'}
+			onPress={handleCopy}
 			prominence="low"
 			size="small"
 			tone="neutral"
 		/>
 	) : null;
 
+	const liveMessage =
+		copyStatus === 'copied' ? 'Copied' : copyStatus === 'error' ? 'Could not copy code' : '';
+
 	return (
-		<figure
-			{...figureProps}
-			className={cx(styles.root, flush && styles.flush, className)}
-			dir="ltr"
-		>
+		<figure {...figureProps} className={cx(styles.root, flush && styles.flush, className)}>
 			{title != null ? (
 				<div className={styles.header}>
 					<figcaption className={styles.title}>{title}</figcaption>
@@ -84,8 +107,10 @@ export function CodeBlock({
 			{showFloatingCopy && copyControl != null ? (
 				<div className={cx(styles.actions, styles.floatingActions)}>{copyControl}</div>
 			) : null}
+			{/* Code scroll region stays LTR so overflow scrolls in RTL documents. */}
 			<div
 				className={cx(styles.viewport, showFloatingCopy && styles.viewportWithFloatingCopy)}
+				dir="ltr"
 				ref={(node) => {
 					resizeObserverRef.current?.disconnect();
 					resizeObserverRef.current = null;
@@ -121,7 +146,7 @@ export function CodeBlock({
 			</div>
 			{allowCopy ? (
 				<VisuallyHidden aria-live="polite" elementType="p" role="status">
-					{copied ? 'Copied' : ''}
+					{liveMessage}
 				</VisuallyHidden>
 			) : null}
 		</figure>

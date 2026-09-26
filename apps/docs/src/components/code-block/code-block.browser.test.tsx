@@ -37,6 +37,20 @@ test('copies plain source including leading and trailing whitespace', async () =
 	await expect.element(page.getByRole('status')).toHaveTextContent('Copied');
 });
 
+test('announces clipboard failure without claiming Copied', async () => {
+	vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('denied'));
+
+	renderCodeBlock(<CodeBlock code="const value = 1;" title="Source" />);
+
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Copy' }));
+	});
+
+	await expect.element(page.getByRole('status')).toHaveTextContent('Could not copy code');
+	await expect.element(page.getByRole('button', { name: 'Copy' })).toBeVisible();
+	expect(page.getByRole('button', { name: 'Copied' })).not.toBeInTheDocument();
+});
+
 test('copies copyText instead of rendered highlighted text', async () => {
 	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 	const source = 'const value = 1;\n';
@@ -63,21 +77,29 @@ test('scrolls horizontally in a narrow viewport and stays operable in RTL', asyn
 	document.documentElement.dir = 'rtl';
 
 	try {
-		renderCodeBlock(
-			<CodeBlock
-				code={'const long = "abcdefghijklmnopqrstuvwxyz0123456789".repeat(8);'}
-				title="Source"
-			/>,
-		);
+		renderCodeBlock(<CodeBlock code={'x'.repeat(200)} title="Source" />);
 
 		const viewport = page.getByRole('region', { name: 'Source' }).element();
 		expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth);
 		expect(viewport.tabIndex).toBe(0);
+		expect(getComputedStyle(viewport).direction).toBe('ltr');
 
 		const copyButton = page.getByRole('button', { name: 'Copy' }).element();
 		const figure = copyButton.closest('figure');
 		assert(figure != null, 'Expected a figure ancestor');
-		expect(getComputedStyle(figure).direction).toBe('ltr');
+
+		// Chrome inherits document direction; only the code scroll region stays LTR.
+		expect(getComputedStyle(figure).direction).toBe('rtl');
+		const pre = figure.querySelector('pre');
+		assert(pre != null, 'Expected a pre element');
+		expect(getComputedStyle(pre).direction).toBe('ltr');
+
+		// In RTL, inline-end is physically left — the copy action sits nearer the figure's left edge.
+		const figureBox = figure.getBoundingClientRect();
+		const buttonBox = copyButton.getBoundingClientRect();
+		const buttonMidX = (buttonBox.left + buttonBox.right) / 2;
+		const figureMidX = (figureBox.left + figureBox.right) / 2;
+		expect(buttonMidX).toBeLessThan(figureMidX);
 	} finally {
 		document.documentElement.dir = 'ltr';
 	}
