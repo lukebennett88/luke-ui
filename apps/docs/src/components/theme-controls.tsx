@@ -39,7 +39,10 @@ interface DocsThemeRootProps extends PropsWithChildren {
 	initialPrefs?: ThemePrefs;
 }
 
-export function DocsThemeRoot({ children, initialPrefs = DEFAULT_THEME_PREFS }: DocsThemeRootProps) {
+export function DocsThemeRoot({
+	children,
+	initialPrefs = DEFAULT_THEME_PREFS,
+}: DocsThemeRootProps) {
 	const colorMode = useResolvedColorMode(initialPrefs.colorMode);
 	const themeIdentity = useThemeIdentity(initialPrefs.themeIdentity);
 	const settings = useMemo(

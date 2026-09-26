@@ -52,9 +52,7 @@ export function useResolvedColorMode(
 }
 
 /** Selected colour-mode preference, available on the first server render from cookies. */
-export function useColorModeSelection(
-	serverColorMode?: ColorModePreference,
-): ColorModePreference {
+export function useColorModeSelection(serverColorMode?: ColorModePreference): ColorModePreference {
 	const prefs = useServerThemePrefs();
 	const fallback = serverColorMode ?? prefs.colorMode;
 

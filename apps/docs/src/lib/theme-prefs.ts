@@ -26,7 +26,7 @@ export const DEFAULT_THEME_PREFS = {
 	themeIdentity: DEFAULT_THEME_IDENTITY,
 } as const satisfies ThemePrefs;
 
-export const THEME_IDENTITY_CLASS_NAMES = {
+const THEME_IDENTITY_CLASS_NAMES = {
 	paper: paperThemeClassName,
 	tactile: tactileThemeClassName,
 } as const satisfies Record<ThemeIdentity, string>;
@@ -41,17 +41,14 @@ export function parseThemeIdentity(value: string | null | undefined): ThemeIdent
 }
 
 export function parseColorMode(value: string | null | undefined): ColorModePreference {
-	return value === 'light' || value === 'dark' || value === 'system'
-		? value
-		: DEFAULT_COLOR_MODE;
+	return value === 'light' || value === 'dark' || value === 'system' ? value : DEFAULT_COLOR_MODE;
 }
 
 export function themeIdentityClassName(themeIdentity: ThemeIdentity): string {
 	return THEME_IDENTITY_CLASS_NAMES[themeIdentity];
 }
 
-/** Read a cookie from `document.cookie`. */
-export function readDocumentCookie(name: string): string | undefined {
+function readDocumentCookie(name: string): string | undefined {
 	const prefix = `${name}=`;
 	for (const part of document.cookie.split('; ')) {
 		if (part.startsWith(prefix)) return decodeURIComponent(part.slice(prefix.length));
