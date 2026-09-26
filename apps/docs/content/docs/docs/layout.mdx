@@ -70,20 +70,10 @@ Every breakpoint is a minimum inline size, so there is no maximum size or range 
 set at `bp640` also applies at `bp768` and above, unless a later breakpoint overrides it. Values
 cascade up from `initial`, so specify only the points where the layout changes.
 
-Import `breakpoints` from `@luke-ui/react/styles` when you author your own `@container` queries so
-they use the same thresholds as Luke UI responsive props:
+Import `breakpoints` from `@luke-ui/react/styles` when you author `@container` queries against the
+same thresholds Luke UI responsive props use.
 
-```tsx
-import { breakpoints } from '@luke-ui/react/styles';
-
-const css = `
-	@container (inline-size >= ${breakpoints.bp768}px) {
-		.sidebar {
-			display: grid;
-		}
-	}
-`;
-```
+<ExampleBlock src="layout/breakpoints" title="Layout: Shared breakpoints" />
 
 <ExampleBlock src="box/responsive-layout" title="Layout: Responsive values" />
 
