@@ -1,7 +1,7 @@
-import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { JSX } from 'react';
 import { Suspense, use } from 'react';
 import type { HighlightedSource } from '../lib/highlighted-source.js';
+import { CodeBlock } from './code-block/code-block.js';
 
 export interface SourceCodeBlockProps {
 	src: string;
@@ -31,26 +31,22 @@ function SourceCodeContent({ src }: SourceCodeBlockProps) {
 	const highlightedSource = use(loadHighlightedSource(src));
 
 	return (
-		<CodeBlock className="my-0">
-			{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
-			<Pre dangerouslySetInnerHTML={{ __html: highlightedSource.html }} />
-		</CodeBlock>
+		<CodeBlock
+			copyText={highlightedSource.source}
+			// Shiki escapes the source before the Vite plugin generates this HTML.
+			html={highlightedSource.html}
+		/>
 	);
 }
 
 function SourceCodeLoadingState() {
 	return (
-		<CodeBlock allowCopy={false} aria-hidden className="my-0" inert>
-			<Pre>
-				<code>
-					{Array.from({ length: FALLBACK_LINE_COUNT }, (_, index) => (
-						<span className="line" key={index}>
-							&nbsp;
-						</span>
-					))}
-				</code>
-			</Pre>
-		</CodeBlock>
+		<CodeBlock
+			allowCopy={false}
+			aria-hidden
+			code={Array.from({ length: FALLBACK_LINE_COUNT }, () => ' ').join('\n')}
+			inert
+		/>
 	);
 }
 

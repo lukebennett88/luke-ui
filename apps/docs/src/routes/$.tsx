@@ -1,3 +1,4 @@
+import { cx } from '@luke-ui/react/utils';
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
@@ -8,6 +9,9 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import * as z from 'zod';
 import browserCollections from '../../.source/browser';
+import * as codeBlockStyles from '../components/code-block/code-block.css.js';
+import { CodeBlock } from '../components/code-block/code-block.js';
+import type { CodeBlockProps } from '../components/code-block/code-block.js';
 import { ComponentPropsTable } from '../components/component-props-table.js';
 import { DocsTreePathnameProvider } from '../components/docs-tree-pathname-provider.js';
 import { ExampleBlock } from '../components/example-block';
@@ -26,6 +30,7 @@ const GITHUB_DOCS_URL = `${GITHUB_REPO_URL}/blob/main/apps/docs/content/docs`;
 const GITHUB_TREE_URL = `${GITHUB_REPO_URL}/tree/main`;
 
 // `remarkAutoTypeTable` converts `<auto-type-table>` to a static `<TypeTable>` during MDX compilation.
+// Override `pre` so MDX fences use the docs CodeBlock instead of Fumadocs CodeBlock/Pre.
 const mdxComponents = {
 	...defaultMdxComponents,
 	ComponentPropsTable,
@@ -33,6 +38,9 @@ const mdxComponents = {
 	IconGallery,
 	SourceCodeBlock,
 	TypeTable,
+	pre: (props: CodeBlockProps) => (
+		<CodeBlock {...props} className={cx(codeBlockStyles.mdxFence, props.className)} />
+	),
 };
 
 export const Route = createFileRoute('/$')({

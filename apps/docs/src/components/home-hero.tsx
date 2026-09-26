@@ -5,9 +5,9 @@ import { Heading } from '@luke-ui/react/heading';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
-import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { SubmitEvent } from 'react';
 import { useTransition } from 'react';
+import { CodeBlock } from './code-block/code-block.js';
 import { DocsLink } from './docs-link.js';
 import { ThemeControls } from './theme-controls.js';
 
@@ -50,13 +50,7 @@ export function HomeHero() {
 					</DocsLink>
 				</Cluster>
 				<div className="max-w-full md:max-w-md">
-					<CodeBlock className="my-0" title="Terminal">
-						<Pre>
-							<code>
-								<span className="line">{INSTALL_COMMAND}</span>
-							</code>
-						</Pre>
-					</CodeBlock>
+					<CodeBlock code={INSTALL_COMMAND} title="Terminal" />
 				</div>
 			</Stack>
 			<Box

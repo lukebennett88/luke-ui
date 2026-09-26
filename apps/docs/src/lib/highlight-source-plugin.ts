@@ -44,8 +44,8 @@ export function highlightSourcePlugin(): Plugin {
 						{
 							name: 'docs:unwrap-pre',
 							root(root) {
-								// Fumadocs provides the outer `<pre>`, so the plugin emits the `<code>` element.
-								// The `<code>` element retains Shiki's theme properties.
+								// Docs CodeBlock owns the outer `<pre>`, so the plugin emits the `<code>`
+								// element. The `<code>` element retains Shiki's theme properties.
 								const pre = root.children[0];
 								if (pre?.type !== 'element') throw new Error(`No <pre> highlighting ${path}`);
 								const code = pre.children[0];
@@ -60,6 +60,7 @@ export function highlightSourcePlugin(): Plugin {
 					],
 				}),
 				playgroundHash: canRunInPlayground(source) ? encodeCodeHash(source) : null,
+				source,
 			};
 
 			return `export default ${JSON.stringify(highlighted)};\n`;
