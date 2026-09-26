@@ -25,13 +25,13 @@ Static evidence: `rg` over `apps/docs` imports, `className`, `fd-`, CSS, package
 playground scripts, and Luke UI exports; review of route, component, generator, and protocol code. A
 root `pnpm run build` generated the package and docs outputs. The app was then inspected at
 `localhost:3000` with browser snapshots and temporary screenshots, which are not committed.
-Inspected states include home, installation, styling, Button guide, desktop and mobile navigation,
-search open/results, theme controls, example frame, playground loading/ready, mobile viewport,
-fullscreen, light/dark, and 404. Desktop screenshots show the Fumadocs notebook sidebar/TOC and code
+Inspected states include home, installation, styling, Button guide and API props, token reference,
+icon gallery and its empty filter, desktop and mobile navigation, search open/results, mobile theme
+popover, example frame, playground loading/ready/error, mobile viewport, fullscreen, light/dark, a
+temporary RTL view, and 404. Desktop screenshots show the Fumadocs notebook sidebar/TOC and code
 blocks alongside Luke UI controls; the mobile drawer is a Fumadocs overlay. The playground showed a
-real Monaco editor and iframe preview after its skeleton. Search results, failed preview
-compilation, RTL, and every individual MDX page were not visually exercised here; the follow-up
-issues explicitly cover them.
+real Monaco editor and iframe preview after its skeleton. The follow-up issues cover individual MDX
+pages and keyboard transitions not visually exercised here.
 
 Classification key: **Existing** = public Luke UI component/primitive or supported extension seam;
 **Component gap** = reusable Luke UI component justified by the docs use cases; **Extension gap** =
