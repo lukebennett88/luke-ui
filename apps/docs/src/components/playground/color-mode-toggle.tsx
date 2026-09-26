@@ -1,5 +1,13 @@
 import { useTheme } from 'next-themes';
 import { useSyncExternalStore } from 'react';
+import { useServerThemePrefs } from '../../lib/theme-prefs-context.js';
+import type { ColorModePreference } from '../../lib/theme-prefs.js';
+import {
+	DEFAULT_COLOR_MODE,
+	readColorModePreference,
+	subscribeToColorModePreference,
+	writeColorModePreference,
+} from '../../lib/theme-prefs.js';
 import { IconToggleButtonGroup } from './icon-toggle-button-group.js';
 
 const COLOR_MODES = [
@@ -8,52 +16,60 @@ const COLOR_MODES = [
 	{ icon: 'circleHalf', label: 'System theme', value: 'system' },
 ] as const;
 
-type ColorMode = (typeof COLOR_MODES)[number]['value'];
+export type ColorMode = ColorModePreference;
 
 /** Lets someone choose the light, dark, or system colour mode. */
 export function ColorModeToggle() {
 	const { setTheme } = useTheme();
-	const colorMode = useHydratedColorModeSelection();
+	const colorMode = useColorModeSelection();
 
 	return (
 		<IconToggleButtonGroup
 			label="Colour mode"
-			onChange={setTheme}
+			onChange={(nextMode) => {
+				writeColorModePreference(nextMode);
+				setTheme(nextMode);
+			}}
 			options={COLOR_MODES}
 			value={colorMode}
 		/>
 	);
 }
 
-export function useHydratedColorMode(): Exclude<ColorMode, 'system'> | null {
+/**
+ * Resolved light/dark for `data-color-mode`. Explicit prefs are known on the server; `system`
+ * stays unset until mount so CSS can follow `prefers-color-scheme`.
+ */
+export function useResolvedColorMode(
+	serverColorMode: ColorModePreference = DEFAULT_COLOR_MODE,
+): Exclude<ColorMode, 'system'> | null {
+	const colorMode = useColorModeSelection(serverColorMode);
 	const { resolvedTheme } = useTheme();
 	const isMounted = useIsMounted();
 
-	return isMounted && isColorMode(resolvedTheme) ? resolvedTheme : null;
+	if (colorMode === 'light' || colorMode === 'dark') return colorMode;
+	return isMounted && isResolvedColorMode(resolvedTheme) ? resolvedTheme : null;
 }
 
-export function useHydratedColorModeSelection(): ColorMode | null {
-	const { theme } = useTheme();
-	const isMounted = useIsMounted();
+/** Selected colour-mode preference, available on the first server render from cookies. */
+export function useColorModeSelection(
+	serverColorMode?: ColorModePreference,
+): ColorModePreference {
+	const prefs = useServerThemePrefs();
+	const fallback = serverColorMode ?? prefs.colorMode;
 
-	return isMounted && isColorModeSelection(theme) ? theme : null;
+	return useSyncExternalStore(
+		subscribeToColorModePreference,
+		readColorModePreference,
+		() => fallback,
+	);
 }
 
 function useIsMounted() {
-	const isMounted = useSyncExternalStore(
-		subscribeToHydration,
-		getHydratedSnapshot,
-		getServerSnapshot,
-	);
-
-	return isMounted;
+	return useSyncExternalStore(subscribeToHydration, getHydratedSnapshot, getServerSnapshot);
 }
 
-function isColorModeSelection(value: string | undefined): value is ColorMode {
-	return value === 'light' || value === 'dark' || value === 'system';
-}
-
-function isColorMode(value: string | undefined): value is Exclude<ColorMode, 'system'> {
+function isResolvedColorMode(value: string | undefined): value is Exclude<ColorMode, 'system'> {
 	return value === 'light' || value === 'dark';
 }
 

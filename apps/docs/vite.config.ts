@@ -154,7 +154,10 @@ export default defineConfig(async () => {
 					// Serialize requests to the internal Vite preview server and retry a
 					// transient failure without omitting the iframe preview page.
 					concurrency: 1,
-					crawlLinks: true,
+					// Keep agent/static assets prerendered via `pages` above. Do not crawl HTML
+					// docs into static files: Netlify `preferStatic` would serve them without
+					// cookies, so theme toggles could not SSR from prefs.
+					crawlLinks: false,
 					enabled: true,
 					retryCount: 2,
 				},

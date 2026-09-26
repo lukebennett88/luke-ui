@@ -3,7 +3,7 @@ import { ClientOnly, createFileRoute } from '@tanstack/react-router';
 import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { useSpinDoctor } from 'spin-doctor';
-import { useHydratedColorModeSelection } from '../../components/playground/color-mode-toggle.js';
+import { useColorModeSelection } from '../../components/playground/color-mode-toggle.js';
 import {
 	EditorSkeleton,
 	EditorSkeletonShapeScript,
@@ -34,7 +34,7 @@ export const Route = createFileRoute('/playground/')({
 
 function Playground() {
 	const { themeIdentity } = useDocsThemeIdentity();
-	const colorMode = useHydratedColorModeSelection();
+	const colorMode = useColorModeSelection();
 	const [initialCode] = useState(() => {
 		if (typeof window === 'undefined') return rawDefaultCode;
 		return decodeCodeHash(window.location.hash) ?? rawDefaultCode;
@@ -61,9 +61,8 @@ function Playground() {
 		sessionRef.current.postCode(code, ports());
 	}, []);
 	const postAppearance = useCallback(() => {
-		const appearance = colorMode === null ? null : { colorMode, themeIdentity };
+		const appearance = { colorMode, themeIdentity };
 		appearanceRef.current = appearance;
-		if (appearance === null) return;
 		sessionRef.current.postAppearance(appearance, ports());
 	}, [colorMode, themeIdentity]);
 

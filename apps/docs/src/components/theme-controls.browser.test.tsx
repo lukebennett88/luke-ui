@@ -13,7 +13,13 @@ import { renderToString } from 'react-dom/server';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { StoryWrapper } from '../lib/story-wrapper';
-import { DocsThemeRoot, ThemeControls, themeIdentityBootstrapScript } from './theme-controls';
+import {
+	COLOR_MODE_COOKIE_NAME,
+	COLOR_MODE_STORAGE_KEY,
+	THEME_IDENTITY_COOKIE_NAME,
+	themePrefsBootstrapScript,
+} from '../lib/theme-prefs.js';
+import { DocsThemeRoot, ThemeControls } from './theme-controls';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
@@ -21,7 +27,7 @@ let root: Root | undefined;
 afterEach(async () => {
 	if (root) act(() => root?.unmount());
 	container?.remove();
-	localStorage.clear();
+	clearThemePrefs();
 	document.documentElement.removeAttribute('class');
 	container = undefined;
 	root = undefined;
@@ -47,14 +53,19 @@ test('persists theme identity and colour mode independently', async () => {
 	expect(paperProfile).toBeChecked();
 	expect(document.documentElement).toHaveClass(paperThemeClassName);
 	expect(themeRoot.dataset.colorMode).toBe('light');
+	expect(readCookie(THEME_IDENTITY_COOKIE_NAME)).toBe('paper');
 
 	await userEvent.click(darkMode, { force: true });
 
 	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
 	expect(document.documentElement).toHaveClass(paperThemeClassName);
+	expect(readCookie(COLOR_MODE_COOKIE_NAME)).toBe('dark');
+	expect(localStorage.getItem(COLOR_MODE_STORAGE_KEY)).toBe('dark');
 
 	unmountTheme();
-	renderTheme(<ThemeControls />);
+	renderTheme(<ThemeControls />, {
+		initialPrefs: { colorMode: 'dark', themeIdentity: 'paper' },
+	});
 
 	expect(page.getByRole('radio', { name: 'Paper' })).toBeChecked();
 	expect(page.getByRole('radio', { name: 'Dark theme' })).toBeChecked();
@@ -64,7 +75,11 @@ test('persists theme identity and colour mode independently', async () => {
 
 test('system colour mode follows the platform preference and drives the docs chrome', async () => {
 	await emulateColorScheme('dark');
-	renderTheme(<ThemeControls />, { defaultTheme: 'system', enableSystem: true });
+	renderTheme(<ThemeControls />, {
+		defaultTheme: 'system',
+		enableSystem: true,
+		initialPrefs: { colorMode: 'system', themeIdentity: 'tactile' },
+	});
 
 	await userEvent.click(page.getByRole('radio', { name: 'System theme' }), { force: true });
 
@@ -91,7 +106,7 @@ test('leaves full-bleed story surfaces unframed', () => {
 });
 
 test('boots the stored colour mode before the themed root hydrates', async () => {
-	localStorage.setItem('theme', 'dark');
+	localStorage.setItem(COLOR_MODE_STORAGE_KEY, 'dark');
 	const bootstrap = renderToString(
 		<ThemeProvider
 			attribute={['class', 'data-color-mode']}
@@ -112,10 +127,9 @@ test('boots the stored colour mode before the themed root hydrates', async () =>
 	iframe.remove();
 });
 
-test('boots the stored theme identity before the themed root hydrates', async () => {
-	localStorage.setItem('luke-ui-docs-theme', 'paper');
+test('boots the theme identity from the preference cookie before paint', async () => {
 	const iframe = document.body.appendChild(document.createElement('iframe'));
-	iframe.srcdoc = `<!doctype html><html><head><script>${themeIdentityBootstrapScript}</script></head><body><script>document.documentElement.dataset.identityAtHydration = document.documentElement.classList.contains('${paperThemeClassName}') ? 'paper' : 'other';</script></body></html>`;
+	iframe.srcdoc = `<!doctype html><html><head><script>document.cookie=${JSON.stringify(`${THEME_IDENTITY_COOKIE_NAME}=paper; Path=/`)};</script><script>${themePrefsBootstrapScript}</script></head><body><script>document.documentElement.dataset.identityAtHydration = document.documentElement.classList.contains('${paperThemeClassName}') ? 'paper' : 'other';</script></body></html>`;
 	await new Promise<void>((resolve) => {
 		iframe.addEventListener('load', () => resolve(), { once: true });
 	});
@@ -128,25 +142,52 @@ test('boots the stored theme identity before the themed root hydrates', async ()
 	iframe.remove();
 });
 
+test('SSR selects Paper and dark colour mode from server prefs', () => {
+	const html = renderToString(
+		<ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+			<IconSpritesheetProvider href={spriteSheetHref}>
+				<DocsThemeRoot initialPrefs={{ colorMode: 'dark', themeIdentity: 'paper' }}>
+					<ThemeControls />
+				</DocsThemeRoot>
+			</IconSpritesheetProvider>
+		</ThemeProvider>,
+	);
+
+	expect(html).toMatch(/aria-checked="true"[^>]*>Paper<|>Paper<\/button[^>]*aria-checked="true"/);
+	expect(html).toMatch(
+		/aria-checked="true"[^>]*aria-label="Dark theme"|aria-label="Dark theme"[^>]*aria-checked="true"/,
+	);
+	expect(html).toContain('data-color-mode="dark"');
+});
+
 function renderTheme(
 	children: ReactNode,
-	options: Pick<ComponentProps<typeof ThemeProvider>, 'defaultTheme' | 'enableSystem'> = {},
+	options: Pick<ComponentProps<typeof ThemeProvider>, 'defaultTheme' | 'enableSystem'> & {
+		initialPrefs?: ComponentProps<typeof DocsThemeRoot>['initialPrefs'];
+	} = {},
 ) {
 	container = document.body.appendChild(document.createElement('div'));
 	root = createRoot(container);
+
+	const initialPrefs = options.initialPrefs;
+	if (initialPrefs) {
+		document.cookie = `${THEME_IDENTITY_COOKIE_NAME}=${initialPrefs.themeIdentity}; Path=/; SameSite=Lax`;
+		document.cookie = `${COLOR_MODE_COOKIE_NAME}=${initialPrefs.colorMode}; Path=/; SameSite=Lax`;
+		localStorage.setItem(COLOR_MODE_STORAGE_KEY, initialPrefs.colorMode);
+	}
 
 	act(() => {
 		root?.render(
 			<ThemeProvider
 				attribute="class"
-				defaultTheme={options.defaultTheme ?? 'light'}
+				defaultTheme={options.defaultTheme ?? initialPrefs?.colorMode ?? 'light'}
 				enableSystem={options.enableSystem ?? false}
 			>
 				{/* Mirrors `__root.tsx`'s real tree shape: `IconSpritesheetProvider` wraps
 				`DocsThemeRoot` there too, and `ThemeControls` (rendered by these tests) consumes it
 				through `ColorModeToggle`'s icons. */}
 				<IconSpritesheetProvider href={spriteSheetHref}>
-					<DocsThemeRoot>{children}</DocsThemeRoot>
+					<DocsThemeRoot initialPrefs={initialPrefs}>{children}</DocsThemeRoot>
 				</IconSpritesheetProvider>
 			</ThemeProvider>,
 		);
@@ -165,6 +206,21 @@ function getThemeRoot() {
 	if (!themeRoot) throw new Error('Expected a Luke UI theme root');
 
 	return themeRoot;
+}
+
+function readCookie(name: string) {
+	const prefix = `${name}=`;
+	for (const part of document.cookie.split('; ')) {
+		if (part.startsWith(prefix)) return part.slice(prefix.length);
+	}
+	return undefined;
+}
+
+function clearThemePrefs() {
+	for (const name of [THEME_IDENTITY_COOKIE_NAME, COLOR_MODE_COOKIE_NAME]) {
+		document.cookie = `${name}=; Path=/; Max-Age=0`;
+	}
+	localStorage.clear();
 }
 
 async function emulateColorScheme(mode: 'light' | 'dark') {
