@@ -10,7 +10,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { renderPlaygroundScopeModule } from '../../../packages/@luke-ui/playground-core/src/generate-scope.ts';
+import { renderPlaygroundScopeModule } from '@luke-ui/playground-core';
 import { docsPlaygroundRuntimeSpecifierList } from '../src/lib/docs-playground-specifiers.ts';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));

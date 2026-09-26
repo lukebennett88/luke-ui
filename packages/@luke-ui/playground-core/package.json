@@ -3,21 +3,24 @@
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
+	"sideEffects": false,
 	"exports": {
-		".": "./src/index.ts",
+		".": "./dist/index.js",
 		"./package.json": "./package.json"
 	},
 	"scripts": {
+		"build": "vp pack",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
 		"check:types": "tsc --noEmit -p tsconfig.json",
+		"clean": "rm -rf .turbo dist",
+		"dev": "vp pack --watch",
 		"fix:format": "vp fmt . --write",
 		"fix:lint": "vp lint . --type-aware --fix",
 		"test": "vp test run --config vitest.config.ts"
 	},
 	"dependencies": {
 		"lz-string": "catalog:",
-		"monaco-editor": "catalog:",
 		"prettier": "catalog:",
 		"sucrase": "catalog:",
 		"zod": "catalog:"

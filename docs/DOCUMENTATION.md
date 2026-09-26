@@ -473,8 +473,15 @@ subpath. The import map, editor types, and pre-hydration skeleton are generated 
 `generate`. New component subpaths in `@luke-ui/react`'s `exports` map are picked up automatically.
 The preview iframe only accepts messages from its parent. Readiness and replay live in
 `@luke-ui/playground-core`'s handshake session. The private `packages/@luke-ui/playground-core`
-package also provides compilation and URL hash helpers. The docs route owns hash updates and
-debounce. The preview runner calls the compiler.
+package also provides compilation, URL hash, and source-formatting helpers. The docs route owns hash
+updates and debounce. The preview runner calls the compiler.
+
+`@luke-ui/playground-core` builds like `@luke-ui/react`: `exports` points at `dist`, so run its
+`build` before consuming it and its `dev` script to watch it. Turbo orders this automatically for
+every docs task that needs it. Docs imports it only through `@luke-ui/playground-core`, never a
+relative `packages/@luke-ui/playground-core/src/...` path. Monaco is a docs-only concern: docs'
+`components/playground/monaco-format.ts` registers the Prettier formatting provider and the save
+keybinding against `formatPlaygroundSource` from the core package, which stays host-agnostic.
 
 ## Keeping docs current
 

@@ -1,3 +1,4 @@
+import { canRunInPlayground, encodeCodeHash } from '@luke-ui/playground-core';
 import { readFile } from 'node:fs/promises';
 // These Shiki entry points load only the core, TSX grammar, and selected themes.
 import type { HighlighterCore } from 'shiki/core';
@@ -5,9 +6,6 @@ import { createHighlighterCore } from 'shiki/core';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import tsx from 'shiki/langs/tsx.mjs';
 import type { Plugin } from 'vite-plus';
-import { encodeCodeHash } from '../../../../packages/@luke-ui/playground-core/src/hash.ts';
-// Relative core imports so Vite's config bundler inlines them (see docs-playground-specifiers).
-import { canRunInPlayground } from '../../../../packages/@luke-ui/playground-core/src/runtime-specifiers.ts';
 import { docsPlaygroundSpecifiers } from './docs-playground-specifiers.js';
 import type { HighlightedSource } from './highlighted-source.js';
 import { SHIKI_THEME_REGISTRATIONS, SHIKI_THEMES } from './shiki-theme.js';

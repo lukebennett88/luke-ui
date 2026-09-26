@@ -579,9 +579,6 @@ importers:
       lz-string:
         specifier: 'catalog:'
         version: 1.5.0
-      monaco-editor:
-        specifier: 'catalog:'
-        version: 0.56.0
       prettier:
         specifier: 'catalog:'
         version: 3.9.8
