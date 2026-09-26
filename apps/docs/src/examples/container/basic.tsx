@@ -1,4 +1,5 @@
 import { Box } from '@luke-ui/react/box';
+import { Code } from '@luke-ui/react/code';
 import { Container } from '@luke-ui/react/container';
 
 export default () => {
@@ -12,7 +13,8 @@ export default () => {
 				borderWidth="thin"
 				padding="sp16"
 			>
-				Content stays centred and has a 672px-equivalent (`42rem`) maximum inline size.
+				Content stays centred and has a 672px-equivalent (<Code>42rem</Code>) maximum inline
+				size.
 			</Box>
 		</Container>
 	);
