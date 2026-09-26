@@ -4,13 +4,7 @@ export {
 	createRequireModule,
 	type PlaygroundScope,
 } from './compile.js';
-export {
-	documentFormattingEdits,
-	formatPlaygroundSource,
-	registerFormatDocumentKeybinding,
-	registerPlaygroundFormatter,
-	runFormatDocument,
-} from './format.js';
+export { formatPlaygroundSource } from './format.js';
 export { renderPlaygroundScopeModule, specifierToIdentifier } from './generate-scope.js';
 export {
 	createPlaygroundPageSession,

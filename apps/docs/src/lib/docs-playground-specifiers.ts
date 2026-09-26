@@ -2,14 +2,13 @@
  * Docs-host playground runtime allowlist: Luke UI exports plus third-party and
  * `#docs` helpers that documented examples import in the playground.
  *
- * Imports core via a relative path so Vite's config bundler inlines the module
- * (bare `@luke-ui/playground-core` is externalized and fails under native Node).
+ * Core stays generic; docs owns the host-specific extras below.
  */
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { playgroundRuntimeSpecifierList } from '@luke-ui/playground-core';
 import * as z from 'zod';
-import { playgroundRuntimeSpecifierList } from '../../../../packages/@luke-ui/playground-core/src/runtime-specifiers.ts';
 
 /**
  * Third-party packages that docs examples import directly. Add a package here
