@@ -4,7 +4,8 @@ description: Arrange direct children on the logical inline axis with wrapping.
 source: packages/@luke-ui/react/src/exports/cluster.ts
 ---
 
-`Cluster` lays out direct children on the logical inline axis and always wraps. Read
+`Cluster` lays out direct children on the logical inline axis. Wrapping defaults to `wrap` and can
+be changed with `flexWrap`, including responsively. Read
 [Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
 
 <ExampleBlock src="cluster/basic" title="Cluster: Basic" />
@@ -14,6 +15,14 @@ source: packages/@luke-ui/react/src/exports/cluster.ts
 `justifyContent` defaults to `flex-start`. `alignItems` defaults to `center`.
 
 <ExampleBlock src="cluster/alignment" title="Cluster: Alignment" />
+
+## Wrapping
+
+`flexWrap` defaults to `wrap`. Set `nowrap` when children should stay on one line, or
+`wrap-reverse` to reverse wrap direction. Responsive objects use the same breakpoint keys as other
+layout props.
+
+<ExampleBlock src="cluster/flex-wrap" title="Cluster: No wrap" />
 
 ## Choose the rendered element
 

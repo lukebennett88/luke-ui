@@ -9,3 +9,9 @@ test('Cluster rejects the props it does not support', () => {
 	// @ts-expect-error — Cluster has no display prop
 	assertType<ClusterProps>({ display: 'grid', gap: 'sp8' });
 });
+
+test('Cluster accepts flexWrap values and responsive objects', () => {
+	assertType<ClusterProps>({ flexWrap: 'nowrap' });
+	assertType<ClusterProps>({ flexWrap: 'wrap-reverse' });
+	assertType<ClusterProps>({ flexWrap: { bp768: 'nowrap' } });
+});

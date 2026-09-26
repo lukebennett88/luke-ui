@@ -28,7 +28,7 @@ afterEach(async () => {
 	await page.viewport(1024, 800);
 });
 
-test('flows children on the inline axis and always wraps', () => {
+test('flows children on the inline axis and wraps by default', () => {
 	const { locator } = render(
 		<Cluster data-testid="cluster" gap="sp12">
 			<span>First</span>
@@ -44,6 +44,51 @@ test('flows children on the inline axis and always wraps', () => {
 	expect(getComputedStyle(element).flexWrap).toBe('wrap');
 	expect(getComputedStyle(element).justifyContent).toBe('flex-start');
 	expect(getComputedStyle(element).alignItems).toBe('center');
+});
+
+test('accepts flexWrap overrides including wrap-reverse', () => {
+	const nowrapResult = render(
+		<Cluster data-testid="cluster-nowrap" flexWrap="nowrap" gap="sp8">
+			<span>First</span>
+			<span>Second</span>
+		</Cluster>,
+	);
+	const wrapReverseResult = render(
+		<Cluster data-testid="cluster-wrap-reverse" flexWrap="wrap-reverse" gap="sp8">
+			<span>First</span>
+			<span>Second</span>
+		</Cluster>,
+	);
+	const nowrap = nowrapResult.locator.getByTestId('cluster-nowrap').element();
+	const wrapReverse = wrapReverseResult.locator.getByTestId('cluster-wrap-reverse').element();
+	if (!(nowrap instanceof HTMLElement) || !(wrapReverse instanceof HTMLElement)) {
+		throw new Error('Expected Cluster elements.');
+	}
+
+	expect(getComputedStyle(nowrap).flexWrap).toBe('nowrap');
+	expect(getComputedStyle(wrapReverse).flexWrap).toBe('wrap-reverse');
+});
+
+test('nowrap disables wrapping without changing child shrink behaviour', () => {
+	const { locator } = render(
+		<Cluster data-testid="cluster" flexWrap="nowrap" style={{ inlineSize: '6rem' }}>
+			<span style={{ inlineSize: '5rem' }}>First</span>
+			<span style={{ inlineSize: '5rem' }}>Second</span>
+		</Cluster>,
+	);
+	const element = locator.getByTestId('cluster').element();
+	if (!(element instanceof HTMLElement)) throw new Error('Expected Cluster element.');
+	const [first, second] = element.children;
+	if (!(first instanceof HTMLElement) || !(second instanceof HTMLElement)) {
+		throw new Error('Expected Cluster children.');
+	}
+
+	expect(getComputedStyle(element).flexWrap).toBe('nowrap');
+	expect(second.offsetTop).toBe(first.offsetTop);
+	expect(getComputedStyle(first).flexShrink).toBe('1');
+	expect(getComputedStyle(second).flexShrink).toBe('1');
+	expect(first.getBoundingClientRect().width).toBeLessThan(5 * 16);
+	expect(second.getBoundingClientRect().width).toBeLessThan(5 * 16);
 });
 
 test('uses no gap by default and accepts alignment overrides', () => {
@@ -154,6 +199,7 @@ test('keeps Cluster defaults below sparse responsive alignment overrides', async
 		<Cluster
 			alignItems={{ bp768: 'stretch' }}
 			data-testid="cluster"
+			flexWrap={{ bp768: 'nowrap' }}
 			gap={{ initial: '0', bp768: 'sp8' }}
 			justifyContent={{ bp768: 'center' }}
 		>
@@ -170,11 +216,13 @@ test('keeps Cluster defaults below sparse responsive alignment overrides', async
 
 	expect(getComputedStyle(element).alignItems).toBe('center');
 	expect(getComputedStyle(element).justifyContent).toBe('flex-start');
+	expect(getComputedStyle(element).flexWrap).toBe('wrap');
 	expect(second.getBoundingClientRect().left - first.getBoundingClientRect().right).toBe(0);
 
 	await page.viewport(breakpoints.bp768, 800);
 	expect(getComputedStyle(element).alignItems).toBe('stretch');
 	expect(getComputedStyle(element).justifyContent).toBe('center');
+	expect(getComputedStyle(element).flexWrap).toBe('nowrap');
 	expect(second.getBoundingClientRect().left).toBeGreaterThan(first.getBoundingClientRect().right);
 });
 
