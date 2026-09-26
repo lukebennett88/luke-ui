@@ -22,7 +22,9 @@ test('compileComponent rejects modules without a default export function', () =>
 
 test('createRequireModule throws for unknown specifiers', () => {
 	const requireModule = createRequireModule({ react: {} });
-	expect(() => requireModule('missing')).toThrow(/Cannot import 'missing'/);
+	expect(() => requireModule('missing')).toThrow(
+		"Cannot import 'missing': module is not in the playground scope.",
+	);
 });
 
 test('renderPlaygroundScopeModule emits import map source', () => {
