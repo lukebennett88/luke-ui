@@ -6,10 +6,30 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import react from '@vitejs/plugin-react';
 import mdx from 'fumadocs-mdx/vite';
+import type { Plugin } from 'vite-plus';
 import { defineConfig, lazyPlugins } from 'vite-plus';
 import { findMdxFiles } from './src/lib/docs-mdx-files.js';
 import { highlightSourcePlugin } from './src/lib/highlight-source-plugin.js';
 import { getMarkdownPagePath } from './src/lib/markdown-page-path.js';
+
+// staticFunctionMiddleware hardcodes `/__tsr/staticServerFnCache/...` for the
+// client fetch URL with no base-path support. When deployed under a sub-path
+// (e.g. GitHub Pages /luke-ui/), the client requests /__tsr/... and 404s.
+// This patches only the client fetch so the on-disk layout stays unchanged.
+function staticFunctionBasePathPlugin(): Plugin {
+	return {
+		name: 'static-function-base-path',
+		transform(code, id) {
+			if (!id.includes('start-static-server-functions')) return null;
+			if (!id.endsWith('staticFunctionMiddleware.js')) return null;
+			if (!code.includes('fetch(url,')) return null;
+			return code.replace(
+				'fetch(url,',
+				"fetch(import.meta.env.BASE_URL.replace(/\\/$/, '') + url,",
+			);
+		},
+	};
+}
 
 const TRAILING_SLASH_PATTERN = /\/$/;
 
@@ -114,6 +134,7 @@ export default defineConfig(async () => {
 			platform: 'browser' as const,
 		},
 		plugins: lazyPlugins(async () => [
+			staticFunctionBasePathPlugin(),
 			highlightSourcePlugin(),
 			mdx(await import('./source.config')),
 			tailwindcss(),
@@ -126,16 +147,16 @@ export default defineConfig(async () => {
 					{ path: '/sitemap.xml' },
 					{ path: '/robots.txt' },
 					{ path: '/index.md' },
+					// The preview page is loaded via an iframe src, which the link
+					// crawler does not follow, so it must be prerendered explicitly.
+					{ path: '/playground/preview' },
 					...markdownPrerenderPages,
 				],
 				prerender: {
 					// Serialize requests to the internal Vite preview server and retry a
-					// transient failure.
+					// transient failure without omitting the iframe preview page.
 					concurrency: 1,
-					// HTML pages render per request so theme cookies decide the first paint.
-					// Netlify's `preferStatic` would serve a prerendered copy without them.
-					autoStaticPathsDiscovery: false,
-					crawlLinks: false,
+					crawlLinks: true,
 					enabled: true,
 					retryCount: 2,
 				},

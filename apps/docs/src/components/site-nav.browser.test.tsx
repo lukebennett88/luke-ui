@@ -17,7 +17,7 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { NotFound } from './not-found.js';
 import { SiteNav } from './site-nav.js';
-import { DocsThemeProvider, DocsThemeRoot } from './theme-controls.js';
+import { DocsThemeRoot } from './theme-controls.js';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
@@ -25,6 +25,7 @@ let root: Root | undefined;
 afterEach(async () => {
 	if (root) act(() => root?.unmount());
 	container?.remove();
+	localStorage.clear();
 	container = undefined;
 	root = undefined;
 	await page.viewport(1024, 800);
@@ -66,11 +67,9 @@ async function renderAt(pathname: string, children: ReactNode) {
 	const rootRoute = createRootRoute({
 		component: () => (
 			<RootProvider search={{}} theme={{ enabled: false }}>
-				<DocsThemeProvider>
-					<IconSpritesheetProvider href={spriteSheetHref}>
-						<DocsThemeRoot>{children}</DocsThemeRoot>
-					</IconSpritesheetProvider>
-				</DocsThemeProvider>
+				<IconSpritesheetProvider href={spriteSheetHref}>
+					<DocsThemeRoot>{children}</DocsThemeRoot>
+				</IconSpritesheetProvider>
 			</RootProvider>
 		),
 	});

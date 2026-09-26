@@ -7,7 +7,7 @@ import { isTrustedParentMessage } from '../../lib/playground-handshake';
 import { decodeCodeHash } from '../../lib/playground-hash';
 import type { PlaygroundPreviewMessage } from '../../lib/playground-protocol';
 import { StoryWrapper } from '../../lib/story-wrapper';
-import { useDocsTheme } from '../theme-controls';
+import { previewThemePrefs } from '../../lib/theme-prefs.js';
 
 // Interop wrappers are cached so repeated requires return stable module objects.
 const moduleCache = new Map<string, Record<string, unknown>>();
@@ -16,8 +16,6 @@ type PreviewRun = { UserComponent: ComponentType; runId: number };
 
 export default function PreviewRunner() {
 	const [run, setRun] = useState<PreviewRun | null>(null);
-	// The parent page has already persisted these prefs, so only mirror them here.
-	const { previewThemePrefs } = useDocsTheme();
 
 	useEffect(() => {
 		let runId = 0;
@@ -39,6 +37,7 @@ export default function PreviewRunner() {
 				runCode(event.data.code);
 				return;
 			}
+			// The parent page has already stored these prefs, so only mirror them here.
 			previewThemePrefs({
 				colorModePreference: event.data.colorMode,
 				themeIdentity: event.data.themeIdentity,
@@ -50,7 +49,7 @@ export default function PreviewRunner() {
 		if (initialCode) runCode(initialCode);
 		postToParent({ type: 'playground:ready' });
 		return () => window.removeEventListener('message', onMessage);
-	}, [previewThemePrefs]);
+	}, []);
 
 	if (!run) return null;
 

@@ -1,28 +1,15 @@
 import { expect, test } from 'vite-plus/test';
 import { parseThemePrefs } from './theme-prefs.js';
 
-test('defaults to Tactile and a light system colour mode without cookies', () => {
-	expect(
-		parseThemePrefs({ colorMode: undefined, colorSchemeHint: undefined, themeIdentity: undefined }),
-	).toEqual({
-		colorModePreference: 'system',
-		resolvedColorMode: 'light',
-		themeIdentity: 'tactile',
+test('reads stored prefs', () => {
+	expect(parseThemePrefs('paper', 'dark')).toEqual({
+		colorModePreference: 'dark',
+		themeIdentity: 'paper',
 	});
 });
 
-test('reads explicit preferences and ignores unknown values', () => {
-	expect(
-		parseThemePrefs({ colorMode: 'dark', colorSchemeHint: 'light', themeIdentity: 'paper' }),
-	).toEqual({ colorModePreference: 'dark', resolvedColorMode: 'dark', themeIdentity: 'paper' });
-	expect(
-		parseThemePrefs({ colorMode: 'sepia', colorSchemeHint: 'dark', themeIdentity: 'glass' }),
-	).toEqual({ colorModePreference: 'system', resolvedColorMode: 'dark', themeIdentity: 'tactile' });
-});
-
-test('resolves the system preference from the client hint', () => {
-	expect(
-		parseThemePrefs({ colorMode: undefined, colorSchemeHint: 'dark', themeIdentity: undefined })
-			.resolvedColorMode,
-	).toBe('dark');
+test('treats missing or unknown values as the defaults', () => {
+	const defaults = { colorModePreference: 'system', themeIdentity: 'tactile' };
+	expect(parseThemePrefs(null, null)).toEqual(defaults);
+	expect(parseThemePrefs('glass', 'sepia')).toEqual(defaults);
 });

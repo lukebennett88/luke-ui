@@ -9,8 +9,6 @@ import { highlightSourcePlugin } from './src/lib/highlight-source-plugin.js';
 export default defineConfig({
 	optimizeDeps: {
 		include: [
-			'@epic-web/client-hints',
-			'@epic-web/client-hints/color-scheme',
 			'react-aria-components/Dialog',
 			'react-aria-components/Modal',
 			'react-aria-components/Popover',

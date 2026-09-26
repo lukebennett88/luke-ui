@@ -36,7 +36,6 @@
 	},
 	"dependencies": {
 		"@catppuccin/palette": "catalog:",
-		"@epic-web/client-hints": "catalog:",
 		"@hookform/resolvers": "catalog:",
 		"@luke-ui/react": "workspace:*",
 		"@monaco-editor/react": "catalog:",
@@ -44,6 +43,7 @@
 		"@tanstack/react-form": "catalog:",
 		"@tanstack/react-router": "catalog:",
 		"@tanstack/react-start": "catalog:",
+		"@tanstack/start-static-server-functions": "catalog:",
 		"@vanilla-extract/css": "catalog:",
 		"@vanilla-extract/recipes": "catalog:",
 		"fumadocs-core": "catalog:",

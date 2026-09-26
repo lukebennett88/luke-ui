@@ -1,6 +1,7 @@
 import { cx } from '@luke-ui/react/utils';
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
+import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
@@ -70,6 +71,8 @@ const loader = createServerFn({
 	method: 'GET',
 })
 	.validator((slugs) => z.array(z.string()).parse(slugs))
+	// staticFunctionMiddleware breaks Vite HMR in dev — only apply in prod build.
+	.middleware(import.meta.env.PROD ? [staticFunctionMiddleware] : [])
 	.handler(async ({ data: slugs }) => {
 		const page = source.getPage(slugs);
 		if (!page) throw notFound();
