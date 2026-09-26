@@ -17,7 +17,22 @@ docs app, JSDoc, code comments, READMEs, and the internal guides in `docs/`. Pac
   body. Leave those headings in place.
 
 The rest of this guide is the editorial reference behind that checklist. `check:docs` owns the
-mechanical rules. This page explains why they exist.
+mechanical rules: the structural checks (heading order, navigation, and the API contract) plus the
+deterministic prose rules below. This page explains why they exist.
+
+```text
+no prose semicolon
+no unspaced em dash
+no plural "assistive technologies"
+no filler: simply, note that, it is important to, allows you to, enables you to,
+  can be used to, seamless
+no first-person: we, us, let's
+no terminology: users, the user, a person, people
+```
+
+A rule that needs semantic judgement to apply correctly, such as telling a correct third-person
+end-user reference apart from an incorrect third-person reader reference, stays editorial guidance
+in this page rather than a `check:docs` rule, because a regex cannot make that judgement reliably.
 
 ## Surfaces
 
@@ -137,8 +152,9 @@ that carry meaning.
   property.
 
 **One term per concept.** Do not use different words for the same concept. Use the same word every
-time. `check:docs` flags the forbidden synonyms so this table can stay a glossary of the preferred
-terms.
+time. `check:docs` flags `users`, `the user`, `a person`, and `people` as forbidden synonyms for
+`developer` and `someone`, and the plural form of `assistive technology`, so this table can stay a
+glossary of the preferred terms. The rest of the table is editorial and not mechanically enforced.
 
 | Term                   | Definition                                                                                         |
 | ---------------------- | -------------------------------------------------------------------------------------------------- |

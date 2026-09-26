@@ -57,7 +57,8 @@ contract. See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for that 
 
 Type styles are grouped from `font.caption` through `font.display`. Keep family, size, weight, line
 height, letter spacing, and Capsize trims together. `font.family.code` is a fixed monospace stack.
-Icon sizes are `xsmall`–`large` at 16px, 20px, 24px, and 32px.
+Icon sizes run from `xsmall` to `large`. `ICON_SIZE_VALUES` in `src/theme/token-values.ts` sets
+their dimensions.
 
 Author `depth.*` and `actionControlFinish.*` per mode as final CSS values. Components pick semantic
 tokens. They do not branch on theme identity.
