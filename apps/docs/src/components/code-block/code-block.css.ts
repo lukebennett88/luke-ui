@@ -85,11 +85,14 @@ export const actions = style({
 	},
 });
 
-/** Titleless copy overlays the full-width scrollport (Fumadocs pattern — no side column). */
+/**
+ * Titleless copy overlays the full-width scrollport (no side column).
+ * Block offset centres the control on the first code line (viewport pad + half line − half control).
+ */
 export const overlayActions = style({
 	'@layer': {
 		recipes: {
-			insetBlockStart: vars.space.sp8,
+			insetBlockStart: `calc(${vars.space.sp12} + (${vars.font.caption.lineHeight} / 2) - (${vars.controlSize.small} / 2))`,
 			insetInlineEnd: vars.space.sp8,
 			position: 'absolute',
 			zIndex: 1,

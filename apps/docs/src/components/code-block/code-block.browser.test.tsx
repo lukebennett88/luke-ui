@@ -101,6 +101,22 @@ test('hides the copy control when allowCopy is false', () => {
 	expect(page.getByRole('button', { name: 'Copy' })).not.toBeInTheDocument();
 });
 
+test('centres overlay copy on the first line of a one-line fence', () => {
+	renderCodeBlock(<CodeBlock code="pnpm add @luke-ui/react react-aria-components" />);
+
+	const copyButton = page.getByRole('button', { name: 'Copy' }).element();
+	const figure = copyButton.closest('figure');
+	assert(figure != null, 'Expected a figure ancestor');
+	const line = figure.querySelector('.line') ?? figure.querySelector('pre');
+	assert(line != null, 'Expected a code line');
+
+	const buttonBox = copyButton.getBoundingClientRect();
+	const lineBox = line.getBoundingClientRect();
+	const buttonMidY = (buttonBox.top + buttonBox.bottom) / 2;
+	const lineMidY = (lineBox.top + lineBox.bottom) / 2;
+	expect(Math.abs(buttonMidY - lineMidY)).toBeLessThanOrEqual(2);
+});
+
 test('opts out of prose inline-code chrome on the fence code element', () => {
 	renderCodeBlock(
 		<div className="prose">
