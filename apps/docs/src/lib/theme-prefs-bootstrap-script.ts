@@ -15,8 +15,8 @@ import {
 	DEFAULT_THEME_IDENTITY,
 	THEME_IDENTITY_BOOTSTRAP_CLASS_NAMES,
 	THEME_IDENTITY_COOKIE_NAME,
-	THEME_PREFS_COOKIE_MAX_AGE_SECONDS,
 } from './theme-prefs-constants.js';
+import { readPrefsCookie, writePrefsCookieAndConfirm } from './theme-prefs-cookie.js';
 
 bootstrapThemePrefs();
 
@@ -24,19 +24,19 @@ function bootstrapThemePrefs(): void {
 	try {
 		let needsReload = false;
 
-		if (!readCookie(THEME_IDENTITY_COOKIE_NAME)) {
+		if (!readPrefsCookie(THEME_IDENTITY_COOKIE_NAME)) {
 			const storedIdentity = localStorage.getItem(THEME_IDENTITY_COOKIE_NAME);
 			if (storedIdentity === 'paper' || storedIdentity === 'tactile') {
-				writeCookie(THEME_IDENTITY_COOKIE_NAME, storedIdentity);
-				if (storedIdentity !== DEFAULT_THEME_IDENTITY) needsReload = true;
+				const persisted = writePrefsCookieAndConfirm(THEME_IDENTITY_COOKIE_NAME, storedIdentity);
+				if (persisted && storedIdentity !== DEFAULT_THEME_IDENTITY) needsReload = true;
 			}
 		}
 
-		if (!readCookie(COLOR_MODE_COOKIE_NAME)) {
+		if (!readPrefsCookie(COLOR_MODE_COOKIE_NAME)) {
 			const storedMode = localStorage.getItem(COLOR_MODE_STORAGE_KEY);
 			if (storedMode === 'light' || storedMode === 'dark' || storedMode === 'system') {
-				writeCookie(COLOR_MODE_COOKIE_NAME, storedMode);
-				if (storedMode !== DEFAULT_COLOR_MODE) needsReload = true;
+				const persisted = writePrefsCookieAndConfirm(COLOR_MODE_COOKIE_NAME, storedMode);
+				if (persisted && storedMode !== DEFAULT_COLOR_MODE) needsReload = true;
 			}
 		}
 
@@ -46,23 +46,11 @@ function bootstrapThemePrefs(): void {
 		}
 
 		document.documentElement.classList.add(
-			readCookie(THEME_IDENTITY_COOKIE_NAME) === 'paper'
+			readPrefsCookie(THEME_IDENTITY_COOKIE_NAME) === 'paper'
 				? THEME_IDENTITY_BOOTSTRAP_CLASS_NAMES.paper
 				: THEME_IDENTITY_BOOTSTRAP_CLASS_NAMES.tactile,
 		);
 	} catch {
 		// Ignore storage / cookie failures; SSR defaults still apply.
 	}
-}
-
-function readCookie(name: string): string | null {
-	const prefix = `${name}=`;
-	for (const part of document.cookie.split('; ')) {
-		if (part.startsWith(prefix)) return decodeURIComponent(part.slice(prefix.length));
-	}
-	return null;
-}
-
-function writeCookie(name: string, value: string): void {
-	document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${THEME_PREFS_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
 }

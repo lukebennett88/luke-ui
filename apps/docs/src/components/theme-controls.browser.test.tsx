@@ -54,6 +54,7 @@ test('persists theme identity and colour mode independently', async () => {
 	expect(document.documentElement).toHaveClass(paperThemeClassName);
 	expect(themeRoot.dataset.colorMode).toBe('light');
 	expect(readCookie(THEME_IDENTITY_COOKIE_NAME)).toBe('paper');
+	expect(localStorage.getItem(THEME_IDENTITY_COOKIE_NAME)).toBe('paper');
 
 	await userEvent.click(darkMode, { force: true });
 
@@ -160,6 +161,53 @@ test('SSR selects Paper and dark colour mode from server prefs', () => {
 	expect(html).toContain('data-color-mode="dark"');
 });
 
+test('syncs theme identity from another tab via the storage event', async () => {
+	renderTheme(<ThemeControls />, {
+		initialPrefs: { colorMode: 'light', themeIdentity: 'paper' },
+	});
+
+	expect(page.getByRole('radio', { name: 'Paper' })).toBeChecked();
+
+	act(() => {
+		localStorage.setItem(THEME_IDENTITY_COOKIE_NAME, 'tactile');
+		window.dispatchEvent(
+			new StorageEvent('storage', {
+				key: THEME_IDENTITY_COOKIE_NAME,
+				newValue: 'tactile',
+				oldValue: 'paper',
+				storageArea: localStorage,
+			}),
+		);
+	});
+
+	expect(page.getByRole('radio', { name: 'Tactile' })).toBeChecked();
+	expect(document.documentElement).not.toHaveClass(paperThemeClassName);
+	expect(readCookie(THEME_IDENTITY_COOKIE_NAME)).toBe('tactile');
+});
+
+test('does not reload when a migrated preference cookie fails to persist', async () => {
+	const iframe = document.body.appendChild(document.createElement('iframe'));
+	iframe.srcdoc = `<!doctype html><html><head><script>
+localStorage.setItem(${JSON.stringify(THEME_IDENTITY_COOKIE_NAME)}, 'paper');
+localStorage.setItem(${JSON.stringify(COLOR_MODE_STORAGE_KEY)}, 'dark');
+var reloadCount = 0;
+Object.defineProperty(location, 'reload', { configurable: true, value: function () { reloadCount += 1; } });
+Object.defineProperty(document, 'cookie', {
+	configurable: true,
+	get: function () { return ''; },
+	set: function () {},
+});
+</script><script>${themePrefsBootstrapScript}</script></head><body><script>
+document.documentElement.dataset.reloadCount = String(reloadCount);
+</script></body></html>`;
+	await new Promise<void>((resolve) => {
+		iframe.addEventListener('load', () => resolve(), { once: true });
+	});
+
+	expect(iframe.contentDocument?.documentElement).toHaveAttribute('data-reload-count', '0');
+	iframe.remove();
+});
+
 function renderTheme(
 	children: ReactNode,
 	options: Pick<ComponentProps<typeof ThemeProvider>, 'defaultTheme' | 'enableSystem'> & {
@@ -173,6 +221,7 @@ function renderTheme(
 	if (initialPrefs) {
 		document.cookie = `${THEME_IDENTITY_COOKIE_NAME}=${initialPrefs.themeIdentity}; Path=/; SameSite=Lax`;
 		document.cookie = `${COLOR_MODE_COOKIE_NAME}=${initialPrefs.colorMode}; Path=/; SameSite=Lax`;
+		localStorage.setItem(THEME_IDENTITY_COOKIE_NAME, initialPrefs.themeIdentity);
 		localStorage.setItem(COLOR_MODE_STORAGE_KEY, initialPrefs.colorMode);
 	}
 

@@ -6,9 +6,9 @@ import {
 	DEFAULT_COLOR_MODE,
 	DEFAULT_THEME_IDENTITY,
 	THEME_IDENTITY_COOKIE_NAME,
-	THEME_PREFS_COOKIE_MAX_AGE_SECONDS,
 } from './theme-prefs-constants.js';
 import type { ColorModePreference, ThemeIdentity, ThemePrefs } from './theme-prefs-constants.js';
+import { readPrefsCookie, writePrefsCookie } from './theme-prefs-cookie.js';
 
 export type { ColorModePreference, ThemeIdentity, ThemePrefs };
 export {
@@ -44,37 +44,47 @@ export function themeIdentityClassName(themeIdentity: ThemeIdentity): string {
 	return THEME_IDENTITY_CLASS_NAMES[themeIdentity];
 }
 
-function readDocumentCookie(name: string): string | undefined {
-	const prefix = `${name}=`;
-	for (const part of document.cookie.split('; ')) {
-		if (part.startsWith(prefix)) return decodeURIComponent(part.slice(prefix.length));
-	}
-	return undefined;
-}
-
 export function readThemeIdentityPreference(): ThemeIdentity {
-	return parseThemeIdentity(readDocumentCookie(THEME_IDENTITY_COOKIE_NAME));
+	// localStorage wins on the client so `storage` events from other tabs are visible.
+	return parseThemeIdentity(
+		localStorage.getItem(THEME_IDENTITY_COOKIE_NAME) ??
+			readPrefsCookie(THEME_IDENTITY_COOKIE_NAME) ??
+			undefined,
+	);
 }
 
 export function readColorModePreference(): ColorModePreference {
-	return parseColorMode(readDocumentCookie(COLOR_MODE_COOKIE_NAME));
+	return parseColorMode(readPrefsCookie(COLOR_MODE_COOKIE_NAME));
 }
 
 export function writeThemeIdentityPreference(themeIdentity: ThemeIdentity) {
-	writeDocumentCookie(THEME_IDENTITY_COOKIE_NAME, themeIdentity);
+	writePrefsCookie(THEME_IDENTITY_COOKIE_NAME, themeIdentity);
+	// Dual-write for cross-tab sync via the `storage` event (cookies are not observable that way).
+	localStorage.setItem(THEME_IDENTITY_COOKIE_NAME, themeIdentity);
 	window.dispatchEvent(new Event(THEME_IDENTITY_CHANGE_EVENT));
 }
 
 export function writeColorModePreference(colorMode: ColorModePreference) {
-	writeDocumentCookie(COLOR_MODE_COOKIE_NAME, colorMode);
+	writePrefsCookie(COLOR_MODE_COOKIE_NAME, colorMode);
 	// Keep next-themes' blocking script aligned with the cookie the server reads.
 	localStorage.setItem(COLOR_MODE_STORAGE_KEY, colorMode);
 	window.dispatchEvent(new Event(COLOR_MODE_CHANGE_EVENT));
 }
 
 export function subscribeToThemeIdentityPreference(onStoreChange: () => void) {
+	const handleStorage = (event: StorageEvent) => {
+		if (event.key !== THEME_IDENTITY_COOKIE_NAME) return;
+		if (event.newValue === 'paper' || event.newValue === 'tactile') {
+			// Keep this tab's SSR cookie aligned with the other tab's preference.
+			writePrefsCookie(THEME_IDENTITY_COOKIE_NAME, event.newValue);
+		}
+		onStoreChange();
+	};
+
+	window.addEventListener('storage', handleStorage);
 	window.addEventListener(THEME_IDENTITY_CHANGE_EVENT, onStoreChange);
 	return () => {
+		window.removeEventListener('storage', handleStorage);
 		window.removeEventListener(THEME_IDENTITY_CHANGE_EVENT, onStoreChange);
 	};
 }
@@ -84,8 +94,4 @@ export function subscribeToColorModePreference(onStoreChange: () => void) {
 	return () => {
 		window.removeEventListener(COLOR_MODE_CHANGE_EVENT, onStoreChange);
 	};
-}
-
-function writeDocumentCookie(name: string, value: string) {
-	document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${THEME_PREFS_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
 }
