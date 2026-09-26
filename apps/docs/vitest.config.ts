@@ -1,4 +1,5 @@
 import tailwindcss from '@tailwindcss/vite';
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import mdx from 'fumadocs-mdx/vite';
 import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
@@ -18,7 +19,7 @@ export default defineConfig({
 			'react-resizable-panels',
 		],
 	},
-	plugins: [highlightSourcePlugin(), tailwindcss(), mdx(sourceConfig)],
+	plugins: [highlightSourcePlugin(), tailwindcss(), vanillaExtractPlugin(), mdx(sourceConfig)],
 	test: {
 		passWithNoTests: true,
 		projects: [

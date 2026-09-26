@@ -2,6 +2,7 @@ import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import paperCss from '@luke-ui/react/themes/paper/stylesheet.css?url';
 import tactileCss from '@luke-ui/react/themes/tactile/stylesheet.css?url';
+import { cx } from '@luke-ui/react/utils';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
@@ -10,6 +11,7 @@ import { lazy, Suspense } from 'react';
 import { DocsThemeRoot } from '../components/theme-controls';
 import { withBasePath } from '../lib/base-path.js';
 import appCss from '../styles/app.css?url';
+import { docsRoot } from '../styles/docs-root.css.js';
 
 const SearchDialog = lazy(() => import('../components/search'));
 
@@ -74,7 +76,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 			<head>
 				<HeadContent />
 			</head>
-			<body className="flex min-h-dvh flex-col">
+			<body className={cx('flex min-h-dvh flex-col', docsRoot)}>
 				<RootProvider
 					search={{ SearchDialog: LazySearchDialog }}
 					theme={{ attribute: ['class', 'data-color-mode'], hotKey: false }}
