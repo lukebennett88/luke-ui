@@ -5,19 +5,10 @@ import { expect, test } from 'vite-plus/test';
 import type { TypeStyle } from '../../theme/contract.js';
 import { typeStyles } from '../../theme/contract.js';
 
-const lukeOwnedLayerNames = [
-	'reset',
-	'theme',
-	'base',
-	'recipes',
-	'structural',
-	'utilities',
-] as const;
+const lukeOwnedLayerNames = ['reset', 'base', 'recipes', 'utilities'] as const;
 const lukeOwnedLayerNameSet = new Set<string>(lukeOwnedLayerNames);
-const AUTHORITATIVE_LAYER_ORDER_PATTERN =
-	/^@layer reset, theme, base, recipes, structural, utilities;/m;
-const AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN =
-	/^@layer reset, theme, base, recipes, structural, utilities;\n/m;
+const AUTHORITATIVE_LAYER_ORDER_PATTERN = /^@layer reset, base, recipes, utilities;/m;
+const AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN = /^@layer reset, base, recipes, utilities;\n/m;
 type TextClassesByTypography = Record<TypeStyle, Array<string>>;
 const numericLineClampVariants = [2, 3, 4, 5] as const;
 type NumericLineClampVariant = (typeof numericLineClampVariants)[number];
@@ -106,13 +97,13 @@ test('builds the public stylesheet with the retained layer contract', async () =
 
 const stylesheetMutations: Array<[string, (css: string) => string]> = [
 	['missing stable selector', (css: string) => css.replace('.luke-ui-theme', '.theme-root')],
-	['extra stable selector', (css: string) => `${css}\n@layer theme { .luke-ui-extra {} }`],
+	['extra stable selector', (css: string) => `${css}\n@layer reset { .luke-ui-extra {} }`],
 	[
 		'reordered authoritative layer declarations',
 		(css: string) => {
 			return css.replace(
 				AUTHORITATIVE_LAYER_ORDER_PATTERN,
-				'@layer theme, reset, base, recipes, structural, utilities;',
+				'@layer base, reset, recipes, utilities;',
 			);
 		},
 	],
@@ -121,7 +112,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		(css: string) => {
 			return css.replace(
 				AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN,
-				'@layer reset;\n@layer theme;\n@layer base;\n@layer recipes;\n@layer structural;\n@layer utilities;\n@layer reset, theme, base, recipes, structural, utilities;\n',
+				'@layer reset;\n@layer base;\n@layer recipes;\n@layer utilities;\n@layer reset, base, recipes, utilities;\n',
 			);
 		},
 	],
@@ -130,7 +121,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		(css: string) => {
 			return css.replace(
 				AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN,
-				'@layer recipes { .early {} }\n@layer reset, theme, base, recipes, structural, utilities;\n',
+				'@layer recipes { .early {} }\n@layer reset, base, recipes, utilities;\n',
 			);
 		},
 	],
@@ -145,8 +136,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'representative recipe class moved to the wrong layer',
 		(css: string) => {
 			return css.replace(
-				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n}',
-				'@layer utilities {\n  .recipe-class { display: inline-flex; }\n}',
+				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
+				'@layer utilities {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
 			);
 		},
 	],
@@ -160,15 +151,19 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		},
 	],
 	[
-		'representative retained-layer content removed',
-		(css: string) => css.replace('  .recipe-class { display: inline-flex; }\n', ''),
+		'representative recipe content removed',
+		(css: string) =>
+			css.replace(
+				'  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n',
+				'',
+			),
 	],
 	[
 		'class-like text in an attribute value',
 		(css: string) => {
 			return css.replace(
-				'.recipe-class { display: inline-flex; }',
-				'[data-class=".recipe-class"] { display: inline-flex; }',
+				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
+				'@layer recipes {\n  [data-class=".recipe-class"] { display: inline-flex; }\n}',
 			);
 		},
 	],
@@ -180,7 +175,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'empty transitional recipes layer',
 		(css: string) =>
 			css.replace(
-				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n}',
+				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
 				'@layer recipes {}',
 			),
 	],
@@ -254,18 +249,18 @@ function assertStylesheetContract(
 	assertStableSelectors(analysis);
 	assertRecipesLayerHasRules(analysis);
 	assertSentinel(analysis, 'luke-ui-reset', 'reset', 'box-sizing', 'border-box');
-	assertSentinel(analysis, 'luke-ui-theme', 'theme', 'color', 'var(--luke-color-text-primary)');
+	assertSentinel(analysis, 'luke-ui-theme', 'reset', 'color', 'var(--luke-color-text-primary)');
 	assertSentinel(
 		analysis,
 		'luke-ui-theme',
-		'theme',
+		'reset',
 		'font-family',
 		'var(--luke-font-body-font-family)',
 	);
 	assertSentinel(
 		analysis,
 		'luke-ui-theme',
-		'theme',
+		'reset',
 		'font-size',
 		'var(--luke-font-body-font-size)',
 	);
@@ -429,7 +424,7 @@ function assertPrivateStylesheetSentinel(analysis: StylesheetAnalysis): void {
 		return declarationListHas(rule, 'background-color', 'var(--luke-color-loading-skeleton)', true);
 	});
 	expect(maskRules.length).toBeGreaterThan(0);
-	for (const rule of maskRules) expect(rule.owningLayer).toBe('structural');
+	for (const rule of maskRules) expect(rule.owningLayer).toBe('recipes');
 }
 
 function getAuthoritativeLayerOrder(analysis: StylesheetAnalysis): Array<string> {
@@ -583,7 +578,7 @@ function assertRecipesLayerHasRules(analysis: StylesheetAnalysis): void {
 	const hasRecipeRule = analysis.styleRules.some(
 		(rule) => rule.owningLayer === 'recipes' && rule.hasDeclarations,
 	);
-	if (!hasRecipeRule) throw new Error('Expected the transitional recipes layer to contain a rule.');
+	if (!hasRecipeRule) throw new Error('Expected the recipes layer to contain a rule.');
 }
 
 function assertStableSelectors(analysis: StylesheetAnalysis): void {
@@ -820,11 +815,9 @@ function formatPrimarySelector(rule: IndexedStyleRule): string {
 		.join(' ');
 }
 
-const validStylesheetFixture = `@layer reset, theme, base, recipes, structural, utilities;
+const validStylesheetFixture = `@layer reset, base, recipes, utilities;
 @layer reset {
   .luke-ui-reset { box-sizing: border-box; }
-}
-@layer theme {
   .luke-ui-theme {
     color: var(--luke-color-text-primary);
     font-family: var(--luke-font-body-font-family);
@@ -833,9 +826,7 @@ const validStylesheetFixture = `@layer reset, theme, base, recipes, structural, 
 }
 @layer recipes {
   .recipe-class { display: inline-flex; }
-}
-@layer structural {
-  .structural-class { margin-block-start: 1px; }
+  .recipe-class > * { margin-block-start: 1px; }
 }
 @layer utilities {
   .utility-class { display: grid; }

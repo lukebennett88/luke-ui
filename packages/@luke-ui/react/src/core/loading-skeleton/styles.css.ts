@@ -140,7 +140,7 @@ export const loadingSkeletonClassName = style({
 	},
 });
 
-globalStyleInLayer('structural', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > *`, {
+globalStyleInLayer('recipes', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > *`, {
 	...surface,
 	borderRadius: fallbackVar(skeletonRadiusVar, '0px'),
 	overflow: 'hidden !important',
@@ -148,24 +148,24 @@ globalStyleInLayer('structural', `${loadingSkeletonClassName}:not([data-skeleton
 });
 
 globalStyleInLayer(
-	'structural',
+	'recipes',
 	`${loadingSkeletonClassName}:not([data-skeleton-inline]) > *:dir(rtl)`,
 	surfaceRtl,
 );
 
-globalStyleInLayer('structural', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > * *`, {
+globalStyleInLayer('recipes', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > * *`, {
 	...surface,
 });
 
 globalStyleInLayer(
-	'structural',
+	'recipes',
 	`${loadingSkeletonClassName}:not([data-skeleton-inline]) > * *:dir(rtl)`,
 	surfaceRtl,
 );
 
 // Overlay covers visuals forced styles can't reach (nested backgrounds, rounded corners).
 globalStyleInLayer(
-	'structural',
+	'recipes',
 	`${loadingSkeletonClassName}:not([data-skeleton-inline]) > *::after`,
 	{
 		...surface,
@@ -177,7 +177,7 @@ globalStyleInLayer(
 );
 
 globalStyleInLayer(
-	'structural',
+	'recipes',
 	`${loadingSkeletonClassName}:not([data-skeleton-inline]) > *:dir(rtl)::after`,
 	surfaceRtl,
 );

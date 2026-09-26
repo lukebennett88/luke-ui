@@ -82,22 +82,20 @@ A colour mode scoped below `<html>` does not reach a body-level portal. Set `dat
 All styles live in named CSS cascade layers. Layer order sets cross-layer priority. Specificity and
 source order still decide conflicts within a layer.
 
-| Layer        | Purpose                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------- |
-| `reset`      | Browser defaults, box sizing, and margins                                                   |
-| `theme`      | Design token custom properties and base typography                                          |
-| `base`       | Reserved for the consuming app (for example Tailwind Preflight). Luke UI emits nothing here |
-| `recipes`    | Component styles, variants, compound variants, and shared compound-slot styles              |
-| `structural` | Retained descendant rhythm, skeleton masking, and combinator selectors                      |
-| `utilities`  | One-off layout and override escape hatches                                                  |
+| Layer       | Purpose                                                                                     |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| `reset`     | Browser defaults, box sizing, root base colour, body typography, focus, and reduced-motion  |
+| `base`      | Reserved for the consuming app (for example Tailwind Preflight). Luke UI emits nothing here |
+| `recipes`   | All Luke UI component styling, including descendant and combinator selectors                |
+| `utilities` | One-off layout and override escape hatches                                                  |
 
 The public stylesheet starts with one combined order statement:
 
 ```css
-@layer reset, theme, base, recipes, structural, utilities;
+@layer reset, base, recipes, utilities;
 ```
 
-The package declares `base` but never writes to it. That pins its rank between `theme` and
+The package declares `base` but never writes to it. That pins its rank between `reset` and
 `recipes`. If a consumer's first `@layer base` write creates the layer instead, the browser places
 it last and it beats every component recipe.
 
@@ -114,15 +112,15 @@ Author component CSS with one of:
 - `recipe()` — component visuals with selection and variants. Styles go in the `recipes` layer.
 - `style()` — one private `recipes` class with no selection (scopes, markers, implementation
   classes).
-- `globalStyleInLayer()` — a global selector in a chosen layer. Use for reset, theme root, and
-  `structural` rules.
+- `globalStyleInLayer()` — a global selector in a chosen layer. Use for reset/root rules and for
+  component-owned descendant or combinator selectors that still belong in `recipes`.
 
 Authors never name the `recipes` layer. Only `globalStyleInLayer()` takes a layer, and it rejects
 `base`.
 
 Put overrides that must beat recipes in the `utilities` layer. Use `!important` only to beat
-un-layered or inline styles. Under `!important`, lower layers win over higher layers. Structural
-masks that must stick on wrapped children use `!important` in `structural` for that reason.
+un-layered or inline styles. Under `!important`, lower layers win over higher layers. Loading
+skeleton masks that must stick on wrapped children use `!important` in `recipes` for that reason.
 
 Reduced-motion handling belongs near the animation. The global `prefers-reduced-motion` rule lives
 in `reset`, so it cannot disable animations in `recipes` or `utilities`. Add a local

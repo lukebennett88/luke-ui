@@ -9,9 +9,10 @@ export const proseRecipe = recipe({ base: proseScopeClassName });
 
 export type ProseRecipeVariants = RecipeSelection<typeof proseRecipe>;
 
-// Wrapping the root and matched element keeps every rule at 0-0-0.
+// Scope class keeps component ownership (0-1-0); `:where()` on the match keeps descendants from
+// racing utility and component classes on specificity alone. Utilities still win via layer order.
 function proseStyle(selector: string, rule: Parameters<typeof globalStyleInLayer>[2]) {
-	globalStyleInLayer('structural', `:where(.${proseScopeClassName}) :where(${selector})`, rule);
+	globalStyleInLayer('recipes', `.${proseScopeClassName} :where(${selector})`, rule);
 }
 
 // Each gap is the following block's start margin. No block-end margin can collapse or escape.

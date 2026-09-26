@@ -6,14 +6,7 @@
  * precedence when `layers.css.ts` calls `globalLayer()`. Do not replace the array with an
  * unordered object as the primary export.
  */
-export const cascadeLayerNames = [
-	'reset',
-	'theme',
-	'base',
-	'recipes',
-	'structural',
-	'utilities',
-] as const;
+export const cascadeLayerNames = ['reset', 'base', 'recipes', 'utilities'] as const;
 
 export type CascadeLayerName = (typeof cascadeLayerNames)[number];
 

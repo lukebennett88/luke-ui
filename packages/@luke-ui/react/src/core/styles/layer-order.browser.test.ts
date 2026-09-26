@@ -54,9 +54,9 @@ test('a recipes-layer rule beats the layers below it in the built stylesheet cas
 
 	expect(getComputedStyle(element).display).toBe('inline-flex');
 
-	const themeStyle = document.head.appendChild(document.createElement('style'));
-	themeStyle.dataset.layerOrderProbe = 'true';
-	themeStyle.textContent = `@layer theme { .${iconClass} { display: block; } }`;
+	const resetStyle = document.head.appendChild(document.createElement('style'));
+	resetStyle.dataset.layerOrderProbe = 'true';
+	resetStyle.textContent = `@layer reset { .${iconClass} { display: block; } }`;
 
 	expect(getComputedStyle(element).display).toBe('inline-flex');
 
@@ -109,11 +109,9 @@ test('reproduces the invalid early layer-declaration failure mode', () => {
 	style.dataset.layerOrderProbe = 'true';
 	style.textContent = `
 @layer probe-reset;
-@layer probe-theme;
 @layer probe-recipes;
-@layer probe-structural;
 @layer probe-utilities;
-@layer probe-reset, probe-theme, probe-base, probe-recipes, probe-structural, probe-utilities;
+@layer probe-reset, probe-base, probe-recipes, probe-utilities;
 @layer probe-recipes { .probe-invalid { display: inline-flex; } }
 @layer probe-utilities { .probe-invalid { display: grid; } }
 @layer probe-base { .probe-invalid { display: block; } }
@@ -144,7 +142,7 @@ test('a consumer base-layer reset does not override component recipes', () => {
 	expect(getComputedStyle(element).display).toBe('inline-flex');
 });
 
-test('LoadingSkeleton structural !important beats utilities-layer !important overrides', () => {
+test('LoadingSkeleton recipes !important beats utilities-layer !important overrides', () => {
 	const skeletonClass = loadingSkeletonClassName(stylesheetCss);
 
 	const element = document.body.appendChild(document.createElement('div'));
