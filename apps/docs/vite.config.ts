@@ -7,6 +7,7 @@ import react from '@vitejs/plugin-react';
 import mdx from 'fumadocs-mdx/vite';
 import type { Plugin } from 'vite-plus';
 import { defineConfig, lazyPlugins } from 'vite-plus';
+import { isDocsStaticDeploy } from './src/lib/docs-deploy-mode.js';
 import { findMdxFiles } from './src/lib/docs-mdx-files.js';
 import { highlightSourcePlugin } from './src/lib/highlight-source-plugin.js';
 import { getMarkdownPagePath } from './src/lib/markdown-page-path.js';
@@ -56,6 +57,9 @@ export default defineConfig(async () => {
 	const markdownPrerenderPages = getMarkdownPrerenderPages();
 	const baseUrl = readBaseUrl();
 	const siteUrl = (process.env.SITE_URL || LOCAL_SITE_URL).replace(TRAILING_SLASH_PATTERN, '');
+	// Netlify (default) keeps docs HTML on runtime SSR. Set DOCS_STATIC=true for a
+	// fully prerendered static host such as GitHub Pages.
+	const docsStatic = isDocsStaticDeploy();
 
 	return {
 		// Allow overriding the base URL for deployments to sub-paths (e.g. GitHub Pages).
@@ -64,6 +68,7 @@ export default defineConfig(async () => {
 		// The public origin for absolute URLs. It is baked in at build time so the
 		// prerendered files and the SSR function agree.
 		define: {
+			'import.meta.env.DOCS_STATIC': JSON.stringify(docsStatic ? 'true' : 'false'),
 			'import.meta.env.SITE_URL': JSON.stringify(siteUrl),
 		},
 		environments: {
@@ -165,11 +170,13 @@ export default defineConfig(async () => {
 					// Serialize requests to the internal Vite preview server and retry a
 					// transient failure without omitting the iframe preview page.
 					concurrency: 1,
-					// Keep agent/static assets prerendered via `pages` above. Do not crawl or
-					// auto-discover HTML docs into static files: Netlify `preferStatic` would
-					// serve them without cookies, so theme toggles could not SSR from prefs.
-					autoStaticPathsDiscovery: false,
-					crawlLinks: false,
+					// SSR (Netlify): keep agent/static assets from `pages` above, but do not
+					// crawl or auto-discover HTML docs. Netlify `preferStatic` would serve
+					// those files without cookies, so theme toggles could not SSR from prefs.
+					// Static (DOCS_STATIC): crawl and discover HTML so
+					// `staticFunctionMiddleware` can write `__tsr/staticServerFnCache`.
+					autoStaticPathsDiscovery: docsStatic,
+					crawlLinks: docsStatic,
 					enabled: true,
 					retryCount: 2,
 				},

@@ -63,8 +63,15 @@ const loader = createServerFn({
 	method: 'GET',
 })
 	.validator((slugs) => z.array(z.string()).parse(slugs))
-	// staticFunctionMiddleware breaks Vite HMR in dev — only apply in prod build.
-	.middleware(import.meta.env.PROD ? [staticFunctionMiddleware] : [])
+	// staticFunctionMiddleware needs prerendered `__tsr/staticServerFnCache` files.
+	// Those exist only for static hosts (`DOCS_STATIC=true`). Netlify SSR builds leave
+	// docs HTML dynamic, so loaders must use runtime `createServerFn` instead.
+	// Do not gate on `import.meta.env.PROD` alone — both deploy modes are production.
+	.middleware(
+		import.meta.env.PROD && import.meta.env.DOCS_STATIC === 'true'
+			? [staticFunctionMiddleware]
+			: [],
+	)
 	.handler(async ({ data: slugs }) => {
 		const page = source.getPage(slugs);
 		if (!page) throw notFound();

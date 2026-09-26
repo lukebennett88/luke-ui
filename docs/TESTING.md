@@ -5,8 +5,10 @@
 - Unit tests (`*.test.ts`) run in Node for pure, non-DOM logic.
 - Component tests (`*.browser.test.tsx`) run in Chromium. Each component has one file for behaviour,
   axe, and visual captures.
+- Docs deployment checks are scripts under `apps/docs/scripts/` that exercise a production `docs`
+  build (for example `check:ssr-nav`). They are not a third Vitest project.
 
-Do not add another test type.
+Do not add another Vitest test type.
 
 ## Component tests
 
@@ -62,3 +64,16 @@ Add a regression test when the intention needs protection. Put it with the contr
 - component behaviour or axe: browser test
 - meaningful appearance: `visual`-tagged browser test
 - public type contract `check:types` cannot catch: unit test (see [Type contracts](#type-contracts))
+- production docs host behaviour that unit/browser tests cannot reach: a docs deployment check
+  script (see [Docs deployment checks](#docs-deployment-checks))
+
+## Docs deployment checks
+
+Use these when the failure only appears against a production `docs` build (SSR vs static deploy
+mode, prerender cache files, Netlify `preferStatic`, and similar).
+
+- Build with the mode under test. Netlify SSR is the default (`DOCS_STATIC` unset). Fully
+  prerendered static hosts set `DOCS_STATIC=true`.
+- `pnpm --filter docs run check:ssr-nav` serves `dist/` like Netlify (`preferStatic` then SSR),
+  loads a docs page, clicks an internal docs link, and fails on `__tsr/staticServerFnCache` 404s or
+  JSON parse errors from those responses.

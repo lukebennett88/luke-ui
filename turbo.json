@@ -34,7 +34,7 @@
 		},
 		"build": {
 			"dependsOn": ["^build", "generate"],
-			"env": ["SITE_URL", "VITE_BASE_URL"],
+			"env": ["DOCS_STATIC", "SITE_URL", "VITE_BASE_URL"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"outputs": ["dist/**", ".output/**", ".source/**"]
 		},
@@ -82,7 +82,7 @@
 		},
 		"docs#build": {
 			"dependsOn": ["docs#generate", "^build"],
-			"env": ["SITE_URL", "VITE_BASE_URL"],
+			"env": ["DOCS_STATIC", "SITE_URL", "VITE_BASE_URL"],
 			"outputs": [".netlify/**", ".output/**", ".source/**", "dist/**"]
 		},
 		"docs#check:format": {
@@ -92,6 +92,10 @@
 			"dependsOn": ["docs#generate", "^build"]
 		},
 		"docs#check:llms": {
+			"dependsOn": ["docs#build"]
+		},
+		"docs#check:ssr-nav": {
+			"cache": false,
 			"dependsOn": ["docs#build"]
 		},
 		"docs#check:types": {
