@@ -10,9 +10,11 @@ import {
 	partitionContractPairs,
 	spaceScale,
 	typeStyles,
+	typeStyleMetricStep,
 	typeStyleWeightRole,
 } from './contract.js';
 import type { IdentityPath, ModePath, SpaceStep, TypeStyle } from './contract.js';
+import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import type { ThemeFoundation } from './foundation.js';
 import {
 	codeFontFamilyStack,
@@ -22,6 +24,7 @@ import {
 	themeFontFamilyStacks,
 } from './foundation.js';
 import { pathEntry, pathRecord } from './path-record.js';
+import { rem } from './rem.js';
 import { getThemeClassName } from './theme-class-name.js';
 import {
 	CONTROL_SIZE_VALUES,
@@ -127,11 +130,12 @@ function buildIdentityValues(foundation: ThemeFoundation): { [Path in IdentityPa
 		'font.weight.emphasis': resolvedWeights.emphasis,
 		'font.weight.heading': resolvedWeights.heading,
 		'font.weight.label': resolvedWeights.label,
-		'radius.control': `${radius?.control ?? defaultRadius.control}px`,
-		'radius.detail': `${radius?.detail ?? defaultRadius.detail}px`,
+		'radius.control': rem(radius?.control ?? defaultRadius.control),
+		'radius.detail': rem(radius?.detail ?? defaultRadius.detail),
+		// Pill technique: a large fixed pixel radius, not scalable design geometry.
 		'radius.full': '9999px',
-		'radius.overlay': `${radius?.overlay ?? defaultRadius.overlay}px`,
-		'radius.surface': `${radius?.surface ?? defaultRadius.surface}px`,
+		'radius.overlay': rem(radius?.overlay ?? defaultRadius.overlay),
+		'radius.surface': rem(radius?.surface ?? defaultRadius.surface),
 		...spaceValues(),
 		...ICON_SIZE_VALUES,
 		...MOTION_VALUES,
@@ -168,8 +172,10 @@ function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): {
 }
 
 function capsizeTrims(fontFamily: keyof typeof FONT_METRICS, style: TypeStyle) {
-	const fontSize = Number.parseFloat(FONT_VALUES[`font.${style}.fontSize`]);
-	const leading = Number.parseFloat(FONT_VALUES[`font.${style}.lineHeight`]);
+	// Capsize expects pixel numbers. Metric keys and rem magnitudes use the same 16px-root design
+	// units, so the trims stay correct when CSS emits rem.
+	const fontSize = typeStyleMetricStep[style];
+	const leading = Number.parseFloat(FONT_METRIC_SCALE[fontSize].lineHeight) * 16;
 	return precomputeValues({
 		fontMetrics: FONT_METRICS[fontFamily],
 		fontSize,

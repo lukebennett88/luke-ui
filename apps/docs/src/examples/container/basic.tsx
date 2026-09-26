@@ -12,7 +12,7 @@ export default () => {
 				borderWidth="thin"
 				padding="sp16"
 			>
-				Content stays centred and has a 672px maximum inline size.
+				Content stays centred and has a 672px-equivalent (`42rem`) maximum inline size.
 			</Box>
 		</Container>
 	);

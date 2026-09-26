@@ -72,8 +72,9 @@ interface ThemeInputCommon {
 	/** Corner radii. A generative base + multiplier scale, with explicit per-step overrides. */
 	radius?: {
 		/**
-		 * Base radius in pixels. Generates `detail = base`, `control = base*2`, `surface = base*3`,
-		 * `overlay = base*4`, each scaled by `multiplier`.
+		 * Base radius in pixel-equivalent design units. Generates `detail = base`,
+		 * `control = base*2`, `surface = base*3`, `overlay = base*4`, each scaled by `multiplier`,
+		 * then emitted as `rem` (16 → 1rem).
 		 * @default 4
 		 */
 		base?: number;

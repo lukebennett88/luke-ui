@@ -15,6 +15,7 @@ import type { IdentityPath, TypeStyle } from './contract.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import { MOTION_DURATION_SCALE } from './motion.js';
 import { pathEntry, pathRecord } from './path-record.js';
+import { rem } from './rem.js';
 
 /**
  * Structural block sizes for the small and medium controls, the minimum tap target, and
@@ -23,10 +24,10 @@ import { pathEntry, pathRecord } from './path-record.js';
 export const CONTROL_SIZE_VALUES: {
 	[Path in Extract<IdentityPath, `controlSize.${string}`>]: string;
 } = {
-	'controlSize.comboboxAction': '28px',
-	'controlSize.medium': '40px',
-	'controlSize.minTarget': '24px',
-	'controlSize.small': '32px',
+	'controlSize.comboboxAction': rem(28),
+	'controlSize.medium': rem(40),
+	'controlSize.minTarget': rem(24),
+	'controlSize.small': rem(32),
 };
 
 /**
@@ -76,10 +77,10 @@ export const FONT_VALUES: { readonly [Key in FontValueKey]: string } = pathRecor
 export const ICON_SIZE_VALUES: {
 	[Path in Extract<IdentityPath, `iconSize.${string}`>]: string;
 } = {
-	'iconSize.large': '32px',
-	'iconSize.medium': '24px',
-	'iconSize.small': '20px',
-	'iconSize.xsmall': '16px',
+	'iconSize.large': rem(32),
+	'iconSize.medium': rem(24),
+	'iconSize.small': rem(20),
+	'iconSize.xsmall': rem(16),
 };
 
 /** The fade every control recipe applies to a disabled or pending control. */
