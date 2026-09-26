@@ -66,7 +66,7 @@ test('copies copyText instead of rendered highlighted text', async () => {
 	expect(page.getByText('rendered').element()).toBeTruthy();
 });
 
-test('scrolls Shiki line spans horizontally under a floating copy control', async () => {
+test('scrolls Shiki line spans horizontally beside an in-flow copy control', async () => {
 	await page.viewport(320, 720);
 
 	const longImport = `import { Box } from '@luke-ui/react/box';`;
@@ -87,7 +87,6 @@ test('scrolls Shiki line spans horizontally under a floating copy control', asyn
 
 	const pre = viewport.querySelector('pre');
 	assert(pre != null, 'Expected a pre element');
-	// max-content pre must outgrow the scrollport so lines are not clipped at the copy gutter.
 	expect(pre.getBoundingClientRect().width).toBeGreaterThan(viewport.clientWidth);
 
 	const firstLine = pre.querySelector('.line');
@@ -120,7 +119,26 @@ test('opts out of prose inline-code chrome on the fence code element', () => {
 	expect(styles.backgroundColor).toBe('rgba(0, 0, 0, 0)');
 });
 
-test('scrolls horizontally in a narrow viewport and stays operable in RTL', async () => {
+test('keeps the titleless copy control in document flow', () => {
+	renderCodeBlock(<CodeBlock code={'const value = 1;'} />);
+
+	const copyButton = page.getByRole('button', { name: 'Copy' }).element();
+	expect(getComputedStyle(copyButton).position).not.toBe('absolute');
+
+	const actions = copyButton.parentElement;
+	assert(actions != null, 'Expected an actions wrapper');
+	expect(getComputedStyle(actions).position).not.toBe('absolute');
+
+	const figure = copyButton.closest('figure');
+	assert(figure != null, 'Expected a figure ancestor');
+	const code = figure.querySelector('pre code') ?? figure.querySelector('pre');
+	assert(code != null, 'Expected code');
+	expect(rectsIntersect(code.getBoundingClientRect(), copyButton.getBoundingClientRect())).toBe(
+		false,
+	);
+});
+
+test('scrolls horizontally in a narrow viewport and keeps titled copy on inline-end in RTL', async () => {
 	await page.viewport(320, 720);
 	document.documentElement.dir = 'rtl';
 
@@ -142,7 +160,7 @@ test('scrolls horizontally in a narrow viewport and stays operable in RTL', asyn
 		assert(pre != null, 'Expected a pre element');
 		expect(getComputedStyle(pre).direction).toBe('ltr');
 
-		// In RTL, inline-end is physically left — the copy action sits nearer the figure's left edge.
+		// In RTL, inline-end is physically left — the header copy sits nearer the figure's left edge.
 		const figureBox = figure.getBoundingClientRect();
 		const buttonBox = copyButton.getBoundingClientRect();
 		const buttonMidX = (buttonBox.left + buttonBox.right) / 2;
@@ -153,7 +171,7 @@ test('scrolls horizontally in a narrow viewport and stays operable in RTL', asyn
 	}
 });
 
-test('titleless floating copy clears code content in RTL', async () => {
+test('keeps titleless in-flow copy on inline-end in RTL', async () => {
 	await page.viewport(320, 720);
 	document.documentElement.dir = 'rtl';
 
@@ -169,21 +187,18 @@ test('titleless floating copy clears code content in RTL', async () => {
 		assert(figure != null, 'Expected a figure ancestor');
 
 		expect(getComputedStyle(figure).direction).toBe('rtl');
-		const pre = figure.querySelector('pre');
-		assert(pre != null, 'Expected a pre element');
-		expect(getComputedStyle(pre).direction).toBe('ltr');
+		expect(getComputedStyle(copyButton).position).not.toBe('absolute');
 
-		// Floating copy uses insetInlineEnd on the figure → physical left in RTL.
+		// Body row is a flex container: in RTL, the actions column is on the physical left.
 		const figureBox = figure.getBoundingClientRect();
 		const buttonBox = copyButton.getBoundingClientRect();
 		const buttonMidX = (buttonBox.left + buttonBox.right) / 2;
 		const figureMidX = (figureBox.left + figureBox.right) / 2;
 		expect(buttonMidX).toBeLessThan(figureMidX);
 
-		// Frame padding (not the LTR viewport) reserves the same physical side as the button.
-		const code = pre.querySelector('code') ?? pre;
-		const codeBox = code.getBoundingClientRect();
-		expect(rectsIntersect(codeBox, buttonBox)).toBe(false);
+		const code = figure.querySelector('pre code') ?? figure.querySelector('pre');
+		assert(code != null, 'Expected code');
+		expect(rectsIntersect(code.getBoundingClientRect(), buttonBox)).toBe(false);
 	} finally {
 		document.documentElement.dir = 'ltr';
 	}

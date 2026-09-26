@@ -17,7 +17,6 @@ export const root = style({
 			lineHeight: vars.font.caption.lineHeight,
 			maxInlineSize: '100%',
 			overflow: 'hidden',
-			position: 'relative',
 		},
 	},
 });
@@ -85,31 +84,23 @@ export const actions = style({
 	},
 });
 
-export const floatingActions = style({
+/** Titleless body: code scrollport + in-flow copy on the inline-end. */
+export const body = style({
 	'@layer': {
 		recipes: {
-			insetBlockStart: vars.space.sp8,
-			insetInlineEnd: vars.space.sp8,
-			position: 'absolute',
-			zIndex: 1,
-		},
-	},
-});
-
-/** Inherits figure direction so floating-copy padding mirrors with the button. */
-export const viewportFrame = style({
-	'@layer': {
-		recipes: {
+			display: 'flex',
 			minInlineSize: 0,
 		},
 	},
 });
 
-export const viewportFrameWithFloatingCopy = style({
+export const bodyActions = style({
 	'@layer': {
 		recipes: {
-			// Same physical side as floatingActions (insetInlineEnd on the figure).
-			paddingInlineEnd: vars.space.sp48,
+			alignSelf: 'start',
+			marginInlineStart: 0,
+			paddingBlockStart: vars.space.sp8,
+			paddingInlineEnd: vars.space.sp8,
 		},
 	},
 });
@@ -117,7 +108,9 @@ export const viewportFrameWithFloatingCopy = style({
 export const viewport = style({
 	'@layer': {
 		recipes: {
+			flex: '1 1 auto',
 			maxBlockSize: '37.5rem',
+			minInlineSize: 0,
 			overflow: 'auto',
 			paddingBlock: vars.space.sp12,
 			paddingInline: vars.space.sp16,
