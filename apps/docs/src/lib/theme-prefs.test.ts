@@ -1,5 +1,8 @@
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
+import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import { expect, test } from 'vite-plus/test';
+import themePrefsBootstrapScript from '../generated/theme-prefs-bootstrap-script.iife.js?raw';
+import { THEME_IDENTITY_BOOTSTRAP_CLASS_NAMES } from './theme-prefs-constants.js';
 import {
 	COLOR_MODE_COOKIE_NAME,
 	DEFAULT_COLOR_MODE,
@@ -8,7 +11,6 @@ import {
 	parseThemeIdentity,
 	THEME_IDENTITY_COOKIE_NAME,
 	themeIdentityClassName,
-	themePrefsBootstrapScript,
 } from './theme-prefs.js';
 
 test('parseThemeIdentity accepts only paper; everything else is tactile', () => {
@@ -28,11 +30,17 @@ test('parseColorMode accepts light, dark, and system', () => {
 
 test('themeIdentityClassName maps each identity to its bundled class', () => {
 	expect(themeIdentityClassName('paper')).toBe(paperThemeClassName);
-	expect(themeIdentityClassName('tactile')).not.toBe(paperThemeClassName);
+	expect(themeIdentityClassName('tactile')).toBe(tactileThemeClassName);
 });
 
-test('bootstrap script names the preference cookies and identity classes', () => {
+test('bootstrap class names stay aligned with the bundled theme packages', () => {
+	expect(THEME_IDENTITY_BOOTSTRAP_CLASS_NAMES.paper).toBe(paperThemeClassName);
+	expect(THEME_IDENTITY_BOOTSTRAP_CLASS_NAMES.tactile).toBe(tactileThemeClassName);
+});
+
+test('bootstrap IIFE names the preference cookies and identity classes', () => {
 	expect(themePrefsBootstrapScript).toContain(THEME_IDENTITY_COOKIE_NAME);
 	expect(themePrefsBootstrapScript).toContain(COLOR_MODE_COOKIE_NAME);
-	expect(themePrefsBootstrapScript).toContain(paperThemeClassName);
+	expect(themePrefsBootstrapScript).toContain(THEME_IDENTITY_BOOTSTRAP_CLASS_NAMES.paper);
+	expect(themePrefsBootstrapScript).toContain(THEME_IDENTITY_BOOTSTRAP_CLASS_NAMES.tactile);
 });

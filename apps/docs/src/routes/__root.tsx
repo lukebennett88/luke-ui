@@ -9,12 +9,9 @@ import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 import type { ReactNode } from 'react';
 import { lazy, Suspense } from 'react';
 import { DocsThemeRoot } from '../components/theme-controls';
+import themePrefsBootstrapScript from '../generated/theme-prefs-bootstrap-script.iife.js?raw';
 import { withBasePath } from '../lib/base-path.js';
-import {
-	DEFAULT_THEME_PREFS,
-	themeIdentityClassName,
-	themePrefsBootstrapScript,
-} from '../lib/theme-prefs.js';
+import { DEFAULT_THEME_PREFS, themeIdentityClassName } from '../lib/theme-prefs.js';
 import appCss from '../styles/app.css?url';
 
 const SearchDialog = lazy(() => import('../components/search'));

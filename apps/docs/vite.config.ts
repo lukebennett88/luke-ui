@@ -117,21 +117,32 @@ export default defineConfig(async () => {
 				'sucrase',
 			],
 		},
-		// `vp pack` compiles the pre-hydration skeleton script to an inline-able
-		// IIFE artifact; it runs as part of `docs#generate`, not `vp build`.
-		pack: {
-			clean: false,
-			dts: false,
-			// Emitted as src/generated/editor-skeleton-script.iife.js — the `.iife`
-			// suffix is fixed by tsdown for this format.
-			entry: ['src/components/playground/editor-skeleton-script.ts'],
-			format: 'iife' as const,
-			// The artifact is inlined into every playground HTML response, so
-			// strip the source's documentation comments.
-			minify: true,
-			outDir: 'src/generated',
-			platform: 'browser' as const,
-		},
+		// `vp pack` compiles pre-hydration scripts to inline-able IIFE artifacts;
+		// it runs as part of `docs#generate`, not `vp build`. IIFE format needs one
+		// entry per pack config (no code-splitting).
+		pack: [
+			{
+				clean: false,
+				dts: false,
+				// Emitted as `src/generated/<name>.iife.js` — the `.iife` suffix is fixed
+				// by tsdown for this format.
+				entry: ['src/components/playground/editor-skeleton-script.ts'],
+				format: 'iife' as const,
+				// Artifacts are inlined into HTML responses, so strip documentation comments.
+				minify: true,
+				outDir: 'src/generated',
+				platform: 'browser' as const,
+			},
+			{
+				clean: false,
+				dts: false,
+				entry: ['src/lib/theme-prefs-bootstrap-script.ts'],
+				format: 'iife' as const,
+				minify: true,
+				outDir: 'src/generated',
+				platform: 'browser' as const,
+			},
+		],
 		plugins: lazyPlugins(async () => [
 			staticFunctionBasePathPlugin(),
 			highlightSourcePlugin(),
