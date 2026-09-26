@@ -5,13 +5,7 @@ import { expect, test } from 'vite-plus/test';
 import type { TypeStyle } from '../../theme/contract.js';
 import { typeStyles } from '../../theme/contract.js';
 
-const lukeOwnedLayerNames = [
-	'reset',
-	'base',
-	'recipes',
-	'structural',
-	'utilities',
-] as const;
+const lukeOwnedLayerNames = ['reset', 'base', 'recipes', 'structural', 'utilities'] as const;
 const lukeOwnedLayerNameSet = new Set<string>(lukeOwnedLayerNames);
 const AUTHORITATIVE_LAYER_ORDER_PATTERN = /^@layer reset, base, recipes, structural, utilities;/m;
 const AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN =
