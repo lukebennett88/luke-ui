@@ -332,6 +332,18 @@ return (
 );
 ```
 
+### Styling engine boundary
+
+`@luke-ui/rainbow-sprinkles` is a private implementation package derived from
+[Wayfair Rainbow Sprinkles](https://github.com/wayfair/rainbow-sprinkles). Keep it private until
+Luke UI's first major release. Reconsider publication at that release.
+
+Keep engine authoring and compilation private. If the engine changes, preserve the public contracts:
+`createSprinkles` passes through own enumerable string-keyed non-utility props, generated
+`className` and `style` replace input values, and `.properties` remains public. Theme `vars` keep
+their semantic paths and CSS custom property names. Recipes return class strings. Generated CSS
+keeps its cascade layers and source order.
+
 ### Implementation rules
 
 - Use CSS logical properties such as `margin-inline-start`, `block-size`, and `inset-inline`.

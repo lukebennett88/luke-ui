@@ -39,6 +39,8 @@ Useful repo commands:
 - Monorepo: pnpm and Turbo.
 - React: `react-aria-components`.
 - Styling: Vanilla Extract static CSS.
+- Styling utilities: a fork of [Rainbow Sprinkles](https://github.com/wayfair/rainbow-sprinkles) by
+  Wayfair, MIT licensed.
 - Lint and format: `oxlint` and `oxfmt`.
 
 ## Repository guides
