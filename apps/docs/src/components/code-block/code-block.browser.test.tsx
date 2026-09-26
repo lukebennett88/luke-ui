@@ -105,6 +105,46 @@ test('scrolls horizontally in a narrow viewport and stays operable in RTL', asyn
 	}
 });
 
+test('titleless floating copy clears code content in RTL', async () => {
+	await page.viewport(320, 720);
+	document.documentElement.dir = 'rtl';
+
+	try {
+		renderCodeBlock(<CodeBlock code={'x'.repeat(200)} />);
+
+		const viewport = page.getByRole('region', { name: 'Code' }).element();
+		expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth);
+		expect(getComputedStyle(viewport).direction).toBe('ltr');
+
+		const copyButton = page.getByRole('button', { name: 'Copy' }).element();
+		const figure = copyButton.closest('figure');
+		assert(figure != null, 'Expected a figure ancestor');
+
+		expect(getComputedStyle(figure).direction).toBe('rtl');
+		const pre = figure.querySelector('pre');
+		assert(pre != null, 'Expected a pre element');
+		expect(getComputedStyle(pre).direction).toBe('ltr');
+
+		// Floating copy uses insetInlineEnd on the figure → physical left in RTL.
+		const figureBox = figure.getBoundingClientRect();
+		const buttonBox = copyButton.getBoundingClientRect();
+		const buttonMidX = (buttonBox.left + buttonBox.right) / 2;
+		const figureMidX = (figureBox.left + figureBox.right) / 2;
+		expect(buttonMidX).toBeLessThan(figureMidX);
+
+		// Frame padding (not the LTR viewport) reserves the same physical side as the button.
+		const code = pre.querySelector('code') ?? pre;
+		const codeBox = code.getBoundingClientRect();
+		expect(rectsIntersect(codeBox, buttonBox)).toBe(false);
+	} finally {
+		document.documentElement.dir = 'ltr';
+	}
+});
+
+function rectsIntersect(a: DOMRect, b: DOMRect): boolean {
+	return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+}
+
 test('the CodeBlock scene has no axe violations', async () => {
 	renderCodeBlock(<CodeBlock code={'const example = "hello";'} title="Example" />);
 

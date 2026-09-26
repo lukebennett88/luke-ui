@@ -96,6 +96,24 @@ export const floatingActions = style({
 	},
 });
 
+/** Inherits figure direction so floating-copy padding mirrors with the button. */
+export const viewportFrame = style({
+	'@layer': {
+		recipes: {
+			minInlineSize: 0,
+		},
+	},
+});
+
+export const viewportFrameWithFloatingCopy = style({
+	'@layer': {
+		recipes: {
+			// Same physical side as floatingActions (insetInlineEnd on the figure).
+			paddingInlineEnd: vars.space.sp48,
+		},
+	},
+});
+
 export const viewport = style({
 	'@layer': {
 		recipes: {
@@ -111,15 +129,6 @@ export const viewport = style({
 					outlineWidth: '2px',
 				},
 			},
-		},
-	},
-});
-
-export const viewportWithFloatingCopy = style({
-	'@layer': {
-		recipes: {
-			// Keep the last line clear of the floating copy control.
-			paddingInlineEnd: vars.space.sp48,
 		},
 	},
 });

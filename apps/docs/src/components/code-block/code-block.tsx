@@ -107,42 +107,51 @@ export function CodeBlock({
 			{showFloatingCopy && copyControl != null ? (
 				<div className={cx(styles.actions, styles.floatingActions)}>{copyControl}</div>
 			) : null}
-			{/* Code scroll region stays LTR so overflow scrolls in RTL documents. */}
+			{/* Frame inherits figure direction so floating-copy padding mirrors with the button. */}
 			<div
-				className={cx(styles.viewport, showFloatingCopy && styles.viewportWithFloatingCopy)}
-				dir="ltr"
-				ref={(node) => {
-					resizeObserverRef.current?.disconnect();
-					resizeObserverRef.current = null;
-					viewportRef.current = node;
-					if (node == null) return;
-
-					const updateTabIndex = () => {
-						const scrollable =
-							node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1;
-						if (scrollable) {
-							node.tabIndex = 0;
-							node.setAttribute('role', 'region');
-							node.setAttribute('aria-label', title ?? 'Code');
-						} else {
-							node.removeAttribute('tabindex');
-							node.removeAttribute('role');
-							node.removeAttribute('aria-label');
-						}
-					};
-
-					updateTabIndex();
-					const observer = new ResizeObserver(updateTabIndex);
-					observer.observe(node);
-					resizeObserverRef.current = observer;
-				}}
-			>
-				{html != null ? (
-					// Shiki escapes source before the highlight plugin emits this markup.
-					<pre className={styles.pre} dangerouslySetInnerHTML={{ __html: html }} />
-				) : (
-					<pre className={styles.pre}>{code != null ? <code>{code}</code> : children}</pre>
+				className={cx(
+					styles.viewportFrame,
+					showFloatingCopy && styles.viewportFrameWithFloatingCopy,
 				)}
+			>
+				{/* Code scroll region stays LTR so overflow scrolls in RTL documents. */}
+				<div
+					className={styles.viewport}
+					dir="ltr"
+					ref={(node) => {
+						resizeObserverRef.current?.disconnect();
+						resizeObserverRef.current = null;
+						viewportRef.current = node;
+						if (node == null) return;
+
+						const updateTabIndex = () => {
+							const scrollable =
+								node.scrollWidth > node.clientWidth + 1 ||
+								node.scrollHeight > node.clientHeight + 1;
+							if (scrollable) {
+								node.tabIndex = 0;
+								node.setAttribute('role', 'region');
+								node.setAttribute('aria-label', title ?? 'Code');
+							} else {
+								node.removeAttribute('tabindex');
+								node.removeAttribute('role');
+								node.removeAttribute('aria-label');
+							}
+						};
+
+						updateTabIndex();
+						const observer = new ResizeObserver(updateTabIndex);
+						observer.observe(node);
+						resizeObserverRef.current = observer;
+					}}
+				>
+					{html != null ? (
+						// Shiki escapes source before the highlight plugin emits this markup.
+						<pre className={styles.pre} dangerouslySetInnerHTML={{ __html: html }} />
+					) : (
+						<pre className={styles.pre}>{code != null ? <code>{code}</code> : children}</pre>
+					)}
+				</div>
 			</div>
 			{allowCopy ? (
 				<VisuallyHidden aria-live="polite" elementType="p" role="status">
