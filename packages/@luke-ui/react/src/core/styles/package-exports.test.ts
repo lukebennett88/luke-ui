@@ -137,6 +137,17 @@ test('does not expose the private combobox styling recipe from the primitive ent
 	expect('comboboxRecipe' in combobox).toBe(false);
 });
 
+test('exports fixed breakpoints from the styles entry', async () => {
+	const styles = await import('@luke-ui/react/styles');
+	expect(styles.breakpoints).toEqual({
+		bp640: 640,
+		bp768: 768,
+		bp1024: 1024,
+		bp1280: 1280,
+		bp1536: 1536,
+	});
+});
+
 /** JS package exports that publish TypeScript declarations beside the runtime file. */
 function publicTypeEntryDeclarations(exportsMap: Record<string, string>): Array<string> {
 	const entries: Array<string> = [];

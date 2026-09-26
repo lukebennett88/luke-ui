@@ -70,6 +70,11 @@ Every breakpoint is a minimum inline size, so there is no maximum size or range 
 set at `bp640` also applies at `bp768` and above, unless a later breakpoint overrides it. Values
 cascade up from `initial`, so specify only the points where the layout changes.
 
+Import `breakpoints` from `@luke-ui/react/styles` when you author `@container` queries against the
+same thresholds Luke UI responsive props use.
+
+<ExampleBlock src="layout/breakpoints" title="Layout: Shared breakpoints" />
+
 <ExampleBlock src="box/responsive-layout" title="Layout: Responsive values" />
 
 Set a responsive value when the layout needs a deliberate change. Prefer intrinsic wrapping when the

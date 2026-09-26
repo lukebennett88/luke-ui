@@ -1,0 +1,31 @@
+import { breakpoints } from '@luke-ui/react/styles';
+import { vars } from '@luke-ui/react/theme';
+import { ExampleItem } from '#docs';
+
+export default () => {
+	return (
+		<>
+			<style
+				dangerouslySetInnerHTML={{
+					__html: `
+				.layout-breakpoints {
+					display: flex;
+					flex-direction: column;
+					gap: ${vars.space.sp12};
+				}
+
+				@container (inline-size >= ${breakpoints.bp768}px) {
+					.layout-breakpoints {
+						flex-direction: row;
+					}
+				}
+			`,
+				}}
+			/>
+			<div className="layout-breakpoints">
+				<ExampleItem style={{ flex: 1 }}>First</ExampleItem>
+				<ExampleItem style={{ flex: 1 }}>Second</ExampleItem>
+			</div>
+		</>
+	);
+};
