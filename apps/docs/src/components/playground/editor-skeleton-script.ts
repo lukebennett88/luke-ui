@@ -18,9 +18,10 @@
 rewriteSkeletonToShape();
 
 function rewriteSkeletonToShape(): void {
-	const shape = /(?:^|&)shape=([\d.,]+)/.exec(location.hash.slice(1))?.[1];
+	const shape = new URLSearchParams(location.hash.slice(1)).get('shape');
+	if (!shape || !/^[\d.,]+$/.test(shape)) return;
 	const root = document.currentScript?.previousElementSibling;
-	if (!shape || !root) return;
+	if (!root) return;
 
 	const rows = root.querySelectorAll('[data-line]');
 	const template = rows[0];
