@@ -2,7 +2,7 @@
 name: luke-ui
 description: >-
   Luke UI conventions for building with @luke-ui/react. Use when writing or reviewing Luke UI
-  components, forms, layout, imports, or class names.
+  components, layout, imports, or class names.
 ---
 
 # Luke UI conventions
@@ -11,23 +11,10 @@ Follow these rules when the task involves Luke UI. Each rule states what to do a
 
 ## Refs on field components
 
-Field components that wrap a control in label, description, and error slots take no plain `ref`.
-Reach the underlying control with `inputRef`.
+`TextField`, `Checkbox`, and `ComboboxField` expose `inputRef` for reaching their underlying input.
 
-Today that means `TextField`, `Checkbox`, and `ComboboxField`. With React Hook Form, pass
-`inputRef={field.ref}` inside `Controller`.
-
-Do not assume every composed Luke UI component uses `inputRef`. Buttons, layout, links, and similar
-components take a normal `ref`. Control primitives that render the input themselves, such as
-`ComboboxInput`, also take plain `ref`, not `inputRef`.
-
-## React Hook Form
-
-Wire Luke UI fields with `Controller`. Pass `field.value`, `field.onChange`, `field.onBlur`, and
-`inputRef={field.ref}` (or `ref={field.ref}` on a control primitive).
-
-Do not use `register` with Luke UI fields. Fields need `inputRef` or controlled props, not
-`{...register()}`'s plain `ref` spread.
+Do not pass a plain `ref` to these field components. Components that expose their rendered element
+directly use their documented `ref` prop instead. For example, `ComboboxInput` takes a plain `ref`.
 
 ## Element choice
 
