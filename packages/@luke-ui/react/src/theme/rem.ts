@@ -1,5 +1,5 @@
 /**
- * Converts a pixel-equivalent design unit to `rem` against the normal 16px root.
+ * Converts a value at a 16px root to `rem` (16 → 1rem).
  * Private to the theme pipeline — not a public API.
  */
 export function rem(pixels: number): `${string}rem` {

@@ -23,10 +23,7 @@ export interface ThemeFoundation {
 	 * `luke-ui-theme-${name}`.
 	 */
 	name: string;
-	/**
-	 * Corner radii in pixel-equivalent design units, shared by both modes. Emitted as `rem`.
-	 * `radius.full` is fixed at 9999px.
-	 */
+	/** Corner radii shared by both modes. Emitted as `rem`. `radius.full` is fixed at 9999px. */
 	radius?: {
 		/**
 		 * Radius for checkbox boxes, tags, badges, and compact details.
@@ -190,7 +187,7 @@ export const defaultFontFamily = 'inter';
 /** Default weights for the four weight roles. */
 export const defaultFontWeights = { body: 400, emphasis: 700, heading: 600, label: 500 } as const;
 
-/** Default corner radii in pixel-equivalent design units (emitted as `rem`). */
+/** Default corner radii. Emitted as `rem`. */
 export const defaultRadius = { control: 8, detail: 4, overlay: 16, surface: 12 } as const;
 
 /**

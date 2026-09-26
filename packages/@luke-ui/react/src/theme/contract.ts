@@ -116,8 +116,8 @@ const fontStyleContract = Object.fromEntries(
 ) as { readonly [Style in TypeStyle]: typeof typeStyle };
 
 /**
- * Fixed spacing values selected from a 4px-equivalent scale. Keys encode their design-unit step;
- * values are `rem` so they scale with the document root font size (16 → 1rem).
+ * Fixed spacing values selected from a 4px scale. Keys encode their step; values are emitted as
+ * `rem` (16 → 1rem).
  */
 export const spaceScale = [
 	['sp4', rem(4)],

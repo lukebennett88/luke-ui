@@ -1,7 +1,7 @@
 import { expect, test } from 'vite-plus/test';
 import { rem } from './rem.js';
 
-test('converts pixel-equivalent design units to rem against a 16px root', () => {
+test('converts values at a 16px root to rem', () => {
 	expect(rem(4)).toBe('0.25rem');
 	expect(rem(8)).toBe('0.5rem');
 	expect(rem(16)).toBe('1rem');

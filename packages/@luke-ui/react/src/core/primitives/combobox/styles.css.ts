@@ -480,8 +480,8 @@ const comboboxConfig = {
 	compoundSlots: [
 		// The trigger and clear button share their action styles and sizes.
 		{ slots: ['trigger', 'clearButton'], style: comboboxActionStyles },
-		// The medium action size gives a 20px-equivalent icon the same 8px-equivalent inset as the
-		// invalid indicator: (28 − 20) ÷ 2 + the 4px-equivalent trigger gap.
+		// The medium action size gives a 20px icon the same 8px inset as the invalid indicator:
+		// (28px − 20px) ÷ 2 + the 4px trigger gap.
 		{
 			slots: ['trigger', 'clearButton'],
 			style: {

@@ -2,10 +2,9 @@
  * The private typography metric scale behind the public type styles. It is resolved in TypeScript
  * and never emitted, so no `--luke-font-12-*` custom properties exist.
  *
- * Keys are the fixed font sizes in pixel-equivalent design units (16 → 1rem). Multiple public type
- * styles may share one step when they differ by weight or family rather than size. Recipes that need
- * raw metrics for geometry or composite control chrome read this scale directly instead of borrowing
- * a semantic text treatment.
+ * Keys are the fixed font sizes (16 → 1rem). Multiple public type styles may share one step when they
+ * differ by weight or family rather than size. Recipes that need raw metrics for geometry or
+ * composite control chrome read this scale directly instead of borrowing a semantic text treatment.
  */
 
 import { rem } from './rem.js';

@@ -3,7 +3,7 @@ import { rem } from '../../theme/rem.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
-/** Rem values for fixed `maxInlineSize` tokens on `Container` (16px-root design units). */
+/** Rem values for fixed `maxInlineSize` tokens on `Container`. */
 export const containerMaxInlineSizeTokens = {
 	ct448: rem(448),
 	ct672: rem(672),

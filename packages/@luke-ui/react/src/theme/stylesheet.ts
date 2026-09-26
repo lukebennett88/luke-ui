@@ -172,8 +172,8 @@ function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): {
 }
 
 function capsizeTrims(fontFamily: keyof typeof FONT_METRICS, style: TypeStyle) {
-	// Capsize expects pixel numbers. Metric keys and rem magnitudes use the same 16px-root design
-	// units, so the trims stay correct when CSS emits rem.
+	// Capsize expects pixel numbers. Metric keys match the 16px root, so trims stay correct when CSS
+	// emits rem.
 	const fontSize = typeStyleMetricStep[style];
 	const leading = Number.parseFloat(FONT_METRIC_SCALE[fontSize].lineHeight) * 16;
 	return precomputeValues({
