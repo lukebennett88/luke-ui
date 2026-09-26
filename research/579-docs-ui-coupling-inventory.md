@@ -15,6 +15,11 @@ framework only if this containment cannot reach #577. No current evidence requir
 Docs Vanilla Extract integration is an app-level decision independent of Luke UI styling-engine
 portability.
 
+#669 adds the docs app's Vanilla Extract dependency and Vite/Vitest plugins. A `base`-layer class on
+the root body sets an unused custom property from a public Luke UI token to prove CSS generation and
+loading. This `--docs-text-color` smoke rule is temporary scaffolding. #678 removes it if no docs UI
+uses it by then. Tailwind and Fumadocs remain in place for the later consumer migrations.
+
 The migration aims at Luke UI's visual language. **Visual parity with the existing Fumadocs/Tailwind
 UI is not a goal.** Preserve useful behaviour, information architecture, semantics, accessibility,
 and interaction contracts. Do not import `packages/@luke-ui/react/src/...` into docs runtime UI. A
