@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vite-plus/test';
-import { decodeCodeHash, encodeCodeHash } from './playground-hash.js';
+import { decodeCodeHash, encodeCodeHash } from './hash.js';
 
 describe('playground hash helpers', () => {
 	test('round-trips code through the serialized hash', () => {

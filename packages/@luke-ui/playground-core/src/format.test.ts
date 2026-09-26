@@ -1,5 +1,5 @@
 import { expect, test } from 'vite-plus/test';
-import { documentFormattingEdits, formatPlaygroundSource } from './playground-format.js';
+import { documentFormattingEdits, formatPlaygroundSource } from './format.js';
 
 test('formats badly formatted valid TSX', async () => {
 	const source = 'const foo=()=>{return <Button label="Foo"/>}';

@@ -1,34 +1,10 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { extname, resolve } from 'node:path';
+import { canRunInPlayground } from '@luke-ui/playground-core';
 import { expect, test } from 'vite-plus/test';
-import {
-	canRunInPlayground,
-	importSpecifiersFromSource,
-	playgroundRuntimeSpecifierList,
-} from './playground-runtime-specifiers.js';
+import { docsPlaygroundSpecifiers } from './docs-playground-specifiers.js';
 
-const specifiers = new Set(playgroundRuntimeSpecifierList());
-
-test('treats a relative import as unresolvable in the playground', () => {
-	const source = [
-		"import { Box } from '@luke-ui/react/box';",
-		"import { DecorativeBox } from './decorative-box.js';",
-		'',
-	].join('\n');
-
-	expect(importSpecifiersFromSource(source)).toEqual(['@luke-ui/react/box', './decorative-box.js']);
-	expect(canRunInPlayground(source, specifiers)).toBe(false);
-});
-
-test('treats an example that only imports playground specifiers as runnable', () => {
-	const source = [
-		"import { Button } from '@luke-ui/react/button';",
-		"import { Comparison, ExampleItem } from '#docs';",
-		'',
-	].join('\n');
-
-	expect(canRunInPlayground(source, specifiers)).toBe(true);
-});
+const specifiers = docsPlaygroundSpecifiers();
 
 test('documented examples that the playground cannot resolve use unsupported relative imports', () => {
 	const docsDir = resolve(import.meta.dirname, '../../content/docs');

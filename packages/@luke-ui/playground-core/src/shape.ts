@@ -19,8 +19,8 @@ export function toSkeletonLines(code: string): Array<SkeletonLine> {
 
 /**
  * Compact `indent.length` pairs (e.g. `0.44,0.0,2.30`) carried in the URL hash
- * so the pre-hydration script in `editor-skeleton.tsx` can mirror shared code
- * before the decompressor is available.
+ * so a pre-hydration host script can mirror shared code before the decompressor
+ * is available.
  */
 export function encodeShape(code: string): string {
 	return toSkeletonLines(code)

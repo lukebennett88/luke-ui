@@ -76,9 +76,9 @@ colour/layout variables consumed by Tailwind classes or Fumadocs CSS.
 | Generated API/props tables                    | `component-props-table.tsx`, `routes/$.tsx`, `source.config.ts`                                           | UI `TypeTable`/Collapsible; typescript generator                            | table/group classes                                               | `fd-*`, preset CSS                                                      | Generated prop descriptions and expandable groups                    | Local UI                        | Keep generator/type nodes; own table/disclosure UI                                                      | #673                   | #674       |
 | Icon gallery, token explorer, component index | `src/components/{icon-gallery,token-explorer,components-index}.tsx`                                       | indirect page/prose host only                                               | many grid/table/filter/empty/copy classes                         | `fd-*`; Luke UI inputs, icons, tokens                                   | Responsive cards/tables, filtering, copy, empty states               | Existing + Local UI             | Own widgets in `.css.ts` with public Luke UI seams                                                      | #673                   | #674       |
 | Example frame and StoryWrapper                | `example-block.tsx`, `lib/story-wrapper.tsx`, `src/examples/**`                                           | code block only (removed in #670)                                           | frame, resize, container query, loading/error classes             | `fd-*`, Luke UI `Box`, `ScrollFade`, `vars`                             | Live examples, code toggle, resize grip, loading/error, canvas       | Existing + Local UI + Structure | #670 swaps the source panel to docs CodeBlock; #675 migrates the frame; keep StoryWrapper and examples  | #670, #673             | #675       |
-| Playground host and split panels              | `routes/playground/index.tsx`, `components/playground/{pane-toolbar,preview-toolbar,viewport-toggle}.tsx` | global site header/search only                                              | split, resize, full-screen, viewport, error and overlay classes   | `fd-*`, hardcoded Monaco surface colours                                | Editor/preview split, viewport/fullscreen, errors, iframe cover      | Local UI + Structure            | Own host styles with `.css.ts` and Luke UI controls                                                     | #669, #671, #672       | #676       |
-| Playground editor and skeleton                | `components/playground/{editor,editor-skeleton,editor-skeleton-script}.ts*`, `lib/monaco-setup.ts`        | none                                                                        | editor shell/skeleton classes                                     | Monaco CSS/themes, Catppuccin, `fd-*` pill                              | Monaco completion/format, pre-hydration skeleton, loading            | Local UI + Structure            | Keep Monaco; move host/skeleton styles to `.css.ts`                                                     | #669, #671             | #676       |
-| Playground preview runtime                    | `routes/playground/preview.tsx`, `components/playground/preview-runner.tsx`, `lib/story-wrapper.tsx`      | root provider reaches preview route, no direct visual import                | runner flex classes                                               | Luke UI root/theme and spritesheet                                      | Compiled component, error boundary, preview theme                    | Existing + Structure            | Keep real Luke UI canvas; separate core compile from docs host                                          | #671                   | #676       |
+| Playground host and split panels              | `routes/playground/index.tsx`, `components/playground/{pane-toolbar,preview-toolbar,viewport-toggle}.tsx` | global site header/search only                                              | split, resize, full-screen, viewport, error and overlay classes   | `fd-*`, hardcoded Monaco surface colours; kernel in `@luke-ui/playground-core` (#671)              | Editor/preview split, viewport/fullscreen, errors, iframe cover      | Local UI + Structure            | Own host styles with `.css.ts` and Luke UI controls                                                     | #669, #671, #672       | #676       |
+| Playground editor and skeleton                | `components/playground/{editor,editor-skeleton,editor-skeleton-script}.ts*`, `lib/monaco-setup.ts`        | none                                                                        | editor shell/skeleton classes                                     | Monaco CSS/themes, Catppuccin, `fd-*` pill; format/hash/shape in `@luke-ui/playground-core` (#671) | Monaco completion/format, pre-hydration skeleton, loading            | Local UI + Structure            | Keep Monaco; move host/skeleton styles to `.css.ts`                                                     | #669, #671             | #676       |
+| Playground preview runtime                    | `routes/playground/preview.tsx`, `components/playground/preview-runner.tsx`, `lib/story-wrapper.tsx`      | root provider reaches preview route, no direct visual import                | runner flex classes                                               | Luke UI root/theme and spritesheet; compile/require in `@luke-ui/playground-core` (#671)           | Compiled component, error boundary, preview theme                    | Existing + Structure            | Keep real Luke UI canvas; core compile extracted, host retains runner shell                             | #671                   | #676       |
 | Responsive, RTL, focus, light/dark            | all above                                                                                                 | notebook/dialog/popover/sidebar supply part of behaviour                    | `md:`, `sm:`, `dark:`, `focus-visible:`, logical utility variants | Fumadocs and Luke UI theme tokens                                       | Cross-cutting behavioural and visual states                          | Local UI + Structure            | Verify state matrix in each consumer PR; use logical properties                                         | #669                   | #672–#678  |
 
 The current MDX corpus has no callout use. There is no presentational Tailwind in `src/examples/**`
@@ -105,35 +105,37 @@ a cleanup candidate, not active visual coupling.
 
 ## Playground extraction boundary
 
-The **host-independent core is technically separable**, so #671 proposes a **private workspace
-package**. Pure message schemas, origin/source validation, page session, hash encoding, import
-allowlist, source compilation, format logic, and generated module/type contracts can take
-host-supplied inputs. `scripts/generate-playground-scope.ts` currently emits 51 runtime modules;
-`generate-playground-types.ts` emits 1,220 virtual files (3.4 MB raw). Those scripts depend on the
-repo package paths today, so extraction must parameterise their inputs without changing the public
-Luke UI subpath allowlist. `vite.config.ts`'s `optimizeDeps` list is separate runtime prebundling,
+The **host-independent core landed in #671** as the private workspace package
+`packages/@luke-ui/playground-core` (`@luke-ui/playground-core`). Pure message schemas,
+origin/source validation, page session, hash encoding, import allowlist helpers, source compilation,
+format logic, and portable scope-module rendering take host-supplied inputs (React package
+`exports`, optional extra specifiers, live `playgroundScope` map). Docs remains the first host:
+`scripts/generate-playground-scope.ts` and `docs-playground-specifiers.ts` pass Luke UI exports plus
+docs third-party/`#docs` extras; `generate-playground-types.ts` still resolves repo paths for Monaco
+virtual files. Scope generation currently emits 51 runtime modules; types generation emits ~1,220
+virtual files (~3.4 MB raw). `vite.config.ts`'s `optimizeDeps` list is separate runtime prebundling,
 not type generation.
 
 The docs host retains routes, Monaco editor/theme, site theme controls, StoryWrapper, preview
 iframe, resize panels, toolbar, loading UI, and `.css.ts` styling. `playground:ready`,
 `playground:code`, `playground:appearance`, `playground:success`, and `playground:error` messages,
 origin/source checks, initial URL hash, and the missed-ready retry are behaviour contracts. #671
-extracts the kernel; #676 migrates the host presentation. The package is private and unpublished.
+extracted the kernel; #676 migrates the host presentation. The package is private and unpublished.
 
 ## Ordered follow-up graph
 
-| Order | Issue                                                       | Purpose                                | Blocked by       | Blocks                             |
-| ----- | ----------------------------------------------------------- | -------------------------------------- | ---------------- | ---------------------------------- |
-| 1     | [#669](https://github.com/lukebennett88/luke-ui/issues/669) | Docs Vanilla Extract setup             | —                | #672, #673, #674, #675, #676, #678 |
-| 2     | [#670](https://github.com/lukebennett88/luke-ui/issues/670) | Docs-local CodeBlock (Shiki in docs)   | —                | #673, #675, #678                   |
-| 3     | [#671](https://github.com/lukebennett88/luke-ui/issues/671) | Private playground core                | —                | #676, #678                         |
-| 4     | [#672](https://github.com/lukebennett88/luke-ui/issues/672) | Local docs shell/navigation/search     | #669             | #673, #676, #677, #678             |
-| 5     | [#673](https://github.com/lukebennett88/luke-ui/issues/673) | Local article and MDX presentation     | #669, #670, #672 | #674, #675, #677, #678             |
-| 6     | [#674](https://github.com/lukebennett88/luke-ui/issues/674) | Local data widgets                     | #669, #673       | #677, #678                         |
-| 7     | [#675](https://github.com/lukebennett88/luke-ui/issues/675) | Examples, source, home and 404         | #669, #670, #673 | #677, #678                         |
-| 8     | [#676](https://github.com/lukebennett88/luke-ui/issues/676) | Playground host presentation           | #669, #671, #672 | #677, #678                         |
-| 9     | [#677](https://github.com/lukebennett88/luke-ui/issues/677) | Remove remaining visual dependencies   | #672–#676        | #678                               |
-| 10    | [#678](https://github.com/lukebennett88/luke-ui/issues/678) | Terminal cleanup and #577 verification | #669–#677        | Close #577                         |
+| Order | Issue                                                       | Purpose                                              | Blocked by       | Blocks                             |
+| ----- | ----------------------------------------------------------- | ---------------------------------------------------- | ---------------- | ---------------------------------- |
+| 1     | [#669](https://github.com/lukebennett88/luke-ui/issues/669) | Docs Vanilla Extract setup                           | —                | #672, #673, #674, #675, #676, #678 |
+| 2     | [#670](https://github.com/lukebennett88/luke-ui/issues/670) | Docs-local CodeBlock (Shiki in docs)                 | —                | #673, #675, #678                   |
+| 3     | [#671](https://github.com/lukebennett88/luke-ui/issues/671) | Private playground core (`@luke-ui/playground-core`) | —                | #676, #678                         |
+| 4     | [#672](https://github.com/lukebennett88/luke-ui/issues/672) | Local docs shell/navigation/search                   | #669             | #673, #676, #677, #678             |
+| 5     | [#673](https://github.com/lukebennett88/luke-ui/issues/673) | Local article and MDX presentation                   | #669, #670, #672 | #674, #675, #677, #678             |
+| 6     | [#674](https://github.com/lukebennett88/luke-ui/issues/674) | Local data widgets                                   | #669, #673       | #677, #678                         |
+| 7     | [#675](https://github.com/lukebennett88/luke-ui/issues/675) | Examples, source, home and 404                       | #669, #670, #673 | #677, #678                         |
+| 8     | [#676](https://github.com/lukebennett88/luke-ui/issues/676) | Playground host presentation                         | #669, #671, #672 | #677, #678                         |
+| 9     | [#677](https://github.com/lukebennett88/luke-ui/issues/677) | Remove remaining visual dependencies                 | #672–#676        | #678                               |
+| 10    | [#678](https://github.com/lukebennett88/luke-ui/issues/678) | Terminal cleanup and #577 verification               | #669–#677        | Close #577                         |
 
 The graph ends in no docs-owned Tailwind styling: #669 makes `.css.ts` available, #670 adds a
 docs-local CodeBlock that replaces Fumadocs `CodeBlock`/`Pre` (Shiki stays in the docs app; no

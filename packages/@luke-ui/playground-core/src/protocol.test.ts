@@ -1,5 +1,5 @@
 import { expect, test } from 'vite-plus/test';
-import { isPlaygroundParentMessage } from './playground-protocol.js';
+import { isPlaygroundParentMessage } from './protocol.js';
 
 test('accepts a complete playground appearance update', () => {
 	expect(

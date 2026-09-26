@@ -5,9 +5,11 @@ import { createHighlighterCore } from 'shiki/core';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import tsx from 'shiki/langs/tsx.mjs';
 import type { Plugin } from 'vite-plus';
+import { encodeCodeHash } from '../../../../packages/@luke-ui/playground-core/src/hash.ts';
+// Relative core imports so Vite's config bundler inlines them (see docs-playground-specifiers).
+import { canRunInPlayground } from '../../../../packages/@luke-ui/playground-core/src/runtime-specifiers.ts';
+import { docsPlaygroundSpecifiers } from './docs-playground-specifiers.js';
 import type { HighlightedSource } from './highlighted-source.js';
-import { encodeCodeHash } from './playground-hash.js';
-import { canRunInPlayground } from './playground-runtime-specifiers.js';
 import { SHIKI_THEME_REGISTRATIONS, SHIKI_THEMES } from './shiki-theme.js';
 
 const HIGHLIGHT_QUERY = '?highlight';
@@ -59,7 +61,9 @@ export function highlightSourcePlugin(): Plugin {
 						},
 					],
 				}),
-				playgroundHash: canRunInPlayground(source) ? encodeCodeHash(source) : null,
+				playgroundHash: canRunInPlayground(source, docsPlaygroundSpecifiers())
+					? encodeCodeHash(source)
+					: null,
 				source,
 			};
 

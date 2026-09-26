@@ -1,10 +1,10 @@
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { encodeCodeHash } from '@luke-ui/playground-core';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { describe, expect, test } from 'vite-plus/test';
 import { highlightSourcePlugin } from './highlight-source-plugin.js';
 import type { HighlightedSource } from './highlighted-source.js';
-import { encodeCodeHash } from './playground-hash.js';
 
 describe('highlightSourcePlugin', () => {
 	test('loads a highlighted source module for the highlight query', async () => {
