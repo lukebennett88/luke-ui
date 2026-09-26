@@ -279,8 +279,9 @@ return (
 );
 ```
 
-Spacing and gap properties use `0` or value-based keys such as `sp16` and `sp24`. Margin also
-accepts `auto`. Enum-like properties use CSS-native values.
+Spacing and gap properties use `0` or value-based keys such as `sp16` and `sp24`. Keys name
+pixel-equivalent design steps and resolve to `rem`. Margin also accepts `auto`. Enum-like properties
+use CSS-native values.
 
 ### Responsive values
 
