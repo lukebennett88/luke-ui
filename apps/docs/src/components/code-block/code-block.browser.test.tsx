@@ -101,6 +101,25 @@ test('hides the copy control when allowCopy is false', () => {
 	expect(page.getByRole('button', { name: 'Copy' })).not.toBeInTheDocument();
 });
 
+test('opts out of prose inline-code chrome on the fence code element', () => {
+	renderCodeBlock(
+		<div className="prose">
+			<CodeBlock code={'const value = 1;'} />
+		</div>,
+	);
+
+	const figure = page.getByRole('button', { name: 'Copy' }).element().closest('figure');
+	assert(figure != null, 'Expected a figure ancestor');
+	expect(figure.classList.contains('not-prose')).toBe(true);
+
+	const code = figure.querySelector('pre code');
+	assert(code != null, 'Expected a code element');
+	const styles = getComputedStyle(code);
+	expect(styles.borderWidth).toBe('0px');
+	expect(styles.padding).toBe('0px');
+	expect(styles.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+});
+
 test('scrolls horizontally in a narrow viewport and stays operable in RTL', async () => {
 	await page.viewport(320, 720);
 	document.documentElement.dir = 'rtl';

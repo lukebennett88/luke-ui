@@ -97,7 +97,11 @@ export function CodeBlock({
 		copyStatus === 'copied' ? 'Copied' : copyStatus === 'error' ? 'Could not copy code' : '';
 
 	return (
-		<figure {...figureProps} className={cx(styles.root, flush && styles.flush, className)}>
+		// `not-prose` opts out of Fumadocs/Tailwind prose inline-code chrome on nested `code`.
+		<figure
+			{...figureProps}
+			className={cx(styles.root, 'not-prose', flush && styles.flush, className)}
+		>
 			{title != null ? (
 				<div className={styles.header}>
 					<figcaption className={styles.title}>{title}</figcaption>

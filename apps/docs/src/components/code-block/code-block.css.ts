@@ -149,11 +149,16 @@ export const pre = style({
 globalStyle(`${pre} code`, {
 	'@layer': {
 		recipes: {
+			// Reset prose inline-code chrome if `not-prose` is missing on an ancestor.
+			backgroundColor: 'transparent',
+			borderRadius: 0,
+			borderWidth: 0,
 			display: 'flex',
 			flexDirection: 'column',
 			fontFamily: 'inherit',
 			fontSize: 'inherit',
 			lineHeight: 'inherit',
+			padding: 0,
 		},
 	},
 });
