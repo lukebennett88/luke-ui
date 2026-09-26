@@ -2,6 +2,7 @@ import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import paperCss from '@luke-ui/react/themes/paper/stylesheet.css?url';
 import tactileCss from '@luke-ui/react/themes/tactile/stylesheet.css?url';
+import { cx } from '@luke-ui/react/utils';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
@@ -13,6 +14,7 @@ import themePrefsBootstrapScript from '../generated/theme-prefs-bootstrap-script
 import { withBasePath } from '../lib/base-path.js';
 import { DEFAULT_THEME_PREFS, themeIdentityClassName } from '../lib/theme-prefs.js';
 import appCss from '../styles/app.css?url';
+import { docsRoot } from '../styles/docs-root.css.js';
 
 const SearchDialog = lazy(() => import('../components/search'));
 
@@ -90,7 +92,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 					suppressHydrationWarning
 				/>
 			</head>
-			<body className="flex min-h-dvh flex-col">
+			<body className={cx('flex min-h-dvh flex-col', docsRoot)}>
 				<RootProvider
 					search={{ SearchDialog: LazySearchDialog }}
 					theme={{

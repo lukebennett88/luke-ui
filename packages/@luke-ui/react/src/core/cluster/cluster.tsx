@@ -11,9 +11,10 @@ import type { Prettify } from '../types/prettify.js';
 /** Props for `Cluster`. */
 export type ClusterProps = Prettify<_ClusterElementProps | _ClusterRenderProps>;
 
-/** Clusters direct children on the logical inline axis and always wraps. */
+/** Clusters direct children on the logical inline axis. Wraps by default. */
 export function Cluster({
 	alignItems = 'center',
+	flexWrap = 'wrap',
 	gap,
 	justifyContent = 'flex-start',
 	...props
@@ -24,7 +25,7 @@ export function Cluster({
 			alignItems={withResponsiveDefault(alignItems, 'center')}
 			display="flex"
 			flexDirection="row"
-			flexWrap="wrap"
+			flexWrap={withResponsiveDefault(flexWrap, 'wrap')}
 			gap={gap}
 			justifyContent={withResponsiveDefault(justifyContent, 'flex-start')}
 		/>
@@ -37,6 +38,11 @@ interface _ClusterLayoutProps {
 	 * @default center
 	 */
 	alignItems?: SprinklesProps['alignItems'];
+	/**
+	 * Whether children wrap on the inline axis.
+	 * @default wrap
+	 */
+	flexWrap?: SprinklesProps['flexWrap'];
 	/** Space between children on both axes. */
 	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
 	/**

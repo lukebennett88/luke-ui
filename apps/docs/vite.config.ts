@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import netlify from '@netlify/vite-plugin-tanstack-start';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import react from '@vitejs/plugin-react';
 import mdx from 'fumadocs-mdx/vite';
 import type { Plugin } from 'vite-plus';
@@ -153,6 +154,7 @@ export default defineConfig(async () => {
 			highlightSourcePlugin(),
 			mdx(await import('./source.config')),
 			tailwindcss(),
+			vanillaExtractPlugin(),
 			tanstackStart({
 				pages: [
 					{ path: '/api/search' },

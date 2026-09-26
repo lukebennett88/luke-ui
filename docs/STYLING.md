@@ -100,6 +100,14 @@ The package declares `base` but never writes to it. That pins its rank between `
 `recipes`. If a consumer's first `@layer base` write creates the layer instead, the browser places
 it last and it beats every component recipe.
 
+The docs app uses `@vanilla-extract/css` for docs-owned `.css.ts` files. Its Vite and Vitest configs
+run the Vanilla Extract plugin. Import a generated class from the component or route that applies
+it. The root route applies a small `base`-layer class from `src/styles/docs-root.css.ts` to
+`<body>`. That rule sets an unused custom property from a public Luke UI theme token, so the built
+CSS and HTML can confirm the generated CSS loads without changing the current UI. Keep docs-owned
+base styles in `base`, and put intentional component overrides in a higher layer. The layer order is
+declared before imports in `apps/docs/src/styles/app.css`.
+
 Author component CSS with one of:
 
 - `recipe()` — component visuals with selection and variants. Styles go in the `recipes` layer.
