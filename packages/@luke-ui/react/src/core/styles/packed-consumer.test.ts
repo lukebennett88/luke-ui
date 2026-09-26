@@ -65,7 +65,7 @@ test(
 					"import { createElement } from 'react';",
 					"import { renderToStaticMarkup } from 'react-dom/server';",
 					"import { Blockquote } from '@luke-ui/react/blockquote';",
-					"import { createSprinkles } from '@luke-ui/react/styles';",
+					"import { breakpoints, createSprinkles } from '@luke-ui/react/styles';",
 					'',
 					'const layout = createSprinkles({ display: "flex", id: "sprinkles-root" });',
 					'if (!createSprinkles.properties.has("display")) {',
@@ -74,9 +74,12 @@ test(
 					'if (layout.id !== "sprinkles-root") {',
 					'  throw new Error("createSprinkles must pass through non-utility props");',
 					'}',
+					'if (breakpoints.bp768 !== 768) {',
+					'  throw new Error("breakpoints.bp768 must be 768");',
+					'}',
 					'',
 					"const markup = renderToStaticMarkup(createElement(Blockquote, null, 'Hello world'));",
-					'process.stdout.write(JSON.stringify({ markup, layoutId: layout.id, className: layout.className }));',
+					'process.stdout.write(JSON.stringify({ markup, layoutId: layout.id, className: layout.className, bp768: breakpoints.bp768 }));',
 				].join('\n'),
 			);
 
@@ -91,15 +94,19 @@ test(
 				!isRecord(parsed) ||
 				typeof parsed.markup !== 'string' ||
 				typeof parsed.layoutId !== 'string' ||
-				typeof parsed.className !== 'string'
+				typeof parsed.className !== 'string' ||
+				typeof parsed.bp768 !== 'number'
 			) {
-				throw new Error('Expected packed consumer output to include markup and sprinkles fields.');
+				throw new Error(
+					'Expected packed consumer output to include markup, sprinkles, and breakpoint fields.',
+				);
 			}
 
 			expect(parsed.markup).toContain('<blockquote');
 			expect(parsed.markup).toContain('Hello world');
 			expect(parsed.layoutId).toBe('sprinkles-root');
 			expect(parsed.className.length).toBeGreaterThan(0);
+			expect(parsed.bp768).toBe(768);
 		} finally {
 			await rm(tarballDir, { force: true, recursive: true });
 			await rm(consumerDir, { force: true, recursive: true });

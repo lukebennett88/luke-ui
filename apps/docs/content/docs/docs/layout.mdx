@@ -70,6 +70,30 @@ Every breakpoint is a minimum inline size, so there is no maximum size or range 
 set at `bp640` also applies at `bp768` and above, unless a later breakpoint overrides it. Values
 cascade up from `initial`, so specify only the points where the layout changes.
 
+Import `breakpoints` from `@luke-ui/react/styles` when you author your own `@container` queries so
+they use the same thresholds as Luke UI responsive props:
+
+```tsx
+import { breakpoints } from '@luke-ui/react/styles';
+
+const wideEnough = `(inline-size >= ${breakpoints.bp768}px)`;
+```
+
+Use that condition in a consumer-authored `@container` rule. For example, in Vanilla Extract:
+
+```tsx
+import { style } from '@vanilla-extract/css';
+import { breakpoints } from '@luke-ui/react/styles';
+
+export const sidebar = style({
+	'@container': {
+		[`(inline-size >= ${breakpoints.bp768}px)`]: {
+			display: 'grid',
+		},
+	},
+});
+```
+
 <ExampleBlock src="box/responsive-layout" title="Layout: Responsive values" />
 
 Set a responsive value when the layout needs a deliberate change. Prefer intrinsic wrapping when the
