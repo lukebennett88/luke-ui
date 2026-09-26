@@ -1,69 +1,69 @@
-/** Visual hierarchy shared by action and navigation controls. */
+/** Strength of a control's visual treatment. */
 type Prominence = 'low' | 'standard' | 'high';
 
 /** Visual presentation props accepted by Button and its public recipe. */
 export type ButtonPresentationProps =
 	| {
 			/**
-			 * Visual emphasis.
+			 * Sets whether the control uses button or text-link styling.
 			 * @default button
 			 */
 			appearance?: 'button';
 			/**
-			 * Whether the control takes up the full inline size of its container.
+			 * Whether the control fills the available inline size.
 			 * @default false
 			 */
 			isBlock?: boolean;
 			/**
-			 * Visual hierarchy relative to nearby actions.
+			 * Controls the strength of the control's visual treatment, from low to high.
 			 * @default standard
 			 */
 			prominence?: Prominence;
 			/**
-			 * Sets the control size.
+			 * Sets the size of the control.
 			 * @default medium
 			 */
 			size?: 'small' | 'medium';
 			/**
-			 * Visual tone. Controls colour scheme.
+			 * Sets the visual tone. Use `critical` for destructive actions.
 			 * @default neutral
 			 */
 			tone?: 'neutral' | 'critical';
 	  }
 	| {
 			/**
-			 * Visual emphasis.
+			 * Sets whether the control uses button or text-link styling.
 			 * @default button
 			 */
 			appearance: 'text';
 			isBlock?: never;
 			/**
-			 * Visual hierarchy relative to nearby actions.
+			 * Controls the strength of the control's visual treatment, from low to high.
 			 * @default standard
 			 */
 			prominence?: Prominence;
 			size?: never;
 			/**
-			 * Visual tone. Controls colour scheme.
+			 * Sets the visual tone. Use `critical` for destructive actions.
 			 * @default neutral
 			 */
 			tone?: 'neutral';
 	  }
 	| {
 			/**
-			 * Visual emphasis.
+			 * Sets whether the control uses button or text-link styling.
 			 * @default button
 			 */
 			appearance: 'text';
 			isBlock?: never;
 			/**
-			 * Visual hierarchy relative to nearby actions.
+			 * Controls the strength of the control's visual treatment, from low to high.
 			 * @default standard
 			 */
 			prominence?: 'low' | 'standard';
 			size?: never;
 			/**
-			 * Visual tone. Controls colour scheme.
+			 * Sets the visual tone. Use `critical` for destructive actions.
 			 * @default neutral
 			 */
 			tone: 'critical';
@@ -73,13 +73,13 @@ export type ButtonPresentationProps =
 export type LinkPresentationProps =
 	| {
 			/**
-			 * Visual emphasis.
+			 * Sets whether the control uses button or text-link styling.
 			 * @default text
 			 */
 			appearance?: 'text';
 			isBlock?: never;
 			/**
-			 * Visual hierarchy relative to nearby actions.
+			 * Controls the strength of the control's visual treatment, from low to high.
 			 * @default standard
 			 */
 			prominence?: Prominence;
@@ -87,22 +87,22 @@ export type LinkPresentationProps =
 	  }
 	| {
 			/**
-			 * Visual emphasis.
+			 * Sets whether the control uses button or text-link styling.
 			 * @default text
 			 */
 			appearance: 'button';
 			/**
-			 * Whether the control takes up the full inline size of its container.
+			 * Whether the control fills the available inline size.
 			 * @default false
 			 */
 			isBlock?: boolean;
 			/**
-			 * Visual hierarchy relative to nearby actions.
+			 * Controls the strength of the control's visual treatment, from low to high.
 			 * @default standard
 			 */
 			prominence?: Prominence;
 			/**
-			 * Sets the control size.
+			 * Sets the size of the control.
 			 * @default medium
 			 */
 			size?: 'small' | 'medium';
@@ -111,17 +111,17 @@ export type LinkPresentationProps =
 /** Visual presentation props accepted by IconButton. */
 export interface IconButtonPresentationProps {
 	/**
-	 * Visual hierarchy relative to nearby actions.
+	 * Controls the strength of the control's visual treatment, from low to high.
 	 * @default standard
 	 */
 	prominence?: Prominence;
 	/**
-	 * Sets the control size.
+	 * Sets the size of the control.
 	 * @default medium
 	 */
 	size?: 'small' | 'medium';
 	/**
-	 * Visual tone. Controls colour scheme.
+	 * Sets the visual tone. Use `critical` for destructive actions.
 	 * @default neutral
 	 */
 	tone?: 'neutral' | 'critical';
@@ -130,12 +130,12 @@ export interface IconButtonPresentationProps {
 /** Visual presentation props accepted by IconLink. */
 export interface IconLinkPresentationProps {
 	/**
-	 * Visual hierarchy relative to nearby actions.
+	 * Controls the strength of the control's visual treatment, from low to high.
 	 * @default standard
 	 */
 	prominence?: Prominence;
 	/**
-	 * Sets the control size.
+	 * Sets the size of the control.
 	 * @default medium
 	 */
 	size?: 'small' | 'medium';
