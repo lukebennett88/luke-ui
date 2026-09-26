@@ -123,8 +123,7 @@ export function CodeBlock({
 
 					const updateTabIndex = () => {
 						const scrollable =
-							node.scrollWidth > node.clientWidth + 1 ||
-							node.scrollHeight > node.clientHeight + 1;
+							node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1;
 						if (scrollable) {
 							node.tabIndex = 0;
 							node.setAttribute('role', 'region');
