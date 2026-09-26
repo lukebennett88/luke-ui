@@ -76,22 +76,13 @@ they use the same thresholds as Luke UI responsive props:
 ```tsx
 import { breakpoints } from '@luke-ui/react/styles';
 
-const wideEnough = `(inline-size >= ${breakpoints.bp768}px)`;
-```
-
-Use that condition in a consumer-authored `@container` rule. For example, in Vanilla Extract:
-
-```tsx
-import { style } from '@vanilla-extract/css';
-import { breakpoints } from '@luke-ui/react/styles';
-
-export const sidebar = style({
-	'@container': {
-		[`(inline-size >= ${breakpoints.bp768}px)`]: {
-			display: 'grid',
-		},
-	},
-});
+const css = `
+	@container (inline-size >= ${breakpoints.bp768}px) {
+		.sidebar {
+			display: grid;
+		}
+	}
+`;
 ```
 
 <ExampleBlock src="box/responsive-layout" title="Layout: Responsive values" />
