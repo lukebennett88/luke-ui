@@ -1,6 +1,8 @@
 import '../../styles/app.css';
 import '@luke-ui/react/themes/paper/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
+import { isPlaygroundPreviewMessage } from '@luke-ui/playground-core';
+import type { PlaygroundPreviewMessage } from '@luke-ui/playground-core';
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { ThemeProvider } from 'next-themes';
 import { act } from 'react';
@@ -8,8 +10,6 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import toneSource from '../../examples/button/tones.tsx?raw';
-import type { PlaygroundPreviewMessage } from '../../lib/playground-protocol.js';
-import { isPlaygroundPreviewMessage } from '../../lib/playground-protocol.js';
 import { DocsThemeRoot } from '../theme-controls.js';
 import PreviewRunner from './preview-runner.js';
 

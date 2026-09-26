@@ -3,8 +3,8 @@ import type {
 	PlaygroundCodeMessage,
 	PlaygroundParentMessage,
 	PlaygroundPreviewMessage,
-} from './playground-protocol.js';
-import { isPlaygroundParentMessage, isPlaygroundPreviewMessage } from './playground-protocol.js';
+} from './protocol.js';
+import { isPlaygroundParentMessage, isPlaygroundPreviewMessage } from './protocol.js';
 
 type PlaygroundMessagePort = {
 	postMessage: (message: unknown, targetOrigin: string) => void;
@@ -53,7 +53,7 @@ function isTrustedPreviewMessage(
 
 /**
  * Owns when the playground page may talk to its preview, and what it does with
- * a preview reply. Compilation, the URL hash, and debounce stay in the route.
+ * a preview reply. Compilation, the URL hash, and debounce stay in the host.
  */
 export function createPlaygroundPageSession() {
 	let ready = false;

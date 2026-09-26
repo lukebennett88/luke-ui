@@ -1,3 +1,9 @@
+import {
+	createPlaygroundPageSession,
+	decodeCodeHash,
+	encodeCodeHash,
+} from '@luke-ui/playground-core';
+import type { PlaygroundAppearanceMessage } from '@luke-ui/playground-core';
 import { cx } from '@luke-ui/react/utils';
 import { ClientOnly, createFileRoute } from '@tanstack/react-router';
 import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState } from 'react';
@@ -17,9 +23,6 @@ import { SiteNav } from '../../components/site-nav.js';
 import { useDocsThemeIdentity } from '../../components/theme-controls';
 import { withBasePath } from '../../lib/base-path.js';
 import rawDefaultCode from '../../lib/playground-default-code.tsx?raw';
-import { createPlaygroundPageSession } from '../../lib/playground-handshake';
-import { decodeCodeHash, encodeCodeHash } from '../../lib/playground-hash';
-import type { PlaygroundAppearanceMessage } from '../../lib/playground-protocol';
 
 const PlaygroundEditor = lazy(() => import('../../components/playground/editor'));
 
