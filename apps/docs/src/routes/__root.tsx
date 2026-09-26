@@ -7,7 +7,7 @@ import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 import type { ReactNode } from 'react';
 import { lazy, Suspense } from 'react';
-import { DocsThemeRoot } from '../components/theme-controls';
+import { DocsThemeRoot, themeIdentityBootstrapScript } from '../components/theme-controls';
 import { withBasePath } from '../lib/base-path.js';
 import appCss from '../styles/app.css?url';
 
@@ -73,6 +73,10 @@ function RootDocument({ children }: { children: ReactNode }) {
 		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
+				<script
+					dangerouslySetInnerHTML={{ __html: themeIdentityBootstrapScript }}
+					suppressHydrationWarning
+				/>
 			</head>
 			<body className="flex min-h-dvh flex-col">
 				<RootProvider

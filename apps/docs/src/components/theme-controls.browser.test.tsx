@@ -13,7 +13,7 @@ import { renderToString } from 'react-dom/server';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { StoryWrapper } from '../lib/story-wrapper';
-import { DocsThemeRoot, ThemeControls } from './theme-controls';
+import { DocsThemeRoot, ThemeControls, themeIdentityBootstrapScript } from './theme-controls';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
@@ -109,6 +109,22 @@ test('boots the stored colour mode before the themed root hydrates', async () =>
 
 	expect(iframe.contentDocument?.documentElement).toHaveAttribute('data-color-mode', 'dark');
 	expect(iframe.contentDocument?.documentElement).toHaveAttribute('data-mode-at-hydration', 'dark');
+	iframe.remove();
+});
+
+test('boots the stored theme identity before the themed root hydrates', async () => {
+	localStorage.setItem('luke-ui-docs-theme', 'paper');
+	const iframe = document.body.appendChild(document.createElement('iframe'));
+	iframe.srcdoc = `<!doctype html><html><head><script>${themeIdentityBootstrapScript}</script></head><body><script>document.documentElement.dataset.identityAtHydration = document.documentElement.classList.contains('${paperThemeClassName}') ? 'paper' : 'other';</script></body></html>`;
+	await new Promise<void>((resolve) => {
+		iframe.addEventListener('load', () => resolve(), { once: true });
+	});
+
+	expect(iframe.contentDocument?.documentElement).toHaveClass(paperThemeClassName);
+	expect(iframe.contentDocument?.documentElement).toHaveAttribute(
+		'data-identity-at-hydration',
+		'paper',
+	);
 	iframe.remove();
 });
 

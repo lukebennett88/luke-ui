@@ -23,6 +23,12 @@ const THEME_IDENTITY_CLASS_NAMES = {
 	tactile: tactileThemeClassName,
 } as const satisfies Record<ThemeIdentity, string>;
 
+/**
+ * Blocking head script that applies the stored theme identity before first paint.
+ * Keep in sync with `getThemeIdentity`: only the exact value `paper` selects Paper.
+ */
+export const themeIdentityBootstrapScript = `(function(){try{var k=${JSON.stringify(THEME_IDENTITY_STORAGE_KEY)};var paper=${JSON.stringify(THEME_IDENTITY_CLASS_NAMES.paper)};var tactile=${JSON.stringify(THEME_IDENTITY_CLASS_NAMES.tactile)};document.documentElement.classList.add(localStorage.getItem(k)==='paper'?paper:tactile)}catch(e){}})();`;
+
 const THEME_IDENTITIES = [
 	{ label: 'Tactile', value: 'tactile' },
 	{ label: 'Paper', value: 'paper' },
