@@ -7,11 +7,11 @@ type WritableLayer = Parameters<typeof globalStyleInLayer>[0];
 
 describe('layers', () => {
 	it('declares cascade layers from lowest to highest priority', () => {
-		expect(Object.keys(layers)).toEqual(['reset', 'base', 'recipes', 'structural', 'utilities']);
+		expect(Object.keys(layers)).toEqual(['reset', 'base', 'recipes', 'utilities']);
 	});
 
 	it('keeps the base layer out of the layers Luke UI may write to', () => {
-		assertType<WritableLayer>('structural');
+		assertType<WritableLayer>('recipes');
 		// @ts-expect-error — Luke UI must not write to the consumer-owned base layer
 		assertType<WritableLayer>('base');
 	});

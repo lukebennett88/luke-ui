@@ -17,9 +17,9 @@ Import the component stylesheet and one bundled theme stylesheet. Importing a th
 themes the whole document from `:root`, so no identity class is needed for a single theme. Apply
 `rootClassName` to an element you own for the reset and base typography.
 
-The shared stylesheet uses the layer order `reset → base → recipes → structural → utilities`. The
-`base` layer is reserved for application defaults such as Tailwind Preflight. Luke UI declares it
-empty so it stays below `recipes`.
+The shared stylesheet uses the layer order `reset → base → recipes → utilities`. The `base` layer
+is reserved for application defaults such as Tailwind Preflight. Luke UI declares it empty so it
+stays below `recipes`.
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';

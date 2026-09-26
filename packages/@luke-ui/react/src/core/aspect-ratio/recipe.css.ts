@@ -23,7 +23,7 @@ const mediaFrameClassName = style(
 // A media element keeps its intrinsic size in a grid cell, so size the direct child to the frame
 // rather than relying on stretch alignment. `object-fit` then decides how replaced media paints
 // inside that filled box — no frame overflow clipping required.
-globalStyleInLayer('structural', `${mediaFrameClassName} > *`, {
+globalStyleInLayer('recipes', `${mediaFrameClassName} > *`, {
 	blockSize: '100%',
 	inlineSize: '100%',
 	minBlockSize: 0,

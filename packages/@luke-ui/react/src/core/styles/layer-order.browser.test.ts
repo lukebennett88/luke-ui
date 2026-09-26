@@ -110,9 +110,8 @@ test('reproduces the invalid early layer-declaration failure mode', () => {
 	style.textContent = `
 @layer probe-reset;
 @layer probe-recipes;
-@layer probe-structural;
 @layer probe-utilities;
-@layer probe-reset, probe-base, probe-recipes, probe-structural, probe-utilities;
+@layer probe-reset, probe-base, probe-recipes, probe-utilities;
 @layer probe-recipes { .probe-invalid { display: inline-flex; } }
 @layer probe-utilities { .probe-invalid { display: grid; } }
 @layer probe-base { .probe-invalid { display: block; } }
@@ -143,7 +142,7 @@ test('a consumer base-layer reset does not override component recipes', () => {
 	expect(getComputedStyle(element).display).toBe('inline-flex');
 });
 
-test('LoadingSkeleton structural !important beats utilities-layer !important overrides', () => {
+test('LoadingSkeleton recipes !important beats utilities-layer !important overrides', () => {
 	const skeletonClass = loadingSkeletonClassName(stylesheetCss);
 
 	const element = document.body.appendChild(document.createElement('div'));

@@ -5,11 +5,10 @@ import { expect, test } from 'vite-plus/test';
 import type { TypeStyle } from '../../theme/contract.js';
 import { typeStyles } from '../../theme/contract.js';
 
-const lukeOwnedLayerNames = ['reset', 'base', 'recipes', 'structural', 'utilities'] as const;
+const lukeOwnedLayerNames = ['reset', 'base', 'recipes', 'utilities'] as const;
 const lukeOwnedLayerNameSet = new Set<string>(lukeOwnedLayerNames);
-const AUTHORITATIVE_LAYER_ORDER_PATTERN = /^@layer reset, base, recipes, structural, utilities;/m;
-const AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN =
-	/^@layer reset, base, recipes, structural, utilities;\n/m;
+const AUTHORITATIVE_LAYER_ORDER_PATTERN = /^@layer reset, base, recipes, utilities;/m;
+const AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN = /^@layer reset, base, recipes, utilities;\n/m;
 type TextClassesByTypography = Record<TypeStyle, Array<string>>;
 const numericLineClampVariants = [2, 3, 4, 5] as const;
 type NumericLineClampVariant = (typeof numericLineClampVariants)[number];
@@ -104,7 +103,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		(css: string) => {
 			return css.replace(
 				AUTHORITATIVE_LAYER_ORDER_PATTERN,
-				'@layer base, reset, recipes, structural, utilities;',
+				'@layer base, reset, recipes, utilities;',
 			);
 		},
 	],
@@ -113,7 +112,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		(css: string) => {
 			return css.replace(
 				AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN,
-				'@layer reset;\n@layer base;\n@layer recipes;\n@layer structural;\n@layer utilities;\n@layer reset, base, recipes, structural, utilities;\n',
+				'@layer reset;\n@layer base;\n@layer recipes;\n@layer utilities;\n@layer reset, base, recipes, utilities;\n',
 			);
 		},
 	],
@@ -122,7 +121,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		(css: string) => {
 			return css.replace(
 				AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN,
-				'@layer recipes { .early {} }\n@layer reset, base, recipes, structural, utilities;\n',
+				'@layer recipes { .early {} }\n@layer reset, base, recipes, utilities;\n',
 			);
 		},
 	],
@@ -421,7 +420,7 @@ function assertPrivateStylesheetSentinel(analysis: StylesheetAnalysis): void {
 		return declarationListHas(rule, 'background-color', 'var(--luke-color-loading-skeleton)', true);
 	});
 	expect(maskRules.length).toBeGreaterThan(0);
-	for (const rule of maskRules) expect(rule.owningLayer).toBe('structural');
+	for (const rule of maskRules) expect(rule.owningLayer).toBe('recipes');
 }
 
 function getAuthoritativeLayerOrder(analysis: StylesheetAnalysis): Array<string> {
@@ -812,7 +811,7 @@ function formatPrimarySelector(rule: IndexedStyleRule): string {
 		.join(' ');
 }
 
-const validStylesheetFixture = `@layer reset, base, recipes, structural, utilities;
+const validStylesheetFixture = `@layer reset, base, recipes, utilities;
 @layer reset {
   .luke-ui-reset { box-sizing: border-box; }
   .luke-ui-theme {
@@ -823,9 +822,7 @@ const validStylesheetFixture = `@layer reset, base, recipes, structural, utiliti
 }
 @layer recipes {
   .recipe-class { display: inline-flex; }
-}
-@layer structural {
-  .structural-class { margin-block-start: 1px; }
+  .recipe-class > * { margin-block-start: 1px; }
 }
 @layer utilities {
   .utility-class { display: grid; }

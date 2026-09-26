@@ -35,8 +35,8 @@ export function style(rule: LayeredStyleRule, debugId?: string): string {
 }
 
 /**
- * A global selector in a chosen layer. Use it for the reset, the theme root, and `structural`
- * rules.
+ * A global selector in a chosen layer. Use it for reset/root rules and for component-owned
+ * descendant or combinator selectors that still belong in `recipes`.
  */
 export function globalStyleInLayer(
 	layer: WritableLayerName,

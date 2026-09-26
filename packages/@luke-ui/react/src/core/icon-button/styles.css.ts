@@ -13,7 +13,7 @@ export const iconOnlyIconWrapper = style({
  * `createIcon`-based custom icon, but a plain `<svg>` reads no context, so this rule constrains the
  * graphic box directly for a hand-authored custom icon such as a brand mark.
  */
-globalStyleInLayer('structural', `${iconOnlyIconWrapper} > svg`, {
+globalStyleInLayer('recipes', `${iconOnlyIconWrapper} > svg`, {
 	blockSize: vars.iconSize.xsmall,
 	inlineSize: vars.iconSize.xsmall,
 });
