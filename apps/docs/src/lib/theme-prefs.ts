@@ -1,30 +1,26 @@
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
+import type { ColorModePreference, ThemeIdentity, ThemePrefs } from './theme-prefs-shared.js';
+import {
+	applyThemePrefs,
+	COLOR_MODE_STORAGE_KEY,
+	parseThemePrefs,
+	THEME_IDENTITY_STORAGE_KEY,
+} from './theme-prefs-shared.js';
 
-export type ThemeIdentity = 'paper' | 'tactile';
+export type { ColorModePreference, ThemeIdentity, ThemePrefs } from './theme-prefs-shared.js';
+export {
+	COLOR_MODE_STORAGE_KEY,
+	parseThemePrefs,
+	THEME_IDENTITY_STORAGE_KEY,
+} from './theme-prefs-shared.js';
+
 type ColorMode = 'light' | 'dark';
-export type ColorModePreference = ColorMode | 'system';
-
-/** Docs theme preferences, stored in `localStorage`. */
-export interface ThemePrefs {
-	colorModePreference: ColorModePreference;
-	themeIdentity: ThemeIdentity;
-}
 
 export interface ThemePrefsSnapshot extends ThemePrefs {
 	/** `colorModePreference`, with `system` resolved from `prefers-color-scheme`. */
 	resolvedColorMode: ColorMode;
 }
-
-export const THEME_IDENTITY_STORAGE_KEY = 'luke-ui-docs-theme';
-export const COLOR_MODE_STORAGE_KEY = 'luke-ui-docs-color-mode';
-
-/**
- * Inline `<head>` script that applies the stored prefs to `<html>` before first paint. A storage
- * read failure falls back to the defaults; the prefs are always applied, so a failure still
- * resolves `system` from `prefers-color-scheme` and sets the `<html>` classes and attributes.
- */
-export const themePrefsScript = `(()=>{let a=null,b=null;try{a=localStorage.getItem(${JSON.stringify(THEME_IDENTITY_STORAGE_KEY)});b=localStorage.getItem(${JSON.stringify(COLOR_MODE_STORAGE_KEY)})}catch(e){}(${applyThemePrefs.toString()})(document.documentElement,(${parseThemePrefs.toString()})(a,b),${JSON.stringify(getThemeIdentityClassNames())})})();`;
 
 /** Reads the stored prefs. Returns the same object until the prefs or system colour mode change. */
 export function getThemePrefsSnapshot(): ThemePrefsSnapshot {
@@ -86,20 +82,6 @@ export function subscribeToThemePrefs(listener: () => void) {
 	};
 }
 
-/**
- * Parses stored values, treating a missing or unknown value as the default. Self-contained, because
- * `themePrefsScript` inlines its source.
- */
-export function parseThemePrefs(
-	themeIdentity: string | null,
-	colorMode: string | null,
-): ThemePrefs {
-	return {
-		colorModePreference: colorMode === 'light' || colorMode === 'dark' ? colorMode : 'system',
-		themeIdentity: themeIdentity === 'paper' ? 'paper' : 'tactile',
-	};
-}
-
 const DARK_COLOR_SCHEME_QUERY = '(prefers-color-scheme: dark)';
 
 const SERVER_SNAPSHOT: ThemePrefsSnapshot = {
@@ -151,28 +133,4 @@ function handleStorage(event: StorageEvent) {
 
 function getThemeIdentityClassNames(): Record<ThemeIdentity, string> {
 	return { paper: paperThemeClassName, tactile: tactileThemeClassName };
-}
-
-/**
- * Sets the identity class and colour mode on `root`. Fumadocs styles key off the `light`/`dark`
- * class; Luke UI keys off `data-color-mode`. Self-contained, because `themePrefsScript` inlines its
- * source.
- */
-function applyThemePrefs(
-	root: HTMLElement,
-	prefs: ThemePrefs,
-	identityClassNames: Record<ThemeIdentity, string>,
-) {
-	const systemColorMode = window.matchMedia('(prefers-color-scheme: dark)').matches
-		? 'dark'
-		: 'light';
-	const colorMode =
-		prefs.colorModePreference === 'system' ? systemColorMode : prefs.colorModePreference;
-	for (const [identity, className] of Object.entries(identityClassNames)) {
-		root.classList.toggle(className, identity === prefs.themeIdentity);
-	}
-	root.classList.toggle('light', colorMode === 'light');
-	root.classList.toggle('dark', colorMode === 'dark');
-	root.dataset.colorMode = colorMode;
-	root.style.colorScheme = colorMode;
 }

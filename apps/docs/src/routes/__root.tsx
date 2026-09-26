@@ -9,8 +9,8 @@ import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 import type { ReactNode } from 'react';
 import { lazy, Suspense } from 'react';
 import { DocsThemeRoot } from '../components/theme-controls';
+import themePrefsScript from '../generated/theme-prefs-script.iife.js?raw';
 import { withBasePath } from '../lib/base-path.js';
-import { themePrefsScript } from '../lib/theme-prefs.js';
 import appCss from '../styles/app.css?url';
 import { docsRoot } from '../styles/docs-root.css.js';
 

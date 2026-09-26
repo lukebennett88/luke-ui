@@ -11,12 +11,12 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
+import themePrefsScript from '../generated/theme-prefs-script.iife.js?raw';
 import { StoryWrapper } from '../lib/story-wrapper';
 import {
 	COLOR_MODE_STORAGE_KEY,
 	subscribeToThemePrefs,
 	THEME_IDENTITY_STORAGE_KEY,
-	themePrefsScript,
 } from '../lib/theme-prefs.js';
 import { DocsThemeRoot, ThemeControls } from './theme-controls';
 
