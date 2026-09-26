@@ -5,7 +5,9 @@ import { ExampleItem } from '#docs';
 export default () => {
 	return (
 		<>
-			<style>{`
+			<style
+				dangerouslySetInnerHTML={{
+					__html: `
 				.layout-breakpoints {
 					display: flex;
 					flex-direction: column;
@@ -17,7 +19,9 @@ export default () => {
 						flex-direction: row;
 					}
 				}
-			`}</style>
+			`,
+				}}
+			/>
 			<div className="layout-breakpoints">
 				<ExampleItem style={{ flex: 1 }}>First</ExampleItem>
 				<ExampleItem style={{ flex: 1 }}>Second</ExampleItem>
