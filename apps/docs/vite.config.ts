@@ -44,9 +44,17 @@ function getMarkdownPrerenderPages(): Array<{ path: string }> {
 	});
 }
 
+function readBaseUrl(): string {
+	const value = process.env.VITE_BASE_URL || '/';
+	if (!value.startsWith('/') || !value.endsWith('/')) {
+		throw new Error(`VITE_BASE_URL must start and end with "/", got "${value}"`);
+	}
+	return value;
+}
+
 export default defineConfig(async () => {
 	const markdownPrerenderPages = getMarkdownPrerenderPages();
-	const baseUrl = process.env.VITE_BASE_URL ?? '/';
+	const baseUrl = readBaseUrl();
 	const siteUrl = (process.env.SITE_URL || LOCAL_SITE_URL).replace(TRAILING_SLASH_PATTERN, '');
 
 	return {
