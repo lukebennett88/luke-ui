@@ -84,8 +84,7 @@ source order still decide conflicts within a layer.
 
 | Layer        | Purpose                                                                                     |
 | ------------ | ------------------------------------------------------------------------------------------- |
-| `reset`      | Browser defaults, box sizing, and margins                                                   |
-| `theme`      | Design token custom properties and base typography                                          |
+| `reset`      | Browser defaults, box sizing, root base colour, and body typography                         |
 | `base`       | Reserved for the consuming app (for example Tailwind Preflight). Luke UI emits nothing here |
 | `recipes`    | Component styles, variants, compound variants, and shared compound-slot styles              |
 | `structural` | Retained descendant rhythm, skeleton masking, and combinator selectors                      |
@@ -94,10 +93,10 @@ source order still decide conflicts within a layer.
 The public stylesheet starts with one combined order statement:
 
 ```css
-@layer reset, theme, base, recipes, structural, utilities;
+@layer reset, base, recipes, structural, utilities;
 ```
 
-The package declares `base` but never writes to it. That pins its rank between `theme` and
+The package declares `base` but never writes to it. That pins its rank between `reset` and
 `recipes`. If a consumer's first `@layer base` write creates the layer instead, the browser places
 it last and it beats every component recipe.
 

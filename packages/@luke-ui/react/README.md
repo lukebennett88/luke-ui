@@ -18,9 +18,8 @@ themes the whole document from `:root`, so no identity class is needed for a sin
 `rootClassName` to an element you own for the reset and base typography.
 
 The shared stylesheet uses the layer order
-`reset → theme → base → recipes → structural → utilities`. The `base` layer is reserved for
-application defaults such as Tailwind Preflight. Luke UI declares it empty so it stays below
-`recipes`.
+`reset → base → recipes → structural → utilities`. The `base` layer is reserved for application
+defaults such as Tailwind Preflight. Luke UI declares it empty so it stays below `recipes`.
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';

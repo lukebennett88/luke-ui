@@ -8,7 +8,6 @@
  */
 export const cascadeLayerNames = [
 	'reset',
-	'theme',
 	'base',
 	'recipes',
 	'structural',
