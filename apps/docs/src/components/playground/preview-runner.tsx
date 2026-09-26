@@ -1,4 +1,3 @@
-import { useTheme } from 'next-themes';
 import type { ComponentType } from 'react';
 import { useEffect, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -8,7 +7,7 @@ import { isTrustedParentMessage } from '../../lib/playground-handshake';
 import { decodeCodeHash } from '../../lib/playground-hash';
 import type { PlaygroundPreviewMessage } from '../../lib/playground-protocol';
 import { StoryWrapper } from '../../lib/story-wrapper';
-import { useDocsThemeIdentity } from '../theme-controls';
+import { previewThemePrefs } from '../../lib/theme-prefs.js';
 
 // Interop wrappers are cached so repeated requires return stable module objects.
 const moduleCache = new Map<string, Record<string, unknown>>();
@@ -17,8 +16,6 @@ type PreviewRun = { UserComponent: ComponentType; runId: number };
 
 export default function PreviewRunner() {
 	const [run, setRun] = useState<PreviewRun | null>(null);
-	const { setTheme: setColorMode } = useTheme();
-	const { setThemeIdentity } = useDocsThemeIdentity();
 
 	useEffect(() => {
 		let runId = 0;
@@ -40,8 +37,11 @@ export default function PreviewRunner() {
 				runCode(event.data.code);
 				return;
 			}
-			setThemeIdentity(event.data.themeIdentity);
-			setColorMode(event.data.colorMode);
+			// The parent page has already stored these prefs, so only mirror them here.
+			previewThemePrefs({
+				colorModePreference: event.data.colorMode,
+				themeIdentity: event.data.themeIdentity,
+			});
 		};
 
 		window.addEventListener('message', onMessage);
@@ -49,7 +49,7 @@ export default function PreviewRunner() {
 		if (initialCode) runCode(initialCode);
 		postToParent({ type: 'playground:ready' });
 		return () => window.removeEventListener('message', onMessage);
-	}, [setColorMode, setThemeIdentity]);
+	}, []);
 
 	if (!run) return null;
 

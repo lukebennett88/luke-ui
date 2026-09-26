@@ -290,9 +290,6 @@ catalogs:
     monaco-editor:
       specifier: ^0.56.0
       version: 0.56.0
-    next-themes:
-      specifier: ^0.4.6
-      version: 0.4.6
     node-html-parser:
       specifier: ^9.0.4
       version: 9.0.4
@@ -473,9 +470,6 @@ importers:
       monaco-editor:
         specifier: 'catalog:'
         version: 0.56.0
-      next-themes:
-        specifier: 'catalog:'
-        version: 0.4.6(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       oxc-parser:
         specifier: 'catalog:'
         version: 0.150.0

@@ -16,7 +16,7 @@ type IconToggleButtonGroupProps<Value extends string> = {
 	label: string;
 	onChange: (value: Value) => void;
 	options: ReadonlyArray<IconToggleItem<Value>>;
-	value: Value | null;
+	value: Value;
 };
 
 type TextToggleItem<Value extends string> = {
@@ -44,10 +44,10 @@ export function IconToggleButtonGroup<Value extends string>({
 		<ToggleButtonGroup
 			aria-label={label}
 			className={GROUP_CLASS_NAME}
-			disallowEmptySelection={value !== null}
+			disallowEmptySelection
 			onSelectionChange={toSelectionChangeHandler(options, onChange)}
 			orientation="horizontal"
-			selectedKeys={value === null ? [] : [value]}
+			selectedKeys={[value]}
 			selectionMode="single"
 		>
 			{options.map(({ icon, label: optionLabel, value: optionValue }) => (

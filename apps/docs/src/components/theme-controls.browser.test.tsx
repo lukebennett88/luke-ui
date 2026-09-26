@@ -4,15 +4,20 @@ import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
-import { ThemeProvider } from 'next-themes';
-import type { ComponentProps, ReactNode } from 'react';
+import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
+import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import { renderToString } from 'react-dom/server';
-import { afterEach, expect, test } from 'vite-plus/test';
+import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
+import themePrefsScript from '../generated/theme-prefs-script.iife.js?raw';
 import { StoryWrapper } from '../lib/story-wrapper';
+import {
+	COLOR_MODE_STORAGE_KEY,
+	subscribeToThemePrefs,
+	THEME_IDENTITY_STORAGE_KEY,
+} from '../lib/theme-prefs.js';
 import { DocsThemeRoot, ThemeControls } from './theme-controls';
 
 let container: HTMLElement | undefined;
@@ -23,56 +28,59 @@ afterEach(async () => {
 	container?.remove();
 	localStorage.clear();
 	document.documentElement.removeAttribute('class');
+	document.documentElement.removeAttribute('data-color-mode');
+	document.documentElement.removeAttribute('style');
 	container = undefined;
 	root = undefined;
 	await emulateColorScheme('light');
 });
 
-test('persists theme identity and colour mode independently', async () => {
-	renderTheme(
-		<>
-			<ThemeControls />
-			<StoryWrapper>
-				<span>Theme example</span>
-			</StoryWrapper>
-		</>,
-	);
-
-	const paperProfile = page.getByRole('radio', { name: 'Paper' });
-	const darkMode = page.getByRole('radio', { name: 'Dark theme' });
-	const themeRoot = getThemeRoot();
-
-	await userEvent.click(paperProfile, { force: true });
-
-	expect(paperProfile).toBeChecked();
-	expect(document.documentElement).toHaveClass(paperThemeClassName);
-	expect(themeRoot.dataset.colorMode).toBe('light');
-
-	await userEvent.click(darkMode, { force: true });
-
-	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
-	expect(document.documentElement).toHaveClass(paperThemeClassName);
-
-	unmountTheme();
+test('stores each choice and applies it to the document', async () => {
 	renderTheme(<ThemeControls />);
 
-	expect(page.getByRole('radio', { name: 'Paper' })).toBeChecked();
-	expect(page.getByRole('radio', { name: 'Dark theme' })).toBeChecked();
+	await userEvent.click(page.getByRole('radio', { name: 'Paper' }), { force: true });
+
+	await expect.element(page.getByRole('radio', { name: 'Paper' })).toBeChecked();
+	expect(localStorage.getItem(THEME_IDENTITY_STORAGE_KEY)).toBe('paper');
 	expect(document.documentElement).toHaveClass(paperThemeClassName);
-	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
+	expect(document.documentElement).not.toHaveClass(tactileThemeClassName);
+
+	await userEvent.click(page.getByRole('radio', { name: 'Dark theme' }), { force: true });
+
+	await expect.element(page.getByRole('radio', { name: 'Dark theme' })).toBeChecked();
+	expect(localStorage.getItem(COLOR_MODE_STORAGE_KEY)).toBe('dark');
+	expect(document.documentElement).toHaveAttribute('data-color-mode', 'dark');
+	expect(document.documentElement).toHaveClass('dark');
+	expect(document.documentElement).not.toHaveClass('light');
+	expect(document.documentElement).toHaveClass(paperThemeClassName);
 });
 
-test('system colour mode follows the platform preference and drives the docs chrome', async () => {
+test('follows a change stored by another tab', async () => {
+	renderTheme(<ThemeControls />);
+
+	localStorage.setItem(THEME_IDENTITY_STORAGE_KEY, 'paper');
+	localStorage.setItem(COLOR_MODE_STORAGE_KEY, 'dark');
+	act(() => {
+		window.dispatchEvent(new StorageEvent('storage', { key: COLOR_MODE_STORAGE_KEY }));
+	});
+
+	await expect.element(page.getByRole('radio', { name: 'Paper' })).toBeChecked();
+	await expect.element(page.getByRole('radio', { name: 'Dark theme' })).toBeChecked();
+	expect(document.documentElement).toHaveClass(paperThemeClassName);
+	expect(document.documentElement).toHaveAttribute('data-color-mode', 'dark');
+});
+
+test('system colour mode follows the platform preference', async () => {
 	await emulateColorScheme('dark');
-	renderTheme(<ThemeControls />, { defaultTheme: 'system', enableSystem: true });
+	renderTheme(<ThemeControls />);
 
 	await userEvent.click(page.getByRole('radio', { name: 'System theme' }), { force: true });
 
-	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
+	await expect.poll(() => document.documentElement.dataset.colorMode).toBe('dark');
 	expect(document.documentElement).toHaveClass('dark');
 
 	await emulateColorScheme('light');
-	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('light');
+	await expect.poll(() => document.documentElement.dataset.colorMode).toBe('light');
 	expect(document.documentElement).toHaveClass('light');
 });
 
@@ -90,65 +98,80 @@ test('leaves full-bleed story surfaces unframed', () => {
 	expect(getComputedStyle(storyRoot).padding).toBe('0px');
 });
 
-test('boots the stored colour mode before the themed root hydrates', async () => {
-	localStorage.setItem('theme', 'dark');
-	const bootstrap = renderToString(
-		<ThemeProvider
-			attribute={['class', 'data-color-mode']}
-			defaultTheme="light"
-			enableSystem={false}
-		>
-			<span>Server content</span>
-		</ThemeProvider>,
-	);
-	const iframe = document.body.appendChild(document.createElement('iframe'));
-	iframe.srcdoc = `<!doctype html><html><body>${bootstrap}<script>document.documentElement.dataset.modeAtHydration = document.documentElement.dataset.colorMode;</script></body></html>`;
-	await new Promise<void>((resolve) => {
-		iframe.addEventListener('load', () => resolve(), { once: true });
-	});
+test('the head script applies stored prefs before body scripts run', async () => {
+	localStorage.setItem(THEME_IDENTITY_STORAGE_KEY, 'paper');
+	localStorage.setItem(COLOR_MODE_STORAGE_KEY, 'dark');
 
-	expect(iframe.contentDocument?.documentElement).toHaveAttribute('data-color-mode', 'dark');
-	expect(iframe.contentDocument?.documentElement).toHaveAttribute('data-mode-at-hydration', 'dark');
-	iframe.remove();
+	const html = await loadHeadScriptDocument();
+
+	expect(html).toHaveClass(paperThemeClassName, 'dark');
+	expect(html).toHaveAttribute('data-color-mode', 'dark');
+	expect(html).toHaveAttribute('data-mode-at-body', 'dark');
+	expect(html.style.colorScheme).toBe('dark');
 });
 
-function renderTheme(
-	children: ReactNode,
-	options: Pick<ComponentProps<typeof ThemeProvider>, 'defaultTheme' | 'enableSystem'> = {},
-) {
+test('the head script resolves the system preference', async () => {
+	await emulateColorScheme('dark');
+
+	const html = await loadHeadScriptDocument();
+
+	expect(html).toHaveClass(tactileThemeClassName, 'dark');
+	expect(html).toHaveAttribute('data-mode-at-body', 'dark');
+});
+
+test('the head script still applies prefs when localStorage throws', async () => {
+	await emulateColorScheme('dark');
+
+	const html = await loadHeadScriptDocument({ throwOnGetItem: true });
+
+	expect(html).toHaveClass(tactileThemeClassName, 'dark');
+	expect(html).toHaveAttribute('data-color-mode', 'dark');
+	expect(html.style.colorScheme).toBe('dark');
+});
+
+test('subscribeToThemePrefs removes the change listener from the same query it added it to', () => {
+	const addEventListener = vi.spyOn(MediaQueryList.prototype, 'addEventListener');
+	const removeEventListener = vi.spyOn(MediaQueryList.prototype, 'removeEventListener');
+
+	const unsubscribe = subscribeToThemePrefs(() => {});
+	const query = addEventListener.mock.instances[0];
+	unsubscribe();
+
+	expect(removeEventListener.mock.instances[0]).toBe(query);
+
+	addEventListener.mockRestore();
+	removeEventListener.mockRestore();
+});
+
+function renderTheme(children: ReactNode) {
 	container = document.body.appendChild(document.createElement('div'));
 	root = createRoot(container);
 
 	act(() => {
 		root?.render(
-			<ThemeProvider
-				attribute="class"
-				defaultTheme={options.defaultTheme ?? 'light'}
-				enableSystem={options.enableSystem ?? false}
-			>
-				{/* Mirrors `__root.tsx`'s real tree shape: `IconSpritesheetProvider` wraps
-				`DocsThemeRoot` there too, and `ThemeControls` (rendered by these tests) consumes it
-				through `ColorModeToggle`'s icons. */}
-				<IconSpritesheetProvider href={spriteSheetHref}>
-					<DocsThemeRoot>{children}</DocsThemeRoot>
-				</IconSpritesheetProvider>
-			</ThemeProvider>,
+			// Mirrors `__root.tsx`: `ThemeControls` consumes the spritesheet through its icons.
+			<IconSpritesheetProvider href={spriteSheetHref}>
+				<DocsThemeRoot>{children}</DocsThemeRoot>
+			</IconSpritesheetProvider>,
 		);
 	});
 }
 
-function unmountTheme() {
-	act(() => root?.unmount());
-	container?.remove();
-	container = undefined;
-	root = undefined;
-}
-
-function getThemeRoot() {
-	const themeRoot = container?.querySelector<HTMLElement>('[data-color-mode]');
-	if (!themeRoot) throw new Error('Expected a Luke UI theme root');
-
-	return themeRoot;
+async function loadHeadScriptDocument(options?: { throwOnGetItem?: boolean }) {
+	const iframe = document.body.appendChild(document.createElement('iframe'));
+	const throwOnGetItemScript = options?.throwOnGetItem
+		? `<script>Storage.prototype.getItem = function () { throw new Error('denied'); };</script>`
+		: '';
+	iframe.srcdoc = `<!doctype html><html><head>${throwOnGetItemScript}<script>${themePrefsScript}</script></head><body><script>document.documentElement.dataset.modeAtBody = document.documentElement.dataset.colorMode;</script></body></html>`;
+	await new Promise<void>((resolve) => {
+		iframe.addEventListener('load', () => resolve(), { once: true });
+	});
+	const html = iframe.contentDocument?.documentElement;
+	if (!html) throw new Error('Expected the iframe document');
+	// Importing a shallow copy keeps the element matchers working across frames.
+	const snapshot = document.importNode(html);
+	iframe.remove();
+	return snapshot;
 }
 
 async function emulateColorScheme(mode: 'light' | 'dark') {

@@ -118,21 +118,36 @@ export default defineConfig(async () => {
 				'sucrase',
 			],
 		},
-		// `vp pack` compiles the pre-hydration skeleton script to an inline-able
-		// IIFE artifact; it runs as part of `docs#generate`, not `vp build`.
-		pack: {
-			clean: false,
-			dts: false,
-			// Emitted as src/generated/editor-skeleton-script.iife.js — the `.iife`
-			// suffix is fixed by tsdown for this format.
-			entry: ['src/components/playground/editor-skeleton-script.ts'],
-			format: 'iife' as const,
-			// The artifact is inlined into every playground HTML response, so
-			// strip the source's documentation comments.
-			minify: true,
-			outDir: 'src/generated',
-			platform: 'browser' as const,
-		},
+		// `vp pack` compiles each pre-hydration script to an inline-able IIFE
+		// artifact; it runs as part of `docs#generate`, not `vp build`.
+		pack: [
+			{
+				clean: false,
+				dts: false,
+				// Emitted as src/generated/editor-skeleton-script.iife.js — the `.iife`
+				// suffix is fixed by tsdown for this format.
+				entry: ['src/components/playground/editor-skeleton-script.ts'],
+				format: 'iife' as const,
+				// The artifact is inlined into every playground HTML response, so
+				// strip the source's documentation comments.
+				minify: true,
+				outDir: 'src/generated',
+				platform: 'browser' as const,
+			},
+			{
+				clean: false,
+				dts: false,
+				// Emitted as src/generated/theme-prefs-script.iife.js — the `.iife`
+				// suffix is fixed by tsdown for this format.
+				entry: ['src/lib/theme-prefs-script.ts'],
+				format: 'iife' as const,
+				// The artifact is inlined into every page response, so strip the
+				// source's documentation comments.
+				minify: true,
+				outDir: 'src/generated',
+				platform: 'browser' as const,
+			},
+		],
 		plugins: lazyPlugins(async () => [
 			staticFunctionBasePathPlugin(),
 			highlightSourcePlugin(),

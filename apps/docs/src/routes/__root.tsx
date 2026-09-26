@@ -9,6 +9,7 @@ import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 import type { ReactNode } from 'react';
 import { lazy, Suspense } from 'react';
 import { DocsThemeRoot } from '../components/theme-controls';
+import themePrefsScript from '../generated/theme-prefs-script.iife.js?raw';
 import { withBasePath } from '../lib/base-path.js';
 import appCss from '../styles/app.css?url';
 import { docsRoot } from '../styles/docs-root.css.js';
@@ -20,8 +21,8 @@ export const Route = createRootRoute({
 	head: () => ({
 		links: [
 			{ href: appCss, rel: 'stylesheet' },
-			// Tactile must stay last: before hydration, the last stylesheet's `:where(:root)`
-			// fallback wins, and it has to match what `getServerThemeIdentity` returns.
+			// Tactile must stay last: an element without an identity class gets the last
+			// stylesheet's `:where(:root)` fallback, and Tactile is the default identity.
 			{ href: paperCss, rel: 'stylesheet' },
 			{ href: tactileCss, rel: 'stylesheet' },
 			{
@@ -72,15 +73,14 @@ function LazySearchDialog(props: SharedProps) {
 
 function RootDocument({ children }: { children: ReactNode }) {
 	return (
+		// `themePrefsScript` and the theme prefs store own the classes and attributes on `<html>`.
 		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
+				<script dangerouslySetInnerHTML={{ __html: themePrefsScript }} />
 			</head>
 			<body className={cx('flex min-h-dvh flex-col', docsRoot)}>
-				<RootProvider
-					search={{ SearchDialog: LazySearchDialog }}
-					theme={{ attribute: ['class', 'data-color-mode'], hotKey: false }}
-				>
+				<RootProvider search={{ SearchDialog: LazySearchDialog }} theme={{ enabled: false }}>
 					<IconSpritesheetProvider href={spriteSheetHref}>
 						<DocsThemeRoot>{children}</DocsThemeRoot>
 					</IconSpritesheetProvider>

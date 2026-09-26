@@ -66,7 +66,7 @@ test('leaves every destination inactive on the 404 page', async () => {
 async function renderAt(pathname: string, children: ReactNode) {
 	const rootRoute = createRootRoute({
 		component: () => (
-			<RootProvider search={{}} theme={{ defaultTheme: 'light', enableSystem: false }}>
+			<RootProvider search={{}} theme={{ enabled: false }}>
 				<IconSpritesheetProvider href={spriteSheetHref}>
 					<DocsThemeRoot>{children}</DocsThemeRoot>
 				</IconSpritesheetProvider>

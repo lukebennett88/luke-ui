@@ -9,7 +9,6 @@ import {
 	createRouter,
 	RouterProvider,
 } from '@tanstack/react-router';
-import { ThemeProvider } from 'next-themes';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
@@ -303,13 +302,11 @@ async function renderExampleBlock({
 }: { src?: string; title?: string; width?: number } = {}) {
 	const rootRoute = createRootRoute({
 		component: () => (
-			<ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-				<IconSpritesheetProvider href={spriteSheetHref}>
-					<DocsThemeRoot>
-						<ExampleBlock src={src} title={title} />
-					</DocsThemeRoot>
-				</IconSpritesheetProvider>
-			</ThemeProvider>
+			<IconSpritesheetProvider href={spriteSheetHref}>
+				<DocsThemeRoot>
+					<ExampleBlock src={src} title={title} />
+				</DocsThemeRoot>
+			</IconSpritesheetProvider>
 		),
 	});
 	const router = createRouter({
