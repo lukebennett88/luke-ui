@@ -66,6 +66,35 @@ test('copies copyText instead of rendered highlighted text', async () => {
 	expect(page.getByText('rendered').element()).toBeTruthy();
 });
 
+test('scrolls Shiki line spans horizontally under a floating copy control', async () => {
+	await page.viewport(320, 720);
+
+	const longImport = `import { Box } from '@luke-ui/react/box';`;
+	const longBox = `<Box maxInlineSize="42rem" padding="sp24">`;
+	const html = [
+		'<code class="shiki">',
+		`<span class="line">${longImport}</span>`,
+		`<span class="line">${longBox}</span>`,
+		'<span class="line">{children}</span>',
+		'<span class="line"></Box>;</span>',
+		'</code>',
+	].join('');
+
+	renderCodeBlock(<CodeBlock copyText={`${longImport}\n${longBox}`} html={html} />);
+
+	const viewport = page.getByRole('region', { name: 'Code' }).element();
+	expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth);
+
+	const pre = viewport.querySelector('pre');
+	assert(pre != null, 'Expected a pre element');
+	// max-content pre must outgrow the scrollport so lines are not clipped at the copy gutter.
+	expect(pre.getBoundingClientRect().width).toBeGreaterThan(viewport.clientWidth);
+
+	const firstLine = pre.querySelector('.line');
+	assert(firstLine != null, 'Expected a Shiki line');
+	expect(firstLine.getBoundingClientRect().width).toBeGreaterThan(viewport.clientWidth);
+});
+
 test('hides the copy control when allowCopy is false', () => {
 	renderCodeBlock(<CodeBlock allowCopy={false} code="secret" />);
 

@@ -136,6 +136,8 @@ export const viewport = style({
 export const pre = style({
 	'@layer': {
 		recipes: {
+			// max-content so long lines widen the scrollport; min 100% so short blocks fill the frame.
+			inlineSize: 'max-content',
 			margin: 0,
 			minInlineSize: '100%',
 			overflow: 'visible',
@@ -147,7 +149,8 @@ export const pre = style({
 globalStyle(`${pre} code`, {
 	'@layer': {
 		recipes: {
-			display: 'block',
+			display: 'flex',
+			flexDirection: 'column',
 			fontFamily: 'inherit',
 			fontSize: 'inherit',
 			lineHeight: 'inherit',
