@@ -43,6 +43,27 @@ test('filters generated component prop tables through the component props genera
 	expect(entryNames).not.toContain('itemProp');
 });
 
+test('keeps JSDoc descriptions for Button presentation props', async () => {
+	const [buttonProps] = await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'packages/@luke-ui/react/src/core/button/button.tsx',
+			name: 'ButtonProps',
+		},
+		{ basePath: repoRoot },
+	);
+	const entriesByName = new Map(
+		(buttonProps?.entries ?? []).map((entry) => [entry.name, entry] as const),
+	);
+
+	for (const name of ['appearance', 'isBlock', 'prominence', 'size', 'tone'] as const) {
+		const entry = entriesByName.get(name);
+		expect(entry, `expected ${name} in ButtonProps`).toBeDefined();
+		expect(entry?.description?.trim().length ?? 0).toBeGreaterThan(0);
+	}
+
+	expect(entriesByName.get('isPending')?.description?.trim().length ?? 0).toBeGreaterThan(0);
+});
+
 test('marks a pure native wrapper with the native-props entry and no visible props', async () => {
 	const [kbdProps] = await componentPropsGenerator.generateTypeTable(
 		{
