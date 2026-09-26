@@ -3,10 +3,7 @@ import { transform } from 'sucrase';
 
 export type PlaygroundScope = Record<string, unknown>;
 
-/**
- * Builds a CommonJS-style `require` that resolves against a host-supplied scope
- * map (for example the docs-generated `playgroundScope`).
- */
+/** Builds a `require` function that resolves modules from the host-supplied scope. */
 export function createRequireModule(
 	scope: PlaygroundScope,
 ): (specifier: string) => Record<string, unknown> {
@@ -19,9 +16,7 @@ export function createRequireModule(
 
 		const namespace = scope[specifier];
 		if (namespace === undefined) {
-			throw new Error(
-				`Cannot import '${specifier}' — only react and @luke-ui/react/* modules are available in the playground.`,
-			);
+			throw new Error(`Cannot import '${specifier}': module is not in the playground scope.`);
 		}
 
 		// Mark as an ES module so sucrase's interop resolves default imports correctly.
@@ -42,9 +37,7 @@ export function compileComponent(
 	}).code;
 
 	const module: { exports: { default?: unknown } } = { exports: {} };
-	// Evaluating user code is the point of the playground; it only ever comes
-	// from the user's own editor or URL hash (same trust model as the
-	// TypeScript playground).
+	// The playground executes code from its editor or URL hash.
 	// oxlint-disable-next-line typescript/no-implied-eval
 	new Function('require', 'module', 'exports', compiled)(requireModule, module, module.exports);
 
@@ -55,7 +48,7 @@ export function compileComponent(
 	return component as ComponentType;
 }
 
-/** Host-supplied scope map → compile helper that resolves imports against it. */
+/** Creates a compiler that resolves imports from the host-supplied scope. */
 export function createPlaygroundCompiler(scope: PlaygroundScope) {
 	const requireModule = createRequireModule(scope);
 	return {

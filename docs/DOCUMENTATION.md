@@ -472,9 +472,9 @@ User code compiles in the browser with sucrase and can import `react` and any `@
 subpath. The import map, editor types, and pre-hydration skeleton are generated as part of
 `generate`. New component subpaths in `@luke-ui/react`'s `exports` map are picked up automatically.
 The preview iframe only accepts messages from its parent. Readiness and replay live in
-`@luke-ui/playground-core`'s handshake session. Compilation, the URL hash, and debounce stay in the
-route and runner. The host-independent kernel is the private `packages/@luke-ui/playground-core`
-package.
+`@luke-ui/playground-core`'s handshake session. The private `packages/@luke-ui/playground-core`
+package also provides compilation and URL hash helpers. The docs route owns hash updates and
+debounce. The preview runner calls the compiler.
 
 ## Keeping docs current
 
