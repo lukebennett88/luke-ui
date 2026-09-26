@@ -9,11 +9,12 @@ import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import { afterEach, expect, test } from 'vite-plus/test';
+import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { StoryWrapper } from '../lib/story-wrapper';
 import {
 	COLOR_MODE_STORAGE_KEY,
+	subscribeToThemePrefs,
 	THEME_IDENTITY_STORAGE_KEY,
 	themePrefsScript,
 } from '../lib/theme-prefs.js';
@@ -118,6 +119,30 @@ test('the head script resolves the system preference', async () => {
 	expect(html).toHaveAttribute('data-mode-at-body', 'dark');
 });
 
+test('the head script still applies prefs when localStorage throws', async () => {
+	await emulateColorScheme('dark');
+
+	const html = await loadHeadScriptDocument({ throwOnGetItem: true });
+
+	expect(html).toHaveClass(tactileThemeClassName, 'dark');
+	expect(html).toHaveAttribute('data-color-mode', 'dark');
+	expect(html.style.colorScheme).toBe('dark');
+});
+
+test('subscribeToThemePrefs removes the change listener from the same query it added it to', () => {
+	const addEventListener = vi.spyOn(MediaQueryList.prototype, 'addEventListener');
+	const removeEventListener = vi.spyOn(MediaQueryList.prototype, 'removeEventListener');
+
+	const unsubscribe = subscribeToThemePrefs(() => {});
+	const query = addEventListener.mock.instances[0];
+	unsubscribe();
+
+	expect(removeEventListener.mock.instances[0]).toBe(query);
+
+	addEventListener.mockRestore();
+	removeEventListener.mockRestore();
+});
+
 function renderTheme(children: ReactNode) {
 	container = document.body.appendChild(document.createElement('div'));
 	root = createRoot(container);
@@ -132,9 +157,12 @@ function renderTheme(children: ReactNode) {
 	});
 }
 
-async function loadHeadScriptDocument() {
+async function loadHeadScriptDocument(options?: { throwOnGetItem?: boolean }) {
 	const iframe = document.body.appendChild(document.createElement('iframe'));
-	iframe.srcdoc = `<!doctype html><html><head><script>${themePrefsScript}</script></head><body><script>document.documentElement.dataset.modeAtBody = document.documentElement.dataset.colorMode;</script></body></html>`;
+	const throwOnGetItemScript = options?.throwOnGetItem
+		? `<script>Storage.prototype.getItem = function () { throw new Error('denied'); };</script>`
+		: '';
+	iframe.srcdoc = `<!doctype html><html><head>${throwOnGetItemScript}<script>${themePrefsScript}</script></head><body><script>document.documentElement.dataset.modeAtBody = document.documentElement.dataset.colorMode;</script></body></html>`;
 	await new Promise<void>((resolve) => {
 		iframe.addEventListener('load', () => resolve(), { once: true });
 	});

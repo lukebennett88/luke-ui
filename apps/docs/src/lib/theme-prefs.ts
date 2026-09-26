@@ -20,10 +20,11 @@ export const THEME_IDENTITY_STORAGE_KEY = 'luke-ui-docs-theme';
 export const COLOR_MODE_STORAGE_KEY = 'luke-ui-docs-color-mode';
 
 /**
- * Inline `<head>` script that applies the stored prefs to `<html>` before first paint. Storage
- * failures leave the defaults.
+ * Inline `<head>` script that applies the stored prefs to `<html>` before first paint. A storage
+ * read failure falls back to the defaults; the prefs are always applied, so a failure still
+ * resolves `system` from `prefers-color-scheme` and sets the `<html>` classes and attributes.
  */
-export const themePrefsScript = `try{(${applyThemePrefs.toString()})(document.documentElement,(${parseThemePrefs.toString()})(localStorage.getItem(${JSON.stringify(THEME_IDENTITY_STORAGE_KEY)}),localStorage.getItem(${JSON.stringify(COLOR_MODE_STORAGE_KEY)})),${JSON.stringify(getThemeIdentityClassNames())})}catch(e){}`;
+export const themePrefsScript = `(()=>{let a=null,b=null;try{a=localStorage.getItem(${JSON.stringify(THEME_IDENTITY_STORAGE_KEY)});b=localStorage.getItem(${JSON.stringify(COLOR_MODE_STORAGE_KEY)})}catch(e){}(${applyThemePrefs.toString()})(document.documentElement,(${parseThemePrefs.toString()})(a,b),${JSON.stringify(getThemeIdentityClassNames())})})();`;
 
 /** Reads the stored prefs. Returns the same object until the prefs or system colour mode change. */
 export function getThemePrefsSnapshot(): ThemePrefsSnapshot {
@@ -72,14 +73,16 @@ export function previewThemePrefs(prefs: ThemePrefs) {
 export function subscribeToThemePrefs(listener: () => void) {
 	if (listeners.size === 0) {
 		window.addEventListener('storage', handleStorage);
-		window.matchMedia(DARK_COLOR_SCHEME_QUERY).addEventListener('change', emitChange);
+		darkColorSchemeQuery = window.matchMedia(DARK_COLOR_SCHEME_QUERY);
+		darkColorSchemeQuery.addEventListener('change', emitChange);
 	}
 	listeners.add(listener);
 	return () => {
 		listeners.delete(listener);
 		if (listeners.size > 0) return;
 		window.removeEventListener('storage', handleStorage);
-		window.matchMedia(DARK_COLOR_SCHEME_QUERY).removeEventListener('change', emitChange);
+		darkColorSchemeQuery?.removeEventListener('change', emitChange);
+		darkColorSchemeQuery = null;
 	};
 }
 
@@ -108,6 +111,8 @@ const SERVER_SNAPSHOT: ThemePrefsSnapshot = {
 const listeners = new Set<() => void>();
 let previewPrefs: ThemePrefs | null = null;
 let snapshot = SERVER_SNAPSHOT;
+/** The `MediaQueryList` holding the `change` listener while subscriptions are active. */
+let darkColorSchemeQuery: MediaQueryList | null = null;
 
 function readStoredThemePrefs(): ThemePrefs {
 	try {
