@@ -17,6 +17,7 @@ export const root = style({
 			lineHeight: vars.font.caption.lineHeight,
 			maxInlineSize: '100%',
 			overflow: 'hidden',
+			position: 'relative',
 		},
 	},
 });
@@ -84,23 +85,14 @@ export const actions = style({
 	},
 });
 
-/** Titleless body: code scrollport + in-flow copy on the inline-end. */
-export const body = style({
+/** Titleless copy overlays the full-width scrollport (Fumadocs pattern — no side column). */
+export const overlayActions = style({
 	'@layer': {
 		recipes: {
-			display: 'flex',
-			minInlineSize: 0,
-		},
-	},
-});
-
-export const bodyActions = style({
-	'@layer': {
-		recipes: {
-			alignSelf: 'start',
-			marginInlineStart: 0,
-			paddingBlockStart: vars.space.sp8,
-			paddingInlineEnd: vars.space.sp8,
+			insetBlockStart: vars.space.sp8,
+			insetInlineEnd: vars.space.sp8,
+			position: 'absolute',
+			zIndex: 1,
 		},
 	},
 });
@@ -108,7 +100,6 @@ export const bodyActions = style({
 export const viewport = style({
 	'@layer': {
 		recipes: {
-			flex: '1 1 auto',
 			maxBlockSize: '37.5rem',
 			minInlineSize: 0,
 			overflow: 'auto',
@@ -122,6 +113,18 @@ export const viewport = style({
 					outlineWidth: '2px',
 				},
 			},
+		},
+	},
+});
+
+/**
+ * Clear the overlay copy without a side column. Padding stays on the full-width
+ * scrollport so the recessed surface continues under the button.
+ */
+export const viewportWithOverlayCopy = style({
+	'@layer': {
+		recipes: {
+			paddingInlineEnd: vars.space.sp48,
 		},
 	},
 });

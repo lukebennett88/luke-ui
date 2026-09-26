@@ -81,6 +81,7 @@ export function CodeBlock({
 		}, COPY_FEEDBACK_MS);
 	}
 
+	const showOverlayCopy = allowCopy && title == null;
 	const copyControl = allowCopy ? (
 		<IconButton
 			aria-label={copyStatus === 'copied' ? 'Copied' : 'Copy'}
@@ -95,70 +96,59 @@ export function CodeBlock({
 	const liveMessage =
 		copyStatus === 'copied' ? 'Copied' : copyStatus === 'error' ? 'Could not copy code' : '';
 
-	// Titleless copy sits in the body row (in flow). Titled copy stays in the header.
-	const copyInHeader = title != null && copyControl != null;
-	const copyInBody = title == null && copyControl != null;
-
-	const viewport = (
-		<div
-			className={styles.viewport}
-			dir="ltr"
-			ref={(node) => {
-				resizeObserverRef.current?.disconnect();
-				resizeObserverRef.current = null;
-				viewportRef.current = node;
-				if (node == null) return;
-
-				const updateTabIndex = () => {
-					const scrollable =
-						node.scrollWidth > node.clientWidth + 1 ||
-						node.scrollHeight > node.clientHeight + 1;
-					if (scrollable) {
-						node.tabIndex = 0;
-						node.setAttribute('role', 'region');
-						node.setAttribute('aria-label', title ?? 'Code');
-					} else {
-						node.removeAttribute('tabindex');
-						node.removeAttribute('role');
-						node.removeAttribute('aria-label');
-					}
-				};
-
-				updateTabIndex();
-				const observer = new ResizeObserver(updateTabIndex);
-				observer.observe(node);
-				resizeObserverRef.current = observer;
-			}}
-		>
-			{html != null ? (
-				// Shiki escapes source before the highlight plugin emits this markup.
-				<pre className={styles.pre} dangerouslySetInnerHTML={{ __html: html }} />
-			) : (
-				<pre className={styles.pre}>{code != null ? <code>{code}</code> : children}</pre>
-			)}
-		</div>
-	);
-
 	return (
 		// `not-prose` opts out of Fumadocs/Tailwind prose inline-code chrome on nested `code`.
+		// `dir="ltr"` matches Fumadocs: scroll and overlay copy stay physical-right in RTL docs.
 		<figure
 			{...figureProps}
 			className={cx(styles.root, 'not-prose', flush && styles.flush, className)}
+			dir="ltr"
 		>
 			{title != null ? (
 				<div className={styles.header}>
 					<figcaption className={styles.title}>{title}</figcaption>
-					{copyInHeader ? <div className={styles.actions}>{copyControl}</div> : null}
+					{copyControl != null ? <div className={styles.actions}>{copyControl}</div> : null}
 				</div>
 			) : null}
-			{copyInBody ? (
-				<div className={styles.body}>
-					{viewport}
-					<div className={cx(styles.actions, styles.bodyActions)}>{copyControl}</div>
-				</div>
-			) : (
-				viewport
-			)}
+			{showOverlayCopy && copyControl != null ? (
+				<div className={cx(styles.actions, styles.overlayActions)}>{copyControl}</div>
+			) : null}
+			<div
+				className={cx(styles.viewport, showOverlayCopy && styles.viewportWithOverlayCopy)}
+				ref={(node) => {
+					resizeObserverRef.current?.disconnect();
+					resizeObserverRef.current = null;
+					viewportRef.current = node;
+					if (node == null) return;
+
+					const updateTabIndex = () => {
+						const scrollable =
+							node.scrollWidth > node.clientWidth + 1 ||
+							node.scrollHeight > node.clientHeight + 1;
+						if (scrollable) {
+							node.tabIndex = 0;
+							node.setAttribute('role', 'region');
+							node.setAttribute('aria-label', title ?? 'Code');
+						} else {
+							node.removeAttribute('tabindex');
+							node.removeAttribute('role');
+							node.removeAttribute('aria-label');
+						}
+					};
+
+					updateTabIndex();
+					const observer = new ResizeObserver(updateTabIndex);
+					observer.observe(node);
+					resizeObserverRef.current = observer;
+				}}
+			>
+				{html != null ? (
+					// Shiki escapes source before the highlight plugin emits this markup.
+					<pre className={styles.pre} dangerouslySetInnerHTML={{ __html: html }} />
+				) : (
+					<pre className={styles.pre}>{code != null ? <code>{code}</code> : children}</pre>
+				)}
+			</div>
 			{allowCopy ? (
 				<VisuallyHidden aria-live="polite" elementType="p" role="status">
 					{liveMessage}
