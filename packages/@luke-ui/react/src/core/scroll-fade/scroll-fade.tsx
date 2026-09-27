@@ -66,7 +66,7 @@ export function ScrollFade(props: ScrollFadeProps): JSX.Element {
 export type ScrollFadeAxis = 'inline' | 'block';
 
 /** Physical side that corresponds to the active axis's logical end. */
-export type ScrollFadePhysicalSide = 'bottom' | 'left' | 'right' | 'top';
+type ScrollFadePhysicalSide = 'bottom' | 'left' | 'right' | 'top';
 
 type _ScrollFadeOwnedLayoutProperty = 'overflow' | 'overflowX' | 'overflowY';
 
@@ -219,10 +219,6 @@ function useScrollOverflow(
 }
 
 /** Whether `element` overflows on the logical `axis` for its writing mode. */
-export function overflowsOnAxis(element: HTMLElement, axis: ScrollFadeAxis): boolean {
-	return overflowsOnAxisForWritingMode(element, axis, getComputedStyle(element).writingMode);
-}
-
 function overflowsOnAxisForWritingMode(
 	element: HTMLElement,
 	axis: ScrollFadeAxis,
@@ -245,7 +241,7 @@ function overflowsOnAxisForWritingMode(
  * Measured from used layout (CSS `direction`, writing mode, `text-orientation`, etc.) via a logical
  * inset probe — not from `:dir()`, which ignores `style={{ direction }}`.
  */
-export function logicalEndSide(element: HTMLElement, axis: ScrollFadeAxis): ScrollFadePhysicalSide {
+function logicalEndSide(element: HTMLElement, axis: ScrollFadeAxis): ScrollFadePhysicalSide {
 	return physicalSideOfLogicalEnd(element, axis === 'inline' ? 'inline-end' : 'block-end');
 }
 
