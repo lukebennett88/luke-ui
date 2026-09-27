@@ -546,7 +546,7 @@ const inventoryCases: ReadonlyArray<{
 ];
 
 for (const inventoryCase of inventoryCases) {
-	test(inventoryCase.name, () => {
+	test(`${inventoryCase.name}`, () => {
 		expect(findDocsIssues(inventoryFixture(inventoryCase.overrides))).toEqual(
 			inventoryCase.expected,
 		);
