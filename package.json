@@ -39,8 +39,12 @@
 		"turbo": "catalog:",
 		"vite-plus": "catalog:"
 	},
-	"engines": {
-		"node": "24.x"
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": "24.x",
+			"onFail": "download"
+		}
 	},
 	"packageManager": "pnpm@12.6.0"
 }

@@ -80,12 +80,26 @@ an exclude list entry before they will install, which no amount of green CI will
 
 ## Tooling versions
 
-`mise.toml` pins and installs pnpm. The root `package.json` `packageManager` field repeats the exact
-version for metadata and tooling. Renovate groups both declarations. Omitting the hash avoids
+The root `package.json` `packageManager` field pins the exact pnpm version. Omitting the hash avoids
 Renovate's Corepack-based hash regeneration.
 
-`mise.toml` pins the Node major. Renovate's `mise` manager tracks it, and its node versioning treats
-odd majors as unstable, so it will only propose the next LTS line.
+The root `devEngines.runtime` field pins the project Node runtime, and `onFail: 'download'` makes
+pnpm provision it. pnpm resolves the `24.x` range to an exact version and records it in the
+lockfile, with a download and integrity hash for each platform.
+
+GitHub Actions sets up tooling with `pnpm/setup`. It installs the pnpm version from `packageManager`
+and the Node runtime from `devEngines.runtime`.
+
+A local developer bootstraps by installing pnpm itself. `pnpm install` then downloads the declared
+Node runtime and links it as `node_modules/.bin/node`, so `pnpm exec node` and pnpm scripts run it.
+Bare `node` is project-aware only when pnpm's global Node shim is the `node` found first on `PATH`.
+
+Cloudflare Pages keeps its host-level `NODE_VERSION=24` setting on the Pages project. Its build
+image does not document `devEngines.runtime` as a Node version selector.
+
+Renovate has no manager for `devEngines.runtime`, so `.github/renovate.json5` adds a
+`custom.jsonata` manager for it. That manager uses node versioning, which treats odd majors as
+unstable, so it only proposes the next LTS line.
 
 The workflows in `.github/workflows` pin actions at the major tag, so the only update Renovate can
 offer is a major tag move. They group into one `github actions` pull request and are never

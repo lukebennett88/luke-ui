@@ -9,7 +9,7 @@ on:
       - 'packages/@luke-ui/rainbow-sprinkles/**'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
-      - 'mise.toml'
+      - 'package.json'
       - '.github/scripts/**'
       - '.github/workflows/visual-baseline.yml'
       - '.github/workflows/visual-regression.yml'
@@ -33,11 +33,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v7
 
-      - name: Setup tooling with mise
-        uses: jdx/mise-action@v4
+      - name: Setup tooling
+        uses: pnpm/setup@v3
         with:
-          install: true
           cache: true
+          install: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

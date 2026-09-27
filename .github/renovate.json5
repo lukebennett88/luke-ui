@@ -7,6 +7,22 @@
 	],
 	labels: ['dependencies'],
 
+	// Renovate has no manager for `devEngines.runtime`, the root `package.json` field that pins the
+	// Node runtime. This JSONata query reads it whether it is an object or an array and extracts the
+	// `node` entry, root `package.json` only.
+	customManagers: [
+		{
+			customType: 'jsonata',
+			fileFormat: 'json',
+			managerFilePatterns: ['/^package\\.json$/'],
+			matchStrings: [
+				'devEngines.runtime[name = "node"].{ "depName": name, "currentValue": version }',
+			],
+			datasourceTemplate: 'node-version',
+			versioningTemplate: 'node',
+		},
+	],
+
 	// pnpm refuses to resolve any release younger than `minimumReleaseAge: 4320` (3 days) in
 	// pnpm-workspace.yaml, so a PR raised for a fresher release cannot generate a lockfile.
 	minimumReleaseAge: '3 days',
@@ -104,31 +120,21 @@
 			groupName: 'github actions',
 			automerge: false,
 		},
-		// The Node major is declared twice: `mise.toml` selects the version this repo runs on, and the
-		// root `engines.node` warns anyone installing with a package manager instead of mise. Both name a
-		// major only, so both need `replace` to stay that way. They take a rule each because the managers
-		// differ — mise reads one, npm the other — and share a `groupName` so a new LTS line moves them in
-		// a single PR. Covering only mise is what let the top-level `bump` rewrite `24.x` to an exact
-		// `24.19.0`, and it landed in the non-major group rather than a Node one.
 		{
-			matchManagers: ['mise'],
+			// The `devEngines.runtime` Node range from the custom manager above. `replace` keeps it a
+			// major-only `24.x`, where the top-level `bump` would rewrite it to an exact version. Node
+			// versioning treats odd majors as unstable, so only the next LTS line is proposed.
+			matchManagers: ['custom.jsonata'],
 			matchDepNames: ['node'],
 			groupName: 'node',
 			rangeStrategy: 'replace',
 			automerge: false,
 		},
 		{
+			// pnpm is declared only in the root `packageManager` field. Keep it with the regenerated
+			// lockfile in one PR.
 			matchManagers: ['npm'],
-			matchDepTypes: ['engines'],
-			matchDepNames: ['node'],
-			groupName: 'node',
-			rangeStrategy: 'replace',
-			automerge: false,
-		},
-		{
-			// pnpm is declared in mise and packageManager. Keep the tool mise installs and the project
-			// declaration in one PR, with the regenerated lockfile.
-			matchManagers: ['mise', 'npm'],
+			matchDepTypes: ['packageManager'],
 			matchDepNames: ['pnpm'],
 			groupName: 'pnpm',
 			rangeStrategy: 'replace',
