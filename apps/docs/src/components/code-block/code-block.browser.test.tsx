@@ -34,7 +34,7 @@ test('copies plain source including leading and trailing whitespace', async () =
 
 	expect(writeText).toHaveBeenCalledWith(source);
 	await expect.element(page.getByRole('button', { name: 'Copied' })).toBeVisible();
-	await expect.element(page.getByRole('status')).toHaveTextContent('Copied');
+	await expect.element(page.getByRole('status')).toMatchTextContent('Copied');
 });
 
 test('announces clipboard failure without claiming Copied', async () => {
@@ -46,7 +46,7 @@ test('announces clipboard failure without claiming Copied', async () => {
 		await userEvent.click(page.getByRole('button', { name: 'Copy' }));
 	});
 
-	await expect.element(page.getByRole('status')).toHaveTextContent('Could not copy code');
+	await expect.element(page.getByRole('status')).toMatchTextContent('Could not copy code');
 	await expect.element(page.getByRole('button', { name: 'Copy' })).toBeVisible();
 	expect(page.getByRole('button', { name: 'Copied' })).not.toBeInTheDocument();
 });

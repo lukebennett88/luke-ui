@@ -87,8 +87,8 @@ function TrayCombobox(
 }
 
 /** Opens the tray and waits for it to finish sliding up. */
-async function openTray() {
-	await userEvent.click(page.getByRole('button', { name: 'Country' }));
+async function openTray(triggerName = 'Country Select a country...', searchName = 'Country') {
+	await userEvent.click(page.getByRole('button', { name: triggerName }));
 
 	const dialog = page.getByRole('dialog');
 	await expect.element(dialog).toBeVisible();
@@ -98,15 +98,15 @@ async function openTray() {
 	await waitForOverlayEnter(overlay);
 
 	// React Aria moves focus to the search field asynchronously.
-	await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveFocus();
+	await expect.element(page.getByRole('searchbox', { name: searchName })).toHaveFocus();
 }
 
 /**
  * Types into the focused tray search field. Prefer this over document-level keyboard entry so
  * keystrokes stay on the input after `openTray` has waited for focus.
  */
-async function enterTraySearch(text: string) {
-	const searchbox = page.getByRole('searchbox', { name: 'Country' });
+async function enterTraySearch(text: string, searchName = 'Country') {
+	const searchbox = page.getByRole('searchbox', { name: searchName });
 	await expect.element(searchbox).toHaveFocus();
 	await userEvent.type(searchbox.element(), text, { skipClick: true });
 	await expect.element(searchbox).toHaveValue(text);
@@ -146,7 +146,9 @@ test('ComboboxTray positions the overlay at the scroll offset each time it opens
 
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-	await expect.element(page.getByRole('button', { name: 'Country' })).toHaveFocus();
+	await expect
+		.element(page.getByRole('button', { name: 'Country Select a country...' }))
+		.toHaveFocus();
 
 	window.scrollTo(0, 0);
 });
@@ -235,7 +237,7 @@ test('ComboboxTrayTrigger cannot open a read-only combobox', async () => {
 	const trigger = page.getByRole('button', { name: 'Country Australia' });
 	await expect.element(trigger).toBeDisabled();
 
-	await expect.element(trigger).toHaveTextContent('Australia');
+	await expect.element(trigger).toMatchTextContent('Australia');
 	expect(page.getByRole('dialog').elements()).toHaveLength(0);
 });
 
@@ -315,7 +317,9 @@ test('ComboboxTrayTrigger blocks submission of a required, unselected combobox w
 
 	expect(new FormData(form).getAll('country')).toHaveLength(1);
 
-	await userEvent.click(page.getByRole('button', { name: 'Country' }).element());
+	await userEvent.click(
+		page.getByRole('button', { name: 'Country* Select a country...' }).element(),
+	);
 	await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
@@ -339,16 +343,16 @@ test('ComboboxTrayTrigger allows a required combobox with allowsCustomValue to s
 		</form>,
 	);
 
-	await openTray();
-	await enterTraySearch('Freedonia');
+	await openTray('Country* Select a country...', 'Country*');
+	await enterTraySearch('Freedonia', 'Country*');
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
 	await userEvent.click(page.getByRole('button', { name: 'Submit' }).element());
 	expect(submitCount).toBe(1);
 
-	await openTray();
-	await userEvent.clear(page.getByRole('searchbox', { name: 'Country' }).element());
+	await openTray('Country* Select a country...', 'Country*');
+	await userEvent.clear(page.getByRole('searchbox', { name: 'Country*' }).element());
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
@@ -392,7 +396,7 @@ test('ComboboxTrayTrigger blocks a closed tray on a custom validation error', as
 	expect(submitCount).toBe(0);
 	await expect.element(page.getByText('Pick somewhere else.')).toBeVisible();
 
-	await userEvent.click(page.getByRole('button', { name: /Country/ }).element());
+	await userEvent.click(page.getByRole('button', { name: 'Country Australia' }).element());
 	await userEvent.click(page.getByRole('option', { name: 'Canada' }).element());
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
@@ -468,7 +472,9 @@ test('ComboboxTrayTrigger associates with an external form via the root form pro
 	form.requestSubmit();
 	expect(submitCount).toBe(0);
 
-	await userEvent.click(page.getByRole('button', { name: 'Country' }).element());
+	await userEvent.click(
+		page.getByRole('button', { name: 'Country* Select a country...' }).element(),
+	);
 	await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
@@ -575,7 +581,7 @@ test('ComboboxTrayTrigger leaves key-mode submission to React Aria', async () =>
 
 	expect(new FormData(form).getAll('country')).toEqual(['au']);
 
-	await openTray();
+	await openTray('Country Australia');
 	expect(new FormData(form).getAll('country')).toEqual(['au']);
 
 	await userEvent.click(page.getByRole('option', { name: 'Canada' }).element());

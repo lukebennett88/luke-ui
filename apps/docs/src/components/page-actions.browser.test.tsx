@@ -17,6 +17,7 @@ afterEach(() => {
 	root = undefined;
 	vi.restoreAllMocks();
 	vi.unstubAllGlobals();
+	vi.useRealTimers();
 });
 
 const githubUrl = 'https://github.com/example/repo/edit/main/page.mdx';
@@ -58,6 +59,11 @@ test('omits the React Aria and Source pills when the page has none', async () =>
 });
 
 test('reports the copied state after Copy Markdown succeeds', async () => {
+	// Fake only the revert timer: a real 1.5s timeout can fire before
+	// `expect.element` starts polling on a slow runner, so "Copied" is never
+	// observed. Vitest's browser-mode polling and `userEvent` keep their own
+	// saved timer references and are unaffected.
+	vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 	vi.stubGlobal(
 		'fetch',
 		vi.fn(async () => new Response('# Example', { status: 200 })),
@@ -77,6 +83,11 @@ test('reports the copied state after Copy Markdown succeeds', async () => {
 
 	await expect.element(page.getByRole('button', { name: 'Copied' })).toBeVisible();
 	expect(writeText).toHaveBeenCalledWith('# Example');
+
+	await act(async () => {
+		vi.advanceTimersByTime(1500);
+	});
+	await expect.element(page.getByRole('button', { name: 'Copy Markdown' })).toBeVisible();
 });
 
 test('does not claim success when the markdown fetch 404s', async () => {

@@ -122,7 +122,7 @@ test('runs the Button tone example with the docs comparison helper', async () =>
 	await expect
 		.poll(() => messages.find((message) => message.type === 'playground:success'))
 		.toEqual({ type: 'playground:success' });
-	expect(container).toHaveTextContent('Neutral');
+	expect(container).toMatchTextContent('Neutral');
 });
 
 test('posts the compileComponent error when parent playground code is invalid', async () => {
