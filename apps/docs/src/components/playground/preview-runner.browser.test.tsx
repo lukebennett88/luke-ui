@@ -1,8 +1,8 @@
 import '../../styles/app.css';
 import '@luke-ui/react/themes/paper/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
-import { isPlaygroundPreviewMessage } from '@luke-ui/playground-core';
-import type { PlaygroundPreviewMessage } from '@luke-ui/playground-core';
+import { isPlaygroundPreviewMessage } from '@luke-ui/playground-core/protocol';
+import type { PlaygroundPreviewMessage } from '@luke-ui/playground-core/protocol';
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -68,13 +68,31 @@ test('applies appearance messages to the preview document without storing them',
 	await mountPreview();
 
 	await act(async () => {
-		postFromParent({ colorMode: 'dark', themeIdentity: 'paper', type: 'playground:appearance' });
+		postFromParent({ colorMode: 'dark', themeIdentity: 'paper', type: 'luke-ui-docs:appearance' });
 		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 	});
 
 	await expect.poll(() => document.documentElement.dataset.colorMode).toBe('dark');
 	expect(document.documentElement).toHaveClass(paperThemeClassName);
 	expect(localStorage.getItem(THEME_IDENTITY_STORAGE_KEY)).toBeNull();
+});
+
+test('ignores an appearance message that is not from the parent', async () => {
+	await mountPreview();
+
+	await act(async () => {
+		window.dispatchEvent(
+			new MessageEvent('message', {
+				data: { colorMode: 'dark', themeIdentity: 'paper', type: 'luke-ui-docs:appearance' },
+				origin: window.location.origin,
+				source: window,
+			}),
+		);
+		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+	});
+
+	expect(document.documentElement.dataset.colorMode).not.toBe('dark');
+	expect(document.documentElement).not.toHaveClass(paperThemeClassName);
 });
 
 test('compiles parent playground code and posts success', async () => {

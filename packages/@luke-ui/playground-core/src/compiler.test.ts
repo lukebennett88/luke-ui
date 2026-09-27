@@ -1,6 +1,5 @@
 import { expect, test } from 'vite-plus/test';
-import { compileComponent, createRequireModule } from './compile.js';
-import { renderPlaygroundScopeModule } from './generate-scope.js';
+import { compileComponent, createPlaygroundCompiler, createRequireModule } from './compiler.js';
 
 test('compileComponent default-exports a function component from scope', () => {
 	const requireModule = createRequireModule({
@@ -27,10 +26,12 @@ test('createRequireModule throws for unknown specifiers', () => {
 	);
 });
 
-test('renderPlaygroundScopeModule emits import map source', () => {
-	const source = renderPlaygroundScopeModule(['react', '@luke-ui/react/box']);
-	expect(source).toContain("import * as react from 'react';");
-	expect(source).toContain("import * as luke_ui_react_box from '@luke-ui/react/box';");
-	expect(source).toContain("'react': react,");
-	expect(source).toContain("'@luke-ui/react/box': luke_ui_react_box,");
+test('createPlaygroundCompiler resolves imports from its scope', () => {
+	const { compileComponent: compile } = createPlaygroundCompiler({
+		'example-ui/greeting': { greeting: 'hello' },
+	});
+	const Component = compile(
+		"import { greeting } from 'example-ui/greeting';\nexport default function Demo() { return greeting; }",
+	);
+	expect((Component as () => string)()).toBe('hello');
 });

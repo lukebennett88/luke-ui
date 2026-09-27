@@ -142,6 +142,24 @@ export default defineConfig({
 					],
 				},
 			},
+			{
+				// These modules back the browser subpaths, so they must not pull in Node-only code.
+				excludeFiles: ['**/*.test.*', 'packages/@luke-ui/playground-core/src/generate.ts'],
+				files: ['packages/@luke-ui/playground-core/src/**/*.ts'],
+				rules: {
+					'no-restricted-imports': [
+						'error',
+						{
+							patterns: [
+								{
+									group: ['node:*', '**/generate.js'],
+									message: 'Browser subpaths must not import Node built-ins or generate.ts.',
+								},
+							],
+						},
+					],
+				},
+			},
 		],
 		plugins: ['import', 'jsx-a11y', 'react', 'typescript', 'vitest'],
 		rules: {

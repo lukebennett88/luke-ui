@@ -1,27 +1,26 @@
 // Default import + destructure because lz-string is CommonJS — named imports
 // fail static analysis in Vite's SSR module runner.
 import lzString from 'lz-string';
-import { encodeShape } from './shape.js';
 
 const { compressToEncodedURIComponent, decompressFromEncodedURIComponent } = lzString;
 
 const CODE_HASH_PARAM = 'code';
-const SHAPE_PARAM = 'shape';
 
-function getHashFragment(hash: string): string {
-	const value = hash.trim();
-	if (!value) return '';
-	if (value.startsWith('#')) return value.slice(1);
-
-	return value;
-}
-
-/** Returns the URL hash value (without the leading `#`) encoding the given code. */
-export function encodeCodeHash(code: string): string {
-	const params = new URLSearchParams({
-		[CODE_HASH_PARAM]: compressToEncodedURIComponent(code),
-		[SHAPE_PARAM]: encodeShape(code),
-	});
+/**
+ * Returns the URL hash value (without the leading `#`) encoding the given code.
+ *
+ * `extraParams` are appended after `code` in insertion order, so a host can
+ * carry its own data, such as a loading-skeleton shape, in the same hash.
+ */
+export function encodeCodeHash(code: string, extraParams?: Record<string, string>): string {
+	const params = new URLSearchParams();
+	params.set(CODE_HASH_PARAM, compressToEncodedURIComponent(code));
+	for (const [name, value] of Object.entries(extraParams ?? {})) {
+		if (name === CODE_HASH_PARAM) {
+			throw new Error(`encodeCodeHash: '${CODE_HASH_PARAM}' is reserved for the encoded code.`);
+		}
+		params.append(name, value);
+	}
 
 	return params.toString();
 }
@@ -34,4 +33,12 @@ export function decodeCodeHash(hash: string): string | null {
 
 	const code = decompressFromEncodedURIComponent(compressed);
 	return code || null;
+}
+
+function getHashFragment(hash: string): string {
+	const value = hash.trim();
+	if (!value) return '';
+	if (value.startsWith('#')) return value.slice(1);
+
+	return value;
 }

@@ -1,10 +1,11 @@
 import '../../styles/app.css';
-import { decodeCodeHash, encodeCodeHash } from '@luke-ui/playground-core';
+import { decodeCodeHash } from '@luke-ui/playground-core/hash';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import { encodeDocsPlaygroundHash } from '../../lib/docs-playground-hash.js';
 
 const PlaygroundEditor = (await import('./editor.js')).default;
 
@@ -23,7 +24,7 @@ afterEach(() => {
 test('monaco fills the editor pane and format updates source through onChange', async () => {
 	const hashRef = { current: window.location.hash };
 	renderPlayground(badlyFormatted, (code) => {
-		hashRef.current = `#${encodeCodeHash(code)}`;
+		hashRef.current = `#${encodeDocsPlaygroundHash(code)}`;
 		history.replaceState(null, '', hashRef.current);
 	});
 

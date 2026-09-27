@@ -1,13 +1,15 @@
+import { createPlaygroundCompiler } from '@luke-ui/playground-core/compiler';
+import { decodeCodeHash } from '@luke-ui/playground-core/hash';
 import {
-	createPlaygroundCompiler,
-	decodeCodeHash,
-	isTrustedParentMessage,
-} from '@luke-ui/playground-core';
-import type { PlaygroundPreviewMessage } from '@luke-ui/playground-core';
+	isPlaygroundParentMessage,
+	isTrustedMessageSource,
+} from '@luke-ui/playground-core/protocol';
+import type { PlaygroundPreviewMessage } from '@luke-ui/playground-core/protocol';
 import { useEffect, useState } from 'react';
 import type { ComponentType } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { playgroundScope } from '../../generated/playground-scope.generated';
+import { isPlaygroundAppearanceMessage } from '../../lib/playground-appearance-message.js';
 import { StoryWrapper } from '../../lib/story-wrapper';
 import { previewThemePrefs } from '../../lib/theme-prefs.js';
 
@@ -33,11 +35,12 @@ export default function PreviewRunner() {
 		};
 
 		const onMessage = (event: MessageEvent) => {
-			if (!isTrustedParentMessage(event, window.location.origin, window.parent)) return;
-			if (event.data.type === 'playground:code') {
+			if (!isTrustedMessageSource(event, window.location.origin, window.parent)) return;
+			if (isPlaygroundParentMessage(event.data)) {
 				runCode(event.data.code);
 				return;
 			}
+			if (!isPlaygroundAppearanceMessage(event.data)) return;
 			// The parent page has already stored these prefs, so only mirror them here.
 			previewThemePrefs({
 				colorModePreference: event.data.colorMode,

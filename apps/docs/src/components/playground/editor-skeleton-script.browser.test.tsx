@@ -1,7 +1,8 @@
-import { encodeCodeHash, toSkeletonLines } from '@luke-ui/playground-core';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, expect, test } from 'vite-plus/test';
 import shapeScript from '../../generated/editor-skeleton-script.iife.js?raw';
+import { encodeDocsPlaygroundHash } from '../../lib/docs-playground-hash.js';
+import { toSkeletonLines } from '../../lib/playground-editor-shape.js';
 import { EditorSkeleton } from './editor-skeleton';
 
 let container: HTMLElement | undefined;
@@ -44,8 +45,8 @@ function renderSkeletonThenRunScript(code: string, hash: string): HTMLElement {
 }
 
 test('rewrites the skeleton to the decoded shape for a shared link with URL-encoded commas', () => {
-	const hash = encodeCodeHash(MULTI_LINE_CODE);
-	// `encodeCodeHash` percent-encodes the `shape` param's commas via
+	const hash = encodeDocsPlaygroundHash(MULTI_LINE_CODE);
+	// `encodeDocsPlaygroundHash` percent-encodes the `shape` param's commas via
 	// `URLSearchParams` — assert that assumption stays true, since the whole
 	// point of this test is exercising that encoded form.
 	expect(hash).toContain('%2C');

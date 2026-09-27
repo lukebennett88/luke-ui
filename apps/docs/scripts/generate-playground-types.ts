@@ -8,14 +8,18 @@
  * type-dependency package is dropped from the allowlist below, imports from
  * it degrade to `any` in hovers — no user-visible errors.
  *
+ * The walk, virtual paths, and package resolution come from
+ * `@luke-ui/playground-core/generate`. This script owns the Luke UI package,
+ * the type-dependency allowlist, and the docs helpers file.
+ *
  * Runs via the `generate:playground` script (wired into `docs#generate` in
  * turbo.json). Requires @luke-ui/react to be built first (dist/*.d.ts).
  */
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
-import { dirname, join, relative, resolve, sep } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { createPlaygroundTypeMap, resolvePackageDir } from '@luke-ui/playground-core/generate';
 import * as z from 'zod';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -25,61 +29,7 @@ const reactPackageDir = resolve(scriptDir, '../../../packages/@luke-ui/react');
 const outputPath = resolve(scriptDir, '../src/generated/playground-types.generated.json');
 const docsHelpersVirtualPath = 'file:///docs/docs.tsx';
 
-const files: Record<string, string> = {};
-
-function virtualPath(packageName: string, relativePath: string): string {
-	return `file:///node_modules/${packageName}/${relativePath.split(sep).join('/')}`;
-}
-
-function addFile(packageName: string, packageDir: string, filePath: string): void {
-	files[virtualPath(packageName, relative(packageDir, filePath))] = readFileSync(filePath, 'utf8');
-}
-
-function addDocsFile(virtualPath: string, filePath: string): void {
-	files[virtualPath] = readFileSync(filePath, 'utf8');
-}
-
-function walk(dir: string, visit: (filePath: string) => void): void {
-	for (const entry of readdirSync(dir, { withFileTypes: true })) {
-		if (entry.name === 'node_modules') continue;
-		const entryPath = join(dir, entry.name);
-		if (entry.isDirectory()) walk(entryPath, visit);
-		else if (entry.isFile()) visit(entryPath);
-	}
-}
-
-/**
- * Resolves an installed package's directory from a dependent package.json.
- * Falls back to resolving the main entry and walking up, because some
- * packages (e.g. @internationalized/date) do not export ./package.json.
- */
-function resolvePackageDir(fromPackageJson: string, packageName: string): string {
-	const require = createRequire(fromPackageJson);
-	try {
-		return dirname(require.resolve(`${packageName}/package.json`));
-	} catch {
-		let dir = dirname(require.resolve(packageName));
-		while (dir !== dirname(dir)) {
-			const packageJsonPath = join(dir, 'package.json');
-			if (existsSync(packageJsonPath)) {
-				const { name } = z
-					.object({ name: z.string().optional() })
-					.parse(JSON.parse(readFileSync(packageJsonPath, 'utf8')));
-				if (name === packageName) return dir;
-			}
-			dir = dirname(dir);
-		}
-		throw new Error(`Could not locate package directory for ${packageName}`);
-	}
-}
-
-function addTypesPackage(packageName: string, packageDir: string): void {
-	walk(packageDir, (filePath) => {
-		if (!filePath.endsWith('.d.ts')) return;
-		addFile(packageName, packageDir, filePath);
-	});
-	addFile(packageName, packageDir, join(packageDir, 'package.json'));
-}
+const typeMap = createPlaygroundTypeMap();
 
 // @luke-ui/react — dist .d.ts files plus a package.json stub so Monaco's
 // bundler-mode resolution can follow the subpath exports map.
@@ -99,13 +49,9 @@ if (!existsSync(reactDistDir)) {
 	);
 	process.exit(1);
 }
-walk(reactDistDir, (filePath) => {
-	if (!filePath.endsWith('.d.ts')) return;
-	addFile('@luke-ui/react', reactPackageDir, filePath);
-});
-files[virtualPath('@luke-ui/react', 'package.json')] = JSON.stringify({
-	exports: reactPackageJson.exports,
-	name: reactPackageJson.name,
+typeMap.addPackage('@luke-ui/react', reactPackageDir, {
+	packageJson: { exports: reactPackageJson.exports, name: reactPackageJson.name },
+	typesDir: 'dist',
 });
 
 // External type dependencies reachable from @luke-ui/react's public types.
@@ -139,11 +85,12 @@ const externalTypePackages: Array<[string, string]> = [
 	['zod', resolvePackageDir(docsPackageJsonPath, 'zod')],
 ];
 for (const [packageName, packageDir] of externalTypePackages) {
-	addTypesPackage(packageName, packageDir);
+	typeMap.addPackage(packageName, packageDir);
 }
 
-addDocsFile(docsHelpersVirtualPath, join(docsExamplesDir, 'docs.tsx'));
+typeMap.addFile(docsHelpersVirtualPath, readFileSync(join(docsExamplesDir, 'docs.tsx'), 'utf8'));
 
+const files = typeMap.files();
 const output = JSON.stringify(files);
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, output);

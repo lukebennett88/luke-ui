@@ -5,7 +5,12 @@
 	"type": "module",
 	"sideEffects": false,
 	"exports": {
-		".": "./dist/index.js",
+		"./compiler": "./dist/compiler.js",
+		"./format": "./dist/format.js",
+		"./generate": "./dist/generate.js",
+		"./hash": "./dist/hash.js",
+		"./protocol": "./dist/protocol.js",
+		"./specifiers": "./dist/specifiers.js",
 		"./package.json": "./package.json"
 	},
 	"scripts": {
@@ -31,5 +36,8 @@
 		"react": "catalog:",
 		"typescript": "catalog:",
 		"vite-plus": "catalog:"
+	},
+	"peerDependencies": {
+		"react": "catalog:"
 	}
 }

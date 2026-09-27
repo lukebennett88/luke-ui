@@ -1,22 +1,235 @@
 import { expect, test } from 'vite-plus/test';
-import { isPlaygroundParentMessage } from './protocol.js';
+import {
+	createPlaygroundPageSession,
+	isPlaygroundParentMessage,
+	isTrustedMessageSource,
+	isTrustedParentMessage,
+} from './protocol.js';
+import type { PlaygroundMessageEvent, PlaygroundPagePorts } from './protocol.js';
 
-test('accepts a complete playground appearance update', () => {
-	expect(
-		isPlaygroundParentMessage({
-			colorMode: 'system',
-			themeIdentity: 'paper',
-			type: 'playground:appearance',
-		}),
-	).toBe(true);
+const ORIGIN = 'https://docs.test';
+const VALID_CODE = 'export default function Preview() { return null; }';
+
+type MessageBus = {
+	listenPage: (listener: (event: PlaygroundMessageEvent) => void) => void;
+	listenPreview: (listener: (event: PlaygroundMessageEvent) => void) => void;
+	page: object;
+	ports: PlaygroundPagePorts;
+	postFromPreview: (data: unknown, source?: object) => void;
+};
+
+function createMessageBus(): MessageBus {
+	const page = { role: 'page' };
+	let pageListener: ((event: PlaygroundMessageEvent) => void) | undefined;
+	let previewListener: ((event: PlaygroundMessageEvent) => void) | undefined;
+
+	const previewWindow = {
+		postMessage(data: unknown, targetOrigin: string) {
+			if (targetOrigin !== ORIGIN) return;
+			previewListener?.({ data, origin: ORIGIN, source: page });
+		},
+	};
+
+	return {
+		listenPage(listener) {
+			pageListener = listener;
+		},
+		listenPreview(listener) {
+			previewListener = listener;
+		},
+		page,
+		ports: { origin: ORIGIN, previewWindow },
+		postFromPreview(data, source = previewWindow) {
+			pageListener?.({ data, origin: ORIGIN, source });
+		},
+	};
+}
+
+function attachFakePreview(
+	bus: MessageBus,
+	compile: (code: string) => { message: string; ok: false } | { ok: true },
+): void {
+	bus.listenPreview((event) => {
+		if (!isTrustedParentMessage(event, ORIGIN, bus.page)) return;
+		if (event.data.type !== 'playground:code') return;
+		const result = compile(event.data.code);
+		if (result.ok) {
+			bus.postFromPreview({ type: 'playground:success' });
+			return;
+		}
+		bus.postFromPreview({ message: result.message, type: 'playground:error' });
+	});
+	bus.postFromPreview({ type: 'playground:ready' });
+}
+
+test('sends code and gets a result when the preview announced itself first', () => {
+	const bus = createMessageBus();
+	const results: Array<string> = [];
+	attachFakePreview(bus, () => ({ ok: true }));
+
+	const session = createPlaygroundPageSession();
+	bus.listenPage((event) => {
+		session.handlePreviewMessage(event, bus.ports, {
+			currentCode: VALID_CODE,
+			onError: (message) => results.push(message),
+			onReady: () => {},
+			onSuccess: () => results.push('success'),
+		});
+	});
+	session.postCode(VALID_CODE, bus.ports, { unguarded: true });
+
+	expect(results).toEqual(['success']);
+	expect(session.isReady).toBe(true);
 });
 
-test('rejects an unknown playground appearance', () => {
+test('surfaces a compilation error from the preview', () => {
+	const bus = createMessageBus();
+	const results: Array<string> = [];
+	const compileError = 'Playground code must default-export a React component.';
+	attachFakePreview(bus, () => ({ message: compileError, ok: false }));
+
+	const session = createPlaygroundPageSession();
+	bus.listenPage((event) => {
+		session.handlePreviewMessage(event, bus.ports, {
+			currentCode: 'const broken = true;',
+			onError: (message) => results.push(message),
+			onReady: () => {},
+			onSuccess: () => results.push('success'),
+		});
+	});
+	session.postCode('const broken = true;', bus.ports, { unguarded: true });
+
+	expect(results).toEqual([compileError]);
+});
+
+test('runs onPreviewReady before replaying code when the preview announces ready', () => {
+	const posted: Array<unknown> = [];
+	const previewWindow = {
+		postMessage(data: unknown) {
+			posted.push(data);
+		},
+	};
+	const session = createPlaygroundPageSession();
+
+	session.handlePreviewMessage(
+		{ data: { type: 'playground:ready' }, origin: ORIGIN, source: previewWindow },
+		{ origin: ORIGIN, previewWindow },
+		{
+			currentCode: VALID_CODE,
+			onError: () => {},
+			onPreviewReady: (ports) => {
+				ports.previewWindow?.postMessage({ type: 'host:appearance' }, ports.origin);
+			},
+			onReady: () => {},
+			onSuccess: () => {},
+		},
+	);
+
+	expect(posted).toEqual([
+		{ type: 'host:appearance' },
+		{ code: VALID_CODE, type: 'playground:code' },
+	]);
+});
+
+test('does not run onPreviewReady for a result message', () => {
+	let previewReadyCalls = 0;
+	const previewWindow = { postMessage: () => {} };
+	const session = createPlaygroundPageSession();
+
+	session.handlePreviewMessage(
+		{ data: { type: 'playground:success' }, origin: ORIGIN, source: previewWindow },
+		{ origin: ORIGIN, previewWindow },
+		{
+			currentCode: VALID_CODE,
+			onError: () => {},
+			onPreviewReady: () => {
+				previewReadyCalls += 1;
+			},
+			onReady: () => {},
+			onSuccess: () => {},
+		},
+	);
+
+	expect(previewReadyCalls).toBe(0);
+});
+
+test('drops code until the preview has spoken, unless the post is unguarded', () => {
+	const posted: Array<unknown> = [];
+	const previewWindow = {
+		postMessage(data: unknown) {
+			posted.push(data);
+		},
+	};
+	const session = createPlaygroundPageSession();
+	const ports = { origin: ORIGIN, previewWindow };
+
+	session.postCode(VALID_CODE, ports);
+	expect(posted).toEqual([]);
+
+	session.postCode(VALID_CODE, ports, { unguarded: true });
+	expect(posted).toEqual([{ code: VALID_CODE, type: 'playground:code' }]);
+});
+
+test('ignores a same-origin message from a frame that is not the preview', () => {
+	const session = createPlaygroundPageSession();
+	let called = false;
+	const previewWindow = { postMessage: () => {} };
+
+	session.handlePreviewMessage(
+		{ data: { type: 'playground:success' }, origin: ORIGIN, source: { role: 'other' } },
+		{ origin: ORIGIN, previewWindow },
+		{
+			currentCode: VALID_CODE,
+			onError: () => {
+				called = true;
+			},
+			onReady: () => {
+				called = true;
+			},
+			onSuccess: () => {
+				called = true;
+			},
+		},
+	);
+
+	expect(called).toBe(false);
+	expect(session.isReady).toBe(false);
+});
+
+test('preview ignores a same-origin message that is not from its parent', () => {
+	const parent = { role: 'parent' };
+	const other = { role: 'other' };
+	const code = { code: VALID_CODE, type: 'playground:code' };
+
 	expect(
-		isPlaygroundParentMessage({
-			colorMode: 'sepia',
-			themeIdentity: 'custom',
-			type: 'playground:appearance',
-		}),
+		isTrustedParentMessage({ data: code, origin: ORIGIN, source: parent }, ORIGIN, parent),
+	).toBe(true);
+	expect(
+		isTrustedParentMessage({ data: code, origin: ORIGIN, source: other }, ORIGIN, parent),
 	).toBe(false);
+});
+
+test('trusts a message source by origin and window only', () => {
+	const parent = { role: 'parent' };
+	const hostMessage = { type: 'host:anything' };
+
+	expect(
+		isTrustedMessageSource({ data: hostMessage, origin: ORIGIN, source: parent }, ORIGIN, parent),
+	).toBe(true);
+	expect(
+		isTrustedMessageSource(
+			{ data: hostMessage, origin: 'https://other.test', source: parent },
+			ORIGIN,
+			parent,
+		),
+	).toBe(false);
+	expect(
+		isTrustedParentMessage({ data: hostMessage, origin: ORIGIN, source: parent }, ORIGIN, parent),
+	).toBe(false);
+});
+
+test('accepts only the code message from the parent', () => {
+	expect(isPlaygroundParentMessage({ code: VALID_CODE, type: 'playground:code' })).toBe(true);
+	expect(isPlaygroundParentMessage({ type: 'playground:reset' })).toBe(false);
+	expect(isPlaygroundParentMessage({ code: 1, type: 'playground:code' })).toBe(false);
 });

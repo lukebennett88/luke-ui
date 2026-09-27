@@ -1,13 +1,19 @@
 /**
- * Docs-host playground runtime allowlist: Luke UI exports plus third-party and
- * `#docs` helpers that documented examples import in the playground.
+ * Docs-host playground runtime allowlist: `@luke-ui/react` subpath exports,
+ * the React specifiers the compiler needs, and the third-party and `#docs`
+ * helpers that documented examples import in the playground.
  *
- * Core stays generic; docs owns the host-specific extras below.
+ * `@luke-ui/playground-core/specifiers` turns an `exports` map into
+ * specifiers. Docs owns the package name, its `package.json` path, and the list
+ * order below.
  */
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { playgroundRuntimeSpecifierList } from '@luke-ui/playground-core';
+import {
+	packageExportSpecifiers,
+	PLAYGROUND_BASE_SPECIFIERS,
+} from '@luke-ui/playground-core/specifiers';
 import * as z from 'zod';
 
 /**
@@ -45,13 +51,12 @@ function readLukeUiReactExports(
 export function docsPlaygroundRuntimeSpecifierList(
 	reactExports: Record<string, string> = readLukeUiReactExports(),
 ): Array<string> {
-	return playgroundRuntimeSpecifierList({
-		extraSpecifiers: [
-			...DOCS_PLAYGROUND_THIRD_PARTY_SPECIFIERS,
-			...DOCS_PLAYGROUND_DOCS_SPECIFIERS,
-		],
-		reactExports,
-	});
+	return [
+		...packageExportSpecifiers('@luke-ui/react', reactExports),
+		...PLAYGROUND_BASE_SPECIFIERS,
+		...DOCS_PLAYGROUND_THIRD_PARTY_SPECIFIERS,
+		...DOCS_PLAYGROUND_DOCS_SPECIFIERS,
+	];
 }
 
 let cachedSpecifiers: ReadonlySet<string> | undefined;

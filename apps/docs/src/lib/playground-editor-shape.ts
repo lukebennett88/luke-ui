@@ -1,3 +1,11 @@
+/**
+ * The loading skeleton's view of playground code: one row per line, sized by
+ * indent and length. The editor skeleton renders it, and the shared-link hash
+ * carries it so `editor-skeleton-script.ts` can reshape the skeleton before
+ * hydration. Client code and the Node highlight plugin both import this, so it
+ * must not import Node built-ins.
+ */
+
 /** Layout of one skeleton code line: leading indent and content length, in `ch`. */
 export type SkeletonLine = { indent: number; length: number };
 
@@ -19,8 +27,8 @@ export function toSkeletonLines(code: string): Array<SkeletonLine> {
 
 /**
  * Compact `indent.length` pairs (e.g. `0.44,0.0,2.30`) carried in the URL hash
- * so a pre-hydration host script can mirror shared code before the decompressor
- * is available.
+ * so a pre-hydration script can mirror shared code before the decompressor is
+ * available.
  */
 export function encodeShape(code: string): string {
 	return toSkeletonLines(code)

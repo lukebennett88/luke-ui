@@ -1,9 +1,5 @@
-import {
-	createPlaygroundPageSession,
-	decodeCodeHash,
-	encodeCodeHash,
-} from '@luke-ui/playground-core';
-import type { PlaygroundAppearanceMessage } from '@luke-ui/playground-core';
+import { decodeCodeHash } from '@luke-ui/playground-core/hash';
+import { createPlaygroundPageSession } from '@luke-ui/playground-core/protocol';
 import { cx } from '@luke-ui/react/utils';
 import { ClientOnly, createFileRoute } from '@tanstack/react-router';
 import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState } from 'react';
@@ -21,6 +17,9 @@ import type { ViewportWidth } from '../../components/playground/viewport-toggle'
 import { SiteNav } from '../../components/site-nav.js';
 import { useDocsTheme } from '../../components/theme-controls';
 import { withBasePath } from '../../lib/base-path.js';
+import { encodeDocsPlaygroundHash } from '../../lib/docs-playground-hash.js';
+import { postPlaygroundAppearance } from '../../lib/playground-appearance-message.js';
+import type { PlaygroundAppearance } from '../../lib/playground-appearance-message.js';
 import rawDefaultCode from '../../lib/playground-default-code.tsx?raw';
 
 const PlaygroundEditor = lazy(() => import('../../components/playground/editor'));
@@ -51,7 +50,7 @@ function Playground() {
 	const sessionRef = useRef(createPlaygroundPageSession());
 	const codeRef = useRef(initialCode);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-	const appearanceRef = useRef<Omit<PlaygroundAppearanceMessage, 'type'> | null>(null);
+	const appearanceRef = useRef<PlaygroundAppearance | null>(null);
 
 	const ports = () => ({
 		origin: window.location.origin,
@@ -64,16 +63,21 @@ function Playground() {
 	const postAppearance = useCallback(() => {
 		const appearance = { colorMode: colorModePreference, themeIdentity };
 		appearanceRef.current = appearance;
-		sessionRef.current.postAppearance(appearance, ports());
+		postPlaygroundAppearance(appearance, ports());
 	}, [colorModePreference, themeIdentity]);
 
 	useEffect(() => {
 		const session = sessionRef.current;
 		const onMessage = (event: MessageEvent) => {
 			session.handlePreviewMessage(event, ports(), {
-				appearance: appearanceRef.current,
 				currentCode: codeRef.current,
 				onError: markError,
+				onPreviewReady: (readyPorts) => {
+					// The preview applies the theme before it renders the replayed code.
+					if (appearanceRef.current !== null) {
+						postPlaygroundAppearance(appearanceRef.current, readyPorts);
+					}
+				},
 				onReady: markReady,
 				onSuccess: markSuccess,
 			});
@@ -107,7 +111,7 @@ function Playground() {
 		codeRef.current = code;
 		clearTimeout(debounceRef.current);
 		debounceRef.current = setTimeout(() => {
-			history.replaceState(null, '', `#${encodeCodeHash(code)}`);
+			history.replaceState(null, '', `#${encodeDocsPlaygroundHash(code)}`);
 			postCode(code);
 		}, CODE_DEBOUNCE_MS);
 	};

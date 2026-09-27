@@ -2,11 +2,12 @@
  * Registers Prettier as the playground's Monaco document formatting provider.
  *
  * Docs is the only Monaco host, so the provider registration, the save
- * keybinding, and the dedupe live here. `@luke-ui/playground-core` keeps the
- * host-agnostic formatting logic that `formatPlaygroundSource` wraps.
+ * keybinding, and the dedupe live here. The docs Prettier style lives in
+ * `lib/playground-format.ts`, and `@luke-ui/playground-core/format` loads
+ * Prettier and runs it.
  */
-import { formatPlaygroundSource } from '@luke-ui/playground-core';
 import type * as Monaco from 'monaco-editor';
+import { formatDocsPlaygroundSource } from '../../lib/playground-format.js';
 
 const FORMAT_DOCUMENT_ACTION_ID = 'editor.action.formatDocument';
 const FORMAT_SHORTCUT_ACTION_ID = 'luke-ui.playground.formatDocumentShortcut';
@@ -26,7 +27,7 @@ function createPrettierFormattingProvider(): Monaco.languages.DocumentFormatting
 		async provideDocumentFormattingEdits(model) {
 			const original = model.getValue();
 			try {
-				const formatted = await formatPlaygroundSource(original);
+				const formatted = await formatDocsPlaygroundSource(original);
 				return documentFormattingEdits(original, formatted, model.getFullModelRange());
 			} catch (error) {
 				// oxlint-disable-next-line no-console
