@@ -97,9 +97,9 @@ Bare `node` is project-aware only when pnpm's global Node shim is the `node` fou
 Cloudflare Pages keeps its host-level `NODE_VERSION=24` setting on the Pages project. Its build
 image does not document `devEngines.runtime` as a Node version selector.
 
-Renovate has no manager for `devEngines.runtime`, so `.github/renovate.json5` adds a
-`custom.jsonata` manager for it. That manager uses node versioning, which treats odd majors as
-unstable, so it only proposes the next LTS line.
+Renovate has no manager for `devEngines.runtime`, so `.github/renovate.json5` adds a `custom.regex`
+manager for it. The regex captures only the major before `.x`, so an update PR rewrites `24.x` to
+the next `<major>.x`. Renovate follows Node's release schedule and only proposes stable LTS lines.
 
 The workflows in `.github/workflows` pin actions at the major tag, so the only update Renovate can
 offer is a major tag move. They group into one `github actions` pull request and are never

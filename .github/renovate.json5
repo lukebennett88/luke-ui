@@ -8,16 +8,16 @@
 	labels: ['dependencies'],
 
 	// Renovate has no manager for `devEngines.runtime`, the root `package.json` field that pins the
-	// Node runtime. This JSONata query reads it whether it is an object or an array and extracts the
-	// `node` entry, root `package.json` only.
+	// Node runtime. This regex finds the `runtime` object whose `name` is `node` and captures only the
+	// major before `.x`, so an update rewrites the digits and keeps the `<major>.x` form.
 	customManagers: [
 		{
-			customType: 'jsonata',
-			fileFormat: 'json',
+			customType: 'regex',
 			managerFilePatterns: ['/^package\\.json$/'],
 			matchStrings: [
-				'devEngines.runtime[name = "node"].{ "depName": name, "currentValue": version }',
+				'"runtime"\\s*:\\s*\\{[^}]*?"name"\\s*:\\s*"node"[^}]*?"version"\\s*:\\s*"(?<currentValue>\\d+)\\.x"',
 			],
+			depNameTemplate: 'node',
 			datasourceTemplate: 'node-version',
 			versioningTemplate: 'node',
 		},
@@ -121,10 +121,10 @@
 			automerge: false,
 		},
 		{
-			// The `devEngines.runtime` Node range from the custom manager above. `replace` keeps it a
-			// major-only `24.x`, where the top-level `bump` would rewrite it to an exact version. Node
-			// versioning treats odd majors as unstable, so only the next LTS line is proposed.
-			matchManagers: ['custom.jsonata'],
+			// The `devEngines.runtime` Node major from the regex manager above. `replace` swaps the major,
+			// where the top-level `bump` would rewrite it to an exact version. Renovate follows Node's
+			// release schedule and only proposes stable LTS lines.
+			matchManagers: ['custom.regex'],
 			matchDepNames: ['node'],
 			groupName: 'node',
 			rangeStrategy: 'replace',
