@@ -33,7 +33,7 @@ jobs:
           install: false
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --no-runtime
 
       - name: Install Playwright Chromium
         run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
@@ -62,7 +62,7 @@ jobs:
           install: false
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --no-runtime
 
       - name: Install Playwright Chromium
         run: pnpm --filter docs exec playwright install --with-deps chromium
