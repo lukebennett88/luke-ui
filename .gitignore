@@ -5,11 +5,11 @@ __screenshots__/
 .claude/worktrees/
 .DS_Store
 .env
-.netlify
 .source/
 .tanstack/
 .turbo/
 .visual-captures/
+.wrangler/
 .vitest-attachments/
 .vitest/
 *.local

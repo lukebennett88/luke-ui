@@ -98,10 +98,6 @@
 			groupName: 'turbo',
 		},
 		{
-			matchPackageNames: ['@netlify/**'],
-			groupName: 'netlify',
-		},
-		{
 			// Workflows pin actions at the major tag, so the only update Renovate can offer is a major tag
 			// move. Read the changelog before merging one.
 			matchManagers: ['github-actions'],

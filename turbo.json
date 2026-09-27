@@ -83,7 +83,7 @@
 		"docs#build": {
 			"dependsOn": ["docs#generate", "^build"],
 			"env": ["SITE_URL", "VITE_BASE_URL"],
-			"outputs": [".netlify/**", ".output/**", ".source/**", "dist/**"]
+			"outputs": [".output/**", ".source/**", "dist/**"]
 		},
 		"docs#check:format": {
 			"dependsOn": ["docs#generate"]

@@ -3,8 +3,8 @@
  * it depends only on the standard `Request`/`Response`/`fetch` types, with the
  * request-forwarding (`next`) and Markdown-fetching (`fetch`) side effects
  * injected via `HandleRequestDeps`, so any host can drive it from a thin
- * adapter — see `netlify/edge-functions/agent-negotiation.ts` for the Netlify
- * one. Kept free of imports so an edge bundler can load it directly.
+ * adapter — see `functions/_middleware.ts` for the Cloudflare Pages one. Kept
+ * free of imports so an edge bundler can load it directly.
  */
 
 const Q_VALUE_PATTERN = /^(?:0(?:\.\d{0,3})?|1(?:\.0{0,3})?)$/;
@@ -106,11 +106,12 @@ async function handleMarkdownRequest(
 
 	if (md.status === 200 && isMarkdown) return markdownResponse(request.method, md, 200);
 
-	// The deployed SSR handler 406s any request whose Accept isn't
-	// HTML-compatible, so re-request with Accept: text/html before falling
-	// through to it. That's the only way to see whether the path is a real
-	// page (200/redirect, e.g. a page with no Markdown twin) or genuinely
-	// missing (404).
+	// TanStack Start's SSR handler (the dev server, or any SSR host) 406s any
+	// request whose Accept isn't HTML-compatible, so re-request with
+	// Accept: text/html before falling through to it. That's the only way to
+	// see whether the path is a real page (200/redirect, e.g. a page with no
+	// Markdown twin) or genuinely missing (404). On a static host this
+	// re-request is harmless.
 	const htmlHeaders = new Headers(request.headers);
 	htmlHeaders.set('Accept', 'text/html');
 	const htmlRequest = new Request(request.url, { headers: htmlHeaders, method: request.method });

@@ -129,10 +129,10 @@ test('passes a browser Accept header through and merges Vary', async () => {
 });
 
 /**
- * Simulates Netlify's SSR function, which 406s any request whose Accept
- * isn't HTML-compatible. `next` is called with no request when the edge
- * function passes the original request through unmodified, so that case
- * checks the request's own Accept header instead.
+ * Simulates TanStack Start's SSR handler, which 406s any request whose Accept
+ * isn't HTML-compatible. `next` is called with no request when the adapter
+ * passes the original request through unmodified, so that case checks the
+ * request's own Accept header instead.
  */
 function makeRealisticNext(originalAccept: string) {
 	return vi.fn<(request?: Request) => Promise<Response>>(async (request) => {

@@ -5,6 +5,10 @@ export default {
 		cycles: 'error',
 	},
 	workspaces: {
+		'.': {
+			entry: ['functions/**/*.ts'],
+			project: ['functions/**/*.ts'],
+		},
 		'apps/docs': {
 			entry: [
 				'scripts/**/*.ts',
