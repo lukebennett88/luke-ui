@@ -1,9 +1,5 @@
 import { expect, test } from 'vite-plus/test';
-import {
-	canRunInPlayground,
-	importSpecifiersFromSource,
-	packageExportSpecifiers,
-} from './specifiers.js';
+import { canRunInPlayground, packageExportSpecifiers } from './specifiers.js';
 
 const exportsMap = {
 	'./button': './dist/button.js',
@@ -94,20 +90,23 @@ test('resolves nested conditions objects', () => {
 });
 
 test('resolves the first active key in object order, not conditions list order', () => {
+	// Both conditions are active, and only `.mjs` is a runnable target, so which
+	// key wins is observable: the key that comes first in the object resolves,
+	// and its target is what isRunnableTarget sees.
 	expect(
 		packageExportSpecifiers(
 			'example-ui',
 			{ './a': { import: './a.mjs', require: './a.cjs' } },
-			{ conditions: ['import', 'require'] },
+			{ conditions: ['import', 'require'], isRunnableTarget: (target) => target.endsWith('.mjs') },
 		),
 	).toEqual(['example-ui/a']);
 	expect(
 		packageExportSpecifiers(
 			'example-ui',
 			{ './a': { require: './a.cjs', import: './a.mjs' } },
-			{ conditions: ['import', 'require'] },
+			{ conditions: ['import', 'require'], isRunnableTarget: (target) => target.endsWith('.mjs') },
 		),
-	).toEqual(['example-ui/a']);
+	).toEqual([]);
 });
 
 test('falls back to default when no other condition is active', () => {
@@ -172,11 +171,10 @@ test('treats a relative import as unresolvable in the playground', () => {
 		'',
 	].join('\n');
 
-	expect(importSpecifiersFromSource(source)).toEqual(['example-ui/box', './decorative-box.js']);
 	expect(canRunInPlayground(source, specifiers)).toBe(false);
 });
 
-test('treats a source that only imports known specifiers as runnable', () => {
+test('treats a source that only imports known specifiers, including side-effect imports, as runnable', () => {
 	const source = [
 		"import { Button } from 'example-ui/button';",
 		"import { Helper } from '#local';",
@@ -185,4 +183,10 @@ test('treats a source that only imports known specifiers as runnable', () => {
 	].join('\n');
 
 	expect(canRunInPlayground(source, specifiers)).toBe(true);
+});
+
+test('treats an unknown side-effect import as unresolvable in the playground', () => {
+	const source = ["import 'react';", "import './side-effect.css';", ''].join('\n');
+
+	expect(canRunInPlayground(source, specifiers)).toBe(false);
 });

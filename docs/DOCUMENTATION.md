@@ -485,9 +485,12 @@ Examples that import a relative module, or anything else the preview cannot `req
 button.
 
 User code compiles in the browser with sucrase and can import `react` and any `@luke-ui/react/*`
-subpath. The import map, editor types, and pre-hydration skeleton are generated as part of
-`generate`. New component subpaths in `@luke-ui/react`'s `exports` map are picked up automatically.
-The preview iframe only accepts messages from its parent.
+subpath. The compiler only rejects a missing default export (`undefined` or `null`) and returns
+`unknown` rather than a React component type, because it does not depend on React to validate the
+result. The preview runner casts the result to render it, and its `ErrorBoundary` reports an invalid
+export as a render-time error. The import map, editor types, and pre-hydration skeleton are
+generated as part of `generate`. New component subpaths in `@luke-ui/react`'s `exports` map are
+picked up automatically. The preview iframe only accepts messages from its parent.
 
 ### Playground core
 
@@ -504,9 +507,23 @@ It has no root entrypoint. Import each subpath directly:
 | `@luke-ui/playground-core/specifiers` | Browser, Node | Base React specifiers, `exports`-map specifiers, and the import allowlist check             |
 | `@luke-ui/playground-core/generate`   | Node          | Scope-module rendering and the editor type-map builder                                      |
 
-`generate` imports Node built-ins. The other subpaths must not import it or any `node:` module, and
-a lint rule in the root `vite.config.ts` enforces that. The compiler returns a React component type,
-so the package declares `react` as a peer dependency.
+`generate`'s implementation lives under `src/node/`, the only directory allowed to import Node
+built-ins. Lint rules in the root `vite.config.ts` stop the other subpaths from importing Node
+built-ins or anything under `src/node/`, and their type check runs without Node types. The compiler
+does not import React at runtime or in its types, so the package has no `react` peer dependency. A
+host renders the compiled result with its own React.
+
+Each subpath exports only what a host needs to call it:
+
+- `compiler`: `createPlaygroundCompiler(scope)` and the `PlaygroundScope` type.
+- `protocol`: `createPlaygroundPageSession(options)`, `isPlaygroundCodeMessage`,
+  `isPlaygroundPreviewMessage`, `isTrustedMessageSource`, and the session, message, port, and result
+  types. The session takes `getPorts`, `getCode`, `onResult`, and an optional `onPreviewReady`, and
+  returns `handleMessage`, `postCode`, and `resync`.
+- `specifiers`: `packageExportSpecifiers`, `PLAYGROUND_BASE_SPECIFIERS`, `canRunInPlayground`, and
+  the `PackageExportTarget`/`PackageExportsMap` types.
+- `generate`: `createPlaygroundTypeMap`, `renderPlaygroundScopeModule`, `playgroundVirtualPath`, and
+  `resolvePackageDir`.
 
 Docs supplies everything specific to Luke UI:
 
@@ -521,7 +538,9 @@ Docs supplies everything specific to Luke UI:
 - `scripts/generate-playground-scope.ts` and `scripts/generate-playground-types.ts` pass Luke UI
   paths, the type-package allowlist, and the output paths to `generate`.
 
-The docs route owns hash updates and debounce. The preview runner calls the compiler.
+The docs route owns hash updates and debounce. It configures one `createPlaygroundPageSession` per
+mount and calls `resync()` on mount to cover a preview that announced ready before the message
+listener attached. The preview runner calls the compiler.
 
 `@luke-ui/playground-core` builds like `@luke-ui/react`: `exports` points at `dist`, so run its
 `build` before consuming it and its `dev` script to watch it. Turbo orders this automatically for

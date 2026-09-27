@@ -17,7 +17,9 @@
 		"build": "vp pack",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
-		"check:types": "tsc --noEmit -p tsconfig.json",
+		"check:types": "pnpm run check:types:browser && pnpm run check:types:node",
+		"check:types:browser": "tsc --noEmit -p tsconfig.browser.json",
+		"check:types:node": "tsc --noEmit -p tsconfig.node.json",
 		"clean": "rm -rf .turbo dist",
 		"dev": "vp pack --watch",
 		"fix:format": "vp fmt . --write",
@@ -36,8 +38,5 @@
 		"react": "catalog:",
 		"typescript": "catalog:",
 		"vite-plus": "catalog:"
-	},
-	"peerDependencies": {
-		"react": "catalog:"
 	}
 }

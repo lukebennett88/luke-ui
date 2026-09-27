@@ -143,17 +143,20 @@ export default defineConfig({
 				},
 			},
 			{
-				// These modules back the browser subpaths, so they must not pull in Node-only code.
-				excludeFiles: ['**/*.test.*', 'packages/@luke-ui/playground-core/src/generate.ts'],
+				// These modules back the browser subpaths, so they must not pull in
+				// Node-only code, including the Node-only implementation under `node/`.
+				excludeFiles: ['**/*.test.*', 'packages/@luke-ui/playground-core/src/node/**'],
 				files: ['packages/@luke-ui/playground-core/src/**/*.ts'],
 				rules: {
+					'import/no-nodejs-modules': 'error',
 					'no-restricted-imports': [
 						'error',
 						{
 							patterns: [
 								{
-									group: ['node:*', '**/generate.js'],
-									message: 'Browser subpaths must not import Node built-ins or generate.ts.',
+									group: ['**/node/**'],
+									message:
+										'Browser subpaths must not import Node built-ins or the node/ directory.',
 								},
 							],
 						},

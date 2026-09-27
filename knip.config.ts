@@ -34,8 +34,8 @@ export default {
 			entry: [
 				'src/compiler.ts',
 				'src/format.ts',
-				'src/generate.ts',
 				'src/hash.ts',
+				'src/node/generate.ts',
 				'src/protocol.ts',
 				'src/specifiers.ts',
 			],

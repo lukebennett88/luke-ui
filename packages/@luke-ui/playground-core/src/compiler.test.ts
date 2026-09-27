@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactJsxRuntime from 'react/jsx-runtime';
 import { expect, test } from 'vite-plus/test';
-import { compileComponent, createPlaygroundCompiler, createRequireModule } from './compiler.js';
+import { createPlaygroundCompiler } from './compiler.js';
 
 const reactScope = {
 	react: React,
@@ -9,83 +9,66 @@ const reactScope = {
 };
 
 test('compileComponent default-exports a function component from scope', () => {
-	const requireModule = createRequireModule({
+	const { compileComponent } = createPlaygroundCompiler({
 		react: { createElement: () => null },
 	});
-	const Component = compileComponent(
-		`export default function Demo() { return null; }`,
-		requireModule,
-	);
+	const Component = compileComponent(`export default function Demo() { return null; }`);
 	expect(typeof Component).toBe('function');
 });
 
-test('compileComponent rejects a module with no default export', () => {
-	const requireModule = createRequireModule({});
-	expect(() => compileComponent('export const value = 1;', requireModule)).toThrow(
-		/default-export a React component/,
-	);
-});
-
-test('compileComponent rejects a default export of null', () => {
-	const requireModule = createRequireModule({});
-	expect(() => compileComponent('export default null;', requireModule)).toThrow(
-		/default-export a React component/,
-	);
-});
-
-test('compileComponent accepts a memo component', () => {
-	const requireModule = createRequireModule(reactScope);
-	const Component = compileComponent(
+test.each([
+	[
+		'memo',
 		[
 			"import { memo } from 'react';",
 			'function Demo() { return null; }',
 			'export default memo(Demo);',
 		].join('\n'),
-		requireModule,
-	);
-	expect(Component).not.toBeNull();
-	expect(typeof Component).toBe('object');
-});
-
-test('compileComponent accepts a forwardRef component', () => {
-	const requireModule = createRequireModule(reactScope);
-	const Component = compileComponent(
+	],
+	[
+		'forwardRef',
 		[
 			"import { forwardRef } from 'react';",
 			'function Demo(_props, ref) { return null; }',
 			'export default forwardRef(Demo);',
 		].join('\n'),
-		requireModule,
-	);
-	expect(Component).not.toBeNull();
-	expect(typeof Component).toBe('object');
-});
-
-test('compileComponent accepts a lazy component', () => {
-	const requireModule = createRequireModule(reactScope);
-	const Component = compileComponent(
+	],
+	[
+		'lazy',
 		[
 			"import { lazy } from 'react';",
 			'export default lazy(() => Promise.resolve({ default: () => null }));',
 		].join('\n'),
-		requireModule,
-	);
+	],
+])('compileComponent accepts a %s component', (_name, code) => {
+	const { compileComponent } = createPlaygroundCompiler(reactScope);
+	const Component = compileComponent(code);
 	expect(Component).not.toBeNull();
 	expect(typeof Component).toBe('object');
 });
 
-test('createRequireModule throws for unknown specifiers', () => {
-	const requireModule = createRequireModule({ react: {} });
-	expect(() => requireModule('missing')).toThrow(
-		"Cannot import 'missing': module is not in the playground scope.",
-	);
+test.each([
+	['no default export', 'export const value = 1;'],
+	['a default export of null', 'export default null;'],
+])('compileComponent rejects %s', (_name, code) => {
+	const { compileComponent } = createPlaygroundCompiler({});
+	expect(() => compileComponent(code)).toThrow(/default-export a React component/);
+});
+
+test('createPlaygroundCompiler throws for unknown specifiers', () => {
+	const { compileComponent } = createPlaygroundCompiler({ react: {} });
+	expect(() =>
+		compileComponent(
+			"import { missing } from 'missing';\nexport default function Demo() { return missing; };",
+		),
+	).toThrow("Cannot import 'missing': module is not in the playground scope.");
 });
 
 test('createPlaygroundCompiler resolves imports from its scope', () => {
-	const { compileComponent: compile } = createPlaygroundCompiler({
+	const { compileComponent } = createPlaygroundCompiler({
 		'example-ui/greeting': { greeting: 'hello' },
 	});
-	const Component = compile(
+	const Component = compileComponent(
 		"import { greeting } from 'example-ui/greeting';\nexport default function Demo() { return greeting; }",
 	);
 	expect((Component as () => string)()).toBe('hello');

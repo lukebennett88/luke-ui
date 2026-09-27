@@ -20,10 +20,10 @@ const previewMessageSchema = z.discriminatedUnion('type', [
 	z.object({ message: z.string(), type: z.literal('playground:error') }),
 ]);
 
-export type PlaygroundCodeMessage = z.infer<typeof codeMessageSchema>;
-export type PlaygroundParentMessage = PlaygroundCodeMessage;
+type PlaygroundCodeMessage = z.infer<typeof codeMessageSchema>;
 export type PlaygroundPreviewMessage = z.infer<typeof previewMessageSchema>;
 
+/** The subset of `MessageEvent` a trust check needs — enough to fake in a test. */
 export type PlaygroundMessageEvent = {
 	data: unknown;
 	origin: string;
@@ -35,24 +35,14 @@ export type PlaygroundPagePorts = {
 	previewWindow: PlaygroundMessagePort | null;
 };
 
-export type PlaygroundPageHandlers = {
-	currentCode: string;
-	onError: (message: string) => void;
-	onReady: () => void;
-	/**
-	 * Runs when the preview announces `playground:ready`, before the session
-	 * replays `currentCode`. Post host messages here that the preview needs
-	 * before it renders code.
-	 */
-	onPreviewReady?: (ports: PlaygroundPagePorts) => void;
-	onSuccess: () => void;
-};
+/** The result a page session reports through `onResult`. */
+export type PlaygroundResult = { type: 'success' } | { type: 'error'; message: string };
 
 type PlaygroundMessagePort = {
 	postMessage: (message: unknown, targetOrigin: string) => void;
 };
 
-export function isPlaygroundParentMessage(data: unknown): data is PlaygroundParentMessage {
+export function isPlaygroundCodeMessage(data: unknown): data is PlaygroundCodeMessage {
 	return codeMessageSchema.safeParse(data).success;
 }
 
@@ -72,61 +62,82 @@ export function isTrustedMessageSource(
 	return event.origin === origin && event.source === source;
 }
 
-/** True when a preview message came from the playground page that owns this iframe. */
-export function isTrustedParentMessage(
-	event: PlaygroundMessageEvent,
-	origin: string,
-	parent: unknown,
-): event is PlaygroundMessageEvent & { data: PlaygroundParentMessage } {
-	return isTrustedMessageSource(event, origin, parent) && isPlaygroundParentMessage(event.data);
-}
+export type CreatePlaygroundPageSessionOptions = {
+	/** Returns the current ports, so the host can reflect live ref values. */
+	getPorts: () => PlaygroundPagePorts;
+	/** Returns the code to (re)send to the preview. */
+	getCode: () => string;
+	/**
+	 * Runs when the preview announces `playground:ready`, before the session
+	 * replays the current code. Post host messages here that the preview needs
+	 * before it renders code.
+	 */
+	onPreviewReady?: (ports: PlaygroundPagePorts) => void;
+	/** Runs for a `playground:success` or `playground:error` message from the preview. */
+	onResult: (result: PlaygroundResult) => void;
+};
+
+export type PlaygroundPageSession = {
+	/** Handles a trusted `message` event from `window`. Ignores anything else. */
+	handleMessage: (event: PlaygroundMessageEvent) => void;
+	/** Posts `code` to the preview. A no-op until the preview has sent any trusted message. */
+	postCode: (code: string) => void;
+	/** Posts the current code even before the preview has announced ready, covering a missed `playground:ready` (fast iframe, slow page listener). */
+	resync: () => void;
+};
 
 /**
- * Owns when the playground page may talk to its preview, and what it does with
- * a preview reply. Compilation, the URL hash, and debounce stay in the host.
+ * Owns when the playground page may talk to its preview, and what it does
+ * with a preview reply. Compilation, the URL hash, and debounce stay in the
+ * host.
  */
-export function createPlaygroundPageSession() {
+export function createPlaygroundPageSession(
+	options: CreatePlaygroundPageSessionOptions,
+): PlaygroundPageSession {
 	let ready = false;
 
-	function postCode(
-		code: string,
-		ports: PlaygroundPagePorts,
-		options?: { unguarded?: boolean },
-	): void {
+	function postCode(code: string): void {
+		if (!ready) return;
+		sendCode(code);
+	}
+
+	/**
+	 * Also covers a missed `playground:ready`: if the preview announced ready
+	 * before the page's message listener attached, this sends the code anyway,
+	 * and the preview's reply to it (a success or error, not a second `ready`)
+	 * is what `handleMessage` sees first and uses to flip `ready` to `true`.
+	 */
+	function resync(): void {
+		sendCode(options.getCode());
+	}
+
+	function sendCode(code: string): void {
+		const ports = options.getPorts();
 		if (!ports.previewWindow) return;
-		// Unguarded posts cover a missed `playground:ready` (fast iframe, slow page listener).
-		if (!options?.unguarded && !ready) return;
 		const message: PlaygroundCodeMessage = { code, type: 'playground:code' };
 		ports.previewWindow.postMessage(message, ports.origin);
 	}
 
-	function handlePreviewMessage(
-		event: PlaygroundMessageEvent,
-		ports: PlaygroundPagePorts,
-		handlers: PlaygroundPageHandlers,
-	): void {
+	function handleMessage(event: PlaygroundMessageEvent): void {
+		const ports = options.getPorts();
 		if (!isTrustedPreviewMessage(event, ports.origin, ports.previewWindow)) return;
+
+		// Any trusted reply means the preview is live.
 		ready = true;
-		handlers.onReady();
+
 		if (event.data.type === 'playground:ready') {
-			handlers.onPreviewReady?.(ports);
-			postCode(handlers.currentCode, ports);
+			options.onPreviewReady?.(ports);
+			resync();
 			return;
 		}
 		if (event.data.type === 'playground:error') {
-			handlers.onError(event.data.message);
+			options.onResult({ message: event.data.message, type: 'error' });
 			return;
 		}
-		handlers.onSuccess();
+		options.onResult({ type: 'success' });
 	}
 
-	return {
-		handlePreviewMessage,
-		get isReady() {
-			return ready;
-		},
-		postCode,
-	};
+	return { handleMessage, postCode, resync };
 }
 
 /** True when a page message came from this playground's preview iframe. */

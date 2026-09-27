@@ -137,7 +137,7 @@ export function resolvePackageDir(fromPackageJson: string, packageName: string):
 }
 
 /** Visits every file under `dir`, depth first, skipping `node_modules` directories. */
-export function walkPackageFiles(dir: string, visit: (filePath: string) => void): void {
+function walkPackageFiles(dir: string, visit: (filePath: string) => void): void {
 	for (const entry of readdirSync(dir, { withFileTypes: true })) {
 		if (entry.name === 'node_modules') continue;
 		const entryPath = join(dir, entry.name);

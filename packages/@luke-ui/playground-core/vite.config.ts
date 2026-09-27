@@ -6,21 +6,22 @@ export default defineConfig({
 		deps: {
 			neverBundle: [
 				...Object.keys(packageJson.dependencies),
-				...Object.keys(packageJson.peerDependencies),
-				// Only `generate.ts` imports Node built-ins, and it runs under Node.
+				// Only `src/node/generate.ts` imports Node built-ins, and it runs under Node.
 				/^node:/,
 			],
 		},
 		dts: true,
-		// One entry per public subpath in `exports`.
-		entry: [
-			'src/compiler.ts',
-			'src/format.ts',
-			'src/generate.ts',
-			'src/hash.ts',
-			'src/protocol.ts',
-			'src/specifiers.ts',
-		],
+		// One entry per public subpath in `exports`. `generate` lives under
+		// `src/node/` — the Node-only implementation, kept out of the browser
+		// subpaths' directory — named here so its dist output stays `generate.js`.
+		entry: {
+			compiler: 'src/compiler.ts',
+			format: 'src/format.ts',
+			generate: 'src/node/generate.ts',
+			hash: 'src/hash.ts',
+			protocol: 'src/protocol.ts',
+			specifiers: 'src/specifiers.ts',
+		},
 		format: ['esm'],
 		platform: 'neutral',
 		// One output module per source module, so a consumer's bundler can still

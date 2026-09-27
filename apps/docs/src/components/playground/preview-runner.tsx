@@ -1,9 +1,6 @@
 import { createPlaygroundCompiler } from '@luke-ui/playground-core/compiler';
 import { decodeCodeHash } from '@luke-ui/playground-core/hash';
-import {
-	isPlaygroundParentMessage,
-	isTrustedMessageSource,
-} from '@luke-ui/playground-core/protocol';
+import { isPlaygroundCodeMessage, isTrustedMessageSource } from '@luke-ui/playground-core/protocol';
 import type { PlaygroundPreviewMessage } from '@luke-ui/playground-core/protocol';
 import { useEffect, useState } from 'react';
 import type { ComponentType } from 'react';
@@ -25,7 +22,9 @@ export default function PreviewRunner() {
 
 		const runCode = (code: string) => {
 			try {
-				const UserComponent = compileComponent(code);
+				// The compiler only rejects a missing default export; the ErrorBoundary
+				// below reports an invalid component type as a render-time error.
+				const UserComponent = compileComponent(code) as ComponentType;
 				runId += 1;
 				setRun({ runId, UserComponent });
 				postToParent({ type: 'playground:success' });
@@ -36,7 +35,7 @@ export default function PreviewRunner() {
 
 		const onMessage = (event: MessageEvent) => {
 			if (!isTrustedMessageSource(event, window.location.origin, window.parent)) return;
-			if (isPlaygroundParentMessage(event.data)) {
+			if (isPlaygroundCodeMessage(event.data)) {
 				runCode(event.data.code);
 				return;
 			}

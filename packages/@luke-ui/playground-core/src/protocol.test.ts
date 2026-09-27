@@ -1,11 +1,16 @@
 import { expect, test } from 'vite-plus/test';
 import {
 	createPlaygroundPageSession,
-	isPlaygroundParentMessage,
+	isPlaygroundCodeMessage,
 	isTrustedMessageSource,
-	isTrustedParentMessage,
 } from './protocol.js';
-import type { PlaygroundMessageEvent, PlaygroundPagePorts } from './protocol.js';
+import type {
+	CreatePlaygroundPageSessionOptions,
+	PlaygroundMessageEvent,
+	PlaygroundPagePorts,
+	PlaygroundPageSession,
+	PlaygroundResult,
+} from './protocol.js';
 
 const ORIGIN = 'https://docs.test';
 const VALID_CODE = 'export default function Preview() { return null; }';
@@ -13,20 +18,20 @@ const VALID_CODE = 'export default function Preview() { return null; }';
 type MessageBus = {
 	listenPage: (listener: (event: PlaygroundMessageEvent) => void) => void;
 	listenPreview: (listener: (event: PlaygroundMessageEvent) => void) => void;
-	page: object;
+	pageWindow: object;
 	ports: PlaygroundPagePorts;
 	postFromPreview: (data: unknown, source?: object) => void;
 };
 
 function createMessageBus(): MessageBus {
-	const page = { role: 'page' };
+	const pageWindow = { role: 'page' };
 	let pageListener: ((event: PlaygroundMessageEvent) => void) | undefined;
 	let previewListener: ((event: PlaygroundMessageEvent) => void) | undefined;
 
 	const previewWindow = {
 		postMessage(data: unknown, targetOrigin: string) {
 			if (targetOrigin !== ORIGIN) return;
-			previewListener?.({ data, origin: ORIGIN, source: page });
+			previewListener?.({ data, origin: ORIGIN, source: pageWindow });
 		},
 	};
 
@@ -37,7 +42,7 @@ function createMessageBus(): MessageBus {
 		listenPreview(listener) {
 			previewListener = listener;
 		},
-		page,
+		pageWindow,
 		ports: { origin: ORIGIN, previewWindow },
 		postFromPreview(data, source = previewWindow) {
 			pageListener?.({ data, origin: ORIGIN, source });
@@ -45,13 +50,14 @@ function createMessageBus(): MessageBus {
 	};
 }
 
+/** Mirrors the trust check `preview-runner.tsx` applies before the schema. */
 function attachFakePreview(
 	bus: MessageBus,
 	compile: (code: string) => { message: string; ok: false } | { ok: true },
 ): void {
 	bus.listenPreview((event) => {
-		if (!isTrustedParentMessage(event, ORIGIN, bus.page)) return;
-		if (event.data.type !== 'playground:code') return;
+		if (!isTrustedMessageSource(event, ORIGIN, bus.pageWindow)) return;
+		if (!isPlaygroundCodeMessage(event.data)) return;
 		const result = compile(event.data.code);
 		if (result.ok) {
 			bus.postFromPreview({ type: 'playground:success' });
@@ -62,68 +68,43 @@ function attachFakePreview(
 	bus.postFromPreview({ type: 'playground:ready' });
 }
 
-test('sends code and gets a result when the preview announced itself first', () => {
-	const bus = createMessageBus();
-	const results: Array<string> = [];
-	attachFakePreview(bus, () => ({ ok: true }));
-
-	const session = createPlaygroundPageSession();
-	bus.listenPage((event) => {
-		session.handlePreviewMessage(event, bus.ports, {
-			currentCode: VALID_CODE,
-			onError: (message) => results.push(message),
-			onReady: () => {},
-			onSuccess: () => results.push('success'),
-		});
-	});
-	session.postCode(VALID_CODE, bus.ports, { unguarded: true });
-
-	expect(results).toEqual(['success']);
-	expect(session.isReady).toBe(true);
-});
-
-test('surfaces a compilation error from the preview', () => {
-	const bus = createMessageBus();
-	const results: Array<string> = [];
-	const compileError = 'Playground code must default-export a React component.';
-	attachFakePreview(bus, () => ({ message: compileError, ok: false }));
-
-	const session = createPlaygroundPageSession();
-	bus.listenPage((event) => {
-		session.handlePreviewMessage(event, bus.ports, {
-			currentCode: 'const broken = true;',
-			onError: (message) => results.push(message),
-			onReady: () => {},
-			onSuccess: () => results.push('success'),
-		});
-	});
-	session.postCode('const broken = true;', bus.ports, { unguarded: true });
-
-	expect(results).toEqual([compileError]);
-});
-
-test('runs onPreviewReady before replaying code when the preview announces ready', () => {
+/** Creates a session over a recording `previewWindow.postMessage` and `onResult`. */
+function createRecordingSession(overrides?: Partial<CreatePlaygroundPageSessionOptions>): {
+	posted: Array<unknown>;
+	previewWindow: { postMessage: (data: unknown) => void };
+	results: Array<PlaygroundResult>;
+	session: PlaygroundPageSession;
+} {
 	const posted: Array<unknown> = [];
 	const previewWindow = {
 		postMessage(data: unknown) {
 			posted.push(data);
 		},
 	};
-	const session = createPlaygroundPageSession();
+	const results: Array<PlaygroundResult> = [];
 
-	session.handlePreviewMessage(
-		{ data: { type: 'playground:ready' }, origin: ORIGIN, source: previewWindow },
-		{ origin: ORIGIN, previewWindow },
-		{
-			currentCode: VALID_CODE,
-			onError: () => {},
-			onPreviewReady: (ports) => {
-				ports.previewWindow?.postMessage({ type: 'host:appearance' }, ports.origin);
-			},
-			onReady: () => {},
-			onSuccess: () => {},
+	const session = createPlaygroundPageSession({
+		getCode: () => VALID_CODE,
+		getPorts: () => ({ origin: ORIGIN, previewWindow }),
+		onResult: (result) => results.push(result),
+		...overrides,
+	});
+
+	return { posted, previewWindow, results, session };
+}
+
+test('on ready, runs onPreviewReady before posting code, in that order', () => {
+	const { posted, previewWindow, session } = createRecordingSession({
+		onPreviewReady: (ports) => {
+			ports.previewWindow?.postMessage({ type: 'host:appearance' }, ports.origin);
 		},
-	);
+	});
+
+	session.handleMessage({
+		data: { type: 'playground:ready' },
+		origin: ORIGIN,
+		source: previewWindow,
+	});
 
 	expect(posted).toEqual([
 		{ type: 'host:appearance' },
@@ -131,105 +112,111 @@ test('runs onPreviewReady before replaying code when the preview announces ready
 	]);
 });
 
-test('does not run onPreviewReady for a result message', () => {
-	let previewReadyCalls = 0;
-	const previewWindow = { postMessage: () => {} };
-	const session = createPlaygroundPageSession();
+test('postCode is dropped before ready and sent after', () => {
+	const { posted, previewWindow, session } = createRecordingSession();
 
-	session.handlePreviewMessage(
-		{ data: { type: 'playground:success' }, origin: ORIGIN, source: previewWindow },
-		{ origin: ORIGIN, previewWindow },
-		{
-			currentCode: VALID_CODE,
-			onError: () => {},
-			onPreviewReady: () => {
-				previewReadyCalls += 1;
-			},
-			onReady: () => {},
-			onSuccess: () => {},
-		},
-	);
-
-	expect(previewReadyCalls).toBe(0);
-});
-
-test('drops code until the preview has spoken, unless the post is unguarded', () => {
-	const posted: Array<unknown> = [];
-	const previewWindow = {
-		postMessage(data: unknown) {
-			posted.push(data);
-		},
-	};
-	const session = createPlaygroundPageSession();
-	const ports = { origin: ORIGIN, previewWindow };
-
-	session.postCode(VALID_CODE, ports);
+	session.postCode(VALID_CODE);
 	expect(posted).toEqual([]);
 
-	session.postCode(VALID_CODE, ports, { unguarded: true });
+	session.handleMessage({
+		data: { type: 'playground:ready' },
+		origin: ORIGIN,
+		source: previewWindow,
+	});
+	posted.length = 0;
+
+	session.postCode('export default function Other() { return null; }');
+	expect(posted).toEqual([
+		{ code: 'export default function Other() { return null; }', type: 'playground:code' },
+	]);
+});
+
+test('resync sends the current code even before ready', () => {
+	const { posted, session } = createRecordingSession();
+
+	session.resync();
 	expect(posted).toEqual([{ code: VALID_CODE, type: 'playground:code' }]);
 });
 
-test('ignores a same-origin message from a frame that is not the preview', () => {
-	const session = createPlaygroundPageSession();
-	let called = false;
-	const previewWindow = { postMessage: () => {} };
+test('a trusted message after a resync-before-ready unblocks later postCode calls', () => {
+	// Missed-ready race: the preview announced ready before the page listener
+	// attached, so resync() sends the code before this session has seen any
+	// message. The preview's reply is a plain success, not a second `ready`,
+	// and that reply alone must be enough to stop postCode from dropping.
+	const { posted, previewWindow, session } = createRecordingSession();
 
-	session.handlePreviewMessage(
-		{ data: { type: 'playground:success' }, origin: ORIGIN, source: { role: 'other' } },
-		{ origin: ORIGIN, previewWindow },
-		{
-			currentCode: VALID_CODE,
-			onError: () => {
-				called = true;
-			},
-			onReady: () => {
-				called = true;
-			},
-			onSuccess: () => {
-				called = true;
-			},
-		},
-	);
+	session.resync();
+	posted.length = 0;
 
-	expect(called).toBe(false);
-	expect(session.isReady).toBe(false);
+	session.handleMessage({
+		data: { type: 'playground:success' },
+		origin: ORIGIN,
+		source: previewWindow,
+	});
+	expect(posted).toEqual([]);
+
+	session.postCode('next');
+	expect(posted).toEqual([{ code: 'next', type: 'playground:code' }]);
 });
 
-test('preview ignores a same-origin message that is not from its parent', () => {
-	const parent = { role: 'parent' };
-	const other = { role: 'other' };
-	const code = { code: VALID_CODE, type: 'playground:code' };
+test('a success and a compilation error each reach onResult', () => {
+	const compileError = 'Playground code must default-export a React component.';
+	const successBus = createMessageBus();
+	const successResults: Array<PlaygroundResult> = [];
+	attachFakePreview(successBus, () => ({ ok: true }));
+	const successSession = createPlaygroundPageSession({
+		getCode: () => VALID_CODE,
+		getPorts: () => successBus.ports,
+		onResult: (result) => successResults.push(result),
+	});
+	successBus.listenPage((event) => successSession.handleMessage(event));
+	successSession.resync();
+	expect(successResults).toEqual([{ type: 'success' }]);
 
-	expect(
-		isTrustedParentMessage({ data: code, origin: ORIGIN, source: parent }, ORIGIN, parent),
-	).toBe(true);
-	expect(
-		isTrustedParentMessage({ data: code, origin: ORIGIN, source: other }, ORIGIN, parent),
-	).toBe(false);
+	const errorBus = createMessageBus();
+	const errorResults: Array<PlaygroundResult> = [];
+	attachFakePreview(errorBus, () => ({ message: compileError, ok: false }));
+	const errorSession = createPlaygroundPageSession({
+		getCode: () => 'const broken = true;',
+		getPorts: () => errorBus.ports,
+		onResult: (result) => errorResults.push(result),
+	});
+	errorBus.listenPage((event) => errorSession.handleMessage(event));
+	errorSession.resync();
+	expect(errorResults).toEqual([{ message: compileError, type: 'error' }]);
 });
 
-test('trusts a message source by origin and window only', () => {
-	const parent = { role: 'parent' };
-	const hostMessage = { type: 'host:anything' };
+test.each([
+	['an untrusted origin', { origin: 'https://other.test', sourceIsPreview: true }],
+	[
+		'a same-origin message from a source that is not the preview',
+		{ origin: ORIGIN, sourceIsPreview: false },
+	],
+])('ignores %s', (_name, { origin, sourceIsPreview }) => {
+	const { previewWindow, results, session } = createRecordingSession();
 
-	expect(
-		isTrustedMessageSource({ data: hostMessage, origin: ORIGIN, source: parent }, ORIGIN, parent),
-	).toBe(true);
-	expect(
-		isTrustedMessageSource(
-			{ data: hostMessage, origin: 'https://other.test', source: parent },
-			ORIGIN,
-			parent,
-		),
-	).toBe(false);
-	expect(
-		isTrustedParentMessage({ data: hostMessage, origin: ORIGIN, source: parent }, ORIGIN, parent),
-	).toBe(false);
+	session.handleMessage({
+		data: { type: 'playground:success' },
+		origin,
+		source: sourceIsPreview ? previewWindow : { role: 'other' },
+	});
+
+	expect(results).toEqual([]);
+});
+
+test('a missing preview window is a no-op for postCode and resync', () => {
+	const session = createPlaygroundPageSession({
+		getCode: () => VALID_CODE,
+		getPorts: () => ({ origin: ORIGIN, previewWindow: null }),
+		onResult: () => {},
+	});
+
+	expect(() => session.resync()).not.toThrow();
+	expect(() => session.postCode(VALID_CODE)).not.toThrow();
 });
 
 test('accepts only the code message from the parent', () => {
-	expect(isPlaygroundParentMessage({ code: VALID_CODE, type: 'playground:code' })).toBe(true);
-	expect(isPlaygroundParentMessage({ type: 'playground:reset' })).toBe(false);
-	expect(isPlaygroundParentMessage({ code: 1, type: 'playground:code' })).toBe(false);
+	expect(isPlaygroundCodeMessage({ code: VALID_CODE, type: 'playground:code' })).toBe(true);
+	expect(isPlaygroundCodeMessage({ type: 'playground:reset' })).toBe(false);
+	expect(isPlaygroundCodeMessage({ code: 1, type: 'playground:code' })).toBe(false);
 });

@@ -1,0 +1,8 @@
+{
+	"compilerOptions": {
+		"types": []
+	},
+	"exclude": ["src/node/**"],
+	"extends": "./tsconfig.json",
+	"include": ["src/**/*.ts"]
+}

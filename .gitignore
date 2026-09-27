@@ -1,3 +1,8 @@
+# Local Claude Code state: machine-specific dev server config, local permission
+# overrides, and worktrees for parallel sessions.
+.claude/launch.json
+.claude/settings.local.json
+.claude/worktrees/
 .artifacts/
 .DS_Store
 .env

@@ -82,7 +82,7 @@ export function packageExportSpecifiers(
 		.sort();
 }
 
-export function importSpecifiersFromSource(source: string): Array<string> {
+function importSpecifiersFromSource(source: string): Array<string> {
 	const specifiers: Array<string> = [];
 
 	for (const match of source.matchAll(IMPORT_SPECIFIER_PATTERN)) {

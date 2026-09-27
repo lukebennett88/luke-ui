@@ -2,13 +2,12 @@ import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, test } from 'vite-plus/test';
-import { formatPlaygroundSource } from './format.js';
+import { formatPlaygroundSource } from '../format.js';
 import {
 	createPlaygroundTypeMap,
 	playgroundVirtualPath,
 	renderPlaygroundScopeModule,
 	resolvePackageDir,
-	walkPackageFiles,
 } from './generate.js';
 
 describe('renderPlaygroundScopeModule', () => {
@@ -174,16 +173,19 @@ describe('playground type map', () => {
 		});
 	});
 
-	test('walks files depth first and skips node_modules', () => {
+	test('collects nested declarations but skips a nested node_modules', () => {
 		const root = createFixture({
-			'a/b.txt': '',
-			'a/node_modules/c.txt': '',
-			'd.txt': '',
+			'pkg/lib/nested/deep.d.ts': 'export {};',
+			'pkg/node_modules/dep/index.d.ts': 'export {};',
+			'pkg/package.json': '{"name":"pkg"}',
 		});
-		const visited: Array<string> = [];
-		walkPackageFiles(root, (filePath) => visited.push(filePath.slice(root.length + 1)));
+		const typeMap = createPlaygroundTypeMap();
+		typeMap.addPackage('pkg', join(root, 'pkg'));
 
-		expect(visited.sort()).toEqual([join('a', 'b.txt'), 'd.txt']);
+		expect(typeMap.files()).toEqual({
+			'file:///node_modules/pkg/lib/nested/deep.d.ts': 'export {};',
+			'file:///node_modules/pkg/package.json': '{"name":"pkg"}',
+		});
 	});
 
 	test('resolves a package directory through its package.json export', () => {
