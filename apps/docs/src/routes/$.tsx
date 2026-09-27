@@ -69,18 +69,19 @@ export const Route = createFileRoute('/$')({
 
 /**
  * Calls the `loader` server function, treating a static-cache miss as a
- * missing page. The static host serves one shared `404.html` for every
- * missing path, so hydrating it at a different URL re-runs this loader.
- * `staticFunctionMiddleware` then fetches a prerendered JSON file that does
- * not exist, the host returns its HTML 404 page instead, and parsing that as
- * JSON throws a `SyntaxError`. Every other error is a real loader failure and
+ * missing page. This applies only in the browser: the static host serves one
+ * shared `404.html` for every missing path, so hydrating it at a different
+ * URL re-runs this loader. `staticFunctionMiddleware` then fetches a
+ * prerendered JSON file that does not exist, the host returns its HTML 404
+ * page instead, and parsing that as JSON throws a `SyntaxError`. Every other
+ * error, and a `SyntaxError` during prerender, is a real loader failure and
  * rethrows unchanged.
  */
 async function fetchPageData(slugs: Array<string>) {
 	try {
 		return await loader({ data: slugs });
 	} catch (error) {
-		if (error instanceof SyntaxError) throw notFound();
+		if (!import.meta.env.SSR && error instanceof SyntaxError) throw notFound();
 		throw error;
 	}
 }
