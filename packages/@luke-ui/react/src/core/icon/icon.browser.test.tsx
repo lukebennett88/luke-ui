@@ -1,7 +1,7 @@
 import { Icon } from '@luke-ui/react/icon';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
