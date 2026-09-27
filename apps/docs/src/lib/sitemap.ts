@@ -14,7 +14,7 @@ export interface SitemapPage {
 
 /**
  * Builds a sitemaps.org 0.9 protocol document. Every URL is absolute and
- * trailing-slashed, except the homepage, matching the URL Netlify serves
+ * trailing-slashed, except the homepage, matching the URL the host serves
  * with a 200 instead of a redirect.
  */
 export function buildSitemap(origin: string, pages: Array<SitemapPage>): string {

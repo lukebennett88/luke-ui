@@ -1,6 +1,5 @@
 .cache
 .DS_Store
-.netlify
 .nitro
 .output
 .source

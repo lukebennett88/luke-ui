@@ -1,6 +1,5 @@
 import { relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import netlify from '@netlify/vite-plugin-tanstack-start';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
@@ -177,13 +176,6 @@ export default defineConfig(async () => {
 				},
 			}),
 			react(),
-			// Netlify's local edge runner invokes `deno eval --allow-scripts`, which
-			// Deno 2.9.x rejects; docs dev does not need edge emulation.
-			netlify({
-				dev: {
-					edgeFunctions: { enabled: false },
-				},
-			}),
 		]),
 		resolve: {
 			alias: {

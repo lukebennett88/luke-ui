@@ -11,7 +11,7 @@
 		"#docs": "./src/examples/docs.tsx"
 	},
 	"scripts": {
-		"build": "vp build",
+		"build": "vp build && node scripts/write-not-found-page.ts",
 		"check:docs": "tsx scripts/check-docs.ts",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
@@ -65,7 +65,6 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@netlify/vite-plugin-tanstack-start": "catalog:",
 		"@tailwindcss/vite": "catalog:",
 		"@tanstack/router-cli": "catalog:",
 		"@types/mdx": "catalog:",
