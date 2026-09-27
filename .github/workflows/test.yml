@@ -26,14 +26,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup tooling with mise
-        uses: jdx/mise-action@v4
+      - name: Setup tooling
+        uses: pnpm/setup@v3
         with:
-          install: true
           cache: true
+          install: false
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --no-runtime
 
       - name: Install Playwright Chromium
         run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
@@ -55,14 +55,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup tooling with mise
-        uses: jdx/mise-action@v4
+      - name: Setup tooling
+        uses: pnpm/setup@v3
         with:
-          install: true
           cache: true
+          install: false
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --no-runtime
 
       - name: Install Playwright Chromium
         run: pnpm --filter docs exec playwright install --with-deps chromium
