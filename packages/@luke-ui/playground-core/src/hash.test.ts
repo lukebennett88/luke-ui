@@ -21,4 +21,24 @@ describe('playground hash helpers', () => {
 	test('rejects an extra param that would replace the code', () => {
 		expect(() => encodeCodeHash('const demo = 1;', { code: 'other' })).toThrow(/reserved/);
 	});
+
+	test('round-trips an empty string as empty, not null', () => {
+		const hash = encodeCodeHash('');
+
+		expect(decodeCodeHash(hash)).toBe('');
+	});
+
+	test('returns null when the hash has no code param', () => {
+		expect(decodeCodeHash('')).toBeNull();
+		expect(decodeCodeHash('#')).toBeNull();
+		expect(decodeCodeHash('zeta=z')).toBeNull();
+	});
+
+	test('returns null for an explicitly empty code param', () => {
+		expect(decodeCodeHash('#code=')).toBeNull();
+	});
+
+	test('returns null instead of throwing for malformed code', () => {
+		expect(decodeCodeHash('#code=zzz')).toBeNull();
+	});
 });

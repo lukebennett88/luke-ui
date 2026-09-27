@@ -34,29 +34,120 @@ test('maps the root export to the package name', () => {
 	).toEqual(['@scope/ui', '@scope/ui/deep/path']);
 });
 
-test('follows import, then default, conditions by default', () => {
+test('accepts .js, .mjs, and .cjs string targets', () => {
+	expect(
+		packageExportSpecifiers('example-ui', {
+			'./a': './dist/a.js',
+			'./b': './dist/b.mjs',
+			'./c': './dist/c.cjs',
+		}),
+	).toEqual(['example-ui/a', 'example-ui/b', 'example-ui/c']);
+});
+
+test('skips a non-runnable string target', () => {
+	expect(
+		packageExportSpecifiers('example-ui', {
+			'./a': './dist/a.css',
+			'./b': './dist/b.json',
+			'./c': './dist/c.js',
+		}),
+	).toEqual(['example-ui/c']);
+});
+
+test('follows a custom isRunnableTarget', () => {
+	expect(
+		packageExportSpecifiers(
+			'example-ui',
+			{ './a': './dist/a.js', './b': './dist/b.wasm' },
+			{ isRunnableTarget: (target) => target.endsWith('.wasm') },
+		),
+	).toEqual(['example-ui/b']);
+});
+
+test('defaults to the import condition', () => {
 	expect(
 		packageExportSpecifiers('example-ui', {
 			'./a': { import: './dist/a.js', require: './dist/a.cjs' },
 			'./b': { default: './dist/b.js', types: './dist/b.d.ts' },
 			'./c': { require: './dist/c.cjs' },
-			'./d': { import: { types: './dist/d.d.ts', default: './dist/d.js' } },
+			'./d': { import: { default: './dist/d.js', types: './dist/d.d.ts' } },
 			'./e': { node: './dist/e.js' },
 		}),
 	).toEqual(['example-ui/a', 'example-ui/b', 'example-ui/d']);
 });
 
-test('follows host-supplied conditions in priority order', () => {
+test('resolves nested conditions objects', () => {
+	expect(
+		packageExportSpecifiers('example-ui', {
+			'./a': { import: { node: './dist/a.node.mjs', types: './dist/a.d.mts' } },
+		}),
+	).toEqual([]);
 	expect(
 		packageExportSpecifiers(
 			'example-ui',
 			{
-				'./a': { browser: './dist/a.browser.js', import: './dist/a.mjs' },
-				'./b': { import: './dist/b.mjs' },
+				'./a': { import: { node: './dist/a.node.mjs', types: './dist/a.d.mts' } },
 			},
-			{ conditions: ['browser', 'import'] },
+			{ conditions: ['import', 'node'] },
 		),
 	).toEqual(['example-ui/a']);
+});
+
+test('resolves the first active key in object order, not conditions list order', () => {
+	expect(
+		packageExportSpecifiers(
+			'example-ui',
+			{ './a': { import: './a.mjs', require: './a.cjs' } },
+			{ conditions: ['import', 'require'] },
+		),
+	).toEqual(['example-ui/a']);
+	expect(
+		packageExportSpecifiers(
+			'example-ui',
+			{ './a': { require: './a.cjs', import: './a.mjs' } },
+			{ conditions: ['import', 'require'] },
+		),
+	).toEqual(['example-ui/a']);
+});
+
+test('falls back to default when no other condition is active', () => {
+	expect(
+		packageExportSpecifiers(
+			'example-ui',
+			{ './a': { node: './a.node.js', default: './a.js' } },
+			{ conditions: [] },
+		),
+	).toEqual(['example-ui/a']);
+});
+
+test('resolves nothing when no condition is active', () => {
+	expect(
+		packageExportSpecifiers(
+			'example-ui',
+			{ './a': { node: './a.node.js', worker: './a.worker.js' } },
+			{ conditions: [] },
+		),
+	).toEqual([]);
+});
+
+test('continues to a later sibling key when a matched nested object has no active key', () => {
+	expect(
+		packageExportSpecifiers(
+			'example-ui',
+			{ './a': { default: './d.js', import: { browser: './b.mjs' } } },
+			{ conditions: ['import'] },
+		),
+	).toEqual(['example-ui/a']);
+});
+
+test('stops at an explicit null target instead of continuing to a sibling key', () => {
+	expect(
+		packageExportSpecifiers(
+			'example-ui',
+			{ './a': { import: null, default: './d.js' } },
+			{ conditions: ['import'] },
+		),
+	).toEqual([]);
 });
 
 test('skips null targets, fallback arrays, and patterns', () => {
@@ -68,6 +159,10 @@ test('skips null targets, fallback arrays, and patterns', () => {
 			'./d': './dist/d.js',
 		}),
 	).toEqual(['example-ui/d']);
+});
+
+test('maps . to the bare package name', () => {
+	expect(packageExportSpecifiers('example-ui', { '.': './dist/index.js' })).toEqual(['example-ui']);
 });
 
 test('treats a relative import as unresolvable in the playground', () => {

@@ -109,6 +109,50 @@ describe('playground type map', () => {
 		expect(Object.keys(typeMap.files()).at(-1)).toBe('file:///node_modules/pkg/package.json');
 	});
 
+	test('collects .d.mts files', () => {
+		const root = createFixture({
+			'pkg/index.d.mts': 'export {};',
+			'pkg/package.json': '{"name":"pkg"}',
+		});
+		const typeMap = createPlaygroundTypeMap();
+		typeMap.addPackage('pkg', join(root, 'pkg'));
+
+		expect(typeMap.files()).toEqual({
+			'file:///node_modules/pkg/index.d.mts': 'export {};',
+			'file:///node_modules/pkg/package.json': '{"name":"pkg"}',
+		});
+	});
+
+	test('collects .d.cts files', () => {
+		const root = createFixture({
+			'pkg/index.d.cts': 'export {};',
+			'pkg/package.json': '{"name":"pkg"}',
+		});
+		const typeMap = createPlaygroundTypeMap();
+		typeMap.addPackage('pkg', join(root, 'pkg'));
+
+		expect(typeMap.files()).toEqual({
+			'file:///node_modules/pkg/index.d.cts': 'export {};',
+			'file:///node_modules/pkg/package.json': '{"name":"pkg"}',
+		});
+	});
+
+	test('does not collect plain .ts or .mts sources', () => {
+		const root = createFixture({
+			'pkg/index.d.ts': 'export {};',
+			'pkg/index.mts': 'export {};',
+			'pkg/index.ts': 'export {};',
+			'pkg/package.json': '{"name":"pkg"}',
+		});
+		const typeMap = createPlaygroundTypeMap();
+		typeMap.addPackage('pkg', join(root, 'pkg'));
+
+		expect(typeMap.files()).toEqual({
+			'file:///node_modules/pkg/index.d.ts': 'export {};',
+			'file:///node_modules/pkg/package.json': '{"name":"pkg"}',
+		});
+	});
+
 	test('collects declarations from a subdirectory and writes a package.json stub', () => {
 		const root = createFixture({
 			'ui/dist/box.d.ts': 'export {};',

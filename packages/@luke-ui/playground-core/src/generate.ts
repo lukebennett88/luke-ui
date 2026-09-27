@@ -61,7 +61,7 @@ export type AddPlaygroundTypePackageOptions = {
 };
 
 export type PlaygroundTypeMap = {
-	/** Adds every `.d.ts` file under the package, then its `package.json`. */
+	/** Adds every `.d.ts`, `.d.mts`, and `.d.cts` file under the package, then its `package.json`. */
 	addPackage: (
 		packageName: string,
 		packageDir: string,
@@ -73,9 +73,12 @@ export type PlaygroundTypeMap = {
 	files: () => Record<string, string>;
 };
 
+const DECLARATION_EXTENSIONS = ['.d.ts', '.d.mts', '.d.cts'];
+
 /**
- * Collects `.d.ts` files into a map of virtual paths to contents, for a host to
- * serialise and hand to the editor's TypeScript worker.
+ * Collects `.d.ts`, `.d.mts`, and `.d.cts` files into a map of virtual paths
+ * to contents, for a host to serialise and hand to the editor's TypeScript
+ * worker.
  */
 export function createPlaygroundTypeMap(): PlaygroundTypeMap {
 	const files: Record<string, string> = {};
@@ -93,7 +96,7 @@ export function createPlaygroundTypeMap(): PlaygroundTypeMap {
 		},
 		addPackage(packageName, packageDir, options) {
 			walkPackageFiles(join(packageDir, options?.typesDir ?? '.'), (filePath) => {
-				if (!filePath.endsWith('.d.ts')) return;
+				if (!DECLARATION_EXTENSIONS.some((extension) => filePath.endsWith(extension))) return;
 				addPackageFile(packageName, packageDir, filePath);
 			});
 			if (options?.packageJson === undefined) {

@@ -26,6 +26,16 @@ export function createRequireModule(
 	};
 }
 
+/**
+ * Compiles playground source and returns its default export as a component.
+ *
+ * This only rejects a missing default export (`undefined` or `null`). It
+ * does not check that the export is a function, because `memo`, `forwardRef`,
+ * and `lazy` all produce objects, not functions, that React still renders as
+ * components. An export that is neither a valid component type nor `null`
+ * reaches the preview renderer's error boundary as a render-time error
+ * instead.
+ */
 export function compileComponent(
 	code: string,
 	requireModule: (specifier: string) => Record<string, unknown>,
@@ -42,7 +52,7 @@ export function compileComponent(
 	new Function('require', 'module', 'exports', compiled)(requireModule, module, module.exports);
 
 	const component = module.exports.default;
-	if (typeof component !== 'function') {
+	if (component === undefined || component === null) {
 		throw new Error('Playground code must default-export a React component.');
 	}
 	return component as ComponentType;

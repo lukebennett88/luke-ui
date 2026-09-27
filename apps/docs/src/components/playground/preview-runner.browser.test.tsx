@@ -143,3 +143,25 @@ test('posts the compileComponent error when parent playground code is invalid', 
 			type: 'playground:error',
 		});
 });
+
+test('reports a non-component default export as a render error, not a compile error', async () => {
+	const messages = collectParentPreviewMessages();
+	await mountPreview();
+
+	await act(async () => {
+		postFromParent({
+			code: 'export default 42;',
+			type: 'playground:code',
+		});
+	});
+
+	// compileComponent only rejects a missing default export, so this reaches
+	// React, which fails at render time inside PreviewRunner's ErrorBoundary.
+	await expect
+		.poll(() => messages.find((message) => message.type === 'playground:error'))
+		.toMatchObject({ type: 'playground:error' });
+	expect(messages.find((message) => message.type === 'playground:error')).not.toEqual({
+		message: 'Playground code must default-export a React component.',
+		type: 'playground:error',
+	});
+});
