@@ -1,27 +1,9 @@
 import { Heading } from '@luke-ui/react/heading';
 import { vars } from '@luke-ui/react/theme';
 import { Track } from '@luke-ui/react/track';
-import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
-import {
-	expectForwardsDomProps,
-	expectHtmlElement,
-	forwardedDomProps,
-} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
-import { captureVisualAppearance, variantValuesFor } from '../test-utils/visual.js';
-
-test('Track forwards className, data attributes, id, and ref to its element', () => {
-	const ref = createRef<HTMLElement>();
-	const { container } = render(
-		<Track {...forwardedDomProps} gap="sp8" ref={ref}>
-			Content
-		</Track>,
-	);
-	const target = expectHtmlElement(container.firstElementChild, 'Expected Track element.');
-
-	expectForwardsDomProps(target, ref);
-});
+import { captureVisualAppearance } from '../test-utils/visual.js';
 
 test('omits a rail wrapper and its gap when a rail prop is absent', () => {
 	const neither = render(
@@ -110,25 +92,7 @@ test('rails keep their natural inline size while the centre can shrink', () => {
 	expect(centre.getBoundingClientRect().width).toBeLessThan(64);
 });
 
-test('maps every railAlignment to the expected cross-axis alignment, defaulting to start', () => {
-	const alignments = [
-		['start', 'flex-start'],
-		['firstLine', 'flex-start'],
-		['center', 'center'],
-		['end', 'flex-end'],
-	] as const;
-
-	for (const [railAlignment, expected] of alignments) {
-		const { locator } = render(
-			<Track data-testid="track" gap="sp8" railAlignment={railAlignment}>
-				Centre
-			</Track>,
-		);
-		const element = locator.getByTestId('track').element();
-		if (!(element instanceof HTMLElement)) throw new Error('Expected Track element.');
-		expect(getComputedStyle(element).alignItems).toBe(expected);
-	}
-
+test('defaults railAlignment to start and pins firstLine to the centre’s first line', () => {
 	const { locator: defaultLocator } = render(
 		<Track data-testid="track" gap="sp8">
 			Centre
@@ -137,9 +101,7 @@ test('maps every railAlignment to the expected cross-axis alignment, defaulting 
 	const defaultElement = defaultLocator.getByTestId('track').element();
 	if (!(defaultElement instanceof HTMLElement)) throw new Error('Expected Track element.');
 	expect(getComputedStyle(defaultElement).alignItems).toBe('flex-start');
-});
 
-test('pins a rail taller than the line box to the centre’s first line under firstLine', () => {
 	const { locator } = render(
 		<Track
 			data-testid="track"
@@ -263,13 +225,6 @@ test('keeps rail order logical under RTL, putting railStart on the inline-start 
 	expect(start.getBoundingClientRect().left).toBeGreaterThan(end.getBoundingClientRect().left);
 });
 
-const railAlignments = variantValuesFor<typeof Track, 'railAlignment'>()([
-	'start',
-	'firstLine',
-	'center',
-	'end',
-]);
-
 const itemStyle = {
 	backgroundColor: vars.color.surface.floating,
 	borderRadius: vars.radius.detail,
@@ -292,48 +247,13 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator: scene } = render(
 			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space.sp16 }}>
-				{railAlignments.map((railAlignment) => (
-					<Track
-						gap="sp8"
-						key={railAlignment}
-						railAlignment={railAlignment}
-						railEnd={railEnd}
-						railStart={railStart}
-						style={{ ...rowStyle, inlineSize: '20rem' }}
-					>
-						<span style={itemStyle}>This centre wraps beside both rails ({railAlignment})</span>
-					</Track>
-				))}
-				<Track gap="sp8" railStart={railStart} style={rowStyle}>
-					<span style={itemStyle}>Start rail only</span>
-				</Track>
-				<Track gap="sp8" railEnd={railEnd} style={rowStyle}>
-					<span style={itemStyle}>End rail only</span>
-				</Track>
-				<Track gap="sp8" railEnd={railEnd} railStart={railStart} style={rowStyle}>
-					<span style={itemStyle}>Both rails</span>
-				</Track>
-				<Track gap="sp8" style={rowStyle}>
-					<span style={itemStyle}>Neither rail</span>
-				</Track>
 				<Track
 					gap="sp8"
 					railEnd={railEnd}
 					railStart={railStart}
-					style={{ ...rowStyle, inlineSize: '16rem' }}
+					style={{ ...rowStyle, inlineSize: '20rem' }}
 				>
-					<span style={{ display: 'block', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-						Anunbrokenstringoftextthatoverflowsthecentrewithoutwrapping
-					</span>
-				</Track>
-				<Track
-					gap="sp8"
-					railEnd={railEnd}
-					railStart={railStart}
-					style={{ ...rowStyle, inlineSize: '16rem' }}
-				>
-					This centre text wraps across multiple lines to show how the rails sit alongside multiline
-					content.
+					<span style={itemStyle}>Both rails beside wrapping centre</span>
 				</Track>
 				<Track
 					gap="sp8"

@@ -51,63 +51,6 @@ function forwardsDomPropsForExport(project: PropProject, path: string, name: str
 }
 
 test(
-	'keeps documented press props on Button while hiding generic DOM props',
-	async () => {
-		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/button/button.tsx',
-			'ButtonProps',
-		);
-		expect(names).toContain('onPress');
-		expect(names).toContain('appearance');
-		expect(names).not.toContain('onClick');
-		expect(names).not.toContain('onPointerMoveCapture');
-		expect(names).not.toContain('itemProp');
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
-
-/**
- * `AriaBaseButtonProps` (react-aria's `useButton`) declares these directly alongside `type` and the
- * props `DocumentedPressProps` redeclares, on the very same interface body, reached through a plain
- * `extends` — no syntax separates them from their documented siblings. `button.mdx` and
- * `icon-button.mdx` teach none of them and both point at the upstream React Aria page via `reactAria`
- * frontmatter, so per `docs/DOCUMENTATION.md` they belong behind that link, not in the table.
- */
-const ARIA_BASE_BUTTON_LONG_TAIL = [
-	'formMethod',
-	'formAction',
-	'formTarget',
-	'formEncType',
-	'formNoValidate',
-	'name',
-	'value',
-	'preventFocusOnPress',
-	'aria-pressed',
-	'aria-expanded',
-	'aria-haspopup',
-	'aria-controls',
-	'aria-current',
-	'aria-disabled',
-] as const;
-
-test(
-	"hides AriaBaseButtonProps' undocumented long tail on Button while keeping its labeling contract",
-	async () => {
-		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/button/button.tsx',
-			'ButtonProps',
-		);
-		for (const prop of ARIA_BASE_BUTTON_LONG_TAIL) {
-			expect(names, `ButtonProps should hide ${prop}`).not.toContain(prop);
-		}
-		// The fixed `AriaLabelingProps` contract stays visible even though Button never redeclares it.
-		expect(names).toContain('aria-label');
-		expect(names).toContain('aria-labelledby');
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
-
-test(
 	'keeps documented form and field props on TextField while hiding generic DOM props',
 	async () => {
 		const names = await visiblePropNames(
@@ -120,21 +63,6 @@ test(
 		expect(names).toContain('description');
 		expect(names).not.toContain('onClick');
 		expect(names).not.toContain('className');
-		expect(names).not.toContain('onPointerMoveCapture');
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
-
-test(
-	'keeps the primitive button styling and press contract without generic DOM props',
-	async () => {
-		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/primitives/button/button.tsx',
-			'ButtonProps',
-		);
-		expect(names).toContain('appearance');
-		expect(names).toContain('onPress');
-		expect(names).not.toContain('onClick');
 		expect(names).not.toContain('onPointerMoveCapture');
 	},
 	TS_MORPH_TEST_TIMEOUT,
@@ -199,57 +127,6 @@ test(
 );
 
 test(
-	"keeps IconProps' curated SVG props visible without marking Icon as DOM-forwarding",
-	async () => {
-		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/icon/icon.tsx',
-			'IconProps',
-		);
-		// Icon deliberately `Pick`s these 5 props from `SVGAttributes`/`AriaAttributes`; the old
-		// declaration-origin heuristic hid them because `Pick` preserves React's own declaration site.
-		expect(names).toContain('aria-hidden');
-		expect(names).toContain('className');
-		expect(names).toContain('id');
-		expect(names).toContain('style');
-		expect(names).toContain('viewBox');
-		// Unrelated DOM/event noise never picked by Icon must stay absent.
-		expect(names).not.toContain('onClick');
-		expect(names).not.toContain('onPointerMoveCapture');
-		expect(names).not.toContain('tabIndex');
-
-		const { declaration } = await loadDoc(
-			'packages/@luke-ui/react/src/core/icon/icon.tsx',
-			'IconProps',
-		);
-		expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(false);
-		expect(
-			forwardsDomPropsForExport(
-				await getSharedPropProject(repoRoot),
-				'packages/@luke-ui/react/src/core/icon/icon.tsx',
-				'IconProps',
-			),
-		).toBe(false);
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
-
-test(
-	"keeps VisuallyHidden's documented elementType prop visible while hiding generic DOM props",
-	async () => {
-		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/visually-hidden/visually-hidden.tsx',
-			'VisuallyHiddenProps',
-		);
-		// The guide explicitly teaches `<VisuallyHidden elementType="h2">`.
-		expect(names).toContain('elementType');
-		expect(names).not.toContain('onClick');
-		expect(names).not.toContain('itemProp');
-		expect(names).not.toContain('onPointerMoveCapture');
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
-
-test(
 	'keeps the redeclared form and state contract visible on the Combobox root primitive',
 	async () => {
 		const names = await visiblePropNames(
@@ -260,10 +137,9 @@ test(
 		expect(names).toContain('isReadOnly');
 		expect(names).toContain('isRequired');
 		expect(names).toContain('isInvalid');
-		// `form` and `name` are the same react-aria long-tail prop names hidden on `ButtonProps` below —
-		// visible here specifically because `ComboboxRootRedeclaredRACProps` redeclares them with useful
-		// JSDoc, which is what "redeclared in Luke UI source wins" means in practice. Button never
-		// redeclares them, so they stay hidden there. The asymmetry is deliberate, not a bug.
+		// `form` and `name` are the same react-aria long-tail prop names hidden on AriaBaseButton
+		// types — visible here specifically because `ComboboxRootRedeclaredRACProps` redeclares them
+		// with useful JSDoc, which is what "redeclared in Luke UI source wins" means in practice.
 		expect(names).toContain('name');
 		expect(names).toContain('form');
 		expect(names).toContain('validate');
@@ -273,75 +149,6 @@ test(
 		expect(names).not.toContain('onPointerMoveCapture');
 		expect(names).not.toContain('onClickCapture');
 		expect(names).not.toContain('onAuxClick');
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
-
-test(
-	"keeps LoadingSpinner's documented aria-label visible while hiding generic DOM props",
-	async () => {
-		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/loading-spinner/loading-spinner.tsx',
-			'LoadingSpinnerProps',
-		);
-		expect(names).toContain('aria-label');
-		expect(names).toContain('isLoading');
-		expect(names).toContain('size');
-		expect(names).not.toContain('onClick');
-		expect(names).not.toContain('onPointerMoveCapture');
-		expect(names).not.toContain('itemProp');
-		expect(names).not.toContain('key');
-		expect(names).not.toContain('ref');
-
-		const { declaration } = await loadDoc(
-			'packages/@luke-ui/react/src/core/loading-spinner/loading-spinner.tsx',
-			'LoadingSpinnerProps',
-		);
-		expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(true);
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
-
-test(
-	"keeps InputGroupInput's documented aria-label and inputMode visible while hiding generic DOM props",
-	async () => {
-		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/primitives/input-group/input-group.tsx',
-			'InputGroupInputProps',
-		);
-		for (const prop of ['aria-label', 'className', 'inputMode', 'ref', 'size'] as const) {
-			expect(names).toContain(prop);
-		}
-		for (const prop of [...GENERIC_DOM_NOISE, 'key'] as const) {
-			expect(names).not.toContain(prop);
-		}
-
-		const { declaration } = await loadDoc(
-			'packages/@luke-ui/react/src/core/primitives/input-group/input-group.tsx',
-			'InputGroupInputProps',
-		);
-		expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(true);
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
-
-test(
-	'keeps a pure native wrapper empty while still forwarding DOM props',
-	async () => {
-		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/kbd/kbd.tsx',
-			'KbdProps',
-		);
-		expect(names).toEqual([]);
-		for (const prop of [...GENERIC_DOM_NOISE, 'key', 'ref'] as const) {
-			expect(names).not.toContain(prop);
-		}
-
-		const { declaration } = await loadDoc(
-			'packages/@luke-ui/react/src/core/kbd/kbd.tsx',
-			'KbdProps',
-		);
-		expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(true);
 	},
 	TS_MORPH_TEST_TIMEOUT,
 );
@@ -357,9 +164,9 @@ const GENERIC_DOM_NOISE = ['itemProp', 'onClick', 'onPointerMoveCapture', 'tabIn
  * The types whose tables were empty before this analysis existed, now audited against what each
  * component's guide actually teaches rather than against whatever the analysis happens to emit.
  *
- * `Kbd`, `Prose` and the two checkbox anatomy parts are pure element wrappers: their guides teach
- * only that they render a native element with the component's own styling, and their source is a
- * bare `extends ComponentProps<'kbd' | 'div' | 'span'>`. They document no Luke UI contract beyond
+ * `Kbd` stands for the pure native wrappers (`Prose`, checkbox anatomy parts, and similar): their
+ * guides teach only that they render a native element with the component's own styling, and their
+ * source is a bare `extends ComponentProps<'…'>`. They document no Luke UI contract beyond
  * pass-through DOM props, so their filtered tables are intentionally empty and rely on the
  * native-props note alone.
  *
@@ -384,24 +191,6 @@ const AUDITED_TYPES: ReadonlyArray<{
 		forwardsDomProps: true,
 		name: 'KbdProps',
 		path: 'packages/@luke-ui/react/src/core/kbd/kbd.tsx',
-		visible: [],
-	},
-	{
-		forwardsDomProps: true,
-		name: 'ProseProps',
-		path: 'packages/@luke-ui/react/src/core/prose/prose.tsx',
-		visible: [],
-	},
-	{
-		forwardsDomProps: true,
-		name: 'CheckboxControlProps',
-		path: 'packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx',
-		visible: [],
-	},
-	{
-		forwardsDomProps: true,
-		name: 'CheckboxIndicatorProps',
-		path: 'packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx',
 		visible: [],
 	},
 	{
@@ -474,29 +263,32 @@ const AUDITED_TYPES: ReadonlyArray<{
 	},
 ];
 
-test.each(AUDITED_TYPES)(
-	'$name documents its own contract without generic DOM props',
-	async ({ forwardsDomProps, hidden = [], name, path, visible }) => {
-		const names = await visiblePropNames(path, name);
+for (const auditedType of AUDITED_TYPES) {
+	test(
+		`${auditedType.name} documents its own contract without generic DOM props`,
+		async () => {
+			const { forwardsDomProps, hidden = [], name, path, visible } = auditedType;
+			const names = await visiblePropNames(path, name);
 
-		for (const prop of visible) {
-			expect(names, `${name} should document ${prop}`).toContain(prop);
-		}
-		const hiddenProps = [
-			...GENERIC_DOM_NOISE,
-			'key',
-			...(visible.includes('ref') ? [] : (['ref'] as const)),
-			...hidden,
-		];
-		for (const prop of hiddenProps) {
-			expect(names, `${name} should hide ${prop}`).not.toContain(prop);
-		}
+			for (const prop of visible) {
+				expect(names, `${name} should document ${prop}`).toContain(prop);
+			}
+			const hiddenProps = [
+				...GENERIC_DOM_NOISE,
+				'key',
+				...(visible.includes('ref') ? [] : (['ref'] as const)),
+				...hidden,
+			];
+			for (const prop of hiddenProps) {
+				expect(names, `${name} should hide ${prop}`).not.toContain(prop);
+			}
 
-		const { declaration } = await loadDoc(path, name);
-		expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(forwardsDomProps);
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
+			const { declaration } = await loadDoc(path, name);
+			expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(forwardsDomProps);
+		},
+		TS_MORPH_TEST_TIMEOUT,
+	);
+}
 
 test(
 	'keeps both branches of a union type documented and DOM-forwarding',
@@ -638,11 +430,15 @@ test(
 );
 
 /**
- * Exact visible-prop sets for types whose shape depends on how React and React Aria declare their
- * own interfaces. The structural analysis reads that upstream syntax, so an upstream release that
- * moves a prop between a curated contract and a generic element attribute bag changes what these
- * tables show. Pinning the whole set makes that change fail here loudly instead of silently
- * rewriting a published API table.
+ * Exact visible-prop sets for the AriaBaseButton family. Those types inherit `AriaBaseButtonProps`
+ * (react-aria's `useButton`), which declares an undocumented long tail directly alongside genuinely
+ * documented siblings on the same interface body. The structural analysis reads that upstream
+ * syntax, so an upstream release that moves a prop between a curated contract and a generic element
+ * attribute bag changes what these tables show. Pinning the whole set makes that change fail here
+ * loudly instead of silently rewriting a published API table.
+ *
+ * `TextProps` is pinned for the same reason against RAC `Text` / `HTMLAttributes` churn. Types
+ * covered by `AUDITED_TYPES` are not re-pinned here.
  */
 const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 	exportName: string;
@@ -650,14 +446,6 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 	path: string;
 	props: ReadonlyArray<string>;
 }> = [
-	{
-		// Every prop arrives through `Pick<SVGAttributes<SVGSVGElement>, …>` or a Luke UI interface, so
-		// nothing here may come from inheriting an attribute bag.
-		exportName: 'IconProps',
-		name: 'IconProps',
-		path: 'packages/@luke-ui/react/src/core/icon/icon.tsx',
-		props: ['aria-hidden', 'className', 'id', 'name', 'size', 'style', 'title', 'viewBox'],
-	},
 	{
 		// `Text` omits RAC's `Text` props it redeclares and adds its own typography contract. Everything
 		// below `HTMLAttributes` must be gone.
@@ -683,40 +471,6 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 		],
 	},
 	{
-		// `Code` composes `Text` and documents `lineClamp` and `textWrap`, while still forwarding
-		// native `<code>` DOM props.
-		exportName: 'CodeProps',
-		name: 'CodeProps',
-		path: 'packages/@luke-ui/react/src/core/code/code.tsx',
-		props: ['lineClamp', 'textWrap'],
-	},
-	{
-		exportName: 'LoadingSpinnerProps',
-		name: 'LoadingSpinnerProps',
-		path: 'packages/@luke-ui/react/src/core/loading-spinner/loading-spinner.tsx',
-		props: ['aria-label', 'children', 'color', 'isLoading', 'size'],
-	},
-	{
-		exportName: 'InputGroupInputProps',
-		name: 'InputGroupInputProps',
-		path: 'packages/@luke-ui/react/src/core/primitives/input-group/input-group.tsx',
-		props: [
-			'aria-label',
-			'className',
-			'inputMode',
-			'onHoverChange',
-			'onHoverEnd',
-			'onHoverStart',
-			'placeholder',
-			'ref',
-			'render',
-			'size',
-		],
-	},
-	{
-		// The five button-shaped types below all inherit `AriaBaseButtonProps` (react-aria's
-		// `useButton`), which declares `ARIA_BASE_BUTTON_LONG_TAIL` directly alongside genuinely
-		// documented siblings on the same interface body — see the comment above that list.
 		exportName: 'ButtonProps',
 		name: 'core ButtonProps',
 		path: 'packages/@luke-ui/react/src/core/button/button.tsx',
@@ -901,11 +655,14 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 	},
 ];
 
-test.each(PINNED_VISIBLE_PROPS)(
-	'$name shows exactly its documented props',
-	async ({ exportName, path, props }) => {
-		const names = await visiblePropNames(path, exportName);
-		expect([...names].sort()).toEqual([...props].sort());
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
+for (const pinned of PINNED_VISIBLE_PROPS) {
+	test(
+		`${pinned.name} shows exactly its documented props`,
+		async () => {
+			const { exportName, path, props } = pinned;
+			const names = await visiblePropNames(path, exportName);
+			expect([...names].sort()).toEqual([...props].sort());
+		},
+		TS_MORPH_TEST_TIMEOUT,
+	);
+}

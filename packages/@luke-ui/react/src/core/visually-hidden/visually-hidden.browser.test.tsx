@@ -1,24 +1,19 @@
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
-import { createRef } from 'react';
-import { test } from 'vite-plus/test';
-import {
-	expectForwardsDomProps,
-	expectHtmlElement,
-	forwardedDomProps,
-} from '../test-utils/forwarding.js';
+import { expect, test } from 'vite-plus/test';
+import { expectHtmlElement } from '../test-utils/forwarding.js';
 import { render } from '../test-utils/render.js';
 
-test('VisuallyHidden forwards className, data attributes, id, and ref to its element', () => {
-	const ref = createRef<HTMLElement>();
-	const { container } = render(
-		<VisuallyHidden {...forwardedDomProps} ref={ref}>
-			Hidden label
-		</VisuallyHidden>,
-	);
+test('VisuallyHidden clips content visually while keeping it in the accessibility tree', () => {
+	const { locator } = render(<VisuallyHidden>Hidden label</VisuallyHidden>);
 	const target = expectHtmlElement(
-		container.firstElementChild,
+		locator.getByText('Hidden label').element(),
 		'Expected a VisuallyHidden element.',
 	);
+	const styles = getComputedStyle(target);
 
-	expectForwardsDomProps(target, ref);
+	expect(styles.blockSize).toBe('1px');
+	expect(styles.inlineSize).toBe('1px');
+	expect(styles.overflow).toBe('hidden');
+	expect(styles.position).toBe('absolute');
+	expect(styles.clipPath).toBe('inset(100%)');
 });

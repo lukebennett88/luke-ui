@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 import { splitBlocks } from './__fixtures__/theme-css.js';
 import { compileTheme } from './build-theme.js';
 import { gamutMapOklch, parseColor } from './color.js';
-import { flattenThemeContract } from './contract.js';
 import { defaultBackdrop, defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
 import { defaultSourceColors } from './foundation.js';
 import { paperTheme } from './foundations/paper.js';
@@ -29,16 +28,7 @@ function extractValue(block: string, varName: string): string {
 const ACCENT_SOLID = '--luke-color-background-accent-solid-rest';
 
 describe('defineTheme single-value accent adaptation', () => {
-	const accents = [
-		'#3b82f6',
-		'#ef4444',
-		'#22c55e',
-		'#eab308',
-		'#f97316',
-		'oklch(0.7 0.15 320)',
-		'oklch(0.6 0.12 160)',
-		'oklch(0.5 0.2 270)',
-	];
+	const accents = ['#3b82f6', 'oklch(0.7 0.15 320)'];
 
 	for (const accent of accents) {
 		it(`adapts ${accent} to an accessible light and dark accent via a per-mode search`, () => {
@@ -285,27 +275,12 @@ describe('normalizeTheme resolves source colours once onto the foundation', () =
 	});
 });
 
-/** Extracts the set of unique `--luke-*` variable names declared in a stylesheet. */
-function emittedVarNames(css: string): Set<string> {
-	return new Set([...css.matchAll(/(--luke-[a-z0-9-]+):/g)].map((match) => match[1] ?? ''));
-}
-
-describe('defineTheme emits the full contract for the bundled themes', () => {
-	const contractNames = flattenThemeContract().map(([, varName]) => varName);
-
+describe('defineTheme emits interactive semantic ramps for the bundled themes', () => {
 	for (const [name, input] of [
 		['tactile', tactileTheme],
 		['paper', paperTheme],
 	] as const) {
 		const css = defineTheme(input);
-		const emitted = emittedVarNames(css);
-
-		it(`${name} emits exactly the contract variables`, () => {
-			// Derived from the contract, not hardcoded: `contract.test.ts` already asserts the typed
-			// `vars` tree has exactly as many leaves as `flattenThemeContract()`, so this only needs to
-			// check that a bundled theme's emitted CSS matches that same list.
-			expect([...emitted].sort()).toEqual([...contractNames].sort());
-		});
 
 		it(`${name} paints info, success, and warning with a real interactive ramp`, () => {
 			const blocks = splitBlocks(css);

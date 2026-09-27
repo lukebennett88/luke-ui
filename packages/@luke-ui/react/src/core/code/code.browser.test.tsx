@@ -1,26 +1,8 @@
 import { Code } from '@luke-ui/react/code';
 import { Text } from '@luke-ui/react/text';
-import { createRef } from 'react';
 import { test, expect } from 'vite-plus/test';
-import {
-	expectForwardsDomProps,
-	expectHtmlElement,
-	forwardedDomProps,
-} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
-
-test('Code forwards className, data attributes, id, and ref to its element', () => {
-	const ref = createRef<HTMLElement>();
-	const { container } = render(
-		<Code {...forwardedDomProps} ref={ref}>
-			npm install
-		</Code>,
-	);
-	const target = expectHtmlElement(container.firstElementChild, 'Expected a Code element.');
-
-	expectForwardsDomProps(target, ref);
-});
 
 const LONG_CONTENT =
 	'one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen';

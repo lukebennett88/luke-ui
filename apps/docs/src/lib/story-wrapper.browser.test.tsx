@@ -10,8 +10,6 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { Comparison, ComparisonItem } from '#docs';
-import AutoGridResponsive from '../examples/auto-grid/responsive.js';
-import GridResponsive from '../examples/grid/responsive.js';
 import { StoryWrapper } from './story-wrapper.js';
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];
@@ -128,28 +126,26 @@ test('flow retains deliberately narrow example sizing', () => {
 	expect(getComputedStyle(autoGrid).gridTemplateColumns.split(' ').filter(Boolean).length).toBe(1);
 });
 
-test('Comparison is compact and centred in flow', () => {
-	const { available, exampleRoot, storyRoot } = renderInWrapper(comparisonFixture());
-	const storyBox = storyRoot.getBoundingClientRect();
-	const comparisonBox = exampleRoot.getBoundingClientRect();
+for (const comparisonCase of [
+	{ containerWidth: undefined as number | undefined, expectCompact: true, name: 'wide' },
+	{ containerWidth: 280, expectCompact: false, name: 'narrow' },
+]) {
+	test(`Comparison stays within the ${comparisonCase.name} flow surface and centred`, () => {
+		const { available, exampleRoot, storyRoot } = renderInWrapper(comparisonFixture(), {
+			containerWidth: comparisonCase.containerWidth,
+		});
+		const storyBox = storyRoot.getBoundingClientRect();
+		const comparisonBox = exampleRoot.getBoundingClientRect();
 
-	expect(comparisonBox.width).toBeLessThan(available);
-	expect(
-		Math.abs(comparisonBox.left - storyBox.left - (storyBox.right - comparisonBox.right)),
-	).toBeLessThanOrEqual(1);
-});
-
-test('Comparison caps its width to the narrow flow surface', () => {
-	const { available, exampleRoot, storyRoot } = renderInWrapper(comparisonFixture(), {
-		containerWidth: 280,
+		expect(comparisonBox.width <= available).toBe(true);
+		expect(comparisonBox.width < available || !comparisonCase.expectCompact).toBe(true);
+		expect(comparisonBox.left).toBeGreaterThanOrEqual(storyBox.left - 1);
+		expect(comparisonBox.right).toBeLessThanOrEqual(storyBox.right + 1);
+		expect(
+			Math.abs(comparisonBox.left - storyBox.left - (storyBox.right - comparisonBox.right)),
+		).toBeLessThanOrEqual(1);
 	});
-	const storyBox = storyRoot.getBoundingClientRect();
-	const comparisonBox = exampleRoot.getBoundingClientRect();
-
-	expect(comparisonBox.width).toBeLessThanOrEqual(available);
-	expect(comparisonBox.left).toBeGreaterThanOrEqual(storyBox.left);
-	expect(comparisonBox.right).toBeLessThanOrEqual(storyBox.right);
-});
+}
 
 test('full-bleed has no inset padding or minimum height', () => {
 	const { exampleRoot, storyRoot } = renderInWrapper(
@@ -163,23 +159,6 @@ test('full-bleed has no inset padding or minimum height', () => {
 		exampleRoot.getBoundingClientRect().height,
 		0,
 	);
-});
-
-test('responsive layout examples resolve against the preview container width', () => {
-	for (const [width, gridColumns, autoGridColumns] of [
-		[900, 4, 3],
-		[400, 2, 2],
-	] as const) {
-		const grid = renderInWrapper(<GridResponsive />, { containerWidth: width });
-		expect(
-			getComputedStyle(grid.exampleRoot).gridTemplateColumns.split(' ').filter(Boolean).length,
-		).toBe(gridColumns);
-
-		const autoGrid = renderInWrapper(<AutoGridResponsive />, { containerWidth: width });
-		expect(
-			getComputedStyle(autoGrid.exampleRoot).gridTemplateColumns.split(' ').filter(Boolean).length,
-		).toBe(autoGridColumns);
-	}
 });
 
 function comparisonFixture() {

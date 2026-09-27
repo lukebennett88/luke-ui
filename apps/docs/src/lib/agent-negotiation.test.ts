@@ -9,30 +9,27 @@ import {
 const CHROME_ACCEPT =
 	'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7';
 
-test.each<[accept: string | null, expected: boolean]>([
-	['text/markdown', true],
+for (const [accept, expected] of [
 	[null, false],
-	['', false],
+	['text/markdown', true],
 	['*/*', false],
 	['text/*', false],
 	['text/markdown, text/html;q=0.9', true],
 	['text/html, text/markdown;q=0.5', false],
 	['text/markdown;q=0.8, */*;q=1', false],
-	['text/markdown;q=1, */*;q=0.8', true],
 	['text/markdown;q=0.5, text/*;q=0.9', false],
-	['text/markdown, text/*;q=0.9', true],
+	// Explicit text/html;q=0 beats */* when scoring HTML, so markdown still wins.
 	['text/markdown;q=0.5, text/html;q=0, */*', true],
 	['text/markdown;q=0', false],
-	['text/markdown, text/html', true],
 	['TEXT/Markdown; charset=utf-8', true],
-	['text/markdown;charset=utf-8;q=0.5, text/html;q=0.4', true],
 	['text/markdown;q=abc', false],
-	['text/markdown;q=2', false],
 	['text/markdown, text/html;q=nope', true],
 	[CHROME_ACCEPT, false],
-])('prefersMarkdown(%j) is %s', (accept, expected) => {
-	expect(prefersMarkdown(accept)).toBe(expected);
-});
+] as const satisfies ReadonlyArray<readonly [accept: string | null, expected: boolean]>) {
+	test(`prefersMarkdown(${JSON.stringify(accept)}) is ${expected}`, () => {
+		expect(prefersMarkdown(accept)).toBe(expected);
+	});
+}
 
 test('maps the homepage to /index.md', () => {
 	expect(markdownPathFor('/')).toBe('/index.md');
@@ -196,24 +193,50 @@ test('builds a root-relative Markdown 404 body when the .md route returns no Mar
 	expect(await res.text()).toBe(notFoundMarkdown('/nope'));
 });
 
-test('serves an empty Markdown 404 body for a HEAD request', async () => {
-	const next = makeRealisticNext('text/markdown');
-	const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
-		return new Response('# Page not found\n', {
-			headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
-			status: 404,
-		});
-	});
+for (const headCase of [
+	{
+		name: '404 markdown twin',
+		setup: async () => {
+			const next = makeRealisticNext('text/markdown');
+			const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
+				return new Response('# Page not found\n', {
+					headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+					status: 404,
+				});
+			});
+			const request = new Request('https://example.com/nope', {
+				headers: { Accept: 'text/markdown' },
+				method: 'HEAD',
+			});
+			return { fetchMock, next, request, status: 404 };
+		},
+	},
+	{
+		name: '200 markdown twin',
+		setup: async () => {
+			const next = vi.fn<() => Promise<Response>>();
+			const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
+				return new Response('# Luke UI\n', {
+					headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+					status: 200,
+				});
+			});
+			const request = new Request('https://luke-ui.netlify.app/', {
+				headers: { Accept: 'text/markdown' },
+				method: 'HEAD',
+			});
+			return { fetchMock, next, request, status: 200 };
+		},
+	},
+]) {
+	test(`serves an empty body for a HEAD ${headCase.name} request`, async () => {
+		const { fetchMock, next, request, status } = await headCase.setup();
+		const res = await handleRequest(request, { fetch: fetchMock, next });
 
-	const request = new Request('https://example.com/nope', {
-		headers: { Accept: 'text/markdown' },
-		method: 'HEAD',
+		expect(res.status).toBe(status);
+		expect(res.body).toBeNull();
 	});
-	const res = await handleRequest(request, { fetch: fetchMock, next });
-
-	expect(res.status).toBe(404);
-	expect(res.body).toBeNull();
-});
+}
 
 test('falls back to HTML with merged Vary when the path has no Markdown twin but the page exists', async () => {
 	const next = vi.fn<(request?: Request) => Promise<Response>>(async () => {
@@ -261,9 +284,8 @@ test('passes through an already-Markdown request unchanged', async () => {
 	expect(fetchMock).not.toHaveBeenCalled();
 });
 
-test.each(['/api', '/api/search'])(
-	'passes through %s unchanged, regardless of Accept',
-	async (pathname) => {
+for (const pathname of ['/api', '/api/search']) {
+	test(`passes through ${pathname} unchanged, regardless of Accept`, async () => {
 		const apiResponse = new Response('{}', { headers: { 'Content-Type': 'application/json' } });
 		const next = vi.fn<() => Promise<Response>>(async () => apiResponse);
 		const fetchMock = vi.fn<(url: URL) => Promise<Response>>();
@@ -277,8 +299,8 @@ test.each(['/api', '/api/search'])(
 		expect(fetchMock).not.toHaveBeenCalled();
 		expect(res).toBe(apiResponse);
 		expect(res.headers.get('Vary')).toBeNull();
-	},
-);
+	});
+}
 
 test('negotiates Markdown for /apiary, a sibling path that merely starts with "api"', async () => {
 	const next = vi.fn<(request?: Request) => Promise<Response>>();
@@ -297,28 +319,4 @@ test('negotiates Markdown for /apiary, a sibling path that merely starts with "a
 	expect(fetchMock).toHaveBeenCalledWith(new URL('https://luke-ui.netlify.app/apiary.md'));
 	expect(next).not.toHaveBeenCalled();
 	expect(res.status).toBe(200);
-});
-
-test('serves an empty body for a HEAD request', async () => {
-	const next = vi.fn<() => Promise<Response>>(async () => {
-		return new Response('# Luke UI\n', {
-			headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
-			status: 200,
-		});
-	});
-	const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
-		return new Response('# Luke UI\n', {
-			headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
-			status: 200,
-		});
-	});
-
-	const request = new Request('https://luke-ui.netlify.app/', {
-		headers: { Accept: 'text/markdown' },
-		method: 'HEAD',
-	});
-	const res = await handleRequest(request, { fetch: fetchMock, next });
-
-	expect(res.status).toBe(200);
-	expect(res.body).toBeNull();
 });

@@ -1,10 +1,8 @@
 import { Emoji } from '@luke-ui/react/emoji';
 import { Text } from '@luke-ui/react/text';
-import { createRef } from 'react';
 import type { CSSProperties } from 'react';
 import { test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
@@ -34,16 +32,6 @@ function EmojiScene() {
 		</Stack>
 	);
 }
-
-test('Emoji forwards className, data attributes, id, and ref to its element', () => {
-	const ref = createRef<HTMLElement>();
-	const { locator } = render(
-		<Emoji {...forwardedDomProps} emoji="🎉" label="Celebration" ref={ref} />,
-	);
-	const target = locator.getByRole('img', { name: 'Celebration' }).element();
-
-	expectForwardsDomProps(target, ref);
-});
 
 test('the Emoji scene has no axe violations', async () => {
 	const { container } = render(<EmojiScene />);

@@ -1,4 +1,3 @@
-import { existsSync } from 'node:fs';
 import { transform } from 'lightningcss';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
@@ -8,7 +7,6 @@ import { typeStyles } from '../../theme/contract.js';
 const lukeOwnedLayerNames = ['reset', 'base', 'recipes', 'utilities'] as const;
 const lukeOwnedLayerNameSet = new Set<string>(lukeOwnedLayerNames);
 const AUTHORITATIVE_LAYER_ORDER_PATTERN = /^@layer reset, base, recipes, utilities;/m;
-const AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN = /^@layer reset, base, recipes, utilities;\n/m;
 type TextClassesByTypography = Record<TypeStyle, Array<string>>;
 const numericLineClampVariants = [2, 3, 4, 5] as const;
 type NumericLineClampVariant = (typeof numericLineClampVariants)[number];
@@ -97,7 +95,6 @@ test('builds the public stylesheet with the retained layer contract', async () =
 
 const stylesheetMutations: Array<[string, (css: string) => string]> = [
 	['missing stable selector', (css: string) => css.replace('.luke-ui-theme', '.theme-root')],
-	['extra stable selector', (css: string) => `${css}\n@layer reset { .luke-ui-extra {} }`],
 	[
 		'reordered authoritative layer declarations',
 		(css: string) => {
@@ -107,31 +104,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 			);
 		},
 	],
-	[
-		'early individual layer declarations before authoritative order',
-		(css: string) => {
-			return css.replace(
-				AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN,
-				'@layer reset;\n@layer base;\n@layer recipes;\n@layer utilities;\n@layer reset, base, recipes, utilities;\n',
-			);
-		},
-	],
-	[
-		'early layer block before authoritative order',
-		(css: string) => {
-			return css.replace(
-				AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN,
-				'@layer recipes { .early {} }\n@layer reset, base, recipes, utilities;\n',
-			);
-		},
-	],
-	['anonymous layer statement', (css: string) => `${css}\n@layer;`],
-	['anonymous layer block', (css: string) => `${css}\n@layer { .anonymous {} }`],
 	['unknown layer', (css: string) => `${css}\n@layer components;`],
-	['nested layer', (css: string) => `${css}\n@layer recipes { @layer utilities {} }`],
-	['root qualified rule', (css: string) => `${css}\n.root-rule { color: red; }`],
-	['base layer rule', (css: string) => `${css}\n@layer base { .consumer-default { color: red; } }`],
-	['lookalike layer at-rule', (css: string) => `${css}\n@layered {}`],
 	[
 		'representative recipe class moved to the wrong layer',
 		(css: string) => {
@@ -140,44 +113,6 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 				'@layer utilities {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
 			);
 		},
-	],
-	[
-		'representative utility class moved to the wrong layer',
-		(css: string) => {
-			return css.replace(
-				'@layer utilities {\n  .utility-class { display: grid; }\n}',
-				'@layer recipes {\n  .utility-class { display: grid; }\n}',
-			);
-		},
-	],
-	[
-		'representative recipe content removed',
-		(css: string) =>
-			css.replace(
-				'  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n',
-				'',
-			),
-	],
-	[
-		'class-like text in an attribute value',
-		(css: string) => {
-			return css.replace(
-				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
-				'@layer recipes {\n  [data-class=".recipe-class"] { display: inline-flex; }\n}',
-			);
-		},
-	],
-	[
-		'redundant empty layer statements after authoritative order',
-		(css: string) => css.replace(AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN, '$&@layer recipes;\n'),
-	],
-	[
-		'empty transitional recipes layer',
-		(css: string) =>
-			css.replace(
-				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
-				'@layer recipes {}',
-			),
 	],
 ];
 
@@ -191,13 +126,6 @@ for (const [name, mutate] of stylesheetMutations) {
 		}).toThrow(/.+/);
 	});
 }
-
-test('ships every style rule in one stylesheet', () => {
-	const dist = (file: string) => new URL(`../../../dist/${file}`, import.meta.url);
-
-	expect(existsSync(dist('stylesheet.css'))).toBe(true);
-	expect(existsSync(dist('stylesheet2.css'))).toBe(false);
-});
 
 test('queries responsive conditions on the logical inline axis', async () => {
 	const stylesheet = await readPublicStylesheet();

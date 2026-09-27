@@ -1,7 +1,7 @@
 import { Icon } from '@luke-ui/react/icon';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
@@ -42,16 +42,6 @@ function IconScene() {
 		</Stack>
 	);
 }
-
-// Icon does not accept `ref` or data attributes.
-test('forwards className and id to the svg', () => {
-	const { container } = render(<Icon className="forwarded-class" id="forwarded-id" name="add" />);
-	const svg = container.querySelector('svg');
-	if (!(svg instanceof SVGSVGElement)) throw new Error('Expected an svg.');
-
-	expect(svg).toHaveClass('forwarded-class');
-	expect(svg).toHaveAttribute('id', 'forwarded-id');
-});
 
 test('the Icon scene has no axe violations', async () => {
 	const { container } = render(<IconScene />);

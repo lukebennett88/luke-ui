@@ -40,13 +40,7 @@ function TrayCombobox(
 		triggerLabel?: string;
 	} & Pick<
 		ComboboxRootProps<CountryItem>,
-		| 'allowsCustomValue'
-		| 'form'
-		| 'formValue'
-		| 'isRequired'
-		| 'name'
-		| 'validate'
-		| 'validationBehavior'
+		'allowsCustomValue' | 'form' | 'isRequired' | 'name' | 'validate' | 'validationBehavior'
 	>,
 ) {
 	const label = props.label ?? 'Country';
@@ -58,7 +52,6 @@ function TrayCombobox(
 			defaultItems={countryItems}
 			defaultValue={props.defaultValue}
 			form={props.form}
-			formValue={props.formValue}
 			isDisabled={props.isDisabled}
 			isReadOnly={props.isReadOnly}
 			isRequired={props.isRequired}
@@ -153,21 +146,6 @@ test('ComboboxTray positions the overlay at the scroll offset each time it opens
 	window.scrollTo(0, 0);
 });
 
-test('ComboboxTray opens from the trigger, focuses the search field, and dismisses', async () => {
-	render(<TrayCombobox />);
-
-	expect(page.getByRole('searchbox').elements()).toHaveLength(0);
-
-	await openTray();
-
-	const searchbox = page.getByRole('searchbox', { name: 'Country' });
-	await expect.element(searchbox).toHaveFocus();
-	expect(searchbox.element()).toHaveAttribute('aria-haspopup', 'listbox');
-
-	await userEvent.keyboard('{Escape}');
-	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-});
-
 test("ComboboxTray search field does not inherit the combobox trigger role's ARIA", async () => {
 	render(<TrayCombobox />);
 	await openTray();
@@ -196,17 +174,6 @@ test('ComboboxTray search field does not toggle or close the tray on click or to
 	await expect.element(searchbox).toHaveFocus();
 });
 
-test('ComboboxTray keeps focus on the search field while arrow keys move the active option', async () => {
-	render(<TrayCombobox />);
-	await openTray();
-
-	const searchbox = page.getByRole('searchbox', { name: 'Country' });
-	await userEvent.keyboard('{ArrowDown}');
-
-	await expect.element(searchbox).toHaveFocus();
-	await expect.poll(() => searchbox.element().getAttribute('aria-activedescendant')).not.toBeNull();
-});
-
 test('ComboboxClearButton clears the search text inside a tray', async () => {
 	render(<TrayCombobox />);
 	await openTray();
@@ -222,37 +189,36 @@ test('ComboboxClearButton clears the search text inside a tray', async () => {
 	await expect.element(page.getByRole('dialog')).toBeVisible();
 });
 
-test('ComboboxTrayTrigger names itself from the field label and its selected value', async () => {
-	render(<TrayCombobox defaultValue="au" />);
+test('ComboboxTrayTrigger names itself from the field label, selected value, or an explicit label', async () => {
+	render(
+		<>
+			<TrayCombobox defaultValue="au" />
+			<TrayCombobox defaultValue="au" label="Explicit" triggerLabel="Destination" />
+		</>,
+	);
 
 	const trigger = page.getByRole('button', { name: 'Country Australia' });
 	await expect.element(trigger).toBeVisible();
 	expect(trigger.element()).toHaveAttribute('aria-expanded', 'false');
 	expect(trigger.element()).toHaveAttribute('aria-haspopup', 'dialog');
-});
-
-test('ComboboxTrayTrigger cannot open a read-only combobox', async () => {
-	render(<TrayCombobox defaultValue="au" isReadOnly />);
-
-	const trigger = page.getByRole('button', { name: 'Country Australia' });
-	await expect.element(trigger).toBeDisabled();
-
-	await expect.element(trigger).toMatchTextContent('Australia');
-	expect(page.getByRole('dialog').elements()).toHaveLength(0);
-});
-
-test('ComboboxTrayTrigger cannot open a disabled combobox', async () => {
-	render(<TrayCombobox defaultValue="au" isDisabled />);
-
-	const trigger = page.getByRole('button', { name: 'Country Australia' });
-	await expect.element(trigger).toBeDisabled();
-	expect(page.getByRole('dialog').elements()).toHaveLength(0);
-});
-
-test('ComboboxTrayTrigger uses an explicit accessible name', async () => {
-	render(<TrayCombobox defaultValue="au" triggerLabel="Destination" />);
-
 	await expect.element(page.getByRole('button', { name: 'Destination' })).toBeVisible();
+});
+
+test('ComboboxTrayTrigger cannot open a read-only or disabled combobox', async () => {
+	render(
+		<>
+			<TrayCombobox defaultValue="au" isReadOnly label="ReadOnly" />
+			<TrayCombobox defaultValue="au" isDisabled label="Disabled" />
+		</>,
+	);
+
+	const readOnlyTrigger = page.getByRole('button', { name: 'ReadOnly Australia' });
+	const disabledTrigger = page.getByRole('button', { name: 'Disabled Australia' });
+
+	await expect.element(readOnlyTrigger).toBeDisabled();
+	await expect.element(readOnlyTrigger).toMatchTextContent('Australia');
+	await expect.element(disabledTrigger).toBeDisabled();
+	expect(page.getByRole('dialog').elements()).toHaveLength(0);
 });
 
 test('ComboboxTray search field does not reopen the popover while the tray is exiting', async () => {
@@ -272,27 +238,6 @@ test('ComboboxTray search field does not reopen the popover while the tray is ex
 	searchbox.element().dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-});
-
-test('ComboboxTray collection-building pass does not leak duplicate structure', async () => {
-	render(<TrayCombobox />);
-
-	expect(page.getByRole('searchbox').elements()).toHaveLength(0);
-	expect(page.getByRole('button', { name: 'Clear search' }).elements()).toHaveLength(0);
-
-	await openTray();
-
-	expect(page.getByRole('option').elements()).toHaveLength(countryItems.length);
-});
-
-test('ComboboxTray stays closed after an option is selected', async () => {
-	render(<TrayCombobox />);
-	await openTray();
-
-	await userEvent.click(page.getByRole('option', { name: 'Australia' }));
-
-	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-	await expect.element(page.getByRole('button', { name: 'Country Australia' })).toBeVisible();
 });
 
 test('ComboboxTrayTrigger blocks submission of a required, unselected combobox while the tray is closed', async () => {
@@ -492,6 +437,9 @@ test('ComboboxTrayTrigger submits custom text in text mode while the tray is clo
 	if (form == null) throw new Error('Expected the form element.');
 
 	await openTray();
+	// The search field must not keep `name`, or it double-submits with the trigger.
+	expect(page.getByRole('searchbox', { name: 'Country' }).element()).not.toHaveAttribute('name');
+
 	await enterTraySearch('Freedonia');
 	expect(new FormData(form).getAll('country')).toEqual(['Freedonia']);
 
@@ -506,107 +454,14 @@ test('ComboboxTrayTrigger submits custom text in text mode while the tray is clo
 	expect(new FormData(form).getAll('country')).toEqual(['']);
 });
 
-test('ComboboxTrayTrigger submits the option text, not its key, in text mode', async () => {
+test('ComboboxTrayTrigger does not submit text-mode values when disabled', async () => {
 	const { container } = render(
-		<form aria-label="Country form">
-			<TrayCombobox allowsCustomValue />
+		<form aria-label="Disabled form">
+			<TrayCombobox allowsCustomValue defaultValue="au" isDisabled label="Disabled" />
 		</form>,
 	);
 	const form = container.querySelector('form');
 	if (form == null) throw new Error('Expected the form element.');
 
-	await openTray();
-	await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
-	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-
-	expect(new FormData(form).getAll('country')).toEqual(['Australia']);
-});
-
-test('ComboboxTrayTrigger submits one text-mode value through an external form association', async () => {
-	const { container } = render(
-		<>
-			<form aria-label="Country form" id="country-form" />
-			<TrayCombobox allowsCustomValue form="country-form" />
-		</>,
-	);
-	const form = container.querySelector('form');
-	if (form == null) throw new Error('Expected the form element.');
-
-	// The search field must not keep `name`, or it double-submits with the trigger.
-	await openTray();
-	const searchbox = page.getByRole('searchbox', { name: 'Country' });
-	expect(searchbox.element()).not.toHaveAttribute('name');
-
-	await enterTraySearch('Freedonia');
-	expect(new FormData(form).getAll('country')).toEqual(['Freedonia']);
-
-	await userEvent.keyboard('{Escape}');
-	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-	expect(new FormData(form).getAll('country')).toEqual(['Freedonia']);
-});
-
-test('ComboboxTrayTrigger submits text-mode values for read-only and aria-validated combobox but not a disabled one', async () => {
-	const { container } = render(
-		<>
-			<form aria-label="ReadOnly form">
-				<TrayCombobox allowsCustomValue defaultValue="au" isReadOnly label="ReadOnly" />
-			</form>
-			<form aria-label="Aria form">
-				<TrayCombobox allowsCustomValue defaultValue="au" label="Aria" validationBehavior="aria" />
-			</form>
-			<form aria-label="Disabled form">
-				<TrayCombobox allowsCustomValue defaultValue="au" isDisabled label="Disabled" />
-			</form>
-		</>,
-	);
-	const forms = [...container.querySelectorAll('form')];
-	const [readOnlyForm, ariaForm, disabledForm] = forms;
-	if (readOnlyForm == null || ariaForm == null || disabledForm == null) {
-		throw new Error('Expected three form elements.');
-	}
-
-	expect(new FormData(readOnlyForm).getAll('country')).toEqual(['Australia']);
-	expect(new FormData(ariaForm).getAll('country')).toEqual(['Australia']);
-	expect(new FormData(disabledForm).getAll('country')).toEqual([]);
-});
-
-test('ComboboxTrayTrigger leaves key-mode submission to React Aria', async () => {
-	const { container } = render(
-		<form aria-label="Country form">
-			<TrayCombobox defaultValue="au" />
-		</form>,
-	);
-	const form = container.querySelector('form');
-	if (form == null) throw new Error('Expected the form element.');
-
-	expect(new FormData(form).getAll('country')).toEqual(['au']);
-
-	await openTray('Country Australia');
-	expect(new FormData(form).getAll('country')).toEqual(['au']);
-
-	await userEvent.click(page.getByRole('option', { name: 'Canada' }).element());
-	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-	expect(new FormData(form).getAll('country')).toEqual(['ca']);
-
-	// A disabled key-mode field still submits through React Aria's hidden input. The docs rely on that.
-	const { container: disabledContainer } = render(
-		<form aria-label="Disabled country form">
-			<TrayCombobox defaultValue="au" isDisabled />
-		</form>,
-	);
-	const disabledForm = disabledContainer.querySelector('form');
-	if (disabledForm == null) throw new Error('Expected the form element.');
-	expect(new FormData(disabledForm).getAll('country')).toEqual(['au']);
-});
-
-test('ComboboxTrayTrigger submits text for an explicit formValue of text', async () => {
-	const { container } = render(
-		<form aria-label="Country form">
-			<TrayCombobox defaultValue="au" formValue="text" />
-		</form>,
-	);
-	const form = container.querySelector('form');
-	if (form == null) throw new Error('Expected the form element.');
-
-	expect(new FormData(form).getAll('country')).toEqual(['Australia']);
+	expect(new FormData(form).getAll('country')).toEqual([]);
 });

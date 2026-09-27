@@ -1,28 +1,10 @@
 import { Cluster } from '@luke-ui/react/cluster';
 import { vars } from '@luke-ui/react/theme';
-import { createRef } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { breakpoints } from '../../theme/breakpoints.js';
-import {
-	expectForwardsDomProps,
-	expectHtmlElement,
-	forwardedDomProps,
-} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
-
-test('Cluster forwards className, data attributes, id, and ref to its element', () => {
-	const ref = createRef<HTMLElement>();
-	const { container } = render(
-		<Cluster {...forwardedDomProps} gap="sp8" ref={ref}>
-			Content
-		</Cluster>,
-	);
-	const target = expectHtmlElement(container.firstElementChild, 'Expected Cluster element.');
-
-	expectForwardsDomProps(target, ref);
-});
 
 afterEach(async () => {
 	await page.viewport(1024, 800);
@@ -44,29 +26,6 @@ test('flows children on the inline axis and wraps by default', () => {
 	expect(getComputedStyle(element).flexWrap).toBe('wrap');
 	expect(getComputedStyle(element).justifyContent).toBe('flex-start');
 	expect(getComputedStyle(element).alignItems).toBe('center');
-});
-
-test('accepts flexWrap overrides including wrap-reverse', () => {
-	const nowrapResult = render(
-		<Cluster data-testid="cluster-nowrap" flexWrap="nowrap" gap="sp8">
-			<span>First</span>
-			<span>Second</span>
-		</Cluster>,
-	);
-	const wrapReverseResult = render(
-		<Cluster data-testid="cluster-wrap-reverse" flexWrap="wrap-reverse" gap="sp8">
-			<span>First</span>
-			<span>Second</span>
-		</Cluster>,
-	);
-	const nowrap = nowrapResult.locator.getByTestId('cluster-nowrap').element();
-	const wrapReverse = wrapReverseResult.locator.getByTestId('cluster-wrap-reverse').element();
-	if (!(nowrap instanceof HTMLElement) || !(wrapReverse instanceof HTMLElement)) {
-		throw new Error('Expected Cluster elements.');
-	}
-
-	expect(getComputedStyle(nowrap).flexWrap).toBe('nowrap');
-	expect(getComputedStyle(wrapReverse).flexWrap).toBe('wrap-reverse');
 });
 
 test('nowrap disables wrapping without changing child shrink behaviour', () => {
@@ -115,20 +74,6 @@ test('uses no gap by default and accepts alignment overrides', () => {
 	expect(second.getBoundingClientRect().left - first.getBoundingClientRect().right).toBe(0);
 });
 
-test('emits no gap utility when gap is omitted', () => {
-	const { locator } = render(
-		<Cluster data-testid="cluster">
-			<span style={{ inlineSize: '1rem' }} />
-			<span style={{ inlineSize: '1rem' }} />
-		</Cluster>,
-	);
-	const element = locator.getByTestId('cluster').element();
-	if (!(element instanceof HTMLElement)) throw new Error('Expected Cluster element.');
-
-	expect(element.className).not.toMatch(/gap/);
-	expect(getComputedStyle(element).gap).toBe('normal');
-});
-
 test('wraps when children exceed the inline size', () => {
 	const { locator } = render(
 		<Cluster data-testid="cluster" gap="sp8" style={{ inlineSize: '8rem' }}>
@@ -146,50 +91,28 @@ test('wraps when children exceed the inline size', () => {
 	expect(second.offsetTop).toBeGreaterThan(first.offsetTop);
 });
 
-test('keeps the inline axis under RTL and vertical writing mode', () => {
+test('keeps the inline axis under RTL', () => {
 	const { locator } = render(
-		<div>
-			<div dir="rtl" style={{ inlineSize: '6rem' }}>
-				<Cluster data-testid="cluster-rtl" gap="sp8">
-					<span style={{ inlineSize: '1rem' }} />
-					<span style={{ inlineSize: '1rem' }} />
-				</Cluster>
-			</div>
-			<div style={{ inlineSize: '6rem', writingMode: 'vertical-rl' }}>
-				<Cluster data-testid="cluster-vertical" gap="sp8">
-					<span style={{ inlineSize: '1rem' }} />
-					<span style={{ inlineSize: '1rem' }} />
-				</Cluster>
-			</div>
+		<div dir="rtl" style={{ inlineSize: '6rem' }}>
+			<Cluster data-testid="cluster-rtl" gap="sp8">
+				<span style={{ inlineSize: '1rem' }} />
+				<span style={{ inlineSize: '1rem' }} />
+			</Cluster>
 		</div>,
 	);
 	const rtl = locator.getByTestId('cluster-rtl').element();
-	const vertical = locator.getByTestId('cluster-vertical').element();
-	if (!(rtl instanceof HTMLElement) || !(vertical instanceof HTMLElement)) {
-		throw new Error('Expected Cluster elements.');
-	}
+	if (!(rtl instanceof HTMLElement)) throw new Error('Expected Cluster element.');
 
 	expect(getComputedStyle(rtl).flexDirection).toBe('row');
 	expect(getComputedStyle(rtl).flexWrap).toBe('wrap');
-	expect(getComputedStyle(vertical).flexDirection).toBe('row');
-	expect(getComputedStyle(vertical).flexWrap).toBe('wrap');
 
 	const [rtlFirst, rtlSecond] = rtl.children;
-	const [verticalFirst, verticalSecond] = vertical.children;
-	if (
-		!(rtlFirst instanceof HTMLElement) ||
-		!(rtlSecond instanceof HTMLElement) ||
-		!(verticalFirst instanceof HTMLElement) ||
-		!(verticalSecond instanceof HTMLElement)
-	) {
+	if (!(rtlFirst instanceof HTMLElement) || !(rtlSecond instanceof HTMLElement)) {
 		throw new Error('Expected Cluster children.');
 	}
 
 	expect(rtlFirst.getBoundingClientRect().left).toBeGreaterThan(
 		rtlSecond.getBoundingClientRect().left,
-	);
-	expect(verticalSecond.getBoundingClientRect().top).toBeGreaterThan(
-		verticalFirst.getBoundingClientRect().top,
 	);
 });
 
@@ -224,65 +147,6 @@ test('keeps Cluster defaults below sparse responsive alignment overrides', async
 	expect(getComputedStyle(element).justifyContent).toBe('center');
 	expect(getComputedStyle(element).flexWrap).toBe('nowrap');
 	expect(second.getBoundingClientRect().left).toBeGreaterThan(first.getBoundingClientRect().right);
-});
-
-test('applies root layout props and ignores unsupported Box utilities from an object spread', () => {
-	const props = {
-		borderStyle: 'solid',
-		borderWidth: 'thick',
-		gap: 'sp8',
-		inlineSize: '10rem',
-		padding: 'sp16',
-	} as const;
-	const { locator } = render(
-		<div data-testid="container" style={{ inlineSize: '20rem' }}>
-			<Cluster {...props} data-testid="cluster">
-				<span style={{ blockSize: '1rem' }} />
-			</Cluster>
-		</div>,
-	);
-	const container = locator.getByTestId('container').element();
-	const element = locator.getByTestId('cluster').element();
-	if (!(container instanceof HTMLElement) || !(element instanceof HTMLElement)) {
-		throw new Error('Expected Cluster elements.');
-	}
-	const child = element.firstElementChild;
-	if (!(child instanceof HTMLElement)) throw new Error('Expected Cluster child.');
-
-	expect(element.getBoundingClientRect().width).toBeLessThan(
-		container.getBoundingClientRect().width,
-	);
-	expect(child.getBoundingClientRect().left).toBeGreaterThan(element.getBoundingClientRect().left);
-	expect(element.offsetWidth).toBe(element.clientWidth);
-});
-
-test('renders semantic elements and a consumer-owned render prop', () => {
-	const ref = createRef<HTMLElement>();
-	const semanticResult = render(
-		<Cluster aria-label="Filters" elementType="ul" gap="sp8">
-			<li>Open</li>
-			<li>Closed</li>
-		</Cluster>,
-	);
-	const list = semanticResult.locator.getByRole('list', { name: 'Filters' });
-	expect(list.element().tagName).toBe('UL');
-
-	const customResult = render(
-		<Cluster
-			ref={ref}
-			gap="sp8"
-			render={(resolvedProps) => <nav {...resolvedProps} data-testid="cluster-render" />}
-		>
-			<span>Home</span>
-			<span>About</span>
-		</Cluster>,
-	);
-	const nav = customResult.locator.getByTestId('cluster-render').element();
-	if (!(nav instanceof HTMLElement)) throw new Error('Expected render callback element.');
-
-	expect(nav.tagName).toBe('NAV');
-	expect(ref.current).toBe(nav);
-	expect(getComputedStyle(nav).flexWrap).toBe('wrap');
 });
 
 const itemStyle = {

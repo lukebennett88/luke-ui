@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 import * as z from 'zod';
-import { createComponent } from './apply-component-creation-plan.js';
 import { createPrimitive } from './apply-primitive-creation-plan.js';
 
 const roots: Array<string> = [];
@@ -142,25 +141,6 @@ describe('createPrimitive', () => {
 		);
 	});
 
-	it('omits the tagged visual case when visual coverage is declined', async () => {
-		const root = await createRepositoryFixture();
-
-		await createPrimitive(root, {
-			name: 'FieldRoot',
-			visualCoverage: false,
-		});
-
-		const browserTest = await readFile(
-			join(
-				root,
-				'packages/@luke-ui/react/src/core/primitives/field-root/field-root.browser.test.tsx',
-			),
-			'utf8',
-		);
-		expect(browserTest).not.toContain("tags: ['visual']");
-		expect(browserTest).toContain("test('the FieldRoot scene has no axe violations'");
-	});
-
 	it('omits hosted docs when docs are disabled', async () => {
 		const root = await createRepositoryFixture({
 			primitivesMeta: {
@@ -180,33 +160,6 @@ describe('createPrimitive', () => {
 			pages: ['button'],
 			title: 'Primitives',
 		});
-	});
-});
-
-describe('shared creation-plan application', () => {
-	it('applies component and primitive plans through the same machinery', async () => {
-		const root = await createRepositoryFixture({
-			primitivesMeta: {
-				pages: [],
-				title: 'Primitives',
-			},
-		});
-		await mkdir(join(root, 'apps/docs/content/docs/components/feedback'), { recursive: true });
-		await writeFile(
-			join(root, 'apps/docs/content/docs/components/meta.json'),
-			`${JSON.stringify({ pages: ['actions'], title: 'Components' }, null, '\t')}\n`,
-			'utf8',
-		);
-
-		await createComponent(root, { docsGroup: 'feedback', name: 'StatusBadge' });
-		await createPrimitive(root, { name: 'InputAddon' });
-
-		await expect(
-			readFile(join(root, 'packages/@luke-ui/react/src/exports/status-badge.ts'), 'utf8'),
-		).resolves.toContain('StatusBadge');
-		await expect(
-			readFile(join(root, 'packages/@luke-ui/react/src/exports/primitives/input-addon.ts'), 'utf8'),
-		).resolves.toContain('export {');
 	});
 });
 

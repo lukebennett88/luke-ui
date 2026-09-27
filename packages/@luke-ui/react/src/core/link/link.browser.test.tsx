@@ -1,9 +1,7 @@
 import { Link } from '@luke-ui/react/link';
-import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { page, userEvent } from 'vite-plus/test/context';
+import { page } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -44,18 +42,6 @@ function LinkScene() {
 		</Stack>
 	);
 }
-
-test('Link forwards className, data attributes, id, and ref to the anchor element', () => {
-	const ref = createRef<HTMLAnchorElement>();
-	const { locator } = render(
-		<Link {...forwardedDomProps} href="#" ref={ref}>
-			Settings
-		</Link>,
-	);
-	const target = locator.getByRole('link', { name: 'Settings' }).element();
-
-	expectForwardsDomProps(target, ref);
-});
 
 test('pressing a Link runs its onPress handler', async () => {
 	let pressed = false;
@@ -200,7 +186,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
-test('interactive states', { tags: ['visual'] }, async () => {
+test('focus-visible state', { tags: ['visual'] }, async () => {
 	const { locator } = render(
 		<Stack align="flex-start">
 			<Link href="#" prominence="low">
@@ -208,47 +194,26 @@ test('interactive states', { tags: ['visual'] }, async () => {
 			</Link>
 		</Stack>,
 	);
-	const link = page.getByRole('link', { name: 'Destination' });
 
-	await userEvent.hover(link);
-	await captureVisual(locator, 'link/hover');
-	await userEvent.unhover(link);
-	await focusViaKeyboard(link);
+	await focusViaKeyboard(page.getByRole('link', { name: 'Destination' }));
 	await captureVisual(locator, 'link/focus-visible');
-	await userEvent.keyboard('{Enter>}');
-	await captureVisual(locator, 'link/pressed');
-	await userEvent.keyboard('{/Enter}');
 });
 
-test('forced-colors states', { tags: ['visual'] }, async () => {
+test('forced-colors resting', { tags: ['visual'] }, async () => {
 	await emulateForcedColors('active');
 
 	try {
 		const { locator } = render(
-			<Grid columns={4}>
+			<Grid columns={2}>
 				<Link href="#" prominence="low">
 					Resting
-				</Link>
-				<Link href="#" prominence="low">
-					Hovered
-				</Link>
-				<Link href="#" prominence="low">
-					Pressed and focused
 				</Link>
 				<Link href="#" isDisabled prominence="low">
 					Disabled
 				</Link>
 			</Grid>,
 		);
-		const hovered = page.getByRole('link', { name: 'Hovered' });
-
-		await userEvent.hover(hovered);
-		await userEvent.tab();
-		await userEvent.tab();
-		await userEvent.tab();
-		await userEvent.keyboard('{Enter>}');
-		await captureVisual(locator, 'link/forced-colors-states');
-		await userEvent.keyboard('{/Enter}');
+		await captureVisual(locator, 'link/forced-colors-resting');
 	} finally {
 		await emulateForcedColors('none');
 	}

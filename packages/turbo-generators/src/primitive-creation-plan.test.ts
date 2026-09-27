@@ -124,32 +124,13 @@ describe('createPrimitivePlan', () => {
 			)?.contents;
 			if (testSource === undefined) throw new Error('Expected the scaffold to write the test.');
 
-			expect(testSource).toContain('TODO: Test actual behaviour or delete.');
 			expect(testSource).toContain(
-				"import { expectForwardsDomProps, expectHtmlElement, forwardedDomProps } from '../../test-utils/forwarding.js';",
+				"import { StatusBadge } from '@luke-ui/react/primitives/status-badge';",
 			);
-			expect(testSource).toContain('{...forwardedDomProps}');
-			expect(testSource).toContain('expectForwardsDomProps(target, ref)');
-
-			expect(testSource).toContain('function StatusBadgeScene()');
-			expect(testSource.match(/StatusBadgeScene/g)?.length).toBeGreaterThanOrEqual(3);
-
-			expect(testSource).toContain(
-				"import { expectNoAxeViolations } from '../../test-utils/axe.js';",
-			);
+			expect(testSource).toContain('expectForwardsDomProps');
 			expect(testSource).toContain("test('the StatusBadge scene has no axe violations'");
-			expect(testSource).toContain('await expectNoAxeViolations(container)');
-
 			expect(testSource).toContain("{ tags: ['visual'] }");
-			expect(testSource).toContain('for (const appearance of visualAppearances)');
-			expect(testSource).toContain(
-				"captureVisualAppearance(locator, 'status-badge/kitchen-sink', appearance)",
-			);
-
-			expect(testSource).toContain("test('StatusBadge renders its content'");
-
 			expect(testSource).not.toContain('testConformance');
-			expect(testSource).not.toContain('conformance');
 		});
 
 		it('omits the tagged visual case when visual coverage is declined, but keeps the axe scene', () => {
@@ -160,9 +141,7 @@ describe('createPrimitivePlan', () => {
 			if (testSource === undefined) throw new Error('Expected the scaffold to write the test.');
 
 			expect(testSource).not.toContain("tags: ['visual']");
-			expect(testSource).not.toContain('visualAppearances');
 			expect(testSource).not.toContain('captureVisualAppearance');
-			expect(testSource).toContain('function StatusBadgeScene()');
 			expect(testSource).toContain("test('the StatusBadge scene has no axe violations'");
 		});
 

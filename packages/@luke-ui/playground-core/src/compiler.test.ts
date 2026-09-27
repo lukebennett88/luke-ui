@@ -16,7 +16,7 @@ test('compileComponent default-exports a function component from scope', () => {
 	expect(typeof Component).toBe('function');
 });
 
-test.each([
+const acceptedComponents = [
 	[
 		'memo',
 		[
@@ -40,20 +40,28 @@ test.each([
 			'export default lazy(() => Promise.resolve({ default: () => null }));',
 		].join('\n'),
 	],
-])('compileComponent accepts a %s component', (_name, code) => {
-	const { compileComponent } = createPlaygroundCompiler(reactScope);
-	const Component = compileComponent(code);
-	expect(Component).not.toBeNull();
-	expect(typeof Component).toBe('object');
-});
+] as const;
 
-test.each([
+for (const [name, code] of acceptedComponents) {
+	test(`compileComponent accepts a ${name} component`, () => {
+		const { compileComponent } = createPlaygroundCompiler(reactScope);
+		const Component = compileComponent(code);
+		expect(Component).not.toBeNull();
+		expect(typeof Component).toBe('object');
+	});
+}
+
+const rejectedExports = [
 	['no default export', 'export const value = 1;'],
 	['a default export of null', 'export default null;'],
-])('compileComponent rejects %s', (_name, code) => {
-	const { compileComponent } = createPlaygroundCompiler({});
-	expect(() => compileComponent(code)).toThrow(/default-export a React component/);
-});
+] as const;
+
+for (const [name, code] of rejectedExports) {
+	test(`compileComponent rejects ${name}`, () => {
+		const { compileComponent } = createPlaygroundCompiler({});
+		expect(() => compileComponent(code)).toThrow(/default-export a React component/);
+	});
+}
 
 test('createPlaygroundCompiler throws for unknown specifiers', () => {
 	const { compileComponent } = createPlaygroundCompiler({ react: {} });

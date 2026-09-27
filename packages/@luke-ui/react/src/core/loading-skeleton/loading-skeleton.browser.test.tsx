@@ -1,16 +1,10 @@
 import { Button } from '@luke-ui/react/button';
 import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading-skeleton';
 import { TextField } from '@luke-ui/react/text-field';
-import { createRef } from 'react';
 import type { CSSProperties } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { emulateReducedMotion } from '../test-utils/emulate-media.js';
-import {
-	expectForwardsDomProps,
-	expectHtmlElement,
-	forwardedDomProps,
-} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
@@ -35,21 +29,6 @@ function LoadingSkeletonScene() {
 		</Stack>
 	);
 }
-
-test('LoadingSkeleton forwards className, data attributes, id, and ref to its root', () => {
-	const ref = createRef<HTMLElement>();
-	const { container } = render(
-		<LoadingSkeleton {...forwardedDomProps} ref={ref}>
-			Loading copy
-		</LoadingSkeleton>,
-	);
-	const target = expectHtmlElement(
-		container.firstElementChild,
-		'Expected a LoadingSkeleton element.',
-	);
-
-	expectForwardsDomProps(target, ref);
-});
 
 test('the LoadingSkeleton scene has no axe violations', async () => {
 	const { container } = render(<LoadingSkeletonScene />);

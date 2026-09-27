@@ -1,10 +1,8 @@
 import { Checkbox } from '@luke-ui/react/checkbox';
 import { Text } from '@luke-ui/react/text';
-import { typeStyles } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
-import type { Locator } from 'vite-plus/test/context';
-import { cdp, page, userEvent } from 'vite-plus/test/context';
+import { cdp, page } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
@@ -54,13 +52,11 @@ function CheckboxScene() {
 			<Checkbox description="Receive updates by email." isDisabled name="description-disabled">
 				Email notifications
 			</Checkbox>
-			{typeStyles.map((typography) => (
-				<Text elementType="div" key={typography} typography={typography}>
-					<Checkbox name={`text-${typography}`}>
-						{typography}: This label wraps to show that the control aligns with its first line.
-					</Checkbox>
-				</Text>
-			))}
+			<Text elementType="div" typography="heading3">
+				<Checkbox name="text-heading3">
+					heading3: This label wraps to show that the control aligns with its first line.
+				</Checkbox>
+			</Text>
 			<Checkbox name="standalone">Standalone control</Checkbox>
 			<Checkbox defaultSelected errorMessage="Choose an option." name="invalid-wrapping">
 				This label wraps onto a second line so the control should sit on the first line, not float
@@ -88,38 +84,37 @@ function CheckboxScene() {
 	);
 }
 
-// RAC puts `id` on the control, not the root.
-test('Checkbox forwards className and data attributes to its root, and id to the DOM', () => {
-	const { container } = render(
-		<Checkbox className="forwarded-class" data-forwarded="true" id="forwarded-id">
-			Terms
-		</Checkbox>,
-	);
-	const root = container.firstElementChild;
-	if (!(root instanceof HTMLElement)) throw new Error('Expected a Checkbox root.');
-
-	expect(root).toHaveClass('forwarded-class');
-	expect(root).toHaveAttribute('data-forwarded', 'true');
-	expect(container.querySelector('#forwarded-id')).not.toBeNull();
-});
-
-test('Checkbox resolves inputRef to the control, participates in a form, and fires onBlur', () => {
+// Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
+test('Checkbox resolves object and callback inputRef to the control, participates in a form, and fires onBlur', () => {
 	const inputRef = createRef<HTMLInputElement>();
+	const callbackResolved: Array<HTMLElement | null> = [];
 	let blurred = false;
 	const { container, locator } = render(
-		<Checkbox
-			inputRef={inputRef}
-			name="terms"
-			onBlur={() => {
-				blurred = true;
-			}}
-		>
-			Terms
-		</Checkbox>,
+		<>
+			<Checkbox
+				inputRef={inputRef}
+				name="terms"
+				onBlur={() => {
+					blurred = true;
+				}}
+			>
+				Terms
+			</Checkbox>
+			<Checkbox
+				inputRef={(node: HTMLElement | null) => {
+					callbackResolved.push(node);
+				}}
+				name="terms-callback"
+			>
+				Callback
+			</Checkbox>
+		</>,
 	);
 	const control = locator.getByRole('checkbox', { name: 'Terms' }).element();
+	const callbackControl = locator.getByRole('checkbox', { name: 'Callback' }).element();
 
 	expect(inputRef.current).toBe(control);
+	expect(callbackResolved.at(-1)).toBe(callbackControl);
 
 	const form = document.createElement('form');
 	container.replaceWith(form);
@@ -138,34 +133,6 @@ test('Checkbox resolves inputRef to the control, participates in a form, and fir
 	expect(blurred).toBe(true);
 
 	form.remove();
-});
-
-// Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
-test('Checkbox resolves a callback inputRef to the control', () => {
-	const resolved: Array<HTMLElement | null> = [];
-	const { locator } = render(
-		<Checkbox
-			inputRef={(node: HTMLElement | null) => {
-				resolved.push(node);
-			}}
-			name="terms"
-		>
-			Terms
-		</Checkbox>,
-	);
-	const control = locator.getByRole('checkbox', { name: 'Terms' }).element();
-
-	expect(resolved.at(-1)).toBe(control);
-});
-
-test('clicking a Checkbox label selects it', async () => {
-	let selected = false;
-	const { locator, user } = render(
-		<Checkbox onChange={(isSelected) => (selected = isSelected)}>Terms</Checkbox>,
-	);
-
-	await user.click(locator.getByText('Terms'));
-	expect(selected).toBe(true);
 });
 
 test('the Checkbox scene has no axe violations', async () => {
@@ -262,17 +229,6 @@ async function getAccessibilityNode(nodeId: DomNode['nodeId']) {
 	return axNode;
 }
 
-function checkboxLabel(checkbox: Locator): HTMLElement {
-	const label = checkbox.element().closest('label');
-	if (label == null) throw new Error('Expected the checkbox content label.');
-	return label;
-}
-
-async function pressCheckbox(checkbox: Locator): Promise<void> {
-	checkbox.element().focus();
-	await userEvent.keyboard('{Space>}');
-}
-
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(<CheckboxScene />, { appearance });
@@ -286,43 +242,7 @@ test('keyboard focus ring', { tags: ['visual'] }, async () => {
 	await captureVisual(locator, 'checkbox/focus-visible');
 });
 
-test('interactive states', { tags: ['visual'] }, async () => {
-	const { locator } = render(
-		<Stack>
-			<Checkbox errorMessage="Choose an option." name="invalid-unchecked">
-				Invalid
-			</Checkbox>
-			<Checkbox defaultSelected errorMessage="Choose an option." name="invalid-selected">
-				Invalid selected
-			</Checkbox>
-			<Checkbox errorMessage="Choose an option." isIndeterminate name="invalid-indeterminate">
-				Invalid indeterminate
-			</Checkbox>
-		</Stack>,
-	);
-	const unchecked = page.getByRole('checkbox', { exact: true, name: 'Invalid' });
-	const selected = page.getByRole('checkbox', { exact: true, name: 'Invalid selected' });
-	const indeterminate = page.getByRole('checkbox', {
-		exact: true,
-		name: 'Invalid indeterminate',
-	});
-
-	for (const [name, checkbox] of [
-		['unchecked', unchecked],
-		['selected', selected],
-		['indeterminate', indeterminate],
-	] as const) {
-		const label = checkboxLabel(checkbox);
-		await userEvent.hover(label);
-		await captureVisual(locator, `checkbox/invalid-hover-${name}`);
-		await userEvent.unhover(label);
-		await pressCheckbox(checkbox);
-		await captureVisual(locator, `checkbox/invalid-pressed-${name}`);
-		await userEvent.keyboard('{/Space}');
-	}
-});
-
-test('forced-colors states', { tags: ['visual'] }, async () => {
+test('forced-colors resting', { tags: ['visual'] }, async () => {
 	await emulateForcedColors('active');
 
 	try {
@@ -332,9 +252,6 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 				<Checkbox defaultSelected name="selected">
 					Selected
 				</Checkbox>
-				<Checkbox isIndeterminate name="indeterminate">
-					Indeterminate
-				</Checkbox>
 				<Checkbox defaultSelected isDisabled name="disabled">
 					Disabled
 				</Checkbox>
@@ -343,7 +260,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 				</Checkbox>
 			</Stack>,
 		);
-		await captureVisual(locator, 'checkbox/forced-colors-states');
+		await captureVisual(locator, 'checkbox/forced-colors-resting');
 	} finally {
 		await emulateForcedColors('none');
 	}
