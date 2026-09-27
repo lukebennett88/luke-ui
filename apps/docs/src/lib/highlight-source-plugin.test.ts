@@ -2,9 +2,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { describe, expect, test } from 'vite-plus/test';
+import { encodeDocsPlaygroundHash } from './docs-playground-hash.js';
 import { highlightSourcePlugin } from './highlight-source-plugin.js';
 import type { HighlightedSource } from './highlighted-source.js';
-import { encodeCodeHash } from './playground-hash.js';
 
 describe('highlightSourcePlugin', () => {
 	test('loads a highlighted source module for the highlight query', async () => {
@@ -30,7 +30,7 @@ describe('highlightSourcePlugin', () => {
 			expect(highlighted.html).toContain('--shiki-light');
 			expect(highlighted.html).toContain('--shiki-dark');
 			expect(highlighted.source).toBe(source.trim());
-			expect(highlighted.playgroundHash).toBe(encodeCodeHash(source.trim()));
+			expect(highlighted.playgroundHash).toBe(encodeDocsPlaygroundHash(source.trim()));
 		} finally {
 			await rm(directory, { force: true, recursive: true });
 		}

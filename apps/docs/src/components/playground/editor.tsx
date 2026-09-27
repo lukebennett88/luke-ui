@@ -4,12 +4,12 @@ import type { OnMount } from '@monaco-editor/react';
 import type * as Monaco from 'monaco-editor';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { loadPlaygroundTypes, monacoThemes } from '../../lib/monaco-setup';
+import { EditorSkeleton } from './editor-skeleton';
 import {
 	registerFormatDocumentKeybinding,
 	registerPlaygroundFormatter,
 	runFormatDocument,
-} from '../../lib/playground-format';
-import { EditorSkeleton } from './editor-skeleton';
+} from './monaco-format.js';
 import { PlaygroundPaneToolbar } from './pane-toolbar.js';
 
 type PlaygroundEditorProps = {

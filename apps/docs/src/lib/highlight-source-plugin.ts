@@ -1,3 +1,4 @@
+import { canRunInPlayground } from '@luke-ui/playground-core/specifiers';
 import { readFile } from 'node:fs/promises';
 // These Shiki entry points load only the core, TSX grammar, and selected themes.
 import type { HighlighterCore } from 'shiki/core';
@@ -5,9 +6,9 @@ import { createHighlighterCore } from 'shiki/core';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import tsx from 'shiki/langs/tsx.mjs';
 import type { Plugin } from 'vite-plus';
+import { encodeDocsPlaygroundHash } from './docs-playground-hash.js';
+import { docsPlaygroundSpecifiers } from './docs-playground-specifiers.js';
 import type { HighlightedSource } from './highlighted-source.js';
-import { encodeCodeHash } from './playground-hash.js';
-import { canRunInPlayground } from './playground-runtime-specifiers.js';
 import { SHIKI_THEME_REGISTRATIONS, SHIKI_THEMES } from './shiki-theme.js';
 
 const HIGHLIGHT_QUERY = '?highlight';
@@ -59,7 +60,9 @@ export function highlightSourcePlugin(): Plugin {
 						},
 					],
 				}),
-				playgroundHash: canRunInPlayground(source) ? encodeCodeHash(source) : null,
+				playgroundHash: canRunInPlayground(source, docsPlaygroundSpecifiers())
+					? encodeDocsPlaygroundHash(source)
+					: null,
 				source,
 			};
 

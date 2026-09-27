@@ -1,6 +1,14 @@
+import { decodeCodeHash } from '@luke-ui/playground-core/hash';
+import { createPlaygroundPageSession } from '@luke-ui/playground-core/protocol';
+import type {
+	PlaygroundPagePorts,
+	PlaygroundPageSession,
+	PlaygroundResult,
+} from '@luke-ui/playground-core/protocol';
 import { cx } from '@luke-ui/react/utils';
 import { ClientOnly, createFileRoute } from '@tanstack/react-router';
-import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useReducer, useRef, useState } from 'react';
+import type { RefObject } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { useSpinDoctor } from 'spin-doctor';
 import {
@@ -15,10 +23,10 @@ import type { ViewportWidth } from '../../components/playground/viewport-toggle'
 import { SiteNav } from '../../components/site-nav.js';
 import { useDocsTheme } from '../../components/theme-controls';
 import { withBasePath } from '../../lib/base-path.js';
+import { encodeDocsPlaygroundHash } from '../../lib/docs-playground-hash.js';
+import { postPlaygroundAppearance } from '../../lib/playground-appearance-message.js';
+import type { PlaygroundAppearance } from '../../lib/playground-appearance-message.js';
 import rawDefaultCode from '../../lib/playground-default-code.tsx?raw';
-import { createPlaygroundPageSession } from '../../lib/playground-handshake';
-import { decodeCodeHash, encodeCodeHash } from '../../lib/playground-hash';
-import type { PlaygroundAppearanceMessage } from '../../lib/playground-protocol';
 
 const PlaygroundEditor = lazy(() => import('../../components/playground/editor'));
 
@@ -37,7 +45,7 @@ function Playground() {
 		if (typeof window === 'undefined') return rawDefaultCode;
 		return decodeCodeHash(window.location.hash) ?? rawDefaultCode;
 	});
-	const { error, markError, markReady, markSuccess, showPreviewLoading } = usePreviewStatus();
+	const { dispatch, error, showPreviewLoading } = usePreviewStatus();
 	// Owned here (not by EditorSkeleton) so the pill survives the skeleton
 	// remounting between loading phases instead of blinking on each one.
 	const showEditorPill = useSpinDoctor(true, { delay: 800 });
@@ -45,49 +53,44 @@ function Playground() {
 	const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
 	const isDesktop = useIsDesktop();
 	const iframeRef = useRef<HTMLIFrameElement>(null);
-	const sessionRef = useRef(createPlaygroundPageSession());
 	const codeRef = useRef(initialCode);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-	const appearanceRef = useRef<Omit<PlaygroundAppearanceMessage, 'type'> | null>(null);
-
-	const ports = () => ({
-		origin: window.location.origin,
-		previewWindow: iframeRef.current?.contentWindow ?? null,
+	const appearanceRef = useRef<PlaygroundAppearance>({
+		colorMode: colorModePreference,
+		themeIdentity,
 	});
 
-	const postCode = useCallback((code: string) => {
-		sessionRef.current.postCode(code, ports());
-	}, []);
-	const postAppearance = useCallback(() => {
-		const appearance = { colorMode: colorModePreference, themeIdentity };
-		appearanceRef.current = appearance;
-		sessionRef.current.postAppearance(appearance, ports());
-	}, [colorModePreference, themeIdentity]);
+	const sessionRef = useRef<PlaygroundPageSession | undefined>(undefined);
 
 	useEffect(() => {
-		const session = sessionRef.current;
-		const onMessage = (event: MessageEvent) => {
-			session.handlePreviewMessage(event, ports(), {
-				appearance: appearanceRef.current,
-				currentCode: codeRef.current,
-				onError: markError,
-				onReady: markReady,
-				onSuccess: markSuccess,
-			});
-		};
+		const session = createPlaygroundPageSession({
+			getCode: () => codeRef.current,
+			getPorts: () => previewPorts(iframeRef),
+			onPreviewReady: (readyPorts) => {
+				// The preview applies the theme before it renders the replayed code.
+				postPlaygroundAppearance(appearanceRef.current, readyPorts);
+				dispatch({ type: 'ready' });
+			},
+			onResult: dispatch,
+		});
+		sessionRef.current = session;
+		const onMessage = (event: MessageEvent) => session.handleMessage(event);
 
 		window.addEventListener('message', onMessage);
 		// Cover the race where the iframe announced ready before this listener attached.
-		session.postCode(codeRef.current, ports(), { unguarded: true });
+		session.resync();
 		return () => {
 			window.removeEventListener('message', onMessage);
 			clearTimeout(debounceRef.current);
+			sessionRef.current = undefined;
 		};
-	}, [markError, markReady, markSuccess]);
+	}, [dispatch]);
 
 	useEffect(() => {
-		postAppearance();
-	}, [postAppearance]);
+		const appearance = { colorMode: colorModePreference, themeIdentity };
+		appearanceRef.current = appearance;
+		postPlaygroundAppearance(appearance, previewPorts(iframeRef));
+	}, [colorModePreference, themeIdentity]);
 
 	useEffect(() => {
 		if (!isPreviewFullscreen) return;
@@ -104,8 +107,8 @@ function Playground() {
 		codeRef.current = code;
 		clearTimeout(debounceRef.current);
 		debounceRef.current = setTimeout(() => {
-			history.replaceState(null, '', `#${encodeCodeHash(code)}`);
-			postCode(code);
+			history.replaceState(null, '', `#${encodeDocsPlaygroundHash(code)}`);
+			sessionRef.current?.postCode(code);
 		}, CODE_DEBOUNCE_MS);
 	};
 
@@ -200,23 +203,28 @@ function Playground() {
 	);
 }
 
+/** Reads the current ports from the iframe ref, so hosts calling this always see live values. */
+function previewPorts(iframeRef: RefObject<HTMLIFrameElement | null>): PlaygroundPagePorts {
+	return {
+		origin: window.location.origin,
+		previewWindow: iframeRef.current?.contentWindow ?? null,
+	};
+}
+
 type PreviewState = { status: 'connecting' } | { status: 'ready'; error: string | null };
 
-type PreviewAction =
-	| { type: 'iframe-ready' }
-	| { type: 'code-applied' }
-	| { type: 'code-error'; message: string };
+type PreviewAction = PlaygroundResult | { type: 'ready' };
 
 function previewReducer(state: PreviewState, action: PreviewAction): PreviewState {
 	switch (action.type) {
-		case 'iframe-ready': {
+		case 'ready': {
 			if (state.status === 'ready') return state;
 			return { error: null, status: 'ready' };
 		}
-		case 'code-applied': {
+		case 'success': {
 			return { error: null, status: 'ready' };
 		}
-		case 'code-error': {
+		case 'error': {
 			return { error: action.message, status: 'ready' };
 		}
 	}
@@ -228,17 +236,10 @@ function usePreviewStatus() {
 		delay: 250,
 		minDuration: 200,
 	});
-	// dispatch is guaranteed stable by React, so these callbacks keep a stable
-	// identity across renders without needing it in the dependency array.
-	const markError = useCallback((message: string) => dispatch({ message, type: 'code-error' }), []);
-	const markReady = useCallback(() => dispatch({ type: 'iframe-ready' }), []);
-	const markSuccess = useCallback(() => dispatch({ type: 'code-applied' }), []);
 
 	return {
+		dispatch,
 		error: state.status === 'ready' ? state.error : null,
-		markError,
-		markReady,
-		markSuccess,
 		showPreviewLoading,
 	};
 }

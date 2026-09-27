@@ -1,18 +1,18 @@
-import type { ComponentType } from 'react';
+import { createPlaygroundCompiler } from '@luke-ui/playground-core/compiler';
+import { decodeCodeHash } from '@luke-ui/playground-core/hash';
+import { isPlaygroundCodeMessage, isTrustedMessageSource } from '@luke-ui/playground-core/protocol';
+import type { PlaygroundPreviewMessage } from '@luke-ui/playground-core/protocol';
 import { useEffect, useState } from 'react';
+import type { ComponentType } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { transform } from 'sucrase';
 import { playgroundScope } from '../../generated/playground-scope.generated';
-import { isTrustedParentMessage } from '../../lib/playground-handshake';
-import { decodeCodeHash } from '../../lib/playground-hash';
-import type { PlaygroundPreviewMessage } from '../../lib/playground-protocol';
+import { isPlaygroundAppearanceMessage } from '../../lib/playground-appearance-message.js';
 import { StoryWrapper } from '../../lib/story-wrapper';
 import { previewThemePrefs } from '../../lib/theme-prefs.js';
 
-// Interop wrappers are cached so repeated requires return stable module objects.
-const moduleCache = new Map<string, Record<string, unknown>>();
-
 type PreviewRun = { UserComponent: ComponentType; runId: number };
+
+const { compileComponent } = createPlaygroundCompiler(playgroundScope);
 
 export default function PreviewRunner() {
 	const [run, setRun] = useState<PreviewRun | null>(null);
@@ -22,7 +22,9 @@ export default function PreviewRunner() {
 
 		const runCode = (code: string) => {
 			try {
-				const UserComponent = compileComponent(code);
+				// The compiler only rejects a missing default export; the ErrorBoundary
+				// below reports an invalid component type as a render-time error.
+				const UserComponent = compileComponent(code) as ComponentType;
 				runId += 1;
 				setRun({ runId, UserComponent });
 				postToParent({ type: 'playground:success' });
@@ -32,11 +34,12 @@ export default function PreviewRunner() {
 		};
 
 		const onMessage = (event: MessageEvent) => {
-			if (!isTrustedParentMessage(event, window.location.origin, window.parent)) return;
-			if (event.data.type === 'playground:code') {
+			if (!isTrustedMessageSource(event, window.location.origin, window.parent)) return;
+			if (isPlaygroundCodeMessage(event.data)) {
 				runCode(event.data.code);
 				return;
 			}
+			if (!isPlaygroundAppearanceMessage(event.data)) return;
 			// The parent page has already stored these prefs, so only mirror them here.
 			previewThemePrefs({
 				colorModePreference: event.data.colorMode,
@@ -62,44 +65,6 @@ export default function PreviewRunner() {
 			</StoryWrapper>
 		</div>
 	);
-}
-
-function requireModule(specifier: string): Record<string, unknown> {
-	const cached = moduleCache.get(specifier);
-	if (cached) return cached;
-
-	const namespace = playgroundScope[specifier];
-	if (namespace === undefined) {
-		throw new Error(
-			`Cannot import '${specifier}' — only react and @luke-ui/react/* modules are available in the playground.`,
-		);
-	}
-
-	// Mark as an ES module so sucrase's interop resolves default imports correctly.
-	const module = { ...(namespace as Record<string, unknown>), __esModule: true };
-	moduleCache.set(specifier, module);
-	return module;
-}
-
-function compileComponent(code: string): ComponentType {
-	const compiled = transform(code, {
-		jsxRuntime: 'automatic',
-		production: true,
-		transforms: ['typescript', 'jsx', 'imports'],
-	}).code;
-
-	const module: { exports: { default?: unknown } } = { exports: {} };
-	// Evaluating user code is the point of the playground; it only ever comes
-	// from the user's own editor or URL hash (same trust model as the
-	// TypeScript playground).
-	// oxlint-disable-next-line typescript/no-implied-eval
-	new Function('require', 'module', 'exports', compiled)(requireModule, module, module.exports);
-
-	const component = module.exports.default;
-	if (typeof component !== 'function') {
-		throw new Error('Playground code must default-export a React component.');
-	}
-	return component as ComponentType;
 }
 
 function postToParent(message: PlaygroundPreviewMessage): void {

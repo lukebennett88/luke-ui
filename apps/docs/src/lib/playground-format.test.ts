@@ -1,43 +1,35 @@
 import { expect, test } from 'vite-plus/test';
-import { documentFormattingEdits, formatPlaygroundSource } from './playground-format.js';
+import { formatDocsPlaygroundSource } from './playground-format.js';
 
-test('formats badly formatted valid TSX', async () => {
-	const source = 'const foo=()=>{return <Button label="Foo"/>}';
-	const formatted = await formatPlaygroundSource(source);
-	const expected = 'const foo = () => {\n\treturn <Button label="Foo" />;\n};\n';
-	expect(formatted).toBe(expected);
+test('formats with the docs style', async () => {
+	const source = [
+		`const x = {a:1,'b':"c"}`,
+		`const y = a => <div className="x" id='y'>{a}</div>`,
+		'call(firstArgument, secondArgument, thirdArgument, fourthArgument, fifthArgument, sixthArgument, seventh)',
+	].join('\n');
+
+	expect(await formatDocsPlaygroundSource(source)).toBe(
+		[
+			`const x = { a: 1, b: 'c' };`,
+			'const y = (a) => (',
+			'\t<div className="x" id="y">',
+			'\t\t{a}',
+			'\t</div>',
+			');',
+			'call(',
+			'\tfirstArgument,',
+			'\tsecondArgument,',
+			'\tthirdArgument,',
+			'\tfourthArgument,',
+			'\tfifthArgument,',
+			'\tsixthArgument,',
+			'\tseventh,',
+			');',
+			'',
+		].join('\n'),
+	);
 });
 
-test('returns no edit for already formatted source', async () => {
-	const source = 'const foo = () => {\n\treturn <Button label="Foo" />;\n};\n';
-	const formatted = await formatPlaygroundSource(source);
-	expect(formatted).toBe(source);
-});
-
-test('returns no edit for incomplete TSX', async () => {
-	const formatted = await formatPlaygroundSource('const incomplete = (');
-	expect(formatted).toBeNull();
-});
-
-test('document formatting edits are empty when output is unchanged', () => {
-	const source = 'const foo = (x) => x;\n';
-	const range = {
-		startLineNumber: 1,
-		startColumn: 1,
-		endLineNumber: 1,
-		endColumn: source.length + 1,
-	};
-	expect(documentFormattingEdits(source, source, range)).toEqual([]);
-});
-
-test('document formatting edits replace the full model when formatting changes source', () => {
-	const source = 'const foo = (x)=>x';
-	const expected = 'const foo = (x) => x;\n';
-	const range = {
-		startLineNumber: 1,
-		startColumn: 1,
-		endLineNumber: 1,
-		endColumn: source.length + 1,
-	};
-	expect(documentFormattingEdits(source, expected, range)).toEqual([{ range, text: expected }]);
+test('returns null for incomplete TSX', async () => {
+	expect(await formatDocsPlaygroundSource('const incomplete = (')).toBeNull();
 });

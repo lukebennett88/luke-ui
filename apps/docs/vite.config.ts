@@ -85,6 +85,8 @@ export default defineConfig(async () => {
 			// which corrupts the in-flight React render with an "Invalid hook call".
 			exclude: ['@luke-ui/react'],
 			include: [
+				'@luke-ui/playground-core > lz-string',
+				'@luke-ui/playground-core > sucrase',
 				'@monaco-editor/react',
 				'@react-aria/utils',
 				'@tanstack/react-router',
@@ -95,7 +97,6 @@ export default defineConfig(async () => {
 				// requests. On the playground, which also loads Monaco, that exhausts
 				// the browser's connection pool and the page never hydrates.
 				'fumadocs-ui > lucide-react',
-				'lz-string',
 				'monaco-editor',
 				'react-aria-components/Breadcrumbs',
 				'react-aria-components/Button',
@@ -115,7 +116,6 @@ export default defineConfig(async () => {
 				'react-aria-components/Text',
 				'react-aria-components/TextField',
 				'react-aria-components/useAsyncList',
-				'sucrase',
 			],
 		},
 		// `vp pack` compiles each pre-hydration script to an inline-able IIFE

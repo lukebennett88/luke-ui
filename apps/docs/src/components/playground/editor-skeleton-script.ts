@@ -15,12 +15,15 @@
  * mismatch — which is also why the bar's style attribute is written as the
  * exact string React serializes.
  */
+const SHAPE_PARAM_PATTERN = /^[\d.,]+$/;
+
 rewriteSkeletonToShape();
 
 function rewriteSkeletonToShape(): void {
-	const shape = /(?:^|&)shape=([\d.,]+)/.exec(location.hash.slice(1))?.[1];
+	const shape = new URLSearchParams(location.hash.slice(1)).get('shape');
+	if (!shape || !SHAPE_PARAM_PATTERN.test(shape)) return;
 	const root = document.currentScript?.previousElementSibling;
-	if (!shape || !root) return;
+	if (!root) return;
 
 	const rows = root.querySelectorAll('[data-line]');
 	const template = rows[0];

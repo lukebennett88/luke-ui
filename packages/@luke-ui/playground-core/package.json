@@ -1,0 +1,42 @@
+{
+	"name": "@luke-ui/playground-core",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		"./compiler": "./dist/compiler.js",
+		"./format": "./dist/format.js",
+		"./generate": "./dist/generate.js",
+		"./hash": "./dist/hash.js",
+		"./protocol": "./dist/protocol.js",
+		"./specifiers": "./dist/specifiers.js",
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"build": "vp pack",
+		"check:format": "vp fmt . --check",
+		"check:lint": "vp lint . --type-aware",
+		"check:types": "pnpm run check:types:browser && pnpm run check:types:node",
+		"check:types:browser": "tsc --noEmit -p tsconfig.browser.json",
+		"check:types:node": "tsc --noEmit -p tsconfig.node.json",
+		"clean": "rm -rf .turbo dist",
+		"dev": "vp pack --watch",
+		"fix:format": "vp fmt . --write",
+		"fix:lint": "vp lint . --type-aware --fix",
+		"test": "vp test run --config vitest.config.ts"
+	},
+	"dependencies": {
+		"lz-string": "catalog:",
+		"prettier": "catalog:",
+		"sucrase": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"react": "catalog:",
+		"typescript": "catalog:",
+		"vite-plus": "catalog:"
+	}
+}

@@ -30,6 +30,17 @@ export default {
 			],
 			project: ['src/**/*.{ts,tsx}'],
 		},
+		'packages/@luke-ui/playground-core': {
+			entry: [
+				'src/compiler.ts',
+				'src/format.ts',
+				'src/hash.ts',
+				'src/node/generate.ts',
+				'src/protocol.ts',
+				'src/specifiers.ts',
+			],
+			project: ['src/**/*.ts'],
+		},
 		'packages/turbo-generators': {
 			entry: ['config.ts'],
 			project: ['**/*.ts'],
