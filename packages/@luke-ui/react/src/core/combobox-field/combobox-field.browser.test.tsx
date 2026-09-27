@@ -862,7 +862,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 			</Stack>,
 		);
 		const input = page.getByRole('combobox', { name: 'Interactive' });
-		const trigger = page.getByRole('button', { name: 'Toggle options Country' }).first();
+		const trigger = page.getByRole('button', { name: 'Toggle options Interactive' }).first();
 
 		await captureVisual(locator, 'combobox-field/forced-colors-resting-states');
 		await userEvent.hover(trigger);

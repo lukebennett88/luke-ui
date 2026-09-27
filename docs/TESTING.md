@@ -24,7 +24,7 @@ Shared assertions take concrete elements and values. Keep the test, fixture, and
 the component's test file.
 
 Package component tests pin `window.screen.width` to a desktop value in `@luke-ui/react` browser
-setup so `useIsMobileDevice` stays desktop. Vitest's browser iframe is 414px wide; Playwright
+setup so `useIsMobileDevice` stays desktop. Vitest's browser iframe is 414px wide. Playwright
 mirrors that onto `screen.width`, which would otherwise look like a phone. Call `mockScreenWidth`
 for tray or mobile-modal cases. The docs app browser setup does not pin screen width.
 
