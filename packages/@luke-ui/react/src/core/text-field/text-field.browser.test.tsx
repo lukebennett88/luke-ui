@@ -276,15 +276,15 @@ test('a required field is painted invalid only after a real submit fails validat
 		</form>,
 	);
 
-	expect(indicatorFor('Email')).toBe(null);
-	expect(indicatorFor('Username')).toBe(null);
+	expect(indicatorFor('Email*')).toBe(null);
+	expect(indicatorFor('Username*')).toBe(null);
 
 	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
 
-	await expect.poll(() => indicatorFor('Email')).not.toBe(null);
-	await expect.poll(() => indicatorFor('Username')).not.toBe(null);
+	await expect.poll(() => indicatorFor('Email*')).not.toBe(null);
+	await expect.poll(() => indicatorFor('Username*')).not.toBe(null);
 	await expect
-		.poll(() => getDescribedText(page.getByRole('textbox', { name: 'Username' }).element()).length)
+		.poll(() => getDescribedText(page.getByRole('textbox', { name: 'Username*' }).element()).length)
 		.toBeGreaterThan(0);
 });
 

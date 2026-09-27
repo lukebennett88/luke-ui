@@ -23,6 +23,11 @@ only when layout is the contract.
 Shared assertions take concrete elements and values. Keep the test, fixture, and contract choice in
 the component's test file.
 
+Package component tests pin `window.screen.width` to a desktop value in `@luke-ui/react` browser
+setup so `useIsMobileDevice` stays desktop. Vitest's browser iframe is 414px wide. Playwright
+mirrors that onto `screen.width`, which would otherwise look like a phone. Call `mockScreenWidth`
+for tray or mobile-modal cases. The docs app browser setup does not pin screen width.
+
 ## Accessibility
 
 Run axe with `expectNoAxeViolations` in component tests. Axe is a floor. Use behavioural assertions
