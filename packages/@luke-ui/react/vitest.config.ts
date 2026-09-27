@@ -26,6 +26,10 @@ export default defineConfig({
 			'react-aria-components/Popover',
 		],
 	},
+	plugins: [
+		// Required for .css.ts processing in unit and browser tests.
+		vanillaExtractPlugin(),
+	],
 	server: {
 		fs: {
 			allow: visualFsAllow,
@@ -41,10 +45,6 @@ export default defineConfig({
 		projects: [
 			{
 				extends: true,
-				plugins: [
-					// Required for .css.ts processing in unit tests.
-					vanillaExtractPlugin(),
-				],
 				test: {
 					environment: 'node',
 					exclude: ['**/node_modules/**', '**/*.browser.test.*'],
@@ -54,10 +54,6 @@ export default defineConfig({
 			},
 			{
 				extends: true,
-				plugins: [
-					// Required for .css.ts processing in Vitest browser mode.
-					vanillaExtractPlugin(),
-				],
 				test: {
 					browser: {
 						enabled: true,

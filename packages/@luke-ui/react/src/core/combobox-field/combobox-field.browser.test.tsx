@@ -18,7 +18,11 @@ import type { Key } from 'react-aria-components/ComboBox';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
+import {
+	DESKTOP_SCREEN_WIDTH,
+	MOBILE_SCREEN_WIDTH,
+	mockScreenWidth,
+} from '../test-utils/mock-screen-width.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -198,84 +202,80 @@ test('the ComboboxField scene has no axe violations', async () => {
 });
 
 test('ComboboxField uses a mobile modal to search and select an option', async () => {
-	const restoreScreenWidth = mockScreenWidth(390);
-	try {
-		const inputRef = createRef<HTMLInputElement>();
-		const { container } = render(
-			<form aria-label="Country form" style={{ inlineSize: 'max-content' }}>
-				<ComboboxField
-					defaultItems={countryItems}
-					defaultValue="au"
-					inputRef={inputRef}
-					label="Country"
-					name="country"
-				>
-					{renderCountryItem}
-				</ComboboxField>
-			</form>,
-		);
-		const form = container.querySelector('form');
-		if (form == null) throw new Error('Expected the form element.');
+	mockScreenWidth(MOBILE_SCREEN_WIDTH);
+	const inputRef = createRef<HTMLInputElement>();
+	const { container } = render(
+		<form aria-label="Country form" style={{ inlineSize: 'max-content' }}>
+			<ComboboxField
+				defaultItems={countryItems}
+				defaultValue="au"
+				inputRef={inputRef}
+				label="Country"
+				name="country"
+			>
+				{renderCountryItem}
+			</ComboboxField>
+		</form>,
+	);
+	const form = container.querySelector('form');
+	if (form == null) throw new Error('Expected the form element.');
 
-		const trigger = page.getByRole('button', { name: 'Country' });
-		const dialog = page.getByRole('dialog');
-		const searchbox = page.getByRole('searchbox', { name: 'Country' });
+	const trigger = page.getByRole('button', { name: 'Country Australia' });
+	const dialog = page.getByRole('dialog');
+	const searchbox = page.getByRole('searchbox', { name: 'Country' });
 
-		// The mobile composition renders a value button where the desktop one renders a text input.
-		expect(inputRef.current).toBeNull();
+	// The mobile composition renders a value button where the desktop one renders a text input.
+	expect(inputRef.current).toBeNull();
 
-		await userEvent.click(trigger);
-		await expect.element(dialog).toBeVisible();
-		expect(inputRef.current).toBe(searchbox.element());
+	await userEvent.click(trigger);
+	await expect.element(dialog).toBeVisible();
+	expect(inputRef.current).toBe(searchbox.element());
 
-		const modal = dialog.element().parentElement;
-		const overlay = modal?.parentElement;
-		if (modal == null || overlay == null) {
-			throw new Error('Expected the mobile modal structure.');
-		}
-
-		// Measuring the tray only means anything once it has stopped sliding up.
-		await waitForOverlayEnter(overlay);
-
-		expect(getComputedStyle(overlay).top).toBe(`${window.scrollY}px`);
-
-		// RAC's own `Modal` sets `--visual-viewport-height` from `useViewportSize`, so overriding it
-		// stands in for the keyboard shrinking the visual viewport. `mobileModal` must take the shrunk
-		// amount off `blockSize` and spend it on `paddingBlockEnd`, so the sheet keeps its content above
-		// the keyboard. Every expectation is measured at runtime, so none pins a resolved spacing value.
-		const restingViewportHeight = window.innerHeight;
-		const keyboardInset = Math.round(restingViewportHeight / 2);
-		overlay.style.setProperty('--visual-viewport-height', `${restingViewportHeight}px`);
-		const trayTop = modal.getBoundingClientRect().top;
-		const restingBlockSize = Number.parseFloat(getComputedStyle(modal).height);
-		const restingPaddingBlockEnd = Number.parseFloat(getComputedStyle(modal).paddingBottom);
-		// The tray's content box runs from its top offset to the bottom of the visual viewport.
-		expect(restingBlockSize + trayTop).toBeCloseTo(restingViewportHeight, 1);
-
-		overlay.style.setProperty(
-			'--visual-viewport-height',
-			`${restingViewportHeight - keyboardInset}px`,
-		);
-		expect(Number.parseFloat(getComputedStyle(modal).height) + trayTop).toBeCloseTo(
-			restingViewportHeight - keyboardInset,
-			1,
-		);
-		expect(Number.parseFloat(getComputedStyle(modal).paddingBottom)).toBeCloseTo(
-			restingPaddingBlockEnd + keyboardInset,
-			1,
-		);
-
-		const listbox = page.getByRole('listbox').element();
-		// Programmatic `element.scrollTo()` does not exercise scroll chaining. Browser-computed
-		// overscroll-behavior is the Luke UI-owned contract (`mobileListBox`).
-		expect(getComputedStyle(listbox).overscrollBehavior).toBe('contain');
-
-		await userEvent.click(page.getByRole('option', { name: 'Canada' }));
-
-		await expect.poll(() => new FormData(form).get('country')).toBe('ca');
-	} finally {
-		restoreScreenWidth();
+	const modal = dialog.element().parentElement;
+	const overlay = modal?.parentElement;
+	if (modal == null || overlay == null) {
+		throw new Error('Expected the mobile modal structure.');
 	}
+
+	// Measuring the tray only means anything once it has stopped sliding up.
+	await waitForOverlayEnter(overlay);
+
+	expect(getComputedStyle(overlay).top).toBe(`${window.scrollY}px`);
+
+	// RAC's own `Modal` sets `--visual-viewport-height` from `useViewportSize`, so overriding it
+	// stands in for the keyboard shrinking the visual viewport. `mobileModal` must take the shrunk
+	// amount off `blockSize` and spend it on `paddingBlockEnd`, so the sheet keeps its content above
+	// the keyboard. Every expectation is measured at runtime, so none pins a resolved spacing value.
+	const restingViewportHeight = window.innerHeight;
+	const keyboardInset = Math.round(restingViewportHeight / 2);
+	overlay.style.setProperty('--visual-viewport-height', `${restingViewportHeight}px`);
+	const trayTop = modal.getBoundingClientRect().top;
+	const restingBlockSize = Number.parseFloat(getComputedStyle(modal).height);
+	const restingPaddingBlockEnd = Number.parseFloat(getComputedStyle(modal).paddingBottom);
+	// The tray's content box runs from its top offset to the bottom of the visual viewport.
+	expect(restingBlockSize + trayTop).toBeCloseTo(restingViewportHeight, 1);
+
+	overlay.style.setProperty(
+		'--visual-viewport-height',
+		`${restingViewportHeight - keyboardInset}px`,
+	);
+	expect(Number.parseFloat(getComputedStyle(modal).height) + trayTop).toBeCloseTo(
+		restingViewportHeight - keyboardInset,
+		1,
+	);
+	expect(Number.parseFloat(getComputedStyle(modal).paddingBottom)).toBeCloseTo(
+		restingPaddingBlockEnd + keyboardInset,
+		1,
+	);
+
+	const listbox = page.getByRole('listbox').element();
+	// Programmatic `element.scrollTo()` does not exercise scroll chaining. Browser-computed
+	// overscroll-behavior is the Luke UI-owned contract (`mobileListBox`).
+	expect(getComputedStyle(listbox).overscrollBehavior).toBe('contain');
+
+	await userEvent.click(page.getByRole('option', { name: 'Canada' }));
+
+	await expect.poll(() => new FormData(form).get('country')).toBe('ca');
 });
 
 // The primitive renders the control itself, so it takes a plain `ref`.
@@ -328,85 +328,77 @@ test('ComboboxField reopens the popover when the focused input is clicked again'
 });
 
 test('ComboboxField clearing the tray search clears the selection', async () => {
-	const restoreScreenWidth = mockScreenWidth(390);
-	try {
-		const { container } = render(
-			<form aria-label="Country form">
-				<ComboboxField defaultItems={countryItems} defaultValue="au" label="Country" name="country">
-					{renderCountryItem}
-				</ComboboxField>
-			</form>,
-		);
-		const form = container.querySelector('form');
-		if (form == null) throw new Error('Expected the form element.');
+	mockScreenWidth(MOBILE_SCREEN_WIDTH);
+	const { container } = render(
+		<form aria-label="Country form">
+			<ComboboxField defaultItems={countryItems} defaultValue="au" label="Country" name="country">
+				{renderCountryItem}
+			</ComboboxField>
+		</form>,
+	);
+	const form = container.querySelector('form');
+	if (form == null) throw new Error('Expected the form element.');
 
-		const trigger = page.getByRole('button', { name: 'Country Australia' }).element();
-		await userEvent.click(trigger);
-		await expect.element(page.getByRole('dialog')).toBeVisible();
+	const trigger = page.getByRole('button', { name: 'Country Australia' }).element();
+	await userEvent.click(trigger);
+	await expect.element(page.getByRole('dialog')).toBeVisible();
 
-		await userEvent.click(page.getByRole('button', { name: 'Clear search' }).element());
-		await userEvent.keyboard('{Escape}');
-		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+	await userEvent.click(page.getByRole('button', { name: 'Clear search' }).element());
+	await userEvent.keyboard('{Escape}');
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
-		expect(new FormData(form).get('country')).toBe('');
-		await expect.element(trigger).toHaveTextContent('');
-	} finally {
-		restoreScreenWidth();
-	}
+	expect(new FormData(form).get('country')).toBe('');
+	await expect.element(trigger).toHaveTextContent('');
 });
 
 test('ComboboxField tray clear clears a controlled selection and inputValue', async () => {
-	const restoreScreenWidth = mockScreenWidth(390);
-	try {
-		const changes: Array<Key | null> = [];
-		const inputChanges: Array<string> = [];
+	mockScreenWidth(MOBILE_SCREEN_WIDTH);
+	const changes: Array<Key | null> = [];
+	const inputChanges: Array<string> = [];
 
-		function ControlledTrayCombobox() {
-			const [value, setValue] = useState<Key | null>('au');
-			const [inputValue, setInputValue] = useState('Australia');
-			return (
-				<form aria-label="Country form">
-					<ComboboxField
-						defaultItems={countryItems}
-						inputValue={inputValue}
-						label="Country"
-						name="country"
-						onChange={(next) => {
-							changes.push(next);
-							setValue(next);
-						}}
-						onInputChange={(next) => {
-							inputChanges.push(next);
-							setInputValue(next);
-						}}
-						value={value}
-					>
-						{renderCountryItem}
-					</ComboboxField>
-				</form>
-			);
-		}
-
-		const { container } = render(<ControlledTrayCombobox />);
-		const form = container.querySelector('form');
-		if (form == null) throw new Error('Expected the form element.');
-
-		await userEvent.click(page.getByRole('button', { name: 'Country Australia' }).element());
-		await expect.element(page.getByRole('dialog')).toBeVisible();
-		await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveValue('Australia');
-
-		await userEvent.click(page.getByRole('button', { name: 'Clear search' }).element());
-		await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveValue('');
-		await userEvent.keyboard('{Escape}');
-		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-
-		expect(changes).toEqual([null]);
-		expect(inputChanges).toContain('');
-		expect(new FormData(form).get('country')).toBe('');
-		await expect.element(page.getByRole('button', { name: 'Country' })).toHaveTextContent('');
-	} finally {
-		restoreScreenWidth();
+	function ControlledTrayCombobox() {
+		const [value, setValue] = useState<Key | null>('au');
+		const [inputValue, setInputValue] = useState('Australia');
+		return (
+			<form aria-label="Country form">
+				<ComboboxField
+					defaultItems={countryItems}
+					inputValue={inputValue}
+					label="Country"
+					name="country"
+					onChange={(next) => {
+						changes.push(next);
+						setValue(next);
+					}}
+					onInputChange={(next) => {
+						inputChanges.push(next);
+						setInputValue(next);
+					}}
+					value={value}
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</form>
+		);
 	}
+
+	const { container } = render(<ControlledTrayCombobox />);
+	const form = container.querySelector('form');
+	if (form == null) throw new Error('Expected the form element.');
+
+	await userEvent.click(page.getByRole('button', { name: 'Country Australia' }).element());
+	await expect.element(page.getByRole('dialog')).toBeVisible();
+	await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveValue('Australia');
+
+	await userEvent.click(page.getByRole('button', { name: 'Clear search' }).element());
+	await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveValue('');
+	await userEvent.keyboard('{Escape}');
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+
+	expect(changes).toEqual([null]);
+	expect(inputChanges).toContain('');
+	expect(new FormData(form).get('country')).toBe('');
+	await expect.element(page.getByRole('button', { name: 'Country' })).toHaveTextContent('');
 });
 
 test('ComboboxField clear selection empties the desktop field', async () => {
@@ -423,118 +415,106 @@ test('ComboboxField clear selection empties the desktop field', async () => {
 });
 
 test('ComboboxField reports a selection the parent had already moved away from', async () => {
-	const restoreScreenWidth = mockScreenWidth(390);
-	try {
-		const changes: Array<Key | null> = [];
-		function ControlledCombobox() {
-			const [value, setValue] = useState<Key | null>('au');
-			return (
-				<>
-					<button onClick={() => setValue('ca')} type="button">
-						Move selection
-					</button>
-					<ComboboxField
-						defaultItems={countryItems}
-						label="Country"
-						onChange={(next) => {
-							changes.push(next);
-							setValue(next);
-						}}
-						value={value}
-					>
-						{renderCountryItem}
-					</ComboboxField>
-				</>
-			);
-		}
-		render(<ControlledCombobox />);
-
-		await userEvent.click(page.getByRole('button', { name: 'Move selection' }).element());
-		await expect.element(page.getByRole('button', { name: 'Country Canada' })).toBeVisible();
-		expect(changes).toEqual([]);
-
-		await userEvent.click(page.getByRole('button', { name: 'Country Canada' }).element());
-		await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
-		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-
-		expect(changes).toEqual(['au']);
-		await expect.element(page.getByRole('button', { name: 'Country Australia' })).toBeVisible();
-	} finally {
-		restoreScreenWidth();
+	mockScreenWidth(MOBILE_SCREEN_WIDTH);
+	const changes: Array<Key | null> = [];
+	function ControlledCombobox() {
+		const [value, setValue] = useState<Key | null>('au');
+		return (
+			<>
+				<button onClick={() => setValue('ca')} type="button">
+					Move selection
+				</button>
+				<ComboboxField
+					defaultItems={countryItems}
+					label="Country"
+					onChange={(next) => {
+						changes.push(next);
+						setValue(next);
+					}}
+					value={value}
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</>
+		);
 	}
+	render(<ControlledCombobox />);
+
+	await userEvent.click(page.getByRole('button', { name: 'Move selection' }).element());
+	await expect.element(page.getByRole('button', { name: 'Country Canada' })).toBeVisible();
+	expect(changes).toEqual([]);
+
+	await userEvent.click(page.getByRole('button', { name: 'Country Canada' }).element());
+	await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+
+	expect(changes).toEqual(['au']);
+	await expect.element(page.getByRole('button', { name: 'Country Australia' })).toBeVisible();
 });
 
 test('ComboboxField keeps a controlled selection cleared by the parent', async () => {
-	const restoreScreenWidth = mockScreenWidth(390);
-	try {
-		function ControlledCombobox() {
-			const [value, setValue] = useState<Key | null>('au');
-			return (
-				<>
-					<button onClick={() => setValue(null)} type="button">
-						Reset from outside
-					</button>
-					<ComboboxField
-						defaultItems={countryItems}
-						label="Country"
-						onChange={setValue}
-						placeholder="Select a country"
-						value={value}
-					>
-						{renderCountryItem}
-					</ComboboxField>
-				</>
-			);
-		}
-		render(<ControlledCombobox />);
-
-		await userEvent.click(page.getByRole('button', { name: 'Reset from outside' }).element());
-		await expect
-			.element(page.getByRole('button', { name: 'Country Select a country' }))
-			.toBeVisible();
-
-		await userEvent.click(page.getByRole('button', { name: 'Country Select a country' }).element());
-		await expect.element(page.getByRole('dialog')).toBeVisible();
-		await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveValue('');
-
-		await userEvent.keyboard('{Escape}');
-		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-		await expect
-			.element(page.getByRole('button', { name: 'Country Select a country' }))
-			.toBeVisible();
-	} finally {
-		restoreScreenWidth();
+	mockScreenWidth(MOBILE_SCREEN_WIDTH);
+	function ControlledCombobox() {
+		const [value, setValue] = useState<Key | null>('au');
+		return (
+			<>
+				<button onClick={() => setValue(null)} type="button">
+					Reset from outside
+				</button>
+				<ComboboxField
+					defaultItems={countryItems}
+					label="Country"
+					onChange={setValue}
+					placeholder="Select a country"
+					value={value}
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</>
+		);
 	}
+	render(<ControlledCombobox />);
+
+	await userEvent.click(page.getByRole('button', { name: 'Reset from outside' }).element());
+	await expect
+		.element(page.getByRole('button', { name: 'Country Select a country' }))
+		.toBeVisible();
+
+	await userEvent.click(page.getByRole('button', { name: 'Country Select a country' }).element());
+	await expect.element(page.getByRole('dialog')).toBeVisible();
+	await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveValue('');
+
+	await userEvent.keyboard('{Escape}');
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+	await expect
+		.element(page.getByRole('button', { name: 'Country Select a country' }))
+		.toBeVisible();
 });
 
 test('ComboboxField clears the selection when a query replaces it without picking an option', async () => {
-	const restoreScreenWidth = mockScreenWidth(390);
-	try {
-		const changes: Array<Key | null> = [];
-		render(
-			<ComboboxField
-				defaultItems={countryItems}
-				defaultValue="au"
-				label="Country"
-				onChange={(next) => changes.push(next)}
-			>
-				{renderCountryItem}
-			</ComboboxField>,
-		);
+	mockScreenWidth(MOBILE_SCREEN_WIDTH);
+	const changes: Array<Key | null> = [];
+	render(
+		<ComboboxField
+			defaultItems={countryItems}
+			defaultValue="au"
+			label="Country"
+			onChange={(next) => changes.push(next)}
+		>
+			{renderCountryItem}
+		</ComboboxField>,
+	);
 
-		const trigger = page.getByRole('button', { name: 'Country Australia' }).element();
-		await userEvent.click(trigger);
-		const search = page.getByRole('searchbox', { name: 'Country' }).element();
-		await userEvent.clear(search);
-		await userEvent.type(search, 'Can');
-		await userEvent.keyboard('{Escape}');
-		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+	const trigger = page.getByRole('button', { name: 'Country Australia' }).element();
+	await userEvent.click(trigger);
+	const search = page.getByRole('searchbox', { name: 'Country' }).element();
+	await userEvent.clear(search);
+	await userEvent.type(search, 'Can');
+	await userEvent.keyboard('{Escape}');
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
-		expect(changes).toEqual([null]);
-		await expect.element(trigger).toHaveTextContent('');
-	} finally {
-		restoreScreenWidth();
-	}
+	expect(changes).toEqual([null]);
+	await expect.element(trigger).toHaveTextContent('');
 });
 
 test('ComboboxField leaves a consumer-controlled inputValue authoritative', async () => {
@@ -546,7 +526,7 @@ test('ComboboxField leaves a consumer-controlled inputValue authoritative', asyn
 	const input = locator.getByRole('combobox', { name: 'Country' });
 	await expect.element(input).toHaveValue('Aus');
 
-	await userEvent.click(page.getByRole('button', { name: 'Toggle options' }).element());
+	await userEvent.click(page.getByRole('button', { name: 'Toggle options Country' }).element());
 	await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
 	await expect.element(input).toHaveValue('Aus');
 });
@@ -714,7 +694,7 @@ test('interactive states', { tags: ['visual'] }, async () => {
 	);
 	const input = page.getByRole('combobox', { name: 'Country' });
 	const clear = page.getByRole('button', { name: 'Clear selection' });
-	const trigger = page.getByRole('button', { name: 'Toggle options' });
+	const trigger = page.getByRole('button', { name: 'Toggle options Country' });
 
 	await userEvent.hover(input);
 	await captureVisual(locator, 'combobox-field/hover');
@@ -787,8 +767,8 @@ test('option with leading icon at both sizes', { tags: ['visual'] }, async () =>
 });
 
 test('mobile tray', { tags: ['visual'] }, async () => {
-	await page.viewport(390, 700);
-	const restoreScreenWidth = mockScreenWidth(390);
+	await page.viewport(MOBILE_SCREEN_WIDTH, 700);
+	mockScreenWidth(MOBILE_SCREEN_WIDTH);
 	try {
 		render(
 			<Stack>
@@ -803,18 +783,18 @@ test('mobile tray', { tags: ['visual'] }, async () => {
 				</ComboboxField>
 			</Stack>,
 		);
-		await userEvent.click(page.getByRole('button', { name: 'Country' }));
+		await userEvent.click(page.getByRole('button', { name: 'Country Select a country...' }));
 		await waitForMobileTrayToSettle();
 		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray');
 	} finally {
-		restoreScreenWidth();
-		await page.viewport(1024, 800);
+		// Screen width resets in render-setup `beforeEach`.
+		await page.viewport(DESKTOP_SCREEN_WIDTH, 800);
 	}
 });
 
 test('mobile tray short list', { tags: ['visual'] }, async () => {
-	await page.viewport(390, 700);
-	const restoreScreenWidth = mockScreenWidth(390);
+	await page.viewport(MOBILE_SCREEN_WIDTH, 700);
+	mockScreenWidth(MOBILE_SCREEN_WIDTH);
 	try {
 		render(
 			<Stack>
@@ -829,12 +809,12 @@ test('mobile tray short list', { tags: ['visual'] }, async () => {
 				</ComboboxField>
 			</Stack>,
 		);
-		await userEvent.click(page.getByRole('button', { name: 'Country' }));
+		await userEvent.click(page.getByRole('button', { name: 'Country Select a country...' }));
 		await waitForMobileTrayToSettle();
 		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray-short');
 	} finally {
-		restoreScreenWidth();
-		await page.viewport(1024, 800);
+		// Screen width resets in render-setup `beforeEach`.
+		await page.viewport(DESKTOP_SCREEN_WIDTH, 800);
 	}
 });
 
@@ -882,7 +862,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 			</Stack>,
 		);
 		const input = page.getByRole('combobox', { name: 'Interactive' });
-		const trigger = page.getByRole('button', { name: 'Toggle options' }).first();
+		const trigger = page.getByRole('button', { name: 'Toggle options Country' }).first();
 
 		await captureVisual(locator, 'combobox-field/forced-colors-resting-states');
 		await userEvent.hover(trigger);
@@ -936,7 +916,7 @@ async function waitForMobileTrayToSettle() {
 
 	await waitForOverlayEnter(overlay);
 	await expect.element(page.elementLocator(overlay)).toBeVisible();
-	expect(window.innerWidth).toBe(390);
+	expect(window.innerWidth).toBe(MOBILE_SCREEN_WIDTH);
 	expect(window.innerHeight).toBe(700);
 	expect(window.matchMedia('(width > 450px)').matches).toBe(false);
 	expect(getComputedStyle(modal).borderEndStartRadius).toBe('0px');

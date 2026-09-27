@@ -1,3 +1,4 @@
+__screenshots__/
 .artifacts/
 .DS_Store
 .env
@@ -7,7 +8,7 @@
 .turbo/
 .visual-captures/
 .vitest-attachments/
-__screenshots__/
+.vitest/
 *.local
 *.log
 apps/docs/.story/

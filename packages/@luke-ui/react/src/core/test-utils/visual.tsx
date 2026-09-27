@@ -5,11 +5,12 @@ import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { setEmulatedMediaFeature } from './emulate-media.js';
 import { peekEmulatedMediaFeatures } from './emulated-media.js';
 import type { VisualAppearance } from './render.js';
+import { DESKTOP_SCREEN_WIDTH } from './mock-screen-width.js';
 import { formatVisualCaptureName, formatVisualViewport } from './visual-capture-id.js';
 
 const VISUAL_CAPTURE_ID_PATTERN = /^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-const VISUAL_VIEWPORT_WIDTH = 1024;
+const VISUAL_VIEWPORT_WIDTH = DESKTOP_SCREEN_WIDTH;
 const VISUAL_VIEWPORT_HEIGHT = 800;
 
 /** Coordinates outside the viewport so `:hover` / React Aria `data-hovered` cannot stick. */
