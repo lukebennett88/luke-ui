@@ -407,6 +407,8 @@ function inventoryFixture(overrides: {
 	});
 }
 
+type InventoryFixtureOverrides = Parameters<typeof inventoryFixture>[0];
+
 const LINK_INVENTORY_GUIDE = `---
 title: Link
 source: packages/@luke-ui/react/src/exports/link.ts
@@ -423,7 +425,11 @@ The visible label is the accessible name.
 <component-props-table path="packages/@luke-ui/react/src/core/link/link.tsx" name="LinkProps" />
 `;
 
-test.each([
+test.each<{
+	expected: ReadonlyArray<string>;
+	name: string;
+	overrides: InventoryFixtureOverrides;
+}>([
 	{
 		expected: [] as ReadonlyArray<string>,
 		name: 'accepts a guide that the root and category metadata both list',
