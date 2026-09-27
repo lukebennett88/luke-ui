@@ -18,6 +18,8 @@ for (const [accept, expected] of [
 	['text/html, text/markdown;q=0.5', false],
 	['text/markdown;q=0.8, */*;q=1', false],
 	['text/markdown;q=0.5, text/*;q=0.9', false],
+	// Explicit text/html;q=0 beats */* when scoring HTML, so markdown still wins.
+	['text/markdown;q=0.5, text/html;q=0, */*', true],
 	['text/markdown;q=0', false],
 	['TEXT/Markdown; charset=utf-8', true],
 	['text/markdown;q=abc', false],

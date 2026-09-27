@@ -11,6 +11,7 @@ import {
 } from '@luke-ui/react/primitives/combobox';
 import type { ComboboxRootProps } from '@luke-ui/react/primitives/combobox';
 import { Field } from '@luke-ui/react/primitives/field';
+import { Form } from 'react-aria-components/Form';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { render } from '../../test-utils/render.js';
@@ -39,7 +40,7 @@ function TrayCombobox(
 		triggerLabel?: string;
 	} & Pick<
 		ComboboxRootProps<CountryItem>,
-		'allowsCustomValue' | 'isRequired' | 'name' | 'validate' | 'validationBehavior'
+		'allowsCustomValue' | 'form' | 'isRequired' | 'name' | 'validate' | 'validationBehavior'
 	>,
 ) {
 	const label = props.label ?? 'Country';
@@ -50,6 +51,7 @@ function TrayCombobox(
 			aria-label={props['aria-label']}
 			defaultItems={countryItems}
 			defaultValue={props.defaultValue}
+			form={props.form}
 			isDisabled={props.isDisabled}
 			isReadOnly={props.isReadOnly}
 			isRequired={props.isRequired}
@@ -271,6 +273,52 @@ test('ComboboxTrayTrigger blocks submission of a required, unselected combobox w
 	expect(new FormData(form).get('country')).toBe('au');
 });
 
+test('ComboboxTrayTrigger allows a required combobox with allowsCustomValue to submit typed text', async () => {
+	let submitCount = 0;
+	render(
+		<form
+			aria-label="Country form"
+			onSubmit={(event) => {
+				event.preventDefault();
+				submitCount += 1;
+			}}
+		>
+			<TrayCombobox allowsCustomValue isRequired />
+			<button type="submit">Submit</button>
+		</form>,
+	);
+
+	await openTray('Country* Select a country...', 'Country*');
+	await enterTraySearch('Freedonia', 'Country*');
+	await userEvent.keyboard('{Escape}');
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+
+	await userEvent.click(page.getByRole('button', { name: 'Submit' }).element());
+	expect(submitCount).toBe(1);
+
+	await openTray('Country* Select a country...', 'Country*');
+	await userEvent.clear(page.getByRole('searchbox', { name: 'Country*' }).element());
+	await userEvent.keyboard('{Escape}');
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+
+	await userEvent.click(page.getByRole('button', { name: 'Submit' }).element());
+	expect(submitCount).toBe(1);
+});
+
+test('ComboboxTrayTrigger sends focus to the first invalid combobox when several are invalid', async () => {
+	render(
+		<form aria-label="Trip form">
+			<TrayCombobox isRequired label="Origin" name="origin" triggerLabel="Origin" />
+			<TrayCombobox isRequired label="Destination" name="destination" triggerLabel="Destination" />
+			<button type="submit">Submit</button>
+		</form>,
+	);
+
+	await userEvent.click(page.getByRole('button', { name: 'Submit' }).element());
+
+	await expect.element(page.getByRole('button', { name: 'Origin' })).toHaveFocus();
+});
+
 test('ComboboxTrayTrigger blocks a closed tray on a custom validation error', async () => {
 	let submitCount = 0;
 	render(
@@ -331,6 +379,52 @@ test('ComboboxTrayTrigger exempts disabled, read-only, and aria-validated combob
 	}
 
 	expect(submitted).toEqual(['Disabled', 'ReadOnly', 'Aria']);
+});
+
+test('ComboboxTrayTrigger inherits validationBehavior from an enclosing Form', async () => {
+	const { container } = render(
+		<Form aria-label="Country form" validationBehavior="aria">
+			<TrayCombobox isRequired />
+		</Form>,
+	);
+	const form = container.querySelector('form');
+	if (form == null) throw new Error('Expected the form element.');
+
+	// Under `aria` validation, and with Form `noValidate`, no constraint inputs participate.
+	const controls = [...form.querySelectorAll('input')];
+	expect(controls.length).toBeGreaterThan(0);
+	expect(controls.map((control) => control.willValidate)).not.toContain(true);
+});
+
+test('ComboboxTrayTrigger associates with an external form via the root form prop', async () => {
+	let submitCount = 0;
+	const { container } = render(
+		<>
+			<form
+				aria-label="Country form"
+				id="country-form"
+				onSubmit={(event) => {
+					event.preventDefault();
+					submitCount += 1;
+				}}
+			/>
+			<TrayCombobox form="country-form" isRequired />
+		</>,
+	);
+	const form = container.querySelector('form');
+	if (form == null) throw new Error('Expected the form element.');
+
+	form.requestSubmit();
+	expect(submitCount).toBe(0);
+
+	await userEvent.click(
+		page.getByRole('button', { name: 'Country* Select a country...' }).element(),
+	);
+	await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+
+	form.requestSubmit();
+	expect(submitCount).toBe(1);
 });
 
 test('ComboboxTrayTrigger submits custom text in text mode while the tray is closed', async () => {

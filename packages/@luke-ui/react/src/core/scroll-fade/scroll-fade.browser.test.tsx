@@ -122,12 +122,29 @@ test('region role and accessible name appear together when a fitting div overflo
 });
 
 for (const writingCase of [
-	{ direction: 'ltr', expectedInlineEnd: 'right', label: 'horizontal-tb LTR' },
-	{ direction: 'rtl', expectedInlineEnd: 'left', label: 'horizontal-tb RTL' },
+	{
+		direction: 'ltr',
+		expectedInlineEnd: 'right',
+		label: 'horizontal-tb LTR',
+		writingMode: 'horizontal-tb',
+	},
+	{
+		direction: 'rtl',
+		expectedInlineEnd: 'left',
+		label: 'horizontal-tb RTL',
+		writingMode: 'horizontal-tb',
+	},
+	// One vertical case proves logical inline-end maps to a physical side other than left/right.
+	{
+		direction: 'ltr',
+		expectedInlineEnd: 'bottom',
+		label: 'vertical-rl LTR',
+		writingMode: 'vertical-rl',
+	},
 ] as const) {
 	test(`inline overflow maps correctly for ${writingCase.label}`, async () => {
 		const { locator } = render(
-			<div dir={writingCase.direction} style={{ writingMode: 'horizontal-tb' }}>
+			<div dir={writingCase.direction} style={{ writingMode: writingCase.writingMode }}>
 				<ScrollFade
 					aria-label={`Inline ${writingCase.label}`}
 					blockSize="10rem"
@@ -143,6 +160,7 @@ for (const writingCase of [
 		);
 		const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 
+		expect(getComputedStyle(element).writingMode).toBe(writingCase.writingMode);
 		expect(getComputedStyle(element).direction).toBe(writingCase.direction);
 		expect(element.tabIndex).toBe(0);
 		expect(element.getAttribute('role')).toBe('region');
@@ -201,6 +219,25 @@ test('inline scroll progression fades start then end across the scroll range', a
 	const maxScroll = element.scrollWidth - element.clientWidth;
 	expect(maxScroll).toBeGreaterThan(96);
 	await assertInlineProgression(element, maxScroll);
+});
+
+test('block scroll progression fades start then end across the scroll range', async () => {
+	const { locator } = render(
+		<ScrollFade
+			aria-label="Block progression"
+			axis="block"
+			blockSize="8rem"
+			data-testid="scroll-fade"
+			inlineSize="12rem"
+			padding="sp8"
+		>
+			<div style={{ blockSize: '40rem' }}>Overflowing block content for scroll progression</div>
+		</ScrollFade>,
+	);
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
+	const maxScroll = element.scrollHeight - element.clientHeight;
+	expect(maxScroll).toBeGreaterThan(96);
+	await assertBlockProgression(element, maxScroll);
 });
 
 test('scroll progression stays coherent when overflow is shorter than the reveal distance', async () => {
@@ -530,6 +567,32 @@ async function assertInlineProgression(element: HTMLElement, maxScroll: number):
 		.toEqual({ start: true, end: true });
 
 	element.scrollLeft = maxScroll;
+	await expect
+		.poll(() => {
+			const maskImage = getComputedStyle(element).maskImage;
+			return { start: hasStartFade(maskImage), end: hasEndFade(maskImage) };
+		})
+		.toEqual({ start: true, end: false });
+}
+
+async function assertBlockProgression(element: HTMLElement, maxScroll: number): Promise<void> {
+	element.scrollTop = 0;
+	await expect
+		.poll(() => {
+			const maskImage = getComputedStyle(element).maskImage;
+			return { start: hasStartFade(maskImage), end: hasEndFade(maskImage) };
+		})
+		.toEqual({ start: false, end: true });
+
+	element.scrollTop = maxScroll / 2;
+	await expect
+		.poll(() => {
+			const maskImage = getComputedStyle(element).maskImage;
+			return { start: hasStartFade(maskImage), end: hasEndFade(maskImage) };
+		})
+		.toEqual({ start: true, end: true });
+
+	element.scrollTop = maxScroll;
 	await expect
 		.poll(() => {
 			const maskImage = getComputedStyle(element).maskImage;
