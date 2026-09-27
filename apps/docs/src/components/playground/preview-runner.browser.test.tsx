@@ -42,12 +42,12 @@ async function mountPreview(): Promise<void> {
 	});
 }
 
-function postFromParent(data: unknown): void {
+function postFromParent(data: unknown, source: Window = window.parent): void {
 	window.dispatchEvent(
 		new MessageEvent('message', {
 			data,
 			origin: window.location.origin,
-			source: window.parent,
+			source,
 		}),
 	);
 }
@@ -61,6 +61,16 @@ function collectParentPreviewMessages(): Array<PlaygroundPreviewMessage> {
 		},
 		{ signal: parentListenController.signal },
 	);
+	return messages;
+}
+
+/** Mounts the preview, posts playground code from the parent, and returns the messages it replies with. */
+async function runCodeInPreview(code: string): Promise<Array<PlaygroundPreviewMessage>> {
+	const messages = collectParentPreviewMessages();
+	await mountPreview();
+	await act(async () => {
+		postFromParent({ code, type: 'playground:code' });
+	});
 	return messages;
 }
 
@@ -81,12 +91,9 @@ test('ignores an appearance message that is not from the parent', async () => {
 	await mountPreview();
 
 	await act(async () => {
-		window.dispatchEvent(
-			new MessageEvent('message', {
-				data: { colorMode: 'dark', themeIdentity: 'paper', type: 'luke-ui-docs:appearance' },
-				origin: window.location.origin,
-				source: window,
-			}),
+		postFromParent(
+			{ colorMode: 'dark', themeIdentity: 'paper', type: 'luke-ui-docs:appearance' },
+			window,
 		);
 		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 	});
@@ -96,15 +103,9 @@ test('ignores an appearance message that is not from the parent', async () => {
 });
 
 test('compiles parent playground code and posts success', async () => {
-	const messages = collectParentPreviewMessages();
-	await mountPreview();
-
-	await act(async () => {
-		postFromParent({
-			code: 'export default function Demo() { return <div>ok</div>; }',
-			type: 'playground:code',
-		});
-	});
+	const messages = await runCodeInPreview(
+		'export default function Demo() { return <div>ok</div>; }',
+	);
 
 	await expect
 		.poll(() => messages.find((message) => message.type === 'playground:success'))
@@ -112,12 +113,7 @@ test('compiles parent playground code and posts success', async () => {
 });
 
 test('runs the Button tone example with the docs comparison helper', async () => {
-	const messages = collectParentPreviewMessages();
-	await mountPreview();
-
-	await act(async () => {
-		postFromParent({ code: toneSource, type: 'playground:code' });
-	});
+	const messages = await runCodeInPreview(toneSource);
 
 	await expect
 		.poll(() => messages.find((message) => message.type === 'playground:success'))
@@ -126,15 +122,7 @@ test('runs the Button tone example with the docs comparison helper', async () =>
 });
 
 test('posts the compileComponent error when parent playground code is invalid', async () => {
-	const messages = collectParentPreviewMessages();
-	await mountPreview();
-
-	await act(async () => {
-		postFromParent({
-			code: 'const broken = true;',
-			type: 'playground:code',
-		});
-	});
+	const messages = await runCodeInPreview('const broken = true;');
 
 	await expect
 		.poll(() => messages.find((message) => message.type === 'playground:error'))
@@ -145,15 +133,7 @@ test('posts the compileComponent error when parent playground code is invalid', 
 });
 
 test('reports a non-component default export as a render error, not a compile error', async () => {
-	const messages = collectParentPreviewMessages();
-	await mountPreview();
-
-	await act(async () => {
-		postFromParent({
-			code: 'export default 42;',
-			type: 'playground:code',
-		});
-	});
+	const messages = await runCodeInPreview('export default 42;');
 
 	// compileComponent only rejects a missing default export, so this reaches
 	// React, which fails at render time inside PreviewRunner's ErrorBoundary.

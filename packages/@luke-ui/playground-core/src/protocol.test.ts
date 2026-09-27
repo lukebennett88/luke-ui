@@ -159,31 +159,27 @@ test('a trusted message after a resync-before-ready unblocks later postCode call
 	expect(posted).toEqual([{ code: 'next', type: 'playground:code' }]);
 });
 
-test('a success and a compilation error each reach onResult', () => {
-	const compileError = 'Playground code must default-export a React component.';
-	const successBus = createMessageBus();
-	const successResults: Array<PlaygroundResult> = [];
-	attachFakePreview(successBus, () => ({ ok: true }));
-	const successSession = createPlaygroundPageSession({
-		getCode: () => VALID_CODE,
-		getPorts: () => successBus.ports,
-		onResult: (result) => successResults.push(result),
-	});
-	successBus.listenPage((event) => successSession.handleMessage(event));
-	successSession.resync();
-	expect(successResults).toEqual([{ type: 'success' }]);
+const COMPILE_ERROR = 'Playground code must default-export a React component.';
 
-	const errorBus = createMessageBus();
-	const errorResults: Array<PlaygroundResult> = [];
-	attachFakePreview(errorBus, () => ({ message: compileError, ok: false }));
-	const errorSession = createPlaygroundPageSession({
-		getCode: () => 'const broken = true;',
-		getPorts: () => errorBus.ports,
-		onResult: (result) => errorResults.push(result),
+test.each([
+	['a success', () => ({ ok: true }) as const, { type: 'success' } as const],
+	[
+		'a compilation error',
+		() => ({ message: COMPILE_ERROR, ok: false }) as const,
+		{ message: COMPILE_ERROR, type: 'error' } as const,
+	],
+])('%s reaches onResult', (_name, compile, expected) => {
+	const bus = createMessageBus();
+	const results: Array<PlaygroundResult> = [];
+	attachFakePreview(bus, compile);
+	const session = createPlaygroundPageSession({
+		getCode: () => VALID_CODE,
+		getPorts: () => bus.ports,
+		onResult: (result) => results.push(result),
 	});
-	errorBus.listenPage((event) => errorSession.handleMessage(event));
-	errorSession.resync();
-	expect(errorResults).toEqual([{ message: compileError, type: 'error' }]);
+	bus.listenPage((event) => session.handleMessage(event));
+	session.resync();
+	expect(results).toEqual([expected]);
 });
 
 test.each([

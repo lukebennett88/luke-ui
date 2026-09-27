@@ -55,7 +55,10 @@ function Playground() {
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const codeRef = useRef(initialCode);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-	const appearanceRef = useRef<PlaygroundAppearance | null>(null);
+	const appearanceRef = useRef<PlaygroundAppearance>({
+		colorMode: colorModePreference,
+		themeIdentity,
+	});
 
 	const sessionRef = useRef<PlaygroundPageSession | undefined>(undefined);
 
@@ -65,9 +68,7 @@ function Playground() {
 			getPorts: () => previewPorts(iframeRef),
 			onPreviewReady: (readyPorts) => {
 				// The preview applies the theme before it renders the replayed code.
-				if (appearanceRef.current !== null) {
-					postPlaygroundAppearance(appearanceRef.current, readyPorts);
-				}
+				postPlaygroundAppearance(appearanceRef.current, readyPorts);
 				dispatch({ type: 'ready' });
 			},
 			onResult: dispatch,

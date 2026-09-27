@@ -538,9 +538,9 @@ Docs supplies everything specific to Luke UI:
 - `scripts/generate-playground-scope.ts` and `scripts/generate-playground-types.ts` pass Luke UI
   paths, the type-package allowlist, and the output paths to `generate`.
 
-The docs route owns hash updates and debounce. It configures one `createPlaygroundPageSession` per
-mount and calls `resync()` on mount to cover a preview that announced ready before the message
-listener attached. The preview runner calls the compiler.
+The docs route owns hash updates and debounce. It creates one page session when it mounts and calls
+`resync()` to cover a preview that announced ready before the message listener attached. The preview
+runner calls the compiler.
 
 `@luke-ui/playground-core` builds like `@luke-ui/react`: `exports` points at `dist`, so run its
 `build` before consuming it and its `dev` script to watch it. Turbo orders this automatically for

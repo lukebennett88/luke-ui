@@ -21,22 +21,29 @@ afterEach(() => {
 	container = undefined;
 });
 
+function monacoEditor(): Element | null {
+	return document.querySelector('.monaco-editor');
+}
+
+function viewText(): string {
+	return (document.querySelector('.view-lines')?.textContent ?? '').replace(/\u00a0/g, ' ');
+}
+
 test('monaco fills the editor pane and format updates source through onChange', async () => {
-	const hashRef = { current: window.location.hash };
+	let hash = window.location.hash;
 	renderPlayground(badlyFormatted, (code) => {
-		hashRef.current = `#${encodeDocsPlaygroundHash(code)}`;
-		history.replaceState(null, '', hashRef.current);
+		hash = `#${encodeDocsPlaygroundHash(code)}`;
+		history.replaceState(null, '', hash);
 	});
 
 	const formatButton = page.getByRole('button', { name: 'Format' });
 	await expect.element(formatButton).toBeVisible();
 
-	const monacoEditor = () => document.querySelector('.monaco-editor');
 	await expect
 		.poll(() => monacoEditor()?.getBoundingClientRect().height ?? 0, { timeout: 30_000 })
 		.toBeGreaterThan(100);
 
-	const editorPane = () => document.querySelector('.monaco-editor')?.parentElement;
+	const editorPane = () => monacoEditor()?.parentElement;
 	await expect
 		.poll(
 			() => {
@@ -54,12 +61,8 @@ test('monaco fills the editor pane and format updates source through onChange', 
 
 	await userEvent.click(formatButton);
 
-	const viewText = () =>
-		(document.querySelector('.view-lines')?.textContent ?? '').replace(/\u00a0/g, ' ');
 	await expect.poll(() => viewText(), { timeout: 10_000 }).toContain(formatted);
-	await expect
-		.poll(() => decodeCodeHash(hashRef.current) ?? '', { timeout: 10_000 })
-		.toContain(formatted);
+	await expect.poll(() => decodeCodeHash(hash) ?? '', { timeout: 10_000 }).toContain(formatted);
 
 	await userEvent.click(monacoEditor()!);
 	await userEvent.keyboard(ctrlCmd('z'));
@@ -70,13 +73,9 @@ test('the save shortcut formats through the Monaco provider and onChange', async
 	const onChangeCalls: Array<string> = [];
 	renderPlayground(badlyFormatted, (code) => onChangeCalls.push(code));
 
-	const monacoEditor = () => document.querySelector('.monaco-editor');
 	await expect
 		.poll(() => monacoEditor()?.getBoundingClientRect().height ?? 0, { timeout: 30_000 })
 		.toBeGreaterThan(100);
-
-	const viewText = () =>
-		(document.querySelector('.view-lines')?.textContent ?? '').replace(/\u00a0/g, ' ');
 
 	await userEvent.click(monacoEditor()!);
 	await userEvent.keyboard(ctrlCmd('s'));

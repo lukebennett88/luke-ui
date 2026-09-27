@@ -41,20 +41,18 @@ function createPrettierFormattingProvider(): Monaco.languages.DocumentFormatting
 const FORMATTER_REGISTERED = Symbol.for('luke-ui.playground.prettierFormatterRegistered');
 
 type FormatterRegistry = typeof Monaco.languages & {
-	[FORMATTER_REGISTERED]?: Monaco.IDisposable;
+	[FORMATTER_REGISTERED]?: true;
 };
 
-export function registerPlaygroundFormatter(monaco: typeof Monaco): Monaco.IDisposable {
+export function registerPlaygroundFormatter(monaco: typeof Monaco): void {
 	const registry = monaco.languages as FormatterRegistry;
-	const existing = registry[FORMATTER_REGISTERED];
-	if (existing) return existing;
+	if (registry[FORMATTER_REGISTERED]) return;
 
-	const disposable = monaco.languages.registerDocumentFormattingEditProvider(
+	monaco.languages.registerDocumentFormattingEditProvider(
 		['typescript', 'javascript'],
 		createPrettierFormattingProvider(),
 	);
-	registry[FORMATTER_REGISTERED] = disposable;
-	return disposable;
+	registry[FORMATTER_REGISTERED] = true;
 }
 
 export function registerFormatDocumentKeybinding(

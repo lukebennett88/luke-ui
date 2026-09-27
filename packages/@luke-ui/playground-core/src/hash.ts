@@ -29,9 +29,8 @@ export function encodeCodeHash(code: string, extraParams?: Record<string, string
  * Decodes playground code from a URL hash (with or without the leading `#`).
  * Returns `null` when the hash has no `code` param, or when the param cannot
  * be decoded back into code, including malformed input that makes `lz-string`
- * throw instead of returning `null` (see the `lz-string` version this repo
- * installs). `encodeCodeHash('')` still round-trips to `''`, because it
- * compresses empty code to the non-empty string `'Q'`.
+ * throw instead of returning `null`. `encodeCodeHash('')` still round-trips
+ * to `''`, because it compresses empty code to the non-empty string `'Q'`.
  */
 export function decodeCodeHash(hash: string): string | null {
 	const params = new URLSearchParams(getHashFragment(hash));
@@ -41,15 +40,11 @@ export function decodeCodeHash(hash: string): string | null {
 	try {
 		return decompressFromEncodedURIComponent(compressed);
 	} catch {
-		// lz-string throws on some malformed input instead of returning null.
 		return null;
 	}
 }
 
 function getHashFragment(hash: string): string {
 	const value = hash.trim();
-	if (!value) return '';
-	if (value.startsWith('#')) return value.slice(1);
-
-	return value;
+	return value.startsWith('#') ? value.slice(1) : value;
 }

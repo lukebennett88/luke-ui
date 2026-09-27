@@ -41,16 +41,11 @@ const reactPackageJsonPath = resolve(
 	'../../../../packages/@luke-ui/react/package.json',
 );
 
-function readLukeUiReactExports(
-	packageJsonPath: string = reactPackageJsonPath,
-): Record<string, string> {
-	return packageJsonSchema.parse(JSON.parse(readFileSync(packageJsonPath, 'utf8'))).exports;
-}
-
 /** Specifiers the docs playground preview can `require` at runtime. */
-export function docsPlaygroundRuntimeSpecifierList(
-	reactExports: Record<string, string> = readLukeUiReactExports(),
-): Array<string> {
+export function docsPlaygroundRuntimeSpecifierList(): Array<string> {
+	const reactExports = packageJsonSchema.parse(
+		JSON.parse(readFileSync(reactPackageJsonPath, 'utf8')),
+	).exports;
 	return [
 		...packageExportSpecifiers('@luke-ui/react', reactExports),
 		...PLAYGROUND_BASE_SPECIFIERS,

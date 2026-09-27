@@ -42,26 +42,6 @@ type PlaygroundMessagePort = {
 	postMessage: (message: unknown, targetOrigin: string) => void;
 };
 
-export function isPlaygroundCodeMessage(data: unknown): data is PlaygroundCodeMessage {
-	return codeMessageSchema.safeParse(data).success;
-}
-
-export function isPlaygroundPreviewMessage(data: unknown): data is PlaygroundPreviewMessage {
-	return previewMessageSchema.safeParse(data).success;
-}
-
-/**
- * True when a message came from the expected window on the expected origin.
- * It does not inspect `event.data`, so pair it with a schema check.
- */
-export function isTrustedMessageSource(
-	event: PlaygroundMessageEvent,
-	origin: string,
-	source: unknown,
-): boolean {
-	return event.origin === origin && event.source === source;
-}
-
 export type CreatePlaygroundPageSessionOptions = {
 	/** Returns the current ports, so the host can reflect live ref values. */
 	getPorts: () => PlaygroundPagePorts;
@@ -82,9 +62,34 @@ export type PlaygroundPageSession = {
 	handleMessage: (event: PlaygroundMessageEvent) => void;
 	/** Posts `code` to the preview. A no-op until the preview has sent any trusted message. */
 	postCode: (code: string) => void;
-	/** Posts the current code even before the preview has announced ready, covering a missed `playground:ready` (fast iframe, slow page listener). */
+	/**
+	 * Posts the current code even before the preview has announced ready,
+	 * covering a missed `playground:ready` (fast iframe, slow page listener):
+	 * the preview's reply to it (a success or error, not a second `ready`) is
+	 * what `handleMessage` sees first and uses to flip to ready.
+	 */
 	resync: () => void;
 };
+
+export function isPlaygroundCodeMessage(data: unknown): data is PlaygroundCodeMessage {
+	return codeMessageSchema.safeParse(data).success;
+}
+
+export function isPlaygroundPreviewMessage(data: unknown): data is PlaygroundPreviewMessage {
+	return previewMessageSchema.safeParse(data).success;
+}
+
+/**
+ * True when a message came from the expected window on the expected origin.
+ * It does not inspect `event.data`, so pair it with a schema check.
+ */
+export function isTrustedMessageSource(
+	event: PlaygroundMessageEvent,
+	origin: string,
+	source: unknown,
+): boolean {
+	return event.origin === origin && event.source === source;
+}
 
 /**
  * Owns when the playground page may talk to its preview, and what it does
@@ -101,12 +106,6 @@ export function createPlaygroundPageSession(
 		sendCode(code);
 	}
 
-	/**
-	 * Also covers a missed `playground:ready`: if the preview announced ready
-	 * before the page's message listener attached, this sends the code anyway,
-	 * and the preview's reply to it (a success or error, not a second `ready`)
-	 * is what `handleMessage` sees first and uses to flip `ready` to `true`.
-	 */
 	function resync(): void {
 		sendCode(options.getCode());
 	}

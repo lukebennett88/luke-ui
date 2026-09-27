@@ -39,10 +39,6 @@ const RUNNABLE_TARGET_PATTERN = /\.(?:c|m)?js$/;
 const IMPORT_SPECIFIER_PATTERN = /\bfrom\s+["']([^"']+)["']/g;
 const SIDE_EFFECT_IMPORT_PATTERN = /^import\s+["']([^"']+)["']/gm;
 
-function defaultIsRunnableTarget(target: string): boolean {
-	return RUNNABLE_TARGET_PATTERN.test(target);
-}
-
 /**
  * Import specifiers for a package's JavaScript subpath exports, sorted. `.`
  * maps to the package name and `./button` maps to `<packageName>/button`.
@@ -76,49 +72,44 @@ export function packageExportSpecifiers(
 		.flatMap(([subpath, target]) => {
 			if (subpath === './package.json' || subpath.includes('*')) return [];
 			const resolved = resolveExportTarget(target, conditions);
-			if (resolved === null || resolved === undefined || !isRunnableTarget(resolved)) return [];
+			if (typeof resolved !== 'string' || !isRunnableTarget(resolved)) return [];
 			return [subpath === '.' ? packageName : `${packageName}/${subpath.slice(2)}`];
 		})
 		.sort();
-}
-
-function importSpecifiersFromSource(source: string): Array<string> {
-	const specifiers: Array<string> = [];
-
-	for (const match of source.matchAll(IMPORT_SPECIFIER_PATTERN)) {
-		const specifier = match[1];
-		if (specifier !== undefined) specifiers.push(specifier);
-	}
-
-	for (const match of source.matchAll(SIDE_EFFECT_IMPORT_PATTERN)) {
-		const specifier = match[1];
-		if (specifier !== undefined) specifiers.push(specifier);
-	}
-
-	return specifiers;
 }
 
 export function canRunInPlayground(source: string, specifiers: ReadonlySet<string>): boolean {
 	return importSpecifiersFromSource(source).every((specifier) => specifiers.has(specifier));
 }
 
+function importSpecifiersFromSource(source: string): Array<string> {
+	const specifiers: Array<string> = [];
+
+	for (const pattern of [IMPORT_SPECIFIER_PATTERN, SIDE_EFFECT_IMPORT_PATTERN]) {
+		for (const match of source.matchAll(pattern)) {
+			const specifier = match[1];
+			if (specifier !== undefined) specifiers.push(specifier);
+		}
+	}
+
+	return specifiers;
+}
+
+function defaultIsRunnableTarget(target: string): boolean {
+	return RUNNABLE_TARGET_PATTERN.test(target);
+}
+
 /**
- * Resolves one export target to a string, following Node's
- * `PACKAGE_TARGET_RESOLVE`. Returns `null` when an explicit `null` target is
- * reached, which stops resolution outright. Returns `undefined` when the
- * target does not resolve for another reason (no active key in a nested
- * conditions object, or an array, which this function does not expand), so
- * the caller's loop over sibling keys can continue.
+ * Resolves one export target to a string: `null` stops resolution, and
+ * `undefined` means try the next key.
  */
 function resolveExportTarget(
-	target: PackageExportTarget | undefined,
+	target: PackageExportTarget,
 	conditions: ReadonlySet<string>,
 ): string | null | undefined {
 	if (typeof target === 'string') return target;
 	if (target === null) return null;
-	// Arrays are out of scope (see packageExportSpecifiers' JSDoc): treated as
-	// no match, not as a stop, so a later sibling condition can still apply.
-	if (target === undefined || isTargetArray(target)) return undefined;
+	if (isTargetArray(target)) return undefined;
 
 	for (const [condition, conditionTarget] of Object.entries(target)) {
 		if (condition !== 'default' && !conditions.has(condition)) continue;

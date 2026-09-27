@@ -8,6 +8,34 @@ import { createRequire } from 'node:module';
 import { dirname, join, relative, sep } from 'node:path';
 import * as z from 'zod';
 
+export type AddPlaygroundTypePackageOptions = {
+	/**
+	 * Replaces the package's `package.json` in the map, serialised with
+	 * `JSON.stringify`. Pass a stub such as `{ exports, name }` to keep only the
+	 * fields the editor's module resolution reads.
+	 */
+	packageJson?: unknown;
+	/**
+	 * Directory under `packageDir` to collect `.d.ts` files from, such as
+	 * `dist`. Paths in the map stay relative to `packageDir`.
+	 * @default '.'
+	 */
+	typesDir?: string;
+};
+
+export type PlaygroundTypeMap = {
+	/** Adds every `.d.ts`, `.d.mts`, and `.d.cts` file under the package, then its `package.json`. */
+	addPackage: (
+		packageName: string,
+		packageDir: string,
+		options?: AddPlaygroundTypePackageOptions,
+	) => void;
+	/** Adds one file at an arbitrary virtual path, such as `file:///host/helpers.tsx`. */
+	addFile: (virtualPath: string, contents: string) => void;
+	/** The virtual path to contents map, in insertion order. */
+	files: () => Record<string, string>;
+};
+
 /**
  * Renders the TypeScript module that maps playground import specifiers to
  * live namespace imports. Hosts write the result to their generated output path.
@@ -44,34 +72,6 @@ ${entryLines.join('')}};
 export function playgroundVirtualPath(packageName: string, relativePath: string): string {
 	return `file:///node_modules/${packageName}/${relativePath.split(sep).join('/')}`;
 }
-
-export type AddPlaygroundTypePackageOptions = {
-	/**
-	 * Replaces the package's `package.json` in the map, serialised with
-	 * `JSON.stringify`. Pass a stub such as `{ exports, name }` to keep only the
-	 * fields the editor's module resolution reads.
-	 */
-	packageJson?: unknown;
-	/**
-	 * Directory under `packageDir` to collect `.d.ts` files from, such as
-	 * `dist`. Paths in the map stay relative to `packageDir`.
-	 * @default '.'
-	 */
-	typesDir?: string;
-};
-
-export type PlaygroundTypeMap = {
-	/** Adds every `.d.ts`, `.d.mts`, and `.d.cts` file under the package, then its `package.json`. */
-	addPackage: (
-		packageName: string,
-		packageDir: string,
-		options?: AddPlaygroundTypePackageOptions,
-	) => void;
-	/** Adds one file at an arbitrary virtual path, such as `file:///host/helpers.tsx`. */
-	addFile: (virtualPath: string, contents: string) => void;
-	/** The virtual path to contents map, in insertion order. */
-	files: () => Record<string, string>;
-};
 
 const DECLARATION_EXTENSIONS = ['.d.ts', '.d.mts', '.d.cts'];
 

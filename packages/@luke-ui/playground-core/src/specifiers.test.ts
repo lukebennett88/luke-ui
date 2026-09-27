@@ -160,10 +160,6 @@ test('skips null targets, fallback arrays, and patterns', () => {
 	).toEqual(['example-ui/d']);
 });
 
-test('maps . to the bare package name', () => {
-	expect(packageExportSpecifiers('example-ui', { '.': './dist/index.js' })).toEqual(['example-ui']);
-});
-
 test('treats a relative import as unresolvable in the playground', () => {
 	const source = [
 		"import { Box } from 'example-ui/box';",

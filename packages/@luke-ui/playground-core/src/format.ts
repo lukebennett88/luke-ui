@@ -38,26 +38,20 @@ type PrettierModules = {
 	typescript: typeof TypeScriptPlugin;
 };
 
-function createPrettierLoader(
-	load: () => Promise<PrettierModules>,
-): () => Promise<PrettierModules> {
-	let modulesPromise: Promise<PrettierModules> | undefined;
-	return () => {
-		if (!modulesPromise) {
-			modulesPromise = load().catch((error: unknown) => {
+let modulesPromise: Promise<PrettierModules> | undefined;
+
+function loadPrettier(): Promise<PrettierModules> {
+	if (!modulesPromise) {
+		modulesPromise = Promise.all([
+			import('prettier/standalone'),
+			import('prettier/plugins/typescript'),
+			import('prettier/plugins/estree'),
+		])
+			.then(([prettier, typescript, estree]) => ({ estree, prettier, typescript }))
+			.catch((error: unknown) => {
 				modulesPromise = undefined;
 				throw error;
 			});
-		}
-		return modulesPromise;
-	};
+	}
+	return modulesPromise;
 }
-
-const loadPrettier = createPrettierLoader(async () => {
-	const [prettier, typescript, estree] = await Promise.all([
-		import('prettier/standalone'),
-		import('prettier/plugins/typescript'),
-		import('prettier/plugins/estree'),
-	]);
-	return { estree, prettier, typescript };
-});

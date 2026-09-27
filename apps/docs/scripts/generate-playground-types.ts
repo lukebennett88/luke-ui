@@ -35,7 +35,6 @@ const typeMap = createPlaygroundTypeMap();
 // bundler-mode resolution can follow the subpath exports map.
 const reactPackageJsonSchema = z.object({
 	exports: z.record(z.string(), z.string()),
-	name: z.string(),
 });
 
 const reactPackageJson = reactPackageJsonSchema.parse(
@@ -50,7 +49,7 @@ if (!existsSync(reactDistDir)) {
 	process.exit(1);
 }
 typeMap.addPackage('@luke-ui/react', reactPackageDir, {
-	packageJson: { exports: reactPackageJson.exports, name: reactPackageJson.name },
+	packageJson: { exports: reactPackageJson.exports, name: '@luke-ui/react' },
 	typesDir: 'dist',
 });
 

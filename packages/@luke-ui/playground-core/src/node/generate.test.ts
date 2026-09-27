@@ -89,10 +89,11 @@ describe('playground type map', () => {
 		);
 	});
 
-	test('adds a package tree of declarations, then its package.json', () => {
+	test('adds a package tree of declarations, then its package.json, skipping a nested node_modules', () => {
 		const root = createFixture({
 			'pkg/index.d.ts': 'export {};',
 			'pkg/index.js': '',
+			'pkg/lib/nested/deep.d.ts': 'export type B = 1;',
 			'pkg/lib/util.d.ts': 'export type A = 1;',
 			'pkg/node_modules/nested/index.d.ts': 'export {};',
 			'pkg/package.json': '{"name":"pkg"}',
@@ -102,42 +103,17 @@ describe('playground type map', () => {
 
 		expect(typeMap.files()).toEqual({
 			'file:///node_modules/pkg/index.d.ts': 'export {};',
+			'file:///node_modules/pkg/lib/nested/deep.d.ts': 'export type B = 1;',
 			'file:///node_modules/pkg/lib/util.d.ts': 'export type A = 1;',
 			'file:///node_modules/pkg/package.json': '{"name":"pkg"}',
 		});
 		expect(Object.keys(typeMap.files()).at(-1)).toBe('file:///node_modules/pkg/package.json');
 	});
 
-	test('collects .d.mts files', () => {
-		const root = createFixture({
-			'pkg/index.d.mts': 'export {};',
-			'pkg/package.json': '{"name":"pkg"}',
-		});
-		const typeMap = createPlaygroundTypeMap();
-		typeMap.addPackage('pkg', join(root, 'pkg'));
-
-		expect(typeMap.files()).toEqual({
-			'file:///node_modules/pkg/index.d.mts': 'export {};',
-			'file:///node_modules/pkg/package.json': '{"name":"pkg"}',
-		});
-	});
-
-	test('collects .d.cts files', () => {
+	test('collects .d.ts, .d.mts, and .d.cts files but not plain .ts or .mts sources', () => {
 		const root = createFixture({
 			'pkg/index.d.cts': 'export {};',
-			'pkg/package.json': '{"name":"pkg"}',
-		});
-		const typeMap = createPlaygroundTypeMap();
-		typeMap.addPackage('pkg', join(root, 'pkg'));
-
-		expect(typeMap.files()).toEqual({
-			'file:///node_modules/pkg/index.d.cts': 'export {};',
-			'file:///node_modules/pkg/package.json': '{"name":"pkg"}',
-		});
-	});
-
-	test('does not collect plain .ts or .mts sources', () => {
-		const root = createFixture({
+			'pkg/index.d.mts': 'export {};',
 			'pkg/index.d.ts': 'export {};',
 			'pkg/index.mts': 'export {};',
 			'pkg/index.ts': 'export {};',
@@ -147,6 +123,8 @@ describe('playground type map', () => {
 		typeMap.addPackage('pkg', join(root, 'pkg'));
 
 		expect(typeMap.files()).toEqual({
+			'file:///node_modules/pkg/index.d.cts': 'export {};',
+			'file:///node_modules/pkg/index.d.mts': 'export {};',
 			'file:///node_modules/pkg/index.d.ts': 'export {};',
 			'file:///node_modules/pkg/package.json': '{"name":"pkg"}',
 		});
@@ -170,21 +148,6 @@ describe('playground type map', () => {
 			'file:///node_modules/@scope/ui/dist/box.d.ts': 'export {};',
 			'file:///node_modules/@scope/ui/package.json':
 				'{"exports":{"./box":"./dist/box.js"},"name":"@scope/ui"}',
-		});
-	});
-
-	test('collects nested declarations but skips a nested node_modules', () => {
-		const root = createFixture({
-			'pkg/lib/nested/deep.d.ts': 'export {};',
-			'pkg/node_modules/dep/index.d.ts': 'export {};',
-			'pkg/package.json': '{"name":"pkg"}',
-		});
-		const typeMap = createPlaygroundTypeMap();
-		typeMap.addPackage('pkg', join(root, 'pkg'));
-
-		expect(typeMap.files()).toEqual({
-			'file:///node_modules/pkg/lib/nested/deep.d.ts': 'export {};',
-			'file:///node_modules/pkg/package.json': '{"name":"pkg"}',
 		});
 	});
 
