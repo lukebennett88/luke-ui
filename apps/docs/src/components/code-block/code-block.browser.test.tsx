@@ -137,40 +137,43 @@ test('opts out of prose inline-code chrome on the fence code element', () => {
 });
 
 test.each([
-	{ name: 'untitled overlay copy', title: undefined as string | undefined },
-	{ name: 'titled header copy', title: 'Source' },
-])('scrolls horizontally and keeps $name on the physical right in RTL docs', async ({ title }) => {
-	await page.viewport(320, 720);
-	document.documentElement.dir = 'rtl';
+	{ focusable: false, name: 'untitled overlay copy', title: undefined as string | undefined },
+	{ focusable: true, name: 'titled header copy', title: 'Source' },
+])(
+	'scrolls horizontally and keeps $name on the physical right in RTL docs',
+	async ({ focusable, title }) => {
+		await page.viewport(320, 720);
+		document.documentElement.dir = 'rtl';
 
-	try {
-		renderCodeBlock(<CodeBlock code={'x'.repeat(200)} title={title} />);
+		try {
+			renderCodeBlock(<CodeBlock code={'x'.repeat(200)} title={title} />);
 
-		const regionName = title ?? 'Code';
-		const viewport = page.getByRole('region', { name: regionName }).element();
-		expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth);
-		if (title !== undefined) expect(viewport.tabIndex).toBe(0);
+			const regionName = title ?? 'Code';
+			const viewport = page.getByRole('region', { name: regionName }).element();
+			expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth);
+			expect(viewport.tabIndex === 0).toBe(focusable);
 
-		const copyButton = page.getByRole('button', { name: 'Copy' }).element();
-		const figure = copyButton.closest('figure');
-		assert(figure != null, 'Expected a figure ancestor');
+			const copyButton = page.getByRole('button', { name: 'Copy' }).element();
+			const figure = copyButton.closest('figure');
+			assert(figure != null, 'Expected a figure ancestor');
 
-		// Figure forces LTR like Fumadocs so copy stays on the physical right.
-		expect(figure.getAttribute('dir')).toBe('ltr');
-		expect(getComputedStyle(figure).direction).toBe('ltr');
+			// Figure forces LTR like Fumadocs so copy stays on the physical right.
+			expect(figure.getAttribute('dir')).toBe('ltr');
+			expect(getComputedStyle(figure).direction).toBe('ltr');
 
-		const figureBox = figure.getBoundingClientRect();
-		const buttonBox = copyButton.getBoundingClientRect();
-		const buttonMidX = (buttonBox.left + buttonBox.right) / 2;
-		const figureMidX = (figureBox.left + figureBox.right) / 2;
-		expect(buttonMidX).toBeGreaterThan(figureMidX);
+			const figureBox = figure.getBoundingClientRect();
+			const buttonBox = copyButton.getBoundingClientRect();
+			const buttonMidX = (buttonBox.left + buttonBox.right) / 2;
+			const figureMidX = (figureBox.left + figureBox.right) / 2;
+			expect(buttonMidX).toBeGreaterThan(figureMidX);
 
-		// Full-width scrollport — not a side column beside the button.
-		expect(viewport.getBoundingClientRect().width).toBeGreaterThan(figure.clientWidth * 0.9);
-	} finally {
-		document.documentElement.dir = 'ltr';
-	}
-});
+			// Full-width scrollport — not a side column beside the button.
+			expect(viewport.getBoundingClientRect().width).toBeGreaterThan(figure.clientWidth * 0.9);
+		} finally {
+			document.documentElement.dir = 'ltr';
+		}
+	},
+);
 
 test('the CodeBlock scene has no axe violations', async () => {
 	renderCodeBlock(<CodeBlock code={'const example = "hello";'} title="Example" />);

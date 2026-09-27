@@ -138,8 +138,8 @@ test.each([
 		const storyBox = storyRoot.getBoundingClientRect();
 		const comparisonBox = exampleRoot.getBoundingClientRect();
 
-		if (expectCompact) expect(comparisonBox.width).toBeLessThan(available);
-		else expect(comparisonBox.width).toBeLessThanOrEqual(available);
+		expect(comparisonBox.width <= available).toBe(true);
+		expect(comparisonBox.width < available || !expectCompact).toBe(true);
 		expect(comparisonBox.left).toBeGreaterThanOrEqual(storyBox.left - 1);
 		expect(comparisonBox.right).toBeLessThanOrEqual(storyBox.right + 1);
 		expect(
