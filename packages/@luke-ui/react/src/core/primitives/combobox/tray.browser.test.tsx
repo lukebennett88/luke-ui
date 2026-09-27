@@ -87,10 +87,7 @@ function TrayCombobox(
 }
 
 /** Opens the tray and waits for it to finish sliding up. */
-async function openTray(
-	triggerName = 'Country Select a country...',
-	searchName = 'Country',
-) {
+async function openTray(triggerName = 'Country Select a country...', searchName = 'Country') {
 	await userEvent.click(page.getByRole('button', { name: triggerName }));
 
 	const dialog = page.getByRole('dialog');
@@ -149,7 +146,9 @@ test('ComboboxTray positions the overlay at the scroll offset each time it opens
 
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-	await expect.element(page.getByRole('button', { name: 'Country Select a country...' })).toHaveFocus();
+	await expect
+		.element(page.getByRole('button', { name: 'Country Select a country...' }))
+		.toHaveFocus();
 
 	window.scrollTo(0, 0);
 });
@@ -318,7 +317,9 @@ test('ComboboxTrayTrigger blocks submission of a required, unselected combobox w
 
 	expect(new FormData(form).getAll('country')).toHaveLength(1);
 
-	await userEvent.click(page.getByRole('button', { name: 'Country* Select a country...' }).element());
+	await userEvent.click(
+		page.getByRole('button', { name: 'Country* Select a country...' }).element(),
+	);
 	await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
@@ -471,7 +472,9 @@ test('ComboboxTrayTrigger associates with an external form via the root form pro
 	form.requestSubmit();
 	expect(submitCount).toBe(0);
 
-	await userEvent.click(page.getByRole('button', { name: 'Country* Select a country...' }).element());
+	await userEvent.click(
+		page.getByRole('button', { name: 'Country* Select a country...' }).element(),
+	);
 	await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
