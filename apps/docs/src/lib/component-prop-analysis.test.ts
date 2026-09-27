@@ -263,29 +263,32 @@ const AUDITED_TYPES: ReadonlyArray<{
 	},
 ];
 
-test.each(AUDITED_TYPES)(
-	'$name documents its own contract without generic DOM props',
-	async ({ forwardsDomProps, hidden = [], name, path, visible }) => {
-		const names = await visiblePropNames(path, name);
+for (const auditedType of AUDITED_TYPES) {
+	test(
+		`${auditedType.name} documents its own contract without generic DOM props`,
+		async () => {
+			const { forwardsDomProps, hidden = [], name, path, visible } = auditedType;
+			const names = await visiblePropNames(path, name);
 
-		for (const prop of visible) {
-			expect(names, `${name} should document ${prop}`).toContain(prop);
-		}
-		const hiddenProps = [
-			...GENERIC_DOM_NOISE,
-			'key',
-			...(visible.includes('ref') ? [] : (['ref'] as const)),
-			...hidden,
-		];
-		for (const prop of hiddenProps) {
-			expect(names, `${name} should hide ${prop}`).not.toContain(prop);
-		}
+			for (const prop of visible) {
+				expect(names, `${name} should document ${prop}`).toContain(prop);
+			}
+			const hiddenProps = [
+				...GENERIC_DOM_NOISE,
+				'key',
+				...(visible.includes('ref') ? [] : (['ref'] as const)),
+				...hidden,
+			];
+			for (const prop of hiddenProps) {
+				expect(names, `${name} should hide ${prop}`).not.toContain(prop);
+			}
 
-		const { declaration } = await loadDoc(path, name);
-		expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(forwardsDomProps);
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
+			const { declaration } = await loadDoc(path, name);
+			expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(forwardsDomProps);
+		},
+		TS_MORPH_TEST_TIMEOUT,
+	);
+}
 
 test(
 	'keeps both branches of a union type documented and DOM-forwarding',
@@ -652,11 +655,14 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 	},
 ];
 
-test.each(PINNED_VISIBLE_PROPS)(
-	'$name shows exactly its documented props',
-	async ({ exportName, path, props }) => {
-		const names = await visiblePropNames(path, exportName);
-		expect([...names].sort()).toEqual([...props].sort());
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
+for (const pinned of PINNED_VISIBLE_PROPS) {
+	test(
+		`${pinned.name} shows exactly its documented props`,
+		async () => {
+			const { exportName, path, props } = pinned;
+			const names = await visiblePropNames(path, exportName);
+			expect([...names].sort()).toEqual([...props].sort());
+		},
+		TS_MORPH_TEST_TIMEOUT,
+	);
+}

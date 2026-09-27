@@ -66,19 +66,20 @@ test('every authored guide/table pair has curated taught-prop metadata', () => {
 	}).toEqual({ missing: [], stale: [] });
 });
 
-test.each(
-	authoredTables.flatMap((table) => {
-		const props = GUIDE_TAUGHT_PROPS[guideTableKey(table.guide, table.path, table.name)];
-		if (props === undefined || props.length === 0) return [];
-		return [{ ...table, props }];
-	}),
-)(
-	'$guide teaches documented props on $name',
-	async ({ guide, name, path, props }) => {
-		const names = await visiblePropNames(path, name);
-		for (const prop of props) {
-			expect(names, `${guide} teaches ${prop} on ${name}`).toContain(prop);
-		}
-	},
-	TS_MORPH_TEST_TIMEOUT,
-);
+for (const table of authoredTables.flatMap((table) => {
+	const props = GUIDE_TAUGHT_PROPS[guideTableKey(table.guide, table.path, table.name)];
+	if (props === undefined || props.length === 0) return [];
+	return [{ ...table, props }];
+})) {
+	test(
+		`${table.guide} teaches documented props on ${table.name}`,
+		async () => {
+			const { guide, name, path, props } = table;
+			const names = await visiblePropNames(path, name);
+			for (const prop of props) {
+				expect(names, `${guide} teaches ${prop} on ${name}`).toContain(prop);
+			}
+		},
+		TS_MORPH_TEST_TIMEOUT,
+	);
+}

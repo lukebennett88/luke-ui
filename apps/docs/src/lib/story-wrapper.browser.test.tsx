@@ -126,27 +126,26 @@ test('flow retains deliberately narrow example sizing', () => {
 	expect(getComputedStyle(autoGrid).gridTemplateColumns.split(' ').filter(Boolean).length).toBe(1);
 });
 
-test.each([
+for (const comparisonCase of [
 	{ containerWidth: undefined as number | undefined, expectCompact: true, name: 'wide' },
 	{ containerWidth: 280, expectCompact: false, name: 'narrow' },
-])(
-	'Comparison stays within the $name flow surface and centred',
-	({ containerWidth, expectCompact }) => {
+]) {
+	test(`Comparison stays within the ${comparisonCase.name} flow surface and centred`, () => {
 		const { available, exampleRoot, storyRoot } = renderInWrapper(comparisonFixture(), {
-			containerWidth,
+			containerWidth: comparisonCase.containerWidth,
 		});
 		const storyBox = storyRoot.getBoundingClientRect();
 		const comparisonBox = exampleRoot.getBoundingClientRect();
 
 		expect(comparisonBox.width <= available).toBe(true);
-		expect(comparisonBox.width < available || !expectCompact).toBe(true);
+		expect(comparisonBox.width < available || !comparisonCase.expectCompact).toBe(true);
 		expect(comparisonBox.left).toBeGreaterThanOrEqual(storyBox.left - 1);
 		expect(comparisonBox.right).toBeLessThanOrEqual(storyBox.right + 1);
 		expect(
 			Math.abs(comparisonBox.left - storyBox.left - (storyBox.right - comparisonBox.right)),
 		).toBeLessThanOrEqual(1);
-	},
-);
+	});
+}
 
 test('full-bleed has no inset padding or minimum height', () => {
 	const { exampleRoot, storyRoot } = renderInWrapper(

@@ -425,13 +425,13 @@ The visible label is the accessible name.
 <component-props-table path="packages/@luke-ui/react/src/core/link/link.tsx" name="LinkProps" />
 `;
 
-test.each<{
+const inventoryCases: ReadonlyArray<{
 	expected: ReadonlyArray<string>;
 	name: string;
 	overrides: InventoryFixtureOverrides;
-}>([
+}> = [
 	{
-		expected: [] as ReadonlyArray<string>,
+		expected: [],
 		name: 'accepts a guide that the root and category metadata both list',
 		overrides: {},
 	},
@@ -543,9 +543,15 @@ test.each<{
 		name: 'reports a missing exports module',
 		overrides: { sourceDirs: [] },
 	},
-])('$name', ({ expected, overrides }) => {
-	expect(findDocsIssues(inventoryFixture(overrides))).toEqual(expected);
-});
+];
+
+for (const inventoryCase of inventoryCases) {
+	test(inventoryCase.name, () => {
+		expect(findDocsIssues(inventoryFixture(inventoryCase.overrides))).toEqual(
+			inventoryCase.expected,
+		);
+	});
+}
 
 function createDocsFixture(input: {
 	authored?: Record<string, string>;

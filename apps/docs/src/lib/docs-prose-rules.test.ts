@@ -59,7 +59,7 @@ test('"us" stays case-sensitive so it does not match inside another word', () =>
 	expect(findProseRuleLabels('This uses the default configuration.')).toEqual([]);
 });
 
-test.each([
+for (const proseCase of [
 	{
 		expected: [] as ReadonlyArray<string>,
 		name: 'strips an HTML entity so &mdash; is not read as an unspaced em dash',
@@ -96,6 +96,8 @@ test.each([
 		source:
 			"import { Foo } from './foo';\n\nThis prose keeps its semicolon; it should still be reported.\n\n<Foo />",
 	},
-])('extractProseForRules $name', ({ expected, source }) => {
-	expect(findProseRuleLabels(extractProseForRules(source))).toEqual(expected);
-});
+]) {
+	test(`extractProseForRules ${proseCase.name}`, () => {
+		expect(findProseRuleLabels(extractProseForRules(proseCase.source))).toEqual(proseCase.expected);
+	});
+}

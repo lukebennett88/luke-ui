@@ -161,44 +161,52 @@ test('a trusted message after a resync-before-ready unblocks later postCode call
 
 const COMPILE_ERROR = 'Playground code must default-export a React component.';
 
-test.each([
+const onResultCases = [
 	['a success', () => ({ ok: true }) as const, { type: 'success' } as const],
 	[
 		'a compilation error',
 		() => ({ message: COMPILE_ERROR, ok: false }) as const,
 		{ message: COMPILE_ERROR, type: 'error' } as const,
 	],
-])('%s reaches onResult', (_name, compile, expected) => {
-	const bus = createMessageBus();
-	const results: Array<PlaygroundResult> = [];
-	attachFakePreview(bus, compile);
-	const session = createPlaygroundPageSession({
-		getCode: () => VALID_CODE,
-		getPorts: () => bus.ports,
-		onResult: (result) => results.push(result),
-	});
-	bus.listenPage((event) => session.handleMessage(event));
-	session.resync();
-	expect(results).toEqual([expected]);
-});
+] as const;
 
-test.each([
+for (const [name, compile, expected] of onResultCases) {
+	test(`${name} reaches onResult`, () => {
+		const bus = createMessageBus();
+		const results: Array<PlaygroundResult> = [];
+		attachFakePreview(bus, compile);
+		const session = createPlaygroundPageSession({
+			getCode: () => VALID_CODE,
+			getPorts: () => bus.ports,
+			onResult: (result) => results.push(result),
+		});
+		bus.listenPage((event) => session.handleMessage(event));
+		session.resync();
+		expect(results).toEqual([expected]);
+	});
+}
+
+const ignoredMessageCases = [
 	['an untrusted origin', { origin: 'https://other.test', sourceIsPreview: true }],
 	[
 		'a same-origin message from a source that is not the preview',
 		{ origin: ORIGIN, sourceIsPreview: false },
 	],
-])('ignores %s', (_name, { origin, sourceIsPreview }) => {
-	const { previewWindow, results, session } = createRecordingSession();
+] as const;
 
-	session.handleMessage({
-		data: { type: 'playground:success' },
-		origin,
-		source: sourceIsPreview ? previewWindow : { role: 'other' },
+for (const [name, { origin, sourceIsPreview }] of ignoredMessageCases) {
+	test(`ignores ${name}`, () => {
+		const { previewWindow, results, session } = createRecordingSession();
+
+		session.handleMessage({
+			data: { type: 'playground:success' },
+			origin,
+			source: sourceIsPreview ? previewWindow : { role: 'other' },
+		});
+
+		expect(results).toEqual([]);
 	});
-
-	expect(results).toEqual([]);
-});
+}
 
 test('a missing preview window is a no-op for postCode and resync', () => {
 	const session = createPlaygroundPageSession({

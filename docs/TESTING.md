@@ -20,6 +20,17 @@ Assert observable public behaviour. Prefer roles and accessible names, `userEven
 Do not test private functions, implementation details, or computed appearance. Use computed styles
 only when layout is the contract.
 
+Do not use `test.each`, `it.each`, or `describe.each`. Parameterise with a `for…of` loop that calls
+`test()` (or `describe()`) inside, and put the distinguishing value in the title:
+
+```ts
+for (const ratio of ratios) {
+	test(`locks the frame to ${ratio}`, () => {
+		// …
+	});
+}
+```
+
 Shared assertions take concrete elements and values. Keep the test, fixture, and contract choice in
 the component's test file.
 
