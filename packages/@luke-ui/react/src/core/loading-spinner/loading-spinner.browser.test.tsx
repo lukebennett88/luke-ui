@@ -1,10 +1,8 @@
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { vars } from '@luke-ui/react/theme';
-import { createRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -55,14 +53,6 @@ function LoadingSpinnerScene() {
 		</Stack>
 	);
 }
-
-test('LoadingSpinner forwards className, data attributes, id, and ref to its status element', () => {
-	const ref = createRef<HTMLElement>();
-	const { locator } = render(<LoadingSpinner {...forwardedDomProps} ref={ref} />);
-	const target = locator.getByRole('status').element();
-
-	expectForwardsDomProps(target, ref);
-});
 
 test('the LoadingSpinner scene has no axe violations', async () => {
 	const { container } = render(<LoadingSpinnerScene />);

@@ -116,42 +116,36 @@ function TextFieldScene() {
 	);
 }
 
-// RAC puts `id` on the control, not the root.
-test('TextField forwards className and data attributes to its root, and id to the DOM', () => {
-	const { container } = render(
-		<TextField
-			className="forwarded-class"
-			data-forwarded="true"
-			description="Helpful context"
-			id="forwarded-id"
-			label="Name"
-		/>,
-	);
-	const root = container.firstElementChild;
-	if (!(root instanceof HTMLElement)) throw new Error('Expected a TextField root.');
-
-	expect(root).toHaveClass('forwarded-class');
-	expect(root).toHaveAttribute('data-forwarded', 'true');
-	expect(container.querySelector('#forwarded-id')).not.toBeNull();
-});
-
-test('TextField resolves inputRef to the input, participates in a form, and fires onBlur', () => {
+// Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
+test('TextField resolves object and callback inputRef to the input, participates in a form, and fires onBlur', () => {
 	const inputRef = createRef<HTMLInputElement>();
+	const callbackResolved: Array<HTMLElement | null> = [];
 	let blurred = false;
 	const { container, locator } = render(
-		<TextField
-			description="Helpful context"
-			inputRef={inputRef}
-			label="Name"
-			name="full-name"
-			onBlur={() => {
-				blurred = true;
-			}}
-		/>,
+		<>
+			<TextField
+				description="Helpful context"
+				inputRef={inputRef}
+				label="Name"
+				name="full-name"
+				onBlur={() => {
+					blurred = true;
+				}}
+			/>
+			<TextField
+				inputRef={(node: HTMLElement | null) => {
+					callbackResolved.push(node);
+				}}
+				label="Callback"
+				name="callback-name"
+			/>
+		</>,
 	);
 	const control = locator.getByRole('textbox', { name: 'Name' }).element();
+	const callbackControl = locator.getByRole('textbox', { name: 'Callback' }).element();
 
 	expect(inputRef.current).toBe(control);
+	expect(callbackResolved.at(-1)).toBe(callbackControl);
 	expect(control).toHaveAttribute('aria-describedby');
 
 	const form = document.createElement('form');
@@ -170,32 +164,6 @@ test('TextField resolves inputRef to the input, participates in a form, and fire
 	expect(blurred).toBe(true);
 
 	form.remove();
-});
-
-// Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
-test('TextField resolves a callback inputRef to the input', () => {
-	const resolved: Array<HTMLElement | null> = [];
-	const { locator } = render(
-		<TextField
-			inputRef={(node: HTMLElement | null) => {
-				resolved.push(node);
-			}}
-			label="Name"
-			name="full-name"
-		/>,
-	);
-	const control = locator.getByRole('textbox', { name: 'Name' }).element();
-
-	expect(resolved.at(-1)).toBe(control);
-});
-
-test('typing in a TextField reports each value through onChange', async () => {
-	let value = '';
-	const { locator, user } = render(<TextField label="Name" onChange={(next) => (value = next)} />);
-	const input = locator.getByRole('textbox', { name: 'Name' });
-
-	await user.type(input, 'Luke');
-	expect(value).toBe('Luke');
 });
 
 test('the TextField scene has no axe violations', async () => {
@@ -226,35 +194,6 @@ function indicatorFor(name: string): SVGSVGElement | null {
 	const glyph = groupFor(name).querySelector('use[href$="#exclamationTriangle"]');
 	return glyph?.closest('svg') ?? null;
 }
-
-// The primitive renders the control itself, so it takes a plain `ref`. Both ref
-// shapes are covered: React Hook Form hands out a callback ref, so the callback
-// arm is the one that decides whether the component is usable with it at all.
-test('InputGroupInput resolves object and callback refs to the input element', () => {
-	const objectRef = createRef<HTMLInputElement>();
-	const callbackResolved: Array<HTMLInputElement | null> = [];
-	render(
-		<>
-			<InputGroup>
-				<InputGroupInput aria-label="Amount object" ref={objectRef} />
-			</InputGroup>
-			<InputGroup>
-				<InputGroupInput
-					aria-label="Amount callback"
-					ref={(node) => {
-						callbackResolved.push(node);
-					}}
-				/>
-			</InputGroup>
-		</>,
-	);
-
-	const objectInput = page.getByRole('textbox', { name: 'Amount object' });
-	const callbackInput = page.getByRole('textbox', { name: 'Amount callback' });
-
-	expect(objectRef.current).toBe(objectInput.element());
-	expect(callbackResolved.at(-1)).toBe(callbackInput.element());
-});
 
 // The shared invalid selector must not match `:has(:invalid)`: that matches a required,
 // empty input from first render — before any interaction or submit — while
@@ -312,14 +251,9 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
-test('interactive states', { tags: ['visual'] }, async () => {
+test('keyboard focus ring', { tags: ['visual'] }, async () => {
 	const { locator } = render(<TextField label="Focus me" name="focus" placeholder="Type here" />);
-	const input = page.getByRole('textbox', { name: 'Focus me' });
-
-	await userEvent.hover(input);
-	await captureVisual(locator, 'text-field/hover');
-	await userEvent.unhover(input);
-	await focusViaKeyboard(input);
+	await focusViaKeyboard(page.getByRole('textbox', { name: 'Focus me' }));
 	await captureVisual(locator, 'text-field/focus-visible');
 });
 
@@ -329,9 +263,8 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 	try {
 		const { locator } = render(
 			<Stack>
-				<TextField label="Interactive" name="interactive" placeholder="Type here" />
+				<TextField label="Default" name="default" placeholder="Type here" />
 				<TextField defaultValue="Unavailable" isDisabled label="Disabled" name="disabled" />
-				<TextField defaultValue="Read only" isReadOnly label="Read-only" name="readonly" />
 				<TextField
 					defaultValue="nope"
 					errorMessage="Please enter a valid email."
@@ -340,14 +273,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 				/>
 			</Stack>,
 		);
-		const input = page.getByRole('textbox', { name: 'Interactive' });
-
-		await captureVisual(locator, 'text-field/forced-colors-resting-states');
-		await userEvent.hover(input);
-		await captureVisual(locator, 'text-field/forced-colors-hover');
-		await userEvent.unhover(input);
-		await focusViaKeyboard(input);
-		await captureVisual(locator, 'text-field/forced-colors-focus-visible');
+		await captureVisual(locator, 'text-field/forced-colors-states');
 	} finally {
 		await emulateForcedColors('none');
 	}

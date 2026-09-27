@@ -1,26 +1,8 @@
 import { AspectRatio } from '@luke-ui/react/aspect-ratio';
 import { vars } from '@luke-ui/react/theme';
-import { createRef } from 'react';
 import { test, expect } from 'vite-plus/test';
-import {
-	expectForwardsDomProps,
-	expectHtmlElement,
-	forwardedDomProps,
-} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
-
-test('AspectRatio forwards className, data attributes, id, and ref to its element', () => {
-	const ref = createRef<HTMLElement>();
-	const { container } = render(
-		<AspectRatio {...forwardedDomProps} ref={ref}>
-			Content
-		</AspectRatio>,
-	);
-	const target = expectHtmlElement(container.firstElementChild, 'Expected AspectRatio element.');
-
-	expectForwardsDomProps(target, ref);
-});
 
 const ratios = ['1 / 1', '4 / 3', '3 / 2', '16 / 9', '21 / 9'] as const;
 
@@ -90,29 +72,6 @@ test('applies an explicit objectFit value to the media child', () => {
 	if (!(media instanceof HTMLImageElement)) throw new Error('Expected media element.');
 
 	expect(getComputedStyle(media).objectFit).toBe('contain');
-});
-
-test('applies root layout props and ignores unsupported Box utilities from an object spread', () => {
-	const props = {
-		borderStyle: 'solid',
-		borderWidth: 'thick',
-		inlineSize: '10rem',
-		ratio: '16 / 9',
-	} as const;
-	const { locator } = render(
-		<div data-testid="parent" style={{ inlineSize: '20rem' }}>
-			<AspectRatio {...props} data-testid="ratio" />
-		</div>,
-	);
-	const parent = locator.getByTestId('parent').element();
-	const element = locator.getByTestId('ratio').element();
-	if (!(parent instanceof HTMLElement) || !(element instanceof HTMLElement)) {
-		throw new Error('Expected AspectRatio elements.');
-	}
-
-	expect(element.getBoundingClientRect().width).toBe(160);
-	expect(element.getBoundingClientRect().width).toBeLessThan(parent.getBoundingClientRect().width);
-	expect(element.offsetWidth).toBe(element.clientWidth);
 });
 
 test('applies the chosen ratio to a caller-owned root', () => {

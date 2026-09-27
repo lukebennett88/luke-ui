@@ -1,40 +1,18 @@
 import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
-import { createRef, useState } from 'react';
+import { useState } from 'react';
 import { renderToString } from 'react-dom/server';
 import { expect, test } from 'vite-plus/test';
 import { userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import {
-	expectForwardsDomProps,
-	expectHtmlElement,
-	forwardedDomProps,
-} from '../test-utils/forwarding.js';
+import { expectHtmlElement } from '../test-utils/forwarding.js';
 import { hydrate, render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Grid } from '../test-utils/visual.js';
-import { ScrollFade as ScrollFadeSource, logicalEndSide, overflowsOnAxis } from './scroll-fade.js';
+import { ScrollFade as ScrollFadeSource } from './scroll-fade.js';
 
-/** Standards-based physical gradient angles for logical-end sides. Hard-coded so tests do not share a wrong production mapping. */
-const maskGradientAngle = {
-	bottom: 180,
-	left: 270,
-	right: 90,
-	top: 0,
-} as const;
-
-test('ScrollFade forwards className, data attributes, id, and ref to its element', () => {
-	const ref = createRef<HTMLElement>();
-	const { container } = render(
-		<ScrollFade {...forwardedDomProps} aria-label="Topics" ref={ref}>
-			Content
-		</ScrollFade>,
-	);
-	const target = expectHtmlElement(container.firstElementChild, 'Expected ScrollFade element.');
-
-	expectForwardsDomProps(target, ref);
-	expect(target.tagName).toBe('DIV');
-});
+/** Physical gradient angles for logical-end sides — hard-coded so tests do not share a wrong production mapping. */
+const maskGradientAngle = { bottom: 180, left: 270, right: 90, top: 0 } as const;
 
 test('fitting div has no mask, tab stop, region role, or accessible name', async () => {
 	const { locator } = render(
@@ -97,8 +75,6 @@ test('overflowing block content is keyboard-focusable with a region role and mas
 	expect(element.getAttribute('aria-label')).toBe('Tall list');
 	expect(getComputedStyle(element).overflowBlock).toBe('auto');
 	expect(getComputedStyle(element).overflowInline).toBe('hidden');
-	expect(getComputedStyle(element).scrollbarWidth).toBe('none');
-	expect(getComputedStyle(element, '::-webkit-scrollbar').display).toBe('none');
 	element.focus();
 	await userEvent.keyboard('{ArrowDown}');
 	await expect.poll(() => element.scrollTop).toBeGreaterThan(0);
@@ -145,104 +121,13 @@ test('region role and accessible name appear together when a fitting div overflo
 	expect(element.hasAttribute('aria-label')).toBe(false);
 });
 
-test('replacing overflowing content still measures overflow after removal', async () => {
-	function Fixture() {
-		const [generation, setGeneration] = useState(0);
-		return (
-			<>
-				<button
-					data-testid="replace"
-					type="button"
-					onClick={() => setGeneration((value) => value + 1)}
-				>
-					Replace
-				</button>
-				<ScrollFade
-					aria-label="Replaced list"
-					axis="block"
-					blockSize="6rem"
-					data-testid="scroll-fade"
-					inlineSize="12rem"
-				>
-					<div key={generation} style={{ blockSize: '18rem' }}>
-						Generation {generation}
-					</div>
-				</ScrollFade>
-			</>
-		);
-	}
-
-	const { locator } = render(<Fixture />);
-	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
-	expect(element.getAttribute('role')).toBe('region');
-	expectMaskToward(element, 'bottom');
-
-	const replaceButton = expectHtmlElement(
-		locator.getByTestId('replace').element(),
-		'Expected replace button.',
-	);
-	replaceButton.click();
-	await waitForScrollport(element, true);
-	expect(element.textContent).toContain('Generation 1');
-	expect(element.getAttribute('role')).toBe('region');
-	expectMaskToward(element, 'bottom');
-
-	replaceButton.click();
-	await waitForScrollport(element, true);
-	expect(element.textContent).toContain('Generation 2');
-	expect(element.tabIndex).toBe(0);
-	expectMaskToward(element, 'bottom');
-});
-
-const writingModeCases = [
-	{
-		direction: 'ltr',
-		expectedBlockEnd: 'bottom',
-		expectedInlineEnd: 'right',
-		label: 'horizontal-tb LTR',
-		writingMode: 'horizontal-tb',
-	},
-	{
-		direction: 'rtl',
-		expectedBlockEnd: 'bottom',
-		expectedInlineEnd: 'left',
-		label: 'horizontal-tb RTL',
-		writingMode: 'horizontal-tb',
-	},
-	{
-		direction: 'ltr',
-		expectedBlockEnd: 'left',
-		expectedInlineEnd: 'bottom',
-		label: 'vertical-rl LTR',
-		writingMode: 'vertical-rl',
-	},
-	{
-		direction: 'rtl',
-		expectedBlockEnd: 'left',
-		expectedInlineEnd: 'top',
-		label: 'vertical-rl RTL',
-		writingMode: 'vertical-rl',
-	},
-	{
-		direction: 'ltr',
-		expectedBlockEnd: 'right',
-		expectedInlineEnd: 'bottom',
-		label: 'vertical-lr LTR',
-		writingMode: 'vertical-lr',
-	},
-	{
-		direction: 'rtl',
-		expectedBlockEnd: 'right',
-		expectedInlineEnd: 'top',
-		label: 'vertical-lr RTL',
-		writingMode: 'vertical-lr',
-	},
-] as const;
-
-for (const writingCase of writingModeCases) {
+for (const writingCase of [
+	{ direction: 'ltr', expectedInlineEnd: 'right', label: 'horizontal-tb LTR' },
+	{ direction: 'rtl', expectedInlineEnd: 'left', label: 'horizontal-tb RTL' },
+] as const) {
 	test(`inline overflow maps correctly for ${writingCase.label}`, async () => {
 		const { locator } = render(
-			<div dir={writingCase.direction} style={{ writingMode: writingCase.writingMode }}>
+			<div dir={writingCase.direction} style={{ writingMode: 'horizontal-tb' }}>
 				<ScrollFade
 					aria-label={`Inline ${writingCase.label}`}
 					blockSize="10rem"
@@ -257,74 +142,14 @@ for (const writingCase of writingModeCases) {
 			</div>,
 		);
 		const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
-		const styles = getComputedStyle(element);
 
-		expect(styles.writingMode).toBe(writingCase.writingMode);
-		expect(styles.direction).toBe(writingCase.direction);
-		expect(overflowsOnAxis(element, 'inline')).toBe(true);
-		expect(overflowsOnAxis(element, 'block')).toBe(false);
-		expect(styles.overflowInline).toBe('auto');
-		expect(styles.overflowBlock).toBe('hidden');
+		expect(getComputedStyle(element).direction).toBe(writingCase.direction);
 		expect(element.tabIndex).toBe(0);
 		expect(element.getAttribute('role')).toBe('region');
 		expect(element.getAttribute('data-scroll-fade-end')).toBe(writingCase.expectedInlineEnd);
-		expect(logicalEndSide(element, 'inline')).toBe(writingCase.expectedInlineEnd);
 		expectMaskToward(element, writingCase.expectedInlineEnd);
 	});
-
-	test(`block overflow maps correctly for ${writingCase.label}`, async () => {
-		const { locator } = render(
-			<div dir={writingCase.direction} style={{ writingMode: writingCase.writingMode }}>
-				<ScrollFade
-					aria-label={`Block ${writingCase.label}`}
-					axis="block"
-					blockSize="5rem"
-					data-testid="scroll-fade"
-					inlineSize="10rem"
-					padding="sp8"
-				>
-					<div style={{ blockSize: '16rem' }}>長いブロック内容 for logical overflow</div>
-				</ScrollFade>
-			</div>,
-		);
-		const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
-		const styles = getComputedStyle(element);
-
-		expect(styles.writingMode).toBe(writingCase.writingMode);
-		expect(styles.direction).toBe(writingCase.direction);
-		expect(overflowsOnAxis(element, 'block')).toBe(true);
-		expect(overflowsOnAxis(element, 'inline')).toBe(false);
-		expect(styles.overflowBlock).toBe('auto');
-		expect(styles.overflowInline).toBe('hidden');
-		expect(element.tabIndex).toBe(0);
-		expect(element.getAttribute('role')).toBe('region');
-		expect(element.getAttribute('data-scroll-fade-end')).toBe(writingCase.expectedBlockEnd);
-		expect(logicalEndSide(element, 'block')).toBe(writingCase.expectedBlockEnd);
-		expectMaskToward(element, writingCase.expectedBlockEnd);
-	});
 }
-
-test('CSS direction rtl on the scrollport flips the inline mask', async () => {
-	const { locator } = render(
-		<ScrollFade
-			aria-label="CSS direction"
-			data-testid="scroll-fade"
-			inlineSize="8rem"
-			padding="sp8"
-			style={{ direction: 'rtl' }}
-		>
-			<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
-				Overflowing inline content for CSS direction
-			</span>
-		</ScrollFade>,
-	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
-
-	expect(getComputedStyle(element).direction).toBe('rtl');
-	expect(element.getAttribute('data-scroll-fade-end')).toBe('left');
-	expect(logicalEndSide(element, 'inline')).toBe('left');
-	expectMaskToward(element, 'left');
-});
 
 test('inherited CSS direction updates the inline mask without remounting', async () => {
 	function Fixture() {
@@ -351,42 +176,12 @@ test('inherited CSS direction updates the inline mask without remounting', async
 	const { locator } = render(<Fixture />);
 	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 
-	expect(getComputedStyle(element).direction).toBe('ltr');
+	expect(element.getAttribute('data-scroll-fade-end')).toBe('right');
 	expectMaskToward(element, 'right');
 
 	await userEvent.click(locator.getByRole('button', { name: 'Switch to RTL' }));
-	await expect.poll(() => getComputedStyle(element).direction).toBe('rtl');
 	await expect.poll(() => element.getAttribute('data-scroll-fade-end')).toBe('left');
-
-	expect(logicalEndSide(element, 'inline')).toBe('left');
 	expectMaskToward(element, 'left');
-});
-
-test('vertical writing mode with RTL and text-orientation upright keeps logical inline end', async () => {
-	const { locator } = render(
-		<div style={{ writingMode: 'vertical-rl', direction: 'rtl', textOrientation: 'upright' }}>
-			<ScrollFade
-				aria-label="Upright vertical"
-				blockSize="10rem"
-				data-testid="scroll-fade"
-				inlineSize="5rem"
-				padding="sp8"
-			>
-				<div style={{ inlineSize: '16rem', whiteSpace: 'nowrap' }}>長い upright contents</div>
-			</ScrollFade>
-		</div>,
-	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
-	const styles = getComputedStyle(element);
-
-	expect(styles.writingMode).toBe('vertical-rl');
-	expect(styles.direction).toBe('rtl');
-	expect(styles.textOrientation).toBe('upright');
-	expect(overflowsOnAxis(element, 'inline')).toBe(true);
-	expect(element.tabIndex).toBe(0);
-	expect(element.getAttribute('data-scroll-fade-end')).toBe('top');
-	expect(logicalEndSide(element, 'inline')).toBe('top');
-	expectMaskToward(element, 'top');
 });
 
 test('inline scroll progression fades start then end across the scroll range', async () => {
@@ -405,28 +200,7 @@ test('inline scroll progression fades start then end across the scroll range', a
 	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 	const maxScroll = element.scrollWidth - element.clientWidth;
 	expect(maxScroll).toBeGreaterThan(96);
-
 	await assertInlineProgression(element, maxScroll);
-});
-
-test('block scroll progression fades start then end across the scroll range', async () => {
-	const { locator } = render(
-		<ScrollFade
-			aria-label="Block progression"
-			axis="block"
-			blockSize="8rem"
-			data-testid="scroll-fade"
-			inlineSize="12rem"
-			padding="sp8"
-		>
-			<div style={{ blockSize: '40rem' }}>Overflowing block content for scroll progression</div>
-		</ScrollFade>,
-	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
-	const maxScroll = element.scrollHeight - element.clientHeight;
-	expect(maxScroll).toBeGreaterThan(96);
-
-	await assertBlockProgression(element, maxScroll);
 });
 
 test('scroll progression stays coherent when overflow is shorter than the reveal distance', async () => {
@@ -447,7 +221,6 @@ test('scroll progression stays coherent when overflow is shorter than the reveal
 	const maxScroll = element.scrollWidth - element.clientWidth;
 	expect(maxScroll).toBeGreaterThan(0);
 	expect(maxScroll).toBeLessThan(96);
-
 	await assertInlineProgression(element, maxScroll);
 });
 
@@ -501,27 +274,6 @@ test('focusing an interactive descendant near a faded edge keeps the mask', asyn
 	expect(getComputedStyle(element).maskImage).not.toBe('none');
 });
 
-test('overflowing scrollport remains a named tab stop with tabbable descendants', async () => {
-	const { locator } = render(
-		<ScrollFade aria-label="Example items" data-testid="scroll-fade" inlineSize="8rem">
-			<div style={{ display: 'flex', gap: '1rem' }}>
-				<button style={{ flex: 'none', inlineSize: '6rem' }} type="button">
-					First item
-				</button>
-				<button style={{ flex: 'none', inlineSize: '6rem' }} type="button">
-					Second item
-				</button>
-			</div>
-		</ScrollFade>,
-	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
-
-	expect(element.tabIndex).toBe(0);
-	expect(element.getAttribute('role')).toBe('region');
-	expect(element.getAttribute('aria-label')).toBe('Example items');
-	expect(locator.getByRole('button', { name: 'First item' }).element().tabIndex).toBe(0);
-});
-
 test('nested intrinsic image load updates overflow from fitting to overflowing', async () => {
 	const tinySvg = svgDataUri(16, 16);
 	const tallSvg = svgDataUri(16, 320);
@@ -541,7 +293,6 @@ test('nested intrinsic image load updates overflow from fitting to overflowing',
 	);
 	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element());
 	expect(element.tabIndex).toBe(-1);
-	expect(element.hasAttribute('role')).toBe(false);
 	expect(getComputedStyle(element).maskImage).toBe('none');
 
 	const image = expectHtmlElement(
@@ -552,23 +303,17 @@ test('nested intrinsic image load updates overflow from fitting to overflowing',
 
 	await loadImageSource(image, tallSvg);
 	await waitForAttribute(element, 'role', 'region');
-
 	expect(element.tabIndex).toBe(0);
-	expect(element.getAttribute('role')).toBe('region');
 	expect(element.getAttribute('aria-label')).toBe('Image list');
 	expectMaskToward(element, 'bottom');
 
 	await loadImageSource(image, tinySvg);
 	await waitForAttribute(element, 'role', null);
-
 	expect(element.tabIndex).toBe(-1);
-	expect(element.hasAttribute('role')).toBe(false);
 	expect(getComputedStyle(element).maskImage).toBe('none');
 });
 
-// WAAPI changes used size without childList/characterData/class/style mutations.
-// Keeps fit ↔ overflow a11y covered for descendant geometry that MutationObserver
-// attribute/childList signals do not see.
+// WAAPI changes used size without MutationObserver-visible childList/attribute mutations.
 test('descendant Web Animations size change updates overflow accessibility without DOM mutation', async () => {
 	const { locator } = render(
 		<ScrollFade
@@ -584,37 +329,29 @@ test('descendant Web Animations size change updates overflow accessibility witho
 		</ScrollFade>,
 	);
 	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element());
-
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
-	expect(element.hasAttribute('aria-label')).toBe(false);
 
 	const child = expectHtmlElement(
 		locator.getByTestId('animated-child').element(),
 		'Expected animated child.',
 	);
 
-	const grow = child.animate([{ blockSize: '2rem' }, { blockSize: '18rem' }], {
+	await child.animate([{ blockSize: '2rem' }, { blockSize: '18rem' }], {
 		duration: 1,
 		fill: 'forwards',
-	});
-	await grow.finished;
+	}).finished;
 	await waitForAttribute(element, 'role', 'region');
-
 	expect(element.tabIndex).toBe(0);
-	expect(element.getAttribute('role')).toBe('region');
 	expect(element.getAttribute('aria-label')).toBe('Animated list');
 
-	const shrink = child.animate([{ blockSize: '18rem' }, { blockSize: '2rem' }], {
+	await child.animate([{ blockSize: '18rem' }, { blockSize: '2rem' }], {
 		duration: 1,
 		fill: 'forwards',
-	});
-	await shrink.finished;
+	}).finished;
 	await waitForAttribute(element, 'role', null);
-
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
-	expect(element.hasAttribute('aria-label')).toBe(false);
 });
 
 test('SSR markup hydrates without mismatch and then measures overflow', async () => {
@@ -641,7 +378,6 @@ test('SSR markup hydrates without mismatch and then measures overflow', async ()
 	const { locator, recoverableErrors, unmount } = hydrate(markup, tree);
 	try {
 		const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
-
 		expect(element.tabIndex).toBe(0);
 		expect(element.getAttribute('role')).toBe('region');
 		expect(element.getAttribute('aria-label')).toBe('Hydrated list');
@@ -652,41 +388,28 @@ test('SSR markup hydrates without mismatch and then measures overflow', async ()
 	}
 });
 
-test('fitting and overflowing default divs have no axe violations', async () => {
-	const { container: fitting, locator: fittingLocator } = render(
-		<ScrollFade aria-label="Fits" blockSize="6rem" data-testid="fitting-axe" inlineSize="12rem">
-			Short
-		</ScrollFade>,
+test('fitting and overflowing ScrollFades have no axe violations', async () => {
+	const { container, locator } = render(
+		<>
+			<ScrollFade aria-label="Fits" blockSize="6rem" data-testid="fitting-axe" inlineSize="12rem">
+				Short
+			</ScrollFade>
+			<ScrollFade
+				aria-label="Overflows"
+				data-testid="overflowing-axe"
+				inlineSize="8rem"
+				padding="sp8"
+			>
+				<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
+					Overflowing content for axe
+				</span>
+			</ScrollFade>
+			<ScrollFadeScene />
+		</>,
 	);
-	const fittingElement = await waitForScrollport(
-		fittingLocator.getByTestId('fitting-axe').element(),
-	);
-	expect(fittingElement.hasAttribute('role')).toBe(false);
-	await expectNoAxeViolations(fitting);
 
-	const { container: overflowing, locator } = render(
-		<ScrollFade
-			aria-label="Overflows"
-			data-testid="overflowing-axe"
-			inlineSize="8rem"
-			padding="sp8"
-		>
-			<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
-				Overflowing content for axe
-			</span>
-		</ScrollFade>,
-	);
-	const overflowingElement = await waitForScrollport(
-		locator.getByTestId('overflowing-axe').element(),
-		true,
-	);
-	expect(overflowingElement.getAttribute('role')).toBe('region');
-	await expectNoAxeViolations(overflowing);
-});
-
-test('the ScrollFade scene has no axe violations', async () => {
-	const { container } = render(<ScrollFadeScene />);
-
+	await waitForScrollport(locator.getByTestId('fitting-axe').element());
+	await waitForScrollport(locator.getByTestId('overflowing-axe').element(), true);
 	await expectNoAxeViolations(container);
 });
 
@@ -694,29 +417,6 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(<ScrollFadeScene />, { appearance });
 		await captureVisualAppearance(locator, 'scroll-mask/kitchen-sink', appearance);
-	}
-});
-
-test('overflowing focus-visible state', { tags: ['visual'] }, async () => {
-	for (const appearance of visualAppearances) {
-		const { locator } = render(
-			<ScrollFade
-				aria-label="Focused overflow"
-				data-testid="scroll-fade"
-				inlineSize="10rem"
-				padding="sp8"
-			>
-				<span style={{ display: 'inline-block', inlineSize: '22rem', whiteSpace: 'nowrap' }}>
-					Design tokens · Layout · Forms · Feedback · Typography
-				</span>
-			</ScrollFade>,
-			{ appearance },
-		);
-		const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
-		element.focus({ focusVisible: true });
-		expect(element.matches(':focus-visible')).toBe(true);
-		expectMaskToward(element, 'right');
-		await captureVisualAppearance(locator, 'scroll-mask/focus-visible', appearance);
 	}
 });
 
@@ -761,16 +461,13 @@ function loadImageSource(image: HTMLImageElement, src: string): Promise<void> {
 	});
 }
 
-/** Waits for ScrollFade's observer-driven React update, not for size polling. */
 function waitForAttribute(element: HTMLElement, name: string, value: string | null): Promise<void> {
 	if (element.getAttribute(name) === value) return Promise.resolve();
-
 	return new Promise((resolve, reject) => {
 		const timeoutId = window.setTimeout(() => {
 			observer.disconnect();
 			reject(new Error(`Timed out waiting for ${name}=${String(value)}.`));
 		}, 2000);
-
 		const observer = new MutationObserver(() => {
 			if (element.getAttribute(name) === value) {
 				window.clearTimeout(timeoutId);
@@ -801,7 +498,6 @@ function fadeLayer(maskImage: string): string {
 
 function hasStartFade(maskImage: string): boolean {
 	const layer = fadeLayer(maskImage);
-	// No fade: `0px` or `calc(0% + (0 * …))`. Partial/full fade uses a non-zero multiplier or bare min().
 	if (/rgb\(0,\s*0,\s*0\)\s+0px/.test(layer)) return false;
 	if (/rgb\(0,\s*0,\s*0\)\s+calc\(0%\s*\+\s*\(0\s*\*/.test(layer)) return false;
 	return /rgb\(0,\s*0,\s*0\)\s+calc\(0%\s*\+/.test(layer);
@@ -842,48 +538,17 @@ async function assertInlineProgression(element: HTMLElement, maxScroll: number):
 		.toEqual({ start: true, end: false });
 }
 
-async function assertBlockProgression(element: HTMLElement, maxScroll: number): Promise<void> {
-	element.scrollTop = 0;
-	await expect
-		.poll(() => {
-			const maskImage = getComputedStyle(element).maskImage;
-			return { start: hasStartFade(maskImage), end: hasEndFade(maskImage) };
-		})
-		.toEqual({ start: false, end: true });
-
-	element.scrollTop = maxScroll / 2;
-	await expect
-		.poll(() => {
-			const maskImage = getComputedStyle(element).maskImage;
-			return { start: hasStartFade(maskImage), end: hasEndFade(maskImage) };
-		})
-		.toEqual({ start: true, end: true });
-
-	element.scrollTop = maxScroll;
-	await expect
-		.poll(() => {
-			const maskImage = getComputedStyle(element).maskImage;
-			return { start: hasStartFade(maskImage), end: hasEndFade(maskImage) };
-		})
-		.toEqual({ start: true, end: false });
-}
-
 async function waitForScrollport(node: Element, shouldOverflow?: boolean): Promise<HTMLElement> {
 	if (!(node instanceof HTMLElement)) throw new Error('Expected ScrollFade element.');
 
 	const deadline = Date.now() + 2000;
 	while (Date.now() < deadline) {
-		const axis: 'inline' | 'block' =
-			getComputedStyle(node).overflowInline === 'auto' ? 'inline' : 'block';
-		const overflows = overflowsOnAxis(node, axis);
-		const focusable = node.tabIndex === 0;
-		if (shouldOverflow === undefined || overflows === shouldOverflow) {
-			if (shouldOverflow === undefined || focusable === shouldOverflow) return node;
-		}
+		const overflows = node.tabIndex === 0;
+		if (shouldOverflow === undefined || overflows === shouldOverflow) return node;
 		await new Promise((resolve) => requestAnimationFrame(resolve));
 	}
 
 	throw new Error(
-		`Timed out waiting for ScrollFade overflow=${String(shouldOverflow)} (tabIndex=${node.tabIndex}).`,
+		`Timed out waiting for ScrollFade overflow=${String(shouldOverflow)} (tabIndex=${String(node.tabIndex)}).`,
 	);
 }

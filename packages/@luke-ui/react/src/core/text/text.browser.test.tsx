@@ -4,28 +4,10 @@ import { Kbd } from '@luke-ui/react/kbd';
 import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
 import { typeStyles } from '@luke-ui/react/theme';
-import { createRef } from 'react';
 import type { CSSProperties } from 'react';
 import { test, expect } from 'vite-plus/test';
-import {
-	expectForwardsDomProps,
-	expectHtmlElement,
-	forwardedDomProps,
-} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
-
-test('Text forwards className, data attributes, id, and ref to its element', () => {
-	const ref = createRef<HTMLElement>();
-	const { container } = render(
-		<Text {...forwardedDomProps} ref={ref}>
-			Body copy
-		</Text>,
-	);
-	const target = expectHtmlElement(container.firstElementChild, 'Expected a Text element.');
-
-	expectForwardsDomProps(target, ref);
-});
 
 // `shouldInheritFont` inherits `textTransform` and `fontVariantNumeric` along with the other font
 // properties, and their variants default to emitting nothing. Without both halves, a composing

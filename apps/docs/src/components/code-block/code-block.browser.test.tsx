@@ -136,15 +136,20 @@ test('opts out of prose inline-code chrome on the fence code element', () => {
 	expect(styles.backgroundColor).toBe('rgba(0, 0, 0, 0)');
 });
 
-test('scrolls horizontally and keeps overlay copy on the physical right in RTL docs', async () => {
+test.each([
+	{ name: 'untitled overlay copy', title: undefined as string | undefined },
+	{ name: 'titled header copy', title: 'Source' },
+])('scrolls horizontally and keeps $name on the physical right in RTL docs', async ({ title }) => {
 	await page.viewport(320, 720);
 	document.documentElement.dir = 'rtl';
 
 	try {
-		renderCodeBlock(<CodeBlock code={'x'.repeat(200)} />);
+		renderCodeBlock(<CodeBlock code={'x'.repeat(200)} title={title} />);
 
-		const viewport = page.getByRole('region', { name: 'Code' }).element();
+		const regionName = title ?? 'Code';
+		const viewport = page.getByRole('region', { name: regionName }).element();
 		expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth);
+		if (title !== undefined) expect(viewport.tabIndex).toBe(0);
 
 		const copyButton = page.getByRole('button', { name: 'Copy' }).element();
 		const figure = copyButton.closest('figure');
@@ -162,32 +167,6 @@ test('scrolls horizontally and keeps overlay copy on the physical right in RTL d
 
 		// Full-width scrollport — not a side column beside the button.
 		expect(viewport.getBoundingClientRect().width).toBeGreaterThan(figure.clientWidth * 0.9);
-	} finally {
-		document.documentElement.dir = 'ltr';
-	}
-});
-
-test('scrolls horizontally with titled copy on the header inline-end in RTL', async () => {
-	await page.viewport(320, 720);
-	document.documentElement.dir = 'rtl';
-
-	try {
-		renderCodeBlock(<CodeBlock code={'x'.repeat(200)} title="Source" />);
-
-		const viewport = page.getByRole('region', { name: 'Source' }).element();
-		expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth);
-		expect(viewport.tabIndex).toBe(0);
-
-		const copyButton = page.getByRole('button', { name: 'Copy' }).element();
-		const figure = copyButton.closest('figure');
-		assert(figure != null, 'Expected a figure ancestor');
-		expect(figure.getAttribute('dir')).toBe('ltr');
-
-		const figureBox = figure.getBoundingClientRect();
-		const buttonBox = copyButton.getBoundingClientRect();
-		const buttonMidX = (buttonBox.left + buttonBox.right) / 2;
-		const figureMidX = (figureBox.left + figureBox.right) / 2;
-		expect(buttonMidX).toBeGreaterThan(figureMidX);
 	} finally {
 		document.documentElement.dir = 'ltr';
 	}

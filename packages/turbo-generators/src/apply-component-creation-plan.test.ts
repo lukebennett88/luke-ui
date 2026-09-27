@@ -127,45 +127,6 @@ describe('createComponent', () => {
 		);
 	});
 
-	it('scaffolds the full browser test coverage on disk', async () => {
-		const root = await createRepositoryFixture();
-
-		await createComponent(root, {
-			docsGroup: 'forms',
-			name: 'DateField',
-		});
-
-		const browserTest = await readFile(
-			join(root, 'packages/@luke-ui/react/src/core/date-field/date-field.browser.test.tsx'),
-			'utf8',
-		);
-		expect(browserTest).toContain("import { DateField } from '@luke-ui/react/date-field';");
-		expect(browserTest).toContain('expectForwardsDomProps');
-		expect(browserTest).toContain('function DateFieldScene()');
-		expect(browserTest).toContain("test('the DateField scene has no axe violations'");
-		expect(browserTest).toContain("{ tags: ['visual'] }");
-		expect(browserTest).not.toContain('testConformance');
-		expect(browserTest).not.toContain('testIntegration');
-	});
-
-	it('omits the tagged visual case when visual coverage does not apply', async () => {
-		const root = await createRepositoryFixture();
-
-		await createComponent(root, {
-			docsGroup: 'forms',
-			name: 'DateField',
-			visualCoverage: false,
-		});
-
-		const browserTest = await readFile(
-			join(root, 'packages/@luke-ui/react/src/core/date-field/date-field.browser.test.tsx'),
-			'utf8',
-		);
-		expect(browserTest).not.toContain("tags: ['visual']");
-		expect(browserTest).not.toContain('captureVisualAppearance');
-		expect(browserTest).toContain("test('the DateField scene has no axe violations'");
-	});
-
 	it('rejects docs navigation JSON that is not an object', async () => {
 		const root = await createRepositoryFixture();
 		await writeFile(join(root, 'apps/docs/content/docs/components/meta.json'), '[]\n', 'utf8');

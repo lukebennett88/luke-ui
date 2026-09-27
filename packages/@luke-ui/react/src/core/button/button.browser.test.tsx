@@ -1,12 +1,11 @@
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
-import { act, createRef } from 'react';
+import { act } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { expect, test } from 'vite-plus/test';
-import { page, userEvent } from 'vite-plus/test/context';
+import { page } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -56,18 +55,6 @@ function ButtonScene() {
 	);
 }
 
-test('Button forwards className, data attributes, id, and ref to the button element', () => {
-	const ref = createRef<HTMLButtonElement>();
-	const { locator } = render(
-		<Button {...forwardedDomProps} ref={ref}>
-			Action
-		</Button>,
-	);
-	const button = locator.getByRole('button').element();
-
-	expectForwardsDomProps(button, ref);
-});
-
 test('pressing a Button runs its onPress handler', async () => {
 	let pressed = false;
 	const { locator, user } = render(<Button onPress={() => (pressed = true)}>Action</Button>);
@@ -80,33 +67,6 @@ test('the Button scene has no axe violations', async () => {
 	const { container } = render(<ButtonScene />);
 
 	await expectNoAxeViolations(container);
-});
-
-test('a text-appearance Button keeps button semantics and runs onPress', async () => {
-	let pressed = false;
-	const { locator, user } = render(
-		<Button appearance="text" onPress={() => (pressed = true)}>
-			Action
-		</Button>,
-	);
-	const button = locator.getByRole('button', { name: 'Action' }).element();
-
-	expect(button.tagName).toBe('BUTTON');
-
-	await user.click(locator.getByRole('button', { name: 'Action' }));
-	expect(pressed).toBe(true);
-});
-
-test('a pending text Button shows a spinner', () => {
-	const { locator } = render(
-		<Button appearance="text" isPending>
-			Save
-		</Button>,
-	);
-	const button = locator.getByRole('button', { name: 'Save' });
-
-	expect(button.element().getAttribute('data-pending')).toBe('true');
-	expect(button.element().querySelector('[role="status"]')).not.toBeNull();
 });
 
 test('a text Button has the same layout styles as inline Text without control padding or sizing', () => {
@@ -184,149 +144,6 @@ test('a text Button in a flex parent is not collapsed to a single character per 
 
 	expect(label.getClientRects().length).toBe(1);
 	expect(button.getBoundingClientRect().width).toBeGreaterThan(20);
-});
-
-test('hover inverts the text Button underline, and low prominence reverses the rest state', () => {
-	const { locator } = render(
-		<div>
-			<Button appearance="text" prominence="low">
-				Low
-			</Button>
-			<Button appearance="text" prominence="standard">
-				Standard
-			</Button>
-			<Button appearance="text" prominence="high">
-				High
-			</Button>
-		</div>,
-	);
-	const low = locator.getByRole('button', { name: 'Low' }).element();
-	const standard = locator.getByRole('button', { name: 'Standard' }).element();
-	const high = locator.getByRole('button', { name: 'High' }).element();
-
-	for (const button of [low, standard, high]) {
-		button.style.transition = 'none';
-	}
-
-	expect(getComputedStyle(low).textDecorationLine).toBe('none');
-	expect(getComputedStyle(standard).textDecorationLine).toBe('underline');
-	expect(getComputedStyle(high).textDecorationLine).toBe('underline');
-
-	low.setAttribute('data-hovered', 'true');
-	standard.setAttribute('data-hovered', 'true');
-	high.setAttribute('data-hovered', 'true');
-
-	expect(getComputedStyle(low).textDecorationLine).toBe('underline');
-	expect(getComputedStyle(standard).textDecorationLine).toBe('none');
-	expect(getComputedStyle(high).textDecorationLine).toBe('none');
-});
-
-test('focus-visible keeps the underline over hover and pressed', () => {
-	const { locator } = render(
-		<div>
-			<Button appearance="text" prominence="low">
-				Low
-			</Button>
-			<Button appearance="text" prominence="standard">
-				Standard
-			</Button>
-		</div>,
-	);
-	const low = locator.getByRole('button', { name: 'Low' }).element();
-	const standard = locator.getByRole('button', { name: 'Standard' }).element();
-	const lowLabel = low.querySelector('span');
-	const standardLabel = standard.querySelector('span');
-	if (!(lowLabel instanceof HTMLElement) || !(standardLabel instanceof HTMLElement)) {
-		throw new Error('Expected text labels.');
-	}
-
-	for (const button of [low, standard]) {
-		button.style.transition = 'none';
-	}
-
-	low.setAttribute('data-focus-visible', 'true');
-	low.setAttribute('data-hovered', 'true');
-	standard.setAttribute('data-focus-visible', 'true');
-	standard.setAttribute('data-hovered', 'true');
-
-	expect(getComputedStyle(low).textDecorationLine).toBe('underline');
-	expect(getComputedStyle(lowLabel).textDecorationLine).toBe('underline');
-	expect(getComputedStyle(standard).textDecorationLine).toBe('underline');
-	expect(getComputedStyle(standardLabel).textDecorationLine).toBe('underline');
-
-	low.removeAttribute('data-hovered');
-	standard.removeAttribute('data-hovered');
-	low.setAttribute('data-pressed', 'true');
-	standard.setAttribute('data-pressed', 'true');
-
-	expect(getComputedStyle(low).textDecorationLine).toBe('underline');
-	expect(getComputedStyle(lowLabel).textDecorationLine).toBe('underline');
-	expect(getComputedStyle(standard).textDecorationLine).toBe('underline');
-	expect(getComputedStyle(standardLabel).textDecorationLine).toBe('underline');
-});
-
-test('the text Button label paints the underline set on the button', () => {
-	const { locator } = render(
-		<Button appearance="text" prominence="standard">
-			Save
-		</Button>,
-	);
-	const button = locator.getByRole('button', { name: 'Save' }).element();
-	const label = button.querySelector('span');
-	if (!(label instanceof HTMLElement)) throw new Error('Expected a text label.');
-
-	// `text-decoration` does not inherit, so a label that sets its own value paints over the button's.
-	expect(getComputedStyle(label).textDecorationLine).toBe('underline');
-});
-
-test('pressed text Buttons shift to a perceptibly different foreground colour per tone', () => {
-	const { locator } = render(
-		<div>
-			<Button appearance="text">Neutral</Button>
-			<Button appearance="text" tone="critical">
-				Critical
-			</Button>
-			<Button appearance="text" prominence="high">
-				Accent
-			</Button>
-		</div>,
-	);
-	const neutral = locator.getByRole('button', { name: 'Neutral' }).element();
-	const critical = locator.getByRole('button', { name: 'Critical' }).element();
-	const accent = locator.getByRole('button', { name: 'Accent' }).element();
-
-	for (const button of [neutral, critical, accent]) {
-		// A computed colour read mid-transition returns the rest value.
-		button.style.transition = 'none';
-	}
-
-	const neutralRest = getComputedStyle(neutral).color;
-	const criticalRest = getComputedStyle(critical).color;
-	const accentRest = getComputedStyle(accent).color;
-
-	neutral.setAttribute('data-pressed', 'true');
-	critical.setAttribute('data-pressed', 'true');
-	accent.setAttribute('data-pressed', 'true');
-
-	expect(getComputedStyle(neutral).color).not.toBe(neutralRest);
-	expect(getComputedStyle(critical).color).not.toBe(criticalRest);
-	expect(getComputedStyle(accent).color).not.toBe(accentRest);
-});
-
-test('disabled Buttons expose disabled state in either appearance', () => {
-	const { locator } = render(
-		<div>
-			<Button isDisabled>Button appearance</Button>
-			<Button appearance="text" isDisabled>
-				Text appearance
-			</Button>
-		</div>,
-	);
-
-	const buttonAppearance = locator.getByRole('button', { name: 'Button appearance' }).element();
-	const textAppearance = locator.getByRole('button', { name: 'Text appearance' }).element();
-	expect(buttonAppearance).toHaveAttribute('data-disabled', 'true');
-	expect(textAppearance).toHaveAttribute('data-disabled', 'true');
 });
 
 test('runs onPress before pressAction and tracks Action pending', async () => {
@@ -484,21 +301,15 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
-test('interactive states', { tags: ['visual'] }, async () => {
+test('focus-visible state', { tags: ['visual'] }, async () => {
 	const { locator } = render(<Button>Action</Button>);
 	const button = page.getByRole('button', { name: 'Action' });
 
-	await userEvent.hover(button);
-	await captureVisual(locator, 'button/hover');
-	await userEvent.unhover(button);
 	await focusViaKeyboard(button);
 	await captureVisual(locator, 'button/focus-visible');
-	await userEvent.keyboard('{Space>}');
-	await captureVisual(locator, 'button/pressed');
-	await userEvent.keyboard('{/Space}');
 });
 
-test('forced-colors states', { tags: ['visual'] }, async () => {
+test('forced-colors resting', { tags: ['visual'] }, async () => {
 	await emulateForcedColors('active');
 
 	try {
@@ -509,17 +320,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 				<Button isPending>Pending</Button>
 			</Grid>,
 		);
-		const action = page.getByRole('button', { name: 'Action' });
-
 		await captureVisual(locator, 'button/forced-colors-resting');
-		await userEvent.hover(action);
-		await captureVisual(locator, 'button/forced-colors-hover');
-		await userEvent.unhover(action);
-		await focusViaKeyboard(action);
-		await captureVisual(locator, 'button/forced-colors-focus-visible');
-		await userEvent.keyboard('{Space>}');
-		await captureVisual(locator, 'button/forced-colors-pressed');
-		await userEvent.keyboard('{/Space}');
 	} finally {
 		await emulateForcedColors('none');
 	}

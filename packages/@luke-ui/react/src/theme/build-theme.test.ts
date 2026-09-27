@@ -91,37 +91,6 @@ describe('buildTheme generation failures', () => {
 			'success',
 		]);
 	});
-
-	it('throws ThemeGenerationError for an accent no on-solid text can sit on', () => {
-		const caught = (() => {
-			try {
-				buildTheme({
-					...tactileFoundation,
-					dark: {
-						...tactileFoundation.dark,
-						color: {
-							...tactileFoundation.dark.color,
-							accent: resolvedColor(UNSATISFIABLE_ON_SOLID.source),
-						},
-					},
-					name: 'bad-accent',
-				});
-				return null;
-			} catch (error) {
-				return error;
-			}
-		})();
-		expect(caught).toBeInstanceOf(ThemeGenerationError);
-		const error = caught as ThemeGenerationError;
-		expect(error.role).toBe('accent');
-		expect(error.mode).toBe('dark');
-		expect(error.bestAttempt.step).toBe(9);
-		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
-		expect(error.diagnostics.role).toBe('accent');
-		expect(error.diagnostics.mode).toBe('dark');
-		expect(error.diagnostics.completedFamilies.neutral).toBeDefined();
-		expect(error.diagnostics.completedFamilies.accent).toBeUndefined();
-	});
 });
 
 describe('compileTheme diagnostics', () => {

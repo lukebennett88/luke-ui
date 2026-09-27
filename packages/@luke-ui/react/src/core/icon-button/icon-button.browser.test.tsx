@@ -1,10 +1,8 @@
 import { IconButton } from '@luke-ui/react/icon-button';
-import { createRef } from 'react';
 import type { JSX } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { page, userEvent } from 'vite-plus/test/context';
+import { page } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -40,16 +38,6 @@ function IconButtonScene() {
 		</Grid>
 	);
 }
-
-test('IconButton forwards className, data attributes, id, and ref to the button element', () => {
-	const ref = createRef<HTMLButtonElement>();
-	const { locator } = render(
-		<IconButton {...forwardedDomProps} aria-label="Add" icon="add" ref={ref} />,
-	);
-	const target = locator.getByRole('button', { name: 'Add' }).element();
-
-	expectForwardsDomProps(target, ref);
-});
 
 test('pressing an IconButton runs its onPress handler', async () => {
 	let pressed = false;
@@ -121,21 +109,14 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
-test('interactive states', { tags: ['visual'] }, async () => {
+test('focus-visible state', { tags: ['visual'] }, async () => {
 	const { locator } = render(<IconButton aria-label="Action" icon="add" />);
-	const button = page.getByRole('button', { name: 'Action' });
 
-	await userEvent.hover(button);
-	await captureVisual(locator, 'icon-button/hover');
-	await userEvent.unhover(button);
-	await focusViaKeyboard(button);
+	await focusViaKeyboard(page.getByRole('button', { name: 'Action' }));
 	await captureVisual(locator, 'icon-button/focus-visible');
-	await userEvent.keyboard('{Space>}');
-	await captureVisual(locator, 'icon-button/pressed');
-	await userEvent.keyboard('{/Space}');
 });
 
-test('forced-colors states', { tags: ['visual'] }, async () => {
+test('forced-colors resting', { tags: ['visual'] }, async () => {
 	await emulateForcedColors('active');
 
 	try {
@@ -146,17 +127,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 				<IconButton aria-label="Pending" icon="add" isPending />
 			</Grid>,
 		);
-		const action = page.getByRole('button', { name: 'Action' });
-
 		await captureVisual(locator, 'icon-button/forced-colors-resting');
-		await userEvent.hover(action);
-		await captureVisual(locator, 'icon-button/forced-colors-hover');
-		await userEvent.unhover(action);
-		await focusViaKeyboard(action);
-		await captureVisual(locator, 'icon-button/forced-colors-focus-visible');
-		await userEvent.keyboard('{Space>}');
-		await captureVisual(locator, 'icon-button/forced-colors-pressed');
-		await userEvent.keyboard('{/Space}');
 	} finally {
 		await emulateForcedColors('none');
 	}

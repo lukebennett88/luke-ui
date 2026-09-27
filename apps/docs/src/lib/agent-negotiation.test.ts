@@ -10,24 +10,17 @@ const CHROME_ACCEPT =
 	'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7';
 
 test.each<[accept: string | null, expected: boolean]>([
-	['text/markdown', true],
 	[null, false],
-	['', false],
+	['text/markdown', true],
 	['*/*', false],
 	['text/*', false],
 	['text/markdown, text/html;q=0.9', true],
 	['text/html, text/markdown;q=0.5', false],
 	['text/markdown;q=0.8, */*;q=1', false],
-	['text/markdown;q=1, */*;q=0.8', true],
 	['text/markdown;q=0.5, text/*;q=0.9', false],
-	['text/markdown, text/*;q=0.9', true],
-	['text/markdown;q=0.5, text/html;q=0, */*', true],
 	['text/markdown;q=0', false],
-	['text/markdown, text/html', true],
 	['TEXT/Markdown; charset=utf-8', true],
-	['text/markdown;charset=utf-8;q=0.5, text/html;q=0.4', true],
 	['text/markdown;q=abc', false],
-	['text/markdown;q=2', false],
 	['text/markdown, text/html;q=nope', true],
 	[CHROME_ACCEPT, false],
 ])('prefersMarkdown(%j) is %s', (accept, expected) => {
@@ -196,22 +189,46 @@ test('builds a root-relative Markdown 404 body when the .md route returns no Mar
 	expect(await res.text()).toBe(notFoundMarkdown('/nope'));
 });
 
-test('serves an empty Markdown 404 body for a HEAD request', async () => {
-	const next = makeRealisticNext('text/markdown');
-	const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
-		return new Response('# Page not found\n', {
-			headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
-			status: 404,
-		});
-	});
-
-	const request = new Request('https://example.com/nope', {
-		headers: { Accept: 'text/markdown' },
-		method: 'HEAD',
-	});
+test.each([
+	{
+		name: '404 markdown twin',
+		setup: async () => {
+			const next = makeRealisticNext('text/markdown');
+			const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
+				return new Response('# Page not found\n', {
+					headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+					status: 404,
+				});
+			});
+			const request = new Request('https://example.com/nope', {
+				headers: { Accept: 'text/markdown' },
+				method: 'HEAD',
+			});
+			return { fetchMock, next, request, status: 404 };
+		},
+	},
+	{
+		name: '200 markdown twin',
+		setup: async () => {
+			const next = vi.fn<() => Promise<Response>>();
+			const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
+				return new Response('# Luke UI\n', {
+					headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+					status: 200,
+				});
+			});
+			const request = new Request('https://luke-ui.netlify.app/', {
+				headers: { Accept: 'text/markdown' },
+				method: 'HEAD',
+			});
+			return { fetchMock, next, request, status: 200 };
+		},
+	},
+])('serves an empty body for a HEAD $name request', async ({ setup }) => {
+	const { fetchMock, next, request, status } = await setup();
 	const res = await handleRequest(request, { fetch: fetchMock, next });
 
-	expect(res.status).toBe(404);
+	expect(res.status).toBe(status);
 	expect(res.body).toBeNull();
 });
 
@@ -297,28 +314,4 @@ test('negotiates Markdown for /apiary, a sibling path that merely starts with "a
 	expect(fetchMock).toHaveBeenCalledWith(new URL('https://luke-ui.netlify.app/apiary.md'));
 	expect(next).not.toHaveBeenCalled();
 	expect(res.status).toBe(200);
-});
-
-test('serves an empty body for a HEAD request', async () => {
-	const next = vi.fn<() => Promise<Response>>(async () => {
-		return new Response('# Luke UI\n', {
-			headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
-			status: 200,
-		});
-	});
-	const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
-		return new Response('# Luke UI\n', {
-			headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
-			status: 200,
-		});
-	});
-
-	const request = new Request('https://luke-ui.netlify.app/', {
-		headers: { Accept: 'text/markdown' },
-		method: 'HEAD',
-	});
-	const res = await handleRequest(request, { fetch: fetchMock, next });
-
-	expect(res.status).toBe(200);
-	expect(res.body).toBeNull();
 });

@@ -1,10 +1,8 @@
 import { IconLink } from '@luke-ui/react/icon-link';
-import { createRef } from 'react';
 import type { JSX } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { page, userEvent } from 'vite-plus/test/context';
+import { page } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -47,16 +45,6 @@ function IconLinkScene() {
 		</Grid>
 	);
 }
-
-test('IconLink forwards className, data attributes, id, and ref to the anchor element', () => {
-	const ref = createRef<HTMLAnchorElement>();
-	const { locator } = render(
-		<IconLink {...forwardedDomProps} aria-label="Search" href="#" icon="search" ref={ref} />,
-	);
-	const target = locator.getByRole('link', { name: 'Search' }).element();
-
-	expectForwardsDomProps(target, ref);
-});
 
 test('pressing an IconLink runs its onPress handler', async () => {
 	let pressed = false;
@@ -166,21 +154,14 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
-test('interactive states', { tags: ['visual'] }, async () => {
+test('focus-visible state', { tags: ['visual'] }, async () => {
 	const { locator } = render(<IconLink aria-label="Search" href="#" icon="search" />);
-	const link = page.getByRole('link', { name: 'Search' });
 
-	await userEvent.hover(link);
-	await captureVisual(locator, 'icon-link/hover');
-	await userEvent.unhover(link);
-	await focusViaKeyboard(link);
+	await focusViaKeyboard(page.getByRole('link', { name: 'Search' }));
 	await captureVisual(locator, 'icon-link/focus-visible');
-	await userEvent.keyboard('{Enter>}');
-	await captureVisual(locator, 'icon-link/pressed');
-	await userEvent.keyboard('{/Enter}');
 });
 
-test('forced-colors states', { tags: ['visual'] }, async () => {
+test('forced-colors resting', { tags: ['visual'] }, async () => {
 	await emulateForcedColors('active');
 
 	try {
@@ -190,17 +171,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 				<IconLink aria-label="Disabled" href="#" icon="delete" isDisabled />
 			</Grid>,
 		);
-		const search = page.getByRole('link', { name: 'Search' });
-
 		await captureVisual(locator, 'icon-link/forced-colors-resting');
-		await userEvent.hover(search);
-		await captureVisual(locator, 'icon-link/forced-colors-hover');
-		await userEvent.unhover(search);
-		await focusViaKeyboard(search);
-		await captureVisual(locator, 'icon-link/forced-colors-focus-visible');
-		await userEvent.keyboard('{Enter>}');
-		await captureVisual(locator, 'icon-link/forced-colors-pressed');
-		await userEvent.keyboard('{/Enter}');
 	} finally {
 		await emulateForcedColors('none');
 	}

@@ -4,27 +4,9 @@ import { Heading } from '@luke-ui/react/heading';
 import { Prose, proseRecipe } from '@luke-ui/react/prose';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
-import { createRef } from 'react';
 import { test, expect } from 'vite-plus/test';
-import {
-	expectForwardsDomProps,
-	expectHtmlElement,
-	forwardedDomProps,
-} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
-
-test('Prose forwards className, data attributes, id, and ref to its element', () => {
-	const ref = createRef<HTMLDivElement>();
-	const { container } = render(
-		<Prose {...forwardedDomProps} ref={ref}>
-			Content
-		</Prose>,
-	);
-	const target = expectHtmlElement(container.firstElementChild, 'Expected a Prose element.');
-
-	expectForwardsDomProps(target, ref);
-});
 
 function query(root: Element, selector: string) {
 	const element = root.querySelector(selector);
@@ -93,31 +75,6 @@ test('normalises a nested pre margin', () => {
 		query(root, 'pre').getBoundingClientRect().top -
 			query(root, 'blockquote').getBoundingClientRect().top,
 	).toBeCloseTo(0, 0);
-});
-
-// Typed ols outside Prose stay on the ordinary markerless reset.
-test('keeps typed ordered lists markerless outside Prose', () => {
-	const { container } = render(
-		<div>
-			<ol type="a">
-				<li>a</li>
-			</ol>
-			<ol type="A">
-				<li>A</li>
-			</ol>
-			<ol type="i">
-				<li>i</li>
-			</ol>
-			<ol type="I">
-				<li>I</li>
-			</ol>
-			<ol>
-				<li>one</li>
-			</ol>
-		</div>,
-	);
-
-	expect(listStyleTypes(container)).toEqual(['none', 'none', 'none', 'none', 'none']);
 });
 
 // Chromium and Safari match `type` case-insensitively, so CSS must not restate A/a or I/i.

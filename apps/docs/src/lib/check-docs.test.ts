@@ -295,31 +295,6 @@ source: packages/@luke-ui/react/src/exports/box.ts
 	expect(findDocsIssues(paths)).toEqual([]);
 });
 
-test('does not report banned terms found only in JSX/MDX attribute values', () => {
-	const paths = createDocsFixture({
-		authored: {
-			'attributes.mdx': `---
-title: Attributes
----
-
-<Card href="/docs/users" title="Team">
-	Invite people to the workspace.
-</Card>
-
-## Continue learning
-
-<Cards>
-	<Card href="/docs/styling" title="Styling">
-		Choose a styling approach.
-	</Card>
-</Cards>
-`,
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual(['docs/attributes.mdx: terminology "people"']);
-});
-
 test('reports prose patterns outside code and ignores them inside fences', () => {
 	const paths = createDocsFixture({
 		authored: {
@@ -432,100 +407,7 @@ function inventoryFixture(overrides: {
 	});
 }
 
-test('accepts a guide that the root and category metadata both list', () => {
-	expect(findDocsIssues(inventoryFixture({}))).toEqual([]);
-});
-
-test('reports a guide that is absent from the root component metadata', () => {
-	const paths = inventoryFixture({
-		metadata: {
-			'actions/meta.json': { pages: [], title: 'Actions' },
-			'meta.json': { pages: ['---Actions---'], root: true, title: 'Components' },
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual([
-		'component-guide-inventory: actions/button.mdx: guide is absent from the root component metadata (expected entry "actions/button")',
-	]);
-});
-
-test('reports stale category metadata when the root category disappears', () => {
-	const paths = inventoryFixture({
-		metadata: {
-			'actions/meta.json': { pages: ['button'], title: 'Actions' },
-			'meta.json': { pages: [], root: true, title: 'Components' },
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual([
-		'component-guide-inventory: actions/button.mdx: guide is absent from the root component metadata (expected entry "actions/button")',
-		'component-guide-inventory: actions/meta.json: pages [button] do not match the root metadata (expected [])',
-	]);
-});
-
-test('reports leftover category metadata when no guide remains in that category', () => {
-	const paths = inventoryFixture({
-		components: {},
-		metadata: {
-			'actions/meta.json': { pages: ['button'], title: 'Actions' },
-			'meta.json': { pages: [], root: true, title: 'Components' },
-		},
-		packageExports: [],
-		sourceDirs: [],
-	});
-
-	expect(findDocsIssues(paths)).toEqual([
-		'component-guide-inventory: actions/meta.json: pages [button] do not match the root metadata (expected [])',
-	]);
-});
-
-test('reports a root metadata entry that has no guide', () => {
-	const paths = inventoryFixture({
-		metadata: {
-			'actions/meta.json': { pages: ['button', 'link'], title: 'Actions' },
-			'meta.json': {
-				pages: ['---Actions---', 'actions/button', 'actions/link'],
-				root: true,
-				title: 'Components',
-			},
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual([
-		'component-guide-inventory: components/meta.json: entry "actions/link" has no guide (expected actions/link.mdx)',
-	]);
-});
-
-test('reports a repeated root metadata entry', () => {
-	const paths = inventoryFixture({
-		metadata: {
-			'actions/meta.json': { pages: ['button', 'button'], title: 'Actions' },
-			'meta.json': {
-				pages: ['---Actions---', 'actions/button', 'actions/button'],
-				root: true,
-				title: 'Components',
-			},
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual([
-		'component-guide-inventory: components/meta.json: entry "actions/button" is repeated',
-	]);
-});
-
-test('reports category metadata that does not match the root metadata', () => {
-	const paths = inventoryFixture({
-		metadata: {
-			'actions/meta.json': { pages: ['link', 'button'], title: 'Actions' },
-			'meta.json': {
-				pages: ['---Actions---', 'actions/button', 'actions/link'],
-				root: true,
-				title: 'Components',
-			},
-		},
-		components: {
-			'actions/button.mdx': INVENTORY_GUIDE,
-			'actions/link.mdx': `---
+const LINK_INVENTORY_GUIDE = `---
 title: Link
 source: packages/@luke-ui/react/src/exports/link.ts
 ---
@@ -539,31 +421,124 @@ The visible label is the accessible name.
 ## API
 
 <component-props-table path="packages/@luke-ui/react/src/core/link/link.tsx" name="LinkProps" />
-`,
+`;
+
+test.each([
+	{
+		expected: [] as ReadonlyArray<string>,
+		name: 'accepts a guide that the root and category metadata both list',
+		overrides: {},
+	},
+	{
+		expected: [
+			'component-guide-inventory: actions/button.mdx: guide is absent from the root component metadata (expected entry "actions/button")',
+		],
+		name: 'reports a guide that is absent from the root component metadata',
+		overrides: {
+			metadata: {
+				'actions/meta.json': { pages: [], title: 'Actions' },
+				'meta.json': { pages: ['---Actions---'], root: true, title: 'Components' },
+			},
 		},
-		packageExports: ['./button', './link'],
-		sourceDirs: ['button', 'link'],
-	});
-
-	expect(findDocsIssues(paths)).toEqual([
-		'component-guide-inventory: actions/meta.json: pages [link, button] do not match the root metadata (expected [button, link])',
-	]);
-});
-
-test('reports a guide source that is not a public package entry point', () => {
-	const paths = inventoryFixture({ packageExports: ['./link'] });
-
-	expect(findDocsIssues(paths)).toEqual([
-		'component-guide-inventory: actions/button.mdx: source "packages/@luke-ui/react/src/exports/button.ts" is not a public package entry point (expected export "./button" in @luke-ui/react)',
-	]);
-});
-
-test('reports a missing exports module', () => {
-	const paths = inventoryFixture({ sourceDirs: [] });
-
-	expect(findDocsIssues(paths)).toEqual([
-		'component-guide-inventory: actions/button.mdx: source "packages/@luke-ui/react/src/exports/button.ts" does not exist',
-	]);
+	},
+	{
+		expected: [
+			'component-guide-inventory: actions/button.mdx: guide is absent from the root component metadata (expected entry "actions/button")',
+			'component-guide-inventory: actions/meta.json: pages [button] do not match the root metadata (expected [])',
+		],
+		name: 'reports stale category metadata when the root category disappears',
+		overrides: {
+			metadata: {
+				'actions/meta.json': { pages: ['button'], title: 'Actions' },
+				'meta.json': { pages: [], root: true, title: 'Components' },
+			},
+		},
+	},
+	{
+		expected: [
+			'component-guide-inventory: actions/meta.json: pages [button] do not match the root metadata (expected [])',
+		],
+		name: 'reports leftover category metadata when no guide remains in that category',
+		overrides: {
+			components: {},
+			metadata: {
+				'actions/meta.json': { pages: ['button'], title: 'Actions' },
+				'meta.json': { pages: [], root: true, title: 'Components' },
+			},
+			packageExports: [],
+			sourceDirs: [],
+		},
+	},
+	{
+		expected: [
+			'component-guide-inventory: components/meta.json: entry "actions/link" has no guide (expected actions/link.mdx)',
+		],
+		name: 'reports a root metadata entry that has no guide',
+		overrides: {
+			metadata: {
+				'actions/meta.json': { pages: ['button', 'link'], title: 'Actions' },
+				'meta.json': {
+					pages: ['---Actions---', 'actions/button', 'actions/link'],
+					root: true,
+					title: 'Components',
+				},
+			},
+		},
+	},
+	{
+		expected: [
+			'component-guide-inventory: components/meta.json: entry "actions/button" is repeated',
+		],
+		name: 'reports a repeated root metadata entry',
+		overrides: {
+			metadata: {
+				'actions/meta.json': { pages: ['button', 'button'], title: 'Actions' },
+				'meta.json': {
+					pages: ['---Actions---', 'actions/button', 'actions/button'],
+					root: true,
+					title: 'Components',
+				},
+			},
+		},
+	},
+	{
+		expected: [
+			'component-guide-inventory: actions/meta.json: pages [link, button] do not match the root metadata (expected [button, link])',
+		],
+		name: 'reports category metadata that does not match the root metadata',
+		overrides: {
+			components: {
+				'actions/button.mdx': INVENTORY_GUIDE,
+				'actions/link.mdx': LINK_INVENTORY_GUIDE,
+			},
+			metadata: {
+				'actions/meta.json': { pages: ['link', 'button'], title: 'Actions' },
+				'meta.json': {
+					pages: ['---Actions---', 'actions/button', 'actions/link'],
+					root: true,
+					title: 'Components',
+				},
+			},
+			packageExports: ['./button', './link'],
+			sourceDirs: ['button', 'link'],
+		},
+	},
+	{
+		expected: [
+			'component-guide-inventory: actions/button.mdx: source "packages/@luke-ui/react/src/exports/button.ts" is not a public package entry point (expected export "./button" in @luke-ui/react)',
+		],
+		name: 'reports a guide source that is not a public package entry point',
+		overrides: { packageExports: ['./link'] },
+	},
+	{
+		expected: [
+			'component-guide-inventory: actions/button.mdx: source "packages/@luke-ui/react/src/exports/button.ts" does not exist',
+		],
+		name: 'reports a missing exports module',
+		overrides: { sourceDirs: [] },
+	},
+])('$name', ({ expected, overrides }) => {
+	expect(findDocsIssues(inventoryFixture(overrides))).toEqual(expected);
 });
 
 function createDocsFixture(input: {

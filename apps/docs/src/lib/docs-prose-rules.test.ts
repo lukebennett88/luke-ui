@@ -59,39 +59,43 @@ test('"us" stays case-sensitive so it does not match inside another word', () =>
 	expect(findProseRuleLabels('This uses the default configuration.')).toEqual([]);
 });
 
-test('extractProseForRules strips an HTML entity so &mdash; is not read as an unspaced em dash', () => {
-	const prose = extractProseForRules('Use the &mdash; entity here.');
-	expect(findProseRuleLabels(prose)).toEqual([]);
-});
-
-test('extractProseForRules strips inline code so a banned word inside it is not reported', () => {
-	const prose = extractProseForRules('Call `we.simply()` to configure it.');
-	expect(findProseRuleLabels(prose)).toEqual([]);
-});
-
-test('extractProseForRules strips a JSX attribute value so a banned word inside it is not reported', () => {
-	const prose = extractProseForRules('<Callout title="We simply note that this works" />');
-	expect(findProseRuleLabels(prose)).toEqual([]);
-});
-
-test('extractProseForRules strips a single-line import line so a banned word in a binding name is not reported', () => {
-	const prose = extractProseForRules("import { we, us } from './data';\n\nConfigure it.");
-	expect(findProseRuleLabels(prose)).toEqual([]);
-});
-
-test('extractProseForRules strips fenced code so a banned word inside a code sample is not reported', () => {
-	const prose = extractProseForRules("```tsx\nconst users = ['we', 'us'];\n```\n\nConfigure it.");
-	expect(findProseRuleLabels(prose)).toEqual([]);
-});
-
-test('extractProseForRules strips frontmatter so a banned word in a title is not reported', () => {
-	const prose = extractProseForRules('---\ntitle: We simply note that\n---\n\nConfigure it.');
-	expect(findProseRuleLabels(prose)).toEqual([]);
-});
-
-test('extractProseForRules leaves ordinary prose outside code, tags, and imports intact', () => {
-	const prose = extractProseForRules(
-		"import { Foo } from './foo';\n\nThis prose keeps its semicolon; it should still be reported.\n\n<Foo />",
-	);
-	expect(findProseRuleLabels(prose)).toEqual(['prose semicolon']);
+test.each([
+	{
+		expected: [] as ReadonlyArray<string>,
+		name: 'strips an HTML entity so &mdash; is not read as an unspaced em dash',
+		source: 'Use the &mdash; entity here.',
+	},
+	{
+		expected: [],
+		name: 'strips inline code so a banned word inside it is not reported',
+		source: 'Call `we.simply()` to configure it.',
+	},
+	{
+		expected: [],
+		name: 'strips a JSX attribute value so a banned word inside it is not reported',
+		source: '<Callout title="We simply note that this works" />',
+	},
+	{
+		expected: [],
+		name: 'strips a single-line import line so a banned word in a binding name is not reported',
+		source: "import { we, us } from './data';\n\nConfigure it.",
+	},
+	{
+		expected: [],
+		name: 'strips fenced code so a banned word inside a code sample is not reported',
+		source: "```tsx\nconst users = ['we', 'us'];\n```\n\nConfigure it.",
+	},
+	{
+		expected: [],
+		name: 'strips frontmatter so a banned word in a title is not reported',
+		source: '---\ntitle: We simply note that\n---\n\nConfigure it.',
+	},
+	{
+		expected: ['prose semicolon'],
+		name: 'leaves ordinary prose outside code, tags, and imports intact',
+		source:
+			"import { Foo } from './foo';\n\nThis prose keeps its semicolon; it should still be reported.\n\n<Foo />",
+	},
+])('extractProseForRules $name', ({ expected, source }) => {
+	expect(findProseRuleLabels(extractProseForRules(source))).toEqual(expected);
 });
