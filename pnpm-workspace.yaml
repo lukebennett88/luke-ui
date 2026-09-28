@@ -76,7 +76,7 @@ catalog:
   fumadocs-ui: ^16.15.14
   knip: ^6.38.0
   lz-string: ^1.5.0
-  monaco-editor: ^0.56.0
+  monaco-editor: ^0.57.0
   node-html-parser: ^9.0.4
   oxc-parser: ^0.151.0
   oxc-transform-react: ^0.151.0
@@ -91,7 +91,7 @@ catalog:
   react-dom: ^19.3.0
   react-error-boundary: ^6.1.6
   react-hook-form: ^7.88.0
-  react-resizable-panels: ^4.13.2
+  react-resizable-panels: ^4.13.3
   serve: ^14.2.6
   shiki: ^4.4.3
   spin-doctor: ^0.0.1
