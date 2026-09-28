@@ -357,7 +357,7 @@ under `apps/docs/content/docs/docs/`, at `/docs/<slug>`. Component guides live u
 `apps/docs/content/docs/components/`, at `/components/<group>/<name>`.
 
 Generated files come from the docs `generate` script in `apps/docs/package.json`. Do not hand-edit
-them. Walking the docs tree, parsing frontmatter, extracting `<ExampleBlock>` `src` values, and
+them. Walking the docs page tree, parsing frontmatter, extracting `<ExampleBlock>` `src` values, and
 mapping page URLs to files each have one owner in `apps/docs/src/lib/`.
 
 Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
@@ -450,26 +450,24 @@ Every surface shares one top nav, `SiteNav` in `apps/docs/src/components/site-na
 the wordmark, the primary destinations, search, and the appearance controls. The wordmark links to
 `/`, the landing page. Docs opens `/docs/installation`. Components opens `/components`. The
 destination list and its active-route matching live in `apps/docs/src/lib/site-destinations.ts`, so
-the nav and the docs layout navigate to the same places. Appearance controls belong to the nav on
-every surface, not to the docs sidebar footer. They use flush ghost toggles so they sit on the
-header's translucent background instead of painting an opaque well.
+the nav and the docs shell navigate to the same places. Appearance controls belong to the nav on
+every surface, not to the docs sidebar footer. They use flush ghost toggles on the header's canvas
+background.
 
 The landing page at `/` renders `SiteNav` with no docs sidebar. It has no active destination.
 
-The docs routes use Fumadocs' notebook layout with `nav.mode: 'top'`, which spans the header across
-the full width and starts the sidebar beneath it. `apps/docs/src/lib/layout.shared.tsx` supplies the
-nav through the layout's `header` slot as `DocsSiteNav`
-(`apps/docs/src/components/docs-site-nav.tsx`), which adds the sidebar triggers. The playground and
-the 404 render `SiteNav` directly.
+The docs routes render `DocsShell`, a docs-local grid with the desktop navigation, mobile drawer,
+and `DocsSiteNav` header. `apps/docs/src/components/fumadocs-layout-adapter.tsx` retains the
+Fumadocs notebook context needed by the current article and table of contents. Its visible header
+and sidebar slots render nothing. The playground and the 404 render `SiteNav` directly.
 
 `DocsSiteNav` passes `hasSidebarNavigation`, which hides the bar's destinations below `lg`. That is
-the breakpoint where Fumadocs starts listing them in the sidebar and its mobile drawer instead, so
-they never appear twice. It also keeps the bar on one row at exactly `h-14`, which the layout's
-`--fd-header-height` is declared to match, so changing the bar's height means changing both.
-Surfaces with no sidebar keep the destinations at every width, moving them to a second nav row below
-`md`.
+the breakpoint where the local sidebar and mobile drawer provide those links instead, so they never
+appear twice. The bar stays on one `3.5rem` row (`SITE_HEADER_BLOCK_SIZE`). The shell's sticky
+sidebar offset and the retained article's table of contents rows depend on that height. Surfaces
+with no sidebar keep the destinations at every width, moving them to a second nav row below `md`.
 
-The notebook article and each example frame use `isolation: isolate` so in-flow stacking, such as
+The docs article and each example frame use `isolation: isolate` so in-flow stacking, such as
 example resize grips, cannot paint over the sticky header. Do not raise the header `z-index` to
 compete with page content.
 

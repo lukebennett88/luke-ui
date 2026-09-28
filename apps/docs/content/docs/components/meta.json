@@ -2,6 +2,8 @@
 	"title": "Components",
 	"root": true,
 	"pages": [
+		"---Overview---",
+		"index",
 		"---Actions---",
 		"actions/button",
 		"actions/icon-button",
@@ -45,6 +47,5 @@
 		"primitives/field",
 		"primitives/input-group",
 		"primitives/combobox"
-	],
-	"pagesIndex": "index"
+	]
 }

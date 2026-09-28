@@ -13,17 +13,14 @@ import {
 	IconToggleButtonGroup,
 	TextToggleButtonGroup,
 } from './playground/icon-toggle-button-group.js';
+import * as styles from './theme-controls.css.js';
 
 /**
  * The Luke UI theme root for docs content. `<html>` carries the identity class and
  * `data-color-mode`, set by the head script before paint.
  */
 export function DocsThemeRoot({ children }: PropsWithChildren) {
-	return (
-		<div className={cx(rootClassName, 'flex min-h-dvh flex-1 flex-col text-fd-foreground')}>
-			{children}
-		</div>
-	);
+	return <div className={cx(rootClassName, styles.root)}>{children}</div>;
 }
 
 export function ThemeControls({ className, style, ...props }: ComponentProps<'div'>) {
@@ -34,7 +31,7 @@ export function ThemeControls({ className, style, ...props }: ComponentProps<'di
 	return (
 		<div
 			{...props}
-			className={cx('flex items-center gap-1', className)}
+			className={cx(styles.controls, className)}
 			// Static HTML renders the default selection, so stay hidden until the stored one is known.
 			style={isHydrated ? style : { ...style, visibility: 'hidden' }}
 		>

@@ -234,6 +234,16 @@ test('ComboboxField reopens the popover when the focused input is clicked again'
 	await expect.element(page.getByRole('option', { name: 'Australia' })).toBeVisible();
 });
 
+test('an unlabeled ComboboxField exposes aria-label on the combobox', () => {
+	const { locator } = render(
+		<ComboboxField aria-label="Country" defaultItems={countryItems}>
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+
+	expect(locator.getByRole('combobox', { name: 'Country' }).element()).toBeTruthy();
+});
+
 test('ComboboxField clearing the tray search clears the selection', async () => {
 	mockScreenWidth(MOBILE_SCREEN_WIDTH);
 	const { container } = render(

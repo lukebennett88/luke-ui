@@ -40,8 +40,8 @@
 		"**/routeTree.gen.ts": true
 	},
 	"js/ts.tsdk.path": "node_modules/typescript/lib",
-	"oxc.path.oxfmt": "node_modules/.bin/oxfmt",
-	"oxc.path.oxlint": "node_modules/.bin/oxlint",
+	"oxc.disableNestedConfig": true,
+	"oxc.fmt.disableNestedConfig": true,
 	"search.exclude": {
 		"**/routeTree.gen.ts": true
 	}

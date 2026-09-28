@@ -1,4 +1,5 @@
 import type { ComponentProps, JSX, ReactNode } from 'react';
+import type { RequiredAccessibleName } from '../../types/accessible-name.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { FieldDescriptionProps } from './description.js';
@@ -22,17 +23,36 @@ export {
 	normalizeErrorMessage,
 };
 
-/** Label, description, and error props shared by field compositions. */
-export interface FieldSlotProps {
+/** Description and necessity props shared by field compositions. */
+interface FieldSlotContentProps {
 	/** Optional helper text shown below the control. */
 	description?: ReactNode;
+	/** Label necessity style. @default 'icon' */
+	necessityIndicator?: FieldNecessityIndicator;
+}
+
+/** Label, description, and error props for the `Field` primitive. */
+interface FieldSlotProps extends FieldSlotContentProps {
 	/** Error content passed to `FieldError`. Accepts React Aria's render-prop form. */
 	errorMessage?: FieldErrorProps['children'];
 	/** Label content shown above the control. */
 	label?: ReactNode;
-	/** Label necessity style. @default 'icon' */
-	necessityIndicator?: FieldNecessityIndicator;
 }
+
+/**
+ * Naming props for composed fields (`TextField`, `ComboboxField`).
+ *
+ * Pass a visible `label`, or omit `label` and provide exactly one of `aria-label` /
+ * `aria-labelledby`. Composition parents forward the aria props to the React Aria field root.
+ */
+export type FieldAccessibleNameProps =
+	| (FieldSlotContentProps & {
+			/** Label content shown above the control. */
+			label: Exclude<ReactNode, boolean | null | undefined>;
+	  })
+	| (FieldSlotContentProps & {
+			label?: never;
+	  } & RequiredAccessibleName);
 
 type PrimitiveFieldProps = ComponentProps<typeof PrimitiveField>;
 

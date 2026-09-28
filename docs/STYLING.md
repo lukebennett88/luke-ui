@@ -101,11 +101,10 @@ it last and it beats every component recipe.
 
 The docs app uses `@vanilla-extract/css` for docs-owned `.css.ts` files. Its Vite and Vitest configs
 run the Vanilla Extract plugin. Import a generated class from the component or route that applies
-it. The root route applies a small `base`-layer class from `src/styles/docs-root.css.ts` to
-`<body>`. That rule sets an unused custom property from a public Luke UI theme token, so the built
-CSS and HTML can confirm the generated CSS loads without changing the current UI. Keep docs-owned
-base styles in `base`, and put intentional component overrides in a higher layer. The layer order is
-declared before imports in `apps/docs/src/styles/app.css`.
+it. The root route applies a `base`-layer class from `src/styles/docs-root.css.ts` to `<body>` for
+the page's flex layout. Docs-owned shell, navigation, search, and theme controls use `recipes`-layer
+classes. Keep docs-owned base styles in `base`, and put intentional component overrides in a higher
+layer. The layer order is declared before imports in `apps/docs/src/styles/app.css`.
 
 Author component CSS with one of:
 
