@@ -182,6 +182,7 @@ export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }
 	return (
 		<div
 			className={styles.fieldMorphHost}
+			inert={isOpen || undefined}
 			ref={(node) => {
 				wideTriggerRef.current = node;
 			}}
@@ -199,7 +200,6 @@ export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }
 					onPress={() => openSearch('wide')}
 					prominence="low"
 					size="small"
-					tabIndex={isOpen ? -1 : undefined}
 				>
 					<Track
 						className={styles.triggerTrack}
