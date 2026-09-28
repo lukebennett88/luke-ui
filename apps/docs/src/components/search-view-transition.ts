@@ -4,9 +4,6 @@ const DOCS_SEARCH_FIELD_VT_NAME = 'luke-docs-search-field';
 /** View Transition Class applied during the shared-element morph. */
 export const DOCS_SEARCH_FIELD_VT_SHARE_CLASS = 'docs-search-field-share';
 
-/** Matches `vars.motion.duration.enter` used for the search field share morph. */
-export const DOCS_SEARCH_FIELD_VT_SHARE_DURATION_MS = 250;
-
 export const searchFieldViewTransition = {
 	default: 'none',
 	enter: 'none',

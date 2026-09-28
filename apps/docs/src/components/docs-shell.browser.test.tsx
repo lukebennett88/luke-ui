@@ -176,7 +176,7 @@ test('opens the mobile drawer, exposes site and docs navigation, and restores fo
 		</DocsShell>,
 	);
 
-	const trigger = page.getByRole('button', { name: 'Open docs navigation' });
+	const trigger = page.getByRole('button', { name: 'Menu' });
 	await act(async () => {
 		await userEvent.click(trigger);
 	});
@@ -208,7 +208,7 @@ test('closes the mobile drawer from its close button and restores focus', async 
 		</DocsShell>,
 	);
 
-	const trigger = page.getByRole('button', { name: 'Open docs navigation' });
+	const trigger = page.getByRole('button', { name: 'Menu' });
 	await act(async () => {
 		await userEvent.click(trigger);
 	});
@@ -230,7 +230,7 @@ test('closes the mobile drawer when a docs nav link is activated', async () => {
 	);
 
 	await act(async () => {
-		await userEvent.click(page.getByRole('button', { name: 'Open docs navigation' }));
+		await userEvent.click(page.getByRole('button', { name: 'Menu' }));
 	});
 	const dialog = page.getByRole('dialog', { name: 'Docs navigation' });
 	await expect.element(dialog).toBeVisible();
@@ -250,7 +250,7 @@ test('shows the Components section in the mobile drawer', async () => {
 	);
 
 	await act(async () => {
-		await userEvent.click(page.getByRole('button', { name: 'Open docs navigation' }));
+		await userEvent.click(page.getByRole('button', { name: 'Menu' }));
 	});
 	const dialog = page.getByRole('dialog', { name: 'Docs navigation' });
 	await expect.element(dialog.getByRole('link', { name: 'All components' })).toBeVisible();
@@ -270,7 +270,7 @@ test('closes the mobile drawer when the viewport crosses into the desktop layout
 	);
 
 	await act(async () => {
-		await userEvent.click(page.getByRole('button', { name: 'Open docs navigation' }));
+		await userEvent.click(page.getByRole('button', { name: 'Menu' }));
 	});
 	await expect.element(page.getByRole('dialog', { name: 'Docs navigation' })).toBeVisible();
 

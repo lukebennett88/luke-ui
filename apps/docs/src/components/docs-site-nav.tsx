@@ -1,3 +1,4 @@
+import { Button } from '@luke-ui/react/button';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { rootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
@@ -27,12 +28,10 @@ export function DocsSiteNav({ tree }: { tree: Root }) {
 	return (
 		<SiteNav className={styles.header} hasSidebarNavigation>
 			<DialogTrigger isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-				<IconButton
-					aria-label="Open docs navigation"
-					className={styles.mobileTrigger}
-					icon="bookOpen"
-					size="small"
-				/>
+				{/* No bars/menu glyph in the Luke UI set; match the Theme labelled control. */}
+				<Button className={styles.mobileTrigger} prominence="low" size="small">
+					Menu
+				</Button>
 				<ModalOverlay className={cx(rootClassName, styles.drawerOverlay)} isDismissable>
 					<Modal className={styles.drawerModal}>
 						<Dialog aria-label="Docs navigation" className={styles.drawerDialog}>

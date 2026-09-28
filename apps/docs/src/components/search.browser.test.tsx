@@ -44,6 +44,18 @@ const { getSearchResults, MANY_RESULTS_COUNT } = vi.hoisted(() => {
 						content: 'Pass a `field.ref` with a <mark>ref</mark> callback',
 					},
 					{
+						id: 'jsx',
+						url: '/docs/button#jsx',
+						type: 'text',
+						content: 'Render `<Button>` or a bare <T> token',
+					},
+					{
+						id: 'generic',
+						url: '/docs/button#generic',
+						type: 'text',
+						content: 'Accepts `Array<T>` and ReadonlyArray<T>',
+					},
+					{
 						id: 'external',
 						url: 'https://example.com/button',
 						type: 'text',
@@ -222,7 +234,7 @@ test('shows safe highlighted results, breadcrumbs, and an empty state', async ()
 	await renderSearch();
 	const input = await openSearchDialog();
 	await typeSearchQuery(input, 'button');
-	await expect.element(page.getByRole('status')).toHaveTextContent('4 results');
+	await expect.element(page.getByRole('status')).toHaveTextContent('6 results');
 
 	const internal = page.getByRole('menuitem', { name: /Use the Button component/ });
 	await expect.element(internal).toBeVisible();
@@ -243,6 +255,17 @@ test('shows safe highlighted results, breadcrumbs, and an empty state', async ()
 	await expect.element(code).toBeVisible();
 	expect(code.element().querySelector('code')?.textContent).toBe('field.ref');
 	expect(code.element().querySelector('mark')?.textContent).toBe('ref');
+
+	const jsx = page.getByRole('menuitem', { name: /Render <Button> or a bare <T> token/ });
+	await expect.element(jsx).toBeVisible();
+	expect(jsx.element().querySelector('code')?.textContent).toBe('<Button>');
+	expect(jsx.element().textContent).toContain('<T>');
+	expect(jsx.element().querySelector('button')).toBeNull();
+
+	const generic = page.getByRole('menuitem', { name: /Accepts Array<T> and ReadonlyArray<T>/ });
+	await expect.element(generic).toBeVisible();
+	expect(generic.element().querySelector('code')?.textContent).toBe('Array<T>');
+	expect(generic.element().textContent).toContain('ReadonlyArray<T>');
 
 	const external = page.getByRole('menuitem', { name: /External Button reference/ });
 	await expect.element(external).toHaveAttribute('href', 'https://example.com/button');

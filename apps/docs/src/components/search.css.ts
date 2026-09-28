@@ -59,22 +59,10 @@ const reducedMotionOverlay = {
 	},
 } as const satisfies ComplexStyleRule;
 
-const reducedMotionPanelResults = {
+const reducedMotionNoTransition = {
 	'@media': {
 		'(prefers-reduced-motion: reduce)': {
 			transition: 'none',
-			selectors: {
-				'&[data-entering]': {
-					maxBlockSize: 'min(calc(70dvh - 3rem), 36rem)',
-					opacity: 1,
-					transition: 'none',
-				},
-				'&[data-exiting]': {
-					maxBlockSize: 0,
-					opacity: 1,
-					transition: 'none',
-				},
-			},
 		},
 	},
 } as const satisfies ComplexStyleRule;
@@ -251,20 +239,34 @@ export const panelResultsRegion = style({
 			overflow: 'hidden',
 			paddingBlockEnd: vars.space.sp8,
 			transition: panelResultsEnter,
-			...reducedMotionPanelResults,
+			...reducedMotionNoTransition,
 		},
 	},
 });
 
-globalStyle(`${panel}[data-entering] ${panelResultsRegion}`, {
+// `data-entering` / `data-exiting` live on the React Aria overlay, not the plain panel div.
+globalStyle(`${overlay}[data-entering] ${panelResultsRegion}`, {
 	maxBlockSize: 0,
 	opacity: 0,
+	'@media': {
+		'(prefers-reduced-motion: reduce)': {
+			maxBlockSize: 'min(calc(70dvh - 3rem), 36rem)',
+			opacity: 1,
+			transition: 'none',
+		},
+	},
 });
 
-globalStyle(`${panel}[data-exiting] ${panelResultsRegion}`, {
+globalStyle(`${overlay}[data-exiting] ${panelResultsRegion}`, {
 	maxBlockSize: 0,
 	opacity: 0,
 	transition: panelResultsExit,
+	'@media': {
+		'(prefers-reduced-motion: reduce)': {
+			opacity: 1,
+			transition: 'none',
+		},
+	},
 });
 
 export const autocomplete = style({

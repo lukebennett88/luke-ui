@@ -5,14 +5,12 @@ import { Button } from '@luke-ui/react/primitives/button';
 import { Track } from '@luke-ui/react/track';
 import {
 	createContext,
-	lazy,
-	Suspense,
 	startTransition,
 	use,
 	useCallback,
 	useEffect,
-	useMemo,
 	useLayoutEffect,
+	useMemo,
 	useRef,
 	useState,
 	useSyncExternalStore,
@@ -25,21 +23,14 @@ import {
 	measureSearchAnchor,
 } from './search-anchor.js';
 import type { SearchAnchorRect } from './search-anchor.js';
-import {
-	DOCS_SEARCH_FIELD_VT_SHARE_DURATION_MS,
-	searchFieldViewTransition,
-} from './search-view-transition.js';
+import { DocsSearchDialog } from './search-dialog.js';
+import { searchFieldViewTransition } from './search-view-transition.js';
 import * as styles from './search.css.js';
-
-const DocsSearchDialog = lazy(() =>
-	import('./search-dialog.js').then((module) => ({ default: module.DocsSearchDialog })),
-);
 
 interface SearchContextValue {
 	compactTriggerRef: RefObject<HTMLElement | null>;
 	isOpen: boolean;
 	openSearch: (source?: 'compact' | 'wide') => void;
-	preloadSearchDialog: () => void;
 	setSearchOpen: (isOpen: boolean) => void;
 	wideTriggerRef: RefObject<HTMLElement | null>;
 }
@@ -68,19 +59,9 @@ function resolveSearchTrigger(
 
 export function DocsSearchProvider({ children }: { children: ReactNode }) {
 	const [isOpen, setIsOpen] = useState(false);
-	const [hasOpened, setHasOpened] = useState(false);
 	const [anchor, setAnchor] = useState<SearchAnchorRect | null>(null);
-	const focusRestoreRef = useRef<HTMLElement | null>(null);
-	const lastOpenSourceRef = useRef<'compact' | 'wide'>('wide');
 	const wideTriggerRef = useRef<HTMLElement | null>(null);
 	const compactTriggerRef = useRef<HTMLElement | null>(null);
-	const pendingOpenRef = useRef<(() => void) | null>(null);
-
-	const mountSearchDialog = useCallback(() => {
-		void import('./search-dialog.js').then(() => {
-			setHasOpened(true);
-		});
-	}, []);
 
 	const updateAnchor = useCallback((source?: 'compact' | 'wide') => {
 		const trigger = resolveSearchTrigger(wideTriggerRef, compactTriggerRef, source);
@@ -88,69 +69,18 @@ export function DocsSearchProvider({ children }: { children: ReactNode }) {
 		setAnchor(measured ? fitSearchAnchorToViewport(measured) : null);
 	}, []);
 
+	// View Transition morph needs the open update in a transition.
 	const setSearchOpen = useCallback((nextOpen: boolean) => {
 		startTransition(() => setIsOpen(nextOpen));
 	}, []);
 
-	const restoreSearchFocus = useCallback(() => {
-		const previous = focusRestoreRef.current;
-		if (previous?.isConnected) {
-			previous.focus();
-			return;
-		}
-		if (lastOpenSourceRef.current === 'compact') {
-			compactTriggerRef.current?.focus();
-			return;
-		}
-		wideTriggerRef.current?.querySelector('button')?.focus();
-	}, []);
-
 	const openSearch = useCallback(
 		(source?: 'compact' | 'wide') => {
-			lastOpenSourceRef.current =
-				source ?? (isSearchTriggerVisible(wideTriggerRef.current) ? 'wide' : 'compact');
-			focusRestoreRef.current =
-				document.activeElement instanceof HTMLElement ? document.activeElement : null;
-			const applyOpen = () => {
-				updateAnchor(source);
-				startTransition(() => setIsOpen(true));
-			};
-			if (hasOpened) {
-				pendingOpenRef.current = null;
-				applyOpen();
-				return;
-			}
-			pendingOpenRef.current = applyOpen;
-			mountSearchDialog();
+			updateAnchor(source);
+			setSearchOpen(true);
 		},
-		[hasOpened, mountSearchDialog, updateAnchor],
+		[setSearchOpen, updateAnchor],
 	);
-
-	useLayoutEffect(() => {
-		if (!hasOpened || !pendingOpenRef.current) return;
-		const frame = requestAnimationFrame(() => {
-			const applyOpen = pendingOpenRef.current;
-			pendingOpenRef.current = null;
-			applyOpen?.();
-		});
-		return () => cancelAnimationFrame(frame);
-	}, [hasOpened]);
-
-	useEffect(() => {
-		mountSearchDialog();
-	}, [mountSearchDialog]);
-
-	const wasOpenRef = useRef(false);
-	useEffect(() => {
-		if (isOpen) {
-			wasOpenRef.current = true;
-			return;
-		}
-		if (!wasOpenRef.current) return;
-		wasOpenRef.current = false;
-		const timeout = window.setTimeout(restoreSearchFocus, DOCS_SEARCH_FIELD_VT_SHARE_DURATION_MS);
-		return () => window.clearTimeout(timeout);
-	}, [isOpen, restoreSearchFocus]);
 
 	useEffect(() => {
 		function onKeyDown(event: KeyboardEvent) {
@@ -190,21 +120,16 @@ export function DocsSearchProvider({ children }: { children: ReactNode }) {
 			compactTriggerRef,
 			isOpen,
 			openSearch,
-			preloadSearchDialog: mountSearchDialog,
 			setSearchOpen,
 			wideTriggerRef,
 		}),
-		[compactTriggerRef, isOpen, mountSearchDialog, openSearch, setSearchOpen, wideTriggerRef],
+		[isOpen, openSearch, setSearchOpen],
 	);
 
 	return (
 		<SearchContext value={contextValue}>
 			{children}
-			{hasOpened && (
-				<Suspense fallback={null}>
-					<DocsSearchDialog anchor={anchor} isOpen={isOpen} onOpenChange={setSearchOpen} />
-				</Suspense>
-			)}
+			<DocsSearchDialog anchor={anchor} isOpen={isOpen} onOpenChange={setSearchOpen} />
 		</SearchContext>
 	);
 }
@@ -237,13 +162,12 @@ function SearchShortcutLabel() {
 export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }) {
 	const context = use(SearchContext);
 	if (!context) throw new Error('DocsSearchTrigger must be inside DocsSearchProvider');
-	const { compactTriggerRef, isOpen, openSearch, preloadSearchDialog, wideTriggerRef } = context;
+	const { compactTriggerRef, isOpen, openSearch, wideTriggerRef } = context;
 	if (isCompact) {
 		return (
 			<IconButton
 				aria-label="Open Search"
 				icon="search"
-				onPointerEnter={preloadSearchDialog}
 				onPress={() => openSearch('compact')}
 				ref={(node) => {
 					compactTriggerRef.current = node;
@@ -253,34 +177,29 @@ export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }
 		);
 	}
 
-	if (isOpen) {
-		return (
-			<span
-				aria-hidden
-				className={styles.triggerSlotReserve}
-				ref={(node) => {
-					wideTriggerRef.current = node;
-				}}
-			/>
-		);
-	}
-
+	// Keep the same button node mounted while open so React Aria can restore focus to it.
+	// Drop the shared VT name once open so only the dialog field owns the morph target.
 	return (
-		<ViewTransition {...searchFieldViewTransition}>
-			<div
-				className={styles.fieldMorphHost}
-				ref={(node) => {
-					wideTriggerRef.current = node;
-				}}
+		<div
+			className={styles.fieldMorphHost}
+			ref={(node) => {
+				wideTriggerRef.current = node;
+			}}
+		>
+			<ViewTransition
+				{...(isOpen
+					? { default: 'none', enter: 'none', exit: 'none', name: 'none', share: 'none' }
+					: searchFieldViewTransition)}
 			>
 				<Button
+					aria-hidden={isOpen || undefined}
 					aria-label="Search documentation"
-					className={styles.trigger}
+					className={isOpen ? styles.triggerSlotReserve : styles.trigger}
 					isBlock
-					onPointerEnter={preloadSearchDialog}
 					onPress={() => openSearch('wide')}
 					prominence="low"
 					size="small"
+					tabIndex={isOpen ? -1 : undefined}
 				>
 					<Track
 						className={styles.triggerTrack}
@@ -293,7 +212,7 @@ export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }
 						<span className={styles.triggerPlaceholder}>Search</span>
 					</Track>
 				</Button>
-			</div>
-		</ViewTransition>
+			</ViewTransition>
+		</div>
 	);
 }

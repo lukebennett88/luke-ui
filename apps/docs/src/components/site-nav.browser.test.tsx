@@ -119,7 +119,7 @@ test('opening search does not also open the docs navigation drawer, and vice ver
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
 	await act(async () => {
-		await userEvent.click(page.getByRole('button', { name: 'Open docs navigation' }));
+		await userEvent.click(page.getByRole('button', { name: 'Menu' }));
 	});
 	await expect.element(page.getByRole('dialog', { name: 'Docs navigation' })).toBeVisible();
 	await expect

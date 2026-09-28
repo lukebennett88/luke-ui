@@ -23,6 +23,7 @@ import { Modal, ModalOverlay } from 'react-aria-components/Modal';
 import { TextContext } from 'react-aria-components/Text';
 import { create } from 'zbsearch';
 import type { SearchAnchorRect } from './search-anchor.js';
+import { plainText } from './search-content.js';
 import { searchFieldViewTransition } from './search-view-transition.js';
 import * as styles from './search.css.js';
 
@@ -36,8 +37,6 @@ interface DocsSearchDialogProps {
 	onOpenChange: (isOpen: boolean) => void;
 }
 
-const HTML_TAG_PATTERN = /<[^>]*>/g;
-const MARKDOWN_EMPHASIS_PATTERN = /\*\*|__|`/g;
 const MARK_OR_CODE_PATTERN = /(<mark>.*?<\/mark>|`[^`]*`)/gi;
 const MARK_PATTERN = /^<mark>(.*)<\/mark>$/i;
 const CODE_SPAN_PATTERN = /^`([^`]*)`$/;
@@ -97,108 +96,102 @@ export function DocsSearchDialog({ anchor, isOpen, onOpenChange }: DocsSearchDia
 			isOpen={isOpen}
 			onOpenChange={(nextOpen) => (nextOpen ? onOpenChange(true) : close())}
 		>
-			{isOpen ? (
-				<Modal className={styles.modalPassThrough}>
-					<div className={styles.panel} style={panelPositionStyle}>
-						<Dialog aria-label="Search documentation" className={styles.dialog}>
-							<RouterProvider
-								navigate={(href) => void router.navigate({ href })}
-								useHref={(href) => {
-									if (isExternalUrl(href)) return href;
-									// buildLocation accepts href at runtime but its type omits it.
-									const location = router.buildLocation({ href } as NavigateOptions);
-									return router.history.createHref(location.publicHref);
-								}}
-							>
-								<ViewTransition {...searchFieldViewTransition}>
-									<div className={styles.fieldMorphHost}>
-										<div className={styles.panelFieldShell}>
-											<div className={styles.autocomplete}>
-												<Autocomplete inputValue={search} onInputChange={setSearch}>
-													<Track
-														className={styles.inputRow}
-														gap="sp12"
-														railAlignment="center"
-														railEnd={
-															<Button
-																aria-label="Close search"
-																className={styles.close}
-																onPress={close}
-																prominence="low"
-																size="small"
-															>
-																<Kbd>Esc</Kbd>
-															</Button>
-														}
-													>
-														<TextField
-															aria-label="Search documentation"
-															autoComplete="off"
-															autoFocus // oxlint-disable-line jsx-a11y/no-autofocus -- The dialog only mounts after someone opens it.
-															className={styles.field}
-															inputClassName={styles.input}
-															placeholder="Search documentation"
-															prefix={<Icon name="search" size="small" />}
+			<Modal className={styles.modalPassThrough}>
+				<div className={styles.panel} style={panelPositionStyle}>
+					<Dialog aria-label="Search documentation" className={styles.dialog}>
+						<RouterProvider
+							navigate={(href) => void router.navigate({ href })}
+							useHref={(href) => {
+								if (isExternalUrl(href)) return href;
+								// buildLocation accepts href at runtime but its type omits it.
+								const location = router.buildLocation({ href } as NavigateOptions);
+								return router.history.createHref(location.publicHref);
+							}}
+						>
+							<ViewTransition {...searchFieldViewTransition}>
+								<div className={styles.fieldMorphHost}>
+									<div className={styles.panelFieldShell}>
+										<div className={styles.autocomplete}>
+											<Autocomplete inputValue={search} onInputChange={setSearch}>
+												<Track
+													className={styles.inputRow}
+													gap="sp12"
+													railAlignment="center"
+													railEnd={
+														<Button
+															aria-label="Close search"
+															className={styles.close}
+															onPress={close}
+															prominence="low"
 															size="small"
-															type="search"
-														/>
-													</Track>
-													<div className={styles.panelResultsRegion}>
-														{/* Static empty copy: embedding the query would re-announce on every keystroke. */}
-														<Text
-															className={hasResults ? styles.resultSummary : styles.empty}
-															color="secondary"
-															elementType="p"
-															role="status"
-															typography="caption"
 														>
-															{statusMessage}
-														</Text>
-														<Menu
-															aria-label="Search results"
-															className={styles.results}
-															onAction={close}
-														>
-															{results.map((result) => (
-																<MenuItem
-																	className={
-																		result.type === 'page'
-																			? styles.result
-																			: cx(styles.result, styles.nestedItem)
-																	}
-																	href={result.url}
-																	id={result.id}
-																	key={result.id}
-																	rel={
-																		isExternalUrl(result.url) ? 'noopener noreferrer' : undefined
-																	}
-																	target={isExternalUrl(result.url) ? '_blank' : undefined}
-																	textValue={plainText(result.content)}
-																>
-																	{/* Luke UI `Code` renders `Text`, which would claim MenuItem's label slot. */}
-																	<TextContext value={null}>
-																		<ResultBody result={result} />
-																	</TextContext>
-																</MenuItem>
-															))}
-														</Menu>
-													</div>
-												</Autocomplete>
-											</div>
+															<Kbd>Esc</Kbd>
+														</Button>
+													}
+												>
+													<TextField
+														aria-label="Search documentation"
+														autoComplete="off"
+														autoFocus // oxlint-disable-line jsx-a11y/no-autofocus -- Focus the field when the modal opens.
+														className={styles.field}
+														inputClassName={styles.input}
+														placeholder="Search documentation"
+														prefix={<Icon name="search" />}
+														size="small"
+														type="search"
+													/>
+												</Track>
+												<div className={styles.panelResultsRegion}>
+													{/* Static empty copy: embedding the query would re-announce on every keystroke. */}
+													<Text
+														className={hasResults ? styles.resultSummary : styles.empty}
+														color="secondary"
+														elementType="p"
+														role="status"
+														typography="caption"
+													>
+														{statusMessage}
+													</Text>
+													<Menu
+														aria-label="Search results"
+														className={styles.results}
+														onAction={close}
+													>
+														{results.map((result) => (
+															<MenuItem
+																className={
+																	result.type === 'page'
+																		? styles.result
+																		: cx(styles.result, styles.nestedItem)
+																}
+																href={result.url}
+																id={result.id}
+																key={result.id}
+																rel={
+																	isExternalUrl(result.url) ? 'noopener noreferrer' : undefined
+																}
+																target={isExternalUrl(result.url) ? '_blank' : undefined}
+																textValue={plainText(result.content)}
+															>
+																{/* Luke UI `Code` renders `Text`, which would claim MenuItem's label slot. */}
+																<TextContext value={null}>
+																	<ResultBody result={result} />
+																</TextContext>
+															</MenuItem>
+														))}
+													</Menu>
+												</div>
+											</Autocomplete>
 										</div>
 									</div>
-								</ViewTransition>
-							</RouterProvider>
-						</Dialog>
-					</div>
-				</Modal>
-			) : null}
+								</div>
+							</ViewTransition>
+						</RouterProvider>
+					</Dialog>
+				</div>
+			</Modal>
 		</ModalOverlay>
 	);
-}
-
-function plainText(value: string) {
-	return value.replace(HTML_TAG_PATTERN, '').replace(MARKDOWN_EMPHASIS_PATTERN, '');
 }
 
 /**
