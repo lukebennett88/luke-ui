@@ -198,10 +198,10 @@ catalogs:
       specifier: ^1.33.5
       version: 1.33.5
     '@tanstack/react-router':
-      specifier: ^1.170.38
+      specifier: ^1.170.39
       version: 1.170.39
     '@tanstack/react-start':
-      specifier: ^1.168.57
+      specifier: ^1.168.58
       version: 1.168.58
     '@tanstack/router-cli':
       specifier: ^1.167.38
