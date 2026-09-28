@@ -44,16 +44,22 @@ interface FieldSlotProps extends FieldSlotContentProps {
  *
  * Pass a visible `label`, or omit `label` and provide exactly one of `aria-label` /
  * `aria-labelledby`. Composition parents forward the aria props to the React Aria field root.
+ *
+ * The labelled branch names `aria-label` / `aria-labelledby` as `never` so every union
+ * constituent carries those keys. That keeps the type-level XOR with `label`, and lets prop-table
+ * analysis see the accessible-name props the same way `RequiredAccessibleName` does for icon-only
+ * controls.
  */
 export type FieldAccessibleNameProps =
 	| (FieldSlotContentProps & {
 			/** Label content shown above the control. */
 			label: Exclude<ReactNode, boolean | null | undefined>;
+			'aria-label'?: never;
+			'aria-labelledby'?: never;
 	  })
 	| (FieldSlotContentProps & {
 			label?: never;
 	  } & RequiredAccessibleName);
-
 type PrimitiveFieldProps = ComponentProps<typeof PrimitiveField>;
 
 type _FieldOmit = DistributiveOmit<PrimitiveFieldProps, 'children'>;

@@ -58,11 +58,30 @@ test(
 			'TextFieldProps',
 		);
 		expect(names).toContain('label');
+		expect(names).toContain('aria-label');
+		expect(names).toContain('aria-labelledby');
 		expect(names).toContain('value');
 		expect(names).toContain('onChange');
 		expect(names).toContain('description');
 		expect(names).not.toContain('onClick');
 		expect(names).not.toContain('className');
+		expect(names).not.toContain('onPointerMoveCapture');
+	},
+	TS_MORPH_TEST_TIMEOUT,
+);
+
+test(
+	'keeps accessible-name props on ComboboxField while hiding generic DOM props',
+	async () => {
+		const names = await visiblePropNames(
+			'packages/@luke-ui/react/src/core/combobox-field/combobox-field.tsx',
+			'ComboboxFieldProps',
+		);
+		expect(names).toContain('label');
+		expect(names).toContain('aria-label');
+		expect(names).toContain('aria-labelledby');
+		expect(names).toContain('defaultItems');
+		expect(names).not.toContain('onClick');
 		expect(names).not.toContain('onPointerMoveCapture');
 	},
 	TS_MORPH_TEST_TIMEOUT,
