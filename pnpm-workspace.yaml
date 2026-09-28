@@ -70,10 +70,10 @@ catalog:
   axe-core: ^4.13.0
   csstype: ^3.2.3
   eslint-plugin-react-hooks: ^7.1.1
-  fumadocs-core: ^16.15.13
-  fumadocs-mdx: ^15.4.3
+  fumadocs-core: ^16.15.14
+  fumadocs-mdx: ^15.4.4
   fumadocs-typescript: ^5.4.1
-  fumadocs-ui: ^16.15.13
+  fumadocs-ui: ^16.15.14
   knip: ^6.38.0
   lz-string: ^1.5.0
   monaco-editor: ^0.56.0
