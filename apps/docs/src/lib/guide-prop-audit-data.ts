@@ -72,7 +72,6 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		],
 	'forms/text-field.mdx::packages/@luke-ui/react/src/core/text-field/text-field.tsx::TextFieldProps':
 		[
-			'aria-label',
 			'errorMessage',
 			'isRequired',
 			'label',
