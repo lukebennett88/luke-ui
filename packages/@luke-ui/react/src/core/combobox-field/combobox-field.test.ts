@@ -21,8 +21,8 @@ test('ComboboxField requires a visible label or an accessible name', () => {
 		'aria-labelledby': 'country-heading',
 		children: () => null,
 	});
+	// @ts-expect-error — a visible label and aria-label are mutually exclusive
 	assertType<ComboboxFieldProps<Item>>({
-		// @ts-expect-error — a visible label and aria-label are mutually exclusive
 		'aria-label': 'Country',
 		children: () => null,
 		label: 'Country',
