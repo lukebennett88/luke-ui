@@ -68,11 +68,13 @@ function readGroups(rootDir: string): ReadonlyArray<ComponentIndexGroup> {
 	const entries = rootMeta.pages ?? [];
 	const groups: Array<ComponentIndexGroup> = [];
 	let currentTitle = 'Components';
+	// Stays undefined until a source-backed guide arrives, so separators never emit an empty group.
+	let currentGroup: ComponentIndexGroup | undefined;
 
 	for (const entry of entries) {
 		if (isSeparator(entry)) {
 			currentTitle = entry.slice(3, -3);
-			groups.push({ entries: [], title: currentTitle });
+			currentGroup = undefined;
 			continue;
 		}
 
@@ -82,13 +84,12 @@ function readGroups(rootDir: string): ReadonlyArray<ComponentIndexGroup> {
 		const frontmatter = readFrontmatter(readFileSync(guidePath, 'utf8'));
 		if (frontmatter.source === undefined) continue;
 
-		let lastGroup = groups[groups.length - 1];
-		if (!lastGroup) {
-			lastGroup = { entries: [], title: currentTitle };
-			groups.push(lastGroup);
+		if (!currentGroup) {
+			currentGroup = { entries: [], title: currentTitle };
+			groups.push(currentGroup);
 		}
 
-		lastGroup.entries.push({
+		currentGroup.entries.push({
 			description: frontmatter.description ?? '',
 			name: frontmatter.title ?? entry,
 			url: `/components/${entry}`,

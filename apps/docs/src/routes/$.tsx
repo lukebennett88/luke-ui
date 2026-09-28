@@ -4,7 +4,6 @@ import { createServerFn } from '@tanstack/react-start';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
-import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/notebook/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
@@ -14,15 +13,14 @@ import * as codeBlockStyles from '../components/code-block/code-block.css.js';
 import { CodeBlock } from '../components/code-block/code-block.js';
 import type { CodeBlockProps } from '../components/code-block/code-block.js';
 import { ComponentPropsTable } from '../components/component-props-table.js';
-import { DocsTreePathnameProvider } from '../components/docs-tree-pathname-provider.js';
 import { ExampleBlock } from '../components/example-block';
+import { FumadocsLayoutAdapter } from '../components/fumadocs-layout-adapter.js';
 import { IconGallery } from '../components/icon-gallery';
 import { PageActions } from '../components/page-actions';
 import type { PageActionsMode } from '../components/page-actions';
 import { SourceCodeBlock } from '../components/source-code-block';
 import { withBasePath } from '../lib/base-path.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
-import { baseOptions } from '../lib/layout.shared';
 import { markdownUrlForPage } from '../lib/markdown-page-path.js';
 import { resolvePageHeadMeta } from '../lib/page-head.js';
 import { source } from '../lib/source';
@@ -158,19 +156,17 @@ function Page() {
 	const data = useFumadocsLoader(Route.useLoaderData());
 
 	return (
-		<DocsTreePathnameProvider>
-			<DocsLayout {...baseOptions()} tree={data.pageTree}>
-				<Suspense>
-					{clientLoader.useContent(data.path, {
-						className: 'pb-16 md:pb-20 xl:pb-24',
-						githubUrl: data.githubUrl,
-						markdownUrl: data.markdownUrl,
-						pageActions: data.pageActions,
-						reactAriaUrl: data.reactAriaUrl,
-						sourceUrl: data.sourceUrl,
-					})}
-				</Suspense>
-			</DocsLayout>
-		</DocsTreePathnameProvider>
+		<FumadocsLayoutAdapter tree={data.pageTree}>
+			<Suspense>
+				{clientLoader.useContent(data.path, {
+					className: 'pb-16 md:pb-20 xl:pb-24',
+					githubUrl: data.githubUrl,
+					markdownUrl: data.markdownUrl,
+					pageActions: data.pageActions,
+					reactAriaUrl: data.reactAriaUrl,
+					sourceUrl: data.sourceUrl,
+				})}
+			</Suspense>
+		</FumadocsLayoutAdapter>
 	);
 }

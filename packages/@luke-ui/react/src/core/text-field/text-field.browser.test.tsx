@@ -244,6 +244,12 @@ test('an errorMessage marks the field invalid and renders its markup', () => {
 	expect(page.getByText('terms').element().tagName).toBe('STRONG');
 });
 
+test('an unlabeled TextField exposes aria-label on the textbox', () => {
+	const { locator } = render(<TextField aria-label="Search documentation" name="search" />);
+
+	expect(locator.getByRole('textbox', { name: 'Search documentation' }).element()).toBeTruthy();
+});
+
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(<TextFieldScene />, { appearance });

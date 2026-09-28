@@ -18,7 +18,7 @@ import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { ComboboxTrayTrigger } from '../primitives/combobox/tray-trigger.js';
 import { ComboboxTray } from '../primitives/combobox/tray.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
-import type { FieldSlotProps } from '../primitives/field/field.js';
+import type { FieldAccessibleNameProps } from '../primitives/field/field.js';
 import {
 	Field,
 	isInvalidFromErrorMessage,
@@ -38,11 +38,15 @@ interface ComboboxFieldRedeclaredRACProps {
 
 type _ComboboxFieldOmit<T extends object> = DistributiveOmit<
 	ComboboxRootProps<T>,
-	'children' | 'isInvalid' | keyof ComboboxFieldRedeclaredRACProps
+	| 'aria-label'
+	| 'aria-labelledby'
+	| 'children'
+	| 'isInvalid'
+	| keyof ComboboxFieldRedeclaredRACProps
 >;
 
-interface _ComboboxFieldProps<T extends object>
-	extends _ComboboxFieldOmit<T>, ComboboxFieldRedeclaredRACProps, FieldSlotProps {
+interface _ComboboxFieldBaseProps<T extends object>
+	extends _ComboboxFieldOmit<T>, ComboboxFieldRedeclaredRACProps {
 	/** Item content for the listbox (render prop or static children). */
 	children: ComboboxListBoxProps<T>['children'];
 
@@ -79,6 +83,8 @@ interface _ComboboxFieldProps<T extends object>
 	/** Control size. @default 'medium' */
 	size?: ComboboxSize;
 }
+
+type _ComboboxFieldProps<T extends object> = _ComboboxFieldBaseProps<T> & FieldAccessibleNameProps;
 
 /** Props for `ComboboxField` (searchable single-select). */
 export type ComboboxFieldProps<T extends object> = Prettify<_ComboboxFieldProps<T>>;

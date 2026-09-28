@@ -1,18 +1,18 @@
+import { Button } from '@luke-ui/react/button';
+import { IconLink } from '@luke-ui/react/icon-link';
+import { rootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
-import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
-import { useLinkProps } from '@tanstack/react-router';
-import { usePathname } from 'fumadocs-core/framework';
-import Link from 'fumadocs-core/link';
-import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
-import { FullSearchTrigger, SearchTrigger } from 'fumadocs-ui/layouts/shared/slots/search-trigger';
+import { useLinkProps, useRouterState } from '@tanstack/react-router';
 import type { ComponentProps } from 'react';
+import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
+import { Popover } from 'react-aria-components/Popover';
 import { GITHUB_REPO_URL } from '../lib/github.js';
 import { getActiveSiteDestination, siteDestinations } from '../lib/site-destinations.js';
+import { DocsLink } from './docs-link.js';
 import { GithubMark } from './github-mark.js';
+import { DocsSearchTrigger } from './search.js';
+import * as styles from './site-nav.css.js';
 import { ThemeControls } from './theme-controls.js';
-
-export const SITE_NAV_BUTTON_CLASS_NAME =
-	'inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md px-2 text-fd-muted-foreground text-sm transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring';
 
 interface SiteNavProps extends ComponentProps<'header'> {
 	hasSidebarNavigation?: boolean;
@@ -26,52 +26,32 @@ export function SiteNav({
 	hideActiveDestination = false,
 	...props
 }: SiteNavProps) {
-	const pathname = usePathname();
+	const pathname = useRouterState({ select: (state) => state.location.pathname });
 	const activeDestination = hideActiveDestination ? undefined : getActiveSiteDestination(pathname);
 
 	return (
-		<header
-			{...props}
-			className={cx(
-				'flex shrink-0 flex-wrap items-center gap-x-3 border-fd-border border-b bg-fd-background/80 px-4 backdrop-blur-sm md:gap-x-4 md:px-6',
-				className,
-			)}
-		>
+		<header {...props} className={cx(styles.header, className)}>
 			<SiteWordmark />
 			<nav
 				aria-label="Site"
-				className={cx(
-					'flex items-center gap-4',
-					hasSidebarNavigation
-						? 'h-14 max-lg:hidden'
-						: 'order-last w-full pb-2 md:order-none md:h-14 md:w-auto md:pb-0',
-				)}
+				className={cx(styles.destinations, hasSidebarNavigation && styles.destinationsWithSidebar)}
 			>
-				{siteDestinations.map((destination) => {
-					const isActive = destination === activeDestination;
-
-					return (
-						<Link
-							aria-current={isActive ? 'page' : undefined}
-							className={cx(
-								'inline-flex items-center gap-1.5 text-sm transition-colors',
-								isActive
-									? 'font-medium text-fd-primary'
-									: 'text-fd-muted-foreground hover:text-fd-accent-foreground',
-							)}
-							external={destination.isExternal}
-							href={destination.url}
-							key={destination.url}
-						>
-							{destination.label}
-						</Link>
-					);
-				})}
+				{siteDestinations.map((destination) => (
+					<DestinationLink
+						destination={destination}
+						isActive={destination === activeDestination}
+						key={destination.url}
+					/>
+				))}
 			</nav>
-			<div className="ms-auto flex h-14 shrink-0 items-center gap-2">
-				<FullSearchTrigger className="w-40 max-md:hidden lg:w-56" hideIfDisabled />
-				<SearchTrigger className="md:hidden" hideIfDisabled />
-				<div className="max-md:hidden">
+			<div className={styles.actions}>
+				<div className={styles.wideSearch}>
+					<DocsSearchTrigger />
+				</div>
+				<div className={styles.compactSearch}>
+					<DocsSearchTrigger isCompact />
+				</div>
+				<div className={styles.desktopTheme}>
 					<ThemeControls />
 				</div>
 				<AppearancePopover />
@@ -82,15 +62,34 @@ export function SiteNav({
 	);
 }
 
-function SiteWordmark() {
-	const linkProps = useLinkProps({
-		activeProps: {},
-		className: 'flex h-14 shrink-0 items-center truncate font-semibold text-sm',
-		to: '/',
-	});
-
+function DestinationLink({
+	destination,
+	isActive,
+}: {
+	destination: (typeof siteDestinations)[number];
+	isActive: boolean;
+}) {
+	// Docs points at `/docs/installation` but must stay current for every `/docs/*` page.
+	// TanStack's exact active state alone cannot express that section-level rule.
 	return (
-		<a {...linkProps} aria-current={undefined} data-status={undefined}>
+		<DocsLink
+			activeOptions={{ exact: true }}
+			aria-current={isActive ? 'page' : undefined}
+			className={cx(styles.destination, isActive && styles.activeDestination)}
+			to={destination.url}
+		>
+			{destination.label}
+		</DocsLink>
+	);
+}
+
+// TanStack's `useLinkProps` returns DOM event handlers that RAC's `Link` cannot accept, so the
+// wordmark stays a raw `<a>`. It also overrides `aria-current`: TanStack marks the home route as
+// current, while the other destinations use custom matching.
+function SiteWordmark() {
+	const linkProps = useLinkProps({ to: '/' });
+	return (
+		<a {...linkProps} aria-current={undefined} className={styles.wordmark} data-status={undefined}>
 			Luke UI
 		</a>
 	);
@@ -98,32 +97,29 @@ function SiteWordmark() {
 
 function AppearancePopover() {
 	return (
-		<Popover>
-			<PopoverTrigger
-				className={cx(
-					SITE_NAV_BUTTON_CLASS_NAME,
-					'md:hidden data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
-				)}
-			>
+		<DialogTrigger>
+			<Button className={styles.mobileThemeTrigger} prominence="low" size="small">
 				Theme
-			</PopoverTrigger>
-			<PopoverContent align="end" className="w-auto">
-				<ThemeControls />
-			</PopoverContent>
-		</Popover>
+			</Button>
+			<Popover className={cx(rootClassName, styles.appearancePopover)} placement="bottom end">
+				<Dialog aria-label="Appearance" className={styles.appearanceDialog}>
+					<ThemeControls />
+				</Dialog>
+			</Popover>
+		</DialogTrigger>
 	);
 }
 
 function RepositoryLink() {
 	return (
-		<a
-			className={cx(SITE_NAV_BUTTON_CLASS_NAME, 'w-8 px-0')}
+		<IconLink
+			aria-label="GitHub repository"
 			href={GITHUB_REPO_URL}
+			icon={<GithubMark />}
+			prominence="low"
 			rel="noreferrer noopener"
+			size="small"
 			target="_blank"
-		>
-			<GithubMark className="size-4" />
-			<VisuallyHidden>GitHub repository</VisuallyHidden>
-		</a>
+		/>
 	);
 }

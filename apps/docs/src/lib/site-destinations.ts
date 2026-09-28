@@ -1,6 +1,5 @@
 export interface SiteDestination {
 	activePath?: string;
-	isExternal?: boolean;
 	label: string;
 	url: string;
 }

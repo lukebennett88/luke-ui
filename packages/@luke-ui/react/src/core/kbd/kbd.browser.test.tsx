@@ -1,3 +1,4 @@
+import { Code } from '@luke-ui/react/code';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Text } from '@luke-ui/react/text';
 import { expect, test } from 'vite-plus/test';
@@ -15,41 +16,17 @@ function getTextElement(container: HTMLElement): HTMLElement {
 	return target;
 }
 
-// `kbdRecipe` is emitted after `textRecipe` in the shared stylesheet, so it wins the source-order
-// tie for the properties it owns. It leaves `letterSpacing` unset so it keeps inheriting.
-test('letterSpacing inherits from the surrounding Text typography', async () => {
-	const { container } = render(
-		<Text typography="lead">
-			Press <Kbd>⌘</Kbd>
-		</Text>,
-	);
-	const surroundingText = getTextElement(container);
-	const kbd = getKbdElement(container);
+function parsePxLength(value: string): number {
+	return Number.parseFloat(value);
+}
 
-	const { container: bodyContainer } = render(<Text>Body copy</Text>);
-	const bodyText = getTextElement(bodyContainer);
+function kbdToParentFontSizeRatio(textElement: HTMLElement, kbdElement: HTMLElement): number {
+	const parentFontSize = parsePxLength(getComputedStyle(textElement).fontSize);
+	const kbdFontSize = parsePxLength(getComputedStyle(kbdElement).fontSize);
+	return kbdFontSize / parentFontSize;
+}
 
-	const leadLetterSpacing = getComputedStyle(surroundingText).letterSpacing;
-	const bodyLetterSpacing = getComputedStyle(bodyText).letterSpacing;
-
-	// Without this, the test would also pass with Kbd falling back to body letter-spacing.
-	expect(leadLetterSpacing).not.toBe(bodyLetterSpacing);
-	expect(getComputedStyle(kbd).letterSpacing).toBe(leadLetterSpacing);
-});
-
-test('Kbd keeps its own code font family, not the surrounding Text font family', async () => {
-	const { container } = render(
-		<Text typography="lead">
-			Press <Kbd>⌘</Kbd>
-		</Text>,
-	);
-	const surroundingText = getTextElement(container);
-	const kbd = getKbdElement(container);
-
-	expect(getComputedStyle(kbd).fontFamily).not.toBe(getComputedStyle(surroundingText).fontFamily);
-});
-
-test('Kbd owns its fontSize, fontWeight, and lineHeight regardless of surrounding typography', async () => {
+test('Kbd font size scales with surrounding typography', async () => {
 	const { container: leadContainer } = render(
 		<Text typography="lead">
 			Press <Kbd>⌘</Kbd>
@@ -60,18 +37,38 @@ test('Kbd owns its fontSize, fontWeight, and lineHeight regardless of surroundin
 			Press <Kbd>⌘</Kbd>
 		</Text>,
 	);
+
+	const leadText = getTextElement(leadContainer);
+	const headingText = getTextElement(headingContainer);
 	const kbdInLead = getKbdElement(leadContainer);
 	const kbdInHeading = getKbdElement(headingContainer);
 
-	const leadStyle = getComputedStyle(kbdInLead);
-	const headingStyle = getComputedStyle(kbdInHeading);
+	expect(getComputedStyle(kbdInLead).fontSize).not.toBe(getComputedStyle(kbdInHeading).fontSize);
+	expect(kbdToParentFontSizeRatio(leadText, kbdInLead)).toBeCloseTo(0.75, 2);
+	expect(kbdToParentFontSizeRatio(headingText, kbdInHeading)).toBeCloseTo(0.75, 2);
+});
 
-	expect(leadStyle.fontSize).toBe(headingStyle.fontSize);
-	expect(leadStyle.fontWeight).toBe(headingStyle.fontWeight);
-	expect(leadStyle.lineHeight).toBe(headingStyle.lineHeight);
+test('Kbd sets its own letter-spacing and word-spacing', async () => {
+	const { container } = render(
+		<Text style={{ letterSpacing: '0.5em', wordSpacing: '0.4em' }} typography="body">
+			Press <Kbd>Ctrl + K</Kbd>
+		</Text>,
+	);
+	const text = getTextElement(container);
+	const kbd = getKbdElement(container);
+	const textStyle = getComputedStyle(text);
+	const kbdStyle = getComputedStyle(kbd);
 
-	const headingText = getTextElement(headingContainer);
-	expect(getComputedStyle(headingText).fontSize).not.toBe(headingStyle.fontSize);
-	// `kbdRecipe` sets `lineHeight: 1`, so the computed value is a px length equal to fontSize.
-	expect(leadStyle.lineHeight).toBe(leadStyle.fontSize);
+	expect(textStyle.letterSpacing).not.toBe(kbdStyle.letterSpacing);
+	expect(textStyle.wordSpacing).not.toBe(kbdStyle.wordSpacing);
+});
+
+test('Kbd uses the body font family, not the code font used by Code', async () => {
+	const { container: kbdContainer } = render(<Kbd>⌘K</Kbd>);
+	const { container: codeContainer } = render(<Code>⌘K</Code>);
+	const kbd = getKbdElement(kbdContainer);
+	const code = codeContainer.querySelector('code');
+	if (!(code instanceof HTMLElement)) throw new Error('Expected a Code element.');
+
+	expect(getComputedStyle(kbd).fontFamily).not.toBe(getComputedStyle(code).fontFamily);
 });

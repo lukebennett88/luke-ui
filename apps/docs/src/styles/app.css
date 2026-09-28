@@ -10,9 +10,8 @@ code > * {
 }
 
 /**
- * Bridge Fumadocs structural colour variables to Luke UI stable tokens.
- * Scoped to the Luke UI theme root so Fumadocs chrome components resolve
- * colours through the Luke UI palette. Status and diff variables remain
+ * Bridge Fumadocs structural colour variables to Luke UI stable tokens while
+ * the article and TOC still use Fumadocs UI. Status and diff variables remain
  * Fumadocs-owned.
  */
 .luke-ui-theme {
@@ -36,7 +35,7 @@ code > * {
 }
 
 /* Keep Fumadocs' 28px DocsTitle with Luke UI's matching 36px line height */
-.luke-ui-theme #nd-notebook-layout article h1:first-of-type {
+.luke-ui-theme #docs-shell article h1:first-of-type {
 	line-height: 36px;
 }
 
@@ -45,31 +44,6 @@ code > * {
  * descendants cannot paint over the sticky header. Isolation rather than a
  * higher header z-index.
  */
-.luke-ui-theme #nd-notebook-layout article {
+.luke-ui-theme #docs-shell article {
 	isolation: isolate;
-}
-
-/*
- * Fumadocs renders a page-tree category label (`SidebarSeparator`, e.g. "Foundations") as a plain
- * `<p>` at the same size, weight, and colour as the links beneath it, so a group reads as another
- * item instead of a heading. The desktop and mobile sidebar trees hold no other `<p>`, so these
- * selectors reach only that label. Shrink it to caption size, give it label weight, and move it to
- * the secondary text colour so it scans as a heading above its entries.
- */
-.luke-ui-theme #nd-sidebar p,
-.luke-ui-theme #nd-sidebar-mobile p {
-	color: var(--luke-color-text-secondary);
-	font-size: var(--luke-font-caption-font-size);
-	font-weight: var(--luke-font-weight-label);
-	line-height: var(--luke-font-caption-line-height);
-}
-
-/*
- * Fumadocs' page-tree link (`SidebarItem`) pads every item 8px block-start and block-end, putting
- * about 38px between item baselines. Tighten that to the theme's smallest spacing step so entries
- * sit about 30px apart, which still keeps a 24px+ tall hit area.
- */
-.luke-ui-theme #nd-sidebar a,
-.luke-ui-theme #nd-sidebar-mobile a {
-	padding-block: var(--luke-space-sp4);
 }

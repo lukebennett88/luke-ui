@@ -4,7 +4,7 @@ import type {
 	TextFieldProps as RacTextFieldProps,
 } from 'react-aria-components/TextField';
 import { TextField as RacTextField } from 'react-aria-components/TextField';
-import type { FieldSlotProps } from '../primitives/field/field.js';
+import type { FieldAccessibleNameProps } from '../primitives/field/field.js';
 import {
 	Field,
 	isInvalidFromErrorMessage,
@@ -23,10 +23,10 @@ import type { Prettify } from '../types/prettify.js';
 
 type _TextFieldOmit = DistributiveOmit<
 	RacTextFieldProps,
-	'children' | 'isInvalid' | keyof DocumentedInputProps
+	'aria-label' | 'aria-labelledby' | 'children' | 'isInvalid' | keyof DocumentedInputProps
 >;
 
-interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlotProps {
+interface _TextFieldBaseProps extends _TextFieldOmit, DocumentedInputProps {
 	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
 	errorMessage?: ReactNode;
 	/** Class name forwarded to the inner input element. */
@@ -47,6 +47,8 @@ interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlo
 	/** Element shown after the input value. */
 	suffix?: ReactNode;
 }
+
+type _TextFieldProps = _TextFieldBaseProps & FieldAccessibleNameProps;
 
 /** Props for `TextField`. */
 export type TextFieldProps = Prettify<_TextFieldProps>;

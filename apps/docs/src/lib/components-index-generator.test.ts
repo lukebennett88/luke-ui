@@ -48,3 +48,48 @@ Body.
 		rmSync(scratchDir, { force: true, recursive: true });
 	}
 });
+
+test('excludes empty groups created by sidebar separators', () => {
+	const scratchDir = mkdtempSync(resolve(tmpdir(), 'components-index-'));
+
+	try {
+		writeFileSync(
+			resolve(scratchDir, 'meta.json'),
+			JSON.stringify({
+				pages: ['---Overview---', 'index', '---Actions---', 'actions/button'],
+			}),
+		);
+
+		writeFileSync(
+			resolve(scratchDir, 'index.mdx'),
+			`---
+title: Components
+description: Component guides and examples.
+---
+
+Body.
+`,
+		);
+
+		mkdirSync(resolve(scratchDir, 'actions'), { recursive: true });
+		writeFileSync(
+			resolve(scratchDir, 'actions/button.mdx'),
+			`---
+title: Button
+description: A labelled control for actions in an interface.
+source: packages/example/src/button
+---
+
+Body.
+`,
+		);
+
+		const generated = generateComponentsIndex(scratchDir);
+
+		expect(generated).not.toContain("title: 'Overview'");
+		expect(generated).toContain("title: 'Actions'");
+		expect(generated).toContain("url: '/components/actions/button'");
+	} finally {
+		rmSync(scratchDir, { force: true, recursive: true });
+	}
+});
