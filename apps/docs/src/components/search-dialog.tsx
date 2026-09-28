@@ -167,9 +167,7 @@ export function DocsSearchDialog({ anchor, isOpen, onOpenChange }: DocsSearchDia
 																href={result.url}
 																id={result.id}
 																key={result.id}
-																rel={
-																	isExternalUrl(result.url) ? 'noopener noreferrer' : undefined
-																}
+																rel={isExternalUrl(result.url) ? 'noopener noreferrer' : undefined}
 																target={isExternalUrl(result.url) ? '_blank' : undefined}
 																textValue={plainText(result.content)}
 															>
