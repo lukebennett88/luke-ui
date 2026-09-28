@@ -48,7 +48,7 @@ jobs:
         run: pnpm --filter @luke-ui/workflow-scripts run visual-ci resolve-baseline
 
       - name: Download baseline
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: visual-baseline
           path: .artifacts/visual-regression/baseline
