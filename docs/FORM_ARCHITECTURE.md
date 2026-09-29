@@ -32,7 +32,7 @@ is a proven contract (#713 friction), not a rename of the single-line field.
 
 | Export                                                  | 1.0 intent          | Notes                                                                                                                                                               |
 | ------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Field`, `FieldLabel`, `FieldDescription`, `FieldError` | **retain**          | Real value for custom stacked composition; not required for ordinary `TextField` / `ComboboxField` use.                                                             |
+| `Field`, `FieldLabel`, `FieldDescription`, `FieldError` | **retain**          | Real value for custom stacked composition. Not required for ordinary `TextField` / `ComboboxField` use.                                                             |
 | `InputGroup`, `InputGroupInput`, prefix/suffix          | **retain**          | Affordance grouping. Do not publish a standalone `TextInput` that merely aliases `InputGroupInput` unless a flow needs an ungrouped bare control with equal polish. |
 | Combobox / button / checkbox primitives                 | **retain per #711** | Documented composition only.                                                                                                                                        |
 
@@ -41,9 +41,9 @@ is a proven contract (#713 friction), not a rename of the single-line field.
 - Visible `label` / `description` / error association stay on high-level fields (see Forms docs).
 - `isRequired`, necessity indicator, controlled vs uncontrolled, native `<form>` submit/reset stay
   as documented.
-- App-owned validation (fixture danger zone) remains valid; Luke UI owns association and invalid
+- App-owned validation (fixture danger zone) remains valid. Luke UI owns association and invalid
   presentation, not every product rule.
-- Refs and form submission follow the control’s public props; do not invent parallel Luke-only form
+- Refs and form submission follow the control’s public props. Do not invent parallel Luke-only form
   state APIs.
 
 ## Explicit non-goals
