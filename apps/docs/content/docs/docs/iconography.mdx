@@ -62,8 +62,9 @@ Do not set `aria-hidden` and `title` on the same icon.
 The `Icon` component reads its symbols from a spritesheet file. The package supplies this file at
 `@luke-ui/react/spritesheet.svg`.
 
-Put an `IconSpritesheetProvider` around your application. Give the provider the URL of the
-spritesheet file.
+Wrap the application with `LukeUIProvider` and pass the spritesheet URL. This is the supported app
+root for runtime setup that icons need today. `IconSpritesheetProvider` remains available when you
+only want the spritesheet context.
 
 <SourceCodeBlock src="iconography/spritesheet-provider" />
 

@@ -1,8 +1,6 @@
-import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import { LukeUIProvider } from '@luke-ui/react/provider';
 import type { PropsWithChildren } from 'react';
 
-export function AppSpritesheetProvider({ children }: PropsWithChildren) {
-	return (
-		<IconSpritesheetProvider href="/assets/spritesheet.svg">{children}</IconSpritesheetProvider>
-	);
+export function AppRoot({ children }: PropsWithChildren) {
+	return <LukeUIProvider spritesheetHref="/assets/spritesheet.svg">{children}</LukeUIProvider>;
 }
