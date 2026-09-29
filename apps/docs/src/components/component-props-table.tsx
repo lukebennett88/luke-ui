@@ -1,5 +1,3 @@
-'use client';
-
 import { Box } from '@luke-ui/react/box';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
