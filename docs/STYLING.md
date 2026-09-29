@@ -340,7 +340,7 @@ return (
 
 ### Styling engine boundary
 
-`@luke-ui/rainbow-sprinkles` is a published 0.x support package derived from
+`@luke-ui/rainbow-sprinkles` is a publishable 0.x support package derived from
 [Wayfair Rainbow Sprinkles](https://github.com/wayfair/rainbow-sprinkles). `@luke-ui/react` depends
 on it at runtime. It is not part of the stable Luke UI 1.x consumer API.
 
