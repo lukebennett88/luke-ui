@@ -54,8 +54,13 @@ body {
 	flex-shrink: 0;
 	padding: 1.5rem 0.85rem;
 	/* Dimmer than the content canvas so the main pane reads as the focus plane. */
-	background: color-mix(in oklab, var(--luke-color-surface-recessed) 78%, var(--luke-color-text-primary) 22%);
-	border-inline-end: 1px solid color-mix(in oklab, var(--luke-color-border-decorative) 70%, var(--luke-color-text-primary) 30%);
+	background: color-mix(
+		in oklab,
+		var(--luke-color-surface-recessed) 78%,
+		var(--luke-color-text-primary) 22%
+	);
+	border-inline-end: 1px solid
+		color-mix(in oklab, var(--luke-color-border-decorative) 70%, var(--luke-color-text-primary) 30%);
 	color: var(--luke-color-text-secondary);
 }
 
@@ -213,7 +218,8 @@ body {
 	border: 1px solid var(--luke-color-border-control);
 	border-radius: 0.375rem;
 	background-color: var(--luke-color-surface-canvas);
-	background-image: linear-gradient(45deg, transparent 50%, var(--luke-color-text-secondary) 50%),
+	background-image:
+		linear-gradient(45deg, transparent 50%, var(--luke-color-text-secondary) 50%),
 		linear-gradient(135deg, var(--luke-color-text-secondary) 50%, transparent 50%);
 	background-position:
 		calc(100% - 11px) calc(50% - 1.5px),
@@ -241,7 +247,11 @@ body {
 
 .settings-select:hover,
 .settings-native-input:hover {
-	border-color: color-mix(in oklab, var(--luke-color-border-control) 70%, var(--luke-color-text-primary));
+	border-color: color-mix(
+		in oklab,
+		var(--luke-color-border-control) 70%,
+		var(--luke-color-text-primary)
+	);
 }
 
 .settings-select:focus-visible,
@@ -320,7 +330,11 @@ body {
 
 .settings-danger-panel {
 	border-color: var(--luke-color-border-danger);
-	background: color-mix(in oklab, var(--luke-color-background-danger-subtle-rest) 70%, var(--luke-color-surface-floating));
+	background: color-mix(
+		in oklab,
+		var(--luke-color-background-danger-subtle-rest) 70%,
+		var(--luke-color-surface-floating)
+	);
 }
 
 .settings-menu-nav {
