@@ -12,13 +12,19 @@ async function settingsLoader() {
 	return { settings };
 }
 
+function RedirectFallback() {
+	return null;
+}
+
 const router = createBrowserRouter([
 	{
 		path: '/',
+		HydrateFallback: RedirectFallback,
 		loader: () => redirect('/settings/profile'),
+		Component: RedirectFallback,
 	},
 	{
-		HydrateFallback: () => null,
+		HydrateFallback: RedirectFallback,
 		path: '/settings',
 		id: 'settings',
 		element: <SettingsLayout />,
@@ -28,7 +34,12 @@ const router = createBrowserRouter([
 			return defaultShouldRevalidate;
 		},
 		children: [
-			{ index: true, loader: () => redirect('profile') },
+			{
+				index: true,
+				HydrateFallback: RedirectFallback,
+				loader: () => redirect('profile'),
+				Component: RedirectFallback,
+			},
 			{
 				path: 'menu',
 				element: <SettingsMenuPage />,

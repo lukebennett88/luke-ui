@@ -179,7 +179,7 @@ export function ProfilePage() {
 						)}
 					</form.Field>
 					<SettingsRow hint="Managed by your workspace." label="Email">
-						<span className="settings-row-hint">{settings.profile.email}</span>
+						<span className="settings-row-value">{settings.profile.email}</span>
 					</SettingsRow>
 				</SettingsSection>
 				<form.Subscribe selector={(state) => [state.canSubmit, state.isDirty] as const}>

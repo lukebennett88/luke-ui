@@ -2,7 +2,7 @@
 @import './generated/theme.css';
 
 :root {
-	--settings-sidebar-width: 15rem;
+	--settings-sidebar-width: 15.5rem;
 	--settings-content-max: 40rem;
 	--app-font-size: 14px;
 }
@@ -49,41 +49,43 @@ body {
 .settings-sidebar {
 	display: none;
 	flex-direction: column;
-	gap: 0.25rem;
+	gap: 0.15rem;
 	inline-size: var(--settings-sidebar-width);
 	flex-shrink: 0;
-	padding: 1.25rem 0.75rem;
-	background: var(--luke-color-surface-recessed);
-	border-inline-end: 1px solid var(--luke-color-border-decorative);
+	padding: 1.5rem 0.85rem;
+	/* Dimmer than the content canvas so the main pane reads as the focus plane. */
+	background: color-mix(in oklab, var(--luke-color-surface-recessed) 78%, var(--luke-color-text-primary) 22%);
+	border-inline-end: 1px solid color-mix(in oklab, var(--luke-color-border-decorative) 70%, var(--luke-color-text-primary) 30%);
 	color: var(--luke-color-text-secondary);
 }
 
 .settings-sidebar-title {
-	padding: 0.35rem 0.65rem 0.85rem;
-	font-size: 0.75rem;
+	padding: 0.2rem 0.7rem 0.95rem;
+	font-size: 0.6875rem;
 	font-weight: 600;
-	letter-spacing: 0.04em;
+	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	color: var(--luke-color-text-secondary);
+	opacity: 0.85;
 }
 
 .settings-nav-link {
 	display: block;
-	padding: 0.45rem 0.65rem;
+	padding: 0.4rem 0.7rem;
 	border-radius: 0.375rem;
 	color: var(--luke-color-text-secondary);
 	text-decoration: none;
 	font-size: 0.875rem;
-	line-height: 1.3;
+	line-height: 1.35;
 }
 
 .settings-nav-link:hover {
-	background: color-mix(in oklab, var(--luke-color-text-primary) 6%, transparent);
+	background: color-mix(in oklab, var(--luke-color-text-primary) 7%, transparent);
 	color: var(--luke-color-text-primary);
 }
 
 .settings-nav-link[aria-current='page'] {
-	background: color-mix(in oklab, var(--luke-color-text-primary) 8%, transparent);
+	background: color-mix(in oklab, var(--luke-color-text-primary) 10%, transparent);
 	color: var(--luke-color-text-primary);
 	font-weight: 550;
 }
@@ -91,32 +93,39 @@ body {
 .settings-main {
 	flex: 1;
 	min-inline-size: 0;
-	padding: 1rem 1.25rem 3rem;
+	padding: 1rem 1rem 3rem;
+	background: var(--luke-color-surface-canvas);
 }
 
 .settings-content {
 	max-inline-size: var(--settings-content-max);
-	margin-inline: auto;
+	/* Left-align in the content pane like Linear Settings, not centered in leftover space. */
+	margin-inline: 0;
 }
 
 .settings-mobile-header {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
-	margin-block-end: 1.25rem;
+	margin-block-end: 1.1rem;
+	font-size: 0.8125rem;
+	color: var(--luke-color-text-secondary);
 }
 
 .settings-mobile-header a {
 	color: var(--luke-color-text-secondary);
 	text-decoration: none;
-	font-size: 0.875rem;
+}
+
+.settings-mobile-header a:hover {
+	color: var(--luke-color-text-primary);
 }
 
 .settings-page-title {
-	margin: 0 0 1.5rem;
-	font-size: 1.25rem;
+	margin: 0 0 1.35rem;
+	font-size: 1.35rem;
 	font-weight: 600;
-	letter-spacing: -0.02em;
+	letter-spacing: -0.025em;
 	color: var(--luke-color-text-primary);
 }
 
@@ -125,15 +134,16 @@ body {
 }
 
 .settings-section-title {
-	margin: 0 0 0.35rem;
+	margin: 0 0 0.3rem;
 	font-size: 0.8125rem;
 	font-weight: 600;
 	color: var(--luke-color-text-primary);
 }
 
 .settings-section-description {
-	margin: 0 0 0.75rem;
+	margin: 0 0 0.7rem;
 	font-size: 0.8125rem;
+	line-height: 1.4;
 	color: var(--luke-color-text-secondary);
 }
 
@@ -148,8 +158,8 @@ body {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 1rem;
-	padding: 0.85rem 1rem;
+	gap: 1.25rem;
+	padding: 0.8rem 1rem;
 	border-block-end: 1px solid var(--luke-color-border-decorative);
 }
 
@@ -160,8 +170,9 @@ body {
 .settings-row-copy {
 	display: flex;
 	flex-direction: column;
-	gap: 0.15rem;
+	gap: 0.2rem;
 	min-inline-size: 0;
+	flex: 1 1 12rem;
 }
 
 .settings-row-label {
@@ -172,40 +183,65 @@ body {
 
 .settings-row-hint {
 	font-size: 0.75rem;
+	line-height: 1.4;
 	color: var(--luke-color-text-secondary);
+	text-wrap: pretty;
+}
+
+.settings-row-value {
+	font-size: 0.875rem;
+	/* Readable read-only values — secondary alone is too faint on light canvas. */
+	color: color-mix(in oklab, var(--luke-color-text-primary) 78%, var(--luke-color-text-secondary));
 }
 
 .settings-row-control {
-	flex-shrink: 0;
+	flex: 0 1 auto;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	min-inline-size: 0;
 }
 
 .settings-select,
 .settings-native-input {
+	-webkit-appearance: none;
 	appearance: none;
 	block-size: 2rem;
-	min-inline-size: 9.5rem;
-	padding: 0 1.75rem 0 0.65rem;
+	min-inline-size: 8.5rem;
+	max-inline-size: 100%;
+	padding: 0 1.85rem 0 0.7rem;
 	border: 1px solid var(--luke-color-border-control);
 	border-radius: 0.375rem;
 	background-color: var(--luke-color-surface-canvas);
-	background-image:
-		linear-gradient(45deg, transparent 50%, var(--luke-color-text-secondary) 50%),
+	background-image: linear-gradient(45deg, transparent 50%, var(--luke-color-text-secondary) 50%),
 		linear-gradient(135deg, var(--luke-color-text-secondary) 50%, transparent 50%);
 	background-position:
-		calc(100% - 12px) calc(50% - 2px),
-		calc(100% - 7px) calc(50% - 2px);
+		calc(100% - 11px) calc(50% - 1.5px),
+		calc(100% - 6px) calc(50% - 1.5px);
 	background-size:
 		5px 5px,
 		5px 5px;
 	background-repeat: no-repeat;
+	box-shadow: inset 0 1px 0 color-mix(in oklab, var(--luke-color-text-primary) 3%, transparent);
 	color: var(--luke-color-text-primary);
 	font: inherit;
+	line-height: 1.2;
+}
+
+.settings-select {
+	/* Hide legacy IE/Edge native arrow if a UA still paints one. */
+	background-clip: padding-box;
 }
 
 .settings-native-input {
 	background-image: none;
-	padding-inline-end: 0.65rem;
-	min-inline-size: 12rem;
+	padding-inline-end: 0.7rem;
+	min-inline-size: 11rem;
+}
+
+.settings-select:hover,
+.settings-native-input:hover {
+	border-color: color-mix(in oklab, var(--luke-color-border-control) 70%, var(--luke-color-text-primary));
 }
 
 .settings-select:focus-visible,
@@ -217,12 +253,13 @@ body {
 
 .settings-switch {
 	position: relative;
-	inline-size: 2.5rem;
-	block-size: 1.4rem;
+	inline-size: 2.4rem;
+	block-size: 1.35rem;
 	border: none;
 	border-radius: 999px;
-	background: color-mix(in oklab, var(--luke-color-text-primary) 18%, transparent);
+	background: color-mix(in oklab, var(--luke-color-text-primary) 16%, transparent);
 	padding: 0;
+	flex-shrink: 0;
 }
 
 .settings-switch[aria-checked='true'] {
@@ -233,26 +270,33 @@ body {
 	position: absolute;
 	inset-block-start: 0.15rem;
 	inset-inline-start: 0.15rem;
-	inline-size: 1.1rem;
-	block-size: 1.1rem;
+	inline-size: 1.05rem;
+	block-size: 1.05rem;
 	border-radius: 999px;
 	background: white;
+	box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
 	transition: translate 120ms ease;
 }
 
 .settings-switch[aria-checked='true'] .settings-switch-thumb {
-	translate: 1.1rem 0;
+	translate: 1.05rem 0;
 }
 
 .settings-avatar {
-	inline-size: 4rem;
-	block-size: 4rem;
+	inline-size: 3.5rem;
+	block-size: 3.5rem;
 	border-radius: 999px;
 	object-fit: cover;
 	background: color-mix(in oklab, var(--luke-color-text-primary) 10%, transparent);
 	border: 1px solid var(--luke-color-border-decorative);
+	flex-shrink: 0;
+}
+
+.settings-avatar-actions {
 	display: flex;
 	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
 	gap: 0.5rem;
 }
 
@@ -270,15 +314,62 @@ body {
 	color: var(--luke-color-foreground-danger-rest);
 }
 
-.settings-danger-panel {
-	border-color: color-mix(in oklab, var(--luke-color-border-danger) 70%, transparent);
+.settings-danger-title {
+	color: var(--luke-color-foreground-danger-rest);
 }
 
-.settings-mobile-nav,
+.settings-danger-panel {
+	border-color: var(--luke-color-border-danger);
+	background: color-mix(in oklab, var(--luke-color-background-danger-subtle-rest) 70%, var(--luke-color-surface-floating));
+}
+
 .settings-menu-nav {
 	display: flex;
 	flex-direction: column;
-	gap: 0.25rem;
+}
+
+.settings-menu-nav .settings-nav-link {
+	padding: 0.85rem 1rem;
+	border-radius: 0;
+	border-block-end: 1px solid var(--luke-color-border-decorative);
+	color: var(--luke-color-text-primary);
+	font-size: 0.9375rem;
+}
+
+.settings-menu-nav .settings-nav-link:last-child {
+	border-block-end: none;
+}
+
+.settings-menu-nav .settings-nav-link:hover,
+.settings-menu-nav .settings-nav-link[aria-current='page'] {
+	background: color-mix(in oklab, var(--luke-color-text-primary) 5%, transparent);
+}
+
+@media (max-width: 767px) {
+	.settings-row {
+		flex-wrap: wrap;
+		align-items: flex-start;
+		gap: 0.65rem;
+	}
+
+	.settings-row-copy {
+		flex: 1 1 100%;
+	}
+
+	.settings-row-control {
+		flex: 1 1 100%;
+		justify-content: flex-start;
+	}
+
+	.settings-native-input,
+	.settings-select {
+		inline-size: 100%;
+		min-inline-size: 0;
+	}
+
+	.settings-avatar-actions {
+		justify-content: flex-start;
+	}
 }
 
 @media (min-width: 768px) {
@@ -286,12 +377,11 @@ body {
 		display: flex;
 	}
 
-	.settings-mobile-header,
-	.settings-mobile-nav {
+	.settings-mobile-header {
 		display: none;
 	}
 
 	.settings-main {
-		padding: 2rem 2.5rem 4rem;
+		padding: 2.25rem 2.75rem 4rem;
 	}
 }

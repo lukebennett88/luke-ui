@@ -49,18 +49,18 @@ export function AccountPage() {
 			<h1 className="settings-page-title">Account</h1>
 			<SettingsSection title="Details">
 				<SettingsRow label="Workspace">
-					<span className="settings-row-hint">{settings.account.workspace}</span>
+					<span className="settings-row-value">{settings.account.workspace}</span>
 				</SettingsRow>
 				<SettingsRow label="Plan">
-					<span className="settings-row-hint">{settings.account.plan}</span>
+					<span className="settings-row-value">{settings.account.plan}</span>
 				</SettingsRow>
 				<SettingsRow label="Member since">
-					<span className="settings-row-hint">{settings.account.createdAt}</span>
+					<span className="settings-row-value">{settings.account.createdAt}</span>
 				</SettingsRow>
 			</SettingsSection>
 
 			<section className="settings-section">
-				<h2 className="settings-section-title">Danger zone</h2>
+				<h2 className="settings-section-title settings-danger-title">Danger zone</h2>
 				<p className="settings-section-description">
 					Permanently delete this account and its personal settings on this device.
 				</p>
@@ -74,7 +74,12 @@ export function AccountPage() {
 								</span>
 							</div>
 							<div className="settings-row-control">
-								<Button onPress={() => dispatch({ type: 'open' })} tone="critical" type="button">
+								<Button
+									onPress={() => dispatch({ type: 'open' })}
+									prominence="high"
+									tone="critical"
+									type="button"
+								>
 									Delete account
 								</Button>
 							</div>

@@ -49,7 +49,9 @@ export function SettingsMenuPage() {
 	return (
 		<>
 			<h1 className="settings-page-title">Settings</h1>
-			<SettingsNav className="settings-menu-nav" />
+			<div className="settings-panel">
+				<SettingsNav className="settings-menu-nav" />
+			</div>
 		</>
 	);
 }
