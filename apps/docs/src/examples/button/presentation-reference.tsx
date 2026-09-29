@@ -1,12 +1,12 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (
-		<Box display="grid" gap="sp24">
-			<Box display="grid" gap="sp8">
+		<Stack gap="sp24">
+			<Stack gap="sp8">
 				<Text typography="label">Button</Text>
 				<Comparison>
 					<ComparisonItem label="Neutral · Low">
@@ -19,7 +19,7 @@ export default () => {
 						<Button prominence="high">Button</Button>
 					</ComparisonItem>
 					<ComparisonItem label="Critical · Low">
-						<Button tone="critical" prominence="low">
+						<Button prominence="low" tone="critical">
 							Button
 						</Button>
 					</ComparisonItem>
@@ -27,13 +27,13 @@ export default () => {
 						<Button tone="critical">Button</Button>
 					</ComparisonItem>
 					<ComparisonItem label="Critical · High">
-						<Button tone="critical" prominence="high">
+						<Button prominence="high" tone="critical">
 							Button
 						</Button>
 					</ComparisonItem>
 				</Comparison>
-			</Box>
-			<Box display="grid" gap="sp8">
+			</Stack>
+			<Stack gap="sp8">
 				<Text typography="label">Text</Text>
 				<Comparison>
 					<ComparisonItem label="Neutral · Low">
@@ -50,7 +50,7 @@ export default () => {
 						</Button>
 					</ComparisonItem>
 					<ComparisonItem label="Critical · Low">
-						<Button appearance="text" tone="critical" prominence="low">
+						<Button appearance="text" prominence="low" tone="critical">
 							Button
 						</Button>
 					</ComparisonItem>
@@ -60,7 +60,7 @@ export default () => {
 						</Button>
 					</ComparisonItem>
 				</Comparison>
-			</Box>
-		</Box>
+			</Stack>
+		</Stack>
 	);
 };

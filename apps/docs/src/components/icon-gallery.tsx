@@ -1,18 +1,10 @@
-/**
- * THESIS: An index, not a showcase. Refuses the icon-library marketing grid — big hero,
- * style/weight tabs, infinite scroll — because 27 first-party icons need one job done:
- * find the name, take it away.
- * OWN-WORLD: The docs' existing pill-toggle and fumadocs token language, unchanged.
- * Hairline-ruled grid, no floating cards, no shadows.
- * STORY: Scan or filter, see the glyph at the size you'll ship it at, take the name or
- * the JSX in one click.
- * FIRST VIEWPORT: Filter, size pills, live count, then the grid — the set is visible
- * without scrolling.
- * FORM: Extension of an established surface. TanStack's ruled grid, with the two copy targets
- * always present in a ruled cell footer rather than revealed on hover.
- */
+import { AutoGrid } from '@luke-ui/react/auto-grid';
+import { Box } from '@luke-ui/react/box';
+import { Cluster } from '@luke-ui/react/cluster';
 import type { IconName, IconProps } from '@luke-ui/react/icon';
 import { Icon, iconNames } from '@luke-ui/react/icon';
+import { Stack } from '@luke-ui/react/stack';
+import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
@@ -57,7 +49,10 @@ const COPY_BUTTON_CLASS_NAME = cx(
 export function IconGallery(): JSX.Element {
 	const [filter, setFilter] = useState('');
 	const [previewSize, setPreviewSize] = useState<GalleryIconSize>('medium');
-	const [copyState, dispatchCopy] = useReducer(copyReducer, { announcement: '', status: null });
+	const [copyState, dispatchCopy] = useReducer(copyReducer, {
+		announcement: '',
+		status: null,
+	});
 	const inputRef = useRef<HTMLInputElement | null>(null);
 	const copyTimeoutRef = useRef<number | null>(null);
 
@@ -93,20 +88,32 @@ export function IconGallery(): JSX.Element {
 
 		try {
 			await navigator.clipboard.writeText(copiedText);
-			dispatchCopy({ kind, name, text: copiedText, type: 'copied' });
+			dispatchCopy({
+				kind,
+				name,
+				text: copiedText,
+				type: 'copied',
+			});
 		} catch {
-			dispatchCopy({ kind, name, text: copiedText, type: 'failed' });
+			dispatchCopy({
+				kind,
+				name,
+				text: copiedText,
+				type: 'failed',
+			});
 		}
 
 		copyTimeoutRef.current = window.setTimeout(() => {
-			dispatchCopy({ type: 'reset' });
+			dispatchCopy({
+				type: 'reset',
+			});
 		}, COPY_FEEDBACK_DURATION_MS);
 	}
 
 	return (
-		<div className="not-prose flex flex-col gap-4">
-			<div className="flex flex-wrap items-center gap-3">
-				<div className="min-w-48 flex-1 basis-56">
+		<Stack className="not-prose" gap="sp16">
+			<Cluster gap="sp12">
+				<Box flexBasis="14rem" flexGrow="1" minInlineSize="12rem">
 					<TextField
 						aria-label="Filter icons by name"
 						inputRef={inputRef}
@@ -116,24 +123,32 @@ export function IconGallery(): JSX.Element {
 						size="small"
 						value={filter}
 					/>
-				</div>
+				</Box>
 				<TextToggleButtonGroup
 					label="Preview size"
 					onChange={setPreviewSize}
 					options={SIZE_OPTIONS}
 					value={previewSize}
 				/>
-				<p className="ms-auto text-fd-muted-foreground text-sm tabular-nums">{countText}</p>
+				<Text
+					className="ms-auto"
+					color="secondary"
+					elementType="p"
+					fontVariantNumeric="tabular-nums"
+					typography="caption"
+				>
+					{countText}
+				</Text>
 				<VisuallyHidden aria-live="polite" elementType="p">
 					{deferredCountText}
 				</VisuallyHidden>
-			</div>
+			</Cluster>
 
 			<div className="overflow-hidden rounded-xl border border-fd-border">
 				{filteredNames.length === 0 ? (
 					<IconGalleryEmptyState onClear={handleClearFilter} query={filter.trim()} />
 				) : (
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+					<AutoGrid minColumnInlineSize="8rem">
 						{filteredNames.map((name) => (
 							<IconGalleryCell
 								copyStatus={copyState.status?.name === name ? copyState.status : null}
@@ -143,14 +158,14 @@ export function IconGallery(): JSX.Element {
 								previewSize={previewSize}
 							/>
 						))}
-					</div>
+					</AutoGrid>
 				)}
 			</div>
 
 			<VisuallyHidden aria-live="polite" elementType="p">
 				{copyState.announcement}
 			</VisuallyHidden>
-		</div>
+		</Stack>
 	);
 }
 
@@ -160,9 +175,21 @@ interface CopyState {
 }
 
 type CopyAction =
-	| { kind: CopyKind; name: IconName; text: string; type: 'copied' }
-	| { kind: CopyKind; name: IconName; text: string; type: 'failed' }
-	| { type: 'reset' };
+	| {
+			kind: CopyKind;
+			name: IconName;
+			text: string;
+			type: 'copied';
+	  }
+	| {
+			kind: CopyKind;
+			name: IconName;
+			text: string;
+			type: 'failed';
+	  }
+	| {
+			type: 'reset';
+	  };
 
 /** Drives the copy button feedback: sets status and announcement together, resets status only. */
 function copyReducer(state: CopyState, action: CopyAction): CopyState {
@@ -170,15 +197,26 @@ function copyReducer(state: CopyState, action: CopyAction): CopyState {
 		case 'copied':
 			return {
 				announcement: `Copied ${action.text}`,
-				status: { kind: action.kind, name: action.name, state: 'copied' },
+				status: {
+					kind: action.kind,
+					name: action.name,
+					state: 'copied',
+				},
 			};
 		case 'failed':
 			return {
 				announcement: `Couldn't copy automatically. Please copy manually: ${action.text}.`,
-				status: { kind: action.kind, name: action.name, state: 'error' },
+				status: {
+					kind: action.kind,
+					name: action.name,
+					state: 'error',
+				},
 			};
 		case 'reset':
-			return { ...state, status: null };
+			return {
+				...state,
+				status: null,
+			};
 	}
 }
 
@@ -193,14 +231,28 @@ interface IconGalleryCellProps {
 function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryCellProps) {
 	return (
 		<div className="-mr-px -mb-px flex flex-col border-fd-border border-r border-b">
-			<div className="flex flex-col items-center gap-1 p-2">
-				<div className="flex h-20 w-full items-center justify-center">
+			<Stack alignItems="center" gap="sp4" padding="sp8">
+				<Box
+					alignItems="center"
+					blockSize="5rem"
+					display="flex"
+					inlineSize="100%"
+					justifyContent="center"
+				>
 					<Icon name={name} size={previewSize} />
-				</div>
-				<span className="w-full truncate text-center text-fd-muted-foreground text-xs" title={name}>
+				</Box>
+				<Text
+					className="w-full"
+					color="secondary"
+					elementType="span"
+					lineClamp={1}
+					textAlign="center"
+					title={name}
+					typography="caption"
+				>
 					{name}
-				</span>
-			</div>
+				</Text>
+			</Stack>
 			<div className="grid grid-cols-2 border-fd-border border-t">
 				<CopyButton
 					copyStatus={copyStatus?.kind === 'jsx' ? copyStatus : null}
@@ -242,7 +294,7 @@ function CopyButton({ copyStatus, kind, name, onCopy }: CopyButtonProps) {
 	return (
 		<button
 			aria-label={accessibleLabel}
-			className={cx(COPY_BUTTON_CLASS_NAME, kind === 'jsx' && 'border-r border-fd-border')}
+			className={cx(COPY_BUTTON_CLASS_NAME, kind === 'jsx' && 'border-fd-border border-r')}
 			onClick={() => onCopy(name, kind)}
 			type="button"
 		>
@@ -259,8 +311,16 @@ interface IconGalleryEmptyStateProps {
 /** Real empty state inside the grid frame: names the query, offers a way back. */
 function IconGalleryEmptyState({ onClear, query }: IconGalleryEmptyStateProps) {
 	return (
-		<div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-			<p className="text-fd-muted-foreground text-sm">No icon matches &quot;{query}&quot;</p>
+		<Stack
+			alignItems="center"
+			className="text-center"
+			gap="sp12"
+			paddingBlock="sp64"
+			paddingInline="sp24"
+		>
+			<Text color="secondary" elementType="p" typography="caption">
+				No icon matches &quot;{query}&quot;
+			</Text>
 			<button
 				className={cx(
 					'rounded-md border border-fd-border px-3 py-1.5 font-medium text-fd-foreground text-sm',
@@ -271,6 +331,6 @@ function IconGalleryEmptyState({ onClear, query }: IconGalleryEmptyStateProps) {
 			>
 				Clear filter
 			</button>
-		</div>
+		</Stack>
 	);
 }

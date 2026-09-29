@@ -1,7 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Heading } from '@luke-ui/react/heading';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
 import { useState } from 'react';
@@ -40,74 +42,79 @@ export default () => {
 			borderStyle="solid"
 			borderWidth="thin"
 			boxShadow="raised"
-			display="flex"
-			flexDirection="column"
-			gap="sp24"
 			inlineSize="100%"
 			marginInline="auto"
 			maxInlineSize="26rem"
 			// Utility props take an object keyed by breakpoint. Breakpoints are
 			// container queries resolved against the theme root, so this follows the
 			// preview's inline size.
-			paddingBlock={{ initial: 'sp32', bp768: 'sp64' }}
-			paddingInline={{ initial: 'sp24', bp768: 'sp48' }}
+			paddingBlock={{
+				initial: 'sp32',
+				bp768: 'sp64',
+			}}
+			paddingInline={{
+				initial: 'sp24',
+				bp768: 'sp48',
+			}}
 			render={(props) => <form {...props} onSubmit={handleSubmit} />}
 		>
-			<Heading level={2}>Sign in</Heading>
-			<Box display="flex" flexDirection="column" gap="sp16">
-				<Controller
-					control={form.control}
-					name="email"
-					render={({ field, fieldState }) => (
-						<TextField
-							autoComplete="email"
-							errorMessage={fieldState.error?.message}
-							inputRef={field.ref}
-							isRequired
-							label="Email"
-							name="email"
-							onBlur={field.onBlur}
-							onChange={field.onChange}
-							placeholder="Enter your email address"
-							type="email"
-							validationBehavior="aria"
-							value={field.value}
-						/>
-					)}
-				/>
-				<Controller
-					control={form.control}
-					name="password"
-					render={({ field, fieldState }) => (
-						<TextField
-							autoComplete="current-password"
-							description="At least 8 characters, including a number."
-							errorMessage={fieldState.error?.message}
-							inputRef={field.ref}
-							isRequired
-							label="Password"
-							minLength={8}
-							name="password"
-							onBlur={field.onBlur}
-							onChange={field.onChange}
-							type="password"
-							validationBehavior="aria"
-							value={field.value}
-						/>
-					)}
-				/>
-			</Box>
-			<Box display="flex" gap="sp12" justifyContent="flex-end">
-				<Button type="button">Create an account</Button>
-				<Button prominence="high" type="submit">
-					Sign in
-				</Button>
-			</Box>
-			{signedInAs && (
-				<Box backgroundColor="success.subtle.rest" borderRadius="control" padding="sp12">
-					<Text elementType="p">Signed in as {signedInAs}</Text>
-				</Box>
-			)}
+			<Stack gap="sp24">
+				<Heading level={2}>Sign in</Heading>
+				<Stack gap="sp16">
+					<Controller
+						control={form.control}
+						name="email"
+						render={({ field, fieldState }) => (
+							<TextField
+								autoComplete="email"
+								errorMessage={fieldState.error?.message}
+								inputRef={field.ref}
+								isRequired
+								label="Email"
+								name="email"
+								onBlur={field.onBlur}
+								onChange={field.onChange}
+								placeholder="Enter your email address"
+								type="email"
+								validationBehavior="aria"
+								value={field.value}
+							/>
+						)}
+					/>
+					<Controller
+						control={form.control}
+						name="password"
+						render={({ field, fieldState }) => (
+							<TextField
+								autoComplete="current-password"
+								description="At least 8 characters, including a number."
+								errorMessage={fieldState.error?.message}
+								inputRef={field.ref}
+								isRequired
+								label="Password"
+								minLength={8}
+								name="password"
+								onBlur={field.onBlur}
+								onChange={field.onChange}
+								type="password"
+								validationBehavior="aria"
+								value={field.value}
+							/>
+						)}
+					/>
+				</Stack>
+				<Cluster gap="sp12" justifyContent="flex-end">
+					<Button type="button">Create an account</Button>
+					<Button prominence="high" type="submit">
+						Sign in
+					</Button>
+				</Cluster>
+				{signedInAs ? (
+					<Box backgroundColor="success.subtle.rest" borderRadius="control" padding="sp12">
+						<Text elementType="p">Signed in as {signedInAs}</Text>
+					</Box>
+				) : null}
+			</Stack>
 		</Box>
 	);
 };

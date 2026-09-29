@@ -2,6 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Grid } from '@luke-ui/react/grid';
 import { Heading, HeadingLevels } from '@luke-ui/react/heading';
 import { Link } from '@luke-ui/react/link';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
@@ -19,35 +20,23 @@ import { componentIndexGroups } from '../generated/components-index.generated.js
 export function ComponentsIndex(): JSX.Element {
 	return (
 		<HeadingLevels base={2}>
-			<Box
-				className="not-prose"
-				display="flex"
-				flexDirection="column"
-				gap="sp32"
-				marginBlockStart="sp32"
-			>
+			<Stack className="not-prose" gap="sp64" marginBlockStart="sp40">
 				{componentIndexGroups.map((group, index) => (
 					<CategoryGroup group={group} isFirst={index === 0} key={group.title} />
 				))}
-			</Box>
+			</Stack>
 		</HeadingLevels>
 	);
 }
 
 const groupStyle = {
 	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
-	paddingBlockStart: vars.space.sp16,
+	paddingBlockStart: vars.space.sp40,
 } as const;
 
 function CategoryGroup({ group, isFirst }: { group: ComponentIndexGroup; isFirst: boolean }) {
 	return (
-		<Box
-			display="flex"
-			elementType="section"
-			flexDirection="column"
-			gap="sp16"
-			style={isFirst ? undefined : groupStyle}
-		>
+		<Stack elementType="section" gap="sp24" style={isFirst ? undefined : groupStyle}>
 			<Heading typography="heading4">{group.title}</Heading>
 			<Grid
 				columns={{
@@ -55,43 +44,42 @@ function CategoryGroup({ group, isFirst }: { group: ComponentIndexGroup; isFirst
 					bp768: 2,
 					bp1024: 3,
 				}}
-				gap="sp16"
+				gap="sp24"
 			>
 				{group.entries.map((entry) => (
 					<ComponentEntry entry={entry} key={entry.url} />
 				))}
 			</Grid>
-		</Box>
+		</Stack>
 	);
 }
 
 function ComponentEntry({ entry }: { entry: ComponentIndexEntry }) {
 	return (
 		<Box
+			backgroundColor="surface.canvas"
 			blockSize="100%"
 			borderColor="decorative"
 			borderRadius="surface"
 			borderStyle="solid"
 			borderWidth="thin"
-			backgroundColor="surface.canvas"
 			className={cx(
 				'no-underline transition-colors focus-visible:outline-2',
 				'focus-visible:outline-(--luke-color-border-focus) focus-visible:outline-offset-2',
 				'hover:bg-(--luke-color-background-neutral-subtle-hover)',
 				'active:bg-(--luke-color-background-neutral-subtle-pressed)',
 			)}
-			display="flex"
-			flexDirection="column"
-			gap="sp8"
-			padding="sp16"
+			padding="sp24"
 			render={(props) => <Link {...props} href={entry.url} />}
 		>
-			<Text elementType="span" fontWeight="emphasis">
-				{entry.name}
-			</Text>
-			<Text color="secondary" elementType="span" typography="caption">
-				{entry.description}
-			</Text>
+			<Stack gap="sp8">
+				<Text elementType="span" fontWeight="emphasis">
+					{entry.name}
+				</Text>
+				<Text color="secondary" elementType="span" typography="caption">
+					{entry.description}
+				</Text>
+			</Stack>
 		</Box>
 	);
 }

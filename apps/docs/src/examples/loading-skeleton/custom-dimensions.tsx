@@ -1,9 +1,10 @@
 import { Box } from '@luke-ui/react/box';
+import { Cluster } from '@luke-ui/react/cluster';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 
 export default () => {
 	return (
-		<Box display="flex" gap="sp8">
+		<Cluster gap="sp8">
 			<LoadingSkeleton>
 				<Box blockSize="3rem" borderRadius="full" inlineSize="3rem" />
 			</LoadingSkeleton>
@@ -13,6 +14,6 @@ export default () => {
 			<LoadingSkeleton>
 				<Box blockSize="3rem" borderRadius="full" inlineSize="3rem" />
 			</LoadingSkeleton>
-		</Box>
+		</Cluster>
 	);
 };

@@ -1,4 +1,5 @@
 import { Cluster } from '@luke-ui/react/cluster';
+import { Container } from '@luke-ui/react/container';
 import { Heading } from '@luke-ui/react/heading';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -10,7 +11,19 @@ export function NotFound() {
 	return (
 		<>
 			<SiteNav hideActiveDestination />
-			<main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-16 pb-16 md:px-6 md:pt-24 md:pb-24">
+			<Container
+				elementType="main"
+				flexGrow="1"
+				maxInlineSize="ct1152"
+				paddingBlock={{
+					initial: 'sp64',
+					bp768: 'sp96',
+				}}
+				paddingInline={{
+					initial: 'sp16',
+					bp768: 'sp24',
+				}}
+			>
 				<Stack alignItems="flex-start" gap="sp24">
 					<Heading level={1} typography="display">
 						Page not found
@@ -24,7 +37,9 @@ export function NotFound() {
 						</DocsLink>
 						<DocsLink
 							appearance="button"
-							params={{ _splat: 'components' }}
+							params={{
+								_splat: 'components',
+							}}
 							prominence="low"
 							to="/$"
 						>
@@ -32,7 +47,7 @@ export function NotFound() {
 						</DocsLink>
 					</Cluster>
 				</Stack>
-			</main>
+			</Container>
 		</>
 	);
 }
