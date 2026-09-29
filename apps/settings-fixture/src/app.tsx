@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Heading } from '@luke-ui/react/heading';
-import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import { LukeUIProvider } from '@luke-ui/react/provider';
 import spritesheetHref from '@luke-ui/react/spritesheet.svg?url';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -28,7 +28,7 @@ export function App() {
 	const [section, setSection] = useState<SectionId>('profile');
 
 	return (
-		<IconSpritesheetProvider href={spritesheetHref}>
+		<LukeUIProvider spritesheetHref={spritesheetHref}>
 			<div className={`${rootClassName} ${tactileThemeClassName}`}>
 				<Box
 					backgroundColor="surface.canvas"
@@ -63,6 +63,6 @@ export function App() {
 					</Box>
 				</Box>
 			</div>
-		</IconSpritesheetProvider>
+		</LukeUIProvider>
 	);
 }

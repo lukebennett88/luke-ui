@@ -4,10 +4,10 @@ Consumer notes from building this app against public `@luke-ui/react` APIs (#713
 
 ## Required setup that is easy to miss
 
-1. **`IconSpritesheetProvider`** — Any icon-using control (and several high-level components) throws
-   without a provider and a resolvable spritesheet URL. The fixture imports
-   `@luke-ui/react/spritesheet.svg?url`. This belongs in installation docs and likely a thin
-   `LukeUIProvider` (#712).
+1. **`LukeUIProvider`** — Icon-using controls need a spritesheet URL at the application root. The
+   fixture wraps with `LukeUIProvider` from `@luke-ui/react/provider` and
+   `@luke-ui/react/spritesheet.svg?url`. The lower-level `IconSpritesheetProvider` remains available
+   (#712 / #725).
 2. **`rootClassName` + theme class + stylesheet imports** — The app needs
    `@luke-ui/react/stylesheet.css`, a theme stylesheet, `rootClassName` on a wrapper, and
    `.luke-ui-theme-<name>` (here via `themeClassName` from `@luke-ui/react/themes/tactile`). README
@@ -32,7 +32,7 @@ Consumer notes from building this app against public `@luke-ui/react` APIs (#713
 
 ## Follow-ups for Wave 1/2
 
-- #712 — document or wrap icon spritesheet setup.
+- #712 / #725 — `LukeUIProvider` adopted here for spritesheet setup.
 - #714 — multi-line field and shared validation patterns once more forms land.
 - #715 — replace Tactile import with an app-owned `defineTheme` output.
 - #717 — drop `rootClassName` once the global stylesheet contract is frozen.
