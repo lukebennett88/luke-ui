@@ -14,18 +14,10 @@ export const sidebar = style({
 	background: `color-mix(in oklab, ${vars.color.surface.recessed} 78%, ${vars.color.text.primary} 22%)`,
 	borderInlineEnd: `1px solid color-mix(in oklab, ${vars.color.border.decorative} 70%, ${vars.color.text.primary} 30%)`,
 	color: vars.color.text.secondary,
-	display: 'none',
-	flexDirection: 'column',
 	flexShrink: 0,
-	gap: vars.space.sp4,
 	inlineSize: '15.5rem',
 	paddingBlock: vars.space.sp24,
 	paddingInline: vars.space.sp12,
-	'@media': {
-		[desktopMin]: {
-			display: 'flex',
-		},
-	},
 });
 
 export const sidebarTitle = style({
@@ -101,16 +93,8 @@ export const content = style({
 });
 
 export const mobileHeader = style({
-	alignItems: 'center',
 	color: vars.color.text.secondary,
-	display: 'flex',
-	gap: vars.space.sp8,
 	marginBlockEnd: vars.space.sp16,
-	'@media': {
-		[desktopMin]: {
-			display: 'none',
-		},
-	},
 });
 
 export const mobileHeaderLink = style({

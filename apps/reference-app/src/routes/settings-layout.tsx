@@ -3,10 +3,8 @@ import '../styles/global.css';
 import '@luke-ui/react/stylesheet.css';
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
-import { Cluster } from '@luke-ui/react/cluster';
 import { Provider } from '@luke-ui/react/provider';
 import spritesheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
-import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { rootClassName } from '@luke-ui/react/theme';
 import { Link, Outlet, useLocation, useRouteLoaderData } from 'react-router';
@@ -32,16 +30,28 @@ export function SettingsLayout() {
 	return (
 		<Provider spritesheetHref={spritesheetHref}>
 			<div className={`${rootClassName} ${styles.shell}`}>
-				<Stack className={styles.sidebar} elementType="aside" gap="sp4">
+				{/* Box owns display — Stack forces flex and would defeat VE hide-on-narrow. */}
+				<Box
+					className={styles.sidebar}
+					display={{ initial: 'none', bp768: 'flex' }}
+					elementType="aside"
+					flexDirection="column"
+					gap="sp4"
+				>
 					<Text className={styles.sidebarTitle} fontWeight="label" typography="caption">
 						Settings
 					</Text>
 					<SettingsNav />
-				</Stack>
+				</Box>
 				<Box className={styles.main} elementType="main">
 					<div className={styles.content}>
 						{isMenu ? null : (
-							<Cluster className={styles.mobileHeader} gap="sp8">
+							<Box
+								alignItems="center"
+								className={styles.mobileHeader}
+								display={{ initial: 'flex', bp768: 'none' }}
+								gap="sp8"
+							>
 								<Link className={styles.mobileHeaderLink} to="/settings/menu">
 									← Settings
 								</Link>
@@ -49,7 +59,7 @@ export function SettingsLayout() {
 									/
 								</Text>
 								<Text color="secondary">{current?.label ?? 'Settings'}</Text>
-							</Cluster>
+							</Box>
 						)}
 						<Outlet context={{ settings: data.settings } satisfies SettingsOutletContext} />
 					</div>
