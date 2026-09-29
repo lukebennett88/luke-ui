@@ -1,6 +1,5 @@
 import { Box } from '@luke-ui/react/box';
 import { buttonRecipe } from '@luke-ui/react/button';
-import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
@@ -26,26 +25,21 @@ export default () => {
 					<Text elementType="strong" fontWeight="emphasis" id={labelId}>
 						Parent colour mode
 					</Text>
-					<Cluster
-						gap="sp8"
-						render={(props) => (
-							<ToggleButtonGroup
-								{...props}
-								aria-labelledby={labelId}
-								disallowEmptySelection
-								onSelectionChange={(selection: Selection) => {
-									if (selection === 'all') return;
+					<ToggleButtonGroup
+						aria-labelledby={labelId}
+						className={GROUP_CLASS_NAME}
+						disallowEmptySelection
+						onSelectionChange={(selection: Selection) => {
+							if (selection === 'all') return;
 
-									const selectedKey = selection.values().next().value;
-									if (selectedKey !== 'light' && selectedKey !== 'dark') return;
+							const selectedKey = selection.values().next().value;
+							if (selectedKey !== 'light' && selectedKey !== 'dark') return;
 
-									setParentMode(selectedKey);
-								}}
-								orientation="horizontal"
-								selectedKeys={[parentMode]}
-								selectionMode="single"
-							/>
-						)}
+							setParentMode(selectedKey);
+						}}
+						orientation="horizontal"
+						selectedKeys={[parentMode]}
+						selectionMode="single"
 					>
 						{(['light', 'dark'] as const).map((option) => (
 							<ToggleButton
@@ -57,7 +51,7 @@ export default () => {
 								{option === 'light' ? 'Light' : 'Dark'}
 							</ToggleButton>
 						))}
-					</Cluster>
+					</ToggleButtonGroup>
 				</Stack>
 				<Box
 					backgroundColor="surface.floating"
@@ -86,6 +80,8 @@ export default () => {
 		</Box>
 	);
 };
+
+const GROUP_CLASS_NAME = 'flex items-center gap-2';
 
 function toggleButtonClassName() {
 	return buttonRecipe({ prominence: 'standard' });

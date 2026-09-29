@@ -40,7 +40,7 @@ test('toggles the parent colour mode and leaves the nested panel fixed to dark',
 		.closest('[data-color-mode]');
 	expect(fixedPanel).toHaveAttribute('data-color-mode', 'dark');
 
-	await userEvent.click(page.getByRole('button', { name: 'Dark' }));
+	await userEvent.click(page.getByRole('radio', { name: 'Dark' }));
 
 	await expect.poll(() => parent.getAttribute('data-color-mode')).toBe('dark');
 	expect(fixedPanel).toHaveAttribute('data-color-mode', 'dark');
