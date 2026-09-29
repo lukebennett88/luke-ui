@@ -1,6 +1,6 @@
 import '../styles/app.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
-import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import { Provider } from '@luke-ui/react/provider';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import {
@@ -237,9 +237,9 @@ function renderExample(title: string) {
 	root = createRoot(container);
 	act(() => {
 		root?.render(
-			<IconSpritesheetProvider href={spriteSheetHref}>
+			<Provider spritesheetHref={spriteSheetHref}>
 				<ExampleLoadingState layout="full-bleed" title={title} />
-			</IconSpritesheetProvider>,
+			</Provider>,
 		);
 	});
 }
@@ -302,11 +302,11 @@ async function renderExampleBlock({
 }: { src?: string; title?: string; width?: number } = {}) {
 	const rootRoute = createRootRoute({
 		component: () => (
-			<IconSpritesheetProvider href={spriteSheetHref}>
+			<Provider spritesheetHref={spriteSheetHref}>
 				<DocsThemeRoot>
 					<ExampleBlock src={src} title={title} />
 				</DocsThemeRoot>
-			</IconSpritesheetProvider>
+			</Provider>
 		),
 	});
 	const router = createRouter({

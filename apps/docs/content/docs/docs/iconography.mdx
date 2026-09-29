@@ -59,21 +59,13 @@ Do not set `aria-hidden` and `title` on the same icon.
 
 ## Set up the spritesheet
 
-The `Icon` component reads its symbols from a spritesheet file. The package supplies this file at
-`@luke-ui/react/spritesheet.svg`.
+`Icon` reads symbols from `@luke-ui/react/spritesheet.svg`.
 
-Put an `IconSpritesheetProvider` around your application. Give the provider the URL of the
-spritesheet file.
+Wrap the application with `Provider` from `@luke-ui/react/provider` and pass the spritesheet URL. Do
+not inline the asset as a `data:` URL. SVG `<use>` does not support that consistently across
+browsers. With Vite, use `?url&no-inline`:
 
-<SourceCodeBlock src="iconography/spritesheet-provider" />
-
-Your bundler must give a URL for the spritesheet file. It must not inline the file as a `data:` URL,
-because a `<use>` reference to a `data:` URL does not resolve in all browsers. In Vite, the
-`?url&no-inline` query gives this result.
-
-```ts
-import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
-```
+<SourceCodeBlock src="iconography/provider" />
 
 ## When the set does not have an icon
 

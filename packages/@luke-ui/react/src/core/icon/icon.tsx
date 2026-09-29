@@ -24,14 +24,14 @@ interface IconStyleProps {
 	size?: IconVariantProps['size'];
 }
 
-/** Props for `IconSpritesheetProvider`. */
+/** Package-internal props for `IconSpritesheetProvider`. */
 export interface IconSpritesheetProviderProps {
 	children: ReactNode;
 	/** URL to the generated sprite sheet file. */
 	href: string;
 }
 
-/** Provides the icon spritesheet URL for `Icon`. */
+/** Package-internal spritesheet context. Apps use `Provider` from `@luke-ui/react/provider`. */
 export function IconSpritesheetProvider({
 	children,
 	href,
@@ -112,7 +112,7 @@ function useIconSpritesheetHref(): string {
 	const href = useContext(IconSpritesheetContext);
 	if (!href) {
 		throw new Error(
-			'IconSpritesheetProvider is required. Wrap your app with <IconSpritesheetProvider href="...">.',
+			'Icon requires Provider from @luke-ui/react/provider. Wrap your app with <Provider spritesheetHref="...">.',
 		);
 	}
 	return href;

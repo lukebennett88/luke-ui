@@ -248,6 +248,4 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	],
 	'visuals/icon.mdx::packages/@luke-ui/react/src/core/icon/icon.tsx::CustomIconProps': ['title'],
 	'visuals/icon.mdx::packages/@luke-ui/react/src/core/icon/icon.tsx::IconProps': ['title'],
-	'visuals/icon.mdx::packages/@luke-ui/react/src/core/icon/icon.tsx::IconSpritesheetProviderProps':
-		['href'],
 };

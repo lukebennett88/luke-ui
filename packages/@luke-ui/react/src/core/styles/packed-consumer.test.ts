@@ -136,7 +136,8 @@ import { createElement } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
 import { Blockquote } from '@luke-ui/react/blockquote';
-import { Icon, IconSpritesheetProvider } from '@luke-ui/react/icon';
+import { Icon } from '@luke-ui/react/icon';
+import { Provider } from '@luke-ui/react/provider';
 import { breakpoints, createSprinkles } from '@luke-ui/react/styles';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -162,8 +163,8 @@ if (breakpoints.bp768 !== 768) {
 
 function app() {
 	return createElement(
-		IconSpritesheetProvider,
-		{ href: spritesheetHref },
+		Provider,
+		{ spritesheetHref },
 		createElement(Blockquote, null, 'Hello world'),
 		createElement(Icon, { name: 'chevronDown', 'aria-label': 'Expand' }),
 	);

@@ -48,6 +48,7 @@
 		"./primitives/field": "./dist/primitives/field.js",
 		"./primitives/input-group": "./dist/primitives/input-group.js",
 		"./prose": "./dist/prose.js",
+		"./provider": "./dist/provider.js",
 		"./quote": "./dist/quote.js",
 		"./scroll-fade": "./dist/scroll-fade.js",
 		"./stack": "./dist/stack.js",

@@ -4,11 +4,9 @@ description: SVG icon component backed by the generated spritesheet.
 source: packages/@luke-ui/react/src/exports/icon.ts
 ---
 
-`Icon` renders a symbol from the generated Luke UI spritesheet. It needs an
-`IconSpritesheetProvider` ancestor so it can resolve the spritesheet URL.
+`Icon` renders a symbol from the Luke UI spritesheet. `Provider` supplies its URL.
 
-To find an icon, set its size or colour, or set up the spritesheet, see
-[Iconography](/docs/iconography).
+See [Iconography](/docs/iconography) for available icons, sizing, colour, and setup.
 
 <ExampleBlock src="icon/basic" layout="centered" title="Icon: Basic" />
 
@@ -45,11 +43,4 @@ Read [Iconography](/docs/iconography#accessibility) for decorative and informati
 <component-props-table
 	path="packages/@luke-ui/react/src/core/icon/icon.tsx"
 	name="CustomIconProps"
-/>
-
-### IconSpritesheetProviderProps
-
-<component-props-table
-	path="packages/@luke-ui/react/src/core/icon/icon.tsx"
-	name="IconSpritesheetProviderProps"
 />

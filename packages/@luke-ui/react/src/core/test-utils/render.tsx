@@ -3,7 +3,7 @@
 import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/react/themes/paper/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
-import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import { Provider } from '@luke-ui/react/provider';
 import { rootClassName, vars } from '@luke-ui/react/theme';
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
@@ -58,7 +58,7 @@ export function render(node: ReactNode, options?: { appearance?: VisualAppearanc
 	trackMountedRender(container, root);
 
 	act(() => {
-		root.render(<IconSpritesheetProvider href={spritesheetHref}>{node}</IconSpritesheetProvider>);
+		root.render(<Provider spritesheetHref={spritesheetHref}>{node}</Provider>);
 	});
 
 	return {

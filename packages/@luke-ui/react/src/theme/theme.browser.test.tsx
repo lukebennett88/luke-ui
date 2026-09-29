@@ -1,8 +1,8 @@
 import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { Button } from '@luke-ui/react/button';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
-import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
+import { Provider } from '@luke-ui/react/provider';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -78,7 +78,7 @@ async function openPortalledCombobox(mountTarget: HTMLElement) {
 
 	act(() => {
 		root.render(
-			<IconSpritesheetProvider href="#icons">
+			<Provider spritesheetHref="#icons">
 				<ComboboxField
 					defaultItems={[{ id: 'au', label: 'Australia' }]}
 					label="Country"
@@ -86,7 +86,7 @@ async function openPortalledCombobox(mountTarget: HTMLElement) {
 				>
 					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 				</ComboboxField>
-			</IconSpritesheetProvider>,
+			</Provider>,
 		);
 	});
 

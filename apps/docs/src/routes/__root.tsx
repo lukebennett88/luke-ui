@@ -1,4 +1,4 @@
-import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import { Provider } from '@luke-ui/react/provider';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import paperCss from '@luke-ui/react/themes/paper/stylesheet.css?url';
 import tactileCss from '@luke-ui/react/themes/tactile/stylesheet.css?url';
@@ -69,11 +69,11 @@ function RootDocument({ children }: { children: ReactNode }) {
 			</head>
 			<body className={docsRoot}>
 				<RootProvider search={{ enabled: false }} theme={{ enabled: false }}>
-					<IconSpritesheetProvider href={spriteSheetHref}>
+					<Provider spritesheetHref={spriteSheetHref}>
 						<DocsThemeRoot>
 							<DocsSearchProvider>{children}</DocsSearchProvider>
 						</DocsThemeRoot>
-					</IconSpritesheetProvider>
+					</Provider>
 				</RootProvider>
 				<Scripts />
 			</body>
