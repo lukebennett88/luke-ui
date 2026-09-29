@@ -11,12 +11,12 @@ const rainbowPackageRoot = fileURLToPath(new URL('../../../../rainbow-sprinkles'
 
 /**
  * Packs `@luke-ui/rainbow-sprinkles` and `@luke-ui/react`, then installs both into an isolated
- * consumer with npm (no workspace links). Proves SSR, hydration, asset resolution, and that
- * sprinkles resolve through the published Rainbow runtime package.
+ * consumer with npm (no workspace links). Proves SSR, hydration, asset resolution, a normal
+ * client bundle, and that a small import does not pull unrelated components or theme authoring.
  */
 test(
-	'installs packed React and Rainbow tarballs with npm and proves SSR, hydration, and assets',
-	{ timeout: 120_000 },
+	'installs packed React and Rainbow tarballs with npm and proves SSR, hydration, assets, and client build',
+	{ timeout: 180_000 },
 	async () => {
 		const workDir = await mkdtemp(path.join(tmpdir(), 'luke-ui-react-consumer-'));
 		const tarballDir = path.join(workDir, 'pack');
@@ -56,6 +56,7 @@ test(
 							'@luke-ui/rainbow-sprinkles': `file:${rainbowTarballPath}`,
 							'@luke-ui/react': `file:${reactTarballPath}`,
 							...packedReactJson.peerDependencies,
+							esbuild: '^0.28.2',
 							jsdom: '^26.1.0',
 						},
 					},
@@ -125,6 +126,37 @@ test(
 			expect(String(parsed.rainbowRuntimePath).includes(`${path.sep}packages${path.sep}`)).toBe(
 				false,
 			);
+
+			const clientEntry = path.join(consumerDir, 'client-entry.mjs');
+			const clientBundle = path.join(consumerDir, 'client-bundle.mjs');
+			await writeFile(clientEntry, CLIENT_ENTRY_SCRIPT);
+
+			execFileSync(
+				path.join(consumerDir, 'node_modules', '.bin', 'esbuild'),
+				[
+					clientEntry,
+					'--bundle',
+					'--format=esm',
+					'--platform=browser',
+					`--outfile=${clientBundle}`,
+					'--external:react',
+					'--external:react-dom',
+					'--external:react-aria-components',
+					'--log-level=error',
+				],
+				{
+					cwd: consumerDir,
+					encoding: 'utf8',
+					env: { PATH: process.env.PATH ?? '' },
+				},
+			);
+
+			const bundleSource = await readFile(clientBundle, 'utf8');
+			expect(bundleSource.length).toBeGreaterThan(0);
+			expect(bundleSource).toContain('blockquote');
+			expect(bundleSource).not.toContain('function ComboboxField');
+			expect(bundleSource).not.toContain('function TextField');
+			expect(bundleSource).not.toContain('function defineTheme');
 		} finally {
 			await rm(workDir, { force: true, recursive: true });
 		}
@@ -203,6 +235,15 @@ process.stdout.write(
 		rainbowRuntimePath,
 	}),
 );
+`;
+
+const CLIENT_ENTRY_SCRIPT = `
+import { createElement } from 'react';
+import { Blockquote } from '@luke-ui/react/blockquote';
+
+export function renderDemo() {
+	return createElement(Blockquote, null, 'Client bundle');
+}
 `;
 
 function packWorkspacePackage(cwd: string, destination: string): string {
