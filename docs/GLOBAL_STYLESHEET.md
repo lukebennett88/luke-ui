@@ -23,13 +23,13 @@ decide what happens when that scope becomes the document (effectively `html` / d
 | ---------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `box-sizing: border-box` on root + descendants       | **yes**           | Safe baseline for mixed hosts.                                                                                                                    |
 | Margin reset on `blockquote, dl, dd, figure, p`      | **yes with care** | Expect apps that rely on UA margins to opt out or restyle. Document the change.                                                                   |
-| Font/margin unset on headings                        | **yes with care** | Same; Luke `Heading` supplies type. Native `h*` in app chrome lose UA size.                                                                       |
-| Margin/padding 0 on `ul, ol`                         | **yes with care** | Interface lists; Prose keeps typed `ol` markers via existing exemption.                                                                           |
+| Font/margin unset on headings                        | **yes with care** | Same. Luke `Heading` supplies type. Native `h*` in app chrome lose UA size.                                                                       |
+| Margin/padding 0 on `ul, ol`                         | **yes with care** | Interface lists. Prose keeps typed `ol` markers via existing exemption.                                                                           |
 | `list-style: none` on most lists                     | **yes**           | Keep Prose exemption.                                                                                                                             |
-| Table collapse / cell padding 0                      | **yes**           | Mild; document.                                                                                                                                   |
+| Table collapse / cell padding 0                      | **yes**           | Mild. Document.                                                                                                                                   |
 | Tap highlight transparent on button/select/label     | **yes**           | Mobile polish.                                                                                                                                    |
 | `font: inherit` on form controls                     | **yes**           | Desired for Luke + mixed forms.                                                                                                                   |
-| Transparent borderless button reset                  | **audit**         | Aggressive for native `<button>` in the host. Prefer scoping to Luke button recipe if mixed-host breakage is severe; otherwise document strongly. |
+| Transparent borderless button reset                  | **audit**         | Aggressive for native `<button>` in the host. Prefer scoping to Luke button recipe if mixed-host breakage is severe. Otherwise document strongly. |
 | `color: inherit; margin: 0` on input/textarea/select | **yes**           |                                                                                                                                                   |
 | Disabled `cursor: not-allowed`                       | **yes**           |                                                                                                                                                   |
 | Focus-visible ring                                   | **yes**           | Keep forced-colors branch.                                                                                                                        |
@@ -41,7 +41,7 @@ class → move to `<body>` (or documented body selector) once identity sits on `
 ## Cascade layers
 
 Keep ordered layers: `reset`, `base`, `recipes`, `utilities` (`layer-names.ts`). Re-evaluate whether
-consumer `base` remains useful after globalisation; do not freeze an empty layer solely for history.
+consumer `base` remains useful after globalisation. Do not freeze an empty layer solely for history.
 
 Unlayered application CSS still wins over layered Luke rules at equal specificity — document that
 interaction for host apps.
@@ -49,7 +49,7 @@ interaction for host apps.
 ## Migration
 
 1. Land this audit + mixed-host test plan.
-2. Implement global selectors; delete `rootClassName` export and call sites (docs, README, overlays,
+2. Implement global selectors. Delete `rootClassName` export and call sites (docs, README, overlays,
    popovers that re-apply root for portals — portals need an explicit follow-up so portaled UI still
    receives reset/theme).
 3. Update installation / styling / theming MDX and settings fixture (#713 friction).
