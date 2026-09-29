@@ -59,18 +59,14 @@ globalStyleInLayer(
 	},
 );
 
-globalStyleInLayer(
-	'reset',
-	`:where(button, [type='button'], [type='reset'], [type='submit'])`,
-	{
-		backgroundColor: 'transparent',
-		borderColor: 'transparent',
-		borderStyle: 'none',
-		borderWidth: 0,
-		color: 'inherit',
-		padding: 0,
-	},
-);
+globalStyleInLayer('reset', `:where(button, [type='button'], [type='reset'], [type='submit'])`, {
+	backgroundColor: 'transparent',
+	borderColor: 'transparent',
+	borderStyle: 'none',
+	borderWidth: 0,
+	color: 'inherit',
+	padding: 0,
+});
 
 globalStyleInLayer('reset', ':where(input, textarea, select)', {
 	color: 'inherit',

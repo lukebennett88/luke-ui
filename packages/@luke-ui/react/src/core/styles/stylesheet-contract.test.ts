@@ -530,9 +530,9 @@ function assertBodyTypography(analysis: StylesheetAnalysis): void {
 			),
 	);
 	expect(rules.length).toBeGreaterThan(0);
-	expect(rules.some((rule) => declarationListHas(rule, 'color', 'var(--luke-color-text-primary)'))).toBe(
-		true,
-	);
+	expect(
+		rules.some((rule) => declarationListHas(rule, 'color', 'var(--luke-color-text-primary)')),
+	).toBe(true);
 	expect(
 		rules.some((rule) =>
 			declarationListHas(rule, 'font-family', 'var(--luke-font-body-font-family)'),
