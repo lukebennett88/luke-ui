@@ -632,9 +632,6 @@ importers:
       '@capsizecss/vanilla-extract':
         specifier: 'catalog:'
         version: 2.0.4(@vanilla-extract/css@1.21.2)
-      '@luke-ui/rainbow-sprinkles':
-        specifier: workspace:*
-        version: link:../rainbow-sprinkles
       '@react-aria/utils':
         specifier: 'catalog:'
         version: 3.34.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -657,6 +654,9 @@ importers:
       '@arethetypeswrong/core':
         specifier: 'catalog:'
         version: 0.18.5
+      '@luke-ui/rainbow-sprinkles':
+        specifier: workspace:*
+        version: link:../rainbow-sprinkles
       '@rolldown/pluginutils':
         specifier: 'catalog:'
         version: 1.0.1

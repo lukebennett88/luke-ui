@@ -185,6 +185,12 @@ export default defineConfig(async () => {
 						import.meta.url,
 					),
 				),
+				'#rainbow-sprinkles-runtime': fileURLToPath(
+					new URL(
+						'../../packages/@luke-ui/react/src/core/styles/rainbow-runtime.ts',
+						import.meta.url,
+					),
+				),
 			},
 			tsconfigPaths: true,
 		},

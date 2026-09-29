@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 
 const require = createRequire(import.meta.url);
@@ -35,6 +35,19 @@ test(
 			) {
 				throw new Error('Expected packed package.json to define dependency objects.');
 			}
+			expect('@luke-ui/rainbow-sprinkles' in packedPackageJson.dependencies).toBe(false);
+			expect('@luke-ui/rainbow-sprinkles' in packedPackageJson.peerDependencies).toBe(false);
+
+			const utilitiesChunk = (await readdir(path.join(packedPackageRoot, 'dist'))).find(
+				(name) => name.startsWith('utilities.css-') && name.endsWith('.js'),
+			);
+			expect(utilitiesChunk).toBeTruthy();
+			const utilitiesSource = await readFile(
+				path.join(packedPackageRoot, 'dist', utilitiesChunk!),
+				'utf8',
+			);
+			expect(utilitiesSource).not.toContain('@luke-ui/rainbow-sprinkles');
+
 			const runtimeDependencies = new Set([
 				...Object.keys(packedPackageJson.dependencies),
 				...Object.keys(packedPackageJson.peerDependencies),

@@ -9,6 +9,9 @@ const dirname =
 const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
 );
+const rainbowRuntimeSource = fileURLToPath(
+	new URL('./src/core/styles/rainbow-runtime.ts', import.meta.url),
+);
 const repoRoot = path.resolve(dirname, '../../..');
 const captureDir = process.env.VISUAL_CAPTURE_DIR;
 const visualFsAllow =
@@ -38,6 +41,7 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			'#recipe-engine': recipeEngineSource,
+			'#rainbow-sprinkles-runtime': rainbowRuntimeSource,
 		},
 	},
 	test: {
