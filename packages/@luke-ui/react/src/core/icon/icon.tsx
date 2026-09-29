@@ -112,7 +112,7 @@ function useIconSpritesheetHref(): string {
 	const href = useContext(IconSpritesheetContext);
 	if (!href) {
 		throw new Error(
-			'IconSpritesheetProvider is required. Wrap your app with <IconSpritesheetProvider href="...">.',
+			'LukeUIProvider is required. Wrap your app with <LukeUIProvider spritesheetHref="..."> from `@luke-ui/react/provider` (or IconSpritesheetProvider for spritesheet-only setup).',
 		);
 	}
 	return href;
