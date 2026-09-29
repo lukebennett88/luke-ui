@@ -32,10 +32,14 @@ test(
 
 			const packedReactJson = readPackedPackageJson(reactTarballPath);
 			const packedRainbowJson = readPackedPackageJson(rainbowTarballPath);
+			const reactDependencies = packedReactJson.dependencies;
+			if (reactDependencies === undefined) {
+				throw new Error('Expected packed @luke-ui/react to declare dependencies.');
+			}
 
-			expect(packedReactJson.dependencies['@luke-ui/rainbow-sprinkles']).toBeTruthy();
-			expect(JSON.stringify(packedReactJson.dependencies)).not.toContain('catalog:');
-			expect(JSON.stringify(packedReactJson.dependencies)).not.toContain('workspace:');
+			expect(reactDependencies['@luke-ui/rainbow-sprinkles']).toBeTruthy();
+			expect(JSON.stringify(reactDependencies)).not.toContain('catalog:');
+			expect(JSON.stringify(reactDependencies)).not.toContain('workspace:');
 			expect(JSON.stringify(packedReactJson.peerDependencies ?? {})).not.toContain('catalog:');
 			expect(JSON.stringify(packedRainbowJson.dependencies ?? {})).not.toContain('catalog:');
 			expect(JSON.stringify(packedRainbowJson.dependencies ?? {})).not.toContain('workspace:');
