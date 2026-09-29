@@ -1,5 +1,5 @@
 import { Box } from '@luke-ui/react/box';
-import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import { Provider } from '@luke-ui/react/provider';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { vars } from '@luke-ui/react/theme';
 import type { ReactNode } from 'react';
@@ -38,7 +38,7 @@ export function StoryWrapper({ children, layout = 'flow' }: StoryWrapperProps) {
 	const boxProps = layoutToBoxProps[layout];
 	return (
 		<Box overflow="auto" {...boxProps}>
-			<IconSpritesheetProvider href={spriteSheetHref}>{children}</IconSpritesheetProvider>
+			<Provider spritesheetHref={spriteSheetHref}>{children}</Provider>
 		</Box>
 	);
 }

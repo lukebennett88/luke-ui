@@ -4,7 +4,7 @@ import { expect, test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render } from '../test-utils/render.js';
 
-test('renders icon-using controls when the app root uses LukeUIProvider', async () => {
+test('renders icon-using controls when the app root uses Provider', async () => {
 	const { container, locator, unmount } = render(
 		<Button startContent={<Icon name="add" />}>With icon</Button>,
 	);

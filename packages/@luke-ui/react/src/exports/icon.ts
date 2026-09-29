@@ -6,8 +6,6 @@ export {
 	type IconName,
 	type IconProps,
 	IconSizeProvider,
-	IconSpritesheetProvider,
-	type IconSpritesheetProviderProps,
 	iconNames,
 	iconViewBoxes,
 } from '../core/icon/icon.js';
