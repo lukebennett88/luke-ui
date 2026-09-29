@@ -48,8 +48,8 @@ notice.
 
 ## Changesets
 
-`@luke-ui/react` is unpublished at version `0.0.0`. `@luke-ui/rainbow-sprinkles` is a publishable 0.x
-support package used by `@luke-ui/react` at runtime. It is not part of the stable Luke UI 1.x
+`@luke-ui/react` is unpublished at version `0.0.0`. `@luke-ui/rainbow-sprinkles` is a publishable
+0.x support package used by `@luke-ui/react` at runtime. It is not part of the stable Luke UI 1.x
 consumer API. `apps/docs` and `@luke-ui/playground-core` are private. Before `1.0.0` no pull request
 needs a changeset, including one that moves a runtime or peer dependency.
 
