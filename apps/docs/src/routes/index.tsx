@@ -1,3 +1,4 @@
+import { Container } from '@luke-ui/react/container';
 import { HeadingLevels } from '@luke-ui/react/heading';
 import { createFileRoute } from '@tanstack/react-router';
 import { HomeFeatures } from '../components/home-features.js';
@@ -30,12 +31,20 @@ function Home() {
 	return (
 		<>
 			<SiteNav />
-			<main className="mx-auto w-full max-w-6xl flex-1 px-4 md:px-6">
+			<Container
+				elementType="main"
+				flexGrow="1"
+				maxInlineSize="ct1152"
+				paddingInline={{
+					initial: 'sp16',
+					bp768: 'sp24',
+				}}
+			>
 				<HeadingLevels base={1}>
 					<HomeHero />
 					<HomeFeatures />
 				</HeadingLevels>
-			</main>
+			</Container>
 		</>
 	);
 }

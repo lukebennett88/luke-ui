@@ -1,29 +1,24 @@
+import { AutoGrid } from '@luke-ui/react/auto-grid';
 import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 
 export default () => {
 	return (
-		<Box
-			display="grid"
-			gap="sp12"
-			style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(14rem, 1fr))' }}
-		>
+		<AutoGrid gap="sp12" minColumnInlineSize="14rem">
 			<SemanticSurface mode="light" />
 			<SemanticSurface mode="dark" />
-		</Box>
+		</AutoGrid>
 	);
 };
 
 function SemanticSurface({ mode }: { mode: 'light' | 'dark' }) {
 	return (
 		<Box
+			backgroundColor="surface.floating"
+			color={vars.color.text.primary}
 			data-color-mode={mode}
 			padding="sp16"
-			style={{
-				backgroundColor: vars.color.surface.floating,
-				color: vars.color.text.primary,
-			}}
 		>
 			<Text>{mode === 'light' ? 'Light' : 'Dark'}</Text>
 		</Box>

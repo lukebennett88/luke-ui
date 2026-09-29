@@ -10,8 +10,8 @@ import { deriveNestedRadius, vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentType, JSX, ReactNode } from 'react';
 import { Suspense, use, useEffect, useId, useRef, useState } from 'react';
-import { Group, Panel, Separator } from 'react-resizable-panels';
 import type { GroupImperativeHandle } from 'react-resizable-panels';
+import { Group, Panel, Separator } from 'react-resizable-panels';
 import type { HighlightedSource } from '../lib/highlighted-source.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
 import { CodeBlock } from './code-block/code-block.js';
@@ -47,8 +47,10 @@ function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element 
 
 	if (!result.ok) {
 		return (
-			<Box className="rounded-lg border border-fd-destructive p-4 text-fd-destructive">
-				Failed to load example {component}/{name}: {result.error.message}
+			<Box className="rounded-lg border border-fd-destructive" padding="sp16">
+				<Text color="danger" elementType="p">
+					Failed to load example {component}/{name}: {result.error.message}
+				</Text>
 			</Box>
 		);
 	}
@@ -159,7 +161,7 @@ export function ExamplePreview({
 		<Group
 			// The outside panel's minimum is set from here with `!` because the
 			// library puts an inline `min-width: 0` on each panel element.
-			className="@container/example-preview-card isolate flex overflow-hidden md:@[640px]/example-preview-card:[&>[data-panel]:last-child]:min-inline-3!"
+			className="@container/example-preview-card md:@[640px]/example-preview-card:[&>[data-panel]:last-child]:min-inline-3! isolate flex overflow-hidden"
 			disabled={!isResizable}
 			elementRef={groupElement}
 			groupRef={groupHandle}
@@ -188,7 +190,7 @@ export function ExamplePreview({
 			<Separator
 				aria-label={`${title} preview`}
 				className={cx(
-					'relative z-10 hidden shrink-0 inline-px cursor-col-resize bg-fd-border md:@[640px]/example-preview-card:block',
+					'inline-px relative z-10 hidden shrink-0 cursor-col-resize bg-fd-border md:@[640px]/example-preview-card:block',
 					'data-[separator=hover]:[&>.example-preview-grip]:border-fd-muted-foreground/80',
 					'data-[separator=active]:[&>.example-preview-grip]:border-fd-muted-foreground',
 					'data-[separator=focus]:[&>.example-preview-grip]:ring-2 data-[separator=focus]:[&>.example-preview-grip]:ring-fd-ring',
@@ -227,7 +229,7 @@ function ExamplePreviewResizeGrip() {
 	return (
 		<span
 			aria-hidden
-			className="example-preview-grip pointer-events-none absolute inset-bs-1/2 inset-s-1/2 flex block-15 inline-3 -translate-1/2 items-center justify-center overflow-hidden rounded-full border border-fd-border bg-fd-card text-fd-muted-foreground shadow-sm transition-[box-shadow,border-color]"
+			className="example-preview-grip block-15 inline-3 -translate-1/2 pointer-events-none absolute inset-bs-1/2 inset-s-1/2 flex items-center justify-center overflow-hidden rounded-full border border-fd-border bg-fd-card text-fd-muted-foreground shadow-sm transition-[box-shadow,border-color]"
 		>
 			<GripIcon className="size-full" />
 		</span>
@@ -286,7 +288,7 @@ function ActionPlaceholder({ children, iconName }: { children: ReactNode; iconNa
 
 function ExampleLoadingActions() {
 	return (
-		<Box aria-hidden alignItems="center" display="flex" flexShrink="0" gap="sp4" inert>
+		<Box alignItems="center" aria-hidden display="flex" flexShrink="0" gap="sp4" inert>
 			<LoadingSkeleton radius="control">
 				<ActionPlaceholder iconName="externalLink">Open in playground</ActionPlaceholder>
 			</LoadingSkeleton>
@@ -316,7 +318,7 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 		>
 			<ScrollFade
 				aria-labelledby={titleId}
-				className="border-b border-fd-border bg-fd-card"
+				className="border-fd-border border-b bg-fd-card"
 				style={{
 					borderStartEndRadius: INNER_RADIUS,
 					borderStartStartRadius: INNER_RADIUS,

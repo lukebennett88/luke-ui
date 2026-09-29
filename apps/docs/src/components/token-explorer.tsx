@@ -1,5 +1,9 @@
+import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Icon } from '@luke-ui/react/icon';
+import { Stack } from '@luke-ui/react/stack';
+import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
 import { vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
@@ -16,7 +20,6 @@ import { DocsLink } from './docs-link.js';
 
 const TOTAL_TOKEN_COUNT = themeTokens.length;
 const VARIABLE_BY_PATH = new Map(themeTokens.map((token) => [token.path, token.variable]));
-const SAMPLE_FRAME_CLASS_NAME = 'flex min-h-10 w-24 items-center justify-center';
 const MOTION_KEYFRAMES = `@keyframes luke-docs-token-motion { from { transform: translateX(-0.75rem); } to { transform: translateX(0.75rem); } } @media (prefers-reduced-motion: reduce) { [data-token-motion] { animation: none !important; } }`;
 const FALLBACK_MOTION_DURATION = '0.9s';
 const FALLBACK_MOTION_EASING = 'ease-in-out';
@@ -38,11 +41,11 @@ export function TokenExplorer(): JSX.Element {
 		query === '' ? `${TOTAL_TOKEN_COUNT} tokens` : `${matchCount} of ${TOTAL_TOKEN_COUNT}`;
 
 	return (
-		<div className="not-prose flex flex-col gap-4">
+		<Stack className="not-prose" gap="sp16">
 			<style>{MOTION_KEYFRAMES}</style>
 
-			<div className="flex flex-wrap items-center gap-3">
-				<div className="min-w-48 flex-1">
+			<Cluster gap="sp12">
+				<Box flexGrow="1" minInlineSize="12rem">
 					<TextField
 						aria-label="Filter tokens by name"
 						onChange={setFilter}
@@ -51,18 +54,25 @@ export function TokenExplorer(): JSX.Element {
 						size="small"
 						value={filter}
 					/>
-				</div>
-				<p aria-live="polite" className="ms-auto text-fd-muted-foreground text-sm tabular-nums">
+				</Box>
+				<Text
+					aria-live="polite"
+					className="ms-auto"
+					color="secondary"
+					elementType="p"
+					fontVariantNumeric="tabular-nums"
+					typography="caption"
+				>
 					{countText}
-				</p>
-			</div>
+				</Text>
+			</Cluster>
 
 			{groups.length === 0 ? (
 				<EmptyState onClear={() => setFilter('')} query={filter.trim()} />
 			) : (
 				groups.map((group) => <PurposeDetails group={group} key={group.id} />)
 			)}
-		</div>
+		</Stack>
 	);
 }
 
@@ -102,8 +112,16 @@ function PurposeDetails({ group }: { group: TokenPurposeGroup }) {
 			</Heading>
 
 			<DisclosurePanel className="border-fd-border border-t">
-				<div className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3">
-					<p className="text-fd-muted-foreground text-sm">{group.description}</p>
+				<Cluster
+					alignItems="baseline"
+					gap="sp8"
+					justifyContent="space-between"
+					paddingBlock="sp12"
+					paddingInline="sp16"
+				>
+					<Text color="secondary" typography="caption">
+						{group.description}
+					</Text>
 					{group.related ? (
 						<DocsLink
 							className="text-fd-muted-foreground text-sm underline-offset-4 hover:text-fd-foreground hover:underline"
@@ -113,7 +131,7 @@ function PurposeDetails({ group }: { group: TokenPurposeGroup }) {
 							{group.related.label}
 						</DocsLink>
 					) : null}
-				</div>
+				</Cluster>
 				<TokenTable showSamples={group.showSamples} tokens={group.tokens} />
 			</DisclosurePanel>
 		</Disclosure>
@@ -174,25 +192,49 @@ function TokenSample({ token }: { token: ThemeToken }) {
 	return <Sample {...token} />;
 }
 
+function SampleFrame({
+	children,
+	className,
+	justifyContent = 'center',
+	paddingInline,
+	style,
+}: {
+	children?: ReactNode;
+	className?: string;
+	justifyContent?: 'center' | 'flex-start';
+	paddingInline?: 'sp8';
+	style?: CSSProperties;
+}): JSX.Element {
+	return (
+		<Box
+			alignItems="center"
+			className={className}
+			display="flex"
+			elementType="span"
+			inlineSize="6rem"
+			justifyContent={justifyContent}
+			minBlockSize="2.5rem"
+			paddingInline={paddingInline}
+			style={style}
+		>
+			{children}
+		</Box>
+	);
+}
+
 function ColorSample({ variable }: ThemeToken) {
 	return (
-		<span
-			className={SAMPLE_FRAME_CLASS_NAME}
-			style={{ ...stageStyle, backgroundColor: vars.color.surface.canvas }}
-		>
+		<SampleFrame style={{ ...stageStyle, backgroundColor: vars.color.surface.canvas }}>
 			<span
 				style={{ alignSelf: 'stretch', backgroundColor: `var(${variable})`, inlineSize: '100%' }}
 			/>
-		</span>
+		</SampleFrame>
 	);
 }
 
 function DepthSample({ variable }: ThemeToken) {
 	return (
-		<span
-			className={SAMPLE_FRAME_CLASS_NAME}
-			style={{ ...stageStyle, backgroundColor: vars.color.surface.recessed }}
-		>
+		<SampleFrame style={{ ...stageStyle, backgroundColor: vars.color.surface.recessed }}>
 			<span
 				style={{
 					backgroundColor: vars.color.surface.floating,
@@ -202,16 +244,13 @@ function DepthSample({ variable }: ThemeToken) {
 					inlineSize: '60%',
 				}}
 			/>
-		</span>
+		</SampleFrame>
 	);
 }
 
 function FinishSample({ variable }: ThemeToken) {
 	return (
-		<span
-			className={SAMPLE_FRAME_CLASS_NAME}
-			style={{ ...stageStyle, backgroundColor: vars.color.surface.recessed }}
-		>
+		<SampleFrame style={{ ...stageStyle, backgroundColor: vars.color.surface.recessed }}>
 			<span
 				style={{
 					backgroundColor: vars.color.background.neutral.solid.rest,
@@ -221,13 +260,13 @@ function FinishSample({ variable }: ThemeToken) {
 					inlineSize: '70%',
 				}}
 			/>
-		</span>
+		</SampleFrame>
 	);
 }
 
 function RadiusSample({ variable }: ThemeToken) {
 	return (
-		<span className={SAMPLE_FRAME_CLASS_NAME}>
+		<SampleFrame>
 			<span
 				style={{
 					backgroundColor: vars.color.background.accent.subtle.rest,
@@ -239,13 +278,13 @@ function RadiusSample({ variable }: ThemeToken) {
 					inlineSize: '2.5rem',
 				}}
 			/>
-		</span>
+		</SampleFrame>
 	);
 }
 
 function SpaceSample({ variable }: ThemeToken) {
 	return (
-		<span className={cx(SAMPLE_FRAME_CLASS_NAME, 'justify-start px-2')} style={stageStyle}>
+		<SampleFrame justifyContent="flex-start" paddingInline="sp8" style={stageStyle}>
 			<span
 				style={{
 					backgroundColor: vars.color.background.accent.solid.rest,
@@ -255,13 +294,13 @@ function SpaceSample({ variable }: ThemeToken) {
 					maxInlineSize: '100%',
 				}}
 			/>
-		</span>
+		</SampleFrame>
 	);
 }
 
 function SizeSample({ variable }: ThemeToken) {
 	return (
-		<span className={SAMPLE_FRAME_CLASS_NAME}>
+		<SampleFrame>
 			<span
 				style={{
 					backgroundColor: vars.color.background.accent.solid.rest,
@@ -270,13 +309,13 @@ function SizeSample({ variable }: ThemeToken) {
 					inlineSize: `var(${variable})`,
 				}}
 			/>
-		</span>
+		</SampleFrame>
 	);
 }
 
 function InteractionSample({ variable }: ThemeToken) {
 	return (
-		<span className={cx(SAMPLE_FRAME_CLASS_NAME, 'gap-1.5')}>
+		<SampleFrame className="gap-1.5">
 			<span
 				style={{
 					backgroundColor: vars.color.background.accent.solid.rest,
@@ -294,7 +333,7 @@ function InteractionSample({ variable }: ThemeToken) {
 					opacity: `var(${variable})`,
 				}}
 			/>
-		</span>
+		</SampleFrame>
 	);
 }
 
@@ -302,7 +341,7 @@ function MotionSample({ path, variable }: ThemeToken) {
 	const axis = path.split('.')[1];
 
 	return (
-		<span className={SAMPLE_FRAME_CLASS_NAME} style={stageStyle}>
+		<SampleFrame style={stageStyle}>
 			<span
 				data-token-motion
 				style={{
@@ -317,15 +356,15 @@ function MotionSample({ path, variable }: ThemeToken) {
 					inlineSize: vars.iconSize.xsmall,
 				}}
 			/>
-		</span>
+		</SampleFrame>
 	);
 }
 
 function TextSample({ children = 'Aa', style }: { children?: ReactNode; style: CSSProperties }) {
 	return (
-		<span className={SAMPLE_FRAME_CLASS_NAME}>
+		<SampleFrame>
 			<span style={{ color: vars.color.text.primary, ...style }}>{children}</span>
-		</span>
+		</SampleFrame>
 	);
 }
 
@@ -337,7 +376,7 @@ function TrimSample({
 	variable: string;
 }) {
 	return (
-		<span className={SAMPLE_FRAME_CLASS_NAME} style={stageStyle}>
+		<SampleFrame style={stageStyle}>
 			<span
 				style={{
 					backgroundColor: vars.color.background.accent.solid.rest,
@@ -346,7 +385,7 @@ function TrimSample({
 					[property]: `var(${variable})`,
 				}}
 			/>
-		</span>
+		</SampleFrame>
 	);
 }
 
@@ -397,11 +436,19 @@ const FAMILY_SAMPLES: Record<ThemeTokenFamily, (token: ThemeToken) => ReactNode>
 
 function EmptyState({ onClear, query }: { onClear: () => void; query: string }) {
 	return (
-		<div className="flex flex-col items-center gap-3 rounded-xl border border-fd-border px-6 py-16 text-center">
-			<p className="text-fd-muted-foreground text-sm">No token matches &quot;{query}&quot;</p>
+		<Stack
+			alignItems="center"
+			className="rounded-xl border border-fd-border text-center"
+			gap="sp12"
+			paddingBlock="sp64"
+			paddingInline="sp24"
+		>
+			<Text color="secondary" elementType="p" typography="caption">
+				No token matches &quot;{query}&quot;
+			</Text>
 			<Button onPress={onClear} size="small">
 				Clear filter
 			</Button>
-		</div>
+		</Stack>
 	);
 }

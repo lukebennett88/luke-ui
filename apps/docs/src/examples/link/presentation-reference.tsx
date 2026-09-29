@@ -1,12 +1,12 @@
-import { Box } from '@luke-ui/react/box';
 import { Link } from '@luke-ui/react/link';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (
-		<Box display="grid" gap="sp24">
-			<Box display="grid" gap="sp8">
+		<Stack gap="sp24">
+			<Stack gap="sp8">
 				<Text typography="label">Text</Text>
 				<Comparison>
 					<ComparisonItem label="Low">
@@ -23,8 +23,8 @@ export default () => {
 						</Link>
 					</ComparisonItem>
 				</Comparison>
-			</Box>
-			<Box display="grid" gap="sp8">
+			</Stack>
+			<Stack gap="sp8">
 				<Text typography="label">Button</Text>
 				<Comparison>
 					<ComparisonItem label="Low">
@@ -43,7 +43,7 @@ export default () => {
 						</Link>
 					</ComparisonItem>
 				</Comparison>
-			</Box>
-		</Box>
+			</Stack>
+		</Stack>
 	);
 };
