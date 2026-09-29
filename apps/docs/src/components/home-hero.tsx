@@ -1,6 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
+import { Grid } from '@luke-ui/react/grid';
 import { Heading } from '@luke-ui/react/heading';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -30,7 +31,24 @@ export function HomeHero() {
 	}
 
 	return (
-		<section className="grid grid-cols-1 items-center gap-10 pt-16 pb-16 md:grid-cols-2 md:gap-16 md:pt-24 md:pb-24">
+		<Grid
+			columns={{
+				initial: 1,
+				bp768: 2,
+			}}
+			elementType="section"
+			gap={{
+				initial: 'sp40',
+				bp768: 'sp64',
+			}}
+			paddingBlock={{
+				initial: 'sp64',
+				bp768: 'sp96',
+			}}
+			style={{
+				alignItems: 'center',
+			}}
+		>
 			<Stack gap="sp24">
 				<Heading typography="display">Luke UI</Heading>
 				<Text color="secondary" elementType="p" typography="lead">
@@ -39,19 +57,33 @@ export function HomeHero() {
 				<Cluster gap="sp12">
 					<DocsLink
 						appearance="button"
-						params={{ _splat: 'docs/installation' }}
+						params={{
+							_splat: 'docs/installation',
+						}}
 						prominence="high"
 						to="/$"
 					>
 						Installation
 					</DocsLink>
-					<DocsLink appearance="button" params={{ _splat: 'components' }} prominence="low" to="/$">
+					<DocsLink
+						appearance="button"
+						params={{
+							_splat: 'components',
+						}}
+						prominence="low"
+						to="/$"
+					>
 						Components
 					</DocsLink>
 				</Cluster>
-				<div className="max-w-full md:max-w-md">
+				<Box
+					maxInlineSize={{
+						initial: '100%',
+						bp768: '28rem',
+					}}
+				>
 					<CodeBlock code={INSTALL_COMMAND} title="Terminal" />
-				</div>
+				</Box>
 			</Stack>
 			<Box
 				backgroundColor="surface.floating"
@@ -79,7 +111,7 @@ export function HomeHero() {
 					</Stack>
 				</form>
 			</Box>
-		</section>
+		</Grid>
 	);
 }
 

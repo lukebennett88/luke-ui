@@ -1,7 +1,11 @@
 'use client';
 
-import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Box } from '@luke-ui/react/box';
+import { Cluster } from '@luke-ui/react/cluster';
+import { Stack } from '@luke-ui/react/stack';
+import { Text } from '@luke-ui/react/text';
 import type { TypeNode } from 'fumadocs-ui/components/type-table';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -24,13 +28,11 @@ export function ComponentPropsTable({
 	const nativePropsNote = type[NATIVE_PROPS_FORWARDING_KEY]?.description;
 
 	return (
-		<div
-			className={['my-6 flex flex-col gap-3', className].filter(Boolean).join(' ')}
-			id={id}
-			{...props}
-		>
+		<Stack className={className} gap="sp12" id={id} marginBlock="sp24" {...props}>
 			{nativePropsNote !== undefined ? (
-				<div className="text-fd-muted-foreground text-sm">{nativePropsNote}</div>
+				<Text color="secondary" elementType="p" typography="caption">
+					{nativePropsNote}
+				</Text>
 			) : null}
 			{groups.map((group) => (
 				<PropGroup
@@ -39,7 +41,7 @@ export function ComponentPropsTable({
 					type={pickGroupProps(type, new Set(group.props))}
 				/>
 			))}
-		</div>
+		</Stack>
 	);
 }
 
@@ -51,15 +53,37 @@ function PropGroup({
 	type: Record<string, TypeNode>;
 }) {
 	return (
-		<Collapsible className="rounded-2xl border bg-fd-card" defaultOpen={group.defaultOpen}>
-			<CollapsibleTrigger className="group flex w-full items-center justify-between px-4 py-3 text-start">
-				<span className="font-medium text-fd-foreground text-sm">{group.name}</span>
+		<Box
+			backgroundColor="surface.canvas"
+			borderColor="decorative"
+			borderRadius="surface"
+			borderStyle="solid"
+			borderWidth="thin"
+			render={(props) => <Collapsible {...props} defaultOpen={group.defaultOpen} />}
+		>
+			<Cluster
+				className="group text-start"
+				flexWrap="nowrap"
+				inlineSize="100%"
+				justifyContent="space-between"
+				paddingBlock="sp12"
+				paddingInline="sp16"
+				render={(props) => <CollapsibleTrigger {...props} />}
+			>
+				<Text elementType="span" fontWeight="emphasis" typography="caption">
+					{group.name}
+				</Text>
 				<ChevronIcon />
-			</CollapsibleTrigger>
-			<CollapsibleContent className="border-fd-border border-t px-1 pb-1">
+			</Cluster>
+			<Box
+				className="border-fd-border border-t"
+				paddingBlockEnd="sp4"
+				paddingInline="sp4"
+				render={(props) => <CollapsibleContent {...props} />}
+			>
 				<TypeTable type={type} />
-			</CollapsibleContent>
-		</Collapsible>
+			</Box>
+		</Box>
 	);
 }
 

@@ -1,5 +1,8 @@
+import { AutoGrid } from '@luke-ui/react/auto-grid';
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { useState } from 'react';
@@ -21,8 +24,8 @@ export default () => {
 	const [role, setRole] = useState<Role>('warning');
 
 	return (
-		<Box display="grid" gap="sp16">
-			<Box aria-label="Semantic role" display="flex" flexWrap="wrap" gap="sp8" role="group">
+		<Stack gap="sp16">
+			<Cluster aria-label="Semantic role" gap="sp8" role="group">
 				{(Object.keys(roles) as Array<Role>).map((option) => (
 					<Button
 						aria-pressed={role === option}
@@ -33,12 +36,8 @@ export default () => {
 						{roles[option]}
 					</Button>
 				))}
-			</Box>
-			<Box
-				display="grid"
-				gap="sp12"
-				style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(16rem, 100%), 1fr))' }}
-			>
+			</Cluster>
+			<AutoGrid gap="sp12" minColumnInlineSize="16rem">
 				{modes.map((mode) => (
 					<Box
 						data-color-mode={mode}
@@ -74,7 +73,7 @@ export default () => {
 									borderRadius: vars.radius.control,
 								}}
 							>
-								<Box alignItems="center" display="flex" flexWrap="wrap" gap="sp4">
+								<Cluster alignItems="center" gap="sp4">
 									<Text
 										elementType="strong"
 										fontWeight="emphasis"
@@ -85,17 +84,17 @@ export default () => {
 									<Text
 										elementType="span"
 										fontWeight="emphasis"
-										typography="caption"
 										style={{
 											backgroundColor: vars.color.background[role].solid.rest,
 											borderRadius: vars.radius.full,
 											color: vars.color.foreground[role].onSolid,
 											padding: `${vars.space.sp4} ${vars.space.sp8}`,
 										}}
+										typography="caption"
 									>
 										{roles[role]}
 									</Text>
-								</Box>
+								</Cluster>
 								<Text style={{ color: vars.color.foreground[role].rest }}>
 									This notice uses the selected semantic role.
 								</Text>
@@ -103,7 +102,7 @@ export default () => {
 						</Box>
 					</Box>
 				))}
-			</Box>
-		</Box>
+			</AutoGrid>
+		</Stack>
 	);
 };

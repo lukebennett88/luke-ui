@@ -1,63 +1,98 @@
 import { Box } from '@luke-ui/react/box';
-import { Button } from '@luke-ui/react/button';
+import { buttonRecipe } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
-import { useState } from 'react';
+import type { ComponentProps } from 'react';
+import { useId, useState } from 'react';
+import type { Selection } from 'react-aria-components/GridList';
+import { ToggleButton } from 'react-aria-components/ToggleButton';
+import { ToggleButtonGroup } from 'react-aria-components/ToggleButtonGroup';
 
 export default () => {
 	const [parentMode, setParentMode] = useState<'light' | 'dark'>('light');
+	const labelId = useId();
 
 	return (
 		<Box
+			backgroundColor="surface.canvas"
+			color={vars.color.text.primary}
 			data-color-mode={parentMode}
-			display="grid"
-			gap="sp16"
 			padding="sp24"
-			style={{
-				backgroundColor: vars.color.surface.canvas,
-				color: vars.color.text.primary,
-			}}
 		>
-			<Box display="grid" gap="sp8">
-				<Text elementType="strong" fontWeight="emphasis">
-					Parent colour mode
-				</Text>
-				<Box aria-label="Parent colour mode" display="flex" gap="sp8" role="group">
-					{(['light', 'dark'] as const).map((option) => (
-						<Button
-							aria-pressed={parentMode === option}
-							key={option}
-							onPress={() => setParentMode(option)}
-							prominence={parentMode === option ? 'high' : 'standard'}
-						>
-							{option === 'light' ? 'Light' : 'Dark'}
-						</Button>
-					))}
+			<Stack gap="sp16">
+				<Stack gap="sp8">
+					<Text elementType="strong" fontWeight="emphasis" id={labelId}>
+						Parent colour mode
+					</Text>
+					<Cluster
+						gap="sp8"
+						render={(props) => (
+							<ToggleButtonGroup
+								{...props}
+								aria-labelledby={labelId}
+								disallowEmptySelection
+								onSelectionChange={(selection: Selection) => {
+									if (selection === 'all') return;
+
+									const selectedKey = selection.values().next().value;
+									if (selectedKey !== 'light' && selectedKey !== 'dark') return;
+
+									setParentMode(selectedKey);
+								}}
+								orientation="horizontal"
+								selectedKeys={[parentMode]}
+								selectionMode="single"
+							/>
+						)}
+					>
+						{(['light', 'dark'] as const).map((option) => (
+							<ToggleButton
+								className={toggleButtonClassName()}
+								id={option}
+								key={option}
+								render={renderToggleButton}
+							>
+								{option === 'light' ? 'Light' : 'Dark'}
+							</ToggleButton>
+						))}
+					</Cluster>
+				</Stack>
+				<Box
+					backgroundColor="surface.floating"
+					borderColor="decorative"
+					borderRadius="surface"
+					borderStyle="solid"
+					borderWidth="thin"
+					color={vars.color.text.primary}
+					padding="sp16"
+				>
+					<Text>This panel follows the parent mode.</Text>
 				</Box>
-			</Box>
-			<Box
-				padding="sp16"
-				style={{
-					backgroundColor: vars.color.surface.floating,
-					border: `1px solid ${vars.color.border.decorative}`,
-					borderRadius: vars.radius.surface,
-					color: vars.color.text.primary,
-				}}
-			>
-				<Text>This panel follows the parent mode.</Text>
-			</Box>
-			<Box
-				data-color-mode="dark"
-				padding="sp16"
-				style={{
-					backgroundColor: vars.color.surface.floating,
-					border: `1px solid ${vars.color.border.decorative}`,
-					borderRadius: vars.radius.surface,
-					color: vars.color.text.primary,
-				}}
-			>
-				<Text>This panel is fixed to dark mode.</Text>
-			</Box>
+				<Box
+					backgroundColor="surface.floating"
+					borderColor="decorative"
+					borderRadius="surface"
+					borderStyle="solid"
+					borderWidth="thin"
+					color={vars.color.text.primary}
+					data-color-mode="dark"
+					padding="sp16"
+				>
+					<Text>This panel is fixed to dark mode.</Text>
+				</Box>
+			</Stack>
 		</Box>
 	);
+};
+
+function toggleButtonClassName() {
+	return buttonRecipe({ prominence: 'standard' });
+}
+
+type RenderToggleButton = ComponentProps<typeof ToggleButton>['render'];
+
+const renderToggleButton: RenderToggleButton = (domProps, state) => {
+	return <button {...domProps} data-pressed={state.isPressed || state.isSelected || undefined} />;
 };

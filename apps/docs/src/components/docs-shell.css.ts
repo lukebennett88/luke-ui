@@ -55,7 +55,7 @@ export const sidebar = style({
 			insetBlockStart: SITE_HEADER_BLOCK_SIZE,
 			maxBlockSize: `calc(100dvh - ${SITE_HEADER_BLOCK_SIZE})`,
 			overflow: 'auto',
-			paddingBlock: vars.space.sp16,
+			paddingBlock: vars.space.sp32,
 			paddingInline: vars.space.sp16,
 			position: 'sticky',
 			'@media': {
@@ -107,8 +107,9 @@ const sectionLabel = {
 	fontSize: vars.font.caption.fontSize,
 	fontWeight: vars.font.weight.label,
 	lineHeight: vars.font.caption.lineHeight,
-	marginBlockStart: vars.space.sp16,
-	paddingBlockStart: vars.space.sp16,
+	marginBlockStart: vars.space.sp32,
+	paddingBlockEnd: vars.space.sp8,
+	paddingBlockStart: vars.space.sp32,
 	paddingInline: vars.space.sp8,
 } as const satisfies ComplexStyleRule;
 
@@ -166,8 +167,8 @@ export const folderLabel = style({
 	'@layer': {
 		recipes: {
 			...sectionLabel,
-			display: 'flex',
 			columnGap: vars.space.sp8,
+			display: 'flex',
 		},
 	},
 });

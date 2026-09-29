@@ -1,4 +1,5 @@
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
 import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@luke-ui/react/link';
@@ -28,7 +29,7 @@ export function PageActions({
 	const showAllActions = mode === 'all';
 
 	return (
-		<div className="not-prose flex w-full flex-wrap items-center gap-2">
+		<Cluster className="not-prose" gap="sp8" inlineSize="100%">
 			{showAllActions && reactAriaUrl ? (
 				<PageActionLink
 					href={reactAriaUrl}
@@ -52,7 +53,7 @@ export function PageActions({
 				icon={<GithubMark className="size-4 shrink-0" />}
 				label="Edit on GitHub"
 			/>
-		</div>
+		</Cluster>
 	);
 }
 
@@ -70,8 +71,8 @@ function PageActionLink({
 	return (
 		<Link
 			appearance="button"
-			prominence="low"
 			href={href}
+			prominence="low"
 			rel="noreferrer noopener"
 			size="small"
 			startContent={icon ?? (iconName ? <Icon name={iconName} /> : null)}
@@ -100,10 +101,10 @@ function CopyMarkdownButton({ markdownUrl }: { markdownUrl: string }) {
 	return (
 		<Button
 			onPress={onCopy}
-			tone="neutral"
 			prominence="low"
 			size="small"
 			startContent={<Icon name={copied ? 'check' : 'copy'} />}
+			tone="neutral"
 		>
 			{copied ? 'Copied' : 'Copy Markdown'}
 		</Button>

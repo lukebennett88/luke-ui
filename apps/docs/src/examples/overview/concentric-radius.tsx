@@ -1,4 +1,5 @@
 import { Box } from '@luke-ui/react/box';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { deriveConcentricRadius, vars } from '@luke-ui/react/theme';
 import { DecorativeBox } from './decorative-box.js';
@@ -7,9 +8,8 @@ export default () => {
 	const controlGap = vars.space.sp8;
 
 	return (
-		<Box display="grid" gap="sp8">
+		<Stack gap="sp8">
 			<DecorativeBox
-				display="grid"
 				padding="sp8"
 				style={{
 					borderRadius: deriveConcentricRadius(vars.radius.control, controlGap),
@@ -24,6 +24,6 @@ export default () => {
 				/>
 			</DecorativeBox>
 			<Text typography="caption">Outer radius from inner radius + gap</Text>
-		</Box>
+		</Stack>
 	);
 };

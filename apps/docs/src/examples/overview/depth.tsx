@@ -1,19 +1,14 @@
+import { AutoGrid } from '@luke-ui/react/auto-grid';
 import { Box } from '@luke-ui/react/box';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 
 export default () => {
 	return (
-		<Box
-			display="grid"
-			gap="sp12"
-			padding="sp16"
-			style={{
-				gridTemplateColumns: 'repeat(auto-fit, minmax(6rem, 1fr))',
-			}}
-		>
+		<AutoGrid gap="sp12" minColumnInlineSize="6rem" padding="sp16">
 			{Object.entries(vars.depth).map(([name, depth]) => (
-				<Box display="grid" gap="sp8" key={name}>
+				<Stack gap="sp8" key={name}>
 					<Box
 						style={{
 							backgroundColor: vars.color.surface.floating,
@@ -23,11 +18,11 @@ export default () => {
 							boxShadow: depth,
 						}}
 					/>
-					<Text typography="caption" style={{ textAlign: 'center' }}>
+					<Text textAlign="center" typography="caption">
 						{name}
 					</Text>
-				</Box>
+				</Stack>
 			))}
-		</Box>
+		</AutoGrid>
 	);
 };

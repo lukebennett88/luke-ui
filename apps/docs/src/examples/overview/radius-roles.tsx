@@ -1,4 +1,5 @@
-import { Box } from '@luke-ui/react/box';
+import { AutoGrid } from '@luke-ui/react/auto-grid';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { DecorativeBox } from './decorative-box.js';
@@ -13,15 +14,9 @@ const radiusRoles = [
 
 export default () => {
 	return (
-		<Box
-			display="grid"
-			gap="sp16"
-			style={{
-				gridTemplateColumns: 'repeat(auto-fit, minmax(5rem, 1fr))',
-			}}
-		>
+		<AutoGrid gap="sp16" minColumnInlineSize="5rem">
 			{radiusRoles.map((role) => (
-				<Box display="grid" gap="sp8" key={role.label}>
+				<Stack gap="sp8" key={role.label}>
 					<DecorativeBox
 						alignItems="center"
 						display="flex"
@@ -33,11 +28,11 @@ export default () => {
 							borderRadius: role.value,
 						}}
 					/>
-					<Text typography="caption" style={{ textAlign: 'center' }}>
+					<Text textAlign="center" typography="caption">
 						{role.label}
 					</Text>
-				</Box>
+				</Stack>
 			))}
-		</Box>
+		</AutoGrid>
 	);
 };
