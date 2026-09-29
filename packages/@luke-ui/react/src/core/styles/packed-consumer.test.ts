@@ -120,6 +120,7 @@ test(
 			expect(parsed.themeStylesheetBytes).toEqual(expect.any(Number));
 			expect(Number(parsed.themeStylesheetBytes)).toBeGreaterThan(0);
 			expect(parsed.hydrated).toBe(true);
+			expect(parsed.recoverableErrors).toEqual([]);
 			expect(parsed.rainbowRuntimePath).toEqual(expect.stringContaining('rainbow-sprinkles'));
 			expect(String(parsed.rainbowRuntimePath).includes(`${path.sep}packages${path.sep}`)).toBe(
 				false,
@@ -180,7 +181,12 @@ globalThis.Node = dom.window.Node;
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Missing #root');
-hydrateRoot(root, app());
+const recoverableErrors = [];
+hydrateRoot(root, app(), {
+	onRecoverableError(error) {
+		recoverableErrors.push(String(error));
+	},
+});
 await new Promise((resolve) => setTimeout(resolve, 25));
 
 process.stdout.write(
@@ -193,6 +199,7 @@ process.stdout.write(
 		spritesheetBytes: readFileSync(spritesheetPath).byteLength,
 		themeStylesheetBytes: readFileSync(themeStylesheetPath).byteLength,
 		hydrated: root.innerHTML.includes('Hello world') && root.innerHTML.includes('<svg'),
+		recoverableErrors,
 		rainbowRuntimePath,
 	}),
 );

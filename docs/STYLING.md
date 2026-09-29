@@ -340,9 +340,9 @@ return (
 
 ### Styling engine boundary
 
-`@luke-ui/rainbow-sprinkles` is a private implementation package derived from
-[Wayfair Rainbow Sprinkles](https://github.com/wayfair/rainbow-sprinkles). Keep it private until
-Luke UI's first major release. Reconsider publication at that release.
+`@luke-ui/rainbow-sprinkles` is a published 0.x support package derived from
+[Wayfair Rainbow Sprinkles](https://github.com/wayfair/rainbow-sprinkles). `@luke-ui/react` depends
+on it at runtime. It is not part of the stable Luke UI 1.x consumer API.
 
 Keep engine authoring and compilation private. If the engine changes, preserve the public contracts:
 `createSprinkles` passes through own enumerable string-keyed non-utility props, generated
