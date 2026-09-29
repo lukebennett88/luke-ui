@@ -1,0 +1,30 @@
+{
+	"name": "settings-fixture",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "vp build",
+		"check:format": "vp fmt . --check",
+		"check:lint": "vp lint . --type-aware",
+		"check:types": "tsc --noEmit",
+		"clean": "rm -rf .turbo dist",
+		"dev": "vp dev",
+		"fix:format": "vp fmt . --write",
+		"fix:lint": "vp lint . --type-aware --fix",
+		"preview": "vp preview"
+	},
+	"dependencies": {
+		"@luke-ui/react": "workspace:*",
+		"react": "catalog:",
+		"react-aria-components": "catalog:",
+		"react-dom": "catalog:"
+	},
+	"devDependencies": {
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"@vitejs/plugin-react": "catalog:",
+		"typescript": "catalog:",
+		"vite": "catalog:",
+		"vite-plus": "catalog:"
+	}
+}
