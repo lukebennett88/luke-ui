@@ -1,9 +1,9 @@
 import { execFileSync } from 'node:child_process';
 import { realpathSync, readdirSync } from 'node:fs';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 
 const packageRoot = fileURLToPath(new URL('../../..', import.meta.url));
@@ -180,11 +180,10 @@ process.stdout.write(
 `;
 
 function packReactTarball(destination: string): string {
-	const output = execFileSync(
-		'pnpm',
-		['pack', '--pack-destination', destination],
-		{ cwd: packageRoot, encoding: 'utf8' },
-	);
+	const output = execFileSync('pnpm', ['pack', '--pack-destination', destination], {
+		cwd: packageRoot,
+		encoding: 'utf8',
+	});
 	const match = /luke-ui-react-[^\s/]+\.tgz/.exec(output);
 	if (match === null) {
 		throw new Error(`Expected pnpm pack to print a tarball name, received:\n${output}`);
