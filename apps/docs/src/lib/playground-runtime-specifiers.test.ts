@@ -16,11 +16,7 @@ test('documented examples that the playground cannot resolve use unsupported rel
 		})
 		.sort();
 
-	expect(unrunnable).toEqual([
-		'overview/concentric-radius',
-		'overview/radius-roles',
-		'theming/color-mode-override',
-	]);
+	expect(unrunnable).toEqual(['overview/concentric-radius', 'overview/radius-roles']);
 });
 
 function documentedExampleSources(docsDir: string): Array<string> {
