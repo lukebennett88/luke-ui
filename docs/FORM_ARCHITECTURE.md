@@ -18,7 +18,7 @@ primitives, and the settings fixture (#713).
 | Future stacked Select / TextArea | **`SelectField` / `TextAreaField`** if added | Match the stacked pattern only when a supported flow needs them.                                    |
 
 Do **not** rename `TextField` to `TextInputField` for taxonomy purity. Fixture bio currently reuses
-`TextField` for multi-line copy; a dedicated `TextAreaField` is a Wave 2/3 addition when multiline
+`TextField` for multi-line copy. A dedicated `TextAreaField` is a Wave 2/3 addition when multiline
 is a proven contract (#713 friction), not a rename of the single-line field.
 
 ### Inline controls keep short natural names
