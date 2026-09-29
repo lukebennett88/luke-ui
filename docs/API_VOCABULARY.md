@@ -55,15 +55,15 @@ consumer evidence), **private** (must not become a consumer contract).
 | `theme` (`vars`, `defineTheme`, `rootClassName`, …)           | audit                | Aggressively review: which helpers are 1.x vs authoring-only. `#717` may drop `rootClassName`. |
 | `themes/tactile`, `themes/paper` (+ stylesheets)              | retain               | Bundled themes.                                                                                |
 | `stylesheet.css`, `spritesheet.svg`                           | retain               | Asset paths are public contracts.                                                              |
-| Recipe / `#recipe-engine` / VE internals                      | private              | Bundled; not importable.                                                                       |
-| `@luke-ui/rainbow-sprinkles`                                  | private-to-consumers | Published 0.x support package; React depends on it. Consumers should not import it.            |
+| Recipe / `#recipe-engine` / VE internals                      | private              | Bundled. Not importable.                                                                       |
+| `@luke-ui/rainbow-sprinkles`                                  | private-to-consumers | Published 0.x support package. React depends on it. Consumers should not import it.            |
 
 ### Utilities (`@luke-ui/react/utils`)
 
 | Export                                           | Status | Notes                                                                                          |
 | ------------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------- |
 | `cx`, `mergeStyleProps`                          | retain | Documented for combining sprinkles with component props.                                       |
-| `pxToRem`, `typedEntries`, related typed helpers | audit  | Confirm each has a consumer use case; demote or keep internal if only build tooling uses them. |
+| `pxToRem`, `typedEntries`, related typed helpers | audit  | Confirm each has a consumer use case. Demote or keep internal if only build tooling uses them. |
 
 ### Provider (lands via #712 / #725)
 
@@ -75,7 +75,7 @@ consumer evidence), **private** (must not become a consumer contract).
 
 - Prefer React Aria-aligned controlled/uncontrolled pairs already documented on each component.
 - Do not invent Luke-specific duplicates of RAC state props.
-- Defaults should stay on the component docs page; changing a default is a breaking 1.x concern once
+- Defaults should stay on the component docs page. Changing a default is a breaking 1.x concern once
   published.
 
 ## Explicitly private
