@@ -4,7 +4,7 @@ import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/react/themes/paper/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
-import { rootClassName, vars } from '@luke-ui/react/theme';
+import { vars } from '@luke-ui/react/theme';
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import type { ReactNode } from 'react';
@@ -52,7 +52,6 @@ export function render(node: ReactNode, options?: { appearance?: VisualAppearanc
 	applyAppearance(appearance);
 
 	const container = document.body.appendChild(document.createElement('div'));
-	container.className = rootClassName;
 	container.style.backgroundColor = vars.color.surface.canvas;
 	const root = createRoot(container);
 	trackMountedRender(container, root);
@@ -82,7 +81,6 @@ export function hydrate(
 	applyAppearance(appearance);
 
 	const container = document.body.appendChild(document.createElement('div'));
-	container.className = rootClassName;
 	container.style.backgroundColor = vars.color.surface.canvas;
 	container.innerHTML = markup;
 

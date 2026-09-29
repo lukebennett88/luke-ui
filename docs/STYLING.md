@@ -9,11 +9,11 @@ published TypeScript surface.
 
 ## Setup
 
-Luke UI ships one static stylesheet for its reset, theme root, recipes, and utilities.
+Luke UI ships one static stylesheet for its reset, base typography, recipes, and utilities.
 
-1. Import `@luke-ui/react/stylesheet.css`.
-2. Apply `rootClassName` from `@luke-ui/react/theme` to `<body>`, `<main>`, or an app shell.
-3. Import one bundled theme stylesheet, for example `@luke-ui/react/themes/tactile/stylesheet.css`.
+1. Import `@luke-ui/react/stylesheet.css`. The reset applies document-wide. Base typography and
+   primary text colour apply on `body`.
+2. Import one bundled theme stylesheet, for example `@luke-ui/react/themes/tactile/stylesheet.css`.
 
 The theme stylesheet themes the document from `:root`. It needs no class and no JS. None of these
 steps inject styles at runtime.

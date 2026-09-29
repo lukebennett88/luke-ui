@@ -20,7 +20,7 @@ afterEach(() => {
 
 function renderColourModeExample() {
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = tactileThemeClassName;
 	root = createRoot(container);
 	act(() => {
 		root?.render(<ColorModeOverride />);

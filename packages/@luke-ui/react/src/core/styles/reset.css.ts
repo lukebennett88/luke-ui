@@ -1,26 +1,23 @@
-import { lukeUiClassNames } from '../../shared/class-names.js';
 import { vars } from '../../theme/contract.css.js';
 import { proseScopeClassName } from '../prose/scope.css.js';
 import { classSelector } from './class-selector.js';
 import { focusRing } from './focus-ring.js';
 import { globalStyleInLayer } from './layered-style.css.js';
 
-const root = classSelector(lukeUiClassNames.resetRoot);
-
-globalStyleInLayer('reset', `${root}, ${root} *, ${root} *::before, ${root} *::after`, {
+globalStyleInLayer('reset', '*, *::before, *::after', {
 	boxSizing: 'border-box',
 });
 
-globalStyleInLayer('reset', `${root} :where(blockquote, dl, dd, figure, p)`, {
+globalStyleInLayer('reset', ':where(blockquote, dl, dd, figure, p)', {
 	margin: 0,
 });
 
-globalStyleInLayer('reset', `${root} :where(h1, h2, h3, h4, h5, h6)`, {
+globalStyleInLayer('reset', ':where(h1, h2, h3, h4, h5, h6)', {
 	font: 'unset',
 	margin: 0,
 });
 
-globalStyleInLayer('reset', `${root} :where(ol, ul)`, {
+globalStyleInLayer('reset', ':where(ol, ul)', {
 	margin: 0,
 	padding: 0,
 });
@@ -31,32 +28,32 @@ globalStyleInLayer('reset', `${root} :where(ol, ul)`, {
 // scope class (`proseScopeClassName`), which `proseRecipe()` and `<Prose>` apply identically.
 globalStyleInLayer(
 	'reset',
-	`${root} :where(ul, ol:not([type]), ol[type]:not(${classSelector(proseScopeClassName)} *))`,
+	`:where(ul, ol:not([type]), ol[type]:not(${classSelector(proseScopeClassName)} *))`,
 	{
 		listStyle: 'none',
 	},
 );
 
-globalStyleInLayer('reset', `${root} :where(table)`, {
+globalStyleInLayer('reset', ':where(table)', {
 	borderCollapse: 'collapse',
 	borderSpacing: 0,
 });
 
-globalStyleInLayer('reset', `${root} :where(caption, th)`, {
+globalStyleInLayer('reset', ':where(caption, th)', {
 	textAlign: 'inherit',
 });
 
-globalStyleInLayer('reset', `${root} :where(th, td)`, {
+globalStyleInLayer('reset', ':where(th, td)', {
 	padding: 0,
 });
 
-globalStyleInLayer('reset', `${root} :where(button, select, label)`, {
+globalStyleInLayer('reset', ':where(button, select, label)', {
 	WebkitTapHighlightColor: 'transparent',
 });
 
 globalStyleInLayer(
 	'reset',
-	`${root} :where(button, select, input, textarea, [type='button'], [type='reset'], [type='submit'])`,
+	`:where(button, select, input, textarea, [type='button'], [type='reset'], [type='submit'])`,
 	{
 		font: 'inherit',
 	},
@@ -64,7 +61,7 @@ globalStyleInLayer(
 
 globalStyleInLayer(
 	'reset',
-	`${root} :where(button, [type='button'], [type='reset'], [type='submit'])`,
+	`:where(button, [type='button'], [type='reset'], [type='submit'])`,
 	{
 		backgroundColor: 'transparent',
 		borderColor: 'transparent',
@@ -75,12 +72,12 @@ globalStyleInLayer(
 	},
 );
 
-globalStyleInLayer('reset', `${root} :where(input, textarea, select)`, {
+globalStyleInLayer('reset', ':where(input, textarea, select)', {
 	color: 'inherit',
 	margin: 0,
 });
 
-globalStyleInLayer('reset', `${root} :where(:disabled, [data-disabled="true"])`, {
+globalStyleInLayer('reset', ':where(:disabled, [data-disabled="true"])', {
 	cursor: 'not-allowed',
 });
 
@@ -88,7 +85,7 @@ globalStyleInLayer('reset', `${root} :where(:disabled, [data-disabled="true"])`,
 // restate it when they deviate — focus-within on a group, or a ring on a non-focusable box like a
 // checkbox's indicator. `[data-focus-visible="true"]` mirrors native `:focus-visible` with React
 // Aria's deterministic signal, so both the browser heuristic and the attribute drive the same ring.
-globalStyleInLayer('reset', `${root} :where(:focus-visible, [data-focus-visible="true"])`, {
+globalStyleInLayer('reset', ':where(:focus-visible, [data-focus-visible="true"])', {
 	...focusRing(vars.color.border.focus),
 
 	'@media': {
@@ -98,7 +95,7 @@ globalStyleInLayer('reset', `${root} :where(:focus-visible, [data-focus-visible=
 	},
 });
 
-globalStyleInLayer('reset', `${root}, ${root} *, ${root} *::before, ${root} *::after`, {
+globalStyleInLayer('reset', '*, *::before, *::after', {
 	'@media': {
 		'(prefers-reduced-motion: reduce)': {
 			animation: 'none',

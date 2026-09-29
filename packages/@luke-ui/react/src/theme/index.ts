@@ -18,4 +18,3 @@ export type {
 } from './define-theme.js';
 export { deriveConcentricRadius, deriveNestedRadius } from './foundation.js';
 export { getThemeClassName } from './theme-class-name.js';
-export { rootClassName } from './theme.js';

@@ -109,8 +109,8 @@ from a curated accent and neutral character. It is not a per-component override 
 
 ## Set up static styles
 
-Import the shared stylesheet and one theme stylesheet, then apply `rootClassName`. Luke UI scopes
-the reset to that root.
+Import the shared stylesheet and one theme stylesheet. The shared stylesheet applies the reset
+document-wide and base typography on `body`.
 
 <SourceCodeBlock src="styling/static-styles" />
 
@@ -121,7 +121,7 @@ Read [Installation](/docs/installation) for the first-run path. Read
 
 Luke UI's stylesheet uses four cascade layers, from lowest to highest priority: `reset`, `base`,
 `recipes`, and `utilities`. That order does not change with stylesheet import order. The reset
-applies only under `rootClassName`.
+applies document-wide once the stylesheet is imported.
 
 The `base` layer is reserved for application defaults such as Tailwind Preflight. Luke UI declares
 it empty so it stays below `recipes`. Put all Luke UI component styles in `recipes`, including

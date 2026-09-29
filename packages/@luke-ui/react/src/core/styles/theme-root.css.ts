@@ -1,9 +1,7 @@
-import { lukeUiClassNames } from '../../shared/class-names.js';
 import { vars } from '../../theme/contract.css.js';
-import { classSelector } from './class-selector.js';
 import { globalStyleInLayer } from './layered-style.css.js';
 
-globalStyleInLayer('reset', classSelector(lukeUiClassNames.themeRoot), {
+globalStyleInLayer('reset', 'body', {
 	accentColor: vars.color.background.accent.solid.rest,
 	color: vars.color.text.primary,
 	...vars.font.body,

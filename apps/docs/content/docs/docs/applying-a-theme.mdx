@@ -1,6 +1,6 @@
 ---
 title: Applying a theme
-description: Load Luke UI CSS and apply the shared root class.
+description: Load Luke UI CSS for the global reset, body typography, and theme tokens.
 ---
 
 A themed subtree needs the shared Luke UI stylesheet and one theme stylesheet. Both are static CSS.
@@ -13,11 +13,10 @@ Import `@luke-ui/react/stylesheet.css` and one theme's stylesheet, for example
 `:root`, with no class and no JavaScript. Import one bundled theme, and Luke UI does not load the
 other.
 
-## Apply the root class
+## Colour mode on the themed tree
 
-Apply `rootClassName` to an element you own, such as the application shell. It supplies the reset
-and base typography. It carries no theme identity, so it works the same way for a bundled theme and
-a custom theme.
+The shared stylesheet already supplies the reset and body typography. Set `data-color-mode` when a
+scope needs an explicit light or dark mode.
 
 <SourceCodeBlock src="theming/apply-theme" />
 
@@ -44,8 +43,8 @@ independently of its parent.
 
 ## Avoid a colour-mode flash
 
-Render `rootClassName` and any known explicit mode in the initial HTML. When the mode comes from a
-client-side preference, set `data-color-mode` before the themed UI paints.
+Render any known explicit mode in the initial HTML. When the mode comes from a client-side
+preference, set `data-color-mode` before the themed UI paints.
 
 Use the same value for the server HTML and the first client render. This avoids a hydration warning.
 

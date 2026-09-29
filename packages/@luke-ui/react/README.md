@@ -13,9 +13,9 @@ Luke UI expects the application to provide a compatible shared `react-aria-compo
 
 ## Setup
 
-Import the component stylesheet and one bundled theme stylesheet. Importing a theme stylesheet
-themes the whole document from `:root`, so no identity class is needed for a single theme. Apply
-`rootClassName` to an element you own for the reset and base typography.
+Import the component stylesheet and one bundled theme stylesheet. The shared stylesheet applies the
+reset document-wide and base typography on `body`. Importing a theme stylesheet themes the document
+from `:root`, so no identity class is needed for a single theme.
 
 The shared stylesheet uses the layer order `reset → base → recipes → utilities`. The `base` layer is
 reserved for application defaults such as Tailwind Preflight. Luke UI declares it empty so it stays
@@ -24,10 +24,9 @@ below `recipes`.
 ```tsx
 import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
-import { rootClassName } from '@luke-ui/react/theme';
 
 export function App() {
-	return <div className={rootClassName}>{/* your app */}</div>;
+	return <main>{/* your app */}</main>;
 }
 ```
 

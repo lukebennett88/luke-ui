@@ -233,7 +233,7 @@ test('narrowing the preview panel flips a responsive example below its container
 
 function renderExample(title: string) {
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = tactileThemeClassName;
 	root = createRoot(container);
 	act(() => {
 		root?.render(
@@ -258,7 +258,7 @@ function renderPreviewHarness({
 	onFirstLayout?: (canvasWidth: number) => void;
 } = {}) {
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = tactileThemeClassName;
 	container.style.inlineSize = withStickyHeader ? '100%' : `${width}px`;
 	root = createRoot(container);
 	act(() => {
@@ -315,7 +315,7 @@ async function renderExampleBlock({
 	});
 
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = tactileThemeClassName;
 	container.style.inlineSize = `${width}px`;
 	root = createRoot(container);
 	await act(async () => {

@@ -1,7 +1,5 @@
 import { Button } from '@luke-ui/react/button';
 import { IconButton } from '@luke-ui/react/icon-button';
-import { rootClassName } from '@luke-ui/react/theme';
-import { cx } from '@luke-ui/react/utils';
 import { useRouterState } from '@tanstack/react-router';
 import type { Root } from 'fumadocs-core/page-tree';
 import { useState } from 'react';
@@ -32,7 +30,7 @@ export function DocsSiteNav({ tree }: { tree: Root }) {
 				<Button className={styles.mobileTrigger} prominence="low" size="small">
 					Menu
 				</Button>
-				<ModalOverlay className={cx(rootClassName, styles.drawerOverlay)} isDismissable>
+				<ModalOverlay className={styles.drawerOverlay} isDismissable>
 					<Modal className={styles.drawerModal}>
 						<Dialog aria-label="Docs navigation" className={styles.drawerDialog}>
 							{({ close }) => (

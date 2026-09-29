@@ -2,8 +2,6 @@ import type { JSX, Ref } from 'react';
 import type { PopoverProps as RacPopoverProps } from 'react-aria-components/ComboBox';
 import { Popover as RacPopover } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import { cx } from '../../../shared/utils/utils.js';
-import { rootClassName } from '../../../theme/theme.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { comboboxRecipe } from './styles.css.js';
@@ -18,9 +16,8 @@ interface _ComboboxPopoverProps extends _ComboboxPopoverOmit {
 export type ComboboxPopoverProps = Prettify<_ComboboxPopoverProps>;
 
 /**
- * Popover surface used for listbox content. The portal inherits the document's theme: importing a
- * theme stylesheet themes the whole document from `:root`, so no propagation is needed. A colour
- * mode scoped below `<html>` does not reach the portal.
+ * Popover surface used for listbox content. Reset and body typography come from the global
+ * stylesheet. A colour mode scoped below `<html>` does not reach the portal.
  */
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 	const { ref, ...restProps } = props;
@@ -29,7 +26,7 @@ export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 		<RacPopover
 			{...restProps}
 			className={composeRenderProps(restProps.className, (className) => {
-				return cx(rootClassName, comboboxRecipe().popover({ className }));
+				return comboboxRecipe().popover({ className });
 			})}
 			ref={ref}
 		/>

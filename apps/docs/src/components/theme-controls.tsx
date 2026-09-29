@@ -1,4 +1,3 @@
-import { rootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, PropsWithChildren } from 'react';
 import { useSyncExternalStore } from 'react';
@@ -16,11 +15,11 @@ import {
 import * as styles from './theme-controls.css.js';
 
 /**
- * The Luke UI theme root for docs content. `<html>` carries the identity class and
- * `data-color-mode`, set by the head script before paint.
+ * Layout wrapper for docs content. `<html>` carries the identity class and `data-color-mode`, set
+ * by the head script before paint. Reset and body typography come from the global stylesheet.
  */
 export function DocsThemeRoot({ children }: PropsWithChildren) {
-	return <div className={cx(rootClassName, styles.root)}>{children}</div>;
+	return <div className={styles.root}>{children}</div>;
 }
 
 export function ThemeControls({ className, style, ...props }: ComponentProps<'div'>) {

@@ -3,8 +3,6 @@ import { useState } from 'react';
 import type { DialogProps } from 'react-aria-components/Dialog';
 import { Dialog, OverlayTriggerStateContext } from 'react-aria-components/Dialog';
 import { Modal, ModalOverlay } from 'react-aria-components/Modal';
-import { cx } from '../../shared/utils/utils.js';
-import { rootClassName } from '../../theme/theme.js';
 import { mobileDialog, mobileModal, mobileOverlay } from './mobile-overlay.css.js';
 
 interface MobileOverlayProps {
@@ -37,7 +35,7 @@ export function MobileOverlay({
 		// enclosing combobox.
 		<OverlayTriggerStateContext.Provider value={null}>
 			<ModalOverlay
-				className={cx(rootClassName, mobileOverlay)}
+				className={mobileOverlay}
 				isDismissable
 				isOpen={isOpen}
 				onOpenChange={onOpenChange}

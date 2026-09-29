@@ -94,7 +94,7 @@ test('builds the public stylesheet with the retained layer contract', async () =
 });
 
 const stylesheetMutations: Array<[string, (css: string) => string]> = [
-	['missing stable selector', (css: string) => css.replace('.luke-ui-theme', '.theme-root')],
+	['missing body typography sentinel', (css: string) => css.replaceAll('body', 'main')],
 	[
 		'reordered authoritative layer declarations',
 		(css: string) => {
@@ -176,22 +176,8 @@ function assertStylesheetContract(
 	assertRootNodes(analysis);
 	assertStableSelectors(analysis);
 	assertRecipesLayerHasRules(analysis);
-	assertSentinel(analysis, 'luke-ui-reset', 'reset', 'box-sizing', 'border-box');
-	assertSentinel(analysis, 'luke-ui-theme', 'reset', 'color', 'var(--luke-color-text-primary)');
-	assertSentinel(
-		analysis,
-		'luke-ui-theme',
-		'reset',
-		'font-family',
-		'var(--luke-font-body-font-family)',
-	);
-	assertSentinel(
-		analysis,
-		'luke-ui-theme',
-		'reset',
-		'font-size',
-		'var(--luke-font-body-font-size)',
-	);
+	assertUniversalBoxSizing(analysis);
+	assertBodyTypography(analysis);
 
 	for (const className of recipeClasses) assertClassOwnership(analysis, className, 'recipes');
 	for (const className of utilityClasses) assertClassOwnership(analysis, className, 'utilities');
@@ -517,20 +503,44 @@ function assertStableSelectors(analysis: StylesheetAnalysis): void {
 		}
 	}
 
-	expect(selectors).toEqual(new Set(['.luke-ui-reset', '.luke-ui-theme']));
+	expect(selectors).toEqual(new Set());
 }
 
-function assertSentinel(
-	analysis: StylesheetAnalysis,
-	className: string,
-	layerName: string,
-	property: string,
-	value: string,
-): void {
-	const rules = getRulesForClass(analysis, className);
+function assertUniversalBoxSizing(analysis: StylesheetAnalysis): void {
+	const rules = analysis.styleRules.filter(
+		(rule) =>
+			rule.owningLayer === 'reset' &&
+			rule.rule.selectors.some((selector) =>
+				selector.some((component) => component.type === 'universal'),
+			) &&
+			declarationListHas(rule, 'box-sizing', 'border-box'),
+	);
 	expect(rules.length).toBeGreaterThan(0);
-	for (const rule of rules) expect(rule.owningLayer).toBe(layerName);
-	expect(rules.some((rule) => declarationListHas(rule, property, value))).toBe(true);
+}
+
+function assertBodyTypography(analysis: StylesheetAnalysis): void {
+	const rules = analysis.styleRules.filter(
+		(rule) =>
+			rule.owningLayer === 'reset' &&
+			rule.rule.selectors.some((selector) =>
+				selector.some(
+					(component) =>
+						component.type === 'type' && (component as { name?: string }).name === 'body',
+				),
+			),
+	);
+	expect(rules.length).toBeGreaterThan(0);
+	expect(rules.some((rule) => declarationListHas(rule, 'color', 'var(--luke-color-text-primary)'))).toBe(
+		true,
+	);
+	expect(
+		rules.some((rule) =>
+			declarationListHas(rule, 'font-family', 'var(--luke-font-body-font-family)'),
+		),
+	).toBe(true);
+	expect(
+		rules.some((rule) => declarationListHas(rule, 'font-size', 'var(--luke-font-body-font-size)')),
+	).toBe(true);
 }
 
 function assertClassOwnership(
@@ -745,8 +755,8 @@ function formatPrimarySelector(rule: IndexedStyleRule): string {
 
 const validStylesheetFixture = `@layer reset, base, recipes, utilities;
 @layer reset {
-  .luke-ui-reset { box-sizing: border-box; }
-  .luke-ui-theme {
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
     color: var(--luke-color-text-primary);
     font-family: var(--luke-font-body-font-family);
     font-size: var(--luke-font-body-font-size);
