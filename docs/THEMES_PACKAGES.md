@@ -14,9 +14,9 @@ issue [#715](https://github.com/lukebennett88/luke-ui/issues/715).
    - `@luke-ui/theme-tactile` (0.x) — exports theme input + precompiled CSS
    - `@luke-ui/theme-paper` (0.x) — same
    - Application-owned themes — consumer runs `defineTheme` in their build and ships CSS
-4. **React 1.x** depends on public theme CSS / class names only; theme packages must not import
+4. **React 1.x** depends on public theme CSS / class names only. Theme packages must not import
    private React internals.
-5. **Fonts:** Arbitrary body stacks require Capsize-compatible metrics; missing metrics must **fail
+5. **Fonts:** Arbitrary body stacks require Capsize-compatible metrics. Missing metrics must **fail
    loudly**, not silently drop trimming.
 6. **Contrast:** Promised contrast-safe pairings stay hard failures (existing contrast policy).
 
