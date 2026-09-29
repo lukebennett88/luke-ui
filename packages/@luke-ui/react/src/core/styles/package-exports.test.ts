@@ -58,6 +58,24 @@ test('requires react-aria-components as a peer dependency', () => {
 	expect('react-aria-components' in (packageJson.dependencies ?? {})).toBe(false);
 });
 
+test('declares @luke-ui/rainbow-sprinkles as a runtime dependency', () => {
+	expect('@luke-ui/rainbow-sprinkles' in (packageJson.dependencies ?? {})).toBe(true);
+	expect('@luke-ui/rainbow-sprinkles' in (packageJson.peerDependencies ?? {})).toBe(false);
+	expect('@luke-ui/rainbow-sprinkles' in (packageJson.devDependencies ?? {})).toBe(false);
+});
+
+test('sprinkles runtime imports published rainbow-sprinkles create-runtime-fn', async () => {
+	const source = await readFile(new URL('../../../dist/styles.js', import.meta.url), 'utf8');
+	const chunkMatch = /from ["'](\.\/utilities\.css-[^"']+)["']/.exec(source);
+	expect(chunkMatch?.[1]).toBeTruthy();
+	const utilities = await readFile(
+		new URL(`../../../dist/${chunkMatch![1]!}`, import.meta.url),
+		'utf8',
+	);
+	expect(utilities).toContain('@luke-ui/rainbow-sprinkles/create-runtime-fn');
+	expect(utilities).not.toContain('#rainbow-sprinkles-runtime');
+});
+
 test('public JS/TS export declaration closures do not import styling engines', async () => {
 	const entryDeclarations = publicTypeEntryDeclarations(packageJson.exports);
 	expect(entryDeclarations.length).toBeGreaterThan(0);

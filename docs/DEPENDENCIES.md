@@ -48,9 +48,10 @@ notice.
 
 ## Changesets
 
-`@luke-ui/react` is unpublished at version `0.0.0`. `apps/docs`, `@luke-ui/rainbow-sprinkles`, and
-`@luke-ui/playground-core` are private. Before `1.0.0` no pull request needs a changeset, including
-one that moves a runtime or peer dependency.
+`@luke-ui/react` is unpublished at version `0.0.0`. `@luke-ui/rainbow-sprinkles` is a publishable
+0.x support package used by `@luke-ui/react` at runtime. It is not part of the stable Luke UI 1.x
+consumer API. `apps/docs` and `@luke-ui/playground-core` are private. Before `1.0.0` no pull request
+needs a changeset, including one that moves a runtime or peer dependency.
 
 The `needs-changeset` label in `.github/renovate.json5` is advance notice. It marks packages that
 will be runtime or peer dependencies of the published package at `1.0.0`. Re-sync that list against
