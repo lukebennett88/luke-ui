@@ -19,7 +19,7 @@ Inputs: `theme/contract.ts`, token docs, #707, settings fixture (#713), themes w
 | Kind                     | Examples                                                                                                        | Owner                                                          |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | **Themeable identity**   | Colour roles, neutral/accent character, font family + weights, radius character, depth/material, control finish | Theme packages / `defineTheme` (#715)                          |
-| **Luke-owned structure** | Spacing scale, breakpoints, control/icon sizes, type size steps, motion durations/easing structure              | `@luke-ui/react` contract; themes may not freely rewrite shape |
+| **Luke-owned structure** | Spacing scale, breakpoints, control/icon sizes, type size steps, motion durations/easing structure              | `@luke-ui/react` contract. Themes may not freely rewrite shape |
 
 Structural **values** still get reviewed (spacing steps may change), but the **shape** of those
 scales is Luke UI’s product contract, not every theme’s.
@@ -58,7 +58,7 @@ does not freeze values yet.
 
 - #715 owns how themes author colour/radius/depth/fonts into CSS.
 - #717 owns global baseline typography colour on `<body>`.
-- #714 owns control naming; this issue owns their visual tokens.
+- #714 owns control naming. This issue owns their visual tokens.
 
 ## Next actions
 
