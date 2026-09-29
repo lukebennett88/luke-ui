@@ -1,3 +1,6 @@
+import { Switch } from 'react-aria-components/Switch';
+import * as styles from '../styles/settings.css.js';
+
 export function SettingsSwitch({
 	checked,
 	disabled,
@@ -12,17 +15,18 @@ export function SettingsSwitch({
 	onChange: (checked: boolean) => void;
 }) {
 	return (
-		<button
+		<Switch
 			aria-checked={checked}
 			aria-label={label}
-			className="settings-switch"
-			disabled={disabled}
+			className={styles.switchRoot}
 			id={id}
-			onClick={() => onChange(!checked)}
-			role="switch"
-			type="button"
+			isDisabled={disabled}
+			isSelected={checked}
+			onChange={onChange}
 		>
-			<span className="settings-switch-thumb" />
-		</button>
+			<span className={styles.switchTrack}>
+				<span className={styles.switchThumb} />
+			</span>
+		</Switch>
 	);
 }

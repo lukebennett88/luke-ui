@@ -1,3 +1,10 @@
+import { Button as RacButton } from 'react-aria-components/Button';
+import { ListBox, ListBoxItem } from 'react-aria-components/ListBox';
+import { Popover } from 'react-aria-components/Popover';
+import { Select, SelectValue } from 'react-aria-components/Select';
+import type { Key } from 'react-aria-components/Select';
+import * as styles from '../styles/settings.css.js';
+
 type Option = { label: string; value: string };
 
 export function SettingsSelect({
@@ -16,19 +23,32 @@ export function SettingsSelect({
 	value: string;
 }) {
 	return (
-		<select
+		<Select
 			aria-label={label}
-			className="settings-select"
-			disabled={disabled}
 			id={id}
-			onChange={(event) => onChange(event.target.value)}
-			value={value}
+			isDisabled={disabled}
+			onSelectionChange={(key: Key | null) => {
+				if (key != null) onChange(String(key));
+			}}
+			selectedKey={value}
 		>
-			{options.map((option) => (
-				<option key={option.value} value={option.value}>
-					{option.label}
-				</option>
-			))}
-		</select>
+			<RacButton aria-label={label} className={styles.selectTrigger}>
+				<SelectValue />
+			</RacButton>
+			<Popover className={styles.selectPopover} placement="bottom end">
+				<ListBox className={styles.selectList}>
+					{options.map((option) => (
+						<ListBoxItem
+							className={styles.selectItem}
+							id={option.value}
+							key={option.value}
+							textValue={option.label}
+						>
+							{option.label}
+						</ListBoxItem>
+					))}
+				</ListBox>
+			</Popover>
+		</Select>
 	);
 }

@@ -1,4 +1,5 @@
 import { expect, test } from 'vite-plus/test';
+import { page } from 'vite-plus/test/context';
 import { settingsApi } from './api/settings-api.js';
 import { renderApp } from './test/render-app.js';
 
@@ -58,26 +59,30 @@ test('persists profile values across remounts', async () => {
 });
 
 test('autosaves a preference toggle', async () => {
-	const { locator, unmount, user } = renderApp(['/settings/preferences']);
+	const { locator, unmount } = renderApp(['/settings/preferences']);
 	const toggle = locator.getByRole('switch', { name: 'Display full names' });
-	await expect.element(toggle).toHaveAttribute('aria-checked', 'false');
-	await user.click(toggle);
-	await expect.element(toggle).toHaveAttribute('aria-checked', 'true');
+	await expect.element(toggle).toBeVisible();
+	await expect.element(toggle).not.toBeChecked();
+	// Hidden RAC input sits under the track; force avoids pointer hit-target flakes.
+	await toggle.click({ force: true });
+	await expect.element(toggle).toBeChecked();
 
 	unmount();
 	const again = renderApp(['/settings/preferences']);
 	await expect
 		.element(again.locator.getByRole('switch', { name: 'Display full names' }))
-		.toHaveAttribute('aria-checked', 'true');
+		.toBeChecked();
 	again.unmount();
 });
 
 test('applies colour mode to the document', async () => {
 	const { locator, unmount, user } = renderApp(['/settings/interface']);
-	const select = locator.getByLabelText('Colour mode');
-	await user.selectOptions(select, 'dark');
+	await expect.element(locator.getByRole('heading', { name: 'Interface', level: 1 })).toBeVisible();
+	await user.click(locator.getByRole('button', { name: /Colour mode|System/ }));
+	await user.click(page.getByRole('option', { name: 'Dark' }));
 	expect(document.documentElement.dataset.colorMode).toBe('dark');
-	await user.selectOptions(select, 'system');
+	await user.click(locator.getByRole('button', { name: /Colour mode|Dark/ }));
+	await user.click(page.getByRole('option', { name: 'System' }));
 	expect(document.documentElement.dataset.colorMode).toBeUndefined();
 	unmount();
 });

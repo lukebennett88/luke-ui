@@ -1,12 +1,22 @@
 import { Button } from '@luke-ui/react/button';
+import { Text } from '@luke-ui/react/text';
+import { TextField } from '@luke-ui/react/text-field';
 import { useForm } from '@tanstack/react-form';
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFetcher, useOutletContext } from 'react-router';
 import type { ActionFunctionArgs } from 'react-router';
 import { profileUpdateSchema } from '../api/schemas.js';
 import type { ProfileUpdate } from '../api/schemas.js';
 import { settingsApi } from '../api/settings-api.js';
-import { SettingsRow, SettingsSection } from '../components/settings-section.js';
+import {
+	SettingsAvatarActions,
+	SettingsPage,
+	SettingsRow,
+	SettingsSection,
+	SettingsStatus,
+	fieldErrorMessage,
+} from '../components/settings-section.js';
+import * as styles from '../styles/settings.css.js';
 import { SaveButton } from './settings-layout.js';
 import type { SettingsOutletContext } from './settings-layout.js';
 
@@ -31,8 +41,6 @@ export function ProfilePage() {
 	const { settings } = useOutletContext<SettingsOutletContext>();
 	const fetcher = useFetcher<typeof profileAction>();
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const nameId = useId();
-	const usernameId = useId();
 	const isPending = fetcher.state !== 'idle';
 
 	const form = useForm({
@@ -96,8 +104,7 @@ export function ProfilePage() {
 			: null;
 
 	return (
-		<>
-			<h1 className="settings-page-title">Profile</h1>
+		<SettingsPage title="Profile">
 			<form
 				onSubmit={(event) => {
 					event.preventDefault();
@@ -109,11 +116,11 @@ export function ProfilePage() {
 					<form.Field name="avatarDataUrl">
 						{(field) => (
 							<SettingsRow hint="Shown next to your name and comments." label="Avatar">
-								<div className="settings-avatar-actions">
+								<SettingsAvatarActions>
 									{field.state.value ? (
-										<img alt="" className="settings-avatar" src={field.state.value} />
+										<img alt="" className={styles.avatar} src={field.state.value} />
 									) : (
-										<div aria-hidden="true" className="settings-avatar" />
+										<div aria-hidden="true" className={styles.avatar} />
 									)}
 									<input
 										accept="image/*"
@@ -142,21 +149,20 @@ export function ProfilePage() {
 									>
 										Remove
 									</Button>
-								</div>
+								</SettingsAvatarActions>
 							</SettingsRow>
 						)}
 					</form.Field>
 					<form.Field name="displayName">
 						{(field) => (
 							<SettingsRow label="Preferred name">
-								<input
-									aria-invalid={field.state.meta.errors.length > 0}
+								<TextField
 									aria-label="Preferred name"
-									className="settings-native-input"
-									id={nameId}
+									errorMessage={fieldErrorMessage(field.state.meta.errors[0])}
 									name={field.name}
 									onBlur={field.handleBlur}
-									onChange={(event) => field.handleChange(event.target.value)}
+									onChange={(value) => field.handleChange(value)}
+									size="small"
 									value={field.state.value}
 								/>
 							</SettingsRow>
@@ -165,21 +171,20 @@ export function ProfilePage() {
 					<form.Field name="username">
 						{(field) => (
 							<SettingsRow hint="Lowercase letters, numbers, and hyphens." label="Username">
-								<input
-									aria-invalid={field.state.meta.errors.length > 0}
+								<TextField
 									aria-label="Username"
-									className="settings-native-input"
-									id={usernameId}
+									errorMessage={fieldErrorMessage(field.state.meta.errors[0])}
 									name={field.name}
 									onBlur={field.handleBlur}
-									onChange={(event) => field.handleChange(event.target.value)}
+									onChange={(value) => field.handleChange(value)}
+									size="small"
 									value={field.state.value}
 								/>
 							</SettingsRow>
 						)}
 					</form.Field>
 					<SettingsRow hint="Managed by your workspace." label="Email">
-						<span className="settings-row-value">{settings.profile.email}</span>
+						<Text color="secondary">{settings.profile.email}</Text>
 					</SettingsRow>
 				</SettingsSection>
 				<form.Subscribe selector={(state) => [state.canSubmit, state.isDirty] as const}>
@@ -187,22 +192,14 @@ export function ProfilePage() {
 						<SaveButton isDirty={Boolean(isDirty && canSubmit)} isPending={isPending} />
 					)}
 				</form.Subscribe>
-				{isPending ? (
-					<p className="settings-status" role="status">
-						Saving…
-					</p>
-				) : null}
-				{fetcher.data?.ok ? (
-					<p className="settings-status" data-tone="success" role="status">
-						Profile saved.
-					</p>
-				) : null}
+				{isPending ? <SettingsStatus>Saving…</SettingsStatus> : null}
+				{fetcher.data?.ok ? <SettingsStatus tone="success">Profile saved.</SettingsStatus> : null}
 				{actionError ? (
-					<p className="settings-status" data-tone="danger" role="alert">
+					<SettingsStatus role="alert" tone="danger">
 						{String(actionError)}
-					</p>
+					</SettingsStatus>
 				) : null}
 			</form>
-		</>
+		</SettingsPage>
 	);
 }

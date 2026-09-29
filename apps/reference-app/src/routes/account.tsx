@@ -1,9 +1,20 @@
+import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Heading } from '@luke-ui/react/heading';
+import { Stack } from '@luke-ui/react/stack';
+import { Text } from '@luke-ui/react/text';
 import { useEffect, useReducer } from 'react';
 import { useFetcher, useOutletContext } from 'react-router';
 import type { ActionFunctionArgs } from 'react-router';
 import { settingsApi } from '../api/settings-api.js';
-import { SettingsRow, SettingsSection } from '../components/settings-section.js';
+import {
+	SettingsAvatarActions,
+	SettingsPage,
+	SettingsRow,
+	SettingsSection,
+	SettingsStatus,
+} from '../components/settings-section.js';
+import * as styles from '../styles/settings.css.js';
 import { deleteAccountReducer, initialDeleteAccountState } from '../workflows/delete-account.js';
 import type { SettingsOutletContext } from './settings-layout.js';
 
@@ -45,100 +56,87 @@ export function AccountPage() {
 	}
 
 	return (
-		<>
-			<h1 className="settings-page-title">Account</h1>
+		<SettingsPage title="Account">
 			<SettingsSection title="Details">
 				<SettingsRow label="Workspace">
-					<span className="settings-row-value">{settings.account.workspace}</span>
+					<Text>{settings.account.workspace}</Text>
 				</SettingsRow>
 				<SettingsRow label="Plan">
-					<span className="settings-row-value">{settings.account.plan}</span>
+					<Text>{settings.account.plan}</Text>
 				</SettingsRow>
 				<SettingsRow label="Member since">
-					<span className="settings-row-value">{settings.account.createdAt}</span>
+					<Text>{settings.account.createdAt}</Text>
 				</SettingsRow>
 			</SettingsSection>
 
-			<section className="settings-section">
-				<h2 className="settings-section-title settings-danger-title">Danger zone</h2>
-				<p className="settings-section-description">
+			<Stack elementType="section" gap="sp8" marginBlockEnd="sp32">
+				<Heading color="danger" level={2} shouldDisableTrim typography="label">
+					Danger zone
+				</Heading>
+				<Text color="secondary" elementType="p" typography="caption">
 					Permanently delete this account and its personal settings on this device.
-				</p>
-				<div className="settings-panel settings-danger-panel">
+				</Text>
+				<div className={`${styles.panel} ${styles.dangerPanel}`}>
 					{state.status === 'idle' ? (
-						<div className="settings-row">
-							<div className="settings-row-copy">
-								<span className="settings-row-label">Delete account</span>
-								<span className="settings-row-hint">
-									This removes locally stored settings. It cannot be undone.
-								</span>
-							</div>
-							<div className="settings-row-control">
-								<Button
-									onPress={() => dispatch({ type: 'open' })}
-									prominence="high"
-									tone="critical"
-									type="button"
-								>
-									Delete account
-								</Button>
-							</div>
-						</div>
+						<SettingsRow
+							hint="This removes locally stored settings. It cannot be undone."
+							label="Delete account"
+						>
+							<Button
+								onPress={() => dispatch({ type: 'open' })}
+								prominence="high"
+								tone="critical"
+								type="button"
+							>
+								Delete account
+							</Button>
+						</SettingsRow>
 					) : null}
 
 					{state.status === 'confirming' ? (
-						<div className="settings-row">
-							<div className="settings-row-copy">
-								<span className="settings-row-label">Confirm deletion</span>
-								<span className="settings-row-hint">
-									Your profile and preferences will be wiped from this browser.
-								</span>
-							</div>
-							<div className="settings-row-control settings-avatar-actions">
+						<SettingsRow
+							hint="Your profile and preferences will be wiped from this browser."
+							label="Confirm deletion"
+						>
+							<SettingsAvatarActions>
 								<Button onPress={() => dispatch({ type: 'cancel' })} prominence="low" type="button">
 									Cancel
 								</Button>
 								<Button onPress={startDelete} tone="critical" type="button">
 									Yes, delete
 								</Button>
-							</div>
-						</div>
+							</SettingsAvatarActions>
+						</SettingsRow>
 					) : null}
 
 					{state.status === 'deleting' ? (
-						<div className="settings-row">
-							<p className="settings-status" role="status">
-								Deleting account…
-							</p>
-						</div>
+						<Box className={styles.settingsRow}>
+							<SettingsStatus>Deleting account…</SettingsStatus>
+						</Box>
 					) : null}
 
 					{state.status === 'failed' ? (
-						<div className="settings-row">
-							<div className="settings-row-copy">
-								<span className="settings-row-label">Deletion failed</span>
-								<span className="settings-row-hint">{state.error}</span>
-							</div>
-							<div className="settings-row-control settings-avatar-actions">
+						<SettingsRow hint={state.error ?? undefined} label="Deletion failed">
+							<SettingsAvatarActions>
 								<Button onPress={() => dispatch({ type: 'cancel' })} prominence="low" type="button">
 									Back
 								</Button>
 								<Button onPress={startDelete} tone="critical" type="button">
 									Try again
 								</Button>
-							</div>
-						</div>
+							</SettingsAvatarActions>
+						</SettingsRow>
 					) : null}
 
 					{state.status === 'completed' ? (
-						<div className="settings-row">
-							<p className="settings-status" data-tone="success" role="status">
+						<Box className={styles.settingsRow}>
+							<SettingsStatus tone="success">
 								Account deleted on this device. Reload to start fresh.
-							</p>
-						</div>
+							</SettingsStatus>
+						</Box>
 					) : null}
 				</div>
-			</section>
-		</>
+			</Stack>
+		</SettingsPage>
 	);
 }

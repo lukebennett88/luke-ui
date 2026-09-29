@@ -1,4 +1,6 @@
+import { Stack } from '@luke-ui/react/stack';
 import { NavLink } from 'react-router';
+import * as styles from '../styles/settings.css.js';
 
 export const SETTINGS_NAV = [
 	{ label: 'Profile', to: '/settings/profile' },
@@ -7,14 +9,16 @@ export const SETTINGS_NAV = [
 	{ label: 'Account', to: '/settings/account' },
 ] as const;
 
-export function SettingsNav({ className }: { className?: string }) {
+export function SettingsNav({ variant = 'sidebar' }: { variant?: 'menu' | 'sidebar' }) {
+	const linkClass = variant === 'menu' ? styles.menuNavLink : styles.navLink;
+
 	return (
-		<nav aria-label="Settings" className={className}>
+		<Stack aria-label="Settings" elementType="nav" gap={variant === 'menu' ? '0' : 'sp4'}>
 			{SETTINGS_NAV.map((item) => (
-				<NavLink key={item.to} className="settings-nav-link" end to={item.to}>
+				<NavLink className={linkClass} end key={item.to} to={item.to}>
 					{item.label}
 				</NavLink>
 			))}
-		</nav>
+		</Stack>
 	);
 }

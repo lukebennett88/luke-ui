@@ -3,7 +3,12 @@ import type { ActionFunctionArgs } from 'react-router';
 import { firstDaySchema, homeViewSchema, preferencesSchema } from '../api/schemas.js';
 import type { Preferences } from '../api/schemas.js';
 import { settingsApi } from '../api/settings-api.js';
-import { SettingsRow, SettingsSection } from '../components/settings-section.js';
+import {
+	SettingsPage,
+	SettingsRow,
+	SettingsSection,
+	SettingsStatus,
+} from '../components/settings-section.js';
 import { SettingsSelect } from '../components/settings-select.js';
 import { SettingsSwitch } from '../components/settings-switch.js';
 import type { SettingsOutletContext } from './settings-layout.js';
@@ -32,8 +37,7 @@ export function PreferencesPage() {
 	}
 
 	return (
-		<>
-			<h1 className="settings-page-title">Preferences</h1>
+		<SettingsPage title="Preferences">
 			<SettingsSection description="Personal defaults for how the product behaves." title="General">
 				<SettingsRow label="Default home view">
 					<SettingsSelect
@@ -82,16 +86,12 @@ export function PreferencesPage() {
 					/>
 				</SettingsRow>
 			</SettingsSection>
-			{isPending ? (
-				<p className="settings-status" role="status">
-					Saving…
-				</p>
-			) : null}
+			{isPending ? <SettingsStatus>Saving…</SettingsStatus> : null}
 			{fetcher.data && !fetcher.data.ok ? (
-				<p className="settings-status" data-tone="danger" role="alert">
+				<SettingsStatus role="alert" tone="danger">
 					{fetcher.data.formError}
-				</p>
+				</SettingsStatus>
 			) : null}
-		</>
+		</SettingsPage>
 	);
 }

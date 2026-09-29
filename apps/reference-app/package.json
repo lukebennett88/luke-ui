@@ -18,7 +18,9 @@
 	"dependencies": {
 		"@luke-ui/react": "workspace:*",
 		"@tanstack/react-form": "catalog:",
+		"@vanilla-extract/css": "catalog:",
 		"react": "catalog:",
+		"react-aria-components": "catalog:",
 		"react-dom": "catalog:",
 		"react-router": "catalog:",
 		"zod": "catalog:"
@@ -26,6 +28,7 @@
 	"devDependencies": {
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
+		"@vanilla-extract/vite-plugin": "catalog:",
 		"@vitejs/plugin-react": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:",
