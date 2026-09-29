@@ -34,6 +34,10 @@ export default {
 			],
 			project: ['src/**/*.{ts,tsx}'],
 		},
+		'packages/@luke-ui/rainbow-sprinkles': {
+			entry: ['src/index.ts', 'src/create-runtime-fn.ts', 'vite.config.ts'],
+			project: ['src/**/*.ts', 'vite.config.ts'],
+		},
 		'packages/@luke-ui/playground-core': {
 			entry: [
 				'src/compiler.ts',

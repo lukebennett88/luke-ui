@@ -3,11 +3,9 @@
 - Do not hand-edit `.generated/entries.ts` or `package.json#exports`. `vp pack` generates entries
   and updates exports during build. The `stylesheet` build entry is excluded from the public export
   map via `exports.exclude` in `vite.config.ts`. Vanilla Extract serializes recipes to
-  `#recipe-engine` and sprinkles to `#rainbow-sprinkles-runtime`; pack, Vitest, and the docs app
-  alias those specifiers to `src/core/styles/recipe-engine.ts` and
-  `src/core/styles/rainbow-runtime.ts`. Pack then bundles relative runtime chunks. The specifiers
-  are not public package subpaths. Keep `@luke-ui/rainbow-sprinkles` as a private workspace
-  `devDependency` so the React tarball never requires installing it.
+  `#recipe-engine`; pack, Vitest, and the docs app alias that specifier to
+  `src/core/styles/recipe-engine.ts`. Pack then bundles a relative runtime chunk. The specifier is
+  not a public package subpath.
 - When adding a component, use `pnpm generate:component` from the repo root. Do not create component
   files by hand. The generator updates the style-module registry and docs wiring.
 - When adding a primitive, use `pnpm generate:primitive` from the repo root. Do not create primitive

@@ -7,14 +7,15 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 
 const packageRoot = fileURLToPath(new URL('../../..', import.meta.url));
+const rainbowPackageRoot = fileURLToPath(new URL('../../../../rainbow-sprinkles', import.meta.url));
 
 /**
- * Installs the packed `@luke-ui/react` tarball through npm in an isolated directory with no
- * workspace dependency links. Proves SSR, hydration, CSS/SVG resolution, and that unpublished
- * `@luke-ui/rainbow-sprinkles` is not required.
+ * Packs `@luke-ui/rainbow-sprinkles` and `@luke-ui/react`, then installs both into an isolated
+ * consumer with npm (no workspace links). Proves SSR, hydration, asset resolution, and that
+ * sprinkles resolve through the published Rainbow runtime package.
  */
 test(
-	'installs the packed tarball with npm and proves SSR, hydration, and asset resolution',
+	'installs packed React and Rainbow tarballs with npm and proves SSR, hydration, and assets',
 	{ timeout: 120_000 },
 	async () => {
 		const workDir = await mkdtemp(path.join(tmpdir(), 'luke-ui-react-consumer-'));
@@ -24,16 +25,21 @@ test(
 			await writeFile(path.join(workDir, 'package.json'), JSON.stringify({ private: true }));
 			execFileSync('mkdir', ['-p', tarballDir, consumerDir]);
 
-			const tarballName = packReactTarball(tarballDir);
-			const tarballPath = path.join(tarballDir, tarballName);
-			const packedPackageJson = readPackedPackageJson(tarballPath);
+			const rainbowTarballName = packWorkspacePackage(rainbowPackageRoot, tarballDir);
+			const reactTarballName = packWorkspacePackage(packageRoot, tarballDir);
+			const rainbowTarballPath = path.join(tarballDir, rainbowTarballName);
+			const reactTarballPath = path.join(tarballDir, reactTarballName);
 
-			expect('@luke-ui/rainbow-sprinkles' in packedPackageJson.dependencies).toBe(false);
-			expect('@luke-ui/rainbow-sprinkles' in (packedPackageJson.peerDependencies ?? {})).toBe(
-				false,
-			);
-			expect(JSON.stringify(packedPackageJson.dependencies)).not.toContain('catalog:');
-			expect(JSON.stringify(packedPackageJson.peerDependencies)).not.toContain('catalog:');
+			const packedReactJson = readPackedPackageJson(reactTarballPath);
+			const packedRainbowJson = readPackedPackageJson(rainbowTarballPath);
+
+			expect(packedReactJson.dependencies['@luke-ui/rainbow-sprinkles']).toBeTruthy();
+			expect(JSON.stringify(packedReactJson.dependencies)).not.toContain('catalog:');
+			expect(JSON.stringify(packedReactJson.dependencies)).not.toContain('workspace:');
+			expect(JSON.stringify(packedReactJson.peerDependencies ?? {})).not.toContain('catalog:');
+			expect(JSON.stringify(packedRainbowJson.dependencies ?? {})).not.toContain('catalog:');
+			expect(JSON.stringify(packedRainbowJson.dependencies ?? {})).not.toContain('workspace:');
+			expect(packedRainbowJson.private).not.toBe(true);
 
 			await writeFile(
 				path.join(consumerDir, 'package.json'),
@@ -43,8 +49,9 @@ test(
 						private: true,
 						type: 'module',
 						dependencies: {
-							'@luke-ui/react': `file:${tarballPath}`,
-							...packedPackageJson.peerDependencies,
+							'@luke-ui/rainbow-sprinkles': `file:${rainbowTarballPath}`,
+							'@luke-ui/react': `file:${reactTarballPath}`,
+							...packedReactJson.peerDependencies,
 							jsdom: '^26.1.0',
 						},
 					},
@@ -68,17 +75,19 @@ test(
 			const installedReactRoot = realpathSync(
 				path.join(consumerDir, 'node_modules', '@luke-ui', 'react'),
 			);
+			const installedRainbowRoot = realpathSync(
+				path.join(consumerDir, 'node_modules', '@luke-ui', 'rainbow-sprinkles'),
+			);
 			expect(installedReactRoot.startsWith(consumerDir)).toBe(true);
+			expect(installedRainbowRoot.startsWith(consumerDir)).toBe(true);
 			expect(installedReactRoot.includes(`${path.sep}packages${path.sep}`)).toBe(false);
-			expect(
-				pathExists(path.join(consumerDir, 'node_modules', '@luke-ui', 'rainbow-sprinkles')),
-			).toBe(false);
+			expect(installedRainbowRoot.includes(`${path.sep}packages${path.sep}`)).toBe(false);
 
 			const utilitiesSource = await readFile(
 				path.join(installedReactRoot, 'dist', findUtilitiesChunk(installedReactRoot)),
 				'utf8',
 			);
-			expect(utilitiesSource).not.toContain('@luke-ui/rainbow-sprinkles');
+			expect(utilitiesSource).toContain('@luke-ui/rainbow-sprinkles/create-runtime-fn');
 
 			const probeScript = path.join(consumerDir, 'probe.mjs');
 			await writeFile(probeScript, PROBE_SCRIPT);
@@ -107,6 +116,10 @@ test(
 			expect(parsed.themeStylesheetBytes).toEqual(expect.any(Number));
 			expect(Number(parsed.themeStylesheetBytes)).toBeGreaterThan(0);
 			expect(parsed.hydrated).toBe(true);
+			expect(parsed.rainbowRuntimePath).toEqual(expect.stringContaining('rainbow-sprinkles'));
+			expect(String(parsed.rainbowRuntimePath).includes(`${path.sep}packages${path.sep}`)).toBe(
+				false,
+			);
 		} finally {
 			await rm(workDir, { force: true, recursive: true });
 		}
@@ -128,6 +141,7 @@ const require = createRequire(import.meta.url);
 const stylesheetPath = require.resolve('@luke-ui/react/stylesheet.css');
 const spritesheetPath = require.resolve('@luke-ui/react/spritesheet.svg');
 const themeStylesheetPath = require.resolve('@luke-ui/react/themes/tactile/stylesheet.css');
+const rainbowRuntimePath = require.resolve('@luke-ui/rainbow-sprinkles/create-runtime-fn');
 const spritesheetHref = spritesheetPath;
 
 const layout = createSprinkles({ display: 'flex', id: 'sprinkles-root' });
@@ -175,16 +189,17 @@ process.stdout.write(
 		spritesheetBytes: readFileSync(spritesheetPath).byteLength,
 		themeStylesheetBytes: readFileSync(themeStylesheetPath).byteLength,
 		hydrated: root.innerHTML.includes('Hello world') && root.innerHTML.includes('<svg'),
+		rainbowRuntimePath,
 	}),
 );
 `;
 
-function packReactTarball(destination: string): string {
+function packWorkspacePackage(cwd: string, destination: string): string {
 	const output = execFileSync('pnpm', ['pack', '--pack-destination', destination], {
-		cwd: packageRoot,
+		cwd,
 		encoding: 'utf8',
 	});
-	const match = /luke-ui-react-[^\s/]+\.tgz/.exec(output);
+	const match = /[a-z0-9@._-]+\.tgz/i.exec(output);
 	if (match === null) {
 		throw new Error(`Expected pnpm pack to print a tarball name, received:\n${output}`);
 	}
@@ -192,21 +207,25 @@ function packReactTarball(destination: string): string {
 }
 
 function readPackedPackageJson(tarballPath: string): {
-	dependencies: Record<string, string>;
+	dependencies?: Record<string, string>;
 	peerDependencies?: Record<string, string>;
+	private?: boolean;
 } {
 	const raw = execFileSync('tar', ['-xOf', tarballPath, 'package/package.json'], {
 		encoding: 'utf8',
 	});
 	const parsed: unknown = JSON.parse(raw);
-	if (!isRecord(parsed) || !isRecord(parsed.dependencies)) {
-		throw new Error('Expected packed package.json to define dependencies.');
+	if (!isRecord(parsed)) {
+		throw new Error('Expected packed package.json to be an object.');
 	}
 	return {
-		dependencies: parsed.dependencies as Record<string, string>,
+		dependencies: isRecord(parsed.dependencies)
+			? (parsed.dependencies as Record<string, string>)
+			: undefined,
 		peerDependencies: isRecord(parsed.peerDependencies)
 			? (parsed.peerDependencies as Record<string, string>)
 			: undefined,
+		private: parsed.private === true,
 	};
 }
 
@@ -218,15 +237,6 @@ function findUtilitiesChunk(installedReactRoot: string): string {
 		throw new Error('Expected a utilities.css-*.js chunk in the installed package.');
 	}
 	return chunk;
-}
-
-function pathExists(target: string): boolean {
-	try {
-		realpathSync(target);
-		return true;
-	} catch {
-		return false;
-	}
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

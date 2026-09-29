@@ -105,6 +105,7 @@
 	"dependencies": {
 		"@capsizecss/metrics": "catalog:",
 		"@capsizecss/vanilla-extract": "catalog:",
+		"@luke-ui/rainbow-sprinkles": "workspace:*",
 		"@react-aria/utils": "catalog:",
 		"@vanilla-extract/css": "catalog:",
 		"@vanilla-extract/dynamic": "catalog:",
@@ -114,7 +115,6 @@
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "catalog:",
-		"@luke-ui/rainbow-sprinkles": "workspace:*",
 		"@rolldown/pluginutils": "catalog:",
 		"@types/node": "catalog:",
 		"@types/pngjs": "catalog:",

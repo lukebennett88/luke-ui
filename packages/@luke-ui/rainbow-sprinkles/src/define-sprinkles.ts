@@ -10,8 +10,6 @@ export function defineSprinkles<Configs extends ReadonlyArray<DefinePropertiesRe
 	return addFunctionSerializer(sprinkles, {
 		args: configs,
 		importName: 'createRuntimeFn',
-		// Private alias: `@luke-ui/react` pack/Vitest/docs resolve this to a bundled runtime chunk
-		// so the React tarball never requires installing unpublished rainbow-sprinkles.
-		importPath: '#rainbow-sprinkles-runtime',
+		importPath: '@luke-ui/rainbow-sprinkles/create-runtime-fn',
 	}) as SprinklesFn<Configs>;
 }

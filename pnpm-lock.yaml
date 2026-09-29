@@ -623,6 +623,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
+      vite-plus:
+        specifier: 'catalog:'
+        version: 1.0.0-rc.0(@arethetypeswrong/core@0.18.5)(@opentelemetry/api@1.9.1)(@types/node@26.6.2)(@vitest/browser-playwright@5.0.1)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1)
 
   packages/@luke-ui/react:
     dependencies:
@@ -632,6 +635,9 @@ importers:
       '@capsizecss/vanilla-extract':
         specifier: 'catalog:'
         version: 2.0.4(@vanilla-extract/css@1.21.2)
+      '@luke-ui/rainbow-sprinkles':
+        specifier: workspace:*
+        version: link:../rainbow-sprinkles
       '@react-aria/utils':
         specifier: 'catalog:'
         version: 3.34.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -654,9 +660,6 @@ importers:
       '@arethetypeswrong/core':
         specifier: 'catalog:'
         version: 0.18.5
-      '@luke-ui/rainbow-sprinkles':
-        specifier: workspace:*
-        version: link:../rainbow-sprinkles
       '@rolldown/pluginutils':
         specifier: 'catalog:'
         version: 1.0.1

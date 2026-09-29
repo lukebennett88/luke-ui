@@ -11,9 +11,6 @@ import { cascadeLayerNames } from './src/core/styles/layer-names.js';
 const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
 );
-const rainbowRuntimeSource = fileURLToPath(
-	new URL('./src/core/styles/rainbow-runtime.ts', import.meta.url),
-);
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const assetExports = [
 	'./stylesheet.css',
@@ -42,9 +39,6 @@ export default defineConfig({
 			// Vanilla Extract serializes recipes to `#recipe-engine`; resolve it to source so pack
 			// can bundle a relative runtime chunk.
 			'#recipe-engine': recipeEngineSource,
-			// Sprinkles serialize to `#rainbow-sprinkles-runtime` so the React tarball never depends
-			// on unpublished `@luke-ui/rainbow-sprinkles`.
-			'#rainbow-sprinkles-runtime': rainbowRuntimeSource,
 		},
 		attw: {
 			// Exclude static asset exports. CSS/SVG files do not need type definitions.
