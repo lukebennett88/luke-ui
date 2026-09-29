@@ -25,9 +25,9 @@ export default {
 			],
 			project: ['src/**/*.{ts,tsx,css}', 'content/**/*.mdx'],
 		},
-		'apps/settings-fixture': {
-			entry: ['src/main.tsx', 'vite.config.ts'],
-			project: ['src/**/*.{ts,tsx,css}'],
+		'apps/reference-app': {
+			entry: ['scripts/generate-theme.ts', 'src/**/*.browser.test.tsx'],
+			project: ['scripts/**/*.ts', 'src/**/*.{ts,tsx}'],
 		},
 		'packages/@luke-ui/react': {
 			entry: [

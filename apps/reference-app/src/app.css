@@ -1,0 +1,297 @@
+@import '@luke-ui/react/stylesheet.css';
+@import './generated/theme.css';
+
+:root {
+	--settings-sidebar-width: 15rem;
+	--settings-content-max: 40rem;
+	--app-font-size: 14px;
+}
+
+:root[data-font-size='small'] {
+	--app-font-size: 13px;
+}
+
+:root[data-font-size='large'] {
+	--app-font-size: 15px;
+}
+
+html,
+body,
+#root {
+	min-block-size: 100%;
+}
+
+body {
+	margin: 0;
+	font-size: var(--app-font-size);
+	background: var(--luke-color-surface-canvas);
+	color: var(--luke-color-text-primary);
+}
+
+:root[data-pointer-cursor='true'] button,
+:root[data-pointer-cursor='true'] a,
+:root[data-pointer-cursor='true'] [role='button'],
+:root[data-pointer-cursor='true'] label,
+:root[data-pointer-cursor='true'] select {
+	cursor: pointer;
+}
+
+:root[data-underline-links='true'] a {
+	text-decoration: underline;
+}
+
+.settings-shell {
+	display: flex;
+	min-block-size: 100dvh;
+	background: var(--luke-color-surface-canvas);
+}
+
+.settings-sidebar {
+	display: none;
+	flex-direction: column;
+	gap: 0.25rem;
+	inline-size: var(--settings-sidebar-width);
+	flex-shrink: 0;
+	padding: 1.25rem 0.75rem;
+	background: var(--luke-color-surface-recessed);
+	border-inline-end: 1px solid var(--luke-color-border-decorative);
+	color: var(--luke-color-text-secondary);
+}
+
+.settings-sidebar-title {
+	padding: 0.35rem 0.65rem 0.85rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--luke-color-text-secondary);
+}
+
+.settings-nav-link {
+	display: block;
+	padding: 0.45rem 0.65rem;
+	border-radius: 0.375rem;
+	color: var(--luke-color-text-secondary);
+	text-decoration: none;
+	font-size: 0.875rem;
+	line-height: 1.3;
+}
+
+.settings-nav-link:hover {
+	background: color-mix(in oklab, var(--luke-color-text-primary) 6%, transparent);
+	color: var(--luke-color-text-primary);
+}
+
+.settings-nav-link[aria-current='page'] {
+	background: color-mix(in oklab, var(--luke-color-text-primary) 8%, transparent);
+	color: var(--luke-color-text-primary);
+	font-weight: 550;
+}
+
+.settings-main {
+	flex: 1;
+	min-inline-size: 0;
+	padding: 1rem 1.25rem 3rem;
+}
+
+.settings-content {
+	max-inline-size: var(--settings-content-max);
+	margin-inline: auto;
+}
+
+.settings-mobile-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-block-end: 1.25rem;
+}
+
+.settings-mobile-header a {
+	color: var(--luke-color-text-secondary);
+	text-decoration: none;
+	font-size: 0.875rem;
+}
+
+.settings-page-title {
+	margin: 0 0 1.5rem;
+	font-size: 1.25rem;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	color: var(--luke-color-text-primary);
+}
+
+.settings-section {
+	margin-block-end: 1.75rem;
+}
+
+.settings-section-title {
+	margin: 0 0 0.35rem;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--luke-color-text-primary);
+}
+
+.settings-section-description {
+	margin: 0 0 0.75rem;
+	font-size: 0.8125rem;
+	color: var(--luke-color-text-secondary);
+}
+
+.settings-panel {
+	border: 1px solid var(--luke-color-border-decorative);
+	border-radius: 0.5rem;
+	background: var(--luke-color-surface-floating);
+	overflow: hidden;
+}
+
+.settings-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.85rem 1rem;
+	border-block-end: 1px solid var(--luke-color-border-decorative);
+}
+
+.settings-row:last-child {
+	border-block-end: none;
+}
+
+.settings-row-copy {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+	min-inline-size: 0;
+}
+
+.settings-row-label {
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--luke-color-text-primary);
+}
+
+.settings-row-hint {
+	font-size: 0.75rem;
+	color: var(--luke-color-text-secondary);
+}
+
+.settings-row-control {
+	flex-shrink: 0;
+}
+
+.settings-select,
+.settings-native-input {
+	appearance: none;
+	block-size: 2rem;
+	min-inline-size: 9.5rem;
+	padding: 0 1.75rem 0 0.65rem;
+	border: 1px solid var(--luke-color-border-control);
+	border-radius: 0.375rem;
+	background-color: var(--luke-color-surface-canvas);
+	background-image:
+		linear-gradient(45deg, transparent 50%, var(--luke-color-text-secondary) 50%),
+		linear-gradient(135deg, var(--luke-color-text-secondary) 50%, transparent 50%);
+	background-position:
+		calc(100% - 12px) calc(50% - 2px),
+		calc(100% - 7px) calc(50% - 2px);
+	background-size:
+		5px 5px,
+		5px 5px;
+	background-repeat: no-repeat;
+	color: var(--luke-color-text-primary);
+	font: inherit;
+}
+
+.settings-native-input {
+	background-image: none;
+	padding-inline-end: 0.65rem;
+	min-inline-size: 12rem;
+}
+
+.settings-select:focus-visible,
+.settings-native-input:focus-visible,
+.settings-switch:focus-visible {
+	outline: 2px solid var(--luke-color-border-focus);
+	outline-offset: 2px;
+}
+
+.settings-switch {
+	position: relative;
+	inline-size: 2.5rem;
+	block-size: 1.4rem;
+	border: none;
+	border-radius: 999px;
+	background: color-mix(in oklab, var(--luke-color-text-primary) 18%, transparent);
+	padding: 0;
+}
+
+.settings-switch[aria-checked='true'] {
+	background: var(--luke-color-background-accent-solid-rest);
+}
+
+.settings-switch-thumb {
+	position: absolute;
+	inset-block-start: 0.15rem;
+	inset-inline-start: 0.15rem;
+	inline-size: 1.1rem;
+	block-size: 1.1rem;
+	border-radius: 999px;
+	background: white;
+	transition: translate 120ms ease;
+}
+
+.settings-switch[aria-checked='true'] .settings-switch-thumb {
+	translate: 1.1rem 0;
+}
+
+.settings-avatar {
+	inline-size: 4rem;
+	block-size: 4rem;
+	border-radius: 999px;
+	object-fit: cover;
+	background: color-mix(in oklab, var(--luke-color-text-primary) 10%, transparent);
+	border: 1px solid var(--luke-color-border-decorative);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.settings-status {
+	margin-block-start: 0.75rem;
+	font-size: 0.8125rem;
+	color: var(--luke-color-text-secondary);
+}
+
+.settings-status[data-tone='success'] {
+	color: var(--luke-color-foreground-success-rest);
+}
+
+.settings-status[data-tone='danger'] {
+	color: var(--luke-color-foreground-danger-rest);
+}
+
+.settings-danger-panel {
+	border-color: color-mix(in oklab, var(--luke-color-border-danger) 70%, transparent);
+}
+
+.settings-mobile-nav,
+.settings-menu-nav {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+@media (min-width: 768px) {
+	.settings-sidebar {
+		display: flex;
+	}
+
+	.settings-mobile-header,
+	.settings-mobile-nav {
+		display: none;
+	}
+
+	.settings-main {
+		padding: 2rem 2.5rem 4rem;
+	}
+}

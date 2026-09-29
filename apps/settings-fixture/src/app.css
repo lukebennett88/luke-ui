@@ -1,8 +1,0 @@
-@import '@luke-ui/react/stylesheet.css';
-@import '@luke-ui/react/themes/tactile/stylesheet.css';
-
-html,
-body,
-#root {
-	min-block-size: 100%;
-}
