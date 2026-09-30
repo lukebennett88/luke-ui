@@ -1,13 +1,18 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createMemoryRouter, RouterProvider, redirect } from 'react-router';
+import { createMemoryRouter, redirect } from 'react-router';
+import { RouterProvider } from 'react-router/dom';
 import { page, userEvent } from 'vite-plus/test/context';
-import { settingsApi } from '../api/settings-api.js';
 import { SettingsLayout } from '../routes/settings-layout.js';
 import { settingsLoader, settingsPageRoutes } from '../routes/settings-routes.js';
 
-function createTestRouter(initialEntries: Array<string> = ['/settings/preferences']) {
-	return createMemoryRouter(
+export async function renderApp(initialEntries: Array<string> = ['/settings/preferences']) {
+	const container = document.body.appendChild(document.createElement('div'));
+	container.id = 'reference-app-test-root';
+	const root = createRoot(container);
+	const queryClient = new QueryClient();
+	const router = createMemoryRouter(
 		[
 			{
 				children: [
@@ -16,40 +21,69 @@ function createTestRouter(initialEntries: Array<string> = ['/settings/preference
 						index: true,
 						loader: () => redirect('/settings/preferences'),
 					},
-					...settingsPageRoutes.map((route) => ({
-						...route,
-						HydrateFallback: () => null,
-					})),
+					...settingsPageRoutes.map((route) => ({ ...route, HydrateFallback: () => null })),
 				],
 				element: <SettingsLayout />,
 				HydrateFallback: () => null,
 				id: 'settings',
-				loader: settingsLoader,
+				loader: () => settingsLoader(queryClient),
 				path: '/settings',
 			},
 		],
 		{ initialEntries },
 	);
-}
-
-export function renderApp(initialEntries?: Array<string>) {
-	settingsApi.setLatency(0);
-	const container = document.body.appendChild(document.createElement('div'));
-	const root = createRoot(container);
-	const router = createTestRouter(initialEntries);
-
-	act(() => {
-		root.render(<RouterProvider router={router} />);
+	await act(async () => {
+		root.render(
+			<QueryClientProvider client={queryClient}>
+				<RouterProvider router={router} />
+			</QueryClientProvider>,
+		);
+		if (router.state.initialized) return;
+		await new Promise<void>((resolve) => {
+			const unsubscribe = router.subscribe((state) => {
+				if (!state.initialized) return;
+				unsubscribe();
+				resolve();
+			});
+		});
 	});
+
+	function unmount() {
+		if (!mountedApps.delete(unmount)) return;
+		act(() => root.unmount());
+		router.dispose();
+		queryClient.clear();
+		container.remove();
+	}
+	mountedApps.add(unmount);
 
 	return {
 		container,
 		locator: page.elementLocator(container),
 		router,
-		unmount: () => {
-			act(() => root.unmount());
-			container.remove();
+		unmount,
+		user: {
+			click: (...args: Parameters<typeof userEvent.click>) => {
+				return act(async () => {
+					await userEvent.click(...args);
+				});
+			},
+			fill: (...args: Parameters<typeof userEvent.fill>) => {
+				return act(async () => {
+					await userEvent.fill(...args);
+				});
+			},
+			keyboard: (...args: Parameters<typeof userEvent.keyboard>) => {
+				return act(async () => {
+					await userEvent.keyboard(...args);
+				});
+			},
 		},
-		user: userEvent,
 	};
+}
+
+const mountedApps = new Set<() => void>();
+
+export function cleanupApps() {
+	for (const unmount of mountedApps) unmount();
 }

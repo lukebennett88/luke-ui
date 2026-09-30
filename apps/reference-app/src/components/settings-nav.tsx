@@ -15,42 +15,80 @@ export const SETTINGS_NAV = [
 
 type SettingsNavItem = (typeof SETTINGS_NAV)[number];
 
-export function SettingsNav({ variant = 'sidebar' }: { variant?: 'menu' | 'sidebar' }) {
-	const [query, setQuery] = useState('');
-	const linkClass = variant === 'menu' ? styles.menuNavLink : styles.navLink;
+function filterSettingsNavItems(query: string) {
 	const normalized = query.trim().toLowerCase();
-	const items = normalized
+	return normalized
 		? SETTINGS_NAV.filter((item) => item.label.toLowerCase().includes(normalized))
 		: SETTINGS_NAV;
+}
+
+export function SettingsNavSearch({
+	onChange,
+	value,
+}: {
+	onChange: (value: string) => void;
+	value: string;
+}) {
+	return (
+		<TextField
+			aria-label="Search settings"
+			onChange={onChange}
+			placeholder="Search…"
+			prefix={<Icon name="search" size="small" />}
+			size="small"
+			type="search"
+			value={value}
+		/>
+	);
+}
+
+type SettingsNavProps = { query: string; variant?: 'sidebar' } | { variant: 'menu' };
+
+export function SettingsNav(props: SettingsNavProps) {
+	const [menuQuery, setMenuQuery] = useState('');
+
+	if (props.variant === 'menu') {
+		return (
+			<Stack gap="sp12">
+				<SettingsNavSearch onChange={setMenuQuery} value={menuQuery} />
+				<SettingsNavList items={filterSettingsNavItems(menuQuery)} variant="menu" />
+			</Stack>
+		);
+	}
 
 	return (
-		<Stack gap={variant === 'menu' ? 'sp12' : 'sp16'}>
-			<TextField
-				aria-label="Search settings"
-				onChange={setQuery}
-				placeholder="Search…"
-				prefix={<Icon name="search" size="small" />}
-				size="small"
-				type="search"
-				value={query}
-			/>
-			<Stack
-				aria-label={variant === 'menu' ? 'Settings menu' : 'Settings'}
-				elementType="nav"
-				gap="sp4"
-			>
-				<Text className={styles.sidebarTitle} fontWeight="label" typography="caption">
-					Personal
+		<Stack gap="sp16">
+			<SettingsNavList items={filterSettingsNavItems(props.query)} variant="sidebar" />
+		</Stack>
+	);
+}
+
+function SettingsNavList({
+	items,
+	variant,
+}: {
+	items: Array<SettingsNavItem>;
+	variant: 'menu' | 'sidebar';
+}) {
+	const linkClass = variant === 'menu' ? styles.menuNavLink : styles.navLink;
+
+	return (
+		<Stack
+			aria-label={variant === 'menu' ? 'Settings menu' : 'Settings'}
+			elementType="nav"
+			gap="sp4"
+		>
+			<Text color="secondary" fontWeight="label" typography="label">
+				Personal
+			</Text>
+			{items.map((item) => (
+				<SettingsNavLink className={linkClass} item={item} key={item.to} />
+			))}
+			{items.length === 0 ? (
+				<Text color="secondary" role="status" typography="caption">
+					No matching settings
 				</Text>
-				{items.map((item) => (
-					<SettingsNavLink className={linkClass} item={item} key={item.to} />
-				))}
-				{items.length === 0 ? (
-					<Text color="secondary" typography="caption">
-						No matching settings
-					</Text>
-				) : null}
-			</Stack>
+			) : null}
 		</Stack>
 	);
 }
@@ -58,7 +96,7 @@ export function SettingsNav({ variant = 'sidebar' }: { variant?: 'menu' | 'sideb
 function SettingsNavLink({ className, item }: { className: string; item: SettingsNavItem }) {
 	return (
 		<NavLink className={className} end to={item.to}>
-			<Icon name={item.icon} size="small" />
+			<Icon name={item.icon} size="xsmall" />
 			{item.label}
 		</NavLink>
 	);

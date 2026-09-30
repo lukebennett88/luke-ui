@@ -1,22 +1,16 @@
 import { vars } from '@luke-ui/react/theme';
 import { globalStyle } from '@vanilla-extract/css';
 
-globalStyle(':root', {
-	vars: {
-		'--app-font-size': '14px',
-	},
+globalStyle('html', {
+	fontSize: '87.5%',
 });
 
-globalStyle(':root[data-font-size="small"]', {
-	vars: {
-		'--app-font-size': '13px',
-	},
+globalStyle('html[data-font-size="small"]', {
+	fontSize: '81.25%',
 });
 
-globalStyle(':root[data-font-size="large"]', {
-	vars: {
-		'--app-font-size': '15px',
-	},
+globalStyle('html[data-font-size="large"]', {
+	fontSize: '100%',
 });
 
 globalStyle('html, body, #root', {
@@ -27,41 +21,36 @@ globalStyle('html, body, #root', {
 globalStyle('html, body', {
 	inset: 0,
 	position: 'fixed',
+	inlineSize: '100%',
 });
 
 globalStyle('body', {
-	// Match the shell well; light recessed is pure white and too close to floating.
 	background: vars.color.surface.canvas,
 	caretColor: vars.color.background.accent.solid.rest,
 	color: vars.color.text.primary,
-	fontSize: 'var(--app-font-size)',
 	margin: 0,
 });
 
 globalStyle('::selection', {
-	background: `color-mix(in oklab, ${vars.color.background.accent.solid.rest} 28%, transparent)`,
+	background: vars.color.background.accent.subtle.pressed,
+	color: vars.color.text.primary,
 });
 
-globalStyle(':root[data-pointer-cursor="true"] button', {
-	cursor: 'pointer',
-});
+globalStyle(
+	':root[data-pointer-cursor="false"] :is(button, a, [role="button"], [role="menuitem"], [role="option"], label)',
+	{
+		cursor: 'default',
+	},
+);
 
-globalStyle(':root[data-pointer-cursor="true"] a', {
-	cursor: 'pointer',
-});
-
-globalStyle(':root[data-pointer-cursor="true"] [role="button"]', {
-	cursor: 'pointer',
-});
-
-globalStyle(':root[data-pointer-cursor="true"] label', {
-	cursor: 'pointer',
-});
+globalStyle(
+	':root[data-pointer-cursor="true"] :is(button, a, [role="button"], [role="menuitem"], [role="option"], label):not(:disabled, [data-disabled], [aria-disabled="true"])',
+	{
+		cursor: 'pointer',
+	},
+);
 
 globalStyle(':root[data-underline-links="true"] a', {
 	textDecoration: 'underline',
-});
-
-globalStyle(':root[data-disable-animated-images="true"] img', {
-	animationPlayState: 'paused',
+	textUnderlineOffset: '0.2em',
 });

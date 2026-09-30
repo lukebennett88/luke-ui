@@ -1,34 +1,25 @@
+import { breakpoints } from '@luke-ui/react/styles';
 import { vars } from '@luke-ui/react/theme';
+import { pxToRem } from '@luke-ui/react/utils';
 import { style } from '@vanilla-extract/css';
 
-const desktopMin = '(min-width: 768px)';
-const mobileMax = '(max-width: 767px)';
+const settingsShellContainer = 'settings-shell';
+const shellBp768Up = `${settingsShellContainer} (inline-size >= ${breakpoints.bp768}px)`;
+const shellBelowBp768 = `${settingsShellContainer} (inline-size < ${breakpoints.bp768}px)`;
+const avatarSize = pxToRem(34);
 
 export const shell = style({
-	// Light recessed is pure white (brighter than floating); canvas sits below floating in both modes.
-	background: vars.color.surface.canvas,
-	blockSize: '100%',
-	display: 'flex',
-	minBlockSize: '100%',
-	overflow: 'hidden',
+	containerName: settingsShellContainer,
+	containerType: 'inline-size',
 });
 
-export const sidebar = style({
-	background: 'transparent',
-	color: vars.color.text.secondary,
-	flexShrink: 0,
-	inlineSize: '15.5rem',
-	minBlockSize: 0,
-	overflow: 'hidden',
-	// Inline padding lives on the scroller / back link so the scrollbar sits on the column edge.
-	paddingBlock: vars.space.sp16,
+export const sidebarHeader = style({
+	paddingInline: vars.space.sp12,
 });
 
 export const sidebarScroll = style({
-	flex: 1,
+	flexGrow: 1,
 	minBlockSize: 0,
-	overflowX: 'hidden',
-	overflowY: 'auto',
 	overscrollBehavior: 'contain',
 	paddingInline: vars.space.sp12,
 });
@@ -62,45 +53,6 @@ export const skipLink = style({
 	zIndex: 100,
 });
 
-export const backLink = style({
-	appearance: 'none',
-	background: 'none',
-	border: 'none',
-	color: vars.color.text.secondary,
-	cursor: 'pointer',
-	display: 'inline-flex',
-	// Match `Text typography="caption"` so Track’s inherited line box (centre strut /
-	// `firstLine` `1lh`) aligns with the caption, not the shell’s body metrics.
-	fontFamily: vars.font.caption.fontFamily,
-	fontSize: vars.font.caption.fontSize,
-	letterSpacing: vars.font.caption.letterSpacing,
-	lineHeight: vars.font.caption.lineHeight,
-	// Sidebar no longer has inline padding; keep the back control aligned with nav items.
-	marginInline: vars.space.sp12,
-	paddingBlock: vars.space.sp4,
-	paddingInline: vars.space.sp8,
-	selectors: {
-		'&:focus-visible': {
-			outline: `2px solid ${vars.color.border.focus}`,
-			outlineOffset: '2px',
-		},
-		'&:hover': {
-			color: vars.color.text.primary,
-		},
-	},
-	textAlign: 'start',
-	textDecoration: 'none',
-});
-
-export const sidebarTitle = style({
-	color: vars.color.text.secondary,
-	letterSpacing: '0.06em',
-	opacity: 0.85,
-	paddingBlockEnd: vars.space.sp4,
-	paddingInline: vars.space.sp8,
-	textTransform: 'uppercase',
-});
-
 export const navLink = style({
 	alignItems: 'center',
 	borderRadius: vars.radius.control,
@@ -122,7 +74,7 @@ export const navLink = style({
 		'&[aria-current="page"]': {
 			background: `color-mix(in oklab, ${vars.color.text.primary} 8%, transparent)`,
 			color: vars.color.text.primary,
-			fontWeight: 550,
+			fontWeight: vars.font.weight.label,
 		},
 	},
 	textDecoration: 'none',
@@ -133,6 +85,7 @@ export const menuNavLink = style([
 	{
 		borderRadius: vars.radius.control,
 		color: vars.color.text.primary,
+		minBlockSize: '44px',
 		paddingBlock: vars.space.sp8,
 		paddingInline: vars.space.sp8,
 		selectors: {
@@ -141,55 +94,22 @@ export const menuNavLink = style([
 			},
 			'&[aria-current="page"]': {
 				background: `color-mix(in oklab, ${vars.color.text.primary} 8%, transparent)`,
-				fontWeight: 550,
+				fontWeight: vars.font.weight.label,
 			},
 		},
 	},
 ]);
 
 export const main = style({
-	'@media': {
-		[desktopMin]: {
+	'@container': {
+		[shellBp768Up]: {
 			borderRadius: '12px',
-			boxShadow: vars.depth.raised,
-			marginBlock: vars.space.sp8,
-			marginInlineEnd: vars.space.sp8,
 		},
 	},
-	background: vars.color.surface.floating,
-	flex: 1,
-	minBlockSize: 0,
-	minInlineSize: 0,
-	overflow: 'hidden',
 });
 
 export const mainScroll = style({
-	'@media': {
-		[desktopMin]: {
-			paddingBlock: vars.space.sp32,
-			paddingBlockEnd: vars.space.sp64,
-			paddingInline: vars.space.sp40,
-		},
-	},
-	blockSize: '100%',
-	overflowX: 'hidden',
-	overflowY: 'auto',
 	overscrollBehavior: 'contain',
-	paddingBlock: vars.space.sp16,
-	paddingBlockEnd: vars.space.sp48,
-	paddingInline: vars.space.sp16,
-});
-
-export const mobileHeader = style({
-	'@media': {
-		[desktopMin]: {
-			display: 'none',
-		},
-	},
-	alignItems: 'center',
-	color: vars.color.text.secondary,
-	display: 'flex',
-	marginBlockEnd: vars.space.sp16,
 });
 
 export const mobileHeaderLink = style({
@@ -197,6 +117,7 @@ export const mobileHeaderLink = style({
 	color: vars.color.text.secondary,
 	display: 'inline-flex',
 	gap: vars.space.sp4,
+	minBlockSize: '44px',
 	selectors: {
 		'&:focus-visible': {
 			outline: `2px solid ${vars.color.border.focus}`,
@@ -216,55 +137,13 @@ export const panel = style({
 	overflow: 'hidden',
 });
 
-export const dangerPanel = style({
-	borderColor: vars.color.border.danger,
-});
-
-export const sessionIcon = style({
-	alignItems: 'center',
-	background: `color-mix(in oklab, ${vars.color.text.primary} 6%, transparent)`,
-	borderRadius: vars.radius.control,
-	color: vars.color.text.secondary,
-	display: 'inline-flex',
-	flexShrink: 0,
-	justifyContent: 'center',
-	padding: vars.space.sp8,
-});
-
-export const sessionMeta = style({
-	alignItems: 'center',
-	display: 'inline-flex',
-	flexWrap: 'wrap',
-	gap: vars.space.sp4,
-});
-
-export const currentDot = style({
-	background: vars.color.foreground.success.rest,
-	blockSize: '0.4rem',
-	borderRadius: vars.radius.full,
-	display: 'inline-block',
-	inlineSize: '0.4rem',
-});
-
-export const subsectionHeader = style({
-	alignItems: 'center',
-	borderBlockEnd: `1px solid color-mix(in oklab, ${vars.color.border.decorative} 85%, transparent)`,
-	display: 'flex',
-	gap: vars.space.sp16,
-	justifyContent: 'space-between',
-	paddingBlock: vars.space.sp12,
-	paddingInline: vars.space.sp16,
-});
-
 export const settingsRow = style({
-	'@media': {
-		[mobileMax]: {
+	'@container': {
+		[shellBelowBp768]: {
 			flexWrap: 'wrap',
 		},
 	},
 	borderBlockEnd: `1px solid color-mix(in oklab, ${vars.color.border.decorative} 85%, transparent)`,
-	paddingBlock: vars.space.sp12,
-	paddingInline: vars.space.sp16,
 	selectors: {
 		'&:last-child': {
 			borderBlockEnd: 'none',
@@ -273,36 +152,96 @@ export const settingsRow = style({
 });
 
 export const rowControl = style({
-	'@media': {
-		[mobileMax]: {
-			flex: '1 1 100%',
+	'@container': {
+		[shellBelowBp768]: {
+			flexBasis: '100%',
+			flexGrow: 1,
+			flexShrink: 1,
+			justifyContent: 'flex-start',
 		},
 	},
 });
 
 export const avatar = style({
+	alignItems: 'center',
 	background: `color-mix(in oklab, ${vars.color.text.primary} 10%, transparent)`,
-	blockSize: '3.5rem',
+	blockSize: avatarSize,
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.full,
+	display: 'inline-flex',
 	flexShrink: 0,
-	inlineSize: '3.5rem',
+	inlineSize: avatarSize,
+	justifyContent: 'center',
 	objectFit: 'cover',
 });
 
 export const avatarButton = style({
 	appearance: 'none',
 	background: 'none',
+	blockSize: avatarSize,
 	border: 'none',
 	borderRadius: vars.radius.full,
 	cursor: 'pointer',
 	display: 'inline-flex',
 	flexShrink: 0,
+	inlineSize: avatarSize,
+	minBlockSize: 0,
+	minInlineSize: 0,
+	overflow: 'hidden',
 	padding: 0,
+	paddingBlock: 0,
+	paddingInline: 0,
+	position: 'relative',
+	transform: 'none',
 	selectors: {
+		'&:hover': {
+			boxShadow: 'none',
+			transform: 'none',
+		},
+		'&[data-hovered]': {
+			boxShadow: 'none',
+			transform: 'none',
+		},
 		'&[data-focus-visible]': {
 			outline: `2px solid ${vars.color.border.focus}`,
 			outlineOffset: '2px',
+		},
+		'&[data-pressed]': {
+			boxShadow: 'none',
+			transform: 'none',
+		},
+	},
+});
+
+export const avatarOverlay = style({
+	alignItems: 'center',
+	background: 'color-mix(in oklab, black 45%, transparent)',
+	borderRadius: vars.radius.full,
+	color: vars.color.foreground.neutral.onSolid,
+	display: 'flex',
+	inset: 0,
+	justifyContent: 'center',
+	opacity: 0,
+	pointerEvents: 'none',
+	position: 'absolute',
+	transition: `opacity ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
+	'@media': {
+		'(prefers-reduced-motion: reduce)': {
+			transition: 'none',
+		},
+	},
+	selectors: {
+		[`${avatarButton}:hover &`]: {
+			opacity: 1,
+		},
+		[`${avatarButton}[data-hovered] &`]: {
+			opacity: 1,
+		},
+		[`${avatarButton}[data-focus-visible] &`]: {
+			opacity: 1,
+		},
+		[`${avatarButton}[data-pending] &`]: {
+			opacity: 0,
 		},
 	},
 });
@@ -312,7 +251,6 @@ export const menuPopover = style({
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.surface,
 	boxShadow: vars.depth.floating,
-	// Portaled outside `rootClassName`, so it cannot inherit theme typography.
 	fontFamily: vars.font.family.body,
 	minInlineSize: '11rem',
 	overflow: 'auto',
@@ -336,7 +274,7 @@ export const menuItem = style({
 	paddingInline: vars.space.sp12,
 	selectors: {
 		'&[data-disabled]': {
-			opacity: 0.45,
+			opacity: vars.interaction.disabledOpacity,
 		},
 		'&[data-focused]': {
 			background: `color-mix(in oklab, ${vars.color.text.primary} 8%, transparent)`,
@@ -344,44 +282,57 @@ export const menuItem = style({
 	},
 });
 
-export const valueButton = style({
-	'@media': {
-		[mobileMax]: {
-			inlineSize: '100%',
-			minInlineSize: 0,
-		},
-	},
+export const emailEditButton = style({
 	alignItems: 'center',
 	appearance: 'none',
-	backgroundColor: vars.color.surface.canvas,
-	blockSize: vars.controlSize.small,
-	border: `1px solid ${vars.color.border.control}`,
-	borderRadius: vars.radius.control,
-	boxShadow: `inset 0 1px 0 color-mix(in oklab, ${vars.color.text.primary} 3%, transparent)`,
-	color: vars.color.text.primary,
+	background: vars.color.surface.canvas,
+	blockSize: '1.75rem',
+	border: `1px solid ${vars.color.border.decorative}`,
+	borderRadius: vars.radius.full,
+	color: vars.color.text.secondary,
 	cursor: 'pointer',
 	display: 'inline-flex',
-	font: 'inherit',
-	lineHeight: 1.2,
-	maxInlineSize: '100%',
-	minInlineSize: '8.5rem',
-	overflow: 'hidden',
-	paddingInline: vars.space.sp12,
+	flexShrink: 0,
+	inlineSize: '1.75rem',
+	justifyContent: 'center',
+	padding: 0,
 	selectors: {
 		'&:hover': {
-			borderColor: `color-mix(in oklab, ${vars.color.border.control} 70%, ${vars.color.text.primary})`,
+			borderColor: `color-mix(in oklab, ${vars.color.border.decorative} 70%, ${vars.color.text.primary})`,
+			boxShadow: 'none',
+			transform: 'none',
+		},
+		'&[data-disabled]': {
+			opacity: vars.interaction.disabledOpacity,
 		},
 		'&[data-focus-visible]': {
 			outline: `2px solid ${vars.color.border.focus}`,
 			outlineOffset: '2px',
 		},
-		'&[data-placeholder]': {
-			color: vars.color.text.secondary,
+		'&[data-hovered]': {
+			borderColor: `color-mix(in oklab, ${vars.color.border.decorative} 70%, ${vars.color.text.primary})`,
+			boxShadow: 'none',
+			transform: 'none',
 		},
 	},
-	textAlign: 'start',
-	textOverflow: 'ellipsis',
-	whiteSpace: 'nowrap',
+});
+
+export const profileTextField = style({
+	'@container': {
+		[shellBelowBp768]: {
+			inlineSize: '100%',
+			minInlineSize: 0,
+		},
+	},
+	minInlineSize: '8.5rem',
+});
+
+export const profileFieldShell = style({
+	alignItems: 'center',
+	display: 'flex',
+	gap: vars.space.sp12,
+	inlineSize: '100%',
+	minInlineSize: 0,
 });
 
 export const dialogOverlay = style({
@@ -390,6 +341,8 @@ export const dialogOverlay = style({
 	display: 'flex',
 	inset: 0,
 	justifyContent: 'center',
+	overflowY: 'auto',
+	padding: vars.space.sp16,
 	position: 'fixed',
 	zIndex: 40,
 });
@@ -399,23 +352,21 @@ export const dialogModal = style({
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.surface,
 	boxShadow: vars.depth.overlay,
-	// Portaled outside `rootClassName`, so it cannot inherit theme typography.
 	fontFamily: vars.font.family.body,
-	inlineSize: 'min(24rem, calc(100vw - 2rem))',
+	inlineSize: 'min(28rem, 100%)',
+	maxBlockSize: 'calc(100dvh - 2rem)',
 	outline: 'none',
+	overflowY: 'auto',
 });
 
 export const dialog = style({
-	display: 'flex',
-	flexDirection: 'column',
-	gap: vars.space.sp16,
 	outline: 'none',
 	padding: vars.space.sp24,
 });
 
 export const selectTrigger = style({
-	'@media': {
-		[mobileMax]: {
+	'@container': {
+		[shellBelowBp768]: {
 			inlineSize: '100%',
 			minInlineSize: 0,
 		},
@@ -423,30 +374,26 @@ export const selectTrigger = style({
 	alignItems: 'center',
 	appearance: 'none',
 	backgroundColor: vars.color.surface.canvas,
-	backgroundImage: `linear-gradient(45deg, transparent 50%, ${vars.color.text.secondary} 50%), linear-gradient(135deg, ${vars.color.text.secondary} 50%, transparent 50%)`,
-	backgroundPosition: 'calc(100% - 11px) calc(50% - 1.5px), calc(100% - 6px) calc(50% - 1.5px)',
-	backgroundRepeat: 'no-repeat',
-	backgroundSize: '5px 5px, 5px 5px',
 	blockSize: vars.controlSize.small,
-	border: `1px solid ${vars.color.border.control}`,
+	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.control,
-	boxShadow: `inset 0 1px 0 color-mix(in oklab, ${vars.color.text.primary} 3%, transparent)`,
 	color: vars.color.text.primary,
+	cursor: 'pointer',
 	display: 'inline-flex',
 	font: 'inherit',
 	gap: vars.space.sp8,
-	justifyContent: 'space-between',
 	lineHeight: 1.2,
 	maxInlineSize: '100%',
 	minInlineSize: '8.5rem',
-	paddingInlineEnd: '1.85rem',
-	paddingInlineStart: vars.space.sp12,
+	outline: 'none',
+	outlineOffset: 0,
+	paddingInline: vars.space.sp12,
 	selectors: {
 		'&:hover': {
-			borderColor: `color-mix(in oklab, ${vars.color.border.control} 70%, ${vars.color.text.primary})`,
+			borderColor: `color-mix(in oklab, ${vars.color.border.decorative} 70%, ${vars.color.text.primary})`,
 		},
 		'&[data-disabled]': {
-			opacity: 0.55,
+			opacity: vars.interaction.disabledOpacity,
 		},
 		'&[data-focus-visible]': {
 			outline: `2px solid ${vars.color.border.focus}`,
@@ -456,17 +403,35 @@ export const selectTrigger = style({
 	textAlign: 'start',
 });
 
+export const selectTriggerValue = style({
+	flexGrow: 1,
+	minInlineSize: 0,
+	overflow: 'hidden',
+	textOverflow: 'ellipsis',
+	whiteSpace: 'nowrap',
+});
+
+export const selectTriggerChevron = style({
+	color: vars.color.text.secondary,
+	flexShrink: 0,
+});
+
 export const selectPopover = style({
+	'@supports': {
+		'(min-block-size: calc-size(fit-content, size))': {
+			maxBlockSize: 'min(calc-size(fit-content, min(size, 16rem)), calc(100dvh - 2rem))',
+			minBlockSize: 'calc-size(fit-content, min(size, 12em))',
+		},
+	},
 	background: vars.color.surface.floating,
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.surface,
 	boxShadow: vars.depth.floating,
-	// Portaled outside `rootClassName`, so it cannot inherit theme typography.
 	fontFamily: vars.font.family.body,
-	maxBlockSize: '16rem',
-	minInlineSize: 'var(--trigger-width)',
+	maxBlockSize: 'min(16rem, calc(100dvh - 2rem))',
+	minInlineSize: 'max(var(--trigger-width), 10rem)',
 	overflow: 'auto',
-	paddingBlock: vars.space.sp4,
+	padding: 0,
 	zIndex: 20,
 });
 
@@ -474,23 +439,44 @@ export const selectList = style({
 	listStyle: 'none',
 	margin: 0,
 	outline: 'none',
-	padding: 0,
+	padding: vars.space.sp4,
+});
+
+export const selectItemTrack = style({
+	inlineSize: '100%',
+	lineHeight: vars.font.label.lineHeight,
 });
 
 export const selectItem = style({
+	borderRadius: vars.radius.control,
 	color: vars.color.text.primary,
 	cursor: 'default',
+	lineHeight: vars.font.label.lineHeight,
 	outline: 'none',
 	paddingBlock: vars.space.sp8,
 	paddingInline: vars.space.sp12,
 	selectors: {
-		'&[data-focused]': {
+		'&[data-disabled]': {
+			opacity: vars.interaction.disabledOpacity,
+		},
+		'&[data-focus-visible]': {
 			background: `color-mix(in oklab, ${vars.color.text.primary} 8%, transparent)`,
 		},
-		'&[data-selected]': {
-			fontWeight: 550,
+		'&[data-hovered]': {
+			background: `color-mix(in oklab, ${vars.color.text.primary} 8%, transparent)`,
 		},
 	},
+});
+
+export const selectItemCheck = style({
+	color: vars.color.text.secondary,
+	flexShrink: 0,
+});
+
+export const switchField = style({
+	alignItems: 'center',
+	display: 'inline-flex',
+	flexShrink: 0,
 });
 
 export const switchRoot = style({
@@ -498,7 +484,7 @@ export const switchRoot = style({
 	display: 'inline-flex',
 	selectors: {
 		'&[data-disabled]': {
-			opacity: 0.55,
+			opacity: vars.interaction.disabledOpacity,
 		},
 		'&[data-focus-visible]': {
 			borderRadius: vars.radius.full,
@@ -525,7 +511,12 @@ export const switchTrack = style({
 });
 
 export const switchThumb = style({
-	background: 'white',
+	'@media': {
+		'(prefers-reduced-motion: reduce)': {
+			transition: 'none',
+		},
+	},
+	background: vars.color.foreground.accent.onSolid,
 	blockSize: '1.05rem',
 	borderRadius: vars.radius.full,
 	boxShadow: '0 1px 2px rgb(0 0 0 / 0.18)',
@@ -539,5 +530,5 @@ export const switchThumb = style({
 			translate: '1.05rem 0',
 		},
 	},
-	transition: 'translate 120ms ease',
+	transition: `translate ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
 });

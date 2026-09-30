@@ -1,16 +1,15 @@
 import { Box } from '@luke-ui/react/box';
-import { Cluster } from '@luke-ui/react/cluster';
 import { Heading } from '@luke-ui/react/heading';
 import { Stack } from '@luke-ui/react/stack';
+import type { TextProps } from '@luke-ui/react/text';
 import { Text } from '@luke-ui/react/text';
-import { Track } from '@luke-ui/react/track';
 import type { ReactNode } from 'react';
 import * as styles from '../styles/settings.css.js';
 
 export function SettingsPage({ children, title }: { children: ReactNode; title: string }) {
 	return (
 		<Stack gap="sp24">
-			<Heading level={1} shouldDisableTrim>
+			<Heading level={1} shouldDisableTrim tabIndex={-1} typography="heading2">
 				{title}
 			</Heading>
 			{children}
@@ -22,24 +21,15 @@ export function SettingsSection({
 	children,
 	description,
 	title,
-	tone,
 }: {
 	children: ReactNode;
 	description?: string;
 	title?: string;
-	tone?: 'danger';
 }) {
-	const panelClass = tone === 'danger' ? `${styles.panel} ${styles.dangerPanel}` : styles.panel;
-
 	return (
-		<Stack elementType="section" gap="sp8" marginBlockEnd="sp32">
+		<Stack elementType="section" gap="sp24" marginBlockEnd="sp32">
 			{title ? (
-				<Heading
-					color={tone === 'danger' ? 'danger' : undefined}
-					level={2}
-					shouldDisableTrim
-					typography="label"
-				>
+				<Heading level={2} shouldDisableTrim typography="lead">
 					{title}
 				</Heading>
 			) : null}
@@ -48,51 +38,63 @@ export function SettingsSection({
 					{description}
 				</Text>
 			) : null}
-			<div className={panelClass}>{children}</div>
+			<div className={styles.panel}>{children}</div>
 		</Stack>
+	);
+}
+
+export function SettingsRowShell({ children }: { children: ReactNode }) {
+	return (
+		<Box
+			alignItems="center"
+			className={styles.settingsRow}
+			display="flex"
+			gap="sp12"
+			paddingBlock="sp12"
+			paddingInline="sp16"
+		>
+			{children}
+		</Box>
+	);
+}
+
+export function SettingsRowControl({ children }: { children: ReactNode }) {
+	return (
+		<Box
+			className={styles.rowControl}
+			display="flex"
+			flexShrink="0"
+			justifyContent="flex-end"
+			marginInlineStart="auto"
+		>
+			{children}
+		</Box>
 	);
 }
 
 export function SettingsRow({
 	children,
+	descriptionId,
 	hint,
 	label,
 }: {
 	children: ReactNode;
+	descriptionId?: string;
 	hint?: string;
 	label: string;
 }) {
 	return (
-		<Track
-			className={styles.settingsRow}
-			gap="sp16"
-			railAlignment="center"
-			railEnd={<div className={styles.rowControl}>{children}</div>}
-		>
-			<Stack gap="sp4">
-				<Text fontWeight="label">{label}</Text>
+		<SettingsRowShell>
+			<Stack flexGrow="1" gap="sp4" minInlineSize="0">
+				<Text typography="label">{label}</Text>
 				{hint ? (
-					<Text color="secondary" typography="caption">
+					<Text color="secondary" fontWeight="body" id={descriptionId} typography="label">
 						{hint}
 					</Text>
 				) : null}
 			</Stack>
-		</Track>
-	);
-}
-
-export function SettingsEmptyState({ action, label }: { action?: ReactNode; label: string }) {
-	return (
-		<Track
-			className={styles.settingsRow}
-			gap="sp16"
-			railAlignment="center"
-			railEnd={action ? <div className={styles.rowControl}>{action}</div> : undefined}
-		>
-			<Heading level={3} shouldDisableTrim typography="label">
-				{label}
-			</Heading>
-		</Track>
+			<SettingsRowControl>{children}</SettingsRowControl>
+		</SettingsRowShell>
 	);
 }
 
@@ -105,24 +107,18 @@ export function SettingsStatus({
 	role?: 'status' | 'alert';
 	tone?: 'danger' | 'success';
 }) {
+	if (children == null || children === false || children === '') return null;
+	const textColor: TextProps['color'] = (() => {
+		if (tone === 'danger') return 'danger';
+		if (tone === 'success') return 'success';
+		return 'secondary';
+	})();
+
 	return (
 		<Box marginBlockStart="sp12">
-			<Text
-				color={tone === 'danger' ? 'danger' : tone === 'success' ? 'success' : 'secondary'}
-				elementType="p"
-				role={role}
-				typography="caption"
-			>
+			<Text color={textColor} elementType="p" role={role} typography="caption">
 				{children}
 			</Text>
 		</Box>
-	);
-}
-
-export function SettingsRowActions({ children }: { children: ReactNode }) {
-	return (
-		<Cluster alignItems="center" gap="sp8">
-			{children}
-		</Cluster>
 	);
 }

@@ -197,6 +197,9 @@ catalogs:
     '@tanstack/react-form':
       specifier: ^1.33.5
       version: 1.33.5
+    '@tanstack/react-query':
+      specifier: ^5.104.0
+      version: 5.104.0
     '@tanstack/react-router':
       specifier: ^1.170.39
       version: 1.170.39
@@ -582,6 +585,9 @@ importers:
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../../packages/@luke-ui/react
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.104.0(react@19.3.0)
       '@vanilla-extract/css':
         specifier: 'catalog:'
         version: 1.21.2
@@ -613,6 +619,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 6.1.1(@voidzero-dev/vite-plus-core@1.0.0-rc.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1))(oxc-transform-react@0.151.0)
+      axe-core:
+        specifier: 'catalog:'
+        version: 4.13.0
       tsx:
         specifier: 'catalog:'
         version: 4.23.15
@@ -2998,6 +3007,9 @@ packages:
     resolution: {integrity: sha512-y/xtNPNt/YeyoVxE/JCx+T7yjEzpezmbb+toK8DDD1P4m7Kzs5YR956+7OKexG3f8aXgC3rLZl7b1V+yNUSy5w==}
     engines: {node: '>=18'}
 
+  '@tanstack/query-core@5.104.0':
+    resolution: {integrity: sha512-JrC2r/JQlXt7khBSdUpsgxNvybzOg+aITa+ARRMlP2AFo93Y8vIqz077rp+e61mJetSZ0T6AJbwW1JHer1vrPQ==}
+
   '@tanstack/react-form@1.33.5':
     resolution: {integrity: sha512-LlRB28qJwO/QCGaHvWnbdh4haBgTFiZVmzA2uzxSBS3YA7/IqrQ6HOBK70CkFQ+DbflZ7NawsmSln13h5iIdTA==}
     peerDependencies:
@@ -3006,6 +3018,11 @@ packages:
     peerDependenciesMeta:
       '@tanstack/react-start':
         optional: true
+
+  '@tanstack/react-query@5.104.0':
+    resolution: {integrity: sha512-e1TZmDCQnWIfiDVryIHeA6Idj+Lfx1hORLOhXS/l5wcgvtVD4yYqbTDl378sGQKIi2cSgb0TEMC9cKK8GGoJEw==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@tanstack/react-router@1.170.39':
     resolution: {integrity: sha512-wLZi/hXW/kTeLlMIvI2VB8Oj38GLz8YkHmTM14lLScAzx79UZEwBHWMj6JZw/imuyuhrcmbe8KTFsFBHzJUftg==}
@@ -7930,6 +7947,8 @@ snapshots:
 
   '@tanstack/pacer-lite@0.1.1': {}
 
+  '@tanstack/query-core@5.104.0': {}
+
   '@tanstack/react-form@1.33.5(@tanstack/react-start@1.168.58(@voidzero-dev/vite-plus-core@1.0.0-rc.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1))(crossws@0.4.12(srvx@0.11.22))(esbuild@0.28.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rollup@4.63.4)(supports-color@7.2.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
       '@tanstack/form-core': 1.33.5
@@ -7939,6 +7958,11 @@ snapshots:
       '@tanstack/react-start': 1.168.58(@voidzero-dev/vite-plus-core@1.0.0-rc.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1))(crossws@0.4.12(srvx@0.11.22))(esbuild@0.28.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rollup@4.63.4)(supports-color@7.2.0)
     transitivePeerDependencies:
       - react-dom
+
+  '@tanstack/react-query@5.104.0(react@19.3.0)':
+    dependencies:
+      '@tanstack/query-core': 5.104.0
+      react: 19.3.0
 
   '@tanstack/react-router@1.170.39(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:

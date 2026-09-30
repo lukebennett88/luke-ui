@@ -75,3 +75,29 @@ jobs:
 
       - name: Run docs tests
         run: pnpm --filter docs run test
+
+  reference-app-tests:
+    name: reference-app-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup tooling
+        uses: pnpm/setup@v3
+        with:
+          cache: true
+          install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --no-runtime
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
+
+      - name: Run reference app tests
+        run: TURBO_FORCE=true pnpm exec turbo run test --filter=reference-app

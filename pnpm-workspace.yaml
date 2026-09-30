@@ -45,6 +45,7 @@ catalog:
   '@hookform/resolvers': ^5.9.1
   '@monaco-editor/react': ^4.7.0
   '@react-aria/utils': ^3.34.1
+  '@tanstack/react-query': ^5.104.0
   '@rolldown/pluginutils': ^1.0.1
   '@tailwindcss/vite': ^4.3.3
   '@tanstack/react-form': ^1.33.5

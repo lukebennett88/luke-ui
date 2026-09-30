@@ -1,13 +1,10 @@
 import type { ThemeInput } from '@luke-ui/react/theme';
 
-/**
- * Product-owned theme for the reference settings app.
- * Cool, low-chroma neutrals with a Linear-like soft purple accent.
- */
+/** Quiet neutrals and a restrained purple accent for settings. */
 export const referenceThemeInput = {
 	color: {
 		accent: { dark: 'oklch(0.72 0.12 275)', light: 'oklch(0.55 0.14 275)' },
-		neutralStyle: 'cool',
+		neutralStyle: 'neutral',
 	},
 	depth: {
 		dark: {
@@ -27,4 +24,5 @@ export const referenceThemeInput = {
 	},
 	name: 'reference',
 	radius: { control: 6, surface: 8 },
+	typography: { fontFamily: 'apple-system', fontWeight: { heading: 600, label: 500 } },
 } satisfies ThemeInput;

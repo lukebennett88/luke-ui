@@ -1,13 +1,12 @@
-import { applyInterfaceSettings, settingsApi } from '../api/settings-api.js';
-import { PreferencesPage, preferencesAction } from './preferences.js';
-import { ProfilePage, profileAction } from './profile.js';
-import { SecurityPage, securityAction } from './security.js';
+import type { QueryClient } from '@tanstack/react-query';
+import { settingsQueryOptions } from '../api/settings-query.js';
+import { PreferencesPage } from './preferences.js';
+import { ProfilePage } from './profile.js';
+import { SecurityPage } from './security.js';
 import { SettingsMenuPage } from './settings-layout.js';
 
-export async function settingsLoader() {
-	const settings = await settingsApi.getSettings();
-	applyInterfaceSettings(settings.preferences);
-	return { settings };
+export async function settingsLoader(queryClient: QueryClient) {
+	await queryClient.query(settingsQueryOptions);
 }
 
 export const settingsPageRoutes = [
@@ -16,17 +15,14 @@ export const settingsPageRoutes = [
 		path: 'menu',
 	},
 	{
-		action: preferencesAction,
 		element: <PreferencesPage />,
 		path: 'preferences',
 	},
 	{
-		action: profileAction,
 		element: <ProfilePage />,
 		path: 'profile',
 	},
 	{
-		action: securityAction,
 		element: <SecurityPage />,
 		path: 'security',
 	},

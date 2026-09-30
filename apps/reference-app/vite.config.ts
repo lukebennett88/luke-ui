@@ -21,7 +21,6 @@ export default defineConfig({
 		port: 5174,
 	},
 	test: {
-		passWithNoTests: true,
 		projects: [
 			{
 				extends: true,

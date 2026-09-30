@@ -137,6 +137,10 @@
 			],
 			"outputs": [".generated/**", "src/routeTree.gen.ts"]
 		},
+		"reference-app#generate": {
+			"dependsOn": ["^build"],
+			"outputs": ["src/generated/**"]
+		},
 		"test": {
 			"dependsOn": ["^build", "generate"],
 			"outputs": []
