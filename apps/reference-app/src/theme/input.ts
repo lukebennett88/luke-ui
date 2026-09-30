@@ -2,25 +2,25 @@ import type { ThemeInput } from '@luke-ui/react/theme';
 
 /**
  * Product-owned theme for the reference settings app.
- * Cool, low-chroma neutrals with a restrained blue accent.
+ * Cool, low-chroma neutrals with a Linear-like soft purple accent.
  */
 export const referenceThemeInput = {
 	color: {
-		accent: { dark: 'oklch(0.72 0.09 255)', light: 'oklch(0.48 0.1 255)' },
+		accent: { dark: 'oklch(0.72 0.12 275)', light: 'oklch(0.55 0.14 275)' },
 		neutralStyle: 'cool',
 	},
 	depth: {
 		dark: {
-			floating: 'none',
-			overlay: '0 12px 32px oklch(0.1 0.01 255 / 0.4)',
-			raised: 'none',
+			floating: '0 4px 16px oklch(0.1 0.01 275 / 0.35), 0 1px 3px oklch(0.1 0.01 275 / 0.2)',
+			overlay: '0 12px 32px oklch(0.1 0.01 275 / 0.4)',
+			raised: '0 1px 2px oklch(0.1 0.01 275 / 0.28), 0 2px 8px oklch(0.1 0.01 275 / 0.18)',
 			recessed: 'none',
 			resting: 'none',
 		},
 		light: {
-			floating: 'none',
-			overlay: '0 12px 32px oklch(0.2 0.01 255 / 0.12)',
-			raised: 'none',
+			floating: '0 4px 16px oklch(0.25 0.01 275 / 0.1), 0 1px 3px oklch(0.25 0.01 275 / 0.06)',
+			overlay: '0 12px 32px oklch(0.2 0.01 275 / 0.12)',
+			raised: '0 1px 2px oklch(0.3 0.01 275 / 0.04), 0 2px 8px oklch(0.3 0.01 275 / 0.06)',
 			recessed: 'none',
 			resting: 'none',
 		},

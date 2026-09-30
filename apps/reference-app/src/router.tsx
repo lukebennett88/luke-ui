@@ -1,16 +1,6 @@
-import { createBrowserRouter, redirect, RouterProvider } from 'react-router';
-import { applyInterfaceSettings, settingsApi } from './api/settings-api.js';
-import { AccountPage, accountAction } from './routes/account.js';
-import { InterfacePage, interfaceAction } from './routes/interface.js';
-import { PreferencesPage, preferencesAction } from './routes/preferences.js';
-import { ProfilePage, profileAction } from './routes/profile.js';
-import { SettingsLayout, SettingsMenuPage } from './routes/settings-layout.js';
-
-async function settingsLoader() {
-	const settings = await settingsApi.getSettings();
-	applyInterfaceSettings(settings.interface);
-	return { settings };
-}
+import { createBrowserRouter, RouterProvider, redirect } from 'react-router';
+import { SettingsLayout } from './routes/settings-layout.js';
+import { settingsLoader, settingsPageRoutes } from './routes/settings-routes.js';
 
 function RedirectFallback() {
 	return null;
@@ -18,53 +8,30 @@ function RedirectFallback() {
 
 const router = createBrowserRouter([
 	{
-		path: '/',
-		HydrateFallback: RedirectFallback,
-		loader: () => redirect('/settings/profile'),
 		Component: RedirectFallback,
+		HydrateFallback: RedirectFallback,
+		loader: () => redirect('/settings/preferences'),
+		path: '/',
 	},
 	{
-		HydrateFallback: RedirectFallback,
-		path: '/settings',
-		id: 'settings',
+		children: [
+			{
+				Component: RedirectFallback,
+				HydrateFallback: RedirectFallback,
+				index: true,
+				loader: () => redirect('preferences'),
+			},
+			...settingsPageRoutes,
+		],
 		element: <SettingsLayout />,
+		HydrateFallback: RedirectFallback,
+		id: 'settings',
 		loader: settingsLoader,
+		path: '/settings',
 		shouldRevalidate: ({ formMethod, defaultShouldRevalidate }) => {
 			if (formMethod && formMethod !== 'GET') return true;
 			return defaultShouldRevalidate;
 		},
-		children: [
-			{
-				index: true,
-				HydrateFallback: RedirectFallback,
-				loader: () => redirect('profile'),
-				Component: RedirectFallback,
-			},
-			{
-				path: 'menu',
-				element: <SettingsMenuPage />,
-			},
-			{
-				path: 'profile',
-				element: <ProfilePage />,
-				action: profileAction,
-			},
-			{
-				path: 'preferences',
-				element: <PreferencesPage />,
-				action: preferencesAction,
-			},
-			{
-				path: 'interface',
-				element: <InterfacePage />,
-				action: interfaceAction,
-			},
-			{
-				path: 'account',
-				element: <AccountPage />,
-				action: accountAction,
-			},
-		],
 	},
 ]);
 

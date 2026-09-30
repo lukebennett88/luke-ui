@@ -1,13 +1,12 @@
+import type { Preferences, ProfileUpdate, Settings } from './schemas.js';
 import {
 	DEFAULT_SETTINGS,
-	settingsSchema,
-	profileUpdateSchema,
 	preferencesSchema,
-	interfaceSchema,
+	profileUpdateSchema,
+	settingsSchema,
 } from './schemas.js';
-import type { InterfaceSettings, Preferences, ProfileUpdate, Settings } from './schemas.js';
 
-const STORAGE_KEY = 'reference-app.settings.v1';
+const STORAGE_KEY = 'reference-app.settings.v3';
 
 export type ApiFailure = 'none' | 'validation' | 'server';
 
@@ -48,21 +47,76 @@ function consumeFailure(): ApiFailure {
 }
 
 export const settingsApi = {
-	/** Deterministic failure for the next mutating call. Auto-resets after use. */
-	setNextFailure(failure: ApiFailure) {
-		controls.failure = failure;
+	async clearLocalSettings(options?: {
+		allowServerFailure?: boolean;
+		serverFailureMessage?: string;
+	}): Promise<void> {
+		await wait();
+		if (options?.allowServerFailure) {
+			const failure = consumeFailure();
+			if (failure === 'server') {
+				throw new Error(options.serverFailureMessage ?? 'Operation failed. Try again.');
+			}
+		}
+		localStorage.removeItem(STORAGE_KEY);
 	},
-	setLatency(ms: number) {
-		controls.latencyMs = ms;
+	async getSettings(): Promise<Settings> {
+		await wait();
+		return readRaw();
 	},
 	reset() {
 		localStorage.removeItem(STORAGE_KEY);
 		controls.failure = 'none';
 		controls.latencyMs = 280;
 	},
-	async getSettings(): Promise<Settings> {
+	async revokeOtherSessions(): Promise<Settings> {
 		await wait();
-		return readRaw();
+		const current = readRaw();
+		const next = {
+			...current,
+			security: {
+				sessions: current.security.sessions.filter((session) => session.isCurrent),
+			},
+		};
+		writeRaw(next);
+		return next;
+	},
+	async revokeSession(sessionId: string): Promise<Settings> {
+		await wait();
+		const current = readRaw();
+		const next = {
+			...current,
+			security: {
+				sessions: current.security.sessions.filter((session) => session.id !== sessionId),
+			},
+		};
+		writeRaw(next);
+		return next;
+	},
+	setLatency(ms: number) {
+		controls.latencyMs = ms;
+	},
+	/** Deterministic failure for the next mutating call. Auto-resets after use. */
+	setNextFailure(failure: ApiFailure) {
+		controls.failure = failure;
+	},
+	async updatePreferences(patch: Partial<Preferences>): Promise<Settings> {
+		await wait();
+		const failure = consumeFailure();
+		if (failure === 'server') {
+			throw new Error('Could not save preferences.');
+		}
+		const current = readRaw();
+		const merged = { ...current.preferences, ...patch };
+		const parsed = preferencesSchema.safeParse(merged);
+		if (!parsed.success || failure === 'validation') {
+			throw new Response(JSON.stringify({ formError: 'Invalid preference.' }), {
+				status: 400,
+			});
+		}
+		const next = { ...current, preferences: parsed.data };
+		writeRaw(next);
+		return next;
 	},
 	async updateProfile(update: ProfileUpdate): Promise<Settings> {
 		await wait();
@@ -91,54 +145,15 @@ export const settingsApi = {
 		writeRaw(next);
 		return next;
 	},
-	async updatePreferences(patch: Partial<Preferences>): Promise<Settings> {
-		await wait();
-		const failure = consumeFailure();
-		if (failure === 'server') {
-			throw new Error('Could not save preferences.');
-		}
-		const current = readRaw();
-		const merged = { ...current.preferences, ...patch };
-		const parsed = preferencesSchema.safeParse(merged);
-		if (!parsed.success || failure === 'validation') {
-			throw new Response(JSON.stringify({ formError: 'Invalid preference.' }), {
-				status: 400,
-			});
-		}
-		const next = { ...current, preferences: parsed.data };
-		writeRaw(next);
-		return next;
-	},
-	async updateInterface(patch: Partial<InterfaceSettings>): Promise<Settings> {
-		await wait();
-		const failure = consumeFailure();
-		if (failure === 'server') {
-			throw new Error('Could not save interface settings.');
-		}
-		const current = readRaw();
-		const merged = { ...current.interface, ...patch };
-		const parsed = interfaceSchema.safeParse(merged);
-		if (!parsed.success || failure === 'validation') {
-			throw new Response(JSON.stringify({ formError: 'Invalid interface setting.' }), {
-				status: 400,
-			});
-		}
-		const next = { ...current, interface: parsed.data };
-		writeRaw(next);
-		return next;
-	},
-	async deleteAccount(): Promise<void> {
-		await wait();
-		const failure = consumeFailure();
-		if (failure === 'server') {
-			throw new Error('Account deletion failed. Try again.');
-		}
-		localStorage.removeItem(STORAGE_KEY);
-	},
 };
 
 /** Apply interface tokens that affect the live document. */
-export function applyInterfaceSettings(settings: InterfaceSettings) {
+export function applyInterfaceSettings(
+	settings: Pick<
+		Preferences,
+		'colorMode' | 'disableAnimatedImages' | 'fontSize' | 'pointerCursor' | 'underlineLinks'
+	>,
+) {
 	const root = document.documentElement;
 	if (settings.colorMode === 'system') {
 		delete root.dataset.colorMode;
@@ -148,4 +163,5 @@ export function applyInterfaceSettings(settings: InterfaceSettings) {
 	root.dataset.fontSize = settings.fontSize;
 	root.dataset.pointerCursor = settings.pointerCursor ? 'true' : 'false';
 	root.dataset.underlineLinks = settings.underlineLinks ? 'true' : 'false';
+	root.dataset.disableAnimatedImages = settings.disableAnimatedImages ? 'true' : 'false';
 }

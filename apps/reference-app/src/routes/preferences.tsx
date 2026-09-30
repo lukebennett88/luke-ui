@@ -1,8 +1,10 @@
-import { useFetcher, useOutletContext } from 'react-router';
+import { useEffect } from 'react';
 import type { ActionFunctionArgs } from 'react-router';
-import { firstDaySchema, homeViewSchema, preferencesSchema } from '../api/schemas.js';
+import { useFetcher, useOutletContext } from 'react-router';
+import { toActionError } from '../api/action-error.js';
 import type { Preferences } from '../api/schemas.js';
-import { settingsApi } from '../api/settings-api.js';
+import { preferencesSchema } from '../api/schemas.js';
+import { applyInterfaceSettings, settingsApi } from '../api/settings-api.js';
 import {
 	SettingsPage,
 	SettingsRow,
@@ -11,6 +13,14 @@ import {
 } from '../components/settings-section.js';
 import { SettingsSelect } from '../components/settings-select.js';
 import { SettingsSwitch } from '../components/settings-switch.js';
+import type { PrefRow } from './preferences-config.js';
+import {
+	AUTOMATION_PREFS,
+	DESKTOP_PREFS,
+	GENERAL_PREFS,
+	INTERFACE_KEYS,
+	INTERFACE_PREFS,
+} from './preferences-config.js';
 import type { SettingsOutletContext } from './settings-layout.js';
 
 export async function preferencesAction({ request }: ActionFunctionArgs) {
@@ -19,10 +29,7 @@ export async function preferencesAction({ request }: ActionFunctionArgs) {
 		const settings = await settingsApi.updatePreferences(patch);
 		return { ok: true as const, settings };
 	} catch (error) {
-		return {
-			ok: false as const,
-			formError: error instanceof Error ? error.message : 'Could not save preference',
-		};
+		return toActionError(error, 'Could not save preference');
 	}
 }
 
@@ -32,60 +39,69 @@ export function PreferencesPage() {
 	const isPending = fetcher.state !== 'idle';
 	const values = fetcher.data?.ok ? fetcher.data.settings.preferences : settings.preferences;
 
+	useEffect(() => {
+		if (fetcher.data?.ok) {
+			applyInterfaceSettings(fetcher.data.settings.preferences);
+		}
+	}, [fetcher.data]);
+
 	function save(patch: Partial<Preferences>) {
+		if (touchesInterface(patch)) {
+			applyInterfaceSettings({ ...values, ...patch });
+		}
 		void fetcher.submit(patch, { encType: 'application/json', method: 'post' });
 	}
 
 	return (
 		<SettingsPage title="Preferences">
-			<SettingsSection description="Personal defaults for how the product behaves." title="General">
-				<SettingsRow label="Default home view">
-					<SettingsSelect
-						disabled={isPending}
-						id="home-view"
-						label="Default home view"
-						onChange={(value) => save({ homeView: homeViewSchema.parse(value) })}
-						options={[
-							{ label: 'Inbox', value: 'inbox' },
-							{ label: 'My issues', value: 'my-issues' },
-							{ label: 'Active', value: 'active' },
-							{ label: 'Board', value: 'board' },
-						]}
-						value={values.homeView}
+			<SettingsSection title="General">
+				{GENERAL_PREFS.map((pref) => (
+					<PreferenceRow
+						isPending={isPending}
+						key={pref.key}
+						onSave={save}
+						pref={pref}
+						values={values}
 					/>
-				</SettingsRow>
-				<SettingsRow hint="Show full names instead of usernames." label="Display full names">
-					<SettingsSwitch
-						checked={values.displayFullNames}
-						disabled={isPending}
-						id="display-full-names"
-						label="Display full names"
-						onChange={(checked) => save({ displayFullNames: checked })}
-					/>
-				</SettingsRow>
-				<SettingsRow label="First day of week">
-					<SettingsSelect
-						disabled={isPending}
-						id="first-day"
-						label="First day of week"
-						onChange={(value) => save({ firstDayOfWeek: firstDaySchema.parse(value) })}
-						options={[
-							{ label: 'Monday', value: 'monday' },
-							{ label: 'Sunday', value: 'sunday' },
-						]}
-						value={values.firstDayOfWeek}
-					/>
-				</SettingsRow>
-				<SettingsRow hint="Turn :) into an emoji while typing." label="Convert emoticons to emoji">
-					<SettingsSwitch
-						checked={values.convertEmoticons}
-						disabled={isPending}
-						id="convert-emoticons"
-						label="Convert emoticons to emoji"
-						onChange={(checked) => save({ convertEmoticons: checked })}
-					/>
-				</SettingsRow>
+				))}
 			</SettingsSection>
+
+			<SettingsSection title="Interface and theme">
+				{INTERFACE_PREFS.map((pref) => (
+					<PreferenceRow
+						isPending={isPending}
+						key={pref.key}
+						onSave={save}
+						pref={pref}
+						values={values}
+					/>
+				))}
+			</SettingsSection>
+
+			<SettingsSection title="Desktop application">
+				{DESKTOP_PREFS.map((pref) => (
+					<PreferenceRow
+						isPending={isPending}
+						key={pref.key}
+						onSave={save}
+						pref={pref}
+						values={values}
+					/>
+				))}
+			</SettingsSection>
+
+			<SettingsSection title="Automations and workflows">
+				{AUTOMATION_PREFS.map((pref) => (
+					<PreferenceRow
+						isPending={isPending}
+						key={pref.key}
+						onSave={save}
+						pref={pref}
+						values={values}
+					/>
+				))}
+			</SettingsSection>
+
 			{isPending ? <SettingsStatus>Saving…</SettingsStatus> : null}
 			{fetcher.data && !fetcher.data.ok ? (
 				<SettingsStatus role="alert" tone="danger">
@@ -94,4 +110,47 @@ export function PreferencesPage() {
 			) : null}
 		</SettingsPage>
 	);
+}
+
+function PreferenceRow({
+	isPending,
+	onSave,
+	pref,
+	values,
+}: {
+	isPending: boolean;
+	onSave: (patch: Partial<Preferences>) => void;
+	pref: PrefRow;
+	values: Preferences;
+}) {
+	if (pref.kind === 'select') {
+		return (
+			<SettingsRow hint={pref.hint} label={pref.label}>
+				<SettingsSelect
+					id={pref.id}
+					isDisabled={isPending}
+					label={pref.label}
+					onChange={(value) => onSave({ [pref.key]: pref.parse(value) })}
+					options={[...pref.options]}
+					value={String(values[pref.key])}
+				/>
+			</SettingsRow>
+		);
+	}
+
+	return (
+		<SettingsRow hint={pref.hint} label={pref.label}>
+			<SettingsSwitch
+				id={pref.id}
+				isChecked={Boolean(values[pref.key])}
+				isDisabled={isPending}
+				label={pref.label}
+				onChange={(checked) => onSave({ [pref.key]: checked })}
+			/>
+		</SettingsRow>
+	);
+}
+
+function touchesInterface(patch: Partial<Preferences>) {
+	return INTERFACE_KEYS.some((key) => key in patch);
 }

@@ -4,6 +4,18 @@ import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
 
 export default defineConfig({
+	optimizeDeps: {
+		include: [
+			'react-aria-components/Button',
+			'react-aria-components/Dialog',
+			'react-aria-components/ListBox',
+			'react-aria-components/Menu',
+			'react-aria-components/Modal',
+			'react-aria-components/Popover',
+			'react-aria-components/Select',
+			'react-aria-components/Switch',
+		],
+	},
 	plugins: [vanillaExtractPlugin(), react()],
 	server: {
 		port: 5174,

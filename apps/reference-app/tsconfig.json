@@ -1,16 +1,16 @@
 {
 	"compilerOptions": {
-		"target": "ES2022",
+		"isolatedModules": true,
+		"jsx": "react-jsx",
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
-		"jsx": "react-jsx",
-		"strict": true,
 		"noEmit": true,
 		"skipLibCheck": true,
-		"isolatedModules": true,
-		"verbatimModuleSyntax": true,
-		"types": ["vite/client"]
+		"strict": true,
+		"target": "ES2022",
+		"types": ["vite/client"],
+		"verbatimModuleSyntax": true
 	},
 	"include": ["src", "scripts", "vite.config.ts"]
 }

@@ -20,14 +20,26 @@ globalStyle(':root[data-font-size="large"]', {
 });
 
 globalStyle('html, body, #root', {
-	minBlockSize: '100%',
+	blockSize: '100%',
+	overflow: 'hidden',
+});
+
+globalStyle('html, body', {
+	inset: 0,
+	position: 'fixed',
 });
 
 globalStyle('body', {
+	// Match the shell well; light recessed is pure white and too close to floating.
 	background: vars.color.surface.canvas,
+	caretColor: vars.color.background.accent.solid.rest,
 	color: vars.color.text.primary,
 	fontSize: 'var(--app-font-size)',
 	margin: 0,
+});
+
+globalStyle('::selection', {
+	background: `color-mix(in oklab, ${vars.color.background.accent.solid.rest} 28%, transparent)`,
 });
 
 globalStyle(':root[data-pointer-cursor="true"] button', {
@@ -48,4 +60,8 @@ globalStyle(':root[data-pointer-cursor="true"] label', {
 
 globalStyle(':root[data-underline-links="true"] a', {
 	textDecoration: 'underline',
+});
+
+globalStyle(':root[data-disable-animated-images="true"] img', {
+	animationPlayState: 'paused',
 });

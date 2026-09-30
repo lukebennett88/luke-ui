@@ -1,22 +1,22 @@
 import { Button as RacButton } from 'react-aria-components/Button';
 import { ListBox, ListBoxItem } from 'react-aria-components/ListBox';
 import { Popover } from 'react-aria-components/Popover';
-import { Select, SelectValue } from 'react-aria-components/Select';
 import type { Key } from 'react-aria-components/Select';
+import { Select, SelectValue } from 'react-aria-components/Select';
 import * as styles from '../styles/settings.css.js';
 
 type Option = { label: string; value: string };
 
 export function SettingsSelect({
-	disabled,
 	id,
+	isDisabled,
 	label,
 	onChange,
 	options,
 	value,
 }: {
-	disabled?: boolean;
 	id: string;
+	isDisabled?: boolean;
 	label: string;
 	onChange: (value: string) => void;
 	options: ReadonlyArray<Option>;
@@ -26,13 +26,13 @@ export function SettingsSelect({
 		<Select
 			aria-label={label}
 			id={id}
-			isDisabled={disabled}
+			isDisabled={isDisabled}
 			onSelectionChange={(key: Key | null) => {
 				if (key != null) onChange(String(key));
 			}}
 			selectedKey={value}
 		>
-			<RacButton aria-label={label} className={styles.selectTrigger}>
+			<RacButton className={styles.selectTrigger}>
 				<SelectValue />
 			</RacButton>
 			<Popover className={styles.selectPopover} placement="bottom end">

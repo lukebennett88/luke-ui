@@ -8,4 +8,5 @@ afterEach(() => {
 	document.documentElement.removeAttribute('data-font-size');
 	document.documentElement.removeAttribute('data-pointer-cursor');
 	document.documentElement.removeAttribute('data-underline-links');
+	document.documentElement.removeAttribute('data-disable-animated-images');
 });

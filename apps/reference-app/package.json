@@ -17,7 +17,6 @@
 	},
 	"dependencies": {
 		"@luke-ui/react": "workspace:*",
-		"@tanstack/react-form": "catalog:",
 		"@vanilla-extract/css": "catalog:",
 		"react": "catalog:",
 		"react-aria-components": "catalog:",

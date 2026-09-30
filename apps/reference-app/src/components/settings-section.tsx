@@ -22,22 +22,33 @@ export function SettingsSection({
 	children,
 	description,
 	title,
+	tone,
 }: {
 	children: ReactNode;
 	description?: string;
-	title: string;
+	title?: string;
+	tone?: 'danger';
 }) {
+	const panelClass = tone === 'danger' ? `${styles.panel} ${styles.dangerPanel}` : styles.panel;
+
 	return (
 		<Stack elementType="section" gap="sp8" marginBlockEnd="sp32">
-			<Heading level={2} shouldDisableTrim typography="label">
-				{title}
-			</Heading>
+			{title ? (
+				<Heading
+					color={tone === 'danger' ? 'danger' : undefined}
+					level={2}
+					shouldDisableTrim
+					typography="label"
+				>
+					{title}
+				</Heading>
+			) : null}
 			{description ? (
 				<Text color="secondary" elementType="p" typography="caption">
 					{description}
 				</Text>
 			) : null}
-			<div className={styles.panel}>{children}</div>
+			<div className={panelClass}>{children}</div>
 		</Stack>
 	);
 }
@@ -70,6 +81,21 @@ export function SettingsRow({
 	);
 }
 
+export function SettingsEmptyState({ action, label }: { action?: ReactNode; label: string }) {
+	return (
+		<Track
+			className={styles.settingsRow}
+			gap="sp16"
+			railAlignment="center"
+			railEnd={action ? <div className={styles.rowControl}>{action}</div> : undefined}
+		>
+			<Heading level={3} shouldDisableTrim typography="label">
+				{label}
+			</Heading>
+		</Track>
+	);
+}
+
 export function SettingsStatus({
 	children,
 	role = 'status',
@@ -93,18 +119,10 @@ export function SettingsStatus({
 	);
 }
 
-export function SettingsAvatarActions({ children }: { children: ReactNode }) {
+export function SettingsRowActions({ children }: { children: ReactNode }) {
 	return (
 		<Cluster alignItems="center" gap="sp8">
 			{children}
 		</Cluster>
 	);
-}
-
-export function fieldErrorMessage(error: unknown): string | undefined {
-	if (typeof error === 'string') return error;
-	if (error && typeof error === 'object' && 'message' in error) {
-		return typeof error.message === 'string' ? error.message : undefined;
-	}
-	return undefined;
 }

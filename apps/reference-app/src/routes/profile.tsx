@@ -1,97 +1,108 @@
-import { Button } from '@luke-ui/react/button';
+import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
-import { TextField } from '@luke-ui/react/text-field';
-import { useForm } from '@tanstack/react-form';
-import { useEffect, useRef } from 'react';
-import { useFetcher, useOutletContext } from 'react-router';
+import { useEffect, useReducer, useRef } from 'react';
+import { Button as RacButton } from 'react-aria-components/Button';
+import { Menu, MenuItem, MenuTrigger } from 'react-aria-components/Menu';
+import { Popover } from 'react-aria-components/Popover';
 import type { ActionFunctionArgs } from 'react-router';
-import { profileUpdateSchema } from '../api/schemas.js';
+import { useFetcher, useOutletContext } from 'react-router';
+import { toActionError } from '../api/action-error.js';
 import type { ProfileUpdate } from '../api/schemas.js';
+import { profileLeaveActionSchema, profileUpdateSchema } from '../api/schemas.js';
 import { settingsApi } from '../api/settings-api.js';
+import { DestructiveConfirmSection } from '../components/destructive-confirm-section.js';
+import { ProfileFieldDialog } from '../components/profile-field-dialog.js';
 import {
-	SettingsAvatarActions,
 	SettingsPage,
 	SettingsRow,
 	SettingsSection,
 	SettingsStatus,
-	fieldErrorMessage,
 } from '../components/settings-section.js';
 import * as styles from '../styles/settings.css.js';
-import { SaveButton } from './settings-layout.js';
+import {
+	destructiveConfirmReducer,
+	initialDestructiveConfirmState,
+} from '../workflows/destructive-confirm.js';
 import type { SettingsOutletContext } from './settings-layout.js';
 
 export async function profileAction({ request }: ActionFunctionArgs) {
-	const payload = profileUpdateSchema.parse(await request.json());
+	const body = await request.json();
+	const leave = profileLeaveActionSchema.safeParse(body);
+	if (leave.success) {
+		try {
+			await settingsApi.clearLocalSettings();
+			return { left: true as const, ok: true as const };
+		} catch (error) {
+			return toActionError(error, 'Could not leave workspace');
+		}
+	}
+
+	const payload = profileUpdateSchema.parse(body);
 	try {
 		const settings = await settingsApi.updateProfile(payload);
 		return { ok: true as const, settings };
 	} catch (error) {
-		if (error instanceof Response) {
-			const body = await error.json();
-			return { ok: false as const, ...body };
-		}
-		return {
-			ok: false as const,
-			formError: error instanceof Error ? error.message : 'Save failed',
-		};
+		return toActionError(error, 'Save failed');
 	}
 }
 
 export function ProfilePage() {
 	const { settings } = useOutletContext<SettingsOutletContext>();
 	const fetcher = useFetcher<typeof profileAction>();
+	const leaveFetcher = useFetcher<typeof profileAction>();
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [leaveState, leaveDispatch] = useReducer(
+		destructiveConfirmReducer,
+		initialDestructiveConfirmState,
+	);
 	const isPending = fetcher.state !== 'idle';
 
-	const form = useForm({
-		defaultValues: {
-			avatarDataUrl: settings.profile.avatarDataUrl,
-			displayName: settings.profile.displayName,
-			username: settings.profile.username,
-		} satisfies ProfileUpdate,
-		onSubmit: async ({ value }) => {
-			void fetcher.submit(value, {
-				encType: 'application/json',
-				method: 'post',
-			});
-		},
-		validators: {
-			onChange: profileUpdateSchema,
-		},
-	});
+	const profile =
+		fetcher.data?.ok && 'settings' in fetcher.data && fetcher.data.settings
+			? fetcher.data.settings.profile
+			: settings.profile;
+
+	const profileUpdate: ProfileUpdate = {
+		avatarDataUrl: profile.avatarDataUrl,
+		displayName: profile.displayName,
+		title: profile.title,
+		username: profile.username,
+	};
 
 	useEffect(() => {
-		if (fetcher.state === 'idle' && fetcher.data?.ok) {
-			const profile = fetcher.data.settings.profile;
-			form.reset({
-				avatarDataUrl: profile.avatarDataUrl,
-				displayName: profile.displayName,
-				username: profile.username,
+		if (leaveFetcher.state !== 'idle' || !leaveFetcher.data) return;
+		if (leaveFetcher.data.ok && 'left' in leaveFetcher.data && leaveFetcher.data.left) {
+			leaveDispatch({ type: 'succeed' });
+			return;
+		}
+		if (!leaveFetcher.data.ok) {
+			leaveDispatch({
+				error: leaveFetcher.data.formError ?? 'Could not leave workspace',
+				type: 'fail',
 			});
 		}
-	}, [fetcher.data, fetcher.state, form]);
+	}, [leaveFetcher.data, leaveFetcher.state]);
 
-	useEffect(() => {
-		form.reset({
-			avatarDataUrl: settings.profile.avatarDataUrl,
-			displayName: settings.profile.displayName,
-			username: settings.profile.username,
-		});
-	}, [
-		settings.profile.avatarDataUrl,
-		settings.profile.displayName,
-		settings.profile.username,
-		form,
-	]);
+	function saveProfile(patch: Partial<ProfileUpdate>) {
+		void fetcher.submit(
+			{ ...profileUpdate, ...patch },
+			{ encType: 'application/json', method: 'post' },
+		);
+	}
 
 	function readAvatar(file: File) {
 		const reader = new FileReader();
 		reader.onload = () => {
 			if (typeof reader.result === 'string') {
-				form.setFieldValue('avatarDataUrl', reader.result);
+				saveProfile({ avatarDataUrl: reader.result });
 			}
 		};
 		reader.readAsDataURL(file);
+	}
+
+	function startLeave() {
+		leaveDispatch({ type: 'confirm' });
+		void leaveFetcher.submit({ intent: 'leave' }, { encType: 'application/json', method: 'post' });
 	}
 
 	const actionError =
@@ -105,101 +116,124 @@ export function ProfilePage() {
 
 	return (
 		<SettingsPage title="Profile">
-			<form
-				onSubmit={(event) => {
-					event.preventDefault();
-					event.stopPropagation();
-					void form.handleSubmit();
-				}}
-			>
-				<SettingsSection description="How you appear across the workspace." title="Identity">
-					<form.Field name="avatarDataUrl">
-						{(field) => (
-							<SettingsRow hint="Shown next to your name and comments." label="Avatar">
-								<SettingsAvatarActions>
-									{field.state.value ? (
-										<img alt="" className={styles.avatar} src={field.state.value} />
-									) : (
-										<div aria-hidden="true" className={styles.avatar} />
-									)}
-									<input
-										accept="image/*"
-										hidden
-										onChange={(event) => {
-											const file = event.target.files?.[0];
-											if (file) readAvatar(file);
-										}}
-										ref={fileInputRef}
-										type="file"
-									/>
-									<Button
-										onPress={() => fileInputRef.current?.click()}
-										prominence="standard"
-										tone="neutral"
-										type="button"
-									>
-										Change
-									</Button>
-									<Button
-										isDisabled={!field.state.value}
-										onPress={() => field.handleChange(null)}
-										prominence="low"
-										tone="neutral"
-										type="button"
-									>
-										Remove
-									</Button>
-								</SettingsAvatarActions>
-							</SettingsRow>
-						)}
-					</form.Field>
-					<form.Field name="displayName">
-						{(field) => (
-							<SettingsRow label="Preferred name">
-								<TextField
-									aria-label="Preferred name"
-									errorMessage={fieldErrorMessage(field.state.meta.errors[0])}
-									name={field.name}
-									onBlur={field.handleBlur}
-									onChange={(value) => field.handleChange(value)}
-									size="small"
-									value={field.state.value}
-								/>
-							</SettingsRow>
-						)}
-					</form.Field>
-					<form.Field name="username">
-						{(field) => (
-							<SettingsRow hint="Lowercase letters, numbers, and hyphens." label="Username">
-								<TextField
-									aria-label="Username"
-									errorMessage={fieldErrorMessage(field.state.meta.errors[0])}
-									name={field.name}
-									onBlur={field.handleBlur}
-									onChange={(value) => field.handleChange(value)}
-									size="small"
-									value={field.state.value}
-								/>
-							</SettingsRow>
-						)}
-					</form.Field>
-					<SettingsRow hint="Managed by your workspace." label="Email">
-						<Text color="secondary">{settings.profile.email}</Text>
-					</SettingsRow>
-				</SettingsSection>
-				<form.Subscribe selector={(state) => [state.canSubmit, state.isDirty] as const}>
-					{([canSubmit, isDirty]) => (
-						<SaveButton isDirty={Boolean(isDirty && canSubmit)} isPending={isPending} />
-					)}
-				</form.Subscribe>
-				{isPending ? <SettingsStatus>Saving…</SettingsStatus> : null}
-				{fetcher.data?.ok ? <SettingsStatus tone="success">Profile saved.</SettingsStatus> : null}
-				{actionError ? (
-					<SettingsStatus role="alert" tone="danger">
-						{String(actionError)}
-					</SettingsStatus>
-				) : null}
-			</form>
+			<SettingsSection>
+				<SettingsRow label="Profile picture">
+					<input
+						accept="image/*"
+						aria-label="Profile photo"
+						hidden
+						onChange={(event) => {
+							const file = event.target.files?.[0];
+							if (file) readAvatar(file);
+							event.target.value = '';
+						}}
+						ref={fileInputRef}
+						type="file"
+					/>
+					<MenuTrigger>
+						<RacButton aria-label="Profile picture" className={styles.avatarButton}>
+							{profile.avatarDataUrl ? (
+								<img alt="" className={styles.avatar} src={profile.avatarDataUrl} />
+							) : (
+								<span aria-hidden="true" className={styles.avatar} />
+							)}
+						</RacButton>
+						<Popover className={styles.menuPopover} placement="bottom end">
+							<Menu
+								aria-label="Profile picture"
+								className={styles.menu}
+								onAction={(key) => {
+									if (key === 'change') {
+										fileInputRef.current?.click();
+										return;
+									}
+									if (key === 'remove') {
+										saveProfile({ avatarDataUrl: null });
+									}
+								}}
+							>
+								<MenuItem className={styles.menuItem} id="change" textValue="Change avatar">
+									<Icon name="edit" size="small" />
+									Change avatar
+								</MenuItem>
+								<MenuItem
+									className={styles.menuItem}
+									id="remove"
+									isDisabled={!profile.avatarDataUrl}
+									textValue="Remove avatar"
+								>
+									<Icon name="close" size="small" />
+									Remove avatar
+								</MenuItem>
+							</Menu>
+						</Popover>
+					</MenuTrigger>
+				</SettingsRow>
+				<SettingsRow label="Email">
+					<Text color="secondary">{profile.email}</Text>
+				</SettingsRow>
+				<SettingsRow label="Full name">
+					<ProfileFieldDialog
+						label="Full name"
+						onSave={(displayName) => saveProfile({ displayName })}
+						validate={(value) => validateProfileField('displayName', value)}
+						value={profile.displayName}
+					/>
+				</SettingsRow>
+				<SettingsRow hint="Your job title or role" label="Title">
+					<ProfileFieldDialog
+						hint="Your job title or role"
+						label="Title"
+						onSave={(title) => saveProfile({ title })}
+						placeholder="Software engineer"
+						validate={(value) => validateProfileField('title', value)}
+						value={profile.title}
+					/>
+				</SettingsRow>
+				<SettingsRow hint="One word, like a nickname or first name" label="Username">
+					<ProfileFieldDialog
+						hint="One word, like a nickname or first name"
+						label="Username"
+						onSave={(username) => saveProfile({ username })}
+						placeholder="username"
+						validate={(value) => validateProfileField('username', value)}
+						value={profile.username}
+					/>
+				</SettingsRow>
+			</SettingsSection>
+			{isPending ? <SettingsStatus>Saving…</SettingsStatus> : null}
+			{fetcher.data?.ok && 'settings' in fetcher.data ? (
+				<SettingsStatus tone="success">Profile saved.</SettingsStatus>
+			) : null}
+			{actionError ? (
+				<SettingsStatus role="alert" tone="danger">
+					{String(actionError)}
+				</SettingsStatus>
+			) : null}
+
+			<DestructiveConfirmSection
+				confirmButtonLabel="Yes, leave"
+				confirmHint="Your profile and preferences will be wiped from this browser."
+				confirmLabel="Confirm leave"
+				dispatch={leaveDispatch}
+				failedLabel="Could not leave"
+				idleButtonLabel="Leave workspace"
+				idleLabel="Remove yourself from workspace"
+				onConfirm={startLeave}
+				pendingMessage="Leaving workspace…"
+				state={leaveState}
+				successMessage="Left workspace on this device. Reload to start fresh."
+				title="Workspace access"
+			/>
 		</SettingsPage>
 	);
+}
+
+function validateProfileField(
+	field: 'displayName' | 'title' | 'username',
+	value: string,
+): string | undefined {
+	const result = profileUpdateSchema.shape[field].safeParse(value);
+	if (result.success) return undefined;
+	return result.error.issues[0]?.message;
 }

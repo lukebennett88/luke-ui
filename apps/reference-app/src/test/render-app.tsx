@@ -1,65 +1,31 @@
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createMemoryRouter, redirect, RouterProvider } from 'react-router';
+import { createMemoryRouter, RouterProvider, redirect } from 'react-router';
 import { page, userEvent } from 'vite-plus/test/context';
-import { applyInterfaceSettings, settingsApi } from '../api/settings-api.js';
-import { AccountPage, accountAction } from '../routes/account.js';
-import { InterfacePage, interfaceAction } from '../routes/interface.js';
-import { PreferencesPage, preferencesAction } from '../routes/preferences.js';
-import { ProfilePage, profileAction } from '../routes/profile.js';
-import { SettingsLayout, SettingsMenuPage } from '../routes/settings-layout.js';
+import { settingsApi } from '../api/settings-api.js';
+import { SettingsLayout } from '../routes/settings-layout.js';
+import { settingsLoader, settingsPageRoutes } from '../routes/settings-routes.js';
 
-async function settingsLoader() {
-	const settings = await settingsApi.getSettings();
-	applyInterfaceSettings(settings.interface);
-	return { settings };
-}
-
-function createTestRouter(initialEntries: Array<string> = ['/settings/profile']) {
+function createTestRouter(initialEntries: Array<string> = ['/settings/preferences']) {
 	return createMemoryRouter(
 		[
 			{
-				HydrateFallback: () => null,
-				path: '/settings',
-				id: 'settings',
-				element: <SettingsLayout />,
-				loader: settingsLoader,
 				children: [
 					{
 						HydrateFallback: () => null,
 						index: true,
-						loader: () => redirect('/settings/profile'),
+						loader: () => redirect('/settings/preferences'),
 					},
-					{
+					...settingsPageRoutes.map((route) => ({
+						...route,
 						HydrateFallback: () => null,
-						path: 'menu',
-						element: <SettingsMenuPage />,
-					},
-					{
-						HydrateFallback: () => null,
-						path: 'profile',
-						element: <ProfilePage />,
-						action: profileAction,
-					},
-					{
-						HydrateFallback: () => null,
-						path: 'preferences',
-						element: <PreferencesPage />,
-						action: preferencesAction,
-					},
-					{
-						HydrateFallback: () => null,
-						path: 'interface',
-						element: <InterfacePage />,
-						action: interfaceAction,
-					},
-					{
-						HydrateFallback: () => null,
-						path: 'account',
-						element: <AccountPage />,
-						action: accountAction,
-					},
+					})),
 				],
+				element: <SettingsLayout />,
+				HydrateFallback: () => null,
+				id: 'settings',
+				loader: settingsLoader,
+				path: '/settings',
 			},
 		],
 		{ initialEntries },
