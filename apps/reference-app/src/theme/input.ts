@@ -1,6 +1,6 @@
 import type { ThemeInput } from '@luke-ui/react/theme';
 
-/** Quiet neutrals and a restrained purple accent for settings. */
+/** Quiet neutrals and a restrained purple accent. */
 export const referenceThemeInput = {
 	color: {
 		accent: { dark: 'oklch(0.72 0.12 275)', light: 'oklch(0.55 0.14 275)' },

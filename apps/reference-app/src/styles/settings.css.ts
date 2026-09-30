@@ -328,11 +328,24 @@ export const profileTextField = style({
 });
 
 export const profileFieldShell = style({
+	'@container': {
+		[shellBelowBp768]: {
+			flexWrap: 'wrap',
+		},
+	},
 	alignItems: 'center',
 	display: 'flex',
 	gap: vars.space.sp12,
 	inlineSize: '100%',
 	minInlineSize: 0,
+});
+
+export const profileTextFieldControl = style({
+	'@container': {
+		[shellBelowBp768]: {
+			inlineSize: '100%',
+		},
+	},
 });
 
 export const dialogOverlay = style({

@@ -4,7 +4,7 @@ import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
 import { rootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
@@ -13,8 +13,7 @@ import { Popover } from 'react-aria-components/Popover';
 import type { Settings } from '../api/schemas.js';
 import { profileSchema } from '../api/schemas.js';
 import { settingsApi } from '../api/settings-api.js';
-import { isSettingsMutationPending } from '../api/settings-mutation.js';
-import { settingsQueryKey, updateSettingsCache } from '../api/settings-query.js';
+import { settingsQueryKey } from '../api/settings-query.js';
 import * as styles from '../styles/settings.css.js';
 import { avatarUploadReducer, initialAvatarUploadState } from '../workflows/avatar-upload.js';
 import { SettingsRow, SettingsSection, SettingsStatus } from './settings-section.js';
@@ -37,15 +36,15 @@ export function ProfileAvatarSection({
 	const [status, setStatus] = useState<string>();
 	const {
 		error: avatarMutationError,
-		isPending: isAvatarSaving,
 		mutateAsync: mutateAvatar,
 		reset: resetAvatarMutation,
 		variables: avatarMutationVariables,
 	} = useMutation({
 		mutationKey: AVATAR_MUTATION_KEY,
 		mutationFn: (avatarDataUrl: string | null) => settingsApi.updateProfile({ avatarDataUrl }),
-		onSuccess: (settings) => updateSettingsCache(queryClient, settings),
+		onSuccess: (settings) => queryClient.setQueryData(settingsQueryKey, settings),
 	});
+	const isAvatarSaving = useIsMutating({ exact: true, mutationKey: AVATAR_MUTATION_KEY }) > 0;
 	const isAvatarPending = avatar.status === 'reading' || isAvatarSaving;
 	const avatarError: string | undefined = (() => {
 		if (avatar.status === 'readFailed') return avatar.error;
@@ -54,7 +53,7 @@ export function ProfileAvatarSection({
 	})();
 	const saveAvatar = useCallback(
 		async (dataUrl: string | null) => {
-			if (isSettingsMutationPending(queryClient, isAvatarSaving, AVATAR_MUTATION_KEY)) return;
+			if (isAvatarSaving) return;
 			dispatch({ type: 'reset' });
 			setStatus(undefined);
 			resetAvatarMutation();
@@ -65,7 +64,7 @@ export function ProfileAvatarSection({
 				// The mutation owns retryable save errors and keeps its variables.
 			}
 		},
-		[isAvatarSaving, mutateAvatar, queryClient, resetAvatarMutation],
+		[isAvatarSaving, mutateAvatar, resetAvatarMutation],
 	);
 
 	useEffect(() => {

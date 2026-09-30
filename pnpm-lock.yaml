@@ -622,9 +622,6 @@ importers:
       axe-core:
         specifier: 'catalog:'
         version: 4.13.0
-      tsx:
-        specifier: 'catalog:'
-        version: 4.23.15
       typescript:
         specifier: 'catalog:'
         version: 7.0.2

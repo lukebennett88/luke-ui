@@ -1,17 +1,13 @@
 import { FieldDescription, FieldError, FieldLabel } from '@luke-ui/react/primitives/field';
 import { InputGroup, InputGroupInput } from '@luke-ui/react/primitives/input-group';
 import { Stack } from '@luke-ui/react/stack';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { TextField as RacTextField } from 'react-aria-components/TextField';
 import type { ProfileUpdate } from '../api/schemas.js';
 import { profileSchema } from '../api/schemas.js';
-import { settingsApi } from '../api/settings-api.js';
-import {
-	isSettingsMutationPending,
-	settingsMutationErrorMessage,
-} from '../api/settings-mutation.js';
-import { settingsQueryKey, updateSettingsCache } from '../api/settings-query.js';
+import { settingsApi, settingsMutationErrorMessage } from '../api/settings-api.js';
+import { settingsQueryKey } from '../api/settings-query.js';
 import * as styles from '../styles/settings.css.js';
 import { SettingsRowControl, SettingsRowShell } from './settings-section.js';
 
@@ -38,22 +34,22 @@ export function ProfileTextField({
 		mutationKey,
 		mutationFn: (patch: ProfileUpdate) => settingsApi.updateProfile(patch),
 		onSuccess: (settings) => {
-			updateSettingsCache(queryClient, settings);
+			queryClient.setQueryData(settingsQueryKey, settings);
 			setDraft(undefined);
 		},
 	});
-	const isPending = () => isSettingsMutationPending(queryClient, mutation.isPending, mutationKey);
+	const isPending = useIsMutating({ exact: true, mutationKey }) > 0;
 	const errorMessage = validationError ?? settingsMutationErrorMessage(mutation.error, field);
 
 	function revert() {
-		if (isPending()) return;
+		if (isPending) return;
 		setDraft(undefined);
 		setValidationError(undefined);
 		mutation.reset();
 	}
 
 	function commit() {
-		if (isPending()) return;
+		if (isPending) return;
 		const nextDraft = draft ?? value;
 		if (nextDraft === value) {
 			setValidationError(undefined);
@@ -75,11 +71,11 @@ export function ProfileTextField({
 			<RacTextField
 				className={styles.profileFieldShell}
 				isInvalid={Boolean(errorMessage)}
-				isReadOnly={isPending()}
+				isReadOnly={isPending}
 				name={field}
 				onBlur={commit}
 				onChange={(nextDraft) => {
-					if (isPending()) return;
+					if (isPending) return;
 					setDraft(nextDraft);
 					setValidationError(undefined);
 					mutation.reset();
@@ -92,7 +88,12 @@ export function ProfileTextField({
 					{hint ? <FieldDescription>{hint}</FieldDescription> : null}
 				</Stack>
 				<SettingsRowControl>
-					<Stack alignItems="flex-end" gap="sp4" minInlineSize="0">
+					<Stack
+						alignItems="flex-end"
+						className={styles.profileTextFieldControl}
+						gap="sp4"
+						minInlineSize="0"
+					>
 						<InputGroup className={styles.profileTextField} size="small">
 							<InputGroupInput
 								onKeyDown={(event) => {

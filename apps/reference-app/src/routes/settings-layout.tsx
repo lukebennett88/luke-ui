@@ -1,33 +1,24 @@
-import '../generated/stylesheet.css';
-import '../styles/global.css';
-import '@luke-ui/react/stylesheet.css';
 import { Box } from '@luke-ui/react/box';
-import { Button } from '@luke-ui/react/button';
 import { Container } from '@luke-ui/react/container';
 import { Heading } from '@luke-ui/react/heading';
 import { Icon } from '@luke-ui/react/icon';
-import { Provider } from '@luke-ui/react/provider';
+import { Link } from '@luke-ui/react/link';
 import { ScrollFade } from '@luke-ui/react/scroll-fade';
-import spritesheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { rootClassName, vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useIsMutating, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router';
+import { Outlet, Link as RouterLink, useLocation } from 'react-router';
 import type { Preferences, Settings } from '../api/schemas.js';
 import { applyInterfaceSettings, settingsApi } from '../api/settings-api.js';
-import { isSettingsMutationPending } from '../api/settings-mutation.js';
-import {
-	settingsQueryKey,
-	settingsQueryOptions,
-	updateSettingsCache,
-} from '../api/settings-query.js';
+import { settingsQueryKey, settingsQueryOptions } from '../api/settings-query.js';
 import { SETTINGS_NAV, SettingsNav, SettingsNavSearch } from '../components/settings-nav.js';
 import * as styles from '../styles/settings.css.js';
 
 const MAIN_ID = 'settings-main';
+const PREFERENCES_MUTATION_KEY = [...settingsQueryKey, 'preferences'] as const;
 
 export type SettingsOutletContext = {
 	preferences: Preferences;
@@ -41,12 +32,13 @@ export function SettingsLayout() {
 	const { pathname } = useLocation();
 	const queryClient = useQueryClient();
 	const settings = useQuery(settingsQueryOptions).data!;
-	const preferencesMutationKey = [...settingsQueryKey, 'preferences'] as const;
 	const preferencesMutation = useMutation({
-		mutationKey: preferencesMutationKey,
+		mutationKey: PREFERENCES_MUTATION_KEY,
 		mutationFn: (patch: Partial<Preferences>) => settingsApi.updatePreferences(patch),
-		onSuccess: (nextSettings) => updateSettingsCache(queryClient, nextSettings),
+		onSuccess: (nextSettings) => queryClient.setQueryData(settingsQueryKey, nextSettings),
 	});
+	const isPreferencesPending =
+		useIsMutating({ exact: true, mutationKey: PREFERENCES_MUTATION_KEY }) > 0;
 	const preferences = useMemo(() => {
 		return preferencesMutation.isPending
 			? { ...settings.preferences, ...preferencesMutation.variables }
@@ -63,10 +55,7 @@ export function SettingsLayout() {
 	const [sidebarNavQuery, setSidebarNavQuery] = useState('');
 
 	function savePreferences(patch: Partial<Preferences>) {
-		if (
-			isSettingsMutationPending(queryClient, preferencesMutation.isPending, preferencesMutationKey)
-		)
-			return;
+		if (isPreferencesPending) return;
 		preferencesMutation.reset();
 		preferencesMutation.mutate(patch);
 	}
@@ -79,7 +68,7 @@ export function SettingsLayout() {
 	}, [pathname]);
 
 	return (
-		<Provider spritesheetHref={spritesheetHref}>
+		<>
 			<title>{current ? `${current.label} · Settings` : 'Settings'}</title>
 			<Box
 				backgroundColor="surface.canvas"
@@ -107,7 +96,17 @@ export function SettingsLayout() {
 					paddingBlock="sp16"
 				>
 					<Stack className={styles.sidebarHeader} flexShrink="0" gap="sp12">
-						<BackToAppButton />
+						<Box>
+							<Link
+								appearance="button"
+								href="/"
+								prominence="low"
+								size="small"
+								startContent={<Icon name="chevronLeft" />}
+							>
+								Back to app
+							</Link>
+						</Box>
 						<SettingsNavSearch onChange={setSidebarNavQuery} value={sidebarNavQuery} />
 					</Stack>
 					<ScrollFade aria-label="Settings sections" axis="block" className={styles.sidebarScroll}>
@@ -145,10 +144,10 @@ export function SettingsLayout() {
 								gap="sp4"
 								marginBlockEnd="sp16"
 							>
-								<Link className={styles.mobileHeaderLink} to="/settings/menu">
+								<RouterLink className={styles.mobileHeaderLink} to="/settings/menu">
 									<Icon name="chevronLeft" size="xsmall" />
 									Settings
-								</Link>
+								</RouterLink>
 							</Box>
 						)}
 						<Container maxInlineSize="ct672">
@@ -156,7 +155,7 @@ export function SettingsLayout() {
 								context={
 									{
 										preferences,
-										isPreferencesPending: preferencesMutation.isPending,
+										isPreferencesPending,
 										preferencesError:
 											preferencesMutation.error instanceof Error
 												? preferencesMutation.error.message
@@ -170,7 +169,7 @@ export function SettingsLayout() {
 					</Box>
 				</Box>
 			</Box>
-		</Provider>
+		</>
 	);
 }
 
@@ -185,16 +184,6 @@ export function SettingsMenuPage() {
 			<AccountSummary profile={profile} />
 			<SettingsNav variant="menu" />
 		</Stack>
-	);
-}
-
-function BackToAppButton() {
-	return (
-		<Box>
-			<Button startContent={<Icon name="chevronLeft" />} prominence="low" size="small">
-				Back to app
-			</Button>
-		</Box>
 	);
 }
 

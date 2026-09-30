@@ -17,26 +17,13 @@ export function SettingsPage({ children, title }: { children: ReactNode; title: 
 	);
 }
 
-export function SettingsSection({
-	children,
-	description,
-	title,
-}: {
-	children: ReactNode;
-	description?: string;
-	title?: string;
-}) {
+export function SettingsSection({ children, title }: { children: ReactNode; title?: string }) {
 	return (
 		<Stack elementType="section" gap="sp24" marginBlockEnd="sp32">
 			{title ? (
 				<Heading level={2} shouldDisableTrim typography="lead">
 					{title}
 				</Heading>
-			) : null}
-			{description ? (
-				<Text color="secondary" elementType="p" typography="caption">
-					{description}
-				</Text>
 			) : null}
 			<div className={styles.panel}>{children}</div>
 		</Stack>

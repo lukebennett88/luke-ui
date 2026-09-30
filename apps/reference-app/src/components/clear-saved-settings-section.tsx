@@ -9,11 +9,13 @@ import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-quer
 import { useId, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Modal, ModalOverlay } from 'react-aria-components/Modal';
+import { DEFAULT_SETTINGS } from '../api/schemas.js';
 import { settingsApi } from '../api/settings-api.js';
-import { isSettingsMutationPending } from '../api/settings-mutation.js';
-import { resetSettingsCache, settingsQueryKey } from '../api/settings-query.js';
+import { settingsQueryKey } from '../api/settings-query.js';
 import * as styles from '../styles/settings.css.js';
 import { SettingsRow, SettingsSection, SettingsStatus } from './settings-section.js';
+
+const CLEAR_MUTATION_KEY = [...settingsQueryKey, 'clear'] as const;
 
 type ClearSavedSettingsSectionProps = {
 	onCleared: () => void;
@@ -23,31 +25,24 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 	const queryClient = useQueryClient();
 	const descriptionId = useId();
 	const [isOpen, setIsOpen] = useState(false);
-	const mutationKey = [...settingsQueryKey, 'clear'] as const;
 	const isOtherMutationPending =
 		useIsMutating({
 			mutationKey: settingsQueryKey,
 			predicate: (mutation) => mutation.options.mutationKey?.[1] !== 'clear',
 		}) > 0;
+	const isPending = useIsMutating({ exact: true, mutationKey: CLEAR_MUTATION_KEY }) > 0;
 	const mutation = useMutation({
-		mutationKey,
+		mutationKey: CLEAR_MUTATION_KEY,
 		mutationFn: () => settingsApi.clearLocalSettings(),
 		onSuccess: () => {
-			resetSettingsCache(queryClient);
+			queryClient.setQueryData(settingsQueryKey, structuredClone(DEFAULT_SETTINGS));
 			onCleared();
 		},
 	});
-	const isPending = isSettingsMutationPending(queryClient, mutation.isPending, mutationKey);
 	const error = mutation.error instanceof Error ? mutation.error.message : undefined;
 
 	async function clearSettings() {
-		if (!isOpen) return;
-		if (isSettingsMutationPending(queryClient, mutation.isPending, mutationKey)) return;
-		const isOtherMutationPending = queryClient.isMutating({
-			mutationKey: settingsQueryKey,
-			predicate: (activeMutation) => activeMutation.options.mutationKey?.[1] !== 'clear',
-		});
-		if (isOtherMutationPending) return;
+		if (!isOpen || isPending || isOtherMutationPending) return;
 
 		mutation.reset();
 		try {
@@ -59,9 +54,7 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 	}
 
 	function changeOpen(next: boolean) {
-		if (isSettingsMutationPending(queryClient, mutation.isPending, mutationKey)) {
-			return;
-		}
+		if (isPending) return;
 		setIsOpen(next);
 		if (next) {
 			mutation.reset();

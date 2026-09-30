@@ -23,9 +23,7 @@ export const profileSchema = z.object({
 		.regex(USERNAME_PATTERN, 'Use lowercase letters, numbers, and hyphens'),
 });
 
-export const profileUpdateSchema = z
-	.preprocess(omitUndefinedFields, profileSchema.partial().strict())
-	.refine((patch) => Object.keys(patch).length > 0, 'No changes to save');
+export const profileUpdateSchema = profileSchema.partial().strict();
 export type ProfileUpdate = z.infer<typeof profileUpdateSchema>;
 
 const preferencesSchema = z.object({
@@ -36,9 +34,7 @@ const preferencesSchema = z.object({
 });
 export type Preferences = z.infer<typeof preferencesSchema>;
 
-export const preferenceUpdateSchema = z
-	.preprocess(omitUndefinedFields, preferencesSchema.partial().strict())
-	.refine((patch) => Object.keys(patch).length > 0, 'No changes to save');
+export const preferenceUpdateSchema = preferencesSchema.partial().strict();
 
 export const settingsSchema = z.object({
 	preferences: preferencesSchema,
@@ -61,11 +57,3 @@ export const DEFAULT_SETTINGS: Settings = {
 		username: 'boricio',
 	},
 };
-
-function omitUndefinedFields(value: unknown) {
-	if (value == null || typeof value !== 'object' || Array.isArray(value)) return value;
-
-	return Object.fromEntries(
-		Object.entries(value).filter(([, fieldValue]) => fieldValue !== undefined),
-	);
-}

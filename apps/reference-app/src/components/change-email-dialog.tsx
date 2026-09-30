@@ -8,20 +8,18 @@ import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
 import { rootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useId, useRef, useState } from 'react';
 import type { SubmitEvent } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Modal, ModalOverlay } from 'react-aria-components/Modal';
 import { profileSchema } from '../api/schemas.js';
-import { settingsApi } from '../api/settings-api.js';
-import {
-	isSettingsMutationPending,
-	settingsMutationErrorMessage,
-} from '../api/settings-mutation.js';
-import { settingsQueryKey, updateSettingsCache } from '../api/settings-query.js';
+import { settingsApi, settingsMutationErrorMessage } from '../api/settings-api.js';
+import { settingsQueryKey } from '../api/settings-query.js';
 import * as styles from '../styles/settings.css.js';
+
+const EMAIL_MUTATION_KEY = [...settingsQueryKey, 'profile-field', 'email'] as const;
 
 export function ChangeEmailDialog({ email }: { email: string }) {
 	const queryClient = useQueryClient();
@@ -30,23 +28,20 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [draft, setDraft] = useState('');
 	const [validationError, setValidationError] = useState<string>();
-	const mutationKey = [...settingsQueryKey, 'profile-field', 'email'] as const;
 	const mutation = useMutation({
-		mutationKey,
+		mutationKey: EMAIL_MUTATION_KEY,
 		mutationFn: (patch: { email: string }) => settingsApi.updateProfile(patch),
 		onError: () => inputRef.current?.focus(),
 		onSuccess: (settings) => {
-			updateSettingsCache(queryClient, settings);
+			queryClient.setQueryData(settingsQueryKey, settings);
 			setIsOpen(false);
 		},
 	});
-	const isSaving = isSettingsMutationPending(queryClient, mutation.isPending, mutationKey);
+	const isSaving = useIsMutating({ exact: true, mutationKey: EMAIL_MUTATION_KEY }) > 0;
 	const errorMessage = validationError ?? settingsMutationErrorMessage(mutation.error, 'email');
 
 	function handleOpenChange(nextOpen: boolean) {
-		if (!nextOpen && isSettingsMutationPending(queryClient, mutation.isPending, mutationKey)) {
-			return;
-		}
+		if (!nextOpen && isSaving) return;
 		if (nextOpen) {
 			setDraft('');
 			setValidationError(undefined);
@@ -57,7 +52,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 
 	function save(event: SubmitEvent<HTMLFormElement>) {
 		event.preventDefault();
-		if (isSettingsMutationPending(queryClient, mutation.isPending, mutationKey)) return;
+		if (isSaving) return;
 		if (draft.trim() === email) {
 			setValidationError('Enter a different email address');
 			inputRef.current?.focus();
@@ -116,9 +111,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 									isReadOnly={isSaving}
 									name="email"
 									onChange={(nextDraft) => {
-										if (isSettingsMutationPending(queryClient, mutation.isPending, mutationKey)) {
-											return;
-										}
+										if (isSaving) return;
 										setDraft(nextDraft);
 										setValidationError(undefined);
 										mutation.reset();

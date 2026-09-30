@@ -1,37 +1,17 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createMemoryRouter, redirect } from 'react-router';
+import { createMemoryRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { page, userEvent } from 'vite-plus/test/context';
-import { SettingsLayout } from '../routes/settings-layout.js';
-import { settingsLoader, settingsPageRoutes } from '../routes/settings-routes.js';
+import { createAppRoutes } from '../routes/app-routes.js';
 
 export async function renderApp(initialEntries: Array<string> = ['/settings/preferences']) {
 	const container = document.body.appendChild(document.createElement('div'));
 	container.id = 'reference-app-test-root';
 	const root = createRoot(container);
 	const queryClient = new QueryClient();
-	const router = createMemoryRouter(
-		[
-			{
-				children: [
-					{
-						HydrateFallback: () => null,
-						index: true,
-						loader: () => redirect('/settings/preferences'),
-					},
-					...settingsPageRoutes.map((route) => ({ ...route, HydrateFallback: () => null })),
-				],
-				element: <SettingsLayout />,
-				HydrateFallback: () => null,
-				id: 'settings',
-				loader: () => settingsLoader(queryClient),
-				path: '/settings',
-			},
-		],
-		{ initialEntries },
-	);
+	const router = createMemoryRouter(createAppRoutes(queryClient), { initialEntries });
 	await act(async () => {
 		root.render(
 			<QueryClientProvider client={queryClient}>

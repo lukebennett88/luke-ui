@@ -6,11 +6,11 @@ import {
 	settingsSchema,
 } from './schemas.js';
 
-const STORAGE_KEY = 'reference-app.settings.v3';
+const STORAGE_KEY = 'reference-app.settings';
 
-export type ApiFailure = 'none' | 'validation' | 'server';
+type ApiFailure = 'none' | 'server';
 
-export class SettingsMutationError extends Error {
+class SettingsMutationError extends Error {
 	fieldErrors?: Record<string, string>;
 
 	constructor(message: string, fieldErrors?: Record<string, string>) {
@@ -59,7 +59,7 @@ export const settingsApi = {
 		checkFailure(invocation.failure, 'Could not save preferences. Try again.');
 		const parsed = preferenceUpdateSchema.safeParse(patch);
 		if (!parsed.success) {
-			throw validationError(
+			throw new SettingsMutationError(
 				parsed.error.issues[0]?.message ?? 'Check the preference and try again.',
 			);
 		}
@@ -87,6 +87,15 @@ export const settingsApi = {
 		return next;
 	},
 };
+
+/** Returns the field's server error when there is one, otherwise the mutation's message. */
+export function settingsMutationErrorMessage(error: unknown, field?: string) {
+	if (error instanceof SettingsMutationError) {
+		return (field ? error.fieldErrors?.[field] : undefined) ?? error.message;
+	}
+	if (error instanceof Error) return error.message;
+	return;
+}
 
 export function applyInterfaceSettings(settings: Preferences) {
 	const root = document.documentElement;
@@ -138,11 +147,6 @@ function consumeControls(): ApiControls {
 
 function checkFailure(failure: ApiFailure, message: string) {
 	if (failure === 'server') throw new Error(message);
-	if (failure === 'validation') throw validationError(message);
-}
-
-function validationError(formError: string) {
-	return new SettingsMutationError(formError);
 }
 
 function profileValidationError(issues: Array<{ message: string; path: Array<PropertyKey> }>) {

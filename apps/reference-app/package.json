@@ -7,12 +7,10 @@
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
 		"check:types": "tsc --noEmit",
-		"clean": "rm -rf .turbo dist src/generated",
+		"clean": "rm -rf .turbo dist",
 		"dev": "vp dev",
 		"fix:format": "vp fmt . --write",
 		"fix:lint": "vp lint . --type-aware --fix",
-		"generate": "pnpm run generate:theme",
-		"generate:theme": "tsx scripts/generate-theme.ts",
 		"preview": "vp preview",
 		"test": "vp test run --project=browser"
 	},
@@ -32,7 +30,6 @@
 		"@vanilla-extract/vite-plugin": "catalog:",
 		"@vitejs/plugin-react": "catalog:",
 		"axe-core": "catalog:",
-		"tsx": "catalog:",
 		"typescript": "catalog:",
 		"vite": "catalog:",
 		"vite-plus": "catalog:"
