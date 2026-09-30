@@ -1,4 +1,3 @@
-import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import { SwitchButton, SwitchField } from 'react-aria-components/Switch';
 import * as styles from '../styles/settings.css.js';
 
@@ -17,9 +16,12 @@ export function SettingsSwitch({
 	label: string;
 	onChange: (checked: boolean) => void;
 }) {
+	// Name the control with aria-label. Luke UI VisuallyHidden is RAC Text-based and
+	// throws inside SwitchField without a description/errorMessage slot.
 	return (
 		<SwitchField
 			aria-describedby={ariaDescribedBy}
+			aria-label={label}
 			className={styles.switchField}
 			id={id}
 			isReadOnly={isReadOnly}
@@ -27,7 +29,6 @@ export function SettingsSwitch({
 			onChange={onChange}
 		>
 			<SwitchButton className={styles.switchRoot}>
-				<VisuallyHidden>{label}</VisuallyHidden>
 				<span className={styles.switchTrack}>
 					<span className={styles.switchThumb} />
 				</span>
