@@ -17,6 +17,7 @@ import {
 	captureVisual,
 	captureVisualAppearance,
 	emulateForcedColors,
+	focusViaKeyboard,
 	Stack,
 } from '../../test-utils/visual.js';
 
@@ -135,6 +136,46 @@ test('a standalone invalid TextInput draws a structural cue without changing siz
 	expect(getComputedStyle(invalid).boxShadow).not.toBe(getComputedStyle(valid).boxShadow);
 	expect(invalidBox.width).toBe(validBox.width);
 	expect(invalidBox.height).toBe(validBox.height);
+});
+
+// Forced colours drop `box-shadow`, so the cue becomes a thicker border. Focus must keep its
+// outline and the box must not change size, or the input shifts when it turns invalid.
+test('a focused invalid TextInput keeps its structural cue in forced colours', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		render(
+			<>
+				<TextInput aria-label="Valid" defaultValue="Example" />
+				<TextInput aria-invalid aria-label="Invalid" defaultValue="Example" />
+			</>,
+		);
+		const valid = input('Valid');
+		const invalid = input('Invalid');
+		const validBox = valid.getBoundingClientRect();
+		const validStyle = getComputedStyle(valid);
+
+		await focusViaKeyboard(page.getByRole('textbox', { name: 'Valid' }));
+		const focusedValidOutline = getComputedStyle(valid).outlineWidth;
+		await focusViaKeyboard(page.getByRole('textbox', { name: 'Invalid' }));
+		const invalidBox = invalid.getBoundingClientRect();
+		const invalidStyle = getComputedStyle(invalid);
+
+		expect(invalidStyle.borderTopWidth).toBe('2px');
+		expect(validStyle.borderTopWidth).toBe('1px');
+		expect(invalidStyle.outlineStyle).toBe('solid');
+		expect(invalidStyle.outlineWidth).toBe(focusedValidOutline);
+		expect(invalidBox.width).toBe(validBox.width);
+		expect(invalidBox.height).toBe(validBox.height);
+		// The border grows by 1px, so the padding gives that pixel back and the text stays put.
+		expect(
+			Number.parseFloat(invalidStyle.borderLeftWidth) + Number.parseFloat(invalidStyle.paddingLeft),
+		).toBe(
+			Number.parseFloat(validStyle.borderLeftWidth) + Number.parseFloat(validStyle.paddingLeft),
+		);
+	} finally {
+		await emulateForcedColors('none');
+	}
 });
 
 test('a rooted TextInput is wired to its label, description, and error with no manual ids', () => {

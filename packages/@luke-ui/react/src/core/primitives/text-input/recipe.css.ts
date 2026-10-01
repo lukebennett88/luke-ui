@@ -1,4 +1,4 @@
-import { createVar } from '@vanilla-extract/css';
+import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
@@ -21,6 +21,12 @@ import { textInputControlScopeClassName } from './styles.css.js';
 // Set per `size` variant on `control` below, from `FIELD_CONTROL_ICON_SIZE`, so the invalid
 // `::after` icon matches the icon size the control provides to its prefix and suffix.
 const textInputErrorIconSize = createVar();
+
+// Set per `size` variant on `input` below. The resting inline padding is split out so a bare
+// input can shrink it while its border thickens, keeping the box (and the text) where it was.
+const textInputInlinePadding = createVar();
+const textInputInvalidPaddingAdjust = createVar();
+const textInputInputPaddingInline = `calc(${textInputInlinePadding} - ${fallbackVar(textInputInvalidPaddingAdjust, '0px')})`;
 
 const control = composeInputStateSelectors();
 
@@ -230,18 +236,12 @@ const textInputConfig = {
 								[input.focusWithin]: {
 									outlineColor: 'Highlight',
 								},
-								// Forced colours drop `box-shadow`, so an inset outline doubles the
-								// border instead. Focus replaces it with the focus ring.
+								// Forced colours drop `box-shadow`, so the invalid cue is a 2px border. The
+								// inline padding gives back the extra pixel, so the box and the text do not
+								// move, and `outline` stays free for the focus ring.
 								[input.invalid]: {
-									outlineColor: 'CanvasText',
-									outlineOffset: '-2px',
-									outlineStyle: 'solid',
-									outlineWidth: '1px',
-								},
-								[input.invalidFocusWithin]: {
-									outlineColor: 'Highlight',
-									outlineOffset: '2px',
-									outlineWidth: '2px',
+									borderWidth: '2px',
+									vars: { [textInputInvalidPaddingAdjust]: '1px' },
 								},
 							},
 						},
@@ -305,8 +305,9 @@ const textInputConfig = {
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
 					lineHeight: FONT_METRIC_SCALE[16].lineHeight,
-					paddingInlineEnd: vars.space.sp12,
-					paddingInlineStart: vars.space.sp12,
+					paddingInlineEnd: textInputInputPaddingInline,
+					paddingInlineStart: textInputInputPaddingInline,
+					vars: { [textInputInlinePadding]: vars.space.sp12 },
 				},
 				prefix: {
 					lineHeight: FONT_METRIC_SCALE[16].lineHeight,
@@ -332,8 +333,9 @@ const textInputConfig = {
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
-					paddingInlineEnd: vars.space.sp8,
-					paddingInlineStart: vars.space.sp8,
+					paddingInlineEnd: textInputInputPaddingInline,
+					paddingInlineStart: textInputInputPaddingInline,
+					vars: { [textInputInlinePadding]: vars.space.sp8 },
 				},
 				prefix: {
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
