@@ -125,7 +125,7 @@ export type InlineFieldProps = Prettify<_InlineFieldProps>;
 
 /**
  * Standard inline field anatomy: a control's content part, a description, and an error slot that
- * is always rendered. The error hangs under the label text with a leading icon.
+ * is always rendered. The error hangs under the label text.
  *
  * `InlineField` provides presentation, not semantics, and adds no field context. Render it inside
  * a control root that supplies one and the control's size, such as `CheckboxRoot`. It takes no

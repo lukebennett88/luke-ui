@@ -18,9 +18,8 @@ inside it, and owns the selection, state, validation, and size. `CheckboxContent
 text. Parts follow document order, so put the control before the label.
 
 [`InlineField`](/components/primitives/field) wraps `CheckboxContent` to add a `description` and an
-`errorMessage`. It spaces them, hangs the error under the label text, and draws the error icon. It
-always renders the error slot, so a validation message from a constraint or `validate` appears
-without an `errorMessage`.
+`errorMessage`. It spaces them, hangs the error under the label text. It always renders the error
+slot, so a validation message from a constraint or `validate` appears without an `errorMessage`.
 
 ```tsx
 <CheckboxRoot isRequired>
@@ -51,11 +50,26 @@ from content elsewhere, give that content an id and pass it to `aria-labelledby`
 `necessityIndicator="icon"` is the default and adds an asterisk. `necessityIndicator="label"`
 appends “(required)”. The marker follows the root's `isRequired`, so set it on the root.
 
+Put the label text in an element such as `Text`, and the marker follows the last word of that
+element, even when the label wraps. Raw text children get the marker after the text, as a separate
+item that does not flow with a wrapped label.
+
+```tsx
+<CheckboxContent>
+	<CheckboxControl>
+		<CheckboxIndicator />
+	</CheckboxControl>
+	<Text elementType="span">Email notifications</Text>
+</CheckboxContent>
+```
+
 ## Root props
 
 Set the selection, state, name, form, value, and validation props on `CheckboxRoot`. `size` on the
 root sets the size of the control and the indent of the error. `Text` renders inside
 `CheckboxContent` with no extra setup.
+
+The root also shows the error icon beside a `FieldError` placed directly inside it.
 
 `id` on `CheckboxRoot` targets the root element. Pass `inputId` to set the input's id, and
 `inputRef` to reach the input. `ref` targets the root element.

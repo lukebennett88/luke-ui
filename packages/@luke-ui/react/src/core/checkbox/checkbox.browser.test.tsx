@@ -1,5 +1,6 @@
 import { Checkbox } from '@luke-ui/react/checkbox';
 import { Text } from '@luke-ui/react/text';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
@@ -100,9 +101,11 @@ function labelFor(input: HTMLInputElement): HTMLLabelElement {
 	return label;
 }
 
-/** The marker drawn after the label text. It is a `::after` with no DOM node. */
+/** The marker drawn after the label text. It is a `::after` on the label text with no DOM node. */
 function necessityMarker(input: HTMLInputElement): string {
-	return getComputedStyle(labelFor(input), '::after').content;
+	const labelText = labelFor(input).lastElementChild;
+	if (labelText == null) throw new Error('Expected the label text element.');
+	return getComputedStyle(labelText, '::after').content;
 }
 
 /** The element holding a piece of text. */
@@ -233,13 +236,43 @@ test('the control renders before the label', () => {
 test('a required Checkbox with a visible label shows the icon marker by default', () => {
 	render(<Checkbox isRequired label="Terms" name="terms" />);
 
-	expect(necessityMarker(checkbox('Terms *'))).toBe('"*"');
+	expect(necessityMarker(checkbox('Terms*'))).toBe('"*"');
 });
 
 test('necessityIndicator="label" shows (required) after the label', () => {
 	render(<Checkbox isRequired label="Terms" name="terms" necessityIndicator="label" />);
 
-	expect(necessityMarker(checkbox('Terms (required)'))).toBe('"(required)"');
+	expect(necessityMarker(checkbox('Terms(required)'))).toBe('"(required)"');
+});
+
+// The marker is inline after the last word, so the accessible name has no space before it, the
+// same as `FieldLabel`.
+test('the necessity marker adds no space to the accessible name, like FieldLabel', () => {
+	render(
+		<>
+			<Checkbox isRequired label="Checkbox icon" name="checkbox-icon" />
+			<Checkbox
+				isRequired
+				label="Checkbox words"
+				name="checkbox-words"
+				necessityIndicator="label"
+			/>
+			<TextInputField isRequired label="Field icon" name="field-icon" />
+			<TextInputField
+				isRequired
+				label="Field words"
+				name="field-words"
+				necessityIndicator="label"
+			/>
+		</>,
+	);
+
+	expect(checkbox('Checkbox icon*')).toBeInTheDocument();
+	expect(checkbox('Checkbox words(required)')).toBeInTheDocument();
+	expect(page.getByRole('textbox', { name: 'Field icon*' }).element()).toBeInTheDocument();
+	expect(
+		page.getByRole('textbox', { name: 'Field words(required)' }).element(),
+	).toBeInTheDocument();
 });
 
 test('an optional Checkbox shows no marker', () => {
@@ -257,8 +290,12 @@ test('an externally named required Checkbox shows no marker', () => {
 		</>,
 	);
 
-	expect(necessityMarker(checkbox('Select row'))).toBe('none');
-	expect(necessityMarker(checkbox('External label'))).toBe('none');
+	for (const name of ['Select row', 'External label']) {
+		const label = labelFor(checkbox(name));
+
+		expect(getComputedStyle(label, '::after').content).toBe('none');
+		expect(necessityMarker(checkbox(name))).toBe('none');
+	}
 });
 
 test('an errorMessage marks the checkbox invalid, with the error under the label and one icon', () => {
@@ -317,7 +354,7 @@ test('a required Checkbox shows its native validation message after a failed sub
 			<button type="submit">Submit</button>
 		</form>,
 	);
-	const input = checkbox('Terms *');
+	const input = checkbox('Terms*');
 
 	expect(input).not.toHaveAttribute('aria-invalid', 'true');
 
@@ -588,6 +625,17 @@ test('necessity markers', { tags: ['visual'] }, async () => {
 				isRequired
 				label="Accept the terms"
 				name="invalid"
+			/>
+			<Checkbox
+				isRequired
+				label="This required label wraps onto a second line so the marker sits after its last word."
+				name="wrapping"
+			/>
+			<Checkbox
+				isRequired
+				label="This required label wraps onto a second line so the marker follows."
+				name="wrapping-words"
+				necessityIndicator="label"
 			/>
 		</Stack>,
 	);

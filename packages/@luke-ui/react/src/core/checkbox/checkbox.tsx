@@ -65,11 +65,11 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
 			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
 		>
 			<InlineField description={description} errorMessage={normalizedErrorMessage}>
-				<CheckboxContentBase necessityIndicator={label == null ? 'none' : necessityIndicator}>
+				<CheckboxContentBase hasLabelText={label != null} necessityIndicator={necessityIndicator}>
 					<CheckboxControl>
 						<CheckboxIndicator />
 					</CheckboxControl>
-					{label}
+					{label != null ? <span>{label}</span> : null}
 				</CheckboxContentBase>
 			</InlineField>
 		</CheckboxRoot>

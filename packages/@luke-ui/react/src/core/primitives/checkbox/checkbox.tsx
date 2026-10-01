@@ -9,12 +9,14 @@ import {
 } from 'react-aria-components/Checkbox';
 import { TextContext as RacTextContext } from 'react-aria-components/Text';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { cx } from '../../../shared/utils/utils.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { FieldNecessityIndicator } from '../field/recipe.css.js';
 import { rootIdProps } from '../root-id.js';
 import type { CheckboxRecipeVariants } from './recipe.css.js';
 import { checkboxRecipe } from './recipe.css.js';
+import { checkboxContentScopeClassName } from './styles.css.js';
 
 type _CheckboxRootOmit = DistributiveOmit<
 	RacCheckboxFieldProps,
@@ -83,7 +85,9 @@ interface _CheckboxContentProps extends _CheckboxContentOmit {
 	 */
 	children: RacCheckboxButtonProps['children'];
 	/**
-	 * Shows how a required checkbox is marked after the label text.
+	 * Shows how a required checkbox is marked after the label text. The marker follows the last
+	 * word of the last element after `CheckboxControl`, such as a `Text`. Raw text children get it
+	 * after the text instead.
 	 * @default 'icon'
 	 */
 	necessityIndicator?: FieldNecessityIndicator;
@@ -93,12 +97,12 @@ interface _CheckboxContentProps extends _CheckboxContentOmit {
 export type CheckboxContentProps = Prettify<_CheckboxContentProps>;
 
 /**
- * Props for `CheckboxContentBase`, the internal form of `CheckboxContent`. `'none'` turns the
- * marker off, for content that has no visible label text.
+ * Props for `CheckboxContentBase`, the internal form of `CheckboxContent`. `hasLabelText={false}`
+ * turns the raw-text marker off, for content that has no visible label text.
  */
 export type CheckboxContentBaseProps = Prettify<
-	DistributiveOmit<_CheckboxContentProps, 'necessityIndicator'> & {
-		necessityIndicator?: FieldNecessityIndicator | 'none';
+	_CheckboxContentProps & {
+		hasLabelText?: boolean;
 	}
 >;
 
@@ -144,11 +148,17 @@ export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
 }
 
 /**
- * `CheckboxContent` with an extra `'none'` necessity value. Primary components use it when the
- * checkbox is named externally, so no marker follows an empty label.
+ * `CheckboxContent` with an internal `hasLabelText` switch. Primary components pass `false` when
+ * the checkbox is named externally, so no marker follows content that holds only the control.
  */
 export function CheckboxContentBase(props: CheckboxContentBaseProps): JSX.Element {
-	const { children, className, necessityIndicator = 'icon', ...restProps } = props;
+	const {
+		children,
+		className,
+		hasLabelText = true,
+		necessityIndicator = 'icon',
+		...restProps
+	} = props;
 
 	// React Aria provides slotted `Text` context for the description and error, so a `Text` without a
 	// `slot` throws. The label has no slot, so clear the context for everything inside it.
@@ -159,8 +169,12 @@ export function CheckboxContentBase(props: CheckboxContentBaseProps): JSX.Elemen
 	return (
 		<RacCheckboxButton
 			{...restProps}
+			data-unlabelled={hasLabelText ? undefined : ''}
 			className={composeRenderProps(className, (className) => {
-				return checkboxRecipe({ necessityIndicator }).content({ className });
+				return cx(
+					checkboxContentScopeClassName,
+					checkboxRecipe({ necessityIndicator }).content({ className }),
+				);
 			})}
 		>
 			{labelChildren}
@@ -171,7 +185,13 @@ export function CheckboxContentBase(props: CheckboxContentBaseProps): JSX.Elemen
 /** Line-height-sized wrapper that centres the fixed visual checkbox affordance. */
 export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
 	const { className, ...restProps } = props;
-	return <span {...restProps} className={checkboxRecipe().control({ className })} />;
+	return (
+		<span
+			{...restProps}
+			className={checkboxRecipe().control({ className })}
+			data-checkbox-control=""
+		/>
+	);
 }
 
 /** Visual square that reflects selected, indeterminate, disabled, and invalid states. */

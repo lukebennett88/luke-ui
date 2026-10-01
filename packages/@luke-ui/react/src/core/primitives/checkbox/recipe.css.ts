@@ -1,21 +1,39 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { classSelector } from '../../styles/class-selector.js';
 import { focusRing } from '../../styles/focus-ring.js';
+import { globalStyleInLayer } from '../../styles/layered-style.css.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { textLineHeight } from '../../text/recipe.css.js';
 import { inlineFieldIndent } from '../field/recipe.css.js';
+import { checkboxContentScopeClassName } from './styles.css.js';
 
 const checkboxControlSize = createVar();
 const checkboxGlyphSize = createVar();
 const checkboxIndicatorSize = createVar();
 
-const dataRequiredSelector = '[data-required="true"]';
+/** The marker's text, colour, and weight, set by the `necessityIndicator` variant on `content`. */
+const necessityMarkerContent = createVar();
+const necessityMarkerColor = createVar();
+const necessityMarkerWeight = createVar();
 
-/** The gap between the control and the label text, which the necessity marker's margin offsets. */
+/** The gap between the control and the label text, which the fallback marker's margin offsets. */
 const checkboxContentGap = vars.space.sp8;
+
+/**
+ * `CheckboxControl` and the visually hidden input wrapper React Aria renders first are the only
+ * children that never hold label text. `data-checkbox-control` marks the control.
+ */
+const labelChild = ':not(:first-child):not([data-checkbox-control])';
+
+const necessityMarker = {
+	color: necessityMarkerColor,
+	content: necessityMarkerContent,
+	fontWeight: necessityMarkerWeight,
+} as const;
 
 const checkboxConfig = {
 	slots: {
@@ -31,6 +49,13 @@ const checkboxConfig = {
 			gap: checkboxContentGap,
 			minInlineSize: 0,
 			selectors: {
+				// Raw text children have no element to attach to, so the marker becomes a flex item
+				// after the text. The negative margin takes back the content gap. Content with no
+				// label text (`data-unlabelled`) draws nothing.
+				[`&[data-required="true"]:not([data-unlabelled]):not(:has(> ${labelChild}))::after`]: {
+					...necessityMarker,
+					marginInlineStart: `calc(${vars.space.sp4} - ${checkboxContentGap})`,
+				},
 				'&[data-disabled="true"]': {
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
@@ -181,34 +206,25 @@ const checkboxConfig = {
 		size: 'medium',
 	},
 	variants: {
-		// The marker is a flex item after the label text, so a negative margin takes the content
-		// gap back and leaves the same distance as `FieldLabel`'s marker. `none` draws nothing, for
-		// content with no visible label text.
 		necessityIndicator: {
 			icon: {
 				content: {
-					selectors: {
-						[`&${dataRequiredSelector}::after`]: {
-							color: vars.color.foreground.danger.rest,
-							content: '"*"',
-							marginInlineStart: `calc(${vars.space.sp4} - ${checkboxContentGap})`,
-						},
+					vars: {
+						[necessityMarkerContent]: '"*"',
+						[necessityMarkerColor]: vars.color.foreground.danger.rest,
+						[necessityMarkerWeight]: 'inherit',
 					},
 				},
 			},
 			label: {
 				content: {
-					selectors: {
-						[`&${dataRequiredSelector}::after`]: {
-							color: vars.color.text.secondary,
-							content: '"(required)"',
-							fontWeight: vars.font.weight.body,
-							marginInlineStart: `calc(${vars.space.sp4} - ${checkboxContentGap})`,
-						},
+					vars: {
+						[necessityMarkerContent]: '"(required)"',
+						[necessityMarkerColor]: vars.color.text.secondary,
+						[necessityMarkerWeight]: vars.font.weight.body,
 					},
 				},
 			},
-			none: {},
 		},
 		size: {
 			large: {
@@ -244,6 +260,18 @@ const checkboxConfig = {
 		},
 	},
 } as const satisfies SlottedConfigInput;
+
+// The marker follows the last word of the label, so it attaches to the last element after the
+// control, such as the primary component's label text or a `Text`. A recipe slot cannot select a
+// descendant, so the rule is global and scoped by `checkboxContentScopeClassName`.
+globalStyleInLayer(
+	'recipes',
+	`${classSelector(checkboxContentScopeClassName)}[data-required="true"] > ${labelChild}:last-child::after`,
+	{
+		...necessityMarker,
+		marginInlineStart: vars.space.sp4,
+	},
+);
 
 /** Slotted recipe for the Checkbox primitive anatomy. */
 export const checkboxRecipe = recipe(checkboxConfig);
