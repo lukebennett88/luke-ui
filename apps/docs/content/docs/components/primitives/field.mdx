@@ -5,8 +5,9 @@ source: packages/@luke-ui/react/src/exports/primitives/field.ts
 ---
 
 Use the field primitives to build a custom field with Luke UI labels, descriptions, and validation
-messages. Start with [`TextInputField`](/components/forms/text-input-field) or
-[`ComboboxField`](/components/forms/combobox-field) when one of those components fits.
+messages. Start with [`TextInputField`](/components/forms/text-input-field),
+[`ComboboxField`](/components/forms/combobox-field), or [`Checkbox`](/components/forms/checkbox)
+when one of those components fits.
 
 <ExampleBlock src="field-primitive/basic" title="Field primitive: Basic" />
 
@@ -20,10 +21,20 @@ slot. It always renders the error slot, so a validation message appears without 
 [`ComboboxRoot`](/components/primitives/combobox). The root connects the label, description, and
 error to the control, so the parts need no manual ids.
 
+`InlineField` provides the standard anatomy for a control that carries its own label, such as
+[`CheckboxRoot`](/components/primitives/checkbox). It wraps the control's content part, such as
+`CheckboxContent`, and takes a `description` and an `errorMessage`. It has no `label` and no
+`necessityIndicator`, because the label lives inside the content part. It indents the error under
+the label text and always renders the error slot.
+
+`InlineField` is not a semantic root. It adds no field context, so render it inside a control root
+that supplies one and sets the control size. Without that root the description and error connect to
+nothing.
+
 `FieldLabel`, `FieldDescription`, and `FieldError` are the lower-level alternative for a custom
 arrangement. Place them directly inside the control root, as the
 [TextInput primitives](/components/primitives/text-input#choosing-a-composition) page shows. Use
-either `Field` or the manual parts for one field, never both.
+either `Field`, `InlineField`, or the manual parts for one field, never a mix.
 
 ## Required fields
 
@@ -42,6 +53,13 @@ icon, while the surrounding control root is invalid.
 <component-props-table
 	path="packages/@luke-ui/react/src/core/primitives/field/field.tsx"
 	name="FieldProps"
+/>
+
+### InlineFieldProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/field/field.tsx"
+	name="InlineFieldProps"
 />
 
 ### FieldLabelProps

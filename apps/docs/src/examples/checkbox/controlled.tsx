@@ -7,9 +7,11 @@ export default () => {
 
 	return (
 		<Stack maxInlineSize="20rem">
-			<Checkbox isSelected={isSelected} onChange={setIsSelected}>
-				{isSelected ? 'Checked' : 'Unchecked'}
-			</Checkbox>
+			<Checkbox
+				isSelected={isSelected}
+				label={isSelected ? 'Checked' : 'Unchecked'}
+				onChange={setIsSelected}
+			/>
 		</Stack>
 	);
 };

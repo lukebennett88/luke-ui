@@ -6,10 +6,24 @@ source: packages/@luke-ui/react/src/exports/checkbox.ts
 reactAria: https://react-spectrum.adobe.com/react-aria/Checkbox.html
 ---
 
-Use `Checkbox` when someone can choose an option independently of nearby controls. Pass
-`description` to clarify what the option means.
+Use `Checkbox` when someone can choose an option independently of nearby controls. Pass `label` to
+name the option, and `description` to clarify what it means.
 
 <ExampleBlock src="checkbox/basic" layout="centered" title="Checkbox: Basic" />
+
+## Labels
+
+Pass the visible label as `label`. The control renders first and the label second.
+
+The label sits inside a native `<label>` element, so pass textual content only. Links and buttons
+are not supported inside it. Place them next to the checkbox instead. To use content elsewhere on
+the page as the label, omit `label` and pass its id to `aria-labelledby`. When the surrounding
+content already names the control, pass `aria-label`. Pass `label` or exactly one of `aria-label`
+and `aria-labelledby`.
+
+```tsx
+<Checkbox aria-label="Select row" />
+```
 
 ## States
 
@@ -35,7 +49,17 @@ fails. Pass `errorMessage` only for an error you already have, such as one from 
 your server. A non-empty message marks the checkbox invalid. Read [Validation](/docs/validation) for
 where messages come from and how to write them.
 
+The message hangs under the label text and starts with an icon. `Checkbox` has no `isInvalid` prop,
+so the message is the only way to mark it invalid.
+
 <ExampleBlock src="checkbox/validation" title="Checkbox: Validation" />
+
+## Required marker
+
+A required checkbox with a visible `label` shows a marker after the label text. The default
+`necessityIndicator="icon"` adds an asterisk. `necessityIndicator="label"` appends “(required)”. A
+checkbox named with `aria-label` or `aria-labelledby` shows no marker, because it has no visible
+label.
 
 ## Labels with Text
 
@@ -45,14 +69,23 @@ wraps. Outside `Text`, it uses the normal compact control size.
 
 <ExampleBlock src="checkbox/first-line-alignment" title="Checkbox: First-line alignment" />
 
-## Accessibility
+## IDs and refs
 
-Pass a visible label as `Checkbox` children. Use `aria-label` only when surrounding content already
-names the control.
+`id` and `className` target the checkbox's root element. Pass `inputId` to set the input's id, and
+`inputRef` to reach the input. The checkbox takes no plain `ref`.
+
+## Form values
+
+Pass `name` so the checkbox joins `FormData` when selected. Pass `value` to set the submitted value,
+and `form` to associate a checkbox with a `<form>` it does not sit inside.
+
+## Accessibility
 
 Disabled checkboxes cannot receive focus, and their value cannot change. Read-only checkboxes remain
 focusable, so someone who uses a keyboard or assistive technology can still perceive their state.
 Keyboard navigation shows a focus ring. Pointer focus does not.
+
+For custom anatomy, use the [Checkbox primitives](/components/primitives/checkbox).
 
 ## API
 

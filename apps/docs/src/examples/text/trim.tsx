@@ -15,9 +15,7 @@ export default () => {
 
 	return (
 		<Stack gap="sp16">
-			<Checkbox isSelected={isTrimmed} onChange={setIsTrimmed}>
-				Trim text
-			</Checkbox>
+			<Checkbox isSelected={isTrimmed} label="Trim text" onChange={setIsTrimmed} />
 			<Box paddingInline="sp12" style={lineBoxStyle}>
 				<Text elementType="div" shouldDisableTrim={!isTrimmed} typography="display">
 					Aa

@@ -1,12 +1,12 @@
 export {
-	Checkbox,
 	CheckboxContent,
 	type CheckboxContentProps,
 	CheckboxControl,
 	type CheckboxControlProps,
 	CheckboxIndicator,
 	type CheckboxIndicatorProps,
-	type CheckboxProps,
+	CheckboxRoot,
+	type CheckboxRootProps,
 } from '../../core/primitives/checkbox/checkbox.js';
 export {
 	type CheckboxRecipeVariants,

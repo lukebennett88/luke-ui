@@ -5,19 +5,13 @@ export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="Small">
-				<Checkbox defaultSelected size="small">
-					Example checkbox
-				</Checkbox>
+				<Checkbox defaultSelected label="Example checkbox" size="small" />
 			</ComparisonItem>
 			<ComparisonItem label="Medium">
-				<Checkbox defaultSelected size="medium">
-					Example checkbox
-				</Checkbox>
+				<Checkbox defaultSelected label="Example checkbox" size="medium" />
 			</ComparisonItem>
 			<ComparisonItem label="Large">
-				<Checkbox defaultSelected size="large">
-					Example checkbox
-				</Checkbox>
+				<Checkbox defaultSelected label="Example checkbox" size="large" />
 			</ComparisonItem>
 		</Comparison>
 	);

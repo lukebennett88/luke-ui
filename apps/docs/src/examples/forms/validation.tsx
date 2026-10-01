@@ -57,9 +57,11 @@ export default () => {
 					</ComboboxField>
 				</Stack>
 				<Stack minBlockSize="4.5rem">
-					<Checkbox errorMessage={errors.terms} name="terms">
-						I accept the terms of service
-					</Checkbox>
+					<Checkbox
+						errorMessage={errors.terms}
+						label="I accept the terms of service"
+						name="terms"
+					/>
 				</Stack>
 				<Cluster>
 					<Button type="submit">Create account</Button>

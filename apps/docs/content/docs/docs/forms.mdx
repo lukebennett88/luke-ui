@@ -10,11 +10,12 @@ A Luke UI form uses the native HTML `<form>` element. Compose it from Luke UI fi
 
 ## Visible labels
 
-Pass a visible `label` to `TextInputField` and `ComboboxField`. Luke UI associates the label with
-its control.
+Pass a visible `label` to `TextInputField`, `ComboboxField`, and `Checkbox`. Luke UI associates the
+label with its control. A label takes textual content only. Place a link or button next to the field
+instead, and name the control with `aria-labelledby` when the label text lives elsewhere.
 
-Pass the visible checkbox label through `Checkbox` children. Use `aria-label` only when surrounding
-content already names the control.
+When surrounding content already names the control, omit `label` and pass `aria-label` or
+`aria-labelledby`.
 
 A placeholder disappears after someone enters a value. Do not use a placeholder as the only label.
 
@@ -32,7 +33,8 @@ Set `isRequired` when someone must complete a field. The browser blocks submissi
 has a value.
 
 Set `necessityIndicator="label"` to append “(required)” to a field label. The default indicator is
-an icon.
+an icon. A control named with `aria-label` or `aria-labelledby` shows no indicator, because Luke UI
+draws the indicator on the visible label.
 
 Read [Required fields](/components/forms/text-input-field#required-fields) for both indicators.
 

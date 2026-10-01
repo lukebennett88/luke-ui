@@ -38,17 +38,28 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	'feedback/loading-spinner.mdx::packages/@luke-ui/react/src/core/loading-spinner/loading-spinner.tsx::LoadingSpinnerProps':
 		['aria-label', 'color', 'isLoading', 'size'],
 	'forms/checkbox.mdx::packages/@luke-ui/react/src/core/checkbox/checkbox.tsx::CheckboxProps': [
+		'aria-label',
+		'aria-labelledby',
 		'defaultSelected',
 		'description',
 		'errorMessage',
+		'form',
+		'id',
+		'inputId',
 		'inputRef',
 		'isDisabled',
 		'isIndeterminate',
 		'isReadOnly',
 		'isRequired',
 		'isSelected',
+		'label',
+		'name',
+		'necessityIndicator',
 		'onChange',
 		'size',
+		'validate',
+		'validationBehavior',
+		'value',
 	],
 	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/combobox-field/combobox-field.tsx::ComboboxFieldProps':
 		[
@@ -149,13 +160,13 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	'primitives/button.mdx::packages/@luke-ui/react/src/core/primitives/button/button.tsx::ButtonProps':
 		['appearance', 'isBlock', 'isDisabled', 'isPending', 'size', 'tone'],
 	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxContentProps':
-		[],
+		['necessityIndicator'],
 	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxControlProps':
 		[],
 	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxIndicatorProps':
 		[],
-	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxProps':
-		['isInvalid'],
+	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxRootProps':
+		['form', 'id', 'inputId', 'inputRef', 'isInvalid', 'name', 'ref', 'size', 'value'],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/clear-button.tsx::ComboboxClearButtonProps':
 		[],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/empty-state.tsx::ComboboxEmptyStateProps':
@@ -192,6 +203,8 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'label',
 		'necessityIndicator',
 	],
+	'primitives/field.mdx::packages/@luke-ui/react/src/core/primitives/field/field.tsx::InlineFieldProps':
+		['description', 'errorMessage'],
 	'primitives/field.mdx::packages/@luke-ui/react/src/core/primitives/field/label.tsx::FieldLabelProps':
 		['htmlFor', 'necessityIndicator'],
 	'primitives/text-input.mdx::packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx::TextInputControlProps':

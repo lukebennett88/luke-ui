@@ -52,12 +52,11 @@ export default () => {
 								<Checkbox
 									errorMessage={field.state.meta.errors[0]?.message}
 									isSelected={field.state.value}
+									label="I accept the terms of service"
 									onBlur={field.handleBlur}
 									onChange={field.handleChange}
 									validationBehavior="aria"
-								>
-									I accept the terms of service
-								</Checkbox>
+								/>
 							</Stack>
 						)}
 					</form.Field>

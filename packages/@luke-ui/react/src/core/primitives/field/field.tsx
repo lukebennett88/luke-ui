@@ -12,6 +12,7 @@ import {
 } from './is-invalid-from-error-message.js';
 import type { FieldLabelProps, FieldNecessityIndicator } from './label.js';
 import { FieldLabel } from './label.js';
+import { fieldRecipe } from './recipe.css.js';
 import { Field as PrimitiveField } from './root.js';
 
 export type { FieldDescriptionProps, FieldErrorProps, FieldLabelProps, FieldNecessityIndicator };
@@ -40,7 +41,7 @@ interface FieldSlotProps extends FieldSlotContentProps {
 }
 
 /**
- * Naming props for composed fields (`TextInputField`, `ComboboxField`).
+ * Naming props for composed fields (`TextInputField`, `ComboboxField`, `Checkbox`).
  *
  * Pass a visible `label`, or omit `label` and provide exactly one of `aria-label` /
  * `aria-labelledby`. Composition parents forward the aria props to the React Aria field root.
@@ -52,7 +53,11 @@ interface FieldSlotProps extends FieldSlotContentProps {
  */
 export type FieldAccessibleNameProps =
 	| (FieldSlotContentProps & {
-			/** Label content shown above the control. */
+			/**
+			 * Visible label. Pass non-empty, textual, non-interactive content: the label is a native
+			 * `<label>` element. Place links and buttons outside it, and associate external label content
+			 * with `aria-labelledby` instead.
+			 */
 			label: Exclude<ReactNode, boolean | null | undefined>;
 			'aria-label'?: never;
 			'aria-labelledby'?: never;
@@ -98,5 +103,44 @@ export function Field(props: FieldProps): JSX.Element {
 			{description != null ? <FieldDescription>{description}</FieldDescription> : null}
 			<FieldError>{errorMessage}</FieldError>
 		</PrimitiveField>
+	);
+}
+
+/** Description and error props for the `InlineField` primitive. */
+interface InlineFieldSlotProps {
+	/** Optional helper text shown below the control, at the field's inline start. */
+	description?: ReactNode;
+	/** Error content passed to `FieldError`. Accepts React Aria's render-prop form. */
+	errorMessage?: FieldErrorProps['children'];
+}
+
+type _InlineFieldOmit = DistributiveOmit<ComponentProps<'div'>, 'children'>;
+interface _InlineFieldProps extends _InlineFieldOmit, InlineFieldSlotProps {
+	/** The control's content part, such as `CheckboxContent`. It holds the control and its label. */
+	children: ReactNode;
+}
+
+/** Props for the inline field primitive. */
+export type InlineFieldProps = Prettify<_InlineFieldProps>;
+
+/**
+ * Standard inline field anatomy: a control's content part, a description, and an error slot that
+ * is always rendered. The error hangs under the label text with a leading icon.
+ *
+ * `InlineField` provides presentation, not semantics, and adds no field context. Render it inside
+ * a control root that supplies one and the control's size, such as `CheckboxRoot`. It takes no
+ * label, because the label lives inside the control's content part. `InlineField` and the manual
+ * `FieldDescription` and `FieldError` parts are alternatives, so do not render those parts inside
+ * an `InlineField`.
+ */
+export function InlineField(props: InlineFieldProps): JSX.Element {
+	const { children, className, description, errorMessage, ...restProps } = props;
+
+	return (
+		<div {...restProps} className={fieldRecipe().inline({ className })}>
+			{children}
+			{description != null ? <FieldDescription>{description}</FieldDescription> : null}
+			<FieldError>{errorMessage}</FieldError>
+		</div>
 	);
 }

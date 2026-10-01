@@ -6,21 +6,21 @@ import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { textLineHeight } from '../../text/recipe.css.js';
-import { fieldMessageIndent } from '../field/recipe.css.js';
+import { inlineFieldIndent } from '../field/recipe.css.js';
 
 const checkboxControlSize = createVar();
 const checkboxGlyphSize = createVar();
 const checkboxIndicatorSize = createVar();
 
+const dataRequiredSelector = '[data-required="true"]';
+
+/** The gap between the control and the label text, which the necessity marker's margin offsets. */
+const checkboxContentGap = vars.space.sp8;
+
 const checkboxConfig = {
 	slots: {
 		root: {
-			display: 'flex',
-			flexDirection: 'column',
-			gap: vars.space.sp4,
 			minInlineSize: 0,
-			// Size variants set `fieldMessageIndent` so the error hangs under the label. Descriptions
-			// stay at the field's inline edge.
 		},
 		content: {
 			alignItems: 'flex-start',
@@ -28,7 +28,7 @@ const checkboxConfig = {
 			cursor: 'pointer',
 			display: 'inline-flex',
 			font: 'inherit',
-			gap: vars.space.sp8,
+			gap: checkboxContentGap,
 			minInlineSize: 0,
 			selectors: {
 				'&[data-disabled="true"]': {
@@ -177,9 +177,39 @@ const checkboxConfig = {
 		},
 	},
 	defaultVariants: {
+		necessityIndicator: 'icon',
 		size: 'medium',
 	},
 	variants: {
+		// The marker is a flex item after the label text, so a negative margin takes the content
+		// gap back and leaves the same distance as `FieldLabel`'s marker. `none` draws nothing, for
+		// content with no visible label text.
+		necessityIndicator: {
+			icon: {
+				content: {
+					selectors: {
+						[`&${dataRequiredSelector}::after`]: {
+							color: vars.color.foreground.danger.rest,
+							content: '"*"',
+							marginInlineStart: `calc(${vars.space.sp4} - ${checkboxContentGap})`,
+						},
+					},
+				},
+			},
+			label: {
+				content: {
+					selectors: {
+						[`&${dataRequiredSelector}::after`]: {
+							color: vars.color.text.secondary,
+							content: '"(required)"',
+							fontWeight: vars.font.weight.body,
+							marginInlineStart: `calc(${vars.space.sp4} - ${checkboxContentGap})`,
+						},
+					},
+				},
+			},
+			none: {},
+		},
 		size: {
 			large: {
 				root: {
@@ -187,7 +217,7 @@ const checkboxConfig = {
 						[checkboxControlSize]: FONT_METRIC_SCALE[20].lineHeight,
 						[checkboxGlyphSize]: vars.iconSize.small,
 						[checkboxIndicatorSize]: vars.iconSize.medium,
-						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space.sp8})`,
+						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${checkboxContentGap})`,
 					},
 				},
 			},
@@ -197,7 +227,7 @@ const checkboxConfig = {
 						[checkboxControlSize]: FONT_METRIC_SCALE[16].lineHeight,
 						[checkboxGlyphSize]: vars.iconSize.xsmall,
 						[checkboxIndicatorSize]: vars.iconSize.small,
-						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space.sp8})`,
+						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${checkboxContentGap})`,
 					},
 				},
 			},
@@ -207,7 +237,7 @@ const checkboxConfig = {
 						[checkboxControlSize]: vars.iconSize.small,
 						[checkboxGlyphSize]: FONT_METRIC_SCALE[12].fontSize,
 						[checkboxIndicatorSize]: vars.iconSize.xsmall,
-						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space.sp8})`,
+						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${checkboxContentGap})`,
 					},
 				},
 			},

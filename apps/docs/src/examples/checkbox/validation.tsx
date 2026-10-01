@@ -13,7 +13,7 @@ export default () => {
 		<form onSubmit={handleSubmit}>
 			<Stack gap="sp16" maxInlineSize="20rem">
 				<Stack minBlockSize="4.5rem">
-					<Checkbox isRequired>I accept the terms of service</Checkbox>
+					<Checkbox isRequired label="I accept the terms of service" />
 				</Stack>
 				<Cluster>
 					<Button type="submit">Create account</Button>
