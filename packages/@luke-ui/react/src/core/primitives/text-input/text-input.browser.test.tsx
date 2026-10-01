@@ -278,6 +278,76 @@ test('a rooted TextInput follows the root for disabled, read-only, and required'
 	expect(input('Editable')).not.toBeRequired();
 });
 
+// `type`, `pattern`, `minLength`, and `maxLength` take part in the field's validation, so the root
+// owns them when a `TextInput` is rooted.
+test('a rooted TextInput uses the root type, pattern, and lengths over its own', () => {
+	render(
+		<TextInputRoot maxLength={20} minLength={5} pattern="[a-z]+@example[.]com" type="email">
+			<FieldLabel>Example field</FieldLabel>
+			<TextInput maxLength={3} minLength={1} pattern="[0-9]+" type="text" />
+		</TextInputRoot>,
+	);
+	const element = input('Example field');
+
+	expect(element).toHaveAttribute('type', 'email');
+	expect(element).toHaveAttribute('pattern', '[a-z]+@example[.]com');
+	expect(element).toHaveAttribute('minlength', '5');
+	expect(element).toHaveAttribute('maxlength', '20');
+});
+
+test('a rooted TextInput ignores its own type, pattern, and lengths when the root sets none', () => {
+	render(
+		<TextInputRoot>
+			<FieldLabel>Example field</FieldLabel>
+			<TextInput maxLength={3} minLength={1} pattern="[0-9]+" type="email" />
+		</TextInputRoot>,
+	);
+	const element = input('Example field');
+
+	expect(element).toHaveAttribute('type', 'text');
+	expect(element).not.toHaveAttribute('pattern');
+	expect(element).not.toHaveAttribute('minlength');
+	expect(element).not.toHaveAttribute('maxlength');
+});
+
+test('the root minLength decides native validation of a rooted TextInput', async () => {
+	render(
+		<form>
+			<TextInputRoot minLength={5} validationBehavior="native">
+				<FieldLabel>Example field</FieldLabel>
+				<TextInput minLength={1} />
+				<FieldError />
+			</TextInputRoot>
+			<button type="submit">Submit</button>
+		</form>,
+	);
+	const element = input('Example field');
+
+	await userEvent.type(page.getByRole('textbox', { name: 'Example field' }), 'abc');
+	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
+
+	expect(element.validity.tooShort).toBe(true);
+	await expect.poll(() => element.getAttribute('aria-invalid')).toBe('true');
+});
+
+test('a standalone TextInput applies its own type, pattern, and lengths', () => {
+	render(
+		<TextInput
+			aria-label="Standalone"
+			maxLength={20}
+			minLength={5}
+			pattern="[a-z]+@example[.]com"
+			type="email"
+		/>,
+	);
+	const element = input('Standalone');
+
+	expect(element).toHaveAttribute('type', 'email');
+	expect(element).toHaveAttribute('pattern', '[a-z]+@example[.]com');
+	expect(element).toHaveAttribute('minlength', '5');
+	expect(element).toHaveAttribute('maxlength', '20');
+});
+
 // A part must never disconnect the field's own wiring, so its ids add to the root's.
 test('a rooted TextInput adds its aria-describedby to the field description and error', () => {
 	render(

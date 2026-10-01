@@ -59,6 +59,8 @@ values for these props and ignores its own:
 - `disabled`, `readOnly`, and `required`. Set `isDisabled`, `isReadOnly`, and `isRequired` on the
   root.
 - `aria-invalid`. Set `isInvalid` or a validation prop on the root.
+- `type`, `pattern`, `minLength`, and `maxLength`. Set them on the root, because they are part of
+  the field's validation.
 
 The root passes the new value to its `onChange`.
 

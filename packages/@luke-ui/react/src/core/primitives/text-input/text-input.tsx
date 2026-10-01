@@ -85,9 +85,13 @@ type RootOwnedInputProp =
 	| 'disabled'
 	| 'form'
 	| 'id'
+	| 'maxLength'
+	| 'minLength'
 	| 'name'
+	| 'pattern'
 	| 'readOnly'
 	| 'required'
+	| 'type'
 	| 'value';
 
 type _TextInputOmit = DistributiveOmit<
@@ -112,8 +116,14 @@ interface _TextInputProps extends _TextInputOmit {
 	id?: RacInputProps['id'];
 	/** Hints which input mechanism is most appropriate for the entered content. */
 	inputMode?: RacInputProps['inputMode'];
+	/** Maximum length of a standalone input's value. Inside a `TextInputRoot`, set `maxLength` on the root. */
+	maxLength?: RacInputProps['maxLength'];
+	/** Minimum length of a standalone input's value. Inside a `TextInputRoot`, set `minLength` on the root. */
+	minLength?: RacInputProps['minLength'];
 	/** The name of a standalone input, used when submitting an HTML form. */
 	name?: RacInputProps['name'];
+	/** Regular expression a standalone input's value must match. Inside a `TextInputRoot`, set `pattern` on the root. */
+	pattern?: RacInputProps['pattern'];
 	/** Whether a standalone input is read-only. Inside a `TextInputRoot`, use `isReadOnly` on the root. */
 	readOnly?: RacInputProps['readOnly'];
 	/**
@@ -129,6 +139,8 @@ interface _TextInputProps extends _TextInputOmit {
 	 * @default 'medium'
 	 */
 	size?: TextInputSize;
+	/** The type of a standalone input, such as `email`. Inside a `TextInputRoot`, set `type` on the root. */
+	type?: RacInputProps['type'];
 	/** Controlled value of a standalone input. Inside a `TextInputRoot`, the root owns the value. */
 	value?: RacInputProps['value'];
 }
@@ -178,10 +190,12 @@ function joinIds(rootIds: string | undefined, ownIds: string | undefined): strin
  * `id` targets the root element. Pass `inputId` to set the input's id.
  *
  * A `TextInput` inside the root ignores its own `id`, `name`, `form`, `value`, `defaultValue`,
- * `disabled`, `readOnly`, `required`, and `aria-invalid`, because the root owns them. Its
- * `aria-describedby` and `aria-labelledby` add to the field's own wiring. Other input props, such
- * as `placeholder` and `autoComplete`, belong to the input. The root accepts some of them, such as
- * `autoComplete` and `inputMode`, and the `TextInput` inherits them and can override them.
+ * `disabled`, `readOnly`, `required`, `aria-invalid`, `type`, `pattern`, `minLength`, and
+ * `maxLength`, because the root owns them. The last four take part in the field's validation, so
+ * set them on the root. Its `aria-describedby` and `aria-labelledby` add to the field's own wiring.
+ * Other input props, such as `placeholder` and `autoComplete`, belong to the input. The root
+ * accepts some of them, such as `autoComplete` and `inputMode`, and the `TextInput` inherits them
+ * and can override them.
  */
 export function TextInputRoot(props: TextInputRootProps): JSX.Element {
 	const { className, id, inputId, size = 'medium', ...textFieldProps } = props;
@@ -203,8 +217,8 @@ export function TextInputRoot(props: TextInputRootProps): JSX.Element {
 
 /**
  * Text input. Used on its own, it draws its own chrome and takes native input props. Inside a
- * `TextInputRoot`, the root owns its id, name, form, value, state, and validation, and the size
- * comes from the nearest `TextInputControl` or root. Inside a `TextInputControl`, the control draws
+ * `TextInputRoot`, the root owns its id, name, form, value, state, validation, `type`, `pattern`,
+ * `minLength`, and `maxLength`, and the size comes from the nearest `TextInputControl` or root. Inside a `TextInputControl`, the control draws
  * the chrome and the input is transparent.
  *
  * Inside a root, `aria-describedby` and `aria-labelledby` add to the field's own label,
@@ -225,10 +239,14 @@ export function TextInput(props: TextInputProps): JSX.Element {
 		disabled,
 		form,
 		id,
+		maxLength,
+		minLength,
 		name,
+		pattern,
 		readOnly,
 		required,
 		size: sizeProp,
+		type,
 		value,
 		...inputProps
 	} = props;
@@ -246,9 +264,13 @@ export function TextInput(props: TextInputProps): JSX.Element {
 				disabled,
 				form,
 				id,
+				maxLength,
+				minLength,
 				name,
+				pattern,
 				readOnly,
 				required,
+				type,
 				value,
 			};
 
