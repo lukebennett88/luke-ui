@@ -54,6 +54,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		[
 			'aria-label',
 			'aria-labelledby',
+			'className',
 			'defaultItems',
 			'errorMessage',
 			'id',
@@ -71,6 +72,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'onLoadMore',
 			'placeholder',
 			'popoverProps',
+			'ref',
 			'size',
 			'validate',
 		],
@@ -171,7 +173,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/popover.tsx::ComboboxPopoverProps':
 		[],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/root.tsx::ComboboxRootProps':
-		['aria-label', 'defaultItems', 'id', 'inputId', 'size'],
+		['aria-label', 'defaultItems', 'id', 'inputId', 'ref', 'size'],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/section.tsx::ComboboxSectionProps':
 		['title'],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/tray-trigger.tsx::ComboboxTrayTriggerProps':
@@ -210,7 +212,18 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'value',
 		],
 	'primitives/text-input.mdx::packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx::TextInputRootProps':
-		['form', 'id', 'inputId', 'isInvalid', 'name', 'onChange', 'size', 'value'],
+		[
+			'autoComplete',
+			'form',
+			'id',
+			'inputId',
+			'isInvalid',
+			'name',
+			'onChange',
+			'ref',
+			'size',
+			'value',
+		],
 	'primitives/text-input.mdx::packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx::TextInputSuffixProps':
 		[],
 	'typography/blockquote.mdx::packages/@luke-ui/react/src/core/blockquote/blockquote.tsx::BlockquoteProps':

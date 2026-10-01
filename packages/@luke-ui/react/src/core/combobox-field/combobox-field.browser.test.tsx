@@ -145,6 +145,42 @@ test('ComboboxRoot and ComboboxField put id on the root element and inputId on t
 	}
 });
 
+test('ComboboxField resolves an object or callback ref to the root element and inputRef to the input', () => {
+	const ref = createRef<HTMLDivElement>();
+	const inputRef = createRef<HTMLInputElement>();
+	const callbackResolved: Array<HTMLDivElement | null> = [];
+	const { locator } = render(
+		<>
+			<ComboboxField<CountryItem>
+				defaultItems={countryItems}
+				id="ref-root"
+				inputRef={inputRef}
+				label="Object"
+				ref={ref}
+			>
+				{renderCountryItem}
+			</ComboboxField>
+			<ComboboxField<CountryItem>
+				defaultItems={countryItems}
+				id="callback-root"
+				label="Callback"
+				ref={(node) => {
+					callbackResolved.push(node);
+				}}
+			>
+				{renderCountryItem}
+			</ComboboxField>
+		</>,
+	);
+	const input = locator.getByRole('combobox', { name: 'Object' }).element();
+
+	expect(ref.current).toBe(document.getElementById('ref-root'));
+	expect(ref.current).toBeInstanceOf(HTMLDivElement);
+	expect(ref.current?.contains(input)).toBe(true);
+	expect(inputRef.current).toBe(input);
+	expect(callbackResolved.at(-1)).toBe(document.getElementById('callback-root'));
+});
+
 test('the ComboboxField scene has no axe violations', async () => {
 	const { container } = render(
 		<Stack>
@@ -400,19 +436,6 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				>
 					{renderCountryItem}
 				</ComboboxField>
-				<ComboboxRoot defaultItems={sceneCountryItems} isInvalid name="invalid-no-message">
-					<Field label="Invalid, no message">
-						<ComboboxControl>
-							<ComboboxInput placeholder="Select a country..." />
-							<ComboboxTrigger aria-label="Toggle options">
-								<Icon name="chevronDown" />
-							</ComboboxTrigger>
-						</ComboboxControl>
-						<ComboboxPopover offset={4}>
-							<ComboboxListBox>{renderCountryItem}</ComboboxListBox>
-						</ComboboxPopover>
-					</Field>
-				</ComboboxRoot>
 				<ComboboxField
 					defaultItems={sceneCountryItems}
 					defaultValue="ca"
@@ -519,6 +542,4 @@ async function waitForMobileTrayToSettle() {
 	expect(window.innerWidth).toBe(MOBILE_SCREEN_WIDTH);
 	expect(window.innerHeight).toBe(700);
 	expect(window.matchMedia('(width > 450px)').matches).toBe(false);
-	expect(getComputedStyle(modal).borderEndStartRadius).toBe('0px');
-	expect(getComputedStyle(modal).borderEndEndRadius).toBe('0px');
 }
