@@ -12,13 +12,16 @@ import { useIsMutating, useMutation, useQuery, useQueryClient } from '@tanstack/
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, Link as RouterLink, useLocation } from 'react-router';
 import type { Preferences, Settings } from '../api/schemas.js';
-import { applyInterfaceSettings, settingsApi } from '../api/settings-api.js';
-import { settingsQueryKey, settingsQueryOptions } from '../api/settings-query.js';
+import { settingsApi } from '../api/settings-api.js';
+import {
+	PREFERENCES_MUTATION_KEY,
+	settingsQueryKey,
+	settingsQueryOptions,
+} from '../api/settings-query.js';
 import { SETTINGS_NAV, SettingsNav, SettingsNavSearch } from '../components/settings-nav.js';
 import * as styles from '../styles/settings.css.js';
 
 const MAIN_ID = 'settings-main';
-const PREFERENCES_MUTATION_KEY = [...settingsQueryKey, 'preferences'] as const;
 
 export type SettingsOutletContext = {
 	preferences: Preferences;
@@ -45,9 +48,6 @@ export function SettingsLayout() {
 			: settings.preferences;
 	}, [preferencesMutation.isPending, preferencesMutation.variables, settings.preferences]);
 
-	useEffect(() => {
-		applyInterfaceSettings(preferences);
-	}, [preferences]);
 	const current = SETTINGS_NAV.find((item) => item.to === pathname);
 	const isMenu = pathname === '/settings/menu';
 	const mainRef = useRef<HTMLDivElement>(null);

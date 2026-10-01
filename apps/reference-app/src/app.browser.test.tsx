@@ -38,6 +38,16 @@ test('home opens settings, desktop navigation follows the URL, and Back to app r
 	expect(app.router.state.location.pathname).toBe('/');
 });
 
+test('a direct load of / applies persisted appearance and profile data before the first paint', async () => {
+	await settingsApi.updatePreferences({ colorMode: 'dark' });
+	await settingsApi.updateProfile({ displayName: 'Ada Lovelace' });
+	settingsApi.setLatency(280);
+	const app = await renderApp(['/']);
+	const heading = app.locator.getByRole('heading', { level: 1 });
+	expect(heading.element().textContent).toBe('Welcome back, Ada');
+	expect(document.documentElement.dataset.colorMode).toBe('dark');
+});
+
 test('a narrow deep link opens the menu and supports back navigation', async () => {
 	await page.viewport(390, 800);
 	const app = await renderApp(['/settings/security']);

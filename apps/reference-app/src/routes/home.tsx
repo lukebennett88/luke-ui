@@ -7,21 +7,14 @@ import { Text } from '@luke-ui/react/text';
 import { rootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
-import { applyInterfaceSettings } from '../api/settings-api.js';
 import { settingsQueryOptions } from '../api/settings-query.js';
 import * as styles from '../styles/settings.css.js';
 
 const NAME_PARTS_PATTERN = /\s+/;
 
 export function HomePage() {
-	const settings = useQuery(settingsQueryOptions).data;
-	const profile = settings?.profile;
-	const firstName = profile?.displayName.trim().split(NAME_PARTS_PATTERN)[0];
-
-	useEffect(() => {
-		if (settings) applyInterfaceSettings(settings.preferences);
-	}, [settings]);
+	const profile = useQuery(settingsQueryOptions).data!.profile;
+	const firstName = profile.displayName.trim().split(NAME_PARTS_PATTERN)[0];
 
 	return (
 		<Box
@@ -54,7 +47,7 @@ export function HomePage() {
 					<Container maxInlineSize="ct672">
 						<Stack alignItems="flex-start" gap="sp16">
 							<Heading level={1} shouldDisableTrim typography="heading2">
-								{firstName ? `Welcome back, ${firstName}` : 'Welcome back'}
+								Welcome back, {firstName}
 							</Heading>
 							<Text color="secondary" elementType="p">
 								Your workspace is ready whenever you need it.

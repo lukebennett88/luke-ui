@@ -10,10 +10,10 @@ follow Linear Settings.
 - Security & access clears the profile and preferences saved in this browser after confirmation.
 
 React Router Data Mode owns navigation and route errors. React Aria's `RouterProvider` sends Luke UI
-`Link` navigation through React Router. The settings loader fills the TanStack Query cache, and each
-mutation writes its result back to that cache. Zod validates mutation inputs at the API boundary.
-Settings persist in localStorage. The fake API adds 280 ms of latency. Tests set latency and fail
-the next mutation through `settingsApi`.
+`Link` navigation through React Router. The root route's loader fills the TanStack Query cache
+before anything renders, and each mutation writes its result back to that cache. Zod validates
+mutation inputs at the API boundary. Settings persist in localStorage. The fake API adds 280 ms of
+latency. Tests set latency and fail the next mutation through `settingsApi`.
 
 Luke UI owns layout, typography, links, buttons, and text fields. React Aria Components supplies
 select, switch, menu, and dialog behaviour. Vanilla Extract owns the remaining product presentation,

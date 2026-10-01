@@ -8,3 +8,6 @@ export const settingsQueryOptions = queryOptions({
 });
 
 export const settingsQueryKey = settingsQueryOptions.queryKey;
+
+/** Shared by the preferences mutation and the root layout's optimistic preview. */
+export const PREFERENCES_MUTATION_KEY = [...settingsQueryKey, 'preferences'] as const;

@@ -32,18 +32,17 @@ export function createAppRoutes(queryClient: QueryClient): Array<RouteObject> {
 						{ element: <SecurityPage />, path: 'security' },
 					],
 					element: <SettingsLayout />,
-					ErrorBoundary: RouteError,
-					HydrateFallback,
 					id: 'settings',
-					loader: async () => {
-						await queryClient.query(settingsQueryOptions);
-					},
 					path: 'settings',
 				},
 				{ Component: NotFound, path: '*' },
 			],
 			element: <RootLayout />,
+			ErrorBoundary: RouteError,
 			HydrateFallback,
+			loader: async () => {
+				await queryClient.query(settingsQueryOptions);
+			},
 			path: '/',
 		},
 	];
