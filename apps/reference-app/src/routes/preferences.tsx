@@ -98,11 +98,14 @@ function SelectPreferenceRow({
 	const labelId = `${pref.id}-label`;
 	const descriptionId = pref.hint ? `${pref.id}-description` : undefined;
 
-	// The select is disabled while a save is in flight, and a disabled button cannot hold focus.
-	// Return focus to the trigger once the save settles, so a keyboard user keeps their place.
+	// The select is disabled while a save is in flight, and a disabled button cannot hold focus, so
+	// focus falls to the body when the listbox closes. Return it to the trigger once the save
+	// settles, but only while nothing else has taken focus in the meantime.
 	useEffect(() => {
 		if (isPending || !shouldRestoreFocus.current) return;
 		shouldRestoreFocus.current = false;
+		const { activeElement } = document;
+		if (activeElement && activeElement !== document.body) return;
 		triggerRef.current?.focus();
 	}, [isPending]);
 

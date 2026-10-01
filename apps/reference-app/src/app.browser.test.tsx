@@ -243,6 +243,34 @@ test('a failed theme change rolls back, and explicit and system themes apply', a
 		.toHaveTextContent('System');
 });
 
+test('a successful select save returns focus to the trigger when nothing else took it', async () => {
+	const app = await renderApp();
+	const trigger = app.locator.getByRole('button', { name: /Theme/ });
+	settingsApi.setLatency(400);
+	await chooseOption(app, 'Theme', 'Dark');
+	await expect.element(trigger).toBeDisabled();
+	await expect.element(trigger).toBeEnabled();
+	await expect.element(trigger).toHaveFocus();
+	expect((await settingsApi.getSettings()).preferences.colorMode).toBe('dark');
+});
+
+for (const outcome of ['success', 'failure'] as const) {
+	test(`focus the user moved during a select save stays put after the save ends in ${outcome}`, async () => {
+		const app = await renderApp();
+		const trigger = app.locator.getByRole('button', { name: /Theme/ });
+		const toggle = app.locator.getByRole('switch', { name: 'Underline links' });
+		settingsApi.setLatency(400);
+		if (outcome === 'failure') settingsApi.setNextFailure('server');
+		await chooseOption(app, 'Theme', 'Dark');
+		await expect.element(trigger).toBeDisabled();
+		toggle.element().focus();
+		await expect.element(toggle).toHaveFocus();
+		await expect.element(trigger).toBeEnabled();
+		await expect.element(toggle).toHaveFocus();
+		expect(document.activeElement).toBe(toggle.element());
+	});
+}
+
 test('text size changes actual heading geometry', async () => {
 	const app = await renderApp();
 	const heading = app.locator.getByRole('heading', { name: 'Preferences', level: 1 });
