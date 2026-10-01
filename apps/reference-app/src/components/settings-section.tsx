@@ -64,16 +64,20 @@ export function SettingsRow({
 	descriptionId,
 	hint,
 	label,
+	labelId,
 }: {
 	children: ReactNode;
 	descriptionId?: string;
 	hint?: string;
 	label: string;
+	labelId?: string;
 }) {
 	return (
 		<SettingsRowShell>
 			<Stack flexGrow="1" gap="sp4" minInlineSize="0">
-				<Text typography="label">{label}</Text>
+				<Text id={labelId} typography="label">
+					{label}
+				</Text>
 				{hint ? (
 					<Text color="secondary" fontWeight="body" id={descriptionId} typography="label">
 						{hint}

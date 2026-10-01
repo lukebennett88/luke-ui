@@ -1,3 +1,5 @@
+import { SelectField, SelectItem } from '@luke-ui/react/select-field';
+import { useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router';
 import type { Preferences } from '../api/schemas.js';
 import {
@@ -6,8 +8,8 @@ import {
 	SettingsSection,
 	SettingsStatus,
 } from '../components/settings-section.js';
-import { SettingsSelect } from '../components/settings-select.js';
 import { SettingsSwitch } from '../components/settings-switch.js';
+import * as styles from '../styles/settings.css.js';
 import type { PrefRow } from './preferences-config.js';
 import { INTERFACE_PREFS } from './preferences-config.js';
 import type { SettingsOutletContext } from './settings-layout.js';
@@ -62,17 +64,7 @@ function PreferenceRow({
 
 	if (pref.kind === 'select') {
 		return (
-			<SettingsRow descriptionId={descriptionId} hint={pref.hint} label={pref.label}>
-				<SettingsSelect
-					aria-describedby={descriptionId}
-					id={pref.id}
-					isPending={isPending}
-					label={pref.label}
-					onChange={(value) => onSave({ [pref.key]: pref.parse(value) })}
-					options={[...pref.options]}
-					value={values[pref.key]}
-				/>
-			</SettingsRow>
+			<SelectPreferenceRow isPending={isPending} onSave={onSave} pref={pref} values={values} />
 		);
 	}
 
@@ -86,6 +78,59 @@ function PreferenceRow({
 				label={pref.label}
 				onChange={(checked) => onSave({ [pref.key]: checked })}
 			/>
+		</SettingsRow>
+	);
+}
+
+function SelectPreferenceRow({
+	isPending,
+	onSave,
+	pref,
+	values,
+}: {
+	isPending: boolean;
+	onSave: (patch: Partial<Preferences>) => void;
+	pref: Extract<PrefRow, { kind: 'select' }>;
+	values: Preferences;
+}) {
+	const triggerRef = useRef<HTMLButtonElement>(null);
+	const shouldRestoreFocus = useRef(false);
+	const labelId = `${pref.id}-label`;
+	const descriptionId = pref.hint ? `${pref.id}-description` : undefined;
+
+	// The select is disabled while a save is in flight, and a disabled button cannot hold focus.
+	// Return focus to the trigger once the save settles, so a keyboard user keeps their place.
+	useEffect(() => {
+		if (isPending || !shouldRestoreFocus.current) return;
+		shouldRestoreFocus.current = false;
+		triggerRef.current?.focus();
+	}, [isPending]);
+
+	return (
+		<SettingsRow
+			descriptionId={descriptionId}
+			hint={pref.hint}
+			label={pref.label}
+			labelId={labelId}
+		>
+			<SelectField
+				aria-describedby={descriptionId}
+				aria-labelledby={labelId}
+				className={styles.settingsSelect}
+				isDisabled={isPending}
+				items={pref.options}
+				onChange={(key) => {
+					if (key == null) return;
+					shouldRestoreFocus.current = true;
+					onSave({ [pref.key]: pref.parse(String(key)) });
+				}}
+				size="small"
+				triggerId={pref.id}
+				triggerRef={triggerRef}
+				value={values[pref.key]}
+			>
+				{(option) => <SelectItem id={option.value}>{option.label}</SelectItem>}
+			</SelectField>
 		</SettingsRow>
 	);
 }

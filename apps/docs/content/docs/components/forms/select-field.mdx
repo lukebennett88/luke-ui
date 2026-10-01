@@ -1,0 +1,108 @@
+---
+title: Select Field
+description: Single-selection field with a label, validation, and a popover list of options.
+source: packages/@luke-ui/react/src/exports/select-field.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/Select.html
+---
+
+Use `SelectField` when someone chooses one option from a short list. It combines a trigger button,
+label, description, validation message, popover, and listbox. Use
+[`ComboboxField`](/components/forms/combobox-field) instead when the list is long enough to need
+search.
+
+<ExampleBlock src="select-field/basic" title="Select Field: Basic" />
+
+## Items and selection
+
+Pass `items` and a render function that returns a `SelectItem` for each one. Import `SelectItem`
+from `@luke-ui/react/select-field`. Each item needs an `id`, or a `key` on the object, which becomes
+the selected key. `SelectField` also accepts static `SelectItem` children with an `id` each.
+
+```tsx
+<SelectField label="Theme" name="theme">
+	<SelectItem id="system">System</SelectItem>
+	<SelectItem id="light">Light</SelectItem>
+	<SelectItem id="dark">Dark</SelectItem>
+</SelectField>
+```
+
+The listbox marks the selected option with a check. `SelectField` holds one selected option and has
+no clear button. Add an option such as “None” when someone needs to return to an empty choice.
+
+Pass `defaultValue` to start with an option selected. Pass `value` and `onChange` to control the
+selection yourself. `onChange` receives the selected key, or `null` when nothing is selected, and
+`value` takes the same type.
+
+<ExampleBlock src="select-field/controlled" title="Select Field: Controlled" />
+
+## Placeholder
+
+Pass `placeholder` for the text the trigger shows while nothing is selected. A placeholder does not
+name the field. Give the field a `label`.
+
+## Required fields
+
+Set `isRequired` to make a selection mandatory. Use `necessityIndicator` to choose how it appears
+beside the label.
+
+<ExampleBlock src="select-field/required" title="Select Field: Required" />
+
+## Validation
+
+Set `isRequired` or pass `validate` to check the selected key. `SelectField` shows its validation
+message after validation fails. Pass `errorMessage` only for an error you already have, such as one
+from a form library or your server. A non-empty message marks the field invalid. Read
+[Validation](/docs/validation) for where messages come from, server errors, and how to write them.
+
+While the field is invalid, the trigger shows an error icon before the chevron. The icon marks a
+problem and does not describe it, so pair it with a message.
+
+<ExampleBlock src="select-field/validation" title="Select Field: Validation" />
+
+## Disabled fields
+
+Set `isDisabled` to block the field. A disabled field cannot take focus and does not submit its
+value. `SelectField` has no read-only state. Show a value that cannot change as text instead.
+
+## Size
+
+Use `size` to set the control height and typography. Use `small` in compact layouts. `medium` is the
+default.
+
+<ExampleBlock src="select-field/sizes" title="Select Field: Size" />
+
+## Labels
+
+Provide a visible `label` where possible. The label is a native `<label>` element, so it takes
+textual, non-interactive content only. Place a link or button beside the field instead.
+
+When a nearby heading or row title already names the field, omit `label`. Pass `aria-labelledby`
+with the id of that element, or pass `aria-label`. Pass `aria-describedby` to point the field at
+hint text that lives elsewhere. Luke UI merges it with the field's own description.
+
+## IDs and refs
+
+`id` and `className` target the field's root element. Pass `triggerId` to set the id of the trigger
+button, and `triggerRef` to reach the button. The field takes no plain `ref`.
+
+## Accessibility
+
+The trigger is a button that opens a listbox. Its name combines the selected option and the label.
+Luke UI associates the label, description, and validation message with the trigger. The listbox
+supports arrow keys and type-ahead.
+
+## API
+
+### SelectFieldProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/select-field/select-field.tsx"
+	name="SelectFieldProps"
+/>
+
+### SelectItemProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectItemProps"
+/>

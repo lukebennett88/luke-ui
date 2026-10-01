@@ -219,7 +219,7 @@ test('a failed theme change rolls back, and explicit and system themes apply', a
 	settingsApi.setNextFailure('server');
 	await chooseOption(app, 'Theme', 'Dark');
 	await expect.poll(() => document.documentElement.dataset.colorMode).toBe('dark');
-	await expect.element(trigger).toHaveAttribute('aria-disabled', 'true');
+	await expect.element(trigger).toBeDisabled();
 	await expect
 		.element(app.locator.getByRole('alert'))
 		.toHaveTextContent('Could not save preferences. Try again.');

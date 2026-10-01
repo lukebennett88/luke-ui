@@ -114,6 +114,33 @@ test(
 );
 
 test(
+	'keeps naming, selection, and id props on SelectField while hiding isInvalid and generic DOM props',
+	async () => {
+		const names = await visiblePropNames(
+			'packages/@luke-ui/react/src/core/select-field/select-field.tsx',
+			'SelectFieldProps',
+		);
+		expect(names).toContain('label');
+		expect(names).toContain('aria-label');
+		expect(names).toContain('aria-labelledby');
+		expect(names).toContain('aria-describedby');
+		expect(names).toContain('items');
+		expect(names).toContain('value');
+		expect(names).toContain('defaultValue');
+		expect(names).toContain('onChange');
+		expect(names).toContain('id');
+		expect(names).toContain('triggerId');
+		expect(names).toContain('triggerRef');
+		expect(names).not.toContain('isInvalid');
+		expect(names).not.toContain('isReadOnly');
+		expect(names).not.toContain('isPending');
+		expect(names).not.toContain('onClick');
+		expect(names).not.toContain('onPointerMoveCapture');
+	},
+	TS_MORPH_TEST_TIMEOUT,
+);
+
+test(
 	'keeps typography props on Heading while hiding generic DOM props',
 	async () => {
 		const names = await visiblePropNames(

@@ -1,0 +1,140 @@
+---
+title: Select primitives
+description: Lower-level parts for composing a single-selection select.
+source: packages/@luke-ui/react/src/exports/primitives/select.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/Select.html
+---
+
+Use these primitives when [`SelectField`](/components/forms/select-field) does not fit your layout.
+They expose the root, trigger, value, indicator, popover, listbox, and option parts that
+`SelectField` composes. Start with `SelectField` when it fits.
+
+<ExampleBlock src="select-primitive/basic" title="Select primitives: Basic" />
+
+## Anatomy
+
+`SelectRoot` is the semantic root. It connects the trigger to the label, description, and error
+inside it, and owns the selection, state, validation, and size. `SelectTrigger` is the button that
+opens the popover, and it draws the control chrome. It holds a `SelectValue`, which shows the
+selected option, and a `SelectIndicator`. `SelectPopover` holds a `SelectListBox`, which holds the
+`SelectItem` options.
+
+```tsx
+<SelectRoot name="theme" placeholder="Choose a theme">
+	<Field label="Theme">
+		<SelectTrigger>
+			<SelectValue />
+			<SelectIndicator />
+		</SelectTrigger>
+		<SelectPopover>
+			<SelectListBox>
+				<SelectItem id="light">Light</SelectItem>
+				<SelectItem id="dark">Dark</SelectItem>
+			</SelectListBox>
+		</SelectPopover>
+	</Field>
+</SelectRoot>
+```
+
+Parts follow document order. Put the `SelectValue` before the `SelectIndicator`.
+
+## Root props
+
+The root owns every prop that crosses parts. Set `name`, `form`, `value`, `defaultValue`,
+`onChange`, `isDisabled`, `isRequired`, `isInvalid`, validation, and `size` on `SelectRoot`. The
+parts take no props for these.
+
+`value` and `defaultValue` take a key, or `null` for no selection, and `onChange` receives the same
+type. Pass `value` and `onChange` for a controlled select, or `defaultValue` for an uncontrolled
+one.
+
+Set `placeholder` on `SelectRoot`. `SelectValue` shows it while nothing is selected. A select holds
+one selected option and has no read-only state.
+
+`id` on `SelectRoot` targets the root element. Pass `triggerId` to set the trigger button's id.
+`ref` on `SelectRoot` reaches the root element, and `ref` on `SelectTrigger` reaches the button.
+
+## Options
+
+Use `SelectItem` for options. It adds a check for the selected option. `SelectListBox` accepts
+static children or `items` with a render function. A text part such as `Text` renders inside
+`SelectTrigger`, `SelectValue`, and `SelectItem`. `SelectValue` shows the content of the selected
+item.
+
+## Indicator
+
+`SelectIndicator` shows a chevron by default. It sets `data-open` while the popover is open, which
+you can use to style the open state. Pass `children` to replace the chevron. The part keeps its
+layout and `data-open`, and it is hidden from assistive technology.
+
+<ExampleBlock src="select-primitive/indicator" title="Select primitives: Indicator" />
+
+## Size
+
+`medium` is the default. Use `small` in compact layouts. Set `size` on `SelectRoot`, and the
+trigger, indicator, and items follow. The parts take no `size` of their own. The trigger sets the
+icon size for everything inside it.
+
+## Validation
+
+Set `isInvalid` or a validation prop on `SelectRoot`. The trigger has no invalid prop. It reads the
+state from the root and, while invalid, draws an error icon between the value and the indicator. The
+icon is decorative and hidden from assistive technology, so it marks a problem but does not describe
+it. Give an invalid select an error message with `FieldError`. See [Validation](/docs/validation).
+
+## Labels
+
+`Field` and `FieldLabel` render a native `<label>`, which takes textual, non-interactive content
+only. Place a link or button outside it. To name the select with content that lives elsewhere, pass
+`aria-labelledby` to `SelectRoot`.
+
+## API
+
+### SelectRootProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectRootProps"
+/>
+
+### SelectTriggerProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectTriggerProps"
+/>
+
+### SelectValueProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectValueProps"
+/>
+
+### SelectIndicatorProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectIndicatorProps"
+/>
+
+### SelectPopoverProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectPopoverProps"
+/>
+
+### SelectListBoxProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectListBoxProps"
+/>
+
+### SelectItemProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectItemProps"
+/>

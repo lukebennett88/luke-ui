@@ -32,7 +32,9 @@ const presentExportPaths = {
 	'./primitives/checkbox': './dist/primitives/checkbox.js',
 	'./primitives/combobox': './dist/primitives/combobox.js',
 	'./primitives/field': './dist/primitives/field.js',
+	'./primitives/select': './dist/primitives/select.js',
 	'./primitives/text-input': './dist/primitives/text-input.js',
+	'./select-field': './dist/select-field.js',
 	'./text-input-field': './dist/text-input-field.js',
 } as const;
 
