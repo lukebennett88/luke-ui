@@ -50,12 +50,35 @@ interactive part an accessible name, keyboard behaviour, and a considered focus 
 
 ## Root and input props
 
-Inside a `TextInputRoot`, set the input's name, form, value, state, and validation on the root. The
-root passes the new value to `onChange`. Keep `placeholder`, `inputMode`, `autoComplete`,
-`className`, `ref`, and event handlers on `TextInput`.
+The root owns the state and semantics that span the field. A `TextInput` inside it takes the root's
+values for these props and ignores its own:
 
-When the root and the input both set the same prop, the root wins. For example, `name` on a rooted
-`TextInput` has no effect.
+- `id`. Set `inputId` on the root.
+- `value` and `defaultValue`.
+- `name` and `form`.
+- `disabled`, `readOnly`, and `required`. Set `isDisabled`, `isReadOnly`, and `isRequired` on the
+  root.
+- `aria-invalid`. Set `isInvalid` or a validation prop on the root.
+
+The root passes the new value to its `onChange`.
+
+`aria-describedby` and `aria-labelledby` on a rooted `TextInput` add to the field's own wiring. They
+never replace the connection to the label, description, and error.
+
+Props that belong to the input itself can be set on `TextInput`. Set `placeholder`,
+`autoCapitalize`, `className`, `style`, and `ref` there. The root also accepts `autoComplete`,
+`inputMode`, `autoCorrect`, `spellCheck`, `enterKeyHint`, and `autoFocus`, and the input inherits
+them. A value set on the `TextInput` wins over the root's. Event handlers on the input run alongside
+the root's. An `onChange` on the input receives the change event, while the root's `onChange` still
+receives the value.
+
+```tsx
+<TextInputRoot autoComplete="off">
+	<Field label="Email">
+		<TextInput autoComplete="email" />
+	</Field>
+</TextInputRoot>
+```
 
 `id` on `TextInputRoot` targets the root element. Pass `inputId` to set the input's id.
 

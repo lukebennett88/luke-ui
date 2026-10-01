@@ -93,6 +93,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'pattern',
 			'placeholder',
 			'prefix',
+			'ref',
 			'size',
 			'suffix',
 			'type',

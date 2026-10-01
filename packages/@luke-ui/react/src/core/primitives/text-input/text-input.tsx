@@ -3,10 +3,11 @@ import { createContext, use } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
 import { Group as RacGroup } from 'react-aria-components/Group';
 import type { InputProps as RacInputProps } from 'react-aria-components/Input';
-import { Input as RacInput } from 'react-aria-components/Input';
+import { Input as RacInput, InputContext } from 'react-aria-components/Input';
 import type { TextFieldProps as RacTextFieldProps } from 'react-aria-components/TextField';
 import { TextField as RacTextField } from 'react-aria-components/TextField';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { useSlottedContext } from 'react-aria-components/slots';
 import { cx } from '../../../shared/utils/utils.js';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
@@ -162,11 +163,25 @@ export type TextInputPrefixProps = Prettify<ComponentProps<'span'>>;
 export type TextInputSuffixProps = Prettify<ComponentProps<'span'>>;
 
 /**
+ * Add the `TextInput`'s own ids to the ones the root wired up. Joining keeps the field's label,
+ * description, and error connected, the way React Aria's `useField` does for its consumers.
+ */
+function joinIds(rootIds: string | undefined, ownIds: string | undefined): string | undefined {
+	const ids = [...(rootIds?.split(' ') ?? []), ...(ownIds?.split(' ') ?? [])].filter(Boolean);
+	return ids.length > 0 ? [...new Set(ids)].join(' ') : undefined;
+}
+
+/**
  * Semantic root for a text input field. It connects a `TextInput` to the label, description, and
  * error parts inside it, and owns the field's value, state, validation, and size.
  *
- * `id` targets the root element. Pass `inputId` to set the input's id. When a prop is set on both
- * the root and the `TextInput` inside it, the root wins.
+ * `id` targets the root element. Pass `inputId` to set the input's id.
+ *
+ * A `TextInput` inside the root ignores its own `id`, `name`, `form`, `value`, `defaultValue`,
+ * `disabled`, `readOnly`, `required`, and `aria-invalid`, because the root owns them. Its
+ * `aria-describedby` and `aria-labelledby` add to the field's own wiring. Other input props, such
+ * as `placeholder` and `autoComplete`, belong to the input. The root accepts some of them, such as
+ * `autoComplete` and `inputMode`, and the `TextInput` inherits them and can override them.
  */
 export function TextInputRoot(props: TextInputRootProps): JSX.Element {
 	const { className, id, inputId, size = 'medium', ...textFieldProps } = props;
@@ -188,8 +203,16 @@ export function TextInputRoot(props: TextInputRootProps): JSX.Element {
 
 /**
  * Text input. Used on its own, it draws its own chrome and takes native input props. Inside a
- * `TextInputRoot`, the root owns its id, name, value, state, validation, and size. Inside a
- * `TextInputControl`, the control draws the chrome and the input is transparent.
+ * `TextInputRoot`, the root owns its id, name, form, value, state, and validation, and the size
+ * comes from the nearest `TextInputControl` or root. Inside a `TextInputControl`, the control draws
+ * the chrome and the input is transparent.
+ *
+ * Inside a root, `aria-describedby` and `aria-labelledby` add to the field's own label,
+ * description, and error wiring instead of replacing it. The other input props, such as
+ * `placeholder`, `autoComplete`, `className`, and `ref`, belong to the input. Those the root also
+ * accepts, such as `autoComplete` and `inputMode`, are inherited and can be overridden here. A
+ * local `onChange` receives the change event and runs alongside the root's `onChange`, which
+ * receives the value.
  *
  * Invalid state comes from `aria-invalid` on a standalone input, or from the root. A standalone or
  * rooted input marks it with a thicker border that does not change its size.
@@ -210,6 +233,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
 		...inputProps
 	} = props;
 	const isRooted = use(TextInputRootContext);
+	const rootInputProps = useSlottedContext(InputContext);
 	const isInControl = use(TextInputControlContext);
 	const size = use(TextInputSizeContext) ?? sizeProp ?? 'medium';
 	// The root supplies these through React Aria's input context. Dropping the input's own values
@@ -228,10 +252,26 @@ export function TextInput(props: TextInputProps): JSX.Element {
 				value,
 			};
 
+	// A local `aria-describedby` or `aria-labelledby` would replace the root's through React Aria's
+	// merge and disconnect the label, description, and error, so join them instead.
+	const rootedWiring = isRooted
+		? {
+				'aria-describedby': joinIds(
+					rootInputProps?.['aria-describedby'],
+					inputProps['aria-describedby'],
+				),
+				'aria-labelledby': joinIds(
+					rootInputProps?.['aria-labelledby'],
+					inputProps['aria-labelledby'],
+				),
+			}
+		: undefined;
+
 	return (
 		<RacInput
 			{...inputProps}
 			{...standaloneProps}
+			{...rootedWiring}
 			className={composeRenderProps(className, (renderedClassName) => {
 				return textInputRecipe({ isInControl, size }).input({ className: renderedClassName });
 			})}

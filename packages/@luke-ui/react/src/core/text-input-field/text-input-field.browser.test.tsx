@@ -185,6 +185,31 @@ test('TextInputField puts id on its root element and inputId on the input', () =
 	expect(getDescribedText(input)).toBe('Example description');
 });
 
+test('TextInputField resolves an object or callback ref to the root element and inputRef to the input', () => {
+	const ref = createRef<HTMLDivElement>();
+	const inputRef = createRef<HTMLInputElement>();
+	const callbackResolved: Array<HTMLDivElement | null> = [];
+	const { locator } = render(
+		<>
+			<TextInputField id="ref-root" inputRef={inputRef} label="Object" ref={ref} />
+			<TextInputField
+				id="callback-root"
+				label="Callback"
+				ref={(node) => {
+					callbackResolved.push(node);
+				}}
+			/>
+		</>,
+	);
+	const control = locator.getByRole('textbox', { name: 'Object' }).element();
+
+	expect(ref.current).toBe(document.getElementById('ref-root'));
+	expect(ref.current).toBeInstanceOf(HTMLDivElement);
+	expect(ref.current?.contains(control)).toBe(true);
+	expect(inputRef.current).toBe(control);
+	expect(callbackResolved.at(-1)).toBe(document.getElementById('callback-root'));
+});
+
 test('TextInputField renders a control with or without a prefix or suffix', () => {
 	render(
 		<>

@@ -27,7 +27,6 @@ type _TextInputFieldOmit = DistributiveOmit<
 	| 'id'
 	| 'inputId'
 	| 'isInvalid'
-	| 'ref'
 	| 'size'
 	| keyof DocumentedInputProps
 >;
@@ -42,16 +41,16 @@ interface _TextInputFieldBaseProps extends _TextInputFieldOmit, DocumentedInputP
 	/** Element id for the input. The field generates one when omitted. */
 	inputId?: TextInputRootProps['inputId'];
 	/**
-	 * Forwarded to the inner `<input>` element.
-	 *
-	 * This field takes no plain `ref`: `inputRef` is the only way to reach the
-	 * control, so a ref can never silently resolve to a wrapper element instead.
+	 * Forwarded to the inner `<input>` element. Accepts a callback ref or a ref object. Use `ref`
+	 * for the root element.
 	 */
 	inputRef?: Ref<HTMLInputElement>;
 	/** Placeholder text for the input. */
 	placeholder?: string;
 	/** Element shown before the input value. */
 	prefix?: ReactNode;
+	/** Forwarded to the field's root element, which is also the target of `id`. Use `inputRef` for the `<input>`. */
+	ref?: TextInputRootProps['ref'];
 	/** Control size. @default 'medium' */
 	size?: TextInputSize;
 	/** Element shown after the input value. */

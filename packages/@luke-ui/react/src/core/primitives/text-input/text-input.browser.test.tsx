@@ -8,8 +8,9 @@ import {
 	TextInputRoot,
 	TextInputSuffix,
 } from '@luke-ui/react/primitives/text-input';
+import { useState } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { page } from 'vite-plus/test/context';
+import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../../test-utils/axe.js';
 import { getDescribedText } from '../../test-utils/get-described-text.js';
 import { render, visualAppearances } from '../../test-utils/render.js';
@@ -194,18 +195,187 @@ test('a rooted TextInput is wired to its label, description, and error with no m
 	expect(hasMessageIcon('Example field')).toBe(true);
 });
 
-test('a rooted TextInput yields its semantic props to the root', () => {
+// Root-coordinated props have one owner. A rooted input ignores its own values for them.
+test('a rooted TextInput ignores its own coordinated props and keeps the root state', async () => {
+	const rootChanges: Array<string> = [];
+	const eventValues: Array<string> = [];
+
+	function Example() {
+		const [value, setValue] = useState('from root');
+		return (
+			<form>
+				<TextInputRoot
+					inputId="root-input"
+					isInvalid
+					name="root-name"
+					onChange={(next) => {
+						rootChanges.push(next);
+						setValue(next);
+					}}
+					value={value}
+				>
+					<FieldLabel>Example field</FieldLabel>
+					<TextInput
+						aria-invalid={false}
+						id="own-input"
+						name="own-name"
+						onChange={(event) => {
+							eventValues.push(event.target.value);
+						}}
+						value="other"
+					/>
+					<FieldError>Example error</FieldError>
+				</TextInputRoot>
+			</form>
+		);
+	}
+	const { container } = render(<Example />);
+	const element = input('Example field');
+	const form = container.querySelector('form');
+	if (form == null) throw new Error('Expected a form.');
+
+	expect(element.id).toBe('root-input');
+	expect(element.value).toBe('from root');
+	expect(element).toHaveAttribute('aria-invalid', 'true');
+	expect(new FormData(form).get('root-name')).toBe('from root');
+	expect(new FormData(form).has('own-name')).toBe(false);
+
+	await userEvent.type(page.getByRole('textbox', { name: 'Example field' }), '!');
+
+	expect(rootChanges.at(-1)).toBe('from root!');
+	expect(eventValues.at(-1)).toBe('from root!');
+	expect(element.value).toBe('from root!');
+	expect(new FormData(form).get('root-name')).toBe('from root!');
+});
+
+test('a rooted TextInput follows the root for disabled, read-only, and required', () => {
 	render(
-		<TextInputRoot inputId="root-input" isDisabled name="root-name">
-			<FieldLabel>Example field</FieldLabel>
-			<TextInput id="own-input" name="own-name" />
-		</TextInputRoot>,
+		<>
+			<TextInputRoot isDisabled>
+				<FieldLabel>Disabled</FieldLabel>
+				<TextInput disabled={false} />
+			</TextInputRoot>
+			<TextInputRoot isReadOnly>
+				<FieldLabel>Read-only</FieldLabel>
+				<TextInput readOnly={false} />
+			</TextInputRoot>
+			<TextInputRoot isRequired>
+				<FieldLabel>Mandatory</FieldLabel>
+				<TextInput required={false} />
+			</TextInputRoot>
+			<TextInputRoot>
+				<FieldLabel>Editable</FieldLabel>
+				<TextInput disabled readOnly required />
+			</TextInputRoot>
+		</>,
+	);
+
+	expect(input('Disabled')).toBeDisabled();
+	expect(input('Read-only')).toHaveAttribute('readonly');
+	expect(input('Mandatory*')).toBeRequired();
+	expect(input('Editable')).toBeEnabled();
+	expect(input('Editable')).not.toHaveAttribute('readonly');
+	expect(input('Editable')).not.toBeRequired();
+});
+
+// A part must never disconnect the field's own wiring, so its ids add to the root's.
+test('a rooted TextInput adds its aria-describedby to the field description and error', () => {
+	render(
+		<>
+			<TextInputRoot isInvalid>
+				<FieldLabel>Example field</FieldLabel>
+				<TextInput aria-describedby="extra" />
+				<FieldDescription>Example description</FieldDescription>
+				<FieldError>Example error</FieldError>
+			</TextInputRoot>
+			<p id="extra">Extra hint</p>
+		</>,
 	);
 	const element = input('Example field');
 
-	expect(element.id).toBe('root-input');
-	expect(element.name).toBe('root-name');
-	expect(element).toBeDisabled();
+	expect(element).toHaveAccessibleDescription('Example description Example error Extra hint');
+});
+
+test('a rooted TextInput adds its aria-labelledby to the field label', () => {
+	render(
+		<>
+			<TextInputRoot>
+				<FieldLabel>Example field</FieldLabel>
+				<TextInput aria-labelledby="extra" />
+			</TextInputRoot>
+			<p id="extra">Extra label</p>
+		</>,
+	);
+
+	expect(page.getByRole('textbox').element()).toHaveAccessibleName('Example field Extra label');
+});
+
+test('a standalone TextInput keeps its own aria-describedby', () => {
+	render(
+		<>
+			<TextInput aria-describedby="extra" aria-label="Standalone" />
+			<p id="extra">Extra hint</p>
+		</>,
+	);
+
+	expect(input('Standalone')).toHaveAccessibleDescription('Extra hint');
+});
+
+// Input-local props are inherited from the root and can be overridden on the part.
+test('a rooted TextInput overrides input-local props from the root', async () => {
+	const changes: Array<string> = [];
+	const rootChanges: Array<string> = [];
+	render(
+		<TextInputRoot
+			autoComplete="off"
+			onChange={(value) => {
+				rootChanges.push(value);
+			}}
+		>
+			<Field label="Email">
+				<TextInput
+					autoComplete="email"
+					className="own-input"
+					onChange={(event) => {
+						changes.push(event.target.value);
+					}}
+					placeholder="you@example.com"
+				/>
+			</Field>
+		</TextInputRoot>,
+	);
+	const element = input('Email');
+
+	expect(element).toHaveAttribute('autocomplete', 'email');
+	expect(element).toHaveAttribute('placeholder', 'you@example.com');
+	expect(element).toHaveClass('own-input');
+
+	await userEvent.type(page.getByRole('textbox', { name: 'Email' }), 'a');
+
+	expect(changes.at(-1)).toBe('a');
+	expect(rootChanges.at(-1)).toBe('a');
+});
+
+test('a rooted TextInput inherits input-local props from the root unless it sets its own', () => {
+	render(
+		<>
+			<TextInputRoot autoComplete="off" inputMode="numeric">
+				<Field label="Inherits">
+					<TextInput />
+				</Field>
+			</TextInputRoot>
+			<TextInputRoot autoComplete="off" inputMode="numeric">
+				<Field label="Overrides">
+					<TextInput autoComplete="email" inputMode="decimal" />
+				</Field>
+			</TextInputRoot>
+		</>,
+	);
+
+	expect(input('Inherits')).toHaveAttribute('autocomplete', 'off');
+	expect(input('Inherits')).toHaveAttribute('inputmode', 'numeric');
+	expect(input('Overrides')).toHaveAttribute('autocomplete', 'email');
+	expect(input('Overrides')).toHaveAttribute('inputmode', 'decimal');
 });
 
 test('TextInputRoot puts id on its root element and inputId on the input', () => {

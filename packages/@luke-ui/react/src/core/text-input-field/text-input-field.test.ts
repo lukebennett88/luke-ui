@@ -1,3 +1,4 @@
+import type { Ref } from 'react';
 import { assertType, test } from 'vite-plus/test';
 import type { TextInputFieldProps } from './text-input-field.js';
 
@@ -20,4 +21,12 @@ test('TextInputField requires a visible label or an accessible name', () => {
 test('TextInputField derives invalid state from errorMessage only', () => {
 	// @ts-expect-error — a non-empty errorMessage is the only way to mark the field invalid
 	assertType<TextInputFieldProps>({ isInvalid: true, label: 'Search' });
+});
+
+test('TextInputField takes a root element ref and an input ref', () => {
+	assertType<TextInputFieldProps>({
+		inputRef: null as unknown as Ref<HTMLInputElement>,
+		label: 'Search',
+		ref: null as unknown as Ref<HTMLDivElement>,
+	});
 });
