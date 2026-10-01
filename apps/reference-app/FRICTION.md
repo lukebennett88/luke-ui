@@ -72,11 +72,11 @@ builds menu items in a hidden collection pass, so the `PressResponder` that `Fil
 never reaches the rendered item. In the browser, no file chooser opens and React warns "A
 PressResponder was rendered without a pressable child". A working `FileTrigger` needs a hidden
 placeholder button outside the popover, an `aria-label` set on its input by hand, and an imperative
-`.click()` from the menu action. That is the native input's path with more code, so the app keeps
-a hidden native `<input type="file">` and clicks it from the menu action. Image decoding stays in
-app code. `FileTrigger` fits when a button opens the picker directly. Owner:
-[#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711), if a
-public menu composition supports file actions.
+`.click()` from the menu action. That is the native input's path with more code, so the app keeps a
+hidden native `<input type="file">` and clicks it from the menu action. Image decoding stays in app
+code. `FileTrigger` fits when a button opens the picker directly. Owner:
+[#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711), if a public
+menu composition supports file actions.
 
 ### Root styles in portals
 
