@@ -1,0 +1,122 @@
+---
+title: TextInput primitives
+description:
+  Lower-level parts for composing a text input, with or without a field root and adornments.
+source: packages/@luke-ui/react/src/exports/primitives/text-input.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/TextField.html
+---
+
+Use these primitives to build a custom text input. For most application forms, use
+[`TextInputField`](/components/forms/text-input-field).
+
+<ExampleBlock src="text-input-primitive/basic" title="TextInput primitives: Basic" />
+
+## Anatomy
+
+`TextInputRoot` is the semantic root. It connects the input to the label, description, and error
+inside it, and owns the value, state, validation, and size. `TextInput` is the `<input>`.
+`TextInputControl` is optional chrome around the input and its `TextInputPrefix` and
+`TextInputSuffix`. Parts follow document order, so put the prefix before the input and the suffix
+after it.
+
+```tsx
+<TextInputRoot name="amount">
+	<Field label="Amount">
+		<TextInputControl>
+			<TextInputPrefix>$</TextInputPrefix>
+			<TextInput inputMode="decimal" />
+			<TextInputSuffix>USD</TextInputSuffix>
+		</TextInputControl>
+	</Field>
+</TextInputRoot>
+```
+
+## Choosing a composition
+
+The parts combine at three levels. Choose the smallest one that fits.
+
+- A standalone `TextInput` draws its own chrome and takes native input props such as `name`,
+  `value`, `onChange`, `disabled`, and `aria-invalid`. Give it an accessible name with `aria-label`
+  or a connected label.
+- A rooted `TextInput` sits inside `TextInputRoot`. The root connects it to `Field`, or to
+  `FieldLabel`, `FieldDescription`, and `FieldError`, with no manual ids.
+- An adorned input wraps `TextInput` in `TextInputControl` to add a prefix or suffix. Use it with or
+  without a root.
+
+<ExampleBlock src="text-input-primitive/rooted" title="TextInput primitives: Rooted" />
+
+A prefix or suffix accepts any React node, including an interactive one such as a button. Give an
+interactive part an accessible name, keyboard behaviour, and a considered focus order.
+
+## Root and input props
+
+Inside a `TextInputRoot`, set the input's name, form, value, state, and validation on the root. The
+root passes the new value to `onChange`. Keep `placeholder`, `inputMode`, `autoComplete`,
+`className`, `ref`, and event handlers on `TextInput`.
+
+When the root and the input both set the same prop, the root wins. For example, `name` on a rooted
+`TextInput` has no effect.
+
+`id` on `TextInputRoot` targets the root element. Pass `inputId` to set the input's id.
+
+## Size
+
+`medium` is the default. Use `small` in compact layouts. Set `size` on one owner, and the parts
+inside it follow:
+
+- `TextInputControl` sets the size of the whole control, and overrides a surrounding root.
+- `TextInputRoot` sets the size of the input and any control inside it.
+- A standalone `TextInput` takes its own `size`.
+
+`TextInputPrefix` and `TextInputSuffix` have no size of their own. The control also sets the icon
+size for everything inside it, so an `Icon` in a prefix or suffix scales with the control without a
+`size` of its own.
+
+## Validation
+
+Mark a standalone `TextInput` invalid with `aria-invalid`. Inside a root, set `isInvalid` or a
+validation prop on the root. An invalid input draws a thicker border that does not change its size.
+
+`TextInputControl` has no invalid prop. It reads invalid state from its input, and while invalid it
+draws an error icon after the input value and before any `TextInputSuffix`. A root with no control
+shows the icon beside the error message instead, so a field shows one icon either way.
+
+The icon is decorative and hidden from assistive technology, so it marks a problem but does not
+describe it. Always give an invalid input an error message. See [Validation](/docs/validation).
+
+## API
+
+### TextInputRootProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx"
+	name="TextInputRootProps"
+/>
+
+### TextInputProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx"
+	name="TextInputProps"
+/>
+
+### TextInputControlProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx"
+	name="TextInputControlProps"
+/>
+
+### TextInputPrefixProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx"
+	name="TextInputPrefixProps"
+/>
+
+### TextInputSuffixProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx"
+	name="TextInputSuffixProps"
+/>

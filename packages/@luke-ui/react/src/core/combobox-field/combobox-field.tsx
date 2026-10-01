@@ -4,8 +4,8 @@ import { Icon } from '../icon/icon.js';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
 import { useIsMobileDevice } from '../overlays/use-is-mobile-device.js';
 import { ComboboxClearButton } from '../primitives/combobox/clear-button.js';
+import { ComboboxControl } from '../primitives/combobox/control.js';
 import { ComboboxEmptyState } from '../primitives/combobox/empty-state.js';
-import { ComboboxInputGroup } from '../primitives/combobox/input-group.js';
 import { ComboboxInput } from '../primitives/combobox/input.js';
 import type { ComboboxLoadMoreItemProps } from '../primitives/combobox/item.js';
 import { ComboboxLoadMoreItem } from '../primitives/combobox/item.js';
@@ -154,18 +154,18 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		if (isMobileDevice) {
 			return (
 				<>
-					<ComboboxInputGroup>
+					<ComboboxControl>
 						<ComboboxTrayTrigger placeholder={placeholder}>
 							<Icon name="chevronDown" />
 						</ComboboxTrayTrigger>
-					</ComboboxInputGroup>
+					</ComboboxControl>
 					<ComboboxTray>
-						<ComboboxInputGroup>
+						<ComboboxControl>
 							<ComboboxInput placeholder={placeholder} ref={inputRef} />
 							<ComboboxClearButton aria-label="Clear search">
 								<Icon name="close" />
 							</ComboboxClearButton>
-						</ComboboxInputGroup>
+						</ComboboxControl>
 						{listBox}
 					</ComboboxTray>
 				</>
@@ -174,7 +174,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 
 		return (
 			<>
-				<ComboboxInputGroup>
+				<ComboboxControl>
 					<ComboboxInput placeholder={placeholder} ref={inputRef} />
 					{isInteractive ? (
 						<ComboboxClearButton aria-label="Clear selection">
@@ -184,7 +184,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 					<ComboboxTrigger aria-label="Toggle options">
 						<Icon name="chevronDown" />
 					</ComboboxTrigger>
-				</ComboboxInputGroup>
+				</ComboboxControl>
 				<ComboboxPopover offset={4} {...popoverProps} style={resolvedStyle}>
 					{listBox}
 				</ComboboxPopover>

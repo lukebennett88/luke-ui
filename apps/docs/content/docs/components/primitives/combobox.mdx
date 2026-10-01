@@ -14,15 +14,15 @@ layout or loading UI. They expose the control, popover, listbox, and option part
 ## Anatomy
 
 `ComboboxRoot` owns the searchable single-select state. Put the control and popover inside it. Put
-the text input and trigger in `ComboboxInputGroup`. Put the listbox and its items in
-`ComboboxPopover`.
+the text input and trigger in `ComboboxControl`, which draws the control chrome. Put the listbox and
+its items in `ComboboxPopover`.
 
 ```tsx
 <ComboboxRoot defaultItems={countries} aria-label="Country">
-	<ComboboxInputGroup>
+	<ComboboxControl>
 		<ComboboxInput />
 		<ComboboxTrigger aria-label="Toggle options" />
-	</ComboboxInputGroup>
+	</ComboboxControl>
 	<ComboboxPopover>
 		<ComboboxListBox<{ id: string; label: string }>>
 			{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
@@ -30,6 +30,8 @@ the text input and trigger in `ComboboxInputGroup`. Put the listbox and its item
 	</ComboboxPopover>
 </ComboboxRoot>
 ```
+
+`id` on `ComboboxRoot` targets the root element. Pass `inputId` to set the input's id.
 
 ## Control and options
 
@@ -44,9 +46,9 @@ render function with `items`. Its `loadMoreItem` slot appends content after the 
 ## Size
 
 Set `size` on `ComboboxRoot` to give the control and option primitives a shared size. Individual
-`ComboboxInputGroup`, `ComboboxInput`, `ComboboxClearButton`, `ComboboxTrigger`, `ComboboxItem`, and
-`ComboboxLoadMoreItem` components can override that size when necessary. `ComboboxInputGroup` sizes
-a nested `Icon` the same way `InputGroup` does at the same control size.
+`ComboboxControl`, `ComboboxInput`, `ComboboxClearButton`, `ComboboxTrigger`, `ComboboxItem`, and
+`ComboboxLoadMoreItem` components can override that size when necessary. `ComboboxControl` sizes a
+nested `Icon` the same way `TextInputControl` does at the same control size.
 
 ## Loading and empty results
 
@@ -102,11 +104,11 @@ remain intact.
 	name="ComboboxRootProps"
 />
 
-### ComboboxInputGroupProps
+### ComboboxControlProps
 
 <component-props-table
-	path="packages/@luke-ui/react/src/core/primitives/combobox/input-group.tsx"
-	name="ComboboxInputGroupProps"
+	path="packages/@luke-ui/react/src/core/primitives/combobox/control.tsx"
+	name="ComboboxControlProps"
 />
 
 ### ComboboxInputProps

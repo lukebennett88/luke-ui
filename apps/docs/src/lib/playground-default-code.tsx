@@ -5,7 +5,7 @@ import { Cluster } from '@luke-ui/react/cluster';
 import { Heading } from '@luke-ui/react/heading';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -65,7 +65,7 @@ export default () => {
 						control={form.control}
 						name="email"
 						render={({ field, fieldState }) => (
-							<TextField
+							<TextInputField
 								autoComplete="email"
 								errorMessage={fieldState.error?.message}
 								inputRef={field.ref}
@@ -85,7 +85,7 @@ export default () => {
 						control={form.control}
 						name="password"
 						render={({ field, fieldState }) => (
-							<TextField
+							<TextInputField
 								autoComplete="current-password"
 								description="At least 8 characters, including a number."
 								errorMessage={fieldState.error?.message}

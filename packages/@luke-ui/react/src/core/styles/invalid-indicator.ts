@@ -20,10 +20,10 @@ function invalidIconMask(size: string) {
 }
 
 /**
- * In-control invalid icon for `Combobox`, rendered as a `::after` inside the control
- * and reordered ahead of trailing affordances (`clearButton`/`trigger`) with flex
- * `order` in `primitives/combobox/styles.css.ts`. No `marginInlineStart`: the control's own
- * `paddingInlineEnd` already supplies the leading gap, so a margin here would double
+ * In-control invalid icon for `ComboboxControl` and `TextInputControl`, rendered as a
+ * `::after` inside the control and reordered ahead of trailing parts (the combobox buttons,
+ * `TextInputSuffix`) with flex `order` in each recipe. No `marginInlineStart`: the input's
+ * own `paddingInlineEnd` already supplies the leading gap, so a margin here would double
  * it. `size` matches the recipe's `small`/`medium` control-size variants.
  */
 export function invalidIndicatorIcon(size: string) {

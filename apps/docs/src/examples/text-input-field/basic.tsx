@@ -1,8 +1,8 @@
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 
 export default () => {
 	return (
-		<TextField
+		<TextInputField
 			description="Use the address you check most often."
 			label="Email address"
 			name="emailAddress"

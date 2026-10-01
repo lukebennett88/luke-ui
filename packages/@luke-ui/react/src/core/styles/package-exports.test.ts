@@ -9,7 +9,9 @@ const absentExportPaths = [
 	'./checkbox/primitive',
 	'./combobox-field/primitive',
 	'./field/primitive',
+	'./text-field',
 	'./text-field/primitive',
+	'./primitives/input-group',
 	'./recipes',
 	'./heading-context',
 	'./icon-size-context',
@@ -30,7 +32,8 @@ const presentExportPaths = {
 	'./primitives/checkbox': './dist/primitives/checkbox.js',
 	'./primitives/combobox': './dist/primitives/combobox.js',
 	'./primitives/field': './dist/primitives/field.js',
-	'./primitives/input-group': './dist/primitives/input-group.js',
+	'./primitives/text-input': './dist/primitives/text-input.js',
+	'./text-input-field': './dist/text-input-field.js',
 } as const;
 
 test('publishes only the final styling entrypoints', () => {

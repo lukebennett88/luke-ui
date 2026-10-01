@@ -2,7 +2,7 @@ import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 
@@ -20,7 +20,7 @@ export default () => {
 		<Stack gap="sp16" maxInlineSize="22rem">
 			<form onReset={() => setSubmittedEmail('')} onSubmit={handleSubmit}>
 				<Stack gap="sp16">
-					<TextField
+					<TextInputField
 						description="We will send the receipt to this address."
 						isRequired
 						label="Email address"

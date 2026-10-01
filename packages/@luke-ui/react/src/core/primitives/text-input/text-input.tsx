@@ -1,0 +1,296 @@
+import type { ComponentProps, JSX, Ref } from 'react';
+import { createContext, use } from 'react';
+import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
+import { Group as RacGroup } from 'react-aria-components/Group';
+import type { InputProps as RacInputProps } from 'react-aria-components/Input';
+import { Input as RacInput } from 'react-aria-components/Input';
+import type { TextFieldProps as RacTextFieldProps } from 'react-aria-components/TextField';
+import { TextField as RacTextField } from 'react-aria-components/TextField';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { cx } from '../../../shared/utils/utils.js';
+import { IconSizeProvider } from '../../icon/icon-size-context.js';
+import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
+import type { DistributiveOmit } from '../../types/distributive-omit.js';
+import type { Prettify } from '../../types/prettify.js';
+import { rootIdProps } from '../root-id.js';
+import type { TextInputSize } from './recipe.css.js';
+import { textInputRecipe } from './recipe.css.js';
+import { textInputControlScopeClassName } from './styles.css.js';
+
+/** Size set by the nearest control-level size owner: `TextInputControl`, then `TextInputRoot`. */
+const TextInputSizeContext = createContext<TextInputSize | null>(null);
+
+/** Whether a `TextInput` renders inside a `TextInputRoot`, which then owns its semantics. */
+const TextInputRootContext = createContext(false);
+
+/** Whether a `TextInput` renders inside a `TextInputControl`, which then owns its chrome. */
+const TextInputControlContext = createContext(false);
+
+type _TextInputRootOmit = DistributiveOmit<
+	RacTextFieldProps,
+	'children' | 'className' | 'id' | 'render'
+>;
+
+interface _TextInputRootProps extends _TextInputRootOmit {
+	/** The field's parts, such as `Field` or `FieldLabel`, and a `TextInput`. */
+	children?: RacTextFieldProps['children'];
+	/** Class name for the root element. */
+	className?: RacTextFieldProps['className'];
+	/** Initial value (uncontrolled). */
+	defaultValue?: RacTextFieldProps['defaultValue'];
+	/** The `<form>` element to associate the input with, by id. */
+	form?: RacTextFieldProps['form'];
+	/** Element id for the root element. Use `inputId` for the input. */
+	id?: string;
+	/** Element id for the input. The root generates one when omitted. */
+	inputId?: RacTextFieldProps['id'];
+	/** Whether the input is disabled. */
+	isDisabled?: RacTextFieldProps['isDisabled'];
+	/** Marks the input invalid, for example after failed validation. */
+	isInvalid?: RacTextFieldProps['isInvalid'];
+	/** Whether the input can be read but not changed. */
+	isReadOnly?: RacTextFieldProps['isReadOnly'];
+	/** Whether a value is required before the form can submit. */
+	isRequired?: RacTextFieldProps['isRequired'];
+	/** The name of the input, used when submitting an HTML form. */
+	name?: RacTextFieldProps['name'];
+	/** Called with the new value when it changes. */
+	onChange?: RacTextFieldProps['onChange'];
+	/** Forwarded to the root element. */
+	ref?: Ref<HTMLDivElement>;
+	/**
+	 * Sets the size of the input and any `TextInputControl` inside the root.
+	 * @default 'medium'
+	 */
+	size?: TextInputSize;
+	/** Custom validation function run against the current value. Return a message, or `true`/`null` when valid. */
+	validate?: RacTextFieldProps['validate'];
+	/**
+	 * When native HTML form validation runs.
+	 * @default 'native'
+	 */
+	validationBehavior?: RacTextFieldProps['validationBehavior'];
+	/** Controlled value. */
+	value?: RacTextFieldProps['value'];
+}
+
+/** Props for `TextInputRoot`. */
+export type TextInputRootProps = Prettify<_TextInputRootProps>;
+
+/** Native input props a `TextInputRoot` owns when a `TextInput` renders inside it. */
+type RootOwnedInputProp =
+	| 'aria-invalid'
+	| 'defaultValue'
+	| 'disabled'
+	| 'form'
+	| 'id'
+	| 'name'
+	| 'readOnly'
+	| 'required'
+	| 'value';
+
+type _TextInputOmit = DistributiveOmit<
+	RacInputProps,
+	'aria-label' | 'className' | 'inputMode' | 'size' | RootOwnedInputProp
+>;
+
+interface _TextInputProps extends _TextInputOmit {
+	/** Accessible name for the input when no visible label is connected. */
+	'aria-label'?: RacInputProps['aria-label'];
+	/** Marks a standalone input invalid. Inside a `TextInputRoot`, the root owns validity. */
+	'aria-invalid'?: RacInputProps['aria-invalid'];
+	/** Class name for the input element. */
+	className?: RacInputProps['className'];
+	/** Initial value of a standalone input. Inside a `TextInputRoot`, the root owns the value. */
+	defaultValue?: RacInputProps['defaultValue'];
+	/** Whether a standalone input is disabled. Inside a `TextInputRoot`, use `isDisabled` on the root. */
+	disabled?: RacInputProps['disabled'];
+	/** The `<form>` element to associate a standalone input with, by id. */
+	form?: RacInputProps['form'];
+	/** Element id for a standalone input. Inside a `TextInputRoot`, use `inputId` on the root. */
+	id?: RacInputProps['id'];
+	/** Hints which input mechanism is most appropriate for the entered content. */
+	inputMode?: RacInputProps['inputMode'];
+	/** The name of a standalone input, used when submitting an HTML form. */
+	name?: RacInputProps['name'];
+	/** Whether a standalone input is read-only. Inside a `TextInputRoot`, use `isReadOnly` on the root. */
+	readOnly?: RacInputProps['readOnly'];
+	/**
+	 * Forwarded to the underlying `<input>` element. Accepts a callback ref or a ref
+	 * object, so form libraries that hand out callback refs work without a bridge.
+	 */
+	ref?: Ref<HTMLInputElement>;
+	/** Whether a standalone input is required. Inside a `TextInputRoot`, use `isRequired` on the root. */
+	required?: RacInputProps['required'];
+	/**
+	 * Sets the size of a standalone input. A surrounding `TextInputRoot` or `TextInputControl`
+	 * sets the size instead.
+	 * @default 'medium'
+	 */
+	size?: TextInputSize;
+	/** Controlled value of a standalone input. Inside a `TextInputRoot`, the root owns the value. */
+	value?: RacInputProps['value'];
+}
+
+/** Props for `TextInput`. */
+export type TextInputProps = Prettify<_TextInputProps>;
+
+type _TextInputControlOmit = DistributiveOmit<
+	RacGroupProps,
+	'children' | 'className' | 'isDisabled' | 'isInvalid' | 'render'
+>;
+
+interface _TextInputControlProps extends _TextInputControlOmit {
+	/** A `TextInput` with optional `TextInputPrefix` and `TextInputSuffix` parts, in document order. */
+	children?: RacGroupProps['children'];
+	/** Class name for the control element. */
+	className?: RacGroupProps['className'];
+	/**
+	 * Sets the size of the whole control, overriding the size of a surrounding `TextInputRoot`.
+	 * @default 'medium'
+	 */
+	size?: TextInputSize;
+}
+
+/** Props for `TextInputControl`. */
+export type TextInputControlProps = Prettify<_TextInputControlProps>;
+
+/** Props for `TextInputPrefix`. */
+export type TextInputPrefixProps = Prettify<ComponentProps<'span'>>;
+
+/** Props for `TextInputSuffix`. */
+export type TextInputSuffixProps = Prettify<ComponentProps<'span'>>;
+
+/**
+ * Semantic root for a text input field. It connects a `TextInput` to the label, description, and
+ * error parts inside it, and owns the field's value, state, validation, and size.
+ *
+ * `id` targets the root element. Pass `inputId` to set the input's id. When a prop is set on both
+ * the root and the `TextInput` inside it, the root wins.
+ */
+export function TextInputRoot(props: TextInputRootProps): JSX.Element {
+	const { className, id, inputId, size = 'medium', ...textFieldProps } = props;
+
+	return (
+		<TextInputRootContext.Provider value>
+			<TextInputSizeContext.Provider value={size}>
+				<RacTextField
+					{...textFieldProps}
+					{...rootIdProps(id, inputId)}
+					className={composeRenderProps(className, (value) => {
+						return textInputRecipe().root({ className: value });
+					})}
+				/>
+			</TextInputSizeContext.Provider>
+		</TextInputRootContext.Provider>
+	);
+}
+
+/**
+ * Text input. Used on its own, it draws its own chrome and takes native input props. Inside a
+ * `TextInputRoot`, the root owns its id, name, value, state, validation, and size. Inside a
+ * `TextInputControl`, the control draws the chrome and the input is transparent.
+ *
+ * Invalid state comes from `aria-invalid` on a standalone input, or from the root. A standalone or
+ * rooted input marks it with a thicker border that does not change its size.
+ */
+export function TextInput(props: TextInputProps): JSX.Element {
+	const {
+		'aria-invalid': ariaInvalid,
+		className,
+		defaultValue,
+		disabled,
+		form,
+		id,
+		name,
+		readOnly,
+		required,
+		size: sizeProp,
+		value,
+		...inputProps
+	} = props;
+	const isRooted = use(TextInputRootContext);
+	const isInControl = use(TextInputControlContext);
+	const size = use(TextInputSizeContext) ?? sizeProp ?? 'medium';
+	// The root supplies these through React Aria's input context. Dropping the input's own values
+	// lets the root win, because a local prop would otherwise override the context.
+	const standaloneProps = isRooted
+		? undefined
+		: {
+				'aria-invalid': ariaInvalid,
+				defaultValue,
+				disabled,
+				form,
+				id,
+				name,
+				readOnly,
+				required,
+				value,
+			};
+
+	return (
+		<RacInput
+			{...inputProps}
+			{...standaloneProps}
+			className={composeRenderProps(className, (renderedClassName) => {
+				return textInputRecipe({ isInControl, size }).input({ className: renderedClassName });
+			})}
+		/>
+	);
+}
+
+/**
+ * Visual chrome around a `TextInput` and its optional `TextInputPrefix` and `TextInputSuffix`. The
+ * control owns the border, background, shadow, and rounding, and its parts are transparent flex
+ * children whose position follows document order.
+ *
+ * The control has no invalid prop. It reads invalid state from its input, and while invalid it
+ * draws an error icon after the input value and before any `TextInputSuffix`. The icon is hidden
+ * from assistive technology, because the field's error message carries the meaning.
+ */
+export function TextInputControl(props: TextInputControlProps): JSX.Element {
+	const { className, size: sizeProp, ...groupProps } = props;
+	const size = sizeProp ?? use(TextInputSizeContext) ?? 'medium';
+
+	return (
+		<TextInputControlContext.Provider value>
+			<TextInputSizeContext.Provider value={size}>
+				{/*
+				 * The provider covers the whole control, so an icon in a prefix or suffix stays
+				 * proportioned to the control without a `size` of its own. Same precedent as `Button`
+				 * (`BUTTON_ICON_SIZE`) and the combobox control.
+				 */}
+				<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
+					<RacGroup
+						{...groupProps}
+						className={composeRenderProps(className, (value) => {
+							return cx(
+								textInputControlScopeClassName,
+								textInputRecipe({ size }).control({ className: value }),
+							);
+						})}
+					/>
+				</IconSizeProvider>
+			</TextInputSizeContext.Provider>
+		</TextInputControlContext.Provider>
+	);
+}
+
+/** Content shown at the leading end of a `TextInputControl`, such as a currency symbol. */
+export function TextInputPrefix(props: TextInputPrefixProps): JSX.Element {
+	const { className, ...spanProps } = props;
+	const size = use(TextInputSizeContext) ?? 'medium';
+
+	return <span {...spanProps} className={textInputRecipe({ size }).prefix({ className })} />;
+}
+
+/**
+ * Content shown at the trailing end of a `TextInputControl`, such as a unit or a button. It always
+ * follows the control's invalid icon, whatever its document position.
+ */
+export function TextInputSuffix(props: TextInputSuffixProps): JSX.Element {
+	const { className, ...spanProps } = props;
+	const size = use(TextInputSizeContext) ?? 'medium';
+
+	return <span {...spanProps} className={textInputRecipe({ size }).suffix({ className })} />;
+}

@@ -3,8 +3,8 @@
  * selector that means "this control is in state X".
  *
  * The defaults cover a RAC `Group` that carries the field's data attributes
- * itself and contains a single `input`. Anatomies with more parts extend
- * these when their anatomy has more parts.
+ * itself and contains a single `input`. An anatomy whose element carries a
+ * state in another form extends them through `composeInputStateSelectors`.
  */
 const inputStates = {
 	disabled:
@@ -26,19 +26,38 @@ const inputStates = {
 	readOnly: '[data-readonly="true"], :has(input:read-only)',
 };
 
-/** Composes the shared field-state selectors used by TextField and Combobox recipes. */
-export function composeInputStateSelectors() {
-	const notDisabled = `:not(:where(${inputStates.disabled}))`;
+/** A state name in the shared field-state matrix. */
+type InputState = keyof typeof inputStates;
+
+/**
+ * Composes the shared field-state selectors used by the text input and combobox recipes.
+ *
+ * `extraStates` appends selectors to a state's list, for an anatomy whose element carries a state
+ * in a form the defaults do not cover, such as a bare `<input>` that is itself `:read-only`.
+ */
+export function composeInputStateSelectors(extraStates: Partial<Record<InputState, string>> = {}) {
+	const states = {
+		disabled: withExtraState(inputStates.disabled, extraStates.disabled),
+		focusWithin: withExtraState(inputStates.focusWithin, extraStates.focusWithin),
+		hover: withExtraState(inputStates.hover, extraStates.hover),
+		invalid: withExtraState(inputStates.invalid, extraStates.invalid),
+		readOnly: withExtraState(inputStates.readOnly, extraStates.readOnly),
+	};
+	const notDisabled = `:not(:where(${states.disabled}))`;
 
 	return {
-		disabled: `&:where(${inputStates.disabled})`,
-		focusWithin: `&:where(${inputStates.focusWithin})${notDisabled}`,
-		hover: `&:where(${inputStates.hover})${notDisabled}:not(:where(${inputStates.focusWithin})):not(:where(${inputStates.readOnly}))`,
-		invalid: `&:where(${inputStates.invalid})${notDisabled}`,
-		invalidFocusWithin: `&:where(${inputStates.invalid}):where(${inputStates.focusWithin})${notDisabled}`,
-		readOnly: `&:where(${inputStates.readOnly})${notDisabled}`,
-		readOnlyFocusWithin: `&:where(${inputStates.readOnly}):where(${inputStates.focusWithin})${notDisabled}`,
+		disabled: `&:where(${states.disabled})`,
+		focusWithin: `&:where(${states.focusWithin})${notDisabled}`,
+		hover: `&:where(${states.hover})${notDisabled}:not(:where(${states.focusWithin})):not(:where(${states.readOnly}))`,
+		invalid: `&:where(${states.invalid})${notDisabled}`,
+		invalidFocusWithin: `&:where(${states.invalid}):where(${states.focusWithin})${notDisabled}`,
+		readOnly: `&:where(${states.readOnly})${notDisabled}`,
+		readOnlyFocusWithin: `&:where(${states.readOnly}):where(${states.focusWithin})${notDisabled}`,
 	};
+}
+
+function withExtraState(selectors: string, extra: string | undefined): string {
+	return extra === undefined ? selectors : `${selectors}, ${extra}`;
 }
 
 /** Only explicit disabled attrs; avoids `:has()` matching an ancestor that contains any disabled input on the page. */

@@ -1,12 +1,5 @@
-import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
-import {
-	InputGroup,
-	InputGroupInput,
-	InputGroupPrefix,
-	InputGroupSuffix,
-} from '@luke-ui/react/primitives/input-group';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -21,41 +14,41 @@ import {
 	Stack,
 } from '../test-utils/visual.js';
 
-function TextFieldScene() {
+function TextInputFieldScene() {
 	return (
 		<Stack>
-			<TextField
+			<TextInputField
 				description="Small control size."
 				label="Small"
 				name="small"
 				placeholder="Small"
 				size="small"
 			/>
-			<TextField
+			<TextInputField
 				description="Medium control size."
 				label="Medium"
 				name="medium"
 				placeholder="Medium"
 				size="medium"
 			/>
-			<TextField label="Amount" name="amount" placeholder="0.00" prefix="$" />
-			<TextField label="Total" name="total" placeholder="0.00" suffix="USD" />
-			<TextField defaultValue="Unavailable" isDisabled label="Disabled" name="disabled" />
-			<TextField defaultValue="Read only" isReadOnly label="Read-only" name="readonly" />
-			<TextField
+			<TextInputField label="Amount" name="amount" placeholder="0.00" prefix="$" />
+			<TextInputField label="Total" name="total" placeholder="0.00" suffix="USD" />
+			<TextInputField defaultValue="Unavailable" isDisabled label="Disabled" name="disabled" />
+			<TextInputField defaultValue="Read only" isReadOnly label="Read-only" name="readonly" />
+			<TextInputField
 				defaultValue="nope"
 				errorMessage="Please enter a valid email."
 				label="Invalid"
 				name="invalid"
 			/>
-			<TextField
+			<TextInputField
 				defaultValue="nope"
 				errorMessage="Please enter a valid email."
 				label="Invalid small"
 				name="invalid-small"
 				size="small"
 			/>
-			<TextField
+			<TextInputField
 				defaultValue="0.00"
 				errorMessage="Enter a valid amount."
 				label="Invalid with a suffix"
@@ -64,7 +57,7 @@ function TextFieldScene() {
 				suffix="USD"
 			/>
 			<Stack width="14rem">
-				<TextField
+				<TextInputField
 					label="Search"
 					name="prefix-multiple-elements"
 					placeholder="Search…"
@@ -75,7 +68,7 @@ function TextFieldScene() {
 						</>
 					}
 				/>
-				<TextField
+				<TextInputField
 					label="Amount with icons"
 					name="suffix-multiple-elements"
 					placeholder="0.00"
@@ -87,43 +80,49 @@ function TextFieldScene() {
 					}
 				/>
 			</Stack>
-			<Stack>
-				<InputGroup>
-					<InputGroupPrefix>$</InputGroupPrefix>
-					<InputGroupInput aria-label="Amount" defaultValue="1250.00" inputMode="decimal" />
-					<InputGroupSuffix>USD</InputGroupSuffix>
-				</InputGroup>
-				<InputGroup>
-					<InputGroupInput aria-label="Workspace" defaultValue="acme" />
-					<InputGroupSuffix>.luke-ui.dev</InputGroupSuffix>
-				</InputGroup>
-				<InputGroup>
-					<InputGroupPrefix>
-						<Icon name="search" />
-					</InputGroupPrefix>
-					<InputGroupInput aria-label="Search input group" defaultValue="invoices" />
-					<InputGroupSuffix>
-						<Button size="small">Clear</Button>
-					</InputGroupSuffix>
-				</InputGroup>
-				<InputGroup isInvalid size="small">
-					<InputGroupPrefix>$</InputGroupPrefix>
-					<InputGroupInput aria-label="Refund" defaultValue="-1" inputMode="decimal" />
-					<InputGroupSuffix>USD</InputGroupSuffix>
-				</InputGroup>
-			</Stack>
 		</Stack>
 	);
 }
 
+/**
+ * The control around the input, if there is one. `TextInputControl` is the input's parent and
+ * carries `role="presentation"` inside a field, because the field's own `<label>` names the input.
+ */
+function controlFor(name: string): HTMLElement | null {
+	const parent = page.getByRole('textbox', { name }).element().parentElement;
+	return parent?.getAttribute('role') === 'presentation' ? parent : null;
+}
+
+/**
+ * Whether the control draws its CSS invalid icon. The icon is a `::after` mask with no DOM node, so
+ * its computed `content` is the only observable signal that it renders.
+ */
+function hasControlIcon(name: string): boolean {
+	const control = controlFor(name);
+	if (control == null) return false;
+	return getComputedStyle(control, '::after').content !== 'none';
+}
+
+/** Whether the field's error message draws its leading icon. */
+function hasMessageIcon(name: string): boolean {
+	const describedBy = page
+		.getByRole('textbox', { name })
+		.element()
+		.getAttribute('aria-describedby');
+	const messages = (describedBy ?? '')
+		.split(' ')
+		.flatMap((id) => document.getElementById(id) ?? []);
+	return messages.some((message) => getComputedStyle(message, '::before').display !== 'none');
+}
+
 // Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
-test('TextField resolves object and callback inputRef to the input, participates in a form, and fires onBlur', () => {
+test('TextInputField resolves object and callback inputRef to the input, participates in a form, and fires onBlur', () => {
 	const inputRef = createRef<HTMLInputElement>();
 	const callbackResolved: Array<HTMLElement | null> = [];
 	let blurred = false;
 	const { container, locator } = render(
 		<>
-			<TextField
+			<TextInputField
 				description="Helpful context"
 				inputRef={inputRef}
 				label="Name"
@@ -132,7 +131,7 @@ test('TextField resolves object and callback inputRef to the input, participates
 					blurred = true;
 				}}
 			/>
-			<TextField
+			<TextInputField
 				inputRef={(node: HTMLElement | null) => {
 					callbackResolved.push(node);
 				}}
@@ -166,39 +165,48 @@ test('TextField resolves object and callback inputRef to the input, participates
 	form.remove();
 });
 
-test('the TextField scene has no axe violations', async () => {
-	const { container } = render(<TextFieldScene />);
+test('TextInputField puts id on its root element and inputId on the input', () => {
+	render(
+		<TextInputField
+			className="example-root"
+			description="Example description"
+			id="example-root"
+			inputId="example-input"
+			label="Example field"
+			name="example"
+		/>,
+	);
+	const input = page.getByRole('textbox', { name: 'Example field' }).element();
+	const root = document.getElementById('example-root');
+
+	expect(input.id).toBe('example-input');
+	expect(root).toHaveClass('example-root');
+	expect(root?.contains(input)).toBe(true);
+	expect(getDescribedText(input)).toBe('Example description');
+});
+
+test('TextInputField renders a control with or without a prefix or suffix', () => {
+	render(
+		<>
+			<TextInputField label="Plain" name="plain" />
+			<TextInputField label="Prefixed" name="prefixed" prefix="$" />
+		</>,
+	);
+
+	expect(controlFor('Plain')).not.toBe(null);
+	expect(controlFor('Prefixed')).not.toBe(null);
+});
+
+test('the TextInputField scene has no axe violations', async () => {
+	const { container } = render(<TextInputFieldScene />);
 
 	await expectNoAxeViolations(container);
 });
 
-/**
- * The input is always a direct child of the styled group (prefix and suffix are
- * siblings, not wrappers), so `parentElement` is the group regardless of what else
- * the composition contains. The group carries `role="presentation"` under a
- * `TextField` (`RacTextField` supplies that through `GroupContext` when the field has
- * its own external `<label>`), so it cannot be found via `[role="group"]`.
- */
-function groupFor(name: string): HTMLElement {
-	const group = page.getByRole('textbox', { name }).element().parentElement;
-	if (group == null) throw new Error(`Expected a text input group for "${name}".`);
-	return group;
-}
-
-/**
- * The invalid indicator `InputGroup` renders itself, if it is present. Matched by the
- * public `exclamationTriangle` icon, not a generated recipe class. A prefix or suffix
- * can hold an `<svg>` of its own.
- */
-function indicatorFor(name: string): SVGSVGElement | null {
-	const glyph = groupFor(name).querySelector('use[href$="#exclamationTriangle"]');
-	return glyph?.closest('svg') ?? null;
-}
-
 // The shared invalid selector must not match `:has(:invalid)`: that matches a required,
 // empty input from first render — before any interaction or submit — while
 // `aria-invalid` stays null, painting an untouched required field invalid even
-// though assistive technology is told it's fine. Guard that the group only picks
+// though assistive technology is told it's fine. Guard that the control only picks
 // up the invalid treatment once React Aria has recorded a real validation
 // failure. `errorMessage={false}` must not suppress that cue. The in-control
 // icon is the invalid cue Luke UI owns.
@@ -209,27 +217,27 @@ test('a required field is painted invalid only after a real submit fails validat
 	// an ancestor `Form`, so a native submit is enough to trigger it.
 	render(
 		<form>
-			<TextField isRequired label="Email" name="email" />
-			<TextField errorMessage={false} isRequired label="Username" name="username" />
+			<TextInputField isRequired label="Email" name="email" />
+			<TextInputField errorMessage={false} isRequired label="Username" name="username" />
 			<button type="submit">Submit</button>
 		</form>,
 	);
 
-	expect(indicatorFor('Email*')).toBe(null);
-	expect(indicatorFor('Username*')).toBe(null);
+	expect(hasControlIcon('Email*')).toBe(false);
+	expect(hasControlIcon('Username*')).toBe(false);
 
 	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
 
-	await expect.poll(() => indicatorFor('Email*')).not.toBe(null);
-	await expect.poll(() => indicatorFor('Username*')).not.toBe(null);
+	await expect.poll(() => hasControlIcon('Email*')).toBe(true);
+	await expect.poll(() => hasControlIcon('Username*')).toBe(true);
 	await expect
 		.poll(() => getDescribedText(page.getByRole('textbox', { name: 'Username*' }).element()).length)
 		.toBeGreaterThan(0);
 });
 
-test('an errorMessage marks the field invalid and renders its markup', () => {
+test('an errorMessage marks the field invalid with one icon and renders its markup', () => {
 	render(
-		<TextField
+		<TextInputField
 			errorMessage={
 				<>
 					See the <strong>terms</strong> for details.
@@ -240,27 +248,34 @@ test('an errorMessage marks the field invalid and renders its markup', () => {
 		/>,
 	);
 
-	expect(indicatorFor('Email')).not.toBe(null);
+	expect(page.getByRole('textbox', { name: 'Email' }).element()).toHaveAttribute(
+		'aria-invalid',
+		'true',
+	);
+	expect(hasControlIcon('Email')).toBe(true);
+	expect(hasMessageIcon('Email')).toBe(false);
 	expect(page.getByText('terms').element().tagName).toBe('STRONG');
 });
 
-test('an unlabeled TextField exposes aria-label on the textbox', () => {
-	const { locator } = render(<TextField aria-label="Search documentation" name="search" />);
+test('an unlabeled TextInputField exposes aria-label on the textbox', () => {
+	const { locator } = render(<TextInputField aria-label="Search documentation" name="search" />);
 
 	expect(locator.getByRole('textbox', { name: 'Search documentation' }).element()).toBeTruthy();
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
-		const { locator } = render(<TextFieldScene />, { appearance });
-		await captureVisualAppearance(locator, 'text-field/kitchen-sink', appearance);
+		const { locator } = render(<TextInputFieldScene />, { appearance });
+		await captureVisualAppearance(locator, 'text-input-field/kitchen-sink', appearance);
 	}
 });
 
 test('keyboard focus ring', { tags: ['visual'] }, async () => {
-	const { locator } = render(<TextField label="Focus me" name="focus" placeholder="Type here" />);
+	const { locator } = render(
+		<TextInputField label="Focus me" name="focus" placeholder="Type here" />,
+	);
 	await focusViaKeyboard(page.getByRole('textbox', { name: 'Focus me' }));
-	await captureVisual(locator, 'text-field/focus-visible');
+	await captureVisual(locator, 'text-input-field/focus-visible');
 });
 
 test('forced-colors states', { tags: ['visual'] }, async () => {
@@ -269,9 +284,9 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 	try {
 		const { locator } = render(
 			<Stack>
-				<TextField label="Default" name="default" placeholder="Type here" />
-				<TextField defaultValue="Unavailable" isDisabled label="Disabled" name="disabled" />
-				<TextField
+				<TextInputField label="Default" name="default" placeholder="Type here" />
+				<TextInputField defaultValue="Unavailable" isDisabled label="Disabled" name="disabled" />
+				<TextInputField
 					defaultValue="nope"
 					errorMessage="Please enter a valid email."
 					label="Invalid"
@@ -279,7 +294,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 				/>
 			</Stack>,
 		);
-		await captureVisual(locator, 'text-field/forced-colors-states');
+		await captureVisual(locator, 'text-input-field/forced-colors-states');
 	} finally {
 		await emulateForcedColors('none');
 	}

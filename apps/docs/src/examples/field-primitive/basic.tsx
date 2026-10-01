@@ -1,19 +1,12 @@
-import { Field, FieldDescription, FieldLabel } from '@luke-ui/react/primitives/field';
-import { InputGroup, InputGroupInput } from '@luke-ui/react/primitives/input-group';
+import { Field } from '@luke-ui/react/primitives/field';
+import { TextInput, TextInputRoot } from '@luke-ui/react/primitives/text-input';
 
 export default () => {
 	return (
-		<Field>
-			<FieldLabel htmlFor="work-email">Email</FieldLabel>
-			<InputGroup>
-				<InputGroupInput
-					aria-describedby="work-email-description"
-					id="work-email"
-					name="email"
-					type="email"
-				/>
-			</InputGroup>
-			<FieldDescription id="work-email-description">Use your work email.</FieldDescription>
-		</Field>
+		<TextInputRoot name="email" type="email">
+			<Field description="Use your work email." label="Email">
+				<TextInput />
+			</Field>
+		</TextInputRoot>
 	);
 };

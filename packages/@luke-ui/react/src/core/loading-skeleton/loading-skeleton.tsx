@@ -41,7 +41,7 @@ interface _LoadingSkeletonProps extends ComponentProps<'span'> {
 	isLoading?: boolean;
 	/**
 	 * Sets the semantic corner radius of the skeleton overlay. Use when the wrapped child has no
-	 * radius of its own but a visual descendant does (e.g. wrapping a `TextField`).
+	 * radius of its own but a visual descendant does (e.g. wrapping a `TextInputField`).
 	 */
 	radius?: keyof typeof vars.radius;
 }

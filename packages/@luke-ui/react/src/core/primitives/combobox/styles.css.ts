@@ -16,7 +16,7 @@ import { overlayEnterTransition, overlayExitTransition } from '../../styles/over
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
-// Set per `size` variant on `inputGroup` below, from `FIELD_CONTROL_ICON_SIZE`, so the invalid
+// Set per `size` variant on `control` below, from `FIELD_CONTROL_ICON_SIZE`, so the invalid
 // `::after` icon matches the trigger/clear chevrons at each size instead of a constant.
 const comboboxErrorIconSize = createVar();
 
@@ -73,7 +73,7 @@ const comboboxActionStyles = {
 	justifyContent: 'center',
 	minBlockSize: vars.controlSize.minTarget,
 	minInlineSize: vars.controlSize.minTarget,
-	// The invalid `::after` icon on `inputGroup` below is its last DOM child (a
+	// The invalid `::after` icon on `control` below is its last DOM child (a
 	// pseudo-element always renders after real children), which put it after both
 	// action buttons too. Giving them an explicit `order` moves them behind the icon
 	// (default `order: 0`) in flex layout without touching document order, so the
@@ -107,11 +107,11 @@ const popoverExitTransition = overlayExitTransition(popoverProperties);
 /**
  * Raw slotted config for the combobox anatomy.
  *
- * Slots follow the anatomy top to bottom: `root`, `inputGroup`, `textInput`,
+ * Slots follow the anatomy top to bottom: `root`, `control`, `textInput`,
  * `trigger`, `clearButton`, `itemCheck`, `popover`, `listBox`, `loadMoreItem`,
  * `section`, `sectionHeading`, `emptyState`, `item`, then the tray-only parts.
  *
- * `inputGroup` and `listBox` use a `presentation` variant for tray styles. `trayTrigger` and
+ * `control` and `listBox` use a `presentation` variant for tray styles. `trayTrigger` and
  * `trayValue` are tray-only slots.
  */
 const comboboxConfig = {
@@ -122,7 +122,7 @@ const comboboxConfig = {
 			inlineSize: '100%',
 			minInlineSize: 0,
 		},
-		inputGroup: {
+		control: {
 			'@media': {
 				'(forced-colors: active)': {
 					backgroundColor: 'Field',
@@ -404,7 +404,7 @@ const comboboxConfig = {
 		presentation: {
 			popover: {},
 			tray: {
-				inputGroup: {
+				control: {
 					flexShrink: 0,
 					inlineSize: 'auto',
 					marginBlock: vars.space.sp12,
@@ -418,7 +418,7 @@ const comboboxConfig = {
 		},
 		size: {
 			medium: {
-				inputGroup: {
+				control: {
 					blockSize: vars.controlSize.medium,
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
 					vars: { [comboboxErrorIconSize]: vars.iconSize[FIELD_CONTROL_ICON_SIZE.medium] },
@@ -446,7 +446,7 @@ const comboboxConfig = {
 				},
 			},
 			small: {
-				inputGroup: {
+				control: {
 					blockSize: vars.controlSize.small,
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,

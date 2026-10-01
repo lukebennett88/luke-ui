@@ -46,7 +46,7 @@ field invalid.
 ```tsx
 <form.Field name="email">
 	{(field) => (
-		<TextField
+		<TextInputField
 			errorMessage={field.state.meta.errors[0]?.message}
 			label="Email"
 			onBlur={field.handleBlur}
@@ -81,14 +81,14 @@ function focusFirstInvalidField(form: HTMLFormElement | null) {
 }
 ```
 
-`TextField`, `Checkbox`, and `ComboboxField` each mark the control itself, so the first branch
+`TextInputField`, `Checkbox`, and `ComboboxField` each mark the control itself, so the first branch
 matches. The second branch covers a grouped control that marks a wrapping element instead. One ref
 on the form covers every field, whatever the form grows to hold.
 
-Reach for `inputRef` when you need a ref to one specific control. `TextField` and `Checkbox` render
-a label, description, and error message around the control, so `inputRef` is what reaches the input
-underneath. A primitive that renders the control itself, such as `ComboboxInput`, takes a plain
-`ref`.
+Reach for `inputRef` when you need a ref to one specific control. `TextInputField` and `Checkbox`
+render a label, description, and error message around the control, so `inputRef` is what reaches the
+input underneath. A primitive that renders the control itself, such as `ComboboxInput`, takes a
+plain `ref`.
 
 ## Submitting data
 

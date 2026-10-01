@@ -1,9 +1,8 @@
-import { ComboboxField } from '@luke-ui/react/combobox-field';
+import { ComboboxField, ComboboxItem } from '@luke-ui/react/combobox-field';
 import { Icon } from '@luke-ui/react/icon';
 import {
+	ComboboxControl,
 	ComboboxInput,
-	ComboboxInputGroup,
-	ComboboxItem,
 	ComboboxListBox,
 	ComboboxPopover,
 	ComboboxRoot,
@@ -100,6 +99,50 @@ test('ComboboxField resolves object and callback inputRefs, submits its value, a
 	expect(blurred).toBe(true);
 
 	form.remove();
+});
+
+test('ComboboxRoot and ComboboxField put id on the root element and inputId on the input', () => {
+	render(
+		<>
+			<ComboboxRoot<CountryItem>
+				className="primitive-root"
+				defaultItems={countryItems}
+				id="primitive-root"
+				inputId="primitive-input"
+			>
+				<Field label="Primitive country">
+					<ComboboxControl>
+						<ComboboxInput />
+					</ComboboxControl>
+					<ComboboxPopover>
+						<ComboboxListBox<CountryItem>>{renderCountryItem}</ComboboxListBox>
+					</ComboboxPopover>
+				</Field>
+			</ComboboxRoot>
+			<ComboboxField<CountryItem>
+				className="field-root"
+				defaultItems={countryItems}
+				id="field-root"
+				inputId="field-input"
+				label="Field country"
+			>
+				{renderCountryItem}
+			</ComboboxField>
+		</>,
+	);
+	const cases = [
+		{ inputId: 'primitive-input', name: 'Primitive country', rootId: 'primitive-root' },
+		{ inputId: 'field-input', name: 'Field country', rootId: 'field-root' },
+	];
+
+	for (const { inputId, name, rootId } of cases) {
+		const input = page.getByRole('combobox', { name }).element();
+		const root = document.getElementById(rootId);
+
+		expect(input.id).toBe(inputId);
+		expect(root).toHaveClass(rootId);
+		expect(root?.contains(input)).toBe(true);
+	}
 });
 
 test('the ComboboxField scene has no axe violations', async () => {
@@ -359,12 +402,12 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				</ComboboxField>
 				<ComboboxRoot defaultItems={sceneCountryItems} isInvalid name="invalid-no-message">
 					<Field label="Invalid, no message">
-						<ComboboxInputGroup>
+						<ComboboxControl>
 							<ComboboxInput placeholder="Select a country..." />
 							<ComboboxTrigger aria-label="Toggle options">
 								<Icon name="chevronDown" />
 							</ComboboxTrigger>
-						</ComboboxInputGroup>
+						</ComboboxControl>
 						<ComboboxPopover offset={4}>
 							<ComboboxListBox>{renderCountryItem}</ComboboxListBox>
 						</ComboboxPopover>
@@ -404,12 +447,12 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					size="small"
 				>
 					<Field label="Small group, medium trigger">
-						<ComboboxInputGroup>
+						<ComboboxControl>
 							<ComboboxInput placeholder="Select a country..." />
 							<ComboboxTrigger aria-label="Toggle medium trigger" size="medium">
 								<Icon name="chevronDown" />
 							</ComboboxTrigger>
-						</ComboboxInputGroup>
+						</ComboboxControl>
 						<ComboboxPopover offset={4}>
 							<ComboboxListBox>{renderCountryItem}</ComboboxListBox>
 						</ComboboxPopover>

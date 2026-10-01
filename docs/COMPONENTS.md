@@ -14,7 +14,7 @@ component entrypoints.
 ```ts
 import { Button } from '@luke-ui/react/button';
 import { Text } from '@luke-ui/react/text';
-import { InputGroup } from '@luke-ui/react/primitives/input-group';
+import { TextInputRoot } from '@luke-ui/react/primitives/text-input';
 import { Field, FieldLabel } from '@luke-ui/react/primitives/field';
 import { ComboboxRoot } from '@luke-ui/react/primitives/combobox';
 ```

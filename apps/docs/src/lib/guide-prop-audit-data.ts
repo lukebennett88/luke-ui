@@ -56,6 +56,8 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'aria-labelledby',
 			'defaultItems',
 			'errorMessage',
+			'id',
+			'inputId',
 			'inputRef',
 			'isRequired',
 			'items',
@@ -72,11 +74,19 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'size',
 			'validate',
 		],
-	'forms/text-field.mdx::packages/@luke-ui/react/src/core/text-field/text-field.tsx::TextFieldProps':
+	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/primitives/combobox/item.tsx::ComboboxItemProps':
+		[],
+	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/primitives/combobox/section.tsx::ComboboxSectionProps':
+		[],
+	'forms/text-input-field.mdx::packages/@luke-ui/react/src/core/text-input-field/text-input-field.tsx::TextInputFieldProps':
 		[
 			'aria-label',
 			'aria-labelledby',
+			'className',
 			'errorMessage',
+			'id',
+			'inputId',
+			'inputRef',
 			'isRequired',
 			'label',
 			'necessityIndicator',
@@ -147,7 +157,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		[],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/empty-state.tsx::ComboboxEmptyStateProps':
 		['children'],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/input-group.tsx::ComboboxInputGroupProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/control.tsx::ComboboxControlProps':
 		['size'],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/input.tsx::ComboboxInputProps':
 		['size'],
@@ -160,7 +170,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/popover.tsx::ComboboxPopoverProps':
 		[],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/root.tsx::ComboboxRootProps':
-		['aria-label', 'defaultItems', 'size'],
+		['aria-label', 'defaultItems', 'id', 'inputId', 'size'],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/section.tsx::ComboboxSectionProps':
 		['title'],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/tray-trigger.tsx::ComboboxTrayTriggerProps':
@@ -181,14 +191,27 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	],
 	'primitives/field.mdx::packages/@luke-ui/react/src/core/primitives/field/label.tsx::FieldLabelProps':
 		['htmlFor', 'necessityIndicator'],
-	'primitives/input-group.mdx::packages/@luke-ui/react/src/core/primitives/input-group/input-group.tsx::InputGroupInputProps':
-		['aria-label', 'className', 'inputMode', 'ref', 'size'],
-	'primitives/input-group.mdx::packages/@luke-ui/react/src/core/primitives/input-group/input-group.tsx::InputGroupPrefixProps':
+	'primitives/text-input.mdx::packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx::TextInputControlProps':
 		['size'],
-	'primitives/input-group.mdx::packages/@luke-ui/react/src/core/primitives/input-group/input-group.tsx::InputGroupProps':
-		['className', 'isInvalid', 'size'],
-	'primitives/input-group.mdx::packages/@luke-ui/react/src/core/primitives/input-group/input-group.tsx::InputGroupSuffixProps':
-		['size'],
+	'primitives/text-input.mdx::packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx::TextInputPrefixProps':
+		[],
+	'primitives/text-input.mdx::packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx::TextInputProps':
+		[
+			'aria-invalid',
+			'aria-label',
+			'className',
+			'disabled',
+			'inputMode',
+			'name',
+			'placeholder',
+			'ref',
+			'size',
+			'value',
+		],
+	'primitives/text-input.mdx::packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx::TextInputRootProps':
+		['form', 'id', 'inputId', 'isInvalid', 'name', 'onChange', 'size', 'value'],
+	'primitives/text-input.mdx::packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx::TextInputSuffixProps':
+		[],
 	'typography/blockquote.mdx::packages/@luke-ui/react/src/core/blockquote/blockquote.tsx::BlockquoteProps':
 		['fontWeight', 'lineClamp', 'typography'],
 	'typography/code.mdx::packages/@luke-ui/react/src/core/code/code.tsx::CodeProps': [],

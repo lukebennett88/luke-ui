@@ -1,7 +1,7 @@
 import { Icon } from '@luke-ui/react/icon';
 import {
+	ComboboxControl,
 	ComboboxInput,
-	ComboboxInputGroup,
 	ComboboxItem,
 	ComboboxListBox,
 	ComboboxPopover,
@@ -12,12 +12,12 @@ import {
 export default () => {
 	return (
 		<ComboboxRoot aria-label="Country">
-			<ComboboxInputGroup>
+			<ComboboxControl>
 				<ComboboxInput />
 				<ComboboxTrigger aria-label="Toggle options">
 					<Icon name="chevronDown" />
 				</ComboboxTrigger>
-			</ComboboxInputGroup>
+			</ComboboxControl>
 			<ComboboxPopover>
 				<ComboboxListBox>
 					<ComboboxItem id="au">Australia</ComboboxItem>

@@ -3,7 +3,7 @@ import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -27,7 +27,7 @@ export default () => {
 						name="name"
 						render={({ field, fieldState }) => (
 							<Stack minBlockSize="5.5rem">
-								<TextField
+								<TextInputField
 									errorMessage={fieldState.error?.message}
 									inputRef={field.ref}
 									label="Name"
@@ -44,7 +44,7 @@ export default () => {
 						name="email"
 						render={({ field, fieldState }) => (
 							<Stack minBlockSize="5.5rem">
-								<TextField
+								<TextInputField
 									errorMessage={fieldState.error?.message}
 									inputRef={field.ref}
 									label="Email"

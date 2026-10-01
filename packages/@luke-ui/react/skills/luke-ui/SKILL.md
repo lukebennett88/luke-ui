@@ -11,7 +11,8 @@ Follow these rules when the task involves Luke UI. Each rule states what to do a
 
 ## Refs on field components
 
-`TextField`, `Checkbox`, and `ComboboxField` expose `inputRef` for reaching their underlying input.
+`TextInputField`, `Checkbox`, and `ComboboxField` expose `inputRef` for reaching their underlying
+input.
 
 Do not pass a plain `ref` to these field components. Components that expose their rendered element
 directly use their documented `ref` prop instead. For example, `ComboboxInput` takes a plain `ref`.

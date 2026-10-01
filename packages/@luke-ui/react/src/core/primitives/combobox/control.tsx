@@ -11,31 +11,33 @@ import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxRecipe } from './styles.css.js';
 
-type _ComboboxInputGroupOmit = DistributiveOmit<RacGroupProps, 'className'>;
-interface _ComboboxInputGroupProps extends _ComboboxInputGroupOmit {
+type _ComboboxControlOmit = DistributiveOmit<RacGroupProps, 'className'>;
+interface _ComboboxControlProps extends _ComboboxControlOmit {
 	className?: RacGroupProps['className'];
 	size?: ComboboxSize;
 }
 
-/** Props for the styled combobox input group. */
-export type ComboboxInputGroupProps = Prettify<_ComboboxInputGroupProps>;
+/** Props for `ComboboxControl`. */
+export type ComboboxControlProps = Prettify<_ComboboxControlProps>;
 
 /**
- * Groups a combobox input and its controls. Inside a `ComboboxTray`, it renders as an inset search
- * bar.
+ * Visual chrome around a combobox input and its buttons. Inside a `ComboboxTray`, it renders as an
+ * inset search bar.
  */
-export function ComboboxInputGroup(props: ComboboxInputGroupProps): JSX.Element {
+export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 	const { size: sizeProp, ...groupProps } = props;
 	const presentation = useComboboxPresentation();
 	const size = useComboboxSize(sizeProp);
 
-	// Same icon size as `InputGroup`, including icons a caller puts in the group.
+	// The well chrome in `comboboxRecipe`'s `control` slot duplicates `TextInputControl`'s
+	// (`primitives/text-input/recipe.css.ts`). Change the two together until they share one source.
+	// Same icon size as `TextInputControl`, including icons a caller puts in the control.
 	return (
 		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 			<RacGroup
 				{...groupProps}
 				className={composeRenderProps(groupProps.className, (className) => {
-					return comboboxRecipe({ presentation, size }).inputGroup({ className });
+					return comboboxRecipe({ presentation, size }).control({ className });
 				})}
 			/>
 		</IconSizeProvider>

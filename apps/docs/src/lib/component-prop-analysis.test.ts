@@ -51,11 +51,11 @@ function forwardsDomPropsForExport(project: PropProject, path: string, name: str
 }
 
 test(
-	'keeps documented form and field props on TextField while hiding generic DOM props',
+	'keeps documented form and field props on TextInputField while hiding generic DOM props',
 	async () => {
 		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/text-field/text-field.tsx',
-			'TextFieldProps',
+			'packages/@luke-ui/react/src/core/text-input-field/text-input-field.tsx',
+			'TextInputFieldProps',
 		);
 		expect(names).toContain('label');
 		expect(names).toContain('aria-label');
@@ -63,8 +63,10 @@ test(
 		expect(names).toContain('value');
 		expect(names).toContain('onChange');
 		expect(names).toContain('description');
+		expect(names).toContain('id');
+		expect(names).toContain('inputId');
+		expect(names).not.toContain('isInvalid');
 		expect(names).not.toContain('onClick');
-		expect(names).not.toContain('className');
 		expect(names).not.toContain('onPointerMoveCapture');
 	},
 	TS_MORPH_TEST_TIMEOUT,
@@ -220,21 +222,30 @@ const AUDITED_TYPES: ReadonlyArray<{
 		visible: ['aria-label', 'children', 'color', 'isLoading', 'size'],
 	},
 	{
-		// The guide teaches `aria-label` and `inputMode` on `InputGroupInput` for standalone inputs.
+		// The guide teaches `aria-label`, `aria-invalid`, and `inputMode` on a standalone `TextInput`.
 		forwardsDomProps: true,
-		name: 'InputGroupInputProps',
-		path: 'packages/@luke-ui/react/src/core/primitives/input-group/input-group.tsx',
+		name: 'TextInputProps',
+		path: 'packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx',
 		visible: [
 			'aria-label',
+			'aria-invalid',
 			'className',
+			'defaultValue',
+			'disabled',
+			'form',
+			'id',
 			'inputMode',
+			'name',
 			'onHoverChange',
 			'onHoverEnd',
 			'onHoverStart',
 			'placeholder',
+			'readOnly',
 			'ref',
 			'render',
+			'required',
 			'size',
+			'value',
 		],
 	},
 	{

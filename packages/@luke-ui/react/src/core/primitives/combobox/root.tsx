@@ -4,6 +4,7 @@ import { ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import { rootIdProps } from '../root-id.js';
 import { ComboboxSizeProvider } from './size-context.js';
 import type { ComboboxSize } from './styles.css.js';
 import { comboboxRecipe } from './styles.css.js';
@@ -46,9 +47,11 @@ type _ComboboxRootOmit<T extends object> = DistributiveOmit<
 	RacComboBoxProps<T, 'single'>,
 	| 'defaultSelectedKey'
 	| 'defaultValue'
+	| 'id'
 	| 'onChange'
 	| 'onOpenChange'
 	| 'onSelectionChange'
+	| 'render'
 	| 'selectedKey'
 	| 'selectionMode'
 	| 'value'
@@ -59,6 +62,12 @@ interface _ComboboxRootProps<T extends object>
 	extends _ComboboxRootOmit<T>, ComboboxRootRedeclaredRACProps<T> {
 	/** The initially selected key (uncontrolled). */
 	defaultValue?: Key | null;
+
+	/** Element id for the root element. Use `inputId` for the input. */
+	id?: string;
+
+	/** Element id for the combobox input. The root generates one when omitted. */
+	inputId?: RacComboBoxProps<T, 'single'>['id'];
 
 	/**
 	 * The interaction required to display the ComboBox menu.
@@ -83,10 +92,18 @@ interface _ComboboxRootProps<T extends object>
 /** Props for the primitive combobox root. */
 export type ComboboxRootProps<T extends object> = Prettify<_ComboboxRootProps<T>>;
 
+/**
+ * Semantic root for a combobox. It connects the input, listbox, label, description, and error parts
+ * inside it.
+ *
+ * `id` targets the root element. Pass `inputId` to set the input's id.
+ */
 export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX.Element {
 	const {
 		allowsEmptyCollection = true,
 		className,
+		id,
+		inputId,
 		menuTrigger = 'focus',
 		ref,
 		size = 'medium',
@@ -112,6 +129,7 @@ export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX
 			<ComboboxValidationProvider value={validationContextValue}>
 				<RacComboBox
 					{...comboboxProps}
+					{...rootIdProps(id, inputId)}
 					allowsEmptyCollection={allowsEmptyCollection}
 					className={composeRenderProps(className, (renderedClassName) => {
 						return comboboxRecipe().root({ className: renderedClassName });

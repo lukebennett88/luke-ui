@@ -4,8 +4,8 @@ export type { ComboboxEmptyStateProps } from '../../core/primitives/combobox/emp
 export { ComboboxEmptyState } from '../../core/primitives/combobox/empty-state.js';
 export type { ComboboxInputProps } from '../../core/primitives/combobox/input.js';
 export { ComboboxInput } from '../../core/primitives/combobox/input.js';
-export type { ComboboxInputGroupProps } from '../../core/primitives/combobox/input-group.js';
-export { ComboboxInputGroup } from '../../core/primitives/combobox/input-group.js';
+export type { ComboboxControlProps } from '../../core/primitives/combobox/control.js';
+export { ComboboxControl } from '../../core/primitives/combobox/control.js';
 export type {
 	ComboboxItemProps,
 	ComboboxLoadMoreItemProps,

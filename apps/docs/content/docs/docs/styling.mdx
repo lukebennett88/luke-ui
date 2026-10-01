@@ -72,14 +72,14 @@ const variants: ButtonRecipeVariants = {
 const className = buttonRecipe({ ...variants, className: 'my-class' });
 ```
 
-A slotted recipe such as `inputGroupRecipe` returns one function per part. Choose variants once at
+A slotted recipe such as `textInputRecipe` returns one function per part. Choose variants once at
 the outer call, then call the part you are styling with an optional `{ className }`.
 
 ```tsx
-import { inputGroupRecipe } from '@luke-ui/react/primitives/input-group';
+import { textInputRecipe } from '@luke-ui/react/primitives/text-input';
 
-const { group, control } = inputGroupRecipe({ size: 'medium' });
-const groupClassName = group({ className: 'my-class' });
+const { control, input } = textInputRecipe({ size: 'medium' });
+const controlClassName = control({ className: 'my-class' });
 ```
 
 Do not import a recipe to restyle a Luke UI component from the outside. Use the component's props

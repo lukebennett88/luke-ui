@@ -2,7 +2,7 @@ import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import { useState } from 'react';
 import { NavLink } from 'react-router';
 import * as styles from '../styles/settings.css.js';
@@ -30,7 +30,7 @@ export function SettingsNavSearch({
 	value: string;
 }) {
 	return (
-		<TextField
+		<TextInputField
 			aria-label="Search settings"
 			onChange={onChange}
 			placeholder="Search…"

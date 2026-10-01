@@ -3,7 +3,7 @@ import { Code } from '@luke-ui/react/code';
 import { Icon } from '@luke-ui/react/icon';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Text } from '@luke-ui/react/text';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import { rootClassName } from '@luke-ui/react/theme';
 import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
@@ -129,7 +129,7 @@ export function DocsSearchDialog({ anchor, isOpen, onOpenChange }: DocsSearchDia
 														</Button>
 													}
 												>
-													<TextField
+													<TextInputField
 														aria-label="Search documentation"
 														autoComplete="off"
 														autoFocus // oxlint-disable-line jsx-a11y/no-autofocus -- Focus the field when the modal opens.

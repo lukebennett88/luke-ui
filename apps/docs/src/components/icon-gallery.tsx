@@ -5,7 +5,7 @@ import type { IconName, IconProps } from '@luke-ui/react/icon';
 import { Icon, iconNames } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import type { JSX, ReactNode } from 'react';
@@ -114,7 +114,7 @@ export function IconGallery(): JSX.Element {
 		<Stack className="not-prose" gap="sp16">
 			<Cluster gap="sp12">
 				<Box flexBasis="14rem" flexGrow="1" minInlineSize="12rem">
-					<TextField
+					<TextInputField
 						aria-label="Filter icons by name"
 						inputRef={inputRef}
 						onChange={setFilter}

@@ -40,7 +40,7 @@ interface FieldSlotProps extends FieldSlotContentProps {
 }
 
 /**
- * Naming props for composed fields (`TextField`, `ComboboxField`).
+ * Naming props for composed fields (`TextInputField`, `ComboboxField`).
  *
  * Pass a visible `label`, or omit `label` and provide exactly one of `aria-label` /
  * `aria-labelledby`. Composition parents forward the aria props to the React Aria field root.
@@ -70,7 +70,15 @@ interface _FieldProps extends _FieldOmit, FieldSlotProps {
 /** Props for the field primitive. */
 export type FieldProps = Prettify<_FieldProps>;
 
-/** Composes label, control slot, description, and error text. */
+/**
+ * Standard stacked field anatomy: a label, the control, a description, and an error slot that is
+ * always rendered.
+ *
+ * `Field` provides presentation, not semantics. Render it inside a control root such as
+ * `TextInputRoot` or `ComboboxRoot`, which connects the label, description, and error to the
+ * control. `Field` and the manual `FieldLabel`, `FieldDescription`, and `FieldError` parts are
+ * alternatives, so do not render those parts inside a `Field`.
+ */
 export function Field(props: FieldProps): JSX.Element {
 	const {
 		children,
