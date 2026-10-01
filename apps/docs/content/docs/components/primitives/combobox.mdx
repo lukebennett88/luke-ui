@@ -7,7 +7,7 @@ reactAria: https://react-spectrum.adobe.com/react-aria/ComboBox.html
 
 Use these primitives when [`ComboboxField`](/components/forms/combobox-field) does not fit your
 layout or loading UI. They expose the control, popover, listbox, and option parts used by
-`ComboboxField`. Start with `ComboboxField` when it fits.
+`ComboboxField`.
 
 <ExampleBlock src="combobox-primitive/basic" title="Combobox primitives: Basic" />
 
@@ -31,7 +31,7 @@ its items in `ComboboxPopover`.
 </ComboboxRoot>
 ```
 
-`id` on `ComboboxRoot` targets the root element. Pass `inputId` to set the input's id.
+`id` and `ref` on `ComboboxRoot` target the root element. Pass `inputId` to set the input's id.
 
 ## Control and options
 
@@ -53,8 +53,7 @@ nested `Icon` the same way `TextInputControl` does at the same control size.
 ## Loading and empty results
 
 Use `ComboboxLoadMoreItem` as the listbox's load-more sentinel. Use `ComboboxEmptyState` for custom
-empty content, including a loading message or spinner. `ComboboxField` supplies common loading and
-empty-state handling when its built-in composition is enough.
+empty content, including a loading message or spinner.
 
 ## Tray presentation
 

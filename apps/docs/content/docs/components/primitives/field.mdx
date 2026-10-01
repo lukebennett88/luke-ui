@@ -10,14 +10,6 @@ messages. Start with [`TextInputField`](/components/forms/text-input-field) or
 
 <ExampleBlock src="field-primitive/basic" title="Field primitive: Basic" />
 
-## Best practices
-
-| Guidance | Practices                                                                                           |
-| -------- | --------------------------------------------------------------------------------------------------- |
-| Do       | Use [`TextInputField`](/components/forms/text-input-field) or another supported field when it fits. |
-| Do       | Render the field parts inside a control root, such as `TextInputRoot` or `ComboboxRoot`.            |
-| Don't    | Render `FieldLabel`, `FieldDescription`, or `FieldError` inside a `Field`.                          |
-
 ## Anatomy
 
 `Field` provides the standard stacked anatomy: a label, the control, a description, and an error
@@ -40,8 +32,8 @@ required, so set the required state on the control root separately.
 
 ## Validation messages
 
-Use `errorMessage` for validation feedback. `FieldError` is styled for the field error slot and
-works with the validation state from the surrounding control root.
+Use `errorMessage` for validation feedback. `FieldError` shows the message, with a leading error
+icon, while the surrounding control root is invalid.
 
 ## API
 

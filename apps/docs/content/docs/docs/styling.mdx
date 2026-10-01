@@ -78,8 +78,9 @@ the outer call, then call the part you are styling with an optional `{ className
 ```tsx
 import { textInputRecipe } from '@luke-ui/react/primitives/text-input';
 
-const { control, input } = textInputRecipe({ size: 'medium' });
-const controlClassName = control({ className: 'my-class' });
+const { input } = textInputRecipe({ size: 'medium' });
+
+<input aria-label="Example input" className={input({ className: 'my-class' })} />;
 ```
 
 Do not import a recipe to restyle a Luke UI component from the outside. Use the component's props

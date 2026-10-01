@@ -107,15 +107,12 @@ updates on every keystroke because that is its purpose.
 ## Always pair an invalid field with a message
 
 Colour alone cannot report a problem. Someone who cannot separate the danger border from the resting
-one gets no signal at all. An invalid field with no message is invisible to them.
+one gets no signal at all. The error message is the cue that does not rely on colour. It shows an
+error icon before its text and says what is wrong.
 
-`TextInputField` and `ComboboxField` add an error icon inside the control, after the value. The icon
-says that something is wrong, not what is wrong, so it does not stand in for the message.
-
-Every invalid field needs a message so the error is not conveyed by colour alone, which is what WCAG
-1.4.1 Use of Colour requires. Let a constraint or `validate` generate the message, or pass your own
-through `errorMessage`. The primitive roots take `isInvalid` directly, so pair that state with a
-message yourself.
+Give every invalid field a message, as WCAG 1.4.1 Use of Colour requires. Let a constraint or
+`validate` generate the message, or pass your own through `errorMessage`. The primitive roots take
+`isInvalid` directly, so pair that state with a message yourself.
 
 ## Write the message
 
