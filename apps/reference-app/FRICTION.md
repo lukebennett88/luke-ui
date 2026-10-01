@@ -62,21 +62,8 @@ the overlay and surface. Luke UI has no public dialog composition. Owner:
 
 The profile picture menu uses RAC `MenuTrigger`, `Menu`, `Popover`, and a RAC `Button` avatar
 trigger to change or remove the picture. App VE styles the circular trigger and menu. Luke UI has no
-public menu composition. The circular trigger and upload flow are app presentation, not a gap.
-Owner: [#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711).
-
-### File selection from a menu item
-
-The Change picture menu item opens a file picker. RAC `FileTrigger` cannot wrap a `MenuItem`. RAC
-builds menu items in a hidden collection pass, so the `PressResponder` that `FileTrigger` provides
-never reaches the rendered item. In the browser, no file chooser opens and React warns "A
-PressResponder was rendered without a pressable child". A working `FileTrigger` needs a hidden
-placeholder button outside the popover, an `aria-label` set on its input by hand, and an imperative
-`.click()` from the menu action. That is the native input's path with more code, so the app keeps a
-hidden native `<input type="file">` and clicks it from the menu action. Image decoding stays in app
-code. `FileTrigger` fits when a button opens the picker directly. Owner:
-[#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711), if a public
-menu composition supports file actions.
+public menu composition. The circular trigger is app presentation, not a gap. Owner:
+[#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711).
 
 ### Root styles in portals
 
@@ -96,3 +83,18 @@ Luke UI `Link` and RAC links navigate through React Router without a full page l
 UI page explains how to connect `Link` to an application router. A consumer has to know `Link` is
 RAC underneath. Owner:
 [#720: 1.0 consumer documentation](https://github.com/lukebennett88/luke-ui/issues/720).
+
+## RAC limitations
+
+These come from RAC itself and need no Luke UI change.
+
+### File selection from a menu item
+
+The Change picture menu item opens a file picker. RAC `FileTrigger` cannot wrap a `MenuItem`. RAC
+builds menu items in a hidden collection pass, so the `PressResponder` that `FileTrigger` provides
+never reaches the rendered item. In the browser, no file chooser opens and React warns "A
+PressResponder was rendered without a pressable child". A working `FileTrigger` needs a hidden
+placeholder button outside the popover, an `aria-label` set on its input by hand, and an imperative
+`.click()` from the menu action. That is the native input's path with more code, so the app keeps a
+hidden native `<input type="file">` and clicks it from the menu action. Reading and validating the
+image is app behaviour. `FileTrigger` fits when a button opens the picker directly.
