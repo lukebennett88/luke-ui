@@ -49,7 +49,7 @@ interface _TextInputFieldBaseProps extends _TextInputFieldOmit, DocumentedInputP
 	placeholder?: string;
 	/** Element shown before the input value. */
 	prefix?: ReactNode;
-	/** Forwarded to the field's root element, which is also the target of `id`. Use `inputRef` for the `<input>`. */
+	/** Forwarded to the field's root element. Use `inputRef` for the input. */
 	ref?: TextInputRootProps['ref'];
 	/** Control size. @default 'medium' */
 	size?: TextInputSize;
@@ -65,8 +65,8 @@ export type TextInputFieldProps = Prettify<_TextInputFieldProps>;
 /**
  * A single-line text input with a label, description, and validation message.
  *
- * It always renders a `TextInputControl`, so the invalid icon sits inside the control with or
- * without `prefix` and `suffix`.
+ * `id`, `className`, and `ref` target the field's root element. `inputId`, `inputClassName`, and
+ * `inputRef` target the input.
  */
 export function TextInputField(props: TextInputFieldProps): JSX.Element {
 	const {

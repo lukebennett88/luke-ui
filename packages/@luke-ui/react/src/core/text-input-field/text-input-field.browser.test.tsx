@@ -26,6 +26,7 @@ function TextInputFieldScene() {
 			/>
 			<TextInputField
 				description="Medium control size."
+				isRequired
 				label="Medium"
 				name="medium"
 				placeholder="Medium"
@@ -51,9 +52,10 @@ function TextInputFieldScene() {
 			<TextInputField
 				defaultValue="0.00"
 				errorMessage="Enter a valid amount."
-				label="Invalid with a suffix"
-				name="invalid-suffix"
+				label="Invalid with a prefix and suffix"
+				name="invalid-adorned"
 				placeholder="0.00"
+				prefix="$"
 				suffix="USD"
 			/>
 			<Stack width="14rem">
@@ -91,28 +93,6 @@ function TextInputFieldScene() {
 function controlFor(name: string): HTMLElement | null {
 	const parent = page.getByRole('textbox', { name }).element().parentElement;
 	return parent?.getAttribute('role') === 'presentation' ? parent : null;
-}
-
-/**
- * Whether the control draws its CSS invalid icon. The icon is a `::after` mask with no DOM node, so
- * its computed `content` is the only observable signal that it renders.
- */
-function hasControlIcon(name: string): boolean {
-	const control = controlFor(name);
-	if (control == null) return false;
-	return getComputedStyle(control, '::after').content !== 'none';
-}
-
-/** Whether the field's error message draws its leading icon. */
-function hasMessageIcon(name: string): boolean {
-	const describedBy = page
-		.getByRole('textbox', { name })
-		.element()
-		.getAttribute('aria-describedby');
-	const messages = (describedBy ?? '')
-		.split(' ')
-		.flatMap((id) => document.getElementById(id) ?? []);
-	return messages.some((message) => getComputedStyle(message, '::before').display !== 'none');
 }
 
 // Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
@@ -228,14 +208,9 @@ test('the TextInputField scene has no axe violations', async () => {
 	await expectNoAxeViolations(container);
 });
 
-// The shared invalid selector must not match `:has(:invalid)`: that matches a required,
-// empty input from first render — before any interaction or submit — while
-// `aria-invalid` stays null, painting an untouched required field invalid even
-// though assistive technology is told it's fine. Guard that the control only picks
-// up the invalid treatment once React Aria has recorded a real validation
-// failure. `errorMessage={false}` must not suppress that cue. The in-control
-// icon is the invalid cue Luke UI owns.
-test('a required field is painted invalid only after a real submit fails validation', async () => {
+// An untouched required field is valid until a submit fails validation, and `errorMessage={false}`
+// must not suppress the native validation message.
+test('a required field turns invalid only after a submit fails validation', async () => {
 	// A plain `<form>`, not react-aria-components' `Form`: the latter fails to
 	// resolve in this browser test environment. React Aria's own field
 	// validation listens for the browser's native `invalid` event regardless of
@@ -247,20 +222,20 @@ test('a required field is painted invalid only after a real submit fails validat
 			<button type="submit">Submit</button>
 		</form>,
 	);
+	const email = page.getByRole('textbox', { name: 'Email*' }).element();
+	const username = page.getByRole('textbox', { name: 'Username*' }).element();
 
-	expect(hasControlIcon('Email*')).toBe(false);
-	expect(hasControlIcon('Username*')).toBe(false);
+	expect(email).not.toHaveAttribute('aria-invalid');
+	expect(username).not.toHaveAttribute('aria-invalid');
 
 	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
 
-	await expect.poll(() => hasControlIcon('Email*')).toBe(true);
-	await expect.poll(() => hasControlIcon('Username*')).toBe(true);
-	await expect
-		.poll(() => getDescribedText(page.getByRole('textbox', { name: 'Username*' }).element()).length)
-		.toBeGreaterThan(0);
+	await expect.poll(() => email.getAttribute('aria-invalid')).toBe('true');
+	await expect.poll(() => username.getAttribute('aria-invalid')).toBe('true');
+	await expect.poll(() => getDescribedText(username).length).toBeGreaterThan(0);
 });
 
-test('an errorMessage marks the field invalid with one icon and renders its markup', () => {
+test('an errorMessage marks the field invalid, describes it, and renders its markup', () => {
 	render(
 		<TextInputField
 			errorMessage={
@@ -273,12 +248,10 @@ test('an errorMessage marks the field invalid with one icon and renders its mark
 		/>,
 	);
 
-	expect(page.getByRole('textbox', { name: 'Email' }).element()).toHaveAttribute(
-		'aria-invalid',
-		'true',
-	);
-	expect(hasControlIcon('Email')).toBe(true);
-	expect(hasMessageIcon('Email')).toBe(false);
+	const input = page.getByRole('textbox', { name: 'Email' }).element();
+
+	expect(input).toHaveAttribute('aria-invalid', 'true');
+	expect(input).toHaveAccessibleDescription('See the terms for details.');
 	expect(page.getByText('terms').element().tagName).toBe('STRONG');
 });
 

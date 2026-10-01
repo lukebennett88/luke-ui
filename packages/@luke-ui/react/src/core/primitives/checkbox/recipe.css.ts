@@ -6,7 +6,7 @@ import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { textLineHeight } from '../../text/recipe.css.js';
-import { fieldMessageIcon, fieldMessageIndent } from '../field/recipe.css.js';
+import { fieldMessageIndent } from '../field/recipe.css.js';
 
 const checkboxControlSize = createVar();
 const checkboxGlyphSize = createVar();
@@ -19,15 +19,8 @@ const checkboxConfig = {
 			flexDirection: 'column',
 			gap: vars.space.sp4,
 			minInlineSize: 0,
-			// Checkbox's own box has no room for an in-control invalid icon without it
-			// floating past the label (see `indicator` below), so its icon renders on
-			// the error message instead — `primitives/field/recipe.css.ts`'s `message` slot draws it,
-			// gated behind this var, which stays off for every other consumer. Size variants
-			// also set `fieldMessageIndent` so the error hangs under the label; descriptions
+			// Size variants set `fieldMessageIndent` so the error hangs under the label. Descriptions
 			// stay at the field's inline edge.
-			vars: {
-				[fieldMessageIcon]: 'inline-block',
-			},
 		},
 		content: {
 			alignItems: 'flex-start',

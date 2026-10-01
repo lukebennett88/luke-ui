@@ -1,9 +1,7 @@
+import type { StyleRule } from '@vanilla-extract/css';
 import { createVar, fallbackVar } from '@vanilla-extract/css';
+import { iconMaskUrls } from '../../../../.generated/icon-mask-data.js';
 import { vars } from '../../../theme/contract.css.js';
-import {
-	invalidIndicatorIconForcedColors,
-	invalidMessageIcon,
-} from '../../styles/invalid-indicator.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
@@ -21,21 +19,34 @@ export const fieldMessageIndent = createVar();
 /**
  * `fieldMessageIndent` with its `0px` fallback pre-applied, computed once so the
  * error message's own hang-indent and the icon box it wraps around
- * (`invalidMessageIcon`) can never disagree about where the text resumes.
+ * (`errorIcon`) can never disagree about where the text resumes.
  */
 const messageIndent = fallbackVar(fieldMessageIndent, '0px');
 
+/** Gap between the error icon and the message text that follows it. */
+const errorIconGap = vars.space.sp8;
+
 /**
- * Optional leading icon on the error message, off (`none`) by default. A field
- * recipe whose own control has no room for an in-control invalid icon switches this
- * to `inline-block` on its own `root` slot instead (see `primitives/checkbox/recipe.css.ts`) so its
- * `FieldError` message renders `invalidMessageIcon`. `TextInputControl` and `Combobox`
- * (via `invalid-indicator.ts`) draw their invalid icon inside the control and never touch
- * this var. `TextInputRoot` switches it on only when it contains no `TextInputControl`, so
- * the icon still appears exactly once per field — attached to the control where there is
- * room, beside the message where there is not.
+ * Leading `exclamationTriangle` icon on every error message. It is the field's non-colour invalid
+ * cue, so controls draw none of their own. The icon's `inlineSize` plus `marginInlineEnd` equals
+ * `messageIndent` exactly, so the text resumes at the label's inline edge. `max()` floors the
+ * `inlineSize` at the icon's own size when no indent is set. `textIndent: 0` cancels the message's
+ * negative indent so it does not also shift the icon.
  */
-export const fieldMessageIcon = createVar();
+const errorIcon = {
+	backgroundColor: vars.color.foreground.danger.rest,
+	blockSize: vars.iconSize.xsmall,
+	content: '""',
+	display: 'inline-block',
+	inlineSize: `max(calc(${messageIndent} - ${errorIconGap}), ${vars.iconSize.xsmall})`,
+	marginInlineEnd: errorIconGap,
+	maskImage: iconMaskUrls.exclamationTriangle,
+	maskPosition: 'center',
+	maskRepeat: 'no-repeat',
+	maskSize: vars.iconSize.xsmall,
+	textIndent: 0,
+	verticalAlign: 'middle',
+} satisfies StyleRule;
 
 /**
  * Raw slotted config for the `Field` primitive.
@@ -106,9 +117,10 @@ const fieldConfig = {
 			error: {
 				message: {
 					'@media': {
+						// `CanvasText` keeps the icon solid when author colours are ignored.
 						'(forced-colors: active)': {
 							selectors: {
-								'&::before': invalidIndicatorIconForcedColors,
+								'&::before': { backgroundColor: 'CanvasText' },
 							},
 						},
 					},
@@ -123,7 +135,7 @@ const fieldConfig = {
 					// aligning its error under its label) on every line, then `textIndent`
 					// pulls the FIRST line back by that same amount so the icon — the line's
 					// first inline content, sized to fill exactly that reserved space by
-					// `invalidMessageIcon` itself — sits in it instead of pushing the text
+					// `errorIcon` itself — sits in it instead of pushing the text
 					// after it. Wrapped lines keep the padding, so they hang aligned with the
 					// text rather than tucking under the icon. Descriptions omit this indent
 					// so supporting copy starts at the field's inline edge.
@@ -131,10 +143,7 @@ const fieldConfig = {
 					textIndent: `calc(-1 * ${messageIndent})`,
 
 					selectors: {
-						'&::before': {
-							...invalidMessageIcon(messageIndent),
-							display: fallbackVar(fieldMessageIcon, 'none'),
-						},
+						'&::before': errorIcon,
 					},
 				},
 			},

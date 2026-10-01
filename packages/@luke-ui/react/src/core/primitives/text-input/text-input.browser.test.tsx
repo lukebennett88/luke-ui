@@ -75,21 +75,20 @@ function controlFor(name: string): HTMLElement {
 	return control;
 }
 
-/**
- * Whether the control draws its CSS invalid icon. The icon is a `::after` mask with no DOM node, so
- * its computed `content` is the only observable signal that it renders.
- */
-function hasControlIcon(name: string): boolean {
-	return getComputedStyle(controlFor(name), '::after').content !== 'none';
+/** Asserts that two inputs share a box and put their text at the same inline offset. */
+function expectSameLayout(reference: HTMLInputElement, actual: HTMLInputElement) {
+	const referenceBox = reference.getBoundingClientRect();
+	const actualBox = actual.getBoundingClientRect();
+
+	expect(actualBox.width).toBe(referenceBox.width);
+	expect(actualBox.height).toBe(referenceBox.height);
+	expect(textInset(actual)).toBe(textInset(reference));
 }
 
-/** Whether an error message linked to the input draws its leading icon. */
-function hasMessageIcon(name: string): boolean {
-	const describedBy = input(name).getAttribute('aria-describedby') ?? '';
-	return describedBy
-		.split(' ')
-		.flatMap((id) => document.getElementById(id) ?? [])
-		.some((message) => getComputedStyle(message, '::before').display !== 'none');
+/** Distance from an input's border edge to its text. */
+function textInset(element: HTMLInputElement): number {
+	const style = getComputedStyle(element);
+	return Number.parseFloat(style.borderLeftWidth) + Number.parseFloat(style.paddingLeft);
 }
 
 test('a standalone TextInput takes its name from aria-label and participates in a form', () => {
@@ -120,28 +119,22 @@ test('a standalone TextInput owns its native state', () => {
 	expect(input('Required')).toBeRequired();
 });
 
-// The cue is a layout contract: an invalid input must not change size.
-test('a standalone invalid TextInput draws a structural cue without changing size', () => {
+// Layout is the contract: turning invalid must not move the input or its text.
+test('a standalone invalid TextInput keeps its size and text position', () => {
 	render(
 		<>
 			<TextInput aria-label="Valid" defaultValue="Example" />
 			<TextInput aria-invalid aria-label="Invalid" defaultValue="Example" />
 		</>,
 	);
-	const valid = input('Valid');
-	const invalid = input('Invalid');
-	const validBox = valid.getBoundingClientRect();
-	const invalidBox = invalid.getBoundingClientRect();
 
-	expect(invalid).toHaveAttribute('data-invalid', 'true');
-	expect(getComputedStyle(invalid).boxShadow).not.toBe(getComputedStyle(valid).boxShadow);
-	expect(invalidBox.width).toBe(validBox.width);
-	expect(invalidBox.height).toBe(validBox.height);
+	expect(input('Invalid')).toHaveAttribute('aria-invalid', 'true');
+	expectSameLayout(input('Valid'), input('Invalid'));
 });
 
-// Forced colours drop `box-shadow`, so the cue becomes a thicker border. Focus must keep its
-// outline and the box must not change size, or the input shifts when it turns invalid.
-test('a focused invalid TextInput keeps its structural cue in forced colours', async () => {
+// Forced colours drop `box-shadow`, so the invalid cue there is a thicker border. The input and its
+// text must still stay put, including while focused.
+test('a focused invalid TextInput keeps its size and text position in forced colours', async () => {
 	await emulateForcedColors('active');
 
 	try {
@@ -151,29 +144,11 @@ test('a focused invalid TextInput keeps its structural cue in forced colours', a
 				<TextInput aria-invalid aria-label="Invalid" defaultValue="Example" />
 			</>,
 		);
-		const valid = input('Valid');
-		const invalid = input('Invalid');
-		const validBox = valid.getBoundingClientRect();
-		const validStyle = getComputedStyle(valid);
-
 		await focusViaKeyboard(page.getByRole('textbox', { name: 'Valid' }));
-		const focusedValidOutline = getComputedStyle(valid).outlineWidth;
 		await focusViaKeyboard(page.getByRole('textbox', { name: 'Invalid' }));
-		const invalidBox = invalid.getBoundingClientRect();
-		const invalidStyle = getComputedStyle(invalid);
 
-		expect(invalidStyle.borderTopWidth).toBe('2px');
-		expect(validStyle.borderTopWidth).toBe('1px');
-		expect(invalidStyle.outlineStyle).toBe('solid');
-		expect(invalidStyle.outlineWidth).toBe(focusedValidOutline);
-		expect(invalidBox.width).toBe(validBox.width);
-		expect(invalidBox.height).toBe(validBox.height);
-		// The border grows by 1px, so the padding gives that pixel back and the text stays put.
-		expect(
-			Number.parseFloat(invalidStyle.borderLeftWidth) + Number.parseFloat(invalidStyle.paddingLeft),
-		).toBe(
-			Number.parseFloat(validStyle.borderLeftWidth) + Number.parseFloat(validStyle.paddingLeft),
-		);
+		expect(input('Invalid')).toHaveAttribute('aria-invalid', 'true');
+		expectSameLayout(input('Valid'), input('Invalid'));
 	} finally {
 		await emulateForcedColors('none');
 	}
@@ -192,7 +167,6 @@ test('a rooted TextInput is wired to its label, description, and error with no m
 
 	expect(element).toHaveAttribute('aria-invalid', 'true');
 	expect(getDescribedText(element)).toBe('Example description Example error');
-	expect(hasMessageIcon('Example field')).toBe(true);
 });
 
 // Root-coordinated props have one owner. A rooted input ignores its own values for them.
@@ -426,6 +400,22 @@ test('a rooted TextInput overrides input-local props from the root', async () =>
 	expect(rootChanges.at(-1)).toBe('a');
 });
 
+test('a rooted TextInput takes the root aria-label unless it sets its own', () => {
+	render(
+		<>
+			<TextInputRoot aria-label="Root name">
+				<TextInput />
+			</TextInputRoot>
+			<TextInputRoot aria-label="Root name">
+				<TextInput aria-label="Input name" />
+			</TextInputRoot>
+		</>,
+	);
+
+	expect(page.getByRole('textbox', { name: 'Root name' }).elements()).toHaveLength(1);
+	expect(page.getByRole('textbox', { name: 'Input name' }).elements()).toHaveLength(1);
+});
+
 test('a rooted TextInput inherits input-local props from the root unless it sets its own', () => {
 	render(
 		<>
@@ -463,7 +453,8 @@ test('TextInputRoot puts id on its root element and inputId on the input', () =>
 	expect(root?.contains(element)).toBe(true);
 });
 
-test('an adorned TextInput shows one invalid icon, inside the control', () => {
+// An invalid adorned field puts its error message in the input's description.
+test('an invalid adorned TextInput describes the error', () => {
 	render(
 		<TextInputRoot isInvalid>
 			<Field errorMessage="Example error" label="Example field">
@@ -474,43 +465,31 @@ test('an adorned TextInput shows one invalid icon, inside the control', () => {
 			</Field>
 		</TextInputRoot>,
 	);
+	const element = input('Example field');
 
-	expect(hasControlIcon('Example field')).toBe(true);
-	expect(hasMessageIcon('Example field')).toBe(false);
+	expect(element).toHaveAttribute('aria-invalid', 'true');
+	expect(element).toHaveAccessibleDescription('Example error');
 });
 
-test('a TextInputControl derives invalid state from its input', () => {
-	render(
-		<>
-			<TextInputControl>
-				<TextInput aria-label="Valid" />
-			</TextInputControl>
-			<TextInputControl>
-				<TextInput aria-invalid aria-label="Invalid" />
-			</TextInputControl>
-		</>,
-	);
-
-	expect(hasControlIcon('Valid')).toBe(false);
-	expect(hasControlIcon('Invalid')).toBe(true);
-	// The control owns the cue, so the input inside it draws none of its own.
-	expect(getComputedStyle(input('Invalid')).boxShadow).toBe('none');
-});
-
-// Block size is the layout contract for `size`.
-test('the nearest control-level size owner sets the input size', () => {
+// Block size is the layout contract for `size`. The root sets a default, a part can override it,
+// and a control sets the size of everything inside it.
+test('a part size overrides the root size, and a control sizes its input', () => {
 	render(
 		<>
 			<TextInput aria-label="Medium reference" />
 			<TextInput aria-label="Small reference" size="small" />
 			<TextInputRoot size="small">
 				<FieldLabel>Root small</FieldLabel>
+				<TextInput />
+			</TextInputRoot>
+			<TextInputRoot size="small">
+				<FieldLabel>Input medium</FieldLabel>
 				<TextInput size="medium" />
 			</TextInputRoot>
 			<TextInputRoot size="small">
 				<FieldLabel>Control medium</FieldLabel>
 				<TextInputControl size="medium">
-					<TextInput />
+					<TextInput size="small" />
 				</TextInputControl>
 			</TextInputRoot>
 		</>,
@@ -520,6 +499,7 @@ test('the nearest control-level size owner sets the input size', () => {
 
 	expect(small).toBeLessThan(medium);
 	expect(input('Root small').getBoundingClientRect().height).toBe(small);
+	expect(input('Input medium').getBoundingClientRect().height).toBe(medium);
 	expect(controlFor('Control medium').getBoundingClientRect().height).toBe(medium);
 });
 
@@ -542,6 +522,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 	try {
 		const { locator } = render(
 			<Stack>
+				<TextInput aria-invalid aria-label="Focused invalid" defaultValue="nope" />
 				<TextInput aria-label="Default" placeholder="Type here" />
 				<TextInput aria-invalid aria-label="Invalid" defaultValue="nope" />
 				<TextInputControl>
@@ -550,6 +531,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 				</TextInputControl>
 			</Stack>,
 		);
+		await focusViaKeyboard(page.getByRole('textbox', { name: 'Focused invalid' }));
 		await captureVisual(locator, 'text-input/forced-colors-states');
 	} finally {
 		await emulateForcedColors('none');

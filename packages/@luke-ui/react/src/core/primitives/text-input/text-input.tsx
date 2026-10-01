@@ -16,9 +16,9 @@ import type { Prettify } from '../../types/prettify.js';
 import { rootIdProps } from '../root-id.js';
 import type { TextInputSize } from './recipe.css.js';
 import { textInputRecipe } from './recipe.css.js';
-import { textInputControlScopeClassName } from './styles.css.js';
+import { textInputInControlClassName } from './styles.css.js';
 
-/** Size set by the nearest control-level size owner: `TextInputControl`, then `TextInputRoot`. */
+/** Size set by the nearest size owner around a part: `TextInputControl`, then `TextInputRoot`. */
 const TextInputSizeContext = createContext<TextInputSize | null>(null);
 
 /** Whether a `TextInput` renders inside a `TextInputRoot`, which then owns its semantics. */
@@ -60,7 +60,8 @@ interface _TextInputRootProps extends _TextInputRootOmit {
 	/** Forwarded to the root element. */
 	ref?: Ref<HTMLDivElement>;
 	/**
-	 * Sets the size of the input and any `TextInputControl` inside the root.
+	 * Default size for the input and any `TextInputControl` inside the root. Either part can set
+	 * its own `size`.
 	 * @default 'medium'
 	 */
 	size?: TextInputSize;
@@ -134,8 +135,8 @@ interface _TextInputProps extends _TextInputOmit {
 	/** Whether a standalone input is required. Inside a `TextInputRoot`, use `isRequired` on the root. */
 	required?: RacInputProps['required'];
 	/**
-	 * Sets the size of a standalone input. A surrounding `TextInputRoot` or `TextInputControl`
-	 * sets the size instead.
+	 * Sets the size of the input, overriding a surrounding `TextInputRoot`. Inside a
+	 * `TextInputControl`, the control sets the size instead.
 	 * @default 'medium'
 	 */
 	size?: TextInputSize;
@@ -159,7 +160,7 @@ interface _TextInputControlProps extends _TextInputControlOmit {
 	/** Class name for the control element. */
 	className?: RacGroupProps['className'];
 	/**
-	 * Sets the size of the whole control, overriding the size of a surrounding `TextInputRoot`.
+	 * Sets the size of the whole control, overriding a surrounding `TextInputRoot`.
 	 * @default 'medium'
 	 */
 	size?: TextInputSize;
@@ -185,17 +186,15 @@ function joinIds(rootIds: string | undefined, ownIds: string | undefined): strin
 
 /**
  * Semantic root for a text input field. It connects a `TextInput` to the label, description, and
- * error parts inside it, and owns the field's value, state, validation, and size.
+ * error parts inside it, and owns the field's value, state, and validation.
  *
  * `id` targets the root element. Pass `inputId` to set the input's id.
  *
  * A `TextInput` inside the root ignores its own `id`, `name`, `form`, `value`, `defaultValue`,
  * `disabled`, `readOnly`, `required`, `aria-invalid`, `type`, `pattern`, `minLength`, and
- * `maxLength`, because the root owns them. The last four take part in the field's validation, so
- * set them on the root. Its `aria-describedby` and `aria-labelledby` add to the field's own wiring.
- * Other input props, such as `placeholder` and `autoComplete`, belong to the input. The root
- * accepts some of them, such as `autoComplete` and `inputMode`, and the `TextInput` inherits them
- * and can override them.
+ * `maxLength`, because the root owns them. Its `aria-describedby` and `aria-labelledby` add to the
+ * field's own wiring. Every other prop the root passes down to its parts, such as `size`,
+ * `autoComplete`, `inputMode`, and `aria-label`, is a default that a part can override.
  */
 export function TextInputRoot(props: TextInputRootProps): JSX.Element {
 	const { className, id, inputId, size = 'medium', ...textFieldProps } = props;
@@ -218,18 +217,18 @@ export function TextInputRoot(props: TextInputRootProps): JSX.Element {
 /**
  * Text input. Used on its own, it draws its own chrome and takes native input props. Inside a
  * `TextInputRoot`, the root owns its id, name, form, value, state, validation, `type`, `pattern`,
- * `minLength`, and `maxLength`, and the size comes from the nearest `TextInputControl` or root. Inside a `TextInputControl`, the control draws
- * the chrome and the input is transparent.
+ * `minLength`, and `maxLength`. Inside a `TextInputControl`, the control draws the chrome and sets
+ * the size.
  *
  * Inside a root, `aria-describedby` and `aria-labelledby` add to the field's own label,
- * description, and error wiring instead of replacing it. The other input props, such as
- * `placeholder`, `autoComplete`, `className`, and `ref`, belong to the input. Those the root also
- * accepts, such as `autoComplete` and `inputMode`, are inherited and can be overridden here. A
- * local `onChange` receives the change event and runs alongside the root's `onChange`, which
- * receives the value.
+ * description, and error wiring instead of replacing it. Any other prop set here, such as
+ * `placeholder`, `autoComplete`, `inputMode`, `aria-label`, or `size`, applies to the input. Where
+ * the root passes down a default for the same prop, the input's own setting wins. A local
+ * `onChange` receives the change event and runs alongside the root's `onChange`, which receives
+ * the value.
  *
- * Invalid state comes from `aria-invalid` on a standalone input, or from the root. A standalone or
- * rooted input marks it with a thicker border that does not change its size.
+ * Invalid state comes from `aria-invalid` on a standalone input, or from the root. Outside a
+ * control, an invalid input draws a thicker border that does not change its size.
  */
 export function TextInput(props: TextInputProps): JSX.Element {
 	const {
@@ -253,7 +252,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
 	const isRooted = use(TextInputRootContext);
 	const rootInputProps = useSlottedContext(InputContext);
 	const isInControl = use(TextInputControlContext);
-	const size = use(TextInputSizeContext) ?? sizeProp ?? 'medium';
+	const contextSize = use(TextInputSizeContext);
 	// The root supplies these through React Aria's input context. Dropping the input's own values
 	// lets the root win, because a local prop would otherwise override the context.
 	const standaloneProps = isRooted
@@ -295,7 +294,11 @@ export function TextInput(props: TextInputProps): JSX.Element {
 			{...standaloneProps}
 			{...rootedWiring}
 			className={composeRenderProps(className, (renderedClassName) => {
-				return textInputRecipe({ isInControl, size }).input({ className: renderedClassName });
+				if (isInControl) return cx(textInputInControlClassName, renderedClassName);
+
+				return textInputRecipe({ size: sizeProp ?? contextSize ?? 'medium' }).input({
+					className: renderedClassName,
+				});
 			})}
 		/>
 	);
@@ -306,9 +309,8 @@ export function TextInput(props: TextInputProps): JSX.Element {
  * control owns the border, background, shadow, and rounding, and its parts are transparent flex
  * children whose position follows document order.
  *
- * The control has no invalid prop. It reads invalid state from its input, and while invalid it
- * draws an error icon after the input value and before any `TextInputSuffix`. The icon is hidden
- * from assistive technology, because the field's error message carries the meaning.
+ * The control has no invalid prop. It reads invalid state from the input inside it and takes a
+ * danger border. Pair an invalid control with an error message.
  */
 export function TextInputControl(props: TextInputControlProps): JSX.Element {
 	const { className, size: sizeProp, ...groupProps } = props;
@@ -326,10 +328,7 @@ export function TextInputControl(props: TextInputControlProps): JSX.Element {
 					<RacGroup
 						{...groupProps}
 						className={composeRenderProps(className, (value) => {
-							return cx(
-								textInputControlScopeClassName,
-								textInputRecipe({ size }).control({ className: value }),
-							);
+							return textInputRecipe({ size }).control({ className: value });
 						})}
 					/>
 				</IconSizeProvider>
@@ -346,10 +345,7 @@ export function TextInputPrefix(props: TextInputPrefixProps): JSX.Element {
 	return <span {...spanProps} className={textInputRecipe({ size }).prefix({ className })} />;
 }
 
-/**
- * Content shown at the trailing end of a `TextInputControl`, such as a unit or a button. It always
- * follows the control's invalid icon, whatever its document position.
- */
+/** Content shown at the trailing end of a `TextInputControl`, such as a unit or a button. */
 export function TextInputSuffix(props: TextInputSuffixProps): JSX.Element {
 	const { className, ...spanProps } = props;
 	const size = use(TextInputSizeContext) ?? 'medium';

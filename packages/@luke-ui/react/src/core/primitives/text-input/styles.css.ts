@@ -1,7 +1,21 @@
 import { style } from '../../styles/layered-style.css.js';
+import { textInputInlinePadding, textInputInputBase } from './recipe.css.js';
 
 /**
- * Marker class on every `TextInputControl`. `textInputRecipe`'s `root` slot probes for it to decide
- * whether the in-control invalid icon or the error-message icon carries the field's invalid cue.
+ * Class for a `TextInput` inside a `TextInputControl`, in place of `textInputRecipe`'s `input`
+ * slot. The control draws the chrome and sets the size, so the input stays transparent and
+ * inherits the control's typography and inline padding.
  */
-export const textInputControlScopeClassName = style({}, 'text-input-control');
+export const textInputInControlClassName = style(
+	{
+		...textInputInputBase,
+		blockSize: '100%',
+		flex: 1,
+		fontSize: 'inherit',
+		letterSpacing: 'inherit',
+		lineHeight: 'inherit',
+		paddingInlineEnd: textInputInlinePadding,
+		paddingInlineStart: textInputInlinePadding,
+	},
+	'text-input-in-control',
+);

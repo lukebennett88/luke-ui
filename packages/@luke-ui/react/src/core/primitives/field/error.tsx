@@ -8,7 +8,7 @@ import { fieldRecipe } from './recipe.css.js';
 /** Props for `FieldError`. */
 export type FieldErrorProps = Prettify<RacFieldErrorProps>;
 
-/** Styled validation message for a field. */
+/** Validation message for a field, shown with a leading error icon while the field is invalid. */
 export function FieldError(props: FieldErrorProps): JSX.Element {
 	return (
 		<RacFieldError

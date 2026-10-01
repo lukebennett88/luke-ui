@@ -21,8 +21,9 @@ interface _ComboboxControlProps extends _ComboboxControlOmit {
 export type ComboboxControlProps = Prettify<_ComboboxControlProps>;
 
 /**
- * Visual chrome around a combobox input and its buttons. Inside a `ComboboxTray`, it renders as an
- * inset search bar.
+ * Visual chrome around a `ComboboxInput` and its buttons, or around a `ComboboxTrayTrigger`. Inside
+ * a `ComboboxTray`, it renders as an inset search bar. It reads invalid state from the combobox and
+ * takes a danger border.
  */
 export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 	const { size: sizeProp, ...groupProps } = props;
