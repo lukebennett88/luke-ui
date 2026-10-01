@@ -14,6 +14,7 @@ import type { Key } from 'react-aria-components/ComboBox';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { measureFieldError } from '../test-utils/measure-field-error.js';
 import {
 	DESKTOP_SCREEN_WIDTH,
 	MOBILE_SCREEN_WIDTH,
@@ -40,6 +41,9 @@ const sceneCountryItems: Array<CountryItem> = [
 	{ id: 'us', label: 'United States' },
 	{ id: 'se', label: 'Sweden' },
 ];
+
+const wrappingErrorMessage =
+	'Choose a work location from the list. Locations outside your region are not available.';
 
 const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</ComboboxItem>;
 
@@ -215,6 +219,29 @@ test('the ComboboxField scene has no axe violations', async () => {
 	);
 
 	await expectNoAxeViolations(container);
+});
+
+test('the ComboboxField error icon is centred on the first line and wrapped lines align with the text', () => {
+	render(
+		<Stack width="16rem">
+			<ComboboxField
+				defaultItems={sceneCountryItems}
+				errorMessage={wrappingErrorMessage}
+				label="Work location"
+				name="work-location"
+			>
+				{renderCountryItem}
+			</ComboboxField>
+		</Stack>,
+	);
+
+	const input = page.getByRole('combobox', { name: 'Work location' }).element();
+	const measurement = measureFieldError(page.getByText(wrappingErrorMessage).element());
+
+	expect(input).toHaveAccessibleDescription(wrappingErrorMessage);
+	expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
+	expect(measurement.secondLineStart).toBeDefined();
+	expect(measurement.secondLineStart).toBeCloseTo(measurement.firstLineStart, 0);
 });
 
 test('ComboboxField uses a mobile modal to search and select an option', async () => {
@@ -446,6 +473,16 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				>
 					{renderCountryItem}
 				</ComboboxField>
+				<Stack width="16rem">
+					<ComboboxField
+						defaultItems={sceneCountryItems}
+						errorMessage={wrappingErrorMessage}
+						label="Work location"
+						name="invalid-wrapping"
+					>
+						{renderCountryItem}
+					</ComboboxField>
+				</Stack>
 				<ComboboxField
 					defaultItems={sceneCountryItems}
 					label="Small"

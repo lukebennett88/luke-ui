@@ -5,6 +5,7 @@ import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
+import { measureFieldError } from '../test-utils/measure-field-error.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -13,6 +14,9 @@ import {
 	focusViaKeyboard,
 	Stack,
 } from '../test-utils/visual.js';
+
+const wrappingErrorMessage =
+	'Enter an email address in the form name@example.com, with no spaces or trailing punctuation.';
 
 function TextInputFieldScene() {
 	return (
@@ -59,6 +63,12 @@ function TextInputFieldScene() {
 				suffix="USD"
 			/>
 			<Stack width="14rem">
+				<TextInputField
+					defaultValue="nope"
+					errorMessage={wrappingErrorMessage}
+					label="Invalid with a wrapping message"
+					name="invalid-wrapping"
+				/>
 				<TextInputField
 					label="Search"
 					name="prefix-multiple-elements"
@@ -253,6 +263,52 @@ test('an errorMessage marks the field invalid, describes it, and renders its mar
 	expect(input).toHaveAttribute('aria-invalid', 'true');
 	expect(input).toHaveAccessibleDescription('See the terms for details.');
 	expect(page.getByText('terms').element().tagName).toBe('STRONG');
+});
+
+test('the error icon is centred on the first line and wrapped lines align with the text', () => {
+	render(
+		<Stack width="14rem">
+			<TextInputField errorMessage={wrappingErrorMessage} label="Email" name="email" />
+		</Stack>,
+	);
+
+	const input = page.getByRole('textbox', { name: 'Email' }).element();
+	const measurement = measureFieldError(page.getByText(wrappingErrorMessage).element());
+
+	expect(input).toHaveAccessibleDescription(wrappingErrorMessage);
+	expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
+	expect(measurement.firstLineStart).toBeGreaterThanOrEqual(measurement.iconEnd);
+	expect(measurement.secondLineStart).toBeDefined();
+	expect(measurement.secondLineStart).toBeCloseTo(measurement.firstLineStart, 0);
+});
+
+test('a message with mixed inline content flows as one run beside the icon', () => {
+	render(
+		<Stack width="14rem">
+			<TextInputField
+				errorMessage={
+					<>
+						Enter an email address in the form <strong>name@example.com</strong> with no spaces.
+					</>
+				}
+				label="Email"
+				name="email"
+			/>
+		</Stack>,
+	);
+
+	const input = page.getByRole('textbox', { name: 'Email' }).element();
+	const emphasis = page.getByText('name@example.com').element();
+	const text = emphasis.parentElement;
+	if (text == null) throw new Error('Expected the emphasis to sit inside the message text.');
+	const measurement = measureFieldError(text);
+
+	expect(text.parentElement?.children).toHaveLength(2);
+	expect(input).toHaveAccessibleDescription(
+		'Enter an email address in the form name@example.com with no spaces.',
+	);
+	expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
+	expect(measurement.secondLineStart).toBeCloseTo(measurement.firstLineStart, 0);
 });
 
 test('an unlabeled TextInputField exposes aria-label on the textbox', () => {
