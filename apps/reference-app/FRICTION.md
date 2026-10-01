@@ -1,9 +1,8 @@
 # Reference app friction log
 
-Consumer evidence for [#713](https://github.com/lukebennett88/luke-ui/issues/713), from the
-reference app in [#723](https://github.com/lukebennett88/luke-ui/pull/723). Each finding names the
-layer that met the need: high-level Luke UI, a public Luke UI primitive, React Aria Components
-(RAC), or app-owned Vanilla Extract (VE).
+Findings for [#713](https://github.com/lukebennett88/luke-ui/issues/713) from the reference app in
+[#723](https://github.com/lukebennett88/luke-ui/pull/723). The app uses high-level Luke UI, public
+Luke UI primitives, React Aria Components (RAC), and app-owned Vanilla Extract (VE).
 
 ## Needs met without a gap
 
@@ -13,7 +12,7 @@ layer that met the need: high-level Luke UI, a public Luke UI primitive, React A
 | Narrow layout                         | Responsive `Box` props hide the sidebar and change padding. App-owned container-query styles stack row labels above their controls.                                                                                              | High-level, app VE    |
 | Page, dialog, and row typography      | `Heading`, `Text`, and `Prose`.                                                                                                                                                                                                  | High-level            |
 | Actions and route links               | `Button` for dialog and destructive actions. `Link appearance="button"` for Open settings and Back to app.                                                                                                                       | High-level            |
-| Settings navigation with active state | React Router `NavLink` supplies `aria-current`. App VE styles the list. The app does not use `Box render` or `Stack render`, and nothing here needed them.                                                                       | App VE                |
+| Settings navigation with active state | React Router `NavLink` supplies `aria-current`. App VE styles the list.                                                                                                                                                          | App VE                |
 | Email and navigation search inputs    | Luke UI `TextField`, including `inputRef`, `errorMessage`, `isReadOnly`, and `prefix`.                                                                                                                                           | High-level            |
 | Inline profile fields beside labels   | Luke UI `TextField` always stacks the label above the input. The rows compose RAC `TextField` with `FieldLabel`, `FieldDescription`, `FieldError`, `InputGroup`, and `InputGroupInput`, which the Field primitive docs describe. | Public primitive, RAC |
 | Product theme                         | `defineTheme` with a `ThemeInput`, served by a Vite plugin. Public `vars` style app-owned surfaces, borders, focus, and control chrome.                                                                                          | High-level            |
@@ -27,77 +26,73 @@ app. TanStack Query, Zod, and React Router own them, and none of them need desig
 
 ### Select
 
-- **Need:** choose a theme or text size.
-- **What solved it:** RAC `Select`, `ListBox`, and `Popover`, with a RAC `Button` trigger. Luke UI
-  `Icon`, `Track`, and `Text` render the options. `textRecipe` styles `SelectValue`.
-- **Layer:** RAC with app VE for the trigger, list, and options.
-- **Gap:** Luke UI has no public Select. The public button primitive applies Luke UI's button
-  recipe, which is the wrong chrome for a select trigger, so the trigger drops to RAC.
-- **Owner:** [#714: Forms and control naming](https://github.com/lukebennett88/luke-ui/issues/714)
+Theme and text size use RAC `Select`, `ListBox`, `Popover`, and a RAC `Button` trigger. Luke UI
+`Icon`, `Track`, and `Text` render the options, while `textRecipe` styles `SelectValue`. App VE
+styles the trigger, list, and options. Luke UI has no public Select. Its public button primitive
+applies the button recipe, which gives the select trigger the wrong chrome. The trigger therefore
+uses RAC. Owner:
+[#714: Forms and control naming](https://github.com/lukebennett88/luke-ui/issues/714).
 
 ### Switch
 
-- **Need:** turn a boolean preference on and off, saving immediately.
-- **What solved it:** RAC `SwitchField` and `SwitchButton`, named with `aria-label`. Luke UI
-  `Checkbox` is the wrong affordance for a setting that saves immediately.
-- **Layer:** RAC with app VE for the track, thumb, and focus ring.
-- **Gap:** Luke UI has no public Switch.
-- **Owner:** [#714: Forms and control naming](https://github.com/lukebennett88/luke-ui/issues/714)
+A boolean preference saves immediately when switched on or off. RAC `SwitchField` and `SwitchButton`
+use `aria-label`, with app VE for the track, thumb, and focus ring. Luke UI has no public Switch,
+and `Checkbox` is the wrong affordance for this setting. Owner:
+[#714: Forms and control naming](https://github.com/lukebennett88/luke-ui/issues/714).
 
 ### Text inside RAC control content
 
-- **Need:** put ordinary text in a Select trigger or a Switch.
-- **What solved it:** `textRecipe` on `SelectValue` in place of `Text`. `aria-label` on the switch
-  in place of a `VisuallyHidden` label.
-- **Layer:** high-level recipe, RAC.
-- **Gap:** Luke UI `Text` and `VisuallyHidden` render RAC `Text`, which reads RAC's slotted text
-  context. Inside a RAC `Select` trigger or a `SwitchField`, both throw "A slot prop is required.
-  Valid slot names are "description" and "errorMessage"". RAC's opt-out is `slot={null}`, but the
-  public `TextProps` type rejects `null`.
-- **Owner:**
-  [#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711), with
-  [#714](https://github.com/lukebennett88/luke-ui/issues/714)
+Ordinary text in a Select trigger uses the high-level `textRecipe` on `SelectValue` in place of
+`Text`. The RAC Switch uses `aria-label` in place of a `VisuallyHidden` label. Luke UI `Text` and
+`VisuallyHidden` render RAC `Text`, which reads RAC's slotted text context. Inside a RAC `Select`
+trigger or a `SwitchField`, both throw "A slot prop is required. Valid slot names are "description"
+and "errorMessage"". RAC's opt-out is `slot={null}`, but the public `TextProps` type rejects `null`.
+Owners: [#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711) and
+[#714](https://github.com/lukebennett88/luke-ui/issues/714).
 
 ### Dialog
 
-- **Need:** change the email address and confirm clearing saved settings.
-- **What solved it:** RAC `DialogTrigger`, `ModalOverlay`, `Modal`, and `Dialog`. RAC supplies focus
-  containment, dismissal, and focus restoration. `Heading`, `Text`, `TextField`, and `Button` fill
-  the dialog.
-- **Layer:** RAC with app VE for the overlay and surface.
-- **Gap:** Luke UI has no public dialog composition.
-- **Owner:** [#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711)
+The dialogs for changing the email address and clearing saved settings use RAC `DialogTrigger`,
+`ModalOverlay`, `Modal`, and `Dialog`. RAC supplies focus containment, dismissal, and focus
+restoration. Luke UI `Heading`, `Text`, `TextField`, and `Button` fill the dialog, with app VE for
+the overlay and surface. Luke UI has no public dialog composition. Owner:
+[#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711).
 
 ### Menu
 
-- **Need:** change or remove the profile picture from its trigger.
-- **What solved it:** RAC `MenuTrigger`, `Menu`, and `Popover`, with a RAC `Button` avatar trigger.
-  A hidden native file input and image decoding handle the upload.
-- **Layer:** RAC with app VE for the circular trigger and the menu.
-- **Gap:** Luke UI has no public menu composition. The circular trigger and upload flow are app
-  presentation, not a gap.
-- **Owner:** [#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711)
+The profile picture menu uses RAC `MenuTrigger`, `Menu`, `Popover`, and a RAC `Button` avatar
+trigger to change or remove the picture. App VE styles the circular trigger and menu. Luke UI has no
+public menu composition. The circular trigger and upload flow are app presentation, not a gap.
+Owner: [#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711).
+
+### File selection from a menu item
+
+The Change picture menu item opens a file picker. RAC `FileTrigger` cannot wrap a `MenuItem`. RAC
+builds menu items in a hidden collection pass, so the `PressResponder` that `FileTrigger` provides
+never reaches the rendered item. In the browser, no file chooser opens and React warns "A
+PressResponder was rendered without a pressable child". A working `FileTrigger` needs a hidden
+placeholder button outside the popover, an `aria-label` set on its input by hand, and an imperative
+`.click()` from the menu action. That is the native input's path with more code, so the app keeps
+a hidden native `<input type="file">` and clicks it from the menu action. Image decoding stays in
+app code. `FileTrigger` fits when a button opens the picker directly. Owner:
+[#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711), if a
+public menu composition supports file actions.
 
 ### Root styles in portals
 
-- **Need:** give dialogs, popovers, and menus the same reset and base typography as the app.
-- **What solved it:** the app adds `rootClassName` to each RAC `ModalOverlay` and `Popover`, next to
-  its own VE class.
-- **Layer:** high-level (`rootClassName`), app VE.
-- **Gap:** the theming guide says "Portals need nothing extra". That holds for theme variables and
-  colour mode, which apply at `:root`. It does not hold for `rootClassName`, which the guide applies
-  to the app shell. A body-level portal falls outside the shell and renders with browser defaults
-  (serif font, default margins), so every overlay needs the class.
-- **Owner:**
-  [#717: Global stylesheet and cascade contract](https://github.com/lukebennett88/luke-ui/issues/717),
-  documented through [#686](https://github.com/lukebennett88/luke-ui/issues/686)
+Dialogs, popovers, and menus need the app's reset and base typography. The app adds the high-level
+`rootClassName` beside its VE class on each RAC `ModalOverlay` and `Popover`. The theming guide says
+"Portals need nothing extra". That applies to theme variables and colour mode at `:root`, but not to
+`rootClassName`, which the guide applies to the app shell. A body-level portal falls outside that
+shell and renders with browser defaults (serif font, default margins), so every overlay needs the
+class. Owner:
+[#717: Global stylesheet and cascade contract](https://github.com/lukebennett88/luke-ui/issues/717),
+documented through [#686](https://github.com/lukebennett88/luke-ui/issues/686).
 
 ### Client-side routing for links
 
-- **Need:** Luke UI `Link` and RAC links navigate through React Router without a full page load.
-- **What solved it:** RAC `RouterProvider`, with React Router's `useNavigate` and `useHref`, in the
-  root layout route.
-- **Layer:** RAC.
-- **Gap:** no Luke UI page says how to connect `Link` to an application router. A consumer has to
-  know `Link` is RAC underneath.
-- **Owner:** [#720: 1.0 consumer documentation](https://github.com/lukebennett88/luke-ui/issues/720)
+Luke UI `Link` and RAC links navigate through React Router without a full page load by using RAC
+`RouterProvider` with React Router's `useNavigate` and `useHref` in the root layout route. No Luke
+UI page explains how to connect `Link` to an application router. A consumer has to know `Link` is
+RAC underneath. Owner:
+[#720: 1.0 consumer documentation](https://github.com/lukebennett88/luke-ui/issues/720).

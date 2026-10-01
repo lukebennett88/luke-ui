@@ -1,7 +1,7 @@
 # Reference app
 
-A small product app for [#713](https://github.com/lukebennett88/luke-ui/issues/713), built only on
-Luke UI's public consumer API. The home page at `/` links to Settings, whose layout and controls
+A settings app for [#713](https://github.com/lukebennett88/luke-ui/issues/713) that uses Luke UI
+through its public consumer API. The home page at `/` links to Settings, whose layout and controls
 follow Linear Settings.
 
 - Preferences saves theme, text size, pointer cursor, and link underlines as they change.
@@ -23,8 +23,8 @@ The theme source is `src/theme/input.ts`. A small Vite plugin in `vite.config.ts
 UI's `defineTheme` and serves the result as `virtual:reference-theme.css`. Vite restarts the dev
 server when the theme source changes.
 
-The app imports `@luke-ui/react` from its built `dist`, so build the package first on a clean
-checkout. Turbo does this for you. Run commands from the repository root:
+The app imports `@luke-ui/react` from its built `dist`. Turbo builds the package on a clean
+checkout. Run commands from the repository root:
 
 ```bash
 pnpm run dev:reference-app
