@@ -17,3 +17,24 @@ test('VisuallyHidden clips content visually while keeping it in the accessibilit
 	expect(styles.position).toBe('absolute');
 	expect(styles.clipPath).toBe('inset(100%)');
 });
+
+test('VisuallyHidden keeps the requested heading semantics', () => {
+	const { locator } = render(<VisuallyHidden elementType="h2">Hidden heading</VisuallyHidden>);
+	const heading = locator.getByRole('heading', { level: 2, name: 'Hidden heading' }).element();
+
+	expect(heading.tagName).toBe('H2');
+});
+
+test('VisuallyHidden forwards render to its element', () => {
+	const { locator } = render(
+		<VisuallyHidden
+			render={(resolvedProps) => <span {...resolvedProps} data-testid="custom-hidden" />}
+		>
+			Hidden label
+		</VisuallyHidden>,
+	);
+	const target = locator.getByTestId('custom-hidden').element();
+
+	expect(target.textContent).toBe('Hidden label');
+	expect(getComputedStyle(target).position).toBe('absolute');
+});

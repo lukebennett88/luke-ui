@@ -25,6 +25,10 @@ export default {
 			],
 			project: ['src/**/*.{ts,tsx,css}', 'content/**/*.mdx'],
 		},
+		'apps/reference-app': {
+			entry: ['src/**/*.browser.test.tsx'],
+			project: ['src/**/*.{ts,tsx}'],
+		},
 		'packages/@luke-ui/react': {
 			entry: [
 				'src/exports/**/*.ts',

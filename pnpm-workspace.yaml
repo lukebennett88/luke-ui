@@ -45,6 +45,7 @@ catalog:
   '@hookform/resolvers': ^5.9.1
   '@monaco-editor/react': ^4.7.0
   '@react-aria/utils': ^3.34.1
+  '@tanstack/react-query': ^5.104.0
   '@rolldown/pluginutils': ^1.0.1
   '@tailwindcss/vite': ^4.3.3
   '@tanstack/react-form': ^1.33.5
@@ -92,6 +93,7 @@ catalog:
   react-error-boundary: ^6.1.6
   react-hook-form: ^7.88.0
   react-resizable-panels: ^4.13.3
+  react-router: ^7.18.4
   serve: ^14.2.6
   shiki: ^4.4.3
   spin-doctor: ^0.0.1

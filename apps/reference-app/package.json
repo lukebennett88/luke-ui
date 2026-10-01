@@ -1,0 +1,37 @@
+{
+	"name": "reference-app",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "vp build",
+		"check:format": "vp fmt . --check",
+		"check:lint": "vp lint . --type-aware",
+		"check:types": "tsc --noEmit",
+		"clean": "rm -rf .turbo dist",
+		"dev": "vp dev",
+		"fix:format": "vp fmt . --write",
+		"fix:lint": "vp lint . --type-aware --fix",
+		"preview": "vp preview",
+		"test": "vp test run --project=browser"
+	},
+	"dependencies": {
+		"@luke-ui/react": "workspace:*",
+		"@tanstack/react-query": "catalog:",
+		"@vanilla-extract/css": "catalog:",
+		"react": "catalog:",
+		"react-aria-components": "catalog:",
+		"react-dom": "catalog:",
+		"react-router": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"@vanilla-extract/vite-plugin": "catalog:",
+		"@vitejs/plugin-react": "catalog:",
+		"axe-core": "catalog:",
+		"typescript": "catalog:",
+		"vite": "catalog:",
+		"vite-plus": "catalog:"
+	}
+}

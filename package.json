@@ -18,6 +18,7 @@
 		"dev": "turbo run dev",
 		"dev:docs": "turbo run dev --filter=docs",
 		"dev:packages": "turbo run dev --filter=./packages/**",
+		"dev:reference-app": "turbo run dev --filter=reference-app",
 		"fix": "turbo run fix:format-root fix fix:unused",
 		"fix:format": "turbo run fix:format-root fix:format",
 		"fix:format-root": "vp fmt . --write",
