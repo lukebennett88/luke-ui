@@ -41,7 +41,7 @@ interface FieldSlotProps extends FieldSlotContentProps {
 }
 
 /**
- * Naming props for composed fields (`TextInputField`, `ComboboxField`, `Checkbox`).
+ * Naming props for composed fields (`TextInputField`, `ComboboxField`, `Checkbox`, `SelectField`).
  *
  * Pass a visible `label`, or omit `label` and provide exactly one of `aria-label` /
  * `aria-labelledby`. Composition parents forward the aria props to the React Aria field root.
