@@ -16,7 +16,7 @@ import type { Prettify } from '../../types/prettify.js';
 import { rootIdProps } from '../root-id.js';
 import type { TextInputSize } from './recipe.css.js';
 import { textInputRecipe } from './recipe.css.js';
-import { textInputInControlClassName } from './styles.css.js';
+import { textInputInControlClassName, textInputPartsRecipe } from './styles.css.js';
 
 /** Size set by the nearest size owner around a part: `TextInputControl`, then `TextInputRoot`. */
 const TextInputSizeContext = createContext<TextInputSize | null>(null);
@@ -206,7 +206,7 @@ export function TextInputRoot(props: TextInputRootProps): JSX.Element {
 					{...textFieldProps}
 					{...rootIdProps(id, inputId)}
 					className={composeRenderProps(className, (value) => {
-						return textInputRecipe().root({ className: value });
+						return textInputPartsRecipe().root({ className: value });
 					})}
 				/>
 			</TextInputSizeContext.Provider>
@@ -296,8 +296,9 @@ export function TextInput(props: TextInputProps): JSX.Element {
 			className={composeRenderProps(className, (renderedClassName) => {
 				if (isInControl) return cx(textInputInControlClassName, renderedClassName);
 
-				return textInputRecipe({ size: sizeProp ?? contextSize ?? 'medium' }).input({
+				return textInputRecipe({
 					className: renderedClassName,
+					size: sizeProp ?? contextSize ?? 'medium',
 				});
 			})}
 		/>
@@ -328,7 +329,7 @@ export function TextInputControl(props: TextInputControlProps): JSX.Element {
 					<RacGroup
 						{...groupProps}
 						className={composeRenderProps(className, (value) => {
-							return textInputRecipe({ size }).control({ className: value });
+							return textInputPartsRecipe({ size }).control({ className: value });
 						})}
 					/>
 				</IconSizeProvider>
@@ -342,7 +343,7 @@ export function TextInputPrefix(props: TextInputPrefixProps): JSX.Element {
 	const { className, ...spanProps } = props;
 	const size = use(TextInputSizeContext) ?? 'medium';
 
-	return <span {...spanProps} className={textInputRecipe({ size }).prefix({ className })} />;
+	return <span {...spanProps} className={textInputPartsRecipe({ size }).prefix({ className })} />;
 }
 
 /** Content shown at the trailing end of a `TextInputControl`, such as a unit or a button. */
@@ -350,5 +351,5 @@ export function TextInputSuffix(props: TextInputSuffixProps): JSX.Element {
 	const { className, ...spanProps } = props;
 	const size = use(TextInputSizeContext) ?? 'medium';
 
-	return <span {...spanProps} className={textInputRecipe({ size }).suffix({ className })} />;
+	return <span {...spanProps} className={textInputPartsRecipe({ size }).suffix({ className })} />;
 }

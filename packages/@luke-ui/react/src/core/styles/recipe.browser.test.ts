@@ -80,13 +80,17 @@ test('a base-only recipe composes a consumer className', () => {
 
 test('slot functions append a consumer className', () => {
 	const ownRoot = fieldRecipe().root();
-	const ownControl = textInputRecipe({ size: 'small' }).input();
 
 	expect(fieldRecipe().root({ className: 'extra-class' })).toBe(`${ownRoot} extra-class`);
-	expect(textInputRecipe({ size: 'small' }).input({ className: 'mine' })).toBe(
-		`${ownControl} mine`,
-	);
 	expect(fieldRecipe().root({})).toBe(ownRoot);
+});
+
+test('textInputRecipe styles a standalone input and appends a consumer className', () => {
+	const medium = textInputRecipe({ size: 'medium' });
+
+	expect(textInputRecipe()).toBe(medium);
+	expect(textInputRecipe({ size: 'small' })).not.toBe(medium);
+	expect(textInputRecipe({ className: 'mine', size: 'medium' })).toBe(`${medium} mine`);
 });
 
 test('an unconditional compoundSlots entry applies to every listed slot and not to unlisted ones', () => {
