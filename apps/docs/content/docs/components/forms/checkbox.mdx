@@ -49,8 +49,8 @@ fails. Pass `errorMessage` only for an error you already have, such as one from 
 your server. A non-empty message marks the checkbox invalid. Read [Validation](/docs/validation) for
 where messages come from and how to write them.
 
-The message hangs under the label text. `Checkbox` has no `isInvalid` prop, so the message is the
-only way to mark it invalid.
+The message hangs under the label text. `Checkbox` has no `isInvalid` prop. To mark it invalid
+yourself, pass `errorMessage`.
 
 <ExampleBlock src="checkbox/validation" title="Checkbox: Validation" />
 
