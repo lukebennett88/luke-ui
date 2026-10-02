@@ -311,7 +311,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
  * children whose position follows document order.
  *
  * The control has no invalid prop. It reads invalid state from the input inside it and takes a
- * danger border. Pair an invalid control with an error message.
+ * danger border. Inside a field, `FieldError` explains the problem.
  */
 export function TextInputControl(props: TextInputControlProps): JSX.Element {
 	const { className, size: sizeProp, ...groupProps } = props;

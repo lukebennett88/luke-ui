@@ -99,8 +99,9 @@ state. Outside a control, an invalid input draws a thicker border that does not 
 `TextInputControl` has no invalid prop. It reads invalid state from the input inside it and takes a
 danger border.
 
-Inside a field, the error message carries the error icon and says what is wrong. Always give an
-invalid input an error message. See [Validation](/docs/validation).
+A rooted input in a field gets its message from `FieldError`, which carries the error icon and says
+what is wrong. A standalone invalid input relies on its structural border, so the surrounding
+interface should explain the problem. See [Validation](/docs/validation).
 
 ## API
 

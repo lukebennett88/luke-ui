@@ -54,8 +54,8 @@ Owners: [#711: Public composition surface](https://github.com/lukebennett88/luke
 
 The dialogs for changing the email address and clearing saved settings use RAC `DialogTrigger`,
 `ModalOverlay`, `Modal`, and `Dialog`. RAC supplies focus containment, dismissal, and focus
-restoration. Luke UI `Heading`, `Text`, `TextField`, and `Button` fill the dialog, with app VE for
-the overlay and surface. Luke UI has no public dialog composition. Owner:
+restoration. Luke UI `Heading`, `Text`, `TextInputField`, and `Button` fill the dialog, with app VE
+for the overlay and surface. Luke UI has no public dialog composition. Owner:
 [#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711).
 
 ### Menu
