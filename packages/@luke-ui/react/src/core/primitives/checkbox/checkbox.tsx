@@ -9,14 +9,12 @@ import {
 } from 'react-aria-components/Checkbox';
 import { TextContext as RacTextContext } from 'react-aria-components/Text';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import { cx } from '../../../shared/utils/utils.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { FieldNecessityIndicator } from '../field/recipe.css.js';
 import { rootIdProps } from '../root-id.js';
 import type { CheckboxRecipeVariants } from './recipe.css.js';
 import { checkboxRecipe } from './recipe.css.js';
-import { checkboxContentScopeClassName } from './styles.css.js';
 
 type _CheckboxRootOmit = DistributiveOmit<
 	RacCheckboxFieldProps,
@@ -84,32 +82,26 @@ interface _CheckboxContentProps extends _CheckboxContentOmit {
 	 * so it takes textual, non-interactive content only. Place links and buttons outside it.
 	 */
 	children: RacCheckboxButtonProps['children'];
-	/**
-	 * Shows how a required checkbox is marked after the label text. The marker follows the last
-	 * word of the last element after `CheckboxControl`, such as a `Text`. Raw text children get it
-	 * after the text instead.
-	 * @default 'icon'
-	 */
-	necessityIndicator?: FieldNecessityIndicator;
 }
 
 /** Props for `CheckboxContent`. */
 export type CheckboxContentProps = Prettify<_CheckboxContentProps>;
 
-/**
- * Props for `CheckboxContentBase`, the internal form of `CheckboxContent`. `hasLabelText={false}`
- * turns the raw-text marker off, for content that has no visible label text.
- */
-export type CheckboxContentBaseProps = Prettify<
-	_CheckboxContentProps & {
-		hasLabelText?: boolean;
-	}
->;
-
 interface _CheckboxControlProps extends ComponentProps<'span'> {}
 
 /** Props for `CheckboxControl`. */
 export type CheckboxControlProps = Prettify<_CheckboxControlProps>;
+
+interface _CheckboxLabelProps extends ComponentProps<'span'> {
+	/**
+	 * Shows how a required checkbox is marked after the label's last inline content.
+	 * @default 'icon'
+	 */
+	necessityIndicator?: FieldNecessityIndicator;
+}
+
+/** Props for `CheckboxLabel`. */
+export type CheckboxLabelProps = Prettify<_CheckboxLabelProps>;
 
 interface _CheckboxIndicatorProps extends ComponentProps<'span'> {}
 
@@ -137,28 +129,14 @@ export function CheckboxRoot(props: CheckboxRootProps): JSX.Element {
 }
 
 /**
- * The native `<label>` for the checkbox. It holds `CheckboxControl` and the visible label, and
- * keeps the input and label associated.
+ * The native `<label>` for the checkbox. It holds `CheckboxControl` and `CheckboxLabel`, and keeps
+ * the input and label associated.
  *
  * The label text must be textual, non-interactive content. A link or button inside a native label
  * is not supported. Place it as a sibling outside `CheckboxContent`.
  */
 export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
-	return <CheckboxContentBase {...props} />;
-}
-
-/**
- * `CheckboxContent` with an internal `hasLabelText` switch. Primary components pass `false` when
- * the checkbox is named externally, so no marker follows content that holds only the control.
- */
-export function CheckboxContentBase(props: CheckboxContentBaseProps): JSX.Element {
-	const {
-		children,
-		className,
-		hasLabelText = true,
-		necessityIndicator = 'icon',
-		...restProps
-	} = props;
+	const { children, className, ...restProps } = props;
 
 	// React Aria provides slotted `Text` context for the description and error, so a `Text` without a
 	// `slot` throws. The label has no slot, so clear the context for everything inside it.
@@ -169,12 +147,8 @@ export function CheckboxContentBase(props: CheckboxContentBaseProps): JSX.Elemen
 	return (
 		<RacCheckboxButton
 			{...restProps}
-			data-unlabelled={hasLabelText ? undefined : ''}
 			className={composeRenderProps(className, (className) => {
-				return cx(
-					checkboxContentScopeClassName,
-					checkboxRecipe({ necessityIndicator }).content({ className }),
-				);
+				return checkboxRecipe().content({ className });
 			})}
 		>
 			{labelChildren}
@@ -185,12 +159,17 @@ export function CheckboxContentBase(props: CheckboxContentBaseProps): JSX.Elemen
 /** Line-height-sized wrapper that centres the fixed visual checkbox affordance. */
 export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
 	const { className, ...restProps } = props;
+	return <span {...restProps} className={checkboxRecipe().control({ className })} />;
+}
+
+/**
+ * The visible label text. It sits inside `CheckboxContent`, after `CheckboxControl`, and draws the
+ * required marker after its last inline content when the root is required.
+ */
+export function CheckboxLabel(props: CheckboxLabelProps): JSX.Element {
+	const { className, necessityIndicator, ...restProps } = props;
 	return (
-		<span
-			{...restProps}
-			className={checkboxRecipe().control({ className })}
-			data-checkbox-control=""
-		/>
+		<span {...restProps} className={checkboxRecipe({ necessityIndicator }).label({ className })} />
 	);
 }
 

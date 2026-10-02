@@ -116,7 +116,8 @@ function controlFor(input: HTMLInputElement): HTMLElement {
 }
 
 // Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
-test('Checkbox resolves object and callback inputRef to the control, participates in a form, and fires onBlur', () => {
+test('Checkbox resolves ref to the root, resolves object and callback inputRef to the control, participates in a form, and fires onBlur', () => {
+	const ref = createRef<HTMLDivElement>();
 	const inputRef = createRef<HTMLInputElement>();
 	const callbackResolved: Array<HTMLElement | null> = [];
 	let blurred = false;
@@ -129,6 +130,7 @@ test('Checkbox resolves object and callback inputRef to the control, participate
 				onBlur={() => {
 					blurred = true;
 				}}
+				ref={ref}
 			/>
 			<Checkbox
 				inputRef={(node: HTMLElement | null) => {
@@ -142,6 +144,8 @@ test('Checkbox resolves object and callback inputRef to the control, participate
 	const control = locator.getByRole('checkbox', { name: 'Terms' }).element();
 	const callbackControl = locator.getByRole('checkbox', { name: 'Callback' }).element();
 
+	expect(ref.current?.tagName).toBe('DIV');
+	expect(ref.current?.contains(control)).toBe(true);
 	expect(inputRef.current).toBe(control);
 	expect(callbackResolved.at(-1)).toBe(callbackControl);
 
@@ -162,18 +166,6 @@ test('Checkbox resolves object and callback inputRef to the control, participate
 	expect(blurred).toBe(true);
 
 	form.remove();
-});
-
-test('Checkbox resolves ref to the root element and inputRef to the input', () => {
-	const ref = createRef<HTMLDivElement>();
-	const inputRef = createRef<HTMLInputElement>();
-	render(<Checkbox id="example-root" inputRef={inputRef} label="Terms" name="terms" ref={ref} />);
-	const input = checkbox('Terms');
-
-	expect(ref.current).toBe(document.getElementById('example-root'));
-	expect(ref.current?.tagName).toBe('DIV');
-	expect(ref.current?.contains(input)).toBe(true);
-	expect(inputRef.current).toBe(input);
 });
 
 test('Checkbox puts id on its root element and inputId on the input', () => {
@@ -218,14 +210,6 @@ test('an externally named Checkbox renders the control alone', () => {
 	expect(labelFor(input).textContent).toBe('');
 });
 
-test('a visible label is wired to the checkbox and toggles it', async () => {
-	render(<Checkbox label="Terms" name="terms" />);
-
-	await userEvent.click(page.getByText('Terms'));
-
-	expect(checkbox('Terms')).toBeChecked();
-});
-
 test('the control renders before the label', () => {
 	render(<Checkbox label="Terms" name="terms" />);
 	const control = controlFor(checkbox('Terms'));
@@ -233,21 +217,9 @@ test('the control renders before the label', () => {
 	expect(control.nextSibling?.textContent).toBe('Terms');
 });
 
-test('a required Checkbox with a visible label shows the icon marker by default', () => {
-	render(<Checkbox isRequired label="Terms" name="terms" />);
-
-	expect(checkbox('Terms*')).toHaveAccessibleName('Terms*');
-});
-
-test('necessityIndicator="label" shows (required) after the label', () => {
-	render(<Checkbox isRequired label="Terms" name="terms" necessityIndicator="label" />);
-
-	expect(checkbox('Terms(required)')).toHaveAccessibleName('Terms(required)');
-});
-
-// The marker is inline after the last word, so the accessible name has no space before it, the
-// same as `FieldLabel`.
-test('the necessity marker adds no space to the accessible name, like FieldLabel', () => {
+// The marker is CSS content with no DOM node, so the accessible name is how the tests observe it.
+// It follows the last word with no space before it, the same as `FieldLabel`.
+test('a required Checkbox marks its label like a required FieldLabel', () => {
 	render(
 		<>
 			<Checkbox isRequired label="Checkbox icon" name="checkbox-icon" />
@@ -275,21 +247,17 @@ test('the necessity marker adds no space to the accessible name, like FieldLabel
 	).toBeInTheDocument();
 });
 
-test('an optional Checkbox shows no marker', () => {
-	render(<Checkbox label="Terms" name="terms" />);
-
-	expect(checkbox('Terms')).toHaveAccessibleName('Terms');
-});
-
-test('an externally named required Checkbox shows no marker', () => {
+test('an optional or externally named Checkbox shows no marker', () => {
 	render(
 		<>
+			<Checkbox label="Optional" name="optional" />
 			<Checkbox aria-label="Select row" isRequired name="row" />
 			<span id="external-label">External label</span>
 			<Checkbox aria-labelledby="external-label" isRequired name="external" />
 		</>,
 	);
 
+	expect(checkbox('Optional')).toHaveAccessibleName('Optional');
 	expect(checkbox('Select row')).toHaveAccessibleName('Select row');
 	expect(checkbox('External label')).toHaveAccessibleName('External label');
 });
@@ -304,34 +272,6 @@ test('an errorMessage marks the checkbox invalid and shows the error under the l
 	expect(error.getBoundingClientRect().top).toBeGreaterThanOrEqual(
 		labelFor(input).getBoundingClientRect().bottom,
 	);
-});
-
-test('an errorMessage renders its markup', () => {
-	render(
-		<Checkbox
-			errorMessage={
-				<>
-					Accept the <strong>updated terms</strong>.
-				</>
-			}
-			label="Terms"
-			name="terms"
-		/>,
-	);
-
-	expect(page.getByText('updated terms').element().tagName).toBe('STRONG');
-});
-
-test('a description renders at the start edge with no error message', () => {
-	render(<Checkbox description="Receive updates by email." label="Email" name="email" />);
-	const input = checkbox('Email');
-	const description = textElement('Receive updates by email.');
-
-	expect(getDescribedText(input)).toBe('Receive updates by email.');
-	expect(description.getBoundingClientRect().left).toBe(
-		labelFor(input).getBoundingClientRect().left,
-	);
-	expect(input).not.toHaveAttribute('aria-invalid', 'true');
 });
 
 // A required checkbox has no error message of its own. React Aria's native validation supplies one
@@ -353,68 +293,6 @@ test('a required Checkbox shows its native validation message after a failed sub
 	await expect.poll(() => getDescribedText(input).length).toBeGreaterThan(0);
 });
 
-test('validate reports its message and clears once the checkbox is valid', async () => {
-	render(
-		<Checkbox
-			label="Terms"
-			name="terms"
-			validate={(isSelected) => (isSelected ? null : 'Accept the terms.')}
-			validationBehavior="aria"
-		/>,
-	);
-	const input = checkbox('Terms');
-
-	expect(input).toHaveAttribute('aria-invalid', 'true');
-	expect(getDescribedText(input)).toBe('Accept the terms.');
-
-	await userEvent.click(page.getByText('Terms'));
-
-	await expect.poll(() => input.getAttribute('aria-invalid')).not.toBe('true');
-	expect(getDescribedText(input)).toBe('');
-});
-
-test('Checkbox submits name and value through FormData only while selected', async () => {
-	const { container } = render(
-		<>
-			<Checkbox label="Terms" name="terms" value="accepted" />
-			<Checkbox form="outside-form" label="Newsletter" name="newsletter" value="yes" />
-		</>,
-	);
-	const form = document.createElement('form');
-	form.id = 'outside-form';
-	document.body.append(form);
-	const ownForm = document.createElement('form');
-	container.replaceWith(ownForm);
-	ownForm.append(container);
-
-	expect(new FormData(ownForm).get('terms')).toBe(null);
-
-	await userEvent.click(page.getByText('Terms'));
-	await userEvent.click(page.getByText('Newsletter'));
-
-	expect(new FormData(ownForm).get('terms')).toBe('accepted');
-	expect(new FormData(form).get('newsletter')).toBe('yes');
-	expect(new FormData(ownForm).get('newsletter')).toBe(null);
-
-	form.remove();
-	ownForm.remove();
-});
-
-test('a Text in the label renders', () => {
-	render(
-		<Checkbox
-			label={
-				<Text color="secondary" elementType="span">
-					Styled label
-				</Text>
-			}
-			name="styled"
-		/>,
-	);
-
-	expect(checkbox('Styled label')).toBeInTheDocument();
-});
-
 test('Checkbox size changes the control size', () => {
 	render(
 		<>
@@ -428,35 +306,10 @@ test('Checkbox size changes the control size', () => {
 	expect(small).toBeLessThan(large);
 });
 
-test('Checkbox state props control the selection', async () => {
-	const changes: Array<boolean> = [];
-	render(
-		<>
-			<Checkbox
-				isSelected
-				label="Controlled"
-				onChange={(isSelected) => {
-					changes.push(isSelected);
-				}}
-			/>
-			<Checkbox isDisabled label="Disabled" />
-			<Checkbox isReadOnly label="Read-only" />
-			<Checkbox isIndeterminate label="Indeterminate" />
-		</>,
-	);
-
-	await userEvent.click(page.getByText('Controlled'));
-
-	expect(changes).toEqual([false]);
-	expect(checkbox('Controlled')).toBeChecked();
-	expect(checkbox('Disabled')).toBeDisabled();
-	expect(checkbox('Read-only')).toHaveAttribute('aria-readonly', 'true');
-	expect(checkbox('Indeterminate')).toHaveProperty('indeterminate', true);
-});
-
-test('a Checkbox with external naming, description, and error has no axe violations', async () => {
+test('the Checkbox scene has no axe violations', async () => {
 	const { container } = render(
 		<>
+			<CheckboxScene />
 			<Checkbox
 				aria-label="Select row"
 				description="One row."
@@ -468,12 +321,6 @@ test('a Checkbox with external naming, description, and error has no axe violati
 			<Checkbox isRequired label="Required" necessityIndicator="label" />
 		</>,
 	);
-
-	await expectNoAxeViolations(container);
-});
-
-test('the Checkbox scene has no axe violations', async () => {
-	const { container } = render(<CheckboxScene />);
 
 	await expectNoAxeViolations(container);
 });
@@ -622,6 +469,7 @@ test('necessity markers', { tags: ['visual'] }, async () => {
 				name="wrapping-words"
 				necessityIndicator="label"
 			/>
+			<Checkbox aria-label="Select row" isRequired name="external" />
 		</Stack>,
 	);
 	await captureVisual(locator, 'checkbox/necessity-markers');

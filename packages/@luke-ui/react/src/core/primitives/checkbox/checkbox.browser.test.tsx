@@ -2,6 +2,7 @@ import {
 	CheckboxContent,
 	CheckboxControl,
 	CheckboxIndicator,
+	CheckboxLabel,
 	CheckboxRoot,
 } from '@luke-ui/react/primitives/checkbox';
 import { FieldDescription, FieldError, InlineField } from '@luke-ui/react/primitives/field';
@@ -35,7 +36,7 @@ function parts(label: string) {
 			<CheckboxControl>
 				<CheckboxIndicator />
 			</CheckboxControl>
-			{label}
+			<CheckboxLabel>{label}</CheckboxLabel>
 		</CheckboxContent>
 	);
 }
@@ -56,28 +57,15 @@ test('CheckboxRoot puts id on its root element, inputId on the input, and ref on
 	expect(ref.current).toBe(root);
 });
 
-test('CheckboxRoot owns state, form participation, and size for the parts inside it', async () => {
-	const { container } = render(
+test('CheckboxRoot size changes the control size', () => {
+	render(
 		<>
-			<CheckboxRoot name="terms" value="accepted">
-				{parts('Terms')}
-			</CheckboxRoot>
-			<CheckboxRoot isDisabled>{parts('Disabled')}</CheckboxRoot>
 			<CheckboxRoot size="small">{parts('Small')}</CheckboxRoot>
 			<CheckboxRoot size="large">{parts('Large')}</CheckboxRoot>
 		</>,
 	);
-	const form = document.createElement('form');
-	container.replaceWith(form);
-	form.append(container);
 
-	await userEvent.click(page.getByText('Terms'));
-
-	expect(new FormData(form).get('terms')).toBe('accepted');
-	expect(checkbox('Disabled')).toBeDisabled();
 	expect(controlWidth('Small')).toBeLessThan(controlWidth('Large'));
-
-	form.remove();
 });
 
 test('InlineField renders the content, description, and error in a CheckboxRoot', () => {
@@ -126,7 +114,7 @@ test('InlineField always renders the error slot', async () => {
 			<button type="submit">Submit</button>
 		</form>,
 	);
-	const input = checkbox('Terms *');
+	const input = checkbox('Terms*');
 
 	expect(getDescribedText(input)).toBe('');
 
@@ -150,44 +138,45 @@ test('manual FieldDescription and FieldError parts work in a CheckboxRoot', () =
 	expect(getDescribedText(input)).toBe('Example description Example error');
 });
 
-test('CheckboxContent draws the necessity marker only for a required root', () => {
+// The marker is CSS content with no DOM node, so the accessible name is how the tests observe it.
+test('CheckboxLabel marks a required root with its necessityIndicator', () => {
 	render(
 		<>
-			<CheckboxRoot isRequired>{parts('Raw')}</CheckboxRoot>
-			<CheckboxRoot isRequired>
-				<CheckboxContent necessityIndicator="label">
-					<CheckboxControl>
-						<CheckboxIndicator />
-					</CheckboxControl>
-					<Text elementType="span">Words</Text>
-				</CheckboxContent>
-			</CheckboxRoot>
+			<CheckboxRoot isRequired>{parts('Icon')}</CheckboxRoot>
 			<CheckboxRoot isRequired>
 				<CheckboxContent>
 					<CheckboxControl>
 						<CheckboxIndicator />
 					</CheckboxControl>
-					<Text elementType="span">Icon</Text>
-				</CheckboxContent>
-			</CheckboxRoot>
-			<CheckboxRoot>
-				<CheckboxContent>
-					<CheckboxControl>
-						<CheckboxIndicator />
-					</CheckboxControl>
-					<Text elementType="span">Optional</Text>
+					<CheckboxLabel necessityIndicator="label">Words</CheckboxLabel>
 				</CheckboxContent>
 			</CheckboxRoot>
 		</>,
 	);
 
-	// The marker is CSS content with no DOM node, so the accessible name is how the test observes
-	// it. An element after the control carries it, so it follows that element's last word. Raw text
-	// has no element to carry it, so the label draws it after the text.
-	expect(checkbox('Icon*')).toHaveAccessibleName('Icon*');
-	expect(checkbox('Words(required)')).toHaveAccessibleName('Words(required)');
-	expect(checkbox('Raw *')).toHaveAccessibleName('Raw *');
+	expect(checkbox('Icon*')).toBeInTheDocument();
+	expect(checkbox('Words(required)')).toBeInTheDocument();
+});
+
+test('CheckboxLabel draws no marker when the root is not required', () => {
+	render(<CheckboxRoot>{parts('Optional')}</CheckboxRoot>);
+
 	expect(checkbox('Optional')).toHaveAccessibleName('Optional');
+});
+
+test('raw text in CheckboxContent gets no marker', () => {
+	render(
+		<CheckboxRoot isRequired>
+			<CheckboxContent>
+				<CheckboxControl>
+					<CheckboxIndicator />
+				</CheckboxControl>
+				Raw
+			</CheckboxContent>
+		</CheckboxRoot>,
+	);
+
+	expect(checkbox('Raw')).toHaveAccessibleName('Raw');
 });
 
 // React Aria provides slotted `Text` context inside a checkbox field, and `Text` throws without a

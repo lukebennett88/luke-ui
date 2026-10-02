@@ -2,9 +2,10 @@ import { useObjectRef } from '@react-aria/utils';
 import type { JSX, ReactNode, Ref } from 'react';
 import type { CheckboxRootProps } from '../primitives/checkbox/checkbox.js';
 import {
-	CheckboxContentBase,
+	CheckboxContent,
 	CheckboxControl,
 	CheckboxIndicator,
+	CheckboxLabel,
 	CheckboxRoot,
 } from '../primitives/checkbox/checkbox.js';
 import type { FieldAccessibleNameProps } from '../primitives/field/field.js';
@@ -63,12 +64,14 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
 			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
 		>
 			<InlineField description={description} errorMessage={normalizedErrorMessage}>
-				<CheckboxContentBase hasLabelText={label != null} necessityIndicator={necessityIndicator}>
+				<CheckboxContent>
 					<CheckboxControl>
 						<CheckboxIndicator />
 					</CheckboxControl>
-					{label != null ? <span>{label}</span> : null}
-				</CheckboxContentBase>
+					{label != null ? (
+						<CheckboxLabel necessityIndicator={necessityIndicator}>{label}</CheckboxLabel>
+					) : null}
+				</CheckboxContent>
 			</InlineField>
 		</CheckboxRoot>
 	);

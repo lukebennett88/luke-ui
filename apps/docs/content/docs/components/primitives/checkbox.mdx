@@ -14,55 +14,65 @@ application forms, use [`Checkbox`](/components/forms/checkbox).
 
 `CheckboxRoot` is the semantic root. It connects the input to the content, description, and error
 inside it, and owns the selection, state, validation, and size. `CheckboxContent` is the native
-`<label>`. It holds `CheckboxControl`, which centres `CheckboxIndicator`, and the visible label
-text. Parts follow document order, so put the control before the label.
+`<label>`. It holds `CheckboxControl`, which centres `CheckboxIndicator`, and `CheckboxLabel`, the
+visible label. Parts follow document order, so put the control before the label.
+
+## Description and error
 
 [`InlineField`](/components/primitives/field) wraps `CheckboxContent` to add a `description` and an
-`errorMessage`. It spaces them and hangs the error under the label text. It always renders the error
-slot, so a validation message from a constraint or `validate` appears without an `errorMessage`.
+`errorMessage`. It spaces them and hangs the error under the label text.
 
 ```tsx
-<CheckboxRoot isRequired>
-	<InlineField description="Receive updates by email.">
+<CheckboxRoot>
+	<InlineField description="Receive updates by email." errorMessage="Choose an option.">
 		<CheckboxContent>
 			<CheckboxControl>
 				<CheckboxIndicator />
 			</CheckboxControl>
-			Email notifications
+			<CheckboxLabel>Email notifications</CheckboxLabel>
 		</CheckboxContent>
 	</InlineField>
 </CheckboxRoot>
 ```
 
-`InlineField` provides anatomy and presentation, not semantics, so it needs the surrounding
-`CheckboxRoot`. For a custom arrangement, place `FieldDescription` and `FieldError` directly inside
-the root instead. Use either `InlineField` or those parts for one checkbox, never both. `FieldError`
-carries the error icon either way.
+`InlineField` always renders the error slot, so a validation message from a constraint or `validate`
+appears without an `errorMessage`. It provides anatomy and presentation, not semantics, so it needs
+the surrounding `CheckboxRoot`. Set `isInvalid` on the root to mark the checkbox invalid.
+
+For a custom arrangement, place `FieldDescription` and `FieldError` directly inside the root
+instead. Use either `InlineField` or those parts for one checkbox, never both. `FieldError` carries
+the error icon either way.
 
 ## Labels
 
-The label is part of a native `<label>`, so it takes textual content only. Do not put a link or
-button inside `CheckboxContent`. Place it as a sibling outside the content. To name the checkbox
-from content elsewhere, give that content an id and pass it to `aria-labelledby` on the root.
+`CheckboxLabel` is the visible-label part. The label is part of a native `<label>`, so it takes
+textual content only. Do not put a link or button inside `CheckboxContent`. Place it as a sibling
+outside the content.
+
+Raw text can go directly in `CheckboxContent`, but it gets no required marker. A checkbox named from
+elsewhere can omit `CheckboxLabel`. To name the checkbox from content on the page, give that content
+an id and pass it to `aria-labelledby` on the root. To supply the name directly, pass `aria-label`
+on the root.
 
 ## Required marker
 
-`CheckboxContent` draws a marker after the label text when the root is required.
+Set `isRequired` on the root, and `CheckboxLabel` draws a marker after its content.
 `necessityIndicator="icon"` is the default and adds an asterisk. `necessityIndicator="label"`
-appends “(required)”. The marker follows the root's `isRequired`, so set it on the root.
-
-Put the label text in an element such as `Text`, and the marker follows the last word of that
-element, even when the label wraps. Raw text children get the marker after the text, as a separate
-item that does not flow with a wrapped label.
+appends “(required)”. Put `necessityIndicator` on `CheckboxLabel`, not on `CheckboxContent`.
 
 ```tsx
-<CheckboxContent>
-	<CheckboxControl>
-		<CheckboxIndicator />
-	</CheckboxControl>
-	<Text elementType="span">Email notifications</Text>
-</CheckboxContent>
+<CheckboxRoot isRequired>
+	<CheckboxContent>
+		<CheckboxControl>
+			<CheckboxIndicator />
+		</CheckboxControl>
+		<CheckboxLabel necessityIndicator="label">Email notifications</CheckboxLabel>
+	</CheckboxContent>
+</CheckboxRoot>
 ```
+
+The marker follows the label's final inline content, even when the label wraps. Block-level children
+inside `CheckboxLabel` can put the marker on another line.
 
 ## Root props
 
@@ -94,6 +104,13 @@ root sets the size of the control and the indent of the error. `Text` renders in
 <component-props-table
 	path="packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx"
 	name="CheckboxControlProps"
+/>
+
+### CheckboxLabelProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx"
+	name="CheckboxLabelProps"
 />
 
 ### CheckboxIndicatorProps

@@ -25,8 +25,8 @@ test('Checkbox takes its label from the label prop, not children', () => {
 	assertType<CheckboxProps>({ children: 'Terms', label: 'Terms' });
 });
 
-test('Checkbox derives invalid state from errorMessage only', () => {
-	// @ts-expect-error — a non-empty errorMessage is the only way to mark the checkbox invalid
+test('Checkbox does not accept isInvalid', () => {
+	// @ts-expect-error — Checkbox exposes no isInvalid prop
 	assertType<CheckboxProps>({ isInvalid: true, label: 'Terms' });
 });
 

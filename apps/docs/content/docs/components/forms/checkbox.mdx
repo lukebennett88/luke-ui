@@ -17,9 +17,9 @@ Pass the visible label as `label`. The control renders first and the label secon
 
 The label sits inside a native `<label>` element, so pass textual content only. Links and buttons
 are not supported inside it. Place them next to the checkbox instead. To use content elsewhere on
-the page as the label, omit `label` and pass its id to `aria-labelledby`. When the surrounding
-content already names the control, pass `aria-label`. Pass `label` or exactly one of `aria-label`
-and `aria-labelledby`.
+the page as the label, omit `label` and pass its id to `aria-labelledby`. To supply the name
+directly, omit `label` and pass `aria-label`. Pass `label` or exactly one of `aria-label` and
+`aria-labelledby`.
 
 ```tsx
 <Checkbox aria-label="Select row" />
@@ -46,11 +46,10 @@ default. Use `small` in compact layouts and `large` where a larger control impro
 
 Set `isRequired` to require the choice. `Checkbox` shows its validation message after validation
 fails. Pass `errorMessage` only for an error you already have, such as one from a form library or
-your server. A non-empty message marks the checkbox invalid. Read [Validation](/docs/validation) for
-where messages come from and how to write them.
+your server. A non-empty message marks the checkbox invalid, and `Checkbox` has no `isInvalid` prop.
+Read [Validation](/docs/validation) for where messages come from and how to write them.
 
-The message hangs under the label text. `Checkbox` has no `isInvalid` prop. To mark it invalid
-yourself, pass `errorMessage`.
+The message hangs under the label text.
 
 <ExampleBlock src="checkbox/validation" title="Checkbox: Validation" />
 
