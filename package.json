@@ -29,6 +29,7 @@
 		"generate:primitive": "pnpm --filter=@luke-ui/turbo-generators run generate:primitive",
 		"release": "turbo run build --filter=docs^... && changeset publish",
 		"test": "turbo run test",
+		"test:consumer": "pnpm --filter=@luke-ui/react run test:consumer",
 		"test:visual": "pnpm --filter=@luke-ui/react run test:visual",
 		"version-packages": "changeset version"
 	},

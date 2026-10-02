@@ -93,6 +93,8 @@
 		"test": "pnpm run test:unit && pnpm run test:browser:run",
 		"test:browser": "turbo run test:browser:run",
 		"test:browser:run": "vp test run --project=browser --tagsFilter='!visual'",
+		"test:consumer": "turbo run test:consumer:run",
+		"test:consumer:run": "vp test run --project=unit src/core/styles/packed-consumer.test.ts",
 		"test:ui": "turbo run test:ui:run",
 		"test:ui:run": "vp test --project=browser --ui",
 		"test:unit": "vp test run --project=unit",
@@ -104,11 +106,9 @@
 		"test:watch:run": "vp test --project=browser --tagsFilter='!visual'"
 	},
 	"dependencies": {
-		"@capsizecss/metrics": "catalog:",
-		"@capsizecss/vanilla-extract": "catalog:",
+		"@capsizecss/core": "catalog:",
 		"@luke-ui/rainbow-sprinkles": "workspace:*",
 		"@react-aria/utils": "catalog:",
-		"@vanilla-extract/css": "catalog:",
 		"@vanilla-extract/dynamic": "catalog:",
 		"@vanilla-extract/recipes": "catalog:",
 		"csstype": "catalog:",
@@ -116,11 +116,13 @@
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "catalog:",
+		"@capsizecss/metrics": "catalog:",
 		"@rolldown/pluginutils": "catalog:",
 		"@types/node": "catalog:",
 		"@types/pngjs": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
+		"@vanilla-extract/css": "catalog:",
 		"@vanilla-extract/rollup-plugin": "catalog:",
 		"@vanilla-extract/vite-plugin": "catalog:",
 		"@vitejs/plugin-react": "catalog:",
@@ -150,5 +152,8 @@
 		"react": "catalog:",
 		"react-aria-components": "catalog:",
 		"react-dom": "catalog:"
+	},
+	"inlinedDependencies": {
+		"@capsizecss/metrics": "4.3.0"
 	}
 }

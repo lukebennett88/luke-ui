@@ -2,9 +2,15 @@ import type { ComplexStyleRule, StyleRule } from '@vanilla-extract/css';
 import { style as vanillaStyle } from '@vanilla-extract/css';
 import { addFunctionSerializer } from '@vanilla-extract/css/functionSerializer';
 import { recipe as vanillaRecipe } from '@vanilla-extract/recipes';
-import { cx } from '../../shared/utils/utils.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import { cascadeLayers } from './layer-names.js';
+import type { BuiltRecipe, SlotFn, SlottedRecipeDescriptor } from './recipe-engine.js';
+import {
+	createRecipe,
+	createSingleRecipe,
+	pickGroups,
+	withDefaultVariants as applyDefaultVariants,
+} from './recipe-engine.js';
 import type { RecipeComposition } from './recipe-types.js';
 
 /**
@@ -20,7 +26,7 @@ import type { RecipeComposition } from './recipe-types.js';
  * classes.
  *
  * Layer wrapping is inline here. Importing `layered-style.css.ts` would break Vanilla Extract
- * serialization. Runtime rebuild uses `createRecipe` and `createSingleRecipe`.
+ * serialization. Runtime rebuild lives in `recipe-engine.ts`.
  */
 
 // ---------------------------------------------------------------------------
@@ -170,9 +176,6 @@ interface MultiPartConfig<
 	variants?: Variants;
 }
 
-/** A single slot function: takes optional composition options and returns a class string. */
-type SlotFn = (options?: RecipeComposition) => string;
-
 /** The runtime function a slotted `recipe()` returns. */
 type MultiPartRecipe<Slot extends string, Variants extends SlotVariantGroups<Slot>> = (
 	selection?: Selection<Variants>,
@@ -264,13 +267,7 @@ export function withDefaultVariants<
 ): (input?: PublicInput) => string {
 	// The rejection map only exists to fail the call; past it, the defaults are an `Input`.
 	const defaults: Input = checkedDefaults;
-	const wrapped = (input?: PublicInput) => {
-		const selection = { ...defaults, ...input };
-		for (const key in defaults) {
-			if (selection[key] === undefined) selection[key] = defaults[key];
-		}
-		return recipe(selection);
-	};
+	const wrapped = applyDefaultVariants(recipe, defaults);
 
 	registerSerializer(wrapped, 'withDefaultVariants', [recipe, defaults]);
 	return wrapped;
@@ -563,71 +560,4 @@ function isComposedStyle(
 	styleRule: RecipeStyleRule,
 ): styleRule is ReadonlyArray<DistributiveOmit<StyleRule, '@layer'> | ClassNames> {
 	return Array.isArray(styleRule);
-}
-
-// ---------------------------------------------------------------------------
-// Runtime (referenced by the function serializer at import time)
-// ---------------------------------------------------------------------------
-
-/** A built Vanilla Extract recipe runtime function (one per slot, or the whole single-part recipe). */
-type BuiltRecipe = (selection?: Record<string, unknown>) => string;
-
-/** Serialized descriptor for a slotted recipe: per-slot runtime fns and their variant groups. */
-interface SlottedRecipeDescriptor {
-	slotGroups: Record<string, ReadonlyArray<string>>;
-	slots: Record<string, BuiltRecipe>;
-}
-
-/** Narrows an outer selection to the variant groups a given slot actually uses. */
-function pickGroups<Value>(
-	selection: Record<string, Value | undefined> | undefined,
-	groups: ReadonlyArray<string>,
-): Record<string, Value | undefined> | undefined {
-	if (selection === undefined) return undefined;
-
-	const picked: Record<string, Value | undefined> = {};
-	for (const group of groups) {
-		if (group in selection) picked[group] = selection[group];
-	}
-	return picked;
-}
-
-/** Split recipe input into VE selection vs consumer `className` (never pass `className` to VE). */
-function splitInput(input: Record<string, unknown> | undefined): {
-	className: string | undefined;
-	selection: Record<string, unknown> | undefined;
-} {
-	if (input === undefined) return { className: undefined, selection: undefined };
-	const { className, ...selection } = input;
-	return { className: typeof className === 'string' ? className : undefined, selection };
-}
-
-/**
- * Runtime rebuild for a slotted recipe. Slots evaluate lazily.
- *
- * @public Path-imported by Vanilla Extract's function serializer.
- */
-export function createRecipe(descriptor: SlottedRecipeDescriptor) {
-	const slotEntries = Object.entries(descriptor.slots);
-
-	return (selection?: Record<string, unknown>): Record<string, SlotFn> => {
-		const slots: Record<string, SlotFn> = {};
-		for (const [slotName, built] of slotEntries) {
-			const groups = descriptor.slotGroups[slotName] ?? [];
-			slots[slotName] = (options) => cx(built(pickGroups(selection, groups)), options?.className);
-		}
-		return slots;
-	};
-}
-
-/**
- * Runtime rebuild for a single-part recipe. Appends consumer `className` after recipe classes.
- *
- * @public Path-imported by Vanilla Extract's function serializer.
- */
-export function createSingleRecipe(built: BuiltRecipe) {
-	return (input?: Record<string, unknown>): string => {
-		const { className, selection } = splitInput(input);
-		return cx(built(selection), className);
-	};
 }

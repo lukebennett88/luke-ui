@@ -1,8 +1,8 @@
 import { transform } from 'lightningcss';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
-import type { TypeStyle } from '../../theme/contract.js';
-import { typeStyles } from '../../theme/contract.js';
+import type { TypeStyle } from '../../theme/type-styles.js';
+import { typeStyles } from '../../theme/type-styles.js';
 
 const lukeOwnedLayerNames = ['reset', 'base', 'recipes', 'utilities'] as const;
 const lukeOwnedLayerNameSet = new Set<string>(lukeOwnedLayerNames);

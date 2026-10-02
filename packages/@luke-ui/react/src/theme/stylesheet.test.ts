@@ -8,14 +8,10 @@ import {
 import { buildTheme } from './build-theme.js';
 import { themeClassName as paperThemeClassName } from './bundles/paper/index.js';
 import { themeClassName as tactileThemeClassName } from './bundles/tactile/index.js';
-import {
-	flattenThemeContract,
-	partitionContractPairs,
-	spaceScale,
-	typeStyles,
-} from './contract.js';
+import { flattenThemeContract, partitionContractPairs, spaceScale } from './contract.js';
 import type { ThemeFoundation } from './foundation.js';
 import { defaultFontWeights, defaultRadius } from './foundation.js';
+import { typeStyles } from './type-styles.js';
 
 const pairs = flattenThemeContract();
 const { identityPairs, modePairs } = partitionContractPairs(pairs);

@@ -10,12 +10,13 @@
 import appleSystemMetrics from '@capsizecss/metrics/appleSystem';
 import dMSansMetrics from '@capsizecss/metrics/dMSans';
 import interMetrics from '@capsizecss/metrics/inter';
-import { typeStyleMetricStep, typeStyles } from './contract.js';
-import type { IdentityPath, TypeStyle } from './contract.js';
+import type { IdentityPath } from './contract.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import { MOTION_DURATION_SCALE } from './motion.js';
 import { pathEntry, pathRecord } from './path-record.js';
 import { rem } from './rem.js';
+import type { TypeStyle } from './type-styles.js';
+import { typeStyleMetricStep, typeStyles } from './type-styles.js';
 
 /**
  * Structural block sizes for the small and medium controls, the minimum tap target, and

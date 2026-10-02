@@ -46,7 +46,12 @@ export default defineConfig({
 			profile: 'esm-only',
 		},
 		deps: {
-			neverBundle: Object.keys(packageJson.peerDependencies),
+			// Vanilla Extract is build-time only. Keep any stray reference external rather than bundling
+			// it, so the packed-consumer harness reports it as an undeclared import.
+			neverBundle: [...Object.keys(packageJson.peerDependencies), '@vanilla-extract/css'],
+			// `defineTheme` reads three fonts' metrics. Bundling them spares consumers from installing
+			// the whole metrics collection, which is about 170 MB.
+			onlyBundle: ['@capsizecss/metrics'],
 		},
 		dts: true,
 		entry: {

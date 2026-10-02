@@ -1,256 +1,916 @@
 import { execFileSync } from 'node:child_process';
-import { realpathSync, readdirSync } from 'node:fs';
+import { lstatSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { expect, test } from 'vite-plus/test';
-
-const packageRoot = fileURLToPath(new URL('../../..', import.meta.url));
-const rainbowPackageRoot = fileURLToPath(new URL('../../../../rainbow-sprinkles', import.meta.url));
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { afterAll, beforeAll, describe, expect, test } from 'vite-plus/test';
+import { cascadeLayerNames } from './layer-names.js';
 
 /**
- * Packs `@luke-ui/rainbow-sprinkles` and `@luke-ui/react`, then installs both into an isolated
- * consumer with npm (no workspace links). Proves SSR, hydration, asset resolution, and that
- * sprinkles resolve through the published Rainbow runtime package.
+ * Clean-consumer harness for `@luke-ui/react`.
+ *
+ * By default it packs the workspace build. Set `LUKE_UI_REACT_SPEC` to a registry version or
+ * dist-tag, such as `snapshot` or `1.0.0`, to run the same fixtures against the published package.
+ * Either way, npm installs the artifact into a directory outside the repository, so nothing resolves
+ * through workspace links.
+ *
+ * The consumer suite runs twice: once with the newest peers the published ranges allow, and once
+ * with the lowest peers they allow and the minimum supported TypeScript.
  */
-test(
-	'installs packed React and Rainbow tarballs with npm and proves SSR, hydration, and assets',
-	{ timeout: 120_000 },
-	async () => {
-		const workDir = await mkdtemp(path.join(tmpdir(), 'luke-ui-react-consumer-'));
-		const tarballDir = path.join(workDir, 'pack');
-		const consumerDir = path.join(workDir, 'consumer');
-		try {
-			await writeFile(path.join(workDir, 'package.json'), JSON.stringify({ private: true }));
-			execFileSync('mkdir', ['-p', tarballDir, consumerDir]);
 
-			const rainbowTarballName = packWorkspacePackage(rainbowPackageRoot, tarballDir);
-			const reactTarballName = packWorkspacePackage(packageRoot, tarballDir);
-			const rainbowTarballPath = path.join(tarballDir, rainbowTarballName);
-			const reactTarballPath = path.join(tarballDir, reactTarballName);
+const registrySpec = process.env.LUKE_UI_REACT_SPEC?.trim() || undefined;
 
-			const packedReactJson = readPackedPackageJson(reactTarballPath);
-			const packedRainbowJson = readPackedPackageJson(rainbowTarballPath);
-			const reactDependencies = packedReactJson.dependencies;
-			if (reactDependencies === undefined) {
-				throw new Error('Expected packed @luke-ui/react to declare dependencies.');
+/** The oldest TypeScript that accepts the published declarations. Lower it only with evidence. */
+const MINIMUM_TYPESCRIPT = '5.8';
+/** Consumer tooling. These ranges are not part of the package contract. */
+const JSDOM_RANGE = '^30.1.1';
+const VITE_RANGE = '^8.3.2';
+/**
+ * Disk space a consumer spends on Luke UI and the dependencies it alone brings, beyond its peers.
+ * Currently about 8 MB.
+ */
+const INSTALL_BUDGET_MB = 16;
+
+const packageRoot = fileURLToPath(new URL('../../..', import.meta.url));
+const scopeRoot = fileURLToPath(new URL('../../../..', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../../../../..', import.meta.url));
+const workspaceTypeScript = readManifest(
+	createRequire(import.meta.url).resolve('typescript/package.json'),
+).version;
+
+/** The only paths a tarball may contain. */
+const PUBLISHED_PATH_PATTERN = /^(?:dist\/|skills\/|LICENSE$|README\.md$|package\.json$)/;
+const WORKSPACE_PROTOCOL_PATTERN = /^(?:catalog|file|link|portal|workspace):/;
+const ASSET_EXPORT_PATTERN = /\.(?:css|svg)$/;
+const CUSTOM_PROPERTY_PATTERN = /--luke-[a-z-]+:/;
+const SYMBOL_PATTERN = /<symbol\b[^>]*\bid="/;
+/** The statement that fixes cascade layer order at the top of the shared stylesheet. */
+const LAYER_STATEMENT = `@layer ${cascadeLayerNames.join(', ')};`;
+const MODULE_SCRIPT_PATTERN = /<script type="module"[^>]+src="\/assets\/[^"]+\.js"/;
+
+interface Manifest {
+	dependencies?: Record<string, string>;
+	exports: Record<string, string>;
+	name: string;
+	peerDependencies: Record<string, string>;
+	private?: boolean;
+	version: string;
+}
+
+interface Artifact {
+	/** Package root extracted from the tarball. */
+	contents: string;
+	/** Tarball paths relative to `package/`. */
+	files: Array<string>;
+	/** Dependency specs that install the artifact, and any packed workspace dependencies. */
+	installSpecs: Record<string, string>;
+	manifest: Manifest;
+}
+
+let workDir = '';
+let artifact: Artifact;
+
+beforeAll(async () => {
+	workDir = await mkdtemp(path.join(tmpdir(), 'luke-ui-consumer-'));
+	artifact = registrySpec === undefined ? await packWorkspace() : await fetchFromRegistry();
+}, 300_000);
+
+afterAll(async () => {
+	if (workDir !== '') await rm(workDir, { force: true, recursive: true });
+}, 60_000);
+
+describe('artifact', () => {
+	test('contains only published files and every export target', () => {
+		expect(artifact.files.filter((file) => !PUBLISHED_PATH_PATTERN.test(file))).toEqual([]);
+
+		const missingTargets = Object.values(artifact.manifest.exports)
+			.map((target) => target.slice(2))
+			.filter((target) => !artifact.files.includes(target));
+		expect(missingTargets).toEqual([]);
+	});
+
+	test('declares only installable dependency ranges', () => {
+		const { manifest } = artifact;
+		const ranges = { ...manifest.dependencies, ...manifest.peerDependencies };
+
+		expect(
+			Object.entries(ranges).filter(([, range]) => WORKSPACE_PROTOCOL_PATTERN.test(range)),
+		).toEqual([]);
+		expect(
+			Object.entries(manifest.dependencies ?? {}).filter(
+				([name, range]) => name.startsWith('@luke-ui/') && !isReleasable(name, range),
+			),
+		).toEqual([]);
+	});
+
+	test('imports exactly the packages it declares from its exports', () => {
+		const { manifest } = artifact;
+		const declared = [
+			...Object.keys(manifest.dependencies ?? {}),
+			...Object.keys(manifest.peerDependencies),
+		].sort();
+		const imported = [...importedPackages(artifact)].sort();
+
+		expect({ undeclared: imported.filter((name) => !declared.includes(name)) }).toEqual({
+			undeclared: [],
+		});
+		// React Aria Components renders through React DOM, so the peer keeps the application's copy.
+		const peersWithoutImports = ['react-dom'];
+		expect({
+			unused: declared.filter(
+				(name) => !imported.includes(name) && !peersWithoutImports.includes(name),
+			),
+		}).toEqual({ unused: [] });
+	});
+});
+
+interface BundleBoundary {
+	/** Strings that only appear when unrelated code is bundled. The build is not minified. */
+	forbiddenMarkers: Array<string>;
+	name: string;
+	/** Packages the bundle may contain, apart from React and React DOM, which are external. */
+	packages: Array<string>;
+	slug: string;
+	source: string;
+}
+
+/** Theme generation runs at build time. A runtime import must never bundle it. */
+const themeGenerationMarkers = [
+	'ThemeContrastError',
+	'flattenThemeContract',
+	'ThemeGenerationError',
+	'precomputeValues',
+	'unitsPerEm',
+];
+
+/** Packages every component bundles: Luke UI, its recipe runtime, and React Aria Components. */
+const componentRuntime = [
+	'@luke-ui/react',
+	'@vanilla-extract/recipes',
+	'clsx',
+	'react-aria',
+	'react-aria-components',
+];
+
+const bundleBoundaries: Array<BundleBoundary> = [
+	{
+		forbiddenMarkers: [
+			...themeGenerationMarkers,
+			'ComboboxField',
+			'LoadingSpinner',
+			'TextInputField',
+		],
+		name: 'Blockquote',
+		packages: [...componentRuntime],
+		slug: 'blockquote',
+		source: `export { Blockquote } from '@luke-ui/react/blockquote';`,
+	},
+	{
+		forbiddenMarkers: [...themeGenerationMarkers, 'ComboboxField', 'TextInputField'],
+		name: 'Button',
+		packages: [
+			...componentRuntime,
+			'@internationalized/string',
+			'@react-aria/utils',
+			'react-stately',
+			'spin-doctor',
+		],
+		slug: 'button',
+		source: `export { Button } from '@luke-ui/react/button';`,
+	},
+	{
+		forbiddenMarkers: [...themeGenerationMarkers, 'defineProperties', 'defineSprinkles'],
+		name: 'createSprinkles',
+		packages: [
+			'@luke-ui/rainbow-sprinkles',
+			'@luke-ui/react',
+			'@vanilla-extract/dynamic',
+			'@vanilla-extract/private',
+		],
+		slug: 'sprinkles',
+		source: `export { createSprinkles } from '@luke-ui/react/styles';`,
+	},
+	{
+		forbiddenMarkers: themeGenerationMarkers,
+		name: 'theme vars',
+		packages: ['@luke-ui/react'],
+		slug: 'theme-vars',
+		source: `export { vars } from '@luke-ui/react/theme';`,
+	},
+];
+
+interface PeerSet {
+	label: string;
+	/** Picks the version installed for a published peer range. */
+	peerVersion: (range: string) => string;
+	slug: string;
+	/** TypeScript range to install. */
+	typescript: string;
+	/** The `major.minor` the installed TypeScript must match. */
+	typescriptLine: string;
+	/** `@types/react` range matching the installed React. */
+	typesRange: (reactRange: string) => string;
+}
+
+const peerSets: Array<PeerSet> = [
+	{
+		label: 'the newest peers',
+		peerVersion: (range) => range,
+		slug: 'newest',
+		typescript: workspaceTypeScript,
+		typescriptLine: workspaceTypeScript.split('.').slice(0, 2).join('.'),
+		typesRange: (range) => range,
+	},
+	{
+		label: `the lowest peers and TypeScript ${MINIMUM_TYPESCRIPT}`,
+		peerVersion: lowestVersion,
+		slug: 'lowest',
+		typescript: `~${MINIMUM_TYPESCRIPT}.0`,
+		typescriptLine: MINIMUM_TYPESCRIPT,
+		typesRange: (range) => {
+			const [major, minor] = lowestVersion(range).split('.');
+			return `~${major}.${minor}.0`;
+		},
+	},
+];
+
+for (const peerSet of peerSets) {
+	describe(`consumer with ${peerSet.label}`, () => {
+		let consumerDir = '';
+		let peers: Record<string, string> = {};
+
+		beforeAll(async () => {
+			consumerDir = path.join(workDir, peerSet.slug);
+			peers = Object.fromEntries(
+				Object.entries(artifact.manifest.peerDependencies).map(([name, range]) => [
+					name,
+					peerSet.peerVersion(range),
+				]),
+			);
+			await installConsumer(consumerDir, peerSet, peers);
+		}, 600_000);
+
+		test('installs the artifact without workspace links', () => {
+			expect(path.relative(repoRoot, consumerDir).startsWith('..')).toBe(true);
+
+			const scopeDir = path.join(consumerDir, 'node_modules', '@luke-ui');
+			for (const name of readdirSync(scopeDir)) {
+				const installed = path.join(scopeDir, name);
+				expect({ name, symlink: lstatSync(installed).isSymbolicLink() }).toEqual({
+					name,
+					symlink: false,
+				});
+				expect(realpathSync(installed).startsWith(realpathSync(consumerDir))).toBe(true);
 			}
 
-			expect(reactDependencies['@luke-ui/rainbow-sprinkles']).toBeTruthy();
-			expect(JSON.stringify(reactDependencies)).not.toContain('catalog:');
-			expect(JSON.stringify(reactDependencies)).not.toContain('workspace:');
-			expect(JSON.stringify(packedReactJson.peerDependencies ?? {})).not.toContain('catalog:');
-			expect(JSON.stringify(packedRainbowJson.dependencies ?? {})).not.toContain('catalog:');
-			expect(JSON.stringify(packedRainbowJson.dependencies ?? {})).not.toContain('workspace:');
-			expect(packedRainbowJson.private).not.toBe(true);
+			expect(installedVersion(consumerDir, '@luke-ui/react')).toBe(artifact.manifest.version);
+		});
 
-			await writeFile(
-				path.join(consumerDir, 'package.json'),
-				JSON.stringify(
-					{
-						name: 'packed-consumer-fixture',
-						private: true,
-						type: 'module',
-						dependencies: {
-							'@luke-ui/rainbow-sprinkles': `file:${rainbowTarballPath}`,
-							'@luke-ui/react': `file:${reactTarballPath}`,
-							...packedReactJson.peerDependencies,
-							jsdom: '^26.1.0',
-						},
-					},
-					null,
-					2,
+		test.runIf(peerSet.peerVersion === lowestVersion)(
+			'installs the lowest version each peer range allows',
+			() => {
+				const installed = Object.fromEntries(
+					Object.keys(peers).map((name) => [name, installedVersion(consumerDir, name)]),
+				);
+				expect(installed).toEqual(peers);
+			},
+		);
+
+		test(`installs under ${INSTALL_BUDGET_MB} MB beyond its peers`, () => {
+			const peerSelector = Object.keys(peers)
+				.flatMap((name) => [`#${name}`, `#${name} *`])
+				.join(', ');
+			const peerLocations = new Set(queryLocations(consumerDir, peerSelector));
+			const ownLocations = new Set(
+				queryLocations(consumerDir, '#@luke-ui/react, #@luke-ui/react *').filter(
+					(location) => !peerLocations.has(location),
 				),
 			);
 
-			execFileSync('npm', ['install', '--ignore-scripts'], {
-				cwd: consumerDir,
-				encoding: 'utf8',
-				env: {
-					PATH: process.env.PATH ?? '',
-					HOME: process.env.HOME ?? '',
-					npm_config_cache: process.env.npm_config_cache,
-					npm_config_registry: process.env.npm_config_registry,
+			const sizes = Object.fromEntries(
+				[...ownLocations].map((location) => [
+					location,
+					directorySize(path.join(consumerDir, location)),
+				]),
+			);
+			let bytes = 0;
+			for (const size of Object.values(sizes)) bytes += size;
+			const largest = Object.entries(sizes)
+				.sort(([, a], [, b]) => b - a)
+				.slice(0, 5)
+				.map(([location, size]) => `${location}: ${(size / 1e6).toFixed(1)} MB`);
+
+			expect(bytes / 1e6, `Largest: ${largest.join(', ')}`).toBeLessThan(INSTALL_BUDGET_MB);
+		});
+
+		test('resolves one copy of each peer dependency', () => {
+			const selector = Object.keys(peers)
+				.map((name) => `#${name}`)
+				.join(', ');
+			const nodes = JSON.parse(npm(['query', selector], consumerDir)) as Array<{
+				location: string;
+				name: string;
+			}>;
+			const locations: Record<string, Array<string>> = {};
+			for (const node of nodes) (locations[node.name] ??= []).push(node.location);
+
+			expect(locations).toEqual(
+				Object.fromEntries(
+					Object.keys(peers).map((name) => [name, [`node_modules/${name}`]] as const),
+				),
+			);
+		});
+
+		test('renders on the server and hydrates without errors', { timeout: 60_000 }, () => {
+			const result = JSON.parse(run('node', ['ssr-probe.mjs'], consumerDir)) as {
+				consoleErrors: Array<string>;
+				htmlAfterHydration: string;
+				inputLabel: string | null;
+				markup: string;
+				recoverableErrors: Array<string>;
+				serverHtml: string;
+			};
+
+			expect(result.markup).toContain('<blockquote');
+			expect(result.markup).toContain('Hello world');
+			expect(result.markup).toContain('<svg');
+			expect(result.markup).toContain('<button');
+			expect(result.recoverableErrors).toEqual([]);
+			expect(result.consoleErrors).toEqual([]);
+			// Hydration adopts the server DOM unchanged.
+			expect(result.htmlAfterHydration).toBe(result.serverHtml);
+			// The label resolves through server-generated ids, so it proves those ids hydrated intact.
+			expect(result.inputLabel).toBe('Name');
+		});
+
+		test('resolves CSS and SVG assets through package exports', () => {
+			const require = createRequire(path.join(consumerDir, 'package.json'));
+			const assetExports = Object.keys(artifact.manifest.exports).filter((subpath) =>
+				ASSET_EXPORT_PATTERN.test(subpath),
+			);
+			expect(assetExports).toEqual(
+				expect.arrayContaining(['./stylesheet.css', './spritesheet.svg']),
+			);
+
+			const assets = assetExports.map((subpath) => {
+				const resolved = realpathSync(require.resolve(`@luke-ui/react/${subpath.slice(2)}`));
+				return {
+					installed: resolved.startsWith(realpathSync(consumerDir)),
+					subpath,
+					valid: isValidAsset(subpath, readFileSync(resolved, 'utf8')),
+				};
+			});
+			expect(assets.filter((asset) => !asset.installed || !asset.valid)).toEqual([]);
+		});
+
+		test('builds a client bundle with Vite', { timeout: 120_000 }, async () => {
+			run(path.join('node_modules', '.bin', 'vite'), ['build', '--logLevel', 'error'], consumerDir);
+
+			const assetsDir = path.join(consumerDir, 'dist', 'assets');
+			const assets = readdirSync(assetsDir);
+			const read = (extension: string) =>
+				assets
+					.filter((name) => name.endsWith(extension))
+					.map((name) => readFileSync(path.join(assetsDir, name), 'utf8'))
+					.join('\n');
+
+			const css = read('.css');
+			// Minifiers may drop the leading `@layer` statement when first appearance gives the same
+			// order, so compare the order the layers take effect in.
+			expect(layerOrder(css)).toEqual(cascadeLayerNames);
+			expect(css).toMatch(CUSTOM_PROPERTY_PATTERN);
+
+			const spritesheet = assets.find((name) => name.endsWith('.svg'));
+			expect(spritesheet).toBeDefined();
+			expect(read('.svg')).toMatch(SYMBOL_PATTERN);
+			// The spritesheet must ship as a URL. `<use>` does not support `data:` URLs consistently.
+			expect(read('.js')).toContain(spritesheet);
+
+			const html = await readFile(path.join(consumerDir, 'dist', 'index.html'), 'utf8');
+			expect(html).toMatch(MODULE_SCRIPT_PATTERN);
+		});
+
+		test(
+			`type-checks every public entrypoint with TypeScript ${peerSet.typescript}`,
+			{
+				timeout: 120_000,
+			},
+			() => {
+				const version = installedVersion(consumerDir, 'typescript');
+				expect(version.startsWith(`${peerSet.typescriptLine}.`)).toBe(true);
+
+				for (const resolution of ['bundler', 'nodenext']) {
+					const tsc = path.join('node_modules', '.bin', 'tsc');
+					expect({
+						resolution,
+						output: tryRun(tsc, ['-p', `tsconfig.${resolution}.json`], consumerDir),
+					}).toEqual({ resolution, output: '' });
+				}
+			},
+		);
+
+		for (const boundary of bundleBoundaries) {
+			test(
+				`keeps a ${boundary.name} import free of unrelated code`,
+				{
+					timeout: 60_000,
 				},
-				stdio: ['ignore', 'pipe', 'pipe'],
-			});
+				() => {
+					const result = JSON.parse(
+						run('node', ['measure-bundle.mjs', `entries/${boundary.slug}.js`], consumerDir),
+					) as { code: string; packages: Array<string> };
 
-			const installedReactRoot = realpathSync(
-				path.join(consumerDir, 'node_modules', '@luke-ui', 'react'),
+					expect({
+						unexpectedPackages: result.packages.filter((name) => !boundary.packages.includes(name)),
+					}).toEqual({ unexpectedPackages: [] });
+					expect({
+						markers: boundary.forbiddenMarkers.filter((marker) => result.code.includes(marker)),
+					}).toEqual({ markers: [] });
+				},
 			);
-			const installedRainbowRoot = realpathSync(
-				path.join(consumerDir, 'node_modules', '@luke-ui', 'rainbow-sprinkles'),
-			);
-			expect(installedReactRoot.startsWith(consumerDir)).toBe(true);
-			expect(installedRainbowRoot.startsWith(consumerDir)).toBe(true);
-			expect(installedReactRoot.includes(`${path.sep}packages${path.sep}`)).toBe(false);
-			expect(installedRainbowRoot.includes(`${path.sep}packages${path.sep}`)).toBe(false);
-
-			const utilitiesSource = await readFile(
-				path.join(installedReactRoot, 'dist', findUtilitiesChunk(installedReactRoot)),
-				'utf8',
-			);
-			expect(utilitiesSource).toContain('@luke-ui/rainbow-sprinkles/create-runtime-fn');
-
-			const probeScript = path.join(consumerDir, 'probe.mjs');
-			await writeFile(probeScript, PROBE_SCRIPT);
-
-			const output = execFileSync('node', [probeScript], {
-				cwd: consumerDir,
-				encoding: 'utf8',
-				env: { PATH: process.env.PATH ?? '' },
-			});
-			const parsed: unknown = JSON.parse(output);
-			if (!isRecord(parsed)) {
-				throw new Error('Expected packed consumer probe to return a JSON object.');
-			}
-
-			expect(parsed.markup).toEqual(expect.stringContaining('<blockquote'));
-			expect(parsed.markup).toEqual(expect.stringContaining('Hello world'));
-			expect(parsed.markup).toEqual(expect.stringContaining('<svg'));
-			expect(parsed.layoutId).toBe('sprinkles-root');
-			expect(typeof parsed.className).toBe('string');
-			expect(String(parsed.className).length).toBeGreaterThan(0);
-			expect(parsed.bp768).toBe(768);
-			expect(parsed.stylesheetBytes).toEqual(expect.any(Number));
-			expect(Number(parsed.stylesheetBytes)).toBeGreaterThan(0);
-			expect(parsed.spritesheetBytes).toEqual(expect.any(Number));
-			expect(Number(parsed.spritesheetBytes)).toBeGreaterThan(0);
-			expect(parsed.themeStylesheetBytes).toEqual(expect.any(Number));
-			expect(Number(parsed.themeStylesheetBytes)).toBeGreaterThan(0);
-			expect(parsed.hydrated).toBe(true);
-			expect(parsed.recoverableErrors).toEqual([]);
-			expect(parsed.rainbowRuntimePath).toEqual(expect.stringContaining('rainbow-sprinkles'));
-			expect(String(parsed.rainbowRuntimePath).includes(`${path.sep}packages${path.sep}`)).toBe(
-				false,
-			);
-		} finally {
-			await rm(workDir, { force: true, recursive: true });
 		}
-	},
-);
-
-const PROBE_SCRIPT = `
-import { createElement } from 'react';
-import { hydrateRoot } from 'react-dom/client';
-import { renderToString } from 'react-dom/server';
-import { Blockquote } from '@luke-ui/react/blockquote';
-import { Icon } from '@luke-ui/react/icon';
-import { Provider } from '@luke-ui/react/provider';
-import { breakpoints, createSprinkles } from '@luke-ui/react/styles';
-import { readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
-import { JSDOM } from 'jsdom';
-
-const require = createRequire(import.meta.url);
-const stylesheetPath = require.resolve('@luke-ui/react/stylesheet.css');
-const spritesheetPath = require.resolve('@luke-ui/react/spritesheet.svg');
-const themeStylesheetPath = require.resolve('@luke-ui/react/themes/tactile/stylesheet.css');
-const rainbowRuntimePath = require.resolve('@luke-ui/rainbow-sprinkles/create-runtime-fn');
-const spritesheetHref = spritesheetPath;
-
-const layout = createSprinkles({ display: 'flex', id: 'sprinkles-root' });
-if (!createSprinkles.properties.has('display')) {
-	throw new Error('createSprinkles.properties must include display');
-}
-if (layout.id !== 'sprinkles-root') {
-	throw new Error('createSprinkles must pass through non-utility props');
-}
-if (breakpoints.bp768 !== 768) {
-	throw new Error('breakpoints.bp768 must be 768');
+	});
 }
 
-function app() {
-	return createElement(
-		Provider,
-		{ spritesheetHref },
-		createElement(Blockquote, null, 'Hello world'),
-		createElement(Icon, { name: 'chevronDown', 'aria-label': 'Expand' }),
+async function packWorkspace(): Promise<Artifact> {
+	const tarball = await pnpmPack(packageRoot, 'react');
+	const contents = await extract(tarball, 'react');
+	const manifest = readManifest(path.join(contents, 'package.json'));
+
+	// npm cannot resolve an unreleased workspace dependency, so pack those beside React.
+	const workspaceDependencies = await Promise.all(
+		Object.keys(manifest.dependencies ?? {})
+			.filter((name) => name.startsWith('@luke-ui/'))
+			.map(async (name) => {
+				const slug = name.slice('@luke-ui/'.length);
+				return [name, `file:${await pnpmPack(path.join(scopeRoot, slug), slug)}`] as const;
+			}),
+	);
+	const installSpecs = {
+		[manifest.name]: `file:${tarball}`,
+		...Object.fromEntries(workspaceDependencies),
+	};
+
+	return { contents, files: listFiles(contents), installSpecs, manifest };
+}
+
+async function fetchFromRegistry(): Promise<Artifact> {
+	const spec = `@luke-ui/react@${registrySpec}`;
+	const destination = path.join(workDir, 'pack');
+	await mkdir(destination, { recursive: true });
+	npm(['pack', spec, '--pack-destination', destination], workDir);
+	const tarball = path.join(destination, onlyTarball(destination));
+	const contents = await extract(tarball, 'react');
+	const manifest = readManifest(path.join(contents, 'package.json'));
+
+	return {
+		contents,
+		files: listFiles(contents),
+		installSpecs: { [manifest.name]: spec },
+		manifest,
+	};
+}
+
+async function pnpmPack(cwd: string, slug: string): Promise<string> {
+	const destination = path.join(workDir, 'pack', slug);
+	await mkdir(destination, { recursive: true });
+	run('pnpm', ['pack', '--pack-destination', destination], cwd, process.env);
+	return path.join(destination, onlyTarball(destination));
+}
+
+function onlyTarball(directory: string): string {
+	const tarballs = readdirSync(directory).filter((name) => name.endsWith('.tgz'));
+	if (tarballs.length !== 1) {
+		throw new Error(
+			`Expected one tarball in ${directory}, found ${tarballs.join(', ') || 'none'}.`,
+		);
+	}
+	return tarballs[0]!;
+}
+
+async function extract(tarball: string, slug: string): Promise<string> {
+	const destination = path.join(workDir, 'extracted', slug);
+	await mkdir(destination, { recursive: true });
+	run('tar', ['-xzf', tarball, '-C', destination], workDir);
+	return path.join(destination, 'package');
+}
+
+function listFiles(root: string, prefix = ''): Array<string> {
+	return readdirSync(path.join(root, prefix), { withFileTypes: true }).flatMap((entry) => {
+		const relative = prefix === '' ? entry.name : `${prefix}/${entry.name}`;
+		return entry.isDirectory() ? listFiles(root, relative) : [relative];
+	});
+}
+
+/**
+ * Whether a `@luke-ui/*` dependency installs from the registry. A packed run cannot see the
+ * registry yet, so the workspace package has to be publishable at the version React pins.
+ */
+function isReleasable(name: string, range: string): boolean {
+	if (registrySpec === undefined) {
+		const workspaceManifest = readWorkspaceManifest(name);
+		return workspaceManifest.private !== true && workspaceManifest.version === range;
+	}
+	try {
+		return npm(['view', `${name}@${range}`, 'version'], workDir).trim() !== '';
+	} catch {
+		return false;
+	}
+}
+
+/** Whether an asset export holds what its path promises. */
+function isValidAsset(subpath: string, source: string): boolean {
+	if (subpath === './stylesheet.css') return source.startsWith(LAYER_STATEMENT);
+	if (subpath.endsWith('/stylesheet.css')) return CUSTOM_PROPERTY_PATTERN.test(source);
+	return SYMBOL_PATTERN.test(source);
+}
+
+function readWorkspaceManifest(name: string): Manifest {
+	return readManifest(path.join(scopeRoot, name.slice('@luke-ui/'.length), 'package.json'));
+}
+
+/** Specifiers in `from '…'`, side-effect `import '…'`, and `import('…')` forms. */
+const MODULE_SPECIFIER_PATTERN =
+	/(?:\bfrom\s*|\bimport\s*\(?\s*)["']((?:\.{1,2}\/|@[\w.-]+\/)?[\w.-]+(?:\/[\w.-]+)*)["']/g;
+const BLOCK_COMMENT_PATTERN = /\/\*[\s\S]*?\*\//g;
+const JS_EXTENSION_PATTERN = /\.js$/;
+
+/** Every package imported by the JavaScript and declarations that the exports map reaches. */
+function importedPackages({ contents, manifest }: Artifact): Set<string> {
+	const queue = Object.values(manifest.exports)
+		.filter((target) => target.endsWith('.js'))
+		.flatMap((target) => [target.slice(2), `${target.slice(2, -3)}.d.ts`]);
+	const visited = new Set<string>();
+	const packages = new Set<string>();
+
+	for (let file = queue.pop(); file !== undefined; file = queue.pop()) {
+		if (visited.has(file)) continue;
+		visited.add(file);
+
+		// JSDoc can mention `import('…')`, so comments are not graph edges.
+		const source = readFileSync(path.join(contents, file), 'utf8').replaceAll(
+			BLOCK_COMMENT_PATTERN,
+			'',
+		);
+		for (const match of source.matchAll(MODULE_SPECIFIER_PATTERN)) {
+			const specifier = match[1]!;
+			if (specifier.startsWith('.')) {
+				const resolved = path.posix.join(path.posix.dirname(file), specifier);
+				queue.push(
+					file.endsWith('.d.ts') ? resolved.replace(JS_EXTENSION_PATTERN, '.d.ts') : resolved,
+				);
+			} else if (!specifier.startsWith('node:')) {
+				const segments = specifier.split('/');
+				packages.add(specifier.startsWith('@') ? segments.slice(0, 2).join('/') : segments[0]!);
+			}
+		}
+	}
+	return packages;
+}
+
+async function installConsumer(
+	consumerDir: string,
+	peerSet: PeerSet,
+	peers: Record<string, string>,
+): Promise<void> {
+	await mkdir(path.join(consumerDir, 'entries'), { recursive: true });
+	await mkdir(path.join(consumerDir, 'src'), { recursive: true });
+
+	const reactRange = artifact.manifest.peerDependencies.react;
+	if (reactRange === undefined) throw new Error('Expected a react peer range.');
+	const typesRange = peerSet.typesRange(reactRange);
+
+	const files: Record<string, string> = {
+		'package.json': JSON.stringify(
+			{
+				name: `luke-ui-consumer-${peerSet.slug}`,
+				private: true,
+				type: 'module',
+				dependencies: { ...artifact.installSpecs, ...peers },
+				devDependencies: {
+					'@types/react': typesRange,
+					'@types/react-dom': typesRange,
+					jsdom: JSDOM_RANGE,
+					typescript: peerSet.typescript,
+					vite: VITE_RANGE,
+				},
+			},
+			null,
+			2,
+		),
+		'ssr-probe.mjs': SSR_PROBE,
+		'index.html': CLIENT_HTML,
+		'src/main.js': CLIENT_ENTRY,
+		'measure-bundle.mjs': MEASURE_BUNDLE,
+		'app.tsx': TYPED_APP,
+		'all-entries.ts': allEntriesSource(artifact.manifest),
+		'tsconfig.bundler.json': tsconfig('esnext', 'bundler'),
+		'tsconfig.nodenext.json': tsconfig('nodenext', 'nodenext'),
+	};
+	for (const boundary of bundleBoundaries) {
+		files[`entries/${boundary.slug}.js`] = `${boundary.source}\n`;
+	}
+	await Promise.all(
+		Object.entries(files).map(([name, source]) => writeFile(path.join(consumerDir, name), source)),
+	);
+
+	npm(['install', '--no-audit', '--no-fund', '--ignore-scripts'], consumerDir);
+}
+
+function allEntriesSource(manifest: Manifest): string {
+	const subpaths = Object.entries(manifest.exports)
+		.filter(([, target]) => target.endsWith('.js'))
+		.map(([subpath]) => subpath.slice(2));
+	return [
+		...subpaths.map(
+			(subpath, index) => `import * as entry${index} from '${manifest.name}/${subpath}';`,
+		),
+		`export const entries = [${subpaths.map((_, index) => `entry${index}`).join(', ')}];`,
+		'',
+	].join('\n');
+}
+
+function tsconfig(module: string, moduleResolution: string): string {
+	return JSON.stringify(
+		{
+			compilerOptions: {
+				jsx: 'react-jsx',
+				lib: ['es2022', 'dom', 'dom.iterable'],
+				module,
+				moduleResolution,
+				noEmit: true,
+				skipLibCheck: false,
+				strict: true,
+				target: 'es2022',
+				types: [],
+			},
+			files: ['all-entries.ts', 'app.tsx'],
+		},
+		null,
+		2,
 	);
 }
 
-const markup = renderToString(app());
+function queryLocations(consumerDir: string, selector: string): Array<string> {
+	return (JSON.parse(npm(['query', selector], consumerDir)) as Array<{ location: string }>).map(
+		(node) => node.location,
+	);
+}
+
+function directorySize(directory: string): number {
+	let total = 0;
+	for (const entry of readdirSync(directory, { withFileTypes: true })) {
+		const entryPath = path.join(directory, entry.name);
+		if (entry.isDirectory()) total += directorySize(entryPath);
+		else if (entry.isFile()) total += lstatSync(entryPath).size;
+	}
+	return total;
+}
+
+const LAYER_RULE_PATTERN = /@layer\s+([^{;]+)[{;]/g;
+
+/** Cascade layers in the order a stylesheet first names them, which is their precedence order. */
+function layerOrder(css: string): Array<string> {
+	const order: Array<string> = [];
+	for (const match of css.matchAll(LAYER_RULE_PATTERN)) {
+		for (const name of match[1]!.split(',').map((part) => part.trim())) {
+			if (!order.includes(name)) order.push(name);
+		}
+	}
+	return order;
+}
+
+const PEER_RANGE_PATTERN = /^(?:\^|~|>=)?(\d+\.\d+\.\d+)$/;
+
+/** Lowest version a peer range admits. Supports the range forms the package publishes. */
+function lowestVersion(range: string): string {
+	const match = PEER_RANGE_PATTERN.exec(range.trim());
+	if (match === null) {
+		throw new Error(`Cannot find the lowest version of peer range "${range}".`);
+	}
+	return match[1]!;
+}
+
+function installedVersion(consumerDir: string, name: string): string {
+	return readManifest(path.join(consumerDir, 'node_modules', name, 'package.json')).version;
+}
+
+function readManifest(file: string): Manifest {
+	return JSON.parse(readFileSync(file, 'utf8')) as Manifest;
+}
+
+/** npm settings a developer or CI sets for network access, which consumer installs still need. */
+const NETWORK_NPM_CONFIG_PATTERN =
+	/^npm_config_(?:cache|cafile|https_proxy|noproxy|proxy|registry|userconfig)$/i;
+const PACKAGE_MANAGER_ENV_PATTERN = /^(?:npm|pnpm)_/i;
+const TEST_RUNNER_ENV_PATTERN = /^(?:NODE_ENV|NODE_OPTIONS|TEST|TURBO_.*|VITE_.*|VITEST.*)$/;
+
+/**
+ * Environment for consumer commands. It drops what the workspace scripts and the test runner set,
+ * so npm, Node, and Vite behave as they would in an application.
+ */
+function consumerEnv(): NodeJS.ProcessEnv {
+	return Object.fromEntries(
+		Object.entries(process.env).filter(([key]) => {
+			if (PACKAGE_MANAGER_ENV_PATTERN.test(key)) return NETWORK_NPM_CONFIG_PATTERN.test(key);
+			return !TEST_RUNNER_ENV_PATTERN.test(key);
+		}),
+	);
+}
+
+function npm(args: Array<string>, cwd: string): string {
+	return run('npm', args, cwd);
+}
+
+function run(command: string, args: Array<string>, cwd: string, env = consumerEnv()): string {
+	return execFileSync(command, args, {
+		cwd,
+		encoding: 'utf8',
+		env,
+		maxBuffer: 64 * 1024 * 1024,
+		stdio: ['ignore', 'pipe', 'pipe'],
+	});
+}
+
+/** Runs a command and returns its output when it fails, or an empty string when it succeeds. */
+function tryRun(command: string, args: Array<string>, cwd: string): string {
+	try {
+		run(command, args, cwd);
+		return '';
+	} catch (error) {
+		const { stderr, stdout } = error as { stderr?: string; stdout?: string };
+		return `${stdout ?? ''}${stderr ?? ''}`.trim() || String(error);
+	}
+}
+
+const SSR_PROBE = `
+import { createElement as h } from 'react';
+import { hydrateRoot } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
+import { JSDOM } from 'jsdom';
+import { Blockquote } from '@luke-ui/react/blockquote';
+import { Button } from '@luke-ui/react/button';
+import { Icon } from '@luke-ui/react/icon';
+import { Provider } from '@luke-ui/react/provider';
+import { createSprinkles } from '@luke-ui/react/styles';
+import { TextInputField } from '@luke-ui/react/text-input-field';
+
+function App() {
+	return h(
+		Provider,
+		{ spritesheetHref: '/spritesheet.svg' },
+		h(
+			'div',
+			createSprinkles({ display: 'flex', gap: 'sp8' }),
+			h(Blockquote, null, 'Hello world'),
+			h(Icon, { name: 'chevronDown', 'aria-label': 'Expand' }),
+			h(TextInputField, { label: 'Name' }),
+			h(Button, null, 'Save'),
+		),
+	);
+}
+
+const markup = renderToString(h(App));
 const dom = new JSDOM(\`<!doctype html><html><body><div id="root">\${markup}</div></body></html>\`, {
+	pretendToBeVisual: true,
 	url: 'http://localhost/',
 });
-globalThis.window = dom.window;
-globalThis.document = dom.window.document;
-globalThis.HTMLElement = dom.window.HTMLElement;
-globalThis.SVGElement = dom.window.SVGElement;
-globalThis.Node = dom.window.Node;
+// Expose the DOM the way a browser does. jsdom has no \`CSS\` namespace, which React Aria reads.
+const domGlobals = ['window', 'document', 'navigator', 'getComputedStyle', 'requestAnimationFrame', 'cancelAnimationFrame'];
+for (const key of [...domGlobals, ...Object.getOwnPropertyNames(dom.window).filter((name) => /^[A-Z]/.test(name) && !(name in globalThis))]) {
+	const value = key === 'window' ? dom.window : dom.window[key];
+	Object.defineProperty(globalThis, key, {
+		configurable: true,
+		value: typeof value === 'function' && !/^[A-Z]/.test(key) ? value.bind(dom.window) : value,
+		writable: true,
+	});
+}
+globalThis.CSS ??= { escape: (value) => String(value).replace(/[^\\w-]/g, (character) => \`\\\\\${character}\`) };
 
-const root = document.getElementById('root');
-if (!root) throw new Error('Missing #root');
+const consoleErrors = [];
+console.error = (...args) => consoleErrors.push(args.map(String).join(' '));
 const recoverableErrors = [];
-hydrateRoot(root, app(), {
+const root = document.getElementById('root');
+const serverHtml = root.innerHTML;
+hydrateRoot(root, h(App), {
 	onRecoverableError(error) {
 		recoverableErrors.push(String(error));
 	},
 });
-await new Promise((resolve) => setTimeout(resolve, 25));
+await new Promise((resolve) => setTimeout(resolve, 100));
 
+const input = root.querySelector('input');
 process.stdout.write(
 	JSON.stringify({
+		consoleErrors,
+		htmlAfterHydration: root.innerHTML,
+		inputLabel: input?.labels?.[0]?.textContent ?? null,
 		markup,
-		layoutId: layout.id,
-		className: layout.className,
-		bp768: breakpoints.bp768,
-		stylesheetBytes: readFileSync(stylesheetPath).byteLength,
-		spritesheetBytes: readFileSync(spritesheetPath).byteLength,
-		themeStylesheetBytes: readFileSync(themeStylesheetPath).byteLength,
-		hydrated: root.innerHTML.includes('Hello world') && root.innerHTML.includes('<svg'),
 		recoverableErrors,
-		rainbowRuntimePath,
+		serverHtml,
 	}),
+	() => process.exit(0),
 );
 `;
 
-function packWorkspacePackage(cwd: string, destination: string): string {
-	const output = execFileSync('pnpm', ['pack', '--pack-destination', destination], {
-		cwd,
-		encoding: 'utf8',
-	});
-	const match = /[a-z0-9@._-]+\.tgz/i.exec(output);
-	if (match === null) {
-		throw new Error(`Expected pnpm pack to print a tarball name, received:\n${output}`);
-	}
-	return match[0];
-}
+const CLIENT_HTML = `<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Luke UI consumer</title>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="module" src="/src/main.js"></script>
+	</body>
+</html>
+`;
 
-function readPackedPackageJson(tarballPath: string): {
-	dependencies?: Record<string, string>;
-	peerDependencies?: Record<string, string>;
-	private?: boolean;
-} {
-	const raw = execFileSync('tar', ['-xOf', tarballPath, 'package/package.json'], {
-		encoding: 'utf8',
-	});
-	const parsed: unknown = JSON.parse(raw);
-	if (!isRecord(parsed)) {
-		throw new Error('Expected packed package.json to be an object.');
-	}
-	return {
-		dependencies: isRecord(parsed.dependencies)
-			? (parsed.dependencies as Record<string, string>)
-			: undefined,
-		peerDependencies: isRecord(parsed.peerDependencies)
-			? (parsed.peerDependencies as Record<string, string>)
-			: undefined,
-		private: parsed.private === true,
-	};
-}
+const CLIENT_ENTRY = `
+import '@luke-ui/react/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
+import spritesheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
+import { createElement as h } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Button } from '@luke-ui/react/button';
+import { Icon } from '@luke-ui/react/icon';
+import { Provider } from '@luke-ui/react/provider';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 
-function findUtilitiesChunk(installedReactRoot: string): string {
-	const chunk = readdirSync(path.join(installedReactRoot, 'dist')).find(
-		(name) => name.startsWith('utilities.css-') && name.endsWith('.js'),
+createRoot(document.getElementById('root')).render(
+	h(
+		Provider,
+		{ spritesheetHref },
+		h(Icon, { name: 'chevronDown', 'aria-label': 'Expand' }),
+		h(TextInputField, { label: 'Name' }),
+		h(Button, null, 'Save'),
+	),
+);
+`;
+
+/**
+ * Builds one entry with Vite, unminified and with React and React DOM external, then prints the
+ * packages it bundled and its code.
+ */
+const MEASURE_BUNDLE = `
+import path from 'node:path';
+import { build } from 'vite';
+
+const [entry] = process.argv.slice(2);
+const packages = new Set();
+const output = await build({
+	configFile: false,
+	logLevel: 'silent',
+	build: {
+		minify: false,
+		rollupOptions: {
+			external: (id) => /^(react|react-dom|scheduler)(\\/|$)/.test(id),
+			input: path.resolve(entry),
+			preserveEntrySignatures: 'exports-only',
+		},
+		write: false,
+	},
+});
+const chunks = (Array.isArray(output) ? output : [output]).flatMap((result) => result.output);
+let code = '';
+for (const chunk of chunks) {
+	if (chunk.type !== 'chunk') continue;
+	code += chunk.code;
+	for (const id of chunk.moduleIds) {
+		const match = /node_modules\\/((?:@[^/]+\\/)?[^/]+)\\//.exec(id.replaceAll('\\\\', '/'));
+		if (match) packages.add(match[1]);
+	}
+}
+process.stdout.write(JSON.stringify({ code, packages: [...packages].sort() }));
+`;
+
+/** Representative typed usage. \`all-entries.ts\` covers the rest of the declaration graph. */
+const TYPED_APP = `
+import { Blockquote } from '@luke-ui/react/blockquote';
+import { Button } from '@luke-ui/react/button';
+import { Provider } from '@luke-ui/react/provider';
+import { createSprinkles, type SprinklesProps } from '@luke-ui/react/styles';
+import { TextInputField } from '@luke-ui/react/text-input-field';
+import { defineTheme, type ThemeInput, vars } from '@luke-ui/react/theme';
+
+const theme: ThemeInput = { name: 'fixture', color: { accent: '#3355ff' } };
+export const css: string = defineTheme(theme);
+export const textColor: string = vars.color.text.primary;
+
+const layoutProps: SprinklesProps = { display: 'flex', gap: 'sp8' };
+const layout = createSprinkles(layoutProps);
+
+export function App({ spritesheetHref }: { spritesheetHref: string }) {
+	return (
+		<Provider spritesheetHref={spritesheetHref}>
+			<div {...layout}>
+				<Blockquote>Hello</Blockquote>
+				<TextInputField label="Name" />
+				<Button onPress={() => {}}>Save</Button>
+			</div>
+		</Provider>
 	);
-	if (chunk === undefined) {
-		throw new Error('Expected a utilities.css-*.js chunk in the installed package.');
-	}
-	return chunk;
 }
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === 'object' && value !== null;
-}
+`;

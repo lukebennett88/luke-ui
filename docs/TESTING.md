@@ -66,6 +66,24 @@ Use `expectTypeOf` for positive shape and equality contracts. Use `assertType` w
 blocks. Do not wrap rejected assignments in a runtime `expect([...]).toHaveLength(...)` or similar
 just to create an assertion or keep consts referenced.
 
+## Package consumption
+
+`packages/@luke-ui/react/src/core/styles/packed-consumer.test.ts` tests the published boundary. It
+packs `@luke-ui/react` and any `@luke-ui/*` runtime dependency, then installs the tarballs with npm
+in a directory outside the repository, so no workspace link can satisfy an import. It is a unit test
+and runs with `pnpm run test`.
+
+It checks the tarball contents and the dependencies its exports import. Then it runs one consumer
+with the newest peers and one with the lowest peers and the minimum TypeScript. Each consumer proves
+SSR and hydration, CSS and SVG asset resolution, a Vite client build, one copy of each peer, the
+install size, type checking of every entrypoint, and what a small import bundles.
+
+Keep it to representative imports and flows. Component behaviour belongs in component tests.
+
+Raise `MINIMUM_TYPESCRIPT` or a bundle allowlist only when a change needs it, and say why in the
+pull request. To run the same fixtures against a published version or dist-tag, run
+`LUKE_UI_REACT_SPEC=snapshot pnpm run test:consumer` from the repo root.
+
 ## Docs
 
 Docs examples must type-check and build. They are not another test corpus.

@@ -13,7 +13,19 @@
 		},
 		"@luke-ui/react#test": {
 			"dependsOn": ["build", "^build", "generate"],
-			"outputs": []
+			"outputs": [],
+			"passThroughEnv": [
+				"HTTP_PROXY",
+				"HTTPS_PROXY",
+				"NO_PROXY",
+				"http_proxy",
+				"https_proxy",
+				"no_proxy",
+				"NODE_EXTRA_CA_CERTS",
+				"SSL_CERT_FILE",
+				"NPM_CONFIG_*",
+				"npm_config_*"
+			]
 		},
 		"//#check:cycles": {
 			"cache": true,
@@ -141,6 +153,24 @@
 		"test": {
 			"dependsOn": ["^build", "generate"],
 			"outputs": []
+		},
+		"test:consumer:run": {
+			"cache": false,
+			"dependsOn": ["build", "^build"],
+			"outputs": [],
+			"passThroughEnv": [
+				"LUKE_UI_REACT_SPEC",
+				"HTTP_PROXY",
+				"HTTPS_PROXY",
+				"NO_PROXY",
+				"http_proxy",
+				"https_proxy",
+				"no_proxy",
+				"NODE_EXTRA_CA_CERTS",
+				"SSL_CERT_FILE",
+				"NPM_CONFIG_*",
+				"npm_config_*"
+			]
 		},
 		"test:browser:run": {
 			"cache": false,
