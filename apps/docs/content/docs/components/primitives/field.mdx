@@ -24,7 +24,7 @@ error to the control, so the parts need no manual ids.
 `InlineField` provides the standard anatomy for a control that carries its own label, such as
 [`CheckboxRoot`](/components/primitives/checkbox). It wraps the control's content part, such as
 `CheckboxContent`, and takes a `description` and an `errorMessage`. It has no `label` and no
-`necessityIndicator`, because the label lives inside the content part, as `CheckboxLabel` does. It
+`necessityIndicator`, because the label, such as `CheckboxLabel`, lives inside the content part. It
 indents the error under the label text and always renders the error slot.
 
 `InlineField` is not a semantic root. It adds no field context, so render it inside a control root

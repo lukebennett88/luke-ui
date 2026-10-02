@@ -23,7 +23,7 @@ visible label. Parts follow document order, so put the control before the label.
 `errorMessage`. It spaces them and hangs the error under the label text.
 
 ```tsx
-<CheckboxRoot>
+<CheckboxRoot isInvalid>
 	<InlineField description="Receive updates by email." errorMessage="Choose an option.">
 		<CheckboxContent>
 			<CheckboxControl>
@@ -37,7 +37,8 @@ visible label. Parts follow document order, so put the control before the label.
 
 `InlineField` always renders the error slot, so a validation message from a constraint or `validate`
 appears without an `errorMessage`. It provides anatomy and presentation, not semantics, so it needs
-the surrounding `CheckboxRoot`. Set `isInvalid` on the root to mark the checkbox invalid.
+the surrounding `CheckboxRoot`. The `errorMessage` shows while the root is invalid, so set
+`isInvalid` on the root for an error you already have.
 
 For a custom arrangement, place `FieldDescription` and `FieldError` directly inside the root
 instead. Use either `InlineField` or those parts for one checkbox, never both. `FieldError` carries
@@ -58,7 +59,7 @@ on the root.
 
 Set `isRequired` on the root, and `CheckboxLabel` draws a marker after its content.
 `necessityIndicator="icon"` is the default and adds an asterisk. `necessityIndicator="label"`
-appends “(required)”. Put `necessityIndicator` on `CheckboxLabel`, not on `CheckboxContent`.
+appends “(required)”. Set `necessityIndicator` on `CheckboxLabel`.
 
 ```tsx
 <CheckboxRoot isRequired>
