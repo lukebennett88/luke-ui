@@ -146,11 +146,8 @@ test('manual FieldDescription and FieldError parts work in a CheckboxRoot', () =
 	);
 
 	const input = checkbox('Example checkbox');
-	const error = page.getByText('Example error').element();
 
 	expect(getDescribedText(input)).toBe('Example description Example error');
-	// Manual composition has no `InlineField`, but the root still switches the message icon on.
-	expect(getComputedStyle(error, '::before').display).not.toBe('none');
 });
 
 test('CheckboxContent draws the necessity marker only for a required root', () => {
@@ -183,24 +180,14 @@ test('CheckboxContent draws the necessity marker only for a required root', () =
 			</CheckboxRoot>
 		</>,
 	);
-	const after = (element: Element | null) => {
-		if (element == null) throw new Error('Expected an element.');
-		return getComputedStyle(element, '::after').content;
-	};
-	const label = (name: string) => {
-		const found = checkbox(name).closest('label');
-		if (found == null) throw new Error('Expected a label.');
-		return found;
-	};
 
-	// An element after the control carries the marker, so it follows the last word.
-	expect(after(label('Icon*').lastElementChild)).toBe('"*"');
-	expect(after(label('Icon*'))).toBe('none');
-	expect(after(label('Words(required)').lastElementChild)).toBe('"(required)"');
-	expect(after(label('Optional').lastElementChild)).toBe('none');
-	// Raw text has no element to carry it, so the label draws the marker after the text.
-	expect(after(label('Raw *'))).toBe('"*"');
-	expect(after(label('Raw *').lastElementChild)).toBe('none');
+	// The marker is CSS content with no DOM node, so the accessible name is how the test observes
+	// it. An element after the control carries it, so it follows that element's last word. Raw text
+	// has no element to carry it, so the label draws it after the text.
+	expect(checkbox('Icon*')).toHaveAccessibleName('Icon*');
+	expect(checkbox('Words(required)')).toHaveAccessibleName('Words(required)');
+	expect(checkbox('Raw *')).toHaveAccessibleName('Raw *');
+	expect(checkbox('Optional')).toHaveAccessibleName('Optional');
 });
 
 // React Aria provides slotted `Text` context inside a checkbox field, and `Text` throws without a

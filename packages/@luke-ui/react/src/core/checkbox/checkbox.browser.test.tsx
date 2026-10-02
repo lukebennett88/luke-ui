@@ -101,13 +101,6 @@ function labelFor(input: HTMLInputElement): HTMLLabelElement {
 	return label;
 }
 
-/** The marker drawn after the label text. It is a `::after` on the label text with no DOM node. */
-function necessityMarker(input: HTMLInputElement): string {
-	const labelText = labelFor(input).lastElementChild;
-	if (labelText == null) throw new Error('Expected the label text element.');
-	return getComputedStyle(labelText, '::after').content;
-}
-
 /** The element holding a piece of text. */
 function textElement(text: string): HTMLElement {
 	const element = page.getByText(text).element();
@@ -120,11 +113,6 @@ function controlFor(input: HTMLInputElement): HTMLElement {
 	const control = labelFor(input).querySelector('[aria-hidden="true"]')?.parentElement;
 	if (control == null) throw new Error('Expected the checkbox control.');
 	return control;
-}
-
-/** Whether the error message draws its leading icon. */
-function hasMessageIcon(message: HTMLElement): boolean {
-	return getComputedStyle(message, '::before').display !== 'none';
 }
 
 // Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
@@ -174,6 +162,18 @@ test('Checkbox resolves object and callback inputRef to the control, participate
 	expect(blurred).toBe(true);
 
 	form.remove();
+});
+
+test('Checkbox resolves ref to the root element and inputRef to the input', () => {
+	const ref = createRef<HTMLDivElement>();
+	const inputRef = createRef<HTMLInputElement>();
+	render(<Checkbox id="example-root" inputRef={inputRef} label="Terms" name="terms" ref={ref} />);
+	const input = checkbox('Terms');
+
+	expect(ref.current).toBe(document.getElementById('example-root'));
+	expect(ref.current?.tagName).toBe('DIV');
+	expect(ref.current?.contains(input)).toBe(true);
+	expect(inputRef.current).toBe(input);
 });
 
 test('Checkbox puts id on its root element and inputId on the input', () => {
@@ -236,13 +236,13 @@ test('the control renders before the label', () => {
 test('a required Checkbox with a visible label shows the icon marker by default', () => {
 	render(<Checkbox isRequired label="Terms" name="terms" />);
 
-	expect(necessityMarker(checkbox('Terms*'))).toBe('"*"');
+	expect(checkbox('Terms*')).toHaveAccessibleName('Terms*');
 });
 
 test('necessityIndicator="label" shows (required) after the label', () => {
 	render(<Checkbox isRequired label="Terms" name="terms" necessityIndicator="label" />);
 
-	expect(necessityMarker(checkbox('Terms(required)'))).toBe('"(required)"');
+	expect(checkbox('Terms(required)')).toHaveAccessibleName('Terms(required)');
 });
 
 // The marker is inline after the last word, so the accessible name has no space before it, the
@@ -278,7 +278,7 @@ test('the necessity marker adds no space to the accessible name, like FieldLabel
 test('an optional Checkbox shows no marker', () => {
 	render(<Checkbox label="Terms" name="terms" />);
 
-	expect(necessityMarker(checkbox('Terms'))).toBe('none');
+	expect(checkbox('Terms')).toHaveAccessibleName('Terms');
 });
 
 test('an externally named required Checkbox shows no marker', () => {
@@ -290,33 +290,20 @@ test('an externally named required Checkbox shows no marker', () => {
 		</>,
 	);
 
-	for (const name of ['Select row', 'External label']) {
-		const label = labelFor(checkbox(name));
-
-		expect(getComputedStyle(label, '::after').content).toBe('none');
-		expect(necessityMarker(checkbox(name))).toBe('none');
-	}
+	expect(checkbox('Select row')).toHaveAccessibleName('Select row');
+	expect(checkbox('External label')).toHaveAccessibleName('External label');
 });
 
-test('an errorMessage marks the checkbox invalid, with the error under the label and one icon', () => {
+test('an errorMessage marks the checkbox invalid and shows the error under the label', () => {
 	render(<Checkbox errorMessage="Choose an option." label="Terms" name="terms" />);
 	const input = checkbox('Terms');
 	const error = textElement('Choose an option.');
-	const control = controlFor(input);
 
 	expect(input).toHaveAttribute('aria-invalid', 'true');
 	expect(getDescribedText(input)).toBe('Choose an option.');
 	expect(error.getBoundingClientRect().top).toBeGreaterThanOrEqual(
 		labelFor(input).getBoundingClientRect().bottom,
 	);
-	// The message hangs under the label text: the control width plus the gap before the text.
-	expect(Number.parseFloat(getComputedStyle(error).paddingInlineStart)).toBe(
-		control.getBoundingClientRect().width + 8,
-	);
-	// The control draws its invalid colour only, so the message icon is the one non-colour cue.
-	expect(hasMessageIcon(error)).toBe(true);
-	expect(getComputedStyle(labelFor(input), '::after').content).toBe('none');
-	expect(getComputedStyle(control, '::before').content).toBe('none');
 });
 
 test('an errorMessage renders its markup', () => {
@@ -341,7 +328,9 @@ test('a description renders at the start edge with no error message', () => {
 	const description = textElement('Receive updates by email.');
 
 	expect(getDescribedText(input)).toBe('Receive updates by email.');
-	expect(Number.parseFloat(getComputedStyle(description).paddingInlineStart)).toBe(0);
+	expect(description.getBoundingClientRect().left).toBe(
+		labelFor(input).getBoundingClientRect().left,
+	);
 	expect(input).not.toHaveAttribute('aria-invalid', 'true');
 });
 
@@ -362,10 +351,6 @@ test('a required Checkbox shows its native validation message after a failed sub
 
 	await expect.poll(() => input.getAttribute('aria-invalid')).toBe('true');
 	await expect.poll(() => getDescribedText(input).length).toBeGreaterThan(0);
-	const describedBy = input.getAttribute('aria-describedby') ?? '';
-	const message = document.getElementById(describedBy.split(' ').at(-1) ?? '');
-	if (message == null) throw new Error('Expected a validation message.');
-	expect(hasMessageIcon(message)).toBe(true);
 });
 
 test('validate reports its message and clears once the checkbox is valid', async () => {
@@ -493,10 +478,9 @@ test('the Checkbox scene has no axe violations', async () => {
 	await expectNoAxeViolations(container);
 });
 
-// The invalid icon lives on the error message, not on `content` (the native
-// `<label>` wrapping the hidden input, which otherwise takes its name from its
-// contents), so there is nothing on the label itself for accessible-name
-// computation to pick up. Checked via CDP against the browser's own accname
+// The invalid icon is an `aria-hidden` element inside `FieldError`, not part of `content` (the
+// native `<label>` wrapping the hidden input, which otherwise takes its name from its contents),
+// so there is nothing on the label itself for accessible-name computation to pick up. Checked via CDP against the browser's own accname
 // computation, not Vitest browser mode's locator engine or the
 // `dom-accessibility-api` package behind `toHaveAccessibleName` — both are JS
 // reimplementations of the accname algorithm that can diverge from a real

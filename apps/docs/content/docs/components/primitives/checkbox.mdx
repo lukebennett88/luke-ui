@@ -18,7 +18,7 @@ inside it, and owns the selection, state, validation, and size. `CheckboxContent
 text. Parts follow document order, so put the control before the label.
 
 [`InlineField`](/components/primitives/field) wraps `CheckboxContent` to add a `description` and an
-`errorMessage`. It spaces them, hangs the error under the label text. It always renders the error
+`errorMessage`. It spaces them and hangs the error under the label text. It always renders the error
 slot, so a validation message from a constraint or `validate` appears without an `errorMessage`.
 
 ```tsx
@@ -36,7 +36,8 @@ slot, so a validation message from a constraint or `validate` appears without an
 
 `InlineField` provides anatomy and presentation, not semantics, so it needs the surrounding
 `CheckboxRoot`. For a custom arrangement, place `FieldDescription` and `FieldError` directly inside
-the root instead. Use either `InlineField` or those parts for one checkbox, never both.
+the root instead. Use either `InlineField` or those parts for one checkbox, never both. `FieldError`
+carries the error icon either way.
 
 ## Labels
 
@@ -69,10 +70,8 @@ Set the selection, state, name, form, value, and validation props on `CheckboxRo
 root sets the size of the control and the indent of the error. `Text` renders inside
 `CheckboxContent` with no extra setup.
 
-The root also shows the error icon beside a `FieldError` placed directly inside it.
-
-`id` on `CheckboxRoot` targets the root element. Pass `inputId` to set the input's id, and
-`inputRef` to reach the input. `ref` targets the root element.
+`id`, `className`, and `ref` target the root element. Pass `inputId` to set the input's id, and
+`inputRef` to reach the input.
 
 ## API
 

@@ -73,7 +73,7 @@ test(
 );
 
 test(
-	'keeps label, naming, and id props on Checkbox while hiding children, isInvalid, and generic DOM props',
+	'keeps label, naming, id, and ref props on Checkbox while hiding children, isInvalid, and generic DOM props',
 	async () => {
 		const names = await visiblePropNames(
 			'packages/@luke-ui/react/src/core/checkbox/checkbox.tsx',
@@ -87,6 +87,7 @@ test(
 		expect(names).toContain('id');
 		expect(names).toContain('inputId');
 		expect(names).toContain('inputRef');
+		expect(names).toContain('ref');
 		expect(names).not.toContain('children');
 		expect(names).not.toContain('isInvalid');
 		expect(names).not.toContain('onClick');

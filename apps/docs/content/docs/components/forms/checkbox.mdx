@@ -49,8 +49,8 @@ fails. Pass `errorMessage` only for an error you already have, such as one from 
 your server. A non-empty message marks the checkbox invalid. Read [Validation](/docs/validation) for
 where messages come from and how to write them.
 
-The message hangs under the label text and starts with an icon. `Checkbox` has no `isInvalid` prop,
-so the message is the only way to mark it invalid.
+The message hangs under the label text. `Checkbox` has no `isInvalid` prop, so the message is the
+only way to mark it invalid.
 
 <ExampleBlock src="checkbox/validation" title="Checkbox: Validation" />
 
@@ -71,8 +71,8 @@ wraps. Outside `Text`, it uses the normal compact control size.
 
 ## IDs and refs
 
-`id` and `className` target the checkbox's root element. Pass `inputId` to set the input's id, and
-`inputRef` to reach the input. The checkbox takes no plain `ref`.
+`id`, `className`, and `ref` target the checkbox's root element. Pass `inputId` to set the input's
+id, and `inputRef` to reach the input.
 
 ## Form values
 

@@ -56,6 +56,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'name',
 		'necessityIndicator',
 		'onChange',
+		'ref',
 		'size',
 		'validate',
 		'validationBehavior',

@@ -18,7 +18,7 @@ import type { Prettify } from '../types/prettify.js';
 
 type _CheckboxOmit = DistributiveOmit<
 	CheckboxRootProps,
-	'aria-label' | 'aria-labelledby' | 'children' | 'inputRef' | 'isInvalid' | 'ref'
+	'aria-label' | 'aria-labelledby' | 'children' | 'inputRef' | 'isInvalid'
 >;
 
 interface _CheckboxBaseProps extends _CheckboxOmit {
@@ -27,10 +27,8 @@ interface _CheckboxBaseProps extends _CheckboxOmit {
 	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
 	errorMessage?: ReactNode;
 	/**
-	 * Forwarded to the underlying `<input type="checkbox">` element.
-	 *
-	 * This field takes no plain `ref`: `inputRef` is the only way to reach the
-	 * control, so a ref can never silently resolve to a wrapper element instead.
+	 * Forwarded to the underlying `<input type="checkbox">` element. A plain `ref` reaches the root
+	 * element instead.
 	 *
 	 * Widened from React Aria's own `inputRef`, which only takes a ref object, so a
 	 * callback ref (what form libraries hand out) is accepted too.
