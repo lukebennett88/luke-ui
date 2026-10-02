@@ -256,11 +256,10 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		[],
 	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectRootProps':
 		[
+			'aria-label',
 			'aria-labelledby',
 			'defaultValue',
-			'form',
 			'id',
-			'isDisabled',
 			'isInvalid',
 			'name',
 			'onChange',

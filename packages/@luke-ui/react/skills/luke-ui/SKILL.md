@@ -15,12 +15,9 @@ When a component supports it, a plain `ref` targets the element the component re
 root. A ref to a descendant names its target, such as `inputRef` for the input.
 
 Pass `inputRef` to reach the input inside a field component such as `TextInputField`,
-`ComboboxField`, or `Checkbox`. Do not use their `ref` for the input, because it reaches the field's
-root element. A part that renders the input itself, such as `ComboboxInput`, takes the input ref on
-`ref`.
-
-Pass `triggerRef` to reach the trigger button inside `SelectField`. Its `ref` also reaches the
-field's root element.
+`ComboboxField`, or `Checkbox`, and `triggerRef` to reach the trigger inside `SelectField`. Do not
+use their `ref` for the input or trigger, because it reaches the field's root element. A part that
+renders the input itself, such as `ComboboxInput`, takes the input ref on `ref`.
 
 ## Element choice
 

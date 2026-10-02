@@ -26,8 +26,8 @@ the selected key. `SelectField` also accepts static `SelectItem` children with a
 </SelectField>
 ```
 
-The listbox marks the selected option with a check. `SelectField` holds one selected option and has
-no clear button. Add an option such as “None” when someone needs to return to an empty choice.
+`SelectField` holds one selected option and has no clear button. Add an option such as “None” when
+someone needs to return to an empty choice.
 
 Pass `defaultValue` to start with an option selected. Pass `value` and `onChange` to control the
 selection yourself. `onChange` receives the selected key, or `null` when nothing is selected, and
@@ -38,7 +38,7 @@ selection yourself. `onChange` receives the selected key, or `null` when nothing
 ## Placeholder
 
 Pass `placeholder` for the text the trigger shows while nothing is selected. A placeholder does not
-name the field. Give the field a `label`.
+name the field.
 
 ## Required fields
 
@@ -70,23 +70,20 @@ default.
 
 ## Labels
 
-Provide a visible `label` where possible. The label is a native `<label>` element, so it takes
-textual, non-interactive content only. Place a link or button beside the field instead.
+`label` takes textual, non-interactive content only. Place a link or button beside the field
+instead.
 
-When a nearby heading or row title already names the field, omit `label`. Pass `aria-labelledby`
-with the id of that element, or pass `aria-label`. Pass `aria-describedby` to point the field at
-hint text that lives elsewhere. Luke UI merges it with the field's own description.
+Without a visible label, pass `aria-labelledby` to use content already on the page, or `aria-label`
+to supply the name directly. `aria-describedby` adds to the field's own description.
 
 ## IDs and refs
 
-`id`, `className`, and `ref` target the field's root element. Pass `triggerId` to set the id of the
-trigger button, and `triggerRef` to reach the button.
+`id`, `className`, and `ref` target the root element. `triggerId` and `triggerRef` target the
+trigger.
 
 ## Accessibility
 
-The trigger is a button that opens a listbox. Its name combines the selected option and the label.
-Luke UI associates the label, description, and validation message with the trigger. The listbox
-supports arrow keys and type-ahead.
+The trigger's accessible name combines the selected option and the label.
 
 ## API
 

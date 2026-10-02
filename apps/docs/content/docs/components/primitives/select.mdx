@@ -36,56 +36,44 @@ selected option, and a `SelectIndicator`. `SelectPopover` holds a `SelectListBox
 </SelectRoot>
 ```
 
-Parts follow document order. Put the `SelectValue` before the `SelectIndicator`.
+Put the `SelectValue` before the `SelectIndicator`.
 
 ## Root props
 
-The root owns every prop that crosses parts. Set `name`, `form`, `value`, `defaultValue`,
-`onChange`, `isDisabled`, `isRequired`, `isInvalid`, validation, and `size` on `SelectRoot`. The
-parts take no props for these.
+`SelectRoot` owns `placeholder` and the value, state, validation, form, and size props. The parts
+take no props for these. `value` and `defaultValue` take a key, or `null` for no selection, and
+`onChange` receives the same type. A select has no read-only state.
 
-`value` and `defaultValue` take a key, or `null` for no selection, and `onChange` receives the same
-type. Pass `value` and `onChange` for a controlled select, or `defaultValue` for an uncontrolled
-one.
-
-Set `placeholder` on `SelectRoot`. `SelectValue` shows it while nothing is selected. A select holds
-one selected option and has no read-only state.
-
-`id`, `className`, and `ref` on `SelectRoot` target the root element. Pass `triggerId` to set the
-trigger button's id. `ref` on `SelectTrigger` reaches the button.
+`id`, `className`, and `ref` on `SelectRoot` target the root element. `triggerId` targets the
+trigger, and `ref` on `SelectTrigger` reaches it.
 
 ## Options
 
-Use `SelectItem` for options. It adds a check for the selected option. `SelectListBox` accepts
-static children or `items` with a render function. A text part such as `Text` renders inside
-`SelectTrigger`, `SelectValue`, and `SelectItem`. `SelectValue` shows the content of the selected
-item.
+Use `SelectItem` for options. `SelectListBox` accepts static children or `items` with a render
+function. `Text` renders inside `SelectTrigger`, `SelectValue`, and `SelectItem`.
 
 ## Indicator
 
-`SelectIndicator` shows a chevron by default. It sets `data-open` while the popover is open, which
-you can use to style the open state. Pass `children` to replace the chevron. The part keeps its
-layout and `data-open`, and it is hidden from assistive technology.
+`SelectIndicator` shows a chevron by default and sets `data-open` while the popover is open. Pass
+`children` to replace the chevron.
 
 <ExampleBlock src="select-primitive/indicator" title="Select primitives: Indicator" />
 
 ## Size
 
-`medium` is the default. Use `small` in compact layouts. Set `size` on `SelectRoot`, and the
-trigger, indicator, and items follow. The parts take no `size` of their own. The trigger sets the
-icon size for everything inside it.
+Set `size` on `SelectRoot`, and the trigger, indicator, and items follow. `medium` is the default.
+Use `small` in compact layouts.
 
 ## Validation
 
-Set `isInvalid` or a validation prop on `SelectRoot`. The trigger has no invalid prop. It reads the
-state from the root and takes a danger border. `Field` and `FieldError` give an invalid select its
-message, and `FieldError` carries the error icon. See [Validation](/docs/validation).
+Set `isInvalid` or a validation prop on `SelectRoot`. The trigger takes a danger border, and
+`FieldError` inside `Field` shows the message and the error icon. See
+[Validation](/docs/validation).
 
 ## Labels
 
-`Field` and `FieldLabel` render a native `<label>`, which takes textual, non-interactive content
-only. Place a link or button outside it. To name the select with content that lives elsewhere, pass
-`aria-labelledby` to `SelectRoot`.
+The label takes textual, non-interactive content only. Place a link or button outside it. To name
+the select without a visible label, pass `aria-labelledby` or `aria-label` to `SelectRoot`.
 
 ## API
 
