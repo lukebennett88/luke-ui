@@ -4,6 +4,7 @@ import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { cdp, page } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { getTextStart, measureFieldError } from '../test-utils/measure-field-error.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -167,6 +168,31 @@ test('the icon indicator stays out of the accessible name', async () => {
 	const axNode = await getAccessibilityNode(inputNode.nodeId);
 	expect(axNode.name?.value).toBe('Invalid');
 });
+
+// The error hangs at the label's inline edge at every size, not under the control. The icon
+// is centred on the message's first line, and wrapped lines align with the first.
+for (const size of ['small', 'medium', 'large'] as const) {
+	test(`the ${size} Checkbox error text starts at the label text and its icon sits on the first line`, () => {
+		const errorMessage =
+			'Accept the terms to continue. This message wraps onto a second line to check its alignment.';
+		const { container } = render(
+			<Stack width="16rem">
+				<Checkbox defaultSelected errorMessage={errorMessage} name="terms" size={size}>
+					Accept the terms
+				</Checkbox>
+			</Stack>,
+		);
+
+		const input = page.getByRole('checkbox', { name: 'Accept the terms' }).element();
+		const measurement = measureFieldError(page.getByText(errorMessage).element());
+		const labelStart = getTextStart(container, 'Accept the terms');
+
+		expect(input).toHaveAccessibleDescription(errorMessage);
+		expect(measurement.firstLineStart).toBeCloseTo(labelStart, 0);
+		expect(measurement.secondLineStart).toBeCloseTo(labelStart, 0);
+		expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
+	});
+}
 
 /** Fetches the CDP DOM tree root, piercing into the Vitest iframe and any shadow roots. */
 async function getDomRoot() {

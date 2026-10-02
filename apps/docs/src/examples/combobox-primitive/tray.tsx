@@ -3,8 +3,8 @@ import { Cluster } from '@luke-ui/react/cluster';
 import { Icon } from '@luke-ui/react/icon';
 import {
 	ComboboxClearButton,
+	ComboboxControl,
 	ComboboxInput,
-	ComboboxInputGroup,
 	ComboboxItem,
 	ComboboxListBox,
 	ComboboxRoot,
@@ -30,18 +30,18 @@ export default () => {
 			<Stack gap="sp16" maxInlineSize="20rem">
 				<ComboboxRoot defaultItems={countries} isRequired name="country">
 					<Field label="Country">
-						<ComboboxInputGroup>
+						<ComboboxControl>
 							<ComboboxTrayTrigger placeholder="Select a country...">
 								<Icon name="chevronDown" />
 							</ComboboxTrayTrigger>
-						</ComboboxInputGroup>
+						</ComboboxControl>
 						<ComboboxTray>
-							<ComboboxInputGroup>
+							<ComboboxControl>
 								<ComboboxInput placeholder="Select a country..." />
 								<ComboboxClearButton aria-label="Clear search">
 									<Icon name="close" />
 								</ComboboxClearButton>
-							</ComboboxInputGroup>
+							</ComboboxControl>
 							<ComboboxListBox<{ id: string; label: string }>>
 								{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 							</ComboboxListBox>

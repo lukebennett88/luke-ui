@@ -5,7 +5,7 @@ import { Icon } from '@luke-ui/react/icon';
 import { Prose } from '@luke-ui/react/prose';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import { rootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -104,7 +104,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 										Enter the new email address you’d like to use.
 									</Text>
 								</Prose>
-								<TextField
+								<TextInputField
 									aria-label="New email address"
 									errorMessage={errorMessage ? <span role="alert">{errorMessage}</span> : undefined}
 									inputRef={inputRef}

@@ -1,7 +1,6 @@
 import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
-import { ComboboxField } from '@luke-ui/react/combobox-field';
-import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
+import { ComboboxField, ComboboxItem } from '@luke-ui/react/combobox-field';
 import { Stack } from '@luke-ui/react/stack';
 import type { SubmitEvent } from 'react';
 

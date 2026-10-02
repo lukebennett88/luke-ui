@@ -20,7 +20,7 @@ steps inject styles at runtime.
 
 ## Structure
 
-Paths below are rooted in `packages/@luke-ui/react/src/`.
+Paths below are relative to `packages/@luke-ui/react/src/`.
 
 | Area                                          | Role                                                                                                                                      |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -226,7 +226,9 @@ const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSel
 ```
 
 `composeInputStateSelectors` owns the shared attribute and pseudo-class matrix. It returns mutually
-exclusive selectors. Control-specific selectors stay in the owning recipe.
+exclusive selectors. Control-specific selectors stay in the owning recipe. Pass `extraStates` when
+an element carries a state in a form the defaults do not cover, such as a bare `<input>` that is
+itself `:read-only`.
 
 Do not widen a state with `:has()` when the group already exposes data attributes such as
 `data-disabled` and `data-invalid`. Probing descendants cannot tell a disabled control from one that

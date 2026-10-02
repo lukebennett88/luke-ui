@@ -15,7 +15,7 @@
 		"---Forms---",
 		"forms/checkbox",
 		"forms/combobox-field",
-		"forms/text-field",
+		"forms/text-input-field",
 		"---Layout---",
 		"layout/aspect-ratio",
 		"layout/auto-grid",
@@ -45,7 +45,7 @@
 		"primitives/button",
 		"primitives/checkbox",
 		"primitives/field",
-		"primitives/input-group",
+		"primitives/text-input",
 		"primitives/combobox"
 	]
 }

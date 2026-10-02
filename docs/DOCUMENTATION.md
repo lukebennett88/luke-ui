@@ -79,7 +79,8 @@ one, cut it.
 Keep the detail that changes the reader's code:
 
 - `Button` sizes a nested `Icon`, so an icon needs no `size` prop.
-- A field component takes no plain `ref`, so `inputRef` is the only way to reach the control.
+- When a field component exposes both `ref` and `inputRef`, `ref` reaches the root and `inputRef`
+  reaches the input.
 
 Cut the detail that only explains the mechanism:
 

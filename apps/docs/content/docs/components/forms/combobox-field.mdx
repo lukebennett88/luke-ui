@@ -17,7 +17,8 @@ filter asynchronously. `ComboboxField` supports one selected value.
 
 ## Choose and clear an option
 
-Pass static children or a render function to create options. The listbox marks the selected option.
+Pass static children or a render function to create options. `@luke-ui/react/combobox-field` exports
+`ComboboxItem` and `ComboboxSection` alongside the field. The listbox marks the selected option.
 When there is a selection, the field shows a clear button before the trigger. The clear button
 removes the selection and input text. The clear button is unavailable for disabled and read-only
 fields.
@@ -88,6 +89,11 @@ Below the `bp640` breakpoint, the field shows a button that displays the selecte
 taps the button to open a modal tray with a focused search input. The tray has a fixed height and
 locks page scroll. The tray motion and desktop popover fade respect reduced-motion preferences.
 
+## IDs and refs
+
+`id`, `className`, and `ref` target the field's root element. Pass `inputId` to set the input's id,
+and `inputRef` to reach the input.
+
 ## Accessibility
 
 Provide a visible `label` where possible. When a nearby heading already names the field, omit
@@ -97,7 +103,23 @@ Luke UI associates the label, description, and validation message with the input
 
 ## API
 
+### ComboboxFieldProps
+
 <component-props-table
 	path="packages/@luke-ui/react/src/core/combobox-field/combobox-field.tsx"
 	name="ComboboxFieldProps"
+/>
+
+### ComboboxItemProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/combobox/item.tsx"
+	name="ComboboxItemProps"
+/>
+
+### ComboboxSectionProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/combobox/section.tsx"
+	name="ComboboxSectionProps"
 />

@@ -1,0 +1,141 @@
+---
+title: TextInput primitives
+description:
+  Lower-level parts for composing a text input, with or without a field root and adornments.
+source: packages/@luke-ui/react/src/exports/primitives/text-input.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/TextField.html
+---
+
+Use these primitives to build a custom text input. For most application forms, use
+[`TextInputField`](/components/forms/text-input-field).
+
+<ExampleBlock src="text-input-primitive/basic" title="TextInput primitives: Basic" />
+
+## Anatomy
+
+`TextInputRoot` is the semantic root. It connects the input to the label, description, and error
+inside it, and owns the value, state, and validation. `TextInput` is the `<input>`.
+`TextInputControl` is optional chrome around the input and its `TextInputPrefix` and
+`TextInputSuffix`. Parts follow document order, so put the prefix before the input and the suffix
+after it.
+
+```tsx
+<TextInputRoot name="amount">
+	<Field label="Amount">
+		<TextInputControl>
+			<TextInputPrefix>$</TextInputPrefix>
+			<TextInput inputMode="decimal" />
+			<TextInputSuffix>USD</TextInputSuffix>
+		</TextInputControl>
+	</Field>
+</TextInputRoot>
+```
+
+## Choosing a composition
+
+Make two independent choices.
+
+- **A root or no root.** Wrap the input in `TextInputRoot` to connect it to `Field`, or to
+  `FieldLabel`, `FieldDescription`, and `FieldError`, with no manual ids. Without a root,
+  `TextInput` takes native input props such as `name`, `value`, `onChange`, `disabled`, and
+  `aria-invalid`, and needs an accessible name from `aria-label` or a connected label.
+- **A control or no control.** Wrap the input in `TextInputControl` to add a prefix or suffix. The
+  control draws the chrome, and the input inside it is transparent. Without a control, `TextInput`
+  draws its own chrome.
+
+<ExampleBlock src="text-input-primitive/with-root" title="TextInput primitives: With a root" />
+
+A prefix or suffix accepts any React node, including an interactive one such as a button. Give an
+interactive part an accessible name, keyboard behaviour, and a considered focus order.
+
+## Root and input props
+
+The root owns the state and semantics that span the field. A `TextInput` inside it ignores its own
+values for these props:
+
+- `id`. Set `inputId` on the root.
+- `value` and `defaultValue`.
+- `name` and `form`.
+- `disabled`, `readOnly`, and `required`. Set `isDisabled`, `isReadOnly`, and `isRequired` on the
+  root.
+- `aria-invalid`. Set `isInvalid` or a validation prop on the root.
+- `type`, `pattern`, `minLength`, and `maxLength`. Set them on the root, because they are part of
+  the field's validation.
+
+`aria-describedby` and `aria-labelledby` on a `TextInput` inside a `TextInputRoot` add to the
+field's own wiring. They never replace the connection to the label, description, and error.
+
+The root passes `autoComplete`, `inputMode`, `autoCorrect`, `spellCheck`, `enterKeyHint`,
+`autoFocus`, `aria-label`, and `size` down to the input as defaults. Set one on the `TextInput` to
+override the root's for that input.
+
+```tsx
+<TextInputRoot autoComplete="off">
+	<Field label="Email">
+		<TextInput autoComplete="email" />
+	</Field>
+</TextInputRoot>
+```
+
+Set input-only props such as `placeholder`, `autoCapitalize`, `className`, `style`, and `ref` on the
+`TextInput`. Event handlers on the input run alongside the root's. An `onChange` on the input
+receives the change event, while the root's `onChange` receives the value.
+
+`id` and `ref` on `TextInputRoot` target the root element. Pass `inputId` to set the input's id.
+
+## Size
+
+`medium` is the default. Use `small` in compact layouts. `size` on `TextInputRoot` sets the default
+for the parts inside it. A `TextInput` or `TextInputControl` with its own `size` overrides the
+root's. Inside a control, the control sets the size, and the input, prefix, and suffix follow it.
+
+The control also sets the icon size for everything inside it, so an `Icon` in a prefix or suffix
+scales with the control without a `size` of its own.
+
+## Validation
+
+Mark a standalone `TextInput` invalid with `aria-invalid`. Inside a root, the root sets the invalid
+state. Outside a control, an invalid input draws a thicker border that does not change its size.
+`TextInputControl` has no invalid prop. It reads invalid state from the input inside it and takes a
+danger border.
+
+An input inside a `TextInputRoot` gets its message from `FieldError`, which carries the error icon
+and says what is wrong. A standalone invalid input relies on its structural border, so the
+surrounding interface should explain the problem. See [Validation](/docs/validation).
+
+## API
+
+### TextInputRootProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx"
+	name="TextInputRootProps"
+/>
+
+### TextInputProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx"
+	name="TextInputProps"
+/>
+
+### TextInputControlProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx"
+	name="TextInputControlProps"
+/>
+
+### TextInputPrefixProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx"
+	name="TextInputPrefixProps"
+/>
+
+### TextInputSuffixProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx"
+	name="TextInputSuffixProps"
+/>

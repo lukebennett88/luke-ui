@@ -4,8 +4,8 @@ import { Icon } from '../icon/icon.js';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
 import { useIsMobileDevice } from '../overlays/use-is-mobile-device.js';
 import { ComboboxClearButton } from '../primitives/combobox/clear-button.js';
+import { ComboboxControl } from '../primitives/combobox/control.js';
 import { ComboboxEmptyState } from '../primitives/combobox/empty-state.js';
-import { ComboboxInputGroup } from '../primitives/combobox/input-group.js';
 import { ComboboxInput } from '../primitives/combobox/input.js';
 import type { ComboboxLoadMoreItemProps } from '../primitives/combobox/item.js';
 import { ComboboxLoadMoreItem } from '../primitives/combobox/item.js';
@@ -41,7 +41,11 @@ type _ComboboxFieldOmit<T extends object> = DistributiveOmit<
 	| 'aria-label'
 	| 'aria-labelledby'
 	| 'children'
+	| 'className'
+	| 'id'
+	| 'inputId'
 	| 'isInvalid'
+	| 'ref'
 	| keyof ComboboxFieldRedeclaredRACProps
 >;
 
@@ -50,12 +54,22 @@ interface _ComboboxFieldBaseProps<T extends object>
 	/** Item content for the listbox (render prop or static children). */
 	children: ComboboxListBoxProps<T>['children'];
 
+	/** Class name for the field's root element. */
+	className?: ComboboxRootProps<T>['className'];
+
 	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
 	errorMessage?: ReactNode;
 
+	/** Element id for the field's root element. Use `inputId` for the input. */
+	id?: ComboboxRootProps<T>['id'];
+
+	/** Element id for the input. The field generates one when omitted. */
+	inputId?: ComboboxRootProps<T>['inputId'];
+
 	/**
 	 * Targets the persistent combobox input on desktop. On mobile it targets the tray search input
-	 * only while the tray is open, so it is null when the tray is closed.
+	 * only while the tray is open, so it is null when the tray is closed. Use `ref` for the root
+	 * element.
 	 */
 	inputRef?: Ref<HTMLInputElement>;
 
@@ -80,6 +94,9 @@ interface _ComboboxFieldBaseProps<T extends object>
 	/** Props forwarded to the desktop popover. Mobile uses the tray instead. */
 	popoverProps?: DistributiveOmit<ComboboxPopoverProps, 'children'>;
 
+	/** Forwarded to the field's root element. Use `inputRef` for the input. */
+	ref?: ComboboxRootProps<T>['ref'];
+
 	/** Control size. @default 'medium' */
 	size?: ComboboxSize;
 }
@@ -89,7 +106,12 @@ type _ComboboxFieldProps<T extends object> = _ComboboxFieldBaseProps<T> & FieldA
 /** Props for `ComboboxField` (searchable single-select). */
 export type ComboboxFieldProps<T extends object> = Prettify<_ComboboxFieldProps<T>>;
 
-/** Composes `ComboboxRoot` with label, description, and error slots. */
+/**
+ * Composes `ComboboxRoot` with label, description, and error slots.
+ *
+ * `id`, `className`, and `ref` target the field's root element. `inputId` and `inputRef` target the
+ * input.
+ */
 export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): JSX.Element {
 	const {
 		children,
@@ -154,18 +176,18 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		if (isMobileDevice) {
 			return (
 				<>
-					<ComboboxInputGroup>
+					<ComboboxControl>
 						<ComboboxTrayTrigger placeholder={placeholder}>
 							<Icon name="chevronDown" />
 						</ComboboxTrayTrigger>
-					</ComboboxInputGroup>
+					</ComboboxControl>
 					<ComboboxTray>
-						<ComboboxInputGroup>
+						<ComboboxControl>
 							<ComboboxInput placeholder={placeholder} ref={inputRef} />
 							<ComboboxClearButton aria-label="Clear search">
 								<Icon name="close" />
 							</ComboboxClearButton>
-						</ComboboxInputGroup>
+						</ComboboxControl>
 						{listBox}
 					</ComboboxTray>
 				</>
@@ -174,7 +196,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 
 		return (
 			<>
-				<ComboboxInputGroup>
+				<ComboboxControl>
 					<ComboboxInput placeholder={placeholder} ref={inputRef} />
 					{isInteractive ? (
 						<ComboboxClearButton aria-label="Clear selection">
@@ -184,7 +206,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 					<ComboboxTrigger aria-label="Toggle options">
 						<Icon name="chevronDown" />
 					</ComboboxTrigger>
-				</ComboboxInputGroup>
+				</ComboboxControl>
 				<ComboboxPopover offset={4} {...popoverProps} style={resolvedStyle}>
 					{listBox}
 				</ComboboxPopover>

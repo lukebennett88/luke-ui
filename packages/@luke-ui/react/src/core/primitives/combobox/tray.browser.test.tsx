@@ -1,8 +1,8 @@
 import { Icon } from '@luke-ui/react/icon';
 import {
 	ComboboxClearButton,
+	ComboboxControl,
 	ComboboxInput,
-	ComboboxInputGroup,
 	ComboboxItem,
 	ComboboxListBox,
 	ComboboxRoot,
@@ -60,18 +60,18 @@ function TrayCombobox(
 			validationBehavior={props.validationBehavior}
 		>
 			<Field label={label}>
-				<ComboboxInputGroup>
+				<ComboboxControl>
 					<ComboboxTrayTrigger aria-label={props.triggerLabel} placeholder="Select a country...">
 						<Icon name="chevronDown" />
 					</ComboboxTrayTrigger>
-				</ComboboxInputGroup>
+				</ComboboxControl>
 				<ComboboxTray>
-					<ComboboxInputGroup>
+					<ComboboxControl>
 						<ComboboxInput placeholder="Select a country..." />
 						<ComboboxClearButton aria-label="Clear search">
 							<Icon name="close" />
 						</ComboboxClearButton>
-					</ComboboxInputGroup>
+					</ComboboxControl>
 					<ComboboxListBox<CountryItem>>{renderCountryItem}</ComboboxListBox>
 				</ComboboxTray>
 			</Field>

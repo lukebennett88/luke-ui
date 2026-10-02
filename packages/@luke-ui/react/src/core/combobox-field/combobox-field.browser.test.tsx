@@ -1,9 +1,8 @@
-import { ComboboxField } from '@luke-ui/react/combobox-field';
+import { ComboboxField, ComboboxItem } from '@luke-ui/react/combobox-field';
 import { Icon } from '@luke-ui/react/icon';
 import {
+	ComboboxControl,
 	ComboboxInput,
-	ComboboxInputGroup,
-	ComboboxItem,
 	ComboboxListBox,
 	ComboboxPopover,
 	ComboboxRoot,
@@ -15,6 +14,7 @@ import type { Key } from 'react-aria-components/ComboBox';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { measureFieldError } from '../test-utils/measure-field-error.js';
 import {
 	DESKTOP_SCREEN_WIDTH,
 	MOBILE_SCREEN_WIDTH,
@@ -41,6 +41,9 @@ const sceneCountryItems: Array<CountryItem> = [
 	{ id: 'us', label: 'United States' },
 	{ id: 'se', label: 'Sweden' },
 ];
+
+const wrappingErrorMessage =
+	'Choose a work location from the list. Locations outside your region are not available.';
 
 const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</ComboboxItem>;
 
@@ -102,6 +105,86 @@ test('ComboboxField resolves object and callback inputRefs, submits its value, a
 	form.remove();
 });
 
+test('ComboboxRoot and ComboboxField put id on the root element and inputId on the input', () => {
+	render(
+		<>
+			<ComboboxRoot<CountryItem>
+				className="primitive-root"
+				defaultItems={countryItems}
+				id="primitive-root"
+				inputId="primitive-input"
+			>
+				<Field label="Primitive country">
+					<ComboboxControl>
+						<ComboboxInput />
+					</ComboboxControl>
+					<ComboboxPopover>
+						<ComboboxListBox<CountryItem>>{renderCountryItem}</ComboboxListBox>
+					</ComboboxPopover>
+				</Field>
+			</ComboboxRoot>
+			<ComboboxField<CountryItem>
+				className="field-root"
+				defaultItems={countryItems}
+				id="field-root"
+				inputId="field-input"
+				label="Field country"
+			>
+				{renderCountryItem}
+			</ComboboxField>
+		</>,
+	);
+	const cases = [
+		{ inputId: 'primitive-input', name: 'Primitive country', rootId: 'primitive-root' },
+		{ inputId: 'field-input', name: 'Field country', rootId: 'field-root' },
+	];
+
+	for (const { inputId, name, rootId } of cases) {
+		const input = page.getByRole('combobox', { name }).element();
+		const root = document.getElementById(rootId);
+
+		expect(input.id).toBe(inputId);
+		expect(root).toHaveClass(rootId);
+		expect(root?.contains(input)).toBe(true);
+	}
+});
+
+test('ComboboxField resolves an object or callback ref to the root element and inputRef to the input', () => {
+	const ref = createRef<HTMLDivElement>();
+	const inputRef = createRef<HTMLInputElement>();
+	const callbackResolved: Array<HTMLDivElement | null> = [];
+	const { locator } = render(
+		<>
+			<ComboboxField<CountryItem>
+				defaultItems={countryItems}
+				id="ref-root"
+				inputRef={inputRef}
+				label="Object"
+				ref={ref}
+			>
+				{renderCountryItem}
+			</ComboboxField>
+			<ComboboxField<CountryItem>
+				defaultItems={countryItems}
+				id="callback-root"
+				label="Callback"
+				ref={(node) => {
+					callbackResolved.push(node);
+				}}
+			>
+				{renderCountryItem}
+			</ComboboxField>
+		</>,
+	);
+	const input = locator.getByRole('combobox', { name: 'Object' }).element();
+
+	expect(ref.current).toBe(document.getElementById('ref-root'));
+	expect(ref.current).toBeInstanceOf(HTMLDivElement);
+	expect(ref.current?.contains(input)).toBe(true);
+	expect(inputRef.current).toBe(input);
+	expect(callbackResolved.at(-1)).toBe(document.getElementById('callback-root'));
+});
+
 test('the ComboboxField scene has no axe violations', async () => {
 	const { container } = render(
 		<Stack>
@@ -136,6 +219,29 @@ test('the ComboboxField scene has no axe violations', async () => {
 	);
 
 	await expectNoAxeViolations(container);
+});
+
+test('the ComboboxField error icon is centred on the first line and wrapped lines align with the text', () => {
+	render(
+		<Stack width="16rem">
+			<ComboboxField
+				defaultItems={sceneCountryItems}
+				errorMessage={wrappingErrorMessage}
+				label="Work location"
+				name="work-location"
+			>
+				{renderCountryItem}
+			</ComboboxField>
+		</Stack>,
+	);
+
+	const input = page.getByRole('combobox', { name: 'Work location' }).element();
+	const measurement = measureFieldError(page.getByText(wrappingErrorMessage).element());
+
+	expect(input).toHaveAccessibleDescription(wrappingErrorMessage);
+	expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
+	expect(measurement.secondLineStart).toBeDefined();
+	expect(measurement.secondLineStart).toBeCloseTo(measurement.firstLineStart, 0);
 });
 
 test('ComboboxField uses a mobile modal to search and select an option', async () => {
@@ -357,19 +463,6 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				>
 					{renderCountryItem}
 				</ComboboxField>
-				<ComboboxRoot defaultItems={sceneCountryItems} isInvalid name="invalid-no-message">
-					<Field label="Invalid, no message">
-						<ComboboxInputGroup>
-							<ComboboxInput placeholder="Select a country..." />
-							<ComboboxTrigger aria-label="Toggle options">
-								<Icon name="chevronDown" />
-							</ComboboxTrigger>
-						</ComboboxInputGroup>
-						<ComboboxPopover offset={4}>
-							<ComboboxListBox>{renderCountryItem}</ComboboxListBox>
-						</ComboboxPopover>
-					</Field>
-				</ComboboxRoot>
 				<ComboboxField
 					defaultItems={sceneCountryItems}
 					defaultValue="ca"
@@ -380,6 +473,16 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				>
 					{renderCountryItem}
 				</ComboboxField>
+				<Stack width="16rem">
+					<ComboboxField
+						defaultItems={sceneCountryItems}
+						errorMessage={wrappingErrorMessage}
+						label="Work location"
+						name="invalid-wrapping"
+					>
+						{renderCountryItem}
+					</ComboboxField>
+				</Stack>
 				<ComboboxField
 					defaultItems={sceneCountryItems}
 					label="Small"
@@ -404,12 +507,12 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					size="small"
 				>
 					<Field label="Small group, medium trigger">
-						<ComboboxInputGroup>
+						<ComboboxControl>
 							<ComboboxInput placeholder="Select a country..." />
 							<ComboboxTrigger aria-label="Toggle medium trigger" size="medium">
 								<Icon name="chevronDown" />
 							</ComboboxTrigger>
-						</ComboboxInputGroup>
+						</ComboboxControl>
 						<ComboboxPopover offset={4}>
 							<ComboboxListBox>{renderCountryItem}</ComboboxListBox>
 						</ComboboxPopover>
@@ -476,6 +579,4 @@ async function waitForMobileTrayToSettle() {
 	expect(window.innerWidth).toBe(MOBILE_SCREEN_WIDTH);
 	expect(window.innerHeight).toBe(700);
 	expect(window.matchMedia('(width > 450px)').matches).toBe(false);
-	expect(getComputedStyle(modal).borderEndStartRadius).toBe('0px');
-	expect(getComputedStyle(modal).borderEndEndRadius).toBe('0px');
 }

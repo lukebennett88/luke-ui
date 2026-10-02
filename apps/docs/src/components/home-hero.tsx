@@ -5,7 +5,7 @@ import { Grid } from '@luke-ui/react/grid';
 import { Heading } from '@luke-ui/react/heading';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import type { SubmitEvent } from 'react';
 import { useTransition } from 'react';
 import { CodeBlock } from './code-block/code-block.js';
@@ -99,7 +99,7 @@ export function HomeHero() {
 				<ThemeControls className="justify-self-start" />
 				<form onSubmit={handleSubmit}>
 					<Stack gap="sp16">
-						<TextField isRequired label="Name" name="name" />
+						<TextInputField isRequired label="Name" name="name" />
 						<Cluster gap="sp8">
 							<Button isPending={isPending} prominence="high" type="submit">
 								Save changes

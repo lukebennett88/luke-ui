@@ -1,6 +1,6 @@
 import { Button } from '@luke-ui/react/button';
 import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading-skeleton';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import type { CSSProperties } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
@@ -21,7 +21,7 @@ function LoadingSkeletonScene() {
 				<Button>Submit</Button>
 			</LoadingSkeleton>
 			<LoadingSkeleton radius="control">
-				<TextField label="Email" name="email" placeholder="Email address" />
+				<TextInputField label="Email" name="email" placeholder="Email address" />
 			</LoadingSkeleton>
 			<LoadingSkeleton isLoading={false}>
 				<Button>Submit</Button>
@@ -164,7 +164,7 @@ test('flattens tactile descendants', { tags: ['visual'] }, async () => {
 			<LoadingSkeleton radius="surface">
 				<div>
 					<Button>Nested action</Button>
-					<TextField label="Email" name="email" />
+					<TextInputField label="Email" name="email" />
 				</div>
 			</LoadingSkeleton>,
 			{ appearance },

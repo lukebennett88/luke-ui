@@ -1,18 +1,18 @@
 import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 
 export default () => {
 	return (
 		<Stack gap="sp16" maxInlineSize="20rem">
-			<TextField
+			<TextInputField
 				label="Search documentation"
 				name="documentationSearch"
 				placeholder="Search components"
 				prefix={<Icon name="search" size="small" />}
 			/>
-			<TextField label="Website" name="website" placeholder="example.com" prefix="https://" />
-			<TextField label="Budget" name="budget" placeholder="0.00" suffix="AUD" />
+			<TextInputField label="Website" name="website" placeholder="example.com" prefix="https://" />
+			<TextInputField label="Budget" name="budget" placeholder="0.00" suffix="AUD" />
 		</Stack>
 	);
 };

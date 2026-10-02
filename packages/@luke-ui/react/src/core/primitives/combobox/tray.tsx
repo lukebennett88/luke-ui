@@ -14,7 +14,7 @@ import { ComboboxPresentationProvider } from './presentation-context.js';
 const trayCollectionContextValue = { shouldUseVirtualFocus: true };
 
 interface _ComboboxTrayProps {
-	/** Typically a search `ComboboxInputGroup` followed by a `ComboboxListBox`. */
+	/** Typically a search `ComboboxControl` followed by a `ComboboxListBox`. */
 	children: ReactNode;
 }
 

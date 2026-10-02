@@ -1,0 +1,76 @@
+---
+title: Text Input Field
+description:
+  Captures a single line of text with a label, validation, and an optional prefix or suffix.
+source: packages/@luke-ui/react/src/exports/text-input-field.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/TextField.html
+---
+
+Use `TextInputField` to collect a single line of text. It combines an input with a label,
+description, and validation message.
+
+<ExampleBlock src="text-input-field/basic" title="Text Input Field: Basic" />
+
+## Labels and placeholders
+
+Give the field a visible `label` where possible. Use `placeholder` for an example value or input
+format, not as the label. A placeholder disappears while someone types and is not a reliable
+accessible name.
+
+When a nearby heading already names the field, omit `label`. Use `aria-label` or `aria-labelledby`
+instead.
+
+```tsx
+<TextInputField aria-label="Search" name="search" placeholder="Search" />
+```
+
+## Required fields
+
+Set `isRequired` for required fields. `necessityIndicator="icon"` adds a visual marker.
+`necessityIndicator="label"` appends “(required)” to the label.
+
+<ExampleBlock src="text-input-field/required" title="Text Input Field: Required" />
+
+## Validation
+
+Set `isRequired`, `type`, or `pattern`, or pass `validate` to check the value. `TextInputField`
+shows its validation message after validation fails. Pass `errorMessage` only for an error you
+already have, such as one from a form library or your server. A non-empty message marks the field
+invalid. Read [Validation](/docs/validation) for where messages come from, server errors, and how to
+write them.
+
+<ExampleBlock src="text-input-field/validation" title="Text Input Field: Validation" />
+
+## Prefix and suffix
+
+Use `prefix` and `suffix` for content inside the input, such as a search icon, currency code, or URL
+scheme. Both accept any `ReactNode`. Give an interactive prefix or suffix an accessible name and
+keyboard behaviour.
+
+<ExampleBlock
+	src="text-input-field/prefix-and-suffix"
+	title="Text Input Field: Prefix and suffix"
+/>
+
+## Size
+
+Use `size` to set the input height and typography. Use `small` in compact layouts. `medium` is the
+default. The HTML numeric `size` attribute is unavailable because `size` is the Luke UI variant.
+
+<ExampleBlock src="text-input-field/sizes" title="Text Input Field: Size" />
+
+## IDs and refs
+
+`id`, `className`, and `ref` target the field's root element. Pass `inputId` to set the input's id,
+and `inputRef` to reach the input.
+
+## Accessibility
+
+Luke UI associates the label, description, and error message with the control.
+
+## API
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/text-input-field/text-input-field.tsx"
+	name="TextInputFieldProps"
+/>

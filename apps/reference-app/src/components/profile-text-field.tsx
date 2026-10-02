@@ -1,9 +1,8 @@
 import { FieldDescription, FieldError, FieldLabel } from '@luke-ui/react/primitives/field';
-import { InputGroup, InputGroupInput } from '@luke-ui/react/primitives/input-group';
+import { TextInput, TextInputControl, TextInputRoot } from '@luke-ui/react/primitives/text-input';
 import { Stack } from '@luke-ui/react/stack';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { TextField as RacTextField } from 'react-aria-components/TextField';
 import type { ProfileUpdate } from '../api/schemas.js';
 import { profileSchema } from '../api/schemas.js';
 import { settingsApi, settingsMutationErrorMessage } from '../api/settings-api.js';
@@ -68,7 +67,7 @@ export function ProfileTextField({
 
 	return (
 		<SettingsRowShell>
-			<RacTextField
+			<TextInputRoot
 				className={styles.profileFieldShell}
 				isInvalid={Boolean(errorMessage)}
 				isReadOnly={isPending}
@@ -80,6 +79,7 @@ export function ProfileTextField({
 					setValidationError(undefined);
 					mutation.reset();
 				}}
+				size="small"
 				validationBehavior="aria"
 				value={draft ?? value}
 			>
@@ -94,8 +94,8 @@ export function ProfileTextField({
 						gap="sp4"
 						minInlineSize="0"
 					>
-						<InputGroup className={styles.profileTextField} size="small">
-							<InputGroupInput
+						<TextInputControl className={styles.profileTextField}>
+							<TextInput
 								onKeyDown={(event) => {
 									if (event.key === 'Escape') {
 										event.preventDefault();
@@ -108,13 +108,13 @@ export function ProfileTextField({
 								}}
 								placeholder={placeholder}
 							/>
-						</InputGroup>
+						</TextInputControl>
 						<FieldError>
 							{errorMessage ? <span role="alert">{errorMessage}</span> : null}
 						</FieldError>
 					</Stack>
 				</SettingsRowControl>
-			</RacTextField>
+			</TextInputRoot>
 		</SettingsRowShell>
 	);
 }

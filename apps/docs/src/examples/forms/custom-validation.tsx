@@ -1,7 +1,7 @@
 import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import type { SubmitEvent } from 'react';
 
 const reservedUsernames = new Set(['admin', 'root', 'support']);
@@ -23,7 +23,7 @@ export default () => {
 		<form onSubmit={handleSubmit}>
 			<Stack gap="sp16" maxInlineSize="20rem">
 				<Stack minBlockSize="5.5rem">
-					<TextField
+					<TextInputField
 						defaultValue="admin"
 						label="Username"
 						name="username"

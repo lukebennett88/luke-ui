@@ -4,7 +4,7 @@ import { Cluster } from '@luke-ui/react/cluster';
 import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import { vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import type { CSSProperties, JSX, ReactNode } from 'react';
@@ -46,7 +46,7 @@ export function TokenExplorer(): JSX.Element {
 
 			<Cluster gap="sp12">
 				<Box flexGrow="1" minInlineSize="12rem">
-					<TextField
+					<TextInputField
 						aria-label="Filter tokens by name"
 						onChange={setFilter}
 						placeholder="Filter by name"

@@ -16,7 +16,7 @@ describe('createPrimitive', () => {
 	it('applies parsed answers to a repository fixture and is safe to rerun', async () => {
 		const root = await createRepositoryFixture({
 			primitivesMeta: {
-				pages: ['button', 'checkbox', 'field', 'input-group', 'combobox'],
+				pages: ['button', 'checkbox', 'field', 'text-input', 'combobox'],
 				title: 'Primitives',
 			},
 		});
@@ -70,7 +70,7 @@ describe('createPrimitive', () => {
 		await expect(
 			readJson(root, 'apps/docs/content/docs/components/primitives/meta.json'),
 		).resolves.toEqual({
-			pages: ['button', 'checkbox', 'field', 'input-group', 'combobox', 'status-badge'],
+			pages: ['button', 'checkbox', 'field', 'text-input', 'combobox', 'status-badge'],
 			title: 'Primitives',
 		});
 		await expect(

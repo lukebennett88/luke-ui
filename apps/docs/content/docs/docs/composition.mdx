@@ -14,7 +14,7 @@ do not fit a custom composition.
 
 ```tsx
 import { Button } from '@luke-ui/react/button';
-import { InputGroup } from '@luke-ui/react/primitives/input-group';
+import { TextInputRoot } from '@luke-ui/react/primitives/text-input';
 ```
 
 `Button` includes its standard label, icon slots, and pending treatment. Use the button primitive
@@ -30,9 +30,12 @@ implementation details as an application API.
 
 ## Build a custom composition
 
-Choose the primitive that owns the behaviour you need. Then compose its documented public parts. For
-example, use the field primitive for a label, description, and control arrangement. Use the combobox
-primitives when `ComboboxField` does not fit your control, popover, or loading UI.
+Choose the primitive that owns the behaviour you need. Then compose its documented public parts.
+Start from the control's semantic root, such as `TextInputRoot` or `ComboboxRoot`. The root connects
+the label, description, and error inside it to the control. Inside the root, use `Field` for the
+standard label, description, and error arrangement. This example adds a prefix with the
+[TextInput primitives](/components/primitives/text-input). Use the combobox primitives when
+`ComboboxField` does not fit your control, popover, or loading UI.
 
 <ExampleBlock
 	src="composition/amount-field"

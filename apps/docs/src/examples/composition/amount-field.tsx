@@ -1,17 +1,20 @@
 import { Field } from '@luke-ui/react/primitives/field';
 import {
-	InputGroup,
-	InputGroupInput,
-	InputGroupPrefix,
-} from '@luke-ui/react/primitives/input-group';
+	TextInput,
+	TextInputControl,
+	TextInputPrefix,
+	TextInputRoot,
+} from '@luke-ui/react/primitives/text-input';
 
 export default () => {
 	return (
-		<Field description="Enter an amount in dollars." label="Amount">
-			<InputGroup>
-				<InputGroupPrefix>$</InputGroupPrefix>
-				<InputGroupInput inputMode="decimal" name="amount" placeholder="0.00" />
-			</InputGroup>
-		</Field>
+		<TextInputRoot name="amount">
+			<Field description="Enter an amount in dollars." label="Amount">
+				<TextInputControl>
+					<TextInputPrefix>$</TextInputPrefix>
+					<TextInput inputMode="decimal" placeholder="0.00" />
+				</TextInputControl>
+			</Field>
+		</TextInputRoot>
 	);
 };

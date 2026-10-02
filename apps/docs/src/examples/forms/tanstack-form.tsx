@@ -2,7 +2,7 @@ import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { TextField } from '@luke-ui/react/text-field';
+import { TextInputField } from '@luke-ui/react/text-input-field';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
 import { useRef } from 'react';
 import * as z from 'zod';
@@ -48,7 +48,7 @@ export default () => {
 					<form.Field name="name">
 						{(field) => (
 							<Stack minBlockSize="5.5rem">
-								<TextField
+								<TextInputField
 									errorMessage={field.state.meta.errors[0]?.message}
 									label="Name"
 									onBlur={field.handleBlur}
@@ -62,7 +62,7 @@ export default () => {
 					<form.Field name="email">
 						{(field) => (
 							<Stack minBlockSize="5.5rem">
-								<TextField
+								<TextInputField
 									errorMessage={field.state.meta.errors[0]?.message}
 									label="Email"
 									onBlur={field.handleBlur}

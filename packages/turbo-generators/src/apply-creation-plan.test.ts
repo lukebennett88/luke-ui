@@ -14,7 +14,7 @@ afterEach(async () => {
 describe('applyCreationPlan json edits', () => {
 	it('appends a unique page without reordering existing entries', async () => {
 		const root = await createMetaFixture({
-			pages: ['button', 'checkbox', 'field', 'input-group', 'combobox'],
+			pages: ['button', 'checkbox', 'field', 'text-input', 'combobox'],
 		});
 
 		await applyCreationPlan(root, {
@@ -35,13 +35,13 @@ describe('applyCreationPlan json edits', () => {
 		await expect(
 			readFile(join(root, 'apps/docs/content/docs/components/primitives/meta.json'), 'utf8'),
 		).resolves.toBe(
-			'{\n\t"pages": ["button", "checkbox", "field", "input-group", "combobox", "status-badge"],\n\t"title": "Primitives"\n}\n',
+			'{\n\t"pages": ["button", "checkbox", "field", "text-input", "combobox", "status-badge"],\n\t"title": "Primitives"\n}\n',
 		);
 	});
 
 	it('does not duplicate an existing append-unique page entry', async () => {
 		const root = await createMetaFixture({
-			pages: ['button', 'checkbox', 'field', 'input-group', 'combobox'],
+			pages: ['button', 'checkbox', 'field', 'text-input', 'combobox'],
 		});
 		const edit = {
 			files: [],
@@ -64,7 +64,7 @@ describe('applyCreationPlan json edits', () => {
 		await expect(
 			readFile(join(root, 'apps/docs/content/docs/components/primitives/meta.json'), 'utf8'),
 		).resolves.toBe(
-			'{\n\t"pages": ["button", "checkbox", "field", "input-group", "combobox"],\n\t"title": "Primitives"\n}\n',
+			'{\n\t"pages": ["button", "checkbox", "field", "text-input", "combobox"],\n\t"title": "Primitives"\n}\n',
 		);
 	});
 });

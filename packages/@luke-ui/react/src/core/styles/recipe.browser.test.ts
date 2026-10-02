@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from 'vite-plus/test';
 import { fieldRecipe } from '../primitives/field/recipe.css.js';
-import { inputGroupRecipe } from '../primitives/input-group/recipe.css.js';
+import { textInputRecipe } from '../primitives/text-input/recipe.css.js';
 import {
 	compoundSlotsRecipe,
 	compoundSlotsPrecedenceRecipe,
@@ -18,7 +18,7 @@ import {
 	untargetedSlotPrecedenceRecipe,
 } from './recipe.fixtures.css.js';
 
-// Field and input-group recipes export from their primitive entrypoints.
+// Field and text input recipes export from their primitive entrypoints.
 
 const mounted: Array<HTMLElement> = [];
 
@@ -80,13 +80,17 @@ test('a base-only recipe composes a consumer className', () => {
 
 test('slot functions append a consumer className', () => {
 	const ownRoot = fieldRecipe().root();
-	const ownControl = inputGroupRecipe({ size: 'small' }).control();
 
 	expect(fieldRecipe().root({ className: 'extra-class' })).toBe(`${ownRoot} extra-class`);
-	expect(inputGroupRecipe({ size: 'small' }).control({ className: 'mine' })).toBe(
-		`${ownControl} mine`,
-	);
 	expect(fieldRecipe().root({})).toBe(ownRoot);
+});
+
+test('textInputRecipe styles a standalone input and appends a consumer className', () => {
+	const medium = textInputRecipe({ size: 'medium' });
+
+	expect(textInputRecipe()).toBe(medium);
+	expect(textInputRecipe({ size: 'small' })).not.toBe(medium);
+	expect(textInputRecipe({ className: 'mine', size: 'medium' })).toBe(`${medium} mine`);
 });
 
 test('an unconditional compoundSlots entry applies to every listed slot and not to unlisted ones', () => {

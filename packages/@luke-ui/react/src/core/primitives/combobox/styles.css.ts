@@ -1,24 +1,14 @@
 import type { StyleRule } from '@vanilla-extract/css';
-import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
-import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
 } from '../../styles/input-states.js';
-import {
-	invalidIndicatorIcon,
-	invalidIndicatorIconForcedColors,
-} from '../../styles/invalid-indicator.js';
 import { overlayEnterTransition, overlayExitTransition } from '../../styles/overlay-motion.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
-
-// Set per `size` variant on `inputGroup` below, from `FIELD_CONTROL_ICON_SIZE`, so the invalid
-// `::after` icon matches the trigger/clear chevrons at each size instead of a constant.
-const comboboxErrorIconSize = createVar();
 
 // React Aria publishes disabled and invalid state on the group, so those states
 // do not need to probe descendants.
@@ -73,12 +63,6 @@ const comboboxActionStyles = {
 	justifyContent: 'center',
 	minBlockSize: vars.controlSize.minTarget,
 	minInlineSize: vars.controlSize.minTarget,
-	// The invalid `::after` icon on `inputGroup` below is its last DOM child (a
-	// pseudo-element always renders after real children), which put it after both
-	// action buttons too. Giving them an explicit `order` moves them behind the icon
-	// (default `order: 0`) in flex layout without touching document order, so the
-	// icon lands right after the text input and before the clear/trigger buttons.
-	order: 1,
 	transform: 'none',
 	transitionDuration: vars.motion.duration.feedback,
 	transitionProperty: 'background-color, color',
@@ -107,11 +91,11 @@ const popoverExitTransition = overlayExitTransition(popoverProperties);
 /**
  * Raw slotted config for the combobox anatomy.
  *
- * Slots follow the anatomy top to bottom: `root`, `inputGroup`, `textInput`,
+ * Slots follow the anatomy top to bottom: `root`, `control`, `textInput`,
  * `trigger`, `clearButton`, `itemCheck`, `popover`, `listBox`, `loadMoreItem`,
  * `section`, `sectionHeading`, `emptyState`, `item`, then the tray-only parts.
  *
- * `inputGroup` and `listBox` use a `presentation` variant for tray styles. `trayTrigger` and
+ * `control` and `listBox` use a `presentation` variant for tray styles. `trayTrigger` and
  * `trayValue` are tray-only slots.
  */
 const comboboxConfig = {
@@ -122,7 +106,7 @@ const comboboxConfig = {
 			inlineSize: '100%',
 			minInlineSize: 0,
 		},
-		inputGroup: {
+		control: {
 			'@media': {
 				'(forced-colors: active)': {
 					backgroundColor: 'Field',
@@ -134,9 +118,6 @@ const comboboxConfig = {
 						[disabled]: { borderColor: 'GrayText', color: 'GrayText', opacity: 1 },
 						[inputFocus]: { outlineColor: 'Highlight' },
 						[invalidInputFocus]: { outlineColor: 'Highlight' },
-						// `invalidFocusWithin` is a strict subset of `invalid` and nothing else
-						// here touches `::after`, so this already covers the focused case.
-						[`${invalid}::after`]: invalidIndicatorIconForcedColors,
 					},
 				},
 				'(prefers-reduced-motion: reduce)': { transition: 'none' },
@@ -171,16 +152,11 @@ const comboboxConfig = {
 					...focusRing(vars.color.border.focus),
 				},
 				[hover]: { borderColor: vars.color.border.accent },
-				// The border stays at the resting 1px here: the in-control icon just below
-				// (`::after`) is the non-colour cue, so thickening the border as well would
-				// be redundant. The gated danger colour is what satisfies the contrast
-				// requirement, and it is unchanged.
+				// The field's error message carries the non-colour invalid cue, so the border keeps
+				// its resting width and only takes the danger colour.
 				[invalid]: {
 					borderColor: vars.color.background.danger.solid.rest,
 				},
-				// `invalidFocusWithin` is a strict subset of `invalid` and nothing else
-				// here touches `::after`, so this already covers the focused case.
-				[`${invalid}::after`]: invalidIndicatorIcon(comboboxErrorIconSize),
 				[invalidInputFocus]: {
 					borderColor: vars.color.background.danger.solid.rest,
 					...focusRing(vars.color.border.focus),
@@ -404,7 +380,7 @@ const comboboxConfig = {
 		presentation: {
 			popover: {},
 			tray: {
-				inputGroup: {
+				control: {
 					flexShrink: 0,
 					inlineSize: 'auto',
 					marginBlock: vars.space.sp12,
@@ -418,10 +394,9 @@ const comboboxConfig = {
 		},
 		size: {
 			medium: {
-				inputGroup: {
+				control: {
 					blockSize: vars.controlSize.medium,
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
-					vars: { [comboboxErrorIconSize]: vars.iconSize[FIELD_CONTROL_ICON_SIZE.medium] },
 				},
 				textInput: {
 					blockSize: vars.controlSize.medium,
@@ -446,12 +421,11 @@ const comboboxConfig = {
 				},
 			},
 			small: {
-				inputGroup: {
+				control: {
 					blockSize: vars.controlSize.small,
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
-					vars: { [comboboxErrorIconSize]: vars.iconSize[FIELD_CONTROL_ICON_SIZE.small] },
 				},
 				textInput: {
 					blockSize: vars.controlSize.small,
@@ -480,7 +454,7 @@ const comboboxConfig = {
 	compoundSlots: [
 		// The trigger and clear button share their action styles and sizes.
 		{ slots: ['trigger', 'clearButton'], style: comboboxActionStyles },
-		// The medium action size gives a 20px icon the same 8px inset as the invalid indicator:
+		// The medium action size gives a 20px icon an 8px inset from the control edge:
 		// (28px − 20px) ÷ 2 + the 4px trigger gap.
 		{
 			slots: ['trigger', 'clearButton'],

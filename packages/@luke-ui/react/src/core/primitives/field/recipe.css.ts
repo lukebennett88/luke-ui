@@ -1,9 +1,6 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
+import { iconMaskUrls } from '../../../../.generated/icon-mask-data.js';
 import { vars } from '../../../theme/contract.css.js';
-import {
-	invalidIndicatorIconForcedColors,
-	invalidMessageIcon,
-} from '../../styles/invalid-indicator.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
@@ -18,29 +15,25 @@ const dataRequiredSelector = '[data-required="true"]';
  */
 export const fieldMessageIndent = createVar();
 
-/**
- * `fieldMessageIndent` with its `0px` fallback pre-applied, computed once so the
- * error message's own hang-indent and the icon box it wraps around
- * (`invalidMessageIcon`) can never disagree about where the text resumes.
- */
-const messageIndent = fallbackVar(fieldMessageIndent, '0px');
+/** Gap between the error icon and the message text that follows it. */
+const errorIconGap = vars.space.sp8;
 
 /**
- * Optional leading icon on the error message, off (`none`) by default. A field
- * recipe whose own control has no room for an in-control invalid icon switches this
- * to `inline-block` on its own `root` slot instead (see `primitives/checkbox/recipe.css.ts`) so its
- * `FieldError` message renders `invalidMessageIcon`. `InputGroup` (as a real `Icon`
- * element) and `Combobox` (via `invalid-indicator.ts`) draw their invalid icon inside
- * the control and never touch this var, so the icon still appears exactly once per
- * field — attached to the control where there is room, beside the message where there
- * is not.
+ * Inline size of the error icon's rail. It is `fieldMessageIndent` less the gap, so the rail plus
+ * the gap spans the indent exactly and the message text starts at the label's inline edge. `max()`
+ * floors the rail at the icon's own size when no indent is set.
  */
-export const fieldMessageIcon = createVar();
+const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px')} - ${errorIconGap}), ${vars.iconSize.xsmall})`;
 
 /**
  * Raw slotted config for the `Field` primitive.
  *
- * Slots: `root` (layout), `label`, and `message` (description/error text).
+ * Slots: `root` (layout), `label`, `message` (description/error text), and `icon` (the error
+ * message's leading icon).
+ *
+ * `FieldError` lays the error `message` out with `trackRecipe`'s `firstLine` rail alignment, which
+ * centres the `icon` rail on the message's first line and keeps wrapped lines aligned with the
+ * text. This recipe supplies the rail's size and glyph.
  */
 const fieldConfig = {
 	slots: {
@@ -66,6 +59,7 @@ const fieldConfig = {
 			fontWeight: vars.font.weight.body,
 			minInlineSize: 0,
 		},
+		icon: {},
 	},
 	defaultVariants: {
 		necessityIndicator: 'icon',
@@ -104,38 +98,21 @@ const fieldConfig = {
 				},
 			},
 			error: {
-				message: {
+				icon: {
 					'@media': {
-						'(forced-colors: active)': {
-							selectors: {
-								'&::before': invalidIndicatorIconForcedColors,
-							},
-						},
+						// `CanvasText` keeps the icon solid when author colours are ignored.
+						'(forced-colors: active)': { backgroundColor: 'CanvasText' },
 					},
+					backgroundColor: vars.color.foreground.danger.rest,
+					inlineSize: errorIconRailInlineSize,
+					maskImage: iconMaskUrls.exclamationTriangle,
+					maskPosition: 'center',
+					maskRepeat: 'no-repeat',
+					maskSize: vars.iconSize.xsmall,
+				},
+				message: {
 					color: vars.color.foreground.danger.rest,
-					// Hanging indent, not `flex`: `errorMessage` is typed `ReactNode` (rich
-					// content, e.g. `<>text <strong>emphasis</strong> text</>`) and RAC's
-					// `FieldError` also accepts a render-prop child, so this recipe cannot
-					// safely wrap the message in a span of its own to make it a single flex
-					// item — a `flex` container instead turns every top-level child into its
-					// own item, each wrapping independently. `paddingInlineStart` reserves
-					// `fieldMessageIndent` (`0px` unless a consumer sets it, e.g. `Checkbox`
-					// aligning its error under its label) on every line, then `textIndent`
-					// pulls the FIRST line back by that same amount so the icon — the line's
-					// first inline content, sized to fill exactly that reserved space by
-					// `invalidMessageIcon` itself — sits in it instead of pushing the text
-					// after it. Wrapped lines keep the padding, so they hang aligned with the
-					// text rather than tucking under the icon. Descriptions omit this indent
-					// so supporting copy starts at the field's inline edge.
-					paddingInlineStart: messageIndent,
-					textIndent: `calc(-1 * ${messageIndent})`,
-
-					selectors: {
-						'&::before': {
-							...invalidMessageIcon(messageIndent),
-							display: fallbackVar(fieldMessageIcon, 'none'),
-						},
-					},
+					gap: errorIconGap,
 				},
 			},
 		},
@@ -145,7 +122,7 @@ const fieldConfig = {
 /**
  * Slotted recipe for the `Field` primitive.
  *
- * `fieldRecipe({ necessityIndicator, tone }).root() / .label() / .message()`.
+ * `fieldRecipe({ necessityIndicator, tone }).root() / .label() / .message() / .icon()`.
  */
 export const fieldRecipe = recipe(fieldConfig);
 
