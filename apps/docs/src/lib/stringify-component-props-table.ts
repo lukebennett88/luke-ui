@@ -79,52 +79,31 @@ function isMdxJsxElement(node: MdastNode): node is MdxJsxElementNode {
 }
 
 function readGeneratedDoc(node: MdxJsxElementNode): GeneratedDoc {
-	const tableId = readTableId(node);
 	const typeAttr = node.attributes.find((attr): attr is MdxJsxAttribute => {
 		return attr.type === 'mdxJsxAttribute' && attr.name === 'type';
 	});
+	const expression =
+		typeAttr?.value !== null &&
+		typeAttr?.value !== undefined &&
+		typeof typeAttr.value !== 'string' &&
+		typeAttr.value.type === 'mdxJsxAttributeValueExpression'
+			? typeAttr.value.value.trim()
+			: undefined;
 
-	if (typeAttr === undefined || typeAttr.value === null || typeAttr.value === undefined) {
+	if (expression === undefined || expression.length === 0) {
 		throw new Error(
-			`${tableId}: processed Markdown requires a \`type\` attribute with GeneratedDoc JSON from remarkAutoTypeTable (remarkStringify).`,
-		);
-	}
-	if (typeof typeAttr.value === 'string') {
-		throw new Error(
-			`${tableId}: processed Markdown expected a \`type={…}\` expression, not a string attribute.`,
-		);
-	}
-	if (typeAttr.value.type !== 'mdxJsxAttributeValueExpression') {
-		throw new Error(`${tableId}: processed Markdown has an unsupported \`type\` attribute shape.`);
-	}
-
-	const raw = typeAttr.value.value.trim();
-	if (raw.length === 0) {
-		throw new Error(
-			`${tableId}: processed Markdown \`type\` attribute is empty; remarkAutoTypeTable should populate GeneratedDoc JSON when remarkStringify is enabled.`,
+			'<ComponentPropsTable>: processed Markdown requires a `type` expression with GeneratedDoc JSON (remarkStringify).',
 		);
 	}
 
 	try {
-		return JSON.parse(raw) as GeneratedDoc;
+		return JSON.parse(expression) as GeneratedDoc;
 	} catch (cause) {
 		throw new Error(
-			`${tableId}: processed Markdown \`type\` attribute is not valid GeneratedDoc JSON.`,
-			{
-				cause,
-			},
+			'<ComponentPropsTable>: processed Markdown `type` attribute is not valid GeneratedDoc JSON.',
+			{ cause },
 		);
 	}
-}
-
-function readTableId(node: MdxJsxElementNode): string {
-	const idAttr = node.attributes.find((attr): attr is MdxJsxAttribute => {
-		return attr.type === 'mdxJsxAttribute' && attr.name === 'id';
-	});
-	if (idAttr !== undefined && typeof idAttr.value === 'string' && idAttr.value.length > 0) {
-		return `<ComponentPropsTable id="${idAttr.value}">`;
-	}
-	return '<ComponentPropsTable>';
 }
 
 function parseTags(tags: GeneratedDoc['entries'][number]['tags']): { default?: string } {

@@ -61,6 +61,8 @@ export default defineConfig({
 					name: 'component-props-table',
 					options: { basePath: repoRoot },
 					outputName: 'ComponentPropsTable',
+					// Processed Markdown reads GeneratedDoc JSON from the `type` attribute.
+					remarkStringify: true,
 				},
 			],
 			remarkValidateExamples,

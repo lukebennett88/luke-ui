@@ -46,7 +46,7 @@ test('stringify throws when ComponentPropsTable has no GeneratedDoc JSON on `typ
 			name: 'ComponentPropsTable',
 			type: 'mdxJsxFlowElement',
 		} as { type: string }),
-	).toThrow(/requires a `type` attribute with GeneratedDoc JSON/);
+	).toThrow(/requires a `type` expression with GeneratedDoc JSON/);
 });
 
 test('stringify throws when ComponentPropsTable `type` is not valid GeneratedDoc JSON', () => {
