@@ -23,8 +23,11 @@
 ## Dev loop
 
 - Run `pnpm run check` from the repo root before committing. `check` covers barrels, format, lint,
-  types, and docs but **not** tests. Run `pnpm run test` separately. `test.yml` runs component and
-  docs tests; visual regression has its own workflow.
+  types, and docs but **not** tests. Run `pnpm run test` separately. `test.yml` runs component,
+  docs, and consumer tests. Visual regression has its own workflow.
+- Run `pnpm run test:consumer` when a change touches the published package, its dependencies, or its
+  exports. It packs the workspace build and installs it with npm outside the repository. Those
+  installs need network access, so `pnpm run test` leaves it out.
 - Component prose lives in MDX files in `apps/docs/content/docs/`, not `.docs.md` files in the
   package. Update the relevant MDX page in the same change as component code.
 - Do not add or edit `.docs.md` files in `packages/@luke-ui/react/src/`.

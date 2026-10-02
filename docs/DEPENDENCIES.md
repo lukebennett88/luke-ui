@@ -46,16 +46,32 @@ an entry, run `pnpm install`, and keep the deletion if the install succeeds.
 update can make an entry unnecessary or wrong, and only a maintainer reading the failure will
 notice.
 
+## Runtime dependencies
+
+Every consumer installs the `dependencies` of `@luke-ui/react`. Declare a package there only when
+the published JavaScript or declarations import it. Keep build-time packages in `devDependencies`.
+The packed-consumer harness in [TESTING.md](TESTING.md#package-consumption) fails on an undeclared
+import or an unused dependency.
+
+Prefer declaring a dependency to bundling it. Bundle one only for a concrete reason, such as
+published code that needs a small part of a package whose install would cost consumers far more than
+that part. To bundle a dependency, list it in `devDependencies` and in `deps.onlyBundle` in
+`packages/@luke-ui/react/vite.config.ts`. The build fails when it bundles a package that
+`deps.onlyBundle` does not list. It records each bundled version in `inlinedDependencies` in
+`package.json`.
+
 ## Changesets
 
 `@luke-ui/react` is unpublished at version `0.0.0`. `@luke-ui/rainbow-sprinkles` is a publishable
 0.x support package used by `@luke-ui/react` at runtime. It is not part of the stable Luke UI 1.x
-consumer API. `apps/docs` and `@luke-ui/playground-core` are private. Before `1.0.0` no pull request
+consumer API. Publish it with React whenever React depends on a Rainbow version that is not yet on
+the registry. `apps/docs` and `@luke-ui/playground-core` are private. Before `1.0.0` no pull request
 needs a changeset, including one that moves a runtime or peer dependency.
 
 The `needs-changeset` label in `.github/renovate.json5` is advance notice. It marks packages that
-will be runtime or peer dependencies of the published package at `1.0.0`. Re-sync that list against
-`dependencies` and `peerDependencies` in `packages/@luke-ui/react/package.json` at `1.0.0`.
+will be runtime, peer, or bundled dependencies of the published package at `1.0.0`. Re-sync that
+list against `dependencies`, `peerDependencies`, and `inlinedDependencies` in
+`packages/@luke-ui/react/package.json` at `1.0.0`.
 
 `react` and `react-dom` use `rangeStrategy: 'replace'` rather than `bump`, so the catalog range only
 widens when the caret stops covering the new version. The catalog range is what gets published as

@@ -1,5 +1,5 @@
 import { Text as RacText } from 'react-aria-components/Text';
-import { typeStyleWeightRole } from '../../theme/contract.js';
+import { typeStyleWeightRole } from '../../theme/type-styles.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';

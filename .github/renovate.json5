@@ -149,15 +149,20 @@
 			automerge: true,
 		},
 		{
-			// Runtime and peer dependencies of unpublished @luke-ui/react. The label is advance notice
-			// until 1.0.0, when a bump here needs a changeset. Keep in step with `dependencies` and
-			// `peerDependencies` in packages/@luke-ui/react/package.json.
+			// Runtime, peer, and bundled dependencies of unpublished @luke-ui/react. The label is advance
+			// notice until 1.0.0, when a bump here needs a changeset. Keep in step with `dependencies`,
+			// `peerDependencies`, and `inlinedDependencies` in packages/@luke-ui/react/package.json.
 			matchPackageNames: [
+				'@capsizecss/core',
 				'@capsizecss/metrics',
 				'@react-aria/utils',
+				'@vanilla-extract/dynamic',
+				'@vanilla-extract/recipes',
+				'csstype',
 				'react',
 				'react-aria-components',
 				'react-dom',
+				'spin-doctor',
 			],
 			addLabels: ['needs-changeset'],
 			automerge: false,

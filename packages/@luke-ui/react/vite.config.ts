@@ -32,6 +32,7 @@ const sourceModule = /\.[cm]?[jt]sx?$/;
 /** Vanilla Extract compiles these to plain style declarations before the plugin sees them. */
 const vanillaExtractStyles = /\.css\.ts$/;
 const dependency = /\/node_modules\//;
+const VANILLA_EXTRACT_CSS_PATTERN = /^@vanilla-extract\/css(?:\/|$)/;
 
 export default defineConfig({
 	pack: {
@@ -46,7 +47,12 @@ export default defineConfig({
 			profile: 'esm-only',
 		},
 		deps: {
-			neverBundle: Object.keys(packageJson.peerDependencies),
+			// Vanilla Extract is build-time only. Keep any stray reference external rather than bundling
+			// it, so the packed-consumer harness reports it as an undeclared import.
+			neverBundle: [...Object.keys(packageJson.peerDependencies), VANILLA_EXTRACT_CSS_PATTERN],
+			// `defineTheme` reads metrics only for its curated font families. Bundling those keeps the
+			// full metrics collection out of consumer installs.
+			onlyBundle: ['@capsizecss/metrics'],
 		},
 		dts: true,
 		entry: {

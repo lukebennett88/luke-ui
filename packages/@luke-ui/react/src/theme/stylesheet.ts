@@ -4,16 +4,9 @@
  * values already resolved for them into the emitted stylesheet's rule blocks.
  */
 
-import { precomputeValues } from '@capsizecss/vanilla-extract';
-import {
-	flattenThemeContract,
-	partitionContractPairs,
-	spaceScale,
-	typeStyles,
-	typeStyleMetricStep,
-	typeStyleWeightRole,
-} from './contract.js';
-import type { IdentityPath, ModePath, SpaceStep, TypeStyle } from './contract.js';
+import { precomputeValues } from '@capsizecss/core';
+import { flattenThemeContract, partitionContractPairs, spaceScale } from './contract.js';
+import type { IdentityPath, ModePath, SpaceStep } from './contract.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import type { ThemeFoundation } from './foundation.js';
 import {
@@ -34,6 +27,8 @@ import {
 	INTERACTION_VALUES,
 	MOTION_VALUES,
 } from './token-values.js';
+import type { TypeStyle } from './type-styles.js';
+import { typeStyleMetricStep, typeStyles, typeStyleWeightRole } from './type-styles.js';
 
 type ColorMode = 'light' | 'dark';
 

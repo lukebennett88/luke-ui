@@ -6,11 +6,11 @@ import {
 	partitionContractPairs,
 	spaceScale,
 	themeContractTree,
-	typeStyles,
 } from './contract.js';
 import type { IdentityPath, ModePath } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
+import { typeStyles } from './type-styles.js';
 
 function countLeaves(node: unknown): number {
 	if (typeof node === 'string') return 1;

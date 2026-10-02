@@ -33,9 +33,10 @@ Stable entry points:
 
 - Stylesheet graph: `core/styles/index.css.ts`
 - Modules registry: `core/styles/modules.css.ts`
-- Recipe engine: `core/styles/recipe.ts`
+- Recipe engine: `core/styles/recipe.ts` for authoring, `core/styles/recipe-engine.ts` for the
+  runtime that components import
 - Layer helpers: `core/styles/layered-style.css.ts`
-- Token contract: `theme/contract.ts` and `theme/contract.css.ts`
+- Token contract: `theme/contract.ts`, `theme/contract.css.ts`, and `theme/type-styles.ts`
 - Theme authoring: `theme/define-theme.ts`
 - Colour pipeline: [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md)
 

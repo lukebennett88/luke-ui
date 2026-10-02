@@ -1,8 +1,8 @@
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
-import type { FontWeightRole, TypeStyle } from '../../theme/contract.js';
-import { fontWeightRoles, typeStyles } from '../../theme/contract.js';
+import type { FontWeightRole, TypeStyle } from '../../theme/type-styles.js';
+import { fontWeightRoles, typeStyles } from '../../theme/type-styles.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 import { visuallyHiddenStyle } from '../visually-hidden/recipe.css.js';
