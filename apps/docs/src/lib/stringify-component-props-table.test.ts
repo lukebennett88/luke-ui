@@ -1,145 +1,34 @@
-import type { GeneratedDoc } from 'fumadocs-typescript';
+import { loader } from 'fumadocs-core/source';
 import { expect, test } from 'vite-plus/test';
+import { docs as docsCollection } from '../../.source/server.js';
 import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
-import {
-	generatedDocToMarkdown,
-	stringifyComponentPropsTable,
-} from './stringify-component-props-table.js';
+import { stringifyComponentPropsTable } from './stringify-component-props-table.js';
 
-function entry(
-	partial: Partial<GeneratedDoc['entries'][number]> & Pick<GeneratedDoc['entries'][number], 'name'>,
-): GeneratedDoc['entries'][number] {
-	return {
-		deprecated: false,
-		description: '',
-		required: true,
-		simplifiedType: 'string',
-		tags: [],
-		type: 'string',
-		...partial,
-	};
-}
+const source = loader({
+	baseUrl: '/',
+	source: docsCollection.toFumadocsSource(),
+});
 
-test('stringifies ComponentPropsTable from GeneratedDoc JSON into a Markdown props table', () => {
-	const doc: GeneratedDoc = {
-		description: 'Props for `Button`.',
-		entries: [
-			entry({
-				description: 'Visual style of the control.',
-				name: 'appearance',
-				required: false,
-				simplifiedType: 'union',
-				type: '"button" | "text"',
-			}),
-			entry({
-				description: 'Called when the button is pressed.',
-				name: 'onPress',
-				simplifiedType: 'function',
-				type: '(e: PressEvent) => void',
-			}),
-			entry({
-				description:
-					'`ButtonProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
-				name: NATIVE_PROPS_FORWARDING_KEY,
-				simplifiedType: '',
-				type: '',
-			}),
-		],
-		id: 'button.tsx-ButtonProps',
-		name: 'ButtonProps',
-	};
+test('component-props-table through Fumadocs MDX becomes processed Markdown props tables', async () => {
+	const page = source.getPage(['components', 'actions', 'button']);
+	expect(page).toBeDefined();
 
-	const markdown = stringifyComponentPropsTable({
-		attributes: [
-			{
-				name: 'id',
-				type: 'mdxJsxAttribute',
-				value: 'type-table-button.tsx-ButtonProps',
-			},
-			{
-				name: 'type',
-				type: 'mdxJsxAttribute',
-				value: {
-					type: 'mdxJsxAttributeValueExpression',
-					value: JSON.stringify(doc, null, 2),
-				},
-			},
-		],
-		name: 'ComponentPropsTable',
-		type: 'mdxJsxFlowElement',
-	} as { type: string });
+	const processed = await page!.data.getText('processed');
+	const api = processed.slice(processed.indexOf('## API'));
 
-	expect(markdown).toBe(generatedDocToMarkdown(doc));
-	expect(markdown).toContain('### ButtonProps');
-	expect(markdown).toContain('Props for `Button`.');
-	expect(markdown).toContain(
+	expect(api).toContain('### ButtonProps');
+	expect(api).toContain('| Prop');
+	expect(api).toContain('`appearance?`');
+	expect(api).toContain(
 		'`ButtonProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
 	);
-	expect(markdown).toContain('| Prop');
-	expect(markdown).toContain('| Type');
-	expect(markdown).toContain('| Description');
-	expect(markdown).toContain('`appearance?`');
-	expect(markdown).toContain('`union`');
-	expect(markdown).toContain('`onPress`');
-	expect(markdown).not.toContain(NATIVE_PROPS_FORWARDING_KEY);
-	expect(markdown).not.toContain('<ComponentPropsTable');
+	expect(api).not.toContain('ComponentPropsTable');
+	expect(api).not.toContain('<component-props-table');
+	expect(api).not.toContain('"entries"');
+	expect(api).not.toContain(NATIVE_PROPS_FORWARDING_KEY);
 });
 
-test('emits the native-props note as prose and omits an empty props table', () => {
-	const markdown = generatedDocToMarkdown({
-		entries: [
-			entry({
-				description:
-					'`KbdProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
-				name: NATIVE_PROPS_FORWARDING_KEY,
-				simplifiedType: '',
-				type: '',
-			}),
-		],
-		id: 'kbd.tsx-KbdProps',
-		name: 'KbdProps',
-	});
-
-	expect(markdown).toBe(
-		[
-			'### KbdProps',
-			'',
-			'`KbdProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
-		].join('\n'),
-	);
-	expect(markdown).not.toContain('| Prop');
-	expect(markdown).not.toContain(NATIVE_PROPS_FORWARDING_KEY);
-});
-
-test('appends default values and marks deprecated props like Fumadocs', () => {
-	const markdown = generatedDocToMarkdown({
-		entries: [
-			entry({
-				deprecated: true,
-				description: 'Legacy size token.',
-				name: 'legacySize',
-				required: false,
-				simplifiedType: '"sm" | "md"',
-				tags: [{ name: 'defaultValue', text: '"md"' }],
-				type: '"sm" | "md"',
-			}),
-		],
-		id: 'demo.tsx-DemoProps',
-		name: 'DemoProps',
-	});
-
-	expect(markdown).toContain('`legacySize?`');
-	expect(markdown).toContain('**Deprecated.** Legacy size token. Default: `"md"`');
-});
-
-test('leaves unrelated JSX nodes for the default stringifier', () => {
-	expect(
-		stringifyComponentPropsTable({
-			attributes: [],
-			name: 'TypeTable',
-			type: 'mdxJsxFlowElement',
-		} as { type: string }),
-	).toBeUndefined();
+test('stringify leaves unrelated nodes to the default Fumadocs stringifier', () => {
 	expect(
 		stringifyComponentPropsTable({
 			attributes: [],
@@ -150,8 +39,18 @@ test('leaves unrelated JSX nodes for the default stringifier', () => {
 	expect(stringifyComponentPropsTable({ type: 'paragraph' })).toBeUndefined();
 });
 
-test('returns undefined when the type attribute is not GeneratedDoc JSON', () => {
-	expect(
+test('stringify throws when ComponentPropsTable has no GeneratedDoc JSON on `type`', () => {
+	expect(() =>
+		stringifyComponentPropsTable({
+			attributes: [],
+			name: 'ComponentPropsTable',
+			type: 'mdxJsxFlowElement',
+		} as { type: string }),
+	).toThrow(/requires a `type` attribute with GeneratedDoc JSON/);
+});
+
+test('stringify throws when ComponentPropsTable `type` is not valid GeneratedDoc JSON', () => {
+	expect(() =>
 		stringifyComponentPropsTable({
 			attributes: [
 				{
@@ -166,5 +65,5 @@ test('returns undefined when the type attribute is not GeneratedDoc JSON', () =>
 			name: 'ComponentPropsTable',
 			type: 'mdxJsxFlowElement',
 		} as { type: string }),
-	).toBeUndefined();
+	).toThrow(/not valid GeneratedDoc JSON/);
 });

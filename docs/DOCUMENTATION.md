@@ -437,10 +437,6 @@ accurate to the type without a generation step. A guide with one table has no ex
 it. A guide with several tables adds a `### <TypeName>` heading above each one, in the order they
 appear.
 
-Per-page `.md` and `llms-full.txt` stringify each expanded `ComponentPropsTable` into a Markdown
-props table (heading, optional native-props note, then Prop / Type / Description rows). That path
-does not change the HTML table UI.
-
 The prose on a table comes from JSDoc in the component's source, so a prop is documented where it is
 declared. When a type still accepts arbitrary DOM and ARIA attributes and event handlers, the table
 renders that note automatically. Do not write the note by hand.

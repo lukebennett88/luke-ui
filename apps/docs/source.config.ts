@@ -17,8 +17,6 @@ export const docs = defineDocs({
 	dir: 'content/docs',
 	docs: {
 		postprocess: {
-			// `stringify` rewrites LLM-facing markdown only; it never touches the AST rendered pages
-			// use. Example blocks become fenced source; ComponentPropsTable becomes a Markdown table.
 			includeProcessedMarkdown: {
 				stringify: (node) => inlineExampleSource(node) ?? stringifyComponentPropsTable(node),
 			},

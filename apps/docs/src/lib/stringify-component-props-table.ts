@@ -1,7 +1,6 @@
 import type { GeneratedDoc } from 'fumadocs-typescript';
 import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
 
-/** Minimal shape of an mdast node, enough to narrow to an MDX JSX element. */
 interface MdastNode {
 	type: string;
 }
@@ -30,25 +29,13 @@ interface MdxJsxElementNode {
 
 const JSDOC_LINK_PATTERN = /{@link (?<link>[^}]*)}/g;
 
-/**
- * `stringify` hook for `remarkLLMs` that turns `<ComponentPropsTable>` into a Markdown props table
- * for `.md` / `llms-full.txt` output. Uses the GeneratedDoc JSON already stored on the `type`
- * attribute by `remarkAutoTypeTable` (`remarkStringify`). Returns `undefined` for any other node.
- */
+/** remarkLLMs `stringify` hook for expanded `<ComponentPropsTable>` nodes. */
 export function stringifyComponentPropsTable(node: MdastNode): string | undefined {
 	if (!isMdxJsxElement(node) || node.name !== 'ComponentPropsTable') return undefined;
-
-	const doc = readGeneratedDoc(node);
-	if (doc === undefined) return undefined;
-
-	return generatedDocToMarkdown(doc);
+	return generatedDocToMarkdown(readGeneratedDoc(node));
 }
 
-/**
- * Serializes one GeneratedDoc the way Fumadocs Sätteri's remark-auto-type-table does, adapted for
- * Luke UI's reserved native-props forwarding entry (prose, never a prop row).
- */
-export function generatedDocToMarkdown(doc: GeneratedDoc): string {
+function generatedDocToMarkdown(doc: GeneratedDoc): string {
 	const rows: Array<[string, string, string]> = [['Prop', 'Type', 'Description']];
 	let nativePropsNote: string | undefined;
 
@@ -91,28 +78,53 @@ function isMdxJsxElement(node: MdastNode): node is MdxJsxElementNode {
 	return node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement';
 }
 
-function readGeneratedDoc(node: MdxJsxElementNode): GeneratedDoc | undefined {
+function readGeneratedDoc(node: MdxJsxElementNode): GeneratedDoc {
+	const tableId = readTableId(node);
 	const typeAttr = node.attributes.find((attr): attr is MdxJsxAttribute => {
 		return attr.type === 'mdxJsxAttribute' && attr.name === 'type';
 	});
+
 	if (typeAttr === undefined || typeAttr.value === null || typeAttr.value === undefined) {
-		return undefined;
+		throw new Error(
+			`${tableId}: processed Markdown requires a \`type\` attribute with GeneratedDoc JSON from remarkAutoTypeTable (remarkStringify).`,
+		);
 	}
-	if (
-		typeof typeAttr.value === 'string' ||
-		typeAttr.value.type !== 'mdxJsxAttributeValueExpression'
-	) {
-		return undefined;
+	if (typeof typeAttr.value === 'string') {
+		throw new Error(
+			`${tableId}: processed Markdown expected a \`type={…}\` expression, not a string attribute.`,
+		);
+	}
+	if (typeAttr.value.type !== 'mdxJsxAttributeValueExpression') {
+		throw new Error(`${tableId}: processed Markdown has an unsupported \`type\` attribute shape.`);
 	}
 
 	const raw = typeAttr.value.value.trim();
-	if (raw.length === 0) return undefined;
+	if (raw.length === 0) {
+		throw new Error(
+			`${tableId}: processed Markdown \`type\` attribute is empty; remarkAutoTypeTable should populate GeneratedDoc JSON when remarkStringify is enabled.`,
+		);
+	}
 
 	try {
 		return JSON.parse(raw) as GeneratedDoc;
-	} catch {
-		return undefined;
+	} catch (cause) {
+		throw new Error(
+			`${tableId}: processed Markdown \`type\` attribute is not valid GeneratedDoc JSON.`,
+			{
+				cause,
+			},
+		);
 	}
+}
+
+function readTableId(node: MdxJsxElementNode): string {
+	const idAttr = node.attributes.find((attr): attr is MdxJsxAttribute => {
+		return attr.type === 'mdxJsxAttribute' && attr.name === 'id';
+	});
+	if (idAttr !== undefined && typeof idAttr.value === 'string' && idAttr.value.length > 0) {
+		return `<ComponentPropsTable id="${idAttr.value}">`;
+	}
+	return '<ComponentPropsTable>';
 }
 
 function parseTags(tags: GeneratedDoc['entries'][number]['tags']): { default?: string } {
@@ -125,7 +137,6 @@ function parseTags(tags: GeneratedDoc['entries'][number]['tags']): { default?: s
 	return typed;
 }
 
-/** Rows as an aligned Markdown table, first row header. Newlines collapse; `|` is escaped. */
 function formatTable(rows: ReadonlyArray<ReadonlyArray<string>>): string {
 	const cells: Array<Array<string>> = [];
 	const widths: Array<number> = [];
