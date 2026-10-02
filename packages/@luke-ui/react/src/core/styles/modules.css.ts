@@ -1,7 +1,7 @@
 // Modules that produce the shipped stylesheet. Named layers set cross-layer priority. Within a
 // layer, later equal-specificity rules win. Put overridden modules first — for example
 // `text/recipe.css` before `code/recipe.css` and `kbd/recipe.css`, so their concrete fonts beat
-// `shouldInheritFont`'s `inherit`. Inherited custom properties (for example `fieldMessageIndent`)
+// `shouldInheritFont`'s `inherit`. Inherited custom properties (for example `inlineFieldIndent`)
 // ignore source order. Generators append imports; they do not sort this list.
 import '../primitives/button/recipe.css.js';
 import '../primitives/field/recipe.css.js';

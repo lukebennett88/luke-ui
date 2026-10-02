@@ -478,9 +478,10 @@ test('the Checkbox scene has no axe violations', async () => {
 	await expectNoAxeViolations(container);
 });
 
-// The invalid icon is an `aria-hidden` element inside `FieldError`, not part of `content` (the
-// native `<label>` wrapping the hidden input, which otherwise takes its name from its contents),
-// so there is nothing on the label itself for accessible-name computation to pick up. Checked via CDP against the browser's own accname
+// The invalid icon lives on the error message, not on `content` (the native
+// `<label>` wrapping the hidden input, which otherwise takes its name from its
+// contents), so there is nothing on the label itself for accessible-name
+// computation to pick up. Checked via CDP against the browser's own accname
 // computation, not Vitest browser mode's locator engine or the
 // `dom-accessibility-api` package behind `toHaveAccessibleName` — both are JS
 // reimplementations of the accname algorithm that can diverge from a real
