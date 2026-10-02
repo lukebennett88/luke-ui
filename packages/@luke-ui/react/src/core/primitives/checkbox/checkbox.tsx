@@ -1,4 +1,4 @@
-import type { ComponentProps, JSX } from 'react';
+import type { ComponentProps, JSX, Ref } from 'react';
 import type {
 	CheckboxButtonProps as RacCheckboxButtonProps,
 	CheckboxFieldProps as RacCheckboxFieldProps,
@@ -7,24 +7,40 @@ import {
 	CheckboxButton as RacCheckboxButton,
 	CheckboxField as RacCheckboxField,
 } from 'react-aria-components/Checkbox';
+import { TextContext as RacTextContext } from 'react-aria-components/Text';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import type { FieldNecessityIndicator } from '../field/recipe.css.js';
+import { rootIdProps } from '../root-id.js';
 import type { CheckboxRecipeVariants } from './recipe.css.js';
 import { checkboxRecipe } from './recipe.css.js';
 
-type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children'>;
+type _CheckboxRootOmit = DistributiveOmit<
+	RacCheckboxFieldProps,
+	'children' | 'className' | 'id' | 'inputRef' | 'render'
+>;
 
-interface _CheckboxProps extends _CheckboxOmit {
-	/** Checkbox anatomy, including clickable `CheckboxContent`. */
+interface _CheckboxRootProps extends _CheckboxRootOmit {
+	/** Checkbox anatomy: `CheckboxContent`, plus a description and error such as `InlineField`. */
 	children: RacCheckboxFieldProps['children'];
+	/** Class name for the root element. */
+	className?: RacCheckboxFieldProps['className'];
 	/** Initial selection state for an uncontrolled checkbox. */
 	defaultSelected?: RacCheckboxFieldProps['defaultSelected'];
+	/** The `<form>` element to associate the input with, by id. */
+	form?: RacCheckboxFieldProps['form'];
+	/** Element id for the root element. Use `inputId` for the input. */
+	id?: string;
+	/** Element id for the input. */
+	inputId?: RacCheckboxFieldProps['id'];
+	/** Forwarded to the underlying `<input type="checkbox">` element. */
+	inputRef?: RacCheckboxFieldProps['inputRef'];
 	/** Whether the checkbox is disabled. */
 	isDisabled?: RacCheckboxFieldProps['isDisabled'];
 	/** Whether the checkbox displays a mixed selection state. */
 	isIndeterminate?: RacCheckboxFieldProps['isIndeterminate'];
-	/** Whether the checkbox is invalid. */
+	/** Marks the checkbox invalid, for example after failed validation. */
 	isInvalid?: RacCheckboxFieldProps['isInvalid'];
 	/** Whether the checkbox can be read but not changed. */
 	isReadOnly?: RacCheckboxFieldProps['isReadOnly'];
@@ -32,48 +48,104 @@ interface _CheckboxProps extends _CheckboxOmit {
 	isRequired?: RacCheckboxFieldProps['isRequired'];
 	/** Whether the checkbox is selected. */
 	isSelected?: RacCheckboxFieldProps['isSelected'];
+	/** The name of the input, used when submitting an HTML form. */
+	name?: RacCheckboxFieldProps['name'];
 	/** Called when the selection changes. */
 	onChange?: RacCheckboxFieldProps['onChange'];
+	/** Forwarded to the root element. */
+	ref?: Ref<HTMLDivElement>;
 	/**
 	 * Visual size of the checkbox control.
 	 *
 	 * @default 'medium'
 	 */
 	size?: CheckboxRecipeVariants['size'];
+	/** Custom validation function run against the selection. Return a message, or `true`/`null` when valid. */
+	validate?: RacCheckboxFieldProps['validate'];
+	/**
+	 * When native HTML form validation runs.
+	 * @default 'native'
+	 */
+	validationBehavior?: RacCheckboxFieldProps['validationBehavior'];
+	/** The value submitted with an HTML form when the checkbox is selected. */
+	value?: RacCheckboxFieldProps['value'];
 }
 
-/** Props for the Checkbox primitive root. */
-export type CheckboxProps = Prettify<_CheckboxProps>;
+/** Props for `CheckboxRoot`. */
+export type CheckboxRootProps = Prettify<_CheckboxRootProps>;
 
 type _CheckboxContentOmit = DistributiveOmit<RacCheckboxButtonProps, 'children'>;
 
 interface _CheckboxContentProps extends _CheckboxContentOmit {
-	/** The control, indicator, and visible checkbox label. */
+	/** `CheckboxControl` plus textual, non-interactive label content such as `CheckboxLabel`. */
 	children: RacCheckboxButtonProps['children'];
 }
 
-/** Props for the Checkbox primitive's clickable content. */
+/** Props for `CheckboxContent`. */
 export type CheckboxContentProps = Prettify<_CheckboxContentProps>;
 
 interface _CheckboxControlProps extends ComponentProps<'span'> {}
 
-/** Props for the Checkbox primitive's control wrapper. */
+/** Props for `CheckboxControl`. */
 export type CheckboxControlProps = Prettify<_CheckboxControlProps>;
+
+interface _CheckboxLabelProps extends ComponentProps<'span'> {
+	/**
+	 * How a required checkbox is marked.
+	 * @default 'icon'
+	 */
+	necessityIndicator?: FieldNecessityIndicator;
+}
+
+/** Props for `CheckboxLabel`. */
+export type CheckboxLabelProps = Prettify<_CheckboxLabelProps>;
 
 interface _CheckboxIndicatorProps extends ComponentProps<'span'> {}
 
-/** Props for the Checkbox primitive's visual indicator. */
+/** Props for `CheckboxIndicator`. */
 export type CheckboxIndicatorProps = Prettify<_CheckboxIndicatorProps>;
 
-/** Clickable content that keeps the checkbox input and label associated. */
-export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
+/**
+ * Semantic root for a checkbox. It owns the selection, state, validation, and size.
+ *
+ * `id` targets the root element. `inputId` targets the input.
+ */
+export function CheckboxRoot(props: CheckboxRootProps): JSX.Element {
+	const { className, id, inputId, size, ...restProps } = props;
+
 	return (
-		<RacCheckboxButton
-			{...props}
-			className={composeRenderProps(props.className, (className) => {
-				return checkboxRecipe().content({ className });
+		<RacCheckboxField
+			{...restProps}
+			{...rootIdProps(id, inputId)}
+			className={composeRenderProps(className, (className) => {
+				return checkboxRecipe({ size }).root({ className });
 			})}
 		/>
+	);
+}
+
+/**
+ * The native `<label>` for the checkbox, holding `CheckboxControl` and `CheckboxLabel`. Place links
+ * and buttons outside it.
+ */
+export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
+	const { children, className, ...restProps } = props;
+
+	// React Aria provides slotted `Text` context for the description and error, so a `Text` without a
+	// `slot` throws. The label has no slot, so clear the context for everything inside it.
+	const labelChildren = composeRenderProps(children, (resolved) => (
+		<RacTextContext.Provider value={null}>{resolved}</RacTextContext.Provider>
+	));
+
+	return (
+		<RacCheckboxButton
+			{...restProps}
+			className={composeRenderProps(className, (className) => {
+				return checkboxRecipe().content({ className });
+			})}
+		>
+			{labelChildren}
+		</RacCheckboxButton>
 	);
 }
 
@@ -83,22 +155,18 @@ export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
 	return <span {...restProps} className={checkboxRecipe().control({ className })} />;
 }
 
+/**
+ * The visible label. When the root is required, it draws the marker after its last inline content.
+ */
+export function CheckboxLabel(props: CheckboxLabelProps): JSX.Element {
+	const { className, necessityIndicator, ...restProps } = props;
+	return (
+		<span {...restProps} className={checkboxRecipe({ necessityIndicator }).label({ className })} />
+	);
+}
+
 /** Visual square that reflects selected, indeterminate, disabled, and invalid states. */
 export function CheckboxIndicator(props: CheckboxIndicatorProps): JSX.Element {
 	const { className, ...restProps } = props;
 	return <span {...restProps} aria-hidden className={checkboxRecipe().indicator({ className })} />;
-}
-
-/** Checkbox field primitive for custom composition. */
-export function Checkbox(props: CheckboxProps): JSX.Element {
-	const { className, size, ...restProps } = props;
-
-	return (
-		<RacCheckboxField
-			{...restProps}
-			className={composeRenderProps(className, (className) => {
-				return checkboxRecipe({ size }).root({ className });
-			})}
-		/>
-	);
 }

@@ -12,31 +12,54 @@ application forms, use [`Checkbox`](/components/forms/checkbox).
 
 ## Anatomy
 
-`Checkbox` is the React Aria field root. `CheckboxContent` is the clickable label and must contain
-`CheckboxControl`, which centres `CheckboxIndicator`. Place visible label content beside the control
-inside `CheckboxContent`. Use `FieldDescription` and `FieldError` as siblings of `CheckboxContent`
-for the standard supporting and validation semantics.
+`CheckboxRoot` is the semantic root. It owns the selection, state, validation, form, and size props.
+`CheckboxContent` is the native `<label>`. It holds `CheckboxControl`, which centres
+`CheckboxIndicator`, and `CheckboxLabel`. Put the control before the label.
+
+`id`, `className`, and `ref` target the root element. `inputId` and `inputRef` target the input.
+
+## Description and error
+
+Wrap `CheckboxContent` in [`InlineField`](/components/primitives/field) to add a `description` and
+an `errorMessage`. The `errorMessage` shows while the root is invalid.
 
 ```tsx
-<Checkbox isInvalid>
-	<CheckboxContent>
-		<CheckboxControl>
-			<CheckboxIndicator />
-		</CheckboxControl>
-		Email notifications
-	</CheckboxContent>
-	<FieldDescription>Receive updates by email.</FieldDescription>
-	<FieldError>Choose a notification preference before you continue.</FieldError>
-</Checkbox>
+<CheckboxRoot isInvalid>
+	<InlineField description="Receive updates by email." errorMessage="Choose an option.">
+		<CheckboxContent>
+			<CheckboxControl>
+				<CheckboxIndicator />
+			</CheckboxControl>
+			<CheckboxLabel>Email notifications</CheckboxLabel>
+		</CheckboxContent>
+	</InlineField>
+</CheckboxRoot>
 ```
+
+For a custom arrangement, place `FieldDescription` and `FieldError` inside the root instead of
+`InlineField`.
+
+## Labels
+
+The label is part of a native `<label>`, so it takes textual content only. Place links and buttons
+outside `CheckboxContent`.
+
+To name a checkbox without a visible label, omit `CheckboxLabel` and pass `aria-labelledby` or
+`aria-label` to the root.
+
+## Required marker
+
+When the root is required, `CheckboxLabel` draws a marker after its final inline content.
+`necessityIndicator="icon"`, the default, adds an asterisk. `necessityIndicator="label"` appends
+“(required)”. Raw text placed directly in `CheckboxContent` gets no marker.
 
 ## API
 
-### CheckboxProps
+### CheckboxRootProps
 
 <component-props-table
 	path="packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx"
-	name="CheckboxProps"
+	name="CheckboxRootProps"
 />
 
 ### CheckboxContentProps
@@ -51,6 +74,13 @@ for the standard supporting and validation semantics.
 <component-props-table
 	path="packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx"
 	name="CheckboxControlProps"
+/>
+
+### CheckboxLabelProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx"
+	name="CheckboxLabelProps"
 />
 
 ### CheckboxIndicatorProps

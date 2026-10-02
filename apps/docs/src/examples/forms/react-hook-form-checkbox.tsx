@@ -32,12 +32,11 @@ export default () => {
 									errorMessage={fieldState.error?.message}
 									inputRef={field.ref}
 									isSelected={field.value}
+									label="I accept the terms of service"
 									onBlur={field.onBlur}
 									onChange={field.onChange}
 									validationBehavior="aria"
-								>
-									I accept the terms of service
-								</Checkbox>
+								/>
 							</Stack>
 						)}
 					/>

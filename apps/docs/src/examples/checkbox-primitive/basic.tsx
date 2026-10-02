@@ -1,22 +1,20 @@
 import {
-	Checkbox,
 	CheckboxContent,
 	CheckboxControl,
 	CheckboxIndicator,
+	CheckboxLabel,
+	CheckboxRoot,
 } from '@luke-ui/react/primitives/checkbox';
-import { FieldDescription, FieldError } from '@luke-ui/react/primitives/field';
 
 export default () => {
 	return (
-		<Checkbox isInvalid>
+		<CheckboxRoot>
 			<CheckboxContent>
 				<CheckboxControl>
 					<CheckboxIndicator />
 				</CheckboxControl>
-				Email notifications
+				<CheckboxLabel>Example checkbox</CheckboxLabel>
 			</CheckboxContent>
-			<FieldDescription>Receive updates by email.</FieldDescription>
-			<FieldError>Choose an option.</FieldError>
-		</Checkbox>
+		</CheckboxRoot>
 	);
 };

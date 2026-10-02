@@ -11,9 +11,17 @@ const dataRequiredSelector = '[data-required="true"]';
 /**
  * Optional indentation for error messages that sit beneath a control+label row.
  * Descriptions stay at the field's inline start; only the error tone reads this
- * var (see `Checkbox`, which aligns its error under the label text).
+ * var. The `inline` slot sets it from `inlineFieldIndent` so an `InlineField` hangs
+ * its error under the label text.
  */
-export const fieldMessageIndent = createVar();
+const fieldMessageIndent = createVar();
+
+/**
+ * Inline distance from the start edge of an inline control to its label text: the control's
+ * width plus the gap before the label. An inline control root (`CheckboxRoot`) sets it per size,
+ * and the `inline` slot reads it, so any inline control indents its error the same way.
+ */
+export const inlineFieldIndent = createVar();
 
 /** Gap between the error icon and the message text that follows it. */
 const errorIconGap = vars.space.sp8;
@@ -28,8 +36,8 @@ const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px
 /**
  * Raw slotted config for the `Field` primitive.
  *
- * Slots: `root` (layout), `label`, `message` (description/error text), and `icon` (the error
- * message's leading icon).
+ * Slots: `root` (stacked layout), `inline` (inline-control layout), `label`, `message`
+ * (description/error text), and `icon` (the error message's leading icon).
  *
  * `FieldError` lays the error `message` out with `trackRecipe`'s `firstLine` rail alignment, which
  * centres the `icon` rail on the message's first line and keeps wrapped lines aligned with the
@@ -42,6 +50,17 @@ const fieldConfig = {
 			flexDirection: 'column',
 			gap: vars.space.sp4,
 			minInlineSize: 0,
+		},
+		inline: {
+			display: 'flex',
+			flexDirection: 'column',
+			gap: vars.space.sp4,
+			minInlineSize: 0,
+			// The error hangs under the label text by the control root's `inlineFieldIndent`;
+			// descriptions stay at the field's inline edge.
+			vars: {
+				[fieldMessageIndent]: fallbackVar(inlineFieldIndent, '0px'),
+			},
 		},
 		label: {
 			color: vars.color.text.primary,
@@ -122,7 +141,7 @@ const fieldConfig = {
 /**
  * Slotted recipe for the `Field` primitive.
  *
- * `fieldRecipe({ necessityIndicator, tone }).root() / .label() / .message() / .icon()`.
+ * `fieldRecipe({ necessityIndicator, tone }).root() / .inline() / .label() / .message() / .icon()`.
  */
 export const fieldRecipe = recipe(fieldConfig);
 

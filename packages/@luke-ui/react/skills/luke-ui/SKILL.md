@@ -14,9 +14,10 @@ Follow these rules when the task involves Luke UI. Each rule states what to do a
 When a component supports it, a plain `ref` targets the element the component renders as its own
 root. A ref to a descendant names its target, such as `inputRef` for the input.
 
-Pass `inputRef` to reach the input inside a field component such as `TextInputField` or
-`ComboboxField`. Do not use their `ref` for the input, because it reaches the field's root element.
-A part that renders the input itself, such as `ComboboxInput`, takes the input ref on `ref`.
+Pass `inputRef` to reach the input inside a field component such as `TextInputField`,
+`ComboboxField`, or `Checkbox`. Do not use their `ref` for the input, because it reaches the field's
+root element. A part that renders the input itself, such as `ComboboxInput`, takes the input ref on
+`ref`.
 
 ## Element choice
 

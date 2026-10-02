@@ -9,9 +9,7 @@ export default () => {
 
 	return (
 		<Stack gap="sp16" maxInlineSize="20rem">
-			<Checkbox isSelected={isLoading} onChange={setIsLoading}>
-				Show loading state
-			</Checkbox>
+			<Checkbox isSelected={isLoading} label="Show loading state" onChange={setIsLoading} />
 			<LoadingSkeleton isLoading={isLoading} radius="control">
 				<TextInputField label="Email address" name="email" placeholder="you@example.com" />
 			</LoadingSkeleton>

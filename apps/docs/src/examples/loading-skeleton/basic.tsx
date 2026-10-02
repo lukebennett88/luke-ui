@@ -9,9 +9,7 @@ export default () => {
 
 	return (
 		<Stack gap="sp16" maxInlineSize="28rem">
-			<Checkbox isSelected={isLoading} onChange={setIsLoading}>
-				Show loading state
-			</Checkbox>
+			<Checkbox isSelected={isLoading} label="Show loading state" onChange={setIsLoading} />
 			<Text>
 				<LoadingSkeleton isLoading={isLoading}>
 					This text wraps across several lines to show how the skeleton follows the final content.

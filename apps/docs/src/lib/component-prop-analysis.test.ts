@@ -73,6 +73,30 @@ test(
 );
 
 test(
+	'keeps label, naming, id, and ref props on Checkbox while hiding children, isInvalid, and generic DOM props',
+	async () => {
+		const names = await visiblePropNames(
+			'packages/@luke-ui/react/src/core/checkbox/checkbox.tsx',
+			'CheckboxProps',
+		);
+		expect(names).toContain('label');
+		expect(names).toContain('aria-label');
+		expect(names).toContain('aria-labelledby');
+		expect(names).toContain('description');
+		expect(names).toContain('necessityIndicator');
+		expect(names).toContain('id');
+		expect(names).toContain('inputId');
+		expect(names).toContain('inputRef');
+		expect(names).toContain('ref');
+		expect(names).not.toContain('children');
+		expect(names).not.toContain('isInvalid');
+		expect(names).not.toContain('onClick');
+		expect(names).not.toContain('onPointerMoveCapture');
+	},
+	TS_MORPH_TEST_TIMEOUT,
+);
+
+test(
 	'keeps accessible-name props on ComboboxField while hiding generic DOM props',
 	async () => {
 		const names = await visiblePropNames(

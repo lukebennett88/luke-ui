@@ -12,9 +12,7 @@ export default () => {
 			<LoadingSpinner aria-label="Saving changes" isLoading={isLoading}>
 				<Button>Save changes</Button>
 			</LoadingSpinner>
-			<Checkbox isSelected={isLoading} onChange={setIsLoading}>
-				Loading
-			</Checkbox>
+			<Checkbox isSelected={isLoading} label="Loading" onChange={setIsLoading} />
 		</Stack>
 	);
 };

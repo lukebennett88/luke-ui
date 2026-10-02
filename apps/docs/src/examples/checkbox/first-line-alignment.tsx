@@ -6,10 +6,10 @@ export default () => {
 	return (
 		<Stack gap="sp16" maxInlineSize="18rem">
 			<Text elementType="div" typography="caption">
-				<Checkbox>A longer label keeps its control aligned when it wraps.</Checkbox>
+				<Checkbox label="A longer label keeps its control aligned when it wraps." />
 			</Text>
 			<Text elementType="div" typography="heading4">
-				<Checkbox>Larger text keeps the same first-line alignment when it wraps.</Checkbox>
+				<Checkbox label="Larger text keeps the same first-line alignment when it wraps." />
 			</Text>
 		</Stack>
 	);

@@ -6,10 +6,22 @@ source: packages/@luke-ui/react/src/exports/checkbox.ts
 reactAria: https://react-spectrum.adobe.com/react-aria/Checkbox.html
 ---
 
-Use `Checkbox` when someone can choose an option independently of nearby controls. Pass
-`description` to clarify what the option means.
+Use `Checkbox` when someone can choose an option independently of nearby controls. Pass `label` to
+name the option, and `description` to clarify what it means.
 
 <ExampleBlock src="checkbox/basic" layout="centered" title="Checkbox: Basic" />
+
+## Labels
+
+`label` sits inside a native `<label>`, so pass textual content only. Place links and buttons next
+to the checkbox.
+
+Without a visible label, pass `aria-labelledby` to use content already on the page, or `aria-label`
+to supply the name directly.
+
+```tsx
+<Checkbox aria-label="Select row" />
+```
 
 ## States
 
@@ -37,6 +49,12 @@ where messages come from and how to write them.
 
 <ExampleBlock src="checkbox/validation" title="Checkbox: Validation" />
 
+## Required marker
+
+A required checkbox shows a marker after its `label`. The default `necessityIndicator="icon"` adds
+an asterisk. `necessityIndicator="label"` appends “(required)”. A checkbox without a visible label
+shows no marker.
+
 ## Labels with Text
 
 Wrap a checkbox in block `Text` when its label needs a specific text size. The control follows the
@@ -45,10 +63,16 @@ wraps. Outside `Text`, it uses the normal compact control size.
 
 <ExampleBlock src="checkbox/first-line-alignment" title="Checkbox: First-line alignment" />
 
-## Accessibility
+## IDs and refs
 
-Pass a visible label as `Checkbox` children. Use `aria-label` only when surrounding content already
-names the control.
+`id`, `className`, and `ref` target the root element. `inputId` and `inputRef` target the input.
+
+## Form values
+
+Pass `name` so the checkbox joins `FormData` when selected. Pass `value` to set the submitted value,
+and `form` to associate a checkbox with a `<form>` it does not sit inside.
+
+## Accessibility
 
 Disabled checkboxes cannot receive focus, and their value cannot change. Read-only checkboxes remain
 focusable, so someone who uses a keyboard or assistive technology can still perceive their state.
