@@ -77,7 +77,7 @@ export type CheckboxRootProps = Prettify<_CheckboxRootProps>;
 type _CheckboxContentOmit = DistributiveOmit<RacCheckboxButtonProps, 'children'>;
 
 interface _CheckboxContentProps extends _CheckboxContentOmit {
-	/** `CheckboxControl` and `CheckboxLabel`. Textual, non-interactive content only. */
+	/** `CheckboxControl` plus textual, non-interactive label content such as `CheckboxLabel`. */
 	children: RacCheckboxButtonProps['children'];
 }
 

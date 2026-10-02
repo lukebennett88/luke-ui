@@ -218,7 +218,7 @@ test('CheckboxContent accepts a render function for its children', () => {
 
 test('a composed checkbox has no axe violations', async () => {
 	const { container } = render(
-		<CheckboxRoot isRequired>
+		<CheckboxRoot isInvalid isRequired>
 			<InlineField description="Example description" errorMessage="Example error">
 				{parts('Example checkbox')}
 			</InlineField>
