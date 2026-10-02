@@ -10,7 +10,7 @@ const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
 );
 const repoRoot = path.resolve(dirname, '../../..');
-/** Installs from the npm registry, so it runs only with `test:consumer`. */
+/** Its npm installs need network access, so it runs only with `test:consumer`. */
 const packedConsumerTest = 'src/core/styles/packed-consumer.test.ts';
 const captureDir = process.env.VISUAL_CAPTURE_DIR;
 const visualFsAllow =

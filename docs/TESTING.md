@@ -72,23 +72,25 @@ just to create an assertion or keep consts referenced.
 ## Package consumption
 
 `packages/@luke-ui/react/src/core/styles/packed-consumer.test.ts` tests the package the way an
-application installs it, with npm and no workspace links. It installs from the npm registry, so
-`pnpm run test` leaves it out. Run it with `pnpm run test:consumer`. The `consumer-tests` CI job
-runs it on every pull request.
+application installs it. It packs the workspace build and installs the tarballs with npm in a
+directory outside the repository, so no workspace link can satisfy an import. Those installs need
+network access, so `pnpm run test` leaves it out. Run it with `pnpm run test:consumer`. The
+`consumer-tests` CI job runs it on every pull request.
 
-Keep it to the package boundary: tarball contents, dependencies, peers, assets, SSR and hydration, a
-client build, type checking, and what small imports bundle. Component behaviour belongs in component
-tests.
+Keep it to the package boundary: tarball contents, dependencies, peers, assets, server rendering, a
+client build, hydration in Chromium, type checking, and what small imports bundle. Component
+behaviour belongs in component tests.
 
-One consumer installs the lowest version each peer range allows and the TypeScript version in
-`MINIMUM_TYPESCRIPT`. That run is the evidence for those floors. Change a peer range or
-`MINIMUM_TYPESCRIPT` only when the harness passes with the new floor.
+One consumer installs the lowest published version each peer range allows, and the first release of
+the TypeScript version in `MINIMUM_TYPESCRIPT`. That run is the evidence for those floors. Change a
+peer range or `MINIMUM_TYPESCRIPT` only when the harness passes with the new floor.
 
-A failing bundle-boundary check means a small import pulls in code it does not need. Fix the import
-graph. Widen a boundary's `composes` or `RUNTIME_THEME_MODULES` only when the import needs the code.
+A runtime import must not pull in theme-generation code, styling-authoring code, or components it
+does not render. A failing bundle-boundary check means one does. Fix the import graph. Change a
+boundary only when the code it flags has intentionally become runtime code.
 
-Set `LUKE_UI_REACT_SPEC` to a published version or dist-tag to run the same checks against the
-registry.
+Set `LUKE_UI_REACT_SPEC` to a published version or dist-tag to test that package from the registry
+instead of the workspace build.
 
 ## Docs
 

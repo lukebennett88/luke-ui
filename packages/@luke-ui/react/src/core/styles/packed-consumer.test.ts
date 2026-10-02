@@ -1,20 +1,23 @@
 import { execFileSync } from 'node:child_process';
 import { lstatSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
+import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
+import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { chromium } from 'playwright';
 import { afterAll, beforeAll, describe, expect, test } from 'vite-plus/test';
 import { cascadeLayerNames } from './layer-names.js';
 
 /**
  * Packed-consumer harness for `@luke-ui/react`. It runs with `pnpm run test:consumer`, not with the
- * unit tests, because it installs from the npm registry.
+ * unit tests, because its npm installs need network access.
  *
- * By default it packs the workspace build. Set `LUKE_UI_REACT_SPEC` to a version or dist-tag to fetch
- * the published package instead. npm installs the package outside the repository, once with the
- * newest peers the published ranges allow and once with the lowest.
+ * By default it packs the workspace build and installs the tarballs with npm outside the repository.
+ * Set `LUKE_UI_REACT_SPEC` to a version or dist-tag to test that published package instead. Each
+ * install runs once with the newest peers the published ranges allow and once with the lowest.
  */
 
 const registrySpec = process.env.LUKE_UI_REACT_SPEC?.trim() || undefined;
@@ -24,16 +27,23 @@ const registrySpec = process.env.LUKE_UI_REACT_SPEC?.trim() || undefined;
  * floor, so change both together.
  */
 const MINIMUM_TYPESCRIPT = '5.8';
-/** Consumer tooling. These ranges are not part of the package contract. */
-const JSDOM_RANGE = '^30.1.1';
-const VITE_RANGE = '^8.3.2';
 
 const packageRoot = fileURLToPath(new URL('../../..', import.meta.url));
 const scopeRoot = fileURLToPath(new URL('../../../..', import.meta.url));
 const repoRoot = fileURLToPath(new URL('../../../../../..', import.meta.url));
+const workspaceRequire = createRequire(import.meta.url);
 const workspaceTypeScript = readManifest(
-	createRequire(import.meta.url).resolve('typescript/package.json'),
+	workspaceRequire.resolve('typescript/package.json'),
 ).version;
+/**
+ * The consumer builds with the Vite the workspace installs, pinned exactly. Bundler drift is not part
+ * of the package contract.
+ */
+const workspaceVite = readManifest(workspaceRequire.resolve('vite/package.json'));
+const VITE_SPEC =
+	workspaceVite.name === 'vite'
+		? workspaceVite.version
+		: `npm:${workspaceVite.name}@${workspaceVite.version}`;
 
 /** The only paths a tarball may contain. */
 const PUBLISHED_PATH_PATTERN = /^(?:dist\/|skills\/|LICENSE$|README\.md$|package\.json$)/;
@@ -44,6 +54,7 @@ const SYMBOL_PATTERN = /<symbol\b[^>]*\bid="/;
 /** The statement that fixes cascade layer order at the top of the shared stylesheet. */
 const LAYER_STATEMENT = `@layer ${cascadeLayerNames.join(', ')};`;
 const MODULE_SCRIPT_PATTERN = /<script type="module"[^>]+src="\/assets\/[^"]+\.js"/;
+const SSR_OUTLET = '<!--ssr-outlet-->';
 
 interface Manifest {
 	dependencies?: Record<string, string>;
@@ -159,37 +170,30 @@ const STYLING_AUTHORING_SOURCE_PATTERN =
 const LUKE_SOURCE_PATTERN = /^@luke-ui\/react\/src\//;
 
 interface PeerSet {
+	/** Whether the set installs the lowest version of each range. */
+	isLowest: boolean;
 	label: string;
-	/** Picks the version installed for a published peer range. */
-	peerVersion: (range: string) => string;
+	/** Picks the version installed for a range. */
+	resolve: (name: string, range: string) => string;
 	slug: string;
-	/** TypeScript range to install. */
-	typescript: string;
-	/** The `major.minor` the installed TypeScript must match. */
-	typescriptLine: string;
-	/** `@types/react` range matching the installed React. */
-	typesRange: (reactRange: string) => string;
+	/** TypeScript range the set type-checks with. */
+	typescriptRange: string;
 }
 
 const peerSets: Array<PeerSet> = [
 	{
+		isLowest: false,
 		label: 'the newest peers',
-		peerVersion: (range) => range,
+		resolve: (_name, range) => range,
 		slug: 'newest',
-		typescript: workspaceTypeScript,
-		typescriptLine: workspaceTypeScript.split('.').slice(0, 2).join('.'),
-		typesRange: (range) => range,
+		typescriptRange: workspaceTypeScript,
 	},
 	{
+		isLowest: true,
 		label: `the lowest peers and TypeScript ${MINIMUM_TYPESCRIPT}`,
-		peerVersion: lowestVersion,
+		resolve: lowestPublished,
 		slug: 'lowest',
-		typescript: `~${MINIMUM_TYPESCRIPT}.0`,
-		typescriptLine: MINIMUM_TYPESCRIPT,
-		typesRange: (range) => {
-			const [major, minor] = lowestVersion(range).split('.');
-			return `~${major}.${minor}.0`;
-		},
+		typescriptRange: `~${MINIMUM_TYPESCRIPT}.0`,
 	},
 ];
 
@@ -198,16 +202,26 @@ for (const peerSet of peerSets) {
 		let consumerDir = '';
 		let peers: Record<string, string> = {};
 		let themeGeneration: Array<string> = [];
+		let typescript = '';
+		let isBuilt = false;
+
+		/** Builds the client app and the server entry once, for the tests that need them. */
+		function buildApp(): void {
+			if (isBuilt) return;
+			run('node', ['build-app.mjs'], consumerDir);
+			isBuilt = true;
+		}
 
 		beforeAll(async () => {
 			consumerDir = path.join(workDir, peerSet.slug);
 			peers = Object.fromEntries(
 				Object.entries(artifact.manifest.peerDependencies).map(([name, range]) => [
 					name,
-					peerSet.peerVersion(range),
+					peerSet.resolve(name, range),
 				]),
 			);
-			await installConsumer(consumerDir, peerSet, peers);
+			typescript = peerSet.resolve('typescript', peerSet.typescriptRange);
+			await installConsumer(consumerDir, peerSet, peers, typescript);
 			themeGeneration = measureBundle(consumerDir, 'define-theme').sources.filter(
 				(source) => THEME_MODULE_PATTERN.test(source) && !RUNTIME_THEME_MODULES.includes(source),
 			);
@@ -229,15 +243,12 @@ for (const peerSet of peerSets) {
 			expect(installedVersion(consumerDir, '@luke-ui/react')).toBe(artifact.manifest.version);
 		});
 
-		test.runIf(peerSet.peerVersion === lowestVersion)(
-			'installs the lowest version each peer range allows',
-			() => {
-				const installed = Object.fromEntries(
-					Object.keys(peers).map((name) => [name, installedVersion(consumerDir, name)]),
-				);
-				expect(installed).toEqual(peers);
-			},
-		);
+		test.runIf(peerSet.isLowest)('installs the lowest version each peer range allows', () => {
+			const installed = Object.fromEntries(
+				Object.keys(peers).map((name) => [name, installedVersion(consumerDir, name)]),
+			);
+			expect(installed).toEqual(peers);
+		});
 
 		// Luke UI layers over React and React Aria, so what it alone adds to an install stays smaller
 		// than its peers. A large data or tooling package in `dependencies` breaks that.
@@ -280,26 +291,67 @@ for (const peerSet of peerSets) {
 			);
 		});
 
-		test('renders on the server and hydrates without errors', { timeout: 60_000 }, () => {
-			const result = JSON.parse(run('node', ['ssr-probe.mjs'], consumerDir)) as {
-				consoleErrors: Array<string>;
-				htmlAfterHydration: string;
-				inputLabel: string | null;
-				markup: string;
-				recoverableErrors: Array<string>;
-				serverHtml: string;
-			};
+		test(
+			'renders on the server and hydrates in Chromium without errors',
+			{ timeout: 120_000 },
+			async () => {
+				buildApp();
+				const markup = run('node', ['render.mjs'], consumerDir);
+				expect(markup).toContain('<blockquote');
+				expect(markup).toContain('Hello world');
+				expect(markup).toContain('<svg');
+				expect(markup).toContain('<button');
+				expect(markup).toContain('<input');
 
-			expect(result.markup).toContain('<blockquote');
-			expect(result.markup).toContain('Hello world');
-			expect(result.markup).toContain('<svg');
-			expect(result.markup).toContain('<button');
-			expect(result.recoverableErrors).toEqual([]);
-			expect(result.consoleErrors).toEqual([]);
-			expect(result.htmlAfterHydration).toBe(result.serverHtml);
-			// The label resolves through server-generated ids, so it proves those ids hydrated intact.
-			expect(result.inputLabel).toBe('Name');
-		});
+				const server = await serveDirectory(path.join(consumerDir, 'dist'));
+				const browser = await chromium.launch();
+				try {
+					const page = await browser.newPage();
+					const consoleErrors: Array<string> = [];
+					page.on('console', (message) => {
+						if (message.type() === 'error') consoleErrors.push(message.text());
+					});
+					page.on('pageerror', (error) => consoleErrors.push(String(error)));
+
+					await page.goto(server.url);
+					await page.waitForFunction(
+						() => (window as Window & HydrationGlobals).hydration !== undefined,
+					);
+					const result = await page.evaluate(() => {
+						const { hydration, serverSnapshot } = window as Window & HydrationGlobals;
+						const root = document.getElementById('root');
+						const elements = [...(root?.querySelectorAll('*') ?? [])];
+						const serverElements = serverSnapshot?.elements ?? [];
+						return {
+							controls: {
+								buttons: root?.querySelectorAll('button').length,
+								inputs: root?.querySelectorAll('input').length,
+							},
+							inputLabel: root?.querySelector('input')?.labels?.[0]?.textContent ?? null,
+							keptServerElements:
+								elements.length === serverElements.length &&
+								elements.every((element, index) => element === serverElements[index]),
+							recoverableErrors: hydration?.recoverableErrors,
+							textAfterHydration: root?.textContent,
+							serverText: serverSnapshot?.text,
+						};
+					});
+
+					expect(result.recoverableErrors).toEqual([]);
+					expect(consoleErrors).toEqual([]);
+					expect(result.controls).toEqual({ buttons: 1, inputs: 1 });
+					// React Aria effects adjust attributes after hydration, so compare nodes, not markup.
+					// Every server element must survive in place: none replaced, added, or removed.
+					expect(result.keptServerElements).toBe(true);
+					expect(result.textAfterHydration).toBe(result.serverText);
+					// The label resolves through server-generated ids, so it proves those ids hydrated intact.
+					expect(result.inputLabel).toBe('Name');
+				} finally {
+					await browser.close();
+					await server.close();
+				}
+			},
+		);
 
 		test('resolves CSS and SVG assets through package exports', () => {
 			const require = createRequire(path.join(consumerDir, 'package.json'));
@@ -322,7 +374,7 @@ for (const peerSet of peerSets) {
 		});
 
 		test('builds a client bundle with Vite', { timeout: 120_000 }, async () => {
-			run(path.join('node_modules', '.bin', 'vite'), ['build', '--logLevel', 'error'], consumerDir);
+			buildApp();
 
 			const assetsDir = path.join(consumerDir, 'dist', 'assets');
 			const assets = readdirSync(assetsDir);
@@ -349,13 +401,12 @@ for (const peerSet of peerSets) {
 		});
 
 		test(
-			`type-checks every public entrypoint with TypeScript ${peerSet.typescript}`,
+			`type-checks every public entrypoint with ${peerSet.isLowest ? `TypeScript ${MINIMUM_TYPESCRIPT}` : 'the workspace TypeScript'}`,
 			{
 				timeout: 120_000,
 			},
 			() => {
-				const version = installedVersion(consumerDir, 'typescript');
-				expect(version.startsWith(`${peerSet.typescriptLine}.`)).toBe(true);
+				expect(installedVersion(consumerDir, 'typescript')).toBe(typescript);
 
 				for (const resolution of ['bundler', 'nodenext']) {
 					const tsc = path.join('node_modules', '.bin', 'tsc');
@@ -533,13 +584,16 @@ async function installConsumer(
 	consumerDir: string,
 	peerSet: PeerSet,
 	peers: Record<string, string>,
+	typescript: string,
 ): Promise<void> {
 	await mkdir(path.join(consumerDir, 'entries'), { recursive: true });
 	await mkdir(path.join(consumerDir, 'src'), { recursive: true });
 
 	const reactRange = artifact.manifest.peerDependencies.react;
 	if (reactRange === undefined) throw new Error('Expected a react peer range.');
-	const typesRange = peerSet.typesRange(reactRange);
+	// The React types follow the React peer range, so the lowest set gets the lowest matching types.
+	const reactTypes = peerSet.resolve('@types/react', reactRange);
+	const reactDomTypes = peerSet.resolve('@types/react-dom', reactRange);
 
 	const files: Record<string, string> = {
 		'package.json': JSON.stringify(
@@ -549,19 +603,21 @@ async function installConsumer(
 				type: 'module',
 				dependencies: { ...artifact.installSpecs, ...peers },
 				devDependencies: {
-					'@types/react': typesRange,
-					'@types/react-dom': typesRange,
-					jsdom: JSDOM_RANGE,
-					typescript: peerSet.typescript,
-					vite: VITE_RANGE,
+					'@types/react': reactTypes,
+					'@types/react-dom': reactDomTypes,
+					typescript,
+					vite: VITE_SPEC,
 				},
 			},
 			null,
 			2,
 		),
-		'ssr-probe.mjs': SSR_PROBE,
+		'build-app.mjs': BUILD_APP,
 		'index.html': CLIENT_HTML,
-		'src/main.js': CLIENT_ENTRY,
+		'render.mjs': RENDER,
+		'src/app.js': APP,
+		'src/entry-client.js': ENTRY_CLIENT,
+		'src/entry-server.js': ENTRY_SERVER,
 		'measure-bundle.mjs': MEASURE_BUNDLE,
 		'app.tsx': TYPED_APP,
 		'all-entries.ts': allEntriesSource(artifact.manifest),
@@ -678,15 +734,55 @@ function layerOrder(css: string): Array<string> {
 	return order;
 }
 
-const PEER_RANGE_PATTERN = /^(?:\^|~|>=)?(\d+\.\d+\.\d+)$/;
-
-/** Lowest version a peer range admits. Supports the range forms the package publishes. */
-function lowestVersion(range: string): string {
-	const match = PEER_RANGE_PATTERN.exec(range.trim());
-	if (match === null) {
-		throw new Error(`Cannot find the lowest version of peer range "${range}".`);
+/** Lowest published version a range admits, so the lowest set never floats. */
+function lowestPublished(name: string, range: string): string {
+	const versions: unknown = JSON.parse(
+		npm(['view', `${name}@${range}`, 'version', '--json'], workDir),
+	);
+	const lowest = Array.isArray(versions) ? versions[0] : versions;
+	if (typeof lowest !== 'string') {
+		throw new Error(`No published version of ${name} satisfies "${range}".`);
 	}
-	return match[1]!;
+	return lowest;
+}
+
+/** Globals the consumer page sets: the server DOM snapshot, then the hydration result. */
+interface HydrationGlobals {
+	hydration?: { recoverableErrors: Array<string> };
+	serverSnapshot?: { elements: Array<Element>; text: string | null };
+}
+
+const CONTENT_TYPES: Record<string, string> = {
+	'.css': 'text/css',
+	'.html': 'text/html',
+	'.js': 'text/javascript',
+	'.svg': 'image/svg+xml',
+};
+
+/** Serves a built app over HTTP on a free local port. */
+async function serveDirectory(root: string): Promise<{ close: () => Promise<void>; url: string }> {
+	const server = createServer((request, response) => {
+		const pathname = new URL(request.url ?? '/', 'http://localhost').pathname;
+		const file = path.join(root, pathname === '/' ? 'index.html' : pathname);
+		readFile(file).then(
+			(body) => {
+				response.writeHead(200, {
+					'content-type': CONTENT_TYPES[path.extname(file)] ?? 'application/octet-stream',
+				});
+				response.end(body);
+			},
+			() => {
+				response.writeHead(404);
+				response.end();
+			},
+		);
+	});
+	await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+	const { port } = server.address() as AddressInfo;
+	return {
+		close: () => new Promise((resolve) => server.close(() => resolve())),
+		url: `http://127.0.0.1:${port}/`,
+	};
 }
 
 function installedVersion(consumerDir: string, name: string): string {
@@ -741,22 +837,25 @@ function tryRun(command: string, args: Array<string>, cwd: string): string {
 	}
 }
 
-const SSR_PROBE = `
-import { createElement as h } from 'react';
-import { hydrateRoot } from 'react-dom/client';
-import { renderToString } from 'react-dom/server';
-import { JSDOM } from 'jsdom';
+/** The app the server renders and the browser hydrates. */
+const APP = `
 import { Blockquote } from '@luke-ui/react/blockquote';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { Provider } from '@luke-ui/react/provider';
+import spritesheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { createSprinkles } from '@luke-ui/react/styles';
 import { TextInputField } from '@luke-ui/react/text-input-field';
+import { createElement as h, useEffect } from 'react';
 
-function App() {
+/** Calls \`onHydrated\` after the first client commit. The server never runs effects. */
+export function App({ onHydrated }) {
+	useEffect(() => {
+		onHydrated?.();
+	}, [onHydrated]);
 	return h(
 		Provider,
-		{ spritesheetHref: '/spritesheet.svg' },
+		{ spritesheetHref },
 		h(
 			'div',
 			createSprinkles({ display: 'flex', gap: 'sp8' }),
@@ -767,50 +866,38 @@ function App() {
 		),
 	);
 }
+`;
 
-const markup = renderToString(h(App));
-const dom = new JSDOM(\`<!doctype html><html><body><div id="root">\${markup}</div></body></html>\`, {
-	pretendToBeVisual: true,
-	url: 'http://localhost/',
-});
-// Expose the DOM the way a browser does. jsdom has no \`CSS\` namespace, which React Aria reads.
-const domGlobals = ['window', 'document', 'navigator', 'getComputedStyle', 'requestAnimationFrame', 'cancelAnimationFrame'];
-for (const key of [...domGlobals, ...Object.getOwnPropertyNames(dom.window).filter((name) => /^[A-Z]/.test(name) && !(name in globalThis))]) {
-	const value = key === 'window' ? dom.window : dom.window[key];
-	Object.defineProperty(globalThis, key, {
-		configurable: true,
-		value: typeof value === 'function' && !/^[A-Z]/.test(key) ? value.bind(dom.window) : value,
-		writable: true,
-	});
-}
-globalThis.CSS ??= { escape: (value) => String(value).replace(/[^\\w-]/g, (character) => \`\\\\\${character}\`) };
+const ENTRY_CLIENT = `
+import '@luke-ui/react/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
+import { createElement as h } from 'react';
+import { hydrateRoot } from 'react-dom/client';
+import { App } from './app.js';
 
-const consoleErrors = [];
-console.error = (...args) => consoleErrors.push(args.map(String).join(' '));
 const recoverableErrors = [];
-const root = document.getElementById('root');
-const serverHtml = root.innerHTML;
-hydrateRoot(root, h(App), {
-	onRecoverableError(error) {
-		recoverableErrors.push(String(error));
-	},
-});
-await new Promise((resolve) => setTimeout(resolve, 100));
-
-const input = root.querySelector('input');
-process.stdout.write(
-	JSON.stringify({
-		consoleErrors,
-		htmlAfterHydration: root.innerHTML,
-		inputLabel: input?.labels?.[0]?.textContent ?? null,
-		markup,
-		recoverableErrors,
-		serverHtml,
+hydrateRoot(
+	document.getElementById('root'),
+	h(App, {
+		onHydrated: () => {
+			window.hydration = { recoverableErrors };
+		},
 	}),
-	() => process.exit(0),
+	{ onRecoverableError: (error) => recoverableErrors.push(String(error)) },
 );
 `;
 
+const ENTRY_SERVER = `
+import { createElement as h } from 'react';
+import { renderToString } from 'react-dom/server';
+import { App } from './app.js';
+
+export function render() {
+	return renderToString(h(App));
+}
+`;
+
+/** The inline script snapshots the server DOM before the deferred module script hydrates it. */
 const CLIENT_HTML = `<!doctype html>
 <html lang="en">
 	<head>
@@ -818,32 +905,40 @@ const CLIENT_HTML = `<!doctype html>
 		<title>Luke UI consumer</title>
 	</head>
 	<body>
-		<div id="root"></div>
-		<script type="module" src="/src/main.js"></script>
+		<div id="root">${SSR_OUTLET}</div>
+		<script>
+			window.serverSnapshot = {
+				elements: [...document.querySelectorAll('#root *')],
+				text: document.getElementById('root').textContent,
+			};
+		</script>
+		<script type="module" src="/src/entry-client.js"></script>
 	</body>
 </html>
 `;
 
-const CLIENT_ENTRY = `
-import '@luke-ui/react/stylesheet.css';
-import '@luke-ui/react/themes/tactile/stylesheet.css';
-import spritesheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
-import { createElement as h } from 'react';
-import { createRoot } from 'react-dom/client';
-import { Button } from '@luke-ui/react/button';
-import { Icon } from '@luke-ui/react/icon';
-import { Provider } from '@luke-ui/react/provider';
-import { TextInputField } from '@luke-ui/react/text-input-field';
+/** Builds the client app, then the server entry, with Vite's JS API. */
+const BUILD_APP = `
+import { build } from 'vite';
 
-createRoot(document.getElementById('root')).render(
-	h(
-		Provider,
-		{ spritesheetHref },
-		h(Icon, { name: 'chevronDown', 'aria-label': 'Expand' }),
-		h(TextInputField, { label: 'Name' }),
-		h(Button, null, 'Save'),
-	),
-);
+await build({ configFile: false, logLevel: 'error' });
+await build({
+	build: { outDir: 'dist-server', ssr: 'src/entry-server.js' },
+	configFile: false,
+	logLevel: 'error',
+});
+`;
+
+/** Renders the app in Node and writes the markup into the built page, then prints it. */
+const RENDER = `
+import { readFileSync, writeFileSync } from 'node:fs';
+import { render } from './dist-server/entry-server.js';
+
+const markup = render();
+const template = readFileSync('dist/index.html', 'utf8');
+if (!template.includes('${SSR_OUTLET}')) throw new Error('The built page has no SSR outlet.');
+writeFileSync('dist/index.html', template.replace('${SSR_OUTLET}', markup));
+process.stdout.write(markup);
 `;
 
 /**
