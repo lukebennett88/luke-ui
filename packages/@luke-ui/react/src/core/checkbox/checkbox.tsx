@@ -27,11 +27,8 @@ interface _CheckboxBaseProps extends _CheckboxOmit {
 	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
 	errorMessage?: ReactNode;
 	/**
-	 * Forwarded to the underlying `<input type="checkbox">` element. A plain `ref` reaches the root
-	 * element instead.
-	 *
-	 * Widened from React Aria's own `inputRef`, which only takes a ref object, so a
-	 * callback ref (what form libraries hand out) is accepted too.
+	 * Forwarded to the `<input type="checkbox">` element. Accepts a callback ref or a ref object. Use
+	 * `ref` for the root element.
 	 */
 	inputRef?: Ref<HTMLInputElement>;
 }
@@ -47,6 +44,9 @@ export type CheckboxProps = Prettify<_CheckboxProps>;
  * The control renders before the label. The label sits inside a native `<label>`, so pass textual,
  * non-interactive content. Name a checkbox that has no visible label with `aria-label` or
  * `aria-labelledby`, which renders the control alone and no required marker.
+ *
+ * `id`, `className`, and `ref` target the checkbox's root element. `inputId` and `inputRef` target
+ * the input.
  */
 export function Checkbox(props: CheckboxProps): JSX.Element {
 	const { description, errorMessage, inputRef, label, necessityIndicator, ...rootProps } = props;
