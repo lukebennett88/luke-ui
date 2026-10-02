@@ -169,7 +169,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxLabelProps':
 		['necessityIndicator'],
 	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxRootProps':
-		['form', 'id', 'inputId', 'inputRef', 'isInvalid', 'name', 'ref', 'size', 'value'],
+		['id', 'inputId', 'inputRef', 'isInvalid', 'ref', 'size'],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/clear-button.tsx::ComboboxClearButtonProps':
 		[],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/empty-state.tsx::ComboboxEmptyStateProps':

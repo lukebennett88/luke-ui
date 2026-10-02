@@ -1,6 +1,5 @@
 import { Checkbox } from '@luke-ui/react/checkbox';
 import { Text } from '@luke-ui/react/text';
-import { TextInputField } from '@luke-ui/react/text-input-field';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
@@ -218,8 +217,8 @@ test('the control renders before the label', () => {
 });
 
 // The marker is CSS content with no DOM node, so the accessible name is how the tests observe it.
-// It follows the last word with no space before it, the same as `FieldLabel`.
-test('a required Checkbox marks its label like a required FieldLabel', () => {
+// It follows the last word with no space before it.
+test('a required Checkbox marks its label with its necessityIndicator', () => {
 	render(
 		<>
 			<Checkbox isRequired label="Checkbox icon" name="checkbox-icon" />
@@ -229,22 +228,11 @@ test('a required Checkbox marks its label like a required FieldLabel', () => {
 				name="checkbox-words"
 				necessityIndicator="label"
 			/>
-			<TextInputField isRequired label="Field icon" name="field-icon" />
-			<TextInputField
-				isRequired
-				label="Field words"
-				name="field-words"
-				necessityIndicator="label"
-			/>
 		</>,
 	);
 
 	expect(checkbox('Checkbox icon*')).toBeInTheDocument();
 	expect(checkbox('Checkbox words(required)')).toBeInTheDocument();
-	expect(page.getByRole('textbox', { name: 'Field icon*' }).element()).toBeInTheDocument();
-	expect(
-		page.getByRole('textbox', { name: 'Field words(required)' }).element(),
-	).toBeInTheDocument();
 });
 
 test('an optional or externally named Checkbox shows no marker', () => {

@@ -12,15 +12,16 @@ application forms, use [`Checkbox`](/components/forms/checkbox).
 
 ## Anatomy
 
-`CheckboxRoot` is the semantic root. It connects the input to the content, description, and error
-inside it, and owns the selection, state, validation, and size. `CheckboxContent` is the native
-`<label>`. It holds `CheckboxControl`, which centres `CheckboxIndicator`, and `CheckboxLabel`, the
-visible label. Parts follow document order, so put the control before the label.
+`CheckboxRoot` is the semantic root. It owns the selection, state, validation, form, and size props.
+`CheckboxContent` is the native `<label>`. It holds `CheckboxControl`, which centres
+`CheckboxIndicator`, and `CheckboxLabel`. Put the control before the label.
+
+`id`, `className`, and `ref` target the root element. `inputId` and `inputRef` target the input.
 
 ## Description and error
 
-[`InlineField`](/components/primitives/field) wraps `CheckboxContent` to add a `description` and an
-`errorMessage`. It spaces them and hangs the error under the label text.
+Wrap `CheckboxContent` in [`InlineField`](/components/primitives/field) to add a `description` and
+an `errorMessage`. The `errorMessage` shows while the root is invalid.
 
 ```tsx
 <CheckboxRoot isInvalid>
@@ -35,54 +36,22 @@ visible label. Parts follow document order, so put the control before the label.
 </CheckboxRoot>
 ```
 
-`InlineField` always renders the error slot, so a validation message from a constraint or `validate`
-appears without an `errorMessage`. It provides anatomy and presentation, not semantics, so it needs
-the surrounding `CheckboxRoot`. The `errorMessage` shows while the root is invalid, so set
-`isInvalid` on the root for an error you already have.
-
-For a custom arrangement, place `FieldDescription` and `FieldError` directly inside the root
-instead. Use either `InlineField` or those parts for one checkbox, never both. `FieldError` carries
-the error icon either way.
+For a custom arrangement, place `FieldDescription` and `FieldError` inside the root instead of
+`InlineField`.
 
 ## Labels
 
-`CheckboxLabel` is the visible-label part. The label is part of a native `<label>`, so it takes
-textual content only. Do not put a link or button inside `CheckboxContent`. Place it as a sibling
-outside the content.
+The label is part of a native `<label>`, so it takes textual content only. Place links and buttons
+outside `CheckboxContent`.
 
-Raw text can go directly in `CheckboxContent`, but it gets no required marker. A checkbox named from
-elsewhere can omit `CheckboxLabel`. To name the checkbox from content on the page, give that content
-an id and pass it to `aria-labelledby` on the root. To supply the name directly, pass `aria-label`
-on the root.
+To name a checkbox without a visible label, omit `CheckboxLabel` and pass `aria-labelledby` or
+`aria-label` to the root.
 
 ## Required marker
 
-Set `isRequired` on the root, and `CheckboxLabel` draws a marker after its content.
-`necessityIndicator="icon"` is the default and adds an asterisk. `necessityIndicator="label"`
-appends “(required)”. Set `necessityIndicator` on `CheckboxLabel`.
-
-```tsx
-<CheckboxRoot isRequired>
-	<CheckboxContent>
-		<CheckboxControl>
-			<CheckboxIndicator />
-		</CheckboxControl>
-		<CheckboxLabel necessityIndicator="label">Email notifications</CheckboxLabel>
-	</CheckboxContent>
-</CheckboxRoot>
-```
-
-The marker follows the label's final inline content, even when the label wraps. Block-level children
-inside `CheckboxLabel` can put the marker on another line.
-
-## Root props
-
-Set the selection, state, name, form, value, and validation props on `CheckboxRoot`. `size` on the
-root sets the size of the control and the indent of the error. `Text` renders inside
-`CheckboxContent` with no extra setup.
-
-`id`, `className`, and `ref` target the root element. Pass `inputId` to set the input's id, and
-`inputRef` to reach the input.
+When the root is required, `CheckboxLabel` draws a marker after its final inline content.
+`necessityIndicator="icon"`, the default, adds an asterisk. `necessityIndicator="label"` appends
+“(required)”. Raw text placed directly in `CheckboxContent` gets no marker.
 
 ## API
 

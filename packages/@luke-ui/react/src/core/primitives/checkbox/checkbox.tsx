@@ -77,10 +77,7 @@ export type CheckboxRootProps = Prettify<_CheckboxRootProps>;
 type _CheckboxContentOmit = DistributiveOmit<RacCheckboxButtonProps, 'children'>;
 
 interface _CheckboxContentProps extends _CheckboxContentOmit {
-	/**
-	 * The control, indicator, and visible checkbox label. The label is part of a native `<label>`,
-	 * so it takes textual, non-interactive content only. Place links and buttons outside it.
-	 */
+	/** `CheckboxControl` and `CheckboxLabel`. Textual, non-interactive content only. */
 	children: RacCheckboxButtonProps['children'];
 }
 
@@ -94,7 +91,7 @@ export type CheckboxControlProps = Prettify<_CheckboxControlProps>;
 
 interface _CheckboxLabelProps extends ComponentProps<'span'> {
 	/**
-	 * Shows how a required checkbox is marked after the label's last inline content.
+	 * How a required checkbox is marked.
 	 * @default 'icon'
 	 */
 	necessityIndicator?: FieldNecessityIndicator;
@@ -109,10 +106,9 @@ interface _CheckboxIndicatorProps extends ComponentProps<'span'> {}
 export type CheckboxIndicatorProps = Prettify<_CheckboxIndicatorProps>;
 
 /**
- * Semantic root for a checkbox. It connects the input to the content, description, and error
- * inside it, and owns the checkbox's selection, state, validation, and size.
+ * Semantic root for a checkbox. It owns the selection, state, validation, and size.
  *
- * `id` targets the root element. Pass `inputId` to set the input's id.
+ * `id` targets the root element. `inputId` targets the input.
  */
 export function CheckboxRoot(props: CheckboxRootProps): JSX.Element {
 	const { className, id, inputId, size, ...restProps } = props;
@@ -129,11 +125,8 @@ export function CheckboxRoot(props: CheckboxRootProps): JSX.Element {
 }
 
 /**
- * The native `<label>` for the checkbox. It holds `CheckboxControl` and `CheckboxLabel`, and keeps
- * the input and label associated.
- *
- * The label text must be textual, non-interactive content. A link or button inside a native label
- * is not supported. Place it as a sibling outside `CheckboxContent`.
+ * The native `<label>` for the checkbox, holding `CheckboxControl` and `CheckboxLabel`. Place links
+ * and buttons outside it.
  */
 export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
 	const { children, className, ...restProps } = props;
@@ -163,8 +156,7 @@ export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
 }
 
 /**
- * The visible label text. It sits inside `CheckboxContent`, after `CheckboxControl`, and draws the
- * required marker after its last inline content when the root is required.
+ * The visible label. When the root is required, it draws the marker after its last inline content.
  */
 export function CheckboxLabel(props: CheckboxLabelProps): JSX.Element {
 	const { className, necessityIndicator, ...restProps } = props;

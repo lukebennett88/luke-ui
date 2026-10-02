@@ -124,14 +124,9 @@ interface _InlineFieldProps extends _InlineFieldOmit, InlineFieldSlotProps {
 export type InlineFieldProps = Prettify<_InlineFieldProps>;
 
 /**
- * Standard inline field anatomy: a control's content part, a description, and an error slot that
- * is always rendered. The error hangs under the label text.
- *
- * `InlineField` provides presentation, not semantics, and adds no field context. Render it inside
- * a control root that supplies one and the control's size, such as `CheckboxRoot`. It takes no
- * label, because the label lives inside the control's content part. `InlineField` and the manual
- * `FieldDescription` and `FieldError` parts are alternatives, so do not render those parts inside
- * an `InlineField`.
+ * Inline field anatomy: a control's content part, a description, and an always-rendered error
+ * slot, with the error under the label text. Render it inside a control root such as
+ * `CheckboxRoot`, and use it instead of the manual `FieldDescription` and `FieldError` parts.
  */
 export function InlineField(props: InlineFieldProps): JSX.Element {
 	const { children, className, description, errorMessage, ...restProps } = props;

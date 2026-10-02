@@ -42,12 +42,7 @@ export type CheckboxProps = Prettify<_CheckboxProps>;
 /**
  * A labelled checkbox with optional description and validation message.
  *
- * The control renders before the label. The label sits inside a native `<label>`, so pass textual,
- * non-interactive content. Name a checkbox that has no visible label with `aria-label` or
- * `aria-labelledby`, which renders the control alone and no required marker.
- *
- * `id`, `className`, and `ref` target the checkbox's root element. `inputId` and `inputRef` target
- * the input.
+ * `id`, `className`, and `ref` target the root element. `inputId` and `inputRef` target the input.
  */
 export function Checkbox(props: CheckboxProps): JSX.Element {
 	const { description, errorMessage, inputRef, label, necessityIndicator, ...rootProps } = props;

@@ -13,13 +13,11 @@ name the option, and `description` to clarify what it means.
 
 ## Labels
 
-Pass the visible label as `label`. The control renders first and the label second.
+`label` sits inside a native `<label>`, so pass textual content only. Place links and buttons next
+to the checkbox.
 
-The label sits inside a native `<label>` element, so pass textual content only. Links and buttons
-are not supported inside it. Place them next to the checkbox instead. To use content elsewhere on
-the page as the label, omit `label` and pass its id to `aria-labelledby`. To supply the name
-directly, omit `label` and pass `aria-label`. Pass `label` or exactly one of `aria-label` and
-`aria-labelledby`.
+Without a visible label, pass `aria-labelledby` to use content already on the page, or `aria-label`
+to supply the name directly.
 
 ```tsx
 <Checkbox aria-label="Select row" />
@@ -46,19 +44,16 @@ default. Use `small` in compact layouts and `large` where a larger control impro
 
 Set `isRequired` to require the choice. `Checkbox` shows its validation message after validation
 fails. Pass `errorMessage` only for an error you already have, such as one from a form library or
-your server. A non-empty message marks the checkbox invalid, and `Checkbox` has no `isInvalid` prop.
-Read [Validation](/docs/validation) for where messages come from and how to write them.
-
-The message hangs under the label text.
+your server. A non-empty message marks the checkbox invalid. Read [Validation](/docs/validation) for
+where messages come from and how to write them.
 
 <ExampleBlock src="checkbox/validation" title="Checkbox: Validation" />
 
 ## Required marker
 
-A required checkbox with a visible `label` shows a marker after the label text. The default
-`necessityIndicator="icon"` adds an asterisk. `necessityIndicator="label"` appends “(required)”. A
-checkbox named with `aria-label` or `aria-labelledby` shows no marker, because it has no visible
-label.
+A required checkbox shows a marker after its `label`. The default `necessityIndicator="icon"` adds
+an asterisk. `necessityIndicator="label"` appends “(required)”. A checkbox without a visible label
+shows no marker.
 
 ## Labels with Text
 
@@ -70,8 +65,7 @@ wraps. Outside `Text`, it uses the normal compact control size.
 
 ## IDs and refs
 
-`id`, `className`, and `ref` target the checkbox's root element. Pass `inputId` to set the input's
-id, and `inputRef` to reach the input.
+`id`, `className`, and `ref` target the root element. `inputId` and `inputRef` target the input.
 
 ## Form values
 
@@ -83,8 +77,6 @@ and `form` to associate a checkbox with a `<form>` it does not sit inside.
 Disabled checkboxes cannot receive focus, and their value cannot change. Read-only checkboxes remain
 focusable, so someone who uses a keyboard or assistive technology can still perceive their state.
 Keyboard navigation shows a focus ring. Pointer focus does not.
-
-For custom anatomy, use the [Checkbox primitives](/components/primitives/checkbox).
 
 ## API
 
