@@ -20,7 +20,7 @@ steps inject styles at runtime.
 
 ## Structure
 
-Paths below are rooted in `packages/@luke-ui/react/src/`.
+Paths below are relative to `packages/@luke-ui/react/src/`.
 
 | Area                                          | Role                                                                                                                                      |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |

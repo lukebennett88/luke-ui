@@ -176,15 +176,6 @@ export type TextInputPrefixProps = Prettify<ComponentProps<'span'>>;
 export type TextInputSuffixProps = Prettify<ComponentProps<'span'>>;
 
 /**
- * Add the `TextInput`'s own ids to the ones the root wired up. Joining keeps the field's label,
- * description, and error connected, the way React Aria's `useField` does for its consumers.
- */
-function joinIds(rootIds: string | undefined, ownIds: string | undefined): string | undefined {
-	const ids = [...(rootIds?.split(' ') ?? []), ...(ownIds?.split(' ') ?? [])].filter(Boolean);
-	return ids.length > 0 ? [...new Set(ids)].join(' ') : undefined;
-}
-
-/**
  * Semantic root for a text input field. It connects a `TextInput` to the label, description, and
  * error parts inside it, and owns the field's value, state, and validation.
  *
@@ -249,13 +240,13 @@ export function TextInput(props: TextInputProps): JSX.Element {
 		value,
 		...inputProps
 	} = props;
-	const isRooted = use(TextInputRootContext);
+	const isInsideRoot = use(TextInputRootContext);
 	const rootInputProps = useSlottedContext(InputContext);
 	const isInControl = use(TextInputControlContext);
 	const contextSize = use(TextInputSizeContext);
 	// The root supplies these through React Aria's input context. Dropping the input's own values
 	// lets the root win, because a local prop would otherwise override the context.
-	const standaloneProps = isRooted
+	const standaloneProps = isInsideRoot
 		? undefined
 		: {
 				'aria-invalid': ariaInvalid,
@@ -274,17 +265,14 @@ export function TextInput(props: TextInputProps): JSX.Element {
 			};
 
 	// A local `aria-describedby` or `aria-labelledby` would replace the root's through React Aria's
-	// merge and disconnect the label, description, and error, so join them instead.
-	const rootedWiring = isRooted
+	// merge and disconnect the label, description, and error, so compose both lists. An empty result
+	// becomes `undefined`, because an empty string would override the value from React Aria's context.
+	const fieldWiring = isInsideRoot
 		? {
-				'aria-describedby': joinIds(
-					rootInputProps?.['aria-describedby'],
-					inputProps['aria-describedby'],
-				),
-				'aria-labelledby': joinIds(
-					rootInputProps?.['aria-labelledby'],
-					inputProps['aria-labelledby'],
-				),
+				'aria-describedby':
+					cx(rootInputProps?.['aria-describedby'], inputProps['aria-describedby']) || undefined,
+				'aria-labelledby':
+					cx(rootInputProps?.['aria-labelledby'], inputProps['aria-labelledby']) || undefined,
 			}
 		: undefined;
 
@@ -292,7 +280,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
 		<RacInput
 			{...inputProps}
 			{...standaloneProps}
-			{...rootedWiring}
+			{...fieldWiring}
 			className={composeRenderProps(className, (renderedClassName) => {
 				if (isInControl) return cx(textInputInControlClassName, renderedClassName);
 

@@ -30,8 +30,8 @@ function TextInputScene() {
 			<TextInput aria-label="Standalone small" defaultValue="Small" size="small" />
 			<TextInput aria-label="Standalone disabled" defaultValue="Unavailable" disabled />
 			<TextInput aria-label="Standalone read-only" defaultValue="Read only" readOnly />
-			<TextInputRoot defaultValue="nope" isInvalid name="rooted">
-				<FieldLabel>Rooted</FieldLabel>
+			<TextInputRoot defaultValue="nope" isInvalid name="inside-root">
+				<FieldLabel>Inside a root</FieldLabel>
 				<TextInput />
 				<FieldError>Enter a valid value.</FieldError>
 			</TextInputRoot>
@@ -154,7 +154,7 @@ test('a focused invalid TextInput keeps its size and text position in forced col
 	}
 });
 
-test('a rooted TextInput is wired to its label, description, and error with no manual ids', () => {
+test('a TextInput inside a TextInputRoot is wired to its label, description, and error with no manual ids', () => {
 	render(
 		<TextInputRoot isInvalid>
 			<FieldLabel>Example field</FieldLabel>
@@ -169,8 +169,8 @@ test('a rooted TextInput is wired to its label, description, and error with no m
 	expect(getDescribedText(element)).toBe('Example description Example error');
 });
 
-// Root-coordinated props have one owner. A rooted input ignores its own values for them.
-test('a rooted TextInput ignores its own coordinated props and keeps the root state', async () => {
+// Root-coordinated props have one owner. A TextInput inside a root ignores its own values for them.
+test('a TextInput inside a TextInputRoot ignores its own coordinated props and keeps the root state', async () => {
 	const rootChanges: Array<string> = [];
 	const eventValues: Array<string> = [];
 
@@ -222,7 +222,7 @@ test('a rooted TextInput ignores its own coordinated props and keeps the root st
 	expect(new FormData(form).get('root-name')).toBe('from root!');
 });
 
-test('a rooted TextInput follows the root for disabled, read-only, and required', () => {
+test('a TextInput inside a TextInputRoot follows the root for disabled, read-only, and required', () => {
 	render(
 		<>
 			<TextInputRoot isDisabled>
@@ -253,8 +253,8 @@ test('a rooted TextInput follows the root for disabled, read-only, and required'
 });
 
 // `type`, `pattern`, `minLength`, and `maxLength` take part in the field's validation, so the root
-// owns them when a `TextInput` is rooted.
-test('a rooted TextInput uses the root type, pattern, and lengths over its own', () => {
+// owns them when a `TextInput` is inside a `TextInputRoot`.
+test('a TextInput inside a TextInputRoot uses the root type, pattern, and lengths over its own', () => {
 	render(
 		<TextInputRoot maxLength={20} minLength={5} pattern="[a-z]+@example[.]com" type="email">
 			<FieldLabel>Example field</FieldLabel>
@@ -269,7 +269,7 @@ test('a rooted TextInput uses the root type, pattern, and lengths over its own',
 	expect(element).toHaveAttribute('maxlength', '20');
 });
 
-test('a rooted TextInput ignores its own type, pattern, and lengths when the root sets none', () => {
+test('a TextInput inside a TextInputRoot ignores its own type, pattern, and lengths when the root sets none', () => {
 	render(
 		<TextInputRoot>
 			<FieldLabel>Example field</FieldLabel>
@@ -284,7 +284,7 @@ test('a rooted TextInput ignores its own type, pattern, and lengths when the roo
 	expect(element).not.toHaveAttribute('maxlength');
 });
 
-test('the root minLength decides native validation of a rooted TextInput', async () => {
+test('the root minLength decides native validation of a TextInput inside a TextInputRoot', async () => {
 	render(
 		<form>
 			<TextInputRoot minLength={5} validationBehavior="native">
@@ -323,7 +323,7 @@ test('a standalone TextInput applies its own type, pattern, and lengths', () => 
 });
 
 // A part must never disconnect the field's own wiring, so its ids add to the root's.
-test('a rooted TextInput adds its aria-describedby to the field description and error', () => {
+test('a TextInput inside a TextInputRoot adds its aria-describedby to the field description and error', () => {
 	render(
 		<>
 			<TextInputRoot isInvalid>
@@ -340,7 +340,7 @@ test('a rooted TextInput adds its aria-describedby to the field description and 
 	expect(element).toHaveAccessibleDescription('Example description Example error Extra hint');
 });
 
-test('a rooted TextInput adds its aria-labelledby to the field label', () => {
+test('a TextInput inside a TextInputRoot adds its aria-labelledby to the field label', () => {
 	render(
 		<>
 			<TextInputRoot>
@@ -366,7 +366,7 @@ test('a standalone TextInput keeps its own aria-describedby', () => {
 });
 
 // Input-local props are inherited from the root and can be overridden on the part.
-test('a rooted TextInput overrides input-local props from the root', async () => {
+test('a TextInput inside a TextInputRoot overrides input-local props from the root', async () => {
 	const changes: Array<string> = [];
 	const rootChanges: Array<string> = [];
 	render(
@@ -400,7 +400,7 @@ test('a rooted TextInput overrides input-local props from the root', async () =>
 	expect(rootChanges.at(-1)).toBe('a');
 });
 
-test('a rooted TextInput takes the root aria-label unless it sets its own', () => {
+test('a TextInput inside a TextInputRoot takes the root aria-label unless it sets its own', () => {
 	render(
 		<>
 			<TextInputRoot aria-label="Root name">
@@ -416,7 +416,7 @@ test('a rooted TextInput takes the root aria-label unless it sets its own', () =
 	expect(page.getByRole('textbox', { name: 'Input name' }).elements()).toHaveLength(1);
 });
 
-test('a rooted TextInput inherits input-local props from the root unless it sets its own', () => {
+test('a TextInput inside a TextInputRoot inherits input-local props from the root unless it sets its own', () => {
 	render(
 		<>
 			<TextInputRoot autoComplete="off" inputMode="numeric">

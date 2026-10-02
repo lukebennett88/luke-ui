@@ -43,7 +43,7 @@ Make two independent choices.
   control draws the chrome, and the input inside it is transparent. Without a control, `TextInput`
   draws its own chrome.
 
-<ExampleBlock src="text-input-primitive/rooted" title="TextInput primitives: Rooted" />
+<ExampleBlock src="text-input-primitive/with-root" title="TextInput primitives: With a root" />
 
 A prefix or suffix accepts any React node, including an interactive one such as a button. Give an
 interactive part an accessible name, keyboard behaviour, and a considered focus order.
@@ -62,8 +62,8 @@ values for these props:
 - `type`, `pattern`, `minLength`, and `maxLength`. Set them on the root, because they are part of
   the field's validation.
 
-`aria-describedby` and `aria-labelledby` on a rooted `TextInput` add to the field's own wiring. They
-never replace the connection to the label, description, and error.
+`aria-describedby` and `aria-labelledby` on a `TextInput` inside a `TextInputRoot` add to the
+field's own wiring. They never replace the connection to the label, description, and error.
 
 The root passes `autoComplete`, `inputMode`, `autoCorrect`, `spellCheck`, `enterKeyHint`,
 `autoFocus`, `aria-label`, and `size` down to the input as defaults. Set one on the `TextInput` to
@@ -99,9 +99,9 @@ state. Outside a control, an invalid input draws a thicker border that does not 
 `TextInputControl` has no invalid prop. It reads invalid state from the input inside it and takes a
 danger border.
 
-A rooted input in a field gets its message from `FieldError`, which carries the error icon and says
-what is wrong. A standalone invalid input relies on its structural border, so the surrounding
-interface should explain the problem. See [Validation](/docs/validation).
+An input inside a `TextInputRoot` gets its message from `FieldError`, which carries the error icon
+and says what is wrong. A standalone invalid input relies on its structural border, so the
+surrounding interface should explain the problem. See [Validation](/docs/validation).
 
 ## API
 
