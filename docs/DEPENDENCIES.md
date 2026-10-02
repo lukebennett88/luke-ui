@@ -54,9 +54,10 @@ The packed-consumer harness in [TESTING.md](TESTING.md#package-consumption) fail
 import or an unused dependency.
 
 When published code needs a small part of a large package, bundle that part instead of declaring the
-package. `deps.onlyBundle` in `packages/@luke-ui/react/vite.config.ts` lists the packages the build
-may bundle, and the build fails on any other. The build records each bundled version in
-`inlinedDependencies` in `package.json`.
+package. List the package in `devDependencies` and in `deps.onlyBundle` in
+`packages/@luke-ui/react/vite.config.ts`. The build fails when it bundles a package that
+`deps.onlyBundle` does not list. It records each bundled version in `inlinedDependencies` in
+`package.json`.
 
 ## Changesets
 

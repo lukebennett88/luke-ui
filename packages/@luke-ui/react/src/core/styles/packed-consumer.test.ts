@@ -9,12 +9,12 @@ import { afterAll, beforeAll, describe, expect, test } from 'vite-plus/test';
 import { cascadeLayerNames } from './layer-names.js';
 
 /**
- * Clean-consumer harness for `@luke-ui/react`. It runs with `pnpm run test:consumer`, not with the
+ * Packed-consumer harness for `@luke-ui/react`. It runs with `pnpm run test:consumer`, not with the
  * unit tests, because it installs from the npm registry.
  *
- * It packs the workspace build, or with `LUKE_UI_REACT_SPEC` set to a version or dist-tag it fetches
- * the published package. npm installs it in a directory outside the repository, once with the newest
- * peers the published ranges allow and once with the lowest.
+ * By default it packs the workspace build. Set `LUKE_UI_REACT_SPEC` to a version or dist-tag to fetch
+ * the published package instead. npm installs the package outside the repository, once with the
+ * newest peers the published ranges allow and once with the lowest.
  */
 
 const registrySpec = process.env.LUKE_UI_REACT_SPEC?.trim() || undefined;
@@ -152,7 +152,7 @@ const RUNTIME_THEME_MODULES = ['@luke-ui/react/src/theme/type-styles.ts'];
 const THEME_MODULE_PATTERN = /^@luke-ui\/react\/src\/theme\//;
 /** Packages that only theme generation needs. */
 const THEME_GENERATION_PACKAGE_PATTERN = /^@capsizecss\//;
-/** Styling authoring: the Vanilla Extract compiler API and the recipe and Rainbow authoring modules. */
+/** Styling authoring: the Vanilla Extract authoring API, and the Luke UI and Rainbow authoring modules. */
 const STYLING_AUTHORING_PACKAGES = ['@vanilla-extract/css'];
 const STYLING_AUTHORING_SOURCE_PATTERN =
 	/^@luke-ui\/(?:react\/src\/core\/styles\/recipe\.ts|rainbow-sprinkles\/.*\/define-(?:properties|sprinkles)\.[jt]s)$/;
@@ -296,7 +296,6 @@ for (const peerSet of peerSets) {
 			expect(result.markup).toContain('<button');
 			expect(result.recoverableErrors).toEqual([]);
 			expect(result.consoleErrors).toEqual([]);
-			// Hydration adopts the server DOM unchanged.
 			expect(result.htmlAfterHydration).toBe(result.serverHtml);
 			// The label resolves through server-generated ids, so it proves those ids hydrated intact.
 			expect(result.inputLabel).toBe('Name');
@@ -465,8 +464,8 @@ function listFiles(root: string, prefix = ''): Array<string> {
 }
 
 /**
- * Whether a `@luke-ui/*` dependency installs from the registry. A packed run cannot see the
- * registry yet, so the workspace package has to be publishable at the version React pins.
+ * Whether a `@luke-ui/*` dependency installs from the registry. A packed run tests an unreleased
+ * version, so the workspace package has to be publishable at the version React pins.
  */
 function isReleasable(name: string, range: string): boolean {
 	if (registrySpec === undefined) {

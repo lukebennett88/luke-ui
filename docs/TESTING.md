@@ -80,8 +80,12 @@ Keep it to the package boundary: tarball contents, dependencies, peers, assets, 
 client build, type checking, and what small imports bundle. Component behaviour belongs in component
 tests.
 
-One consumer installs the lowest version each peer range allows, with `MINIMUM_TYPESCRIPT`. A
-passing run is the evidence for those floors, so change a floor or a peer range only with one.
+One consumer installs the lowest version each peer range allows and the TypeScript version in
+`MINIMUM_TYPESCRIPT`. That run is the evidence for those floors. Change a peer range or
+`MINIMUM_TYPESCRIPT` only when the harness passes with the new floor.
+
+A failing bundle-boundary check means a small import pulls in code it does not need. Fix the import
+graph. Widen a boundary's `composes` or `RUNTIME_THEME_MODULES` only when the import needs the code.
 
 Set `LUKE_UI_REACT_SPEC` to a published version or dist-tag to run the same checks against the
 registry.
