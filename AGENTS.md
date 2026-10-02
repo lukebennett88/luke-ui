@@ -45,3 +45,12 @@
   same file and rule do not merge: the later entry wins.
 - In `apps/docs`, a `src/lib/` module imported by a client component must not import `node:fs` or
   `node:path`. If it does, the page returns HTTP 200 but its MDX body renders empty.
+
+### Turborepo
+
+- Turbo configuration, tasks, and CLI behaviour can vary with the installed version; do not rely on
+  training data alone.
+- Before changing Turbo config or commands, resolve the installed `turbo` package (for example
+  `node -p "require.resolve('turbo/package.json')"` from a workspace that depends on `turbo`).
+- Read that package's bundled `docs/README.md` and relevant files under `docs/`; those docs match
+  the installed version and are available offline.
