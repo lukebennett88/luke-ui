@@ -11,15 +11,16 @@ import { createComponentPropsGenerator } from './src/lib/create-component-props-
 import { inlineExampleSource } from './src/lib/inline-example-source';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
+import { stringifyComponentPropsTable } from './src/lib/stringify-component-props-table.js';
 
 export const docs = defineDocs({
 	dir: 'content/docs',
 	docs: {
 		postprocess: {
-			// `stringify` inlines `<ExampleBlock>`/`<SourceCodeBlock>` source into the LLM-facing
-			// markdown text only; it never touches the AST rendered pages use.
+			// `stringify` rewrites LLM-facing markdown only; it never touches the AST rendered pages
+			// use. Example blocks become fenced source; ComponentPropsTable becomes a Markdown table.
 			includeProcessedMarkdown: {
-				stringify: inlineExampleSource,
+				stringify: (node) => inlineExampleSource(node) ?? stringifyComponentPropsTable(node),
 			},
 		},
 		schema: pageSchema.extend({

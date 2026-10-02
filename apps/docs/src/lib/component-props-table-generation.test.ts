@@ -4,6 +4,7 @@ import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typesc
 import { expect, test } from 'vite-plus/test';
 import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
+import { generatedDocToMarkdown } from './stringify-component-props-table.js';
 
 const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
 const generator = createGenerator({
@@ -117,4 +118,49 @@ test('does not mark an object-only type with the native-props entry', async () =
 	expect(renderProps?.entries.some((entry) => entry.name === NATIVE_PROPS_FORWARDING_KEY)).toBe(
 		false,
 	);
+});
+
+test('processed Markdown turns ButtonProps into a table and keeps the native-props note as prose', async () => {
+	const [buttonProps] = await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'packages/@luke-ui/react/src/core/button/button.tsx',
+			name: 'ButtonProps',
+		},
+		{ basePath: repoRoot },
+	);
+
+	expect(buttonProps).toBeDefined();
+	const markdown = generatedDocToMarkdown(buttonProps!);
+
+	expect(markdown).toContain('### ButtonProps');
+	expect(markdown).toContain('| Prop');
+	expect(markdown).toContain('`appearance?`');
+	expect(markdown).toContain(
+		'`ButtonProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
+	);
+	expect(markdown).not.toContain(NATIVE_PROPS_FORWARDING_KEY);
+	// Rendering still receives the reserved entry; only Markdown serialization strips it from rows.
+	expect(buttonProps!.entries.some((entry) => entry.name === NATIVE_PROPS_FORWARDING_KEY)).toBe(
+		true,
+	);
+});
+
+test('processed Markdown for a native-only wrapper has the note and no prop rows', async () => {
+	const [kbdProps] = await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'packages/@luke-ui/react/src/core/kbd/kbd.tsx',
+			name: 'KbdProps',
+		},
+		{ basePath: repoRoot },
+	);
+
+	expect(kbdProps).toBeDefined();
+	const markdown = generatedDocToMarkdown(kbdProps!);
+
+	expect(markdown).toContain('### KbdProps');
+	expect(markdown).toContain(
+		'`KbdProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
+	);
+	expect(markdown).not.toContain('| Prop');
+	expect(markdown).not.toContain(NATIVE_PROPS_FORWARDING_KEY);
 });
