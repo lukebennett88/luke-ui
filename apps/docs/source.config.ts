@@ -11,15 +11,14 @@ import { createComponentPropsGenerator } from './src/lib/create-component-props-
 import { inlineExampleSource } from './src/lib/inline-example-source';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
+import { stringifyComponentPropsTable } from './src/lib/stringify-component-props-table.js';
 
 export const docs = defineDocs({
 	dir: 'content/docs',
 	docs: {
 		postprocess: {
-			// `stringify` inlines `<ExampleBlock>`/`<SourceCodeBlock>` source into the LLM-facing
-			// markdown text only; it never touches the AST rendered pages use.
 			includeProcessedMarkdown: {
-				stringify: inlineExampleSource,
+				stringify: (node) => inlineExampleSource(node) ?? stringifyComponentPropsTable(node),
 			},
 		},
 		schema: pageSchema.extend({
@@ -62,6 +61,8 @@ export default defineConfig({
 					name: 'component-props-table',
 					options: { basePath: repoRoot },
 					outputName: 'ComponentPropsTable',
+					// Processed Markdown reads GeneratedDoc JSON from the `type` attribute.
+					remarkStringify: true,
 				},
 			],
 			remarkValidateExamples,
