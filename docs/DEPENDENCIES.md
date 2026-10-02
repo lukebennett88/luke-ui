@@ -53,8 +53,9 @@ the published JavaScript or declarations import it. Keep build-time packages in 
 The packed-consumer harness in [TESTING.md](TESTING.md#package-consumption) fails on an undeclared
 import or an unused dependency.
 
-When published code needs a small part of a large package, bundle that part instead of declaring the
-package. List the package in `devDependencies` and in `deps.onlyBundle` in
+Prefer declaring a dependency to bundling it. Bundle one only for a concrete reason, such as
+published code that needs a small part of a package whose install would cost consumers far more than
+that part. To bundle a dependency, list it in `devDependencies` and in `deps.onlyBundle` in
 `packages/@luke-ui/react/vite.config.ts`. The build fails when it bundles a package that
 `deps.onlyBundle` does not list. It records each bundled version in `inlinedDependencies` in
 `package.json`.

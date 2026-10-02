@@ -163,7 +163,10 @@ const RUNTIME_THEME_MODULES = ['@luke-ui/react/src/theme/type-styles.ts'];
 const THEME_MODULE_PATTERN = /^@luke-ui\/react\/src\/theme\//;
 /** Packages that only theme generation needs. */
 const THEME_GENERATION_PACKAGE_PATTERN = /^@capsizecss\//;
-/** Styling authoring: the Vanilla Extract authoring API, and the Luke UI and Rainbow authoring modules. */
+/**
+ * Styling authoring: the Vanilla Extract authoring API, and the Luke UI and Rainbow authoring
+ * modules.
+ */
 const STYLING_AUTHORING_PACKAGES = ['@vanilla-extract/css'];
 const STYLING_AUTHORING_SOURCE_PATTERN =
 	/^@luke-ui\/(?:react\/src\/core\/styles\/recipe\.ts|rainbow-sprinkles\/.*\/define-(?:properties|sprinkles)\.[jt]s)$/;
@@ -515,8 +518,9 @@ function listFiles(root: string, prefix = ''): Array<string> {
 }
 
 /**
- * Whether a `@luke-ui/*` dependency installs from the registry. A packed run tests an unreleased
- * version, so the workspace package has to be publishable at the version React pins.
+ * Whether a `@luke-ui/*` dependency can be released at the range React declares. A packed run checks
+ * that the sibling workspace package is not private and has exactly that version. A registry run
+ * checks that a published version satisfies the range.
  */
 function isReleasable(name: string, range: string): boolean {
 	if (registrySpec === undefined) {

@@ -6,8 +6,8 @@
 - Component tests (`*.browser.test.tsx`) run in Chromium. Each component has one file for behaviour,
   axe, and visual captures.
 
-The packed-consumer harness is the one Node test outside the unit run. See
-[Package consumption](#package-consumption).
+The packed-consumer harness is the one test outside these types. It runs in Node and drives Chromium
+for hydration. See [Package consumption](#package-consumption).
 
 Do not add another test type.
 

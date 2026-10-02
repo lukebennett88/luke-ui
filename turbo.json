@@ -148,6 +148,7 @@
 			"outputs": [],
 			"passThroughEnv": [
 				"LUKE_UI_REACT_SPEC",
+				"PLAYWRIGHT_BROWSERS_PATH",
 				"HTTP_PROXY",
 				"HTTPS_PROXY",
 				"NO_PROXY",
