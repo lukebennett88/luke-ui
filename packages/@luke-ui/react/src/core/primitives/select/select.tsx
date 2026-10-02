@@ -30,7 +30,7 @@ import { ComboboxItem } from '../combobox/item.js';
 import { comboboxRecipe } from '../combobox/styles.css.js';
 import { rootIdProps } from '../root-id.js';
 import type { SelectSize } from './styles.css.js';
-import { selectRecipe, selectRootScopeClassName } from './styles.css.js';
+import { selectRecipe } from './styles.css.js';
 
 export type { SelectSize };
 
@@ -164,12 +164,10 @@ export type SelectItemProps<T extends object> = Prettify<
 >;
 
 /**
- * Semantic root for a select. It connects the trigger, listbox, label, description, and error
- * parts inside it, and owns the select's value, state, validation, and size. It holds one
- * selected option.
+ * Semantic root for a select. It owns the value, state, validation, and size of the parts inside
+ * it.
  *
- * `id`, `className`, and `ref` target the root element. Pass `triggerId` to set the trigger's id.
- * Pass `value` and `onChange` for a controlled select, or `defaultValue` for an uncontrolled one.
+ * `id`, `className`, and `ref` target the root element. `triggerId` targets the trigger.
  */
 export function SelectRoot(props: SelectRootProps): JSX.Element {
 	const { className, id, size = 'medium', triggerId, ...selectProps } = props;
@@ -180,10 +178,7 @@ export function SelectRoot(props: SelectRootProps): JSX.Element {
 				{...selectProps}
 				{...rootIdProps(id, triggerId)}
 				className={composeRenderProps(className, (renderedClassName) => {
-					return cx(
-						selectRootScopeClassName,
-						selectRecipe().root({ className: renderedClassName }),
-					);
+					return selectRecipe().root({ className: renderedClassName });
 				})}
 			/>
 		</SelectSizeContext.Provider>
@@ -191,11 +186,8 @@ export function SelectRoot(props: SelectRootProps): JSX.Element {
 }
 
 /**
- * The button that opens the select. It owns the control chrome: the border, background, focus
- * ring, and disabled state. While the root is invalid, it takes the danger border. It draws no
- * error icon, because `FieldError` carries it.
- *
- * Invalid and disabled state come from the root, so the trigger has no props for them.
+ * The button that opens the select and draws its control chrome. While the root is invalid it takes
+ * the danger border. `FieldError` carries the error icon.
  */
 export function SelectTrigger(props: SelectTriggerProps): JSX.Element {
 	const { children, className, ...buttonProps } = props;
@@ -257,9 +249,9 @@ export function SelectIndicator(props: SelectIndicatorProps): JSX.Element {
 }
 
 /**
- * Popover surface for the listbox. It is as wide as the trigger. The portal inherits the
- * document's theme: importing a theme stylesheet themes the whole document from `:root`, so no
- * propagation is needed. A colour mode scoped below `<html>` does not reach the portal.
+ * Popover surface for the listbox. The portal inherits the document's theme: importing a theme
+ * stylesheet themes the whole document from `:root`, so no propagation is needed. A colour mode
+ * scoped below `<html>` does not reach the portal.
  */
 export function SelectPopover(props: SelectPopoverProps): JSX.Element {
 	const { offset = 4, ref, ...popoverProps } = props;

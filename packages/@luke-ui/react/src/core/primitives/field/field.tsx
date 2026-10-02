@@ -54,9 +54,8 @@ interface FieldSlotProps extends FieldSlotContentProps {
 export type FieldAccessibleNameProps =
 	| (FieldSlotContentProps & {
 			/**
-			 * Visible label. Pass non-empty, textual, non-interactive content: the label is a native
-			 * `<label>` element. Place links and buttons outside it, and associate external label content
-			 * with `aria-labelledby` instead.
+			 * Visible label. Pass non-empty, textual, non-interactive content. Place links and buttons
+			 * outside it, and associate external label content with `aria-labelledby` instead.
 			 */
 			label: Exclude<ReactNode, boolean | null | undefined>;
 			'aria-label'?: never;

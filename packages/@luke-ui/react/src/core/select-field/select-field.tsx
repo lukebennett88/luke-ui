@@ -14,13 +14,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '../primitives/select/select.js';
-import type { SelectSize } from '../primitives/select/styles.css.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 
 type _SelectFieldOmit = DistributiveOmit<
 	SelectRootProps,
-	'aria-label' | 'aria-labelledby' | 'children' | 'isInvalid' | 'size'
+	'aria-label' | 'aria-labelledby' | 'children' | 'isInvalid'
 >;
 
 interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
@@ -33,12 +32,8 @@ interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
 	errorMessage?: ReactNode;
 	/** Options for the render function in `children`. */
 	items?: SelectListBoxProps<T>['items'];
-	/** Placeholder text shown while nothing is selected. */
-	placeholder?: string;
 	/** Forwarded to the field's root element. Use `triggerRef` for the trigger. */
 	ref?: SelectRootProps['ref'];
-	/** Control size. @default 'medium' */
-	size?: SelectSize;
 	/**
 	 * Forwarded to the trigger `<button>` element. Accepts a callback ref or a ref object. Use `ref`
 	 * for the root element.
@@ -55,9 +50,6 @@ export type SelectFieldProps<T extends object> = Prettify<_SelectFieldProps<T>>;
  * A single-selection field with a label, description, validation message, and a popover list of
  * options.
  *
- * It composes `SelectRoot`, `Field`, `SelectTrigger`, `SelectPopover`, and `SelectListBox`. Pass
- * `value` and `onChange` for a controlled field, or `defaultValue` for an uncontrolled one.
- *
  * `id`, `className`, and `ref` target the field's root element. `triggerId` and `triggerRef` target
  * the trigger.
  */
@@ -69,8 +61,6 @@ export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.E
 		items,
 		label,
 		necessityIndicator,
-		placeholder,
-		size = 'medium',
 		triggerRef,
 		...rootProps
 	} = props;
@@ -78,12 +68,7 @@ export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.E
 	const normalizedErrorMessage = normalizeErrorMessage(errorMessage);
 
 	return (
-		<SelectRoot
-			{...rootProps}
-			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
-			placeholder={placeholder}
-			size={size}
-		>
+		<SelectRoot {...rootProps} isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}>
 			<Field
 				description={description}
 				errorMessage={normalizedErrorMessage}

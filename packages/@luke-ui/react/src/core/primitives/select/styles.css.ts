@@ -1,20 +1,12 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
-import { classSelector } from '../../styles/class-selector.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import { descendantDisabledSelector } from '../../styles/input-states.js';
-import { style } from '../../styles/layered-style.css.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
-/**
- * Marker class on every `SelectRoot`. React Aria publishes validity on the root as `data-invalid`,
- * and the trigger reads it through this class.
- */
-export const selectRootScopeClassName = style({}, 'select-root');
-
 const notDisabled = ':not([data-disabled="true"])';
-const rootInvalid = `${classSelector(selectRootScopeClassName)}[data-invalid="true"] &${notDisabled}`;
+const rootInvalid = `[data-invalid="true"] &${notDisabled}`;
 
 /**
  * Raw slotted config for the Select primitives.
@@ -25,7 +17,6 @@ const rootInvalid = `${classSelector(selectRootScopeClassName)}[data-invalid="tr
  *
  * The trigger draws the same well chrome as `comboboxRecipe`'s `control` slot and
  * `textInputPartsRecipe`'s `control` slot. Change the three together until they share one source.
- * The field's error message carries the error icon, so the trigger draws only the danger border.
  */
 const selectConfig = {
 	slots: {
