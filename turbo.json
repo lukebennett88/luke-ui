@@ -1,5 +1,6 @@
 {
-	"$schema": "https://v2-8-10.turborepo.dev/schema.json",
+	"$schema": "./node_modules/turbo/schema.json",
+	"agentGuidance": false,
 	"tasks": {
 		"@luke-ui/react#check:lint": {
 			"dependsOn": ["build", "generate"]
