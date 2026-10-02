@@ -34,20 +34,6 @@ function trigger(name: RegExp | string): HTMLButtonElement {
 	return element;
 }
 
-/** Whether the trigger draws its CSS invalid icon, which has no DOM node. */
-function hasTriggerIcon(element: HTMLElement): boolean {
-	return getComputedStyle(element, '::after').content !== 'none';
-}
-
-/** Whether an error message linked to the trigger draws its leading icon. */
-function hasMessageIcon(element: HTMLElement): boolean {
-	const describedBy = element.getAttribute('aria-describedby') ?? '';
-	return describedBy
-		.split(' ')
-		.flatMap((id) => document.getElementById(id) ?? [])
-		.some((message) => getComputedStyle(message, '::before').display !== 'none');
-}
-
 function SelectFieldScene() {
 	return (
 		<Stack>
@@ -171,37 +157,45 @@ test('SelectField points aria-describedby at external hint text without a descri
 	expect(getDescribedText(trigger(/Example field/))).toBe('External hint');
 });
 
+// The marker follows the last word of the label, so the accessible name has no space before it.
 test('SelectField marks a required field with an icon or a label', () => {
 	render(
 		<>
-			<SelectField isRequired items={themeItems} label="Icon field">
+			<SelectField defaultValue="light" isRequired items={themeItems} label="Icon field">
 				{renderThemeItem}
 			</SelectField>
-			<SelectField isRequired items={themeItems} label="Text field" necessityIndicator="label">
+			<SelectField
+				defaultValue="light"
+				isRequired
+				items={themeItems}
+				label="Text field"
+				necessityIndicator="label"
+			>
 				{renderThemeItem}
 			</SelectField>
-			<SelectField items={themeItems} label="Optional field">
+			<SelectField defaultValue="light" items={themeItems} label="Optional field">
 				{renderThemeItem}
 			</SelectField>
 		</>,
 	);
-	const marker = (text: string) => {
-		const label = page.getByText(text, { exact: true }).element();
-		return getComputedStyle(label, '::after').content;
-	};
 
-	expect(marker('Icon field')).toBe('"*"');
-	expect(marker('Text field')).toBe('"(required)"');
-	expect(marker('Optional field')).toBe('none');
+	expect(trigger(/Icon field/)).toHaveAccessibleName('Light Icon field*');
+	expect(trigger(/Text field/)).toHaveAccessibleName('Light Text field(required)');
+	expect(trigger(/Optional field/)).toHaveAccessibleName('Light Optional field');
 });
 
-test('an errorMessage marks the field invalid with one icon, inside the trigger', () => {
+test('an errorMessage marks the field invalid and describes the trigger with the error', () => {
 	render(
 		<>
-			<SelectField items={themeItems} label="Valid">
+			<SelectField defaultValue="light" items={themeItems} label="Valid">
 				{renderThemeItem}
 			</SelectField>
-			<SelectField errorMessage="Example error" items={themeItems} label="Invalid">
+			<SelectField
+				defaultValue="light"
+				errorMessage="Example error"
+				items={themeItems}
+				label="Invalid"
+			>
 				{renderThemeItem}
 			</SelectField>
 		</>,
@@ -209,12 +203,12 @@ test('an errorMessage marks the field invalid with one icon, inside the trigger'
 	const valid = trigger(/Valid/);
 	const invalid = trigger(/Invalid/);
 
-	expect(getDescribedText(invalid)).toBe('Example error');
+	expect(invalid).toHaveAccessibleDescription('Example error');
 	expect(invalid.closest('[data-invalid="true"]')).not.toBeNull();
+	expect(valid).toHaveAccessibleDescription('');
 	expect(valid.closest('[data-invalid="true"]')).toBeNull();
-	expect(hasTriggerIcon(valid)).toBe(false);
-	expect(hasTriggerIcon(invalid)).toBe(true);
-	expect(hasMessageIcon(invalid)).toBe(false);
+	// The error icon is hidden from assistive technology, so the message does not change the name.
+	expect(invalid).toHaveAccessibleName('Light Invalid');
 });
 
 test('an empty errorMessage leaves the field valid', () => {
@@ -250,7 +244,6 @@ test('an isRequired SelectField shows the native message after a failed submit',
 
 	await expect.poll(() => getDescribedText(trigger(/Theme/)).length).toBeGreaterThan(0);
 	expect(trigger(/Theme/).closest('[data-invalid="true"]')).not.toBeNull();
-	expect(hasTriggerIcon(trigger(/Theme/))).toBe(true);
 
 	await userEvent.click(trigger(/Theme/));
 	await userEvent.click(page.getByRole('option', { name: 'Dark' }));
@@ -391,6 +384,42 @@ test('SelectField resolves object and callback triggerRefs', () => {
 	expect(callbackResolved.at(-1)).toBe(trigger(/Callback ref/));
 });
 
+test('SelectField resolves ref to the root element and triggerRef to the trigger', () => {
+	const ref = createRef<HTMLDivElement>();
+	const triggerRef = createRef<HTMLButtonElement>();
+	const callbackRoots: Array<HTMLDivElement | null> = [];
+	render(
+		<>
+			<SelectField
+				id="example-root"
+				items={themeItems}
+				label="Object refs"
+				ref={ref}
+				triggerRef={triggerRef}
+			>
+				{renderThemeItem}
+			</SelectField>
+			<SelectField
+				items={themeItems}
+				label="Callback ref"
+				ref={(node) => {
+					callbackRoots.push(node);
+				}}
+			>
+				{renderThemeItem}
+			</SelectField>
+		</>,
+	);
+	const element = trigger(/Object refs/);
+
+	expect(ref.current).toBe(document.getElementById('example-root'));
+	expect(ref.current?.tagName).toBe('DIV');
+	expect(ref.current?.contains(element)).toBe(true);
+	expect(triggerRef.current).toBe(element);
+	expect(callbackRoots.at(-1)?.contains(trigger(/Callback ref/))).toBe(true);
+	expect(callbackRoots.at(-1)).not.toBe(ref.current);
+});
+
 test('SelectField puts id on its root element and triggerId on the trigger', () => {
 	render(
 		<SelectField
@@ -467,6 +496,9 @@ test('an open SelectField has no axe violations', async () => {
 
 	await userEvent.click(trigger(/Theme/));
 	await expect.element(page.getByRole('listbox')).toBeVisible();
+	await waitForOverlayEnter(
+		page.getByRole('listbox').element().closest('[data-trigger]') ?? document.body,
+	);
 
 	await expectNoAxeViolations(container);
 	await expectNoAxeViolations(document.body);

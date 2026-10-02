@@ -1,3 +1,4 @@
+import type { Ref } from 'react';
 import { assertType, test } from 'vite-plus/test';
 import type { SelectFieldProps } from './select-field.js';
 
@@ -55,5 +56,20 @@ test('SelectField selection props speak Key | null', () => {
 		label: 'Theme',
 		onChange: (value: string | number | null) => value,
 		value: null,
+	});
+});
+
+test('SelectField takes a root element ref and a trigger ref', () => {
+	assertType<SelectFieldProps<object>>({
+		children: [],
+		label: 'Theme',
+		ref: null as unknown as Ref<HTMLDivElement>,
+		triggerRef: null as unknown as Ref<HTMLButtonElement>,
+	});
+	assertType<SelectFieldProps<object>>({
+		children: [],
+		label: 'Theme',
+		ref: () => {},
+		triggerRef: () => {},
 	});
 });

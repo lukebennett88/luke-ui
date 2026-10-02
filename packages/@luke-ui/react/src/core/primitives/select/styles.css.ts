@@ -1,14 +1,8 @@
-import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
-import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import { classSelector } from '../../styles/class-selector.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import { descendantDisabledSelector } from '../../styles/input-states.js';
-import {
-	invalidIndicatorIcon,
-	invalidIndicatorIconForcedColors,
-} from '../../styles/invalid-indicator.js';
 import { style } from '../../styles/layered-style.css.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
@@ -18,10 +12,6 @@ import { recipe } from '../../styles/recipe.js';
  * and the trigger reads it through this class.
  */
 export const selectRootScopeClassName = style({}, 'select-root');
-
-// Set per `size` variant on `trigger` below, from `FIELD_CONTROL_ICON_SIZE`, so the invalid
-// `::after` icon matches the indicator chevron at each size.
-const selectErrorIconSize = createVar();
 
 const notDisabled = ':not([data-disabled="true"])';
 const rootInvalid = `${classSelector(selectRootScopeClassName)}[data-invalid="true"] &${notDisabled}`;
@@ -34,7 +24,8 @@ const rootInvalid = `${classSelector(selectRootScopeClassName)}[data-invalid="tr
  * and popover surfaces come from the combobox recipe.
  *
  * The trigger draws the same well chrome as `comboboxRecipe`'s `control` slot and
- * `textInputRecipe`'s `control` slot. Change the three together until they share one source.
+ * `textInputPartsRecipe`'s `control` slot. Change the three together until they share one source.
+ * The field's error message carries the error icon, so the trigger draws only the danger border.
  */
 const selectConfig = {
 	slots: {
@@ -55,7 +46,6 @@ const selectConfig = {
 					selectors: {
 						'&[data-disabled="true"]': { borderColor: 'GrayText', color: 'GrayText', opacity: 1 },
 						'&[data-focus-visible="true"]': { outlineColor: 'Highlight' },
-						[`${rootInvalid}::after`]: invalidIndicatorIconForcedColors,
 					},
 				},
 				'(prefers-reduced-motion: reduce)': { transition: 'none' },
@@ -97,17 +87,10 @@ const selectConfig = {
 					borderColor: vars.color.border.accent,
 					...focusRing(vars.color.border.focus),
 				},
-				// The border stays at the resting 1px here: the `::after` icon is the non-colour cue,
-				// so thickening the border as well would be redundant. The gated danger colour is what
-				// satisfies the contrast requirement. These come after the states above so an invalid
-				// select keeps its danger border while hovered, open, or focused.
+				// The field's error message carries the non-colour invalid cue, so the border keeps its
+				// resting width and only takes the danger colour. This comes after the states above so an
+				// invalid select keeps its danger border while hovered, open, or focused.
 				[rootInvalid]: { borderColor: vars.color.background.danger.solid.rest },
-				// The icon is the trigger's last box. `indicator` takes `order: 1`, so flex layout
-				// places the icon between the value and the indicator. `gap` supplies the spacing.
-				[`${rootInvalid}::after`]: {
-					...invalidIndicatorIcon(selectErrorIconSize),
-					marginInlineEnd: 0,
-				},
 			},
 		},
 		value: {
@@ -128,9 +111,6 @@ const selectConfig = {
 			color: vars.color.text.secondary,
 			display: 'inline-flex',
 			flexShrink: 0,
-			// The trigger's invalid icon is a `::after`, so it renders after this part in document
-			// order. An explicit `order` moves the indicator behind the icon (default `order: 0`).
-			order: 1,
 
 			selectors: {
 				[descendantDisabledSelector]: { color: vars.color.text.disabled },
@@ -145,7 +125,6 @@ const selectConfig = {
 					blockSize: vars.controlSize.medium,
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
 					paddingInline: vars.space.sp12,
-					vars: { [selectErrorIconSize]: vars.iconSize[FIELD_CONTROL_ICON_SIZE.medium] },
 				},
 			},
 			small: {
@@ -155,7 +134,6 @@ const selectConfig = {
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 					paddingInline: vars.space.sp8,
-					vars: { [selectErrorIconSize]: vars.iconSize[FIELD_CONTROL_ICON_SIZE.small] },
 				},
 			},
 		},

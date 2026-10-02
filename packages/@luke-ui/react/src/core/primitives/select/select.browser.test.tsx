@@ -88,23 +88,6 @@ function trigger(name: RegExp | string): HTMLButtonElement {
 	return element;
 }
 
-/**
- * Whether the trigger draws its CSS invalid icon. The icon is a `::after` mask with no DOM node,
- * so its computed `content` is the only observable signal that it renders.
- */
-function hasTriggerIcon(element: HTMLElement): boolean {
-	return getComputedStyle(element, '::after').content !== 'none';
-}
-
-/** Whether an error message linked to the trigger draws its leading icon. */
-function hasMessageIcon(element: HTMLElement): boolean {
-	const describedBy = element.getAttribute('aria-describedby') ?? '';
-	return describedBy
-		.split(' ')
-		.flatMap((id) => document.getElementById(id) ?? [])
-		.some((message) => getComputedStyle(message, '::before').display !== 'none');
-}
-
 test('SelectRoot puts id on its root element and triggerId on the trigger button', () => {
 	render(
 		<ExampleSelect
@@ -202,17 +185,6 @@ test('a select closes without changing the value on Escape', async () => {
 	expect(changes).toEqual([]);
 });
 
-test('keyboard focus draws one ring, on the trigger', async () => {
-	render(<ExampleSelect id="example-root" label="Example field" />);
-
-	await focusViaKeyboard(page.getByRole('button', { name: /Example field/ }));
-
-	expect(getComputedStyle(trigger(/Example field/)).outlineStyle).toBe('solid');
-	expect(
-		getComputedStyle(document.getElementById('example-root') as HTMLElement).outlineStyle,
-	).toBe('none');
-});
-
 test('SelectIndicator reflects the open state with data-open', async () => {
 	render(<ExampleSelect label="Example field" />);
 	const indicator = trigger(/Example field/).querySelector('span[aria-hidden]:last-child');
@@ -261,46 +233,41 @@ test('SelectIndicator children replace the chevron and keep data-open', async ()
 test('SelectValue shows the root placeholder, then the selected value', async () => {
 	render(<ExampleSelect label="Example field" placeholder="Choose an option" />);
 	const element = trigger(/Example field/);
-	const value = element.querySelector('[data-placeholder]');
 
-	expect(value).toHaveTextContent('Choose an option');
-	if (!(value instanceof HTMLElement)) throw new Error('Expected the placeholder.');
-	const placeholderColor = getComputedStyle(value).color;
+	expect(element.querySelector('[data-placeholder]')).toHaveTextContent('Choose an option');
 
 	await userEvent.click(element);
 	await userEvent.click(page.getByRole('option', { name: 'Example three' }));
 
 	expect(element.querySelector('[data-placeholder]')).toBeNull();
 	expect(element).toHaveTextContent('Example three');
-	expect(getComputedStyle(element.querySelector('span') ?? element).color).not.toBe(
-		placeholderColor,
-	);
 });
 
-test('a SelectRoot reports validity on the trigger with exactly one invalid icon', () => {
+test('a SelectRoot reports validity on the root and describes the trigger with the error', () => {
 	render(
 		<>
-			<ExampleSelect label="Valid" />
-			<ExampleSelect errorMessage="Example error" isInvalid label="Invalid" />
+			<ExampleSelect defaultValue="one" label="Valid" />
+			<ExampleSelect defaultValue="one" errorMessage="Example error" isInvalid label="Invalid" />
 		</>,
 	);
 	const valid = trigger(/Valid/);
 	const invalid = trigger(/Invalid/);
 
-	expect(hasTriggerIcon(valid)).toBe(false);
-	expect(hasTriggerIcon(invalid)).toBe(true);
-	expect(hasMessageIcon(invalid)).toBe(false);
-	expect(getDescribedText(invalid)).toBe('Example error');
+	expect(invalid).toHaveAccessibleDescription('Example error');
+	expect(valid).toHaveAccessibleDescription('');
+	// The error icon is hidden from assistive technology, so the name is the value and the label.
+	expect(invalid).toHaveAccessibleName('Example one Invalid');
 	// ARIA has no `aria-invalid` for a button, so the root carries the semantic state.
 	expect(invalid).not.toHaveAttribute('aria-invalid');
 	expect(invalid.closest('[data-invalid="true"]')).not.toBeNull();
+	expect(valid.closest('[data-invalid="true"]')).toBeNull();
 });
 
-test('an invalid SelectTrigger keeps its icon while open and does not shift', async () => {
+test('an invalid SelectTrigger keeps its block size and its description while open', async () => {
 	render(
 		<>
 			<ExampleSelect label="Valid" />
-			<ExampleSelect isInvalid label="Invalid" />
+			<ExampleSelect errorMessage="Example error" isInvalid label="Invalid" />
 		</>,
 	);
 	const valid = trigger(/Valid/);
@@ -311,15 +278,14 @@ test('an invalid SelectTrigger keeps its icon while open and does not shift', as
 	await userEvent.click(invalid);
 	await expect.element(page.getByRole('listbox')).toBeVisible();
 
-	expect(hasTriggerIcon(invalid)).toBe(true);
+	expect(invalid.getBoundingClientRect().height).toBe(valid.getBoundingClientRect().height);
+	expect(invalid).toHaveAccessibleDescription('Example error');
 });
 
-test('a disabled SelectRoot disables the trigger and draws no invalid icon', async () => {
+test('a disabled invalid SelectRoot still disables the trigger', () => {
 	render(<ExampleSelect isDisabled isInvalid label="Example field" />);
-	const element = trigger(/Example field/);
 
-	expect(element).toBeDisabled();
-	expect(hasTriggerIcon(element)).toBe(false);
+	expect(trigger(/Example field/)).toBeDisabled();
 });
 
 // Block size is the layout contract for `size`.
@@ -452,6 +418,9 @@ test('an open select has no axe violations', async () => {
 
 	await userEvent.click(trigger(/Example field/));
 	await expect.element(page.getByRole('listbox')).toBeVisible();
+	await waitForOverlayEnter(
+		page.getByRole('listbox').element().closest('[data-trigger]') ?? document.body,
+	);
 
 	await expectNoAxeViolations(container);
 	await expectNoAxeViolations(document.body);

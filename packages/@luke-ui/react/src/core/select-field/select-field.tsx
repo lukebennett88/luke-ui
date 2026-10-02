@@ -20,7 +20,7 @@ import type { Prettify } from '../types/prettify.js';
 
 type _SelectFieldOmit = DistributiveOmit<
 	SelectRootProps,
-	'aria-label' | 'aria-labelledby' | 'children' | 'isInvalid' | 'ref' | 'size'
+	'aria-label' | 'aria-labelledby' | 'children' | 'isInvalid' | 'size'
 >;
 
 interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
@@ -35,13 +35,13 @@ interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
 	items?: SelectListBoxProps<T>['items'];
 	/** Placeholder text shown while nothing is selected. */
 	placeholder?: string;
+	/** Forwarded to the field's root element. Use `triggerRef` for the trigger. */
+	ref?: SelectRootProps['ref'];
 	/** Control size. @default 'medium' */
 	size?: SelectSize;
 	/**
-	 * Forwarded to the trigger `<button>` element.
-	 *
-	 * This field takes no plain `ref`: `triggerRef` is the only way to reach the control, so a ref
-	 * can never silently resolve to a wrapper element instead.
+	 * Forwarded to the trigger `<button>` element. Accepts a callback ref or a ref object. Use `ref`
+	 * for the root element.
 	 */
 	triggerRef?: Ref<HTMLButtonElement>;
 }
@@ -57,6 +57,9 @@ export type SelectFieldProps<T extends object> = Prettify<_SelectFieldProps<T>>;
  *
  * It composes `SelectRoot`, `Field`, `SelectTrigger`, `SelectPopover`, and `SelectListBox`. Pass
  * `value` and `onChange` for a controlled field, or `defaultValue` for an uncontrolled one.
+ *
+ * `id`, `className`, and `ref` target the field's root element. `triggerId` and `triggerRef` target
+ * the trigger.
  */
 export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.Element {
 	const {

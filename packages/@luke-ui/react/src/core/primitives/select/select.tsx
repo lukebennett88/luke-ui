@@ -168,8 +168,8 @@ export type SelectItemProps<T extends object> = Prettify<
  * parts inside it, and owns the select's value, state, validation, and size. It holds one
  * selected option.
  *
- * `id` targets the root element. Pass `triggerId` to set the trigger's id. Pass `value` and
- * `onChange` for a controlled select, or `defaultValue` for an uncontrolled one.
+ * `id`, `className`, and `ref` target the root element. Pass `triggerId` to set the trigger's id.
+ * Pass `value` and `onChange` for a controlled select, or `defaultValue` for an uncontrolled one.
  */
 export function SelectRoot(props: SelectRootProps): JSX.Element {
 	const { className, id, size = 'medium', triggerId, ...selectProps } = props;
@@ -192,9 +192,8 @@ export function SelectRoot(props: SelectRootProps): JSX.Element {
 
 /**
  * The button that opens the select. It owns the control chrome: the border, background, focus
- * ring, and disabled state. While the root is invalid, it draws an error icon between the value
- * and the indicator. The icon is hidden from assistive technology, because the field's error
- * message carries the meaning.
+ * ring, and disabled state. While the root is invalid, it takes the danger border. It draws no
+ * error icon, because `FieldError` carries it.
  *
  * Invalid and disabled state come from the root, so the trigger has no props for them.
  */

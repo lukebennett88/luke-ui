@@ -110,6 +110,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'necessityIndicator',
 			'onChange',
 			'placeholder',
+			'ref',
 			'size',
 			'triggerId',
 			'triggerRef',

@@ -54,9 +54,6 @@ message after validation fails. Pass `errorMessage` only for an error you alread
 from a form library or your server. A non-empty message marks the field invalid. Read
 [Validation](/docs/validation) for where messages come from, server errors, and how to write them.
 
-While the field is invalid, the trigger shows an error icon before the chevron. The icon marks a
-problem and does not describe it, so pair it with a message.
-
 <ExampleBlock src="select-field/validation" title="Select Field: Validation" />
 
 ## Disabled fields
@@ -82,8 +79,8 @@ hint text that lives elsewhere. Luke UI merges it with the field's own descripti
 
 ## IDs and refs
 
-`id` and `className` target the field's root element. Pass `triggerId` to set the id of the trigger
-button, and `triggerRef` to reach the button. The field takes no plain `ref`.
+`id`, `className`, and `ref` target the field's root element. Pass `triggerId` to set the id of the
+trigger button, and `triggerRef` to reach the button.
 
 ## Accessibility
 

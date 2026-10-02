@@ -19,6 +19,9 @@ Pass `inputRef` to reach the input inside a field component such as `TextInputFi
 root element. A part that renders the input itself, such as `ComboboxInput`, takes the input ref on
 `ref`.
 
+Pass `triggerRef` to reach the trigger button inside `SelectField`. Its `ref` also reaches the
+field's root element.
+
 ## Element choice
 
 Use `elementType` only to change the rendered element without owning its DOM attributes.

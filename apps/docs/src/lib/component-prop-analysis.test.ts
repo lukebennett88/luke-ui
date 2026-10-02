@@ -114,7 +114,7 @@ test(
 );
 
 test(
-	'keeps naming, selection, and id props on SelectField while hiding isInvalid and generic DOM props',
+	'keeps naming, selection, id, and ref props on SelectField while hiding isInvalid and generic DOM props',
 	async () => {
 		const names = await visiblePropNames(
 			'packages/@luke-ui/react/src/core/select-field/select-field.tsx',
@@ -129,6 +129,7 @@ test(
 		expect(names).toContain('defaultValue');
 		expect(names).toContain('onChange');
 		expect(names).toContain('id');
+		expect(names).toContain('ref');
 		expect(names).toContain('triggerId');
 		expect(names).toContain('triggerRef');
 		expect(names).not.toContain('isInvalid');
