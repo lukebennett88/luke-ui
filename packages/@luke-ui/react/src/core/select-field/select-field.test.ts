@@ -28,8 +28,8 @@ test('SelectField requires a visible label or an accessible name', () => {
 	});
 });
 
-test('SelectField derives invalid state from errorMessage only', () => {
-	// @ts-expect-error — a non-empty errorMessage is the only way to mark the field invalid
+test('SelectField does not accept isInvalid', () => {
+	// @ts-expect-error — SelectField exposes no `isInvalid` prop
 	assertType<SelectFieldProps<object>>({ children: [], isInvalid: true, label: 'Theme' });
 });
 

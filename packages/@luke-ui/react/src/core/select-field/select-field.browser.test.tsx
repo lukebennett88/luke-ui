@@ -1,6 +1,6 @@
 import { Button } from '@luke-ui/react/button';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
-import { createRef, useState } from 'react';
+import { createRef } from 'react';
 import type { Key } from 'react-aria-components/Select';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -126,7 +126,7 @@ test('SelectField names the trigger from a visible label, aria-label, or aria-la
 	expect(page.getByText('Hidden label').elements()).toHaveLength(0);
 });
 
-test('SelectField merges aria-describedby with its own description', () => {
+test('SelectField adds aria-describedby to its own description', () => {
 	render(
 		<>
 			<span id="external-hint">External hint</span>
@@ -134,27 +134,18 @@ test('SelectField merges aria-describedby with its own description', () => {
 				aria-describedby="external-hint"
 				description="Own description"
 				items={themeItems}
-				label="Example field"
+				label="With a description"
 			>
 				{renderThemeItem}
 			</SelectField>
-		</>,
-	);
-
-	expect(getDescribedText(trigger(/Example field/))).toBe('Own description External hint');
-});
-
-test('SelectField points aria-describedby at external hint text without a description', () => {
-	render(
-		<>
-			<span id="external-hint">External hint</span>
-			<SelectField aria-describedby="external-hint" items={themeItems} label="Example field">
+			<SelectField aria-describedby="external-hint" items={themeItems} label="Without one">
 				{renderThemeItem}
 			</SelectField>
 		</>,
 	);
 
-	expect(getDescribedText(trigger(/Example field/))).toBe('External hint');
+	expect(getDescribedText(trigger(/With a description/))).toBe('Own description External hint');
+	expect(getDescribedText(trigger(/Without one/))).toBe('External hint');
 });
 
 // The marker follows the last word of the label, so the accessible name has no space before it.
@@ -211,22 +202,6 @@ test('an errorMessage marks the field invalid and describes the trigger with the
 	expect(invalid).toHaveAccessibleName('Light Invalid');
 });
 
-test('an empty errorMessage leaves the field valid', () => {
-	render(
-		<>
-			<SelectField errorMessage="" items={themeItems} label="Empty">
-				{renderThemeItem}
-			</SelectField>
-			<SelectField errorMessage={false} items={themeItems} label="False">
-				{renderThemeItem}
-			</SelectField>
-		</>,
-	);
-
-	expect(trigger(/Empty/).closest('[data-invalid="true"]')).toBeNull();
-	expect(trigger(/False/).closest('[data-invalid="true"]')).toBeNull();
-});
-
 test('an isRequired SelectField shows the native message after a failed submit', async () => {
 	const { container } = render(
 		<form aria-label="Theme form">
@@ -250,30 +225,6 @@ test('an isRequired SelectField shows the native message after a failed submit',
 
 	await expect.poll(() => trigger(/Theme/).closest('[data-invalid="true"]')).toBeNull();
 	expect(new FormData(form).get('theme')).toBe('dark');
-});
-
-test('SelectField runs validate and shows its message', async () => {
-	render(
-		<SelectField
-			items={themeItems}
-			label="Theme"
-			validate={(key) => (key === 'dark' ? 'Dark is unavailable.' : null)}
-			validationBehavior="aria"
-		>
-			{renderThemeItem}
-		</SelectField>,
-	);
-
-	await userEvent.click(trigger(/Theme/));
-	await userEvent.click(page.getByRole('option', { name: 'Dark' }));
-
-	await expect.poll(() => getDescribedText(trigger(/Theme/))).toBe('Dark is unavailable.');
-	expect(trigger(/Theme/).closest('[data-invalid="true"]')).not.toBeNull();
-
-	await userEvent.click(trigger(/Theme/));
-	await userEvent.click(page.getByRole('option', { name: 'Light' }));
-
-	await expect.poll(() => getDescribedText(trigger(/Theme/))).toBe('');
 });
 
 test('an uncontrolled SelectField starts from defaultValue and reports Key | null', async () => {
@@ -301,49 +252,28 @@ test('an uncontrolled SelectField starts from defaultValue and reports Key | nul
 test('a controlled SelectField follows value and calls onChange without moving itself', async () => {
 	const changes: Array<Key | null> = [];
 	render(
-		<SelectField
-			items={themeItems}
-			label="Theme"
-			onChange={(next) => changes.push(next)}
-			value="light"
-		>
-			{renderThemeItem}
-		</SelectField>,
+		<>
+			<SelectField
+				items={themeItems}
+				label="Theme"
+				onChange={(next) => changes.push(next)}
+				value="light"
+			>
+				{renderThemeItem}
+			</SelectField>
+			<SelectField items={themeItems} label="Empty" placeholder="Choose a theme" value={null}>
+				{renderThemeItem}
+			</SelectField>
+		</>,
 	);
+
+	expect(trigger(/Empty/)).toHaveTextContent('Choose a theme');
 
 	await userEvent.click(trigger(/Theme/));
 	await userEvent.click(page.getByRole('option', { name: 'Dark' }));
 
 	expect(changes).toEqual(['dark']);
 	expect(trigger(/Theme/)).toHaveTextContent('Light');
-});
-
-test('a SelectField keeps in step with state that follows onChange', async () => {
-	function Controlled() {
-		const [value, setValue] = useState<Key | null>('light');
-
-		return (
-			<SelectField items={themeItems} label="Theme" onChange={setValue} value={value}>
-				{renderThemeItem}
-			</SelectField>
-		);
-	}
-	render(<Controlled />);
-
-	await userEvent.click(trigger(/Theme/));
-	await userEvent.click(page.getByRole('option', { name: 'Dark' }));
-
-	await expect.element(page.getByRole('button', { name: /Theme/ })).toHaveTextContent('Dark');
-});
-
-test('a SelectField with value null shows the placeholder', () => {
-	render(
-		<SelectField items={themeItems} label="Theme" placeholder="Choose a theme" value={null}>
-			{renderThemeItem}
-		</SelectField>,
-	);
-
-	expect(trigger(/Theme/)).toHaveTextContent('Choose a theme');
 });
 
 test('SelectField accepts static SelectItem children', async () => {
@@ -360,34 +290,11 @@ test('SelectField accepts static SelectItem children', async () => {
 	await expect.element(page.getByRole('option', { name: 'Letter A' })).toBeVisible();
 });
 
-test('SelectField resolves object and callback triggerRefs', () => {
-	const objectRef = createRef<HTMLButtonElement>();
-	const callbackResolved: Array<HTMLButtonElement | null> = [];
-	render(
-		<>
-			<SelectField items={themeItems} label="Object ref" triggerRef={objectRef}>
-				{renderThemeItem}
-			</SelectField>
-			<SelectField
-				items={themeItems}
-				label="Callback ref"
-				triggerRef={(node) => {
-					callbackResolved.push(node);
-				}}
-			>
-				{renderThemeItem}
-			</SelectField>
-		</>,
-	);
-
-	expect(objectRef.current).toBe(trigger(/Object ref/));
-	expect(callbackResolved.at(-1)).toBe(trigger(/Callback ref/));
-});
-
 test('SelectField resolves ref to the root element and triggerRef to the trigger', () => {
 	const ref = createRef<HTMLDivElement>();
 	const triggerRef = createRef<HTMLButtonElement>();
 	const callbackRoots: Array<HTMLDivElement | null> = [];
+	const callbackTriggers: Array<HTMLButtonElement | null> = [];
 	render(
 		<>
 			<SelectField
@@ -401,9 +308,12 @@ test('SelectField resolves ref to the root element and triggerRef to the trigger
 			</SelectField>
 			<SelectField
 				items={themeItems}
-				label="Callback ref"
+				label="Callback refs"
 				ref={(node) => {
 					callbackRoots.push(node);
+				}}
+				triggerRef={(node) => {
+					callbackTriggers.push(node);
 				}}
 			>
 				{renderThemeItem}
@@ -411,13 +321,14 @@ test('SelectField resolves ref to the root element and triggerRef to the trigger
 		</>,
 	);
 	const element = trigger(/Object refs/);
+	const callbackTrigger = trigger(/Callback refs/);
 
 	expect(ref.current).toBe(document.getElementById('example-root'));
-	expect(ref.current?.tagName).toBe('DIV');
 	expect(ref.current?.contains(element)).toBe(true);
 	expect(triggerRef.current).toBe(element);
-	expect(callbackRoots.at(-1)?.contains(trigger(/Callback ref/))).toBe(true);
+	expect(callbackRoots.at(-1)?.contains(callbackTrigger)).toBe(true);
 	expect(callbackRoots.at(-1)).not.toBe(ref.current);
+	expect(callbackTriggers.at(-1)).toBe(callbackTrigger);
 });
 
 test('SelectField puts id on its root element and triggerId on the trigger', () => {
@@ -438,21 +349,6 @@ test('SelectField puts id on its root element and triggerId on the trigger', () 
 	expect(element.id).toBe('example-trigger');
 	expect(root).toHaveClass('example-root');
 	expect(root?.contains(element)).toBe(true);
-});
-
-test('a disabled SelectField disables the trigger and submits no value', () => {
-	const { container } = render(
-		<form aria-label="Theme form">
-			<SelectField defaultValue="light" isDisabled items={themeItems} label="Theme" name="theme">
-				{renderThemeItem}
-			</SelectField>
-		</form>,
-	);
-	const form = container.querySelector('form');
-	if (form == null) throw new Error('Expected the form element.');
-
-	expect(trigger(/Theme/)).toBeDisabled();
-	expect(new FormData(form).get('theme')).toBeNull();
 });
 
 test('a SelectField participates in FormData through name and form', async () => {

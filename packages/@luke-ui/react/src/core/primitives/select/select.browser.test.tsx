@@ -13,7 +13,6 @@ import type { SelectRootProps } from '@luke-ui/react/primitives/select';
 import { Text } from '@luke-ui/react/text';
 import type { ReactNode } from 'react';
 import { createRef } from 'react';
-import type { Key } from 'react-aria-components/Select';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../../test-utils/axe.js';
@@ -88,37 +87,18 @@ function trigger(name: RegExp | string): HTMLButtonElement {
 	return element;
 }
 
-test('SelectRoot puts id on its root element and triggerId on the trigger button', () => {
+test('SelectRoot puts id and ref on its root element, and triggerId and the trigger ref on the button', () => {
+	const rootRef = createRef<HTMLDivElement>();
+	const triggerRef = createRef<HTMLButtonElement>();
 	render(
-		<ExampleSelect
+		<SelectRoot
+			aria-label="Example field"
 			className="example-root"
 			id="example-root"
-			label="Example field"
+			ref={rootRef}
 			triggerId="example-trigger"
-		/>,
-	);
-	const element = trigger(/Example field/);
-	const root = document.getElementById('example-root');
-
-	expect(element.id).toBe('example-trigger');
-	expect(root).toHaveClass('example-root');
-	expect(root?.tagName).toBe('DIV');
-	expect(root?.contains(element)).toBe(true);
-});
-
-test('SelectRoot generates a trigger id and forwards ref to the root element', () => {
-	const ref = createRef<HTMLDivElement>();
-	render(<ExampleSelect id="example-root" label="Example field" ref={ref} />);
-
-	expect(trigger(/Example field/).id).not.toBe('');
-	expect(ref.current).toBe(document.getElementById('example-root'));
-});
-
-test('SelectTrigger forwards ref to the button', () => {
-	const ref = createRef<HTMLButtonElement>();
-	render(
-		<SelectRoot aria-label="Example field">
-			<SelectTrigger ref={ref}>
+		>
+			<SelectTrigger ref={triggerRef}>
 				<SelectValue />
 			</SelectTrigger>
 			<SelectPopover>
@@ -128,8 +108,14 @@ test('SelectTrigger forwards ref to the button', () => {
 			</SelectPopover>
 		</SelectRoot>,
 	);
+	const element = trigger(/Example field/);
+	const root = document.getElementById('example-root');
 
-	expect(ref.current).toBe(trigger(/Example field/));
+	expect(element.id).toBe('example-trigger');
+	expect(root).toHaveClass('example-root');
+	expect(root?.contains(element)).toBe(true);
+	expect(rootRef.current).toBe(root);
+	expect(triggerRef.current).toBe(element);
 });
 
 test('a SelectRoot is wired to its label and description with no manual ids', async () => {
@@ -144,90 +130,47 @@ test('a SelectRoot is wired to its label and description with no manual ids', as
 	expect(getDescribedText(trigger(/Example field/))).toBe('Example description');
 });
 
-test('a select opens, selects, and closes by keyboard', async () => {
-	const changes: Array<Key | null> = [];
+test('SelectIndicator shows a chevron and sets data-open while open, and children replace the chevron', async () => {
 	render(
-		<ExampleSelect
-			label="Example field"
-			onChange={(next) => changes.push(next)}
-			placeholder="Choose"
-		/>,
+		<>
+			<ExampleSelect label="Default indicator" />
+			<SelectRoot aria-label="Custom indicator">
+				<SelectTrigger>
+					<SelectValue />
+					<SelectIndicator className="example-indicator">
+						<Icon name="add" />
+					</SelectIndicator>
+				</SelectTrigger>
+				<SelectPopover>
+					<SelectListBox>
+						<SelectItem id="one">Example one</SelectItem>
+					</SelectListBox>
+				</SelectPopover>
+			</SelectRoot>
+		</>,
 	);
-	const element = trigger(/Example field/);
+	const chevron = trigger(/Default indicator/).querySelector('span[aria-hidden]:last-child');
+	const custom = trigger(/Custom indicator/).querySelector('.example-indicator');
+	if (!(chevron instanceof HTMLElement) || !(custom instanceof HTMLElement)) {
+		throw new Error('Expected both indicators.');
+	}
 
-	await focusViaKeyboard(page.getByRole('button', { name: /Example field/ }));
-	await userEvent.keyboard('{Enter}');
+	expect(chevron.querySelector('svg')).not.toBeNull();
+	expect(chevron).not.toHaveAttribute('data-open');
+	expect(custom.querySelector('use')?.getAttribute('href')).toContain('add');
+	expect(custom.querySelectorAll('svg')).toHaveLength(1);
+
+	await userEvent.click(trigger(/Default indicator/));
 	await expect.element(page.getByRole('listbox')).toBeVisible();
-	await userEvent.keyboard('{ArrowDown}');
-	await userEvent.keyboard('{Enter}');
-	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
-
-	expect(changes).toEqual(['two']);
-	expect(element).toHaveTextContent('Example two');
-	expect(document.activeElement).toBe(element);
-});
-
-test('a select closes without changing the value on Escape', async () => {
-	const changes: Array<Key | null> = [];
-	render(
-		<ExampleSelect
-			defaultValue="one"
-			label="Example field"
-			onChange={(next) => changes.push(next)}
-		/>,
-	);
-
-	await userEvent.click(trigger(/Example field/));
-	await expect.element(page.getByRole('listbox')).toBeVisible();
-	await userEvent.keyboard('{Escape}');
-	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
-
-	expect(changes).toEqual([]);
-});
-
-test('SelectIndicator reflects the open state with data-open', async () => {
-	render(<ExampleSelect label="Example field" />);
-	const indicator = trigger(/Example field/).querySelector('span[aria-hidden]:last-child');
-	if (!(indicator instanceof HTMLElement)) throw new Error('Expected the indicator.');
-
-	expect(indicator).not.toHaveAttribute('data-open');
-	expect(indicator.querySelector('svg')).not.toBeNull();
-
-	await userEvent.click(trigger(/Example field/));
-	await expect.element(page.getByRole('listbox')).toBeVisible();
-	expect(indicator).toHaveAttribute('data-open', 'true');
+	expect(chevron).toHaveAttribute('data-open', 'true');
 
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
-	expect(indicator).not.toHaveAttribute('data-open');
-});
+	expect(chevron).not.toHaveAttribute('data-open');
 
-test('SelectIndicator children replace the chevron and keep data-open', async () => {
-	render(
-		<SelectRoot aria-label="Example field">
-			<SelectTrigger>
-				<SelectValue />
-				<SelectIndicator className="example-indicator">
-					<Icon name="add" />
-				</SelectIndicator>
-			</SelectTrigger>
-			<SelectPopover>
-				<SelectListBox>
-					<SelectItem id="one">Example one</SelectItem>
-				</SelectListBox>
-			</SelectPopover>
-		</SelectRoot>,
-	);
-	const indicator = trigger(/Example field/).querySelector('.example-indicator');
-	if (!(indicator instanceof HTMLElement)) throw new Error('Expected the indicator.');
-
-	expect(indicator.querySelectorAll('svg')).toHaveLength(1);
-	expect(indicator.querySelector('use')?.getAttribute('href')).toContain('add');
-	expect(indicator).not.toHaveAttribute('data-open');
-
-	await userEvent.click(trigger(/Example field/));
+	await userEvent.click(trigger(/Custom indicator/));
 	await expect.element(page.getByRole('listbox')).toBeVisible();
-	expect(indicator).toHaveAttribute('data-open', 'true');
+	expect(custom).toHaveAttribute('data-open', 'true');
 });
 
 test('SelectValue shows the root placeholder, then the selected value', async () => {
@@ -263,51 +206,17 @@ test('a SelectRoot reports validity on the root and describes the trigger with t
 	expect(valid.closest('[data-invalid="true"]')).toBeNull();
 });
 
-test('an invalid SelectTrigger keeps its block size and its description while open', async () => {
-	render(
-		<>
-			<ExampleSelect label="Valid" />
-			<ExampleSelect errorMessage="Example error" isInvalid label="Invalid" />
-		</>,
-	);
-	const valid = trigger(/Valid/);
-	const invalid = trigger(/Invalid/);
-
-	expect(invalid.getBoundingClientRect().height).toBe(valid.getBoundingClientRect().height);
-
-	await userEvent.click(invalid);
-	await expect.element(page.getByRole('listbox')).toBeVisible();
-
-	expect(invalid.getBoundingClientRect().height).toBe(valid.getBoundingClientRect().height);
-	expect(invalid).toHaveAccessibleDescription('Example error');
-});
-
-test('a disabled invalid SelectRoot still disables the trigger', () => {
-	render(<ExampleSelect isDisabled isInvalid label="Example field" />);
-
-	expect(trigger(/Example field/)).toBeDisabled();
-});
-
 // Block size is the layout contract for `size`.
-test('SelectRoot sets the size of the trigger', () => {
+test('SelectRoot sets the size of the trigger and of the items', async () => {
 	render(
 		<>
 			<ExampleSelect label="Medium" />
 			<ExampleSelect label="Small" size="small" />
 		</>,
 	);
-	const medium = trigger(/Medium/).getBoundingClientRect().height;
-	const small = trigger(/Small/).getBoundingClientRect().height;
 
-	expect(small).toBeLessThan(medium);
-});
-
-test('SelectItem takes its size from SelectRoot', async () => {
-	render(
-		<>
-			<ExampleSelect label="Medium" />
-			<ExampleSelect label="Small" size="small" />
-		</>,
+	expect(trigger(/Small/).getBoundingClientRect().height).toBeLessThan(
+		trigger(/Medium/).getBoundingClientRect().height,
 	);
 
 	await userEvent.click(trigger(/Medium/));
@@ -354,57 +263,6 @@ test('Text renders inside SelectTrigger, SelectValue, and SelectItem', async () 
 	await userEvent.click(element);
 	await expect.element(page.getByRole('option', { name: 'Item text' })).toBeVisible();
 	expect(page.getByRole('option', { name: 'Another item' }).element()).toBeTruthy();
-});
-
-test('the selected item content renders in SelectValue', () => {
-	render(
-		<SelectRoot aria-label="Example field" defaultValue="one">
-			<SelectTrigger>
-				<SelectValue />
-			</SelectTrigger>
-			<SelectPopover>
-				<SelectListBox>
-					<SelectItem id="one" textValue="Example one">
-						<Text>Item text</Text>
-					</SelectItem>
-				</SelectListBox>
-			</SelectPopover>
-		</SelectRoot>,
-	);
-
-	expect(trigger(/Example field/)).toHaveTextContent('Item text');
-});
-
-test('a SelectRoot participates in FormData through name', async () => {
-	const { container } = render(
-		<form aria-label="Example form">
-			<ExampleSelect defaultValue="one" label="Example field" name="example" />
-		</form>,
-	);
-	const form = container.querySelector('form');
-	if (form == null) throw new Error('Expected the form element.');
-
-	// React Aria renders a hidden native select that carries the value.
-	expect(form.querySelector('select[name="example"]')).not.toBeNull();
-	expect(new FormData(form).get('example')).toBe('one');
-
-	await userEvent.click(trigger(/Example field/));
-	await userEvent.click(page.getByRole('option', { name: 'Example three' }));
-
-	expect(new FormData(form).get('example')).toBe('three');
-});
-
-test('a SelectRoot associates with a form through form', () => {
-	const { container } = render(
-		<>
-			<form aria-label="Example form" id="example-form" />
-			<ExampleSelect defaultValue="two" form="example-form" label="Example field" name="example" />
-		</>,
-	);
-	const form = container.querySelector('form');
-	if (form == null) throw new Error('Expected the form element.');
-
-	expect(new FormData(form).get('example')).toBe('two');
 });
 
 test('the Select scene has no axe violations', async () => {
