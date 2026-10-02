@@ -98,7 +98,10 @@ function readGeneratedDoc(node: MdxJsxElementNode): GeneratedDoc | undefined {
 	if (typeAttr === undefined || typeAttr.value === null || typeAttr.value === undefined) {
 		return undefined;
 	}
-	if (typeof typeAttr.value === 'string' || typeAttr.value.type !== 'mdxJsxAttributeValueExpression') {
+	if (
+		typeof typeAttr.value === 'string' ||
+		typeAttr.value.type !== 'mdxJsxAttributeValueExpression'
+	) {
 		return undefined;
 	}
 
