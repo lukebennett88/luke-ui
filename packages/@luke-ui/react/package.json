@@ -94,7 +94,7 @@
 		"test:browser": "turbo run test:browser:run",
 		"test:browser:run": "vp test run --project=browser --tagsFilter='!visual'",
 		"test:consumer": "turbo run test:consumer:run",
-		"test:consumer:run": "vp test run --project=unit src/core/styles/packed-consumer.test.ts",
+		"test:consumer:run": "vp test run --project=consumer",
 		"test:ui": "turbo run test:ui:run",
 		"test:ui:run": "vp test --project=browser --ui",
 		"test:unit": "vp test run --project=unit",

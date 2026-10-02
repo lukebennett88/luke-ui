@@ -6,6 +6,13 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      react-spec:
+        description:
+          Published @luke-ui/react version or dist-tag for consumer-tests. Leave empty to pack the
+          branch.
+        required: false
+        type: string
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -43,6 +50,34 @@ jobs:
 
       - name: Run component tests
         run: pnpm --filter @luke-ui/react run test
+
+  consumer-tests:
+    name: consumer-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup tooling
+        uses: pnpm/setup@v3
+        with:
+          cache: true
+          install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --no-runtime
+
+      - name: Build package
+        run: pnpm build:packages
+
+      - name: Run consumer tests
+        run: pnpm --filter @luke-ui/react run test:consumer:run
+        env:
+          LUKE_UI_REACT_SPEC: ${{ inputs.react-spec }}
 
   docs-tests:
     name: docs-tests

@@ -48,22 +48,22 @@ notice.
 
 ## Runtime dependencies
 
-Every consumer installs the `dependencies` of `@luke-ui/react`, so each one has to earn its place.
-Declare a package there only when the published JavaScript or declarations import it. Keep
-build-time packages, such as `@vanilla-extract/css`, in `devDependencies`. The packed-consumer
-harness in [TESTING.md](TESTING.md#package-consumption) fails on an undeclared import, an unused
-dependency, or an install over its size budget.
+Every consumer installs the `dependencies` of `@luke-ui/react`. Declare a package there only when
+the published JavaScript or declarations import it. Keep build-time packages in `devDependencies`.
+The packed-consumer harness in [TESTING.md](TESTING.md#package-consumption) fails on an undeclared
+import or an unused dependency.
 
-`@capsizecss/metrics` is a dev dependency that the build bundles. `defineTheme` reads three fonts'
-metrics from it, but the package holds the whole collection, about 170 MB. `deps.onlyBundle` in
-`packages/@luke-ui/react/vite.config.ts` fails the build if any other dependency gets bundled. The
-build records the bundled version in `inlinedDependencies` in `package.json`.
+When published code needs a small part of a large package, bundle that part instead of declaring the
+package. `deps.onlyBundle` in `packages/@luke-ui/react/vite.config.ts` lists the packages the build
+may bundle, and the build fails on any other. The build records each bundled version in
+`inlinedDependencies` in `package.json`.
 
 ## Changesets
 
 `@luke-ui/react` is unpublished at version `0.0.0`. `@luke-ui/rainbow-sprinkles` is a publishable
 0.x support package used by `@luke-ui/react` at runtime. It is not part of the stable Luke UI 1.x
-consumer API. `apps/docs` and `@luke-ui/playground-core` are private. Before `1.0.0` no pull request
+consumer API. Publish it with React whenever React depends on a Rainbow version that is not yet on
+the registry. `apps/docs` and `@luke-ui/playground-core` are private. Before `1.0.0` no pull request
 needs a changeset, including one that moves a runtime or peer dependency.
 
 The `needs-changeset` label in `.github/renovate.json5` is advance notice. It marks packages that

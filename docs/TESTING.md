@@ -6,6 +6,9 @@
 - Component tests (`*.browser.test.tsx`) run in Chromium. Each component has one file for behaviour,
   axe, and visual captures.
 
+The packed-consumer harness is the one Node test outside the unit run. See
+[Package consumption](#package-consumption).
+
 Do not add another test type.
 
 ## Component tests
@@ -68,21 +71,20 @@ just to create an assertion or keep consts referenced.
 
 ## Package consumption
 
-`packages/@luke-ui/react/src/core/styles/packed-consumer.test.ts` tests the published boundary. It
-packs `@luke-ui/react` and any `@luke-ui/*` runtime dependency, then installs the tarballs with npm
-in a directory outside the repository, so no workspace link can satisfy an import. It is a unit test
-and runs with `pnpm run test`.
+`packages/@luke-ui/react/src/core/styles/packed-consumer.test.ts` tests the package the way an
+application installs it, with npm and no workspace links. It installs from the npm registry, so
+`pnpm run test` leaves it out. Run it with `pnpm run test:consumer`. The `consumer-tests` CI job
+runs it on every pull request.
 
-It checks the tarball contents and the dependencies its exports import. Then it runs one consumer
-with the newest peers and one with the lowest peers and the minimum TypeScript. Each consumer proves
-SSR and hydration, CSS and SVG asset resolution, a Vite client build, one copy of each peer, the
-install size, type checking of every entrypoint, and what a small import bundles.
+Keep it to the package boundary: tarball contents, dependencies, peers, assets, SSR and hydration, a
+client build, type checking, and what small imports bundle. Component behaviour belongs in component
+tests.
 
-Keep it to representative imports and flows. Component behaviour belongs in component tests.
+One consumer installs the lowest version each peer range allows, with `MINIMUM_TYPESCRIPT`. A
+passing run is the evidence for those floors, so change a floor or a peer range only with one.
 
-Raise `MINIMUM_TYPESCRIPT` or a bundle allowlist only when a change needs it, and say why in the
-pull request. To run the same fixtures against a published version or dist-tag, run
-`LUKE_UI_REACT_SPEC=snapshot pnpm run test:consumer` from the repo root.
+Set `LUKE_UI_REACT_SPEC` to a published version or dist-tag to run the same checks against the
+registry.
 
 ## Docs
 

@@ -10,6 +10,8 @@ const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
 );
 const repoRoot = path.resolve(dirname, '../../..');
+/** Installs from the npm registry, so it runs only with `test:consumer`. */
+const packedConsumerTest = 'src/core/styles/packed-consumer.test.ts';
 const captureDir = process.env.VISUAL_CAPTURE_DIR;
 const visualFsAllow =
 	captureDir === undefined || captureDir === '' ? [repoRoot] : [repoRoot, path.resolve(captureDir)];
@@ -47,9 +49,17 @@ export default defineConfig({
 				extends: true,
 				test: {
 					environment: 'node',
-					exclude: ['**/node_modules/**', '**/*.browser.test.*'],
+					exclude: ['**/node_modules/**', '**/*.browser.test.*', packedConsumerTest],
 					include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
 					name: 'unit',
+				},
+			},
+			{
+				extends: true,
+				test: {
+					environment: 'node',
+					include: [packedConsumerTest],
+					name: 'consumer',
 				},
 			},
 			{

@@ -10,7 +10,6 @@ pnpm add @luke-ui/react react-aria-components
 ```
 
 Luke UI expects the application to provide a compatible shared `react-aria-components` instance.
-Type checking Luke UI needs TypeScript 5.8 or later.
 
 ## Setup
 

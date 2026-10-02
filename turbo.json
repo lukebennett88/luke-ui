@@ -13,19 +13,7 @@
 		},
 		"@luke-ui/react#test": {
 			"dependsOn": ["build", "^build", "generate"],
-			"outputs": [],
-			"passThroughEnv": [
-				"HTTP_PROXY",
-				"HTTPS_PROXY",
-				"NO_PROXY",
-				"http_proxy",
-				"https_proxy",
-				"no_proxy",
-				"NODE_EXTRA_CA_CERTS",
-				"SSL_CERT_FILE",
-				"NPM_CONFIG_*",
-				"npm_config_*"
-			]
+			"outputs": []
 		},
 		"//#check:cycles": {
 			"cache": true,

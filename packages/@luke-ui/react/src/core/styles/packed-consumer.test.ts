@@ -9,29 +9,24 @@ import { afterAll, beforeAll, describe, expect, test } from 'vite-plus/test';
 import { cascadeLayerNames } from './layer-names.js';
 
 /**
- * Clean-consumer harness for `@luke-ui/react`.
+ * Clean-consumer harness for `@luke-ui/react`. It runs with `pnpm run test:consumer`, not with the
+ * unit tests, because it installs from the npm registry.
  *
- * By default it packs the workspace build. Set `LUKE_UI_REACT_SPEC` to a registry version or
- * dist-tag, such as `snapshot` or `1.0.0`, to run the same fixtures against the published package.
- * Either way, npm installs the artifact into a directory outside the repository, so nothing resolves
- * through workspace links.
- *
- * The consumer suite runs twice: once with the newest peers the published ranges allow, and once
- * with the lowest peers they allow and the minimum supported TypeScript.
+ * It packs the workspace build, or with `LUKE_UI_REACT_SPEC` set to a version or dist-tag it fetches
+ * the published package. npm installs it in a directory outside the repository, once with the newest
+ * peers the published ranges allow and once with the lowest.
  */
 
 const registrySpec = process.env.LUKE_UI_REACT_SPEC?.trim() || undefined;
 
-/** The oldest TypeScript that accepts the published declarations. Lower it only with evidence. */
+/**
+ * The oldest TypeScript that accepts the published declarations. The Installation page states this
+ * floor, so change both together.
+ */
 const MINIMUM_TYPESCRIPT = '5.8';
 /** Consumer tooling. These ranges are not part of the package contract. */
 const JSDOM_RANGE = '^30.1.1';
 const VITE_RANGE = '^8.3.2';
-/**
- * Disk space a consumer spends on Luke UI and the dependencies it alone brings, beyond its peers.
- * Currently about 8 MB.
- */
-const INSTALL_BUDGET_MB = 16;
 
 const packageRoot = fileURLToPath(new URL('../../..', import.meta.url));
 const scopeRoot = fileURLToPath(new URL('../../../..', import.meta.url));
@@ -127,79 +122,41 @@ describe('artifact', () => {
 });
 
 interface BundleBoundary {
-	/** Strings that only appear when unrelated code is bundled. The build is not minified. */
-	forbiddenMarkers: Array<string>;
-	name: string;
-	/** Packages the bundle may contain, apart from React and React DOM, which are external. */
-	packages: Array<string>;
-	slug: string;
-	source: string;
+	/**
+	 * Public entrypoints whose components the import renders, apart from its own. Add one only when
+	 * the component starts rendering it.
+	 */
+	composes: Array<string>;
+	/** The public entrypoint under test. */
+	entry: string;
+	exportName: string;
 }
 
-/** Theme generation runs at build time. A runtime import must never bundle it. */
-const themeGenerationMarkers = [
-	'ThemeContrastError',
-	'flattenThemeContract',
-	'ThemeGenerationError',
-	'precomputeValues',
-	'unitsPerEm',
-];
-
-/** Packages every component bundles: Luke UI, its recipe runtime, and React Aria Components. */
-const componentRuntime = [
-	'@luke-ui/react',
-	'@vanilla-extract/recipes',
-	'clsx',
-	'react-aria',
-	'react-aria-components',
-];
-
+/** Small runtime imports, each checked for what it bundles. */
 const bundleBoundaries: Array<BundleBoundary> = [
+	{ composes: ['text'], entry: 'blockquote', exportName: 'Blockquote' },
 	{
-		forbiddenMarkers: [
-			...themeGenerationMarkers,
-			'ComboboxField',
-			'LoadingSpinner',
-			'TextInputField',
-		],
-		name: 'Blockquote',
-		packages: [...componentRuntime],
-		slug: 'blockquote',
-		source: `export { Blockquote } from '@luke-ui/react/blockquote';`,
+		composes: ['loading-spinner', 'primitives/button', 'text', 'visually-hidden'],
+		entry: 'button',
+		exportName: 'Button',
 	},
-	{
-		forbiddenMarkers: [...themeGenerationMarkers, 'ComboboxField', 'TextInputField'],
-		name: 'Button',
-		packages: [
-			...componentRuntime,
-			'@internationalized/string',
-			'@react-aria/utils',
-			'react-stately',
-			'spin-doctor',
-		],
-		slug: 'button',
-		source: `export { Button } from '@luke-ui/react/button';`,
-	},
-	{
-		forbiddenMarkers: [...themeGenerationMarkers, 'defineProperties', 'defineSprinkles'],
-		name: 'createSprinkles',
-		packages: [
-			'@luke-ui/rainbow-sprinkles',
-			'@luke-ui/react',
-			'@vanilla-extract/dynamic',
-			'@vanilla-extract/private',
-		],
-		slug: 'sprinkles',
-		source: `export { createSprinkles } from '@luke-ui/react/styles';`,
-	},
-	{
-		forbiddenMarkers: themeGenerationMarkers,
-		name: 'theme vars',
-		packages: ['@luke-ui/react'],
-		slug: 'theme-vars',
-		source: `export { vars } from '@luke-ui/react/theme';`,
-	},
+	{ composes: [], entry: 'styles', exportName: 'createSprinkles' },
+	{ composes: [], entry: 'theme', exportName: 'vars' },
 ];
+
+/**
+ * Theme modules that runtime code shares with theme generation. Every other theme module a
+ * `defineTheme` import bundles counts as theme generation.
+ */
+const RUNTIME_THEME_MODULES = ['@luke-ui/react/src/theme/type-styles.ts'];
+const THEME_MODULE_PATTERN = /^@luke-ui\/react\/src\/theme\//;
+/** Packages that only theme generation needs. */
+const THEME_GENERATION_PACKAGE_PATTERN = /^@capsizecss\//;
+/** Styling authoring: the Vanilla Extract compiler API and the recipe and Rainbow authoring modules. */
+const STYLING_AUTHORING_PACKAGES = ['@vanilla-extract/css'];
+const STYLING_AUTHORING_SOURCE_PATTERN =
+	/^@luke-ui\/(?:react\/src\/core\/styles\/recipe\.ts|rainbow-sprinkles\/.*\/define-(?:properties|sprinkles)\.[jt]s)$/;
+const LUKE_SOURCE_PATTERN = /^@luke-ui\/react\/src\//;
 
 interface PeerSet {
 	label: string;
@@ -240,6 +197,7 @@ for (const peerSet of peerSets) {
 	describe(`consumer with ${peerSet.label}`, () => {
 		let consumerDir = '';
 		let peers: Record<string, string> = {};
+		let themeGeneration: Array<string> = [];
 
 		beforeAll(async () => {
 			consumerDir = path.join(workDir, peerSet.slug);
@@ -250,6 +208,9 @@ for (const peerSet of peerSets) {
 				]),
 			);
 			await installConsumer(consumerDir, peerSet, peers);
+			themeGeneration = measureBundle(consumerDir, 'define-theme').sources.filter(
+				(source) => THEME_MODULE_PATTERN.test(source) && !RUNTIME_THEME_MODULES.includes(source),
+			);
 		}, 600_000);
 
 		test('installs the artifact without workspace links', () => {
@@ -278,7 +239,9 @@ for (const peerSet of peerSets) {
 			},
 		);
 
-		test(`installs under ${INSTALL_BUDGET_MB} MB beyond its peers`, () => {
+		// Luke UI layers over React and React Aria, so what it alone adds to an install stays smaller
+		// than its peers. A large data or tooling package in `dependencies` breaks that.
+		test('adds less to an install than its peers do', () => {
 			const peerSelector = Object.keys(peers)
 				.flatMap((name) => [`#${name}`, `#${name} *`])
 				.join(', ');
@@ -288,21 +251,15 @@ for (const peerSet of peerSets) {
 					(location) => !peerLocations.has(location),
 				),
 			);
-
-			const sizes = Object.fromEntries(
-				[...ownLocations].map((location) => [
-					location,
-					directorySize(path.join(consumerDir, location)),
-				]),
-			);
-			let bytes = 0;
-			for (const size of Object.values(sizes)) bytes += size;
-			const largest = Object.entries(sizes)
+			const ownSizes = sizesOf(consumerDir, ownLocations);
+			const largest = [...ownSizes]
 				.sort(([, a], [, b]) => b - a)
 				.slice(0, 5)
-				.map(([location, size]) => `${location}: ${(size / 1e6).toFixed(1)} MB`);
+				.map(([location]) => location);
 
-			expect(bytes / 1e6, `Largest: ${largest.join(', ')}`).toBeLessThan(INSTALL_BUDGET_MB);
+			expect(totalSize(ownSizes), `Largest own packages: ${largest.join(', ')}`).toBeLessThan(
+				totalSize(sizesOf(consumerDir, peerLocations)),
+			);
 		});
 
 		test('resolves one copy of each peer dependency', () => {
@@ -412,24 +369,27 @@ for (const peerSet of peerSets) {
 		);
 
 		for (const boundary of bundleBoundaries) {
-			test(
-				`keeps a ${boundary.name} import free of unrelated code`,
-				{
-					timeout: 60_000,
-				},
-				() => {
-					const result = JSON.parse(
-						run('node', ['measure-bundle.mjs', `entries/${boundary.slug}.js`], consumerDir),
-					) as { code: string; packages: Array<string> };
+			test(`keeps a ${boundary.exportName} import to its own code`, { timeout: 60_000 }, () => {
+				const { packages, sources } = measureBundle(consumerDir, boundarySlug(boundary));
+				const related = new Set([boundary.entry, ...boundary.composes]);
+				const unrelatedComponents = componentFiles(artifact.manifest).filter(
+					([entry, file]) => !related.has(entry) && sources.includes(file),
+				);
 
-					expect({
-						unexpectedPackages: result.packages.filter((name) => !boundary.packages.includes(name)),
-					}).toEqual({ unexpectedPackages: [] });
-					expect({
-						markers: boundary.forbiddenMarkers.filter((marker) => result.code.includes(marker)),
-					}).toEqual({ markers: [] });
-				},
-			);
+				// Without Luke UI source paths, the source maps did not resolve and nothing below is checked.
+				expect(sources.some((source) => LUKE_SOURCE_PATTERN.test(source))).toBe(true);
+				expect({
+					stylingAuthoring: [
+						...packages.filter((name) => STYLING_AUTHORING_PACKAGES.includes(name)),
+						...sources.filter((source) => STYLING_AUTHORING_SOURCE_PATTERN.test(source)),
+					],
+					themeGeneration: [
+						...packages.filter((name) => THEME_GENERATION_PACKAGE_PATTERN.test(name)),
+						...sources.filter((source) => themeGeneration.includes(source)),
+					],
+					unrelatedComponents: unrelatedComponents.map(([, file]) => file),
+				}).toEqual({ stylingAuthoring: [], themeGeneration: [], unrelatedComponents: [] });
+			});
 		}
 	});
 }
@@ -610,8 +570,10 @@ async function installConsumer(
 		'tsconfig.nodenext.json': tsconfig('nodenext', 'nodenext'),
 	};
 	for (const boundary of bundleBoundaries) {
-		files[`entries/${boundary.slug}.js`] = `${boundary.source}\n`;
+		files[`entries/${boundarySlug(boundary)}.js`] =
+			`export { ${boundary.exportName} } from '@luke-ui/react/${boundary.entry}';\n`;
 	}
+	files['entries/define-theme.js'] = `export { defineTheme } from '@luke-ui/react/theme';\n`;
 	await Promise.all(
 		Object.entries(files).map(([name, source]) => writeFile(path.join(consumerDir, name), source)),
 	);
@@ -653,10 +615,45 @@ function tsconfig(module: string, moduleResolution: string): string {
 	);
 }
 
+function boundarySlug({ entry, exportName }: BundleBoundary): string {
+	return `${entry.replaceAll('/', '-')}-${exportName}`;
+}
+
+/** Each JS entrypoint paired with the source file its component would live in. */
+function componentFiles(manifest: Manifest): Array<[entry: string, file: string]> {
+	return Object.entries(manifest.exports).flatMap(([subpath, target]) => {
+		if (!target.endsWith('.js')) return [];
+		const entry = subpath.slice(2);
+		return [[entry, `${manifest.name}/src/core/${entry}/${path.posix.basename(entry)}.tsx`]];
+	});
+}
+
+/** Packages, and `@luke-ui/*` source files, that contribute code to a bundle of one entry. */
+function measureBundle(
+	consumerDir: string,
+	slug: string,
+): { packages: Array<string>; sources: Array<string> } {
+	return JSON.parse(run('node', ['measure-bundle.mjs', `entries/${slug}.js`], consumerDir));
+}
+
 function queryLocations(consumerDir: string, selector: string): Array<string> {
 	return (JSON.parse(npm(['query', selector], consumerDir)) as Array<{ location: string }>).map(
 		(node) => node.location,
 	);
+}
+
+function sizesOf(consumerDir: string, locations: Iterable<string>): Map<string, number> {
+	const sizes = new Map<string, number>();
+	for (const location of locations) {
+		sizes.set(location, directorySize(path.join(consumerDir, location)));
+	}
+	return sizes;
+}
+
+function totalSize(sizes: Map<string, number>): number {
+	let total = 0;
+	for (const size of sizes.values()) total += size;
+	return total;
 }
 
 function directorySize(directory: string): number {
@@ -851,15 +848,63 @@ createRoot(document.getElementById('root')).render(
 `;
 
 /**
- * Builds one entry with Vite, unminified and with React and React DOM external, then prints the
- * packages it bundled and its code.
+ * Builds one entry with Vite, with React and React DOM external, then prints the packages and the
+ * `@luke-ui/*` source files that contribute code. It reads each `@luke-ui/*` dist file's own source
+ * map to trace bundled code back to `src/`.
  */
 const MEASURE_BUNDLE = `
+import { readFileSync } from 'node:fs';
+import { SourceMap } from 'node:module';
 import path from 'node:path';
 import { build } from 'vite';
 
+const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+// The last node_modules segment names the package, including inside a pnpm store path.
+const PACKAGE_PATH = /^.*node_modules\\/((?:@[^/]+\\/)?[^/]+)\\/(.+)$/;
+
+/** Decodes source map mappings into the original position of each segment. */
+function* originalPositions(mappings) {
+	let source = 0;
+	let line = 0;
+	let column = 0;
+	for (const group of mappings.split(';')) {
+		for (const segment of group.split(',')) {
+			const values = [];
+			let value = 0;
+			let shift = 0;
+			for (const character of segment) {
+				const digit = BASE64.indexOf(character);
+				value += (digit & 31) << shift;
+				if (digit & 32) {
+					shift += 5;
+					continue;
+				}
+				values.push(value & 1 ? -(value >>> 1) : value >>> 1);
+				value = 0;
+				shift = 0;
+			}
+			if (values.length < 4) continue;
+			source += values[1];
+			line += values[2];
+			column += values[3];
+			yield { column, line, source };
+		}
+	}
+}
+
+const distMaps = new Map();
+function distMap(file) {
+	if (!distMaps.has(file)) {
+		try {
+			distMaps.set(file, new SourceMap(JSON.parse(readFileSync(\`\${file}.map\`, 'utf8'))));
+		} catch {
+			distMaps.set(file, undefined);
+		}
+	}
+	return distMaps.get(file);
+}
+
 const [entry] = process.argv.slice(2);
-const packages = new Set();
 const output = await build({
 	configFile: false,
 	logLevel: 'silent',
@@ -870,20 +915,38 @@ const output = await build({
 			input: path.resolve(entry),
 			preserveEntrySignatures: 'exports-only',
 		},
+		sourcemap: true,
 		write: false,
 	},
 });
-const chunks = (Array.isArray(output) ? output : [output]).flatMap((result) => result.output);
-let code = '';
-for (const chunk of chunks) {
-	if (chunk.type !== 'chunk') continue;
-	code += chunk.code;
-	for (const id of chunk.moduleIds) {
-		const match = /node_modules\\/((?:@[^/]+\\/)?[^/]+)\\//.exec(id.replaceAll('\\\\', '/'));
-		if (match) packages.add(match[1]);
+
+const packages = new Set();
+const sources = new Set();
+for (const chunk of [output].flat().flatMap((result) => result.output)) {
+	if (chunk.type !== 'chunk' || !chunk.map) continue;
+	const chunkDir = path.resolve('dist', path.dirname(chunk.fileName));
+	for (const position of originalPositions(chunk.map.mappings)) {
+		const file = path.resolve(chunkDir, chunk.map.sources[position.source]);
+		const match = PACKAGE_PATH.exec(file.replaceAll('\\\\', '/'));
+		if (!match) continue;
+		const [, name, inner] = match;
+		if (!name.startsWith('@luke-ui/')) {
+			packages.add(name);
+			continue;
+		}
+		const map = distMap(file);
+		// Vanilla Extract output maps to its one \`.css.ts\` source without mappings.
+		const original =
+			map?.findEntry(position.line, position.column)?.originalSource ??
+			(map?.payload.sources.length === 1 ? map.payload.sources[0] : undefined);
+		const resolved = original ? path.posix.join(path.posix.dirname(inner), original) : inner;
+		// A dependency bundled into dist resolves to its own package.
+		const bundled = PACKAGE_PATH.exec(resolved);
+		packages.add(bundled ? bundled[1] : name);
+		if (!bundled) sources.add(\`\${name}/\${resolved}\`);
 	}
 }
-process.stdout.write(JSON.stringify({ code, packages: [...packages].sort() }));
+process.stdout.write(JSON.stringify({ packages: [...packages].sort(), sources: [...sources].sort() }));
 `;
 
 /** Representative typed usage. \`all-entries.ts\` covers the rest of the declaration graph. */
