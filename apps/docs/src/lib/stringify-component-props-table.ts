@@ -14,7 +14,7 @@ interface MdxJsxAttributeValueExpression {
 interface MdxJsxAttribute {
 	name: string;
 	type: 'mdxJsxAttribute';
-	value: string | MdxJsxAttributeValueExpression | null | undefined;
+	value?: string | MdxJsxAttributeValueExpression | null;
 }
 
 interface MdxJsxExpressionAttribute {

@@ -67,7 +67,7 @@ test('stringifies ComponentPropsTable from GeneratedDoc JSON into a Markdown pro
 		],
 		name: 'ComponentPropsTable',
 		type: 'mdxJsxFlowElement',
-	});
+	} as { type: string });
 
 	expect(markdown).toBe(generatedDocToMarkdown(doc));
 	expect(markdown).toContain('### ButtonProps');
@@ -138,14 +138,14 @@ test('leaves unrelated JSX nodes for the default stringifier', () => {
 			attributes: [],
 			name: 'TypeTable',
 			type: 'mdxJsxFlowElement',
-		}),
+		} as { type: string }),
 	).toBeUndefined();
 	expect(
 		stringifyComponentPropsTable({
 			attributes: [],
 			name: 'ExampleBlock',
 			type: 'mdxJsxFlowElement',
-		}),
+		} as { type: string }),
 	).toBeUndefined();
 	expect(stringifyComponentPropsTable({ type: 'paragraph' })).toBeUndefined();
 });
@@ -165,6 +165,6 @@ test('returns undefined when the type attribute is not GeneratedDoc JSON', () =>
 			],
 			name: 'ComponentPropsTable',
 			type: 'mdxJsxFlowElement',
-		}),
+		} as { type: string }),
 	).toBeUndefined();
 });
