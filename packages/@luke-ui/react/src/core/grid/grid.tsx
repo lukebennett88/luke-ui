@@ -113,14 +113,17 @@ interface _GridLayoutProps {
 	 * shorthand, because rows are usually auto-sized.
 	 */
 	rows?: RequiredInitialResponsiveValue<string>;
+	// `@remarks` sets the type the docs props table shows, which would otherwise be `union`.
 	/**
 	 * Named grid areas, one string per row, such as `['a a', 'b c']`.
 	 *
 	 * Each row needs the same number of cells. Use `.` for an empty cell. Without `columns`, the
 	 * column tracks that `areas` creates are auto-sized. Accepts a responsive object with a required
 	 * `initial` value.
+	 *
+	 * @remarks `RequiredInitialResponsiveValue<ReadonlyArray<string>>`
 	 */
-	areas?: ResponsiveGridAreas;
+	areas?: RequiredInitialResponsiveValue<ReadonlyArray<string>>;
 	/** Space between grid tracks. */
 	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
 	/** Space between row tracks. Overrides `gap` on the block axis. */
@@ -136,12 +139,6 @@ interface _GridLayoutProps {
 	/** Distribution of column tracks within the grid on the inline axis. */
 	justifyContent?: SprinklesProps['justifyContent'];
 }
-
-/**
- * Private name for the `areas` type so the generated props table shows it instead of `union`. It
- * includes `undefined` so the optional prop keeps the alias rather than a flattened union.
- */
-type ResponsiveGridAreas = RequiredInitialResponsiveValue<ReadonlyArray<string>> | undefined;
 
 interface _GridElementProps extends BoxLikeElementProps, LayoutProps, _GridLayoutProps {}
 
