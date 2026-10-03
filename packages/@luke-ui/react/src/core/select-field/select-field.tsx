@@ -36,7 +36,7 @@ interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
 	errorMessage?: ReactNode;
 	/**
 	 * Whether the field is pending. The trigger keeps focus but can't open the select or change
-	 * its value.
+	 * its value. An open select closes when the field turns pending.
 	 */
 	isPending?: SelectTriggerProps['isPending'];
 	/** Options for the render function in `children`. */

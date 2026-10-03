@@ -233,7 +233,12 @@ const comboboxConfig = {
 
 			selectors: {
 				'&[data-entering]': { opacity: 0 },
-				'&[data-exiting]': { opacity: 0, transition: popoverExitTransition },
+				'&[data-exiting]': {
+					opacity: 0,
+					// A closing popover takes no input, so a pending Select can't select while it fades.
+					pointerEvents: 'none',
+					transition: popoverExitTransition,
+				},
 			},
 
 			'@supports': {

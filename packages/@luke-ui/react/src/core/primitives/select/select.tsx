@@ -1,5 +1,5 @@
 import type { ComponentProps, JSX, ReactNode, Ref } from 'react';
-import { createContext, use } from 'react';
+import { createContext, use, useEffect } from 'react';
 import type {
 	ButtonProps as RacButtonProps,
 	Key,
@@ -113,13 +113,13 @@ type _SelectTriggerOmit = DistributiveOmit<
 >;
 
 interface _SelectTriggerProps extends _SelectTriggerOmit {
-	/** The `SelectValue` and `SelectIndicator`. Text parts such as `Text` render inside it. */
+	/** The `SelectValue` and `SelectIndicator`. */
 	children: RacButtonProps['children'];
 	/** Class name for the trigger button. */
 	className?: RacButtonProps['className'];
 	/**
 	 * Whether the trigger is pending. It keeps focus but can't open the select or change its
-	 * value.
+	 * value. An open select closes when the trigger turns pending.
 	 */
 	isPending?: RacButtonProps['isPending'];
 	/** Forwarded to the trigger `<button>` element. */
@@ -197,6 +197,14 @@ export function SelectRoot(props: SelectRootProps): JSX.Element {
 export function SelectTrigger(props: SelectTriggerProps): JSX.Element {
 	const { children, className, ...buttonProps } = props;
 	const size = use(SelectSizeContext) ?? 'medium';
+	const state = use(RacSelectStateContext);
+	const isPending = buttonProps.isPending;
+
+	// React Aria's pending Button only blocks the trigger. An already open listbox would still
+	// accept a selection, so close the select when the trigger turns pending.
+	useEffect(() => {
+		if (isPending && state?.isOpen) state.close();
+	}, [isPending, state]);
 
 	// React Aria provides slotted `Text` context for the description and error, so a `Text` without
 	// a `slot` throws. The trigger has no slot, so clear the context for everything inside it.
@@ -218,10 +226,7 @@ export function SelectTrigger(props: SelectTriggerProps): JSX.Element {
 	);
 }
 
-/**
- * The selected option, or the root's `placeholder` while nothing is selected. It renders the
- * selected item's content, so a `Text` inside an item also renders here.
- */
+/** The selected option, or the root's `placeholder` while nothing is selected. */
 export function SelectValue<T extends object>(props: SelectValueProps<T>): JSX.Element {
 	return (
 		<RacSelectValue<T>

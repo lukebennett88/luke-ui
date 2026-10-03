@@ -28,8 +28,8 @@ selected key.
 </SelectField>
 ```
 
-`SelectField` holds one selected option and has no clear button. Add an option such as “None” when
-someone needs to return to an empty choice.
+`SelectField` holds one selected option and has no clear button. An option labelled “None” is a
+choice like any other: selecting it selects its key and doesn't empty the field.
 
 Pass `defaultValue` to start with an option selected. Pass `value` and `onChange` to control the
 selection yourself. `onChange` receives the selected key, or `null` when nothing is selected, and
@@ -66,7 +66,7 @@ value. `SelectField` has no read-only state. Show a value that cannot change as 
 ## Pending
 
 Pass `isPending` while a change is saving. The trigger keeps focus but can't open the select or
-change its value.
+change its value. An open select closes when the field turns pending.
 
 ## Size
 

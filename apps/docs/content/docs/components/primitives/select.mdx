@@ -14,10 +14,10 @@ They expose the root, trigger, value, indicator, popover, listbox, and option pa
 ## Anatomy
 
 `SelectRoot` is the semantic root. It connects the trigger to the label, description, and error
-inside it, and owns the selection, state, validation, and size. `SelectTrigger` is the button that
-opens the popover, and it draws the control chrome. It holds a `SelectValue`, which shows the
-selected option, and a `SelectIndicator`. `SelectPopover` holds a `SelectListBox`, which holds the
-`SelectItem` options.
+inside it, and normally owns the selection, open state, validation, form state, and size.
+`SelectTrigger` is the button that opens the popover, and it draws the control chrome. It holds a
+`SelectValue`, which shows the selected option, and a `SelectIndicator`. `SelectPopover` holds a
+`SelectListBox`, which holds the `SelectItem` options.
 
 ```tsx
 <SelectRoot name="theme" placeholder="Choose a theme">
@@ -40,9 +40,9 @@ Put the `SelectValue` before the `SelectIndicator`.
 
 ## Root props
 
-`SelectRoot` owns `placeholder` and the value, state, validation, form, and size props. The parts
-take no props for these. `value` and `defaultValue` take a key, or `null` for no selection, and
-`onChange` receives the same type. A select has no read-only state.
+Put `placeholder` and the selection, open state, validation, form, and size props on `SelectRoot`.
+`value` and `defaultValue` take a key, or `null` for no selection, and `onChange` receives the same
+type. A select has no read-only state.
 
 `id`, `className`, and `ref` on `SelectRoot` target the root element. `triggerId` targets the
 trigger, and `ref` on `SelectTrigger` reaches it.
@@ -67,7 +67,7 @@ Use `small` in compact layouts.
 ## Pending
 
 Pass `isPending` to `SelectTrigger` while a change is saving. The trigger keeps focus but can't open
-the select or change its value.
+the select or change its value. An open select closes when the trigger turns pending.
 
 ## Validation
 

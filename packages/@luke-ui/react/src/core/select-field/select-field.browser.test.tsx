@@ -438,6 +438,61 @@ test("a pending SelectField keeps focus but can't open or change", async () => {
 	await expect.element(page.getByRole('listbox')).toBeVisible();
 });
 
+test("a SelectField that turns pending while open can't change its value", async () => {
+	const changes: Array<Key | null> = [];
+
+	onTestFinished(() => {
+		for (const message of document.querySelectorAll('[data-live-announcer] [role="img"]')) {
+			message.remove();
+		}
+	});
+
+	function Fixture() {
+		const [isPending, setIsPending] = useState(false);
+		return (
+			<>
+				<SelectField
+					defaultValue="light"
+					isPending={isPending}
+					items={themeItems}
+					label="Theme"
+					onChange={(next) => changes.push(next)}
+				>
+					{renderThemeItem}
+				</SelectField>
+				<button onClick={() => setIsPending((value) => !value)} type="button">
+					Toggle pending
+				</button>
+			</>
+		);
+	}
+
+	render(<Fixture />);
+	await userEvent.click(trigger(/Theme/));
+	await expect.element(page.getByRole('listbox')).toBeVisible();
+
+	// The option can outlive the popover's exit animation, so try to click it straight away.
+	const option = page.getByRole('option', { name: 'Dark' });
+	act(() => trigger('Toggle pending').click());
+	await option.click({ force: true, timeout: 500 }).catch(() => {});
+
+	await expect.poll(() => page.getByRole('listbox').elements()).toHaveLength(0);
+	expect(changes).toEqual([]);
+	expect(trigger(/Theme/)).toHaveTextContent('Light');
+	await expect.element(trigger(/Theme/)).toHaveFocus();
+
+	await userEvent.keyboard('{ArrowDown}{Enter}');
+	expect(page.getByRole('listbox').elements()).toHaveLength(0);
+	expect(changes).toEqual([]);
+
+	act(() => trigger('Toggle pending').click());
+
+	await userEvent.click(trigger(/Theme/));
+	await userEvent.click(page.getByRole('option', { name: 'Dark' }));
+	expect(changes).toEqual(['dark']);
+	expect(trigger(/Theme/)).toHaveTextContent('Dark');
+});
+
 test('the SelectField scene has no axe violations', async () => {
 	const { container } = render(<SelectFieldScene />);
 
