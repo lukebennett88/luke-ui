@@ -3,6 +3,7 @@
 	"pages": [
 		"aspect-ratio",
 		"auto-grid",
+		"bleed",
 		"box",
 		"cluster",
 		"container",

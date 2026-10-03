@@ -19,6 +19,7 @@
 		"---Layout---",
 		"layout/aspect-ratio",
 		"layout/auto-grid",
+		"layout/bleed",
 		"layout/box",
 		"layout/cluster",
 		"layout/container",
