@@ -1,6 +1,6 @@
 import { Button } from '@luke-ui/react/button';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
-import { createRef } from 'react';
+import { act, createRef, useState } from 'react';
 import type { Key } from 'react-aria-components/Select';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -398,6 +398,61 @@ test('an open SelectField has no axe violations', async () => {
 
 	await expectNoAxeViolations(container);
 	await expectNoAxeViolations(document.body);
+});
+
+// Keep this after the axe tests. React Aria announces a pending button in a live region that
+// outlives the test and would fail a later page-wide audit.
+test("a pending SelectField keeps focus but can't open or change", async () => {
+	const changes: Array<Key | null> = [];
+
+	function Fixture() {
+		const [isPending, setIsPending] = useState(false);
+		return (
+			<>
+				<SelectField
+					defaultValue="light"
+					isPending={isPending}
+					items={themeItems}
+					label="Theme"
+					onChange={(next) => changes.push(next)}
+				>
+					{renderThemeItem}
+				</SelectField>
+				<button onClick={() => setIsPending((value) => !value)} type="button">
+					Toggle pending
+				</button>
+			</>
+		);
+	}
+
+	render(<Fixture />);
+	await userEvent.tab();
+	expect(trigger(/Theme/)).toHaveFocus();
+
+	// A programmatic click leaves focus on the trigger.
+	const toggle = trigger('Toggle pending');
+	act(() => toggle.click());
+
+	expect(trigger(/Theme/)).toHaveFocus();
+	expect(trigger(/Theme/).disabled).toBe(false);
+	expect(trigger(/Theme/).tabIndex).toBe(0);
+
+	for (const keys of ['{Enter}', ' ', '{ArrowDown}', 'd']) {
+		await userEvent.keyboard(keys);
+		expect(page.getByRole('listbox').elements()).toHaveLength(0);
+	}
+	// Playwright treats an aria-disabled button as not actionable, so force the click.
+	await page.getByRole('button', { name: /Theme/ }).click({ force: true });
+	expect(page.getByRole('listbox').elements()).toHaveLength(0);
+	expect(changes).toEqual([]);
+	expect(trigger(/Theme/)).toHaveTextContent('Light');
+	expect(trigger(/Theme/)).toHaveFocus();
+
+	act(() => toggle.click());
+
+	expect(trigger(/Theme/)).toHaveFocus();
+	await userEvent.keyboard('{Enter}');
+	await expect.element(page.getByRole('listbox')).toBeVisible();
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {

@@ -109,7 +109,7 @@ export type SelectRootProps = Prettify<_SelectRootProps>;
 
 type _SelectTriggerOmit = DistributiveOmit<
 	RacButtonProps,
-	'children' | 'className' | 'id' | 'isDisabled' | 'isPending' | 'render' | 'type'
+	'children' | 'className' | 'id' | 'isDisabled' | 'render' | 'type'
 >;
 
 interface _SelectTriggerProps extends _SelectTriggerOmit {
@@ -117,6 +117,8 @@ interface _SelectTriggerProps extends _SelectTriggerOmit {
 	children: RacButtonProps['children'];
 	/** Class name for the trigger button. */
 	className?: RacButtonProps['className'];
+	/** Whether the trigger is pending. It keeps focus but can't open the select or change its value. */
+	isPending?: RacButtonProps['isPending'];
 	/** Forwarded to the trigger `<button>` element. */
 	ref?: Ref<HTMLButtonElement>;
 }
@@ -248,11 +250,7 @@ export function SelectIndicator(props: SelectIndicatorProps): JSX.Element {
 	);
 }
 
-/**
- * Popover surface for the listbox. The portal inherits the document's theme: importing a theme
- * stylesheet themes the whole document from `:root`, so no propagation is needed. A colour mode
- * scoped below `<html>` does not reach the portal.
- */
+/** Popover surface for the listbox. */
 export function SelectPopover(props: SelectPopoverProps): JSX.Element {
 	const { offset = 4, ref, ...popoverProps } = props;
 

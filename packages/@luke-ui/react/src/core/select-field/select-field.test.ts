@@ -1,5 +1,6 @@
 import type { Ref } from 'react';
 import { assertType, test } from 'vite-plus/test';
+import type { SelectRootProps, SelectTriggerProps } from '../primitives/select/select.js';
 import type { SelectFieldProps } from './select-field.js';
 
 test('SelectField requires a visible label or an accessible name', () => {
@@ -33,11 +34,16 @@ test('SelectField does not accept isInvalid', () => {
 	assertType<SelectFieldProps<object>>({ children: [], isInvalid: true, label: 'Theme' });
 });
 
-test('SelectField has no read-only or pending state', () => {
+test('SelectField has no read-only state and accepts isPending', () => {
 	// @ts-expect-error — React Aria's Select has no read-only state
 	assertType<SelectFieldProps<object>>({ children: [], isReadOnly: true, label: 'Theme' });
-	// @ts-expect-error — a pending save uses isDisabled or lets later changes through
 	assertType<SelectFieldProps<object>>({ children: [], isPending: true, label: 'Theme' });
+});
+
+test('isPending belongs to the trigger, not the select root', () => {
+	// @ts-expect-error — a pending state sits on the trigger, so the root takes no `isPending`
+	assertType<SelectRootProps>({ isPending: true });
+	assertType<SelectTriggerProps>({ children: null, isPending: true });
 });
 
 test('SelectField has no popover, menu width, or listbox props', () => {

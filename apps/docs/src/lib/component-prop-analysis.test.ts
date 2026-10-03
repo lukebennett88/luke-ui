@@ -129,12 +129,12 @@ test(
 		expect(names).toContain('defaultValue');
 		expect(names).toContain('onChange');
 		expect(names).toContain('id');
+		expect(names).toContain('isPending');
 		expect(names).toContain('ref');
 		expect(names).toContain('triggerId');
 		expect(names).toContain('triggerRef');
 		expect(names).not.toContain('isInvalid');
 		expect(names).not.toContain('isReadOnly');
-		expect(names).not.toContain('isPending');
 		expect(names).not.toContain('onClick');
 		expect(names).not.toContain('onPointerMoveCapture');
 	},

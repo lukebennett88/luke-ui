@@ -5,7 +5,11 @@ import {
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
 } from '../primitives/field/field.js';
-import type { SelectListBoxProps, SelectRootProps } from '../primitives/select/select.js';
+import type {
+	SelectListBoxProps,
+	SelectRootProps,
+	SelectTriggerProps,
+} from '../primitives/select/select.js';
 import {
 	SelectIndicator,
 	SelectListBox,
@@ -30,6 +34,8 @@ interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
 	children: SelectListBoxProps<T>['children'];
 	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
 	errorMessage?: ReactNode;
+	/** Whether the field is pending. The trigger keeps focus but can't open the select or change its value. */
+	isPending?: SelectTriggerProps['isPending'];
 	/** Options for the render function in `children`. */
 	items?: SelectListBoxProps<T>['items'];
 	/** Forwarded to the field's root element. Use `triggerRef` for the trigger. */
@@ -58,6 +64,7 @@ export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.E
 		children,
 		description,
 		errorMessage,
+		isPending,
 		items,
 		label,
 		necessityIndicator,
@@ -75,7 +82,7 @@ export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.E
 				label={label}
 				necessityIndicator={necessityIndicator}
 			>
-				<SelectTrigger ref={triggerRef}>
+				<SelectTrigger isPending={isPending} ref={triggerRef}>
 					<SelectValue />
 					<SelectIndicator />
 				</SelectTrigger>
