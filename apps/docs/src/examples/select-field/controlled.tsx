@@ -10,7 +10,7 @@ const sizes = [
 ];
 
 export default () => {
-	const [size, setSize] = useState<string | number | null>('default');
+	const [size, setSize] = useState<string | null>('default');
 
 	return (
 		<Stack gap="sp16" maxInlineSize="20rem">

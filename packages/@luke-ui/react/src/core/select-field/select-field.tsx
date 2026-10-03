@@ -1,4 +1,5 @@
 import type { JSX, ReactNode, Ref } from 'react';
+import type { Key } from 'react-aria-components/Select';
 import type { FieldAccessibleNameProps } from '../primitives/field/field.js';
 import {
 	Field,
@@ -21,9 +22,25 @@ import {
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 
+/**
+ * The key React Aria derives for an item: its `key`, then its `id`. An item with neither has a plain
+ * `Key`, for example data whose `SelectItem` gets an explicit `id`.
+ */
+type ItemKey<T> = T extends { key: infer K extends Key }
+	? K
+	: T extends { id: infer K extends Key }
+		? K
+		: Key;
+
 type _SelectFieldOmit = DistributiveOmit<
 	SelectRootProps,
-	'aria-label' | 'aria-labelledby' | 'children' | 'isInvalid'
+	| 'aria-label'
+	| 'aria-labelledby'
+	| 'children'
+	| 'defaultValue'
+	| 'isInvalid'
+	| 'onChange'
+	| 'value'
 >;
 
 interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
@@ -32,6 +49,11 @@ interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
 	 * static `SelectItem` children.
 	 */
 	children: SelectListBoxProps<T>['children'];
+	/**
+	 * The initially selected key (uncontrolled). The key type follows the `id` or `key` of the items
+	 * in `items`.
+	 */
+	defaultValue?: NoInfer<ItemKey<T>> | null;
 	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
 	errorMessage?: ReactNode;
 	/**
@@ -41,6 +63,8 @@ interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
 	isPending?: SelectTriggerProps['isPending'];
 	/** Options for the render function in `children`. */
 	items?: SelectListBoxProps<T>['items'];
+	/** Called with the new key when the selection changes. */
+	onChange?: (value: NoInfer<ItemKey<T>> | null) => void;
 	/** Forwarded to the field's root element. Use `triggerRef` for the trigger. */
 	ref?: SelectRootProps['ref'];
 	/**
@@ -48,6 +72,8 @@ interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
 	 * for the root element.
 	 */
 	triggerRef?: Ref<HTMLButtonElement>;
+	/** The selected key (controlled). Pass `null` for no selection. */
+	value?: NoInfer<ItemKey<T>> | null;
 }
 
 type _SelectFieldProps<T extends object> = _SelectFieldBaseProps<T> & FieldAccessibleNameProps;
@@ -71,6 +97,7 @@ export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.E
 		items,
 		label,
 		necessityIndicator,
+		onChange,
 		triggerRef,
 		...rootProps
 	} = props;
@@ -78,7 +105,12 @@ export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.E
 	const normalizedErrorMessage = normalizeErrorMessage(errorMessage);
 
 	return (
-		<SelectRoot {...rootProps} isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}>
+		<SelectRoot
+			{...rootProps}
+			// React Aria only reports keys it derived from `items`, so `onChange` receives `ItemKey<T>`.
+			onChange={onChange as SelectRootProps['onChange']}
+			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
+		>
 			<Field
 				description={description}
 				errorMessage={normalizedErrorMessage}

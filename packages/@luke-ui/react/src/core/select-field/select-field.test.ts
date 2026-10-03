@@ -1,7 +1,11 @@
+import { createElement } from 'react';
 import type { Ref } from 'react';
-import { assertType, test } from 'vite-plus/test';
+import type { Key } from 'react-aria-components/Select';
+import { assertType, expectTypeOf, test } from 'vite-plus/test';
 import type { SelectRootProps, SelectTriggerProps } from '../primitives/select/select.js';
+import { SelectItem } from '../primitives/select/select.js';
 import type { SelectFieldProps } from './select-field.js';
+import { SelectField } from './select-field.js';
 
 test('SelectField requires a visible label or an accessible name', () => {
 	// @ts-expect-error — a field without a label requires aria-label or aria-labelledby
@@ -55,13 +59,236 @@ test('SelectField has no popover, menu width, or listbox props', () => {
 	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', listBoxProps: {} });
 });
 
-test('SelectField selection props speak Key | null', () => {
-	assertType<SelectFieldProps<object>>({
+// SelectField is called directly in these tests so that TypeScript infers `T` the same way it does
+// for JSX. Nothing renders, and the render functions never run.
+
+const countries = [
+	{ code: 'au', name: 'Australia' },
+	{ code: 'nz', name: 'New Zealand' },
+];
+
+const sizes = [
+	{ id: 'small', label: 'Small' },
+	{ id: 'large', label: 'Large' },
+];
+
+const literalSizes = [
+	{ id: 'small', label: 'Small' },
+	{ id: 'large', label: 'Large' },
+] as const;
+
+const numberedSizes = [
+	{ id: 1, label: 'Small' },
+	{ id: 2, label: 'Large' },
+];
+
+test('SelectField infers the item type from items', () => {
+	SelectField({
+		children: (country) => {
+			expectTypeOf(country).toEqualTypeOf<{ code: string; name: string }>();
+			return null;
+		},
+		items: countries,
+		label: 'Country',
+	});
+	SelectField({
+		children: (size) => {
+			expectTypeOf(size).toEqualTypeOf<{ id: string; label: string }>();
+			return null;
+		},
+		items: sizes,
+		label: 'Size',
+	});
+});
+
+test('SelectField infers the key type from the id of each item', () => {
+	SelectField({
+		children: () => null,
+		items: sizes,
+		label: 'Size',
+		onChange: (value) => {
+			expectTypeOf(value).toEqualTypeOf<string | null>();
+		},
+	});
+	SelectField({
+		children: () => null,
+		items: numberedSizes,
+		label: 'Size',
+		onChange: (value) => {
+			expectTypeOf(value).toEqualTypeOf<number | null>();
+		},
+	});
+});
+
+test('SelectField infers literal keys from as const data', () => {
+	SelectField({
+		children: () => null,
+		items: literalSizes,
+		label: 'Size',
+		onChange: (value) => {
+			expectTypeOf(value).toEqualTypeOf<'large' | 'small' | null>();
+		},
+	});
+});
+
+test('SelectField infers the key type from the key of each item', () => {
+	const keyed = [
+		{ key: 'a', title: 'A' },
+		{ key: 'b', title: 'B' },
+	];
+	SelectField({
+		children: (item) => {
+			expectTypeOf(item).toEqualTypeOf<{ key: string; title: string }>();
+			return null;
+		},
+		items: keyed,
+		label: 'Letter',
+		onChange: (value) => {
+			expectTypeOf(value).toEqualTypeOf<string | null>();
+		},
+	});
+});
+
+test('SelectField prefers the key of an item over its id', () => {
+	const both = [{ id: 1, key: 'one' }];
+	SelectField({
+		children: () => null,
+		items: both,
+		label: 'Number',
+		onChange: (value) => {
+			expectTypeOf(value).toEqualTypeOf<string | null>();
+		},
+	});
+});
+
+test('SelectField takes the union of keys across a union of item types', () => {
+	const mixed: Array<{ id: string } | { key: number }> = [];
+	SelectField({
+		children: () => null,
+		items: mixed,
+		label: 'Mixed',
+		onChange: (value) => {
+			expectTypeOf(value).toEqualTypeOf<number | string | null>();
+		},
+	});
+});
+
+test('SelectField keys fall back to Key when the items have no id or key', () => {
+	SelectField({
+		children: (country) => {
+			expectTypeOf(country).toEqualTypeOf<{ code: string; name: string }>();
+			return createElement(SelectItem, { id: country.code }, country.name);
+		},
+		items: countries,
+		label: 'Country',
+		onChange: (value) => {
+			expectTypeOf(value).toEqualTypeOf<Key | null>();
+		},
+	});
+	SelectField<object>({
+		children: [],
+		label: 'Country',
+		onChange: (value) => {
+			expectTypeOf(value).toEqualTypeOf<Key | null>();
+		},
+	});
+});
+
+test('SelectField takes Key | null for static children without items', () => {
+	SelectField({
+		children: [createElement(SelectItem, { id: 'light', key: 'light' }, 'Light')],
+		label: 'Theme',
+		onChange: (value) => {
+			expectTypeOf(value).toEqualTypeOf<Key | null>();
+		},
+	});
+	SelectField({
 		children: [],
 		defaultValue: 'system',
 		label: 'Theme',
-		onChange: (value: string | number | null) => value,
+		onChange: (value: number | string | null) => value,
 		value: null,
+	});
+});
+
+test('SelectField types value and defaultValue from the item keys', () => {
+	SelectField({
+		children: () => null,
+		defaultValue: 'small',
+		items: literalSizes,
+		label: 'Size',
+		onChange: (value) => {
+			expectTypeOf(value).toEqualTypeOf<'large' | 'small' | null>();
+		},
+		value: 'large',
+	});
+	SelectField({
+		children: () => null,
+		items: literalSizes,
+		label: 'Size',
+		value: null,
+	});
+	SelectField({
+		children: () => null,
+		// @ts-expect-error — 'huge' is not the id of any item
+		defaultValue: 'huge',
+		items: literalSizes,
+		label: 'Size',
+	});
+	SelectField({
+		children: () => null,
+		items: literalSizes,
+		label: 'Size',
+		// @ts-expect-error — 'huge' is not the id of any item
+		value: 'huge',
+	});
+	SelectField({
+		children: () => null,
+		items: sizes,
+		label: 'Size',
+		// @ts-expect-error — the ids are strings
+		value: 1,
+	});
+});
+
+test("SelectField's selection props do not change the inferred item type", () => {
+	SelectField({
+		children: (size) => {
+			expectTypeOf(size).toEqualTypeOf<{ id: string; label: string }>();
+			return null;
+		},
+		items: sizes,
+		label: 'Size',
+		// A handler that accepts any Key is still assignable.
+		onChange: (value: Key | null) => value,
+		value: 'small',
+	});
+	SelectField({
+		children: (size) => {
+			expectTypeOf(size).toEqualTypeOf<{ id: string; label: string }>();
+			return null;
+		},
+		defaultValue: 'small',
+		items: sizes,
+		label: 'Size',
+	});
+	const anyKey = 'small' as Key | null;
+	SelectField({
+		children: (size) => {
+			expectTypeOf(size).toEqualTypeOf<{ id: string; label: string }>();
+			return null;
+		},
+		items: sizes,
+		label: 'Size',
+		// @ts-expect-error — a value typed as any Key is wider than the item keys
+		value: anyKey,
+	});
+	SelectField({
+		children: () => null,
+		items: literalSizes,
+		label: 'Size',
+		// @ts-expect-error — a handler that accepts only 'small' can't take 'large'
+		onChange: (value: 'small' | null) => value,
 	});
 });
 
