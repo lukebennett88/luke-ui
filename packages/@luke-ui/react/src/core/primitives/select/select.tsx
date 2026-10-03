@@ -1,5 +1,5 @@
 import type { ComponentProps, JSX, ReactNode, Ref } from 'react';
-import { createContext, use, useEffect } from 'react';
+import { createContext, use } from 'react';
 import type {
 	ButtonProps as RacButtonProps,
 	Key,
@@ -118,8 +118,8 @@ interface _SelectTriggerProps extends _SelectTriggerOmit {
 	/** Class name for the trigger button. */
 	className?: RacButtonProps['className'];
 	/**
-	 * Whether the trigger is pending. It keeps focus but can't open the select or change its
-	 * value. An open select closes when the trigger turns pending.
+	 * Whether the trigger is pending. It keeps focus but can't be pressed or opened, and can't change
+	 * the value from the trigger, until pending ends.
 	 */
 	isPending?: RacButtonProps['isPending'];
 	/** Forwarded to the trigger `<button>` element. */
@@ -197,14 +197,6 @@ export function SelectRoot(props: SelectRootProps): JSX.Element {
 export function SelectTrigger(props: SelectTriggerProps): JSX.Element {
 	const { children, className, ...buttonProps } = props;
 	const size = use(SelectSizeContext) ?? 'medium';
-	const state = use(RacSelectStateContext);
-	const isPending = buttonProps.isPending;
-
-	// React Aria's pending Button only blocks the trigger. An already open listbox would still
-	// accept a selection, so close the select when the trigger turns pending.
-	useEffect(() => {
-		if (isPending && state?.isOpen) state.close();
-	}, [isPending, state]);
 
 	// React Aria provides slotted `Text` context for the description and error, so a `Text` without
 	// a `slot` throws. The trigger has no slot, so clear the context for everything inside it.

@@ -233,12 +233,7 @@ const comboboxConfig = {
 
 			selectors: {
 				'&[data-entering]': { opacity: 0 },
-				'&[data-exiting]': {
-					opacity: 0,
-					// A closing popover no longer accepts interaction while its exit animation finishes.
-					pointerEvents: 'none',
-					transition: popoverExitTransition,
-				},
+				'&[data-exiting]': { opacity: 0, transition: popoverExitTransition },
 			},
 
 			'@supports': {

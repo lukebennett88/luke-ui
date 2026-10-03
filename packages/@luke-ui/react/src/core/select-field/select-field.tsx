@@ -35,8 +35,8 @@ interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
 	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
 	errorMessage?: ReactNode;
 	/**
-	 * Whether the field is pending. The trigger keeps focus but can't open the select or change
-	 * its value. An open select closes when the field turns pending.
+	 * Whether the field is pending. The trigger keeps focus but can't be pressed or opened, and can't
+	 * change the value from the trigger, until pending ends.
 	 */
 	isPending?: SelectTriggerProps['isPending'];
 	/** Options for the render function in `children`. */
