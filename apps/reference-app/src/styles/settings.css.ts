@@ -377,113 +377,15 @@ export const dialog = style({
 	padding: vars.space.sp24,
 });
 
-export const selectTrigger = style({
+export const settingsSelect = style({
 	'@container': {
 		[shellBelowBp768]: {
 			inlineSize: '100%',
 			minInlineSize: 0,
 		},
 	},
-	alignItems: 'center',
-	appearance: 'none',
-	backgroundColor: vars.color.surface.canvas,
-	blockSize: vars.controlSize.small,
-	border: `1px solid ${vars.color.border.decorative}`,
-	borderRadius: vars.radius.control,
-	color: vars.color.text.primary,
-	cursor: 'pointer',
-	display: 'inline-flex',
-	font: 'inherit',
-	gap: vars.space.sp8,
-	lineHeight: 1.2,
 	maxInlineSize: '100%',
 	minInlineSize: '8.5rem',
-	outline: 'none',
-	outlineOffset: 0,
-	paddingInline: vars.space.sp12,
-	selectors: {
-		'&:hover': {
-			borderColor: `color-mix(in oklab, ${vars.color.border.decorative} 70%, ${vars.color.text.primary})`,
-		},
-		'&[data-disabled]': {
-			opacity: vars.interaction.disabledOpacity,
-		},
-		'&[data-focus-visible]': {
-			outline: `2px solid ${vars.color.border.focus}`,
-			outlineOffset: '2px',
-		},
-	},
-	textAlign: 'start',
-});
-
-export const selectTriggerValue = style({
-	flexGrow: 1,
-	minInlineSize: 0,
-	overflow: 'hidden',
-	textOverflow: 'ellipsis',
-	whiteSpace: 'nowrap',
-});
-
-export const selectTriggerChevron = style({
-	color: vars.color.text.secondary,
-	flexShrink: 0,
-});
-
-export const selectPopover = style({
-	'@supports': {
-		'(min-block-size: calc-size(fit-content, size))': {
-			maxBlockSize: 'min(calc-size(fit-content, min(size, 16rem)), calc(100dvh - 2rem))',
-			minBlockSize: 'calc-size(fit-content, min(size, 12em))',
-		},
-	},
-	background: vars.color.surface.floating,
-	border: `1px solid ${vars.color.border.decorative}`,
-	borderRadius: vars.radius.surface,
-	boxShadow: vars.depth.floating,
-	fontFamily: vars.font.family.body,
-	maxBlockSize: 'min(16rem, calc(100dvh - 2rem))',
-	minInlineSize: 'max(var(--trigger-width), 10rem)',
-	overflow: 'auto',
-	padding: 0,
-	zIndex: 20,
-});
-
-export const selectList = style({
-	listStyle: 'none',
-	margin: 0,
-	outline: 'none',
-	padding: vars.space.sp4,
-});
-
-export const selectItemTrack = style({
-	inlineSize: '100%',
-	lineHeight: vars.font.label.lineHeight,
-});
-
-export const selectItem = style({
-	borderRadius: vars.radius.control,
-	color: vars.color.text.primary,
-	cursor: 'default',
-	lineHeight: vars.font.label.lineHeight,
-	outline: 'none',
-	paddingBlock: vars.space.sp8,
-	paddingInline: vars.space.sp12,
-	selectors: {
-		'&[data-disabled]': {
-			opacity: vars.interaction.disabledOpacity,
-		},
-		'&[data-focus-visible]': {
-			background: `color-mix(in oklab, ${vars.color.text.primary} 8%, transparent)`,
-		},
-		'&[data-hovered]': {
-			background: `color-mix(in oklab, ${vars.color.text.primary} 8%, transparent)`,
-		},
-	},
-});
-
-export const selectItemCheck = style({
-	color: vars.color.text.secondary,
-	flexShrink: 0,
 });
 
 export const switchField = style({

@@ -35,8 +35,9 @@ A checkbox reads its value from `isSelected`.
 <ExampleBlock src="forms/react-hook-form-checkbox" title="React Hook Form: Checkbox" />
 
 `TextInputField` and `Checkbox` render a label, description, and error message around the control,
-so `inputRef` is what reaches the input underneath. A primitive that renders the control itself,
-such as `ComboboxInput`, takes `field.ref` on `ref`.
+so `inputRef` is what reaches the input underneath. For `SelectField`, pass the library's ref
+through `triggerRef` to reach the trigger button. A primitive that renders the control itself, such
+as `ComboboxInput`, takes `field.ref` on `ref`.
 
 ## Validation
 

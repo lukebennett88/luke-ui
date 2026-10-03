@@ -7,6 +7,7 @@ import '../primitives/button/recipe.css.js';
 import '../primitives/field/recipe.css.js';
 import '../primitives/checkbox/recipe.css.js';
 import '../primitives/combobox/styles.css.js';
+import '../primitives/select/styles.css.js';
 import '../primitives/text-input/styles.css.js';
 import '../primitives/text-input/recipe.css.js';
 import '../text/recipe.css.js';
