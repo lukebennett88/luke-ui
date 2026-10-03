@@ -1,5 +1,4 @@
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
-import { useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router';
 import type { Preferences } from '../api/schemas.js';
 import {
@@ -93,21 +92,8 @@ function SelectPreferenceRow({
 	pref: Extract<PrefRow, { kind: 'select' }>;
 	values: Preferences;
 }) {
-	const triggerRef = useRef<HTMLButtonElement>(null);
-	const shouldRestoreFocus = useRef(false);
 	const labelId = `${pref.id}-label`;
 	const descriptionId = pref.hint ? `${pref.id}-description` : undefined;
-
-	// The select is disabled while a save is in flight, and a disabled button cannot hold focus, so
-	// focus falls to the body when the listbox closes. Return it to the trigger once the save
-	// settles, but only while nothing else has taken focus in the meantime.
-	useEffect(() => {
-		if (isPending || !shouldRestoreFocus.current) return;
-		shouldRestoreFocus.current = false;
-		const { activeElement } = document;
-		if (activeElement && activeElement !== document.body) return;
-		triggerRef.current?.focus();
-	}, [isPending]);
 
 	return (
 		<SettingsRow
@@ -120,16 +106,14 @@ function SelectPreferenceRow({
 				aria-describedby={descriptionId}
 				aria-labelledby={labelId}
 				className={styles.settingsSelect}
-				isDisabled={isPending}
+				isPending={isPending}
 				items={pref.options}
 				onChange={(key) => {
 					if (key == null) return;
-					shouldRestoreFocus.current = true;
 					onSave({ [pref.key]: pref.parse(String(key)) });
 				}}
 				size="small"
 				triggerId={pref.id}
-				triggerRef={triggerRef}
 				value={values[pref.key]}
 			>
 				{(option) => <SelectItem id={option.value}>{option.label}</SelectItem>}
