@@ -69,6 +69,28 @@ test('SelectField has no open-state props', () => {
 	assertType<SelectRootProps>({ defaultOpen: true, isOpen: true, onOpenChange: () => {} });
 });
 
+test('SelectField has no allowsEmptyCollection, disabledKeys, or slot', () => {
+	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme' });
+	assertType<SelectFieldProps<object>>({
+		// @ts-expect-error — SelectField does not expose allowsEmptyCollection
+		allowsEmptyCollection: true,
+		children: [],
+		label: 'Theme',
+	});
+	assertType<SelectFieldProps<object>>({
+		children: [],
+		// @ts-expect-error — SelectField does not expose disabledKeys
+		disabledKeys: ['small'],
+		label: 'Theme',
+	});
+	assertType<SelectFieldProps<object>>({
+		children: [],
+		label: 'Theme',
+		// @ts-expect-error — SelectField does not expose slot
+		slot: 'example',
+	});
+});
+
 // SelectField is called directly in these tests so that TypeScript infers `T` the same way it does
 // for JSX. Nothing renders, and the render functions never run.
 

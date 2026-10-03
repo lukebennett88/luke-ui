@@ -23,8 +23,8 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 
 /**
- * The key React Aria derives for an item: its `key`, then its `id`. An item with neither has a plain
- * `Key`, for example data whose `SelectItem` gets an explicit `id`.
+ * The key type `SelectField` infers from item data: `key`, then `id`. Items with neither fall back
+ * to `Key`.
  */
 type ItemKey<T> = T extends { key: infer K extends Key }
 	? K
@@ -34,15 +34,18 @@ type ItemKey<T> = T extends { key: infer K extends Key }
 
 type _SelectFieldOmit = DistributiveOmit<
 	SelectRootProps,
+	| 'allowsEmptyCollection'
 	| 'aria-label'
 	| 'aria-labelledby'
 	| 'children'
 	| 'defaultOpen'
 	| 'defaultValue'
+	| 'disabledKeys'
 	| 'isInvalid'
 	| 'isOpen'
 	| 'onChange'
 	| 'onOpenChange'
+	| 'slot'
 	| 'value'
 >;
 
@@ -110,7 +113,8 @@ export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.E
 	return (
 		<SelectRoot
 			{...rootProps}
-			// React Aria only reports keys it derived from `items`, so `onChange` receives `ItemKey<T>`.
+			// `SelectRoot` works with any `Key`.
+			// `SelectField` narrows the key type from item data for its own API.
 			onChange={onChange as SelectRootProps['onChange']}
 			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
 		>
