@@ -32,6 +32,8 @@ type ItemKey<T> = T extends { key: infer K extends Key }
 		? K
 		: Key;
 
+type SelectRootValidate = NonNullable<SelectRootProps['validate']>;
+
 type _SelectFieldOmit = DistributiveOmit<
 	SelectRootProps,
 	| 'allowsEmptyCollection'
@@ -46,6 +48,7 @@ type _SelectFieldOmit = DistributiveOmit<
 	| 'onChange'
 	| 'onOpenChange'
 	| 'slot'
+	| 'validate'
 	| 'value'
 >;
 
@@ -78,6 +81,11 @@ interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
 	 * for the root element.
 	 */
 	triggerRef?: Ref<HTMLButtonElement>;
+	/**
+	 * Custom validation function run against the selected key. Return a message, or `true`/`null`
+	 * when valid. The key type follows the `id` or `key` of the items in `items`.
+	 */
+	validate?: (value: NoInfer<ItemKey<T>>) => ReturnType<SelectRootValidate>;
 	/** The selected key (controlled). Pass `null` for no selection. */
 	value?: NoInfer<ItemKey<T>> | null;
 }
@@ -105,6 +113,7 @@ export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.E
 		necessityIndicator,
 		onChange,
 		triggerRef,
+		validate,
 		...rootProps
 	} = props;
 
@@ -116,6 +125,7 @@ export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.E
 			// `SelectRoot` works with any `Key`.
 			// `SelectField` narrows the key type from item data for its own API.
 			onChange={onChange as SelectRootProps['onChange']}
+			validate={validate as SelectRootProps['validate']}
 			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
 		>
 			<Field

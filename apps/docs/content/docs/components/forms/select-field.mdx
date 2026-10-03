@@ -18,8 +18,9 @@ Pass `items` and a render function that returns a `SelectItem` for each one. Imp
 from `@luke-ui/react/select-field`.
 
 Each option needs a stable id. Give each item in `items` an `id` or `key`, or give each `SelectItem`
-an `id` when your data has neither. When the items carry an `id` or `key`, `value` and `onChange`
-use its type, so string ids give `string | null`. Otherwise they take a string or a number.
+an `id` when your data has neither. When the items carry an `id` or `key`, `value`, `onChange`, and
+`validate` use its type, so string ids give `string | null` for `value`. Otherwise they use React
+Aria's `Key`, a string or a number, with `null` for no selection.
 
 For a fixed set of options, pass `SelectItem` children with an `id` each instead of `items`.
 

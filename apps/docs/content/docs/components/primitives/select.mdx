@@ -19,23 +19,6 @@ inside it, and normally owns the selection, open state, validation, form state, 
 `SelectValue`, which shows the selected option, and a `SelectIndicator`. `SelectPopover` holds a
 `SelectListBox`, which holds the `SelectItem` options.
 
-```tsx
-<SelectRoot name="theme" placeholder="Choose a theme">
-	<Field label="Theme">
-		<SelectTrigger>
-			<SelectValue />
-			<SelectIndicator />
-		</SelectTrigger>
-		<SelectPopover>
-			<SelectListBox>
-				<SelectItem id="light">Light</SelectItem>
-				<SelectItem id="dark">Dark</SelectItem>
-			</SelectListBox>
-		</SelectPopover>
-	</Field>
-</SelectRoot>
-```
-
 Put the `SelectValue` before the `SelectIndicator`.
 
 ## Root props

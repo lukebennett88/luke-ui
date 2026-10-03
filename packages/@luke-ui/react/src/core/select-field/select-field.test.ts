@@ -324,6 +324,72 @@ test("SelectField's selection props do not change the inferred item type", () =>
 	});
 });
 
+test('SelectField types the validate argument from the item keys', () => {
+	SelectField({
+		children: () => null,
+		items: sizes,
+		label: 'Size',
+		validate: (value) => {
+			expectTypeOf(value).toEqualTypeOf<string>();
+			return null;
+		},
+	});
+	SelectField({
+		children: () => null,
+		items: literalSizes,
+		label: 'Size',
+		validate: (value) => {
+			expectTypeOf(value).toEqualTypeOf<'large' | 'small'>();
+			return value === 'small' ? 'Choose a larger size.' : true;
+		},
+	});
+	SelectField({
+		children: () => null,
+		items: [{ key: 'a', title: 'A' }],
+		label: 'Letter',
+		validate: (value) => {
+			expectTypeOf(value).toEqualTypeOf<string>();
+			return undefined;
+		},
+	});
+	SelectField({
+		children: (country) => createElement(SelectItem, { id: country.code }, country.name),
+		items: countries,
+		label: 'Country',
+		validate: (value) => {
+			expectTypeOf(value).toEqualTypeOf<Key>();
+			return ['Choose a country.'];
+		},
+	});
+});
+
+test("SelectField's validate does not change the inferred item type", () => {
+	SelectField({
+		children: (size) => {
+			expectTypeOf(size).toEqualTypeOf<{ id: string; label: string }>();
+			return null;
+		},
+		items: sizes,
+		label: 'Size',
+		// A validator that accepts any Key is still assignable.
+		validate: (value: Key) => (value === 'small' ? null : true),
+	});
+	SelectField({
+		children: () => null,
+		items: literalSizes,
+		label: 'Size',
+		// @ts-expect-error — a validator that accepts only 'small' can't take 'large'
+		validate: (value: 'small') => (value === 'small' ? null : true),
+	});
+	SelectField({
+		children: () => null,
+		items: sizes,
+		label: 'Size',
+		// @ts-expect-error — the ids are strings, so a number parameter is rejected
+		validate: (value: number) => (value > 0 ? null : 'Pick one.'),
+	});
+});
+
 test('SelectField takes a root element ref and a trigger ref', () => {
 	assertType<SelectFieldProps<object>>({
 		children: [],
