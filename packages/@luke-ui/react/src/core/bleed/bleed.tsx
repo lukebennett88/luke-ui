@@ -70,23 +70,10 @@ export function Bleed({
 	return (
 		<Box
 			{...omitUnsupportedSprinklesProps(props, bleedProperties)}
-			{...mergeStyleProps(
-				{
-					className: cx(
-						inlineStartStyle.className,
-						inlineEndStyle.className,
-						blockStartStyle.className,
-						blockEndStyle.className,
-					),
-					style: {
-						...inlineStartStyle.style,
-						...inlineEndStyle.style,
-						...blockStartStyle.style,
-						...blockEndStyle.style,
-					},
-				},
-				{ className, style },
-			)}
+			{...mergeStyleProps(inlineStartStyle, inlineEndStyle, blockStartStyle, blockEndStyle, {
+				className,
+				style,
+			})}
 		/>
 	);
 }
