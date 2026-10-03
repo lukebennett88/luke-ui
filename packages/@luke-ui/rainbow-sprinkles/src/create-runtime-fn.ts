@@ -70,7 +70,11 @@ function assignClasses(
 	}
 	const parts: Array<string> = [];
 	for (const cond of keys) {
-		const rawValueAtCondition = String((propValue as Record<string, unknown>)[cond]);
+		const valueAtCondition = (propValue as Record<string, unknown>)[cond];
+		const rawValueAtCondition = String(valueAtCondition);
+		// An empty value gets no variable, so treat it as omitted. Its class alone would reset the
+		// property or inherit an ancestor's variable.
+		if (valueAtCondition == null || valueAtCondition === '') continue;
 		const result = handleEntry(propertyConfig, rawValueAtCondition, cache, cond);
 		if (result) {
 			parts.push(result);

@@ -2,8 +2,11 @@ import type { ResponsiveCondition } from './responsive-conditions.js';
 
 type ResponsiveObject<Value> = Extract<NonNullable<Value>, object>;
 
-/** A direct value, or a responsive object keyed by breakpoint. */
-type ResponsivePropValue<Value> =
+/**
+ * A direct value, or a responsive object keyed by breakpoint. A breakpoint that is omitted, `null`,
+ * or `undefined` does not provide a new value.
+ */
+export type ResponsivePropValue<Value> =
 	| Value
 	| {
 			[Condition in ResponsiveCondition]?: Value | null;

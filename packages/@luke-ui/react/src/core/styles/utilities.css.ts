@@ -231,7 +231,10 @@ type ScaleValue<Property extends PropertyKey, Scale> = Scale extends true
 		? keyof Scale & string
 		: never;
 
-/** Direct value, or a responsive object keyed by breakpoint. */
+/**
+ * Direct value, or a responsive object keyed by breakpoint. A breakpoint that is omitted, `null`,
+ * or `undefined` does not provide a new value.
+ */
 type ResponsiveValue<Value> =
 	| Value
 	| null

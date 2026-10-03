@@ -2,7 +2,7 @@ import { assignInlineVars } from '@vanilla-extract/dynamic';
 import { typedEntries } from '../../shared/utils/utils.js';
 import type { ResponsiveCondition } from './responsive-conditions.js';
 import { responsiveConditions } from './responsive-conditions.js';
-import type { RequiredInitialResponsiveValue } from './responsive.js';
+import type { ResponsivePropValue } from './responsive.js';
 
 type ResponsiveCssProperty = {
 	classes: Record<ResponsiveCondition, string>;
@@ -14,7 +14,7 @@ type ResponsiveCssProperty = {
  * `createResponsiveCssProperty`.
  */
 export function resolveResponsiveCssProperty(
-	value: RequiredInitialResponsiveValue<string | number>,
+	value: ResponsivePropValue<string | number>,
 	property: ResponsiveCssProperty,
 	options: {
 		expectedValueDescription?: string;
