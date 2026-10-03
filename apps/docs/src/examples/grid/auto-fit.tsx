@@ -1,13 +1,15 @@
-import { AutoGrid } from '@luke-ui/react/auto-grid';
+import { Grid, minmax, repeat } from '@luke-ui/react/grid';
 import { ExampleItem } from '#docs';
 
 export default () => {
 	return (
-		<AutoGrid gap="sp12" minColumnInlineSize={{ initial: '10rem', bp768: '14rem' }}>
+		<Grid columns={repeat('auto-fit', minmax('min(12rem, 100%)', '1fr'))} gap="sp12">
 			<ExampleItem>First grid item</ExampleItem>
 			<ExampleItem>Second grid item</ExampleItem>
 			<ExampleItem>Third grid item</ExampleItem>
 			<ExampleItem>Fourth grid item</ExampleItem>
-		</AutoGrid>
+			<ExampleItem>Fifth grid item</ExampleItem>
+			<ExampleItem>Sixth grid item</ExampleItem>
+		</Grid>
 	);
 };

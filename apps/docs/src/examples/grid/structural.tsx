@@ -4,13 +4,16 @@ import { ExampleItem } from '#docs';
 export default () => {
 	return (
 		<Grid
-			areas={{ initial: ['a', 'b', 'c'], bp768: ['a b b', 'a c c'] }}
-			columns={{ initial: 1, bp768: '10rem 1fr 1fr' }}
+			areas={['a a', 'b c', 'd d']}
+			columns="10rem 1fr"
 			gap="sp12"
+			minBlockSize="16rem"
+			rows="auto 1fr auto"
 		>
 			<ExampleItem gridArea="a">Area a</ExampleItem>
 			<ExampleItem gridArea="b">Area b</ExampleItem>
 			<ExampleItem gridArea="c">Area c</ExampleItem>
+			<ExampleItem gridArea="d">Area d</ExampleItem>
 		</Grid>
 	);
 };

@@ -21,7 +21,6 @@
 	],
 	"exports": {
 		"./aspect-ratio": "./dist/aspect-ratio.js",
-		"./auto-grid": "./dist/auto-grid.js",
 		"./bleed": "./dist/bleed.js",
 		"./blockquote": "./dist/blockquote.js",
 		"./box": "./dist/box.js",

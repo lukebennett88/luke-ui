@@ -1,8 +1,8 @@
 import { Box } from '@luke-ui/react/box';
 import { Container } from '@luke-ui/react/container';
-import { Grid } from '@luke-ui/react/grid';
+import { Grid, minmax, repeat } from '@luke-ui/react/grid';
 import { vars } from '@luke-ui/react/theme';
-import { afterEach, expect, test } from 'vite-plus/test';
+import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { breakpoints } from '../../theme/breakpoints.js';
 import { render, visualAppearances } from '../test-utils/render.js';
@@ -38,6 +38,131 @@ test('creates equal explicit columns', () => {
 	expect(second.getBoundingClientRect().top).toBe(third.getBoundingClientRect().top);
 });
 
+test('applies a CSS track list passed to columns', () => {
+	const { locator } = render(
+		<Grid columns="12rem 1fr" data-testid="grid" inlineSize="40rem">
+			<span data-testid="fixed" style={{ blockSize: '1rem' }} />
+			<span data-testid="flexible" style={{ blockSize: '1rem' }} />
+		</Grid>,
+	);
+	const fixed = locator.getByTestId('fixed').element();
+	const flexible = locator.getByTestId('flexible').element();
+	if (!(fixed instanceof HTMLElement) || !(flexible instanceof HTMLElement)) {
+		throw new Error('Expected Grid children.');
+	}
+
+	expect(fixed.getBoundingClientRect().width).toBeCloseTo(192, 0);
+	expect(flexible.getBoundingClientRect().width).toBeCloseTo(448, 0);
+	expect(fixed.getBoundingClientRect().top).toBe(flexible.getBoundingClientRect().top);
+});
+
+for (const invalidColumns of ['', '   ', '3', '3 ', '-1', '1.5']) {
+	test(`rejects ${JSON.stringify(invalidColumns)} as columns and keeps one implicit column`, () => {
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const { locator } = render(
+			<Grid columns={{ initial: invalidColumns }} data-testid="grid" inlineSize="40rem">
+				<span style={{ blockSize: '1rem' }}>First</span>
+				<span style={{ blockSize: '1rem' }}>Second</span>
+			</Grid>,
+		);
+		const element = locator.getByTestId('grid').element();
+		if (!(element instanceof HTMLElement)) throw new Error('Expected Grid element.');
+		const [first, second] = element.children;
+		if (!(first instanceof HTMLElement) || !(second instanceof HTMLElement)) {
+			throw new Error('Expected Grid children.');
+		}
+
+		expect(getComputedStyle(element).display).toBe('grid');
+		expect(second.getBoundingClientRect().top).toBeGreaterThan(first.getBoundingClientRect().top);
+		expect(consoleError).toHaveBeenCalledTimes(1);
+		expect(consoleError.mock.calls[0]?.[0]).toMatch(/'columns'.*CSS track list/);
+
+		consoleError.mockRestore();
+	});
+}
+
+test('applies a CSS track list passed to rows', () => {
+	const { locator } = render(
+		<Grid columns={1} data-testid="grid" rows="3rem 5rem">
+			<span data-testid="first" />
+			<span data-testid="second" />
+		</Grid>,
+	);
+	const first = locator.getByTestId('first').element();
+	const second = locator.getByTestId('second').element();
+	if (!(first instanceof HTMLElement) || !(second instanceof HTMLElement)) {
+		throw new Error('Expected Grid children.');
+	}
+
+	expect(first.getBoundingClientRect().height).toBeCloseTo(48, 0);
+	expect(second.getBoundingClientRect().height).toBeCloseTo(80, 0);
+});
+
+test('places children in named areas', () => {
+	const { locator } = render(
+		<Grid areas={['a b', 'c c']} columns={2} data-testid="grid" inlineSize="30rem">
+			<Box data-testid="c" gridArea="c" style={{ blockSize: '1rem' }} />
+			<Box data-testid="a" gridArea="a" style={{ blockSize: '1rem' }} />
+			<Box data-testid="b" gridArea="b" style={{ blockSize: '1rem' }} />
+		</Grid>,
+	);
+	const grid = locator.getByTestId('grid').element();
+	const a = locator.getByTestId('a').element();
+	const b = locator.getByTestId('b').element();
+	const c = locator.getByTestId('c').element();
+	if (
+		!(grid instanceof HTMLElement) ||
+		!(a instanceof HTMLElement) ||
+		!(b instanceof HTMLElement) ||
+		!(c instanceof HTMLElement)
+	) {
+		throw new Error('Expected Grid elements.');
+	}
+
+	expect(a.getBoundingClientRect().top).toBe(b.getBoundingClientRect().top);
+	expect(c.getBoundingClientRect().top).toBeGreaterThan(a.getBoundingClientRect().top);
+	expect(c.getBoundingClientRect().width).toBeCloseTo(grid.getBoundingClientRect().width, 0);
+});
+
+test('lets columnGap override gap', () => {
+	const { locator } = render(
+		<Grid columnGap="sp24" columns={2} data-testid="grid" gap="sp8">
+			<span />
+			<span />
+		</Grid>,
+	);
+	const element = locator.getByTestId('grid').element();
+	if (!(element instanceof HTMLElement)) throw new Error('Expected Grid element.');
+
+	expect(getComputedStyle(element).columnGap).toBe('24px');
+	expect(getComputedStyle(element).rowGap).toBe('8px');
+});
+
+test('does not overflow a parent narrower than the auto-fit minimum', () => {
+	const { locator } = render(
+		<div data-testid="parent" style={{ inlineSize: '10rem' }}>
+			<Grid
+				columns={repeat('auto-fit', minmax('min(12rem, 100%)', '1fr'))}
+				data-testid="grid"
+				gap="sp8"
+			>
+				<span style={{ blockSize: '1rem' }}>Item</span>
+				<span style={{ blockSize: '1rem' }}>Item</span>
+			</Grid>
+		</div>,
+	);
+	const parent = locator.getByTestId('parent').element();
+	const grid = locator.getByTestId('grid').element();
+	if (!(parent instanceof HTMLElement) || !(grid instanceof HTMLElement)) {
+		throw new Error('Expected Grid elements.');
+	}
+
+	expect(grid.getBoundingClientRect().width).toBeLessThanOrEqual(
+		parent.getBoundingClientRect().width + 1,
+	);
+	expect(grid.scrollWidth).toBeLessThanOrEqual(grid.clientWidth + 1);
+});
+
 test('lets children span tracks with Box grid-placement props', () => {
 	const { locator } = render(
 		<Grid columns={4} data-testid="grid" gap="sp8" inlineSize="40rem">
@@ -57,18 +182,18 @@ test('lets children span tracks with Box grid-placement props', () => {
 	);
 });
 
-test('resolves responsive column counts against nested size containers', async () => {
+test('resolves responsive columns against nested size containers', async () => {
 	await page.viewport(1024, 800);
 	const { locator } = render(
 		<Container maxInlineSize="100%" paddingInline="sp16">
-			<Grid columns={{ initial: 1, bp768: 4 }} data-testid="outer" gap="sp8">
+			<Grid columns={{ initial: 1, bp768: '1fr 1fr 1fr 1fr' }} data-testid="outer" gap="sp8">
 				<span style={{ blockSize: '1rem' }} />
 				<span style={{ blockSize: '1rem' }} />
 				<span style={{ blockSize: '1rem' }} />
 				<span style={{ blockSize: '1rem' }} />
 			</Grid>
 			<Container maxInlineSize="ct448">
-				<Grid columns={{ initial: 1, bp768: 4 }} data-testid="nested" gap="sp8">
+				<Grid columns={{ initial: 1, bp768: '1fr 1fr 1fr 1fr' }} data-testid="nested" gap="sp8">
 					<span style={{ blockSize: '1rem' }} />
 					<span style={{ blockSize: '1rem' }} />
 					<span style={{ blockSize: '1rem' }} />
@@ -177,21 +302,18 @@ const itemStyle = {
 	paddingInline: vars.space.sp12,
 } as const;
 
+const sceneStyle = {
+	backgroundColor: vars.color.surface.recessed,
+	borderRadius: vars.radius.surface,
+	color: vars.color.text.primary,
+	padding: vars.space.sp16,
+} as const;
+
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator: scene } = render(
 			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space.sp16 }}>
-				<Grid
-					columns={4}
-					gap="sp8"
-					style={{
-						backgroundColor: vars.color.surface.recessed,
-						borderRadius: vars.radius.surface,
-						color: vars.color.text.primary,
-						inlineSize: '36rem',
-						padding: vars.space.sp16,
-					}}
-				>
+				<Grid columns={4} gap="sp8" style={{ ...sceneStyle, inlineSize: '36rem' }}>
 					<Box gridColumn="span 2" style={itemStyle}>
 						Wide
 					</Box>
@@ -203,23 +325,36 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 						Wide again
 					</Box>
 				</Grid>
-				<div dir="rtl">
-					<Grid
-						columns={3}
-						gap="sp8"
-						style={{
-							backgroundColor: vars.color.surface.recessed,
-							borderRadius: vars.radius.surface,
-							color: vars.color.text.primary,
-							inlineSize: '24rem',
-							padding: vars.space.sp16,
-						}}
-					>
-						<span style={itemStyle}>One</span>
-						<span style={itemStyle}>Two</span>
-						<span style={itemStyle}>Three</span>
-					</Grid>
-				</div>
+				<Grid
+					columns={repeat('auto-fit', minmax('min(10rem, 100%)', '1fr'))}
+					gap="sp8"
+					style={{ ...sceneStyle, inlineSize: '36rem' }}
+				>
+					<span style={itemStyle}>Auto one</span>
+					<span style={itemStyle}>Auto two</span>
+					<span style={itemStyle}>Auto three</span>
+					<span style={itemStyle}>Auto four</span>
+				</Grid>
+				<Grid
+					areas={['a a b', 'c d b']}
+					columns="1fr 1fr 8rem"
+					gap="sp8"
+					rows="auto 4rem"
+					style={{ ...sceneStyle, inlineSize: '36rem' }}
+				>
+					<Box gridArea="a" style={itemStyle}>
+						Area a
+					</Box>
+					<Box gridArea="b" style={itemStyle}>
+						Area b
+					</Box>
+					<Box gridArea="c" style={itemStyle}>
+						Area c
+					</Box>
+					<Box gridArea="d" style={itemStyle}>
+						Area d
+					</Box>
+				</Grid>
 			</div>,
 			{ appearance },
 		);

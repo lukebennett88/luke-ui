@@ -1,32 +1,87 @@
 ---
 title: Grid
-description: Arrange direct children in an equal explicit column grid.
+description:
+  Arrange direct children in two dimensions with column tracks, row tracks, and named areas.
 source: packages/@luke-ui/react/src/exports/grid.ts
 ---
 
-`Grid` lays out direct children in a fixed number of equal columns. Use it when you know how many
-columns the layout should have. Read [Layout](/docs/layout#choose-a-layout-component) to choose a
+`Grid` lays out direct children in two dimensions. Use it when a layout needs explicit columns,
+rows, or named areas. Use [Stack](/components/layout/stack) or [Cluster](/components/layout/cluster)
+when children flow on one axis. Read [Layout](/docs/layout#choose-a-layout-component) to choose a
 layout component.
 
-Prefer [AutoGrid](/components/layout/auto-grid) when columns should grow from a minimum inline size
-instead of an explicit count.
+Pass a number to `columns` for that many equal columns. Each column can shrink below the width of
+its content, so long content wraps instead of widening one column.
 
 <ExampleBlock src="grid/basic" title="Grid: Basic" />
+
+Without `columns`, the grid has one auto-sized column that grows to fit its widest child. Pass
+`columns={1}` for a single column that keeps long content inside the grid.
+
+## Columns from the available space
+
+Pass a `repeat('auto-fit', …)` track list when the column count should follow the available inline
+size. Wrap the minimum column size in `min(…, 100%)` so a parent narrower than the minimum does not
+overflow.
+
+<ExampleBlock src="grid/auto-fit" title="Grid: Auto-fit columns" />
+
+## Tracks and named areas
+
+`columns` and `rows` also accept a CSS track list, such as `"10rem 1fr"`. `areas` takes one string
+per row. Name each cell, use `.` for an empty cell, and place a child in an area with Box's
+`gridArea` prop.
+
+Keep `areas` and `columns` on the same number of tracks at every breakpoint. Without `columns`, the
+tracks that `areas` creates size to their content.
+
+<ExampleBlock src="grid/structural" title="Grid: Tracks and named areas" />
+
+## Track functions
+
+`@luke-ui/react/grid` exports `repeat`, `minmax`, and `fitContent` to build track lists. Each
+returns the matching CSS function as a string. They do not validate or convert their arguments, so
+pass units and keywords as CSS expects them.
+
+| Function                | Arguments                                                                  | Returns                 |
+| ----------------------- | -------------------------------------------------------------------------- | ----------------------- |
+| `repeat(count, tracks)` | `count` is a number, `'auto-fit'`, or `'auto-fill'`. `tracks` is a string. | `repeat(count, tracks)` |
+| `minmax(min, max)`      | Two track sizes as strings                                                 | `minmax(min, max)`      |
+| `fitContent(limit)`     | A length or percentage as a string                                         | `fit-content(limit)`    |
+
+Rename an import when a function name clashes with another import:
+
+```tsx
+import { repeat as gridRepeat } from '@luke-ui/react/grid';
+```
+
+## Responsive layouts
+
+`columns`, `rows`, and `areas` accept a responsive object with a required `initial` value. Each
+`columns` breakpoint can be a number or a track list. Stack named areas in one column at `initial`,
+then arrange them from a wider breakpoint.
+
+<ExampleBlock src="grid/responsive" title="Grid: Responsive areas" />
 
 ## Spanning columns
 
 Child placement belongs to the child. Use Box grid-placement props such as `gridColumn` when an item
 should span more than one track. `Grid` itself does not expose a span API.
 
+When `columns` is a number, keep each span within the active column count at every breakpoint. A
+span that fits at `bp768` can overflow a smaller `initial` column count, so change both values
+together.
+
 <ExampleBlock src="grid/spanning" title="Grid: Spanning columns" />
 
-## Responsive columns and spans
+## Alignment
 
-`columns` accepts a responsive object with a required `initial` value. Child spans must fit the
-active explicit column count at every responsive condition. A span that is valid at `bp768` can
-overflow the `initial` column count if those values are not kept in sync.
+`alignItems` and `justifyItems` align each child inside its grid area. Use `start` and `end` rather
+than `flex-start` and `flex-end` in a grid.
 
-<ExampleBlock src="grid/responsive" title="Grid: Responsive columns and spans" />
+`justifyContent` and `alignContent` distribute tracks inside the grid container. They have no
+visible effect when `fr` tracks already fill the available space, such as `columns={3}`. They matter
+when tracks are narrower than the container.
 
 ## Choose the rendered element
 
@@ -34,6 +89,12 @@ Grid uses
 [Box's `elementType` and `render` contract](/components/layout/box#choose-the-rendered-element).
 
 <ExampleBlock src="grid/semantic-element" title="Grid: List" />
+
+## Accessibility
+
+Grid placement changes visual position only. Reading order and focus order follow the DOM order.
+This applies to named areas, `gridColumn`, `gridRow`, and `order`. Arrange areas and placements so
+the visual order matches the DOM order at every breakpoint.
 
 ## API
 
