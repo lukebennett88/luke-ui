@@ -34,7 +34,10 @@ interface _SelectFieldBaseProps<T extends object> extends _SelectFieldOmit {
 	children: SelectListBoxProps<T>['children'];
 	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
 	errorMessage?: ReactNode;
-	/** Whether the field is pending. The trigger keeps focus but can't open the select or change its value. */
+	/**
+	 * Whether the field is pending. The trigger keeps focus but can't open the select or change
+	 * its value.
+	 */
 	isPending?: SelectTriggerProps['isPending'];
 	/** Options for the render function in `children`. */
 	items?: SelectListBoxProps<T>['items'];

@@ -117,7 +117,10 @@ interface _SelectTriggerProps extends _SelectTriggerOmit {
 	children: RacButtonProps['children'];
 	/** Class name for the trigger button. */
 	className?: RacButtonProps['className'];
-	/** Whether the trigger is pending. It keeps focus but can't open the select or change its value. */
+	/**
+	 * Whether the trigger is pending. It keeps focus but can't open the select or change its
+	 * value.
+	 */
 	isPending?: RacButtonProps['isPending'];
 	/** Forwarded to the trigger `<button>` element. */
 	ref?: Ref<HTMLButtonElement>;

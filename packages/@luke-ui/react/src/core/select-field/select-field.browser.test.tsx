@@ -2,7 +2,7 @@ import { Button } from '@luke-ui/react/button';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
 import { act, createRef, useState } from 'react';
 import type { Key } from 'react-aria-components/Select';
-import { expect, test } from 'vite-plus/test';
+import { expect, onTestFinished, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
@@ -377,33 +377,16 @@ test('a SelectField participates in FormData through name and form', async () =>
 	expect(new FormData(form).get('theme')).toBe('dark');
 });
 
-test('the SelectField scene has no axe violations', async () => {
-	const { container } = render(<SelectFieldScene />);
-
-	await expectNoAxeViolations(container);
-});
-
-test('an open SelectField has no axe violations', async () => {
-	const { container } = render(
-		<SelectField defaultValue="light" items={themeItems} label="Theme">
-			{renderThemeItem}
-		</SelectField>,
-	);
-
-	await userEvent.click(trigger(/Theme/));
-	await expect.element(page.getByRole('listbox')).toBeVisible();
-	await waitForOverlayEnter(
-		page.getByRole('listbox').element().closest('[data-trigger]') ?? document.body,
-	);
-
-	await expectNoAxeViolations(container);
-	await expectNoAxeViolations(document.body);
-});
-
-// Keep this after the axe tests. React Aria announces a pending button in a live region that
-// outlives the test and would fail a later page-wide audit.
 test("a pending SelectField keeps focus but can't open or change", async () => {
 	const changes: Array<Key | null> = [];
+
+	// React Aria announces the pending change with a message that points at the trigger by id.
+	// Remove it so the message doesn't outlive the trigger.
+	onTestFinished(() => {
+		for (const message of document.querySelectorAll('[data-live-announcer] [role="img"]')) {
+			message.remove();
+		}
+	});
 
 	function Fixture() {
 		const [isPending, setIsPending] = useState(false);
@@ -453,6 +436,29 @@ test("a pending SelectField keeps focus but can't open or change", async () => {
 	expect(trigger(/Theme/)).toHaveFocus();
 	await userEvent.keyboard('{Enter}');
 	await expect.element(page.getByRole('listbox')).toBeVisible();
+});
+
+test('the SelectField scene has no axe violations', async () => {
+	const { container } = render(<SelectFieldScene />);
+
+	await expectNoAxeViolations(container);
+});
+
+test('an open SelectField has no axe violations', async () => {
+	const { container } = render(
+		<SelectField defaultValue="light" items={themeItems} label="Theme">
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	await userEvent.click(trigger(/Theme/));
+	await expect.element(page.getByRole('listbox')).toBeVisible();
+	await waitForOverlayEnter(
+		page.getByRole('listbox').element().closest('[data-trigger]') ?? document.body,
+	);
+
+	await expectNoAxeViolations(container);
+	await expectNoAxeViolations(document.body);
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
