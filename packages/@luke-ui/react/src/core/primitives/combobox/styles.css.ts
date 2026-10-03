@@ -235,7 +235,7 @@ const comboboxConfig = {
 				'&[data-entering]': { opacity: 0 },
 				'&[data-exiting]': {
 					opacity: 0,
-					// A closing popover takes no input, so a pending Select can't select while it fades.
+					// A closing popover no longer accepts interaction while its exit animation finishes.
 					pointerEvents: 'none',
 					transition: popoverExitTransition,
 				},
