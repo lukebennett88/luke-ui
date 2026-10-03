@@ -19,8 +19,9 @@ from `@luke-ui/react/select-field`.
 
 Each option needs a stable id. Give each item in `items` an `id` or `key`, or give each `SelectItem`
 an `id` when your data has neither. When the items carry an `id` or `key`, `value`, `onChange`, and
-`validate` use its type, so string ids give `string | null` for `value`. Otherwise they use React
-Aria's `Key`, a string or a number, with `null` for no selection.
+`validate` use the inferred key type, so string ids give `string | null` for `value` and `string`
+for `validate`. Otherwise selection values use `Key | null`, and `validate` receives `Key`. React
+Aria doesn't call `validate` while nothing is selected.
 
 For a fixed set of options, pass `SelectItem` children with an `id` each instead of `items`.
 
