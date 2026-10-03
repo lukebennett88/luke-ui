@@ -11,9 +11,11 @@ test('emits a shorthand before longhands even when the config lists longhands fi
 });
 
 test('orders a broad shorthand before a narrower shorthand before a longhand', () => {
-	expect(
-		orderPropertiesBySpecificity(['marginInlineStart', 'margin', 'marginInline']),
-	).toEqual(['margin', 'marginInline', 'marginInlineStart']);
+	expect(orderPropertiesBySpecificity(['marginInlineStart', 'margin', 'marginInline'])).toEqual([
+		'margin',
+		'marginInline',
+		'marginInlineStart',
+	]);
 });
 
 test('orders a longhand after its shorthand when the middle shorthand is absent', () => {
@@ -45,15 +47,20 @@ test('orders nested grid placement shorthands before start and end longhands', (
 });
 
 test('orders flex longhands after the flex shorthand', () => {
-	expect(
-		orderPropertiesBySpecificity(['flexGrow', 'flex', 'flexBasis', 'flexShrink']),
-	).toEqual(['flex', 'flexGrow', 'flexBasis', 'flexShrink']);
+	expect(orderPropertiesBySpecificity(['flexGrow', 'flex', 'flexBasis', 'flexShrink'])).toEqual([
+		'flex',
+		'flexGrow',
+		'flexBasis',
+		'flexShrink',
+	]);
 });
 
 test('orders placeSelf before its alignment longhands', () => {
-	expect(
-		orderPropertiesBySpecificity(['justifySelf', 'alignSelf', 'placeSelf']),
-	).toEqual(['placeSelf', 'justifySelf', 'alignSelf']);
+	expect(orderPropertiesBySpecificity(['justifySelf', 'alignSelf', 'placeSelf'])).toEqual([
+		'placeSelf',
+		'justifySelf',
+		'alignSelf',
+	]);
 });
 
 test('preserves relative order for unrelated properties', () => {

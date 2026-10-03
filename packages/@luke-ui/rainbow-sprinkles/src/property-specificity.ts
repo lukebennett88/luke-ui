@@ -2,7 +2,7 @@
  * Immediate shorthand → longhand edges for equal-specificity utility classes.
  * Broader properties must be emitted before narrower ones so a longhand wins in the cascade.
  */
-const SHORTHAND_LONGHANDS: Record<string, readonly string[]> = {
+const SHORTHAND_LONGHANDS: Record<string, ReadonlyArray<string>> = {
 	flex: ['flexBasis', 'flexGrow', 'flexShrink'],
 	gap: ['columnGap', 'rowGap'],
 	gridArea: ['gridColumn', 'gridRow'],
@@ -37,7 +37,7 @@ const PARENTS_BY_PROPERTY = (() => {
  * Sort CSS property names so broader shorthands come before overlapping narrower properties.
  * Unrelated properties keep their relative input order.
  */
-export function orderPropertiesBySpecificity(properties: readonly string[]): Array<string> {
+export function orderPropertiesBySpecificity(properties: ReadonlyArray<string>): Array<string> {
 	const configured = new Set(properties);
 	const depthCache = new Map<string, number>();
 

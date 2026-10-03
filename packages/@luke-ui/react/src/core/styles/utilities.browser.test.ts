@@ -146,13 +146,9 @@ test('marginInlineStart overrides margin through the inline shorthand', () => {
 	);
 	const computedStyle = getComputedStyle(element);
 
-	expect(computedStyle.marginInlineStart).toBe(
-		resolvedCustomProperty(element, '--luke-space-sp4'),
-	);
+	expect(computedStyle.marginInlineStart).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
 	expect(computedStyle.marginInlineEnd).toBe(resolvedCustomProperty(element, '--luke-space-sp8'));
-	expect(computedStyle.marginBlockStart).toBe(
-		resolvedCustomProperty(element, '--luke-space-sp16'),
-	);
+	expect(computedStyle.marginBlockStart).toBe(resolvedCustomProperty(element, '--luke-space-sp16'));
 });
 
 test('overflowX overrides overflow while overflowY keeps the shorthand', () => {

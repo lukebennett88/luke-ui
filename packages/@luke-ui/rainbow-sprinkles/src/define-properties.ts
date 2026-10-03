@@ -160,15 +160,14 @@ export function defineProperties(options: DefinePropertiesOptions): DefineProper
 	const { conditions, dynamicProperties, staticProperties, defaultCondition } = options;
 	const config: SprinkleProperties = {};
 	const layerOptions = { '@layer': options['@layer'] };
+	const dynamicByName = new Map(Object.entries(dynamicProperties ?? {}));
+	const staticByName = new Map(Object.entries(staticProperties ?? {}));
 	const propertyNames = orderPropertiesBySpecificity([
-		...new Set([
-			...Object.keys(dynamicProperties ?? {}),
-			...Object.keys(staticProperties ?? {}),
-		]),
+		...new Set([...dynamicByName.keys(), ...staticByName.keys()]),
 	]);
 
 	for (const propertyName of propertyNames) {
-		const dynamicScale = dynamicProperties?.[propertyName];
+		const dynamicScale = dynamicByName.get(propertyName);
 		if (dynamicScale !== undefined) {
 			config[propertyName] = createStyles(
 				propertyName,
@@ -180,7 +179,7 @@ export function defineProperties(options: DefinePropertiesOptions): DefineProper
 			);
 		}
 
-		const staticScale = staticProperties?.[propertyName];
+		const staticScale = staticByName.get(propertyName);
 		if (staticScale !== undefined) {
 			const staticStyle = createStaticStyles(
 				propertyName,
