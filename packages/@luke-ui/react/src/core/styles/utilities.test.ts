@@ -9,6 +9,7 @@ type UtilityProps = NonNullable<BoxProps>;
 test('exposes the responsive layout and appearance property surface', () => {
 	expect(createSprinkles.properties).toContain('display');
 	expect(createSprinkles.properties).toContain('gridColumn');
+	expect(createSprinkles.properties).toContain('justifyItems');
 	expect(createSprinkles.properties).toContain('backgroundColor');
 	expect(createSprinkles.properties).toContain('borderColor');
 	expect(createSprinkles.properties).toContain('borderWidth');
@@ -130,6 +131,17 @@ test('border props reject CSS values outside the design system vocabulary', () =
 	assertType<UtilityProps['borderWidth']>('medium');
 	// @ts-expect-error — a style the design system does not offer
 	assertType<UtilityProps['borderStyle']>('groove');
+});
+
+test('alignment props accept start and end, which grid alignment uses', () => {
+	expectTypeOf<'start'>().toExtend<UtilityProps['alignItems']>();
+	expectTypeOf<'end'>().toExtend<UtilityProps['alignItems']>();
+	expectTypeOf<'start'>().toExtend<UtilityProps['justifyItems']>();
+	expectTypeOf<'end'>().toExtend<UtilityProps['justifyItems']>();
+	expectTypeOf<'start'>().toExtend<UtilityProps['alignContent']>();
+	expectTypeOf<'end'>().toExtend<UtilityProps['alignContent']>();
+	expectTypeOf<'start'>().toExtend<UtilityProps['justifyContent']>();
+	expectTypeOf<'end'>().toExtend<UtilityProps['justifyContent']>();
 });
 
 test('responsive objects reject unknown breakpoints and off-scale values', () => {
