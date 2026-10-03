@@ -59,6 +59,16 @@ test('SelectField has no popover, menu width, or listbox props', () => {
 	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', listBoxProps: {} });
 });
 
+test('SelectField has no open-state props', () => {
+	// @ts-expect-error — the field owns the popover's open state
+	assertType<SelectFieldProps<object>>({ children: [], isOpen: true, label: 'Theme' });
+	// @ts-expect-error — the field owns the popover's open state
+	assertType<SelectFieldProps<object>>({ children: [], defaultOpen: true, label: 'Theme' });
+	// @ts-expect-error — the field owns the popover's open state
+	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', onOpenChange: () => {} });
+	assertType<SelectRootProps>({ defaultOpen: true, isOpen: true, onOpenChange: () => {} });
+});
+
 // SelectField is called directly in these tests so that TypeScript infers `T` the same way it does
 // for JSX. Nothing renders, and the render functions never run.
 

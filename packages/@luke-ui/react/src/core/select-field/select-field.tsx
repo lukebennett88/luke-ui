@@ -37,9 +37,12 @@ type _SelectFieldOmit = DistributiveOmit<
 	| 'aria-label'
 	| 'aria-labelledby'
 	| 'children'
+	| 'defaultOpen'
 	| 'defaultValue'
 	| 'isInvalid'
+	| 'isOpen'
 	| 'onChange'
+	| 'onOpenChange'
 	| 'value'
 >;
 

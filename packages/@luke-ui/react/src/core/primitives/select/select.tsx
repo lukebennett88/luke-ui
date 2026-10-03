@@ -32,8 +32,6 @@ import { rootIdProps } from '../root-id.js';
 import type { SelectSize } from './styles.css.js';
 import { selectRecipe } from './styles.css.js';
 
-export type { SelectSize };
-
 /** Size set by `SelectRoot`, which owns the size of every part inside it. */
 const SelectSizeContext = createContext<SelectSize | null>(null);
 
