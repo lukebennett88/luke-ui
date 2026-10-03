@@ -15,18 +15,13 @@ helps.
 ## Items and selection
 
 Pass `items` and a render function that returns a `SelectItem` for each one. Import `SelectItem`
-from `@luke-ui/react/select-field`. Give each item in `items` a stable `id`. The `id` becomes the
-selected key.
+from `@luke-ui/react/select-field`.
 
-`SelectField` also accepts static `SelectItem` children. Give each static `SelectItem` an `id`.
+Each option needs a stable id. Give each item in `items` an `id` or `key`, or give each `SelectItem`
+an `id` when your data has neither. When the items carry an `id` or `key`, `value` and `onChange`
+use its type, so string ids give `string | null`. Otherwise they take a string or a number.
 
-```tsx
-<SelectField label="Theme" name="theme">
-	<SelectItem id="system">System</SelectItem>
-	<SelectItem id="light">Light</SelectItem>
-	<SelectItem id="dark">Dark</SelectItem>
-</SelectField>
-```
+For a fixed set of options, pass `SelectItem` children with an `id` each instead of `items`.
 
 `SelectField` holds one selected option and has no clear button. An option labelled “None” is a
 choice like any other: selecting it selects its key and doesn't empty the field.
@@ -36,11 +31,6 @@ selection yourself. `onChange` receives the selected key, or `null` when nothing
 `value` takes the same type.
 
 <ExampleBlock src="select-field/controlled" title="Select Field: Controlled" />
-
-## Placeholder
-
-Pass `placeholder` for the text the trigger shows while nothing is selected. A placeholder does not
-name the field.
 
 ## Required fields
 
@@ -58,12 +48,13 @@ from a form library or your server. A non-empty message marks the field invalid.
 
 <ExampleBlock src="select-field/validation" title="Select Field: Validation" />
 
-## Disabled fields
+To move focus to the trigger yourself, pass `triggerRef`. `ref` reaches the root element.
 
-Set `isDisabled` to block the field. A disabled field cannot take focus and does not submit its
-value. `SelectField` has no read-only state. Show a value that cannot change as text instead.
+## Disabled, pending, and fixed values
 
-## Pending
+`SelectField` has no read-only state. Show a value that can't change as text instead.
+
+Set `isDisabled` to block the field. A disabled field can't take focus and doesn't submit its value.
 
 Pass `isPending` while a change is saving. The trigger keeps focus but can't be pressed or opened,
 and can't change the value from the trigger, until pending ends.
@@ -75,23 +66,11 @@ default.
 
 <ExampleBlock src="select-field/sizes" title="Select Field: Size" />
 
-## Labels
-
-`label` takes textual, non-interactive content only. Place a link or button beside the field
-instead.
-
-Without a visible label, pass `aria-labelledby` to use content already on the page, or `aria-label`
-to supply the name directly. `aria-describedby` adds to the field's own description.
-
-## IDs and refs
-
-`id`, `className`, and `ref` target the root element. `triggerId` and `triggerRef` target the
-trigger.
-
 ## Accessibility
 
-The select needs an accessible label. Use its visible `label`, otherwise pass `aria-labelledby` or
-`aria-label`.
+The select needs an accessible name. Use the visible `label`. Without one, pass `aria-labelledby` to
+point at content already on the page, or `aria-label` to supply the name directly. A `placeholder`
+doesn't name the field.
 
 ## API
 
