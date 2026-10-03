@@ -243,6 +243,25 @@ test('a failed theme change rolls back, and explicit and system themes apply', a
 		.toHaveTextContent('System');
 });
 
+test('a select keeps focus and cannot be opened while its save is pending', async () => {
+	const app = await renderApp();
+	const trigger = app.locator.getByRole('button', { name: /Theme/ });
+	settingsApi.setLatency(400);
+	trigger.element().focus();
+	await app.user.keyboard('{Enter}');
+	await app.user.keyboard('{ArrowDown}{ArrowDown}{Enter}');
+	await expect.element(app.locator.getByRole('status')).toHaveTextContent('Saving…');
+	await expect.element(trigger).toHaveFocus();
+	await expect.element(trigger).toHaveAttribute('aria-disabled', 'true');
+	await app.user.keyboard('{ArrowDown}');
+	await app.user.keyboard('{Enter}');
+	expect(page.getByRole('listbox').elements()).toHaveLength(0);
+	await expect.element(app.locator.getByRole('status')).not.toBeInTheDocument();
+	await expect.element(trigger).toHaveFocus();
+	await expect.element(trigger).toHaveTextContent('Dark');
+	expect((await settingsApi.getSettings()).preferences.colorMode).toBe('dark');
+});
+
 test('text size changes actual heading geometry', async () => {
 	const app = await renderApp();
 	const heading = app.locator.getByRole('heading', { name: 'Preferences', level: 1 });

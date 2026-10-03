@@ -87,8 +87,9 @@ on the form covers every field, whatever the form grows to hold.
 
 Reach for `inputRef` when you need a ref to one specific control. `TextInputField` and `Checkbox`
 render a label, description, and error message around the control, so `inputRef` is what reaches the
-input underneath. A primitive that renders the control itself, such as `ComboboxInput`, takes a
-plain `ref`.
+input underneath. For `SelectField`, pass the library's ref through `triggerRef` to reach the
+trigger button. A primitive that renders the control itself, such as `ComboboxInput`, takes a plain
+`ref`.
 
 ## Submitting data
 

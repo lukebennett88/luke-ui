@@ -1,0 +1,115 @@
+---
+title: Select primitives
+description: Lower-level parts for composing a single-selection select.
+source: packages/@luke-ui/react/src/exports/primitives/select.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/Select.html
+---
+
+Use these primitives when [`SelectField`](/components/forms/select-field) does not fit your layout.
+They expose the root, trigger, value, indicator, popover, listbox, and option parts that
+`SelectField` composes. Start with `SelectField` when it fits.
+
+<ExampleBlock src="select-primitive/basic" title="Select primitives: Basic" />
+
+## Anatomy
+
+`SelectRoot` is the semantic root. It connects the trigger to the label, description, and error
+inside it, and normally owns the selection, open state, validation, form state, and size.
+`SelectTrigger` is the button that opens the popover, and it draws the control chrome. It holds a
+`SelectValue`, which shows the selected option, and a `SelectIndicator`. `SelectPopover` holds a
+`SelectListBox`, which holds the `SelectItem` options.
+
+Put the `SelectValue` before the `SelectIndicator`.
+
+## Root props
+
+Put `placeholder` and the selection, open state, validation, form, and size props on `SelectRoot`.
+`value` and `defaultValue` take a key, or `null` for no selection, and `onChange` receives the same
+type. A select has no read-only state.
+
+`id`, `className`, and `ref` on `SelectRoot` target the root element. `triggerId` targets the
+trigger, and `ref` on `SelectTrigger` reaches it.
+
+## Options
+
+Use `SelectItem` for options. `SelectListBox` accepts static children or `items` with a render
+function.
+
+## Indicator
+
+`SelectIndicator` shows a chevron by default and sets `data-open` while the popover is open. Pass
+`children` to replace the chevron.
+
+<ExampleBlock src="select-primitive/indicator" title="Select primitives: Indicator" />
+
+## Size
+
+Set `size` on `SelectRoot`, and the trigger, indicator, and items follow. `medium` is the default.
+Use `small` in compact layouts.
+
+## Pending
+
+Pass `isPending` to `SelectTrigger` while a change is saving. The trigger keeps focus but can't be
+pressed or opened, and can't change the value from the trigger, until pending ends.
+
+## Validation
+
+Set `isInvalid` or a validation prop on `SelectRoot`. The trigger takes a danger border, and
+`FieldError` inside `Field` shows the message and the error icon. See
+[Validation](/docs/validation).
+
+## Labels
+
+The label takes textual, non-interactive content only. Place a link or button outside it. To name
+the select without a visible label, pass `aria-labelledby` or `aria-label` to `SelectRoot`.
+
+## API
+
+### SelectRootProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectRootProps"
+/>
+
+### SelectTriggerProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectTriggerProps"
+/>
+
+### SelectValueProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectValueProps"
+/>
+
+### SelectIndicatorProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectIndicatorProps"
+/>
+
+### SelectPopoverProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectPopoverProps"
+/>
+
+### SelectListBoxProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectListBoxProps"
+/>
+
+### SelectItemProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/select/select.tsx"
+	name="SelectItemProps"
+/>

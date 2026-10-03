@@ -92,6 +92,28 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		[],
 	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/primitives/combobox/section.tsx::ComboboxSectionProps':
 		[],
+	'forms/select-field.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectItemProps':
+		[],
+	'forms/select-field.mdx::packages/@luke-ui/react/src/core/select-field/select-field.tsx::SelectFieldProps':
+		[
+			'aria-label',
+			'aria-labelledby',
+			'defaultValue',
+			'errorMessage',
+			'isDisabled',
+			'isPending',
+			'isRequired',
+			'items',
+			'label',
+			'necessityIndicator',
+			'onChange',
+			'placeholder',
+			'ref',
+			'size',
+			'triggerRef',
+			'validate',
+			'value',
+		],
 	'forms/text-input-field.mdx::packages/@luke-ui/react/src/core/text-input-field/text-input-field.tsx::TextInputFieldProps':
 		[
 			'aria-label',
@@ -221,6 +243,33 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		['description', 'errorMessage'],
 	'primitives/field.mdx::packages/@luke-ui/react/src/core/primitives/field/label.tsx::FieldLabelProps':
 		['htmlFor', 'necessityIndicator'],
+	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectIndicatorProps':
+		['children'],
+	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectItemProps':
+		[],
+	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectListBoxProps':
+		['items'],
+	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectPopoverProps':
+		[],
+	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectRootProps':
+		[
+			'aria-label',
+			'aria-labelledby',
+			'defaultValue',
+			'id',
+			'isInvalid',
+			'name',
+			'onChange',
+			'placeholder',
+			'ref',
+			'size',
+			'triggerId',
+			'value',
+		],
+	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectTriggerProps':
+		['isPending', 'ref'],
+	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectValueProps':
+		[],
 	'primitives/text-input.mdx::packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx::TextInputControlProps':
 		['size'],
 	'primitives/text-input.mdx::packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx::TextInputPrefixProps':

@@ -17,11 +17,7 @@ interface _ComboboxPopoverProps extends _ComboboxPopoverOmit {
 /** Props for the styled combobox popover. */
 export type ComboboxPopoverProps = Prettify<_ComboboxPopoverProps>;
 
-/**
- * Popover surface used for listbox content. The portal inherits the document's theme: importing a
- * theme stylesheet themes the whole document from `:root`, so no propagation is needed. A colour
- * mode scoped below `<html>` does not reach the portal.
- */
+/** Popover surface used for listbox content. */
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 	const { ref, ...restProps } = props;
 
