@@ -1,7 +1,8 @@
 import { IconButton } from '@luke-ui/react/icon-button';
 import type { JSX } from 'react';
-import { expect, test } from 'vite-plus/test';
+import { expect, onTestFinished, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
+import { expectDelayedSpinner, watchSpinner } from '../test-utils/action-spinner.js';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
@@ -72,31 +73,30 @@ test('a custom SVG icon with no aria-hidden of its own contributes no accessible
 });
 
 test('shares Action pending timing with Button', async () => {
+	let startedAt: number | undefined;
 	let release!: () => void;
 	const gate = new Promise<void>((resolve) => {
 		release = resolve;
 	});
+	onTestFinished(release);
 
 	const { locator, user } = render(
 		<IconButton
 			aria-label="Save"
 			icon="check"
 			pressAction={async () => {
+				startedAt = performance.now();
 				await gate;
 			}}
 		/>,
 	);
 	const button = locator.getByRole('button', { name: 'Save' });
+	const spinner = watchSpinner(button.element());
 
 	await user.click(button);
 	expect(button.element().getAttribute('data-pending')).toBe('true');
-	expect(button.element().querySelector('[role="status"]')).toBeNull();
 
-	await delay(ACTION_SPINNER_DELAY_MS - 50);
-	expect(button.element().querySelector('[role="status"]')).toBeNull();
-
-	await delay(150);
-	expect(button.element().querySelector('[role="status"]')).not.toBeNull();
+	await expectDelayedSpinner(spinner, () => startedAt, ACTION_SPINNER_DELAY_MS);
 
 	release();
 	await expect.poll(() => button.element().getAttribute('data-pending')).toBeNull();
@@ -132,9 +132,3 @@ test('forced-colors resting', { tags: ['visual'] }, async () => {
 		await emulateForcedColors('none');
 	}
 });
-
-function delay(ms: number) {
-	return new Promise<void>((resolve) => {
-		setTimeout(resolve, ms);
-	});
-}
