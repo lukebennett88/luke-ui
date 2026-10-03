@@ -171,7 +171,6 @@ export function defineProperties(options: DefinePropertiesOptions): DefineProper
 		if (dynamicScale !== undefined) {
 			config[propertyName] = createStyles(
 				propertyName,
-				// biome-ignore lint/suspicious/noExplicitAny: CSS property scales are dynamic
 				dynamicScale as Record<string, string> | true,
 				conditions,
 				defaultCondition ?? '',
@@ -183,7 +182,6 @@ export function defineProperties(options: DefinePropertiesOptions): DefineProper
 		if (staticScale !== undefined) {
 			const staticStyle = createStaticStyles(
 				propertyName,
-				// biome-ignore lint/suspicious/noExplicitAny: CSS property scales are dynamic
 				staticScale as ReadonlyArray<string> | Record<string, string>,
 				conditions,
 				defaultCondition ?? '',

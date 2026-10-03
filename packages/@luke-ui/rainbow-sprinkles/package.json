@@ -29,7 +29,7 @@
 		"dev": "vp pack --watch",
 		"fix:format": "vp fmt . --write",
 		"fix:lint": "vp lint . --type-aware --fix",
-		"test": "vp test run --config vitest.config.ts"
+		"test": "vp test run"
 	},
 	"dependencies": {
 		"@vanilla-extract/css": "catalog:",

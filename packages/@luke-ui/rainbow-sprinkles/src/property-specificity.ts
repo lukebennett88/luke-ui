@@ -1,6 +1,7 @@
 /**
- * Immediate shorthand → longhand edges for equal-specificity utility classes.
- * Broader properties must be emitted before narrower ones so a longhand wins in the cascade.
+ * Immediate shorthand → narrower-property edges for equal-specificity utility classes.
+ * Broader properties must be emitted before overlapping narrower ones so a longhand wins
+ * within the same condition.
  */
 const SHORTHAND_LONGHANDS: Record<string, ReadonlyArray<string>> = {
 	flex: ['flexBasis', 'flexGrow', 'flexShrink'],
@@ -21,56 +22,71 @@ const SHORTHAND_LONGHANDS: Record<string, ReadonlyArray<string>> = {
 	placeSelf: ['alignSelf', 'justifySelf'],
 };
 
-const PARENTS_BY_PROPERTY = (() => {
-	const parents = new Map<string, Array<string>>();
-	for (const [shorthand, longhands] of Object.entries(SHORTHAND_LONGHANDS)) {
-		for (const longhand of longhands) {
-			const existing = parents.get(longhand);
-			if (existing) existing.push(shorthand);
-			else parents.set(longhand, [shorthand]);
+const PARENTS_BY_PROPERTY = new Map<string, Array<string>>();
+for (const [shorthand, longhands] of Object.entries(SHORTHAND_LONGHANDS)) {
+	for (const longhand of longhands) {
+		const parents = PARENTS_BY_PROPERTY.get(longhand);
+		if (parents) parents.push(shorthand);
+		else PARENTS_BY_PROPERTY.set(longhand, [shorthand]);
+	}
+}
+
+/** Depth among configured properties: roots are 0, each overlapping narrower property is deeper. */
+function depthAmongConfigured(
+	property: string,
+	configured: ReadonlySet<string>,
+	depths: Map<string, number>,
+): number {
+	const cached = depths.get(property);
+	if (cached !== undefined) return cached;
+
+	let depth = 0;
+	const stack = [...(PARENTS_BY_PROPERTY.get(property) ?? [])];
+	const seen = new Set<string>();
+
+	while (stack.length > 0) {
+		const ancestor = stack.pop();
+		if (ancestor === undefined || seen.has(ancestor)) continue;
+		seen.add(ancestor);
+
+		if (configured.has(ancestor)) {
+			depth = Math.max(depth, depthAmongConfigured(ancestor, configured, depths) + 1);
+			continue;
+		}
+
+		for (const next of PARENTS_BY_PROPERTY.get(ancestor) ?? []) {
+			stack.push(next);
 		}
 	}
-	return parents;
-})();
+
+	depths.set(property, depth);
+	return depth;
+}
 
 /**
  * Sort CSS property names so broader shorthands come before overlapping narrower properties.
- * Unrelated properties keep their relative input order.
+ * Unrelated properties may move relative to each other across depth buckets.
  */
 export function orderPropertiesBySpecificity(properties: ReadonlyArray<string>): Array<string> {
 	const configured = new Set(properties);
-	const depthCache = new Map<string, number>();
+	const depths = new Map<string, number>();
+	const buckets = new Map<number, Array<string>>();
+	let maxDepth = 0;
 
-	function depth(property: string): number {
-		const cached = depthCache.get(property);
-		if (cached !== undefined) return cached;
+	for (const property of properties) {
+		const depth = depthAmongConfigured(property, configured, depths);
+		maxDepth = Math.max(maxDepth, depth);
 
-		let maxConfiguredAncestorDepth = -1;
-		const stack = [...(PARENTS_BY_PROPERTY.get(property) ?? [])];
-		const seen = new Set<string>();
-
-		while (stack.length > 0) {
-			const ancestor = stack.pop();
-			if (ancestor === undefined || seen.has(ancestor)) continue;
-			seen.add(ancestor);
-
-			if (configured.has(ancestor)) {
-				maxConfiguredAncestorDepth = Math.max(maxConfiguredAncestorDepth, depth(ancestor));
-				continue;
-			}
-
-			for (const next of PARENTS_BY_PROPERTY.get(ancestor) ?? []) {
-				stack.push(next);
-			}
-		}
-
-		const value = maxConfiguredAncestorDepth + 1;
-		depthCache.set(property, value);
-		return value;
+		const bucket = buckets.get(depth);
+		if (bucket) bucket.push(property);
+		else buckets.set(depth, [property]);
 	}
 
-	return properties
-		.map((property, index) => ({ depth: depth(property), index, property }))
-		.sort((left, right) => left.depth - right.depth || left.index - right.index)
-		.map(({ property }) => property);
+	const ordered: Array<string> = [];
+	for (let depth = 0; depth <= maxDepth; depth++) {
+		const bucket = buckets.get(depth);
+		if (!bucket) continue;
+		for (const property of bucket) ordered.push(property);
+	}
+	return ordered;
 }

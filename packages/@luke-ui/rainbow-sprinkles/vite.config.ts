@@ -16,4 +16,9 @@ export default defineConfig({
 		// Keep modules separate so React's create-runtime-fn import stays a thin dependency.
 		unbundle: true,
 	},
+	test: {
+		environment: 'node',
+		include: ['src/**/*.test.ts'],
+		name: 'unit',
+	},
 });

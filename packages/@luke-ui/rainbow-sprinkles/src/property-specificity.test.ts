@@ -62,11 +62,3 @@ test('orders placeSelf before its alignment longhands', () => {
 		'alignSelf',
 	]);
 });
-
-test('preserves relative order for unrelated properties', () => {
-	expect(orderPropertiesBySpecificity(['zIndex', 'display', 'opacity'])).toEqual([
-		'zIndex',
-		'display',
-		'opacity',
-	]);
-});

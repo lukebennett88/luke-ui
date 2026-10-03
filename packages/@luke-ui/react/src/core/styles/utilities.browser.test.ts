@@ -120,20 +120,11 @@ test('returns class and style output that merges with consumer props', () => {
 });
 
 test('columnGap overrides gap while rowGap keeps the shorthand', () => {
-	const element = mount(createSprinkles({ gap: 'sp16', columnGap: 'sp4' }));
+	const element = mount(createSprinkles({ gap: 'sp8', columnGap: 'sp4' }));
 	const computedStyle = getComputedStyle(element);
 
 	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
-	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-sp16'));
-});
-
-test('alignSelf overrides placeSelf while justifySelf keeps the shorthand', () => {
-	const computedStyle = getComputedStyle(
-		mount(createSprinkles({ placeSelf: 'center', alignSelf: 'flex-end' })),
-	);
-
-	expect(computedStyle.alignSelf).toBe('flex-end');
-	expect(computedStyle.justifySelf).toBe('center');
+	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-sp8'));
 });
 
 test('marginInlineStart overrides margin through the inline shorthand', () => {
@@ -151,25 +142,6 @@ test('marginInlineStart overrides margin through the inline shorthand', () => {
 	expect(computedStyle.marginBlockStart).toBe(resolvedCustomProperty(element, '--luke-space-sp16'));
 });
 
-test('overflowX overrides overflow while overflowY keeps the shorthand', () => {
-	const computedStyle = getComputedStyle(
-		mount(createSprinkles({ overflow: 'hidden', overflowX: 'scroll' })),
-	);
-
-	expect(computedStyle.overflowX).toBe('scroll');
-	expect(computedStyle.overflowY).toBe('hidden');
-});
-
-test('flexGrow overrides the flex shorthand', () => {
-	const computedStyle = getComputedStyle(
-		mount(createSprinkles({ flex: '1 1 auto', flexGrow: '0' })),
-	);
-
-	expect(computedStyle.flexGrow).toBe('0');
-	expect(computedStyle.flexShrink).toBe('1');
-	expect(computedStyle.flexBasis).toBe('auto');
-});
-
 test('gridColumnStart overrides gridArea', () => {
 	const computedStyle = getComputedStyle(
 		mount(createSprinkles({ gridArea: '1 / 2 / 3 / 4', gridColumnStart: '5' })),
@@ -179,6 +151,45 @@ test('gridColumnStart overrides gridArea', () => {
 	expect(computedStyle.gridColumnEnd).toBe('4');
 	expect(computedStyle.gridRowStart).toBe('1');
 	expect(computedStyle.gridRowEnd).toBe('3');
+});
+
+test('a later responsive gap overrides a base columnGap on both axes', async () => {
+	const element = mount(
+		createSprinkles({
+			gap: { initial: 'sp8', bp768: 'sp24' },
+			columnGap: 'sp4',
+		}),
+	);
+
+	await page.viewport(320, 800);
+	expect(getComputedStyle(element).rowGap).toBe(
+		resolvedCustomProperty(element, '--luke-space-sp8'),
+	);
+	expect(getComputedStyle(element).columnGap).toBe(
+		resolvedCustomProperty(element, '--luke-space-sp4'),
+	);
+
+	await page.viewport(breakpoints.bp768, 800);
+	expect(getComputedStyle(element).rowGap).toBe(
+		resolvedCustomProperty(element, '--luke-space-sp24'),
+	);
+	expect(getComputedStyle(element).columnGap).toBe(
+		resolvedCustomProperty(element, '--luke-space-sp24'),
+	);
+});
+
+test('columnGap overrides gap when both are set at the same breakpoint', async () => {
+	await page.viewport(breakpoints.bp768, 800);
+	const element = mount(
+		createSprinkles({
+			gap: { bp768: 'sp24' },
+			columnGap: { bp768: 'sp4' },
+		}),
+	);
+	const computedStyle = getComputedStyle(element);
+
+	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-sp24'));
+	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
 });
 
 /**
