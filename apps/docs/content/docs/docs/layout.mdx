@@ -69,7 +69,9 @@ pixels when a scrollbar is present.
 Each breakpoint is a fixed constant, not a theme token. A custom theme cannot change these sizes.
 Every breakpoint is a minimum inline size, so there is no maximum size or range condition. A value
 set at `bp640` also applies at `bp768` and above, unless a later breakpoint overrides it. Values
-cascade up from `initial`, so specify only the points where the layout changes.
+cascade up from `initial`, so specify only the points where the layout changes. `null` and
+`undefined` at a breakpoint mean the same as leaving it out. They do not reset the property. To
+change the value at a breakpoint, pass the new value, such as `'0'` for spacing.
 
 Import `breakpoints` from `@luke-ui/react/styles` when you author `@container` queries against the
 same thresholds Luke UI responsive props use.

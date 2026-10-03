@@ -6,7 +6,6 @@ import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
 import { resolveResponsiveCssProperty } from '../styles/responsive-css-property.js';
-import type { RequiredInitialResponsiveValue } from '../styles/responsive.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -168,7 +167,7 @@ function resolveBleedValue(
 ): StyleProps | undefined {
 	if (value == null) return undefined;
 
-	return resolveResponsiveCssProperty(value as RequiredInitialResponsiveValue<string>, property, {
+	return resolveResponsiveCssProperty(value, property, {
 		expectedValueDescription: 'a spacing token',
 		format: formatBleedSpace,
 		isValid: isBleedSpaceToken,

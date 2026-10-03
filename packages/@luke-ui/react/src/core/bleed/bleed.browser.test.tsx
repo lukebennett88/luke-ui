@@ -216,6 +216,23 @@ for (const emptyValue of [undefined, null]) {
 	});
 }
 
+test('falls back to the axis value where a responsive edge value omits a breakpoint', async () => {
+	await page.viewport(breakpoints.bp640, 800);
+	const { locator } = render(
+		<div style={{ containerType: 'inline-size', inlineSize: '100%' }}>
+			<Bleed data-testid="bleed" inline="sp16" inlineStart={{ bp768: 'sp8' }}>
+				Content
+			</Bleed>
+		</div>,
+	);
+	const bleed = expectHtmlElement(locator.getByTestId('bleed').element());
+
+	expect(getComputedStyle(bleed).marginInlineStart).toBe('-16px');
+
+	await page.viewport(breakpoints.bp768, 800);
+	expect(getComputedStyle(bleed).marginInlineStart).toBe('-8px');
+});
+
 test('a direct edge value overrides only the initial axis value', async () => {
 	await page.viewport(breakpoints.bp640, 800);
 	const { locator } = render(

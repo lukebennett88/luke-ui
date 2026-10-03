@@ -38,6 +38,10 @@ function replaceVarsInValue(
 	if (staticScale && !Array.isArray(staticScale) && propValue in staticScale) {
 		return false;
 	}
+	// A CSS-wide keyword in a custom property applies to the variable, so `unset` would inherit an
+	// ancestor's variable. `initial` makes the variable invalid, and the property then behaves as
+	// `unset`.
+	if (propValue === 'unset') return 'initial';
 	return propValue;
 }
 
@@ -70,8 +74,16 @@ function assignClasses(
 	}
 	const parts: Array<string> = [];
 	for (const cond of keys) {
-		const rawValueAtCondition = String((propValue as Record<string, unknown>)[cond]);
-		const result = handleEntry(propertyConfig, rawValueAtCondition, cache, cond);
+		const valueAtCondition = (propValue as Record<string, unknown>)[cond];
+		// Skip the empty values `assignVars` sets no variable for. A class without its variable would
+		// reset the property or inherit an ancestor's variable.
+		if (
+			(typeof valueAtCondition !== 'string' && typeof valueAtCondition !== 'number') ||
+			valueAtCondition === ''
+		) {
+			continue;
+		}
+		const result = handleEntry(propertyConfig, String(valueAtCondition), cache, cond);
 		if (result) {
 			parts.push(result);
 		}
