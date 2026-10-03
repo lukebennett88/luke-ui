@@ -1,0 +1,54 @@
+---
+title: Bleed
+description: Extend content beyond the space provided by its parent.
+source: packages/@luke-ui/react/src/exports/bleed.ts
+---
+
+`Bleed` lets content extend beyond the space provided by its parent. Use it when a child should
+reach farther on one or more edges without changing the parent's spacing.
+
+<ExampleBlock src="bleed/basic" title="Bleed: Basic" />
+
+## Choose how far to extend
+
+Pass a spacing token for the distance to extend. The value does not need to match the parent's
+padding. When it does, the content reaches the parent's edge.
+
+Use `all` to extend both axes by the same amount.
+
+Bleed accepts the same responsive spacing values as other layout props. Read
+[Responsive values](/docs/layout#responsive-values) for breakpoint behaviour.
+
+## Choose the edges
+
+Use `inline` to extend both inline edges and `block` to extend both block edges. Use `inlineStart`,
+`inlineEnd`, `blockStart`, or `blockEnd` when only one edge should extend.
+
+At the same breakpoint, an axis prop overrides `all`, and an edge prop overrides its axis prop.
+
+<ExampleBlock src="bleed/edges" title="Bleed: Choose the edges" />
+
+Use `'0'` at a breakpoint to stop bleeding. Here, `inline` matches the parent's padding on narrow
+viewports, so the item reaches both edges. Resize the preview: at `bp640`, `inline` is `'0'` and the
+parent's padding keeps the item inset.
+
+<ExampleBlock src="bleed/responsive" title="Bleed: Responsive edges" layout="full-bleed" />
+
+## Overlap adjacent items
+
+In a `Stack`, a block bleed larger than the gap extends into the space around adjacent items.
+
+<ExampleBlock src="bleed/stack-overlap" title="Bleed: Overlap Stack items" />
+
+In a `Grid`, use `all` to extend a cell into the gaps on every side.
+
+<ExampleBlock src="bleed/grid-overlap" title="Bleed: Extend a Grid item" />
+
+## Choose the rendered element
+
+Bleed uses
+[Box's `elementType` and `render` contract](/components/layout/box#choose-the-rendered-element).
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/bleed/bleed.tsx" name="BleedProps" />

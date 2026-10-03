@@ -121,6 +121,17 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'minColumnInlineSize',
 		'render',
 	],
+	'layout/bleed.mdx::packages/@luke-ui/react/src/core/bleed/bleed.tsx::BleedProps': [
+		'all',
+		'block',
+		'blockEnd',
+		'blockStart',
+		'elementType',
+		'inline',
+		'inlineEnd',
+		'inlineStart',
+		'render',
+	],
 	'layout/box.mdx::packages/@luke-ui/react/src/core/box/box.tsx::BoxProps': [
 		'elementType',
 		'ref',
