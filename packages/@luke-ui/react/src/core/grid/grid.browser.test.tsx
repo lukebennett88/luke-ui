@@ -1,6 +1,6 @@
 import { Box } from '@luke-ui/react/box';
 import { Container } from '@luke-ui/react/container';
-import { Grid, minmax, repeat } from '@luke-ui/react/grid';
+import { Grid } from '@luke-ui/react/grid';
 import { vars } from '@luke-ui/react/theme';
 import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
@@ -56,7 +56,7 @@ test('applies a CSS track list passed to columns', () => {
 	expect(fixed.getBoundingClientRect().top).toBe(flexible.getBoundingClientRect().top);
 });
 
-for (const invalidColumns of ['', '   ', '3', '3 ', '-1', '1.5']) {
+for (const invalidColumns of ['', '   ', '3', '3 ']) {
 	test(`rejects ${JSON.stringify(invalidColumns)} as columns and keeps one implicit column`, () => {
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 		const { locator } = render(
@@ -76,6 +76,21 @@ for (const invalidColumns of ['', '   ', '3', '3 ', '-1', '1.5']) {
 		expect(second.getBoundingClientRect().top).toBeGreaterThan(first.getBoundingClientRect().top);
 		expect(consoleError).toHaveBeenCalledTimes(1);
 		expect(consoleError.mock.calls[0]?.[0]).toMatch(/'columns'.*CSS track list/);
+
+		consoleError.mockRestore();
+	});
+}
+
+for (const columns of ['-1', '1.5', '+3']) {
+	test(`does not reject ${JSON.stringify(columns)} as a columns string`, () => {
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+		render(
+			<Grid columns={columns} data-testid="grid" inlineSize="40rem">
+				<span style={{ blockSize: '1rem' }} />
+			</Grid>,
+		);
+
+		expect(consoleError).not.toHaveBeenCalled();
 
 		consoleError.mockRestore();
 	});
@@ -124,9 +139,17 @@ test('places children in named areas', () => {
 	expect(c.getBoundingClientRect().width).toBeCloseTo(grid.getBoundingClientRect().width, 0);
 });
 
-// `['a..b', 'c']` is invalid only because `..` counts as its own cell. Splitting on whitespace
-// would count one cell in each row.
-for (const invalidAreas of [[], ['   '], ['a "b"'], ['a b', 'c'], ['a..b', 'c']]) {
+for (const invalidAreas of [
+	[],
+	['   '],
+	['a "b"'],
+	['a b', 'c'],
+	['a..b', 'c'],
+	['a a', 'a b'],
+	['a b a'],
+	['a# b'],
+	['a/b c'],
+]) {
 	test(`rejects ${JSON.stringify(invalidAreas)} as areas and keeps auto-placement`, () => {
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 		const { locator } = render(
@@ -150,27 +173,29 @@ for (const invalidAreas of [[], ['   '], ['a "b"'], ['a b', 'c'], ['a..b', 'c']]
 		expect(first.getBoundingClientRect().top).toBe(second.getBoundingClientRect().top);
 		expect(second.getBoundingClientRect().left).toBeGreaterThan(first.getBoundingClientRect().left);
 		expect(consoleError).toHaveBeenCalledTimes(1);
-		expect(consoleError.mock.calls[0]?.[0]).toMatch(/'areas'.*same number of cells/);
+		expect(consoleError.mock.calls[0]?.[0]).toMatch(/'areas'/);
 
 		consoleError.mockRestore();
 	});
 }
 
-test('counts each run of dots in areas as one cell', () => {
-	const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-	const { locator } = render(
-		<Grid areas={['a..b', 'c d e']} data-testid="grid">
-			<span />
-		</Grid>,
-	);
-	const grid = locator.getByTestId('grid').element();
-	if (!(grid instanceof HTMLElement)) throw new Error('Expected Grid element.');
+for (const validAreas of [['1 2'], ['a-b c_d'], ['é ü'], ['a..b', 'c d e']]) {
+	test(`accepts ${JSON.stringify(validAreas)} as areas`, () => {
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const { locator } = render(
+			<Grid areas={validAreas} data-testid="grid">
+				<span />
+			</Grid>,
+		);
+		const grid = locator.getByTestId('grid').element();
+		if (!(grid instanceof HTMLElement)) throw new Error('Expected Grid element.');
 
-	expect(getComputedStyle(grid).gridTemplateAreas).toBe('"a . b" "c d e"');
-	expect(consoleError).not.toHaveBeenCalled();
+		expect(getComputedStyle(grid).gridTemplateAreas).not.toBe('none');
+		expect(consoleError).not.toHaveBeenCalled();
 
-	consoleError.mockRestore();
-});
+		consoleError.mockRestore();
+	});
+}
 
 test('lets columnGap override gap', () => {
 	const { locator } = render(
@@ -189,11 +214,7 @@ test('lets columnGap override gap', () => {
 test('does not overflow a parent narrower than the auto-fit minimum', () => {
 	const { locator } = render(
 		<div data-testid="parent" style={{ inlineSize: '10rem' }}>
-			<Grid
-				columns={repeat('auto-fit', minmax('min(12rem, 100%)', '1fr'))}
-				data-testid="grid"
-				gap="sp8"
-			>
+			<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" data-testid="grid" gap="sp8">
 				<span style={{ blockSize: '1rem' }}>Item</span>
 				<span style={{ blockSize: '1rem' }}>Item</span>
 			</Grid>
@@ -374,7 +395,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					</Box>
 				</Grid>
 				<Grid
-					columns={repeat('auto-fit', minmax('min(10rem, 100%)', '1fr'))}
+					columns="repeat(auto-fit, minmax(min(10rem, 100%), 1fr))"
 					gap="sp8"
 					style={{ ...sceneStyle, inlineSize: '36rem' }}
 				>

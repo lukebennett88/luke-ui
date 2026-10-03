@@ -12,6 +12,7 @@ import type {
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { Prettify } from '../types/prettify.js';
+import { formatAreas, isValidAreas } from './areas.js';
 import {
 	gridAreasProperty,
 	gridColumnsProperty,
@@ -61,7 +62,7 @@ export function Grid({
 			? undefined
 			: resolveResponsiveCssProperty<ReadonlyArray<string>>(areas, gridAreasProperty, {
 					expectedValueDescription:
-						'one or more non-empty rows without double quotes, each with the same number of cells',
+						'named-area rows with equal cell counts that form filled rectangles',
 					format: formatAreas,
 					isValid: isValidAreas,
 					propName: 'areas',
@@ -99,29 +100,22 @@ interface _GridLayoutProps {
 	/**
 	 * Column tracks.
 	 *
-	 * Pass a positive integer for that many equal columns that can shrink below their content's
-	 * width, or a CSS track list such as `"12rem 1fr"` to use as `grid-template-columns`. Accepts a
-	 * responsive object with a required `initial` value, and each breakpoint can use either form.
-	 * When neither `columns` nor `areas` sets column tracks, the grid has one unprotected auto-sized
-	 * column. Pass `1` for a single `minmax(0, 1fr)` column instead.
+	 * A positive integer creates that many equal columns that can shrink below their content width.
+	 * A non-empty string is used as `grid-template-columns`. Accepts a responsive object with a
+	 * required `initial` value, and each breakpoint can use either form.
 	 */
 	columns?: RequiredInitialResponsiveValue<number | string>;
 	/**
 	 * Row tracks, as a CSS track list such as `"auto 1fr auto"`.
 	 *
-	 * Accepts a responsive object with a required `initial` value. There is deliberately no numeric
-	 * shorthand, because rows are usually auto-sized.
+	 * Accepts a responsive object with a required `initial` value.
 	 */
 	rows?: RequiredInitialResponsiveValue<string>;
-	// `@remarks` sets the type the docs props table shows, which would otherwise be `union`.
 	/**
 	 * Named grid areas, one string per row, such as `['a a', 'b c']`.
 	 *
-	 * Each row needs the same number of cells. Use `.` for an empty cell. Without `columns`, the
-	 * column tracks that `areas` creates are auto-sized. Accepts a responsive object with a required
-	 * `initial` value.
-	 *
-	 * @remarks `RequiredInitialResponsiveValue<ReadonlyArray<string>>`
+	 * Each row needs the same number of cells, and each named area must form a filled rectangle. Use
+	 * `.` for an empty cell. Accepts a responsive object with a required `initial` value.
 	 */
 	areas?: RequiredInitialResponsiveValue<ReadonlyArray<string>>;
 	/** Space between grid tracks. */
@@ -144,31 +138,14 @@ interface _GridElementProps extends BoxLikeElementProps, LayoutProps, _GridLayou
 
 interface _GridRenderProps extends BoxLikeRenderProps, LayoutProps, _GridLayoutProps {}
 
-/** A trimmed numeric-looking string, such as `"3"`, `"-1"`, or `"1.5"`. */
-const NUMERIC_STRING_PATTERN = /^[+-]?(\d+\.?\d*|\.\d+)$/;
-
-/** One area cell: a run of `.` for an empty cell, or a name. `a..b` is three cells. */
-const AREA_CELL_PATTERN = /\.+|[^\s.]+/g;
+/** Digit-only strings such as `"3"`, which look like the numeric columns shorthand in JSX. */
+const DIGIT_ONLY_STRING_PATTERN = /^\d+$/;
 
 function isValidColumns(value: number | string): boolean {
 	if (typeof value === 'number') return isPositiveInteger(value);
-	return isNonEmptyString(value) && !NUMERIC_STRING_PATTERN.test(value.trim());
+	return isNonEmptyString(value) && !DIGIT_ONLY_STRING_PATTERN.test(value.trim());
 }
 
 function formatColumns(value: number | string): string {
 	return typeof value === 'number' ? `repeat(${value}, minmax(0, 1fr))` : value;
-}
-
-function isValidAreas(rows: ReadonlyArray<string>): boolean {
-	if (rows.length === 0) return false;
-	const cellCounts = new Set<number>();
-	for (const row of rows) {
-		if (!isNonEmptyString(row) || row.includes('"')) return false;
-		cellCounts.add(row.match(AREA_CELL_PATTERN)?.length ?? 0);
-	}
-	return cellCounts.size === 1;
-}
-
-function formatAreas(rows: ReadonlyArray<string>): string {
-	return rows.map((row) => `"${row}"`).join(' ');
 }

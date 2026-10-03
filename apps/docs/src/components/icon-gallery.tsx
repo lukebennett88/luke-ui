@@ -1,6 +1,6 @@
 import { Box } from '@luke-ui/react/box';
 import { Cluster } from '@luke-ui/react/cluster';
-import { Grid, minmax, repeat } from '@luke-ui/react/grid';
+import { Grid } from '@luke-ui/react/grid';
 import type { IconName, IconProps } from '@luke-ui/react/icon';
 import { Icon, iconNames } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
@@ -148,7 +148,7 @@ export function IconGallery(): JSX.Element {
 				{filteredNames.length === 0 ? (
 					<IconGalleryEmptyState onClear={handleClearFilter} query={filter.trim()} />
 				) : (
-					<Grid columns={repeat('auto-fit', minmax('min(8rem, 100%)', '1fr'))}>
+					<Grid columns="repeat(auto-fit, minmax(min(8rem, 100%), 1fr))">
 						{filteredNames.map((name) => (
 							<IconGalleryCell
 								copyStatus={copyState.status?.name === name ? copyState.status : null}

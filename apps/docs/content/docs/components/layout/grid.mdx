@@ -21,7 +21,7 @@ grid.
 
 ## Columns from the available space
 
-Pass a `repeat('auto-fit', …)` track list when the column count should follow the available inline
+Pass a CSS `repeat(auto-fit, …)` track list when the column count should follow the available inline
 size. Wrap the minimum column size in `min(…, 100%)` so a parent narrower than the minimum does not
 overflow.
 
@@ -34,27 +34,9 @@ per row. Name each cell, use `.` for an empty cell, and place a child in an area
 `gridArea` prop.
 
 Keep `areas` and `columns` on the same number of tracks at every breakpoint. Without `columns`, the
-column tracks that `areas` creates are auto-sized.
+column tracks that `areas` creates are auto-sized. Each named area must form one filled rectangle.
 
 <ExampleBlock src="grid/structural" title="Grid: Tracks and named areas" />
-
-## Track functions
-
-`@luke-ui/react/grid` exports `repeat`, `minmax`, and `fitContent` to build track lists. Each
-returns the matching CSS function as a string. They do not validate or convert their arguments, so
-pass units and keywords as CSS expects them.
-
-| Function                | Arguments                                                                  | Returns                 |
-| ----------------------- | -------------------------------------------------------------------------- | ----------------------- |
-| `repeat(count, tracks)` | `count` is a number, `'auto-fit'`, or `'auto-fill'`. `tracks` is a string. | `repeat(count, tracks)` |
-| `minmax(min, max)`      | Two track sizes as strings                                                 | `minmax(min, max)`      |
-| `fitContent(limit)`     | A length or percentage as a string                                         | `fit-content(limit)`    |
-
-Rename an import when a function name clashes with another import:
-
-```tsx
-import { repeat as gridRepeat } from '@luke-ui/react/grid';
-```
 
 ## Responsive layouts
 
@@ -80,9 +62,7 @@ together.
 `alignItems` and `justifyItems` align each child inside its grid area. Use `start` and `end` rather
 than `flex-start` and `flex-end` in a grid.
 
-`justifyContent` and `alignContent` distribute tracks inside the grid container. They have no
-visible effect when `fr` tracks already fill the available space, such as `columns={3}`. They matter
-when tracks are narrower than the container.
+`justifyContent` and `alignContent` distribute tracks inside the grid container.
 
 ## Choose the rendered element
 

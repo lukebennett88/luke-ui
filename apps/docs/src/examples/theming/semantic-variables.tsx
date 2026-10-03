@@ -1,11 +1,11 @@
 import { Box } from '@luke-ui/react/box';
-import { Grid, minmax, repeat } from '@luke-ui/react/grid';
+import { Grid } from '@luke-ui/react/grid';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 
 export default () => {
 	return (
-		<Grid columns={repeat('auto-fit', minmax('min(14rem, 100%)', '1fr'))} gap="sp12">
+		<Grid columns="repeat(auto-fit, minmax(min(14rem, 100%), 1fr))" gap="sp12">
 			<SemanticSurface mode="light" />
 			<SemanticSurface mode="dark" />
 		</Grid>

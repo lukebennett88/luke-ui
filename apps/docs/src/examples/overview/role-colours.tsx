@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
-import { Grid, minmax, repeat } from '@luke-ui/react/grid';
+import { Grid } from '@luke-ui/react/grid';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
@@ -37,7 +37,7 @@ export default () => {
 					</Button>
 				))}
 			</Cluster>
-			<Grid columns={repeat('auto-fit', minmax('min(16rem, 100%)', '1fr'))} gap="sp12">
+			<Grid columns="repeat(auto-fit, minmax(min(16rem, 100%), 1fr))" gap="sp12">
 				{modes.map((mode) => (
 					<Box
 						data-color-mode={mode}

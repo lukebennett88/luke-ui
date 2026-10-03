@@ -1,7 +1,7 @@
 import '../styles/app.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { Button } from '@luke-ui/react/button';
-import { Grid, minmax, repeat } from '@luke-ui/react/grid';
+import { Grid } from '@luke-ui/react/grid';
 import { Stack } from '@luke-ui/react/stack';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import { act } from 'react';
@@ -34,7 +34,7 @@ test('default and explicit flow give block roots the available width', () => {
 
 test('flow gives an auto-fit Grid multiple tracks without explicit width', () => {
 	const { available, exampleRoot } = renderInWrapper(
-		<Grid columns={repeat('auto-fit', minmax('min(12rem, 100%)', '1fr'))} gap="sp12">
+		<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" gap="sp12">
 			<span>First</span>
 			<span>Second</span>
 			<span>Third</span>
@@ -81,7 +81,7 @@ test('centered keeps an intrinsic Button centred', () => {
 
 test('centered intentionally keeps an unsized auto-fit Grid intrinsic', () => {
 	const { available, exampleRoot } = renderInWrapper(
-		<Grid columns={repeat('auto-fit', minmax('min(12rem, 100%)', '1fr'))} gap="sp12">
+		<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" gap="sp12">
 			<span>First</span>
 			<span>Second</span>
 		</Grid>,
@@ -114,7 +114,7 @@ test('flow respects a max-inline-size cap without requiring full width', () => {
 test('flow retains deliberately narrow example sizing', () => {
 	const { exampleRoot } = renderInWrapper(
 		<div style={{ inlineSize: '10rem' }}>
-			<Grid columns={repeat('auto-fit', minmax('min(16rem, 100%)', '1fr'))} gap="sp12">
+			<Grid columns="repeat(auto-fit, minmax(min(16rem, 100%), 1fr))" gap="sp12">
 				<span>First</span>
 				<span>Second</span>
 			</Grid>
