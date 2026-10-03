@@ -23,9 +23,8 @@ export function watchSpinner(element: Element) {
 /**
  * Asserts that a spinner appeared no sooner than `delayMs` after the Action started.
  *
- * Timers never fire early, so the lower bound is tight. The 1ms allowance covers clock granularity
- * between `performance.now()` and the timer. There is no upper bound beyond the poll timeout,
- * because a loaded machine can delay the spinner arbitrarily.
+ * The 1ms tolerance covers clock granularity. Do not add a tight upper bound, because scheduling
+ * delays can be arbitrary.
  */
 export async function expectDelayedSpinner(
 	spinner: ReturnType<typeof watchSpinner>,
