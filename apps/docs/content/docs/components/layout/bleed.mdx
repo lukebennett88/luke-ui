@@ -24,9 +24,10 @@ Bleed accepts the same responsive spacing values as other layout props. Read
 Use `inline` to extend both inline edges and `block` to extend both block edges. Use `inlineStart`,
 `inlineEnd`, `blockStart`, or `blockEnd` when only one edge should extend.
 
-An edge prop overrides its axis prop, and an axis prop overrides `all`. Each override applies only
-at the breakpoints it includes. For example, `inline="sp16" inlineStart={{ bp768: 'sp8' }}` extends
-the inline-start edge by `sp16` until `bp768`.
+At the same breakpoint, an axis prop overrides `all`, and an edge prop overrides its axis prop. A
+value continues to larger breakpoints until any of these props has a value at a later breakpoint.
+For example, `inline="sp16" inlineStart={{ bp768: 'sp8' }}` extends the inline-start edge by `sp16`
+below `bp768` and by `sp8` from `bp768`.
 
 <ExampleBlock src="bleed/edges" title="Bleed: Choose the edges" />
 

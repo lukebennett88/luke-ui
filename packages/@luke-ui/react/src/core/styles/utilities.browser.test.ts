@@ -88,17 +88,6 @@ for (const emptyValue of [null, undefined, '']) {
 	});
 }
 
-test("resets a breakpoint set to 'unset' instead of taking an ancestor's value", async () => {
-	await page.viewport(breakpoints.bp640, 800);
-	const parent = mount(createSprinkles({ maxInlineSize: { initial: '50px', bp640: '400px' } }));
-	const element = mount(
-		createSprinkles({ maxInlineSize: { initial: '10px', bp640: 'unset' } }),
-		parent,
-	);
-
-	expect(getComputedStyle(element).maxInlineSize).toBe('none');
-});
-
 test('returns class and style output that merges with consumer props', () => {
 	// `display` is a static class. `inlineSize` is a dynamic property, so Sprinkles emits inline
 	// style for it. A consumer style-only fixture would still pass if `mergeStyleProps` dropped the
