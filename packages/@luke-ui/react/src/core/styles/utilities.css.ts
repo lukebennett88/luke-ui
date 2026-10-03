@@ -54,7 +54,14 @@ const backgroundColorScale = Object.fromEntries([
 	}),
 ]) as Record<BackgroundColorToken, string>;
 
-/** Property scales shared by the runtime config and the public prop types. */
+/**
+ * Property scales shared by the runtime config and the public prop types.
+ *
+ * Key order is cascade order. Sprinkles emits one equal-specificity class per property, in key
+ * order, into the same layer. A later key wins when two properties set the same CSS property on the
+ * same condition. Declare each shorthand before its longhands so a longhand overrides it. The keys
+ * are otherwise alphabetical.
+ */
 const dynamicProperties = {
 	alignContent: {
 		center: 'center',
@@ -71,6 +78,15 @@ const dynamicProperties = {
 		'flex-end': 'flex-end',
 		'flex-start': 'flex-start',
 		normal: 'normal',
+		stretch: 'stretch',
+	},
+	// Shorthand before its longhands `alignSelf` and `justifySelf`.
+	placeSelf: {
+		auto: 'auto',
+		center: 'center',
+		end: 'end',
+		normal: 'normal',
+		start: 'start',
 		stretch: 'stretch',
 	},
 	alignSelf: {
@@ -101,6 +117,8 @@ const dynamicProperties = {
 		floating: vars.depth.floating,
 		overlay: vars.depth.overlay,
 	},
+	// Shorthand before its longhands `columnGap` and `rowGap`.
+	gap: spaceScale,
 	columnGap: spaceScale,
 	display: {
 		block: 'block',
@@ -124,7 +142,6 @@ const dynamicProperties = {
 	flexGrow: { '0': '0', '1': '1' },
 	flexShrink: { '0': '0', '1': '1' },
 	flexWrap: { nowrap: 'nowrap', wrap: 'wrap', 'wrap-reverse': 'wrap-reverse' },
-	gap: spaceScale,
 	gridArea: true,
 	gridColumn: true,
 	gridColumnEnd: true,
@@ -198,14 +215,6 @@ const dynamicProperties = {
 	paddingInline: spaceScale,
 	paddingInlineEnd: spaceScale,
 	paddingInlineStart: spaceScale,
-	placeSelf: {
-		auto: 'auto',
-		center: 'center',
-		end: 'end',
-		normal: 'normal',
-		start: 'start',
-		stretch: 'stretch',
-	},
 	position: {
 		absolute: 'absolute',
 		fixed: 'fixed',

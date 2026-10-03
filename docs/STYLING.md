@@ -323,6 +323,9 @@ The supported properties live in `core/styles/utilities.css.ts` and export from
 `@luke-ui/react/styles`. Use CSS-native values throughout, for example `flex-start` instead of
 `start`.
 
+Property key order in `utilities.css.ts` is cascade order, so a later key wins. Declare a shorthand
+such as `gap` before its longhands, such as `columnGap` and `rowGap`, so a longhand overrides it.
+
 Semantic colour, typography, and pseudo-state properties are excluded. For sanctioned custom
 styling, use typed `vars` from `@luke-ui/react/theme`:
 

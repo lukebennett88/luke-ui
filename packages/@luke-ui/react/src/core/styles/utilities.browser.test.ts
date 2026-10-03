@@ -5,6 +5,7 @@ import { page } from 'vite-plus/test/context';
 import { mergeStyleProps } from '../../shared/utils/utils.js';
 import { breakpoints } from '../../theme/breakpoints.js';
 import { themeClassName as tactileThemeClassName } from '../../theme/bundles/tactile/index.js';
+import type { SprinklesProps } from './utilities.css.js';
 import { createSprinkles } from './utilities.css.js';
 
 const mounted: Array<HTMLElement> = [];
@@ -96,6 +97,54 @@ test('returns class and style output that merges with consumer props', () => {
 	expect(getComputedStyle(element).inlineSize).toBe('400px');
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(1, 2, 3)');
 });
+
+const gapLonghands = [
+	{ longhand: 'columnGap', other: 'rowGap', props: { gap: 'sp16', columnGap: 'sp4' } },
+	{ longhand: 'rowGap', other: 'columnGap', props: { gap: 'sp16', rowGap: 'sp4' } },
+] as const satisfies ReadonlyArray<{
+	longhand: 'columnGap' | 'rowGap';
+	other: 'columnGap' | 'rowGap';
+	props: SprinklesProps;
+}>;
+
+for (const { longhand, other, props } of gapLonghands) {
+	test(`${longhand} overrides gap at the same condition`, () => {
+		const element = mount(createSprinkles(props));
+		const computedStyle = getComputedStyle(element);
+
+		expect(computedStyle[longhand]).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
+		expect(computedStyle[other]).toBe(resolvedCustomProperty(element, '--luke-space-sp16'));
+	});
+}
+
+const selfAlignmentLonghands = [
+	{
+		expected: 'flex-end',
+		longhand: 'alignSelf',
+		other: 'justifySelf',
+		props: { placeSelf: 'center', alignSelf: 'flex-end' },
+	},
+	{
+		expected: 'end',
+		longhand: 'justifySelf',
+		other: 'alignSelf',
+		props: { placeSelf: 'center', justifySelf: 'end' },
+	},
+] as const satisfies ReadonlyArray<{
+	expected: string;
+	longhand: 'alignSelf' | 'justifySelf';
+	other: 'alignSelf' | 'justifySelf';
+	props: SprinklesProps;
+}>;
+
+for (const { expected, longhand, other, props } of selfAlignmentLonghands) {
+	test(`${longhand} overrides placeSelf at the same condition`, () => {
+		const computedStyle = getComputedStyle(mount(createSprinkles(props)));
+
+		expect(computedStyle[longhand]).toBe(expected);
+		expect(computedStyle[other]).toBe('center');
+	});
+}
 
 /**
  * Resolves a custom-property length through used-value computation. `getPropertyValue` returns the
