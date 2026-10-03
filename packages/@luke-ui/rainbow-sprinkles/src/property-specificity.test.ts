@@ -1,7 +1,7 @@
 import { expect, test } from 'vite-plus/test';
 import { orderPropertiesBySpecificity } from './property-specificity.js';
 
-test('emits a shorthand before longhands even when the config lists longhands first', () => {
+test('emits a shorthand before narrower properties even when the config lists them first', () => {
 	expect(orderPropertiesBySpecificity(['columnGap', 'rowGap', 'gap', 'display'])).toEqual([
 		'gap',
 		'display',
@@ -10,7 +10,7 @@ test('emits a shorthand before longhands even when the config lists longhands fi
 	]);
 });
 
-test('orders a broad shorthand before a narrower shorthand before a longhand', () => {
+test('orders a broad shorthand before a narrower shorthand before a narrower property', () => {
 	expect(orderPropertiesBySpecificity(['marginInlineStart', 'margin', 'marginInline'])).toEqual([
 		'margin',
 		'marginInline',
@@ -18,7 +18,7 @@ test('orders a broad shorthand before a narrower shorthand before a longhand', (
 	]);
 });
 
-test('orders a longhand after its shorthand when the middle shorthand is absent', () => {
+test('orders a narrower property after its shorthand when the middle shorthand is absent', () => {
 	expect(orderPropertiesBySpecificity(['marginInlineStart', 'padding', 'margin'])).toEqual([
 		'padding',
 		'margin',
@@ -26,7 +26,7 @@ test('orders a longhand after its shorthand when the middle shorthand is absent'
 	]);
 });
 
-test('keeps sibling longhands after their shared shorthand', () => {
+test('keeps sibling narrower properties after their shared shorthand', () => {
 	expect(orderPropertiesBySpecificity(['overflowY', 'overflow', 'overflowX'])).toEqual([
 		'overflow',
 		'overflowY',
@@ -34,7 +34,7 @@ test('keeps sibling longhands after their shared shorthand', () => {
 	]);
 });
 
-test('orders nested grid placement shorthands before start and end longhands', () => {
+test('orders nested grid placement shorthands before start and end properties', () => {
 	expect(
 		orderPropertiesBySpecificity([
 			'gridColumnStart',
@@ -46,7 +46,7 @@ test('orders nested grid placement shorthands before start and end longhands', (
 	).toEqual(['gridArea', 'gridColumn', 'gridRow', 'gridColumnStart', 'gridRowEnd']);
 });
 
-test('orders flex longhands after the flex shorthand', () => {
+test('orders flex narrower properties after the flex shorthand', () => {
 	expect(orderPropertiesBySpecificity(['flexGrow', 'flex', 'flexBasis', 'flexShrink'])).toEqual([
 		'flex',
 		'flexGrow',
@@ -55,7 +55,7 @@ test('orders flex longhands after the flex shorthand', () => {
 	]);
 });
 
-test('orders placeSelf before its alignment longhands', () => {
+test('orders placeSelf before its alignment properties', () => {
 	expect(orderPropertiesBySpecificity(['justifySelf', 'alignSelf', 'placeSelf'])).toEqual([
 		'placeSelf',
 		'justifySelf',

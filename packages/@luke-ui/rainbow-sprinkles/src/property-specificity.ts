@@ -1,9 +1,9 @@
 /**
  * Immediate shorthand → narrower-property edges for equal-specificity utility classes.
- * Broader properties must be emitted before overlapping narrower ones so a longhand wins
- * within the same condition.
+ * Broader properties must be emitted before overlapping narrower ones so the narrower
+ * property wins within the same condition.
  */
-const SHORTHAND_LONGHANDS: Record<string, ReadonlyArray<string>> = {
+const NARROWER_PROPERTIES_BY_SHORTHAND: Record<string, ReadonlyArray<string>> = {
 	flex: ['flexBasis', 'flexGrow', 'flexShrink'],
 	gap: ['columnGap', 'rowGap'],
 	gridArea: ['gridColumn', 'gridRow'],
@@ -23,11 +23,11 @@ const SHORTHAND_LONGHANDS: Record<string, ReadonlyArray<string>> = {
 };
 
 const PARENTS_BY_PROPERTY = new Map<string, Array<string>>();
-for (const [shorthand, longhands] of Object.entries(SHORTHAND_LONGHANDS)) {
-	for (const longhand of longhands) {
-		const parents = PARENTS_BY_PROPERTY.get(longhand);
+for (const [shorthand, narrowerProperties] of Object.entries(NARROWER_PROPERTIES_BY_SHORTHAND)) {
+	for (const narrowerProperty of narrowerProperties) {
+		const parents = PARENTS_BY_PROPERTY.get(narrowerProperty);
 		if (parents) parents.push(shorthand);
-		else PARENTS_BY_PROPERTY.set(longhand, [shorthand]);
+		else PARENTS_BY_PROPERTY.set(narrowerProperty, [shorthand]);
 	}
 }
 
