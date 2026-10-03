@@ -5,7 +5,6 @@ import { page } from 'vite-plus/test/context';
 import { mergeStyleProps } from '../../shared/utils/utils.js';
 import { breakpoints } from '../../theme/breakpoints.js';
 import { themeClassName as tactileThemeClassName } from '../../theme/bundles/tactile/index.js';
-import type { SprinklesProps } from './utilities.css.js';
 import { createSprinkles } from './utilities.css.js';
 
 const mounted: Array<HTMLElement> = [];
@@ -120,53 +119,71 @@ test('returns class and style output that merges with consumer props', () => {
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(1, 2, 3)');
 });
 
-const gapLonghands = [
-	{ longhand: 'columnGap', other: 'rowGap', props: { gap: 'sp16', columnGap: 'sp4' } },
-	{ longhand: 'rowGap', other: 'columnGap', props: { gap: 'sp16', rowGap: 'sp4' } },
-] as const satisfies ReadonlyArray<{
-	longhand: 'columnGap' | 'rowGap';
-	other: 'columnGap' | 'rowGap';
-	props: SprinklesProps;
-}>;
+test('columnGap overrides gap while rowGap keeps the shorthand', () => {
+	const element = mount(createSprinkles({ gap: 'sp16', columnGap: 'sp4' }));
+	const computedStyle = getComputedStyle(element);
 
-for (const { longhand, other, props } of gapLonghands) {
-	test(`${longhand} overrides gap at the same condition`, () => {
-		const element = mount(createSprinkles(props));
-		const computedStyle = getComputedStyle(element);
+	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
+	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-sp16'));
+});
 
-		expect(computedStyle[longhand]).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
-		expect(computedStyle[other]).toBe(resolvedCustomProperty(element, '--luke-space-sp16'));
-	});
-}
+test('alignSelf overrides placeSelf while justifySelf keeps the shorthand', () => {
+	const computedStyle = getComputedStyle(
+		mount(createSprinkles({ placeSelf: 'center', alignSelf: 'flex-end' })),
+	);
 
-const selfAlignmentLonghands = [
-	{
-		expected: 'flex-end',
-		longhand: 'alignSelf',
-		other: 'justifySelf',
-		props: { placeSelf: 'center', alignSelf: 'flex-end' },
-	},
-	{
-		expected: 'end',
-		longhand: 'justifySelf',
-		other: 'alignSelf',
-		props: { placeSelf: 'center', justifySelf: 'end' },
-	},
-] as const satisfies ReadonlyArray<{
-	expected: string;
-	longhand: 'alignSelf' | 'justifySelf';
-	other: 'alignSelf' | 'justifySelf';
-	props: SprinklesProps;
-}>;
+	expect(computedStyle.alignSelf).toBe('flex-end');
+	expect(computedStyle.justifySelf).toBe('center');
+});
 
-for (const { expected, longhand, other, props } of selfAlignmentLonghands) {
-	test(`${longhand} overrides placeSelf at the same condition`, () => {
-		const computedStyle = getComputedStyle(mount(createSprinkles(props)));
+test('marginInlineStart overrides margin through the inline shorthand', () => {
+	const element = mount(
+		createSprinkles({
+			margin: 'sp16',
+			marginInline: 'sp8',
+			marginInlineStart: 'sp4',
+		}),
+	);
+	const computedStyle = getComputedStyle(element);
 
-		expect(computedStyle[longhand]).toBe(expected);
-		expect(computedStyle[other]).toBe('center');
-	});
-}
+	expect(computedStyle.marginInlineStart).toBe(
+		resolvedCustomProperty(element, '--luke-space-sp4'),
+	);
+	expect(computedStyle.marginInlineEnd).toBe(resolvedCustomProperty(element, '--luke-space-sp8'));
+	expect(computedStyle.marginBlockStart).toBe(
+		resolvedCustomProperty(element, '--luke-space-sp16'),
+	);
+});
+
+test('overflowX overrides overflow while overflowY keeps the shorthand', () => {
+	const computedStyle = getComputedStyle(
+		mount(createSprinkles({ overflow: 'hidden', overflowX: 'scroll' })),
+	);
+
+	expect(computedStyle.overflowX).toBe('scroll');
+	expect(computedStyle.overflowY).toBe('hidden');
+});
+
+test('flexGrow overrides the flex shorthand', () => {
+	const computedStyle = getComputedStyle(
+		mount(createSprinkles({ flex: '1 1 auto', flexGrow: '0' })),
+	);
+
+	expect(computedStyle.flexGrow).toBe('0');
+	expect(computedStyle.flexShrink).toBe('1');
+	expect(computedStyle.flexBasis).toBe('auto');
+});
+
+test('gridColumnStart overrides gridArea', () => {
+	const computedStyle = getComputedStyle(
+		mount(createSprinkles({ gridArea: '1 / 2 / 3 / 4', gridColumnStart: '5' })),
+	);
+
+	expect(computedStyle.gridColumnStart).toBe('5');
+	expect(computedStyle.gridColumnEnd).toBe('4');
+	expect(computedStyle.gridRowStart).toBe('1');
+	expect(computedStyle.gridRowEnd).toBe('3');
+});
 
 /**
  * Resolves a custom-property length through used-value computation. `getPropertyValue` returns the

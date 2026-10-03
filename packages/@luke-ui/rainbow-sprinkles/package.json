@@ -28,7 +28,8 @@
 		"clean": "rm -rf .turbo dist",
 		"dev": "vp pack --watch",
 		"fix:format": "vp fmt . --write",
-		"fix:lint": "vp lint . --type-aware --fix"
+		"fix:lint": "vp lint . --type-aware --fix",
+		"test": "vp test run --config vitest.config.ts"
 	},
 	"dependencies": {
 		"@vanilla-extract/css": "catalog:",
