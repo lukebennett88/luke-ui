@@ -24,10 +24,26 @@ type Merged<A, B> = {
 					: never;
 };
 
+type MergePossiblyWithArray<A, B> = {
+	[K in keyof A | keyof B]: K extends 'className'
+		? string
+		: K extends 'style'
+			? Record<string, unknown>
+			: K extends keyof A
+				? K extends keyof B
+					? A[K] | B[K]
+					: A[K]
+				: K extends keyof B
+					? B[K] | undefined
+					: never;
+};
+
 type MergedAll<T extends ReadonlyArray<unknown>> = T extends readonly [infer First, ...infer Rest]
 	? Rest extends readonly [infer Second, ...infer Others]
 		? MergedAll<[Merged<First, Second>, ...Others]>
-		: First
+		: number extends Rest['length']
+			? MergePossiblyWithArray<First, Rest[number]>
+			: First
 	: never;
 
 type MergeableProps = {

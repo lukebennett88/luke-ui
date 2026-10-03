@@ -59,3 +59,13 @@ test('infers the merged return type for fixed positional arguments', () => {
 	const pair = mergeStyleProps({ id: 1 }, { id: 'last' });
 	expectTypeOf(pair).toEqualTypeOf<{ id: string }>();
 });
+
+test('widens the return type for an unknown-length array spread', () => {
+	const tail: Array<{ id: boolean; extra: number }> = [];
+	const result = mergeStyleProps({ id: 1 }, { id: 'second' }, ...tail);
+
+	expectTypeOf(result).toEqualTypeOf<{
+		extra: number | undefined;
+		id: string | boolean;
+	}>();
+});
