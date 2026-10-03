@@ -124,6 +124,54 @@ test('places children in named areas', () => {
 	expect(c.getBoundingClientRect().width).toBeCloseTo(grid.getBoundingClientRect().width, 0);
 });
 
+// `['a..b', 'c']` is invalid only because `..` counts as its own cell. Splitting on whitespace
+// would count one cell in each row.
+for (const invalidAreas of [[], ['   '], ['a "b"'], ['a b', 'c'], ['a..b', 'c']]) {
+	test(`rejects ${JSON.stringify(invalidAreas)} as areas and keeps auto-placement`, () => {
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const { locator } = render(
+			<Grid areas={invalidAreas} columns={2} data-testid="grid" inlineSize="30rem">
+				<span data-testid="first" style={{ blockSize: '1rem' }} />
+				<span data-testid="second" style={{ blockSize: '1rem' }} />
+			</Grid>,
+		);
+		const grid = locator.getByTestId('grid').element();
+		const first = locator.getByTestId('first').element();
+		const second = locator.getByTestId('second').element();
+		if (
+			!(grid instanceof HTMLElement) ||
+			!(first instanceof HTMLElement) ||
+			!(second instanceof HTMLElement)
+		) {
+			throw new Error('Expected Grid elements.');
+		}
+
+		expect(getComputedStyle(grid).gridTemplateAreas).toBe('none');
+		expect(first.getBoundingClientRect().top).toBe(second.getBoundingClientRect().top);
+		expect(second.getBoundingClientRect().left).toBeGreaterThan(first.getBoundingClientRect().left);
+		expect(consoleError).toHaveBeenCalledTimes(1);
+		expect(consoleError.mock.calls[0]?.[0]).toMatch(/'areas'.*same number of cells/);
+
+		consoleError.mockRestore();
+	});
+}
+
+test('counts each run of dots in areas as one cell', () => {
+	const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+	const { locator } = render(
+		<Grid areas={['a..b', 'c d e']} data-testid="grid">
+			<span />
+		</Grid>,
+	);
+	const grid = locator.getByTestId('grid').element();
+	if (!(grid instanceof HTMLElement)) throw new Error('Expected Grid element.');
+
+	expect(getComputedStyle(grid).gridTemplateAreas).toBe('"a . b" "c d e"');
+	expect(consoleError).not.toHaveBeenCalled();
+
+	consoleError.mockRestore();
+});
+
 test('lets columnGap override gap', () => {
 	const { locator } = render(
 		<Grid columnGap="sp24" columns={2} data-testid="grid" gap="sp8">

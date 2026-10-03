@@ -102,29 +102,31 @@ interface _GridLayoutProps {
 	 * Pass a positive integer for that many equal columns that can shrink below their content's
 	 * width, or a CSS track list such as `"12rem 1fr"` to use as `grid-template-columns`. Accepts a
 	 * responsive object with a required `initial` value, and each breakpoint can use either form.
-	 * When omitted, the grid has one auto-sized column. Pass `1` for a single equal column.
+	 * When neither `columns` nor `areas` sets column tracks, the grid has one unprotected auto-sized
+	 * column. Pass `1` for a single `minmax(0, 1fr)` column instead.
 	 */
 	columns?: RequiredInitialResponsiveValue<number | string>;
 	/**
 	 * Row tracks, as a CSS track list such as `"auto 1fr auto"`.
 	 *
 	 * Accepts a responsive object with a required `initial` value. There is deliberately no numeric
-	 * shorthand, because rows usually size to their content.
+	 * shorthand, because rows are usually auto-sized.
 	 */
 	rows?: RequiredInitialResponsiveValue<string>;
 	/**
 	 * Named grid areas, one string per row, such as `['a a', 'b c']`.
 	 *
-	 * Each row needs the same number of cells. Use `.` for an empty cell. Accepts a responsive
-	 * object with a required `initial` value.
+	 * Each row needs the same number of cells. Use `.` for an empty cell. Without `columns`, the
+	 * column tracks that `areas` creates are auto-sized. Accepts a responsive object with a required
+	 * `initial` value.
 	 */
-	areas?: RequiredInitialResponsiveValue<ReadonlyArray<string>>;
+	areas?: ResponsiveGridAreas;
 	/** Space between grid tracks. */
 	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
 	/** Space between row tracks. Overrides `gap` on the block axis. */
-	rowGap?: RequiredInitialResponsive<SprinklesProps['rowGap']>;
+	rowGap?: RequiredInitialResponsive<SprinklesProps['gap']>;
 	/** Space between column tracks. Overrides `gap` on the inline axis. */
-	columnGap?: RequiredInitialResponsive<SprinklesProps['columnGap']>;
+	columnGap?: RequiredInitialResponsive<SprinklesProps['gap']>;
 	/** Alignment of each child within its grid area on the block axis. */
 	alignItems?: SprinklesProps['alignItems'];
 	/** Alignment of each child within its grid area on the inline axis. */
@@ -134,6 +136,12 @@ interface _GridLayoutProps {
 	/** Distribution of column tracks within the grid on the inline axis. */
 	justifyContent?: SprinklesProps['justifyContent'];
 }
+
+/**
+ * Private name for the `areas` type so the generated props table shows it instead of `union`. It
+ * includes `undefined` so the optional prop keeps the alias rather than a flattened union.
+ */
+type ResponsiveGridAreas = RequiredInitialResponsiveValue<ReadonlyArray<string>> | undefined;
 
 interface _GridElementProps extends BoxLikeElementProps, LayoutProps, _GridLayoutProps {}
 

@@ -15,8 +15,9 @@ its content, so long content wraps instead of widening one column.
 
 <ExampleBlock src="grid/basic" title="Grid: Basic" />
 
-Without `columns`, the grid has one auto-sized column that grows to fit its widest child. Pass
-`columns={1}` for a single column that keeps long content inside the grid.
+When neither `columns` nor `areas` sets column tracks, the grid has one unprotected auto-sized
+column that grows to fit its widest child. Pass `columns={1}` for a single `minmax(0, 1fr)` column
+that keeps long content inside the grid.
 
 ## Columns from the available space
 
@@ -33,7 +34,7 @@ per row. Name each cell, use `.` for an empty cell, and place a child in an area
 `gridArea` prop.
 
 Keep `areas` and `columns` on the same number of tracks at every breakpoint. Without `columns`, the
-tracks that `areas` creates size to their content.
+column tracks that `areas` creates are auto-sized.
 
 <ExampleBlock src="grid/structural" title="Grid: Tracks and named areas" />
 
