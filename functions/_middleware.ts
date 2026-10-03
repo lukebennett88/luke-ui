@@ -2,6 +2,8 @@
  * Cloudflare Pages adapter for `agent-negotiation.ts`'s host-agnostic logic. A
  * different host would need only a similarly small adapter of its own.
  * `apps/docs/public/_routes.json` excludes the paths this middleware skips.
+ * Every Pages project built from the repository root picks up this directory,
+ * so `apps/reference-app/public/_routes.json` excludes every path.
  */
 import { handleRequest, notFoundMarkdown } from '../apps/docs/src/lib/agent-negotiation.ts';
 
