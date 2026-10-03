@@ -30,24 +30,20 @@ type MergedAll<T extends ReadonlyArray<unknown>> = T extends readonly [infer Fir
 		: First
 	: never;
 
-/** Resolves to `never` when `T` is not a fixed-length tuple, so spreading an array is rejected. */
-type FixedLength<T extends ReadonlyArray<unknown>> = number extends T['length'] ? never : unknown;
-
 type MergeableProps = {
 	className?: unknown;
 	style?: unknown;
 };
 
 /**
- * Merges two or more prop objects from left to right. Pass each object as its own argument:
- * spreading an array of unknown length is a type error. `className` values are concatenated with
+ * Merges two or more prop objects from left to right. `className` values are concatenated with
  * `cx`, and `style` objects are shallowly merged (later props win). All other properties are
  * overwritten by the later object, including `on*` handlers — unlike React Aria's `mergeProps`,
  * this does not chain event handlers. Useful for combining component props with
  * `createSprinkles()` output.
  */
 export function mergeStyleProps<T extends [object, object, ...Array<object>]>(
-	...props: T & FixedLength<T>
+	...props: T
 ): MergedAll<T> {
 	const [first, ...rest] = props as Array<object>;
 	const result = { ...first } as Record<string, unknown>;

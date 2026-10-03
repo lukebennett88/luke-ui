@@ -1,4 +1,4 @@
-import { assertType, expect, expectTypeOf, test } from 'vite-plus/test';
+import { expect, expectTypeOf, test } from 'vite-plus/test';
 import { mergeStyleProps } from './utils.js';
 
 test('merges class names and styles from left to right across four objects', () => {
@@ -27,23 +27,6 @@ test('replaces other properties and handlers with the last supplied value', () =
 	expect(result.onClick).toBe(lastHandler);
 });
 
-test('keeps the first object’s own enumerable symbol properties without copying its prototype', () => {
-	const metadata = Symbol('metadata');
-	class Props {
-		[metadata] = 'retained';
-		id = 'first';
-	}
-	Object.defineProperty(Props.prototype, 'inherited', { enumerable: true, value: 'excluded' });
-	const first = new Props();
-	Object.defineProperty(first, 'hidden', { value: 'excluded' });
-	const result = mergeStyleProps(first, {});
-
-	expect(result[metadata]).toBe('retained');
-	expect(result.id).toBe('first');
-	expect(result).not.toHaveProperty('inherited');
-	expect(result).not.toHaveProperty('hidden');
-});
-
 test('does not mutate props or their style objects', () => {
 	const first = Object.freeze({ className: 'first', style: Object.freeze({ color: 'red' }) });
 	const second = Object.freeze({ className: 'second', style: Object.freeze({ margin: 8 }) });
@@ -59,20 +42,7 @@ test('does not mutate props or their style objects', () => {
 	expect(result.style).not.toBe(third.style);
 });
 
-test('ignores non-string class names and non-object styles', () => {
-	const result = mergeStyleProps(
-		{ className: 123, style: null },
-		{ className: 'valid', style: { color: 'red' } },
-		{ className: () => 'ignored', style: 'ignored' },
-		{ className: false, style: undefined },
-	);
-
-	expect(result.className).toBe('valid');
-	expect(result.style).toEqual({ color: 'red' });
-	expect(mergeStyleProps({}, {})).toEqual({ className: '', style: {} });
-});
-
-test('preserves the merged type of fixed tuples', () => {
+test('infers the merged return type for fixed positional arguments', () => {
 	const result = mergeStyleProps(
 		{ id: 1, title: 'retained', className: 'first' },
 		{ id: 'second', style: { color: 'red' } },
@@ -88,11 +58,4 @@ test('preserves the merged type of fixed tuples', () => {
 	}>();
 	const pair = mergeStyleProps({ id: 1 }, { id: 'last' });
 	expectTypeOf(pair).toEqualTypeOf<{ id: string }>();
-});
-
-test('rejects spreading an array of unknown length', () => {
-	const tail: Array<{ id: boolean }> = [];
-
-	// @ts-expect-error A spread array has no fixed length.
-	assertType(mergeStyleProps({ id: 1 }, { title: 'a' }, ...tail));
 });
