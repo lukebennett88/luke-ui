@@ -119,6 +119,79 @@ test('returns class and style output that merges with consumer props', () => {
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(1, 2, 3)');
 });
 
+test('columnGap overrides gap while rowGap keeps the shorthand', () => {
+	const element = mount(createSprinkles({ gap: 'sp8', columnGap: 'sp4' }));
+	const computedStyle = getComputedStyle(element);
+
+	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
+	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-sp8'));
+});
+
+test('marginInlineStart overrides margin through the inline shorthand', () => {
+	const element = mount(
+		createSprinkles({
+			margin: 'sp16',
+			marginInline: 'sp8',
+			marginInlineStart: 'sp4',
+		}),
+	);
+	const computedStyle = getComputedStyle(element);
+
+	expect(computedStyle.marginInlineStart).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
+	expect(computedStyle.marginInlineEnd).toBe(resolvedCustomProperty(element, '--luke-space-sp8'));
+	expect(computedStyle.marginBlockStart).toBe(resolvedCustomProperty(element, '--luke-space-sp16'));
+});
+
+test('gridColumnStart overrides gridArea', () => {
+	const computedStyle = getComputedStyle(
+		mount(createSprinkles({ gridArea: '1 / 2 / 3 / 4', gridColumnStart: '5' })),
+	);
+
+	expect(computedStyle.gridColumnStart).toBe('5');
+	expect(computedStyle.gridColumnEnd).toBe('4');
+	expect(computedStyle.gridRowStart).toBe('1');
+	expect(computedStyle.gridRowEnd).toBe('3');
+});
+
+test('a later responsive gap overrides a base columnGap on both axes', async () => {
+	const element = mount(
+		createSprinkles({
+			gap: { initial: 'sp8', bp768: 'sp24' },
+			columnGap: 'sp4',
+		}),
+	);
+
+	await page.viewport(320, 800);
+	expect(getComputedStyle(element).rowGap).toBe(
+		resolvedCustomProperty(element, '--luke-space-sp8'),
+	);
+	expect(getComputedStyle(element).columnGap).toBe(
+		resolvedCustomProperty(element, '--luke-space-sp4'),
+	);
+
+	await page.viewport(breakpoints.bp768, 800);
+	expect(getComputedStyle(element).rowGap).toBe(
+		resolvedCustomProperty(element, '--luke-space-sp24'),
+	);
+	expect(getComputedStyle(element).columnGap).toBe(
+		resolvedCustomProperty(element, '--luke-space-sp24'),
+	);
+});
+
+test('columnGap overrides gap when both are set at the same breakpoint', async () => {
+	await page.viewport(breakpoints.bp768, 800);
+	const element = mount(
+		createSprinkles({
+			gap: { bp768: 'sp24' },
+			columnGap: { bp768: 'sp4' },
+		}),
+	);
+	const computedStyle = getComputedStyle(element);
+
+	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-sp24'));
+	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
+});
+
 /**
  * Resolves a custom-property length through used-value computation. `getPropertyValue` returns the
  * authored token (`0.25rem`); computed padding is always in CSS pixels.

@@ -1,4 +1,5 @@
 import { createVar, style } from '@vanilla-extract/css';
+import { orderPropertiesBySpecificity } from './property-specificity.js';
 import type {
 	CommonOptions,
 	ConfigConditions,
@@ -158,31 +159,35 @@ export function defineProperties<
 export function defineProperties(options: DefinePropertiesOptions): DefinePropertiesReturn {
 	const { conditions, dynamicProperties, staticProperties, defaultCondition } = options;
 	const config: SprinkleProperties = {};
+	const layerOptions = { '@layer': options['@layer'] };
+	const dynamicByName = new Map(Object.entries(dynamicProperties ?? {}));
+	const staticByName = new Map(Object.entries(staticProperties ?? {}));
+	const propertyNames = orderPropertiesBySpecificity([
+		...new Set([...dynamicByName.keys(), ...staticByName.keys()]),
+	]);
 
-	if (dynamicProperties) {
-		for (const [dynamicProp, scale] of Object.entries(dynamicProperties)) {
-			config[dynamicProp] = createStyles(
-				dynamicProp,
-				// biome-ignore lint/suspicious/noExplicitAny: CSS property scales are dynamic
-				scale as Record<string, string> | true,
+	for (const propertyName of propertyNames) {
+		const dynamicScale = dynamicByName.get(propertyName);
+		if (dynamicScale !== undefined) {
+			config[propertyName] = createStyles(
+				propertyName,
+				dynamicScale as Record<string, string> | true,
 				conditions,
 				defaultCondition ?? '',
-				{ '@layer': options['@layer'] },
+				layerOptions,
 			);
 		}
-	}
 
-	if (staticProperties) {
-		for (const [staticProp, scale] of Object.entries(staticProperties)) {
+		const staticScale = staticByName.get(propertyName);
+		if (staticScale !== undefined) {
 			const staticStyle = createStaticStyles(
-				staticProp,
-				// biome-ignore lint/suspicious/noExplicitAny: CSS property scales are dynamic
-				scale as ReadonlyArray<string> | Record<string, string>,
+				propertyName,
+				staticScale as ReadonlyArray<string> | Record<string, string>,
 				conditions,
 				defaultCondition ?? '',
-				{ '@layer': options['@layer'] },
+				layerOptions,
 			);
-			config[staticProp] = Object.assign({}, config[staticProp], staticStyle);
+			config[propertyName] = Object.assign({}, config[propertyName], staticStyle);
 		}
 	}
 
