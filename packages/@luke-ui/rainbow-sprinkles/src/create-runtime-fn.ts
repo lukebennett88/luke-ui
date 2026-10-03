@@ -72,7 +72,7 @@ function assignClasses(
 	for (const cond of keys) {
 		const valueAtCondition = (propValue as Record<string, unknown>)[cond];
 		const rawValueAtCondition = String(valueAtCondition);
-		// An empty condition gets no variable, so treat it as omitted. Its class alone would reset the
+		// An empty value gets no variable, so treat it as omitted. Its class alone would reset the
 		// property or inherit an ancestor's variable.
 		if (valueAtCondition == null || valueAtCondition === '') continue;
 		const result = handleEntry(propertyConfig, rawValueAtCondition, cache, cond);
