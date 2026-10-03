@@ -42,3 +42,7 @@ pnpm --filter=reference-app run test
 ```
 
 The dev server runs at http://localhost:5174.
+
+Cloudflare Pages deploys the app from the repository root, so it also picks up the docs site's
+`functions/` middleware. `public/_routes.json` excludes every path, so that middleware never runs
+for the app and Pages serves `dist` as static assets.
