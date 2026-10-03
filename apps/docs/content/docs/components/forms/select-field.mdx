@@ -5,18 +5,20 @@ source: packages/@luke-ui/react/src/exports/select-field.ts
 reactAria: https://react-spectrum.adobe.com/react-aria/Select.html
 ---
 
-Use `SelectField` when someone chooses one option from a short list. It combines a trigger button,
-label, description, validation message, popover, and listbox. Use
-[`ComboboxField`](/components/forms/combobox-field) instead when the list is long enough to need
-search.
+Use `SelectField` when someone chooses one option from a predefined list. It combines a trigger
+button, label, description, validation message, popover, and listbox. Use
+[`ComboboxField`](/components/forms/combobox-field) instead when searching or filtering the options
+helps.
 
 <ExampleBlock src="select-field/basic" title="Select Field: Basic" />
 
 ## Items and selection
 
 Pass `items` and a render function that returns a `SelectItem` for each one. Import `SelectItem`
-from `@luke-ui/react/select-field`. Each item needs an `id`, or a `key` on the object, which becomes
-the selected key. `SelectField` also accepts static `SelectItem` children with an `id` each.
+from `@luke-ui/react/select-field`. Give each item in `items` a stable `id`. The `id` becomes the
+selected key.
+
+`SelectField` also accepts static `SelectItem` children. Give each static `SelectItem` an `id`.
 
 ```tsx
 <SelectField label="Theme" name="theme">
@@ -61,6 +63,11 @@ from a form library or your server. A non-empty message marks the field invalid.
 Set `isDisabled` to block the field. A disabled field cannot take focus and does not submit its
 value. `SelectField` has no read-only state. Show a value that cannot change as text instead.
 
+## Pending
+
+Pass `isPending` while a change is saving. The trigger keeps focus but can't open the select or
+change its value.
+
 ## Size
 
 Use `size` to set the control height and typography. Use `small` in compact layouts. `medium` is the
@@ -83,7 +90,8 @@ trigger.
 
 ## Accessibility
 
-The trigger's accessible name combines the selected option and the label.
+The select needs an accessible label. Use its visible `label`, otherwise pass `aria-labelledby` or
+`aria-label`.
 
 ## API
 

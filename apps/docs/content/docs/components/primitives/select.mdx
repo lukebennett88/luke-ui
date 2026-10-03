@@ -50,7 +50,7 @@ trigger, and `ref` on `SelectTrigger` reaches it.
 ## Options
 
 Use `SelectItem` for options. `SelectListBox` accepts static children or `items` with a render
-function. `Text` renders inside `SelectTrigger`, `SelectValue`, and `SelectItem`.
+function.
 
 ## Indicator
 
@@ -63,6 +63,11 @@ function. `Text` renders inside `SelectTrigger`, `SelectValue`, and `SelectItem`
 
 Set `size` on `SelectRoot`, and the trigger, indicator, and items follow. `medium` is the default.
 Use `small` in compact layouts.
+
+## Pending
+
+Pass `isPending` to `SelectTrigger` while a change is saving. The trigger keeps focus but can't open
+the select or change its value.
 
 ## Validation
 

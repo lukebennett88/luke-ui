@@ -103,6 +103,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'errorMessage',
 			'id',
 			'isDisabled',
+			'isPending',
 			'isRequired',
 			'items',
 			'label',
@@ -270,7 +271,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'value',
 		],
 	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectTriggerProps':
-		['ref'],
+		['isPending', 'ref'],
 	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectValueProps':
 		[],
 	'primitives/text-input.mdx::packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx::TextInputControlProps':
