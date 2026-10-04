@@ -4,9 +4,12 @@
  */
 export function cx(...parts: Array<string | undefined | null | false>): string {
 	let result = '';
-	for (const part of parts) {
-		if (part) {
-			result = result ? `${result} ${part.trim()}` : part.trim();
+	for (let index = 0; index < parts.length; index++) {
+		const part = parts[index];
+		if (!part) continue;
+		const trimmed = part.trim();
+		if (trimmed) {
+			result = result ? `${result} ${trimmed}` : trimmed;
 		}
 	}
 	return result;
@@ -52,34 +55,32 @@ type MergeableProps = {
 };
 
 /**
- * Merges two or more prop objects from left to right. `className` values are concatenated with
- * `cx`, and `style` objects are shallowly merged (later props win). All other properties are
- * overwritten by the later object, including `on*` handlers — unlike React Aria's `mergeProps`,
- * this does not chain event handlers. Useful for combining component props with
- * `createSprinkles()` output.
+ * Merges two or more prop objects left to right. Joins `className` with `cx`;
+ * shallow-merges `style` (later props win).
  */
 export function mergeStyleProps<T extends [object, object, ...Array<object>]>(
 	...props: T
 ): MergedAll<T> {
-	const [first, ...rest] = props as Array<object>;
-	const result = { ...first } as Record<string, unknown>;
-	const firstProps = first as MergeableProps;
-	let className = cx(typeof firstProps.className === 'string' && firstProps.className);
-	let style: Record<string, unknown> = {
-		...(typeof firstProps.style === 'object' && firstProps.style !== null ? firstProps.style : {}),
-	};
+	const items = props as Array<Record<string, unknown>>;
+	const result = { ...items[0] };
+	const style: Record<string, unknown> = {};
+	let className = '';
 
-	for (const current of rest as Array<Record<string, unknown>>) {
-		const { className: nextClassName, style: nextStyle } = current as MergeableProps;
+	for (let index = 0; index < items.length; index++) {
+		const current = items[index] as Record<string, unknown> & MergeableProps;
+		const { className: nextClassName, style: nextStyle } = current;
 
-		className = cx(className, typeof nextClassName === 'string' && nextClassName);
-		if (typeof nextStyle === 'object' && nextStyle !== null) {
-			style = { ...style, ...nextStyle };
+		if (typeof nextClassName === 'string') {
+			className = cx(className, nextClassName);
 		}
-
-		for (const key in current) {
-			if (key !== 'className' && key !== 'style') {
-				result[key] = current[key];
+		if (typeof nextStyle === 'object' && nextStyle !== null) {
+			Object.assign(style, nextStyle);
+		}
+		if (index > 0) {
+			for (const key in current) {
+				if (key !== 'className' && key !== 'style') {
+					result[key] = current[key];
+				}
 			}
 		}
 	}

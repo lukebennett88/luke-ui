@@ -1,5 +1,12 @@
 import { expect, expectTypeOf, test } from 'vite-plus/test';
-import { mergeStyleProps } from './utils.js';
+import { cx, mergeStyleProps } from './utils.js';
+
+test('cx joins trimmed parts with single spaces and skips empty values', () => {
+	expect(cx(' first ', undefined, 'second', null, false, '', 'third')).toBe('first second third');
+	expect(cx('a', '  ')).toBe('a');
+	expect(cx('  ', 'a')).toBe('a');
+	expect(cx()).toBe('');
+});
 
 test('merges class names and styles from left to right across four objects', () => {
 	const result = mergeStyleProps(
