@@ -1,5 +1,5 @@
 import { expect, test } from 'vite-plus/test';
-import { isNonEmptyString, isPositiveInteger, withResponsiveDefault } from './responsive.js';
+import { isPopulatedString, isPositiveInteger, withResponsiveDefault } from './responsive.js';
 
 test('isPositiveInteger accepts only integers greater than zero', () => {
 	expect(isPositiveInteger(1)).toBe(true);
@@ -11,13 +11,13 @@ test('isPositiveInteger accepts only integers greater than zero', () => {
 	expect(isPositiveInteger(null)).toBe(false);
 });
 
-test('isNonEmptyString accepts only strings with non-whitespace content', () => {
-	expect(isNonEmptyString('12rem 1fr')).toBe(true);
-	expect(isNonEmptyString(' a ')).toBe(true);
-	expect(isNonEmptyString('')).toBe(false);
-	expect(isNonEmptyString(' \t\n')).toBe(false);
-	expect(isNonEmptyString(3)).toBe(false);
-	expect(isNonEmptyString(null)).toBe(false);
+test('isPopulatedString accepts only strings with non-whitespace content', () => {
+	expect(isPopulatedString('12rem 1fr')).toBe(true);
+	expect(isPopulatedString(' a ')).toBe(true);
+	expect(isPopulatedString('')).toBe(false);
+	expect(isPopulatedString(' \t\n')).toBe(false);
+	expect(isPopulatedString(3)).toBe(false);
+	expect(isPopulatedString(null)).toBe(false);
 });
 
 test('withResponsiveDefault returns a direct array unchanged', () => {

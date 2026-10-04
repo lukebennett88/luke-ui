@@ -4,7 +4,7 @@ import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
 import { resolveResponsiveCssProperty } from '../styles/responsive-css-property.js';
-import { isNonEmptyString, isPositiveInteger } from '../styles/responsive.js';
+import { isPopulatedString, isPositiveInteger } from '../styles/responsive.js';
 import type {
 	RequiredInitialResponsive,
 	RequiredInitialResponsiveValue,
@@ -20,6 +20,48 @@ import {
 	gridRowsProperty,
 	gridRecipe,
 } from './recipe.css.js';
+
+/** Props for `Grid`. */
+export type GridProps = Prettify<_GridElementProps | _GridRenderProps>;
+
+/** Lays out direct children in rows, columns, and named areas. */
+export function Grid({
+	alignContent,
+	alignItems,
+	areas,
+	className,
+	columnGap,
+	columns,
+	gap,
+	justifyContent,
+	justifyItems,
+	rowGap,
+	rows,
+	style,
+	...props
+}: GridProps): JSX.Element {
+	return (
+		<Box
+			{...omitUnsupportedSprinklesProps(props, layoutProperties)}
+			{...mergeStyleProps(
+				resolveColumnsStyle(columns),
+				resolveRowsStyle(rows),
+				resolveAreasStyle(areas),
+				{
+					className: gridRecipe({ className }),
+					style,
+				},
+			)}
+			alignContent={alignContent}
+			alignItems={alignItems}
+			columnGap={columnGap}
+			gap={gap}
+			justifyContent={justifyContent}
+			justifyItems={justifyItems}
+			rowGap={rowGap}
+		/>
+	);
+}
 
 type StyleProps = Partial<ReturnType<typeof resolveResponsiveCssProperty>>;
 
@@ -73,81 +115,45 @@ interface _GridElementProps extends BoxLikeElementProps, LayoutProps, _GridLayou
 
 interface _GridRenderProps extends BoxLikeRenderProps, LayoutProps, _GridLayoutProps {}
 
-/** Props for `Grid`. */
-export type GridProps = Prettify<_GridElementProps | _GridRenderProps>;
-
-/** Lays out direct children in rows, columns, and named areas. */
-export function Grid({
-	alignContent,
-	alignItems,
-	areas,
-	className,
-	columnGap,
-	columns,
-	gap,
-	justifyContent,
-	justifyItems,
-	rowGap,
-	rows,
-	style,
-	...props
-}: GridProps): JSX.Element {
-	const columnsStyle: StyleProps = (() => {
-		if (columns == null) return {};
-
-		return resolveResponsiveCssProperty<number | string>(columns, gridColumnsProperty, {
-			expectedValueDescription:
-				'a positive integer such as 3, or a CSS track list such as "12rem 1fr"',
-			format: formatColumns,
-			isValid: isValidColumns,
-			propName: 'columns',
-		});
-	})();
-	const rowsStyle: StyleProps = (() => {
-		if (rows == null) return {};
-
-		return resolveResponsiveCssProperty<string>(rows, gridRowsProperty, {
-			expectedValueDescription: 'a non-empty CSS track list',
-			isValid: isNonEmptyString,
-			propName: 'rows',
-		});
-	})();
-	const areasStyle: StyleProps = (() => {
-		if (areas == null) return {};
-
-		return resolveResponsiveCssProperty<ReadonlyArray<string>>(areas, gridAreasProperty, {
-			expectedValueDescription:
-				'named-area rows with equal cell counts that form filled rectangles',
-			format: formatAreas,
-			isValid: isValidAreas,
-			propName: 'areas',
-		});
-	})();
-
-	return (
-		<Box
-			{...omitUnsupportedSprinklesProps(props, layoutProperties)}
-			{...mergeStyleProps(columnsStyle, rowsStyle, areasStyle, {
-				className: gridRecipe({ className }),
-				style,
-			})}
-			alignContent={alignContent}
-			alignItems={alignItems}
-			columnGap={columnGap}
-			gap={gap}
-			justifyContent={justifyContent}
-			justifyItems={justifyItems}
-			rowGap={rowGap}
-		/>
-	);
-}
-
 /** Digit-only strings such as `"3"`, which look like the numeric columns shorthand in JSX. */
 const DIGIT_ONLY_STRING_PATTERN = /^\d+$/;
 
+function resolveColumnsStyle(columns: _GridLayoutProps['columns'] | undefined): StyleProps {
+	if (columns == null) return {};
+
+	return resolveResponsiveCssProperty<number | string>(columns, gridColumnsProperty, {
+		expectedValueDescription:
+			'a positive integer such as 3, or a CSS track list such as "12rem 1fr"',
+		format: formatColumns,
+		isValid: isValidColumns,
+		propName: 'columns',
+	});
+}
+
+function resolveRowsStyle(rows: _GridLayoutProps['rows'] | undefined): StyleProps {
+	if (rows == null) return {};
+
+	return resolveResponsiveCssProperty<string>(rows, gridRowsProperty, {
+		expectedValueDescription: 'a non-empty CSS track list',
+		isValid: isPopulatedString,
+		propName: 'rows',
+	});
+}
+
+function resolveAreasStyle(areas: _GridLayoutProps['areas'] | undefined): StyleProps {
+	if (areas == null) return {};
+
+	return resolveResponsiveCssProperty<ReadonlyArray<string>>(areas, gridAreasProperty, {
+		expectedValueDescription: 'named-area rows with equal cell counts that form filled rectangles',
+		format: formatAreas,
+		isValid: isValidAreas,
+		propName: 'areas',
+	});
+}
+
 function isValidColumns(value: number | string): boolean {
 	if (typeof value === 'number') return isPositiveInteger(value);
-	return isNonEmptyString(value) && !DIGIT_ONLY_STRING_PATTERN.test(value);
+	return isPopulatedString(value) && !DIGIT_ONLY_STRING_PATTERN.test(value);
 }
 
 function formatColumns(value: number | string): string {
