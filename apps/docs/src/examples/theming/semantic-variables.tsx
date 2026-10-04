@@ -1,14 +1,14 @@
-import { AutoGrid } from '@luke-ui/react/auto-grid';
 import { Box } from '@luke-ui/react/box';
+import { Grid } from '@luke-ui/react/grid';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 
 export default () => {
 	return (
-		<AutoGrid gap="sp12" minColumnInlineSize="14rem">
+		<Grid columns="repeat(auto-fit, minmax(min(14rem, 100%), 1fr))" gap="sp12">
 			<SemanticSurface mode="light" />
 			<SemanticSurface mode="dark" />
-		</AutoGrid>
+		</Grid>
 	);
 };
 

@@ -3,11 +3,10 @@ import { ExampleItem } from '#docs';
 
 export default () => {
 	return (
-		<Grid columns={4} gap="sp12">
+		<Grid columns={2} gap="sp12">
 			<ExampleItem gridColumn="span 2">Spans two columns</ExampleItem>
-			<ExampleItem>Second grid item</ExampleItem>
-			<ExampleItem>Third grid item</ExampleItem>
-			<ExampleItem>Fourth grid item</ExampleItem>
+			<ExampleItem>Second</ExampleItem>
+			<ExampleItem>Third</ExampleItem>
 		</Grid>
 	);
 };

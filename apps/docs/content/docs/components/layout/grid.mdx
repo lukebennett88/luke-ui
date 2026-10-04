@@ -1,32 +1,64 @@
 ---
 title: Grid
-description: Arrange direct children in an equal explicit column grid.
+description: Arrange direct children in rows, columns, and named areas.
 source: packages/@luke-ui/react/src/exports/grid.ts
 ---
 
-`Grid` lays out direct children in a fixed number of equal columns. Use it when you know how many
-columns the layout should have. Read [Layout](/docs/layout#choose-a-layout-component) to choose a
+`Grid` lays out direct children in two dimensions. Use it when a layout needs explicit columns,
+rows, or named areas. Use [Stack](/components/layout/stack) or [Cluster](/components/layout/cluster)
+when children flow on one axis. Read [Layout](/docs/layout#choose-a-layout-component) to choose a
 layout component.
 
-Prefer [AutoGrid](/components/layout/auto-grid) when columns should grow from a minimum inline size
-instead of an explicit count.
+Pass a number to `columns` for that many equal columns. Each column can shrink below the width of
+its content, so long content wraps instead of widening one column.
 
 <ExampleBlock src="grid/basic" title="Grid: Basic" />
+
+Without `columns` or `areas`, Grid has one column that grows with its content. Pass `columns={1}`
+when long content should wrap inside the grid instead of widening it.
+
+## Columns from the available space
+
+Pass a CSS `repeat(auto-fit, …)` value when the column count should follow the available width. Wrap
+the minimum column size in `min(…, 100%)` so a parent narrower than the minimum does not overflow.
+
+<ExampleBlock src="grid/auto-fit" title="Grid: Auto-fit columns" />
+
+## Tracks and named areas
+
+`columns` and `rows` also accept a CSS value such as `"1fr 1fr"`. `areas` takes one string per row.
+Name each cell, use `.` for an empty cell, and place a child in an area with Box's `gridArea` prop.
+
+Without `columns`, columns from `areas` size to their content. Each named area must form one filled
+rectangle.
+
+<ExampleBlock src="grid/structural" title="Grid: Tracks and named areas" />
+
+## Responsive layouts
+
+`columns`, `rows`, and `areas` accept a responsive object with a required `initial` value. Each
+`columns` breakpoint can be a number or a CSS value. Stack named areas in one column at `initial`,
+then arrange them from a wider breakpoint.
+
+<ExampleBlock src="grid/responsive" title="Grid: Responsive areas" />
 
 ## Spanning columns
 
 Child placement belongs to the child. Use Box grid-placement props such as `gridColumn` when an item
-should span more than one track. `Grid` itself does not expose a span API.
+should span more than one column. `Grid` itself does not expose a span API.
+
+When `columns` is a number, keep each span within the active column count at every breakpoint. A
+span that fits at `bp768` can overflow a smaller `initial` column count, so change both values
+together.
 
 <ExampleBlock src="grid/spanning" title="Grid: Spanning columns" />
 
-## Responsive columns and spans
+## Alignment
 
-`columns` accepts a responsive object with a required `initial` value. Child spans must fit the
-active explicit column count at every responsive condition. A span that is valid at `bp768` can
-overflow the `initial` column count if those values are not kept in sync.
+`alignItems` and `justifyItems` place each child within its grid area. `alignContent` and
+`justifyContent` distribute the tracks when the grid is larger than its tracks.
 
-<ExampleBlock src="grid/responsive" title="Grid: Responsive columns and spans" />
+<ExampleBlock src="grid/alignment" title="Grid: Alignment" />
 
 ## Choose the rendered element
 
@@ -34,6 +66,12 @@ Grid uses
 [Box's `elementType` and `render` contract](/components/layout/box#choose-the-rendered-element).
 
 <ExampleBlock src="grid/semantic-element" title="Grid: List" />
+
+## Accessibility
+
+Grid placement changes visual position only. Reading order and focus order follow the DOM order.
+This applies to named areas, `gridColumn`, `gridRow`, and `order`. Arrange areas and placements so
+the visual order matches the DOM order at every breakpoint.
 
 ## API
 

@@ -51,7 +51,6 @@ globalStyleInLayer('reset', `${root} :where(th, td)`, {
 });
 
 globalStyleInLayer('reset', `${root} :where(button, select, label)`, {
-	touchAction: 'manipulation',
 	WebkitTapHighlightColor: 'transparent',
 });
 

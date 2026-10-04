@@ -315,7 +315,6 @@ const comboboxConfig = {
 			minBlockSize: vars.controlSize.minTarget,
 			minInlineSize: 0,
 			outline: 'none',
-			touchAction: 'manipulation',
 			transform: 'none',
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, color, opacity',

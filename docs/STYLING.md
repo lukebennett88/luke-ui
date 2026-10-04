@@ -320,8 +320,8 @@ const buttonBox = createSprinkles({ padding: 'sp16' });
 ### Utility surface
 
 The supported properties live in `core/styles/utilities.css.ts` and export from
-`@luke-ui/react/styles`. Use CSS-native values throughout, for example `flex-start` instead of
-`start`.
+`@luke-ui/react/styles`. Use CSS-native values throughout, for example `space-between` instead of
+`between`.
 
 Semantic colour, typography, and pseudo-state properties are excluded. For sanctioned custom
 styling, use typed `vars` from `@luke-ui/react/theme`:

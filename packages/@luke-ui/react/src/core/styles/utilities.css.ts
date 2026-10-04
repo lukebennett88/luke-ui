@@ -58,19 +58,24 @@ const backgroundColorScale = Object.fromEntries([
 const dynamicProperties = {
 	alignContent: {
 		center: 'center',
+		end: 'end',
 		'flex-end': 'flex-end',
 		'flex-start': 'flex-start',
 		normal: 'normal',
 		'space-around': 'space-around',
 		'space-between': 'space-between',
+		'space-evenly': 'space-evenly',
+		start: 'start',
 		stretch: 'stretch',
 	},
 	alignItems: {
 		baseline: 'baseline',
 		center: 'center',
+		end: 'end',
 		'flex-end': 'flex-end',
 		'flex-start': 'flex-start',
 		normal: 'normal',
+		start: 'start',
 		stretch: 'stretch',
 	},
 	alignSelf: {
@@ -142,12 +147,22 @@ const dynamicProperties = {
 	insetInlineStart: true,
 	justifyContent: {
 		center: 'center',
+		end: 'end',
 		'flex-end': 'flex-end',
 		'flex-start': 'flex-start',
 		normal: 'normal',
 		'space-around': 'space-around',
 		'space-between': 'space-between',
 		'space-evenly': 'space-evenly',
+		start: 'start',
+		stretch: 'stretch',
+	},
+	justifyItems: {
+		baseline: 'baseline',
+		center: 'center',
+		end: 'end',
+		normal: 'normal',
+		start: 'start',
 		stretch: 'stretch',
 	},
 	justifySelf: {
