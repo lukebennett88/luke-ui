@@ -4,7 +4,7 @@ import { Heading } from '@luke-ui/react/heading';
 import { Prose, proseRecipe } from '@luke-ui/react/prose';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
-import { test, expect } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 

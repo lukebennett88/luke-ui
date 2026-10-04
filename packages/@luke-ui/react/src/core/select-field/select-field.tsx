@@ -122,11 +122,11 @@ export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.E
 	return (
 		<SelectRoot
 			{...rootProps}
+			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
 			// `SelectRoot` works with any `Key`.
 			// `SelectField` narrows the key type from item data for its own API.
 			onChange={onChange as SelectRootProps['onChange']}
 			validate={validate as SelectRootProps['validate']}
-			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
 		>
 			<Field
 				description={description}

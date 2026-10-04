@@ -1,11 +1,11 @@
 export type { ComboboxClearButtonProps } from '../../core/primitives/combobox/clear-button.js';
 export { ComboboxClearButton } from '../../core/primitives/combobox/clear-button.js';
+export type { ComboboxControlProps } from '../../core/primitives/combobox/control.js';
+export { ComboboxControl } from '../../core/primitives/combobox/control.js';
 export type { ComboboxEmptyStateProps } from '../../core/primitives/combobox/empty-state.js';
 export { ComboboxEmptyState } from '../../core/primitives/combobox/empty-state.js';
 export type { ComboboxInputProps } from '../../core/primitives/combobox/input.js';
 export { ComboboxInput } from '../../core/primitives/combobox/input.js';
-export type { ComboboxControlProps } from '../../core/primitives/combobox/control.js';
-export { ComboboxControl } from '../../core/primitives/combobox/control.js';
 export type {
 	ComboboxItemProps,
 	ComboboxLoadMoreItemProps,

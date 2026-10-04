@@ -2,7 +2,7 @@ import { useObjectRef } from '@react-aria/utils';
 import type { JSX, ReactNode, Ref } from 'react';
 import { useContext, useId } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
-import { Button as RacButton, ButtonContext } from 'react-aria-components/Button';
+import { ButtonContext, Button as RacButton } from 'react-aria-components/Button';
 import { ComboBoxStateContext, ComboBoxValue } from 'react-aria-components/ComboBox';
 import { LabelContext } from 'react-aria-components/Label';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
@@ -81,13 +81,13 @@ export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Elemen
 						return comboboxRecipe({ size }).trayTrigger({ className });
 					})}
 					isDisabled={resolvedIsDisabled}
-					ref={triggerRef}
 					onPress={(event) => {
 						if (resolvedIsDisabled) return;
 
 						state.open(null, 'manual');
 						buttonProps.onPress?.(event);
 					}}
+					ref={triggerRef}
 					// Opt out of the ComboBox button slot so this does not also toggle the popover.
 					slot={null}
 				>

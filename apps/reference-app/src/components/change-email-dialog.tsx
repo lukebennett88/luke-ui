@@ -9,8 +9,8 @@ import { TextInputField } from '@luke-ui/react/text-input-field';
 import { rootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useId, useRef, useState } from 'react';
 import type { SubmitEvent } from 'react';
+import { useId, useRef, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Modal, ModalOverlay } from 'react-aria-components/Modal';
@@ -29,8 +29,8 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 	const [draft, setDraft] = useState('');
 	const [validationError, setValidationError] = useState<string>();
 	const mutation = useMutation({
-		mutationKey: EMAIL_MUTATION_KEY,
 		mutationFn: (patch: { email: string }) => settingsApi.updateProfile(patch),
+		mutationKey: EMAIL_MUTATION_KEY,
 		onError: () => inputRef.current?.focus(),
 		onSuccess: (settings) => {
 			queryClient.setQueryData(settingsQueryKey, settings);
@@ -100,7 +100,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 										Please check if the new email address is tied to an existing account before
 										proceeding with the change.
 									</Text>
-									<Text color="primary" fontWeight="label" elementType="p">
+									<Text color="primary" elementType="p" fontWeight="label">
 										Enter the new email address you’d like to use.
 									</Text>
 								</Prose>
@@ -135,13 +135,12 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 									<Cluster gap="sp8" justifyContent="flex-end">
 										<Button
 											isDisabled={isSaving}
-											type="button"
 											onPress={() => handleOpenChange(false)}
 											prominence="low"
 										>
 											Cancel
 										</Button>
-										<Button isPending={isSaving} type="submit" prominence="high">
+										<Button isPending={isSaving} prominence="high" type="submit">
 											Check for existing account
 										</Button>
 									</Cluster>

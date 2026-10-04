@@ -1,9 +1,9 @@
 import { createPlaygroundCompiler } from '@luke-ui/playground-core/compiler';
 import { decodeCodeHash } from '@luke-ui/playground-core/hash';
-import { isPlaygroundCodeMessage, isTrustedMessageSource } from '@luke-ui/playground-core/protocol';
 import type { PlaygroundPreviewMessage } from '@luke-ui/playground-core/protocol';
-import { useEffect, useState } from 'react';
+import { isPlaygroundCodeMessage, isTrustedMessageSource } from '@luke-ui/playground-core/protocol';
 import type { ComponentType } from 'react';
+import { useEffect, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { playgroundScope } from '../../generated/playground-scope.generated';
 import { isPlaygroundAppearanceMessage } from '../../lib/playground-appearance-message.js';

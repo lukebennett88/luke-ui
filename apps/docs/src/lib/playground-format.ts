@@ -1,5 +1,5 @@
-import { formatPlaygroundSource } from '@luke-ui/playground-core/format';
 import type { PlaygroundFormatOptions } from '@luke-ui/playground-core/format';
+import { formatPlaygroundSource } from '@luke-ui/playground-core/format';
 
 /** The docs playground's Prettier style, matching the repo's own formatting. */
 const DOCS_PLAYGROUND_FORMAT_OPTIONS = {

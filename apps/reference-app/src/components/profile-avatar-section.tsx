@@ -5,8 +5,8 @@ import { Text } from '@luke-ui/react/text';
 import { rootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { Menu, MenuItem, MenuTrigger } from 'react-aria-components/Menu';
 import { Popover } from 'react-aria-components/Popover';
@@ -40,8 +40,8 @@ export function ProfileAvatarSection({
 		reset: resetAvatarMutation,
 		variables: avatarMutationVariables,
 	} = useMutation({
-		mutationKey: AVATAR_MUTATION_KEY,
 		mutationFn: (avatarDataUrl: string | null) => settingsApi.updateProfile({ avatarDataUrl }),
+		mutationKey: AVATAR_MUTATION_KEY,
 		onSuccess: (settings) => queryClient.setQueryData(settingsQueryKey, settings),
 	});
 	const isAvatarSaving = useIsMutating({ exact: true, mutationKey: AVATAR_MUTATION_KEY }) > 0;

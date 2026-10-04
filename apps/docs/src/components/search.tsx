@@ -3,6 +3,7 @@ import { IconButton } from '@luke-ui/react/icon-button';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Button } from '@luke-ui/react/primitives/button';
 import { Track } from '@luke-ui/react/track';
+import type { ReactNode, RefObject } from 'react';
 import {
 	createContext,
 	startTransition,
@@ -16,13 +17,12 @@ import {
 	useSyncExternalStore,
 	ViewTransition,
 } from 'react';
-import type { ReactNode, RefObject } from 'react';
+import type { SearchAnchorRect } from './search-anchor.js';
 import {
 	fitSearchAnchorToViewport,
 	isSearchTriggerVisible,
 	measureSearchAnchor,
 } from './search-anchor.js';
-import type { SearchAnchorRect } from './search-anchor.js';
 import { DocsSearchDialog } from './search-dialog.js';
 import { searchFieldViewTransition } from './search-view-transition.js';
 import * as styles from './search.css.js';

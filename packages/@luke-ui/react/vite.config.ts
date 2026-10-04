@@ -46,6 +46,12 @@ export default defineConfig({
 			excludeEntrypoints: assetExports,
 			profile: 'esm-only',
 		},
+		// `generate` writes these to `.generated/`, not `dist/`, so a cache replay of one Turbo task
+		// can't overwrite the other's outputs by restoring over a shared directory.
+		copy: [
+			{ from: '.generated/spritesheet.svg', to: 'dist' },
+			{ flatten: false, from: '.generated/themes/*/stylesheet.css', to: 'dist' },
+		],
 		deps: {
 			// Vanilla Extract is build-time only. Keep any stray reference external rather than bundling
 			// it, so the packed-consumer harness reports it as an undeclared import.
@@ -56,9 +62,9 @@ export default defineConfig({
 		},
 		dts: true,
 		entry: {
-			stylesheet: 'src/core/stylesheet.css.ts',
 			'*': ['src/exports/*.ts'],
 			'primitives/*': ['src/exports/primitives/*.ts'],
+			stylesheet: 'src/core/stylesheet.css.ts',
 			'themes/*': ['src/exports/themes/*.ts'],
 		},
 		exports: {
@@ -68,12 +74,6 @@ export default defineConfig({
 			// Built for extraction; not consumer subpaths.
 			exclude: ['stylesheet'],
 		},
-		// `generate` writes these to `.generated/`, not `dist/`, so a cache replay of one Turbo task
-		// can't overwrite the other's outputs by restoring over a shared directory.
-		copy: [
-			{ from: '.generated/spritesheet.svg', to: 'dist' },
-			{ from: '.generated/themes/*/stylesheet.css', to: 'dist', flatten: false },
-		],
 		format: ['esm'],
 		outputOptions: {
 			assetFileNames: '[name][extname]',
@@ -97,7 +97,6 @@ export default defineConfig({
 
 function authoritativeLayerOrderPlugin(): Plugin {
 	return {
-		name: 'authoritative-layer-order',
 		generateBundle(_options, bundle) {
 			const stylesheet = bundle['stylesheet.css'];
 			if (stylesheet?.type !== 'asset') return;
@@ -105,6 +104,7 @@ function authoritativeLayerOrderPlugin(): Plugin {
 			const vanillaCss = stripRedundantEmptyLayerStatements(stylesheet.source.toString());
 			stylesheet.source = `${buildAuthoritativeLayerOrder()}\n${vanillaCss}`;
 		},
+		name: 'authoritative-layer-order',
 	};
 }
 
@@ -114,8 +114,8 @@ function reactCompilerPlugin(): Plugin {
 		transform: {
 			filter: {
 				id: {
-					include: makeIdFiltersToMatchWithQuery([sourceModule]),
 					exclude: makeIdFiltersToMatchWithQuery([vanillaExtractStyles, dependency]),
+					include: makeIdFiltersToMatchWithQuery([sourceModule]),
 				},
 			},
 			handler(code, id) {
@@ -128,10 +128,10 @@ function reactCompilerPlugin(): Plugin {
 				const lang = filename.endsWith('x') ? 'tsx' : 'ts';
 
 				const result = transformSync(filename, code, {
+					jsx: 'preserve',
 					lang,
 					reactCompiler: { target: '19' },
 					sourcemap: true,
-					jsx: 'preserve',
 				});
 
 				if (result.fatal) {

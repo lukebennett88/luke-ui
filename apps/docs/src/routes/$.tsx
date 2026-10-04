@@ -10,14 +10,14 @@ import { Suspense } from 'react';
 import * as z from 'zod';
 import browserCollections from '../../.source/browser';
 import * as codeBlockStyles from '../components/code-block/code-block.css.js';
-import { CodeBlock } from '../components/code-block/code-block.js';
 import type { CodeBlockProps } from '../components/code-block/code-block.js';
+import { CodeBlock } from '../components/code-block/code-block.js';
 import { ComponentPropsTable } from '../components/component-props-table.js';
 import { ExampleBlock } from '../components/example-block';
 import { FumadocsLayoutAdapter } from '../components/fumadocs-layout-adapter.js';
 import { IconGallery } from '../components/icon-gallery';
-import { PageActions } from '../components/page-actions';
 import type { PageActionsMode } from '../components/page-actions';
+import { PageActions } from '../components/page-actions';
 import { SourceCodeBlock } from '../components/source-code-block';
 import { withBasePath } from '../lib/base-path.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
@@ -35,11 +35,11 @@ const mdxComponents = {
 	ComponentPropsTable,
 	ExampleBlock,
 	IconGallery,
-	SourceCodeBlock,
-	TypeTable,
 	pre: (props: CodeBlockProps) => (
 		<CodeBlock {...props} className={cx(codeBlockStyles.mdxFence, props.className)} />
 	),
+	SourceCodeBlock,
+	TypeTable,
 };
 
 export const Route = createFileRoute('/$')({

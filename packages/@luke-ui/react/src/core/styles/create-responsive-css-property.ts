@@ -1,7 +1,7 @@
 import { createVar, style } from '@vanilla-extract/css';
 import { layers } from './layers.css.js';
-import { responsiveConditions } from './responsive-conditions.js';
 import type { ResponsiveCondition } from './responsive-conditions.js';
+import { responsiveConditions } from './responsive-conditions.js';
 
 type ConditionValue = {
 	'@container'?: string;

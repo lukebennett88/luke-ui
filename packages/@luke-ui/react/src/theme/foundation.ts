@@ -110,6 +110,11 @@ export interface ThemeSourceColors {
 	/** Required. The brand or interaction accent colour. */
 	accent: Oklch;
 	/**
+	 * Modal-backdrop dimming colour, emitted verbatim (may carry an alpha channel). Required
+	 * internally: `defineTheme` always resolves it, from the author's value or a mode-aware default.
+	 */
+	backdrop: string;
+	/**
 	 * Required. The canvas anchor, resolved per mode from an explicit `background`, an adapted
 	 * opposite-mode `background`, or (when `background` is entirely omitted) a copy of the resolved
 	 * `neutral` canvas anchor. `buildTheme` takes this value directly as the canvas anchor: every
@@ -129,11 +134,6 @@ export interface ThemeSourceColors {
 	 * separately.
 	 */
 	neutral: Oklch;
-	/**
-	 * Modal-backdrop dimming colour, emitted verbatim (may carry an alpha channel). Required
-	 * internally: `defineTheme` always resolves it, from the author's value or a mode-aware default.
-	 */
-	backdrop: string;
 	/** Source colour for the `success` role. */
 	success: Oklch;
 	/** Source colour for the `warning` role. */

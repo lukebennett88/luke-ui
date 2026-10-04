@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { createSprinkles } from '@luke-ui/react/styles';
 import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
-import { test, expect } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import {
 	expectForwardsDomProps,
 	expectHtmlElement,
@@ -57,13 +57,13 @@ test('consumer className and style win collisions on the ordinary element path',
 	const utility = createSprinkles({ display: 'flex', inlineSize: '12rem' });
 	const { locator } = render(
 		<Box
-			ref={ref}
 			className="consumer-class"
 			data-testid="box-element"
 			display="flex"
 			gap="sp16"
 			id="box-root"
 			inlineSize="12rem"
+			ref={ref}
 			style={{ backgroundColor: 'rgb(1, 2, 3)', display: 'grid' }}
 		>
 			Element path
@@ -86,11 +86,11 @@ test('consumer className and style win collisions on the render callback path', 
 	let receivedRef: unknown;
 	const { locator } = render(
 		<Box
-			ref={ref}
 			className="consumer-class"
 			display="flex"
 			gap={{ initial: 'sp8', bp768: 'sp24' }}
 			inlineSize="10rem"
+			ref={ref}
 			render={(resolvedProps) => {
 				receivedRef = resolvedProps.ref;
 				return <article {...resolvedProps} data-testid="box-render" />;

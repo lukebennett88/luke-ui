@@ -1,6 +1,6 @@
 import { applyCreationPlan } from './apply-creation-plan.js';
-import { createComponentWork, parseComponentAnswers } from './component-creation-plan.js';
 import type { ComponentCreationPlan } from './component-creation-plan.js';
+import { createComponentWork, parseComponentAnswers } from './component-creation-plan.js';
 
 export async function createComponent(
 	root: string,

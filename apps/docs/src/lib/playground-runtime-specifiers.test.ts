@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { extname, resolve } from 'node:path';
 import { canRunInPlayground } from '@luke-ui/playground-core/specifiers';
 import { expect, test } from 'vite-plus/test';

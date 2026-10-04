@@ -62,9 +62,9 @@ export function Link(props: LinkProps): JSX.Element {
 					className={composeRenderProps(props.className, (className) => {
 						return linkRecipe({
 							appearance: 'button',
-							prominence,
 							className: cx(linkCursor, className),
 							isBlock,
+							prominence,
 							size,
 						});
 					})}
@@ -91,8 +91,8 @@ export function Link(props: LinkProps): JSX.Element {
 			className={composeRenderProps(props.className, (className) => {
 				return linkRecipe({
 					appearance: 'text',
-					prominence,
 					className: cx(linkCursor, className),
+					prominence,
 				});
 			})}
 		>

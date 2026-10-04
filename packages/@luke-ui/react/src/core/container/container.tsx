@@ -53,13 +53,13 @@ type _ContainerOwnedProperty = 'inlineSize' | 'marginInline' | 'maxInlineSize' |
 type _ContainerOmit = DistributiveOmit<LayoutProps, _ContainerOwnedProperty>;
 
 interface _ContainerLayoutProps {
-	/** Maximum inline size of the container's border box. */
-	maxInlineSize: ContainerMaxInlineSize;
 	/**
 	 * Inline margin around the container.
 	 * @default auto
 	 */
 	marginInline?: SprinklesProps['marginInline'];
+	/** Maximum inline size of the container's border box. */
+	maxInlineSize: ContainerMaxInlineSize;
 	/** Padding inside the container's query box. */
 	paddingInline?: SprinklesProps['paddingInline'];
 }

@@ -2,10 +2,10 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { fieldRecipe } from '../primitives/field/recipe.css.js';
 import { textInputRecipe } from '../primitives/text-input/recipe.css.js';
 import {
-	compoundSlotsRecipe,
-	compoundSlotsPrecedenceRecipe,
-	conditionalSlotsBaseRecipe,
 	compoundSlotsOrderRecipe,
+	compoundSlotsPrecedenceRecipe,
+	compoundSlotsRecipe,
+	conditionalSlotsBaseRecipe,
 	defaultedVariantsRecipe,
 	nestedArrayFixtureClassA,
 	nestedArrayFixtureClassB,

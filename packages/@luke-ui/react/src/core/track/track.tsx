@@ -23,8 +23,6 @@ interface _TrackProps extends HTMLAttributes<HTMLElement> {
 	elementType?: TrackElementType;
 	/** Space between each rendered rail and `children`. */
 	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
-	/** Content shown after `children` that keeps its intrinsic inline size. */
-	railEnd?: ReactNode;
 	/**
 	 * Cross-axis alignment of the rails.
 	 *
@@ -33,6 +31,8 @@ interface _TrackProps extends HTMLAttributes<HTMLElement> {
 	 * @default start
 	 */
 	railAlignment?: NonNullable<TrackRecipeVariants>['railAlignment'];
+	/** Content shown after `children` that keeps its intrinsic inline size. */
+	railEnd?: ReactNode;
 	/** Content shown before `children` that keeps its intrinsic inline size. */
 	railStart?: ReactNode;
 	/** Ref to the rendered element. */

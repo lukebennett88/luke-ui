@@ -32,14 +32,14 @@ export default defineConfig({
 		// Required for .css.ts processing in unit and browser tests.
 		vanillaExtractPlugin(),
 	],
-	server: {
-		fs: {
-			allow: visualFsAllow,
-		},
-	},
 	resolve: {
 		alias: {
 			'#recipe-engine': recipeEngineSource,
+		},
+	},
+	server: {
+		fs: {
+			allow: visualFsAllow,
 		},
 	},
 	test: {

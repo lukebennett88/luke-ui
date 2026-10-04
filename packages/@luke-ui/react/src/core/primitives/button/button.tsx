@@ -40,7 +40,14 @@ export function Button(props: ButtonProps): JSX.Element {
 			<RacButton
 				{...restProps}
 				className={composeRenderProps(props.className, (className) => {
-					return buttonRecipeInternal({ appearance, tone, prominence, className, isBlock, size });
+					return buttonRecipeInternal({
+						appearance,
+						className,
+						isBlock,
+						prominence,
+						size,
+						tone,
+					});
 				})}
 				isDisabled={isDisabled}
 				isPending={isPending}

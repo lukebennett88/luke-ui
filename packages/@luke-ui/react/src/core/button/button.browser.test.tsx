@@ -25,11 +25,11 @@ function ButtonScene() {
 			<Button prominence="low">Neutral low button</Button>
 			<Button>Neutral standard button</Button>
 			<Button prominence="high">Neutral high button</Button>
-			<Button tone="critical" prominence="low">
+			<Button prominence="low" tone="critical">
 				Critical low button
 			</Button>
 			<Button tone="critical">Critical standard button</Button>
-			<Button tone="critical" prominence="high">
+			<Button prominence="high" tone="critical">
 				Critical high button
 			</Button>
 			<Button appearance="text" prominence="low">
@@ -39,7 +39,7 @@ function ButtonScene() {
 			<Button appearance="text" prominence="high">
 				Neutral high text Button
 			</Button>
-			<Button appearance="text" tone="critical" prominence="low">
+			<Button appearance="text" prominence="low" tone="critical">
 				Critical low text Button
 			</Button>
 			<Button appearance="text" tone="critical">

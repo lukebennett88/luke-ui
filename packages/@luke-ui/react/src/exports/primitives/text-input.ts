@@ -1,4 +1,9 @@
 export {
+	type TextInputRecipeVariants,
+	type TextInputSize,
+	textInputRecipe,
+} from '../../core/primitives/text-input/recipe.css.js';
+export {
 	TextInput,
 	TextInputControl,
 	type TextInputControlProps,
@@ -10,8 +15,3 @@ export {
 	TextInputSuffix,
 	type TextInputSuffixProps,
 } from '../../core/primitives/text-input/text-input.js';
-export {
-	type TextInputRecipeVariants,
-	type TextInputSize,
-	textInputRecipe,
-} from '../../core/primitives/text-input/recipe.css.js';

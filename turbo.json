@@ -142,6 +142,11 @@
 			"dependsOn": ["^build", "generate"],
 			"outputs": []
 		},
+		"test:browser:run": {
+			"cache": false,
+			"dependsOn": ["build"],
+			"outputs": []
+		},
 		"test:consumer:run": {
 			"cache": false,
 			"dependsOn": ["build", "^build"],
@@ -160,11 +165,6 @@
 				"NPM_CONFIG_*",
 				"npm_config_*"
 			]
-		},
-		"test:browser:run": {
-			"cache": false,
-			"dependsOn": ["build"],
-			"outputs": []
 		},
 		"test:ui:run": {
 			"cache": false,

@@ -1,5 +1,6 @@
 import { Icon } from '@luke-ui/react/icon';
 import { Field } from '@luke-ui/react/primitives/field';
+import type { SelectRootProps } from '@luke-ui/react/primitives/select';
 import {
 	SelectIndicator,
 	SelectItem,
@@ -9,7 +10,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@luke-ui/react/primitives/select';
-import type { SelectRootProps } from '@luke-ui/react/primitives/select';
 import { Text } from '@luke-ui/react/text';
 import type { ReactNode } from 'react';
 import { createRef } from 'react';
@@ -125,7 +125,7 @@ test('a SelectRoot is wired to its label and description with no manual ids', as
 
 	// The trigger is named by its value and its label.
 	await expect
-		.element(page.getByRole('button', { name: 'Example two Example field', exact: true }))
+		.element(page.getByRole('button', { exact: true, name: 'Example two Example field' }))
 		.toBeVisible();
 	expect(getDescribedText(trigger(/Example field/))).toBe('Example description');
 });

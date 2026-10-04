@@ -7,8 +7,8 @@ import { TextInputField } from '@luke-ui/react/text-input-field';
 import { rootClassName } from '@luke-ui/react/theme';
 import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
-import { useRouter } from '@tanstack/react-router';
 import type { NavigateOptions } from '@tanstack/react-router';
+import { useRouter } from '@tanstack/react-router';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import type { SortedResult } from 'fumadocs-core/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
@@ -244,7 +244,7 @@ function ResultBody({ result }: { result: SortedResult }) {
 	return (
 		<span className={styles.nestedResult}>
 			{result.type === 'heading' ? (
-				<span className={styles.headingHash} aria-hidden="true">
+				<span aria-hidden="true" className={styles.headingHash}>
 					#{' '}
 				</span>
 			) : null}

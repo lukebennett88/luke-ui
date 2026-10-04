@@ -30,8 +30,8 @@ export function ProfileTextField({
 	const [validationError, setValidationError] = useState<string>();
 	const mutationKey = [...settingsQueryKey, 'profile-field', field] as const;
 	const mutation = useMutation({
-		mutationKey,
 		mutationFn: (patch: ProfileUpdate) => settingsApi.updateProfile(patch),
+		mutationKey,
 		onSuccess: (settings) => {
 			queryClient.setQueryData(settingsQueryKey, settings);
 			setDraft(undefined);

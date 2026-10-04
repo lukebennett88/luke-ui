@@ -9,9 +9,9 @@
 		"./format": "./dist/format.js",
 		"./generate": "./dist/generate.js",
 		"./hash": "./dist/hash.js",
+		"./package.json": "./package.json",
 		"./protocol": "./dist/protocol.js",
-		"./specifiers": "./dist/specifiers.js",
-		"./package.json": "./package.json"
+		"./specifiers": "./dist/specifiers.js"
 	},
 	"scripts": {
 		"build": "vp pack",

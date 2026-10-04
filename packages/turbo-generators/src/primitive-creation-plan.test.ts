@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { findComponentPropsTableTags } from '../../../apps/docs/src/lib/component-props-table-tags.js';
 import {
-	PRIMITIVE_DEFAULTS,
 	createPrimitivePlan,
+	PRIMITIVE_DEFAULTS,
 	parsePrimitiveAnswers,
 	validatePrimitiveName,
 } from './primitive-creation-plan.js';

@@ -76,7 +76,7 @@ function parseInlinedBlocks(builtOutput: string): {
 			problems.push(`${repoRelativePath} has an empty \`\`\`tsx fenced block.`);
 		}
 
-		blocks.push({ repoRelativePath, content });
+		blocks.push({ content, repoRelativePath });
 	}
 
 	return { blocks, problems };

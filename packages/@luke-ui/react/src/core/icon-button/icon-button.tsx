@@ -18,6 +18,8 @@ import { iconButtonIcon, iconButtonRecipe, iconButtonReset } from './recipe.css.
 import { iconOnlyIconWrapper } from './styles.css.js';
 
 interface IconButtonBaseProps extends IconButtonPresentationProps {
+	/** Icon name from the generated icon set, or a custom icon element such as a brand mark. */
+	icon: IconName | ReactElement;
 	/**
 	 * Externally owned pending state. When true, the button is non-interactive and shows a spinner
 	 * immediately. Prefer `pressAction` for IconButton-owned operations.
@@ -30,8 +32,6 @@ interface IconButtonBaseProps extends IconButtonPresentationProps {
 	 * resulting operation.
 	 */
 	pressAction?: PressAction;
-	/** Icon name from the generated icon set, or a custom icon element such as a brand mark. */
-	icon: IconName | ReactElement;
 }
 
 type _IconButtonOmit = DistributiveOmit<
@@ -78,14 +78,14 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 		<Button
 			{...buttonProps}
 			appearance="button"
-			tone={tone}
-			prominence={prominence}
 			className={composeRenderProps(props.className, (value) => {
 				return cx(iconButtonReset, iconButtonRecipe({ className: value, size }));
 			})}
 			isPending={isPendingState}
 			onPress={handlePress}
+			prominence={prominence}
 			size={size}
+			tone={tone}
 		>
 			{showSpinner && (
 				<span aria-hidden className={pendingSpinnerOverlay()}>

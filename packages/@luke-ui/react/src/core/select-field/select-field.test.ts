@@ -1,5 +1,5 @@
-import { createElement } from 'react';
 import type { Ref } from 'react';
+import { createElement } from 'react';
 import type { Key } from 'react-aria-components/Select';
 import { assertType, expectTypeOf, test } from 'vite-plus/test';
 import type { SelectRootProps, SelectTriggerProps } from '../primitives/select/select.js';

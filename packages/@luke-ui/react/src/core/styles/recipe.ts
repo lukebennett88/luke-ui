@@ -6,10 +6,10 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import { cascadeLayers } from './layer-names.js';
 import type { BuiltRecipe, SlotFn, SlottedRecipeDescriptor } from './recipe-engine.js';
 import {
+	withDefaultVariants as applyDefaultVariants,
 	createRecipe,
 	createSingleRecipe,
 	pickGroups,
-	withDefaultVariants as applyDefaultVariants,
 } from './recipe-engine.js';
 import type { RecipeComposition } from './recipe-types.js';
 

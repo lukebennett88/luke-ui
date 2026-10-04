@@ -5,8 +5,8 @@
  */
 
 import { precomputeValues } from '@capsizecss/core';
-import { flattenThemeContract, partitionContractPairs, spaceScale } from './contract.js';
 import type { IdentityPath, ModePath, SpaceStep } from './contract.js';
+import { flattenThemeContract, partitionContractPairs, spaceScale } from './contract.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import type { ThemeFoundation } from './foundation.js';
 import {

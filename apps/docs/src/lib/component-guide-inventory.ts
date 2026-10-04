@@ -67,9 +67,9 @@ export function buildComponentGuideInventory(
 		guides: input.guides.map((guide) => {
 			const name = guide.relativePath.replace(MDX_EXTENSION_PATTERN, '').split('/').at(-1) ?? '';
 			return {
+				props: findComponentPropsTableTags(guide.source),
 				relativePath: guide.relativePath,
 				slug: `${guide.group}/${name}`,
-				props: findComponentPropsTableTags(guide.source),
 				source: readFrontmatter(guide.source).source,
 			};
 		}),

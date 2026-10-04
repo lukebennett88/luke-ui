@@ -46,14 +46,14 @@ interface PropSymbol {
  * walk switches on `getKindName()` before reaching for the rest.
  */
 interface SyntaxNode {
+	/** `ExpressionWithTypeArguments` only: the referenced name, e.g. `Pick` in `extends Pick<…>`. */
+	getExpression?: () => SyntaxNode;
 	/**
 	 * `InterfaceDeclaration`: the `extends A, B` heritage clauses. A `ClassDeclaration` also carries
 	 * `getExtends`, returning a single clause or `undefined`, so the return type covers both and the
 	 * walk normalises it — only interfaces are ever walked here in practice.
 	 */
 	getExtends?: () => ReadonlyArray<SyntaxNode> | SyntaxNode | undefined;
-	/** `ExpressionWithTypeArguments` only: the referenced name, e.g. `Pick` in `extends Pick<…>`. */
-	getExpression?: () => SyntaxNode;
 	getKindName: () => string;
 	/** `InterfaceDeclaration` and `TypeLiteral`: own (syntactically declared) members. */
 	getMembers?: () => ReadonlyArray<SyntaxNode>;
@@ -66,10 +66,10 @@ interface SyntaxNode {
 	getType?: () => PropType;
 	/** `TypeReference` and `ExpressionWithTypeArguments`: the `<…>` arguments. */
 	getTypeArguments?: () => ReadonlyArray<SyntaxNode>;
-	/** `TypeAliasDeclaration` and `ParenthesizedType`: the type on the right of the `=`. */
-	getTypeNode?: () => SyntaxNode | undefined;
 	/** `TypeReference` only: the referenced name, e.g. `Prettify` in `Prettify<X>`. */
 	getTypeName?: () => SyntaxNode;
+	/** `TypeAliasDeclaration` and `ParenthesizedType`: the type on the right of the `=`. */
+	getTypeNode?: () => SyntaxNode | undefined;
 	/** `UnionType` and `IntersectionType`: the constituents. */
 	getTypeNodes?: () => ReadonlyArray<SyntaxNode>;
 }
@@ -83,8 +83,8 @@ export function getSharedPropProject(repoRoot: string): Promise<PropProject> {
 
 	const project = Promise.resolve(
 		new Project({
-			tsConfigFilePath: `${repoRoot}/apps/docs/tsconfig.json`,
 			skipAddingFilesFromTsConfig: true,
+			tsConfigFilePath: `${repoRoot}/apps/docs/tsconfig.json`,
 		}),
 	);
 	sharedProjects.set(repoRoot, project);

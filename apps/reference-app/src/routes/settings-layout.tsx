@@ -36,8 +36,8 @@ export function SettingsLayout() {
 	const queryClient = useQueryClient();
 	const settings = useQuery(settingsQueryOptions).data!;
 	const preferencesMutation = useMutation({
-		mutationKey: PREFERENCES_MUTATION_KEY,
 		mutationFn: (patch: Partial<Preferences>) => settingsApi.updatePreferences(patch),
+		mutationKey: PREFERENCES_MUTATION_KEY,
 		onSuccess: (nextSettings) => queryClient.setQueryData(settingsQueryKey, nextSettings),
 	});
 	const isPreferencesPending =
@@ -84,12 +84,12 @@ export function SettingsLayout() {
 				{/* Box owns display — Stack forces flex and would defeat VE hide-on-narrow. */}
 				<Box
 					aria-label="Settings navigation"
+					color={vars.color.text.secondary}
 					display={isMenu ? 'none' : { bp768: 'flex', initial: 'none' }}
 					elementType="aside"
 					flexDirection="column"
 					flexShrink="0"
 					gap="sp24"
-					color={vars.color.text.secondary}
 					inlineSize="244px"
 					minBlockSize={0}
 					overflow="hidden"
@@ -154,8 +154,8 @@ export function SettingsLayout() {
 							<Outlet
 								context={
 									{
-										preferences,
 										isPreferencesPending,
+										preferences,
 										preferencesError:
 											preferencesMutation.error instanceof Error
 												? preferencesMutation.error.message

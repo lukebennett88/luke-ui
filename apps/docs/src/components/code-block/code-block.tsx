@@ -12,24 +12,24 @@ type CopyStatus = 'idle' | 'copied' | 'error';
 const COPY_FEEDBACK_MS = 1500;
 
 export interface CodeBlockProps extends Omit<FigureProps, 'children'> {
-	/** Optional caption shown above the code. */
-	title?: string;
 	/**
 	 * Shows the copy control. MDX may pass the string `"true"` / `"false"`.
 	 * @default true
 	 */
 	allowCopy?: boolean | 'true' | 'false';
+	/** MDX `pre` children or other React nodes rendered inside `<pre>`. */
+	children?: ReactNode;
 	/** Plain source. Prefer this over children when the text is a string constant. */
 	code?: string;
-	/** Shiki `<code>…</code>` markup. Docs CodeBlock owns the outer `<pre>`. */
-	html?: string;
 	/** Exact clipboard payload when rendered markup should not define what is copied. */
 	copyText?: string;
 	/** Drop outer margin and frame chrome so the block can sit flush under an example frame. */
 	flush?: boolean;
-	/** MDX `pre` children or other React nodes rendered inside `<pre>`. */
-	children?: ReactNode;
+	/** Shiki `<code>…</code>` markup. Docs CodeBlock owns the outer `<pre>`. */
+	html?: string;
 	ref?: Ref<HTMLElement>;
+	/** Optional caption shown above the code. */
+	title?: string;
 }
 
 /**

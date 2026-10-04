@@ -4,12 +4,12 @@ import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
 import { resolveResponsiveCssProperty } from '../styles/responsive-css-property.js';
-import { isPopulatedString, isPositiveInteger } from '../styles/responsive.js';
 import type {
 	RequiredInitialResponsive,
 	RequiredInitialResponsiveValue,
 	ResponsivePropValue,
 } from '../styles/responsive.js';
+import { isPopulatedString, isPositiveInteger } from '../styles/responsive.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -17,8 +17,8 @@ import { formatAreas, isValidAreas } from './areas.js';
 import {
 	gridAreasProperty,
 	gridColumnsProperty,
-	gridRowsProperty,
 	gridRecipe,
+	gridRowsProperty,
 } from './recipe.css.js';
 
 /** Props for `Grid`. */
@@ -74,6 +74,19 @@ type GridAlignmentProp<Prop extends 'alignContent' | 'alignItems' | 'justifyCont
 	>;
 
 interface _GridLayoutProps {
+	/** Distribution of row tracks within the grid on the block axis. */
+	alignContent?: GridAlignmentProp<'alignContent'>;
+	/** Alignment of each child within its grid area on the block axis. */
+	alignItems?: GridAlignmentProp<'alignItems'>;
+	/**
+	 * Named grid areas, one string per row, such as `['a a', 'b c']`.
+	 *
+	 * Each row needs the same number of cells, and each named area must form a filled rectangle. Use
+	 * `.` for an empty cell. Accepts a responsive object with a required `initial` value.
+	 */
+	areas?: RequiredInitialResponsiveValue<ReadonlyArray<string>>;
+	/** Space between column tracks. Overrides `gap` on the inline axis. */
+	columnGap?: RequiredInitialResponsive<SprinklesProps['gap']>;
 	/**
 	 * Column tracks.
 	 *
@@ -82,33 +95,20 @@ interface _GridLayoutProps {
 	 * required `initial` value, and each breakpoint can use either form.
 	 */
 	columns?: RequiredInitialResponsiveValue<number | string>;
+	/** Space between grid tracks. */
+	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
+	/** Distribution of column tracks within the grid on the inline axis. */
+	justifyContent?: GridAlignmentProp<'justifyContent'>;
+	/** Alignment of each child within its grid area on the inline axis. */
+	justifyItems?: SprinklesProps['justifyItems'];
+	/** Space between row tracks. Overrides `gap` on the block axis. */
+	rowGap?: RequiredInitialResponsive<SprinklesProps['gap']>;
 	/**
 	 * Row tracks, as a CSS track list such as `"auto 1fr auto"`.
 	 *
 	 * Accepts a responsive object with a required `initial` value.
 	 */
 	rows?: RequiredInitialResponsiveValue<string>;
-	/**
-	 * Named grid areas, one string per row, such as `['a a', 'b c']`.
-	 *
-	 * Each row needs the same number of cells, and each named area must form a filled rectangle. Use
-	 * `.` for an empty cell. Accepts a responsive object with a required `initial` value.
-	 */
-	areas?: RequiredInitialResponsiveValue<ReadonlyArray<string>>;
-	/** Space between grid tracks. */
-	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
-	/** Space between row tracks. Overrides `gap` on the block axis. */
-	rowGap?: RequiredInitialResponsive<SprinklesProps['gap']>;
-	/** Space between column tracks. Overrides `gap` on the inline axis. */
-	columnGap?: RequiredInitialResponsive<SprinklesProps['gap']>;
-	/** Alignment of each child within its grid area on the block axis. */
-	alignItems?: GridAlignmentProp<'alignItems'>;
-	/** Alignment of each child within its grid area on the inline axis. */
-	justifyItems?: SprinklesProps['justifyItems'];
-	/** Distribution of row tracks within the grid on the block axis. */
-	alignContent?: GridAlignmentProp<'alignContent'>;
-	/** Distribution of column tracks within the grid on the inline axis. */
-	justifyContent?: GridAlignmentProp<'justifyContent'>;
 }
 
 interface _GridElementProps extends BoxLikeElementProps, LayoutProps, _GridLayoutProps {}

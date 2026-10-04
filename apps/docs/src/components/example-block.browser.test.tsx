@@ -299,7 +299,11 @@ async function renderExampleBlock({
 	src = 'box/responsive-layout',
 	title = 'Box: Responsive layout',
 	width = 800,
-}: { src?: string; title?: string; width?: number } = {}) {
+}: {
+	src?: string;
+	title?: string;
+	width?: number;
+} = {}) {
 	const rootRoute = createRootRoute({
 		component: () => (
 			<Provider spritesheetHref={spriteSheetHref}>

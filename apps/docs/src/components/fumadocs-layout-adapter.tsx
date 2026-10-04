@@ -22,10 +22,10 @@ export function FumadocsLayoutAdapter({ children, tree }: { children: ReactNode;
 						container: ContentContainer,
 						header: EmptySlot,
 						sidebar: {
+							collapseTrigger: EmptySlot,
 							provider: ContentContainer,
 							root: EmptySlot,
 							trigger: EmptySlot,
-							collapseTrigger: EmptySlot,
 							useSidebar: () => ({ collapsed: false, open: false, setOpen: () => {} }),
 						},
 					}}

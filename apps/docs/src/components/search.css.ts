@@ -1,7 +1,7 @@
 import { vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
-import { createVar, globalStyle, style } from '@vanilla-extract/css';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
+import { createVar, globalStyle, style } from '@vanilla-extract/css';
 import { DOCS_SEARCH_FIELD_VT_SHARE_CLASS } from './search-view-transition.js';
 
 export const searchAnchorHeightVar = createVar();

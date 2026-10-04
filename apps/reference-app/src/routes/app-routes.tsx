@@ -37,8 +37,8 @@ export function createAppRoutes(queryClient: QueryClient): Array<RouteObject> {
 				},
 				{ Component: NotFound, path: '*' },
 			],
-			element: <RootLayout />,
 			ErrorBoundary: RouteError,
+			element: <RootLayout />,
 			HydrateFallback,
 			loader: async () => {
 				await queryClient.query(settingsQueryOptions);

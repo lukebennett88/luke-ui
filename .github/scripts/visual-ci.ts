@@ -5,7 +5,7 @@
 
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { appendFile, readFile, readdir } from 'node:fs/promises';
+import { appendFile, readdir, readFile } from 'node:fs/promises';
 import {
 	VISUAL_BASELINE_DIR,
 	VISUAL_SUMMARY_FILE,

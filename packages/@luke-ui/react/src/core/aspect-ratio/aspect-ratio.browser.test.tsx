@@ -1,6 +1,6 @@
 import { AspectRatio } from '@luke-ui/react/aspect-ratio';
 import { vars } from '@luke-ui/react/theme';
-import { test, expect } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
 
@@ -105,12 +105,12 @@ test('media frame ratios and objectFit values', { tags: ['visual'] }, async () =
 		const { locator: scene } = render(
 			<div style={{ display: 'grid', gap: vars.space.sp16 }}>
 				{ratios.map((ratio) => (
-					<AspectRatio key={ratio} inlineSize="18rem" ratio={ratio}>
+					<AspectRatio inlineSize="18rem" key={ratio} ratio={ratio}>
 						<img alt={`Ratio ${ratio}`} src={mediaSrc} />
 					</AspectRatio>
 				))}
 				{objectFits.map((objectFit) => (
-					<AspectRatio key={objectFit} inlineSize="18rem" objectFit={objectFit} ratio="16 / 9">
+					<AspectRatio inlineSize="18rem" key={objectFit} objectFit={objectFit} ratio="16 / 9">
 						<img alt={`objectFit ${objectFit}`} src={mediaSrc} />
 					</AspectRatio>
 				))}

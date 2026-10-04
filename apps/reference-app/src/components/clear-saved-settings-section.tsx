@@ -32,8 +32,8 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 		}) > 0;
 	const isPending = useIsMutating({ exact: true, mutationKey: CLEAR_MUTATION_KEY }) > 0;
 	const mutation = useMutation({
-		mutationKey: CLEAR_MUTATION_KEY,
 		mutationFn: () => settingsApi.clearLocalSettings(),
+		mutationKey: CLEAR_MUTATION_KEY,
 		onSuccess: () => {
 			queryClient.setQueryData(settingsQueryKey, structuredClone(DEFAULT_SETTINGS));
 			onCleared();

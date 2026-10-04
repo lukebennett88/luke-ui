@@ -3,7 +3,7 @@ import { createContext, use } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
 import { Group as RacGroup } from 'react-aria-components/Group';
 import type { InputProps as RacInputProps } from 'react-aria-components/Input';
-import { Input as RacInput, InputContext } from 'react-aria-components/Input';
+import { InputContext, Input as RacInput } from 'react-aria-components/Input';
 import type { TextFieldProps as RacTextFieldProps } from 'react-aria-components/TextField';
 import { TextField as RacTextField } from 'react-aria-components/TextField';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
@@ -101,10 +101,10 @@ type _TextInputOmit = DistributiveOmit<
 >;
 
 interface _TextInputProps extends _TextInputOmit {
-	/** Accessible name for the input when no visible label is connected. */
-	'aria-label'?: RacInputProps['aria-label'];
 	/** Marks a standalone input invalid. Inside a `TextInputRoot`, the root owns validity. */
 	'aria-invalid'?: RacInputProps['aria-invalid'];
+	/** Accessible name for the input when no visible label is connected. */
+	'aria-label'?: RacInputProps['aria-label'];
 	/** Class name for the input element. */
 	className?: RacInputProps['className'];
 	/** Initial value of a standalone input. Inside a `TextInputRoot`, the root owns the value. */

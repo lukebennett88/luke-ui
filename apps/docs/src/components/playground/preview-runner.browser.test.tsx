@@ -1,8 +1,8 @@
 import '../../styles/app.css';
 import '@luke-ui/react/themes/paper/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
-import { isPlaygroundPreviewMessage } from '@luke-ui/playground-core/protocol';
 import type { PlaygroundPreviewMessage } from '@luke-ui/playground-core/protocol';
+import { isPlaygroundPreviewMessage } from '@luke-ui/playground-core/protocol';
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';

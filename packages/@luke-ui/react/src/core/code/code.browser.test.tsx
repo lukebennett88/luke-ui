@@ -1,6 +1,6 @@
 import { Code } from '@luke-ui/react/code';
 import { Text } from '@luke-ui/react/text';
-import { test, expect } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 

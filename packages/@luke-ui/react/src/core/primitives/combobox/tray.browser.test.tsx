@@ -1,4 +1,5 @@
 import { Icon } from '@luke-ui/react/icon';
+import type { ComboboxRootProps } from '@luke-ui/react/primitives/combobox';
 import {
 	ComboboxClearButton,
 	ComboboxControl,
@@ -9,7 +10,6 @@ import {
 	ComboboxTray,
 	ComboboxTrayTrigger,
 } from '@luke-ui/react/primitives/combobox';
-import type { ComboboxRootProps } from '@luke-ui/react/primitives/combobox';
 import { Field } from '@luke-ui/react/primitives/field';
 import { Form } from 'react-aria-components/Form';
 import { expect, test } from 'vite-plus/test';

@@ -1,6 +1,6 @@
 import { Button } from '@luke-ui/react/button';
-import Editor from '@monaco-editor/react';
 import type { OnMount } from '@monaco-editor/react';
+import Editor from '@monaco-editor/react';
 import type * as Monaco from 'monaco-editor';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { loadPlaygroundTypes, monacoThemes } from '../../lib/monaco-setup';
@@ -56,9 +56,9 @@ export default function PlaygroundEditor({
 			</PlaygroundPaneToolbar>
 			<div className="min-h-0 flex-1">
 				<Editor
-					height="100%"
 					defaultLanguage="typescript"
 					defaultValue={defaultValue}
+					height="100%"
 					loading={<EditorSkeleton code={defaultValue} showPill={showLoadingPill} />}
 					onChange={(value) => onChange(value ?? '')}
 					onMount={handleMount}

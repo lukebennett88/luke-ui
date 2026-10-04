@@ -29,19 +29,6 @@ export default {
 			entry: ['src/**/*.browser.test.tsx'],
 			project: ['src/**/*.{ts,tsx}'],
 		},
-		'packages/@luke-ui/react': {
-			entry: [
-				'src/exports/**/*.ts',
-				'src/core/stylesheet.css.ts',
-				'src/core/styles/index.css.ts',
-				'scripts/**/*.ts',
-			],
-			project: ['src/**/*.{ts,tsx}'],
-		},
-		'packages/@luke-ui/rainbow-sprinkles': {
-			entry: ['src/index.ts', 'src/create-runtime-fn.ts', 'vite.config.ts'],
-			project: ['src/**/*.ts', 'vite.config.ts'],
-		},
 		'packages/@luke-ui/playground-core': {
 			entry: [
 				'src/compiler.ts',
@@ -52,6 +39,19 @@ export default {
 				'src/specifiers.ts',
 			],
 			project: ['src/**/*.ts'],
+		},
+		'packages/@luke-ui/rainbow-sprinkles': {
+			entry: ['src/index.ts', 'src/create-runtime-fn.ts', 'vite.config.ts'],
+			project: ['src/**/*.ts', 'vite.config.ts'],
+		},
+		'packages/@luke-ui/react': {
+			entry: [
+				'src/exports/**/*.ts',
+				'src/core/stylesheet.css.ts',
+				'src/core/styles/index.css.ts',
+				'scripts/**/*.ts',
+			],
+			project: ['src/**/*.{ts,tsx}'],
 		},
 		'packages/turbo-generators': {
 			entry: ['config.ts'],

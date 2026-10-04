@@ -1,14 +1,14 @@
 import { decodeCodeHash } from '@luke-ui/playground-core/hash';
-import { createPlaygroundPageSession } from '@luke-ui/playground-core/protocol';
 import type {
 	PlaygroundPagePorts,
 	PlaygroundPageSession,
 	PlaygroundResult,
 } from '@luke-ui/playground-core/protocol';
+import { createPlaygroundPageSession } from '@luke-ui/playground-core/protocol';
 import { cx } from '@luke-ui/react/utils';
 import { ClientOnly, createFileRoute } from '@tanstack/react-router';
-import { lazy, Suspense, useEffect, useReducer, useRef, useState } from 'react';
 import type { RefObject } from 'react';
+import { lazy, Suspense, useEffect, useReducer, useRef, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { useSpinDoctor } from 'spin-doctor';
 import {
@@ -24,8 +24,8 @@ import { SiteNav } from '../../components/site-nav.js';
 import { useDocsTheme } from '../../components/theme-controls';
 import { withBasePath } from '../../lib/base-path.js';
 import { encodeDocsPlaygroundHash } from '../../lib/docs-playground-hash.js';
-import { postPlaygroundAppearance } from '../../lib/playground-appearance-message.js';
 import type { PlaygroundAppearance } from '../../lib/playground-appearance-message.js';
+import { postPlaygroundAppearance } from '../../lib/playground-appearance-message.js';
 import rawDefaultCode from '../../lib/playground-default-code.tsx?raw';
 
 const PlaygroundEditor = lazy(() => import('../../components/playground/editor'));
@@ -149,7 +149,7 @@ function Playground() {
 				{/* react-resizable-panels owns hit-testing and the resize cursor at the document level; the grab band is configured by resizeTargetMinimumSize on Group above. */}
 				<Separator
 					aria-label="Resize editor and preview panels"
-					className="relative z-10 shrink-0 block-px inline-auto bg-fd-border after:absolute after:block-1.5 after:inline-16 after:rounded-full after:bg-fd-muted-foreground/50 after:transition-colors after:-translate-x-1/2 after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[50%] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65 md:block-auto md:inline-px md:after:block-16 md:after:inline-1.5"
+					className="block-px inline-auto after:block-1.5 after:inline-16 md:block-auto md:inline-px md:after:block-16 md:after:inline-1.5 relative z-10 shrink-0 bg-fd-border after:absolute after:inset-bs-[50%] after:inset-s-[50%] after:-translate-x-1/2 after:-translate-y-1/2 after:rounded-full after:bg-fd-muted-foreground/50 after:transition-colors after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65"
 				/>
 				<Panel
 					className={cx(

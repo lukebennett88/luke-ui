@@ -8,8 +8,8 @@ export default defineConfig({
 		},
 		dts: true,
 		entry: {
-			index: 'src/index.ts',
 			'create-runtime-fn': 'src/create-runtime-fn.ts',
+			index: 'src/index.ts',
 		},
 		format: ['esm'],
 		platform: 'neutral',

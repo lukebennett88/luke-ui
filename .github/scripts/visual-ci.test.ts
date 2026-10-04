@@ -2,6 +2,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
+import type { VisualCounts } from './visual-ci.js';
 import {
 	countPngs,
 	countRequiringReview,
@@ -9,7 +10,6 @@ import {
 	decideBaselineRun,
 	isWorkflowMissingStatus,
 } from './visual-ci.js';
-import type { VisualCounts } from './visual-ci.js';
 
 const runUrl = (runId: number) => `https://github.com/o/r/actions/runs/${runId}`;
 

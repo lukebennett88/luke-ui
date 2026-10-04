@@ -61,8 +61,8 @@ export function registerFormatDocumentKeybinding(
 ): Monaco.IDisposable {
 	return editor.addAction({
 		id: FORMAT_SHORTCUT_ACTION_ID,
-		label: 'Format Document',
 		keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
+		label: 'Format Document',
 		run: (ed) => {
 			const action = ed.getAction(FORMAT_DOCUMENT_ACTION_ID);
 			if (!action) return;

@@ -5,7 +5,7 @@ import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
 import { typeStyles } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
-import { test, expect } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
