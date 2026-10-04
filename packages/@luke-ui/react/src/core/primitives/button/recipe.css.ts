@@ -12,6 +12,7 @@ export const buttonRecipeInternal = recipe({
 			},
 		},
 		font: 'inherit',
+		touchAction: 'manipulation',
 		transitionDuration: vars.motion.duration.feedback,
 		transitionProperty:
 			'background-color, border-color, box-shadow, color, opacity, text-decoration-color, transform',
