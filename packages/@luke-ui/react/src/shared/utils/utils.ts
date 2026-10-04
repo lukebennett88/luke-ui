@@ -24,39 +24,70 @@ type Merged<A, B> = {
 					: never;
 };
 
+type MergePossiblyWithArray<A, B> = {
+	[K in keyof A | keyof B]: K extends 'className'
+		? string
+		: K extends 'style'
+			? Record<string, unknown>
+			: K extends keyof A
+				? K extends keyof B
+					? A[K] | B[K]
+					: A[K]
+				: K extends keyof B
+					? B[K] | undefined
+					: never;
+};
+
+type MergedAll<T extends ReadonlyArray<unknown>> = T extends readonly [infer First, ...infer Rest]
+	? Rest extends readonly [infer Second, ...infer Others]
+		? MergedAll<[Merged<First, Second>, ...Others]>
+		: number extends Rest['length']
+			? MergePossiblyWithArray<First, Rest[number]>
+			: First
+	: never;
+
 type MergeableProps = {
 	className?: unknown;
 	style?: unknown;
 };
 
 /**
- * Merges two prop objects, concatenating `className` with `cx` and shallowly
- * merging `style` objects (later props win). All other properties are overwritten
- * by the later object, including `on*` handlers — unlike React Aria's `mergeProps`,
+ * Merges two or more prop objects from left to right. `className` values are concatenated with
+ * `cx`, and `style` objects are shallowly merged (later props win). All other properties are
+ * overwritten by the later object, including `on*` handlers — unlike React Aria's `mergeProps`,
  * this does not chain event handlers. Useful for combining component props with
  * `createSprinkles()` output.
  */
-export function mergeStyleProps<A extends object, B extends object>(a: A, b: B): Merged<A, B> {
-	const result = { ...a } as Record<string, unknown>;
-	const aProps = a as MergeableProps;
-	const bProps = b as MergeableProps;
-
-	result.className = cx(
-		typeof aProps.className === 'string' && aProps.className,
-		typeof bProps.className === 'string' && bProps.className,
-	);
-	result.style = {
-		...(typeof aProps.style === 'object' && aProps.style !== null ? aProps.style : {}),
-		...(typeof bProps.style === 'object' && bProps.style !== null ? bProps.style : {}),
+export function mergeStyleProps<T extends [object, object, ...Array<object>]>(
+	...props: T
+): MergedAll<T> {
+	const [first, ...rest] = props as Array<object>;
+	const result = { ...first } as Record<string, unknown>;
+	const firstProps = first as MergeableProps;
+	let className = cx(typeof firstProps.className === 'string' && firstProps.className);
+	let style: Record<string, unknown> = {
+		...(typeof firstProps.style === 'object' && firstProps.style !== null ? firstProps.style : {}),
 	};
 
-	for (const key in b) {
-		if (key !== 'className' && key !== 'style') {
-			result[key] = b[key as keyof B];
+	for (const current of rest as Array<Record<string, unknown>>) {
+		const { className: nextClassName, style: nextStyle } = current as MergeableProps;
+
+		className = cx(className, typeof nextClassName === 'string' && nextClassName);
+		if (typeof nextStyle === 'object' && nextStyle !== null) {
+			style = { ...style, ...nextStyle };
+		}
+
+		for (const key in current) {
+			if (key !== 'className' && key !== 'style') {
+				result[key] = current[key];
+			}
 		}
 	}
 
-	return result as Merged<A, B>;
+	result.className = className;
+	result.style = style;
+
+	return result as MergedAll<T>;
 }
 
 /** Converts a pixel value to rem. */

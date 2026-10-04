@@ -3,8 +3,9 @@ import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
 import { act } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { expect, test } from 'vite-plus/test';
+import { expect, onTestFinished, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
+import { expectDelayedSpinner, watchSpinner } from '../test-utils/action-spinner.js';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
@@ -152,6 +153,7 @@ test('runs onPress before pressAction and tracks Action pending', async () => {
 	const gate = new Promise<void>((resolve) => {
 		release = resolve;
 	});
+	onTestFinished(release);
 
 	const { locator, user } = render(
 		<Button
@@ -171,7 +173,6 @@ test('runs onPress before pressAction and tracks Action pending', async () => {
 	await user.click(button);
 	expect(order).toEqual(['onPress', 'pressAction']);
 	expect(button.element().getAttribute('data-pending')).toBe('true');
-	expect(button.element().querySelector('[role="status"]')).toBeNull();
 
 	release();
 	await expect.poll(() => button.element().getAttribute('data-pending')).toBeNull();
@@ -183,6 +184,7 @@ test('suppresses a same-tick second Action start', async () => {
 	const gate = new Promise<void>((resolve) => {
 		release = resolve;
 	});
+	onTestFinished(release);
 
 	const { locator } = render(
 		<Button
@@ -241,14 +243,17 @@ test('shows no spinner for a fast Action', async () => {
 });
 
 test('shows a delayed spinner for a slow Action', async () => {
+	let startedAt: number | undefined;
 	let releaseSlow!: () => void;
 	const slowGate = new Promise<void>((resolve) => {
 		releaseSlow = resolve;
 	});
+	onTestFinished(releaseSlow);
 
 	const { locator, user } = render(
 		<Button
 			pressAction={async () => {
+				startedAt = performance.now();
 				await slowGate;
 			}}
 		>
@@ -256,16 +261,12 @@ test('shows a delayed spinner for a slow Action', async () => {
 		</Button>,
 	);
 	const slow = locator.getByRole('button', { name: 'Slow' });
+	const spinner = watchSpinner(slow.element());
 
 	await user.click(slow);
 	expect(slow.element().getAttribute('data-pending')).toBe('true');
-	expect(slow.element().querySelector('[role="status"]')).toBeNull();
 
-	await delay(ACTION_SPINNER_DELAY_MS - 50);
-	expect(slow.element().querySelector('[role="status"]')).toBeNull();
-
-	await delay(150);
-	expect(slow.element().querySelector('[role="status"]')).not.toBeNull();
+	await expectDelayedSpinner(spinner, () => startedAt, ACTION_SPINNER_DELAY_MS);
 
 	releaseSlow();
 	await expect.poll(() => slow.element().getAttribute('data-pending')).toBeNull();
