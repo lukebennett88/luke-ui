@@ -162,6 +162,15 @@ globalStyle(`${pre} code`, {
 	},
 });
 
+// Empty lines are flex items and collapse to zero height without a minimum.
+globalStyle(`${pre} code .line`, {
+	'@layer': {
+		recipes: {
+			minBlockSize: vars.font.caption.lineHeight,
+		},
+	},
+});
+
 // Dual-theme Shiki spans: light-dark picks the active colour mode.
 globalStyle(`${pre} :is(.shiki, code) span`, {
 	'@layer': {

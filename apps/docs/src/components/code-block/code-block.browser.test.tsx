@@ -95,6 +95,28 @@ test('scrolls Shiki line spans across the full figure width under overlay copy',
 	expect(pre.getBoundingClientRect().width).toBeGreaterThan(viewport.clientWidth);
 });
 
+test('keeps empty Shiki line spans one line tall', () => {
+	// The highlight plugin drops the `shiki` class, so Fumadocs' `.line:empty` rule does not apply.
+	const html = [
+		'<code>',
+		'<span class="line">import a from "a";</span>',
+		'<span class="line"></span>',
+		'<span class="line">export default a;</span>',
+		'</code>',
+	].join('');
+
+	renderCodeBlock(<CodeBlock copyText={'import a from "a";\n\nexport default a;'} html={html} />);
+
+	const lines = container?.querySelectorAll('.line');
+	assert(lines != null && lines.length === 3, 'Expected three line spans');
+	const [first, empty, last] = [...lines].map((line) => line.getBoundingClientRect());
+	assert(first != null && empty != null && last != null, 'Expected line boxes');
+
+	expect(empty.height).toBeGreaterThan(0);
+	expect(empty.height).toBeGreaterThanOrEqual(first.height - 1);
+	expect(last.top - first.top).toBeGreaterThanOrEqual(first.height + empty.height - 1);
+});
+
 test('hides the copy control when allowCopy is false', () => {
 	renderCodeBlock(<CodeBlock allowCopy={false} code="secret" />);
 

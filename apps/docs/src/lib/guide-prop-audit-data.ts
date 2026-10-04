@@ -137,12 +137,6 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		],
 	'layout/aspect-ratio.mdx::packages/@luke-ui/react/src/core/aspect-ratio/aspect-ratio.tsx::AspectRatioProps':
 		['elementType', 'objectFit', 'ratio', 'render'],
-	'layout/auto-grid.mdx::packages/@luke-ui/react/src/core/auto-grid/auto-grid.tsx::AutoGridProps': [
-		'elementType',
-		'gap',
-		'minColumnInlineSize',
-		'render',
-	],
 	'layout/bleed.mdx::packages/@luke-ui/react/src/core/bleed/bleed.tsx::BleedProps': [
 		'all',
 		'block',
@@ -169,10 +163,18 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	'layout/container.mdx::packages/@luke-ui/react/src/core/container/container.tsx::ContainerProps':
 		['elementType', 'marginInline', 'maxInlineSize', 'paddingInline', 'render'],
 	'layout/grid.mdx::packages/@luke-ui/react/src/core/grid/grid.tsx::GridProps': [
+		'alignContent',
+		'alignItems',
+		'areas',
+		'columnGap',
 		'columns',
 		'elementType',
 		'gap',
+		'justifyContent',
+		'justifyItems',
 		'render',
+		'rowGap',
+		'rows',
 	],
 	'layout/scroll-fade.mdx::packages/@luke-ui/react/src/core/scroll-fade/scroll-fade.tsx::ScrollFadeProps':
 		['aria-label', 'aria-labelledby', 'axis'],

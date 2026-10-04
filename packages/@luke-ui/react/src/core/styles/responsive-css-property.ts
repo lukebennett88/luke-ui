@@ -9,51 +9,52 @@ type ResponsiveCssProperty = {
 	vars: Record<ResponsiveCondition, string>;
 };
 
+type ResolveOptions<Value> = {
+	expectedValueDescription?: string;
+	isValid?: (value: Value) => boolean;
+	propName: string;
+} & FormatOption<Value>;
+
+/** `String` formats strings and numbers. Any other value needs its own `format`. */
+type FormatOption<Value> = [Value] extends [string | number]
+	? { format?: (value: Value) => string }
+	: { format: (value: Value) => string };
+
 /**
  * Applies classes and inline CSS variables for a responsive value built with
- * `createResponsiveCssProperty`.
+ * `createResponsiveCssProperty`. An array is a direct value. Any other object is a responsive
+ * object keyed by breakpoint. An invalid breakpoint value is reported and skipped, so the previous
+ * valid breakpoint still applies.
  */
-export function resolveResponsiveCssProperty(
-	value: ResponsivePropValue<string | number>,
+export function resolveResponsiveCssProperty<Value>(
+	value: ResponsivePropValue<Value>,
 	property: ResponsiveCssProperty,
-	options: {
-		expectedValueDescription?: string;
-		format?: (value: string | number) => string;
-		isValid?: (value: string | number) => boolean;
-		propName: string;
-	},
+	options: ResolveOptions<Value>,
 ): { className: string; style: Record<string, string> } {
-	const format = options.format ?? String;
+	const format: (value: Value) => string = options.format ?? String;
 	const isValid = options.isValid ?? (() => true);
 	const styleVars: Record<string, string> = {};
 	const classNames: Array<string> = [];
 
-	if (typeof value !== 'object') {
-		assignCondition(
-			'initial',
-			value,
-			property,
-			format,
-			isValid,
-			options.expectedValueDescription,
-			options.propName,
-			styleVars,
-			classNames,
-		);
-	} else {
-		for (const [condition, conditionValue] of typedEntries(value)) {
-			if (!isResponsiveCondition(condition) || conditionValue == null) continue;
-			assignCondition(
-				condition,
-				conditionValue,
-				property,
-				format,
-				isValid,
-				options.expectedValueDescription,
-				options.propName,
-				styleVars,
-				classNames,
+	function assignCondition(condition: ResponsiveCondition, conditionValue: Value): void {
+		if (!isValid(conditionValue)) {
+			// oxlint-disable-next-line no-console -- match Rainbow Sprinkles invalid-value reporting
+			console.error(
+				`Invalid value provided to '${options.propName}'. Expected ${options.expectedValueDescription ?? 'a valid value'}. Received: ${JSON.stringify(conditionValue)}.`,
 			);
+			return;
+		}
+		styleVars[property.vars[condition]] = format(conditionValue);
+		classNames.push(property.classes[condition]);
+	}
+
+	if (typeof value !== 'object' || Array.isArray(value)) {
+		assignCondition('initial', value as Value);
+	} else {
+		const conditionValues = value as Partial<Record<ResponsiveCondition, Value | null>>;
+		for (const [condition, conditionValue] of typedEntries(conditionValues)) {
+			if (!isResponsiveCondition(condition) || conditionValue == null) continue;
+			assignCondition(condition, conditionValue);
 		}
 	}
 
@@ -65,26 +66,4 @@ export function resolveResponsiveCssProperty(
 
 function isResponsiveCondition(value: string): value is ResponsiveCondition {
 	return Object.hasOwn(responsiveConditions, value);
-}
-
-function assignCondition(
-	condition: ResponsiveCondition,
-	conditionValue: string | number,
-	property: ResponsiveCssProperty,
-	format: (value: string | number) => string,
-	isValid: (value: string | number) => boolean,
-	expectedValueDescription: string | undefined,
-	propName: string,
-	styleVars: Record<string, string>,
-	classNames: Array<string>,
-): void {
-	if (!isValid(conditionValue)) {
-		// oxlint-disable-next-line no-console -- match Rainbow Sprinkles invalid-value reporting
-		console.error(
-			`Invalid value provided to '${propName}'. Expected ${expectedValueDescription ?? 'a valid value'}. Received: ${JSON.stringify(conditionValue)}.`,
-		);
-		return;
-	}
-	styleVars[property.vars[condition]] = format(conditionValue);
-	classNames.push(property.classes[condition]);
 }
