@@ -12,6 +12,7 @@ const absentExportPaths = [
 	'./text-field',
 	'./text-field/primitive',
 	'./primitives/input-group',
+	'./auto-grid',
 	'./recipes',
 	'./heading-context',
 	'./icon-size-context',

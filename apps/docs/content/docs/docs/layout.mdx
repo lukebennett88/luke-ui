@@ -7,16 +7,18 @@ description: Build responsive structure with layout utilities and breakpoints.
 
 | Component                                      | Use when                                                         |
 | ---------------------------------------------- | ---------------------------------------------------------------- |
-| [Box](/components/layout/box)                  | You need a custom flex or grid layout, or visual utilities       |
+| [Box](/components/layout/box)                  | You need a custom flex layout, or visual utilities               |
 | [Stack](/components/layout/stack)              | Direct children should flow on the logical block axis            |
 | [Cluster](/components/layout/cluster)          | Direct children should flow on the logical inline axis and wrap  |
-| [Grid](/components/layout/grid)                | Direct children need an explicit equal column count              |
-| [AutoGrid](/components/layout/auto-grid)       | Columns should grow from a minimum inline size                   |
+| [Grid](/components/layout/grid)                | Direct children need column tracks, rows, or named areas         |
 | [Track](/components/layout/track)              | Rails need controlled alignment beside flexible inline content   |
 | [Container](/components/layout/container)      | Content needs a maximum inline size and local responsive queries |
 | [Bleed](/components/layout/bleed)              | Content should extend beyond the space provided by its parent    |
 | [AspectRatio](/components/layout/aspect-ratio) | Media should fill a locked inline-to-block ratio                 |
 | [ScrollFade](/components/layout/scroll-fade)   | Scrollable content should fade at its edges                      |
+
+Use Grid for a two-dimensional layout with explicit grid structure. Use Stack or Cluster for a
+single-axis layout.
 
 ## Box
 
@@ -110,10 +112,7 @@ defines its spacing scale and typography styles in source.
 		Cluster lays out children on the inline axis with wrapping by default.
 	</Card>
 	<Card href="/components/layout/grid" title="Grid">
-		Lay out children in an explicit equal column count.
-	</Card>
-	<Card href="/components/layout/auto-grid" title="AutoGrid">
-		Lay out children from a minimum column inline size.
+		Lay out children with column tracks, rows, and named areas.
 	</Card>
 	<Card href="/components/layout/track" title="Track">
 		Align rails beside flexible inline content.

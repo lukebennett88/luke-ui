@@ -19,7 +19,6 @@
 		"forms/text-input-field",
 		"---Layout---",
 		"layout/aspect-ratio",
-		"layout/auto-grid",
 		"layout/bleed",
 		"layout/box",
 		"layout/cluster",

@@ -1,7 +1,7 @@
 import '../styles/app.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
-import { AutoGrid } from '@luke-ui/react/auto-grid';
 import { Button } from '@luke-ui/react/button';
+import { Grid } from '@luke-ui/react/grid';
 import { Stack } from '@luke-ui/react/stack';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import { act } from 'react';
@@ -32,14 +32,14 @@ test('default and explicit flow give block roots the available width', () => {
 	}
 });
 
-test('flow gives AutoGrid multiple tracks without explicit width', () => {
+test('flow gives an auto-fit Grid multiple tracks without explicit width', () => {
 	const { available, exampleRoot } = renderInWrapper(
-		<AutoGrid gap="sp12" minColumnInlineSize="12rem">
+		<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" gap="sp12">
 			<span>First</span>
 			<span>Second</span>
 			<span>Third</span>
 			<span>Fourth</span>
-		</AutoGrid>,
+		</Grid>,
 	);
 
 	expect(exampleRoot.getBoundingClientRect().width).toBeCloseTo(available, 0);
@@ -79,12 +79,12 @@ test('centered keeps an intrinsic Button centred', () => {
 	).toBeLessThanOrEqual(1);
 });
 
-test('centered intentionally keeps an unsized AutoGrid intrinsic', () => {
+test('centered intentionally keeps an unsized auto-fit Grid intrinsic', () => {
 	const { available, exampleRoot } = renderInWrapper(
-		<AutoGrid gap="sp12" minColumnInlineSize="12rem">
+		<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" gap="sp12">
 			<span>First</span>
 			<span>Second</span>
-		</AutoGrid>,
+		</Grid>,
 		{ layout: 'centered' },
 	);
 
@@ -114,16 +114,16 @@ test('flow respects a max-inline-size cap without requiring full width', () => {
 test('flow retains deliberately narrow example sizing', () => {
 	const { exampleRoot } = renderInWrapper(
 		<div style={{ inlineSize: '10rem' }}>
-			<AutoGrid gap="sp12" minColumnInlineSize="16rem">
+			<Grid columns="repeat(auto-fit, minmax(min(16rem, 100%), 1fr))" gap="sp12">
 				<span>First</span>
 				<span>Second</span>
-			</AutoGrid>
+			</Grid>
 		</div>,
 	);
-	const autoGrid = exampleRoot.firstElementChild as HTMLElement;
+	const grid = exampleRoot.firstElementChild as HTMLElement;
 
 	expect(exampleRoot.getBoundingClientRect().width).toBeCloseTo(160, 0);
-	expect(getComputedStyle(autoGrid).gridTemplateColumns.split(' ').filter(Boolean).length).toBe(1);
+	expect(getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length).toBe(1);
 });
 
 for (const comparisonCase of [

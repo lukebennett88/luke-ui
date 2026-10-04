@@ -2,7 +2,6 @@
 	"title": "Layout",
 	"pages": [
 		"aspect-ratio",
-		"auto-grid",
 		"bleed",
 		"box",
 		"cluster",
