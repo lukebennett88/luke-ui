@@ -187,7 +187,7 @@ function outputPath(outputDir: string, id: string, kind: string) {
 }
 
 async function publish(outputDir: string, id: string, kind: string, source?: string) {
-	if (source === undefined) return undefined;
+	if (source === undefined) return;
 	const destination = outputPath(outputDir, id, kind);
 	await mkdir(path.dirname(destination), { recursive: true });
 	await copyFile(source, destination);

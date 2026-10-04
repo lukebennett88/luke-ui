@@ -27,7 +27,7 @@ export function findComponentPropsTableTags(source: string): Array<ComponentProp
 /** The `## API` section body, from its heading up to the next `##` heading or end of file. */
 function apiSection(source: string): string | undefined {
 	const headingMatch = API_HEADING_PATTERN.exec(source);
-	if (headingMatch === null) return undefined;
+	if (headingMatch === null) return;
 
 	const start = headingMatch.index + headingMatch[0].length;
 	HEADING_PATTERN.lastIndex = start;

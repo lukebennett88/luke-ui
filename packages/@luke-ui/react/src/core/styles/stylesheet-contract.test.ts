@@ -262,9 +262,9 @@ function walkRules(
 
 function layerBlockName(rule: CssRule): string | undefined {
 	const name = rule.value.name;
-	if (name == null) return undefined;
+	if (name == null) return;
 	if (Array.isArray(name)) return name.join('.');
-	return undefined;
+	return;
 }
 
 function indexStyleRule(rule: StyleRule, owningLayer: string | undefined): IndexedStyleRule {

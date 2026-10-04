@@ -152,7 +152,7 @@ function resolveBleedValue(
 	propName: string,
 	value: BleedSpaceProp | undefined,
 ): StyleProps | undefined {
-	if (value == null) return undefined;
+	if (value == null) return;
 
 	return resolveResponsiveCssProperty(value, property, {
 		expectedValueDescription: 'a spacing token',

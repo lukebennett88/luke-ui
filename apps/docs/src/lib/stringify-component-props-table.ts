@@ -31,7 +31,7 @@ const JSDOC_LINK_PATTERN = /{@link (?<link>[^}]*)}/g;
 
 /** remarkLLMs `stringify` hook for expanded `<ComponentPropsTable>` nodes. */
 export function stringifyComponentPropsTable(node: MdastNode): string | undefined {
-	if (!isMdxJsxElement(node) || node.name !== 'ComponentPropsTable') return undefined;
+	if (!isMdxJsxElement(node) || node.name !== 'ComponentPropsTable') return;
 	return generatedDocToMarkdown(readGeneratedDoc(node));
 }
 

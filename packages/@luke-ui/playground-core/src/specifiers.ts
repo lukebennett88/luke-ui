@@ -109,14 +109,14 @@ function resolveExportTarget(
 ): string | null | undefined {
 	if (typeof target === 'string') return target;
 	if (target === null) return null;
-	if (isTargetArray(target)) return undefined;
+	if (isTargetArray(target)) return;
 
 	for (const [condition, conditionTarget] of Object.entries(target)) {
 		if (condition !== 'default' && !conditions.has(condition)) continue;
 		const resolved = resolveExportTarget(conditionTarget, conditions);
 		if (resolved !== undefined) return resolved;
 	}
-	return undefined;
+	return;
 }
 
 function isTargetArray(target: PackageExportTarget): target is ReadonlyArray<PackageExportTarget> {

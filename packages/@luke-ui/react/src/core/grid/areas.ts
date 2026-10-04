@@ -57,7 +57,7 @@ function tokenizeAreaRow(row: string): Array<string | null> | undefined {
 			continue;
 		}
 
-		return undefined;
+		return;
 	}
 
 	return cells.length > 0 ? cells : undefined;

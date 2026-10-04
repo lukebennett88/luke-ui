@@ -349,7 +349,7 @@ test('SelectField types the validate argument from the item keys', () => {
 		label: 'Letter',
 		validate: (value) => {
 			expectTypeOf(value).toEqualTypeOf<string>();
-			return undefined;
+			return;
 		},
 	});
 	SelectField({
