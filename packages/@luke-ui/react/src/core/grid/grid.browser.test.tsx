@@ -56,7 +56,7 @@ test('applies a CSS track list passed to columns', () => {
 	expect(fixed.getBoundingClientRect().top).toBe(flexible.getBoundingClientRect().top);
 });
 
-for (const invalidColumns of ['', '   ', '3', '3 ']) {
+for (const invalidColumns of ['', '   ', '3']) {
 	test(`rejects ${JSON.stringify(invalidColumns)} as columns and keeps one implicit column`, () => {
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 		const { locator } = render(
@@ -81,7 +81,7 @@ for (const invalidColumns of ['', '   ', '3', '3 ']) {
 	});
 }
 
-for (const columns of ['-1', '1.5', '+3']) {
+for (const columns of ['3 ', ' 3', '-1', '1.5', '+3']) {
 	test(`does not reject ${JSON.stringify(columns)} as a columns string`, () => {
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 		render(
@@ -149,6 +149,9 @@ for (const invalidAreas of [
 	['a b a'],
 	['a# b'],
 	['a/b c'],
+	['a\nb'],
+	['a\rb'],
+	['a\fb'],
 ]) {
 	test(`rejects ${JSON.stringify(invalidAreas)} as areas and keeps auto-placement`, () => {
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -179,7 +182,7 @@ for (const invalidAreas of [
 	});
 }
 
-for (const validAreas of [['1 2'], ['a-b c_d'], ['é ü'], ['a..b', 'c d e']]) {
+for (const validAreas of [['a b'], ['a\tb'], ['1 2'], ['a-b c_d'], ['é ü'], ['a..b', 'c d e']]) {
 	test(`accepts ${JSON.stringify(validAreas)} as areas`, () => {
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 		const { locator } = render(

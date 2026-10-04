@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { cx, mergeStyleProps } from '../../shared/utils/utils.js';
+import { mergeStyleProps } from '../../shared/utils/utils.js';
 import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
@@ -71,20 +71,10 @@ export function Grid({
 	return (
 		<Box
 			{...omitUnsupportedSprinklesProps(props, layoutProperties)}
-			{...mergeStyleProps(
-				{
-					className: gridRecipe({
-						className: cx(
-							columnsStyle?.className,
-							rowsStyle?.className,
-							areasStyle?.className,
-							className,
-						),
-					}),
-					style: { ...columnsStyle?.style, ...rowsStyle?.style, ...areasStyle?.style },
-				},
-				{ style },
-			)}
+			{...mergeStyleProps(columnsStyle ?? {}, rowsStyle ?? {}, areasStyle ?? {}, {
+				className: gridRecipe({ className }),
+				style,
+			})}
 			alignContent={alignContent}
 			alignItems={alignItems}
 			columnGap={columnGap}
@@ -143,7 +133,7 @@ const DIGIT_ONLY_STRING_PATTERN = /^\d+$/;
 
 function isValidColumns(value: number | string): boolean {
 	if (typeof value === 'number') return isPositiveInteger(value);
-	return isNonEmptyString(value) && !DIGIT_ONLY_STRING_PATTERN.test(value.trim());
+	return isNonEmptyString(value) && !DIGIT_ONLY_STRING_PATTERN.test(value);
 }
 
 function formatColumns(value: number | string): string {

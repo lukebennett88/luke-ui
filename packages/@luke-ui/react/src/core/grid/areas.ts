@@ -4,20 +4,15 @@
  * Follows CSS Grid string tokenisation: whitespace separates cells, runs of `.` are empty cells,
  * runs of ident code points are named cells, and any other character invalidates the row. Named
  * areas must form one filled rectangle each.
+ *
+ * Only space and tab count as authored whitespace. LF, CR, and FF cannot appear literally inside
+ * the quoted CSS string that `formatAreas` emits.
  */
 
-/** Whitespace that separates area cells. */
 function isAreaWhitespace(codePoint: number): boolean {
-	return (
-		codePoint === 0x20 || // SPACE
-		codePoint === 0x09 || // TAB
-		codePoint === 0x0a || // LF
-		codePoint === 0x0d || // CR
-		codePoint === 0x0c // FF
-	);
+	return codePoint === 0x20 || codePoint === 0x09;
 }
 
-/** Ident code points that may appear in a named area cell. */
 function isIdentCodePoint(codePoint: number): boolean {
 	return (
 		(codePoint >= 0x41 && codePoint <= 0x5a) || // A-Z
@@ -29,10 +24,6 @@ function isIdentCodePoint(codePoint: number): boolean {
 	);
 }
 
-/**
- * Tokenises one area row into cell names. Empty cells are `null`. Returns `undefined` when the row
- * contains an invalid token or no cells.
- */
 function tokenizeAreaRow(row: string): Array<string | null> | undefined {
 	const cells: Array<string | null> = [];
 	let index = 0;
@@ -72,7 +63,6 @@ function tokenizeAreaRow(row: string): Array<string | null> | undefined {
 	return cells.length > 0 ? cells : undefined;
 }
 
-/** True when every named area's cells form one filled rectangle. */
 function namedAreasAreRectangles(grid: ReadonlyArray<ReadonlyArray<string | null>>): boolean {
 	const positionsByName = new Map<string, Array<{ column: number; row: number }>>();
 
@@ -106,7 +96,6 @@ function namedAreasAreRectangles(grid: ReadonlyArray<ReadonlyArray<string | null
 	return true;
 }
 
-/** True when `rows` is a valid `grid-template-areas` value. */
 export function isValidAreas(rows: ReadonlyArray<string>): boolean {
 	if (rows.length === 0) return false;
 
@@ -127,7 +116,6 @@ export function isValidAreas(rows: ReadonlyArray<string>): boolean {
 	return namedAreasAreRectangles(grid);
 }
 
-/** Formats validated area rows as a `grid-template-areas` value. */
 export function formatAreas(rows: ReadonlyArray<string>): string {
 	return rows.map((row) => `"${row}"`).join(' ');
 }
