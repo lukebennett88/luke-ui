@@ -3,7 +3,7 @@ import { useContext, useEffect, useRef } from 'react';
 import { ComboBoxStateContext } from 'react-aria-components/ComboBox';
 import { FormContext } from 'react-aria-components/Form';
 import { useSlottedContext } from 'react-aria-components/slots';
-import { visuallyHiddenRecipe } from '../../visually-hidden/recipe.css.js';
+import { VisuallyHidden } from '../../visually-hidden/visually-hidden.js';
 import { useComboboxValidation } from './validation-context.js';
 
 interface ComboboxTrayValidationProps {
@@ -54,34 +54,35 @@ export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.
 	if (state.isOpen) return null;
 
 	return (
-		<input
-			aria-hidden
-			className={visuallyHiddenRecipe()}
-			disabled={!isValidated}
-			form={form}
-			onChange={() => {
-				// Value is driven by the combobox selection; React requires a handler for a value prop.
-			}}
-			onInvalid={(event) => {
-				event.preventDefault();
+		<VisuallyHidden>
+			<input
+				aria-hidden
+				disabled={!isValidated}
+				form={form}
+				onChange={() => {
+					// Value is driven by the combobox selection; React requires a handler for a value prop.
+				}}
+				onInvalid={(event) => {
+					event.preventDefault();
 
-				const validity = event.currentTarget.validity;
-				state.updateValidation({
-					isInvalid: true,
-					validationDetails: toValidationDetails(validity),
-					validationErrors: [event.currentTarget.validationMessage],
-				});
-				state.commitValidation();
+					const validity = event.currentTarget.validity;
+					state.updateValidation({
+						isInvalid: true,
+						validationDetails: toValidationDetails(validity),
+						validationErrors: [event.currentTarget.validationMessage],
+					});
+					state.commitValidation();
 
-				if (isFirstInvalidControl(event.currentTarget)) {
-					triggerRef.current?.focus();
-				}
-			}}
-			ref={ref}
-			required={isRequired}
-			tabIndex={-1}
-			value={value}
-		/>
+					if (isFirstInvalidControl(event.currentTarget)) {
+						triggerRef.current?.focus();
+					}
+				}}
+				ref={ref}
+				required={isRequired}
+				tabIndex={-1}
+				value={value}
+			/>
+		</VisuallyHidden>
 	);
 }
 

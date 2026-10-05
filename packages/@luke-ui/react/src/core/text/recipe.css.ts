@@ -5,7 +5,6 @@ import type { FontWeightRole, TypeStyle } from '../../theme/type-styles.js';
 import { fontWeightRoles, typeStyles } from '../../theme/type-styles.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
-import { visuallyHiddenStyle } from '../visually-hidden/recipe.css.js';
 
 const lineClampNone = {} satisfies ComplexStyleRule;
 export const textLineHeight = createVar();
@@ -144,7 +143,15 @@ export const textRecipe = recipe({
 	variants: {
 		isVisuallyHidden: {
 			false: {},
-			true: visuallyHiddenStyle,
+			true: {
+				blockSize: '1px', // 1px, not 0: zero dimensions trip screen-reader bugs
+				clip: 'rect(1px, 1px, 1px, 1px)', // legacy fallback for clip-path
+				clipPath: 'inset(100%)',
+				inlineSize: '1px',
+				overflow: 'hidden',
+				position: 'absolute',
+				whiteSpace: 'nowrap', // stop text wrapping inside the 1px box
+			},
 		},
 		textWrap: {
 			balance: { textWrap: 'balance' },
