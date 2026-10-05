@@ -27,6 +27,26 @@ test('replaces ordinary properties with the last supplied value', () => {
 	expect(result.title).toBe('retained');
 });
 
+test('lets explicit undefined win for ordinary props', () => {
+	const result = mergeProps({ id: 'default', title: 'keep' }, { id: undefined });
+
+	expect(result.id).toBeUndefined();
+	expect(result.title).toBe('keep');
+});
+
+test('lets explicit undefined clear className and style', () => {
+	expect(mergeProps({ className: 'first' }, { className: undefined }).className).toBeUndefined();
+	expect(mergeProps({ style: { color: 'red' } }, { style: undefined }).style).toBeUndefined();
+	expect(mergeProps({ className: undefined, style: undefined }, {})).toEqual({
+		className: undefined,
+		style: undefined,
+	});
+});
+
+test('leaves className and style absent when never supplied', () => {
+	expect(mergeProps({ id: 'only' }, {})).toEqual({ id: 'only' });
+});
+
 test('chains event handlers in argument order', () => {
 	const calls: Array<string> = [];
 	const result = mergeProps(
@@ -39,11 +59,23 @@ test('chains event handlers in argument order', () => {
 	expect(calls).toEqual(['first', 'second', 'third']);
 });
 
+test('replaces chained handlers when the later value is explicitly undefined', () => {
+	const first = () => {};
+	const result = mergeProps({ onClick: first }, { onClick: undefined });
+	expect(result.onClick).toBeUndefined();
+});
+
 test('does not specially merge refs', () => {
 	const firstRef = () => {};
 	const lastRef = () => {};
 	const result = mergeProps({ ref: firstRef }, { ref: lastRef });
 	expect(result.ref).toBe(lastRef);
+});
+
+test('replaces refs when the later value is explicitly undefined', () => {
+	const firstRef = () => {};
+	const result = mergeProps({ ref: firstRef }, { ref: undefined });
+	expect(result.ref).toBeUndefined();
 });
 
 test('does not mutate props or their style objects', () => {
@@ -77,6 +109,9 @@ test('infers the merged return type for fixed positional arguments', () => {
 	}>();
 	const pair = mergeProps({ id: 1 }, { id: 'last' });
 	expectTypeOf(pair).toEqualTypeOf<{ id: string }>();
+
+	const cleared = mergeProps({ className: undefined, style: undefined }, {});
+	expectTypeOf(cleared).toEqualTypeOf<{ className: undefined; style: undefined }>();
 });
 
 test('widens the return type for an unknown-length array spread', () => {

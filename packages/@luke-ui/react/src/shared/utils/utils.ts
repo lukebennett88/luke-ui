@@ -17,11 +17,31 @@ export function cx(...parts: Array<string | undefined | null | false>): string {
 	return result;
 }
 
+type MergedClassName<A, B> = 'className' extends keyof B
+	? undefined extends B['className']
+		? undefined
+		: string
+	: 'className' extends keyof A
+		? A['className'] extends string
+			? string
+			: undefined
+		: never;
+
+type MergedStyle<A, B> = 'style' extends keyof B
+	? undefined extends B['style']
+		? undefined
+		: Record<string, unknown>
+	: 'style' extends keyof A
+		? A['style'] extends object
+			? Record<string, unknown>
+			: undefined
+		: never;
+
 type Merged<A, B> = {
 	[K in keyof A | keyof B]: K extends 'className'
-		? string
+		? MergedClassName<A, B>
 		: K extends 'style'
-			? Record<string, unknown>
+			? MergedStyle<A, B>
 			: K extends keyof B
 				? B[K]
 				: K extends keyof A
@@ -31,9 +51,9 @@ type Merged<A, B> = {
 
 type MergePossiblyWithArray<A, B> = {
 	[K in keyof A | keyof B]: K extends 'className'
-		? string
+		? MergedClassName<A, B>
 		: K extends 'style'
-			? Record<string, unknown>
+			? MergedStyle<A, B>
 			: K extends keyof A
 				? K extends keyof B
 					? A[K] | B[K]
@@ -65,55 +85,65 @@ function isEventHandlerKey(key: string): boolean {
 	);
 }
 
+function mergePropObjects(
+	result: Record<string, unknown>,
+	current: Record<string, unknown>,
+): Record<string, unknown> {
+	for (const key in current) {
+		const previous = result[key];
+		const next = current[key];
+
+		if (key === 'className') {
+			if (next === undefined) {
+				result.className = undefined;
+			} else if (typeof next === 'string') {
+				result.className = cx(typeof previous === 'string' ? previous : undefined, next);
+			}
+			continue;
+		}
+
+		if (key === 'style') {
+			if (next === undefined) {
+				result.style = undefined;
+			} else if (typeof next === 'object' && next !== null) {
+				result.style = {
+					...(typeof previous === 'object' && previous !== null
+						? (previous as Record<string, unknown>)
+						: null),
+					...(next as Record<string, unknown>),
+				};
+			}
+			continue;
+		}
+
+		if (typeof previous === 'function' && typeof next === 'function' && isEventHandlerKey(key)) {
+			result[key] = chain(previous, next);
+			continue;
+		}
+
+		result[key] = next;
+	}
+
+	return result;
+}
+
 /**
  * Merges prop objects for composition and `renderRoot` callbacks.
  *
- * - Ordinary props: rightmost wins.
- * - `className`: concatenate left to right with `cx`.
- * - `style`: shallow merge; rightmost wins per key.
- * - Event handlers (`on*`): chain in argument order with React Aria's `chain`.
+ * - Ordinary props: rightmost wins, including explicit `undefined`.
+ * - `className`: concatenate left to right with `cx`; explicit `undefined` clears the merged value.
+ * - `style`: shallow merge; rightmost wins per key; explicit `undefined` clears the merged value.
+ * - Event handlers (`on*`): chain in argument order with React Aria's `chain` when both are functions.
  * - Refs are not merged; rightmost wins like ordinary props.
  */
 export function mergeProps<T extends [object, object, ...Array<object>]>(
 	...props: T
 ): MergedAll<T> {
 	const items = props as Array<Record<string, unknown>>;
-	const result = { ...items[0] };
+	let result: Record<string, unknown> = {};
 
-	for (let index = 1; index < items.length; index++) {
-		const current = items[index];
-		for (const key in current) {
-			const previous = result[key];
-			const next = current[key];
-
-			if (key === 'className') {
-				if (typeof next === 'string') {
-					result.className = cx(typeof previous === 'string' ? previous : undefined, next);
-				}
-				continue;
-			}
-
-			if (key === 'style') {
-				if (typeof next === 'object' && next !== null) {
-					result.style = {
-						...(typeof previous === 'object' && previous !== null
-							? (previous as Record<string, unknown>)
-							: null),
-						...(next as Record<string, unknown>),
-					};
-				}
-				continue;
-			}
-
-			if (typeof previous === 'function' && typeof next === 'function' && isEventHandlerKey(key)) {
-				result[key] = chain(previous, next);
-				continue;
-			}
-
-			if (next !== undefined) {
-				result[key] = next;
-			}
-		}
+	for (const item of items) {
+		result = mergePropObjects(result, item);
 	}
 
 	return result as MergedAll<T>;
