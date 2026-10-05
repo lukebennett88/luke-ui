@@ -49,10 +49,10 @@ catalog:
   '@rolldown/pluginutils': ^1.0.1
   '@tailwindcss/vite': ^4.3.3
   '@tanstack/react-form': ^1.33.5
-  '@tanstack/react-router': ^1.170.39
-  '@tanstack/react-start': ^1.168.58
-  '@tanstack/router-cli': ^1.167.38
-  '@tanstack/start-static-server-functions': ^1.167.37
+  '@tanstack/react-router': ^1.170.41
+  '@tanstack/react-start': ^1.168.60
+  '@tanstack/router-cli': ^1.167.40
+  '@tanstack/start-static-server-functions': ^1.167.39
   '@turbo/gen': ^2.11.4
   '@types/mdx': ^2.0.14
   '@types/node': ^26.6.2
