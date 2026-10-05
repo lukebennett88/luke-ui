@@ -6,6 +6,7 @@ import { Prose, proseRecipe } from '@luke-ui/react/prose';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
 import { expect, test } from 'vite-plus/test';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
@@ -241,14 +242,17 @@ test('fits media inside a narrow prose column', async () => {
 	}
 });
 
-test('scrolls long preformatted lines without widening a narrow grid column', () => {
+test('scrolls long preformatted lines without widening a narrow grid column', async () => {
 	const code = 'padding-inline: var(--luke-space-sp16);'.repeat(5);
-	const { locator } = render(
+	const { locator, user } = render(
 		<Prose style={{ display: 'grid', inlineSize: 160 }}>
-			<pre>
+			<button type="button">Before code</button>
+			{/* Scrollable code needs keyboard focus. */}
+			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+			<pre tabIndex={0}>
 				<code>{code}</code>
 			</pre>
-			<Text elementType="pre">
+			<Text elementType="pre" tabIndex={0}>
 				<Code>{code}</Code>
 			</Text>
 		</Prose>,
@@ -263,25 +267,39 @@ test('scrolls long preformatted lines without widening a narrow grid column', ()
 		pre.scrollLeft = 100;
 		expect(pre.scrollLeft).toBe(100);
 	}
+
+	const firstPre = query(root, 'pre:first-of-type');
+	firstPre.scrollLeft = 0;
+	locator.getByRole('button', { name: 'Before code' }).element().focus();
+	await user.tab();
+	expect(firstPre).toHaveFocus();
+	await user.keyboard('{ArrowRight}');
+	await expect.poll(() => firstPre.scrollLeft).toBeGreaterThan(0);
 });
 
-test('keeps multiline Code inside pre at the same size as plain code', () => {
+test('preserves line breaks in multiline Code inside pre', () => {
 	const code = 'first line\nsecond line';
 	const { locator } = render(
 		<Prose>
+			<Text elementType="pre">first line</Text>
 			<Text elementType="pre">{code}</Text>
+			<Text elementType="pre">
+				<Code>first line</Code>
+			</Text>
 			<Text elementType="pre">
 				<Code>{code}</Code>
 			</Text>
 		</Prose>,
 	);
-	const plain = query(locator.element(), 'pre:first-of-type');
-	const composed = query(locator.element(), 'pre:last-of-type');
+	const root = locator.element();
+	const plainSingle = query(root, 'pre:nth-of-type(1)').getBoundingClientRect().height;
+	const plainMultiline = query(root, 'pre:nth-of-type(2)').getBoundingClientRect().height;
+	const composedSingle = query(root, 'pre:nth-of-type(3)').getBoundingClientRect().height;
+	const composedMultiline = query(root, 'pre:nth-of-type(4)').getBoundingClientRect().height;
 
-	expect(composed.getBoundingClientRect().height).toBeCloseTo(
-		plain.getBoundingClientRect().height,
-		0,
-	);
+	expect(plainMultiline).toBeGreaterThan(plainSingle);
+	expect(composedMultiline).toBeGreaterThan(composedSingle);
+	expect(composedMultiline).toBeCloseTo(plainMultiline, 0);
 });
 
 const swatch =
@@ -344,10 +362,12 @@ const document = (
 		</Blockquote>
 
 		<Heading level={4}>Reading a token</Heading>
-		<pre>
+		{/* Scrollable code needs keyboard focus. */}
+		{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+		<pre tabIndex={0}>
 			<code>{'padding-inline: var(--luke-space-sp16);\nmargin-block: 0;'}</code>
 		</pre>
-		<Text elementType="pre">
+		<Text elementType="pre" tabIndex={0}>
 			<Code>{'padding-inline: var(--luke-space-sp16);\nmargin-block: 0;'}</Code>
 		</Text>
 		<img alt="" height={64} src={swatch} width={320} />
@@ -359,7 +379,11 @@ const document = (
 		<table>
 			<thead>
 				<tr>
-					<th scope="col">Step</th>
+					<th scope="col">
+						Step
+						<br />
+						name
+					</th>
 					<th scope="col">Value</th>
 				</tr>
 			</thead>
@@ -367,6 +391,8 @@ const document = (
 				<tr>
 					<td>
 						<Code>sp8</Code>
+						<br />
+						Small gap
 					</td>
 					<td>8px</td>
 				</tr>
@@ -417,6 +443,12 @@ const document = (
 		</figure>
 	</Prose>
 );
+
+test('the prose document has no axe violations', async () => {
+	const { container } = render(<Stack width="18rem">{document}</Stack>);
+
+	await expectNoAxeViolations(container);
+});
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {

@@ -8,9 +8,8 @@ const swatch =
 export default () => {
 	return (
 		<Prose style={{ inlineSize: '18rem', maxInlineSize: '100%' }}>
-			<Text elementType="p">Media fits the column, while long code lines scroll within it.</Text>
-			<img alt="Gray sample swatch" height={64} src={swatch} width={320} />
-			<Text elementType="pre">
+			<img alt="Grey sample swatch" height={64} src={swatch} width={320} />
+			<Text elementType="pre" tabIndex={0}>
 				<Code>{'padding-inline: var(--luke-space-sp16);'}</Code>
 			</Text>
 			<table>
