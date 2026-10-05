@@ -192,7 +192,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'railStart',
 	],
 	'layout/visually-hidden.mdx::packages/@luke-ui/react/src/core/visually-hidden/visually-hidden.tsx::VisuallyHiddenProps':
-		['elementType', 'isFocusable'],
+		['elementType'],
 	'primitives/button.mdx::packages/@luke-ui/react/src/core/primitives/button/button.tsx::ButtonProps':
 		['appearance', 'isBlock', 'isDisabled', 'isPending', 'size', 'tone'],
 	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxContentProps':
