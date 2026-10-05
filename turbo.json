@@ -64,7 +64,7 @@
 			]
 		},
 		"check:format": {
-			"dependsOn": ["generate"]
+			"dependsOn": ["generate", "^build"]
 		},
 		"check:lint": {
 			"dependsOn": ["generate", "^build"]
@@ -87,7 +87,7 @@
 			"outputs": [".output/**", ".source/**", "dist/**"]
 		},
 		"docs#check:format": {
-			"dependsOn": ["docs#generate"]
+			"dependsOn": ["docs#generate", "^build"]
 		},
 		"docs#check:lint": {
 			"dependsOn": ["docs#generate", "^build"]
@@ -117,7 +117,7 @@
 		},
 		"fix:format": {
 			"cache": false,
-			"dependsOn": ["generate"]
+			"dependsOn": ["generate", "^build"]
 		},
 		"fix:lint": {
 			"cache": false,
