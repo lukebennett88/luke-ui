@@ -185,13 +185,46 @@ export const mobileTrigger = style({
 	},
 });
 
+// Same overlay roles as `MobileOverlay` and docs search. The helpers in the package are private.
+const enterTiming = `${vars.motion.duration.enter} ${vars.motion.easing.standard}`;
+const exitTiming = `${vars.motion.duration.exit} ${vars.motion.easing.exit}`;
+
+const scrimEnter = `opacity ${enterTiming}`;
+const scrimExit = `opacity ${exitTiming}`;
+const drawerEnter = `opacity ${enterTiming}, translate ${enterTiming}`;
+const drawerExit = `opacity ${exitTiming}, translate ${exitTiming}`;
+
+// Off-screen toward the inline-end edge.
+const drawerOffscreen = '100% 0';
+
 export const drawerOverlay = style({
 	'@layer': {
 		recipes: {
 			backgroundColor: vars.color.overlay.backdrop,
 			inset: 0,
 			position: 'fixed',
+			transition: scrimEnter,
 			zIndex: 100,
+			selectors: {
+				'&[data-entering]': {
+					opacity: 0,
+				},
+				'&[data-exiting]': {
+					opacity: 0,
+					pointerEvents: 'none',
+					transition: scrimExit,
+				},
+			},
+			'@media': {
+				// Reduced motion must repeat `none` on each selector, or the state rules win.
+				'(prefers-reduced-motion: reduce)': {
+					transition: 'none',
+					selectors: {
+						'&[data-entering]': { opacity: 1, transition: 'none' },
+						'&[data-exiting]': { opacity: 1, pointerEvents: 'none', transition: 'none' },
+					},
+				},
+			},
 		},
 	},
 });
@@ -204,6 +237,28 @@ export const drawerModal = style({
 			boxShadow: vars.depth.overlay,
 			inlineSize: 'min(22rem, 90vw)',
 			marginInlineStart: 'auto',
+			transition: drawerEnter,
+			translate: 'none',
+			selectors: {
+				'&[data-entering]': {
+					opacity: 0,
+					translate: drawerOffscreen,
+				},
+				'&[data-exiting]': {
+					opacity: 0,
+					transition: drawerExit,
+					translate: drawerOffscreen,
+				},
+			},
+			'@media': {
+				'(prefers-reduced-motion: reduce)': {
+					transition: 'none',
+					selectors: {
+						'&[data-entering]': { opacity: 1, transition: 'none', translate: 'none' },
+						'&[data-exiting]': { opacity: 1, transition: 'none', translate: 'none' },
+					},
+				},
+			},
 		},
 	},
 });
