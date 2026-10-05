@@ -69,14 +69,17 @@ export function DocsSearchProvider({ children }: { children: ReactNode }) {
 		setAnchor(measured ? fitSearchAnchorToViewport(measured) : null);
 	}, []);
 
-	// View Transition morph needs the open update in a transition. Close stays synchronous so the
-	// trigger is no longer inert when focus is restored.
+	// Both open and close must run in a transition, or React skips the View Transition morph.
 	const setSearchOpen = useCallback((nextOpen: boolean) => {
-		if (nextOpen) {
-			startTransition(() => setIsOpen(true));
-			return;
-		}
-		setIsOpen(false);
+		startTransition(() => setIsOpen(nextOpen));
+	}, []);
+
+	// The wide trigger button remounts on close, so React Aria has no node to restore focus to.
+	// Wait until the dialog has exited: its focus trap pulls focus back while it is still mounted.
+	const restoreWideTriggerFocus = useCallback(() => {
+		const host = wideTriggerRef.current;
+		if (!isSearchTriggerVisible(host)) return;
+		requestAnimationFrame(() => host?.querySelector('button')?.focus());
 	}, []);
 
 	const openSearch = useCallback(
@@ -134,7 +137,12 @@ export function DocsSearchProvider({ children }: { children: ReactNode }) {
 	return (
 		<SearchContext value={contextValue}>
 			{children}
-			<DocsSearchDialog anchor={anchor} isOpen={isOpen} onOpenChange={setSearchOpen} />
+			<DocsSearchDialog
+				anchor={anchor}
+				isOpen={isOpen}
+				onExited={restoreWideTriggerFocus}
+				onOpenChange={setSearchOpen}
+			/>
 		</SearchContext>
 	);
 }
@@ -167,8 +175,8 @@ function SearchShortcutLabel() {
 export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }) {
 	const context = use(SearchContext);
 	if (!context) throw new Error('DocsSearchTrigger must be inside DocsSearchProvider');
-	const { compactTriggerRef, isOpen, openSearch, wideTriggerRef } = context;
 	if (isCompact) {
+		const { compactTriggerRef, openSearch } = context;
 		return (
 			<IconButton
 				aria-label="Open Search"
@@ -182,8 +190,15 @@ export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }
 		);
 	}
 
-	// Keep the same button node mounted while open so React Aria can restore focus to it.
-	// Drop the shared VT name once open so only the dialog field owns the morph target.
+	return <WideSearchTrigger context={context} />;
+}
+
+function WideSearchTrigger({ context }: { context: SearchContextValue }) {
+	const { isOpen, openSearch, wideTriggerRef } = context;
+
+	// The share morph needs one named boundary to unmount while another with the same name mounts.
+	// In React 19.3, changing `name` on a mounted boundary does nothing. So unmount the trigger
+	// boundary while open and keep a hidden placeholder to hold the layout.
 	return (
 		<div
 			className={styles.fieldMorphHost}
@@ -192,32 +207,31 @@ export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }
 				wideTriggerRef.current = node;
 			}}
 		>
-			<ViewTransition
-				{...(isOpen
-					? { default: 'none', enter: 'none', exit: 'none', name: 'none', share: 'none' }
-					: searchFieldViewTransition)}
-			>
-				<Button
-					aria-hidden={isOpen || undefined}
-					aria-label="Search documentation"
-					className={isOpen ? styles.triggerSlotReserve : styles.trigger}
-					isBlock
-					onPress={() => openSearch('wide')}
-					prominence="low"
-					size="small"
-				>
-					<Track
-						className={styles.triggerTrack}
-						elementType="span"
-						gap="sp8"
-						railAlignment="center"
-						railEnd={<SearchShortcutLabel />}
-						railStart={<Icon name="search" />}
+			{isOpen ? (
+				<div aria-hidden className={styles.triggerSlotReserve} />
+			) : (
+				<ViewTransition {...searchFieldViewTransition}>
+					<Button
+						aria-label="Search documentation"
+						className={styles.trigger}
+						isBlock
+						onPress={() => openSearch('wide')}
+						prominence="low"
+						size="small"
 					>
-						<span className={styles.triggerPlaceholder}>Search</span>
-					</Track>
-				</Button>
-			</ViewTransition>
+						<Track
+							className={styles.triggerTrack}
+							elementType="span"
+							gap="sp8"
+							railAlignment="center"
+							railEnd={<SearchShortcutLabel />}
+							railStart={<Icon name="search" />}
+						>
+							<span className={styles.triggerPlaceholder}>Search</span>
+						</Track>
+					</Button>
+				</ViewTransition>
+			)}
 		</div>
 	);
 }
