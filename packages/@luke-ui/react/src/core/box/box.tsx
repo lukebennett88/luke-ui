@@ -1,5 +1,5 @@
 import type { JSX, Ref } from 'react';
-import { mergeProps } from '../../shared/utils/utils.js';
+import { mergeProps, presentationMergeTail } from '../../shared/utils/utils.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import { createSprinkles } from '../styles/utilities.css.js';
 import type {
@@ -7,6 +7,7 @@ import type {
 	BoxLikeRef,
 	BoxLikeRenderProps,
 	BoxLikeRenderState,
+	BoxLikeResolvedRenderProps,
 } from '../types/box-like-props.js';
 import type { Prettify } from '../types/prettify.js';
 
@@ -27,12 +28,13 @@ export function Box(props: BoxProps): JSX.Element {
 		...restProps
 	} = props;
 
+	const presentation = presentationMergeTail(props, { children, className, style });
+
 	if (renderRoot) {
-		const renderProps = mergeProps(createSprinkles(normaliseRef(restProps)), {
-			children,
-			className,
-			style,
-		});
+		const renderProps = mergeProps(
+			createSprinkles(normaliseRef(restProps)),
+			presentation,
+		) as BoxLikeResolvedRenderProps;
 
 		return renderRoot(renderProps, boxLikeRenderState);
 	}
@@ -41,11 +43,7 @@ export function Box(props: BoxProps): JSX.Element {
 	// unchanged, so it reaches the element without being named here. `normaliseRef`
 	// swaps it for a callback: a `RefObject<HTMLElement>` can't spread onto a
 	// narrower concrete element (`current` is invariant), but a callback ref can.
-	const domProps = mergeProps(createSprinkles(normaliseRef(restProps)), {
-		children,
-		className,
-		style,
-	});
+	const domProps = mergeProps(createSprinkles(normaliseRef(restProps)), presentation);
 	return <Element {...domProps} />;
 }
 

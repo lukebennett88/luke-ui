@@ -1,4 +1,5 @@
 import { chain } from '@react-aria/utils';
+import type { CSSProperties } from 'react';
 
 /**
  * Joins a space-separated token list, such as class names or an `aria-labelledby` ID list, and
@@ -125,6 +126,25 @@ function mergePropObjects(
 	}
 
 	return result;
+}
+
+/**
+ * Builds a merge tail for presentation props that were present on `sourceProps`.
+ * Omits keys the caller did not supply so optional destructuring does not clear merges.
+ */
+export function presentationMergeTail(
+	sourceProps: object,
+	values: {
+		children?: unknown;
+		className?: string;
+		style?: CSSProperties;
+	},
+): Record<string, unknown> {
+	const tail: Record<string, unknown> = {};
+	if ('children' in sourceProps) tail.children = values.children;
+	if ('className' in sourceProps) tail.className = values.className;
+	if ('style' in sourceProps) tail.style = values.style;
+	return tail;
 }
 
 /**

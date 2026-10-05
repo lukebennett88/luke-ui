@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { cx, mergeProps } from '../../shared/utils/utils.js';
+import { cx, mergeProps, presentationMergeTail } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
 import type { SpaceStep } from '../../theme/contract.js';
 import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
@@ -69,10 +69,13 @@ export function Bleed({
 	return (
 		<Box
 			{...omitUnsupportedSprinklesProps(props, bleedProperties)}
-			{...mergeProps(inlineStartStyle, inlineEndStyle, blockStartStyle, blockEndStyle, {
-				className,
-				style,
-			})}
+			{...mergeProps(
+				inlineStartStyle,
+				inlineEndStyle,
+				blockStartStyle,
+				blockEndStyle,
+				presentationMergeTail(props, { className, style }),
+			)}
 		/>
 	);
 }

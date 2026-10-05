@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { mergeProps } from '../../shared/utils/utils.js';
+import { mergeProps, presentationMergeTail } from '../../shared/utils/utils.js';
 import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
@@ -47,10 +47,10 @@ export function Grid({
 				resolveColumnsStyle(columns),
 				resolveRowsStyle(rows),
 				resolveAreasStyle(areas),
-				{
+				presentationMergeTail(props, {
 					className: gridRecipe({ className }),
 					style,
-				},
+				}),
 			)}
 			alignContent={alignContent}
 			alignItems={alignItems}
