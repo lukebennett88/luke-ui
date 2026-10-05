@@ -267,16 +267,16 @@ catalogs:
       specifier: ^7.1.1
       version: 7.1.1
     fumadocs-core:
-      specifier: ^16.15.14
+      specifier: ^16.15.17
       version: 16.15.17
     fumadocs-mdx:
-      specifier: ^15.4.4
+      specifier: ^15.4.5
       version: 15.4.5
     fumadocs-typescript:
       specifier: ^5.4.1
       version: 5.4.1
     fumadocs-ui:
-      specifier: ^16.15.14
+      specifier: ^16.15.17
       version: 16.15.17
     knip:
       specifier: ^6.38.0
