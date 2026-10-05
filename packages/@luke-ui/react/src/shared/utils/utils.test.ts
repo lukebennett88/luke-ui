@@ -114,6 +114,26 @@ test('infers the merged return type for fixed positional arguments', () => {
 	expectTypeOf(cleared).toEqualTypeOf<{ className: undefined; style: undefined }>();
 });
 
+test('keeps earlier className and style when a later optional prop object omits them', () => {
+	const optionalPresentation: { className?: string; style?: { color?: string } } = {};
+	const withEarlier = mergeProps(
+		{ className: 'first', style: { color: 'red', padding: 4 } },
+		optionalPresentation,
+	);
+
+	expect(withEarlier.className).toBe('first');
+	expect(withEarlier.style).toEqual({ color: 'red', padding: 4 });
+	expectTypeOf(withEarlier).toEqualTypeOf<{
+		className: string | undefined;
+		style: Record<string, unknown> | undefined;
+	}>();
+
+	const optionalWithClass: { className?: string } = { className: 'second' };
+	const mergedClass = mergeProps({ className: 'first' }, optionalWithClass);
+	expect(mergedClass.className).toBe('first second');
+	expectTypeOf(mergedClass).toEqualTypeOf<{ className: string | undefined }>();
+});
+
 test('widens the return type for an unknown-length array spread', () => {
 	const tail: Array<{ id: boolean; extra: number }> = [];
 	const result = mergeProps({ id: 1 }, { id: 'second' }, ...tail);

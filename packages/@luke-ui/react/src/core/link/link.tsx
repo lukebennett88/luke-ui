@@ -25,7 +25,7 @@ type LinkContentProps =
 			startContent?: never;
 	  };
 
-type _LinkOmit = DistributiveOmit<RacLinkProps, 'href' | 'isDisabled' | 'onPress'>;
+type _LinkOmit = DistributiveOmit<RacLinkProps, 'href' | 'isDisabled' | 'onPress' | 'slot'>;
 
 interface _LinkProps extends _LinkOmit {
 	/** URL the Link points to. */

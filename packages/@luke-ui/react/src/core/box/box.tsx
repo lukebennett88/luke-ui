@@ -1,5 +1,5 @@
 import type { JSX, Ref } from 'react';
-import { mergeProps, presentationMergeTail } from '../../shared/utils/utils.js';
+import { cx } from '../../shared/utils/utils.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import { createSprinkles } from '../styles/utilities.css.js';
 import type {
@@ -28,23 +28,26 @@ export function Box(props: BoxProps): JSX.Element {
 		...restProps
 	} = props;
 
-	const presentation = presentationMergeTail(props, { children, className, style });
+	// `createSprinkles` always emits `className` and `style`. Destructuring turns absent
+	// consumer presentation into `undefined`; spreading that through `mergeProps` would
+	// clear the sprinkles output. Merge presentation here so absent keys stay absent.
+	const sprinkles = createSprinkles(normaliseRef(restProps));
+	const resolved: BoxLikeResolvedRenderProps = {
+		...sprinkles,
+		...(children !== undefined ? { children } : {}),
+		className: cx(sprinkles.className, className),
+		style: style === undefined ? sprinkles.style : { ...sprinkles.style, ...style },
+	};
 
 	if (renderRoot) {
-		const renderProps = mergeProps(
-			createSprinkles(normaliseRef(restProps)),
-			presentation,
-		) as BoxLikeResolvedRenderProps;
-
-		return renderRoot(renderProps, boxLikeRenderState);
+		return renderRoot(resolved, boxLikeRenderState);
 	}
 
 	// `restProps` still carries `ref`; createSprinkles passes unknown keys through
 	// unchanged, so it reaches the element without being named here. `normaliseRef`
 	// swaps it for a callback: a `RefObject<HTMLElement>` can't spread onto a
 	// narrower concrete element (`current` is invariant), but a callback ref can.
-	const domProps = mergeProps(createSprinkles(normaliseRef(restProps)), presentation);
-	return <Element {...domProps} />;
+	return <Element {...resolved} />;
 }
 
 interface _BoxElementProps extends BoxLikeElementProps, SprinklesProps {}

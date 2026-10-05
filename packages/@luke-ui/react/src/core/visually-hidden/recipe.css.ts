@@ -1,5 +1,4 @@
 import type { StyleRule } from '@vanilla-extract/css';
-import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /**
@@ -21,10 +20,7 @@ export const visuallyHiddenStyle = {
 	whiteSpace: 'nowrap', // stop text wrapping inside the 1px box
 } satisfies StyleRule;
 
-/** Recipe for content hidden visually but kept available to assistive technology. */
+/** Package-private recipe for content hidden visually but kept available to assistive technology. */
 export const visuallyHiddenRecipe = recipe({
 	base: visuallyHiddenStyle,
 });
-
-/** Presentation props accepted by `visuallyHiddenRecipe`. */
-export type VisuallyHiddenRecipeVariants = RecipeSelection<typeof visuallyHiddenRecipe>;

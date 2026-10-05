@@ -397,6 +397,27 @@ test('supports semantic and caller-owned elements', () => {
 	expect(getComputedStyle(element).marginInlineStart).toBe('-16px');
 });
 
+test('keeps consumer className and style alongside bleed presentation', () => {
+	const { locator } = render(
+		<Bleed
+			className="consumer-bleed"
+			data-testid="bleed"
+			inline="sp16"
+			style={{ backgroundColor: 'rgb(1, 2, 3)', position: 'relative' }}
+		>
+			Content
+		</Bleed>,
+	);
+	const bleed = expectHtmlElement(locator.getByTestId('bleed').element());
+	const style = getComputedStyle(bleed);
+
+	expect(bleed.className.split(/\s+/)).toContain('consumer-bleed');
+	expect(style.marginInlineStart).toBe('-16px');
+	expect(style.marginInlineEnd).toBe('-16px');
+	expect(style.backgroundColor).toBe('rgb(1, 2, 3)');
+	expect(style.position).toBe('relative');
+});
+
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator: scene } = render(

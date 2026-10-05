@@ -1,4 +1,4 @@
-import type { HTMLAttributes, JSX, ReactElement, Ref, RefObject } from 'react';
+import type { CSSProperties, HTMLAttributes, JSX, ReactElement, Ref, RefObject } from 'react';
 
 /** Structural elements a Box-like component may render. */
 type BoxLikeElementType = keyof Pick<
@@ -38,9 +38,19 @@ export interface BoxLikeElementProps extends HTMLAttributes<HTMLElement> {
 	renderRoot?: never;
 }
 
-/** Resolved root props a Box-like component hands to `renderRoot` after sprinkles merge. */
-export type BoxLikeResolvedRenderProps = Omit<HTMLAttributes<HTMLElement>, 'ref'> & {
+/**
+ * Resolved root props a Box-like component hands to `renderRoot` after sprinkles merge.
+ *
+ * `className` and `style` are always present: sprinkles emits them, and absent consumer
+ * presentation does not clear them.
+ */
+export type BoxLikeResolvedRenderProps = Omit<
+	HTMLAttributes<HTMLElement>,
+	'className' | 'ref' | 'style'
+> & {
+	className: string;
 	ref: BoxLikeRef;
+	style: CSSProperties;
 };
 
 /** Curated render state for Box-like roots. Box-like roots have no interactive state today. */

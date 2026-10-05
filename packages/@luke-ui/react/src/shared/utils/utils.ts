@@ -1,5 +1,4 @@
 import { chain } from '@react-aria/utils';
-import type { CSSProperties } from 'react';
 
 /**
  * Joins a space-separated token list, such as class names or an `aria-labelledby` ID list, and
@@ -18,24 +17,50 @@ export function cx(...parts: Array<string | undefined | null | false>): string {
 	return result;
 }
 
+/** True when `K` is an optional key on `T` (may be absent from a value of that type). */
+type IsOptionalKey<T, K extends PropertyKey> = K extends keyof T
+	? {} extends Pick<T, K>
+		? true
+		: false
+	: false;
+
+/**
+ * `className` merge result.
+ *
+ * - Later required `string` → `string`
+ * - Later required `undefined` → `undefined`
+ * - Later required `string | undefined` → `string | undefined`
+ * - Later optional `className?` → may be absent (keep earlier) or present (merge/clear) →
+ *   `string | undefined`
+ * - No later `className` → earlier value
+ */
 type MergedClassName<A, B> = 'className' extends keyof B
-	? undefined extends B['className']
-		? undefined
-		: string
+	? IsOptionalKey<B, 'className'> extends true
+		? string | undefined
+		: [B['className']] extends [undefined]
+			? undefined
+			: undefined extends B['className']
+				? string | undefined
+				: string
 	: 'className' extends keyof A
 		? A['className'] extends string
 			? string
-			: undefined
+			: A['className']
 		: never;
 
+/** `style` merge result. Same optional-vs-required rules as `MergedClassName`. */
 type MergedStyle<A, B> = 'style' extends keyof B
-	? undefined extends B['style']
-		? undefined
-		: Record<string, unknown>
+	? IsOptionalKey<B, 'style'> extends true
+		? Record<string, unknown> | undefined
+		: [B['style']] extends [undefined]
+			? undefined
+			: undefined extends B['style']
+				? Record<string, unknown> | undefined
+				: Record<string, unknown>
 	: 'style' extends keyof A
 		? A['style'] extends object
 			? Record<string, unknown>
-			: undefined
+			: A['style']
 		: never;
 
 type Merged<A, B> = {
@@ -126,31 +151,6 @@ function mergePropObjects(
 	}
 
 	return result;
-}
-
-/**
- * Builds a merge tail for presentation props that were present on `sourceProps`.
- * Omits keys the caller did not supply so optional destructuring does not clear merges.
- */
-export function presentationMergeTail(
-	sourceProps: object,
-	values: {
-		children?: unknown;
-		className?: string;
-		style?: CSSProperties;
-	},
-): Record<string, unknown> {
-	const tail: Record<string, unknown> = {};
-	if ('children' in sourceProps && values.children !== undefined) {
-		tail.children = values.children;
-	}
-	if ('className' in sourceProps && values.className !== undefined) {
-		tail.className = values.className;
-	}
-	if ('style' in sourceProps && values.style !== undefined) {
-		tail.style = values.style;
-	}
-	return tail;
 }
 
 /**

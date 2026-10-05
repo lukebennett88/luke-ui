@@ -23,7 +23,7 @@ interface IconLinkBaseProps extends IconLinkPresentationProps {
 
 type _IconLinkOmit = DistributiveOmit<
 	RacLinkProps,
-	'aria-label' | 'aria-labelledby' | 'children' | 'href' | 'isDisabled' | 'onPress'
+	'aria-label' | 'aria-labelledby' | 'children' | 'href' | 'isDisabled' | 'onPress' | 'slot'
 >;
 
 interface _IconLinkProps extends _IconLinkOmit {

@@ -69,14 +69,17 @@ RAC `slot` is a composition seam, not a free pass.
 
 - Primitives may expose `slot` when RAC slot composition is an intentional consumer capability.
 - High-level components omit `slot` unless a demonstrated product need exists. Form fields from #714
-  omit it (`SelectField` and peers).
+  omit it (`SelectField`, `ComboboxField`, `TextInputField`, `Checkbox`). High-level `Button`,
+  `IconButton`, `Link`, and `IconLink` also omit it; use the button/link primitives for RAC slot
+  composition.
 
 ### Controlled and uncontrolled
 
 Stateful and form components follow React Aria's controlled/uncontrolled pairs (`value` /
 `defaultValue`, `isSelected` / `defaultSelected`, open-state pairs where documented). Controlled
-mode requires the matching change handler. High-level fields keep the pairs #714 settled. Do not
-invent parallel APIs.
+value props and their change handlers are independent in the public types: TypeScript does not
+require the matching handler when a controlled value is set. Prefer supplying both in product code.
+High-level fields keep the pairs #714 settled. Do not invent parallel APIs.
 
 ### Meaningful defaults
 
@@ -149,7 +152,9 @@ Public: `Heading`, `HeadingProps`, `HeadingLevel`, `HeadingLevels`, `HeadingLeve
 | Drop public `HeadingTag`, `HeadingLevelsRenderProps`, `iconViewBoxes` | No independent annotation need                                 |
 | Drop public theme defaults (`defaultBackdrop`, …)                     | Internal `defineTheme` only                                    |
 | Drop layout recipes without independent use                           | See audit                                                      |
-| High-level Button/IconButton omit RAC `render`                        | Composition on the button primitive                            |
+| High-level Button/IconButton omit RAC `render` and `slot`             | Composition on the button primitive                            |
+| High-level Link/IconLink omit RAC `slot`                              | Composition on the link primitive / RAC Link                   |
+| Drop public `visuallyHiddenRecipe`                                    | `VisuallyHidden` + `elementType` covers consumer use           |
 | Constrain `LoadingSkeleton` `elementType`                             | Narrow demonstrated substitutions                              |
 
 ## Follow-ups

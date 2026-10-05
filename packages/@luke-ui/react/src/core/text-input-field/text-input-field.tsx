@@ -28,6 +28,7 @@ type _TextInputFieldOmit = DistributiveOmit<
 	| 'inputId'
 	| 'isInvalid'
 	| 'size'
+	| 'slot'
 	| keyof DocumentedInputProps
 >;
 

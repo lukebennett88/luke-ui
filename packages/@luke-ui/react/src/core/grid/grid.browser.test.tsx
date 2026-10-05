@@ -38,6 +38,31 @@ test('creates equal explicit columns', () => {
 	expect(second.getBoundingClientRect().top).toBe(third.getBoundingClientRect().top);
 });
 
+test('keeps consumer className and style alongside grid presentation', () => {
+	const { locator } = render(
+		<Grid
+			className="consumer-grid"
+			columns={2}
+			data-testid="grid"
+			gap="sp8"
+			inlineSize="20rem"
+			style={{ backgroundColor: 'rgb(4, 5, 6)', position: 'relative' }}
+		>
+			<span style={{ blockSize: '1rem' }} />
+			<span style={{ blockSize: '1rem' }} />
+		</Grid>,
+	);
+	const element = locator.getByTestId('grid').element();
+	if (!(element instanceof HTMLElement)) throw new Error('Expected Grid element.');
+	const style = getComputedStyle(element);
+
+	expect(element.className.split(/\s+/)).toContain('consumer-grid');
+	expect(style.display).toBe('grid');
+	expect(style.backgroundColor).toBe('rgb(4, 5, 6)');
+	expect(style.position).toBe('relative');
+	expect(style.inlineSize).toBe('320px');
+});
+
 test('applies a CSS track list passed to columns', () => {
 	const { locator } = render(
 		<Grid columns="12rem 1fr" data-testid="grid" inlineSize="40rem">

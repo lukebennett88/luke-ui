@@ -42,10 +42,14 @@ type _ComboboxFieldOmit<T extends object> = DistributiveOmit<
 	| 'aria-labelledby'
 	| 'children'
 	| 'className'
+	| 'defaultOpen'
 	| 'id'
 	| 'inputId'
 	| 'isInvalid'
+	| 'isOpen'
+	| 'onOpenChange'
 	| 'ref'
+	| 'slot'
 	| keyof ComboboxFieldRedeclaredRACProps
 >;
 

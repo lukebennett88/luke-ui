@@ -6,18 +6,17 @@ Not normative contributor guidance. Durable rules live in
 
 Decision values: **retain**, **change**, **remove**, **defer**.
 
-## Cross-cutting dimensions reviewed
+Evidence is from the TypeScript sources and prop-analysis expectations on this branch unless noted.
 
-These were audited across the public surface. Notable rules are recorded in `docs/PUBLIC_API.md`.
-Component-specific notes appear only where they change the contract.
+## Cross-cutting dimensions
 
 ### Controlled / uncontrolled
 
-| Area                                                                       | Finding                                                                                                                                  |
-| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Form fields (`TextInputField`, `SelectField`, `ComboboxField`, `Checkbox`) | Keep RAC-style `value`/`defaultValue` or `isSelected`/`defaultSelected` pairs from #714. Controlled mode requires the change handler.    |
-| Open state on select/combobox                                              | High-level fields omit open-state control where #714 chose label/value-focused APIs; primitives retain RAC open pairs for custom chrome. |
-| `LoadingSkeleton`                                                          | `isLoading` may be controlled locally or inherited from `LoadingSkeletonProvider`.                                                       |
+| Area                                                                       | Finding                                                                                                                                                                                                 |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Form fields (`TextInputField`, `SelectField`, `ComboboxField`, `Checkbox`) | Keep RAC-style `value`/`defaultValue` or `isSelected`/`defaultSelected` pairs from #714. Public types allow controlled value props and handlers independently; they do not require the matching handler. |
+| Open state on select/combobox                                              | High-level `SelectField` and `ComboboxField` omit `defaultOpen`, `isOpen`, and `onOpenChange` (label/value-focused APIs from #714). Primitives retain RAC open pairs for custom chrome.                  |
+| `LoadingSkeleton`                                                          | `isLoading` may be controlled locally or inherited from `LoadingSkeletonProvider`.                                                                                                                      |
 
 ### Meaningful defaults
 
@@ -26,17 +25,17 @@ Component-specific notes appear only where they change the contract.
 | Button/Link `appearance`, `tone`, `prominence`, `size` | Product look without props.                               |
 | Field control `size` (`medium`)                        | Aligns control chrome and icons.                          |
 | Box `elementType` (`div`)                              | Structural default; mutual exclusivity with `renderRoot`. |
-| LoadingSkeleton `elementType` (`div`)                  | Narrowed to `div` \| `li` \| `span`.                      |
+| LoadingSkeleton `elementType` (`span`)                 | Narrowed to `div` \| `li` \| `span`; default is `span`.   |
 
 Absence of optional layout/DOM props is not treated as a catalogue of public defaults.
 
 ### Slot
 
-| Surface                                                            | Decision                                                        |
-| ------------------------------------------------------------------ | --------------------------------------------------------------- |
-| Primitives (button, select, combobox, field, text-input, checkbox) | Retain RAC `slot` where the primitive forwards RAC composition. |
-| High-level form fields                                             | Omit `slot` (explicit on `SelectField`; same policy for peers). |
-| High-level Button/IconButton/Link                                  | Do not expose RAC `slot` for free.                              |
+| Surface                                                            | Decision                                                                                   |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| Primitives (button, select, combobox, field, text-input, checkbox) | Retain RAC `slot` where the primitive forwards RAC composition.                            |
+| High-level form fields                                             | Omit `slot` (`SelectField`, `ComboboxField`, `TextInputField`, `Checkbox`).                |
+| High-level Button/IconButton/Link/IconLink                         | Omit RAC `slot`. Use primitives when slot composition is required.                         |
 
 ### Render contracts
 
@@ -60,29 +59,30 @@ only for primitive composition typing (`SelectSize`, `TextInputSize`, `ComboboxS
 
 ## Recipe decisions
 
-| Recipe                 | Decision   | Independent consumer use                                                                         |
-| ---------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
-| `buttonRecipe`         | retain     | Button chrome on an app-owned element (`apps/docs/src/examples/styling/button-recipe.tsx`)       |
-| `checkboxRecipe`       | retain     | Checkbox chrome with custom anatomy                                                              |
-| `fieldRecipe`          | retain     | Field chrome in custom field trees                                                               |
-| `textInputRecipe`      | retain     | Input chrome in custom controls                                                                  |
-| `visuallyHiddenRecipe` | retain     | Visually hidden text without the component (`apps/docs/src/examples/visually-hidden/recipe.tsx`) |
-| `iconRecipe`           | retain     | Size/colour on custom SVG via `createIcon`                                                       |
-| `iconButtonRecipe`     | retain     | Icon-button chrome on an owned control                                                           |
-| `linkRecipe`           | retain     | Link appearance on router/anchors the app owns                                                   |
-| `textRecipe`           | retain     | Typography treatment on owned text elements                                                      |
-| `blockquoteRecipe`     | retain     | Blockquote treatment in app-owned markup / MDX                                                   |
-| `codeRecipe`           | retain     | Inline code treatment in app-owned markup / MDX                                                  |
-| `kbdRecipe`            | retain     | Keyboard chip treatment in app-owned markup                                                      |
-| `proseRecipe`          | retain     | Long-form rhythm on an owned content root (e.g. MDX article)                                     |
-| `loadingSpinnerRecipe` | retain     | Spinner chrome without `LoadingSpinner` behaviour                                                |
-| `gridRecipe`           | **remove** | Only sets `display: grid`. Apps use Box/`createSprinkles` or `Grid`                              |
-| `aspectRatioRecipe`    | **remove** | Coupled to AspectRatio's media-frame child CSS; no credible standalone use                       |
-| `trackRecipe`          | **remove** | Requires Track's centre/rail/root anatomy; use `Track` (FieldError imports privately)            |
-| `containerRecipe`      | **remove** | Coupled to Container token/container-type behaviour; use `Container`                             |
-| `scrollFadeRecipe`     | **remove** | Fade depends on ScrollFade-owned overflow measurement; use `ScrollFade`                          |
+| Recipe                 | Decision   | Independent consumer use                                                                   |
+| ---------------------- | ---------- | ------------------------------------------------------------------------------------------ |
+| `buttonRecipe`         | retain     | Button chrome on an app-owned element (`apps/docs/src/examples/styling/button-recipe.tsx`) |
+| `checkboxRecipe`       | retain     | Checkbox chrome with custom anatomy                                                        |
+| `fieldRecipe`          | retain     | Field chrome in custom field trees                                                         |
+| `textInputRecipe`      | retain     | Input chrome in custom controls                                                            |
+| `visuallyHiddenRecipe` | **remove** | No use beyond `VisuallyHidden`; `elementType` covers element choice. Package-private only. |
+| `iconRecipe`           | retain     | Size/colour on custom SVG via `createIcon`                                                 |
+| `iconButtonRecipe`     | retain     | Icon-button chrome on an owned control                                                     |
+| `linkRecipe`           | retain     | Link appearance on router/anchors the app owns                                             |
+| `textRecipe`           | retain     | Typography treatment on owned text elements                                                |
+| `blockquoteRecipe`     | retain     | Blockquote treatment in app-owned markup / MDX                                             |
+| `codeRecipe`           | retain     | Inline code treatment in app-owned markup / MDX                                            |
+| `kbdRecipe`            | retain     | Keyboard chip treatment in app-owned markup                                                |
+| `proseRecipe`          | retain     | Long-form rhythm on an owned content root (e.g. MDX article)                               |
+| `loadingSpinnerRecipe` | retain     | Spinner chrome without `LoadingSpinner` behaviour                                          |
+| `gridRecipe`           | **remove** | Only sets `display: grid`. Apps use Box/`createSprinkles` or `Grid`                        |
+| `aspectRatioRecipe`    | **remove** | Coupled to AspectRatio's media-frame child CSS; no credible standalone use                 |
+| `trackRecipe`          | **remove** | Requires Track's centre/rail/root anatomy; use `Track` (FieldError imports privately)      |
+| `containerRecipe`      | **remove** | Coupled to Container token/container-type behaviour; use `Container`                       |
+| `scrollFadeRecipe`     | **remove** | Fade depends on ScrollFade-owned overflow measurement; use `ScrollFade`                    |
 
-Matching `*RecipeVariants` follow the recipe decision.
+Matching `*RecipeVariants` follow the recipe decision. Do not export a variants type for a recipe
+with no variants solely for naming symmetry (`VisuallyHiddenRecipeVariants` removed with the recipe).
 
 ## Other lower-level exports
 
@@ -118,32 +118,32 @@ noted.
 | `bleed`                             | `Bleed`, `BleedProps` retain                                                        |
 | `blockquote`                        | component + `blockquoteRecipe` / variants retain                                    |
 | `box`                               | `Box`, `BoxProps` retain; `BoxLikeResolvedRenderProps` **remove**                   |
-| `button`                            | component + `buttonRecipe` / variants retain                                        |
-| `checkbox`                          | component + `checkboxRecipe` / variants retain                                      |
+| `button`                            | component + `buttonRecipe` / variants retain; omit RAC `render` and `slot`          |
+| `checkbox`                          | component + `checkboxRecipe` / variants retain; omit `slot`                         |
 | `cluster`                           | `Cluster`, `ClusterProps` retain                                                    |
 | `code`                              | component + `codeRecipe` / variants retain                                          |
-| `combobox-field`                    | field + item/section exports retain (#714)                                          |
+| `combobox-field`                    | field + item/section exports retain (#714); omit open-state and `slot`              |
 | `container`                         | `Container`, `ContainerProps` retain; recipe exports **remove**                     |
 | `em` / `emoji` / `strong` / `quote` | component + props retain                                                            |
 | `grid`                              | `Grid`, `GridProps` retain; recipe exports **remove**                               |
 | `heading`                           | Heading surface retain (see PUBLIC_API.md)                                          |
 | `icon`                              | Icon surface + `iconRecipe` retain; `iconViewBoxes` already private                 |
-| `icon-button`                       | component + recipe retain                                                           |
-| `icon-link`                         | component + props retain                                                            |
+| `icon-button`                       | component + recipe retain; omit RAC `render` and `slot`                             |
+| `icon-link`                         | component + props retain; omit RAC `slot`                                           |
 | `kbd`                               | component + recipe retain                                                           |
-| `link`                              | component + recipe retain                                                           |
+| `link`                              | component + recipe retain; omit RAC `slot`                                          |
 | `loading-skeleton`                  | component + provider retain                                                         |
 | `loading-spinner`                   | component + recipe retain                                                           |
 | `numeral`                           | component + format helper types retain                                              |
 | `prose`                             | component + recipe retain                                                           |
 | `provider`                          | `Provider`, `ProviderProps` retain                                                  |
 | `scroll-fade`                       | `ScrollFade`, `ScrollFadeAxis`, `ScrollFadeProps` retain; recipe exports **remove** |
-| `select-field`                      | field + `SelectItem` retain (#714)                                                  |
+| `select-field`                      | field + `SelectItem` retain (#714); omit open-state and `slot`                      |
 | `stack`                             | `Stack`, `StackProps` retain                                                        |
 | `text`                              | component + recipe retain                                                           |
-| `text-input-field`                  | field + props retain (#714)                                                         |
+| `text-input-field`                  | field + props retain (#714); omit `slot`                                            |
 | `track`                             | `Track`, `TrackProps` retain; recipe exports **remove**                             |
-| `visually-hidden`                   | component + recipe retain                                                           |
+| `visually-hidden`                   | `VisuallyHidden`, `VisuallyHiddenProps` retain; recipe exports **remove**           |
 
 ### Primitives
 
@@ -155,13 +155,3 @@ on high-level entrypoints).
 
 Retain current `@luke-ui/react/theme` exports after removal of the three defaults. Retain temporary
 `themes/tactile` and `themes/paper` until #715. Retain styles and utils as above.
-
-## Evidence of dimension review
-
-- Controlled/uncontrolled: inspected field and checkbox prop types and #714 omit lists.
-- Defaults: inspected Button, field controls, Box, LoadingSkeleton.
-- Slot: confirmed high-level `SelectField` omits `slot`; primitives retain RAC forwarding.
-- Render: Box-like `renderRoot` contract tests; Button omits `render`; primitive Button keeps RAC
-  `render`.
-- Refs: field `ref` / `inputRef` / `triggerRef` split reviewed against #714.
-- Variants: recipe colocations and size helper types reviewed for independent typing need.
