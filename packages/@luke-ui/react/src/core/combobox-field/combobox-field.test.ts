@@ -39,21 +39,18 @@ test('ComboboxField takes a root element ref and an input ref', () => {
 	});
 });
 
-test('ComboboxField has no open-state props or slot', () => {
-	// @ts-expect-error — the field owns the overlay's open state
-	assertType<ComboboxFieldProps<Item>>({ children: () => null, isOpen: true, label: 'Country' });
-	// @ts-expect-error — the field owns the overlay's open state
-	assertType<ComboboxFieldProps<Item>>({
-		children: () => null,
-		defaultOpen: true,
-		label: 'Country',
-	});
-	// @ts-expect-error — the field owns the overlay's open state
+test('ComboboxField has no open-state handler or slot', () => {
+	// RAC ComboBox exposes onOpenChange but not isOpen/defaultOpen; the field omits the handler.
 	assertType<ComboboxFieldProps<Item>>({
 		children: () => null,
 		label: 'Country',
+		// @ts-expect-error — the field owns the overlay's open state
 		onOpenChange: () => {},
 	});
-	// @ts-expect-error — ComboboxField does not expose slot
-	assertType<ComboboxFieldProps<Item>>({ children: () => null, label: 'Country', slot: 'example' });
+	assertType<ComboboxFieldProps<Item>>({
+		children: () => null,
+		label: 'Country',
+		// @ts-expect-error — ComboboxField does not expose slot
+		slot: 'example',
+	});
 });

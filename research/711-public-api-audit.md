@@ -12,11 +12,11 @@ Evidence is from the TypeScript sources and prop-analysis expectations on this b
 
 ### Controlled / uncontrolled
 
-| Area                                                                       | Finding                                                                                                                                                                                                 |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Form fields (`TextInputField`, `SelectField`, `ComboboxField`, `Checkbox`) | Keep RAC-style `value`/`defaultValue` or `isSelected`/`defaultSelected` pairs from #714. Public types allow controlled value props and handlers independently; they do not require the matching handler. |
-| Open state on select/combobox                                              | High-level `SelectField` and `ComboboxField` omit `defaultOpen`, `isOpen`, and `onOpenChange` (label/value-focused APIs from #714). Primitives retain RAC open pairs for custom chrome.                  |
-| `LoadingSkeleton`                                                          | `isLoading` may be controlled locally or inherited from `LoadingSkeletonProvider`.                                                                                                                      |
+| Area                                                                       | Finding                                                                                                                                                                                                                                 |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Form fields (`TextInputField`, `SelectField`, `ComboboxField`, `Checkbox`) | Keep RAC-style `value`/`defaultValue` or `isSelected`/`defaultSelected` pairs from #714. Public types allow controlled value props and handlers independently; they do not require the matching handler.                                |
+| Open state on select/combobox                                              | High-level `SelectField` omits `defaultOpen`, `isOpen`, and `onOpenChange`. RAC ComboBox has no `isOpen`/`defaultOpen` props; `ComboboxField` omits the inherited `onOpenChange`. Primitives retain what RAC exposes for custom chrome. |
+| `LoadingSkeleton`                                                          | `isLoading` may be controlled locally or inherited from `LoadingSkeletonProvider`.                                                                                                                                                      |
 
 ### Meaningful defaults
 
@@ -31,11 +31,11 @@ Absence of optional layout/DOM props is not treated as a catalogue of public def
 
 ### Slot
 
-| Surface                                                            | Decision                                                                                   |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| Primitives (button, select, combobox, field, text-input, checkbox) | Retain RAC `slot` where the primitive forwards RAC composition.                            |
-| High-level form fields                                             | Omit `slot` (`SelectField`, `ComboboxField`, `TextInputField`, `Checkbox`).                |
-| High-level Button/IconButton/Link/IconLink                         | Omit RAC `slot`. Use primitives when slot composition is required.                         |
+| Surface                                                            | Decision                                                                    |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| Primitives (button, select, combobox, field, text-input, checkbox) | Retain RAC `slot` where the primitive forwards RAC composition.             |
+| High-level form fields                                             | Omit `slot` (`SelectField`, `ComboboxField`, `TextInputField`, `Checkbox`). |
+| High-level Button/IconButton/Link/IconLink                         | Omit RAC `slot`. Use primitives when slot composition is required.          |
 
 ### Render contracts
 
@@ -82,7 +82,8 @@ only for primitive composition typing (`SelectSize`, `TextInputSize`, `ComboboxS
 | `scrollFadeRecipe`     | **remove** | Fade depends on ScrollFade-owned overflow measurement; use `ScrollFade`                    |
 
 Matching `*RecipeVariants` follow the recipe decision. Do not export a variants type for a recipe
-with no variants solely for naming symmetry (`VisuallyHiddenRecipeVariants` removed with the recipe).
+with no variants solely for naming symmetry (`VisuallyHiddenRecipeVariants` removed with the
+recipe).
 
 ## Other lower-level exports
 
@@ -122,7 +123,7 @@ noted.
 | `checkbox`                          | component + `checkboxRecipe` / variants retain; omit `slot`                         |
 | `cluster`                           | `Cluster`, `ClusterProps` retain                                                    |
 | `code`                              | component + `codeRecipe` / variants retain                                          |
-| `combobox-field`                    | field + item/section exports retain (#714); omit open-state and `slot`              |
+| `combobox-field`                    | field + item/section exports retain (#714); omit `onOpenChange` and `slot`          |
 | `container`                         | `Container`, `ContainerProps` retain; recipe exports **remove**                     |
 | `em` / `emoji` / `strong` / `quote` | component + props retain                                                            |
 | `grid`                              | `Grid`, `GridProps` retain; recipe exports **remove**                               |

@@ -70,7 +70,7 @@ RAC `slot` is a composition seam, not a free pass.
 - Primitives may expose `slot` when RAC slot composition is an intentional consumer capability.
 - High-level components omit `slot` unless a demonstrated product need exists. Form fields from #714
   omit it (`SelectField`, `ComboboxField`, `TextInputField`, `Checkbox`). High-level `Button`,
-  `IconButton`, `Link`, and `IconLink` also omit it; use the button/link primitives for RAC slot
+  `IconButton`, `Link`, and `IconLink` also omit it. Use the button/link primitives for RAC slot
   composition.
 
 ### Controlled and uncontrolled
