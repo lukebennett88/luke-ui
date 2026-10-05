@@ -69,9 +69,14 @@ export function DocsSearchProvider({ children }: { children: ReactNode }) {
 		setAnchor(measured ? fitSearchAnchorToViewport(measured) : null);
 	}, []);
 
-	// View Transition morph needs the open update in a transition.
+	// View Transition morph needs the open update in a transition. Close stays synchronous so the
+	// trigger is no longer inert when focus is restored.
 	const setSearchOpen = useCallback((nextOpen: boolean) => {
-		startTransition(() => setIsOpen(nextOpen));
+		if (nextOpen) {
+			startTransition(() => setIsOpen(true));
+			return;
+		}
+		setIsOpen(false);
 	}, []);
 
 	const openSearch = useCallback(
