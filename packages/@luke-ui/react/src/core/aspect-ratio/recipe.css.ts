@@ -1,6 +1,5 @@
 import { createVar } from '@vanilla-extract/css';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
-import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /** Supplies `object-fit` for the direct media child. */
@@ -55,6 +54,3 @@ export const aspectRatioRecipe = recipe({
 		},
 	},
 });
-
-/** Variant type for the `AspectRatio` recipe. */
-export type AspectRatioRecipeVariants = RecipeSelection<typeof aspectRatioRecipe>;
