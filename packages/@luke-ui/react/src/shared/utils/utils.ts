@@ -1,3 +1,5 @@
+import { chain } from '@react-aria/utils';
+
 /**
  * Joins a space-separated token list, such as class names or an `aria-labelledby` ID list, and
  * skips empty values.
@@ -49,44 +51,70 @@ type MergedAll<T extends ReadonlyArray<unknown>> = T extends readonly [infer Fir
 			: First
 	: never;
 
-type MergeableProps = {
-	className?: unknown;
-	style?: unknown;
-};
+/**
+ * True when `key` looks like a React event handler prop (`on` + capital letter).
+ * Matches React Aria's mergeProps event detection without a regex.
+ */
+function isEventHandlerKey(key: string): boolean {
+	return (
+		key.length >= 3 &&
+		key.charCodeAt(0) === 111 /* o */ &&
+		key.charCodeAt(1) === 110 /* n */ &&
+		key.charCodeAt(2) >= 65 /* A */ &&
+		key.charCodeAt(2) <= 90 /* Z */
+	);
+}
 
 /**
- * Merges two or more prop objects left to right. Joins `className` with `cx`;
- * shallow-merges `style` (later props win).
+ * Merges prop objects for composition and `renderRoot` callbacks.
+ *
+ * - Ordinary props: rightmost wins.
+ * - `className`: concatenate left to right with `cx`.
+ * - `style`: shallow merge; rightmost wins per key.
+ * - Event handlers (`on*`): chain in argument order with React Aria's `chain`.
+ * - Refs are not merged; rightmost wins like ordinary props.
  */
-export function mergeStyleProps<T extends [object, object, ...Array<object>]>(
+export function mergeProps<T extends [object, object, ...Array<object>]>(
 	...props: T
 ): MergedAll<T> {
 	const items = props as Array<Record<string, unknown>>;
 	const result = { ...items[0] };
-	const style: Record<string, unknown> = {};
-	let className = '';
 
-	for (let index = 0; index < items.length; index++) {
-		const current = items[index] as Record<string, unknown> & MergeableProps;
-		const { className: nextClassName, style: nextStyle } = current;
+	for (let index = 1; index < items.length; index++) {
+		const current = items[index];
+		for (const key in current) {
+			const previous = result[key];
+			const next = current[key];
 
-		if (typeof nextClassName === 'string') {
-			className = cx(className, nextClassName);
-		}
-		if (typeof nextStyle === 'object' && nextStyle !== null) {
-			Object.assign(style, nextStyle);
-		}
-		if (index > 0) {
-			for (const key in current) {
-				if (key !== 'className' && key !== 'style') {
-					result[key] = current[key];
+			if (key === 'className') {
+				if (typeof next === 'string') {
+					result.className = cx(typeof previous === 'string' ? previous : undefined, next);
 				}
+				continue;
+			}
+
+			if (key === 'style') {
+				if (typeof next === 'object' && next !== null) {
+					result.style = {
+						...(typeof previous === 'object' && previous !== null
+							? (previous as Record<string, unknown>)
+							: null),
+						...(next as Record<string, unknown>),
+					};
+				}
+				continue;
+			}
+
+			if (typeof previous === 'function' && typeof next === 'function' && isEventHandlerKey(key)) {
+				result[key] = chain(previous, next);
+				continue;
+			}
+
+			if (next !== undefined) {
+				result[key] = next;
 			}
 		}
 	}
-
-	result.className = className;
-	result.style = style;
 
 	return result as MergedAll<T>;
 }
@@ -96,11 +124,13 @@ export function pxToRem(px: number, base: number = 16): string {
 	return `${px / base}rem`;
 }
 
-/** Typed key-value pair from an object. */
+/** Typed key-value pair from an object. Package-internal; not a public export. */
 export type ObjectEntry<T> = { [K in keyof T]-?: [K, T[K]] }[keyof T];
 
 /**
  * An alternative to `Object.entries()` that avoids type widening.
+ *
+ * Package-internal; not a public export.
  *
  * @example
  * Object.entries({ foo: 1, bar: 2 }) // [string, number][]
@@ -113,6 +143,8 @@ export function typedEntries<T extends object>(value: T) {
 /**
  * An alternative to `Object.keys()` that avoids type widening.
  *
+ * Package-internal; not a public export.
+ *
  * @example
  * Object.keys({ foo: 1, bar: 2 }) // string[]
  * typedKeys({ foo: 1, bar: 2 }) // ("foo" | "bar")[]
@@ -124,6 +156,8 @@ export function typedKeys<T extends object>(value: T) {
 /**
  * An alternative to `Object.fromEntries()` that avoids type widening. Must be
  * used in conjunction with `typedEntries` or `typedKeys`.
+ *
+ * Package-internal; not a public export.
  *
  * @example
  * const obj = { name: 'Alice', age: 30 };

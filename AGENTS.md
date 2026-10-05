@@ -3,8 +3,9 @@
 - Use `catalog:` dependency versions in `package.json`. The catalog lives in `pnpm-workspace.yaml`.
   Do not add raw versions. See [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md).
 - Read [docs/CONVENTIONS.md](docs/CONVENTIONS.md), [docs/COMPONENTS.md](docs/COMPONENTS.md),
-  [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md), [docs/STYLING.md](docs/STYLING.md), and
-  [docs/TESTING.md](docs/TESTING.md) before changing code, styles, docs, or tests.
+  [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md), [docs/PUBLIC_API.md](docs/PUBLIC_API.md),
+  [docs/STYLING.md](docs/STYLING.md), and [docs/TESTING.md](docs/TESTING.md) before changing code,
+  styles, docs, or tests.
 - Read [docs/TESTING.md](docs/TESTING.md) before adding or changing tests. It is the only normative
   testing guide.
 - Run tasks through Turbo from the repo root, for example `pnpm run check` or `pnpm run build`.

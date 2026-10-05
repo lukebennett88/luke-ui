@@ -1,4 +1,5 @@
 import type { StyleRule } from '@vanilla-extract/css';
+import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /**
@@ -24,3 +25,6 @@ export const visuallyHiddenStyle = {
 export const visuallyHiddenRecipe = recipe({
 	base: visuallyHiddenStyle,
 });
+
+/** Presentation props accepted by `visuallyHiddenRecipe`. */
+export type VisuallyHiddenRecipeVariants = RecipeSelection<typeof visuallyHiddenRecipe>;

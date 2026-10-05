@@ -1,4 +1,7 @@
-export { visuallyHiddenRecipe } from '../core/visually-hidden/recipe.css.js';
+export {
+	type VisuallyHiddenRecipeVariants,
+	visuallyHiddenRecipe,
+} from '../core/visually-hidden/recipe.css.js';
 export {
 	VisuallyHidden,
 	type VisuallyHiddenProps,

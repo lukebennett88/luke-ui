@@ -43,6 +43,7 @@ type _IconButtonOmit = DistributiveOmit<
 	| 'isBlock'
 	| 'isPending'
 	| 'prominence'
+	| 'render'
 	| 'size'
 	| 'tone'
 	| keyof DocumentedPressProps

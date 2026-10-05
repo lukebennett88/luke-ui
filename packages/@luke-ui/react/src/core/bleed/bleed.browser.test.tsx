@@ -297,7 +297,7 @@ test('zero overrides a lower-priority margin', () => {
 			</Bleed>
 			<Bleed
 				inline="0"
-				render={(resolvedProps) => {
+				renderRoot={(resolvedProps) => {
 					return <div {...resolvedProps} data-margin-fixture="" data-testid="bleed" />;
 				}}
 			>
@@ -387,7 +387,7 @@ test('supports semantic and caller-owned elements', () => {
 	const custom = render(
 		<Bleed
 			inline="sp16"
-			render={(resolvedProps) => <aside {...resolvedProps} data-testid="custom-bleed" />}
+			renderRoot={(resolvedProps) => <aside {...resolvedProps} data-testid="custom-bleed" />}
 		>
 			Custom content
 		</Bleed>,

@@ -259,7 +259,7 @@ does not preserve symbol keys or non-enumerable properties.
 `createSprinkles.properties` is a `ReadonlySet` of utility keys for TypeScript consumers. The
 runtime value is still a mutable `Set`.
 
-Spread `className` and `style` onto the element, or pass the result through `mergeStyleProps` when
+Spread `className` and `style` onto the element, or pass the result through `mergeProps` when
 merging with other props:
 
 ```tsx
@@ -298,17 +298,16 @@ Breakpoints: `initial` (base), `bp640`, `bp768`, `bp1024`, `bp1280`, and `bp1536
 ### React Aria `render` prop
 
 Combine `createSprinkles` with React Aria's `render` prop when you need to style the underlying DOM
-element. Use `mergeStyleProps` from `@luke-ui/react/utils` so `className` and `style` merge
-correctly:
+element. Use `mergeProps` from `@luke-ui/react/utils` so `className` and `style` merge correctly:
 
 ```tsx
-import { mergeStyleProps } from '@luke-ui/react/utils';
+import { mergeProps } from '@luke-ui/react/utils';
 
 const buttonBox = createSprinkles({ padding: 'sp16' });
 
 <Button
 	render={(props) => (
-		<button {...mergeStyleProps(props, buttonBox)} type="button">
+		<button {...mergeProps(props, buttonBox)} type="button">
 			Save
 		</button>
 	)}

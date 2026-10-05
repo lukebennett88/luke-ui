@@ -1,5 +1,5 @@
 import { assignInlineVars } from '@vanilla-extract/dynamic';
-import type { ComponentProps, ElementType, JSX, ReactNode } from 'react';
+import type { ComponentProps, JSX, ReactNode } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
 import { cx } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
@@ -12,6 +12,9 @@ import {
 } from './styles.css.js';
 
 const LoadingSkeletonContext = createContext<boolean | null>(null);
+
+/** Supported native elements for the loading skeleton overlay. */
+type LoadingSkeletonElementType = 'div' | 'span';
 
 /** Props for `LoadingSkeletonProvider`. */
 export interface LoadingSkeletonProviderProps {
@@ -33,7 +36,7 @@ interface _LoadingSkeletonProps extends ComponentProps<'span'> {
 	 * Element rendered while loading.
 	 * @default 'span'
 	 */
-	elementType?: ElementType;
+	elementType?: LoadingSkeletonElementType;
 	/**
 	 * Whether the skeleton is shown in place of `children`. Overrides a `LoadingSkeletonProvider` ancestor.
 	 * @default true

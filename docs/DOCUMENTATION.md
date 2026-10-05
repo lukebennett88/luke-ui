@@ -115,10 +115,10 @@ Do not document an export that is not public API.
 
 ## Internal documentation scope
 
-Internal guides such as [COMPONENTS.md](COMPONENTS.md), [STYLING.md](STYLING.md), and
-[TESTING.md](TESTING.md) explain how contributors build and maintain Luke UI. They may document
-architecture, cascade layers, recipes, generators, and implementation. The public "do not document
-implementation" rule does not apply to them.
+Internal guides such as [COMPONENTS.md](COMPONENTS.md), [STYLING.md](STYLING.md),
+[TESTING.md](TESTING.md), and [PUBLIC_API.md](PUBLIC_API.md) explain how contributors build and
+maintain Luke UI. They may document architecture, cascade layers, recipes, generators, and
+implementation. The public "do not document implementation" rule does not apply to them.
 
 They still need a clear purpose for a maintainer, enough context to act, no redundancy, and no prose
 that only explains one editing session. Cut an implementation detail that does not help a

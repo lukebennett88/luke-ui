@@ -1,10 +1,10 @@
 import { Box } from '@luke-ui/react/box';
 
-export default () => {
+export default function Example() {
 	return (
-		<Box padding="sp16" render={(props) => <details {...props} open />}>
-			<summary>More details</summary>
-			<p>This content is revealed when the details element is expanded.</p>
+		<Box padding="sp16" renderRoot={(props) => <details {...props} open />}>
+			<summary>Owned details element</summary>
+			Box passes resolved children, className, style, and ref into renderRoot.
 		</Box>
 	);
-};
+}

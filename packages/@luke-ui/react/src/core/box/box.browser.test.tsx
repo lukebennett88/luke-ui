@@ -23,7 +23,7 @@ test('Box forwards className, data attributes, id, and ref to its element', () =
 	expectForwardsDomProps(target, ref);
 });
 
-test('renders semantic elements and a consumer-owned render prop', () => {
+test('renders semantic elements and a consumer-owned renderRoot prop', () => {
 	const semanticResult = render(
 		<Box aria-label="Account summary" elementType="section">
 			Account summary content
@@ -36,7 +36,7 @@ test('renders semantic elements and a consumer-owned render prop', () => {
 	const customResult = render(
 		<Box
 			aria-label="Ignored Box label"
-			render={(resolvedProps) => {
+			renderRoot={(resolvedProps) => {
 				receivedAriaLabel = Object.hasOwn(resolvedProps, 'aria-label');
 				return <div {...resolvedProps} />;
 			}}
@@ -80,7 +80,7 @@ test('consumer className and style win collisions on the ordinary element path',
 	expectConsumerClassAfterUtilities(element.className, utility.className);
 });
 
-test('consumer className and style win collisions on the render callback path', () => {
+test('consumer className and style win collisions on the renderRoot callback path', () => {
 	const ref = createRef<HTMLElement>();
 	const utility = createSprinkles({ display: 'flex', inlineSize: '10rem' });
 	let receivedRef: unknown;
@@ -91,7 +91,7 @@ test('consumer className and style win collisions on the render callback path', 
 			gap={{ initial: 'sp8', bp768: 'sp24' }}
 			inlineSize="10rem"
 			ref={ref}
-			render={(resolvedProps) => {
+			renderRoot={(resolvedProps) => {
 				receivedRef = resolvedProps.ref;
 				return <article {...resolvedProps} data-testid="box-render" />;
 			}}
@@ -101,7 +101,7 @@ test('consumer className and style win collisions on the render callback path', 
 		</Box>,
 	);
 	const element = locator.getByTestId('box-render').element();
-	if (!(element instanceof HTMLElement)) throw new Error('Expected render callback element.');
+	if (!(element instanceof HTMLElement)) throw new Error('Expected renderRoot callback element.');
 
 	expect(element.tagName).toBe('ARTICLE');
 	expect(ref.current).toBe(element);

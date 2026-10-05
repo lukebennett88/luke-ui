@@ -3,10 +3,6 @@ export {
 	type HeadingLevel,
 	HeadingLevels,
 	type HeadingProps,
-	type HeadingTag,
 	useHeadingLevel,
 } from '../core/heading/heading.js';
-export type {
-	HeadingLevelsProps,
-	HeadingLevelsRenderProps,
-} from '../core/heading/heading-context.js';
+export type { HeadingLevelsProps } from '../core/heading/heading-context.js';

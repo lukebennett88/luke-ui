@@ -1,5 +1,5 @@
 import { expect, expectTypeOf, test } from 'vite-plus/test';
-import { cx, mergeStyleProps } from './utils.js';
+import { cx, mergeProps } from './utils.js';
 
 test('cx joins trimmed parts with single spaces and skips empty values', () => {
 	expect(cx(' first ', undefined, 'second', null, false, '', 'third')).toBe('first second third');
@@ -9,7 +9,7 @@ test('cx joins trimmed parts with single spaces and skips empty values', () => {
 });
 
 test('merges class names and styles from left to right across four objects', () => {
-	const result = mergeStyleProps(
+	const result = mergeProps(
 		{ className: ' first ', style: { color: 'red', padding: 4 } },
 		{ className: 'second', style: { color: 'blue' } },
 		{ className: 'third', style: { margin: 8 } },
@@ -20,25 +20,37 @@ test('merges class names and styles from left to right across four objects', () 
 	expect(result.style).toEqual({ color: 'green', margin: 8, padding: 4 });
 });
 
-test('replaces other properties and handlers with the last supplied value', () => {
-	const firstHandler = () => 'first';
-	const lastHandler = () => 'last';
-	const result = mergeStyleProps(
-		{ id: 'first', onClick: firstHandler, title: 'retained' },
-		{ id: 'second', onClick: firstHandler },
-		{ id: 'last', onClick: lastHandler },
-	);
+test('replaces ordinary properties with the last supplied value', () => {
+	const result = mergeProps({ id: 'first', title: 'retained' }, { id: 'second' }, { id: 'last' });
 
 	expect(result.id).toBe('last');
 	expect(result.title).toBe('retained');
-	expect(result.onClick).toBe(lastHandler);
+});
+
+test('chains event handlers in argument order', () => {
+	const calls: Array<string> = [];
+	const result = mergeProps(
+		{ onClick: () => calls.push('first') },
+		{ onClick: () => calls.push('second') },
+		{ onClick: () => calls.push('third') },
+	);
+
+	result.onClick();
+	expect(calls).toEqual(['first', 'second', 'third']);
+});
+
+test('does not specially merge refs', () => {
+	const firstRef = () => {};
+	const lastRef = () => {};
+	const result = mergeProps({ ref: firstRef }, { ref: lastRef });
+	expect(result.ref).toBe(lastRef);
 });
 
 test('does not mutate props or their style objects', () => {
 	const first = Object.freeze({ className: 'first', style: Object.freeze({ color: 'red' }) });
 	const second = Object.freeze({ className: 'second', style: Object.freeze({ margin: 8 }) });
 	const third = Object.freeze({ style: Object.freeze({ color: 'blue' }) });
-	const result = mergeStyleProps(first, second, third);
+	const result = mergeProps(first, second, third);
 
 	expect(first.style).toEqual({ color: 'red' });
 	expect(second.style).toEqual({ margin: 8 });
@@ -50,7 +62,7 @@ test('does not mutate props or their style objects', () => {
 });
 
 test('infers the merged return type for fixed positional arguments', () => {
-	const result = mergeStyleProps(
+	const result = mergeProps(
 		{ id: 1, title: 'retained', className: 'first' },
 		{ id: 'second', style: { color: 'red' } },
 		{ id: true, tabIndex: 0 },
@@ -63,13 +75,13 @@ test('infers the merged return type for fixed positional arguments', () => {
 		tabIndex: number;
 		title: string;
 	}>();
-	const pair = mergeStyleProps({ id: 1 }, { id: 'last' });
+	const pair = mergeProps({ id: 1 }, { id: 'last' });
 	expectTypeOf(pair).toEqualTypeOf<{ id: string }>();
 });
 
 test('widens the return type for an unknown-length array spread', () => {
 	const tail: Array<{ id: boolean; extra: number }> = [];
-	const result = mergeStyleProps({ id: 1 }, { id: 'second' }, ...tail);
+	const result = mergeProps({ id: 1 }, { id: 'second' }, ...tail);
 
 	expectTypeOf(result).toEqualTypeOf<{
 		extra: number | undefined;

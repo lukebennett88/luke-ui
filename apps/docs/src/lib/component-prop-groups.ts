@@ -64,6 +64,7 @@ const ADVANCED_PROPS = new Set([
 	'popover',
 	'ref',
 	'render',
+	'renderRoot',
 	'slot',
 	'suppressHydrationWarning',
 ]);

@@ -41,8 +41,8 @@ test('ScrollFade rejects owned and polymorphic props', () => {
 	assertType<ScrollFadeProps>({
 		'aria-label': 'Topics',
 		children: 'Content',
-		// @ts-expect-error — ScrollFade does not expose render
-		render: () => null,
+		// @ts-expect-error — ScrollFade does not expose renderRoot
+		renderRoot: () => null,
 	});
 	assertType<ScrollFadeProps>({
 		'aria-label': 'Topics',

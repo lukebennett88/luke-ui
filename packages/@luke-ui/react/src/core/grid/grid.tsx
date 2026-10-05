@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { mergeStyleProps } from '../../shared/utils/utils.js';
+import { mergeProps } from '../../shared/utils/utils.js';
 import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
@@ -43,7 +43,7 @@ export function Grid({
 	return (
 		<Box
 			{...omitUnsupportedSprinklesProps(props, layoutProperties)}
-			{...mergeStyleProps(
+			{...mergeProps(
 				resolveColumnsStyle(columns),
 				resolveRowsStyle(rows),
 				resolveAreasStyle(areas),

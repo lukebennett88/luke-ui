@@ -6,8 +6,6 @@ import { HeadingPresenceProvider, useHeadingLevel } from './heading-context.js';
 
 export type { HeadingLevel } from './heading-context.js';
 export { HeadingLevels, useHeadingLevel } from './heading-context.js';
-/** Valid heading tag name for Luke UI headings. */
-export type HeadingTag = `h${HeadingLevel}`;
 
 interface _HeadingProps extends TextProps {
 	/** Heading level override. Inherits from context when omitted. */

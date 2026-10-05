@@ -74,7 +74,7 @@ type _ScrollFadeLayoutOmit = DistributiveOmit<LayoutProps, _ScrollFadeOwnedLayou
 
 type _ScrollFadeDomOmit = DistributiveOmit<
 	BoxLikeElementProps,
-	'elementType' | 'render' | 'role' | 'tabIndex'
+	'elementType' | 'renderRoot' | 'role' | 'tabIndex'
 >;
 
 type _ScrollFadeProps = _ScrollFadeDomOmit &
@@ -98,7 +98,7 @@ type _ScrollFadeProps = _ScrollFadeDomOmit &
 		/** ScrollFade owns `role` for the `div` root. */
 		role?: never;
 		/** ScrollFade owns the scrollport element. Compose semantics around or inside it. */
-		render?: never;
+		renderRoot?: never;
 	};
 
 const scrollFadeOwnedProperties: ReadonlySet<PropertyKey> = new Set<_ScrollFadeOwnedLayoutProperty>(
