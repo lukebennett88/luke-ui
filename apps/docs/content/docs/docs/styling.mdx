@@ -24,11 +24,12 @@ primitive rather than between styling mechanisms.
 | -------- | ------------------------------------------------------------------------------------------ |
 | Do       | Use a supported component prop for its appearance, size, state, or behaviour.              |
 | Do       | Use a layout utility for its element contract, and `vars` for application-owned custom UI. |
-| Don't    | Target generated selectors or implementation-state attributes such as `data-pressed`.      |
+| Don't    | Target generated selectors or undocumented state attributes.                               |
 
-Do not override component recipe selectors or implementation-state attributes such as
-`data-hovered`, `data-pressed`, or `data-focus-visible`. They are not supported styling hooks and
-can change without a migration path.
+Do not override component recipe selectors or target state attributes unless the component documents
+that attribute as part of its supported DOM contract. Many React Aria attributes are implementation
+details and can change without a migration path. When a component deliberately exposes a state
+attribute for styling or integration, treat it as public for that component only.
 
 ### Start with component props
 

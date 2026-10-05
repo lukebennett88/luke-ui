@@ -11,9 +11,6 @@ export type {
 	TypeStyle,
 } from '../theme/index.js';
 export {
-	defaultBackdrop,
-	defaultControlFinish,
-	defaultDepth,
 	defineTheme,
 	deriveConcentricRadius,
 	deriveNestedRadius,

@@ -208,7 +208,7 @@ export const defaultDepth: Record<ColorMode, DepthLadder> = {
 };
 
 /** Curated flat control finish applied when an `actionControlFinish` rung is omitted. */
-export const defaultControlFinish: ControlFinish = {
+const defaultControlFinish: ControlFinish = {
 	raised: 'none',
 	recessed: 'none',
 	resting: 'none',

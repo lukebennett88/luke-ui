@@ -10,12 +10,7 @@ export type {
 	ExtendingThemeInput,
 	ThemeInput,
 } from './define-theme.js';
-export {
-	defaultBackdrop,
-	defaultControlFinish,
-	defaultDepth,
-	defineTheme,
-} from './define-theme.js';
+export { defineTheme } from './define-theme.js';
 export { deriveConcentricRadius, deriveNestedRadius } from './foundation.js';
 export { rootClassName } from './theme.js';
 export { getThemeClassName } from './theme-class-name.js';
