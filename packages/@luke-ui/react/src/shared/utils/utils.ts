@@ -141,9 +141,15 @@ export function presentationMergeTail(
 	},
 ): Record<string, unknown> {
 	const tail: Record<string, unknown> = {};
-	if ('children' in sourceProps) tail.children = values.children;
-	if ('className' in sourceProps) tail.className = values.className;
-	if ('style' in sourceProps) tail.style = values.style;
+	if ('children' in sourceProps && values.children !== undefined) {
+		tail.children = values.children;
+	}
+	if ('className' in sourceProps && values.className !== undefined) {
+		tail.className = values.className;
+	}
+	if ('style' in sourceProps && values.style !== undefined) {
+		tail.style = values.style;
+	}
 	return tail;
 }
 
