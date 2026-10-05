@@ -131,6 +131,12 @@
 			automerge: false,
 		},
 		{
+			// Keep `@types/node` on the Node major in root `devEngines.runtime` (`24.x`). Raise this bound
+			// and the catalog entry when that major moves.
+			matchPackageNames: ['@types/node'],
+			allowedVersions: '<25',
+		},
+		{
 			// pnpm is declared only in the root `packageManager` field. Keep it with the regenerated
 			// lockfile in one PR.
 			matchManagers: ['npm'],

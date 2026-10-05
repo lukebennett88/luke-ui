@@ -118,6 +118,10 @@ Renovate has no manager for `devEngines.runtime`, so `.github/renovate.json5` ad
 manager for it. The regex captures only the major before `.x`, so an update PR rewrites `24.x` to
 the next `<major>.x`. Renovate follows Node's release schedule and only proposes stable LTS lines.
 
+`@types/node` tracks that Node major. Renovate's `allowedVersions: '<25'` blocks newer majors, and
+an `overrides` entry forces every copy onto the catalog so optional peers cannot drift. When the
+Node major PR lands, update `allowedVersions` and the catalog entry in the same change.
+
 The workflows in `.github/workflows` pin actions at the major tag, so the only update Renovate can
 offer is a major tag move. They group into one `github actions` pull request and are never
 automerged.
