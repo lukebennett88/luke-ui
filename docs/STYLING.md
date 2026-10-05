@@ -295,12 +295,15 @@ const responsive = createSprinkles({
 
 Breakpoints: `initial` (base), `bp640`, `bp768`, `bp1024`, `bp1280`, and `bp1536`.
 
-### React Aria `render` prop
+### React Aria `render` prop (button primitive)
 
-Combine `createSprinkles` with React Aria's `render` prop when you need to style the underlying DOM
-element. Use `mergeProps` from `@luke-ui/react/utils` so `className` and `style` merge correctly:
+High-level `Button` does not expose RAC `render`. Import the button primitive when you need React
+Aria's `render` composition seam. Combine `createSprinkles` with `mergeProps` so `className` and
+`style` merge correctly:
 
 ```tsx
+import { Button } from '@luke-ui/react/primitives/button';
+import { createSprinkles } from '@luke-ui/react/styles';
 import { mergeProps } from '@luke-ui/react/utils';
 
 const buttonBox = createSprinkles({ padding: 'sp16' });
