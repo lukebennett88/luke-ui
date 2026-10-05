@@ -1,5 +1,4 @@
 import type { HTMLAttributes, JSX, ReactElement, Ref, RefObject } from 'react';
-import type { DistributiveOmit } from './distributive-omit.js';
 
 /** Structural elements a Box-like component may render. */
 type BoxLikeElementType = keyof Pick<
@@ -39,16 +38,8 @@ export interface BoxLikeElementProps extends HTMLAttributes<HTMLElement> {
 	renderRoot?: never;
 }
 
-/** Content and presentation props a Box-like component passes through to its element. */
-interface BoxLikePresentationProps extends Pick<
-	HTMLAttributes<HTMLElement>,
-	'children' | 'className' | 'style'
-> {
-	ref?: Ref<HTMLElement>;
-}
-
-/** Props a Box-like component hands to a caller-owned `renderRoot` element. */
-type BoxLikeResolvedRenderProps = DistributiveOmit<BoxLikePresentationProps, 'ref'> & {
+/** Resolved root props a Box-like component hands to `renderRoot` after sprinkles merge. */
+export type BoxLikeResolvedRenderProps = Omit<HTMLAttributes<HTMLElement>, 'ref'> & {
 	ref: BoxLikeRef;
 };
 
@@ -56,17 +47,15 @@ type BoxLikeResolvedRenderProps = DistributiveOmit<BoxLikePresentationProps, 're
 export type BoxLikeRenderState = Record<string, never>;
 
 /** Props a Box-like component accepts when a caller owns the rendered element. */
-export interface BoxLikeRenderProps extends BoxLikePresentationProps {
+export interface BoxLikeRenderProps extends HTMLAttributes<HTMLElement> {
 	/** Use `elementType` instead of `renderRoot` for a supported structural element. */
 	elementType?: never;
+	/** Ref to the rendered element. Normalised to a callback ref in `renderRoot` props. */
+	ref?: Ref<HTMLElement>;
 	/**
-	 * Passes the component's content and presentation props to a caller-owned element.
-	 * Receives resolved element props and curated render state.
+	 * Passes the component's resolved root props to a caller-owned element.
+	 * Receives the same accepted DOM props the element path would apply, plus resolved
+	 * `children`, `className`, and `style`, and a callback `ref`.
 	 */
-	renderRoot: (
-		props: {
-			[K in keyof BoxLikeResolvedRenderProps]: BoxLikeResolvedRenderProps[K];
-		},
-		state: BoxLikeRenderState,
-	) => ReactElement;
+	renderRoot: (props: BoxLikeResolvedRenderProps, state: BoxLikeRenderState) => ReactElement;
 }

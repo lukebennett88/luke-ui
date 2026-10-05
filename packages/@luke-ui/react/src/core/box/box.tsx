@@ -28,14 +28,13 @@ export function Box(props: BoxProps): JSX.Element {
 	} = props;
 
 	if (renderRoot) {
-		const renderProps = mergeProps(createSprinkles(retainSprinklesProps(restProps)), {
+		const renderProps = mergeProps(createSprinkles(normaliseRef(restProps)), {
 			children,
 			className,
 			style,
 		});
 
-		// The render owner must receive Box's ref with its presentation props.
-		return renderRoot({ ...renderProps, ref: toCallbackRef(restProps.ref) }, boxLikeRenderState);
+		return renderRoot(renderProps, boxLikeRenderState);
 	}
 
 	// `restProps` still carries `ref`; createSprinkles passes unknown keys through
@@ -82,18 +81,6 @@ export function omitUnsupportedSprinklesProps<Props extends object>(
 
 	for (const key of Reflect.ownKeys(props)) {
 		if (!sprinklesProperties.has(key) || supportedProperties.has(key)) {
-			nextProps[key] = props[key as keyof Props];
-		}
-	}
-
-	return nextProps as Props;
-}
-
-function retainSprinklesProps<Props extends object>(props: Props): Props {
-	const nextProps: Record<PropertyKey, unknown> = {};
-
-	for (const key of Reflect.ownKeys(props)) {
-		if (sprinklesProperties.has(key)) {
 			nextProps[key] = props[key as keyof Props];
 		}
 	}
