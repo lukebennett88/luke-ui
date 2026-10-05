@@ -334,7 +334,7 @@ const AUDITED_TYPES: ReadonlyArray<{
 		forwardsDomProps: true,
 		name: 'VisuallyHiddenProps',
 		path: 'packages/@luke-ui/react/src/core/visually-hidden/visually-hidden.tsx',
-		visible: ['elementType', 'render'],
+		visible: ['elementType', 'isFocusable', 'render'],
 	},
 	{
 		// Icon picks five SVG props by name and forwards nothing else, so its table is closed.

@@ -43,11 +43,11 @@ and `Checkbox` is the wrong affordance for this setting. Owner:
 ### Text inside RAC control content
 
 Ordinary text in a Select trigger uses the high-level `textRecipe` on `SelectValue` in place of
-`Text`. The RAC Switch uses `aria-label` in place of a `VisuallyHidden` label. Luke UI `Text` and
-`VisuallyHidden` render RAC `Text`, which reads RAC's slotted text context. Inside a RAC `Select`
-trigger or a `SwitchField`, both throw "A slot prop is required. Valid slot names are "description"
-and "errorMessage"". RAC's opt-out is `slot={null}`, but the public `TextProps` type rejects `null`.
-Owners: [#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711) and
+`Text`. Luke UI `Text` renders RAC `Text`, which reads RAC's slotted text context. Inside a RAC
+`Select` trigger or a `SwitchField`, it throws "A slot prop is required. Valid slot names are
+"description" and "errorMessage"". RAC's opt-out is `slot={null}`, but the public `TextProps` type
+rejects `null`. Owners:
+[#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711) and
 [#714](https://github.com/lukebennett88/luke-ui/issues/714).
 
 ### Dialog

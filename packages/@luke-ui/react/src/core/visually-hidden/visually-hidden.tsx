@@ -1,33 +1,57 @@
-import type { ComponentPropsWithRef, JSX } from 'react';
-import { Text as RacText } from 'react-aria-components/Text';
+import type { ComponentPropsWithRef, HTMLAttributes, JSX, RefAttributes } from 'react';
+import { createElement } from 'react';
+import type { TextProps as RacTextProps } from 'react-aria-components/Text';
+import { VisuallyHidden as RacVisuallyHidden } from 'react-aria-components/VisuallyHidden';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import { visuallyHiddenRecipe } from './recipe.css.js';
 
 type _VisuallyHiddenOmit = DistributiveOmit<
-	ComponentPropsWithRef<typeof RacText>,
+	ComponentPropsWithRef<typeof RacVisuallyHidden>,
 	keyof DocumentedElementTypeProps
 >;
 
-interface _VisuallyHiddenProps extends _VisuallyHiddenOmit, DocumentedElementTypeProps {}
+type _VisuallyHiddenDomProps = DistributiveOmit<
+	HTMLAttributes<HTMLElement>,
+	keyof ComponentPropsWithRef<typeof RacVisuallyHidden> & keyof HTMLAttributes<HTMLElement>
+>;
+
+interface _VisuallyHiddenProps
+	extends
+		_VisuallyHiddenOmit,
+		_VisuallyHiddenDomProps,
+		DocumentedElementTypeProps,
+		RefAttributes<HTMLElement> {
+	/** Whether the content becomes visible when it or a descendant receives focus. */
+	isFocusable?: ComponentPropsWithRef<typeof RacVisuallyHidden>['isFocusable'];
+	/** Render the element with the resolved hidden styles and DOM props. */
+	render?: RacTextProps['render'];
+	/**
+	 * Renders a different semantic element.
+	 * @default 'span'
+	 */
+	elementType?: DocumentedElementTypeProps['elementType'];
+}
 
 /** Props for `VisuallyHidden`. */
 export type VisuallyHiddenProps = Prettify<_VisuallyHiddenProps>;
 
 /**
  * Hides its content visually while keeping it available to assistive technology.
- *
- * Use it to give assistive-technology users context conveyed visually by other
- * means — a text label behind an icon-only control, extra context for a link, or
- * a status message inside a live region. The content stays in the accessibility
- * tree and the document flow (unlike `display: none` or the `hidden` attribute),
- * so it is announced and can be referenced by `aria-labelledby`/`aria-describedby`.
- *
- * Renders a `span` by default. Pass `elementType` to render a different element
- * (for example `elementType="h2"` for a screen-reader-only section heading).
+ * Renders a `span` by default.
  */
 export function VisuallyHidden(props: VisuallyHiddenProps): JSX.Element {
-	const { className, ...racProps } = props;
-	return <RacText {...racProps} className={visuallyHiddenRecipe({ className })} />;
+	const { elementType = 'span', ...racProps } = props;
+	const hiddenProps = { ...racProps, hiddenElementType: elementType };
+	return <RacVisuallyHidden {...hiddenProps} elementType={HiddenElement} />;
+}
+
+interface HiddenElementProps extends ComponentPropsWithRef<'span'> {
+	hiddenElementType: string;
+	render?: VisuallyHiddenProps['render'];
+}
+
+function HiddenElement(props: HiddenElementProps): JSX.Element {
+	const { hiddenElementType, render, ...domProps } = props;
+	return render ? render(domProps, {}) : createElement(hiddenElementType, domProps);
 }

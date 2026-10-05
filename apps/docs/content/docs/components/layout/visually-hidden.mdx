@@ -4,14 +4,9 @@ description: Hide content visually and keep it available to assistive technology
 source: packages/@luke-ui/react/src/exports/visually-hidden.ts
 ---
 
-Use `VisuallyHidden` to hide content from sight. The content stays in the accessibility tree and the
-document flow. Screen readers still announce it, and `aria-labelledby` or `aria-describedby` can
-reference it. Unlike `display: none` or the `hidden` attribute, `VisuallyHidden` does not remove the
-content from assistive technology.
-
-Reach for it when the interface conveys meaning visually but needs a text equivalent. Examples
-include a label behind an icon-only control, extra context for a link, and a status message inside a
-live region.
+Use `VisuallyHidden` for text labels behind icon-only controls, extra context for links, or status
+messages in live regions. The content stays available to assistive technology and can be referenced
+by `aria-labelledby` or `aria-describedby`.
 
 <ExampleBlock src="visually-hidden/basic" title="Visually Hidden: Basic" />
 
@@ -24,6 +19,12 @@ element.
 ```tsx
 <VisuallyHidden elementType="h2">Search results</VisuallyHidden>
 ```
+
+## Show content on focus
+
+Set `isFocusable` for content such as a skip link. The content becomes visible when it or a
+descendant receives focus, then hides again when focus leaves. Put the focusable control inside
+`VisuallyHidden`.
 
 ## API
 
