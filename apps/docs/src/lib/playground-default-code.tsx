@@ -56,7 +56,7 @@ export default () => {
 				initial: 'sp24',
 				bp768: 'sp48',
 			}}
-			render={(props) => <form {...props} onSubmit={handleSubmit} />}
+			renderRoot={(props) => <form {...props} onSubmit={handleSubmit} />}
 		>
 			<Stack gap="sp24">
 				<Heading level={2}>Sign in</Heading>

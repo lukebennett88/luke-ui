@@ -141,21 +141,8 @@ export function typedEntries<T extends object>(value: T) {
 }
 
 /**
- * An alternative to `Object.keys()` that avoids type widening.
- *
- * Package-internal; not a public export.
- *
- * @example
- * Object.keys({ foo: 1, bar: 2 }) // string[]
- * typedKeys({ foo: 1, bar: 2 }) // ("foo" | "bar")[]
- */
-export function typedKeys<T extends object>(value: T) {
-	return Object.keys(value) as Array<keyof T>;
-}
-
-/**
  * An alternative to `Object.fromEntries()` that avoids type widening. Must be
- * used in conjunction with `typedEntries` or `typedKeys`.
+ * used in conjunction with `typedEntries`.
  *
  * Package-internal; not a public export.
  *

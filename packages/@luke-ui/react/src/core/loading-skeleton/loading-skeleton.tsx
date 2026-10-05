@@ -1,5 +1,5 @@
 import { assignInlineVars } from '@vanilla-extract/dynamic';
-import type { ComponentProps, JSX, ReactNode } from 'react';
+import type { HTMLAttributes, JSX, ReactNode, Ref } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
 import { cx } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
@@ -14,7 +14,7 @@ import {
 const LoadingSkeletonContext = createContext<boolean | null>(null);
 
 /** Supported native elements for the loading skeleton overlay. */
-type LoadingSkeletonElementType = 'div' | 'span';
+type LoadingSkeletonElementType = 'div' | 'li' | 'span';
 
 /** Props for `LoadingSkeletonProvider`. */
 export interface LoadingSkeletonProviderProps {
@@ -31,7 +31,7 @@ export function LoadingSkeletonProvider(props: LoadingSkeletonProviderProps): JS
 	);
 }
 
-interface _LoadingSkeletonProps extends ComponentProps<'span'> {
+interface _LoadingSkeletonProps extends HTMLAttributes<HTMLElement> {
 	/**
 	 * Element rendered while loading.
 	 * @default 'span'
@@ -47,6 +47,8 @@ interface _LoadingSkeletonProps extends ComponentProps<'span'> {
 	 * radius of its own but a visual descendant does (e.g. wrapping a `TextInputField`).
 	 */
 	radius?: keyof typeof vars.radius;
+	/** Ref to the rendered skeleton element. */
+	ref?: Ref<HTMLElement>;
 }
 
 /** Props for `LoadingSkeleton`. */
@@ -63,8 +65,9 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 		className,
 		isLoading: isLoadingProp,
 		radius,
+		ref,
 		style,
-		...spanProps
+		...elementProps
 	} = props;
 
 	const isLoadingContext = useContext(LoadingSkeletonContext);
@@ -79,11 +82,12 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 
 	return (
 		<Component
-			{...spanProps}
+			{...elementProps}
 			aria-hidden
 			className={cx(loadingSkeletonClassName, className)}
 			data-skeleton-inline={isInline ? '' : undefined}
 			inert
+			ref={toCallbackRef(ref)}
 			style={
 				radius
 					? { ...assignInlineVars({ [skeletonRadiusVar]: vars.radius[radius] }), ...style }
@@ -94,4 +98,12 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 			{children}
 		</Component>
 	);
+}
+
+/** Callback ref so `div` | `span` can accept an `HTMLElement` ref without RefObject variance issues. */
+function toCallbackRef(ref: Ref<HTMLElement> | undefined) {
+	return (element: HTMLElement | null) => {
+		if (typeof ref === 'function') return ref(element);
+		if (ref) ref.current = element;
+	};
 }

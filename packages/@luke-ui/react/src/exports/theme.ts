@@ -1,23 +1,27 @@
-export type { ThemeContrastFailure, ThemeInheritance } from '../theme/build-theme.js';
-export { ThemeContrastError, ThemeGenerationError } from '../theme/build-theme.js';
-export { vars } from '../theme/contract.css.js';
-export type { SpaceStep } from '../theme/contract.js';
-export { spaceScale } from '../theme/contract.js';
 export type {
 	ColorInput,
 	ControlFinish,
 	DepthLadder,
 	ExtendingThemeInput,
+	FontWeightRole,
+	SpaceStep,
+	ThemeContrastFailure,
+	ThemeInheritance,
 	ThemeInput,
-} from '../theme/define-theme.js';
+	TypeStyle,
+} from '../theme/index.js';
 export {
 	defaultBackdrop,
 	defaultControlFinish,
 	defaultDepth,
 	defineTheme,
-} from '../theme/define-theme.js';
-export { deriveConcentricRadius, deriveNestedRadius } from '../theme/foundation.js';
-export { rootClassName } from '../theme/theme.js';
-export { getThemeClassName } from '../theme/theme-class-name.js';
-export type { FontWeightRole, TypeStyle } from '../theme/type-styles.js';
-export { typeStyles } from '../theme/type-styles.js';
+	deriveConcentricRadius,
+	deriveNestedRadius,
+	getThemeClassName,
+	rootClassName,
+	spaceScale,
+	ThemeContrastError,
+	ThemeGenerationError,
+	typeStyles,
+	vars,
+} from '../theme/index.js';

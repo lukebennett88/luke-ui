@@ -70,7 +70,7 @@ function ComponentEntry({ entry }: { entry: ComponentIndexEntry }) {
 				'active:bg-(--luke-color-background-neutral-subtle-pressed)',
 			)}
 			padding="sp24"
-			render={(props) => <Link {...props} href={entry.url} />}
+			renderRoot={(props) => <Link {...props} href={entry.url} />}
 		>
 			<Stack gap="sp8">
 				<Text elementType="span" fontWeight="emphasis">

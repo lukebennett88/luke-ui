@@ -51,7 +51,7 @@ Narrow native semantic substitution on components that document supported tags. 
 polymorphism. Mutually exclusive with `renderRoot` in TypeScript.
 
 Box-like layout components support a fixed structural set (`article`, `aside`, `div`, `section`, and
-related list/figure/landmark tags). `LoadingSkeleton` supports `div` | `span`. Text-family
+related list/figure/landmark tags). `LoadingSkeleton` supports `div` | `li` | `span`. Text-family
 components keep RAC's documented `elementType` surface for semantic text tags.
 
 ### `renderRoot` / `render<Name>`
@@ -70,7 +70,7 @@ consequences.
 
 React Aria's own `render` prop remains on primitives and other RAC-backed seams where RAC owns the
 replacement API. Do not rename RAC `render` to `renderRoot`. High-level `Button` and `IconButton`
-omit RAC `render` and function children; use `@luke-ui/react/primitives/button` for that
+omit RAC `render` and function children. Use `@luke-ui/react/primitives/button` for that
 composition.
 
 Box-like components that support `renderRoot` today: `Box`, `Stack`, `Cluster`, `Grid`, `Container`,
@@ -94,7 +94,7 @@ Consumer `className` and `style` retain presentation precedence.
 
 Deliberately emitted RAC-style attributes such as `data-disabled` and `data-focus-visible` are
 public DOM API when a component emits them. Boolean state uses presence/absence. Components provide
-final state-attribute props explicitly. Private helpers may map common RAC state; those helpers are
+final state-attribute props explicitly. Private helpers may map common RAC state. Those helpers are
 not public. Render-callback state is public render API only for the curated object passed to the
 callback.
 
@@ -112,7 +112,7 @@ A public recipe is a stable visual treatment for app-owned elements. Export the 
 | `visuallyHiddenRecipe`  | `@luke-ui/react/visually-hidden`       | Visually hidden treatment without the component |
 | Other component recipes | Matching high-level entrypoint         | Same visual treatment on owned elements         |
 
-Generated class strings from recipes are private. Consumers call the recipe function; they must not
+Generated class strings from recipes are private. Consumers call the recipe function. They must not
 hard-code or target generated class identifiers.
 
 ## Primitives
@@ -145,10 +145,10 @@ left to right. `style`: shallow merge, rightmost wins per key. Event handlers: c
 order with React Aria's `chain`. Refs are not specially merged.
 
 The current event model is intentionally the simple RAC-style chained model. Base UI's
-consumer-first cancellable handler model may be reconsidered later if a real use case appears; that
+consumer-first cancellable handler model may be reconsidered later if a real use case appears. That
 is rationale only, not an open follow-up.
 
-Internal typed object helpers (`typedEntries`, `typedKeys`, `typedFromEntries`, `ObjectEntry`) stay
+Internal typed object helpers (`typedEntries`, `typedFromEntries`, `ObjectEntry`) stay
 package-private.
 
 ## Styles (`@luke-ui/react/styles`)
@@ -178,15 +178,15 @@ for icon construction, not a public export.
 
 Public heading surface: `Heading`, `HeadingProps`, `HeadingLevel`, `HeadingLevels`,
 `HeadingLevelsProps`, `useHeadingLevel`. `HeadingTag` and `HeadingLevelsRenderProps` are not public
-exports; annotate heading-level values through `ReturnType<typeof useHeadingLevel>` when needed.
+exports. Annotate heading-level values through `ReturnType<typeof useHeadingLevel>` when needed.
 
 ## Explicitly private
 
 - Generated recipe and utility class identifiers
 - Incidental DOM nesting and undocumented anatomy
 - Vanilla Extract implementation modules and `#recipe-engine`
-- Internal render helpers (none exported; a private `useRender` may appear later if it removes
-  duplication)
+- Internal render helpers (none exported). A private `useRender` may appear later if it removes
+  duplication.
 - Typed object helpers in `shared/utils`
 - `iconViewBoxes`
 - `omitUnsupportedSprinklesProps` and other Box internals
@@ -195,27 +195,27 @@ exports; annotate heading-level values through `ReturnType<typeof useHeadingLeve
 
 ## Meaningful removals and renames in this audit
 
-| Change                                                                            | Reason                                         |
-| --------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `mergeStyleProps` → `mergeProps`                                                  | Composition-oriented name; adds event chaining |
-| Remove public `typedEntries` / `typedKeys` / `typedFromEntries` / `ObjectEntry`   | No independent consumer use                    |
-| Box-like `render` → `renderRoot`                                                  | Luke-owned root replacement vocabulary         |
-| Remove duplicate `buttonRecipe` / `checkboxRecipe` from primitives entrypoints    | One canonical recipe path                      |
-| Remove public `HeadingTag`, `HeadingLevelsRenderProps`                            | No annotation need beyond inferred types       |
-| Remove public `iconViewBoxes`                                                     | Internal icon construction data                |
-| Constrain `LoadingSkeleton` `elementType` to `div` \| `span`                      | Narrow demonstrated substitutions              |
-| Explicit exports for `theme`, `themes/*`, `utils`                                 | No public `export *`                           |
-| High-level `Button` / `IconButton` omit RAC `render` and Button function children | Composition belongs on the button primitive    |
-| Add `VisuallyHiddenRecipeVariants`                                                | Public recipes export matching variants types  |
+| Change                                                                            | Reason                                                |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `mergeStyleProps` → `mergeProps`                                                  | Composition-oriented name. Adds event chaining        |
+| Remove public `typedEntries` / `typedKeys` / `typedFromEntries` / `ObjectEntry`   | No independent consumer use. Drop unused `typedKeys`. |
+| Box-like `render` → `renderRoot`                                                  | Luke-owned root replacement vocabulary                |
+| Remove duplicate `buttonRecipe` / `checkboxRecipe` from primitives entrypoints    | One canonical recipe path                             |
+| Remove public `HeadingTag`, `HeadingLevelsRenderProps`                            | No annotation need beyond inferred types              |
+| Remove public `iconViewBoxes`                                                     | Internal icon construction data                       |
+| Constrain `LoadingSkeleton` `elementType` to `div` \| `li` \| `span`              | Narrow demonstrated substitutions                     |
+| Explicit exports for `theme`, `themes/*`, `utils`                                 | No public `export *`                                  |
+| High-level `Button` / `IconButton` omit RAC `render` and Button function children | Composition belongs on the button primitive           |
+| Add `VisuallyHiddenRecipeVariants`                                                | Public recipes export matching variants types         |
 
 ## Delegated follow-ups
 
 | Issue | Owns                                                          |
 | ----- | ------------------------------------------------------------- |
 | #714  | Form architecture (settled input for this audit)              |
-| #712  | Icon/provider architecture (settled; visibility audited here) |
+| #712  | Icon/provider architecture (settled, visibility audited here) |
 | #715  | Theme authoring and Tactile/Paper package extraction          |
 | #716  | Control/token redesign                                        |
 | #717  | Global stylesheet, reset, and cascade contract                |
 
-No duplicate issue is opened for splitting bundled themes; #715 already covers it.
+No duplicate issue is opened for splitting bundled themes. #715 already covers it.
