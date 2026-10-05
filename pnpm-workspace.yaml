@@ -93,7 +93,7 @@ catalog:
   react-error-boundary: ^6.1.6
   react-hook-form: ^7.88.0
   react-resizable-panels: ^4.13.3
-  react-router: ^7.18.4
+  react-router: ^8.4.0
   serve: ^14.2.6
   shiki: ^4.4.3
   spin-doctor: ^0.0.1
