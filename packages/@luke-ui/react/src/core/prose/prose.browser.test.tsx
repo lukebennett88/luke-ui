@@ -216,6 +216,74 @@ test('lets utility classes override Prose margins', () => {
 	expect(margin(query(locator.element(), '[data-testid="utility"]'))).toBe('8px');
 });
 
+test('fits media inside a narrow prose column', async () => {
+	const { locator } = render(
+		<Prose style={{ inlineSize: 160 }}>
+			<img alt="" height={64} src={swatch} width={320} />
+			<picture>
+				<img alt="" height={64} src={swatch} width={320} />
+			</picture>
+			<video aria-label="Animation" height={64} muted poster={swatch} width={320} />
+		</Prose>,
+	);
+	const root = query(locator.element(), 'div');
+	const rootBounds = root.getBoundingClientRect();
+	await Promise.all([...root.querySelectorAll('img')].map((img) => img.decode()));
+
+	for (const media of root.querySelectorAll('img, picture, video')) {
+		const bounds = media.getBoundingClientRect();
+		expect(bounds.right).toBeLessThanOrEqual(rootBounds.right + 1);
+	}
+
+	for (const media of root.querySelectorAll('img, video')) {
+		const bounds = media.getBoundingClientRect();
+		expect(bounds.width / bounds.height).toBeCloseTo(5, 0);
+	}
+});
+
+test('scrolls long preformatted lines without widening a narrow grid column', () => {
+	const code = 'padding-inline: var(--luke-space-sp16);'.repeat(5);
+	const { locator } = render(
+		<Prose style={{ display: 'grid', inlineSize: 160 }}>
+			<pre>
+				<code>{code}</code>
+			</pre>
+			<Text elementType="pre">
+				<Code>{code}</Code>
+			</Text>
+		</Prose>,
+	);
+	const root = query(locator.element(), 'div');
+
+	for (const pre of root.querySelectorAll('pre')) {
+		expect(pre.getBoundingClientRect().right).toBeLessThanOrEqual(
+			root.getBoundingClientRect().right + 1,
+		);
+		expect(pre.scrollWidth).toBeGreaterThan(pre.clientWidth);
+		pre.scrollLeft = 100;
+		expect(pre.scrollLeft).toBe(100);
+	}
+});
+
+test('keeps multiline Code inside pre at the same size as plain code', () => {
+	const code = 'first line\nsecond line';
+	const { locator } = render(
+		<Prose>
+			<Text elementType="pre">{code}</Text>
+			<Text elementType="pre">
+				<Code>{code}</Code>
+			</Text>
+		</Prose>,
+	);
+	const plain = query(locator.element(), 'pre:first-of-type');
+	const composed = query(locator.element(), 'pre:last-of-type');
+
+	expect(composed.getBoundingClientRect().height).toBeCloseTo(
+		plain.getBoundingClientRect().height,
+		0,
+	);
+});
+
 const swatch =
 	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='64'%3E%3Crect width='320' height='64' fill='%23888'/%3E%3C/svg%3E";
 
@@ -276,8 +344,11 @@ const document = (
 		</Blockquote>
 
 		<Heading level={4}>Reading a token</Heading>
+		<pre>
+			<code>{'padding-inline: var(--luke-space-sp16);\nmargin-block: 0;'}</code>
+		</pre>
 		<Text elementType="pre">
-			<Code>{'padding-inline: var(--luke-space-sp16);'}</Code>
+			<Code>{'padding-inline: var(--luke-space-sp16);\nmargin-block: 0;'}</Code>
 		</Text>
 		<img alt="" height={64} src={swatch} width={320} />
 		<picture>
@@ -306,6 +377,12 @@ const document = (
 					<td>24px</td>
 				</tr>
 			</tbody>
+			<tfoot>
+				<tr>
+					<td>Total steps</td>
+					<td>2</td>
+				</tr>
+			</tfoot>
 		</table>
 
 		<hr />
@@ -343,7 +420,7 @@ const document = (
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
-		const { locator } = render(<Stack width="40rem">{document}</Stack>, { appearance });
+		const { locator } = render(<Stack width="18rem">{document}</Stack>, { appearance });
 
 		await captureVisualAppearance(locator, 'prose/kitchen-sink', appearance);
 	}

@@ -53,8 +53,34 @@ proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space.sp16 });
 proseStyle('hr + *', { marginBlockStart: vars.space.sp64 });
 
 proseStyle('img, picture, video', { display: 'block' });
+proseStyle('img, video', { blockSize: 'auto', maxInlineSize: '100%' });
+proseStyle('picture', { maxInlineSize: '100%' });
 proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 	marginBlockStart: 0,
+});
+
+proseStyle('pre', {
+	maxInlineSize: '100%',
+	minInlineSize: 0,
+	overflowX: 'auto',
+});
+// Block code overrides the Text and Code font recipes while staying inside the Prose boundary.
+globalStyleInLayer('recipes', ':scope pre', {
+	'@scope': {
+		[`${proseScope} to (.not-prose)`]: { fontFamily: vars.font.family.code },
+	},
+});
+globalStyleInLayer('recipes', ':scope pre code', {
+	'@scope': {
+		[`${proseScope} to (.not-prose)`]: {
+			backgroundColor: 'transparent',
+			border: 0,
+			borderRadius: 0,
+			fontSize: 'inherit',
+			padding: 0,
+			whiteSpace: 'inherit',
+		},
+	},
 });
 
 proseStyle('ul', { listStyleType: 'disc', paddingInlineStart: vars.space.sp24 });
@@ -68,10 +94,15 @@ proseStyle('hr', {
 	border: 'none',
 	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
 });
+proseStyle('table', { inlineSize: '100%' });
 // Table cells need padding after the reset removes it.
 proseStyle('th, td', { paddingBlock: vars.space.sp8, paddingInline: vars.space.sp12 });
-proseStyle('th', { textAlign: 'start' });
+proseStyle('th', { textAlign: 'start', verticalAlign: 'bottom' });
+proseStyle('td', { verticalAlign: 'baseline' });
 proseStyle('thead th', { borderBlockEnd: `1px solid ${vars.color.border.decorative}` });
+proseStyle('tbody tr + tr, tfoot', {
+	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
+});
 
 proseBoundaryGapStyle(['h1'], vars.space.sp40);
 proseBoundaryGapStyle(['h2'], vars.space.sp32);
