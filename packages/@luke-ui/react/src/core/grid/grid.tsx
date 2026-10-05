@@ -47,10 +47,8 @@ export function Grid({
 				resolveColumnsStyle(columns),
 				resolveRowsStyle(rows),
 				resolveAreasStyle(areas),
-				presentationMergeTail(props, {
-					className: gridRecipe({ className }),
-					style,
-				}),
+				{ className: gridRecipe({ className }) },
+				presentationMergeTail(props, { style }),
 			)}
 			alignContent={alignContent}
 			alignItems={alignItems}
