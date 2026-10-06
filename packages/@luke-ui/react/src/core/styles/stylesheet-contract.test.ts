@@ -153,7 +153,9 @@ async function readPublicStylesheet(): Promise<string> {
 
 /** One utilities-layer class from the built stylesheet (package-internal sprinkles). */
 function representativeUtilityClasses(stylesheet: string): Array<string> {
-	const utilitiesBlock = stylesheet.match(/@layer utilities \{([\s\S]*?)(?=\n@layer |\n@keyframes |$)/)?.[1];
+	const utilitiesBlock = stylesheet.match(
+		/@layer utilities \{([\s\S]*?)(?=\n@layer |\n@keyframes |$)/,
+	)?.[1];
 	if (utilitiesBlock == null) throw new Error('Expected an @layer utilities block.');
 	const className = utilitiesBlock.match(/^\s*\.([A-Za-z0-9_-]+)\s*\{/m)?.[1];
 	if (className == null) throw new Error('Expected a class rule in @layer utilities.');

@@ -64,9 +64,6 @@ Icon sizes run from `xsmall` to `large` and are emitted as `rem`. `ICON_SIZE_VAL
 Author `depth.*` and `actionControlFinish.*` per mode as final CSS values. Components pick semantic
 tokens. They do not branch on theme identity.
 
-Use CSS `calc()` when one rounded surface sits inside another: outer radius is inner radius plus the
-gap between them (usually the wrapper's padding). Both inputs can be semantic theme variables.
-
 Bundled themes (`tactile`, `paper`) ship precompiled. Each stylesheet pairs `:where(:root)` with a
 `.luke-ui-theme-<name>` identity class. Apply the bundled `themeClassName` export only when a
 document needs more than one theme at once.
