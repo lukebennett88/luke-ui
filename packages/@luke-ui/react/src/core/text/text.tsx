@@ -131,6 +131,7 @@ export function Text(props: TextProps) {
 		lineClamp,
 		shouldDisableTrim,
 		shouldInheritFont,
+		slot,
 		style,
 		textAlign,
 		textDecoration,
@@ -166,6 +167,8 @@ export function Text(props: TextProps) {
 	});
 
 	const ownedStyle = plainStyle(style);
+	// RAC accepts `null` at runtime to opt out of slotted text context; its props type omits null.
+	const racSlot = slot as string | undefined;
 
 	if (isVisuallyHidden) {
 		return (
@@ -175,6 +178,7 @@ export function Text(props: TextProps) {
 					<RacText
 						{...mergeProps(ownedStyle === undefined ? { ...racProps, style } : racProps, domProps)}
 						elementType={elementType}
+						slot={racSlot}
 					/>
 				)}
 				style={ownedStyle}
@@ -185,7 +189,13 @@ export function Text(props: TextProps) {
 	}
 
 	return (
-		<RacText {...racProps} className={recipeClassName} elementType={elementType} style={style}>
+		<RacText
+			{...racProps}
+			className={recipeClassName}
+			elementType={elementType}
+			slot={racSlot}
+			style={style}
+		>
 			{children}
 		</RacText>
 	);

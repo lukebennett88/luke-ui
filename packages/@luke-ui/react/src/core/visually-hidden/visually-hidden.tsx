@@ -32,7 +32,7 @@ interface VisuallyHiddenPresentationProps {
 /** Props when `VisuallyHidden` renders a supported element itself. */
 interface VisuallyHiddenElementProps
 	extends
-		DistributiveOmit<HTMLAttributes<HTMLElement>, 'children' | 'className' | 'ref' | 'style'>,
+		DistributiveOmit<HTMLAttributes<HTMLElement>, 'children' | 'className' | 'style'>,
 		VisuallyHiddenPresentationProps {
 	/**
 	 * Chooses a supported semantic element.
