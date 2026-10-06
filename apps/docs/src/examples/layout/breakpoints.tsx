@@ -1,5 +1,4 @@
-import { breakpoints } from '@luke-ui/react/theme';
-import { vars } from '@luke-ui/react/theme';
+import { breakpoints, vars } from '@luke-ui/react/theme';
 import { ExampleItem } from '#docs';
 
 export default () => {
