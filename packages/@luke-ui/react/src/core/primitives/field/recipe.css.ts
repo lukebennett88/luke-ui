@@ -1,7 +1,6 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { iconMaskUrls } from '../../../../.generated/icon-mask-data.js';
 import { vars } from '../../../theme/contract.css.js';
-import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
@@ -144,9 +143,6 @@ const fieldConfig = {
  * `fieldRecipe({ necessityIndicator, tone }).root() / .inline() / .label() / .message() / .icon()`.
  */
 export const fieldRecipe = recipe(fieldConfig);
-
-/** Outer variant selection for the `Field` recipe. */
-export type FieldRecipeVariants = RecipeSelection<typeof fieldRecipe>;
 
 /** Allowed `necessityIndicator` values for the field label. */
 export type FieldNecessityIndicator = keyof typeof fieldConfig.variants.necessityIndicator;

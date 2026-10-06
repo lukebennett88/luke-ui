@@ -1,168 +1,94 @@
 # Public API
 
-Contributor guidance for the `@luke-ui/react` public surface before 1.0. Prefer clean breaking
-changes over compatibility aliases. Issue
-[#711](https://github.com/lukebennett88/luke-ui/issues/711) owns this settlement.
+How to decide what `@luke-ui/react` makes public, and how public composition props are named. Luke
+UI is pre-1.0, so prefer a clean breaking change to a compatibility alias. The per-export decisions
+from [#711](https://github.com/lukebennett88/luke-ui/issues/711), with their evidence, are in
+[research/711-public-api-audit.md](../research/711-public-api-audit.md).
 
-The exhaustive symbol-by-symbol audit lives in
-[research/711-public-api-audit.md](../research/711-public-api-audit.md). That file is temporary
-research, not normative guidance.
+## What is public
 
-## What counts as public
+Every subpath in the package `exports` map is public, and so is every symbol it exports, documented
+or not. There is no root `@luke-ui/react` entrypoint.
 
-- Every package-exported subpath and every symbol exported from it is public, documented or not.
-- There is no root `@luke-ui/react` export. Consumers import subpaths only.
-- Public entrypoints use explicit named exports. Do not use `export *` in `src/exports/`.
-- Prefer one canonical import path per concept.
-- High-level components are the primary product surface. Primitives, recipes, helpers, utilities,
-  metadata, providers, and hooks need a credible independent consumer use case to stay public.
-- Internal reuse, implementation decomposition, and naming symmetry are not justifications.
-- Generated recipe and utility class identifiers, incidental DOM nesting, Vanilla Extract details,
-  and undocumented anatomy are private.
+Each module in `src/exports/` names its exports. Do not use `export *`, because it publishes
+whatever the source module happens to export.
 
-## Subpaths
+Generated class names, Vanilla Extract types, and any DOM structure or state attribute that a guide
+does not document are private.
 
-| Subpath                                | Purpose                                            |
-| -------------------------------------- | -------------------------------------------------- |
-| `@luke-ui/react/<component>`           | High-level component, props type, colocated recipe |
-| `@luke-ui/react/primitives/<name>`     | Documented composition anatomy                     |
-| `@luke-ui/react/styles`                | `createSprinkles`, `SprinklesProps`, `breakpoints` |
-| `@luke-ui/react/theme`                 | Theme authoring helpers, `vars`, `rootClassName`   |
-| `@luke-ui/react/themes/*`              | Temporary bundled theme JS/CSS until #715          |
-| `@luke-ui/react/utils`                 | `cx`, `mergeProps`, `pxToRem`                      |
-| `@luke-ui/react/provider`              | Application `Provider` (#712)                      |
-| Assets (`stylesheet.css`, spritesheet) | Shared CSS and icon spritesheet                    |
+| Subpath                                                        | Holds                                                                                        |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `@luke-ui/react/<component>`                                   | A high-level component, its props type, and the companion exports it needs                   |
+| `@luke-ui/react/primitives/<name>`                             | Parts for composing a variant of a component                                                 |
+| `@luke-ui/react/styles`                                        | Layout utilities                                                                             |
+| `@luke-ui/react/theme`                                         | Theme authoring and semantic variables                                                       |
+| `@luke-ui/react/themes/*`                                      | Bundled themes, until [#715](https://github.com/lukebennett88/luke-ui/issues/715) moves them |
+| `@luke-ui/react/utils`                                         | Helpers for composing Luke UI output with other props                                        |
+| `@luke-ui/react/provider`                                      | The application `Provider`                                                                   |
+| `stylesheet.css`, `spritesheet.svg`, `themes/*/stylesheet.css` | Static assets                                                                                |
 
-## Composition seams
+## What earns an export
 
-### Root ownership and refs
+A high-level component and its props type are the default public surface. Any other export needs a
+consumer use that the high-level component does not already cover. Internal reuse, implementation
+structure, and symmetry with another component are not reasons to export something.
 
-`className`, `style`, `id`, and `ref` target the documented component-owned root. Named part refs
-such as `inputRef` or `triggerRef` exist only when a stable integration need exists. Incidental
-wrappers stay private.
+High-level components do not need matching APIs. Decide each prop on what consumers of that
+component need, not on what a sibling component or React Aria exposes.
 
-### `elementType`
+| Export    | Public when                                                                                                                                                                                                                   |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primitive | An app can compose a variant of a component from it. Every primitive entrypoint has a docs page.                                                                                                                              |
+| Recipe    | An app would style an element it owns without the component, and the recipe works on that element alone. A recipe that needs the component's private anatomy, internal hooks, or undocumented state attributes stays private. |
+| Utility   | Consumers need it to combine Luke UI output with their own props.                                                                                                                                                             |
 
-Narrow native semantic substitution on components that document supported tags. Not generic
-polymorphism. Mutually exclusive with `renderRoot` in TypeScript.
+Export a public recipe, and the `*RecipeVariants` type derived from it, from the entrypoint of the
+component or primitive that owns it. [STYLING.md](STYLING.md#recipes) covers recipe authoring.
 
-### `renderRoot` / `render<Name>` / RAC `render`
+## Composition props
 
-- Luke UI-owned root replacement → `renderRoot`
-- Deliberately replaceable named part → `render<Name>`
-- React Aria's own `render` remains `render` on primitives and other RAC-owned seams
-- Do not rename RAC `render` to `renderRoot`
-- High-level `Button` and `IconButton` omit RAC `render` and Button function children
+[CONVENTIONS.md](CONVENTIONS.md#element-choice) owns element choice: `elementType`, `renderRoot`,
+`render<Part>`, and React Aria's `render`.
 
-Callback shape is `(props, state) => ReactElement`. For Box-like components, `renderRoot` receives
-the complete resolved root props Luke UI accepts for that root after sprinkles merge (`children`,
-`className`, `style`, callback `ref`, `id`, supported `aria-*` / `data-*`, supported DOM/event
-props). It does not receive props the component never accepted. Consumers may omit or replace
-supplied props and then own the consequences.
+### IDs and refs
 
-Box-like components with `renderRoot` today: `Box`, `Stack`, `Cluster`, `Grid`, `Container`,
-`Bleed`, `AspectRatio`. `ScrollFade` forbids `elementType` and `renderRoot`.
+Unprefixed `id`, `className`, `style`, and `ref` target the component's own root element. A prop for
+a descendant names it, such as `inputId`, `inputRef`, `triggerId`, or `triggerRef`. This is the
+ownership convention from the
+[#714 decision record](https://github.com/lukebennett88/luke-ui/issues/714#issuecomment-5925988115).
 
-### Slot
+### `slot`
 
-RAC `slot` is a composition seam, not a free pass.
+React Aria's `slot` lets a React Aria parent configure a child through context. Keep `slot` on a
+high-level component only when a React Aria parent defines a named slot that component can fill.
+`Button` and `IconButton` keep it for slots such as `slot="close"` in a React Aria `Dialog`.
+`Checkbox` keeps it for `slot="selection"` in a `GridList` or `Table`. Other high-level components
+omit it. Primitives keep the `slot` of the React Aria component they wrap.
 
-- Primitives may expose `slot` when RAC slot composition is an intentional consumer capability.
-- High-level components omit `slot` unless a demonstrated product need exists. Form fields from #714
-  omit it (`SelectField`, `ComboboxField`, `TextInputField`, `Checkbox`). High-level `Button`,
-  `IconButton`, `Link`, and `IconLink` also omit it. Use the button/link primitives for RAC slot
-  composition.
+### Controlled state
 
-### Controlled and uncontrolled
+Use React Aria's names for controlled and uncontrolled pairs, such as `value`, `defaultValue`, and
+`onChange`, or `isOpen`, `defaultOpen`, and `onOpenChange`. Do not add a parallel API. A change
+event can exist without its controlled pair when React Aria offers only the event, as `onOpenChange`
+does on `ComboboxField`.
 
-Stateful and form components follow React Aria's controlled/uncontrolled pairs (`value` /
-`defaultValue`, `isSelected` / `defaultSelected`, open-state pairs where documented). Controlled
-value props and their change handlers are independent in the public types: TypeScript does not
-require the matching handler when a controlled value is set. Prefer supplying both in product code.
-High-level fields keep the pairs #714 settled. Do not invent parallel APIs.
+### Defaults
 
-### Meaningful defaults
-
-Document defaults that change product behaviour (appearance, size, tone, prominence, pending). Do
-not treat every optional prop's absence as a public default worth listing. Defaults that only mirror
-the underlying RAC component stay undocumented unless Luke UI chooses a different value.
-
-### Variants
-
-Public appearance variants live on the high-level component and its colocated recipe. Recipe variant
-types are `*RecipeVariants`. Do not duplicate variant unions as standalone exports unless typing
-custom primitive composition requires them (`SelectSize`, `TextInputSize`, `ComboboxSize`).
+A default value is part of the public contract, so changing one is a breaking change. Document it
+with `@default`, as [DOCUMENTATION.md](DOCUMENTATION.md#comments-and-jsdoc) describes.
 
 ### State attributes
 
-A state attribute is public only when a component deliberately documents it as part of its supported
-DOM contract. Undocumented RAC or internal attributes remain private.
+A state attribute is public only when a guide documents it, as the Select primitive guide documents
+`data-open` on `SelectIndicator`. Other attributes that React Aria or Luke UI set can change without
+a migration path.
 
-### Spread and precedence
+## Owned elsewhere
 
-Consumer spreads happen near the start. Luke UI then writes the props it owns. Consumer `className`
-and `style` retain presentation precedence. Luke UI may override conflicting consumer values when
-correctness requires it.
-
-## Recipes
-
-A public recipe is a stable visual treatment for app-owned elements. Export the recipe and matching
-`*RecipeVariants` from the visual concept's entrypoint. Generated class strings are private.
-
-Retain a recipe only when an app would credibly style an owned element without the component. Layout
-recipes that only set `display` or that require the component's private anatomy are not public. See
-the audit for per-recipe decisions.
-
-## Primitives and utilities
-
-Public primitives live under `@luke-ui/react/primitives/*` for independent composition. Form
-primitives and companion item exports follow #714.
-
-`@luke-ui/react/utils` exports `cx`, `mergeProps`, and `pxToRem` only.
-
-`mergeProps` accepts prop objects only:
-
-- Ordinary props: rightmost wins, including explicit `undefined`
-- `className`: concatenate left to right with `cx`. Explicit `undefined` clears
-- `style`: shallow merge. Explicit `undefined` clears
-- Event handlers: chain in argument order with React Aria's `chain` when both are functions
-- Refs: rightmost wins (no special merge)
-
-## Theme and icons
-
-Theme authoring (`defineTheme`, `ThemeInput`, `vars`, `rootClassName`, and related helpers) stays
-public. Bundled Tactile/Paper paths are temporary until #715. Token taxonomy belongs to #715/#716.
-Cascade layers belong to #717.
-
-Icon and provider architecture from #712 is settled. `iconViewBoxes` stays package-private.
-
-## Heading
-
-Public: `Heading`, `HeadingProps`, `HeadingLevel`, `HeadingLevels`, `HeadingLevelsProps`,
-`useHeadingLevel`. Not public: `HeadingTag`, `HeadingLevelsRenderProps`.
-
-## Removals in this settlement
-
-| Change                                                                | Reason                                                         |
-| --------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `mergeStyleProps` → `mergeProps`                                      | Composition merge with event chaining and explicit `undefined` |
-| Drop public typed object helpers                                      | No independent consumer use                                    |
-| Box-like `render` → `renderRoot`                                      | Luke-owned root vocabulary                                     |
-| Drop duplicate recipes on primitives                                  | One canonical recipe path                                      |
-| Drop public `HeadingTag`, `HeadingLevelsRenderProps`, `iconViewBoxes` | No independent annotation need                                 |
-| Drop public theme defaults (`defaultBackdrop`, …)                     | Internal `defineTheme` only                                    |
-| Drop layout recipes without independent use                           | See audit                                                      |
-| High-level Button/IconButton omit RAC `render` and `slot`             | Composition on the button primitive                            |
-| High-level Link/IconLink omit RAC `slot`                              | Composition on the link primitive / RAC Link                   |
-| Drop public `visuallyHiddenRecipe`                                    | `VisuallyHidden` + `elementType` covers consumer use           |
-| Constrain `LoadingSkeleton` `elementType`                             | Narrow demonstrated substitutions                              |
-
-## Follow-ups
-
-| Issue | Owns                                         |
-| ----- | -------------------------------------------- |
-| #712  | Icon/provider (settled)                      |
-| #714  | Form architecture (settled input)            |
-| #715  | Theme authoring and bundled-theme extraction |
-| #716  | Control/token redesign                       |
-| #717  | Global stylesheet and cascade                |
+| Topic                                      | Owner                                                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Form field names, parts, and semantics     | [#714 decision record](https://github.com/lukebennett88/luke-ui/issues/714#issuecomment-5925988115) |
+| Icons and `Provider`                       | [#712](https://github.com/lukebennett88/luke-ui/issues/712)                                         |
+| Theme authoring and bundled-theme subpaths | [#715](https://github.com/lukebennett88/luke-ui/issues/715)                                         |
+| Token taxonomy                             | [#716](https://github.com/lukebennett88/luke-ui/issues/716)                                         |
+| Global stylesheet and cascade layers       | [#717](https://github.com/lukebennett88/luke-ui/issues/717)                                         |

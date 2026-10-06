@@ -25,10 +25,7 @@ const clampLevel = (n: number): HeadingLevel => Math.max(MIN_LEVEL, Math.min(6, 
 const HeadingLevelContext = createContext<HeadingLevel | undefined>(undefined);
 const WithinHeadingContext = createContext(false);
 
-/**
- * Values returned when resolving heading level from context.
- * Not re-exported from `@luke-ui/react/heading`; annotate via `ReturnType<typeof useHeadingLevel>`.
- */
+/** Values returned when resolving heading level from context. */
 export type HeadingLevelsRenderProps = {
 	element: `h${HeadingLevel}`;
 	level: HeadingLevel;

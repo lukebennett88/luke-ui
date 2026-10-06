@@ -3,6 +3,7 @@ import type { HTMLAttributes, JSX, ReactNode, Ref } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
 import { cx } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
+import { Box } from '../box/box.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import {
@@ -60,7 +61,7 @@ export type LoadingSkeletonProps = Prettify<_LoadingSkeletonProps>;
  */
 export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 	const {
-		elementType: Component = 'span',
+		elementType = 'span',
 		children,
 		className,
 		isLoading: isLoadingProp,
@@ -81,13 +82,14 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 	const isInline = !isValidElement(children);
 
 	return (
-		<Component
+		<Box
 			{...elementProps}
 			aria-hidden
 			className={cx(loadingSkeletonClassName, className)}
 			data-skeleton-inline={isInline ? '' : undefined}
+			elementType={elementType}
 			inert
-			ref={toCallbackRef(ref)}
+			ref={ref}
 			style={
 				radius
 					? { ...assignInlineVars({ [skeletonRadiusVar]: vars.radius[radius] }), ...style }
@@ -96,14 +98,6 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 			tabIndex={-1}
 		>
 			{children}
-		</Component>
+		</Box>
 	);
-}
-
-/** Callback ref so `div` | `span` can accept an `HTMLElement` ref without RefObject variance issues. */
-function toCallbackRef(ref: Ref<HTMLElement> | undefined) {
-	return (element: HTMLElement | null) => {
-		if (typeof ref === 'function') return ref(element);
-		if (ref) ref.current = element;
-	};
 }

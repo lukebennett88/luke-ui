@@ -63,7 +63,6 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 	const pascalName = displayName.replaceAll(' ', '');
 	const camelName = toCamelCase(name);
 	const recipeName = `${camelName}Recipe`;
-	const variantsType = `${pascalName}RecipeVariants`;
 	const packagePath = `@luke-ui/react/${name}`;
 
 	const files: Array<PlanFile> = [
@@ -74,16 +73,15 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 				packagePath,
 				pascalName,
 				recipeName,
-				variantsType,
 			}),
 			path: `packages/@luke-ui/react/src/core/${name}/${name}.tsx`,
 		},
 		{
-			contents: renderPackageExport({ name, pascalName, recipeName, variantsType }),
+			contents: renderPackageExport({ name, pascalName }),
 			path: `packages/@luke-ui/react/src/exports/${name}.ts`,
 		},
 		{
-			contents: renderRecipe({ recipeName, variantsType }),
+			contents: renderRecipe({ recipeName }),
 			path: `packages/@luke-ui/react/src/core/${name}/recipe.css.ts`,
 		},
 		{
@@ -146,7 +144,6 @@ function renderComponentSource(input: {
 	packagePath: string;
 	pascalName: string;
 	recipeName: string;
-	variantsType: string;
 }): string {
 	return `import type { ComponentProps, JSX } from 'react';
 import { cx } from '../../shared/utils/utils.js';
@@ -161,14 +158,8 @@ export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Elemen
 `;
 }
 
-function renderPackageExport(input: {
-	name: string;
-	pascalName: string;
-	recipeName: string;
-	variantsType: string;
-}): string {
+function renderPackageExport(input: { name: string; pascalName: string }): string {
 	return `export { ${input.pascalName}, type ${input.pascalName}Props } from '../core/${input.name}/${input.name}.js';
-export { type ${input.variantsType}, ${input.recipeName} } from '../core/${input.name}/recipe.css.js';
 `;
 }
 
@@ -292,16 +283,13 @@ ${propsTable}
 `;
 }
 
-function renderRecipe(input: { recipeName: string; variantsType: string }): string {
-	return `import type { RecipeSelection } from '../styles/recipe.js';
-import { recipe } from '../styles/recipe.js';
+function renderRecipe(input: { recipeName: string }): string {
+	return `import { recipe } from '../styles/recipe.js';
 
 export const ${input.recipeName} = recipe({
 	base: {
 		display: 'inline-flex',
 	},
 });
-
-export type ${input.variantsType} = RecipeSelection<typeof ${input.recipeName}>;
 `;
 }

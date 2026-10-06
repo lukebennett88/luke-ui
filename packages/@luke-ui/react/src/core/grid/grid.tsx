@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { mergeProps } from '../../shared/utils/utils.js';
+import { mergeProps } from '../../shared/utils/merge-props.js';
 import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
@@ -47,9 +47,9 @@ export function Grid({
 				resolveColumnsStyle(columns),
 				resolveRowsStyle(rows),
 				resolveAreasStyle(areas),
-				{ className: gridRecipe({ className }) },
 				{
-					...(style !== undefined ? { style } : {}),
+					className: gridRecipe({ className }),
+					style,
 				},
 			)}
 			alignContent={alignContent}

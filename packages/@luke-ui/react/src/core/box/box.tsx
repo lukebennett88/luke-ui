@@ -1,13 +1,11 @@
 import type { JSX, Ref } from 'react';
-import { cx } from '../../shared/utils/utils.js';
+import { mergeProps } from '../../shared/utils/merge-props.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import { createSprinkles } from '../styles/utilities.css.js';
 import type {
 	BoxLikeElementProps,
 	BoxLikeRef,
 	BoxLikeRenderProps,
-	BoxLikeRenderState,
-	BoxLikeResolvedRenderProps,
 } from '../types/box-like-props.js';
 import type { Prettify } from '../types/prettify.js';
 
@@ -28,33 +26,32 @@ export function Box(props: BoxProps): JSX.Element {
 		...restProps
 	} = props;
 
-	// `createSprinkles` always emits `className` and `style`. Destructuring turns absent
-	// consumer presentation into `undefined`; spreading that through `mergeProps` would
-	// clear the sprinkles output. Merge presentation here so absent keys stay absent.
-	const sprinkles = createSprinkles(normaliseRef(restProps));
-	const resolved: BoxLikeResolvedRenderProps = {
-		...sprinkles,
-		...(children !== undefined ? { children } : {}),
-		className: cx(sprinkles.className, className),
-		style: style === undefined ? sprinkles.style : { ...sprinkles.style, ...style },
-	};
-
 	if (renderRoot) {
-		return renderRoot(resolved, boxLikeRenderState);
+		const renderProps = mergeProps(createSprinkles(retainSprinklesProps(restProps)), {
+			children,
+			className,
+			style,
+		});
+
+		// The render owner must receive Box's ref with its presentation props.
+		return renderRoot({ ...renderProps, ref: toCallbackRef(restProps.ref) });
 	}
 
 	// `restProps` still carries `ref`; createSprinkles passes unknown keys through
 	// unchanged, so it reaches the element without being named here. `normaliseRef`
 	// swaps it for a callback: a `RefObject<HTMLElement>` can't spread onto a
 	// narrower concrete element (`current` is invariant), but a callback ref can.
-	return <Element {...resolved} />;
+	const domProps = mergeProps(createSprinkles(normaliseRef(restProps)), {
+		children,
+		className,
+		style,
+	});
+	return <Element {...domProps} />;
 }
 
 interface _BoxElementProps extends BoxLikeElementProps, SprinklesProps {}
 
 interface _BoxRenderProps extends BoxLikeRenderProps, SprinklesProps {}
-
-const boxLikeRenderState: BoxLikeRenderState = {};
 
 /** Normalises Box's `ref` so `renderRoot` can spread it onto a concrete element. */
 function toCallbackRef(ref: Ref<HTMLElement> | undefined): BoxLikeRef {
@@ -82,6 +79,18 @@ export function omitUnsupportedSprinklesProps<Props extends object>(
 
 	for (const key of Reflect.ownKeys(props)) {
 		if (!sprinklesProperties.has(key) || supportedProperties.has(key)) {
+			nextProps[key] = props[key as keyof Props];
+		}
+	}
+
+	return nextProps as Props;
+}
+
+function retainSprinklesProps<Props extends object>(props: Props): Props {
+	const nextProps: Record<PropertyKey, unknown> = {};
+
+	for (const key of Reflect.ownKeys(props)) {
+		if (sprinklesProperties.has(key)) {
 			nextProps[key] = props[key as keyof Props];
 		}
 	}

@@ -38,7 +38,6 @@ type _ButtonOmit = DistributiveOmit<
 	| 'prominence'
 	| 'render'
 	| 'size'
-	| 'slot'
 	| 'tone'
 	| keyof DocumentedPressProps
 >;

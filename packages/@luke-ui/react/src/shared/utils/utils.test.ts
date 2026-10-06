@@ -1,5 +1,7 @@
-import { expect, expectTypeOf, test } from 'vite-plus/test';
-import { cx, mergeProps } from './utils.js';
+import type { RefCallback } from 'react';
+import { assertType, expect, expectTypeOf, test } from 'vite-plus/test';
+import { mergeProps } from './merge-props.js';
+import { cx } from './utils.js';
 
 test('cx joins trimmed parts with single spaces and skips empty values', () => {
 	expect(cx(' first ', undefined, 'second', null, false, '', 'third')).toBe('first second third');
@@ -20,62 +22,56 @@ test('merges class names and styles from left to right across four objects', () 
 	expect(result.style).toEqual({ color: 'green', margin: 8, padding: 4 });
 });
 
-test('replaces ordinary properties with the last supplied value', () => {
-	const result = mergeProps({ id: 'first', title: 'retained' }, { id: 'second' }, { id: 'last' });
+test('chains event handlers left to right and keeps other last-defined props', () => {
+	const calls: Array<string> = [];
+	const firstHandler = () => {
+		calls.push('first');
+	};
+	const lastHandler = () => {
+		calls.push('last');
+	};
+	const result = mergeProps(
+		{ id: 'first', onClick: firstHandler, title: 'retained' },
+		{ id: 'second', onClick: firstHandler },
+		{ id: 'last', onClick: lastHandler },
+	);
 
 	expect(result.id).toBe('last');
 	expect(result.title).toBe('retained');
+	expect(result.onClick).not.toBe(lastHandler);
+	result.onClick();
+	expect(calls).toEqual(['first', 'first', 'last']);
 });
 
-test('lets explicit undefined win for ordinary props', () => {
-	const result = mergeProps({ id: 'default', title: 'keep' }, { id: undefined });
-
-	expect(result.id).toBeUndefined();
-	expect(result.title).toBe('keep');
-});
-
-test('lets explicit undefined clear className and style', () => {
-	expect(mergeProps({ className: 'first' }, { className: undefined }).className).toBeUndefined();
-	expect(mergeProps({ style: { color: 'red' } }, { style: undefined }).style).toBeUndefined();
-	expect(mergeProps({ className: undefined, style: undefined }, {})).toEqual({
-		className: undefined,
-		style: undefined,
-	});
-});
-
-test('leaves className and style absent when never supplied', () => {
-	expect(mergeProps({ id: 'only' }, {})).toEqual({ id: 'only' });
-});
-
-test('chains event handlers in argument order', () => {
-	const calls: Array<string> = [];
+test('keeps earlier className and style when a later object leaves them undefined', () => {
 	const result = mergeProps(
-		{ onClick: () => calls.push('first') },
-		{ onClick: () => calls.push('second') },
-		{ onClick: () => calls.push('third') },
+		{ className: 'first', style: { color: 'red' } },
+		{ className: undefined, style: undefined },
 	);
 
-	result.onClick();
-	expect(calls).toEqual(['first', 'second', 'third']);
+	expect(result.className).toBe('first');
+	expect(result.style).toEqual({ color: 'red' });
 });
 
-test('replaces chained handlers when the later value is explicitly undefined', () => {
-	const first = () => {};
-	const result = mergeProps({ onClick: first }, { onClick: undefined });
-	expect(result.onClick).toBeUndefined();
+test('keeps earlier values when a later object sets a prop to undefined', () => {
+	const result = mergeProps({ title: 'kept', tabIndex: 0 }, { title: undefined, tabIndex: 1 });
+
+	expect(result.title).toBe('kept');
+	expect(result.tabIndex).toBe(1);
 });
 
-test('does not specially merge refs', () => {
-	const firstRef = () => {};
-	const lastRef = () => {};
-	const result = mergeProps({ ref: firstRef }, { ref: lastRef });
-	expect(result.ref).toBe(lastRef);
-});
+test('merges refs so each callback receives the element', () => {
+	const seen: Array<unknown> = [];
+	const result = mergeProps(
+		{ ref: (element: unknown) => seen.push(['a', element]) },
+		{ ref: (element: unknown) => seen.push(['b', element]) },
+	);
 
-test('replaces refs when the later value is explicitly undefined', () => {
-	const firstRef = () => {};
-	const result = mergeProps({ ref: firstRef }, { ref: undefined });
-	expect(result.ref).toBeUndefined();
+	result.ref('node');
+	expect(seen).toEqual([
+		['a', 'node'],
+		['b', 'node'],
+	]);
 });
 
 test('does not mutate props or their style objects', () => {
@@ -109,29 +105,6 @@ test('infers the merged return type for fixed positional arguments', () => {
 	}>();
 	const pair = mergeProps({ id: 1 }, { id: 'last' });
 	expectTypeOf(pair).toEqualTypeOf<{ id: string }>();
-
-	const cleared = mergeProps({ className: undefined, style: undefined }, {});
-	expectTypeOf(cleared).toEqualTypeOf<{ className: undefined; style: undefined }>();
-});
-
-test('keeps earlier className and style when a later optional prop object omits them', () => {
-	const optionalPresentation: { className?: string; style?: { color?: string } } = {};
-	const withEarlier = mergeProps(
-		{ className: 'first', style: { color: 'red', padding: 4 } },
-		optionalPresentation,
-	);
-
-	expect(withEarlier.className).toBe('first');
-	expect(withEarlier.style).toEqual({ color: 'red', padding: 4 });
-	expectTypeOf(withEarlier).toEqualTypeOf<{
-		className: string | undefined;
-		style: Record<string, unknown> | undefined;
-	}>();
-
-	const optionalWithClass: { className?: string } = { className: 'second' };
-	const mergedClass = mergeProps({ className: 'first' }, optionalWithClass);
-	expect(mergedClass.className).toBe('first second');
-	expectTypeOf(mergedClass).toEqualTypeOf<{ className: string | undefined }>();
 });
 
 test('widens the return type for an unknown-length array spread', () => {
@@ -142,4 +115,168 @@ test('widens the return type for an unknown-length array spread', () => {
 		extra: number | undefined;
 		id: string | boolean;
 	}>();
+});
+
+test('types absent presentation and retained values to match runtime', () => {
+	const absent = mergeProps({ className: undefined, style: undefined }, {});
+	expect(absent.className).toBeUndefined();
+	expect(absent.style).toBeUndefined();
+	expectTypeOf(absent.className).toEqualTypeOf<undefined>();
+	expectTypeOf(absent.style).toEqualTypeOf<undefined>();
+
+	const retained = mergeProps({ title: 'kept' }, { title: undefined });
+	expect(retained.title).toBe('kept');
+	expectTypeOf(retained.title).toEqualTypeOf<string>();
+
+	const chained = mergeProps(
+		{ onClick: (_event: { type: string }) => 'first' as const },
+		{ onClick: (_event: { type: string }) => 'second' as const },
+	);
+	expectTypeOf(chained.onClick).toEqualTypeOf<(event: { type: string }) => void>();
+});
+
+test('ignores invalid presentation without clearing earlier values', () => {
+	const result = mergeProps(
+		{ className: 'first', style: { color: 'red' } },
+		{ className: null, style: false },
+	);
+	expect(result.className).toBe('first');
+	expect(result.style).toEqual({ color: 'red' });
+
+	const absent = mergeProps({ className: null, style: false }, {});
+	expect(absent.className).toBeUndefined();
+	expect(absent.style).toBeUndefined();
+});
+
+test('keeps optional presentation optional, including array tails', () => {
+	const optional: { className?: string; style?: { color: string } } = {};
+	const absent = mergeProps({}, optional);
+	expect(absent.className).toBeUndefined();
+	expect(absent.style).toBeUndefined();
+	expectTypeOf(absent.className).toEqualTypeOf<string | undefined>();
+	expectTypeOf(absent.style).toEqualTypeOf<Record<string, unknown> | undefined>();
+
+	const unknown: { className: unknown; style: unknown } = {
+		className: 'custom',
+		style: { color: 'red' },
+	};
+	const valid = mergeProps(unknown, {});
+	expect(valid.className).toBe('custom');
+	expect(valid.style).toEqual({ color: 'red' });
+	expectTypeOf(valid.className).toEqualTypeOf<string | undefined>();
+	expectTypeOf(valid.style).toEqualTypeOf<Record<string, unknown> | undefined>();
+
+	const tail: Array<{ className: string; style: { color: string } }> = [];
+	const empty = mergeProps({}, {}, ...tail);
+	expect(empty.className).toBeUndefined();
+	expect(empty.style).toBeUndefined();
+	expectTypeOf(empty.className).toEqualTypeOf<string | undefined>();
+	expectTypeOf(empty.style).toEqualTypeOf<Record<string, unknown> | undefined>();
+
+	const retained = mergeProps({ className: 'first', style: { color: 'red' } }, {}, ...tail);
+	expectTypeOf(retained.className).toEqualTypeOf<string>();
+	expectTypeOf(retained.style).toEqualTypeOf<Record<string, unknown>>();
+});
+
+test('types optional event handlers conservatively and retains their argument contract', () => {
+	const optional: { onClick?: (event: string) => string } = {};
+	const absent = mergeProps(optional, optional);
+	expect(absent.onClick).toBeUndefined();
+	expectTypeOf(absent.onClick).toEqualTypeOf<((event: string) => void) | undefined>();
+
+	const retained = mergeProps({ onClick: (_event: string) => 'value' }, optional);
+	expectTypeOf(retained.onClick).toEqualTypeOf<(event: string) => void>();
+
+	const incompatible = mergeProps(
+		{ onClick: (_event: string) => undefined },
+		{ onClick: (_event: number) => undefined },
+	);
+	// @ts-expect-error Both handlers must accept the argument.
+	assertType<Parameters<typeof incompatible.onClick>>(['string']);
+	// @ts-expect-error Both handlers must accept the argument.
+	assertType<Parameters<typeof incompatible.onClick>>([123]);
+
+	const ambiguous: {
+		onClick: ((event: string) => void) | ((event: number) => void);
+	} = { onClick: (_event: string) => {} };
+	const union = mergeProps(ambiguous, { onClick: (_event: unknown) => {} });
+	// @ts-expect-error Every possible handler must accept the argument.
+	assertType<Parameters<typeof union.onClick>>(['string']);
+	// @ts-expect-error Every possible handler must accept the argument.
+	assertType<Parameters<typeof union.onClick>>([123]);
+
+	const tail: Array<{ onClick: (event: string) => void } | { onClick: (event: number) => void }> =
+		[];
+	const spread = mergeProps({ onClick: (_event: unknown) => {} }, {}, ...tail);
+	// @ts-expect-error Every possible tail handler must accept the argument.
+	assertType<Parameters<typeof spread.onClick>>(['string']);
+	// @ts-expect-error Every possible tail handler must accept the argument.
+	assertType<Parameters<typeof spread.onClick>>([123]);
+
+	const cleared = mergeProps({ onClick: (_event: string) => {} }, { onClick: null });
+	expect(cleared.onClick).toBeNull();
+	expectTypeOf(cleared.onClick).toEqualTypeOf<null>();
+});
+
+test('replaces functions whose names do not begin with on and an ASCII capital', () => {
+	const first = () => 'first' as const;
+	const last = () => 'last' as const;
+	const result = mergeProps(
+		{ on_: first, on1: first, onÉ: first },
+		{ on_: last, on1: last, onÉ: last },
+	);
+	expect(result.on_).toBe(last);
+	expect(result.on1).toBe(last);
+	expect(result.onÉ).toBe(last);
+	expectTypeOf(result.on_).returns.toEqualTypeOf<'last'>();
+	expectTypeOf(result.on1).returns.toEqualTypeOf<'last'>();
+	expectTypeOf(result.onÉ).returns.toEqualTypeOf<'last'>();
+});
+
+test('types merged callback and object refs as a callback', () => {
+	const seen: Array<string | null> = [];
+	const objectRef: { current: string | null } = { current: null };
+	const callbackRef = (node: string | null) => {
+		seen.push(node);
+	};
+	const result = mergeProps({ ref: callbackRef }, { ref: objectRef });
+	expectTypeOf(result.ref).toEqualTypeOf<RefCallback<string | null>>();
+	result.ref('node');
+	expect(objectRef.current).toBe('node');
+	expect(seen).toEqual(['node']);
+
+	const single = mergeProps({ ref: objectRef }, {});
+	expect(single.ref).toBe(objectRef);
+	expectTypeOf(single.ref).toEqualTypeOf<{ current: string | null }>();
+
+	const optional: { ref?: { current: string | null } } = {};
+	const retained = mergeProps({ ref: objectRef }, optional);
+	expect(retained.ref).toBe(objectRef);
+	expectTypeOf(retained.ref).toEqualTypeOf<
+		{ current: string | null } | RefCallback<string | null>
+	>();
+});
+
+test('preserves merged ref cleanup and clears object refs on unmount', () => {
+	const seen: Array<string | null> = [];
+	const objectRef: { current: string | null } = { current: null };
+	const result = mergeProps(
+		{
+			ref: (node: string | null) => {
+				seen.push(node);
+				return () => {
+					seen.push(null);
+				};
+			},
+		},
+		{ ref: objectRef },
+	);
+
+	const cleanup = result.ref('node');
+	expect(objectRef.current).toBe('node');
+	expectTypeOf(cleanup).toEqualTypeOf<ReturnType<RefCallback<string | null>>>();
+	if (typeof cleanup !== 'function') throw new Error('Expected ref cleanup');
+	cleanup();
+	expect(objectRef.current).toBeNull();
+	expect(seen).toEqual(['node', null]);
 });

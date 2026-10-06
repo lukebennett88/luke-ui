@@ -32,19 +32,12 @@ test('renders semantic elements and a consumer-owned renderRoot prop', () => {
 	const section = semanticResult.locator.getByRole('region', { name: 'Account summary' });
 	expect(section.element().tagName).toBe('SECTION');
 
-	const clicks: Array<string> = [];
-	let receivedProps: Record<string, unknown> | undefined;
-	const ref = createRef<HTMLElement>();
+	let receivedAriaLabel = false;
 	const customResult = render(
 		<Box
-			aria-label="Account summary"
-			className="consumer-class"
-			data-testid="box-render-root"
-			id="box-render-root"
-			onClick={() => clicks.push('consumer')}
-			ref={ref}
+			aria-label="Ignored Box label"
 			renderRoot={(resolvedProps) => {
-				receivedProps = resolvedProps;
+				receivedAriaLabel = Object.hasOwn(resolvedProps, 'aria-label');
 				return <div {...resolvedProps} />;
 			}}
 			style={{ display: 'grid' }}
@@ -52,20 +45,11 @@ test('renders semantic elements and a consumer-owned renderRoot prop', () => {
 			Custom div
 		</Box>,
 	);
-	const div = customResult.locator.getByTestId('box-render-root').element();
+	const div = customResult.locator.getByText('Custom div').element();
 	if (!(div instanceof HTMLDivElement)) throw new Error('Expected custom rendered div.');
 
-	expect(receivedProps?.['aria-label']).toBe('Account summary');
-	expect(receivedProps?.id).toBe('box-render-root');
-	expect(receivedProps?.['data-testid']).toBe('box-render-root');
-	expect(receivedProps?.children).toBeTruthy();
-	expect(receivedProps?.className).toContain('consumer-class');
-	expect(receivedProps?.style).toEqual({ display: 'grid' });
-	expect(typeof receivedProps?.ref).toBe('function');
-	expect(ref.current).toBe(div);
+	expect(receivedAriaLabel).toBe(false);
 	expect(div.style.display).toBe('grid');
-	div.click();
-	expect(clicks).toEqual(['consumer']);
 });
 
 test('consumer className and style win collisions on the ordinary element path', () => {

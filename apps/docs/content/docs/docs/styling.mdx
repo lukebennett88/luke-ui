@@ -73,22 +73,10 @@ const variants: ButtonRecipeVariants = {
 const className = buttonRecipe({ ...variants, className: 'my-class' });
 ```
 
-A slotted recipe such as `fieldRecipe` returns one function per part. Choose variants once at the
-outer call, then call the part you are styling with an optional `{ className }`.
-
-```tsx
-import { fieldRecipe } from '@luke-ui/react/primitives/field';
-
-const { label, message, root } = fieldRecipe({ tone: 'description' });
-
-<div className={root()}>
-	<label className={label()} htmlFor="example-input">
-		Example label
-	</label>
-	<input id="example-input" />
-	<p className={message({ className: 'my-class' })}>Example description</p>
-</div>;
-```
+A slotted recipe returns one function per part. Choose variants once at the outer call, then call
+the part you are styling with an optional `{ className }`. Recipes that style a component's private
+multi-part anatomy stay package-private. Compose the public primitives instead of importing those
+recipes.
 
 A primitive's recipe imports from the primitive's entrypoint. `textInputRecipe` styles an input you
 own:

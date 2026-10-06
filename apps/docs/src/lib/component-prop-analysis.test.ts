@@ -107,6 +107,7 @@ test(
 		expect(names).toContain('aria-label');
 		expect(names).toContain('aria-labelledby');
 		expect(names).toContain('defaultItems');
+		expect(names).toContain('onOpenChange');
 		expect(names).not.toContain('onClick');
 		expect(names).not.toContain('onPointerMoveCapture');
 	},
@@ -587,6 +588,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'prominence',
 			'ref',
 			'size',
+			'slot',
 			'startContent',
 			'tone',
 			'type',
@@ -661,6 +663,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'prominence',
 			'ref',
 			'size',
+			'slot',
 			'tone',
 			'type',
 		],

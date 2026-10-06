@@ -1,4 +1,5 @@
-import type { CSSProperties, HTMLAttributes, JSX, ReactElement, Ref, RefObject } from 'react';
+import type { HTMLAttributes, JSX, ReactElement, Ref, RefObject } from 'react';
+import type { DistributiveOmit } from './distributive-omit.js';
 
 /** Structural elements a Box-like component may render. */
 type BoxLikeElementType = keyof Pick<
@@ -38,34 +39,28 @@ export interface BoxLikeElementProps extends HTMLAttributes<HTMLElement> {
 	renderRoot?: never;
 }
 
-/**
- * Resolved root props a Box-like component hands to `renderRoot` after sprinkles merge.
- *
- * `className` and `style` are always present: sprinkles emits them, and absent consumer
- * presentation does not clear them.
- */
-export type BoxLikeResolvedRenderProps = Omit<
+/** Content and presentation props a Box-like component passes through to its element. */
+interface BoxLikePresentationProps extends Pick<
 	HTMLAttributes<HTMLElement>,
-	'className' | 'ref' | 'style'
-> & {
-	className: string;
+	'children' | 'className' | 'style'
+> {
+	ref?: Ref<HTMLElement>;
+}
+
+/** Props a Box-like component hands to a caller-owned `renderRoot` element. */
+type BoxLikeResolvedRenderProps = DistributiveOmit<BoxLikePresentationProps, 'ref'> & {
 	ref: BoxLikeRef;
-	style: CSSProperties;
 };
 
-/** Curated render state for Box-like roots. Box-like roots have no interactive state today. */
-export type BoxLikeRenderState = Record<string, never>;
-
 /** Props a Box-like component accepts when a caller owns the rendered element. */
-export interface BoxLikeRenderProps extends HTMLAttributes<HTMLElement> {
+export interface BoxLikeRenderProps extends BoxLikePresentationProps {
 	/** Use `elementType` instead of `renderRoot` for a supported structural element. */
 	elementType?: never;
-	/** Ref to the rendered element. Normalised to a callback ref in `renderRoot` props. */
-	ref?: Ref<HTMLElement>;
 	/**
-	 * Passes the component's resolved root props to a caller-owned element.
-	 * Receives the same accepted DOM props the element path would apply, plus resolved
-	 * `children`, `className`, and `style`, and a callback `ref`.
+	 * Passes `children`, `className`, `style`, and a callback `ref` to a caller-owned element.
+	 * Put DOM attributes on the element the callback returns.
 	 */
-	renderRoot: (props: BoxLikeResolvedRenderProps, state: BoxLikeRenderState) => ReactElement;
+	renderRoot: (props: {
+		[K in keyof BoxLikeResolvedRenderProps]: BoxLikeResolvedRenderProps[K];
+	}) => ReactElement;
 }

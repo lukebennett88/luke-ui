@@ -45,12 +45,9 @@ The supported elements are `article`, `aside`, `dd`, `div`, `dl`, `dt`, `figcapt
 
 ## Own the rendered element
 
-Use `renderRoot` when the callback must own the element and its DOM attributes. The callback can
-return an appropriate intrinsic element or custom component. It receives the same resolved root
-props Box would apply on the element path: accepted DOM props such as `id`, supported `aria-*` and
-`data-*` attributes, event handlers, `children`, `className`, and `style`, plus a callback `ref`,
-and a curated state object as the second argument. You may omit or replace supplied props. You then
-own the consequences.
+Use `renderRoot` when the callback must own the element and its DOM attributes. The callback
+receives `children`, `className`, `style`, and a callback `ref`. Put other DOM attributes on the
+element the callback returns. You may omit or replace supplied props. You then own the consequences.
 
 Do not combine `renderRoot` with `elementType`. Use `Link` or `Button` when you need their
 behaviour.

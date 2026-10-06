@@ -19,7 +19,7 @@ import type { Prettify } from '../types/prettify.js';
 
 type _CheckboxOmit = DistributiveOmit<
 	CheckboxRootProps,
-	'aria-label' | 'aria-labelledby' | 'children' | 'inputRef' | 'isInvalid' | 'slot'
+	'aria-label' | 'aria-labelledby' | 'children' | 'inputRef' | 'isInvalid'
 >;
 
 interface _CheckboxBaseProps extends _CheckboxOmit {
