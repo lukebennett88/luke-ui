@@ -5,7 +5,7 @@ import type { JSX, ReactElement, Ref, RefObject } from 'react';
 export type UseRenderRef = NonNullable<Exclude<Ref<HTMLElement>, RefObject<HTMLElement | null>>>;
 
 /** Normalises a ref so `renderRoot` and intrinsic elements can share one callback. */
-export function toCallbackRef(ref: Ref<HTMLElement> | undefined): UseRenderRef {
+function toCallbackRef(ref: Ref<HTMLElement> | undefined): UseRenderRef {
 	return (element) => {
 		if (typeof ref === 'function') return ref(element);
 		if (ref) ref.current = element;

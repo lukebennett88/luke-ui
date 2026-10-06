@@ -24,7 +24,7 @@ type BoxLikeElementType = keyof Pick<
 >;
 
 /** Ref shape a Box-like component hands to `renderRoot`, spreadable onto a concrete element. */
-export type BoxLikeRef = NonNullable<Exclude<Ref<HTMLElement>, RefObject<HTMLElement | null>>>;
+type BoxLikeRef = NonNullable<Exclude<Ref<HTMLElement>, RefObject<HTMLElement | null>>>;
 
 /** Props a Box-like component accepts when it renders a structural element itself. */
 export interface BoxLikeElementProps extends HTMLAttributes<HTMLElement> {
