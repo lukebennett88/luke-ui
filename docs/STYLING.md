@@ -306,8 +306,8 @@ on it at runtime. It is not part of the stable Luke UI 1.x consumer API.
 
 Keep engine authoring and compilation private. If the engine changes, preserve the package-internal
 contracts: `createSprinkles` passes through own enumerable string-keyed non-utility props, generated
-`className` and `style` replace input values, and `.properties` remains typed as read-only.
-Theme `vars` keep their semantic paths and CSS custom property names. Recipes return class strings.
+`className` and `style` replace input values, and `.properties` remains typed as read-only. Theme
+`vars` keep their semantic paths and CSS custom property names. Recipes return class strings.
 Generated CSS keeps its cascade layers and source order.
 
 ### Implementation rules

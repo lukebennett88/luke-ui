@@ -16,17 +16,17 @@ whatever the source module happens to export.
 Generated class names, Vanilla Extract types, and any DOM structure or state attribute that a guide
 does not document are private.
 
-| Subpath                                                        | Holds                                                                                                 |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `@luke-ui/react/<component>`                                   | A high-level component, its props type, and the companion exports it needs                            |
-| `@luke-ui/react/primitives/<name>`                             | Parts for composing a variant of a component                                                          |
-| `@luke-ui/react/theme`                                         | `breakpoints`, `defineTheme`, `ThemeInput`, `rootClassName`, `ThemeContrastError`, `ThemeGenerationError`, `vars` |
+| Subpath                                                        | Holds                                                                                                              |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `@luke-ui/react/<component>`                                   | A high-level component, its props type, and the companion exports it needs                                         |
+| `@luke-ui/react/primitives/<name>`                             | Parts for composing a variant of a component                                                                       |
+| `@luke-ui/react/theme`                                         | `breakpoints`, `defineTheme`, `ThemeInput`, `rootClassName`, `ThemeContrastError`, `ThemeGenerationError`, `vars`  |
 | `@luke-ui/react/themes/*`                                      | Bundled `theme` and `themeClassName`, until [#715](https://github.com/lukebennett88/luke-ui/issues/715) moves them |
-| `@luke-ui/react/utils`                                         | Helpers for composing Luke UI output with other props                                                 |
-| `@luke-ui/react/provider`                                      | The application `Provider`                                                                            |
-| `stylesheet.css`, `spritesheet.svg`, `themes/*/stylesheet.css` | Static assets                                                                                         |
+| `@luke-ui/react/utils`                                         | Helpers for composing Luke UI output with other props                                                              |
+| `@luke-ui/react/provider`                                      | The application `Provider`                                                                                         |
+| `stylesheet.css`, `spritesheet.svg`, `themes/*/stylesheet.css` | Static assets                                                                                                      |
 
-There is no `@luke-ui/react/styles` subpath. Layout utilities stay package-internal; consumers use
+There is no `@luke-ui/react/styles` subpath. Layout utilities stay package-internal. Consumers use
 `Box` and the other layout components.
 
 ## What earns an export

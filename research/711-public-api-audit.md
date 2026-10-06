@@ -38,8 +38,8 @@ current export or slot decision open.
 
 A component props type earns its export by typing consumer wrappers and configuration. Primitive
 parts earn theirs through custom anatomy rather than internal reuse. Public recipe selection types
-travel with their independently usable recipe only when that recipe has selectable variants. Type names in
-this inventory are exports, not new runtime values.
+travel with their independently usable recipe only when that recipe has selectable variants. Type
+names in this inventory are exports, not new runtime values.
 
 ### `@luke-ui/react/aspect-ratio`
 
@@ -66,11 +66,11 @@ Source: [src/exports/bleed.ts](../packages/@luke-ui/react/src/exports/bleed.ts).
 Source: [src/exports/blockquote.ts](../packages/@luke-ui/react/src/exports/blockquote.ts).
 Entrypoint: **retain**.
 
-| Symbol                     | Decision | Independent consumer use                                                                           |
-| -------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `Blockquote`               | retain   | Render a styled block quotation.                                                                   |
-| `BlockquoteProps`          | retain   | Type an app wrapper around `Blockquote`. Render a styled block quotation. |
-| `blockquoteRecipe`         | retain   | Apply the border and inset to an app-owned blockquote.                    |
+| Symbol             | Decision | Independent consumer use                                                  |
+| ------------------ | -------- | ------------------------------------------------------------------------- |
+| `Blockquote`       | retain   | Render a styled block quotation.                                          |
+| `BlockquoteProps`  | retain   | Type an app wrapper around `Blockquote`. Render a styled block quotation. |
+| `blockquoteRecipe` | retain   | Apply the border and inset to an app-owned blockquote.                    |
 
 ### `@luke-ui/react/box`
 
@@ -236,11 +236,11 @@ Source: [src/exports/icon.ts](../packages/@luke-ui/react/src/exports/icon.ts). E
 
 Source: [src/exports/kbd.ts](../packages/@luke-ui/react/src/exports/kbd.ts). Entrypoint: **retain**.
 
-| Symbol              | Decision | Independent consumer use                                                                           |
-| ------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `Kbd`               | retain   | Render styled keyboard input.                                                                      |
-| `KbdProps`          | retain   | Type an app wrapper around `Kbd`. Render styled keyboard input. |
-| `kbdRecipe`         | retain   | Style app-owned keyboard markup.                                |
+| Symbol      | Decision | Independent consumer use                                        |
+| ----------- | -------- | --------------------------------------------------------------- |
+| `Kbd`       | retain   | Render styled keyboard input.                                   |
+| `KbdProps`  | retain   | Type an app wrapper around `Kbd`. Render styled keyboard input. |
+| `kbdRecipe` | retain   | Style app-owned keyboard markup.                                |
 
 ### `@luke-ui/react/link`
 
@@ -427,11 +427,11 @@ Entrypoint: **retain**.
 Source: [src/exports/prose.ts](../packages/@luke-ui/react/src/exports/prose.ts). Entrypoint:
 **retain**.
 
-| Symbol                | Decision | Independent consumer use                                                                              |
-| --------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `Prose`               | retain   | Apply long-form rhythm to app-owned Markdown, MDX or CMS content.                                     |
-| `ProseProps`          | retain   | Type an app wrapper around `Prose`. Apply long-form rhythm to app-owned Markdown, MDX or CMS content. |
-| `proseRecipe`         | retain   | Apply long-form rhythm to an app-owned content root.                                                  |
+| Symbol        | Decision | Independent consumer use                                                                              |
+| ------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `Prose`       | retain   | Apply long-form rhythm to app-owned Markdown, MDX or CMS content.                                     |
+| `ProseProps`  | retain   | Type an app wrapper around `Prose`. Apply long-form rhythm to app-owned Markdown, MDX or CMS content. |
+| `proseRecipe` | retain   | Apply long-form rhythm to an app-owned content root.                                                  |
 
 ### `@luke-ui/react/provider`
 
@@ -882,11 +882,12 @@ supported public seams. The shared grouping also describes the Button primitive'
 Sources: `core/styles/utilities.css.ts`, `core/styles/responsive-conditions.ts`,
 `theme/breakpoints.ts` and `shared/utils/merge-props.ts`. `createSprinkles` and `SprinklesProps`
 stay package-internal for `Box` and layout components. Public `breakpoints` live on
-`@luke-ui/react/theme`. These are the actual utility keys, not a promise of arbitrary CSS props. All entries support a direct value, null or a responsive object with `initial`,
-`bp640`, `bp768`, `bp1024`, `bp1280`, `bp1536`. Null/omitted conditions add no value. Responsive
-values use the nearest size container, with thresholds 640/768/1024/1280/1536 px. No utility
-property has an implicit presentation default. Specialised layout components may require `initial`,
-as recorded above.
+`@luke-ui/react/theme`. These are the actual utility keys, not a promise of arbitrary CSS props. All
+entries support a direct value, null or a responsive object with `initial`, `bp640`, `bp768`,
+`bp1024`, `bp1280`, `bp1536`. Null/omitted conditions add no value. Responsive values use the
+nearest size container, with thresholds 640/768/1024/1280/1536 px. No utility property has an
+implicit presentation default. Specialised layout components may require `initial`, as recorded
+above.
 
 | Utility properties                                                                                                                                                                                                                                                                                                                               | Accepted scale                                                                                                                                               |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -1024,10 +1025,10 @@ example, `vars.color.foreground.danger.onSolid` is `var(--luke-color-foreground-
 
 Only color, depth and actionControlFinish vary by colour mode. Other token families belong to theme
 identity. All CSS variables are public through vars even though generation helpers and contract-tree
-types stay private. The ten space leaves and rem values above remain on `vars.space`. The nine type styles remain on
-`vars.font.*`. Package-private catalogues may mirror those keys for internals. No raw
-palette step, private metric step, generated class hash or component-owned custom property becomes
-public from its use in CSS.
+types stay private. The ten space leaves and rem values above remain on `vars.space`. The nine type
+styles remain on `vars.font.*`. Package-private catalogues may mirror those keys for internals. No
+raw palette step, private metric step, generated class hash or component-owned custom property
+becomes public from its use in CSS.
 
 ### Cascade and stylesheet names
 
@@ -1107,11 +1108,11 @@ The existing `@luke-ui/rainbow-sprinkles` support package is a runtime dependenc
 ## Completion evidence and deferred owners
 
 The current map has explicit per-symbol decisions for the retained JavaScript entrypoints after
-removing `@luke-ui/react/styles`, plus each of the five static/map entrypoints. Component/primitive tables cover
-their own props, meaningful defaults, selection/text/open/loading state, variants, slots, anatomy,
-refs/root ownership, element choice and rendering seams. Styles, theme exports, every finite token
-leaf family, concrete CSS-variable naming, cascade/root names and asset paths have decisions. No
-additional speculative export is required to complete the inventory.
+removing `@luke-ui/react/styles`, plus each of the five static/map entrypoints. Component/primitive
+tables cover their own props, meaningful defaults, selection/text/open/loading state, variants,
+slots, anatomy, refs/root ownership, element choice and rendering seams. Styles, theme exports,
+every finite token leaf family, concrete CSS-variable naming, cascade/root names and asset paths
+have decisions. No additional speculative export is required to complete the inventory.
 
 #712 and #714 remain settled input. #715 owns future theme authoring/package design, #716 owns token
 taxonomy, #717 owns global stylesheet/reset/layers and #756 owns VisuallyHidden's primitive
