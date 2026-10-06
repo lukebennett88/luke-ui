@@ -145,7 +145,7 @@ interface BundleBoundary {
 
 /** Small runtime imports, each checked for what it bundles. */
 const bundleBoundaries: Array<BundleBoundary> = [
-	{ composes: ['text'], entry: 'blockquote', exportName: 'Blockquote' },
+	{ composes: ['text', 'visually-hidden'], entry: 'blockquote', exportName: 'Blockquote' },
 	{
 		composes: ['loading-spinner', 'primitives/button', 'text', 'visually-hidden'],
 		entry: 'button',
