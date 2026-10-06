@@ -331,11 +331,11 @@ const AUDITED_TYPES: ReadonlyArray<{
 	},
 	{
 		// The guide teaches `elementType` for a screen-reader-only heading, `isFocusable` for focus
-		// reveal, and `renderRoot` for a caller-owned skip link.
+		// reveal, and `renderRoot` for a caller-owned skip link. `ref` reaches the owned root.
 		forwardsDomProps: true,
 		name: 'VisuallyHiddenProps',
 		path: 'packages/@luke-ui/react/src/core/visually-hidden/visually-hidden.tsx',
-		visible: ['elementType', 'isFocusable', 'renderRoot'],
+		visible: ['elementType', 'isFocusable', 'ref', 'renderRoot'],
 	},
 	{
 		// Icon picks five SVG props by name and forwards nothing else, so its table is closed.
