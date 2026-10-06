@@ -35,6 +35,7 @@ type _ButtonOmit = DistributiveOmit<
 	| 'isBlock'
 	| 'isPending'
 	| 'prominence'
+	| 'render'
 	| 'size'
 	| 'tone'
 	| keyof DocumentedPressProps

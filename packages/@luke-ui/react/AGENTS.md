@@ -17,7 +17,8 @@
 ## Source structure
 
 - `src/core/` holds implementation, styles, test helpers, and their co-located tests and fixtures.
-- `src/exports/` holds the thin public modules that pack publishes for each package subpath.
+- `src/exports/` holds the thin public modules that pack publishes for each package subpath. Use
+  explicit named exports only. See [`docs/PUBLIC_API.md`](../../docs/PUBLIC_API.md).
 - `src/theme/` holds the theme compiler, foundations, and bundled themes in `bundles/`.
 - `src/shared/` holds low-level primitives with no domain of their own, such as the class-name
   constants and the typed object helpers. It exists so a zone never has to duplicate a value or

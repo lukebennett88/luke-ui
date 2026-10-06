@@ -1,5 +1,10 @@
+import { AspectRatio } from '@luke-ui/react/aspect-ratio';
+import { Bleed } from '@luke-ui/react/bleed';
 import { Box } from '@luke-ui/react/box';
-import { createSprinkles } from '@luke-ui/react/styles';
+import { Cluster } from '@luke-ui/react/cluster';
+import { Container } from '@luke-ui/react/container';
+import { Grid } from '@luke-ui/react/grid';
+import { Stack } from '@luke-ui/react/stack';
 import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
@@ -23,7 +28,7 @@ test('Box forwards className, data attributes, id, and ref to its element', () =
 	expectForwardsDomProps(target, ref);
 });
 
-test('renders semantic elements and a consumer-owned render prop', () => {
+test('renders semantic elements and a consumer-owned renderRoot prop', () => {
 	const semanticResult = render(
 		<Box aria-label="Account summary" elementType="section">
 			Account summary content
@@ -36,9 +41,9 @@ test('renders semantic elements and a consumer-owned render prop', () => {
 	const customResult = render(
 		<Box
 			aria-label="Ignored Box label"
-			render={(resolvedProps) => {
-				receivedAriaLabel = Object.hasOwn(resolvedProps, 'aria-label');
-				return <div {...resolvedProps} />;
+			renderRoot={(domProps) => {
+				receivedAriaLabel = Object.hasOwn(domProps, 'aria-label');
+				return <div {...domProps} />;
 			}}
 			style={{ display: 'grid' }}
 		>
@@ -54,7 +59,12 @@ test('renders semantic elements and a consumer-owned render prop', () => {
 
 test('consumer className and style win collisions on the ordinary element path', () => {
 	const ref = createRef<HTMLElement>();
-	const utility = createSprinkles({ display: 'flex', inlineSize: '12rem' });
+	const baseline = render(
+		<Box data-testid="box-baseline" display="flex" gap="sp16" inlineSize="12rem" />,
+	);
+	const utilityClassName = baseline.locator.getByTestId('box-baseline').element().className;
+	baseline.unmount();
+
 	const { locator } = render(
 		<Box
 			className="consumer-class"
@@ -77,12 +87,22 @@ test('consumer className and style win collisions on the ordinary element path',
 	expect(getComputedStyle(element).display).toBe('grid');
 	expect(getComputedStyle(element).inlineSize).toBe('192px');
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(1, 2, 3)');
-	expectConsumerClassAfterUtilities(element.className, utility.className);
+	expectConsumerClassAfterUtilities(element.className, utilityClassName);
 });
 
-test('consumer className and style win collisions on the render callback path', () => {
+test('consumer className and style win collisions on the renderRoot callback path', () => {
 	const ref = createRef<HTMLElement>();
-	const utility = createSprinkles({ display: 'flex', inlineSize: '10rem' });
+	const baseline = render(
+		<Box
+			data-testid="box-baseline"
+			display="flex"
+			gap={{ initial: 'sp8', bp768: 'sp24' }}
+			inlineSize="10rem"
+		/>,
+	);
+	const utilityClassName = baseline.locator.getByTestId('box-baseline').element().className;
+	baseline.unmount();
+
 	let receivedRef: unknown;
 	const { locator } = render(
 		<Box
@@ -91,9 +111,9 @@ test('consumer className and style win collisions on the render callback path', 
 			gap={{ initial: 'sp8', bp768: 'sp24' }}
 			inlineSize="10rem"
 			ref={ref}
-			render={(resolvedProps) => {
-				receivedRef = resolvedProps.ref;
-				return <article {...resolvedProps} data-testid="box-render" />;
+			renderRoot={(domProps) => {
+				receivedRef = domProps.ref;
+				return <article {...domProps} data-testid="box-render" />;
 			}}
 			style={{ backgroundColor: 'rgb(4, 5, 6)', display: 'grid' }}
 		>
@@ -101,7 +121,7 @@ test('consumer className and style win collisions on the render callback path', 
 		</Box>,
 	);
 	const element = locator.getByTestId('box-render').element();
-	if (!(element instanceof HTMLElement)) throw new Error('Expected render callback element.');
+	if (!(element instanceof HTMLElement)) throw new Error('Expected renderRoot callback element.');
 
 	expect(element.tagName).toBe('ARTICLE');
 	expect(ref.current).toBe(element);
@@ -109,7 +129,75 @@ test('consumer className and style win collisions on the render callback path', 
 	expect(getComputedStyle(element).display).toBe('grid');
 	expect(getComputedStyle(element).inlineSize).toBe('160px');
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(4, 5, 6)');
-	expectConsumerClassAfterUtilities(element.className, utility.className);
+	expectConsumerClassAfterUtilities(element.className, utilityClassName);
+});
+
+for (const [name, Component] of Object.entries({
+	AspectRatio,
+	Bleed,
+	Box,
+	Cluster,
+	Container,
+	Grid,
+	Stack,
+})) {
+	test(`${name} renderRoot receives presentation props and empty state`, () => {
+		const calls: Array<Array<unknown>> = [];
+		const ref = createRef<HTMLElement>();
+		const { locator, unmount } = render(
+			<Component
+				className="consumer-class"
+				maxInlineSize="40rem"
+				ref={ref}
+				renderRoot={(...args) => {
+					const [domProps] = args;
+					calls.push(args);
+					return <section {...domProps} aria-label="Owned root" />;
+				}}
+				style={{ backgroundColor: 'rgb(4, 5, 6)' }}
+			>
+				Content
+			</Component>,
+		);
+		const element = locator.getByRole('region', { name: 'Owned root' }).element();
+
+		expect(calls.length).toBeGreaterThan(0);
+		for (const args of calls) {
+			expect(args).toEqual([
+				{
+					children: 'Content',
+					className: expect.stringContaining('consumer-class'),
+					ref: expect.any(Function),
+					style: expect.objectContaining({ backgroundColor: 'rgb(4, 5, 6)' }),
+				},
+				{},
+			]);
+		}
+		expect(ref.current).toBe(element);
+		unmount();
+		expect(ref.current).toBeNull();
+	});
+}
+
+test('renderRoot preserves callback ref cleanup', () => {
+	const elements: Array<HTMLElement | null> = [];
+	let cleanups = 0;
+	const { locator, unmount } = render(
+		<Box
+			ref={(element) => {
+				elements.push(element);
+				return () => {
+					cleanups += 1;
+				};
+			}}
+			renderRoot={(domProps) => <section {...domProps} aria-label="Owned root" />}
+		/>,
+	);
+
+	expect(elements).toEqual([locator.getByRole('region', { name: 'Owned root' }).element()]);
+	unmount();
+	expect(cleanups).toBe(1);
+	expect(elements).toHaveLength(1);
 });
 
 /** Consumer `className` is merged after utility classes, so it appears later in the token list. */

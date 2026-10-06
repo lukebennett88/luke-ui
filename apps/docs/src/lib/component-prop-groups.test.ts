@@ -29,6 +29,12 @@ test('classifies styling, accessibility, and advanced props into shared groups',
 	expect(classifyPropGroup('children')).toBe('Advanced');
 });
 
+test('keeps primitive render and Luke UI renderRoot in Advanced', () => {
+	expect(groupPropNames(['render', 'renderRoot'])).toEqual([
+		{ defaultOpen: false, name: 'Advanced', props: ['render', 'renderRoot'] },
+	]);
+});
+
 test('omits groups that no visible prop falls into', () => {
 	const groups = groupPropNames(['appearance', 'onPress']);
 

@@ -297,8 +297,8 @@ test('zero overrides a lower-priority margin', () => {
 			</Bleed>
 			<Bleed
 				inline="0"
-				render={(resolvedProps) => {
-					return <div {...resolvedProps} data-margin-fixture="" data-testid="bleed" />;
+				renderRoot={(domProps) => {
+					return <div {...domProps} data-margin-fixture="" data-testid="bleed" />;
 				}}
 			>
 				Content
@@ -387,7 +387,7 @@ test('supports semantic and caller-owned elements', () => {
 	const custom = render(
 		<Bleed
 			inline="sp16"
-			render={(resolvedProps) => <aside {...resolvedProps} data-testid="custom-bleed" />}
+			renderRoot={(domProps) => <aside {...domProps} data-testid="custom-bleed" />}
 		>
 			Custom content
 		</Bleed>,
@@ -395,6 +395,27 @@ test('supports semantic and caller-owned elements', () => {
 	const element = expectHtmlElement(custom.locator.getByTestId('custom-bleed').element());
 	expect(element.tagName).toBe('ASIDE');
 	expect(getComputedStyle(element).marginInlineStart).toBe('-16px');
+});
+
+test('keeps consumer className and style alongside bleed presentation', () => {
+	const { locator } = render(
+		<Bleed
+			className="consumer-bleed"
+			data-testid="bleed"
+			inline="sp16"
+			style={{ backgroundColor: 'rgb(1, 2, 3)', position: 'relative' }}
+		>
+			Content
+		</Bleed>,
+	);
+	const bleed = expectHtmlElement(locator.getByTestId('bleed').element());
+	const style = getComputedStyle(bleed);
+
+	expect(bleed.className.split(/\s+/)).toContain('consumer-bleed');
+	expect(style.marginInlineStart).toBe('-16px');
+	expect(style.marginInlineEnd).toBe('-16px');
+	expect(style.backgroundColor).toBe('rgb(1, 2, 3)');
+	expect(style.position).toBe('relative');
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {

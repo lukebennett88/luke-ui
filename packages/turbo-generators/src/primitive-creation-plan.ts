@@ -50,24 +50,24 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 	const pascalName = displayName.replaceAll(' ', '');
 	const camelName = toCamelCase(name);
 	const recipeName = `${camelName}Recipe`;
-	const variantsType = `${pascalName}RecipeVariants`;
 	const packagePath = `@luke-ui/react/primitives/${name}`;
 	const docsTitle = `${displayName} primitive`;
 
 	// Most primitives on main are multi-part compositions without a single root. The scaffold keeps
-	// a minimal div and recipe so the public export and stylesheet registration can build; replace
-	// both when the real primitive shape is known.
+	// a minimal div and an internal recipe so the public export and stylesheet registration can
+	// build; replace both when the real primitive shape is known. The recipe stays unexported from
+	// the package until an independent consumer needs it.
 	const files: Array<PlanFile> = [
 		{
 			contents: renderPrimitiveSource({ pascalName, recipeName }),
 			path: `packages/@luke-ui/react/src/core/primitives/${name}/${name}.tsx`,
 		},
 		{
-			contents: renderPackageExport({ name, pascalName, recipeName, variantsType }),
+			contents: renderPackageExport({ name, pascalName }),
 			path: `packages/@luke-ui/react/src/exports/primitives/${name}.ts`,
 		},
 		{
-			contents: renderRecipe({ recipeName, variantsType }),
+			contents: renderRecipe({ recipeName }),
 			path: `packages/@luke-ui/react/src/core/primitives/${name}/recipe.css.ts`,
 		},
 		{
@@ -135,26 +135,17 @@ export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Elemen
 `;
 }
 
-function renderPackageExport(input: {
-	name: string;
-	pascalName: string;
-	recipeName: string;
-	variantsType: string;
-}): string {
+function renderPackageExport(input: { name: string; pascalName: string }): string {
 	return `export { ${input.pascalName}, type ${input.pascalName}Props } from '../../core/primitives/${input.name}/${input.name}.js';
-export { type ${input.variantsType}, ${input.recipeName} } from '../../core/primitives/${input.name}/recipe.css.js';
 `;
 }
 
-function renderRecipe(input: { recipeName: string; variantsType: string }): string {
-	return `import type { RecipeSelection } from '../../styles/recipe.js';
-import { recipe } from '../../styles/recipe.js';
+function renderRecipe(input: { recipeName: string }): string {
+	return `import { recipe } from '../../styles/recipe.js';
 
 export const ${input.recipeName} = recipe({
 	base: {},
 });
-
-export type ${input.variantsType} = RecipeSelection<typeof ${input.recipeName}>;
 `;
 }
 

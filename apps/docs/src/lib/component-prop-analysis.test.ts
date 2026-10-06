@@ -107,6 +107,7 @@ test(
 		expect(names).toContain('aria-label');
 		expect(names).toContain('aria-labelledby');
 		expect(names).toContain('defaultItems');
+		expect(names).toContain('onOpenChange');
 		expect(names).not.toContain('onClick');
 		expect(names).not.toContain('onPointerMoveCapture');
 	},
@@ -375,18 +376,19 @@ for (const auditedType of AUDITED_TYPES) {
 test(
 	'keeps both branches of a union type documented and DOM-forwarding',
 	async () => {
-		// `Box`'s props are a union of an element branch and a render branch. TypeScript reports only
-		// the props common to *every* constituent, so reading the union directly hides the element
-		// branch entirely — and with it the fact that `Box` spreads its rest props onto a real element.
+		// `Box`'s props are a union of an element branch and a renderRoot branch. TypeScript reports
+		// only the props common to *every* constituent, so reading the union directly hides the
+		// element branch entirely — and with it the fact that `Box` spreads its rest props onto a
+		// real element.
 		const names = await visiblePropNames(
 			'packages/@luke-ui/react/src/core/box/box.tsx',
 			'BoxProps',
 		);
-		// From the element branch, which the render branch does not declare.
+		// From the element branch, which the renderRoot branch does not declare.
 		expect(names).toContain('elementType');
 		expect(names).toContain('ref');
-		// From the render branch, which the element branch types as `never`.
-		expect(names).toContain('render');
+		// From the renderRoot branch, which the element branch types as `never`.
+		expect(names).toContain('renderRoot');
 		// Shared layout props from both branches' `SprinklesProps`.
 		expect(names).toContain('padding');
 		expect(names).toContain('display');
@@ -416,7 +418,7 @@ test(
 			'overflowY',
 			'elementType',
 			'role',
-			'render',
+			'renderRoot',
 		] as const) {
 			expect(names, `ScrollFadeProps should hide ${prop}`).not.toContain(prop);
 		}
@@ -545,6 +547,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'render',
 			'shouldDisableTrim',
 			'shouldInheritFont',
+			'slot',
 			'textAlign',
 			'textDecoration',
 			'textTransform',
@@ -585,7 +588,6 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'pressAction',
 			'prominence',
 			'ref',
-			'render',
 			'size',
 			'slot',
 			'startContent',
@@ -661,7 +663,6 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'pressAction',
 			'prominence',
 			'ref',
-			'render',
 			'size',
 			'slot',
 			'tone',

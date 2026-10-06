@@ -1,7 +1,6 @@
 import { assertType, expect, expectTypeOf, test } from 'vite-plus/test';
 import type { BoxProps } from '../../../dist/box.js';
-import type { SprinklesProps } from '../../../dist/styles.js';
-import { createSprinkles as createPublicSprinkles } from '../../../dist/styles.js';
+import type { SprinklesProps } from './utilities.css.js';
 import { createSprinkles } from './utilities.css.js';
 
 type UtilityProps = NonNullable<BoxProps>;
@@ -162,14 +161,14 @@ test('unconstrained properties keep property-specific CSS value typing', () => {
 	assertType<UtilityProps['flex']>(false);
 });
 
-test('createSprinkles.properties is a read-only public Set contract', () => {
-	expectTypeOf(createPublicSprinkles.properties).toEqualTypeOf<ReadonlySet<keyof SprinklesProps>>();
-	// @ts-expect-error — the public type is read-only; mutation APIs are not part of the contract
-	createPublicSprinkles.properties.add('display');
+test('createSprinkles.properties is a read-only Set contract', () => {
+	expectTypeOf(createSprinkles.properties).toEqualTypeOf<ReadonlySet<keyof SprinklesProps>>();
+	// @ts-expect-error — the type is read-only; mutation APIs are not part of the contract
+	createSprinkles.properties.add('display');
 });
 
 test('createSprinkles keeps non-utility props on the result and consumes the utility ones', () => {
-	const result = createPublicSprinkles({ 'data-testid': 'box', display: 'flex', id: 'root' });
+	const result = createSprinkles({ 'data-testid': 'box', display: 'flex', id: 'root' });
 	expectTypeOf(result).not.toHaveProperty('display');
 	expect(Object.hasOwn(result, 'display')).toBe(false);
 	expect(result.id).toBe('root');

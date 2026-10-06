@@ -1,7 +1,9 @@
 import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
-import { spaceScale, vars } from '@luke-ui/react/theme';
+import { vars } from '@luke-ui/react/theme';
 import { Fragment } from 'react';
+
+const spacingSteps = Object.keys(vars.space) as Array<keyof typeof vars.space>;
 
 export default () => {
 	return (
@@ -13,10 +15,10 @@ export default () => {
 			rowGap="sp12"
 			style={{ gridTemplateColumns: 'auto 1fr' }}
 		>
-			{spaceScale.map(([step, value]) => (
+			{spacingSteps.map((step) => (
 				<Fragment key={step}>
 					<Text elementType="span" fontVariantNumeric="tabular-nums" typography="caption">
-						{step} ({value})
+						{step}
 					</Text>
 					<Box
 						style={{

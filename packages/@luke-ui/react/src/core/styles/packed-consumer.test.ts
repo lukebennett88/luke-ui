@@ -151,7 +151,7 @@ const bundleBoundaries: Array<BundleBoundary> = [
 		entry: 'button',
 		exportName: 'Button',
 	},
-	{ composes: [], entry: 'styles', exportName: 'createSprinkles' },
+	{ composes: [], entry: 'box', exportName: 'Box' },
 	{ composes: [], entry: 'theme', exportName: 'vars' },
 ];
 
@@ -844,11 +844,11 @@ function tryRun(command: string, args: Array<string>, cwd: string): string {
 /** The app the server renders and the browser hydrates. */
 const APP = `
 import { Blockquote } from '@luke-ui/react/blockquote';
+import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { Provider } from '@luke-ui/react/provider';
 import spritesheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
-import { createSprinkles } from '@luke-ui/react/styles';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { createElement as h, useEffect } from 'react';
 
@@ -861,8 +861,8 @@ export function App({ onHydrated }) {
 		Provider,
 		{ spritesheetHref },
 		h(
-			'div',
-			createSprinkles({ display: 'flex', gap: 'sp8' }),
+			Box,
+			{ display: 'flex', gap: 'sp8' },
 			h(Blockquote, null, 'Hello world'),
 			h(Icon, { name: 'chevronDown', 'aria-label': 'Expand' }),
 			h(TextInputField, { label: 'Name' }),
@@ -1050,27 +1050,36 @@ process.stdout.write(JSON.stringify({ packages: [...packages].sort(), sources: [
 /** Representative typed usage. \`all-entries.ts\` covers the rest of the declaration graph. */
 const TYPED_APP = `
 import { Blockquote } from '@luke-ui/react/blockquote';
+import { Box, type BoxProps } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Provider } from '@luke-ui/react/provider';
-import { createSprinkles, type SprinklesProps } from '@luke-ui/react/styles';
 import { TextInputField } from '@luke-ui/react/text-input-field';
-import { defineTheme, type ThemeInput, vars } from '@luke-ui/react/theme';
+import { breakpoints, defineTheme, type ThemeInput, vars } from '@luke-ui/react/theme';
 
 const theme: ThemeInput = { name: 'fixture', color: { accent: '#3355ff' } };
 export const css: string = defineTheme(theme);
 export const textColor: string = vars.color.text.primary;
+export const mobileBreakpoint: number = breakpoints.bp640;
 
-const layoutProps: SprinklesProps = { display: 'flex', gap: 'sp8' };
-const layout = createSprinkles(layoutProps);
+const renderRoot: NonNullable<BoxProps['renderRoot']> = (domProps, state) => {
+	const emptyState: Record<string, never> = state;
+	return <section {...domProps} data-state-keys={Object.keys(emptyState).length} />;
+};
+
+// @ts-expect-error — renderRoot owns its element and excludes elementType
+export const conflictingRoot: BoxProps = { elementType: 'section', renderRoot };
+// @ts-expect-error — Box exposes no public render state properties
+export const invalidRenderState: Parameters<typeof renderRoot>[1] = { isHovered: true };
 
 export function App({ spritesheetHref }: { spritesheetHref: string }) {
 	return (
 		<Provider spritesheetHref={spritesheetHref}>
-			<div {...layout}>
+			<Box display="flex" gap="sp8">
 				<Blockquote>Hello</Blockquote>
+				<Box padding="sp16" renderRoot={renderRoot}>Owned root</Box>
 				<TextInputField label="Name" />
 				<Button onPress={() => {}}>Save</Button>
-			</div>
+			</Box>
 		</Provider>
 	);
 }

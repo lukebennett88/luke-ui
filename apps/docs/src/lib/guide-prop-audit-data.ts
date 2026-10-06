@@ -136,7 +136,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'validate',
 		],
 	'layout/aspect-ratio.mdx::packages/@luke-ui/react/src/core/aspect-ratio/aspect-ratio.tsx::AspectRatioProps':
-		['elementType', 'objectFit', 'ratio', 'render'],
+		['elementType', 'objectFit', 'ratio', 'renderRoot'],
 	'layout/bleed.mdx::packages/@luke-ui/react/src/core/bleed/bleed.tsx::BleedProps': [
 		'all',
 		'block',
@@ -146,22 +146,22 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'inline',
 		'inlineEnd',
 		'inlineStart',
-		'render',
+		'renderRoot',
 	],
 	'layout/box.mdx::packages/@luke-ui/react/src/core/box/box.tsx::BoxProps': [
 		'elementType',
 		'ref',
-		'render',
+		'renderRoot',
 	],
 	'layout/cluster.mdx::packages/@luke-ui/react/src/core/cluster/cluster.tsx::ClusterProps': [
 		'alignItems',
 		'elementType',
 		'gap',
 		'justifyContent',
-		'render',
+		'renderRoot',
 	],
 	'layout/container.mdx::packages/@luke-ui/react/src/core/container/container.tsx::ContainerProps':
-		['elementType', 'marginInline', 'maxInlineSize', 'paddingInline', 'render'],
+		['elementType', 'marginInline', 'maxInlineSize', 'paddingInline', 'renderRoot'],
 	'layout/grid.mdx::packages/@luke-ui/react/src/core/grid/grid.tsx::GridProps': [
 		'alignContent',
 		'alignItems',
@@ -172,7 +172,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'gap',
 		'justifyContent',
 		'justifyItems',
-		'render',
+		'renderRoot',
 		'rowGap',
 		'rows',
 	],
@@ -182,7 +182,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'alignItems',
 		'elementType',
 		'gap',
-		'render',
+		'renderRoot',
 	],
 	'layout/track.mdx::packages/@luke-ui/react/src/core/track/track.tsx::TrackProps': [
 		'elementType',
@@ -317,8 +317,6 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	],
 	'typography/heading.mdx::packages/@luke-ui/react/src/core/heading/heading-context.tsx::HeadingLevelsProps':
 		['base'],
-	'typography/heading.mdx::packages/@luke-ui/react/src/core/heading/heading-context.tsx::HeadingLevelsRenderProps':
-		['element', 'level'],
 	'typography/heading.mdx::packages/@luke-ui/react/src/core/heading/heading.tsx::HeadingProps': [
 		'level',
 		'typography',
@@ -351,6 +349,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'fontWeight',
 		'lineClamp',
 		'shouldDisableTrim',
+		'slot',
 		'textAlign',
 		'textDecoration',
 		'textTransform',

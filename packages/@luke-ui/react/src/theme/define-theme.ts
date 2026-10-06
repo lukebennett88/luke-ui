@@ -23,7 +23,7 @@ import { highContrastText, passesOnSolidGate } from './scale.js';
  * accept `#rgb`, `#rrggbb`, or `oklch(<l> <c> <h>)` (lightness 0-1 or %, no alpha), except
  * `backdrop`, which is used verbatim and may carry an alpha channel.
  */
-export type ColorInput = string | { light?: string; dark?: string };
+type ColorInput = string | { light?: string; dark?: string };
 
 /** A composite `box-shadow` ladder for one colour mode, rung by rung. */
 export interface DepthLadder {
@@ -40,7 +40,7 @@ export interface DepthLadder {
 }
 
 /** A Button/IconButton `background-image` face-finish ladder for one colour mode. */
-export interface ControlFinish {
+interface ControlFinish {
 	/** Face lighting for a hovered control. */
 	raised: string;
 	/** Face lighting for a pressed control. */
@@ -208,7 +208,7 @@ export const defaultDepth: Record<ColorMode, DepthLadder> = {
 };
 
 /** Curated flat control finish applied when an `actionControlFinish` rung is omitted. */
-export const defaultControlFinish: ControlFinish = {
+const defaultControlFinish: ControlFinish = {
 	raised: 'none',
 	recessed: 'none',
 	resting: 'none',

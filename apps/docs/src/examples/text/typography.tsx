@@ -1,8 +1,13 @@
 import { Box } from '@luke-ui/react/box';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { typeStyles, vars } from '@luke-ui/react/theme';
+import { vars } from '@luke-ui/react/theme';
 import { Fragment } from 'react';
+
+const typographyStyles = (Object.keys(vars.font) as Array<keyof typeof vars.font>).filter(
+	(key): key is Exclude<keyof typeof vars.font, 'family' | 'weight'> =>
+		key !== 'family' && key !== 'weight',
+);
 
 export default () => {
 	return (
@@ -14,7 +19,7 @@ export default () => {
 				gap="sp12"
 				style={{ gridTemplateColumns: 'max-content minmax(0, 1fr)' }}
 			>
-				{typeStyles.map((typography) => (
+				{typographyStyles.map((typography) => (
 					<Fragment key={typography}>
 						<Text color="secondary" elementType="dt" typography="caption">
 							{typography}

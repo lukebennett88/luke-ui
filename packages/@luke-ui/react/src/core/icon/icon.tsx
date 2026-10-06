@@ -10,7 +10,7 @@ import { iconRecipe } from './recipe.css.js';
 
 export type { IconName } from '../../../.generated/icon-data.js';
 export { IconSizeProvider } from './icon-size-context.js';
-export { iconNames, iconViewBoxes };
+export { iconNames };
 
 const IconSpritesheetContext = createContext<string | null>(null);
 

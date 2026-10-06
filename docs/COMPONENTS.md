@@ -50,7 +50,8 @@ Do not move creation rules into one-off generator code.
 Public subpath modules live under `src/exports/`. Single-segment subpaths use a flat module such as
 `src/exports/button.ts`. Grouped subpaths use nested modules such as
 `src/exports/primitives/button.ts`. A component's implementation lives under `src/core/`. Support
-modules and multi-part primitives each keep their own file.
+modules and multi-part primitives each keep their own file. Public entrypoints use explicit named
+exports. See [PUBLIC_API.md](PUBLIC_API.md) for the public surface rules.
 
 ## Icons
 

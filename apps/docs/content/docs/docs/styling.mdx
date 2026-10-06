@@ -24,11 +24,12 @@ primitive rather than between styling mechanisms.
 | -------- | ------------------------------------------------------------------------------------------ |
 | Do       | Use a supported component prop for its appearance, size, state, or behaviour.              |
 | Do       | Use a layout utility for its element contract, and `vars` for application-owned custom UI. |
-| Don't    | Target generated selectors or implementation-state attributes such as `data-pressed`.      |
+| Don't    | Target generated selectors or undocumented state attributes.                               |
 
-Do not override component recipe selectors or implementation-state attributes such as
-`data-hovered`, `data-pressed`, or `data-focus-visible`. They are not supported styling hooks and
-can change without a migration path.
+Do not override component recipe selectors or target state attributes unless the component documents
+that attribute as part of its supported DOM contract. Many React Aria attributes are implementation
+details and can change without a migration path. When a component deliberately exposes a state
+attribute for styling or integration, treat it as public for that component only.
 
 ### Start with component props
 
@@ -72,22 +73,10 @@ const variants: ButtonRecipeVariants = {
 const className = buttonRecipe({ ...variants, className: 'my-class' });
 ```
 
-A slotted recipe such as `fieldRecipe` returns one function per part. Choose variants once at the
-outer call, then call the part you are styling with an optional `{ className }`.
-
-```tsx
-import { fieldRecipe } from '@luke-ui/react/primitives/field';
-
-const { label, message, root } = fieldRecipe({ tone: 'description' });
-
-<div className={root()}>
-	<label className={label()} htmlFor="example-input">
-		Example label
-	</label>
-	<input id="example-input" />
-	<p className={message({ className: 'my-class' })}>Example description</p>
-</div>;
-```
+A slotted recipe returns one function per part. Choose variants once at the outer call, then call
+the part you are styling with an optional `{ className }`. Recipes that style a component's private
+multi-part anatomy stay package-private. Compose the public primitives instead of importing those
+recipes.
 
 A primitive's recipe imports from the primitive's entrypoint. `textInputRecipe` styles an input you
 own:
@@ -101,11 +90,11 @@ import { textInputRecipe } from '@luke-ui/react/primitives/text-input';
 Do not import a recipe to restyle a Luke UI component from the outside. Use the component's props
 for supported variation.
 
-### Use layout utilities for structure
+### Use layout components for structure
 
-`Box` and layout utilities from `@luke-ui/react/styles` handle spacing, sizing, positioning, and
-responsive structure around components. They do not set semantic colour, typography, or pseudo
-states. Read [Layout](/docs/layout) for the full API.
+`Box` and the other layout components handle spacing, sizing, positioning, and responsive structure
+around components. They do not set semantic colour, typography, or pseudo states. Read
+[Layout](/docs/layout) for the full API.
 
 ### Use semantic variables for custom UI
 
@@ -173,7 +162,7 @@ selectors or implementation attributes.
 
 <Cards>
 	<Card href="/docs/layout" title="Layout">
-		Use Box and Sprinkles for responsive structure.
+		Use Box and layout components for responsive structure.
 	</Card>
 	<Card href="/docs/color" title="Colour">
 		Choose semantic surfaces and roles for custom UI.

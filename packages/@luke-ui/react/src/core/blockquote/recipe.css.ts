@@ -1,5 +1,4 @@
 import { vars } from '../../theme/contract.css.js';
-import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /** Left-border accent. Type treatment comes from the composed `Text`. */
@@ -9,5 +8,3 @@ export const blockquoteRecipe = recipe({
 		paddingInlineStart: vars.space.sp16,
 	},
 });
-
-export type BlockquoteRecipeVariants = RecipeSelection<typeof blockquoteRecipe>;

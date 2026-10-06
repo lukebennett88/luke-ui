@@ -74,14 +74,10 @@ describe('createComponentPlan', () => {
 		expect(packageExportSource).toContain(
 			"export { StatusBadge, type StatusBadgeProps } from '../core/status-badge/status-badge.js';",
 		);
-		expect(packageExportSource).toContain(
-			"export { type StatusBadgeRecipeVariants, statusBadgeRecipe } from '../core/status-badge/recipe.css.js';",
-		);
+		expect(packageExportSource).not.toContain('ecipe');
 		expect(packageExportSource).not.toContain("from './index.js'");
 		expect(recipeSource).toContain('export const statusBadgeRecipe = recipe({');
-		expect(recipeSource).toContain(
-			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof statusBadgeRecipe>;',
-		);
+		expect(recipeSource).not.toContain('RecipeVariants');
 
 		const testSource = plan.files.find((file) =>
 			file.path.endsWith('status-badge.browser.test.tsx'),

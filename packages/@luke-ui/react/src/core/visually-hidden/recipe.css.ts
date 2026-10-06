@@ -20,7 +20,7 @@ export const visuallyHiddenStyle = {
 	whiteSpace: 'nowrap', // stop text wrapping inside the 1px box
 } satisfies StyleRule;
 
-/** Recipe for content hidden visually but kept available to assistive technology. */
+/** Package-private recipe for content hidden visually but kept available to assistive technology. */
 export const visuallyHiddenRecipe = recipe({
 	base: visuallyHiddenStyle,
 });

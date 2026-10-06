@@ -64,12 +64,13 @@ test('builds the public stylesheet with the retained layer contract', async () =
 	const stylesheet = await readPublicStylesheet();
 	const icon = await import('@luke-ui/react/icon');
 	const text = await import('@luke-ui/react/text');
-	const styles = await import('@luke-ui/react/styles');
 	const recipeClasses = [...icon.iconRecipe({ size: 'medium' }).split(' ')];
 	const textClassesByTypography = Object.fromEntries(
 		typeStyles.map((typography) => [typography, text.textRecipe({ typography }).split(' ')]),
 	) as TextClassesByTypography;
-	const utilityClasses = styles.createSprinkles({ display: 'grid' }).className?.split(' ') ?? [];
+	// Source `createSprinkles` can emit different hashes than the built stylesheet. Read a
+	// representative utilities-layer class from the stylesheet itself.
+	const utilityClasses = representativeUtilityClasses(stylesheet);
 	const lineClampClasses: LineClampClasses = {
 		numeric: Object.fromEntries(
 			numericLineClampVariants.map((lineClamp) => [
@@ -148,6 +149,17 @@ test('recognises escaped class identifiers', () => {
 
 async function readPublicStylesheet(): Promise<string> {
 	return readFile(new URL('../../../dist/stylesheet.css', import.meta.url), 'utf8');
+}
+
+/** One utilities-layer class from the built stylesheet (package-internal sprinkles). */
+function representativeUtilityClasses(stylesheet: string): Array<string> {
+	const utilitiesBlock = stylesheet.match(
+		/@layer utilities \{([\s\S]*?)(?=\n@layer |\n@keyframes |$)/,
+	)?.[1];
+	if (utilitiesBlock == null) throw new Error('Expected an @layer utilities block.');
+	const className = utilitiesBlock.match(/^\s*\.([A-Za-z0-9_-]+)\s*\{/m)?.[1];
+	if (className == null) throw new Error('Expected a class rule in @layer utilities.');
+	return [className];
 }
 
 function assertStylesheetContract(

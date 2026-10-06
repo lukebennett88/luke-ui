@@ -55,7 +55,6 @@
 		"./select-field": "./dist/select-field.js",
 		"./stack": "./dist/stack.js",
 		"./strong": "./dist/strong.js",
-		"./styles": "./dist/styles.js",
 		"./text": "./dist/text.js",
 		"./text-input-field": "./dist/text-input-field.js",
 		"./theme": "./dist/theme.js",

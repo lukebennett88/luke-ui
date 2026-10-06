@@ -25,10 +25,6 @@ describe('createComponent', () => {
 		).resolves.toBe(
 			[
 				"export { StatusBadge, type StatusBadgeProps } from '../core/status-badge/status-badge.js';",
-				'export {',
-				'\ttype StatusBadgeRecipeVariants,',
-				'\tstatusBadgeRecipe,',
-				"} from '../core/status-badge/recipe.css.js';",
 				'',
 			].join('\n'),
 		);

@@ -10,7 +10,3 @@ export {
 	CheckboxRoot,
 	type CheckboxRootProps,
 } from '../../core/primitives/checkbox/checkbox.js';
-export {
-	type CheckboxRecipeVariants,
-	checkboxRecipe,
-} from '../../core/primitives/checkbox/recipe.css.js';

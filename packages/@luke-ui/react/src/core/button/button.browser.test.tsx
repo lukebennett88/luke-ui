@@ -64,6 +64,38 @@ test('pressing a Button runs its onPress handler', async () => {
 	expect(pressed).toBe(true);
 });
 
+test('function children receive button render state', () => {
+	let received:
+		| {
+				isDisabled: boolean;
+				isFocused: boolean;
+				isFocusVisible: boolean;
+				isHovered: boolean;
+				isPending: boolean;
+				isPressed: boolean;
+		  }
+		| undefined;
+	const { locator } = render(
+		<Button>
+			{(renderProps) => {
+				received = renderProps;
+				return 'Action';
+			}}
+		</Button>,
+	);
+
+	expect(locator.getByRole('button', { name: 'Action' }).element()).toBeTruthy();
+	expect(received).toEqual({
+		defaultChildren: undefined,
+		isDisabled: false,
+		isFocused: false,
+		isFocusVisible: false,
+		isHovered: false,
+		isPending: false,
+		isPressed: false,
+	});
+});
+
 test('the Button scene has no axe violations', async () => {
 	const { container } = render(<ButtonScene />);
 

@@ -1,6 +1,5 @@
 import { createVar } from '@vanilla-extract/css';
 import { rem } from '../../theme/rem.js';
-import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /** Rem values for fixed `maxInlineSize` tokens on `Container`. */
@@ -36,6 +35,3 @@ export const containerRecipe = recipe({
 		},
 	},
 });
-
-/** Variant type for the `Container` recipe. */
-export type ContainerRecipeVariants = RecipeSelection<typeof containerRecipe>;

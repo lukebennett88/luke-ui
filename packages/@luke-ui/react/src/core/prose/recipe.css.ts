@@ -1,13 +1,10 @@
 import { vars } from '../../theme/contract.css.js';
 import { globalStyleInLayer } from '../styles/layered-style.css.js';
-import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 import { proseScopeClassName } from './scope.css.js';
 
 /** Scope class for the long-form rhythm applied by the global rules below. */
 export const proseRecipe = recipe({ base: proseScopeClassName });
-
-export type ProseRecipeVariants = RecipeSelection<typeof proseRecipe>;
 
 // Scope class keeps component ownership (0-1-0); `:where()` on the match keeps descendants from
 // racing utility and component classes on specificity alone. Utilities still win via layer order.

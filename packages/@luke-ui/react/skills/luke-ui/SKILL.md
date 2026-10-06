@@ -23,10 +23,12 @@ renders the input itself, such as `ComboboxInput`, takes the input ref on `ref`.
 
 Use `elementType` only to change the rendered element without owning its DOM attributes.
 
-Use `render` when the callback must own the element and its DOM attributes. Pass the component's
-documented resolved props to that element.
+Use `renderRoot` when the callback must own the element and its DOM attributes. Pass the component's
+documented resolved props to that element. Named replaceable parts use `render<Name>`.
 
-Do not use `render` and `elementType` together. They are mutually exclusive.
+Do not use `renderRoot` and `elementType` together. They are mutually exclusive.
+
+React Aria components may still expose RAC's own `render` prop. Leave that vocabulary alone.
 
 ## Imports
 

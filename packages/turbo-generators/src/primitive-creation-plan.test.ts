@@ -76,9 +76,7 @@ describe('createPrimitivePlan', () => {
 		expect(packageExportSource).toContain(
 			"export { StatusBadge, type StatusBadgeProps } from '../../core/primitives/status-badge/status-badge.js';",
 		);
-		expect(packageExportSource).toContain(
-			"export { type StatusBadgeRecipeVariants, statusBadgeRecipe } from '../../core/primitives/status-badge/recipe.css.js';",
-		);
+		expect(packageExportSource).not.toContain('ecipe');
 		expect(example).toContain("from '@luke-ui/react/primitives/status-badge'");
 		expect(example).toContain('export default () => {');
 		expect(example).not.toContain('export default function Basic');

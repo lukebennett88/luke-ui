@@ -36,10 +36,6 @@ describe('createPrimitive', () => {
 				'\tStatusBadge,',
 				'\ttype StatusBadgeProps,',
 				"} from '../../core/primitives/status-badge/status-badge.js';",
-				'export {',
-				'\ttype StatusBadgeRecipeVariants,',
-				'\tstatusBadgeRecipe,',
-				"} from '../../core/primitives/status-badge/recipe.css.js';",
 				'',
 			].join('\n'),
 		);

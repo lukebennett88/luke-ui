@@ -46,6 +46,7 @@ type _ComboboxFieldOmit<T extends object> = DistributiveOmit<
 	| 'inputId'
 	| 'isInvalid'
 	| 'ref'
+	| 'slot'
 	| keyof ComboboxFieldRedeclaredRACProps
 >;
 

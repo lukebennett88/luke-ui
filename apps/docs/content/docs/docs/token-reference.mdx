@@ -43,20 +43,6 @@ Radius provides five semantic roles. Choose the role that matches the element be
 
 <ExampleBlock src="overview/radius-roles" title="Token reference: Radius roles" />
 
-<ExampleBlock
-	src="overview/concentric-radius"
-	title="Token reference: Keep nested corners concentric"
-/>
-
-When one rounded surface sits inside another, derive the outer radius from the inner radius and the
-space between them, usually the wrapper's padding. This keeps their corners concentric.
-
-```tsx
-import { deriveConcentricRadius, vars } from '@luke-ui/react/theme';
-
-const wrapperRadius = deriveConcentricRadius(vars.radius.control, vars.space.sp8);
-```
-
 ### Depth
 
 Depth describes how a surface sits above or within the interface.

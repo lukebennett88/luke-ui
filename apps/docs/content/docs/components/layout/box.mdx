@@ -45,18 +45,18 @@ The supported elements are `article`, `aside`, `dd`, `div`, `dl`, `dt`, `figcapt
 
 ## Own the rendered element
 
-Use `render` when the callback must own the element and its DOM attributes. The callback can return
-an appropriate intrinsic element or custom component. It receives resolved `children`, `className`,
-and `style` props, plus a callback `ref`.
+Use `renderRoot` when the callback must own the element and its DOM attributes. The callback
+receives `domProps` containing resolved `children`, `className`, `style`, and a callback `ref` as
+its first argument. Its second argument is an empty state object. Put other DOM attributes on the
+element the callback returns. You may omit or replace supplied props. You then own the consequences.
 
-Put event, accessibility, and element-specific attributes on the element inside the callback.
-
-Do not combine `render` with `elementType`. Use `Link` or `Button` when you need their behaviour.
+Do not combine `renderRoot` with `elementType`. Use `Link` or `Button` when you need their
+behaviour.
 
 <ExampleBlock src="box/render-element" title="Box: Own the rendered element" />
 
 Read [Composition](/docs/composition#render-a-different-dom-component) for the general `elementType`
-and `render` rule.
+and `renderRoot` rule.
 
 ## Visual styles
 

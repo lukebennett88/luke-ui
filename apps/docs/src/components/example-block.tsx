@@ -6,7 +6,7 @@ import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { Text } from '@luke-ui/react/text';
-import { deriveNestedRadius, vars } from '@luke-ui/react/theme';
+import { vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentType, JSX, ReactNode } from 'react';
 import { Suspense, use, useEffect, useId, useRef, useState } from 'react';
@@ -21,7 +21,7 @@ import { useIsDesktop } from './playground/use-is-desktop.js';
 // The frame, header, preview, and code block nest one border's gap inside
 // `OUTER_RADIUS`, so their corners stay concentric with the frame's own.
 const OUTER_RADIUS = vars.radius.control;
-const INNER_RADIUS = deriveNestedRadius(OUTER_RADIUS, '1px');
+const INNER_RADIUS = `max(0px, calc(${OUTER_RADIUS} - 1px))`;
 
 type ExampleBlockProps = {
 	src: string;

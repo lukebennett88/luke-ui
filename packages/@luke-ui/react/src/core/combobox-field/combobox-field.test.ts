@@ -38,3 +38,17 @@ test('ComboboxField takes a root element ref and an input ref', () => {
 		ref: null as unknown as Ref<HTMLDivElement>,
 	});
 });
+
+test('ComboboxField accepts onOpenChange but not slot', () => {
+	assertType<ComboboxFieldProps<Item>>({
+		children: () => null,
+		label: 'Country',
+		onOpenChange: (_isOpen: boolean) => {},
+	});
+	assertType<ComboboxFieldProps<Item>>({
+		children: () => null,
+		label: 'Country',
+		// @ts-expect-error — RAC defines no slot for a ComboBox child
+		slot: 'example',
+	});
+});

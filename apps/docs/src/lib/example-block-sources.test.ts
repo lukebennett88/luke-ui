@@ -4,10 +4,10 @@ import { exampleBlockSources } from './example-block-sources.js';
 test('reads src from a multi-line ExampleBlock tag', () => {
 	expect(
 		exampleBlockSources(`<ExampleBlock
-	src="overview/concentric-radius"
-	title="Token reference: Keep nested corners concentric"
+	src="overview/radius-roles"
+	title="Token reference: Radius roles"
 />`),
-	).toEqual(['overview/concentric-radius']);
+	).toEqual(['overview/radius-roles']);
 });
 
 test('does not take src from later markup after an ExampleBlock with no src', () => {

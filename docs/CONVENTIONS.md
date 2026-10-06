@@ -86,8 +86,14 @@ only the elements a component is designed to render.
 Use a dedicated component for element-specific behaviour or props. Use `Link` for links and `Button`
 for buttons.
 
-Use `render` when its callback must own the element and its DOM attributes. Pass the component's
-documented resolved props to that element. Keep `render` and `elementType` mutually exclusive.
+Use `renderRoot` for Luke UI-owned root replacement when the callback must own the element and its
+DOM attributes. Use `render<Name>` only for a deliberately replaceable named part. React Aria's own
+`render` stays `render` on primitives and other RAC-owned seams. Keep `elementType` and `renderRoot`
+mutually exclusive.
+
+Luke UI `renderRoot` and `render<Name>` callbacks receive `(domProps, state)`. The first argument
+contains resolved presentation props. Pass an empty object as the second argument when the component
+has no public render state.
 
 Do not add generic polymorphic props, `as`, or `asChild` without a demonstrated need. Apply this
 rule to public component APIs, not internal prop handling.

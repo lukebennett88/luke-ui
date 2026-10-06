@@ -1,8 +1,9 @@
 import { assignInlineVars } from '@vanilla-extract/dynamic';
-import type { ComponentProps, ElementType, JSX, ReactNode } from 'react';
+import type { HTMLAttributes, JSX, ReactNode, Ref } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
 import { cx } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
+import { Box } from '../box/box.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import {
@@ -12,6 +13,9 @@ import {
 } from './styles.css.js';
 
 const LoadingSkeletonContext = createContext<boolean | null>(null);
+
+/** Supported native elements for the loading skeleton overlay. */
+type LoadingSkeletonElementType = 'div' | 'li' | 'span';
 
 /** Props for `LoadingSkeletonProvider`. */
 export interface LoadingSkeletonProviderProps {
@@ -28,12 +32,12 @@ export function LoadingSkeletonProvider(props: LoadingSkeletonProviderProps): JS
 	);
 }
 
-interface _LoadingSkeletonProps extends ComponentProps<'span'> {
+interface _LoadingSkeletonProps extends HTMLAttributes<HTMLElement> {
 	/**
 	 * Element rendered while loading.
 	 * @default 'span'
 	 */
-	elementType?: ElementType;
+	elementType?: LoadingSkeletonElementType;
 	/**
 	 * Whether the skeleton is shown in place of `children`. Overrides a `LoadingSkeletonProvider` ancestor.
 	 * @default true
@@ -44,6 +48,8 @@ interface _LoadingSkeletonProps extends ComponentProps<'span'> {
 	 * radius of its own but a visual descendant does (e.g. wrapping a `TextInputField`).
 	 */
 	radius?: keyof typeof vars.radius;
+	/** Ref to the rendered skeleton element. */
+	ref?: Ref<HTMLElement>;
 }
 
 /** Props for `LoadingSkeleton`. */
@@ -55,13 +61,14 @@ export type LoadingSkeletonProps = Prettify<_LoadingSkeletonProps>;
  */
 export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 	const {
-		elementType: Component = 'span',
+		elementType = 'span',
 		children,
 		className,
 		isLoading: isLoadingProp,
 		radius,
+		ref,
 		style,
-		...spanProps
+		...elementProps
 	} = props;
 
 	const isLoadingContext = useContext(LoadingSkeletonContext);
@@ -75,12 +82,14 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 	const isInline = !isValidElement(children);
 
 	return (
-		<Component
-			{...spanProps}
+		<Box
+			{...elementProps}
 			aria-hidden
 			className={cx(loadingSkeletonClassName, className)}
 			data-skeleton-inline={isInline ? '' : undefined}
+			elementType={elementType}
 			inert
+			ref={ref}
 			style={
 				radius
 					? { ...assignInlineVars({ [skeletonRadiusVar]: vars.radius[radius] }), ...style }
@@ -89,6 +98,6 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 			tabIndex={-1}
 		>
 			{children}
-		</Component>
+		</Box>
 	);
 }
