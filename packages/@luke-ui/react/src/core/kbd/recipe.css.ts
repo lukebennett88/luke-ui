@@ -1,5 +1,4 @@
 import { vars } from '../../theme/contract.css.js';
-import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /** Key chip for `<kbd>`. Scales with surrounding text and sets its own spacing. */
@@ -30,5 +29,3 @@ export const kbdRecipe = recipe({
 		wordSpacing: '0.08em',
 	},
 });
-
-export type KbdRecipeVariants = RecipeSelection<typeof kbdRecipe>;
