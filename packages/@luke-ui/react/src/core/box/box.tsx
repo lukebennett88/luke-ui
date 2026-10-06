@@ -1,10 +1,7 @@
 import type { JSX } from 'react';
 import { mergeProps } from '../../shared/utils/merge-props.js';
 import { createSprinkles, type SprinklesProps } from '../styles/utilities.css.js';
-import type {
-	BoxLikeElementProps,
-	BoxLikeRenderProps,
-} from '../types/box-like-props.js';
+import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { Prettify } from '../types/prettify.js';
 import { useRender } from '../use-render/use-render.js';
 
@@ -16,14 +13,7 @@ export function Box(props: BoxProps): JSX.Element {
 	// `ref` is left out of this destructure and read via `restProps.ref` below: the
 	// compiler only tracks a ref through a named binding, and bails out of memoising
 	// Box if it sees one destructured or passed on.
-	const {
-		children,
-		className,
-		elementType,
-		renderRoot,
-		style,
-		...restProps
-	} = props;
+	const { children, className, elementType, renderRoot, style, ...restProps } = props;
 
 	const resolvedProps = renderRoot
 		? mergeProps(createSprinkles(retainSprinklesProps(restProps)), {

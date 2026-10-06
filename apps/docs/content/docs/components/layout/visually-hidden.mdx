@@ -22,10 +22,10 @@ Pass `elementType` to choose a supported semantic element without changing the h
 
 ## Own the rendered element
 
-Use `renderRoot` when the callback must own the element and its DOM attributes. The callback receives
-resolved `children`, `className`, `style`, focus-within handlers, and a callback `ref` as its first
-argument. Its second argument is an empty state object. Put element-specific attributes on the
-element the callback returns.
+Use `renderRoot` when the callback must own the element and its DOM attributes. The callback
+receives resolved `children`, `className`, `style`, focus-within handlers, and a callback `ref` as
+its first argument. Its second argument is an empty state object. Put element-specific attributes on
+the element the callback returns.
 
 `isFocusable` removes the visually-hidden treatment while focus is within the root or a descendant.
 It does not make anything focusable. Pair it with an element that is already focusable, such as a
@@ -37,8 +37,8 @@ Do not combine `renderRoot` with `elementType`.
 
 ## Static escape hatch
 
-Export `visuallyHiddenStyle` from `@luke-ui/react/visually-hidden` when application-owned markup must
-stay visually hidden without the component. It covers the static case only. Prefer
+Export `visuallyHiddenStyle` from `@luke-ui/react/visually-hidden` when application-owned markup
+must stay visually hidden without the component. It covers the static case only. Prefer
 `<VisuallyHidden isFocusable>` when hidden content needs to reveal on focus.
 
 ```tsx
@@ -47,7 +47,7 @@ import { visuallyHiddenStyle } from '@luke-ui/react/visually-hidden';
 <label>
 	<input type="checkbox" />
 	<span style={visuallyHiddenStyle}>Accept terms</span>
-</label>
+</label>;
 ```
 
 ## API

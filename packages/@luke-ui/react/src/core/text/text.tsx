@@ -173,10 +173,7 @@ export function Text(props: TextProps) {
 				className={recipeClassName}
 				renderRoot={(domProps) => (
 					<RacText
-						{...mergeProps(
-							ownedStyle === undefined ? { ...racProps, style } : racProps,
-							domProps,
-						)}
+						{...mergeProps(ownedStyle === undefined ? { ...racProps, style } : racProps, domProps)}
 						elementType={elementType}
 					/>
 				)}

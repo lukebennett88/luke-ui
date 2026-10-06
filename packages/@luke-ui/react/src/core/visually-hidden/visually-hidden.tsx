@@ -1,11 +1,4 @@
-import type {
-	CSSProperties,
-	HTMLAttributes,
-	JSX,
-	ReactElement,
-	ReactNode,
-	Ref,
-} from 'react';
+import type { CSSProperties, HTMLAttributes, JSX, ReactElement, ReactNode, Ref } from 'react';
 import { mergeProps } from '../../shared/utils/merge-props.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -51,7 +44,10 @@ interface VisuallyHiddenElementProps
 }
 
 /** Resolved props handed to a caller-owned `renderRoot` element. */
-type VisuallyHiddenResolvedRenderProps = DistributiveOmit<VisuallyHiddenPresentationProps, 'ref'> & {
+type VisuallyHiddenResolvedRenderProps = DistributiveOmit<
+	VisuallyHiddenPresentationProps,
+	'ref'
+> & {
 	ref: UseRenderRef;
 };
 
@@ -105,9 +101,7 @@ export function VisuallyHidden(props: VisuallyHiddenProps): JSX.Element {
 	});
 }
 
-function omitRef<Props extends { ref?: Ref<HTMLElement> }>(
-	props: Props,
-): Omit<Props, 'ref'> {
+function omitRef<Props extends { ref?: Ref<HTMLElement> }>(props: Props): Omit<Props, 'ref'> {
 	const { ref: _ref, ...rest } = props;
 	return rest;
 }

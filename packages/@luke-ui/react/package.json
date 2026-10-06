@@ -110,10 +110,10 @@
 		"@capsizecss/core": "catalog:",
 		"@luke-ui/rainbow-sprinkles": "workspace:*",
 		"@react-aria/utils": "catalog:",
-		"react-aria": "catalog:",
 		"@vanilla-extract/dynamic": "catalog:",
 		"@vanilla-extract/recipes": "catalog:",
 		"csstype": "catalog:",
+		"react-aria": "catalog:",
 		"spin-doctor": "catalog:"
 	},
 	"devDependencies": {
