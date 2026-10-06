@@ -1,4 +1,5 @@
-import { createElement, type JSX, type ReactElement, type Ref, type RefObject } from 'react';
+import { createElement } from 'react';
+import type { JSX, ReactElement, Ref, RefObject } from 'react';
 
 /** Callback ref shape handed to `renderRoot`, spreadable onto a concrete element. */
 export type UseRenderRef = NonNullable<Exclude<Ref<HTMLElement>, RefObject<HTMLElement | null>>>;

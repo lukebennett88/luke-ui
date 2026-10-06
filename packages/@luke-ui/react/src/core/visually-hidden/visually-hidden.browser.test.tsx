@@ -141,7 +141,11 @@ test('VisuallyHidden renderRoot preserves callback ref cleanup', () => {
 					cleanups += 1;
 				};
 			}}
-			renderRoot={(domProps) => <a {...domProps} href="#main" />}
+			renderRoot={({ children, ...domProps }) => (
+				<a {...domProps} href="#main">
+					{children}
+				</a>
+			)}
 		>
 			Skip
 		</VisuallyHidden>,

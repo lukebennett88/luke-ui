@@ -2,7 +2,8 @@ import type { CSSProperties, HTMLAttributes, JSX, ReactElement, ReactNode, Ref }
 import { mergeProps } from '../../shared/utils/merge-props.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { useRender, type UseRenderRef } from '../use-render/use-render.js';
+import type { UseRenderRef } from '../use-render/use-render.js';
+import { useRender } from '../use-render/use-render.js';
 import { useVisuallyHidden } from './use-visually-hidden.js';
 
 /** Elements `VisuallyHidden` may render when it owns the root. */

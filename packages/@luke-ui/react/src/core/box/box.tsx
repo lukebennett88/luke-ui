@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 import { mergeProps } from '../../shared/utils/merge-props.js';
-import { createSprinkles, type SprinklesProps } from '../styles/utilities.css.js';
+import type { SprinklesProps } from '../styles/utilities.css.js';
+import { createSprinkles } from '../styles/utilities.css.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { Prettify } from '../types/prettify.js';
 import { useRender } from '../use-render/use-render.js';

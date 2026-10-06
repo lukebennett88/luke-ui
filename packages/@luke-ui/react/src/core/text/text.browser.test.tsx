@@ -12,6 +12,8 @@ import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 import { visuallyHiddenStyle } from '../visually-hidden/visually-hidden-style.js';
 
+const slottedTextContext = { slots: { description: {}, errorMessage: {} } };
+
 function isVisuallyHidden(element: Element): boolean {
 	if (!(element instanceof HTMLElement)) return false;
 	const style = element.style;
@@ -43,7 +45,7 @@ test('Text fills a React Aria MenuItem label and description', async () => {
 
 test('Text slot null opts out of surrounding slotted text context', () => {
 	const { locator } = render(
-		<TextContext.Provider value={{ slots: { description: {}, errorMessage: {} } }}>
+		<TextContext.Provider value={slottedTextContext}>
 			<Text slot={null}>Opted out label</Text>
 		</TextContext.Provider>,
 	);
@@ -71,7 +73,7 @@ test('Text isVisuallyHidden hides without an extra wrapper and keeps named slots
 
 test('Text isVisuallyHidden keeps slot null opt-out', () => {
 	const { locator } = render(
-		<TextContext.Provider value={{ slots: { description: {}, errorMessage: {} } }}>
+		<TextContext.Provider value={slottedTextContext}>
 			<Text isVisuallyHidden slot={null}>
 				Hidden opted out
 			</Text>
