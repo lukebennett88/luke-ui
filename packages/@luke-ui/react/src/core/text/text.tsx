@@ -1,10 +1,19 @@
+import type { CSSProperties } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
+import { mergeProps } from '../../shared/utils/merge-props.js';
 import { typeStyleWeightRole } from '../../theme/type-styles.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
+import { VisuallyHidden } from '../visually-hidden/visually-hidden.js';
 import type { TextRecipeVariants } from './recipe.css.js';
 import { textRecipe } from './recipe.css.js';
+
+function plainStyle(style: unknown): CSSProperties | undefined {
+	if (style === undefined) return undefined;
+	if (typeof style === 'object' && style !== null) return style as CSSProperties;
+	return undefined;
+}
 
 interface TextVariantProps extends NonNullable<TextRecipeVariants> {}
 
@@ -33,7 +42,7 @@ interface TextStyleProps {
 	 * Hides text visually while keeping it accessible.
 	 * @default false
 	 */
-	isVisuallyHidden?: TextVariantProps['isVisuallyHidden'];
+	isVisuallyHidden?: boolean;
 	/** Clamps text lines. `true` clamps to 1 line; numeric values clamp to 1–5. */
 	lineClamp?: TextVariantProps['lineClamp'];
 	/**
@@ -76,11 +85,14 @@ interface TextStyleProps {
 
 type _TextOmit = DistributiveOmit<
 	React.ComponentProps<typeof RacText>,
-	'color' | keyof DocumentedElementTypeProps
+	'color' | keyof DocumentedElementTypeProps | 'slot'
 >;
 interface _TextProps extends _TextOmit, TextStyleProps, DocumentedElementTypeProps {
-	/** Connects text to a React Aria parent's named text slot. */
-	slot?: string;
+	/**
+	 * Connects text to a React Aria parent's named text slot. Pass `null` to opt out of surrounding
+	 * slotted text context.
+	 */
+	slot?: string | null;
 }
 
 /** Props for the `Text` component. */
@@ -115,10 +127,11 @@ export function Text(props: TextProps) {
 		fontStyle,
 		fontVariantNumeric,
 		fontWeight,
-		isVisuallyHidden,
+		isVisuallyHidden = false,
 		lineClamp,
 		shouldDisableTrim,
 		shouldInheritFont,
+		style,
 		textAlign,
 		textDecoration,
 		textTransform,
@@ -135,28 +148,47 @@ export function Text(props: TextProps) {
 		return !blockTextElementTypes.has(elementType);
 	})();
 
+	const recipeClassName = textRecipe({
+		className,
+		color,
+		fontStyle,
+		fontVariantNumeric,
+		fontWeight:
+			fontWeight ?? (shouldInheritFont ? undefined : typeStyleWeightRole[resolvedTypography]),
+		lineClamp,
+		shouldDisableTrim: resolvedShouldDisableTrim,
+		shouldInheritFont,
+		textAlign,
+		textDecoration,
+		textTransform,
+		textWrap,
+		typography: resolvedTypography,
+	});
+
+	const ownedStyle = plainStyle(style);
+
+	if (isVisuallyHidden) {
+		return (
+			<VisuallyHidden
+				className={recipeClassName}
+				renderRoot={(domProps) => (
+					<RacText
+						{...mergeProps(
+							ownedStyle === undefined ? { ...racProps, style } : racProps,
+							domProps,
+						)}
+						elementType={elementType}
+					/>
+				)}
+				style={ownedStyle}
+			>
+				{children}
+			</VisuallyHidden>
+		);
+	}
+
 	return (
-		<RacText
-			{...racProps}
-			className={textRecipe({
-				className,
-				color,
-				fontStyle,
-				fontVariantNumeric,
-				fontWeight:
-					fontWeight ?? (shouldInheritFont ? undefined : typeStyleWeightRole[resolvedTypography]),
-				isVisuallyHidden,
-				lineClamp,
-				shouldDisableTrim: resolvedShouldDisableTrim,
-				shouldInheritFont,
-				textAlign,
-				textDecoration,
-				textTransform,
-				textWrap,
-				typography: resolvedTypography,
-			})}
-			elementType={elementType}
-		>
+		<RacText {...racProps} className={recipeClassName} elementType={elementType} style={style}>
 			{children}
 		</RacText>
 	);

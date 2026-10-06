@@ -273,6 +273,25 @@ test('ComboboxTrayTrigger blocks submission of a required, unselected combobox w
 	expect(new FormData(form).get('country')).toBe('au');
 });
 
+test('ComboboxTray validation root is the hidden input itself', () => {
+	const { container } = render(
+		<form aria-label="Country form">
+			<TrayCombobox isRequired />
+			<button type="submit">Submit</button>
+		</form>,
+	);
+	const input = container.querySelector('input[aria-hidden="true"]');
+	if (!(input instanceof HTMLInputElement)) {
+		throw new Error('Expected the tray validation input.');
+	}
+
+	expect(input.required).toBe(true);
+	expect(input.tabIndex).toBe(-1);
+	expect(input.style.position).toBe('absolute');
+	expect(input.style.clipPath).toBe('inset(100%)');
+	expect(input.parentElement?.tagName).not.toBe('SPAN');
+});
+
 test('ComboboxTrayTrigger allows a required combobox with allowsCustomValue to submit typed text', async () => {
 	let submitCount = 0;
 	render(

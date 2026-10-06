@@ -2,3 +2,4 @@ export {
 	VisuallyHidden,
 	type VisuallyHiddenProps,
 } from '../core/visually-hidden/visually-hidden.js';
+export { visuallyHiddenStyle } from '../core/visually-hidden/visually-hidden-style.js';

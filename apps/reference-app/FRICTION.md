@@ -40,16 +40,6 @@ use `aria-label`, with app VE for the track, thumb, and focus ring. Luke UI has 
 and `Checkbox` is the wrong affordance for this setting. Owner:
 [#714: Forms and control naming](https://github.com/lukebennett88/luke-ui/issues/714).
 
-### Text inside RAC control content
-
-Ordinary text in a Select trigger uses the high-level `textRecipe` on `SelectValue` in place of
-`Text`. Luke UI `Text` renders RAC `Text`, which reads RAC's slotted text context. Inside a RAC
-`Select` trigger or a `SwitchField`, it throws "A slot prop is required. Valid slot names are
-"description" and "errorMessage"". RAC's opt-out is `slot={null}`, but the public `TextProps` type
-rejects `null`. Owners:
-[#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711) and
-[#714](https://github.com/lukebennett88/luke-ui/issues/714).
-
 ### Dialog
 
 The dialogs for changing the email address and clearing saved settings use RAC `DialogTrigger`,

@@ -5,10 +5,22 @@ import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
 import { Menu, MenuItem } from 'react-aria-components/Menu';
+import { TextContext } from 'react-aria-components/Text';
 import { expect, test } from 'vite-plus/test';
 import { typeStyles } from '../../theme/type-styles.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
+import { visuallyHiddenStyle } from '../visually-hidden/visually-hidden-style.js';
+
+function isVisuallyHidden(element: Element): boolean {
+	if (!(element instanceof HTMLElement)) return false;
+	const style = element.style;
+	return (
+		style.position === visuallyHiddenStyle.position &&
+		style.overflow === visuallyHiddenStyle.overflow &&
+		style.clipPath === visuallyHiddenStyle.clipPath
+	);
+}
 
 test('Text fills a React Aria MenuItem label and description', async () => {
 	const { locator } = render(
@@ -27,6 +39,57 @@ test('Text fills a React Aria MenuItem label and description', async () => {
 	const item = locator.getByRole('menuitem');
 	await expect.element(item).toHaveAccessibleName('Save changes');
 	await expect.element(item).toHaveAccessibleDescription('Updates the current document');
+});
+
+test('Text slot null opts out of surrounding slotted text context', () => {
+	const { locator } = render(
+		<TextContext.Provider value={{ slots: { description: {}, errorMessage: {} } }}>
+			<Text slot={null}>Opted out label</Text>
+		</TextContext.Provider>,
+	);
+
+	expect(locator.getByText('Opted out label').element().tagName).toBe('SPAN');
+});
+
+test('Text isVisuallyHidden hides without an extra wrapper and keeps named slots', async () => {
+	const { locator } = render(
+		<Menu aria-label="Actions">
+			<MenuItem>
+				<Text isVisuallyHidden slot="label" typography="label">
+					Save changes
+				</Text>
+			</MenuItem>
+		</Menu>,
+	);
+	const label = locator.getByText('Save changes').element();
+
+	expect(label.tagName).toBe('SPAN');
+	expect(isVisuallyHidden(label)).toBe(true);
+	expect(label.parentElement == null || !isVisuallyHidden(label.parentElement)).toBe(true);
+	await expect.element(locator.getByRole('menuitem', { name: 'Save changes' })).toBeInTheDocument();
+});
+
+test('Text isVisuallyHidden keeps slot null opt-out', () => {
+	const { locator } = render(
+		<TextContext.Provider value={{ slots: { description: {}, errorMessage: {} } }}>
+			<Text isVisuallyHidden slot={null}>
+				Hidden opted out
+			</Text>
+		</TextContext.Provider>,
+	);
+	const label = locator.getByText('Hidden opted out').element();
+
+	expect(label.tagName).toBe('SPAN');
+	expect(isVisuallyHidden(label)).toBe(true);
+	expect(label.parentElement == null || !isVisuallyHidden(label.parentElement)).toBe(true);
+});
+
+test('ordinary Text remains a single React Aria Text root', () => {
+	const { locator } = render(<Text>Body copy</Text>);
+	const text = locator.getByText('Body copy').element();
+
+	expect(text.tagName).toBe('SPAN');
+	expect(isVisuallyHidden(text)).toBe(false);
 });
 
 // `shouldInheritFont` inherits `textTransform` and `fontVariantNumeric` along with the other font

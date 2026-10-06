@@ -130,7 +130,6 @@ export const textRecipe = recipe({
 	defaultVariants: {
 		fontStyle: 'default',
 		fontVariantNumeric: 'default',
-		isVisuallyHidden: false,
 		lineClamp: false,
 		shouldDisableTrim: false,
 		shouldInheritFont: false,
@@ -141,18 +140,6 @@ export const textRecipe = recipe({
 		typography: 'body',
 	},
 	variants: {
-		isVisuallyHidden: {
-			false: {},
-			true: {
-				blockSize: '1px', // 1px, not 0: zero dimensions trip screen-reader bugs
-				clip: 'rect(1px, 1px, 1px, 1px)', // legacy fallback for clip-path
-				clipPath: 'inset(100%)',
-				inlineSize: '1px',
-				overflow: 'hidden',
-				position: 'absolute',
-				whiteSpace: 'nowrap', // stop text wrapping inside the 1px box
-			},
-		},
 		textWrap: {
 			balance: { textWrap: 'balance' },
 			pretty: { textWrap: 'pretty' },
