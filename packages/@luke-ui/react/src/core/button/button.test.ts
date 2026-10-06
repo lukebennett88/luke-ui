@@ -3,6 +3,11 @@ import type { ButtonProps } from './button.js';
 
 test('Button supports ref and rejects unsupported prop combinations', () => {
 	assertType<ButtonProps>({ ref: null });
+	assertType<ButtonProps>({
+		children: (renderProps) => (renderProps.isPressed ? 'Pressed' : 'Idle'),
+	});
+	// @ts-expect-error — high-level Button omits RAC render; use function children instead
+	assertType<ButtonProps>({ render: () => <button type="button">Custom</button> });
 	// @ts-expect-error — text Buttons wrap and do not use control sizing
 	assertType<ButtonProps>({ appearance: 'text', size: 'small' });
 	// @ts-expect-error — accent is not a consumer-selectable tone

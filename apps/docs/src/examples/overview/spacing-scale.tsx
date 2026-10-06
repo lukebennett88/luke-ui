@@ -3,18 +3,7 @@ import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { Fragment } from 'react';
 
-const spacingSteps = [
-	'sp4',
-	'sp8',
-	'sp12',
-	'sp16',
-	'sp24',
-	'sp32',
-	'sp40',
-	'sp48',
-	'sp64',
-	'sp96',
-] as const;
+const spacingSteps = Object.keys(vars.space) as Array<keyof typeof vars.space>;
 
 export default () => {
 	return (

@@ -4,17 +4,10 @@ import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { Fragment } from 'react';
 
-const typographyStyles = [
-	'caption',
-	'label',
-	'body',
-	'lead',
-	'heading4',
-	'heading3',
-	'heading2',
-	'heading1',
-	'display',
-] as const;
+const typographyStyles = (Object.keys(vars.font) as Array<keyof typeof vars.font>).filter(
+	(key): key is Exclude<keyof typeof vars.font, 'family' | 'weight'> =>
+		key !== 'family' && key !== 'weight',
+);
 
 export default () => {
 	return (

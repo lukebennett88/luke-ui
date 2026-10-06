@@ -32,7 +32,6 @@ type ButtonContentProps =
 type _ButtonOmit = DistributiveOmit<
 	PrimitiveButtonProps,
 	| 'appearance'
-	| 'children'
 	| 'isBlock'
 	| 'isPending'
 	| 'prominence'
@@ -44,8 +43,6 @@ type _ButtonOmit = DistributiveOmit<
 
 type _ButtonProps = _ButtonOmit &
 	DocumentedPressProps & {
-		/** Button label. */
-		children?: ReactNode;
 		/**
 		 * Externally owned pending state. When true, the button is non-interactive and shows a spinner
 		 * immediately. Prefer `pressAction` for Button-owned operations.
@@ -98,7 +95,7 @@ export function Button(props: ButtonProps): JSX.Element {
 				isPending={isPendingState}
 				onPress={handlePress}
 			>
-				{() => (
+				{(renderProps) => (
 					<>
 						{showSpinner && (
 							<span aria-hidden className={pendingSpinnerOverlay()}>
@@ -111,7 +108,7 @@ export function Button(props: ButtonProps): JSX.Element {
 							shouldInheritFont
 							textDecoration="inherit"
 						>
-							{children}
+							{typeof children === 'function' ? children(renderProps) : children}
 						</Text>
 					</>
 				)}
@@ -126,7 +123,7 @@ export function Button(props: ButtonProps): JSX.Element {
 			isPending={isPendingState}
 			onPress={handlePress}
 		>
-			{() => (
+			{(renderProps) => (
 				<span className={buttonContent()}>
 					{showSpinner && (
 						<span aria-hidden className={pendingSpinnerOverlay()}>
@@ -136,7 +133,7 @@ export function Button(props: ButtonProps): JSX.Element {
 					<span className={buttonLabel({ hasAdornments: true, isPending: showSpinner })}>
 						{startContent}
 						<Text elementType="span" lineClamp shouldInheritFont>
-							{children}
+							{typeof children === 'function' ? children(renderProps) : children}
 						</Text>
 						{endContent}
 					</span>
