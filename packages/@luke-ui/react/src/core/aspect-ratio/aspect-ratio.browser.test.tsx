@@ -79,7 +79,7 @@ test('applies the chosen ratio to a caller-owned root', () => {
 		<AspectRatio
 			inlineSize="16rem"
 			ratio="21 / 9"
-			renderRoot={(resolvedProps) => <figure {...resolvedProps} data-testid="custom-ratio" />}
+			renderRoot={(domProps) => <figure {...domProps} data-testid="custom-ratio" />}
 		/>,
 	);
 	const element = locator.getByTestId('custom-ratio').element();

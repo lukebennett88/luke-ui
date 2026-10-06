@@ -78,7 +78,10 @@ type _TextOmit = DistributiveOmit<
 	React.ComponentProps<typeof RacText>,
 	'color' | keyof DocumentedElementTypeProps
 >;
-interface _TextProps extends _TextOmit, TextStyleProps, DocumentedElementTypeProps {}
+interface _TextProps extends _TextOmit, TextStyleProps, DocumentedElementTypeProps {
+	/** Connects text to a React Aria parent's named text slot. */
+	slot?: string;
+}
 
 /** Props for the `Text` component. */
 export type TextProps = Prettify<_TextProps>;

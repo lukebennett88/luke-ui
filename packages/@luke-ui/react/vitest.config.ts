@@ -24,6 +24,7 @@ export default defineConfig({
 			'react-aria-components/Dialog',
 			'react-aria-components/I18nProvider',
 			'react-aria-components/Link',
+			'react-aria-components/Menu',
 			'react-aria-components/Modal',
 			'react-aria-components/Popover',
 		],

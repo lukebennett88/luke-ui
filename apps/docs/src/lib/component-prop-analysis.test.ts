@@ -547,6 +547,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'render',
 			'shouldDisableTrim',
 			'shouldInheritFont',
+			'slot',
 			'textAlign',
 			'textDecoration',
 			'textTransform',

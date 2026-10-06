@@ -57,10 +57,14 @@ export interface BoxLikeRenderProps extends BoxLikePresentationProps {
 	/** Use `elementType` instead of `renderRoot` for a supported structural element. */
 	elementType?: never;
 	/**
-	 * Passes `children`, `className`, `style`, and a callback `ref` to a caller-owned element.
+	 * Passes resolved `children`, `className`, `style`, and a callback `ref` as `domProps`.
+	 * The second argument is an empty state object.
 	 * Put DOM attributes on the element the callback returns.
 	 */
-	renderRoot: (props: {
-		[K in keyof BoxLikeResolvedRenderProps]: BoxLikeResolvedRenderProps[K];
-	}) => ReactElement;
+	renderRoot: (
+		domProps: {
+			[K in keyof BoxLikeResolvedRenderProps]: BoxLikeResolvedRenderProps[K];
+		},
+		state: Record<string, never>,
+	) => ReactElement;
 }

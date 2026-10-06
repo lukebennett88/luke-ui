@@ -57,7 +57,7 @@ function PropGroup({
 			borderRadius="surface"
 			borderStyle="solid"
 			borderWidth="thin"
-			renderRoot={(props) => <Collapsible {...props} defaultOpen={group.defaultOpen} />}
+			renderRoot={(domProps) => <Collapsible {...domProps} defaultOpen={group.defaultOpen} />}
 		>
 			<Cluster
 				className="group text-start"
@@ -66,7 +66,7 @@ function PropGroup({
 				justifyContent="space-between"
 				paddingBlock="sp12"
 				paddingInline="sp16"
-				renderRoot={(props) => <CollapsibleTrigger {...props} />}
+				renderRoot={(domProps) => <CollapsibleTrigger {...domProps} />}
 			>
 				<Text elementType="span" fontWeight="emphasis" typography="caption">
 					{group.name}
@@ -77,7 +77,7 @@ function PropGroup({
 				className="border-fd-border border-t"
 				paddingBlockEnd="sp4"
 				paddingInline="sp4"
-				renderRoot={(props) => <CollapsibleContent {...props} />}
+				renderRoot={(domProps) => <CollapsibleContent {...domProps} />}
 			>
 				<TypeTable type={type} />
 			</Box>

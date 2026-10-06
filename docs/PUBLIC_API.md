@@ -62,8 +62,9 @@ ownership convention from the
 React Aria's `slot` lets a React Aria parent configure a child through context. Keep `slot` on a
 high-level component only when a React Aria parent defines a named slot that component can fill.
 `Button` and `IconButton` keep it for slots such as `slot="close"` in a React Aria `Dialog`.
-`Checkbox` keeps it for `slot="selection"` in a `GridList` or `Table`. Other high-level components
-omit it. Primitives keep the `slot` of the React Aria component they wrap.
+`Checkbox` keeps it for `slot="selection"` in a `GridList` or `Table`. `Text`, its typography
+compositions, and `VisuallyHidden` keep it for named text slots. Other high-level components omit
+it. Primitives keep the `slot` of the React Aria component they wrap.
 
 ### Controlled state
 

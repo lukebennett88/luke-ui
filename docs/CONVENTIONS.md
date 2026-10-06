@@ -91,6 +91,10 @@ DOM attributes. Use `render<Name>` only for a deliberately replaceable named par
 `render` stays `render` on primitives and other RAC-owned seams. Keep `elementType` and `renderRoot`
 mutually exclusive.
 
+Luke UI `renderRoot` and `render<Name>` callbacks receive `(domProps, state)`. The first argument
+contains resolved presentation props. Pass an empty object as the second argument when the component
+has no public render state.
+
 Do not add generic polymorphic props, `as`, or `asChild` without a demonstrated need. Apply this
 rule to public component APIs, not internal prop handling.
 

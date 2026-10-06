@@ -116,7 +116,7 @@ test('supports semantic and caller-owned elements', () => {
 	const custom = render(
 		<Container
 			maxInlineSize="ct896"
-			renderRoot={(resolvedProps) => <section {...resolvedProps} data-testid="custom-container" />}
+			renderRoot={(domProps) => <section {...domProps} data-testid="custom-container" />}
 		>
 			Custom content
 		</Container>,

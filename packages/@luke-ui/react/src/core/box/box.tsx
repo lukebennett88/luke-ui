@@ -27,14 +27,14 @@ export function Box(props: BoxProps): JSX.Element {
 	} = props;
 
 	if (renderRoot) {
-		const renderProps = mergeProps(createSprinkles(retainSprinklesProps(restProps)), {
+		const domProps = mergeProps(createSprinkles(retainSprinklesProps(restProps)), {
 			children,
 			className,
 			style,
 		});
 
 		// The render owner must receive Box's ref with its presentation props.
-		return renderRoot({ ...renderProps, ref: toCallbackRef(restProps.ref) });
+		return renderRoot({ ...domProps, ref: toCallbackRef(restProps.ref) }, {});
 	}
 
 	// `restProps` still carries `ref`; createSprinkles passes unknown keys through

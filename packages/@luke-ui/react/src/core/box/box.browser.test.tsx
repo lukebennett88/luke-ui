@@ -1,4 +1,10 @@
+import { AspectRatio } from '@luke-ui/react/aspect-ratio';
+import { Bleed } from '@luke-ui/react/bleed';
 import { Box } from '@luke-ui/react/box';
+import { Cluster } from '@luke-ui/react/cluster';
+import { Container } from '@luke-ui/react/container';
+import { Grid } from '@luke-ui/react/grid';
+import { Stack } from '@luke-ui/react/stack';
 import { createSprinkles } from '@luke-ui/react/styles';
 import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
@@ -36,9 +42,9 @@ test('renders semantic elements and a consumer-owned renderRoot prop', () => {
 	const customResult = render(
 		<Box
 			aria-label="Ignored Box label"
-			renderRoot={(resolvedProps) => {
-				receivedAriaLabel = Object.hasOwn(resolvedProps, 'aria-label');
-				return <div {...resolvedProps} />;
+			renderRoot={(domProps) => {
+				receivedAriaLabel = Object.hasOwn(domProps, 'aria-label');
+				return <div {...domProps} />;
 			}}
 			style={{ display: 'grid' }}
 		>
@@ -91,9 +97,9 @@ test('consumer className and style win collisions on the renderRoot callback pat
 			gap={{ initial: 'sp8', bp768: 'sp24' }}
 			inlineSize="10rem"
 			ref={ref}
-			renderRoot={(resolvedProps) => {
-				receivedRef = resolvedProps.ref;
-				return <article {...resolvedProps} data-testid="box-render" />;
+			renderRoot={(domProps) => {
+				receivedRef = domProps.ref;
+				return <article {...domProps} data-testid="box-render" />;
 			}}
 			style={{ backgroundColor: 'rgb(4, 5, 6)', display: 'grid' }}
 		>
@@ -110,6 +116,74 @@ test('consumer className and style win collisions on the renderRoot callback pat
 	expect(getComputedStyle(element).inlineSize).toBe('160px');
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(4, 5, 6)');
 	expectConsumerClassAfterUtilities(element.className, utility.className);
+});
+
+for (const [name, Component] of Object.entries({
+	AspectRatio,
+	Bleed,
+	Box,
+	Cluster,
+	Container,
+	Grid,
+	Stack,
+})) {
+	test(`${name} renderRoot receives presentation props and empty state`, () => {
+		const calls: Array<Array<unknown>> = [];
+		const ref = createRef<HTMLElement>();
+		const { locator, unmount } = render(
+			<Component
+				className="consumer-class"
+				maxInlineSize="40rem"
+				ref={ref}
+				renderRoot={(...args) => {
+					const [domProps] = args;
+					calls.push(args);
+					return <section {...domProps} aria-label="Owned root" />;
+				}}
+				style={{ backgroundColor: 'rgb(4, 5, 6)' }}
+			>
+				Content
+			</Component>,
+		);
+		const element = locator.getByRole('region', { name: 'Owned root' }).element();
+
+		expect(calls.length).toBeGreaterThan(0);
+		for (const args of calls) {
+			expect(args).toEqual([
+				{
+					children: 'Content',
+					className: expect.stringContaining('consumer-class'),
+					ref: expect.any(Function),
+					style: expect.objectContaining({ backgroundColor: 'rgb(4, 5, 6)' }),
+				},
+				{},
+			]);
+		}
+		expect(ref.current).toBe(element);
+		unmount();
+		expect(ref.current).toBeNull();
+	});
+}
+
+test('renderRoot preserves callback ref cleanup', () => {
+	const elements: Array<HTMLElement | null> = [];
+	let cleanups = 0;
+	const { locator, unmount } = render(
+		<Box
+			ref={(element) => {
+				elements.push(element);
+				return () => {
+					cleanups += 1;
+				};
+			}}
+			renderRoot={(domProps) => <section {...domProps} aria-label="Owned root" />}
+		/>,
+	);
+
+	expect(elements).toEqual([locator.getByRole('region', { name: 'Owned root' }).element()]);
+	unmount();
+	expect(cleanups).toBe(1);
+	expect(elements).toHaveLength(1);
 });
 
 /** Consumer `className` is merged after utility classes, so it appears later in the token list. */

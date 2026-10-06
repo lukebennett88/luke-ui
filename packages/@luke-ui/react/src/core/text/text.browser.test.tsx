@@ -5,9 +5,29 @@ import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
 import { typeStyles } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
+import { Menu, MenuItem } from 'react-aria-components/Menu';
 import { expect, test } from 'vite-plus/test';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
+
+test('Text fills a React Aria MenuItem label and description', async () => {
+	const { locator } = render(
+		<Menu aria-label="Actions">
+			<MenuItem>
+				<Text slot="label" typography="label">
+					Save changes
+				</Text>
+				<Text color="secondary" slot="description" typography="caption">
+					Updates the current document
+				</Text>
+			</MenuItem>
+		</Menu>,
+	);
+
+	const item = locator.getByRole('menuitem');
+	await expect.element(item).toHaveAccessibleName('Save changes');
+	await expect.element(item).toHaveAccessibleDescription('Updates the current document');
+});
 
 // `shouldInheritFont` inherits `textTransform` and `fontVariantNumeric` along with the other font
 // properties, and their variants default to emitting nothing. Without both halves, a composing

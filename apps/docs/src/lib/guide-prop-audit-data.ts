@@ -349,6 +349,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'fontWeight',
 		'lineClamp',
 		'shouldDisableTrim',
+		'slot',
 		'textAlign',
 		'textDecoration',
 		'textTransform',
