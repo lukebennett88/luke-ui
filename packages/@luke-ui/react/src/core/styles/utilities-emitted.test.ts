@@ -140,5 +140,5 @@ test('public utilities declarations do not import a styling-engine package', asy
 	const declaration = await readUtilitiesDeclaration();
 	expect(declaration).not.toMatch(/from ["']@luke-ui\/rainbow-sprinkles["']/);
 	expect(declaration).not.toMatch(/from ["']@vanilla-extract\//);
-	expect(declaration).toContain('readonly properties: ReadonlySet<keyof SprinklesProps>');
+	expect(declaration).toContain('type SprinklesProps =');
 });

@@ -71,7 +71,13 @@ test('declares @luke-ui/rainbow-sprinkles as a runtime dependency', () => {
 });
 
 test('sprinkles runtime imports published rainbow-sprinkles create-runtime-fn', async () => {
-	const source = await readFile(new URL('../../../dist/box.js', import.meta.url), 'utf8');
+	const entry = await readFile(new URL('../../../dist/box.js', import.meta.url), 'utf8');
+	const chunkSpecifier = entry.match(/from\s+["'](\.\/box-[^"']+)["']/)?.[1];
+	expect(chunkSpecifier).toBeTypeOf('string');
+	const source = await readFile(
+		new URL(chunkSpecifier!, new URL('../../../dist/', import.meta.url)),
+		'utf8',
+	);
 	expect(source).toContain('@luke-ui/rainbow-sprinkles/create-runtime-fn');
 	expect(source).not.toContain('#rainbow-sprinkles-runtime');
 });

@@ -8,7 +8,6 @@ import { Stack } from '@luke-ui/react/stack';
 import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { createSprinkles } from '../styles/utilities.css.js';
 import {
 	expectForwardsDomProps,
 	expectHtmlElement,
@@ -60,7 +59,12 @@ test('renders semantic elements and a consumer-owned renderRoot prop', () => {
 
 test('consumer className and style win collisions on the ordinary element path', () => {
 	const ref = createRef<HTMLElement>();
-	const utility = createSprinkles({ display: 'flex', inlineSize: '12rem' });
+	const baseline = render(
+		<Box data-testid="box-baseline" display="flex" gap="sp16" inlineSize="12rem" />,
+	);
+	const utilityClassName = baseline.locator.getByTestId('box-baseline').element().className;
+	baseline.unmount();
+
 	const { locator } = render(
 		<Box
 			className="consumer-class"
@@ -83,12 +87,22 @@ test('consumer className and style win collisions on the ordinary element path',
 	expect(getComputedStyle(element).display).toBe('grid');
 	expect(getComputedStyle(element).inlineSize).toBe('192px');
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(1, 2, 3)');
-	expectConsumerClassAfterUtilities(element.className, utility.className);
+	expectConsumerClassAfterUtilities(element.className, utilityClassName);
 });
 
 test('consumer className and style win collisions on the renderRoot callback path', () => {
 	const ref = createRef<HTMLElement>();
-	const utility = createSprinkles({ display: 'flex', inlineSize: '10rem' });
+	const baseline = render(
+		<Box
+			data-testid="box-baseline"
+			display="flex"
+			gap={{ initial: 'sp8', bp768: 'sp24' }}
+			inlineSize="10rem"
+		/>,
+	);
+	const utilityClassName = baseline.locator.getByTestId('box-baseline').element().className;
+	baseline.unmount();
+
 	let receivedRef: unknown;
 	const { locator } = render(
 		<Box
@@ -115,7 +129,7 @@ test('consumer className and style win collisions on the renderRoot callback pat
 	expect(getComputedStyle(element).display).toBe('grid');
 	expect(getComputedStyle(element).inlineSize).toBe('160px');
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(4, 5, 6)');
-	expectConsumerClassAfterUtilities(element.className, utility.className);
+	expectConsumerClassAfterUtilities(element.className, utilityClassName);
 });
 
 for (const [name, Component] of Object.entries({
