@@ -1,5 +1,6 @@
 export type { ThemeContrastFailure, ThemeInheritance } from './build-theme.js';
 export { ThemeContrastError, ThemeGenerationError } from './build-theme.js';
+export { breakpoints } from './breakpoints.js';
 export { vars } from './contract.css.js';
 export type { SpaceStep } from './contract.js';
 export { spaceScale } from './contract.js';

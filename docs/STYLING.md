@@ -64,12 +64,12 @@ Icon sizes run from `xsmall` to `large` and are emitted as `rem`. `ICON_SIZE_VAL
 Author `depth.*` and `actionControlFinish.*` per mode as final CSS values. Components pick semantic
 tokens. They do not branch on theme identity.
 
-Use `deriveConcentricRadius(innerRadius, gap)` for nested radii. It returns a CSS `calc()` so both
-inputs can be semantic theme variables.
+Use CSS `calc()` when one rounded surface sits inside another: outer radius is inner radius plus the
+gap between them (usually the wrapper's padding). Both inputs can be semantic theme variables.
 
 Bundled themes (`tactile`, `paper`) ship precompiled. Each stylesheet pairs `:where(:root)` with a
-`.luke-ui-theme-<name>` identity class. Apply `themeClassName` only when a document needs more than
-one theme at once. Authored themes use the same class mechanism through `getThemeClassName(name)`.
+`.luke-ui-theme-<name>` identity class. Apply the bundled `themeClassName` export only when a
+document needs more than one theme at once.
 
 Without `data-color-mode`, a themed subtree follows `prefers-color-scheme`. Set
 `data-color-mode="light"` or `data-color-mode="dark"` to force a mode. Nested scopes can override
@@ -238,92 +238,47 @@ control is disabled.
 
 ## Styling utilities
 
-Styling utilities are public from `@luke-ui/react/styles`. Use them when component props are too
-narrow for layout or appearance.
+Layout and appearance utilities live in `core/styles/utilities.css.ts`. They are package-internal.
+`Box` and the other layout components apply them. There is no `@luke-ui/react/styles` subpath and no
+public `createSprinkles` / `SprinklesProps` export.
 
 They use Rainbow Sprinkles over Vanilla Extract. Values can land on inline `style`, which raises
 specificity. That tradeoff is acceptable because utilities are already the highest-priority escape
-hatch.
+hatch inside the package.
 
-`Box` from `@luke-ui/react/box` applies these utilities. Use it as the escape hatch for layout and
-appearance. It excludes typography and text colour. Use `Text` or `Heading` for those.
+`Box` from `@luke-ui/react/box` is the public escape hatch for layout and appearance. It excludes
+typography and text colour. Use `Text` or `Heading` for those.
 
 Do not add style props to every component. Keep component props on variants and behaviour.
 
-### `createSprinkles()`
+### Package-internal `createSprinkles`
 
 `createSprinkles(props)` returns `{ className, style }` plus any own enumerable string-keyed props
 that are not utility keys. Generated `className` and `style` replace input keys of those names. It
 does not preserve symbol keys or non-enumerable properties.
 
-`createSprinkles.properties` is a `ReadonlySet` of utility keys for TypeScript consumers. The
-runtime value is still a mutable `Set`.
-
-Spread `className` and `style` onto the element, or pass the result through `mergeProps` when
-merging with other props:
-
-```tsx
-import { createSprinkles } from '@luke-ui/react/styles';
-
-const layout = createSprinkles({
-	display: 'flex',
-	gap: 'sp16',
-	padding: 'sp24',
-});
-
-return (
-	<div className={layout.className} style={layout.style}>
-		...
-	</div>
-);
-```
+`createSprinkles.properties` is a `ReadonlySet` of utility keys for TypeScript inside the package.
+The runtime value is still a mutable `Set`.
 
 Spacing and gap properties use `0` or value-based keys such as `sp16` and `sp24`. Keys are emitted
 as `rem`. Margin also accepts `auto`. Enum-like properties use CSS-native values.
 
 ### Responsive values
 
-Use object notation keyed by breakpoint names. Values cascade from smaller to larger breakpoints:
-
-```tsx
-const responsive = createSprinkles({
-	display: 'flex',
-	flexDirection: { initial: 'column', bp768: 'row' },
-	gap: { initial: 'sp12', bp768: 'sp24' },
-});
-```
-
-Breakpoints: `initial` (base), `bp640`, `bp768`, `bp1024`, `bp1280`, and `bp1536`.
+Use object notation keyed by breakpoint names. Values cascade from smaller to larger breakpoints.
+Breakpoints: `initial` (base), `bp640`, `bp768`, `bp1024`, `bp1280`, and `bp1536`. Import
+`breakpoints` from `@luke-ui/react/theme` when authoring matching `@container` queries outside Box.
 
 ### React Aria `render` prop (button primitive)
 
 High-level `Button` does not expose RAC `render`. Import the button primitive when you need React
-Aria's `render` composition seam. Combine `createSprinkles` with `mergeProps` so `className` and
-`style` merge correctly:
-
-```tsx
-import { Button } from '@luke-ui/react/primitives/button';
-import { createSprinkles } from '@luke-ui/react/styles';
-import { mergeProps } from '@luke-ui/react/utils';
-
-const buttonBox = createSprinkles({ padding: 'sp16' });
-
-<Button
-	render={(props) => (
-		<button {...mergeProps(props, buttonBox)} type="button">
-			Save
-		</button>
-	)}
->
-	Save
-</Button>;
-```
+Aria's `render` composition seam. Combine `Box` or package-internal sprinkles with `mergeProps` so
+`className` and `style` merge correctly.
 
 ### Utility surface
 
-The supported properties live in `core/styles/utilities.css.ts` and export from
-`@luke-ui/react/styles`. Use CSS-native values throughout, for example `space-between` instead of
-`between`.
+The supported properties live in `core/styles/utilities.css.ts`. Use CSS-native values throughout,
+for example `space-between` instead of `between`.
 
 Semantic colour, typography, and pseudo-state properties are excluded. For sanctioned custom
 styling, use typed `vars` from `@luke-ui/react/theme`:
@@ -349,11 +304,11 @@ return (
 [Wayfair Rainbow Sprinkles](https://github.com/wayfair/rainbow-sprinkles). `@luke-ui/react` depends
 on it at runtime. It is not part of the stable Luke UI 1.x consumer API.
 
-Keep engine authoring and compilation private. If the engine changes, preserve the public contracts:
-`createSprinkles` passes through own enumerable string-keyed non-utility props, generated
-`className` and `style` replace input values, and `.properties` remains public. Theme `vars` keep
-their semantic paths and CSS custom property names. Recipes return class strings. Generated CSS
-keeps its cascade layers and source order.
+Keep engine authoring and compilation private. If the engine changes, preserve the package-internal
+contracts: `createSprinkles` passes through own enumerable string-keyed non-utility props, generated
+`className` and `style` replace input values, and `.properties` remains typed as read-only.
+Theme `vars` keep their semantic paths and CSS custom property names. Recipes return class strings.
+Generated CSS keeps its cascade layers and source order.
 
 ### Implementation rules
 

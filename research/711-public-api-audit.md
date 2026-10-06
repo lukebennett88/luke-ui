@@ -38,7 +38,7 @@ current export or slot decision open.
 
 A component props type earns its export by typing consumer wrappers and configuration. Primitive
 parts earn theirs through custom anatomy rather than internal reuse. Public recipe selection types
-travel with their independently usable recipe, including recipes with no variants. Type names in
+travel with their independently usable recipe only when that recipe has selectable variants. Type names in
 this inventory are exports, not new runtime values.
 
 ### `@luke-ui/react/aspect-ratio`
@@ -69,9 +69,8 @@ Entrypoint: **retain**.
 | Symbol                     | Decision | Independent consumer use                                                                           |
 | -------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
 | `Blockquote`               | retain   | Render a styled block quotation.                                                                   |
-| `BlockquoteProps`          | retain   | Type an app wrapper around `Blockquote`. Render a styled block quotation.                          |
-| `BlockquoteRecipeVariants` | retain   | Type a wrapper’s recipe selection. There are no variant keys; className remains composition input. |
-| `blockquoteRecipe`         | retain   | Apply the border and inset to an app-owned blockquote.                                             |
+| `BlockquoteProps`          | retain   | Type an app wrapper around `Blockquote`. Render a styled block quotation. |
+| `blockquoteRecipe`         | retain   | Apply the border and inset to an app-owned blockquote.                    |
 
 ### `@luke-ui/react/box`
 
@@ -240,9 +239,8 @@ Source: [src/exports/kbd.ts](../packages/@luke-ui/react/src/exports/kbd.ts). Ent
 | Symbol              | Decision | Independent consumer use                                                                           |
 | ------------------- | -------- | -------------------------------------------------------------------------------------------------- |
 | `Kbd`               | retain   | Render styled keyboard input.                                                                      |
-| `KbdProps`          | retain   | Type an app wrapper around `Kbd`. Render styled keyboard input.                                    |
-| `KbdRecipeVariants` | retain   | Type a wrapper’s recipe selection. There are no variant keys; className remains composition input. |
-| `kbdRecipe`         | retain   | Style app-owned keyboard markup.                                                                   |
+| `KbdProps`          | retain   | Type an app wrapper around `Kbd`. Render styled keyboard input. |
+| `kbdRecipe`         | retain   | Style app-owned keyboard markup.                                |
 
 ### `@luke-ui/react/link`
 
@@ -433,7 +431,6 @@ Source: [src/exports/prose.ts](../packages/@luke-ui/react/src/exports/prose.ts).
 | --------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
 | `Prose`               | retain   | Apply long-form rhythm to app-owned Markdown, MDX or CMS content.                                     |
 | `ProseProps`          | retain   | Type an app wrapper around `Prose`. Apply long-form rhythm to app-owned Markdown, MDX or CMS content. |
-| `ProseRecipeVariants` | retain   | Type a wrapper’s recipe selection. There are no variant keys; className remains composition input.    |
 | `proseRecipe`         | retain   | Apply long-form rhythm to an app-owned content root.                                                  |
 
 ### `@luke-ui/react/provider`
@@ -501,14 +498,9 @@ Source: [src/exports/strong.ts](../packages/@luke-ui/react/src/exports/strong.ts
 
 ### `@luke-ui/react/styles`
 
-Source: [src/exports/styles.ts](../packages/@luke-ui/react/src/exports/styles.ts). Entrypoint:
-**retain**.
-
-| Symbol            | Decision | Independent consumer use                                                     |
-| ----------------- | -------- | ---------------------------------------------------------------------------- |
-| `SprinklesProps`  | retain   | Type app-owned layout props without importing the styling engine.            |
-| `createSprinkles` | retain   | Apply responsive layout and appearance to app-owned markup.                  |
-| `breakpoints`     | retain   | Author container queries with the same 640/768/1024/1280/1536 px thresholds. |
+Entrypoint: **private/absent**. There is no styles subpath. `createSprinkles` and `SprinklesProps`
+stay package-internal for `Box` and the other layout components. `breakpoints` moves to
+`@luke-ui/react/theme`.
 
 ### `@luke-ui/react/text-input-field`
 
@@ -538,28 +530,17 @@ Source: [src/exports/text.ts](../packages/@luke-ui/react/src/exports/text.ts). E
 Source: [src/exports/theme.ts](../packages/@luke-ui/react/src/exports/theme.ts). Entrypoint:
 **retain**.
 
-| Symbol                   | Decision | Independent consumer use                                                        |
-| ------------------------ | -------- | ------------------------------------------------------------------------------- |
-| `ColorInput`             | retain   | Type a single source colour or independently authored light/dark colours.       |
-| `ControlFinish`          | retain   | Type custom resting, raised and recessed control background images.             |
-| `DepthLadder`            | retain   | Type custom recessed/resting/raised/floating/overlay shadow values.             |
-| `ExtendingThemeInput`    | retain   | Type a named theme that overrides and inherits another theme.                   |
-| `FontWeightRole`         | retain   | Type one of the body/label/heading/emphasis weight roles.                       |
-| `SpaceStep`              | retain   | Type a spacing token accepted by layout APIs.                                   |
-| `ThemeContrastFailure`   | retain   | Present failing foreground/background pairs and achieved/required contrast.     |
-| `ThemeInheritance`       | retain   | Present which source colours came from an inherited theme.                      |
-| `ThemeInput`             | retain   | Type a curated theme definition before compiling it.                            |
-| `TypeStyle`              | retain   | Type a typography selection shared by app-owned text and Luke UI text.          |
-| `defineTheme`            | retain   | Compile an app-authored theme to static CSS with contrast validation.           |
-| `deriveConcentricRadius` | retain   | Calculate an outer radius from the inner radius and gap in app CSS.             |
-| `deriveNestedRadius`     | retain   | Calculate an inner radius from the outer radius and gap, clamped at zero.       |
-| `getThemeClassName`      | retain   | Apply a named authored theme to an app-owned subtree.                           |
-| `rootClassName`          | retain   | Apply scoped reset and base typography to the application root.                 |
-| `spaceScale`             | retain   | Build a spacing selector or tooling from the public token keys and rem values.  |
-| `ThemeContrastError`     | retain   | Catch and report failed contrast pairs from theme compilation.                  |
-| `ThemeGenerationError`   | retain   | Catch an unachievable semantic colour family and inspect role/mode diagnostics. |
-| `typeStyles`             | retain   | Build a typography selector over the public style keys.                         |
-| `vars`                   | retain   | Style app-owned content using typed semantic CSS custom properties.             |
+1.0 allowlist only. Useful helpers can return in a minor when they have a concrete consumer use.
+
+| Symbol                 | Decision | Independent consumer use                                                        |
+| ---------------------- | -------- | ------------------------------------------------------------------------------- |
+| `ThemeInput`           | retain   | Type a curated theme definition before compiling it.                            |
+| `breakpoints`          | retain   | Author container queries with the same 640/768/1024/1280/1536 px thresholds.    |
+| `defineTheme`          | retain   | Compile an app-authored theme to static CSS with contrast validation.           |
+| `rootClassName`        | retain   | Apply scoped reset and base typography to the application root.                 |
+| `ThemeContrastError`   | retain   | Catch and report failed contrast pairs from theme compilation.                  |
+| `ThemeGenerationError` | retain   | Catch an unachievable semantic colour family and inspect role/mode diagnostics. |
+| `vars`                 | retain   | Style app-owned content using typed semantic CSS custom properties.             |
 
 ### `@luke-ui/react/themes/paper`
 
@@ -899,9 +880,9 @@ supported public seams. The shared grouping also describes the Button primitive'
 ## Styles, utility props and merge semantics
 
 Sources: `core/styles/utilities.css.ts`, `core/styles/responsive-conditions.ts`,
-`theme/breakpoints.ts` and `shared/utils/merge-props.ts`. Retain `createSprinkles`, `SprinklesProps`
-and `breakpoints` for app-owned markup. These are the actual utility keys, not a promise of
-arbitrary CSS props. All entries support a direct value, null or a responsive object with `initial`,
+`theme/breakpoints.ts` and `shared/utils/merge-props.ts`. `createSprinkles` and `SprinklesProps`
+stay package-internal for `Box` and layout components. Public `breakpoints` live on
+`@luke-ui/react/theme`. These are the actual utility keys, not a promise of arbitrary CSS props. All entries support a direct value, null or a responsive object with `initial`,
 `bp640`, `bp768`, `bp1024`, `bp1280`, `bp1536`. Null/omitted conditions add no value. Responsive
 values use the nearest size container, with thresholds 640/768/1024/1280/1536 px. No utility
 property has an implicit presentation default. Specialised layout components may require `initial`,
@@ -930,11 +911,11 @@ as recorded above.
 | `position`                                                                                                                                                                                                                                                                                                                                       | absolute, fixed, relative, static, sticky                                                                                                                    |
 | `blockSize`, `inlineSize`, `maxBlockSize`, `maxInlineSize`, `minBlockSize`, `minInlineSize`, `flex`, `flexBasis`, `gridArea`, `gridColumn`, `gridColumnStart`, `gridColumnEnd`, `gridRow`, `gridRowStart`, `gridRowEnd`, `inset`, `insetBlock`, `insetBlockStart`, `insetBlockEnd`, `insetInline`, `insetInlineStart`, `insetInlineEnd`, `order` | The corresponding CSS-native value type from csstype; no invented token scale.                                                                               |
 
-`createSprinkles` returns className/style and passes through own enumerable string-keyed non-utility
-props. Generated presentation replaces input className/style. Symbols and non-enumerable props are
-not preserved. Its `.properties` is a public ReadonlySet in TypeScript, but the runtime Set remains
-mutable. Retain this inspected contract; engine functions/types are not consumer APIs. Typography,
-text colour and pseudo-state utilities remain excluded; use Text/Heading or `vars`.
+Package-internal `createSprinkles` returns className/style and passes through own enumerable
+string-keyed non-utility props. Generated presentation replaces input className/style. Symbols and
+non-enumerable props are not preserved. Its `.properties` is a ReadonlySet in TypeScript, but the
+runtime Set remains mutable. Engine functions/types are not consumer APIs. Typography, text colour
+and pseudo-state utilities remain excluded; use Text/Heading or `vars`.
 
 `cx` joins non-empty trimmed string tokens in order and skips false/null/undefined. It does not
 promise deduplication. `pxToRem(px, base=16)` returns a rem string.
@@ -965,25 +946,26 @@ these recipes work on consumer-owned markup, including the limited IconButton si
 | `kbdRecipe`        | retain   | No variant keys. Keyboard chip presentation on owned kbd markup.                                                                                                                                                      |
 | `proseRecipe`      | retain   | No variant keys. Long-form scope affects ordinary caller-owned descendant markup; requires no private React anatomy.                                                                                                  |
 
-`BlockquoteRecipeVariants`, `ButtonRecipeVariants`, `CodeRecipeVariants`,
-`IconButtonRecipeVariants`, `IconRecipeVariants`, `KbdRecipeVariants`, `LinkRecipeVariants`,
-`ProseRecipeVariants`, `TextInputRecipeVariants` and `TextRecipeVariants` each retain the matching
-selection annotation. The no-variant types express that no variants are supported; className remains
-composition input. Generators keep a new recipe private until an independent use is recorded.
+`ButtonRecipeVariants`, `CodeRecipeVariants`, `IconButtonRecipeVariants`, `IconRecipeVariants`,
+`LinkRecipeVariants`, `TextInputRecipeVariants` and `TextRecipeVariants` each retain the matching
+selection annotation. Recipes with no selectable variants (`blockquoteRecipe`, `kbdRecipe`,
+`proseRecipe`) do not export empty `*RecipeVariants` types. Generators keep a new recipe private
+until an independent use is recorded.
 
 ## Theme authoring and bundled-theme contracts
 
-Retain every individually listed theme export for authored themes, typed semantic styling and useful
-generation failures. #715 owns redesign of authoring and bundled-theme locations. #716 owns token
+Retain only the theme 1.0 allowlist above. Spacing/type catalogues, radius helpers,
+`getThemeClassName`, and theme-input helper types stay package-private until a concrete consumer use
+lands in a minor. #715 owns redesign of authoring and bundled-theme locations. #716 owns token
 taxonomy. Record the existing contracts here without expanding this PR into those projects.
 
-`defineTheme(ThemeInput | ExtendingThemeInput)` is pure/Node-compatible and returns complete static
-CSS. A fresh ThemeInput requires name and color.accent; ExtendingThemeInput requires name/extends
-and inherits omitted values. Names are validated kebab-case through getThemeClassName and generate
-`luke-ui-theme-${name}`. Theme inheritance merges per-role/per-mode values, never the identity name.
-Cycles fail. ColorInput accepts a string or partial light/dark pair. Supported source formats are
-hex or non-alpha OKLCH, except backdrop is verbatim CSS and may have alpha. A single accent is
-adapted for each mode; explicit authored mode colours remain distinct.
+`defineTheme` is pure/Node-compatible and returns complete static CSS. It still accepts extending
+themes at runtime; `ExtendingThemeInput` is not a named public export. A fresh ThemeInput requires
+name and color.accent. Extending inputs require name/extends and inherit omitted values. Names are
+kebab-case and generate `luke-ui-theme-${name}`. Theme inheritance merges per-role/per-mode values,
+never the identity name. Cycles fail. Colour inputs accept a string or partial light/dark pair.
+Supported source formats are hex or non-alpha OKLCH, except backdrop is verbatim CSS and may have
+alpha. A single accent is adapted for each mode; explicit authored mode colours remain distinct.
 
 | Authoring section     | Meaningful defaults and retained choices                                                                                                                                                                                                                                                       |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -994,17 +976,14 @@ adapted for each mode; explicit authored mode colours remain distinct.
 | `typography`          | fontFamily inter (default), apple-system or dm-sans. Weight roles body=400, label=500, heading=600, emphasis=700 by default; each may be authored. Semantic styles/metric scale and code-family stack are fixed.                                                                               |
 | `extends`             | Inherits omitted colour/material/radius/typography keys from the base; outer name stays required. Both bundled `theme` exports are usable bases.                                                                                                                                               |
 
-`ThemeContrastError` exposes failures and optional inheritance. Each ThemeContrastFailure names
-foreground/background token paths, mode, achieved ratio and required ratio. ThemeInheritance names
-the chain and inherited/own colour paths. `ThemeGenerationError` exposes role, mode, bestAttempt and
-partial diagnostics when a family cannot satisfy generation. Their referenced structural types stay
-available through the exported class properties without separate compiler/diagnostic exports.
+`ThemeContrastError` exposes failures and optional inheritance on the class instance.
+`ThemeContrastFailure` and `ThemeInheritance` are not named public exports. `ThemeGenerationError`
+exposes role, mode, bestAttempt and partial diagnostics when a family cannot satisfy generation.
 
-`deriveConcentricRadius(inner,gap)` returns calc(inner + gap). `deriveNestedRadius(outer,gap)`
-returns max(0px, calc(outer - gap)). Both accept CSS strings, including semantic variables.
 `rootClassName` applies `luke-ui-theme luke-ui-reset`, a scoped reset plus base typography with no
-theme identity. Retain these concrete class names as the root contract. Bundled themeClassName and
-getThemeClassName apply identity only, with no compiler import required for class-only use.
+theme identity. Retain these concrete class names as the root contract. Bundled themes export
+`themeClassName` for multi-theme documents. Authored multi-theme identity via `getThemeClassName` is
+not part of the 1.0 public surface.
 
 Bundled stylesheet scopes combine `:where(:root)` and `.luke-ui-theme-paper` or
 `.luke-ui-theme-tactile`. Default mode follows prefers-color-scheme; data-color-mode=light/dark
@@ -1045,8 +1024,8 @@ example, `vars.color.foreground.danger.onSolid` is `var(--luke-color-foreground-
 
 Only color, depth and actionControlFinish vary by colour mode. Other token families belong to theme
 identity. All CSS variables are public through vars even though generation helpers and contract-tree
-types stay private. `spaceScale` names exactly the ten space leaves and rem values above.
-`typeStyles` names exactly the nine type styles; FontWeightRole names the four weight leaves. No raw
+types stay private. The ten space leaves and rem values above remain on `vars.space`. The nine type styles remain on
+`vars.font.*`. Package-private catalogues may mirror those keys for internals. No raw
 palette step, private metric step, generated class hash or component-owned custom property becomes
 public from its use in CSS.
 
@@ -1060,7 +1039,7 @@ public from its use in CSS.
 | `utilities` layer                                             | retain   | Highest normal-priority utility escape hatch.                                                                                           |
 | `@layer reset, base, recipes, utilities`                      | retain   | One combined initial order statement fixes normal cascade precedence. Important declarations reverse layer precedence according to CSS. |
 | `luke-ui-theme`, `luke-ui-reset`                              | retain   | Concrete scoped root classes returned together by rootClassName.                                                                        |
-| `luke-ui-theme-${name}`                                       | retain   | Authored and bundled theme identity scopes returned by getThemeClassName/themeClassName.                                                |
+| `luke-ui-theme-${name}`                                       | retain   | Theme identity scopes. Bundled themes export `themeClassName`; authored helpers stay private.                                           |
 | `data-color-mode=light/dark`                                  | retain   | Explicit theme mode selection.                                                                                                          |
 | `SelectIndicator[data-open]`                                  | retain   | Documented primitive indicator affordance for an app replacing the chevron.                                                             |
 | Generated classes and other undocumented DOM/state attributes | private  | No independent stability promise. Use documented props, recipes, vars and primitive parts.                                              |
@@ -1080,6 +1059,17 @@ export names internally; that does not publish them through the package map.
 | `loadingSpinnerRecipe`                                                 | private              | Couples geometry, animation and child overlay anatomy. Use LoadingSpinner.                                                                                |
 | `LoadingSpinnerRecipeVariants`                                         | private              | Follows private spinner recipe; use LoadingSpinnerProps to type consumer settings.                                                                        |
 | `visuallyHiddenRecipe`                                                 | private              | Hidden content semantics are covered by VisuallyHidden and elementType.                                                                                   |
+| `BlockquoteRecipeVariants`                                             | private              | No selectable variants; recipe alone is enough.                                                                                                           |
+| `KbdRecipeVariants`                                                    | private              | No selectable variants; recipe alone is enough.                                                                                                           |
+| `ProseRecipeVariants`                                                  | private              | No selectable variants; recipe alone is enough.                                                                                                           |
+| `@luke-ui/react/styles`                                                | private/absent       | Layout via Box; createSprinkles/SprinklesProps stay package-internal.                                                                                     |
+| `createSprinkles` / `SprinklesProps`                                   | private              | Package-internal utility runtime for Box and layout components.                                                                                           |
+| `getThemeClassName`                                                    | private              | Bundled themes export themeClassName; authored multi-theme helper deferred.                                                                               |
+| `spaceScale` / `SpaceStep` / `typeStyles` / `TypeStyle`                | private              | No concrete 1.0 consumer use beyond Box/Text internals.                                                                                                   |
+| `fontWeightRoles` / `FontWeightRole`                                   | private              | No concrete 1.0 consumer use.                                                                                                                             |
+| `deriveConcentricRadius` / `deriveNestedRadius`                        | private              | Docs show inline calc(); helpers deferred.                                                                                                                |
+| `ThemeContrastFailure` / `ThemeInheritance`                            | private              | Readable on ThemeContrastError properties without named exports.                                                                                          |
+| `ColorInput` / `ControlFinish` / `DepthLadder` / `ExtendingThemeInput` | private              | Nested under ThemeInput / defineTheme without named exports.                                                                                              |
 | `gridRecipe`                                                           | private              | Only establishes Grid's own display treatment; app markup can use display:grid.                                                                           |
 | `GridRecipeVariants`                                                   | private              | Follows the private display-only recipe; use GridProps.                                                                                                   |
 | `aspectRatioRecipe`                                                    | private              | Depends on direct media-child rules. Use AspectRatio.                                                                                                     |
@@ -1116,8 +1106,8 @@ The existing `@luke-ui/rainbow-sprinkles` support package is a runtime dependenc
 
 ## Completion evidence and deferred owners
 
-The current map has explicit per-symbol decisions for all 44 JavaScript entrypoints and all 214
-symbol occurrences, plus each of the five static/map entrypoints. Component/primitive tables cover
+The current map has explicit per-symbol decisions for the retained JavaScript entrypoints after
+removing `@luke-ui/react/styles`, plus each of the five static/map entrypoints. Component/primitive tables cover
 their own props, meaningful defaults, selection/text/open/loading state, variants, slots, anatomy,
 refs/root ownership, element choice and rendering seams. Styles, theme exports, every finite token
 leaf family, concrete CSS-variable naming, cascade/root names and asset paths have decisions. No

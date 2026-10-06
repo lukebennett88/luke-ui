@@ -1,4 +1,4 @@
-import { breakpoints } from '@luke-ui/react/styles';
+import { breakpoints } from '@luke-ui/react/theme';
 import { useSyncExternalStore } from 'react';
 
 const DOCS_SIDEBAR_BREAKPOINT = breakpoints.bp1024;

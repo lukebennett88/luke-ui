@@ -11,14 +11,9 @@ test('no rendered example applies a theme identity class', () => {
 	// `themeClassName` is the export name every per-theme entrypoint
 	// (`@luke-ui/react/themes/paper`, `@luke-ui/react/themes/tactile`) uses for its identity class,
 	// and `tactileThemeClassName`/`paperThemeClassName` are the aliases docs code imports it under.
-	// `getThemeClassName` derives one for an authored theme. A rendered example using any of them
-	// would establish its own identity and nest one inside the docs' own `<html>`-level identity.
-	const identityClassNames = [
-		'tactileThemeClassName',
-		'paperThemeClassName',
-		'themeClassName',
-		'getThemeClassName',
-	];
+	// A rendered example using any of them would establish its own identity and nest one inside the
+	// docs' own `<html>`-level identity.
+	const identityClassNames = ['tactileThemeClassName', 'paperThemeClassName', 'themeClassName'];
 
 	for (const file of findMdxFiles(allDocsContentDir)) {
 		const contents = readFileSync(file, 'utf8');

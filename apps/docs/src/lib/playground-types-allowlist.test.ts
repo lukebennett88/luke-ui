@@ -15,10 +15,15 @@ test('generated Monaco playground types omit styling-engine packages', () => {
 	expect(paths.some((path) => path.includes('vanilla-extract'))).toBe(false);
 	expect(paths.some((path) => path.includes('rainbow-sprinkles'))).toBe(false);
 
-	const stylesDeclaration = files['file:///node_modules/@luke-ui/react/dist/styles.d.ts'];
-	expect(stylesDeclaration).toBeTypeOf('string');
-	expect(stylesDeclaration).not.toMatch(/from ["']@vanilla-extract\//);
-	expect(stylesDeclaration).not.toMatch(/from ["']@luke-ui\/rainbow-sprinkles["']/);
+	const themeDeclaration = files['file:///node_modules/@luke-ui/react/dist/theme.d.ts'];
+	expect(themeDeclaration).toBeTypeOf('string');
+	expect(themeDeclaration).not.toMatch(/from ["']@vanilla-extract\//);
+	expect(themeDeclaration).not.toMatch(/from ["']@luke-ui\/rainbow-sprinkles["']/);
+
+	const boxDeclaration = files['file:///node_modules/@luke-ui/react/dist/box.d.ts'];
+	expect(boxDeclaration).toBeTypeOf('string');
+	expect(boxDeclaration).not.toMatch(/from ["']@vanilla-extract\//);
+	expect(boxDeclaration).not.toMatch(/from ["']@luke-ui\/rainbow-sprinkles["']/);
 
 	const utilitiesDeclaration = Object.entries(files).find(([path]) => {
 		return /\/@luke-ui\/react\/dist\/utilities\.css[^/]*\.d\.ts$/.test(path);

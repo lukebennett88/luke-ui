@@ -5,8 +5,8 @@ import { Cluster } from '@luke-ui/react/cluster';
 import { Container } from '@luke-ui/react/container';
 import { Grid } from '@luke-ui/react/grid';
 import { Stack } from '@luke-ui/react/stack';
-import { createSprinkles } from '@luke-ui/react/styles';
 import { vars } from '@luke-ui/react/theme';
+import { createSprinkles } from '../styles/utilities.css.js';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import {

@@ -2,7 +2,7 @@
  * Fixed minimum container inline sizes in CSS pixels.
  *
  * Luke UI responsive props use these thresholds against the nearest size container. Import
- * `breakpoints` from `@luke-ui/react/styles` when authoring your own `@container` queries so custom
+ * `breakpoints` from `@luke-ui/react/theme` when authoring your own `@container` queries so custom
  * CSS tracks the same sizes. Values stay in TypeScript because container-query conditions cannot
  * use custom properties, and they are not themeable.
  */

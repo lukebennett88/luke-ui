@@ -3,7 +3,7 @@ import { Em } from '@luke-ui/react/em';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
-import { typeStyles } from '@luke-ui/react/theme';
+import { typeStyles } from '../../theme/type-styles.js';
 import type { CSSProperties } from 'react';
 import { Menu, MenuItem } from 'react-aria-components/Menu';
 import { expect, test } from 'vite-plus/test';

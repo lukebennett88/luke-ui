@@ -16,16 +16,18 @@ whatever the source module happens to export.
 Generated class names, Vanilla Extract types, and any DOM structure or state attribute that a guide
 does not document are private.
 
-| Subpath                                                        | Holds                                                                                        |
-| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `@luke-ui/react/<component>`                                   | A high-level component, its props type, and the companion exports it needs                   |
-| `@luke-ui/react/primitives/<name>`                             | Parts for composing a variant of a component                                                 |
-| `@luke-ui/react/styles`                                        | Layout utilities                                                                             |
-| `@luke-ui/react/theme`                                         | Theme authoring and semantic variables                                                       |
-| `@luke-ui/react/themes/*`                                      | Bundled themes, until [#715](https://github.com/lukebennett88/luke-ui/issues/715) moves them |
-| `@luke-ui/react/utils`                                         | Helpers for composing Luke UI output with other props                                        |
-| `@luke-ui/react/provider`                                      | The application `Provider`                                                                   |
-| `stylesheet.css`, `spritesheet.svg`, `themes/*/stylesheet.css` | Static assets                                                                                |
+| Subpath                                                        | Holds                                                                                                 |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `@luke-ui/react/<component>`                                   | A high-level component, its props type, and the companion exports it needs                            |
+| `@luke-ui/react/primitives/<name>`                             | Parts for composing a variant of a component                                                          |
+| `@luke-ui/react/theme`                                         | `breakpoints`, `defineTheme`, `ThemeInput`, `rootClassName`, `ThemeContrastError`, `ThemeGenerationError`, `vars` |
+| `@luke-ui/react/themes/*`                                      | Bundled `theme` and `themeClassName`, until [#715](https://github.com/lukebennett88/luke-ui/issues/715) moves them |
+| `@luke-ui/react/utils`                                         | Helpers for composing Luke UI output with other props                                                 |
+| `@luke-ui/react/provider`                                      | The application `Provider`                                                                            |
+| `stylesheet.css`, `spritesheet.svg`, `themes/*/stylesheet.css` | Static assets                                                                                         |
+
+There is no `@luke-ui/react/styles` subpath. Layout utilities stay package-internal; consumers use
+`Box` and the other layout components.
 
 ## What earns an export
 
@@ -42,8 +44,9 @@ component need, not on what a sibling component or React Aria exposes.
 | Recipe    | An app would style an element it owns without the component, and the recipe works on that element alone. A recipe that needs the component's private anatomy, internal hooks, or undocumented state attributes stays private. |
 | Utility   | Consumers need it to combine Luke UI output with their own props.                                                                                                                                                             |
 
-Export a public recipe, and the `*RecipeVariants` type derived from it, from the entrypoint of the
-component or primitive that owns it. [STYLING.md](STYLING.md#recipes) covers recipe authoring.
+Export a public recipe from the entrypoint of the component or primitive that owns it. Export the
+matching `*RecipeVariants` type only when the recipe has selectable variants. Do not export an empty
+variants type for naming symmetry. [STYLING.md](STYLING.md#recipes) covers recipe authoring.
 
 ## Composition props
 

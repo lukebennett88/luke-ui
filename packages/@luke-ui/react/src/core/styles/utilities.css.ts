@@ -264,7 +264,7 @@ type SprinklesPropsShape = {
 };
 
 /**
- * Layout and appearance props accepted by `createSprinkles` and `Box`. Owned by Luke UI so public
+ * Layout and appearance props accepted by `createSprinkles` and `Box`. Package-internal so public
  * declarations do not require a styling-engine package for type checking.
  */
 export type SprinklesProps = Prettify<SprinklesPropsShape>;
@@ -275,9 +275,10 @@ type CreateSprinklesResult<Props extends object> = {
 } & Omit<Props, keyof SprinklesProps | 'className' | 'style'>;
 
 /**
- * Internal `createSprinkles` contract. `properties` is read-only in TypeScript; the runtime `Set`
- * is still mutable. Own enumerable string-keyed non-utility props pass through. Generated
- * `className` and `style` replace input keys of those names.
+ * Package-internal sprinkles contract used by `Box` and layout components. `properties` is
+ * read-only in TypeScript; the runtime `Set` is still mutable. Own enumerable string-keyed
+ * non-utility props pass through. Generated `className` and `style` replace input keys of those
+ * names.
  */
 type CreateSprinkles = {
 	<Props extends SprinklesProps>(props: Props): CreateSprinklesResult<Props>;

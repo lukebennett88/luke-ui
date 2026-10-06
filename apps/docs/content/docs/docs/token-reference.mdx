@@ -52,9 +52,9 @@ When one rounded surface sits inside another, derive the outer radius from the i
 space between them, usually the wrapper's padding. This keeps their corners concentric.
 
 ```tsx
-import { deriveConcentricRadius, vars } from '@luke-ui/react/theme';
+import { vars } from '@luke-ui/react/theme';
 
-const wrapperRadius = deriveConcentricRadius(vars.radius.control, vars.space.sp8);
+const wrapperRadius = `calc(${vars.radius.control} + ${vars.space.sp8})`;
 ```
 
 ### Depth

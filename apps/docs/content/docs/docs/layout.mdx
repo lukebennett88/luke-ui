@@ -38,15 +38,12 @@ import { Box } from '@luke-ui/react/box';
 ```
 
 Use semantic HTML when no layout properties are needed. Box is a layout tool, not a replacement for
-every element. Use `createSprinkles` from `@luke-ui/react/styles` when another application-owned
-element needs the same responsive layout properties without wrapping it in a `Box`.
-`createSprinkles` passes through its own enumerable string-keyed non-utility props and replaces any
-input `className` or `style` with the generated values.
+every element.
 
 ## Responsive values
 
-Properties passed to `Box` and Sprinkles accept either a direct value or an object keyed by
-breakpoint. Layout utility props exposed by layout components accept the same responsive form.
+Properties passed to `Box` and the other layout components accept either a direct value or an object
+keyed by breakpoint.
 
 Responsive values resolve against the nearest ancestor size container. Luke UI uses the document
 root as the fallback. Use `Container` when descendants should respond to a nearer content area.
@@ -75,7 +72,7 @@ cascade up from `initial`, so specify only the points where the layout changes. 
 `undefined` at a breakpoint mean the same as leaving it out. They do not reset the property. To
 change the value at a breakpoint, pass the new value, such as `'0'` for spacing.
 
-Import `breakpoints` from `@luke-ui/react/styles` when you author `@container` queries against the
+Import `breakpoints` from `@luke-ui/react/theme` when you author `@container` queries against the
 same thresholds Luke UI responsive props use.
 
 <ExampleBlock src="layout/breakpoints" title="Layout: Shared breakpoints" />

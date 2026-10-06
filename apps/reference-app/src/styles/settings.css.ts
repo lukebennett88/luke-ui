@@ -1,4 +1,4 @@
-import { breakpoints } from '@luke-ui/react/styles';
+import { breakpoints } from '@luke-ui/react/theme';
 import { vars } from '@luke-ui/react/theme';
 import { pxToRem } from '@luke-ui/react/utils';
 import { style } from '@vanilla-extract/css';

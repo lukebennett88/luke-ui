@@ -67,10 +67,6 @@ Each bundled theme exports its identity class as `themeClassName` from its own e
 example `@luke-ui/react/themes/tactile`. Apply it to `<html>`, or to the root of the subtree that
 needs it.
 
-An authored theme gets its class the same way, from `getThemeClassName` in `@luke-ui/react/theme`.
-Pass the `name` your `ThemeInput` declares. It returns the same class the generated stylesheet
-selects on, and throws when the name is not kebab-case.
-
 <SourceCodeBlock src="theming/multi-theme-app" />
 
 Theme identities do not nest. Never place one identity class inside another identity's subtree. A

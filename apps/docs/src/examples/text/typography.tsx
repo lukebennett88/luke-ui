@@ -1,8 +1,20 @@
 import { Box } from '@luke-ui/react/box';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { typeStyles, vars } from '@luke-ui/react/theme';
+import { vars } from '@luke-ui/react/theme';
 import { Fragment } from 'react';
+
+const typographyStyles = [
+	'caption',
+	'label',
+	'body',
+	'lead',
+	'heading4',
+	'heading3',
+	'heading2',
+	'heading1',
+	'display',
+] as const;
 
 export default () => {
 	return (
@@ -14,7 +26,7 @@ export default () => {
 				gap="sp12"
 				style={{ gridTemplateColumns: 'max-content minmax(0, 1fr)' }}
 			>
-				{typeStyles.map((typography) => (
+				{typographyStyles.map((typography) => (
 					<Fragment key={typography}>
 						<Text color="secondary" elementType="dt" typography="caption">
 							{typography}

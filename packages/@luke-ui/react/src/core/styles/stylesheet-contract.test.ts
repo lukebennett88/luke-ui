@@ -64,12 +64,12 @@ test('builds the public stylesheet with the retained layer contract', async () =
 	const stylesheet = await readPublicStylesheet();
 	const icon = await import('@luke-ui/react/icon');
 	const text = await import('@luke-ui/react/text');
-	const styles = await import('@luke-ui/react/styles');
+	const { createSprinkles } = await import('./utilities.css.js');
 	const recipeClasses = [...icon.iconRecipe({ size: 'medium' }).split(' ')];
 	const textClassesByTypography = Object.fromEntries(
 		typeStyles.map((typography) => [typography, text.textRecipe({ typography }).split(' ')]),
 	) as TextClassesByTypography;
-	const utilityClasses = styles.createSprinkles({ display: 'grid' }).className?.split(' ') ?? [];
+	const utilityClasses = createSprinkles({ display: 'grid' }).className?.split(' ') ?? [];
 	const lineClampClasses: LineClampClasses = {
 		numeric: Object.fromEntries(
 			numericLineClampVariants.map((lineClamp) => [

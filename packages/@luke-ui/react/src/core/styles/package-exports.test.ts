@@ -16,6 +16,7 @@ const absentExportPaths = [
 	'./recipes',
 	'./heading-context',
 	'./icon-size-context',
+	'./styles',
 	'./styles/recipe-engine',
 	'./stylesheet',
 	'./primitives',
@@ -27,7 +28,6 @@ const presentExportPaths = {
 	'./theme': './dist/theme.js',
 	'./themes/tactile': './dist/themes/tactile.js',
 	'./themes/paper': './dist/themes/paper.js',
-	'./styles': './dist/styles.js',
 	'./stylesheet.css': './dist/stylesheet.css',
 	'./primitives/button': './dist/primitives/button.js',
 	'./primitives/checkbox': './dist/primitives/checkbox.js',
@@ -71,15 +71,9 @@ test('declares @luke-ui/rainbow-sprinkles as a runtime dependency', () => {
 });
 
 test('sprinkles runtime imports published rainbow-sprinkles create-runtime-fn', async () => {
-	const source = await readFile(new URL('../../../dist/styles.js', import.meta.url), 'utf8');
-	const chunkMatch = /from ["'](\.\/utilities\.css-[^"']+)["']/.exec(source);
-	expect(chunkMatch?.[1]).toBeTruthy();
-	const utilities = await readFile(
-		new URL(`../../../dist/${chunkMatch![1]!}`, import.meta.url),
-		'utf8',
-	);
-	expect(utilities).toContain('@luke-ui/rainbow-sprinkles/create-runtime-fn');
-	expect(utilities).not.toContain('#rainbow-sprinkles-runtime');
+	const source = await readFile(new URL('../../../dist/box.js', import.meta.url), 'utf8');
+	expect(source).toContain('@luke-ui/rainbow-sprinkles/create-runtime-fn');
+	expect(source).not.toContain('#rainbow-sprinkles-runtime');
 });
 
 test('public JS/TS export declaration closures do not import styling engines', async () => {
@@ -152,7 +146,7 @@ test('resolves nested and parent-relative declaration imports from the importing
 	expect(resolveDeclarationImport('themes/paper.d.ts', '../define-theme.js')).toBe(
 		'define-theme.d.ts',
 	);
-	expect(resolveDeclarationImport('styles.d.ts', './utilities.css.js')).toBe('utilities.css.d.ts');
+	expect(resolveDeclarationImport('box.d.ts', './utilities.css.js')).toBe('utilities.css.d.ts');
 	expect(resolveDeclarationImport('themes/paper.d.ts', './tokens.js')).toBe('themes/tokens.d.ts');
 });
 
@@ -161,15 +155,27 @@ test('does not expose the private combobox styling recipe from the primitive ent
 	expect('comboboxRecipe' in combobox).toBe(false);
 });
 
-test('exports fixed breakpoints from the styles entry', async () => {
-	const styles = await import('@luke-ui/react/styles');
-	expect(styles.breakpoints).toEqual({
+test('exports fixed breakpoints from the theme entry', async () => {
+	const theme = await import('@luke-ui/react/theme');
+	expect(theme.breakpoints).toEqual({
 		bp640: 640,
 		bp768: 768,
 		bp1024: 1024,
 		bp1280: 1280,
 		bp1536: 1536,
 	});
+});
+
+test('theme entry publishes only the 1.0 allowlist', async () => {
+	const theme = await import('@luke-ui/react/theme');
+	expect(Object.keys(theme).sort()).toEqual([
+		'ThemeContrastError',
+		'ThemeGenerationError',
+		'breakpoints',
+		'defineTheme',
+		'rootClassName',
+		'vars',
+	]);
 });
 
 /** JS package exports that publish TypeScript declarations beside the runtime file. */
