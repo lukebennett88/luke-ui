@@ -595,8 +595,8 @@ Entrypoint: **retain**.
 
 ## Static entrypoints and package boundary
 
-These are the five non-JavaScript entries in `package.json`. Together with the 44 JavaScript entries
-above, they account for the whole exports map. The JavaScript inventory contains 214 symbol
+These are the five non-JavaScript entries in `package.json`. Together with the 43 JavaScript entries
+above, they account for the whole exports map. The JavaScript inventory contains 195 symbol
 occurrences, including intentional field/primitive re-exports.
 
 | Public path                                    | Decision | Independent consumer use and contract                                                                                                                          |
@@ -1107,12 +1107,12 @@ The existing `@luke-ui/rainbow-sprinkles` support package is a runtime dependenc
 
 ## Completion evidence and deferred owners
 
-The current map has explicit per-symbol decisions for the retained JavaScript entrypoints after
-removing `@luke-ui/react/styles`, plus each of the five static/map entrypoints. Component/primitive
+The current map has explicit per-symbol decisions for all 43 JavaScript entrypoints and all 195
+exported symbol occurrences, plus each of the five static/map entrypoints. Component/primitive
 tables cover their own props, meaningful defaults, selection/text/open/loading state, variants,
-slots, anatomy, refs/root ownership, element choice and rendering seams. Styles, theme exports,
-every finite token leaf family, concrete CSS-variable naming, cascade/root names and asset paths
-have decisions. No additional speculative export is required to complete the inventory.
+slots, anatomy, refs/root ownership, element choice and rendering seams. Theme exports, every finite
+token leaf family, concrete CSS-variable naming, cascade/root names and asset paths have decisions.
+No additional speculative export is required to complete the inventory.
 
 #712 and #714 remain settled input. #715 owns future theme authoring/package design, #716 owns token
 taxonomy, #717 owns global stylesheet/reset/layers and #756 owns VisuallyHidden's primitive
