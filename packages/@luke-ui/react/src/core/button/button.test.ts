@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import { assertType, test } from 'vite-plus/test';
 import type { ButtonProps } from './button.js';
 
@@ -7,7 +8,7 @@ test('Button supports ref and rejects unsupported prop combinations', () => {
 		children: (renderProps) => (renderProps.isPressed ? 'Pressed' : 'Idle'),
 	});
 	// @ts-expect-error — high-level Button omits RAC render; use function children instead
-	assertType<ButtonProps>({ render: () => <button type="button">Custom</button> });
+	assertType<ButtonProps>({ render: (props) => createElement('button', props) });
 	// @ts-expect-error — text Buttons wrap and do not use control sizing
 	assertType<ButtonProps>({ appearance: 'text', size: 'small' });
 	// @ts-expect-error — accent is not a consumer-selectable tone
