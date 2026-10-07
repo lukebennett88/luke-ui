@@ -1,4 +1,5 @@
-import type { HTMLAttributes, JSX, ReactElement, Ref, RefObject } from 'react';
+import type { HTMLAttributes, JSX, ReactElement, Ref } from 'react';
+import type { UseRenderRef } from '../use-render/use-render.js';
 import type { DistributiveOmit } from './distributive-omit.js';
 
 /** Structural elements a Box-like component may render. */
@@ -23,9 +24,6 @@ type BoxLikeElementType = keyof Pick<
 	| 'ul'
 >;
 
-/** Ref shape a Box-like component hands to `renderRoot`, spreadable onto a concrete element. */
-export type BoxLikeRef = NonNullable<Exclude<Ref<HTMLElement>, RefObject<HTMLElement | null>>>;
-
 /** Props a Box-like component accepts when it renders a structural element itself. */
 export interface BoxLikeElementProps extends HTMLAttributes<HTMLElement> {
 	/**
@@ -49,7 +47,7 @@ interface BoxLikePresentationProps extends Pick<
 
 /** Props a Box-like component hands to a caller-owned `renderRoot` element. */
 type BoxLikeResolvedRenderProps = DistributiveOmit<BoxLikePresentationProps, 'ref'> & {
-	ref: BoxLikeRef;
+	ref: UseRenderRef;
 };
 
 /** Props a Box-like component accepts when a caller owns the rendered element. */

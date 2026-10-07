@@ -4,25 +4,50 @@ description: Hide content visually and keep it available to assistive technology
 source: packages/@luke-ui/react/src/exports/visually-hidden.ts
 ---
 
-Use `VisuallyHidden` to hide content from sight. The content stays in the accessibility tree and the
-document flow. Screen readers still announce it, and `aria-labelledby` or `aria-describedby` can
-reference it. Unlike `display: none` or the `hidden` attribute, `VisuallyHidden` does not remove the
-content from assistive technology.
+`VisuallyHidden` hides content visually while keeping it available to assistive technology. Use it
+for text labels behind icon-only controls, extra context for links, or status messages in live
+regions. The content can still be referenced by `aria-labelledby` or `aria-describedby`.
 
-Reach for it when the interface conveys meaning visually but needs a text equivalent. Examples
-include a label behind an icon-only control, extra context for a link, and a status message inside a
-live region.
+It renders a `span` by default.
 
 <ExampleBlock src="visually-hidden/basic" title="Visually Hidden: Basic" />
 
 ## Render a different element
 
-By default `VisuallyHidden` renders a `span`. Pass `elementType` to render a different element, such
-as a semantic heading, `label`, or list item. `VisuallyHidden` keeps the hidden styles on that
-element.
+Pass `elementType` to choose a supported semantic element without changing the hiding treatment.
 
 ```tsx
 <VisuallyHidden elementType="h2">Search results</VisuallyHidden>
+```
+
+## Own the rendered element
+
+Use `renderRoot` when the callback must own the element and its DOM attributes. The callback
+receives resolved `children`, `className`, `style`, focus-within handlers, and a callback `ref` as
+its first argument. Its second argument is an empty state object. Put element-specific attributes on
+the element the callback returns.
+
+`isFocusable` removes the visually-hidden treatment while focus is within the root or a descendant.
+It does not make anything focusable. Pair it with an element that is already focusable, such as a
+skip link.
+
+Do not combine `renderRoot` with `elementType`.
+
+<ExampleBlock src="visually-hidden/skip-link" title="Visually Hidden: Skip link" />
+
+## Static escape hatch
+
+Use `visuallyHiddenStyle` from `@luke-ui/react/visually-hidden` when application-owned markup must
+stay visually hidden without the component. It covers the static case only. Prefer
+`<VisuallyHidden isFocusable>` when hidden content needs to reveal on focus.
+
+```tsx
+import { visuallyHiddenStyle } from '@luke-ui/react/visually-hidden';
+
+<label>
+	<input type="checkbox" />
+	<span style={visuallyHiddenStyle}>Accept terms</span>
+</label>;
 ```
 
 ## API

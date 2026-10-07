@@ -86,7 +86,7 @@
 			rangeStrategy: 'replace',
 		},
 		{
-			matchPackageNames: ['@react-aria/**', 'react-aria-components'],
+			matchPackageNames: ['@react-aria/**', 'react-aria', 'react-aria-components'],
 			groupName: 'react-aria',
 		},
 		{
@@ -166,6 +166,7 @@
 				'@vanilla-extract/recipes',
 				'csstype',
 				'react',
+				'react-aria',
 				'react-aria-components',
 				'react-dom',
 				'spin-doctor',

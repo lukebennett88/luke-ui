@@ -9,7 +9,15 @@ See [Getting started](/docs/installation).
 
 <ExampleBlock src="text/basic" title="Text: Basic" />
 
-Pass `slot` to fill a named text slot defined by a React Aria parent.
+Pass `slot` to fill a named text slot defined by a React Aria parent. Pass `slot={null}` to opt out
+of surrounding slotted text context.
+
+## Visually hidden
+
+Set `isVisuallyHidden` to hide the text while keeping it available to assistive technology. Text
+keeps its React Aria Text root. There is no extra wrapper. Use
+[`VisuallyHidden`](/components/layout/visually-hidden) directly when the content is not typography
+text, or when it must reveal on focus.
 
 ## Element type
 

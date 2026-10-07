@@ -5,7 +5,6 @@ import type { FontWeightRole, TypeStyle } from '../../theme/type-styles.js';
 import { fontWeightRoles, typeStyles } from '../../theme/type-styles.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
-import { visuallyHiddenStyle } from '../visually-hidden/recipe.css.js';
 
 const lineClampNone = {} satisfies ComplexStyleRule;
 export const textLineHeight = createVar();
@@ -131,7 +130,6 @@ export const textRecipe = recipe({
 	defaultVariants: {
 		fontStyle: 'default',
 		fontVariantNumeric: 'default',
-		isVisuallyHidden: false,
 		lineClamp: false,
 		shouldDisableTrim: false,
 		shouldInheritFont: false,
@@ -142,10 +140,6 @@ export const textRecipe = recipe({
 		typography: 'body',
 	},
 	variants: {
-		isVisuallyHidden: {
-			false: {},
-			true: visuallyHiddenStyle,
-		},
 		textWrap: {
 			balance: { textWrap: 'balance' },
 			pretty: { textWrap: 'pretty' },

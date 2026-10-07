@@ -351,19 +351,14 @@ test('keeps the active result within the visible list while navigating and wraps
 
 	await userEvent.keyboard('{ArrowDown}'.repeat(10));
 	const option = page.getByRole('menuitem').nth(10).element();
-	const listBounds = list.getBoundingClientRect();
-	const optionBounds = option.getBoundingClientRect();
 	expect(activeDescendantId(input)).toBe(option.id);
-	expect(optionBounds.top).toBeGreaterThanOrEqual(listBounds.top);
-	expect(optionBounds.bottom).toBeLessThanOrEqual(listBounds.bottom);
+	await expectResultWithinList(option, list);
 	await expect.element(input).toHaveFocus();
 
 	await userEvent.keyboard('{ArrowUp}');
 	const previousElement = page.getByRole('menuitem').nth(9).element();
 	expect(activeDescendantId(input)).toBe(previousElement.id);
-	const previous = previousElement.getBoundingClientRect();
-	expect(previous.top).toBeGreaterThanOrEqual(listBounds.top);
-	expect(previous.bottom).toBeLessThanOrEqual(listBounds.bottom);
+	await expectResultWithinList(previousElement, list);
 	await expect.element(input).toHaveFocus();
 
 	// Wrap upward past the first item to the last.
@@ -373,17 +368,24 @@ test('keeps the active result within the visible list while navigating and wraps
 		.nth(MANY_RESULTS_COUNT - 1)
 		.element();
 	expect(activeDescendantId(input)).toBe(last.id);
-	const lastBounds = last.getBoundingClientRect();
-	expect(lastBounds.top).toBeGreaterThanOrEqual(listBounds.top);
-	expect(lastBounds.bottom).toBeLessThanOrEqual(listBounds.bottom);
+	await expectResultWithinList(last, list);
 	await expect.element(input).toHaveFocus();
 
 	// Wrap downward past the last item back to the first.
 	await userEvent.keyboard('{ArrowDown}');
 	const first = page.getByRole('menuitem').nth(0).element();
 	expect(activeDescendantId(input)).toBe(first.id);
-	const firstBounds = first.getBoundingClientRect();
-	expect(firstBounds.top).toBeGreaterThanOrEqual(listBounds.top);
-	expect(firstBounds.bottom).toBeLessThanOrEqual(listBounds.bottom);
+	await expectResultWithinList(first, list);
 	await expect.element(input).toHaveFocus();
 });
+
+async function expectResultWithinList(result: Element, list: Element) {
+	// The list expands during opening, so compare current bounds on each poll.
+	await expect
+		.poll(() => {
+			const listBounds = list.getBoundingClientRect();
+			const resultBounds = result.getBoundingClientRect();
+			return resultBounds.top >= listBounds.top && resultBounds.bottom <= listBounds.bottom;
+		})
+		.toBe(true);
+}

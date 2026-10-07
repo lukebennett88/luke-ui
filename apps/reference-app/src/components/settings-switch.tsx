@@ -16,8 +16,6 @@ export function SettingsSwitch({
 	label: string;
 	onChange: (checked: boolean) => void;
 }) {
-	// Name the control with aria-label. Luke UI VisuallyHidden is RAC Text-based and
-	// throws inside SwitchField without a description/errorMessage slot.
 	return (
 		<SwitchField
 			aria-describedby={ariaDescribedBy}
