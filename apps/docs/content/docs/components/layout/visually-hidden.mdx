@@ -37,8 +37,8 @@ Do not combine `renderRoot` with `elementType`.
 
 ## Static escape hatch
 
-Export `visuallyHiddenStyle` from `@luke-ui/react/visually-hidden` when application-owned markup
-must stay visually hidden without the component. It covers the static case only. Prefer
+Use `visuallyHiddenStyle` from `@luke-ui/react/visually-hidden` when application-owned markup must
+stay visually hidden without the component. It covers the static case only. Prefer
 `<VisuallyHidden isFocusable>` when hidden content needs to reveal on focus.
 
 ```tsx

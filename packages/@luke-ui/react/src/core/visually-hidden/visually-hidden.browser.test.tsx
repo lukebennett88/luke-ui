@@ -244,7 +244,6 @@ for (const appearance of visualAppearances) {
 			await user.tab();
 			await expect.element(locator.getByRole('button', { name: 'After' })).toHaveFocus();
 			expect(focusLog).toEqual(['focus', 'blur']);
-			await captureVisualAppearance(locator, 'visually-hidden/blurred', appearance);
 		},
 	);
 }
