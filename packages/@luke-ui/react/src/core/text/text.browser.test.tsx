@@ -81,6 +81,25 @@ test('Text isVisuallyHidden keeps slot null opt-out without an extra wrapper', (
 	expect(container.childElementCount).toBe(1);
 });
 
+test('Text isVisuallyHidden hides visually while keeping accessible text', async () => {
+	const { locator, container } = render(
+		<button type="button">
+			<Text isVisuallyHidden style={{ color: 'rgb(1, 2, 3)' }}>
+				Save changes
+			</Text>
+		</button>,
+	);
+	const label = locator.getByText('Save changes').element();
+
+	expect(label.tagName).toBe('SPAN');
+	expect(container.firstElementChild).toBe(label.parentElement);
+	expect(label.style.position).toBe('absolute');
+	expect(label.style.overflow).toBe('hidden');
+	expect(label.style.clip).toBe('rect(1px, 1px, 1px, 1px)');
+	expect(label.style.color).toBe('rgb(1, 2, 3)');
+	await expect.element(locator.getByRole('button', { name: 'Save changes' })).toBeInTheDocument();
+});
+
 test('ordinary Text remains a single React Aria Text root', () => {
 	const { locator, container } = render(<Text>Body copy</Text>);
 	const text = locator.getByText('Body copy').element();

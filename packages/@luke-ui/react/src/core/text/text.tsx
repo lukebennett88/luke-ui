@@ -1,10 +1,9 @@
 import { Text as RacText } from 'react-aria-components/Text';
-import { mergeProps } from '../../shared/utils/merge-props.js';
 import { typeStyleWeightRole } from '../../theme/type-styles.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import { VisuallyHidden } from '../visually-hidden/visually-hidden.js';
+import { visuallyHiddenStyle } from '../visually-hidden/visually-hidden-style.js';
 import type { TextRecipeVariants } from './recipe.css.js';
 import { textRecipe } from './recipe.css.js';
 
@@ -157,27 +156,6 @@ export function Text(props: TextProps) {
 		typography: resolvedTypography,
 	});
 
-	if (isVisuallyHidden) {
-		return (
-			<VisuallyHidden
-				className={recipeClassName}
-				renderRoot={(domProps) => {
-					return (
-						<RacText
-							{...mergeProps(racProps, domProps)}
-							elementType={elementType}
-							// @ts-expect-error — RAC TextProps omits null, which opts out of slotted context at runtime.
-							slot={slot}
-						/>
-					);
-				}}
-				style={style}
-			>
-				{children}
-			</VisuallyHidden>
-		);
-	}
-
 	return (
 		<RacText
 			{...racProps}
@@ -185,7 +163,7 @@ export function Text(props: TextProps) {
 			elementType={elementType}
 			// @ts-expect-error — RAC TextProps omits null, which opts out of slotted context at runtime.
 			slot={slot}
-			style={style}
+			style={isVisuallyHidden ? { ...visuallyHiddenStyle, ...style } : style}
 		>
 			{children}
 		</RacText>
