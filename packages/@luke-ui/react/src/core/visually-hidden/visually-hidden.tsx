@@ -1,5 +1,6 @@
 import type { CSSProperties, HTMLAttributes, JSX, ReactElement, ReactNode, Ref } from 'react';
 import { mergeProps } from '../../shared/utils/merge-props.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import type { UseRenderRef } from '../use-render/use-render.js';
 import { useRender } from '../use-render/use-render.js';
@@ -32,8 +33,13 @@ interface VisuallyHiddenBaseProps extends VisuallyHiddenPresentationProps {
 	ref?: Ref<HTMLElement>;
 }
 
+type _VisuallyHiddenElementOmit = DistributiveOmit<
+	HTMLAttributes<HTMLElement>,
+	'children' | 'className' | 'slot' | 'style'
+>;
+
 /** Props when `VisuallyHidden` renders a supported element itself. */
-interface VisuallyHiddenElementProps extends VisuallyHiddenBaseProps, HTMLAttributes<HTMLElement> {
+interface VisuallyHiddenElementProps extends _VisuallyHiddenElementOmit, VisuallyHiddenBaseProps {
 	/**
 	 * Chooses a supported semantic element.
 	 * @default 'span'

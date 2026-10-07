@@ -34,3 +34,8 @@ test('VisuallyHidden renderRoot and elementType are mutually exclusive', () => {
 	// @ts-expect-error — DOM attributes belong on the caller-owned element
 	assertType<VisuallyHiddenProps>({ id: 'root', renderRoot: () => createElement('a') });
 });
+
+test('VisuallyHidden does not expose slot', () => {
+	// @ts-expect-error — VisuallyHidden does not expose React Aria slot semantics
+	assertType<VisuallyHiddenProps>({ slot: 'label' });
+});

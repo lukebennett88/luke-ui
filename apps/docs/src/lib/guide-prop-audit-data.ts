@@ -347,6 +347,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'elementType',
 		'fontVariantNumeric',
 		'fontWeight',
+		'isVisuallyHidden',
 		'lineClamp',
 		'shouldDisableTrim',
 		'slot',
