@@ -1,4 +1,4 @@
-import type { CSSProperties, HTMLAttributes } from 'react';
+import type { CSSProperties, DOMAttributes } from 'react';
 import { useState } from 'react';
 import { useFocusWithin } from 'react-aria/useFocusWithin';
 import { visuallyHiddenStyle } from './visually-hidden-style.js';
@@ -15,7 +15,7 @@ interface UseVisuallyHiddenProps {
 
 interface UseVisuallyHiddenResult {
 	/** Props to spread onto the visually hidden root. */
-	visuallyHiddenProps: Pick<HTMLAttributes<HTMLElement>, 'onBlur' | 'onFocus'> & {
+	visuallyHiddenProps: Pick<DOMAttributes<Element>, 'onBlur' | 'onFocus'> & {
 		style: CSSProperties | undefined;
 	};
 }

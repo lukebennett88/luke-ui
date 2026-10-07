@@ -1,4 +1,12 @@
-import type { CSSProperties, HTMLAttributes, JSX, ReactElement, ReactNode, Ref } from 'react';
+import type {
+	CSSProperties,
+	DOMAttributes,
+	HTMLAttributes,
+	JSX,
+	ReactElement,
+	ReactNode,
+	Ref,
+} from 'react';
 import { mergeProps } from '../../shared/utils/merge-props.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -51,7 +59,7 @@ interface VisuallyHiddenElementProps extends _VisuallyHiddenElementOmit, Visuall
 
 /** Resolved props handed to a caller-owned `renderRoot` element. */
 interface VisuallyHiddenResolvedRenderProps
-	extends VisuallyHiddenPresentationProps, Pick<HTMLAttributes<HTMLElement>, 'onBlur' | 'onFocus'> {
+	extends VisuallyHiddenPresentationProps, Pick<DOMAttributes<Element>, 'onBlur' | 'onFocus'> {
 	ref: UseRenderRef;
 }
 
