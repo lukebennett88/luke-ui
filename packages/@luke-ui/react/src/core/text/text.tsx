@@ -8,72 +8,70 @@ import { VisuallyHidden } from '../visually-hidden/visually-hidden.js';
 import type { TextRecipeVariants } from './recipe.css.js';
 import { textRecipe } from './recipe.css.js';
 
-interface TextVariantProps extends NonNullable<TextRecipeVariants> {}
-
 interface TextStyleProps {
 	/**
 	 * Sets text colour.
 	 * @default 'primary'
 	 */
-	color?: TextVariantProps['color'];
+	color?: TextRecipeVariants['color'];
 	/**
 	 * Sets font style.
 	 * @default 'default'
 	 */
-	fontStyle?: TextVariantProps['fontStyle'];
+	fontStyle?: TextRecipeVariants['fontStyle'];
 	/**
 	 * Sets numeric glyph style.
 	 * @default 'default'
 	 */
-	fontVariantNumeric?: TextVariantProps['fontVariantNumeric'];
+	fontVariantNumeric?: TextRecipeVariants['fontVariantNumeric'];
 	/**
 	 * Sets the semantic font-weight role. When omitted, the selected typography style supplies its
 	 * weight.
 	 */
-	fontWeight?: TextVariantProps['fontWeight'];
+	fontWeight?: TextRecipeVariants['fontWeight'];
 	/**
 	 * Hides text visually while keeping it accessible.
 	 * @default false
 	 */
 	isVisuallyHidden?: boolean;
 	/** Clamps text lines. `true` clamps to 1 line; numeric values clamp to 1–5. */
-	lineClamp?: TextVariantProps['lineClamp'];
+	lineClamp?: TextRecipeVariants['lineClamp'];
 	/**
 	 * Turns cap-height trim on or off. When omitted, trimming is disabled for inline or unknown
 	 * element types. Line clamp always disables trim.
 	 */
-	shouldDisableTrim?: TextVariantProps['shouldDisableTrim'];
+	shouldDisableTrim?: TextRecipeVariants['shouldDisableTrim'];
 	/**
 	 * Makes text inherit its surrounding font and colour styles.
 	 * @default false
 	 */
-	shouldInheritFont?: TextVariantProps['shouldInheritFont'];
+	shouldInheritFont?: TextRecipeVariants['shouldInheritFont'];
 	/**
 	 * Sets text alignment.
 	 * @default 'start'
 	 */
-	textAlign?: TextVariantProps['textAlign'];
+	textAlign?: TextRecipeVariants['textAlign'];
 	/**
 	 * Sets text decoration.
 	 * @default 'none'
 	 */
-	textDecoration?: TextVariantProps['textDecoration'];
+	textDecoration?: TextRecipeVariants['textDecoration'];
 	/**
 	 * Sets text transform.
 	 * @default 'none'
 	 */
-	textTransform?: TextVariantProps['textTransform'];
+	textTransform?: TextRecipeVariants['textTransform'];
 	/**
 	 * Sets text wrapping behavior.
 	 * @default 'default'
 	 */
-	textWrap?: TextVariantProps['textWrap'];
+	textWrap?: TextRecipeVariants['textWrap'];
 	/**
 	 * Applies a complete typography style: family, size, weight, line height, letter spacing, and
 	 * trim.
 	 * @default 'body'
 	 */
-	typography?: TextVariantProps['typography'];
+	typography?: TextRecipeVariants['typography'];
 }
 
 type _TextOmit = DistributiveOmit<
@@ -90,19 +88,6 @@ interface _TextProps extends _TextOmit, TextStyleProps, DocumentedElementTypePro
 
 /** Props for the `Text` component. */
 export type TextProps = Prettify<_TextProps>;
-
-const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
-	'blockquote',
-	'div',
-	'h1',
-	'h2',
-	'h3',
-	'h4',
-	'h5',
-	'h6',
-	'p',
-	'pre',
-]);
 
 /**
  * Styled text with semantic typography styles and colour controls.
@@ -190,3 +175,16 @@ export function Text(props: TextProps) {
 		</RacText>
 	);
 }
+
+const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
+	'blockquote',
+	'div',
+	'h1',
+	'h2',
+	'h3',
+	'h4',
+	'h5',
+	'h6',
+	'p',
+	'pre',
+]);
