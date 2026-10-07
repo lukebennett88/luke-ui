@@ -6,6 +6,10 @@ import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-
 import type { Prettify } from '../types/prettify.js';
 import { useRender } from '../use-render/use-render.js';
 
+interface _BoxElementProps extends BoxLikeElementProps, SprinklesProps {}
+
+interface _BoxRenderProps extends BoxLikeRenderProps, SprinklesProps {}
+
 /** Props for `Box`. */
 export type BoxProps = Prettify<_BoxElementProps | _BoxRenderProps>;
 
@@ -16,17 +20,13 @@ export function Box(props: BoxProps): JSX.Element {
 	// Box if it sees one destructured or passed on.
 	const { children, className, elementType, renderRoot, style, ...restProps } = props;
 
-	const resolvedProps = renderRoot
-		? mergeProps(createSprinkles(retainSprinklesProps(restProps)), {
-				children,
-				className,
-				style,
-			})
-		: mergeProps(createSprinkles(omitRef(restProps)), {
-				children,
-				className,
-				style,
-			});
+	const sprinklesProps = renderRoot ? retainSprinklesProps(restProps) : restProps;
+
+	const resolvedProps = mergeProps(createSprinkles(sprinklesProps), {
+		children,
+		className,
+		style,
+	});
 
 	return useRender({
 		defaultElementType: 'div',
@@ -37,10 +37,6 @@ export function Box(props: BoxProps): JSX.Element {
 		state: {},
 	});
 }
-
-interface _BoxElementProps extends BoxLikeElementProps, SprinklesProps {}
-
-interface _BoxRenderProps extends BoxLikeRenderProps, SprinklesProps {}
 
 const sprinklesProperties: ReadonlySet<PropertyKey> = createSprinkles.properties;
 
@@ -70,9 +66,4 @@ function retainSprinklesProps<Props extends object>(props: Props): Props {
 	}
 
 	return nextProps as Props;
-}
-
-function omitRef<Props extends { ref?: unknown }>(props: Props): Omit<Props, 'ref'> {
-	const { ref: _ref, ...rest } = props;
-	return rest;
 }
