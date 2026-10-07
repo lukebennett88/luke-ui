@@ -1,6 +1,5 @@
 import type { CSSProperties, HTMLAttributes, JSX, ReactElement, ReactNode, Ref } from 'react';
 import { mergeProps } from '../../shared/utils/merge-props.js';
-import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import type { UseRenderRef } from '../use-render/use-render.js';
 import { useRender } from '../use-render/use-render.js';
@@ -18,6 +17,11 @@ interface VisuallyHiddenPresentationProps {
 	children?: ReactNode;
 	/** Class name on the stable owned root. Remains applied while focus visibility changes. */
 	className?: string;
+	/** Style on the stable owned root. Wins over the hiding styles when both apply. */
+	style?: CSSProperties;
+}
+
+interface VisuallyHiddenBaseProps extends VisuallyHiddenPresentationProps {
 	/**
 	 * When true, remove the visually-hidden treatment while focus is within the root or a
 	 * descendant. Does not make anything focusable.
@@ -26,15 +30,10 @@ interface VisuallyHiddenPresentationProps {
 	isFocusable?: boolean;
 	/** Ref to the rendered root. */
 	ref?: Ref<HTMLElement>;
-	/** Style on the stable owned root. Wins over the hiding styles when both apply. */
-	style?: CSSProperties;
 }
 
 /** Props when `VisuallyHidden` renders a supported element itself. */
-interface VisuallyHiddenElementProps
-	extends
-		DistributiveOmit<HTMLAttributes<HTMLElement>, 'children' | 'className' | 'style'>,
-		VisuallyHiddenPresentationProps {
+interface VisuallyHiddenElementProps extends VisuallyHiddenBaseProps, HTMLAttributes<HTMLElement> {
 	/**
 	 * Chooses a supported semantic element.
 	 * @default 'span'
@@ -45,15 +44,13 @@ interface VisuallyHiddenElementProps
 }
 
 /** Resolved props handed to a caller-owned `renderRoot` element. */
-type VisuallyHiddenResolvedRenderProps = DistributiveOmit<
-	VisuallyHiddenPresentationProps,
-	'isFocusable' | 'ref'
-> & {
+interface VisuallyHiddenResolvedRenderProps
+	extends VisuallyHiddenPresentationProps, Pick<HTMLAttributes<HTMLElement>, 'onBlur' | 'onFocus'> {
 	ref: UseRenderRef;
-};
+}
 
 /** Props when a caller owns the rendered element. */
-interface VisuallyHiddenRenderProps extends VisuallyHiddenPresentationProps {
+interface VisuallyHiddenRenderProps extends VisuallyHiddenBaseProps {
 	/** Use `elementType` instead of `renderRoot` for a supported semantic element. */
 	elementType?: never;
 	/**
@@ -62,9 +59,7 @@ interface VisuallyHiddenRenderProps extends VisuallyHiddenPresentationProps {
 	 * attributes on the element the callback returns.
 	 */
 	renderRoot: (
-		domProps: {
-			[K in keyof VisuallyHiddenResolvedRenderProps]: VisuallyHiddenResolvedRenderProps[K];
-		} & Pick<HTMLAttributes<HTMLElement>, 'onBlur' | 'onFocus'>,
+		domProps: VisuallyHiddenResolvedRenderProps,
 		state: Record<string, never>,
 	) => ReactElement;
 }
