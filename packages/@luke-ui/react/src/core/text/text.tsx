@@ -89,6 +89,19 @@ interface _TextProps extends _TextOmit, TextStyleProps, DocumentedElementTypePro
 /** Props for the `Text` component. */
 export type TextProps = Prettify<_TextProps>;
 
+const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
+	'blockquote',
+	'div',
+	'h1',
+	'h2',
+	'h3',
+	'h4',
+	'h5',
+	'h6',
+	'p',
+	'pre',
+]);
+
 /**
  * Styled text with semantic typography styles and colour controls.
  *
@@ -178,16 +191,3 @@ export function Text(props: TextProps) {
 		</RacText>
 	);
 }
-
-const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
-	'blockquote',
-	'div',
-	'h1',
-	'h2',
-	'h3',
-	'h4',
-	'h5',
-	'h6',
-	'p',
-	'pre',
-]);
