@@ -144,16 +144,18 @@ export function Text(props: TextProps) {
 		typography: resolvedTypography,
 	});
 
-	// RAC accepts `null` at runtime to opt out of slotted text context; its props type omits null.
-	const racSlot = slot as string | undefined;
-
 	if (isVisuallyHidden) {
 		return (
 			<VisuallyHidden
 				className={recipeClassName}
 				renderRoot={(domProps) => {
 					return (
-						<RacText {...mergeProps(racProps, domProps)} elementType={elementType} slot={racSlot} />
+						<RacText
+							{...mergeProps(racProps, domProps)}
+							elementType={elementType}
+							// @ts-expect-error — RAC TextProps omits null, which opts out of slotted context at runtime.
+							slot={slot}
+						/>
 					);
 				}}
 				style={style}
@@ -168,7 +170,8 @@ export function Text(props: TextProps) {
 			{...racProps}
 			className={recipeClassName}
 			elementType={elementType}
-			slot={racSlot}
+			// @ts-expect-error — RAC TextProps omits null, which opts out of slotted context at runtime.
+			slot={slot}
 			style={style}
 		>
 			{children}
