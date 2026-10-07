@@ -589,14 +589,14 @@ Entrypoint: **retain**.
 
 | Symbol                | Decision | Independent consumer use                                                                                                                        |
 | --------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `VisuallyHidden`      | retain   | Provide visually hidden accessible content.                                                                                                     |
-| `VisuallyHiddenProps` | retain   | Type an app wrapper around `VisuallyHidden`. Provide visually hidden accessible content.                                                        |
+| `VisuallyHidden`      | change   | Provide visually hidden accessible content.                                                                                                     |
+| `VisuallyHiddenProps` | change   | Type an app wrapper around `VisuallyHidden`. Provide visually hidden accessible content.                                                        |
 | `visuallyHiddenStyle` | retain   | Statically hide application-owned markup without the component. Prefer `<VisuallyHidden isFocusable>` when hidden content must reveal on focus. |
 
 ## Static entrypoints and package boundary
 
 These are the five non-JavaScript entries in `package.json`. Together with the 43 JavaScript entries
-above, they account for the whole exports map. The JavaScript inventory contains 195 symbol
+above, they account for the whole exports map. The JavaScript inventory contains 196 symbol
 occurrences, including intentional field/primitive re-exports.
 
 | Public path                                    | Decision | Independent consumer use and contract                                                                                                                          |
@@ -1108,7 +1108,7 @@ The existing `@luke-ui/rainbow-sprinkles` support package is a runtime dependenc
 
 ## Completion evidence and deferred owners
 
-The current map has explicit per-symbol decisions for all 43 JavaScript entrypoints and all 195
+The current map has explicit per-symbol decisions for all 43 JavaScript entrypoints and all 196
 exported symbol occurrences, plus each of the five static/map entrypoints. Component/primitive
 tables cover their own props, meaningful defaults, selection/text/open/loading state, variants,
 slots, anatomy, refs/root ownership, element choice and rendering seams. Theme exports, every finite

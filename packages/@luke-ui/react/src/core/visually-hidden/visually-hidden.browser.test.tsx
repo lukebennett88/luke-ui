@@ -3,8 +3,8 @@ import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
-import { render } from '../test-utils/render.js';
-import { visuallyHiddenStyle } from './visually-hidden-style.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
 test('VisuallyHidden supplies an accessible label and defaults to span', async () => {
 	const { locator, container } = render(
@@ -15,7 +15,6 @@ test('VisuallyHidden supplies an accessible label and defaults to span', async (
 	const label = locator.getByText('Save changes').element();
 
 	expect(label.tagName).toBe('SPAN');
-	expect(isVisuallyHidden(label)).toBe(true);
 	await expect.element(locator.getByRole('button', { name: 'Save changes' })).toBeInTheDocument();
 	await expectNoAxeViolations(container);
 });
@@ -38,10 +37,9 @@ test('VisuallyHidden keeps the requested heading semantics', () => {
 	const heading = locator.getByRole('heading', { level: 2, name: 'Hidden heading' }).element();
 
 	expect(heading.tagName).toBe('H2');
-	expect(isVisuallyHidden(heading)).toBe(true);
 });
 
-test('VisuallyHidden reveals on focus within when isFocusable and hides again on blur', async () => {
+test('VisuallyHidden isFocusable preserves keyboard focus navigation', async () => {
 	const { locator, user } = render(
 		<>
 			<button type="button">Before</button>
@@ -52,18 +50,13 @@ test('VisuallyHidden reveals on focus within when isFocusable and hides again on
 		</>,
 	);
 	const link = locator.getByRole('link', { name: 'Skip to main content' }).element();
-	const root = link.parentElement;
-	if (!(root instanceof HTMLElement)) throw new Error('Expected VisuallyHidden root.');
-
-	expect(isVisuallyHidden(root)).toBe(true);
 
 	await user.tab();
 	await user.tab();
 	expect(link).toHaveFocus();
-	expect(isVisuallyHidden(root)).toBe(false);
 
 	await user.tab();
-	expect(isVisuallyHidden(root)).toBe(true);
+	expect(locator.getByRole('button', { name: 'After' }).element()).toHaveFocus();
 });
 
 test('VisuallyHidden keeps consumer style while focus visibility changes', async () => {
@@ -73,6 +66,7 @@ test('VisuallyHidden keeps consumer style while focus visibility changes', async
 			<VisuallyHidden isFocusable style={{ color: 'rgb(1, 2, 3)' }}>
 				<a href="#main">Skip link</a>
 			</VisuallyHidden>
+			<button type="button">After</button>
 		</>,
 	);
 	const link = locator.getByRole('link', { name: 'Skip link' }).element();
@@ -80,17 +74,15 @@ test('VisuallyHidden keeps consumer style while focus visibility changes', async
 	if (!(root instanceof HTMLElement)) throw new Error('Expected VisuallyHidden root.');
 
 	expect(root.style.color).toBe('rgb(1, 2, 3)');
-	expect(isVisuallyHidden(root)).toBe(true);
 
 	await user.tab();
 	await user.tab();
 	expect(link).toHaveFocus();
 	expect(root.style.color).toBe('rgb(1, 2, 3)');
-	expect(isVisuallyHidden(root)).toBe(false);
 
 	await user.tab();
+	expect(locator.getByRole('button', { name: 'After' }).element()).toHaveFocus();
 	expect(root.style.color).toBe('rgb(1, 2, 3)');
-	expect(isVisuallyHidden(root)).toBe(true);
 });
 
 test('VisuallyHidden renderRoot owns the root without an extra wrapper', () => {
@@ -172,21 +164,19 @@ test('VisuallyHidden composes consumer focus handlers with internal focus-within
 			>
 				<a href="#main">Skip link</a>
 			</VisuallyHidden>
+			<button type="button">After</button>
 		</>,
 	);
 	const link = locator.getByRole('link', { name: 'Skip link' }).element();
-	const root = link.parentElement;
-	if (!(root instanceof HTMLElement)) throw new Error('Expected VisuallyHidden root.');
 
 	await user.tab();
 	await user.tab();
 	expect(link).toHaveFocus();
-	expect(isVisuallyHidden(root)).toBe(false);
 	expect(focusLog).toContain('focus');
 
 	await user.tab();
-	expect(isVisuallyHidden(root)).toBe(true);
-	expect(focusLog).toContain('blur');
+	expect(locator.getByRole('button', { name: 'After' }).element()).toHaveFocus();
+	expect(focusLog).toEqual(['focus', 'blur']);
 });
 
 test('VisuallyHidden keeps consumer className while focus visibility changes', async () => {
@@ -196,6 +186,7 @@ test('VisuallyHidden keeps consumer className while focus visibility changes', a
 			<VisuallyHidden className="consumer-class" isFocusable>
 				<a href="#main">Skip link</a>
 			</VisuallyHidden>
+			<button type="button">After</button>
 		</>,
 	);
 	const link = locator.getByRole('link', { name: 'Skip link' }).element();
@@ -203,20 +194,57 @@ test('VisuallyHidden keeps consumer className while focus visibility changes', a
 	if (!(root instanceof HTMLElement)) throw new Error('Expected VisuallyHidden root.');
 
 	expect(root).toHaveClass('consumer-class');
-	expect(isVisuallyHidden(root)).toBe(true);
 
 	await user.tab();
 	await user.tab();
+	expect(link).toHaveFocus();
 	expect(root).toHaveClass('consumer-class');
-	expect(isVisuallyHidden(root)).toBe(false);
+
+	await user.tab();
+	expect(locator.getByRole('button', { name: 'After' }).element()).toHaveFocus();
+	expect(root).toHaveClass('consumer-class');
 });
 
-function isVisuallyHidden(element: Element): boolean {
-	if (!(element instanceof HTMLElement)) return false;
-	const style = element.style;
-	return (
-		style.position === visuallyHiddenStyle.position &&
-		style.overflow === visuallyHiddenStyle.overflow &&
-		style.clipPath === visuallyHiddenStyle.clipPath
+for (const appearance of visualAppearances) {
+	test(
+		`VisuallyHidden focus reveal: ${appearance.theme} ${appearance.mode}`,
+		{ tags: ['visual'] },
+		async () => {
+			const focusLog: Array<string> = [];
+			const { locator, user } = render(
+				<Stack>
+					<button type="button">Before</button>
+					<VisuallyHidden>Static hidden content</VisuallyHidden>
+					<VisuallyHidden
+						isFocusable
+						onBlur={() => {
+							focusLog.push('blur');
+						}}
+						onFocus={() => {
+							focusLog.push('focus');
+						}}
+					>
+						<a href="#main">Skip to main content</a>
+					</VisuallyHidden>
+					<button type="button">After</button>
+				</Stack>,
+				{ appearance },
+			);
+
+			await captureVisualAppearance(locator, 'visually-hidden/hidden', appearance);
+
+			await user.tab();
+			await user.tab();
+			await expect
+				.element(locator.getByRole('link', { name: 'Skip to main content' }))
+				.toHaveFocus();
+			expect(focusLog).toEqual(['focus']);
+			await captureVisualAppearance(locator, 'visually-hidden/focused', appearance);
+
+			await user.tab();
+			await expect.element(locator.getByRole('button', { name: 'After' })).toHaveFocus();
+			expect(focusLog).toEqual(['focus', 'blur']);
+			await captureVisualAppearance(locator, 'visually-hidden/blurred', appearance);
+		},
 	);
 }

@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
 import { mergeProps } from '../../shared/utils/merge-props.js';
 import { typeStyleWeightRole } from '../../theme/type-styles.js';
@@ -8,12 +7,6 @@ import type { Prettify } from '../types/prettify.js';
 import { VisuallyHidden } from '../visually-hidden/visually-hidden.js';
 import type { TextRecipeVariants } from './recipe.css.js';
 import { textRecipe } from './recipe.css.js';
-
-function plainStyle(style: unknown): CSSProperties | undefined {
-	if (style === undefined) return undefined;
-	if (typeof style === 'object' && style !== null) return style as CSSProperties;
-	return undefined;
-}
 
 interface TextVariantProps extends NonNullable<TextRecipeVariants> {}
 
@@ -166,7 +159,6 @@ export function Text(props: TextProps) {
 		typography: resolvedTypography,
 	});
 
-	const ownedStyle = plainStyle(style);
 	// RAC accepts `null` at runtime to opt out of slotted text context; its props type omits null.
 	const racSlot = slot as string | undefined;
 
@@ -174,14 +166,12 @@ export function Text(props: TextProps) {
 		return (
 			<VisuallyHidden
 				className={recipeClassName}
-				renderRoot={(domProps) => (
-					<RacText
-						{...mergeProps(ownedStyle === undefined ? { ...racProps, style } : racProps, domProps)}
-						elementType={elementType}
-						slot={racSlot}
-					/>
-				)}
-				style={ownedStyle}
+				renderRoot={(domProps) => {
+					return (
+						<RacText {...mergeProps(racProps, domProps)} elementType={elementType} slot={racSlot} />
+					);
+				}}
+				style={style}
 			>
 				{children}
 			</VisuallyHidden>

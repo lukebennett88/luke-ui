@@ -7,6 +7,10 @@ type RenderRoot = NonNullable<VisuallyHiddenProps['renderRoot']>;
 
 test('VisuallyHidden renderRoot receives resolved props and empty state', () => {
 	expectTypeOf<Parameters<RenderRoot>['length']>().toEqualTypeOf<2>();
+	expectTypeOf<keyof Parameters<RenderRoot>[0]>().toEqualTypeOf<
+		'children' | 'className' | 'onBlur' | 'onFocus' | 'ref' | 'style'
+	>();
+	expectTypeOf<Extract<keyof Parameters<RenderRoot>[0], 'isFocusable'>>().toEqualTypeOf<never>();
 	expectTypeOf<Parameters<RenderRoot>[1]>().toEqualTypeOf<Record<string, never>>();
 	expectTypeOf<ReturnType<RenderRoot>>().toEqualTypeOf<ReactElement>();
 	assertType<VisuallyHiddenProps>({

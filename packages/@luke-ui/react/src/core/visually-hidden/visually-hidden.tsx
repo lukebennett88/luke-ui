@@ -47,7 +47,7 @@ interface VisuallyHiddenElementProps
 /** Resolved props handed to a caller-owned `renderRoot` element. */
 type VisuallyHiddenResolvedRenderProps = DistributiveOmit<
 	VisuallyHiddenPresentationProps,
-	'ref'
+	'isFocusable' | 'ref'
 > & {
 	ref: UseRenderRef;
 };
