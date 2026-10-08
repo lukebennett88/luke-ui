@@ -55,6 +55,43 @@ test('pressing a Link runs its onPress handler', async () => {
 	expect(pressed).toBe(true);
 });
 
+test('a Link forwards title, hrefLang, and type to its anchor', async () => {
+	const { locator } = render(
+		<Link href="#" hrefLang="fr" title="More detail" type="text/html">
+			Settings
+		</Link>,
+	);
+
+	const link = locator.getByRole('link', { name: 'Settings' });
+	await expect.element(link).toHaveAttribute('title', 'More detail');
+	await expect.element(link).toHaveAttribute('hreflang', 'fr');
+	await expect.element(link).toHaveAttribute('type', 'text/html');
+});
+
+test('a Link keeps title alongside a consumer render function', async () => {
+	const { locator } = render(
+		<Link
+			href="#"
+			render={({ children, ...props }) =>
+				'href' in props ? (
+					<a {...props} data-rendered="">
+						{children}
+					</a>
+				) : (
+					<span {...props}>{children}</span>
+				)
+			}
+			title="More detail"
+		>
+			Settings
+		</Link>,
+	);
+
+	const link = locator.getByRole('link', { name: 'Settings' });
+	await expect.element(link).toHaveAttribute('title', 'More detail');
+	await expect.element(link).toHaveAttribute('data-rendered');
+});
+
 test('the Link scene has no axe violations', async () => {
 	const { container } = render(<LinkScene />);
 

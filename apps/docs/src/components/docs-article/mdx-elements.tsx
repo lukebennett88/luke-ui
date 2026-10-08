@@ -22,15 +22,27 @@ import * as styles from './mdx-elements.css.js';
 
 const EXTERNAL_HREF_PATTERN = /^(?:\w+:|\/\/)/;
 
-type AnchorProps = Pick<ComponentPropsWithoutRef<'a'>, 'children' | 'href'>;
+// MDX passes attributes, not handlers. React Aria Components' `Link` types its own event handlers.
+type AnchorProps = Omit<
+	ComponentPropsWithoutRef<'a'>,
+	'dangerouslySetInnerHTML' | 'style' | `on${string}`
+>;
 
-/** Link in MDX prose. External URLs open in a new tab. Internal paths navigate client-side. */
-export function MdxLink({ children, href }: AnchorProps) {
-	if (href === undefined) return <>{children}</>;
+const EXTERNAL_REL_TOKENS = ['noreferrer', 'noopener'];
+
+/**
+ * Link in MDX prose. External URLs open in a new tab. Internal paths navigate client-side. Every
+ * anchor attribute the author writes reaches the DOM.
+ */
+export function MdxLink({ children, href, ...props }: AnchorProps) {
+	// Without an `href` the anchor is a placeholder: not interactive, but still a valid target for
+	// `id` and a carrier for the author's other attributes.
+	if (href === undefined) return <a {...props}>{children}</a>;
 
 	if (EXTERNAL_HREF_PATTERN.test(href)) {
+		const target = props.target ?? '_blank';
 		return (
-			<LukeLink href={href} rel="noreferrer noopener" target="_blank">
+			<LukeLink {...props} href={href} rel={mergeRel(props.rel, target)} target={target}>
 				{children}
 			</LukeLink>
 		);
@@ -38,15 +50,30 @@ export function MdxLink({ children, href }: AnchorProps) {
 
 	// A same-page anchor needs no router. The browser scrolls to it.
 	if (href.startsWith('#')) {
-		return <LukeLink href={href}>{children}</LukeLink>;
+		return (
+			<LukeLink {...props} href={href}>
+				{children}
+			</LukeLink>
+		);
 	}
 
 	const { hash, path } = splitHash(href);
 	return (
-		<DocsLink hash={hash} to={path}>
+		<DocsLink {...props} hash={hash} to={path}>
 			{children}
 		</DocsLink>
 	);
+}
+
+/** Adds `noreferrer noopener` to the author's `rel` tokens when the link opens a new browsing context. */
+function mergeRel(rel: string | undefined, target: string) {
+	const tokens = rel?.split(/\s+/).filter(Boolean) ?? [];
+	if (target === '_blank') {
+		for (const token of EXTERNAL_REL_TOKENS) {
+			if (!tokens.includes(token)) tokens.push(token);
+		}
+	}
+	return tokens.length > 0 ? tokens.join(' ') : undefined;
 }
 
 /** Builds the heading renderer for one level, with a link and a copy button when it has an `id`. */
@@ -55,18 +82,24 @@ export function createMdxHeading(level: HeadingLevel) {
 		children,
 		id,
 	}: Pick<ComponentPropsWithoutRef<'h2'>, 'children' | 'id'>) {
+		if (id === undefined) {
+			return (
+				<Heading className={styles.heading} level={level}>
+					{children}
+				</Heading>
+			);
+		}
+
+		// The copy button sits inside the heading to keep its spacing and alignment, so the heading
+		// takes its name from the anchor alone. `:` cannot appear in a generated slug, so the anchor id
+		// never collides with another heading's id.
+		const titleId = `${id}:title`;
 		return (
-			<Heading className={styles.heading} id={id} level={level}>
-				{id === undefined ? (
-					children
-				) : (
-					<>
-						<a className={styles.headingAnchor} href={`#${id}`}>
-							{children}
-						</a>
-						<CopyAnchorButton id={id} level={level} />
-					</>
-				)}
+			<Heading aria-labelledby={titleId} className={styles.heading} id={id} level={level}>
+				<a className={styles.headingAnchor} href={`#${id}`} id={titleId}>
+					{children}
+				</a>
+				<CopyAnchorButton id={id} level={level} />
 			</Heading>
 		);
 	};

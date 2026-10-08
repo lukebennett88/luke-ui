@@ -38,6 +38,7 @@ afterEach(async () => {
 });
 
 const H2 = createMdxHeading(2);
+const H3 = createMdxHeading(3);
 
 test('opens an external link in a new tab without an opener', async () => {
 	await renderMdx(<MdxLink href="https://example.com/docs">External</MdxLink>);
@@ -71,6 +72,79 @@ test('keeps an internal link, with and without a hash, in the same tab', async (
 	);
 });
 
+const linkPaths = [
+	['an external link', 'https://example.com/docs'],
+	['a hash-only link', '#local'],
+	['an internal link', '/docs/typography#fonts'],
+] as const;
+
+for (const [kind, href] of linkPaths) {
+	test(`keeps the anchor attributes an author writes on ${kind}`, async () => {
+		await renderMdx(
+			<MdxLink
+				aria-label="Read more"
+				className="author-class"
+				data-foo="bar"
+				data-testid="the-link"
+				download="file.txt"
+				hrefLang="fr"
+				href={href}
+				id="author-id"
+				title="Link title"
+			>
+				Visible text
+			</MdxLink>,
+		);
+
+		const link = page.getByTestId('the-link');
+		await expect.element(link).toHaveAttribute('href', href);
+		await expect.element(link).toHaveAttribute('title', 'Link title');
+		await expect.element(link).toHaveAttribute('id', 'author-id');
+		await expect.element(link).toHaveAttribute('aria-label', 'Read more');
+		await expect.element(link).toHaveAttribute('download', 'file.txt');
+		await expect.element(link).toHaveAttribute('data-foo', 'bar');
+		await expect.element(link).toHaveAttribute('hreflang', 'fr');
+		expect(link.element().classList.contains('author-class')).toBe(true);
+	});
+}
+
+test('merges an author rel into the external link safety tokens', async () => {
+	await renderMdx(
+		<MdxLink href="https://example.com" rel="nofollow noopener">
+			Merged
+		</MdxLink>,
+	);
+
+	const rel = page.getByRole('link', { name: 'Merged' }).element().getAttribute('rel');
+	expect(rel?.split(' ').sort()).toEqual(['nofollow', 'noopener', 'noreferrer']);
+});
+
+test('lets an author target and rel override the external link defaults', async () => {
+	await renderMdx(
+		<MdxLink href="https://example.com" rel="author" target="_self">
+			Same tab
+		</MdxLink>,
+	);
+
+	const link = page.getByRole('link', { name: 'Same tab' });
+	await expect.element(link).toHaveAttribute('target', '_self');
+	await expect.element(link).toHaveAttribute('rel', 'author');
+});
+
+test('renders a link without an href as a placeholder anchor that keeps its attributes', async () => {
+	await renderMdx(
+		<MdxLink data-testid="placeholder" id="target" title="Marker">
+			Marker text
+		</MdxLink>,
+	);
+
+	const anchor = page.getByTestId('placeholder');
+	await expect.element(anchor).toHaveAttribute('id', 'target');
+	await expect.element(anchor).toHaveAttribute('title', 'Marker');
+	expect(anchor.element().hasAttribute('href')).toBe(false);
+	expect(page.getByRole('link')).not.toBeInTheDocument();
+});
+
 test('links a heading to its own anchor and copies the full URL with the hash', async () => {
 	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 	await renderMdx(<H2 id="usage">Usage</H2>);
@@ -92,6 +166,50 @@ test('links a heading to its own anchor and copies the full URL with the hash', 
 	await expect
 		.element(page.getByRole('button', { name: 'Copy Anchor Link' }), { timeout: 3000 })
 		.toBeVisible();
+});
+
+for (const [level, Heading] of [
+	[2, H2],
+	[3, H3],
+] as const) {
+	test(`names an h${level} by its text alone while the copy button stays inside it`, async () => {
+		vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
+		await renderMdx(<Heading id="usage">Usage</Heading>);
+
+		const heading = page.getByRole('heading', { exact: true, level, name: 'Usage' });
+		await expect.element(heading).toBeVisible();
+		const button = page.getByRole('button', { name: 'Copy Anchor Link' });
+		expect(heading.element().contains(button.element())).toBe(true);
+
+		await userEvent.tab();
+		await userEvent.tab();
+		await expect.element(button).toHaveFocus();
+
+		await act(async () => {
+			await userEvent.keyboard('{Enter}');
+			await new Promise((resolve) => setTimeout(resolve, 50));
+		});
+		await expect.element(page.getByRole('status')).toHaveTextContent('Copied');
+		await expect
+			.element(page.getByRole('heading', { exact: true, level, name: 'Usage' }))
+			.toBeVisible();
+		await expect.element(page.getByRole('button', { name: 'Copied Anchor Link' })).toBeVisible();
+	});
+}
+
+test('keeps the heading id as the deep-link target and gives the anchor a distinct id', async () => {
+	await renderMdx(
+		<>
+			<H2 id="usage">Usage</H2>
+			<H2 id="usage-title">Usage title</H2>
+		</>,
+	);
+
+	const ids = [...document.querySelectorAll('[id]')].map((element) => element.id);
+	expect(new Set(ids).size).toBe(ids.length);
+	const heading = page.getByRole('heading', { name: 'Usage', exact: true }).element();
+	expect(heading.id).toBe('usage');
+	expect(heading.querySelector('a')?.getAttribute('href')).toBe('#usage');
 });
 
 test('hides the anchor button until keyboard focus reaches the heading', async () => {
