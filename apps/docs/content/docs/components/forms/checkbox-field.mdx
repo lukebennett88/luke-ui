@@ -1,0 +1,88 @@
+---
+title: Checkbox Field
+description:
+  Lets someone select an independent option, with optional supporting and validation text.
+source: packages/@luke-ui/react/src/exports/checkbox-field.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/Checkbox.html
+---
+
+Use `CheckboxField` when someone can choose an option independently of nearby controls. Pass `label`
+to name the option, and `description` to clarify what it means.
+
+<ExampleBlock src="checkbox-field/basic" layout="centered" title="Checkbox Field: Basic" />
+
+## Labels
+
+Every `CheckboxField` has a visible `label`. The label sits inside a native `<label>`, so pass
+textual content only. Place links and buttons next to the checkbox. Inline typography such as
+`Strong` works inside the label. Set `slot={null}` on a `Text` you place there, as the
+[Checkbox primitive](/components/primitives/checkbox#text-in-the-label) describes.
+
+When another part of the layout draws the visible label, such as a table row or a settings row,
+compose the [Checkbox primitive](/components/primitives/checkbox) and name the control with
+`aria-labelledby`.
+
+## States
+
+Use `defaultSelected` for an uncontrolled initial value, or pair `isSelected` with `onChange` when
+application state owns the selection. `isIndeterminate` communicates a mixed state, such as a parent
+option whose child options are only partly selected.
+
+<ExampleBlock src="checkbox-field/states" title="Checkbox Field: States" />
+
+<ExampleBlock src="checkbox-field/controlled" title="Checkbox Field: Controlled" />
+
+## Size
+
+Use `size` to change the checkbox control. It does not change the label typography. `medium` is the
+default. Use `small` in compact layouts and `large` where a larger control improves scanning.
+
+<ExampleBlock src="checkbox-field/sizes" title="Checkbox Field: Size" />
+
+## Validation
+
+Set `isRequired` to require the choice. `CheckboxField` shows its validation message after
+validation fails. Pass `errorMessage` only for an error you already have, such as one from a form
+library or your server. A non-empty message marks the checkbox invalid. Read
+[Validation](/docs/validation) for where messages come from and how to write them.
+
+<ExampleBlock src="checkbox-field/validation" title="Checkbox Field: Validation" />
+
+## Required marker
+
+A required checkbox shows a marker after its `label`. Read
+[Required fields](/components/forms/text-input-field#required-fields) for both `necessityIndicator`
+values.
+
+## Labels with Text
+
+Wrap a checkbox in block `Text` when its label needs a specific text size. The control follows the
+inherited line height. It keeps its fixed visual square centred on the first line when the label
+wraps. Outside `Text`, it uses the normal compact control size.
+
+<ExampleBlock
+	src="checkbox-field/first-line-alignment"
+	title="Checkbox Field: First-line alignment"
+/>
+
+## IDs and refs
+
+`id`, `className`, and `ref` target the root element. `inputId` and `inputRef` target the input.
+
+## Form values
+
+Pass `name` so the checkbox joins `FormData` when selected. Pass `value` to set the submitted value,
+and `form` to associate a checkbox with a `<form>` it does not sit inside.
+
+## Accessibility
+
+Disabled checkboxes cannot receive focus, and their value cannot change. Read-only checkboxes remain
+focusable, so someone who uses a keyboard or assistive technology can still perceive their state.
+Keyboard navigation shows a focus ring. Pointer focus does not.
+
+## API
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/checkbox-field/checkbox-field.tsx"
+	name="CheckboxFieldProps"
+/>

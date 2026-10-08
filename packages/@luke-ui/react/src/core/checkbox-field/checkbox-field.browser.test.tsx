@@ -1,4 +1,5 @@
-import { Checkbox } from '@luke-ui/react/checkbox';
+import { CheckboxField } from '@luke-ui/react/checkbox-field';
+import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
@@ -18,61 +19,66 @@ import {
 function CheckboxScene() {
 	return (
 		<Stack>
-			<Checkbox label="Default" name="default" />
-			<Checkbox defaultSelected label="Selected" name="selected" />
-			<Checkbox isIndeterminate label="Indeterminate" name="indeterminate" />
-			<Checkbox defaultSelected isDisabled label="Disabled" name="disabled" />
-			<Checkbox defaultSelected errorMessage="Choose an option." label="Invalid" name="invalid" />
-			<Checkbox
+			<CheckboxField label="Default" name="default" />
+			<CheckboxField defaultSelected label="Selected" name="selected" />
+			<CheckboxField isIndeterminate label="Indeterminate" name="indeterminate" />
+			<CheckboxField defaultSelected isDisabled label="Disabled" name="disabled" />
+			<CheckboxField
+				defaultSelected
+				errorMessage="Choose an option."
+				label="Invalid"
+				name="invalid"
+			/>
+			<CheckboxField
 				description="Receive updates by email."
 				label="Email notifications"
 				name="description-small"
 				size="small"
 			/>
-			<Checkbox
+			<CheckboxField
 				description="This supporting text wraps onto a second line and should still start at the field's inline edge, not under the label."
 				label="Email notifications"
 				name="description-wrapping"
 			/>
-			<Checkbox
+			<CheckboxField
 				description="Receive updates by email."
 				label="Email notifications"
 				name="description-large"
 				size="large"
 			/>
-			<Checkbox
+			<CheckboxField
 				defaultSelected
 				description="Receive updates by email."
 				errorMessage="Choose an option."
 				label="Email notifications"
 				name="description-with-error"
 			/>
-			<Checkbox
+			<CheckboxField
 				description="Receive updates by email."
 				isDisabled
 				label="Email notifications"
 				name="description-disabled"
 			/>
 			<Text elementType="div" typography="heading3">
-				<Checkbox
+				<CheckboxField
 					label="heading3: This label wraps to show that the control aligns with its first line."
 					name="text-heading3"
 				/>
 			</Text>
-			<Checkbox label="Standalone control" name="standalone" />
-			<Checkbox
+			<CheckboxField label="Standalone control" name="standalone" />
+			<CheckboxField
 				defaultSelected
 				errorMessage="Choose an option."
 				label="This label wraps onto a second line so the control should sit on the first line, not float at the row's top edge."
 				name="invalid-wrapping"
 			/>
-			<Checkbox
+			<CheckboxField
 				defaultSelected
 				errorMessage="This error message wraps onto a second and third line so the icon should sit on the first line, not centre itself against the whole block."
 				label="Accept the terms"
 				name="invalid-wrapping-message"
 			/>
-			<Checkbox
+			<CheckboxField
 				defaultSelected
 				errorMessage={
 					<>
@@ -114,15 +120,14 @@ function controlFor(input: HTMLInputElement): HTMLElement {
 	return control;
 }
 
-// Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
-test('Checkbox resolves ref to the root, resolves object and callback inputRef to the control, participates in a form, and fires onBlur', () => {
+test('CheckboxField resolves ref to the root, resolves object and callback inputRef to the control, participates in a form, and fires onBlur', () => {
 	const ref = createRef<HTMLDivElement>();
 	const inputRef = createRef<HTMLInputElement>();
 	const callbackResolved: Array<HTMLElement | null> = [];
 	let blurred = false;
 	const { container, locator } = render(
 		<>
-			<Checkbox
+			<CheckboxField
 				inputRef={inputRef}
 				label="Terms"
 				name="terms"
@@ -131,7 +136,7 @@ test('Checkbox resolves ref to the root, resolves object and callback inputRef t
 				}}
 				ref={ref}
 			/>
-			<Checkbox
+			<CheckboxField
 				inputRef={(node: HTMLElement | null) => {
 					callbackResolved.push(node);
 				}}
@@ -167,9 +172,9 @@ test('Checkbox resolves ref to the root, resolves object and callback inputRef t
 	form.remove();
 });
 
-test('Checkbox puts id on its root element and inputId on the input', () => {
+test('CheckboxField puts id on its root element and inputId on the input', () => {
 	render(
-		<Checkbox
+		<CheckboxField
 			className="example-root"
 			description="Example description"
 			id="example-root"
@@ -187,30 +192,93 @@ test('Checkbox puts id on its root element and inputId on the input', () => {
 	expect(getDescribedText(input)).toBe('Example description');
 });
 
-test('Checkbox takes its name from a visible label, aria-label, or aria-labelledby', () => {
+test('CheckboxField renders its label inside the clickable label', async () => {
+	render(<CheckboxField label="Terms" name="terms" />);
+	const input = checkbox('Terms');
+
+	expect(labelFor(input).textContent).toBe('Terms');
+
+	await userEvent.click(page.getByText('Terms'));
+
+	expect(input).toBeChecked();
+});
+
+test('CheckboxField renders Luke UI typography inside its label', () => {
+	render(
+		<CheckboxField
+			label={
+				<>
+					Accept the <Strong>terms</Strong>
+				</>
+			}
+			name="terms"
+		/>,
+	);
+
+	expect(checkbox('Accept the terms')).toBeInTheDocument();
+});
+
+test('CheckboxField supports uncontrolled, controlled, and indeterminate selection', async () => {
+	const changes: Array<boolean> = [];
 	render(
 		<>
-			<Checkbox label="Visible label" name="visible" />
-			<Checkbox aria-label="Label attribute" name="attribute" />
-			<span id="external-label">External label</span>
-			<Checkbox aria-labelledby="external-label" name="external" />
+			<CheckboxField defaultSelected label="Uncontrolled" />
+			<CheckboxField
+				isSelected={false}
+				label="Controlled"
+				onChange={(isSelected) => changes.push(isSelected)}
+			/>
+			<CheckboxField isIndeterminate label="Mixed" />
 		</>,
 	);
 
-	expect(checkbox('Visible label')).toHaveAttribute('name', 'visible');
-	expect(checkbox('Label attribute')).toHaveAttribute('name', 'attribute');
-	expect(checkbox('External label')).toHaveAttribute('name', 'external');
+	await userEvent.click(page.getByText('Uncontrolled', { exact: true }));
+	await userEvent.click(page.getByText('Controlled', { exact: true }));
+
+	expect(checkbox('Uncontrolled')).not.toBeChecked();
+	expect(changes).toEqual([true]);
+	expect(checkbox('Controlled')).not.toBeChecked();
+	expect(checkbox('Mixed').indeterminate).toBe(true);
 });
 
-test('an externally named Checkbox renders the control alone', () => {
-	render(<Checkbox aria-label="Select row" name="row" />);
-	const input = checkbox('Select row');
+test('a disabled or read-only CheckboxField keeps its selection', async () => {
+	const changes: Array<boolean> = [];
+	render(
+		<>
+			<CheckboxField isDisabled label="Disabled" onChange={(value) => changes.push(value)} />
+			<CheckboxField isReadOnly label="Read only" onChange={(value) => changes.push(value)} />
+		</>,
+	);
 
-	expect(labelFor(input).textContent).toBe('');
+	expect(checkbox('Disabled')).toBeDisabled();
+
+	await userEvent.click(page.getByText('Read only'));
+
+	expect(checkbox('Read only')).not.toBeChecked();
+	expect(changes).toEqual([]);
+});
+
+test('CheckboxField runs a validate function', async () => {
+	render(
+		<form>
+			<CheckboxField
+				label="Terms"
+				name="terms"
+				validate={(isSelected) => (isSelected ? null : 'Accept the terms to continue.')}
+			/>
+			<button type="submit">Submit</button>
+		</form>,
+	);
+	const input = checkbox('Terms');
+
+	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
+
+	await expect.poll(() => getDescribedText(input)).toBe('Accept the terms to continue.');
+	expect(input).toHaveAttribute('aria-invalid', 'true');
 });
 
 test('the control renders before the label', () => {
-	render(<Checkbox label="Terms" name="terms" />);
+	render(<CheckboxField label="Terms" name="terms" />);
 	const control = controlFor(checkbox('Terms'));
 
 	expect(control.nextSibling?.textContent).toBe('Terms');
@@ -218,11 +286,11 @@ test('the control renders before the label', () => {
 
 // The marker is CSS content with no DOM node, so the accessible name is how the tests observe it.
 // It follows the last word with no space before it.
-test('a required Checkbox marks its label with its necessityIndicator', () => {
+test('a required CheckboxField marks its label with its necessityIndicator', () => {
 	render(
 		<>
-			<Checkbox isRequired label="Checkbox icon" name="checkbox-icon" />
-			<Checkbox
+			<CheckboxField isRequired label="Checkbox icon" name="checkbox-icon" />
+			<CheckboxField
 				isRequired
 				label="Checkbox words"
 				name="checkbox-words"
@@ -235,23 +303,14 @@ test('a required Checkbox marks its label with its necessityIndicator', () => {
 	expect(checkbox('Checkbox words(required)')).toBeInTheDocument();
 });
 
-test('an optional or externally named Checkbox shows no marker', () => {
-	render(
-		<>
-			<Checkbox label="Optional" name="optional" />
-			<Checkbox aria-label="Select row" isRequired name="row" />
-			<span id="external-label">External label</span>
-			<Checkbox aria-labelledby="external-label" isRequired name="external" />
-		</>,
-	);
+test('an optional CheckboxField shows no marker', () => {
+	render(<CheckboxField label="Optional" name="optional" />);
 
 	expect(checkbox('Optional')).toHaveAccessibleName('Optional');
-	expect(checkbox('Select row')).toHaveAccessibleName('Select row');
-	expect(checkbox('External label')).toHaveAccessibleName('External label');
 });
 
 test('an errorMessage marks the checkbox invalid and shows the error under the label', () => {
-	render(<Checkbox errorMessage="Choose an option." label="Terms" name="terms" />);
+	render(<CheckboxField errorMessage="Choose an option." label="Terms" name="terms" />);
 	const input = checkbox('Terms');
 	const error = textElement('Choose an option.');
 
@@ -264,10 +323,10 @@ test('an errorMessage marks the checkbox invalid and shows the error under the l
 
 // A required checkbox has no error message of its own. React Aria's native validation supplies one
 // after a submit, so Luke UI must render the error slot with no `errorMessage`.
-test('a required Checkbox shows its native validation message after a failed submit', async () => {
+test('a required CheckboxField shows its native validation message after a failed submit', async () => {
 	render(
 		<form>
-			<Checkbox isRequired label="Terms" name="terms" />
+			<CheckboxField isRequired label="Terms" name="terms" />
 			<button type="submit">Submit</button>
 		</form>,
 	);
@@ -281,11 +340,11 @@ test('a required Checkbox shows its native validation message after a failed sub
 	await expect.poll(() => getDescribedText(input).length).toBeGreaterThan(0);
 });
 
-test('Checkbox size changes the control size', () => {
+test('CheckboxField size changes the control size', () => {
 	render(
 		<>
-			<Checkbox label="Small" size="small" />
-			<Checkbox label="Large" size="large" />
+			<CheckboxField label="Small" size="small" />
+			<CheckboxField label="Large" size="large" />
 		</>,
 	);
 	const small = controlFor(checkbox('Small')).getBoundingClientRect().width;
@@ -294,26 +353,24 @@ test('Checkbox size changes the control size', () => {
 	expect(small).toBeLessThan(large);
 });
 
-test('the Checkbox scene has no axe violations', async () => {
+test('the CheckboxField scene has no axe violations', async () => {
 	const { container } = render(
 		<>
 			<CheckboxScene />
-			<Checkbox
-				aria-label="Select row"
-				description="One row."
-				errorMessage="Pick one."
+			<CheckboxField
+				description="Example description"
+				errorMessage="Example error"
 				isRequired
+				label="Required"
 			/>
-			<span id="external-label">External label</span>
-			<Checkbox aria-labelledby="external-label" />
-			<Checkbox isRequired label="Required" necessityIndicator="label" />
+			<CheckboxField isRequired label="Required words" necessityIndicator="label" />
 		</>,
 	);
 
 	await expectNoAxeViolations(container);
 });
 
-// The invalid icon lives on the error message, not on `content` (the native
+// The invalid icon lives on the error message, not on `CheckboxLabel` (the native
 // `<label>` wrapping the hidden input, which otherwise takes its name from its
 // contents), so there is nothing on the label itself for accessible-name
 // computation to pick up. Checked via CDP against the browser's own accname
@@ -323,7 +380,12 @@ test('the Checkbox scene has no axe violations', async () => {
 // browser in edge cases.
 test('the icon indicator stays out of the accessible name', async () => {
 	render(
-		<Checkbox defaultSelected errorMessage="Choose an option." label="Invalid" name="invalid" />,
+		<CheckboxField
+			defaultSelected
+			errorMessage="Choose an option."
+			label="Invalid"
+			name="invalid"
+		/>,
 	);
 
 	// Only a role-only lookup here: the name-matching arm of `getByRole` is exactly
@@ -341,12 +403,12 @@ test('the icon indicator stays out of the accessible name', async () => {
 // The error hangs at the label's inline edge at every size, not under the control. The icon
 // is centred on the message's first line, and wrapped lines align with the first.
 for (const size of ['small', 'medium', 'large'] as const) {
-	test(`the ${size} Checkbox error text starts at the label text and its icon sits on the first line`, () => {
+	test(`the ${size} CheckboxField error text starts at the label text and its icon sits on the first line`, () => {
 		const errorMessage =
 			'Accept the terms to continue. This message wraps onto a second line to check its alignment.';
 		const { container } = render(
 			<Stack width="16rem">
-				<Checkbox
+				<CheckboxField
 					defaultSelected
 					errorMessage={errorMessage}
 					label="Accept the terms"
@@ -431,42 +493,41 @@ async function getAccessibilityNode(nodeId: DomNode['nodeId']) {
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(<CheckboxScene />, { appearance });
-		await captureVisualAppearance(locator, 'checkbox/kitchen-sink', appearance);
+		await captureVisualAppearance(locator, 'checkbox-field/kitchen-sink', appearance);
 	}
 });
 
 test('necessity markers', { tags: ['visual'] }, async () => {
 	const { locator } = render(
 		<Stack>
-			<Checkbox isRequired label="Accept the terms" name="icon" />
-			<Checkbox isRequired label="Accept the terms" name="label" necessityIndicator="label" />
-			<Checkbox
+			<CheckboxField isRequired label="Accept the terms" name="icon" />
+			<CheckboxField isRequired label="Accept the terms" name="label" necessityIndicator="label" />
+			<CheckboxField
 				errorMessage="Choose an option."
 				isRequired
 				label="Accept the terms"
 				name="invalid"
 			/>
-			<Checkbox
+			<CheckboxField
 				isRequired
 				label="This required label wraps onto a second line so the marker sits after its last word."
 				name="wrapping"
 			/>
-			<Checkbox
+			<CheckboxField
 				isRequired
 				label="This required label wraps onto a second line so the marker follows."
 				name="wrapping-words"
 				necessityIndicator="label"
 			/>
-			<Checkbox aria-label="Select row" isRequired name="external" />
 		</Stack>,
 	);
-	await captureVisual(locator, 'checkbox/necessity-markers');
+	await captureVisual(locator, 'checkbox-field/necessity-markers');
 });
 
 test('keyboard focus ring', { tags: ['visual'] }, async () => {
-	const { locator } = render(<Checkbox label="Focus me" name="focus" />);
+	const { locator } = render(<CheckboxField label="Focus me" name="focus" />);
 	await focusViaKeyboard(page.getByRole('checkbox', { name: 'Focus me' }));
-	await captureVisual(locator, 'checkbox/focus-visible');
+	await captureVisual(locator, 'checkbox-field/focus-visible');
 });
 
 test('forced-colors resting', { tags: ['visual'] }, async () => {
@@ -475,13 +536,18 @@ test('forced-colors resting', { tags: ['visual'] }, async () => {
 	try {
 		const { locator } = render(
 			<Stack>
-				<Checkbox label="Default" name="default" />
-				<Checkbox defaultSelected label="Selected" name="selected" />
-				<Checkbox defaultSelected isDisabled label="Disabled" name="disabled" />
-				<Checkbox defaultSelected errorMessage="Choose an option." label="Invalid" name="invalid" />
+				<CheckboxField label="Default" name="default" />
+				<CheckboxField defaultSelected label="Selected" name="selected" />
+				<CheckboxField defaultSelected isDisabled label="Disabled" name="disabled" />
+				<CheckboxField
+					defaultSelected
+					errorMessage="Choose an option."
+					label="Invalid"
+					name="invalid"
+				/>
 			</Stack>,
 		);
-		await captureVisual(locator, 'checkbox/forced-colors-resting');
+		await captureVisual(locator, 'checkbox-field/forced-colors-resting');
 	} finally {
 		await emulateForcedColors('none');
 	}

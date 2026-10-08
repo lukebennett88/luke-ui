@@ -15,7 +15,10 @@ interface _FieldDescriptionProps extends _FieldDescriptionOmit {
 /** Props for `FieldDescription`. */
 export type FieldDescriptionProps = Prettify<_FieldDescriptionProps>;
 
-/** Styled helper text shown under a field. */
+/**
+ * Styled helper text for a field. Anywhere inside a control root, it describes the control
+ * automatically.
+ */
 export function FieldDescription(props: FieldDescriptionProps): JSX.Element {
 	const { className, ...restProps } = props;
 

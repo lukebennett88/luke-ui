@@ -15,7 +15,7 @@ interface StrongStyleProps {
 	textWrap?: TextProps['textWrap'];
 }
 
-type _StrongOmit = DistributiveOmit<React.ComponentProps<'strong'>, 'color'>;
+type _StrongOmit = DistributiveOmit<React.ComponentProps<'strong'>, 'color' | 'slot'>;
 
 interface _StrongProps extends _StrongOmit, StrongStyleProps {}
 
@@ -25,6 +25,9 @@ export type StrongProps = Prettify<_StrongProps>;
 /**
  * Marks text with strong importance, rendered as `<strong>`.
  * Inherits surrounding typography and applies the emphasis weight.
+ *
+ * It never fills a React Aria text slot, so it renders inside a field's label, description, or
+ * error message.
  */
 export function Strong(props: StrongProps) {
 	const { lineClamp, textWrap, ...elementProps } = props;
@@ -35,6 +38,7 @@ export function Strong(props: StrongProps) {
 			fontWeight="emphasis"
 			lineClamp={lineClamp}
 			shouldInheritFont
+			slot={null}
 			textWrap={textWrap}
 		/>
 	);

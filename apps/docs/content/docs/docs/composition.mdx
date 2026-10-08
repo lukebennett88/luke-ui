@@ -42,6 +42,11 @@ standard label, description, and error arrangement. This example adds a prefix w
 	title="Composition and customisation: Build a custom composition"
 />
 
+Use primitives when your layout owns a control's visible label, such as a settings row with the
+label beside a switch. Place `FieldLabel` and `FieldDescription` inside the control's root. The root
+names and describes the control from them, with no ids to pass. The
+[Switch primitive](/components/primitives/switch#labels-from-the-layout) shows this layout.
+
 Give the custom component the same accessibility care as a normal component. Preserve its documented
 structure. Provide an accessible name. Keep keyboard and focus behaviour intact. Use a normal React
 element for surrounding content when no primitive is needed.

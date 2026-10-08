@@ -17,13 +17,39 @@ const fieldMessageIndent = createVar();
 
 /**
  * Inline distance from the start edge of an inline control to its label text: the control's
- * width plus the gap before the label. An inline control root (`CheckboxRoot`) sets it per size,
- * and the `inline` slot reads it, so any inline control indents its error the same way.
+ * width plus the gap before the label. An inline control root (`CheckboxRoot`, `SwitchRoot`) sets it
+ * per size, and the `inline` slot reads it, so any inline control indents its error the same way.
  */
 export const inlineFieldIndent = createVar();
 
+/** Gap between an inline control and its label text. */
+export const inlineControlGap = vars.space.sp8;
+
 /** Gap between the error icon and the message text that follows it. */
 const errorIconGap = vars.space.sp8;
+
+/** Required marker drawn after a label's last inline content: an asterisk. */
+const iconNecessityMarker = {
+	selectors: {
+		[`${dataRequiredSelector} &::after`]: {
+			color: vars.color.foreground.danger.rest,
+			content: '"*"',
+			marginInlineStart: vars.space.sp4,
+		},
+	},
+} as const;
+
+/** Required marker drawn after a label's last inline content: the word “(required)”. */
+const labelNecessityMarker = {
+	selectors: {
+		[`${dataRequiredSelector} &::after`]: {
+			color: vars.color.text.secondary,
+			content: '"(required)"',
+			fontWeight: vars.font.weight.body,
+			marginInlineStart: vars.space.sp4,
+		},
+	},
+} as const;
 
 /**
  * Inline size of the error icon's rail. It is `fieldMessageIndent` less the gap, so the rail plus
@@ -35,8 +61,10 @@ const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px
 /**
  * Raw slotted config for the `Field` primitive.
  *
- * Slots: `root` (stacked layout), `inline` (inline-control layout), `label`, `message`
- * (description/error text), and `icon` (the error message's leading icon).
+ * Slots: `root` (stacked layout), `inline` (inline-control layout), `label`, `inlineLabel` (the
+ * clickable label of an inline control such as `CheckboxLabel`), `inlineLabelText` (the text of a
+ * composed inline control's label, which carries the required marker), `message` (description/error
+ * text), and `icon` (the error message's leading icon).
  *
  * `FieldError` lays the error `message` out with `trackRecipe`'s `firstLine` rail alignment, which
  * centres the `icon` rail on the message's first line and keeps wrapped lines aligned with the
@@ -72,6 +100,26 @@ const fieldConfig = {
 				},
 			},
 		},
+		inlineLabel: {
+			alignItems: 'flex-start',
+			color: 'inherit',
+			display: 'inline-flex',
+			font: 'inherit',
+			gap: inlineControlGap,
+			minInlineSize: 0,
+			selectors: {
+				[`&${dataDisabledSelector}`]: {
+					color: vars.color.text.disabled,
+					cursor: 'not-allowed',
+				},
+				// The reset default ring would otherwise paint both this clickable row and the
+				// control; the control alone carries the focus indication.
+				'&[data-focus-visible="true"]': {
+					outline: 'none',
+				},
+			},
+		},
+		inlineLabelText: {},
 		message: {
 			...vars.font.label,
 			fontWeight: vars.font.weight.body,
@@ -86,27 +134,12 @@ const fieldConfig = {
 	variants: {
 		necessityIndicator: {
 			icon: {
-				label: {
-					selectors: {
-						[`${dataRequiredSelector} &::after`]: {
-							color: vars.color.foreground.danger.rest,
-							content: '"*"',
-							marginInlineStart: vars.space.sp4,
-						},
-					},
-				},
+				inlineLabelText: iconNecessityMarker,
+				label: iconNecessityMarker,
 			},
 			label: {
-				label: {
-					selectors: {
-						[`${dataRequiredSelector} &::after`]: {
-							color: vars.color.text.secondary,
-							content: '"(required)"',
-							fontWeight: vars.font.weight.body,
-							marginInlineStart: vars.space.sp4,
-						},
-					},
-				},
+				inlineLabelText: labelNecessityMarker,
+				label: labelNecessityMarker,
 			},
 		},
 		tone: {
@@ -140,7 +173,8 @@ const fieldConfig = {
 /**
  * Slotted recipe for the `Field` primitive.
  *
- * `fieldRecipe({ necessityIndicator, tone }).root() / .inline() / .label() / .message() / .icon()`.
+ * `fieldRecipe({ necessityIndicator, tone }).root() / .inline() / .label() / .inlineLabel() /
+ * .inlineLabelText() / .message() / .icon()`.
  */
 export const fieldRecipe = recipe(fieldConfig);
 

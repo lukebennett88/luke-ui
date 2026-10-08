@@ -6,39 +6,25 @@ Luke UI primitives, React Aria Components (RAC), and app-owned Vanilla Extract (
 
 ## Needs met without a gap
 
-| Consumer need                         | What solved it                                                                                                                                                                                                                             | Layer              |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
-| App shell, sidebar, and settings rows | `Box`, `Stack`, `Cluster`, `Container`, and `ScrollFade`. `elementType` supplies landmarks. The sidebar uses `Box` because `Stack` always sets `display: flex`.                                                                            | High-level         |
-| Narrow layout                         | Responsive `Box` props hide the sidebar and change padding. App-owned container-query styles stack row labels above their controls.                                                                                                        | High-level, app VE |
-| Page, dialog, and row typography      | `Heading`, `Text`, and `Prose`.                                                                                                                                                                                                            | High-level         |
-| Actions and route links               | `Button` for dialog and destructive actions. `Link appearance="button"` for Open settings and Back to app.                                                                                                                                 | High-level         |
-| Settings navigation with active state | React Router `NavLink` supplies `aria-current`. App VE styles the list.                                                                                                                                                                    | App VE             |
-| Email and navigation search inputs    | Luke UI `TextInputField`, including `inputRef`, `errorMessage`, `isReadOnly`, and `prefix`.                                                                                                                                                | High-level         |
-| Inline profile fields beside labels   | Luke UI `TextInputField` always stacks the label above the input. The rows compose `TextInputRoot` with `FieldLabel`, `FieldDescription`, `FieldError`, `TextInputControl`, and `TextInput`, which the TextInput primitives docs describe. | Public primitive   |
-| Product theme                         | `defineTheme` with a `ThemeInput`, served by a Vite plugin. Public `vars` style app-owned surfaces, borders, focus, and control chrome.                                                                                                    | High-level         |
-| Colour mode and text size             | `data-color-mode` on `<html>` reaches portals. The root font size scales Luke UI's rem-based type and spacing together.                                                                                                                    | High-level         |
-| Icons                                 | `Provider` with the documented spritesheet URL, and `Icon`.                                                                                                                                                                                | High-level         |
+| Consumer need                         | What solved it                                                                                                                                                                                                                                                                     | Layer              |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| App shell, sidebar, and settings rows | `Box`, `Stack`, `Cluster`, `Container`, and `ScrollFade`. `elementType` supplies landmarks. The sidebar uses `Box` because `Stack` always sets `display: flex`.                                                                                                                    | High-level         |
+| Narrow layout                         | Responsive `Box` props hide the sidebar and change padding. App-owned container-query styles stack row labels above their controls.                                                                                                                                                | High-level, app VE |
+| Page, dialog, and row typography      | `Heading`, `Text`, and `Prose`.                                                                                                                                                                                                                                                    | High-level         |
+| Actions and route links               | `Button` for dialog and destructive actions. `Link appearance="button"` for Open settings and Back to app.                                                                                                                                                                         | High-level         |
+| Settings navigation with active state | React Router `NavLink` supplies `aria-current`. App VE styles the list.                                                                                                                                                                                                            | App VE             |
+| Email and navigation search inputs    | Luke UI `TextInputField`, including `inputRef`, `errorMessage`, `isReadOnly`, and `prefix`.                                                                                                                                                                                        | High-level         |
+| Inline profile fields beside labels   | Luke UI `TextInputField` always stacks the label above the input. The rows compose `TextInputRoot` with `FieldLabel`, `FieldDescription`, `FieldError`, `TextInputControl`, and `TextInput`, which the TextInput primitives docs describe.                                         | Public primitive   |
+| Theme and text size selects           | Luke UI `SelectRoot`, `SelectTrigger`, `SelectValue`, `SelectIndicator`, `SelectPopover`, `SelectListBox`, and `SelectItem`. The settings row draws the visible label and description, so the root takes their ids through `aria-labelledby` and `aria-describedby`.               | Public primitive   |
+| Boolean preferences that save at once | Luke UI `SwitchRoot`, `SwitchLabel`, `SwitchControl`, and `SwitchThumb`. `SwitchRoot` wraps the row, so its `FieldLabel` and `FieldDescription` name and describe the switch with no ids, clicking the label toggles it, and `isReadOnly` holds the value while a save is pending. | Public primitive   |
+| Product theme                         | `defineTheme` with a `ThemeInput`, served by a Vite plugin. Public `vars` style app-owned surfaces, borders, focus, and control chrome.                                                                                                                                            | High-level         |
+| Colour mode and text size             | `data-color-mode` on `<html>` reaches portals. The root font size scales Luke UI's rem-based type and spacing together.                                                                                                                                                            | High-level         |
+| Icons                                 | `Provider` with the documented spritesheet URL, and `Icon`.                                                                                                                                                                                                                        | High-level         |
 
 Saved settings, mutations, validation, drafts, upload limits, and fake persistence belong to the
 app. TanStack Query, Zod, and React Router own them, and none of them need design-system support.
 
 ## Remaining gaps
-
-### Select
-
-Theme and text size use RAC `Select`, `ListBox`, `Popover`, and a RAC `Button` trigger. Luke UI
-`Icon`, `Track`, and `Text` render the options, while `textRecipe` styles `SelectValue`. App VE
-styles the trigger, list, and options. Luke UI has no public Select. Its public button primitive
-applies the button recipe, which gives the select trigger the wrong chrome. The trigger therefore
-uses RAC. Owner:
-[#714: Forms and control naming](https://github.com/lukebennett88/luke-ui/issues/714).
-
-### Switch
-
-A boolean preference saves immediately when switched on or off. RAC `SwitchField` and `SwitchButton`
-use `aria-label`, with app VE for the track, thumb, and focus ring. Luke UI has no public Switch,
-and `Checkbox` is the wrong affordance for this setting. Owner:
-[#714: Forms and control naming](https://github.com/lukebennett88/luke-ui/issues/714).
 
 ### Dialog
 

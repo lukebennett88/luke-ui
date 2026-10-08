@@ -1,4 +1,4 @@
-import { Checkbox } from '@luke-ui/react/checkbox';
+import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Stack } from '@luke-ui/react/stack';
 import { useState } from 'react';
 
@@ -7,7 +7,7 @@ export default () => {
 
 	return (
 		<Stack maxInlineSize="20rem">
-			<Checkbox
+			<CheckboxField
 				isSelected={isSelected}
 				label={isSelected ? 'Checked' : 'Unchecked'}
 				onChange={setIsSelected}

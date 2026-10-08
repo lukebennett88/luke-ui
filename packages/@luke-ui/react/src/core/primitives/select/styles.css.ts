@@ -50,7 +50,6 @@ const selectConfig = {
 			borderWidth: '1px',
 			boxShadow: vars.depth.recessed,
 			color: vars.color.text.primary,
-			cursor: 'pointer',
 			display: 'inline-flex',
 			fontFamily: vars.font.family.body,
 			gap: vars.space.sp8,

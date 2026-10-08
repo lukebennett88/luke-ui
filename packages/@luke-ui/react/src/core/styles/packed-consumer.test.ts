@@ -305,6 +305,7 @@ for (const peerSet of peerSets) {
 				expect(markup).toContain('<svg');
 				expect(markup).toContain('<button');
 				expect(markup).toContain('<input');
+				expect(markup).toContain('role="switch"');
 
 				const server = await serveDirectory(path.join(consumerDir, 'dist'));
 				const browser = await chromium.launch();
@@ -330,7 +331,9 @@ for (const peerSet of peerSets) {
 								buttons: root?.querySelectorAll('button').length,
 								inputs: root?.querySelectorAll('input').length,
 							},
-							inputLabel: root?.querySelector('input')?.labels?.[0]?.textContent ?? null,
+							inputLabels: [...(root?.querySelectorAll('input') ?? [])].map(
+								(input) => input.labels?.[0]?.textContent ?? null,
+							),
 							keptServerElements:
 								elements.length === serverElements.length &&
 								elements.every((element, index) => element === serverElements[index]),
@@ -342,13 +345,21 @@ for (const peerSet of peerSets) {
 
 					expect(result.recoverableErrors).toEqual([]);
 					expect(consoleErrors).toEqual([]);
-					expect(result.controls).toEqual({ buttons: 1, inputs: 1 });
+					expect(result.controls).toEqual({ buttons: 1, inputs: 3 });
 					// React Aria effects adjust attributes after hydration, so compare nodes, not markup.
 					// Every server element must survive in place: none replaced, added, or removed.
 					expect(result.keptServerElements).toBe(true);
 					expect(result.textAfterHydration).toBe(result.serverText);
-					// The label resolves through server-generated ids, so it proves those ids hydrated intact.
-					expect(result.inputLabel).toBe('Name');
+					// Each label resolves through server-generated ids, so it proves those ids hydrated intact.
+					expect(result.inputLabels).toEqual(['Name', 'Example checkbox', 'Example switch']);
+
+					// Clicking the label text proves hydration attached each field's handlers.
+					await page.getByText('Example checkbox').click();
+					expect(await page.getByRole('checkbox', { name: 'Example checkbox' }).isChecked()).toBe(
+						true,
+					);
+					await page.getByText('Example switch').click();
+					expect(await page.getByRole('switch', { name: 'Example switch' }).isChecked()).toBe(true);
 				} finally {
 					await browser.close();
 					await server.close();
@@ -846,9 +857,11 @@ const APP = `
 import { Blockquote } from '@luke-ui/react/blockquote';
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Icon } from '@luke-ui/react/icon';
 import { Provider } from '@luke-ui/react/provider';
 import spritesheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
+import { SwitchField } from '@luke-ui/react/switch-field';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { createElement as h, useEffect } from 'react';
 
@@ -866,6 +879,8 @@ export function App({ onHydrated }) {
 			h(Blockquote, null, 'Hello world'),
 			h(Icon, { name: 'chevronDown', 'aria-label': 'Expand' }),
 			h(TextInputField, { label: 'Name' }),
+			h(CheckboxField, { label: 'Example checkbox' }),
+			h(SwitchField, { label: 'Example switch' }),
 			h(Button, null, 'Save'),
 		),
 	);

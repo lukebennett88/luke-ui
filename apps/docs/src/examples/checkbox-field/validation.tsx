@@ -1,5 +1,5 @@
 import { Button } from '@luke-ui/react/button';
-import { Checkbox } from '@luke-ui/react/checkbox';
+import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import type { SubmitEvent } from 'react';
@@ -13,7 +13,7 @@ export default () => {
 		<form onSubmit={handleSubmit}>
 			<Stack gap="sp16" maxInlineSize="20rem">
 				<Stack minBlockSize="4.5rem">
-					<Checkbox isRequired label="I accept the terms of service" />
+					<CheckboxField isRequired label="I accept the terms of service" />
 				</Stack>
 				<Cluster>
 					<Button type="submit">Create account</Button>

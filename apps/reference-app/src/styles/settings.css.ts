@@ -142,7 +142,12 @@ export const settingsRow = style({
 			flexWrap: 'wrap',
 		},
 	},
+	alignItems: 'center',
 	borderBlockEnd: `1px solid color-mix(in oklab, ${vars.color.border.decorative} 85%, transparent)`,
+	display: 'flex',
+	gap: vars.space.sp12,
+	paddingBlock: vars.space.sp12,
+	paddingInline: vars.space.sp16,
 	selectors: {
 		'&:last-child': {
 			borderBlockEnd: 'none',
@@ -180,7 +185,6 @@ export const avatarButton = style({
 	blockSize: avatarSize,
 	border: 'none',
 	borderRadius: vars.radius.full,
-	cursor: 'pointer',
 	display: 'inline-flex',
 	flexShrink: 0,
 	inlineSize: avatarSize,
@@ -289,7 +293,6 @@ export const emailEditButton = style({
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.full,
 	color: vars.color.text.secondary,
-	cursor: 'pointer',
 	display: 'inline-flex',
 	flexShrink: 0,
 	inlineSize: '1.75rem',
@@ -385,64 +388,4 @@ export const settingsSelect = style({
 	},
 	maxInlineSize: '100%',
 	minInlineSize: '8.5rem',
-});
-
-export const switchField = style({
-	alignItems: 'center',
-	display: 'inline-flex',
-	flexShrink: 0,
-});
-
-export const switchRoot = style({
-	alignItems: 'center',
-	display: 'inline-flex',
-	selectors: {
-		'&[data-disabled]': {
-			opacity: vars.interaction.disabledOpacity,
-		},
-		'&[data-focus-visible]': {
-			borderRadius: vars.radius.full,
-			outline: `2px solid ${vars.color.border.focus}`,
-			outlineOffset: '2px',
-		},
-	},
-});
-
-export const switchTrack = style({
-	background: `color-mix(in oklab, ${vars.color.text.primary} 16%, transparent)`,
-	blockSize: '1.35rem',
-	borderRadius: vars.radius.full,
-	display: 'inline-block',
-	flexShrink: 0,
-	inlineSize: '2.4rem',
-	pointerEvents: 'none',
-	position: 'relative',
-	selectors: {
-		[`${switchRoot}[data-selected] &`]: {
-			background: vars.color.background.accent.solid.rest,
-		},
-	},
-});
-
-export const switchThumb = style({
-	'@media': {
-		'(prefers-reduced-motion: reduce)': {
-			transition: 'none',
-		},
-	},
-	background: vars.color.foreground.accent.onSolid,
-	blockSize: '1.05rem',
-	borderRadius: vars.radius.full,
-	boxShadow: '0 1px 2px rgb(0 0 0 / 0.18)',
-	inlineSize: '1.05rem',
-	insetBlockStart: '0.15rem',
-	insetInlineStart: '0.15rem',
-	pointerEvents: 'none',
-	position: 'absolute',
-	selectors: {
-		[`${switchRoot}[data-selected] &`]: {
-			translate: '1.05rem 0',
-		},
-	},
-	transition: `translate ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
 });

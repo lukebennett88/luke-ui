@@ -54,7 +54,6 @@ const comboboxActionStyles = {
 	borderRadius: vars.radius.detail,
 	boxShadow: 'none',
 	color: vars.color.text.secondary,
-	cursor: 'pointer',
 	display: 'inline-flex',
 	flexShrink: 0,
 	fontFamily: 'inherit',

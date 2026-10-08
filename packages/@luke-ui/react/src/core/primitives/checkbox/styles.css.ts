@@ -6,41 +6,16 @@ import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { textLineHeight } from '../../text/recipe.css.js';
-import { inlineFieldIndent } from '../field/recipe.css.js';
+import { inlineControlGap, inlineFieldIndent } from '../field/recipe.css.js';
 
 const checkboxControlSize = createVar();
 const checkboxGlyphSize = createVar();
 const checkboxIndicatorSize = createVar();
 
-const checkboxContentGap = vars.space.sp8;
-
 const checkboxConfig = {
 	slots: {
 		root: {
 			minInlineSize: 0,
-		},
-		content: {
-			alignItems: 'flex-start',
-			color: 'inherit',
-			cursor: 'pointer',
-			display: 'inline-flex',
-			font: 'inherit',
-			gap: checkboxContentGap,
-			minInlineSize: 0,
-			selectors: {
-				'&[data-disabled="true"]': {
-					color: vars.color.text.disabled,
-					cursor: 'not-allowed',
-				},
-				// The reset default ring would otherwise paint both this clickable row and the
-				// indicator box; the box alone carries the focus indication (see `indicator`).
-				'&[data-focus-visible="true"]': {
-					outline: 'none',
-				},
-				'&[data-readonly="true"]': {
-					cursor: 'default',
-				},
-			},
 		},
 		control: {
 			alignItems: 'center',
@@ -50,7 +25,6 @@ const checkboxConfig = {
 			inlineSize: checkboxControlSize,
 			justifyContent: 'center',
 		},
-		label: {},
 		indicator: {
 			'@media': {
 				'(forced-colors: active)': {
@@ -175,35 +149,9 @@ const checkboxConfig = {
 		},
 	},
 	defaultVariants: {
-		necessityIndicator: 'icon',
 		size: 'medium',
 	},
 	variants: {
-		necessityIndicator: {
-			icon: {
-				label: {
-					selectors: {
-						'[data-required="true"] &::after': {
-							color: vars.color.foreground.danger.rest,
-							content: '"*"',
-							marginInlineStart: vars.space.sp4,
-						},
-					},
-				},
-			},
-			label: {
-				label: {
-					selectors: {
-						'[data-required="true"] &::after': {
-							color: vars.color.text.secondary,
-							content: '"(required)"',
-							fontWeight: vars.font.weight.body,
-							marginInlineStart: vars.space.sp4,
-						},
-					},
-				},
-			},
-		},
 		size: {
 			large: {
 				root: {
@@ -211,7 +159,7 @@ const checkboxConfig = {
 						[checkboxControlSize]: FONT_METRIC_SCALE[20].lineHeight,
 						[checkboxGlyphSize]: vars.iconSize.small,
 						[checkboxIndicatorSize]: vars.iconSize.medium,
-						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${checkboxContentGap})`,
+						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${inlineControlGap})`,
 					},
 				},
 			},
@@ -221,7 +169,7 @@ const checkboxConfig = {
 						[checkboxControlSize]: FONT_METRIC_SCALE[16].lineHeight,
 						[checkboxGlyphSize]: vars.iconSize.xsmall,
 						[checkboxIndicatorSize]: vars.iconSize.small,
-						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${checkboxContentGap})`,
+						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${inlineControlGap})`,
 					},
 				},
 			},
@@ -231,7 +179,7 @@ const checkboxConfig = {
 						[checkboxControlSize]: vars.iconSize.small,
 						[checkboxGlyphSize]: FONT_METRIC_SCALE[12].fontSize,
 						[checkboxIndicatorSize]: vars.iconSize.xsmall,
-						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${checkboxContentGap})`,
+						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${inlineControlGap})`,
 					},
 				},
 			},
@@ -239,7 +187,10 @@ const checkboxConfig = {
 	},
 } as const satisfies SlottedConfigInput;
 
-/** Slotted recipe for the Checkbox primitive anatomy. */
+/**
+ * Slotted recipe for the Checkbox primitive anatomy. It is private: its slots depend on the
+ * Checkbox parts and their state attributes.
+ */
 export const checkboxRecipe = recipe(checkboxConfig);
 
 /** Outer variant selection for the Checkbox recipe. */

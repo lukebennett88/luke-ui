@@ -1,0 +1,75 @@
+---
+title: Switch Field
+description: Lets someone turn a setting on or off, with optional supporting and validation text.
+source: packages/@luke-ui/react/src/exports/switch-field.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/Switch.html
+---
+
+Use `SwitchField` for a setting someone turns on or off. Pass `label` to name the setting, and
+`description` to clarify what it changes.
+
+<ExampleBlock src="switch-field/basic" layout="centered" title="Switch Field: Basic" />
+
+## Best practices
+
+Use a switch for an immediate change, such as a preference that saves straight away. Use a
+[`CheckboxField`](/components/forms/checkbox-field) for a choice that someone submits with a form,
+such as accepting terms.
+
+## Labels
+
+Every `SwitchField` has a visible `label`. The label sits inside a native `<label>`, so pass textual
+content only. Place links and buttons next to the switch. Inline typography such as `Strong` works
+inside the label. Set `slot={null}` on a `Text` you place there, as the
+[Checkbox primitive](/components/primitives/checkbox#text-in-the-label) describes.
+
+When another part of the layout draws the visible label, such as a settings row, compose the
+[Switch primitive](/components/primitives/switch) and name the control with `aria-labelledby`.
+
+## States
+
+Use `defaultSelected` for an uncontrolled initial value, or pair `isSelected` with `onChange` when
+application state owns the setting. Set `isReadOnly` to keep the current value while a change is
+saving.
+
+<ExampleBlock src="switch-field/states" title="Switch Field: States" />
+
+## Size
+
+Use `size` to change the switch control. It does not change the label typography. `medium` is the
+default.
+
+<ExampleBlock src="switch-field/sizes" title="Switch Field: Size" />
+
+## Validation
+
+Pass `errorMessage` for an error you already have, such as one from your server. A non-empty message
+marks the switch invalid. Set `isRequired` only when the switch must be on before a form submits,
+and pass `validate` for a custom rule. Read [Validation](/docs/validation) for where messages come
+from and how to write them.
+
+A required switch shows a marker after its `label`. Read
+[Required fields](/components/forms/text-input-field#required-fields) for both `necessityIndicator`
+values.
+
+## IDs and refs
+
+`id`, `className`, and `ref` target the root element. `inputId` and `inputRef` target the input.
+
+## Form values
+
+Pass `name` so the switch joins `FormData` while it is on. Pass `value` to set the submitted value,
+and `form` to associate a switch with a `<form>` it does not sit inside.
+
+## Accessibility
+
+A switch has the `switch` role, so assistive technology announces it as on or off. Space toggles it
+from the keyboard. Disabled switches cannot receive focus. Read-only switches remain focusable, so
+someone who uses a keyboard or assistive technology can still perceive their state.
+
+## API
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/switch-field/switch-field.tsx"
+	name="SwitchFieldProps"
+/>

@@ -1,5 +1,5 @@
 import { Button } from '@luke-ui/react/button';
-import { Checkbox } from '@luke-ui/react/checkbox';
+import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Cluster } from '@luke-ui/react/cluster';
 import { ComboboxField, ComboboxItem } from '@luke-ui/react/combobox-field';
 import { Stack } from '@luke-ui/react/stack';
@@ -57,7 +57,7 @@ export default () => {
 					</ComboboxField>
 				</Stack>
 				<Stack minBlockSize="4.5rem">
-					<Checkbox
+					<CheckboxField
 						errorMessage={errors.terms}
 						label="I accept the terms of service"
 						name="terms"

@@ -1,4 +1,4 @@
-import { Checkbox } from '@luke-ui/react/checkbox';
+import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { Stack } from '@luke-ui/react/stack';
 import { TextInputField } from '@luke-ui/react/text-input-field';
@@ -9,7 +9,7 @@ export default () => {
 
 	return (
 		<Stack gap="sp16" maxInlineSize="20rem">
-			<Checkbox isSelected={isLoading} label="Show loading state" onChange={setIsLoading} />
+			<CheckboxField isSelected={isLoading} label="Show loading state" onChange={setIsLoading} />
 			<LoadingSkeleton isLoading={isLoading} radius="control">
 				<TextInputField label="Email address" name="email" placeholder="you@example.com" />
 			</LoadingSkeleton>

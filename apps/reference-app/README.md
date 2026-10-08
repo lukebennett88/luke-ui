@@ -15,9 +15,11 @@ before anything renders, and each mutation writes its result back to that cache.
 mutation inputs at the API boundary. Settings persist in localStorage. The fake API adds 280 ms of
 latency. Tests set latency and fail the next mutation through `settingsApi`.
 
-Luke UI owns layout, typography, links, buttons, and text fields. React Aria Components supplies
-select, switch, menu, and dialog behaviour. Vanilla Extract owns the remaining product presentation,
-using public theme variables. [`FRICTION.md`](./FRICTION.md) records the remaining consumer gaps.
+Luke UI owns layout, typography, links, buttons, text fields, selects, and switches. The settings
+rows draw their own labels, so their selects and switches use Luke UI primitives. React Aria
+Components supplies menu and dialog behaviour. Vanilla Extract owns the remaining product
+presentation, using public theme variables. [`FRICTION.md`](./FRICTION.md) records the remaining
+consumer gaps.
 
 The theme source is `src/theme/input.ts`. A small Vite plugin in `vite.config.ts` passes it to Luke
 UI's `defineTheme` and serves the result as `virtual:reference-theme.css`. Vite restarts the dev

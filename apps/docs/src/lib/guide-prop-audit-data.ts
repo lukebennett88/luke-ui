@@ -37,31 +37,30 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		['isLoading'],
 	'feedback/loading-spinner.mdx::packages/@luke-ui/react/src/core/loading-spinner/loading-spinner.tsx::LoadingSpinnerProps':
 		['aria-label', 'color', 'isLoading', 'size'],
-	'forms/checkbox.mdx::packages/@luke-ui/react/src/core/checkbox/checkbox.tsx::CheckboxProps': [
-		'aria-label',
-		'aria-labelledby',
-		'defaultSelected',
-		'description',
-		'errorMessage',
-		'form',
-		'id',
-		'inputId',
-		'inputRef',
-		'isDisabled',
-		'isIndeterminate',
-		'isReadOnly',
-		'isRequired',
-		'isSelected',
-		'label',
-		'name',
-		'necessityIndicator',
-		'onChange',
-		'ref',
-		'size',
-		'validate',
-		'validationBehavior',
-		'value',
-	],
+	'forms/checkbox-field.mdx::packages/@luke-ui/react/src/core/checkbox-field/checkbox-field.tsx::CheckboxFieldProps':
+		[
+			'defaultSelected',
+			'description',
+			'errorMessage',
+			'form',
+			'id',
+			'inputId',
+			'inputRef',
+			'isDisabled',
+			'isIndeterminate',
+			'isReadOnly',
+			'isRequired',
+			'isSelected',
+			'label',
+			'name',
+			'necessityIndicator',
+			'onChange',
+			'ref',
+			'size',
+			'validate',
+			'validationBehavior',
+			'value',
+		],
 	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/combobox-field/combobox-field.tsx::ComboboxFieldProps':
 		[
 			'aria-label',
@@ -112,6 +111,29 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'size',
 			'triggerRef',
 			'validate',
+			'value',
+		],
+	'forms/switch-field.mdx::packages/@luke-ui/react/src/core/switch-field/switch-field.tsx::SwitchFieldProps':
+		[
+			'defaultSelected',
+			'description',
+			'errorMessage',
+			'form',
+			'id',
+			'inputId',
+			'inputRef',
+			'isDisabled',
+			'isReadOnly',
+			'isRequired',
+			'isSelected',
+			'label',
+			'name',
+			'necessityIndicator',
+			'onChange',
+			'ref',
+			'size',
+			'validate',
+			'validationBehavior',
 			'value',
 		],
 	'forms/text-input-field.mdx::packages/@luke-ui/react/src/core/text-input-field/text-input-field.tsx::TextInputFieldProps':
@@ -195,16 +217,14 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		['elementType', 'isFocusable', 'ref', 'renderRoot'],
 	'primitives/button.mdx::packages/@luke-ui/react/src/core/primitives/button/button.tsx::ButtonProps':
 		['appearance', 'isBlock', 'isDisabled', 'isPending', 'size', 'tone'],
-	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxContentProps':
-		[],
 	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxControlProps':
 		[],
 	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxIndicatorProps':
 		[],
 	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxLabelProps':
-		['necessityIndicator'],
+		['children', 'ref'],
 	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxRootProps':
-		['id', 'inputId', 'inputRef', 'isInvalid', 'ref', 'size'],
+		['aria-labelledby', 'id', 'inputId', 'inputRef', 'isInvalid', 'ref', 'size'],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/clear-button.tsx::ComboboxClearButtonProps':
 		[],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/empty-state.tsx::ComboboxEmptyStateProps':
@@ -271,6 +291,23 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectTriggerProps':
 		['isPending', 'ref'],
 	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectValueProps':
+		[],
+	'primitives/switch.mdx::packages/@luke-ui/react/src/core/primitives/switch/switch.tsx::SwitchControlProps':
+		[],
+	'primitives/switch.mdx::packages/@luke-ui/react/src/core/primitives/switch/switch.tsx::SwitchLabelProps':
+		['children', 'ref'],
+	'primitives/switch.mdx::packages/@luke-ui/react/src/core/primitives/switch/switch.tsx::SwitchRootProps':
+		[
+			'aria-describedby',
+			'aria-labelledby',
+			'id',
+			'inputId',
+			'inputRef',
+			'isInvalid',
+			'ref',
+			'size',
+		],
+	'primitives/switch.mdx::packages/@luke-ui/react/src/core/primitives/switch/switch.tsx::SwitchThumbProps':
 		[],
 	'primitives/text-input.mdx::packages/@luke-ui/react/src/core/primitives/text-input/text-input.tsx::TextInputControlProps':
 		['size'],

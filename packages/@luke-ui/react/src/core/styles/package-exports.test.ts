@@ -6,7 +6,10 @@ import packageJson from '../../../package.json' with { type: 'json' };
 
 const absentExportPaths = [
 	'./button/primitive',
+	'./checkbox',
 	'./checkbox/primitive',
+	'./switch',
+	'./switch/primitive',
 	'./combobox-field/primitive',
 	'./field/primitive',
 	'./text-field',
@@ -34,8 +37,11 @@ const presentExportPaths = {
 	'./primitives/combobox': './dist/primitives/combobox.js',
 	'./primitives/field': './dist/primitives/field.js',
 	'./primitives/select': './dist/primitives/select.js',
+	'./primitives/switch': './dist/primitives/switch.js',
 	'./primitives/text-input': './dist/primitives/text-input.js',
 	'./select-field': './dist/select-field.js',
+	'./checkbox-field': './dist/checkbox-field.js',
+	'./switch-field': './dist/switch-field.js',
 	'./text-input-field': './dist/text-input-field.js',
 } as const;
 
@@ -159,6 +165,23 @@ test('resolves nested and parent-relative declaration imports from the importing
 test('does not expose the private combobox styling recipe from the primitive entrypoint', async () => {
 	const combobox = await import('@luke-ui/react/primitives/combobox');
 	expect('comboboxRecipe' in combobox).toBe(false);
+});
+
+test('exports the inline-control primitive parts without their anatomy-coupled recipes', async () => {
+	const checkbox = await import('@luke-ui/react/primitives/checkbox');
+	const switchPrimitives = await import('@luke-ui/react/primitives/switch');
+	expect(Object.keys(checkbox).sort()).toEqual([
+		'CheckboxControl',
+		'CheckboxIndicator',
+		'CheckboxLabel',
+		'CheckboxRoot',
+	]);
+	expect(Object.keys(switchPrimitives).sort()).toEqual([
+		'SwitchControl',
+		'SwitchLabel',
+		'SwitchRoot',
+		'SwitchThumb',
+	]);
 });
 
 test('exports fixed breakpoints from the theme entry', async () => {

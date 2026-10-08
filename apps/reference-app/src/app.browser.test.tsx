@@ -188,6 +188,23 @@ test('profile picture rejects invalid files, retries a failed save, and can be r
 	expect((await settingsApi.getSettings()).profile.avatarDataUrl).toBeNull();
 });
 
+test('preference controls take their name and description from the settings row', async () => {
+	const app = await renderApp();
+
+	await expect
+		.element(app.locator.getByRole('switch', { name: 'Underline links' }))
+		.toHaveAccessibleDescription('Keep links underlined.');
+	await expect
+		.element(app.locator.getByRole('switch', { name: 'Pointer cursor' }))
+		.toHaveAccessibleDescription('Show a pointer over buttons and other controls.');
+	await expect
+		.element(app.locator.getByRole('button', { name: /Theme/ }))
+		.toHaveAccessibleName('System Theme');
+	await expect
+		.element(app.locator.getByRole('button', { name: /Text size/ }))
+		.toHaveAccessibleName('Default Text size');
+});
+
 test('keyboard autosave updates a switch and persists after remount', async () => {
 	const app = await renderApp();
 	const toggle = app.locator.getByRole('switch', { name: 'Underline links' });
@@ -210,6 +227,14 @@ test('keyboard autosave updates a switch and persists after remount', async () =
 		.element(again.locator.getByRole('switch', { name: 'Underline links' }))
 		.toBeChecked();
 	expect(document.documentElement.dataset.underlineLinks).toBe('true');
+});
+
+test('clicking a switch row label toggles the switch', async () => {
+	const app = await renderApp();
+	const toggle = app.locator.getByRole('switch', { name: 'Pointer cursor' });
+	const before = (toggle.element() as HTMLInputElement).checked;
+	await app.user.click(app.locator.getByText('Pointer cursor', { exact: true }));
+	await expect.element(toggle).toHaveProperty('checked', !before);
 });
 
 test('a failed theme change rolls back, and explicit and system themes apply', async () => {
