@@ -93,7 +93,7 @@ test('backgroundColor is keyed by tokens, not by an index signature', async () =
 	expect(mentionsRoles, `backgroundColor lost its role tokens: ${tokenSource}`).toBe(true);
 
 	const mentionsSurfaces =
-		tokenSource.includes('surface.') || tokenSource.includes('"surface.canvas"');
+		tokenSource.includes('surface.') || tokenSource.includes('"surface.base"');
 	expect(mentionsSurfaces, `backgroundColor lost its surface tokens: ${tokenSource}`).toBe(true);
 
 	// A translucent scrim is not an opaque fill.

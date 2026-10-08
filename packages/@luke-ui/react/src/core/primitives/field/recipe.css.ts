@@ -1,6 +1,7 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { iconMaskUrls } from '../../../../.generated/icon-mask-data.js';
 import { vars } from '../../../theme/contract.css.js';
+import { ICON_SIZES } from '../../sizing/icon-sizing.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
@@ -56,7 +57,7 @@ const labelNecessityMarker = {
  * the gap spans the indent exactly and the message text starts at the label's inline edge. `max()`
  * floors the rail at the icon's own size when no indent is set.
  */
-const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px')} - ${errorIconGap}), ${vars.iconSize.xsmall})`;
+const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px')} - ${errorIconGap}), ${ICON_SIZES.xsmall})`;
 
 /**
  * Raw slotted config for the `Field` primitive.
@@ -159,7 +160,7 @@ const fieldConfig = {
 					maskImage: iconMaskUrls.exclamationTriangle,
 					maskPosition: 'center',
 					maskRepeat: 'no-repeat',
-					maskSize: vars.iconSize.xsmall,
+					maskSize: ICON_SIZES.xsmall,
 				},
 				message: {
 					color: vars.color.foreground.danger.rest,

@@ -24,7 +24,7 @@ export const sidebarScroll = style({
 });
 
 export const skipLink = style({
-	background: vars.color.surface.floating,
+	background: vars.color.surface.overlay,
 	blockSize: '1px',
 	clip: 'rect(1px, 1px, 1px, 1px)',
 	clipPath: 'inset(100%)',
@@ -130,7 +130,7 @@ export const mobileHeaderLink = style({
 });
 
 export const panel = style({
-	background: vars.color.surface.floating,
+	background: vars.color.surface.base,
 	border: `1px solid color-mix(in oklab, ${vars.color.border.decorative} 85%, transparent)`,
 	borderRadius: vars.radius.surface,
 	overflow: 'hidden',
@@ -250,7 +250,7 @@ export const avatarOverlay = style({
 });
 
 export const menuPopover = style({
-	background: vars.color.surface.floating,
+	background: vars.color.surface.overlay,
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.surface,
 	boxShadow: vars.depth.floating,
@@ -288,7 +288,7 @@ export const menuItem = style({
 export const emailEditButton = style({
 	alignItems: 'center',
 	appearance: 'none',
-	background: vars.color.surface.canvas,
+	background: vars.color.surface.base,
 	blockSize: '1.75rem',
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.full,
@@ -363,7 +363,7 @@ export const dialogOverlay = style({
 });
 
 export const dialogModal = style({
-	background: vars.color.surface.floating,
+	background: vars.color.surface.overlay,
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.surface,
 	boxShadow: vars.depth.overlay,

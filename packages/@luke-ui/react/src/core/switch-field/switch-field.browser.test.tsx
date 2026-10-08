@@ -7,7 +7,7 @@ import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
 import { getTextStart, measureFieldError } from '../test-utils/measure-field-error.js';
-import { render, visualAppearances } from '../test-utils/render.js';
+import { flatAppearances, render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -326,6 +326,29 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(<SwitchScene />, { appearance });
 		await captureVisualAppearance(locator, 'switch-field/kitchen-sink', appearance);
+	}
+});
+
+// Regression: hover and pressed must look different from each other, and from rest, by colour
+// alone. The flat fixture has no depth or control finish to tell them apart.
+test('rest, hover, and pressed stay distinct without materials', { tags: ['visual'] }, async () => {
+	for (const appearance of flatAppearances) {
+		const { locator } = render(
+			<Stack>
+				{(['rest', 'hover', 'pressed'] as const).flatMap((state) => [
+					<SwitchField key={`off-${state}`} label={`Off, ${state}`} />,
+					<SwitchField defaultSelected key={`on-${state}`} label={`On, ${state}`} />,
+				])}
+			</Stack>,
+			{ appearance },
+		);
+		for (const state of ['hover', 'pressed'] as const) {
+			for (const name of [`Off, ${state}`, `On, ${state}`]) {
+				const label = locator.getByRole('switch', { name }).element().closest('label');
+				label?.setAttribute(state === 'hover' ? 'data-hovered' : 'data-pressed', 'true');
+			}
+		}
+		await captureVisualAppearance(locator, 'switch-field/interaction-states', appearance);
 	}
 });
 

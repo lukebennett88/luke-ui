@@ -15,18 +15,18 @@ code > * {
  * Fumadocs-owned.
  */
 .luke-ui-theme {
-	--color-fd-background: var(--luke-color-surface-canvas);
+	--color-fd-background: var(--luke-color-surface-base);
 	--color-fd-foreground: var(--luke-color-text-primary);
-	--color-fd-muted: var(--luke-color-surface-recessed);
+	--color-fd-muted: var(--luke-color-surface-subdued);
 	--color-fd-muted-foreground: var(--luke-color-text-secondary);
-	--color-fd-popover: var(--luke-color-surface-floating);
+	--color-fd-popover: var(--luke-color-surface-overlay);
 	--color-fd-popover-foreground: var(--luke-color-text-primary);
-	--color-fd-card: var(--luke-color-surface-canvas);
+	--color-fd-card: var(--luke-color-surface-base);
 	--color-fd-card-foreground: var(--luke-color-text-primary);
 	--color-fd-border: var(--luke-color-border-decorative);
 	--color-fd-primary: var(--luke-color-background-accent-solid-rest);
 	--color-fd-primary-foreground: var(--luke-color-foreground-accent-on-solid);
-	--color-fd-secondary: var(--luke-color-surface-recessed);
+	--color-fd-secondary: var(--luke-color-surface-subdued);
 	--color-fd-secondary-foreground: var(--luke-color-text-primary);
 	--color-fd-accent: var(--luke-color-background-neutral-subtle-hover);
 	--color-fd-accent-foreground: var(--luke-color-text-primary);

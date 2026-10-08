@@ -42,6 +42,9 @@ Each style includes Capsize trim values for the active font family. A line box n
 space above and below its letters. Trim removes that extra space from a block text element. Read
 [Text](/components/typography/text#trimming) for how `Text` infers trim from the element type.
 
+Trim values belong to `Text`. They are not public tokens. Render trimmed custom text with `Text` and
+its `elementType` rather than recreating the trim in application CSS.
+
 ## Weight and colour
 
 Each typography style already carries its weight. Pass `fontWeight` only when you need a different

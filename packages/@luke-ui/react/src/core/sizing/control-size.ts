@@ -19,3 +19,6 @@ export const FIELD_CONTROL_ICON_SIZE: Record<FieldControlSize, IconSize> = {
 	medium: 'small',
 	small: 'xsmall',
 };
+
+/** Minimum block and inline size of an interactive target, 24px per WCAG 2.5.8. */
+export const MIN_TARGET_SIZE = '1.5rem';

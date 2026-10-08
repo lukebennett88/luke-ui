@@ -23,7 +23,7 @@ export interface TokenPurposeGroup {
 const PURPOSE_DEFINITIONS = [
 	{
 		description:
-			'Background layers, from the page canvas to the translucent backdrop behind a dialog.',
+			'The base, subdued, field, and overlay surfaces, and the translucent backdrop behind a dialog.',
 		id: 'surfaces',
 		related: { label: 'Colour', splat: 'color' },
 		showSamples: true,
@@ -38,7 +38,8 @@ const PURPOSE_DEFINITIONS = [
 		title: 'Content',
 	},
 	{
-		description: 'Border colours for decoration, control outlines, and the focus ring.',
+		description:
+			'Border colours for decoration, guaranteed control boundaries and their hover, and the focus ring.',
 		id: 'borders',
 		related: { label: 'Colour', splat: 'color' },
 		showSamples: true,
@@ -74,14 +75,15 @@ const PURPOSE_DEFINITIONS = [
 		title: 'Radius',
 	},
 	{
-		description: 'The shadow ladder, and the face finish that pairs with it on action controls.',
+		description:
+			'The shadow ladder, and the face finish that pairs with it on solid control fills.',
 		id: 'depth',
 		related: null,
 		showSamples: false,
 		title: 'Depth',
 	},
 	{
-		description: 'Block sizes for controls and icons.',
+		description: 'Block sizes for small and medium controls.',
 		id: 'sizing',
 		related: null,
 		showSamples: true,
@@ -111,12 +113,11 @@ type TokenPurposeId = (typeof PURPOSE_DEFINITIONS)[number]['id'];
  * `null` because its tokens split across four purposes; `resolveColorPurpose` handles those.
  */
 const FAMILY_PURPOSES = {
-	actionControlFinish: 'depth',
 	color: null,
+	controlFinish: 'depth',
 	controlSize: 'sizing',
 	depth: 'depth',
 	font: 'typography',
-	iconSize: 'sizing',
 	interaction: 'interaction',
 	motion: 'motion',
 	radius: 'radius',
@@ -132,7 +133,7 @@ const COLOR_SECTION_PURPOSES: Record<string, TokenPurposeId | undefined> = {
 	text: 'content',
 };
 
-const STRUCTURAL_BORDERS = new Set(['control', 'decorative', 'focus']);
+const STRUCTURAL_BORDERS = new Set(['control', 'controlHover', 'decorative', 'focus']);
 
 function resolveColorPurpose(path: string): TokenPurposeId | undefined {
 	const [, section, leaf] = path.split('.');

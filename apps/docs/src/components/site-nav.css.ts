@@ -7,7 +7,7 @@ export const header = style({
 	'@layer': {
 		recipes: {
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.surface.base,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 			display: 'flex',
 			flexShrink: 0,
@@ -173,7 +173,7 @@ export const mobileThemeTrigger = style({
 export const appearancePopover = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.floating,
+			backgroundColor: vars.color.surface.overlay,
 			border: `1px solid ${vars.color.border.decorative}`,
 			borderRadius: vars.radius.surface,
 			boxShadow: vars.depth.floating,

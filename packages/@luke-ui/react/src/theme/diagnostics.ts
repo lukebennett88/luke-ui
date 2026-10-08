@@ -7,8 +7,8 @@
  */
 
 import type { Oklch } from './color.js';
-import type { GeneratedSurfaces } from './elevation.js';
 import type { FamilyRole, ScaleFamily, ScaleStep } from './scale.js';
+import type { GeneratedSurfaces } from './surfaces.js';
 
 /** A chroma reduction forced by sRGB gamut mapping on one generated rung. */
 export interface GamutReduction {
@@ -63,7 +63,7 @@ export interface FamilyDiagnostics {
  * gate. Tooling reads that classification instead of inferring it from token paths.
  */
 export interface ContrastCheck {
-	/** Token path of the background colour, for example `color.surface.floating`. */
+	/** Token path of the background colour, for example `color.surface.overlay`. */
 	background: string;
 	/** Token path of the foreground colour, for example `color.text.primary`. */
 	foreground: string;
@@ -89,7 +89,7 @@ export interface ThemeModeDiagnostics {
 	families: Record<FamilyRole, FamilyDiagnostics>;
 	/** The colour mode the diagnostics describe. */
 	mode: 'light' | 'dark';
-	/** The mode-aware elevation surfaces the canvas anchor produced. */
+	/** The four surfaces the mode resolved from its base and any authored surfaces. */
 	surfaces: GeneratedSurfaces;
 }
 

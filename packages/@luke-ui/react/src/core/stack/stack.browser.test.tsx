@@ -77,7 +77,7 @@ test('applies a responsive gap from its required initial value', async () => {
 });
 
 const itemStyle = {
-	backgroundColor: vars.color.surface.floating,
+	backgroundColor: vars.color.surface.base,
 	borderRadius: vars.radius.detail,
 	color: vars.color.text.primary,
 	paddingBlock: vars.space.sp8,
@@ -91,7 +91,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				<Stack
 					gap="sp12"
 					style={{
-						backgroundColor: vars.color.surface.recessed,
+						backgroundColor: vars.color.surface.subdued,
 						borderRadius: vars.radius.surface,
 						color: vars.color.text.primary,
 						padding: vars.space.sp16,
@@ -104,7 +104,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					alignItems="center"
 					gap="sp8"
 					style={{
-						backgroundColor: vars.color.surface.recessed,
+						backgroundColor: vars.color.surface.subdued,
 						borderRadius: vars.radius.surface,
 						color: vars.color.text.primary,
 						padding: vars.space.sp16,
@@ -117,7 +117,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					elementType="section"
 					gap="0"
 					style={{
-						backgroundColor: vars.color.surface.recessed,
+						backgroundColor: vars.color.surface.subdued,
 						borderRadius: vars.radius.surface,
 						color: vars.color.text.primary,
 						padding: vars.space.sp16,
@@ -130,7 +130,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					<Stack
 						gap="sp8"
 						style={{
-							backgroundColor: vars.color.surface.recessed,
+							backgroundColor: vars.color.surface.subdued,
 							borderRadius: vars.radius.surface,
 							color: vars.color.text.primary,
 							padding: vars.space.sp16,

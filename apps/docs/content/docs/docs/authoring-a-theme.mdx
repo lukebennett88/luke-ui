@@ -14,13 +14,12 @@ A basic theme authors an accent colour and a neutral character. Everything else 
 
 - a kebab-case `name`
 - `color.accent`, the required brand or interaction accent
-- `color.neutral` or `color.neutralStyle` (`'cool'`, `'neutral'`, or `'warm'`) for the neutral
-  canvas anchor
-- optional `color.background` to separate the page canvas from the neutral family's hue and chroma
-  character. It defaults to the resolved neutral canvas anchor.
+- `color.neutral` or `color.neutralStyle` (`'cool'`, `'neutral'`, or `'warm'`) for the neutral base
+  anchor
+- optional `color.surface` colours for the `base`, `subdued`, `field`, and `overlay` surfaces
 - optional `color.info`, `color.success`, `color.warning`, `color.danger`, `color.focus`, and
   `color.backdrop`
-- optional `typography`, `radius`, `depth`, and `actionControlFinish` overrides
+- optional `typography`, `radius`, `depth`, and `controlFinish` overrides
 
 Each colour accepts one string, adapted independently for light and dark, or an explicit
 `{ light, dark }` pair. Omit either side to fall back to that role's default. Luke UI supplies
@@ -30,16 +29,26 @@ accessible mode-specific defaults for every optional colour.
 `color.overlay.backdrop`. Hover and pressed colours are generated from the resting semantic colours.
 Do not author them.
 
-`radius` is a generative `base` and `multiplier` scale with explicit per-step overrides. Numeric
-radius inputs use a 16px base and emit as `rem`. `depth` and `actionControlFinish` are optional and
-deep-partial per mode over curated, extremely-subtle defaults. The typography styles and motion
-values are source-owned and are not authored.
+`radius` overrides the `detail`, `control`, `surface`, and `overlay` corners, which default to 4, 8,
+12, and 16px. Radius inputs are pixels at a 16px root and emit as `rem`. `depth` and `controlFinish`
+are optional and deep-partial per mode over curated, extremely-subtle defaults. The typography
+styles and motion values are source-owned and are not authored.
 
 <auto-type-table path="packages/@luke-ui/react/src/theme/define-theme.ts" name="ThemeInput" />
 
 The minimal theme authors one colour and a neutral character:
 
 <SourceCodeBlock src="theming/minimal-theme" />
+
+### Surfaces
+
+`color.surface.base` is the application background. It also anchors the neutral and role colours, so
+it defaults to the resolved neutral anchor. One `base` value is adapted for each mode.
+
+Every other surface defaults to a fixed offset from `base` for the mode. Set `subdued`, `field`, or
+`overlay` as a `{ light, dark }` pair when a default does not suit the theme. Luke UI uses an
+authored surface exactly as written. It never adjusts a surface to pass contrast. If a generated
+surface fails [contrast validation](#contrast-validation), set that surface explicitly.
 
 ## Extend a bundled theme
 
@@ -57,7 +66,8 @@ What each section inherits:
   neutral decision.
 - `radius` and `typography.fontWeight` merge key by key.
 - `typography.fontFamily` replaces the base value.
-- `depth` and `actionControlFinish` merge per mode, then per rung.
+- `color.surface` merges surface by surface. A surface replaces the base's surface whole.
+- `depth` and `controlFinish` merge per mode, then per rung.
 
 A value set to `undefined` counts as omitted and inherits.
 
@@ -96,33 +106,42 @@ some only, and does not check one category.
 
 Every text/surface pair the compiler emits is a hard gate:
 
-- `color.text.primary` and `color.text.secondary` against the elevation surfaces (`canvas`,
-  `recessed`, `floating`, `overlay`).
+- `color.text.primary` and `color.text.secondary` against all four surfaces (`base`, `subdued`,
+  `field`, and `overlay`).
 - For each of the six semantic roles (`neutral`, `accent`, `info`, `success`, `warning`, `danger`),
-  its rest, hover, and pressed foreground against `canvas`, `recessed`, and that role's own subtle
-  rest, hover, and pressed backgrounds.
+  its rest, hover, and pressed foreground against `base`, `field`, `overlay`, and that role's own
+  subtle rest, hover, and pressed backgrounds.
 - Each role's `onSolid` foreground against its solid rest, hover, and pressed backgrounds.
 
 ### Guaranteed at 3:1
 
-Four more pairs are hard gates, at the WCAG 2.2 non-text ratio: `color.border.focus` and
-`color.border.control`, each against the canvas and recessed surfaces. `border.control` is a
-dedicated solved colour for this boundary, not a scale-step alias that happens to pass.
+These pairs are hard gates at the WCAG 2.2 non-text ratio:
+
+- `color.border.focus` against all four surfaces.
+- `color.border.control` and `color.border.controlHover` against `base`, `field`, and `overlay`.
+  `border.control` is a dedicated solved colour for this boundary, not a scale-step alias that
+  happens to pass. `border.controlHover` is the same boundary moved a fixed step further from the
+  surfaces.
+- `color.background.danger.solid.rest`, the invalid control boundary, against `base`, `field`, and
+  `overlay`.
+
+`subdued` is a static region rather than a control surface, so these boundary gates do not cover it.
+A control placed on a subdued region still draws its own `field` surface.
 
 If any hard gate fails, `defineTheme` throws `ThemeContrastError`. Its `failures` array identifies
 each colour mode and token pair, so `defineTheme` never writes the stylesheet with an invalid
-combination.
+combination. When the failing pair names a generated surface, author that surface explicitly.
 
 ### Measured only, cannot fail the build
 
-`defineTheme` checks each role's border against the canvas and recessed surfaces at 3:1, for example
-`color.border.neutral` and `color.border.accent`. This applies to all six roles, but only as an
-advisory diagnostic. `defineTheme` records and reports a miss, but never throws it.
+`defineTheme` checks each role's border against the `base`, `field`, and `overlay` surfaces at 3:1,
+for example `color.border.neutral` and `color.border.accent`. This applies to all six roles, but
+only as an advisory diagnostic. `defineTheme` records and reports a miss, but never throws it.
 
-These borders use the same subtle family rung as ordinary separators. An author can then choose a
-neutral character whose role borders read as gentle separators rather than assertive boundaries.
-Diagnostics record whether each check is a hard gate or advisory-only (`ContrastCheck.hard`).
-Tooling can then tell the two apart without a guess from the token path.
+Role borders are decorative tints that use the same subtle family rung as ordinary separators. An
+author can then choose a neutral character whose role borders read as gentle separators rather than
+assertive boundaries. Diagnostics record whether each check is a hard gate or advisory-only
+(`ContrastCheck.hard`). Tooling can then tell the two apart without a guess from the token path.
 
 These pairs are not guaranteed to reach 3:1. Never rely on a role border alone to communicate a
 required state such as selected, invalid, or checked. Pair it with text, an icon, or a

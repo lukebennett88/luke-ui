@@ -57,7 +57,7 @@ function CategoryGroup({ group, isFirst }: { group: ComponentIndexGroup; isFirst
 function ComponentEntry({ entry }: { entry: ComponentIndexEntry }) {
 	return (
 		<Box
-			backgroundColor="surface.canvas"
+			backgroundColor="surface.base"
 			blockSize="100%"
 			borderColor="decorative"
 			borderRadius="surface"

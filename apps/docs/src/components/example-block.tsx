@@ -182,7 +182,7 @@ export function ExamplePreview({
 				*/}
 				<div
 					className="example-preview-canvas @container overflow-hidden md:@[640px]/example-preview-card:pe-6"
-					style={{ backgroundColor: vars.color.surface.canvas }}
+					style={{ backgroundColor: vars.color.surface.base }}
 				>
 					<StoryWrapper layout={layout}>{children}</StoryWrapper>
 				</div>

@@ -4,7 +4,7 @@ import { globalStyle, style } from '@vanilla-extract/css';
 export const root = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.recessed,
+			backgroundColor: vars.color.surface.subdued,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.surface,
 			borderStyle: 'solid',

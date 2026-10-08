@@ -30,7 +30,7 @@ describe('buildTheme contrast failures', () => {
 		const failure = error.failures.find((candidate) => {
 			return (
 				candidate.foreground === 'color.border.focus' &&
-				candidate.background === 'color.surface.canvas'
+				candidate.background === 'color.surface.base'
 			);
 		});
 		expect(failure).toBeDefined();
@@ -38,18 +38,21 @@ describe('buildTheme contrast failures', () => {
 		expect(failure?.required).toBe(3);
 		expect(failure?.ratio).toBeLessThan(3);
 		expect(error.message).toMatch(
-			/light: color\.border\.focus on color\.surface\.canvas — \d+\.\d\d:1 < 3:1/,
+			/light: color\.border\.focus on color\.surface\.base — \d+\.\d\d:1 < 3:1/,
 		);
 	});
 
-	it('rejects a dark-mode canvas the fixed text anchors cannot clear', () => {
+	it('rejects a dark-mode base the fixed text anchors cannot clear', () => {
 		const error = buildFailures({
 			...tactileFoundation,
 			dark: {
 				...tactileFoundation.dark,
-				color: { ...tactileFoundation.dark.color, background: resolvedColor('oklch(0.9 0 0)') },
+				color: {
+					...tactileFoundation.dark.color,
+					surface: { base: resolvedColor('oklch(0.9 0 0)') },
+				},
 			},
-			name: 'bad-dark-canvas',
+			name: 'bad-dark-base',
 		});
 		const failure = error.failures.find((candidate) => {
 			return (
@@ -60,7 +63,7 @@ describe('buildTheme contrast failures', () => {
 		});
 		expect(failure).toBeDefined();
 		expect(failure?.required).toBe(4.5);
-		expect(error.message).toContain('dark: color.text.primary on color.surface.canvas');
+		expect(error.message).toContain('dark: color.text.primary on color.surface.base');
 	});
 
 	it('aggregates every failing pair into one error', () => {
@@ -68,7 +71,10 @@ describe('buildTheme contrast failures', () => {
 			...tactileFoundation,
 			dark: {
 				...tactileFoundation.dark,
-				color: { ...tactileFoundation.dark.color, background: resolvedColor('oklch(0.9 0 0)') },
+				color: {
+					...tactileFoundation.dark.color,
+					surface: { base: resolvedColor('oklch(0.9 0 0)') },
+				},
 			},
 			light: {
 				...tactileFoundation.light,
@@ -77,29 +83,48 @@ describe('buildTheme contrast failures', () => {
 			name: 'bad-both',
 		});
 		const foregrounds = new Set(error.failures.map((failure) => failure.foreground));
-		// A low-contrast light focus ring and a pathological dark canvas fail different pairs across both
+		// A low-contrast light focus ring and a pathological dark base fail different pairs across both
 		// modes; the error collects them all.
 		expect(foregrounds.has('color.border.focus')).toBe(true);
 		expect(foregrounds.has('color.text.primary')).toBe(true);
 		expect(error.failures.length).toBeGreaterThan(2);
 		expect(error.message.split('\n').length).toBe(error.failures.length + 1);
 	});
+
+	it('validates an authored surface as written instead of repairing it', () => {
+		const field = resolvedColor('oklch(0.6 0 0)');
+		const error = buildFailures({
+			...tactileFoundation,
+			light: {
+				...tactileFoundation.light,
+				color: {
+					...tactileFoundation.light.color,
+					surface: { ...tactileFoundation.light.color.surface, field },
+				},
+			},
+			name: 'bad-field',
+		});
+		const failingSurfaces = new Set(error.failures.map((failure) => failure.background));
+		expect(failingSurfaces.has('color.surface.field')).toBe(true);
+		expect(error.failures.every((failure) => failure.mode === 'light')).toBe(true);
+	});
 });
 
 describe('contrast validation matrix', () => {
 	const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
-	const BASE_SURFACES = ['color.surface.canvas', 'color.surface.recessed'] as const;
-	const ELEVATION_SURFACES = [
-		...BASE_SURFACES,
-		'color.surface.floating',
+	// `subdued` is a static region, so only text and the focus ring are gated against it.
+	const CONTROL_SURFACES = [
+		'color.surface.base',
+		'color.surface.field',
 		'color.surface.overlay',
 	] as const;
+	const ALL_SURFACES = [...CONTROL_SURFACES, 'color.surface.subdued'] as const;
 
 	function expectedChecks() {
 		const hard: Array<{ background: string; foreground: string; required: number }> = [];
 		const advisory: Array<{ background: string; foreground: string; required: number }> = [];
 		for (const text of ['color.text.primary', 'color.text.secondary'] as const) {
-			for (const surface of ELEVATION_SURFACES) {
+			for (const surface of ALL_SURFACES) {
 				hard.push({ background: surface, foreground: text, required: TEXT_RATIO });
 			}
 		}
@@ -108,7 +133,7 @@ describe('contrast validation matrix', () => {
 				return `color.background.${role}.subtle.${state}`;
 			});
 			for (const state of INTERACTION_STATES) {
-				for (const background of [...BASE_SURFACES, ...subtleBackgrounds]) {
+				for (const background of [...CONTROL_SURFACES, ...subtleBackgrounds]) {
 					hard.push({
 						background,
 						foreground: `color.foreground.${role}.${state}`,
@@ -123,13 +148,16 @@ describe('contrast validation matrix', () => {
 					required: TEXT_RATIO,
 				});
 			}
-			for (const background of BASE_SURFACES) {
+			for (const background of CONTROL_SURFACES) {
 				advisory.push({ background, foreground: `color.border.${role}`, required: UI_RATIO });
 			}
 		}
-		for (const background of BASE_SURFACES) {
+		for (const background of ALL_SURFACES) {
 			hard.push({ background, foreground: 'color.border.focus', required: UI_RATIO });
+		}
+		for (const background of CONTROL_SURFACES) {
 			hard.push({ background, foreground: 'color.border.control', required: UI_RATIO });
+			hard.push({ background, foreground: 'color.border.controlHover', required: UI_RATIO });
 			hard.push({
 				background,
 				foreground: 'color.background.danger.solid.rest',

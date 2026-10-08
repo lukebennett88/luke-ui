@@ -71,7 +71,7 @@ export function SettingsLayout() {
 		<>
 			<title>{current ? `${current.label} · Settings` : 'Settings'}</title>
 			<Box
-				backgroundColor="surface.canvas"
+				backgroundColor="surface.subdued"
 				blockSize="100%"
 				className={cx(rootClassName, styles.shell)}
 				display="flex"
@@ -114,7 +114,7 @@ export function SettingsLayout() {
 					</ScrollFade>
 				</Box>
 				<Box
-					backgroundColor="surface.floating"
+					backgroundColor="surface.base"
 					boxShadow={{ bp768: 'raised' }}
 					className={styles.main}
 					elementType="main"

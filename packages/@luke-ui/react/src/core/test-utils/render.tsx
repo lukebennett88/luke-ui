@@ -14,6 +14,7 @@ import { createRoot, hydrateRoot } from 'react-dom/client';
 import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
 import spritesheetHref from '../../../dist/spritesheet.svg?url';
+import { buildFlatThemeStylesheet, flatThemeClassName } from './flat-theme.js';
 import {
 	getAppliedIdentityClassName,
 	setAppliedIdentityClassName,
@@ -23,7 +24,7 @@ import {
 
 export type VisualAppearance = {
 	mode: 'light' | 'dark';
-	theme: 'tactile' | 'paper';
+	theme: 'tactile' | 'paper' | 'flat';
 };
 
 export const visualAppearances = [
@@ -31,6 +32,15 @@ export const visualAppearances = [
 	{ mode: 'dark', theme: 'tactile' },
 	{ mode: 'light', theme: 'paper' },
 	{ mode: 'dark', theme: 'paper' },
+] as const satisfies ReadonlyArray<VisualAppearance>;
+
+/**
+ * The flat fixture in both modes: Tactile's colours with no depth or control finish. Use it for
+ * captures that prove a state stays distinct without materials. It is not part of the theme matrix.
+ */
+export const flatAppearances = [
+	{ mode: 'light', theme: 'flat' },
+	{ mode: 'dark', theme: 'flat' },
 ] as const satisfies ReadonlyArray<VisualAppearance>;
 
 const defaultVisualAppearance: VisualAppearance = visualAppearances[0];
@@ -53,7 +63,7 @@ export function render(node: ReactNode, options?: { appearance?: VisualAppearanc
 
 	const container = document.body.appendChild(document.createElement('div'));
 	container.className = rootClassName;
-	container.style.backgroundColor = vars.color.surface.canvas;
+	container.style.backgroundColor = vars.color.surface.base;
 	const root = createRoot(container);
 	trackMountedRender(container, root);
 
@@ -83,7 +93,7 @@ export function hydrate(
 
 	const container = document.body.appendChild(document.createElement('div'));
 	container.className = rootClassName;
-	container.style.backgroundColor = vars.color.surface.canvas;
+	container.style.backgroundColor = vars.color.surface.base;
 	container.innerHTML = markup;
 
 	const recoverableErrors: Array<unknown> = [];
@@ -107,6 +117,7 @@ export function hydrate(
 }
 
 function applyAppearance(appearance: VisualAppearance) {
+	if (appearance.theme === 'flat') loadFlatTheme();
 	const identityClassName = identityClassNameFor(appearance.theme);
 	const appliedIdentityClassName = getAppliedIdentityClassName();
 	if (appliedIdentityClassName != null) {
@@ -124,5 +135,21 @@ function unmount(container: HTMLElement, root: Root) {
 }
 
 function identityClassNameFor(theme: VisualAppearance['theme']) {
-	return theme === 'tactile' ? tactileThemeClassName : paperThemeClassName;
+	const classNames = {
+		flat: flatThemeClassName,
+		paper: paperThemeClassName,
+		tactile: tactileThemeClassName,
+	} as const satisfies Record<VisualAppearance['theme'], string>;
+	return classNames[theme];
+}
+
+const FLAT_THEME_STYLE_ID = 'luke-ui-flat-fixture-theme';
+
+/** Adds the flat fixture's stylesheet once. The bundled themes load as static imports above. */
+function loadFlatTheme() {
+	if (document.getElementById(FLAT_THEME_STYLE_ID) !== null) return;
+	const style = document.createElement('style');
+	style.id = FLAT_THEME_STYLE_ID;
+	style.textContent = buildFlatThemeStylesheet();
+	document.head.append(style);
 }

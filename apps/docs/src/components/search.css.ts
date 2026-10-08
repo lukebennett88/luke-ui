@@ -82,7 +82,7 @@ export const trigger = style({
 					transition: 'none',
 				},
 			},
-			backgroundColor: vars.color.surface.recessed,
+			backgroundColor: vars.color.surface.field,
 			borderColor: vars.color.border.control,
 			boxShadow: vars.depth.recessed,
 			cursor: 'text',
@@ -92,22 +92,15 @@ export const trigger = style({
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, border-color, box-shadow, color',
 			transitionTimingFunction: vars.motion.easing.standard,
+			// The trigger reads as a search field, so it follows the field model: the hover border, and
+			// no button depth or fill changes. Focus keeps the Button's ring.
 			selectors: {
-				'&[data-focus-visible="true"]': {
-					borderColor: vars.color.border.accent,
-				},
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: vars.color.surface.recessed,
-					borderColor: vars.color.border.accent,
-					boxShadow: vars.depth.recessed,
-					transform: 'none',
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: vars.color.surface.recessed,
-					borderColor: vars.color.border.accent,
-					boxShadow: vars.depth.recessed,
-					transform: 'none',
-				},
+				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"]), &[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])':
+					{
+						backgroundColor: vars.color.surface.field,
+						borderColor: vars.color.border.controlHover,
+						boxShadow: vars.depth.recessed,
+					},
 			},
 		},
 	},
@@ -209,7 +202,7 @@ export const panel = style({
 export const panelFieldShell = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.floating,
+			backgroundColor: vars.color.surface.overlay,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.surface,
 			borderStyle: 'solid',
@@ -297,7 +290,7 @@ export const inputRow = style({
 	'@layer': {
 		recipes: {
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.floating,
+			backgroundColor: vars.color.surface.overlay,
 			borderRadius: vars.radius.surface,
 			display: 'flex',
 			flexShrink: 0,

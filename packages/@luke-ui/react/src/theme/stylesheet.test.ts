@@ -8,6 +8,7 @@ import {
 import { buildTheme } from './build-theme.js';
 import { themeClassName as paperThemeClassName } from './bundles/paper/index.js';
 import { themeClassName as tactileThemeClassName } from './bundles/tactile/index.js';
+import { capsizeTrimVarName } from './capsize-trim-vars.js';
 import { flattenThemeContract, partitionContractPairs, spaceScale } from './contract.js';
 import type { ThemeFoundation } from './foundation.js';
 import { defaultFontWeights, defaultRadius } from './foundation.js';
@@ -176,7 +177,7 @@ describe('buildTheme output', () => {
 		] as const) {
 			const paperResting = extractValue(paperBlock, '--luke-depth-resting');
 			const paperRaised = extractValue(paperBlock, '--luke-depth-raised');
-			const paperFinish = extractValue(paperBlock, '--luke-action-control-finish-resting');
+			const paperFinish = extractValue(paperBlock, '--luke-control-finish-resting');
 			const tactileResting = extractValue(tactileBlock, '--luke-depth-resting');
 
 			expect(paperResting).not.toBe(tactileResting);
@@ -184,9 +185,7 @@ describe('buildTheme output', () => {
 			expect(paperRaised.split(', ')).toHaveLength(2);
 			expect(paperRaised).not.toBe(paperResting);
 			expect(paperFinish).toContain('radial-gradient');
-			expect(paperFinish).not.toBe(
-				extractValue(tactileBlock, '--luke-action-control-finish-resting'),
-			);
+			expect(paperFinish).not.toBe(extractValue(tactileBlock, '--luke-control-finish-resting'));
 		}
 	});
 });
@@ -225,8 +224,11 @@ describe('buildTheme defaults', () => {
 			const identity = splitBlocks(css).identity;
 
 			for (const style of typeStyles) {
-				expect(identity).toContain(`--luke-font-${style}-cap-height-trim:`);
-				expect(identity).toContain(`--luke-font-${style}-baseline-trim:`);
+				// The trims are private: `Text` reads them, but they are not public tokens.
+				expect(identity).toContain(`${capsizeTrimVarName(style, 'capHeightTrim')}:`);
+				expect(identity).toContain(`${capsizeTrimVarName(style, 'baselineTrim')}:`);
+				expect(identity).not.toContain(`--luke-font-${style}-cap-height-trim:`);
+				expect(identity).not.toContain(`--luke-font-${style}-baseline-trim:`);
 				expect(identity).toContain(`--luke-font-${style}-font-weight:`);
 				expect(identity).toContain(`--luke-font-${style}-font-family:`);
 			}

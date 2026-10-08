@@ -6,7 +6,7 @@ import { vars } from '@luke-ui/react/theme';
 import { useState } from 'react';
 
 const lineBoxStyle = {
-	backgroundColor: vars.color.surface.recessed,
+	backgroundColor: vars.color.surface.subdued,
 	borderBlock: `1px dashed ${vars.color.border.decorative}`,
 } as const;
 

@@ -8,7 +8,7 @@ import { recipe } from '../styles/recipe.js';
  */
 export const codeRecipe = recipe({
 	base: {
-		backgroundColor: vars.color.surface.recessed,
+		backgroundColor: vars.color.surface.subdued,
 		borderRadius: vars.radius.control,
 		fontFamily: vars.font.family.code,
 		// Monospace reads large at the same nominal size. Use `em` so the correction tracks the

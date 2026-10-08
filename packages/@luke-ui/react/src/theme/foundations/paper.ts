@@ -9,7 +9,7 @@ import type { ThemeInput } from '../define-theme.js';
 // Multi-layer values below are concatenated string literals, not `[...].join(', ')`, because a
 // joined value survives dead-code elimination even when unused. See `themes/theme-bundle.test.ts`.
 export const paperTheme: ThemeInput = {
-	actionControlFinish: {
+	controlFinish: {
 		dark: {
 			raised:
 				'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.1) 0%, transparent 100%), ' +

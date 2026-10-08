@@ -15,7 +15,7 @@ test('renders every bundled identity and explicit colour mode independently', ()
 		expect(document.documentElement).toHaveAttribute('data-color-mode', appearance.mode);
 		const styles = getComputedStyle(root);
 		expect(styles.colorScheme).toBe(appearance.mode);
-		expect(styles.backgroundColor).toBe(styles.getPropertyValue('--luke-color-surface-canvas'));
+		expect(styles.backgroundColor).toBe(styles.getPropertyValue('--luke-color-surface-base'));
 	}
 });
 

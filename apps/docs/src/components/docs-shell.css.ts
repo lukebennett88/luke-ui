@@ -13,7 +13,7 @@ export const shell = style({
 				'--fd-docs-row-1': '0px',
 				'--fd-docs-row-2': SITE_HEADER_BLOCK_SIZE,
 			},
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.surface.base,
 			display: 'grid',
 			gridTemplateAreas: '"header" "toc-popover" "main"',
 			gridTemplateColumns: 'minmax(0, 1fr)',
@@ -48,7 +48,7 @@ export const header = style({
 export const sidebar = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.surface.base,
 			borderInlineEnd: `1px solid ${vars.color.border.decorative}`,
 			display: 'none',
 			gridArea: 'sidebar',
@@ -199,7 +199,7 @@ export const drawerOverlay = style({
 export const drawerModal = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.surface.overlay,
 			blockSize: '100%',
 			boxShadow: vars.depth.overlay,
 			inlineSize: 'min(22rem, 90vw)',

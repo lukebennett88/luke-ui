@@ -87,7 +87,7 @@ export const textInputPartsRecipe = recipe({
 				},
 			},
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.recessed,
+			backgroundColor: vars.color.surface.field,
 			borderColor: vars.color.border.control,
 			borderRadius: vars.radius.control,
 			borderStyle: 'solid',
@@ -103,37 +103,29 @@ export const textInputPartsRecipe = recipe({
 			minInlineSize: 0,
 			overflow: 'visible',
 			transitionDuration: vars.motion.duration.feedback,
-			transitionProperty: 'background-color, border-color, color',
+			transitionProperty: 'background-color, border-color, box-shadow, color',
 			transitionTimingFunction: vars.motion.easing.standard,
 
+			// Precedence: invalid beats read-only and hover. Focus only adds the ring, so it composes
+			// with every state.
 			selectors: {
 				[control.disabled]: {
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
-				[control.focusWithin]: {
-					borderColor: vars.color.border.accent,
-					...focusRing(vars.color.border.focus),
-				},
+				[control.focusWithin]: focusRing(vars.color.border.focus),
 				[control.hover]: {
-					borderColor: vars.color.border.accent,
+					borderColor: vars.color.border.controlHover,
+				},
+				// A read-only control keeps its field surface and guaranteed border. It drops the inset
+				// depth and, through the hover selector, hover feedback.
+				[control.readOnly]: {
+					boxShadow: 'none',
 				},
 				// The field's error message carries the non-colour invalid cue, so the border keeps
 				// its resting width and only takes the danger colour.
 				[control.invalid]: {
 					borderColor: vars.color.background.danger.solid.rest,
-				},
-				[control.invalidFocusWithin]: {
-					borderColor: vars.color.background.danger.solid.rest,
-					...focusRing(vars.color.border.focus),
-				},
-				[control.readOnly]: {
-					backgroundColor: vars.color.surface.canvas,
-					borderColor: vars.color.border.decorative,
-					boxShadow: 'none',
-				},
-				[control.readOnlyFocusWithin]: {
-					...focusRing(vars.color.border.focus),
 				},
 			},
 		},

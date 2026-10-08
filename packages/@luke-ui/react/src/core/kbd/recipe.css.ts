@@ -5,7 +5,7 @@ import { recipe } from '../styles/recipe.js';
 export const kbdRecipe = recipe({
 	base: {
 		alignItems: 'center',
-		backgroundColor: vars.color.surface.recessed,
+		backgroundColor: vars.color.surface.subdued,
 		blockSize: 'fit-content',
 		borderColor: vars.color.border.decorative,
 		borderRadius: vars.radius.control,

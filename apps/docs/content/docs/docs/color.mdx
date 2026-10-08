@@ -11,21 +11,25 @@ mode. A component then stays consistent, because it does not need to know the un
 
 Surface roles describe where an element sits in the interface:
 
-- `color.surface.canvas`: the page.
-- `color.surface.recessed`: an inset area.
-- `color.surface.floating`: elevated UI, such as menus and cards.
-- `color.surface.overlay`: dialogs and other high-elevation surfaces. This is an opaque colour.
+- `color.surface.base`: the application background and primary content.
+- `color.surface.subdued`: secondary static regions, such as a sidebar or a panel set apart from the
+  page.
+- `color.surface.field`: form-control surfaces.
+- `color.surface.overlay`: detached content, such as menus, popovers, and dialogs. This is an opaque
+  colour.
 
 `color.overlay.backdrop` dims content behind a modal. It is not a surface colour.
 
 Text uses `primary` and `secondary` roles. Borders distinguish decorative, control, and focus uses.
+`color.border.control` and `color.border.controlHover` are guaranteed control boundaries.
+`color.border.decorative` is a separator with no contrast guarantee.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
 
 <section
 	style={{
-		backgroundColor: vars.color.surface.floating,
+		backgroundColor: vars.color.surface.subdued,
 		borderColor: vars.color.border.decorative,
 		color: vars.color.text.primary,
 	}}
@@ -94,10 +98,12 @@ Each role also has one state-free border, for example `vars.color.border.warning
 describes meaning. The component decides when to apply it, such as only while invalid or as a
 permanent outline.
 
-Luke UI measures a semantic border for contrast, but does not guarantee it reaches 3:1. See
+Role borders are decorative tints, for example on an application notice. Luke UI measures a role
+border for contrast, but does not guarantee it reaches 3:1. See
 [contrast validation](/docs/authoring-a-theme#contrast-validation). Never rely on one alone to
 communicate a required state such as selected, invalid, or checked. Pair it with text, an icon, or
-another cue that is separately contrast-gated.
+another cue that is separately contrast-gated. Use `color.border.control` when a custom element
+needs a guaranteed boundary.
 
 ### The numeric scale is private
 

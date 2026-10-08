@@ -1,5 +1,6 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
 import { recipe } from '../../styles/recipe.js';
 import { textRecipe } from '../../text/recipe.css.js';
 
@@ -15,7 +16,7 @@ export const buttonRecipeInternal = recipe({
 		touchAction: 'manipulation',
 		transitionDuration: vars.motion.duration.feedback,
 		transitionProperty:
-			'background-color, border-color, box-shadow, color, opacity, text-decoration-color, transform',
+			'background-color, border-color, box-shadow, color, opacity, text-decoration-color',
 		transitionTimingFunction: vars.motion.easing.standard,
 		selectors: {
 			'&[data-disabled="true"]': {
@@ -52,17 +53,6 @@ export const buttonRecipeInternal = recipe({
 								opacity: 1,
 							},
 						},
-						transform: 'none',
-					},
-					'(prefers-reduced-motion: reduce)': {
-						selectors: {
-							'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-								transform: 'none',
-							},
-							'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-								transform: 'none',
-							},
-						},
 					},
 				},
 				alignItems: 'center',
@@ -79,23 +69,21 @@ export const buttonRecipeInternal = recipe({
 				justifyContent: 'center',
 				letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 				lineHeight: FONT_METRIC_SCALE[14].lineHeight,
-				minBlockSize: vars.controlSize.minTarget,
-				minInlineSize: vars.controlSize.minTarget,
+				minBlockSize: MIN_TARGET_SIZE,
+				minInlineSize: MIN_TARGET_SIZE,
 				position: 'relative',
 				textDecoration: 'none',
-				transform: 'translateY(0)',
 				whiteSpace: 'nowrap',
+				// Hover and pressed change colour, depth, and finish, never position or scale.
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						boxShadow: vars.depth.raised,
-						transform: 'translateY(-1px)',
 					},
 					'&[data-pending="true"]': {
 						cursor: 'wait',
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						boxShadow: vars.depth.recessed,
-						transform: 'translateY(1px)',
 					},
 				},
 			},
@@ -223,16 +211,16 @@ function buttonAppearance(
 					'(forced-colors: active)': { backgroundImage: 'none' },
 				},
 				backgroundColor: ramp.rest,
-				backgroundImage: isSolid ? vars.actionControlFinish.resting : 'none',
+				backgroundImage: isSolid ? vars.controlFinish.resting : 'none',
 				color,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						backgroundColor: ramp.hover,
-						backgroundImage: isSolid ? vars.actionControlFinish.raised : 'none',
+						backgroundImage: isSolid ? vars.controlFinish.raised : 'none',
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						backgroundColor: ramp.pressed,
-						backgroundImage: isSolid ? vars.actionControlFinish.recessed : 'none',
+						backgroundImage: isSolid ? vars.controlFinish.recessed : 'none',
 					},
 				},
 			},

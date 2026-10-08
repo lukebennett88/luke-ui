@@ -17,7 +17,7 @@ same across bundled and custom themes.
 
 <ExampleBlock src="theming/semantic-variables" title="Token reference: Use semantic variables" />
 
-Choose the token whose name matches the element's role. A card might use `surface.floating`,
+Choose the token whose name matches the element's role. A card might use `surface.subdued`,
 `radius.surface`, and `depth.resting`. A warning message might use the warning role's subtle
 background and foreground.
 
@@ -49,8 +49,8 @@ Depth describes how a surface sits above or within the interface.
 
 <ExampleBlock src="overview/depth" title="Token reference: Depth scale" />
 
-Pair each depth role with the matching surface role. For example, a menu can use `surface.floating`
-with `depth.floating`, while a dialog can use `surface.overlay` with `depth.overlay`.
+Pair each depth role with the matching surface role. Menus and dialogs both use `surface.overlay`. A
+menu adds `depth.floating`, while a dialog adds `depth.overlay`.
 
 Components already apply depth to their own states. Use these variables only for custom surfaces.
 

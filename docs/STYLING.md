@@ -56,13 +56,24 @@ pure and Node-compatible. It normalises a curated `ThemeInput` into static CSS a
 Colour tokens come from private 12-step scales and elevation surfaces, then map onto the semantic
 contract. See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for that pipeline.
 
-Type styles are grouped from `font.caption` through `font.display`. Keep family, size, weight, line
-height, letter spacing, and Capsize trims together. `font.family.code` is a fixed monospace stack.
-Icon sizes run from `xsmall` to `large` and are emitted as `rem`. `ICON_SIZE_VALUES` in
-`src/theme/token-values.ts` sets their dimensions.
+Type styles are grouped from `font.caption` through `font.display`. Each has five public leaves:
+family, size, weight, line height, and letter spacing. `font.family.code` is a fixed monospace
+stack.
 
-Author `depth.*` and `actionControlFinish.*` per mode as final CSS values. Components pick semantic
-tokens. They do not branch on theme identity.
+The Capsize trims depend on the theme's font, so the theme stylesheet writes them in its identity
+rule as private `--luke-internal-font-<style>-baseline-trim` and `-cap-height-trim` variables.
+`theme/capsize-trim-vars.ts` names them for both the stylesheet and the `Text` recipe. They are not
+part of `vars`.
+
+Public tokens are theme-dependent semantic values and shared fixed measurements that applications
+demonstrably align with. Component-specific geometry is a private TypeScript constant in
+`core/sizing/`: the minimum target, the Combobox action size, and the icon sizes. `Box`'s
+token-backed values derive from `vars`, so removing a token removes its `Box` value. The decision
+record is [research/716-token-contract.md](../research/716-token-contract.md).
+
+Author `depth.*` and `controlFinish.*` per mode as final CSS values. Components pick semantic
+tokens. They do not branch on theme identity. A component must keep its essential state distinctions
+when every depth and control finish is `none`. The `flat` test appearance checks that.
 
 Bundled themes (`tactile`, `paper`) ship precompiled. Each stylesheet pairs `:where(:root)` with a
 `.luke-ui-theme-<name>` identity class. Apply the bundled `themeClassName` export only when a
@@ -223,10 +234,13 @@ import { composeInputStateSelectors, descendantDisabledSelector } from './input-
 const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSelectors();
 ```
 
-`composeInputStateSelectors` owns the shared attribute and pseudo-class matrix. It returns mutually
-exclusive selectors. Control-specific selectors stay in the owning recipe. Pass `extraStates` when
-an element carries a state in a form the defaults do not cover, such as a bare `<input>` that is
-itself `:read-only`.
+`composeInputStateSelectors` owns the shared attribute and pseudo-class matrix. Control-specific
+selectors stay in the owning recipe. The field model is the same in every field control: hover uses
+`border.controlHover` and never applies while read-only or disabled. Focus adds the ring and leaves
+the border alone. Invalid comes last, so its danger border survives hover, focus, and read-only.
+Read-only keeps the field surface and `border.control` and drops the inset depth. Pass `extraStates`
+when an element carries a state in a form the defaults do not cover, such as a bare `<input>` that
+is itself `:read-only`.
 
 Do not widen a state with `:has()` when the group already exposes data attributes such as
 `data-disabled` and `data-invalid`. Probing descendants cannot tell a disabled control from one that
@@ -286,7 +300,7 @@ import { vars } from '@luke-ui/react/theme';
 return (
 	<div
 		style={{
-			backgroundColor: vars.color.surface.recessed,
+			backgroundColor: vars.color.surface.subdued,
 			color: vars.color.text.primary,
 		}}
 	>

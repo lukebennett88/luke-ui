@@ -1,6 +1,7 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { ICON_SIZES } from '../../sizing/icon-sizing.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
@@ -53,15 +54,18 @@ const checkboxConfig = {
 					transition: 'none',
 				},
 			},
+			// Unchecked, the box is a field part: the field surface, the guaranteed control border, and
+			// inset depth. Checked, it is a solid fill with the control finish. Hover and pressed
+			// change colour, so they stay distinct when a theme sets every material to `none`.
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.canvas,
-			backgroundImage: vars.actionControlFinish.resting,
+			backgroundColor: vars.color.surface.field,
+			backgroundImage: 'none',
 			blockSize: checkboxIndicatorSize,
 			borderColor: vars.color.border.control,
 			borderRadius: vars.radius.detail,
 			borderStyle: 'solid',
 			borderWidth: '1px',
-			boxShadow: 'none',
+			boxShadow: vars.depth.recessed,
 			color: vars.color.foreground.accent.onSolid,
 			display: 'inline-flex',
 			fontSize: checkboxGlyphSize,
@@ -70,7 +74,8 @@ const checkboxConfig = {
 			justifyContent: 'center',
 			lineHeight: 1,
 			transitionDuration: vars.motion.duration.feedback,
-			transitionProperty: 'background-color, background-image, border-color, color, opacity',
+			transitionProperty:
+				'background-color, background-image, border-color, box-shadow, color, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
 			selectors: {
 				'&::after': {
@@ -82,16 +87,17 @@ const checkboxConfig = {
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
 				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
-					backgroundImage: vars.actionControlFinish.raised,
-					borderColor: vars.color.border.accent,
+					borderColor: vars.color.border.controlHover,
 				},
 				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
-					backgroundImage: vars.actionControlFinish.recessed,
-					borderColor: vars.color.border.accent,
+					backgroundColor: vars.color.background.neutral.subtle.pressed,
+					borderColor: vars.color.border.controlHover,
 				},
 				'[data-indeterminate="true"] &': {
 					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundImage: vars.controlFinish.resting,
 					borderColor: vars.color.background.accent.solid.rest,
+					boxShadow: 'none',
 				},
 				'[data-indeterminate="true"] &::after': {
 					content: '"−"',
@@ -102,7 +108,9 @@ const checkboxConfig = {
 				},
 				'[data-selected="true"] &': {
 					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundImage: vars.controlFinish.resting,
 					borderColor: vars.color.background.accent.solid.rest,
+					boxShadow: 'none',
 				},
 				'[data-selected="true"] &::after': {
 					opacity: 1,
@@ -110,11 +118,13 @@ const checkboxConfig = {
 				'[data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
 					{
 						backgroundColor: vars.color.background.accent.solid.hover,
+						backgroundImage: vars.controlFinish.raised,
 						borderColor: vars.color.background.accent.solid.hover,
 					},
 				'[data-selected="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
 					{
 						backgroundColor: vars.color.background.accent.solid.pressed,
+						backgroundImage: vars.controlFinish.recessed,
 						borderColor: vars.color.background.accent.solid.pressed,
 					},
 				'[data-invalid="true"][data-selected="true"] &, [data-invalid="true"][data-indeterminate="true"] &':
@@ -125,12 +135,10 @@ const checkboxConfig = {
 					},
 				'[data-invalid="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
 					{
-						backgroundImage: vars.actionControlFinish.raised,
 						borderColor: vars.color.background.danger.solid.hover,
 					},
 				'[data-invalid="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
 					{
-						backgroundImage: vars.actionControlFinish.recessed,
 						borderColor: vars.color.background.danger.solid.pressed,
 					},
 				'[data-invalid="true"][data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-invalid="true"][data-indeterminate="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
@@ -157,8 +165,8 @@ const checkboxConfig = {
 				root: {
 					vars: {
 						[checkboxControlSize]: FONT_METRIC_SCALE[20].lineHeight,
-						[checkboxGlyphSize]: vars.iconSize.small,
-						[checkboxIndicatorSize]: vars.iconSize.medium,
+						[checkboxGlyphSize]: ICON_SIZES.small,
+						[checkboxIndicatorSize]: ICON_SIZES.medium,
 						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${inlineControlGap})`,
 					},
 				},
@@ -167,8 +175,8 @@ const checkboxConfig = {
 				root: {
 					vars: {
 						[checkboxControlSize]: FONT_METRIC_SCALE[16].lineHeight,
-						[checkboxGlyphSize]: vars.iconSize.xsmall,
-						[checkboxIndicatorSize]: vars.iconSize.small,
+						[checkboxGlyphSize]: ICON_SIZES.xsmall,
+						[checkboxIndicatorSize]: ICON_SIZES.small,
 						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${inlineControlGap})`,
 					},
 				},
@@ -176,9 +184,9 @@ const checkboxConfig = {
 			small: {
 				root: {
 					vars: {
-						[checkboxControlSize]: vars.iconSize.small,
+						[checkboxControlSize]: ICON_SIZES.small,
 						[checkboxGlyphSize]: FONT_METRIC_SCALE[12].fontSize,
-						[checkboxIndicatorSize]: vars.iconSize.xsmall,
+						[checkboxIndicatorSize]: ICON_SIZES.xsmall,
 						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${inlineControlGap})`,
 					},
 				},

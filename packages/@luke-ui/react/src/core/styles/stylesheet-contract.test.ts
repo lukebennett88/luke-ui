@@ -1,6 +1,7 @@
 import { transform } from 'lightningcss';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
+import { capsizeTrimVarName } from '../../theme/capsize-trim-vars.js';
 import type { TypeStyle } from '../../theme/type-styles.js';
 import { typeStyles } from '../../theme/type-styles.js';
 
@@ -568,13 +569,13 @@ function assertTextTrimOwnership(
 			rules,
 			'before',
 			'margin-block-end',
-			`var(--luke-font-${typography}-cap-height-trim)`,
+			`var(${capsizeTrimVarName(typography, 'capHeightTrim')})`,
 		);
 		assertPseudoDeclaration(
 			rules,
 			'after',
 			'margin-block-start',
-			`var(--luke-font-${typography}-baseline-trim)`,
+			`var(${capsizeTrimVarName(typography, 'baselineTrim')})`,
 		);
 	}
 }

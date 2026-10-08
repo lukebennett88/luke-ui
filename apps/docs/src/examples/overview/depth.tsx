@@ -11,7 +11,7 @@ export default () => {
 				<Stack gap="sp8" key={name}>
 					<Box
 						style={{
-							backgroundColor: vars.color.surface.floating,
+							backgroundColor: vars.color.surface.base,
 							blockSize: '5rem',
 							border: `1px solid ${vars.color.border.control}`,
 							borderRadius: vars.radius.surface,

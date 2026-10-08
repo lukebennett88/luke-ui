@@ -2,7 +2,7 @@
  * The `defineTheme` authoring util: the sole public theme-authoring surface. It normalises a small,
  * curated-default {@link ThemeInput} into the internal per-mode {@link ThemeFoundation} and hands it
  * to the internal {@link buildTheme} value pipeline. It owns the single-value accent/neutral
- * adaptation and the one resolution of curated defaults (source colours, materials, radius,
+ * adaptation and the one resolution of curated defaults (source colours, surfaces, materials,
  * backdrop) into {@link Oklch} values the foundation carries.
  */
 
@@ -12,7 +12,12 @@ import type { Oklch } from './color.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import { TEXT_RATIO } from './contrast-policy.js';
 import { resolveThemeInput } from './extend-theme.js';
-import type { ThemeFoundation, ThemeModeFoundation, ThemeSourceColors } from './foundation.js';
+import type {
+	ThemeFoundation,
+	ThemeModeFoundation,
+	ThemeSourceColors,
+	ThemeSurfaceSources,
+} from './foundation.js';
 import { defaultSourceColors } from './foundation.js';
 import { lightnessCandidates } from './lightness-candidates.js';
 import { highContrastText, passesOnSolidGate } from './scale.js';
@@ -23,7 +28,10 @@ import { highContrastText, passesOnSolidGate } from './scale.js';
  * accept `#rgb`, `#rrggbb`, or `oklch(<l> <c> <h>)` (lightness 0-1 or %, no alpha), except
  * `backdrop`, which is used verbatim and may carry an alpha channel.
  */
-type ColorInput = string | { light?: string; dark?: string };
+type ColorInput = string | ModeColorInput;
+
+/** A colour for each mode. An omitted side falls back to that role's default or generation. */
+type ModeColorInput = { light?: string; dark?: string };
 
 /** A composite `box-shadow` ladder for one colour mode, rung by rung. */
 export interface DepthLadder {
@@ -39,7 +47,7 @@ export interface DepthLadder {
 	resting: string;
 }
 
-/** A Button/IconButton `background-image` face-finish ladder for one colour mode. */
+/** A `background-image` face-finish ladder for solid control fills, for one colour mode. */
 interface ControlFinish {
 	/** Face lighting for a hovered control. */
 	raised: string;
@@ -55,10 +63,10 @@ interface ControlFinish {
  */
 interface ThemeInputCommon {
 	/**
-	 * Button/IconButton face finish, per mode. Optional and deep-partial: an omitted rung falls back
-	 * to `'none'` (a flat control).
+	 * Face finish for solid control fills, such as a solid Button or a checked Checkbox, per mode.
+	 * Optional and deep-partial: an omitted rung falls back to `'none'` (a flat control).
 	 */
-	actionControlFinish?: { light?: Partial<ControlFinish>; dark?: Partial<ControlFinish> };
+	controlFinish?: { light?: Partial<ControlFinish>; dark?: Partial<ControlFinish> };
 	/**
 	 * Composite `box-shadow` depth ladder, per mode. Optional and deep-partial: an omitted rung
 	 * falls back to the curated extremely-subtle default for that mode.
@@ -69,28 +77,28 @@ interface ThemeInputCommon {
 	 * `luke-ui-theme-${name}`.
 	 */
 	name: string;
-	/** Corner radii. A generative base + multiplier scale, with explicit per-step overrides. */
+	/** Corner radii in pixels, emitted as `rem`. `radius.full` is fixed at 9999px. */
 	radius?: {
 		/**
-		 * Base radius. Uses a 16px base and emits as `rem`. Generates `detail = base`,
-		 * `control = base*2`, `surface = base*3`, `overlay = base*4`, each scaled by `multiplier`.
+		 * Radius for checkbox boxes, tags, badges, and compact details.
 		 * @default 4
 		 */
-		base?: number;
-		/**
-		 * Scales the whole generated set.
-		 * @default 1
-		 */
-		multiplier?: number;
-		/** Explicit override for the detail radius (checkboxes, tags, badges). */
 		detail?: number;
-		/** Explicit override for the control radius (buttons, fields, selects). */
+		/**
+		 * Radius for buttons, fields, selects, and other controls.
+		 * @default 8
+		 */
 		control?: number;
-		/** Explicit override for the surface radius (cards, popovers, menus). */
+		/**
+		 * Radius for cards, popovers, and menus.
+		 * @default 12
+		 */
 		surface?: number;
-		/** Explicit override for the overlay radius (dialogs, sheets). */
+		/**
+		 * Radius for dialogs, sheets, and large overlays.
+		 * @default 16
+		 */
 		overlay?: number;
-		// radius.full is fixed at 9999px and is not authored.
 	};
 	/** Typography — family and weights only. The typography styles are source-owned (not authored here). */
 	typography?: {
@@ -115,7 +123,7 @@ export interface ThemeInput extends ThemeInputCommon {
 	color: {
 		/** Required — the brand or interaction accent. */
 		accent: ColorInput;
-		/** Neutral canvas anchor. Give a raw colour, or set `neutralStyle` for a curated neutral. */
+		/** Neutral base anchor. Give a raw colour, or set `neutralStyle` for a curated neutral. */
 		neutral?: ColorInput;
 		/**
 		 * Curated neutral character when `neutral` is omitted; sets the neutral hue and tint while the
@@ -124,11 +132,23 @@ export interface ThemeInput extends ThemeInputCommon {
 		 */
 		neutralStyle?: 'cool' | 'neutral' | 'warm';
 		/**
-		 * The canvas anchor, split from `neutral`'s hue/chroma character. Give a raw colour to move the
-		 * canvas away from the resolved neutral while keeping the neutral family's own character.
-		 * Defaults to the resolved neutral canvas anchor.
+		 * The four surfaces. Each is optional. Set one explicitly when its generated default does not
+		 * suit the theme or fails a contrast gate; an authored surface is used exactly as written.
 		 */
-		background?: ColorInput;
+		surface?: {
+			/**
+			 * The application background and primary content, split from `neutral`'s hue/chroma
+			 * character. The neutral and role colours ramp from it. One value is adapted per mode.
+			 * Defaults to the resolved neutral base anchor.
+			 */
+			base?: ColorInput;
+			/** Secondary static regions. Defaults to a fixed per-mode offset from `base`. */
+			subdued?: ModeColorInput;
+			/** Form-control surfaces. Defaults to a fixed per-mode offset from `base`. */
+			field?: ModeColorInput;
+			/** Menus, popovers, and dialogs. Defaults to a fixed per-mode offset from `base`. */
+			overlay?: ModeColorInput;
+		};
 		/** Source colour for the `info` role. Defaults to an accessible Luke UI blue for the mode. */
 		info?: ColorInput;
 		/** Source colour for the `success` role. Defaults to an accessible Luke UI green for the mode. */
@@ -172,7 +192,7 @@ const NEUTRAL_STYLE = {
 	warm: { chroma: 0.01, hue: 70 },
 } as const satisfies Record<string, { chroma: number; hue: number }>;
 
-// Canvas lightness a single-value or styled neutral targets per mode: near-white light, near-dark
+// Base lightness a single-value or styled neutral targets per mode: near-white light, near-dark
 // dark. The neutral solid's on-solid gate depends on its (tiny) chroma and a fixed solid lightness,
 // not on this anchor, so the neutral never has the accent's mid-lightness dead zone.
 const NEUTRAL_LIGHTNESS = { dark: 0.22, light: 0.985 } as const satisfies Record<ColorMode, number>;
@@ -207,7 +227,7 @@ export const defaultDepth: Record<ColorMode, DepthLadder> = {
 	},
 };
 
-/** Curated flat control finish applied when an `actionControlFinish` rung is omitted. */
+/** Curated flat control finish applied when a `controlFinish` rung is omitted. */
 const defaultControlFinish: ControlFinish = {
 	raised: 'none',
 	recessed: 'none',
@@ -220,15 +240,11 @@ export const defaultBackdrop: Record<ColorMode, string> = {
 	light: 'oklch(0 0 0 / 0.2)',
 };
 
-const DEFAULT_RADIUS_BASE = 4;
-const DEFAULT_RADIUS_MULTIPLIER = 1;
-const RADIUS_STEPS = { control: 2, detail: 1, overlay: 4, surface: 3 } as const;
-
 /**
  * Compiles a curated {@link ThemeInput} into a complete static stylesheet. Resolves any `extends`
  * chain into one merged input first, then normalises it into the per-mode {@link ThemeFoundation}
- * shape — adapting single-value accents and neutrals per mode, resolving source colours to
- * {@link Oklch} once, generating the radius scale, and merging materials over curated defaults —
+ * shape — adapting single-value accents and neutrals per mode, resolving source colours and authored
+ * surfaces to {@link Oklch} once, and merging materials over curated defaults —
  * then delegates to {@link buildTheme}, whose build-time contrast validation stays authoritative.
  * Throws when a single-value accent has no accessible lightness in a mode, and (via `buildTheme`)
  * throws {@link ThemeContrastError} when any resolved pair misses WCAG 2.2 AA.
@@ -256,8 +272,8 @@ export function normalizeTheme(input: ThemeInput): ThemeFoundation {
 		dark: buildModeFoundation(input, 'dark'),
 		light: buildModeFoundation(input, 'light'),
 		name: input.name,
-		radius: resolveRadius(input),
 	};
+	if (input.radius !== undefined) foundation.radius = input.radius;
 	if (input.typography !== undefined) foundation.typography = input.typography;
 	return foundation;
 }
@@ -265,11 +281,11 @@ export function normalizeTheme(input: ThemeInput): ThemeFoundation {
 /** Resolves one mode's source colours and materials. */
 function buildModeFoundation(input: ThemeInput, mode: ColorMode): ThemeModeFoundation {
 	return {
-		actionControlFinish: {
-			...defaultControlFinish,
-			...omitUndefined(input.actionControlFinish?.[mode] ?? {}),
-		},
 		color: resolveColors(input, mode),
+		controlFinish: {
+			...defaultControlFinish,
+			...omitUndefined(input.controlFinish?.[mode] ?? {}),
+		},
 		depth: { ...defaultDepth[mode], ...omitUndefined(input.depth?.[mode] ?? {}) },
 	};
 }
@@ -296,12 +312,6 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 		accent: resolveAdaptedRole(color.accent, mode, (source, mode, raw) => {
 			return adaptAccent(source, mode, raw, textPrimary);
 		}),
-		// The canvas anchor, split from `neutral`'s hue/chroma character: explicit per-mode value wins,
-		// a single value or the opposite side is adapted to the mode canvas lightness, and an entirely
-		// omitted `background` copies the resolved neutral canvas anchor exactly (not a second,
-		// independent adaptation of the neutral source). `buildModeColors` takes this resolved value
-		// directly as the canvas anchor for every family's ramp and the elevation surfaces.
-		background: resolveOptionalModeColour(color.background, mode, neutral),
 		neutral,
 		// Emitted verbatim; a single string applies to both modes, an omitted side falls back to the
 		// curated mode-aware default.
@@ -310,9 +320,34 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 		focus: resolveSourceRole(color.focus, mode, defaults.focus),
 		info: resolveSourceRole(color.info, mode, defaults.info),
 		success: resolveSourceRole(color.success, mode, defaults.success),
+		surface: resolveSurfaces(color.surface, mode, neutral),
 		warning: resolveSourceRole(color.warning, mode, defaults.warning),
 	};
 	return colors;
+}
+
+/**
+ * Resolves the base surface and any explicitly authored surface for one mode. The base, split from
+ * `neutral`'s hue/chroma character: an explicit per-mode value wins, a single value or the opposite
+ * side is adapted to the mode base lightness, and an entirely omitted `base` copies the resolved
+ * neutral anchor exactly (not a second, independent adaptation of the neutral source).
+ * `buildModeColors` takes it as the anchor for every family's ramp and every generated surface.
+ * Another surface is present only when the author set this mode's side; `buildTheme` generates the
+ * rest from the base.
+ */
+function resolveSurfaces(
+	surface: ThemeInput['color']['surface'],
+	mode: ColorMode,
+	neutral: Oklch,
+): ThemeSurfaceSources {
+	const resolved: ThemeSurfaceSources = {
+		base: resolveOptionalModeColour(surface?.base, mode, neutral),
+	};
+	for (const role of ['subdued', 'field', 'overlay'] as const) {
+		const side = surface?.[role]?.[mode];
+		if (side !== undefined) resolved[role] = gamutMapOklch(parseColor(side));
+	}
+	return resolved;
 }
 
 /**
@@ -354,7 +389,7 @@ function resolveNeutral(color: ThemeInput['color'], mode: ColorMode): Oklch {
 	});
 }
 
-/** Adapts a single neutral source to the mode canvas lightness, preserving hue and chroma. */
+/** Adapts a single neutral source to the mode base lightness, preserving hue and chroma. */
 function adaptNeutral(source: Oklch, mode: ColorMode): Oklch {
 	return gamutMapOklch({
 		l: NEUTRAL_LIGHTNESS[mode],
@@ -364,10 +399,10 @@ function adaptNeutral(source: Oklch, mode: ColorMode): Oklch {
 }
 
 /**
- * Resolves an optional canvas-anchor role (currently `background`) for one mode: an explicit side
- * wins, a single string or the opposite side is adapted to the mode canvas lightness (mirroring
- * `adaptNeutral`), and an entirely omitted input falls back to `fallback` verbatim — the
- * resolved neutral canvas anchor, not a second independent adaptation.
+ * Resolves the optional base surface for one mode: an explicit side wins, a single string or the
+ * opposite side is adapted to the mode base lightness (mirroring `adaptNeutral`), and an entirely
+ * omitted input falls back to `fallback` verbatim — the resolved neutral anchor, not a second
+ * independent adaptation.
  */
 function resolveOptionalModeColour(
 	input: ColorInput | undefined,
@@ -465,18 +500,4 @@ function adaptAccent(source: Oklch, mode: ColorMode, raw: string, interactionSou
 		);
 	}
 	return makeSolid(best);
-}
-
-/** Generates the radius scale from `base`/`multiplier`, with explicit per-step overrides winning. */
-function resolveRadius(input: ThemeInput): NonNullable<ThemeFoundation['radius']> {
-	const radius = input.radius;
-	const base = radius?.base ?? DEFAULT_RADIUS_BASE;
-	const multiplier = radius?.multiplier ?? DEFAULT_RADIUS_MULTIPLIER;
-	const generated = (step: number) => Math.round(base * step * multiplier);
-	return {
-		control: radius?.control ?? generated(RADIUS_STEPS.control),
-		detail: radius?.detail ?? generated(RADIUS_STEPS.detail),
-		overlay: radius?.overlay ?? generated(RADIUS_STEPS.overlay),
-		surface: radius?.surface ?? generated(RADIUS_STEPS.surface),
-	};
 }

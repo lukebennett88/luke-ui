@@ -8,7 +8,7 @@ import type { ThemeInput } from '../define-theme.js';
 // Multi-layer values below are concatenated string literals, not `[...].join(', ')`, because a
 // joined value survives dead-code elimination even when unused. See `themes/theme-bundle.test.ts`.
 export const tactileTheme: ThemeInput = {
-	actionControlFinish: {
+	controlFinish: {
 		dark: {
 			raised:
 				'radial-gradient(80% 70% at 50% 0%, rgb(255 255 255 / 0.18) 0%, transparent 100%), ' +
