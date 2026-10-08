@@ -1,17 +1,17 @@
-import { Checkbox } from '@luke-ui/react/checkbox';
+import { SwitchField } from '@luke-ui/react/switch-field';
 import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="Small">
-				<Checkbox defaultSelected label="Example checkbox" size="small" />
+				<SwitchField defaultSelected label="Example switch" size="small" />
 			</ComparisonItem>
 			<ComparisonItem label="Medium">
-				<Checkbox defaultSelected label="Example checkbox" size="medium" />
+				<SwitchField defaultSelected label="Example switch" size="medium" />
 			</ComparisonItem>
 			<ComparisonItem label="Large">
-				<Checkbox defaultSelected label="Example checkbox" size="large" />
+				<SwitchField defaultSelected label="Example switch" size="large" />
 			</ComparisonItem>
 		</Comparison>
 	);

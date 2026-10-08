@@ -1,20 +1,22 @@
 import {
-	CheckboxContent,
 	CheckboxControl,
 	CheckboxIndicator,
 	CheckboxLabel,
 	CheckboxRoot,
 } from '@luke-ui/react/primitives/checkbox';
+import { InlineField } from '@luke-ui/react/primitives/field';
 
 export default () => {
 	return (
 		<CheckboxRoot>
-			<CheckboxContent>
-				<CheckboxControl>
-					<CheckboxIndicator />
-				</CheckboxControl>
-				<CheckboxLabel>Example checkbox</CheckboxLabel>
-			</CheckboxContent>
+			<InlineField description="Example description">
+				<CheckboxLabel>
+					<CheckboxControl>
+						<CheckboxIndicator />
+					</CheckboxControl>
+					Example checkbox
+				</CheckboxLabel>
+			</InlineField>
 		</CheckboxRoot>
 	);
 };

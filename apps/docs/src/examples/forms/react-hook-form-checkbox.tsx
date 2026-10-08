@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@luke-ui/react/button';
-import { Checkbox } from '@luke-ui/react/checkbox';
+import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -28,7 +28,7 @@ export default () => {
 						name="terms"
 						render={({ field, fieldState }) => (
 							<Stack minBlockSize="4.5rem">
-								<Checkbox
+								<CheckboxField
 									errorMessage={fieldState.error?.message}
 									inputRef={field.ref}
 									isSelected={field.value}

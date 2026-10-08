@@ -1,4 +1,4 @@
 {
 	"title": "Primitives",
-	"pages": ["button", "checkbox", "field", "text-input", "combobox", "select"]
+	"pages": ["button", "checkbox", "field", "text-input", "combobox", "select", "switch"]
 }

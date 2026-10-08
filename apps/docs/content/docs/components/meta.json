@@ -13,9 +13,10 @@
 		"feedback/loading-skeleton",
 		"feedback/loading-spinner",
 		"---Forms---",
-		"forms/checkbox",
+		"forms/checkbox-field",
 		"forms/combobox-field",
 		"forms/select-field",
+		"forms/switch-field",
 		"forms/text-input-field",
 		"---Layout---",
 		"layout/aspect-ratio",
@@ -48,6 +49,7 @@
 		"primitives/field",
 		"primitives/text-input",
 		"primitives/combobox",
-		"primitives/select"
+		"primitives/select",
+		"primitives/switch"
 	]
 }

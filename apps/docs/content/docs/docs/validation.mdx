@@ -15,9 +15,10 @@ constraint or a `validate` rule, leave `errorMessage` out entirely.
 
 ## Let the browser validate
 
-Set `isRequired` on `TextInputField`, `ComboboxField`, `SelectField`, or `Checkbox` to require a
-value before the form submits. Pass `minLength`, `maxLength`, or `pattern` on `TextInputField` to
-state a rule for the text. Pass `type="email"` or `type="url"` to check the value's format.
+Set `isRequired` on `TextInputField`, `ComboboxField`, `SelectField`, `CheckboxField`, or
+`SwitchField` to require a value before the form submits. Pass `minLength`, `maxLength`, or
+`pattern` on `TextInputField` to state a rule for the text. Pass `type="email"` or `type="url"` to
+check the value's format.
 
 Leave out `errorMessage`. The field renders the message the constraint produces. It appears on blur
 or on submit.

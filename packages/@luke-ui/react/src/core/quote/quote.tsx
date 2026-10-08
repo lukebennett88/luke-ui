@@ -15,7 +15,7 @@ interface QuoteStyleProps {
 	textWrap?: TextProps['textWrap'];
 }
 
-type _QuoteOmit = DistributiveOmit<React.ComponentProps<'q'>, 'cite' | 'color'>;
+type _QuoteOmit = DistributiveOmit<React.ComponentProps<'q'>, 'cite' | 'color' | 'slot'>;
 
 interface _QuoteProps extends _QuoteOmit, QuoteStyleProps {
 	/** URL of the quoted source. */
@@ -28,6 +28,9 @@ export type QuoteProps = Prettify<_QuoteProps>;
 /**
  * Short inline quotation, rendered as `<q>`.
  * Inherits surrounding typography.
+ *
+ * It never fills a React Aria text slot, so it renders inside a field's label, description, or
+ * error message.
  */
 export function Quote(props: QuoteProps) {
 	const { lineClamp, textWrap, ...elementProps } = props;
@@ -37,6 +40,7 @@ export function Quote(props: QuoteProps) {
 			elementType="q"
 			lineClamp={lineClamp}
 			shouldInheritFont
+			slot={null}
 			textWrap={textWrap}
 		/>
 	);

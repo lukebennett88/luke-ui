@@ -41,7 +41,7 @@ interface FieldSlotProps extends FieldSlotContentProps {
 }
 
 /**
- * Naming props for composed fields (`TextInputField`, `ComboboxField`, `Checkbox`, `SelectField`).
+ * Naming props for composed stacked fields (`TextInputField`, `ComboboxField`, `SelectField`).
  *
  * Pass a visible `label`, or omit `label` and provide exactly one of `aria-label` /
  * `aria-labelledby`. Composition parents forward the aria props to the React Aria field root.
@@ -115,7 +115,10 @@ interface InlineFieldSlotProps {
 
 type _InlineFieldOmit = DistributiveOmit<ComponentProps<'div'>, 'children'>;
 interface _InlineFieldProps extends _InlineFieldOmit, InlineFieldSlotProps {
-	/** The control's content part, such as `CheckboxContent`. It holds the control and its label. */
+	/**
+	 * The control's label part, such as `CheckboxLabel` or `SwitchLabel`. It holds the control and
+	 * its label text.
+	 */
 	children: ReactNode;
 }
 
@@ -123,9 +126,9 @@ interface _InlineFieldProps extends _InlineFieldOmit, InlineFieldSlotProps {
 export type InlineFieldProps = Prettify<_InlineFieldProps>;
 
 /**
- * Inline field anatomy: a control's content part, a description, and an always-rendered error
- * slot, with the error under the label text. Render it inside a control root such as
- * `CheckboxRoot`, and use it instead of the manual `FieldDescription` and `FieldError` parts.
+ * Inline field anatomy: a control's label part, a description, and an always-rendered error slot,
+ * with the error under the label text. Render it inside a control root such as `CheckboxRoot` or
+ * `SwitchRoot`, and use it instead of the manual `FieldDescription` and `FieldError` parts.
  */
 export function InlineField(props: InlineFieldProps): JSX.Element {
 	const { children, className, description, errorMessage, ...restProps } = props;

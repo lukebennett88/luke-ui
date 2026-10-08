@@ -1,5 +1,5 @@
 import { Button } from '@luke-ui/react/button';
-import { Checkbox } from '@luke-ui/react/checkbox';
+import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -49,7 +49,7 @@ export default () => {
 					<form.Field name="terms">
 						{(field) => (
 							<Stack minBlockSize="4.5rem">
-								<Checkbox
+								<CheckboxField
 									errorMessage={field.state.meta.errors[0]?.message}
 									isSelected={field.state.value}
 									label="I accept the terms of service"

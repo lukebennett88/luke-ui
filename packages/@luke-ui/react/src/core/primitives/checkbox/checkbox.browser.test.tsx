@@ -1,5 +1,4 @@
 import {
-	CheckboxContent,
 	CheckboxControl,
 	CheckboxIndicator,
 	CheckboxLabel,
@@ -7,7 +6,6 @@ import {
 } from '@luke-ui/react/primitives/checkbox';
 import { FieldDescription, FieldError, InlineField } from '@luke-ui/react/primitives/field';
 import { Text } from '@luke-ui/react/text';
-import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -30,45 +28,186 @@ function controlWidth(name: string): number {
 	return control.getBoundingClientRect().width;
 }
 
-function parts(label: string) {
+function Parts({ label }: { label: string }) {
 	return (
-		<CheckboxContent>
+		<CheckboxLabel>
 			<CheckboxControl>
 				<CheckboxIndicator />
 			</CheckboxControl>
-			<CheckboxLabel>{label}</CheckboxLabel>
-		</CheckboxContent>
+			{label}
+		</CheckboxLabel>
 	);
 }
 
 test('CheckboxRoot puts id on its root element, inputId on the input, and ref on the root', () => {
 	const ref = createRef<HTMLDivElement>();
+	const inputRef = createRef<HTMLInputElement>();
 	render(
-		<CheckboxRoot className="example-root" id="example-root" inputId="example-input" ref={ref}>
-			{parts('Example checkbox')}
+		<CheckboxRoot
+			className="example-root"
+			id="example-root"
+			inputId="example-input"
+			inputRef={inputRef}
+			ref={ref}
+		>
+			<Parts label="Example checkbox" />
 		</CheckboxRoot>,
 	);
 	const input = checkbox('Example checkbox');
 	const root = document.getElementById('example-root');
 
 	expect(input.id).toBe('example-input');
+	expect(inputRef.current).toBe(input);
 	expect(root).toHaveClass('example-root');
 	expect(root?.contains(input)).toBe(true);
 	expect(ref.current).toBe(root);
 });
 
+test('CheckboxLabel is the clickable native label around the input', async () => {
+	const ref = createRef<HTMLLabelElement>();
+	render(
+		<CheckboxRoot>
+			<CheckboxLabel ref={ref}>
+				<CheckboxControl>
+					<CheckboxIndicator />
+				</CheckboxControl>
+				Example checkbox
+			</CheckboxLabel>
+		</CheckboxRoot>,
+	);
+	const input = checkbox('Example checkbox');
+
+	expect(ref.current?.tagName).toBe('LABEL');
+	expect(ref.current?.contains(input)).toBe(true);
+
+	await userEvent.click(page.getByText('Example checkbox'));
+
+	expect(input).toBeChecked();
+});
+
+test('CheckboxLabel resolves className, style, and children from the checkbox state', async () => {
+	render(
+		<CheckboxRoot>
+			<CheckboxLabel
+				className={({ isSelected }) => (isSelected ? 'is-on' : 'is-off')}
+				data-testid="label"
+				style={({ isSelected }) => ({ opacity: isSelected ? 1 : 0.75 })}
+			>
+				{({ isSelected }) => {
+					return (
+						<>
+							<CheckboxControl>
+								<CheckboxIndicator />
+							</CheckboxControl>
+							{isSelected ? 'On' : 'Off'}
+						</>
+					);
+				}}
+			</CheckboxLabel>
+		</CheckboxRoot>,
+	);
+	const label = page.getByTestId('label').element();
+	if (!(label instanceof HTMLElement)) throw new Error('Expected an HTML label.');
+
+	expect(label).toHaveClass('is-off');
+	expect(label.style.opacity).toBe('0.75');
+
+	await userEvent.click(page.getByText('Off', { exact: true }));
+
+	expect(label).toHaveClass('is-on');
+	expect(label.style.opacity).toBe('1');
+	expect(checkbox('On')).toBeChecked();
+});
+
+test('CheckboxLabel keeps its slot', () => {
+	render(
+		<CheckboxRoot>
+			<CheckboxLabel data-testid="label" slot="example">
+				<CheckboxControl>
+					<CheckboxIndicator />
+				</CheckboxControl>
+				Example checkbox
+			</CheckboxLabel>
+		</CheckboxRoot>,
+	);
+
+	expect(page.getByTestId('label').element()).toHaveAttribute('slot', 'example');
+});
+
+// The root provides React Aria's slotted `Text` context for the description and error, so `Text`
+// in the label opts out with `slot={null}`.
+test('Text with slot null renders inside CheckboxLabel', () => {
+	render(
+		<CheckboxRoot>
+			<CheckboxLabel>
+				<CheckboxControl>
+					<CheckboxIndicator />
+				</CheckboxControl>
+				<Text slot={null}>Visible</Text>
+				<Text isVisuallyHidden slot={null}>
+					{' hidden context'}
+				</Text>
+			</CheckboxLabel>
+		</CheckboxRoot>,
+	);
+
+	expect(checkbox('Visible hidden context')).toBeInTheDocument();
+});
+
+test('CheckboxRoot owns controlled selection and the indeterminate state', async () => {
+	const changes: Array<boolean> = [];
+	render(
+		<>
+			<CheckboxRoot isSelected={false} onChange={(isSelected) => changes.push(isSelected)}>
+				<Parts label="Controlled" />
+			</CheckboxRoot>
+			<CheckboxRoot isIndeterminate>
+				<Parts label="Mixed" />
+			</CheckboxRoot>
+		</>,
+	);
+
+	await userEvent.click(page.getByText('Controlled', { exact: true }));
+
+	expect(changes).toEqual([true]);
+	expect(checkbox('Controlled')).not.toBeChecked();
+	expect(checkbox('Mixed').indeterminate).toBe(true);
+});
+
+test('CheckboxRoot joins FormData with its name and value', async () => {
+	render(
+		<form data-testid="form">
+			<CheckboxRoot name="terms" value="accepted">
+				<Parts label="Terms" />
+			</CheckboxRoot>
+		</form>,
+	);
+	const form = page.getByTestId('form').element();
+	if (!(form instanceof HTMLFormElement)) throw new Error('Expected a form.');
+
+	expect(new FormData(form).get('terms')).toBe(null);
+
+	await userEvent.click(page.getByText('Terms', { exact: true }));
+
+	expect(new FormData(form).get('terms')).toBe('accepted');
+});
+
 test('CheckboxRoot size changes the control size', () => {
 	render(
 		<>
-			<CheckboxRoot size="small">{parts('Small')}</CheckboxRoot>
-			<CheckboxRoot size="large">{parts('Large')}</CheckboxRoot>
+			<CheckboxRoot size="small">
+				<Parts label="Small" />
+			</CheckboxRoot>
+			<CheckboxRoot size="large">
+				<Parts label="Large" />
+			</CheckboxRoot>
 		</>,
 	);
 
 	expect(controlWidth('Small')).toBeLessThan(controlWidth('Large'));
 });
 
-test('InlineField renders the content, description, and error in a CheckboxRoot', () => {
+test('InlineField renders the label, description, and error in a CheckboxRoot', () => {
 	render(
 		<CheckboxRoot isInvalid>
 			<InlineField
@@ -76,7 +215,7 @@ test('InlineField renders the content, description, and error in a CheckboxRoot'
 				description="Example description"
 				errorMessage="Example error"
 			>
-				{parts('Example checkbox')}
+				<Parts label="Example checkbox" />
 			</InlineField>
 		</CheckboxRoot>,
 	);
@@ -91,7 +230,7 @@ test('InlineField takes div props and adds no semantics of its own', () => {
 	render(
 		<CheckboxRoot>
 			<InlineField data-testid="inline-field" id="inline-field">
-				{parts('Example checkbox')}
+				<Parts label="Example checkbox" />
 			</InlineField>
 		</CheckboxRoot>,
 	);
@@ -109,12 +248,14 @@ test('InlineField always renders the error slot', async () => {
 	render(
 		<form>
 			<CheckboxRoot isRequired>
-				<InlineField>{parts('Terms')}</InlineField>
+				<InlineField>
+					<Parts label="Terms" />
+				</InlineField>
 			</CheckboxRoot>
 			<button type="submit">Submit</button>
 		</form>,
 	);
-	const input = checkbox('Terms*');
+	const input = checkbox('Terms');
 
 	expect(getDescribedText(input)).toBe('');
 
@@ -127,7 +268,7 @@ test('InlineField always renders the error slot', async () => {
 test('manual FieldDescription and FieldError parts work in a CheckboxRoot', () => {
 	render(
 		<CheckboxRoot isInvalid>
-			{parts('Example checkbox')}
+			<Parts label="Example checkbox" />
 			<FieldDescription>Example description</FieldDescription>
 			<FieldError>Example error</FieldError>
 		</CheckboxRoot>,
@@ -138,89 +279,22 @@ test('manual FieldDescription and FieldError parts work in a CheckboxRoot', () =
 	expect(getDescribedText(input)).toBe('Example description Example error');
 });
 
-// The marker is CSS content with no DOM node, so the accessible name is how the tests observe it.
-test('CheckboxLabel marks a required root with its necessityIndicator', () => {
-	render(
-		<>
-			<CheckboxRoot isRequired>{parts('Icon')}</CheckboxRoot>
-			<CheckboxRoot isRequired>
-				<CheckboxContent>
-					<CheckboxControl>
-						<CheckboxIndicator />
-					</CheckboxControl>
-					<CheckboxLabel necessityIndicator="label">Words</CheckboxLabel>
-				</CheckboxContent>
-			</CheckboxRoot>
-		</>,
-	);
-
-	expect(checkbox('Icon*')).toBeInTheDocument();
-	expect(checkbox('Words(required)')).toBeInTheDocument();
-});
-
-test('CheckboxLabel draws no marker when the root is not required', () => {
-	render(<CheckboxRoot>{parts('Optional')}</CheckboxRoot>);
-
-	expect(checkbox('Optional')).toHaveAccessibleName('Optional');
-});
-
-test('raw text in CheckboxContent gets no marker', () => {
+// `CheckboxField` owns the required marker. A primitive label draws none.
+test('CheckboxLabel draws no required marker', () => {
 	render(
 		<CheckboxRoot isRequired>
-			<CheckboxContent>
-				<CheckboxControl>
-					<CheckboxIndicator />
-				</CheckboxControl>
-				Raw
-			</CheckboxContent>
+			<Parts label="Required" />
 		</CheckboxRoot>,
 	);
 
-	expect(checkbox('Raw')).toHaveAccessibleName('Raw');
+	expect(checkbox('Required')).toHaveAccessibleName('Required');
 });
 
-// React Aria provides slotted `Text` context inside a checkbox field, and `Text` throws without a
-// slot. `CheckboxContent` clears it, so ordinary `Text` and `VisuallyHidden` render in the label.
-test('Text and VisuallyHidden render inside CheckboxContent', () => {
-	render(
-		<CheckboxRoot>
-			<CheckboxContent>
-				<CheckboxControl>
-					<CheckboxIndicator />
-				</CheckboxControl>
-				<Text elementType="span">Visible</Text>
-				<VisuallyHidden> hidden context</VisuallyHidden>
-			</CheckboxContent>
-		</CheckboxRoot>,
-	);
-
-	expect(checkbox('Visible hidden context')).toBeInTheDocument();
-});
-
-test('CheckboxContent accepts a render function for its children', () => {
-	render(
-		<CheckboxRoot defaultSelected>
-			<CheckboxContent>
-				{({ isSelected }) => (
-					<>
-						<CheckboxControl>
-							<CheckboxIndicator />
-						</CheckboxControl>
-						<Text elementType="span">{isSelected ? 'On' : 'Off'}</Text>
-					</>
-				)}
-			</CheckboxContent>
-		</CheckboxRoot>,
-	);
-
-	expect(checkbox('On')).toBeChecked();
-});
-
-test('a composed checkbox has no axe violations', async () => {
+test('a composed checkbox primitive has no axe violations', async () => {
 	const { container } = render(
 		<CheckboxRoot isInvalid isRequired>
 			<InlineField description="Example description" errorMessage="Example error">
-				{parts('Example checkbox')}
+				<Parts label="Example checkbox" />
 			</InlineField>
 		</CheckboxRoot>,
 	);

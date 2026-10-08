@@ -121,11 +121,11 @@
 		},
 		"fix:lint": {
 			"cache": false,
-			"dependsOn": ["generate"]
+			"dependsOn": ["generate", "^build"]
 		},
 		"fix:unsafe": {
 			"cache": false,
-			"dependsOn": ["generate"]
+			"dependsOn": ["generate", "^build"]
 		},
 		"generate": {
 			"dependsOn": ["^generate"],

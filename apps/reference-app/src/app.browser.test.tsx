@@ -188,6 +188,23 @@ test('profile picture rejects invalid files, retries a failed save, and can be r
 	expect((await settingsApi.getSettings()).profile.avatarDataUrl).toBeNull();
 });
 
+test('preference controls take their name and description from the settings row', async () => {
+	const app = await renderApp();
+
+	await expect
+		.element(app.locator.getByRole('switch', { name: 'Underline links' }))
+		.toHaveAccessibleDescription('Keep links underlined.');
+	await expect
+		.element(app.locator.getByRole('switch', { name: 'Pointer cursor' }))
+		.toHaveAccessibleDescription('Show a pointer over buttons and other controls.');
+	await expect
+		.element(app.locator.getByRole('button', { name: /Theme/ }))
+		.toHaveAccessibleName('System Theme');
+	await expect
+		.element(app.locator.getByRole('button', { name: /Text size/ }))
+		.toHaveAccessibleName('Default Text size');
+});
+
 test('keyboard autosave updates a switch and persists after remount', async () => {
 	const app = await renderApp();
 	const toggle = app.locator.getByRole('switch', { name: 'Underline links' });

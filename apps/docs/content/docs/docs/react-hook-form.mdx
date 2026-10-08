@@ -30,14 +30,14 @@ Wrap each control in `Controller`. Its `render` prop hands you `field` and `fiel
 
 <ExampleBlock src="forms/react-hook-form" title="React Hook Form: Controller" />
 
-A checkbox reads its value from `isSelected`.
+A checkbox or switch reads its value from `isSelected`.
 
 <ExampleBlock src="forms/react-hook-form-checkbox" title="React Hook Form: Checkbox" />
 
-`TextInputField` and `Checkbox` render a label, description, and error message around the control,
-so `inputRef` is what reaches the input underneath. For `SelectField`, pass the library's ref
-through `triggerRef` to reach the trigger button. A primitive that renders the control itself, such
-as `ComboboxInput`, takes `field.ref` on `ref`.
+`TextInputField`, `CheckboxField`, and `SwitchField` render a label, description, and error message
+around the control, so `inputRef` is what reaches the input underneath. For `SelectField`, pass the
+library's ref through `triggerRef` to reach the trigger button. A primitive that renders the control
+itself, such as `ComboboxInput`, takes `field.ref` on `ref`.
 
 ## Validation
 

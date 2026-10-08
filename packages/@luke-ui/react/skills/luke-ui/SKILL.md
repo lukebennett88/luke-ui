@@ -15,9 +15,20 @@ When a component supports it, a plain `ref` targets the element the component re
 root. A ref to a descendant names its target, such as `inputRef` for the input.
 
 Pass `inputRef` to reach the input inside a field component such as `TextInputField`,
-`ComboboxField`, or `Checkbox`, and `triggerRef` to reach the trigger inside `SelectField`. Do not
-use their `ref` for the input or trigger, because it reaches the field's root element. A part that
-renders the input itself, such as `ComboboxInput`, takes the input ref on `ref`.
+`ComboboxField`, `CheckboxField`, or `SwitchField`, and `triggerRef` to reach the trigger inside
+`SelectField`. Do not use their `ref` for the input or trigger, because it reaches the field's root
+element. A part that renders the input itself, such as `ComboboxInput`, takes the input ref on
+`ref`.
+
+## Labels
+
+`CheckboxField` and `SwitchField` always take a visible `label`. Do not pass `aria-label` or
+`aria-labelledby` to them. When the layout draws the label, compose
+`@luke-ui/react/primitives/checkbox` or `@luke-ui/react/primitives/switch` and pass
+`aria-labelledby` to the root.
+
+Set `slot={null}` on `Text` inside a primitive label such as `CheckboxLabel` or `SwitchLabel`. Do
+not leave its `slot` unset there, because the root's slotted text context makes it throw.
 
 ## Element choice
 

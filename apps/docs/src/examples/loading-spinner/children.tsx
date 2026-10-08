@@ -1,5 +1,5 @@
 import { Button } from '@luke-ui/react/button';
-import { Checkbox } from '@luke-ui/react/checkbox';
+import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { Stack } from '@luke-ui/react/stack';
 import { useState } from 'react';
@@ -12,7 +12,7 @@ export default () => {
 			<LoadingSpinner aria-label="Saving changes" isLoading={isLoading}>
 				<Button>Save changes</Button>
 			</LoadingSpinner>
-			<Checkbox isSelected={isLoading} label="Loading" onChange={setIsLoading} />
+			<CheckboxField isSelected={isLoading} label="Loading" onChange={setIsLoading} />
 		</Stack>
 	);
 };

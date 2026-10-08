@@ -1,6 +1,8 @@
 import { Code } from '@luke-ui/react/code';
 import { Em } from '@luke-ui/react/em';
+import { Emoji } from '@luke-ui/react/emoji';
 import { Kbd } from '@luke-ui/react/kbd';
+import { Quote } from '@luke-ui/react/quote';
 import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
@@ -41,6 +43,27 @@ test('Text slot null opts out of surrounding slotted text context', () => {
 
 	expect(locator.getByText('Opted out label').element().tagName).toBe('SPAN');
 });
+
+// Inline typography sits inside a field's label, description, or error, where React Aria provides
+// slotted text context. It never fills a slot.
+const inlineTypography = [
+	{ element: <Code>Inline code</Code>, name: 'Code', text: 'Inline code' },
+	{ element: <Em>Inline emphasis</Em>, name: 'Em', text: 'Inline emphasis' },
+	{ element: <Emoji emoji="🙂" label="Inline emoji" />, name: 'Emoji', text: '🙂' },
+	{ element: <Kbd>Inline key</Kbd>, name: 'Kbd', text: 'Inline key' },
+	{ element: <Quote>Inline quote</Quote>, name: 'Quote', text: 'Inline quote' },
+	{ element: <Strong>Inline strong</Strong>, name: 'Strong', text: 'Inline strong' },
+];
+
+for (const { element, name, text } of inlineTypography) {
+	test(`${name} renders inside slotted text context without a slot`, () => {
+		const { locator } = render(
+			<TextContext.Provider value={slottedTextContext}>{element}</TextContext.Provider>,
+		);
+
+		expect(locator.getByText(text).element()).toBeInTheDocument();
+	});
+}
 
 test('Text isVisuallyHidden keeps named slots without an extra wrapper', async () => {
 	const { locator } = render(

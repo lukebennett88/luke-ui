@@ -60,15 +60,44 @@ a descendant names it, such as `inputId`, `inputRef`, `triggerId`, or `triggerRe
 ownership convention from the
 [#714 decision record](https://github.com/lukebennett88/luke-ui/issues/714#issuecomment-5925988115).
 
+### Field names
+
+Name a composed component `<Control>Field` when it owns the complete form-field experience: the
+control, its visible label, description, error message, validation and necessity presentation, and
+the field semantics that tie them together. The suffix follows that ownership, not the layout, so
+the inline `CheckboxField` and `SwitchField` share it with the stacked `TextInputField`,
+`ComboboxField`, and `SelectField`. A future radio group is `RadioGroupField`. An individual radio
+is an option within that field, not a field itself. Primitives keep their part names, such as
+`CheckboxRoot` and `SwitchControl`.
+
+### Accessible names
+
+`TextInputField`, `ComboboxField`, and `SelectField` take a visible `label`, or `aria-label` or
+`aria-labelledby` instead, because a label-less field such as a search input is a normal use.
+`CheckboxField` and `SwitchField` always take a visible `label` and accept neither `aria-label` nor
+`aria-labelledby`. When another component owns the label, the consumer composes the control's
+primitives. [#714](https://github.com/lukebennett88/luke-ui/issues/714) owns both decisions.
+
+### Primitives and composed components
+
+Primitives stay close to React Aria. Keep the wrapped component's render props, state-aware
+`className` and `style`, events, refs, and `slot`, unless a prop conflicts with Luke UI's ownership
+rules. Composed components own the normal anatomy. Do not add escape hatches to them for custom
+anatomy that their primitives already support.
+
 ### `slot`
 
 React Aria's `slot` lets a React Aria parent configure a child through context. Keep `slot` on a
 high-level component only when a React Aria parent defines a named slot that component can fill.
-`Button` and `IconButton` keep it for slots such as `slot="close"` in a React Aria `Dialog`.
-`Checkbox` keeps it for `slot="selection"` in a `GridList` or `Table`. `Text` and its typography
-compositions keep it for named text slots, including `slot={null}` to opt out of surrounding slotted
-text context. Other high-level components omit it. Primitives keep the `slot` of the React Aria
-component they wrap.
+`Button` and `IconButton` keep it for slots such as `slot="close"` in a React Aria `Dialog`. A
+selection checkbox in a `GridList` or `Table` takes its name from the collection, so it uses
+`CheckboxRoot` with `slot="selection"`, not `CheckboxField`. `Text` and the Text-derived `Numeral`,
+`Heading`, and `Blockquote` keep it for named text slots, including `slot={null}` to opt out of
+surrounding slotted text context. The inline wrappers `Strong`, `Em`, `Code`, `Kbd`, `Quote`, and
+`Emoji` take no `slot` and never fill a text slot, so they render inside a field's label,
+description, or error. Composed components do not clear slotted text context for their content.
+Other high-level components omit it. Primitives keep the `slot` of the React Aria component they
+wrap.
 
 ### Controlled state
 
@@ -90,10 +119,10 @@ a migration path.
 
 ## Owned elsewhere
 
-| Topic                                      | Owner                                                                                               |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| Form field names, parts, and semantics     | [#714 decision record](https://github.com/lukebennett88/luke-ui/issues/714#issuecomment-5925988115) |
-| Icons and `Provider`                       | [#712](https://github.com/lukebennett88/luke-ui/issues/712)                                         |
-| Theme authoring and bundled-theme subpaths | [#715](https://github.com/lukebennett88/luke-ui/issues/715)                                         |
-| Token taxonomy                             | [#716](https://github.com/lukebennett88/luke-ui/issues/716)                                         |
-| Global stylesheet and cascade layers       | [#717](https://github.com/lukebennett88/luke-ui/issues/717)                                         |
+| Topic                                      | Owner                                                       |
+| ------------------------------------------ | ----------------------------------------------------------- |
+| Form field names, parts, and semantics     | [#714](https://github.com/lukebennett88/luke-ui/issues/714) |
+| Icons and `Provider`                       | [#712](https://github.com/lukebennett88/luke-ui/issues/712) |
+| Theme authoring and bundled-theme subpaths | [#715](https://github.com/lukebennett88/luke-ui/issues/715) |
+| Token taxonomy                             | [#716](https://github.com/lukebennett88/luke-ui/issues/716) |
+| Global stylesheet and cascade layers       | [#717](https://github.com/lukebennett88/luke-ui/issues/717) |

@@ -19,7 +19,7 @@ interface CodeStyleProps {
 	textWrap?: TextProps['textWrap'];
 }
 
-type _CodeOmit = DistributiveOmit<React.ComponentProps<'code'>, 'color'>;
+type _CodeOmit = DistributiveOmit<React.ComponentProps<'code'>, 'color' | 'slot'>;
 
 interface _CodeProps extends _CodeOmit, CodeStyleProps {}
 
@@ -30,6 +30,9 @@ export type CodeProps = Prettify<_CodeProps>;
  * Marks a short fragment of computer code as `<code>`. Inherits surrounding size and colour,
  * applies the code font with an optical size correction, and stays on one line unless `lineClamp`
  * or `textWrap` wraps it.
+ *
+ * It never fills a React Aria text slot, so it renders inside a field's label, description, or
+ * error message.
  */
 export function Code(props: CodeProps) {
 	const { className, lineClamp, textWrap, ...elementProps } = props;
@@ -44,6 +47,7 @@ export function Code(props: CodeProps) {
 			elementType="code"
 			lineClamp={lineClamp}
 			shouldInheritFont
+			slot={null}
 			textWrap={textWrap}
 		/>
 	);

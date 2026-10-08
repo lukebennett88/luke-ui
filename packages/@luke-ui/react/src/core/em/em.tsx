@@ -15,7 +15,7 @@ interface EmStyleProps {
 	textWrap?: TextProps['textWrap'];
 }
 
-type _EmOmit = DistributiveOmit<React.ComponentProps<'em'>, 'color'>;
+type _EmOmit = DistributiveOmit<React.ComponentProps<'em'>, 'color' | 'slot'>;
 
 interface _EmProps extends _EmOmit, EmStyleProps {}
 
@@ -25,6 +25,9 @@ export type EmProps = Prettify<_EmProps>;
 /**
  * Marks text to stress emphasis, rendered as `<em>`.
  * Inherits surrounding typography and applies italic styling.
+ *
+ * It never fills a React Aria text slot, so it renders inside a field's label, description, or
+ * error message.
  */
 export function Em(props: EmProps) {
 	const { lineClamp, textWrap, ...elementProps } = props;
@@ -35,6 +38,7 @@ export function Em(props: EmProps) {
 			fontStyle="italic"
 			lineClamp={lineClamp}
 			shouldInheritFont
+			slot={null}
 			textWrap={textWrap}
 		/>
 	);

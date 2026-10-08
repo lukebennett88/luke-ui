@@ -1,0 +1,76 @@
+---
+title: Switch primitive
+description: Lower-level switch anatomy for custom label layouts.
+source: packages/@luke-ui/react/src/exports/primitives/switch.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/Switch.html
+---
+
+Use the Switch primitive when your layout owns the label, such as a settings row, or when the label
+needs custom content. For a normal labelled switch, use
+[`SwitchField`](/components/forms/switch-field).
+
+<ExampleBlock src="switch-primitive/basic" layout="centered" title="Switch primitive: Basic" />
+
+## Anatomy
+
+`SwitchRoot` is the semantic root. It owns the selection, state, validation, form, and size props.
+`id`, `className`, and `ref` target the root element. `inputId` and `inputRef` target the input.
+
+`SwitchLabel` is the clickable native `<label>`. It holds the hidden input, `SwitchControl`, and the
+label text. Like React Aria's `SwitchButton`, it takes `className`, `style`, and `children` as
+functions of the switch state, as well as `render`, `slot`, and event handlers.
+
+`SwitchControl` draws the track, and `SwitchThumb` draws the thumb that moves along it. Pass
+`children` to `SwitchThumb` to draw inside the thumb. Put the control before the label text.
+
+## Description and error
+
+Wrap `SwitchLabel` in [`InlineField`](/components/primitives/field) to add a `description` and an
+`errorMessage`. The `errorMessage` shows while the root is invalid. For a custom arrangement, place
+`FieldDescription` and `FieldError` inside the root instead of `InlineField`.
+
+## Labels from the layout
+
+When another part of the layout draws the visible label and description, leave the text out of
+`SwitchLabel`. Pass the label's id to the root's `aria-labelledby` and the description's id to
+`aria-describedby`.
+
+<ExampleBlock
+	src="switch-primitive/external-label"
+	title="Switch primitive: Labels from the layout"
+/>
+
+`SwitchLabel` is a native `<label>`, so it takes textual, non-interactive content only. Place links
+and buttons outside it. Set `slot={null}` on each `Text` you place in it, as the
+[Checkbox primitive](/components/primitives/checkbox#text-in-the-label) describes. The primitive
+draws no required marker.
+
+## API
+
+### SwitchRootProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/switch/switch.tsx"
+	name="SwitchRootProps"
+/>
+
+### SwitchLabelProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/switch/switch.tsx"
+	name="SwitchLabelProps"
+/>
+
+### SwitchControlProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/switch/switch.tsx"
+	name="SwitchControlProps"
+/>
+
+### SwitchThumbProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/switch/switch.tsx"
+	name="SwitchThumbProps"
+/>

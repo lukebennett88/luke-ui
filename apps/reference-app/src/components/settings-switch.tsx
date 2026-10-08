@@ -1,36 +1,43 @@
-import { SwitchButton, SwitchField } from 'react-aria-components/Switch';
-import * as styles from '../styles/settings.css.js';
+import {
+	SwitchControl,
+	SwitchLabel,
+	SwitchRoot,
+	SwitchThumb,
+} from '@luke-ui/react/primitives/switch';
 
+/**
+ * A switch for a settings row. The row draws the visible label and description, so the switch takes
+ * its name and description from their ids.
+ */
 export function SettingsSwitch({
 	'aria-describedby': ariaDescribedBy,
+	'aria-labelledby': ariaLabelledBy,
 	id,
 	isChecked,
 	isReadOnly,
-	label,
 	onChange,
 }: {
+	'aria-describedby'?: string;
+	'aria-labelledby': string;
 	id: string;
 	isChecked: boolean;
 	isReadOnly?: boolean;
-	'aria-describedby'?: string;
-	label: string;
 	onChange: (checked: boolean) => void;
 }) {
 	return (
-		<SwitchField
+		<SwitchRoot
 			aria-describedby={ariaDescribedBy}
-			aria-label={label}
-			className={styles.switchField}
-			id={id}
+			aria-labelledby={ariaLabelledBy}
+			inputId={id}
 			isReadOnly={isReadOnly}
 			isSelected={isChecked}
 			onChange={onChange}
 		>
-			<SwitchButton className={styles.switchRoot}>
-				<span className={styles.switchTrack}>
-					<span className={styles.switchThumb} />
-				</span>
-			</SwitchButton>
-		</SwitchField>
+			<SwitchLabel>
+				<SwitchControl>
+					<SwitchThumb />
+				</SwitchControl>
+			</SwitchLabel>
+		</SwitchRoot>
 	);
 }

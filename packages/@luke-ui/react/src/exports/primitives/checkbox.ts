@@ -1,6 +1,4 @@
 export {
-	CheckboxContent,
-	type CheckboxContentProps,
 	CheckboxControl,
 	type CheckboxControlProps,
 	CheckboxIndicator,

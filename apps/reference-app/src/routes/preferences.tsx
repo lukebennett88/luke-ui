@@ -1,4 +1,12 @@
-import { SelectField, SelectItem } from '@luke-ui/react/select-field';
+import {
+	SelectIndicator,
+	SelectItem,
+	SelectListBox,
+	SelectPopover,
+	SelectRoot,
+	SelectTrigger,
+	SelectValue,
+} from '@luke-ui/react/primitives/select';
 import { useOutletContext } from 'react-router';
 import type { Preferences } from '../api/schemas.js';
 import {
@@ -59,22 +67,28 @@ function PreferenceRow({
 	pref: PrefRow;
 	values: Preferences;
 }) {
-	const descriptionId = pref.hint ? `${pref.id}-description` : undefined;
-
 	if (pref.kind === 'select') {
 		return (
 			<SelectPreferenceRow isPending={isPending} onSave={onSave} pref={pref} values={values} />
 		);
 	}
 
+	const labelId = `${pref.id}-label`;
+	const descriptionId = `${pref.id}-description`;
+
 	return (
-		<SettingsRow descriptionId={descriptionId} hint={pref.hint} label={pref.label}>
+		<SettingsRow
+			descriptionId={descriptionId}
+			hint={pref.hint}
+			label={pref.label}
+			labelId={labelId}
+		>
 			<SettingsSwitch
 				aria-describedby={descriptionId}
+				aria-labelledby={labelId}
 				id={pref.id}
 				isChecked={values[pref.key]}
 				isReadOnly={isPending}
-				label={pref.label}
 				onChange={(checked) => onSave({ [pref.key]: checked })}
 			/>
 		</SettingsRow>
@@ -102,12 +116,10 @@ function SelectPreferenceRow({
 			label={pref.label}
 			labelId={labelId}
 		>
-			<SelectField
+			<SelectRoot
 				aria-describedby={descriptionId}
 				aria-labelledby={labelId}
 				className={styles.settingsSelect}
-				isPending={isPending}
-				items={pref.options}
 				onChange={(key) => {
 					if (key == null) return;
 					onSave({ [pref.key]: pref.parse(String(key)) });
@@ -116,8 +128,16 @@ function SelectPreferenceRow({
 				triggerId={pref.id}
 				value={values[pref.key]}
 			>
-				{(option) => <SelectItem id={option.value}>{option.label}</SelectItem>}
-			</SelectField>
+				<SelectTrigger isPending={isPending}>
+					<SelectValue />
+					<SelectIndicator />
+				</SelectTrigger>
+				<SelectPopover>
+					<SelectListBox items={pref.options}>
+						{(option) => <SelectItem id={option.value}>{option.label}</SelectItem>}
+					</SelectListBox>
+				</SelectPopover>
+			</SelectRoot>
 		</SettingsRow>
 	);
 }

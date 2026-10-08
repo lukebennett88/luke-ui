@@ -1,57 +1,56 @@
 ---
 title: Checkbox primitive
-description: Lower-level checkbox anatomy for custom form control layouts.
+description: Lower-level checkbox anatomy for custom label layouts.
 source: packages/@luke-ui/react/src/exports/primitives/checkbox.ts
 reactAria: https://react-spectrum.adobe.com/react-aria/Checkbox.html
 ---
 
-Use the Checkbox primitive when you need a custom label layout or extra content. For normal
-application forms, use [`Checkbox`](/components/forms/checkbox).
+Use the Checkbox primitive when your layout owns the label, such as a table row, or when the label
+needs custom content. For a normal labelled checkbox, use
+[`CheckboxField`](/components/forms/checkbox-field).
 
 <ExampleBlock src="checkbox-primitive/basic" layout="centered" title="Checkbox primitive: Basic" />
 
 ## Anatomy
 
 `CheckboxRoot` is the semantic root. It owns the selection, state, validation, form, and size props.
-`CheckboxContent` is the native `<label>`. It holds `CheckboxControl`, which centres
-`CheckboxIndicator`, and `CheckboxLabel`. Put the control before the label.
-
 `id`, `className`, and `ref` target the root element. `inputId` and `inputRef` target the input.
+
+`CheckboxLabel` is the clickable native `<label>`. It holds the hidden input, `CheckboxControl`, and
+the label text. Like React Aria's `CheckboxButton`, it takes `className`, `style`, and `children` as
+functions of the checkbox state, as well as `render`, `slot`, and event handlers.
+
+`CheckboxControl` sizes the visual affordance to the label's first line, and `CheckboxIndicator`
+draws the box and its selected and indeterminate states. Put the control before the label text.
 
 ## Description and error
 
-Wrap `CheckboxContent` in [`InlineField`](/components/primitives/field) to add a `description` and
-an `errorMessage`. The `errorMessage` shows while the root is invalid.
-
-```tsx
-<CheckboxRoot isInvalid>
-	<InlineField description="Receive updates by email." errorMessage="Choose an option.">
-		<CheckboxContent>
-			<CheckboxControl>
-				<CheckboxIndicator />
-			</CheckboxControl>
-			<CheckboxLabel>Email notifications</CheckboxLabel>
-		</CheckboxContent>
-	</InlineField>
-</CheckboxRoot>
-```
-
-For a custom arrangement, place `FieldDescription` and `FieldError` inside the root instead of
-`InlineField`.
+Wrap `CheckboxLabel` in [`InlineField`](/components/primitives/field) to add a `description` and an
+`errorMessage`. The `errorMessage` shows while the root is invalid. For a custom arrangement, place
+`FieldDescription` and `FieldError` inside the root instead of `InlineField`.
 
 ## Labels
 
-The label is part of a native `<label>`, so it takes textual content only. Place links and buttons
-outside `CheckboxContent`.
+`CheckboxLabel` is a native `<label>`, so it takes textual, non-interactive content only. Place
+links and buttons outside it.
 
-To name a checkbox without a visible label, omit `CheckboxLabel` and pass `aria-labelledby` or
-`aria-label` to the root.
+When another part of the layout draws the visible label, leave the text out of `CheckboxLabel` and
+pass `aria-labelledby` to the root, with `aria-describedby` for any description. Pass `aria-label`
+when no visible text names the checkbox.
 
-## Required marker
+The primitive draws no required marker. Show the required state in your own label content.
 
-When the root is required, `CheckboxLabel` draws a marker after its final inline content.
-`necessityIndicator="icon"`, the default, adds an asterisk. `necessityIndicator="label"` appends
-“(required)”. Raw text placed directly in `CheckboxContent` gets no marker.
+## Text in the label
+
+The root provides React Aria's slotted text context for its description and error. Set `slot={null}`
+on each `Text` you place in `CheckboxLabel`, so it renders as label content rather than a
+description or error.
+
+<ExampleBlock
+	src="checkbox-primitive/text-label"
+	layout="centered"
+	title="Checkbox primitive: Text in the label"
+/>
 
 ## API
 
@@ -62,11 +61,11 @@ When the root is required, `CheckboxLabel` draws a marker after its final inline
 	name="CheckboxRootProps"
 />
 
-### CheckboxContentProps
+### CheckboxLabelProps
 
 <component-props-table
 	path="packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx"
-	name="CheckboxContentProps"
+	name="CheckboxLabelProps"
 />
 
 ### CheckboxControlProps
@@ -74,13 +73,6 @@ When the root is required, `CheckboxLabel` draws a marker after its final inline
 <component-props-table
 	path="packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx"
 	name="CheckboxControlProps"
-/>
-
-### CheckboxLabelProps
-
-<component-props-table
-	path="packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx"
-	name="CheckboxLabelProps"
 />
 
 ### CheckboxIndicatorProps
