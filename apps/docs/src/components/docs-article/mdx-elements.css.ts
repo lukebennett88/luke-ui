@@ -1,6 +1,6 @@
 import { vars } from '@luke-ui/react/theme';
 import { globalStyle, style } from '@vanilla-extract/css';
-import { docsTocMinWidth } from '../../lib/docs-sidebar-media.js';
+import { docsTocMinInlineSize } from '../../lib/docs-container-queries.js';
 import { SITE_HEADER_BLOCK_SIZE } from '../site-header-size.js';
 import { TOC_BAR_BLOCK_SIZE } from './docs-article.css.js';
 
@@ -13,8 +13,8 @@ export const heading = style({
 		recipes: {
 			// Clears the sticky header, and below the table of contents breakpoint the sticky bar too.
 			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${TOC_BAR_BLOCK_SIZE} + ${vars.space.sp16})`,
-			'@media': {
-				[docsTocMinWidth]: {
+			'@container': {
+				[docsTocMinInlineSize]: {
 					scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space.sp16})`,
 				},
 			},

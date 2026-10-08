@@ -7,7 +7,7 @@ import type { Root } from 'fumadocs-core/page-tree';
 import { useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Modal, ModalOverlay } from 'react-aria-components/Modal';
-import { useIsDocsSidebarLayout } from '../lib/docs-sidebar-media.js';
+import { useIsDocsSidebarLayout } from '../lib/docs-container-queries.js';
 import { getActiveSiteDestination, siteDestinations } from '../lib/site-destinations.js';
 import { DocsLink } from './docs-link.js';
 import { DocsNav } from './docs-nav.js';

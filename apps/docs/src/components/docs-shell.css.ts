@@ -1,7 +1,7 @@
 import { vars } from '@luke-ui/react/theme';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { globalStyle, style } from '@vanilla-extract/css';
-import { docsSidebarMinWidth, docsTocMinWidth } from '../lib/docs-sidebar-media.js';
+import { docsSidebarMinInlineSize, docsTocMinInlineSize } from '../lib/docs-container-queries.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
 export const shell = style({
@@ -15,12 +15,12 @@ export const shell = style({
 			gridTemplateRows: 'auto minmax(0, 1fr)',
 			minBlockSize: '100dvh',
 			minInlineSize: 0,
-			'@media': {
-				[docsSidebarMinWidth]: {
+			'@container': {
+				[docsSidebarMinInlineSize]: {
 					gridTemplateAreas: '"header header" "sidebar main"',
 					gridTemplateColumns: '16rem minmax(0, 1fr)',
 				},
-				[docsTocMinWidth]: {
+				[docsTocMinInlineSize]: {
 					gridTemplateAreas: '"header header header" "sidebar main toc"',
 					gridTemplateColumns: '16rem minmax(0, 1fr) 16rem',
 				},
@@ -53,8 +53,8 @@ export const sidebar = style({
 			paddingBlock: vars.space.sp32,
 			paddingInline: vars.space.sp16,
 			position: 'sticky',
-			'@media': {
-				[docsSidebarMinWidth]: {
+			'@container': {
+				[docsSidebarMinInlineSize]: {
 					display: 'block',
 				},
 			},
@@ -171,8 +171,8 @@ export const folderLabel = style({
 export const mobileTrigger = style({
 	'@layer': {
 		recipes: {
-			'@media': {
-				[docsSidebarMinWidth]: {
+			'@container': {
+				[docsSidebarMinInlineSize]: {
 					display: 'none',
 				},
 			},

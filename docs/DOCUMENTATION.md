@@ -469,6 +469,13 @@ sidebar offset, the table of contents offset, and the heading scroll margin depe
 Surfaces with no sidebar keep the destinations at every width, moving them to a second nav row below
 `md`.
 
+The docs app's own size queries are unnamed `@container` queries against the root container, built
+from the conditions in `apps/docs/src/lib/docs-container-queries.ts`. Environmental queries such as
+`prefers-reduced-motion` and `hover: none` stay `@media`. No element below the root is a container,
+so the sidebar, table of contents, header, and heading scroll margin all switch at the same root
+width. If a docs component later needs its own container, name it and keep the shell-synchronised
+queries on the root.
+
 The docs article and each example frame use `isolation: isolate` so in-flow stacking, such as
 example resize grips, cannot paint over the sticky header. Do not raise the header `z-index` to
 compete with page content.

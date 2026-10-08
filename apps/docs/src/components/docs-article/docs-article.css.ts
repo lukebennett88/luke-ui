@@ -1,10 +1,12 @@
-import { breakpoints, vars } from '@luke-ui/react/theme';
+import { vars } from '@luke-ui/react/theme';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { globalStyle, style } from '@vanilla-extract/css';
-import { docsSidebarMinWidth, docsTocMinWidth } from '../../lib/docs-sidebar-media.js';
+import {
+	docsSidebarMinInlineSize,
+	docsTabletMinInlineSize,
+	docsTocMinInlineSize,
+} from '../../lib/docs-container-queries.js';
 import { SITE_HEADER_BLOCK_SIZE } from '../site-header-size.js';
-
-const tabletMinWidth = `(min-width: ${breakpoints.bp768}px)`;
 
 /**
  * Reading measure of the article. Roughly 75 characters of body text, which still leaves room for
@@ -27,11 +29,11 @@ export const main = style({
 // The bar and the article share this gutter so the bar's label lines up with the article text.
 const contentInlinePadding = {
 	paddingInline: vars.space.sp16,
-	'@media': {
-		[tabletMinWidth]: {
+	'@container': {
+		[docsTabletMinInlineSize]: {
 			paddingInline: vars.space.sp24,
 		},
-		[docsSidebarMinWidth]: {
+		[docsSidebarMinInlineSize]: {
 			paddingInline: vars.space.sp32,
 		},
 	},
@@ -42,10 +44,10 @@ export const content = style({
 		recipes: {
 			...contentInlinePadding,
 			paddingBlock: `${vars.space.sp32} ${vars.space.sp64}`,
-			'@media': {
-				...contentInlinePadding['@media'],
-				[tabletMinWidth]: {
-					...contentInlinePadding['@media'][tabletMinWidth],
+			'@container': {
+				...contentInlinePadding['@container'],
+				[docsTabletMinInlineSize]: {
+					...contentInlinePadding['@container'][docsTabletMinInlineSize],
 					paddingBlockEnd: vars.space.sp96,
 				},
 			},
@@ -152,8 +154,8 @@ export const tocBar = style({
 			insetBlockStart: SITE_HEADER_BLOCK_SIZE,
 			position: 'sticky',
 			zIndex: 5,
-			'@media': {
-				[docsTocMinWidth]: {
+			'@container': {
+				[docsTocMinInlineSize]: {
 					display: 'none',
 				},
 			},
@@ -219,8 +221,8 @@ export const tocBarPanel = style({
 			paddingBlock: vars.space.sp8,
 			paddingInline: vars.space.sp16,
 			position: 'absolute',
-			'@media': {
-				[tabletMinWidth]: {
+			'@container': {
+				[docsTabletMinInlineSize]: {
 					paddingInline: vars.space.sp24,
 				},
 			},
@@ -240,8 +242,8 @@ export const tocColumn = style({
 			paddingBlock: vars.space.sp32,
 			paddingInline: vars.space.sp16,
 			position: 'sticky',
-			'@media': {
-				[docsTocMinWidth]: {
+			'@container': {
+				[docsTocMinInlineSize]: {
 					display: 'block',
 				},
 			},

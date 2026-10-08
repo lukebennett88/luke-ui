@@ -212,3 +212,12 @@ Reconciliation commands for follow-ups:
 `apps/docs/dist/client/assets/*.css` after build, and compare any residual match to one row above.
 Do not count generated `.source`, build outputs, or displayed MDX code as active styling without
 tracing the owner. #678 owns the final absence check and the decision to close #577.
+
+## Container queries in docs-owned styles
+
+Docs-owned size queries use `@container` against the root container that the Luke UI theme
+stylesheet declares on `:where(:root)`. The conditions live in
+`apps/docs/src/lib/docs-container-queries.ts`. Environmental queries (`prefers-reduced-motion`,
+`forced-colors`, `hover: none`) stay `@media`. The remaining Tailwind `md:` and `sm:` responsive
+classes in the #674, #675, and #676 consumers, and `use-is-desktop.ts`, should migrate to
+`@container` when those issues move them to `.css.ts`.

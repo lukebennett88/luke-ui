@@ -66,6 +66,12 @@ afterEach(async () => {
 	await page.viewport(1024, 800);
 });
 
+// Docs size queries are `@container` queries against `:root`. Without that containment they never
+// match, and every layout silently falls back to its base style.
+test('contains the root so docs container queries have a container to match', () => {
+	expect(getComputedStyle(document.documentElement).containerType).toBe('inline-size');
+});
+
 test('keeps every section visible in RTL with plain link semantics', async () => {
 	await page.viewport(1280, 800);
 	document.documentElement.dir = 'rtl';
