@@ -1,6 +1,7 @@
 import { breakpoints, vars } from '@luke-ui/react/theme';
+import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { globalStyle, style } from '@vanilla-extract/css';
-import { docsTocMinWidth } from '../../lib/docs-sidebar-media.js';
+import { docsSidebarMinWidth, docsTocMinWidth } from '../../lib/docs-sidebar-media.js';
 import { SITE_HEADER_BLOCK_SIZE } from '../site-header-size.js';
 
 const tabletMinWidth = `(min-width: ${breakpoints.bp768}px)`;
@@ -11,17 +12,41 @@ const tabletMinWidth = `(min-width: ${breakpoints.bp768}px)`;
  */
 const ARTICLE_MAX_INLINE_SIZE = '52rem';
 
+/** Block size of the sticky table of contents bar, which scroll margins must clear. */
+export const TOC_BAR_BLOCK_SIZE = '3rem';
+
 export const main = style({
 	'@layer': {
 		recipes: {
 			gridArea: 'main',
 			minInlineSize: 0,
+		},
+	},
+});
+
+// The bar and the article share this gutter so the bar's label lines up with the article text.
+const contentInlinePadding = {
+	paddingInline: vars.space.sp16,
+	'@media': {
+		[tabletMinWidth]: {
+			paddingInline: vars.space.sp24,
+		},
+		[docsSidebarMinWidth]: {
+			paddingInline: vars.space.sp32,
+		},
+	},
+} as const satisfies ComplexStyleRule;
+
+export const content = style({
+	'@layer': {
+		recipes: {
+			...contentInlinePadding,
 			paddingBlock: `${vars.space.sp32} ${vars.space.sp64}`,
-			paddingInline: vars.space.sp16,
 			'@media': {
+				...contentInlinePadding['@media'],
 				[tabletMinWidth]: {
-					paddingBlock: `${vars.space.sp48} ${vars.space.sp96}`,
-					paddingInline: vars.space.sp32,
+					...contentInlinePadding['@media'][tabletMinWidth],
+					paddingBlockEnd: vars.space.sp96,
 				},
 			},
 		},
@@ -29,12 +54,12 @@ export const main = style({
 });
 
 // `isolation` keeps in-flow stacking inside the article, such as example resize grips, from
-// painting over the sticky header.
+// painting over the sticky header. The article hugs the inline start so the gap beside the sidebar
+// matches the content gutter.
 export const article = style({
 	'@layer': {
 		recipes: {
 			isolation: 'isolate',
-			marginInline: 'auto',
 			maxInlineSize: ARTICLE_MAX_INLINE_SIZE,
 		},
 	},
@@ -43,7 +68,7 @@ export const article = style({
 export const header = style({
 	'@layer': {
 		recipes: {
-			marginBlockEnd: vars.space.sp32,
+			marginBlockEnd: vars.space.sp48,
 		},
 	},
 });
@@ -118,17 +143,16 @@ export const pagerIcon = style({
 	},
 });
 
+// Sticks below the site header. The open panel overlays the article instead of pushing it down.
 export const tocBar = style({
 	'@layer': {
 		recipes: {
+			backgroundColor: vars.color.surface.canvas,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
-			gridArea: 'toc-bar',
-			minInlineSize: 0,
-			paddingInline: vars.space.sp16,
+			insetBlockStart: SITE_HEADER_BLOCK_SIZE,
+			position: 'sticky',
+			zIndex: 5,
 			'@media': {
-				[tabletMinWidth]: {
-					paddingInline: vars.space.sp32,
-				},
 				[docsTocMinWidth]: {
 					display: 'none',
 				},
@@ -140,7 +164,9 @@ export const tocBar = style({
 export const tocSummary = style({
 	'@layer': {
 		recipes: {
+			...contentInlinePadding,
 			alignItems: 'center',
+			blockSize: TOC_BAR_BLOCK_SIZE,
 			color: vars.color.text.primary,
 			columnGap: vars.space.sp8,
 			cursor: 'pointer',
@@ -149,8 +175,6 @@ export const tocSummary = style({
 			fontWeight: vars.font.weight.label,
 			lineHeight: vars.font.label.lineHeight,
 			listStyle: 'none',
-			minBlockSize: vars.controlSize.medium,
-			paddingBlock: vars.space.sp8,
 			selectors: {
 				'&::-webkit-details-marker': {
 					display: 'none',
@@ -185,9 +209,21 @@ globalStyle(`${tocBar}[open] ${tocSummaryIcon}`, {
 export const tocBarPanel = style({
 	'@layer': {
 		recipes: {
-			maxBlockSize: '50dvh',
+			backgroundColor: vars.color.surface.floating,
+			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+			boxShadow: vars.depth.floating,
+			insetBlockStart: '100%',
+			insetInline: 0,
+			maxBlockSize: `min(24rem, calc(100dvh - ${SITE_HEADER_BLOCK_SIZE} - ${TOC_BAR_BLOCK_SIZE}))`,
 			overflowY: 'auto',
-			paddingBlockEnd: vars.space.sp16,
+			paddingBlock: vars.space.sp8,
+			paddingInline: vars.space.sp16,
+			position: 'absolute',
+			'@media': {
+				[tabletMinWidth]: {
+					paddingInline: vars.space.sp24,
+				},
+			},
 		},
 	},
 });

@@ -17,25 +17,25 @@ proseStyle(
 	'p, h1, h2, h3, h4, h5, h6, ul, ol, li, dl, dt, dd, blockquote, pre, hr, figure, figcaption, table, img, picture, video',
 	{ marginBlock: 0 },
 );
-proseStyle('* + p, * + ul, * + ol, * + dl, * + h1', { marginBlockStart: vars.space.sp24 });
-proseStyle('* + h2, * + hr', { marginBlockStart: vars.space.sp48 });
+proseStyle('* + p, * + ul, * + ol, * + dl, * + h1', { marginBlockStart: vars.space.sp32 });
+proseStyle('* + h2, * + hr', { marginBlockStart: vars.space.sp64 });
 proseStyle('* + h3, * + blockquote, * + table, * + figure, * + img, * + picture, * + video', {
-	marginBlockStart: vars.space.sp32,
+	marginBlockStart: vars.space.sp40,
 });
-proseStyle('* + h4, * + h5, * + h6, * + pre', { marginBlockStart: vars.space.sp24 });
-proseStyle('* + li, * + dd', { marginBlockStart: vars.space.sp8 });
-proseStyle('* + dt', { marginBlockStart: vars.space.sp24 });
+proseStyle('* + h4, * + h5, * + h6, * + pre', { marginBlockStart: vars.space.sp32 });
+proseStyle('* + li, * + dd', { marginBlockStart: vars.space.sp12 });
+proseStyle('* + dt', { marginBlockStart: vars.space.sp32 });
 proseStyle('* + figcaption, li > ul, li > ol, li > p + p', {
-	marginBlockStart: vars.space.sp12,
+	marginBlockStart: vars.space.sp16,
 });
 
-proseStyle('h1 + *', { marginBlockStart: vars.space.sp32 });
-proseStyle('h1 + h2, h1 + hr', { marginBlockStart: vars.space.sp48 });
-proseStyle('h2 + *', { marginBlockStart: vars.space.sp24 });
-proseStyle('h3 + *', { marginBlockStart: vars.space.sp16 });
-proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space.sp12 });
+proseStyle('h1 + *', { marginBlockStart: vars.space.sp40 });
+proseStyle('h1 + h2, h1 + hr', { marginBlockStart: vars.space.sp64 });
+proseStyle('h2 + *', { marginBlockStart: vars.space.sp32 });
+proseStyle('h3 + *', { marginBlockStart: vars.space.sp24 });
+proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space.sp16 });
 // A rule is a section break on both sides.
-proseStyle('hr + *', { marginBlockStart: vars.space.sp48 });
+proseStyle('hr + *', { marginBlockStart: vars.space.sp64 });
 
 proseStyle('img, picture, video', { display: 'block' });
 proseStyle('figure > img, figure > picture, figure > video, picture > img', {

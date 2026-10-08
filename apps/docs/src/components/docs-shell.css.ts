@@ -7,22 +7,21 @@ import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 export const shell = style({
 	'@layer': {
 		recipes: {
-			// `DocsArticle` places its mobile table of contents, article, and desktop table of contents
-			// in the `toc-bar`, `main`, and `toc` areas.
+			// `DocsArticle` places the article in `main` and the desktop table of contents in `toc`.
 			backgroundColor: vars.color.surface.canvas,
 			display: 'grid',
-			gridTemplateAreas: '"header" "toc-bar" "main"',
+			gridTemplateAreas: '"header" "main"',
 			gridTemplateColumns: 'minmax(0, 1fr)',
-			gridTemplateRows: 'auto auto minmax(0, 1fr)',
+			gridTemplateRows: 'auto minmax(0, 1fr)',
 			minBlockSize: '100dvh',
 			minInlineSize: 0,
 			'@media': {
 				[docsSidebarMinWidth]: {
-					gridTemplateAreas: '"header header" "sidebar toc-bar" "sidebar main"',
+					gridTemplateAreas: '"header header" "sidebar main"',
 					gridTemplateColumns: '16rem minmax(0, 1fr)',
 				},
 				[docsTocMinWidth]: {
-					gridTemplateAreas: '"header header header" "sidebar toc-bar toc" "sidebar main toc"',
+					gridTemplateAreas: '"header header header" "sidebar main toc"',
 					gridTemplateColumns: '16rem minmax(0, 1fr) 16rem',
 				},
 			},

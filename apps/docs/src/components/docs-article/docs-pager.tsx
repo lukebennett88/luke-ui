@@ -59,7 +59,11 @@ function PagerLink({ direction, page }: { direction: 'next' | 'previous'; page: 
 	return (
 		<Link className={cx(blockLink, isNext && styles.pagerNext)} to={page.url}>
 			<span className={cx(styles.pagerRow, isNext && styles.pagerRowNext)}>
-				<Icon className={styles.pagerIcon} name={isNext ? 'chevronRight' : 'chevronLeft'} />
+				<Icon
+					className={styles.pagerIcon}
+					name={isNext ? 'chevronRight' : 'chevronLeft'}
+					size="small"
+				/>
 				<span className={styles.pagerText}>
 					<Text color="secondary" typography="caption">
 						{isNext ? 'Next' : 'Previous'}

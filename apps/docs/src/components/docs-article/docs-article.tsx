@@ -24,7 +24,7 @@ interface DocsArticleProps {
 
 /**
  * One documentation page: title block, MDX body, previous and next links, and the table of
- * contents. It renders into the `toc-bar`, `main`, and `toc` areas of `DocsShell`.
+ * contents. It renders into the `main` and `toc` areas of `DocsShell`.
  */
 export function DocsArticle({
 	actions,
@@ -38,23 +38,25 @@ export function DocsArticle({
 
 	return (
 		<AnchorProvider toc={toc}>
-			{hasToc ? <DocsTocBar toc={toc} /> : null}
 			<main className={styles.main}>
-				<article className={styles.article}>
-					<Stack className={styles.header} elementType="header" gap="sp24">
-						<Stack gap="sp12">
-							<Heading level={1}>{title}</Heading>
-							{description ? (
-								<Text color="secondary" elementType="p" typography="lead">
-									{description}
-								</Text>
-							) : null}
+				{hasToc ? <DocsTocBar toc={toc} /> : null}
+				<div className={styles.content}>
+					<article className={styles.article}>
+						<Stack className={styles.header} elementType="header" gap="sp24">
+							<Stack gap="sp24">
+								<Heading level={1}>{title}</Heading>
+								{description ? (
+									<Text color="secondary" elementType="p" typography="lead">
+										{description}
+									</Text>
+								) : null}
+							</Stack>
+							{actions}
 						</Stack>
-						{actions}
-					</Stack>
-					<Prose>{children}</Prose>
-					<DocsPager tree={tree} />
-				</article>
+						<Prose>{children}</Prose>
+						<DocsPager tree={tree} />
+					</article>
+				</div>
 			</main>
 			{hasToc ? <DocsTocColumn toc={toc} /> : null}
 		</AnchorProvider>

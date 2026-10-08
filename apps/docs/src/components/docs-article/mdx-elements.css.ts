@@ -1,6 +1,8 @@
 import { vars } from '@luke-ui/react/theme';
 import { globalStyle, style } from '@vanilla-extract/css';
+import { docsTocMinWidth } from '../../lib/docs-sidebar-media.js';
 import { SITE_HEADER_BLOCK_SIZE } from '../site-header-size.js';
+import { TOC_BAR_BLOCK_SIZE } from './docs-article.css.js';
 
 // Prose spaces a block from the block before it with an element selector at `:where()` strength.
 // Wrappers that stand in for a prose element repeat that spacing here. The `h2 + &` style selectors
@@ -9,8 +11,13 @@ import { SITE_HEADER_BLOCK_SIZE } from '../site-header-size.js';
 export const heading = style({
 	'@layer': {
 		recipes: {
-			// Clears the sticky header and a little breathing room when a heading is a link target.
-			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space.sp16})`,
+			// Clears the sticky header, and below the table of contents breakpoint the sticky bar too.
+			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${TOC_BAR_BLOCK_SIZE} + ${vars.space.sp16})`,
+			'@media': {
+				[docsTocMinWidth]: {
+					scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space.sp16})`,
+				},
+			},
 		},
 	},
 });
@@ -67,11 +74,11 @@ export const tableScroll = style({
 		recipes: {
 			border: `1px solid ${vars.color.border.decorative}`,
 			borderRadius: vars.radius.surface,
-			marginBlockStart: vars.space.sp32,
+			marginBlockStart: vars.space.sp40,
 			selectors: {
-				'h2 + &': { marginBlockStart: vars.space.sp24 },
-				'h3 + &': { marginBlockStart: vars.space.sp16 },
-				'h4 + &, h5 + &, h6 + &': { marginBlockStart: vars.space.sp12 },
+				'h2 + &': { marginBlockStart: vars.space.sp32 },
+				'h3 + &': { marginBlockStart: vars.space.sp24 },
+				'h4 + &, h5 + &, h6 + &': { marginBlockStart: vars.space.sp16 },
 			},
 		},
 	},
@@ -117,7 +124,7 @@ export const cards = style({
 			display: 'grid',
 			gap: vars.space.sp16,
 			gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 20rem), 1fr))',
-			marginBlockStart: vars.space.sp24,
+			marginBlockStart: vars.space.sp32,
 		},
 	},
 });

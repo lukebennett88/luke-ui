@@ -187,6 +187,12 @@ test('shows a keyboard-operable disclosure instead of the column below the wide 
 	await userEvent.keyboard('{Enter}');
 	await userEvent.click(page.getByRole('link', { name: 'API' }));
 	expect(details.open).toBe(false);
+
+	summary.element().focus();
+	await userEvent.keyboard('{Enter}');
+	expect(details.open).toBe(true);
+	await userEvent.click(page.getByRole('heading', { name: 'Usage' }));
+	expect(details.open).toBe(false);
 });
 
 test('renders no table of contents when the page has no headings', async () => {

@@ -1,12 +1,13 @@
+import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
 import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@luke-ui/react/link';
+import { vars } from '@luke-ui/react/theme';
 import type { ReactNode } from 'react';
 import { useCopyButton } from '../lib/use-copy-button.js';
 import { GithubMark } from './github-mark.js';
-import * as styles from './page-actions.css.js';
 import { ReactAriaMark } from './react-aria-mark.js';
 
 export type PageActionsMode = 'all' | 'edit';
@@ -34,7 +35,16 @@ export function PageActions({
 			{showAllActions && reactAriaUrl ? (
 				<PageActionLink
 					href={reactAriaUrl}
-					icon={<ReactAriaMark className={styles.brandMark} />}
+					icon={
+						<Box
+							blockSize={vars.iconSize.xsmall}
+							flexShrink="0"
+							inlineSize={vars.iconSize.xsmall}
+							renderRoot={({ className, style }) => (
+								<ReactAriaMark className={className} style={style} />
+							)}
+						/>
+					}
 					label="React Aria"
 				/>
 			) : null}

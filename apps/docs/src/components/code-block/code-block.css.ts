@@ -26,7 +26,7 @@ export const root = style({
 export const mdxFence = style({
 	'@layer': {
 		recipes: {
-			marginBlockStart: vars.space.sp24,
+			marginBlockStart: vars.space.sp32,
 		},
 	},
 });

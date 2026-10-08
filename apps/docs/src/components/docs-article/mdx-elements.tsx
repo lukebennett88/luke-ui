@@ -170,7 +170,7 @@ export function Card({ children, description, href, title }: CardProps) {
 					<InheritTypographyContext value>{description ?? children}</InheritTypographyContext>
 				</Text>
 			</div>
-			<Icon className={styles.cardIcon} name="chevronRight" />
+			<Icon className={styles.cardIcon} name="chevronRight" size="small" />
 		</div>
 	);
 

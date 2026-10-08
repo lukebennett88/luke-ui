@@ -27,7 +27,8 @@ export function DocsTocBar({ toc }: { toc: Array<TOCItemType> }) {
 		if (detailsRef.current) detailsRef.current.open = false;
 	}
 
-	// Escape closes the panel from anywhere inside it and returns focus to the summary.
+	// Escape closes the panel from anywhere inside it and returns focus to the summary. A press
+	// outside the disclosure closes it too, because the open panel overlays the article.
 	useEffect(() => {
 		const details = detailsRef.current;
 		if (!details) return;
@@ -36,15 +37,22 @@ export function DocsTocBar({ toc }: { toc: Array<TOCItemType> }) {
 			details.open = false;
 			details.querySelector('summary')?.focus();
 		}
+		function handlePointerDown(event: PointerEvent) {
+			if (event.target instanceof Node && !details?.contains(event.target)) close();
+		}
 		details.addEventListener('keydown', handleKeyDown);
-		return () => details.removeEventListener('keydown', handleKeyDown);
+		document.addEventListener('pointerdown', handlePointerDown);
+		return () => {
+			details.removeEventListener('keydown', handleKeyDown);
+			document.removeEventListener('pointerdown', handlePointerDown);
+		};
 	}, []);
 
 	return (
 		<details className={styles.tocBar} ref={detailsRef}>
 			<summary className={styles.tocSummary}>
 				{TOC_LABEL}
-				<Icon className={styles.tocSummaryIcon} name="chevronDown" />
+				<Icon className={styles.tocSummaryIcon} name="chevronDown" size="xsmall" />
 			</summary>
 			<nav aria-label={TOC_LABEL} className={styles.tocBarPanel}>
 				<TocLinks onNavigate={close} toc={toc} />
