@@ -8,25 +8,10 @@ import {
 } from '../../lib/docs-container-queries.js';
 import { SITE_HEADER_BLOCK_SIZE } from '../site-header-size.js';
 
-/**
- * Reading measure of the article. Roughly 75 characters of body text, which still leaves room for
- * example frames and tables.
- */
-const ARTICLE_MAX_INLINE_SIZE = '52rem';
-
 /** Block size of the sticky table of contents bar, which scroll margins must clear. */
 export const TOC_BAR_BLOCK_SIZE = '3rem';
 
-export const main = style({
-	'@layer': {
-		recipes: {
-			gridArea: 'main',
-			minInlineSize: 0,
-		},
-	},
-});
-
-// The bar and the article share this gutter so the bar's label lines up with the article text.
+// Keep in sync with the article content `paddingInline` on `DocsArticle` so the bar label lines up.
 const contentInlinePadding = {
 	paddingInline: vars.space.sp16,
 	'@container': {
@@ -39,38 +24,12 @@ const contentInlinePadding = {
 	},
 } as const satisfies ComplexStyleRule;
 
-export const content = style({
-	'@layer': {
-		recipes: {
-			...contentInlinePadding,
-			paddingBlock: `${vars.space.sp32} ${vars.space.sp64}`,
-			'@container': {
-				...contentInlinePadding['@container'],
-				[docsTabletMinInlineSize]: {
-					...contentInlinePadding['@container'][docsTabletMinInlineSize],
-					paddingBlockEnd: vars.space.sp96,
-				},
-			},
-		},
-	},
-});
-
 // `isolation` keeps in-flow stacking inside the article, such as example resize grips, from
-// painting over the sticky header. The article hugs the inline start so the gap beside the sidebar
-// matches the content gutter.
+// painting over the sticky header.
 export const article = style({
 	'@layer': {
 		recipes: {
 			isolation: 'isolate',
-			maxInlineSize: ARTICLE_MAX_INLINE_SIZE,
-		},
-	},
-});
-
-export const header = style({
-	'@layer': {
-		recipes: {
-			marginBlockEnd: vars.space.sp48,
 		},
 	},
 });
@@ -218,7 +177,7 @@ export const tocBarPanel = style({
 			insetInline: 0,
 			maxBlockSize: `min(24rem, calc(100dvh - ${SITE_HEADER_BLOCK_SIZE} - ${TOC_BAR_BLOCK_SIZE}))`,
 			overflowY: 'auto',
-			paddingBlock: vars.space.sp8,
+			// Inline padding stays here so it tracks the article gutter via docs container queries.
 			paddingInline: vars.space.sp16,
 			position: 'absolute',
 			'@container': {
@@ -239,8 +198,6 @@ export const tocColumn = style({
 			insetBlockStart: SITE_HEADER_BLOCK_SIZE,
 			maxBlockSize: `calc(100dvh - ${SITE_HEADER_BLOCK_SIZE})`,
 			overflowY: 'auto',
-			paddingBlock: vars.space.sp32,
-			paddingInline: vars.space.sp16,
 			position: 'sticky',
 			'@container': {
 				[docsTocMinInlineSize]: {
@@ -251,39 +208,15 @@ export const tocColumn = style({
 	},
 });
 
-export const tocTitle = style({
-	'@layer': {
-		recipes: {
-			marginBlockEnd: vars.space.sp8,
-			paddingInline: vars.space.sp8,
-		},
-	},
-});
-
-export const tocList = style({
-	'@layer': {
-		recipes: {
-			borderInlineStart: `1px solid ${vars.color.border.decorative}`,
-			display: 'grid',
-			listStyle: 'none',
-			margin: 0,
-			padding: 0,
-		},
-	},
-});
-
+/** Hover and current styles for TOC links. Layout lives on Box. */
 export const tocLink = style({
 	'@layer': {
 		recipes: {
 			borderInlineStart: '2px solid transparent',
 			color: vars.color.text.secondary,
-			display: 'block',
 			fontSize: vars.font.label.fontSize,
 			lineHeight: vars.font.label.lineHeight,
 			marginInlineStart: '-1px',
-			paddingBlock: vars.space.sp4,
-			paddingInlineEnd: vars.space.sp8,
-			paddingInlineStart: vars.space.sp12,
 			textDecoration: 'none',
 			selectors: {
 				'&:hover': {
@@ -292,12 +225,6 @@ export const tocLink = style({
 				'&[aria-current="location"]': {
 					borderInlineStartColor: vars.color.border.accent,
 					color: vars.color.foreground.accent.rest,
-				},
-				'&[data-depth="nested"]': {
-					paddingInlineStart: vars.space.sp24,
-				},
-				'&[data-depth="deep"]': {
-					paddingInlineStart: vars.space.sp40,
 				},
 			},
 		},

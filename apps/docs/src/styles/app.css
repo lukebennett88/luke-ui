@@ -9,6 +9,13 @@ code > * {
 	tab-size: 2;
 }
 
+/* TOC and in-page heading anchors. Instant when the reader prefers reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+}
+
 /**
  * Bridge Fumadocs structural colour variables to Luke UI stable tokens for the
  * Fumadocs UI components the docs still render: the type table and its

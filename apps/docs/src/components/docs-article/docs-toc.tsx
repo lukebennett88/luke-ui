@@ -1,21 +1,46 @@
+import { Box } from '@luke-ui/react/box';
 import { Icon } from '@luke-ui/react/icon';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
+import { vars } from '@luke-ui/react/theme';
+import { cx } from '@luke-ui/react/utils';
 import { useActiveAnchor } from 'fumadocs-core/toc';
 import type { TOCItemType } from 'fumadocs-core/toc';
+import type { CSSProperties, ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
+import { docsNavPaneProps } from '../docs-nav.js';
 import * as styles from './docs-article.css.js';
 
 const TOC_LABEL = 'On this page';
 
+const tocListBorder = {
+	borderInlineStart: `1px solid ${vars.color.border.decorative}`,
+} as const satisfies CSSProperties;
+
+const tocLinkPaddingInlineStart = {
+	top: 'sp12',
+	nested: 'sp24',
+	deep: 'sp40',
+} as const;
+
 /** Sticky table of contents shown in its own column at wide viewports. */
 export function DocsTocColumn({ toc }: { toc: Array<TOCItemType> }) {
 	return (
-		<nav aria-label={TOC_LABEL} className={styles.tocColumn}>
-			<Text className={styles.tocTitle} color="secondary" elementType="p" typography="label">
-				{TOC_LABEL}
-			</Text>
-			<TocLinks toc={toc} />
-		</nav>
+		<Box
+			{...docsNavPaneProps}
+			aria-label={TOC_LABEL}
+			className={styles.tocColumn}
+			elementType="nav"
+		>
+			<Stack gap="sp8">
+				<Box paddingInline="sp8">
+					<Text color="secondary" elementType="p" typography="label">
+						{TOC_LABEL}
+					</Text>
+				</Box>
+				<TocLinks toc={toc} />
+			</Stack>
+		</Box>
 	);
 }
 
@@ -55,7 +80,9 @@ export function DocsTocBar({ toc }: { toc: Array<TOCItemType> }) {
 				<Icon className={styles.tocSummaryIcon} name="chevronDown" size="xsmall" />
 			</summary>
 			<nav aria-label={TOC_LABEL} className={styles.tocBarPanel}>
-				<TocLinks onNavigate={close} toc={toc} />
+				<Box paddingBlock="sp8">
+					<TocLinks onNavigate={close} toc={toc} />
+				</Box>
 			</nav>
 		</details>
 	);
@@ -65,26 +92,61 @@ function TocLinks({ onNavigate, toc }: { onNavigate?: () => void; toc: Array<TOC
 	const activeId = useActiveAnchor();
 
 	return (
-		<ul className={styles.tocList}>
+		<Box elementType="ul" style={tocListBorder}>
 			{toc.map((item) => (
-				<li key={item.url}>
-					<a
-						aria-current={item.url === `#${activeId}` ? 'location' : undefined}
-						className={styles.tocLink}
-						data-depth={tocDepth(item.depth)}
+				<Box elementType="li" key={item.url}>
+					<TocLink
 						href={item.url}
-						onClick={onNavigate}
+						isCurrent={item.url === `#${activeId}`}
+						onNavigate={onNavigate}
+						paddingInlineStart={tocLinkPaddingInlineStart[tocDepth(item.depth)]}
 					>
 						{item.title}
-					</a>
-				</li>
+					</TocLink>
+				</Box>
 			))}
-		</ul>
+		</Box>
+	);
+}
+
+function TocLink({
+	children,
+	href,
+	isCurrent,
+	onNavigate,
+	paddingInlineStart,
+}: {
+	children: ReactNode;
+	href: string;
+	isCurrent: boolean;
+	onNavigate?: () => void;
+	paddingInlineStart: (typeof tocLinkPaddingInlineStart)[keyof typeof tocLinkPaddingInlineStart];
+}) {
+	return (
+		<Box
+			display="block"
+			paddingBlock="sp4"
+			paddingInlineEnd="sp8"
+			paddingInlineStart={paddingInlineStart}
+			renderRoot={(domProps) => (
+				<a
+					{...domProps}
+					aria-current={isCurrent ? 'location' : undefined}
+					className={cx(domProps.className, styles.tocLink)}
+					href={href}
+					onClick={onNavigate}
+				>
+					{domProps.children}
+				</a>
+			)}
+		>
+			{children}
+		</Box>
 	);
 }
 
 /** Heading depth 2 sits flush. Each deeper level indents one step, capped at two. */
-function tocDepth(depth: number) {
+function tocDepth(depth: number): keyof typeof tocLinkPaddingInlineStart {
 	if (depth <= 2) return 'top';
 	return depth === 3 ? 'nested' : 'deep';
 }

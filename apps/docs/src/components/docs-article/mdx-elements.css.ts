@@ -14,10 +14,10 @@ export const heading = style({
 	'@layer': {
 		recipes: {
 			// Clears the sticky header, and below the table of contents breakpoint the sticky bar too.
-			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${TOC_BAR_BLOCK_SIZE} + ${vars.space.sp16})`,
+			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${TOC_BAR_BLOCK_SIZE} + ${vars.space.sp24})`,
 			'@container': {
 				[docsTocMinInlineSize]: {
-					scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space.sp16})`,
+					scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space.sp24})`,
 				},
 			},
 		},

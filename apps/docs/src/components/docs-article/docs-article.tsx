@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { Heading } from '@luke-ui/react/heading';
 import { Prose } from '@luke-ui/react/prose';
 import { Stack } from '@luke-ui/react/stack';
@@ -6,9 +7,13 @@ import type { Root } from 'fumadocs-core/page-tree';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { AnchorProvider } from 'fumadocs-core/toc';
 import type { ReactNode } from 'react';
+import { docsContentPaddingBlockStart } from '../docs-nav.js';
 import * as styles from './docs-article.css.js';
 import { DocsPager } from './docs-pager.js';
 import { DocsTocBar, DocsTocColumn } from './docs-toc.js';
+
+/** Roughly 75 characters of body text; still leaves room for example frames. */
+const ARTICLE_MAX_INLINE_SIZE = '52rem';
 
 interface DocsArticleProps {
 	/** Rendered MDX body. */
@@ -38,11 +43,26 @@ export function DocsArticle({
 
 	return (
 		<AnchorProvider toc={toc}>
-			<main className={styles.main}>
+			<Box elementType="main" gridArea="main" minInlineSize="0">
 				{hasToc ? <DocsTocBar toc={toc} /> : null}
-				<div className={styles.content}>
-					<article className={styles.article}>
-						<Stack className={styles.header} elementType="header" gap="sp24">
+				<Box
+					paddingBlockEnd={{
+						initial: 'sp64',
+						bp768: 'sp96',
+					}}
+					paddingBlockStart={docsContentPaddingBlockStart}
+					paddingInline={{
+						initial: 'sp16',
+						bp768: 'sp24',
+						bp1024: 'sp32',
+					}}
+				>
+					<Box
+						className={styles.article}
+						elementType="article"
+						maxInlineSize={ARTICLE_MAX_INLINE_SIZE}
+					>
+						<Stack elementType="header" gap="sp24" marginBlockEnd="sp48">
 							<Stack gap="sp24">
 								<Heading level={1}>{title}</Heading>
 								{description ? (
@@ -55,9 +75,9 @@ export function DocsArticle({
 						</Stack>
 						<Prose>{children}</Prose>
 						<DocsPager tree={tree} />
-					</article>
-				</div>
-			</main>
+					</Box>
+				</Box>
+			</Box>
 			{hasToc ? <DocsTocColumn toc={toc} /> : null}
 		</AnchorProvider>
 	);
