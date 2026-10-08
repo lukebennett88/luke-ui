@@ -16,6 +16,7 @@ import * as codeBlockStyles from '../code-block/code-block.css.js';
 import type { CodeBlockProps } from '../code-block/code-block.js';
 import { CodeBlock } from '../code-block/code-block.js';
 import { DocsLink } from '../docs-link.js';
+import { LinkIcon } from '../link-icon.js';
 import { blockLink } from './block-link.css.js';
 import * as styles from './mdx-elements.css.js';
 
@@ -63,7 +64,7 @@ export function createMdxHeading(level: HeadingLevel) {
 						<a className={styles.headingAnchor} href={`#${id}`}>
 							{children}
 						</a>
-						<CopyAnchorButton id={id} />
+						<CopyAnchorButton id={id} level={level} />
 					</>
 				)}
 			</Heading>
@@ -71,7 +72,7 @@ export function createMdxHeading(level: HeadingLevel) {
 	};
 }
 
-function CopyAnchorButton({ id }: { id: string }) {
+function CopyAnchorButton({ id, level }: { id: string; level: HeadingLevel }) {
 	const [copied, onCopy] = useCopyButton(() => {
 		const url = new URL(window.location.href);
 		url.hash = id;
@@ -79,11 +80,11 @@ function CopyAnchorButton({ id }: { id: string }) {
 	});
 
 	return (
-		<>
+		<span className={cx(styles.headingCopyWrapper, styles.headingCopyWrapperByLevel[level])}>
 			<IconButton
 				aria-label={copied ? 'Copied Anchor Link' : 'Copy Anchor Link'}
 				className={styles.headingCopyButton}
-				icon={copied ? 'check' : 'copy'}
+				icon={copied ? 'check' : <LinkIcon />}
 				onPress={onCopy}
 				prominence="low"
 				size="small"
@@ -91,7 +92,7 @@ function CopyAnchorButton({ id }: { id: string }) {
 			<VisuallyHidden aria-live="polite" role="status">
 				{copied ? 'Copied' : ''}
 			</VisuallyHidden>
-		</>
+		</span>
 	);
 }
 

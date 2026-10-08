@@ -94,7 +94,7 @@ test('links a heading to its own anchor and copies the full URL with the hash', 
 		.toBeVisible();
 });
 
-test('reveals the anchor button when keyboard focus reaches the heading', async () => {
+test('hides the anchor button until keyboard focus reaches the heading', async () => {
 	await renderMdx(<H2 id="usage">Usage</H2>);
 
 	const button = page.getByRole('button', { name: 'Copy Anchor Link' });
@@ -104,6 +104,16 @@ test('reveals the anchor button when keyboard focus reaches the heading', async 
 	await userEvent.tab();
 	await expect.element(button).toHaveFocus();
 	await expect.poll(() => getComputedStyle(button.element()).opacity).toBe('1');
+});
+
+test('keeps the anchor button a 24px target', async () => {
+	await renderMdx(<H2 id="usage">Usage</H2>);
+
+	const { height, width } = page
+		.getByRole('button', { name: 'Copy Anchor Link' })
+		.element()
+		.getBoundingClientRect();
+	expect([width, height]).toEqual([24, 24]);
 });
 
 test('renders a heading without an id as plain text', async () => {
