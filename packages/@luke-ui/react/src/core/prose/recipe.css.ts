@@ -6,10 +6,25 @@ import { proseScopeClassName } from './scope.css.js';
 /** Scope class for the long-form rhythm applied by the global rules below. */
 export const proseRecipe = recipe({ base: proseScopeClassName });
 
-// Scope class keeps component ownership (0-1-0); `:where()` on the match keeps descendants from
-// racing utility and component classes on specificity alone. Utilities still win via layer order.
+// Every rule sits in an `@scope` from the Prose class to the `not-prose` class. The limit excludes
+// a `not-prose` element and everything under it, and a nested Prose starts its own scope, so it
+// applies again inside the boundary. `:where()` on the match and the implicit scope root add no
+// specificity, so recipe and utility classes win on specificity as well as on layer order.
+const proseScope = `(.${proseScopeClassName})`;
+
 function proseStyle(selector: string, rule: Parameters<typeof globalStyleInLayer>[2]) {
-	globalStyleInLayer('recipes', `.${proseScopeClassName} :where(${selector})`, rule);
+	globalStyleInLayer('recipes', `:where(${selector})`, {
+		'@scope': { [`${proseScope} to (.not-prose)`]: rule },
+	});
+}
+
+// A `not-prose` element still sits in the surrounding flow, so it keeps the gap that follows a
+// heading or rule. This scope stops below the boundary: `not-prose` descendants get nothing.
+function proseBoundaryGapStyle(previous: ReadonlyArray<string>, gap: string) {
+	const selector = previous.map((tag) => `${tag} + .not-prose`).join(', ');
+	globalStyleInLayer('recipes', `:where(${selector})`, {
+		'@scope': { [`${proseScope} to (.not-prose *)`]: { marginBlockStart: gap } },
+	});
 }
 
 // Each gap is the following block's start margin. No block-end margin can collapse or escape.
@@ -57,3 +72,9 @@ proseStyle('hr', {
 proseStyle('th, td', { paddingBlock: vars.space.sp8, paddingInline: vars.space.sp12 });
 proseStyle('th', { textAlign: 'start' });
 proseStyle('thead th', { borderBlockEnd: `1px solid ${vars.color.border.decorative}` });
+
+proseBoundaryGapStyle(['h1'], vars.space.sp40);
+proseBoundaryGapStyle(['h2'], vars.space.sp32);
+proseBoundaryGapStyle(['h3'], vars.space.sp24);
+proseBoundaryGapStyle(['h4', 'h5', 'h6'], vars.space.sp16);
+proseBoundaryGapStyle(['hr'], vars.space.sp64);

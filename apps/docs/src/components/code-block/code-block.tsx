@@ -97,7 +97,7 @@ export function CodeBlock({
 		copyStatus === 'copied' ? 'Copied' : copyStatus === 'error' ? 'Could not copy code' : '';
 
 	return (
-		// `not-prose` opts out of Fumadocs/Tailwind prose inline-code chrome on nested `code`.
+		// `not-prose` keeps Luke UI Prose spacing, list, and table rules out of the code block.
 		// `dir="ltr"` matches Fumadocs: scroll and overlay copy stay physical-right in RTL docs.
 		<figure
 			{...figureProps}

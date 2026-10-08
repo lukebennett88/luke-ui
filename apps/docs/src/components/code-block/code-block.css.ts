@@ -22,7 +22,10 @@ export const root = style({
 	},
 });
 
-/** Vertical rhythm for MDX fences; parent Stack/Cluster owns spacing elsewhere. */
+/**
+ * Vertical rhythm for code blocks in MDX flow. A `not-prose` root gets no Prose margin, so the
+ * block supplies its own; a parent Stack/Cluster owns spacing elsewhere.
+ */
 export const mdxFence = style({
 	'@layer': {
 		recipes: {
@@ -148,7 +151,7 @@ export const pre = style({
 globalStyle(`${pre} code`, {
 	'@layer': {
 		recipes: {
-			// Reset prose inline-code chrome if `not-prose` is missing on an ancestor.
+			// Reset inline-code chrome so highlighted lines do not look like inline `code`.
 			backgroundColor: 'transparent',
 			borderRadius: 0,
 			borderWidth: 0,

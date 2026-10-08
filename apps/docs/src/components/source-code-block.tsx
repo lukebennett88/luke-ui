@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 import { Suspense, use } from 'react';
 import type { HighlightedSource } from '../lib/highlighted-source.js';
+import { mdxFence } from './code-block/code-block.css.js';
 import { CodeBlock } from './code-block/code-block.js';
 
 export interface SourceCodeBlockProps {
@@ -32,6 +33,7 @@ function SourceCodeContent({ src }: SourceCodeBlockProps) {
 
 	return (
 		<CodeBlock
+			className={mdxFence}
 			copyText={highlightedSource.source}
 			// Shiki escapes the source before the Vite plugin generates this HTML.
 			html={highlightedSource.html}
@@ -44,6 +46,7 @@ function SourceCodeLoadingState() {
 		<CodeBlock
 			allowCopy={false}
 			aria-hidden
+			className={mdxFence}
 			code={Array.from({ length: FALLBACK_LINE_COUNT }, () => ' ').join('\n')}
 			inert
 		/>
