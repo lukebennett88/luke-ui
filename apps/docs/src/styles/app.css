@@ -10,9 +10,10 @@ code > * {
 }
 
 /**
- * Bridge Fumadocs structural colour variables to Luke UI stable tokens while
- * the article and TOC still use Fumadocs UI. Status and diff variables remain
- * Fumadocs-owned.
+ * Bridge Fumadocs structural colour variables to Luke UI stable tokens for the
+ * Fumadocs UI components the docs still render: the type table and its
+ * collapsible, and the Tailwind classes the example, icon gallery, and token
+ * widgets use. Status and diff variables remain Fumadocs-owned.
  */
 .luke-ui-theme {
 	--color-fd-background: var(--luke-color-surface-canvas);
@@ -32,18 +33,4 @@ code > * {
 	--color-fd-accent-foreground: var(--luke-color-text-primary);
 	--color-fd-ring: var(--luke-color-border-focus);
 	--color-fd-overlay: var(--luke-color-overlay-backdrop);
-}
-
-/* Keep Fumadocs' 28px DocsTitle with Luke UI's matching 36px line height */
-.luke-ui-theme #docs-shell article h1:first-of-type {
-	line-height: 36px;
-}
-
-/*
- * Contain in-flow stacking (example resize grips, code copy controls) so
- * descendants cannot paint over the sticky header. Isolation rather than a
- * higher header z-index.
- */
-.luke-ui-theme #docs-shell article {
-	isolation: isolate;
 }

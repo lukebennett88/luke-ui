@@ -1,32 +1,28 @@
 import { vars } from '@luke-ui/react/theme';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { globalStyle, style } from '@vanilla-extract/css';
-import { docsSidebarMinWidth } from '../lib/docs-sidebar-media.js';
+import { docsSidebarMinWidth, docsTocMinWidth } from '../lib/docs-sidebar-media.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
 export const shell = style({
 	'@layer': {
 		recipes: {
-			// The retained Fumadocs DocsPage TOC uses these rows to sit below the header.
-			// Remove them when #673 replaces the article and TOC.
-			vars: {
-				'--fd-docs-row-1': '0px',
-				'--fd-docs-row-2': SITE_HEADER_BLOCK_SIZE,
-			},
+			// `DocsArticle` places its mobile table of contents, article, and desktop table of contents
+			// in the `toc-bar`, `main`, and `toc` areas.
 			backgroundColor: vars.color.surface.canvas,
 			display: 'grid',
-			gridTemplateAreas: '"header" "toc-popover" "main"',
+			gridTemplateAreas: '"header" "toc-bar" "main"',
 			gridTemplateColumns: 'minmax(0, 1fr)',
 			gridTemplateRows: 'auto auto minmax(0, 1fr)',
 			minBlockSize: '100dvh',
 			minInlineSize: 0,
 			'@media': {
 				[docsSidebarMinWidth]: {
-					gridTemplateAreas: '"header header" "sidebar toc-popover" "sidebar main"',
+					gridTemplateAreas: '"header header" "sidebar toc-bar" "sidebar main"',
 					gridTemplateColumns: '16rem minmax(0, 1fr)',
 				},
-				'(min-width: 1280px)': {
-					gridTemplateAreas: '"header header header" "sidebar toc-popover toc" "sidebar main toc"',
+				[docsTocMinWidth]: {
+					gridTemplateAreas: '"header header header" "sidebar toc-bar toc" "sidebar main toc"',
 					gridTemplateColumns: '16rem minmax(0, 1fr) 16rem',
 				},
 			},

@@ -6,6 +6,7 @@ import { Link } from '@luke-ui/react/link';
 import type { ReactNode } from 'react';
 import { useCopyButton } from '../lib/use-copy-button.js';
 import { GithubMark } from './github-mark.js';
+import * as styles from './page-actions.css.js';
 import { ReactAriaMark } from './react-aria-mark.js';
 
 export type PageActionsMode = 'all' | 'edit';
@@ -29,30 +30,22 @@ export function PageActions({
 	const showAllActions = mode === 'all';
 
 	return (
-		<Cluster className="not-prose" gap="sp8" inlineSize="100%">
+		<Cluster gap="sp8" inlineSize="100%">
 			{showAllActions && reactAriaUrl ? (
 				<PageActionLink
 					href={reactAriaUrl}
-					icon={<ReactAriaMark className="size-4 shrink-0" />}
+					icon={<ReactAriaMark className={styles.brandMark} />}
 					label="React Aria"
 				/>
 			) : null}
 			{showAllActions && sourceUrl ? (
-				<PageActionLink
-					href={sourceUrl}
-					icon={<GithubMark className="size-4 shrink-0" />}
-					label="Source"
-				/>
+				<PageActionLink href={sourceUrl} icon={<GithubMark />} label="Source" />
 			) : null}
 			{showAllActions ? <CopyMarkdownButton markdownUrl={markdownUrl} /> : null}
 			{showAllActions ? (
 				<PageActionLink href={markdownUrl} iconName="codeBlock" label="View as Markdown" />
 			) : null}
-			<PageActionLink
-				href={githubUrl}
-				icon={<GithubMark className="size-4 shrink-0" />}
-				label="Edit on GitHub"
-			/>
+			<PageActionLink href={githubUrl} icon={<GithubMark />} label="Edit on GitHub" />
 		</Cluster>
 	);
 }

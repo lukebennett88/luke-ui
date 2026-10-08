@@ -7,6 +7,11 @@ const DOCS_SIDEBAR_BREAKPOINT = breakpoints.bp1024;
 export const docsSidebarMinWidth = `(min-width: ${DOCS_SIDEBAR_BREAKPOINT}px)`;
 export const docsSidebarMaxWidth = `(max-width: ${DOCS_SIDEBAR_BREAKPOINT - 1}px)`;
 
+const DOCS_TOC_BREAKPOINT = breakpoints.bp1280;
+
+/** Matches the docs shell breakpoint where the table of contents moves into its own column. */
+export const docsTocMinWidth = `(min-width: ${DOCS_TOC_BREAKPOINT}px)`;
+
 const DOCS_SIDEBAR_MEDIA_QUERY = docsSidebarMinWidth;
 
 export function useIsDocsSidebarLayout() {

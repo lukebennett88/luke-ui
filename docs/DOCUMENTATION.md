@@ -458,15 +458,16 @@ background.
 The landing page at `/` renders `SiteNav` with no docs sidebar. It has no active destination.
 
 The docs routes render `DocsShell`, a docs-local grid with the desktop navigation, mobile drawer,
-and `DocsSiteNav` header. `apps/docs/src/components/fumadocs-layout-adapter.tsx` retains the
-Fumadocs notebook context needed by the current article and table of contents. Its visible header
-and sidebar slots render nothing. The playground and the 404 render `SiteNav` directly.
+and `DocsSiteNav` header. `DocsArticle` in `apps/docs/src/components/docs-article/` renders each
+page into the shell: title block, MDX body, previous and next links, and the table of contents. The
+playground and the 404 render `SiteNav` directly.
 
 `DocsSiteNav` passes `hasSidebarNavigation`, which hides the bar's destinations below `lg`. That is
 the breakpoint where the local sidebar and mobile drawer provide those links instead, so they never
 appear twice. The bar stays on one `3.5rem` row (`SITE_HEADER_BLOCK_SIZE`). The shell's sticky
-sidebar offset and the retained article's table of contents rows depend on that height. Surfaces
-with no sidebar keep the destinations at every width, moving them to a second nav row below `md`.
+sidebar offset, the table of contents offset, and the heading scroll margin depend on that height.
+Surfaces with no sidebar keep the destinations at every width, moving them to a second nav row below
+`md`.
 
 The docs article and each example frame use `isolation: isolate` so in-flow stacking, such as
 example resize grips, cannot paint over the sticky header. Do not raise the header `z-index` to
