@@ -62,9 +62,9 @@ const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px
  * Raw slotted config for the `Field` primitive.
  *
  * Slots: `root` (stacked layout), `inline` (inline-control layout), `label`, `inlineLabel` (the
- * clickable label of an inline control such as `CheckboxLabel`), `inlineLabelText` (the
- * text of a composed inline control's label, which carries the required marker), `message`
- * (description/error text), and `icon` (the error message's leading icon).
+ * clickable label of an inline control such as `CheckboxLabel`), `inlineLabelText` (the text of a
+ * composed inline control's label, which carries the required marker), `message` (description/error
+ * text), and `icon` (the error message's leading icon).
  *
  * `FieldError` lays the error `message` out with `trackRecipe`'s `firstLine` rail alignment, which
  * centres the `icon` rail on the message's first line and keeps wrapped lines aligned with the
@@ -103,7 +103,6 @@ const fieldConfig = {
 		inlineLabel: {
 			alignItems: 'flex-start',
 			color: 'inherit',
-			cursor: 'pointer',
 			display: 'inline-flex',
 			font: 'inherit',
 			gap: inlineControlGap,
@@ -117,9 +116,6 @@ const fieldConfig = {
 				// control; the control alone carries the focus indication.
 				'&[data-focus-visible="true"]': {
 					outline: 'none',
-				},
-				'&[data-readonly="true"]': {
-					cursor: 'default',
 				},
 			},
 		},

@@ -1,4 +1,5 @@
 import type { ComponentProps, JSX, Ref } from 'react';
+import { useId, useMemo } from 'react';
 import type {
 	CheckboxButtonProps as RacCheckboxButtonProps,
 	CheckboxFieldProps as RacCheckboxFieldProps,
@@ -7,6 +8,7 @@ import {
 	CheckboxButton as RacCheckboxButton,
 	CheckboxField as RacCheckboxField,
 } from 'react-aria-components/Checkbox';
+import { LabelContext } from 'react-aria-components/Label';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
@@ -21,7 +23,10 @@ type _CheckboxRootOmit = DistributiveOmit<
 >;
 
 interface _CheckboxRootProps extends _CheckboxRootOmit {
-	/** Checkbox anatomy: `CheckboxLabel`, plus a description and error such as `InlineField`. */
+	/**
+	 * Checkbox anatomy: `CheckboxLabel`, plus a `FieldLabel`, a description, and an error such as
+	 * `InlineField`.
+	 */
 	children: RacCheckboxFieldProps['children'];
 	/** Class name for the root element. */
 	className?: RacCheckboxFieldProps['className'];
@@ -31,7 +36,7 @@ interface _CheckboxRootProps extends _CheckboxRootOmit {
 	form?: RacCheckboxFieldProps['form'];
 	/** Element id for the root element. Use `inputId` for the input. */
 	id?: string;
-	/** Element id for the input. */
+	/** Element id for the input and the `for` of a `FieldLabel` in the root. Defaults to a generated id. */
 	inputId?: RacCheckboxFieldProps['id'];
 	/** Forwarded to the underlying `<input type="checkbox">` element. */
 	inputRef?: RacCheckboxFieldProps['inputRef'];
@@ -75,8 +80,8 @@ export type CheckboxRootProps = Prettify<_CheckboxRootProps>;
 
 interface _CheckboxLabelProps extends RacCheckboxButtonProps {
 	/**
-	 * `CheckboxControl` plus textual, non-interactive label content. Pass a function to render from
-	 * the checkbox state.
+	 * `CheckboxControl` plus textual, non-interactive label content, unless a `FieldLabel` supplies
+	 * the label. Pass a function to render from the checkbox state.
 	 */
 	children: RacCheckboxButtonProps['children'];
 	/** Forwarded to the `<label>` element. */
@@ -100,24 +105,38 @@ export type CheckboxIndicatorProps = Prettify<_CheckboxIndicatorProps>;
  * Semantic root for a checkbox. It owns the selection, state, validation, and size.
  *
  * `id`, `className`, and `ref` target the root element. `inputId` and `inputRef` target the input.
+ * Without an `inputId`, the root generates one.
+ *
+ * Put the visible label in `CheckboxLabel`, or draw it elsewhere in the root with `FieldLabel`. A
+ * `FieldLabel` and a `FieldDescription` anywhere inside the root name and describe the checkbox,
+ * with no ids to pass. A `FieldLabel` draws the required marker for `isRequired`. `CheckboxLabel`
+ * does not.
  */
 export function CheckboxRoot(props: CheckboxRootProps): JSX.Element {
 	const { className, id, inputId, size, ...restProps } = props;
+	const generatedInputId = useId();
+	const resolvedInputId = inputId ?? generatedInputId;
+	const labelContext = useMemo(() => ({ htmlFor: resolvedInputId }), [resolvedInputId]);
 
 	return (
-		<RacCheckboxField
-			{...restProps}
-			{...rootIdProps(id, inputId)}
-			className={composeRenderProps(className, (className) => {
-				return checkboxRecipe({ size }).root({ className });
-			})}
-		/>
+		<LabelContext.Provider value={labelContext}>
+			<RacCheckboxField
+				{...restProps}
+				{...rootIdProps(id, resolvedInputId)}
+				className={composeRenderProps(className, (className) => {
+					return checkboxRecipe({ size }).root({ className });
+				})}
+			/>
+		</LabelContext.Provider>
 	);
 }
 
 /**
- * The clickable native `<label>` for the checkbox. It holds the hidden input, `CheckboxControl`, and
- * the label text. Place links and buttons outside it.
+ * The clickable native `<label>` for the checkbox. It holds the hidden input and `CheckboxControl`.
+ *
+ * Add the label text here, or leave it out and draw the label with `FieldLabel` elsewhere in the
+ * root. Do not do both, because the checkbox's name joins the text from each. Place links and
+ * buttons outside it.
  */
 export function CheckboxLabel(props: CheckboxLabelProps): JSX.Element {
 	const { className, ...restProps } = props;

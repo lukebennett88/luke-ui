@@ -24,8 +24,9 @@ element. A part that renders the input itself, such as `ComboboxInput`, takes th
 
 `CheckboxField` and `SwitchField` always take a visible `label`. Do not pass `aria-label` or
 `aria-labelledby` to them. When the layout draws the label, compose
-`@luke-ui/react/primitives/checkbox` or `@luke-ui/react/primitives/switch` and pass
-`aria-labelledby` to the root.
+`@luke-ui/react/primitives/checkbox` or `@luke-ui/react/primitives/switch`, and place `FieldLabel`
+and `FieldDescription` inside the root. The root connects them, so pass no ids. Do not also put
+label text in `CheckboxLabel` or `SwitchLabel`.
 
 Set `slot={null}` on `Text` inside a primitive label such as `CheckboxLabel` or `SwitchLabel`. Do
 not leave its `slot` unset there, because the root's slotted text context makes it throw.

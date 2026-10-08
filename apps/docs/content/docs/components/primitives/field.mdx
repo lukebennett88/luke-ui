@@ -32,7 +32,9 @@ surrounding control root.
 `FieldLabel`, `FieldDescription`, and `FieldError` are the lower-level alternative for a custom
 arrangement. Place them directly inside the control root, as the
 [TextInput primitives](/components/primitives/text-input#choosing-a-composition) page shows. Use
-either `Field`, `InlineField`, or the manual parts for one field, never a mix.
+either `Field`, `InlineField`, or the manual parts for one field, never a mix. Inside `CheckboxRoot`
+or `SwitchRoot`, a `FieldLabel` replaces the text in `CheckboxLabel` or `SwitchLabel` and toggles
+the control when clicked.
 
 ## Required fields
 

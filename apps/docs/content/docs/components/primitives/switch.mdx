@@ -16,9 +16,9 @@ needs custom content. For a normal labelled switch, use
 `SwitchRoot` is the semantic root. It owns the selection, state, validation, form, and size props.
 `id`, `className`, and `ref` target the root element. `inputId` and `inputRef` target the input.
 
-`SwitchLabel` is the clickable native `<label>`. It holds the hidden input, `SwitchControl`, and the
-label text. Like React Aria's `SwitchButton`, it takes `className`, `style`, and `children` as
-functions of the switch state, as well as `render`, `slot`, and event handlers.
+`SwitchLabel` is the clickable native `<label>`. It holds the hidden input, `SwitchControl`, and
+usually the label text. Like React Aria's `SwitchButton`, it takes `className`, `style`, and
+`children` as functions of the switch state, as well as `render`, `slot`, and event handlers.
 
 `SwitchControl` draws the track, and `SwitchThumb` draws the thumb that moves along it. Pass
 `children` to `SwitchThumb` to draw inside the thumb. Put the control before the label text.
@@ -32,8 +32,12 @@ Wrap `SwitchLabel` in [`InlineField`](/components/primitives/field) to add a `de
 ## Labels from the layout
 
 When another part of the layout draws the visible label and description, leave the text out of
-`SwitchLabel`. Pass the label's id to the root's `aria-labelledby` and the description's id to
-`aria-describedby`.
+`SwitchLabel`. Place a [`FieldLabel`](/components/primitives/field) and a `FieldDescription`
+anywhere inside `SwitchRoot`. The root connects them to the input, so the label names the switch,
+clicking it toggles the switch, and the description describes it. Pass no ids.
+
+Put the label text in either `SwitchLabel` or `FieldLabel`, not both. The switch's name joins the
+text from each.
 
 <ExampleBlock
 	src="switch-primitive/external-label"
@@ -42,8 +46,11 @@ When another part of the layout draws the visible label and description, leave t
 
 `SwitchLabel` is a native `<label>`, so it takes textual, non-interactive content only. Place links
 and buttons outside it. Set `slot={null}` on each `Text` you place in it, as the
-[Checkbox primitive](/components/primitives/checkbox#text-in-the-label) describes. The primitive
-draws no required marker.
+[Checkbox primitive](/components/primitives/checkbox#text-in-the-label) describes.
+
+`SwitchLabel` draws no required marker. With `isRequired` on `SwitchRoot`, a `FieldLabel` does, as
+[Required fields](/components/forms/text-input-field#required-fields) describes. Show the required
+state in your own content when you use `SwitchLabel` for the text.
 
 ## API
 

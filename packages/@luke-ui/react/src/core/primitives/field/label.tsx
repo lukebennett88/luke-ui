@@ -24,7 +24,15 @@ interface _FieldLabelProps extends _FieldLabelOmit, FieldLabelStyleProps {
 /** Props for `FieldLabel`. */
 export type FieldLabelProps = Prettify<_FieldLabelProps>;
 
-/** Styled label for form fields. */
+/**
+ * Styled label for form fields.
+ *
+ * Inside a control root such as `TextInputRoot`, `SwitchRoot`, or `CheckboxRoot`, it connects to the
+ * control automatically. In a switch or checkbox root, clicking it toggles the control. Do not also
+ * put label text in `SwitchLabel` or `CheckboxLabel`, which draw no required marker.
+ *
+ * It draws the required marker when the control root is required.
+ */
 export function FieldLabel(props: FieldLabelProps): JSX.Element {
 	const { className, necessityIndicator = 'icon', ...restProps } = props;
 

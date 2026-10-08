@@ -1,4 +1,6 @@
 import type { ComponentProps, JSX, Ref } from 'react';
+import { useId, useMemo } from 'react';
+import { LabelContext } from 'react-aria-components/Label';
 import type {
 	SwitchButtonProps as RacSwitchButtonProps,
 	SwitchFieldProps as RacSwitchFieldProps,
@@ -21,7 +23,10 @@ type _SwitchRootOmit = DistributiveOmit<
 >;
 
 interface _SwitchRootProps extends _SwitchRootOmit {
-	/** Switch anatomy: `SwitchLabel`, plus a description and error such as `InlineField`. */
+	/**
+	 * Switch anatomy: `SwitchLabel`, plus a `FieldLabel`, a description, and an error such as
+	 * `InlineField`.
+	 */
 	children: RacSwitchFieldProps['children'];
 	/** Class name for the root element. */
 	className?: RacSwitchFieldProps['className'];
@@ -31,7 +36,7 @@ interface _SwitchRootProps extends _SwitchRootOmit {
 	form?: RacSwitchFieldProps['form'];
 	/** Element id for the root element. Use `inputId` for the input. */
 	id?: string;
-	/** Element id for the input. */
+	/** Element id for the input and the `for` of a `FieldLabel` in the root. Defaults to a generated id. */
 	inputId?: RacSwitchFieldProps['id'];
 	/** Forwarded to the underlying `<input type="checkbox" role="switch">` element. */
 	inputRef?: RacSwitchFieldProps['inputRef'];
@@ -73,8 +78,8 @@ export type SwitchRootProps = Prettify<_SwitchRootProps>;
 
 interface _SwitchLabelProps extends RacSwitchButtonProps {
 	/**
-	 * `SwitchControl` plus textual, non-interactive label content. Pass a function to render from the
-	 * switch state.
+	 * `SwitchControl` plus textual, non-interactive label content, unless a `FieldLabel` supplies the
+	 * label. Pass a function to render from the switch state.
 	 */
 	children: RacSwitchButtonProps['children'];
 	/** Forwarded to the `<label>` element. */
@@ -98,24 +103,37 @@ export type SwitchThumbProps = Prettify<_SwitchThumbProps>;
  * Semantic root for a switch. It owns the selection, state, validation, and size.
  *
  * `id`, `className`, and `ref` target the root element. `inputId` and `inputRef` target the input.
+ * Without an `inputId`, the root generates one.
+ *
+ * Put the visible label in `SwitchLabel`, or draw it elsewhere in the root with `FieldLabel`. A
+ * `FieldLabel` and a `FieldDescription` anywhere inside the root name and describe the switch, with
+ * no ids to pass. A `FieldLabel` draws the required marker for `isRequired`. `SwitchLabel` does not.
  */
 export function SwitchRoot(props: SwitchRootProps): JSX.Element {
 	const { className, id, inputId, size, ...restProps } = props;
+	const generatedInputId = useId();
+	const resolvedInputId = inputId ?? generatedInputId;
+	const labelContext = useMemo(() => ({ htmlFor: resolvedInputId }), [resolvedInputId]);
 
 	return (
-		<RacSwitchField
-			{...restProps}
-			{...rootIdProps(id, inputId)}
-			className={composeRenderProps(className, (className) => {
-				return switchRecipe({ size }).root({ className });
-			})}
-		/>
+		<LabelContext.Provider value={labelContext}>
+			<RacSwitchField
+				{...restProps}
+				{...rootIdProps(id, resolvedInputId)}
+				className={composeRenderProps(className, (className) => {
+					return switchRecipe({ size }).root({ className });
+				})}
+			/>
+		</LabelContext.Provider>
 	);
 }
 
 /**
- * The clickable native `<label>` for the switch. It holds the hidden input, `SwitchControl`, and the
- * label text. Place links and buttons outside it.
+ * The clickable native `<label>` for the switch. It holds the hidden input and `SwitchControl`.
+ *
+ * Add the label text here, or leave it out and draw the label with `FieldLabel` elsewhere in the
+ * root. Do not do both, because the switch's name joins the text from each. Place links and buttons
+ * outside it.
  */
 export function SwitchLabel(props: SwitchLabelProps): JSX.Element {
 	const { className, ...restProps } = props;

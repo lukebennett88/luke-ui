@@ -15,7 +15,7 @@ import {
 	SettingsSection,
 	SettingsStatus,
 } from '../components/settings-section.js';
-import { SettingsSwitch } from '../components/settings-switch.js';
+import { SettingsSwitchRow } from '../components/settings-switch.js';
 import * as styles from '../styles/settings.css.js';
 import type { PrefRow } from './preferences-config.js';
 import { INTERFACE_PREFS } from './preferences-config.js';
@@ -73,25 +73,14 @@ function PreferenceRow({
 		);
 	}
 
-	const labelId = `${pref.id}-label`;
-	const descriptionId = `${pref.id}-description`;
-
 	return (
-		<SettingsRow
-			descriptionId={descriptionId}
+		<SettingsSwitchRow
 			hint={pref.hint}
+			isChecked={values[pref.key]}
+			isReadOnly={isPending}
 			label={pref.label}
-			labelId={labelId}
-		>
-			<SettingsSwitch
-				aria-describedby={descriptionId}
-				aria-labelledby={labelId}
-				id={pref.id}
-				isChecked={values[pref.key]}
-				isReadOnly={isPending}
-				onChange={(checked) => onSave({ [pref.key]: checked })}
-			/>
-		</SettingsRow>
+			onChange={(checked) => onSave({ [pref.key]: checked })}
+		/>
 	);
 }
 

@@ -1,4 +1,4 @@
-import { InlineField } from '@luke-ui/react/primitives/field';
+import { FieldDescription, FieldLabel, InlineField } from '@luke-ui/react/primitives/field';
 import {
 	SwitchControl,
 	SwitchLabel,
@@ -256,6 +256,80 @@ test('a composed switch primitive has no axe violations', async () => {
 			<InlineField description="Example description" errorMessage="Example error">
 				<Parts label="Example switch" />
 			</InlineField>
+		</SwitchRoot>,
+	);
+
+	await expectNoAxeViolations(container);
+});
+
+function Bare() {
+	return (
+		<SwitchLabel>
+			<SwitchControl>
+				<SwitchThumb />
+			</SwitchControl>
+		</SwitchLabel>
+	);
+}
+
+test('a FieldLabel inside SwitchRoot names and toggles the switch with no ids passed', async () => {
+	render(
+		<SwitchRoot>
+			<FieldLabel data-testid="label">Example label</FieldLabel>
+			<FieldDescription>Example description</FieldDescription>
+			<Bare />
+		</SwitchRoot>,
+	);
+	const input = toggle('Example label');
+
+	expect(input).toHaveAccessibleName('Example label');
+	expect(input).toHaveAccessibleDescription('Example description');
+	expect(input.id).not.toBe('');
+	expect(page.getByTestId('label').element()).toHaveAttribute('for', input.id);
+
+	await userEvent.click(page.getByText('Example label', { exact: true }));
+
+	expect(input).toBeChecked();
+});
+
+test('SwitchRoot uses inputId as the input id and the FieldLabel for', async () => {
+	render(
+		<SwitchRoot inputId="example-input">
+			<FieldLabel data-testid="label">Example label</FieldLabel>
+			<Bare />
+		</SwitchRoot>,
+	);
+	const input = toggle('Example label');
+
+	expect(input.id).toBe('example-input');
+	expect(page.getByTestId('label').element()).toHaveAttribute('for', 'example-input');
+
+	await userEvent.click(page.getByText('Example label', { exact: true }));
+
+	expect(input).toBeChecked();
+});
+
+test('SwitchRoot keeps aria-labelledby and aria-describedby from the layout', () => {
+	render(
+		<>
+			<span id="outside-label">Outside label</span>
+			<span id="outside-description">Outside description</span>
+			<SwitchRoot aria-describedby="outside-description" aria-labelledby="outside-label">
+				<Bare />
+			</SwitchRoot>
+		</>,
+	);
+	const input = toggle('Outside label');
+
+	expect(input).toHaveAccessibleDescription('Outside description');
+});
+
+test('a switch with a FieldLabel has no axe violations', async () => {
+	const { container } = render(
+		<SwitchRoot>
+			<FieldLabel>Example label</FieldLabel>
+			<FieldDescription>Example description</FieldDescription>
+			<Bare />
 		</SwitchRoot>,
 	);
 

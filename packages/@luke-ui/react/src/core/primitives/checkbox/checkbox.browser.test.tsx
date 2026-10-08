@@ -4,7 +4,12 @@ import {
 	CheckboxLabel,
 	CheckboxRoot,
 } from '@luke-ui/react/primitives/checkbox';
-import { FieldDescription, FieldError, InlineField } from '@luke-ui/react/primitives/field';
+import {
+	FieldDescription,
+	FieldError,
+	FieldLabel,
+	InlineField,
+} from '@luke-ui/react/primitives/field';
 import { Text } from '@luke-ui/react/text';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
@@ -296,6 +301,80 @@ test('a composed checkbox primitive has no axe violations', async () => {
 			<InlineField description="Example description" errorMessage="Example error">
 				<Parts label="Example checkbox" />
 			</InlineField>
+		</CheckboxRoot>,
+	);
+
+	await expectNoAxeViolations(container);
+});
+
+function Bare() {
+	return (
+		<CheckboxLabel>
+			<CheckboxControl>
+				<CheckboxIndicator />
+			</CheckboxControl>
+		</CheckboxLabel>
+	);
+}
+
+test('a FieldLabel inside CheckboxRoot names and toggles the checkbox with no ids passed', async () => {
+	render(
+		<CheckboxRoot>
+			<FieldLabel data-testid="label">Example label</FieldLabel>
+			<FieldDescription>Example description</FieldDescription>
+			<Bare />
+		</CheckboxRoot>,
+	);
+	const input = checkbox('Example label');
+
+	expect(input).toHaveAccessibleName('Example label');
+	expect(input).toHaveAccessibleDescription('Example description');
+	expect(input.id).not.toBe('');
+	expect(page.getByTestId('label').element()).toHaveAttribute('for', input.id);
+
+	await userEvent.click(page.getByText('Example label', { exact: true }));
+
+	expect(input).toBeChecked();
+});
+
+test('CheckboxRoot uses inputId as the input id and the FieldLabel for', async () => {
+	render(
+		<CheckboxRoot inputId="example-input">
+			<FieldLabel data-testid="label">Example label</FieldLabel>
+			<Bare />
+		</CheckboxRoot>,
+	);
+	const input = checkbox('Example label');
+
+	expect(input.id).toBe('example-input');
+	expect(page.getByTestId('label').element()).toHaveAttribute('for', 'example-input');
+
+	await userEvent.click(page.getByText('Example label', { exact: true }));
+
+	expect(input).toBeChecked();
+});
+
+test('CheckboxRoot keeps aria-labelledby and aria-describedby from the layout', () => {
+	render(
+		<>
+			<span id="outside-label">Outside label</span>
+			<span id="outside-description">Outside description</span>
+			<CheckboxRoot aria-describedby="outside-description" aria-labelledby="outside-label">
+				<Bare />
+			</CheckboxRoot>
+		</>,
+	);
+	const input = checkbox('Outside label');
+
+	expect(input).toHaveAccessibleDescription('Outside description');
+});
+
+test('a checkbox with a FieldLabel has no axe violations', async () => {
+	const { container } = render(
+		<CheckboxRoot>
+			<FieldLabel>Example label</FieldLabel>
+			<FieldDescription>Example description</FieldDescription>
+			<Bare />
 		</CheckboxRoot>,
 	);
 

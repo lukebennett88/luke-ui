@@ -142,7 +142,12 @@ export const settingsRow = style({
 			flexWrap: 'wrap',
 		},
 	},
+	alignItems: 'center',
 	borderBlockEnd: `1px solid color-mix(in oklab, ${vars.color.border.decorative} 85%, transparent)`,
+	display: 'flex',
+	gap: vars.space.sp12,
+	paddingBlock: vars.space.sp12,
+	paddingInline: vars.space.sp16,
 	selectors: {
 		'&:last-child': {
 			borderBlockEnd: 'none',
@@ -180,7 +185,6 @@ export const avatarButton = style({
 	blockSize: avatarSize,
 	border: 'none',
 	borderRadius: vars.radius.full,
-	cursor: 'pointer',
 	display: 'inline-flex',
 	flexShrink: 0,
 	inlineSize: avatarSize,
@@ -289,7 +293,6 @@ export const emailEditButton = style({
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.full,
 	color: vars.color.text.secondary,
-	cursor: 'pointer',
 	display: 'inline-flex',
 	flexShrink: 0,
 	inlineSize: '1.75rem',

@@ -31,18 +31,7 @@ export function SettingsSection({ children, title }: { children: ReactNode; titl
 }
 
 export function SettingsRowShell({ children }: { children: ReactNode }) {
-	return (
-		<Box
-			alignItems="center"
-			className={styles.settingsRow}
-			display="flex"
-			gap="sp12"
-			paddingBlock="sp12"
-			paddingInline="sp16"
-		>
-			{children}
-		</Box>
-	);
+	return <Box className={styles.settingsRow}>{children}</Box>;
 }
 
 export function SettingsRowControl({ children }: { children: ReactNode }) {

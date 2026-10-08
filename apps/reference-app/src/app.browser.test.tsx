@@ -229,6 +229,14 @@ test('keyboard autosave updates a switch and persists after remount', async () =
 	expect(document.documentElement.dataset.underlineLinks).toBe('true');
 });
 
+test('clicking a switch row label toggles the switch', async () => {
+	const app = await renderApp();
+	const toggle = app.locator.getByRole('switch', { name: 'Pointer cursor' });
+	const before = (toggle.element() as HTMLInputElement).checked;
+	await app.user.click(app.locator.getByText('Pointer cursor', { exact: true }));
+	await expect.element(toggle).toHaveProperty('checked', !before);
+});
+
 test('a failed theme change rolls back, and explicit and system themes apply', async () => {
 	const app = await renderApp();
 	const trigger = app.locator.getByRole('button', { name: /Theme/ });

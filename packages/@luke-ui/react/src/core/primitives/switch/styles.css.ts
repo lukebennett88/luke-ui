@@ -11,7 +11,7 @@ const trackBlockSize = createVar();
 const trackInlineSize = createVar();
 
 const trackBorderWidth = '1px';
-const thumbInset = '2px';
+const thumbInset = '1px';
 
 /** Space between the thumb and the track's inner edge, including the border. */
 const thumbOffset = `calc(${trackBorderWidth} + ${thumbInset})`;
@@ -72,7 +72,7 @@ const switchConfig = {
 				},
 			},
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.border.control,
 			blockSize: trackBlockSize,
 			borderColor: vars.color.border.control,
 			borderRadius: vars.radius.full,
@@ -124,6 +124,7 @@ const switchConfig = {
 			'@media': {
 				'(forced-colors: active)': {
 					backgroundColor: 'CanvasText',
+					boxShadow: 'none',
 					forcedColorAdjust: 'none',
 					// The thumb opts out of forced colours to stay visible, so every state that sets an
 					// author colour needs a system colour here. Disabled comes last.
@@ -144,8 +145,12 @@ const switchConfig = {
 				},
 			},
 			alignItems: 'center',
-			backgroundColor: vars.color.border.control,
+			// Thumb contrast comes from the fills, never the shadow. `compileTheme` hard-gates each pair at
+			// build time, so every shipped and extended theme clears it: the canvas thumb on the
+			// `border.control` track at 3:1, and each `onSolid` thumb on its solid track at 4.5:1.
+			backgroundColor: vars.color.surface.canvas,
 			blockSize: thumbSize,
+			boxShadow: vars.depth.resting,
 			borderRadius: vars.radius.full,
 			display: 'inline-flex',
 			flexShrink: 0,
@@ -156,9 +161,6 @@ const switchConfig = {
 			transitionProperty: 'background-color, margin-inline-start',
 			transitionTimingFunction: vars.motion.easing.standard,
 			selectors: {
-				'[data-invalid="true"] &': {
-					backgroundColor: vars.color.background.danger.solid.rest,
-				},
 				'[data-selected="true"] &': {
 					backgroundColor: vars.color.foreground.accent.onSolid,
 					marginInlineStart: thumbTravel,

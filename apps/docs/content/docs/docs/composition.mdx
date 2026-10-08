@@ -43,8 +43,9 @@ standard label, description, and error arrangement. This example adds a prefix w
 />
 
 Use primitives when your layout owns a control's visible label, such as a settings row with the
-label beside a switch. Name the control by passing the label's id to the root's `aria-labelledby`.
-The [Switch primitive](/components/primitives/switch#labels-from-the-layout) shows this layout.
+label beside a switch. Place `FieldLabel` and `FieldDescription` inside the control's root. The root
+names and describes the control from them, with no ids to pass. The
+[Switch primitive](/components/primitives/switch#labels-from-the-layout) shows this layout.
 
 Give the custom component the same accessibility care as a normal component. Preserve its documented
 structure. Provide an accessible name. Keep keyboard and focus behaviour intact. Use a normal React

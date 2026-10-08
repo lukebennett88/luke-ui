@@ -95,7 +95,7 @@ function PurposeDetails({ group }: { group: TokenPurposeGroup }) {
 		<Disclosure className="group rounded-xl border border-fd-border" defaultExpanded>
 			<Heading className="m-0" level={3}>
 				<RacButton
-					className="flex w-full cursor-pointer items-center gap-2 px-4 py-3 text-left font-semibold text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring focus-visible:ring-inset"
+					className="flex w-full items-center gap-2 px-4 py-3 text-left font-semibold text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring focus-visible:ring-inset"
 					slot="trigger"
 				>
 					<Icon

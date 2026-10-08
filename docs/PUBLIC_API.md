@@ -76,7 +76,9 @@ is an option within that field, not a field itself. Primitives keep their part n
 `aria-labelledby` instead, because a label-less field such as a search input is a normal use.
 `CheckboxField` and `SwitchField` always take a visible `label` and accept neither `aria-label` nor
 `aria-labelledby`. When another component owns the label, the consumer composes the control's
-primitives. [#714](https://github.com/lukebennett88/luke-ui/issues/714) owns both decisions.
+primitives. `CheckboxRoot` and `SwitchRoot` give a `FieldLabel` inside them a `for` that points at
+the input, using `inputId` or a generated id, so the layout passes no ids.
+[#714](https://github.com/lukebennett88/luke-ui/issues/714) owns both decisions.
 
 ### Primitives and composed components
 
