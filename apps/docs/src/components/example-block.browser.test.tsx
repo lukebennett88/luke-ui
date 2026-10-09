@@ -385,38 +385,27 @@ test('collapsing source that now fits moves keyboard focus from the toggle to Co
 	await expect.element(page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN })).toHaveFocus();
 });
 
-test('collapsing does not take focus back from a control focused while the collapse is pending', async () => {
+test('collapsing leaves focus alone when it moves off the toggle before the collapse commits', async () => {
 	await renderSourcePreview();
+	assert(container, 'expected render container');
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
 	await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
 	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toBeVisible();
+	await expect.element(collapse).toHaveFocus();
 	shrinkTypography(sourceElement());
 	await expect.poll(() => sourceElement().getBoundingClientRect().height).toBeLessThan(30);
 
-	const elsewhere = document.body.appendChild(document.createElement('button'));
-	elsewhere.textContent = 'Elsewhere';
-	// Move focus in a task after the press. The collapse is a deferred transition, so the toggle is
-	// still mounted then; the guard fails the test if that ever stops being true.
-	let toggleWasMounted = false;
-	const moveFocus = () => {
-		setTimeout(() => {
-			toggleWasMounted = collapse.query() != null;
-			elsewhere.focus();
-		});
-	};
-	window.addEventListener('click', moveFocus, { capture: true, once: true });
-	try {
-		await act(async () => {
-			await userEvent.click(collapse);
-		});
-		await expect.poll(() => collapse.query()).toBeNull();
-		expect(toggleWasMounted).toBe(true);
-		expect(elsewhere).toHaveFocus();
-	} finally {
-		window.removeEventListener('click', moveFocus, { capture: true });
-		elsewhere.remove();
-	}
+	// React handles the press in its own listener on this container, and this listener runs right
+	// after it in the same dispatch. React never commits a transition inside an event dispatch, so
+	// focus leaves the toggle while the collapse is still pending. Blurring to the page matches a
+	// click on non-focusable content.
+	const blurToggle = () => collapse.element().blur();
+	container.addEventListener('click', blurToggle, { once: true });
+	await act(async () => {
+		await userEvent.click(collapse);
+	});
+	await expect.poll(() => collapse.query()).toBeNull();
+	expect(document.activeElement).toBe(document.body);
 });
 
 test('typography changes without interaction do not move focus', async () => {
