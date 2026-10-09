@@ -21,8 +21,8 @@ A basic theme authors an accent colour and a neutral character. Everything else 
   `color.backdrop`
 - optional `typography`, `radius`, `depth`, and `controlFinish` overrides
 
-Each colour accepts one string or a `{ light, dark }` object. Either side of the object may be
-omitted.
+Most source colours accept one string or a `{ light, dark }` object. Either side of the object may
+be omitted. How each colour treats them differs:
 
 - `accent`, `neutral`, and `surface.base` adapt one string to each mode: they keep its hue and
   chroma and choose a lightness for the mode. A missing side is adapted from the side you set.

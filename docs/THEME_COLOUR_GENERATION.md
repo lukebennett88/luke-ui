@@ -20,7 +20,7 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    `generateSurfaces`. `base` and any authored surface pass through as written. Each missing surface
    is a fixed, mode-specific lightness offset from `base`, never from a sibling. Surfaces are never
    adjusted for contrast. Validation throws instead, and the author can set the surface.
-4. Solves `border.control` against `base`, `field`, and `overlay` (`control-border.ts`), and derives
+4. Solves `border.control` against all four surfaces (`control-border.ts`), and derives
    `border.controlHover` from it by a fixed per-mode lightness offset.
 5. Applies the one default semantic mapping (`semantic-map.ts`'s `mapSemanticColors`) that aliases
    every colour contract leaf onto a family step, a generated surface, or a generated interaction
