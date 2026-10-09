@@ -24,7 +24,7 @@ const VIRTUAL_ENTRY = '\0luke-ui-theme-bundle-entry';
  */
 const FOUNDATION_MARKERS = {
 	paper: ['oklch(', 'radial-gradient(', '#185281'],
-	tactile: ['oklch(', 'radial-gradient(', 'oklch(0.75 0.1 200)'],
+	tactile: ['oklch(', 'linear-gradient(', 'oklch(0.75 0.1 200)'],
 } as const;
 
 const bundleCache = new Map<string, Promise<string>>();

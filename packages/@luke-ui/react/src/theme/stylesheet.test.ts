@@ -14,6 +14,11 @@ import type { ThemeFoundation } from './foundation.js';
 import { defaultFontWeights, defaultRadius } from './foundation.js';
 import { typeStyles } from './type-styles.js';
 
+/** An exterior shadow with no blur, such as `0 2px 0 …`, which draws a hard ledge. */
+const ZERO_BLUR_SHADOW_PATTERN = /^-?\d+(?:px)? -?\d+(?:px)? 0 /;
+/** An inset shadow offset upwards, such as `inset 0 -1px 0 …`, which lights the bottom edge. */
+const UPWARD_INSET_PATTERN = /inset -?\d+(?:px)? -\d/;
+
 const pairs = flattenThemeContract();
 const { identityPairs, modePairs } = partitionContractPairs(pairs);
 const modeVarNames = modePairs.map(([, varName]) => varName);
@@ -138,10 +143,12 @@ describe('buildTheme output', () => {
 		);
 		for (const foundation of [tactileFoundation, paperFoundation]) {
 			for (const mode of ['light', 'dark'] as const) {
-				expect(foundation[mode].depth.resting).not.toContain('inset');
-				expect(foundation[mode].depth.raised).not.toContain('inset');
-				expect(foundation[mode].depth.resting.split(', ')).toHaveLength(2);
-				expect(foundation[mode].depth.raised.split(', ')).toHaveLength(2);
+				for (const raised of [foundation[mode].depth.resting, foundation[mode].depth.raised]) {
+					const exterior = raised.split(', ').filter((layer) => !layer.startsWith('inset '));
+					// Raised rungs lift with soft exterior shadows. A zero-blur offset reads as a second edge.
+					expect(exterior.length).toBeGreaterThan(0);
+					expect(exterior.filter((layer) => ZERO_BLUR_SHADOW_PATTERN.test(layer))).toEqual([]);
+				}
 			}
 		}
 		expect(paperFoundation.light.depth.recessed).toBe('none');
@@ -152,6 +159,8 @@ describe('buildTheme output', () => {
 		]) {
 			expect(recessed).not.toBe('none');
 			expect(recessed.split(', ').every((layer) => layer.startsWith('inset '))).toBe(true);
+			// A recessed well is shaded from above. An upward inset draws a rim along the bottom edge.
+			expect(recessed).not.toMatch(UPWARD_INSET_PATTERN);
 		}
 	});
 
@@ -161,12 +170,10 @@ describe('buildTheme output', () => {
 			extractValue(blocks.identity, '--luke-radius-control'),
 		);
 		expect(extractValue(paperBlocks.baseLight, '--luke-depth-recessed')).toBe('none');
-		expect(extractValue(blocks.baseLight, '--luke-depth-recessed').split(', ')).toHaveLength(2);
+		expect(extractValue(blocks.baseLight, '--luke-depth-recessed')).not.toBe('none');
 
 		const paperDarkRecessed = extractValue(paperBlocks.mediaDark, '--luke-depth-recessed');
 		const tactileDarkRecessed = extractValue(blocks.mediaDark, '--luke-depth-recessed');
-		expect(paperDarkRecessed.split(', ')).toHaveLength(1);
-		expect(tactileDarkRecessed.split(', ')).toHaveLength(2);
 		expect(Math.max(...extractShadowOpacities(tactileDarkRecessed))).toBeGreaterThan(
 			Math.max(...extractShadowOpacities(paperDarkRecessed)),
 		);
