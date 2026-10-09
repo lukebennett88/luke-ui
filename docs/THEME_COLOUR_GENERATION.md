@@ -67,17 +67,17 @@ ladder, not a colour surface, and the depth ladder did not change.
 
 WCAG 2.2 SC 1.4.11 requires 3:1 contrast only for visual information required to identify a
 component or state, not every authored border, so v2 splits border tokens into hard gates and an
-advisory group. The control surfaces are `base`, `field`, and `overlay`. `subdued` is a static
-region, so only text and the focus ring are gated against it.
+advisory group. Every gate covers all four surfaces: forms, links, and semantic text appear on
+`subdued` regions as well as on `base`, `field`, and `overlay`.
 
 - `color.border.control` is a hard gate. It is a dedicated contrast boundary, not a scale-step
-  alias, and must reach ≥3:1 against every control surface in both modes. It is frequently the sole
-  resting boundary of a form control, so it cannot use the softer step-7 aesthetic.
+  alias, and must reach ≥3:1 against every surface in both modes. It is frequently the sole resting
+  boundary of a form control, so it cannot use the softer step-7 aesthetic.
 - `color.border.controlHover` is a hard gate against the same surfaces. It is `border.control` moved
   by a fixed, tuned lightness offset toward more contrast. There is no search and no rule that hover
   must exceed rest: the guarantee is 3:1, and how distinct hover looks is a visual decision.
-- `color.background.danger.solid.rest` is also a hard gate against the control surfaces. It is the
-  only role fill that carries a required state's boundary (the invalid field boundary —
+- `color.background.danger.solid.rest` is also a hard gate against every surface. It is the only
+  role fill that carries a required state's boundary (the invalid field boundary —
   [#247](https://github.com/lukebennett88/luke-ui/issues/247)), so it needs the same guarantee as
   `border.control`. This is deliberately not extended to the other five roles: a role's solid anchor
   is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind it, and `warning` lands

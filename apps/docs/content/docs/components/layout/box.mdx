@@ -64,12 +64,12 @@ Box accepts theme-backed background, border colour, radius, and depth values, pl
 width and style values. Each value is a public token, so the options match the
 [token reference](/docs/token-reference). Use a component API for interaction states and typography.
 
-`borderColor="control"` is a guaranteed control boundary that reaches 3:1 against the base, field,
-and overlay surfaces. The role colours, such as `borderColor="warning"`, are decorative tints. Do
-not rely on one alone to show a required state. `borderColor="decorative"` is a separator. When a
-custom element that is not a Box needs a colour, radius, or depth value, use `vars` from
-`@luke-ui/react/theme`. Read [Styling](/docs/styling#use-semantic-variables-for-custom-ui) for when
-to reach for `vars`, and the [token reference](/docs/token-reference) for the contract.
+`borderColor="control"` is a guaranteed control boundary that reaches 3:1 against every surface. The
+role colours, such as `borderColor="warning"`, are decorative tints. Do not rely on one alone to
+show a required state. `borderColor="decorative"` is a separator. When a custom element that is not
+a Box needs a colour, radius, or depth value, use `vars` from `@luke-ui/react/theme`. Read
+[Styling](/docs/styling#use-semantic-variables-for-custom-ui) for when to reach for `vars`, and the
+[token reference](/docs/token-reference) for the contract.
 
 <ExampleBlock src="box/visual-styles" title="Box: Visual styles" />
 

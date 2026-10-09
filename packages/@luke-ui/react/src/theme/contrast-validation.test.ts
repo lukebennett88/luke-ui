@@ -108,23 +108,45 @@ describe('buildTheme contrast failures', () => {
 		expect(failingSurfaces.has('color.surface.field')).toBe(true);
 		expect(error.failures.every((failure) => failure.mode === 'light')).toBe(true);
 	});
+
+	// Forms and links sit on subdued regions too, such as a sidebar search field.
+	it('gates role text on an authored subdued surface', () => {
+		const subdued = resolvedColor('oklch(0.75 0 0)');
+		const error = buildFailures({
+			...tactileFoundation,
+			light: {
+				...tactileFoundation.light,
+				color: {
+					...tactileFoundation.light.color,
+					surface: { ...tactileFoundation.light.color.surface, subdued },
+				},
+			},
+			name: 'dark-subdued',
+		});
+		expect(error.failures).toContainEqual(
+			expect.objectContaining({
+				background: 'color.surface.subdued',
+				foreground: 'color.foreground.danger.rest',
+				mode: 'light',
+			}),
+		);
+	});
 });
 
 describe('contrast validation matrix', () => {
 	const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
-	// `subdued` is a static region, so only text and the focus ring are gated against it.
-	const CONTROL_SURFACES = [
+	const SURFACES = [
 		'color.surface.base',
+		'color.surface.subdued',
 		'color.surface.field',
 		'color.surface.overlay',
 	] as const;
-	const ALL_SURFACES = [...CONTROL_SURFACES, 'color.surface.subdued'] as const;
 
 	function expectedChecks() {
 		const hard: Array<{ background: string; foreground: string; required: number }> = [];
 		const advisory: Array<{ background: string; foreground: string; required: number }> = [];
 		for (const text of ['color.text.primary', 'color.text.secondary'] as const) {
-			for (const surface of ALL_SURFACES) {
+			for (const surface of SURFACES) {
 				hard.push({ background: surface, foreground: text, required: TEXT_RATIO });
 			}
 		}
@@ -133,7 +155,7 @@ describe('contrast validation matrix', () => {
 				return `color.background.${role}.subtle.${state}`;
 			});
 			for (const state of INTERACTION_STATES) {
-				for (const background of [...CONTROL_SURFACES, ...subtleBackgrounds]) {
+				for (const background of [...SURFACES, ...subtleBackgrounds]) {
 					hard.push({
 						background,
 						foreground: `color.foreground.${role}.${state}`,
@@ -148,14 +170,14 @@ describe('contrast validation matrix', () => {
 					required: TEXT_RATIO,
 				});
 			}
-			for (const background of CONTROL_SURFACES) {
+			for (const background of SURFACES) {
 				advisory.push({ background, foreground: `color.border.${role}`, required: UI_RATIO });
 			}
 		}
-		for (const background of ALL_SURFACES) {
+		for (const background of SURFACES) {
 			hard.push({ background, foreground: 'color.border.focus', required: UI_RATIO });
 		}
-		for (const background of CONTROL_SURFACES) {
+		for (const background of SURFACES) {
 			hard.push({ background, foreground: 'color.border.control', required: UI_RATIO });
 			hard.push({ background, foreground: 'color.border.controlHover', required: UI_RATIO });
 			hard.push({

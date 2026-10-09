@@ -213,7 +213,7 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 	const controlBorder = solveControlBorder({
 		mode,
 		neutral: families.neutral,
-		surfaces: [surfaces.base, surfaces.field, surfaces.overlay],
+		surfaces: [surfaces.base, surfaces.subdued, surfaces.field, surfaces.overlay],
 	});
 	const colorValues = mapSemanticColors({
 		controlBorder,

@@ -1,9 +1,6 @@
 /**
- * Solves `color.border.control`, the dedicated contrast boundary for form controls, and derives
- * `color.border.controlHover` from it. The resting search walks OKLCH lightness for a value that
- * clears the non-text gate, which is colour generation, so it sits with `scale.ts` and
- * `surfaces.ts` rather than with the mapping. `semantic-map.ts` only passes the resolved values
- * through.
+ * Solves `color.border.control`, the contrast boundary for form controls, and derives
+ * `color.border.controlHover` from it.
  */
 
 import type { Oklch } from './color.js';
@@ -19,22 +16,18 @@ type ColorMode = 'light' | 'dark';
 interface SolveControlBorderRequest {
 	/** The colour mode being solved for. */
 	mode: ColorMode;
-	/** The generated neutral family for this mode, whose semantic border rung seeds the search. */
+	/** The generated neutral family for this mode. Its border rung seeds the search. */
 	neutral: ScaleFamily;
-	/** The surfaces a control sits on, which the boundary is gated against: base, field, overlay. */
+	/** The surfaces the boundary must clear. */
 	surfaces: ReadonlyArray<Oklch>;
 }
 
 /**
- * Solves `color.border.control` as a dedicated contrast boundary, rather than a subtle step-7
- * alias: the semantic border and muted rungs land at roughly 1.6-2.7:1 against the surfaces, well
- * short of the 3:1 non-text gate. Starting from {@link FAMILY_RUNG.border}'s own lightness (its hue
- * and a low, neutral chroma), the search steps in the higher-contrast direction, darker in light
- * mode and lighter in dark mode, until the candidate clears 3:1 (plus headroom) against every
- * surface a control sits on, gated on whichever currently has the lowest contrast. It stops at the
- * first clearing lightness, so the result deviates from the border-rung aesthetic by the minimum
- * needed to reach the boundary. Lightness is clamped to [0, 1]. When no lightness clears the gate,
- * it returns the last candidate and validation reports the failure.
+ * The neutral border rung lands at roughly 1.6–2.7:1 against the surfaces, short of the 3:1 non-text
+ * minimum. Starting from that rung, the search moves lightness away from the surfaces (darker in
+ * light mode, lighter in dark mode) and stops at the first value that clears 3:1, plus headroom,
+ * against every surface. When none does, it returns the last candidate and validation reports the
+ * failure.
  */
 export function solveControlBorder(params: SolveControlBorderRequest): Oklch {
 	const { neutral, surfaces, mode } = params;
@@ -64,8 +57,8 @@ export function solveControlBorder(params: SolveControlBorderRequest): Oklch {
 	);
 }
 
-// The hovered boundary moves away from the surfaces by a fixed, tuned amount. It is not searched:
-// its only guarantee is the same 3:1 gate as the resting border, which validation measures.
+// A fixed, tuned step further from the surfaces. Validation holds it to the same 3:1 as the resting
+// border; how distinct it looks is a visual decision, not a searched one.
 const CONTROL_HOVER_LIGHTNESS_OFFSET = {
 	dark: 0.12,
 	light: -0.12,
