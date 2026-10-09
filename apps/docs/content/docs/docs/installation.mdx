@@ -1,27 +1,28 @@
 ---
 title: Installation
-description: Install Luke UI, apply a bundled theme, and render a component.
+description: Install Luke UI and a theme, and render a component.
 ---
 
 ## Install Luke UI
 
-Install Luke UI and React Aria Components. Luke UI uses the application's React Aria Components
-instance so shared contexts remain compatible. Luke UI's type declarations need TypeScript 5.8 or
-later.
+Install Luke UI, React Aria Components, and a theme. Luke UI uses the application's React Aria
+Components instance so shared contexts remain compatible. Luke UI's type declarations need
+TypeScript 5.8 or later. This guide uses the Tactile theme.
 
 ```bash
-pnpm add @luke-ui/react react-aria-components
+pnpm add @luke-ui/react @luke-ui/theme-tactile react-aria-components
 ```
 
 ## Set up the theme
 
-Import `@luke-ui/react/stylesheet.css` and one theme stylesheet at your application root. This guide
-uses Tactile. To use Paper, import `@luke-ui/react/themes/paper/stylesheet.css` instead.
-
-Apply `rootClassName` to an element you own, such as the application shell. The theme stylesheet
-supplies the semantic variables. `rootClassName` adds the reset and base typography.
+Import `@luke-ui/react/stylesheet.css` and the theme's `stylesheet.css` at your application root.
+Import the theme's `fonts.css` to load its Inter font. Then set the theme's identity class on
+`<html>` and `rootClassName` on `<body>`.
 
 <SourceCodeBlock src="theming/getting-started" />
+
+The theme stylesheet supplies the semantic variables. `rootClassName` adds the reset and base
+typography.
 
 ## Use components
 
@@ -35,13 +36,13 @@ bundler setup.
 
 ## Change the theme
 
-Tactile is the default bundled theme. Paper uses the same component APIs with a flatter visual
-treatment. Switch which theme stylesheet you import to change the theme.
+Paper, in `@luke-ui/theme-paper`, uses the same component APIs with a flatter visual treatment.
+Install it, then import its stylesheets and set its identity class instead of Tactile's.
 
 <SourceCodeBlock src="overview/paper-theme" />
 
-Set `data-color-mode="light"` or `data-color-mode="dark"` on a themed element when the application
-must use a specific mode. Without it, Luke UI follows the system preference.
+Without `data-color-mode`, the theme follows the system colour mode. Read
+[Applying a theme](/docs/applying-a-theme#choose-a-colour-mode) to set a mode.
 
 ## Continue learning
 
@@ -53,7 +54,7 @@ must use a specific mode. Without it, Luke UI follows the system preference.
 		Build responsive structure with Box.
 	</Card>
 	<Card href="/docs/theming" title="Theming">
-		Understand how the theme root, identity, and tokens fit together.
+		Understand how the theme identity, colour mode, and tokens fit together.
 	</Card>
 	<Card href="/components/actions/button" title="Components">
 		Browse the available components.

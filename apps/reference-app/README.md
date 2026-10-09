@@ -21,9 +21,10 @@ Components supplies menu and dialog behaviour. Vanilla Extract owns the remainin
 presentation, using public theme variables. [`FRICTION.md`](./FRICTION.md) records the remaining
 consumer gaps.
 
-The theme source is `src/theme/input.ts`. A small Vite plugin in `vite.config.ts` passes it to Luke
-UI's `defineTheme` and serves the result as `virtual:reference-theme.css`. Vite restarts the dev
-server when the theme source changes.
+The theme source is `src/theme/input.ts`. A small Vite plugin in `vite.config.ts` passes it to
+`defineTheme` from `@luke-ui/react/theme/compiler` and serves the result as
+`virtual:reference-theme.css`. `index.html` sets the theme's identity class on `<html>`. Vite
+restarts the dev server when the theme source changes.
 
 The app imports `@luke-ui/react` from its built `dist`. Turbo builds the package on a clean
 checkout. Run commands from the repository root:

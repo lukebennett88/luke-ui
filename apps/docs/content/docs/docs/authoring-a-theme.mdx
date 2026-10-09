@@ -3,23 +3,29 @@ title: Authoring a theme
 description: Compile a curated theme input into a static Luke UI theme stylesheet.
 ---
 
-Author a custom theme when the bundled themes do not suit the product. `defineTheme` turns a small,
-curated `ThemeInput` into static CSS for one theme with light and dark modes. It does not need a
-browser or a Luke UI release.
+Author a custom theme when Tactile and Paper do not suit the product. `defineTheme` turns a small,
+curated `ThemeInput` into static CSS for one theme with light and dark modes. It runs at build time
+in Node 24 or later, and needs no browser and no Luke UI release.
+
+Import every authoring API from `@luke-ui/react/theme/compiler`. Never import it from application
+code that runs in the browser. The application imports only the compiled stylesheet and
+`@luke-ui/react/theme`.
 
 ## Define the input
 
-A basic theme authors an accent colour and a neutral character. Everything else defaults. A
-`ThemeInput` includes:
+A basic theme authors an accent colour, a neutral character, and a body font. Everything else
+defaults. A `ThemeInput` includes:
 
 - a kebab-case `name`
+- `typography.fonts.body`, the required body font
 - `color.accent`, the required brand or interaction accent
 - `color.neutral` or `color.neutralStyle` (`'cool'`, `'neutral'`, or `'warm'`) for the neutral base
   anchor
 - optional `color.surface` colours for the `base`, `subdued`, `field`, and `overlay` surfaces
 - optional `color.info`, `color.success`, `color.warning`, `color.danger`, `color.focus`, and
   `color.backdrop`
-- optional `typography`, `radius`, `depth`, and `controlFinish` overrides
+- optional `typography.fonts.display`, `typography.fontWeight`, `radius`, `depth`, and
+  `controlFinish`
 
 Most source colours accept one string or a `{ light, dark }` object. Either side of the object may
 be omitted. How each colour treats them differs:
@@ -38,13 +44,33 @@ Do not author them.
 `radius` overrides the `detail`, `control`, `surface`, and `overlay` corners, which default to 4, 8,
 12, and 16px. Radius inputs are pixels at a 16px root and emit as `rem`. `depth` and `controlFinish`
 can be set per mode and per rung. An omitted `depth` rung uses a subtle default shadow, and an
-omitted `controlFinish` rung is `none`. Typography styles and motion are not authored.
+omitted `controlFinish` rung is `none`. Typography sizes, line heights, letter spacing, and motion
+are not authored. Read [Fonts](#fonts) for the font input.
 
 <auto-type-table path="packages/@luke-ui/react/src/theme/define-theme.ts" name="ThemeInput" />
 
-The minimal theme authors one colour and a neutral character:
+The minimal theme authors one colour, a neutral character, and a body font:
 
 <SourceCodeBlock src="theming/minimal-theme" />
+
+### Fonts
+
+Each font is a `ThemeFont`: an authored CSS `family` stack, and Capsize `metrics` for the stack's
+primary font. Luke UI trims each typography style with its font's metrics. Take metrics from
+`@capsizecss/metrics`, or read them from a font file with `@capsizecss/unpack`. `FontMetrics` from
+`@luke-ui/react/theme/compiler` types a full metrics object.
+
+`typography.fonts.body` sets `caption`, `label`, `body`, and `lead`. The optional
+`typography.fonts.display` sets `heading4` through `heading1` and `display`. Without a display font,
+those styles use the body font.
+
+<SourceCodeBlock src="theming/display-font" />
+
+A theme names its fonts but does not load them. Load every font, and every weight, the theme uses.
+Read [Typography](/docs/typography#fonts) for how font loading affects trims.
+
+`typography.fontWeight` sets the `body`, `label`, `heading`, and `emphasis` weights, which default
+to 400, 500, 600, and 700.
 
 ### Surfaces
 
@@ -56,10 +82,10 @@ Every other surface is a fixed lightness offset from `base` for the mode. Set `s
 gamut but never changes its lightness to pass contrast. If a surface fails
 [contrast validation](#contrast-validation), set it explicitly or choose a different value.
 
-## Extend a bundled theme
+## Extend a theme
 
-Set `extends` to another theme's input. Your theme inherits every value it does not set. Each
-bundled theme entrypoint, such as `@luke-ui/react/themes/tactile`, exports its input as `theme`.
+Set `extends` to another theme's input. Your theme inherits every value it does not set. Each theme
+package exports its input as `theme` from `./input`, such as `@luke-ui/theme-paper/input`.
 
 <SourceCodeBlock src="theming/extend-bundled-theme" />
 
@@ -71,7 +97,8 @@ What each section inherits:
 - `color.neutral` and `color.neutralStyle` are one decision. Setting either replaces the base's
   neutral decision.
 - `radius` and `typography.fontWeight` merge key by key.
-- `typography.fontFamily` replaces the base value.
+- `typography.fonts` merges font by font. A font replaces the base's font whole, so a family never
+  pairs with another font's metrics. Set `display: null` to remove an inherited display font.
 - `color.surface` merges surface by surface. A surface replaces the base's surface whole.
 - `depth` and `controlFinish` merge per mode, then per rung.
 
@@ -79,28 +106,53 @@ A value set to `undefined` counts as omitted and inherits.
 
 A theme may extend a theme that extends another. A cycle throws.
 
+An extending theme compiles to a complete stylesheet of its own, so load it instead of the base
+theme's stylesheet. It still names the base's fonts, so keep loading them. With a theme package,
+keep importing its `fonts.css`.
+
 Contrast validation runs on the merged theme. `ThemeContrastError` carries `inheritance`, naming the
 chain of themes and which colours came from a base.
 
 ## Generate a stylesheet
 
-Call `defineTheme` from an application build script. Write the returned CSS to a stylesheet your
-framework can load.
+`defineTheme` returns the stylesheet as a string. Write it to a file with a Node script, and run the
+script whenever the input changes.
 
-<SourceCodeBlock src="theming/author-theme" />
+<SourceCodeBlock src="theming/compile-theme" />
 
-Apply a product theme exactly like a bundled one. Load the generated stylesheet. Apply
-`rootClassName` to an element you own.
+Node 24 runs this script as TypeScript directly, within these limits:
 
-The product theme's own stylesheet themes the document. Colour mode uses the same `data-color-mode`
-attribute as bundled themes.
+- It strips types without compiling, so the script and every module it imports use erasable syntax
+  only. Enums and namespaces fail.
+- The nearest `package.json` `"type"` field decides whether a `.ts` file loads as ES modules or
+  CommonJS. Use `"type": "module"` for top-level `await`.
+- Relative imports name the `.ts` extension. Enable `allowImportingTsExtensions` or
+  `rewriteRelativeImportExtensions` in `tsconfig.json` so TypeScript accepts it.
+- `tsconfig.json` path aliases do not resolve.
+- Every dependency the script imports ships JavaScript.
 
-<SourceCodeBlock src="theming/custom-theme-app" />
+Load the generated stylesheet, set the theme's identity class on `<html>`, and apply
+`rootClassName`, exactly as for [Tactile or Paper](/docs/applying-a-theme). The class is
+`luke-ui-theme-` followed by the theme's `name`. `getThemeClassName` from `@luke-ui/react/theme`
+returns it.
 
-A single authored theme needs no identity class. Loading more than one bundled theme in the same
-document is covered in [Applying a theme](/docs/applying-a-theme).
+### Generate with Vite
 
-Applications must load any non-system font files their `typography` selects.
+A Vite application can compile the theme as part of its build instead. This plugin serves the
+stylesheet as a virtual module. Import `virtual:theme.css` from the application entry.
+
+<SourceCodeBlock src="theming/vite-theme-plugin" />
+
+## Validation
+
+`defineTheme` validates each input in an `extends` chain on its own, then checks the merged theme
+for a body font. It reports every problem at once. `ThemeValidationError.issues` lists each one with
+the `theme` that contains it, the `path` within that theme, and a `message`. A base theme with an
+invalid font fails even when your theme replaces that font.
+
+A font `family` must not contain `;`, `{`, `}`, `<`, control characters, or an unclosed quote. Font
+metrics must be finite numbers, with a positive `unitsPerEm`, `capHeight`, and `ascent`, a `descent`
+of 0 or less, and a `lineGap` of 0 or more. Font weights are numbers from 1 to 1000.
 
 ## Contrast validation
 
@@ -141,7 +193,7 @@ string and let `defineTheme` adapt it.
 
 <Cards>
 	<Card href="/docs/applying-a-theme" title="Applying a theme">
-		Load the stylesheet, set the root class, and handle colour mode.
+		Load the stylesheet, set the identity class, and handle colour mode.
 	</Card>
 	<Card href="/docs/token-reference" title="Token reference">
 		Browse the semantic variables every generated theme provides.

@@ -1,8 +1,8 @@
-import { defineTheme } from '@luke-ui/react/theme';
-import { theme as tactileTheme } from '@luke-ui/react/themes/tactile';
+import type { ExtendingThemeInput } from '@luke-ui/react/theme/compiler';
+import { theme as paperTheme } from '@luke-ui/theme-paper/input';
 
-export const css = defineTheme({
+export const theme: ExtendingThemeInput = {
 	color: { accent: '#3b82f6' },
-	extends: tactileTheme,
+	extends: paperTheme,
 	name: 'product',
-});
+};

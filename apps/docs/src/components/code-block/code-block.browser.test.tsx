@@ -1,6 +1,5 @@
 import '../../styles/app.css';
-import '@luke-ui/react/themes/tactile/stylesheet.css';
-import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
+import '@luke-ui/theme-tactile/stylesheet.css';
 import axe from 'axe-core';
 import type { ReactNode } from 'react';
 import { act, createRef } from 'react';
@@ -297,7 +296,7 @@ test('the CodeBlock scene has no axe violations', async () => {
 
 function renderCodeBlock(node: ReactNode) {
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = 'luke-ui-theme';
 	root = createRoot(container);
 	rerenderCodeBlock(node);
 }

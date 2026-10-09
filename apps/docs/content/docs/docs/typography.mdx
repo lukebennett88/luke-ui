@@ -38,8 +38,8 @@ changing its semantic level. There is no `heading5` or `heading6` style. Those H
 
 ## Capsize trims
 
-Each style includes Capsize trim values for the active font family. A line box normally reserves
-space above and below its letters. Trim removes that extra space from a block text element. Read
+Each style includes Capsize trim values for its font. A line box normally reserves space above and
+below its letters. Trim removes that extra space from a block text element. Read
 [Text](/components/typography/text#trimming) for how `Text` infers trim from the element type.
 
 Trim values belong to `Text`. They are not public tokens. Render trimmed custom text with `Text` and
@@ -58,8 +58,37 @@ Text also accepts semantic `color` values such as `primary`, `secondary`, `accen
 </Text>
 ```
 
-Applications load any font files required by a custom theme. The theme then assigns that typeface to
-the shared styles and weight roles. Luke UI computes trim values from that font's metrics.
+## Fonts
+
+A theme names a body font and, optionally, a display font. The body font sets `caption`, `label`,
+`body`, and `lead`. The display font sets `heading4` through `heading1` and `display`. A theme
+without a display font uses its body font for every style. `vars.font.family.body` and
+`vars.font.family.display` expose the two families.
+
+Tactile and Paper use Inter for every style, and each theme package ships it in an optional
+`fonts.css`. A custom theme loads its own fonts. Read
+[Authoring a theme](/docs/authoring-a-theme#fonts) to set them.
+
+Luke UI computes each style's trim from the metrics of the primary font in its family stack. The
+trim matches only while that font renders:
+
+- With `font-display: swap`, a fallback font shows until the primary font loads. Trims are slightly
+  off until the swap.
+- A system stack such as `-apple-system, BlinkMacSystemFont, system-ui, sans-serif` resolves to a
+  different font on each platform. Its metrics describe one of them, so trims are exact only on the
+  platforms that use that font.
+
+### Code font
+
+`Code` uses `vars.font.family.code`, a system monospace stack that no theme sets. To use another
+font, override the variable after the theme stylesheet with an unlayered rule at least as specific
+as the theme's:
+
+```css
+:root {
+	--luke-font-family-code: 'JetBrains Mono', ui-monospace, monospace;
+}
+```
 
 ## Continue learning
 

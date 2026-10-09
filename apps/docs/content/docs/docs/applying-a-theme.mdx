@@ -1,38 +1,61 @@
 ---
 title: Applying a theme
-description: Load Luke UI CSS and apply the shared root class.
+description: Load a theme, set its identity class, and choose colour modes.
 ---
 
-A themed subtree needs the shared Luke UI stylesheet and one theme stylesheet. Both are static CSS.
-Luke UI does not inject styles at runtime.
+A themed document needs the shared Luke UI stylesheet, one theme stylesheet, and that theme's
+identity class on `<html>`. All of it is static CSS. Luke UI does not inject styles at runtime and
+needs no provider for theming.
 
-## Import the stylesheets
+## Load the theme
 
-Import `@luke-ui/react/stylesheet.css` and one theme's stylesheet, for example
-`@luke-ui/react/themes/tactile/stylesheet.css`. A theme stylesheet themes the whole document from
-`:root`, with no class and no JavaScript. Import one bundled theme, and Luke UI does not load the
-other.
+Import `@luke-ui/react/stylesheet.css` and the theme's stylesheet. Import the theme's `fonts.css` to
+load the font it names, or load that font another way. Render the theme's identity class on `<html>`
+and `rootClassName` on `<body>`. Render both on the server when the application renders there.
 
-## Apply the root class
+<SourceCodeBlock src="theming/getting-started" />
 
-Apply `rootClassName` to an element you own, such as the application shell. It supplies the reset
-and base typography. It carries no theme identity, so it works the same way for a bundled theme and
-a custom theme.
+The identity class selects the theme's tokens. `rootClassName` adds the reset and base typography.
+It carries no theme identity, so it works the same way for every theme.
 
-<SourceCodeBlock src="theming/apply-theme" />
+## Use one identity class
+
+Set exactly one identity class, on `<html>`. An identity class on any other element does nothing.
+Two identity classes on `<html>` are not supported: the themes' rules compete, and stylesheet order
+decides which values win. To switch themes at runtime, replace the class rather than adding a second
+one.
 
 ## Choose a colour mode
 
-Leave `data-color-mode` unset to follow `prefers-color-scheme`. Set `data-color-mode="light"` or
-`data-color-mode="dark"` when a root or nested scope needs a fixed mode.
+Without a colour mode, the document follows the system preference, and changes with it live. Set
+`data-color-mode="light"` or `data-color-mode="dark"` on `<html>` to fix the mode for the whole
+document.
 
-An explicit mode also sets the native `color-scheme` property. Browser controls and scrollbars then
-match the Luke UI content.
+<SourceCodeBlock src="theming/apply-theme" />
+
+The theme sets the native `color-scheme` property for each mode. Browser controls and scrollbars
+then match the Luke UI content.
+
+System mode exists only at the document level, and it means no attribute. When a preference control
+offers "System", remove `data-color-mode` from `<html>`. Do not resolve the preference to `light` or
+`dark` yourself, because the attribute would then stop following a later system change. Only
+lowercase `light` and `dark` are valid values.
+
+## Set the mode before first paint
+
+Render the identity class, and any explicit mode you know on the server, in the initial HTML. When
+the mode comes from a stored client-side preference, set it with an inline script in `<head>`,
+before the page paints. The script sets `data-color-mode` only for an explicit choice.
+
+<SourceCodeBlock src="theming/color-mode-script" />
+
+The script changes `<html>` before React hydrates it. In a React application that renders `<html>`,
+set `suppressHydrationWarning` on it.
 
 ## Nest colour-mode scopes
 
-Colour modes nest freely. Use a nested mode when one part of the interface must stay light or dark
-independently of its parent.
+Set `data-color-mode` on any element below `<html>` to fix the mode for that subtree. Scopes nest to
+any depth, and the nearest explicit scope wins.
 
 <ExampleBlock
 	src="theming/color-mode-override"
@@ -42,38 +65,38 @@ independently of its parent.
 
 <SourceCodeBlock src="theming/nested-color-mode" />
 
-## Avoid a colour-mode flash
+The shared stylesheet repaints each scope with its mode's text colour, accent colour, and base
+surface. Your own CSS and Luke UI components outrank that repaint, so a scope element can still set
+its own background.
 
-Render `rootClassName` and any known explicit mode in the initial HTML. When the mode comes from a
-client-side preference, set `data-color-mode` before the themed UI paints.
+`<body>` can be a scope too. Its background paints the whole page canvas, but page scrollbars follow
+`<html>`. Set a mode for the whole document on `<html>` instead.
 
-Use the same value for the server HTML and the first client render. This avoids a hydration warning.
+### Override a token on a scope
 
-## Portals need nothing extra
+A token you override on an element that carries `data-color-mode` loses to the theme's explicit-mode
+rule, which has a specificity of (0,2,0). Override the token on a child element, or use a more
+specific selector, such as `.app .sidebar[data-color-mode]`.
 
-A theme stylesheet themes the whole document from `:root`, so a body-level portal inherits it with
-no class applied.
+## Overlays in a scope
 
-A colour mode does not follow a portal out of its branch. A portal rendered into `document.body`
-takes the document's mode, not a mode set on a nested scope near its trigger. Set `data-color-mode`
-on the portal root yourself when it must match a nested scope.
+An overlay renders into `document.body`, outside the scope around its trigger. Luke UI's own
+overlays handle this. The `Select` popover, the `Combobox` popover, and the `Combobox` tray copy the
+trigger's mode from the nearest scope below `<html>` onto the overlay. Without such a scope, the
+overlay follows the document.
 
-## Add an identity class for more than one theme
+Luke UI copies the trigger's colour mode onto the overlay when the overlay element is created. It
+doesn't update while the overlay stays mounted.
 
-Loading one theme needs no identity class. Loading more than one theme in the same document does, so
-an explicit class can win over another theme's `:root` fallback.
+To give one of these overlays its own mode, pass `data-color-mode` to the overlay primitive, such as
+`ComboboxPopover` or `SelectPopover`. Your value wins, even when it matches the document mode.
 
-Each bundled theme exports its identity class as `themeClassName` from its own entrypoint, for
-example `@luke-ui/react/themes/tactile`. Apply it to `<html>`, or to the root of the subtree that
-needs it.
+### React Aria overlays
 
-<SourceCodeBlock src="theming/multi-theme-app" />
+A React Aria overlay that you render yourself does not copy the mode. When one can open inside a
+scope, set the scope's mode on the overlay too.
 
-Theme identities do not nest. Never place one identity class inside another identity's subtree. A
-nested identity resolves its own identity-owned values correctly, and its colour, depth, and
-action-control-finish values also resolve correctly under the system-controlled mode. But an
-explicit `data-color-mode` scope on or inside the nested identity makes those mode-dependent values
-compete with the ancestor identity at equal precedence, so stylesheet order decides the winner.
+<SourceCodeBlock src="theming/scoped-overlay" />
 
 ## Continue learning
 

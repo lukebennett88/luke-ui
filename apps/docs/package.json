@@ -39,6 +39,8 @@
 		"@hookform/resolvers": "catalog:",
 		"@luke-ui/playground-core": "workspace:*",
 		"@luke-ui/react": "workspace:*",
+		"@luke-ui/theme-paper": "workspace:*",
+		"@luke-ui/theme-tactile": "workspace:*",
 		"@monaco-editor/react": "catalog:",
 		"@react-aria/utils": "catalog:",
 		"@tanstack/react-form": "catalog:",
@@ -66,6 +68,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
+		"@capsizecss/metrics": "catalog:",
 		"@tailwindcss/vite": "catalog:",
 		"@tanstack/router-cli": "catalog:",
 		"@types/mdx": "catalog:",

@@ -8,11 +8,10 @@ const allDocsContentDir = resolve(import.meta.dirname, '../../content/docs');
 const examplesDir = resolve(import.meta.dirname, '../examples');
 
 test('no rendered example applies a theme identity class', () => {
-	// `themeClassName` is the export name every per-theme entrypoint
-	// (`@luke-ui/react/themes/paper`, `@luke-ui/react/themes/tactile`) uses for its identity class,
-	// and `tactileThemeClassName`/`paperThemeClassName` are the aliases docs code imports it under.
-	// A rendered example using any of them would establish its own identity and nest one inside the
-	// docs' own `<html>`-level identity.
+	// `themeClassName` is the export name each theme package (`@luke-ui/theme-paper`,
+	// `@luke-ui/theme-tactile`) uses for its identity class, and `tactileThemeClassName`/
+	// `paperThemeClassName` are the aliases docs code imports it under. An identity class belongs
+	// on `<html>` only, so a rendered example must never apply one.
 	const identityClassNames = ['tactileThemeClassName', 'paperThemeClassName', 'themeClassName'];
 
 	for (const file of findMdxFiles(allDocsContentDir)) {

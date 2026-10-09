@@ -450,6 +450,12 @@ importers:
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../../packages/@luke-ui/react
+      '@luke-ui/theme-paper':
+        specifier: workspace:*
+        version: link:../../packages/@luke-ui/theme-paper
+      '@luke-ui/theme-tactile':
+        specifier: workspace:*
+        version: link:../../packages/@luke-ui/theme-tactile
       '@monaco-editor/react':
         specifier: 'catalog:'
         version: 4.7.0(monaco-editor@0.57.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -526,6 +532,9 @@ importers:
         specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
+      '@capsizecss/metrics':
+        specifier: 'catalog:'
+        version: 4.3.0
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.3(@voidzero-dev/vite-plus-core@1.0.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1))
@@ -589,6 +598,9 @@ importers:
 
   apps/reference-app:
     dependencies:
+      '@capsizecss/metrics':
+        specifier: 'catalog:'
+        version: 4.3.0
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../../packages/@luke-ui/react
