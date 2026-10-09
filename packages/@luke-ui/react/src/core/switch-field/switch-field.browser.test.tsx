@@ -364,8 +364,35 @@ test('a pressed off switch keeps the thumb on the field surface', () => {
 	expect(resting).toBe(resolvedBackgroundColor(label, 'var(--luke-color-surface-field)'));
 });
 
-// Regression: hover and pressed must look different from each other, and from rest, by colour
-// alone. The flat fixture has no depth or control finish to tell them apart.
+// Pressing stretches the thumb instead of recolouring it, so the press shows without materials and
+// the thumb keeps its guaranteed contrast with the track.
+for (const isSelected of [false, true]) {
+	test(`pressing an ${isSelected ? 'on' : 'off'} switch stretches its thumb until release`, async () => {
+		render(<SwitchField defaultSelected={isSelected} label="Notify" />);
+		const input = switchInput('Notify');
+		const thumb = controlFor(input).querySelector('span');
+		if (!(thumb instanceof HTMLElement)) throw new Error('Expected the switch thumb.');
+		thumb.style.transition = 'none';
+		const restingWidth = thumb.getBoundingClientRect().width;
+		const restingColor = getComputedStyle(thumb).backgroundColor;
+
+		input.focus();
+		await userEvent.keyboard('[Space>]');
+		await expect.element(labelFor(input)).toHaveAttribute('data-pressed', 'true');
+
+		expect(thumb.getBoundingClientRect().width).toBeGreaterThan(restingWidth);
+		expect(getComputedStyle(thumb).backgroundColor).toBe(restingColor);
+
+		await userEvent.keyboard('[/Space]');
+		await expect.element(labelFor(input)).not.toHaveAttribute('data-pressed');
+
+		expect(thumb.getBoundingClientRect().width).toBe(restingWidth);
+	});
+}
+
+// Regression: rest, hover, and pressed must stay distinct without materials, which the flat fixture
+// removes. Hover recolours the track. Pressed recolours an on track and stretches the thumb, which
+// keeps its guaranteed colour. Off, the stretch alone tells pressed from hover.
 test('rest, hover, and pressed stay distinct without materials', { tags: ['visual'] }, async () => {
 	for (const appearance of flatAppearances) {
 		const { locator } = render(
