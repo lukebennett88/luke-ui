@@ -1,13 +1,13 @@
+import interMetrics from '@capsizecss/metrics/inter';
 import type { ThemeInput } from '../define-theme.js';
 
 /**
- * Paper, the materially minimal bundled theme. Its light mode approximates the flat,
+ * The visual-test copy of Paper, the materially minimal theme `@luke-ui/theme-paper` publishes. The
+ * two inputs are independent and may diverge. Its light mode approximates the flat,
  * hairline-bordered Luke UI look with the blue `#185281`-family accent and explicitly authored status
  * colours; its dark mode is net-new and lets the `info`, `success`, and `warning` roles fall back to
  * the curated mode defaults (their dark sides are omitted).
  */
-// Multi-layer values below are concatenated string literals, not `[...].join(', ')`, because a
-// joined value survives dead-code elimination even when unused. See `themes/theme-bundle.test.ts`.
 export const paperTheme: ThemeInput = {
 	controlFinish: {
 		dark: {
@@ -56,4 +56,7 @@ export const paperTheme: ThemeInput = {
 	},
 	name: 'paper',
 	radius: { control: 4 },
+	typography: {
+		fonts: { body: { family: "'Inter', system-ui, sans-serif", metrics: interMetrics } },
+	},
 };

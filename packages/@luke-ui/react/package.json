@@ -16,8 +16,7 @@
 	"type": "module",
 	"sideEffects": [
 		"**/*.css.ts",
-		"./dist/stylesheet.css",
-		"./dist/themes/*/stylesheet.css"
+		"./dist/stylesheet.css"
 	],
 	"exports": {
 		"./aspect-ratio": "./dist/aspect-ratio.js",
@@ -60,16 +59,13 @@
 		"./text": "./dist/text.js",
 		"./text-input-field": "./dist/text-input-field.js",
 		"./theme": "./dist/theme.js",
-		"./themes/paper": "./dist/themes/paper.js",
-		"./themes/tactile": "./dist/themes/tactile.js",
+		"./theme/compiler": "./dist/theme/compiler.js",
 		"./track": "./dist/track.js",
 		"./utils": "./dist/utils.js",
 		"./visually-hidden": "./dist/visually-hidden.js",
 		"./package.json": "./package.json",
 		"./stylesheet.css": "./dist/stylesheet.css",
-		"./spritesheet.svg": "./dist/spritesheet.svg",
-		"./themes/tactile/stylesheet.css": "./dist/themes/tactile/stylesheet.css",
-		"./themes/paper/stylesheet.css": "./dist/themes/paper/stylesheet.css"
+		"./spritesheet.svg": "./dist/spritesheet.svg"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -77,7 +73,7 @@
 	"scripts": {
 		"build": "pnpm run build:tsdown",
 		"build:tsdown": "vp pack",
-		"check:barrels": "unbarrelify --check --skip 'src/exports/**/*.ts' --skip 'src/theme/index.ts' --skip 'src/theme/bundles/*/index.ts'",
+		"check:barrels": "unbarrelify --check --skip 'src/exports/**/*.ts'",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
 		"check:types": "pnpm run check:types:browser && pnpm run check:types:node",
@@ -90,9 +86,8 @@
 		"fix:lint": "vp lint . --type-aware --fix",
 		"fix:unsafe": "vp lint . --type-aware --fix-dangerously",
 		"generate": "pnpm run generate:assets",
-		"generate:assets": "pnpm run generate:icons && pnpm run generate:themes",
+		"generate:assets": "pnpm run generate:icons",
 		"generate:icons": "tsx scripts/build-icons.ts",
-		"generate:themes": "tsx scripts/build-themes.ts",
 		"test": "pnpm run test:unit && pnpm run test:browser:run",
 		"test:browser": "turbo run test:browser:run",
 		"test:browser:run": "vp test run --project=browser --tagsFilter='!visual'",
@@ -156,8 +151,5 @@
 		"react": "catalog:",
 		"react-aria-components": "catalog:",
 		"react-dom": "catalog:"
-	},
-	"inlinedDependencies": {
-		"@capsizecss/metrics": "4.3.0"
 	}
 }

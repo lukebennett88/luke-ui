@@ -24,13 +24,16 @@ const absentExportPaths = [
 	'./stylesheet',
 	'./primitives',
 	'./tokens',
+	'./themes/tactile',
+	'./themes/paper',
+	'./themes/tactile/stylesheet.css',
+	'./themes/paper/stylesheet.css',
 ] as const;
 
 const presentExportPaths = {
 	'./box': './dist/box.js',
 	'./theme': './dist/theme.js',
-	'./themes/tactile': './dist/themes/tactile.js',
-	'./themes/paper': './dist/themes/paper.js',
+	'./theme/compiler': './dist/theme/compiler.js',
 	'./stylesheet.css': './dist/stylesheet.css',
 	'./primitives/button': './dist/primitives/button.js',
 	'./primitives/checkbox': './dist/primitives/checkbox.js',
@@ -47,7 +50,7 @@ const presentExportPaths = {
 
 test('publishes only the final styling entrypoints', () => {
 	for (const exportPath of absentExportPaths) {
-		expect(exportPath in packageJson.exports).toBe(false);
+		expect(Object.hasOwn(packageJson.exports, exportPath)).toBe(false);
 	}
 
 	for (const [exportPath, target] of Object.entries(presentExportPaths) as Array<
@@ -195,17 +198,66 @@ test('exports fixed breakpoints from the theme entry', async () => {
 	});
 });
 
-test('theme entry publishes only the 1.0 allowlist', async () => {
+test('theme entry publishes only the runtime allowlist', async () => {
 	const theme = await import('@luke-ui/react/theme');
 	expect(Object.keys(theme).sort()).toEqual([
-		'ThemeContrastError',
-		'ThemeGenerationError',
 		'breakpoints',
-		'defineTheme',
+		'getThemeClassName',
 		'rootClassName',
 		'vars',
 	]);
 });
+
+test('theme compiler entry publishes only the authoring allowlist', async () => {
+	const compiler = await import('@luke-ui/react/theme/compiler');
+	expect(Object.keys(compiler).sort()).toEqual([
+		'ThemeContrastError',
+		'ThemeGenerationError',
+		'ThemeValidationError',
+		'defineTheme',
+	]);
+});
+
+test('keeps the built theme runtime entry out of the compiler import graph', async () => {
+	const runtimeGraph = await builtImportGraph('theme.js');
+	const compilerGraph = await builtImportGraph('theme/compiler.js');
+
+	// The compiler reaches modules the runtime must not, so the check below cannot pass by luck.
+	expect(compilerGraph.files.some((file) => !runtimeGraph.files.includes(file))).toBe(true);
+	expect(compilerGraph.packages).toContain('@capsizecss/core');
+
+	expect(runtimeGraph.files).not.toContain('theme/compiler.js');
+	expect(runtimeGraph.packages).toEqual([]);
+	for (const file of runtimeGraph.files) {
+		const source = await readFile(new URL(`../../../dist/${file}`, import.meta.url), 'utf8');
+		expect(source).not.toMatch(DEFINE_THEME_PATTERN);
+	}
+});
+
+const DEFINE_THEME_PATTERN = /function defineTheme\b/;
+const STATIC_IMPORT_PATTERN =
+	/(?:^|\n)\s*(?:import|export)\b[^'"]*?from\s*["']([^"']+)["']|(?:^|\n)\s*import\s*["']([^"']+)["']/g;
+
+/** Every built file a dist entry reaches through static imports, plus the packages it imports. */
+async function builtImportGraph(
+	entry: string,
+): Promise<{ files: Array<string>; packages: Array<string> }> {
+	const files = new Set<string>();
+	const packages = new Set<string>();
+	const pending = [entry];
+	for (let file = pending.pop(); file !== undefined; file = pending.pop()) {
+		if (files.has(file)) continue;
+		files.add(file);
+		const source = await readFile(new URL(`../../../dist/${file}`, import.meta.url), 'utf8');
+		for (const match of source.matchAll(STATIC_IMPORT_PATTERN)) {
+			const specifier = match[1] ?? match[2];
+			if (specifier === undefined) continue;
+			if (specifier.startsWith('.')) pending.push(posix.join(posix.dirname(file), specifier));
+			else packages.add(specifier);
+		}
+	}
+	return { files: [...files].sort(), packages: [...packages].sort() };
+}
 
 /** JS package exports that publish TypeScript declarations beside the runtime file. */
 function publicTypeEntryDeclarations(exportsMap: Record<string, string>): Array<string> {

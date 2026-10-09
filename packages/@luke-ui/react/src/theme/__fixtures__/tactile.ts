@@ -1,12 +1,12 @@
+import interMetrics from '@capsizecss/metrics/inter';
 import type { ThemeInput } from '../define-theme.js';
 
 /**
- * Tactile, the default bundled theme: a teal accent, a neutral near-white light canvas, lighter
+ * The visual-test copy of Tactile, the theme `@luke-ui/theme-tactile` publishes. The two inputs are
+ * independent and may diverge. Tactile has a teal accent, a neutral near-white light canvas, lighter
  * chromatic dark surfaces, and a restrained material lit from above. Both modes are authored
  * explicitly, so `defineTheme` uses each side as written.
  */
-// Multi-layer values below are concatenated string literals, not `[...].join(', ')`, because a
-// joined value survives dead-code elimination even when unused. See `themes/theme-bundle.test.ts`.
 export const tactileTheme: ThemeInput = {
 	// A solid face is lighter at the top and slightly darker at the bottom. Pressed reverses it.
 	controlFinish: {
@@ -60,4 +60,7 @@ export const tactileTheme: ThemeInput = {
 		},
 	},
 	name: 'tactile',
+	typography: {
+		fonts: { body: { family: "'Inter', system-ui, sans-serif", metrics: interMetrics } },
+	},
 };

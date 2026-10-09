@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
+import { tactileTheme } from './__fixtures__/tactile.js';
 import { defineTheme } from './define-theme.js';
-import { tactileTheme } from './foundations/tactile.js';
 import { getThemeClassName } from './theme-class-name.js';
 
 const VALID_NAMES = ['tactile', 'high-contrast', 'brand-v2', 'a1'];

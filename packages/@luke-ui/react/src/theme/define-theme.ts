@@ -11,7 +11,8 @@ import { buildTheme, ThemeContrastError } from './build-theme.js';
 import type { Oklch } from './color.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import { TEXT_RATIO } from './contrast-policy.js';
-import { resolveThemeInput } from './extend-theme.js';
+import { collectThemeChain, resolveThemeChain } from './extend-theme.js';
+import type { ThemeFont, ThemeFontWeights } from './font.js';
 import type {
 	ThemeFoundation,
 	ThemeModeFoundation,
@@ -21,6 +22,7 @@ import type {
 import { defaultSourceColors } from './foundation.js';
 import { lightnessCandidates } from './lightness-candidates.js';
 import { highContrastText, passesOnSolidGate } from './scale.js';
+import { ThemeValidationError, validateMergedInput, validateThemeInput } from './validate-input.js';
 
 /**
  * A colour: one string, or a per-mode object where either side may be omitted. Each role documents
@@ -99,21 +101,11 @@ interface ThemeInputCommon {
 		 */
 		overlay?: number;
 	};
-	/** Typography — family and weights only. The typography styles are source-owned (not authored here). */
-	typography?: {
-		/**
-		 * Curated Capsize-compatible font-family choice.
-		 * @default 'inter'
-		 */
-		fontFamily?: 'inter' | 'apple-system' | 'dm-sans';
-		/** Font weights for the four theme-controlled weight roles. */
-		fontWeight?: { body?: number; label?: number; heading?: number; emphasis?: number };
-	};
 }
 
 /**
  * The curated theme-authoring input for a theme that authors its own accent. A basic theme authors
- * an accent and a neutral character and lets everything else default. Materials are optional and
+ * an accent, a neutral character, and a body font, and lets everything else default. Materials are optional and
  * deep-partial, and light and dark stay independently authorable. A theme that starts from another
  * theme instead uses {@link ExtendingThemeInput}.
  */
@@ -185,6 +177,20 @@ export interface ThemeInput extends ThemeInputCommon {
 	 * inherits, so an extending theme always declares its own identity.
 	 */
 	extends?: ThemeInput | ExtendingThemeInput;
+	/** Fonts and weights. Luke UI owns type sizes, line heights, and letter spacing. */
+	typography: {
+		fonts: {
+			/** Font for `caption`, `label`, `body`, and `lead` text. */
+			body: ThemeFont;
+			/**
+			 * Font for `heading4` through `heading1` and `display` text. Omitted or `null`, those styles
+			 * use the body font.
+			 */
+			display?: ThemeFont | null;
+		};
+		/** Weights for the four weight roles. Each inherits key by key. */
+		fontWeight?: ThemeFontWeights;
+	};
 }
 
 /**
@@ -196,6 +202,20 @@ export interface ExtendingThemeInput extends ThemeInputCommon {
 	color?: Partial<ThemeInput['color']>;
 	/** The theme to start from. */
 	extends: ThemeInput | ExtendingThemeInput;
+	/** Font and weight overrides. Each font replaces the base's font of that role whole. */
+	typography?: {
+		fonts?: {
+			/** Font for `caption`, `label`, `body`, and `lead` text. */
+			body?: ThemeFont;
+			/**
+			 * Font for `heading4` through `heading1` and `display` text. Omitted, it inherits the base's
+			 * display font. `null` removes an inherited display font, so those styles use the body font.
+			 */
+			display?: ThemeFont | null;
+		};
+		/** Weights for the four weight roles. Each inherits key by key. */
+		fontWeight?: ThemeFontWeights;
+	};
 }
 
 type ColorMode = 'light' | 'dark';
@@ -259,16 +279,21 @@ export const defaultBackdrop: Record<ColorMode, string> = {
 };
 
 /**
- * Compiles a curated {@link ThemeInput} into a complete static stylesheet. Resolves any `extends`
- * chain into one merged input first, then normalises it into the per-mode {@link ThemeFoundation}
- * shape — adapting single-value accents and neutrals per mode, resolving source colours and authored
- * surfaces to {@link Oklch} once, and merging materials over curated defaults —
- * then delegates to {@link buildTheme}, whose build-time contrast validation stays authoritative.
- * Throws when a single-value accent has no accessible lightness in a mode, and (via `buildTheme`)
- * throws {@link ThemeContrastError} when any resolved pair misses WCAG 2.2 AA.
+ * Compiles a curated {@link ThemeInput} into a complete static stylesheet. Validates each input in
+ * the `extends` chain on its own, resolves the chain into one merged input, then normalises it into
+ * the per-mode {@link ThemeFoundation} shape — adapting single-value accents and neutrals per mode,
+ * resolving source colours and authored surfaces to {@link Oklch} once, and merging materials over
+ * curated defaults — then delegates to {@link buildTheme}, whose build-time contrast validation stays
+ * authoritative. Throws {@link ThemeValidationError} listing every invalid or missing field, throws
+ * when a single-value accent has no accessible lightness in a mode, and (via `buildTheme`) throws
+ * {@link ThemeContrastError} when any resolved pair misses WCAG 2.2 AA.
  */
 export function defineTheme(input: ThemeInput | ExtendingThemeInput): string {
-	const resolved = resolveThemeInput(input);
+	const chain = collectThemeChain(input);
+	const issues = chain.inputs.flatMap(validateThemeInput);
+	const resolved = resolveThemeChain(chain);
+	issues.push(...validateMergedInput(input.name, resolved.input));
+	if (issues.length > 0) throw new ThemeValidationError(issues);
 	try {
 		return buildTheme(normalizeTheme(resolved.input));
 	} catch (error) {
@@ -281,18 +306,23 @@ export function defineTheme(input: ThemeInput | ExtendingThemeInput): string {
 
 /**
  * Resolves a merged {@link ThemeInput} into the internal per-mode {@link ThemeFoundation}
- * `buildTheme` consumes. The `extends` chain must already be folded; call {@link resolveThemeInput}
- * once and pass `resolved.input`. Exported for internal callers and tests only; it is not part of
- * the public package entry, where `defineTheme` is the sole authoring surface.
+ * `buildTheme` consumes. The `extends` chain must already be folded; call `resolveThemeInput`
+ * once and pass `resolved.input`. A `null` display font becomes no display font here, after the
+ * whole chain is merged. Exported for internal callers and tests only; it is not part of the public
+ * package entry, where `defineTheme` is the sole authoring surface.
  */
 export function normalizeTheme(input: ThemeInput): ThemeFoundation {
+	const { display, body } = input.typography.fonts;
 	const foundation: ThemeFoundation = {
 		dark: buildModeFoundation(input, 'dark'),
 		light: buildModeFoundation(input, 'light'),
 		name: input.name,
+		typography: { fonts: display ? { body, display } : { body } },
 	};
+	if (input.typography.fontWeight !== undefined) {
+		foundation.typography.fontWeight = input.typography.fontWeight;
+	}
 	if (input.radius !== undefined) foundation.radius = input.radius;
-	if (input.typography !== undefined) foundation.typography = input.typography;
 	return foundation;
 }
 

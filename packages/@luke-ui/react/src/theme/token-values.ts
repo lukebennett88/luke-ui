@@ -1,15 +1,12 @@
 /**
- * The fixed values behind the contract's non-colour leaves: motion, typography styles and Capsize
- * metrics, control sizes, and the disabled-control opacity. None of them depend on a
+ * The fixed values behind the contract's non-colour leaves: motion, typography style metrics,
+ * control sizes, and the disabled-control opacity. None of them depend on a
  * theme's source colours, so they live here beside `contract.ts` rather than inside the compiler.
  *
  * The spacing scale is the exception: it stays in `contract.ts` as `spaceScale`, because it is also
  * the source of the public `SpaceStep` type.
  */
 
-import appleSystemMetrics from '@capsizecss/metrics/appleSystem';
-import dMSansMetrics from '@capsizecss/metrics/dMSans';
-import interMetrics from '@capsizecss/metrics/inter';
 import type { IdentityPath } from './contract.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import { MOTION_DURATION_SCALE } from './motion.js';
@@ -24,26 +21,6 @@ export const CONTROL_SIZE_VALUES: {
 } = {
 	'controlSize.medium': rem(40),
 	'controlSize.small': rem(32),
-};
-
-/**
- * Shape of a Capsize font-metrics object, named locally so `.d.ts` output never needs Capsize's
- * unexported per-font interfaces.
- */
-type CapsizeFontMetrics = {
-	ascent: number;
-	capHeight: number;
-	descent: number;
-	lineGap: number;
-	unitsPerEm: number;
-	xHeight: number;
-};
-
-/** Capsize font metrics for each curated font-family choice. */
-export const FONT_METRICS: Record<'apple-system' | 'dm-sans' | 'inter', CapsizeFontMetrics> = {
-	'apple-system': appleSystemMetrics,
-	'dm-sans': dMSansMetrics,
-	inter: interMetrics,
 };
 
 type FontValueLeaf = 'fontSize' | 'letterSpacing' | 'lineHeight';

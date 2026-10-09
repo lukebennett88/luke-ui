@@ -12,12 +12,7 @@ const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
 );
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
-const assetExports = [
-	'./stylesheet.css',
-	'./spritesheet.svg',
-	'./themes/tactile/stylesheet.css',
-	'./themes/paper/stylesheet.css',
-];
+const assetExports = ['./stylesheet.css', './spritesheet.svg'];
 
 function buildAuthoritativeLayerOrder(): string {
 	return `@layer ${cascadeLayerNames.join(', ')};`;
@@ -48,24 +43,19 @@ export default defineConfig({
 		},
 		// `generate` writes these to `.generated/`, not `dist/`, so a cache replay of one Turbo task
 		// can't overwrite the other's outputs by restoring over a shared directory.
-		copy: [
-			{ from: '.generated/spritesheet.svg', to: 'dist' },
-			{ flatten: false, from: '.generated/themes/*/stylesheet.css', to: 'dist' },
-		],
+		copy: [{ from: '.generated/spritesheet.svg', to: 'dist' }],
 		deps: {
 			// Vanilla Extract is build-time only. Keep any stray reference external rather than bundling
 			// it, so the packed-consumer harness reports it as an undeclared import.
 			neverBundle: [...Object.keys(packageJson.peerDependencies), VANILLA_EXTRACT_CSS_PATTERN],
-			// `defineTheme` reads metrics only for its curated font families. Bundling those keeps the
-			// full metrics collection out of consumer installs.
-			onlyBundle: ['@capsizecss/metrics'],
+			onlyBundle: [],
 		},
 		dts: true,
 		entry: {
 			'*': ['src/exports/*.ts'],
 			'primitives/*': ['src/exports/primitives/*.ts'],
 			stylesheet: 'src/core/stylesheet.css.ts',
-			'themes/*': ['src/exports/themes/*.ts'],
+			'theme/*': ['src/exports/theme/*.ts'],
 		},
 		exports: {
 			customExports: Object.fromEntries(

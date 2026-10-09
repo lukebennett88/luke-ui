@@ -1,12 +1,8 @@
 /// <reference types="vite/client" />
 
 import '@luke-ui/react/stylesheet.css';
-import '@luke-ui/react/themes/paper/stylesheet.css';
-import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { Provider } from '@luke-ui/react/provider';
 import { rootClassName, vars } from '@luke-ui/react/theme';
-import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
-import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -14,7 +10,8 @@ import { createRoot, hydrateRoot } from 'react-dom/client';
 import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
 import spritesheetHref from '../../../dist/spritesheet.svg?url';
-import { buildFlatThemeStylesheet, flatThemeClassName } from './flat-theme.js';
+import type { FixtureThemeName } from './fixture-themes.js';
+import { fixtureThemeClassName, installFixtureThemes } from './fixture-themes.js';
 import {
 	getAppliedIdentityClassName,
 	setAppliedIdentityClassName,
@@ -24,7 +21,7 @@ import {
 
 export type VisualAppearance = {
 	mode: 'light' | 'dark';
-	theme: 'tactile' | 'paper' | 'flat';
+	theme: FixtureThemeName;
 };
 
 export const visualAppearances = [
@@ -117,8 +114,8 @@ export function hydrate(
 }
 
 function applyAppearance(appearance: VisualAppearance) {
-	if (appearance.theme === 'flat') loadFlatTheme();
-	const identityClassName = identityClassNameFor(appearance.theme);
+	installFixtureThemes();
+	const identityClassName = fixtureThemeClassName(appearance.theme);
 	const appliedIdentityClassName = getAppliedIdentityClassName();
 	if (appliedIdentityClassName != null) {
 		document.documentElement.classList.remove(appliedIdentityClassName);
@@ -132,24 +129,4 @@ function unmount(container: HTMLElement, root: Root) {
 	untrackMountedRender(container);
 	act(() => root.unmount());
 	container.remove();
-}
-
-function identityClassNameFor(theme: VisualAppearance['theme']) {
-	const classNames = {
-		flat: flatThemeClassName,
-		paper: paperThemeClassName,
-		tactile: tactileThemeClassName,
-	} as const satisfies Record<VisualAppearance['theme'], string>;
-	return classNames[theme];
-}
-
-const FLAT_THEME_STYLE_ID = 'luke-ui-flat-fixture-theme';
-
-/** Adds the flat fixture's stylesheet once. The bundled themes load as static imports above. */
-function loadFlatTheme() {
-	if (document.getElementById(FLAT_THEME_STYLE_ID) !== null) return;
-	const style = document.createElement('style');
-	style.id = FLAT_THEME_STYLE_ID;
-	style.textContent = buildFlatThemeStylesheet();
-	document.head.append(style);
 }

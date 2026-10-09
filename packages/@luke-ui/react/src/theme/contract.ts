@@ -163,6 +163,7 @@ export const themeContractTree = {
 		...fontStyleContract,
 		family: {
 			body: null,
+			display: null,
 			code: null,
 		},
 		weight: {

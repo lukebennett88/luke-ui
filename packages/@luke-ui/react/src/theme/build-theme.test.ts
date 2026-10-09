@@ -6,6 +6,7 @@ import {
 	resolvedColor,
 	splitBlocks,
 	tactileFoundation,
+	testTypography,
 } from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeGenerationError } from './build-theme.js';
 import { contrastRatio, formatOklch, parseColor } from './color.js';
@@ -32,6 +33,7 @@ describe('buildTheme independent modes', () => {
 				color: { ...tactileFoundation.light.color, accent: resolvedColor('oklch(0.5 0.13 150)') },
 			},
 			name: 'green-purple',
+			typography: testTypography,
 		};
 		const blocks = splitBlocks(buildTheme(greenPurpleFoundation));
 		const solidVar = '--luke-color-background-accent-solid-rest';
@@ -124,6 +126,7 @@ describe('compileTheme interaction source', () => {
 			neutral: { dark: 'oklch(0.22 0.03 70)', light: 'oklch(0.985 0.03 70)' },
 		},
 		name: 'chromatic-neutral',
+		typography: testTypography,
 	});
 
 	it('gates every family against the emitted neutral text.primary, including the neutral family', () => {

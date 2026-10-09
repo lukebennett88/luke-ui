@@ -57,9 +57,18 @@ function authorsNeutral(color: Partial<ThemeInput['color']> | undefined): boolea
  * provenance of the outermost theme. Throws when a theme extends a theme that extends it.
  */
 export function resolveThemeInput(input: ThemeInput | ExtendingThemeInput): ResolvedThemeInput {
+	return resolveThemeChain(collectThemeChain(input));
+}
+
+/**
+ * Folds a chain from {@link collectThemeChain} into one merged {@link ThemeInput}, plus the colour
+ * provenance of the outermost theme.
+ */
+export function resolveThemeChain(chain: ThemeChain): ResolvedThemeInput {
+	const { base, inputs } = chain;
+	const [outermost] = inputs;
 	// Returns the object it was handed, so inheritance cannot affect a theme with no base.
-	if (extendsNothing(input)) return { inheritance: null, input };
-	const { base, inputs } = collectChain(input);
+	if (outermost === undefined || outermost === base) return { inheritance: null, input: base };
 	// Fold from the innermost base outward, so every step merges over a complete `ThemeInput` and
 	// `color.accent` is always present.
 	let merged = base;
@@ -68,7 +77,7 @@ export function resolveThemeInput(input: ThemeInput | ExtendingThemeInput): Reso
 	}
 	return {
 		inheritance: describeInheritance(
-			input,
+			outermost,
 			merged,
 			inputs.map((entry) => entry.name),
 		),
@@ -76,7 +85,7 @@ export function resolveThemeInput(input: ThemeInput | ExtendingThemeInput): Reso
 	};
 }
 
-interface ThemeChain {
+export interface ThemeChain {
 	/** The innermost input, the one input in the chain that extends nothing. */
 	base: ThemeInput;
 	/** Every input in the chain, the outermost first and `base` last. */
@@ -93,7 +102,7 @@ function extendsNothing(input: ThemeInput | ExtendingThemeInput): input is Theme
 }
 
 /** Walks `extends` outermost first, and throws when the walk reaches an input twice. */
-function collectChain(input: ThemeInput | ExtendingThemeInput): ThemeChain {
+export function collectThemeChain(input: ThemeInput | ExtendingThemeInput): ThemeChain {
 	const inputs: Array<ThemeInput | ExtendingThemeInput> = [];
 	const seen = new Set<ThemeInput | ExtendingThemeInput>();
 	let current: ThemeInput | ExtendingThemeInput = input;
@@ -188,18 +197,31 @@ function inheritModes(
 	return merged;
 }
 
-/** Merges typography. `fontFamily` is a scalar and replaces, and `fontWeight` merges key by key. */
+/**
+ * Merges typography. Each font role replaces the base's role whole, so a family never pairs with
+ * another font's metrics. A `null` display font is kept, so it removes the display font of every
+ * theme further in. `fontWeight` merges key by key.
+ */
 function inheritTypography(
 	base: ThemeInput['typography'],
-	own: ThemeInput['typography'],
+	own: ExtendingThemeInput['typography'],
 ): ThemeInput['typography'] {
-	if (base === undefined) return own;
 	if (own === undefined) return base;
-	const merged: NonNullable<ThemeInput['typography']> = {};
-	const fontFamily = own.fontFamily ?? base.fontFamily;
-	if (fontFamily !== undefined) merged.fontFamily = fontFamily;
+	const merged: ThemeInput['typography'] = { fonts: inheritFonts(base.fonts, own.fonts) };
 	const fontWeight = inheritKeys(base.fontWeight, own.fontWeight);
 	if (fontWeight !== undefined) merged.fontWeight = fontWeight;
+	return merged;
+}
+
+/** Merges font roles. An omitted role inherits, and an own role, including `null`, replaces. */
+function inheritFonts(
+	base: ThemeInput['typography']['fonts'],
+	own: NonNullable<ExtendingThemeInput['typography']>['fonts'],
+): ThemeInput['typography']['fonts'] {
+	if (own === undefined) return base;
+	const merged: ThemeInput['typography']['fonts'] = { body: own.body ?? base.body };
+	const display = own.display === undefined ? base.display : own.display;
+	if (display !== undefined) merged.display = display;
 	return merged;
 }
 
