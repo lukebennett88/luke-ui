@@ -354,6 +354,44 @@ test('keeps expanded source collapsible when its typography changes to fit', asy
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
 });
 
+test('moves keyboard focus to Copy when collapsing removes the expand control', async () => {
+	await page.viewport(1000, 800);
+	const source = Array.from({ length: 20 }, () => 'const value = 1;').join('\n');
+	container = document.body.appendChild(document.createElement('div'));
+	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	root = createRoot(container);
+	act(() => {
+		root?.render(
+			<Provider spritesheetHref={spriteSheetHref}>
+				<ExampleCodePreview html={`<code>${source}</code>`} source={source} title="Source sizing" />
+			</Provider>,
+		);
+	});
+
+	const expand = page.getByRole('button', { name: 'Expand code' });
+	await expect.element(expand).toBeVisible();
+	expand.element().focus();
+	await act(async () => {
+		await userEvent.keyboard('{Enter}');
+	});
+
+	const collapse = page.getByRole('button', { name: 'Collapse code' });
+	await expect.element(collapse).toBeVisible();
+	await expect.element(collapse).toHaveFocus();
+	const pre = container.querySelector('pre');
+	assert(pre, 'expected source element');
+	pre.style.fontSize = '1px';
+	pre.style.lineHeight = '1px';
+	await expect.poll(() => pre.getBoundingClientRect().height).toBeLessThan(30);
+
+	await act(async () => {
+		await userEvent.keyboard('{Enter}');
+	});
+	await expect.poll(() => page.getByRole('button', { name: 'Collapse code' }).query()).toBeNull();
+	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeNull();
+	await expect.element(page.getByRole('button', { name: 'Copy' })).toHaveFocus();
+});
+
 test('narrowing the preview panel flips a responsive example below its container breakpoint', async () => {
 	await page.viewport(1000, 800);
 	// Wide enough that the canvas @container stays ≥768 after the 12px outside

@@ -23,7 +23,10 @@ export function ExampleCodePreview({
 	title: string;
 }) {
 	const [mode, dispatch] = useReducer(sourceReducer, 'unmeasured');
+	const rootRef = useRef<HTMLDivElement>(null);
 	const sourceRef = useRef<HTMLPreElement>(null);
+	const toggleButtonRef = useRef<HTMLButtonElement>(null);
+	const restoreFocusToCopyRef = useRef(false);
 	const codeId = useId();
 	const isExpanded = mode === 'expanded';
 	const canExpand = mode === 'collapsed' || isExpanded;
@@ -57,11 +60,27 @@ export function ExampleCodePreview({
 		const sourceElement = sourceRef.current;
 		if (!sourceElement) return;
 
+		const isSourceClipped = sourceElement.scrollHeight > sourceElement.clientHeight + 1;
+		// Press-time restore intent: drop it when the toggle survives (still clipped).
+		if (restoreFocusToCopyRef.current && isSourceClipped) {
+			restoreFocusToCopyRef.current = false;
+		}
+
 		dispatch({
-			isClipped: sourceElement.scrollHeight > sourceElement.clientHeight + 1,
+			isClipped: isSourceClipped,
 			type: 'measured',
 		});
 	}, [mode]);
+
+	useLayoutEffect(() => {
+		if (canExpand || !restoreFocusToCopyRef.current) return;
+		restoreFocusToCopyRef.current = false;
+
+		const copyButton = rootRef.current?.querySelector<HTMLElement>(
+			'[aria-label="Copy"], [aria-label="Copied"]',
+		);
+		copyButton?.focus();
+	}, [canExpand]);
 
 	return (
 		<ViewTransition default="none" update={styles.codeUpdate}>
@@ -71,6 +90,7 @@ export function ExampleCodePreview({
 				overflow="hidden"
 				paddingBlockEnd={canExpand ? 'sp40' : undefined}
 				position="relative"
+				ref={rootRef}
 			>
 				{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
 				<CodeBlock
@@ -101,11 +121,23 @@ export function ExampleCodePreview({
 							aria-controls={codeId}
 							aria-expanded={isExpanded}
 							onPress={() => {
+								const toggle = toggleButtonRef.current;
+								const active = document.activeElement;
+								// Capture before startTransition/ViewTransition; activeElement is
+								// often body by the collapsed remeasure layout effect.
+								if (
+									isExpanded &&
+									toggle != null &&
+									(active === toggle || toggle.contains(active))
+								) {
+									restoreFocusToCopyRef.current = true;
+								}
 								startTransition(() => {
 									addTransitionType(styles.codeTransitionType);
 									dispatch({ type: 'toggle' });
 								});
 							}}
+							ref={toggleButtonRef}
 							size="small"
 						>
 							{isExpanded ? 'Collapse code' : 'Expand code'}
