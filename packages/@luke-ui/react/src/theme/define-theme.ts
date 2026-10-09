@@ -23,14 +23,13 @@ import { lightnessCandidates } from './lightness-candidates.js';
 import { highContrastText, passesOnSolidGate } from './scale.js';
 
 /**
- * A colour value: one string (adapted independently for each mode) OR a per-mode object where
- * EITHER side may be omitted to fall back to that role's curated default / generation. Strings
- * accept `#rgb`, `#rrggbb`, or `oklch(<l> <c> <h>)` (lightness 0-1 or %, no alpha), except
- * `backdrop`, which is used verbatim and may carry an alpha channel.
+ * A colour: one string, or a per-mode object where either side may be omitted. Each role documents
+ * how it uses one string and what a missing side becomes. Strings accept `#rgb`, `#rrggbb`, or
+ * `oklch(<l> <c> <h>)` (lightness 0-1 or %, no alpha), except `backdrop`, which may carry alpha.
  */
 type ColorInput = string | ModeColorInput;
 
-/** A colour for each mode. An omitted side falls back to that role's default or generation. */
+/** A colour for each mode. Either side may be omitted. */
 type ModeColorInput = { light?: string; dark?: string };
 
 /** A composite `box-shadow` ladder for one colour mode, rung by rung. */
@@ -119,11 +118,17 @@ interface ThemeInputCommon {
  * theme instead uses {@link ExtendingThemeInput}.
  */
 export interface ThemeInput extends ThemeInputCommon {
-	/** Source colours. Each is one value (adapted per mode) or an explicit `{ light, dark }` pair. */
+	/** Source colours. Each is one string or a `{ light, dark }` object. */
 	color: {
-		/** Required — the brand or interaction accent. */
+		/**
+		 * Required — the brand or interaction accent. One string, or a missing side, is adapted to the
+		 * mode: its hue and chroma are kept and its lightness is chosen for accessible on-solid text.
+		 */
 		accent: ColorInput;
-		/** Neutral base anchor. Give a raw colour, or set `neutralStyle` for a curated neutral. */
+		/**
+		 * Neutral base anchor. Give a colour, or set `neutralStyle` for a curated neutral. One string, or
+		 * a missing side, keeps its hue and chroma at the mode's base lightness.
+		 */
 		neutral?: ColorInput;
 		/**
 		 * Curated neutral character when `neutral` is omitted; sets the neutral hue and tint while the
@@ -132,32 +137,45 @@ export interface ThemeInput extends ThemeInputCommon {
 		 */
 		neutralStyle?: 'cool' | 'neutral' | 'warm';
 		/**
-		 * The four surfaces. Each is optional. Set one explicitly when its generated default does not
-		 * suit the theme or fails a contrast gate; an authored surface is used exactly as written.
+		 * The four surfaces. Each is optional. Set one when its generated default does not suit the
+		 * theme or fails a contrast gate. An authored surface is mapped into the sRGB gamut, but its
+		 * lightness is never changed to pass contrast.
 		 */
 		surface?: {
 			/**
-			 * The application background and primary content, split from `neutral`'s hue/chroma
-			 * character. The neutral and role colours ramp from it. One value is adapted per mode.
-			 * Defaults to the resolved neutral base anchor.
+			 * The application background and primary content. The neutral and role colours are generated
+			 * from it. One string, or a missing side, is adapted to each mode like `neutral`. Defaults to
+			 * the neutral.
 			 */
 			base?: ColorInput;
-			/** Secondary static regions. Defaults to a fixed per-mode offset from `base`. */
+			/** Secondary regions, such as a sidebar. A missing side is a fixed offset from `base`. */
 			subdued?: ModeColorInput;
-			/** Form-control surfaces. Defaults to a fixed per-mode offset from `base`. */
+			/** Form-control surfaces. A missing side is a fixed offset from `base`. */
 			field?: ModeColorInput;
-			/** Menus, popovers, and dialogs. Defaults to a fixed per-mode offset from `base`. */
+			/** Menus, popovers, and dialogs. A missing side is a fixed offset from `base`. */
 			overlay?: ModeColorInput;
 		};
-		/** Source colour for the `info` role. Defaults to an accessible Luke UI blue for the mode. */
+		/**
+		 * Source colour for the `info` role. One string is used in both modes. A missing side uses an
+		 * accessible Luke UI blue for that mode.
+		 */
 		info?: ColorInput;
-		/** Source colour for the `success` role. Defaults to an accessible Luke UI green for the mode. */
+		/**
+		 * Source colour for the `success` role. One string is used in both modes. A missing side uses an
+		 * accessible Luke UI green for that mode.
+		 */
 		success?: ColorInput;
-		/** Source colour for the `warning` role. Defaults to an accessible Luke UI amber for the mode. */
+		/**
+		 * Source colour for the `warning` role. One string is used in both modes. A missing side uses an
+		 * accessible Luke UI amber for that mode.
+		 */
 		warning?: ColorInput;
-		/** Source colour for the `danger` role. Defaults to an accessible Luke UI red for the mode. */
+		/**
+		 * Source colour for the `danger` role. One string is used in both modes. A missing side uses an
+		 * accessible Luke UI red for that mode.
+		 */
 		danger?: ColorInput;
-		/** Keyboard-focus ring colour, used verbatim after gamut mapping. Defaults per mode. */
+		/** Keyboard-focus ring colour. One string is used in both modes. Defaults per mode. */
 		focus?: ColorInput;
 		/** Modal-backdrop dimming colour, used verbatim; defaults to black at a mode-aware alpha. */
 		backdrop?: ColorInput;
