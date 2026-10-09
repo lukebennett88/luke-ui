@@ -185,6 +185,41 @@ describe('validation across an extends chain', () => {
 		]);
 	});
 
+	it('reports a base without typography instead of failing the merge', () => {
+		// A base from an older theme package can lack a field a newer compiler requires.
+		const base = { color: { accent: '#3b82f6' }, name: 'older-base' } as unknown as ThemeInput;
+		const issues = issuesOf({
+			extends: base,
+			name: 'outer',
+			typography: { fonts: { display: loraFont }, fontWeight: { heading: 700 } },
+		});
+
+		expect(issues).toEqual([
+			{
+				message: 'is required. Set it on this theme or on a theme it extends.',
+				path: 'typography.fonts.body',
+				theme: 'outer',
+			},
+		]);
+	});
+
+	it('reports malformed typography instead of failing the merge', () => {
+		const base: ThemeInput = {
+			color: { accent: '#3b82f6' },
+			name: 'base',
+			typography: testTypography,
+		};
+		const child = {
+			extends: base,
+			name: 'child',
+			typography: { fonts: null },
+		} as unknown as ExtendingThemeInput;
+
+		expect(issuesOf(child)).toEqual([
+			{ message: 'must be an object', path: 'typography.fonts', theme: 'child' },
+		]);
+	});
+
 	it('keeps detecting a cyclic chain before validating it', () => {
 		const first: ThemeInput = {
 			color: { accent: '#3b82f6' },

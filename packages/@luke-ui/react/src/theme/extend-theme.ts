@@ -201,28 +201,41 @@ function inheritModes(
  * Merges typography. Each font role replaces the base's role whole, so a family never pairs with
  * another font's metrics. A `null` display font is kept, so it removes the display font of every
  * theme further in. `fontWeight` merges key by key.
+ *
+ * Either side may break its type at runtime, for example a base from an older theme package with no
+ * `typography`. The merge then keeps what it can, and validation reports the problem instead of the
+ * merge throwing a `TypeError`.
  */
 function inheritTypography(
 	base: ThemeInput['typography'],
 	own: ExtendingThemeInput['typography'],
 ): ThemeInput['typography'] {
-	if (own === undefined) return base;
-	const merged: ThemeInput['typography'] = { fonts: inheritFonts(base.fonts, own.fonts) };
-	const fontWeight = inheritKeys(base.fontWeight, own.fontWeight);
+	if (!isRecord(own)) return base;
+	const baseTypography: Partial<ThemeInput['typography']> = isRecord(base) ? base : {};
+	const merged = {
+		fonts: inheritFonts(baseTypography.fonts, own.fonts),
+	} as ThemeInput['typography'];
+	const fontWeight = inheritKeys(baseTypography.fontWeight, own.fontWeight);
 	if (fontWeight !== undefined) merged.fontWeight = fontWeight;
 	return merged;
 }
 
+type FontRoles = NonNullable<NonNullable<ExtendingThemeInput['typography']>['fonts']>;
+
 /** Merges font roles. An omitted role inherits, and an own role, including `null`, replaces. */
-function inheritFonts(
-	base: ThemeInput['typography']['fonts'],
-	own: NonNullable<ExtendingThemeInput['typography']>['fonts'],
-): ThemeInput['typography']['fonts'] {
-	if (own === undefined) return base;
-	const merged: ThemeInput['typography']['fonts'] = { body: own.body ?? base.body };
-	const display = own.display === undefined ? base.display : own.display;
+function inheritFonts(base: FontRoles | undefined, own: FontRoles | undefined): FontRoles {
+	const baseFonts: FontRoles = isRecord(base) ? base : {};
+	if (!isRecord(own)) return baseFonts;
+	const merged: FontRoles = {};
+	const body = own.body === undefined ? baseFonts.body : own.body;
+	if (body !== undefined) merged.body = body;
+	const display = own.display === undefined ? baseFonts.display : own.display;
 	if (display !== undefined) merged.display = display;
 	return merged;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /**
