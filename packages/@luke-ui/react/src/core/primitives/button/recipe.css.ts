@@ -40,6 +40,7 @@ export const buttonRecipeInternal = recipe({
 						backgroundColor: 'ButtonFace',
 						backgroundImage: 'none',
 						borderColor: 'ButtonText',
+						borderWidth: '1px',
 						boxShadow: 'none',
 						color: 'ButtonText',
 						forcedColorAdjust: 'auto',
@@ -57,10 +58,12 @@ export const buttonRecipeInternal = recipe({
 				},
 				alignItems: 'center',
 				appearance: 'none',
+				// No border outside forced colours. An inset depth shadow and the face finish paint inside
+				// the border, so even a transparent border would leave an unshaded rim around the face.
 				borderColor: 'transparent',
 				borderRadius: vars.radius.control,
 				borderStyle: 'solid',
-				borderWidth: '1px',
+				borderWidth: 0,
 				boxShadow: vars.depth.resting,
 				display: 'inline-flex',
 				fontFamily: vars.font.family.body,

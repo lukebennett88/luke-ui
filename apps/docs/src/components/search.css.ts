@@ -84,6 +84,8 @@ export const trigger = style({
 			},
 			backgroundColor: vars.color.surface.field,
 			borderColor: vars.color.border.control,
+			// Button draws no border of its own, so the field look sets the width.
+			borderWidth: '1px',
 			boxShadow: vars.depth.recessed,
 			cursor: 'text',
 			fontWeight: vars.font.weight.body,

@@ -81,6 +81,9 @@ const switchConfig = {
 			alignItems: 'center',
 			backgroundColor: vars.color.border.control,
 			backgroundImage: 'none',
+			// The finish spans the border too. From the padding box it would tile into the border and
+			// repeat its lit top along the bottom edge.
+			backgroundOrigin: 'border-box',
 			blockSize: trackBlockSize,
 			borderColor: vars.color.border.control,
 			borderRadius: vars.radius.full,
