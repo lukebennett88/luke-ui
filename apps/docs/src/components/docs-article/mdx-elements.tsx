@@ -3,6 +3,7 @@ import { Grid } from '@luke-ui/react/grid';
 import type { HeadingLevel } from '@luke-ui/react/heading';
 import { Heading, HeadingLevels } from '@luke-ui/react/heading';
 import { IconButton } from '@luke-ui/react/icon-button';
+import type { LinkProps } from '@luke-ui/react/link';
 import { Link as LukeLink } from '@luke-ui/react/link';
 import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { Text } from '@luke-ui/react/text';
@@ -38,10 +39,29 @@ export function MdxLink({ children, href, ...props }: AnchorProps) {
 	// `id` and a carrier for the author's other attributes.
 	if (href === undefined) return <a {...props}>{children}</a>;
 
+	// React Aria Components drops the anchor attributes it does not model, such as `title` and
+	// `aria-expanded`. `render` puts the author's attributes under the ones it keeps, so it still
+	// owns `href`, `rel`, `target`, handlers, and `ref`. Every branch below passes an `href`, so the
+	// `span` fallback only satisfies the render type.
+	const render: LinkProps['render'] = (domProps) =>
+		'href' in domProps ? (
+			<a {...props} {...domProps}>
+				{domProps.children}
+			</a>
+		) : (
+			<span {...domProps} />
+		);
+
 	if (EXTERNAL_HREF_PATTERN.test(href)) {
 		const target = props.target ?? '_blank';
 		return (
-			<LukeLink {...props} href={href} rel={mergeRel(props.rel, target)} target={target}>
+			<LukeLink
+				{...props}
+				href={href}
+				rel={mergeRel(props.rel, target)}
+				render={render}
+				target={target}
+			>
 				{children}
 			</LukeLink>
 		);
@@ -50,7 +70,7 @@ export function MdxLink({ children, href, ...props }: AnchorProps) {
 	// A same-page anchor needs no router. The browser scrolls to it.
 	if (href.startsWith('#')) {
 		return (
-			<LukeLink {...props} href={href}>
+			<LukeLink {...props} href={href} render={render}>
 				{children}
 			</LukeLink>
 		);
@@ -58,7 +78,7 @@ export function MdxLink({ children, href, ...props }: AnchorProps) {
 
 	const { hash, path } = splitHash(href);
 	return (
-		<DocsLink {...props} hash={hash} to={path}>
+		<DocsLink {...props} hash={hash} render={render} to={path}>
 			{children}
 		</DocsLink>
 	);

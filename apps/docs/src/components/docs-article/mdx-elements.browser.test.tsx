@@ -73,15 +73,18 @@ test('keeps an internal link, with and without a hash, in the same tab', async (
 });
 
 const linkPaths = [
-	['an external link', 'https://example.com/docs'],
-	['a hash-only link', '#local'],
-	['an internal link', '/docs/typography#fonts'],
+	['an external link', 'https://example.com/docs', '_blank'],
+	['a hash-only link', '#local', null],
+	['an internal link', '/docs/typography#fonts', null],
 ] as const;
 
-for (const [kind, href] of linkPaths) {
+for (const [kind, href, target] of linkPaths) {
 	test(`keeps the anchor attributes an author writes on ${kind}`, async () => {
 		await renderMdx(
 			<MdxLink
+				aria-controls="panel"
+				aria-expanded="false"
+				aria-haspopup="menu"
 				aria-label="Read more"
 				className="author-class"
 				data-foo="bar"
@@ -91,6 +94,7 @@ for (const [kind, href] of linkPaths) {
 				href={href}
 				id="author-id"
 				title="Link title"
+				type="text/html"
 			>
 				Visible text
 			</MdxLink>,
@@ -104,7 +108,16 @@ for (const [kind, href] of linkPaths) {
 		await expect.element(link).toHaveAttribute('download', 'file.txt');
 		await expect.element(link).toHaveAttribute('data-foo', 'bar');
 		await expect.element(link).toHaveAttribute('hreflang', 'fr');
+		await expect.element(link).toHaveAttribute('type', 'text/html');
+		await expect.element(link).toHaveAttribute('aria-expanded', 'false');
+		await expect.element(link).toHaveAttribute('aria-controls', 'panel');
+		await expect.element(link).toHaveAttribute('aria-haspopup', 'menu');
+		// React Aria Components still owns the class list, so the Link recipe class sits beside the author's.
 		expect(link.element().classList.contains('author-class')).toBe(true);
+		expect(link.element().classList.length).toBeGreaterThan(1);
+		// React Aria Components still owns `target` and `rel`, so an external link keeps its defaults.
+		expect(link.element().getAttribute('target')).toBe(target);
+		expect(link.element().getAttribute('rel')).toBe(target && 'noreferrer noopener');
 	});
 }
 
