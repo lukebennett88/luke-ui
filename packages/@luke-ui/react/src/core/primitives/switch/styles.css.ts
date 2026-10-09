@@ -19,6 +19,8 @@ const thumbOffset = `calc(${trackBorderWidth} + ${thumbInset})`;
 const thumbSize = `calc(${trackBlockSize} - 2 * ${thumbOffset})`;
 /** How far the thumb moves along the track when the switch is on. */
 const thumbTravel = `calc(${trackInlineSize} - ${trackBlockSize})`;
+/** How much a pressed thumb stretches along the track, towards the side it would move to. */
+const thumbStretch = `calc(${thumbSize} * 0.3)`;
 
 // React Aria drops hover while the switch is disabled or read-only, and press while it is disabled,
 // so only press needs a read-only guard. Hover and pressed stay separate so each has its own look.
@@ -112,11 +114,10 @@ const switchConfig = {
 				'[data-invalid="true"] &': {
 					borderColor: vars.color.background.danger.solid.rest,
 				},
-				[hovered('[data-invalid="true"]')]: {
-					borderColor: vars.color.background.danger.solid.hover,
-				},
-				[pressed('[data-invalid="true"]')]: {
-					borderColor: vars.color.background.danger.solid.pressed,
+				// Only `danger.solid.rest` is a guaranteed 3:1 boundary, so an invalid track keeps it through
+				// hover and press. The track fill and the thumb carry the feedback instead.
+				[`${hovered('[data-invalid="true"]')}, ${pressed('[data-invalid="true"]')}`]: {
+					borderColor: vars.color.background.danger.solid.rest,
 				},
 				'[data-selected="true"] &': {
 					backgroundColor: vars.color.background.accent.solid.rest,
@@ -140,11 +141,11 @@ const switchConfig = {
 				},
 				[hovered('[data-invalid="true"][data-selected="true"]')]: {
 					backgroundColor: vars.color.background.danger.solid.hover,
-					borderColor: vars.color.background.danger.solid.hover,
+					borderColor: vars.color.background.danger.solid.rest,
 				},
 				[pressed('[data-invalid="true"][data-selected="true"]')]: {
 					backgroundColor: vars.color.background.danger.solid.pressed,
-					borderColor: vars.color.background.danger.solid.pressed,
+					borderColor: vars.color.background.danger.solid.rest,
 				},
 			},
 		},
@@ -158,9 +159,6 @@ const switchConfig = {
 					// author colour needs a system colour here. Disabled comes last.
 					selectors: {
 						'[data-invalid="true"] &': {
-							backgroundColor: 'CanvasText',
-						},
-						[pressed(':not([data-selected="true"])')]: {
 							backgroundColor: 'CanvasText',
 						},
 						'[data-selected="true"] &, [data-invalid="true"][data-selected="true"] &': {
@@ -189,17 +187,20 @@ const switchConfig = {
 			justifyContent: 'center',
 			marginInlineStart: 0,
 			transitionDuration: vars.motion.duration.feedback,
-			transitionProperty: 'background-color, margin-inline-start',
+			transitionProperty: 'background-color, inline-size, margin-inline-start',
 			transitionTimingFunction: vars.motion.easing.standard,
 			selectors: {
-				// The off thumb is the switch's field part, so it takes the neutral pressed fill, as an
-				// unchecked Checkbox box does.
-				[pressed(':not([data-selected="true"])')]: {
-					backgroundColor: vars.color.background.neutral.subtle.pressed,
+				// Pressing stretches the thumb rather than recolouring it, so it keeps its guaranteed
+				// contrast with the track and the press stays visible without materials.
+				[pressed()]: {
+					inlineSize: `calc(${thumbSize} + ${thumbStretch})`,
 				},
 				'[data-selected="true"] &': {
 					backgroundColor: vars.color.foreground.accent.onSolid,
 					marginInlineStart: thumbTravel,
+				},
+				[pressed('[data-selected="true"]')]: {
+					marginInlineStart: `calc(${thumbTravel} - ${thumbStretch})`,
 				},
 				'[data-invalid="true"][data-selected="true"] &': {
 					backgroundColor: vars.color.foreground.danger.onSolid,

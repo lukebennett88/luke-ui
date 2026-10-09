@@ -497,6 +497,27 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
+// Only `danger.solid.rest` carries the 3:1 control-boundary guarantee, so an invalid checkbox must
+// keep it through hover and press, whether it is on or off.
+for (const isSelected of [false, true]) {
+	for (const state of ['data-hovered', 'data-pressed'] as const) {
+		test(`an invalid ${isSelected ? 'on' : 'off'} checkbox keeps the guaranteed border with ${state}`, () => {
+			const { locator } = render(
+				<CheckboxField defaultSelected={isSelected} errorMessage="Required" label="Accept" />,
+			);
+			const label = locator.getByRole('checkbox', { name: 'Accept' }).element().closest('label');
+			const indicator = label?.querySelector<HTMLElement>('[aria-hidden="true"]');
+			if (label == null || indicator == null) throw new Error('Expected the checkbox indicator.');
+			indicator.style.transition = 'none';
+			label.setAttribute(state, 'true');
+
+			expect(getComputedStyle(indicator).borderTopColor).toBe(
+				resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
+			);
+		});
+	}
+}
+
 // Regression: hover and pressed must look different from each other, and from rest, by colour
 // alone. The flat fixture has no depth or control finish to tell them apart.
 test('rest, hover, and pressed stay distinct without materials', { tags: ['visual'] }, async () => {
@@ -575,3 +596,12 @@ test('forced-colors resting', { tags: ['visual'] }, async () => {
 		await emulateForcedColors('none');
 	}
 });
+
+/** Resolves a colour the way the browser would for a border, in the same theme scope. */
+function resolvedBorderColor(scope: Element, color: string): string {
+	const probe = scope.appendChild(document.createElement('span'));
+	probe.style.borderTop = `1px solid ${color}`;
+	const resolved = getComputedStyle(probe).borderTopColor;
+	probe.remove();
+	return resolved;
+}

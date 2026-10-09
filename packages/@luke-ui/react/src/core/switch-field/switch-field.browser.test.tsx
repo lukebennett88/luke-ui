@@ -329,6 +329,41 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
+// Only `danger.solid.rest` carries the 3:1 control-boundary guarantee, so an invalid switch must
+// keep it through hover and press, whether it is on or off.
+for (const isSelected of [false, true]) {
+	for (const state of ['data-hovered', 'data-pressed'] as const) {
+		test(`an invalid ${isSelected ? 'on' : 'off'} switch keeps the guaranteed border with ${state}`, () => {
+			const { locator } = render(
+				<SwitchField defaultSelected={isSelected} errorMessage="Required" label="Accept" />,
+			);
+			const label = locator.getByRole('switch', { name: 'Accept' }).element().closest('label');
+			const track = label?.querySelector<HTMLElement>('[aria-hidden="true"]');
+			if (label == null || track == null) throw new Error('Expected the switch track.');
+			track.style.transition = 'none';
+			label.setAttribute(state, 'true');
+
+			expect(getComputedStyle(track).borderTopColor).toBe(
+				resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
+			);
+		});
+	}
+}
+
+// The off thumb on the off track is a guaranteed 3:1 pair. Pressing must not recolour the thumb.
+test('a pressed off switch keeps the thumb on the field surface', () => {
+	const { locator } = render(<SwitchField label="Notify" />);
+	const label = locator.getByRole('switch', { name: 'Notify' }).element().closest('label');
+	const thumb = label?.querySelector<HTMLElement>('[aria-hidden="true"] > span');
+	if (label == null || thumb == null) throw new Error('Expected the switch thumb.');
+	thumb.style.transition = 'none';
+	const resting = getComputedStyle(thumb).backgroundColor;
+	label.setAttribute('data-pressed', 'true');
+
+	expect(getComputedStyle(thumb).backgroundColor).toBe(resting);
+	expect(resting).toBe(resolvedBackgroundColor(label, 'var(--luke-color-surface-field)'));
+});
+
 // Regression: hover and pressed must look different from each other, and from rest, by colour
 // alone. The flat fixture has no depth or control finish to tell them apart.
 test('rest, hover, and pressed stay distinct without materials', { tags: ['visual'] }, async () => {
@@ -407,3 +442,21 @@ test('forced-colors resting', { tags: ['visual'] }, async () => {
 		await emulateForcedColors('none');
 	}
 });
+
+/** Resolves a colour the way the browser would for a border, in the same theme scope. */
+function resolvedBorderColor(scope: Element, color: string): string {
+	const probe = scope.appendChild(document.createElement('span'));
+	probe.style.borderTop = `1px solid ${color}`;
+	const resolved = getComputedStyle(probe).borderTopColor;
+	probe.remove();
+	return resolved;
+}
+
+/** Resolves a colour the way the browser would for a background, in the same theme scope. */
+function resolvedBackgroundColor(scope: Element, color: string): string {
+	const probe = scope.appendChild(document.createElement('span'));
+	probe.style.backgroundColor = color;
+	const resolved = getComputedStyle(probe).backgroundColor;
+	probe.remove();
+	return resolved;
+}
