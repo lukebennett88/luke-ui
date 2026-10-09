@@ -66,6 +66,12 @@ afterEach(async () => {
 	await page.viewport(1024, 800);
 });
 
+// Docs size queries are `@container` queries against `:root`. Without that containment they never
+// match, and every layout silently falls back to its base style.
+test('contains the root so docs container queries have a container to match', () => {
+	expect(getComputedStyle(document.documentElement).containerType).toBe('inline-size');
+});
+
 test('keeps every section visible in RTL with plain link semantics', async () => {
 	await page.viewport(1280, 800);
 	document.documentElement.dir = 'rtl';
@@ -87,7 +93,7 @@ test('keeps every section visible in RTL with plain link semantics', async () =>
 		.not.toHaveAttribute('aria-current');
 });
 
-test('renders flat sections in page order and moves keyboard focus through the desktop nav with Tab', async () => {
+test('groups separator sections into nested lists and moves keyboard focus through the desktop nav with Tab', async () => {
 	await page.viewport(1280, 800);
 	await renderAt(
 		'/docs/installation',
@@ -98,12 +104,30 @@ test('renders flat sections in page order and moves keyboard focus through the d
 
 	const navigation = page.getByRole('navigation', { name: 'Docs' });
 	const installation = navigation.getByRole('link', { name: 'Installation' });
-	await expect.element(navigation.getByText('Overview')).toBeVisible();
+	const overview = navigation.getByRole('heading', { name: 'Overview', level: 2 });
+	const foundations = navigation.getByRole('heading', { name: 'Foundations', level: 2 });
+	await expect.element(overview).toBeVisible();
+	await expect.element(foundations).toBeVisible();
 	await expect.element(navigation.getByText('Documentation')).not.toBeInTheDocument();
-	await expect.element(navigation.getByText('Foundations')).toBeVisible();
 	await expect.element(navigation.getByText('Actions')).not.toBeInTheDocument();
 	await expect.element(navigation.getByRole('link', { name: 'Button' })).not.toBeInTheDocument();
 	await expect.element(navigation.getByRole('button')).not.toBeInTheDocument();
+
+	const overviewList = navigation
+		.element()
+		.querySelector(`ul[aria-labelledby="${overview.element().id}"]`);
+	expect(overviewList).not.toBeNull();
+	expect(
+		Array.from(overviewList!.querySelectorAll(':scope > li > a'), (link) => link.textContent),
+	).toEqual(['Installation']);
+	const foundationsList = navigation
+		.element()
+		.querySelector(`ul[aria-labelledby="${foundations.element().id}"]`);
+	expect(foundationsList).not.toBeNull();
+	expect(
+		Array.from(foundationsList!.querySelectorAll(':scope > li > a'), (link) => link.textContent),
+	).toEqual(['Composition']);
+
 	expect(
 		Array.from(navigation.element().querySelectorAll('a'), (link) => link.textContent),
 	).toEqual(['Installation', 'Composition']);
@@ -144,10 +168,18 @@ for (const pathname of ['/components', '/components/actions/button']) {
 		);
 
 		const navigation = page.getByRole('navigation', { name: 'Docs' });
-		await expect.element(navigation.getByText('Actions')).toBeVisible();
+		const actions = navigation.getByRole('heading', { name: 'Actions', level: 2 });
+		await expect.element(actions).toBeVisible();
 		await expect
 			.element(navigation.getByRole('link', { name: 'Installation' }))
 			.not.toBeInTheDocument();
+		const actionsList = navigation
+			.element()
+			.querySelector(`ul[aria-labelledby="${actions.element().id}"]`);
+		expect(actionsList).not.toBeNull();
+		expect(
+			Array.from(actionsList!.querySelectorAll(':scope > li > a'), (link) => link.textContent),
+		).toEqual(['Button', 'Text']);
 		expect(
 			Array.from(navigation.element().querySelectorAll('a'), (link) => link.textContent),
 		).toEqual(['All components', 'Button', 'Text']);

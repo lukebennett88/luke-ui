@@ -1,4 +1,5 @@
 import { Blockquote } from '@luke-ui/react/blockquote';
+import { Box } from '@luke-ui/react/box';
 import { Code } from '@luke-ui/react/code';
 import { Heading } from '@luke-ui/react/heading';
 import { Prose, proseRecipe } from '@luke-ui/react/prose';
@@ -107,6 +108,112 @@ test('preserves native ordered-list type markers under proseRecipe alone', () =>
 		'lower-roman',
 		'upper-roman',
 	]);
+});
+
+function margin(element: Element) {
+	return getComputedStyle(element).marginBlockStart;
+}
+
+function boundaryFixture() {
+	return (
+		<Prose>
+			<p>Before.</p>
+			<p data-testid="outside">Outside.</p>
+			<div className="not-prose" data-testid="boundary">
+				<p>Inside.</p>
+				<p data-testid="inside">Second.</p>
+				<ul>
+					<li>One</li>
+					<li data-testid="item">Two</li>
+				</ul>
+				<table>
+					<tbody>
+						<tr>
+							<td>Cell</td>
+						</tr>
+					</tbody>
+				</table>
+				<Prose data-testid="nested">
+					<p>First.</p>
+					<p data-testid="nested-second">Second.</p>
+					<ul data-testid="nested-list">
+						<li>One</li>
+					</ul>
+				</Prose>
+			</div>
+		</Prose>
+	);
+}
+
+test('applies Prose rhythm to elements outside a not-prose boundary', () => {
+	const { locator } = render(boundaryFixture());
+	const root = locator.element();
+
+	expect(margin(query(root, '[data-testid="outside"]'))).toBe('32px');
+});
+
+test('removes Prose margins, list styles, and cell padding inside a not-prose boundary', () => {
+	const { locator } = render(boundaryFixture());
+	const boundary = query(locator.element(), '[data-testid="boundary"]');
+
+	expect(margin(boundary)).toBe('0px');
+	expect(margin(query(boundary, '[data-testid="inside"]'))).toBe('0px');
+	expect(margin(query(boundary, '[data-testid="item"]'))).toBe('0px');
+	expect(margin(query(boundary, 'ul'))).toBe('0px');
+	expect(getComputedStyle(query(boundary, 'ul')).listStyleType).toBe('none');
+	expect(getComputedStyle(query(boundary, 'ul')).paddingInlineStart).toBe('0px');
+	expect(getComputedStyle(query(boundary, 'td')).paddingInlineStart).toBe('0px');
+});
+
+test('excludes an element that carries not-prose itself', () => {
+	const { locator } = render(
+		<Prose>
+			<p>Before.</p>
+			<p className="not-prose" data-testid="marked">
+				Marked.
+			</p>
+		</Prose>,
+	);
+
+	expect(margin(query(locator.element(), '[data-testid="marked"]'))).toBe('0px');
+});
+
+test('keeps the gap after a heading for a not-prose element but not for its descendants', () => {
+	const { locator } = render(
+		<Prose>
+			<h2>Section</h2>
+			<div className="not-prose" data-testid="widget">
+				<h2>Inner</h2>
+				<div className="not-prose" data-testid="inner-widget" />
+			</div>
+		</Prose>,
+	);
+	const root = locator.element();
+
+	expect(margin(query(root, '[data-testid="widget"]'))).toBe('32px');
+	expect(margin(query(root, '[data-testid="inner-widget"]'))).toBe('0px');
+});
+
+test('restores Prose rhythm for a Prose nested inside a not-prose boundary', () => {
+	const { locator } = render(boundaryFixture());
+	const nested = query(locator.element(), '[data-testid="nested"]');
+
+	expect(margin(query(nested, '[data-testid="nested-second"]'))).toBe('32px');
+	expect(getComputedStyle(query(nested, 'ul')).listStyleType).toBe('disc');
+	expect(getComputedStyle(query(nested, 'ul')).paddingInlineStart).toBe('24px');
+});
+
+test('lets utility classes override Prose margins', () => {
+	const { locator } = render(
+		<Prose>
+			<h2>Before.</h2>
+			<Box data-testid="utility" marginBlockStart="sp8">
+				Utility.
+			</Box>
+		</Prose>,
+	);
+
+	expect(margin(query(locator.element(), '[data-testid="utility"]'))).toBe('8px');
 });
 
 const swatch =

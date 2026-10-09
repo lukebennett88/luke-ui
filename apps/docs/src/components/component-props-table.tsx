@@ -2,6 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
+import { cx } from '@luke-ui/react/utils';
 import type { TypeNode } from 'fumadocs-ui/components/type-table';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import {
@@ -26,7 +27,7 @@ export function ComponentPropsTable({
 	const nativePropsNote = type[NATIVE_PROPS_FORWARDING_KEY]?.description;
 
 	return (
-		<Stack className={className} gap="sp12" id={id} marginBlock="sp24" {...props}>
+		<Stack className={cx('not-prose', className)} gap="sp12" id={id} marginBlock="sp24" {...props}>
 			{nativePropsNote !== undefined ? (
 				<Text color="secondary" elementType="p" typography="caption">
 					{nativePropsNote}

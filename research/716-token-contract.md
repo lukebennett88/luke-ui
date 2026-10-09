@@ -272,26 +272,28 @@ and the 4px combobox action gap are component-private.
 
 ## Surface migration
 
-| Consumer                                        | Old        | New       | Reason                                  |
-| ----------------------------------------------- | ---------- | --------- | --------------------------------------- |
-| TextInput, TextInputControl, Combobox, Select   | `recessed` | `field`   | Form-control surface                    |
-| Same controls, read-only                        | `canvas`   | `field`   | Read-only stays a field                 |
-| Checkbox box, Switch thumb                      | `canvas`   | `field`   | The field part of a selection control   |
-| Combobox and Select popover, mobile tray        | `floating` | `overlay` | Detached content                        |
-| `Code`, `Kbd`                                   | `recessed` | `subdued` | Static secondary tint                   |
-| Test render container                           | `canvas`   | `base`    | Page background                         |
-| Reference app body, settings and home shell     | `canvas`   | `subdued` | The secondary region around the content |
-| Reference app main content, settings panels     | `floating` | `base`    | Primary content                         |
-| Reference app menu, dialog, skip link           | `floating` | `overlay` | Detached content                        |
-| Reference app email edit button                 | `canvas`   | `base`    | A control face on the content           |
-| Docs header, sidebar, shell, previews, tables   | `canvas`   | `base`    | Page background and primary content     |
-| Docs appearance popover, search panel and input | `floating` | `overlay` | Detached content                        |
-| Docs mobile drawer                              | `canvas`   | `overlay` | Detached content                        |
-| Docs search trigger                             | `recessed` | `field`   | A field-shaped control                  |
-| Docs code block, Fumadocs muted and secondary   | `recessed` | `subdued` | Static secondary region                 |
-| Docs Fumadocs popover                           | `floating` | `overlay` | Detached content                        |
-| Docs examples showing a card or panel           | `floating` | `subdued` | Static region set apart from the page   |
-| Docs examples showing an inset or bleed region  | `recessed` | `subdued` | Static region set apart from the page   |
+| Consumer                                               | Old        | New       | Reason                                  |
+| ------------------------------------------------------ | ---------- | --------- | --------------------------------------- |
+| TextInput, TextInputControl, Combobox, Select          | `recessed` | `field`   | Form-control surface                    |
+| Same controls, read-only                               | `canvas`   | `field`   | Read-only stays a field                 |
+| Checkbox box, Switch thumb                             | `canvas`   | `field`   | The field part of a selection control   |
+| Combobox and Select popover, mobile tray               | `floating` | `overlay` | Detached content                        |
+| `Kbd`                                                  | `recessed` | `subdued` | Static secondary tint                   |
+| Test render container                                  | `canvas`   | `base`    | Page background                         |
+| Reference app body, settings and home shell            | `canvas`   | `subdued` | The secondary region around the content |
+| Reference app main content, settings panels            | `floating` | `base`    | Primary content                         |
+| Reference app menu, dialog, skip link                  | `floating` | `overlay` | Detached content                        |
+| Reference app email edit button                        | `canvas`   | `base`    | A control face on the content           |
+| Docs header, sidebar, shell, previews, tables          | `canvas`   | `base`    | Page background and primary content     |
+| Docs cards, table of contents bar                      | `canvas`   | `base`    | Primary content                         |
+| Docs table of contents panel                           | `floating` | `overlay` | Detached content                        |
+| Docs appearance popover, search panel and input        | `floating` | `overlay` | Detached content                        |
+| Docs mobile drawer                                     | `canvas`   | `overlay` | Detached content                        |
+| Docs search trigger                                    | `recessed` | `field`   | A field-shaped control                  |
+| Docs code block, table head, Fumadocs muted, secondary | `recessed` | `subdued` | Static secondary region                 |
+| Docs Fumadocs popover                                  | `floating` | `overlay` | Detached content                        |
+| Docs examples showing a card or panel                  | `floating` | `subdued` | Static region set apart from the page   |
+| Docs examples showing an inset or bleed region         | `recessed` | `subdued` | Static region set apart from the page   |
 
 ## Simplifications and trade-offs
 

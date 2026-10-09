@@ -1,20 +1,30 @@
-import { cx } from '@luke-ui/react/utils';
+import { Blockquote } from '@luke-ui/react/blockquote';
+import { Em } from '@luke-ui/react/em';
+import { Strong } from '@luke-ui/react/strong';
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
+import type { Root as PageTree } from 'fumadocs-core/page-tree';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/notebook/page';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import * as z from 'zod';
 import browserCollections from '../../.source/browser';
-import * as codeBlockStyles from '../components/code-block/code-block.css.js';
-import type { CodeBlockProps } from '../components/code-block/code-block.js';
-import { CodeBlock } from '../components/code-block/code-block.js';
 import { ComponentPropsTable } from '../components/component-props-table.js';
+import { DocsArticle } from '../components/docs-article/docs-article.js';
+import {
+	Card,
+	Cards,
+	createMdxHeading,
+	MdxCode,
+	MdxFence,
+	MdxImage,
+	MdxLink,
+	MdxParagraph,
+	MdxTable,
+} from '../components/docs-article/mdx-elements.js';
+import { DocsShell } from '../components/docs-shell.js';
 import { ExampleBlock } from '../components/example-block';
-import { FumadocsLayoutAdapter } from '../components/fumadocs-layout-adapter.js';
 import { IconGallery } from '../components/icon-gallery';
 import type { PageActionsMode } from '../components/page-actions';
 import { PageActions } from '../components/page-actions';
@@ -29,16 +39,28 @@ const GITHUB_DOCS_URL = `${GITHUB_REPO_URL}/blob/main/apps/docs/content/docs`;
 const GITHUB_TREE_URL = `${GITHUB_REPO_URL}/tree/main`;
 
 // `remarkAutoTypeTable` converts `<auto-type-table>` to a static `<TypeTable>` during MDX compilation.
-// Override `pre` so MDX fences use the docs CodeBlock instead of Fumadocs CodeBlock/Pre.
 const mdxComponents = {
-	...defaultMdxComponents,
+	a: MdxLink,
+	blockquote: Blockquote,
+	Card,
+	Cards,
+	code: MdxCode,
 	ComponentPropsTable,
+	em: Em,
 	ExampleBlock,
+	h1: createMdxHeading(1),
+	h2: createMdxHeading(2),
+	h3: createMdxHeading(3),
+	h4: createMdxHeading(4),
+	h5: createMdxHeading(5),
+	h6: createMdxHeading(6),
 	IconGallery,
-	pre: (props: CodeBlockProps) => (
-		<CodeBlock {...props} className={cx(codeBlockStyles.mdxFence, props.className)} />
-	),
+	img: MdxImage,
+	p: MdxParagraph,
+	pre: MdxFence,
 	SourceCodeBlock,
+	strong: Strong,
+	table: MdxTable,
 	TypeTable,
 };
 
@@ -113,29 +135,18 @@ const clientLoader = browserCollections.docs.createClientLoader({
 	component(
 		{ toc, frontmatter, default: MDX },
 		props: {
-			className?: string;
 			githubUrl: string;
 			markdownUrl: string;
 			pageActions: PageActionsMode;
 			reactAriaUrl: string | null;
 			sourceUrl: string | null;
+			tree: PageTree;
 		},
 	) {
-		const { githubUrl, markdownUrl, pageActions, reactAriaUrl, sourceUrl, ...pageProps } = props;
+		const { githubUrl, markdownUrl, pageActions, reactAriaUrl, sourceUrl, tree } = props;
 		return (
-			<DocsPage
-				toc={toc}
-				{...pageProps}
-				footer={{ className: 'mt-12 border-t pt-8 md:mt-16 md:pt-10' }}
-			>
-				<DocsTitle>{frontmatter.title}</DocsTitle>
-				{/*
-				 * Fumadocs' default `mb-8` stacks with the `article` layout's own `gap-4` and this row's
-				 * `mt-4`, leaving about 64px before the actions row. Drop it to normal rhythm: the layout
-				 * gap plus this row's own top margin.
-				 */}
-				<DocsDescription className="mb-0">{frontmatter.description}</DocsDescription>
-				<div className="not-prose mt-4">
+			<DocsArticle
+				actions={
 					<PageActions
 						githubUrl={githubUrl}
 						markdownUrl={markdownUrl}
@@ -143,11 +154,14 @@ const clientLoader = browserCollections.docs.createClientLoader({
 						reactAriaUrl={reactAriaUrl}
 						sourceUrl={sourceUrl}
 					/>
-				</div>
-				<DocsBody>
-					<MDX components={mdxComponents} />
-				</DocsBody>
-			</DocsPage>
+				}
+				description={frontmatter.description}
+				title={frontmatter.title}
+				toc={toc}
+				tree={tree}
+			>
+				<MDX components={mdxComponents} />
+			</DocsArticle>
 		);
 	},
 });
@@ -156,17 +170,17 @@ function Page() {
 	const data = useFumadocsLoader(Route.useLoaderData());
 
 	return (
-		<FumadocsLayoutAdapter tree={data.pageTree}>
+		<DocsShell tree={data.pageTree}>
 			<Suspense>
 				{clientLoader.useContent(data.path, {
-					className: 'pb-16 md:pb-20 xl:pb-24',
 					githubUrl: data.githubUrl,
 					markdownUrl: data.markdownUrl,
 					pageActions: data.pageActions,
 					reactAriaUrl: data.reactAriaUrl,
 					sourceUrl: data.sourceUrl,
+					tree: data.pageTree,
 				})}
 			</Suspense>
-		</FumadocsLayoutAdapter>
+		</DocsShell>
 	);
 }

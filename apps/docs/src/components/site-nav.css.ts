@@ -1,6 +1,13 @@
 import { vars } from '@luke-ui/react/theme';
 import { style } from '@vanilla-extract/css';
-import { docsSidebarMaxWidth, docsSidebarMinWidth } from '../lib/docs-sidebar-media.js';
+import {
+	docsMaxInlineSize,
+	docsMinInlineSize,
+	docsSidebarMaxInlineSize,
+	docsSidebarMinInlineSize,
+	docsTabletMaxInlineSize,
+	docsTabletMinInlineSize,
+} from '../lib/docs-container-queries.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
 export const header = style({
@@ -14,8 +21,8 @@ export const header = style({
 			flexWrap: 'wrap',
 			gap: vars.space.sp12,
 			paddingInline: vars.space.sp16,
-			'@media': {
-				'(min-width: 768px)': {
+			'@container': {
+				[docsTabletMinInlineSize]: {
 					columnGap: vars.space.sp16,
 					paddingInline: vars.space.sp24,
 				},
@@ -48,8 +55,8 @@ export const destinations = style({
 			inlineSize: '100%',
 			order: 1,
 			paddingBlockEnd: vars.space.sp8,
-			'@media': {
-				'(min-width: 768px)': {
+			'@container': {
+				[docsTabletMinInlineSize]: {
 					inlineSize: 'auto',
 					minBlockSize: SITE_HEADER_BLOCK_SIZE,
 					order: 0,
@@ -63,8 +70,8 @@ export const destinations = style({
 export const destinationsWithSidebar = style({
 	'@layer': {
 		recipes: {
-			'@media': {
-				[docsSidebarMaxWidth]: {
+			'@container': {
+				[docsSidebarMaxInlineSize]: {
 					display: 'none',
 				},
 			},
@@ -124,11 +131,11 @@ export const wideSearch = style({
 	'@layer': {
 		recipes: {
 			inlineSize: '10rem',
-			'@media': {
-				[`(max-width: ${WIDE_SEARCH_MIN_WIDTH_PX - 1}px)`]: {
+			'@container': {
+				[docsMaxInlineSize(WIDE_SEARCH_MIN_WIDTH_PX)]: {
 					display: 'none',
 				},
-				[docsSidebarMinWidth]: {
+				[docsSidebarMinInlineSize]: {
 					inlineSize: '14rem',
 				},
 			},
@@ -138,8 +145,8 @@ export const wideSearch = style({
 export const compactSearch = style({
 	'@layer': {
 		recipes: {
-			'@media': {
-				[`(min-width: ${WIDE_SEARCH_MIN_WIDTH_PX}px)`]: {
+			'@container': {
+				[docsMinInlineSize(WIDE_SEARCH_MIN_WIDTH_PX)]: {
 					display: 'none',
 				},
 			},
@@ -149,8 +156,8 @@ export const compactSearch = style({
 export const desktopTheme = style({
 	'@layer': {
 		recipes: {
-			'@media': {
-				'(max-width: 767px)': {
+			'@container': {
+				[docsTabletMaxInlineSize]: {
 					display: 'none',
 				},
 			},
@@ -161,8 +168,8 @@ export const desktopTheme = style({
 export const mobileThemeTrigger = style({
 	'@layer': {
 		recipes: {
-			'@media': {
-				'(min-width: 768px)': {
+			'@container': {
+				[docsTabletMinInlineSize]: {
 					display: 'none',
 				},
 			},
