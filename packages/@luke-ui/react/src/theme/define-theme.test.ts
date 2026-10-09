@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { splitBlocks } from './__fixtures__/theme-css.js';
-import { compileTheme } from './build-theme.js';
+import { compileTheme, ThemeContrastError } from './build-theme.js';
 import { gamutMapOklch, parseColor } from './color.js';
+import type { ThemeInput } from './define-theme.js';
 import { defaultBackdrop, defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
 import { defaultSourceColors } from './foundation.js';
 import { paperTheme } from './foundations/paper.js';
@@ -169,83 +170,137 @@ describe('defineTheme backdrop validation', () => {
 	});
 });
 
-describe('normalizeTheme resolves the source-tier `background` split from `neutral`', () => {
-	it('omitted background resolves to the resolved neutral canvas anchor in both modes', () => {
+describe('normalizeTheme resolves `surface.base` split from `neutral`', () => {
+	it('omitted base resolves to the resolved neutral base anchor in both modes', () => {
 		const foundation = normalizeTheme({
 			color: {
 				accent: '#3b82f6',
 				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
 			},
-			name: 'background-omitted',
+			name: 'base-omitted',
 		});
-		expect(foundation.light.color.background).toBe(foundation.light.color.neutral);
-		expect(foundation.dark.color.background).toBe(foundation.dark.color.neutral);
+		expect(foundation.light.color.surface.base).toBe(foundation.light.color.neutral);
+		expect(foundation.dark.color.surface.base).toBe(foundation.dark.color.neutral);
 	});
 
-	it('omitted background also coincides with a curated neutralStyle', () => {
+	it('omitted base also coincides with a curated neutralStyle', () => {
 		const foundation = normalizeTheme({
 			color: { accent: '#3b82f6', neutralStyle: 'warm' },
-			name: 'background-omitted-style',
+			name: 'base-omitted-style',
 		});
-		expect(foundation.light.color.background).toBe(foundation.light.color.neutral);
-		expect(foundation.dark.color.background).toBe(foundation.dark.color.neutral);
+		expect(foundation.light.color.surface.base).toBe(foundation.light.color.neutral);
+		expect(foundation.dark.color.surface.base).toBe(foundation.dark.color.neutral);
 	});
 
-	it('an explicit per-mode background wins over the neutral canvas anchor', () => {
+	it('an explicit per-mode base wins over the neutral base anchor', () => {
 		const foundation = normalizeTheme({
 			color: {
 				accent: '#3b82f6',
-				background: { dark: 'oklch(0.18 0.01 210)', light: 'oklch(0.99 0.002 210)' },
+				surface: { base: { dark: 'oklch(0.18 0.01 210)', light: 'oklch(0.99 0.002 210)' } },
 				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
 			},
-			name: 'background-explicit',
+			name: 'base-explicit',
 		});
-		expect(foundation.light.color.background).toEqual(
+		expect(foundation.light.color.surface.base).toEqual(
 			gamutMapOklch(parseColor('oklch(0.99 0.002 210)')),
 		);
-		expect(foundation.dark.color.background).toEqual(
+		expect(foundation.dark.color.surface.base).toEqual(
 			gamutMapOklch(parseColor('oklch(0.18 0.01 210)')),
 		);
-		// Different from the neutral canvas anchor: the split actually took effect.
-		expect(foundation.light.color.background).not.toBe(foundation.light.color.neutral);
-		expect(foundation.dark.color.background).not.toBe(foundation.dark.color.neutral);
+		// Different from the neutral base anchor: the split actually took effect.
+		expect(foundation.light.color.surface.base).not.toBe(foundation.light.color.neutral);
+		expect(foundation.dark.color.surface.base).not.toBe(foundation.dark.color.neutral);
 	});
 
-	it('a single-mode background is adapted to the opposite mode canvas lightness, not copied verbatim', () => {
+	it('a single-mode base is adapted to the opposite mode base lightness, not copied verbatim', () => {
 		const foundation = normalizeTheme({
 			color: {
 				accent: '#3b82f6',
-				background: { light: 'oklch(0.4 0.05 30)' },
+				surface: { base: { light: 'oklch(0.4 0.05 30)' } },
 				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
 			},
-			name: 'background-single-mode',
+			name: 'base-single-mode',
 		});
 		// Light keeps the authored value verbatim.
-		expect(foundation.light.color.background).toEqual(
+		expect(foundation.light.color.surface.base).toEqual(
 			gamutMapOklch(parseColor('oklch(0.4 0.05 30)')),
 		);
-		// Dark is adapted from light: same hue and chroma, but the dark canvas lightness (~0.22), not
+		// Dark is adapted from light: same hue and chroma, but the dark base lightness (~0.22), not
 		// the light source's lightness (0.4) and not a raw copy of the light colour.
-		const adaptedDark = foundation.dark.color.background;
+		const adaptedDark = foundation.dark.color.surface.base;
 		expect(adaptedDark.h).toBeCloseTo(30, 0);
 		expect(adaptedDark.c).toBeCloseTo(0.05, 2);
 		expect(adaptedDark.l).toBeCloseTo(0.22, 2);
-		expect(foundation.dark.color.background).not.toBe(foundation.light.color.background);
-		// And it still differs from the resolved dark neutral canvas anchor (background is split).
-		expect(foundation.dark.color.background).not.toBe(foundation.dark.color.neutral);
+		expect(foundation.dark.color.surface.base).not.toBe(foundation.light.color.surface.base);
+		// And it still differs from the resolved dark neutral base anchor (the base is split).
+		expect(foundation.dark.color.surface.base).not.toBe(foundation.dark.color.neutral);
 	});
 
-	it('a single-value background string adapts independently per mode, mirroring single-value neutral', () => {
+	it('a single-value base string adapts independently per mode, mirroring single-value neutral', () => {
 		const foundation = normalizeTheme({
-			color: { accent: '#3b82f6', background: 'oklch(0.5 0.03 140)' },
-			name: 'background-single-value',
+			color: { accent: '#3b82f6', surface: { base: 'oklch(0.5 0.03 140)' } },
+			name: 'base-single-value',
 		});
-		const light = foundation.light.color.background;
-		const dark = foundation.dark.color.background;
+		const light = foundation.light.color.surface.base;
+		const dark = foundation.dark.color.surface.base;
 		expect(light.h).toBeCloseTo(140, 0);
 		expect(dark.h).toBeCloseTo(140, 0);
 		expect(light.l).toBeCloseTo(0.985, 2);
 		expect(dark.l).toBeCloseTo(0.22, 2);
+	});
+});
+
+describe('normalizeTheme carries authored surfaces', () => {
+	it('passes an authored surface side through and leaves the rest for generation', () => {
+		const foundation = normalizeTheme({
+			color: {
+				accent: '#3b82f6',
+				surface: { field: { light: 'oklch(0.97 0 0)' }, overlay: { dark: 'oklch(0.3 0 0)' } },
+			},
+			name: 'authored-surfaces',
+		});
+		expect(foundation.light.color.surface.field).toEqual(
+			gamutMapOklch(parseColor('oklch(0.97 0 0)')),
+		);
+		expect(foundation.light.color.surface.overlay).toBeUndefined();
+		expect(foundation.dark.color.surface.field).toBeUndefined();
+		expect(foundation.dark.color.surface.overlay).toEqual(
+			gamutMapOklch(parseColor('oklch(0.3 0 0)')),
+		);
+		expect(foundation.light.color.surface.subdued).toBeUndefined();
+	});
+
+	it('emits an authored surface exactly and generates the others from the base', () => {
+		const blocks = splitBlocks(
+			defineTheme({
+				color: { accent: '#3b82f6', surface: { subdued: { light: 'oklch(0.9 0 0)' } } },
+				name: 'authored-subdued',
+			}),
+		);
+		expect(extractValue(blocks.baseLight, '--luke-color-surface-subdued')).toBe('oklch(0.9 0 0)');
+		expect(extractValue(blocks.baseLight, '--luke-color-surface-field')).toBe(
+			extractValue(blocks.baseLight, '--luke-color-surface-base'),
+		);
+	});
+
+	it('lets an author replace a generated surface that fails a contrast gate', () => {
+		// A lighter dark base pushes the generated overlay, which sits above the base, under the text
+		// gate. The surface is reported rather than repaired, and authoring it clears its failures.
+		const base = { dark: 'oklch(0.33 0 0)', light: 'oklch(0.985 0 0)' };
+		function overlayFailures(surface: NonNullable<ThemeInput['color']['surface']>) {
+			try {
+				defineTheme({ color: { accent: '#3b82f6', surface }, name: 'weak-overlay' });
+				return [];
+			} catch (error) {
+				if (!(error instanceof ThemeContrastError)) throw error;
+				return error.failures.filter((failure) => failure.background === 'color.surface.overlay');
+			}
+		}
+
+		expect(overlayFailures({ base })).toContainEqual(
+			expect.objectContaining({ foreground: 'color.text.secondary', mode: 'dark' }),
+		);
+		expect(overlayFailures({ base, overlay: { dark: base.dark } })).toEqual([]);
 	});
 });
 

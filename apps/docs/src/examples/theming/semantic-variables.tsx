@@ -15,7 +15,7 @@ export default () => {
 function SemanticSurface({ mode }: { mode: 'light' | 'dark' }) {
 	return (
 		<Box
-			backgroundColor="surface.floating"
+			backgroundColor="surface.subdued"
 			color={vars.color.text.primary}
 			data-color-mode={mode}
 			padding="sp16"

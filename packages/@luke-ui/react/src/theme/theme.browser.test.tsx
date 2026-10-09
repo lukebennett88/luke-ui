@@ -49,7 +49,7 @@ test('applies explicit and nested opposite colour modes with native colour-schem
 	const outer = renderScope('dark');
 	const nested = outer.appendChild(document.createElement('div'));
 	nested.dataset.colorMode = 'light';
-	nested.style.backgroundColor = 'var(--luke-color-surface-canvas)';
+	nested.style.backgroundColor = 'var(--luke-color-surface-base)';
 	const lightReference = renderScope('light');
 
 	expect(getComputedStyle(outer).colorScheme).toBe('dark');
@@ -107,10 +107,10 @@ test('a portalled combobox follows a colour mode set on the document', async () 
 	const portal = await openPortalledCombobox(outer);
 
 	expect(getComputedStyle(portal).colorScheme).toBe('dark');
-	const portalCanvas = getComputedStyle(portal).getPropertyValue('--luke-color-surface-canvas');
-	expect(portalCanvas).not.toBe('');
-	expect(portalCanvas).toBe(
-		getComputedStyle(document.documentElement).getPropertyValue('--luke-color-surface-canvas'),
+	const portalBase = getComputedStyle(portal).getPropertyValue('--luke-color-surface-base');
+	expect(portalBase).not.toBe('');
+	expect(portalBase).toBe(
+		getComputedStyle(document.documentElement).getPropertyValue('--luke-color-surface-base'),
 	);
 });
 
@@ -125,12 +125,12 @@ test('a colour mode scoped to a nested div does not reach a portalled combobox (
 	// mode, so the portal resolves the system preference instead, not the nested div's mode.
 	expect(portal).not.toHaveAttribute('data-color-mode');
 	expect(getComputedStyle(portal).colorScheme).not.toBe('dark');
-	const portalCanvas = getComputedStyle(portal).getPropertyValue('--luke-color-surface-canvas');
-	expect(portalCanvas).toBe(
-		getComputedStyle(document.documentElement).getPropertyValue('--luke-color-surface-canvas'),
+	const portalBase = getComputedStyle(portal).getPropertyValue('--luke-color-surface-base');
+	expect(portalBase).toBe(
+		getComputedStyle(document.documentElement).getPropertyValue('--luke-color-surface-base'),
 	);
-	expect(portalCanvas).not.toBe(
-		getComputedStyle(nested).getPropertyValue('--luke-color-surface-canvas'),
+	expect(portalBase).not.toBe(
+		getComputedStyle(nested).getPropertyValue('--luke-color-surface-base'),
 	);
 });
 
@@ -138,7 +138,7 @@ function renderScope(mode?: 'light' | 'dark') {
 	const scope = document.body.appendChild(document.createElement('div'));
 	scopes.push(scope);
 	scope.className = tactileThemeClassName;
-	scope.style.backgroundColor = 'var(--luke-color-surface-canvas)';
+	scope.style.backgroundColor = 'var(--luke-color-surface-base)';
 	if (mode !== undefined) scope.dataset.colorMode = mode;
 
 	return scope;

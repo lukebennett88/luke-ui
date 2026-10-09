@@ -67,7 +67,7 @@ test('sizes and colors', { tags: ['visual'] }, async () => {
 });
 
 const themeMatrixStyle = {
-	backgroundColor: vars.color.surface.canvas,
+	backgroundColor: vars.color.surface.base,
 	display: 'flex',
 	gap: '1rem',
 	padding: '1rem',
@@ -91,7 +91,7 @@ function ThemeMatrixScope({
 			data-color-mode={mode}
 			style={{
 				alignItems: 'center',
-				backgroundColor: vars.color.surface.recessed,
+				backgroundColor: vars.color.surface.subdued,
 				border: `1px solid ${vars.color.border.decorative}`,
 				color: vars.color.text.primary,
 				display: 'flex',

@@ -8,8 +8,8 @@ import { recipe } from '../styles/recipe.js';
  */
 export const codeRecipe = recipe({
 	base: {
-		// A neutral subtle fill with a hairline separates from the canvas in every theme identity and
-		// colour mode. `surface.recessed` alone is within 1.1:1 of the canvas in light mode.
+		// A neutral subtle fill with a hairline separates from every surface in every theme identity
+		// and colour mode, which a surface tint alone does not.
 		backgroundColor: vars.color.background.neutral.subtle.rest,
 		border: `1px solid ${vars.color.border.decorative}`,
 		borderRadius: vars.radius.control,

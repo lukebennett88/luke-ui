@@ -392,7 +392,7 @@ test('does not let long unbreakable content expand equal grid tracks', () => {
 });
 
 const itemStyle = {
-	backgroundColor: vars.color.surface.floating,
+	backgroundColor: vars.color.surface.base,
 	borderRadius: vars.radius.detail,
 	color: vars.color.text.primary,
 	paddingBlock: vars.space.sp8,
@@ -400,7 +400,7 @@ const itemStyle = {
 } as const;
 
 const sceneStyle = {
-	backgroundColor: vars.color.surface.recessed,
+	backgroundColor: vars.color.surface.subdued,
 	borderRadius: vars.radius.surface,
 	color: vars.color.text.primary,
 	padding: vars.space.sp16,

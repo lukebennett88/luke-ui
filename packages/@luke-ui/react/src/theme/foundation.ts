@@ -80,18 +80,18 @@ export interface ThemeFoundation {
 	};
 }
 
-/** The per-mode authored inputs: source colours, action-control finish, and depth treatments. */
+/** The per-mode authored inputs: source colours, control finish, and depth treatments. */
 export interface ThemeModeFoundation {
-	/** Final `background-image` values for the shared Button and IconButton face finish. */
-	actionControlFinish: ActionControlFinishFoundation;
 	/** Source colours the semantic colour contract is generated from. */
 	color: ThemeSourceColors;
+	/** Final `background-image` values for the face of a solid control fill. */
+	controlFinish: ControlFinishFoundation;
 	/** Final composite `box-shadow` values for the semantic depth ladder. */
 	depth: ThemeDepthFoundation;
 }
 
-/** Authored action-control face lighting for one colour mode. */
-interface ActionControlFinishFoundation {
+/** Authored control face lighting for one colour mode. */
+interface ControlFinishFoundation {
 	/** Face lighting for a hovered control. */
 	raised: string;
 	/** Face lighting for a pressed control. */
@@ -114,14 +114,6 @@ export interface ThemeSourceColors {
 	 * internally: `defineTheme` always resolves it, from the author's value or a mode-aware default.
 	 */
 	backdrop: string;
-	/**
-	 * Required. The canvas anchor, resolved per mode from an explicit `background`, an adapted
-	 * opposite-mode `background`, or (when `background` is entirely omitted) a copy of the resolved
-	 * `neutral` canvas anchor. `buildTheme` takes this value directly as the canvas anchor: every
-	 * family's ramp and the elevation surfaces (including `color.surface.canvas`) are generated
-	 * against `background`, not `neutral`.
-	 */
-	background: Oklch;
 	/** Source colour for the `danger` role. */
 	danger: Oklch;
 	/** Keyboard-focus ring colour, used verbatim after gamut mapping. */
@@ -130,24 +122,37 @@ export interface ThemeSourceColors {
 	info: Oklch;
 	/**
 	 * Required. Anchors the surface, text, and border ramps — the family's hue/chroma character.
-	 * `background` is the actual canvas colour; the two coincide unless `background` is authored
+	 * `surface.base` is the actual base colour; the two coincide unless `surface.base` is authored
 	 * separately.
 	 */
 	neutral: Oklch;
 	/** Source colour for the `success` role. */
 	success: Oklch;
+	/** The resolved base surface plus any surface the author set explicitly for this mode. */
+	surface: ThemeSurfaceSources;
 	/** Source colour for the `warning` role. */
 	warning: Oklch;
 }
 
+/** The surface roles a theme emits. */
+export const SURFACE_ROLES = ['base', 'subdued', 'field', 'overlay'] as const;
+
+/** A surface role. */
+export type SurfaceRole = (typeof SURFACE_ROLES)[number];
+
 /**
- * The per-mode source colour fields that participate in generation as {@link Oklch}. `background` is
- * the resolved canvas anchor and `focus` is the authored keyboard-focus ring. `backdrop` is
- * deliberately absent, because it is emitted as CSS text rather than parsed.
+ * One mode's surface sources. `base` is always resolved. Other roles are present only when authored;
+ * `buildTheme` generates the rest from `base`.
+ */
+export type ThemeSurfaceSources = { base: Oklch } & Partial<Record<SurfaceRole, Oklch>>;
+
+/**
+ * The per-mode source colour fields that participate in generation as {@link Oklch}, apart from the
+ * surfaces. `focus` is the authored keyboard-focus ring. `backdrop` is deliberately absent, because
+ * it is emitted as CSS text rather than parsed.
  */
 export const SOURCE_COLOR_FIELDS = [
 	'neutral',
-	'background',
 	'accent',
 	'info',
 	'success',

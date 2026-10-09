@@ -8,7 +8,7 @@ import { style } from '@vanilla-extract/css';
 export const cardLink = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.surface.base,
 			color: vars.color.text.primary,
 			textDecoration: 'none',
 			transition: `background-color ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,

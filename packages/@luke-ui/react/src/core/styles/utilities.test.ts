@@ -1,5 +1,6 @@
 import { assertType, expect, expectTypeOf, test } from 'vite-plus/test';
 import type { BoxProps } from '../../../dist/box.js';
+import { vars } from '../../theme/contract.css.js';
 import type { SprinklesProps } from './utilities.css.js';
 import { createSprinkles } from './utilities.css.js';
 
@@ -32,9 +33,9 @@ test('resolves backgroundColor and borderColor tokens to their theme variables',
 	]);
 });
 
-// Surfaces are opaque backgrounds for cards and panels. The translucent scrim is excluded.
-test('resolves every elevation surface background token to its theme variable', () => {
-	const surfaces = ['canvas', 'recessed', 'floating', 'overlay'] as const;
+// Surfaces are opaque backgrounds. The translucent scrim is excluded.
+test('resolves every surface background token to its theme variable', () => {
+	const surfaces = ['base', 'subdued', 'field', 'overlay'] as const;
 
 	// A missing token still returns a class with the raw string, so assert the generated variable.
 	const resolved = surfaces.map((surface) => {
@@ -43,11 +44,29 @@ test('resolves every elevation surface background token to its theme variable', 
 	});
 
 	expect(Object.fromEntries(resolved)).toEqual({
-		canvas: ['var(--luke-color-surface-canvas)'],
-		floating: ['var(--luke-color-surface-floating)'],
+		base: ['var(--luke-color-surface-base)'],
+		field: ['var(--luke-color-surface-field)'],
 		overlay: ['var(--luke-color-surface-overlay)'],
-		recessed: ['var(--luke-color-surface-recessed)'],
+		subdued: ['var(--luke-color-surface-subdued)'],
 	});
+});
+
+// Box is a second way into the token contract, so its token-backed values follow `vars`.
+test('derives token-backed Box values from the public contract', () => {
+	const cases = [
+		...Object.entries(vars.radius).map(([key, value]) => ['borderRadius', key, value] as const),
+		...Object.entries(vars.depth).map(([key, value]) => ['boxShadow', key, value] as const),
+		...Object.entries(vars.color.border).map(
+			([key, value]) => ['borderColor', key, value] as const,
+		),
+		...Object.entries(vars.space).map(([key, value]) => ['gap', key, value] as const),
+	];
+
+	const mismatched = cases.filter(([property, key, value]) => {
+		const { style } = createSprinkles({ [property]: key });
+		return !Object.values(style ?? {}).includes(value);
+	});
+	expect(mismatched).toEqual([]);
 });
 
 test('passes through own enumerable string-keyed non-utility props', () => {

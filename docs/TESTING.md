@@ -54,6 +54,9 @@ Visual cases are `visual`-tagged browser tests. Capture each visually meaningful
 representative fixture across Tactile light, Tactile dark, Paper light, and Paper dark. This is not
 an exhaustive state matrix. Add another capture only for a materially different state.
 
+`flatAppearances` renders Tactile's colours with every depth and control finish set to `none`. Use
+it, outside the theme matrix, for a capture that proves states stay distinct without materials.
+
 Comparison is per-pixel with `includeAA: true` and `threshold: 0.1`. There is no canvas-wide
 mismatch allowance. Remove nondeterminism. Do not add an allowance.
 

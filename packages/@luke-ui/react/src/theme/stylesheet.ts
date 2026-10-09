@@ -5,6 +5,7 @@
  */
 
 import { precomputeValues } from '@capsizecss/core';
+import { capsizeTrimVarName } from './capsize-trim-vars.js';
 import type { IdentityPath, ModePath, SpaceStep } from './contract.js';
 import { flattenThemeContract, partitionContractPairs, spaceScale } from './contract.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
@@ -23,7 +24,6 @@ import {
 	CONTROL_SIZE_VALUES,
 	FONT_METRICS,
 	FONT_VALUES,
-	ICON_SIZE_VALUES,
 	INTERACTION_VALUES,
 	MOTION_VALUES,
 } from './token-values.js';
@@ -35,8 +35,8 @@ type ColorMode = 'light' | 'dark';
 /**
  * Emits the root-only containment rule, followed by the five rule blocks: an identity rule, the
  * base light rule, the `prefers-color-scheme: dark` media rule, and the two explicit
- * `data-color-mode` rules. The identity rule carries every non-mode contract leaf. Throws when a
- * contract leaf has no resolved value.
+ * `data-color-mode` rules. The identity rule carries every non-mode contract leaf, then the private
+ * Capsize trims `Text` reads. Throws when a contract leaf has no resolved value.
  */
 export function assembleStylesheet(
 	foundation: ThemeFoundation,
@@ -46,7 +46,11 @@ export function assembleStylesheet(
 	const selector = `.${getThemeClassName(foundation.name)}`;
 	const { identityPairs, modePairs } = partitionContractPairs(flattenThemeContract());
 
-	const identityDeclarations = declarations(identityPairs, buildIdentityValues(foundation));
+	const fontFamily = foundation.typography?.fontFamily ?? defaultFontFamily;
+	const identityDeclarations = [
+		...declarations(identityPairs, buildIdentityValues(foundation)),
+		...capsizeTrimDeclarations(fontFamily),
+	];
 	const lightDeclarations = ['color-scheme: light;', ...declarations(modePairs, lightValues)];
 	const darkDeclarations = ['color-scheme: dark;', ...declarations(modePairs, darkValues)];
 
@@ -116,7 +120,6 @@ function buildIdentityValues(foundation: ThemeFoundation): { [Path in IdentityPa
 		...CONTROL_SIZE_VALUES,
 		...INTERACTION_VALUES,
 		...FONT_VALUES,
-		...buildCapsizeValues(fontFamily),
 		...typeStyleValues('fontFamily', () => bodyFontFamily),
 		...typeStyleValues('fontWeight', (style) => resolvedWeights[typeStyleWeightRole[style]]),
 		'font.family.body': bodyFontFamily,
@@ -132,7 +135,6 @@ function buildIdentityValues(foundation: ThemeFoundation): { [Path in IdentityPa
 		'radius.overlay': rem(radius?.overlay ?? defaultRadius.overlay),
 		'radius.surface': rem(radius?.surface ?? defaultRadius.surface),
 		...spaceValues(),
-		...ICON_SIZE_VALUES,
 		...MOTION_VALUES,
 	};
 }
@@ -150,20 +152,15 @@ function spaceValues(): { [Step in SpaceStep as `space.${Step}`]: string } {
 	return pathRecord(spaceScale.map(([step, value]) => pathEntry(`space.${step}`, value)));
 }
 
-function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): {
-	[Style in TypeStyle as `font.${Style}.baselineTrim`]: string;
-} & {
-	[Style in TypeStyle as `font.${Style}.capHeightTrim`]: string;
-} {
-	return pathRecord(
-		typeStyles.flatMap((style) => {
-			const { baselineTrim, capHeightTrim } = capsizeTrims(fontFamily, style);
-			return [
-				pathEntry(`font.${style}.baselineTrim`, baselineTrim),
-				pathEntry(`font.${style}.capHeightTrim`, capHeightTrim),
-			];
-		}),
-	);
+/** The private `--luke-internal-*` Capsize trim declarations for every type style. */
+function capsizeTrimDeclarations(fontFamily: keyof typeof FONT_METRICS): Array<string> {
+	return typeStyles.flatMap((style) => {
+		const { baselineTrim, capHeightTrim } = capsizeTrims(fontFamily, style);
+		return [
+			`${capsizeTrimVarName(style, 'baselineTrim')}: ${baselineTrim};`,
+			`${capsizeTrimVarName(style, 'capHeightTrim')}: ${capHeightTrim};`,
+		];
+	});
 }
 
 function capsizeTrims(fontFamily: keyof typeof FONT_METRICS, style: TypeStyle) {

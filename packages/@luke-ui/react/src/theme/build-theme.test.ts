@@ -103,8 +103,8 @@ describe('compileTheme diagnostics', () => {
 			// A family diagnostic per role, and every scale role generated.
 			expect(Object.keys(modeDiagnostics.families).sort()).toEqual([...SEMANTIC_ROLES].sort());
 			expect(modeDiagnostics.families.accent.solidAnchor.satisfied).toBe(true);
-			// The canvas surface equals the resolved background anchor.
-			expect(modeDiagnostics.surfaces.canvas).toBeDefined();
+			// The base surface equals the resolved base anchor.
+			expect(modeDiagnostics.surfaces.base).toEqual(tactileFoundation[mode].color.surface.base);
 			// The diagnostics data model records every hard-gated text check, not just failures, so
 			// tooling (the "Theme/Diagnostics" story) can display the full matrix. Asserting `passes` on
 			// each would be dead: `compileTheme` above already throws `ThemeContrastError` before
@@ -156,28 +156,22 @@ describe('compileTheme interaction source', () => {
 
 describe('bundled themes meet WCAG 2.2 AA', () => {
 	for (const foundation of [tactileFoundation, paperFoundation]) {
-		it(`${foundation.name} keeps light canvas neutral, recessed surfaces white, and dark wells distinct`, () => {
+		it(`${foundation.name} keeps the light base neutral, light fields on it, and dark fields sunk`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
-			const lightCanvas = parseColor(extractValue(blocks.baseLight, '--luke-color-surface-canvas'));
-			const lightRecessed = parseColor(
-				extractValue(blocks.baseLight, '--luke-color-surface-recessed'),
-			);
-			const darkCanvas = parseColor(extractValue(blocks.mediaDark, '--luke-color-surface-canvas'));
-			const darkRecessed = parseColor(
-				extractValue(blocks.mediaDark, '--luke-color-surface-recessed'),
-			);
+			const surface = (block: string, role: string) => {
+				return parseColor(extractValue(block, `--luke-color-surface-${role}`));
+			};
+			const lightBase = surface(blocks.baseLight, 'base');
 
-			expect(lightCanvas.c).toBe(0);
-			expect(lightRecessed).toEqual({
-				l: 1,
-				c: 0,
-				h: 0,
-			});
-			expect(darkCanvas.l - darkRecessed.l).toBeGreaterThanOrEqual(0.02);
+			expect(lightBase.c).toBe(0);
+			expect(surface(blocks.baseLight, 'field')).toEqual(lightBase);
+			expect(
+				surface(blocks.mediaDark, 'base').l - surface(blocks.mediaDark, 'field').l,
+			).toBeGreaterThanOrEqual(0.02);
 		});
 
 		it(`${foundation.name} keeps dark accent subtle-hover legible for primary text`, () => {
-			// Subtle rest ramps from the canvas independently of the elevation surfaces. Primary text
+			// Subtle rest ramps from the base independently of the other surfaces. Primary text
 			// on generated accent subtle-hover is not a hard-gated pair, so recompute it here.
 			const { mediaDark } = splitBlocks(buildTheme(foundation));
 			const textPrimary = parseColor(extractValue(mediaDark, '--luke-color-text-primary'));
@@ -190,7 +184,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 		it(`${foundation.name} generates subtle, distinct semantic borders`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
-				const surfaces = ['canvas', 'recessed'].map((surface) => {
+				const surfaces = ['base', 'field', 'overlay'].map((surface) => {
 					return parseColor(extractValue(block, `--luke-color-surface-${surface}`));
 				});
 				// The functional borders are excluded: `border.control` is a solved contrast boundary,
@@ -205,8 +199,8 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 						...surfaces.map((surface) => contrastRatio(border, surface)),
 					);
 					// The semantic borders alias the scale's step 7 (subtle UI border). They stay visibly
-					// distinct from the base surfaces but sit below the 3:1 non-text gate by design: these
-					// are soft separators, not solved-contrast boundaries like `border.control`.
+					// distinct from the control surfaces but sit below the 3:1 non-text gate by design: these
+					// are decorative tints, not solved-contrast boundaries like `border.control`.
 					expect(minimumContrast).toBeGreaterThan(1.2);
 					expect(minimumContrast).toBeLessThan(3);
 				}

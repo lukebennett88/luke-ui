@@ -12,7 +12,7 @@ export default () => {
 
 	return (
 		<Box
-			backgroundColor="surface.canvas"
+			backgroundColor="surface.base"
 			color={vars.color.text.primary}
 			data-color-mode={parentMode}
 			padding="sp24"
@@ -36,7 +36,7 @@ export default () => {
 					</Cluster>
 				</Stack>
 				<Box
-					backgroundColor="surface.floating"
+					backgroundColor="surface.subdued"
 					borderColor="decorative"
 					borderRadius="surface"
 					borderStyle="solid"
@@ -47,7 +47,7 @@ export default () => {
 					<Text>This panel follows the parent mode.</Text>
 				</Box>
 				<Box
-					backgroundColor="surface.floating"
+					backgroundColor="surface.subdued"
 					borderColor="decorative"
 					borderRadius="surface"
 					borderStyle="solid"

@@ -7,7 +7,7 @@ export const shell = style({
 	'@layer': {
 		recipes: {
 			// `DocsArticle` places the article in `main` and the desktop table of contents in `toc`.
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.surface.base,
 			display: 'grid',
 			gridTemplateAreas: '"header" "main"',
 			gridTemplateColumns: 'minmax(0, 1fr)',
@@ -42,7 +42,7 @@ export const header = style({
 export const sidebar = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.surface.base,
 			borderInlineEnd: `1px solid ${vars.color.border.decorative}`,
 			display: 'none',
 			gridArea: 'sidebar',
@@ -111,7 +111,7 @@ export const drawerOverlay = style({
 export const drawerModal = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.surface.overlay,
 			blockSize: '100%',
 			boxShadow: vars.depth.overlay,
 			inlineSize: 'min(22rem, 90vw)',

@@ -350,6 +350,30 @@ test('an unlabeled ComboboxField exposes aria-label on the combobox', () => {
 	expect(locator.getByRole('combobox', { name: 'Country' }).element()).toBeTruthy();
 });
 
+// The clear and toggle buttons sit side by side, so WCAG 2.5.8's spacing exception cannot excuse a
+// target under 24px. Applications may set a root font size below 16px.
+for (const size of ['small', 'medium'] as const) {
+	test(`the ${size} ComboboxField action buttons stay at least 24px at a 13px root font size`, () => {
+		document.documentElement.style.fontSize = '13px';
+
+		try {
+			render(
+				<ComboboxField defaultItems={countryItems} defaultValue="au" label="Country" size={size}>
+					{renderCountryItem}
+				</ComboboxField>,
+			);
+
+			for (const name of [/^Clear selection/, /^Toggle options/]) {
+				const target = page.getByRole('button', { name }).element().getBoundingClientRect();
+				expect(target.width).toBeGreaterThanOrEqual(24);
+				expect(target.height).toBeGreaterThanOrEqual(24);
+			}
+		} finally {
+			document.documentElement.style.fontSize = '';
+		}
+	});
+}
+
 test('ComboboxField clearing the tray search clears the selection', async () => {
 	mockScreenWidth(MOBILE_SCREEN_WIDTH);
 	const { container } = render(

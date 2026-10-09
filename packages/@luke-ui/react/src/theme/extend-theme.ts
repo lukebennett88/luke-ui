@@ -6,12 +6,13 @@
  */
 
 import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
+import { SURFACE_ROLES } from './foundation.js';
 
 /** Which colours a theme authored, and which it inherited. Carried by `ThemeContrastError`. */
 export interface ThemeInheritance {
 	/** Theme names, the extending theme first and the innermost base last. */
 	chain: Array<string>;
-	/** Colour roles the theme took from a base, for example `color.accent`. */
+	/** Colour roles the theme took from a base, for example `color.accent` or `color.surface.base`. */
 	inheritedColors: Array<string>;
 	/** Colour roles the theme authored itself. */
 	ownColors: Array<string>;
@@ -25,19 +26,21 @@ export interface ResolvedThemeInput {
 	input: ThemeInput;
 }
 
-/** Colour roles in `ThemeInput['color']` declaration order, for a stable provenance report. */
+/**
+ * Colour roles in `ThemeInput['color']` declaration order, for a stable provenance report.
+ * `surface` is reported role by role through {@link SURFACE_ROLES} instead.
+ */
 const COLOR_ROLES = [
 	'accent',
 	'neutral',
 	'neutralStyle',
-	'background',
 	'info',
 	'success',
 	'warning',
 	'danger',
 	'focus',
 	'backdrop',
-] as const satisfies ReadonlyArray<keyof ThemeInput['color']>;
+] as const satisfies ReadonlyArray<Exclude<keyof ThemeInput['color'], 'surface'>>;
 
 /** The two keys that spell one neutral decision. `inheritColor` inherits them together. */
 const NEUTRAL_ROLES = ['neutral', 'neutralStyle'] as const satisfies ReadonlyArray<
@@ -112,8 +115,8 @@ function collectChain(input: ThemeInput | ExtendingThemeInput): ThemeChain {
 /** Merges one input over an already-merged base, section by section. */
 function inheritInput(base: ThemeInput, own: ThemeInput | ExtendingThemeInput): ThemeInput {
 	return {
-		actionControlFinish: inheritModes(base.actionControlFinish, own.actionControlFinish),
 		color: inheritColor(base.color, own.color),
+		controlFinish: inheritModes(base.controlFinish, own.controlFinish),
 		depth: inheritModes(base.depth, own.depth),
 		// `name` never inherits: the identity belongs to the theme the author declares.
 		name: own.name,
@@ -122,7 +125,10 @@ function inheritInput(base: ThemeInput, own: ThemeInput | ExtendingThemeInput): 
 	};
 }
 
-/** Merges source colours role by role. A role replaces the base's role whole. */
+/**
+ * Merges source colours role by role. A role replaces the base's role whole. Each surface role is a
+ * role of its own, so a theme can replace one surface and inherit the rest.
+ */
 function inheritColor(
 	base: ThemeInput['color'],
 	own: Partial<ThemeInput['color']> | undefined,
@@ -134,7 +140,6 @@ function inheritColor(
 	const ownNeutral = authorsNeutral(own);
 	return {
 		accent: own.accent ?? base.accent,
-		background: own.background ?? base.background,
 		danger: own.danger ?? base.danger,
 		focus: own.focus ?? base.focus,
 		info: own.info ?? base.info,
@@ -142,7 +147,23 @@ function inheritColor(
 		neutralStyle: ownNeutral ? own.neutralStyle : base.neutralStyle,
 		backdrop: own.backdrop ?? base.backdrop,
 		success: own.success ?? base.success,
+		surface: inheritSurface(base.surface, own.surface),
 		warning: own.warning ?? base.warning,
+	};
+}
+
+/** Merges surfaces role by role. A role replaces the base's role whole. */
+function inheritSurface(
+	base: ThemeInput['color']['surface'],
+	own: ThemeInput['color']['surface'],
+): ThemeInput['color']['surface'] {
+	if (base === undefined) return own;
+	if (own === undefined) return base;
+	return {
+		base: own.base ?? base.base,
+		field: own.field ?? base.field,
+		overlay: own.overlay ?? base.overlay,
+		subdued: own.subdued ?? base.subdued,
 	};
 }
 
@@ -213,6 +234,12 @@ function describeInheritance(
 	for (const role of COLOR_ROLES) {
 		if (outermost.color?.[role] !== undefined) ownColors.push(`color.${role}`);
 		else if (merged.color[role] !== undefined) inheritedColors.push(`color.${role}`);
+	}
+	for (const role of SURFACE_ROLES) {
+		if (outermost.color?.surface?.[role] !== undefined) ownColors.push(`color.surface.${role}`);
+		else if (merged.color.surface?.[role] !== undefined) {
+			inheritedColors.push(`color.surface.${role}`);
+		}
 	}
 	return { chain, inheritedColors, ownColors };
 }

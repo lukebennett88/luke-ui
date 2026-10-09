@@ -2,15 +2,13 @@ import type { ModePath } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { ThemeContrastFailure } from './contrast-validation.js';
 import { validateContrast } from './contrast-validation.js';
-import { solveControlBorder } from './control-border.js';
+import { controlHoverBorder, solveControlBorder } from './control-border.js';
 import type {
 	FamilyDiagnostics,
 	ThemeDiagnostics,
 	ThemeGenerationDiagnostics,
 	ThemeModeDiagnostics,
 } from './diagnostics.js';
-import type { GeneratedSurfaces } from './elevation.js';
-import { generateSurfaces } from './elevation.js';
 import type { ThemeInheritance } from './extend-theme.js';
 import type { ThemeFoundation, ThemeModeFoundation } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
@@ -18,15 +16,17 @@ import { generateFamilyWithDiagnostics, highContrastText, ScaleGenerationError }
 import type { SemanticColorValues } from './semantic-map.js';
 import { mapSemanticColors } from './semantic-map.js';
 import { assembleStylesheet } from './stylesheet.js';
+import type { GeneratedSurfaces } from './surfaces.js';
+import { generateSurfaces } from './surfaces.js';
 import { validateFoundation } from './validate-foundation.js';
 
 /**
  * Compiles a theme foundation into a complete static stylesheet plus its {@link ThemeDiagnostics}.
  *
- * Per mode: takes the already-resolved source colours and canvas anchor, generates the six private
- * scale families (neutral / accent / info / success / warning / danger), derives the mode-aware
- * elevation surfaces, applies the one default semantic mapping onto the colour contract, and runs
- * the full WCAG 2.2 validation matrix — which stays authoritative for text and on-solid pairs.
+ * Per mode: takes the already-resolved source colours and base surface, generates the six private
+ * scale families (neutral / accent / info / success / warning / danger), resolves the four surfaces,
+ * applies the one default semantic mapping onto the colour contract, and runs the full WCAG 2.2
+ * validation matrix — which stays authoritative for text, boundary, and on-solid pairs.
  *
  * Pure and Node-compatible: no DOM and deterministic output. Throws {@link ThemeGenerationError}
  * when a role that must guarantee on-solid contrast cannot reach an accessible solid (an inaccessible
@@ -147,9 +147,9 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 	const { checks, failures } = validateContrast(mode, colorValues);
 	const values: Record<ModePath, string> = {
 		...colorValues,
-		'actionControlFinish.raised': modeFoundation.actionControlFinish.raised,
-		'actionControlFinish.recessed': modeFoundation.actionControlFinish.recessed,
-		'actionControlFinish.resting': modeFoundation.actionControlFinish.resting,
+		'controlFinish.raised': modeFoundation.controlFinish.raised,
+		'controlFinish.recessed': modeFoundation.controlFinish.recessed,
+		'controlFinish.resting': modeFoundation.controlFinish.resting,
 		'depth.floating': modeFoundation.depth.floating,
 		'depth.overlay': modeFoundation.depth.overlay,
 		'depth.raised': modeFoundation.depth.raised,
@@ -170,16 +170,16 @@ interface ModeColors {
 }
 
 /**
- * Runs the v2 colour pipeline for one mode: take the resolved source colours and canvas anchor,
- * generate the six scale families, derive the elevation surfaces, and apply the semantic map.
+ * Runs the v2 colour pipeline for one mode: take the resolved source colours and base surface,
+ * generate the six scale families, resolve the four surfaces, and apply the semantic map.
  * Rethrows a scale-level {@link ScaleGenerationError} as a {@link ThemeGenerationError} carrying
  * the families it had already resolved.
  */
 function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): ModeColors {
 	const source = modeFoundation.color;
-	// The canvas anchor drives every family's ramp and the elevation surfaces alike, so a family's
-	// subtle steps always ramp away from the same background the surfaces sit on.
-	const canvasAnchor = source.background;
+	// The base surface drives every family's ramp and the generated surfaces alike, so a family's
+	// subtle steps always ramp away from the same base the other surfaces derive from.
+	const base = source.surface.base;
 
 	const families = {} as Record<FamilyRole, ScaleFamily>;
 	const familyDiagnostics = {} as Record<FamilyRole, FamilyDiagnostics>;
@@ -189,7 +189,7 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 	for (const role of SEMANTIC_ROLES) {
 		try {
 			const generated = generateFamilyWithDiagnostics({
-				background: canvasAnchor,
+				background: base,
 				interactionSource: textPrimary,
 				mode,
 				role,
@@ -209,15 +209,15 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		}
 	}
 
-	const surfaces = generateSurfaces({ background: canvasAnchor, mode });
+	const surfaces = generateSurfaces({ mode, surface: source.surface });
 	const controlBorder = solveControlBorder({
-		canvas: surfaces.canvas,
 		mode,
 		neutral: families.neutral,
-		recessed: surfaces.recessed,
+		surfaces: [surfaces.base, surfaces.subdued, surfaces.field, surfaces.overlay],
 	});
 	const colorValues = mapSemanticColors({
 		controlBorder,
+		controlHoverBorder: controlHoverBorder(controlBorder, mode),
 		families,
 		focus: source.focus,
 		backdrop: modeFoundation.color.backdrop,

@@ -53,7 +53,7 @@ export function ComparisonItem({ children, label }: ComparisonItemProps) {
 export function ExampleItem(props: BoxProps) {
 	return (
 		<Box
-			backgroundColor="surface.floating"
+			backgroundColor="surface.subdued"
 			borderColor="decorative"
 			borderRadius="detail"
 			borderStyle="solid"

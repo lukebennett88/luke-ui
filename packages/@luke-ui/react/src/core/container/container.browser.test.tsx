@@ -136,7 +136,7 @@ test('fixed maximum inline sizes', { tags: ['visual'] }, async () => {
 				{sizes.map((maxInlineSize) => (
 					<Container key={maxInlineSize} maxInlineSize={maxInlineSize} paddingInline="sp16">
 						<Box
-							backgroundColor="surface.floating"
+							backgroundColor="surface.base"
 							borderColor="decorative"
 							borderRadius="detail"
 							borderStyle="solid"

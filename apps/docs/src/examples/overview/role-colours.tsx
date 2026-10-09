@@ -46,7 +46,7 @@ export default () => {
 						key={mode}
 						padding="sp12"
 						style={{
-							backgroundColor: vars.color.surface.canvas,
+							backgroundColor: vars.color.surface.base,
 							borderRadius: vars.radius.surface,
 						}}
 					>
@@ -58,7 +58,7 @@ export default () => {
 							gap="sp8"
 							padding="sp8"
 							style={{
-								backgroundColor: vars.color.surface.floating,
+								backgroundColor: vars.color.surface.subdued,
 								border: `1px solid ${vars.color.border.decorative}`,
 								borderRadius: vars.radius.surface,
 							}}

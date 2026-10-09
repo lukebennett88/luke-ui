@@ -1,5 +1,6 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
 import { recipe } from '../../styles/recipe.js';
 import { textRecipe } from '../../text/recipe.css.js';
 
@@ -15,7 +16,7 @@ export const buttonRecipeInternal = recipe({
 		touchAction: 'manipulation',
 		transitionDuration: vars.motion.duration.feedback,
 		transitionProperty:
-			'background-color, border-color, box-shadow, color, opacity, text-decoration-color, transform',
+			'background-color, border-color, box-shadow, color, opacity, text-decoration-color',
 		transitionTimingFunction: vars.motion.easing.standard,
 		selectors: {
 			'&[data-disabled="true"]': {
@@ -39,6 +40,7 @@ export const buttonRecipeInternal = recipe({
 						backgroundColor: 'ButtonFace',
 						backgroundImage: 'none',
 						borderColor: 'ButtonText',
+						borderWidth: '1px',
 						boxShadow: 'none',
 						color: 'ButtonText',
 						forcedColorAdjust: 'auto',
@@ -52,25 +54,16 @@ export const buttonRecipeInternal = recipe({
 								opacity: 1,
 							},
 						},
-						transform: 'none',
-					},
-					'(prefers-reduced-motion: reduce)': {
-						selectors: {
-							'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-								transform: 'none',
-							},
-							'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-								transform: 'none',
-							},
-						},
 					},
 				},
 				alignItems: 'center',
 				appearance: 'none',
+				// No border outside forced colours: inset depth and the face finish would leave an
+				// unshaded rim inside even a transparent one. The size padding makes up its width.
 				borderColor: 'transparent',
 				borderRadius: vars.radius.control,
 				borderStyle: 'solid',
-				borderWidth: '1px',
+				borderWidth: 0,
 				boxShadow: vars.depth.resting,
 				display: 'inline-flex',
 				fontFamily: vars.font.family.body,
@@ -79,23 +72,21 @@ export const buttonRecipeInternal = recipe({
 				justifyContent: 'center',
 				letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 				lineHeight: FONT_METRIC_SCALE[14].lineHeight,
-				minBlockSize: vars.controlSize.minTarget,
-				minInlineSize: vars.controlSize.minTarget,
+				minBlockSize: MIN_TARGET_SIZE,
+				minInlineSize: MIN_TARGET_SIZE,
 				position: 'relative',
 				textDecoration: 'none',
-				transform: 'translateY(0)',
 				whiteSpace: 'nowrap',
+				// Hover and pressed change colour, depth, and finish, never position or scale.
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						boxShadow: vars.depth.raised,
-						transform: 'translateY(-1px)',
 					},
 					'&[data-pending="true"]': {
 						cursor: 'wait',
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						boxShadow: vars.depth.recessed,
-						transform: 'translateY(1px)',
 					},
 				},
 			},
@@ -223,16 +214,16 @@ function buttonAppearance(
 					'(forced-colors: active)': { backgroundImage: 'none' },
 				},
 				backgroundColor: ramp.rest,
-				backgroundImage: isSolid ? vars.actionControlFinish.resting : 'none',
+				backgroundImage: isSolid ? vars.controlFinish.resting : 'none',
 				color,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						backgroundColor: ramp.hover,
-						backgroundImage: isSolid ? vars.actionControlFinish.raised : 'none',
+						backgroundImage: isSolid ? vars.controlFinish.raised : 'none',
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						backgroundColor: ramp.pressed,
-						backgroundImage: isSolid ? vars.actionControlFinish.recessed : 'none',
+						backgroundImage: isSolid ? vars.controlFinish.recessed : 'none',
 					},
 				},
 			},
@@ -242,22 +233,30 @@ function buttonAppearance(
 }
 
 function buttonSize(size: 'medium' | 'small') {
+	const paddingInline = size === 'medium' ? vars.space.sp16 : vars.space.sp12;
+	// The extra 1px replaces the border. Forced colours draws the border, so it uses the plain padding.
+	const inset = {
+		'@media': {
+			'(forced-colors: active)': { paddingInline },
+		},
+		paddingInline: `calc(${paddingInline} + 1px)`,
+	};
 	return {
 		style:
 			size === 'medium'
 				? {
+						...inset,
 						blockSize: vars.controlSize.medium,
 						fontSize: FONT_METRIC_SCALE[14].fontSize,
 						gap: vars.space.sp8,
-						paddingInline: vars.space.sp16,
 					}
 				: {
+						...inset,
 						blockSize: vars.controlSize.small,
 						fontSize: FONT_METRIC_SCALE[12].fontSize,
 						gap: vars.space.sp4,
 						letterSpacing: FONT_METRIC_SCALE[12].letterSpacing,
 						lineHeight: FONT_METRIC_SCALE[12].lineHeight,
-						paddingInline: vars.space.sp12,
 					},
 		variants: { appearance: 'button' as const, size },
 	};

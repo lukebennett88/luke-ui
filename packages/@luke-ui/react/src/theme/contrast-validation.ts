@@ -14,7 +14,7 @@ type ColorMode = 'light' | 'dark';
 
 /** One WCAG contrast failure recorded while generating a theme. */
 export interface ThemeContrastFailure {
-	/** Token path of the background colour, for example `color.surface.floating`. */
+	/** Token path of the background colour, for example `color.surface.overlay`. */
 	background: string;
 	/** Token path of the foreground colour, for example `color.text.primary`. */
 	foreground: string;
@@ -34,25 +34,18 @@ interface ValidationResult {
 type ColorPath = keyof SemanticColorValues;
 
 /**
- * Runs the full semantic validation matrix over the emitted (rounded) colour values. Every pair is
- * recorded as a {@link ContrastCheck}, and the hard ones populate `failures` (which `compileTheme`
- * raises as a {@link import('./build-theme.js').ThemeContrastError}).
+ * Runs the validation matrix over the emitted (rounded) colour values. Every pair is recorded as a
+ * {@link ContrastCheck}; failing hard pairs populate `failures`, which `compileTheme` throws.
  *
- * Hard at the AA text ratio: functional primary and secondary text against all four elevation
- * surfaces; every role's rest, hover, and pressed foreground against the base surfaces and that
- * role's own subtle ramp; and every role's on-solid foreground against its solid ramp. Hard at the
- * non-text ratio: the authored focus ring and `border.control`, which is `control-border.ts`'s
- * solved boundary rather than a scale-step alias; and `danger.solid.rest` against the base
- * surfaces, because it is the only role fill that carries a required state's boundary (the invalid
- * field boundary). This last gate is deliberately not extended to the other five roles: a role's
- * solid anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind it, and for
- * `warning` that lands at only 2.43:1 against canvas in light mode.
+ * Content and controls can sit on any of the four surfaces, so every surface gate covers all four.
+ * Hard at 4.5:1: primary and secondary text, and each role's rest, hover, and pressed foreground
+ * (also against that role's subtle fills); each role's on-solid foreground against its solid fills.
+ * Hard at 3:1: the focus ring, the control border and its hover, and `danger.solid.rest`, the
+ * invalid control boundary. Only danger is gated as a boundary: the other roles' solid fills are
+ * solved for on-solid text and `warning` lands well under 3:1 in light mode.
  *
- * The six semantic borders alias step 7 of the 12-step scale, a subtle separator that deliberately
- * sits below the non-text ratio for a softer look, so they are advisory only — which is why a
- * component must never let one be the sole cue for a required state. `color.border.decorative`,
- * `color.text.disabled`, and `color.loadingSkeleton` keep their own separate policies and are not
- * measured here.
+ * Role borders are decorative tints, measured but not gated, so a component must never rely on one
+ * alone for a required state.
  */
 export function validateContrast(
 	mode: ColorMode,
@@ -68,40 +61,28 @@ export function validateContrast(
 	function check(foreground: ColorPath, background: ColorPath, required: number, hard: boolean) {
 		const ratio = contrastRatio(colorAt(foreground), colorAt(background));
 		const passes = ratio >= required;
-		// `hard` is recorded on the check itself, so tooling reads the compiler's own decision rather
-		// than re-deriving it from token paths.
 		checks.push({ background, foreground, hard, passes, ratio, required });
 		if (hard && !passes) failures.push({ background, foreground, mode, ratio, required });
 	}
 
-	// v2 validates only against surfaces consumers can reference (the hidden `resting` rung is gone).
 	const surfacePaths = [
-		'color.surface.canvas',
-		'color.surface.recessed',
-		'color.surface.floating',
+		'color.surface.base',
+		'color.surface.subdued',
+		'color.surface.field',
 		'color.surface.overlay',
-	] as const satisfies ReadonlyArray<ColorPath>;
-	const basePaths = [
-		'color.surface.canvas',
-		'color.surface.recessed',
 	] as const satisfies ReadonlyArray<ColorPath>;
 
 	for (const text of ['color.text.primary', 'color.text.secondary'] as const) {
 		for (const surface of surfacePaths) check(text, surface, TEXT_RATIO, true);
 	}
-	// Per role: rest, hover, and pressed foregrounds vs the base surfaces and that role's own
-	// subtle ramp, and the on-solid foreground vs its solid ramp. The scale generator already
-	// guarantees on-solid; this revalidates it on the emitted, rounded values.
 	for (const role of SEMANTIC_ROLES) {
 		const subtleBackgrounds = (['rest', 'hover', 'pressed'] as const).map((state) => {
 			return `color.background.${role}.subtle.${state}` as const;
 		});
 		for (const state of ['rest', 'hover', 'pressed'] as const) {
-			for (const background of [...basePaths, ...subtleBackgrounds]) {
+			for (const background of [...surfacePaths, ...subtleBackgrounds]) {
 				check(`color.foreground.${role}.${state}`, background, TEXT_RATIO, true);
 			}
-		}
-		for (const state of ['rest', 'hover', 'pressed'] as const) {
 			check(
 				`color.foreground.${role}.onSolid`,
 				`color.background.${role}.solid.${state}`,
@@ -110,23 +91,17 @@ export function validateContrast(
 			);
 		}
 	}
-	// The keyboard-focus ring is authored and focus-visibility critical, so it stays a hard 3:1 gate,
-	// and `border.control` is a solved boundary held to the same ratio.
-	for (const background of basePaths) check('color.border.focus', background, UI_RATIO, true);
-	for (const background of basePaths) check('color.border.control', background, UI_RATIO, true);
-	// `danger.solid.rest` is the only role fill that carries a required state's boundary (the invalid
-	// field boundary), so it is held to the same hard non-text ratio as the focus ring and
-	// `border.control`. This is deliberately not a per-role loop: a role's solid anchor is solved for
-	// 4.5:1 on-solid text, not for 3:1 against the surface behind it, and for `warning` that lands at
-	// only 2.43:1 against canvas in light mode. Extending this gate to the other five roles throws
-	// `ThemeContrastError` on the bundled themes.
-	for (const background of basePaths)
-		check('color.background.danger.solid.rest', background, UI_RATIO, true);
-	// Semantic role borders are measured and reported but not gated.
+	const boundaries = [
+		'color.border.focus',
+		'color.border.control',
+		'color.border.controlHover',
+		'color.background.danger.solid.rest',
+	] as const satisfies ReadonlyArray<ColorPath>;
+	for (const boundary of boundaries) {
+		for (const surface of surfacePaths) check(boundary, surface, UI_RATIO, true);
+	}
 	for (const role of SEMANTIC_ROLES) {
-		for (const background of basePaths) {
-			check(`color.border.${role}`, background, UI_RATIO, false);
-		}
+		for (const surface of surfacePaths) check(`color.border.${role}`, surface, UI_RATIO, false);
 	}
 
 	return { checks, failures };

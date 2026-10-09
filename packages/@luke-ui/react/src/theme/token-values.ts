@@ -1,6 +1,6 @@
 /**
  * The fixed values behind the contract's non-colour leaves: motion, typography styles and Capsize
- * metrics, icon sizes, control sizes, and the disabled-control opacity. None of them depend on a
+ * metrics, control sizes, and the disabled-control opacity. None of them depend on a
  * theme's source colours, so they live here beside `contract.ts` rather than inside the compiler.
  *
  * The spacing scale is the exception: it stays in `contract.ts` as `spaceScale`, because it is also
@@ -18,16 +18,11 @@ import { rem } from './rem.js';
 import type { TypeStyle } from './type-styles.js';
 import { typeStyleMetricStep, typeStyles } from './type-styles.js';
 
-/**
- * Structural block sizes for the small and medium controls, the minimum tap target, and
- * Combobox's square actions.
- */
+/** Structural block sizes for the small and medium controls. */
 export const CONTROL_SIZE_VALUES: {
 	[Path in Extract<IdentityPath, `controlSize.${string}`>]: string;
 } = {
-	'controlSize.comboboxAction': rem(28),
 	'controlSize.medium': rem(40),
-	'controlSize.minTarget': rem(24),
 	'controlSize.small': rem(32),
 };
 
@@ -60,8 +55,8 @@ function styleMetrics(style: TypeStyle) {
 
 /**
  * Fixed metrics for each public type style: font size, line height, and letter spacing, resolved
- * from the private metric scale. Family, weight, and Capsize trims are resolved in the stylesheet
- * from the active theme.
+ * from the private metric scale. Family and weight are resolved in the stylesheet from the active
+ * theme, and so are the private Capsize trims.
  */
 export const FONT_VALUES: { readonly [Key in FontValueKey]: string } = pathRecord(
 	typeStyles.flatMap((style) => {
@@ -73,16 +68,6 @@ export const FONT_VALUES: { readonly [Key in FontValueKey]: string } = pathRecor
 		];
 	}),
 );
-
-/** Inline and block sizes for the four public icon sizes. */
-export const ICON_SIZE_VALUES: {
-	[Path in Extract<IdentityPath, `iconSize.${string}`>]: string;
-} = {
-	'iconSize.large': rem(32),
-	'iconSize.medium': rem(24),
-	'iconSize.small': rem(20),
-	'iconSize.xsmall': rem(16),
-};
 
 /** The fade every control recipe applies to a disabled or pending control. */
 export const INTERACTION_VALUES: {

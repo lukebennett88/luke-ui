@@ -423,7 +423,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 		const { locator: scene } = render(
 			<div
 				style={{
-					backgroundColor: vars.color.surface.recessed,
+					backgroundColor: vars.color.surface.subdued,
 					borderRadius: vars.radius.surface,
 					display: 'flex',
 					flexDirection: 'column',
@@ -432,7 +432,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				}}
 			>
 				<Box
-					backgroundColor="surface.floating"
+					backgroundColor="surface.base"
 					borderColor="decorative"
 					borderRadius="detail"
 					borderStyle="solid"
@@ -447,7 +447,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					</Bleed>
 				</Box>
 				<Box
-					backgroundColor="surface.floating"
+					backgroundColor="surface.base"
 					borderColor="decorative"
 					borderRadius="detail"
 					borderStyle="solid"

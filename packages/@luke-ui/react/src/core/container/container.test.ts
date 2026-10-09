@@ -8,7 +8,7 @@ test('Container rejects the props it does not support', () => {
 	assertType<ContainerProps>({ inlineSize: '50%', maxInlineSize: 'ct672' });
 	assertType<ContainerProps>({
 		// @ts-expect-error — Container does not expose Box appearance utilities
-		backgroundColor: 'surface.canvas',
+		backgroundColor: 'surface.base',
 		maxInlineSize: 'ct672',
 	});
 	// @ts-expect-error — Container has no display prop

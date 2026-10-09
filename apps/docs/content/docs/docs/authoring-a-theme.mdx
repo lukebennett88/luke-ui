@@ -14,32 +14,47 @@ A basic theme authors an accent colour and a neutral character. Everything else 
 
 - a kebab-case `name`
 - `color.accent`, the required brand or interaction accent
-- `color.neutral` or `color.neutralStyle` (`'cool'`, `'neutral'`, or `'warm'`) for the neutral
-  canvas anchor
-- optional `color.background` to separate the page canvas from the neutral family's hue and chroma
-  character. It defaults to the resolved neutral canvas anchor.
+- `color.neutral` or `color.neutralStyle` (`'cool'`, `'neutral'`, or `'warm'`) for the neutral base
+  anchor
+- optional `color.surface` colours for the `base`, `subdued`, `field`, and `overlay` surfaces
 - optional `color.info`, `color.success`, `color.warning`, `color.danger`, `color.focus`, and
   `color.backdrop`
-- optional `typography`, `radius`, `depth`, and `actionControlFinish` overrides
+- optional `typography`, `radius`, `depth`, and `controlFinish` overrides
 
-Each colour accepts one string, adapted independently for light and dark, or an explicit
-`{ light, dark }` pair. Omit either side to fall back to that role's default. Luke UI supplies
-accessible mode-specific defaults for every optional colour.
+Most source colours accept one string or a `{ light, dark }` object. Either side of the object may
+be omitted. How each colour treats them differs:
+
+- `accent`, `neutral`, and `surface.base` adapt one string to each mode: they keep its hue and
+  chroma and choose a lightness for the mode. A missing side is adapted from the side you set.
+- `info`, `success`, `warning`, `danger`, `focus`, and `backdrop` use one string as written in both
+  modes. A missing side uses Luke UI's default for that mode.
+- `surface.subdued`, `surface.field`, and `surface.overlay` take only the object, because one value
+  cannot suit both modes. A missing side is generated from `base`. See [Surfaces](#surfaces).
 
 `color.backdrop` is the one colour that may include alpha. Luke UI emits it as
 `color.overlay.backdrop`. Hover and pressed colours are generated from the resting semantic colours.
 Do not author them.
 
-`radius` is a generative `base` and `multiplier` scale with explicit per-step overrides. Numeric
-radius inputs use a 16px base and emit as `rem`. `depth` and `actionControlFinish` are optional and
-deep-partial per mode over curated, extremely-subtle defaults. The typography styles and motion
-values are source-owned and are not authored.
+`radius` overrides the `detail`, `control`, `surface`, and `overlay` corners, which default to 4, 8,
+12, and 16px. Radius inputs are pixels at a 16px root and emit as `rem`. `depth` and `controlFinish`
+can be set per mode and per rung. An omitted `depth` rung uses a subtle default shadow, and an
+omitted `controlFinish` rung is `none`. Typography styles and motion are not authored.
 
 <auto-type-table path="packages/@luke-ui/react/src/theme/define-theme.ts" name="ThemeInput" />
 
 The minimal theme authors one colour and a neutral character:
 
 <SourceCodeBlock src="theming/minimal-theme" />
+
+### Surfaces
+
+`color.surface.base` is the application background. The neutral and role colours are generated from
+it. When you omit it, it uses the neutral colour.
+
+Every other surface is a fixed lightness offset from `base` for the mode. Set `subdued`, `field`, or
+`overlay` when a default does not suit the theme. Luke UI maps an authored colour into the sRGB
+gamut but never changes its lightness to pass contrast. If a surface fails
+[contrast validation](#contrast-validation), set it explicitly or choose a different value.
 
 ## Extend a bundled theme
 
@@ -57,7 +72,8 @@ What each section inherits:
   neutral decision.
 - `radius` and `typography.fontWeight` merge key by key.
 - `typography.fontFamily` replaces the base value.
-- `depth` and `actionControlFinish` merge per mode, then per rung.
+- `color.surface` merges surface by surface. A surface replaces the base's surface whole.
+- `depth` and `controlFinish` merge per mode, then per rung.
 
 A value set to `undefined` counts as omitted and inherits.
 
@@ -88,65 +104,38 @@ Applications must load any non-system font files their `typography` selects.
 
 ## Contrast validation
 
-`defineTheme` calculates the generated colour values in OKLCH, maps them to the sRGB gamut, and runs
-a WCAG 2.2 validation matrix over the result. It treats some pairs as hard requirements, measures
-some only, and does not check one category.
+`defineTheme` checks the generated colours against WCAG 2.2 in both modes. Content and controls can
+sit on any surface, so every surface check covers all four: `base`, `subdued`, `field`, and
+`overlay`.
 
-### Guaranteed at 4.5:1
+At 4.5:1:
 
-Every text/surface pair the compiler emits is a hard gate:
+- `color.text.primary` and `color.text.secondary` against every surface.
+- Each role's rest, hover, and pressed foreground against every surface and that role's subtle
+  backgrounds.
+- Each role's `onSolid` foreground against its solid backgrounds.
 
-- `color.text.primary` and `color.text.secondary` against the elevation surfaces (`canvas`,
-  `recessed`, `floating`, `overlay`).
-- For each of the six semantic roles (`neutral`, `accent`, `info`, `success`, `warning`, `danger`),
-  its rest, hover, and pressed foreground against `canvas`, `recessed`, and that role's own subtle
-  rest, hover, and pressed backgrounds.
-- Each role's `onSolid` foreground against its solid rest, hover, and pressed backgrounds.
+At 3:1, against every surface:
 
-### Guaranteed at 3:1
+- `color.border.focus`, the focus ring.
+- `color.border.control` and `color.border.controlHover`, the boundary of a form control.
+- `color.background.danger.solid.rest`, the boundary of an invalid control.
 
-Four more pairs are hard gates, at the WCAG 2.2 non-text ratio: `color.border.focus` and
-`color.border.control`, each against the canvas and recessed surfaces. `border.control` is a
-dedicated solved colour for this boundary, not a scale-step alias that happens to pass.
+If any pair fails, `defineTheme` throws `ThemeContrastError` instead of returning CSS. Its
+`failures` array names the colour mode and both tokens of each failing pair. When a failing pair
+names a surface, set that surface explicitly.
 
-If any hard gate fails, `defineTheme` throws `ThemeContrastError`. Its `failures` array identifies
-each colour mode and token pair, so `defineTheme` never writes the stylesheet with an invalid
-combination.
+Role borders, such as `color.border.accent`, and `color.border.decorative` never fail validation.
+Never rely on one alone to show a required state such as selected, invalid, or checked. Pair it with
+text, an icon, or one of the colours above.
 
-### Measured only, cannot fail the build
+### When an accent cannot be used
 
-`defineTheme` checks each role's border against the canvas and recessed surfaces at 3:1, for example
-`color.border.neutral` and `color.border.accent`. This applies to all six roles, but only as an
-advisory diagnostic. `defineTheme` records and reports a miss, but never throws it.
-
-These borders use the same subtle family rung as ordinary separators. An author can then choose a
-neutral character whose role borders read as gentle separators rather than assertive boundaries.
-Diagnostics record whether each check is a hard gate or advisory-only (`ContrastCheck.hard`).
-Tooling can then tell the two apart without a guess from the token path.
-
-These pairs are not guaranteed to reach 3:1. Never rely on a role border alone to communicate a
-required state such as selected, invalid, or checked. Pair it with text, an icon, or a
-guaranteed-contrast surface change instead. This keeps the state legible for a theme whose role
-border happens to measure under 3:1.
-
-### Never checked
-
-`color.border.decorative` has no contrast check at all, in any mode. Treat it as a pure visual
-separator, never as the sole signal for state or meaning.
-
-### When generation itself fails
-
-Separately from contrast validation, `compileTheme` (and so `defineTheme`) can throw
-`ThemeGenerationError` when a role that must guarantee on-solid text cannot reach an accessible
-solid colour. The generator gates every one of the six roles this way. For a single-value accent,
-`defineTheme` holds the hue and chroma. It searches for a lightness that clears the same on-solid
-gate the generator enforces internally. An explicit `{ light, dark }` accent skips that adaptation.
-`defineTheme` uses it verbatim for each side.
-
-A dead zone is a lightness where no near-white or near-black text reaches 4.5:1 against it. If an
-authored accent's lightness sits in that zone, `compileTheme` throws `ThemeGenerationError` and
-names the failing role and mode. Author an explicit `{ light, dark }` accent when you need exact
-control over its lightness. Otherwise, author a single value and let `defineTheme` adapt it.
+`defineTheme` throws `ThemeGenerationError` when a role's solid colour cannot carry 4.5:1 `onSolid`
+text. Some lightnesses have no near-white or near-black text that reaches 4.5:1. When you author one
+accent string, `defineTheme` keeps its hue and chroma and searches for a lightness that works. An
+accent side you set explicitly is used as written, so choose a lightness that works, or author one
+string and let `defineTheme` adapt it.
 
 ## Continue learning
 

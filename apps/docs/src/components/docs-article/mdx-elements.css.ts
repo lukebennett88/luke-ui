@@ -1,10 +1,11 @@
 import { vars } from '@luke-ui/react/theme';
-import { createVar, globalStyle, style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 import { docsTocMinInlineSize } from '../../lib/docs-container-queries.js';
 import { SITE_HEADER_BLOCK_SIZE } from '../site-header-size.js';
 import { TOC_BAR_BLOCK_SIZE } from './docs-article.css.js';
 
-const capCentreVar = createVar();
+// WCAG 2.5.8 minimum target size: 24 CSS pixels, whatever the root font size.
+const MIN_TARGET_SIZE = 'max(1.5rem, 24px)';
 
 // Prose spaces a block from the block before it with an element selector at `:where()` strength.
 // Wrappers that stand in for a prose element repeat that spacing here. The `h2 + &` style selectors
@@ -31,15 +32,16 @@ export const headingAnchor = style({
 	'@layer': {
 		recipes: {
 			color: 'inherit',
-			marginInlineEnd: `calc(${vars.space.sp4} + ${vars.controlSize.minTarget})`,
+			marginInlineEnd: `calc(${vars.space.sp4} + ${MIN_TARGET_SIZE})`,
 			textDecoration: 'none',
 		},
 	},
 });
 
 // A zero-size inline box on the baseline, at the end of the reserved space. It adds nothing to the
-// line box, so the Prose gaps around the heading and the Text cap-height trim stay intact. The
-// button is positioned from the baseline.
+// line box, so the Prose gaps around the heading and the Text cap-height trim stay intact. It moves
+// up half the cap height, in the heading's own font, to the centre of the cap-height band, and the
+// button is centred on it.
 export const headingCopyWrapper = style({
 	'@layer': {
 		recipes: {
@@ -47,38 +49,11 @@ export const headingCopyWrapper = style({
 			display: 'inline-block',
 			inlineSize: 0,
 			position: 'relative',
+			translate: '0 -0.5cap',
 			verticalAlign: 'baseline',
 		},
 	},
 });
-
-// Centres the button on the cap-height band: half the band lies above the baseline. The band is the
-// line height less both Capsize trims, which are negative.
-function capCentre(
-	typography: 'body' | 'heading1' | 'heading2' | 'heading3' | 'heading4' | 'lead',
-) {
-	const { baselineTrim, capHeightTrim, lineHeight } = vars.font[typography];
-	return `calc((${lineHeight} + ${capHeightTrim} + ${baselineTrim}) / 2)`;
-}
-
-function wrapperForTypography(typography: Parameters<typeof capCentre>[0]) {
-	return style({
-		'@layer': {
-			recipes: {
-				vars: { [capCentreVar]: capCentre(typography) },
-			},
-		},
-	});
-}
-
-export const headingCopyWrapperByLevel = {
-	1: wrapperForTypography('heading1'),
-	2: wrapperForTypography('heading2'),
-	3: wrapperForTypography('heading3'),
-	4: wrapperForTypography('heading4'),
-	5: wrapperForTypography('lead'),
-	6: wrapperForTypography('body'),
-};
 
 // The control size token is 32px. A 24px target keeps the button quiet beside the heading text and
 // still meets the minimum target size. Hidden until the heading is hovered or keyboard focus is
@@ -86,17 +61,16 @@ export const headingCopyWrapperByLevel = {
 export const headingCopyButton = style({
 	'@layer': {
 		recipes: {
-			blockSize: vars.controlSize.minTarget,
+			blockSize: MIN_TARGET_SIZE,
 			color: vars.color.text.secondary,
-			// The Capsize trims in `translate` are in `em`, so the button takes the heading's font size.
 			fontSize: 'inherit',
-			inlineSize: vars.controlSize.minTarget,
+			inlineSize: MIN_TARGET_SIZE,
 			insetBlockStart: 0,
 			insetInlineEnd: 0,
 			minBlockSize: 0,
 			opacity: 0,
 			position: 'absolute',
-			translate: `0 calc(-50% - ${capCentreVar})`,
+			translate: '0 -50%',
 			transition: `opacity ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
 			selectors: {
 				'&:hover': {
@@ -160,7 +134,7 @@ globalStyle(`${table} th, ${table} td`, {
 globalStyle(`${table} th`, {
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.recessed,
+			backgroundColor: vars.color.surface.subdued,
 			fontWeight: vars.font.weight.label,
 		},
 	},

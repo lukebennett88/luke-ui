@@ -41,7 +41,7 @@ function headingTagAt(depth: number): (typeof HEADING_TAGS)[number] {
 	return HEADING_TAGS[index] ?? 'h5';
 }
 
-/** `actionControlFinish` reads as one word; splits it (and others like it) into heading-sized words. */
+/** `controlFinish` reads as one word; splits it (and others like it) into heading-sized words. */
 function humanizeSegment(segment: string): string {
 	return segment.replace(CAMEL_BOUNDARY_SPACE_PATTERN, '$1 $2');
 }
@@ -249,7 +249,7 @@ function ColorPreview({ path, varName }: LeafPreviewProps) {
 				role="img"
 				style={{
 					...swatchBoxStyle,
-					backgroundColor: vars.color.surface.canvas,
+					backgroundColor: vars.color.surface.base,
 					backgroundImage: `linear-gradient(var(${varName}), var(${varName}))`,
 				}}
 			/>
@@ -272,7 +272,7 @@ function DepthPreview({ path, varName }: LeafPreviewProps) {
 			role="img"
 			style={{
 				...swatchBoxStyle,
-				backgroundColor: vars.color.surface.recessed,
+				backgroundColor: vars.color.surface.subdued,
 				boxShadow: `var(${varName})`,
 			}}
 		/>
@@ -300,7 +300,7 @@ function RadiusPreview({ path, varName }: LeafPreviewProps) {
 			role="img"
 			style={{
 				...swatchBoxStyle,
-				backgroundColor: vars.color.surface.recessed,
+				backgroundColor: vars.color.surface.subdued,
 				borderRadius: `var(${varName})`,
 			}}
 		/>
@@ -324,7 +324,7 @@ function SpacePreview({ path, varName }: LeafPreviewProps) {
 	);
 }
 
-/** Shared by `controlSize` and `iconSize`: both are box dimensions, sized directly from the token. */
+/** `controlSize` leaves are box dimensions, sized directly from the token. */
 function SizePreview({ path, varName }: LeafPreviewProps) {
 	return (
 		<span style={previewFrameStyle}>
@@ -353,10 +353,10 @@ function SizePreview({ path, varName }: LeafPreviewProps) {
 function InteractionPreview({ path, varName }: LeafPreviewProps) {
 	const swatch = {
 		backgroundColor: vars.color.background.accent.solid.rest,
-		blockSize: vars.iconSize.medium,
+		blockSize: vars.space.sp24,
 		borderRadius: vars.radius.detail,
 		display: 'inline-block',
-		inlineSize: vars.iconSize.medium,
+		inlineSize: vars.space.sp24,
 	} as const satisfies CSSProperties;
 
 	return (
@@ -391,10 +391,10 @@ function MotionPreview({ path, segments, varName }: LeafPreviewProps) {
 					animationName: 'luke-token-board-motion',
 					animationTimingFunction: easing,
 					backgroundColor: vars.color.background.accent.solid.rest,
-					blockSize: vars.iconSize.xsmall,
+					blockSize: vars.space.sp16,
 					borderRadius: vars.radius.full,
 					display: 'inline-block',
-					inlineSize: vars.iconSize.xsmall,
+					inlineSize: vars.space.sp16,
 				}}
 			/>
 		</span>
@@ -426,44 +426,6 @@ function TextSample({
 			>
 				{children}
 			</span>
-		</span>
-	);
-}
-
-/**
- * `baselineTrim` and `capHeightTrim` are capsize margin offsets applied to a `::before`/`::after`
- * pair in `text/recipe.css.ts`; a plain swatch cannot show a margin, so this applies the trim
- * directly to a bar's block-start or block-end margin instead.
- */
-function TrimSample({
-	label,
-	marginProperty,
-	varName,
-}: {
-	label: string;
-	marginProperty: 'marginBlockEnd' | 'marginBlockStart';
-	varName: string;
-}) {
-	return (
-		<span
-			style={{
-				...previewFrameStyle,
-				borderColor: vars.color.border.decorative,
-				borderStyle: 'solid',
-				borderWidth: 1,
-			}}
-		>
-			<span
-				aria-label={label}
-				role="img"
-				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
-					blockSize: vars.space.sp12,
-					display: 'inline-block',
-					inlineSize: vars.space.sp24,
-					[marginProperty]: `var(${varName})`,
-				}}
-			/>
 		</span>
 	);
 }
@@ -500,32 +462,27 @@ function FontPreview({ path, segments, varName }: LeafPreviewProps) {
 			</TextSample>
 		);
 	}
-	if (third === 'letterSpacing') {
-		return (
-			<TextSample
-				label={label}
-				style={{ fontSize: `var(${fontSizeVarName})`, letterSpacing: `var(${varName})` }}
-			/>
-		);
-	}
-
-	const marginProperty = third === 'baselineTrim' ? 'marginBlockStart' : 'marginBlockEnd';
-	return <TrimSample label={label} marginProperty={marginProperty} varName={varName} />;
+	// The remaining leaf is `letterSpacing`.
+	return (
+		<TextSample
+			label={label}
+			style={{ fontSize: `var(${fontSizeVarName})`, letterSpacing: `var(${varName})` }}
+		/>
+	);
 }
 
 /**
  * Previews a plain colour swatch cannot express — motion, spacing, radius, depth, and control-finish
  * tokens each need a family-specific visual — keyed by the contract's own top-level family names.
- * Typed as `Record<Family, …>` rather than `Partial`, so a ninth top-level family added to
+ * Typed as `Record<Family, …>` rather than `Partial`, so a new top-level family added to
  * `contract.ts` is a type error here until this board grows a renderer for it too.
  */
 const familyPreviews: Record<Family, PreviewRenderer> = {
-	actionControlFinish: FinishPreview,
 	color: ColorPreview,
+	controlFinish: FinishPreview,
 	controlSize: SizePreview,
 	depth: DepthPreview,
 	font: FontPreview,
-	iconSize: SizePreview,
 	interaction: InteractionPreview,
 	motion: MotionPreview,
 	radius: RadiusPreview,

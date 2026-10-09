@@ -86,7 +86,7 @@ export function HomeHero() {
 				</Box>
 			</Stack>
 			<Box
-				backgroundColor="surface.floating"
+				backgroundColor="surface.subdued"
 				borderColor="decorative"
 				borderRadius="surface"
 				borderStyle="solid"

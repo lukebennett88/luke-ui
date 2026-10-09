@@ -7,7 +7,7 @@ export function DecorativeBox({ style, ...props }: BoxProps) {
 		<Box
 			{...props}
 			style={{
-				backgroundColor: vars.color.surface.recessed,
+				backgroundColor: vars.color.surface.subdued,
 				backgroundImage: `repeating-linear-gradient(
 					-45deg,
 					transparent 0,

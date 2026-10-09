@@ -150,7 +150,7 @@ test('keeps Cluster defaults below sparse responsive alignment overrides', async
 });
 
 const itemStyle = {
-	backgroundColor: vars.color.surface.floating,
+	backgroundColor: vars.color.surface.base,
 	borderRadius: vars.radius.detail,
 	color: vars.color.text.primary,
 	paddingBlock: vars.space.sp8,
@@ -164,7 +164,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				<Cluster
 					gap="sp8"
 					style={{
-						backgroundColor: vars.color.surface.recessed,
+						backgroundColor: vars.color.surface.subdued,
 						borderRadius: vars.radius.surface,
 						color: vars.color.text.primary,
 						inlineSize: '14rem',
@@ -182,7 +182,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					gap="sp8"
 					justifyContent="space-between"
 					style={{
-						backgroundColor: vars.color.surface.recessed,
+						backgroundColor: vars.color.surface.subdued,
 						borderRadius: vars.radius.surface,
 						color: vars.color.text.primary,
 						padding: vars.space.sp16,
@@ -196,7 +196,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 						elementType="ul"
 						gap="sp8"
 						style={{
-							backgroundColor: vars.color.surface.recessed,
+							backgroundColor: vars.color.surface.subdued,
 							borderRadius: vars.radius.surface,
 							color: vars.color.text.primary,
 							listStyle: 'none',

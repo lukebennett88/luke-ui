@@ -1,24 +1,24 @@
-import { vars } from '../../theme/contract.css.js';
+import { ICON_SIZES } from '../sizing/icon-sizing.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /** Shared size dimensions for Icon and LoadingSpinner (icon-aligned sizing). */
 export const iconSizeVariants = {
 	large: {
-		blockSize: vars.iconSize.large,
-		inlineSize: vars.iconSize.large,
+		blockSize: ICON_SIZES.large,
+		inlineSize: ICON_SIZES.large,
 	},
 	medium: {
-		blockSize: vars.iconSize.medium,
-		inlineSize: vars.iconSize.medium,
+		blockSize: ICON_SIZES.medium,
+		inlineSize: ICON_SIZES.medium,
 	},
 	small: {
-		blockSize: vars.iconSize.small,
-		inlineSize: vars.iconSize.small,
+		blockSize: ICON_SIZES.small,
+		inlineSize: ICON_SIZES.small,
 	},
 	xsmall: {
-		blockSize: vars.iconSize.xsmall,
-		inlineSize: vars.iconSize.xsmall,
+		blockSize: ICON_SIZES.xsmall,
+		inlineSize: ICON_SIZES.xsmall,
 	},
 } as const;
 
