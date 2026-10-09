@@ -102,6 +102,35 @@ test('the Button scene has no axe violations', async () => {
 	await expectNoAxeViolations(container);
 });
 
+// The inset is the padding plus the 1px border it replaces, so the Button keeps the outer size it
+// had with a border. Forced colours draws the border instead.
+const buttonInlineInsets = [
+	['medium', 17],
+	['small', 13],
+] as const;
+
+for (const [size, inset] of buttonInlineInsets) {
+	for (const forcedColors of ['none', 'active'] as const) {
+		test(`a ${size} Button insets its label ${inset}px from each edge with forced colours ${forcedColors}`, async () => {
+			await emulateForcedColors(forcedColors);
+
+			try {
+				const { locator } = render(<Button size={size}>Save changes</Button>);
+				const button = locator.getByRole('button', { name: 'Save changes' }).element();
+				const label = button.querySelector('span');
+				if (!(label instanceof HTMLElement)) throw new Error('Expected a label.');
+				const buttonBox = button.getBoundingClientRect();
+				const labelBox = label.getBoundingClientRect();
+
+				expect(labelBox.left - buttonBox.left).toBeCloseTo(inset, 1);
+				expect(buttonBox.right - labelBox.right).toBeCloseTo(inset, 1);
+			} finally {
+				await emulateForcedColors('none');
+			}
+		});
+	}
+}
+
 test('a text Button has the same layout styles as inline Text without control padding or sizing', () => {
 	const { locator } = render(
 		<div>

@@ -204,7 +204,8 @@ transition list. Colour, border, depth, and finish transitions stay. Overlay ani
 
 Buttons draw no border outside forced colours. An inset shadow and a background image paint inside
 the border, so a transparent 1px border left an unshaded rim around a pressed face, and let the
-finish tile into the border strip.
+finish tile into the border strip. Each size adds 1px to its inline padding instead, so the outer
+size is unchanged. Forced colours draws the 1px border with the plain padding.
 
 ### Tactile material
 
