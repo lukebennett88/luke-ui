@@ -79,7 +79,7 @@ describe('theme contract', () => {
 	});
 
 	it('partitions identity and mode paths from the declared mode families', () => {
-		expect(modeFamilies).toEqual(['actionControlFinish', 'color', 'depth']);
+		expect(modeFamilies).toEqual(['color', 'controlFinish', 'depth']);
 		const pairs = flattenThemeContract();
 		const { identityPairs, modePairs } = partitionContractPairs(pairs);
 		expect(identityPairs.length + modePairs.length).toBe(pairs.length);
@@ -114,6 +114,30 @@ describe('theme contract', () => {
 		expect(vars.color.overlay).toEqual({
 			backdrop: 'var(--luke-color-overlay-backdrop)',
 		});
+	});
+
+	it('keeps the settled 1.0 surface, border, sizing, and type style leaves', () => {
+		expect(Object.keys(vars.color.surface)).toEqual(['base', 'subdued', 'field', 'overlay']);
+		expect(Object.keys(vars.color.border).slice(0, 4)).toEqual([
+			'decorative',
+			'control',
+			'controlHover',
+			'focus',
+		]);
+		expect(Object.keys(vars.controlFinish)).toEqual(['recessed', 'resting', 'raised']);
+		expect(Object.keys(vars.controlSize)).toEqual(['small', 'medium']);
+		for (const style of typeStyles) {
+			expect(Object.keys(vars.font[style]).sort()).toEqual([
+				'fontFamily',
+				'fontSize',
+				'fontWeight',
+				'letterSpacing',
+				'lineHeight',
+			]);
+		}
+		// Component geometry and font metrics are private, not public families.
+		expect(Object.hasOwn(vars, 'iconSize')).toBe(false);
+		expect(Object.hasOwn(vars, 'actionControlFinish')).toBe(false);
 	});
 
 	it('derives the spacing contract keys from the spacing scale', () => {

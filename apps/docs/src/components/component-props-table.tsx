@@ -53,7 +53,7 @@ function PropGroup({
 }) {
 	return (
 		<Box
-			backgroundColor="surface.canvas"
+			backgroundColor="surface.base"
 			borderColor="decorative"
 			borderRadius="surface"
 			borderStyle="solid"

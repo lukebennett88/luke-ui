@@ -53,7 +53,6 @@ describe('theme inheritance', () => {
 		const base: ThemeInput = {
 			color: {
 				accent: '#3b82f6',
-				background: 'oklch(0.6 0.02 260)',
 				danger: { dark: 'oklch(0.72 0.16 25)', light: 'oklch(0.52 0.18 27)' },
 				focus: { dark: 'oklch(0.72 0.13 255)', light: 'oklch(0.55 0.17 255)' },
 				info: { dark: 'oklch(0.72 0.13 255)', light: 'oklch(0.52 0.16 255)' },
@@ -61,6 +60,12 @@ describe('theme inheritance', () => {
 				neutralStyle: 'cool',
 				backdrop: 'oklch(0 0 0 / 0.3)',
 				success: { dark: 'oklch(0.74 0.13 150)', light: 'oklch(0.5 0.13 150)' },
+				surface: {
+					base: 'oklch(0.6 0.02 260)',
+					field: { light: 'oklch(0.99 0.01 260)' },
+					overlay: { dark: 'oklch(0.3 0.01 260)' },
+					subdued: { dark: 'oklch(0.18 0.01 260)', light: 'oklch(0.96 0.01 260)' },
+				},
 				warning: { dark: 'oklch(0.78 0.13 80)', light: 'oklch(0.72 0.14 75)' },
 			},
 			name: 'all-roles',
@@ -95,6 +100,34 @@ describe('theme inheritance', () => {
 		expect(dark.l).toBeCloseTo(0.72, 1);
 	});
 
+	it('merges surfaces role by role, replacing each authored role whole', () => {
+		const base: ThemeInput = {
+			color: {
+				accent: '#3b82f6',
+				surface: {
+					field: { dark: 'oklch(0.2 0 0)', light: 'oklch(0.97 0 0)' },
+					subdued: { dark: 'oklch(0.18 0 0)', light: 'oklch(0.95 0 0)' },
+				},
+			},
+			name: 'surface-base',
+		};
+		const foundation = foundationOf({
+			color: { surface: { field: { light: 'oklch(0.99 0 0)' } } },
+			extends: base,
+			name: 'surface-child',
+		});
+
+		// The child's field replaces the base's field whole, so the dark side falls back to generation.
+		expect(foundation.light.color.surface.field).toEqual(
+			gamutMapOklch(parseColor('oklch(0.99 0 0)')),
+		);
+		expect(foundation.dark.color.surface.field).toBeUndefined();
+		// A surface the child leaves out is inherited from the base.
+		expect(foundation.light.color.surface.subdued).toEqual(
+			gamutMapOklch(parseColor('oklch(0.95 0 0)')),
+		);
+	});
+
 	it('treats the neutral character as one decision', () => {
 		const base: ThemeInput = {
 			color: {
@@ -124,13 +157,13 @@ describe('theme inheritance', () => {
 				light: { overlay: 'base-light-overlay', resting: 'base-light-resting' },
 			},
 			name: 'material-base',
-			radius: { base: 4, control: 10 },
+			radius: { control: 10, surface: 14 },
 		};
 		const foundation = foundationOf({
 			depth: { light: { overlay: 'own-light-overlay', resting: undefined } },
 			extends: base,
 			name: 'material-child',
-			radius: { base: 8 },
+			radius: { detail: 2, surface: undefined },
 		});
 
 		expect(foundation.light.depth.overlay).toBe('own-light-overlay');
@@ -141,8 +174,8 @@ describe('theme inheritance', () => {
 		// Dark is untouched by a light-only override.
 		expect(foundation.dark.depth.overlay).toBe('base-dark-overlay');
 
-		// The base's pinned `control` survives, and every other step regenerates from the new base.
-		expect(foundation.radius).toEqual({ control: 10, detail: 8, overlay: 32, surface: 24 });
+		// The base's radii survive, a step authored as `undefined` inherits, and the child adds its own.
+		expect(foundation.radius).toEqual({ control: 10, detail: 2, surface: 14 });
 	});
 
 	it('replaces the font family and merges the font weights', () => {
@@ -211,6 +244,30 @@ describe('theme inheritance', () => {
 		expect(thrown.inheritance?.ownColors).toContain('color.focus');
 		expect(thrown.inheritance?.inheritedColors).toContain('color.accent');
 		expect(thrown.inheritance?.inheritedColors).toContain('color.neutral');
+	});
+
+	it('names surface provenance role by role on a contrast failure', () => {
+		const base: ThemeInput = {
+			color: { accent: '#3b82f6', surface: { overlay: { light: 'oklch(1 0 0)' } } },
+			name: 'surface-provenance-base',
+		};
+		let thrown: unknown = null;
+		try {
+			defineTheme({
+				color: { surface: { field: { light: 'oklch(0.6 0 0)' } } },
+				extends: base,
+				name: 'surface-provenance',
+			});
+		} catch (error) {
+			thrown = error;
+		}
+
+		expect(thrown).toBeInstanceOf(ThemeContrastError);
+		if (!(thrown instanceof ThemeContrastError)) return;
+		expect(thrown.inheritance?.ownColors).toEqual(['color.surface.field']);
+		expect(thrown.inheritance?.inheritedColors).toContain('color.surface.overlay');
+		expect(thrown.inheritance?.inheritedColors).not.toContain('color.surface.base');
+		expect(thrown.message).toContain('Own colours: color.surface.field.');
 	});
 
 	it('does not report a colour a later theme in the chain discarded', () => {

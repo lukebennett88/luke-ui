@@ -60,7 +60,7 @@ export function ExamplePreview({
 				minSize={isResizable ? MIN_PREVIEW_WIDTH + RESIZE_GUTTER_WIDTH : 0}
 			>
 				{/* CSS sets the gutter before measurement. Examples query this canvas's width. */}
-				<Box backgroundColor="surface.canvas" className={styles.previewCanvas} overflow="hidden">
+				<Box backgroundColor="surface.base" className={styles.previewCanvas} overflow="hidden">
 					<StoryWrapper layout={layout}>{children}</StoryWrapper>
 				</Box>
 			</Panel>
@@ -115,7 +115,7 @@ function ExamplePreviewResizeGrip() {
 		<Box
 			alignItems="center"
 			aria-hidden
-			backgroundColor="surface.canvas"
+			backgroundColor="surface.base"
 			blockSize={GRIP_BLOCK_SIZE}
 			borderRadius="full"
 			borderStyle="solid"

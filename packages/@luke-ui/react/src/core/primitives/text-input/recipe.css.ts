@@ -51,7 +51,7 @@ export const textInputRecipe = recipe({
 			},
 		},
 		...textInputInputBase,
-		backgroundColor: vars.color.surface.recessed,
+		backgroundColor: vars.color.surface.field,
 		borderColor: vars.color.border.control,
 		borderRadius: vars.radius.control,
 		borderStyle: 'solid',
@@ -62,33 +62,25 @@ export const textInputRecipe = recipe({
 		transitionProperty: 'background-color, border-color, box-shadow, color',
 		transitionTimingFunction: vars.motion.easing.standard,
 
+		// Precedence: invalid beats read-only and hover. Focus only adds the ring, so it composes with
+		// every state.
 		selectors: {
 			...textInputInputBase.selectors,
 			[input.disabled]: {
 				opacity: vars.interaction.disabledOpacity,
 			},
-			[input.focusWithin]: {
-				borderColor: vars.color.border.accent,
-				...focusRing(vars.color.border.focus),
-			},
+			[input.focusWithin]: focusRing(vars.color.border.focus),
 			[input.hover]: {
-				borderColor: vars.color.border.accent,
+				borderColor: vars.color.border.controlHover,
 			},
+			// Read-only drops the inset depth. The hover selector already excludes it.
 			[input.readOnly]: {
-				backgroundColor: vars.color.surface.canvas,
-				borderColor: vars.color.border.decorative,
 				boxShadow: 'none',
-			},
-			[input.readOnlyFocusWithin]: {
-				...focusRing(vars.color.border.focus),
 			},
 			// After `readOnly`, so a read-only invalid input keeps its cue.
 			[input.invalid]: {
 				borderColor: vars.color.background.danger.solid.rest,
 				boxShadow: `inset 0 0 0 1px ${vars.color.background.danger.solid.rest}`,
-			},
-			[input.invalidFocusWithin]: {
-				...focusRing(vars.color.border.focus),
 			},
 		},
 	},

@@ -36,7 +36,7 @@ export default () => {
 		<Box
 			// These utility props turn a plain Box into a card. Background, border,
 			// radius, and shadow all come from the theme scale.
-			backgroundColor="surface.floating"
+			backgroundColor="surface.subdued"
 			borderColor="decorative"
 			borderRadius="surface"
 			borderStyle="solid"

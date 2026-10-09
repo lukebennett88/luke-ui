@@ -50,6 +50,33 @@ const PUBLISHED_PATH_PATTERN = /^(?:dist\/|skills\/|LICENSE$|README\.md$|package
 const WORKSPACE_PROTOCOL_PATTERN = /^(?:catalog|file|link|portal|workspace):/;
 const ASSET_EXPORT_PATTERN = /\.(?:css|svg)$/;
 const CUSTOM_PROPERTY_PATTERN = /--luke-[a-z-]+:/;
+/** Custom properties a bundled theme must define: the 1.0 surfaces, boundaries, and finish. */
+const REQUIRED_THEME_PROPERTIES = [
+	'--luke-color-surface-base',
+	'--luke-color-surface-subdued',
+	'--luke-color-surface-field',
+	'--luke-color-surface-overlay',
+	'--luke-color-border-control',
+	'--luke-color-border-control-hover',
+	'--luke-control-finish-resting',
+	'--luke-control-size-small',
+	'--luke-control-size-medium',
+	// Private, but `Text` cannot trim without it.
+	'--luke-internal-font-body-baseline-trim',
+	'--luke-internal-font-body-cap-height-trim',
+];
+/** Removed pre-1.0 properties. A bundled theme must not emit them. */
+const REMOVED_THEME_PROPERTIES = [
+	'--luke-color-surface-canvas',
+	'--luke-color-surface-recessed',
+	'--luke-color-surface-floating',
+	'--luke-action-control-finish-',
+	'--luke-icon-size-',
+	'--luke-control-size-min-target',
+	'--luke-control-size-combobox-action',
+	'--luke-font-body-baseline-trim',
+	'--luke-font-body-cap-height-trim',
+];
 const SYMBOL_PATTERN = /<symbol\b[^>]*\bid="/;
 /** The statement that fixes cascade layer order at the top of the shared stylesheet. */
 const LAYER_STATEMENT = `@layer ${cascadeLayerNames.join(', ')};`;
@@ -385,6 +412,21 @@ for (const peerSet of peerSets) {
 				};
 			});
 			expect(assets.filter((asset) => !asset.installed || !asset.valid)).toEqual([]);
+		});
+
+		test('ships bundled themes that emit the settled token contract', () => {
+			const require = createRequire(path.join(consumerDir, 'package.json'));
+			for (const theme of ['tactile', 'paper']) {
+				const css = readFileSync(
+					require.resolve(`@luke-ui/react/themes/${theme}/stylesheet.css`),
+					'utf8',
+				);
+				expect({
+					missing: REQUIRED_THEME_PROPERTIES.filter((name) => !css.includes(`${name}:`)),
+					removed: REMOVED_THEME_PROPERTIES.filter((name) => css.includes(name)),
+					theme,
+				}).toEqual({ missing: [], removed: [], theme });
+			}
 		});
 
 		test('builds a client bundle with Vite', { timeout: 120_000 }, async () => {
@@ -1070,11 +1112,87 @@ import { Button } from '@luke-ui/react/button';
 import { Provider } from '@luke-ui/react/provider';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { breakpoints, defineTheme, type ThemeInput, vars } from '@luke-ui/react/theme';
+import type { entries } from './all-entries.js';
 
-const theme: ThemeInput = { name: 'fixture', color: { accent: '#3355ff' } };
+const theme: ThemeInput = {
+	name: 'fixture',
+	color: { accent: '#3355ff', surface: { base: '#fafafa', field: { light: '#ffffff' } } },
+	controlFinish: { light: { resting: 'none' } },
+	radius: { control: 6 },
+};
 export const css: string = defineTheme(theme);
 export const textColor: string = vars.color.text.primary;
 export const mobileBreakpoint: number = breakpoints.bp640;
+
+// The 1.0 token contract: retained paths compile, and removed pre-1.0 paths do not.
+export const retainedTokens: Array<string> = [
+	vars.color.surface.base,
+	vars.color.surface.subdued,
+	vars.color.surface.field,
+	vars.color.surface.overlay,
+	vars.color.border.control,
+	vars.color.border.controlHover,
+	vars.color.border.warning,
+	vars.color.background.neutral.subtle.pressed,
+	vars.color.text.disabled,
+	vars.color.loadingSkeleton,
+	vars.controlFinish.raised,
+	vars.depth.overlay,
+	vars.font.body.lineHeight,
+	vars.controlSize.small,
+	vars.controlSize.medium,
+	vars.radius.full,
+	vars.interaction.disabledOpacity,
+];
+// @ts-expect-error — replaced by color.surface.base
+export const removedCanvas = vars.color.surface.canvas;
+// @ts-expect-error — removed surface
+export const removedRecessed = vars.color.surface.recessed;
+// @ts-expect-error — removed surface
+export const removedFloating = vars.color.surface.floating;
+// @ts-expect-error — renamed to controlFinish
+export const removedFinish = vars.actionControlFinish;
+// @ts-expect-error — icon sizes are private
+export const removedIconSize = vars.iconSize;
+// @ts-expect-error — the minimum target is private
+export const removedMinTarget = vars.controlSize.minTarget;
+// @ts-expect-error — the Combobox action size is private
+export const removedComboboxAction = vars.controlSize.comboboxAction;
+// @ts-expect-error — Capsize trims are private
+export const removedBaselineTrim = vars.font.body.baselineTrim;
+// @ts-expect-error — Capsize trims are private
+export const removedCapHeightTrim = vars.font.body.capHeightTrim;
+export const removedThemeInputs: Array<ThemeInput> = [
+	// @ts-expect-error — replaced by color.surface.base
+	{ name: 'a', color: { accent: '#3355ff', background: '#ffffff' } },
+	// @ts-expect-error — radius takes explicit roles only
+	{ name: 'b', color: { accent: '#3355ff' }, radius: { base: 4 } },
+	// @ts-expect-error — renamed to controlFinish
+	{ name: 'c', color: { accent: '#3355ff' }, actionControlFinish: {} },
+];
+
+// Box values follow the public token contract.
+export const retainedBoxValues: Array<BoxProps> = [
+	{ backgroundColor: 'surface.field', borderColor: 'controlHover', boxShadow: 'overlay' },
+	{ backgroundColor: 'warning.subtle.rest', borderRadius: 'full', gap: 'sp96' },
+];
+// @ts-expect-error — removed with color.surface.canvas
+export const removedBoxSurface: BoxProps['backgroundColor'] = 'surface.canvas';
+// @ts-expect-error — removed with color.surface.floating
+export const removedBoxFloating: BoxProps['backgroundColor'] = 'surface.floating';
+
+// No public entrypoint exports a private structural constant or the Capsize name helper.
+type ExportNames<Entry> = Entry extends unknown ? keyof Entry : never;
+type PublicExportName = ExportNames<(typeof entries)[number]>;
+type LeakedName = Extract<
+	PublicExportName,
+	| 'ICON_SIZES'
+	| 'MIN_TARGET_SIZE'
+	| 'COMBOBOX_ACTION_SIZE'
+	| 'CONTROL_SIZE_VALUES'
+	| 'capsizeTrimVarName'
+>;
+export const leakedNames: [LeakedName] extends [never] ? true : LeakedName = true;
 
 const renderRoot: NonNullable<BoxProps['renderRoot']> = (domProps, state) => {
 	const emptyState: Record<string, never> = state;

@@ -5,7 +5,7 @@ import { ExampleItem } from '#docs';
 export default () => {
 	return (
 		<Box
-			backgroundColor="surface.recessed"
+			backgroundColor="surface.subdued"
 			borderColor="decorative"
 			borderStyle="solid"
 			borderWidth="thin"

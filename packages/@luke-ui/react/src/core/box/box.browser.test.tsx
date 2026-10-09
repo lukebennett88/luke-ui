@@ -224,7 +224,7 @@ test('layout', { tags: ['visual'] }, async () => {
 				gap="sp8"
 				padding="sp16"
 				style={{
-					backgroundColor: vars.color.surface.recessed,
+					backgroundColor: vars.color.surface.subdued,
 					borderRadius: vars.radius.surface,
 					boxShadow: vars.depth.recessed,
 					color: vars.color.text.primary,

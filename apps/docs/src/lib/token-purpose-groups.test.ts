@@ -17,7 +17,7 @@ test('no purpose group is empty', () => {
 });
 
 const COLOR_PURPOSE_ROUTES = [
-	['color.surface.canvas', 'surfaces'],
+	['color.surface.base', 'surfaces'],
 	['color.overlay.backdrop', 'surfaces'],
 	['color.text.secondary', 'content'],
 	['color.loadingSkeleton', 'content'],

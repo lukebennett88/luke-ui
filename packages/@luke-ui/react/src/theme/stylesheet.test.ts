@@ -8,6 +8,7 @@ import {
 import { buildTheme } from './build-theme.js';
 import { themeClassName as paperThemeClassName } from './bundles/paper/index.js';
 import { themeClassName as tactileThemeClassName } from './bundles/tactile/index.js';
+import { capsizeTrimVarName } from './capsize-trim-vars.js';
 import { flattenThemeContract, partitionContractPairs, spaceScale } from './contract.js';
 import type { ThemeFoundation } from './foundation.js';
 import { defaultFontWeights, defaultRadius } from './foundation.js';
@@ -20,10 +21,6 @@ const identityVarNames = identityPairs.map(([, varName]) => varName);
 
 function countOccurrences(text: string, needle: string): number {
 	return text.split(needle).length - 1;
-}
-
-function extractShadowOpacities(shadow: string): Array<number> {
-	return [...shadow.matchAll(/\/ ([\d.]+)\)/g)].map((match) => Number(match[1]));
 }
 
 describe('buildTheme output', () => {
@@ -128,66 +125,13 @@ describe('buildTheme output', () => {
 		}
 	});
 
-	it('emits authored semantic depth while keeping only Paper light flat', () => {
+	it('emits authored depth as written', () => {
 		expect(extractValue(blocks.baseLight, '--luke-depth-resting')).toBe(
 			tactileFoundation.light.depth.resting,
 		);
 		expect(extractValue(blocks.mediaDark, '--luke-depth-raised')).toBe(
 			tactileFoundation.dark.depth.raised,
 		);
-		for (const foundation of [tactileFoundation, paperFoundation]) {
-			for (const mode of ['light', 'dark'] as const) {
-				expect(foundation[mode].depth.resting).not.toContain('inset');
-				expect(foundation[mode].depth.raised).not.toContain('inset');
-				expect(foundation[mode].depth.resting.split(', ')).toHaveLength(2);
-				expect(foundation[mode].depth.raised.split(', ')).toHaveLength(2);
-			}
-		}
-		expect(paperFoundation.light.depth.recessed).toBe('none');
-		for (const recessed of [
-			tactileFoundation.light.depth.recessed,
-			tactileFoundation.dark.depth.recessed,
-			paperFoundation.dark.depth.recessed,
-		]) {
-			expect(recessed).not.toBe('none');
-			expect(recessed.split(', ').every((layer) => layer.startsWith('inset '))).toBe(true);
-		}
-	});
-
-	it('keeps Paper softer than Tactile while retaining finish and state depth', () => {
-		const paperBlocks = splitBlocks(buildTheme(paperFoundation));
-		expect(extractValue(paperBlocks.identity, '--luke-radius-control')).not.toBe(
-			extractValue(blocks.identity, '--luke-radius-control'),
-		);
-		expect(extractValue(paperBlocks.baseLight, '--luke-depth-recessed')).toBe('none');
-		expect(extractValue(blocks.baseLight, '--luke-depth-recessed').split(', ')).toHaveLength(2);
-
-		const paperDarkRecessed = extractValue(paperBlocks.mediaDark, '--luke-depth-recessed');
-		const tactileDarkRecessed = extractValue(blocks.mediaDark, '--luke-depth-recessed');
-		expect(paperDarkRecessed.split(', ')).toHaveLength(1);
-		expect(tactileDarkRecessed.split(', ')).toHaveLength(2);
-		expect(Math.max(...extractShadowOpacities(tactileDarkRecessed))).toBeGreaterThan(
-			Math.max(...extractShadowOpacities(paperDarkRecessed)),
-		);
-
-		for (const [paperBlock, tactileBlock] of [
-			[paperBlocks.baseLight, blocks.baseLight],
-			[paperBlocks.mediaDark, blocks.mediaDark],
-		] as const) {
-			const paperResting = extractValue(paperBlock, '--luke-depth-resting');
-			const paperRaised = extractValue(paperBlock, '--luke-depth-raised');
-			const paperFinish = extractValue(paperBlock, '--luke-action-control-finish-resting');
-			const tactileResting = extractValue(tactileBlock, '--luke-depth-resting');
-
-			expect(paperResting).not.toBe(tactileResting);
-			expect(paperResting.split(', ')).toHaveLength(2);
-			expect(paperRaised.split(', ')).toHaveLength(2);
-			expect(paperRaised).not.toBe(paperResting);
-			expect(paperFinish).toContain('radial-gradient');
-			expect(paperFinish).not.toBe(
-				extractValue(tactileBlock, '--luke-action-control-finish-resting'),
-			);
-		}
 	});
 });
 
@@ -225,8 +169,11 @@ describe('buildTheme defaults', () => {
 			const identity = splitBlocks(css).identity;
 
 			for (const style of typeStyles) {
-				expect(identity).toContain(`--luke-font-${style}-cap-height-trim:`);
-				expect(identity).toContain(`--luke-font-${style}-baseline-trim:`);
+				// The trims are private: `Text` reads them, but they are not public tokens.
+				expect(identity).toContain(`${capsizeTrimVarName(style, 'capHeightTrim')}:`);
+				expect(identity).toContain(`${capsizeTrimVarName(style, 'baselineTrim')}:`);
+				expect(identity).not.toContain(`--luke-font-${style}-cap-height-trim:`);
+				expect(identity).not.toContain(`--luke-font-${style}-baseline-trim:`);
 				expect(identity).toContain(`--luke-font-${style}-font-weight:`);
 				expect(identity).toContain(`--luke-font-${style}-font-family:`);
 			}

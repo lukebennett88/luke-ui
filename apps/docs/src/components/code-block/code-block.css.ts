@@ -4,7 +4,7 @@ import { globalStyle, style } from '@vanilla-extract/css';
 export const root = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.recessed,
+			backgroundColor: vars.color.surface.subdued,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.surface,
 			borderStyle: 'solid',
@@ -96,7 +96,7 @@ export const actions = style({
 export const overlayActions = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.recessed,
+			backgroundColor: vars.color.surface.subdued,
 			insetBlockStart: `calc(${vars.space.sp12} + (${vars.font.caption.lineHeight} / 2) - (${vars.controlSize.small} / 2))`,
 			insetInlineEnd: vars.space.sp8,
 			position: 'absolute',

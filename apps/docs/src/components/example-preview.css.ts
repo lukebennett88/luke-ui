@@ -59,7 +59,7 @@ export const previewCanvas = style({
 export const previewOutside = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: `color-mix(in oklab, ${vars.color.surface.recessed} 50%, transparent)`,
+			backgroundColor: `color-mix(in oklab, ${vars.color.surface.subdued} 50%, transparent)`,
 		},
 	},
 });

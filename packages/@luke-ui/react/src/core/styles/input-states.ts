@@ -48,11 +48,11 @@ export function composeInputStateSelectors(extraStates: Partial<Record<InputStat
 	return {
 		disabled: `&:where(${states.disabled})`,
 		focusWithin: `&:where(${states.focusWithin})${notDisabled}`,
-		hover: `&:where(${states.hover})${notDisabled}:not(:where(${states.focusWithin})):not(:where(${states.readOnly}))`,
+		// Read-only and disabled controls give no hover feedback. Focus does not suppress it: focus
+		// draws its own ring and leaves the border to hover.
+		hover: `&:where(${states.hover})${notDisabled}:not(:where(${states.readOnly}))`,
 		invalid: `&:where(${states.invalid})${notDisabled}`,
-		invalidFocusWithin: `&:where(${states.invalid}):where(${states.focusWithin})${notDisabled}`,
 		readOnly: `&:where(${states.readOnly})${notDisabled}`,
-		readOnlyFocusWithin: `&:where(${states.readOnly}):where(${states.focusWithin})${notDisabled}`,
 	};
 }
 

@@ -128,7 +128,7 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 		>
 			<Box
 				alignItems="center"
-				backgroundColor="surface.canvas"
+				backgroundColor="surface.base"
 				display="flex"
 				gap="sp8"
 				justifyContent="space-between"

@@ -43,7 +43,7 @@ const selectConfig = {
 			},
 			alignItems: 'center',
 			appearance: 'none',
-			backgroundColor: vars.color.surface.recessed,
+			backgroundColor: vars.color.surface.field,
 			borderColor: vars.color.border.control,
 			borderRadius: vars.radius.control,
 			borderStyle: 'solid',
@@ -63,7 +63,7 @@ const selectConfig = {
 			paddingBlock: 0,
 			textAlign: 'start',
 			transitionDuration: vars.motion.duration.feedback,
-			transitionProperty: 'background-color, border-color, color',
+			transitionProperty: 'background-color, border-color, box-shadow, color',
 			transitionTimingFunction: vars.motion.easing.standard,
 
 			selectors: {
@@ -71,12 +71,12 @@ const selectConfig = {
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
-				[`&[data-hovered="true"]${notDisabled}`]: { borderColor: vars.color.border.accent },
-				[`&[aria-expanded="true"]${notDisabled}`]: { borderColor: vars.color.border.accent },
-				[`&[data-focus-visible="true"]${notDisabled}`]: {
-					borderColor: vars.color.border.accent,
-					...focusRing(vars.color.border.focus),
+				// An open select keeps the hover border while its popover is showing.
+				[`&[data-hovered="true"]${notDisabled}, &[aria-expanded="true"]${notDisabled}`]: {
+					borderColor: vars.color.border.controlHover,
 				},
+				// Focus only adds the ring, so it composes with every state.
+				[`&[data-focus-visible="true"]${notDisabled}`]: focusRing(vars.color.border.focus),
 				// The field's error message carries the non-colour invalid cue, so the border keeps its
 				// resting width and only takes the danger colour. This comes after the states above so an
 				// invalid select keeps its danger border while hovered, open, or focused.

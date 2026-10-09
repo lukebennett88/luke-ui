@@ -1,6 +1,8 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { COMBOBOX_ACTION_SIZE } from '../../sizing/combobox-sizing.js';
+import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
@@ -12,13 +14,10 @@ import { recipe } from '../../styles/recipe.js';
 
 // React Aria publishes disabled and invalid state on the group, so those states
 // do not need to probe descendants.
-const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, readOnlyFocusWithin } =
-	composeInputStateSelectors();
+const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSelectors();
 
 // The well ring tracks the text input so inner actions do not paint a second ring.
 const inputFocus = `${focusWithin}:has(input:focus)`;
-const invalidInputFocus = `${invalidFocusWithin}:has(input:focus)`;
-const readOnlyInputFocus = `${readOnlyFocusWithin}:has(input:focus)`;
 
 const comboboxActionStyles = {
 	'@media': {
@@ -60,8 +59,8 @@ const comboboxActionStyles = {
 	fontSize: 'inherit',
 	fontWeight: 'inherit',
 	justifyContent: 'center',
-	minBlockSize: vars.controlSize.minTarget,
-	minInlineSize: vars.controlSize.minTarget,
+	minBlockSize: MIN_TARGET_SIZE,
+	minInlineSize: MIN_TARGET_SIZE,
 	transform: 'none',
 	transitionDuration: vars.motion.duration.feedback,
 	transitionProperty: 'background-color, color',
@@ -116,13 +115,12 @@ const comboboxConfig = {
 					selectors: {
 						[disabled]: { borderColor: 'GrayText', color: 'GrayText', opacity: 1 },
 						[inputFocus]: { outlineColor: 'Highlight' },
-						[invalidInputFocus]: { outlineColor: 'Highlight' },
 					},
 				},
 				'(prefers-reduced-motion: reduce)': { transition: 'none' },
 			},
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.recessed,
+			backgroundColor: vars.color.surface.field,
 			borderColor: vars.color.border.control,
 			borderRadius: vars.radius.control,
 			borderStyle: 'solid',
@@ -141,31 +139,22 @@ const comboboxConfig = {
 			outline: 'none',
 			overflow: 'visible',
 			transitionDuration: vars.motion.duration.feedback,
-			transitionProperty: 'background-color, border-color, color',
+			transitionProperty: 'background-color, border-color, box-shadow, color',
 			transitionTimingFunction: vars.motion.easing.standard,
 
+			// Precedence: invalid beats read-only and hover. Focus only adds the ring, so it composes
+			// with every state. Opening the popover adds no border state of its own.
 			selectors: {
 				[disabled]: { cursor: 'not-allowed', opacity: vars.interaction.disabledOpacity },
-				[inputFocus]: {
-					borderColor: vars.color.border.accent,
-					...focusRing(vars.color.border.focus),
-				},
-				[hover]: { borderColor: vars.color.border.accent },
+				[inputFocus]: focusRing(vars.color.border.focus),
+				[hover]: { borderColor: vars.color.border.controlHover },
+				// Read-only drops the inset depth. The hover selector already excludes it.
+				[readOnly]: { boxShadow: 'none' },
 				// The field's error message carries the non-colour invalid cue, so the border keeps
 				// its resting width and only takes the danger colour.
 				[invalid]: {
 					borderColor: vars.color.background.danger.solid.rest,
 				},
-				[invalidInputFocus]: {
-					borderColor: vars.color.background.danger.solid.rest,
-					...focusRing(vars.color.border.focus),
-				},
-				[readOnly]: {
-					backgroundColor: vars.color.surface.canvas,
-					borderColor: vars.color.border.decorative,
-					boxShadow: 'none',
-				},
-				[readOnlyInputFocus]: { ...focusRing(vars.color.border.focus) },
 			},
 		},
 		textInput: {
@@ -216,7 +205,7 @@ const comboboxConfig = {
 					},
 				},
 			},
-			backgroundColor: vars.color.surface.floating,
+			backgroundColor: vars.color.surface.overlay,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.surface,
 			borderStyle: 'solid',
@@ -311,7 +300,7 @@ const comboboxConfig = {
 			display: 'flex',
 			gap: vars.space.sp8,
 			inlineSize: '100%',
-			minBlockSize: vars.controlSize.minTarget,
+			minBlockSize: MIN_TARGET_SIZE,
 			minInlineSize: 0,
 			outline: 'none',
 			touchAction: 'manipulation',
@@ -364,7 +353,7 @@ const comboboxConfig = {
 			// `inlineSize: '100%'` resolves against a shrink-to-fit ancestor, which would collapse
 			// the closed trigger onto its selected value. This floor reserves 20ch of value text
 			// plus room for the trailing chevron.
-			minInlineSize: `calc(20ch + ${vars.controlSize.comboboxAction})`,
+			minInlineSize: `calc(20ch + ${COMBOBOX_ACTION_SIZE})`,
 		},
 		trayValue: {
 			flex: 1,
@@ -459,8 +448,8 @@ const comboboxConfig = {
 		{
 			slots: ['trigger', 'clearButton'],
 			style: {
-				blockSize: vars.controlSize.comboboxAction,
-				inlineSize: vars.controlSize.comboboxAction,
+				blockSize: COMBOBOX_ACTION_SIZE,
+				inlineSize: COMBOBOX_ACTION_SIZE,
 				paddingInline: 0,
 			},
 			variants: { size: 'medium' },
@@ -468,8 +457,8 @@ const comboboxConfig = {
 		{
 			slots: ['trigger', 'clearButton'],
 			style: {
-				blockSize: vars.controlSize.minTarget,
-				inlineSize: vars.controlSize.minTarget,
+				blockSize: MIN_TARGET_SIZE,
+				inlineSize: MIN_TARGET_SIZE,
 				paddingInline: 0,
 			},
 			variants: { size: 'small' },

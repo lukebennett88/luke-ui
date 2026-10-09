@@ -2,26 +2,16 @@ import { defineProperties, defineSprinkles } from '@luke-ui/rainbow-sprinkles';
 import type { Properties as CSSProperties } from 'csstype';
 import { typedEntries } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
-import type { SpaceStep } from '../../theme/contract.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import type { Prettify } from '../types/prettify.js';
 import { layers } from './layers.css.js';
 import { responsiveConditions } from './responsive-conditions.js';
 
+// Every token-backed scale below derives from the public `vars` contract, so a token removed from
+// the contract removes its Box value too.
+
 /** Space steps plus `0`. `'0'` is quoted so declaration emit keeps it a string key. */
-const spaceScale = {
-	'0': '0',
-	sp4: vars.space.sp4,
-	sp8: vars.space.sp8,
-	sp12: vars.space.sp12,
-	sp16: vars.space.sp16,
-	sp24: vars.space.sp24,
-	sp32: vars.space.sp32,
-	sp40: vars.space.sp40,
-	sp48: vars.space.sp48,
-	sp64: vars.space.sp64,
-	sp96: vars.space.sp96,
-} as const satisfies Record<SpaceStep | '0', string>;
+const spaceScale = { '0': '0', ...vars.space } as const;
 
 const marginScale = { ...spaceScale, auto: 'auto' } as const;
 
@@ -40,7 +30,7 @@ type BackgroundColorToken =
 	| `${SemanticRole}.${ProminenceLevel}.${InteractionState}`
 	| `surface.${keyof typeof vars.color.surface}`;
 
-/** Background tokens for semantic roles and elevation surfaces. */
+/** Background tokens for semantic roles and surfaces. */
 const backgroundColorScale = Object.fromEntries([
 	...SEMANTIC_ROLES.flatMap((role) => {
 		return PROMINENCE_LEVELS.flatMap((prominence) => {
@@ -89,23 +79,12 @@ const dynamicProperties = {
 	},
 	backgroundColor: backgroundColorScale,
 	blockSize: true,
+	// `control` and `controlHover` are guaranteed 3:1 boundaries; the role borders are decorative.
 	borderColor: vars.color.border,
-	borderRadius: {
-		detail: vars.radius.detail,
-		control: vars.radius.control,
-		surface: vars.radius.surface,
-		overlay: vars.radius.overlay,
-		full: vars.radius.full,
-	},
+	borderRadius: vars.radius,
 	borderStyle: { none: 'none', solid: 'solid', dashed: 'dashed', dotted: 'dotted' },
 	borderWidth: borderWidthScale,
-	boxShadow: {
-		recessed: vars.depth.recessed,
-		resting: vars.depth.resting,
-		raised: vars.depth.raised,
-		floating: vars.depth.floating,
-		overlay: vars.depth.overlay,
-	},
+	boxShadow: vars.depth,
 	columnGap: spaceScale,
 	display: {
 		block: 'block',

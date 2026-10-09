@@ -1,7 +1,6 @@
 ---
 title: Colour
-description:
-  Use semantic surfaces, content roles, and the shared role contract instead of palette values.
+description: Use semantic surfaces, text, and roles instead of palette values.
 ---
 
 Luke UI names colours by their job. A theme maps those roles to values for each identity and colour
@@ -11,21 +10,25 @@ mode. A component then stays consistent, because it does not need to know the un
 
 Surface roles describe where an element sits in the interface:
 
-- `color.surface.canvas`: the page.
-- `color.surface.recessed`: an inset area.
-- `color.surface.floating`: elevated UI, such as menus and cards.
-- `color.surface.overlay`: dialogs and other high-elevation surfaces. This is an opaque colour.
+- `color.surface.base`: the application background and primary content.
+- `color.surface.subdued`: secondary regions, such as a sidebar or a panel set apart from the page.
+- `color.surface.field`: form-control surfaces.
+- `color.surface.overlay`: detached content, such as menus, popovers, and dialogs. This is an opaque
+  colour.
 
 `color.overlay.backdrop` dims content behind a modal. It is not a surface colour.
 
 Text uses `primary` and `secondary` roles. Borders distinguish decorative, control, and focus uses.
+Text, role foregrounds, `color.border.control`, `color.border.controlHover`, and the focus ring are
+guaranteed to contrast with all four surfaces. `color.border.decorative` is a separator with no
+contrast guarantee.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
 
 <section
 	style={{
-		backgroundColor: vars.color.surface.floating,
+		backgroundColor: vars.color.surface.subdued,
 		borderColor: vars.color.border.decorative,
 		color: vars.color.text.primary,
 	}}
@@ -38,8 +41,8 @@ CSS. It will not adapt when the identity or colour mode changes.
 ## Semantic roles
 
 Six roles cover the meanings a component needs beyond plain surfaces and text: `neutral`, `accent`,
-`info`, `success`, `warning`, and `danger`. Every role offers the same capabilities, so a role's
-meaning never limits what it can do:
+`info`, `success`, `warning`, and `danger`. All six provide the same background, foreground, and
+border tokens. Choose a role for what the colour communicates:
 
 - `neutral`: no accent or status meaning, distinct from ordinary surfaces.
 - `accent`: preferred, selected, or emphasised. Not a promise of a brand colour.
@@ -55,9 +58,6 @@ stays constant, so only the role and mode change its colours.
 
 ### Background and foreground
 
-Background varies by the weight of the surface. Foreground varies by what the content sits on. This
-is why a role has two background ramps, but one foreground ramp and a separate `onSolid` colour.
-
 Each role has a `subtle` and a `solid` background ramp. Each ramp has `rest`, `hover`, and `pressed`
 states:
 
@@ -72,8 +72,8 @@ vars.color.background.warning.solid.hover;
 vars.color.background.warning.solid.pressed;
 ```
 
-Foreground gives each role rest, hover, and pressed colours, plus a colour guaranteed to read
-against that role's solid backgrounds:
+Use a role's `rest`, `hover`, and `pressed` foreground on any surface or on that role's subtle
+background. Use `onSolid` on that role's solid backgrounds:
 
 ```tsx
 vars.color.foreground.warning.rest;
@@ -82,8 +82,7 @@ vars.color.foreground.warning.pressed;
 vars.color.foreground.warning.onSolid;
 ```
 
-`onSolid` is a single token, not a state ramp. It must read against `solid.rest`, `solid.hover`, and
-`solid.pressed`.
+`onSolid` has no states. It reads against `solid.rest`, `solid.hover`, and `solid.pressed`.
 
 Built-in controls select these tokens for hover and pressed. Custom interactive elements should do
 the same.
@@ -94,16 +93,18 @@ Each role also has one state-free border, for example `vars.color.border.warning
 describes meaning. The component decides when to apply it, such as only while invalid or as a
 permanent outline.
 
-Luke UI measures a semantic border for contrast, but does not guarantee it reaches 3:1. See
+Role borders are decorative tints, for example on an application notice. Luke UI measures a role
+border for contrast, but does not guarantee it reaches 3:1. See
 [contrast validation](/docs/authoring-a-theme#contrast-validation). Never rely on one alone to
 communicate a required state such as selected, invalid, or checked. Pair it with text, an icon, or
-another cue that is separately contrast-gated.
+another cue that is separately contrast-gated. Use `color.border.control` when a custom element
+needs a guaranteed boundary.
 
 ### The numeric scale is private
 
-Behind each role, the theme generator builds a numeric colour scale. This scale is an internal
-implementation detail. It is never emitted as CSS and has no public token. Use the semantic roles in
-your application, and use `defineTheme` with source colours to author a theme.
+Behind each role, the theme generator builds a numeric colour scale. It is not emitted as CSS and
+has no public token. Use the semantic roles in your application, and use `defineTheme` with source
+colours to author a theme.
 
 ## Disabled and loading states
 

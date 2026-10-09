@@ -1,4 +1,4 @@
-import { vars } from '../../theme/contract.css.js';
+import { ICON_SIZES } from '../sizing/icon-sizing.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 
 /** Centers the icon graphic inside an icon-only control. */
@@ -14,6 +14,6 @@ export const iconOnlyIconWrapper = style({
  * graphic box directly for a hand-authored custom icon such as a brand mark.
  */
 globalStyleInLayer('recipes', `${iconOnlyIconWrapper} > svg`, {
-	blockSize: vars.iconSize.xsmall,
-	inlineSize: vars.iconSize.xsmall,
+	blockSize: ICON_SIZES.xsmall,
+	inlineSize: ICON_SIZES.xsmall,
 });

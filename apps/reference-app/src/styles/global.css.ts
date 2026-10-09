@@ -25,7 +25,7 @@ globalStyle('html, body', {
 });
 
 globalStyle('body', {
-	background: vars.color.surface.canvas,
+	background: vars.color.surface.subdued,
 	caretColor: vars.color.background.accent.solid.rest,
 	color: vars.color.text.primary,
 	margin: 0,

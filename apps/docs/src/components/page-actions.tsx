@@ -37,9 +37,9 @@ export function PageActions({
 					href={reactAriaUrl}
 					icon={
 						<Box
-							blockSize={vars.iconSize.xsmall}
+							blockSize={vars.space.sp16}
 							flexShrink="0"
-							inlineSize={vars.iconSize.xsmall}
+							inlineSize={vars.space.sp16}
 							renderRoot={({ className, style }) => (
 								<ReactAriaMark className={className} style={style} />
 							)}

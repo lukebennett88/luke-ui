@@ -3,7 +3,6 @@ import type { Oklch } from './color.js';
 import { formatOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
-import { generateSurfaces } from './elevation.js';
 import { defaultSourceColors } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import {
@@ -15,6 +14,7 @@ import {
 	mixInteractionState,
 } from './scale.js';
 import { mapSemanticColors } from './semantic-map.js';
+import { generateSurfaces } from './surfaces.js';
 
 type ColorMode = 'light' | 'dark';
 
@@ -31,6 +31,10 @@ const MODES: ReadonlyArray<ColorMode> = ['light', 'dark'];
 const CONTROL_BORDER: Record<ColorMode, Oklch> = {
 	dark: parseColor('oklch(0.62 0.006 250)'),
 	light: parseColor('oklch(0.38 0.006 250)'),
+};
+const CONTROL_HOVER_BORDER: Record<ColorMode, Oklch> = {
+	dark: parseColor('oklch(0.74 0.006 250)'),
+	light: parseColor('oklch(0.26 0.006 250)'),
 };
 
 const FOCUS = parseColor('oklch(0.6 0.2 260)');
@@ -85,23 +89,23 @@ describe('mapSemanticColors', () => {
 			it(`resolves every leaf to its mapped family step / surface / passthrough (${mode})`, () => {
 				const background = BACKGROUND[mode];
 				const families = buildFamilies(mode, background);
-				const surfaces = generateSurfaces({ background, mode });
+				const surfaces = generateSurfaces({ mode, surface: { base: background } });
 				const backdrop = 'oklch(0 0 0 / 0.45)';
 				const controlBorder = CONTROL_BORDER[mode];
 
 				const result = mapSemanticColors({
 					backdrop,
 					controlBorder,
+					controlHoverBorder: CONTROL_HOVER_BORDER[mode],
 					families,
 					focus: FOCUS,
 					surfaces,
 				});
 
-				// Surfaces: canvas IS the background.
-				expect(result['color.surface.canvas']).toBe(formatOklch(surfaces.canvas));
-				expect(result['color.surface.recessed']).toBe(formatOklch(surfaces.recessed));
-				expect(result['color.surface.floating']).toBe(formatOklch(surfaces.floating));
-				expect(result['color.surface.overlay']).toBe(formatOklch(surfaces.overlay));
+				// Surfaces: the four resolved surfaces pass through.
+				for (const role of ['base', 'subdued', 'field', 'overlay'] as const) {
+					expect(result[`color.surface.${role}`]).toBe(formatOklch(surfaces[role]));
+				}
 				expect(result['color.overlay.backdrop']).toBe(backdrop);
 				expect(result['color.loadingSkeleton']).toBe(
 					formatOklch(families.neutral[FAMILY_RUNG.muted]),
@@ -122,6 +126,7 @@ describe('mapSemanticColors', () => {
 					formatOklch(families.neutral[FAMILY_RUNG.decorative]),
 				);
 				expect(result['color.border.control']).toBe(formatOklch(controlBorder));
+				expect(result['color.border.controlHover']).toBe(formatOklch(CONTROL_HOVER_BORDER[mode]));
 				expect(result['color.border.focus']).toBe(formatOklch(FOCUS));
 
 				// The shared contract: identical rest / hover / pressed mapping for every semantic role.
@@ -171,11 +176,12 @@ describe('mapSemanticColors', () => {
 			it(`assigns every colour leaf exactly once, and nothing else (${mode})`, () => {
 				const background = BACKGROUND[mode];
 				const families = buildFamilies(mode, background);
-				const surfaces = generateSurfaces({ background, mode });
+				const surfaces = generateSurfaces({ mode, surface: { base: background } });
 
 				const result = mapSemanticColors({
 					backdrop: 'oklch(0 0 0 / 0.45)',
 					controlBorder: CONTROL_BORDER[mode],
+					controlHoverBorder: CONTROL_HOVER_BORDER[mode],
 					families,
 					focus: FOCUS,
 					surfaces,
@@ -193,12 +199,13 @@ describe('mapSemanticColors', () => {
 		it('passes the authored backdrop value through verbatim, alpha channel included', () => {
 			const background = BACKGROUND.light;
 			const families = buildFamilies('light', background);
-			const surfaces = generateSurfaces({ background, mode: 'light' });
+			const surfaces = generateSurfaces({ mode: 'light', surface: { base: background } });
 			const backdrop = 'oklch(0 0 0 / 0.5)';
 
 			const result = mapSemanticColors({
 				backdrop,
 				controlBorder: CONTROL_BORDER.light,
+				controlHoverBorder: CONTROL_HOVER_BORDER.light,
 				families,
 				focus: FOCUS,
 				surfaces,

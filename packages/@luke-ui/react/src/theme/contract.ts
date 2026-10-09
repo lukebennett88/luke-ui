@@ -14,10 +14,11 @@ function perRole<Leaf>(leaf: () => Leaf) {
 	};
 }
 
-/** Leaves shared by every public type style. */
+/**
+ * Leaves shared by every public type style. The font-dependent Capsize trims are not public; see
+ * `capsize-trim-vars.ts`.
+ */
 const typeStyle = {
-	baselineTrim: null,
-	capHeightTrim: null,
 	fontFamily: null,
 	fontSize: null,
 	fontWeight: null,
@@ -93,16 +94,21 @@ export const themeContractTree = {
 	 * (`neutral`, `accent`, `info`, `success`, `warning`, `danger`).
 	 *
 	 * Organised by the property a token styles, not by the component that happens to use it: the
-	 * functional leaves (`surface`, `overlay`, `loadingSkeleton`, `text`, and the first three `border`
+	 * functional leaves (`surface`, `overlay`, `loadingSkeleton`, `text`, and the first four `border`
 	 * leaves) come first, then `background` / `foreground` / the role leaves under `border` give all
 	 * six roles the same capabilities. A role's meaning never decides which visual slots it can fill,
 	 * so no role is a special case here. Hover and pressed leaves are generated, not authored.
 	 */
 	color: {
+		/** The four surfaces content sits on. */
 		surface: {
-			canvas: null,
-			recessed: null,
-			floating: null,
+			/** The application background and primary content. */
+			base: null,
+			/** Secondary regions, such as a sidebar or an inline code chip. */
+			subdued: null,
+			/** Form-control surfaces. */
+			field: null,
+			/** Detached content, such as menus, popovers, and dialogs. */
 			overlay: null,
 		},
 		/** Translucent layer painted over other interface content, such as a modal backdrop. */
@@ -121,11 +127,15 @@ export const themeContractTree = {
 		/** Resting, hover, and pressed content colours, plus the guaranteed on-solid pairing. */
 		foreground: perRole(() => ({ ...roleForeground })),
 		border: {
+			/** A subtle separator. Not contrast-checked. */
 			decorative: null,
+			/** The guaranteed 3:1 boundary of a control against every surface. */
 			control: null,
+			/** The hovered control boundary, with the same 3:1 guarantee as `control`. */
+			controlHover: null,
 			focus: null,
 			// The shared semantic borders. State-free on purpose: the token carries the meaning and the
-			// component decides when to apply it.
+			// component decides when to apply it. Decorative tints: they carry no contrast guarantee.
 			...perRole(() => null),
 		},
 	},
@@ -137,8 +147,8 @@ export const themeContractTree = {
 		floating: null,
 		overlay: null,
 	},
-	/** Final background images for the shared Button and IconButton face finish. */
-	actionControlFinish: {
+	/** Final background images for the face of a solid control fill, such as a solid Button. */
+	controlFinish: {
 		recessed: null,
 		resting: null,
 		raised: null,
@@ -172,26 +182,15 @@ export const themeContractTree = {
 	},
 	/** The fixed spacing scale used by components and layout utilities. */
 	space: spaceContract,
-	/** Structural block sizes for small and medium controls, plus the shared minimum tap target. */
+	/** Structural block sizes for small and medium controls. */
 	controlSize: {
 		small: null,
 		medium: null,
-		/** Minimum block and inline size for interactive targets, per WCAG 2.5.8. */
-		minTarget: null,
-		/** Square tap target for `Combobox`'s trigger and clear-button actions. */
-		comboboxAction: null,
 	},
 	/** Interaction treatment shared by every control recipe. */
 	interaction: {
 		/** The fade applied to disabled and pending controls. */
 		disabledOpacity: null,
-	},
-	/** Inline and block sizes for the four public icon sizes. */
-	iconSize: {
-		xsmall: null,
-		small: null,
-		medium: null,
-		large: null,
 	},
 	/**
 	 * Luke UI-owned durations and easing curves for interaction motion. Each duration is named for
@@ -221,11 +220,9 @@ export const themeContractTree = {
  * {@link themeContractTree}. This one list drives the mode-family type, {@link ModePath},
  * {@link IdentityPath}, and stylesheet partitioning.
  */
-export const modeFamilies = [
-	'actionControlFinish',
-	'color',
-	'depth',
-] as const satisfies ReadonlyArray<keyof typeof themeContractTree>;
+export const modeFamilies = ['color', 'controlFinish', 'depth'] as const satisfies ReadonlyArray<
+	keyof typeof themeContractTree
+>;
 
 /** A top-level contract family that varies by colour mode. */
 type ModeFamily = (typeof modeFamilies)[number];

@@ -4,7 +4,7 @@
  * loaded theme's fallback. Both hold regardless of the order the stylesheets load in.
  *
  * Nested identity classes do not collide by default: a nested identity resolves its own
- * identity-owned values, and it also resolves its own colour, depth, and action-control-finish
+ * identity-owned values, and it also resolves its own colour, depth, and control-finish
  * values correctly under the system-controlled mode, because those are declared directly on the
  * identity class by the base-light and media-dark blocks. The collision happens only when an
  * explicit `data-color-mode` scope sits on or inside the nested identity: then the ancestor's
@@ -28,14 +28,14 @@ const paperBlocks = splitBlocks(paperCss);
 
 const tactileRadius = extractValue(tactileBlocks.identity, '--luke-radius-control');
 const paperRadius = extractValue(paperBlocks.identity, '--luke-radius-control');
-const tactileLightCanvas = extractValue(tactileBlocks.baseLight, '--luke-color-surface-canvas');
-const tactileDarkCanvas = extractValue(tactileBlocks.mediaDark, '--luke-color-surface-canvas');
-const paperLightCanvas = extractValue(paperBlocks.baseLight, '--luke-color-surface-canvas');
-const paperDarkCanvas = extractValue(paperBlocks.mediaDark, '--luke-color-surface-canvas');
+const tactileLightBase = extractValue(tactileBlocks.baseLight, '--luke-color-surface-base');
+const tactileDarkBase = extractValue(tactileBlocks.mediaDark, '--luke-color-surface-base');
+const paperLightBase = extractValue(paperBlocks.baseLight, '--luke-color-surface-base');
+const paperDarkBase = extractValue(paperBlocks.mediaDark, '--luke-color-surface-base');
 
 it('keeps every theme and mode combination distinct, so a resolved match below cannot pass by luck', () => {
-	const canvases = [tactileLightCanvas, tactileDarkCanvas, paperLightCanvas, paperDarkCanvas];
-	expect(new Set(canvases).size).toBe(canvases.length);
+	const bases = [tactileLightBase, tactileDarkBase, paperLightBase, paperDarkBase];
+	expect(new Set(bases).size).toBe(bases.length);
 	const radii = [tactileRadius, paperRadius];
 	expect(new Set(radii).size).toBe(radii.length);
 });
@@ -75,7 +75,7 @@ type Scenario = {
 	description: string;
 	expected: string;
 	target: () => Element;
-	varName: '--luke-color-surface-canvas' | '--luke-radius-control';
+	varName: '--luke-color-surface-base' | '--luke-radius-control';
 };
 
 // Each scenario names the theme it expects to win, so a passing assertion is not a coincidence.
@@ -103,19 +103,19 @@ function scenarios(): Array<Scenario> {
 		},
 		{
 			description:
-				"a plain descendant resolves paper's dark canvas when <html> carries the paper identity class and data-color-mode='dark'",
-			expected: paperDarkCanvas,
+				"a plain descendant resolves paper's dark base surface when <html> carries the paper identity class and data-color-mode='dark'",
+			expected: paperDarkBase,
 			target: () => {
 				document.documentElement.className = paperThemeClassName;
 				document.documentElement.dataset.colorMode = 'dark';
 				return createDiv(document.body);
 			},
-			varName: '--luke-color-surface-canvas',
+			varName: '--luke-color-surface-base',
 		},
 		{
 			description:
-				"a nested data-color-mode='dark' div resolves paper's dark canvas inside a div.luke-ui-theme-paper, with no identity on <html>",
-			expected: paperDarkCanvas,
+				"a nested data-color-mode='dark' div resolves paper's dark base surface inside a div.luke-ui-theme-paper, with no identity on <html>",
+			expected: paperDarkBase,
 			target: () => {
 				const outer = createDiv(document.body);
 				outer.className = paperThemeClassName;
@@ -123,12 +123,12 @@ function scenarios(): Array<Scenario> {
 				inner.dataset.colorMode = 'dark';
 				return inner;
 			},
-			varName: '--luke-color-surface-canvas',
+			varName: '--luke-color-surface-base',
 		},
 		{
 			description:
-				"a nested data-color-mode='dark' div resolves tactile's dark canvas inside a div.luke-ui-theme-tactile, with no identity on <html>",
-			expected: tactileDarkCanvas,
+				"a nested data-color-mode='dark' div resolves tactile's dark base surface inside a div.luke-ui-theme-tactile, with no identity on <html>",
+			expected: tactileDarkBase,
 			target: () => {
 				const outer = createDiv(document.body);
 				outer.className = tactileThemeClassName;
@@ -136,7 +136,7 @@ function scenarios(): Array<Scenario> {
 				inner.dataset.colorMode = 'dark';
 				return inner;
 			},
-			varName: '--luke-color-surface-canvas',
+			varName: '--luke-color-surface-base',
 		},
 		{
 			description:
@@ -172,29 +172,29 @@ for (const order of stylesheetOrders) {
 			});
 		}
 
-		it("resolves paper's light canvas on a div.luke-ui-theme-paper nested inside <html class='luke-ui-theme-tactile'>, under system light, with no explicit data-color-mode anywhere", async () => {
+		it("resolves paper's light base surface on a div.luke-ui-theme-paper nested inside <html class='luke-ui-theme-tactile'>, under system light, with no explicit data-color-mode anywhere", async () => {
 			await emulateColorScheme('light');
 			document.documentElement.className = tactileThemeClassName;
 			const paperDiv = createDiv(document.body);
 			paperDiv.className = paperThemeClassName;
-			expect(readVar(paperDiv, '--luke-color-surface-canvas')).toBe(paperLightCanvas);
+			expect(readVar(paperDiv, '--luke-color-surface-base')).toBe(paperLightBase);
 		});
 
-		it("resolves paper's dark canvas on a div.luke-ui-theme-paper nested inside <html class='luke-ui-theme-tactile'>, under system dark, with no explicit data-color-mode anywhere", async () => {
+		it("resolves paper's dark base surface on a div.luke-ui-theme-paper nested inside <html class='luke-ui-theme-tactile'>, under system dark, with no explicit data-color-mode anywhere", async () => {
 			await emulateColorScheme('dark');
 			document.documentElement.className = tactileThemeClassName;
 			const paperDiv = createDiv(document.body);
 			paperDiv.className = paperThemeClassName;
-			expect(readVar(paperDiv, '--luke-color-surface-canvas')).toBe(paperDarkCanvas);
+			expect(readVar(paperDiv, '--luke-color-surface-base')).toBe(paperDarkBase);
 		});
 
-		it(`resolves the dark canvas of whichever theme's stylesheet loaded last (${order[1]}) when data-color-mode='dark' sits on a nested div.luke-ui-theme-paper inside <html class='luke-ui-theme-tactile'>`, () => {
+		it(`resolves the dark base surface of whichever theme's stylesheet loaded last (${order[1]}) when data-color-mode='dark' sits on a nested div.luke-ui-theme-paper inside <html class='luke-ui-theme-tactile'>`, () => {
 			document.documentElement.className = tactileThemeClassName;
 			const paperDiv = createDiv(document.body);
 			paperDiv.className = paperThemeClassName;
 			paperDiv.dataset.colorMode = 'dark';
-			const expected = order[1] === 'paper' ? paperDarkCanvas : tactileDarkCanvas;
-			expect(readVar(paperDiv, '--luke-color-surface-canvas')).toBe(expected);
+			const expected = order[1] === 'paper' ? paperDarkBase : tactileDarkBase;
+			expect(readVar(paperDiv, '--luke-color-surface-base')).toBe(expected);
 		});
 	});
 }
@@ -207,22 +207,22 @@ describe('a single stylesheet with no identity class applied anywhere', () => {
 		await emulateColorScheme('light');
 	});
 
-	it("resolves tactile's light canvas on a plain descendant", () => {
+	it("resolves tactile's light base surface on a plain descendant", () => {
 		const container = createDiv(document.body);
 		const target = createDiv(container);
-		expect(readVar(target, '--luke-color-surface-canvas')).toBe(tactileLightCanvas);
+		expect(readVar(target, '--luke-color-surface-base')).toBe(tactileLightBase);
 	});
 
-	it("resolves tactile's dark canvas on a nested data-color-mode='dark' div", () => {
+	it("resolves tactile's dark base surface on a nested data-color-mode='dark' div", () => {
 		const container = createDiv(document.body);
 		const target = createDiv(container);
 		target.dataset.colorMode = 'dark';
-		expect(readVar(target, '--luke-color-surface-canvas')).toBe(tactileDarkCanvas);
+		expect(readVar(target, '--luke-color-surface-base')).toBe(tactileDarkBase);
 	});
 
-	it("resolves tactile's dark canvas on a plain descendant when <html> carries data-color-mode='dark'", () => {
+	it("resolves tactile's dark base surface on a plain descendant when <html> carries data-color-mode='dark'", () => {
 		document.documentElement.dataset.colorMode = 'dark';
 		const target = createDiv(document.body);
-		expect(readVar(target, '--luke-color-surface-canvas')).toBe(tactileDarkCanvas);
+		expect(readVar(target, '--luke-color-surface-base')).toBe(tactileDarkBase);
 	});
 });

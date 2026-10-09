@@ -7,7 +7,7 @@ import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
 import { getTextStart, measureFieldError } from '../test-utils/measure-field-error.js';
-import { render, visualAppearances } from '../test-utils/render.js';
+import { flatAppearances, render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -329,6 +329,75 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
+// Only `danger.solid.rest` carries the 3:1 control-boundary guarantee, so an invalid switch must
+// keep it through hover and press, whether it is on or off.
+for (const isSelected of [false, true]) {
+	for (const state of ['data-hovered', 'data-pressed'] as const) {
+		test(`an invalid ${isSelected ? 'on' : 'off'} switch keeps the guaranteed border with ${state}`, () => {
+			render(<SwitchField defaultSelected={isSelected} errorMessage="Required" label="Accept" />);
+			const input = switchInput('Accept');
+			const label = labelFor(input);
+			const track = controlFor(input);
+			track.style.transition = 'none';
+			label.setAttribute(state, 'true');
+
+			expect(getComputedStyle(track).borderTopColor).toBe(
+				resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
+			);
+		});
+	}
+}
+
+// Pressing stretches the thumb instead of recolouring it, so the press shows without materials and
+// the thumb keeps its guaranteed contrast with the track.
+for (const isSelected of [false, true]) {
+	test(`pressing an ${isSelected ? 'on' : 'off'} switch stretches its thumb until release`, async () => {
+		render(<SwitchField defaultSelected={isSelected} label="Notify" />);
+		const input = switchInput('Notify');
+		const thumb = controlFor(input).querySelector('span');
+		if (!(thumb instanceof HTMLElement)) throw new Error('Expected the switch thumb.');
+		thumb.style.transition = 'none';
+		const restingWidth = thumb.getBoundingClientRect().width;
+		const restingColor = getComputedStyle(thumb).backgroundColor;
+
+		input.focus();
+		await userEvent.keyboard('[Space>]');
+		await expect.element(labelFor(input)).toHaveAttribute('data-pressed', 'true');
+
+		expect(thumb.getBoundingClientRect().width).toBeGreaterThan(restingWidth);
+		expect(getComputedStyle(thumb).backgroundColor).toBe(restingColor);
+
+		await userEvent.keyboard('[/Space]');
+		await expect.element(labelFor(input)).not.toHaveAttribute('data-pressed');
+
+		expect(thumb.getBoundingClientRect().width).toBe(restingWidth);
+	});
+}
+
+// Regression: rest, hover, and pressed must stay distinct without materials, which the flat fixture
+// removes. Hover recolours the track. Pressed recolours an on track and stretches the thumb, which
+// keeps its guaranteed colour. Off, the stretch alone tells pressed from hover.
+test('rest, hover, and pressed stay distinct without materials', { tags: ['visual'] }, async () => {
+	for (const appearance of flatAppearances) {
+		const { locator } = render(
+			<Stack>
+				{(['rest', 'hover', 'pressed'] as const).flatMap((state) => [
+					<SwitchField key={`off-${state}`} label={`Off, ${state}`} />,
+					<SwitchField defaultSelected key={`on-${state}`} label={`On, ${state}`} />,
+				])}
+			</Stack>,
+			{ appearance },
+		);
+		for (const state of ['hover', 'pressed'] as const) {
+			for (const name of [`Off, ${state}`, `On, ${state}`]) {
+				const label = locator.getByRole('switch', { name }).element().closest('label');
+				label?.setAttribute(state === 'hover' ? 'data-hovered' : 'data-pressed', 'true');
+			}
+		}
+		await captureVisualAppearance(locator, 'switch-field/interaction-states', appearance);
+	}
+});
+
 test('necessity markers', { tags: ['visual'] }, async () => {
 	const { locator } = render(
 		<Stack>
@@ -384,3 +453,12 @@ test('forced-colors resting', { tags: ['visual'] }, async () => {
 		await emulateForcedColors('none');
 	}
 });
+
+/** Resolves a colour the way the browser would for a border, in the same theme scope. */
+function resolvedBorderColor(scope: Element, color: string): string {
+	const probe = scope.appendChild(document.createElement('span'));
+	probe.style.borderTop = `1px solid ${color}`;
+	const resolved = getComputedStyle(probe).borderTopColor;
+	probe.remove();
+	return resolved;
+}

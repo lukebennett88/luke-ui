@@ -18,7 +18,7 @@ export function HomePage() {
 
 	return (
 		<Box
-			backgroundColor="surface.canvas"
+			backgroundColor="surface.subdued"
 			blockSize="100%"
 			className={cx(rootClassName, styles.shell)}
 			display="flex"
@@ -27,7 +27,7 @@ export function HomePage() {
 		>
 			<title>Home</title>
 			<Box
-				backgroundColor="surface.floating"
+				backgroundColor="surface.base"
 				boxShadow={{ bp768: 'raised' }}
 				className={styles.main}
 				elementType="main"

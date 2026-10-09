@@ -53,7 +53,7 @@ export const pagerIcon = style({
 export const tocBar = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.surface.base,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 			insetBlockStart: SITE_HEADER_BLOCK_SIZE,
 			position: 'sticky',
@@ -115,7 +115,7 @@ globalStyle(`${tocBar}[open] ${tocSummaryIcon}`, {
 export const tocBarPanel = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.floating,
+			backgroundColor: vars.color.surface.overlay,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 			boxShadow: vars.depth.floating,
 			insetBlockStart: '100%',

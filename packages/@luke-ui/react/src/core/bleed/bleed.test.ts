@@ -37,7 +37,7 @@ test('Bleed rejects margin props and Box appearance utilities', () => {
 	// @ts-expect-error — Bleed owns negative margins
 	assertType<BleedProps>({ marginBlock: 'sp16' });
 	// @ts-expect-error — Bleed does not expose Box appearance utilities
-	assertType<BleedProps>({ backgroundColor: 'surface.canvas' });
+	assertType<BleedProps>({ backgroundColor: 'surface.base' });
 	// @ts-expect-error — Bleed has no display prop
 	assertType<BleedProps>({ display: 'grid' });
 });

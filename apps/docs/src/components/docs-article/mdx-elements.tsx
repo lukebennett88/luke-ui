@@ -118,13 +118,13 @@ export function createMdxHeading(level: HeadingLevel) {
 				<a className={styles.headingAnchor} href={`#${id}`} id={titleId}>
 					{children}
 				</a>
-				<CopyAnchorButton id={id} level={level} />
+				<CopyAnchorButton id={id} />
 			</Heading>
 		);
 	};
 }
 
-function CopyAnchorButton({ id, level }: { id: string; level: HeadingLevel }) {
+function CopyAnchorButton({ id }: { id: string }) {
 	const [copied, onCopy] = useCopyButton(() => {
 		const url = new URL(window.location.href);
 		url.hash = id;
@@ -132,7 +132,7 @@ function CopyAnchorButton({ id, level }: { id: string; level: HeadingLevel }) {
 	});
 
 	return (
-		<span className={cx(styles.headingCopyWrapper, styles.headingCopyWrapperByLevel[level])}>
+		<span className={styles.headingCopyWrapper}>
 			<IconButton
 				aria-label={copied ? 'Copied Anchor Link' : 'Copy Anchor Link'}
 				className={styles.headingCopyButton}

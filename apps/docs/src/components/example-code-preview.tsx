@@ -66,7 +66,7 @@ export function ExampleCodePreview({
 	return (
 		<ViewTransition default="none" update={styles.codeUpdate}>
 			<Box
-				backgroundColor="surface.recessed"
+				backgroundColor="surface.subdued"
 				id={codeId}
 				overflow="hidden"
 				paddingBlockEnd={canExpand ? 'sp40' : undefined}

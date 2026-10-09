@@ -14,7 +14,7 @@ const layoutToBoxProps = {
 		minBlockSize: '6rem',
 		padding: 'sp32',
 		style: {
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.surface.base,
 			color: vars.color.text.primary,
 		},
 	},
@@ -22,7 +22,7 @@ const layoutToBoxProps = {
 		minBlockSize: '6rem',
 		padding: 'sp32',
 		style: {
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.surface.base,
 			color: vars.color.text.primary,
 		},
 	},

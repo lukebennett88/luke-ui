@@ -66,7 +66,7 @@ export const mobileOverlay = style({
 });
 
 export const mobileModal = style({
-	backgroundColor: vars.color.surface.floating,
+	backgroundColor: vars.color.surface.overlay,
 	blockSize: `calc(var(--visual-viewport-height) - ${trayInsetBlockStart})`,
 	borderEndEndRadius: 0,
 	borderEndStartRadius: 0,

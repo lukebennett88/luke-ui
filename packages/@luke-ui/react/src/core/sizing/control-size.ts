@@ -19,3 +19,9 @@ export const FIELD_CONTROL_ICON_SIZE: Record<FieldControlSize, IconSize> = {
 	medium: 'small',
 	small: 'xsmall',
 };
+
+/**
+ * Minimum block and inline size of an interactive target. WCAG 2.5.8 asks for 24 CSS pixels, so the
+ * `max()` keeps that floor when an application sets a root font size below 16px.
+ */
+export const MIN_TARGET_SIZE = 'max(1.5rem, 24px)';

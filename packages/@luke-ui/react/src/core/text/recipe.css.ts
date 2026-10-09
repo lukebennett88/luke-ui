@@ -1,5 +1,6 @@
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
+import { capsizeTrimVarName } from '../../theme/capsize-trim-vars.js';
 import { vars } from '../../theme/contract.css.js';
 import type { FontWeightRole, TypeStyle } from '../../theme/type-styles.js';
 import { fontWeightRoles, typeStyles } from '../../theme/type-styles.js';
@@ -73,7 +74,11 @@ const typographyVariants = Object.fromEntries(
 >;
 
 const typographyCompoundVariants = typeStyles.map((typography) => {
-	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[typography];
+	const { fontSize, lineHeight } = vars.font[typography];
+	// The trims depend on the theme's font, so the theme stylesheet supplies them as private
+	// variables rather than public tokens.
+	const baselineTrim = `var(${capsizeTrimVarName(typography, 'baselineTrim')})`;
+	const capHeightTrim = `var(${capsizeTrimVarName(typography, 'capHeightTrim')})`;
 	return {
 		style: createLayeredTextStyle({ baselineTrim, capHeightTrim, fontSize, lineHeight }),
 		// `shouldInheritFont: true` asks the browser to resolve font size and line height from

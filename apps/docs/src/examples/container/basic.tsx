@@ -6,7 +6,7 @@ export default () => {
 	return (
 		<Container maxInlineSize="ct672" paddingInline="sp16">
 			<Box
-				backgroundColor="surface.floating"
+				backgroundColor="surface.subdued"
 				borderColor="decorative"
 				borderRadius="detail"
 				borderStyle="solid"

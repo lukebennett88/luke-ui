@@ -6,13 +6,13 @@
  */
 
 import type { ThemeFoundation } from './foundation.js';
-import { SOURCE_COLOR_FIELDS, themeFontFamilyStacks } from './foundation.js';
+import { SOURCE_COLOR_FIELDS, SURFACE_ROLES, themeFontFamilyStacks } from './foundation.js';
 import { getThemeClassName } from './theme-class-name.js';
 
 /**
  * Whether a value is unsafe to emit verbatim into the generated stylesheet: anything other than a
  * non-empty string, or a string containing a statement-breaking character (`;`, `{`, `}`). Shared by
- * every authored-but-unparsed CSS value — the depth box-shadow rungs, the action-control-finish
+ * every authored-but-unparsed CSS value — the depth box-shadow rungs, the control-finish
  * background-images, and the backdrop colour (deliberately excluded from OKLCH colour parsing because
  * its alpha channel does not fit that pattern) — so the rule has one home. Checking `typeof value`
  * rather than assuming a string keeps this guard correct even when a caller other than `defineTheme`
@@ -58,6 +58,14 @@ export function validateFoundation(foundation: ThemeFoundation): void {
 				issues.push(`${mode}.color.${field}: must be an OKLCH colour with lightness 0-1`);
 			}
 		}
+		for (const role of SURFACE_ROLES) {
+			const value = modeFoundation.color.surface[role];
+			// Only `base` is required; a missing surface is generated from it.
+			if (role !== 'base' && value === undefined) continue;
+			if (isInvalidOklch(value)) {
+				issues.push(`${mode}.color.surface.${role}: must be an OKLCH colour with lightness 0-1`);
+			}
+		}
 		if (isUnsafeCssValue(modeFoundation.color.backdrop)) {
 			issues.push(`${mode}.color.backdrop: must be a non-empty CSS colour value`);
 		}
@@ -66,10 +74,10 @@ export function validateFoundation(foundation: ThemeFoundation): void {
 				issues.push(`${mode}.depth.${name}: must be a non-empty CSS box-shadow value`);
 			}
 		}
-		for (const [name, value] of Object.entries(modeFoundation.actionControlFinish)) {
+		for (const [name, value] of Object.entries(modeFoundation.controlFinish)) {
 			if (isUnsafeCssValue(value)) {
 				issues.push(
-					`${mode}.actionControlFinish.${name}: must be a non-empty CSS background-image value`,
+					`${mode}.controlFinish.${name}: must be a non-empty CSS background-image value`,
 				);
 			}
 		}

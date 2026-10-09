@@ -224,7 +224,7 @@ function SampleFrame({
 
 function ColorSample({ variable }: ThemeToken) {
 	return (
-		<SampleFrame style={{ ...stageStyle, backgroundColor: vars.color.surface.canvas }}>
+		<SampleFrame style={{ ...stageStyle, backgroundColor: vars.color.surface.base }}>
 			<span
 				style={{ alignSelf: 'stretch', backgroundColor: `var(${variable})`, inlineSize: '100%' }}
 			/>
@@ -234,10 +234,10 @@ function ColorSample({ variable }: ThemeToken) {
 
 function DepthSample({ variable }: ThemeToken) {
 	return (
-		<SampleFrame style={{ ...stageStyle, backgroundColor: vars.color.surface.recessed }}>
+		<SampleFrame style={{ ...stageStyle, backgroundColor: vars.color.surface.subdued }}>
 			<span
 				style={{
-					backgroundColor: vars.color.surface.floating,
+					backgroundColor: vars.color.surface.base,
 					blockSize: '1.5rem',
 					borderRadius: vars.radius.control,
 					boxShadow: `var(${variable})`,
@@ -250,7 +250,7 @@ function DepthSample({ variable }: ThemeToken) {
 
 function FinishSample({ variable }: ThemeToken) {
 	return (
-		<SampleFrame style={{ ...stageStyle, backgroundColor: vars.color.surface.recessed }}>
+		<SampleFrame style={{ ...stageStyle, backgroundColor: vars.color.surface.subdued }}>
 			<span
 				style={{
 					backgroundColor: vars.color.background.neutral.solid.rest,
@@ -351,9 +351,9 @@ function MotionSample({ path, variable }: ThemeToken) {
 					animationName: 'luke-docs-token-motion',
 					animationTimingFunction: axis === 'easing' ? `var(${variable})` : FALLBACK_MOTION_EASING,
 					backgroundColor: vars.color.background.accent.solid.rest,
-					blockSize: vars.iconSize.xsmall,
+					blockSize: vars.space.sp16,
 					borderRadius: vars.radius.full,
-					inlineSize: vars.iconSize.xsmall,
+					inlineSize: vars.space.sp16,
 				}}
 			/>
 		</SampleFrame>
@@ -364,27 +364,6 @@ function TextSample({ children = 'Aa', style }: { children?: ReactNode; style: C
 	return (
 		<SampleFrame>
 			<span style={{ color: vars.color.text.primary, ...style }}>{children}</span>
-		</SampleFrame>
-	);
-}
-
-function TrimSample({
-	property,
-	variable,
-}: {
-	property: 'marginBlockEnd' | 'marginBlockStart';
-	variable: string;
-}) {
-	return (
-		<SampleFrame style={stageStyle}>
-			<span
-				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
-					blockSize: '0.75rem',
-					inlineSize: '3rem',
-					[property]: `var(${variable})`,
-				}}
-			/>
 		</SampleFrame>
 	);
 }
@@ -411,23 +390,16 @@ function FontSample({ path, variable }: ThemeToken) {
 	if (property === 'letterSpacing') {
 		return <TextSample style={{ fontSize, letterSpacing: `var(${variable})` }} />;
 	}
-	if (property === 'baselineTrim') {
-		return <TrimSample property="marginBlockStart" variable={variable} />;
-	}
-	if (property === 'capHeightTrim') {
-		return <TrimSample property="marginBlockEnd" variable={variable} />;
-	}
 
 	return <TextSample style={{}} />;
 }
 
 const FAMILY_SAMPLES: Record<ThemeTokenFamily, (token: ThemeToken) => ReactNode> = {
-	actionControlFinish: FinishSample,
 	color: ColorSample,
+	controlFinish: FinishSample,
 	controlSize: SizeSample,
 	depth: DepthSample,
 	font: FontSample,
-	iconSize: SizeSample,
 	interaction: InteractionSample,
 	motion: MotionSample,
 	radius: RadiusSample,

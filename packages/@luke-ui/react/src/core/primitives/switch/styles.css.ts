@@ -1,5 +1,6 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
+import { ICON_SIZES } from '../../sizing/icon-sizing.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
@@ -18,15 +19,19 @@ const thumbOffset = `calc(${trackBorderWidth} + ${thumbInset})`;
 const thumbSize = `calc(${trackBlockSize} - 2 * ${thumbOffset})`;
 /** How far the thumb moves along the track when the switch is on. */
 const thumbTravel = `calc(${trackInlineSize} - ${trackBlockSize})`;
+/** How much a pressed thumb stretches along the track, towards the side it would move to. */
+const thumbStretch = `calc(${thumbSize} * 0.3)`;
 
 // React Aria drops hover while the switch is disabled or read-only, and press while it is disabled,
-// so only press needs a read-only guard.
-const hovered = '[data-hovered="true"]';
-const pressed = '[data-pressed="true"]:not([data-readonly="true"])';
+// so only press needs a read-only guard. Hover and pressed stay separate so each has its own look.
+/** Selects a part while the switch matches `state` and is hovered. */
+function hovered(state = '') {
+	return `${state}[data-hovered="true"] &`;
+}
 
-/** Selects the track while the switch matches `state` and is hovered or pressed. */
-function active(state: string) {
-	return `${state}${hovered} &, ${state}${pressed} &`;
+/** Selects a part while the switch matches `state` and is pressed. */
+function pressed(state = '') {
+	return `${state}[data-pressed="true"]:not([data-readonly="true"]) &`;
 }
 
 /** Sets the track size for a size variant. The track is 1.75 times as wide as it is tall. */
@@ -49,6 +54,7 @@ const switchConfig = {
 			'@media': {
 				'(forced-colors: active)': {
 					backgroundColor: 'Canvas',
+					backgroundImage: 'none',
 					borderColor: 'CanvasText',
 					forcedColorAdjust: 'auto',
 					// Disabled comes last so a disabled switch reads as disabled whether it is on or off.
@@ -71,13 +77,20 @@ const switchConfig = {
 					transition: 'none',
 				},
 			},
+			// Off, the track is filled with the control border colour; on, it is a solid fill with the
+			// control finish. Hover and pressed change colour, so they stay distinct without materials.
 			alignItems: 'center',
 			backgroundColor: vars.color.border.control,
+			backgroundImage: 'none',
+			// The finish spans the border too. From the padding box it would tile into the border and
+			// repeat its lit top along the bottom edge.
+			backgroundOrigin: 'border-box',
 			blockSize: trackBlockSize,
 			borderColor: vars.color.border.control,
 			borderRadius: vars.radius.full,
 			borderStyle: 'solid',
 			borderWidth: trackBorderWidth,
+			boxShadow: vars.depth.recessed,
 			boxSizing: 'border-box',
 			display: 'inline-flex',
 			flexShrink: 0,
@@ -86,37 +99,52 @@ const switchConfig = {
 			marginBlock: `calc((${fallbackVar(textLineHeight, '1lh')} - ${trackBlockSize}) / 2)`,
 			paddingInline: thumbInset,
 			transitionDuration: vars.motion.duration.feedback,
-			transitionProperty: 'background-color, border-color, opacity',
+			transitionProperty: 'background-color, background-image, border-color, box-shadow, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
 			selectors: {
 				'[data-disabled="true"] &': {
 					opacity: vars.interaction.disabledOpacity,
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
-				[active('')]: {
-					borderColor: vars.color.border.accent,
+				[`${hovered()}, ${pressed()}`]: {
+					backgroundColor: vars.color.border.controlHover,
+					borderColor: vars.color.border.controlHover,
 				},
 				'[data-invalid="true"] &': {
 					borderColor: vars.color.background.danger.solid.rest,
 				},
+				// Only `danger.solid.rest` is a guaranteed 3:1 boundary, so an invalid track keeps it through
+				// hover and press. The track fill and the thumb carry the feedback instead.
+				[`${hovered('[data-invalid="true"]')}, ${pressed('[data-invalid="true"]')}`]: {
+					borderColor: vars.color.background.danger.solid.rest,
+				},
 				'[data-selected="true"] &': {
 					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundImage: vars.controlFinish.resting,
 					borderColor: vars.color.background.accent.solid.rest,
+					boxShadow: 'none',
 				},
-				[active('[data-selected="true"]')]: {
+				[hovered('[data-selected="true"]')]: {
 					backgroundColor: vars.color.background.accent.solid.hover,
+					backgroundImage: vars.controlFinish.raised,
 					borderColor: vars.color.background.accent.solid.hover,
 				},
-				[active('[data-invalid="true"]')]: {
-					borderColor: vars.color.background.danger.solid.hover,
+				[pressed('[data-selected="true"]')]: {
+					backgroundColor: vars.color.background.accent.solid.pressed,
+					backgroundImage: vars.controlFinish.recessed,
+					borderColor: vars.color.background.accent.solid.pressed,
 				},
 				'[data-invalid="true"][data-selected="true"] &': {
 					backgroundColor: vars.color.background.danger.solid.rest,
 					borderColor: vars.color.background.danger.solid.rest,
 				},
-				[active('[data-invalid="true"][data-selected="true"]')]: {
+				[hovered('[data-invalid="true"][data-selected="true"]')]: {
 					backgroundColor: vars.color.background.danger.solid.hover,
-					borderColor: vars.color.background.danger.solid.hover,
+					borderColor: vars.color.background.danger.solid.rest,
+				},
+				[pressed('[data-invalid="true"][data-selected="true"]')]: {
+					backgroundColor: vars.color.background.danger.solid.pressed,
+					borderColor: vars.color.background.danger.solid.rest,
 				},
 			},
 		},
@@ -146,9 +174,9 @@ const switchConfig = {
 			},
 			alignItems: 'center',
 			// Thumb contrast comes from the fills, never the shadow. `compileTheme` hard-gates each pair at
-			// build time, so every shipped and extended theme clears it: the canvas thumb on the
+			// build time, so every shipped and extended theme clears it: the field thumb on the
 			// `border.control` track at 3:1, and each `onSolid` thumb on its solid track at 4.5:1.
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: vars.color.surface.field,
 			blockSize: thumbSize,
 			boxShadow: vars.depth.resting,
 			borderRadius: vars.radius.full,
@@ -158,12 +186,20 @@ const switchConfig = {
 			justifyContent: 'center',
 			marginInlineStart: 0,
 			transitionDuration: vars.motion.duration.feedback,
-			transitionProperty: 'background-color, margin-inline-start',
+			transitionProperty: 'background-color, inline-size, margin-inline-start',
 			transitionTimingFunction: vars.motion.easing.standard,
 			selectors: {
+				// Pressing stretches the thumb rather than recolouring it, so it keeps its guaranteed
+				// contrast with the track and the press stays visible without materials.
+				[pressed()]: {
+					inlineSize: `calc(${thumbSize} + ${thumbStretch})`,
+				},
 				'[data-selected="true"] &': {
 					backgroundColor: vars.color.foreground.accent.onSolid,
 					marginInlineStart: thumbTravel,
+				},
+				[pressed('[data-selected="true"]')]: {
+					marginInlineStart: `calc(${thumbTravel} - ${thumbStretch})`,
 				},
 				'[data-invalid="true"][data-selected="true"] &': {
 					backgroundColor: vars.color.foreground.danger.onSolid,
@@ -176,9 +212,9 @@ const switchConfig = {
 	},
 	variants: {
 		size: {
-			large: { root: sizeVars(vars.iconSize.medium) },
-			medium: { root: sizeVars(vars.iconSize.small) },
-			small: { root: sizeVars(vars.iconSize.xsmall) },
+			large: { root: sizeVars(ICON_SIZES.medium) },
+			medium: { root: sizeVars(ICON_SIZES.small) },
+			small: { root: sizeVars(ICON_SIZES.xsmall) },
 		},
 	},
 } as const satisfies SlottedConfigInput;
