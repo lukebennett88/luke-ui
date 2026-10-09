@@ -50,9 +50,11 @@ result.
 
 ## Visual regression
 
-Visual cases are `visual`-tagged browser tests. Capture each visually meaningful component in its
-representative fixture across Tactile light, Tactile dark, Paper light, and Paper dark. This is not
-an exhaustive state matrix. Add another capture only for a materially different state.
+Visual cases are `visual`-tagged browser tests. `render()` compiles React-owned copies of the
+Tactile and Paper inputs from `src/theme/__fixtures__/` and loads no fonts. Those copies can diverge
+from the published theme packages. Capture each visually meaningful component in its representative
+fixture across Tactile light, Tactile dark, Paper light, and Paper dark. This is not an exhaustive
+state matrix. Add another capture only for a materially different state.
 
 `flatAppearances` renders Tactile's colours with every depth and control finish set to `none`. Use
 it, outside the theme matrix, for a capture that proves states stay distinct without materials.
@@ -74,15 +76,18 @@ just to create an assertion or keep consts referenced.
 
 ## Package consumption
 
-`packages/@luke-ui/react/src/core/styles/packed-consumer.test.ts` tests the package the way an
-application installs it. It packs the workspace build and installs the tarballs with npm in a
-directory outside the repository, so no workspace link can satisfy an import. Those installs need
-network access, so `pnpm run test` leaves it out. Run it with `pnpm run test:consumer`. The
-`consumer-tests` CI job runs it on every pull request.
+`packages/@luke-ui/react/src/core/styles/packed-consumer.test.ts` tests the packages the way an
+application installs them. It packs the workspace builds of React, Paper, and Tactile and installs
+the tarballs with npm in a directory outside the repository, so no workspace link can satisfy an
+import. Those installs need network access, so `pnpm run test` leaves it out. Run it with
+`pnpm run test:consumer`. The `consumer-tests` CI job runs it on every pull request.
 
 Keep it to the package boundary: tarball contents, dependencies, peers, assets, server rendering, a
-client build, hydration in Chromium, type checking, and what small imports bundle. Component
-behaviour belongs in component tests.
+client build, hydration in Chromium, type checking, and what small imports bundle. For the theme
+packages it also compiles themes with the documented Node script, checks each stylesheet rule by
+rule against the token contract, and renders the bundled and fixture fonts. Component behaviour
+belongs in component tests. The display-font fixture lives in
+`src/core/styles/__fixtures__/packed-consumer/`, outside the published files.
 
 One consumer installs the lowest published version each peer range allows, and the first release of
 the TypeScript version in `MINIMUM_TYPESCRIPT`. That run is the evidence for those floors. Change a
@@ -93,7 +98,7 @@ does not render. A failing bundle-boundary check means one does. Fix the import 
 boundary only when the code it flags has intentionally become runtime code.
 
 Set `LUKE_UI_REACT_SPEC` to a published version or dist-tag to test that package from the registry
-instead of the workspace build.
+instead of the workspace build. That run skips the theme package checks and prints why.
 
 ## Docs
 

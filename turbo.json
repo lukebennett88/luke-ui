@@ -13,7 +13,12 @@
 		},
 		"@luke-ui/react#test:consumer:run": {
 			"cache": false,
-			"dependsOn": ["build", "^build", "@luke-ui/theme-paper#build", "@luke-ui/theme-tactile#build"],
+			"dependsOn": [
+				"build",
+				"^build",
+				"@luke-ui/theme-paper#build",
+				"@luke-ui/theme-tactile#build"
+			],
 			"outputs": [],
 			"passThroughEnv": [
 				"LUKE_UI_REACT_SPEC",

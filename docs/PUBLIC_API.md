@@ -16,18 +16,22 @@ whatever the source module happens to export.
 Generated class names, Vanilla Extract types, and any DOM structure or state attribute that a guide
 does not document are private.
 
-| Subpath                                                        | Holds                                                                                                              |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `@luke-ui/react/<component>`                                   | A high-level component, its props type, and the companion exports it needs                                         |
-| `@luke-ui/react/primitives/<name>`                             | Parts for composing a variant of a component                                                                       |
-| `@luke-ui/react/theme`                                         | `breakpoints`, `defineTheme`, `ThemeInput`, `rootClassName`, `ThemeContrastError`, `ThemeGenerationError`, `vars`  |
-| `@luke-ui/react/themes/*`                                      | Bundled `theme` and `themeClassName`, until [#715](https://github.com/lukebennett88/luke-ui/issues/715) moves them |
-| `@luke-ui/react/utils`                                         | Helpers for composing Luke UI output with other props                                                              |
-| `@luke-ui/react/provider`                                      | The application `Provider`                                                                                         |
-| `stylesheet.css`, `spritesheet.svg`, `themes/*/stylesheet.css` | Static assets                                                                                                      |
+| Subpath                             | Holds                                                                                          |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `@luke-ui/react/<component>`        | A high-level component, its props type, and the companion exports it needs                     |
+| `@luke-ui/react/primitives/<name>`  | Parts for composing a variant of a component                                                   |
+| `@luke-ui/react/theme`              | Runtime only: `breakpoints`, `getThemeClassName`, `rootClassName`, and `vars`                  |
+| `@luke-ui/react/theme/compiler`     | Build time only: `defineTheme`, its input, font, and metrics types, and the three theme errors |
+| `@luke-ui/react/utils`              | Helpers for composing Luke UI output with other props                                          |
+| `@luke-ui/react/provider`           | The application `Provider`                                                                     |
+| `stylesheet.css`, `spritesheet.svg` | Static assets                                                                                  |
 
 There is no `@luke-ui/react/styles` subpath. Layout utilities stay package-internal. Consumers use
 `Box` and the other layout components.
+
+Runtime code must never import `@luke-ui/react/theme/compiler`. The decisions behind the split, and
+behind the separate `@luke-ui/theme-paper` and `@luke-ui/theme-tactile` packages, are in
+[research/715-theme-authoring-contract.md](../research/715-theme-authoring-contract.md).
 
 ## What earns an export
 
@@ -121,10 +125,10 @@ a migration path.
 
 ## Owned elsewhere
 
-| Topic                                      | Owner                                                       |
-| ------------------------------------------ | ----------------------------------------------------------- |
-| Form field names, parts, and semantics     | [#714](https://github.com/lukebennett88/luke-ui/issues/714) |
-| Icons and `Provider`                       | [#712](https://github.com/lukebennett88/luke-ui/issues/712) |
-| Theme authoring and bundled-theme subpaths | [#715](https://github.com/lukebennett88/luke-ui/issues/715) |
-| Token taxonomy                             | [#716](https://github.com/lukebennett88/luke-ui/issues/716) |
-| Global stylesheet and cascade layers       | [#717](https://github.com/lukebennett88/luke-ui/issues/717) |
+| Topic                                  | Owner                                                       |
+| -------------------------------------- | ----------------------------------------------------------- |
+| Form field names, parts, and semantics | [#714](https://github.com/lukebennett88/luke-ui/issues/714) |
+| Icons and `Provider`                   | [#712](https://github.com/lukebennett88/luke-ui/issues/712) |
+| Theme authoring and theme packages     | [#715](https://github.com/lukebennett88/luke-ui/issues/715) |
+| Token taxonomy                         | [#716](https://github.com/lukebennett88/luke-ui/issues/716) |
+| Global stylesheet and cascade layers   | [#717](https://github.com/lukebennett88/luke-ui/issues/717) |

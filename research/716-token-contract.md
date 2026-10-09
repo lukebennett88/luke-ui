@@ -162,3 +162,10 @@ There are no compatibility aliases.
 | #717  | Remove `rootClassName` and the `:root` fallback; require an identity on `<html>`; rework reset/base | The reference app and docs still apply `rootClassName` to portals and shells (FRICTION.md) |
 | #717  | Apply client-selected identity and colour mode before first paint                                   | Surface changes are mode-dependent and visible on first paint                              |
 | #718  | Full component visual audit, broader forced-colours and device testing                              | #716 changed representative controls only; other components consume the new surfaces       |
+
+## Addition in #715
+
+[#715](https://github.com/lukebennett88/luke-ui/issues/715) adds one public token,
+`font.family.display` (`--luke-font-family-display`), for the optional display font role that
+`heading4` through `heading1` and `display` use. Without a display font it is a literal copy of the
+body family. See [715-theme-authoring-contract.md](./715-theme-authoring-contract.md).

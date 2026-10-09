@@ -9,14 +9,16 @@ published TypeScript surface.
 
 ## Setup
 
-Luke UI ships one static stylesheet for its reset, theme root, recipes, and utilities.
+Luke UI ships one static stylesheet for its reset, theme root, colour-mode scopes, root containment,
+recipes, and utilities. Themes ship separately.
 
 1. Import `@luke-ui/react/stylesheet.css`.
-2. Apply `rootClassName` from `@luke-ui/react/theme` to `<body>`, `<main>`, or an app shell.
-3. Import one bundled theme stylesheet, for example `@luke-ui/react/themes/tactile/stylesheet.css`.
+2. Import one theme stylesheet, for example `@luke-ui/theme-tactile/stylesheet.css`, or a stylesheet
+   compiled with `defineTheme`.
+3. Set the theme's identity class on `<html>`.
+4. Apply `rootClassName` from `@luke-ui/react/theme` to `<body>`, `<main>`, or an app shell.
 
-The theme stylesheet themes the document from `:root`. It needs no class and no JS. None of these
-steps inject styles at runtime.
+None of these steps inject styles at runtime.
 
 ## Structure
 
@@ -26,8 +28,7 @@ Paths below are relative to `packages/@luke-ui/react/src/`.
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `core/styles/`                                | Stylesheet graph, layers, reset, theme root, recipe engine, modules registry, utilities, and shared helpers that emit no CSS on their own |
 | Component and primitive folders under `core/` | Colocate `recipe.css.ts` (public) and `styles.css.ts` (private) beside the owner                                                          |
-| `theme/`                                      | Token contract, `defineTheme`, foundations, bundles, and the build pipeline                                                               |
-| `scripts/build-themes.ts`                     | Writes `.generated/themes/<name>/stylesheet.css`, which `vp pack` copies into `dist/`                                                     |
+| `theme/`                                      | Token contract, `defineTheme`, foundations, validation, and the build pipeline. `__fixtures__/` holds the visual suite's theme inputs     |
 
 Stable entry points:
 
@@ -37,7 +38,8 @@ Stable entry points:
   runtime that components import
 - Layer helpers: `core/styles/layered-style.css.ts`
 - Token contract: `theme/contract.ts`, `theme/contract.css.ts`, and `theme/type-styles.ts`
-- Theme authoring: `theme/define-theme.ts`
+- Theme authoring: `theme/define-theme.ts`, published from `exports/theme/compiler.ts`
+- Theme runtime: `exports/theme.ts`, which must never reach a compiler module
 - Colour pipeline: [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md)
 
 `modules.css.ts` imports every shipped `recipe.css.ts` and `styles.css.ts`, plus primitive and
@@ -48,20 +50,26 @@ ignore source order.
 
 ## Themes
 
-`defineTheme(input)` from `@luke-ui/react/theme` is the sole public theme-authoring surface. It is
-pure and Node-compatible. It normalises a curated `ThemeInput` into static CSS and throws
-`ThemeContrastError` when a pair misses WCAG 2.2 AA contrast. The raw `ThemeFoundation` object and
-`buildTheme` are internal.
+`@luke-ui/react/theme/compiler` is the only theme-authoring entry. `defineTheme(input)` is pure and
+Node-compatible. It validates each input in an `extends` chain, throwing `ThemeValidationError` with
+every issue, then normalises the merged `ThemeInput` into static CSS and throws `ThemeContrastError`
+when a pair misses WCAG 2.2 AA contrast. The raw `ThemeFoundation` object and `buildTheme` are
+internal. `@luke-ui/react/theme` is the runtime entry. Keep it free of theme generation, colour
+solving, Capsize, and Node-only code. `package-exports.test.ts` and the packed-consumer harness
+check its import graph.
 
 Colour tokens come from private 12-step scales and elevation surfaces, then map onto the semantic
 contract. See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for that pipeline.
 
 Type styles are grouped from `font.caption` through `font.display`. Each has five public leaves:
-family, size, weight, line height, and letter spacing. `font.family.code` is a fixed monospace
-stack.
+family, size, weight, line height, and letter spacing. `typeStyleFontRole` in `theme/type-styles.ts`
+maps each style to the body or display font. `font.family.display` is always a literal copy of a
+family, never a `var()`: no generated value references another token. `font.family.code` is a fixed
+monospace stack.
 
 The Capsize trims are private `--luke-internal-font-<style>-*` variables. The theme stylesheet
-writes them, `Text` reads them, and `theme/capsize-trim-vars.ts` names them for both.
+writes them from each style's own font metrics, `Text` reads them, and `theme/capsize-trim-vars.ts`
+names them for both.
 
 Public tokens are theme-dependent semantic values and shared fixed measurements that applications
 demonstrably align with. Component-specific geometry is a private TypeScript constant in
@@ -73,16 +81,27 @@ Author `depth.*` and `controlFinish.*` per mode as final CSS values. Components 
 tokens. They do not branch on theme identity. A component must keep its essential state distinctions
 when every depth and control finish is `none`. The `flat` test appearance checks that.
 
-Bundled themes (`tactile`, `paper`) ship precompiled. Each stylesheet pairs `:where(:root)` with a
-`.luke-ui-theme-<name>` identity class. Apply the bundled `themeClassName` export only when a
-document needs more than one theme at once.
+Tactile and Paper live in `packages/@luke-ui/theme-tactile` and `packages/@luke-ui/theme-paper`.
+Each build compiles its built `./input` into `dist/stylesheet.css`. React's visual suite compiles
+its own copies of their inputs from `theme/__fixtures__/`, so the two may diverge.
 
-Without `data-color-mode`, a themed subtree follows `prefers-color-scheme`. Set
-`data-color-mode="light"` or `data-color-mode="dark"` to force a mode. Nested scopes can override
-it. Every scope also sets native `color-scheme`.
+Generated CSS scopes every rule to `:where(html).luke-ui-theme-<name>`. There is no `:root`
+fallback. The theme-wide and base light rules, and the `prefers-color-scheme: dark` rule, are
+(0,1,0). The explicit rules, `…[data-color-mode='light']` on `<html>` and
+`… [data-color-mode='light']` below it, are (0,2,0), so they beat the media rule and the nearest
+explicit scope wins by inheritance. Every mode rule declares every mode token and sets native
+`color-scheme`. The output is unlayered.
 
-A colour mode scoped below `<html>` does not reach a body-level portal. Set `data-color-mode` on
-`<html>` when a portalled surface must follow an explicit mode.
+`core/styles/theme-root.css.ts` repaints each scope below `<html>` in the `reset` layer with the
+scope's text colour, accent colour, and base surface, because inherited properties would otherwise
+keep the parent's computed values. It also sets root `container-type`.
+
+Overlays portal to `<body>`, outside the trigger's scope. `copyScopeColorMode` in
+`core/overlays/scope-color-mode.ts` is a callback ref that copies the trigger's scoped mode onto the
+Select popover, the Combobox popover, and the Combobox tray when the overlay element is created.
+Popovers read the trigger from React Aria's `PopoverContext.triggerRef`. The tray reads the combobox
+input group from `ComboboxInputGroupContext`, because the group inside an open tray sits in the
+tray's own portal.
 
 ## Cascade layers
 
@@ -278,13 +297,13 @@ Use object notation keyed by breakpoint names. Values cascade from smaller to la
 Breakpoints: `initial` (base), `bp640`, `bp768`, `bp1024`, `bp1280`, and `bp1536`. Import
 `breakpoints` from `@luke-ui/react/theme` when authoring matching `@container` queries outside Box.
 
-Write size queries as `@container`, not `@media`. The theme stylesheet sets
-`container-type: inline-size` on `:where(:root)`, so an unnamed query measures the root's inline
-size. Keep `@media` for environmental conditions such as `prefers-reduced-motion`,
-`prefers-color-scheme`, `prefers-contrast`, `forced-colors`, and `hover`. A container query with no
-container never matches, so the style silently stays at its base value. Do not set `container-type`
-on an element below the root without naming the container: unnamed queries on its descendants would
-start measuring it.
+Write size queries as `@container`, not `@media`. The shared stylesheet sets
+`container-type: inline-size` on `:where(:root)` in the `reset` layer, so an unnamed query measures
+the root's inline size with or without a theme. Keep `@media` for environmental conditions such as
+`prefers-reduced-motion`, `prefers-color-scheme`, `prefers-contrast`, `forced-colors`, and `hover`.
+A container query with no container never matches, so the style silently stays at its base value. Do
+not set `container-type` on an element below the root without naming the container: unnamed queries
+on its descendants would start measuring it.
 
 ### React Aria `render` prop (button primitive)
 
