@@ -169,9 +169,16 @@ describe('theme fonts', () => {
 	});
 
 	it('compiles a null display font exactly like an omitted one', () => {
-		expect(themeWideOf({ fonts: { body: interFont, display: null } })).toBe(
-			themeWideOf({ fonts: { body: interFont } }),
-		);
+		function compile(display?: null) {
+			const fonts = display === undefined ? { body: interFont } : { body: interFont, display };
+			return defineTheme({
+				color: { accent: '#3b82f6' },
+				name: 'font-check',
+				typography: { fonts },
+			});
+		}
+
+		expect(compile(null)).toBe(compile());
 	});
 
 	it('keeps the code family on the system monospace stack', () => {
