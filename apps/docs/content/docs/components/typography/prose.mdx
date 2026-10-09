@@ -17,6 +17,26 @@ Lists inside `Prose` include markers and indentation, including nested lists.
 
 <ExampleBlock src="prose/lists" title="Prose: Lists" />
 
+## Opting out
+
+Add the `not-prose` class to an element to keep `Prose` spacing, list styles, and table padding off
+it and everything inside it. Use it for an interactive widget or a component that sets its own
+layout. A `Prose` inside that element applies again.
+
+```tsx
+<Prose>
+	<p>Spaced like the rest of the content.</p>
+	<div className="not-prose">
+		<p>No Prose margins here.</p>
+	</div>
+</Prose>
+```
+
+A `not-prose` element that follows a heading or rule keeps the gap `Prose` puts after it.
+
+`Prose` styles use CSS `@scope`, which needs Chrome 118, Safari 17.4, or Firefox 146. Older browsers
+show the content without `Prose` spacing.
+
 ## API
 
 <component-props-table path="packages/@luke-ui/react/src/core/prose/prose.tsx" name="ProseProps" />

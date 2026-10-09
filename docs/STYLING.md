@@ -266,6 +266,14 @@ Use object notation keyed by breakpoint names. Values cascade from smaller to la
 Breakpoints: `initial` (base), `bp640`, `bp768`, `bp1024`, `bp1280`, and `bp1536`. Import
 `breakpoints` from `@luke-ui/react/theme` when authoring matching `@container` queries outside Box.
 
+Write size queries as `@container`, not `@media`. The theme stylesheet sets
+`container-type: inline-size` on `:where(:root)`, so an unnamed query measures the root's inline
+size. Keep `@media` for environmental conditions such as `prefers-reduced-motion`,
+`prefers-color-scheme`, `prefers-contrast`, `forced-colors`, and `hover`. A container query with no
+container never matches, so the style silently stays at its base value. Do not set `container-type`
+on an element below the root without naming the container: unnamed queries on its descendants would
+start measuring it.
+
 ### React Aria `render` prop (button primitive)
 
 High-level `Button` does not expose RAC `render`. Import the button primitive when you need React

@@ -8,7 +8,10 @@ import { recipe } from '../styles/recipe.js';
  */
 export const codeRecipe = recipe({
 	base: {
-		backgroundColor: vars.color.surface.recessed,
+		// A neutral subtle fill with a hairline separates from the canvas in every theme identity and
+		// colour mode. `surface.recessed` alone is within 1.1:1 of the canvas in light mode.
+		backgroundColor: vars.color.background.neutral.subtle.rest,
+		border: `1px solid ${vars.color.border.decorative}`,
 		borderRadius: vars.radius.control,
 		fontFamily: vars.font.family.code,
 		// Monospace reads large at the same nominal size. Use `em` so the correction tracks the
