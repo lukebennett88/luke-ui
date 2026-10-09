@@ -35,10 +35,8 @@ export function ExampleCodePreview({
 		if (!sourceElement) return;
 
 		const update = () => {
-			dispatch({
-				isClipped: sourceElement.scrollHeight > sourceElement.clientHeight + 1,
-				type: 'measured',
-			});
+			const isClipped = measureIsClipped(sourceElement);
+			if (isClipped != null) dispatch({ isClipped, type: 'measured' });
 		};
 
 		const observer = new ResizeObserver(update);
@@ -58,10 +56,8 @@ export function ExampleCodePreview({
 		const sourceElement = sourceRef.current;
 		if (!sourceElement) return;
 
-		dispatch({
-			isClipped: sourceElement.scrollHeight > sourceElement.clientHeight + 1,
-			type: 'measured',
-		});
+		const isClipped = measureIsClipped(sourceElement);
+		if (isClipped != null) dispatch({ isClipped, type: 'measured' });
 	}, [mode]);
 
 	// The reducer asks for this only after a focused collapse control has unmounted.
@@ -126,6 +122,16 @@ export function ExampleCodePreview({
 			</Box>
 		</ViewTransition>
 	);
+}
+
+/**
+ * Whether the collapsed clip cuts off source lines. Returns `undefined` while the clip is not
+ * applied (for example when a resize callback fires for the expanded DOM just as a collapse is
+ * queued), because that measurement says nothing about the collapsed source.
+ */
+function measureIsClipped(sourceElement: HTMLElement) {
+	if (getComputedStyle(sourceElement).overflowY !== 'hidden') return undefined;
+	return sourceElement.scrollHeight > sourceElement.clientHeight + 1;
 }
 
 interface SourceState {
