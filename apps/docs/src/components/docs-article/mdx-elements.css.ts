@@ -4,8 +4,8 @@ import { docsTocMinInlineSize } from '../../lib/docs-container-queries.js';
 import { SITE_HEADER_BLOCK_SIZE } from '../site-header-size.js';
 import { TOC_BAR_BLOCK_SIZE } from './docs-article.css.js';
 
-// WCAG 2.5.8 minimum target size, 24px.
-const MIN_TARGET_SIZE = '1.5rem';
+// WCAG 2.5.8 minimum target size: 24 CSS pixels, whatever the root font size.
+const MIN_TARGET_SIZE = 'max(1.5rem, 24px)';
 
 // Prose spaces a block from the block before it with an element selector at `:where()` strength.
 // Wrappers that stand in for a prose element repeat that spacing here. The `h2 + &` style selectors

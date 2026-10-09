@@ -7,5 +7,5 @@ import type { IconSize } from '../types/icon-size.js';
  */
 export const COMBOBOX_CHECK_ICON_SIZE: IconSize = 'xsmall';
 
-/** Square size of the Combobox trigger and clear button at the medium size, 28px. */
-export const COMBOBOX_ACTION_SIZE = '1.75rem';
+/** Square size of the medium Combobox trigger and clear button: 28px, and never below 24px. */
+export const COMBOBOX_ACTION_SIZE = 'max(1.75rem, 24px)';
