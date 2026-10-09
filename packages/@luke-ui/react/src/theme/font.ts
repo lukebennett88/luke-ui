@@ -6,7 +6,7 @@
 import type { FontMetrics } from '@capsizecss/core';
 
 /** The Capsize metrics Luke UI reads from a font. Any complete {@link FontMetrics} object fits. */
-export type ThemeFontMetrics = Pick<
+type ThemeFontMetrics = Pick<
 	FontMetrics,
 	'ascent' | 'capHeight' | 'descent' | 'familyName' | 'lineGap' | 'unitsPerEm'
 > &

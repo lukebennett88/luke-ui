@@ -15,15 +15,10 @@ import { getThemeClassName } from '../theme-class-name.js';
 import { typeStyles } from '../type-styles.js';
 
 /** The role a generated theme rule plays. */
-export type ThemeRuleRole =
-	| 'themeWide'
-	| 'baseLight'
-	| 'systemDark'
-	| 'explicitLight'
-	| 'explicitDark';
+type ThemeRuleRole = 'themeWide' | 'baseLight' | 'systemDark' | 'explicitLight' | 'explicitDark';
 
 /** One generated theme rule: its role and the properties it declares, in source order. */
-export interface ThemeRule {
+interface ThemeRule {
 	properties: Array<string>;
 	/** Custom properties whose value is a `var()` reference. */
 	referencingProperties: Array<string>;
@@ -33,7 +28,7 @@ export interface ThemeRule {
 const { identityPairs, modePairs } = partitionContractPairs(flattenThemeContract());
 
 /** Every theme-wide token and private Capsize trim, as the contract expects them. */
-export const expectedThemeWideProperties: ReadonlyArray<string> = [
+const expectedThemeWideProperties: ReadonlyArray<string> = [
 	...identityPairs.map(([, varName]) => varName),
 	...typeStyles.flatMap((style) => [
 		capsizeTrimVarName(style, 'baselineTrim'),
@@ -42,7 +37,7 @@ export const expectedThemeWideProperties: ReadonlyArray<string> = [
 ];
 
 /** Every mode token, plus the native `color-scheme` each mode rule sets. */
-export const expectedModeProperties: ReadonlyArray<string> = [
+const expectedModeProperties: ReadonlyArray<string> = [
 	'color-scheme',
 	...modePairs.map(([, varName]) => varName),
 ];
@@ -59,7 +54,7 @@ const EXPECTED_PROPERTIES = {
  * Reads the generated rules of the theme named `themeName`, keyed by role. Throws when the
  * stylesheet holds a rule that is not one of the five, or when a role is missing or repeated.
  */
-export function readThemeRules(css: string, themeName: string): Record<ThemeRuleRole, ThemeRule> {
+function readThemeRules(css: string, themeName: string): Record<ThemeRuleRole, ThemeRule> {
 	const rules: Array<ThemeRule> = [];
 	const unexpected: Array<string> = [];
 	const identity = `:where(html).${getThemeClassName(themeName)}`;

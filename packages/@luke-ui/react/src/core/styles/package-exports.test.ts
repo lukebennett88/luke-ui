@@ -218,9 +218,9 @@ test('theme compiler entry publishes only the authoring allowlist', async () => 
 	]);
 });
 
-test('keeps the built theme runtime entry out of the compiler import graph', async () => {
-	const runtimeGraph = await builtImportGraph('theme.js');
-	const compilerGraph = await builtImportGraph('theme/compiler.js');
+test('keeps the built theme runtime entry out of the compiler import graph', () => {
+	const runtimeGraph = builtImportGraph('theme.js');
+	const compilerGraph = builtImportGraph('theme/compiler.js');
 
 	// The compiler reaches modules the runtime must not, so the check below cannot pass by luck.
 	expect(compilerGraph.files.some((file) => !runtimeGraph.files.includes(file))).toBe(true);
@@ -229,8 +229,7 @@ test('keeps the built theme runtime entry out of the compiler import graph', asy
 	expect(runtimeGraph.files).not.toContain('theme/compiler.js');
 	expect(runtimeGraph.packages).toEqual([]);
 	for (const file of runtimeGraph.files) {
-		const source = await readFile(new URL(`../../../dist/${file}`, import.meta.url), 'utf8');
-		expect(source).not.toMatch(DEFINE_THEME_PATTERN);
+		expect(readDist(file)).not.toMatch(DEFINE_THEME_PATTERN);
 	}
 });
 
@@ -239,17 +238,14 @@ const STATIC_IMPORT_PATTERN =
 	/(?:^|\n)\s*(?:import|export)\b[^'"]*?from\s*["']([^"']+)["']|(?:^|\n)\s*import\s*["']([^"']+)["']/g;
 
 /** Every built file a dist entry reaches through static imports, plus the packages it imports. */
-async function builtImportGraph(
-	entry: string,
-): Promise<{ files: Array<string>; packages: Array<string> }> {
+function builtImportGraph(entry: string): { files: Array<string>; packages: Array<string> } {
 	const files = new Set<string>();
 	const packages = new Set<string>();
 	const pending = [entry];
 	for (let file = pending.pop(); file !== undefined; file = pending.pop()) {
 		if (files.has(file)) continue;
 		files.add(file);
-		const source = await readFile(new URL(`../../../dist/${file}`, import.meta.url), 'utf8');
-		for (const match of source.matchAll(STATIC_IMPORT_PATTERN)) {
+		for (const match of readDist(file).matchAll(STATIC_IMPORT_PATTERN)) {
 			const specifier = match[1] ?? match[2];
 			if (specifier === undefined) continue;
 			if (specifier.startsWith('.')) pending.push(posix.join(posix.dirname(file), specifier));
@@ -257,6 +253,10 @@ async function builtImportGraph(
 		}
 	}
 	return { files: [...files].sort(), packages: [...packages].sort() };
+}
+
+function readDist(file: string): string {
+	return readFileSync(new URL(`../../../dist/${file}`, import.meta.url), 'utf8');
 }
 
 /** JS package exports that publish TypeScript declarations beside the runtime file. */

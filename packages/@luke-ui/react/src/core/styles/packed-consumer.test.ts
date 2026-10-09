@@ -476,19 +476,24 @@ for (const peerSet of peerSets) {
 			() => {
 				compileThemes();
 				const require = createRequire(path.join(consumerDir, 'package.json'));
-				const stylesheets = {
+				const stylesheets: Record<string, string> = {
 					'display-fixture': path.join(consumerDir, 'generated', 'display.css'),
-					paper: require.resolve('@luke-ui/theme-paper/stylesheet.css'),
 					product: path.join(consumerDir, 'generated', 'product.css'),
 					reference: path.join(consumerDir, 'generated', 'reference.css'),
-					tactile: require.resolve('@luke-ui/theme-tactile/stylesheet.css'),
 				};
+				for (const name of THEME_PACKAGES) {
+					stylesheets[name.slice('@luke-ui/theme-'.length)] = require.resolve(
+						`${name}/stylesheet.css`,
+					);
+				}
 				for (const [name, file] of Object.entries(stylesheets)) {
 					const problems = findTokenCompatibilityProblems(readFileSync(file, 'utf8'), name);
 					expect({ name, problems }).toEqual({ name, problems: [] });
 				}
 				// The product theme extends Paper and stands alone: it never names Paper's identity.
-				expect(readFileSync(stylesheets.product, 'utf8')).not.toContain('luke-ui-theme-paper');
+				expect(
+					readFileSync(path.join(consumerDir, 'generated', 'product.css'), 'utf8'),
+				).not.toContain('luke-ui-theme-paper');
 			},
 		);
 
