@@ -6,18 +6,27 @@ import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { precomputeValues } from '@capsizecss/core';
+import interMetrics from '@capsizecss/metrics/inter';
+import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import type { Browser, Page } from 'playwright';
 import { chromium } from 'playwright';
 import { afterAll, beforeAll, describe, expect, test } from 'vite-plus/test';
+import { findTokenCompatibilityProblems } from '../../theme/__fixtures__/token-compatibility.js';
+import { capsizeTrimVarName } from '../../theme/capsize-trim-vars.js';
+import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
+import type { TypeStyle } from '../../theme/type-styles.js';
+import { typeStyleFontRole, typeStyleMetricStep, typeStyles } from '../../theme/type-styles.js';
 import { cascadeLayerNames } from './layer-names.js';
 
 /**
  * Packed-consumer harness for `@luke-ui/react`. It runs with `pnpm run test:consumer`, not with the
  * unit tests, because its npm installs need network access.
  *
- * By default it packs the workspace build and installs the tarballs with npm outside the repository.
- * Set `LUKE_UI_REACT_SPEC` to a version or dist-tag to test that published package instead. Each
- * install runs once with the newest peers the published ranges allow and once with the lowest.
+ * By default it packs the workspace builds of React, Paper, and Tactile and installs the tarballs
+ * with npm outside the repository. Set `LUKE_UI_REACT_SPEC` to a version or dist-tag to test that
+ * published React instead. That run skips the theme package checks. Each install runs once with the
+ * newest peers the published ranges allow and once with the lowest.
  */
 
 const registrySpec = process.env.LUKE_UI_REACT_SPEC?.trim() || undefined;
@@ -50,33 +59,14 @@ const PUBLISHED_PATH_PATTERN = /^(?:dist\/|skills\/|LICENSE$|README\.md$|package
 const WORKSPACE_PROTOCOL_PATTERN = /^(?:catalog|file|link|portal|workspace):/;
 const ASSET_EXPORT_PATTERN = /\.(?:css|svg)$/;
 const CUSTOM_PROPERTY_PATTERN = /--luke-[a-z-]+:/;
-/** Custom properties a bundled theme must define: the 1.0 surfaces, boundaries, and finish. */
-const REQUIRED_THEME_PROPERTIES = [
-	'--luke-color-surface-base',
-	'--luke-color-surface-subdued',
-	'--luke-color-surface-field',
-	'--luke-color-surface-overlay',
-	'--luke-color-border-control',
-	'--luke-color-border-control-hover',
-	'--luke-control-finish-resting',
-	'--luke-control-size-small',
-	'--luke-control-size-medium',
-	// Private, but `Text` cannot trim without it.
-	'--luke-internal-font-body-baseline-trim',
-	'--luke-internal-font-body-cap-height-trim',
-];
-/** Removed pre-1.0 properties. A bundled theme must not emit them. */
-const REMOVED_THEME_PROPERTIES = [
-	'--luke-color-surface-canvas',
-	'--luke-color-surface-recessed',
-	'--luke-color-surface-floating',
-	'--luke-action-control-finish-',
-	'--luke-icon-size-',
-	'--luke-control-size-min-target',
-	'--luke-control-size-combobox-action',
-	'--luke-font-body-baseline-trim',
-	'--luke-font-body-cap-height-trim',
-];
+/** The theme packages a workspace run packs and installs beside React. */
+const THEME_PACKAGES = ['@luke-ui/theme-paper', '@luke-ui/theme-tactile'] as const;
+const THEME_SKIP_REASON =
+	'LUKE_UI_REACT_SPEC tests a published @luke-ui/react, and the theme packages have no matching ' +
+	'published versions to install beside it.';
+/** Fixtures the theme package checks copy into the consumer. Kept out of the published package. */
+const fixturesDir = fileURLToPath(new URL('./__fixtures__/packed-consumer/', import.meta.url));
+const referenceThemeSource = path.join(repoRoot, 'apps/reference-app/src/theme/input.ts');
 const SYMBOL_PATTERN = /<symbol\b[^>]*\bid="/;
 /** The statement that fixes cascade layer order at the top of the shared stylesheet. */
 const LAYER_STATEMENT = `@layer ${cascadeLayerNames.join(', ')};`;
@@ -104,10 +94,15 @@ interface Artifact {
 
 let workDir = '';
 let artifact: Artifact;
+/** The packed theme packages. Empty in a registry run. */
+let themeArtifacts: Array<Artifact> = [];
+const hasThemePackages = registrySpec === undefined;
 
 beforeAll(async () => {
 	workDir = await mkdtemp(path.join(tmpdir(), 'luke-ui-consumer-'));
 	artifact = registrySpec === undefined ? await packWorkspace() : await fetchFromRegistry();
+	if (hasThemePackages) themeArtifacts = await Promise.all(THEME_PACKAGES.map(packThemePackage));
+	else process.stdout.write(`Skipping the theme package checks: ${THEME_SKIP_REASON}\n`);
 }, 300_000);
 
 afterAll(async () => {
@@ -116,13 +111,44 @@ afterAll(async () => {
 
 describe('artifact', () => {
 	test('contains only published files and every export target', () => {
-		expect(artifact.files.filter((file) => !PUBLISHED_PATH_PATTERN.test(file))).toEqual([]);
+		for (const packed of [artifact, ...themeArtifacts]) {
+			const { name } = packed.manifest;
+			expect({
+				name,
+				unpublished: packed.files.filter((file) => !PUBLISHED_PATH_PATTERN.test(file)),
+			}).toEqual({ name, unpublished: [] });
 
-		const missingTargets = Object.values(artifact.manifest.exports)
-			.map((target) => target.slice(2))
-			.filter((target) => !artifact.files.includes(target));
-		expect(missingTargets).toEqual([]);
+			const missingTargets = Object.values(packed.manifest.exports)
+				.map((target) => target.slice(2))
+				.filter((target) => !packed.files.includes(target));
+			expect({ missingTargets, name }).toEqual({ missingTargets: [], name });
+		}
 	});
+
+	test.skipIf(!hasThemePackages)(
+		'ships each theme package with declarations, its font, and its licence',
+		() => {
+			for (const { files, manifest } of themeArtifacts) {
+				const declarations = Object.values(manifest.exports)
+					.filter((target) => target.endsWith('.js'))
+					.map((target) => `${target.slice(2, -'.js'.length)}.d.ts`);
+				expect({
+					missing: declarations.filter((file) => !files.includes(file)),
+					name: manifest.name,
+				}).toEqual({ missing: [], name: manifest.name });
+				expect(files).toEqual(
+					expect.arrayContaining([
+						'dist/fonts/inter-latin-wght-normal.woff2',
+						'dist/fonts/OFL.txt',
+					]),
+				);
+				expect(manifest.peerDependencies).toEqual({
+					'@luke-ui/react': `^${artifact.manifest.version}`,
+				});
+				expect(manifest.dependencies ?? {}).toEqual({});
+			}
+		},
+	);
 
 	test('declares only installable dependency ranges', () => {
 		const { manifest } = artifact;
@@ -186,7 +212,12 @@ const bundleBoundaries: Array<BundleBoundary> = [
  * Theme modules that runtime code shares with theme generation. Every other theme module a
  * `defineTheme` import bundles counts as theme generation.
  */
-const RUNTIME_THEME_MODULES = ['@luke-ui/react/src/theme/type-styles.ts'];
+const RUNTIME_THEME_MODULES = [
+	'@luke-ui/react/src/theme/theme-class-name.ts',
+	'@luke-ui/react/src/theme/type-styles.ts',
+];
+/** Theme package modules a root entry import must never bundle. */
+const THEME_INPUT_SOURCE_PATTERN = /^@luke-ui\/theme-[a-z]+\/dist\/input\.js$/;
 const THEME_MODULE_PATTERN = /^@luke-ui\/react\/src\/theme\//;
 /** Packages that only theme generation needs. */
 const THEME_GENERATION_PACKAGE_PATTERN = /^@capsizecss\//;
@@ -234,10 +265,19 @@ for (const peerSet of peerSets) {
 		let themeGeneration: Array<string> = [];
 		let typescript = '';
 		let isBuilt = false;
+		let areThemesCompiled = false;
+
+		/** Compiles the consumer's own themes once, with the documented Node script. */
+		function compileThemes(): void {
+			if (!hasThemePackages || areThemesCompiled) return;
+			run('node', ['compile-themes.ts'], consumerDir);
+			areThemesCompiled = true;
+		}
 
 		/** Builds the client app and the server entry once, for the tests that need them. */
 		function buildApp(): void {
 			if (isBuilt) return;
+			compileThemes();
 			run('node', ['build-app.mjs'], consumerDir);
 			isBuilt = true;
 		}
@@ -414,20 +454,82 @@ for (const peerSet of peerSets) {
 			expect(assets.filter((asset) => !asset.installed || !asset.valid)).toEqual([]);
 		});
 
-		test('ships bundled themes that emit the settled token contract', () => {
+		test.skipIf(!hasThemePackages)('resolves every theme package export with valid peers', () => {
 			const require = createRequire(path.join(consumerDir, 'package.json'));
-			for (const theme of ['tactile', 'paper']) {
-				const css = readFileSync(
-					require.resolve(`@luke-ui/react/themes/${theme}/stylesheet.css`),
-					'utf8',
-				);
-				expect({
-					missing: REQUIRED_THEME_PROPERTIES.filter((name) => !css.includes(`${name}:`)),
-					removed: REMOVED_THEME_PROPERTIES.filter((name) => css.includes(name)),
-					theme,
-				}).toEqual({ missing: [], removed: [], theme });
+			for (const { manifest } of themeArtifacts) {
+				for (const subpath of Object.keys(manifest.exports)) {
+					const specifier =
+						subpath === '.' ? manifest.name : `${manifest.name}/${subpath.slice(2)}`;
+					const resolved = realpathSync(require.resolve(specifier));
+					expect({ installed: resolved.startsWith(realpathSync(consumerDir)), specifier }).toEqual({
+						installed: true,
+						specifier,
+					});
+				}
 			}
+			// `npm ls` exits non-zero on a missing or invalid peer.
+			expect(tryRun('npm', ['ls', '--all'], consumerDir)).toBe('');
 		});
+
+		test.skipIf(!hasThemePackages)(
+			'compiles standalone themes, and ships theme stylesheets, that declare every contract token',
+			() => {
+				compileThemes();
+				const require = createRequire(path.join(consumerDir, 'package.json'));
+				const stylesheets = {
+					'display-fixture': path.join(consumerDir, 'generated', 'display.css'),
+					paper: require.resolve('@luke-ui/theme-paper/stylesheet.css'),
+					product: path.join(consumerDir, 'generated', 'product.css'),
+					reference: path.join(consumerDir, 'generated', 'reference.css'),
+					tactile: require.resolve('@luke-ui/theme-tactile/stylesheet.css'),
+				};
+				for (const [name, file] of Object.entries(stylesheets)) {
+					const problems = findTokenCompatibilityProblems(readFileSync(file, 'utf8'), name);
+					expect({ name, problems }).toEqual({ name, problems: [] });
+				}
+				// The product theme extends Paper and stands alone: it never names Paper's identity.
+				expect(readFileSync(stylesheets.product, 'utf8')).not.toContain('luke-ui-theme-paper');
+			},
+		);
+
+		test.skipIf(!hasThemePackages || peerSet.isLowest)(
+			'renders the bundled Inter for an extending theme, and a display font with exact trims',
+			{ timeout: 120_000 },
+			async () => {
+				buildApp();
+				const server = await serveDirectory(path.join(consumerDir, 'dist'));
+				const browser = await chromium.launch();
+				try {
+					const product = await openFontPage(browser, `${server.url}product.html`);
+					expect(product.fontResponses).toEqual([{ font: 'inter', status: 200 }]);
+					expect(await renderedFonts(product.page, '#body-text')).toEqual(['Inter']);
+
+					const display = await openFontPage(browser, `${server.url}display.html`);
+					expect([...display.fontResponses].sort(byFont)).toEqual([
+						{ font: 'inter', status: 200 },
+						{ font: 'lora', status: 200 },
+					]);
+					expect(await renderedFonts(display.page, '#body-text')).toEqual(['Inter']);
+					expect(await renderedFonts(display.page, '#display-text')).toEqual(['Lora']);
+
+					const trimNames = typeStyles.flatMap((style) => [
+						capsizeTrimVarName(style, 'baselineTrim'),
+						capsizeTrimVarName(style, 'capHeightTrim'),
+					]);
+					const trims = await display.page.evaluate((names) => {
+						const styles = getComputedStyle(document.documentElement);
+						return Object.fromEntries(
+							names.map((name) => [name, styles.getPropertyValue(name).trim()]),
+						);
+					}, trimNames);
+					// The production build minifies CSS, so compare the lengths, not their spelling.
+					expect(emValues(trims)).toEqual(emValues(expectedDisplayFixtureTrims()));
+				} finally {
+					await browser.close();
+					await server.close();
+				}
+			},
+		);
 
 		test('builds a client bundle with Vite', { timeout: 120_000 }, async () => {
 			buildApp();
@@ -454,6 +556,16 @@ for (const peerSet of peerSets) {
 
 			const html = await readFile(path.join(consumerDir, 'dist', 'index.html'), 'utf8');
 			expect(html).toMatch(MODULE_SCRIPT_PATTERN);
+
+			if (!hasThemePackages) return;
+			// The theme stylesheets and their fonts survive the build as linked assets.
+			const fonts = assets.filter((name) => name.endsWith('.woff2'));
+			expect(new Set(fonts.map((name) => FONT_ASSET_PATTERN.exec(name)?.[1]))).toEqual(
+				new Set(['inter-latin-wght-normal', 'lora-latin-400-normal']),
+			);
+			for (const font of fonts) expect(css).toContain(font);
+			expect(css).toContain(':where(html).luke-ui-theme-tactile');
+			expect(css).toContain(':where(html).luke-ui-theme-product');
 		});
 
 		test(
@@ -497,6 +609,26 @@ for (const peerSet of peerSets) {
 				}).toEqual({ stylingAuthoring: [], themeGeneration: [], unrelatedComponents: [] });
 			});
 		}
+
+		for (const name of THEME_PACKAGES) {
+			test.skipIf(!hasThemePackages)(
+				`keeps a ${name} themeClassName import apart from its input and the compiler`,
+				{ timeout: 60_000 },
+				() => {
+					const { packages, sources } = measureBundle(consumerDir, themeBoundarySlug(name));
+
+					// The root entry itself, so the checks below cannot pass on an empty bundle.
+					expect(sources).toContain(`${name}/dist/index.js`);
+					expect({
+						input: sources.filter((source) => THEME_INPUT_SOURCE_PATTERN.test(source)),
+						themeGeneration: [
+							...packages.filter((pkg) => THEME_GENERATION_PACKAGE_PATTERN.test(pkg)),
+							...sources.filter((source) => themeGeneration.includes(source)),
+						],
+					}).toEqual({ input: [], themeGeneration: [] });
+				},
+			);
+		}
 	});
 }
 
@@ -535,6 +667,19 @@ async function fetchFromRegistry(): Promise<Artifact> {
 		contents,
 		files: listFiles(contents),
 		installSpecs: { [manifest.name]: spec },
+		manifest,
+	};
+}
+
+async function packThemePackage(name: string): Promise<Artifact> {
+	const slug = name.slice('@luke-ui/'.length);
+	const tarball = await pnpmPack(path.join(scopeRoot, slug), slug);
+	const contents = await extract(tarball, slug);
+	const manifest = readManifest(path.join(contents, 'package.json'));
+	return {
+		contents,
+		files: listFiles(contents),
+		installSpecs: { [name]: `file:${tarball}` },
 		manifest,
 	};
 }
@@ -590,7 +735,6 @@ function isReleasable(name: string, range: string): boolean {
 /** Whether an asset export holds what its path promises. */
 function isValidAsset(subpath: string, source: string): boolean {
 	if (subpath === './stylesheet.css') return source.startsWith(LAYER_STATEMENT);
-	if (subpath.endsWith('/stylesheet.css')) return CUSTOM_PROPERTY_PATTERN.test(source);
 	return SYMBOL_PATTERN.test(source);
 }
 
@@ -658,8 +802,13 @@ async function installConsumer(
 				name: `luke-ui-consumer-${peerSet.slug}`,
 				private: true,
 				type: 'module',
-				dependencies: { ...artifact.installSpecs, ...peers },
+				dependencies: {
+					...artifact.installSpecs,
+					...Object.assign({}, ...themeArtifacts.map((theme) => theme.installSpecs)),
+					...peers,
+				},
 				devDependencies: {
+					...(hasThemePackages ? { '@capsizecss/metrics': CAPSIZE_METRICS_VERSION } : {}),
 					'@types/react': reactTypes,
 					'@types/react-dom': reactDomTypes,
 					typescript,
@@ -669,11 +818,11 @@ async function installConsumer(
 			null,
 			2,
 		),
-		'build-app.mjs': BUILD_APP,
-		'index.html': CLIENT_HTML,
+		'build-app.mjs': buildAppSource(),
+		'index.html': clientHtml(),
 		'render.mjs': RENDER,
 		'src/app.js': APP,
-		'src/entry-client.js': ENTRY_CLIENT,
+		'src/entry-client.js': entryClientSource(),
 		'src/entry-server.js': ENTRY_SERVER,
 		'measure-bundle.mjs': MEASURE_BUNDLE,
 		'app.tsx': TYPED_APP,
@@ -681,11 +830,35 @@ async function installConsumer(
 		'tsconfig.bundler.json': tsconfig('esnext', 'bundler'),
 		'tsconfig.nodenext.json': tsconfig('nodenext', 'nodenext'),
 	};
+	if (hasThemePackages) {
+		Object.assign(files, {
+			'compile-themes.ts': COMPILE_THEMES,
+			'display-theme.ts': DISPLAY_THEME,
+			'display.html': fontPageHtml('display-fixture', DISPLAY_PAGE_BODY, 'display'),
+			'product-theme.ts': PRODUCT_THEME,
+			'product.html': fontPageHtml('product', PRODUCT_PAGE_BODY, 'product'),
+			'reference-theme.ts': await readFile(referenceThemeSource, 'utf8'),
+			'src/display.js': DISPLAY_ENTRY,
+			'src/product.js': PRODUCT_ENTRY,
+			'theme-app.ts': THEME_APP,
+		});
+		for (const name of THEME_PACKAGES) {
+			files[`entries/${themeBoundarySlug(name)}.js`] =
+				`export { themeClassName } from '${name}';\n`;
+		}
+		await mkdir(path.join(consumerDir, 'fixtures'), { recursive: true });
+		await Promise.all(
+			['lora.css', 'lora-latin-400-normal.woff2'].map((fixture) =>
+				copyFile(path.join(fixturesDir, fixture), path.join(consumerDir, 'fixtures', fixture)),
+			),
+		);
+	}
 	for (const boundary of bundleBoundaries) {
 		files[`entries/${boundarySlug(boundary)}.js`] =
 			`export { ${boundary.exportName} } from '@luke-ui/react/${boundary.entry}';\n`;
 	}
-	files['entries/define-theme.js'] = `export { defineTheme } from '@luke-ui/react/theme';\n`;
+	files['entries/define-theme.js'] =
+		`export { defineTheme } from '@luke-ui/react/theme/compiler';\n`;
 	await Promise.all(
 		Object.entries(files).map(([name, source]) => writeFile(path.join(consumerDir, name), source)),
 	);
@@ -720,7 +893,7 @@ function tsconfig(module: string, moduleResolution: string): string {
 				target: 'es2022',
 				types: [],
 			},
-			files: ['all-entries.ts', 'app.tsx'],
+			files: ['all-entries.ts', 'app.tsx', ...(hasThemePackages ? ['theme-app.ts'] : [])],
 		},
 		null,
 		2,
@@ -729,6 +902,75 @@ function tsconfig(module: string, moduleResolution: string): string {
 
 function boundarySlug({ entry, exportName }: BundleBoundary): string {
 	return `${entry.replaceAll('/', '-')}-${exportName}`;
+}
+
+function themeBoundarySlug(name: string): string {
+	return `${name.slice('@luke-ui/'.length)}-themeClassName`;
+}
+
+const FONT_ASSET_PATTERN = /^(.+)-[\w-]{8}\.woff2$/;
+
+/** Opens a page and records each font file it requests. */
+async function openFontPage(browser: Browser, url: string) {
+	const page = await browser.newPage();
+	const fontResponses: Array<{ font: string; status: number }> = [];
+	page.on('response', (response) => {
+		const name = path.posix.basename(new URL(response.url()).pathname);
+		if (!name.endsWith('.woff2')) return;
+		fontResponses.push({ font: name.split('-')[0] ?? name, status: response.status() });
+	});
+	await page.goto(url);
+	await page.evaluate(() => document.fonts.ready.then(() => undefined));
+	return { fontResponses, page };
+}
+
+function byFont(a: { font: string }, b: { font: string }): number {
+	return a.font.localeCompare(b.font);
+}
+
+/** The families Chromium actually used to render an element's text. */
+async function renderedFonts(page: Page, selector: string): Promise<Array<string>> {
+	const session = await page.context().newCDPSession(page);
+	await session.send('DOM.enable');
+	await session.send('CSS.enable');
+	const { root } = await session.send('DOM.getDocument');
+	const { nodeId } = await session.send('DOM.querySelector', { nodeId: root.nodeId, selector });
+	const { fonts } = await session.send('CSS.getPlatformFontsForNode', { nodeId });
+	await session.detach();
+	return fonts.map((font) => font.familyName);
+}
+
+const EM_LENGTH_PATTERN = /^(-?\d*\.?\d+)em$/;
+
+/** Reads each `em` length as a number. A value in another unit reads as `NaN`. */
+function emValues(lengths: Record<string, string>): Record<string, number> {
+	return Object.fromEntries(
+		Object.entries(lengths).map(([name, length]) => [
+			name,
+			Number(EM_LENGTH_PATTERN.exec(length)?.[1] ?? Number.NaN),
+		]),
+	);
+}
+
+/** Lora's metrics, as `DISPLAY_THEME` authors them. */
+const LORA_METRICS = { ascent: 1006, capHeight: 700, descent: -274, lineGap: 0, unitsPerEm: 1000 };
+
+/** The trims `@capsizecss/core` computes for the display fixture: Inter body, Lora display. */
+function expectedDisplayFixtureTrims(): Record<string, string> {
+	return Object.fromEntries(
+		typeStyles.flatMap((style: TypeStyle) => {
+			const fontSize = typeStyleMetricStep[style];
+			const { baselineTrim, capHeightTrim } = precomputeValues({
+				fontMetrics: typeStyleFontRole[style] === 'display' ? LORA_METRICS : interMetrics,
+				fontSize,
+				leading: Number.parseFloat(FONT_METRIC_SCALE[fontSize].lineHeight) * 16,
+			});
+			return [
+				[capsizeTrimVarName(style, 'baselineTrim'), baselineTrim],
+				[capsizeTrimVarName(style, 'capHeightTrim'), capHeightTrim],
+			];
+		}),
+	);
 }
 
 /** Each JS entrypoint paired with the source file its component would live in. */
@@ -814,6 +1056,7 @@ const CONTENT_TYPES: Record<string, string> = {
 	'.html': 'text/html',
 	'.js': 'text/javascript',
 	'.svg': 'image/svg+xml',
+	'.woff2': 'font/woff2',
 };
 
 /** Serves a built app over HTTP on a free local port. */
@@ -929,10 +1172,14 @@ export function App({ onHydrated }) {
 }
 `;
 
-const ENTRY_CLIENT = `
+/** The hydration entry. A run with the theme packages themes the page with Tactile and its font. */
+function entryClientSource(): string {
+	const themeImports = hasThemePackages
+		? "import '@luke-ui/theme-tactile/stylesheet.css';\nimport '@luke-ui/theme-tactile/fonts.css';\n"
+		: '';
+	return `
 import '@luke-ui/react/stylesheet.css';
-import '@luke-ui/react/themes/tactile/stylesheet.css';
-import { createElement as h } from 'react';
+${themeImports}import { createElement as h } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { App } from './app.js';
 
@@ -947,6 +1194,7 @@ hydrateRoot(
 	{ onRecoverableError: (error) => recoverableErrors.push(String(error)) },
 );
 `;
+}
 
 const ENTRY_SERVER = `
 import { createElement as h } from 'react';
@@ -959,8 +1207,10 @@ export function render() {
 `;
 
 /** The inline script snapshots the server DOM before the deferred module script hydrates it. */
-const CLIENT_HTML = `<!doctype html>
-<html lang="en">
+function clientHtml(): string {
+	const identity = hasThemePackages ? ' class="luke-ui-theme-tactile"' : '';
+	return `<!doctype html>
+<html lang="en"${identity}>
 	<head>
 		<meta charset="utf-8" />
 		<title>Luke UI consumer</title>
@@ -977,18 +1227,27 @@ const CLIENT_HTML = `<!doctype html>
 	</body>
 </html>
 `;
+}
 
-/** Builds the client app, then the server entry, with Vite's JS API. */
-const BUILD_APP = `
+/** Builds the client pages, then the server entry, with Vite's JS API. */
+function buildAppSource(): string {
+	const pages = hasThemePackages ? ['index', 'product', 'display'] : ['index'];
+	const input = Object.fromEntries(pages.map((page) => [page, `${page}.html`]));
+	return `
 import { build } from 'vite';
 
-await build({ configFile: false, logLevel: 'error' });
+await build({
+	build: { rollupOptions: { input: ${JSON.stringify(input)} } },
+	configFile: false,
+	logLevel: 'error',
+});
 await build({
 	build: { outDir: 'dist-server', ssr: 'src/entry-server.js' },
 	configFile: false,
 	logLevel: 'error',
 });
 `;
+}
 
 /** Renders the app in Node and writes the markup into the built page, then prints it. */
 const RENDER = `
@@ -1104,6 +1363,113 @@ for (const chunk of [output].flat().flatMap((result) => result.output)) {
 process.stdout.write(JSON.stringify({ packages: [...packages].sort(), sources: [...sources].sort() }));
 `;
 
+/** The Capsize metrics version the reference theme imports, as the workspace installs it. */
+const CAPSIZE_METRICS_VERSION = readManifest(
+	workspaceRequire.resolve('@capsizecss/metrics/package.json'),
+).version;
+
+/** The documented Node script, run inside the consumer with Node's own TypeScript support. */
+const COMPILE_THEMES = `
+import { mkdir, writeFile } from 'node:fs/promises';
+import { defineTheme } from '@luke-ui/react/theme/compiler';
+import { displayTheme } from './display-theme.ts';
+import { productTheme } from './product-theme.ts';
+import { referenceThemeInput } from './reference-theme.ts';
+
+await mkdir('generated', { recursive: true });
+await writeFile('generated/display.css', defineTheme(displayTheme));
+await writeFile('generated/product.css', defineTheme(productTheme));
+await writeFile('generated/reference.css', defineTheme(referenceThemeInput));
+`;
+
+/** A product theme that starts from Paper. It loads Paper's fonts but not Paper's stylesheet. */
+const PRODUCT_THEME = `
+import type { ExtendingThemeInput } from '@luke-ui/react/theme/compiler';
+import { theme as paperTheme } from '@luke-ui/theme-paper/input';
+
+export const productTheme: ExtendingThemeInput = {
+	color: { accent: '#3b82f6' },
+	extends: paperTheme,
+	name: 'product',
+};
+`;
+
+/** Tactile with Lora, a 1000-units-per-em serif, as its display font. */
+const DISPLAY_THEME = `
+import type { ExtendingThemeInput } from '@luke-ui/react/theme/compiler';
+import { theme as tactileTheme } from '@luke-ui/theme-tactile/input';
+
+export const displayTheme: ExtendingThemeInput = {
+	extends: tactileTheme,
+	name: 'display-fixture',
+	typography: {
+		fonts: {
+			display: {
+				family: "'Lora', serif",
+				metrics: { ...${JSON.stringify(LORA_METRICS)}, familyName: 'Lora' },
+			},
+		},
+	},
+};
+`;
+
+const PRODUCT_ENTRY = `
+import '@luke-ui/react/stylesheet.css';
+import '../generated/product.css';
+import '@luke-ui/theme-paper/fonts.css';
+`;
+
+const DISPLAY_ENTRY = `
+import '@luke-ui/react/stylesheet.css';
+import '../generated/display.css';
+import '@luke-ui/theme-tactile/fonts.css';
+import '../fixtures/lora.css';
+`;
+
+const PRODUCT_PAGE_BODY = `<p id="body-text" style="font-family: var(--luke-font-body-font-family)">
+	Product body text
+</p>`;
+
+const DISPLAY_PAGE_BODY = `<p id="body-text" style="font-family: var(--luke-font-body-font-family)">
+	Display fixture body text
+</p>
+<h1
+	id="display-text"
+	style="font-family: var(--luke-font-display-font-family); font-weight: 400"
+>
+	Display fixture heading
+</h1>`;
+
+/** A page themed by one consumer-compiled theme on \`<html>\`. */
+function fontPageHtml(themeName: string, body: string, entry: string): string {
+	return `<!doctype html>
+<html lang="en" class="luke-ui-theme-${themeName}">
+	<head>
+		<meta charset="utf-8" />
+		<title>${themeName}</title>
+	</head>
+	<body>
+		${body}
+		<script type="module" src="/src/${entry}.js"></script>
+	</body>
+</html>
+`;
+}
+
+/** Typed usage of the theme packages through their published declarations. */
+const THEME_APP = `
+import { defineTheme, type ExtendingThemeInput, type ThemeInput } from '@luke-ui/react/theme/compiler';
+import { themeClassName as paperClassName } from '@luke-ui/theme-paper';
+import { theme as paperTheme } from '@luke-ui/theme-paper/input';
+import { themeClassName as tactileClassName } from '@luke-ui/theme-tactile';
+import { theme as tactileTheme } from '@luke-ui/theme-tactile/input';
+
+export const classNames: Array<string> = [paperClassName, tactileClassName];
+export const inputs: Array<ThemeInput> = [paperTheme, tactileTheme];
+const product: ExtendingThemeInput = { extends: paperTheme, name: 'product' };
+export const css: string = defineTheme(product);
+`;
+
 /** Representative typed usage. \`all-entries.ts\` covers the rest of the declaration graph. */
 const TYPED_APP = `
 import { Blockquote } from '@luke-ui/react/blockquote';
@@ -1111,16 +1477,38 @@ import { Box, type BoxProps } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Provider } from '@luke-ui/react/provider';
 import { TextInputField } from '@luke-ui/react/text-input-field';
-import { breakpoints, defineTheme, type ThemeInput, vars } from '@luke-ui/react/theme';
+import { breakpoints, getThemeClassName, vars } from '@luke-ui/react/theme';
+import {
+	defineTheme,
+	type FontMetrics,
+	type ThemeFont,
+	type ThemeInput,
+	ThemeValidationError,
+} from '@luke-ui/react/theme/compiler';
 import type { entries } from './all-entries.js';
 
+const metrics = {
+	ascent: 1984,
+	capHeight: 1490,
+	descent: -494,
+	familyName: 'Inter',
+	lineGap: 0,
+	unitsPerEm: 2048,
+};
+const body: ThemeFont = { family: "'Inter', sans-serif", metrics };
+const typography = { fonts: { body } };
 const theme: ThemeInput = {
 	name: 'fixture',
 	color: { accent: '#3355ff', surface: { base: '#fafafa', field: { light: '#ffffff' } } },
 	controlFinish: { light: { resting: 'none' } },
 	radius: { control: 6 },
+	typography,
 };
 export const css: string = defineTheme(theme);
+export const identityClassName: string = getThemeClassName(theme.name);
+export const validationIssues: ReadonlyArray<{ message: string; path: string; theme: string }> =
+	new ThemeValidationError([]).issues;
+export const fullMetrics: Partial<FontMetrics> = metrics;
 export const textColor: string = vars.color.text.primary;
 export const mobileBreakpoint: number = breakpoints.bp640;
 
@@ -1164,12 +1552,24 @@ export const removedBaselineTrim = vars.font.body.baselineTrim;
 export const removedCapHeightTrim = vars.font.body.capHeightTrim;
 export const removedThemeInputs: Array<ThemeInput> = [
 	// @ts-expect-error — replaced by color.surface.base
-	{ name: 'a', color: { accent: '#3355ff', background: '#ffffff' } },
+	{ name: 'a', color: { accent: '#3355ff', background: '#ffffff' }, typography },
 	// @ts-expect-error — radius takes explicit roles only
-	{ name: 'b', color: { accent: '#3355ff' }, radius: { base: 4 } },
+	{ name: 'b', color: { accent: '#3355ff' }, radius: { base: 4 }, typography },
 	// @ts-expect-error — renamed to controlFinish
-	{ name: 'c', color: { accent: '#3355ff' }, actionControlFinish: {} },
+	{ name: 'c', color: { accent: '#3355ff' }, actionControlFinish: {}, typography },
+	// @ts-expect-error — the curated font enum is replaced by typography.fonts
+	{ name: 'd', color: { accent: '#3355ff' }, typography: { ...typography, fontFamily: 'inter' } },
+	// @ts-expect-error — a fresh theme needs a body font
+	{ name: 'e', color: { accent: '#3355ff' }, typography: { fonts: {} } },
+	// @ts-expect-error — the body font is never nullable
+	{ name: 'f', color: { accent: '#3355ff' }, typography: { fonts: { body: null } } },
 ];
+// A null display font is how an extending theme removes an inherited one.
+export const withoutDisplay: ThemeInput = {
+	name: 'g',
+	color: { accent: '#3355ff' },
+	typography: { fonts: { body, display: null } },
+};
 
 // Box values follow the public token contract.
 export const retainedBoxValues: Array<BoxProps> = [
