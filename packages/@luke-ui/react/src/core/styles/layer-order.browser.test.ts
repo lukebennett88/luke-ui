@@ -1,4 +1,3 @@
-import '../../../dist/themes/tactile/stylesheet.css';
 import { afterAll, afterEach, beforeAll, expect, test } from 'vite-plus/test';
 import builtStylesheetCss from '../../../dist/stylesheet.css?inline';
 
@@ -155,4 +154,14 @@ test('LoadingSkeleton recipes !important beats utilities-layer !important overri
 	utilityStyle.textContent = `@layer utilities { .${skeletonClass}:not([data-skeleton-inline]) > * { background-color: red !important; } }`;
 
 	expect(getComputedStyle(element.firstElementChild!).backgroundColor).not.toBe('rgb(255, 0, 0)');
+});
+
+test('a consumer base-layer rule overrides root containment from the reset layer', () => {
+	expect(getComputedStyle(document.documentElement).containerType).toBe('inline-size');
+
+	const baseStyle = document.head.appendChild(document.createElement('style'));
+	baseStyle.dataset.layerOrderProbe = 'true';
+	baseStyle.textContent = '@layer base { :root { container-type: normal; } }';
+
+	expect(getComputedStyle(document.documentElement).containerType).toBe('normal');
 });

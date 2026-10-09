@@ -1,5 +1,7 @@
+import { mergeRefs } from '@react-aria/utils';
 import type { ComponentProps, JSX, ReactNode, Ref } from 'react';
 import { createContext, use } from 'react';
+import { PopoverContext } from 'react-aria-components/Popover';
 import type {
 	Key,
 	ButtonProps as RacButtonProps,
@@ -18,10 +20,12 @@ import {
 } from 'react-aria-components/Select';
 import { TextContext as RacTextContext } from 'react-aria-components/Text';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { useSlottedContext } from 'react-aria-components/slots';
 import { cx } from '../../../shared/utils/utils.js';
 import { rootClassName } from '../../../theme/theme.js';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
+import { copyScopeColorMode } from '../../overlays/scope-color-mode.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
@@ -251,6 +255,7 @@ export function SelectIndicator(props: SelectIndicatorProps): JSX.Element {
 /** Popover surface for the listbox. */
 export function SelectPopover(props: SelectPopoverProps): JSX.Element {
 	const { offset = 4, ref, ...popoverProps } = props;
+	const popoverContext = useSlottedContext(PopoverContext);
 
 	return (
 		<RacPopover
@@ -259,7 +264,7 @@ export function SelectPopover(props: SelectPopoverProps): JSX.Element {
 				return cx(rootClassName, comboboxRecipe().popover({ className }));
 			})}
 			offset={offset}
-			ref={ref}
+			ref={mergeRefs(ref, copyScopeColorMode(popoverContext?.triggerRef))}
 		/>
 	);
 }

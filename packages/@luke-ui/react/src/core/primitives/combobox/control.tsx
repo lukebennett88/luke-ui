@@ -6,6 +6,7 @@ import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import { useComboboxInputGroupRef } from './input-group-context.js';
 import { useComboboxPresentation } from './presentation-context.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
@@ -29,6 +30,7 @@ export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 	const { size: sizeProp, ...groupProps } = props;
 	const presentation = useComboboxPresentation();
 	const size = useComboboxSize(sizeProp);
+	const inputGroupRef = useComboboxInputGroupRef();
 
 	// The well chrome in `comboboxRecipe`'s `control` slot duplicates `TextInputControl`'s
 	// (`primitives/text-input/recipe.css.ts`). Change the two together until they share one source.
@@ -40,6 +42,8 @@ export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 				className={composeRenderProps(groupProps.className, (className) => {
 					return comboboxRecipe({ presentation, size }).control({ className });
 				})}
+				// The group inside a tray is not the input group: it sits in the tray's own portal.
+				ref={presentation === 'tray' ? undefined : inputGroupRef}
 			/>
 		</IconSizeProvider>
 	);
