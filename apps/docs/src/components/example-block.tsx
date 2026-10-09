@@ -1,32 +1,30 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
-import type { IconName } from '@luke-ui/react/icon';
-import { createIcon, Icon } from '@luke-ui/react/icon';
+import { Icon } from '@luke-ui/react/icon';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
-import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
-import { cx } from '@luke-ui/react/utils';
-import type { ComponentType, JSX, ReactNode } from 'react';
-import { Suspense, use, useEffect, useId, useRef, useState } from 'react';
-import type { GroupImperativeHandle } from 'react-resizable-panels';
-import { Group, Panel, Separator } from 'react-resizable-panels';
+import type { ComponentProps, ComponentType, JSX, ReactNode } from 'react';
+import { Suspense, use } from 'react';
 import type { HighlightedSource } from '../lib/highlighted-source.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
-import { CodeBlock } from './code-block/code-block.js';
 import { DocsLink } from './docs-link.js';
-import { useIsDesktop } from './playground/use-is-desktop.js';
+import { ExampleCodePreview } from './example-code-preview.js';
+import { ExamplePreview } from './example-preview.js';
 
-// The frame, header, preview, and code block nest one border's gap inside
-// `OUTER_RADIUS`, so their corners stay concentric with the frame's own.
-const OUTER_RADIUS = vars.radius.control;
-const INNER_RADIUS = `max(0px, calc(${OUTER_RADIUS} - 1px))`;
+/** Concentric with the frame's `borderRadius="control"` after the 1px border. */
+const INNER_RADIUS = `max(0px, calc(${vars.radius.control} - 1px))`;
+
+const frameEndRadiusStyle = {
+	borderEndEndRadius: INNER_RADIUS,
+	borderEndStartRadius: INNER_RADIUS,
+} as const;
 
 type ExampleBlockProps = {
 	src: string;
 	title: string;
-	layout?: 'flow' | 'centered' | 'full-bleed';
+	layout?: ComponentProps<typeof StoryWrapper>['layout'];
 };
 
 export function ExampleBlock(props: ExampleBlockProps): JSX.Element {
@@ -34,62 +32,6 @@ export function ExampleBlock(props: ExampleBlockProps): JSX.Element {
 		<Suspense fallback={<ExampleLoadingState layout={props.layout} title={props.title} />}>
 			<ExampleContent {...props} />
 		</Suspense>
-	);
-}
-
-function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element {
-	const slashIndex = src.indexOf('/');
-	const component = src.slice(0, slashIndex);
-	const name = src.slice(slashIndex + 1);
-	const result = use(loadExample(component, name));
-	const [showCode, setShowCode] = useState(false);
-	const codeId = useId();
-
-	if (!result.ok) {
-		return (
-			<Box className="rounded-lg border border-fd-destructive" padding="sp16">
-				<Text color="danger" elementType="p">
-					Failed to load example {component}/{name}: {result.error.message}
-				</Text>
-			</Box>
-		);
-	}
-
-	const [PreviewComponent, highlightedSource] = result.data;
-
-	return (
-		<ExampleFrame
-			actions={
-				<Box alignItems="center" display="flex" flexShrink="0" gap="sp4">
-					{highlightedSource.playgroundHash != null ? (
-						<OpenInPlayground hash={highlightedSource.playgroundHash} />
-					) : null}
-					<ShowCode
-						codeId={codeId}
-						isExpanded={showCode}
-						onPress={() => setShowCode((prev) => !prev)}
-					/>
-				</Box>
-			}
-			title={title}
-		>
-			<ExamplePreview layout={layout} title={title}>
-				<PreviewComponent />
-			</ExamplePreview>
-			{showCode ? (
-				<Box
-					id={codeId}
-					overflow="hidden"
-					style={{
-						borderEndEndRadius: INNER_RADIUS,
-						borderEndStartRadius: INNER_RADIUS,
-					}}
-				>
-					{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
-					<CodeBlock copyText={highlightedSource.source} flush html={highlightedSource.html} />
-				</Box>
-			) : null}
-		</ExampleFrame>
 	);
 }
 
@@ -116,123 +58,103 @@ export function ExampleLoadingState({
 	);
 }
 
-// The Tailwind classes in ExamplePreview repeat these values, so change both together:
-// `md:` is DESKTOP_MEDIA_QUERY, `@[640px]/example-preview-card` is MIN_RESIZABLE_CARD_WIDTH,
-// `pe-6` is RESIZE_GUTTER_WIDTH, and `min-inline-3!` is OUTSIDE_STRIP_WIDTH.
-const MIN_RESIZABLE_CARD_WIDTH = 640;
-const MIN_PREVIEW_WIDTH = 320;
-const RESIZE_GUTTER_WIDTH = 24;
-/** Half the grip's inline size, so the grip stays inside the card at full width. */
-const OUTSIDE_STRIP_WIDTH = 12;
+function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element {
+	const slashIndex = src.indexOf('/');
+	const component = src.slice(0, slashIndex);
+	const name = src.slice(slashIndex + 1);
+	const result = use(loadExample(component, name));
 
-// Larger than the playground's `RESIZE_TARGET_MINIMUM_SIZE` so the grip is easier to hit.
-const EXAMPLE_RESIZE_TARGET_MINIMUM_SIZE = { coarse: 32, fine: 32 };
+	if (!result.ok) {
+		return (
+			<Box
+				borderColor="danger"
+				borderRadius="control"
+				borderStyle="solid"
+				borderWidth="thin"
+				padding="sp16"
+			>
+				<Text color="danger" elementType="p">
+					Failed to load example {component}/{name}: {result.error.message}
+				</Text>
+			</Box>
+		);
+	}
 
-export function ExamplePreview({
-	children,
-	layout,
-	title,
-}: {
-	children: ReactNode;
-	layout?: ExampleBlockProps['layout'];
-	title: string;
-}) {
-	const isDesktop = useIsDesktop();
-	const groupElement = useRef<HTMLDivElement>(null);
-	const groupHandle = useRef<GroupImperativeHandle>(null);
-	const [cardWidth, setCardWidth] = useState(0);
-	const previewId = useId();
-	const outsideId = useId();
-	const isResizable = isDesktop && cardWidth >= MIN_RESIZABLE_CARD_WIDTH;
-
-	useEffect(() => {
-		const element = groupElement.current;
-		if (!element) return;
-		const observer = new ResizeObserver(() => setCardWidth(element.getBoundingClientRect().width));
-		observer.observe(element);
-		return () => observer.disconnect();
-	}, []);
-
-	useEffect(() => {
-		if (!isResizable) groupHandle.current?.setLayout({ [previewId]: 100, [outsideId]: 0 });
-	}, [isResizable, outsideId, previewId]);
+	const [PreviewComponent, highlightedSource] = result.data;
 
 	return (
-		<Group
-			// The outside panel's minimum is set from here with `!` because the
-			// library puts an inline `min-width: 0` on each panel element.
-			className="@container/example-preview-card md:@[640px]/example-preview-card:[&>[data-panel]:last-child]:min-inline-3! isolate flex overflow-hidden"
-			disabled={!isResizable}
-			elementRef={groupElement}
-			groupRef={groupHandle}
-			orientation="horizontal"
-			resizeTargetMinimumSize={EXAMPLE_RESIZE_TARGET_MINIMUM_SIZE}
+		<ExampleFrame
+			actions={
+				highlightedSource.playgroundHash != null ? (
+					<OpenInPlayground hash={highlightedSource.playgroundHash} />
+				) : null
+			}
+			title={title}
 		>
-			<Panel
-				defaultSize="100%"
-				id={previewId}
-				minSize={isResizable ? MIN_PREVIEW_WIDTH + RESIZE_GUTTER_WIDTH : 0}
-			>
-				{/*
-					This is the nearest inline-size container for a responsive
-					example, so it narrows against the preview width rather than
-					the viewport. The gutter and the separator use container
-					queries, not `isResizable`, so the first paint already has
-					its final width.
-				*/}
-				<div
-					className="example-preview-canvas @container overflow-hidden md:@[640px]/example-preview-card:pe-6"
-					style={{ backgroundColor: vars.color.surface.canvas }}
-				>
-					<StoryWrapper layout={layout}>{children}</StoryWrapper>
-				</div>
-			</Panel>
-			<Separator
-				aria-label={`${title} preview`}
-				className={cx(
-					'inline-px relative z-10 hidden shrink-0 cursor-col-resize bg-fd-border md:@[640px]/example-preview-card:block',
-					'data-[separator=hover]:[&>.example-preview-grip]:border-fd-muted-foreground/80',
-					'data-[separator=active]:[&>.example-preview-grip]:border-fd-muted-foreground',
-					'data-[separator=focus]:[&>.example-preview-grip]:ring-2 data-[separator=focus]:[&>.example-preview-grip]:ring-fd-ring',
-				)}
-				disabled={!isResizable}
-				onDoubleClick={() => {
-					groupHandle.current?.setLayout({ [previewId]: 100, [outsideId]: 0 });
-				}}
-			>
-				<ExamplePreviewResizeGrip />
-			</Separator>
-			<Panel
-				className="bg-fd-muted/50"
-				defaultSize={0}
-				id={outsideId}
-				minSize={isResizable ? OUTSIDE_STRIP_WIDTH : 0}
+			<ExamplePreview layout={layout} title={title}>
+				<PreviewComponent />
+			</ExamplePreview>
+			{/* Remount when the source changes so expand state resets without an effect. */}
+			<ExampleCodePreview
+				html={highlightedSource.html}
+				key={highlightedSource.source}
+				source={highlightedSource.source}
+				title={title}
 			/>
-		</Group>
+		</ExampleFrame>
 	);
 }
 
-const GripIcon = createIcon({
-	path: (
-		<>
-			<path d="M8 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-			<path d="M8 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-			<path d="M8 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-			<path d="M14 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-			<path d="M14 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-			<path d="M14 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-		</>
-	),
-});
+type ExampleFrameProps = {
+	actions?: ReactNode;
+	ariaLabel?: string;
+	children: ReactNode;
+	title: string;
+};
 
-function ExamplePreviewResizeGrip() {
+function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps) {
 	return (
-		<span
-			aria-hidden
-			className="example-preview-grip block-15 inline-3 -translate-1/2 pointer-events-none absolute inset-bs-1/2 inset-s-1/2 flex items-center justify-center overflow-hidden rounded-full border border-fd-border bg-fd-card text-fd-muted-foreground shadow-sm transition-[box-shadow,border-color]"
+		<Box
+			aria-label={ariaLabel}
+			borderColor="decorative"
+			borderRadius="control"
+			borderStyle="solid"
+			borderWidth="thin"
+			className="not-prose"
+			data-example-frame
+			marginBlock="sp16"
+			role={ariaLabel ? 'region' : undefined}
+			style={{ isolation: 'isolate' }}
 		>
-			<GripIcon className="size-full" />
-		</span>
+			<Box
+				alignItems="center"
+				backgroundColor="surface.canvas"
+				display="flex"
+				gap="sp8"
+				justifyContent="space-between"
+				paddingBlock="sp8"
+				paddingInline="sp16"
+				style={{
+					borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+					borderStartEndRadius: INNER_RADIUS,
+					borderStartStartRadius: INNER_RADIUS,
+				}}
+			>
+				<Box flex="1 1 auto" minInlineSize={0}>
+					<Text color="secondary" elementType="div" typography="label">
+						{title}
+					</Text>
+				</Box>
+				{actions != null ? (
+					<Box alignItems="center" display="flex" flexShrink="0" gap="sp4">
+						{actions}
+					</Box>
+				) : null}
+			</Box>
+			<Box overflow="hidden" style={frameEndRadiusStyle}>
+				{children}
+			</Box>
+		</Box>
 	);
 }
 
@@ -252,109 +174,19 @@ function OpenInPlayground({ hash }: { hash: string }) {
 	);
 }
 
-function ShowCode({
-	codeId,
-	isExpanded,
-	onPress,
-}: {
-	codeId: string;
-	isExpanded: boolean;
-	onPress: () => void;
-}) {
-	return (
-		<Button
-			aria-controls={codeId}
-			aria-expanded={isExpanded}
-			onPress={onPress}
-			prominence="low"
-			size="small"
-			startContent={<Icon name="codeBlock" />}
-		>
-			{isExpanded ? 'Hide code' : 'Show code'}
-		</Button>
-	);
-}
-
-// Mirrors `OpenInPlayground` and `ShowCode`'s visuals without mounting a
-// router link or wiring up real interaction — this is an `aria-hidden`,
-// `inert` placeholder, so a plain disabled `Button` is enough for both.
-function ActionPlaceholder({ children, iconName }: { children: ReactNode; iconName: IconName }) {
-	return (
-		<Button isDisabled prominence="low" size="small" startContent={<Icon name={iconName} />}>
-			{children}
-		</Button>
-	);
-}
-
 function ExampleLoadingActions() {
 	return (
 		<Box alignItems="center" aria-hidden display="flex" flexShrink="0" gap="sp4" inert>
 			<LoadingSkeleton radius="control">
-				<ActionPlaceholder iconName="externalLink">Open in playground</ActionPlaceholder>
-			</LoadingSkeleton>
-			<LoadingSkeleton radius="control">
-				<ActionPlaceholder iconName="codeBlock">Show code</ActionPlaceholder>
-			</LoadingSkeleton>
-		</Box>
-	);
-}
-
-type ExampleFrameProps = {
-	actions?: ReactNode;
-	ariaLabel?: string;
-	children: ReactNode;
-	title: string;
-};
-
-function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps) {
-	const titleId = useId();
-	return (
-		<Box
-			aria-label={ariaLabel}
-			className="not-prose isolate border border-fd-border"
-			marginBlock="sp16"
-			role={ariaLabel ? 'region' : undefined}
-			style={{ borderRadius: OUTER_RADIUS }}
-		>
-			<ScrollFade
-				aria-labelledby={titleId}
-				className="border-fd-border border-b bg-fd-card"
-				style={{
-					borderStartEndRadius: INNER_RADIUS,
-					borderStartStartRadius: INNER_RADIUS,
-				}}
-			>
-				<Box
-					alignItems="center"
-					display="flex"
-					gap="sp8"
-					inlineSize="max-content"
-					justifyContent="space-between"
-					minInlineSize="100%"
-					paddingBlock="sp8"
-					paddingInline="sp16"
+				<Button
+					isDisabled
+					prominence="low"
+					size="small"
+					startContent={<Icon name="externalLink" />}
 				>
-					<Text
-						color="secondary"
-						elementType="span"
-						id={titleId}
-						style={{ flexShrink: 0, whiteSpace: 'nowrap' }}
-						typography="label"
-					>
-						{title}
-					</Text>
-					{actions}
-				</Box>
-			</ScrollFade>
-			<Box
-				overflow="hidden"
-				style={{
-					borderEndEndRadius: INNER_RADIUS,
-					borderEndStartRadius: INNER_RADIUS,
-				}}
-			>
-				{children}
-			</Box>
+					Open in playground
+				</Button>
+			</LoadingSkeleton>
 		</Box>
 	);
 }

@@ -38,8 +38,9 @@ export const flush = style({
 	'@layer': {
 		recipes: {
 			borderInlineWidth: 0,
-			borderRadius: 0,
+			borderRadius: 'inherit',
 			borderBlockEndWidth: 0,
+			overflow: 'visible',
 		},
 	},
 });
@@ -95,6 +96,7 @@ export const actions = style({
 export const overlayActions = style({
 	'@layer': {
 		recipes: {
+			backgroundColor: vars.color.surface.recessed,
 			insetBlockStart: `calc(${vars.space.sp12} + (${vars.font.caption.lineHeight} / 2) - (${vars.controlSize.small} / 2))`,
 			insetInlineEnd: vars.space.sp8,
 			position: 'absolute',

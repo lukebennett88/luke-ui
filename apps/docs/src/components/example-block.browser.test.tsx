@@ -12,21 +12,27 @@ import {
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import { afterEach, assert, expect, test } from 'vite-plus/test';
+import { afterEach, assert, expect, test, vi } from 'vite-plus/test';
 import { commands, page, userEvent } from 'vite-plus/test/context';
-import { ExampleBlock, ExampleLoadingState, ExamplePreview } from './example-block';
+import responsiveLayoutSource from '../examples/box/responsive-layout.tsx?raw';
+import { ExampleBlock, ExampleLoadingState } from './example-block.js';
+import { ExampleCodePreview } from './example-code-preview.js';
+import * as styles from './example-preview.css.js';
+import { ExamplePreview } from './example-preview.js';
 import { DocsThemeRoot } from './theme-controls.js';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
 const exampleTitle = 'Combobox Field: Basic';
 const loadingLabel = `Loading ${exampleTitle} example`;
+const COPY_BUTTON_NAME_PATTERN = /^(Copy|Copied)$/;
 
 afterEach(() => {
 	if (root) act(() => root?.unmount());
 	container?.remove();
 	container = undefined;
 	root = undefined;
+	vi.restoreAllMocks();
 });
 
 test('shows a named loading state in a frame that reserves the preview space', () => {
@@ -119,10 +125,17 @@ test('keyboard resize and double-click reset work without losing width on code e
 	await expect.poll(previewWidth).toBeLessThan(before);
 
 	const resized = previewWidth();
-	await userEvent.click(page.getByRole('button', { name: 'Show code' }));
+	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeTruthy();
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
+	});
+	await expect.element(page.getByRole('button', { name: 'Collapse code' })).toBeVisible();
 	await expect.poll(previewWidth).toBeCloseTo(resized, 0);
 	expectGripInsidePreview();
-	await userEvent.click(page.getByRole('button', { name: 'Hide code' }));
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Collapse code' }));
+	});
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
 	await expect.poll(previewWidth).toBeCloseTo(resized, 0);
 
 	separator().dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
@@ -140,6 +153,16 @@ test('narrow cards use the whole preview width and hide the resize control', asy
 	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
 });
 
+test('wide cards hide resize chrome below the desktop viewport breakpoint', async () => {
+	await page.viewport(700, 800);
+	renderPreviewHarness({ width: 800 });
+	const resizeSeparator = container?.querySelector<HTMLElement>('[data-separator]');
+	assert(resizeSeparator, 'expected resize separator');
+	await expect.poll(() => resizeSeparator.getBoundingClientRect().width).toBe(0);
+	expect(previewWidth()).toBeCloseTo(800, 0);
+	expect(previewCanvas().getBoundingClientRect().width).toBeCloseTo(800, 0);
+});
+
 test('a resized preview returns to full width when its card becomes narrow', async () => {
 	await page.viewport(1000, 800);
 	renderPreviewHarness();
@@ -152,7 +175,7 @@ test('a resized preview returns to full width when its card becomes narrow', asy
 	expect(previewCanvas().getBoundingClientRect().width).toBeCloseTo(400, 0);
 });
 
-test('the mobile card header scrolls complete controls without page overflow', async () => {
+test('the mobile card header keeps a long title and playground action without page overflow', async () => {
 	await page.viewport(400, 800);
 	await renderExampleBlock({
 		src: 'button/basic',
@@ -160,54 +183,23 @@ test('the mobile card header scrolls complete controls without page overflow', a
 		width: 360,
 	});
 	const titleText = 'Box: Responsive layout with a deliberately long heading';
-	const title = page.getByText(titleText).element();
-	const playground = page.getByText('Open in playground', { exact: true }).element();
-	expect(playground.closest('a, button')).not.toBeNull();
-	const showCode = page.getByRole('button', { name: 'Show code' }).element();
-	const headerRegion = page.getByRole('region', { name: titleText });
-	await expect.poll(() => headerRegion.query()).toBeTruthy();
-	const header = headerRegion.element();
-	assert(header instanceof HTMLElement, 'expected header region');
-	expect(header.tabIndex).toBe(0);
-	expect(header.scrollWidth).toBeGreaterThan(header.clientWidth);
-	expect(title.getBoundingClientRect().width).toBeGreaterThan(300);
-	expect(title.getBoundingClientRect().height).toBeLessThan(30);
-	expect(playground.getBoundingClientRect().height).toBeLessThan(40);
-	expect(showCode.getBoundingClientRect().height).toBeLessThan(40);
+	expect(page.getByText(titleText)).toBeVisible();
+	expect(page.getByRole('link', { name: 'Open in playground' })).toBeVisible();
+	expect(page.getByRole('button', { name: 'Show code' }).query()).toBeNull();
 	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
 
-	showCode.focus();
-	expect(document.activeElement).toBe(showCode);
-	await userEvent.keyboard('{Enter}');
-	await expect.poll(() => page.getByRole('button', { name: 'Hide code' }).element()).toBeTruthy();
 	const code = container?.querySelector('pre');
 	expect(code).toBeTruthy();
 	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
 });
 
-test('the frame does not clip the scrollable header focus ring', async () => {
+test('the mobile playground action is keyboard accessible', async () => {
 	await page.viewport(400, 800);
 	const titleText = 'Box: Responsive layout with a deliberately long heading';
 	await renderExampleBlock({ src: 'button/basic', title: titleText, width: 360 });
-	const headerRegion = page.getByRole('region', { name: titleText });
-	await expect.poll(() => headerRegion.query()).toBeTruthy();
-	const header = headerRegion.element();
-	assert(header instanceof HTMLElement, 'expected header region');
-
-	header.focus({ focusVisible: true });
-	expect(document.activeElement).toBe(header);
-	expect(header.matches(':focus-visible')).toBe(true);
-	const headerStyle = getComputedStyle(header);
-	expect(headerStyle.outlineStyle).toBe('solid');
-	expect(Number.parseFloat(headerStyle.outlineWidth)).toBeGreaterThan(0);
-	expect(headerStyle.outlineOffset).toBe('2px');
-
-	const frame = header.parentElement;
-	assert(frame, 'expected the example frame');
-	const frameStyle = getComputedStyle(frame);
-	for (const overflow of [frameStyle.overflow, frameStyle.overflowX, frameStyle.overflowY]) {
-		expect(overflow).not.toMatch(/hidden|clip/);
-	}
+	const playground = page.getByRole('link', { name: 'Open in playground' }).element();
+	await userEvent.tab();
+	await expect.element(playground).toHaveFocus();
 });
 
 test('a missing example stays readable at mobile width', async () => {
@@ -215,6 +207,155 @@ test('a missing example stays readable at mobile width', async () => {
 	await renderExampleBlock({ src: 'missing/example', width: 360 });
 	expect(page.getByText(/Failed to load example missing\/example/)).toBeVisible();
 	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
+});
+
+test('shows source by default and expands it by keyboard while retaining control focus', async () => {
+	await page.viewport(1000, 800);
+	await renderExampleBlock({ src: 'box/responsive-layout', title: 'Box: Responsive layout' });
+
+	expect(container?.querySelector('pre')).toBeTruthy();
+	expect(page.getByRole('button', { name: 'Show code' }).query()).toBeNull();
+
+	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeTruthy();
+	const expand = page.getByRole('button', { name: 'Expand code' });
+	expect(expand).toBeVisible();
+	const codeFigure = () => {
+		const figure = container?.querySelector('figure');
+		assert(figure instanceof HTMLElement, 'expected code figure');
+		return figure;
+	};
+	const collapsedHeight = codeFigure().getBoundingClientRect().height;
+	const control = expand.element();
+	const codeId = control.getAttribute('aria-controls');
+	assert(codeId, 'expected the controlled source id');
+	const codeRegion = document.getElementById(codeId);
+	assert(codeRegion?.contains(codeFigure()), 'expected the control to target its source');
+	const regionRect = codeRegion?.getBoundingClientRect();
+	assert(regionRect, 'expected code region bounds');
+	const controlRect = control.getBoundingClientRect();
+	expect(controlRect.bottom).toBeLessThanOrEqual(regionRect.bottom + 1);
+	expect(controlRect.top).toBeGreaterThanOrEqual(regionRect.top - 1);
+	expect(control).toHaveAttribute('aria-expanded', 'false');
+	control.focus();
+
+	await act(async () => {
+		await userEvent.keyboard('{Enter}');
+	});
+	await expect.poll(() => page.getByRole('button', { name: 'Collapse code' }).query()).toBeTruthy();
+	await expect.element(control).toHaveFocus();
+	expect(control).toHaveAttribute('aria-expanded', 'true');
+	expect(control).toHaveAttribute('aria-controls', codeId);
+	await expect
+		.poll(() => codeFigure().getBoundingClientRect().height)
+		.toBeGreaterThan(collapsedHeight);
+
+	await act(async () => {
+		await userEvent.keyboard(' ');
+	});
+	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeTruthy();
+	await expect.element(control).toHaveFocus();
+	expect(control).toHaveAttribute('aria-expanded', 'false');
+	await expect
+		.poll(() => codeFigure().getBoundingClientRect().height)
+		.toBeCloseTo(collapsedHeight, 0);
+});
+
+test('copies the complete source from both collapsed and expanded previews', async () => {
+	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
+	await page.viewport(1000, 800);
+	await renderExampleBlock();
+
+	await userEvent.click(page.getByRole('button', { name: 'Copy', exact: true }));
+	expect(writeText).toHaveBeenLastCalledWith(responsiveLayoutSource.trim());
+	await expect.element(page.getByRole('button', { name: 'Copied' })).toBeVisible();
+
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
+	});
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN }));
+	});
+	expect(writeText).toHaveBeenCalledTimes(2);
+	expect(writeText).toHaveBeenLastCalledWith(responsiveLayoutSource.trim());
+});
+
+test('keyboard scrolls long lines while collapsed and expanded without revealing clipped lines', async () => {
+	await page.viewport(400, 800);
+	await renderExampleBlock({ width: 360 });
+	const viewport = page.getByRole('region', { name: 'Box: Responsive layout code' }).element();
+	const copy = page.getByRole('button', { name: 'Copy', exact: true }).element();
+	copy.focus();
+	await userEvent.tab();
+	await expect.element(viewport).toHaveFocus();
+	await userEvent.keyboard('{ArrowRight}');
+	await expect.poll(() => viewport.scrollLeft).toBeGreaterThan(0);
+	await userEvent.keyboard('{ArrowDown}');
+	expect(viewport.scrollTop).toBe(0);
+
+	await userEvent.tab();
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toHaveFocus();
+	await act(async () => {
+		await userEvent.keyboard('{Enter}');
+	});
+	await expect.element(page.getByRole('button', { name: 'Collapse code' })).toBeVisible();
+	await userEvent.tab({ shift: true });
+	await expect.element(viewport).toHaveFocus();
+	viewport.scrollLeft = 0;
+	await userEvent.keyboard('{ArrowRight}');
+	await expect.poll(() => viewport.scrollLeft).toBeGreaterThan(0);
+	expect(viewport.scrollHeight).toBeLessThanOrEqual(viewport.clientHeight + 1);
+	await userEvent.tab({ shift: true });
+	await expect.element(copy).toHaveFocus();
+});
+
+test('omits expand controls when the source already fits the collapsed preview', async () => {
+	await page.viewport(1000, 800);
+	await renderExampleBlock({ src: 'button/basic', title: 'Button: Basic' });
+
+	expect(container?.querySelector('pre')).toBeTruthy();
+	expect(page.getByRole('button', { name: 'Expand code' }).query()).toBeNull();
+	expect(page.getByRole('button', { name: 'Collapse code' }).query()).toBeNull();
+	expect(page.getByRole('button', { name: 'Copy' })).toBeVisible();
+});
+
+test('keeps expanded source collapsible when its typography changes to fit', async () => {
+	await page.viewport(1000, 800);
+	const source = Array.from({ length: 20 }, () => 'const value = 1;').join('\n');
+	container = document.body.appendChild(document.createElement('div'));
+	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	root = createRoot(container);
+	act(() => {
+		root?.render(
+			<Provider spritesheetHref={spriteSheetHref}>
+				<ExampleCodePreview html={`<code>${source}</code>`} source={source} title="Source sizing" />
+			</Provider>,
+		);
+	});
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
+	});
+	const collapse = page.getByRole('button', { name: 'Collapse code' });
+	await expect.element(collapse).toBeVisible();
+	const pre = container.querySelector('pre');
+	assert(pre, 'expected source element');
+	pre.style.fontSize = '1px';
+	pre.style.lineHeight = '1px';
+	await expect.poll(() => pre.getBoundingClientRect().height).toBeLessThan(30);
+	// Let layout observers process the new typography before collapsing.
+	await new Promise<void>((resolve) => {
+		requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+	});
+	expect(collapse).toHaveAttribute('aria-expanded', 'true');
+	await act(async () => {
+		await userEvent.click(collapse);
+	});
+	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeNull();
+	await expect.poll(() => collapse.query()).toBeNull();
+
+	pre.style.removeProperty('font-size');
+	pre.style.removeProperty('line-height');
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
 });
 
 test('narrowing the preview panel flips a responsive example below its container breakpoint', async () => {
@@ -254,7 +395,7 @@ function renderPreviewHarness({
 }: {
 	width?: number;
 	withStickyHeader?: boolean;
-	/** Fires during commit (ref callback), before ResizeObserver updates cardWidth. */
+	/** Fires during commit (ref callback), before ResizeObserver enables resizing. */
 	onFirstLayout?: (canvasWidth: number) => void;
 } = {}) {
 	container = document.body.appendChild(document.createElement('div'));
@@ -278,7 +419,7 @@ function renderPreviewHarness({
 								<div
 									ref={(node) => {
 										if (!node || !onFirstLayout) return;
-										const canvas = node.closest('.example-preview-canvas')?.firstElementChild;
+										const canvas = node.closest(`.${styles.previewCanvas}`)?.firstElementChild;
 										if (canvas instanceof HTMLElement) {
 											onFirstLayout(canvas.getBoundingClientRect().width);
 										}
@@ -354,14 +495,14 @@ function previewWidth() {
 }
 
 function previewCanvas() {
-	const panelContent = getPreviewPanel().querySelector<HTMLElement>('.example-preview-canvas');
+	const panelContent = getPreviewPanel().querySelector<HTMLElement>(`.${styles.previewCanvas}`);
 	const canvas = panelContent?.firstElementChild;
 	assert(canvas instanceof HTMLElement, 'expected preview canvas');
 	return canvas;
 }
 
 function resizeGrip() {
-	const grip = separator().querySelector<HTMLElement>('.example-preview-grip');
+	const grip = separator().querySelector<HTMLElement>('[data-example-preview-grip]');
 	assert(grip, 'expected resize grip');
 	return grip;
 }
@@ -382,7 +523,7 @@ function expectGripInsidePreview() {
 	expect(Math.abs(gripCenterX - dividerCenterX)).toBeLessThanOrEqual(2);
 	expect(grip.top).toBeGreaterThan(group.top);
 	expect(grip.bottom).toBeLessThan(group.bottom);
-	const card = getPreviewPanel().closest('.not-prose')?.getBoundingClientRect() ?? group;
+	const card = getPreviewPanel().closest('[data-example-frame]')?.getBoundingClientRect() ?? group;
 	expect(grip.left).toBeGreaterThan(card.left);
 	expect(grip.right).toBeLessThanOrEqual(card.right);
 	expect(card.right - grip.right).toBeGreaterThanOrEqual(4);
