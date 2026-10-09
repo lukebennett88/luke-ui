@@ -60,10 +60,8 @@ Type styles are grouped from `font.caption` through `font.display`. Each has fiv
 family, size, weight, line height, and letter spacing. `font.family.code` is a fixed monospace
 stack.
 
-The Capsize trims depend on the theme's font, so the theme stylesheet writes them in its identity
-rule as private `--luke-internal-font-<style>-baseline-trim` and `-cap-height-trim` variables.
-`theme/capsize-trim-vars.ts` names them for both the stylesheet and the `Text` recipe. They are not
-part of `vars`.
+The Capsize trims are private `--luke-internal-font-<style>-*` variables. The theme stylesheet
+writes them, `Text` reads them, and `theme/capsize-trim-vars.ts` names them for both.
 
 Public tokens are theme-dependent semantic values and shared fixed measurements that applications
 demonstrably align with. Component-specific geometry is a private TypeScript constant in

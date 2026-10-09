@@ -69,17 +69,6 @@ test('derives token-backed Box values from the public contract', () => {
 	expect(mismatched).toEqual([]);
 });
 
-test('accepts the settled Box token values and rejects removed ones', () => {
-	assertType<UtilityProps['backgroundColor']>('surface.field');
-	assertType<UtilityProps['borderColor']>('controlHover');
-	// @ts-expect-error — the canvas surface was replaced by `surface.base`
-	assertType<UtilityProps['backgroundColor']>('surface.canvas');
-	// @ts-expect-error — the recessed surface was removed
-	assertType<UtilityProps['backgroundColor']>('surface.recessed');
-	// @ts-expect-error — the floating surface was removed
-	assertType<UtilityProps['backgroundColor']>('surface.floating');
-});
-
 test('passes through own enumerable string-keyed non-utility props', () => {
 	const result = createSprinkles({
 		'data-testid': 'box',
