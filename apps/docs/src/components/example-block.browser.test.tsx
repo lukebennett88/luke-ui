@@ -385,6 +385,40 @@ test('collapsing source that now fits moves keyboard focus from the toggle to Co
 	await expect.element(page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN })).toHaveFocus();
 });
 
+test('collapsing does not take focus back from a control focused while the collapse is pending', async () => {
+	await renderSourcePreview();
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
+	const collapse = page.getByRole('button', { name: 'Collapse code' });
+	await expect.element(collapse).toBeVisible();
+	shrinkTypography(sourceElement());
+	await expect.poll(() => sourceElement().getBoundingClientRect().height).toBeLessThan(30);
+
+	const elsewhere = document.body.appendChild(document.createElement('button'));
+	elsewhere.textContent = 'Elsewhere';
+	// Move focus in a task after the press. The collapse is a deferred transition, so the toggle is
+	// still mounted then; the guard fails the test if that ever stops being true.
+	let toggleWasMounted = false;
+	const moveFocus = () => {
+		setTimeout(() => {
+			toggleWasMounted = collapse.query() != null;
+			elsewhere.focus();
+		});
+	};
+	window.addEventListener('click', moveFocus, { capture: true, once: true });
+	try {
+		await act(async () => {
+			await userEvent.click(collapse);
+		});
+		await expect.poll(() => collapse.query()).toBeNull();
+		expect(toggleWasMounted).toBe(true);
+		expect(elsewhere).toHaveFocus();
+	} finally {
+		window.removeEventListener('click', moveFocus, { capture: true });
+		elsewhere.remove();
+	}
+});
+
 test('typography changes without interaction do not move focus', async () => {
 	await renderSourcePreview();
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();

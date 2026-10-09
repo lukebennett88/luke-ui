@@ -60,10 +60,12 @@ export function ExampleCodePreview({
 		if (isClipped != null) dispatch({ isClipped, type: 'measured' });
 	}, [mode]);
 
-	// The reducer asks for this only after a focused collapse control has unmounted.
+	// The reducer asks for this only after a focused collapse control has unmounted. Skip the move
+	// when focus is already somewhere else, because someone moved it while the collapse was pending.
 	useLayoutEffect(() => {
 		if (focus !== 'copy') return;
-		copyButtonRef.current?.focus();
+		const active = document.activeElement;
+		if (active == null || active === document.body) copyButtonRef.current?.focus();
 		dispatch({ type: 'focusRestored' });
 	}, [focus]);
 
