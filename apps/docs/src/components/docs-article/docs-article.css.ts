@@ -34,67 +34,12 @@ export const article = style({
 	},
 });
 
-export const footer = style({
-	'@layer': {
-		recipes: {
-			borderBlockStart: `1px solid ${vars.color.border.decorative}`,
-			marginBlockStart: vars.space.sp64,
-			paddingBlockStart: vars.space.sp32,
-		},
-	},
-});
-
-export const pager = style({
-	'@layer': {
-		recipes: {
-			display: 'grid',
-			gap: vars.space.sp16,
-			gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))',
-		},
-	},
-});
-
-export const pagerNext = style({
-	'@layer': {
-		recipes: {
-			textAlign: 'end',
-		},
-	},
-});
-
-export const pagerRow = style({
-	'@layer': {
-		recipes: {
-			alignItems: 'center',
-			columnGap: vars.space.sp12,
-			display: 'flex',
-		},
-	},
-});
-
-export const pagerRowNext = style({
-	'@layer': {
-		recipes: {
-			flexDirection: 'row-reverse',
-		},
-	},
-});
-
-export const pagerText = style({
-	'@layer': {
-		recipes: {
-			display: 'grid',
-			flexGrow: 1,
-			minInlineSize: 0,
-		},
-	},
-});
-
 // A chevron points along the inline axis, so it flips with the writing direction.
 export const pagerIcon = style({
 	'@layer': {
 		recipes: {
 			flexShrink: 0,
+			marginInline: `calc(${vars.space.sp4} * -1)`,
 			selectors: {
 				'&:dir(rtl)': {
 					transform: 'scaleX(-1)',

@@ -279,7 +279,7 @@ test('leaves fenced code as plain code and styles inline code', async () => {
 	expect(getComputedStyle(fenced).backgroundColor).toBe('rgba(0, 0, 0, 0)');
 });
 
-test('renders a card as a link with a heading and its description', async () => {
+test('renders a card as a link with a title and its description', async () => {
 	await renderMdx(
 		<Cards>
 			<Card href="/components/layout/stack" title="Stack">
@@ -292,6 +292,21 @@ test('renders a card as a link with a heading and its description', async () => 
 	await expect.element(link).toHaveAttribute('href', '/components/layout/stack');
 	await expect.element(link.getByRole('heading', { name: 'Stack', level: 3 })).toBeVisible();
 	await expect.element(link.getByText('Stack children on the block axis.')).toBeVisible();
+});
+
+test('names an external card as opening in a new tab', async () => {
+	await renderMdx(
+		<Cards>
+			<Card href="https://example.com/guide" title="External guide">
+				Read the external guide.
+			</Card>
+		</Cards>,
+	);
+
+	const link = page.getByRole('link', { name: /External guide.*opens in a new tab/i });
+	await expect.element(link).toHaveAttribute('href', 'https://example.com/guide');
+	await expect.element(link).toHaveAttribute('target', '_blank');
+	await expect.element(link).toHaveAttribute('rel', 'noreferrer noopener');
 });
 
 async function renderMdx(children: ReactNode) {

@@ -1,10 +1,15 @@
+import { Box } from '@luke-ui/react/box';
+import { Grid } from '@luke-ui/react/grid';
 import { Icon } from '@luke-ui/react/icon';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { cx } from '@luke-ui/react/utils';
-import { Link, useRouterState } from '@tanstack/react-router';
+import { vars } from '@luke-ui/react/theme';
+import { Track } from '@luke-ui/react/track';
+import { useRouterState } from '@tanstack/react-router';
 import type { Folder, Item, Node, Root } from 'fumadocs-core/page-tree';
 import { findPath, flattenTree } from 'fumadocs-core/page-tree';
-import { blockLink } from './block-link.css.js';
+import type { CSSProperties, ReactNode } from 'react';
+import { DocsCardLink } from '../docs-card.js';
 import * as styles from './docs-article.css.js';
 
 /**
@@ -18,14 +23,23 @@ export function DocsPager({ tree }: { tree: Root }) {
 	if (!previous && !next) return null;
 
 	return (
-		<footer className={styles.footer}>
-			<nav aria-label="Pagination" className={styles.pager}>
+		<Box elementType="footer" marginBlockStart="sp64" paddingBlockStart="sp32" style={footerRule}>
+			<Grid
+				aria-label="Pagination"
+				columns="repeat(auto-fit, minmax(min(100%, 16rem), 1fr))"
+				elementType="nav"
+				gap="sp16"
+			>
 				{previous ? <PagerLink direction="previous" page={previous} /> : null}
 				{next ? <PagerLink direction="next" page={next} /> : null}
-			</nav>
-		</footer>
+			</Grid>
+		</Box>
 	);
 }
+
+const footerRule = {
+	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
+} as const satisfies CSSProperties;
 
 const TRAILING_SLASH_PATTERN = /\/+$/;
 
@@ -53,24 +67,82 @@ function findNeighbours(tree: Root, pathname: string): { next?: Item; previous?:
 	return {};
 }
 
-function PagerLink({ direction, page }: { direction: 'next' | 'previous'; page: Item }) {
-	const isNext = direction === 'next';
+type PagerDirection = 'next' | 'previous';
+
+const pagerDirection = {
+	previous: {
+		align: 'start',
+		chevron: 'chevronLeft',
+		fallbackDescription: 'Previous Page',
+	},
+	next: {
+		align: 'end',
+		chevron: 'chevronRight',
+		fallbackDescription: 'Next Page',
+	},
+} as const satisfies Record<
+	PagerDirection,
+	{
+		align: 'end' | 'start';
+		chevron: 'chevronLeft' | 'chevronRight';
+		fallbackDescription: string;
+	}
+>;
+
+function PagerLink({ direction, page }: { direction: PagerDirection; page: Item }) {
+	const { align, fallbackDescription } = pagerDirection[direction];
+	const description: string = (() => {
+		if (typeof page.description === 'string' && page.description.length > 0) {
+			return page.description;
+		}
+		return fallbackDescription;
+	})();
 
 	return (
-		<Link className={cx(blockLink, isNext && styles.pagerNext)} to={page.url}>
-			<span className={cx(styles.pagerRow, isNext && styles.pagerRowNext)}>
-				<Icon
-					className={styles.pagerIcon}
-					name={isNext ? 'chevronRight' : 'chevronLeft'}
-					size="small"
-				/>
-				<span className={styles.pagerText}>
-					<Text color="secondary" typography="caption">
-						{isNext ? 'Next' : 'Previous'}
-					</Text>
-					<Text fontWeight="label">{page.name}</Text>
-				</span>
-			</span>
-		</Link>
+		<DocsCardLink align={align} href={page.url}>
+			<Stack gap="sp12" minInlineSize="0">
+				<PagerTitle direction={direction} name={page.name} />
+				<Text
+					color="secondary"
+					elementType="div"
+					fontWeight="body"
+					lineClamp={1}
+					textAlign={align}
+					typography="label"
+				>
+					{description}
+				</Text>
+			</Stack>
+		</DocsCardLink>
+	);
+}
+
+function PagerTitle({ direction, name }: { direction: PagerDirection; name: ReactNode }) {
+	const chevron = (
+		<Icon className={styles.pagerIcon} name={pagerDirection[direction].chevron} size="xsmall" />
+	);
+
+	return (
+		<Text
+			elementType="div"
+			fontWeight="label"
+			style={
+				direction === 'next'
+					? { marginInlineStart: 'auto', maxInlineSize: '100%', width: 'fit-content' }
+					: undefined
+			}
+			typography="label"
+		>
+			<Track
+				gap="sp8"
+				railAlignment="firstLine"
+				railEnd={direction === 'next' ? chevron : undefined}
+				railStart={direction === 'previous' ? chevron : undefined}
+			>
+				<Text elementType="span" shouldInheritFont>
+					{name}
+				</Text>
+			</Track>
+		</Text>
 	);
 }

@@ -1,23 +1,22 @@
 import { Code } from '@luke-ui/react/code';
+import { Grid } from '@luke-ui/react/grid';
 import type { HeadingLevel } from '@luke-ui/react/heading';
-import { Heading } from '@luke-ui/react/heading';
-import { Icon } from '@luke-ui/react/icon';
+import { Heading, HeadingLevels } from '@luke-ui/react/heading';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Link as LukeLink } from '@luke-ui/react/link';
 import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
-import { Link as RouterLink } from '@tanstack/react-router';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { createContext, use } from 'react';
 import { useCopyButton } from '../../lib/use-copy-button.js';
 import * as codeBlockStyles from '../code-block/code-block.css.js';
 import type { CodeBlockProps } from '../code-block/code-block.js';
 import { CodeBlock } from '../code-block/code-block.js';
+import { DocsCard } from '../docs-card.js';
 import { DocsLink } from '../docs-link.js';
 import { LinkIcon } from '../link-icon.js';
-import { blockLink } from './block-link.css.js';
 import * as styles from './mdx-elements.css.js';
 
 const EXTERNAL_HREF_PATTERN = /^(?:\w+:|\/\/)/;
@@ -176,7 +175,18 @@ export function MdxTable({ className, ...props }: ComponentPropsWithoutRef<'tabl
 }
 
 export function Cards({ className, ...props }: ComponentPropsWithoutRef<'div'>) {
-	return <div {...props} className={cx(styles.cards, className)} />;
+	// Continue learning is an h2 in MDX; card titles step to h3 for the outline.
+	return (
+		<HeadingLevels base={3}>
+			<Grid
+				{...props}
+				className={cx('not-prose', className)}
+				columns="repeat(auto-fit, minmax(min(100%, 20rem), 1fr))"
+				gap="sp12"
+				marginBlockStart="sp40"
+			/>
+		</HeadingLevels>
+	);
 }
 
 interface CardProps {
@@ -187,40 +197,16 @@ interface CardProps {
 	title: ReactNode;
 }
 
-/** Link block with a heading and a short description. */
+/** Same card chrome as the components index: title, short description, whole-surface link. */
 export function Card({ children, description, href, title }: CardProps) {
-	const content = (
-		<div className={styles.cardRow}>
-			<div>
-				<Heading className={styles.cardTitle} level={3} typography="body">
-					{title}
-				</Heading>
-				<Text
-					className={styles.cardDescription}
-					color="secondary"
-					elementType="div"
-					typography="label"
-				>
-					<InheritTypographyContext value>{description ?? children}</InheritTypographyContext>
-				</Text>
-			</div>
-			<Icon className={styles.cardIcon} name="chevronRight" size="small" />
-		</div>
-	);
-
-	if (EXTERNAL_HREF_PATTERN.test(href)) {
-		return (
-			<a className={blockLink} href={href} rel="noreferrer noopener" target="_blank">
-				{content}
-			</a>
-		);
-	}
-
-	const { hash, path } = splitHash(href);
 	return (
-		<RouterLink className={blockLink} hash={hash} to={path}>
-			{content}
-		</RouterLink>
+		<DocsCard
+			description={
+				<InheritTypographyContext value>{description ?? children}</InheritTypographyContext>
+			}
+			href={href}
+			title={title}
+		/>
 	);
 }
 
