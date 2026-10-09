@@ -1,0 +1,52 @@
+{
+	"name": "@luke-ui/theme-paper",
+	"version": "0.0.0",
+	"description": "Paper, a materially minimal Luke UI theme: flat, hairline-bordered surfaces with a blue accent.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukebennett88/luke-ui.git",
+		"directory": "packages/@luke-ui/theme-paper"
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"type": "module",
+	"sideEffects": [
+		"./dist/fonts.css",
+		"./dist/stylesheet.css"
+	],
+	"exports": {
+		".": "./dist/index.js",
+		"./input": "./dist/input.js",
+		"./stylesheet.css": "./dist/stylesheet.css",
+		"./fonts.css": "./dist/fonts.css",
+		"./package.json": "./package.json"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "vp pack && node scripts/build-stylesheet.js && publint",
+		"check:format": "vp fmt . --check",
+		"check:lint": "vp lint . --type-aware",
+		"check:types": "tsc --noEmit -p tsconfig.json",
+		"clean": "rm -rf .turbo dist",
+		"fix:format": "vp fmt . --write",
+		"fix:lint": "vp lint . --type-aware --fix",
+		"test": "vp test run"
+	},
+	"devDependencies": {
+		"@capsizecss/unpack": "catalog:",
+		"@luke-ui/react": "workspace:*",
+		"@types/node": "catalog:",
+		"publint": "catalog:",
+		"typescript": "catalog:",
+		"vite-plus": "catalog:"
+	},
+	"peerDependencies": {
+		"@luke-ui/react": "workspace:^"
+	}
+}

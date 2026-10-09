@@ -51,6 +51,9 @@ jobs:
       - name: Run component tests
         run: pnpm --filter @luke-ui/react run test
 
+      - name: Run theme package tests
+        run: pnpm --filter "@luke-ui/theme-*" run test
+
   consumer-tests:
     name: consumer-tests
     runs-on: ubuntu-latest

@@ -53,6 +53,14 @@ export default {
 			],
 			project: ['src/**/*.{ts,tsx}'],
 		},
+		'packages/@luke-ui/theme-paper': {
+			entry: ['src/index.ts', 'src/input.ts', 'scripts/build-stylesheet.js'],
+			project: ['src/**/*.ts', 'scripts/**/*.js'],
+		},
+		'packages/@luke-ui/theme-tactile': {
+			entry: ['src/index.ts', 'src/input.ts', 'scripts/build-stylesheet.js'],
+			project: ['src/**/*.ts', 'scripts/**/*.js'],
+		},
 		'packages/turbo-generators': {
 			entry: ['config.ts'],
 			project: ['**/*.ts'],
