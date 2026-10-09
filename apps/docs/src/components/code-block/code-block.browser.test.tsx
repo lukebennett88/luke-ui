@@ -3,7 +3,7 @@ import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import axe from 'axe-core';
 import type { ReactNode } from 'react';
-import { act } from 'react';
+import { act, createRef } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test, vi } from 'vite-plus/test';
@@ -64,6 +64,93 @@ test('copies copyText instead of rendered highlighted text', async () => {
 
 	expect(writeText).toHaveBeenCalledWith(source);
 	expect(page.getByText('rendered').element()).toBeTruthy();
+});
+
+test('updates scroll accessibility when the mounted source and label change', async () => {
+	await page.viewport(400, 800);
+	renderCodeBlock(<CodeBlock allowCopy={false} code="short" viewportLabel="Source" />);
+	const source = container?.querySelector('pre');
+	assert(source != null, 'Expected a source element');
+	const viewport = source.parentElement;
+	assert(viewport != null, 'Expected a scroll viewport');
+	expect(page.getByRole('region').query()).toBeNull();
+
+	rerenderCodeBlock(<CodeBlock allowCopy={false} code={'x'.repeat(200)} viewportLabel="Source" />);
+	await expect.element(page.getByRole('region', { name: 'Source' })).toBeVisible();
+	expect(viewport).toHaveAttribute('tabindex', '0');
+	expect(container?.querySelector('pre')).toBe(source);
+
+	rerenderCodeBlock(
+		<CodeBlock allowCopy={false} code={'x'.repeat(200)} viewportLabel="Updated source" />,
+	);
+	await expect.element(page.getByRole('region', { name: 'Updated source' })).toBeVisible();
+	expect(page.getByRole('region', { name: 'Source', exact: true }).query()).toBeNull();
+
+	rerenderCodeBlock(<CodeBlock allowCopy={false} code="short" viewportLabel="Updated source" />);
+	await expect.poll(() => page.getByRole('region').query()).toBeNull();
+	expect(viewport).not.toHaveAttribute('tabindex');
+	expect(viewport).not.toHaveAttribute('aria-label');
+});
+
+test('updates scroll accessibility when the viewport narrows and widens', async () => {
+	await page.viewport(1000, 800);
+	renderCodeBlock(<CodeBlock allowCopy={false} code={'x'.repeat(80)} title="Source" />);
+	expect(page.getByRole('region').query()).toBeNull();
+
+	await page.viewport(320, 800);
+	const viewport = page.getByRole('region', { name: 'Source' });
+	await expect.element(viewport).toBeVisible();
+	expect(viewport).toHaveAttribute('tabindex', '0');
+
+	await page.viewport(1000, 800);
+	await expect.poll(() => viewport.query()).toBeNull();
+});
+
+test('composes source refs through content changes, ref replacement, and unmount', () => {
+	const cleanup = vi.fn<() => void>();
+	const callbackRef = vi.fn<(node: HTMLPreElement | null) => (() => void) | void>((node) => {
+		if (node) return cleanup;
+	});
+	const figureRef = createRef<HTMLElement>();
+	const objectRef = createRef<HTMLPreElement>();
+	renderCodeBlock(<CodeBlock code="first" ref={figureRef} sourceRef={callbackRef} />);
+	const source = container?.querySelector('pre');
+	assert(source != null, 'Expected a source element');
+	expect(callbackRef).toHaveBeenCalledExactlyOnceWith(source);
+	expect(figureRef.current).toBe(source.closest('figure'));
+
+	rerenderCodeBlock(
+		<CodeBlock html="<code>second</code>" ref={figureRef} sourceRef={callbackRef} />,
+	);
+	expect(source).toHaveTextContent('second');
+	expect(callbackRef).toHaveBeenCalledTimes(1);
+	expect(cleanup).not.toHaveBeenCalled();
+
+	rerenderCodeBlock(<CodeBlock code="third" ref={figureRef} sourceRef={objectRef} />);
+	expect(cleanup).toHaveBeenCalledTimes(1);
+	expect(objectRef.current).toBe(source);
+	expect(source).toHaveTextContent('third');
+
+	act(() => root?.unmount());
+	root = undefined;
+	expect(objectRef.current).toBeNull();
+	expect(figureRef.current).toBeNull();
+});
+
+test('copies child source while excluding ignored spans', async () => {
+	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
+	renderCodeBlock(
+		<CodeBlock>
+			<code>
+				first<span className="nd-copy-ignore">annotation</span>second
+			</code>
+		</CodeBlock>,
+	);
+
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Copy' }));
+	});
+	expect(writeText).toHaveBeenCalledWith('first\nsecond');
 });
 
 test('scrolls Shiki line spans across the full figure width under overlay copy', async () => {
@@ -212,6 +299,10 @@ function renderCodeBlock(node: ReactNode) {
 	container = document.body.appendChild(document.createElement('div'));
 	container.className = `luke-ui-theme ${tactileThemeClassName}`;
 	root = createRoot(container);
+	rerenderCodeBlock(node);
+}
+
+function rerenderCodeBlock(node: ReactNode) {
 	act(() => {
 		root?.render(<StoryWrapper>{node}</StoryWrapper>);
 	});

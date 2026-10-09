@@ -1,15 +1,35 @@
 import { IconButton } from '@luke-ui/react/icon-button';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
+import { useObjectRef } from '@react-aria/utils';
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 import * as styles from './code-block.css.js';
 
 type FigureProps = ComponentPropsWithoutRef<'figure'>;
 
 type CopyStatus = 'idle' | 'copied' | 'error';
 
+interface CodeBlockState {
+	copyStatus: CopyStatus;
+	/** Counts copy attempts so copying again during feedback restarts the timer. */
+	copyAttempt: number;
+	isScrollable: boolean;
+}
+
+type CodeBlockEvent =
+	| { type: 'copySucceeded' }
+	| { type: 'copyFailed' }
+	| { type: 'copyFeedbackExpired' }
+	| { type: 'overflowChanged'; isScrollable: boolean };
+
 const COPY_FEEDBACK_MS = 1500;
+
+const initialState: CodeBlockState = {
+	copyStatus: 'idle',
+	copyAttempt: 0,
+	isScrollable: false,
+};
 
 export interface CodeBlockProps extends Omit<FigureProps, 'children'> {
 	/**
@@ -28,8 +48,14 @@ export interface CodeBlockProps extends Omit<FigureProps, 'children'> {
 	/** Shiki `<code>…</code>` markup. Docs CodeBlock owns the outer `<pre>`. */
 	html?: string;
 	ref?: Ref<HTMLElement>;
+	/** Ref for the source `<pre>` element. */
+	sourceRef?: Ref<HTMLPreElement>;
 	/** Optional caption shown above the code. */
 	title?: string;
+	/** Class for the scroll region when its parent owns source clipping. */
+	viewportClassName?: string;
+	/** Accessible name for the scroll region. Defaults to the title or "Code". */
+	viewportLabel?: string;
 }
 
 /**
@@ -44,41 +70,60 @@ export function CodeBlock({
 	copyText,
 	flush = false,
 	html,
+	sourceRef,
 	title,
+	viewportClassName,
+	viewportLabel = title ?? 'Code',
 	...figureProps
 }: CodeBlockProps) {
 	const allowCopy = allowCopyProp !== false && allowCopyProp !== 'false';
-	const viewportRef = useRef<HTMLDivElement | null>(null);
-	const resizeObserverRef = useRef<ResizeObserver | null>(null);
-	const copyTimeoutRef = useRef<number | null>(null);
-	const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle');
+	const sourceElementRef = useObjectRef(sourceRef);
+	const [{ copyAttempt, copyStatus, isScrollable }, dispatch] = useReducer(
+		codeBlockReducer,
+		initialState,
+	);
+	const viewportRef = useCallback(
+		(node: HTMLDivElement | null) => {
+			if (!node) return;
+			const update = () => {
+				dispatch({
+					type: 'overflowChanged',
+					isScrollable: isOverflowing(node),
+				});
+			};
+
+			update();
+			const observer = new ResizeObserver(update);
+			observer.observe(node);
+			if (sourceElementRef.current) observer.observe(sourceElementRef.current);
+			return () => observer.disconnect();
+		},
+		[sourceElementRef],
+	);
 
 	useEffect(() => {
-		return () => {
-			if (copyTimeoutRef.current != null) window.clearTimeout(copyTimeoutRef.current);
-		};
-	}, []);
+		if (copyStatus === 'idle') return;
+		const timeout = window.setTimeout(
+			() => dispatch({ type: 'copyFeedbackExpired' }),
+			COPY_FEEDBACK_MS,
+		);
+		return () => window.clearTimeout(timeout);
+		// `copyAttempt` restarts the timer when someone copies again during feedback.
+	}, [copyStatus, copyAttempt]);
 
 	async function handleCopy() {
 		const text = resolveCopyText({
 			code,
 			copyText,
-			viewport: viewportRef.current,
+			sourceElement: sourceElementRef.current,
 		});
-
-		if (copyTimeoutRef.current != null) window.clearTimeout(copyTimeoutRef.current);
 
 		try {
 			await navigator.clipboard.writeText(text);
-			setCopyStatus('copied');
+			dispatch({ type: 'copySucceeded' });
 		} catch {
-			setCopyStatus('error');
+			dispatch({ type: 'copyFailed' });
 		}
-
-		copyTimeoutRef.current = window.setTimeout(() => {
-			setCopyStatus('idle');
-			copyTimeoutRef.current = null;
-		}, COPY_FEEDBACK_MS);
 	}
 
 	const showOverlayCopy = allowCopy && title == null;
@@ -114,38 +159,27 @@ export function CodeBlock({
 				<div className={cx(styles.actions, styles.overlayActions)}>{copyControl}</div>
 			) : null}
 			<div
-				className={cx(styles.viewport, showOverlayCopy && styles.viewportWithOverlayCopy)}
-				ref={(node) => {
-					resizeObserverRef.current?.disconnect();
-					resizeObserverRef.current = null;
-					viewportRef.current = node;
-					if (node == null) return;
-
-					const updateTabIndex = () => {
-						const scrollable =
-							node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1;
-						if (scrollable) {
-							node.tabIndex = 0;
-							node.setAttribute('role', 'region');
-							node.setAttribute('aria-label', title ?? 'Code');
-						} else {
-							node.removeAttribute('tabindex');
-							node.removeAttribute('role');
-							node.removeAttribute('aria-label');
-						}
-					};
-
-					updateTabIndex();
-					const observer = new ResizeObserver(updateTabIndex);
-					observer.observe(node);
-					resizeObserverRef.current = observer;
-				}}
+				aria-label={isScrollable ? viewportLabel : undefined}
+				className={cx(
+					styles.viewport,
+					showOverlayCopy && styles.viewportWithOverlayCopy,
+					viewportClassName,
+				)}
+				ref={viewportRef}
+				role={isScrollable ? 'region' : undefined}
+				tabIndex={isScrollable ? 0 : undefined}
 			>
 				{html != null ? (
 					// Shiki escapes source before the highlight plugin emits this markup.
-					<pre className={styles.pre} dangerouslySetInnerHTML={{ __html: html }} />
+					<pre
+						className={styles.pre}
+						dangerouslySetInnerHTML={{ __html: html }}
+						ref={sourceElementRef}
+					/>
 				) : (
-					<pre className={styles.pre}>{code != null ? <code>{code}</code> : children}</pre>
+					<pre className={styles.pre} ref={sourceElementRef}>
+						{code != null ? <code>{code}</code> : children}
+					</pre>
 				)}
 			</div>
 			{allowCopy ? (
@@ -157,22 +191,39 @@ export function CodeBlock({
 	);
 }
 
+function codeBlockReducer(state: CodeBlockState, event: CodeBlockEvent): CodeBlockState {
+	switch (event.type) {
+		case 'copySucceeded':
+			return { ...state, copyStatus: 'copied', copyAttempt: state.copyAttempt + 1 };
+		case 'copyFailed':
+			return { ...state, copyStatus: 'error', copyAttempt: state.copyAttempt + 1 };
+		case 'copyFeedbackExpired':
+			return { ...state, copyStatus: 'idle' };
+		case 'overflowChanged':
+			if (state.isScrollable === event.isScrollable) return state;
+			return { ...state, isScrollable: event.isScrollable };
+	}
+}
+
+function isOverflowing(node: HTMLElement) {
+	return node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1;
+}
+
 function resolveCopyText({
 	code,
 	copyText,
-	viewport,
+	sourceElement,
 }: {
 	code: string | undefined;
 	copyText: string | undefined;
-	viewport: HTMLDivElement | null;
+	sourceElement: HTMLPreElement | null;
 }): string {
 	if (copyText != null) return copyText;
 	if (code != null) return code;
 
-	const pre = viewport?.querySelector('pre');
-	if (pre == null) return '';
+	if (sourceElement == null) return '';
 
-	const clone = pre.cloneNode(true);
+	const clone = sourceElement.cloneNode(true);
 	if (clone instanceof HTMLElement) {
 		for (const ignored of clone.querySelectorAll('.nd-copy-ignore')) {
 			ignored.replaceWith('\n');
@@ -180,5 +231,5 @@ function resolveCopyText({
 		return clone.textContent ?? '';
 	}
 
-	return pre.textContent ?? '';
+	return sourceElement.textContent ?? '';
 }
