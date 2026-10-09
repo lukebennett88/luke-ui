@@ -77,9 +77,8 @@ const switchConfig = {
 					transition: 'none',
 				},
 			},
-			// Off, the track is filled with the guaranteed control boundary colour and sits in as a well.
-			// On, it is a solid fill with the control finish. Hover and pressed change colour, so they
-			// stay distinct when a theme sets every material to `none`.
+			// Off, the track is filled with the control border colour; on, it is a solid fill with the
+			// control finish. Hover and pressed change colour, so they stay distinct without materials.
 			alignItems: 'center',
 			backgroundColor: vars.color.border.control,
 			backgroundImage: 'none',

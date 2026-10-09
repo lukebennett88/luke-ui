@@ -2,15 +2,13 @@ import type { ThemeInput } from '../define-theme.js';
 
 /**
  * Tactile, the default bundled theme: a teal accent, a neutral near-white light canvas, lighter
- * chromatic dark surfaces, and a restrained dimensional material: soft light from above and soft
- * shadows, never a bright lower rim or a second hard edge. Both modes are authored explicitly, so
- * `defineTheme` uses each side verbatim.
+ * chromatic dark surfaces, and a restrained material lit from above. Both modes are authored
+ * explicitly, so `defineTheme` uses each side as written.
  */
 // Multi-layer values below are concatenated string literals, not `[...].join(', ')`, because a
 // joined value survives dead-code elimination even when unused. See `themes/theme-bundle.test.ts`.
 export const tactileTheme: ThemeInput = {
-	// The face of a solid fill is lit from above: a soft lighter top fading out, and a slightly
-	// darker bottom. Nothing brightens the bottom edge. Pressed reverses the light, as if pushed in.
+	// A solid face is lighter at the top and slightly darker at the bottom. Pressed reverses it.
 	controlFinish: {
 		dark: {
 			raised:
@@ -35,9 +33,8 @@ export const tactileTheme: ThemeInput = {
 		accent: { dark: 'oklch(0.75 0.1 200)', light: 'oklch(0.52 0.11 200)' },
 		neutral: { dark: 'oklch(0.25 0.015 210)', light: 'oklch(0.985 0 0)' },
 	},
-	// Raised rungs pair a faint top specular highlight with soft exterior shadows. They have no
-	// zero-blur offset, which would read as a second edge. The recessed rung is one restrained inset
-	// shadow from above, with no highlight along the bottom.
+	// Raised rungs: a faint top highlight and blurred shadows; a zero-blur offset would read as a
+	// second edge. Recessed: one soft inset shadow from above.
 	depth: {
 		dark: {
 			floating: '0 4px 12px oklch(0.05 0.01 220 / 0.38), 0 2px 4px oklch(0.05 0.01 220 / 0.22)',

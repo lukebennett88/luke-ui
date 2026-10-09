@@ -6,6 +6,7 @@
  */
 
 import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
+import { SURFACE_ROLES } from './foundation.js';
 
 /** Which colours a theme authored, and which it inherited. Carried by `ThemeContrastError`. */
 export interface ThemeInheritance {
@@ -40,11 +41,6 @@ const COLOR_ROLES = [
 	'focus',
 	'backdrop',
 ] as const satisfies ReadonlyArray<Exclude<keyof ThemeInput['color'], 'surface'>>;
-
-/** Surface roles in `ThemeInput['color']['surface']` declaration order. */
-const SURFACE_ROLES = ['base', 'subdued', 'field', 'overlay'] as const satisfies ReadonlyArray<
-	keyof NonNullable<ThemeInput['color']['surface']>
->;
 
 /** The two keys that spell one neutral decision. `inheritColor` inherits them together. */
 const NEUTRAL_ROLES = ['neutral', 'neutralStyle'] as const satisfies ReadonlyArray<

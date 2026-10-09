@@ -14,12 +14,10 @@ import { recipe } from '../../styles/recipe.js';
 
 // React Aria publishes disabled and invalid state on the group, so those states
 // do not need to probe descendants.
-const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly } =
-	composeInputStateSelectors();
+const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSelectors();
 
 // The well ring tracks the text input so inner actions do not paint a second ring.
 const inputFocus = `${focusWithin}:has(input:focus)`;
-const invalidInputFocus = `${invalidFocusWithin}:has(input:focus)`;
 
 const comboboxActionStyles = {
 	'@media': {
@@ -117,7 +115,6 @@ const comboboxConfig = {
 					selectors: {
 						[disabled]: { borderColor: 'GrayText', color: 'GrayText', opacity: 1 },
 						[inputFocus]: { outlineColor: 'Highlight' },
-						[invalidInputFocus]: { outlineColor: 'Highlight' },
 					},
 				},
 				'(prefers-reduced-motion: reduce)': { transition: 'none' },
@@ -151,8 +148,7 @@ const comboboxConfig = {
 				[disabled]: { cursor: 'not-allowed', opacity: vars.interaction.disabledOpacity },
 				[inputFocus]: focusRing(vars.color.border.focus),
 				[hover]: { borderColor: vars.color.border.controlHover },
-				// A read-only control keeps its field surface and guaranteed border. It drops the inset
-				// depth and, through the hover selector, hover feedback.
+				// Read-only drops the inset depth. The hover selector already excludes it.
 				[readOnly]: { boxShadow: 'none' },
 				// The field's error message carries the non-colour invalid cue, so the border keeps
 				// its resting width and only takes the danger colour.

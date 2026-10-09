@@ -52,9 +52,7 @@ export function composeInputStateSelectors(extraStates: Partial<Record<InputStat
 		// draws its own ring and leaves the border to hover.
 		hover: `&:where(${states.hover})${notDisabled}:not(:where(${states.readOnly}))`,
 		invalid: `&:where(${states.invalid})${notDisabled}`,
-		invalidFocusWithin: `&:where(${states.invalid}):where(${states.focusWithin})${notDisabled}`,
 		readOnly: `&:where(${states.readOnly})${notDisabled}`,
-		readOnlyFocusWithin: `&:where(${states.readOnly}):where(${states.focusWithin})${notDisabled}`,
 	};
 }
 

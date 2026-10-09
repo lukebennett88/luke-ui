@@ -58,9 +58,8 @@ export const buttonRecipeInternal = recipe({
 				},
 				alignItems: 'center',
 				appearance: 'none',
-				// No border outside forced colours. An inset depth shadow and the face finish paint inside
-				// the border, so even a transparent border would leave an unshaded rim around the face. The
-				// size padding makes up the width the border took.
+				// No border outside forced colours: inset depth and the face finish would leave an
+				// unshaded rim inside even a transparent one. The size padding makes up its width.
 				borderColor: 'transparent',
 				borderRadius: vars.radius.control,
 				borderStyle: 'solid',
@@ -235,8 +234,7 @@ function buttonAppearance(
 
 function buttonSize(size: 'medium' | 'small') {
 	const paddingInline = size === 'medium' ? vars.space.sp16 : vars.space.sp12;
-	// The padding takes the 1px each side that the border no longer draws, so the outer size stays
-	// the same. Forced colours restores the border, so it uses the padding alone.
+	// The extra 1px replaces the border. Forced colours draws the border, so it uses the plain padding.
 	const inset = {
 		'@media': {
 			'(forced-colors: active)': { paddingInline },

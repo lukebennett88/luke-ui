@@ -104,7 +104,7 @@ export const themeContractTree = {
 		surface: {
 			/** The application background and primary content. */
 			base: null,
-			/** Secondary static regions, such as a sidebar or an inline code chip. */
+			/** Secondary regions, such as a sidebar or an inline code chip. */
 			subdued: null,
 			/** Form-control surfaces. */
 			field: null,
@@ -129,7 +129,7 @@ export const themeContractTree = {
 		border: {
 			/** A subtle separator. Not contrast-checked. */
 			decorative: null,
-			/** The guaranteed 3:1 boundary of a control against the base, field, and overlay surfaces. */
+			/** The guaranteed 3:1 boundary of a control against every surface. */
 			control: null,
 			/** The hovered control boundary, with the same 3:1 guarantee as `control`. */
 			controlHover: null,

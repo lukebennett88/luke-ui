@@ -80,9 +80,6 @@ export const textInputPartsRecipe = recipe({
 						[control.focusWithin]: {
 							outlineColor: 'Highlight',
 						},
-						[control.invalidFocusWithin]: {
-							outlineColor: 'Highlight',
-						},
 					},
 				},
 			},
@@ -117,8 +114,7 @@ export const textInputPartsRecipe = recipe({
 				[control.hover]: {
 					borderColor: vars.color.border.controlHover,
 				},
-				// A read-only control keeps its field surface and guaranteed border. It drops the inset
-				// depth and, through the hover selector, hover feedback.
+				// Read-only drops the inset depth. The hover selector already excludes it.
 				[control.readOnly]: {
 					boxShadow: 'none',
 				},

@@ -13,6 +13,19 @@ const checkboxControlSize = createVar();
 const checkboxGlyphSize = createVar();
 const checkboxIndicatorSize = createVar();
 
+// Disabled and read-only boxes give no hover or press feedback.
+const interactive = ':not([data-disabled="true"]):not([data-readonly="true"])';
+
+/** Selects the box while the checkbox matches `state` and is hovered. */
+function hovered(state = '') {
+	return `${state}[data-hovered="true"]${interactive} &`;
+}
+
+/** Selects the box while the checkbox matches `state` and is pressed. */
+function pressed(state = '') {
+	return `${state}[data-pressed="true"]${interactive} &`;
+}
+
 const checkboxConfig = {
 	slots: {
 		root: {
@@ -54,9 +67,8 @@ const checkboxConfig = {
 					transition: 'none',
 				},
 			},
-			// Unchecked, the box is a field part: the field surface, the guaranteed control border, and
-			// inset depth. Checked, it is a solid fill with the control finish. Hover and pressed
-			// change colour, so they stay distinct when a theme sets every material to `none`.
+			// Unchecked, the box is a field part; checked, a solid fill with the control finish. Hover
+			// and pressed change colour, so they stay distinct without materials.
 			alignItems: 'center',
 			backgroundColor: vars.color.surface.field,
 			backgroundImage: 'none',
@@ -89,10 +101,10 @@ const checkboxConfig = {
 					opacity: vars.interaction.disabledOpacity,
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
-				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
+				[hovered()]: {
 					borderColor: vars.color.border.controlHover,
 				},
-				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
+				[pressed()]: {
 					backgroundColor: vars.color.background.neutral.subtle.pressed,
 					borderColor: vars.color.border.controlHover,
 				},
@@ -118,18 +130,16 @@ const checkboxConfig = {
 				'[data-selected="true"] &::after': {
 					opacity: 1,
 				},
-				'[data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.accent.solid.hover,
-						backgroundImage: vars.controlFinish.raised,
-						borderColor: vars.color.background.accent.solid.hover,
-					},
-				'[data-selected="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.accent.solid.pressed,
-						backgroundImage: vars.controlFinish.recessed,
-						borderColor: vars.color.background.accent.solid.pressed,
-					},
+				[`${hovered('[data-selected="true"]')}, ${hovered('[data-indeterminate="true"]')}`]: {
+					backgroundColor: vars.color.background.accent.solid.hover,
+					backgroundImage: vars.controlFinish.raised,
+					borderColor: vars.color.background.accent.solid.hover,
+				},
+				[`${pressed('[data-selected="true"]')}, ${pressed('[data-indeterminate="true"]')}`]: {
+					backgroundColor: vars.color.background.accent.solid.pressed,
+					backgroundImage: vars.controlFinish.recessed,
+					borderColor: vars.color.background.accent.solid.pressed,
+				},
 				'[data-invalid="true"][data-selected="true"] &, [data-invalid="true"][data-indeterminate="true"] &':
 					{
 						backgroundColor: vars.color.background.danger.solid.rest,
@@ -138,27 +148,23 @@ const checkboxConfig = {
 					},
 				// Only `danger.solid.rest` is a guaranteed 3:1 boundary, so an invalid box keeps it through
 				// hover and press. The fill carries the feedback instead.
-				'[data-invalid="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.danger.subtle.hover,
-						borderColor: vars.color.background.danger.solid.rest,
-					},
-				'[data-invalid="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.danger.subtle.pressed,
-						borderColor: vars.color.background.danger.solid.rest,
-					},
-				'[data-invalid="true"][data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-invalid="true"][data-indeterminate="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
+				[hovered('[data-invalid="true"]')]: {
+					backgroundColor: vars.color.background.danger.subtle.hover,
+					borderColor: vars.color.background.danger.solid.rest,
+				},
+				[pressed('[data-invalid="true"]')]: {
+					backgroundColor: vars.color.background.danger.subtle.pressed,
+					borderColor: vars.color.background.danger.solid.rest,
+				},
+				[`${hovered('[data-invalid="true"][data-selected="true"]')}, ${hovered('[data-invalid="true"][data-indeterminate="true"]')}`]:
 					{
 						backgroundColor: vars.color.background.danger.solid.hover,
 						borderColor: vars.color.background.danger.solid.rest,
-						color: vars.color.foreground.danger.onSolid,
 					},
-				'[data-invalid="true"][data-selected="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-invalid="true"][data-indeterminate="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
+				[`${pressed('[data-invalid="true"][data-selected="true"]')}, ${pressed('[data-invalid="true"][data-indeterminate="true"]')}`]:
 					{
 						backgroundColor: vars.color.background.danger.solid.pressed,
 						borderColor: vars.color.background.danger.solid.rest,
-						color: vars.color.foreground.danger.onSolid,
 					},
 			},
 		},

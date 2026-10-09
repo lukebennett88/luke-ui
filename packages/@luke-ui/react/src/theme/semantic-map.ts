@@ -47,11 +47,7 @@ interface MapSemanticColorsRequest {
 	 * channel).
 	 */
 	backdrop: string;
-	/**
-	 * `color.border.control`'s solved value is a dedicated contrast boundary, not a scale-step alias.
-	 * `control-border.ts`'s `solveControlBorder` resolves it against the base, field, and overlay
-	 * surfaces before this map runs, then this function passes it through verbatim.
-	 */
+	/** `color.border.control`, solved by `solveControlBorder` and passed through as is. */
 	controlBorder: Oklch;
 	/** `color.border.controlHover`, derived from `controlBorder` by `controlHoverBorder`. */
 	controlHoverBorder: Oklch;

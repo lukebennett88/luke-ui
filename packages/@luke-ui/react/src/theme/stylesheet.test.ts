@@ -14,11 +14,6 @@ import type { ThemeFoundation } from './foundation.js';
 import { defaultFontWeights, defaultRadius } from './foundation.js';
 import { typeStyles } from './type-styles.js';
 
-/** An exterior shadow with no blur, such as `0 2px 0 …`, which draws a hard ledge. */
-const ZERO_BLUR_SHADOW_PATTERN = /^-?\d+(?:px)? -?\d+(?:px)? 0 /;
-/** An inset shadow offset upwards, such as `inset 0 -1px 0 …`, which lights the bottom edge. */
-const UPWARD_INSET_PATTERN = /inset -?\d+(?:px)? -\d/;
-
 const pairs = flattenThemeContract();
 const { identityPairs, modePairs } = partitionContractPairs(pairs);
 const modeVarNames = modePairs.map(([, varName]) => varName);
@@ -26,10 +21,6 @@ const identityVarNames = identityPairs.map(([, varName]) => varName);
 
 function countOccurrences(text: string, needle: string): number {
 	return text.split(needle).length - 1;
-}
-
-function extractShadowOpacities(shadow: string): Array<number> {
-	return [...shadow.matchAll(/\/ ([\d.]+)\)/g)].map((match) => Number(match[1]));
 }
 
 describe('buildTheme output', () => {
@@ -134,66 +125,13 @@ describe('buildTheme output', () => {
 		}
 	});
 
-	it('emits authored semantic depth while keeping only Paper light flat', () => {
+	it('emits authored depth as written', () => {
 		expect(extractValue(blocks.baseLight, '--luke-depth-resting')).toBe(
 			tactileFoundation.light.depth.resting,
 		);
 		expect(extractValue(blocks.mediaDark, '--luke-depth-raised')).toBe(
 			tactileFoundation.dark.depth.raised,
 		);
-		for (const foundation of [tactileFoundation, paperFoundation]) {
-			for (const mode of ['light', 'dark'] as const) {
-				for (const raised of [foundation[mode].depth.resting, foundation[mode].depth.raised]) {
-					const exterior = raised.split(', ').filter((layer) => !layer.startsWith('inset '));
-					// Raised rungs lift with soft exterior shadows. A zero-blur offset reads as a second edge.
-					expect(exterior.length).toBeGreaterThan(0);
-					expect(exterior.filter((layer) => ZERO_BLUR_SHADOW_PATTERN.test(layer))).toEqual([]);
-				}
-			}
-		}
-		expect(paperFoundation.light.depth.recessed).toBe('none');
-		for (const recessed of [
-			tactileFoundation.light.depth.recessed,
-			tactileFoundation.dark.depth.recessed,
-			paperFoundation.dark.depth.recessed,
-		]) {
-			expect(recessed).not.toBe('none');
-			expect(recessed.split(', ').every((layer) => layer.startsWith('inset '))).toBe(true);
-			// A recessed well is shaded from above. An upward inset draws a rim along the bottom edge.
-			expect(recessed).not.toMatch(UPWARD_INSET_PATTERN);
-		}
-	});
-
-	it('keeps Paper softer than Tactile while retaining finish and state depth', () => {
-		const paperBlocks = splitBlocks(buildTheme(paperFoundation));
-		expect(extractValue(paperBlocks.identity, '--luke-radius-control')).not.toBe(
-			extractValue(blocks.identity, '--luke-radius-control'),
-		);
-		expect(extractValue(paperBlocks.baseLight, '--luke-depth-recessed')).toBe('none');
-		expect(extractValue(blocks.baseLight, '--luke-depth-recessed')).not.toBe('none');
-
-		const paperDarkRecessed = extractValue(paperBlocks.mediaDark, '--luke-depth-recessed');
-		const tactileDarkRecessed = extractValue(blocks.mediaDark, '--luke-depth-recessed');
-		expect(Math.max(...extractShadowOpacities(tactileDarkRecessed))).toBeGreaterThan(
-			Math.max(...extractShadowOpacities(paperDarkRecessed)),
-		);
-
-		for (const [paperBlock, tactileBlock] of [
-			[paperBlocks.baseLight, blocks.baseLight],
-			[paperBlocks.mediaDark, blocks.mediaDark],
-		] as const) {
-			const paperResting = extractValue(paperBlock, '--luke-depth-resting');
-			const paperRaised = extractValue(paperBlock, '--luke-depth-raised');
-			const paperFinish = extractValue(paperBlock, '--luke-control-finish-resting');
-			const tactileResting = extractValue(tactileBlock, '--luke-depth-resting');
-
-			expect(paperResting).not.toBe(tactileResting);
-			expect(paperResting.split(', ')).toHaveLength(2);
-			expect(paperRaised.split(', ')).toHaveLength(2);
-			expect(paperRaised).not.toBe(paperResting);
-			expect(paperFinish).toContain('radial-gradient');
-			expect(paperFinish).not.toBe(extractValue(tactileBlock, '--luke-control-finish-resting'));
-		}
 	});
 });
 

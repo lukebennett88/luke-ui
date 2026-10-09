@@ -502,12 +502,11 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 for (const isSelected of [false, true]) {
 	for (const state of ['data-hovered', 'data-pressed'] as const) {
 		test(`an invalid ${isSelected ? 'on' : 'off'} checkbox keeps the guaranteed border with ${state}`, () => {
-			const { locator } = render(
-				<CheckboxField defaultSelected={isSelected} errorMessage="Required" label="Accept" />,
-			);
-			const label = locator.getByRole('checkbox', { name: 'Accept' }).element().closest('label');
-			const indicator = label?.querySelector<HTMLElement>('[aria-hidden="true"]');
-			if (label == null || indicator == null) throw new Error('Expected the checkbox indicator.');
+			render(<CheckboxField defaultSelected={isSelected} errorMessage="Required" label="Accept" />);
+			const input = checkbox('Accept');
+			const label = labelFor(input);
+			const indicator = label.querySelector<HTMLElement>('[aria-hidden="true"]');
+			if (indicator == null) throw new Error('Expected the checkbox indicator.');
 			indicator.style.transition = 'none';
 			label.setAttribute(state, 'true');
 

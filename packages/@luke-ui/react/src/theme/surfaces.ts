@@ -16,19 +16,16 @@ export interface GenerateSurfacesRequest {
 	surface: ThemeSurfaceSources;
 }
 
-// Each missing surface is a fixed lightness offset from `base`, never from a sibling surface. Light
-// mode keeps fields on the base and lifts overlays to near-white. Dark mode sinks fields and
-// secondary regions below the base and lifts overlays well above it. Generated surfaces are never
-// adjusted for contrast: validation throws instead, and the author can set the surface explicitly.
+// Offsets from `base`, never from a sibling surface. Generated surfaces are never adjusted for
+// contrast: validation throws instead, and the author sets the surface explicitly.
 const SURFACE_LIGHTNESS_OFFSETS = {
 	dark: { field: -0.025, overlay: 0.07, subdued: -0.03 },
 	light: { field: 0, overlay: 0.015, subdued: -0.02 },
 } as const satisfies Record<SurfaceMode, Record<Exclude<SurfaceRole, 'base'>, number>>;
 
 /**
- * Resolves the four surfaces for one mode. `base` and any authored surface pass through as written.
- * Every other surface is the base moved by a fixed, mode-specific lightness offset, keeping the
- * base's hue and chroma.
+ * Resolves the four surfaces for one mode. `base` and authored surfaces pass through. Each other
+ * surface is `base` with its lightness moved by a fixed offset.
  */
 export function generateSurfaces(request: GenerateSurfacesRequest): GeneratedSurfaces {
 	const { mode, surface } = request;

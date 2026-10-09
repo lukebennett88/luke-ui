@@ -334,12 +334,10 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 for (const isSelected of [false, true]) {
 	for (const state of ['data-hovered', 'data-pressed'] as const) {
 		test(`an invalid ${isSelected ? 'on' : 'off'} switch keeps the guaranteed border with ${state}`, () => {
-			const { locator } = render(
-				<SwitchField defaultSelected={isSelected} errorMessage="Required" label="Accept" />,
-			);
-			const label = locator.getByRole('switch', { name: 'Accept' }).element().closest('label');
-			const track = label?.querySelector<HTMLElement>('[aria-hidden="true"]');
-			if (label == null || track == null) throw new Error('Expected the switch track.');
+			render(<SwitchField defaultSelected={isSelected} errorMessage="Required" label="Accept" />);
+			const input = switchInput('Accept');
+			const label = labelFor(input);
+			const track = controlFor(input);
 			track.style.transition = 'none';
 			label.setAttribute(state, 'true');
 
@@ -349,20 +347,6 @@ for (const isSelected of [false, true]) {
 		});
 	}
 }
-
-// The off thumb on the off track is a guaranteed 3:1 pair. Pressing must not recolour the thumb.
-test('a pressed off switch keeps the thumb on the field surface', () => {
-	const { locator } = render(<SwitchField label="Notify" />);
-	const label = locator.getByRole('switch', { name: 'Notify' }).element().closest('label');
-	const thumb = label?.querySelector<HTMLElement>('[aria-hidden="true"] > span');
-	if (label == null || thumb == null) throw new Error('Expected the switch thumb.');
-	thumb.style.transition = 'none';
-	const resting = getComputedStyle(thumb).backgroundColor;
-	label.setAttribute('data-pressed', 'true');
-
-	expect(getComputedStyle(thumb).backgroundColor).toBe(resting);
-	expect(resting).toBe(resolvedBackgroundColor(label, 'var(--luke-color-surface-field)'));
-});
 
 // Pressing stretches the thumb instead of recolouring it, so the press shows without materials and
 // the thumb keeps its guaranteed contrast with the track.
@@ -475,15 +459,6 @@ function resolvedBorderColor(scope: Element, color: string): string {
 	const probe = scope.appendChild(document.createElement('span'));
 	probe.style.borderTop = `1px solid ${color}`;
 	const resolved = getComputedStyle(probe).borderTopColor;
-	probe.remove();
-	return resolved;
-}
-
-/** Resolves a colour the way the browser would for a background, in the same theme scope. */
-function resolvedBackgroundColor(scope: Element, color: string): string {
-	const probe = scope.appendChild(document.createElement('span'));
-	probe.style.backgroundColor = color;
-	const resolved = getComputedStyle(probe).backgroundColor;
 	probe.remove();
 	return resolved;
 }

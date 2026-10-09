@@ -344,15 +344,7 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 	return colors;
 }
 
-/**
- * Resolves the base surface and any explicitly authored surface for one mode. The base, split from
- * `neutral`'s hue/chroma character: an explicit per-mode value wins, a single value or the opposite
- * side is adapted to the mode base lightness, and an entirely omitted `base` copies the resolved
- * neutral anchor exactly (not a second, independent adaptation of the neutral source).
- * `buildModeColors` takes it as the anchor for every family's ramp and every generated surface.
- * Another surface is present only when the author set this mode's side; `buildTheme` generates the
- * rest from the base.
- */
+/** Resolves `base` and any surface authored for this mode. `buildTheme` generates the rest. */
 function resolveSurfaces(
 	surface: ThemeInput['color']['surface'],
 	mode: ColorMode,
@@ -417,10 +409,8 @@ function adaptNeutral(source: Oklch, mode: ColorMode): Oklch {
 }
 
 /**
- * Resolves the optional base surface for one mode: an explicit side wins, a single string or the
- * opposite side is adapted to the mode base lightness (mirroring `adaptNeutral`), and an entirely
- * omitted input falls back to `fallback` verbatim — the resolved neutral anchor, not a second
- * independent adaptation.
+ * Resolves `surface.base` for one mode like the neutral: an explicit side wins, one string or the
+ * other side is adapted, and an omitted input is `fallback`, the resolved neutral.
  */
 function resolveOptionalModeColour(
 	input: ColorInput | undefined,

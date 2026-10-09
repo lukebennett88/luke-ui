@@ -35,8 +35,8 @@ export const visualAppearances = [
 ] as const satisfies ReadonlyArray<VisualAppearance>;
 
 /**
- * The flat fixture in both modes: Tactile's colours with no depth or control finish. Use it for
- * captures that prove a state stays distinct without materials. It is not part of the theme matrix.
+ * The flat fixture in both modes, for captures that prove a state stays distinct without materials.
+ * It is not part of the theme matrix.
  */
 export const flatAppearances = [
 	{ mode: 'light', theme: 'flat' },

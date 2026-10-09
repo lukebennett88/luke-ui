@@ -141,10 +141,8 @@ export const SURFACE_ROLES = ['base', 'subdued', 'field', 'overlay'] as const;
 export type SurfaceRole = (typeof SURFACE_ROLES)[number];
 
 /**
- * One mode's surface sources. `base` is required: it is resolved from an explicit `surface.base`, an
- * adapted opposite-mode or single-value `surface.base`, or (when omitted) a copy of the resolved
- * `neutral` anchor. Every family's ramp is generated against it. The other roles are present only
- * when the author set them explicitly; `buildTheme` generates any that are missing from `base`.
+ * One mode's surface sources. `base` is always resolved. Other roles are present only when authored;
+ * `buildTheme` generates the rest from `base`.
  */
 export type ThemeSurfaceSources = { base: Oklch } & Partial<Record<SurfaceRole, Oklch>>;
 

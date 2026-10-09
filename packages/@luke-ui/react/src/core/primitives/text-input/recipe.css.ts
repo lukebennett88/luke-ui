@@ -73,8 +73,7 @@ export const textInputRecipe = recipe({
 			[input.hover]: {
 				borderColor: vars.color.border.controlHover,
 			},
-			// A read-only input keeps its field surface and guaranteed border. It drops the inset depth
-			// and, through the hover selector, hover feedback.
+			// Read-only drops the inset depth. The hover selector already excludes it.
 			[input.readOnly]: {
 				boxShadow: 'none',
 			},
