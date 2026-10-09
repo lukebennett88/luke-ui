@@ -491,6 +491,11 @@ list in `apps/docs/src/lib/docs-playground-specifiers.ts`. The button opens that
 Examples that import a relative module, or anything else the preview cannot `require`, omit the
 button.
 
+Each example shows a six-line source preview below its live preview. Longer snippets fade at the
+bottom and have an "Expand code" control to reveal the full source. Copy always copies the full
+source, including while collapsed. Expansion and collapse animate unless reduced motion is
+preferred.
+
 User code compiles in the browser with sucrase and can import `react` and any `@luke-ui/react/*`
 subpath. The compiler only rejects a missing default export (`undefined` or `null`) and returns
 `unknown` rather than a React component type, because it does not depend on React to validate the
