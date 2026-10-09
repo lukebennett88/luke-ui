@@ -173,12 +173,14 @@ Checkbox and Switch use the same vocabulary, mapped to their anatomy:
 | Switch track, checked   | Solid fill: `background.accent.solid.*` with `controlFinish.*`.                 |
 | Switch thumb            | `surface.field` when off, `foreground.accent.onSolid` when on, `depth.resting`. |
 
-Interaction states come from colour, so the flat fixture keeps them distinct:
+Interaction states come from colour or geometry, never materials, so the flat fixture keeps them
+distinct:
 
-| State   | Unchecked                                                                | Checked         |
-| ------- | ------------------------------------------------------------------------ | --------------- |
-| Hover   | `border.controlHover` (Switch: track fill too)                           | `solid.hover`   |
-| Pressed | Hover border, plus `background.neutral.subtle.pressed` on the field part | `solid.pressed` |
+| State   | Unchecked                                                                                       | Checked                                                   |
+| ------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Hover   | `border.controlHover` (Switch: track fill too)                                                  | `solid.hover`                                             |
+| Pressed | Checkbox: hover border plus `neutral.subtle.pressed` fill. Switch: the thumb stretches          | `solid.pressed` (Switch: stretch)                         |
+| Invalid | `danger.solid.rest` border in every state. Checkbox hover and press use `danger.subtle.*` fills | `danger.solid.*` fill inside a `danger.solid.rest` border |
 
 The two known defects were both material-only distinctions:
 
@@ -187,16 +189,39 @@ The two known defects were both material-only distinctions:
 2. Switch grouped hover and pressed into one `active()` selector, so pressed had no appearance of
    its own.
 
-Contrast is preserved: the off thumb (`surface.field`) on the off track (`border.control`, or
-`border.controlHover` while hovered) is a gated control-boundary pair, and each on-thumb is the
-gated `onSolid` pair. The pressed fill on an unchecked part is momentary feedback during a press,
-not a state to identify, so it is not a gated pair.
+Contrast is preserved in every state. Only `danger.solid.rest` is a guaranteed invalid boundary, so
+an invalid box or track keeps it while hovered and pressed; `danger.solid.hover` and `.pressed` only
+ever fill. The off thumb stays `surface.field` on a `border.control` or `border.controlHover` track,
+both gated pairs, so pressing stretches the thumb instead of recolouring it. Each on-thumb is the
+gated `onSolid` pair. The Checkbox's pressed fill sits inside a gated border, so the box stays
+identifiable.
 
 ### Buttons
 
 `Button`, `IconButton`, button-shaped `Link`, and `IconLink` share one recipe. Hover and pressed no
 longer move the button: the `translateY` transforms are gone, and `transform` is no longer in the
 transition list. Colour, border, depth, and finish transitions stay. Overlay animation is unchanged.
+
+Buttons draw no border outside forced colours. An inset shadow and a background image paint inside
+the border, so a transparent 1px border left an unshaded rim around a pressed face, and let the
+finish tile into the border strip.
+
+### Tactile material
+
+Tactile follows the material language of React Aria's Vanilla CSS starter: restrained depth, light
+from above, and inset shadows for wells. It keeps Luke UI's colours and geometry.
+
+| Rung                            | Treatment                                                                                         |
+| ------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `depth.resting`, `depth.raised` | A faint 1px top specular highlight and soft, blurred exterior shadows. No zero-blur offset.       |
+| `depth.recessed`                | One restrained inset shadow from above. No highlight along the bottom.                            |
+| `controlFinish.*`               | One vertical gradient: lighter at the top and slightly deeper at the bottom. Pressed reverses it. |
+
+The previous values produced a bright lower rim and a double-bordered, bevelled look. A second
+radial gradient sat at `50% 110%`, `depth.recessed` ended with a light `inset 0 -1px 0`, and
+`depth.resting` and `depth.raised` used `0 2px 0` and `0 3px 0` ledges. Checkbox and Switch fills
+now start their finish at the border box, so it cannot tile into the border. Paper keeps its values.
+No token or contract changed.
 
 ## Visual review
 

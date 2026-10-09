@@ -21,9 +21,11 @@ A basic theme authors an accent colour and a neutral character. Everything else 
   `color.backdrop`
 - optional `typography`, `radius`, `depth`, and `controlFinish` overrides
 
-Each colour accepts one string, adapted independently for light and dark, or an explicit
+Most colours accept one string, adapted independently for light and dark, or an explicit
 `{ light, dark }` pair. Omit either side to fall back to that role's default. Luke UI supplies
-accessible mode-specific defaults for every optional colour.
+accessible mode-specific defaults for every optional colour. `color.surface.subdued`,
+`color.surface.field`, and `color.surface.overlay` accept only a `{ light, dark }` pair, because one
+value cannot suit both modes. See [Surfaces](#surfaces).
 
 `color.backdrop` is the one colour that may include alpha. Luke UI emits it as
 `color.overlay.backdrop`. Hover and pressed colours are generated from the resting semantic colours.
