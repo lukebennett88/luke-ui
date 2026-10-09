@@ -50,6 +50,19 @@ export function ExampleCodePreview({
 		};
 	}, []);
 
+	// Collapsed styles can land without a size change (for example after
+	// shrinking typography while expanded). Remeasure once they apply.
+	useLayoutEffect(() => {
+		if (mode !== 'collapsed') return;
+		const sourceElement = sourceRef.current;
+		if (!sourceElement) return;
+
+		dispatch({
+			isClipped: sourceElement.scrollHeight > sourceElement.clientHeight + 1,
+			type: 'measured',
+		});
+	}, [mode]);
+
 	return (
 		<ViewTransition default="none" update={styles.codeUpdate}>
 			<Box

@@ -342,10 +342,6 @@ test('keeps expanded source collapsible when its typography changes to fit', asy
 	pre.style.fontSize = '1px';
 	pre.style.lineHeight = '1px';
 	await expect.poll(() => pre.getBoundingClientRect().height).toBeLessThan(30);
-	// Let layout observers process the new typography before collapsing.
-	await new Promise<void>((resolve) => {
-		requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-	});
 	expect(collapse).toHaveAttribute('aria-expanded', 'true');
 	await act(async () => {
 		await userEvent.click(collapse);
