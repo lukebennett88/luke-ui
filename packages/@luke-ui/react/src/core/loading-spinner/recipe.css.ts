@@ -7,8 +7,10 @@ import { recipe } from '../styles/recipe.js';
 import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
 
 const rotationDuration = '1.2s';
-const rubberBandDuration = '2s';
-const rubberBandEasing = 'cubic-bezier(0.42, 0, 0.58, 1)';
+// 2× spin so dash breathe and rotation stay phase-locked.
+const rubberBandDuration = '2.4s';
+// Strong ease-in-out so the arc length-up / length-down reads clearly.
+const rubberBandEasing = 'cubic-bezier(0.77, 0, 0.175, 1)';
 
 /**
  * @internal

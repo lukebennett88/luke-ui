@@ -17,6 +17,16 @@ export const buttonContent = recipe({
  * `startContent`/`endContent` around the label; the text appearance has no adornments.
  */
 export const buttonLabel = recipe({
+	base: {
+		transitionDuration: vars.motion.duration.feedback,
+		transitionProperty: 'opacity',
+		transitionTimingFunction: vars.motion.easing.standard,
+		'@media': {
+			'(prefers-reduced-motion: reduce)': {
+				transition: 'none',
+			},
+		},
+	},
 	defaultVariants: {
 		hasAdornments: false,
 		isPending: false,

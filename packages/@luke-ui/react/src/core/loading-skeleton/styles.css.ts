@@ -101,14 +101,19 @@ const surfaceRtl = {
 	},
 } as const satisfies StyleRule;
 
+// Strong ease-in-out so the sheen speeds through the middle and eases at the ends (same curve as
+// the spinner rubber-band). Duration stays a local loader constant — there is no second loop to
+// phase-lock with.
+const sheenDuration = '3s';
+const sheenEasing = 'cubic-bezier(0.77, 0, 0.175, 1)';
+
 // Only the root runs the animation; descendants inherit `sheenPositionVar`. Not `!important` so the
 // reduced-motion override below can turn it off.
 const sheen = {
-	animationDelay: '0.5s',
-	animationDuration: '3s',
+	animationDuration: sheenDuration,
 	animationIterationCount: 'infinite',
 	animationName: skeletonAnimationName,
-	animationTimingFunction: 'linear',
+	animationTimingFunction: sheenEasing,
 	'@media': {
 		'(forced-colors: active)': {
 			...forcedColorsSurface,
