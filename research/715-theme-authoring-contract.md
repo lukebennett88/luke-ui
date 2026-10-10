@@ -12,7 +12,7 @@ room for additive extension after 1.0. Prefer extensibility over configurability
 
 | Package or entry                   | Contents                                                                                                                                                                         |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@luke-ui/react/theme`             | Runtime only: `vars`, `breakpoints`, `getThemeClassName`, and `rootClassName` until #717.                                                                                        |
+| `@luke-ui/react/theme`             | Runtime only: `vars`, `breakpoints`, and `getThemeClassName`. #717 removed `rootClassName`.                                                                                      |
 | `@luke-ui/react/theme/compiler`    | Build time only, Node 24+: `defineTheme`, `ThemeInput`, `ExtendingThemeInput`, `ThemeFont`, `FontMetrics`, `ThemeValidationError`, `ThemeContrastError`, `ThemeGenerationError`. |
 | `@luke-ui/theme-paper`, `-tactile` | `.` exports `themeClassName`; `./input` exports `theme`; `./stylesheet.css`; `./fonts.css`.                                                                                      |
 
@@ -123,10 +123,11 @@ room for additive extension after 1.0. Prefer extensibility over configurability
   on that element never wins, whatever its specificity. This is documented.
 - **D10, D11, D40. Scoped repaint lives in the shared stylesheet,** in the `reset` layer:
   `:where(body[data-color-mode='light'], body[data-color-mode='dark'], body [data-color-mode='light'], body [data-color-mode='dark'])`
-  sets `color`, `accent-color` (shared with the `rootClassName` rule) and
-  `background-color: surface.base`. Without it, scopes would inherit the parent's computed text
-  colour. App CSS and Luke UI recipes outrank it. `<html>` is excluded; `<body>`'s background paints
-  the page canvas, and page scrollbars follow `<html>`'s colour scheme.
+  sets `color`, `accent-color` and `background-color: surface.base`. #717 moved the `<body>` match
+  into its own `<body>` rule ([717 record](./717-global-stylesheet-contract.md)). Without it, scopes
+  would inherit the parent's computed text colour. App CSS and Luke UI recipes outrank it. `<html>`
+  is excluded; `<body>`'s background paints the page canvas, and page scrollbars follow `<html>`'s
+  colour scheme.
 - **D58. Root `container-type: inline-size` moves to the shared stylesheet** (`reset` layer,
   `:where(:root)`). This amends the earlier note that left the move to #717.
 - **D37. Multiple identity classes on `<html>` are invalid.** This is documented, with no runtime
