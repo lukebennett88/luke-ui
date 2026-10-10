@@ -136,7 +136,7 @@ function baselineRecipeStyles() {
 }
 
 for (const scenario of scenarios) {
-	describe(scenario.name, () => {
+	describe(`${scenario.name}`, () => {
 		test('Preflight leaves Luke UI component recipes intact', () => {
 			const baseline = baselineRecipeStyles();
 			loadCss(scenario.css);
@@ -152,19 +152,14 @@ for (const scenario of scenarios) {
 			expect(getComputedStyle(byTestId('box-button')).paddingInlineStart).toBe('4px');
 		});
 
-		test(
-			scenario.isOrdered
-				? 'Tailwind utilities override Luke UI declarations'
-				: 'Luke UI outranks Tailwind utilities',
-			() => {
-				loadCss(scenario.css);
-				renderHost();
+		test(`Tailwind utilities ${scenario.isOrdered ? 'override' : 'lose to'} Luke UI declarations`, () => {
+			loadCss(scenario.css);
+			renderHost();
 
-				expect(getComputedStyle(byTestId('tailwind-button')).paddingInlineStart).toBe(
-					scenario.isOrdered ? '11px' : getComputedStyle(byTestId('button')).paddingInlineStart,
-				);
-			},
-		);
+			expect(getComputedStyle(byTestId('tailwind-button')).paddingInlineStart).toBe(
+				scenario.isOrdered ? '11px' : getComputedStyle(byTestId('button')).paddingInlineStart,
+			);
+		});
 
 		test('Tailwind utilities outrank Tailwind components', () => {
 			loadCss(scenario.css);
@@ -188,18 +183,12 @@ for (const scenario of scenarios) {
 			expect(getComputedStyle(byTestId('important-button')).backgroundColor).toBe('rgb(7, 8, 9)');
 		});
 
-		test(
-			scenario.isOrdered
-				? 'LoadingSkeleton keeps its important surface over an important utility'
-				: 'an important utility breaks the LoadingSkeleton surface',
-			() => {
-				loadCss(scenario.css);
-				renderHost();
+		test(`an important utility ${scenario.isOrdered ? 'loses to' : 'beats'} the important LoadingSkeleton surface`, () => {
+			loadCss(scenario.css);
+			renderHost();
 
-				const background = getComputedStyle(byTestId('skeleton')).backgroundColor;
-				if (scenario.isOrdered) expect(background).not.toBe('rgb(7, 8, 9)');
-				else expect(background).toBe('rgb(7, 8, 9)');
-			},
-		);
+			const background = getComputedStyle(byTestId('skeleton')).backgroundColor;
+			expect(background === 'rgb(7, 8, 9)').toBe(!scenario.isOrdered);
+		});
 	});
 }

@@ -13,7 +13,7 @@ export const lukeUiLayerName = 'luke-ui';
  * application, for example Tailwind Preflight. Luke UI declares it so it ranks below `luke-ui`, and
  * never writes to it.
  */
-export const topLevelLayerNames = ['base', lukeUiLayerName] as const;
+const topLevelLayerNames = ['base', lukeUiLayerName] as const;
 
 /** Layers inside `luke-ui`, from lowest to highest priority. */
 export const lukeUiSublayerNames = ['reset', 'recipes', 'utilities'] as const;

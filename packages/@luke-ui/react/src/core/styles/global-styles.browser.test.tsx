@@ -256,26 +256,37 @@ const items = [
 	{ id: 'two', label: 'Option two' },
 ];
 
-test('shows exactly one ring for controls whose wrappers carry data-focus-visible', async () => {
-	const { container } = render(
-		<div>
-			<CheckboxField label="Checkbox" />
+const wrappedControls = [
+	{ control: <CheckboxField label="Checkbox" />, name: 'CheckboxField' },
+	{
+		control: (
 			<SelectField items={items} label="Select">
 				{(item) => <SelectItem>{item.label}</SelectItem>}
 			</SelectField>
+		),
+		name: 'SelectField',
+	},
+	{
+		control: (
 			<ComboboxField defaultItems={items} label="Combobox">
 				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 			</ComboboxField>
-		</div>,
-	);
+		),
+		name: 'ComboboxField',
+	},
+];
 
-	for (const _ of ['checkbox', 'select', 'combobox']) {
+for (const { control, name } of wrappedControls) {
+	test(`shows exactly one ring for ${name}, whose wrapper carries data-focus-visible`, async () => {
+		const { container } = render(control);
+
 		await userEvent.tab();
+
 		// React Aria marks a wrapper as well as the focused element.
 		expect(container.querySelectorAll('[data-focus-visible="true"]').length).toBeGreaterThan(0);
 		expect(visibleRings(container)).toHaveLength(1);
-	}
-});
+	});
+}
 
 test('shows virtual focus on a list box item without a second ring', async () => {
 	// Padding keeps the trigger-width popover inside the narrow test frame. An overflowing popover
