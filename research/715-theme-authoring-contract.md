@@ -178,7 +178,8 @@ room for additive extension after 1.0. Prefer extensibility over configurability
 
 ## Process
 
-- **D45.** One draft PR with logical commits and a green final state. Changesets are included.
+- **D45.** One draft PR with logical commits and a green final state. It has no changeset: before
+  `1.0.0` no pull request needs one ([DEPENDENCIES.md](../docs/DEPENDENCIES.md#changesets)).
 - **D52, D57.** #709, #715, #717, and #721 are updated to match this record. Closed #716 gets a
   follow-up comment, and `research/716-token-contract.md` notes the display family as a #715
   addition.
