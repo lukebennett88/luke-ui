@@ -14,8 +14,9 @@ to those components.
 ## Lists
 
 Lists inside `Prose` include markers and indentation, including nested lists. Untyped ordered lists
-use decimal markers. Typed lists keep the HTML `type` values (`1`, `a`, `A`, `i`, and `I`),
-including uppercase and lowercase, when Tailwind Preflight is present.
+use decimal markers, and typed lists keep their HTML `type` markers. A reset that removes list
+markers, such as Tailwind Preflight, also removes letter and roman markers in Chromium, which cannot
+match `type` case-sensitively. Decimal markers stay in every browser.
 
 <ExampleBlock src="prose/lists" title="Prose: Lists" />
 

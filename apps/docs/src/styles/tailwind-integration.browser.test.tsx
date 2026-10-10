@@ -194,37 +194,32 @@ for (const scenario of scenarios) {
 	});
 }
 
-// Preflight's `list-style: none` overrides HTML `type` presentational hints. With the documented
-// layer order, Prose recipes sit above Preflight and must restore each supported type.
+// Preflight's `list-style: none` beats the HTML `type` hint. Prose restates the HTML rules for
+// `type`, which need the `s` selector flag to tell `a` from `A`. Without it, only `type="1"` returns.
 for (const scenario of scenarios.filter((entry) => entry.isOrdered)) {
-	test(`${scenario.name}: Prose keeps typed ordered-list markers under Tailwind Preflight`, () => {
+	test(`${scenario.name}: Prose restores typed ordered-list markers under Preflight`, () => {
 		loadCss(scenario.css);
 		container = document.body.appendChild(document.createElement('div'));
 		root = createRoot(container);
 		act(() => {
 			root?.render(
 				<Prose>
-					<ol type="1">
-						<li>1</li>
-					</ol>
-					<ol type="a">
-						<li>a</li>
-					</ol>
-					<ol type="A">
-						<li>A</li>
-					</ol>
-					<ol type="i">
-						<li>i</li>
-					</ol>
-					<ol type="I">
-						<li>I</li>
-					</ol>
+					{['1', 'a', 'A', 'i', 'I'].map((type) => (
+						<ol key={type} type={type as '1'}>
+							<li>{type}</li>
+						</ol>
+					))}
 				</Prose>,
 			);
 		});
+		const hasCaseSensitiveSelectors = CSS.supports('selector([type="A" s])');
 
 		expect(
 			[...container.querySelectorAll('ol')].map((ol) => getComputedStyle(ol).listStyleType),
-		).toEqual(['decimal', 'a', 'A', 'i', 'I']);
+		).toEqual(
+			hasCaseSensitiveSelectors
+				? ['decimal', 'lower-alpha', 'upper-alpha', 'lower-roman', 'upper-roman']
+				: ['decimal', 'none', 'none', 'none', 'none'],
+		);
 	});
 }

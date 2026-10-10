@@ -78,30 +78,64 @@ test('normalises a nested pre margin', () => {
 	).toBeCloseTo(0, 0);
 });
 
-test('preserves ordered-list type markers, including uppercase and lowercase, under proseRecipe', () => {
+function TypedLists() {
+	return (
+		<>
+			{['1', 'a', 'A', 'i', 'I'].map((type) => (
+				<ol key={type} type={type as '1'}>
+					<li>{type}</li>
+				</ol>
+			))}
+		</>
+	);
+}
+
+const nativeTypedMarkers = ['decimal', 'lower-alpha', 'upper-alpha', 'lower-roman', 'upper-roman'];
+
+/** A `list-style: none` reset below Luke UI, as Tailwind Preflight writes it. */
+function addListReset() {
+	// This file's `document` is a fixture, so reach the page document explicitly.
+	const style = globalThis.document.head.appendChild(globalThis.document.createElement('style'));
+	style.textContent = '@layer base { ol, ul { list-style: none; } }';
+	return style;
+}
+
+test('keeps native typed ordered-list markers under proseRecipe', () => {
 	const { locator } = render(
 		<div className={proseRecipe()}>
-			<ol type="1">
-				<li>1</li>
-			</ol>
-			<ol type="a">
-				<li>a</li>
-			</ol>
-			<ol type="A">
-				<li>A</li>
-			</ol>
-			<ol type="i">
-				<li>i</li>
-			</ol>
-			<ol type="I">
-				<li>I</li>
-			</ol>
+			<TypedLists />
 		</div>,
 	);
 
-	// Computed names are the HTML `type` values (`a`/`A`/…), mapped through `@counter-style` to the
-	// matching alpha/roman systems. `type="1"` is not a custom-ident, so it stays decimal.
-	expect(listStyleTypes(locator.element())).toEqual(['decimal', 'a', 'A', 'i', 'I']);
+	expect(listStyleTypes(locator.element())).toEqual(nativeTypedMarkers);
+});
+
+// HTML matches `type` case-insensitively, so only a browser with the `s` selector flag can restore
+// `A` and `I` over a reset. Elsewhere Prose restores `type="1"` and the reset wins for the rest.
+test('restores typed ordered-list markers over a list reset where the s flag is supported', () => {
+	const style = addListReset();
+	try {
+		const { locator } = render(
+			<div className={proseRecipe()}>
+				<TypedLists />
+				<div className="not-prose">
+					<ol type="1">
+						<li>Outside Prose</li>
+					</ol>
+				</div>
+			</div>,
+		);
+		const hasCaseSensitiveSelectors = CSS.supports('selector([type="A" s])');
+
+		expect(listStyleTypes(locator.element())).toEqual([
+			...(hasCaseSensitiveSelectors
+				? nativeTypedMarkers
+				: ['decimal', 'none', 'none', 'none', 'none']),
+			'none',
+		]);
+	} finally {
+		style.remove();
+	}
 });
 
 function margin(element: Element) {

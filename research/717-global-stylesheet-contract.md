@@ -139,27 +139,27 @@ The module is `core/styles/global-styles.css.ts`. It replaces `reset.css.ts` and
 
 Old rules came from `reset.css.ts` (scoped to `.luke-ui-reset`) and `theme-root.css.ts`.
 
-| Old rule                                                             | Decision                        | New owner                                                                                                                                                                                         |
-| -------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Root and descendant `box-sizing: border-box`                         | Retained, globalised            | G1                                                                                                                                                                                                |
-| `blockquote, dl, dd, figure, p { margin: 0 }`                        | Removed                         | `Text` zeroes its own margin. `Prose` zeroes block margins inside its scope.                                                                                                                      |
-| `h1`–`h6 { font: unset; margin: 0 }`                                 | Removed                         | `Text` zeroes margins and always sets a weight from its type style, or inherits one. `Heading` sets its type style and weight. Native headings keep browser sizes and weight.                     |
-| `ol, ul { margin: 0; padding: 0 }`                                   | Removed                         | Combobox and Select list boxes already zero both. `Prose` sets list indentation.                                                                                                                  |
-| `ul, ol:not([type]), ol[type]:not(.prose *) { list-style: none }`    | Removed                         | List boxes already remove markers. `Prose` restores markers, including typed `ol` via `attr()` and `@counter-style`, so a later framework reset such as Tailwind Preflight cannot remove them.    |
-| `table { border-collapse: collapse; border-spacing: 0 }`             | Removed                         | `Prose` owns its table treatment.                                                                                                                                                                 |
-| `caption, th { text-align: inherit }`                                | Removed                         | `Prose` aligns `th` and `caption` to the start.                                                                                                                                                   |
-| `th, td { padding: 0 }`                                              | Removed                         | `Prose` already pads cells.                                                                                                                                                                       |
-| `button, select, label { touch-action: manipulation }`               | Removed                         | Button and list box items already own it. Combobox actions, Checkbox, and Switch add it, because they are tapped repeatedly.                                                                      |
-| `button, select, label { -webkit-tap-highlight-color: transparent }` | Removed                         | Components with their own pressed state suppress it: Button, Combobox actions, list box items, Checkbox, and Switch. Select and the Combobox tray trigger have no pressed state, so they keep it. |
-| Form controls `font: inherit`                                        | Retained                        | G5                                                                                                                                                                                                |
-| Button chrome reset (`background`, `border`, `color`, `padding`)     | Removed                         | Each Luke UI button recipe sets its own chrome. The Combobox tray trigger and actions gained the declarations they had relied on.                                                                 |
-| `input, textarea, select { color: inherit; margin: 0 }`              | Colour removed, margin retained | G5 keeps `margin: 0`. Native controls keep `FieldText`, which follows `color-scheme`. Luke UI inputs set their own colour.                                                                        |
-| `:disabled, [data-disabled='true'] { cursor: not-allowed }`          | Removed                         | Already owned by Button, Select, Combobox, TextInput, and the field inline label. The Combobox tray trigger, which relied on it, now owns it.                                                     |
-| `:focus-visible, [data-focus-visible='true']` ring                   | Native pseudo-class retained    | G6. Attribute rings stay in the recipes that need them. The Field inline-label, Select root, and Combobox group `outline: none` workarounds are removed.                                          |
-| Blanket `prefers-reduced-motion` suppression                         | Removed                         | Component recipes (see [Reduced motion](#reduced-motion)).                                                                                                                                        |
-| `.luke-ui-theme` colour, accent, and body font                       | Modified                        | G3, on `<body>`, with `line-height: 1.5`, `margin: 0`, and `background-color`.                                                                                                                    |
-| Scoped colour-mode repaint                                           | Retained, selector narrowed     | G4. The `body[data-color-mode]` self-match moves to G3.                                                                                                                                           |
-| `:where(:root) { container-type: inline-size }`                      | Retained                        | G2                                                                                                                                                                                                |
+| Old rule                                                             | Decision                        | New owner                                                                                                                                                                                                          |
+| -------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Root and descendant `box-sizing: border-box`                         | Retained, globalised            | G1                                                                                                                                                                                                                 |
+| `blockquote, dl, dd, figure, p { margin: 0 }`                        | Removed                         | `Text` zeroes its own margin. `Prose` zeroes block margins inside its scope.                                                                                                                                       |
+| `h1`–`h6 { font: unset; margin: 0 }`                                 | Removed                         | `Text` zeroes margins and always sets a weight from its type style, or inherits one. `Heading` sets its type style and weight. Native headings keep browser sizes and weight.                                      |
+| `ol, ul { margin: 0; padding: 0 }`                                   | Removed                         | Combobox and Select list boxes already zero both. `Prose` sets list indentation.                                                                                                                                   |
+| `ul, ol:not([type]), ol[type]:not(.prose *) { list-style: none }`    | Removed                         | List boxes already remove markers. `Prose` restates its markers, and the HTML rendering rules for typed `ol`, so a framework reset such as Tailwind Preflight cannot remove them. See [Typed lists](#typed-lists). |
+| `table { border-collapse: collapse; border-spacing: 0 }`             | Removed                         | `Prose` owns its table treatment.                                                                                                                                                                                  |
+| `caption, th { text-align: inherit }`                                | Removed                         | `Prose` aligns `th` and `caption` to the start.                                                                                                                                                                    |
+| `th, td { padding: 0 }`                                              | Removed                         | `Prose` already pads cells.                                                                                                                                                                                        |
+| `button, select, label { touch-action: manipulation }`               | Removed                         | Button and list box items already own it. Combobox actions, Checkbox, and Switch add it, because they are tapped repeatedly.                                                                                       |
+| `button, select, label { -webkit-tap-highlight-color: transparent }` | Removed                         | Components with their own pressed state suppress it: Button, Combobox actions, list box items, Checkbox, and Switch. Select and the Combobox tray trigger have no pressed state, so they keep it.                  |
+| Form controls `font: inherit`                                        | Retained                        | G5                                                                                                                                                                                                                 |
+| Button chrome reset (`background`, `border`, `color`, `padding`)     | Removed                         | Each Luke UI button recipe sets its own chrome. The Combobox tray trigger and actions gained the declarations they had relied on.                                                                                  |
+| `input, textarea, select { color: inherit; margin: 0 }`              | Colour removed, margin retained | G5 keeps `margin: 0`. Native controls keep `FieldText`, which follows `color-scheme`. Luke UI inputs set their own colour.                                                                                         |
+| `:disabled, [data-disabled='true'] { cursor: not-allowed }`          | Removed                         | Already owned by Button, Select, Combobox, TextInput, and the field inline label. The Combobox tray trigger, which relied on it, now owns it.                                                                      |
+| `:focus-visible, [data-focus-visible='true']` ring                   | Native pseudo-class retained    | G6. Attribute rings stay in the recipes that need them. The Field inline-label, Select root, and Combobox group `outline: none` workarounds are removed.                                                           |
+| Blanket `prefers-reduced-motion` suppression                         | Removed                         | Component recipes (see [Reduced motion](#reduced-motion)).                                                                                                                                                         |
+| `.luke-ui-theme` colour, accent, and body font                       | Modified                        | G3, on `<body>`, with `line-height: 1.5`, `margin: 0`, and `background-color`.                                                                                                                                     |
+| Scoped colour-mode repaint                                           | Retained, selector narrowed     | G4. The `body[data-color-mode]` self-match moves to G3.                                                                                                                                                            |
+| `:where(:root) { container-type: inline-size }`                      | Retained                        | G2                                                                                                                                                                                                                 |
 
 ### Component ownership
 
@@ -169,14 +169,32 @@ Old rules came from `reset.css.ts` (scoped to `.luke-ui-reset`) and `theme-root.
   agent's bold. Raw `textRecipe()` on a heading without `fontWeight` keeps the native weight, like
   any native heading.
 - **`Prose`.** Zeroes block margins on all sides (blockquotes, figures, and `dd` had inline margins
-  from the user agent), keeps disc markers for `ul` and decimal markers for untyped `ol`, restores
-  typed `ol` markers against framework resets by reading `type` with `attr()` into case-sensitive
-  `@counter-style` names, indents every list, collapses tables, aligns `th` and `caption` to the
-  start, and pads cells. `prose/scope.css.ts` and the old global `ol[type]` workaround are gone.
+  from the user agent), keeps disc markers for `ul` and decimal markers for untyped `ol`, restates
+  the HTML rendering rules for typed `ol` (see [Typed lists](#typed-lists)), indents every list,
+  collapses tables, aligns `th` and `caption` to the start, and pads cells. `prose/scope.css.ts` and
+  the old global `ol[type]` workaround are gone.
 - **Buttons.** The Button primitive owns its chrome, cursor, touch action, and tap highlight. The
   Combobox trigger and clear button, and the Combobox tray trigger, set their own padding,
   background, border, and appearance.
 - **Field controls.** Select, Combobox, Checkbox, Switch, and TextInput already own their states.
+
+### Typed lists
+
+HTML maps `ol` `type` to a marker style with a presentational hint. Any author `list-style`,
+including Tailwind Preflight's `list-style: none` in `base`, beats it. HTML also matches `type`
+case-insensitively in selectors, so only the Selectors 4 `s` flag can tell `a` from `A` and `i` from
+`I`.
+
+Prose restates the HTML rendering rules: `ol[type="1"]` is decimal, and `ol[type="a" s]`,
+`[type="A" s]`, `[type="i" s]`, and `[type="I" s]` map to lower and upper alpha and roman. Without a
+reset, every browser shows the native markers. With a reset, Firefox 66+ and Safari 27+ restore all
+five. Chromium does not support `s` ([crbug 40667738](https://crbug.com/40667738)), so those four
+rules match nothing there: `type="1"` returns and the letter and roman lists keep the reset's
+`none`.
+
+No CSS can recover the case in Chromium under a reset except typed `attr()`, which Safari has not
+shipped. The rejected alternatives are a case-insensitive fallback, which would turn `A` and `I`
+lowercase in Chromium even without a reset, and `attr()` with page-wide `@counter-style` names.
 
 ### Focus indicators
 
@@ -284,26 +302,26 @@ One indicator per control:
 
 ## Replaced inputs
 
-| Input                                                                                 | Replacement                                                               |
-| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `docs/STYLING.md` flat four-layer table and `@layer reset, base, recipes, utilities;` | Nested order, D6.                                                         |
-| `docs/STYLING.md` claim that the reset owns reduced motion                            | D4: component-owned.                                                      |
-| `docs/STYLING.md` setup step 4 and the `theme-root.css.ts` paragraph                  | `<html>` identity only; `global-styles.css.ts`.                           |
-| `layers.css.ts` and `layer-names.ts` JSDoc                                            | Nested layers.                                                            |
-| `prose/recipe.css.ts` `ol[type]` comment and `prose/scope.css.ts`                     | Removed; Prose restores typed markers with `attr()` and `@counter-style`. |
-| LoadingSkeleton "global reduced-motion reset" comment                                 | Removed.                                                                  |
-| Field inline-label, Select root, and Combobox group "reset ring" comments             | Removed with their `outline: none` workarounds.                           |
-| "Table cells need padding after the reset removes it" (Prose)                         | Prose owns its table treatment.                                           |
-| `overlay-motion.ts` reduced-motion note                                               | Fade stays; movement is removed.                                          |
-| `rootClassName` in overlays, test utilities, docs, samples, reference app             | Removed.                                                                  |
-| `FRICTION.md` "Root styles in portals"                                                | Resolved by D2 and D5.                                                    |
-| Stylesheet contract test sentinels for `.luke-ui-reset` and `.luke-ui-theme`          | Global-rule sentinels.                                                    |
-| `cascade.browser.test.ts` `rootClassName` variants of the body-scope test             | Body painted by G3.                                                       |
-| `#715` record: `rootClassName` "until #717" and repaint selector                      | This record.                                                              |
-| `PUBLIC_API.md` `/theme` exports                                                      | `breakpoints`, `getThemeClassName`, `vars`.                               |
-| `DOCUMENTATION.md` `rootClassName` wording example                                    | A current example.                                                        |
-| Assumption that body typography uses the fixed body line height                       | D2.                                                                       |
-| Assumption that `[data-focus-visible]` draws a ring everywhere                        | D3.                                                                       |
+| Input                                                                                 | Replacement                                     |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `docs/STYLING.md` flat four-layer table and `@layer reset, base, recipes, utilities;` | Nested order, D6.                               |
+| `docs/STYLING.md` claim that the reset owns reduced motion                            | D4: component-owned.                            |
+| `docs/STYLING.md` setup step 4 and the `theme-root.css.ts` paragraph                  | `<html>` identity only; `global-styles.css.ts`. |
+| `layers.css.ts` and `layer-names.ts` JSDoc                                            | Nested layers.                                  |
+| `prose/recipe.css.ts` `ol[type]` comment and `prose/scope.css.ts`                     | Removed; see [Typed lists](#typed-lists).       |
+| LoadingSkeleton "global reduced-motion reset" comment                                 | Removed.                                        |
+| Field inline-label, Select root, and Combobox group "reset ring" comments             | Removed with their `outline: none` workarounds. |
+| "Table cells need padding after the reset removes it" (Prose)                         | Prose owns its table treatment.                 |
+| `overlay-motion.ts` reduced-motion note                                               | Fade stays; movement is removed.                |
+| `rootClassName` in overlays, test utilities, docs, samples, reference app             | Removed.                                        |
+| `FRICTION.md` "Root styles in portals"                                                | Resolved by D2 and D5.                          |
+| Stylesheet contract test sentinels for `.luke-ui-reset` and `.luke-ui-theme`          | Global-rule sentinels.                          |
+| `cascade.browser.test.ts` `rootClassName` variants of the body-scope test             | Body painted by G3.                             |
+| `#715` record: `rootClassName` "until #717" and repaint selector                      | This record.                                    |
+| `PUBLIC_API.md` `/theme` exports                                                      | `breakpoints`, `getThemeClassName`, `vars`.     |
+| `DOCUMENTATION.md` `rootClassName` wording example                                    | A current example.                              |
+| Assumption that body typography uses the fixed body line height                       | D2.                                             |
+| Assumption that `[data-focus-visible]` draws a ring everywhere                        | D3.                                             |
 
 ## Deferred work and issue disposition
 
@@ -315,4 +333,5 @@ One indicator per control:
 | Consumer documentation for routers and composition       | #720.                                                                                                                                                                                              |
 | Dialog and Popover components                            | #767.                                                                                                                                                                                              |
 | Publishing                                               | #721.                                                                                                                                                                                              |
+| Chromium typed letter and roman lists under a list reset | Waits on Chromium's `s` selector flag. No Luke UI change.                                                                                                                                          |
 | Trigger-width popovers overflowing an edge-to-edge field | #771. Found by the virtual-focus test. Without a page margin, the popover is wider than the viewport allows, the page scrolls, and React Aria closes it.                                           |
