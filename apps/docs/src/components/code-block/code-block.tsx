@@ -41,6 +41,8 @@ export interface CodeBlockProps extends Omit<FigureProps, 'children'> {
 	children?: ReactNode;
 	/** Plain source. Prefer this over children when the text is a string constant. */
 	code?: string;
+	/** Ref for the copy button, when the copy control is shown. */
+	copyButtonRef?: Ref<HTMLButtonElement>;
 	/** Exact clipboard payload when rendered markup should not define what is copied. */
 	copyText?: string;
 	/** Drop outer margin and frame chrome so the block can sit flush under an example frame. */
@@ -67,6 +69,7 @@ export function CodeBlock({
 	children,
 	className,
 	code,
+	copyButtonRef,
 	copyText,
 	flush = false,
 	html,
@@ -132,6 +135,7 @@ export function CodeBlock({
 			aria-label={copyStatus === 'copied' ? 'Copied' : 'Copy'}
 			icon={copyStatus === 'copied' ? 'check' : 'copy'}
 			onPress={handleCopy}
+			ref={copyButtonRef}
 			prominence="low"
 			size="small"
 			tone="neutral"

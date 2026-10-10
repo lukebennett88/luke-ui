@@ -28,6 +28,7 @@ const loadingLabel = `Loading ${exampleTitle} example`;
 const COPY_BUTTON_NAME_PATTERN = /^(Copy|Copied)$/;
 
 afterEach(() => {
+	vi.unstubAllGlobals();
 	if (root) act(() => root?.unmount());
 	container?.remove();
 	container = undefined;
@@ -265,7 +266,9 @@ test('copies the complete source from both collapsed and expanded previews', asy
 	await page.viewport(1000, 800);
 	await renderExampleBlock();
 
-	await userEvent.click(page.getByRole('button', { name: 'Copy', exact: true }));
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Copy', exact: true }));
+	});
 	expect(writeText).toHaveBeenLastCalledWith(responsiveLayoutSource.trim());
 	await expect.element(page.getByRole('button', { name: 'Copied' })).toBeVisible();
 
@@ -342,10 +345,6 @@ test('keeps expanded source collapsible when its typography changes to fit', asy
 	pre.style.fontSize = '1px';
 	pre.style.lineHeight = '1px';
 	await expect.poll(() => pre.getBoundingClientRect().height).toBeLessThan(30);
-	// Let layout observers process the new typography before collapsing.
-	await new Promise<void>((resolve) => {
-		requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-	});
 	expect(collapse).toHaveAttribute('aria-expanded', 'true');
 	await act(async () => {
 		await userEvent.click(collapse);
@@ -356,6 +355,143 @@ test('keeps expanded source collapsible when its typography changes to fit', asy
 	pre.style.removeProperty('font-size');
 	pre.style.removeProperty('line-height');
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+});
+
+for (const { key, name } of [
+	{ key: '{Enter}', name: 'Enter' },
+	{ key: ' ', name: 'Space' },
+]) {
+	test(`collapsing clipped source with ${name} keeps focus on the toggle`, async () => {
+		await renderSourcePreview();
+		const expand = page.getByRole('button', { name: 'Expand code' });
+		await expect.element(expand).toBeVisible();
+		expand.element().focus();
+		await pressKey(key);
+		const collapse = page.getByRole('button', { name: 'Collapse code' });
+		await expect.element(collapse).toHaveFocus();
+
+		await pressKey(key);
+		await expect.element(page.getByRole('button', { name: 'Expand code' })).toHaveFocus();
+	});
+
+	test(`collapsing source that now fits with ${name} moves focus to Copy`, async () => {
+		await renderSourcePreview();
+		const expand = page.getByRole('button', { name: 'Expand code' });
+		await expect.element(expand).toBeVisible();
+		expand.element().focus();
+		await pressKey(key);
+		await expect.element(page.getByRole('button', { name: 'Collapse code' })).toHaveFocus();
+		shrinkTypography(sourceElement());
+		await expect.poll(() => sourceElement().getBoundingClientRect().height).toBeLessThan(30);
+
+		await pressKey(key);
+		await expect.poll(() => page.getByRole('button', { name: 'Collapse code' }).query()).toBeNull();
+		await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeNull();
+		await expect
+			.element(page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN }))
+			.toHaveFocus();
+	});
+
+	for (const returns of [false, true]) {
+		test(`collapse with ${name} respects focus ${returns ? 'returning' : 'moving away'} before commit`, async () => {
+			await renderSourcePreview({ withNextControl: true });
+			const expand = page.getByRole('button', { name: 'Expand code' });
+			await expect.element(expand).toBeVisible();
+			expand.element().focus();
+			await pressKey(key);
+			const collapse = page.getByRole('button', { name: 'Collapse code' });
+			await expect.element(collapse).toHaveFocus();
+			shrinkTypography(sourceElement());
+			await expect.poll(() => sourceElement().getBoundingClientRect().height).toBeLessThan(30);
+
+			const focusChanges: Array<string> = [];
+			const control = collapse.element();
+			control.addEventListener('blur', () => {
+				focusChanges.push(`blur ${control.getAttribute('aria-expanded')}`);
+			});
+			control.addEventListener('focus', () => {
+				focusChanges.push(`focus ${control.getAttribute('aria-expanded')}`);
+			});
+			const next = page.getByRole('button', { name: 'Next example' }).element();
+			// Redirect focus during the native activation event, before another browser task can run.
+			// Keep React's scheduler active rather than deferring the collapse with act.
+			control.addEventListener(
+				'keyup',
+				() => {
+					next.focus();
+					if (returns) control.focus();
+				},
+				{ once: true },
+			);
+			vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', false);
+			await userEvent.keyboard(key);
+			expect(focusChanges.slice(0, returns ? 2 : 1)).toEqual(
+				returns ? ['blur true', 'focus true'] : ['blur true'],
+			);
+			await expect.poll(() => collapse.query()).toBeNull();
+			const destination = returns
+				? page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN })
+				: page.getByRole('button', { name: 'Next example' });
+			await expect.element(destination).toHaveFocus();
+		});
+	}
+}
+
+test('typography changes without interaction do not move focus', async () => {
+	await renderSourcePreview();
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
+	const collapse = page.getByRole('button', { name: 'Collapse code' });
+	await expect.element(collapse).toBeVisible();
+	collapse.element().focus();
+	const pre = sourceElement();
+
+	// The source now fits, but the expanded toggle stays until someone collapses it.
+	shrinkTypography(pre);
+	await expect.poll(() => pre.getBoundingClientRect().height).toBeLessThan(30);
+	await expect.element(collapse).toHaveFocus();
+
+	// Collapsing removes the toggle and hands focus to Copy. Growing the source again must leave it
+	// there while the expand control comes back.
+	await pressKey('{Enter}');
+	await expect.poll(() => collapse.query()).toBeNull();
+	const copy = page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN });
+	await expect.element(copy).toHaveFocus();
+	pre.style.removeProperty('font-size');
+	pre.style.removeProperty('line-height');
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	await expect.element(copy).toHaveFocus();
+});
+
+test('a surviving collapse does not restore focus after a later typography change', async () => {
+	await renderSourcePreview({ withNextControl: true });
+	const expand = page.getByRole('button', { name: 'Expand code' });
+	await expect.element(expand).toBeVisible();
+	expand.element().focus();
+	await pressKey('{Enter}');
+	await expect.element(page.getByRole('button', { name: 'Collapse code' })).toHaveFocus();
+	await pressKey(' ');
+	await expect.element(expand).toHaveFocus();
+
+	await userEvent.tab();
+	await expect.element(page.getByRole('button', { name: 'Next example' })).toHaveFocus();
+	await userEvent.tab({ shift: true });
+	await expect.element(expand).toHaveFocus();
+	shrinkTypography(sourceElement());
+	await expect.poll(() => expand.query()).toBeNull();
+	expect(document.activeElement).toBe(document.body);
+});
+
+test('resizing the viewport does not move focus away from Copy', async () => {
+	await renderSourcePreview();
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	const copy = page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN });
+	copy.element().focus();
+	await page.viewport(600, 800);
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	await expect.element(copy).toHaveFocus();
+	await page.viewport(1000, 800);
+	await expect.element(copy).toHaveFocus();
 });
 
 test('narrowing the preview panel flips a responsive example below its container breakpoint', async () => {
@@ -371,6 +507,39 @@ test('narrowing the preview panel flips a responsive example below its container
 	await expect.poll(previewWidth).toBeLessThan(768);
 	await expect.poll(flexDirection).toBe('column');
 });
+
+async function renderSourcePreview({ withNextControl = false } = {}) {
+	await page.viewport(1000, 800);
+	const source = Array.from({ length: 20 }, () => 'const value = 1;').join('\n');
+	container = document.body.appendChild(document.createElement('div'));
+	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	root = createRoot(container);
+	act(() => {
+		root?.render(
+			<Provider spritesheetHref={spriteSheetHref}>
+				<ExampleCodePreview html={`<code>${source}</code>`} source={source} title="Source sizing" />
+				{withNextControl ? <button type="button">Next example</button> : null}
+			</Provider>,
+		);
+	});
+}
+
+function sourceElement() {
+	const pre = container?.querySelector('pre');
+	assert(pre, 'expected source element');
+	return pre;
+}
+
+function shrinkTypography(pre: HTMLElement) {
+	pre.style.fontSize = '1px';
+	pre.style.lineHeight = '1px';
+}
+
+async function pressKey(key: string) {
+	await act(async () => {
+		await userEvent.keyboard(key);
+	});
+}
 
 function renderExample(title: string) {
 	container = document.body.appendChild(document.createElement('div'));
