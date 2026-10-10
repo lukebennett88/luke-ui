@@ -65,6 +65,9 @@ const THEME_SKIP_REASON =
 	'LUKE_UI_REACT_SPEC tests a published @luke-ui/react, and the theme packages have no matching ' +
 	'published versions to install beside it.';
 const referenceThemeSource = path.join(repoRoot, 'apps/reference-app/src/theme/input.ts');
+/** The docs' theme compilation samples, copied verbatim so the test runs what the docs show. */
+const docsThemingSamplesDir = path.join(repoRoot, 'apps/docs/src/samples/theming');
+const NODE_24_OR_LATER_PATTERN = /^v(?:2[4-9]|[3-9]\d)\./;
 const SYMBOL_PATTERN = /<symbol\b[^>]*\bid="/;
 /** The statement that fixes cascade layer order at the top of the shared stylesheet. */
 const LAYER_STATEMENT = `@layer ${cascadeLayerNames.join(', ')};`;
@@ -265,7 +268,7 @@ for (const peerSet of peerSets) {
 		let isBuilt = false;
 		let areThemesCompiled = false;
 
-		/** Compiles the consumer's own themes once, with the documented Node script. */
+		/** Compiles the fixture themes once, with Node's own TypeScript support. */
 		function compileThemes(): void {
 			if (!hasThemePackages || areThemesCompiled) return;
 			run('node', ['compile-themes.ts'], consumerDir);
@@ -492,6 +495,17 @@ for (const peerSet of peerSets) {
 				expect(
 					readFileSync(path.join(consumerDir, 'generated', 'product.css'), 'utf8'),
 				).not.toContain('luke-ui-theme-paper');
+			},
+		);
+
+		test.skipIf(!hasThemePackages)(
+			'runs the documented `node compile-theme.ts` with Node 24 and writes a complete theme',
+			() => {
+				expect(run('node', ['--version'], consumerDir)).toMatch(NODE_24_OR_LATER_PATTERN);
+				run('node', ['compile-theme.ts'], consumerDir);
+
+				const css = readFileSync(path.join(consumerDir, 'src', 'theme.css'), 'utf8');
+				expect(findTokenCompatibilityProblems(css, 'product')).toEqual([]);
 			},
 		);
 
@@ -837,6 +851,10 @@ async function installConsumer(
 	};
 	if (hasThemePackages) {
 		Object.assign(files, {
+			'compile-theme.ts': await readFile(
+				path.join(docsThemingSamplesDir, 'compile-theme.ts'),
+				'utf8',
+			),
 			'compile-themes.ts': COMPILE_THEMES,
 			'display-theme.ts': DISPLAY_THEME,
 			'display.html': fontPageHtml('display-fixture', DISPLAY_PAGE_BODY, 'display'),
@@ -846,6 +864,7 @@ async function installConsumer(
 			'src/display.js': DISPLAY_ENTRY,
 			'src/product.js': PRODUCT_ENTRY,
 			'theme-app.ts': THEME_APP,
+			'theme.ts': await readFile(path.join(docsThemingSamplesDir, 'theme.ts'), 'utf8'),
 		});
 		for (const name of THEME_PACKAGES) {
 			files[`entries/${themeBoundarySlug(name)}.js`] =
@@ -1372,7 +1391,7 @@ const LORA_VERSION = readManifest(
 	fileURLToPath(import.meta.resolve('@fontsource/lora/package.json')),
 ).version;
 
-/** The documented Node script, run inside the consumer with Node's own TypeScript support. */
+/** Compiles the fixture themes the build and render tests load, as the documented script does. */
 const COMPILE_THEMES = `
 import { mkdir, writeFile } from 'node:fs/promises';
 import { defineTheme } from '@luke-ui/react/theme/compiler';

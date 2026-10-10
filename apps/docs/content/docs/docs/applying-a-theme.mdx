@@ -4,15 +4,9 @@ description: Load a theme, set its identity class, and choose colour modes.
 ---
 
 A themed document needs the shared Luke UI stylesheet, one theme stylesheet, and that theme's
-identity class on `<html>`. Theming is static CSS, so it needs no provider.
-
-## Load the theme
-
-Import `@luke-ui/react/stylesheet.css` and the theme's stylesheet. Import the theme's `fonts.css` to
-load its font, or load that font another way. Render the theme's identity class on `<html>` and
-`rootClassName` on `<body>`. When the application renders on the server, render both there too.
-
-<SourceCodeBlock src="theming/getting-started" />
+identity class on `<html>`. Theming is static CSS, so it needs no provider. Read
+[Installation](/docs/installation#set-up-the-theme) for the imports, and for where to set the
+classes in a single-page app or a framework that renders the document.
 
 The identity class selects the theme's tokens. `rootClassName` adds the reset and base typography,
 and works the same way for every theme.
@@ -28,9 +22,7 @@ one.
 
 Without a colour mode, the document follows the system preference, and changes with it live. Set
 `data-color-mode="light"` or `data-color-mode="dark"` on `<html>` to fix the mode for the whole
-document.
-
-<SourceCodeBlock src="theming/apply-theme" />
+document, as in `<html class="luke-ui-theme-tactile" data-color-mode="dark">`.
 
 The theme sets the native `color-scheme` property for each mode. Browser controls and scrollbars
 then match the Luke UI content.
@@ -42,14 +34,15 @@ lowercase `light` and `dark` are valid values.
 
 ## Set the mode before first paint
 
-Render the identity class, and any explicit mode you know on the server, in the initial HTML. When
-the mode comes from a stored client-side preference, set it with an inline script in `<head>`,
-before the page paints. The script sets `data-color-mode` only for an explicit choice.
+Put the identity class, and any mode you know in advance, in the initial HTML. When the mode comes
+from a preference stored in the browser, set it with an inline script in `<head>`, before the page
+paints. The script sets `data-color-mode` only for an explicit choice.
 
 <SourceCodeBlock src="theming/color-mode-script" />
 
-The script changes `<html>` before React hydrates it. In a React application that renders `<html>`,
-set `suppressHydrationWarning` on it.
+In a single-page app, put the same script in a `<script>` element in the `<head>` of `index.html`.
+In a framework that renders `<html>`, set `suppressHydrationWarning` on it, because the script
+changes `<html>` before React hydrates it.
 
 ## Nest colour-mode scopes
 

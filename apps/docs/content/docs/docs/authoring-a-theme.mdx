@@ -48,9 +48,9 @@ are not authored. Read [Fonts](#fonts) for the font input.
 
 <auto-type-table path="packages/@luke-ui/react/src/theme/define-theme.ts" name="ThemeInput" />
 
-The minimal theme authors one colour, a neutral character, and a body font:
+This minimal theme, saved as `theme.ts`, authors one colour, a neutral character, and a body font:
 
-<SourceCodeBlock src="theming/minimal-theme" />
+<SourceCodeBlock src="theming/theme.ts" />
 
 ### Fonts
 
@@ -64,7 +64,7 @@ with `@capsizecss/unpack`.
 `typography.fonts.display` sets `heading4` through `heading1` and `display`. Without a display font,
 those styles use the body font.
 
-<SourceCodeBlock src="theming/display-font" />
+<SourceCodeBlock src="theming/display-font.ts" />
 
 A theme only names its fonts. The generated stylesheet sets each style's `font-family`, but it has
 no `@font-face` rule, so the browser does not download the font. Load every font and weight the
@@ -91,7 +91,7 @@ gamut but never changes its lightness to pass contrast. If a surface fails
 Set `extends` to another theme's input. Your theme inherits every value it does not set. Each theme
 package exports its input as `theme` from `./input`, such as `@luke-ui/theme-paper/input`.
 
-<SourceCodeBlock src="theming/extend-bundled-theme" />
+<SourceCodeBlock src="theming/extend-bundled-theme.ts" />
 
 Your theme always declares its own `name`. Two themes with one name emit a colliding identity class.
 
@@ -119,26 +119,33 @@ chain of themes and which colours came from a base.
 
 ## Generate a stylesheet
 
-`defineTheme` returns the stylesheet as a string. Write it to a file with a script, and run the
-script whenever the input changes:
+`defineTheme` returns the stylesheet as a string. Save this script as `compile-theme.ts`, beside
+`theme.ts`:
 
-<SourceCodeBlock src="theming/compile-theme" />
+<SourceCodeBlock src="theming/compile-theme.ts" />
 
-Run the script with `node`. Node 24 runs TypeScript files directly by stripping their types, which
-supports a subset of TypeScript. Read
+Run it from the project root with Node 24 or later, and again whenever the input changes:
+
+```bash
+node compile-theme.ts
+```
+
+The script writes `src/theme.css`. Node runs TypeScript files by stripping their types, so keep the
+`.ts` extension on relative imports and use only the syntax Node supports. Read
 [Node's TypeScript documentation](https://nodejs.org/docs/latest-v24.x/api/typescript.html) for the
 limits.
 
-Load the generated stylesheet, and set the identity class and `rootClassName` as for
-[Tactile or Paper](/docs/applying-a-theme). The identity class is `luke-ui-theme-` followed by the
-theme's `name`. `getThemeClassName` from `@luke-ui/react/theme` returns it.
+Import `./theme.css` in place of a theme package's `stylesheet.css`, and set the theme's identity
+class on `<html>`, as [Installation](/docs/installation#set-up-the-theme) shows for Tactile. The
+class is `luke-ui-theme-` followed by the theme's `name`, and `getThemeClassName` from
+`@luke-ui/react/theme` returns it.
 
 ### Generate with Vite
 
 A Vite application can compile the theme during its build instead. This plugin serves the stylesheet
 as a virtual module. Import `virtual:theme.css` from the application entry.
 
-<SourceCodeBlock src="theming/vite-theme-plugin" />
+<SourceCodeBlock src="theming/vite-theme-plugin.ts" />
 
 ## Validation
 

@@ -15,11 +15,40 @@ pnpm add @luke-ui/react @luke-ui/theme-tactile react-aria-components
 
 ## Set up the theme
 
-Import `@luke-ui/react/stylesheet.css` and the theme's `stylesheet.css` at your application root.
-Import the theme's `fonts.css` to load its Inter font. Then set the theme's identity class on
-`<html>` and `rootClassName` on `<body>`.
+The theme's identity class goes on `<html>`, and it must be there before the first paint. How you
+set it depends on whether React renders the whole document.
 
-<SourceCodeBlock src="theming/getting-started" />
+### Single-page apps
+
+In a Vite app, or any app that mounts React into an existing page, set the identity class in
+`index.html`:
+
+```html
+<!doctype html>
+<html class="luke-ui-theme-tactile" lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>My app</title>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
+</html>
+```
+
+Import the stylesheets in the entry module, and apply `rootClassName` to the element React renders
+at the root. `fonts.css` loads the theme's Inter font. Leave it out if you load Inter another way.
+
+<SourceCodeBlock src="overview/main" />
+
+### Frameworks that render the document
+
+When React renders `<html>` and `<body>`, as in Next.js, React Router, or TanStack Start, set both
+classes in the root layout. The server then sends them in the first HTML.
+
+<SourceCodeBlock src="overview/root-layout" />
 
 ## Use components
 
@@ -33,10 +62,9 @@ bundler setup.
 
 ## Change the theme
 
-Paper, in `@luke-ui/theme-paper`, uses the same component APIs with a flatter visual treatment.
-Install it, then import its stylesheets and set its identity class instead of Tactile's.
-
-<SourceCodeBlock src="overview/paper-theme" />
+Paper uses the same component APIs with a flatter visual treatment. To use it, install
+`@luke-ui/theme-paper`, import its `stylesheet.css` and `fonts.css` instead of Tactile's, and set
+`luke-ui-theme-paper` on `<html>`. Each theme package exports its class as `themeClassName`.
 
 Without `data-color-mode`, the theme follows the system colour mode. Read
 [Applying a theme](/docs/applying-a-theme#choose-a-colour-mode) to set a mode.
