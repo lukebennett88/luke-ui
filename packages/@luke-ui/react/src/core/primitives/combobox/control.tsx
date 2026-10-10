@@ -1,3 +1,4 @@
+import { mergeRefs } from '@react-aria/utils';
 import type { JSX } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
 import { Group as RacGroup } from 'react-aria-components/Group';
@@ -27,7 +28,7 @@ export type ComboboxControlProps = Prettify<_ComboboxControlProps>;
  * takes a danger border.
  */
 export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
-	const { size: sizeProp, ...groupProps } = props;
+	const { ref, size: sizeProp, ...groupProps } = props;
 	const presentation = useComboboxPresentation();
 	const size = useComboboxSize(sizeProp);
 	const inputGroupRef = useComboboxInputGroupRef();
@@ -43,7 +44,7 @@ export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 					return comboboxRecipe({ presentation, size }).control({ className });
 				})}
 				// The group inside a tray is not the input group: it sits in the tray's own portal.
-				ref={presentation === 'tray' ? undefined : inputGroupRef}
+				ref={presentation === 'tray' ? ref : mergeRefs(ref, inputGroupRef)}
 			/>
 		</IconSizeProvider>
 	);

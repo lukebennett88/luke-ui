@@ -11,6 +11,8 @@ import {
 	ComboboxTrayTrigger,
 } from '@luke-ui/react/primitives/combobox';
 import { Field } from '@luke-ui/react/primitives/field';
+import type { Ref } from 'react';
+import { createRef } from 'react';
 import { Form } from 'react-aria-components/Form';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -37,6 +39,7 @@ function TrayCombobox(
 		isDisabled?: boolean;
 		isReadOnly?: boolean;
 		label?: string;
+		trayControlRef?: Ref<HTMLDivElement>;
 		triggerLabel?: string;
 	} & Pick<
 		ComboboxRootProps<CountryItem>,
@@ -66,7 +69,7 @@ function TrayCombobox(
 					</ComboboxTrayTrigger>
 				</ComboboxControl>
 				<ComboboxTray>
-					<ComboboxControl>
+					<ComboboxControl ref={props.trayControlRef}>
 						<ComboboxInput placeholder="Select a country..." />
 						<ComboboxClearButton aria-label="Clear search">
 							<Icon name="close" />
@@ -144,6 +147,22 @@ test('ComboboxTray positions the overlay at the scroll offset each time it opens
 		.toHaveFocus();
 
 	window.scrollTo(0, 0);
+});
+
+test('ComboboxControl inside a tray forwards its ref to the tray search group', async () => {
+	const ref = createRef<HTMLDivElement>();
+	const { unmount } = render(<TrayCombobox trayControlRef={ref} />);
+
+	await openTray();
+	const searchGroup = page
+		.getByRole('searchbox', { name: 'Country' })
+		.element()
+		.closest('[role="group"]');
+	expect(searchGroup).not.toBeNull();
+	expect(ref.current).toBe(searchGroup);
+
+	unmount();
+	expect(ref.current).toBeNull();
 });
 
 test("ComboboxTray search field does not inherit the combobox trigger role's ARIA", async () => {
