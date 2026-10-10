@@ -8,6 +8,7 @@ import { findTokenCompatibilityProblems } from '../../theme/__fixtures__/token-c
 import type { ThemeInput } from '../../theme/define-theme.js';
 import {
 	builtAssets,
+	importedPackages,
 	measureBundle,
 	packageContentProblems,
 	run,
@@ -41,20 +42,22 @@ describe.skipIf(themes.length === 0)('the packed theme packages', () => {
 			expect(manifest.dependencies ?? {}).toEqual({});
 		});
 
+		test(`${manifest.name} imports only its peer, with Capsize's metrics inlined`, () => {
+			expect([...importedPackages(theme)]).toEqual(['@luke-ui/react']);
+			expect(Object.keys(manifest.inlinedDependencies ?? {})).toEqual(['@capsizecss/metrics']);
+		});
+
 		test(`${manifest.name} ships the Inter its input measures, at every weight it uses`, async () => {
 			const input: { theme: ThemeInput } = await import(
 				pathToFileURL(path.join(contents, 'dist', 'input.js')).href
 			);
-			const { ascent, capHeight, descent, familyName, lineGap, unitsPerEm } = await fromFile(
+			const shipped = await fromFile(
 				path.join(contents, 'dist', 'fonts', 'inter-latin-wght-normal.woff2'),
 			);
+			// `@capsizecss/metrics` adds the font's category, which the font file does not carry.
 			expect(input.theme.typography.fonts.body.metrics).toEqual({
-				ascent,
-				capHeight,
-				descent,
-				familyName,
-				lineGap,
-				unitsPerEm,
+				...shipped,
+				category: 'sans-serif',
 			});
 
 			const fontsCss = readFileSync(path.join(contents, 'dist', 'fonts.css'), 'utf8');

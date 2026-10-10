@@ -58,7 +58,8 @@ published code that needs a small part of a package whose install would cost con
 that part. To bundle a dependency, list it in `devDependencies` and in `deps.onlyBundle` in
 `packages/@luke-ui/react/vite.config.ts`. The build fails when it bundles a package that
 `deps.onlyBundle` does not list. It records each bundled version in `inlinedDependencies` in
-`package.json`.
+`package.json`. Paper and Tactile inline `@capsizecss/metrics` the same way, through
+`deps.onlyBundle` in `packages/@luke-ui/theme-build/theme-package.ts`.
 
 ## Changesets
 

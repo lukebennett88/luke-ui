@@ -21,9 +21,9 @@
 	"exports": {
 		".": "./dist/index.js",
 		"./input": "./dist/input.js",
-		"./stylesheet.css": "./dist/stylesheet.css",
+		"./package.json": "./package.json",
 		"./fonts.css": "./dist/fonts.css",
-		"./package.json": "./package.json"
+		"./stylesheet.css": "./dist/stylesheet.css"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -38,6 +38,7 @@
 		"fix:lint": "vp lint . --type-aware --fix"
 	},
 	"devDependencies": {
+		"@capsizecss/metrics": "catalog:",
 		"@luke-ui/react": "workspace:*",
 		"@luke-ui/theme-build": "workspace:*",
 		"@types/node": "catalog:",
@@ -46,5 +47,8 @@
 	},
 	"peerDependencies": {
 		"@luke-ui/react": "workspace:^"
+	},
+	"inlinedDependencies": {
+		"@capsizecss/metrics": "4.3.0"
 	}
 }

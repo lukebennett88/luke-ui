@@ -5,10 +5,11 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 import { describe, expect, inject, test } from 'vite-plus/test';
 import { cascadeLayerNames } from '../styles/layer-names.js';
-import type { Manifest, PackedPackage } from './environment.js';
+import type { Manifest } from './environment.js';
 import {
 	MINIMUM_TYPESCRIPT,
 	builtAssets,
+	importedPackages,
 	installedVersion,
 	measureBundle,
 	npm,
@@ -321,45 +322,6 @@ function isReleasable(name: string, range: string): boolean {
 function isValidAsset(subpath: string, source: string): boolean {
 	if (subpath === './stylesheet.css') return source.startsWith(LAYER_STATEMENT);
 	return SYMBOL_PATTERN.test(source);
-}
-
-/** Specifiers in `from '…'`, side-effect `import '…'`, and `import('…')` forms. */
-const MODULE_SPECIFIER_PATTERN =
-	/(?:\bfrom\s*|\bimport\s*\(?\s*)["']((?:\.{1,2}\/|@[\w.-]+\/)?[\w.-]+(?:\/[\w.-]+)*)["']/g;
-const BLOCK_COMMENT_PATTERN = /\/\*[\s\S]*?\*\//g;
-const JS_EXTENSION_PATTERN = /\.js$/;
-
-/** Every package imported by the JavaScript and declarations that the exports map reaches. */
-function importedPackages({ contents, manifest }: PackedPackage): Set<string> {
-	const queue = Object.values(manifest.exports)
-		.filter((target) => target.endsWith('.js'))
-		.flatMap((target) => [target.slice(2), `${target.slice(2, -3)}.d.ts`]);
-	const visited = new Set<string>();
-	const packages = new Set<string>();
-
-	for (let file = queue.pop(); file !== undefined; file = queue.pop()) {
-		if (visited.has(file)) continue;
-		visited.add(file);
-
-		// JSDoc can mention `import('…')`, so comments are not graph edges.
-		const source = readFileSync(path.join(contents, file), 'utf8').replaceAll(
-			BLOCK_COMMENT_PATTERN,
-			'',
-		);
-		for (const match of source.matchAll(MODULE_SPECIFIER_PATTERN)) {
-			const specifier = match[1]!;
-			if (specifier.startsWith('.')) {
-				const resolved = path.posix.join(path.posix.dirname(file), specifier);
-				queue.push(
-					file.endsWith('.d.ts') ? resolved.replace(JS_EXTENSION_PATTERN, '.d.ts') : resolved,
-				);
-			} else if (!specifier.startsWith('node:')) {
-				const segments = specifier.split('/');
-				packages.add(specifier.startsWith('@') ? segments.slice(0, 2).join('/') : segments[0]!);
-			}
-		}
-	}
-	return packages;
 }
 
 /** Each JS entrypoint paired with the source file its component would live in. */

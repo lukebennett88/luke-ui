@@ -873,6 +873,9 @@ importers:
 
   packages/@luke-ui/theme-paper:
     devDependencies:
+      '@capsizecss/metrics':
+        specifier: 'catalog:'
+        version: 4.3.0
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../react
@@ -891,6 +894,9 @@ importers:
 
   packages/@luke-ui/theme-tactile:
     devDependencies:
+      '@capsizecss/metrics':
+        specifier: 'catalog:'
+        version: 4.3.0
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../react

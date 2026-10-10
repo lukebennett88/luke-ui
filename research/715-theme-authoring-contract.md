@@ -78,7 +78,9 @@ room for additive extension after 1.0. Prefer extensibility over configurability
   private build module, `@luke-ui/theme-build`, a dev dependency that consumers never install. It
   packs both entries, copies the font, and compiles `stylesheet.css` from the built `./input`. Both
   keep today's typography: Inter body, no display font. Custom themes load their own fonts.
-- **D15. Bundled metrics live in each package's `./input`,** with the font release recorded.
+- **D15. Bundled metrics live in each package's `./input`.** The source imports
+  `@capsizecss/metrics/inter`, and the build inlines it through `deps.onlyBundle`, so consumers
+  never install Capsize. The build records the inlined version in `inlinedDependencies`.
 - **D49. Paper and Tactile may each bundle and declare the same Inter font.** Duplicate declarations
   are acceptable. There is no shared font package and no requirement to rename the families. How
   browsers pick between duplicate faces, load them, and cache them is not part of Luke UI's

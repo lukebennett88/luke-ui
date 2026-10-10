@@ -2,10 +2,11 @@
  * The build Paper and Tactile share. Each theme package's `vite.config.ts` uses it as is, so the two
  * packages build, and publish, the same way.
  *
- * It packs `src/index.ts` and `src/input.ts` apart, so the root entry never shares a chunk with the
- * input. It copies `fonts.css` and the Inter it declares from the pinned Fontsource package, so the
- * build never downloads a font. It then compiles `stylesheet.css` from the built `dist/input.js`,
- * the JavaScript consumers install.
+ * It bundles `src/index.ts` and `src/input.ts` as separate entries, which share only the theme's
+ * name. The input imports its font metrics from `@capsizecss/metrics`, and the build inlines them,
+ * so consumers never install Capsize. It copies `fonts.css` and the Inter it declares from the
+ * pinned Fontsource package, so the build never downloads a font. It then compiles
+ * `stylesheet.css` from the built `dist/input.js`, the JavaScript consumers install.
  */
 
 import { createRequire } from 'node:module';
@@ -31,9 +32,16 @@ export const themePackage: UserConfig = {
 				to: 'dist/fonts',
 			},
 		],
-		deps: { neverBundle: ['@luke-ui/react'], onlyBundle: [] },
+		// Only Capsize's metrics may be inlined. Anything else from `node_modules` fails the build.
+		deps: { neverBundle: ['@luke-ui/react'], onlyBundle: ['@capsizecss/metrics'] },
 		dts: true,
 		entry: { index: 'src/index.ts', input: 'src/input.ts' },
+		exports: {
+			customExports: {
+				'./fonts.css': './dist/fonts.css',
+				'./stylesheet.css': './dist/stylesheet.css',
+			},
+		},
 		format: ['esm'],
 		platform: 'neutral',
 		plugins: [
@@ -46,6 +54,5 @@ export const themePackage: UserConfig = {
 			},
 		],
 		publint: true,
-		unbundle: true,
 	},
 };

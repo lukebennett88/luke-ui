@@ -1,3 +1,4 @@
+import interMetrics from '@capsizecss/metrics/inter';
 import type { ThemeInput } from '@luke-ui/react/theme/compiler';
 import { THEME_NAME } from './name.js';
 
@@ -59,15 +60,7 @@ export const theme: ThemeInput = {
 		fonts: {
 			body: {
 				family: "'Inter', system-ui, sans-serif",
-				// Capsize metrics of the bundled Inter, `fonts/inter-latin-wght-normal.woff2`.
-				metrics: {
-					ascent: 1984,
-					capHeight: 1490,
-					descent: -494,
-					familyName: 'Inter',
-					lineGap: 0,
-					unitsPerEm: 2048,
-				},
+				metrics: interMetrics,
 			},
 		},
 	},
