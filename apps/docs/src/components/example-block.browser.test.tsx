@@ -410,9 +410,19 @@ for (const { key, name } of [
 			control.addEventListener('focus', () => {
 				focusChanges.push(`focus ${control.getAttribute('aria-expanded')}`);
 			});
-			// Native input lets the browser commit between keys. act would defer the transition.
+			const next = page.getByRole('button', { name: 'Next example' }).element();
+			// Redirect focus during the native activation event, before another browser task can run.
+			// Keep React's scheduler active rather than deferring the collapse with act.
+			control.addEventListener(
+				'keyup',
+				() => {
+					next.focus();
+					if (returns) control.focus();
+				},
+				{ once: true },
+			);
 			vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', false);
-			await userEvent.keyboard(`${key}{Tab}${returns ? '{Shift>}{Tab}{/Shift}' : ''}`);
+			await userEvent.keyboard(key);
 			expect(focusChanges.slice(0, returns ? 2 : 1)).toEqual(
 				returns ? ['blur true', 'focus true'] : ['blur true'],
 			);
