@@ -1,7 +1,7 @@
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties, ReactNode } from 'react';
-import { expect, test } from 'vite-plus/test';
+import { afterEach, expect, test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { emulateReducedMotion } from '../test-utils/emulate-media.js';
 import { render, visualAppearances } from '../test-utils/render.js';
@@ -11,6 +11,10 @@ import {
 	Stack,
 	variantValuesFor,
 } from '../test-utils/visual.js';
+
+afterEach(async () => {
+	await emulateReducedMotion(false);
+});
 
 const rowStyle = {
 	alignItems: 'center',
@@ -62,6 +66,7 @@ test('the LoadingSpinner scene has no axe violations', async () => {
 });
 
 test('shows a static fixed arc under prefers-reduced-motion: reduce', async () => {
+	await emulateReducedMotion(false);
 	const { locator } = render(<LoadingSpinner aria-label="Loading" />);
 	const spinner = locator.element();
 	const indicator = spinner.querySelector('circle');
