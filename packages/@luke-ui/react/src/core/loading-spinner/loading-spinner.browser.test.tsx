@@ -67,8 +67,9 @@ test('the LoadingSpinner scene has no axe violations', async () => {
 
 test('shows a static fixed arc under prefers-reduced-motion: reduce', async () => {
 	await emulateReducedMotion(false);
-	const { locator } = render(<LoadingSpinner aria-label="Loading" />);
-	const spinner = locator.element();
+	const { container } = render(<LoadingSpinner aria-label="Loading" />);
+	const spinner = container.querySelector('[role="status"]');
+	if (!(spinner instanceof HTMLElement)) throw new Error('Expected the loading status.');
 	const indicator = spinner.querySelector('circle');
 	if (indicator == null) throw new Error('Expected the spinner indicator circle.');
 
@@ -77,7 +78,6 @@ test('shows a static fixed arc under prefers-reduced-motion: reduce', async () =
 
 	await emulateReducedMotion(true);
 
-	expect(spinner).toHaveAttribute('role', 'status');
 	expect(spinner).toHaveAccessibleName('Loading');
 	expect(getComputedStyle(spinner).animationName).toBe('none');
 	expect(getComputedStyle(indicator).animationName).toBe('none');
