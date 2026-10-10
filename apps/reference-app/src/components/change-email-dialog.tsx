@@ -6,8 +6,6 @@ import { Prose } from '@luke-ui/react/prose';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
-import { rootClassName } from '@luke-ui/react/theme';
-import { cx } from '@luke-ui/react/utils';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { SubmitEvent } from 'react';
 import { useId, useRef, useState } from 'react';
@@ -75,7 +73,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 				<Icon aria-hidden="true" name="edit" size="xsmall" />
 			</RacButton>
 			<ModalOverlay
-				className={cx(rootClassName, styles.dialogOverlay)}
+				className={styles.dialogOverlay}
 				isDismissable={!isSaving}
 				isKeyboardDismissDisabled={isSaving}
 			>

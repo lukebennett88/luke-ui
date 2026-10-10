@@ -2,8 +2,6 @@ import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
-import { rootClassName } from '@luke-ui/react/theme';
-import { cx } from '@luke-ui/react/utils';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
@@ -143,7 +141,7 @@ export function ProfileAvatarSection({
 								<Icon name="edit" size="xsmall" />
 							</span>
 						</RacButton>
-						<Popover className={cx(rootClassName, styles.menuPopover)} placement="bottom end">
+						<Popover className={styles.menuPopover} placement="bottom end">
 							<Menu
 								aria-label="Profile picture"
 								className={styles.menu}

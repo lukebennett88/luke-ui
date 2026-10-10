@@ -12,7 +12,7 @@ import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
 export const header = style({
 	'@layer': {
-		recipes: {
+		components: {
 			alignItems: 'center',
 			backgroundColor: vars.color.surface.base,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
@@ -33,7 +33,7 @@ export const header = style({
 
 export const wordmark = style({
 	'@layer': {
-		recipes: {
+		components: {
 			alignItems: 'center',
 			color: vars.color.text.primary,
 			display: 'flex',
@@ -48,7 +48,7 @@ export const wordmark = style({
 
 export const destinations = style({
 	'@layer': {
-		recipes: {
+		components: {
 			alignItems: 'center',
 			columnGap: vars.space.sp16,
 			display: 'flex',
@@ -69,7 +69,7 @@ export const destinations = style({
 
 export const destinationsWithSidebar = style({
 	'@layer': {
-		recipes: {
+		components: {
 			'@container': {
 				[docsSidebarMaxInlineSize]: {
 					display: 'none',
@@ -81,7 +81,7 @@ export const destinationsWithSidebar = style({
 
 export const destination = style({
 	'@layer': {
-		recipes: {
+		components: {
 			alignItems: 'center',
 			color: vars.color.text.secondary,
 			display: 'inline-flex',
@@ -104,7 +104,7 @@ export const destination = style({
 
 export const activeDestination = style({
 	'@layer': {
-		recipes: {
+		components: {
 			color: vars.color.text.primary,
 			fontWeight: vars.font.weight.emphasis,
 		},
@@ -113,7 +113,7 @@ export const activeDestination = style({
 
 export const actions = style({
 	'@layer': {
-		recipes: {
+		components: {
 			alignItems: 'center',
 			columnGap: vars.space.sp8,
 			display: 'flex',
@@ -129,7 +129,7 @@ const WIDE_SEARCH_MIN_WIDTH_PX = 840;
 
 export const wideSearch = style({
 	'@layer': {
-		recipes: {
+		components: {
 			inlineSize: '10rem',
 			'@container': {
 				[docsMaxInlineSize(WIDE_SEARCH_MIN_WIDTH_PX)]: {
@@ -144,7 +144,7 @@ export const wideSearch = style({
 });
 export const compactSearch = style({
 	'@layer': {
-		recipes: {
+		components: {
 			'@container': {
 				[docsMinInlineSize(WIDE_SEARCH_MIN_WIDTH_PX)]: {
 					display: 'none',
@@ -155,7 +155,7 @@ export const compactSearch = style({
 });
 export const desktopTheme = style({
 	'@layer': {
-		recipes: {
+		components: {
 			'@container': {
 				[docsTabletMaxInlineSize]: {
 					display: 'none',
@@ -167,7 +167,7 @@ export const desktopTheme = style({
 
 export const mobileThemeTrigger = style({
 	'@layer': {
-		recipes: {
+		components: {
 			'@container': {
 				[docsTabletMinInlineSize]: {
 					display: 'none',
@@ -179,7 +179,7 @@ export const mobileThemeTrigger = style({
 
 export const appearancePopover = style({
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: vars.color.surface.overlay,
 			border: `1px solid ${vars.color.border.decorative}`,
 			borderRadius: vars.radius.surface,
@@ -192,6 +192,6 @@ export const appearancePopover = style({
 });
 export const appearanceDialog = style({
 	'@layer': {
-		recipes: {},
+		components: {},
 	},
 });

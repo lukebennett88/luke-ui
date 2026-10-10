@@ -13,7 +13,7 @@ const MIN_TARGET_SIZE = 'max(1.5rem, 24px)';
 
 export const heading = style({
 	'@layer': {
-		recipes: {
+		components: {
 			// Clears the sticky header, and below the table of contents breakpoint the sticky bar too.
 			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${TOC_BAR_BLOCK_SIZE} + ${vars.space.sp24})`,
 			'@container': {
@@ -30,7 +30,7 @@ export const heading = style({
 // line.
 export const headingAnchor = style({
 	'@layer': {
-		recipes: {
+		components: {
 			color: 'inherit',
 			marginInlineEnd: `calc(${vars.space.sp4} + ${MIN_TARGET_SIZE})`,
 			textDecoration: 'none',
@@ -44,7 +44,7 @@ export const headingAnchor = style({
 // button is centred on it.
 export const headingCopyWrapper = style({
 	'@layer': {
-		recipes: {
+		components: {
 			blockSize: 0,
 			display: 'inline-block',
 			inlineSize: 0,
@@ -60,7 +60,7 @@ export const headingCopyWrapper = style({
 // inside it. A mouse click leaves `:focus-visible` unset, so it does not pin the button open.
 export const headingCopyButton = style({
 	'@layer': {
-		recipes: {
+		components: {
 			blockSize: MIN_TARGET_SIZE,
 			color: vars.color.text.secondary,
 			fontSize: 'inherit',
@@ -91,7 +91,7 @@ export const headingCopyButton = style({
 
 export const image = style({
 	'@layer': {
-		recipes: {
+		components: {
 			blockSize: 'auto',
 			borderRadius: vars.radius.surface,
 			maxInlineSize: '100%',
@@ -101,7 +101,7 @@ export const image = style({
 
 export const tableScroll = style({
 	'@layer': {
-		recipes: {
+		components: {
 			border: `1px solid ${vars.color.border.decorative}`,
 			borderRadius: vars.radius.surface,
 			marginBlockStart: vars.space.sp40,
@@ -116,7 +116,7 @@ export const tableScroll = style({
 
 export const table = style({
 	'@layer': {
-		recipes: {
+		components: {
 			inlineSize: '100%',
 		},
 	},
@@ -124,7 +124,7 @@ export const table = style({
 
 globalStyle(`${table} th, ${table} td`, {
 	'@layer': {
-		recipes: {
+		components: {
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 			verticalAlign: 'top',
 		},
@@ -133,7 +133,7 @@ globalStyle(`${table} th, ${table} td`, {
 
 globalStyle(`${table} th`, {
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: vars.color.surface.subdued,
 			fontWeight: vars.font.weight.label,
 		},
@@ -142,7 +142,7 @@ globalStyle(`${table} th`, {
 
 globalStyle(`${table} tbody tr:last-child td`, {
 	'@layer': {
-		recipes: {
+		components: {
 			borderBlockEnd: 0,
 		},
 	},

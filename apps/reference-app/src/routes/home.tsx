@@ -4,8 +4,6 @@ import { Heading } from '@luke-ui/react/heading';
 import { Link } from '@luke-ui/react/link';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { rootClassName } from '@luke-ui/react/theme';
-import { cx } from '@luke-ui/react/utils';
 import { useQuery } from '@tanstack/react-query';
 import { settingsQueryOptions } from '../api/settings-query.js';
 import * as styles from '../styles/settings.css.js';
@@ -20,7 +18,7 @@ export function HomePage() {
 		<Box
 			backgroundColor="surface.subdued"
 			blockSize="100%"
-			className={cx(rootClassName, styles.shell)}
+			className={styles.shell}
 			display="flex"
 			minBlockSize="100%"
 			overflow="hidden"

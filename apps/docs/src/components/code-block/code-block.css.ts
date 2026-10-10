@@ -3,7 +3,7 @@ import { globalStyle, style } from '@vanilla-extract/css';
 
 export const root = style({
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: vars.color.surface.subdued,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.surface,
@@ -28,7 +28,7 @@ export const root = style({
  */
 export const mdxFence = style({
 	'@layer': {
-		recipes: {
+		components: {
 			marginBlockStart: vars.space.sp32,
 		},
 	},
@@ -36,7 +36,7 @@ export const mdxFence = style({
 
 export const flush = style({
 	'@layer': {
-		recipes: {
+		components: {
 			borderInlineWidth: 0,
 			borderRadius: 'inherit',
 			borderBlockEndWidth: 0,
@@ -47,7 +47,7 @@ export const flush = style({
 
 export const header = style({
 	'@layer': {
-		recipes: {
+		components: {
 			alignItems: 'center',
 			borderBlockEndColor: vars.color.border.decorative,
 			borderBlockEndStyle: 'solid',
@@ -63,7 +63,7 @@ export const header = style({
 
 export const title = style({
 	'@layer': {
-		recipes: {
+		components: {
 			color: vars.color.text.secondary,
 			flex: '1 1 auto',
 			fontFamily: vars.font.family.body,
@@ -79,7 +79,7 @@ export const title = style({
 
 export const actions = style({
 	'@layer': {
-		recipes: {
+		components: {
 			alignItems: 'center',
 			display: 'flex',
 			flexShrink: 0,
@@ -95,7 +95,7 @@ export const actions = style({
  */
 export const overlayActions = style({
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: vars.color.surface.subdued,
 			insetBlockStart: `calc(${vars.space.sp12} + (${vars.font.caption.lineHeight} / 2) - (${vars.controlSize.small} / 2))`,
 			insetInlineEnd: vars.space.sp8,
@@ -107,7 +107,7 @@ export const overlayActions = style({
 
 export const viewport = style({
 	'@layer': {
-		recipes: {
+		components: {
 			maxBlockSize: '37.5rem',
 			minInlineSize: 0,
 			overflow: 'auto',
@@ -131,7 +131,7 @@ export const viewport = style({
  */
 export const viewportWithOverlayCopy = style({
 	'@layer': {
-		recipes: {
+		components: {
 			paddingInlineEnd: vars.space.sp48,
 		},
 	},
@@ -139,7 +139,7 @@ export const viewportWithOverlayCopy = style({
 
 export const pre = style({
 	'@layer': {
-		recipes: {
+		components: {
 			// max-content so long lines widen the scrollport; min 100% so short blocks fill the frame.
 			inlineSize: 'max-content',
 			margin: 0,
@@ -152,7 +152,7 @@ export const pre = style({
 
 globalStyle(`${pre} code`, {
 	'@layer': {
-		recipes: {
+		components: {
 			// Reset inline-code chrome so highlighted lines do not look like inline `code`.
 			backgroundColor: 'transparent',
 			borderRadius: 0,
@@ -170,7 +170,7 @@ globalStyle(`${pre} code`, {
 // Empty lines are flex items and collapse to zero height without a minimum.
 globalStyle(`${pre} code .line`, {
 	'@layer': {
-		recipes: {
+		components: {
 			minBlockSize: vars.font.caption.lineHeight,
 		},
 	},
@@ -179,7 +179,7 @@ globalStyle(`${pre} code .line`, {
 // Dual-theme Shiki spans: light-dark picks the active colour mode.
 globalStyle(`${pre} :is(.shiki, code) span`, {
 	'@layer': {
-		recipes: {
+		components: {
 			color: 'light-dark(var(--shiki-light), var(--shiki-dark))',
 		},
 	},

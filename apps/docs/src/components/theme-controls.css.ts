@@ -3,7 +3,7 @@ import { style } from '@vanilla-extract/css';
 
 export const root = style({
 	'@layer': {
-		recipes: {
+		components: {
 			color: vars.color.text.primary,
 			display: 'flex',
 			flex: '1 1 auto',
@@ -15,7 +15,7 @@ export const root = style({
 
 export const controls = style({
 	'@layer': {
-		recipes: {
+		components: {
 			alignItems: 'center',
 			display: 'flex',
 			gap: vars.space.sp4,

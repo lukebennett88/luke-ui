@@ -16,7 +16,8 @@ Luke UI provides two themes as separate packages, `@luke-ui/theme-tactile` and
 `@luke-ui/theme-paper`. A product can also compile its own theme with
 [`defineTheme`](/docs/authoring-a-theme).
 
-`rootClassName` applies the shared reset and base typography. It carries no theme identity.
+The shared stylesheet, `@luke-ui/react/stylesheet.css`, sets the document baseline from the theme's
+tokens. It carries no theme identity.
 
 Each theme includes light and dark colour values. Without an explicit `data-color-mode`, the
 document follows the system preference. `data-color-mode` on `<html>` fixes the mode for the whole

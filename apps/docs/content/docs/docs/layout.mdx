@@ -46,10 +46,10 @@ Properties passed to `Box` and the other layout components accept either a direc
 keyed by breakpoint.
 
 Responsive values resolve against the nearest ancestor size container. Luke UI's stylesheet makes
-the document root a size container in its `reset` layer, so the root is the fallback, with or
-without a theme. A rule in your `base` layer can change that. Use `Container` when descendants
-should respond to a nearer content area. Component-responsive styles always query an ancestor. They
-do not query the component itself.
+the document root a size container, so the root is the fallback, with or without a theme. A rule in
+no cascade layer can change that. Use `Container` when descendants should respond to a nearer
+content area. Component-responsive styles always query an ancestor. They do not query the component
+itself.
 
 Portalled content leaves containers around its trigger and resolves against the nearest size
 container at its portal location, falling back to the root when there is none.
