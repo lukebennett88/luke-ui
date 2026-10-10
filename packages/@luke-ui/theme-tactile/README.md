@@ -21,7 +21,8 @@ import '@luke-ui/theme-tactile/stylesheet.css';
 import '@luke-ui/theme-tactile/fonts.css';
 ```
 
-Set the identity class on `<html>`. It is `luke-ui-theme-tactile`, and the root entry exports it.
+Set the identity class on `<html>`. It is `luke-ui-theme-tactile`, and the root entry exports it. No
+other class is needed.
 
 ```ts
 import { themeClassName } from '@luke-ui/theme-tactile';

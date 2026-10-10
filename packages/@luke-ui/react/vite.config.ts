@@ -6,7 +6,7 @@ import { transformSync } from 'oxc-transform-react';
 import type { Plugin } from 'vite-plus';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
-import { cascadeLayerNames } from './src/core/styles/layer-names.js';
+import { cascadeLayerOrder } from './src/core/styles/layer-names.js';
 
 const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
@@ -14,12 +14,15 @@ const recipeEngineSource = fileURLToPath(
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const assetExports = ['./stylesheet.css', './spritesheet.svg'];
 
-function buildAuthoritativeLayerOrder(): string {
-	return `@layer ${cascadeLayerNames.join(', ')};`;
-}
+/** Vanilla Extract writes one `@layer name;` statement per layer and module. */
+const SINGLE_LAYER_STATEMENT_PATTERN = /^@layer [^,{]+;\n/gm;
 
+/**
+ * Drops the per-module layer statements. Each one creates its layer where it first appears, so a
+ * module emitted before the order statement could otherwise reorder the layers.
+ */
 function stripRedundantEmptyLayerStatements(css: string): string {
-	return css.replace(/^@layer [^,{]+;\n/gm, '');
+	return css.replace(SINGLE_LAYER_STATEMENT_PATTERN, '');
 }
 
 /** Any JS or TS module the React Compiler can read, including `.mjs`/`.cts` variants. */
@@ -92,7 +95,7 @@ function authoritativeLayerOrderPlugin(): Plugin {
 			if (stylesheet?.type !== 'asset') return;
 
 			const vanillaCss = stripRedundantEmptyLayerStatements(stylesheet.source.toString());
-			stylesheet.source = `${buildAuthoritativeLayerOrder()}\n${vanillaCss}`;
+			stylesheet.source = `${cascadeLayerOrder}\n${vanillaCss}`;
 		},
 		name: 'authoritative-layer-order',
 	};

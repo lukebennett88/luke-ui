@@ -3,8 +3,6 @@ import { Cluster } from '@luke-ui/react/cluster';
 import { Heading } from '@luke-ui/react/heading';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { rootClassName } from '@luke-ui/react/theme';
-import { cx } from '@luke-ui/react/utils';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useId, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
@@ -73,7 +71,7 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 							Clear saved settings
 						</Button>
 						<ModalOverlay
-							className={cx(rootClassName, styles.dialogOverlay)}
+							className={styles.dialogOverlay}
 							isDismissable={!isPending}
 							isKeyboardDismissDisabled={isPending}
 						>

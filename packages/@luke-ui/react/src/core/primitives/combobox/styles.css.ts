@@ -8,7 +8,11 @@ import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
 } from '../../styles/input-states.js';
-import { overlayEnterTransition, overlayExitTransition } from '../../styles/overlay-motion.js';
+import {
+	overlayEnterTransition,
+	overlayExitTransition,
+	reducedMotionOverlayProperties,
+} from '../../styles/overlay-motion.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
@@ -44,7 +48,6 @@ const comboboxActionStyles = {
 				},
 			},
 		},
-		'(prefers-reduced-motion: reduce)': { transform: 'none', transition: 'none' },
 	},
 	alignItems: 'center',
 	appearance: 'none',
@@ -61,9 +64,13 @@ const comboboxActionStyles = {
 	justifyContent: 'center',
 	minBlockSize: MIN_TARGET_SIZE,
 	minInlineSize: MIN_TARGET_SIZE,
+	paddingBlock: 0,
+	touchAction: 'manipulation',
 	transform: 'none',
 	transitionDuration: vars.motion.duration.feedback,
 	transitionProperty: 'background-color, color',
+	// Hover and pressed states give their own feedback, so the browser's tap highlight would double it.
+	WebkitTapHighlightColor: 'transparent',
 	transitionTimingFunction: vars.motion.easing.standard,
 
 	selectors: {
@@ -85,6 +92,8 @@ const comboboxActionStyles = {
 const popoverProperties = ['opacity', 'translate', 'box-shadow'];
 const popoverTransition = overlayEnterTransition(popoverProperties);
 const popoverExitTransition = overlayExitTransition(popoverProperties);
+const popoverReducedTransition = overlayEnterTransition(reducedMotionOverlayProperties);
+const popoverReducedExitTransition = overlayExitTransition(reducedMotionOverlayProperties);
 
 /**
  * Raw slotted config for the combobox anatomy.
@@ -117,7 +126,6 @@ const comboboxConfig = {
 						[inputFocus]: { outlineColor: 'Highlight' },
 					},
 				},
-				'(prefers-reduced-motion: reduce)': { transition: 'none' },
 			},
 			alignItems: 'center',
 			backgroundColor: vars.color.surface.field,
@@ -135,8 +143,6 @@ const comboboxConfig = {
 			letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
 			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 			minInlineSize: 0,
-			// Suppress the reset ring React Aria exposes on the group when an inner action is focus-visible.
-			outline: 'none',
 			overflow: 'visible',
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, border-color, box-shadow, color',
@@ -196,12 +202,12 @@ const comboboxConfig = {
 					boxShadow: 'none',
 					forcedColorAdjust: 'auto',
 				},
+				// The fade stays and the movement goes. See `styles/overlay-motion.ts`.
 				'(prefers-reduced-motion: reduce)': {
-					transition: 'none',
+					transition: popoverReducedTransition,
 					selectors: {
-						'&[data-entering]': { opacity: 1, translate: 'none' },
-						// Reduced motion has to repeat `none` here. See `styles/overlay-motion.ts`.
-						'&[data-exiting]': { opacity: 1, transition: 'none', translate: 'none' },
+						'&[data-entering]': { translate: 'none' },
+						'&[data-exiting]': { transition: popoverReducedExitTransition, translate: 'none' },
 					},
 				},
 			},
@@ -290,7 +296,6 @@ const comboboxConfig = {
 						},
 					},
 				},
-				'(prefers-reduced-motion: reduce)': { transform: 'none', transition: 'none' },
 			},
 			alignItems: 'center',
 			backgroundColor: 'transparent',
@@ -308,6 +313,9 @@ const comboboxConfig = {
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, color, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
+			// Hover and pressed states give their own feedback, so the browser's tap highlight would
+			// double it.
+			WebkitTapHighlightColor: 'transparent',
 
 			selectors: {
 				'&[data-disabled="true"]': {
@@ -344,7 +352,10 @@ const comboboxConfig = {
 		},
 		trayTrigger: {
 			alignItems: 'center',
+			appearance: 'none',
+			backgroundColor: 'transparent',
 			blockSize: '100%',
+			border: 'none',
 			color: vars.color.text.primary,
 			display: 'flex',
 			inlineSize: '100%',
@@ -354,6 +365,11 @@ const comboboxConfig = {
 			// the closed trigger onto its selected value. This floor reserves 20ch of value text
 			// plus room for the trailing chevron.
 			minInlineSize: `calc(20ch + ${COMBOBOX_ACTION_SIZE})`,
+			paddingBlock: 0,
+
+			selectors: {
+				'&[data-disabled="true"]': { cursor: 'not-allowed' },
+			},
 		},
 		trayValue: {
 			flex: 1,

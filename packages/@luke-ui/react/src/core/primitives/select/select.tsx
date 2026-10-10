@@ -21,8 +21,6 @@ import {
 import { TextContext as RacTextContext } from 'react-aria-components/Text';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
-import { cx } from '../../../shared/utils/utils.js';
-import { rootClassName } from '../../../theme/theme.js';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import { copyScopeColorMode } from '../../overlays/scope-color-mode.js';
@@ -261,7 +259,7 @@ export function SelectPopover(props: SelectPopoverProps): JSX.Element {
 		<RacPopover
 			{...popoverProps}
 			className={composeRenderProps(popoverProps.className, (className) => {
-				return cx(rootClassName, comboboxRecipe().popover({ className }));
+				return comboboxRecipe().popover({ className });
 			})}
 			offset={offset}
 			ref={mergeRefs(ref, copyScopeColorMode(popoverContext?.triggerRef))}

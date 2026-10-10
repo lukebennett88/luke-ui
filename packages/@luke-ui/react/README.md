@@ -16,28 +16,28 @@ Luke UI expects the application to provide a compatible shared `react-aria-compo
 ## Setup
 
 Import the component stylesheet and the theme's stylesheet, plus its `fonts.css` to load the font it
-uses. Set the theme's identity class on `<html>`, and apply `rootClassName` to an element you own
-for the reset and base typography.
-
-The shared stylesheet uses the layer order `reset → base → recipes → utilities`. The `base` layer is
-reserved for application defaults such as Tailwind Preflight. Luke UI declares it empty so it stays
-below `recipes`.
+uses. Set the theme's identity class on `<html>`. No root class is needed: the shared stylesheet
+paints `<body>` with the theme's surface, text colour, and body font, and keeps native HTML
+presentation otherwise.
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/theme-tactile/stylesheet.css';
 import '@luke-ui/theme-tactile/fonts.css';
-import { rootClassName } from '@luke-ui/react/theme';
 import { themeClassName } from '@luke-ui/theme-tactile';
 
 export function RootLayout() {
 	return (
 		<html className={themeClassName} lang="en">
-			<body className={rootClassName}>{/* your app */}</body>
+			<body>{/* your app */}</body>
 		</html>
 	);
 }
 ```
+
+The shared stylesheet declares `@layer base, luke-ui;` and puts all its rules inside `luke-ui`. The
+`base` layer is reserved for application defaults and ranks below Luke UI. With Tailwind CSS,
+declare `@layer theme, base, luke-ui, components, utilities;` before any import.
 
 Without `data-color-mode` on `<html>`, the theme follows the system colour mode.
 

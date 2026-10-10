@@ -314,9 +314,8 @@ When a task has several valid approaches, the reader still needs only one.
 2. Choose one approach and show it.
 3. Mention an alternative only when the reader has to pick between them.
 
-"Apply `rootClassName` to an element you own that contains the Luke UI interface. This example uses
-the application shell" beats "You can apply `rootClassName` to `<html>`, `<body>`, or a layout
-wrapper".
+"Set the theme's identity class on `<html>` in the root layout" beats "You can set the identity
+class in `index.html`, the root layout, or a script".
 
 ### Move forwards
 

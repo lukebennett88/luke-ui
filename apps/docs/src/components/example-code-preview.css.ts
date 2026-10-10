@@ -10,7 +10,7 @@ export const codeUpdate = style({});
 // Keep the surrounding article out of the code expansion crossfade.
 globalStyle(`:root:active-view-transition-type(${codeTransitionType})::view-transition-old(root)`, {
 	'@layer': {
-		recipes: {
+		components: {
 			display: 'none',
 		},
 	},
@@ -23,7 +23,7 @@ globalStyle(
 	].join(', '),
 	{
 		'@layer': {
-			recipes: {
+			components: {
 				animation: 'none',
 			},
 		},
@@ -38,7 +38,7 @@ globalStyle(
 	].join(', '),
 	{
 		'@layer': {
-			recipes: {
+			components: {
 				animationDuration: vars.motion.duration.enter,
 				animationTimingFunction: vars.motion.easing.standard,
 				'@media': {
@@ -66,7 +66,7 @@ export const codeViewportFade = style({});
 // Clip the source itself so keyboard scrolling cannot reveal hidden lines.
 globalStyle(`${codeViewportCollapsed} pre`, {
 	'@layer': {
-		recipes: {
+		components: {
 			maxBlockSize: collapsedSourceMaxBlockSize,
 			overflow: 'hidden',
 		},
@@ -76,7 +76,7 @@ globalStyle(`${codeViewportCollapsed} pre`, {
 // Keep the scroll region's focus ring and copy control outside the text fade.
 globalStyle(`${codeViewportFade} pre`, {
 	'@layer': {
-		recipes: {
+		components: {
 			maskImage: 'linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%)',
 		},
 	},

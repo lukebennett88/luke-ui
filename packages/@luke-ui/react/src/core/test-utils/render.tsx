@@ -2,7 +2,6 @@
 
 import '@luke-ui/react/stylesheet.css';
 import { Provider } from '@luke-ui/react/provider';
-import { rootClassName, vars } from '@luke-ui/react/theme';
 import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -59,8 +58,6 @@ export function render(node: ReactNode, options?: { appearance?: VisualAppearanc
 	applyAppearance(appearance);
 
 	const container = document.body.appendChild(document.createElement('div'));
-	container.className = rootClassName;
-	container.style.backgroundColor = vars.color.surface.base;
 	const root = createRoot(container);
 	trackMountedRender(container, root);
 
@@ -89,8 +86,6 @@ export function hydrate(
 	applyAppearance(appearance);
 
 	const container = document.body.appendChild(document.createElement('div'));
-	container.className = rootClassName;
-	container.style.backgroundColor = vars.color.surface.base;
 	container.innerHTML = markup;
 
 	const recoverableErrors: Array<unknown> = [];

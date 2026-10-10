@@ -7,13 +7,11 @@ import { textRecipe } from '../../text/recipe.css.js';
 /** Shared presentation recipe for Button and button-shaped Link. */
 export const buttonRecipeInternal = recipe({
 	base: {
-		'@media': {
-			'(prefers-reduced-motion: reduce)': {
-				transition: 'none',
-			},
-		},
 		font: 'inherit',
 		touchAction: 'manipulation',
+		// Hover and pressed states give their own feedback, so the browser's tap highlight would
+		// double it.
+		WebkitTapHighlightColor: 'transparent',
 		transitionDuration: vars.motion.duration.feedback,
 		transitionProperty:
 			'background-color, border-color, box-shadow, color, opacity, text-decoration-color',

@@ -75,9 +75,10 @@ const loadingSpinnerConfig = {
 			color: 'currentColor',
 			display: 'inline-flex',
 			flexShrink: 0,
+			// Under reduced motion the fixed arc keeps turning, so the busy state stays visible. Only
+			// the stroke stops stretching.
 			'@media': {
 				'(forced-colors: active)': { animationName: 'none' },
-				'(prefers-reduced-motion: reduce)': { animationName: 'none' },
 			},
 		},
 		spinnerOverlay: spinnerOverlayBase,

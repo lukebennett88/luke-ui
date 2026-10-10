@@ -1,7 +1,11 @@
 import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import { style } from '../styles/layered-style.css.js';
-import { overlayEnterTransition, overlayExitTransition } from '../styles/overlay-motion.js';
+import {
+	overlayEnterTransition,
+	overlayExitTransition,
+	reducedMotionOverlayProperties,
+} from '../styles/overlay-motion.js';
 
 const trayPaddingBlockEnd = createVar();
 
@@ -31,6 +35,8 @@ const scrimExitTransition = overlayExitTransition(['opacity']);
 
 const trayTransition = overlayEnterTransition(['opacity', 'translate']);
 const trayExitTransition = overlayExitTransition(['opacity', 'translate']);
+const trayReducedTransition = overlayEnterTransition(reducedMotionOverlayProperties);
+const trayReducedExitTransition = overlayExitTransition(reducedMotionOverlayProperties);
 
 /** Based on Apache-2.0 React Spectrum `Tray.tsx` and `tray/index.css`. */
 export const mobileOverlay = style({
@@ -43,6 +49,7 @@ export const mobileOverlay = style({
 	// against anything of ours. It is a floor meant to sit above consumer page content.
 	zIndex: 100,
 
+	// The scrim only fades, so it keeps its transition under reduced motion.
 	selectors: {
 		'&[data-entering]': {
 			opacity: 0,
@@ -50,17 +57,6 @@ export const mobileOverlay = style({
 		'&[data-exiting]': {
 			opacity: 0,
 			transition: scrimExitTransition,
-		},
-	},
-
-	'@media': {
-		'(prefers-reduced-motion: reduce)': {
-			transition: 'none',
-
-			selectors: {
-				'&[data-entering]': { opacity: 1, transition: 'none' },
-				'&[data-exiting]': { opacity: 1, transition: 'none' },
-			},
 		},
 	},
 });
@@ -116,13 +112,13 @@ export const mobileModal = style({
 			boxShadow: 'none',
 			forcedColorAdjust: 'auto',
 		},
+		// The fade stays and the slide goes. See `styles/overlay-motion.ts`.
 		'(prefers-reduced-motion: reduce)': {
-			transition: 'none',
+			transition: trayReducedTransition,
 
 			selectors: {
-				// Reduced motion has to repeat `none` on each selector. See `styles/overlay-motion.ts`.
-				'&[data-entering]': { opacity: 1, transition: 'none', translate: 'none' },
-				'&[data-exiting]': { opacity: 1, transition: 'none', translate: 'none' },
+				'&[data-entering]': { translate: 'none' },
+				'&[data-exiting]': { transition: trayReducedExitTransition, translate: 'none' },
 			},
 		},
 		// Past the cap the tray is inset from the viewport edges, so its bottom corners are

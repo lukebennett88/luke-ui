@@ -114,7 +114,7 @@ const sheen = {
 			...forcedColorsSurface,
 			animationName: 'none',
 		},
-		// The global reduced-motion reset lives in the lowest layer, so it can't win against this rule.
+		// The sheen stops and the placeholder surface stays.
 		'(prefers-reduced-motion: reduce)': {
 			animationName: 'none',
 		},

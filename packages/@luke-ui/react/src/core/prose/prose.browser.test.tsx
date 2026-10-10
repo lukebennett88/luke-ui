@@ -61,7 +61,7 @@ test('does not leak space from a nested final block', () => {
 	);
 });
 
-// A nested pre is not covered by the shared reset, so Prose must normalise it itself.
+// The user agent gives `pre` a block margin, so Prose must normalise a nested one itself.
 test('normalises a nested pre margin', () => {
 	const { locator } = render(
 		<Prose>
@@ -78,8 +78,8 @@ test('normalises a nested pre margin', () => {
 	).toBeCloseTo(0, 0);
 });
 
-// Chromium and Safari match `type` case-insensitively, so CSS must not restate A/a or I/i.
-// `proseRecipe` is public, so the scope must ride the recipe class, not the component.
+// Chromium and Safari match `type` case-insensitively, so CSS must not restate A/a or I/i. Prose
+// sets no marker on a typed list, so its presentational hint applies.
 test('preserves native ordered-list type markers under proseRecipe alone', () => {
 	const { locator } = render(
 		<div className={proseRecipe()}>
@@ -152,30 +152,59 @@ test('applies Prose rhythm to elements outside a not-prose boundary', () => {
 	expect(margin(query(root, '[data-testid="outside"]'))).toBe('32px');
 });
 
-test('removes Prose margins, list styles, and cell padding inside a not-prose boundary', () => {
-	const { locator } = render(boundaryFixture());
+test('leaves browser defaults inside a not-prose boundary', () => {
+	const { locator } = render(
+		<div>
+			{boundaryFixture()}
+			<div data-testid="reference">
+				<p>Inside.</p>
+				<p data-testid="inside">Second.</p>
+				<ul>
+					<li>One</li>
+					<li data-testid="item">Two</li>
+				</ul>
+				<table>
+					<tbody>
+						<tr>
+							<td>Cell</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>,
+	);
 	const boundary = query(locator.element(), '[data-testid="boundary"]');
+	const reference = query(locator.element(), '[data-testid="reference"]');
 
 	expect(margin(boundary)).toBe('0px');
-	expect(margin(query(boundary, '[data-testid="inside"]'))).toBe('0px');
-	expect(margin(query(boundary, '[data-testid="item"]'))).toBe('0px');
-	expect(margin(query(boundary, 'ul'))).toBe('0px');
-	expect(getComputedStyle(query(boundary, 'ul')).listStyleType).toBe('none');
-	expect(getComputedStyle(query(boundary, 'ul')).paddingInlineStart).toBe('0px');
-	expect(getComputedStyle(query(boundary, 'td')).paddingInlineStart).toBe('0px');
+	for (const selector of ['[data-testid="inside"]', '[data-testid="item"]', 'ul']) {
+		expect(margin(query(boundary, selector))).toBe(margin(query(reference, selector)));
+	}
+	const list = getComputedStyle(query(boundary, 'ul'));
+	const referenceList = getComputedStyle(query(reference, 'ul'));
+	expect(list.listStyleType).toBe(referenceList.listStyleType);
+	expect(list.paddingInlineStart).toBe(referenceList.paddingInlineStart);
+	expect(getComputedStyle(query(boundary, 'td')).paddingInlineStart).toBe(
+		getComputedStyle(query(reference, 'td')).paddingInlineStart,
+	);
 });
 
 test('excludes an element that carries not-prose itself', () => {
 	const { locator } = render(
-		<Prose>
-			<p>Before.</p>
-			<p className="not-prose" data-testid="marked">
-				Marked.
-			</p>
-		</Prose>,
+		<div>
+			<Prose>
+				<p>Before.</p>
+				<p className="not-prose" data-testid="marked">
+					Marked.
+				</p>
+			</Prose>
+			<p data-testid="reference">Reference.</p>
+		</div>,
 	);
 
-	expect(margin(query(locator.element(), '[data-testid="marked"]'))).toBe('0px');
+	expect(margin(query(locator.element(), '[data-testid="marked"]'))).toBe(
+		margin(query(locator.element(), '[data-testid="reference"]')),
+	);
 });
 
 test('keeps the gap after a heading for a not-prose element but not for its descendants', () => {

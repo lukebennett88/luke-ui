@@ -7,10 +7,7 @@ import { layers } from './layers.css.js';
 type LayeredStyleRule = DistributiveOmit<StyleRule, '@layer'>;
 type LayeredGlobalStyleRule = DistributiveOmit<GlobalStyleRule, '@layer'>;
 
-/** Layers Luke UI may write to. The `base` layer is reserved for the consuming application. */
-type WritableLayerName = Exclude<LayerName, 'base'>;
-
-function withLayer(layer: WritableLayerName, rule: LayeredStyleRule): StyleRule {
+function withLayer(layer: LayerName, rule: LayeredStyleRule): StyleRule {
 	return {
 		'@layer': {
 			[layers[layer]]: rule,
@@ -18,7 +15,7 @@ function withLayer(layer: WritableLayerName, rule: LayeredStyleRule): StyleRule 
 	};
 }
 
-function withLayerGlobal(layer: WritableLayerName, rule: LayeredGlobalStyleRule): GlobalStyleRule {
+function withLayerGlobal(layer: LayerName, rule: LayeredGlobalStyleRule): GlobalStyleRule {
 	return {
 		'@layer': {
 			[layers[layer]]: rule,
@@ -27,7 +24,7 @@ function withLayerGlobal(layer: WritableLayerName, rule: LayeredGlobalStyleRule)
 }
 
 /**
- * A private class in the `recipes` layer with no variants. Prefer `recipe()` for component visuals,
+ * A private class in the `luke-ui.recipes` layer with no variants. Prefer `recipe()` for component visuals,
  * even when the recipe has no variants.
  */
 export function style(rule: LayeredStyleRule, debugId?: string): string {
@@ -35,11 +32,11 @@ export function style(rule: LayeredStyleRule, debugId?: string): string {
 }
 
 /**
- * A global selector in a chosen layer. Use it for reset/root rules and for component-owned
- * descendant or combinator selectors that still belong in `recipes`.
+ * A global selector in a chosen Luke UI layer. Use it for the global stylesheet and for
+ * component-owned descendant or combinator selectors that still belong in `recipes`.
  */
 export function globalStyleInLayer(
-	layer: WritableLayerName,
+	layer: LayerName,
 	selector: string,
 	rule: LayeredGlobalStyleRule,
 ): void {

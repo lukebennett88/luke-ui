@@ -73,9 +73,6 @@ const switchConfig = {
 						},
 					},
 				},
-				'(prefers-reduced-motion: reduce)': {
-					transition: 'none',
-				},
 			},
 			// Off, the track is filled with the control border colour; on, it is a solid fill with the
 			// control finish. Hover and pressed change colour, so they stay distinct without materials.
@@ -168,8 +165,9 @@ const switchConfig = {
 						},
 					},
 				},
+				// The thumb stops sliding and stretching. Its colour still fades.
 				'(prefers-reduced-motion: reduce)': {
-					transition: 'none',
+					transitionProperty: 'background-color',
 				},
 			},
 			alignItems: 'center',

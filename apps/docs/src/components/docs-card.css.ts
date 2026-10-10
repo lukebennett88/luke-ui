@@ -7,7 +7,7 @@ import { style } from '@vanilla-extract/css';
  */
 export const cardLink = style({
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: vars.color.surface.base,
 			color: vars.color.text.primary,
 			textDecoration: 'none',
@@ -36,7 +36,7 @@ export const cardLink = style({
 
 export const cardLinkAlignEnd = style({
 	'@layer': {
-		recipes: {
+		components: {
 			textAlign: 'end',
 		},
 	},

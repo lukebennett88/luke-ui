@@ -21,7 +21,8 @@ import '@luke-ui/theme-paper/stylesheet.css';
 import '@luke-ui/theme-paper/fonts.css';
 ```
 
-Set the identity class on `<html>`. It is `luke-ui-theme-paper`, and the root entry exports it.
+Set the identity class on `<html>`. It is `luke-ui-theme-paper`, and the root entry exports it. No
+other class is needed.
 
 ```ts
 import { themeClassName } from '@luke-ui/theme-paper';

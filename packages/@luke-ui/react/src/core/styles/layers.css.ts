@@ -1,22 +1,24 @@
 import { globalLayer } from '@vanilla-extract/css';
-import { cascadeLayerNames } from './layer-names.js';
+import { lukeUiLayerName, lukeUiSublayerNames } from './layer-names.js';
 
 /**
- * Cascade layers, ordered from lowest to highest priority.
+ * Luke UI's cascade layers, all inside the top-level `luke-ui` layer, from lowest to highest
+ * priority:
  *
- * - **reset** — Browser defaults, root base colour, body typography, form defaults, focus, and
- *   reduced-motion defaults.
- * - **base** — Reserved for the consuming application (for example Tailwind Preflight). Declared
- *   empty so the first consumer write does not create the layer last and outrank `recipes`.
- * - **recipes** — All Luke UI component styling, including variants, compound styles, and
- *   component-owned descendant or combinator selectors.
- * - **utilities** — One-off overrides.
+ * - **reset** — The global stylesheet: box sizing, root containment, the `<body>` baseline, scoped
+ *   colour-mode repaint, form-control font, and the native focus ring.
+ * - **recipes** — All component styling, including variants, compound styles, and component-owned
+ *   descendant or combinator selectors.
+ * - **utilities** — `Box` and the other utility props.
  *
- * Precedence comes from the order of `cascadeLayerNames`. The build prepends the combined `@layer`
- * order and strips empty `@layer name;` declarations that would reorder layers.
+ * The consuming application's `base` layer ranks below `luke-ui`. Luke UI declares it and never
+ * writes to it. The build prepends `cascadeLayerOrder` and strips the single-name `@layer`
+ * statements these calls emit, so the order statement is the only one that creates layers.
  */
+const lukeUiLayer = globalLayer(lukeUiLayerName);
+
 export const layers = Object.fromEntries(
-	cascadeLayerNames.map((name) => [name, globalLayer(name)]),
-) as { [Name in (typeof cascadeLayerNames)[number]]: ReturnType<typeof globalLayer> };
+	lukeUiSublayerNames.map((name) => [name, globalLayer({ parent: lukeUiLayer }, name)]),
+) as { [Name in (typeof lukeUiSublayerNames)[number]]: ReturnType<typeof globalLayer> };
 
 export type LayerName = keyof typeof layers;

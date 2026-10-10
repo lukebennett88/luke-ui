@@ -5,7 +5,6 @@
  * winning.
  */
 
-import { rootClassName } from '@luke-ui/react/theme';
 import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 import { emulateColorScheme } from '../core/test-utils/emulate-media.js';
 import { paperTheme } from './__fixtures__/paper.js';
@@ -63,7 +62,6 @@ afterEach(async () => {
 	document.documentElement.className = '';
 	document.documentElement.removeAttribute('data-color-mode');
 	document.body.removeAttribute('data-color-mode');
-	document.body.classList.remove(...rootClassName.split(' '));
 	await emulateColorScheme('light');
 });
 
@@ -155,19 +153,16 @@ describe('nested colour-mode scopes', () => {
 		expect(getComputedStyle(scope).backgroundColor).toBe('rgb(1, 2, 3)');
 	});
 
-	for (const withRootClassName of [false, true]) {
-		it(`treats <body> as a scope ${withRootClassName ? 'with' : 'without'} rootClassName`, () => {
-			document.documentElement.dataset.colorMode = 'light';
-			if (withRootClassName) document.body.classList.add(...rootClassName.split(' '));
-			document.body.dataset.colorMode = 'dark';
-			const styles = getComputedStyle(document.body);
+	it('treats <body> as a scope', () => {
+		document.documentElement.dataset.colorMode = 'light';
+		document.body.dataset.colorMode = 'dark';
+		const styles = getComputedStyle(document.body);
 
-			expect(styles.colorScheme).toBe('dark');
-			expect(styles.color).toBe(computedColor(darkText));
-			expect(styles.backgroundColor).toBe(computedColor(darkBase));
-			expect(readVar(createDiv(document.body), '--luke-color-surface-base')).toBe(darkBase);
-		});
-	}
+		expect(styles.colorScheme).toBe('dark');
+		expect(styles.color).toBe(computedColor(darkText));
+		expect(styles.backgroundColor).toBe(computedColor(darkBase));
+		expect(readVar(createDiv(document.body), '--luke-color-surface-base')).toBe(darkBase);
+	});
 });
 
 describe('root containment', () => {
