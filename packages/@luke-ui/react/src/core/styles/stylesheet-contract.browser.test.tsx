@@ -109,18 +109,17 @@ function expectLayerContract(css: string) {
 }
 
 test('builds the public stylesheet with the layer and global-rule contract', () => {
-	expectLayerContract(builtCss);
+	expect(() => expectLayerContract(builtCss)).not.toThrow();
 });
 
 test('puts utility props in the utilities layer', () => {
 	const { container } = render(<Box display="grid" padding="sp4" />);
 	const { rules } = parseStylesheet(builtCss);
 
-	expectOwnedBy(
-		rules,
-		(container.firstElementChild as HTMLElement).className.split(' '),
-		'luke-ui.utilities',
-	);
+	const classNames = container.firstElementChild?.className.split(' ') ?? [];
+
+	expect(classNames.length).toBeGreaterThan(0);
+	expect(() => expectOwnedBy(rules, classNames, 'luke-ui.utilities')).not.toThrow();
 });
 
 test('trims every type style with its own Capsize variables', () => {
