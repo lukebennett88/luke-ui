@@ -11,7 +11,7 @@ import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
 import spritesheetHref from '../../../dist/spritesheet.svg?url';
 import type { FixtureThemeName } from './fixture-themes.js';
-import { fixtureThemeClassName, installFixtureThemes } from './fixture-themes.js';
+import { fixtureThemeClassName } from './fixture-themes.js';
 import {
 	getAppliedIdentityClassName,
 	setAppliedIdentityClassName,
@@ -114,7 +114,6 @@ export function hydrate(
 }
 
 function applyAppearance(appearance: VisualAppearance) {
-	installFixtureThemes();
 	const identityClassName = fixtureThemeClassName(appearance.theme);
 	const appliedIdentityClassName = getAppliedIdentityClassName();
 	if (appliedIdentityClassName != null) {

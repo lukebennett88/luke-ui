@@ -11,10 +11,10 @@ import { ThemeContrastError } from './build-theme.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
 import { defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
-import { resolveThemeInput } from './extend-theme.js';
+import { collectThemeChain, resolveThemeChain } from './extend-theme.js';
 
 function foundationOf(input: ThemeInput | ExtendingThemeInput) {
-	return normalizeTheme(resolveThemeInput(input).input);
+	return normalizeTheme(resolveThemeChain(collectThemeChain(input)).input);
 }
 
 /** Every `--luke-*` declaration in a stylesheet, keyed by rule block and variable name. */

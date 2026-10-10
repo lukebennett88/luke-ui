@@ -84,6 +84,21 @@ describe('font metric validation', () => {
 		});
 	}
 
+	for (const familyName of [undefined, '', '  ', 42]) {
+		it(`rejects a familyName of ${JSON.stringify(familyName)}`, () => {
+			const metrics = { ...interFont.metrics, familyName };
+			expect(issuesOf(themeWithTypography({ fonts: { body: { ...interFont, metrics } } }))).toEqual(
+				[
+					{
+						message: 'must be a non-empty string',
+						path: 'typography.fonts.body.metrics.familyName',
+						theme: 'invalid-fonts',
+					},
+				],
+			);
+		});
+	}
+
 	it('accepts a cap height taller than the em and metrics with only the required fields', () => {
 		const { ascent, descent, familyName, lineGap, unitsPerEm } = loraFont.metrics;
 		const metrics = {

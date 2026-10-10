@@ -1,12 +1,14 @@
 /**
- * Inheritance between theme-authoring inputs. `resolveThemeInput` folds an `extends` chain into one
- * {@link ThemeInput}, and records which colours came from a base.
+ * Inheritance between theme-authoring inputs. `collectThemeChain` walks an `extends` chain, and
+ * `resolveThemeChain` folds it into one {@link ThemeInput} and records which colours came from a
+ * base.
  *
  * A theme's values behave as if an author wrote them on top of the base in one input.
  */
 
 import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
 import { SURFACE_ROLES } from './foundation.js';
+import { isRecord } from './validate-input.js';
 
 /** Which colours a theme authored, and which it inherited. Carried by `ThemeContrastError`. */
 export interface ThemeInheritance {
@@ -50,14 +52,6 @@ const NEUTRAL_ROLES = ['neutral', 'neutralStyle'] as const satisfies ReadonlyArr
 /** Whether a colour input authors the neutral character under either of its two keys. */
 function authorsNeutral(color: Partial<ThemeInput['color']> | undefined): boolean {
 	return NEUTRAL_ROLES.some((role) => color?.[role] !== undefined);
-}
-
-/**
- * Resolves a theme input's `extends` chain into one merged {@link ThemeInput}, plus the colour
- * provenance of the outermost theme. Throws when a theme extends a theme that extends it.
- */
-export function resolveThemeInput(input: ThemeInput | ExtendingThemeInput): ResolvedThemeInput {
-	return resolveThemeChain(collectThemeChain(input));
 }
 
 /**
@@ -232,10 +226,6 @@ function inheritFonts(base: FontRoles | undefined, own: FontRoles | undefined): 
 	const display = own.display === undefined ? baseFonts.display : own.display;
 	if (display !== undefined) merged.display = display;
 	return merged;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /**

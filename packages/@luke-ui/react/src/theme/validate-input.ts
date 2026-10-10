@@ -23,14 +23,7 @@ interface ThemeValidationIssue {
  */
 export class ThemeValidationError extends Error {
 	/** Every issue found, in chain order from the outermost input. */
-	readonly issues: ReadonlyArray<{
-		/** Name of the input that contains the problem. */
-		theme: string;
-		/** Dot path within that input, for example `typography.fonts.body.metrics.unitsPerEm`. */
-		path: string;
-		/** What is wrong with the value at `path`. */
-		message: string;
-	}>;
+	readonly issues: ReadonlyArray<ThemeValidationIssue>;
 
 	constructor(issues: ReadonlyArray<ThemeValidationIssue>) {
 		super(
@@ -146,6 +139,9 @@ function validateFont(
 		report(`${path}.metrics`, 'must be a Capsize font-metrics object');
 		return;
 	}
+	if (typeof metrics.familyName !== 'string' || metrics.familyName.trim() === '') {
+		report(`${path}.metrics.familyName`, 'must be a non-empty string');
+	}
 	for (const field of REQUIRED_METRICS) {
 		if (!isFiniteNumber(metrics[field])) {
 			report(`${path}.metrics.${field}`, 'must be a finite number');
@@ -188,7 +184,7 @@ function hasUnbalancedQuotes(family: string): boolean {
 	return open !== null;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+export function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 

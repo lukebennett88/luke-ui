@@ -105,9 +105,9 @@ interface ThemeInputCommon {
 
 /**
  * The curated theme-authoring input for a theme that authors its own accent. A basic theme authors
- * an accent, a neutral character, and a body font, and lets everything else default. Materials are optional and
- * deep-partial, and light and dark stay independently authorable. A theme that starts from another
- * theme instead uses {@link ExtendingThemeInput}.
+ * an accent, a neutral character, and a body font, and lets everything else default. Materials are
+ * optional and deep-partial, and light and dark stay independently authorable. A theme that starts
+ * from another theme instead uses {@link ExtendingThemeInput}.
  */
 export interface ThemeInput extends ThemeInputCommon {
 	/** Source colours. Each is one string or a `{ light, dark }` object. */
@@ -306,10 +306,10 @@ export function defineTheme(input: ThemeInput | ExtendingThemeInput): string {
 
 /**
  * Resolves a merged {@link ThemeInput} into the internal per-mode {@link ThemeFoundation}
- * `buildTheme` consumes. The `extends` chain must already be folded; call `resolveThemeInput`
- * once and pass `resolved.input`. A `null` display font becomes no display font here, after the
- * whole chain is merged. Exported for internal callers and tests only; it is not part of the public
- * package entry, where `defineTheme` is the sole authoring surface.
+ * `buildTheme` consumes. The `extends` chain must already be folded by `resolveThemeChain`. A
+ * `null` display font becomes no display font here, after the whole chain is merged. Exported for
+ * internal callers and tests only; it is not part of the public package entry, where `defineTheme`
+ * is the sole authoring surface.
  */
 export function normalizeTheme(input: ThemeInput): ThemeFoundation {
 	const { display, body } = input.typography.fonts;
