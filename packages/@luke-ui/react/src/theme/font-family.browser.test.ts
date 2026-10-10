@@ -52,6 +52,12 @@ describe('an accepted family', () => {
 		`"Font's Name", 'Other "Quoted" Name', system-ui`,
 		`'Slash/Name', 'Star*Name', "Font, Inc", serif`,
 		'-apple-system, BlinkMacSystemFont, Noto Sans CJK JP, sans-serif',
+		// CSS whitespace around quoted names, between words, and around commas.
+		"  'Inter'  ,  Noto   Sans  ,  sans-serif  ",
+		// Unicode spaces and letters inside quotes are part of the name.
+		"'Noto\u00A0Sans', 'Ünïcödé\u2003Sans', 'ヒラギノ角ゴ ProN', sans-serif",
+		// CSS identifiers may contain non-ASCII letters.
+		'Ünïcödé Sans, ヒラギノ角ゴ, sans-serif',
 	];
 
 	for (const family of accepted) {
@@ -89,6 +95,26 @@ describe('a rejected family', () => {
 
 	for (const family of invalid) {
 		it(`fails to compile ${JSON.stringify(family)}, which the browser drops`, () => {
+			expect(browserReading(family)).toBe('');
+			expect(familyIssues(family)).toEqual([
+				expect.objectContaining({ path: 'typography.fonts.body.family', theme: name }),
+			]);
+		});
+	}
+
+	// CSS whitespace is only space, tab, and line breaks. Next to a quoted name, U+00A0 or U+2003 is
+	// stray text the browser rejects, not padding to trim.
+	const unicodeSpaces = [
+		['U+00A0 after a quoted name', "'Inter'\u00A0, sans-serif"],
+		['U+00A0 before a quoted name', "\u00A0'Inter', sans-serif"],
+		['U+00A0 after a comma, before a quoted name', "'Inter',\u00A0'Lora', serif"],
+		['U+2003 after a quoted name', "'Inter'\u2003, sans-serif"],
+		['U+2003 before a quoted name', "\u2003'Inter', sans-serif"],
+		['U+2003 after a comma, before a quoted name', "'Inter',\u2003'Lora', serif"],
+	] as const;
+
+	for (const [label, family] of unicodeSpaces) {
+		it(`fails to compile a stack with ${label}, which the browser drops`, () => {
 			expect(browserReading(family)).toBe('');
 			expect(familyIssues(family)).toEqual([
 				expect.objectContaining({ path: 'typography.fonts.body.family', theme: name }),

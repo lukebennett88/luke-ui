@@ -224,20 +224,21 @@ function validateFont(
  */
 function isFontFamilyList(family: string): boolean {
 	// A quoted name may contain a comma, so each quoted name becomes `''` before the split.
-	return family
-		.replaceAll(QUOTED_FAMILY_PATTERN, "''")
-		.split(',')
-		.every((entry) => isFamilyName(entry.trim()));
+	return family.replaceAll(QUOTED_FAMILY_PATTERN, "''").split(',').every(isFamilyName);
 }
 
 /** Whether one entry is a quoted name, a generic family, or plain words. */
 function isFamilyName(entry: string): boolean {
-	if (entry === "''") return true;
-	const words = entry.split(/[ \t]+/);
+	// Only CSS whitespace separates words. `trim` would also strip U+00A0 and U+2003, which CSS reads
+	// as part of the entry, so a quoted name followed by one would pass here and fail in the browser.
+	const words = entry.split(/[ \t\n\r\f]+/).filter((word) => word !== '');
+	const [first] = words;
+	if (first === undefined) return false;
+	if (words.length === 1 && first === "''") return true;
 	if (!words.every((word) => IDENTIFIER_PATTERN.test(word))) return false;
-	const first = (words[0] ?? '').toLowerCase();
-	if (words.length === 1) return !RESERVED_KEYWORDS.has(first);
-	return !GENERIC_FAMILIES.has(first);
+	const keyword = first.toLowerCase();
+	if (words.length === 1) return !RESERVED_KEYWORDS.has(keyword);
+	return !GENERIC_FAMILIES.has(keyword);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
