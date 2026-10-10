@@ -1,8 +1,11 @@
 import { readFileSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { fromFile } from '@capsizecss/unpack/fs';
 import { describe, expect, inject, test } from 'vite-plus/test';
 import { findTokenCompatibilityProblems } from '../../theme/__fixtures__/token-compatibility.js';
+import type { ThemeInput } from '../../theme/define-theme.js';
 import {
 	builtAssets,
 	measureBundle,
@@ -19,10 +22,11 @@ const NODE_24_OR_LATER_PATTERN = /^v(?:2[4-9]|[3-9]\d)\./;
 /** Theme package modules a root entry import must never bundle. */
 const THEME_INPUT_SOURCE_PATTERN = /^@luke-ui\/theme-[a-z]+\/dist\/input\.js$/;
 const FONT_ASSET_PATTERN = /^(.+)-[\w-]{8}\.woff2$/;
+const FONT_WEIGHT_RANGE_PATTERN = /font-weight:\s*(\d+)\s+(\d+);/;
 
 describe.skipIf(themes.length === 0)('the packed theme packages', () => {
 	for (const theme of themes) {
-		const { files, manifest } = theme;
+		const { contents, files, manifest } = theme;
 
 		test(`${manifest.name} ships declarations, its font, and its licence`, () => {
 			expect(packageContentProblems(theme)).toEqual({ missingTargets: [], unpublished: [] });
@@ -35,6 +39,26 @@ describe.skipIf(themes.length === 0)('the packed theme packages', () => {
 			);
 			expect(manifest.peerDependencies).toEqual({ '@luke-ui/react': `^${react.manifest.version}` });
 			expect(manifest.dependencies ?? {}).toEqual({});
+		});
+
+		test(`${manifest.name} ships the Inter its input measures, at every weight it uses`, async () => {
+			const input: { theme: ThemeInput } = await import(
+				pathToFileURL(path.join(contents, 'dist', 'input.js')).href
+			);
+			const { ascent, capHeight, descent, familyName, lineGap, unitsPerEm } = await fromFile(
+				path.join(contents, 'dist', 'fonts', 'inter-latin-wght-normal.woff2'),
+			);
+			expect(input.theme.typography.fonts.body.metrics).toEqual({
+				ascent,
+				capHeight,
+				descent,
+				familyName,
+				lineGap,
+				unitsPerEm,
+			});
+
+			const fontsCss = readFileSync(path.join(contents, 'dist', 'fonts.css'), 'utf8');
+			expect(FONT_WEIGHT_RANGE_PATTERN.exec(fontsCss)?.slice(1).map(Number)).toEqual([100, 900]);
 		});
 	}
 
@@ -57,6 +81,26 @@ describe.skipIf(themes.length === 0)('the packed theme packages', () => {
 				}
 				// `npm ls` exits non-zero on a missing or invalid peer.
 				expect(tryRun('npm', ['ls', '--all'], dir)).toBe('');
+			});
+
+			test('names each theme stylesheet with the class its root entry exports', () => {
+				const require = createRequire(path.join(dir, 'package.json'));
+				for (const { manifest } of themes) {
+					const themeClassName = run(
+						'node',
+						[
+							'--input-type=module',
+							'-e',
+							`import { themeClassName } from '${manifest.name}'; process.stdout.write(themeClassName);`,
+						],
+						dir,
+					);
+					const css = readFileSync(require.resolve(`${manifest.name}/stylesheet.css`), 'utf8');
+					expect({
+						name: manifest.name,
+						selects: css.includes(`:where(html).${themeClassName} {`),
+					}).toEqual({ name: manifest.name, selects: true });
+				}
 			});
 
 			test('compiles standalone themes, and ships theme stylesheets, that declare every contract token', () => {

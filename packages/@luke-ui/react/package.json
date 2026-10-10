@@ -116,6 +116,7 @@
 	"devDependencies": {
 		"@arethetypeswrong/core": "catalog:",
 		"@capsizecss/metrics": "catalog:",
+		"@capsizecss/unpack": "catalog:",
 		"@fontsource/lora": "catalog:",
 		"@rolldown/pluginutils": "catalog:",
 		"@types/node": "catalog:",

@@ -752,6 +752,9 @@ importers:
       '@capsizecss/metrics':
         specifier: 'catalog:'
         version: 4.3.0
+      '@capsizecss/unpack':
+        specifier: 'catalog:'
+        version: 4.0.1
       '@fontsource/lora':
         specifier: 'catalog:'
         version: 5.3.0
@@ -846,23 +849,39 @@ importers:
         specifier: 'catalog:'
         version: 5.0.1(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(@vitest/browser-playwright@5.0.1)(@vitest/browser-preview@5.0.1)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(@voidzero-dev/vite-plus-core@1.0.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1))(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1)
 
-  packages/@luke-ui/theme-paper:
-    devDependencies:
-      '@capsizecss/unpack':
-        specifier: 'catalog:'
-        version: 4.0.1
+  packages/@luke-ui/theme-build:
+    dependencies:
       '@fontsource-variable/inter':
         specifier: 'catalog:'
         version: 5.3.0
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../react
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.19.1
       publint:
         specifier: 'catalog:'
         version: 0.3.25
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.1
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vite-plus:
+        specifier: 'catalog:'
+        version: 1.0.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(@vitest/browser-playwright@5.0.1)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1)
+
+  packages/@luke-ui/theme-paper:
+    devDependencies:
+      '@luke-ui/react':
+        specifier: workspace:*
+        version: link:../react
+      '@luke-ui/theme-build':
+        specifier: workspace:*
+        version: link:../theme-build
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.1
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
@@ -872,21 +891,15 @@ importers:
 
   packages/@luke-ui/theme-tactile:
     devDependencies:
-      '@capsizecss/unpack':
-        specifier: 'catalog:'
-        version: 4.0.1
-      '@fontsource-variable/inter':
-        specifier: 'catalog:'
-        version: 5.3.0
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../react
+      '@luke-ui/theme-build':
+        specifier: workspace:*
+        version: link:../theme-build
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.1
-      publint:
-        specifier: 'catalog:'
-        version: 0.3.25
       typescript:
         specifier: 'catalog:'
         version: 7.0.2

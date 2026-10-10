@@ -1,7 +1,5 @@
 {
 	"compilerOptions": {
-		"allowJs": true,
-		"checkJs": true,
 		"forceConsistentCasingInFileNames": true,
 		"isolatedModules": true,
 		"lib": ["ES2022"],
@@ -17,5 +15,5 @@
 		"types": ["node"],
 		"verbatimModuleSyntax": true
 	},
-	"include": ["src/**/*.ts", "scripts/**/*.js", "vite.config.ts"]
+	"include": ["src/**/*.ts", "vite.config.ts"]
 }

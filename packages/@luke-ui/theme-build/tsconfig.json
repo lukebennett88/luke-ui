@@ -15,5 +15,5 @@
 		"types": ["node"],
 		"verbatimModuleSyntax": true
 	},
-	"include": ["src/**/*.ts", "vite.config.ts"]
+	"include": ["*.ts"]
 }

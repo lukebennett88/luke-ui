@@ -67,9 +67,10 @@ that part. To bundle a dependency, list it in `devDependencies` and in `deps.onl
 consumer API. Publish it with React whenever React depends on a Rainbow version that is not yet on
 the registry. `@luke-ui/theme-paper` and `@luke-ui/theme-tactile` are unpublished 0.x theme packages
 with `@luke-ui/react` as a peer dependency. Their final peer ranges belong to
-[#721](https://github.com/lukebennett88/luke-ui/issues/721). `apps/docs` and
-`@luke-ui/playground-core` are private. Before `1.0.0` no pull request needs a changeset, including
-one that moves a runtime or peer dependency.
+[#721](https://github.com/lukebennett88/luke-ui/issues/721). `apps/docs`,
+`@luke-ui/playground-core`, and `@luke-ui/theme-build`, the build the two theme packages share, are
+private. Before `1.0.0` no pull request needs a changeset, including one that moves a runtime or
+peer dependency.
 
 The `needs-changeset` label in `.github/renovate.json5` is advance notice. It marks packages that
 will be runtime, peer, or bundled dependencies of the published package at `1.0.0`. Re-sync that

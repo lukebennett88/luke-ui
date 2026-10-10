@@ -73,9 +73,11 @@ room for additive extension after 1.0. Prefer extensibility over configurability
   Both are documented. No runtime font detection.
 - **D4, D12, D24. Theme packages bundle their own fonts.** Paper and Tactile each ship an
   OFL-licensed, Latin-subset variable Inter WOFF2 with its licence, declared in an optional
-  `fonts.css`. Each build copies both files from a pinned `@fontsource-variable/inter` dev
-  dependency, so the repository holds no font binaries and the build downloads nothing. Both keep
-  today's typography: Inter body, no display font. Custom themes load their own fonts.
+  `fonts.css`. Each build copies both files from a pinned `@fontsource-variable/inter`, so the
+  repository holds no font binaries and the build downloads nothing. The two packages share one
+  private build module, `@luke-ui/theme-build`, a dev dependency that consumers never install. It
+  packs both entries, copies the font, and compiles `stylesheet.css` from the built `./input`. Both
+  keep today's typography: Inter body, no display font. Custom themes load their own fonts.
 - **D15. Bundled metrics live in each package's `./input`,** with the font release recorded.
 - **D49. Paper and Tactile may each bundle and declare the same Inter font.** Duplicate declarations
   are acceptable. There is no shared font package and no requirement to rename the families. How

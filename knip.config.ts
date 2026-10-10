@@ -53,13 +53,17 @@ export default {
 			],
 			project: ['src/**/*.{ts,tsx}'],
 		},
+		'packages/@luke-ui/theme-build': {
+			// Pack loads it for `publint: true` in the shared config, which knip does not trace.
+			ignoreDependencies: ['publint'],
+		},
 		'packages/@luke-ui/theme-paper': {
 			entry: ['src/index.ts', 'src/input.ts'],
-			project: ['src/**/*.ts', 'scripts/**/*.js'],
+			project: ['src/**/*.ts'],
 		},
 		'packages/@luke-ui/theme-tactile': {
 			entry: ['src/index.ts', 'src/input.ts'],
-			project: ['src/**/*.ts', 'scripts/**/*.js'],
+			project: ['src/**/*.ts'],
 		},
 		'packages/turbo-generators': {
 			entry: ['config.ts'],
