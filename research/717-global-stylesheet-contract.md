@@ -145,7 +145,7 @@ Old rules came from `reset.css.ts` (scoped to `.luke-ui-reset`) and `theme-root.
 | `blockquote, dl, dd, figure, p { margin: 0 }`                        | Removed                         | `Text` zeroes its own margin. `Prose` zeroes block margins inside its scope.                                                                                                                      |
 | `h1`–`h6 { font: unset; margin: 0 }`                                 | Removed                         | `Text` zeroes margins and always sets a weight from its type style, or inherits one. `Heading` sets its type style and weight. Native headings keep browser sizes and weight.                     |
 | `ol, ul { margin: 0; padding: 0 }`                                   | Removed                         | Combobox and Select list boxes already zero both. `Prose` sets list indentation.                                                                                                                  |
-| `ul, ol:not([type]), ol[type]:not(.prose *) { list-style: none }`    | Removed                         | List boxes already remove markers. `Prose` restates markers, including each supported `ol[type]` value, so a later framework reset such as Tailwind Preflight cannot remove them.              |
+| `ul, ol:not([type]), ol[type]:not(.prose *) { list-style: none }`    | Removed                         | List boxes already remove markers. `Prose` restates markers, including each supported `ol[type]` value, so a later framework reset such as Tailwind Preflight cannot remove them.                 |
 | `table { border-collapse: collapse; border-spacing: 0 }`             | Removed                         | `Prose` owns its table treatment.                                                                                                                                                                 |
 | `caption, th { text-align: inherit }`                                | Removed                         | `Prose` aligns `th` and `caption` to the start.                                                                                                                                                   |
 | `th, td { padding: 0 }`                                              | Removed                         | `Prose` already pads cells.                                                                                                                                                                       |
@@ -195,15 +195,15 @@ One indicator per control:
 
 ### Reduced motion
 
-| Component                                                                     | Under reduced motion                                                                            |
-| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Button, Checkbox, Select, Combobox actions and items, TextInput, Switch track | Feedback transitions stay. The media queries that removed them are gone.                        |
-| Switch thumb                                                                  | The thumb stops sliding and stretching. Its colour transition stays.                            |
-| Combobox and Select popovers                                                  | Opacity fades stay. Movement is removed, including on `[data-entering]` and `[data-exiting]`.   |
-| Mobile tray and scrim                                                         | Opacity fades stay. The tray no longer slides.                                                  |
-| LoadingSpinner                                                                | Rotation and rubber-band animation stop. A fixed arc remains so the busy state stays visible.   |
-| LoadingSkeleton                                                               | The sheen stops and the placeholder surface stays.                                              |
-| ScrollFade                                                                    | Exempt: scroll-linked, not time-based.                                                          |
+| Component                                                                     | Under reduced motion                                                                          |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Button, Checkbox, Select, Combobox actions and items, TextInput, Switch track | Feedback transitions stay. The media queries that removed them are gone.                      |
+| Switch thumb                                                                  | The thumb stops sliding and stretching. Its colour transition stays.                          |
+| Combobox and Select popovers                                                  | Opacity fades stay. Movement is removed, including on `[data-entering]` and `[data-exiting]`. |
+| Mobile tray and scrim                                                         | Opacity fades stay. The tray no longer slides.                                                |
+| LoadingSpinner                                                                | Rotation and rubber-band animation stop. A fixed arc remains so the busy state stays visible. |
+| LoadingSkeleton                                                               | The sheen stops and the placeholder surface stays.                                            |
+| ScrollFade                                                                    | Exempt: scroll-linked, not time-based.                                                        |
 
 ## Public API and consumer behaviour
 
@@ -284,26 +284,26 @@ One indicator per control:
 
 ## Replaced inputs
 
-| Input                                                                                 | Replacement                                                            |
-| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `docs/STYLING.md` flat four-layer table and `@layer reset, base, recipes, utilities;` | Nested order, D6.                                                      |
-| `docs/STYLING.md` claim that the reset owns reduced motion                            | D4: component-owned.                                                   |
-| `docs/STYLING.md` setup step 4 and the `theme-root.css.ts` paragraph                  | `<html>` identity only; `global-styles.css.ts`.                        |
-| `layers.css.ts` and `layer-names.ts` JSDoc                                            | Nested layers.                                                         |
-| `prose/recipe.css.ts` `ol[type]` comment and `prose/scope.css.ts`                     | Removed; Prose restates typed markers so Preflight cannot clear them.  |
-| LoadingSkeleton "global reduced-motion reset" comment                                 | Removed.                                                               |
-| Field inline-label, Select root, and Combobox group "reset ring" comments             | Removed with their `outline: none` workarounds.                        |
-| "Table cells need padding after the reset removes it" (Prose)                         | Prose owns its table treatment.                                        |
-| `overlay-motion.ts` reduced-motion note                                               | Fade stays; movement is removed.                                       |
-| `rootClassName` in overlays, test utilities, docs, samples, reference app             | Removed.                                                               |
-| `FRICTION.md` "Root styles in portals"                                                | Resolved by D2 and D5.                                                 |
-| Stylesheet contract test sentinels for `.luke-ui-reset` and `.luke-ui-theme`          | Global-rule sentinels.                                                 |
-| `cascade.browser.test.ts` `rootClassName` variants of the body-scope test             | Body painted by G3.                                                    |
-| `#715` record: `rootClassName` "until #717" and repaint selector                      | This record.                                                           |
-| `PUBLIC_API.md` `/theme` exports                                                      | `breakpoints`, `getThemeClassName`, `vars`.                            |
-| `DOCUMENTATION.md` `rootClassName` wording example                                    | A current example.                                                     |
-| Assumption that body typography uses the fixed body line height                       | D2.                                                                    |
-| Assumption that `[data-focus-visible]` draws a ring everywhere                        | D3.                                                                    |
+| Input                                                                                 | Replacement                                                           |
+| ------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `docs/STYLING.md` flat four-layer table and `@layer reset, base, recipes, utilities;` | Nested order, D6.                                                     |
+| `docs/STYLING.md` claim that the reset owns reduced motion                            | D4: component-owned.                                                  |
+| `docs/STYLING.md` setup step 4 and the `theme-root.css.ts` paragraph                  | `<html>` identity only; `global-styles.css.ts`.                       |
+| `layers.css.ts` and `layer-names.ts` JSDoc                                            | Nested layers.                                                        |
+| `prose/recipe.css.ts` `ol[type]` comment and `prose/scope.css.ts`                     | Removed; Prose restates typed markers so Preflight cannot clear them. |
+| LoadingSkeleton "global reduced-motion reset" comment                                 | Removed.                                                              |
+| Field inline-label, Select root, and Combobox group "reset ring" comments             | Removed with their `outline: none` workarounds.                       |
+| "Table cells need padding after the reset removes it" (Prose)                         | Prose owns its table treatment.                                       |
+| `overlay-motion.ts` reduced-motion note                                               | Fade stays; movement is removed.                                      |
+| `rootClassName` in overlays, test utilities, docs, samples, reference app             | Removed.                                                              |
+| `FRICTION.md` "Root styles in portals"                                                | Resolved by D2 and D5.                                                |
+| Stylesheet contract test sentinels for `.luke-ui-reset` and `.luke-ui-theme`          | Global-rule sentinels.                                                |
+| `cascade.browser.test.ts` `rootClassName` variants of the body-scope test             | Body painted by G3.                                                   |
+| `#715` record: `rootClassName` "until #717" and repaint selector                      | This record.                                                          |
+| `PUBLIC_API.md` `/theme` exports                                                      | `breakpoints`, `getThemeClassName`, `vars`.                           |
+| `DOCUMENTATION.md` `rootClassName` wording example                                    | A current example.                                                    |
+| Assumption that body typography uses the fixed body line height                       | D2.                                                                   |
+| Assumption that `[data-focus-visible]` draws a ring everywhere                        | D3.                                                                   |
 
 ## Deferred work and issue disposition
 

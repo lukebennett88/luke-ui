@@ -606,7 +606,12 @@ function isRootContainerRule(rule: IndexedStyleRule): boolean {
 
 function isBodyRule(rule: IndexedStyleRule): boolean {
 	const inners = whereSelectors(rule);
-	return inners.length === 1 && inners[0]?.length === 1 && inners[0][0]?.type === 'type' && inners[0][0].name === 'body';
+	return (
+		inners.length === 1 &&
+		inners[0]?.length === 1 &&
+		inners[0][0]?.type === 'type' &&
+		inners[0][0].name === 'body'
+	);
 }
 
 function isColorModeRepaintRule(rule: IndexedStyleRule): boolean {
@@ -638,9 +643,7 @@ function isFocusVisibleRule(rule: IndexedStyleRule): boolean {
 	if (!declarationListHas(rule, 'outline-width', '2px')) return false;
 	const [inner] = whereSelectors(rule);
 	return (
-		inner?.length === 1 &&
-		inner[0]?.type === 'pseudo-class' &&
-		inner[0].kind === 'focus-visible'
+		inner?.length === 1 && inner[0]?.type === 'pseudo-class' && inner[0].kind === 'focus-visible'
 	);
 }
 
@@ -649,9 +652,7 @@ function isForcedColorsFocusRule(rule: IndexedStyleRule): boolean {
 	if (!declarationListHas(rule, 'outline-color', 'Highlight')) return false;
 	const [inner] = whereSelectors(rule);
 	return (
-		inner?.length === 1 &&
-		inner[0]?.type === 'pseudo-class' &&
-		inner[0].kind === 'focus-visible'
+		inner?.length === 1 && inner[0]?.type === 'pseudo-class' && inner[0].kind === 'focus-visible'
 	);
 }
 
@@ -891,7 +892,11 @@ function matchesDeclaration(declaration: Declaration, property: string, value: s
 
 	if (property === 'line-height' && value === '1.5') {
 		const lineHeight = declaration.value as { type?: string; value?: number };
-		return declaration.property === 'line-height' && lineHeight.type === 'number' && lineHeight.value === 1.5;
+		return (
+			declaration.property === 'line-height' &&
+			lineHeight.type === 'number' &&
+			lineHeight.value === 1.5
+		);
 	}
 
 	if (property === 'margin' && value === '0') {
@@ -953,7 +958,10 @@ function matchesDeclaration(declaration: Declaration, property: string, value: s
 
 function matchesZeroMargin(declaration: Declaration): boolean {
 	if (declaration.property !== 'margin') return false;
-	const margin = declaration.value as Record<string, { type?: string; value?: { type?: string; value?: { unit?: string; value?: number } } }>;
+	const margin = declaration.value as Record<
+		string,
+		{ type?: string; value?: { type?: string; value?: { unit?: string; value?: number } } }
+	>;
 	return (['top', 'right', 'bottom', 'left'] as const).every((side) => {
 		const entry = margin[side];
 		return (

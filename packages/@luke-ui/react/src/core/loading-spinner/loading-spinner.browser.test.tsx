@@ -76,9 +76,9 @@ test('shows a static fixed arc under prefers-reduced-motion: reduce', async () =
 	expect(spinner).toHaveAccessibleName('Loading');
 	expect(getComputedStyle(spinner).animationName).toBe('none');
 	expect(getComputedStyle(indicator).animationName).toBe('none');
-	expect(getComputedStyle(indicator).strokeDasharray.replaceAll('px', '').replaceAll(', ', ' ')).toBe(
-		'25 100',
-	);
+	expect(
+		getComputedStyle(indicator).strokeDasharray.replaceAll('px', '').replaceAll(', ', ' '),
+	).toBe('25 100');
 });
 
 test('sizes and colors', { tags: ['visual'] }, async () => {

@@ -8,10 +8,7 @@ import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
 } from '../../styles/input-states.js';
-import {
-	overlayEnterTransition,
-	overlayExitTransition,
-} from '../../styles/overlay-motion.js';
+import { overlayEnterTransition, overlayExitTransition } from '../../styles/overlay-motion.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 

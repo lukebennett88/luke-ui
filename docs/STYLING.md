@@ -106,8 +106,8 @@ tray's own portal.
 
 `core/styles/global-styles.css.ts` is the only module that styles the document. It holds six rules
 in `luke-ui.reset`. Each uses `:where()`, so the selector contributes no specificity.
-Pseudo-elements are invalid inside `:where()`, so the box-sizing rule lists `::before` and
-`::after` outside it and each adds (0,0,1):
+Pseudo-elements are invalid inside `:where()`, so the box-sizing rule lists `::before` and `::after`
+outside it and each adds (0,0,1):
 
 | Rule                              | Sets                                                                                          |
 | --------------------------------- | --------------------------------------------------------------------------------------------- |
