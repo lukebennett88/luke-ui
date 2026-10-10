@@ -156,8 +156,11 @@ with an invalid font fails even when your theme replaces that font.
 
 The rules for fonts:
 
-- `family` must not contain `;`, `{`, `}`, `<`, `\`, `/*`, `*/`, control characters, or an unclosed
-  quote.
+- `family` must be a valid CSS `font-family` list: family names and generic families such as
+  `sans-serif`, separated by commas. Quote a name unless it is plain words, such as `Noto Sans`, and
+  quote a name that starts with a generic family, such as `'Serif Pro'`.
+- `family` must not contain `;`, `{`, `}`, `<`, `\`, `/*`, `*/`, or control characters, even in
+  quotes.
 - `metrics.familyName` must be a non-empty string.
 - The other metrics must be finite numbers. `unitsPerEm`, `capHeight`, and `ascent` must be
   positive, `descent` 0 or less, and `lineGap` 0 or more.

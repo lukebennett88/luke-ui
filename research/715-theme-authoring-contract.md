@@ -89,12 +89,13 @@ room for additive extension after 1.0. Prefer extensibility over configurability
 ## Validation and errors
 
 - **D32 (revised). Strict validation, every failure reported at once.** Reject family strings
-  containing `;`, `{`, `}`, `<`, `\`, `/*`, `*/`, control characters, or unbalanced quotes. Metrics
-  must be finite, with `unitsPerEm > 0`, `capHeight > 0`, `ascent > 0`, `descent ≤ 0` (Capsize's
-  convention), and `lineGap ≥ 0`. `familyName` must be a non-empty string. Optional numeric fields
-  must be finite if present. Weights must be finite numbers from 1 to 1000. Don't compare
-  `metrics.familyName` with the stack. The earlier `capHeight ≤ unitsPerEm` rule is withdrawn
-  because fonts don't guarantee it.
+  containing `;`, `{`, `}`, `<`, `\`, `/*`, `*/`, or control characters, and any that are not a
+  valid CSS `font-family` list or are a CSS-wide keyword. Metrics must be finite, with
+  `unitsPerEm > 0`, `capHeight > 0`, `ascent > 0`, `descent ≤ 0` (Capsize's convention), and
+  `lineGap ≥ 0`. `familyName` must be a non-empty string. Optional numeric fields must be finite if
+  present. Weights must be finite numbers from 1 to 1000. Don't compare `metrics.familyName` with
+  the stack. The earlier `capHeight ≤ unitsPerEm` rule is withdrawn because fonts don't guarantee
+  it.
 - **D43, D54 (revised in final review). Validate each input in an `extends` chain on its own,**
   against the fields it authors, then check completeness (the required `body` font) after merging.
   `ThemeValidationError.issues` is `ReadonlyArray<{ theme; path; message }>`, where `theme` is the

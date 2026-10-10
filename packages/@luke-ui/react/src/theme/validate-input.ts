@@ -123,6 +123,39 @@ const OPTIONAL_METRICS = ['xHeight', 'xWidthAvg'] as const;
 // oxlint-disable-next-line eslint/no-control-regex
 const UNSAFE_FAMILY_PATTERN = /[;{}<\\\u0000-\u001F\u007F]|\/\*|\*\//;
 
+/** A quoted family name. A backslash is unsafe, so a quote inside the name can't be escaped. */
+const QUOTED_FAMILY_PATTERN = /'[^']*'|"[^"]*"/g;
+
+/** One word of an unquoted family name: a CSS identifier without escapes. */
+const IDENTIFIER_PATTERN = /^(?:--|-?[a-z_\u0080-\u{10FFFF}])[\w\u0080-\u{10FFFF}-]*$/iu;
+
+/** Valid alone in `font-family`, but they name no font, so a theme can't use them as a family. */
+const RESERVED_KEYWORDS = new Set([
+	'default',
+	'inherit',
+	'initial',
+	'revert',
+	'revert-layer',
+	'unset',
+]);
+
+/** Generic families. An unquoted name can't start with one, so `serif Pro` must be quoted. */
+const GENERIC_FAMILIES = new Set([
+	'cursive',
+	'emoji',
+	'fangsong',
+	'fantasy',
+	'math',
+	'monospace',
+	'sans-serif',
+	'serif',
+	'system-ui',
+	'ui-monospace',
+	'ui-rounded',
+	'ui-sans-serif',
+	'ui-serif',
+]);
+
 function validateFont(
 	font: unknown,
 	path: string,
@@ -140,8 +173,11 @@ function validateFont(
 			`${path}.family`,
 			'must not contain `;`, `{`, `}`, `<`, `\\`, `/*`, `*/`, or control characters',
 		);
-	} else if (hasUnbalancedQuotes(family)) {
-		report(`${path}.family`, 'has an unclosed quote');
+	} else if (!isFontFamilyList(family)) {
+		report(
+			`${path}.family`,
+			'must be a comma-separated list of family names and generic families. Quote a name that is not plain words',
+		);
 	}
 
 	if (!isRecord(metrics)) {
@@ -182,15 +218,26 @@ function validateFont(
 	}
 }
 
-/** Whether a quoted family name is left open. Each quote closes only the kind that opened it. */
-function hasUnbalancedQuotes(family: string): boolean {
-	let open: string | null = null;
-	for (const character of family) {
-		if (character !== "'" && character !== '"') continue;
-		if (open === null) open = character;
-		else if (open === character) open = null;
-	}
-	return open !== null;
+/**
+ * Whether a family is a valid CSS `font-family` list. A browser drops an invalid one whole when it
+ * substitutes the token, so the text would fall back to the parent's font instead of the stack.
+ */
+function isFontFamilyList(family: string): boolean {
+	// A quoted name may contain a comma, so each quoted name becomes `''` before the split.
+	return family
+		.replaceAll(QUOTED_FAMILY_PATTERN, "''")
+		.split(',')
+		.every((entry) => isFamilyName(entry.trim()));
+}
+
+/** Whether one entry is a quoted name, a generic family, or plain words. */
+function isFamilyName(entry: string): boolean {
+	if (entry === "''") return true;
+	const words = entry.split(/[ \t]+/);
+	if (!words.every((word) => IDENTIFIER_PATTERN.test(word))) return false;
+	const first = (words[0] ?? '').toLowerCase();
+	if (words.length === 1) return !RESERVED_KEYWORDS.has(first);
+	return !GENERIC_FAMILIES.has(first);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

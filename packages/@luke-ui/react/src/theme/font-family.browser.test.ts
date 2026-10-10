@@ -1,44 +1,114 @@
 /**
- * `validateFont` accepts a family only when the stylesheet `defineTheme` writes around it still
- * parses whole. Chromium parses each compiled stylesheet here, because an escape or a comment that
- * swallows later declarations changes what a browser reads, not what the input looks like.
+ * `defineTheme` accepts a family only when a browser reads it as a `font-family` list. A custom
+ * property keeps any value, so these tests apply the generated token to a real `font-family`
+ * declaration and compare it with the browser's own reading of the stack.
  */
 
-import { afterEach, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 import { interFont } from './__fixtures__/theme-css.js';
 import { defineTheme } from './define-theme.js';
 import { codeFontFamilyStack } from './foundation.js';
 import { getThemeClassName } from './theme-class-name.js';
+import { ThemeValidationError } from './validate-input.js';
 
+const name = 'font-family-probe';
 const style = document.createElement('style');
+const probe = document.createElement('span');
 
 afterEach(() => {
 	style.remove();
+	probe.remove();
 	document.documentElement.className = '';
 });
 
-const accepted = [
-	"'Inter', system-ui, sans-serif",
-	`"Font's Name", 'Other "Quoted" Name', system-ui`,
-	"'Slash/Name', Star*Name, sans-serif",
-];
-
-for (const family of accepted) {
-	it(`keeps every declaration after the family ${JSON.stringify(family)}`, () => {
-		const name = 'font-family-probe';
-		style.textContent = defineTheme({
-			color: { accent: '#3b82f6' },
-			name,
-			typography: { fonts: { body: { ...interFont, family } } },
-		});
-		document.head.append(style);
-		document.documentElement.className = getThemeClassName(name);
-
-		const computed = getComputedStyle(document.documentElement);
-		expect({
-			body: computed.getPropertyValue('--luke-font-family-body').trim(),
-			code: computed.getPropertyValue('--luke-font-family-code').trim(),
-			colorScheme: computed.colorScheme,
-		}).toEqual({ body: family, code: codeFontFamilyStack, colorScheme: 'light' });
+function compile(family: string): string {
+	return defineTheme({
+		color: { accent: '#3b82f6' },
+		name,
+		typography: { fonts: { body: { ...interFont, family } } },
 	});
 }
+
+function familyIssues(family: string) {
+	try {
+		compile(family);
+	} catch (error) {
+		if (error instanceof ThemeValidationError) return error.issues;
+		throw error;
+	}
+	return [];
+}
+
+/** How the browser serialises `family` as a `font-family` value, or `''` when it drops it. */
+function browserReading(family: string): string {
+	const reference = document.createElement('span');
+	reference.style.fontFamily = family;
+	return reference.style.fontFamily;
+}
+
+describe('an accepted family', () => {
+	const accepted = [
+		"'Inter', system-ui, sans-serif",
+		`"Font's Name", 'Other "Quoted" Name', system-ui`,
+		`'Slash/Name', 'Star*Name', "Font, Inc", serif`,
+		'-apple-system, BlinkMacSystemFont, Noto Sans CJK JP, sans-serif',
+	];
+
+	for (const family of accepted) {
+		it(`sets font-family to ${JSON.stringify(family)} and keeps the declarations after it`, () => {
+			style.textContent = `${compile(family)}\nspan { font-family: var(--luke-font-family-body); }`;
+			document.head.append(style);
+			document.documentElement.className = getThemeClassName(name);
+			document.body.append(probe);
+
+			const root = getComputedStyle(document.documentElement);
+			expect(browserReading(family)).not.toBe('');
+			expect({
+				code: root.getPropertyValue('--luke-font-family-code').trim(),
+				colorScheme: root.colorScheme,
+				fontFamily: getComputedStyle(probe).fontFamily,
+			}).toEqual({
+				code: codeFontFamilyStack,
+				colorScheme: 'light',
+				fontFamily: browserReading(family),
+			});
+		});
+	}
+});
+
+describe('a rejected family', () => {
+	// A browser drops each of these whole when it substitutes the token, so text would fall back to
+	// the parent's font instead of any font in the stack.
+	const invalid = [
+		"'Slash/Name', Star*Name, sans-serif",
+		'Inter, , sans-serif',
+		'Font Name 2, serif',
+		'serif Pro, sans-serif',
+		"'Inter' Sans, sans-serif",
+	];
+
+	for (const family of invalid) {
+		it(`fails to compile ${JSON.stringify(family)}, which the browser drops`, () => {
+			expect(browserReading(family)).toBe('');
+			expect(familyIssues(family)).toEqual([
+				expect.objectContaining({ path: 'typography.fonts.body.family', theme: name }),
+			]);
+		});
+	}
+
+	it('fails to compile a CSS-wide keyword, which the browser accepts but which names no font', () => {
+		expect(browserReading('inherit')).toBe('inherit');
+		expect(familyIssues('inherit')).toEqual([
+			expect.objectContaining({ path: 'typography.fonts.body.family', theme: name }),
+		]);
+	});
+
+	// An open comment or an escape would hide the declarations after the family in the stylesheet.
+	for (const family of ['Inter/*', "'Inter\\', sans-serif"]) {
+		it(`fails to compile ${JSON.stringify(family)}, which would hide later declarations`, () => {
+			expect(familyIssues(family)).toEqual([
+				expect.objectContaining({ path: 'typography.fonts.body.family', theme: name }),
+			]);
+		});
+	}
+});

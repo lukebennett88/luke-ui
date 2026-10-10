@@ -35,8 +35,15 @@ describe('font family validation', () => {
 		// A backslash escapes the `;` or closing quote after it, so later declarations are lost.
 		['Inter\\', 'must not contain'],
 		["'Inter\\', sans-serif", 'must not contain'],
-		["'Inter, sans-serif", 'has an unclosed quote'],
-		['"Inter\', sans-serif', 'has an unclosed quote'],
+		// A browser drops an invalid `font-family` list whole, so the stack's fallbacks are lost too.
+		["'Inter, sans-serif", 'must be a comma-separated list'],
+		['"Inter\', sans-serif', 'must be a comma-separated list'],
+		["'Slash/Name', Star*Name, sans-serif", 'must be a comma-separated list'],
+		['Inter, , sans-serif', 'must be a comma-separated list'],
+		['Font Name 2, serif', 'must be a comma-separated list'],
+		['serif Pro, sans-serif', 'must be a comma-separated list'],
+		["'Inter' Sans, sans-serif", 'must be a comma-separated list'],
+		['inherit', 'must be a comma-separated list'],
 		['  ', 'must be a non-empty CSS font-family stack'],
 	] as const;
 
@@ -53,8 +60,15 @@ describe('font family validation', () => {
 		});
 	}
 
-	it('accepts quoted names, generic families, and a quote of the other kind inside a name', () => {
-		const family = `"Font's Name", 'Other "Quoted" Name', 'Slash/Name', Star*Name, system-ui, sans-serif`;
+	it('accepts quoted names with punctuation, generic families, and a quote of the other kind inside a name', () => {
+		const family = `"Font's Name", 'Other "Quoted" Name', "Font, Inc", 'Star*Name', system-ui, sans-serif`;
+		expect(() =>
+			defineTheme(themeWithTypography({ fonts: { body: { ...interFont, family } } })),
+		).not.toThrow();
+	});
+
+	it('accepts unquoted names of several words, including ones that end with a keyword', () => {
+		const family = '-apple-system, BlinkMacSystemFont, Noto Sans CJK JP, Pro Serif, sans-serif';
 		expect(() =>
 			defineTheme(themeWithTypography({ fonts: { body: { ...interFont, family } } })),
 		).not.toThrow();
