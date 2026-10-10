@@ -7,7 +7,13 @@
  * NOT imported by production code.
  */
 
-import type { Selector, SelectorComponent, StyleRule } from 'lightningcss';
+import type {
+	MediaQuery,
+	Selector,
+	SelectorComponent,
+	StyleRule,
+	TokenOrValue,
+} from 'lightningcss';
 import { transform } from 'lightningcss';
 import { capsizeTrimVarName } from '../capsize-trim-vars.js';
 import { flattenThemeContract, partitionContractPairs } from '../contract.js';
@@ -71,18 +77,17 @@ function readThemeRules(css: string, themeName: string): Record<ThemeRuleRole, T
 				for (const rule of stylesheet.rules) {
 					if (rule.type === 'media') {
 						const [inner, ...rest] = rule.value.rules;
-						const isSystemDark = JSON.stringify(rule.value.query).includes(
-							'"name":"prefers-color-scheme","value":{"type":"ident","value":"dark"}',
-						);
+						const [query, ...otherQueries] = rule.value.query.mediaQueries;
 						if (
-							isSystemDark &&
+							isPrefersDark(query) &&
+							otherQueries.length === 0 &&
 							rest.length === 0 &&
 							inner?.type === 'style' &&
 							selectorText(inner.value.selectors) === identity
 						) {
 							rules.push(describe(inner.value, 'systemDark'));
 						} else {
-							unexpected.push(`@media ${JSON.stringify(rule.value.query)}`);
+							unexpected.push('@media');
 						}
 						continue;
 					}
@@ -154,7 +159,7 @@ function describe(rule: StyleRule, role: ThemeRuleRole): ThemeRule {
 	for (const declaration of rule.declarations?.declarations ?? []) {
 		if (declaration.property === 'custom') {
 			properties.push(declaration.value.name);
-			if (JSON.stringify(declaration.value.value).includes('"type":"var"')) {
+			if (referencesToken(declaration.value.value)) {
 				referencingProperties.push(declaration.value.name);
 			}
 		} else if (declaration.property === 'unparsed') {
@@ -164,6 +169,29 @@ function describe(rule: StyleRule, role: ThemeRuleRole): ThemeRule {
 		}
 	}
 	return { properties, referencingProperties, role };
+}
+
+/** Whether a media query is exactly `(prefers-color-scheme: dark)`. */
+function isPrefersDark(query: MediaQuery | undefined): boolean {
+	const condition = query?.condition;
+	if (query?.mediaType !== 'all' || query.qualifier != null || condition?.type !== 'feature') {
+		return false;
+	}
+	const feature = condition.value;
+	return (
+		feature.type === 'plain' &&
+		feature.name === 'prefers-color-scheme' &&
+		feature.value.type === 'ident' &&
+		feature.value.value === 'dark'
+	);
+}
+
+/** Whether a custom property value contains a `var()`, at any depth. */
+function referencesToken(tokens: Array<TokenOrValue>): boolean {
+	return tokens.some(
+		(token) =>
+			token.type === 'var' || (token.type === 'function' && referencesToken(token.value.arguments)),
+	);
 }
 
 /** Prints a selector list in the generator's own spelling, for matching by role. */
