@@ -1,7 +1,12 @@
 import { vars } from '../../theme/contract.css.js';
-import { globalStyleInLayer } from '../styles/layered-style.css.js';
+import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import { recipe } from '../styles/recipe.js';
-import { proseScopeClassName } from './scope.css.js';
+
+/**
+ * The Prose scope class. Every Prose rule below is scoped to it, and `proseRecipe()` applies it as
+ * its base class, so `<Prose>` and recipe-only usage scope identically.
+ */
+const proseScopeClassName = style({}, 'prose');
 
 /** Scope class for the long-form rhythm applied by the global rules below. */
 export const proseRecipe = recipe({ base: proseScopeClassName });
@@ -28,9 +33,10 @@ function proseBoundaryGapStyle(previous: ReadonlyArray<string>, gap: string) {
 }
 
 // Each gap is the following block's start margin. No block-end margin can collapse or escape.
+// Inline margins go too: user agents indent blockquotes, figures, and `dd`.
 proseStyle(
 	'p, h1, h2, h3, h4, h5, h6, ul, ol, li, dl, dt, dd, blockquote, pre, hr, figure, figcaption, table, img, picture, video',
-	{ marginBlock: 0 },
+	{ margin: 0 },
 );
 proseStyle('* + p, * + ul, * + ol, * + dl, * + h1', { marginBlockStart: vars.space.sp32 });
 proseStyle('* + h2, * + hr', { marginBlockStart: vars.space.sp64 });
@@ -57,20 +63,21 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 	marginBlockStart: 0,
 });
 
-proseStyle('ul', { listStyleType: 'disc', paddingInlineStart: vars.space.sp24 });
-// Untyped ols restore decimal. Typed ols omit list-style-type so HTML presentational hints apply
-// inside Prose; the reset leaves those ols alone via `proseScopeClassName` from `./scope.css.js`.
-proseStyle('ol:not([type])', { listStyleType: 'decimal', paddingInlineStart: vars.space.sp24 });
-proseStyle('ol[type]', { paddingInlineStart: vars.space.sp24 });
+// Markers are restated so a framework reset below Luke UI, such as Tailwind Preflight, cannot
+// remove them. A typed `ol` keeps its HTML presentational hint, which any author `list-style-type`
+// would override.
+proseStyle('ul, ol', { paddingInlineStart: vars.space.sp24 });
+proseStyle('ul', { listStyleType: 'disc' });
+proseStyle('ol:not([type])', { listStyleType: 'decimal' });
 
 proseStyle('hr', {
 	blockSize: 0,
 	border: 'none',
 	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
 });
-// Table cells need padding after the reset removes it.
+proseStyle('table', { borderCollapse: 'collapse', borderSpacing: 0 });
 proseStyle('th, td', { paddingBlock: vars.space.sp8, paddingInline: vars.space.sp12 });
-proseStyle('th', { textAlign: 'start' });
+proseStyle('caption, th', { textAlign: 'start' });
 proseStyle('thead th', { borderBlockEnd: `1px solid ${vars.color.border.decorative}` });
 
 proseBoundaryGapStyle(['h1'], vars.space.sp40);

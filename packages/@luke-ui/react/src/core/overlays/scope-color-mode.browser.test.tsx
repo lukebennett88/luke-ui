@@ -144,6 +144,12 @@ for (const kind of overlayKinds) {
 		expect(getComputedStyle(overlay).colorScheme).toBe('dark');
 		expect(surfaceBase(overlay)).toBe(surfaceBase(scope));
 		expect(surfaceBase(overlay)).not.toBe(surfaceBase(document.documentElement));
+		// The overlay sits in <body>, outside the scope, so the paint has to come from its own mode.
+		expect(getComputedStyle(overlay).color).toBe(getComputedStyle(scope).color);
+		expect(getComputedStyle(overlay).color).not.toBe(getComputedStyle(document.body).color);
+		const option = page.getByRole('option', { name: 'Option one' }).element();
+		expect(getComputedStyle(option).color).toBe(getComputedStyle(scope).color);
+		expect(getComputedStyle(overlay).fontFamily).toBe(getComputedStyle(document.body).fontFamily);
 	});
 
 	test(`the ${kind} copies no mode outside a scope below <html>`, async () => {
@@ -153,6 +159,8 @@ for (const kind of overlayKinds) {
 
 		expect(overlay).not.toHaveAttribute('data-color-mode');
 		expect(surfaceBase(overlay)).toBe(surfaceBase(document.documentElement));
+		expect(getComputedStyle(overlay).color).toBe(getComputedStyle(document.body).color);
+		expect(getComputedStyle(overlay).fontFamily).toBe(getComputedStyle(document.body).fontFamily);
 	});
 }
 

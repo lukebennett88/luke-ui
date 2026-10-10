@@ -22,9 +22,6 @@ const selectConfig = {
 	slots: {
 		root: {
 			minInlineSize: 0,
-			// React Aria sets `data-focus-visible` on the root while the trigger has keyboard focus,
-			// which the reset layer would draw as a ring around the whole field. The trigger owns the ring.
-			outline: 'none',
 		},
 		trigger: {
 			'@media': {
@@ -39,7 +36,6 @@ const selectConfig = {
 						'&[data-focus-visible="true"]': { outlineColor: 'Highlight' },
 					},
 				},
-				'(prefers-reduced-motion: reduce)': { transition: 'none' },
 			},
 			alignItems: 'center',
 			appearance: 'none',
@@ -59,6 +55,8 @@ const selectConfig = {
 			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 			margin: 0,
 			minInlineSize: 0,
+			// The ring follows React Aria's focus-visible signal below, so the native ring cannot draw
+			// a second one where the two disagree.
 			outline: 'none',
 			paddingBlock: 0,
 			textAlign: 'start',

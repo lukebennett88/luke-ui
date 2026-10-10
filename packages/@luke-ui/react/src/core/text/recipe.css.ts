@@ -4,8 +4,17 @@ import { capsizeTrimVarName } from '../../theme/capsize-trim-vars.js';
 import { vars } from '../../theme/contract.css.js';
 import type { FontWeightRole, TypeStyle } from '../../theme/type-styles.js';
 import { fontWeightRoles, typeStyles } from '../../theme/type-styles.js';
+import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
+
+/** Marks every element `textRecipe` styles, so the margin rule below can match it. */
+const textElementClassName = style({}, 'text');
+
+// `Text` renders headings, paragraphs, and blockquotes, which have user agent margins. Spacing
+// between them belongs to layout, so `Text` removes them. `:where()` keeps this at zero
+// specificity, so `Prose` spacing, utility props, and recipe margins still apply.
+globalStyleInLayer('recipes', `:where(.${textElementClassName})`, { margin: 0 });
 
 const lineClampNone = {} satisfies ComplexStyleRule;
 export const textLineHeight = createVar();
@@ -119,18 +128,21 @@ function createLayeredTextStyle({
 }
 
 export const textRecipe = recipe({
-	base: {
-		color: vars.color.text.primary,
-		fontFamily: vars.font.family.body,
-		// `Text` renders untransformed text with the font's default numerals unless asked otherwise.
-		// These sit in the base rather than in a default variant so `shouldInheritFont` can override
-		// them: a composed `Code`/`Em`/`Kbd`/`Strong` keeps the surrounding case and numeric styling,
-		// while a plain `Text` is still insulated from whatever the page sets around it.
-		fontVariantNumeric: 'normal',
-		minInlineSize: 0,
-		overflowWrap: 'break-word',
-		textTransform: 'none',
-	},
+	base: [
+		textElementClassName,
+		{
+			color: vars.color.text.primary,
+			fontFamily: vars.font.family.body,
+			// `Text` renders untransformed text with the font's default numerals unless asked otherwise.
+			// These sit in the base rather than in a default variant so `shouldInheritFont` can override
+			// them: a composed `Code`/`Em`/`Kbd`/`Strong` keeps the surrounding case and numeric styling,
+			// while a plain `Text` is still insulated from whatever the page sets around it.
+			fontVariantNumeric: 'normal',
+			minInlineSize: 0,
+			overflowWrap: 'break-word',
+			textTransform: 'none',
+		},
+	],
 	compoundVariants: typographyCompoundVariants,
 	defaultVariants: {
 		fontStyle: 'default',

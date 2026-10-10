@@ -108,15 +108,13 @@ const fieldConfig = {
 			font: 'inherit',
 			gap: inlineControlGap,
 			minInlineSize: 0,
+			// The control shows its own pressed state, so the browser's tap highlight would double it.
+			touchAction: 'manipulation',
+			WebkitTapHighlightColor: 'transparent',
 			selectors: {
 				[`&${dataDisabledSelector}`]: {
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
-				},
-				// The reset default ring would otherwise paint both this clickable row and the
-				// control; the control alone carries the focus indication.
-				'&[data-focus-visible="true"]': {
-					outline: 'none',
 				},
 			},
 		},
