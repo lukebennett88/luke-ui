@@ -4,10 +4,54 @@ import { expect, test } from 'vite-plus/test';
 import { capsizeTrimVarName } from '../../theme/capsize-trim-vars.js';
 import type { TypeStyle } from '../../theme/type-styles.js';
 import { typeStyles } from '../../theme/type-styles.js';
+import { cascadeLayerOrder } from './layer-names.js';
 
-const lukeOwnedLayerNames = ['reset', 'base', 'recipes', 'utilities'] as const;
-const lukeOwnedLayerNameSet = new Set<string>(lukeOwnedLayerNames);
-const AUTHORITATIVE_LAYER_ORDER_PATTERN = /^@layer reset, base, recipes, utilities;/m;
+/** Every layer the stylesheet may name, in precedence order. */
+const layerOrder = ['base', 'luke-ui', 'luke-ui.reset', 'luke-ui.recipes', 'luke-ui.utilities'];
+const layerNameSet = new Set<string>(layerOrder);
+const RESET_LAYER_BLOCK_PATTERN = /^@layer luke-ui\.reset \{\n([\s\S]*?)\n\}$/m;
+
+/**
+ * The whole global stylesheet, as built. Every other rule belongs to a component. See
+ * `research/717-global-stylesheet-contract.md` before changing it.
+ */
+const globalRules = `  :where(*), :where(*)::before, :where(*)::after {
+    box-sizing: border-box;
+  }
+  :where(:root) {
+    container-type: inline-size;
+  }
+  :where(body) {
+    accent-color: var(--luke-color-background-accent-solid-rest);
+    background-color: var(--luke-color-surface-base);
+    color: var(--luke-color-text-primary);
+    font-family: var(--luke-font-body-font-family);
+    font-size: var(--luke-font-body-font-size);
+    font-weight: var(--luke-font-body-font-weight);
+    letter-spacing: var(--luke-font-body-letter-spacing);
+    line-height: 1.5;
+    margin: 0;
+  }
+  :where(body [data-color-mode='light'], body [data-color-mode='dark']) {
+    accent-color: var(--luke-color-background-accent-solid-rest);
+    background-color: var(--luke-color-surface-base);
+    color: var(--luke-color-text-primary);
+  }
+  :where(button, input, select, textarea) {
+    font: inherit;
+    margin: 0;
+  }
+  :where(:focus-visible) {
+    outline-color: var(--luke-color-border-focus);
+    outline-offset: 2px;
+    outline-style: solid;
+    outline-width: 2px;
+  }
+  @media (forced-colors: active) {
+    :where(:focus-visible) {
+      outline-color: Highlight;
+    }
+  }`;
 type TextClassesByTypography = Record<TypeStyle, Array<string>>;
 const numericLineClampVariants = [2, 3, 4, 5] as const;
 type NumericLineClampVariant = (typeof numericLineClampVariants)[number];
@@ -61,7 +105,7 @@ type StylesheetAnalysis = {
 	rulesByClass: Map<string, Array<IndexedStyleRule>>;
 };
 
-test('builds the public stylesheet with the retained layer contract', async () => {
+test('builds the public stylesheet with the layer contract', async () => {
 	const stylesheet = await readPublicStylesheet();
 	const icon = await import('@luke-ui/react/icon');
 	const text = await import('@luke-ui/react/text');
@@ -96,23 +140,45 @@ test('builds the public stylesheet with the retained layer contract', async () =
 });
 
 const stylesheetMutations: Array<[string, (css: string) => string]> = [
-	['missing stable selector', (css: string) => css.replace('.luke-ui-theme', '.theme-root')],
 	[
-		'reordered authoritative layer declarations',
+		'reordered top-level layers',
+		(css: string) => css.replace('@layer base, luke-ui;', '@layer luke-ui, base;'),
+	],
+	[
+		'reordered Luke UI layers',
 		(css: string) => {
-			return css.replace(
-				AUTHORITATIVE_LAYER_ORDER_PATTERN,
-				'@layer base, reset, recipes, utilities;',
-			);
+			return css.replace('@layer reset, recipes, utilities;', '@layer reset, utilities, recipes;');
 		},
 	],
+	[
+		'layer created before the order statement',
+		(css: string) => `@layer luke-ui.utilities;\n${css}`,
+	],
 	['unknown layer', (css: string) => `${css}\n@layer components;`],
+	['flat Luke UI layer', (css: string) => `${css}\n@layer recipes { .x { color: red; } }`],
+	[
+		'declaration in the consumer base layer',
+		(css: string) => `${css}\n@layer base { .x { color: red; } }`,
+	],
+	[
+		'root class selector',
+		(css: string) => `${css}\n@layer luke-ui.recipes { .luke-ui-theme { color: red; } }`,
+	],
+	[
+		'extra global rule',
+		(css: string) =>
+			css.replace(
+				'    margin: 0;\n  }\n  :where(:focus-visible)',
+				'    margin: 0;\n  }\n  :where(ul) {\n    list-style: none;\n  }\n  :where(:focus-visible)',
+			),
+	],
+	['unlayered rule', (css: string) => `${css}\n.x { color: red; }`],
 	[
 		'representative recipe class moved to the wrong layer',
 		(css: string) => {
 			return css.replace(
-				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
-				'@layer utilities {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
+				'@layer luke-ui.recipes {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
+				'@layer luke-ui.utilities {\n  .recipe-class { display: inline-flex; }\n  .recipe-class > * { margin-block-start: 1px; }\n}',
 			);
 		},
 	],
@@ -155,11 +221,11 @@ async function readPublicStylesheet(): Promise<string> {
 /** One utilities-layer class from the built stylesheet (package-internal sprinkles). */
 function representativeUtilityClasses(stylesheet: string): Array<string> {
 	const utilitiesBlock = stylesheet.match(
-		/@layer utilities \{([\s\S]*?)(?=\n@layer |\n@keyframes |$)/,
+		/@layer luke-ui\.utilities \{([\s\S]*?)(?=\n@layer |\n@keyframes |$)/,
 	)?.[1];
-	if (utilitiesBlock == null) throw new Error('Expected an @layer utilities block.');
+	if (utilitiesBlock == null) throw new Error('Expected an @layer luke-ui.utilities block.');
 	const className = utilitiesBlock.match(/^\s*\.([A-Za-z0-9_-]+)\s*\{/m)?.[1];
-	if (className == null) throw new Error('Expected a class rule in @layer utilities.');
+	if (className == null) throw new Error('Expected a class rule in @layer luke-ui.utilities.');
 	return [className];
 }
 
@@ -181,33 +247,22 @@ function assertStylesheetContract(
 ): void {
 	const analysis = providedAnalysis ?? analyzeStylesheet(stylesheet);
 
-	assertEffectiveLayerCreationOrder(analysis);
+	assertLayerOrderStatementFirst(stylesheet);
 	assertNoRedundantEmptyLayerStatements(stylesheet);
-	assertAuthoritativeLayerOrder(getAuthoritativeLayerOrder(analysis));
+	assertEffectiveLayerOrder(analysis);
 	assertLayerNames(analysis);
 	assertNoBaseLayerDeclarations(analysis);
 	assertRootNodes(analysis);
-	assertStableSelectors(analysis);
+	assertNoStableClassSelectors(analysis);
 	assertRecipesLayerHasRules(analysis);
-	assertSentinel(analysis, 'luke-ui-reset', 'reset', 'box-sizing', 'border-box');
-	assertSentinel(analysis, 'luke-ui-theme', 'reset', 'color', 'var(--luke-color-text-primary)');
-	assertSentinel(
-		analysis,
-		'luke-ui-theme',
-		'reset',
-		'font-family',
-		'var(--luke-font-body-font-family)',
-	);
-	assertSentinel(
-		analysis,
-		'luke-ui-theme',
-		'reset',
-		'font-size',
-		'var(--luke-font-body-font-size)',
-	);
+	assertGlobalRules(stylesheet);
 
-	for (const className of recipeClasses) assertClassOwnership(analysis, className, 'recipes');
-	for (const className of utilityClasses) assertClassOwnership(analysis, className, 'utilities');
+	for (const className of recipeClasses) {
+		assertClassOwnership(analysis, className, 'luke-ui.recipes');
+	}
+	for (const className of utilityClasses) {
+		assertClassOwnership(analysis, className, 'luke-ui.utilities');
+	}
 	if (textClassesByTypography) assertTextTrimOwnership(analysis, textClassesByTypography);
 	if (lineClampClasses) assertLineClampOwnership(analysis, lineClampClasses);
 }
@@ -252,8 +307,7 @@ function walkRules(
 ): void {
 	for (const rule of rules) {
 		if (rule.type === 'layer-block') {
-			const name = layerBlockName(rule);
-			layerStack.push(name);
+			layerStack.push(qualifiedLayerName(layerStack.at(-1), layerBlockName(rule)));
 			walkRules((rule.value.rules as Array<CssRule>) ?? [], layerStack, onStyle);
 			layerStack.pop();
 			continue;
@@ -278,6 +332,15 @@ function layerBlockName(rule: CssRule): string | undefined {
 	if (name == null) return;
 	if (Array.isArray(name)) return name.join('.');
 	return;
+}
+
+/** The full name of `name` declared inside the `parent` layer. */
+function qualifiedLayerName(
+	parent: string | undefined,
+	name: string | undefined,
+): string | undefined {
+	if (name == null) return;
+	return parent == null ? name : `${parent}.${name}`;
 }
 
 function indexStyleRule(rule: StyleRule, owningLayer: string | undefined): IndexedStyleRule {
@@ -352,7 +415,7 @@ function indexStyleRule(rule: StyleRule, owningLayer: string | undefined): Index
 function assertPrivateStylesheetSentinel(analysis: StylesheetAnalysis): void {
 	const rules = analysis.styleRules.filter((rule) => rule.hasAttribute('data-skeleton-inline'));
 	expect(rules.length).toBeGreaterThan(0);
-	for (const rule of rules) expect(rule.owningLayer).toBe('recipes');
+	for (const rule of rules) expect(rule.owningLayer).toBe('luke-ui.recipes');
 	expect(
 		rules.some((rule) =>
 			declarationListHas(rule, 'background-color', 'var(--luke-color-loading-skeleton)', true),
@@ -365,53 +428,46 @@ function assertPrivateStylesheetSentinel(analysis: StylesheetAnalysis): void {
 		return declarationListHas(rule, 'background-color', 'var(--luke-color-loading-skeleton)', true);
 	});
 	expect(maskRules.length).toBeGreaterThan(0);
-	for (const rule of maskRules) expect(rule.owningLayer).toBe('recipes');
+	for (const rule of maskRules) expect(rule.owningLayer).toBe('luke-ui.recipes');
 }
 
-function getAuthoritativeLayerOrder(analysis: StylesheetAnalysis): Array<string> {
-	for (const rule of analysis.rootRules) {
-		if (rule.type !== 'layer-statement') continue;
-		const names = layerStatementNames(rule);
-		if (names.length < 2) continue;
-		return names;
+function assertLayerOrderStatementFirst(stylesheet: string): void {
+	if (!stylesheet.startsWith(`${cascadeLayerOrder}\n`)) {
+		throw new Error('Expected the stylesheet to start with the cascade layer order statement.');
 	}
-
-	throw new Error('Expected an authoritative combined cascade-layer order statement.');
 }
 
-function assertEffectiveLayerCreationOrder(analysis: StylesheetAnalysis): void {
-	let sawAuthoritativeOrder = false;
-
-	for (const rule of analysis.rootRules) {
-		if (rule.type !== 'layer-statement' && rule.type !== 'layer-block') continue;
-
-		const isCombinedOrder = rule.type === 'layer-statement' && layerStatementNames(rule).length > 1;
-
-		if (isCombinedOrder) {
-			if (!sawAuthoritativeOrder) {
-				sawAuthoritativeOrder = true;
-				continue;
-			}
-
-			throw new Error(
-				'Expected a single authoritative combined cascade-layer order statement at the start of the stylesheet.',
-			);
+/** Layers by full name, in the order the stylesheet first creates them. */
+function effectiveLayerOrder(rules: Array<CssRule>, parent?: string): Array<string> {
+	const order: Array<string> = [];
+	for (const rule of rules) {
+		const names =
+			rule.type === 'layer-statement'
+				? layerStatementNames(rule)
+				: rule.type === 'layer-block'
+					? [layerBlockName(rule) ?? '']
+					: [];
+		for (const name of names) {
+			const fullName = qualifiedLayerName(parent, name) ?? '';
+			if (!order.includes(fullName)) order.push(fullName);
 		}
-
-		if (!sawAuthoritativeOrder) {
-			const label =
-				rule.type === 'layer-statement'
-					? layerStatementNames(rule).join(', ')
-					: (layerBlockName(rule) ?? '');
-			throw new Error(
-				`Layer "${label}" was created before the authoritative combined cascade-layer order statement.`,
-			);
+		const nested = (rule.value.rules as Array<CssRule> | undefined) ?? [];
+		const nestedParent =
+			rule.type === 'layer-block' ? qualifiedLayerName(parent, layerBlockName(rule)) : parent;
+		for (const fullName of effectiveLayerOrder(nested, nestedParent)) {
+			if (!order.includes(fullName)) order.push(fullName);
 		}
 	}
+	return order;
+}
 
-	if (!sawAuthoritativeOrder) {
-		throw new Error('Expected an authoritative combined cascade-layer order statement.');
-	}
+/**
+ * The order statement alone creates every layer in precedence order, so nothing after it can
+ * create a layer early or out of order.
+ */
+function assertEffectiveLayerOrder(analysis: StylesheetAnalysis): void {
+	expect(effectiveLayerOrder(analysis.rootRules.slice(0, 2))).toEqual(layerOrder);
+	expect(effectiveLayerOrder(analysis.rootRules)).toEqual(layerOrder);
 }
 
 function assertNoRedundantEmptyLayerStatements(stylesheet: string): void {
@@ -425,33 +481,30 @@ function assertNoRedundantEmptyLayerStatements(stylesheet: string): void {
 	}
 }
 
-function assertAuthoritativeLayerOrder(order: Array<string>): void {
-	expect(order).toEqual([...lukeOwnedLayerNames]);
+/** The reset layer holds exactly the global rules, in one block. */
+function assertGlobalRules(stylesheet: string): void {
+	const blocks = [...stylesheet.matchAll(new RegExp(RESET_LAYER_BLOCK_PATTERN, 'gm'))];
+	expect(blocks).toHaveLength(1);
+	expect(blocks[0]?.[1]).toBe(globalRules);
 }
 
 function assertLayerNames(analysis: StylesheetAnalysis): void {
-	const visit = (rules: Array<CssRule>, depth: number): void => {
+	const visit = (rules: Array<CssRule>, parent: string | undefined): void => {
 		for (const rule of rules) {
 			if (rule.type === 'layer-statement') {
 				const names = layerStatementNames(rule);
 				if (names.length === 0) throw new Error('Anonymous cascade layers are not allowed.');
-				for (const name of names) {
-					if (lukeOwnedLayerNameSet.has(name)) continue;
-					throw new Error(`Unexpected cascade layer: ${name}`);
-				}
+				for (const name of names) assertKnownLayer(qualifiedLayerName(parent, name));
 				continue;
 			}
 
 			if (rule.type === 'layer-block') {
-				if (depth > 0) throw new Error('Nested cascade layers are not allowed.');
-				const name = layerBlockName(rule);
+				const name = qualifiedLayerName(parent, layerBlockName(rule));
 				if (name == null || name === '') {
 					throw new Error('Anonymous cascade layers are not allowed.');
 				}
-				if (!lukeOwnedLayerNameSet.has(name)) {
-					throw new Error(`Unexpected cascade layer: ${name}`);
-				}
-				visit((rule.value.rules as Array<CssRule>) ?? [], depth + 1);
+				assertKnownLayer(name);
+				visit((rule.value.rules as Array<CssRule>) ?? [], name);
 				continue;
 			}
 
@@ -462,12 +515,17 @@ function assertLayerNames(analysis: StylesheetAnalysis): void {
 				rule.type === 'style'
 			) {
 				const nested = (rule.value.rules as Array<CssRule>) ?? [];
-				if (nested.length > 0) visit(nested, depth);
+				if (nested.length > 0) visit(nested, parent);
 			}
 		}
 	};
 
-	visit(analysis.rootRules, 0);
+	visit(analysis.rootRules, undefined);
+}
+
+function assertKnownLayer(name: string | undefined): void {
+	if (name != null && layerNameSet.has(name)) return;
+	throw new Error(`Unexpected cascade layer: ${name}`);
 }
 
 function layerStatementNames(rule: CssRule): Array<string> {
@@ -517,12 +575,13 @@ function assertRootNodes(analysis: StylesheetAnalysis): void {
 
 function assertRecipesLayerHasRules(analysis: StylesheetAnalysis): void {
 	const hasRecipeRule = analysis.styleRules.some(
-		(rule) => rule.owningLayer === 'recipes' && rule.hasDeclarations,
+		(rule) => rule.owningLayer === 'luke-ui.recipes' && rule.hasDeclarations,
 	);
 	if (!hasRecipeRule) throw new Error('Expected the recipes layer to contain a rule.');
 }
 
-function assertStableSelectors(analysis: StylesheetAnalysis): void {
+/** No root or reset class: the stylesheet styles the document, not an opt-in element. */
+function assertNoStableClassSelectors(analysis: StylesheetAnalysis): void {
 	const selectors = new Set<string>();
 	for (const rule of analysis.styleRules) {
 		for (const className of rule.classNames) {
@@ -530,20 +589,7 @@ function assertStableSelectors(analysis: StylesheetAnalysis): void {
 		}
 	}
 
-	expect(selectors).toEqual(new Set(['.luke-ui-reset', '.luke-ui-theme']));
-}
-
-function assertSentinel(
-	analysis: StylesheetAnalysis,
-	className: string,
-	layerName: string,
-	property: string,
-	value: string,
-): void {
-	const rules = getRulesForClass(analysis, className);
-	expect(rules.length).toBeGreaterThan(0);
-	for (const rule of rules) expect(rule.owningLayer).toBe(layerName);
-	expect(rules.some((rule) => declarationListHas(rule, property, value))).toBe(true);
+	expect(selectors).toEqual(new Set());
 }
 
 function assertClassOwnership(
@@ -601,7 +647,7 @@ function assertLineClampOwnership(
 function assertDeclaration(rules: Array<IndexedStyleRule>, property: string, value: string): void {
 	const matchingRules = rules.filter((rule) => declarationListHas(rule, property, value));
 	expect(matchingRules.length).toBeGreaterThan(0);
-	for (const rule of matchingRules) expect(rule.owningLayer).toBe('recipes');
+	for (const rule of matchingRules) expect(rule.owningLayer).toBe('luke-ui.recipes');
 }
 
 function assertPseudoDeclaration(
@@ -614,7 +660,7 @@ function assertPseudoDeclaration(
 		(rule) => rule.hasPseudo(pseudo) && declarationListHas(rule, property, value),
 	);
 	expect(matchingRules.length).toBeGreaterThan(0);
-	for (const rule of matchingRules) expect(rule.owningLayer).toBe('recipes');
+	for (const rule of matchingRules) expect(rule.owningLayer).toBe('luke-ui.recipes');
 }
 
 function getRulesForClass(
@@ -756,20 +802,15 @@ function formatPrimarySelector(rule: IndexedStyleRule): string {
 		.join(' ');
 }
 
-const validStylesheetFixture = `@layer reset, base, recipes, utilities;
-@layer reset {
-  .luke-ui-reset { box-sizing: border-box; }
-  .luke-ui-theme {
-    color: var(--luke-color-text-primary);
-    font-family: var(--luke-font-body-font-family);
-    font-size: var(--luke-font-body-font-size);
-  }
+const validStylesheetFixture = `${cascadeLayerOrder}
+@layer luke-ui.reset {
+${globalRules}
 }
-@layer recipes {
+@layer luke-ui.recipes {
   .recipe-class { display: inline-flex; }
   .recipe-class > * { margin-block-start: 1px; }
 }
-@layer utilities {
+@layer luke-ui.utilities {
   .utility-class { display: grid; }
 }
 @keyframes generated-animation {

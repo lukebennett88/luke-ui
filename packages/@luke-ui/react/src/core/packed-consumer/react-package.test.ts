@@ -2,9 +2,10 @@ import { lstatSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { transform } from 'lightningcss';
 import { chromium } from 'playwright';
 import { describe, expect, inject, test } from 'vite-plus/test';
-import { cascadeLayerNames } from '../styles/layer-names.js';
+import { cascadeLayerOrder } from '../styles/layer-names.js';
 import type { Manifest } from './environment.js';
 import {
 	MINIMUM_TYPESCRIPT,
@@ -30,8 +31,8 @@ const WORKSPACE_PROTOCOL_PATTERN = /^(?:catalog|file|link|portal|workspace):/;
 const ASSET_EXPORT_PATTERN = /\.(?:css|svg)$/;
 const CUSTOM_PROPERTY_PATTERN = /--luke-[a-z-]+:/;
 const SYMBOL_PATTERN = /<symbol\b[^>]*\bid="/;
-/** The statement that fixes cascade layer order at the top of the shared stylesheet. */
-const LAYER_STATEMENT = `@layer ${cascadeLayerNames.join(', ')};`;
+/** Every cascade layer the shared stylesheet uses, in precedence order. */
+const LAYER_ORDER = ['base', 'luke-ui', 'luke-ui.reset', 'luke-ui.recipes', 'luke-ui.utilities'];
 const MODULE_SCRIPT_PATTERN = /<script type="module"[^>]+src="\/assets\/[^"]+\.js"/;
 /**
  * Styling authoring: the Vanilla Extract authoring API, and the Luke UI and Rainbow authoring
@@ -245,9 +246,9 @@ for (const consumer of consumers) {
 		test('builds a client bundle with Vite', () => {
 			const assets = builtAssets(dir);
 			const css = assets.read('.css');
-			// Minifiers may drop the leading `@layer` statement when first appearance gives the same
+			// Minifiers may rewrite the leading `@layer` statements when first appearance gives the same
 			// order, so compare the order the layers take effect in.
-			expect(layerOrder(css)).toEqual(cascadeLayerNames);
+			expect(layerOrder(css)).toEqual(LAYER_ORDER);
 			expect(css).toMatch(CUSTOM_PROPERTY_PATTERN);
 
 			const spritesheet = assets.names.find((name) => name.endsWith('.svg'));
@@ -320,7 +321,7 @@ function isReleasable(name: string, range: string): boolean {
 
 /** Whether an asset export holds what its path promises. */
 function isValidAsset(subpath: string, source: string): boolean {
-	if (subpath === './stylesheet.css') return source.startsWith(LAYER_STATEMENT);
+	if (subpath === './stylesheet.css') return source.startsWith(cascadeLayerOrder);
 	return SYMBOL_PATTERN.test(source);
 }
 
@@ -363,16 +364,48 @@ function directorySize(directory: string): number {
 	return total;
 }
 
-const LAYER_RULE_PATTERN = /@layer\s+([^{;]+)[{;]/g;
+/** A Lightning CSS rule, reduced to the fields the layer walk reads. */
+interface LayerWalkRule {
+	type: string;
+	value: { name?: Array<string>; names?: Array<Array<string>>; rules?: Array<LayerWalkRule> };
+}
 
-/** Cascade layers in the order a stylesheet first names them, which is their precedence order. */
+/**
+ * Cascade layers by full name, in the order the stylesheet first creates them, which is their
+ * precedence order among siblings.
+ */
 function layerOrder(css: string): Array<string> {
 	const order: Array<string> = [];
-	for (const match of css.matchAll(LAYER_RULE_PATTERN)) {
-		for (const name of match[1]!.split(',').map((part) => part.trim())) {
-			if (!order.includes(name)) order.push(name);
+	function add(parent: Array<string>, name: Array<string>) {
+		const fullName = [...parent, ...name].join('.');
+		if (!order.includes(fullName)) order.push(fullName);
+	}
+	function walk(rules: Array<LayerWalkRule>, parent: Array<string>) {
+		for (const rule of rules) {
+			if (rule.type === 'layer-statement') {
+				for (const name of rule.value.names ?? []) add(parent, name);
+				continue;
+			}
+			const nested = rule.value.rules ?? [];
+			if (rule.type === 'layer-block' && rule.value.name) {
+				add(parent, rule.value.name);
+				walk(nested, [...parent, ...rule.value.name]);
+				continue;
+			}
+			if (rule.type === 'media' || rule.type === 'supports' || rule.type === 'container') {
+				walk(nested, parent);
+			}
 		}
 	}
+	transform({
+		code: Buffer.from(css),
+		filename: 'consumer.css',
+		visitor: {
+			StyleSheetExit(sheet) {
+				walk(structuredClone(sheet).rules as Array<LayerWalkRule>, []);
+			},
+		},
+	});
 	return order;
 }
 

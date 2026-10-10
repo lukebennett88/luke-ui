@@ -200,12 +200,7 @@ test('exports fixed breakpoints from the theme entry', async () => {
 
 test('theme entry publishes only the runtime allowlist', async () => {
 	const theme = await import('@luke-ui/react/theme');
-	expect(Object.keys(theme).sort()).toEqual([
-		'breakpoints',
-		'getThemeClassName',
-		'rootClassName',
-		'vars',
-	]);
+	expect(Object.keys(theme).sort()).toEqual(['breakpoints', 'getThemeClassName', 'vars']);
 });
 
 test('theme compiler entry publishes only the authoring allowlist', async () => {

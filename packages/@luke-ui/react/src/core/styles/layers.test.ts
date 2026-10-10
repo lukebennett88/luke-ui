@@ -1,4 +1,5 @@
 import { assertType, describe, expect, it } from 'vite-plus/test';
+import { cascadeLayerOrder } from './layer-names.js';
 import type { globalStyleInLayer } from './layered-style.css.js';
 import { layers } from './layers.css.js';
 
@@ -6,8 +7,18 @@ import { layers } from './layers.css.js';
 type WritableLayer = Parameters<typeof globalStyleInLayer>[0];
 
 describe('layers', () => {
-	it('declares cascade layers from lowest to highest priority', () => {
-		expect(Object.keys(layers)).toEqual(['reset', 'base', 'recipes', 'utilities']);
+	it('nests Luke UI layers inside luke-ui, from lowest to highest priority', () => {
+		expect(layers).toEqual({
+			reset: 'luke-ui.reset',
+			recipes: 'luke-ui.recipes',
+			utilities: 'luke-ui.utilities',
+		});
+	});
+
+	it('orders the consumer base layer before luke-ui, then the sublayers', () => {
+		expect(cascadeLayerOrder).toBe(
+			'@layer base, luke-ui;\n@layer luke-ui {\n  @layer reset, recipes, utilities;\n}',
+		);
 	});
 
 	it('keeps the base layer out of the layers Luke UI may write to', () => {
