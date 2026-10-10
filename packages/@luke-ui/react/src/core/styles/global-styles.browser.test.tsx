@@ -341,6 +341,24 @@ test('leaves application animations and Luke UI feedback running under reduced m
 	expect(getComputedStyle(page.getByLabelText('Loading').element()).animationName).not.toBe('none');
 });
 
+test('keeps overlay fades without movement under reduced motion', async () => {
+	render(
+		<div style={{ padding: '1rem' }}>
+			<SelectField items={items} label="Select">
+				{(item) => <SelectItem>{item.label}</SelectItem>}
+			</SelectField>
+		</div>,
+	);
+	await emulateReducedMotion(true);
+
+	await userEvent.click(page.getByRole('button', { name: /Select/ }));
+	await expect.poll(() => document.querySelector('[data-trigger="Select"]')).not.toBeNull();
+	const popover = document.querySelector('[data-trigger="Select"]')!;
+
+	expect(getComputedStyle(popover).transitionProperty).toBe('opacity');
+	expect(getComputedStyle(popover).translate).toBe('none');
+});
+
 for (const appearance of visualAppearances) {
 	test(`mixed host: ${appearance.theme} ${appearance.mode}`, { tags: ['visual'] }, async () => {
 		const { locator } = render(<MixedHost />, { appearance });
