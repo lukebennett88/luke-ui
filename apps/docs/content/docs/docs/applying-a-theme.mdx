@@ -66,9 +66,17 @@ its own background.
 
 ### Override a token on a scope
 
-A token you override on an element that carries `data-color-mode` loses to the theme's explicit-mode
-rule, which has a specificity of (0,2,0). Override the token on a child element, or use a more
-specific selector, such as `.app .sidebar[data-color-mode]`.
+The theme sets every mode token on an element that carries `data-color-mode`. Its rule has a
+specificity of (0,2,0) and sits in no cascade layer. To override a token on that same element, your
+rule has to beat it:
+
+- A rule in no cascade layer wins if it is more specific, such as `.app .sidebar[data-color-mode]`,
+  or equally specific and later.
+- A rule in a cascade layer never wins, however specific it is. Styles in no layer beat every
+  layered style.
+
+To avoid the conflict, set the token on a child of the scope instead. The theme's rule doesn't match
+the child, so the child's value applies from any layer, and the child's descendants inherit it.
 
 ## Overlays in a scope
 

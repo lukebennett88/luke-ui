@@ -118,7 +118,8 @@ room for additive extension after 1.0. Prefer extensibility over configurability
   explicit rules `…[data-color-mode='dark']` and `… [data-color-mode='dark']` are (0,2,0). Explicit
   rules set `color-scheme`.
 - **D35. Theme CSS stays unlayered.** Overriding a token on an element that itself carries
-  `data-color-mode` needs a child element or a more specific selector; this is documented.
+  `data-color-mode` needs a child element or a more specific unlayered selector. A layered override
+  on that element never wins, whatever its specificity. This is documented.
 - **D10, D11, D40. Scoped repaint lives in the shared stylesheet,** in the `reset` layer:
   `:where(body[data-color-mode='light'], body[data-color-mode='dark'], body [data-color-mode='light'], body [data-color-mode='dark'])`
   sets `color`, `accent-color` (shared with the `rootClassName` rule) and
