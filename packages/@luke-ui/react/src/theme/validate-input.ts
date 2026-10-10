@@ -116,11 +116,12 @@ const REQUIRED_METRICS = ['ascent', 'capHeight', 'descent', 'lineGap', 'unitsPer
 const OPTIONAL_METRICS = ['xHeight', 'xWidthAvg'] as const;
 
 /**
- * Characters that would let a family break out of its declaration or the stylesheet: a declaration
- * or block delimiter, the start of a tag, or a control character.
+ * Text that would let a family break out of its declaration or the stylesheet: a declaration or
+ * block delimiter, the start of a tag, a control character, a backslash, which can escape the
+ * closing quote or `;`, or a comment delimiter, which can hide every declaration after it.
  */
 // oxlint-disable-next-line eslint/no-control-regex
-const UNSAFE_FAMILY_PATTERN = /[;{}<\u0000-\u001F\u007F]/;
+const UNSAFE_FAMILY_PATTERN = /[;{}<\\\u0000-\u001F\u007F]|\/\*|\*\//;
 
 function validateFont(
 	font: unknown,
@@ -135,7 +136,10 @@ function validateFont(
 	if (typeof family !== 'string' || family.trim() === '') {
 		report(`${path}.family`, 'must be a non-empty CSS font-family stack');
 	} else if (UNSAFE_FAMILY_PATTERN.test(family)) {
-		report(`${path}.family`, 'must not contain `;`, `{`, `}`, `<`, or control characters');
+		report(
+			`${path}.family`,
+			'must not contain `;`, `{`, `}`, `<`, `\\`, `/*`, `*/`, or control characters',
+		);
 	} else if (hasUnbalancedQuotes(family)) {
 		report(`${path}.family`, 'has an unclosed quote');
 	}

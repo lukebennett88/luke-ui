@@ -29,6 +29,12 @@ describe('font family validation', () => {
 		["'Inter' } html {", 'must not contain'],
 		['Inter, <script>', 'must not contain'],
 		['Inter\nsans-serif', 'must not contain'],
+		// An open comment hides every declaration after it, so the theme loses all its tokens.
+		['Inter/*', 'must not contain'],
+		['Inter */ sans-serif', 'must not contain'],
+		// A backslash escapes the `;` or closing quote after it, so later declarations are lost.
+		['Inter\\', 'must not contain'],
+		["'Inter\\', sans-serif", 'must not contain'],
 		["'Inter, sans-serif", 'has an unclosed quote'],
 		['"Inter\', sans-serif', 'has an unclosed quote'],
 		['  ', 'must be a non-empty CSS font-family stack'],
@@ -48,7 +54,7 @@ describe('font family validation', () => {
 	}
 
 	it('accepts quoted names, generic families, and a quote of the other kind inside a name', () => {
-		const family = `"Font's Name", 'Other "Quoted" Name', system-ui, sans-serif`;
+		const family = `"Font's Name", 'Other "Quoted" Name', 'Slash/Name', Star*Name, system-ui, sans-serif`;
 		expect(() =>
 			defineTheme(themeWithTypography({ fonts: { body: { ...interFont, family } } })),
 		).not.toThrow();
