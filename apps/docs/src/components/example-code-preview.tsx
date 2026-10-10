@@ -107,6 +107,7 @@ export function ExampleCodePreview({
 							aria-expanded={isExpanded}
 							// React ignores the blur from unmounting, so this only sees focus moving away.
 							onBlur={() => dispatch({ type: 'toggleBlurred' })}
+							onFocus={() => dispatch({ type: 'toggleFocused' })}
 							onPress={(event) => {
 								// Read focus at press time. A view transition can move it to body before effects run.
 								const hadFocus = event.target === document.activeElement;
@@ -139,11 +140,10 @@ function measureIsClipped(sourceElement: HTMLElement) {
 interface SourceState {
 	mode: 'unmeasured' | 'fits' | 'collapsed' | 'expanded';
 	/**
-	 * Where focus should land once the collapse control may have gone. `copy-if-fits` waits for the
-	 * next measurement and is dropped if focus leaves the toggle first, `copy` asks the component to
-	 * move focus, and `none` leaves focus alone.
+	 * Only a pending collapse can request restoration. Remember blur until measurement so focus
+	 * returning before commit can reinstate the request.
 	 */
-	focus: 'none' | 'copy-if-fits' | 'copy';
+	focus: 'none' | 'copy-if-fits' | 'collapse-blurred' | 'copy';
 }
 
 type SourceEvent =
@@ -151,6 +151,7 @@ type SourceEvent =
 	| { type: 'expand' }
 	| { hadFocus: boolean; type: 'collapse' }
 	| { type: 'toggleBlurred' }
+	| { type: 'toggleFocused' }
 	| { type: 'focusRestored' };
 
 const initialSourceState: SourceState = { focus: 'none', mode: 'unmeasured' };
@@ -162,7 +163,7 @@ function sourceReducer(state: SourceState, event: SourceEvent): SourceState {
 			if (state.mode === 'expanded') return state;
 			const mode = event.isClipped ? 'collapsed' : 'fits';
 			let focus = state.focus;
-			if (event.isClipped) focus = 'none';
+			if (event.isClipped || focus === 'collapse-blurred') focus = 'none';
 			else if (focus === 'copy-if-fits') focus = 'copy';
 			return mode === state.mode && focus === state.focus ? state : { focus, mode };
 		}
@@ -173,7 +174,9 @@ function sourceReducer(state: SourceState, event: SourceEvent): SourceState {
 				? { focus: event.hadFocus ? 'copy-if-fits' : 'none', mode: 'collapsed' }
 				: state;
 		case 'toggleBlurred':
-			return state.focus === 'copy-if-fits' ? { ...state, focus: 'none' } : state;
+			return state.focus === 'copy-if-fits' ? { ...state, focus: 'collapse-blurred' } : state;
+		case 'toggleFocused':
+			return state.focus === 'collapse-blurred' ? { ...state, focus: 'copy-if-fits' } : state;
 		case 'focusRestored':
 			return state.focus === 'copy' ? { ...state, focus: 'none' } : state;
 	}
