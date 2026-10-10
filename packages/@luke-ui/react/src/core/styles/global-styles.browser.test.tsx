@@ -337,8 +337,7 @@ test('leaves application animations and Luke UI feedback running under reduced m
 	expect(app.animationName).toBe('app-spin');
 	expect(app.transitionDuration).toBe('0.5s');
 	expect(getComputedStyle(byTestId(container, 'luke-button')).transitionDuration).not.toBe('0s');
-	// The spinner keeps turning, so a busy state still reads as busy.
-	expect(getComputedStyle(page.getByLabelText('Loading').element()).animationName).not.toBe('none');
+	expect(getComputedStyle(page.getByLabelText('Loading').element()).animationName).toBe('none');
 });
 
 test('keeps overlay fades without movement under reduced motion', async () => {

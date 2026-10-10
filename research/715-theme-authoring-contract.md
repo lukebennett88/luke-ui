@@ -122,9 +122,9 @@ room for additive extension after 1.0. Prefer extensibility over configurability
   `data-color-mode` needs a child element or a more specific unlayered selector. A layered override
   on that element never wins, whatever its specificity. This is documented.
 - **D10, D11, D40. Scoped repaint lives in the shared stylesheet,** in the `reset` layer:
-  `:where(body[data-color-mode='light'], body[data-color-mode='dark'], body [data-color-mode='light'], body [data-color-mode='dark'])`
-  sets `color`, `accent-color` and `background-color: surface.base`. #717 moved the `<body>` match
-  into its own `<body>` rule ([717 record](./717-global-stylesheet-contract.md)). Without it, scopes
+  `:where(body [data-color-mode='light'], body [data-color-mode='dark'])` sets `color`,
+  `accent-color` and `background-color: surface.base`. #717 paints `<body>` itself in a separate
+  rule ([717 record](./717-global-stylesheet-contract.md)). Without the descendant rule, scopes
   would inherit the parent's computed text colour. App CSS and Luke UI recipes outrank it. `<html>`
   is excluded; `<body>`'s background paints the page canvas, and page scrollbars follow `<html>`'s
   colour scheme.

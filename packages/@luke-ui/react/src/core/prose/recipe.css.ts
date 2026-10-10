@@ -64,11 +64,17 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 });
 
 // Markers are restated so a framework reset below Luke UI, such as Tailwind Preflight, cannot
-// remove them. A typed `ol` keeps its HTML presentational hint, which any author `list-style-type`
-// would override.
+// remove them. Preflight's `list-style: none` also overrides HTML `type` presentational hints, so
+// typed lists restate each supported value. The `s` flag keeps `a`/`A` and `i`/`I` distinct: HTML
+// matches the `type` attribute case-insensitively without it.
 proseStyle('ul, ol', { paddingInlineStart: vars.space.sp24 });
 proseStyle('ul', { listStyleType: 'disc' });
 proseStyle('ol:not([type])', { listStyleType: 'decimal' });
+proseStyle('ol[type="1"]', { listStyleType: 'decimal' });
+proseStyle('ol[type="a" s]', { listStyleType: 'lower-alpha' });
+proseStyle('ol[type="A" s]', { listStyleType: 'upper-alpha' });
+proseStyle('ol[type="i" s]', { listStyleType: 'lower-roman' });
+proseStyle('ol[type="I" s]', { listStyleType: 'upper-roman' });
 
 proseStyle('hr', {
 	blockSize: 0,

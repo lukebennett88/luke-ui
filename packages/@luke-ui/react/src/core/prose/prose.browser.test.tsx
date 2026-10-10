@@ -78,9 +78,7 @@ test('normalises a nested pre margin', () => {
 	).toBeCloseTo(0, 0);
 });
 
-// Chromium and Safari match `type` case-insensitively, so CSS must not restate A/a or I/i. Prose
-// sets no marker on a typed list, so its presentational hint applies.
-test('preserves native ordered-list type markers under proseRecipe alone', () => {
+test('preserves ordered-list type markers, including uppercase and lowercase, under proseRecipe', () => {
 	const { locator } = render(
 		<div className={proseRecipe()}>
 			<ol type="1">

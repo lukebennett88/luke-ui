@@ -104,8 +104,10 @@ tray's own portal.
 
 ## Global styles
 
-`core/styles/global-styles.css.ts` is the only module that styles the document. It holds six rules,
-all at zero specificity in `luke-ui.reset`:
+`core/styles/global-styles.css.ts` is the only module that styles the document. It holds six rules
+in `luke-ui.reset`. Each uses `:where()`, so the selector contributes no specificity.
+Pseudo-elements are invalid inside `:where()`, so the box-sizing rule lists `::before` and
+`::after` outside it and each adds (0,0,1):
 
 | Rule                              | Sets                                                                                          |
 | --------------------------------- | --------------------------------------------------------------------------------------------- |
@@ -195,7 +197,7 @@ never disables an application's animations. Under `@media (prefers-reduced-motio
   reduced-motion query that only removes them.
 - Remove spatial movement, scaling, pulsing, and looping, or replace it with a non-spatial change.
   An overlay keeps its fade and loses its movement. See `core/styles/overlay-motion.ts`.
-- Keep loading states understandable. `LoadingSpinner` keeps turning a fixed arc. `LoadingSkeleton`
+- Keep loading states understandable. `LoadingSpinner` shows a static fixed arc. `LoadingSkeleton`
   keeps its static placeholder.
 - `ScrollFade`'s scroll-linked animation is exempt, because it tracks scroll position rather than
   time.

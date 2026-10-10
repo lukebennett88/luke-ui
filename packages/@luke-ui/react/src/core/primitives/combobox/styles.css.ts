@@ -11,7 +11,6 @@ import {
 import {
 	overlayEnterTransition,
 	overlayExitTransition,
-	reducedMotionOverlayProperties,
 } from '../../styles/overlay-motion.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
@@ -92,8 +91,8 @@ const comboboxActionStyles = {
 const popoverProperties = ['opacity', 'translate', 'box-shadow'];
 const popoverTransition = overlayEnterTransition(popoverProperties);
 const popoverExitTransition = overlayExitTransition(popoverProperties);
-const popoverReducedTransition = overlayEnterTransition(reducedMotionOverlayProperties);
-const popoverReducedExitTransition = overlayExitTransition(reducedMotionOverlayProperties);
+const popoverReducedTransition = overlayEnterTransition(['opacity']);
+const popoverReducedExitTransition = overlayExitTransition(['opacity']);
 
 /**
  * Raw slotted config for the combobox anatomy.

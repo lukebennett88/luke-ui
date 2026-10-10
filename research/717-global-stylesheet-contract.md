@@ -115,8 +115,9 @@ Tailwind is supported as an application styling convenience, not an architectura
 ## Global rule inventory
 
 The stylesheet has exactly six global rules, plus the layer order statement. Every rule is in
-`luke-ui.reset` and uses `:where()`, so its specificity is zero. Pseudo-elements are invalid inside
-`:where()`, so G1 lists them outside it, where each adds its own (0,0,1).
+`luke-ui.reset` and uses `:where()` on the matching part, so that part contributes no specificity.
+Pseudo-elements are invalid inside `:where()`, so G1 lists them outside it, where each adds its own
+(0,0,1). The other five rules stay at zero specificity.
 
 | #   | Selector                                                                | Declarations                                                                                                                 |
 | --- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -144,7 +145,7 @@ Old rules came from `reset.css.ts` (scoped to `.luke-ui-reset`) and `theme-root.
 | `blockquote, dl, dd, figure, p { margin: 0 }`                        | Removed                         | `Text` zeroes its own margin. `Prose` zeroes block margins inside its scope.                                                                                                                      |
 | `h1`–`h6 { font: unset; margin: 0 }`                                 | Removed                         | `Text` zeroes margins and always sets a weight from its type style, or inherits one. `Heading` sets its type style and weight. Native headings keep browser sizes and weight.                     |
 | `ol, ul { margin: 0; padding: 0 }`                                   | Removed                         | Combobox and Select list boxes already zero both. `Prose` sets list indentation.                                                                                                                  |
-| `ul, ol:not([type]), ol[type]:not(.prose *) { list-style: none }`    | Removed                         | List boxes already remove markers. `Prose` keeps its markers. Typed `ol` elements keep their HTML presentational hints everywhere.                                                                |
+| `ul, ol:not([type]), ol[type]:not(.prose *) { list-style: none }`    | Removed                         | List boxes already remove markers. `Prose` restates markers, including each supported `ol[type]` value, so a later framework reset such as Tailwind Preflight cannot remove them.              |
 | `table { border-collapse: collapse; border-spacing: 0 }`             | Removed                         | `Prose` owns its table treatment.                                                                                                                                                                 |
 | `caption, th { text-align: inherit }`                                | Removed                         | `Prose` aligns `th` and `caption` to the start.                                                                                                                                                   |
 | `th, td { padding: 0 }`                                              | Removed                         | `Prose` already pads cells.                                                                                                                                                                       |
@@ -168,10 +169,10 @@ Old rules came from `reset.css.ts` (scoped to `.luke-ui-reset`) and `theme-root.
   agent's bold. Raw `textRecipe()` on a heading without `fontWeight` keeps the native weight, like
   any native heading.
 - **`Prose`.** Zeroes block margins on all sides (blockquotes, figures, and `dd` had inline margins
-  from the user agent), keeps disc markers for `ul` and decimal markers for untyped `ol`, indents
-  every list, collapses tables, aligns `th` and `caption` to the start, and pads cells. Typed `ol`
-  elements keep their presentational hints without an exemption, so `prose/scope.css.ts` and the
-  `ol[type]` workaround are gone.
+  from the user agent), keeps disc markers for `ul` and decimal markers for untyped `ol`, restates
+  each supported typed `ol` marker with a case-sensitive attribute selector, indents every list,
+  collapses tables, aligns `th` and `caption` to the start, and pads cells. `prose/scope.css.ts` and
+  the old global `ol[type]` workaround are gone.
 - **Buttons.** The Button primitive owns its chrome, cursor, touch action, and tap highlight. The
   Combobox trigger and clear button, and the Combobox tray trigger, set their own padding,
   background, border, and appearance.
@@ -200,7 +201,7 @@ One indicator per control:
 | Switch thumb                                                                  | The thumb stops sliding and stretching. Its colour transition stays.                            |
 | Combobox and Select popovers                                                  | Opacity fades stay. Movement is removed, including on `[data-entering]` and `[data-exiting]`.   |
 | Mobile tray and scrim                                                         | Opacity fades stay. The tray no longer slides.                                                  |
-| LoadingSpinner                                                                | The arc keeps rotating so the busy state stays visible. The rubber-band stroke animation stops. |
+| LoadingSpinner                                                                | Rotation and rubber-band animation stop. A fixed arc remains so the busy state stays visible.   |
 | LoadingSkeleton                                                               | The sheen stops and the placeholder surface stays.                                              |
 | ScrollFade                                                                    | Exempt: scroll-linked, not time-based.                                                          |
 
@@ -259,7 +260,8 @@ One indicator per control:
 
 - `stylesheet-contract.test.ts` checks the built `dist/stylesheet.css`: one leading order statement,
   nested layer order, no early layer, no declarations in `base`, recipes in `luke-ui.recipes`,
-  utilities in `luke-ui.utilities`, the six global rules, and no `luke-ui-` class selectors.
+  utilities in `luke-ui.utilities`, the six global rules by selector and declaration (via the CSS
+  parser, not a full-string pin), and no `luke-ui-` class selectors.
 - `layer-order.browser.test.ts` checks precedence in Chromium with the built stylesheet, including
   important declarations and a consumer `base` write.
 - `apps/docs/src/styles/tailwind-integration.browser.test.tsx` loads real Tailwind v4 output,
@@ -288,7 +290,7 @@ One indicator per control:
 | `docs/STYLING.md` claim that the reset owns reduced motion                            | D4: component-owned.                                                   |
 | `docs/STYLING.md` setup step 4 and the `theme-root.css.ts` paragraph                  | `<html>` identity only; `global-styles.css.ts`.                        |
 | `layers.css.ts` and `layer-names.ts` JSDoc                                            | Nested layers.                                                         |
-| `prose/recipe.css.ts` `ol[type]` comment and `prose/scope.css.ts`                     | Removed; typed lists keep hints because nothing global strips markers. |
+| `prose/recipe.css.ts` `ol[type]` comment and `prose/scope.css.ts`                     | Removed; Prose restates typed markers so Preflight cannot clear them.  |
 | LoadingSkeleton "global reduced-motion reset" comment                                 | Removed.                                                               |
 | Field inline-label, Select root, and Combobox group "reset ring" comments             | Removed with their `outline: none` workarounds.                        |
 | "Table cells need padding after the reset removes it" (Prose)                         | Prose owns its table treatment.                                        |

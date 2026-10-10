@@ -9,13 +9,25 @@ import { cascadeLayerOrder } from './layer-names.js';
 /** Every layer the stylesheet may name, in precedence order. */
 const layerOrder = ['base', 'luke-ui', 'luke-ui.reset', 'luke-ui.recipes', 'luke-ui.utilities'];
 const layerNameSet = new Set<string>(layerOrder);
-const RESET_LAYER_BLOCK_PATTERN = /^@layer luke-ui\.reset \{\n([\s\S]*?)\n\}$/m;
+
+const documentColorVars = {
+	'accent-color': '--luke-color-background-accent-solid-rest',
+	'background-color': '--luke-color-surface-base',
+	color: '--luke-color-text-primary',
+} as const;
+
+const bodyFontVars = {
+	'font-family': '--luke-font-body-font-family',
+	'font-size': '--luke-font-body-font-size',
+	'font-weight': '--luke-font-body-font-weight',
+	'letter-spacing': '--luke-font-body-letter-spacing',
+} as const;
 
 /**
- * The whole global stylesheet, as built. Every other rule belongs to a component. See
- * `research/717-global-stylesheet-contract.md` before changing it.
+ * Compact reset-layer CSS for mutation fixtures. The built stylesheet is checked structurally
+ * against `research/717-global-stylesheet-contract.md`, not by string equality with this text.
  */
-const globalRules = `  :where(*), :where(*)::before, :where(*)::after {
+const resetLayerFixtureCss = `  :where(*), :where(*)::before, :where(*)::after {
     box-sizing: border-box;
   }
   :where(:root) {
@@ -255,7 +267,7 @@ function assertStylesheetContract(
 	assertRootNodes(analysis);
 	assertNoStableClassSelectors(analysis);
 	assertRecipesLayerHasRules(analysis);
-	assertGlobalRules(stylesheet);
+	assertGlobalRules(analysis);
 
 	for (const className of recipeClasses) {
 		assertClassOwnership(analysis, className, 'luke-ui.recipes');
@@ -481,11 +493,166 @@ function assertNoRedundantEmptyLayerStatements(stylesheet: string): void {
 	}
 }
 
-/** The reset layer holds exactly the global rules, in one block. */
-function assertGlobalRules(stylesheet: string): void {
-	const blocks = [...stylesheet.matchAll(new RegExp(RESET_LAYER_BLOCK_PATTERN, 'gm'))];
-	expect(blocks).toHaveLength(1);
-	expect(blocks[0]?.[1]).toBe(globalRules);
+/**
+ * The reset layer holds exactly the six global selector groups (plus the forced-colours focus
+ * variant). Assertions use the Lightning CSS AST already walked by `analyzeStylesheet`.
+ */
+function assertGlobalRules(analysis: StylesheetAnalysis): void {
+	const resetRules = analysis.styleRules.filter((rule) => rule.owningLayer === 'luke-ui.reset');
+	const matched = new Set<IndexedStyleRule>();
+
+	const take = (
+		predicate: (rule: IndexedStyleRule) => boolean,
+		assertRule: (rule: IndexedStyleRule) => void,
+	): void => {
+		const rule = resetRules.find((entry) => !matched.has(entry) && predicate(entry));
+		if (rule == null) throw new Error('Expected a global reset rule that was not found.');
+		assertRule(rule);
+		matched.add(rule);
+	};
+
+	take(isBoxSizingRule, (rule) => {
+		expect(declarationListHas(rule, 'box-sizing', 'border-box')).toBe(true);
+		expect(rule.hasPseudo('before')).toBe(true);
+		expect(rule.hasPseudo('after')).toBe(true);
+	});
+
+	take(isRootContainerRule, (rule) => {
+		expect(declarationListHas(rule, 'container-type', 'inline-size')).toBe(true);
+	});
+
+	take(isBodyRule, (rule) => {
+		for (const [property, ident] of Object.entries(documentColorVars)) {
+			expect(declarationListHas(rule, property, `var(${ident})`)).toBe(true);
+		}
+		for (const [property, ident] of Object.entries(bodyFontVars)) {
+			expect(declarationListHas(rule, property, `var(${ident})`)).toBe(true);
+		}
+		expect(declarationListHas(rule, 'line-height', '1.5')).toBe(true);
+		expect(declarationListHas(rule, 'margin', '0')).toBe(true);
+	});
+
+	take(isColorModeRepaintRule, (rule) => {
+		for (const [property, ident] of Object.entries(documentColorVars)) {
+			expect(declarationListHas(rule, property, `var(${ident})`)).toBe(true);
+		}
+		expect(declarationListHas(rule, 'font-family', 'var(--luke-font-body-font-family)')).toBe(
+			false,
+		);
+	});
+
+	take(isFormControlRule, (rule) => {
+		expect(declarationListHas(rule, 'font', 'inherit')).toBe(true);
+		expect(declarationListHas(rule, 'margin', '0')).toBe(true);
+	});
+
+	take(isFocusVisibleRule, (rule) => {
+		expect(declarationListHas(rule, 'outline-color', 'var(--luke-color-border-focus)')).toBe(true);
+		expect(declarationListHas(rule, 'outline-offset', '2px')).toBe(true);
+		expect(declarationListHas(rule, 'outline-style', 'solid')).toBe(true);
+		expect(declarationListHas(rule, 'outline-width', '2px')).toBe(true);
+	});
+
+	take(isForcedColorsFocusRule, (rule) => {
+		expect(declarationListHas(rule, 'outline-color', 'Highlight')).toBe(true);
+	});
+
+	const unexpected = resetRules.filter((rule) => !matched.has(rule) && rule.hasDeclarations);
+	if (unexpected.length > 0) {
+		throw new Error(
+			`Unexpected document-wide rules in luke-ui.reset: ${unexpected
+				.map((rule) => formatPrimarySelector(rule))
+				.join(', ')}`,
+		);
+	}
+}
+
+function whereSelectors(rule: IndexedStyleRule): Array<Array<SelectorComponent>> {
+	const selectors: Array<Array<SelectorComponent>> = [];
+	for (const selector of rule.rule.selectors) {
+		const where = selector[0];
+		if (where?.type === 'pseudo-class' && where.kind === 'where' && where.selectors) {
+			selectors.push(...where.selectors);
+			continue;
+		}
+		selectors.push(selector);
+	}
+	return selectors;
+}
+
+function isBoxSizingRule(rule: IndexedStyleRule): boolean {
+	const selectors = rule.rule.selectors;
+	if (selectors.length !== 3) return false;
+	const [universal, before, after] = selectors;
+	return (
+		universal?.[0]?.type === 'pseudo-class' &&
+		universal[0].kind === 'where' &&
+		universal[0].selectors?.[0]?.[0]?.type === 'universal' &&
+		before?.[0]?.type === 'pseudo-class' &&
+		before[0].kind === 'where' &&
+		before[1]?.type === 'pseudo-element' &&
+		before[1].kind === 'before' &&
+		after?.[0]?.type === 'pseudo-class' &&
+		after[0].kind === 'where' &&
+		after[1]?.type === 'pseudo-element' &&
+		after[1].kind === 'after'
+	);
+}
+
+function isRootContainerRule(rule: IndexedStyleRule): boolean {
+	const [inner] = whereSelectors(rule);
+	return inner?.length === 1 && inner[0]?.type === 'pseudo-class' && inner[0].kind === 'root';
+}
+
+function isBodyRule(rule: IndexedStyleRule): boolean {
+	const inners = whereSelectors(rule);
+	return inners.length === 1 && inners[0]?.length === 1 && inners[0][0]?.type === 'type' && inners[0][0].name === 'body';
+}
+
+function isColorModeRepaintRule(rule: IndexedStyleRule): boolean {
+	const inners = whereSelectors(rule);
+	if (inners.length !== 2) return false;
+	return inners.every((inner) => {
+		if (inner.length !== 3) return false;
+		const [body, combinator, attribute] = inner;
+		return (
+			body?.type === 'type' &&
+			body.name === 'body' &&
+			combinator?.type === 'combinator' &&
+			combinator.value === 'descendant' &&
+			attribute?.type === 'attribute' &&
+			attribute.name === 'data-color-mode'
+		);
+	});
+}
+
+function isFormControlRule(rule: IndexedStyleRule): boolean {
+	const names = whereSelectors(rule)
+		.map((inner) => (inner.length === 1 && inner[0]?.type === 'type' ? inner[0].name : undefined))
+		.filter((name): name is string => name != null)
+		.sort();
+	return names.join(',') === 'button,input,select,textarea';
+}
+
+function isFocusVisibleRule(rule: IndexedStyleRule): boolean {
+	if (!declarationListHas(rule, 'outline-width', '2px')) return false;
+	const [inner] = whereSelectors(rule);
+	return (
+		inner?.length === 1 &&
+		inner[0]?.type === 'pseudo-class' &&
+		inner[0].kind === 'focus-visible'
+	);
+}
+
+function isForcedColorsFocusRule(rule: IndexedStyleRule): boolean {
+	if (declarationListHas(rule, 'outline-width', '2px')) return false;
+	if (!declarationListHas(rule, 'outline-color', 'Highlight')) return false;
+	const [inner] = whereSelectors(rule);
+	return (
+		inner?.length === 1 &&
+		inner[0]?.type === 'pseudo-class' &&
+		inner[0].kind === 'focus-visible'
+	);
 }
 
 function assertLayerNames(analysis: StylesheetAnalysis): void {
@@ -693,6 +860,10 @@ function matchesDeclaration(declaration: Declaration, property: string, value: s
 		return declaration.property === 'box-sizing' && declaration.value === 'border-box';
 	}
 
+	if (property === 'container-type' && value === 'inline-size') {
+		return declaration.property === 'container-type' && declaration.value === 'inline-size';
+	}
+
 	if (property === 'text-overflow' && value === 'ellipsis') {
 		return declaration.property === 'text-overflow' && declaration.value === 'ellipsis';
 	}
@@ -718,11 +889,91 @@ function matchesDeclaration(declaration: Declaration, property: string, value: s
 		return matchesLineClamp(declaration, property, value);
 	}
 
+	if (property === 'line-height' && value === '1.5') {
+		const lineHeight = declaration.value as { type?: string; value?: number };
+		return declaration.property === 'line-height' && lineHeight.type === 'number' && lineHeight.value === 1.5;
+	}
+
+	if (property === 'margin' && value === '0') {
+		return matchesZeroMargin(declaration);
+	}
+
+	if (property === 'font' && value === 'inherit') {
+		return matchesIdentUnparsed(declaration, 'font', 'inherit');
+	}
+
+	if (property === 'outline-style' && value === 'solid') {
+		const outlineStyle = declaration.value as { type?: string; value?: string };
+		return (
+			declaration.property === 'outline-style' &&
+			outlineStyle.type === 'line-style' &&
+			outlineStyle.value === 'solid'
+		);
+	}
+
+	if (property === 'outline-width' && value === '2px') {
+		const outlineWidth = declaration.value as {
+			type?: string;
+			value?: { type?: string; value?: { unit?: string; value?: number } };
+		};
+		return (
+			declaration.property === 'outline-width' &&
+			outlineWidth.type === 'length' &&
+			outlineWidth.value?.type === 'value' &&
+			outlineWidth.value.value?.unit === 'px' &&
+			outlineWidth.value.value.value === 2
+		);
+	}
+
+	if (property === 'outline-offset' && value === '2px') {
+		const custom = declaration.value as {
+			name?: string;
+			value?: Array<{ type?: string; value?: { unit?: string; value?: number } }>;
+		};
+		const token = custom.value?.[0];
+		return (
+			declaration.property === 'custom' &&
+			custom.name === 'outline-offset' &&
+			token?.type === 'length' &&
+			token.value?.unit === 'px' &&
+			token.value.value === 2
+		);
+	}
+
+	if (property === 'outline-color' && value === 'Highlight') {
+		return declaration.property === 'outline-color' && declaration.value === 'highlight';
+	}
+
 	if (value.startsWith('var(')) {
 		return matchesVarDeclaration(declaration, property, value);
 	}
 
 	return false;
+}
+
+function matchesZeroMargin(declaration: Declaration): boolean {
+	if (declaration.property !== 'margin') return false;
+	const margin = declaration.value as Record<string, { type?: string; value?: { type?: string; value?: { unit?: string; value?: number } } }>;
+	return (['top', 'right', 'bottom', 'left'] as const).every((side) => {
+		const entry = margin[side];
+		return (
+			entry?.type === 'length-percentage' &&
+			entry.value?.type === 'dimension' &&
+			entry.value.value?.unit === 'px' &&
+			entry.value.value.value === 0
+		);
+	});
+}
+
+function matchesIdentUnparsed(declaration: Declaration, property: string, ident: string): boolean {
+	if (declaration.property !== 'unparsed') return false;
+	const unparsed = declaration.value as {
+		propertyId?: { property?: string };
+		value?: Array<{ type?: string; value?: { type?: string; value?: string } }>;
+	};
+	if (unparsed.propertyId?.property !== property) return false;
+	const token = unparsed.value?.[0];
+	return token?.type === 'token' && token.value?.type === 'ident' && token.value.value === ident;
 }
 
 function matchesDisplay(declaration: Declaration, value: string): boolean {
@@ -804,7 +1055,7 @@ function formatPrimarySelector(rule: IndexedStyleRule): string {
 
 const validStylesheetFixture = `${cascadeLayerOrder}
 @layer luke-ui.reset {
-${globalRules}
+${resetLayerFixtureCss}
 }
 @layer luke-ui.recipes {
   .recipe-class { display: inline-flex; }

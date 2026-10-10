@@ -1,11 +1,7 @@
 import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import { style } from '../styles/layered-style.css.js';
-import {
-	overlayEnterTransition,
-	overlayExitTransition,
-	reducedMotionOverlayProperties,
-} from '../styles/overlay-motion.js';
+import { overlayEnterTransition, overlayExitTransition } from '../styles/overlay-motion.js';
 
 const trayPaddingBlockEnd = createVar();
 
@@ -35,8 +31,8 @@ const scrimExitTransition = overlayExitTransition(['opacity']);
 
 const trayTransition = overlayEnterTransition(['opacity', 'translate']);
 const trayExitTransition = overlayExitTransition(['opacity', 'translate']);
-const trayReducedTransition = overlayEnterTransition(reducedMotionOverlayProperties);
-const trayReducedExitTransition = overlayExitTransition(reducedMotionOverlayProperties);
+const trayReducedTransition = overlayEnterTransition(['opacity']);
+const trayReducedExitTransition = overlayExitTransition(['opacity']);
 
 /** Based on Apache-2.0 React Spectrum `Tray.tsx` and `tray/index.css`. */
 export const mobileOverlay = style({

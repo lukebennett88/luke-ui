@@ -1,8 +1,9 @@
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties, ReactNode } from 'react';
-import { test } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { emulateReducedMotion } from '../test-utils/emulate-media.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -58,6 +59,26 @@ test('the LoadingSpinner scene has no axe violations', async () => {
 	const { container } = render(<LoadingSpinnerScene />);
 
 	await expectNoAxeViolations(container);
+});
+
+test('shows a static fixed arc under prefers-reduced-motion: reduce', async () => {
+	const { locator } = render(<LoadingSpinner aria-label="Loading" />);
+	const spinner = locator.element();
+	const indicator = spinner.querySelector('circle');
+	if (indicator == null) throw new Error('Expected the spinner indicator circle.');
+
+	expect(getComputedStyle(spinner).animationName).not.toBe('none');
+	expect(getComputedStyle(indicator).animationName).not.toBe('none');
+
+	await emulateReducedMotion(true);
+
+	expect(spinner).toHaveAttribute('role', 'status');
+	expect(spinner).toHaveAccessibleName('Loading');
+	expect(getComputedStyle(spinner).animationName).toBe('none');
+	expect(getComputedStyle(indicator).animationName).toBe('none');
+	expect(getComputedStyle(indicator).strokeDasharray.replaceAll('px', '').replaceAll(', ', ' ')).toBe(
+		'25 100',
+	);
 });
 
 test('sizes and colors', { tags: ['visual'] }, async () => {

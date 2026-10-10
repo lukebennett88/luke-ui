@@ -2,6 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Button, buttonRecipe } from '@luke-ui/react/button';
 import { Heading } from '@luke-ui/react/heading';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
+import { Prose } from '@luke-ui/react/prose';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -190,5 +191,40 @@ for (const scenario of scenarios) {
 			const background = getComputedStyle(byTestId('skeleton')).backgroundColor;
 			expect(background === 'rgb(7, 8, 9)').toBe(!scenario.isOrdered);
 		});
+	});
+}
+
+// Preflight's `list-style: none` overrides HTML `type` presentational hints. With the documented
+// layer order, Prose recipes sit above Preflight and must restore each supported type.
+for (const scenario of scenarios.filter((entry) => entry.isOrdered)) {
+	test(`${scenario.name}: Prose keeps typed ordered-list markers under Tailwind Preflight`, () => {
+		loadCss(scenario.css);
+		container = document.body.appendChild(document.createElement('div'));
+		root = createRoot(container);
+		act(() => {
+			root?.render(
+				<Prose>
+					<ol type="1">
+						<li>1</li>
+					</ol>
+					<ol type="a">
+						<li>a</li>
+					</ol>
+					<ol type="A">
+						<li>A</li>
+					</ol>
+					<ol type="i">
+						<li>i</li>
+					</ol>
+					<ol type="I">
+						<li>I</li>
+					</ol>
+				</Prose>,
+			);
+		});
+
+		expect(
+			[...container.querySelectorAll('ol')].map((ol) => getComputedStyle(ol).listStyleType),
+		).toEqual(['decimal', 'lower-alpha', 'upper-alpha', 'lower-roman', 'upper-roman']);
 	});
 }
