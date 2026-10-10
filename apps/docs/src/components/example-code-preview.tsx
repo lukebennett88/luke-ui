@@ -22,32 +22,21 @@ export function ExampleCodePreview({
 	source: string;
 	title: string;
 }) {
-	const [mode, dispatch] = useReducer(sourceReducer, 'unmeasured');
+	const [{ focus, mode }, dispatch] = useReducer(sourceReducer, initialSourceState);
 	const sourceRef = useRef<HTMLPreElement>(null);
+	const copyButtonRef = useRef<HTMLButtonElement>(null);
 	const codeId = useId();
 	const isExpanded = mode === 'expanded';
 	const canExpand = mode === 'collapsed' || isExpanded;
 	const isClipped = !isExpanded;
-	const committedModeRef = useRef(mode);
-
-	useLayoutEffect(() => {
-		committedModeRef.current = mode;
-		// Collapsing source that already fits does not resize it, so the observer stays quiet.
-		const sourceElement = sourceRef.current;
-		if (mode === 'collapsed' && sourceElement) {
-			dispatch({ isClipped: isSourceClipped(sourceElement), type: 'measured' });
-		}
-	}, [mode]);
 
 	useLayoutEffect(() => {
 		const sourceElement = sourceRef.current;
 		if (!sourceElement) return;
 
 		const update = () => {
-			// Expanded source says nothing about whether it fits when collapsed. A measurement taken
-			// now could also be applied after a pending collapse, so skip it.
-			if (committedModeRef.current === 'expanded') return;
-			dispatch({ isClipped: isSourceClipped(sourceElement), type: 'measured' });
+			const isClipped = measureIsClipped(sourceElement);
+			if (isClipped != null) dispatch({ isClipped, type: 'measured' });
 		};
 
 		const observer = new ResizeObserver(update);
@@ -60,6 +49,24 @@ export function ExampleCodePreview({
 		};
 	}, []);
 
+	// Collapsed styles can land without a size change (for example after
+	// shrinking typography while expanded). Remeasure once they apply.
+	useLayoutEffect(() => {
+		if (mode !== 'collapsed') return;
+		const sourceElement = sourceRef.current;
+		if (!sourceElement) return;
+
+		const isClipped = measureIsClipped(sourceElement);
+		if (isClipped != null) dispatch({ isClipped, type: 'measured' });
+	}, [mode]);
+
+	// The reducer asks for this only after a focused collapse control has unmounted.
+	useLayoutEffect(() => {
+		if (focus !== 'copy') return;
+		copyButtonRef.current?.focus();
+		dispatch({ type: 'focusRestored' });
+	}, [focus]);
+
 	return (
 		<ViewTransition default="none" update={styles.codeUpdate}>
 			<Box
@@ -71,6 +78,7 @@ export function ExampleCodePreview({
 			>
 				{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
 				<CodeBlock
+					copyButtonRef={copyButtonRef}
 					copyText={source}
 					flush
 					html={html}
@@ -97,10 +105,15 @@ export function ExampleCodePreview({
 						<Button
 							aria-controls={codeId}
 							aria-expanded={isExpanded}
-							onPress={() => {
+							// React ignores the blur from unmounting, so this only sees focus moving away.
+							onBlur={() => dispatch({ type: 'toggleBlurred' })}
+							onFocus={() => dispatch({ type: 'toggleFocused' })}
+							onPress={(event) => {
+								// Read focus at press time. A view transition can move it to body before effects run.
+								const hadFocus = event.target === document.activeElement;
 								startTransition(() => {
 									addTransitionType(styles.codeTransitionType);
-									dispatch({ type: 'toggle' });
+									dispatch(isExpanded ? { hadFocus, type: 'collapse' } : { type: 'expand' });
 								});
 							}}
 							size="small"
@@ -114,27 +127,57 @@ export function ExampleCodePreview({
 	);
 }
 
-function isSourceClipped(sourceElement: HTMLElement) {
+/**
+ * Whether the collapsed clip cuts off source lines. Returns `undefined` while the clip is not
+ * applied (for example when a resize callback fires for the expanded DOM just as a collapse is
+ * queued), because that measurement says nothing about the collapsed source.
+ */
+function measureIsClipped(sourceElement: HTMLElement) {
+	if (getComputedStyle(sourceElement).overflowY !== 'hidden') return undefined;
 	return sourceElement.scrollHeight > sourceElement.clientHeight + 1;
 }
 
-type SourceMode = 'unmeasured' | 'fits' | 'collapsed' | 'expanded';
+interface SourceState {
+	mode: 'unmeasured' | 'fits' | 'collapsed' | 'expanded';
+	/**
+	 * Only a pending collapse can request restoration. Remember blur until measurement so focus
+	 * returning before commit can reinstate the request.
+	 */
+	focus: 'none' | 'copy-if-fits' | 'collapse-blurred' | 'copy';
+}
 
-type SourceEvent = { isClipped: boolean; type: 'measured' } | { type: 'toggle' };
+type SourceEvent =
+	| { isClipped: boolean; type: 'measured' }
+	| { type: 'expand' }
+	| { hadFocus: boolean; type: 'collapse' }
+	| { type: 'toggleBlurred' }
+	| { type: 'toggleFocused' }
+	| { type: 'focusRestored' };
 
-function sourceReducer(mode: SourceMode, event: SourceEvent): SourceMode {
-	if (event.type === 'measured') {
-		// Expanded source fits by definition. Keep its collapse control until it is toggled.
-		if (mode === 'expanded') return mode;
-		return event.isClipped ? 'collapsed' : 'fits';
-	}
+const initialSourceState: SourceState = { focus: 'none', mode: 'unmeasured' };
 
-	switch (mode) {
-		case 'collapsed':
-			return 'expanded';
-		case 'expanded':
-			return 'collapsed';
-		default:
-			return mode;
+function sourceReducer(state: SourceState, event: SourceEvent): SourceState {
+	switch (event.type) {
+		case 'measured': {
+			// Expanded source fits by definition. Keep its collapse control until it is collapsed.
+			if (state.mode === 'expanded') return state;
+			const mode = event.isClipped ? 'collapsed' : 'fits';
+			let focus = state.focus;
+			if (event.isClipped || focus === 'collapse-blurred') focus = 'none';
+			else if (focus === 'copy-if-fits') focus = 'copy';
+			return mode === state.mode && focus === state.focus ? state : { focus, mode };
+		}
+		case 'expand':
+			return state.mode === 'collapsed' ? { focus: 'none', mode: 'expanded' } : state;
+		case 'collapse':
+			return state.mode === 'expanded'
+				? { focus: event.hadFocus ? 'copy-if-fits' : 'none', mode: 'collapsed' }
+				: state;
+		case 'toggleBlurred':
+			return state.focus === 'copy-if-fits' ? { ...state, focus: 'collapse-blurred' } : state;
+		case 'toggleFocused':
+			return state.focus === 'collapse-blurred' ? { ...state, focus: 'copy-if-fits' } : state;
+		case 'focusRestored':
+			return state.focus === 'copy' ? { ...state, focus: 'none' } : state;
 	}
 }
