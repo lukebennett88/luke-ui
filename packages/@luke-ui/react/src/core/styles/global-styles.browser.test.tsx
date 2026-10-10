@@ -277,6 +277,33 @@ test('shows exactly one ring for controls whose wrappers carry data-focus-visibl
 	}
 });
 
+test('shows virtual focus on a list box item without a second ring', async () => {
+	// Padding keeps the trigger-width popover inside the narrow test frame. An overflowing popover
+	// would scroll the page, and React Aria closes popovers on scroll.
+	const { container } = render(
+		<div style={{ padding: '1rem' }}>
+			<ComboboxField defaultItems={items} label="Combobox">
+				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+			</ComboboxField>
+		</div>,
+	);
+	const input = page.getByRole('combobox').element();
+
+	await userEvent.tab();
+	await userEvent.keyboard('{ArrowDown}');
+	const option = page.getByRole('option', { name: 'Option one' });
+	await expect.element(option).toHaveAttribute('data-focus-visible', 'true');
+
+	// DOM focus stays on the input, so the option shows focus with its background alone.
+	expect(input).toHaveFocus();
+	expect(input).toHaveAttribute('aria-activedescendant', option.element().id);
+	expect(getComputedStyle(option.element()).outlineStyle).toBe('none');
+	expect(getComputedStyle(option.element()).backgroundColor).not.toBe(
+		getComputedStyle(page.getByRole('option', { name: 'Option two' }).element()).backgroundColor,
+	);
+	expect(visibleRings(container)).toHaveLength(1);
+});
+
 test('leaves application animations and Luke UI feedback running under reduced motion', async () => {
 	addStyle(`
 @keyframes app-spin { to { rotate: 1turn; } }
