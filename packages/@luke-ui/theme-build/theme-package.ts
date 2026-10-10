@@ -18,6 +18,12 @@ import type { UserConfig } from 'vite-plus';
 
 const require = createRequire(import.meta.url);
 
+/**
+ * Counts the builds in this process. Node caches an imported module by URL, so each build imports
+ * `input.js` under its own query, or a rebuild in watch mode would compile the first build's input.
+ */
+let build = 0;
+
 export const themePackage: UserConfig = {
 	pack: {
 		copy: [
@@ -48,7 +54,10 @@ export const themePackage: UserConfig = {
 			{
 				name: 'luke-ui-theme-stylesheet',
 				async writeBundle({ dir = 'dist' }) {
-					const { theme } = await import(pathToFileURL(path.resolve(dir, 'input.js')).href);
+					const input = pathToFileURL(path.resolve(dir, 'input.js'));
+					build += 1;
+					input.search = `build=${build}`;
+					const { theme } = await import(input.href);
 					await writeFile(path.resolve(dir, 'stylesheet.css'), defineTheme(theme));
 				},
 			},
