@@ -40,6 +40,7 @@
 	},
 	"devDependencies": {
 		"@capsizecss/unpack": "catalog:",
+		"@fontsource-variable/inter": "catalog:",
 		"@luke-ui/react": "workspace:*",
 		"@types/node": "catalog:",
 		"publint": "catalog:",

@@ -1,11 +1,18 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
+
+/** Resolves a file in the pinned Fontsource package, so the build never downloads a font. */
+function fontsourceFile(file: string): string {
+	return fileURLToPath(import.meta.resolve(`@fontsource-variable/inter/${file}`));
+}
 
 export default defineConfig({
 	pack: {
 		copy: [
 			{ from: 'src/fonts.css', to: 'dist' },
-			{ from: 'src/fonts/*', to: 'dist/fonts' },
+			{ from: fontsourceFile('files/inter-latin-wght-normal.woff2'), to: 'dist/fonts' },
+			{ from: fontsourceFile('LICENSE'), rename: 'OFL.txt', to: 'dist/fonts' },
 		],
 		deps: {
 			neverBundle: Object.keys(packageJson.peerDependencies),

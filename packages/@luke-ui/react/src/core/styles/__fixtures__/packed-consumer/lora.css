@@ -1,8 +1,0 @@
-/* Lora 3.008, Latin subset, weight 400, from @fontsource/lora 5.3.0. SIL Open Font License 1.1: see OFL-lora.txt. */
-@font-face {
-	font-display: block;
-	font-family: 'Lora';
-	font-style: normal;
-	font-weight: 400;
-	src: url('./lora-latin-400-normal.woff2') format('woff2');
-}

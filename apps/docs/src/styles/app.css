@@ -2,8 +2,8 @@
 
 @import '@luke-ui/react/stylesheet.css';
 @import '@luke-ui/theme-paper/stylesheet.css';
-@import '@luke-ui/theme-paper/fonts.css';
 @import '@luke-ui/theme-tactile/stylesheet.css';
+/* Paper and Tactile declare the same Inter face. Load it once for both. */
 @import '@luke-ui/theme-tactile/fonts.css';
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';

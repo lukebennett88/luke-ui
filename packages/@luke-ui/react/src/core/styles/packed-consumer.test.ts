@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { precomputeValues } from '@capsizecss/core';
 import interMetrics from '@capsizecss/metrics/inter';
-import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import type { Browser, Page } from 'playwright';
 import { chromium } from 'playwright';
 import { afterAll, beforeAll, describe, expect, test } from 'vite-plus/test';
@@ -64,8 +64,6 @@ const THEME_PACKAGES = ['@luke-ui/theme-paper', '@luke-ui/theme-tactile'] as con
 const THEME_SKIP_REASON =
 	'LUKE_UI_REACT_SPEC tests a published @luke-ui/react, and the theme packages have no matching ' +
 	'published versions to install beside it.';
-/** Fixtures the theme package checks copy into the consumer. Kept out of the published package. */
-const fixturesDir = fileURLToPath(new URL('./__fixtures__/packed-consumer/', import.meta.url));
 const referenceThemeSource = path.join(repoRoot, 'apps/reference-app/src/theme/input.ts');
 const SYMBOL_PATTERN = /<symbol\b[^>]*\bid="/;
 /** The statement that fixes cascade layer order at the top of the shared stylesheet. */
@@ -813,7 +811,9 @@ async function installConsumer(
 					...peers,
 				},
 				devDependencies: {
-					...(hasThemePackages ? { '@capsizecss/metrics': CAPSIZE_METRICS_VERSION } : {}),
+					...(hasThemePackages
+						? { '@capsizecss/metrics': CAPSIZE_METRICS_VERSION, '@fontsource/lora': LORA_VERSION }
+						: {}),
 					'@types/react': reactTypes,
 					'@types/react-dom': reactDomTypes,
 					typescript,
@@ -851,12 +851,6 @@ async function installConsumer(
 			files[`entries/${themeBoundarySlug(name)}.js`] =
 				`export { themeClassName } from '${name}';\n`;
 		}
-		await mkdir(path.join(consumerDir, 'fixtures'), { recursive: true });
-		await Promise.all(
-			['lora.css', 'lora-latin-400-normal.woff2'].map((fixture) =>
-				copyFile(path.join(fixturesDir, fixture), path.join(consumerDir, 'fixtures', fixture)),
-			),
-		);
 	}
 	for (const boundary of bundleBoundaries) {
 		files[`entries/${boundarySlug(boundary)}.js`] =
@@ -1373,6 +1367,11 @@ const CAPSIZE_METRICS_VERSION = readManifest(
 	workspaceRequire.resolve('@capsizecss/metrics/package.json'),
 ).version;
 
+/** The Lora version the display fixture loads, as the workspace installs it. */
+const LORA_VERSION = readManifest(
+	fileURLToPath(import.meta.resolve('@fontsource/lora/package.json')),
+).version;
+
 /** The documented Node script, run inside the consumer with Node's own TypeScript support. */
 const COMPILE_THEMES = `
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -1428,7 +1427,7 @@ const DISPLAY_ENTRY = `
 import '@luke-ui/react/stylesheet.css';
 import '../generated/display.css';
 import '@luke-ui/theme-tactile/fonts.css';
-import '../fixtures/lora.css';
+import '@fontsource/lora/latin-400.css';
 `;
 
 const PRODUCT_PAGE_BODY = `<p id="body-text" style="font-family: var(--luke-font-body-font-family)">

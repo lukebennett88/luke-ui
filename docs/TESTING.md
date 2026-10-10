@@ -85,9 +85,8 @@ import. Those installs need network access, so `pnpm run test` leaves it out. Ru
 Keep it to the package boundary: tarball contents, dependencies, peers, assets, server rendering, a
 client build, hydration in Chromium, type checking, and what small imports bundle. For the theme
 packages it also compiles themes with the documented Node script, checks each stylesheet rule by
-rule against the token contract, and renders the bundled and fixture fonts. Component behaviour
-belongs in component tests. The display-font fixture lives in
-`src/core/styles/__fixtures__/packed-consumer/`, outside the published files.
+rule against the token contract, and renders the packages' Inter and a Lora display font from
+`@fontsource/lora`. Component behaviour belongs in component tests.
 
 One consumer installs the lowest published version each peer range allows, and the first release of
 the TypeScript version in `MINIMUM_TYPESCRIPT`. That run is the evidence for those floors. Change a
