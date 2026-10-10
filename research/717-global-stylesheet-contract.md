@@ -284,26 +284,26 @@ One indicator per control:
 
 ## Replaced inputs
 
-| Input                                                                                 | Replacement                                                           |
-| ------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `docs/STYLING.md` flat four-layer table and `@layer reset, base, recipes, utilities;` | Nested order, D6.                                                     |
-| `docs/STYLING.md` claim that the reset owns reduced motion                            | D4: component-owned.                                                  |
-| `docs/STYLING.md` setup step 4 and the `theme-root.css.ts` paragraph                  | `<html>` identity only; `global-styles.css.ts`.                       |
-| `layers.css.ts` and `layer-names.ts` JSDoc                                            | Nested layers.                                                        |
+| Input                                                                                 | Replacement                                                               |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `docs/STYLING.md` flat four-layer table and `@layer reset, base, recipes, utilities;` | Nested order, D6.                                                         |
+| `docs/STYLING.md` claim that the reset owns reduced motion                            | D4: component-owned.                                                      |
+| `docs/STYLING.md` setup step 4 and the `theme-root.css.ts` paragraph                  | `<html>` identity only; `global-styles.css.ts`.                           |
+| `layers.css.ts` and `layer-names.ts` JSDoc                                            | Nested layers.                                                            |
 | `prose/recipe.css.ts` `ol[type]` comment and `prose/scope.css.ts`                     | Removed; Prose restores typed markers with `attr()` and `@counter-style`. |
-| LoadingSkeleton "global reduced-motion reset" comment                                 | Removed.                                                              |
-| Field inline-label, Select root, and Combobox group "reset ring" comments             | Removed with their `outline: none` workarounds.                       |
-| "Table cells need padding after the reset removes it" (Prose)                         | Prose owns its table treatment.                                       |
-| `overlay-motion.ts` reduced-motion note                                               | Fade stays; movement is removed.                                      |
-| `rootClassName` in overlays, test utilities, docs, samples, reference app             | Removed.                                                              |
-| `FRICTION.md` "Root styles in portals"                                                | Resolved by D2 and D5.                                                |
-| Stylesheet contract test sentinels for `.luke-ui-reset` and `.luke-ui-theme`          | Global-rule sentinels.                                                |
-| `cascade.browser.test.ts` `rootClassName` variants of the body-scope test             | Body painted by G3.                                                   |
-| `#715` record: `rootClassName` "until #717" and repaint selector                      | This record.                                                          |
-| `PUBLIC_API.md` `/theme` exports                                                      | `breakpoints`, `getThemeClassName`, `vars`.                           |
-| `DOCUMENTATION.md` `rootClassName` wording example                                    | A current example.                                                    |
-| Assumption that body typography uses the fixed body line height                       | D2.                                                                   |
-| Assumption that `[data-focus-visible]` draws a ring everywhere                        | D3.                                                                   |
+| LoadingSkeleton "global reduced-motion reset" comment                                 | Removed.                                                                  |
+| Field inline-label, Select root, and Combobox group "reset ring" comments             | Removed with their `outline: none` workarounds.                           |
+| "Table cells need padding after the reset removes it" (Prose)                         | Prose owns its table treatment.                                           |
+| `overlay-motion.ts` reduced-motion note                                               | Fade stays; movement is removed.                                          |
+| `rootClassName` in overlays, test utilities, docs, samples, reference app             | Removed.                                                                  |
+| `FRICTION.md` "Root styles in portals"                                                | Resolved by D2 and D5.                                                    |
+| Stylesheet contract test sentinels for `.luke-ui-reset` and `.luke-ui-theme`          | Global-rule sentinels.                                                    |
+| `cascade.browser.test.ts` `rootClassName` variants of the body-scope test             | Body painted by G3.                                                       |
+| `#715` record: `rootClassName` "until #717" and repaint selector                      | This record.                                                              |
+| `PUBLIC_API.md` `/theme` exports                                                      | `breakpoints`, `getThemeClassName`, `vars`.                               |
+| `DOCUMENTATION.md` `rootClassName` wording example                                    | A current example.                                                        |
+| Assumption that body typography uses the fixed body line height                       | D2.                                                                       |
+| Assumption that `[data-focus-visible]` draws a ring everywhere                        | D3.                                                                       |
 
 ## Deferred work and issue disposition
 
