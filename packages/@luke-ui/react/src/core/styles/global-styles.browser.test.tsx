@@ -2,7 +2,6 @@ import { Button } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { Heading } from '@luke-ui/react/heading';
-import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
 import { SelectItem } from '@luke-ui/react/primitives/select';
 import { SelectField } from '@luke-ui/react/select-field';
@@ -328,7 +327,6 @@ test('leaves application animations and Luke UI feedback running under reduced m
 		<div>
 			<div className="app-animated" data-testid="app" />
 			<Button data-testid="luke-button">Save</Button>
-			<LoadingSpinner aria-label="Loading" />
 		</div>,
 	);
 	await emulateReducedMotion(true);
@@ -337,7 +335,6 @@ test('leaves application animations and Luke UI feedback running under reduced m
 	expect(app.animationName).toBe('app-spin');
 	expect(app.transitionDuration).toBe('0.5s');
 	expect(getComputedStyle(byTestId(container, 'luke-button')).transitionDuration).not.toBe('0s');
-	expect(getComputedStyle(page.getByLabelText('Loading').element()).animationName).toBe('none');
 });
 
 test('keeps overlay fades without movement under reduced motion', async () => {

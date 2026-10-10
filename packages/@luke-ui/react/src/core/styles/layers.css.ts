@@ -1,9 +1,7 @@
 import { globalLayer } from '@vanilla-extract/css';
-import { lukeUiLayerName, lukeUiSublayerNames } from './layer-names.js';
 
 /**
- * Luke UI's cascade layers, all inside the top-level `luke-ui` layer, from lowest to highest
- * priority:
+ * Luke UI's cascade layers, inside the top-level `luke-ui` layer, from lowest to highest priority:
  *
  * - **reset** — The global stylesheet: box sizing, root containment, the `<body>` baseline, scoped
  *   colour-mode repaint, form-control font, and the native focus ring.
@@ -11,14 +9,15 @@ import { lukeUiLayerName, lukeUiSublayerNames } from './layer-names.js';
  *   descendant or combinator selectors.
  * - **utilities** — `Box` and the other utility props.
  *
- * The consuming application's `base` layer ranks below `luke-ui`. Luke UI declares it and never
- * writes to it. The build prepends `cascadeLayerOrder` and strips the single-name `@layer`
- * statements these calls emit, so the order statement is the only one that creates layers.
+ * The build prepends `cascadeLayerOrder` from `layer-names.ts` and strips the single-name `@layer`
+ * statements these calls emit, so that statement alone sets the order.
  */
-const lukeUiLayer = globalLayer(lukeUiLayerName);
+const lukeUi = globalLayer('luke-ui');
 
-export const layers = Object.fromEntries(
-	lukeUiSublayerNames.map((name) => [name, globalLayer({ parent: lukeUiLayer }, name)]),
-) as { [Name in (typeof lukeUiSublayerNames)[number]]: ReturnType<typeof globalLayer> };
+export const layers = {
+	reset: globalLayer({ parent: lukeUi }, 'reset'),
+	recipes: globalLayer({ parent: lukeUi }, 'recipes'),
+	utilities: globalLayer({ parent: lukeUi }, 'utilities'),
+};
 
 export type LayerName = keyof typeof layers;
