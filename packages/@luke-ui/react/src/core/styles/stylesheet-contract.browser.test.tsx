@@ -234,7 +234,12 @@ const mutations: Array<[string, RegExp, (css: string) => string]> = [
 	[
 		'forced-colours focus outside its media query',
 		/global rules/,
-		(css) => css.replace('@media (forced-colors: active)', '@media (prefers-contrast: more)'),
+		// Component recipes use this media query too, and build order can put one first.
+		(css) =>
+			css.replace(
+				'@media (forced-colors: active) {\n    :where(:focus-visible)',
+				'@media (prefers-contrast: more) {\n    :where(:focus-visible)',
+			),
 	],
 	[
 		'recipe class in the utilities layer',
