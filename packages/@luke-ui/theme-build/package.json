@@ -12,7 +12,8 @@
 		"check:lint": "vp lint . --type-aware",
 		"check:types": "tsc --noEmit -p tsconfig.json",
 		"fix:format": "vp fmt . --write",
-		"fix:lint": "vp lint . --type-aware --fix"
+		"fix:lint": "vp lint . --type-aware --fix",
+		"test:integration": "vp test run"
 	},
 	"dependencies": {
 		"@fontsource-variable/inter": "catalog:",

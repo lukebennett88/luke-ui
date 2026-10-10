@@ -190,6 +190,11 @@
 				"npm_config_*"
 			]
 		},
+		"test:integration": {
+			"cache": false,
+			"dependsOn": ["^build"],
+			"outputs": []
+		},
 		"test:ui:run": {
 			"cache": false,
 			"dependsOn": ["build"],

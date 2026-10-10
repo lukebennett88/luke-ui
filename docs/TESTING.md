@@ -6,8 +6,9 @@
 - Component tests (`*.browser.test.tsx`) run in Chromium. Each component has one file for behaviour,
   axe, and visual captures.
 
-The packed-consumer harness is the one test outside these types. It runs in Node and drives Chromium
-for hydration. See [Package consumption](#package-consumption).
+Two tests sit outside these types. The packed-consumer harness runs in Node and drives Chromium for
+hydration. See [Package consumption](#package-consumption). The theme build test runs
+`vp pack --watch`. See [Theme build](#theme-build).
 
 Do not add another test type.
 
@@ -102,6 +103,13 @@ boundary only when the code it flags has intentionally become runtime code.
 
 Set `LUKE_UI_REACT_SPEC` to a published version or dist-tag to test that package from the registry
 instead of the workspace build. That run skips the theme package checks and prints why.
+
+## Theme build
+
+`packages/@luke-ui/theme-build/theme-package.test.ts` runs `vp pack --watch` with the shared theme
+build on a small theme package in a temporary directory. It edits the theme input twice and checks
+the stylesheet after each rebuild. Starting a watcher is slow, so `pnpm run test` leaves it out. Run
+it with `pnpm run test:integration`. The `component-tests` CI job runs it after the component tests.
 
 ## Docs
 
