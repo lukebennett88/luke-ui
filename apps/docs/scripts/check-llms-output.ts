@@ -48,7 +48,7 @@ function parseInlinedBlocks(builtOutput: string): {
 } {
 	const blocks: Array<ParsedBlock> = [];
 	const problems: Array<string> = [];
-	const pathPattern = /^apps\/docs\/src\/(?:examples|samples)\/[^\n]+\.tsx$/gm;
+	const pathPattern = /^apps\/docs\/src\/(?:examples|samples)\/[^\n]+\.tsx?$/gm;
 
 	for (const match of builtOutput.matchAll(pathPattern)) {
 		const repoRelativePath = match[0];

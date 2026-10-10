@@ -30,6 +30,7 @@
 		"release": "turbo run build --filter=docs^... && changeset publish",
 		"test": "turbo run test",
 		"test:consumer": "pnpm --filter=@luke-ui/react run test:consumer",
+		"test:integration": "turbo run test:integration",
 		"test:visual": "pnpm --filter=@luke-ui/react run test:visual",
 		"version-packages": "changeset version"
 	},

@@ -11,6 +11,30 @@
 		"@luke-ui/react#fix:lint": {
 			"dependsOn": ["build", "generate"]
 		},
+		"@luke-ui/react#test:consumer:run": {
+			"cache": false,
+			"dependsOn": [
+				"build",
+				"^build",
+				"@luke-ui/theme-paper#build",
+				"@luke-ui/theme-tactile#build"
+			],
+			"outputs": [],
+			"passThroughEnv": [
+				"LUKE_UI_REACT_SPEC",
+				"PLAYWRIGHT_BROWSERS_PATH",
+				"HTTP_PROXY",
+				"HTTPS_PROXY",
+				"NO_PROXY",
+				"http_proxy",
+				"https_proxy",
+				"no_proxy",
+				"NODE_EXTRA_CA_CERTS",
+				"SSL_CERT_FILE",
+				"NPM_CONFIG_*",
+				"npm_config_*"
+			]
+		},
 		"@luke-ui/react#test": {
 			"dependsOn": ["build", "^build", "generate"],
 			"outputs": []
@@ -165,6 +189,11 @@
 				"NPM_CONFIG_*",
 				"npm_config_*"
 			]
+		},
+		"test:integration": {
+			"cache": false,
+			"dependsOn": ["^build"],
+			"outputs": []
 		},
 		"test:ui:run": {
 			"cache": false,

@@ -1,12 +1,13 @@
 /**
  * Checks a `ThemeFoundation` before it enters the colour and stylesheet pipeline: kebab-case naming,
- * well-formed source colours, safe-to-emit authored CSS strings, curated font-family choices, and
- * in-range weight and radius numbers. It collects every issue before throwing, so an author fixes
- * the whole foundation at once instead of one error per build.
+ * well-formed source colours, safe-to-emit authored CSS strings, and in-range radius numbers. Fonts
+ * and weights are checked per input by `validate-input.ts`, before the `extends` chain is merged.
+ * It collects every issue before throwing, so an author fixes the whole foundation at once instead
+ * of one error per build.
  */
 
 import type { ThemeFoundation } from './foundation.js';
-import { SOURCE_COLOR_FIELDS, SURFACE_ROLES, themeFontFamilyStacks } from './foundation.js';
+import { SOURCE_COLOR_FIELDS, SURFACE_ROLES } from './foundation.js';
 import { getThemeClassName } from './theme-class-name.js';
 
 /**
@@ -79,20 +80,6 @@ export function validateFoundation(foundation: ThemeFoundation): void {
 				issues.push(
 					`${mode}.controlFinish.${name}: must be a non-empty CSS background-image value`,
 				);
-			}
-		}
-	}
-	const fontFamily = foundation.typography?.fontFamily;
-	if (fontFamily !== undefined && !(fontFamily in themeFontFamilyStacks)) {
-		issues.push(`typography.fontFamily: "${fontFamily}" is not a curated font-family choice`);
-	}
-	const fontWeight = foundation.typography?.fontWeight;
-	if (fontWeight !== undefined) {
-		for (const role of ['body', 'label', 'heading', 'emphasis'] as const) {
-			const value = fontWeight[role];
-			if (value === undefined) continue;
-			if (!Number.isFinite(value) || value < 1 || value > 1000) {
-				issues.push(`typography.fontWeight.${role}: must be a number between 1 and 1000`);
 			}
 		}
 	}

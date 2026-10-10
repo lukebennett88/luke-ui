@@ -1,9 +1,9 @@
 import '../../styles/app.css';
-import '@luke-ui/react/themes/paper/stylesheet.css';
-import '@luke-ui/react/themes/tactile/stylesheet.css';
+import '@luke-ui/theme-paper/stylesheet.css';
+import '@luke-ui/theme-tactile/stylesheet.css';
 import type { PlaygroundPreviewMessage } from '@luke-ui/playground-core/protocol';
 import { isPlaygroundPreviewMessage } from '@luke-ui/playground-core/protocol';
-import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
+import { themeClassName as paperThemeClassName } from '@luke-ui/theme-paper';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
@@ -85,6 +85,32 @@ test('applies appearance messages to the preview document without storing them',
 	await expect.poll(() => document.documentElement.dataset.colorMode).toBe('dark');
 	expect(document.documentElement).toHaveClass(paperThemeClassName);
 	expect(localStorage.getItem(THEME_IDENTITY_STORAGE_KEY)).toBeNull();
+});
+
+test('leaves a system appearance to the theme CSS', async () => {
+	await mountPreview();
+
+	await act(async () => {
+		postFromParent({
+			colorMode: 'dark',
+			themeIdentity: 'tactile',
+			type: 'luke-ui-docs:appearance',
+		});
+		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+	});
+	await expect.poll(() => document.documentElement.dataset.colorMode).toBe('dark');
+
+	await act(async () => {
+		postFromParent({
+			colorMode: 'system',
+			themeIdentity: 'tactile',
+			type: 'luke-ui-docs:appearance',
+		});
+		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+	});
+
+	await expect.poll(() => document.documentElement.hasAttribute('data-color-mode')).toBe(false);
+	expect(document.documentElement.style.colorScheme).toBe('');
 });
 
 test('ignores an appearance message that is not from the parent', async () => {

@@ -1,14 +1,20 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { splitBlocks } from './__fixtures__/theme-css.js';
+import { tactileTheme } from './__fixtures__/tactile.js';
+import {
+	interFont,
+	loraFont,
+	playfairFont,
+	splitBlocks,
+	testTypography,
+} from './__fixtures__/theme-css.js';
 import { ThemeContrastError } from './build-theme.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
 import { defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
-import { resolveThemeInput } from './extend-theme.js';
-import { tactileTheme } from './foundations/tactile.js';
+import { collectThemeChain, resolveThemeChain } from './extend-theme.js';
 
 function foundationOf(input: ThemeInput | ExtendingThemeInput) {
-	return normalizeTheme(resolveThemeInput(input).input);
+	return normalizeTheme(resolveThemeChain(collectThemeChain(input)).input);
 }
 
 /** Every `--luke-*` declaration in a stylesheet, keyed by rule block and variable name. */
@@ -45,8 +51,8 @@ describe('theme inheritance', () => {
 		expect(withoutAccent(subject)).toEqual(withoutAccent(reference));
 		expect(accentOnly(subject)).not.toEqual(accentOnly(reference));
 
-		expect(splitBlocks(subject).identity).toContain('.luke-ui-theme-product');
-		expect(splitBlocks(subject).identity).not.toContain('luke-ui-theme-tactile');
+		expect(splitBlocks(subject).themeWide).toContain('.luke-ui-theme-product');
+		expect(splitBlocks(subject).themeWide).not.toContain('luke-ui-theme-tactile');
 	});
 
 	it('inherits every colour role a base authors', () => {
@@ -69,6 +75,7 @@ describe('theme inheritance', () => {
 				warning: { dark: 'oklch(0.78 0.13 80)', light: 'oklch(0.72 0.14 75)' },
 			},
 			name: 'all-roles',
+			typography: testTypography,
 		};
 
 		expect(defineTheme({ extends: base, name: 'all-roles' })).toBe(defineTheme(base));
@@ -78,6 +85,7 @@ describe('theme inheritance', () => {
 		const base: ThemeInput = {
 			color: { accent: { dark: 'oklch(0.75 0.1 200)', light: 'oklch(0.52 0.11 200)' } },
 			name: 'pair-accent',
+			typography: testTypography,
 		};
 		const foundation = foundationOf({
 			color: { accent: 'oklch(0.6 0.15 30)' },
@@ -110,6 +118,7 @@ describe('theme inheritance', () => {
 				},
 			},
 			name: 'surface-base',
+			typography: testTypography,
 		};
 		const foundation = foundationOf({
 			color: { surface: { field: { light: 'oklch(0.99 0 0)' } } },
@@ -135,6 +144,7 @@ describe('theme inheritance', () => {
 				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
 			},
 			name: 'pair-neutral',
+			typography: testTypography,
 		};
 		const baseFoundation = foundationOf(base);
 		const foundation = foundationOf({
@@ -157,6 +167,7 @@ describe('theme inheritance', () => {
 				light: { overlay: 'base-light-overlay', resting: 'base-light-resting' },
 			},
 			name: 'material-base',
+			typography: testTypography,
 			radius: { control: 10, surface: 14 },
 		};
 		const foundation = foundationOf({
@@ -178,22 +189,46 @@ describe('theme inheritance', () => {
 		expect(foundation.radius).toEqual({ control: 10, detail: 2, surface: 14 });
 	});
 
-	it('replaces the font family and merges the font weights', () => {
+	it('replaces each font role whole and merges the font weights', () => {
 		const base: ThemeInput = {
 			color: { accent: '#3b82f6' },
 			name: 'type-base',
-			typography: { fontFamily: 'dm-sans', fontWeight: { body: 300, heading: 800 } },
+			typography: {
+				fonts: { body: interFont, display: loraFont },
+				fontWeight: { body: 300, heading: 800 },
+			},
 		};
 		const foundation = foundationOf({
 			extends: base,
 			name: 'type-child',
-			typography: { fontFamily: 'apple-system', fontWeight: { body: 400 } },
+			typography: { fonts: { body: playfairFont }, fontWeight: { body: 400 } },
 		});
 
 		expect(foundation.typography).toEqual({
-			fontFamily: 'apple-system',
+			fonts: { body: playfairFont, display: loraFont },
 			fontWeight: { body: 400, heading: 800 },
 		});
+	});
+
+	it('keeps a null display font through a chain of three and resolves it after the merge', () => {
+		const root: ThemeInput = {
+			color: { accent: '#3b82f6' },
+			name: 'root',
+			typography: { fonts: { body: interFont, display: loraFont } },
+		};
+		const middle: ExtendingThemeInput = {
+			extends: root,
+			name: 'middle',
+			typography: { fonts: { display: null } },
+		};
+		// The leaf omits `display`, so it inherits the middle theme's `null`, not the root's font.
+		const foundation = foundationOf({
+			extends: middle,
+			name: 'leaf',
+			typography: { fonts: { body: playfairFont } },
+		});
+
+		expect(foundation.typography.fonts).toEqual({ body: playfairFont });
 	});
 
 	it('resolves a chain of three, and throws when a chain forms a cycle', () => {
@@ -203,6 +238,7 @@ describe('theme inheritance', () => {
 				success: { dark: 'oklch(0.8 0.12 150)', light: 'oklch(0.45 0.12 150)' },
 			},
 			name: 'root',
+			typography: testTypography,
 		};
 		const middle: ExtendingThemeInput = {
 			color: { accent: '#ef4444' },
@@ -217,7 +253,11 @@ describe('theme inheritance', () => {
 		);
 		expect(foundation.dark.color.success).toEqual(gamutMapOklch(parseColor('oklch(0.8 0.12 150)')));
 
-		const first: ThemeInput = { color: { accent: '#3b82f6' }, name: 'first' };
+		const first: ThemeInput = {
+			color: { accent: '#3b82f6' },
+			name: 'first',
+			typography: testTypography,
+		};
 		const second: ExtendingThemeInput = { extends: first, name: 'second' };
 		first.extends = second;
 		expect(() => defineTheme(first)).toThrow(/"first".*"second"/);
@@ -232,6 +272,7 @@ describe('theme inheritance', () => {
 				color: { focus: 'oklch(0.99 0 0)' },
 				extends: tactileTheme,
 				name: 'low-contrast-focus',
+				typography: testTypography,
 			});
 		} catch (error) {
 			thrown = error;
@@ -250,6 +291,7 @@ describe('theme inheritance', () => {
 		const base: ThemeInput = {
 			color: { accent: '#3b82f6', surface: { overlay: { light: 'oklch(1 0 0)' } } },
 			name: 'surface-provenance-base',
+			typography: testTypography,
 		};
 		let thrown: unknown = null;
 		try {
@@ -277,6 +319,7 @@ describe('theme inheritance', () => {
 				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
 			},
 			name: 'root',
+			typography: testTypography,
 		};
 		const middle: ExtendingThemeInput = {
 			color: { focus: 'oklch(0.99 0 0)', neutralStyle: 'warm' },

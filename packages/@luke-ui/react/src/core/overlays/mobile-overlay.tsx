@@ -1,4 +1,4 @@
-import type { JSX, ReactNode, Ref } from 'react';
+import type { JSX, ReactNode, Ref, RefObject } from 'react';
 import { useState } from 'react';
 import type { DialogProps } from 'react-aria-components/Dialog';
 import { Dialog, OverlayTriggerStateContext } from 'react-aria-components/Dialog';
@@ -6,6 +6,7 @@ import { Modal, ModalOverlay } from 'react-aria-components/Modal';
 import { cx } from '../../shared/utils/utils.js';
 import { rootClassName } from '../../theme/theme.js';
 import { mobileDialog, mobileModal, mobileOverlay } from './mobile-overlay.css.js';
+import { copyScopeColorMode } from './scope-color-mode.js';
 
 interface MobileOverlayProps {
 	'aria-describedby'?: DialogProps['aria-describedby'];
@@ -16,6 +17,8 @@ interface MobileOverlayProps {
 	onOpenChange: (isOpen: boolean) => void;
 	/** Forwarded to the tray's dialog element. */
 	ref?: Ref<HTMLElement>;
+	/** The element that opens the tray. The tray takes the colour mode of its scope. */
+	triggerRef?: RefObject<Element | null> | null;
 }
 
 /**
@@ -29,6 +32,7 @@ export function MobileOverlay({
 	isOpen,
 	onOpenChange,
 	ref,
+	triggerRef,
 }: MobileOverlayProps): JSX.Element {
 	const scrollOffset = useScrollOffsetOnOpen(isOpen);
 
@@ -41,6 +45,7 @@ export function MobileOverlay({
 				isDismissable
 				isOpen={isOpen}
 				onOpenChange={onOpenChange}
+				ref={copyScopeColorMode(triggerRef)}
 				style={{ top: scrollOffset }}
 			>
 				<Modal className={mobileModal}>

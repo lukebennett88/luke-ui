@@ -7,6 +7,7 @@ import { PopoverContext } from 'react-aria-components/Popover';
 import { useSlottedContext } from 'react-aria-components/slots';
 import { MobileOverlay } from '../../overlays/mobile-overlay.js';
 import type { Prettify } from '../../types/prettify.js';
+import { useComboboxInputGroupRef } from './input-group-context.js';
 import { ComboboxPresentationProvider } from './presentation-context.js';
 
 // The listbox uses virtual focus: DOM focus stays on the search input while
@@ -27,6 +28,7 @@ export function ComboboxTray(props: ComboboxTrayProps): JSX.Element {
 	const labelContext = useSlottedContext(LabelContext);
 	const popoverContext = useSlottedContext(PopoverContext);
 	const state = useContext(ComboBoxStateContext);
+	const inputGroupRef = useComboboxInputGroupRef();
 
 	const content = (
 		<ComboboxPresentationProvider presentation="tray">
@@ -53,6 +55,7 @@ export function ComboboxTray(props: ComboboxTrayProps): JSX.Element {
 			}}
 			// React Aria uses the popover ref for measurement and dismissal.
 			ref={popoverContext?.ref}
+			triggerRef={inputGroupRef}
 		>
 			{content}
 		</MobileOverlay>

@@ -16,8 +16,8 @@ import {
 import * as styles from './theme-controls.css.js';
 
 /**
- * The Luke UI theme root for docs content. `<html>` carries the identity class and
- * `data-color-mode`, set by the head script before paint.
+ * The Luke UI theme root for docs content. `<html>` carries the identity class, and
+ * `data-color-mode` for an explicit colour mode, set by the head script before paint.
  */
 export function DocsThemeRoot({ children }: PropsWithChildren) {
 	return <div className={cx(rootClassName, styles.root)}>{children}</div>;

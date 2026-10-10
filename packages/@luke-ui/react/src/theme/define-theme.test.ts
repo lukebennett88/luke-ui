@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { splitBlocks } from './__fixtures__/theme-css.js';
+import { paperTheme } from './__fixtures__/paper.js';
+import { tactileTheme } from './__fixtures__/tactile.js';
+import { splitBlocks, testTypography } from './__fixtures__/theme-css.js';
 import { compileTheme, ThemeContrastError } from './build-theme.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import type { ThemeInput } from './define-theme.js';
 import { defaultBackdrop, defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
 import { defaultSourceColors } from './foundation.js';
-import { paperTheme } from './foundations/paper.js';
-import { tactileTheme } from './foundations/tactile.js';
 import { FAMILY_RUNG } from './scale.js';
 
 const VAR_VALUE_PATTERN_CACHE = new Map<string, RegExp>();
@@ -35,7 +35,9 @@ describe('defineTheme single-value accent adaptation', () => {
 		it(`adapts ${accent} to an accessible light and dark accent via a per-mode search`, () => {
 			// buildTheme throws ThemeContrastError on any breach, so reaching the assertions proves the
 			// adapted accent is accessible in both modes.
-			const blocks = splitBlocks(defineTheme({ color: { accent }, name: 'accent-adapt' }));
+			const blocks = splitBlocks(
+				defineTheme({ color: { accent }, name: 'accent-adapt', typography: testTypography }),
+			);
 			const lightSolid = parseColor(extractValue(blocks.baseLight, ACCENT_SOLID));
 			const darkSolid = parseColor(extractValue(blocks.mediaDark, ACCENT_SOLID));
 			const source = gamutMapOklch(parseColor(accent));
@@ -77,7 +79,11 @@ describe('defineTheme accent pre-conditioning shares the generator gate', () => 
 
 	it('hands the generator an accent the solid-anchor search honours verbatim in both modes', () => {
 		const resolved = accents.flatMap((accent) => {
-			const foundation = normalizeTheme({ color: { accent }, name: 'accent-gate' });
+			const foundation = normalizeTheme({
+				color: { accent },
+				name: 'accent-gate',
+				typography: testTypography,
+			});
 			const { diagnostics } = compileTheme(foundation);
 			return (['light', 'dark'] as const).map((mode) => {
 				const source = foundation[mode].color.accent;
@@ -106,6 +112,7 @@ describe('defineTheme partial per-mode merges', () => {
 				color: { accent: '#3b82f6' },
 				depth: { light: { overlay } },
 				name: 'partial-depth',
+				typography: testTypography,
 			}),
 		);
 		// The authored light rung wins; the other light rungs keep the light default.
@@ -125,6 +132,7 @@ describe('defineTheme partial per-mode merges', () => {
 				color: { accent: '#3b82f6' },
 				depth: { light: { resting: undefined } },
 				name: 'undefined-depth-rung',
+				typography: testTypography,
 			}),
 		);
 		expect(extractValue(blocks.baseLight, '--luke-depth-resting')).toBe(defaultDepth.light.resting);
@@ -137,10 +145,18 @@ describe('defineTheme partial per-mode merges', () => {
 			'--luke-color-background-info-subtle-rest',
 		];
 		const overridden = splitBlocks(
-			defineTheme({ color: { accent: '#fff', info: { light: '#1d39c4' } }, name: 'partial-color' }),
+			defineTheme({
+				color: { accent: '#fff', info: { light: '#1d39c4' } },
+				name: 'partial-color',
+				typography: testTypography,
+			}),
 		);
 		const allDefault = splitBlocks(
-			defineTheme({ color: { accent: '#fff' }, name: 'partial-color-default' }),
+			defineTheme({
+				color: { accent: '#fff' },
+				name: 'partial-color-default',
+				typography: testTypography,
+			}),
 		);
 		// The omitted dark info side falls back to the curated default: identical to the all-default build.
 		for (const varName of infoVarNames) {
@@ -165,6 +181,7 @@ describe('defineTheme backdrop validation', () => {
 			return defineTheme({
 				color: { accent: '#3b82f6', backdrop: 'oklch(0 0 0 / 0.2); } .evil {' },
 				name: 'unsafe-backdrop',
+				typography: testTypography,
 			});
 		}).toThrow('light.color.backdrop: must be a non-empty CSS colour value');
 	});
@@ -178,6 +195,7 @@ describe('normalizeTheme resolves `surface.base` split from `neutral`', () => {
 				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
 			},
 			name: 'base-omitted',
+			typography: testTypography,
 		});
 		expect(foundation.light.color.surface.base).toBe(foundation.light.color.neutral);
 		expect(foundation.dark.color.surface.base).toBe(foundation.dark.color.neutral);
@@ -187,6 +205,7 @@ describe('normalizeTheme resolves `surface.base` split from `neutral`', () => {
 		const foundation = normalizeTheme({
 			color: { accent: '#3b82f6', neutralStyle: 'warm' },
 			name: 'base-omitted-style',
+			typography: testTypography,
 		});
 		expect(foundation.light.color.surface.base).toBe(foundation.light.color.neutral);
 		expect(foundation.dark.color.surface.base).toBe(foundation.dark.color.neutral);
@@ -200,6 +219,7 @@ describe('normalizeTheme resolves `surface.base` split from `neutral`', () => {
 				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
 			},
 			name: 'base-explicit',
+			typography: testTypography,
 		});
 		expect(foundation.light.color.surface.base).toEqual(
 			gamutMapOklch(parseColor('oklch(0.99 0.002 210)')),
@@ -220,6 +240,7 @@ describe('normalizeTheme resolves `surface.base` split from `neutral`', () => {
 				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
 			},
 			name: 'base-single-mode',
+			typography: testTypography,
 		});
 		// Light keeps the authored value verbatim.
 		expect(foundation.light.color.surface.base).toEqual(
@@ -240,6 +261,7 @@ describe('normalizeTheme resolves `surface.base` split from `neutral`', () => {
 		const foundation = normalizeTheme({
 			color: { accent: '#3b82f6', surface: { base: 'oklch(0.5 0.03 140)' } },
 			name: 'base-single-value',
+			typography: testTypography,
 		});
 		const light = foundation.light.color.surface.base;
 		const dark = foundation.dark.color.surface.base;
@@ -258,6 +280,7 @@ describe('normalizeTheme carries authored surfaces', () => {
 				surface: { field: { light: 'oklch(0.97 0 0)' }, overlay: { dark: 'oklch(0.3 0 0)' } },
 			},
 			name: 'authored-surfaces',
+			typography: testTypography,
 		});
 		expect(foundation.light.color.surface.field).toEqual(
 			gamutMapOklch(parseColor('oklch(0.97 0 0)')),
@@ -275,6 +298,7 @@ describe('normalizeTheme carries authored surfaces', () => {
 			defineTheme({
 				color: { accent: '#3b82f6', surface: { subdued: { light: 'oklch(0.9 0 0)' } } },
 				name: 'authored-subdued',
+				typography: testTypography,
 			}),
 		);
 		expect(extractValue(blocks.baseLight, '--luke-color-surface-subdued')).toBe('oklch(0.9 0 0)');
@@ -289,7 +313,11 @@ describe('normalizeTheme carries authored surfaces', () => {
 		const base = { dark: 'oklch(0.33 0 0)', light: 'oklch(0.985 0 0)' };
 		function overlayFailures(surface: NonNullable<ThemeInput['color']['surface']>) {
 			try {
-				defineTheme({ color: { accent: '#3b82f6', surface }, name: 'weak-overlay' });
+				defineTheme({
+					color: { accent: '#3b82f6', surface },
+					name: 'weak-overlay',
+					typography: testTypography,
+				});
 				return [];
 			} catch (error) {
 				if (!(error instanceof ThemeContrastError)) throw error;
@@ -309,6 +337,7 @@ describe('normalizeTheme resolves source colours once onto the foundation', () =
 		const foundation = normalizeTheme({
 			color: { accent: '#3b82f6' },
 			name: 'resolved-once',
+			typography: testTypography,
 		});
 		const light = foundation.light.color;
 		expect(Number.isFinite(light.accent.l)).toBe(true);
@@ -324,7 +353,11 @@ describe('normalizeTheme resolves source colours once onto the foundation', () =
 
 	it('keeps the adapted accent hue without a format-parse round trip', () => {
 		const source = gamutMapOklch(parseColor('#3b82f6'));
-		const foundation = normalizeTheme({ color: { accent: '#3b82f6' }, name: 'precision' });
+		const foundation = normalizeTheme({
+			color: { accent: '#3b82f6' },
+			name: 'precision',
+			typography: testTypography,
+		});
 		expect(foundation.light.color.accent.h).toBe(source.h);
 		expect(foundation.dark.color.accent.h).toBe(source.h);
 	});

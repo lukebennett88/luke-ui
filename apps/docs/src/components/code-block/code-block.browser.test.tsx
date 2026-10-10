@@ -1,6 +1,5 @@
 import '../../styles/app.css';
-import '@luke-ui/react/themes/tactile/stylesheet.css';
-import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
+import '@luke-ui/theme-tactile/stylesheet.css';
 import axe from 'axe-core';
 import type { ReactNode } from 'react';
 import { act, createRef } from 'react';
@@ -20,9 +19,13 @@ afterEach(() => {
 	container = undefined;
 	root = undefined;
 	vi.restoreAllMocks();
+	vi.useRealTimers();
 });
 
 test('copies plain source including leading and trailing whitespace', async () => {
+	// Fake only the revert timer: a real 1.5s timeout can fire before `expect.element` starts
+	// polling on a slow runner, so "Copied" is never observed.
+	vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 	const source = '  pnpm add @luke-ui/react  ';
 
@@ -297,7 +300,7 @@ test('the CodeBlock scene has no axe violations', async () => {
 
 function renderCodeBlock(node: ReactNode) {
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = 'luke-ui-theme';
 	root = createRoot(container);
 	rerenderCodeBlock(node);
 }

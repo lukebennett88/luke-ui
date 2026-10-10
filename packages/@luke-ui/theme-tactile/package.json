@@ -1,0 +1,54 @@
+{
+	"name": "@luke-ui/theme-tactile",
+	"version": "0.0.0",
+	"description": "Tactile, the default Luke UI theme: a teal accent, a neutral near-white light canvas, and a restrained dimensional material.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukebennett88/luke-ui.git",
+		"directory": "packages/@luke-ui/theme-tactile"
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"type": "module",
+	"sideEffects": [
+		"./dist/fonts.css",
+		"./dist/stylesheet.css"
+	],
+	"exports": {
+		".": "./dist/index.js",
+		"./input": "./dist/input.js",
+		"./package.json": "./package.json",
+		"./fonts.css": "./dist/fonts.css",
+		"./stylesheet.css": "./dist/stylesheet.css"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "vp pack",
+		"check:format": "vp fmt . --check",
+		"check:lint": "vp lint . --type-aware",
+		"check:types": "tsc --noEmit -p tsconfig.json",
+		"clean": "rm -rf .turbo dist",
+		"fix:format": "vp fmt . --write",
+		"fix:lint": "vp lint . --type-aware --fix"
+	},
+	"devDependencies": {
+		"@capsizecss/metrics": "catalog:",
+		"@luke-ui/react": "workspace:*",
+		"@luke-ui/theme-build": "workspace:*",
+		"@types/node": "catalog:",
+		"typescript": "catalog:",
+		"vite-plus": "catalog:"
+	},
+	"peerDependencies": {
+		"@luke-ui/react": "workspace:^"
+	},
+	"inlinedDependencies": {
+		"@capsizecss/metrics": "4.3.0"
+	}
+}

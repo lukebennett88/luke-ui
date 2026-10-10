@@ -45,8 +45,8 @@ public menu composition. The circular trigger is app presentation, not a gap. Ow
 
 Dialogs, popovers, and menus need the app's reset and base typography. The app adds the high-level
 `rootClassName` beside its VE class on each RAC `ModalOverlay` and `Popover`. The theming guide says
-"Portals need nothing extra". That applies to theme variables and colour mode at `:root`, but not to
-`rootClassName`, which the guide applies to the app shell. A body-level portal falls outside that
+"Portals need nothing extra". That applies to theme variables and colour mode on `<html>`, but not
+to `rootClassName`, which the guide applies to the app shell. A body-level portal falls outside that
 shell and renders with browser defaults (serif font, default margins), so every overlay needs the
 class. Owner:
 [#717: Global stylesheet and cascade contract](https://github.com/lukebennett88/luke-ui/issues/717),

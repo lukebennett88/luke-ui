@@ -160,7 +160,6 @@
 			// `peerDependencies`, and `inlinedDependencies` in packages/@luke-ui/react/package.json.
 			matchPackageNames: [
 				'@capsizecss/core',
-				'@capsizecss/metrics',
 				'@react-aria/utils',
 				'@vanilla-extract/dynamic',
 				'@vanilla-extract/recipes',

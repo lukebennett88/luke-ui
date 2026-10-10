@@ -5,17 +5,19 @@ import the shipped CSS and do not need the Vanilla Extract compiler.
 
 ## Install
 
+Install Luke UI, React Aria Components, and a theme. This example uses Tactile.
+
 ```sh
-pnpm add @luke-ui/react react-aria-components
+pnpm add @luke-ui/react @luke-ui/theme-tactile react-aria-components
 ```
 
 Luke UI expects the application to provide a compatible shared `react-aria-components` instance.
 
 ## Setup
 
-Import the component stylesheet and one bundled theme stylesheet. Importing a theme stylesheet
-themes the whole document from `:root`, so no identity class is needed for a single theme. Apply
-`rootClassName` to an element you own for the reset and base typography.
+Import the component stylesheet and the theme's stylesheet, plus its `fonts.css` to load the font it
+uses. Set the theme's identity class on `<html>`, and apply `rootClassName` to an element you own
+for the reset and base typography.
 
 The shared stylesheet uses the layer order `reset → base → recipes → utilities`. The `base` layer is
 reserved for application defaults such as Tailwind Preflight. Luke UI declares it empty so it stays
@@ -23,17 +25,26 @@ below `recipes`.
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';
-import '@luke-ui/react/themes/tactile/stylesheet.css';
+import '@luke-ui/theme-tactile/stylesheet.css';
+import '@luke-ui/theme-tactile/fonts.css';
 import { rootClassName } from '@luke-ui/react/theme';
+import { themeClassName } from '@luke-ui/theme-tactile';
 
-export function App() {
-	return <div className={rootClassName}>{/* your app */}</div>;
+export function RootLayout() {
+	return (
+		<html className={themeClassName} lang="en">
+			<body className={rootClassName}>{/* your app */}</body>
+		</html>
+	);
 }
 ```
 
-Loading more than one theme stylesheet in the same document needs an explicit identity class so one
-theme wins. Import it from that theme's own entrypoint, for example
-`@luke-ui/react/themes/tactile`'s `themeClassName`.
+Without `data-color-mode` on `<html>`, the theme follows the system colour mode.
+
+## Custom themes
+
+Compile your own theme at build time with `defineTheme` from `@luke-ui/react/theme/compiler`, in
+Node 24 or later. It returns a stylesheet to load in place of a theme package's.
 
 ## Components and docs
 

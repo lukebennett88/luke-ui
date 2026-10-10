@@ -5,6 +5,7 @@ import { mdxFence } from './code-block/code-block.css.js';
 import { CodeBlock } from './code-block/code-block.js';
 
 export interface SourceCodeBlockProps {
+	/** Sample path below `src/samples`, without `.tsx`. A `.ts` sample names its extension. */
 	src: string;
 }
 
@@ -17,7 +18,7 @@ export function SourceCodeBlock({ src }: SourceCodeBlockProps): JSX.Element {
 }
 
 // Highlighted sample modules load only when a page renders them.
-const highlightedSources = import.meta.glob<HighlightedSource>('../samples/*/*.tsx', {
+const highlightedSources = import.meta.glob<HighlightedSource>('../samples/*/*.{ts,tsx}', {
 	eager: false,
 	import: 'default',
 	query: '?highlight',
@@ -57,7 +58,7 @@ function loadHighlightedSource(src: string): Promise<HighlightedSource> {
 	const cached = highlightedSourceCache.get(src);
 	if (cached) return cached;
 
-	const load = highlightedSources[`../samples/${src}.tsx`];
+	const load = highlightedSources[`../samples/${src.endsWith('.ts') ? src : `${src}.tsx`}`];
 	if (!load) throw new Error(`Source example not found: ${src}`);
 
 	const promise = load();

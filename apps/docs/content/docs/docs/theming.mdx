@@ -1,6 +1,6 @@
 ---
 title: Theming
-description: Understand how the theme root, identity, colour mode, and tokens fit together.
+description: Understand how the theme identity, colour mode, and tokens fit together.
 ---
 
 A theme supplies the semantic values used by Luke UI components and custom UI. It is static CSS and
@@ -8,22 +8,20 @@ does not change component behaviour.
 
 ## Theme foundations
 
-A theme stylesheet themes the whole document from `:root`. Import one theme stylesheet, and every
-element uses its semantic values, with no class applied and no JavaScript.
+A theme is a stylesheet and an identity class. The stylesheet declares the theme's semantic values
+for the element that carries its identity class, and that class belongs on `<html>`. A document uses
+one theme at a time.
 
-`rootClassName` applies the shared reset and base typography. It carries no theme identity. Apply it
-to an element you already own, such as the application shell.
+Luke UI provides two themes as separate packages, `@luke-ui/theme-tactile` and
+`@luke-ui/theme-paper`. A product can also compile its own theme with
+[`defineTheme`](/docs/authoring-a-theme).
 
-Each theme includes light and dark colour values. The active colour mode chooses between them. An
-explicit `data-color-mode` is optional. Without one, the theme follows the system preference.
-Colour-mode scopes nest freely. Theme identities do not. A nested theme identity resolves its own
-identity-owned values correctly, and its colour, depth, and action-control-finish values also
-resolve correctly under the system-controlled mode. An explicit `data-color-mode` scope on or inside
-the nested identity makes those mode-dependent values compete with the ancestor identity at equal
-precedence, so stylesheet order decides the winner.
+`rootClassName` applies the shared reset and base typography. It carries no theme identity.
 
-Loading more than one theme in the same document needs an explicit identity class, so one theme wins
-over the other's `:root` fallback.
+Each theme includes light and dark colour values. Without an explicit `data-color-mode`, the
+document follows the system preference. `data-color-mode` on `<html>` fixes the mode for the whole
+document, and the same attribute on an element below sets the mode for that subtree. Colour-mode
+scopes nest, and the nearest one wins.
 
 Read [Applying a theme](/docs/applying-a-theme) for the exact imports, classes, and colour-mode
 rules.
@@ -57,7 +55,7 @@ the semantic roles it exposes.
 
 <Cards>
 	<Card href="/docs/applying-a-theme" title="Applying a theme">
-		Load the CSS, set the root classes, and preserve them through portals.
+		Load the CSS, set the identity class, and choose colour modes.
 	</Card>
 	<Card href="/docs/color" title="Colour">
 		Choose semantic surfaces and roles for custom UI.

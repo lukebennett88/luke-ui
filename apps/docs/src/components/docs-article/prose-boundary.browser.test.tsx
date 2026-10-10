@@ -1,9 +1,8 @@
 import '../../styles/app.css';
-import '@luke-ui/react/themes/tactile/stylesheet.css';
+import '@luke-ui/theme-tactile/stylesheet.css';
 import { Prose } from '@luke-ui/react/prose';
 import { Provider } from '@luke-ui/react/provider';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
-import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import {
 	createMemoryHistory,
 	createRootRoute,
@@ -152,7 +151,7 @@ async function renderInProse(children: ReactNode) {
 	});
 
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = 'luke-ui-theme';
 	container.style.inlineSize = '800px';
 	root = createRoot(container);
 	await act(async () => {

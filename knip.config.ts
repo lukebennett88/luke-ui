@@ -41,8 +41,8 @@ export default {
 			project: ['src/**/*.ts'],
 		},
 		'packages/@luke-ui/rainbow-sprinkles': {
-			entry: ['src/index.ts', 'src/create-runtime-fn.ts', 'vite.config.ts'],
-			project: ['src/**/*.ts', 'vite.config.ts'],
+			entry: ['src/index.ts', 'src/create-runtime-fn.ts'],
+			project: ['src/**/*.ts'],
 		},
 		'packages/@luke-ui/react': {
 			entry: [
@@ -52,6 +52,18 @@ export default {
 				'scripts/**/*.ts',
 			],
 			project: ['src/**/*.{ts,tsx}'],
+		},
+		'packages/@luke-ui/theme-build': {
+			// Pack loads it for `publint: true` in the shared config, which knip does not trace.
+			ignoreDependencies: ['publint'],
+		},
+		'packages/@luke-ui/theme-paper': {
+			entry: ['src/index.ts', 'src/input.ts'],
+			project: ['src/**/*.ts'],
+		},
+		'packages/@luke-ui/theme-tactile': {
+			entry: ['src/index.ts', 'src/input.ts'],
+			project: ['src/**/*.ts'],
 		},
 		'packages/turbo-generators': {
 			entry: ['config.ts'],

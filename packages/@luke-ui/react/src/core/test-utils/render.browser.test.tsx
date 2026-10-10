@@ -1,17 +1,14 @@
-import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
-import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import { expect, test } from 'vite-plus/test';
+import { fixtureThemeClassName } from './fixture-themes.js';
 import { cleanupMountedRenders } from './render-mount-state.js';
 import { render, visualAppearances } from './render.js';
 
-test('renders every bundled identity and explicit colour mode independently', () => {
+test('renders every fixture identity and explicit colour mode independently', () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(<span>Theme contract</span>, { appearance });
 		const root = locator.element();
 
-		expect(document.documentElement).toHaveClass(
-			appearance.theme === 'tactile' ? tactileThemeClassName : paperThemeClassName,
-		);
+		expect(document.documentElement).toHaveClass(fixtureThemeClassName(appearance.theme));
 		expect(document.documentElement).toHaveAttribute('data-color-mode', appearance.mode);
 		const styles = getComputedStyle(root);
 		expect(styles.colorScheme).toBe(appearance.mode);
@@ -22,7 +19,7 @@ test('renders every bundled identity and explicit colour mode independently', ()
 test('defaults existing callers to Tactile light', () => {
 	render(<span>Default contract</span>);
 
-	expect(document.documentElement).toHaveClass(tactileThemeClassName);
+	expect(document.documentElement).toHaveClass('luke-ui-theme-tactile');
 	expect(document.documentElement).toHaveAttribute('data-color-mode', 'light');
 });
 

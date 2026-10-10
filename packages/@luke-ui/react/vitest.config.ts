@@ -11,7 +11,7 @@ const recipeEngineSource = fileURLToPath(
 );
 const repoRoot = path.resolve(dirname, '../../..');
 /** Its npm installs need network access, so it runs only with `test:consumer`. */
-const packedConsumerTest = 'src/core/styles/packed-consumer.test.ts';
+const packedConsumerTests = 'src/core/packed-consumer/**';
 const captureDir = process.env.VISUAL_CAPTURE_DIR;
 const visualFsAllow =
 	captureDir === undefined || captureDir === '' ? [repoRoot] : [repoRoot, path.resolve(captureDir)];
@@ -50,7 +50,7 @@ export default defineConfig({
 				extends: true,
 				test: {
 					environment: 'node',
-					exclude: ['**/node_modules/**', '**/*.browser.test.*', packedConsumerTest],
+					exclude: ['**/node_modules/**', '**/*.browser.test.*', packedConsumerTests],
 					include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
 					name: 'unit',
 				},
@@ -59,7 +59,8 @@ export default defineConfig({
 				extends: true,
 				test: {
 					environment: 'node',
-					include: [packedConsumerTest],
+					globalSetup: ['src/core/packed-consumer/setup.ts'],
+					include: [`${packedConsumerTests}/*.test.ts`],
 					name: 'consumer',
 				},
 			},

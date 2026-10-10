@@ -1,11 +1,11 @@
 # Luke UI
 
-Luke UI is a React design system built on React Aria Components. It ships static CSS, two bundled
-themes, and layout utilities that share a semantic token system.
+Luke UI is a React design system built on React Aria Components. It ships static CSS, two theme
+packages (Tactile and Paper), and layout utilities that share a semantic token system.
 
 ## Features
 
-- Custom themes with light/dark modes and contrast validation
+- Custom themes compiled at build time, with light and dark modes and contrast validation
 - Static CSS with no runtime styling layer; theming does not require a React provider
 - Composed components, exported primitives, and React Aria Components underneath
 - Built-in async and loading states

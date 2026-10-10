@@ -1,6 +1,5 @@
 import '../styles/app.css';
-import '@luke-ui/react/themes/tactile/stylesheet.css';
-import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
+import '@luke-ui/theme-tactile/stylesheet.css';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
@@ -20,7 +19,7 @@ afterEach(() => {
 
 function renderColourModeExample() {
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = 'luke-ui-theme';
 	root = createRoot(container);
 	act(() => {
 		root?.render(<ColorModeOverride />);

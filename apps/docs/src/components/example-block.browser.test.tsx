@@ -1,8 +1,7 @@
 import '../styles/app.css';
-import '@luke-ui/react/themes/tactile/stylesheet.css';
+import '@luke-ui/theme-tactile/stylesheet.css';
 import { Provider } from '@luke-ui/react/provider';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
-import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import {
 	createMemoryHistory,
 	createRootRoute,
@@ -34,6 +33,7 @@ afterEach(() => {
 	container = undefined;
 	root = undefined;
 	vi.restoreAllMocks();
+	vi.useRealTimers();
 });
 
 test('shows a named loading state in a frame that reserves the preview space', () => {
@@ -265,6 +265,9 @@ test('copies the complete source from both collapsed and expanded previews', asy
 	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 	await page.viewport(1000, 800);
 	await renderExampleBlock();
+	// Fake only the revert timer, after the example has loaded: a real 1.5s timeout can fire
+	// before `expect.element` starts polling on a slow runner, so "Copied" is never observed.
+	vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
 	await act(async () => {
 		await userEvent.click(page.getByRole('button', { name: 'Copy', exact: true }));
@@ -325,7 +328,7 @@ test('keeps expanded source collapsible when its typography changes to fit', asy
 	await page.viewport(1000, 800);
 	const source = Array.from({ length: 20 }, () => 'const value = 1;').join('\n');
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = 'luke-ui-theme';
 	root = createRoot(container);
 	act(() => {
 		root?.render(
@@ -512,7 +515,7 @@ async function renderSourcePreview({ withNextControl = false } = {}) {
 	await page.viewport(1000, 800);
 	const source = Array.from({ length: 20 }, () => 'const value = 1;').join('\n');
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = 'luke-ui-theme';
 	root = createRoot(container);
 	act(() => {
 		root?.render(
@@ -543,7 +546,7 @@ async function pressKey(key: string) {
 
 function renderExample(title: string) {
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = 'luke-ui-theme';
 	root = createRoot(container);
 	act(() => {
 		root?.render(
@@ -568,7 +571,7 @@ function renderPreviewHarness({
 	onFirstLayout?: (canvasWidth: number) => void;
 } = {}) {
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = 'luke-ui-theme';
 	container.style.inlineSize = withStickyHeader ? '100%' : `${width}px`;
 	root = createRoot(container);
 	act(() => {
@@ -629,7 +632,7 @@ async function renderExampleBlock({
 	});
 
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	container.className = 'luke-ui-theme';
 	container.style.inlineSize = `${width}px`;
 	root = createRoot(container);
 	await act(async () => {
