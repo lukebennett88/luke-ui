@@ -115,11 +115,12 @@ Tailwind is supported as an application styling convenience, not an architectura
 ## Global rule inventory
 
 The stylesheet has exactly six global rules, plus the layer order statement. Every rule is in
-`luke-ui.reset` and uses `:where()`, so its specificity is zero.
+`luke-ui.reset` and uses `:where()`, so its specificity is zero. Pseudo-elements are invalid inside
+`:where()`, so G1 lists them outside it, where each adds its own (0,0,1).
 
 | #   | Selector                                                                | Declarations                                                                                                                 |
 | --- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| G1  | `:where(*, *::before, *::after)`                                        | `box-sizing: border-box`                                                                                                     |
+| G1  | `:where(*), :where(*)::before, :where(*)::after`                        | `box-sizing: border-box`                                                                                                     |
 | G2  | `:where(:root)`                                                         | `container-type: inline-size`                                                                                                |
 | G3  | `:where(body)`                                                          | `margin: 0`, `background-color`, `color`, `accent-color`, body font family, size, weight, letter spacing, `line-height: 1.5` |
 | G4  | `:where(body [data-color-mode='light'], body [data-color-mode='dark'])` | `background-color`, `color`, `accent-color`                                                                                  |
@@ -141,7 +142,7 @@ Old rules came from `reset.css.ts` (scoped to `.luke-ui-reset`) and `theme-root.
 | -------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Root and descendant `box-sizing: border-box`                         | Retained, globalised            | G1                                                                                                                                                                                                |
 | `blockquote, dl, dd, figure, p { margin: 0 }`                        | Removed                         | `Text` zeroes its own margin. `Prose` zeroes block margins inside its scope.                                                                                                                      |
-| `h1`–`h6 { font: unset; margin: 0 }`                                 | Removed                         | `Text` zeroes margins and keeps the inherited weight on heading elements. `Heading` sets its type style and weight. Native headings keep browser sizes.                                           |
+| `h1`–`h6 { font: unset; margin: 0 }`                                 | Removed                         | `Text` zeroes margins and always sets a weight from its type style, or inherits one. `Heading` sets its type style and weight. Native headings keep browser sizes and weight.                     |
 | `ol, ul { margin: 0; padding: 0 }`                                   | Removed                         | Combobox and Select list boxes already zero both. `Prose` sets list indentation.                                                                                                                  |
 | `ul, ol:not([type]), ol[type]:not(.prose *) { list-style: none }`    | Removed                         | List boxes already remove markers. `Prose` keeps its markers. Typed `ol` elements keep their HTML presentational hints everywhere.                                                                |
 | `table { border-collapse: collapse; border-spacing: 0 }`             | Removed                         | `Prose` owns its table treatment.                                                                                                                                                                 |
@@ -152,7 +153,7 @@ Old rules came from `reset.css.ts` (scoped to `.luke-ui-reset`) and `theme-root.
 | Form controls `font: inherit`                                        | Retained                        | G5                                                                                                                                                                                                |
 | Button chrome reset (`background`, `border`, `color`, `padding`)     | Removed                         | Each Luke UI button recipe sets its own chrome. The Combobox tray trigger and actions gained the declarations they had relied on.                                                                 |
 | `input, textarea, select { color: inherit; margin: 0 }`              | Colour removed, margin retained | G5 keeps `margin: 0`. Native controls keep `FieldText`, which follows `color-scheme`. Luke UI inputs set their own colour.                                                                        |
-| `:disabled, [data-disabled='true'] { cursor: not-allowed }`          | Removed                         | Already owned by Button, Select, Combobox, TextInput, and the field inline label. No other component relied on it.                                                                                |
+| `:disabled, [data-disabled='true'] { cursor: not-allowed }`          | Removed                         | Already owned by Button, Select, Combobox, TextInput, and the field inline label. The Combobox tray trigger, which relied on it, now owns it.                                                     |
 | `:focus-visible, [data-focus-visible='true']` ring                   | Native pseudo-class retained    | G6. Attribute rings stay in the recipes that need them. The Field inline-label, Select root, and Combobox group `outline: none` workarounds are removed.                                          |
 | Blanket `prefers-reduced-motion` suppression                         | Removed                         | Component recipes (see [Reduced motion](#reduced-motion)).                                                                                                                                        |
 | `.luke-ui-theme` colour, accent, and body font                       | Modified                        | G3, on `<body>`, with `line-height: 1.5`, `margin: 0`, and `background-color`.                                                                                                                    |
@@ -162,8 +163,10 @@ Old rules came from `reset.css.ts` (scoped to `.luke-ui-reset`) and `theme-root.
 ### Component ownership
 
 - **`Text`.** A zero-specificity rule in `luke-ui.recipes` zeroes the margin of every element `Text`
-  renders, so `Prose` spacing and `Box` margins still win. Heading elements keep the inherited font
-  weight unless `fontWeight` is set, as `font: unset` did before.
+  renders, so `Prose` spacing and `Box` margins still win. `Text` always sets a font weight from its
+  type style, or inherits one with `shouldInheritFont`, so a heading element never takes the user
+  agent's bold. Raw `textRecipe()` on a heading without `fontWeight` keeps the native weight, like
+  any native heading.
 - **`Prose`.** Zeroes block margins on all sides (blockquotes, figures, and `dd` had inline margins
   from the user agent), keeps disc markers for `ul` and decimal markers for untyped `ol`, indents
   every list, collapses tables, aligns `th` and `caption` to the start, and pads cells. Typed `ol`
@@ -247,6 +250,9 @@ One indicator per control:
 - **Docs app.** `apps/docs` declares the Tailwind order. Docs-owned shell styles move from Luke UI's
   old `recipes` name to `components`, docs utilities to `utilities`, and the root layout stays in
   `base`. The Fumadocs colour bridge uses `:root, [data-color-mode]`, so it resolves per mode scope.
+  Two visible results: dark mode paints the page with `surface.base` instead of Fumadocs' unbridged
+  near-black, and docs styles that set `text-decoration: none` on Luke UI links, such as the sidebar
+  navigation, now win over the link's focus-visible underline. The focus ring is unchanged.
 - **Reference app.** Its global styles stay unlayered and override the body baseline on purpose.
 
 ## Testing and documentation requirements
@@ -299,11 +305,12 @@ One indicator per control:
 
 ## Deferred work and issue disposition
 
-| Item                                                    | Disposition                                                                                                                                                                                        |
-| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| #686 Root styles page                                   | Closed as superseded by #717. Its useful requirements (behaviour by category, cascade placement, no `focusRing()` export, state attributes are not styling hooks) are in Styling and Installation. |
-| WebKit, iOS tap highlight, and touch verification       | #718.                                                                                                                                                                                              |
-| Component visual audit beyond the controls touched here | #718.                                                                                                                                                                                              |
-| Consumer documentation for routers and composition      | #720.                                                                                                                                                                                              |
-| Dialog and Popover components                           | #767.                                                                                                                                                                                              |
-| Publishing                                              | #721.                                                                                                                                                                                              |
+| Item                                                     | Disposition                                                                                                                                                                                        |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| #686 Root styles page                                    | Closed as superseded by #717. Its useful requirements (behaviour by category, cascade placement, no `focusRing()` export, state attributes are not styling hooks) are in Styling and Installation. |
+| WebKit, iOS tap highlight, and touch verification        | #718.                                                                                                                                                                                              |
+| Component visual audit beyond the controls touched here  | #718.                                                                                                                                                                                              |
+| Consumer documentation for routers and composition       | #720.                                                                                                                                                                                              |
+| Dialog and Popover components                            | #767.                                                                                                                                                                                              |
+| Publishing                                               | #721.                                                                                                                                                                                              |
+| Trigger-width popovers overflowing an edge-to-edge field | #771. Found by the virtual-focus test. Without a page margin, the popover is wider than the viewport allows, the page scrolls, and React Aria closes it.                                           |
