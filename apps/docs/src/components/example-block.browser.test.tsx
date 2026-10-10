@@ -33,6 +33,7 @@ afterEach(() => {
 	container = undefined;
 	root = undefined;
 	vi.restoreAllMocks();
+	vi.useRealTimers();
 });
 
 test('shows a named loading state in a frame that reserves the preview space', () => {
@@ -264,6 +265,9 @@ test('copies the complete source from both collapsed and expanded previews', asy
 	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 	await page.viewport(1000, 800);
 	await renderExampleBlock();
+	// Fake only the revert timer, after the example has loaded: a real 1.5s timeout can fire
+	// before `expect.element` starts polling on a slow runner, so "Copied" is never observed.
+	vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
 	await act(async () => {
 		await userEvent.click(page.getByRole('button', { name: 'Copy', exact: true }));

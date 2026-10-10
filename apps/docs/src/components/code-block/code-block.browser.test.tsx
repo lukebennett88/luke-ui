@@ -19,9 +19,13 @@ afterEach(() => {
 	container = undefined;
 	root = undefined;
 	vi.restoreAllMocks();
+	vi.useRealTimers();
 });
 
 test('copies plain source including leading and trailing whitespace', async () => {
+	// Fake only the revert timer: a real 1.5s timeout can fire before `expect.element` starts
+	// polling on a slow runner, so "Copied" is never observed.
+	vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 	const source = '  pnpm add @luke-ui/react  ';
 
