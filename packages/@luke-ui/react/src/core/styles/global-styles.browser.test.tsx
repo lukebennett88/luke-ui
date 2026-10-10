@@ -6,6 +6,7 @@ import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
 import { SelectItem } from '@luke-ui/react/primitives/select';
 import { SelectField } from '@luke-ui/react/select-field';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { afterEach, expect, test } from 'vite-plus/test';
@@ -96,13 +97,16 @@ function MixedHost() {
 				Native button
 			</button>
 			<input aria-label="Native input" data-testid="native-input" defaultValue="Native" />
-			<Heading data-testid="luke-heading" level={2}>
-				Luke UI heading
-			</Heading>
-			<Text data-testid="luke-text" elementType="p">
-				Luke UI paragraph.
-			</Text>
-			<Button data-testid="luke-button">Luke UI button</Button>
+			{/* Luke UI text is trimmed to its glyphs, so layout components own the spacing. */}
+			<Stack alignItems="start" gap="sp16" marginBlockStart="sp24">
+				<Heading data-testid="luke-heading" level={2}>
+					Luke UI heading
+				</Heading>
+				<Text data-testid="luke-text" elementType="p">
+					Luke UI paragraph.
+				</Text>
+				<Button data-testid="luke-button">Luke UI button</Button>
+			</Stack>
 		</div>
 	);
 }
