@@ -7,8 +7,8 @@
  */
 
 import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
+import type { ThemeFont, ThemeFontWeights } from './font.js';
 import { SURFACE_ROLES } from './foundation.js';
-import { isRecord } from './validate-input.js';
 
 /** Which colours a theme authored, and which it inherited. Carried by `ThemeContrastError`. */
 export interface ThemeInheritance {
@@ -56,19 +56,21 @@ function authorsNeutral(color: Partial<ThemeInput['color']> | undefined): boolea
 
 /**
  * Folds a chain from {@link collectThemeChain} into one merged {@link ThemeInput}, plus the colour
- * provenance of the outermost theme.
+ * provenance of the outermost theme. The chain must have passed `validateThemeChain`.
  */
 export function resolveThemeChain(chain: ThemeChain): ResolvedThemeInput {
 	const { base, inputs } = chain;
 	const [outermost] = inputs;
 	// Returns the object it was handed, so inheritance cannot affect a theme with no base.
 	if (outermost === undefined || outermost === base) return { inheritance: null, input: base };
-	// Fold from the innermost base outward, so every step merges over a complete `ThemeInput` and
+	// Fold from the innermost base outward, so every step merges over complete sections and
 	// `color.accent` is always present.
-	let merged = base;
-	for (const own of inputs.slice(0, -1).reverse()) {
-		merged = inheritInput(merged, own);
+	const innermostFirst = [...inputs].reverse();
+	let sections: ThemeSections = base;
+	for (const own of innermostFirst.slice(1)) {
+		sections = inheritSections(sections, own);
 	}
+	const merged: ThemeInput = { ...sections, typography: resolveTypography(innermostFirst) };
 	return {
 		inheritance: describeInheritance(
 			outermost,
@@ -115,8 +117,14 @@ export function collectThemeChain(input: ThemeInput | ExtendingThemeInput): Them
 	}
 }
 
-/** Merges one input over an already-merged base, section by section. */
-function inheritInput(base: ThemeInput, own: ThemeInput | ExtendingThemeInput): ThemeInput {
+/** Every merged section but `typography`, which {@link resolveTypography} merges across the chain. */
+type ThemeSections = Omit<ThemeInput, 'extends' | 'typography'>;
+
+/** Merges one input over already-merged sections, section by section. */
+function inheritSections(
+	base: ThemeSections,
+	own: ThemeInput | ExtendingThemeInput,
+): ThemeSections {
 	return {
 		color: inheritColor(base.color, own.color),
 		controlFinish: inheritModes(base.controlFinish, own.controlFinish),
@@ -124,7 +132,6 @@ function inheritInput(base: ThemeInput, own: ThemeInput | ExtendingThemeInput): 
 		// `name` never inherits: the identity belongs to the theme the author declares.
 		name: own.name,
 		radius: inheritKeys(base.radius, own.radius),
-		typography: inheritTypography(base.typography, own.typography),
 	};
 }
 
@@ -192,40 +199,34 @@ function inheritModes(
 }
 
 /**
- * Merges typography. Each font role replaces the base's role whole, so a family never pairs with
- * another font's metrics. A `null` display font is kept, so it removes the display font of every
- * theme further in. `fontWeight` merges key by key.
+ * Merges typography across a chain, innermost first. Each font role replaces the base's role whole,
+ * so a family never pairs with another font's metrics. A `null` display font is kept, so it removes
+ * the display font of every theme further in. `fontWeight` merges key by key.
  *
- * Either side may break its type at runtime, for example a base from an older theme package with no
- * `typography`. The merge then keeps what it can, and validation reports the problem instead of the
- * merge throwing a `TypeError`.
+ * Every input is read as overrides, so a base from an older theme package with no `typography`
+ * inherits nothing instead of throwing. `validateThemeChain` has already rejected malformed
+ * typography and a chain with no body font.
  */
-function inheritTypography(
-	base: ThemeInput['typography'],
-	own: ExtendingThemeInput['typography'],
+function resolveTypography(
+	innermostFirst: ReadonlyArray<ThemeInput | ExtendingThemeInput>,
 ): ThemeInput['typography'] {
-	if (!isRecord(own)) return base;
-	const baseTypography: Partial<ThemeInput['typography']> = isRecord(base) ? base : {};
-	const merged = {
-		fonts: inheritFonts(baseTypography.fonts, own.fonts),
-	} as ThemeInput['typography'];
-	const fontWeight = inheritKeys(baseTypography.fontWeight, own.fontWeight);
-	if (fontWeight !== undefined) merged.fontWeight = fontWeight;
-	return merged;
-}
-
-type FontRoles = NonNullable<NonNullable<ExtendingThemeInput['typography']>['fonts']>;
-
-/** Merges font roles. An omitted role inherits, and an own role, including `null`, replaces. */
-function inheritFonts(base: FontRoles | undefined, own: FontRoles | undefined): FontRoles {
-	const baseFonts: FontRoles = isRecord(base) ? base : {};
-	if (!isRecord(own)) return baseFonts;
-	const merged: FontRoles = {};
-	const body = own.body === undefined ? baseFonts.body : own.body;
-	if (body !== undefined) merged.body = body;
-	const display = own.display === undefined ? baseFonts.display : own.display;
-	if (display !== undefined) merged.display = display;
-	return merged;
+	let body: ThemeFont | undefined;
+	let display: ThemeFont | null | undefined;
+	let fontWeight: ThemeFontWeights | undefined;
+	for (const input of innermostFirst) {
+		const own: ExtendingThemeInput['typography'] = input.typography;
+		body = own?.fonts?.body ?? body;
+		if (own?.fonts?.display !== undefined) display = own.fonts.display;
+		fontWeight = inheritKeys(fontWeight, own?.fontWeight);
+	}
+	if (body === undefined) {
+		throw new Error('Expected a validated theme chain to set a body font.');
+	}
+	const typography: ThemeInput['typography'] = {
+		fonts: display === undefined ? { body } : { body, display },
+	};
+	if (fontWeight !== undefined) typography.fontWeight = fontWeight;
+	return typography;
 }
 
 /**

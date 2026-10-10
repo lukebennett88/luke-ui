@@ -1,7 +1,10 @@
 /**
- * Validates theme-authoring inputs before they are merged. Each input in an `extends` chain is
- * checked on its own, against only the fields it sets, so an issue always names the input that
- * contains it. Completeness, which depends on the whole chain, is checked after the merge.
+ * Validates an `extends` chain of theme-authoring inputs before it is merged. Each input is checked
+ * on its own, against only the fields it sets, so an issue always names the input that contains it.
+ * The one requirement that depends on the whole chain, a body font, is checked across all inputs.
+ *
+ * A chain that passes has a well-formed or absent `typography` on every input and a body font on at
+ * least one, which is what `resolveThemeChain` relies on.
  */
 
 import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
@@ -37,10 +40,33 @@ export class ThemeValidationError extends Error {
 	}
 }
 
-/** Checks the fields one input sets. Returns every issue found, or an empty array. */
-export function validateThemeInput(
-	input: ThemeInput | ExtendingThemeInput,
+/**
+ * Checks every input in a chain, the outermost first, and that some input sets the required body
+ * font. Returns every issue found, or an empty array.
+ */
+export function validateThemeChain(
+	inputs: ReadonlyArray<ThemeInput | ExtendingThemeInput>,
 ): Array<ThemeValidationIssue> {
+	const issues = inputs.flatMap(validateThemeInput);
+	const [outermost] = inputs;
+	if (outermost !== undefined && !inputs.some(setsBodyFont)) {
+		issues.push({
+			message: 'is required. Set it on this theme or on a theme it extends.',
+			path: 'typography.fonts.body',
+			theme: String(outermost.name),
+		});
+	}
+	return issues;
+}
+
+/** Whether an input sets a body font, whatever its shape. `validateThemeInput` reports the shape. */
+function setsBodyFont(input: ThemeInput | ExtendingThemeInput): boolean {
+	const typography: unknown = input.typography;
+	return isRecord(typography) && isRecord(typography.fonts) && typography.fonts.body !== undefined;
+}
+
+/** Checks the fields one input sets. Returns every issue found, or an empty array. */
+function validateThemeInput(input: ThemeInput | ExtendingThemeInput): Array<ThemeValidationIssue> {
 	const issues: Array<ThemeValidationIssue> = [];
 	function report(path: string, message: string) {
 		issues.push({ message, path, theme: String(input.name) });
@@ -81,27 +107,6 @@ export function validateThemeInput(
 		}
 	}
 	return issues;
-}
-
-/**
- * Checks what only the merged chain can prove: that some input set the required body font. Reports
- * a missing value against the outermost theme.
- */
-export function validateMergedInput(
-	outermostName: string,
-	merged: ThemeInput,
-): Array<ThemeValidationIssue> {
-	const typography: unknown = merged.typography;
-	const body =
-		isRecord(typography) && isRecord(typography.fonts) ? typography.fonts.body : undefined;
-	if (body !== undefined) return [];
-	return [
-		{
-			message: 'is required. Set it on this theme or on a theme it extends.',
-			path: 'typography.fonts.body',
-			theme: outermostName,
-		},
-	];
 }
 
 /** The metrics Capsize needs to trim text. Each must be a finite number. */
@@ -184,7 +189,7 @@ function hasUnbalancedQuotes(family: string): boolean {
 	return open !== null;
 }
 
-export function isRecord(value: unknown): value is Record<string, unknown> {
+function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 

@@ -22,7 +22,7 @@ import type {
 import { defaultSourceColors } from './foundation.js';
 import { lightnessCandidates } from './lightness-candidates.js';
 import { highContrastText, passesOnSolidGate } from './scale.js';
-import { ThemeValidationError, validateMergedInput, validateThemeInput } from './validate-input.js';
+import { ThemeValidationError, validateThemeChain } from './validate-input.js';
 
 /**
  * A colour: one string, or a per-mode object where either side may be omitted. Each role documents
@@ -290,10 +290,9 @@ export const defaultBackdrop: Record<ColorMode, string> = {
  */
 export function defineTheme(input: ThemeInput | ExtendingThemeInput): string {
 	const chain = collectThemeChain(input);
-	const issues = chain.inputs.flatMap(validateThemeInput);
-	const resolved = resolveThemeChain(chain);
-	issues.push(...validateMergedInput(input.name, resolved.input));
+	const issues = validateThemeChain(chain.inputs);
 	if (issues.length > 0) throw new ThemeValidationError(issues);
+	const resolved = resolveThemeChain(chain);
 	try {
 		return buildTheme(normalizeTheme(resolved.input));
 	} catch (error) {

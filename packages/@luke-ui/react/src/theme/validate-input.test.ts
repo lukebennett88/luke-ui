@@ -187,7 +187,7 @@ describe('validation across an extends chain', () => {
 		);
 	});
 
-	it('reports a missing body font against the outermost theme after the merge', () => {
+	it('reports a missing body font against the outermost theme', () => {
 		const base = { color: { accent: '#3b82f6' }, name: 'no-fonts' } as unknown as ThemeInput;
 		const issues = issuesOf({ extends: base, name: 'outer' });
 
