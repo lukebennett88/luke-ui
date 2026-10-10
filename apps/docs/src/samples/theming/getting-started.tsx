@@ -8,11 +8,7 @@ import type { PropsWithChildren } from 'react';
 export function RootLayout({ children }: PropsWithChildren) {
 	return (
 		<html className={themeClassName} lang="en">
-			<body className={rootClassName}>
-				<header />
-				<main>{children}</main>
-				<footer />
-			</body>
+			<body className={rootClassName}>{children}</body>
 		</html>
 	);
 }

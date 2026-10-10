@@ -4,19 +4,18 @@ description: Load a theme, set its identity class, and choose colour modes.
 ---
 
 A themed document needs the shared Luke UI stylesheet, one theme stylesheet, and that theme's
-identity class on `<html>`. All of it is static CSS. Luke UI does not inject styles at runtime and
-needs no provider for theming.
+identity class on `<html>`. Theming is static CSS, so it needs no provider.
 
 ## Load the theme
 
 Import `@luke-ui/react/stylesheet.css` and the theme's stylesheet. Import the theme's `fonts.css` to
-load the font it names, or load that font another way. Render the theme's identity class on `<html>`
-and `rootClassName` on `<body>`. Render both on the server when the application renders there.
+load its font, or load that font another way. Render the theme's identity class on `<html>` and
+`rootClassName` on `<body>`. When the application renders on the server, render both there too.
 
 <SourceCodeBlock src="theming/getting-started" />
 
-The identity class selects the theme's tokens. `rootClassName` adds the reset and base typography.
-It carries no theme identity, so it works the same way for every theme.
+The identity class selects the theme's tokens. `rootClassName` adds the reset and base typography,
+and works the same way for every theme.
 
 ## Use one identity class
 

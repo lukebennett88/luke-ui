@@ -61,28 +61,26 @@ Text also accepts semantic `color` values such as `primary`, `secondary`, `accen
 ## Fonts
 
 A theme names a body font and, optionally, a display font. The body font sets `caption`, `label`,
-`body`, and `lead`. The display font sets `heading4` through `heading1` and `display`. A theme
-without a display font uses its body font for every style. `vars.font.family.body` and
-`vars.font.family.display` expose the two families.
+`body`, and `lead`. The display font sets `heading4` through `heading1` and `display`. Without a
+display font, every style uses the body font. `vars.font.family.body` and `vars.font.family.display`
+expose the two families.
 
-Tactile and Paper use Inter for every style, and each theme package ships it in an optional
-`fonts.css`. A custom theme loads its own fonts. Read
-[Authoring a theme](/docs/authoring-a-theme#fonts) to set them.
+Tactile and Paper use Inter for every style. Read [Authoring a theme](/docs/authoring-a-theme#fonts)
+to set and load the fonts of your own theme.
 
-Luke UI computes each style's trim from the metrics of the primary font in its family stack. The
-trim matches only while that font renders:
+Each style's trim comes from the metrics of the first font in its stack. The trim is exact only
+while that font renders:
 
-- With `font-display: swap`, a fallback font shows until the primary font loads. Trims are slightly
-  off until the swap.
+- With `font-display: swap`, a fallback font shows until the first font loads. Trims are slightly
+  off until then.
 - A system stack such as `-apple-system, BlinkMacSystemFont, system-ui, sans-serif` resolves to a
   different font on each platform. Its metrics describe one of them, so trims are exact only on the
   platforms that use that font.
 
 ### Code font
 
-`Code` uses `vars.font.family.code`, a system monospace stack that no theme sets. To use another
-font, override the variable after the theme stylesheet with an unlayered rule at least as specific
-as the theme's:
+`Code` uses `vars.font.family.code`, a system monospace stack that every theme declares. To use
+another font, override the variable on `:root` in an unlayered rule after the theme stylesheet:
 
 ```css
 :root {

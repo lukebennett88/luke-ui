@@ -4,12 +4,11 @@ description: Compile a curated theme input into a static Luke UI theme styleshee
 ---
 
 Author a custom theme when Tactile and Paper do not suit the product. `defineTheme` turns a small,
-curated `ThemeInput` into static CSS for one theme with light and dark modes. It runs at build time
-in Node 24 or later, and needs no browser and no Luke UI release.
+curated `ThemeInput` into static CSS for one theme with light and dark modes. Run it at build time,
+in Node 24 or later.
 
-Import every authoring API from `@luke-ui/react/theme/compiler`. Never import it from application
-code that runs in the browser. The application imports only the compiled stylesheet and
-`@luke-ui/react/theme`.
+Import the authoring APIs from `@luke-ui/react/theme/compiler`, and only in build scripts. The
+application imports the compiled stylesheet and `@luke-ui/react/theme`.
 
 ## Define the input
 
@@ -55,10 +54,11 @@ The minimal theme authors one colour, a neutral character, and a body font:
 
 ### Fonts
 
-Each font is a `ThemeFont`: an authored CSS `family` stack, and Capsize `metrics` for the stack's
-primary font. Luke UI trims each typography style with its font's metrics. Take metrics from
-`@capsizecss/metrics`, or read them from a font file with `@capsizecss/unpack`. `FontMetrics` from
-`@luke-ui/react/theme/compiler` types a full metrics object.
+Each font is a `ThemeFont`: a CSS `family` stack, and Capsize `metrics` for the stack's first font.
+Luke UI trims each typography style with its font's metrics. The metrics need `familyName`,
+`ascent`, `capHeight`, `descent`, `lineGap`, and `unitsPerEm`. Import them from
+`@capsizecss/metrics`, which you install as a development dependency, or read them from a font file
+with `@capsizecss/unpack`.
 
 `typography.fonts.body` sets `caption`, `label`, `body`, and `lead`. The optional
 `typography.fonts.display` sets `heading4` through `heading1` and `display`. Without a display font,
@@ -66,8 +66,12 @@ those styles use the body font.
 
 <SourceCodeBlock src="theming/display-font" />
 
-A theme names its fonts but does not load them. Load every font, and every weight, the theme uses.
-Read [Typography](/docs/typography#fonts) for how font loading affects trims.
+A theme only names its fonts. The generated stylesheet sets each style's `font-family`, but it has
+no `@font-face` rule, so the browser does not download the font. Load every font and weight the
+theme uses, with your own `@font-face` rules or a package such as Fontsource. The `family` stack
+must name the family that the `@font-face` rule declares. For example, `@fontsource-variable/inter`
+declares `'Inter Variable'`. Until a font loads, text renders in the next font of the stack. Read
+[Typography](/docs/typography#fonts) for how that affects trims.
 
 `typography.fontWeight` sets the `body`, `label`, `heading`, and `emphasis` weights, which default
 to 400, 500, 600, and 700.
@@ -107,52 +111,49 @@ A value set to `undefined` counts as omitted and inherits.
 A theme may extend a theme that extends another. A cycle throws.
 
 An extending theme compiles to a complete stylesheet of its own, so load it instead of the base
-theme's stylesheet. It still names the base's fonts, so keep loading them. With a theme package,
-keep importing its `fonts.css`.
+theme's stylesheet. It still names the base's fonts. When you extend Tactile or Paper, keep
+importing the package's `fonts.css`.
 
 Contrast validation runs on the merged theme. `ThemeContrastError` carries `inheritance`, naming the
 chain of themes and which colours came from a base.
 
 ## Generate a stylesheet
 
-`defineTheme` returns the stylesheet as a string. Write it to a file with a Node script, and run the
-script whenever the input changes.
+`defineTheme` returns the stylesheet as a string. Write it to a file with a script, and run the
+script whenever the input changes:
 
 <SourceCodeBlock src="theming/compile-theme" />
 
-Node 24 runs this script as TypeScript directly, within these limits:
+Run the script with `node`. Node 24 runs TypeScript files directly by stripping their types, which
+supports a subset of TypeScript. Read
+[Node's TypeScript documentation](https://nodejs.org/docs/latest-v24.x/api/typescript.html) for the
+limits.
 
-- It strips types without compiling, so the script and every module it imports use erasable syntax
-  only. Enums and namespaces fail.
-- The nearest `package.json` `"type"` field decides whether a `.ts` file loads as ES modules or
-  CommonJS. Use `"type": "module"` for top-level `await`.
-- Relative imports name the `.ts` extension. Enable `allowImportingTsExtensions` or
-  `rewriteRelativeImportExtensions` in `tsconfig.json` so TypeScript accepts it.
-- `tsconfig.json` path aliases do not resolve.
-- Every dependency the script imports ships JavaScript.
-
-Load the generated stylesheet, set the theme's identity class on `<html>`, and apply
-`rootClassName`, exactly as for [Tactile or Paper](/docs/applying-a-theme). The class is
-`luke-ui-theme-` followed by the theme's `name`. `getThemeClassName` from `@luke-ui/react/theme`
-returns it.
+Load the generated stylesheet, and set the identity class and `rootClassName` as for
+[Tactile or Paper](/docs/applying-a-theme). The identity class is `luke-ui-theme-` followed by the
+theme's `name`. `getThemeClassName` from `@luke-ui/react/theme` returns it.
 
 ### Generate with Vite
 
-A Vite application can compile the theme as part of its build instead. This plugin serves the
-stylesheet as a virtual module. Import `virtual:theme.css` from the application entry.
+A Vite application can compile the theme during its build instead. This plugin serves the stylesheet
+as a virtual module. Import `virtual:theme.css` from the application entry.
 
 <SourceCodeBlock src="theming/vite-theme-plugin" />
 
 ## Validation
 
 `defineTheme` validates each input in an `extends` chain on its own, then checks the merged theme
-for a body font. It reports every problem at once. `ThemeValidationError.issues` lists each one with
-the `theme` that contains it, the `path` within that theme, and a `message`. A base theme with an
-invalid font fails even when your theme replaces that font.
+for a body font. It throws `ThemeValidationError` with every problem at once. Its `issues` list each
+one with the `theme` that contains it, the `path` within that theme, and a `message`. A base theme
+with an invalid font fails even when your theme replaces that font.
 
-A font `family` must not contain `;`, `{`, `}`, `<`, control characters, or an unclosed quote. Font
-metrics must be finite numbers, with a positive `unitsPerEm`, `capHeight`, and `ascent`, a `descent`
-of 0 or less, and a `lineGap` of 0 or more. Font weights are numbers from 1 to 1000.
+The rules for fonts:
+
+- `family` must not contain `;`, `{`, `}`, `<`, control characters, or an unclosed quote.
+- `metrics.familyName` must be a non-empty string.
+- The other metrics must be finite numbers. `unitsPerEm`, `capHeight`, and `ascent` must be
+  positive, `descent` 0 or less, and `lineGap` 0 or more.
+- Font weights must be numbers from 1 to 1000.
 
 ## Contrast validation
 

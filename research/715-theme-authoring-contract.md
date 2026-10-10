@@ -21,8 +21,11 @@ room for additive extension after 1.0. Prefer extensibility over configurability
   would only help at build time; the runtime still needs the class name.
 - **D16. One home for authoring APIs.** Everything for authoring lives on `/theme/compiler`. There
   are no compatibility re-exports from `/theme`. `@luke-ui/react/themes/*` is removed.
-- **D3. Capsize's own `FontMetrics` type** is used directly and re-exported from `/theme/compiler`,
-  so authors don't need to install `@capsizecss/core`.
+- **D3. Font metrics follow Capsize's `FontMetrics` type.** `ThemeFont.metrics` requires
+  `familyName` and the five fields Luke UI trims with: `ascent`, `capHeight`, `descent`, `lineGap`,
+  and `unitsPerEm`. Every other `FontMetrics` field is optional, so a complete object from
+  `@capsizecss/metrics` or `@capsizecss/unpack` fits. `FontMetrics` is re-exported from
+  `/theme/compiler`, so authors don't need to install `@capsizecss/core`.
 - **D5. Runtime and authoring entries are separate in theme packages too.** The root entry imports
   only `getThemeClassName` and a name constant shared with `./input`, so runtime imports can never
   load the input. This replaces today's reliance on tree shaking and the rule against `.join()` in
@@ -68,24 +71,26 @@ room for additive extension after 1.0. Prefer extensibility over configurability
 - **D14. Metrics describe the primary font.** Accept the temporary mismatch while a fallback font
   shows during `font-display: swap`, and the permanent mismatch of system stacks on other platforms.
   Both are documented. No runtime font detection.
-- **D4, D12, D24. Theme packages bundle their own fonts.** Paper and Tactile each ship a pinned,
+- **D4, D12, D24. Theme packages bundle their own fonts.** Paper and Tactile each ship an
   OFL-licensed, Latin-subset variable Inter WOFF2 with its licence, declared in an optional
-  `fonts.css`. Both keep today's typography: Inter body, no display font. Custom themes load their
-  own fonts.
+  `fonts.css`. Each build copies both files from a pinned `@fontsource-variable/inter` dev
+  dependency, so the repository holds no font binaries and the build downloads nothing. Both keep
+  today's typography: Inter body, no display font. Custom themes load their own fonts.
 - **D15. Bundled metrics live in each package's `./input`,** with the font release recorded.
 - **D49. Paper and Tactile may each bundle and declare the same Inter font.** Duplicate declarations
   are acceptable. There is no shared font package and no requirement to rename the families. How
   browsers pick between duplicate faces, load them, and cache them is not part of Luke UI's
-  contract.
+  contract. An application that loads both themes, such as the docs site, imports one `fonts.css`.
 
 ## Validation and errors
 
 - **D32 (revised). Strict validation, every failure reported at once.** Reject family strings
   containing `;`, `{`, `}`, `<`, control characters, or unbalanced quotes. Metrics must be finite,
   with `unitsPerEm > 0`, `capHeight > 0`, `ascent > 0`, `descent ≤ 0` (Capsize's convention), and
-  `lineGap ≥ 0`. Optional numeric fields must be finite if present. Weights must be finite numbers
-  from 1 to 1000. Don't compare `metrics.familyName` with the stack. The earlier
-  `capHeight ≤ unitsPerEm` rule is withdrawn because fonts don't guarantee it.
+  `lineGap ≥ 0`. `familyName` must be a non-empty string. Optional numeric fields must be finite if
+  present. Weights must be finite numbers from 1 to 1000. Don't compare `metrics.familyName` with
+  the stack. The earlier `capHeight ≤ unitsPerEm` rule is withdrawn because fonts don't guarantee
+  it.
 - **D43, D54 (revised in final review). Validate each input in an `extends` chain on its own,**
   against the fields it authors, then check completeness (the required `body` font) after merging.
   `ThemeValidationError.issues` is `ReadonlyArray<{ theme; path; message }>`, where `theme` is the
@@ -149,7 +154,8 @@ room for additive extension after 1.0. Prefer extensibility over configurability
   binary using `@capsizecss/unpack`. Assert the 400–700 weight axis only if that library exposes it.
   No second parser and no checksum record.
 - **D55. A display-font fixture** uses a genuinely different OFL font (preferably 1000 units per em)
-  and asserts exact Capsize-computed trims.
+  and asserts exact Capsize-computed trims. The packed-consumer test loads Lora from a pinned
+  `@fontsource/lora`.
 - **D42, D47 (revised), D62. Fixtures and parity.** React's visual suite uses React-owned copies of
   today's Paper and Tactile inputs, keeping their names and screenshot IDs. A one-time migration
   comparison of declarations by semantic rule role, plus a zero-change visual run, proves the
