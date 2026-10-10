@@ -145,7 +145,7 @@ Old rules came from `reset.css.ts` (scoped to `.luke-ui-reset`) and `theme-root.
 | `blockquote, dl, dd, figure, p { margin: 0 }`                        | Removed                         | `Text` zeroes its own margin. `Prose` zeroes block margins inside its scope.                                                                                                                      |
 | `h1`–`h6 { font: unset; margin: 0 }`                                 | Removed                         | `Text` zeroes margins and always sets a weight from its type style, or inherits one. `Heading` sets its type style and weight. Native headings keep browser sizes and weight.                     |
 | `ol, ul { margin: 0; padding: 0 }`                                   | Removed                         | Combobox and Select list boxes already zero both. `Prose` sets list indentation.                                                                                                                  |
-| `ul, ol:not([type]), ol[type]:not(.prose *) { list-style: none }`    | Removed                         | List boxes already remove markers. `Prose` restates markers, including each supported `ol[type]` value, so a later framework reset such as Tailwind Preflight cannot remove them.                 |
+| `ul, ol:not([type]), ol[type]:not(.prose *) { list-style: none }`    | Removed                         | List boxes already remove markers. `Prose` restores markers, including typed `ol` via `attr()` and `@counter-style`, so a later framework reset such as Tailwind Preflight cannot remove them.    |
 | `table { border-collapse: collapse; border-spacing: 0 }`             | Removed                         | `Prose` owns its table treatment.                                                                                                                                                                 |
 | `caption, th { text-align: inherit }`                                | Removed                         | `Prose` aligns `th` and `caption` to the start.                                                                                                                                                   |
 | `th, td { padding: 0 }`                                              | Removed                         | `Prose` already pads cells.                                                                                                                                                                       |
@@ -169,10 +169,10 @@ Old rules came from `reset.css.ts` (scoped to `.luke-ui-reset`) and `theme-root.
   agent's bold. Raw `textRecipe()` on a heading without `fontWeight` keeps the native weight, like
   any native heading.
 - **`Prose`.** Zeroes block margins on all sides (blockquotes, figures, and `dd` had inline margins
-  from the user agent), keeps disc markers for `ul` and decimal markers for untyped `ol`, restates
-  each supported typed `ol` marker with a case-sensitive attribute selector, indents every list,
-  collapses tables, aligns `th` and `caption` to the start, and pads cells. `prose/scope.css.ts` and
-  the old global `ol[type]` workaround are gone.
+  from the user agent), keeps disc markers for `ul` and decimal markers for untyped `ol`, restores
+  typed `ol` markers against framework resets by reading `type` with `attr()` into case-sensitive
+  `@counter-style` names, indents every list, collapses tables, aligns `th` and `caption` to the
+  start, and pads cells. `prose/scope.css.ts` and the old global `ol[type]` workaround are gone.
 - **Buttons.** The Button primitive owns its chrome, cursor, touch action, and tap highlight. The
   Combobox trigger and clear button, and the Combobox tray trigger, set their own padding,
   background, border, and appearance.
@@ -290,7 +290,7 @@ One indicator per control:
 | `docs/STYLING.md` claim that the reset owns reduced motion                            | D4: component-owned.                                                  |
 | `docs/STYLING.md` setup step 4 and the `theme-root.css.ts` paragraph                  | `<html>` identity only; `global-styles.css.ts`.                       |
 | `layers.css.ts` and `layer-names.ts` JSDoc                                            | Nested layers.                                                        |
-| `prose/recipe.css.ts` `ol[type]` comment and `prose/scope.css.ts`                     | Removed; Prose restates typed markers so Preflight cannot clear them. |
+| `prose/recipe.css.ts` `ol[type]` comment and `prose/scope.css.ts`                     | Removed; Prose restores typed markers with `attr()` and `@counter-style`. |
 | LoadingSkeleton "global reduced-motion reset" comment                                 | Removed.                                                              |
 | Field inline-label, Select root, and Combobox group "reset ring" comments             | Removed with their `outline: none` workarounds.                       |
 | "Table cells need padding after the reset removes it" (Prose)                         | Prose owns its table treatment.                                       |

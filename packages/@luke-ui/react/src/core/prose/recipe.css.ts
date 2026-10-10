@@ -1,3 +1,4 @@
+import { globalStyle } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import { recipe } from '../styles/recipe.js';
@@ -64,17 +65,21 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 });
 
 // Markers are restated so a framework reset below Luke UI, such as Tailwind Preflight, cannot
-// remove them. Preflight's `list-style: none` also overrides HTML `type` presentational hints, so
-// typed lists restate each supported value. The `s` flag keeps `a`/`A` and `i`/`I` distinct: HTML
-// matches the `type` attribute case-insensitively without it.
+// remove them. Preflight's `list-style: none` also overrides HTML `type` presentational hints.
+// HTML matches `type` case-insensitively in selectors, and Chromium does not support the `s` flag,
+// so typed lists read the attribute with `attr()` and map each value through a case-sensitive
+// `@counter-style` name (`a`/`A`, `i`/`I`). `type="1"` is not a custom-ident, so it falls back to
+// decimal.
+globalStyle('@counter-style a', { system: 'extends lower-alpha' } as never);
+globalStyle('@counter-style A', { system: 'extends upper-alpha' } as never);
+globalStyle('@counter-style i', { system: 'extends lower-roman' } as never);
+globalStyle('@counter-style I', { system: 'extends upper-roman' } as never);
 proseStyle('ul, ol', { paddingInlineStart: vars.space.sp24 });
 proseStyle('ul', { listStyleType: 'disc' });
 proseStyle('ol:not([type])', { listStyleType: 'decimal' });
-proseStyle('ol[type="1"]', { listStyleType: 'decimal' });
-proseStyle('ol[type="a" s]', { listStyleType: 'lower-alpha' });
-proseStyle('ol[type="A" s]', { listStyleType: 'upper-alpha' });
-proseStyle('ol[type="i" s]', { listStyleType: 'lower-roman' });
-proseStyle('ol[type="I" s]', { listStyleType: 'upper-roman' });
+proseStyle('ol[type]', {
+	listStyleType: 'attr(type type(<custom-ident>), decimal)',
+});
 
 proseStyle('hr', {
 	blockSize: 0,

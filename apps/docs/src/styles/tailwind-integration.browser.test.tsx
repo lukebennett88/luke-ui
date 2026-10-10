@@ -225,6 +225,6 @@ for (const scenario of scenarios.filter((entry) => entry.isOrdered)) {
 
 		expect(
 			[...container.querySelectorAll('ol')].map((ol) => getComputedStyle(ol).listStyleType),
-		).toEqual(['decimal', 'lower-alpha', 'upper-alpha', 'lower-roman', 'upper-roman']);
+		).toEqual(['decimal', 'a', 'A', 'i', 'I']);
 	});
 }

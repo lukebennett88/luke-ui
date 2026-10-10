@@ -99,13 +99,9 @@ test('preserves ordered-list type markers, including uppercase and lowercase, un
 		</div>,
 	);
 
-	expect(listStyleTypes(locator.element())).toEqual([
-		'decimal',
-		'lower-alpha',
-		'upper-alpha',
-		'lower-roman',
-		'upper-roman',
-	]);
+	// Computed names are the HTML `type` values (`a`/`A`/…), mapped through `@counter-style` to the
+	// matching alpha/roman systems. `type="1"` is not a custom-ident, so it stays decimal.
+	expect(listStyleTypes(locator.element())).toEqual(['decimal', 'a', 'A', 'i', 'I']);
 });
 
 function margin(element: Element) {
