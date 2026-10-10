@@ -41,8 +41,8 @@ export default {
 			project: ['src/**/*.ts'],
 		},
 		'packages/@luke-ui/rainbow-sprinkles': {
-			entry: ['src/index.ts', 'src/create-runtime-fn.ts', 'vite.config.ts'],
-			project: ['src/**/*.ts', 'vite.config.ts'],
+			entry: ['src/index.ts', 'src/create-runtime-fn.ts'],
+			project: ['src/**/*.ts'],
 		},
 		'packages/@luke-ui/react': {
 			entry: [
