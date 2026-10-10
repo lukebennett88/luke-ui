@@ -266,7 +266,9 @@ test('copies the complete source from both collapsed and expanded previews', asy
 	await page.viewport(1000, 800);
 	await renderExampleBlock();
 
-	await userEvent.click(page.getByRole('button', { name: 'Copy', exact: true }));
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Copy', exact: true }));
+	});
 	expect(writeText).toHaveBeenLastCalledWith(responsiveLayoutSource.trim());
 	await expect.element(page.getByRole('button', { name: 'Copied' })).toBeVisible();
 
