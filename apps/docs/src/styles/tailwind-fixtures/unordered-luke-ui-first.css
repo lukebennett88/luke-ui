@@ -1,0 +1,12 @@
+@import '@luke-ui/react/stylesheet.css';
+@import '@luke-ui/theme-tactile/stylesheet.css';
+@import 'tailwindcss' source(none);
+
+/* Only the classes the integration test uses, rather than a scan of the docs app. */
+@source inline("p-[11px] p-[3px] bg-[rgb(7,8,9)]!");
+
+@layer components {
+	.tw-component {
+		padding: 5px;
+	}
+}

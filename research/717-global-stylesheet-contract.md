@@ -256,10 +256,12 @@ One indicator per control:
   utilities in `luke-ui.utilities`, the six global rules, and no `luke-ui-` class selectors.
 - `layer-order.browser.test.ts` checks precedence in Chromium with the built stylesheet, including
   important declarations and a consumer `base` write.
-- `tailwind.browser.test.ts` compiles real Tailwind v4 CSS with `@tailwindcss/node` and loads it
-  with the built stylesheet in both import orders, with and without the combined order statement. It
-  checks Preflight against Luke UI recipes, utility props against recipes, Tailwind utilities
-  against recipes and components, unlayered CSS, and important declarations.
+- `apps/docs/src/styles/tailwind-integration.browser.test.tsx` loads real Tailwind v4 output,
+  compiled by the docs app's Tailwind Vite plugin, with the built stylesheet in both import orders,
+  with and without the combined order statement. It checks Preflight against Luke UI recipes, `Box`
+  utility props against recipes, Tailwind utilities against recipes and components, unlayered CSS,
+  and important declarations. Without the statement and with Tailwind first, `luke-ui` lands above
+  Tailwind `utilities`; the test pins that failure mode so the documented statement stays necessary.
 - `global-styles.browser.test.tsx` renders mixed native and Luke UI markup and checks native
   headings, paragraphs, blockquotes, lists, tables, buttons, links, and form controls; body
   painting, overrides, and nested repaint; focus rings by keyboard, programmatic focus, React Aria
