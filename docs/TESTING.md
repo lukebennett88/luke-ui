@@ -76,11 +76,15 @@ just to create an assertion or keep consts referenced.
 
 ## Package consumption
 
-`packages/@luke-ui/react/src/core/styles/packed-consumer.test.ts` tests the packages the way an
-application installs them. It packs the workspace builds of React, Paper, and Tactile and installs
-the tarballs with npm in a directory outside the repository, so no workspace link can satisfy an
-import. Those installs need network access, so `pnpm run test` leaves it out. Run it with
-`pnpm run test:consumer`. The `consumer-tests` CI job runs it on every pull request.
+`packages/@luke-ui/react/src/core/packed-consumer/` tests the packages the way an application
+installs them. Its global setup, `setup.ts`, packs the workspace builds of React, Paper, and
+Tactile, installs the tarballs with npm in directories outside the repository, so no workspace link
+can satisfy an import, and builds each consumer once. The scenarios read those consumers and never
+install or build. `react-package.test.ts` covers React, `theme-packages.test.ts` the theme packages,
+and `fonts.test.ts` font loading and Capsize trims. The consumer files they need live in
+`react-fixture.ts` and `theme-fixture.ts`. The installs need network access, so `pnpm run test`
+leaves the harness out. Run it with `pnpm run test:consumer`. The `consumer-tests` CI job runs it on
+every pull request.
 
 Keep it to the package boundary: tarball contents, dependencies, peers, assets, server rendering, a
 client build, hydration in Chromium, type checking, and what small imports bundle. For the theme

@@ -163,9 +163,10 @@ room for additive extension after 1.0. Prefer extensibility over configurability
   difference, including Capsize trims from new font metrics, is investigated; existing values are
   kept where they correctly describe the font. After that, the fixtures and the published themes may
   diverge. No permanent parity test and no integration package.
-- **Packed consumer.** The existing `packed-consumer.test.ts` harness stays where it is and adds the
-  theme packages. A React-specific Turbo entry depends on the theme package builds, which keeps the
-  graph acyclic.
+- **Packed consumer.** The existing packed-consumer harness adds the theme packages. It was later
+  split into a global setup, one fixture module per scenario, and React, theme, and font scenario
+  files, so one install per peer set still serves every scenario. A React-specific Turbo entry
+  depends on the theme package builds, which keeps the graph acyclic.
 - **D56.** `LUKE_UI_REACT_SPEC` keeps its React-only checks and skips cross-package checks with a
   printed reason. #721 adds published combinations.
 - **D39.** #715 automates Chromium. #718 owns WebKit and iOS sign-off.
