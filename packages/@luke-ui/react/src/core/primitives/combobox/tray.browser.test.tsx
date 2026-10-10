@@ -32,20 +32,21 @@ const countryItems: Array<CountryItem> = [
 const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</ComboboxItem>;
 
 /** Minimal tray composition built from public primitives. */
-function TrayCombobox(
-	props: {
-		'aria-label'?: string;
-		defaultValue?: string;
-		isDisabled?: boolean;
-		isReadOnly?: boolean;
-		label?: string;
-		trayControlRef?: Ref<HTMLDivElement>;
-		triggerLabel?: string;
-	} & Pick<
-		ComboboxRootProps<CountryItem>,
-		'allowsCustomValue' | 'form' | 'isRequired' | 'name' | 'validate' | 'validationBehavior'
-	>,
-) {
+function TrayCombobox({
+	trayControlRef,
+	...props
+}: {
+	'aria-label'?: string;
+	defaultValue?: string;
+	isDisabled?: boolean;
+	isReadOnly?: boolean;
+	label?: string;
+	trayControlRef?: Ref<HTMLDivElement>;
+	triggerLabel?: string;
+} & Pick<
+	ComboboxRootProps<CountryItem>,
+	'allowsCustomValue' | 'form' | 'isRequired' | 'name' | 'validate' | 'validationBehavior'
+>) {
 	const label = props.label ?? 'Country';
 
 	return (
@@ -69,7 +70,7 @@ function TrayCombobox(
 					</ComboboxTrayTrigger>
 				</ComboboxControl>
 				<ComboboxTray>
-					<ComboboxControl ref={props.trayControlRef}>
+					<ComboboxControl ref={trayControlRef}>
 						<ComboboxInput placeholder="Select a country..." />
 						<ComboboxClearButton aria-label="Clear search">
 							<Icon name="close" />

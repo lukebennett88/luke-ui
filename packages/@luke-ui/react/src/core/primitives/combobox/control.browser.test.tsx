@@ -42,7 +42,7 @@ function controlElement() {
 }
 
 test('ComboboxControl forwards a callback ref to its group and clears it on unmount', () => {
-	const ref = vi.fn();
+	const ref = vi.fn<(element: HTMLDivElement | null) => void>();
 	const { unmount } = render(<PopoverCombobox controlRef={ref} />);
 
 	expect(ref).toHaveBeenLastCalledWith(controlElement());
@@ -62,8 +62,8 @@ test('ComboboxControl forwards an object ref to its group and clears it on unmou
 });
 
 test('ComboboxControl runs the cleanup a callback ref returns', () => {
-	const cleanup = vi.fn();
-	const ref = vi.fn(() => cleanup);
+	const cleanup = vi.fn<() => void>();
+	const ref = vi.fn<(element: HTMLDivElement | null) => () => void>(() => cleanup);
 	const { unmount } = render(<PopoverCombobox controlRef={ref} />);
 
 	expect(ref).toHaveBeenLastCalledWith(controlElement());

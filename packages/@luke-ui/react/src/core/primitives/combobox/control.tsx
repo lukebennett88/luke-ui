@@ -1,5 +1,5 @@
 import { mergeRefs } from '@react-aria/utils';
-import type { JSX } from 'react';
+import type { JSX, Ref } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
 import { Group as RacGroup } from 'react-aria-components/Group';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
@@ -16,6 +16,8 @@ import { comboboxRecipe } from './styles.css.js';
 type _ComboboxControlOmit = DistributiveOmit<RacGroupProps, 'className'>;
 interface _ComboboxControlProps extends _ComboboxControlOmit {
 	className?: RacGroupProps['className'];
+	/** Forwarded to the control's group element. */
+	ref?: Ref<HTMLDivElement>;
 	size?: ComboboxSize;
 }
 
@@ -43,8 +45,16 @@ export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 				className={composeRenderProps(groupProps.className, (className) => {
 					return comboboxRecipe({ presentation, size }).control({ className });
 				})}
-				// The group inside a tray is not the input group: it sits in the tray's own portal.
-				ref={presentation === 'tray' ? ref : mergeRefs(ref, inputGroupRef)}
+				// The group inside a tray is not the input group: it sits in the tray's own portal. The
+				// merge runs inside the callback, because reading a ref object during render is not allowed.
+				ref={
+					presentation === 'tray'
+						? ref
+						: (element: HTMLDivElement | null) => {
+								const merged = mergeRefs(ref, inputGroupRef);
+								return typeof merged === 'function' ? merged(element) : undefined;
+							}
+				}
 			/>
 		</IconSizeProvider>
 	);
