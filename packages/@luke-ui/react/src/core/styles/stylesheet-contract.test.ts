@@ -726,7 +726,9 @@ function assertRootNodes(analysis: StylesheetAnalysis): void {
 			rule.type === 'layer-statement' ||
 			rule.type === 'layer-block' ||
 			rule.type === 'property' ||
-			rule.type === 'keyframes'
+			rule.type === 'keyframes' ||
+			// Prose maps HTML `ol[type]` through case-sensitive counter styles.
+			rule.type === 'counter-style'
 		) {
 			continue;
 		}
