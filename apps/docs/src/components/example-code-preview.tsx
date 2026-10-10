@@ -28,16 +28,28 @@ export function ExampleCodePreview({
 	const isExpanded = mode === 'expanded';
 	const canExpand = mode === 'collapsed' || isExpanded;
 	const isClipped = !isExpanded;
+	const isExpandedInDomRef = useRef(false);
+
+	useLayoutEffect(() => {
+		isExpandedInDomRef.current = isExpanded;
+	}, [isExpanded]);
+
+	// Collapsing source that already fits does not resize it, so the observer stays quiet.
+	useLayoutEffect(() => {
+		const sourceElement = sourceRef.current;
+		if (mode !== 'collapsed' || !sourceElement) return;
+		dispatch({ isClipped: isSourceClipped(sourceElement), type: 'measured' });
+	}, [mode]);
 
 	useLayoutEffect(() => {
 		const sourceElement = sourceRef.current;
 		if (!sourceElement) return;
 
 		const update = () => {
-			dispatch({
-				isClipped: sourceElement.scrollHeight > sourceElement.clientHeight + 1,
-				type: 'measured',
-			});
+			// Expanded source says nothing about whether it fits when collapsed. A measurement taken
+			// now could also be applied after a pending collapse, so skip it.
+			if (isExpandedInDomRef.current) return;
+			dispatch({ isClipped: isSourceClipped(sourceElement), type: 'measured' });
 		};
 
 		const observer = new ResizeObserver(update);
@@ -102,6 +114,10 @@ export function ExampleCodePreview({
 			</Box>
 		</ViewTransition>
 	);
+}
+
+function isSourceClipped(sourceElement: HTMLElement) {
+	return sourceElement.scrollHeight > sourceElement.clientHeight + 1;
 }
 
 type SourceMode = 'unmeasured' | 'fits' | 'collapsed' | 'expanded';

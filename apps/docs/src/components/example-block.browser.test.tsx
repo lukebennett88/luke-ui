@@ -349,8 +349,9 @@ test('keeps expanded source collapsible when its typography changes to fit', asy
 	await act(async () => {
 		await userEvent.click(collapse);
 	});
-	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeNull();
+	// Wait for the collapse to commit, so the fitting source must then drop its Expand control.
 	await expect.poll(() => collapse.query()).toBeNull();
+	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeNull();
 
 	pre.style.removeProperty('font-size');
 	pre.style.removeProperty('line-height');
