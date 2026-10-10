@@ -123,8 +123,9 @@ overrides, without erasing native structure such as heading sizes, list markers,
 button chrome. Everything else belongs in the component that needs it. A component that renders a
 native element with user agent styles, such as a `<button>`, `<p>`, or `<ul>`, sets the declarations
 it depends on in its own recipe. `Text` zeroes the margins of the elements it renders at zero
-specificity, so `Prose` spacing and utility props still apply. The test in
-`stylesheet-contract.test.ts` pins the rule list. The decision record is
+specificity, so `Prose` spacing and utility props still apply.
+`stylesheet-contract.browser.test.tsx` pins each global rule's selector and declarations. The
+decision record is
 [research/717-global-stylesheet-contract.md](../research/717-global-stylesheet-contract.md).
 
 Only the native `:focus-visible` pseudo-class draws the global ring. React Aria also sets
@@ -157,7 +158,7 @@ The package declares `base` but never writes to it. That pins it below `luke-ui`
 first `@layer base` write created the layer instead, the browser would place it last and it would
 beat every component recipe. The build prepends the statement and strips the single-name `@layer`
 statements Vanilla Extract writes per module, so nothing creates a layer before it.
-`stylesheet-contract.test.ts` checks the built `dist/stylesheet.css`, and
+`stylesheet-contract.browser.test.tsx` checks the built `dist/stylesheet.css`, and
 `layer-order.browser.test.ts` checks precedence in Chromium.
 
 Applications that use Tailwind CSS v4 declare `@layer theme, base, luke-ui, components, utilities;`

@@ -276,10 +276,11 @@ One indicator per control:
 
 ## Testing and documentation requirements
 
-- `stylesheet-contract.test.ts` checks the built `dist/stylesheet.css`: one leading order statement,
-  nested layer order, no early layer, no declarations in `base`, recipes in `luke-ui.recipes`,
-  utilities in `luke-ui.utilities`, the six global rules by selector and declaration (via the CSS
-  parser, not a full-string pin), and no `luke-ui-` class selectors.
+- `stylesheet-contract.browser.test.tsx` parses the built `dist/stylesheet.css` with the browser's
+  CSSOM and checks the leading order statement, layer order, no rules in `base` or outside a layer,
+  no `luke-ui-` class selectors, recipe and utility ownership, and each global rule's selector,
+  media condition, and declarations in the browser's normal form. Mutations of the built file show
+  each of those checks failing.
 - `layer-order.browser.test.ts` checks precedence in Chromium with the built stylesheet, including
   important declarations and a consumer `base` write.
 - `apps/docs/src/styles/tailwind-integration.browser.test.tsx` loads real Tailwind v4 output,
