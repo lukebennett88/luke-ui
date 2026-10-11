@@ -1,6 +1,7 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
+import { pressFeedback } from '../../styles/press-feedback.js';
 import { recipe } from '../../styles/recipe.js';
 import { textRecipe } from '../../text/recipe.css.js';
 
@@ -8,10 +9,7 @@ import { textRecipe } from '../../text/recipe.css.js';
 export const buttonRecipeInternal = recipe({
 	base: {
 		font: 'inherit',
-		touchAction: 'manipulation',
-		// Hover and pressed states give their own feedback, so the browser's tap highlight would
-		// double it.
-		WebkitTapHighlightColor: 'transparent',
+		...pressFeedback,
 		transitionDuration: vars.motion.duration.feedback,
 		transitionProperty:
 			'background-color, border-color, box-shadow, color, opacity, text-decoration-color',

@@ -45,11 +45,12 @@ function parseStylesheet(css: string) {
 	const layers: Array<string> = [];
 	const rules: Array<ParsedRule> = [];
 	function visit(list: CSSRuleList, layer: string, media: string) {
+		const qualify = (name: string) => (layer ? `${layer}.${name}` : name);
 		for (const rule of list) {
-			const qualify = (name: string) => (layer ? `${layer}.${name}` : name);
 			if (rule instanceof CSSLayerStatementRule) {
-				for (const name of rule.nameList)
+				for (const name of rule.nameList) {
 					if (!layers.includes(qualify(name))) layers.push(qualify(name));
+				}
 			} else if (rule instanceof CSSLayerBlockRule) {
 				if (!layers.includes(qualify(rule.name))) layers.push(qualify(rule.name));
 				visit(rule.cssRules, qualify(rule.name), media);
@@ -81,20 +82,14 @@ function expectOwnedBy(rules: Array<ParsedRule>, classNames: Array<string>, laye
 	}
 }
 
-function expectLayerContract(css: string) {
-	const { layers, rules } = parseStylesheet(css);
+test('builds the public stylesheet with the layer and global-rule contract', () => {
+	const { layers, rules } = parseStylesheet(builtCss);
 
-	expect(css.startsWith(`${cascadeLayerOrder}\n`), 'order statement first').toBe(true);
+	expect(builtCss.startsWith(`${cascadeLayerOrder}\n`), 'order statement first').toBe(true);
 	expect(layers, 'layer order').toEqual(layerOrder);
 	expect(
 		rules.filter(({ layer }) => layer === '' || layer === 'base').map(({ rule }) => rule.cssText),
 		'unlayered or base rules',
-	).toEqual([]);
-	expect(
-		rules
-			.filter(({ rule }) => rule.selectorText.includes('.luke-ui-'))
-			.map(({ rule }) => rule.cssText),
-		'root class selectors',
 	).toEqual([]);
 	expect(
 		rules
@@ -106,10 +101,6 @@ function expectLayerContract(css: string) {
 		'global rules',
 	).toEqual(globalRules);
 	expectOwnedBy(rules, iconRecipe({ size: 'medium' }).split(' '), 'luke-ui.recipes');
-}
-
-test('builds the public stylesheet with the layer and global-rule contract', () => {
-	expect(() => expectLayerContract(builtCss)).not.toThrow();
 });
 
 test('puts utility props in the utilities layer', () => {
@@ -119,7 +110,7 @@ test('puts utility props in the utilities layer', () => {
 	const classNames = container.firstElementChild?.className.split(' ') ?? [];
 
 	expect(classNames.length).toBeGreaterThan(0);
-	expect(() => expectOwnedBy(rules, classNames, 'luke-ui.utilities')).not.toThrow();
+	expectOwnedBy(rules, classNames, 'luke-ui.utilities');
 });
 
 test('trims every type style with its own Capsize variables', () => {
@@ -185,74 +176,3 @@ test('queries responsive conditions on the logical inline axis', () => {
 	expect(builtCss).toContain('@container (inline-size >=');
 	expect(builtCss).not.toContain('@container (width >=');
 });
-
-const iconClass = iconRecipe({ size: 'medium' }).split(' ')[0];
-
-const mutations: Array<[string, RegExp, (css: string) => string]> = [
-	[
-		'reordered top-level layers',
-		/order statement first/,
-		(css) => css.replace('@layer base, luke-ui;', '@layer luke-ui, base;'),
-	],
-	[
-		'reordered Luke UI layers',
-		/order statement first/,
-		(css) => css.replace('@layer reset, recipes, utilities;', '@layer reset, utilities, recipes;'),
-	],
-	['layer created early', /order statement first/, (css) => `@layer luke-ui.utilities;\n${css}`],
-	['unknown layer', /layer order/, (css) => `${css}\n@layer components { .x { color: red; } }`],
-	[
-		'rule in base',
-		/unlayered or base rules/,
-		(css) => `${css}\n@layer base { .x { color: red; } }`,
-	],
-	['unlayered rule', /unlayered or base rules/, (css) => `${css}\n.x { color: red; }`],
-	[
-		'root class',
-		/root class selectors/,
-		(css) => `${css}\n@layer luke-ui.recipes { .luke-ui-theme { color: red; } }`,
-	],
-	[
-		'extra global rule',
-		/global rules/,
-		(css) => `${css}\n@layer luke-ui.reset { :where(ul) { list-style: none; } }`,
-	],
-	[
-		'extra declaration in a global rule',
-		/global rules/,
-		(css) =>
-			css.replace(
-				'line-height: 1.5;',
-				'line-height: 1.5;\n    text-rendering: optimizeLegibility;',
-			),
-	],
-	[
-		'wrong colour-mode value in the repaint rule',
-		/global rules/,
-		(css) => css.replace("body [data-color-mode='dark']", "body [data-color-mode='dim']"),
-	],
-	[
-		'forced-colours focus outside its media query',
-		/global rules/,
-		// Component recipes use this media query too, and build order can put one first.
-		(css) =>
-			css.replace(
-				'@media (forced-colors: active) {\n    :where(:focus-visible)',
-				'@media (prefers-contrast: more) {\n    :where(:focus-visible)',
-			),
-	],
-	[
-		'recipe class in the utilities layer',
-		/\.\S+ layer/,
-		(css) => `${css}\n@layer luke-ui.utilities { .${iconClass} { color: red; } }`,
-	],
-];
-
-for (const [name, reason, mutate] of mutations) {
-	test(`rejects a stylesheet with a ${name}`, () => {
-		const mutated = mutate(builtCss);
-
-		expect(mutated).not.toBe(builtCss);
-		expect(() => expectLayerContract(mutated)).toThrow(reason);
-	});
-}

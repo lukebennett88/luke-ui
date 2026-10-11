@@ -2,6 +2,7 @@ import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { iconMaskUrls } from '../../../../.generated/icon-mask-data.js';
 import { vars } from '../../../theme/contract.css.js';
 import { ICON_SIZES } from '../../sizing/icon-sizing.js';
+import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
@@ -108,9 +109,7 @@ const fieldConfig = {
 			font: 'inherit',
 			gap: inlineControlGap,
 			minInlineSize: 0,
-			// The control shows its own pressed state, so the browser's tap highlight would double it.
-			touchAction: 'manipulation',
-			WebkitTapHighlightColor: 'transparent',
+			...pressFeedback,
 			selectors: {
 				[`&${dataDisabledSelector}`]: {
 					color: vars.color.text.disabled,

@@ -13,7 +13,7 @@ const textElementClassName = style({}, 'text');
 
 // `Text` renders headings, paragraphs, and blockquotes, which have user agent margins. Spacing
 // between them belongs to layout, so `Text` removes them. `:where()` keeps this at zero
-// specificity, so `Prose` spacing, utility props, and recipe margins still apply.
+// specificity, so Prose's scoped rules and other recipe margins override it.
 globalStyleInLayer('recipes', `:where(.${textElementClassName})`, { margin: 0 });
 
 const lineClampNone = {} satisfies ComplexStyleRule;

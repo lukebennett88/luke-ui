@@ -114,7 +114,6 @@ const sheen = {
 			...forcedColorsSurface,
 			animationName: 'none',
 		},
-		// The sheen stops and the placeholder surface stays.
 		'(prefers-reduced-motion: reduce)': {
 			animationName: 'none',
 		},

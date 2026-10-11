@@ -4,6 +4,7 @@ import { Heading } from '@luke-ui/react/heading';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { Prose } from '@luke-ui/react/prose';
 import { TextInputField } from '@luke-ui/react/text-input-field';
+import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
@@ -19,20 +20,24 @@ import unorderedTailwindFirstCss from './tailwind-fixtures/unordered-tailwind-fi
 const scenarios = [
 	{
 		css: orderedTailwindFirstCss,
-		isOrdered: true,
+		isTailwindAboveLukeUi: true,
 		name: 'with the order statement, Tailwind first',
 	},
-	{ css: orderedLukeUiFirstCss, isOrdered: true, name: 'with the order statement, Luke UI first' },
+	{
+		css: orderedLukeUiFirstCss,
+		isTailwindAboveLukeUi: true,
+		name: 'with the order statement, Luke UI first',
+	},
 	// Luke UI declares `base` and `luke-ui` first, so Tailwind's layers land above it.
 	{
 		css: unorderedLukeUiFirstCss,
-		isOrdered: true,
+		isTailwindAboveLukeUi: true,
 		name: 'without the order statement, Luke UI first',
 	},
 	// Tailwind creates `utilities` first, so `luke-ui` lands above it. The order statement fixes this.
 	{
 		css: unorderedTailwindFirstCss,
-		isOrdered: false,
+		isTailwindAboveLukeUi: false,
 		name: 'without the order statement, Tailwind first',
 	},
 ] as const;
@@ -41,14 +46,16 @@ let root: Root | undefined;
 let container: HTMLElement | undefined;
 const styles: Array<HTMLStyleElement> = [];
 
-afterEach(() => {
+function cleanup() {
 	if (root) act(() => root?.unmount());
 	container?.remove();
 	for (const style of styles) style.remove();
 	styles.length = 0;
 	root = undefined;
 	container = undefined;
-});
+}
+
+afterEach(cleanup);
 
 function loadCss(css: string) {
 	const style = document.head.appendChild(document.createElement('style'));
@@ -56,36 +63,42 @@ function loadCss(css: string) {
 	styles.push(style);
 }
 
-function renderHost() {
-	container = document.body.appendChild(document.createElement('div'));
-	root = createRoot(container);
+function mount(node: ReactNode): HTMLElement {
+	const host = document.body.appendChild(document.createElement('div'));
+	container = host;
+	root = createRoot(host);
 	act(() => {
-		root?.render(
-			<div>
-				<Heading data-testid="heading" level={2}>
-					Heading
-				</Heading>
-				<Button data-testid="button">Plain</Button>
-				<TextInputField label="Name" />
-				<Button className="p-[11px]" data-testid="tailwind-button">
-					Utility
-				</Button>
-				<Button className="app-override" data-testid="app-button">
-					App CSS
-				</Button>
-				<Button className="bg-[rgb(7,8,9)]!" data-testid="important-button">
-					Important
-				</Button>
-				<Box className={buttonRecipe()} data-testid="box-button" padding="sp4">
-					Box
-				</Box>
-				<div className="tw-component p-[3px]" data-testid="tailwind-component" />
-				<LoadingSkeleton className="bg-[rgb(7,8,9)]!" data-testid="skeleton" isLoading>
-					Loading
-				</LoadingSkeleton>
-			</div>,
-		);
+		root?.render(node);
 	});
+	return host;
+}
+
+function renderHost() {
+	mount(
+		<div>
+			<Heading data-testid="heading" level={2}>
+				Heading
+			</Heading>
+			<Button data-testid="button">Plain</Button>
+			<TextInputField label="Name" />
+			<Button className="p-[11px]" data-testid="tailwind-button">
+				Utility
+			</Button>
+			<Button className="app-override" data-testid="app-button">
+				App CSS
+			</Button>
+			<Button className="bg-[rgb(7,8,9)]!" data-testid="important-button">
+				Important
+			</Button>
+			<Box className={buttonRecipe()} data-testid="box-button" padding="sp4">
+				Box
+			</Box>
+			<div className="tw-component p-[3px]" data-testid="tailwind-component" />
+			<LoadingSkeleton className="bg-[rgb(7,8,9)]!" data-testid="skeleton" isLoading>
+				Loading
+			</LoadingSkeleton>
+		</div>,
+	);
 }
 
 function byTestId(id: string): HTMLElement {
@@ -112,16 +125,17 @@ const recipeProperties = [
 function recipeStyles() {
 	const input = container?.querySelector('input');
 	if (input == null) throw new Error('Expected the text input.');
-	return Object.fromEntries(
-		[
-			['heading', byTestId('heading')],
-			['button', byTestId('button')],
-			['input', input],
-		].map(([name, element]) => {
-			const computed = getComputedStyle(element as Element);
-			return [name, Object.fromEntries(recipeProperties.map((key) => [key, computed[key]]))];
-		}),
-	);
+	const elements: Record<'button' | 'heading' | 'input', Element> = {
+		button: byTestId('button'),
+		heading: byTestId('heading'),
+		input,
+	};
+	const result: Record<string, Record<string, string>> = {};
+	for (const [name, element] of Object.entries(elements)) {
+		const computed = getComputedStyle(element);
+		result[name] = Object.fromEntries(recipeProperties.map((key) => [key, computed[key]]));
+	}
+	return result;
 }
 
 /** Luke UI's own appearance with no Tailwind loaded. */
@@ -129,10 +143,7 @@ function baselineRecipeStyles() {
 	loadCss(lukeUiOnlyCss);
 	renderHost();
 	const baseline = recipeStyles();
-	act(() => root?.unmount());
-	container?.remove();
-	for (const style of styles) style.remove();
-	styles.length = 0;
+	cleanup();
 	return baseline;
 }
 
@@ -153,12 +164,14 @@ for (const scenario of scenarios) {
 			expect(getComputedStyle(byTestId('box-button')).paddingInlineStart).toBe('4px');
 		});
 
-		test(`Tailwind utilities ${scenario.isOrdered ? 'override' : 'lose to'} Luke UI declarations`, () => {
+		test(`Tailwind utilities ${scenario.isTailwindAboveLukeUi ? 'override' : 'lose to'} Luke UI declarations`, () => {
 			loadCss(scenario.css);
 			renderHost();
 
 			expect(getComputedStyle(byTestId('tailwind-button')).paddingInlineStart).toBe(
-				scenario.isOrdered ? '11px' : getComputedStyle(byTestId('button')).paddingInlineStart,
+				scenario.isTailwindAboveLukeUi
+					? '11px'
+					: getComputedStyle(byTestId('button')).paddingInlineStart,
 			);
 		});
 
@@ -184,38 +197,38 @@ for (const scenario of scenarios) {
 			expect(getComputedStyle(byTestId('important-button')).backgroundColor).toBe('rgb(7, 8, 9)');
 		});
 
-		test(`an important utility ${scenario.isOrdered ? 'loses to' : 'beats'} the important LoadingSkeleton surface`, () => {
+		test(`an important utility ${scenario.isTailwindAboveLukeUi ? 'loses to' : 'beats'} the important LoadingSkeleton surface`, () => {
 			loadCss(scenario.css);
 			renderHost();
 
 			const background = getComputedStyle(byTestId('skeleton')).backgroundColor;
-			expect(background === 'rgb(7, 8, 9)').toBe(!scenario.isOrdered);
+			expect(background === 'rgb(7, 8, 9)', `skeleton background was ${background}`).toBe(
+				!scenario.isTailwindAboveLukeUi,
+			);
 		});
 	});
 }
 
 // Preflight's `list-style: none` beats the HTML `type` hint. Prose restates the HTML rules for
 // `type`, which need the `s` selector flag to tell `a` from `A`. Without it, only `type="1"` returns.
-for (const scenario of scenarios.filter((entry) => entry.isOrdered)) {
+const listTypes = ['1', 'a', 'A', 'i', 'I'] as const;
+
+for (const scenario of scenarios.filter((entry) => entry.isTailwindAboveLukeUi)) {
 	test(`${scenario.name}: Prose restores typed ordered-list markers under Preflight`, () => {
 		loadCss(scenario.css);
-		container = document.body.appendChild(document.createElement('div'));
-		root = createRoot(container);
-		act(() => {
-			root?.render(
-				<Prose>
-					{['1', 'a', 'A', 'i', 'I'].map((type) => (
-						<ol key={type} type={type as '1'}>
-							<li>{type}</li>
-						</ol>
-					))}
-				</Prose>,
-			);
-		});
+		const host = mount(
+			<Prose>
+				{listTypes.map((type) => (
+					<ol key={type} type={type}>
+						<li>{type}</li>
+					</ol>
+				))}
+			</Prose>,
+		);
 		const hasCaseSensitiveSelectors = CSS.supports('selector([type="A" s])');
 
 		expect(
-			[...container.querySelectorAll('ol')].map((ol) => getComputedStyle(ol).listStyleType),
+			[...host.querySelectorAll('ol')].map((ol) => getComputedStyle(ol).listStyleType),
 		).toEqual(
 			hasCaseSensitiveSelectors
 				? ['decimal', 'lower-alpha', 'upper-alpha', 'lower-roman', 'upper-roman']

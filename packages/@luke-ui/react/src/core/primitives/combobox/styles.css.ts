@@ -9,6 +9,7 @@ import {
 	descendantDisabledSelector,
 } from '../../styles/input-states.js';
 import { overlayEnterTransition, overlayExitTransition } from '../../styles/overlay-motion.js';
+import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
@@ -61,12 +62,10 @@ const comboboxActionStyles = {
 	minBlockSize: MIN_TARGET_SIZE,
 	minInlineSize: MIN_TARGET_SIZE,
 	paddingBlock: 0,
-	touchAction: 'manipulation',
+	...pressFeedback,
 	transform: 'none',
 	transitionDuration: vars.motion.duration.feedback,
 	transitionProperty: 'background-color, color',
-	// Hover and pressed states give their own feedback, so the browser's tap highlight would double it.
-	WebkitTapHighlightColor: 'transparent',
 	transitionTimingFunction: vars.motion.easing.standard,
 
 	selectors: {
@@ -304,14 +303,11 @@ const comboboxConfig = {
 			minBlockSize: MIN_TARGET_SIZE,
 			minInlineSize: 0,
 			outline: 'none',
-			touchAction: 'manipulation',
+			...pressFeedback,
 			transform: 'none',
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, color, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
-			// Hover and pressed states give their own feedback, so the browser's tap highlight would
-			// double it.
-			WebkitTapHighlightColor: 'transparent',
 
 			selectors: {
 				'&[data-disabled="true"]': {

@@ -2,13 +2,12 @@ import { vars } from '../../theme/contract.css.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import { recipe } from '../styles/recipe.js';
 
-/**
- * The Prose scope class. Every Prose rule below is scoped to it, and `proseRecipe()` applies it as
- * its base class, so `<Prose>` and recipe-only usage scope identically.
- */
 const proseScopeClassName = style({}, 'prose');
 
-/** Scope class for the long-form rhythm applied by the global rules below. */
+/**
+ * Every Prose rule is scoped to the Prose class, and `proseRecipe()` applies it as its base, so
+ * `<Prose>` and recipe-only usage scope identically.
+ */
 export const proseRecipe = recipe({ base: proseScopeClassName });
 
 // Every rule sits in an `@scope` from the Prose class to the `not-prose` class. The limit excludes

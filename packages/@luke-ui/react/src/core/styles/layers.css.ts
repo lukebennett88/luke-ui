@@ -1,4 +1,5 @@
 import { globalLayer } from '@vanilla-extract/css';
+import { lukeUiLayerNames } from './layer-names.js';
 
 /**
  * Luke UI's cascade layers, inside the top-level `luke-ui` layer, from lowest to highest priority:
@@ -14,10 +15,8 @@ import { globalLayer } from '@vanilla-extract/css';
  */
 const lukeUi = globalLayer('luke-ui');
 
-export const layers = {
-	reset: globalLayer({ parent: lukeUi }, 'reset'),
-	recipes: globalLayer({ parent: lukeUi }, 'recipes'),
-	utilities: globalLayer({ parent: lukeUi }, 'utilities'),
-};
+export type LayerName = (typeof lukeUiLayerNames)[number];
 
-export type LayerName = keyof typeof layers;
+export const layers = Object.fromEntries(
+	lukeUiLayerNames.map((name) => [name, globalLayer({ parent: lukeUi }, name)]),
+) as Record<LayerName, string>;

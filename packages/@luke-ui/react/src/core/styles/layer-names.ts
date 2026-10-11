@@ -3,12 +3,13 @@
  * would make that file a Vanilla Extract boundary and re-emit its `@layer` declarations.
  */
 
-/** Luke UI's layers, from lowest to highest priority, all inside the top-level `luke-ui` layer. */
-export const cascadeLayers = {
-	reset: 'luke-ui.reset',
-	recipes: 'luke-ui.recipes',
-	utilities: 'luke-ui.utilities',
-} as const;
+/** Layer names inside the top-level `luke-ui` layer. Array order is precedence, lowest first. */
+export const lukeUiLayerNames = ['reset', 'recipes', 'utilities'] as const;
+
+/** The dotted layer name for each Luke UI layer, for example `luke-ui.reset`. */
+export const cascadeLayers = Object.fromEntries(
+	lukeUiLayerNames.map((name) => [name, `luke-ui.${name}`]),
+) as { [Name in (typeof lukeUiLayerNames)[number]]: `luke-ui.${Name}` };
 
 /**
  * The order statement the build puts at the start of the public stylesheet, so nothing in it can
@@ -17,5 +18,5 @@ export const cascadeLayers = {
  */
 export const cascadeLayerOrder = `@layer base, luke-ui;
 @layer luke-ui {
-  @layer reset, recipes, utilities;
+  @layer ${lukeUiLayerNames.join(', ')};
 }`;

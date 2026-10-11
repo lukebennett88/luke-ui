@@ -36,7 +36,8 @@ globalStyleInLayer('reset', ':where(body)', {
 
 // A colour-mode scope gets new token values, but inherited properties keep the values its parent
 // computed. Repaint the scope so its own text and surface follow its mode. The theme sets
-// `color-scheme`. `<html>` and `<body>` take their colours from the rule above.
+// `color-scheme`. `<body>` takes its colours from the rule above. `<html>` stays unpainted so the
+// body background reaches the canvas.
 globalStyleInLayer(
 	'reset',
 	":where(body [data-color-mode='light'], body [data-color-mode='dark'])",

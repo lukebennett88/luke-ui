@@ -14,15 +14,13 @@ const recipeEngineSource = fileURLToPath(
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const assetExports = ['./stylesheet.css', './spritesheet.svg'];
 
-/** Vanilla Extract writes one `@layer name;` statement per layer and module. */
-const SINGLE_LAYER_STATEMENT_PATTERN = /^@layer [^,{]+;\n/gm;
-
 /**
- * Drops the per-module layer statements. Each one creates its layer where it first appears, so a
- * module emitted before the order statement could otherwise reorder the layers.
+ * Drops the `@layer name;` statement Vanilla Extract writes per layer and module. Each one creates
+ * its layer where it first appears, so a module emitted before the order statement could otherwise
+ * reorder the layers.
  */
 function stripRedundantEmptyLayerStatements(css: string): string {
-	return css.replace(SINGLE_LAYER_STATEMENT_PATTERN, '');
+	return css.replace(/^@layer [^,{]+;\n/gm, '');
 }
 
 /** Any JS or TS module the React Compiler can read, including `.mjs`/`.cts` variants. */

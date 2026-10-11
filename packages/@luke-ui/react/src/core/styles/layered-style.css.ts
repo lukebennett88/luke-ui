@@ -24,8 +24,8 @@ function withLayerGlobal(layer: LayerName, rule: LayeredGlobalStyleRule): Global
 }
 
 /**
- * A private class in the `luke-ui.recipes` layer with no variants. Prefer `recipe()` for component visuals,
- * even when the recipe has no variants.
+ * A private class in the `luke-ui.recipes` layer with no variants. Prefer `recipe()` for component
+ * visuals, even when the recipe has no variants.
  */
 export function style(rule: LayeredStyleRule, debugId?: string): string {
 	return vanillaStyle(withLayer('recipes', rule), debugId);
