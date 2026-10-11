@@ -269,9 +269,24 @@ const comboboxConfig = {
 							outlineStyle: 'solid',
 							outlineWidth: '2px',
 						},
-						'&[data-selected="true"]:not([data-disabled="true"])': {
+						// A forced-colours backplate would paint `Canvas` behind the label and hide the
+						// `HighlightText` on it, so the selected item opts out and sets both colours. The list
+						// repeats every selected-state selector below so author colours never show through.
+						[[
+							'&[data-selected="true"]:not([data-disabled="true"])',
+							'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])',
+							'&[data-pressed="true"][data-selected="true"]:not([data-disabled="true"])',
+							'&[data-selected="true"][data-focus-visible="true"]:not([data-disabled="true"])',
+						].join(', ')]: {
 							backgroundColor: 'Highlight',
 							color: 'HighlightText',
+							forcedColorAdjust: 'none',
+						},
+						// A `Highlight` ring would vanish into the fill, and a `HighlightText` ring at the
+						// edge would merge with the `Canvas` around the item. Inset it inside the fill.
+						'&[data-selected="true"][data-focus-visible="true"]:not([data-disabled="true"])': {
+							outlineColor: 'HighlightText',
+							outlineOffset: '-4px',
 						},
 					},
 				},

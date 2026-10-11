@@ -47,12 +47,9 @@ const checkboxConfig = {
 					borderColor: 'CanvasText',
 					color: 'CanvasText',
 					forcedColorAdjust: 'auto',
+					position: 'relative',
+					// Disabled comes last so a disabled box reads as disabled whether it is checked or not.
 					selectors: {
-						'[data-disabled="true"] &': {
-							borderColor: 'GrayText',
-							color: 'GrayText',
-							opacity: 1,
-						},
 						'[data-focus-visible="true"] &': {
 							outlineColor: 'Highlight',
 						},
@@ -60,6 +57,29 @@ const checkboxConfig = {
 							backgroundColor: 'Highlight',
 							borderColor: 'Highlight',
 							color: 'HighlightText',
+						},
+						// The glyph is text, so a forced-colours backplate would paint `Canvas` over the
+						// fill and hide the mark. It opts out and draws the fill itself, so hover, press,
+						// and invalid colours on the box cannot show through either.
+						'[data-indeterminate="true"] &::after, [data-selected="true"] &::after': {
+							alignItems: 'center',
+							backgroundColor: 'Highlight',
+							borderRadius: 'inherit',
+							color: 'HighlightText',
+							display: 'flex',
+							forcedColorAdjust: 'none',
+							inset: 0,
+							justifyContent: 'center',
+							position: 'absolute',
+						},
+						'[data-disabled="true"] &': {
+							borderColor: 'GrayText',
+							color: 'GrayText',
+							opacity: 1,
+						},
+						'[data-disabled="true"] &::after': {
+							backgroundColor: 'Canvas',
+							color: 'GrayText',
 						},
 					},
 				},

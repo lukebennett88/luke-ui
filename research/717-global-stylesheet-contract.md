@@ -180,7 +180,7 @@ One indicator per control:
 | Combobox                 | The control draws the ring while its input has focus. The input keeps `outline: none`. Inner actions take G6.                                    |
 | TextInput                | The control or the standalone input draws the ring on focus within.                                                                              |
 | Checkbox, Switch         | The indicator or track draws the ring on the label's `data-focus-visible`. The hidden input is clipped.                                          |
-| List box items           | Background change. Items keep `outline: none`. Forced colours draws an inset `Highlight` ring.                                                   |
+| List box items           | Background change. Items keep `outline: none`. Forced colours draws an inset `Highlight` ring, or `HighlightText` inside a selected item's fill. |
 | ScrollFade               | G6 on the scrollport, inside its opaque mask gutter.                                                                                             |
 | Overlay dialogs          | The tray dialog keeps `outline: none`.                                                                                                           |
 

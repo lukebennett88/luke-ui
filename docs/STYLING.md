@@ -207,6 +207,14 @@ never disables an application's animations. Under `@media (prefers-reduced-motio
 A `[data-entering]` or `[data-exiting]` selector that sets `transition` outranks the plain class
 rule, so restate its reduced-motion value on that selector too.
 
+## Forced colours
+
+Under `@media (forced-colors: active)`, set system colours such as `Canvas`, `CanvasText`,
+`Highlight`, and `GrayText`. Chromium paints a `Canvas` backplate behind text, so text on a
+`Highlight` fill disappears. An element that draws text on `Highlight`, such as a selected list box
+item or a checked Checkbox's glyph, sets `forced-color-adjust: none` and both colours. Its forced
+rule must match every state selector that sets an author colour on it, or that colour shows through.
+
 ## Recipes
 
 Public recipes export from the owning component or primitive entrypoint. Keep them separate from

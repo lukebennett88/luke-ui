@@ -354,3 +354,25 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 		await emulateForcedColors('none');
 	}
 });
+
+// The selected option opts out of forced colours. With the backplate, its label is invisible.
+test('forced-colors open popover', { tags: ['visual'] }, async () => {
+	await emulateForcedColors('active');
+
+	try {
+		render(
+			<Stack>
+				<ExampleSelect defaultValue="two" label="Example field" />
+			</Stack>,
+		);
+
+		await focusViaKeyboard(page.getByRole('button', { name: /Example field/ }));
+		await userEvent.keyboard('{ArrowDown}');
+		const listbox = page.getByRole('listbox').element();
+		await waitForOverlayEnter(listbox.closest('[data-trigger]') ?? listbox);
+		await expect.element(page.getByRole('option', { name: 'Example two' })).toHaveFocus();
+		await captureVisual(page.elementLocator(document.body), 'select/forced-colors-open');
+	} finally {
+		await emulateForcedColors('none');
+	}
+});
