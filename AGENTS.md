@@ -7,8 +7,10 @@
   `apps/docs/content/docs/`, `docs/*.md`, READMEs, and JSDoc when it is the main task or documents a
   new public export or prop.
 - Writing, changing, or reviewing tests, including pull request reviews that touch them: follow
-  [.agents/skills/write-tests/SKILL.md](.agents/skills/write-tests/SKILL.md). A pull request that
-  touches both documentation and tests uses both skills.
+  [.agents/skills/write-tests/SKILL.md](.agents/skills/write-tests/SKILL.md).
+- Read the whole `SKILL.md` of every skill that applies before you write or review. To review a pull
+  request, first check whether its diff touches documentation, tests, or both. A grep, an excerpt,
+  or a skill listing is not a read.
 - Incidental edits to existing JSDoc or code comments:
   [docs/DOCUMENTATION.md#comments-and-jsdoc](docs/DOCUMENTATION.md#comments-and-jsdoc).
 - Writing or changing JavaScript, TypeScript, or TSX: [docs/CONVENTIONS.md](docs/CONVENTIONS.md).

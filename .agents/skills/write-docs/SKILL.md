@@ -48,8 +48,8 @@ Authors use this before finishing. Reviewers use it on the diff.
 
 - Run `pnpm run check` first. Do not report what it already catches. Spend the review on what it
   cannot.
-- Support every finding with evidence. For a convention violation, cite the DOCUMENTATION.md
-  section. For a defect without a written convention, such as a wrong statement, a broken link, or a
-  rendering problem, show it. Do not report a preference as a defect without a convention or a
-  concrete impact.
+- Support every finding with evidence. For a convention violation, cite the DOCUMENTATION.md section
+  that owns it, not this skill. For a defect without a written convention, such as a wrong
+  statement, a broken link, or a rendering problem, show it. Do not report a preference as a defect
+  without a convention or a concrete impact.
 - Report each problem once, with every location. Leave out speculative findings and nits.
