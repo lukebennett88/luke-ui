@@ -278,6 +278,19 @@ test('does not start pressAction when external isPending is already true', async
 	expect(started).toBe(false);
 });
 
+test('shows no spinner for a fast Action', async () => {
+	const { locator, user } = render(<Button pressAction={async () => {}}>Fast</Button>);
+	const fast = locator.getByRole('button', { name: 'Fast' });
+	const spinner = watchSpinner(fast.element());
+
+	await user.click(fast);
+	await expect.poll(() => fast.element().getAttribute('data-pending')).toBeNull();
+	// Wait out the spinner delay so a late flash would still be observed.
+	await delay(ACTION_SPINNER_DELAY_MS);
+	expect(spinner.appearedAt()).toBeUndefined();
+	expect(fast.element().querySelector('[role="status"]')).toBeNull();
+});
+
 test('shows a delayed spinner for a slow Action', async () => {
 	let startedAt: number | undefined;
 	let releaseSlow!: () => void;
@@ -362,6 +375,12 @@ test('forced-colors resting', { tags: ['visual'] }, async () => {
 		await emulateForcedColors('none');
 	}
 });
+
+function delay(ms: number) {
+	return new Promise<void>((resolve) => {
+		setTimeout(resolve, ms);
+	});
+}
 
 function dispatchPress(element: Element) {
 	element.dispatchEvent(

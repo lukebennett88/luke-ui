@@ -257,21 +257,23 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
-// Only `danger.solid.rest` carries the 3:1 control-boundary guarantee. Off and on invalid tracks use
-// different selector branches, so both must keep the border through hover.
+// Only `danger.solid.rest` carries the 3:1 control-boundary guarantee. Off invalid hover/pressed
+// share one rule, but on invalid keeps separate hover and pressed selectors — cover each path.
 for (const isSelected of [false, true]) {
-	test(`an invalid ${isSelected ? 'on' : 'off'} switch keeps the guaranteed border with data-hovered`, () => {
-		render(<SwitchField defaultSelected={isSelected} errorMessage="Required" label="Accept" />);
-		const input = switchInput('Accept');
-		const label = labelFor(input);
-		const track = controlFor(input);
-		track.style.transition = 'none';
-		label.setAttribute('data-hovered', 'true');
+	for (const state of ['data-hovered', 'data-pressed'] as const) {
+		test(`an invalid ${isSelected ? 'on' : 'off'} switch keeps the guaranteed border with ${state}`, () => {
+			render(<SwitchField defaultSelected={isSelected} errorMessage="Required" label="Accept" />);
+			const input = switchInput('Accept');
+			const label = labelFor(input);
+			const track = controlFor(input);
+			track.style.transition = 'none';
+			label.setAttribute(state, 'true');
 
-		expect(getComputedStyle(track).borderTopColor).toBe(
-			resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
-		);
-	});
+			expect(getComputedStyle(track).borderTopColor).toBe(
+				resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
+			);
+		});
+	}
 }
 
 // Pressing stretches the thumb instead of recolouring it. Off stretches forward; on also pulls the
