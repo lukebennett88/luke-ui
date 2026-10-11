@@ -276,33 +276,51 @@ for (const isSelected of [false, true]) {
 
 // Pressing stretches the thumb instead of recolouring it. Off stretches forward; on also pulls the
 // travel margin back so the stretch points toward the off side.
-for (const isSelected of [false, true]) {
-	test(`pressing an ${isSelected ? 'on' : 'off'} switch stretches its thumb until release`, async () => {
-		render(<SwitchField defaultSelected={isSelected} label="Notify" />);
-		const input = switchInput('Notify');
-		const thumb = controlFor(input).querySelector('span');
-		if (!(thumb instanceof HTMLElement)) throw new Error('Expected the switch thumb.');
-		thumb.style.transition = 'none';
-		const restingWidth = thumb.getBoundingClientRect().width;
-		const restingColor = getComputedStyle(thumb).backgroundColor;
-		const restingStart = thumb.getBoundingClientRect().left;
+test('pressing an off switch stretches its thumb until release', async () => {
+	render(<SwitchField label="Notify" />);
+	const input = switchInput('Notify');
+	const thumb = controlFor(input).querySelector('span');
+	if (!(thumb instanceof HTMLElement)) throw new Error('Expected the switch thumb.');
+	thumb.style.transition = 'none';
+	const restingWidth = thumb.getBoundingClientRect().width;
+	const restingColor = getComputedStyle(thumb).backgroundColor;
 
-		input.focus();
-		await userEvent.keyboard('[Space>]');
-		await expect.element(labelFor(input)).toHaveAttribute('data-pressed', 'true');
+	input.focus();
+	await userEvent.keyboard('[Space>]');
+	await expect.element(labelFor(input)).toHaveAttribute('data-pressed', 'true');
 
-		expect(thumb.getBoundingClientRect().width).toBeGreaterThan(restingWidth);
-		expect(getComputedStyle(thumb).backgroundColor).toBe(restingColor);
-		if (isSelected) {
-			expect(thumb.getBoundingClientRect().left).toBeLessThan(restingStart);
-		}
+	expect(thumb.getBoundingClientRect().width).toBeGreaterThan(restingWidth);
+	expect(getComputedStyle(thumb).backgroundColor).toBe(restingColor);
 
-		await userEvent.keyboard('[/Space]');
-		await expect.element(labelFor(input)).not.toHaveAttribute('data-pressed');
+	await userEvent.keyboard('[/Space]');
+	await expect.element(labelFor(input)).not.toHaveAttribute('data-pressed');
 
-		expect(thumb.getBoundingClientRect().width).toBe(restingWidth);
-	});
-}
+	expect(thumb.getBoundingClientRect().width).toBe(restingWidth);
+});
+
+test('pressing an on switch stretches its thumb toward the off side until release', async () => {
+	render(<SwitchField defaultSelected label="Notify" />);
+	const input = switchInput('Notify');
+	const thumb = controlFor(input).querySelector('span');
+	if (!(thumb instanceof HTMLElement)) throw new Error('Expected the switch thumb.');
+	thumb.style.transition = 'none';
+	const restingWidth = thumb.getBoundingClientRect().width;
+	const restingColor = getComputedStyle(thumb).backgroundColor;
+	const restingStart = thumb.getBoundingClientRect().left;
+
+	input.focus();
+	await userEvent.keyboard('[Space>]');
+	await expect.element(labelFor(input)).toHaveAttribute('data-pressed', 'true');
+
+	expect(thumb.getBoundingClientRect().width).toBeGreaterThan(restingWidth);
+	expect(getComputedStyle(thumb).backgroundColor).toBe(restingColor);
+	expect(thumb.getBoundingClientRect().left).toBeLessThan(restingStart);
+
+	await userEvent.keyboard('[/Space]');
+	await expect.element(labelFor(input)).not.toHaveAttribute('data-pressed');
+
+	expect(thumb.getBoundingClientRect().width).toBe(restingWidth);
+});
 
 // Regression: rest, hover, and pressed must stay distinct without materials, which the flat fixture
 // removes. Hover recolours the track. Pressed recolours an on track and stretches the thumb, which
