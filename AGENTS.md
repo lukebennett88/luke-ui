@@ -11,12 +11,14 @@
   touches both documentation and tests uses both skills.
 - Incidental edits to existing JSDoc or code comments:
   [docs/DOCUMENTATION.md#comments-and-jsdoc](docs/DOCUMENTATION.md#comments-and-jsdoc).
-- Code style, naming, and element choice: [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
-- Components, primitives, generators, and icons: [docs/COMPONENTS.md](docs/COMPONENTS.md).
-- Exports and composition props: [docs/PUBLIC_API.md](docs/PUBLIC_API.md).
-- Styles, recipes, cascade layers, and themes: [docs/STYLING.md](docs/STYLING.md).
-- Dependencies, Renovate, and changesets: [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md). Use
-  `catalog:` versions in `package.json`, not raw versions.
+- Writing or changing JavaScript, TypeScript, or TSX: [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
+- Adding or restructuring a component, primitive, or icon: [docs/COMPONENTS.md](docs/COMPONENTS.md).
+  Scaffold non-interactively with `pnpm run generate:component --args <name> <docs-group>` or
+  `pnpm run generate:primitive --args <name>`.
+- Changing public exports, props, or types: [docs/PUBLIC_API.md](docs/PUBLIC_API.md).
+- Editing `*.css.ts` files, recipes, or theme files: [docs/STYLING.md](docs/STYLING.md).
+- Changing dependencies in `package.json`: [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md). Use
+  `catalog:` versions, not raw versions.
 
 ## Dev loop
 

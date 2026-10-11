@@ -29,6 +29,8 @@ Authors use this before finishing. Reviewers use it on the diff.
       [What documentation is for](../../../docs/DOCUMENTATION.md#what-documentation-is-for),
       [Public documentation scope](../../../docs/DOCUMENTATION.md#public-documentation-scope),
       [Internal documentation scope](../../../docs/DOCUMENTATION.md#internal-documentation-scope)
+- [ ] Say it once. Put guidance on the page that owns the topic, and link to it from other pages.
+      ([Writing style](../../../docs/DOCUMENTATION.md#writing-style))
 - [ ] Does the prose meet the writing rules?
       [Writing style](../../../docs/DOCUMENTATION.md#writing-style),
       [Instructions](../../../docs/DOCUMENTATION.md#instructions)

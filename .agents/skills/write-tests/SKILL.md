@@ -33,10 +33,17 @@ skill and the guide disagree, the guide wins.
 
 Authors use this before finishing. Reviewers use it on the diff.
 
-- [ ] Each test protects a Luke UI contract that no other test already proves.
+- [ ] Each test proves a contract that Luke UI adds or composes and that no other test proves. It
+      does not re-prove behaviour another component owns.
+      ([Component tests](../../../docs/TESTING.md#component-tests))
 - [ ] The test type is the smallest that proves the contract, in the place TESTING.md gives.
-- [ ] The test meets the TESTING.md section for its type, such as "Component tests" and
-      "Accessibility" for a browser test, or "Type contracts" for a type test.
+- [ ] Browser component tests prefer roles and accessible names over text queries or DOM selectors.
+      ([Component tests](../../../docs/TESTING.md#component-tests))
+- [ ] Tests assert computed styles only when layout is the contract.
+      ([Component tests](../../../docs/TESTING.md#component-tests))
+- [ ] Parameterised tests use `for…of` with the distinguishing value in the title, never
+      `test.each`, `it.each`, or `describe.each`.
+      ([Component tests](../../../docs/TESTING.md#component-tests))
 - [ ] No result depends on timing, test order, or leftover state.
 - [ ] The tests ran for real, or the report says why they did not.
 

@@ -2,8 +2,11 @@
 
 This is the only normative documentation guide for the repository. It covers MDX pages in the hosted
 docs app, JSDoc, code comments, READMEs, and the internal guides in `docs/`. Package-level
-`AGENTS.md` files and the skills in `.agents/skills/` must not restate these rules. Point here
-instead.
+`AGENTS.md` files must not restate these rules. Point here instead.
+
+A skill in `.agents/skills/` may name a rule from a guide in `docs/` in one actionable line that
+links to the section that owns it. A skill must not explain, extend, or weaken the rule, or drop its
+qualifications and exceptions. When a skill and a guide disagree, the guide wins.
 
 ## Authoring checklist
 
