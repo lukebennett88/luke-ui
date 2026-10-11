@@ -11,8 +11,8 @@ export default () => {
 		<Prose style={{ inlineSize: '18rem', maxInlineSize: '100%' }}>
 			<Heading level={3}>Spacing tokens</Heading>
 			<Text elementType="p">
-				Prefer a named step such as <Code>sp16</Code> over a raw pixel value when laying out long-form
-				content.
+				Prefer a named step such as <Code>sp16</Code> over a raw pixel value when laying out
+				long-form content.
 			</Text>
 			<figure>
 				<img
