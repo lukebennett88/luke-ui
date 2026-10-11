@@ -1,4 +1,5 @@
 import { Icon } from '@luke-ui/react/icon';
+import { Kbd } from '@luke-ui/react/kbd';
 import { Field } from '@luke-ui/react/primitives/field';
 import type { SelectRootProps } from '@luke-ui/react/primitives/select';
 import {
@@ -350,6 +351,48 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 			</Stack>,
 		);
 		await captureVisual(locator, 'select/forced-colors-states');
+	} finally {
+		await emulateForcedColors('none');
+	}
+});
+
+// The selected option opts out of forced colours, and so does everything inside it. Its own label
+// would vanish behind the backplate, and nested content would keep author colours on the fill.
+test('forced-colors open popover', { tags: ['visual'] }, async () => {
+	await emulateForcedColors('active');
+
+	try {
+		render(
+			<Stack>
+				<SelectRoot defaultValue="two">
+					<Field label="Example field">
+						<SelectTrigger>
+							<SelectValue />
+							<SelectIndicator />
+						</SelectTrigger>
+						<SelectPopover>
+							<SelectListBox>
+								<SelectItem id="one">Example one</SelectItem>
+								<SelectItem id="two" textValue="Example two">
+									<Text>Example two</Text>
+									<Text color="secondary" typography="caption">
+										Example description <Kbd>Enter</Kbd>
+									</Text>
+								</SelectItem>
+								<SelectItem id="three">Example three</SelectItem>
+							</SelectListBox>
+						</SelectPopover>
+					</Field>
+				</SelectRoot>
+			</Stack>,
+		);
+
+		await focusViaKeyboard(page.getByRole('button', { name: /Example field/ }));
+		await userEvent.keyboard('{ArrowDown}');
+		const listbox = page.getByRole('listbox').element();
+		await waitForOverlayEnter(listbox.closest('[data-trigger]') ?? listbox);
+		await expect.element(page.getByRole('option', { name: /Example two/ })).toHaveFocus();
+		await captureVisual(page.elementLocator(document.body), 'select/forced-colors-open');
 	} finally {
 		await emulateForcedColors('none');
 	}
