@@ -20,18 +20,27 @@ in every browser.
 
 <ExampleBlock src="prose/lists" title="Prose: Lists" />
 
-## Media, code, and tables
+## Media
 
-Images and videos shrink to the content width. Use a native `<pre><code>` for code blocks. Keep
-[Code](/components/typography/code) for inline fragments. Long lines scroll inside the `pre`. When a
-block overflows, set `tabIndex={0}` on that `pre` so it can take keyboard focus.
+Images and videos shrink to fit the content width without changing their proportions.
 
-<ExampleBlock src="prose/content" title="Prose: Media and code" />
+<ExampleBlock src="prose/media" title="Prose: Media" />
 
-Tables fill the content width and separate body rows and footers. Wide tables are not clipped or
-wrapped. Wrap a table in [ScrollFade](/components/layout/scroll-fade) with an accessible name when
-the content can overflow. `Prose` spaces `table` elements, not scroll wrappers, so put the table gap
-on the wrapper (`marginBlockStart="sp40"` after a paragraph).
+## Code blocks
+
+Use native `<pre><code>` for code blocks and [Code](/components/typography/code) for inline
+fragments. Long code lines scroll inside `pre`. Add `tabIndex={0}` to an overflowing `pre` so it can
+receive keyboard focus.
+
+<ExampleBlock src="prose/code" title="Prose: Code blocks" />
+
+## Tables
+
+Tables fill the available width but can overflow when their content is too wide. Wrap wide tables in
+[ScrollFade](/components/layout/scroll-fade) with an accessible name.
+
+The scroll wrapper needs its own spacing. After a paragraph, set `marginBlockStart="sp40"` on the
+wrapper to match the usual `Prose` gap.
 
 <ExampleBlock src="prose/wide-table" title="Prose: Wide table" />
 

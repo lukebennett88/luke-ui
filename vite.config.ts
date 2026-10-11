@@ -68,10 +68,9 @@ export default defineConfig({
 		},
 		overrides: [
 			{
-				files: ['apps/docs/src/examples/**/*.{ts,tsx}'],
+				// The Prose code example focuses a scrollable native `pre` with `tabIndex={0}`.
+				files: ['apps/docs/src/examples/prose/code.tsx'],
 				rules: {
-					// Examples may put `tabIndex={0}` on a scrollable `pre` so the block can take
-					// keyboard focus. That is intentional demo chrome, not a product control.
 					'jsx-a11y/no-noninteractive-tabindex': 'off',
 				},
 			},
