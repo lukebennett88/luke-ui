@@ -1,54 +1,41 @@
 ---
 title: Prose
-description: Vertical rhythm and list styling for long-form content.
+description: Spacing and element styles for long-form content.
 source: packages/@luke-ui/react/src/exports/prose.ts
 ---
 
-`Prose` adds vertical rhythm and list styling to long-form content. It does not constrain content
-width. Pair it with [Heading](/components/typography/heading) and
-[Text](/components/typography/text) for visual hierarchy, or map rendered Markdown and CMS elements
-to those components.
+`Prose` styles rendered Markdown, MDX, or CMS content. It spaces the blocks and styles lists, code
+blocks, tables, rules, and media. It does not set a content width or style headings and paragraphs,
+so map those elements to [Heading](/components/typography/heading) and
+[Text](/components/typography/text).
 
 <ExampleBlock src="prose/basic" title="Prose: Basic" />
 
 ## Lists
 
-Lists inside `Prose` include markers and indentation, including nested lists. Untyped ordered lists
-use decimal markers, and typed lists keep their HTML `type` markers. Under a reset that removes list
-markers, such as Tailwind Preflight, Chromium shows no letter or roman markers. Decimal markers stay
-in every browser.
+Lists get markers and indentation at every nesting level. Untyped ordered lists use decimal markers.
+A typed list, such as `<ol type="a">`, keeps its HTML markers, except in Chromium under a reset that
+removes list markers, such as Tailwind Preflight.
 
 <ExampleBlock src="prose/lists" title="Prose: Lists" />
 
-## Media
+## Wide content
 
-Images and videos shrink to fit the content width without changing their proportions.
+Images and videos shrink to fit the content width. A long line in a code block scrolls inside the
+`pre`. Set `tabIndex={0}` on the `pre` so someone using a keyboard can scroll it.
 
-<ExampleBlock src="prose/media" title="Prose: Media" />
+A table grows past the content width when its columns need more room. Wrap it in
+[Scroll Fade](/components/layout/scroll-fade), which scrolls it in place and makes it a focusable,
+named region while it overflows. `Prose` spacing does not reach the wrapper, so set
+`marginBlockStart="sp40"` on it to match the gap before a table.
 
-## Code blocks
-
-Use native `<pre><code>` for code blocks and [Code](/components/typography/code) for inline
-fragments. Long code lines scroll inside `pre`. Add `tabIndex={0}` to an overflowing `pre` so it can
-receive keyboard focus.
-
-<ExampleBlock src="prose/code" title="Prose: Code blocks" />
-
-## Tables
-
-Tables fill the available width but can overflow when their content is too wide. Wrap wide tables in
-[ScrollFade](/components/layout/scroll-fade) with an accessible name.
-
-The scroll wrapper needs its own spacing. After a paragraph, set `marginBlockStart="sp40"` on the
-wrapper to match the usual `Prose` gap.
-
-<ExampleBlock src="prose/wide-table" title="Prose: Wide table" />
+<ExampleBlock src="prose/wide-content" title="Prose: Wide content" />
 
 ## Opting out
 
-Add the `not-prose` class to an element to keep `Prose` spacing, list styles, and table padding off
-it and everything inside it. Use it for an interactive widget or a component that sets its own
-layout. A `Prose` inside that element applies again.
+Add the `not-prose` class to an element to keep `Prose` styles off it and everything inside it. Use
+it for an interactive widget or a component that sets its own layout. A `Prose` nested inside that
+element applies again.
 
 ```tsx
 <Prose>
@@ -59,10 +46,12 @@ layout. A `Prose` inside that element applies again.
 </Prose>
 ```
 
-A `not-prose` element that follows a heading or rule keeps the gap `Prose` puts after it.
+The element still keeps the gap that `Prose` puts after a heading or rule.
 
-`Prose` styles use CSS `@scope`, which needs Chrome 118, Safari 17.4, or Firefox 146. Older browsers
-show the content without `Prose` spacing.
+## Browser support
+
+`Prose` uses CSS `@scope`, which needs Chrome 118, Safari 17.4, or Firefox 146. Older browsers show
+the content without `Prose` styles.
 
 ## API
 
