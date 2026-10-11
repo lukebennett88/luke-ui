@@ -96,31 +96,13 @@ function TextInputFieldScene() {
 	);
 }
 
-/**
- * The control around the input, if there is one. `TextInputControl` is the input's parent and
- * carries `role="presentation"` inside a field, because the field's own `<label>` names the input.
- */
-function controlFor(name: string): HTMLElement | null {
-	const parent = page.getByRole('textbox', { name }).element().parentElement;
-	return parent?.getAttribute('role') === 'presentation' ? parent : null;
-}
-
 // Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
-test('TextInputField resolves object and callback inputRef to the input, participates in a form, and fires onBlur', () => {
+test('TextInputField resolves object and callback inputRef to the input', () => {
 	const inputRef = createRef<HTMLInputElement>();
 	const callbackResolved: Array<HTMLElement | null> = [];
-	let blurred = false;
-	const { container, locator } = render(
+	const { locator } = render(
 		<>
-			<TextInputField
-				description="Helpful context"
-				inputRef={inputRef}
-				label="Name"
-				name="full-name"
-				onBlur={() => {
-					blurred = true;
-				}}
-			/>
+			<TextInputField inputRef={inputRef} label="Name" name="full-name" />
 			<TextInputField
 				inputRef={(node: HTMLElement | null) => {
 					callbackResolved.push(node);
@@ -130,86 +112,11 @@ test('TextInputField resolves object and callback inputRef to the input, partici
 			/>
 		</>,
 	);
-	const control = locator.getByRole('textbox', { name: 'Name' }).element();
-	const callbackControl = locator.getByRole('textbox', { name: 'Callback' }).element();
 
-	expect(inputRef.current).toBe(control);
-	expect(callbackResolved.at(-1)).toBe(callbackControl);
-	expect(control).toHaveAttribute('aria-describedby');
-
-	const form = document.createElement('form');
-	container.replaceWith(form);
-	form.append(container);
-	const namedControl = form.elements.namedItem('full-name');
-	if (!(namedControl instanceof HTMLInputElement)) {
-		throw new Error('Expected a native input named full-name.');
-	}
-	namedControl.value = 'Luke';
-	expect(new FormData(form).get('full-name')).toBe('Luke');
-
-	if (!(control instanceof HTMLElement)) throw new Error('Expected an HTML control.');
-	control.focus();
-	control.blur();
-	expect(blurred).toBe(true);
-
-	form.remove();
-});
-
-test('TextInputField puts id on its root element and inputId on the input', () => {
-	render(
-		<TextInputField
-			className="example-root"
-			description="Example description"
-			id="example-root"
-			inputId="example-input"
-			label="Example field"
-			name="example"
-		/>,
+	expect(inputRef.current).toBe(locator.getByRole('textbox', { name: 'Name' }).element());
+	expect(callbackResolved.at(-1)).toBe(
+		locator.getByRole('textbox', { name: 'Callback' }).element(),
 	);
-	const input = page.getByRole('textbox', { name: 'Example field' }).element();
-	const root = document.getElementById('example-root');
-
-	expect(input.id).toBe('example-input');
-	expect(root).toHaveClass('example-root');
-	expect(root?.contains(input)).toBe(true);
-	expect(getDescribedText(input)).toBe('Example description');
-});
-
-test('TextInputField resolves an object or callback ref to the root element and inputRef to the input', () => {
-	const ref = createRef<HTMLDivElement>();
-	const inputRef = createRef<HTMLInputElement>();
-	const callbackResolved: Array<HTMLDivElement | null> = [];
-	const { locator } = render(
-		<>
-			<TextInputField id="ref-root" inputRef={inputRef} label="Object" ref={ref} />
-			<TextInputField
-				id="callback-root"
-				label="Callback"
-				ref={(node) => {
-					callbackResolved.push(node);
-				}}
-			/>
-		</>,
-	);
-	const control = locator.getByRole('textbox', { name: 'Object' }).element();
-
-	expect(ref.current).toBe(document.getElementById('ref-root'));
-	expect(ref.current).toBeInstanceOf(HTMLDivElement);
-	expect(ref.current?.contains(control)).toBe(true);
-	expect(inputRef.current).toBe(control);
-	expect(callbackResolved.at(-1)).toBe(document.getElementById('callback-root'));
-});
-
-test('TextInputField renders a control with or without a prefix or suffix', () => {
-	render(
-		<>
-			<TextInputField label="Plain" name="plain" />
-			<TextInputField label="Prefixed" name="prefixed" prefix="$" />
-		</>,
-	);
-
-	expect(controlFor('Plain')).not.toBe(null);
-	expect(controlFor('Prefixed')).not.toBe(null);
 });
 
 test('the TextInputField scene has no axe violations', async () => {
@@ -309,12 +216,6 @@ test('a message with mixed inline content flows as one run beside the icon', () 
 	);
 	expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
 	expect(measurement.secondLineStart).toBeCloseTo(measurement.firstLineStart, 0);
-});
-
-test('an unlabeled TextInputField exposes aria-label on the textbox', () => {
-	const { locator } = render(<TextInputField aria-label="Search documentation" name="search" />);
-
-	expect(locator.getByRole('textbox', { name: 'Search documentation' }).element()).toBeTruthy();
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {

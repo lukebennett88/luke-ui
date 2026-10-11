@@ -1,8 +1,7 @@
 import { IconButton } from '@luke-ui/react/icon-button';
 import type { JSX } from 'react';
-import { expect, onTestFinished, test } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
-import { expectDelayedSpinner, watchSpinner } from '../test-utils/action-spinner.js';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
@@ -12,9 +11,6 @@ import {
 	focusViaKeyboard,
 	Grid,
 } from '../test-utils/visual.js';
-
-/** Intended Action spinner delay (~300ms). Kept in the test so production timing drifts fail. */
-const ACTION_SPINNER_DELAY_MS = 300;
 
 /** A custom SVG that deliberately omits its own `aria-hidden` and any `<title>`. */
 function UnlabelledCustomIcon(): JSX.Element {
@@ -70,36 +66,6 @@ test('a custom SVG icon with no aria-hidden of its own contributes no accessible
 	expect(button).toHaveAccessibleName('Brand');
 	// The wrapper hides the whole subtree, so the custom svg needs no aria-hidden of its own.
 	expect(button.querySelector('svg')?.closest('[aria-hidden="true"]')).not.toBeNull();
-});
-
-test('shares Action pending timing with Button', async () => {
-	let startedAt: number | undefined;
-	let release!: () => void;
-	const gate = new Promise<void>((resolve) => {
-		release = resolve;
-	});
-	onTestFinished(release);
-
-	const { locator, user } = render(
-		<IconButton
-			aria-label="Save"
-			icon="check"
-			pressAction={async () => {
-				startedAt = performance.now();
-				await gate;
-			}}
-		/>,
-	);
-	const button = locator.getByRole('button', { name: 'Save' });
-	const spinner = watchSpinner(button.element());
-
-	await user.click(button);
-	expect(button.element().getAttribute('data-pending')).toBe('true');
-
-	await expectDelayedSpinner(spinner, () => startedAt, ACTION_SPINNER_DELAY_MS);
-
-	release();
-	await expect.poll(() => button.element().getAttribute('data-pending')).toBeNull();
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {

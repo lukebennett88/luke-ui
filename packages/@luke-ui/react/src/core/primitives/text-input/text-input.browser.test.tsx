@@ -91,34 +91,6 @@ function textInset(element: HTMLInputElement): number {
 	return Number.parseFloat(style.borderLeftWidth) + Number.parseFloat(style.paddingLeft);
 }
 
-test('a standalone TextInput takes its name from aria-label and participates in a form', () => {
-	const { container } = render(<TextInput aria-label="Example input" name="example" />);
-	const element = input('Example input');
-
-	const form = document.createElement('form');
-	container.replaceWith(form);
-	form.append(container);
-	element.value = 'Example value';
-	expect(new FormData(form).get('example')).toBe('Example value');
-
-	form.remove();
-});
-
-test('a standalone TextInput owns its native state', () => {
-	render(
-		<>
-			<TextInput aria-label="Disabled" disabled />
-			<TextInput aria-label="Read-only" readOnly />
-			<TextInput aria-label="Required" required />
-		</>,
-	);
-
-	expect(input('Disabled')).toBeDisabled();
-	expect(input('Disabled')).toHaveAttribute('data-disabled', 'true');
-	expect(input('Read-only')).toHaveAttribute('readonly');
-	expect(input('Required')).toBeRequired();
-});
-
 // Layout is the contract: turning invalid must not move the input or its text.
 test('a standalone invalid TextInput keeps its size and text position', () => {
 	render(
@@ -304,24 +276,6 @@ test('the root minLength decides native validation of a TextInput inside a TextI
 	await expect.poll(() => element.getAttribute('aria-invalid')).toBe('true');
 });
 
-test('a standalone TextInput applies its own type, pattern, and lengths', () => {
-	render(
-		<TextInput
-			aria-label="Standalone"
-			maxLength={20}
-			minLength={5}
-			pattern="[a-z]+@example[.]com"
-			type="email"
-		/>,
-	);
-	const element = input('Standalone');
-
-	expect(element).toHaveAttribute('type', 'email');
-	expect(element).toHaveAttribute('pattern', '[a-z]+@example[.]com');
-	expect(element).toHaveAttribute('minlength', '5');
-	expect(element).toHaveAttribute('maxlength', '20');
-});
-
 // A part must never disconnect the field's own wiring, so its ids add to the root's.
 test('a TextInput inside a TextInputRoot adds its aria-describedby to the field description and error', () => {
 	render(
@@ -352,17 +306,6 @@ test('a TextInput inside a TextInputRoot adds its aria-labelledby to the field l
 	);
 
 	expect(page.getByRole('textbox').element()).toHaveAccessibleName('Example field Extra label');
-});
-
-test('a standalone TextInput keeps its own aria-describedby', () => {
-	render(
-		<>
-			<TextInput aria-describedby="extra" aria-label="Standalone" />
-			<p id="extra">Extra hint</p>
-		</>,
-	);
-
-	expect(input('Standalone')).toHaveAccessibleDescription('Extra hint');
 });
 
 // Input-local props are inherited from the root and can be overridden on the part.

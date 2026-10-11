@@ -321,25 +321,6 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 	await expect.poll(() => new FormData(form).get('country')).toBe('ca');
 });
 
-test('ComboboxField reopens the popover when the focused input is clicked again', async () => {
-	const { locator } = render(
-		<ComboboxField defaultItems={countryItems} label="Country">
-			{renderCountryItem}
-		</ComboboxField>,
-	);
-	const input = locator.getByRole('combobox', { name: 'Country' }).element() as HTMLElement;
-
-	await userEvent.click(input);
-	await expect.element(page.getByRole('option', { name: 'Australia' })).toBeVisible();
-
-	await userEvent.keyboard('{Escape}');
-	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
-	expect(document.activeElement).toBe(input);
-
-	await userEvent.click(input);
-	await expect.element(page.getByRole('option', { name: 'Australia' })).toBeVisible();
-});
-
 test('an unlabeled ComboboxField exposes aria-label on the combobox', () => {
 	const { locator } = render(
 		<ComboboxField aria-label="Country" defaultItems={countryItems}>

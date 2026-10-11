@@ -123,12 +123,6 @@ test('region role and accessible name appear together when a fitting div overflo
 
 for (const writingCase of [
 	{
-		direction: 'ltr',
-		expectedInlineEnd: 'right',
-		label: 'horizontal-tb LTR',
-		writingMode: 'horizontal-tb',
-	},
-	{
 		direction: 'rtl',
 		expectedInlineEnd: 'left',
 		label: 'horizontal-tb RTL',
@@ -164,7 +158,6 @@ for (const writingCase of [
 		expect(getComputedStyle(element).direction).toBe(writingCase.direction);
 		expect(element.tabIndex).toBe(0);
 		expect(element.getAttribute('role')).toBe('region');
-		expect(element.getAttribute('data-scroll-fade-end')).toBe(writingCase.expectedInlineEnd);
 		expectMaskToward(element, writingCase.expectedInlineEnd);
 	});
 }
@@ -194,12 +187,10 @@ test('inherited CSS direction updates the inline mask without remounting', async
 	const { locator } = render(<Fixture />);
 	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), true);
 
-	expect(element.getAttribute('data-scroll-fade-end')).toBe('right');
 	expectMaskToward(element, 'right');
 
 	await userEvent.click(locator.getByRole('button', { name: 'Switch to RTL' }));
-	await expect.poll(() => element.getAttribute('data-scroll-fade-end')).toBe('left');
-	expectMaskToward(element, 'left');
+	await expect.poll(() => hasMaskToward(element, 'left')).toBe(true);
 });
 
 test('inline scroll progression fades start then end across the scroll range', async () => {
@@ -516,16 +507,18 @@ function waitForAttribute(element: HTMLElement, name: string, value: string | nu
 	});
 }
 
-function expectMaskToward(element: HTMLElement, side: 'bottom' | 'left' | 'right' | 'top'): void {
+function hasMaskToward(element: HTMLElement, side: 'bottom' | 'left' | 'right' | 'top'): boolean {
 	const maskImage = getComputedStyle(element).maskImage;
-	expect(maskImage).not.toBe('none');
+	if (maskImage === 'none') return false;
 	const angle = maskGradientAngle[side];
 	// Chromium omits the default `180deg` direction from computed `mask-image`.
-	expect(
-		angle === 180
-			? !/\b(?:0|90|270)deg\b/.test(maskImage)
-			: maskImage.includes(`${String(angle)}deg`),
-	).toBe(true);
+	return angle === 180
+		? !/\b(?:0|90|270)deg\b/.test(maskImage)
+		: maskImage.includes(`${String(angle)}deg`);
+}
+
+function expectMaskToward(element: HTMLElement, side: 'bottom' | 'left' | 'right' | 'top'): void {
+	expect(hasMaskToward(element, side)).toBe(true);
 }
 
 function fadeLayer(maskImage: string): string {

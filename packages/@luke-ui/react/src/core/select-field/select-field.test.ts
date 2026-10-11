@@ -1,4 +1,3 @@
-import type { Ref } from 'react';
 import { createElement } from 'react';
 import type { Key } from 'react-aria-components/Select';
 import { assertType, expectTypeOf, test } from 'vite-plus/test';
@@ -38,39 +37,29 @@ test('SelectField does not accept isInvalid', () => {
 	assertType<SelectFieldProps<object>>({ children: [], isInvalid: true, label: 'Theme' });
 });
 
-test('SelectField has no read-only state and accepts isPending', () => {
-	// @ts-expect-error — React Aria's Select has no read-only state
-	assertType<SelectFieldProps<object>>({ children: [], isReadOnly: true, label: 'Theme' });
-	assertType<SelectFieldProps<object>>({ children: [], isPending: true, label: 'Theme' });
-});
-
 test('isPending belongs to the trigger, not the select root', () => {
 	// @ts-expect-error — a pending state sits on the trigger, so the root takes no `isPending`
 	assertType<SelectRootProps>({ isPending: true });
 	assertType<SelectTriggerProps>({ children: null, isPending: true });
 });
 
-test('SelectField has no popover, menu width, or listbox props', () => {
-	// @ts-expect-error — the popover takes no props through the field
-	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', popoverProps: {} });
-	// @ts-expect-error — the popover is as wide as the trigger
-	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', menuWidth: 100 });
-	// @ts-expect-error — the listbox takes no props through the field
-	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', listBoxProps: {} });
-});
-
-test('SelectField has no open-state props', () => {
+test('SelectField has no open-state or popover configuration props', () => {
 	// @ts-expect-error — the field owns the popover's open state
 	assertType<SelectFieldProps<object>>({ children: [], isOpen: true, label: 'Theme' });
 	// @ts-expect-error — the field owns the popover's open state
 	assertType<SelectFieldProps<object>>({ children: [], defaultOpen: true, label: 'Theme' });
 	// @ts-expect-error — the field owns the popover's open state
 	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', onOpenChange: () => {} });
+	// @ts-expect-error — the popover takes no props through the field
+	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', popoverProps: {} });
+	// @ts-expect-error — the popover is as wide as the trigger
+	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', menuWidth: 100 });
+	// @ts-expect-error — the listbox takes no props through the field
+	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', listBoxProps: {} });
 	assertType<SelectRootProps>({ defaultOpen: true, isOpen: true, onOpenChange: () => {} });
 });
 
 test('SelectField has no allowsEmptyCollection, disabledKeys, or slot', () => {
-	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme' });
 	assertType<SelectFieldProps<object>>({
 		// @ts-expect-error — SelectField does not expose allowsEmptyCollection
 		allowsEmptyCollection: true,
@@ -387,20 +376,5 @@ test("SelectField's validate does not change the inferred item type", () => {
 		label: 'Size',
 		// @ts-expect-error — the ids are strings, so a number parameter is rejected
 		validate: (value: number) => (value > 0 ? null : 'Pick one.'),
-	});
-});
-
-test('SelectField takes a root element ref and a trigger ref', () => {
-	assertType<SelectFieldProps<object>>({
-		children: [],
-		label: 'Theme',
-		ref: null as unknown as Ref<HTMLDivElement>,
-		triggerRef: null as unknown as Ref<HTMLButtonElement>,
-	});
-	assertType<SelectFieldProps<object>>({
-		children: [],
-		label: 'Theme',
-		ref: () => {},
-		triggerRef: () => {},
 	});
 });

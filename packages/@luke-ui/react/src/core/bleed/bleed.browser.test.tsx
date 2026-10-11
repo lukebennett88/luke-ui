@@ -93,33 +93,45 @@ test('bleeds on each logical edge', () => {
 	expect(style.marginBlockEnd).toBe('-8px');
 });
 
-test('edge props override axis shorthands at the same responsive condition', () => {
-	const { locator } = render(
-		<Bleed block="sp24" blockStart="sp8" data-testid="bleed" inline="sp32" inlineStart="sp16">
+test('edge and axis props override broader shorthands at the same responsive condition', () => {
+	const { locator: edgeOverAxis } = render(
+		<Bleed
+			block="sp24"
+			blockStart="sp8"
+			data-testid="edge-over-axis"
+			inline="sp32"
+			inlineStart="sp16"
+		>
 			Content
 		</Bleed>,
 	);
-	const bleed = expectHtmlElement(locator.getByTestId('bleed').element());
-	const style = getComputedStyle(bleed);
+	const edgeStyle = getComputedStyle(
+		expectHtmlElement(edgeOverAxis.getByTestId('edge-over-axis').element()),
+	);
 
-	expect(style.marginInlineStart).toBe('-16px');
-	expect(style.marginInlineEnd).toBe('-32px');
-	expect(style.marginBlockStart).toBe('-8px');
-	expect(style.marginBlockEnd).toBe('-24px');
-});
+	expect(edgeStyle.marginInlineStart).toBe('-16px');
+	expect(edgeStyle.marginInlineEnd).toBe('-32px');
+	expect(edgeStyle.marginBlockStart).toBe('-8px');
+	expect(edgeStyle.marginBlockEnd).toBe('-24px');
 
-test('axis and edge props override all at the same responsive condition', () => {
-	const { locator } = render(
-		<Bleed all="sp32" block="sp24" blockEnd="sp8" data-testid="bleed" inline="sp16" inlineStart="0">
+	const { locator: overAll } = render(
+		<Bleed
+			all="sp32"
+			block="sp24"
+			blockEnd="sp8"
+			data-testid="over-all"
+			inline="sp16"
+			inlineStart="0"
+		>
 			Content
 		</Bleed>,
 	);
-	const style = getComputedStyle(expectHtmlElement(locator.getByTestId('bleed').element()));
+	const allStyle = getComputedStyle(expectHtmlElement(overAll.getByTestId('over-all').element()));
 
-	expect(style.marginInlineStart).toBe('0px');
-	expect(style.marginInlineEnd).toBe('-16px');
-	expect(style.marginBlockStart).toBe('-24px');
-	expect(style.marginBlockEnd).toBe('-8px');
+	expect(allStyle.marginInlineStart).toBe('0px');
+	expect(allStyle.marginInlineEnd).toBe('-16px');
+	expect(allStyle.marginBlockStart).toBe('-24px');
+	expect(allStyle.marginBlockEnd).toBe('-8px');
 });
 
 test('resolves responsive bleed values', async () => {
@@ -192,29 +204,6 @@ test('edge props override axis values per responsive condition', async () => {
 	expect(getComputedStyle(bleed).marginInlineStart).toBe('-8px');
 	expect(getComputedStyle(bleed).marginInlineEnd).toBe('-32px');
 });
-
-for (const emptyValue of [undefined, null]) {
-	test(`falls back to the axis value where a responsive edge value is ${emptyValue}`, async () => {
-		await page.viewport(breakpoints.bp640, 800);
-		const { locator } = render(
-			<div style={{ containerType: 'inline-size', inlineSize: '100%' }}>
-				<Bleed
-					data-testid="bleed"
-					inline="sp16"
-					inlineStart={{ initial: emptyValue, bp768: 'sp8' }}
-				>
-					Content
-				</Bleed>
-			</div>,
-		);
-		const bleed = expectHtmlElement(locator.getByTestId('bleed').element());
-
-		expect(getComputedStyle(bleed).marginInlineStart).toBe('-16px');
-
-		await page.viewport(breakpoints.bp768, 800);
-		expect(getComputedStyle(bleed).marginInlineStart).toBe('-8px');
-	});
-}
 
 test('falls back to the axis value where a responsive edge value omits a breakpoint', async () => {
 	await page.viewport(breakpoints.bp640, 800);

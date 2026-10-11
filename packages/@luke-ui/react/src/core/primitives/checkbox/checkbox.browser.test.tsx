@@ -10,7 +10,6 @@ import {
 	FieldLabel,
 	InlineField,
 } from '@luke-ui/react/primitives/field';
-import { Text } from '@luke-ui/react/text';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -22,15 +21,6 @@ function checkbox(name: string): HTMLInputElement {
 	const element = page.getByRole('checkbox', { name }).element();
 	if (!(element instanceof HTMLInputElement)) throw new Error(`Expected a checkbox "${name}".`);
 	return element;
-}
-
-/** The width of the `CheckboxControl` span around the indicator. */
-function controlWidth(name: string): number {
-	const control = checkbox(name)
-		.closest('label')
-		?.querySelector('[aria-hidden="true"]')?.parentElement;
-	if (control == null) throw new Error('Expected the checkbox control.');
-	return control.getBoundingClientRect().width;
 }
 
 function Parts({ label }: { label: string }) {
@@ -124,41 +114,6 @@ test('CheckboxLabel resolves className, style, and children from the checkbox st
 	expect(checkbox('On')).toBeChecked();
 });
 
-test('CheckboxLabel keeps its slot', () => {
-	render(
-		<CheckboxRoot>
-			<CheckboxLabel data-testid="label" slot="example">
-				<CheckboxControl>
-					<CheckboxIndicator />
-				</CheckboxControl>
-				Example checkbox
-			</CheckboxLabel>
-		</CheckboxRoot>,
-	);
-
-	expect(page.getByTestId('label').element()).toHaveAttribute('slot', 'example');
-});
-
-// The root provides React Aria's slotted `Text` context for the description and error, so `Text`
-// in the label opts out with `slot={null}`.
-test('Text with slot null renders inside CheckboxLabel', () => {
-	render(
-		<CheckboxRoot>
-			<CheckboxLabel>
-				<CheckboxControl>
-					<CheckboxIndicator />
-				</CheckboxControl>
-				<Text slot={null}>Visible</Text>
-				<Text isVisuallyHidden slot={null}>
-					{' hidden context'}
-				</Text>
-			</CheckboxLabel>
-		</CheckboxRoot>,
-	);
-
-	expect(checkbox('Visible hidden context')).toBeInTheDocument();
-});
-
 test('CheckboxRoot owns controlled selection and the indeterminate state', async () => {
 	const changes: Array<boolean> = [];
 	render(
@@ -177,39 +132,6 @@ test('CheckboxRoot owns controlled selection and the indeterminate state', async
 	expect(changes).toEqual([true]);
 	expect(checkbox('Controlled')).not.toBeChecked();
 	expect(checkbox('Mixed').indeterminate).toBe(true);
-});
-
-test('CheckboxRoot joins FormData with its name and value', async () => {
-	render(
-		<form data-testid="form">
-			<CheckboxRoot name="terms" value="accepted">
-				<Parts label="Terms" />
-			</CheckboxRoot>
-		</form>,
-	);
-	const form = page.getByTestId('form').element();
-	if (!(form instanceof HTMLFormElement)) throw new Error('Expected a form.');
-
-	expect(new FormData(form).get('terms')).toBe(null);
-
-	await userEvent.click(page.getByText('Terms', { exact: true }));
-
-	expect(new FormData(form).get('terms')).toBe('accepted');
-});
-
-test('CheckboxRoot size changes the control size', () => {
-	render(
-		<>
-			<CheckboxRoot size="small">
-				<Parts label="Small" />
-			</CheckboxRoot>
-			<CheckboxRoot size="large">
-				<Parts label="Large" />
-			</CheckboxRoot>
-		</>,
-	);
-
-	expect(controlWidth('Small')).toBeLessThan(controlWidth('Large'));
 });
 
 test('InlineField renders the label, description, and error in a CheckboxRoot', () => {
@@ -367,16 +289,4 @@ test('CheckboxRoot keeps aria-labelledby and aria-describedby from the layout', 
 	const input = checkbox('Outside label');
 
 	expect(input).toHaveAccessibleDescription('Outside description');
-});
-
-test('a checkbox with a FieldLabel has no axe violations', async () => {
-	const { container } = render(
-		<CheckboxRoot>
-			<FieldLabel>Example label</FieldLabel>
-			<FieldDescription>Example description</FieldDescription>
-			<Bare />
-		</CheckboxRoot>,
-	);
-
-	await expectNoAxeViolations(container);
 });

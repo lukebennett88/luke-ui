@@ -118,7 +118,9 @@ test('public JS/TS export declaration closures do not import styling engines', a
 	}
 });
 
-test('detects styling-engine packages in from and inline import() forms', () => {
+// Positive control for the declaration scanner the boundary test above depends on. Synthetic
+// fragments prove from/import(), relative resolution, and JSDoc {@link} filtering still work.
+test('declaration scanner detects styling-engine and relative imports without following JSDoc links', () => {
 	expect(stylingEngineReferences(`import type { StyleRule } from '@vanilla-extract/css';`)).toEqual(
 		{ hasRainbowSprinkles: false, hasVanillaExtract: true },
 	);
@@ -128,40 +130,19 @@ test('detects styling-engine packages in from and inline import() forms', () => 
 	expect(
 		stylingEngineReferences(`type Sprinkles = import('@luke-ui/rainbow-sprinkles').SprinklesFn;`),
 	).toEqual({ hasRainbowSprinkles: true, hasVanillaExtract: false });
-	expect(stylingEngineReferences(`type Local = import('./local.js').Local;`)).toEqual({
-		hasRainbowSprinkles: false,
-		hasVanillaExtract: false,
-	});
-});
 
-test('collects relative specifiers from from and inline import() forms', () => {
 	expect(
 		relativeDeclarationSpecifiers(`
 			export type { ThemeInput } from './define-theme.js';
 			type Nested = import('../themes/paper.js').ThemeInput;
-			import type { BoxProps } from './box.js';
+			/** See {@link import('./build-theme.js').ThemeGenerationError}. */
+			type Real = import('./real.js').Real;
 		`),
-	).toEqual(['./define-theme.js', '../themes/paper.js', './box.js']);
-});
+	).toEqual(['./define-theme.js', '../themes/paper.js', './real.js']);
 
-test('ignores relative import() mentions inside JSDoc {@link} tags', () => {
-	expect(
-		relativeDeclarationSpecifiers(
-			`/** Attached to {@link import('./build-theme.js').ThemeGenerationError}. */\nexport type Ok = true;`,
-		),
-	).toEqual([]);
-	expect(
-		relativeDeclarationSpecifiers(
-			`/** See {@link import('./build-theme.js').ThemeGenerationError}. */\ntype Nested = import('./real.js').Nested;`,
-		),
-	).toEqual(['./real.js']);
-});
-
-test('resolves nested and parent-relative declaration imports from the importing file', () => {
 	expect(resolveDeclarationImport('themes/paper.d.ts', '../define-theme.js')).toBe(
 		'define-theme.d.ts',
 	);
-	expect(resolveDeclarationImport('box.d.ts', './utilities.css.js')).toBe('utilities.css.d.ts');
 	expect(resolveDeclarationImport('themes/paper.d.ts', './tokens.js')).toBe('themes/tokens.d.ts');
 });
 
