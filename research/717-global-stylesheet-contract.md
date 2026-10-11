@@ -2,7 +2,7 @@
 
 Decision record for [#717](https://github.com/lukebennett88/luke-ui/issues/717): the global
 stylesheet, its reset, and its cascade contract for 1.0. It supersedes contradictory wording in
-#686, #709, #717, the [#715 decision record](./715-theme-authoring-contract.md), and the
+#686, #709, the [#715 decision record](./715-theme-authoring-contract.md), and the
 [#716 decision record](./716-token-contract.md). The #715 contracts for theme identity on `<html>`,
 nested colour modes, unlayered static theme CSS, and overlay mode propagation are unchanged.
 
@@ -15,15 +15,15 @@ recipe.
 
 ### D1. Balanced global reset
 
-Luke UI is opinionated, and the stylesheet paints a coherent visual foundation. It does not
-indiscriminately erase native HTML presentation. A global rule is justified when it corrects a
-cross-browser inconsistency, or replaces a default that almost every application overrides, without
-removing semantic visual structure. Component-specific resets live in component recipes.
+A global rule is justified when it corrects a cross-browser inconsistency, or replaces a default
+that almost every application overrides, without removing semantic visual structure.
+Component-specific resets live in component recipes.
 
 - **Rationale.** Once `rootClassName` goes, every rule applies to the whole document. The old reset
   stripped heading sizes, paragraph and list spacing, list markers, table spacing, and native button
   chrome, so plain application markup lost its structure as soon as the stylesheet was imported.
-  Luke UI components already style themselves, so they never needed those rules globally.
+  Most Luke UI components already set what they need. The Combobox tray trigger and actions gained
+  the declarations they relied on.
 - **Rejected.** Globalising the old reset unchanged (breaks application markup). No reset at all
   (loses the document baseline, focus treatment, and form-control font inheritance). A reset opt-out
   or a second stylesheet (more contract, no demonstrated need).
@@ -102,8 +102,6 @@ framework import:
 @layer theme, base, luke-ui, components, utilities;
 ```
 
-Tailwind is supported as an application styling convenience, not an architectural dependency.
-
 - **Rationale.** Flat names (`reset`, `recipes`, `utilities`) collide with framework layers. A
   Tailwind `utilities` declared before Luke UI's merged with Luke UI's own utilities, and the import
   that came first decided whether Tailwind or Luke UI won. One namespace keeps Luke UI's internal
@@ -114,10 +112,9 @@ Tailwind is supported as an application styling convenience, not an architectura
 
 ## Global rule inventory
 
-The stylesheet has exactly six global rules, plus the layer order statement. Every rule is in
-`luke-ui.reset` and uses `:where()` on the matching part, so that part contributes no specificity.
-Pseudo-elements are invalid inside `:where()`, so G1 lists them outside it, where each adds its own
-(0,0,1). The other five rules stay at zero specificity.
+The stylesheet has exactly six global rules, plus the layer order statement, all in `luke-ui.reset`.
+See [STYLING.md](../docs/STYLING.md#global-styles) for how `:where()` keeps them at zero
+specificity.
 
 | #   | Selector                                                                | Declarations                                                                                                                 |
 | --- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -176,7 +173,6 @@ Old rules came from `reset.css.ts` (scoped to `.luke-ui-reset`) and `theme-root.
 - **Buttons.** The Button primitive owns its chrome, cursor, touch action, and tap highlight. The
   Combobox trigger and clear button, and the Combobox tray trigger, set their own padding,
   background, border, and appearance.
-- **Field controls.** Select, Combobox, Checkbox, Switch, and TextInput already own their states.
 
 ### Typed lists
 
@@ -278,9 +274,8 @@ One indicator per control:
 
 - `stylesheet-contract.browser.test.tsx` parses the built `dist/stylesheet.css` with the browser's
   CSSOM and checks the leading order statement, layer order, no rules in `base` or outside a layer,
-  no `luke-ui-` class selectors, recipe and utility ownership, and each global rule's selector,
-  media condition, and declarations in the browser's normal form. Mutations of the built file show
-  each of those checks failing.
+  recipe and utility ownership, and each global rule's selector, media condition, and declarations
+  in the browser's normal form.
 - `layer-order.browser.test.ts` checks precedence in Chromium with the built stylesheet, including
   important declarations and a consumer `base` write.
 - `apps/docs/src/styles/tailwind-integration.browser.test.tsx` loads real Tailwind v4 output,
@@ -298,31 +293,6 @@ One indicator per control:
   document.
 - The packed-consumer harness checks the layer statement and server rendering without
   `rootClassName`.
-- Docs: `docs/STYLING.md`, the Installation, Styling, Applying a theme, and Theming pages, the React
-  package README, the Paper and Tactile READMEs, docs samples, and the reference app.
-
-## Replaced inputs
-
-| Input                                                                                 | Replacement                                     |
-| ------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| `docs/STYLING.md` flat four-layer table and `@layer reset, base, recipes, utilities;` | Nested order, D6.                               |
-| `docs/STYLING.md` claim that the reset owns reduced motion                            | D4: component-owned.                            |
-| `docs/STYLING.md` setup step 4 and the `theme-root.css.ts` paragraph                  | `<html>` identity only; `global-styles.css.ts`. |
-| `layers.css.ts` and `layer-names.ts` JSDoc                                            | Nested layers.                                  |
-| `prose/recipe.css.ts` `ol[type]` comment and `prose/scope.css.ts`                     | Removed; see [Typed lists](#typed-lists).       |
-| LoadingSkeleton "global reduced-motion reset" comment                                 | Removed.                                        |
-| Field inline-label, Select root, and Combobox group "reset ring" comments             | Removed with their `outline: none` workarounds. |
-| "Table cells need padding after the reset removes it" (Prose)                         | Prose owns its table treatment.                 |
-| `overlay-motion.ts` reduced-motion note                                               | Fade stays; movement is removed.                |
-| `rootClassName` in overlays, test utilities, docs, samples, reference app             | Removed.                                        |
-| `FRICTION.md` "Root styles in portals"                                                | Resolved by D2 and D5.                          |
-| Stylesheet contract test sentinels for `.luke-ui-reset` and `.luke-ui-theme`          | Global-rule sentinels.                          |
-| `cascade.browser.test.ts` `rootClassName` variants of the body-scope test             | Body painted by G3.                             |
-| `#715` record: `rootClassName` "until #717" and repaint selector                      | This record.                                    |
-| `PUBLIC_API.md` `/theme` exports                                                      | `breakpoints`, `getThemeClassName`, `vars`.     |
-| `DOCUMENTATION.md` `rootClassName` wording example                                    | A current example.                              |
-| Assumption that body typography uses the fixed body line height                       | D2.                                             |
-| Assumption that `[data-focus-visible]` draws a ring everywhere                        | D3.                                             |
 
 ## Deferred work and issue disposition
 

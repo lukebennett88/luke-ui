@@ -16,9 +16,8 @@ Luke UI expects the application to provide a compatible shared `react-aria-compo
 ## Setup
 
 Import the component stylesheet and the theme's stylesheet, plus its `fonts.css` to load the font it
-uses. Set the theme's identity class on `<html>`. No root class is needed: the shared stylesheet
-paints `<body>` with the theme's surface, text colour, and body font, and keeps native HTML
-presentation otherwise.
+uses. Set the theme's identity class on `<html>`. The shared stylesheet paints `<body>` with the
+theme's surface, text colour, and body font, and keeps native HTML presentation otherwise.
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';

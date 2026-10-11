@@ -17,7 +17,7 @@ recipes, and utilities. Themes ship separately.
    compiled with `defineTheme`.
 3. Set the theme's identity class on `<html>`.
 
-There is no root class. None of these steps inject styles at runtime.
+None of these steps inject styles at runtime.
 
 ## Structure
 
@@ -123,9 +123,7 @@ overrides, without erasing native structure such as heading sizes, list markers,
 button chrome. Everything else belongs in the component that needs it. A component that renders a
 native element with user agent styles, such as a `<button>`, `<p>`, or `<ul>`, sets the declarations
 it depends on in its own recipe. `Text` zeroes the margins of the elements it renders at zero
-specificity, so `Prose` spacing and utility props still apply.
-`stylesheet-contract.browser.test.tsx` pins each global rule's selector and declarations. The
-decision record is
+specificity, so `Prose` spacing and utility props still apply. The decision record is
 [research/717-global-stylesheet-contract.md](../research/717-global-stylesheet-contract.md).
 
 Only the native `:focus-visible` pseudo-class draws the global ring. React Aria also sets
