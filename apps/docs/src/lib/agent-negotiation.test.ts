@@ -21,6 +21,7 @@ for (const [accept, expected] of [
 	// Explicit text/html;q=0 beats */* when scoring HTML, so markdown still wins.
 	['text/markdown;q=0.5, text/html;q=0, */*', true],
 	['text/markdown;q=0', false],
+	['text/markdown;q=abc', false],
 	[CHROME_ACCEPT, false],
 ] as const satisfies ReadonlyArray<readonly [accept: string | null, expected: boolean]>) {
 	test(`prefersMarkdown(${JSON.stringify(accept)}) is ${expected}`, () => {
@@ -271,3 +272,22 @@ for (const pathname of ['/api', '/api/search']) {
 		expect(res.headers.get('Vary')).toBeNull();
 	});
 }
+
+test('negotiates Markdown for /apiary, a sibling path that merely starts with "api"', async () => {
+	const next = vi.fn<(request?: Request) => Promise<Response>>();
+	const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
+		return new Response('# Apiary\n', {
+			headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+			status: 200,
+		});
+	});
+
+	const request = new Request('https://luke-ui.netlify.app/apiary', {
+		headers: { Accept: 'text/markdown' },
+	});
+	const res = await handleRequest(request, { fetch: fetchMock, next });
+
+	expect(fetchMock).toHaveBeenCalledWith(new URL('https://luke-ui.netlify.app/apiary.md'));
+	expect(next).not.toHaveBeenCalled();
+	expect(res.status).toBe(200);
+});

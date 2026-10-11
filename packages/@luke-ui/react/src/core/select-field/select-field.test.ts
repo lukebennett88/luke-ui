@@ -32,10 +32,52 @@ test('SelectField requires a visible label or an accessible name', () => {
 	});
 });
 
+test('SelectField does not accept isInvalid', () => {
+	// @ts-expect-error — SelectField exposes no `isInvalid` prop
+	assertType<SelectFieldProps<object>>({ children: [], isInvalid: true, label: 'Theme' });
+});
+
 test('isPending belongs to the trigger, not the select root', () => {
 	// @ts-expect-error — a pending state sits on the trigger, so the root takes no `isPending`
 	assertType<SelectRootProps>({ isPending: true });
 	assertType<SelectTriggerProps>({ children: null, isPending: true });
+});
+
+test('SelectField has no open-state or popover configuration props', () => {
+	// @ts-expect-error — the field owns the popover's open state
+	assertType<SelectFieldProps<object>>({ children: [], isOpen: true, label: 'Theme' });
+	// @ts-expect-error — the field owns the popover's open state
+	assertType<SelectFieldProps<object>>({ children: [], defaultOpen: true, label: 'Theme' });
+	// @ts-expect-error — the field owns the popover's open state
+	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', onOpenChange: () => {} });
+	// @ts-expect-error — the popover takes no props through the field
+	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', popoverProps: {} });
+	// @ts-expect-error — the popover is as wide as the trigger
+	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', menuWidth: 100 });
+	// @ts-expect-error — the listbox takes no props through the field
+	assertType<SelectFieldProps<object>>({ children: [], label: 'Theme', listBoxProps: {} });
+	assertType<SelectRootProps>({ defaultOpen: true, isOpen: true, onOpenChange: () => {} });
+});
+
+test('SelectField has no allowsEmptyCollection, disabledKeys, or slot', () => {
+	assertType<SelectFieldProps<object>>({
+		// @ts-expect-error — SelectField does not expose allowsEmptyCollection
+		allowsEmptyCollection: true,
+		children: [],
+		label: 'Theme',
+	});
+	assertType<SelectFieldProps<object>>({
+		children: [],
+		// @ts-expect-error — SelectField does not expose disabledKeys
+		disabledKeys: ['small'],
+		label: 'Theme',
+	});
+	assertType<SelectFieldProps<object>>({
+		children: [],
+		label: 'Theme',
+		// @ts-expect-error — SelectField does not expose slot
+		slot: 'example',
+	});
 });
 
 // SelectField is called directly in these tests so that TypeScript infers `T` the same way it does

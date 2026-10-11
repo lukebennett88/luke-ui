@@ -81,6 +81,63 @@ test('VisuallyHidden renderRoot owns the root without an extra wrapper', () => {
 	expect(ref.current).toBe(link);
 });
 
+test('VisuallyHidden renderRoot preserves callback ref cleanup', () => {
+	const elements: Array<HTMLElement | null> = [];
+	let cleanups = 0;
+	const { locator, unmount } = render(
+		<VisuallyHidden
+			ref={(element) => {
+				elements.push(element);
+				return () => {
+					cleanups += 1;
+				};
+			}}
+			renderRoot={({ children, ...domProps }) => (
+				<a {...domProps} href="#main">
+					{children}
+				</a>
+			)}
+		>
+			Skip
+		</VisuallyHidden>,
+	);
+
+	expect(elements).toEqual([locator.getByRole('link', { name: 'Skip' }).element()]);
+	unmount();
+	expect(cleanups).toBe(1);
+});
+
+test('VisuallyHidden composes consumer focus handlers with internal focus-within handlers', async () => {
+	const focusLog: Array<string> = [];
+	const { locator, user } = render(
+		<>
+			<button type="button">Before</button>
+			<VisuallyHidden
+				isFocusable
+				onBlur={() => {
+					focusLog.push('blur');
+				}}
+				onFocus={() => {
+					focusLog.push('focus');
+				}}
+			>
+				<a href="#main">Skip link</a>
+			</VisuallyHidden>
+			<button type="button">After</button>
+		</>,
+	);
+	const link = locator.getByRole('link', { name: 'Skip link' }).element();
+
+	await user.tab();
+	await user.tab();
+	expect(link).toHaveFocus();
+	expect(focusLog).toContain('focus');
+
+	await user.tab();
+	expect(locator.getByRole('button', { name: 'After' }).element()).toHaveFocus();
+	expect(focusLog).toEqual(['focus', 'blur']);
+});
+
 for (const appearance of visualAppearances) {
 	test(
 		`VisuallyHidden focus reveal: ${appearance.theme} ${appearance.mode}`,

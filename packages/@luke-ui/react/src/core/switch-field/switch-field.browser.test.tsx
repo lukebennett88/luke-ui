@@ -257,44 +257,52 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
-// Only `danger.solid.rest` carries the 3:1 control-boundary guarantee, so an invalid switch must
-// keep it through hover.
-test('an invalid on switch keeps the guaranteed border with data-hovered', () => {
-	render(<SwitchField defaultSelected errorMessage="Required" label="Accept" />);
-	const input = switchInput('Accept');
-	const label = labelFor(input);
-	const track = controlFor(input);
-	track.style.transition = 'none';
-	label.setAttribute('data-hovered', 'true');
+// Only `danger.solid.rest` carries the 3:1 control-boundary guarantee. Off and on invalid tracks use
+// different selector branches, so both must keep the border through hover.
+for (const isSelected of [false, true]) {
+	test(`an invalid ${isSelected ? 'on' : 'off'} switch keeps the guaranteed border with data-hovered`, () => {
+		render(<SwitchField defaultSelected={isSelected} errorMessage="Required" label="Accept" />);
+		const input = switchInput('Accept');
+		const label = labelFor(input);
+		const track = controlFor(input);
+		track.style.transition = 'none';
+		label.setAttribute('data-hovered', 'true');
 
-	expect(getComputedStyle(track).borderTopColor).toBe(
-		resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
-	);
-});
+		expect(getComputedStyle(track).borderTopColor).toBe(
+			resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
+		);
+	});
+}
 
-// Pressing stretches the thumb instead of recolouring it, so the press shows without materials and
-// the thumb keeps its guaranteed contrast with the track.
-test('pressing an on switch stretches its thumb until release', async () => {
-	render(<SwitchField defaultSelected label="Notify" />);
-	const input = switchInput('Notify');
-	const thumb = controlFor(input).querySelector('span');
-	if (!(thumb instanceof HTMLElement)) throw new Error('Expected the switch thumb.');
-	thumb.style.transition = 'none';
-	const restingWidth = thumb.getBoundingClientRect().width;
-	const restingColor = getComputedStyle(thumb).backgroundColor;
+// Pressing stretches the thumb instead of recolouring it. Off stretches forward; on also pulls the
+// travel margin back so the stretch points toward the off side.
+for (const isSelected of [false, true]) {
+	test(`pressing an ${isSelected ? 'on' : 'off'} switch stretches its thumb until release`, async () => {
+		render(<SwitchField defaultSelected={isSelected} label="Notify" />);
+		const input = switchInput('Notify');
+		const thumb = controlFor(input).querySelector('span');
+		if (!(thumb instanceof HTMLElement)) throw new Error('Expected the switch thumb.');
+		thumb.style.transition = 'none';
+		const restingWidth = thumb.getBoundingClientRect().width;
+		const restingColor = getComputedStyle(thumb).backgroundColor;
+		const restingStart = thumb.getBoundingClientRect().left;
 
-	input.focus();
-	await userEvent.keyboard('[Space>]');
-	await expect.element(labelFor(input)).toHaveAttribute('data-pressed', 'true');
+		input.focus();
+		await userEvent.keyboard('[Space>]');
+		await expect.element(labelFor(input)).toHaveAttribute('data-pressed', 'true');
 
-	expect(thumb.getBoundingClientRect().width).toBeGreaterThan(restingWidth);
-	expect(getComputedStyle(thumb).backgroundColor).toBe(restingColor);
+		expect(thumb.getBoundingClientRect().width).toBeGreaterThan(restingWidth);
+		expect(getComputedStyle(thumb).backgroundColor).toBe(restingColor);
+		if (isSelected) {
+			expect(thumb.getBoundingClientRect().left).toBeLessThan(restingStart);
+		}
 
-	await userEvent.keyboard('[/Space]');
-	await expect.element(labelFor(input)).not.toHaveAttribute('data-pressed');
+		await userEvent.keyboard('[/Space]');
+		await expect.element(labelFor(input)).not.toHaveAttribute('data-pressed');
 
-	expect(thumb.getBoundingClientRect().width).toBe(restingWidth);
-});
+		expect(thumb.getBoundingClientRect().width).toBe(restingWidth);
+	});
+}
 
 // Regression: rest, hover, and pressed must stay distinct without materials, which the flat fixture
 // removes. Hover recolours the track. Pressed recolours an on track and stretches the thumb, which

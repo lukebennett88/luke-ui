@@ -222,6 +222,25 @@ test('falls back to the axis value where a responsive edge value omits a breakpo
 	expect(getComputedStyle(bleed).marginInlineStart).toBe('-8px');
 });
 
+test('a direct edge value overrides only the initial axis value', async () => {
+	await page.viewport(breakpoints.bp640, 800);
+	const { locator } = render(
+		<div style={{ containerType: 'inline-size', inlineSize: '100%' }}>
+			<Bleed data-testid="bleed" inline={{ initial: 'sp16', bp768: 'sp32' }} inlineStart="sp8">
+				Content
+			</Bleed>
+		</div>,
+	);
+	const bleed = expectHtmlElement(locator.getByTestId('bleed').element());
+
+	expect(getComputedStyle(bleed).marginInlineStart).toBe('-8px');
+	expect(getComputedStyle(bleed).marginInlineEnd).toBe('-16px');
+
+	await page.viewport(breakpoints.bp768, 800);
+	expect(getComputedStyle(bleed).marginInlineStart).toBe('-32px');
+	expect(getComputedStyle(bleed).marginInlineEnd).toBe('-32px');
+});
+
 test('reports an invalid value against the prop that received it', () => {
 	const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 

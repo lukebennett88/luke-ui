@@ -369,6 +369,38 @@ test('ComboboxTrayTrigger blocks a closed tray on a custom validation error', as
 	expect(submitCount).toBe(1);
 });
 
+test('disabled, read-only, and aria-validated tray comboboxes do not block native submission', async () => {
+	const submitted: Array<string> = [];
+	const renderCase = (label: string, props: Partial<Parameters<typeof TrayCombobox>[0]>) => (
+		<form
+			aria-label={`${label} form`}
+			onSubmit={(event) => {
+				event.preventDefault();
+				submitted.push(label);
+			}}
+		>
+			<TrayCombobox isRequired label={label} triggerLabel={label} {...props} />
+			<button type="submit">Submit {label}</button>
+		</form>
+	);
+
+	render(
+		<>
+			{renderCase('Disabled', { isDisabled: true })}
+			{renderCase('ReadOnly', { isReadOnly: true })}
+			{renderCase('Aria', { validationBehavior: 'aria' })}
+		</>,
+	);
+
+	// oxlint-disable-next-line no-await-in-loop
+	for (const label of ['Disabled', 'ReadOnly', 'Aria']) {
+		// oxlint-disable-next-line no-await-in-loop
+		await userEvent.click(page.getByRole('button', { name: `Submit ${label}` }).element());
+	}
+
+	expect(submitted).toEqual(['Disabled', 'ReadOnly', 'Aria']);
+});
+
 test('ComboboxTrayTrigger inherits validationBehavior from an enclosing Form', async () => {
 	const { container } = render(
 		<Form aria-label="Country form" validationBehavior="aria">
@@ -440,4 +472,16 @@ test('ComboboxTrayTrigger submits custom text in text mode while the tray is clo
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 	expect(new FormData(form).getAll('country')).toEqual(['']);
+});
+
+test('a disabled text-mode tray combobox does not contribute values to FormData', () => {
+	const { container } = render(
+		<form aria-label="Disabled form">
+			<TrayCombobox allowsCustomValue defaultValue="au" isDisabled label="Disabled" />
+		</form>,
+	);
+	const form = container.querySelector('form');
+	if (form == null) throw new Error('Expected the form element.');
+
+	expect(new FormData(form).getAll('country')).toEqual([]);
 });

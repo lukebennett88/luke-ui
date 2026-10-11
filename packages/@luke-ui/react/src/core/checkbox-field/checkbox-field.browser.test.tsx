@@ -347,21 +347,23 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
-// Only `danger.solid.rest` carries the 3:1 control-boundary guarantee, so an invalid checkbox must
-// keep it through hover.
-test('an invalid on checkbox keeps the guaranteed border with data-hovered', () => {
-	render(<CheckboxField defaultSelected errorMessage="Required" label="Accept" />);
-	const input = checkbox('Accept');
-	const label = labelFor(input);
-	const indicator = label.querySelector<HTMLElement>('[aria-hidden="true"]');
-	if (indicator == null) throw new Error('Expected the checkbox indicator.');
-	indicator.style.transition = 'none';
-	label.setAttribute('data-hovered', 'true');
+// Only `danger.solid.rest` carries the 3:1 control-boundary guarantee. Off and on invalid boxes use
+// different selector branches (subtle vs solid fill), so both must keep the border through hover.
+for (const isSelected of [false, true]) {
+	test(`an invalid ${isSelected ? 'on' : 'off'} checkbox keeps the guaranteed border with data-hovered`, () => {
+		render(<CheckboxField defaultSelected={isSelected} errorMessage="Required" label="Accept" />);
+		const input = checkbox('Accept');
+		const label = labelFor(input);
+		const indicator = label.querySelector<HTMLElement>('[aria-hidden="true"]');
+		if (indicator == null) throw new Error('Expected the checkbox indicator.');
+		indicator.style.transition = 'none';
+		label.setAttribute('data-hovered', 'true');
 
-	expect(getComputedStyle(indicator).borderTopColor).toBe(
-		resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
-	);
-});
+		expect(getComputedStyle(indicator).borderTopColor).toBe(
+			resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
+		);
+	});
+}
 
 // Regression: hover and pressed must look different from each other, and from rest, by colour
 // alone. The flat fixture has no depth or control finish to tell them apart.

@@ -27,6 +27,7 @@ const loadingLabel = `Loading ${exampleTitle} example`;
 const COPY_BUTTON_NAME_PATTERN = /^(Copy|Copied)$/;
 
 afterEach(() => {
+	vi.unstubAllGlobals();
 	if (root) act(() => root?.unmount());
 	container?.remove();
 	container = undefined;
@@ -388,6 +389,98 @@ test('collapsing source that now fits with Enter moves focus to Copy', async () 
 	await expect.element(page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN })).toHaveFocus();
 });
 
+test('collapse with Enter respects focus moving away before commit', async () => {
+	await renderSourcePreview({ withNextControl: true });
+	const expand = page.getByRole('button', { name: 'Expand code' });
+	await expect.element(expand).toBeVisible();
+	expand.element().focus();
+	await pressKey('{Enter}');
+	const collapse = page.getByRole('button', { name: 'Collapse code' });
+	await expect.element(collapse).toHaveFocus();
+	shrinkTypography(sourceElement());
+	await expect.poll(() => sourceElement().getBoundingClientRect().height).toBeLessThan(30);
+
+	const next = page.getByRole('button', { name: 'Next example' }).element();
+	// Redirect focus during the native activation event, before another browser task can run.
+	collapse.element().addEventListener('keyup', () => next.focus(), { once: true });
+	vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', false);
+	await userEvent.keyboard('{Enter}');
+	await expect.poll(() => collapse.query()).toBeNull();
+	await expect.element(page.getByRole('button', { name: 'Next example' })).toHaveFocus();
+});
+
+test('collapse with Enter respects focus returning before commit', async () => {
+	await renderSourcePreview({ withNextControl: true });
+	const expand = page.getByRole('button', { name: 'Expand code' });
+	await expect.element(expand).toBeVisible();
+	expand.element().focus();
+	await pressKey('{Enter}');
+	const collapse = page.getByRole('button', { name: 'Collapse code' });
+	await expect.element(collapse).toHaveFocus();
+	shrinkTypography(sourceElement());
+	await expect.poll(() => sourceElement().getBoundingClientRect().height).toBeLessThan(30);
+
+	const control = collapse.element();
+	const next = page.getByRole('button', { name: 'Next example' }).element();
+	control.addEventListener(
+		'keyup',
+		() => {
+			next.focus();
+			control.focus();
+		},
+		{ once: true },
+	);
+	vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', false);
+	await userEvent.keyboard('{Enter}');
+	await expect.poll(() => collapse.query()).toBeNull();
+	await expect.element(page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN })).toHaveFocus();
+});
+
+test('typography changes without interaction do not move focus', async () => {
+	await renderSourcePreview();
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
+	const collapse = page.getByRole('button', { name: 'Collapse code' });
+	await expect.element(collapse).toBeVisible();
+	collapse.element().focus();
+	const pre = sourceElement();
+
+	// The source now fits, but the expanded toggle stays until someone collapses it.
+	shrinkTypography(pre);
+	await expect.poll(() => pre.getBoundingClientRect().height).toBeLessThan(30);
+	await expect.element(collapse).toHaveFocus();
+
+	// Collapsing removes the toggle and hands focus to Copy. Growing the source again must leave it
+	// there while the expand control comes back.
+	await pressKey('{Enter}');
+	await expect.poll(() => collapse.query()).toBeNull();
+	const copy = page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN });
+	await expect.element(copy).toHaveFocus();
+	pre.style.removeProperty('font-size');
+	pre.style.removeProperty('line-height');
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	await expect.element(copy).toHaveFocus();
+});
+
+test('a surviving collapse does not restore focus after a later typography change', async () => {
+	await renderSourcePreview({ withNextControl: true });
+	const expand = page.getByRole('button', { name: 'Expand code' });
+	await expect.element(expand).toBeVisible();
+	expand.element().focus();
+	await pressKey('{Enter}');
+	await expect.element(page.getByRole('button', { name: 'Collapse code' })).toHaveFocus();
+	await pressKey('{Enter}');
+	await expect.element(expand).toHaveFocus();
+
+	await userEvent.tab();
+	await expect.element(page.getByRole('button', { name: 'Next example' })).toHaveFocus();
+	await userEvent.tab({ shift: true });
+	await expect.element(expand).toHaveFocus();
+	shrinkTypography(sourceElement());
+	await expect.poll(() => expand.query()).toBeNull();
+	expect(document.activeElement).toBe(document.body);
+});
+
 test('narrowing the preview panel flips a responsive example below its container breakpoint', async () => {
 	await page.viewport(1000, 800);
 	// Wide enough that the canvas @container stays ≥768 after the 12px outside
@@ -402,7 +495,7 @@ test('narrowing the preview panel flips a responsive example below its container
 	await expect.poll(flexDirection).toBe('column');
 });
 
-async function renderSourcePreview() {
+async function renderSourcePreview({ withNextControl = false } = {}) {
 	await page.viewport(1000, 800);
 	const source = Array.from({ length: 20 }, () => 'const value = 1;').join('\n');
 	container = document.body.appendChild(document.createElement('div'));
@@ -412,6 +505,7 @@ async function renderSourcePreview() {
 		root?.render(
 			<Provider spritesheetHref={spriteSheetHref}>
 				<ExampleCodePreview html={`<code>${source}</code>`} source={source} title="Source sizing" />
+				{withNextControl ? <button type="button">Next example</button> : null}
 			</Provider>,
 		);
 	});
