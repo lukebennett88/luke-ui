@@ -3,11 +3,13 @@ import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { COMBOBOX_ACTION_SIZE } from '../../sizing/combobox-sizing.js';
 import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
+import { classSelector } from '../../styles/class-selector.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
 } from '../../styles/input-states.js';
+import { globalStyleInLayer, style } from '../../styles/layered-style.css.js';
 import { overlayMotion } from '../../styles/overlay-motion.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
@@ -81,6 +83,27 @@ const comboboxActionStyles = {
 		[descendantDisabledSelector]: { color: vars.color.text.disabled },
 	},
 } satisfies StyleRule;
+
+/** Marker class on every combobox and select item, for rules that reach into its content. */
+export const comboboxItemClassName = style({}, 'combobox-item');
+
+// A selected item's `forced-color-adjust: none` inherits, so its content would keep author colours on
+// the `Highlight` fill: a `Text` keeps its theme colour and a `Kbd` its surface. Do for that content
+// what forced colours would have done. `!important` beats application and utility CSS, which ranks
+// below every Luke UI layer under `!important`.
+globalStyleInLayer(
+	'recipes',
+	`${classSelector(comboboxItemClassName)}[data-selected="true"]:not([data-disabled="true"]) *`,
+	{
+		'@media': {
+			'(forced-colors: active)': {
+				backgroundColor: 'transparent !important',
+				borderColor: 'currentColor !important',
+				color: 'inherit !important',
+			},
+		},
+	},
+);
 
 /**
  * Raw slotted config for the combobox anatomy.
@@ -272,6 +295,7 @@ const comboboxConfig = {
 						// A forced-colours backplate would paint `Canvas` behind the label and hide the
 						// `HighlightText` on it, so the selected item opts out and sets both colours. The list
 						// repeats every selected-state selector below so author colours never show through.
+						// The opt-out inherits, so the `comboboxItemClassName` rule resets the item's content.
 						[[
 							'&[data-selected="true"]:not([data-disabled="true"])',
 							'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])',

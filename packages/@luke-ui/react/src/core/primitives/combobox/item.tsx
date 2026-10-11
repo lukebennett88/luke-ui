@@ -8,6 +8,7 @@ import {
 	ListBoxLoadMoreItem as RacListBoxLoadMoreItem,
 } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { cx } from '../../../shared/utils/utils.js';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import { COMBOBOX_CHECK_ICON_SIZE } from '../../sizing/combobox-sizing.js';
@@ -16,7 +17,7 @@ import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
-import { comboboxRecipe } from './styles.css.js';
+import { comboboxItemClassName, comboboxRecipe } from './styles.css.js';
 
 type _ComboboxItemOmit<T extends object> = DistributiveOmit<RacListBoxItemProps<T>, 'className'>;
 
@@ -39,7 +40,7 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 			textValue={typeof itemProps.children === 'string' ? itemProps.children : undefined}
 			{...itemProps}
 			className={composeRenderProps(itemProps.className, (className) => {
-				return comboboxRecipe({ size }).item({ className });
+				return cx(comboboxItemClassName, comboboxRecipe({ size }).item({ className }));
 			})}
 		>
 			{composeRenderProps(itemProps.children, (children, { isSelected }) => {

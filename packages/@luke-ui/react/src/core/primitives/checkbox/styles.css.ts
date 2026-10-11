@@ -72,7 +72,9 @@ const checkboxConfig = {
 							justifyContent: 'center',
 							position: 'absolute',
 						},
-						'[data-disabled="true"] &': {
+						// The invalid form matches the invalid checked rule's specificity, so that rule's
+						// border cannot outrank this one. Forced colours come later in the stylesheet.
+						'[data-disabled="true"] &, [data-disabled="true"][data-invalid="true"] &': {
 							borderColor: 'GrayText',
 							color: 'GrayText',
 							opacity: 1,

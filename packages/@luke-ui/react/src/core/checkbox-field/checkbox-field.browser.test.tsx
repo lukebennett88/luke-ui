@@ -439,6 +439,13 @@ test('forced-colors resting', { tags: ['visual'] }, async () => {
 					label="Invalid"
 					name="invalid"
 				/>
+				<CheckboxField
+					defaultSelected
+					errorMessage="Choose an option."
+					isDisabled
+					label="Disabled invalid"
+					name="disabled-invalid"
+				/>
 			</Stack>,
 		);
 		await captureVisual(locator, 'checkbox-field/forced-colors-resting');
