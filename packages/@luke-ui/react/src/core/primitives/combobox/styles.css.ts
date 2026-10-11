@@ -9,6 +9,7 @@ import {
 	descendantDisabledSelector,
 } from '../../styles/input-states.js';
 import { overlayMotion } from '../../styles/overlay-motion.js';
+import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
@@ -44,7 +45,6 @@ const comboboxActionStyles = {
 				},
 			},
 		},
-		'(prefers-reduced-motion: reduce)': { transform: 'none', transition: 'none' },
 	},
 	alignItems: 'center',
 	appearance: 'none',
@@ -61,6 +61,8 @@ const comboboxActionStyles = {
 	justifyContent: 'center',
 	minBlockSize: MIN_TARGET_SIZE,
 	minInlineSize: MIN_TARGET_SIZE,
+	paddingBlock: 0,
+	...pressFeedback,
 	transform: 'none',
 	transitionDuration: vars.motion.duration.feedback,
 	transitionProperty: 'background-color, color',
@@ -111,7 +113,6 @@ const comboboxConfig = {
 						[inputFocus]: { outlineColor: 'Highlight' },
 					},
 				},
-				'(prefers-reduced-motion: reduce)': { transition: 'none' },
 			},
 			alignItems: 'center',
 			backgroundColor: vars.color.surface.field,
@@ -129,8 +130,6 @@ const comboboxConfig = {
 			letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
 			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 			minInlineSize: 0,
-			// Suppress the reset ring React Aria exposes on the group when an inner action is focus-visible.
-			outline: 'none',
 			overflow: 'visible',
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, border-color, box-shadow, color',
@@ -276,7 +275,6 @@ const comboboxConfig = {
 						},
 					},
 				},
-				'(prefers-reduced-motion: reduce)': { transform: 'none', transition: 'none' },
 			},
 			alignItems: 'center',
 			backgroundColor: 'transparent',
@@ -289,7 +287,7 @@ const comboboxConfig = {
 			minBlockSize: MIN_TARGET_SIZE,
 			minInlineSize: 0,
 			outline: 'none',
-			touchAction: 'manipulation',
+			...pressFeedback,
 			transform: 'none',
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, color, opacity',
@@ -330,7 +328,10 @@ const comboboxConfig = {
 		},
 		trayTrigger: {
 			alignItems: 'center',
+			appearance: 'none',
+			backgroundColor: 'transparent',
 			blockSize: '100%',
+			border: 'none',
 			color: vars.color.text.primary,
 			display: 'flex',
 			inlineSize: '100%',
@@ -340,6 +341,12 @@ const comboboxConfig = {
 			// the closed trigger onto its selected value. This floor reserves 20ch of value text
 			// plus room for the trailing chevron.
 			minInlineSize: `calc(20ch + ${COMBOBOX_ACTION_SIZE})`,
+			paddingBlock: 0,
+			...pressFeedback,
+
+			selectors: {
+				'&[data-disabled="true"]': { cursor: 'not-allowed' },
+			},
 		},
 		trayValue: {
 			flex: 1,

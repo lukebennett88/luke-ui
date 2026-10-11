@@ -4,7 +4,6 @@ import { Icon } from '@luke-ui/react/icon';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
-import { rootClassName } from '@luke-ui/react/theme';
 import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
 import type { NavigateOptions } from '@tanstack/react-router';
@@ -174,7 +173,7 @@ export function DocsSearchDialog({
 
 	return (
 		<ModalOverlay
-			className={cx(rootClassName, styles.overlay)}
+			className={styles.overlay}
 			isDismissable
 			isOpen={isOpen}
 			onOpenChange={(nextOpen) => (nextOpen ? onOpenChange(true) : close())}

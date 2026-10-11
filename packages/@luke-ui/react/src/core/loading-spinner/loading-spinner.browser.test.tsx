@@ -12,6 +12,10 @@ import {
 	variantValuesFor,
 } from '../test-utils/visual.js';
 
+afterEach(async () => {
+	await emulateReducedMotion(false);
+});
+
 const rowStyle = {
 	alignItems: 'center',
 	display: 'flex',
@@ -59,10 +63,6 @@ test('the LoadingSpinner scene has no axe violations', async () => {
 	const { container } = render(<LoadingSpinnerScene />);
 
 	await expectNoAxeViolations(container);
-});
-
-afterEach(async () => {
-	await emulateReducedMotion(false);
 });
 
 test('animates the root and the indicator by default', () => {

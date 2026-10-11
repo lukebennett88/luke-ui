@@ -151,7 +151,6 @@ async function renderInProse(children: ReactNode) {
 	});
 
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = 'luke-ui-theme';
 	container.style.inlineSize = '800px';
 	root = createRoot(container);
 	await act(async () => {

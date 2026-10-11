@@ -10,7 +10,10 @@ interface HiddenValues {
 }
 
 interface OverlayMotionOptions {
-	/** The values React Aria's `data-entering` and `data-exiting` states hold while hidden. */
+	/**
+	 * The values React Aria's `data-entering` and `data-exiting` states hold while hidden. Reduced
+	 * motion keeps `opacity` and replaces `translate` with `none`.
+	 */
 	hidden: HiddenValues;
 	/** The CSS properties that animate. Each takes the same enter and exit timing. */
 	properties: ReadonlyArray<string>;
@@ -32,9 +35,10 @@ interface OverlayMotionOptions {
  * This is a copy of the package's private `overlay-motion.ts`, which the docs app cannot import.
  * The two share one API, and this copy adds `pseudo`.
  *
- * The `data-entering` and `data-exiting` selectors outrank the plain class rule. Under
- * `prefers-reduced-motion: reduce` every one of them therefore repeats `transition: none` and the
- * visible values, and resetting the rest rule alone would keep animating.
+ * Under `prefers-reduced-motion: reduce` an overlay keeps its opacity fade and loses its movement:
+ * the transitions cover only `opacity`, and both state selectors set `translate: none`. An overlay
+ * that does not fade gets `transition: none`. The `data-exiting` selector sets its own
+ * `transition`, so it outranks the plain rule and needs its own reduced-motion value.
  */
 export function overlayMotion({
 	hidden,
@@ -44,11 +48,13 @@ export function overlayMotion({
 }: OverlayMotionOptions): StyleRule {
 	const enter = transitionFor(properties, vars.motion.duration.enter, vars.motion.easing.standard);
 	const exit = transitionFor(properties, vars.motion.duration.exit, vars.motion.easing.exit);
-	const visible = {
-		...(hidden.opacity === undefined ? {} : { opacity: 1 }),
-		...(hidden.translate === undefined ? {} : { translate: 'none' }),
-	};
-	const noTransition = { transition: 'none' } as const;
+	const fades = hidden.opacity !== undefined;
+	const reducedEnter = fades
+		? transitionFor(['opacity'], vars.motion.duration.enter, vars.motion.easing.standard)
+		: 'none';
+	const reducedExit = fades
+		? transitionFor(['opacity'], vars.motion.duration.exit, vars.motion.easing.exit)
+		: 'none';
 
 	const suffix = pseudo ?? '';
 	const enteringSelector = `&[data-entering]${suffix}`;
@@ -58,16 +64,16 @@ export function overlayMotion({
 		[exitingSelector]: { ...hidden, transition: exit },
 	};
 	const reducedSelectors: Selectors = {
-		[enteringSelector]: { ...visible, ...noTransition },
-		[exitingSelector]: { ...visible, ...noTransition },
+		[enteringSelector]: { translate: 'none' },
+		[exitingSelector]: { transition: reducedExit, translate: 'none' },
 	};
 	if (pseudo) {
 		generatedSelectors['&::before'] = { transition: enter };
-		reducedSelectors['&::before'] = noTransition;
+		reducedSelectors['&::before'] = { transition: reducedEnter };
 	}
 	const generatedMedia: MediaRules = {
 		'(prefers-reduced-motion: reduce)': {
-			...(pseudo ? {} : noTransition),
+			...(pseudo ? {} : { transition: reducedEnter }),
 			selectors: reducedSelectors,
 		},
 	};

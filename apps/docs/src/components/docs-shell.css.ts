@@ -6,7 +6,7 @@ import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
 export const shell = style({
 	'@layer': {
-		recipes: {
+		components: {
 			// `DocsArticle` places the article in `main` and the desktop table of contents in `toc`.
 			backgroundColor: vars.color.surface.base,
 			display: 'grid',
@@ -31,7 +31,7 @@ export const shell = style({
 
 export const header = style({
 	'@layer': {
-		recipes: {
+		components: {
 			gridArea: 'header',
 			insetBlockStart: 0,
 			position: 'sticky',
@@ -42,7 +42,7 @@ export const header = style({
 
 export const sidebar = style({
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: vars.color.surface.base,
 			borderInlineEnd: `1px solid ${vars.color.border.decorative}`,
 			display: 'none',
@@ -63,7 +63,7 @@ export const sidebar = style({
 /** Hover, current, and focus styles for docs nav links. Layout lives on Box. */
 export const navLink = style({
 	'@layer': {
-		recipes: {
+		components: {
 			color: vars.color.text.secondary,
 			fontSize: vars.font.label.fontSize,
 			lineHeight: vars.font.label.lineHeight,
@@ -88,7 +88,7 @@ export const navLink = style({
 
 export const mobileTrigger = style({
 	'@layer': {
-		recipes: {
+		components: {
 			'@container': {
 				[docsSidebarMinInlineSize]: {
 					display: 'none',
@@ -108,7 +108,7 @@ const drawerOffset = createVar();
 // not on pseudo-elements.
 export const drawerOverlay = style({
 	'@layer': {
-		recipes: {
+		components: {
 			...overlayMotion({
 				hidden: { opacity: 0 },
 				properties: ['opacity'],
@@ -134,7 +134,7 @@ export const drawerOverlay = style({
 
 export const drawerModal = style({
 	'@layer': {
-		recipes: {
+		components: {
 			...overlayMotion({
 				hidden: { translate: `${drawerOffset} 0` },
 				properties: ['translate'],
@@ -160,7 +160,7 @@ export const drawerModal = style({
 
 export const drawerDialog = style({
 	'@layer': {
-		recipes: {
+		components: {
 			blockSize: '100%',
 			overflowY: 'auto',
 		},

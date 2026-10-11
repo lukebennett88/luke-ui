@@ -48,7 +48,7 @@ const reducedMotionNoTransition = {
 
 export const trigger = style({
 	'@layer': {
-		recipes: {
+		components: {
 			'@media': {
 				'(forced-colors: active)': {
 					backgroundColor: 'Field',
@@ -89,7 +89,7 @@ export const trigger = style({
 
 export const triggerPlaceholder = style({
 	'@layer': {
-		recipes: {
+		components: {
 			color: vars.color.text.secondary,
 			fontWeight: vars.font.weight.body,
 		},
@@ -98,7 +98,7 @@ export const triggerPlaceholder = style({
 
 export const triggerSlotReserve = style({
 	'@layer': {
-		recipes: {
+		components: {
 			blockSize: '100%',
 			inlineSize: '100%',
 			minBlockSize: '2.25rem',
@@ -110,7 +110,7 @@ export const triggerSlotReserve = style({
 
 export const fieldMorphHost = style({
 	'@layer': {
-		recipes: {
+		components: {
 			inlineSize: '100%',
 		},
 	},
@@ -118,7 +118,7 @@ export const fieldMorphHost = style({
 
 export const triggerTrack = style({
 	'@layer': {
-		recipes: {
+		components: {
 			inlineSize: '100%',
 			minInlineSize: 0,
 			textAlign: 'start',
@@ -128,7 +128,7 @@ export const triggerTrack = style({
 
 export const overlay = style({
 	'@layer': {
-		recipes: {
+		components: {
 			...overlayMotion({
 				hidden: { opacity: 0 },
 				properties: ['opacity'],
@@ -146,7 +146,7 @@ export const overlay = style({
 
 export const modalPassThrough = style({
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: 'transparent',
 			border: 'none',
 			boxShadow: 'none',
@@ -160,7 +160,7 @@ export const modalPassThrough = style({
 
 export const panel = style({
 	'@layer': {
-		recipes: {
+		components: {
 			color: vars.color.text.primary,
 			display: 'flex',
 			flexDirection: 'column',
@@ -177,7 +177,7 @@ export const panel = style({
 
 export const panelFieldShell = style({
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: vars.color.surface.overlay,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.surface,
@@ -196,7 +196,7 @@ export const panelFieldShell = style({
 
 export const panelResultsRegion = style({
 	'@layer': {
-		recipes: {
+		components: {
 			borderColor: vars.color.border.decorative,
 			borderStyle: 'solid',
 			borderWidth: '1px',
@@ -240,7 +240,7 @@ globalStyle(`${overlay}[data-exiting] ${panelResultsRegion}`, {
 
 export const autocomplete = style({
 	'@layer': {
-		recipes: {
+		components: {
 			display: 'flex',
 			flex: 1,
 			flexDirection: 'column',
@@ -251,7 +251,7 @@ export const autocomplete = style({
 
 export const dialog = style({
 	'@layer': {
-		recipes: {
+		components: {
 			display: 'flex',
 			flex: 1,
 			flexDirection: 'column',
@@ -264,7 +264,7 @@ export const dialog = style({
 
 export const inputRow = style({
 	'@layer': {
-		recipes: {
+		components: {
 			alignItems: 'center',
 			backgroundColor: vars.color.surface.overlay,
 			borderRadius: vars.radius.surface,
@@ -280,7 +280,7 @@ export const inputRow = style({
 
 export const field = style({
 	'@layer': {
-		recipes: {
+		components: {
 			inlineSize: '100%',
 			minInlineSize: 0,
 		},
@@ -289,7 +289,7 @@ export const field = style({
 
 export const input = style({
 	'@layer': {
-		recipes: {
+		components: {
 			// Hide the native WebKit clear button so the ESC keycap is the only close control.
 			selectors: {
 				'&::-webkit-search-cancel-button': {
@@ -302,7 +302,7 @@ export const input = style({
 
 export const close = style({
 	'@layer': {
-		recipes: {
+		components: {
 			flexShrink: 0,
 		},
 	},
@@ -310,7 +310,7 @@ export const close = style({
 
 export const results = style({
 	'@layer': {
-		recipes: {
+		components: {
 			flex: 1,
 			minBlockSize: 0,
 			overflowY: 'auto',
@@ -327,7 +327,7 @@ export const results = style({
 
 export const resultSummary = style({
 	'@layer': {
-		recipes: {
+		components: {
 			paddingBlock: vars.space.sp12,
 			paddingInline: vars.space.sp16,
 		},
@@ -336,7 +336,7 @@ export const resultSummary = style({
 
 export const result = style({
 	'@layer': {
-		recipes: {
+		components: {
 			':hover': {
 				backgroundColor: vars.color.background.neutral.subtle.hover,
 			},
@@ -368,7 +368,7 @@ export const result = style({
 // Nested rows move their block padding inside the rule so it runs unbroken between rows.
 export const nestedItem = style({
 	'@layer': {
-		recipes: {
+		components: {
 			paddingBlock: 0,
 		},
 	},
@@ -376,7 +376,7 @@ export const nestedItem = style({
 
 export const pageTitle = style({
 	'@layer': {
-		recipes: {
+		components: {
 			fontWeight: vars.font.weight.emphasis,
 		},
 	},
@@ -384,7 +384,7 @@ export const pageTitle = style({
 
 export const breadcrumbs = style({
 	'@layer': {
-		recipes: {
+		components: {
 			alignItems: 'center',
 			color: vars.color.text.secondary,
 			display: 'inline-flex',
@@ -395,7 +395,7 @@ export const breadcrumbs = style({
 
 export const breadcrumbChevron = style({
 	'@layer': {
-		recipes: {
+		components: {
 			color: vars.color.text.secondary,
 			flexShrink: 0,
 		},
@@ -404,7 +404,7 @@ export const breadcrumbChevron = style({
 
 export const nestedResult = style({
 	'@layer': {
-		recipes: {
+		components: {
 			borderInlineStart: `1px solid ${vars.color.border.decorative}`,
 			marginInlineStart: vars.space.sp8,
 			paddingBlock: vars.space.sp8,
@@ -415,7 +415,7 @@ export const nestedResult = style({
 
 export const headingHash = style({
 	'@layer': {
-		recipes: {
+		components: {
 			color: vars.color.text.secondary,
 			fontWeight: vars.font.weight.emphasis,
 		},
@@ -424,7 +424,7 @@ export const headingHash = style({
 
 export const headingContent = style({
 	'@layer': {
-		recipes: {
+		components: {
 			fontWeight: vars.font.weight.emphasis,
 		},
 	},
@@ -432,7 +432,7 @@ export const headingContent = style({
 
 export const textContent = style({
 	'@layer': {
-		recipes: {
+		components: {
 			color: vars.color.text.secondary,
 		},
 	},
@@ -440,7 +440,7 @@ export const textContent = style({
 
 export const highlight = style({
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: 'transparent',
 			color: vars.color.text.primary,
 			textDecoration: 'underline',
@@ -451,7 +451,7 @@ export const highlight = style({
 
 export const empty = style({
 	'@layer': {
-		recipes: {
+		components: {
 			paddingBlock: vars.space.sp24,
 			paddingInline: vars.space.sp16,
 			textAlign: 'center',

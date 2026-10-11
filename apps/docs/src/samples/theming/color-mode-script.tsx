@@ -1,4 +1,3 @@
-import { rootClassName } from '@luke-ui/react/theme';
 import { themeClassName } from '@luke-ui/theme-tactile';
 import type { PropsWithChildren } from 'react';
 
@@ -18,7 +17,7 @@ export function RootLayout({ children }: PropsWithChildren) {
 			<head>
 				<script dangerouslySetInnerHTML={{ __html: colorModeScript }} />
 			</head>
-			<body className={rootClassName}>{children}</body>
+			<body>{children}</body>
 		</html>
 	);
 }

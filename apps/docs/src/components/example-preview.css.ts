@@ -12,7 +12,7 @@ const previewCardResizable = `${PREVIEW_CARD_CONTAINER} (inline-size >= ${MIN_RE
 // Name the card container so shell queries keep measuring the root.
 export const previewGroup = style({
 	'@layer': {
-		recipes: {
+		components: {
 			containerName: PREVIEW_CARD_CONTAINER,
 			containerType: 'inline-size',
 			display: 'flex',
@@ -25,7 +25,7 @@ export const previewGroup = style({
 // Inline panel styles set `min-width: 0`. Keep the outside strip open.
 globalStyle(`${previewGroup} > [data-panel]:last-child`, {
 	'@layer': {
-		recipes: {
+		components: {
 			'@media': {
 				[DESKTOP_MEDIA_QUERY]: {
 					'@container': {
@@ -41,7 +41,7 @@ globalStyle(`${previewGroup} > [data-panel]:last-child`, {
 
 export const previewCanvas = style({
 	'@layer': {
-		recipes: {
+		components: {
 			containerType: 'inline-size',
 			'@media': {
 				[DESKTOP_MEDIA_QUERY]: {
@@ -58,7 +58,7 @@ export const previewCanvas = style({
 
 export const previewOutside = style({
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: `color-mix(in oklab, ${vars.color.surface.subdued} 50%, transparent)`,
 		},
 	},
@@ -66,7 +66,7 @@ export const previewOutside = style({
 
 export const previewSeparator = style({
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: vars.color.border.decorative,
 			cursor: 'col-resize',
 			display: 'none',
@@ -89,7 +89,7 @@ export const previewSeparator = style({
 
 export const previewGripState = style({
 	'@layer': {
-		recipes: {
+		components: {
 			borderColor: vars.color.border.decorative,
 			boxShadow: vars.depth.resting,
 			selectors: {

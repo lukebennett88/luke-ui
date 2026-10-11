@@ -7,10 +7,11 @@ import { vars } from '../../theme/contract.css.js';
  *
  * `overlayMotion` builds the whole motion block for a React Aria overlay element: the rest
  * transition, the hidden values on `[data-entering]` and `[data-exiting]`, and the exit transition
- * on `[data-exiting]`. Under `prefers-reduced-motion: reduce` it resets `transition: none` on the
- * class and on each state selector. Those selectors set their own `transition`, so they outrank the
- * plain class rule and keep animating when only the class rule is reset. Generating the block here
- * keeps that repetition from being forgotten at a call site.
+ * on `[data-exiting]`. Under `prefers-reduced-motion: reduce` an overlay keeps its opacity fade and
+ * loses its movement: the transitions cover only `opacity`, and both state selectors set
+ * `translate: none`. An overlay that does not fade gets `transition: none`. `[data-exiting]` sets
+ * its own `transition`, so it outranks the plain class rule and needs its own reduced-motion value.
+ * Generating the block here keeps that repetition from being forgotten at a call site.
  *
  * The docs app keeps its own copy of this helper in `apps/docs/src/lib/overlay-motion.ts`, because
  * it cannot import this private module. The two copies share one API. The docs copy adds `pseudo`,
@@ -21,20 +22,14 @@ type OverlayRule = Omit<StyleRule, 'transition'>;
 type Selectors = NonNullable<StyleRule['selectors']>;
 type MediaRules = NonNullable<StyleRule['@media']>;
 
-// The value types are aliases rather than interfaces. A recipe config that infers its type from
-// `overlayMotion` can inline an alias in its declaration file, but it cannot name a private
-// interface from this module.
+// The hidden values type is an alias rather than an interface. A recipe config that infers its
+// type from `overlayMotion` can inline an alias in its declaration file, but it cannot name a
+// private interface from this module.
 
 /** The values an overlay animates from on enter and to on exit. */
 type OverlayHiddenValues = {
 	opacity?: 0;
 	translate?: string;
-};
-
-/** The values a reduced-motion overlay holds in place of `OverlayHiddenValues`. */
-type OverlayVisibleValues = {
-	opacity?: 1;
-	translate?: 'none';
 };
 
 /**
@@ -44,7 +39,10 @@ type OverlayVisibleValues = {
 type KnownKeysOnly<Rule> = Record<Exclude<keyof Rule, keyof OverlayRule>, never>;
 
 interface OverlayMotionOptions<Rule extends OverlayRule> {
-	/** The values the overlay holds while hidden. Reduced motion shows `opacity: 1` and `translate: none`. */
+	/**
+	 * The values the overlay holds while hidden. Reduced motion keeps `opacity` and replaces
+	 * `translate` with `none`.
+	 */
 	hidden: OverlayHiddenValues;
 	/** The CSS properties that transition between hidden and visible. */
 	properties: ReadonlyArray<string>;
@@ -88,7 +86,7 @@ function mergeRules<Generated extends Record<string, object>>(
 
 /**
  * A complete style rule for an overlay element, with motion applied to `rule`. Entry and exit use
- * the overlay duration roles, and reduced motion turns the transition off. The caller's
+ * the overlay duration roles. Reduced motion keeps the opacity fade and drops movement. The caller's
  * `selectors` and `@media` entries are merged into the generated ones, and declaring the same
  * property twice on one selector or media query throws, so no declaration is lost silently.
  *
@@ -101,10 +99,6 @@ export function overlayMotion<const Rule extends OverlayRule>({
 	properties,
 	rule,
 }: OverlayMotionOptions<Rule>) {
-	const visible: OverlayVisibleValues = {
-		...(hidden.opacity === undefined ? {} : { opacity: 1 }),
-		...(hidden.translate === undefined ? {} : { translate: 'none' }),
-	};
 	const enterTransition = transitionFor(
 		properties,
 		vars.motion.duration.enter,
@@ -119,12 +113,19 @@ export function overlayMotion<const Rule extends OverlayRule>({
 		'&[data-entering]': hidden,
 		'&[data-exiting]': { ...hidden, transition: exitTransition },
 	} satisfies Selectors;
+	const fades = hidden.opacity !== undefined;
+	const reducedEnterTransition = fades
+		? transitionFor(['opacity'], vars.motion.duration.enter, vars.motion.easing.standard)
+		: 'none';
+	const reducedExitTransition = fades
+		? transitionFor(['opacity'], vars.motion.duration.exit, vars.motion.easing.exit)
+		: 'none';
 	const generatedMedia = {
 		'(prefers-reduced-motion: reduce)': {
-			transition: 'none',
+			transition: reducedEnterTransition,
 			selectors: {
-				'&[data-entering]': { ...visible, transition: 'none' },
-				'&[data-exiting]': { ...visible, transition: 'none' },
+				'&[data-entering]': { translate: 'none' },
+				'&[data-exiting]': { transition: reducedExitTransition, translate: 'none' },
 			},
 		},
 	} satisfies MediaRules;

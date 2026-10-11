@@ -1,4 +1,8 @@
-@layer reset, base, recipes, utilities;
+/*
+ * One order for Tailwind and Luke UI layers, before any import. Preflight lands in `base` below Luke
+ * UI, and Tailwind utilities and docs-owned `components` styles land above it.
+ */
+@layer theme, base, luke-ui, components, utilities;
 
 @import '@luke-ui/react/stylesheet.css';
 @import '@luke-ui/theme-paper/stylesheet.css';
@@ -24,9 +28,11 @@ code > * {
  * Bridge Fumadocs structural colour variables to Luke UI stable tokens for the
  * Fumadocs UI components the docs still render: the type table and its
  * collapsible, and the Tailwind classes the example, icon gallery, and token
- * widgets use. Status and diff variables remain Fumadocs-owned.
+ * widgets use. Status and diff variables remain Fumadocs-owned. The variables resolve on the root
+ * and again on each colour-mode scope, so a nested scope bridges its own token values.
  */
-.luke-ui-theme {
+:root,
+[data-color-mode] {
 	--color-fd-background: var(--luke-color-surface-base);
 	--color-fd-foreground: var(--luke-color-text-primary);
 	--color-fd-muted: var(--luke-color-surface-subdued);

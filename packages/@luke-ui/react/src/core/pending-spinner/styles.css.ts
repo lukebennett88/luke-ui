@@ -3,17 +3,11 @@ import { recipe } from '../styles/recipe.js';
 import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
 
 // Both recipes fade opacity on the feedback role so the spinner and the content it covers
-// cross-fade. Reduced motion turns the fade off.
+// cross-fade. A fade is not movement, so it stays under reduced motion.
 const pendingFade = {
 	transitionDuration: vars.motion.duration.feedback,
 	transitionProperty: 'opacity',
 	transitionTimingFunction: vars.motion.easing.standard,
-} as const;
-
-const reducedMotionFade = {
-	'(prefers-reduced-motion: reduce)': {
-		transition: 'none',
-	},
 } as const;
 
 /**
@@ -31,7 +25,6 @@ export const pendingSpinnerOverlay = recipe({
 			'(forced-colors: active)': {
 				color: 'ButtonText',
 			},
-			...reducedMotionFade,
 		},
 		...spinnerOverlayBase,
 	},
@@ -42,10 +35,7 @@ export const pendingSpinnerOverlay = recipe({
  * cross-fade.
  */
 export const pendingContent = recipe({
-	base: {
-		...pendingFade,
-		'@media': reducedMotionFade,
-	},
+	base: pendingFade,
 	defaultVariants: { isPending: false },
 	variants: {
 		isPending: {

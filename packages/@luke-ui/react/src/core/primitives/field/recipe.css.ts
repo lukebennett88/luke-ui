@@ -2,6 +2,7 @@ import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { iconMaskUrls } from '../../../../.generated/icon-mask-data.js';
 import { vars } from '../../../theme/contract.css.js';
 import { ICON_SIZES } from '../../sizing/icon-sizing.js';
+import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
@@ -108,15 +109,11 @@ const fieldConfig = {
 			font: 'inherit',
 			gap: inlineControlGap,
 			minInlineSize: 0,
+			...pressFeedback,
 			selectors: {
 				[`&${dataDisabledSelector}`]: {
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
-				},
-				// The reset default ring would otherwise paint both this clickable row and the
-				// control; the control alone carries the focus indication.
-				'&[data-focus-visible="true"]': {
-					outline: 'none',
 				},
 			},
 		},

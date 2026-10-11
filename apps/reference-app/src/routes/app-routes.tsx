@@ -4,7 +4,6 @@ import { Heading } from '@luke-ui/react/heading';
 import { Link } from '@luke-ui/react/link';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { rootClassName } from '@luke-ui/react/theme';
 import type { QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import type { RouteObject } from 'react-router';
@@ -89,14 +88,7 @@ function ErrorPage({
 	title: string;
 }) {
 	return (
-		<Stack
-			className={rootClassName}
-			elementType="main"
-			gap="sp16"
-			marginInline="auto"
-			maxInlineSize="32rem"
-			padding="sp32"
-		>
+		<Stack elementType="main" gap="sp16" marginInline="auto" maxInlineSize="32rem" padding="sp32">
 			<title>{title}</title>
 			<Heading level={1} shouldDisableTrim typography="heading3">
 				{title}

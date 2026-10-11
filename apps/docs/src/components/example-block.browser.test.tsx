@@ -328,7 +328,6 @@ test('keeps expanded source collapsible when its typography changes to fit', asy
 	await page.viewport(1000, 800);
 	const source = Array.from({ length: 20 }, () => 'const value = 1;').join('\n');
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = 'luke-ui-theme';
 	root = createRoot(container);
 	act(() => {
 		root?.render(
@@ -499,7 +498,6 @@ async function renderSourcePreview({ withNextControl = false } = {}) {
 	await page.viewport(1000, 800);
 	const source = Array.from({ length: 20 }, () => 'const value = 1;').join('\n');
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = 'luke-ui-theme';
 	root = createRoot(container);
 	act(() => {
 		root?.render(
@@ -530,7 +528,6 @@ async function pressKey(key: string) {
 
 function renderExample(title: string) {
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = 'luke-ui-theme';
 	root = createRoot(container);
 	act(() => {
 		root?.render(
@@ -555,7 +552,6 @@ function renderPreviewHarness({
 	onFirstLayout?: (canvasWidth: number) => void;
 } = {}) {
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = 'luke-ui-theme';
 	container.style.inlineSize = withStickyHeader ? '100%' : `${width}px`;
 	root = createRoot(container);
 	act(() => {
@@ -616,7 +612,6 @@ async function renderExampleBlock({
 	});
 
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = 'luke-ui-theme';
 	container.style.inlineSize = `${width}px`;
 	root = createRoot(container);
 	await act(async () => {

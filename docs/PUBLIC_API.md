@@ -20,7 +20,7 @@ does not document are private.
 | ----------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `@luke-ui/react/<component>`        | A high-level component, its props type, and the companion exports it needs                     |
 | `@luke-ui/react/primitives/<name>`  | Parts for composing a variant of a component                                                   |
-| `@luke-ui/react/theme`              | Runtime only: `breakpoints`, `getThemeClassName`, `rootClassName`, and `vars`                  |
+| `@luke-ui/react/theme`              | Runtime only: `breakpoints`, `getThemeClassName`, and `vars`                                   |
 | `@luke-ui/react/theme/compiler`     | Build time only: `defineTheme`, its input, font, and metrics types, and the three theme errors |
 | `@luke-ui/react/utils`              | Helpers for composing Luke UI output with other props                                          |
 | `@luke-ui/react/provider`           | The application `Provider`                                                                     |

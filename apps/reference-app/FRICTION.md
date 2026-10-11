@@ -19,6 +19,7 @@ Luke UI primitives, React Aria Components (RAC), and app-owned Vanilla Extract (
 | Boolean preferences that save at once | Luke UI `SwitchRoot`, `SwitchLabel`, `SwitchControl`, and `SwitchThumb`. `SwitchRoot` wraps the row, so its `FieldLabel` and `FieldDescription` name and describe the switch with no ids, clicking the label toggles it, and `isReadOnly` holds the value while a save is pending. | Public primitive   |
 | Product theme                         | `defineTheme` with a `ThemeInput`, served by a Vite plugin. Public `vars` style app-owned surfaces, borders, focus, and control chrome.                                                                                                                                            | High-level         |
 | Colour mode and text size             | `data-color-mode` on `<html>` reaches portals. The root font size scales Luke UI's rem-based type and spacing together.                                                                                                                                                            | High-level         |
+| Base styles in portals                | The shared stylesheet styles `<body>`, so dialogs, popovers, and menus portalled into it inherit the theme's text colour and body font with no class.                                                                                                                              | High-level         |
 | Icons                                 | `Provider` with the documented spritesheet URL, and `Icon`.                                                                                                                                                                                                                        | High-level         |
 
 Saved settings, mutations, validation, drafts, upload limits, and fake persistence belong to the
@@ -40,17 +41,6 @@ The profile picture menu uses RAC `MenuTrigger`, `Menu`, `Popover`, and a RAC `B
 trigger to change or remove the picture. App VE styles the circular trigger and menu. Luke UI has no
 public menu composition. The circular trigger is app presentation, not a gap. Owner:
 [#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711).
-
-### Root styles in portals
-
-Dialogs, popovers, and menus need the app's reset and base typography. The app adds the high-level
-`rootClassName` beside its VE class on each RAC `ModalOverlay` and `Popover`. The theming guide says
-"Portals need nothing extra". That applies to theme variables and colour mode on `<html>`, but not
-to `rootClassName`, which the guide applies to the app shell. A body-level portal falls outside that
-shell and renders with browser defaults (serif font, default margins), so every overlay needs the
-class. Owner:
-[#717: Global stylesheet and cascade contract](https://github.com/lukebennett88/luke-ui/issues/717),
-documented through [#686](https://github.com/lukebennett88/luke-ui/issues/686).
 
 ### Client-side routing for links
 

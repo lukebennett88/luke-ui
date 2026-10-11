@@ -6,8 +6,7 @@ import { Link } from '@luke-ui/react/link';
 import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { rootClassName, vars } from '@luke-ui/react/theme';
-import { cx } from '@luke-ui/react/utils';
+import { vars } from '@luke-ui/react/theme';
 import { useIsMutating, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, Link as RouterLink, useLocation } from 'react-router';
@@ -73,7 +72,7 @@ export function SettingsLayout() {
 			<Box
 				backgroundColor="surface.subdued"
 				blockSize="100%"
-				className={cx(rootClassName, styles.shell)}
+				className={styles.shell}
 				display="flex"
 				minBlockSize="100%"
 				overflow="hidden"

@@ -300,7 +300,6 @@ test('the CodeBlock scene has no axe violations', async () => {
 
 function renderCodeBlock(node: ReactNode) {
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = 'luke-ui-theme';
 	root = createRoot(container);
 	rerenderCodeBlock(node);
 }

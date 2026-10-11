@@ -63,9 +63,6 @@ const checkboxConfig = {
 						},
 					},
 				},
-				'(prefers-reduced-motion: reduce)': {
-					transition: 'none',
-				},
 			},
 			// Unchecked, the box is a field part; checked, a solid fill with the control finish. Hover
 			// and pressed change colour, so they stay distinct without materials.

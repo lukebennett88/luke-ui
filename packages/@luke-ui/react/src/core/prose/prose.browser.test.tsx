@@ -61,7 +61,7 @@ test('does not leak space from a nested final block', () => {
 	);
 });
 
-// A nested pre is not covered by the shared reset, so Prose must normalise it itself.
+// The user agent gives `pre` a block margin, so Prose must normalise a nested one itself.
 test('normalises a nested pre margin', () => {
 	const { locator } = render(
 		<Prose>
@@ -78,36 +78,64 @@ test('normalises a nested pre margin', () => {
 	).toBeCloseTo(0, 0);
 });
 
-// Chromium and Safari match `type` case-insensitively, so CSS must not restate A/a or I/i.
-// `proseRecipe` is public, so the scope must ride the recipe class, not the component.
-test('preserves native ordered-list type markers under proseRecipe alone', () => {
+function TypedLists() {
+	return (
+		<>
+			{['1', 'a', 'A', 'i', 'I'].map((type) => (
+				<ol key={type} type={type as '1'}>
+					<li>{type}</li>
+				</ol>
+			))}
+		</>
+	);
+}
+
+const nativeTypedMarkers = ['decimal', 'lower-alpha', 'upper-alpha', 'lower-roman', 'upper-roman'];
+
+/** A `list-style: none` reset below Luke UI, as Tailwind Preflight writes it. */
+function addListReset() {
+	// This file's `document` is a fixture, so reach the page document explicitly.
+	const style = globalThis.document.head.appendChild(globalThis.document.createElement('style'));
+	style.textContent = '@layer base { ol, ul { list-style: none; } }';
+	return style;
+}
+
+test('keeps native typed ordered-list markers under proseRecipe', () => {
 	const { locator } = render(
 		<div className={proseRecipe()}>
-			<ol type="1">
-				<li>1</li>
-			</ol>
-			<ol type="a">
-				<li>a</li>
-			</ol>
-			<ol type="A">
-				<li>A</li>
-			</ol>
-			<ol type="i">
-				<li>i</li>
-			</ol>
-			<ol type="I">
-				<li>I</li>
-			</ol>
+			<TypedLists />
 		</div>,
 	);
 
-	expect(listStyleTypes(locator.element())).toEqual([
-		'decimal',
-		'lower-alpha',
-		'upper-alpha',
-		'lower-roman',
-		'upper-roman',
-	]);
+	expect(listStyleTypes(locator.element())).toEqual(nativeTypedMarkers);
+});
+
+// HTML matches `type` case-insensitively, so only a browser with the `s` selector flag can restore
+// `A` and `I` over a reset. Elsewhere Prose restores `type="1"` and the reset wins for the rest.
+test('restores typed ordered-list markers over a list reset where the s flag is supported', () => {
+	const style = addListReset();
+	try {
+		const { locator } = render(
+			<div className={proseRecipe()}>
+				<TypedLists />
+				<div className="not-prose">
+					<ol type="1">
+						<li>Outside Prose</li>
+					</ol>
+				</div>
+			</div>,
+		);
+		const hasCaseSensitiveSelectors = CSS.supports('selector([type="A" s])');
+
+		expect(listStyleTypes(locator.element())).toEqual([
+			...(hasCaseSensitiveSelectors
+				? nativeTypedMarkers
+				: ['decimal', 'none', 'none', 'none', 'none']),
+			'none',
+		]);
+	} finally {
+		style.remove();
+	}
 });
 
 function margin(element: Element) {
@@ -152,30 +180,59 @@ test('applies Prose rhythm to elements outside a not-prose boundary', () => {
 	expect(margin(query(root, '[data-testid="outside"]'))).toBe('32px');
 });
 
-test('removes Prose margins, list styles, and cell padding inside a not-prose boundary', () => {
-	const { locator } = render(boundaryFixture());
+test('leaves browser defaults inside a not-prose boundary', () => {
+	const { locator } = render(
+		<div>
+			{boundaryFixture()}
+			<div data-testid="reference">
+				<p>Inside.</p>
+				<p data-testid="inside">Second.</p>
+				<ul>
+					<li>One</li>
+					<li data-testid="item">Two</li>
+				</ul>
+				<table>
+					<tbody>
+						<tr>
+							<td>Cell</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>,
+	);
 	const boundary = query(locator.element(), '[data-testid="boundary"]');
+	const reference = query(locator.element(), '[data-testid="reference"]');
 
 	expect(margin(boundary)).toBe('0px');
-	expect(margin(query(boundary, '[data-testid="inside"]'))).toBe('0px');
-	expect(margin(query(boundary, '[data-testid="item"]'))).toBe('0px');
-	expect(margin(query(boundary, 'ul'))).toBe('0px');
-	expect(getComputedStyle(query(boundary, 'ul')).listStyleType).toBe('none');
-	expect(getComputedStyle(query(boundary, 'ul')).paddingInlineStart).toBe('0px');
-	expect(getComputedStyle(query(boundary, 'td')).paddingInlineStart).toBe('0px');
+	for (const selector of ['[data-testid="inside"]', '[data-testid="item"]', 'ul']) {
+		expect(margin(query(boundary, selector))).toBe(margin(query(reference, selector)));
+	}
+	const list = getComputedStyle(query(boundary, 'ul'));
+	const referenceList = getComputedStyle(query(reference, 'ul'));
+	expect(list.listStyleType).toBe(referenceList.listStyleType);
+	expect(list.paddingInlineStart).toBe(referenceList.paddingInlineStart);
+	expect(getComputedStyle(query(boundary, 'td')).paddingInlineStart).toBe(
+		getComputedStyle(query(reference, 'td')).paddingInlineStart,
+	);
 });
 
 test('excludes an element that carries not-prose itself', () => {
 	const { locator } = render(
-		<Prose>
-			<p>Before.</p>
-			<p className="not-prose" data-testid="marked">
-				Marked.
-			</p>
-		</Prose>,
+		<div>
+			<Prose>
+				<p>Before.</p>
+				<p className="not-prose" data-testid="marked">
+					Marked.
+				</p>
+			</Prose>
+			<p data-testid="reference">Reference.</p>
+		</div>,
 	);
 
-	expect(margin(query(locator.element(), '[data-testid="marked"]'))).toBe('0px');
+	expect(margin(query(locator.element(), '[data-testid="marked"]'))).toBe(
+		margin(query(locator.element(), '[data-testid="reference"]')),
+	);
 });
 
 test('keeps the gap after a heading for a not-prose element but not for its descendants', () => {
