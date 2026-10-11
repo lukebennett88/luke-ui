@@ -2,6 +2,7 @@ import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import { descendantDisabledSelector } from '../../styles/input-states.js';
+import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
@@ -59,6 +60,7 @@ const selectConfig = {
 			// a second one where the two disagree.
 			outline: 'none',
 			paddingBlock: 0,
+			...pressFeedback,
 			textAlign: 'start',
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, border-color, box-shadow, color',

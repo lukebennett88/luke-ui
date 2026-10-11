@@ -342,6 +342,7 @@ const comboboxConfig = {
 			// plus room for the trailing chevron.
 			minInlineSize: `calc(20ch + ${COMBOBOX_ACTION_SIZE})`,
 			paddingBlock: 0,
+			...pressFeedback,
 
 			selectors: {
 				'&[data-disabled="true"]': { cursor: 'not-allowed' },

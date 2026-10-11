@@ -122,8 +122,10 @@ A global rule must correct a cross-browser difference or replace a default almos
 overrides, without erasing native structure such as heading sizes, list markers, table spacing, or
 button chrome. Everything else belongs in the component that needs it. A component that renders a
 native element with user agent styles, such as a `<button>`, `<p>`, or `<ul>`, sets the declarations
-it depends on in its own recipe. `Text` zeroes the margins of the elements it renders at zero
-specificity, so `Prose` spacing and utility props still apply. The decision record is
+it depends on in its own recipe. A pressable control also spreads `pressFeedback` from
+`core/styles/press-feedback.ts` for its touch action and tap highlight. `Text` zeroes the margins of
+the elements it renders at zero specificity, so `Prose` spacing and utility props still apply. The
+decision record is
 [research/717-global-stylesheet-contract.md](../research/717-global-stylesheet-contract.md).
 
 Only the native `:focus-visible` pseudo-class draws the global ring. React Aria also sets
