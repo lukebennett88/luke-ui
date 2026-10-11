@@ -9,25 +9,25 @@ published TypeScript surface.
 
 ## Setup
 
-Luke UI ships one static stylesheet for its reset, theme root, recipes, and utilities.
+Luke UI ships one static stylesheet for its global styles, colour-mode scopes, root containment,
+recipes, and utilities. Themes ship separately.
 
 1. Import `@luke-ui/react/stylesheet.css`.
-2. Apply `rootClassName` from `@luke-ui/react/theme` to `<body>`, `<main>`, or an app shell.
-3. Import one bundled theme stylesheet, for example `@luke-ui/react/themes/tactile/stylesheet.css`.
+2. Import one theme stylesheet, for example `@luke-ui/theme-tactile/stylesheet.css`, or a stylesheet
+   compiled with `defineTheme`.
+3. Set the theme's identity class on `<html>`.
 
-The theme stylesheet themes the document from `:root`. It needs no class and no JS. None of these
-steps inject styles at runtime.
+None of these steps inject styles at runtime.
 
 ## Structure
 
 Paths below are relative to `packages/@luke-ui/react/src/`.
 
-| Area                                          | Role                                                                                                                                      |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `core/styles/`                                | Stylesheet graph, layers, reset, theme root, recipe engine, modules registry, utilities, and shared helpers that emit no CSS on their own |
-| Component and primitive folders under `core/` | Colocate `recipe.css.ts` (public) and `styles.css.ts` (private) beside the owner                                                          |
-| `theme/`                                      | Token contract, `defineTheme`, foundations, bundles, and the build pipeline                                                               |
-| `scripts/build-themes.ts`                     | Writes `.generated/themes/<name>/stylesheet.css`, which `vp pack` copies into `dist/`                                                     |
+| Area                                          | Role                                                                                                                                  |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `core/styles/`                                | Stylesheet graph, layers, global styles, recipe engine, modules registry, utilities, and shared helpers that emit no CSS on their own |
+| Component and primitive folders under `core/` | Colocate `recipe.css.ts` (public) and `styles.css.ts` (private) beside the owner                                                      |
+| `theme/`                                      | Token contract, `defineTheme`, foundations, validation, and the build pipeline. `__fixtures__/` holds the visual suite's theme inputs |
 
 Stable entry points:
 
@@ -37,7 +37,8 @@ Stable entry points:
   runtime that components import
 - Layer helpers: `core/styles/layered-style.css.ts`
 - Token contract: `theme/contract.ts`, `theme/contract.css.ts`, and `theme/type-styles.ts`
-- Theme authoring: `theme/define-theme.ts`
+- Theme authoring: `theme/define-theme.ts`, published from `exports/theme/compiler.ts`
+- Theme runtime: `exports/theme.ts`, which must never reach a compiler module
 - Colour pipeline: [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md)
 
 `modules.css.ts` imports every shipped `recipe.css.ts` and `styles.css.ts`, plus primitive and
@@ -48,20 +49,26 @@ ignore source order.
 
 ## Themes
 
-`defineTheme(input)` from `@luke-ui/react/theme` is the sole public theme-authoring surface. It is
-pure and Node-compatible. It normalises a curated `ThemeInput` into static CSS and throws
-`ThemeContrastError` when a pair misses WCAG 2.2 AA contrast. The raw `ThemeFoundation` object and
-`buildTheme` are internal.
+`@luke-ui/react/theme/compiler` is the only theme-authoring entry. `defineTheme(input)` is pure and
+Node-compatible. It validates each input in an `extends` chain, throwing `ThemeValidationError` with
+every issue, then normalises the merged `ThemeInput` into static CSS and throws `ThemeContrastError`
+when a pair misses WCAG 2.2 AA contrast. The raw `ThemeFoundation` object and `buildTheme` are
+internal. `@luke-ui/react/theme` is the runtime entry. Keep it free of theme generation, colour
+solving, Capsize, and Node-only code. `package-exports.test.ts` and the packed-consumer harness
+check its import graph.
 
 Colour tokens come from private 12-step scales and elevation surfaces, then map onto the semantic
 contract. See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for that pipeline.
 
 Type styles are grouped from `font.caption` through `font.display`. Each has five public leaves:
-family, size, weight, line height, and letter spacing. `font.family.code` is a fixed monospace
-stack.
+family, size, weight, line height, and letter spacing. `typeStyleFontRole` in `theme/type-styles.ts`
+maps each style to the body or display font. `font.family.display` is always a literal copy of a
+family, never a `var()`: no generated value references another token. `font.family.code` is a fixed
+monospace stack.
 
 The Capsize trims are private `--luke-internal-font-<style>-*` variables. The theme stylesheet
-writes them, `Text` reads them, and `theme/capsize-trim-vars.ts` names them for both.
+writes them from each style's own font metrics, `Text` reads them, and `theme/capsize-trim-vars.ts`
+names them for both.
 
 Public tokens are theme-dependent semantic values and shared fixed measurements that applications
 demonstrably align with. Component-specific geometry is a private TypeScript constant in
@@ -73,64 +80,132 @@ Author `depth.*` and `controlFinish.*` per mode as final CSS values. Components 
 tokens. They do not branch on theme identity. A component must keep its essential state distinctions
 when every depth and control finish is `none`. The `flat` test appearance checks that.
 
-Bundled themes (`tactile`, `paper`) ship precompiled. Each stylesheet pairs `:where(:root)` with a
-`.luke-ui-theme-<name>` identity class. Apply the bundled `themeClassName` export only when a
-document needs more than one theme at once.
+Tactile and Paper live in `packages/@luke-ui/theme-tactile` and `packages/@luke-ui/theme-paper`.
+Each build compiles its built `./input` into `dist/stylesheet.css`. React's visual suite compiles
+its own copies of their inputs from `theme/__fixtures__/`, so the two may diverge.
 
-Without `data-color-mode`, a themed subtree follows `prefers-color-scheme`. Set
-`data-color-mode="light"` or `data-color-mode="dark"` to force a mode. Nested scopes can override
-it. Every scope also sets native `color-scheme`.
+Generated CSS scopes every rule to `:where(html).luke-ui-theme-<name>`. There is no `:root`
+fallback. The theme-wide and base light rules, and the `prefers-color-scheme: dark` rule, are
+(0,1,0). The explicit rules, `…[data-color-mode='light']` on `<html>` and
+`… [data-color-mode='light']` below it, are (0,2,0), so they beat the media rule and the nearest
+explicit scope wins by inheritance. Every mode rule declares every mode token and sets native
+`color-scheme`. The output is unlayered.
 
-A colour mode scoped below `<html>` does not reach a body-level portal. Set `data-color-mode` on
-`<html>` when a portalled surface must follow an explicit mode.
+`core/styles/global-styles.css.ts` paints `<body>` and repaints each scope below `<body>` with the
+scope's text colour, accent colour, and base surface, because inherited properties would otherwise
+keep the parent's computed values. See [Global styles](#global-styles).
+
+Overlays portal to `<body>`, outside the trigger's scope. `copyScopeColorMode` in
+`core/overlays/scope-color-mode.ts` is a callback ref that copies the trigger's scoped mode onto the
+Select popover, the Combobox popover, and the Combobox tray when the overlay element is created.
+Popovers read the trigger from React Aria's `PopoverContext.triggerRef`. The tray reads the combobox
+input group from `ComboboxInputGroupContext`, because the group inside an open tray sits in the
+tray's own portal.
+
+## Global styles
+
+`core/styles/global-styles.css.ts` is the only module that styles the document. It holds six rules
+in `luke-ui.reset`. Each uses `:where()`, so the selector contributes no specificity.
+Pseudo-elements are invalid inside `:where()`, so the box-sizing rule lists `::before` and `::after`
+outside it and each adds (0,0,1):
+
+| Rule                              | Sets                                                                                          |
+| --------------------------------- | --------------------------------------------------------------------------------------------- |
+| `*, *::before, *::after`          | `box-sizing: border-box`                                                                      |
+| `:root`                           | `container-type: inline-size`                                                                 |
+| `body`                            | `margin: 0`, base surface, text and accent colour, body font, and unitless `line-height: 1.5` |
+| `body [data-color-mode]`          | Base surface, text and accent colour, so a scope repaints with its own mode                   |
+| `button, input, select, textarea` | `font: inherit`, `margin: 0`                                                                  |
+| `:focus-visible`                  | The themed focus ring, with `Highlight` under forced colours                                  |
+
+A global rule must correct a cross-browser difference or replace a default almost every application
+overrides, without erasing native structure such as heading sizes, list markers, table spacing, or
+button chrome. Everything else belongs in the component that needs it. A component that renders a
+native element with user agent styles, such as a `<button>`, `<p>`, or `<ul>`, sets the declarations
+it depends on in its own recipe. A pressable control also spreads `pressFeedback` from
+`core/styles/press-feedback.ts` for its touch action and tap highlight. `Text` zeroes the margins of
+the elements it renders at zero specificity, so `Prose` spacing and utility props still apply. The
+decision record is
+[research/717-global-stylesheet-contract.md](../research/717-global-stylesheet-contract.md).
+
+Only the native `:focus-visible` pseudo-class draws the global ring. React Aria also sets
+`data-focus-visible` on wrappers such as labels and groups, so a recipe that wants a ring from that
+attribute draws it on the element that should show it. Keep exactly one focus indicator per control.
+Remove an `outline: none` only when nothing else would draw a second ring.
 
 ## Cascade layers
 
 All styles live in named CSS cascade layers. Layer order sets cross-layer priority. Specificity and
 source order still decide conflicts within a layer.
 
-| Layer       | Purpose                                                                                     |
-| ----------- | ------------------------------------------------------------------------------------------- |
-| `reset`     | Browser defaults, box sizing, root base colour, body typography, focus, and reduced-motion  |
-| `base`      | Reserved for the consuming app (for example Tailwind Preflight). Luke UI emits nothing here |
-| `recipes`   | All Luke UI component styling, including descendant and combinator selectors                |
-| `utilities` | One-off layout and override escape hatches                                                  |
+| Layer               | Purpose                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| `base`              | Reserved for the consuming app (for example Tailwind Preflight). Luke UI emits nothing here |
+| `luke-ui.reset`     | The global styles                                                                           |
+| `luke-ui.recipes`   | All Luke UI component styling, including descendant and combinator selectors                |
+| `luke-ui.utilities` | `Box` and the other utility props                                                           |
 
-The public stylesheet starts with one combined order statement:
+The public stylesheet starts with one order statement, built from `core/styles/layer-names.ts`:
 
 ```css
-@layer reset, base, recipes, utilities;
+@layer base, luke-ui;
+@layer luke-ui {
+	@layer reset, recipes, utilities;
+}
 ```
 
-The package declares `base` but never writes to it. That pins its rank between `reset` and
-`recipes`. If a consumer's first `@layer base` write creates the layer instead, the browser places
-it last and it beats every component recipe.
+The package declares `base` but never writes to it. That pins it below `luke-ui`. If a consumer's
+first `@layer base` write created the layer instead, the browser would place it last and it would
+beat every component recipe. The build prepends the statement and strips the single-name `@layer`
+statements Vanilla Extract writes per module, so nothing creates a layer before it.
+`stylesheet-contract.browser.test.tsx` checks the built `dist/stylesheet.css`, and
+`layer-order.browser.test.ts` checks precedence in Chromium.
+
+Applications that use Tailwind CSS v4 declare `@layer theme, base, luke-ui, components, utilities;`
+before any import. Without it, import order decides whether Tailwind's `utilities` or `luke-ui`
+comes later. `apps/docs/src/styles/tailwind-integration.browser.test.tsx` checks both import orders,
+with and without the statement, against real Tailwind output.
 
 The docs app uses `@vanilla-extract/css` for docs-owned `.css.ts` files. Its Vite and Vitest configs
 run the Vanilla Extract plugin. Import a generated class from the component or route that applies
-it. The root route applies a `base`-layer class from `src/styles/docs-root.css.ts` to `<body>` for
-the page's flex layout. Docs-owned shell, navigation, search, and theme controls use `recipes`-layer
-classes. Keep docs-owned base styles in `base`, and put intentional component overrides in a higher
-layer. The layer order is declared before imports in `apps/docs/src/styles/app.css`.
+it. The docs app declares the Tailwind order in `apps/docs/src/styles/app.css`. The root route
+applies a `base`-layer class from `src/styles/docs-root.css.ts` to `<body>` for the page's flex
+layout. Docs-owned shell, navigation, search, and theme controls use `components`-layer classes,
+which outrank Luke UI. Docs code never writes to Luke UI's layers.
 
 Author component CSS with one of:
 
-- `recipe()` — component visuals with selection and variants. Styles go in the `recipes` layer.
-- `style()` — one private `recipes` class with no selection (scopes, markers, implementation
+- `recipe()` — component visuals with selection and variants. Styles go in `luke-ui.recipes`.
+- `style()` — one private `luke-ui.recipes` class with no selection (scopes, markers, implementation
   classes).
-- `globalStyleInLayer()` — a global selector in a chosen layer. Use for reset/root rules and for
-  component-owned descendant or combinator selectors that still belong in `recipes`.
+- `globalStyleInLayer()` — a global selector in a chosen Luke UI layer. Use it for the global styles
+  and for component-owned descendant or combinator selectors that still belong in `recipes`.
 
-Authors never name the `recipes` layer. Only `globalStyleInLayer()` takes a layer, and it rejects
-`base`.
+Authors never name the `recipes` layer. Only `globalStyleInLayer()` takes a layer, and it cannot
+target `base`.
 
 Put overrides that must beat recipes in the `utilities` layer. Use `!important` only to beat
-un-layered or inline styles. Under `!important`, lower layers win over higher layers. Loading
-skeleton masks that must stick on wrapped children use `!important` in `recipes` for that reason.
+un-layered or inline styles. Under `!important` the layer order reverses: earlier layers win over
+later ones, and unlayered CSS ranks below every layer. Loading skeleton masks that must stick on
+wrapped children use `!important` in `recipes` for that reason.
 
-Reduced-motion handling belongs near the animation. The global `prefers-reduced-motion` rule lives
-in `reset`, so it cannot disable animations in `recipes` or `utilities`. Add a local
-`@media (prefers-reduced-motion: reduce)` override in any animated recipe.
+## Motion
+
+Each component owns its reduced-motion behaviour. The stylesheet has no global motion rule, so it
+never disables an application's animations. Under `@media (prefers-reduced-motion: reduce)`:
+
+- Keep short non-spatial feedback: colour, border, shadow, and opacity transitions. Do not add a
+  reduced-motion query that only removes them.
+- Remove spatial movement, scaling, pulsing, and looping, or replace it with a non-spatial change.
+  An overlay keeps its fade and loses its movement. Build overlay motion with `overlayMotion` from
+  `core/styles/overlay-motion.ts`, which generates those reduced-motion rules.
+- Keep loading states understandable. `LoadingSpinner` shows a static fixed arc. `LoadingSkeleton`
+  keeps its static placeholder.
+- `ScrollFade`'s scroll-linked animation is exempt, because it tracks scroll position rather than
+  time.
+
+A `[data-entering]` or `[data-exiting]` selector that sets `transition` outranks the plain class
+rule, so restate its reduced-motion value on that selector too.
 
 ## Recipes
 
@@ -278,13 +353,13 @@ Use object notation keyed by breakpoint names. Values cascade from smaller to la
 Breakpoints: `initial` (base), `bp640`, `bp768`, `bp1024`, `bp1280`, and `bp1536`. Import
 `breakpoints` from `@luke-ui/react/theme` when authoring matching `@container` queries outside Box.
 
-Write size queries as `@container`, not `@media`. The theme stylesheet sets
-`container-type: inline-size` on `:where(:root)`, so an unnamed query measures the root's inline
-size. Keep `@media` for environmental conditions such as `prefers-reduced-motion`,
-`prefers-color-scheme`, `prefers-contrast`, `forced-colors`, and `hover`. A container query with no
-container never matches, so the style silently stays at its base value. Do not set `container-type`
-on an element below the root without naming the container: unnamed queries on its descendants would
-start measuring it.
+Write size queries as `@container`, not `@media`. The shared stylesheet sets
+`container-type: inline-size` on `:where(:root)` in `luke-ui.reset`, so an unnamed query measures
+the root's inline size with or without a theme. Keep `@media` for environmental conditions such as
+`prefers-reduced-motion`, `prefers-color-scheme`, `prefers-contrast`, `forced-colors`, and `hover`.
+A container query with no container never matches, so the style silently stays at its base value. Do
+not set `container-type` on an element below the root without naming the container: unnamed queries
+on its descendants would start measuring it.
 
 ### React Aria `render` prop (button primitive)
 

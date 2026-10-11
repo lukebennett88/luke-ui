@@ -2,9 +2,9 @@
  * The pure, dependency-free pieces of the theme prefs logic. `theme-prefs.ts` and
  * `theme-prefs-script.ts` both import from here so the store and the pre-paint head script keep
  * one implementation. This module must keep importing nothing else: `theme-prefs-script.ts` is
- * compiled to a standalone IIFE by `vp pack`, and pulling in `@luke-ui/react/themes/*` here would
- * drag the theme compiler and its CSS into that bundle. `theme-identity-class-names.test.ts` checks
- * `THEME_IDENTITY_CLASS_NAMES` against the real theme packages' `themeClassName`.
+ * compiled to a standalone IIFE by `vp pack`, and an import here would join that inline script.
+ * `theme-identity-class-names.test.ts` checks `THEME_IDENTITY_CLASS_NAMES` against the theme
+ * packages' `themeClassName`.
  */
 
 export type ThemeIdentity = 'paper' | 'tactile';
@@ -39,7 +39,8 @@ export function parseThemePrefs(
 
 /**
  * Sets the identity class and colour mode on `root`. Fumadocs styles key off the `light`/`dark`
- * class; Luke UI keys off `data-color-mode`.
+ * class, so it always gets the resolved mode. Luke UI keys off `data-color-mode`, which is set only
+ * for an explicit choice: without it, the theme follows `prefers-color-scheme` itself.
  */
 export function applyThemePrefs(
 	root: HTMLElement,
@@ -56,6 +57,6 @@ export function applyThemePrefs(
 	}
 	root.classList.toggle('light', colorMode === 'light');
 	root.classList.toggle('dark', colorMode === 'dark');
-	root.dataset.colorMode = colorMode;
-	root.style.colorScheme = colorMode;
+	if (prefs.colorModePreference === 'system') delete root.dataset.colorMode;
+	else root.dataset.colorMode = prefs.colorModePreference;
 }

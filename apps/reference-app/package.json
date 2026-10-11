@@ -15,6 +15,7 @@
 		"test": "vp test run --project=browser"
 	},
 	"dependencies": {
+		"@capsizecss/metrics": "catalog:",
 		"@luke-ui/react": "workspace:*",
 		"@tanstack/react-query": "catalog:",
 		"@vanilla-extract/css": "catalog:",

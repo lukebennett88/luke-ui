@@ -1,16 +1,22 @@
 /**
- * Cascade layer names, ordered from lowest to highest priority.
- *
- * Keep this as a plain `.ts` module. Importing these names from `layers.css.ts` would turn that
- * file into a Vanilla Extract boundary and re-emit its `@layer` declarations. The array order is
- * precedence when `layers.css.ts` calls `globalLayer()`. Do not replace the array with an
- * unordered object as the primary export.
+ * Cascade layer names. Keep this a plain `.ts` module: importing these names from `layers.css.ts`
+ * would make that file a Vanilla Extract boundary and re-emit its `@layer` declarations.
  */
-export const cascadeLayerNames = ['reset', 'base', 'recipes', 'utilities'] as const;
 
-export type CascadeLayerName = (typeof cascadeLayerNames)[number];
+/** Layer names inside the top-level `luke-ui` layer. Array order is precedence, lowest first. */
+export const lukeUiLayerNames = ['reset', 'recipes', 'utilities'] as const;
 
-/** Lookup by name, for example `cascadeLayers.recipes`. */
-export const cascadeLayers = Object.fromEntries(cascadeLayerNames.map((name) => [name, name])) as {
-	[Name in CascadeLayerName]: Name;
-};
+/** The dotted layer name for each Luke UI layer, for example `luke-ui.reset`. */
+export const cascadeLayers = Object.fromEntries(
+	lukeUiLayerNames.map((name) => [name, `luke-ui.${name}`]),
+) as { [Name in (typeof lukeUiLayerNames)[number]]: `luke-ui.${Name}` };
+
+/**
+ * The order statement the build puts at the start of the public stylesheet, so nothing in it can
+ * create a layer earlier. `base` belongs to the consuming application, for example Tailwind
+ * Preflight. Declaring it here ranks it below `luke-ui`. Luke UI never writes to it.
+ */
+export const cascadeLayerOrder = `@layer base, luke-ui;
+@layer luke-ui {
+  @layer ${lukeUiLayerNames.join(', ')};
+}`;

@@ -5,6 +5,7 @@
  */
 
 import type { Oklch } from './color.js';
+import type { ThemeFont, ThemeFontWeights } from './font.js';
 
 /**
  * The complete input for one theme. A foundation is the minimal authored surface: Luke UI
@@ -46,37 +47,11 @@ export interface ThemeFoundation {
 		 */
 		overlay?: number;
 	};
-	/** Typography choices shared by both modes. */
-	typography?: {
-		/**
-		 * Curated Capsize-compatible font-family choice. Applications load non-system font files
-		 * themselves.
-		 * @default 'inter'
-		 */
-		fontFamily?: 'inter' | 'apple-system' | 'dm-sans';
-		/** Font weights for the four theme-controlled weight roles. */
-		fontWeight?: {
-			/**
-			 * Weight for body text.
-			 * @default 400
-			 */
-			body?: number;
-			/**
-			 * Weight for control labels and other dense UI text.
-			 * @default 500
-			 */
-			label?: number;
-			/**
-			 * Weight for headings.
-			 * @default 600
-			 */
-			heading?: number;
-			/**
-			 * Weight for emphasised inline text.
-			 * @default 700
-			 */
-			emphasis?: number;
-		};
+	/** Fonts and weights shared by both modes. */
+	typography: {
+		/** The body font, and the display font when the theme has one. */
+		fonts: { body: ThemeFont; display?: ThemeFont };
+		fontWeight?: ThemeFontWeights;
 	};
 }
 
@@ -175,19 +150,9 @@ interface ThemeDepthFoundation {
 	resting: string;
 }
 
-/** Curated Capsize-compatible font stacks for each font-family choice. */
-export const themeFontFamilyStacks = {
-	'apple-system': "-apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif",
-	'dm-sans': "'DM Sans', system-ui, sans-serif",
-	inter: "'Inter', system-ui, sans-serif",
-} as const;
-
 /** Fixed neutral font stack for code and keyboard input. */
 export const codeFontFamilyStack =
 	"ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
-
-/** Default font-family choice applied when `typography.fontFamily` is omitted. */
-export const defaultFontFamily = 'inter';
 
 /** Default weights for the four weight roles. */
 export const defaultFontWeights = { body: 400, emphasis: 700, heading: 600, label: 500 } as const;

@@ -1,15 +1,19 @@
-import '../../../dist/themes/tactile/stylesheet.css';
 import '../stylesheet.css.js';
-import { afterEach, expect, test } from 'vite-plus/test';
+import { afterEach, beforeEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { mergeProps } from '../../shared/utils/merge-props.js';
 import { breakpoints } from '../../theme/breakpoints.js';
-import { themeClassName as tactileThemeClassName } from '../../theme/bundles/tactile/index.js';
+import { fixtureThemeClassName } from '../test-utils/fixture-themes.js';
 import { createSprinkles } from './utilities.css.js';
 
 const mounted: Array<HTMLElement> = [];
 
+beforeEach(() => {
+	document.documentElement.classList.add(fixtureThemeClassName('tactile'));
+});
+
 afterEach(async () => {
+	document.documentElement.classList.remove(fixtureThemeClassName('tactile'));
 	for (const element of mounted) element.remove();
 	mounted.length = 0;
 	await page.viewport(1024, 800);
@@ -210,7 +214,7 @@ function mount(
 ): HTMLElement {
 	const element = parent.appendChild(document.createElement('div'));
 	mounted.push(element);
-	element.className = `${tactileThemeClassName} ${props.className ?? ''}`;
+	element.className = props.className ?? '';
 	Object.assign(element.style, props.style);
 	for (const [property, value] of Object.entries(props.style ?? {})) {
 		if (property.startsWith('--')) element.style.setProperty(property, String(value));

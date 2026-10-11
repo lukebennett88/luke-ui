@@ -1,22 +1,22 @@
 import { globalLayer } from '@vanilla-extract/css';
-import { cascadeLayerNames } from './layer-names.js';
+import { lukeUiLayerNames } from './layer-names.js';
 
 /**
- * Cascade layers, ordered from lowest to highest priority.
+ * Luke UI's cascade layers, inside the top-level `luke-ui` layer, from lowest to highest priority:
  *
- * - **reset** — Browser defaults, root base colour, body typography, form defaults, focus, and
- *   reduced-motion defaults.
- * - **base** — Reserved for the consuming application (for example Tailwind Preflight). Declared
- *   empty so the first consumer write does not create the layer last and outrank `recipes`.
- * - **recipes** — All Luke UI component styling, including variants, compound styles, and
- *   component-owned descendant or combinator selectors.
- * - **utilities** — One-off overrides.
+ * - **reset** — The global stylesheet: box sizing, root containment, the `<body>` baseline, scoped
+ *   colour-mode repaint, form-control font, and the native focus ring.
+ * - **recipes** — All component styling, including variants, compound styles, and component-owned
+ *   descendant or combinator selectors.
+ * - **utilities** — `Box` and the other utility props.
  *
- * Precedence comes from the order of `cascadeLayerNames`. The build prepends the combined `@layer`
- * order and strips empty `@layer name;` declarations that would reorder layers.
+ * The build prepends `cascadeLayerOrder` from `layer-names.ts` and strips the single-name `@layer`
+ * statements these calls emit, so that statement alone sets the order.
  */
-export const layers = Object.fromEntries(
-	cascadeLayerNames.map((name) => [name, globalLayer(name)]),
-) as { [Name in (typeof cascadeLayerNames)[number]]: ReturnType<typeof globalLayer> };
+const lukeUi = globalLayer('luke-ui');
 
-export type LayerName = keyof typeof layers;
+export type LayerName = (typeof lukeUiLayerNames)[number];
+
+export const layers = Object.fromEntries(
+	lukeUiLayerNames.map((name) => [name, globalLayer({ parent: lukeUi }, name)]),
+) as Record<LayerName, string>;

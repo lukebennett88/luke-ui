@@ -41,7 +41,7 @@ looked visually similar. This is a property of switching generators, not a regre
 token.
 
 Theme output is protected by the contrast, scale, semantic-map, and stylesheet contract unit tests,
-plus the token-board visual captures across bundled themes and modes. A generator change that
+plus the token-board visual captures across the fixture themes and modes. A generator change that
 repaints colours should show up there and in visual review. The pre-v2 output is recoverable from
 git history (commit `cef0076`) and is not committed.
 

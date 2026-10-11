@@ -45,8 +45,9 @@ every element.
 Properties passed to `Box` and the other layout components accept either a direct value or an object
 keyed by breakpoint.
 
-Responsive values resolve against the nearest ancestor size container. Luke UI uses the document
-root as the fallback. Use `Container` when descendants should respond to a nearer content area.
+Responsive values resolve against the nearest ancestor size container. Luke UI's stylesheet makes
+the document root a size container, so the root is the fallback, with or without a theme. Unlayered
+CSS can override it. Use `Container` when descendants should respond to a nearer content area.
 Component-responsive styles always query an ancestor. They do not query the component itself.
 
 Portalled content leaves containers around its trigger and resolves against the nearest size

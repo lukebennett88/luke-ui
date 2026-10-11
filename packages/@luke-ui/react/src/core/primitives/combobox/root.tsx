@@ -1,10 +1,12 @@
 import type { JSX, Ref } from 'react';
+import { useRef } from 'react';
 import type { Key, ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import { ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { rootIdProps } from '../root-id.js';
+import { ComboboxInputGroupContext } from './input-group-context.js';
 import { ComboboxSizeProvider } from './size-context.js';
 import type { ComboboxSize } from './styles.css.js';
 import { comboboxRecipe } from './styles.css.js';
@@ -124,20 +126,24 @@ export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX
 		validationBehavior: comboboxProps.validationBehavior,
 	};
 
+	const inputGroupRef = useRef<HTMLDivElement>(null);
+
 	return (
-		<ComboboxSizeProvider size={size}>
-			<ComboboxValidationProvider value={validationContextValue}>
-				<RacComboBox
-					{...comboboxProps}
-					{...rootIdProps(id, inputId)}
-					allowsEmptyCollection={allowsEmptyCollection}
-					className={composeRenderProps(className, (renderedClassName) => {
-						return comboboxRecipe().root({ className: renderedClassName });
-					})}
-					menuTrigger={menuTrigger}
-					ref={ref}
-				/>
-			</ComboboxValidationProvider>
-		</ComboboxSizeProvider>
+		<ComboboxInputGroupContext.Provider value={inputGroupRef}>
+			<ComboboxSizeProvider size={size}>
+				<ComboboxValidationProvider value={validationContextValue}>
+					<RacComboBox
+						{...comboboxProps}
+						{...rootIdProps(id, inputId)}
+						allowsEmptyCollection={allowsEmptyCollection}
+						className={composeRenderProps(className, (renderedClassName) => {
+							return comboboxRecipe().root({ className: renderedClassName });
+						})}
+						menuTrigger={menuTrigger}
+						ref={ref}
+					/>
+				</ComboboxValidationProvider>
+			</ComboboxSizeProvider>
+		</ComboboxInputGroupContext.Provider>
 	);
 }

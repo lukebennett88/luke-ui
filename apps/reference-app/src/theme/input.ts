@@ -1,4 +1,5 @@
-import type { ThemeInput } from '@luke-ui/react/theme';
+import appleSystemMetrics from '@capsizecss/metrics/appleSystem';
+import type { ThemeInput } from '@luke-ui/react/theme/compiler';
 
 /** Quiet neutrals and a restrained purple accent. */
 export const referenceThemeInput = {
@@ -24,5 +25,15 @@ export const referenceThemeInput = {
 	},
 	name: 'reference',
 	radius: { control: 6, surface: 8 },
-	typography: { fontFamily: 'apple-system', fontWeight: { heading: 600, label: 500 } },
+	typography: {
+		fonts: {
+			// A system stack resolves to a different font on each platform. The metrics describe
+			// Apple's system font, so trims are exact only where that font renders.
+			body: {
+				family: "-apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif",
+				metrics: appleSystemMetrics,
+			},
+		},
+		fontWeight: { heading: 600, label: 500 },
+	},
 } satisfies ThemeInput;

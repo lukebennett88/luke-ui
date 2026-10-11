@@ -558,39 +558,37 @@ Source: [src/exports/text.ts](../packages/@luke-ui/react/src/exports/text.ts). E
 ### `@luke-ui/react/theme`
 
 Source: [src/exports/theme.ts](../packages/@luke-ui/react/src/exports/theme.ts). Entrypoint:
-**retain**.
+**retain**, runtime only. #715 moved every authoring export to `@luke-ui/react/theme/compiler` and
+made `getThemeClassName` public.
 
-1.0 allowlist only. Useful helpers can return in a minor when they have a concrete consumer use.
+| Symbol              | Decision | Independent consumer use                                                     |
+| ------------------- | -------- | ---------------------------------------------------------------------------- |
+| `breakpoints`       | retain   | Author container queries with the same 640/768/1024/1280/1536 px thresholds. |
+| `getThemeClassName` | retain   | Derive an authored theme's identity class for `<html>` at runtime.           |
+| `rootClassName`     | retain   | Apply scoped reset and base typography to the application root.              |
+| `vars`              | retain   | Style app-owned content using typed semantic CSS custom properties.          |
+
+### `@luke-ui/react/theme/compiler`
+
+Source: [src/exports/theme/compiler.ts](../packages/@luke-ui/react/src/exports/theme/compiler.ts).
+Entrypoint: **retain**, build time only (Node 24 or later). Added by #715.
 
 | Symbol                 | Decision | Independent consumer use                                                        |
 | ---------------------- | -------- | ------------------------------------------------------------------------------- |
-| `ThemeInput`           | retain   | Type a curated theme definition before compiling it.                            |
-| `breakpoints`          | retain   | Author container queries with the same 640/768/1024/1280/1536 px thresholds.    |
-| `defineTheme`          | retain   | Compile an app-authored theme to static CSS with contrast validation.           |
-| `rootClassName`        | retain   | Apply scoped reset and base typography to the application root.                 |
+| `defineTheme`          | retain   | Compile an app-authored theme to static CSS with validation.                    |
+| `ThemeInput`           | retain   | Type a fresh theme definition before compiling it.                              |
+| `ExtendingThemeInput`  | retain   | Type a theme that extends another theme's input.                                |
+| `ThemeFont`            | retain   | Type a font role: a family stack and its Capsize metrics.                       |
+| `FontMetrics`          | retain   | Type full Capsize metrics without installing `@capsizecss/core`.                |
+| `ThemeValidationError` | retain   | Catch and report every invalid or missing input field at once.                  |
 | `ThemeContrastError`   | retain   | Catch and report failed contrast pairs from theme compilation.                  |
 | `ThemeGenerationError` | retain   | Catch an unachievable semantic colour family and inspect role/mode diagnostics. |
-| `vars`                 | retain   | Style app-owned content using typed semantic CSS custom properties.             |
 
-### `@luke-ui/react/themes/paper`
+### `@luke-ui/react/themes/*`
 
-Source: [src/exports/themes/paper.ts](../packages/@luke-ui/react/src/exports/themes/paper.ts).
-Entrypoint: **retain**.
-
-| Symbol           | Decision | Independent consumer use                                                                               |
-| ---------------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `theme`          | retain   | Extend the bundled Paper authoring input in an authored theme (#715 owns the future location).         |
-| `themeClassName` | retain   | Apply bundled Paper to a subtree without importing the theme compiler (#715 owns the future location). |
-
-### `@luke-ui/react/themes/tactile`
-
-Source: [src/exports/themes/tactile.ts](../packages/@luke-ui/react/src/exports/themes/tactile.ts).
-Entrypoint: **retain**.
-
-| Symbol           | Decision | Independent consumer use                                                                                 |
-| ---------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `theme`          | retain   | Extend the bundled Tactile authoring input in an authored theme (#715 owns the future location).         |
-| `themeClassName` | retain   | Apply bundled Tactile to a subtree without importing the theme compiler (#715 owns the future location). |
+Entrypoint: **removed** by #715. Tactile and Paper ship as `@luke-ui/theme-tactile` and
+`@luke-ui/theme-paper`. Each exports `themeClassName` from `.`, its input as `theme` from `./input`,
+and `./stylesheet.css` and `./fonts.css`.
 
 ### `@luke-ui/react/track`
 
@@ -630,13 +628,12 @@ These are the five non-JavaScript entries in `package.json`. Together with the 4
 above, they account for the whole exports map. The JavaScript inventory contains 196 symbol
 occurrences, including intentional field/primitive re-exports.
 
-| Public path                                    | Decision | Independent consumer use and contract                                                                                                                          |
-| ---------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@luke-ui/react/package.json`                  | retain   | Inspect package metadata, version and declared entrypoints in tooling.                                                                                         |
-| `@luke-ui/react/stylesheet.css`                | retain   | Load the reset, theme root, component recipes and utilities once. CSS remains static and marked as a side effect. Global reset/layer redesign belongs to #717. |
-| `@luke-ui/react/spritesheet.svg`               | retain   | Obtain the URL supplied to `Provider.spritesheetHref`. Symbol IDs follow the exported `iconNames` set. Preserve the external-asset architecture from #712.     |
-| `@luke-ui/react/themes/paper/stylesheet.css`   | retain   | Load Paper's complete light/dark token values without theme-authoring JS. Future theme packaging belongs to #715.                                              |
-| `@luke-ui/react/themes/tactile/stylesheet.css` | retain   | Load Tactile's complete light/dark token values without theme-authoring JS. Future theme packaging belongs to #715.                                            |
+| Public path                              | Decision | Independent consumer use and contract                                                                                                                          |
+| ---------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@luke-ui/react/package.json`            | retain   | Inspect package metadata, version and declared entrypoints in tooling.                                                                                         |
+| `@luke-ui/react/stylesheet.css`          | retain   | Load the reset, theme root, component recipes and utilities once. CSS remains static and marked as a side effect. Global reset/layer redesign belongs to #717. |
+| `@luke-ui/react/spritesheet.svg`         | retain   | Obtain the URL supplied to `Provider.spritesheetHref`. Symbol IDs follow the exported `iconNames` set. Preserve the external-asset architecture from #712.     |
+| `@luke-ui/react/themes/*/stylesheet.css` | removed  | #715 moved Tactile and Paper to `@luke-ui/theme-tactile/stylesheet.css` and `@luke-ui/theme-paper/stylesheet.css`.                                             |
 
 There are no wildcard exports, root barrel, engine-authoring entrypoints or deep `core/*` imports.
 Only declared map paths are imports. `dist`, `skills`, `README.md` and `LICENSE` are published
@@ -1000,44 +997,26 @@ selection annotation. Recipes with no selectable variants (`blockquoteRecipe`, `
 `proseRecipe`) do not export empty `*RecipeVariants` types. Generators keep a new recipe private
 until an independent use is recorded.
 
-## Theme authoring and bundled-theme contracts
+## Theme authoring and theme package contracts
 
-Retain only the theme 1.0 allowlist above. Spacing/type catalogues, radius helpers,
-`getThemeClassName`, and theme-input helper types stay package-private until a concrete consumer use
-lands in a minor. #715 owns redesign of authoring and bundled-theme locations. #716 owns token
-taxonomy. Record the existing contracts here without expanding this PR into those projects.
+#715 settled authoring and theme packaging. Its decision record,
+[715-theme-authoring-contract.md](./715-theme-authoring-contract.md), supersedes this section's
+earlier notes. In summary:
 
-`defineTheme` is pure/Node-compatible and returns complete static CSS. It still accepts extending
-themes at runtime; `ExtendingThemeInput` is not a named public export. A fresh ThemeInput requires
-name and color.accent. Extending inputs require name/extends and inherit omitted values. Names are
-kebab-case and generate `luke-ui-theme-${name}`. Theme inheritance merges per-role/per-mode values,
-never the identity name. Cycles fail. Colour inputs accept a string or partial light/dark pair.
-Supported source formats are hex or non-alpha OKLCH, except backdrop is verbatim CSS and may have
-alpha. A single accent is adapted for each mode; explicit authored mode colours remain distinct.
-
-| Authoring section     | Meaningful defaults and retained choices                                                                                                                                                                                                                                                       |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `color`               | Required accent for a fresh theme. Optional neutral or neutralStyle cool/neutral/warm (neutral default). Background defaults to the resolved neutral canvas. Info/success/warning/danger/focus use curated mode defaults when omitted. Backdrop defaults black OKLCH alpha 0.2 light/0.4 dark. |
-| `depth`               | Optional per-mode partial DepthLadder (recessed, resting, raised, floating, overlay). Omitted rungs use curated subtle shadows. Defaults are private, not reusable authoring constants.                                                                                                        |
-| `actionControlFinish` | Optional per-mode partial ControlFinish (recessed, resting, raised). Omitted rungs use none.                                                                                                                                                                                                   |
-| `radius`              | base=4 px, multiplier=1. Generated detail/control/surface/overlay use base × 1/2/3/4, rounded, with explicit rung overrides. Full remains 9999 px and is not authored.                                                                                                                         |
-| `typography`          | fontFamily inter (default), apple-system or dm-sans. Weight roles body=400, label=500, heading=600, emphasis=700 by default; each may be authored. Semantic styles/metric scale and code-family stack are fixed.                                                                               |
-| `extends`             | Inherits omitted colour/material/radius/typography keys from the base; outer name stays required. Both bundled `theme` exports are usable bases.                                                                                                                                               |
+- Authoring lives on `@luke-ui/react/theme/compiler`. `@luke-ui/react/theme` stays runtime only.
+- A fresh `ThemeInput` requires `name`, `color.accent`, and `typography.fonts.body`. Fonts are
+  `{ family, metrics }` roles, `body` and an optional `display`, replaced whole on inheritance.
+- `ThemeValidationError` reports each issue with the input that contains it and a dot path.
+- Generated CSS scopes every rule to `:where(html).luke-ui-theme-<name>`, with no `:root` fallback.
+  Nested explicit colour-mode scopes are supported. Nested identities are not.
+- Tactile and Paper are separate packages that use only these public entries.
 
 `ThemeContrastError` exposes failures and optional inheritance on the class instance.
 `ThemeContrastFailure` and `ThemeInheritance` are not named public exports. `ThemeGenerationError`
 exposes role, mode, bestAttempt and partial diagnostics when a family cannot satisfy generation.
 
 `rootClassName` applies `luke-ui-theme luke-ui-reset`, a scoped reset plus base typography with no
-theme identity. Retain these concrete class names as the root contract. Bundled themes export
-`themeClassName` for multi-theme documents. Authored multi-theme identity via `getThemeClassName` is
-not part of the 1.0 public surface.
-
-Bundled stylesheet scopes combine `:where(:root)` and `.luke-ui-theme-paper` or
-`.luke-ui-theme-tactile`. Default mode follows prefers-color-scheme; data-color-mode=light/dark
-forces a mode, including native color-scheme. Nested identity/mode scopes are supported. Body
-portals need mode on html to inherit an explicit mode. Retain stylesheet/class/authoring exports
-now; #715 owns any package move.
+theme identity. Retain these concrete class names as the root contract until #717.
 
 ### Token paths and CSS variable names
 
@@ -1087,7 +1066,7 @@ becomes public from its use in CSS.
 | `utilities` layer                                             | retain   | Highest normal-priority utility escape hatch.                                                                                           |
 | `@layer reset, base, recipes, utilities`                      | retain   | One combined initial order statement fixes normal cascade precedence. Important declarations reverse layer precedence according to CSS. |
 | `luke-ui-theme`, `luke-ui-reset`                              | retain   | Concrete scoped root classes returned together by rootClassName.                                                                        |
-| `luke-ui-theme-${name}`                                       | retain   | Theme identity scopes. Bundled themes export `themeClassName`; authored helpers stay private.                                           |
+| `luke-ui-theme-${name}`                                       | retain   | Theme identity on `<html>`. Theme packages export `themeClassName`, and `getThemeClassName` derives it for an authored theme.           |
 | `data-color-mode=light/dark`                                  | retain   | Explicit theme mode selection.                                                                                                          |
 | `SelectIndicator[data-open]`                                  | retain   | Documented primitive indicator affordance for an app replacing the chevron.                                                             |
 | Generated classes and other undocumented DOM/state attributes | private  | No independent stability promise. Use documented props, recipes, vars and primitive parts.                                              |
@@ -1098,58 +1077,58 @@ These names do not appear in any current public entrypoint. The decisions explai
 pre-1.0 removals and why package-internal reuse is insufficient. Implementation modules may still
 export names internally; that does not publish them through the package map.
 
-| Symbol or rejected public path                                         | Decision             | Reason / supported consumer path                                                                                                                          |
-| ---------------------------------------------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `checkboxRecipe`                                                       | private              | Requires checkbox-owned selection/anatomy. Use CheckboxField or its primitives.                                                                           |
-| `CheckboxRecipeVariants`                                               | private              | Selection type follows the private recipe; public size is on CheckboxFieldProps/CheckboxRootProps.                                                        |
-| `switchRecipe`                                                         | private              | Requires switch-owned selection/anatomy. Use SwitchField or its primitives.                                                                               |
-| `SwitchRecipeVariants`                                                 | private              | Selection type follows the private recipe; public size is on SwitchFieldProps/SwitchRootProps.                                                            |
-| `fieldRecipe`                                                          | private              | Requires field label/message/icon anatomy and state. Use Field or its parts.                                                                              |
-| `FieldRecipeVariants`                                                  | private              | Follows the private field recipe; use FieldProps or the named part Props.                                                                                 |
-| `loadingSpinnerRecipe`                                                 | private              | Couples geometry, animation and child overlay anatomy. Use LoadingSpinner.                                                                                |
-| `LoadingSpinnerRecipeVariants`                                         | private              | Follows private spinner recipe; use LoadingSpinnerProps to type consumer settings.                                                                        |
-| `visuallyHiddenRecipe`                                                 | private/absent       | Replaced by public `visuallyHiddenStyle` for static application-owned markup. Use `VisuallyHidden` for component behaviour and focus reveal.              |
-| `BlockquoteRecipeVariants`                                             | private              | No selectable variants; recipe alone is enough.                                                                                                           |
-| `KbdRecipeVariants`                                                    | private              | No selectable variants; recipe alone is enough.                                                                                                           |
-| `ProseRecipeVariants`                                                  | private              | No selectable variants; recipe alone is enough.                                                                                                           |
-| `@luke-ui/react/styles`                                                | private/absent       | Layout via Box; createSprinkles/SprinklesProps stay package-internal.                                                                                     |
-| `createSprinkles` / `SprinklesProps`                                   | private              | Package-internal utility runtime for Box and layout components.                                                                                           |
-| `getThemeClassName`                                                    | private              | Bundled themes export themeClassName; authored multi-theme helper deferred.                                                                               |
-| `spaceScale` / `SpaceStep` / `typeStyles` / `TypeStyle`                | private              | No concrete 1.0 consumer use beyond Box/Text internals.                                                                                                   |
-| `fontWeightRoles` / `FontWeightRole`                                   | private              | No concrete 1.0 consumer use.                                                                                                                             |
-| `deriveConcentricRadius` / `deriveNestedRadius`                        | private              | No public consumer surface; helpers stay package-internal.                                                                                                |
-| `ThemeContrastFailure` / `ThemeInheritance`                            | private              | Readable on ThemeContrastError properties without named exports.                                                                                          |
-| `ColorInput` / `ControlFinish` / `DepthLadder` / `ExtendingThemeInput` | private              | Nested under ThemeInput / defineTheme without named exports.                                                                                              |
-| `gridRecipe`                                                           | private              | Only establishes Grid's own display treatment; app markup can use display:grid.                                                                           |
-| `GridRecipeVariants`                                                   | private              | Follows the private display-only recipe; use GridProps.                                                                                                   |
-| `aspectRatioRecipe`                                                    | private              | Depends on direct media-child rules. Use AspectRatio.                                                                                                     |
-| `AspectRatioRecipeVariants`                                            | private              | Follows the private media-frame recipe; use AspectRatioProps.                                                                                             |
-| `trackRecipe`                                                          | private              | Requires centre/rail/root anatomy. Use Track's rail content API.                                                                                          |
-| `TrackRecipeVariants`                                                  | private              | Follows private Track recipe; use TrackProps.                                                                                                             |
-| `containerRecipe`                                                      | private              | Coupled to Container's fixed/arbitrary size resolution. Use Container.                                                                                    |
-| `ContainerRecipeVariants`                                              | private              | Follows the private container recipe; use ContainerProps.                                                                                                 |
-| `scrollFadeRecipe`                                                     | private              | Requires owned scrollport/overflow measurement. Use ScrollFade.                                                                                           |
-| `ScrollFadeRecipeVariants`                                             | private              | Follows private recipe; retain independently useful ScrollFadeAxis instead.                                                                               |
-| `defaultBackdrop`                                                      | private              | Compiler fallback, not a second theme-authoring input. Omit backdrop or author one.                                                                       |
-| `defaultControlFinish`                                                 | private              | Compiler fallback. Omit material rungs or author them.                                                                                                    |
-| `defaultDepth`                                                         | private              | Compiler fallback. Omit shadow rungs or author them.                                                                                                      |
-| `BoxLikeResolvedRenderProps`                                           | private              | Inferred callback argument is sufficient; no independent import required.                                                                                 |
-| `BoxLikeElementProps`                                                  | private              | Shared implementation union, not a consumer extension contract. Use component Props.                                                                      |
-| `BoxLikeRenderProps`                                                   | private              | Shared implementation union, not a consumer extension contract. Use component Props.                                                                      |
-| `UseRenderRef`                                                         | private              | Normalised callback-ref implementation typing (shared by `useRender` and Box-like `renderRoot`). Callback props already infer it.                         |
-| `iconViewBoxes`                                                        | private              | Generated construction data. Icon/createIcon own viewBox resolution.                                                                                      |
-| `IconSpritesheetProvider`                                              | private              | Settled application setup is Provider (#712).                                                                                                             |
-| `IconSpritesheetProviderProps`                                         | private              | Follows private provider.                                                                                                                                 |
-| `useIconSizeContext`                                                   | private              | Internal hook; IconSizeProvider is the consumer composition seam.                                                                                         |
-| `HeadingTag`                                                           | private              | Derivable from HeadingLevel or hook result; no independent annotation need.                                                                               |
-| `HeadingLevelsRenderProps`                                             | private              | Inferred HeadingLevels children/hook result is sufficient.                                                                                                |
-| `ObjectEntry`                                                          | private              | General typed-object iteration helper, unrelated to consuming Luke UI output.                                                                             |
-| `typedEntries`                                                         | private              | Internal typed iteration, not a Luke UI consumer requirement.                                                                                             |
-| `typedFromEntries`                                                     | private              | Internal typed object construction, not a Luke UI consumer requirement.                                                                                   |
-| `mergeStyleProps`                                                      | private/removed name | Use the current mergeProps contract. No compatibility alias.                                                                                              |
-| `@luke-ui/react/primitives`                                            | private/absent       | Import the actual primitive entrypoint; no umbrella barrel.                                                                                               |
-| `@luke-ui/react`                                                       | private/absent       | Import named component/support subpaths.                                                                                                                  |
-| Theme compiler/engine authoring and raw palette/diagnostic entrypoints | private/absent       | defineTheme and exported error properties cover authoring/diagnostics. No raw ThemeFoundation/buildTheme/compileTheme or styling-engine API is published. |
+| Symbol or rejected public path                                         | Decision             | Reason / supported consumer path                                                                                                             |
+| ---------------------------------------------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `checkboxRecipe`                                                       | private              | Requires checkbox-owned selection/anatomy. Use CheckboxField or its primitives.                                                              |
+| `CheckboxRecipeVariants`                                               | private              | Selection type follows the private recipe; public size is on CheckboxFieldProps/CheckboxRootProps.                                           |
+| `switchRecipe`                                                         | private              | Requires switch-owned selection/anatomy. Use SwitchField or its primitives.                                                                  |
+| `SwitchRecipeVariants`                                                 | private              | Selection type follows the private recipe; public size is on SwitchFieldProps/SwitchRootProps.                                               |
+| `fieldRecipe`                                                          | private              | Requires field label/message/icon anatomy and state. Use Field or its parts.                                                                 |
+| `FieldRecipeVariants`                                                  | private              | Follows the private field recipe; use FieldProps or the named part Props.                                                                    |
+| `loadingSpinnerRecipe`                                                 | private              | Couples geometry, animation and child overlay anatomy. Use LoadingSpinner.                                                                   |
+| `LoadingSpinnerRecipeVariants`                                         | private              | Follows private spinner recipe; use LoadingSpinnerProps to type consumer settings.                                                           |
+| `visuallyHiddenRecipe`                                                 | private/absent       | Replaced by public `visuallyHiddenStyle` for static application-owned markup. Use `VisuallyHidden` for component behaviour and focus reveal. |
+| `BlockquoteRecipeVariants`                                             | private              | No selectable variants; recipe alone is enough.                                                                                              |
+| `KbdRecipeVariants`                                                    | private              | No selectable variants; recipe alone is enough.                                                                                              |
+| `ProseRecipeVariants`                                                  | private              | No selectable variants; recipe alone is enough.                                                                                              |
+| `@luke-ui/react/styles`                                                | private/absent       | Layout via Box; createSprinkles/SprinklesProps stay package-internal.                                                                        |
+| `createSprinkles` / `SprinklesProps`                                   | private              | Package-internal utility runtime for Box and layout components.                                                                              |
+| `getThemeClassName`                                                    | retain               | Public on `@luke-ui/react/theme` since #715, for an authored theme's identity class.                                                         |
+| `spaceScale` / `SpaceStep` / `typeStyles` / `TypeStyle`                | private              | No concrete 1.0 consumer use beyond Box/Text internals.                                                                                      |
+| `fontWeightRoles` / `FontWeightRole`                                   | private              | No concrete 1.0 consumer use.                                                                                                                |
+| `deriveConcentricRadius` / `deriveNestedRadius`                        | private              | No public consumer surface; helpers stay package-internal.                                                                                   |
+| `ThemeContrastFailure` / `ThemeInheritance`                            | private              | Readable on ThemeContrastError properties without named exports.                                                                             |
+| `ColorInput` / `ControlFinish` / `DepthLadder`                         | private              | Nested under ThemeInput / defineTheme without named exports. `ExtendingThemeInput` is public on the compiler entry since #715.               |
+| `gridRecipe`                                                           | private              | Only establishes Grid's own display treatment; app markup can use display:grid.                                                              |
+| `GridRecipeVariants`                                                   | private              | Follows the private display-only recipe; use GridProps.                                                                                      |
+| `aspectRatioRecipe`                                                    | private              | Depends on direct media-child rules. Use AspectRatio.                                                                                        |
+| `AspectRatioRecipeVariants`                                            | private              | Follows the private media-frame recipe; use AspectRatioProps.                                                                                |
+| `trackRecipe`                                                          | private              | Requires centre/rail/root anatomy. Use Track's rail content API.                                                                             |
+| `TrackRecipeVariants`                                                  | private              | Follows private Track recipe; use TrackProps.                                                                                                |
+| `containerRecipe`                                                      | private              | Coupled to Container's fixed/arbitrary size resolution. Use Container.                                                                       |
+| `ContainerRecipeVariants`                                              | private              | Follows the private container recipe; use ContainerProps.                                                                                    |
+| `scrollFadeRecipe`                                                     | private              | Requires owned scrollport/overflow measurement. Use ScrollFade.                                                                              |
+| `ScrollFadeRecipeVariants`                                             | private              | Follows private recipe; retain independently useful ScrollFadeAxis instead.                                                                  |
+| `defaultBackdrop`                                                      | private              | Compiler fallback, not a second theme-authoring input. Omit backdrop or author one.                                                          |
+| `defaultControlFinish`                                                 | private              | Compiler fallback. Omit material rungs or author them.                                                                                       |
+| `defaultDepth`                                                         | private              | Compiler fallback. Omit shadow rungs or author them.                                                                                         |
+| `BoxLikeResolvedRenderProps`                                           | private              | Inferred callback argument is sufficient; no independent import required.                                                                    |
+| `BoxLikeElementProps`                                                  | private              | Shared implementation union, not a consumer extension contract. Use component Props.                                                         |
+| `BoxLikeRenderProps`                                                   | private              | Shared implementation union, not a consumer extension contract. Use component Props.                                                         |
+| `UseRenderRef`                                                         | private              | Normalised callback-ref implementation typing (shared by `useRender` and Box-like `renderRoot`). Callback props already infer it.            |
+| `iconViewBoxes`                                                        | private              | Generated construction data. Icon/createIcon own viewBox resolution.                                                                         |
+| `IconSpritesheetProvider`                                              | private              | Settled application setup is Provider (#712).                                                                                                |
+| `IconSpritesheetProviderProps`                                         | private              | Follows private provider.                                                                                                                    |
+| `useIconSizeContext`                                                   | private              | Internal hook; IconSizeProvider is the consumer composition seam.                                                                            |
+| `HeadingTag`                                                           | private              | Derivable from HeadingLevel or hook result; no independent annotation need.                                                                  |
+| `HeadingLevelsRenderProps`                                             | private              | Inferred HeadingLevels children/hook result is sufficient.                                                                                   |
+| `ObjectEntry`                                                          | private              | General typed-object iteration helper, unrelated to consuming Luke UI output.                                                                |
+| `typedEntries`                                                         | private              | Internal typed iteration, not a Luke UI consumer requirement.                                                                                |
+| `typedFromEntries`                                                     | private              | Internal typed object construction, not a Luke UI consumer requirement.                                                                      |
+| `mergeStyleProps`                                                      | private/removed name | Use the current mergeProps contract. No compatibility alias.                                                                                 |
+| `@luke-ui/react/primitives`                                            | private/absent       | Import the actual primitive entrypoint; no umbrella barrel.                                                                                  |
+| `@luke-ui/react`                                                       | private/absent       | Import named component/support subpaths.                                                                                                     |
+| Theme compiler/engine authoring and raw palette/diagnostic entrypoints | private/absent       | The compiler entry's exports cover authoring/diagnostics. No raw ThemeFoundation/buildTheme/compileTheme or styling-engine API is published. |
 
 The existing `@luke-ui/rainbow-sprinkles` support package is a runtime dependency, not an additional
 `@luke-ui/react` entrypoint or promised stable Luke UI 1.x authoring API.

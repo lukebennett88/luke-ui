@@ -32,6 +32,9 @@ export const fontWeightRoles = ['body', 'label', 'heading', 'emphasis'] as const
 /** A theme font-weight role key. */
 export type FontWeightRole = (typeof fontWeightRoles)[number];
 
+/** A theme font role. A theme without a display font uses its body font for both. */
+export type FontRole = 'body' | 'display';
+
 /**
  * Private metric step each public type style resolves from. Kept beside `typeStyles` so
  * `FONT_VALUES` emission cannot invent a different mapping.
@@ -63,3 +66,19 @@ export const typeStyleWeightRole = {
 	heading1: 'heading',
 	display: 'heading',
 } as const satisfies Record<TypeStyle, FontWeightRole>;
+
+/**
+ * Theme font role each type style resolves to. The style's family and Capsize trims both come from
+ * that role's font.
+ */
+export const typeStyleFontRole = {
+	caption: 'body',
+	label: 'body',
+	body: 'body',
+	lead: 'body',
+	heading4: 'display',
+	heading3: 'display',
+	heading2: 'display',
+	heading1: 'display',
+	display: 'display',
+} as const satisfies Record<TypeStyle, FontRole>;

@@ -104,7 +104,6 @@ const surfaceRtl = {
 // Only the root runs the animation; descendants inherit `sheenPositionVar`. Not `!important` so the
 // reduced-motion override below can turn it off.
 const sheen = {
-	animationDelay: '0.5s',
 	animationDuration: '3s',
 	animationIterationCount: 'infinite',
 	animationName: skeletonAnimationName,
@@ -114,7 +113,6 @@ const sheen = {
 			...forcedColorsSurface,
 			animationName: 'none',
 		},
-		// The global reduced-motion reset lives in the lowest layer, so it can't win against this rule.
 		'(prefers-reduced-motion: reduce)': {
 			animationName: 'none',
 		},

@@ -5,11 +5,15 @@
  * NOT imported by production code.
  */
 
+import interMetrics from '@capsizecss/metrics/inter';
+import loraMetrics from '@capsizecss/metrics/lora';
+import playfairDisplayMetrics from '@capsizecss/metrics/playfairDisplay';
 import type { Oklch } from '../color.js';
 import { gamutMapOklch, parseColor } from '../color.js';
 import { normalizeTheme } from '../define-theme.js';
-import { paperTheme } from '../foundations/paper.js';
-import { tactileTheme } from '../foundations/tactile.js';
+import type { ThemeFont } from '../font.js';
+import { paperTheme } from './paper.js';
+import { tactileTheme } from './tactile.js';
 
 const COMMENT_HEADER_PATTERN = /^\/\*.*\*\/\n\n/;
 const VAR_VALUE_PATTERN_CACHE = new Map<string, RegExp>();
@@ -34,18 +38,17 @@ export function resolvedColor(input: string): Oklch {
 }
 
 /**
- * Splits the generated stylesheet into its six rule blocks: the root-only containment rule,
- * identity, base light, media-query dark, explicit light, and explicit dark. Strips the leading
- * banner comment first, so the split models emitted CSS rules only.
+ * Splits the generated stylesheet into its five rule blocks: theme-wide, base light, media-query
+ * dark, explicit light, and explicit dark. Strips the leading banner comment first, so the split
+ * models emitted CSS rules only.
  */
 export function splitBlocks(css: string) {
 	const withoutBanner = css.replace(COMMENT_HEADER_PATTERN, '');
 	const blocks = withoutBanner.split('\n\n').filter((block) => block.trim() !== '');
-	if (blocks.length !== 6) throw new Error(`expected 6 rule blocks, found ${blocks.length}`);
-	const [containment, identity, baseLight, mediaDark, explicitLight, explicitDark] = blocks;
+	if (blocks.length !== 5) throw new Error(`expected 5 rule blocks, found ${blocks.length}`);
+	const [themeWide, baseLight, mediaDark, explicitLight, explicitDark] = blocks;
 	if (
-		containment === undefined ||
-		identity === undefined ||
+		themeWide === undefined ||
 		baseLight === undefined ||
 		mediaDark === undefined ||
 		explicitLight === undefined ||
@@ -53,7 +56,7 @@ export function splitBlocks(css: string) {
 	) {
 		throw new Error('expected every generated theme rule block to be defined');
 	}
-	return { baseLight, containment, explicitDark, explicitLight, identity, mediaDark };
+	return { baseLight, explicitDark, explicitLight, mediaDark, themeWide };
 }
 
 /** Reads one declared custom property's value out of a rule block. */
@@ -64,3 +67,26 @@ export function extractValue(block: string, varName: string): string {
 	}
 	return match[1];
 }
+
+/** Inter, the body font of the theme fixtures. 2048 units per em. */
+export const interFont: ThemeFont = {
+	family: "'Inter', system-ui, sans-serif",
+	metrics: interMetrics,
+};
+
+/** Lora, a serif whose metrics differ from Inter's. 1000 units per em. */
+export const loraFont: ThemeFont = {
+	family: "'Lora', serif",
+	metrics: loraMetrics,
+};
+
+/** Playfair Display, a third font for whole-object replacement checks. */
+export const playfairFont: ThemeFont = {
+	family: "'Playfair Display', serif",
+	metrics: playfairDisplayMetrics,
+};
+
+/** A complete `typography` section for test inputs that do not exercise fonts. */
+export const testTypography: { fonts: { body: ThemeFont } } = {
+	fonts: { body: interFont },
+};

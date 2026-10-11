@@ -1,19 +1,15 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
+import { pressFeedback } from '../../styles/press-feedback.js';
 import { recipe } from '../../styles/recipe.js';
 import { textRecipe } from '../../text/recipe.css.js';
 
 /** Shared presentation recipe for Button and button-shaped Link. */
 export const buttonRecipeInternal = recipe({
 	base: {
-		'@media': {
-			'(prefers-reduced-motion: reduce)': {
-				transition: 'none',
-			},
-		},
 		font: 'inherit',
-		touchAction: 'manipulation',
+		...pressFeedback,
 		transitionDuration: vars.motion.duration.feedback,
 		transitionProperty:
 			'background-color, border-color, box-shadow, color, opacity, text-decoration-color',
@@ -74,6 +70,8 @@ export const buttonRecipeInternal = recipe({
 				lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 				minBlockSize: MIN_TARGET_SIZE,
 				minInlineSize: MIN_TARGET_SIZE,
+				// `buttonSize()` sets the inline padding. A native `<button>` has block padding too.
+				paddingBlock: 0,
 				position: 'relative',
 				textDecoration: 'none',
 				whiteSpace: 'nowrap',

@@ -1,6 +1,5 @@
 import { Button } from '@luke-ui/react/button';
 import { IconLink } from '@luke-ui/react/icon-link';
-import { rootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import { useLinkProps, useRouterState } from '@tanstack/react-router';
 import type { ComponentProps } from 'react';
@@ -101,7 +100,7 @@ function AppearancePopover() {
 			<Button className={styles.mobileThemeTrigger} prominence="low" size="small">
 				Theme
 			</Button>
-			<Popover className={cx(rootClassName, styles.appearancePopover)} placement="bottom end">
+			<Popover className={styles.appearancePopover} placement="bottom end">
 				<Dialog aria-label="Appearance" className={styles.appearanceDialog}>
 					<ThemeControls />
 				</Dialog>

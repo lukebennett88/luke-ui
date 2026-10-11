@@ -1,4 +1,4 @@
-import { defineTheme } from '@luke-ui/react/theme';
+import { defineTheme } from '@luke-ui/react/theme/compiler';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite-plus';

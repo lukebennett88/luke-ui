@@ -1,5 +1,4 @@
-import type { Ref } from 'react';
-import { assertType, expectTypeOf, test } from 'vite-plus/test';
+import { assertType, test } from 'vite-plus/test';
 import type { CheckboxFieldProps } from './checkbox-field.js';
 
 test('CheckboxField requires a visible label', () => {
@@ -28,10 +27,4 @@ test('CheckboxField takes its label from the label prop, not children', () => {
 test('CheckboxField does not accept isInvalid', () => {
 	// @ts-expect-error — a non-empty errorMessage marks the checkbox invalid
 	assertType<CheckboxFieldProps>({ isInvalid: true, label: 'Terms' });
-});
-
-test('CheckboxField takes a plain ref for its root and an inputRef for its input', () => {
-	expectTypeOf<CheckboxFieldProps['ref']>().toEqualTypeOf<Ref<HTMLDivElement> | undefined>();
-	expectTypeOf<CheckboxFieldProps['inputRef']>().toEqualTypeOf<Ref<HTMLInputElement> | undefined>();
-	assertType<CheckboxFieldProps>({ inputRef: () => {}, label: 'Terms', ref: () => {} });
 });

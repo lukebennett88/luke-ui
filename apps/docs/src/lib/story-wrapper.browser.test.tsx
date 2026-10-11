@@ -1,9 +1,8 @@
 import '../styles/app.css';
-import '@luke-ui/react/themes/tactile/stylesheet.css';
+import '@luke-ui/theme-tactile/stylesheet.css';
 import { Button } from '@luke-ui/react/button';
 import { Grid } from '@luke-ui/react/grid';
 import { Stack } from '@luke-ui/react/stack';
-import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import { act } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 import type { Root } from 'react-dom/client';
@@ -185,7 +184,6 @@ function renderInWrapper(
 	} = {},
 ) {
 	const container = document.createElement('div');
-	container.className = tactileThemeClassName;
 	container.style.cssText = `container-type: inline-size; inline-size: ${containerWidth}px;`;
 	document.body.append(container);
 	const root = createRoot(container);

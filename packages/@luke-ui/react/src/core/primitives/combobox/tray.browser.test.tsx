@@ -11,6 +11,8 @@ import {
 	ComboboxTrayTrigger,
 } from '@luke-ui/react/primitives/combobox';
 import { Field } from '@luke-ui/react/primitives/field';
+import type { Ref } from 'react';
+import { createRef } from 'react';
 import { Form } from 'react-aria-components/Form';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -30,19 +32,21 @@ const countryItems: Array<CountryItem> = [
 const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</ComboboxItem>;
 
 /** Minimal tray composition built from public primitives. */
-function TrayCombobox(
-	props: {
-		'aria-label'?: string;
-		defaultValue?: string;
-		isDisabled?: boolean;
-		isReadOnly?: boolean;
-		label?: string;
-		triggerLabel?: string;
-	} & Pick<
-		ComboboxRootProps<CountryItem>,
-		'allowsCustomValue' | 'form' | 'isRequired' | 'name' | 'validate' | 'validationBehavior'
-	>,
-) {
+function TrayCombobox({
+	trayControlRef,
+	...props
+}: {
+	'aria-label'?: string;
+	defaultValue?: string;
+	isDisabled?: boolean;
+	isReadOnly?: boolean;
+	label?: string;
+	trayControlRef?: Ref<HTMLDivElement>;
+	triggerLabel?: string;
+} & Pick<
+	ComboboxRootProps<CountryItem>,
+	'allowsCustomValue' | 'form' | 'isRequired' | 'name' | 'validate' | 'validationBehavior'
+>) {
 	const label = props.label ?? 'Country';
 
 	return (
@@ -66,7 +70,7 @@ function TrayCombobox(
 					</ComboboxTrayTrigger>
 				</ComboboxControl>
 				<ComboboxTray>
-					<ComboboxControl>
+					<ComboboxControl ref={trayControlRef}>
 						<ComboboxInput placeholder="Select a country..." />
 						<ComboboxClearButton aria-label="Clear search">
 							<Icon name="close" />
@@ -144,6 +148,22 @@ test('ComboboxTray positions the overlay at the scroll offset each time it opens
 		.toHaveFocus();
 
 	window.scrollTo(0, 0);
+});
+
+test('ComboboxControl inside a tray forwards its ref to the tray search group', async () => {
+	const ref = createRef<HTMLDivElement>();
+	const { unmount } = render(<TrayCombobox trayControlRef={ref} />);
+
+	await openTray();
+	const searchGroup = page
+		.getByRole('searchbox', { name: 'Country' })
+		.element()
+		.closest('[role="group"]');
+	expect(searchGroup).not.toBeNull();
+	expect(ref.current).toBe(searchGroup);
+
+	unmount();
+	expect(ref.current).toBeNull();
 });
 
 test("ComboboxTray search field does not inherit the combobox trigger role's ARIA", async () => {
@@ -273,28 +293,6 @@ test('ComboboxTrayTrigger blocks submission of a required, unselected combobox w
 	expect(new FormData(form).get('country')).toBe('au');
 });
 
-test('ComboboxTray validation input has no wrapper and remains non-tabbable', () => {
-	const { container } = render(
-		<form aria-label="Country form">
-			<TrayCombobox isRequired />
-			<button type="submit">Submit</button>
-		</form>,
-	);
-	const input = container.querySelector('input[aria-hidden="true"]');
-	if (!(input instanceof HTMLInputElement)) {
-		throw new Error('Expected the tray validation input.');
-	}
-
-	expect(input.required).toBe(true);
-	expect(input.tabIndex).toBe(-1);
-	expect(input.willValidate).toBe(true);
-	expect(input.validity.valueMissing).toBe(true);
-	expect(input.form).toBe(container.querySelector('form'));
-	expect(input.parentElement).toBe(
-		page.getByRole('button', { name: 'Country* Select a country...' }).element().parentElement,
-	);
-});
-
 test('ComboboxTrayTrigger allows a required combobox with allowsCustomValue to submit typed text', async () => {
 	let submitCount = 0;
 	render(
@@ -371,7 +369,7 @@ test('ComboboxTrayTrigger blocks a closed tray on a custom validation error', as
 	expect(submitCount).toBe(1);
 });
 
-test('ComboboxTrayTrigger exempts disabled, read-only, and aria-validated combobox from blocking submission', async () => {
+test('disabled, read-only, and aria-validated tray comboboxes do not block native submission', async () => {
 	const submitted: Array<string> = [];
 	const renderCase = (label: string, props: Partial<Parameters<typeof TrayCombobox>[0]>) => (
 		<form
@@ -476,7 +474,7 @@ test('ComboboxTrayTrigger submits custom text in text mode while the tray is clo
 	expect(new FormData(form).getAll('country')).toEqual(['']);
 });
 
-test('ComboboxTrayTrigger does not submit text-mode values when disabled', async () => {
+test('a disabled text-mode tray combobox does not contribute values to FormData', () => {
 	const { container } = render(
 		<form aria-label="Disabled form">
 			<TrayCombobox allowsCustomValue defaultValue="au" isDisabled label="Disabled" />

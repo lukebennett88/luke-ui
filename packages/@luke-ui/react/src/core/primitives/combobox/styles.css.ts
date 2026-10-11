@@ -8,7 +8,8 @@ import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
 } from '../../styles/input-states.js';
-import { overlayEnterTransition, overlayExitTransition } from '../../styles/overlay-motion.js';
+import { overlayMotion } from '../../styles/overlay-motion.js';
+import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
@@ -44,7 +45,6 @@ const comboboxActionStyles = {
 				},
 			},
 		},
-		'(prefers-reduced-motion: reduce)': { transform: 'none', transition: 'none' },
 	},
 	alignItems: 'center',
 	appearance: 'none',
@@ -61,6 +61,8 @@ const comboboxActionStyles = {
 	justifyContent: 'center',
 	minBlockSize: MIN_TARGET_SIZE,
 	minInlineSize: MIN_TARGET_SIZE,
+	paddingBlock: 0,
+	...pressFeedback,
 	transform: 'none',
 	transitionDuration: vars.motion.duration.feedback,
 	transitionProperty: 'background-color, color',
@@ -79,12 +81,6 @@ const comboboxActionStyles = {
 		[descendantDisabledSelector]: { color: vars.color.text.disabled },
 	},
 } satisfies StyleRule;
-
-// The popover is an overlay, so it takes the shared overlay motion roles. See
-// `styles/overlay-motion.ts` for the roles and the reduced-motion rule that follows from them.
-const popoverProperties = ['opacity', 'translate', 'box-shadow'];
-const popoverTransition = overlayEnterTransition(popoverProperties);
-const popoverExitTransition = overlayExitTransition(popoverProperties);
 
 /**
  * Raw slotted config for the combobox anatomy.
@@ -117,7 +113,6 @@ const comboboxConfig = {
 						[inputFocus]: { outlineColor: 'Highlight' },
 					},
 				},
-				'(prefers-reduced-motion: reduce)': { transition: 'none' },
 			},
 			alignItems: 'center',
 			backgroundColor: vars.color.surface.field,
@@ -135,8 +130,6 @@ const comboboxConfig = {
 			letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
 			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 			minInlineSize: 0,
-			// Suppress the reset ring React Aria exposes on the group when an inner action is focus-visible.
-			outline: 'none',
 			overflow: 'visible',
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, border-color, box-shadow, color',
@@ -188,48 +181,40 @@ const comboboxConfig = {
 			flexShrink: 0,
 			marginInlineStart: 'auto',
 		},
-		popover: {
-			'@media': {
-				'(forced-colors: active)': {
-					backgroundColor: 'Canvas',
-					borderColor: 'CanvasText',
-					boxShadow: 'none',
-					forcedColorAdjust: 'auto',
+		// The popover is an overlay, so it takes the shared overlay motion roles. See
+		// `styles/overlay-motion.ts` for the roles and the reduced-motion rule that follows from them.
+		popover: overlayMotion({
+			hidden: { opacity: 0 },
+			properties: ['opacity', 'translate', 'box-shadow'],
+			rule: {
+				'@media': {
+					'(forced-colors: active)': {
+						backgroundColor: 'Canvas',
+						borderColor: 'CanvasText',
+						boxShadow: 'none',
+						forcedColorAdjust: 'auto',
+					},
 				},
-				'(prefers-reduced-motion: reduce)': {
-					transition: 'none',
-					selectors: {
-						'&[data-entering]': { opacity: 1, translate: 'none' },
-						// Reduced motion has to repeat `none` here. See `styles/overlay-motion.ts`.
-						'&[data-exiting]': { opacity: 1, transition: 'none', translate: 'none' },
+				backgroundColor: vars.color.surface.overlay,
+				borderColor: vars.color.border.decorative,
+				borderRadius: vars.radius.surface,
+				borderStyle: 'solid',
+				borderWidth: '1px',
+				boxShadow: vars.depth.floating,
+				display: 'flex',
+				flexDirection: 'column',
+				inlineSize: 'var(--trigger-width)',
+				isolation: 'isolate',
+				minInlineSize: 'var(--trigger-width)',
+				overflow: 'hidden',
+
+				'@supports': {
+					'(min-block-size: calc-size(fit-content, size))': {
+						minBlockSize: 'calc-size(fit-content, min(size, 12em))',
 					},
 				},
 			},
-			backgroundColor: vars.color.surface.overlay,
-			borderColor: vars.color.border.decorative,
-			borderRadius: vars.radius.surface,
-			borderStyle: 'solid',
-			borderWidth: '1px',
-			boxShadow: vars.depth.floating,
-			display: 'flex',
-			flexDirection: 'column',
-			inlineSize: 'var(--trigger-width)',
-			isolation: 'isolate',
-			minInlineSize: 'var(--trigger-width)',
-			overflow: 'hidden',
-			transition: popoverTransition,
-
-			selectors: {
-				'&[data-entering]': { opacity: 0 },
-				'&[data-exiting]': { opacity: 0, transition: popoverExitTransition },
-			},
-
-			'@supports': {
-				'(min-block-size: calc-size(fit-content, size))': {
-					minBlockSize: 'calc-size(fit-content, min(size, 12em))',
-				},
-			},
-		},
+		}),
 		listBox: {
 			flex: 1,
 			inlineSize: '100%',
@@ -290,7 +275,6 @@ const comboboxConfig = {
 						},
 					},
 				},
-				'(prefers-reduced-motion: reduce)': { transform: 'none', transition: 'none' },
 			},
 			alignItems: 'center',
 			backgroundColor: 'transparent',
@@ -303,7 +287,7 @@ const comboboxConfig = {
 			minBlockSize: MIN_TARGET_SIZE,
 			minInlineSize: 0,
 			outline: 'none',
-			touchAction: 'manipulation',
+			...pressFeedback,
 			transform: 'none',
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, color, opacity',
@@ -344,7 +328,10 @@ const comboboxConfig = {
 		},
 		trayTrigger: {
 			alignItems: 'center',
+			appearance: 'none',
+			backgroundColor: 'transparent',
 			blockSize: '100%',
+			border: 'none',
 			color: vars.color.text.primary,
 			display: 'flex',
 			inlineSize: '100%',
@@ -354,6 +341,12 @@ const comboboxConfig = {
 			// the closed trigger onto its selected value. This floor reserves 20ch of value text
 			// plus room for the trailing chevron.
 			minInlineSize: `calc(20ch + ${COMBOBOX_ACTION_SIZE})`,
+			paddingBlock: 0,
+			...pressFeedback,
+
+			selectors: {
+				'&[data-disabled="true"]': { cursor: 'not-allowed' },
+			},
 		},
 		trayValue: {
 			flex: 1,

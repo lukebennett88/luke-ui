@@ -28,7 +28,7 @@ const contentInlinePadding = {
 // painting over the sticky header.
 export const article = style({
 	'@layer': {
-		recipes: {
+		components: {
 			isolation: 'isolate',
 		},
 	},
@@ -37,7 +37,7 @@ export const article = style({
 // A chevron points along the inline axis, so it flips with the writing direction.
 export const pagerIcon = style({
 	'@layer': {
-		recipes: {
+		components: {
 			flexShrink: 0,
 			marginInline: `calc(${vars.space.sp4} * -1)`,
 			selectors: {
@@ -52,7 +52,7 @@ export const pagerIcon = style({
 // Sticks below the site header. The open panel overlays the article instead of pushing it down.
 export const tocBar = style({
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: vars.color.surface.base,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 			insetBlockStart: SITE_HEADER_BLOCK_SIZE,
@@ -69,7 +69,7 @@ export const tocBar = style({
 
 export const tocSummary = style({
 	'@layer': {
-		recipes: {
+		components: {
 			...contentInlinePadding,
 			alignItems: 'center',
 			blockSize: TOC_BAR_BLOCK_SIZE,
@@ -92,7 +92,7 @@ export const tocSummary = style({
 
 export const tocSummaryIcon = style({
 	'@layer': {
-		recipes: {
+		components: {
 			marginInlineStart: 'auto',
 			transition: `transform ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
 			'@media': {
@@ -106,7 +106,7 @@ export const tocSummaryIcon = style({
 
 globalStyle(`${tocBar}[open] ${tocSummaryIcon}`, {
 	'@layer': {
-		recipes: {
+		components: {
 			transform: 'rotate(180deg)',
 		},
 	},
@@ -114,7 +114,7 @@ globalStyle(`${tocBar}[open] ${tocSummaryIcon}`, {
 
 export const tocBarPanel = style({
 	'@layer': {
-		recipes: {
+		components: {
 			backgroundColor: vars.color.surface.overlay,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 			boxShadow: vars.depth.floating,
@@ -136,7 +136,7 @@ export const tocBarPanel = style({
 
 export const tocColumn = style({
 	'@layer': {
-		recipes: {
+		components: {
 			alignSelf: 'start',
 			display: 'none',
 			gridArea: 'toc',
@@ -156,7 +156,7 @@ export const tocColumn = style({
 /** Hover and current styles for TOC links. Layout lives on Box. */
 export const tocLink = style({
 	'@layer': {
-		recipes: {
+		components: {
 			borderInlineStart: '2px solid transparent',
 			color: vars.color.text.secondary,
 			fontSize: vars.font.label.fontSize,

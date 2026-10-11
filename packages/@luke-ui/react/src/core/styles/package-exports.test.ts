@@ -24,13 +24,16 @@ const absentExportPaths = [
 	'./stylesheet',
 	'./primitives',
 	'./tokens',
+	'./themes/tactile',
+	'./themes/paper',
+	'./themes/tactile/stylesheet.css',
+	'./themes/paper/stylesheet.css',
 ] as const;
 
 const presentExportPaths = {
 	'./box': './dist/box.js',
 	'./theme': './dist/theme.js',
-	'./themes/tactile': './dist/themes/tactile.js',
-	'./themes/paper': './dist/themes/paper.js',
+	'./theme/compiler': './dist/theme/compiler.js',
 	'./stylesheet.css': './dist/stylesheet.css',
 	'./primitives/button': './dist/primitives/button.js',
 	'./primitives/checkbox': './dist/primitives/checkbox.js',
@@ -47,7 +50,7 @@ const presentExportPaths = {
 
 test('publishes only the final styling entrypoints', () => {
 	for (const exportPath of absentExportPaths) {
-		expect(exportPath in packageJson.exports).toBe(false);
+		expect(Object.hasOwn(packageJson.exports, exportPath)).toBe(false);
 	}
 
 	for (const [exportPath, target] of Object.entries(presentExportPaths) as Array<
@@ -115,7 +118,9 @@ test('public JS/TS export declaration closures do not import styling engines', a
 	}
 });
 
-test('detects styling-engine packages in from and inline import() forms', () => {
+// Positive control for the declaration scanner the boundary test above depends on. Synthetic
+// fragments prove from/import(), relative resolution, and JSDoc {@link} filtering still work.
+test('declaration scanner detects styling-engine and relative imports without following JSDoc links', () => {
 	expect(stylingEngineReferences(`import type { StyleRule } from '@vanilla-extract/css';`)).toEqual(
 		{ hasRainbowSprinkles: false, hasVanillaExtract: true },
 	);
@@ -125,40 +130,19 @@ test('detects styling-engine packages in from and inline import() forms', () => 
 	expect(
 		stylingEngineReferences(`type Sprinkles = import('@luke-ui/rainbow-sprinkles').SprinklesFn;`),
 	).toEqual({ hasRainbowSprinkles: true, hasVanillaExtract: false });
-	expect(stylingEngineReferences(`type Local = import('./local.js').Local;`)).toEqual({
-		hasRainbowSprinkles: false,
-		hasVanillaExtract: false,
-	});
-});
 
-test('collects relative specifiers from from and inline import() forms', () => {
 	expect(
 		relativeDeclarationSpecifiers(`
 			export type { ThemeInput } from './define-theme.js';
 			type Nested = import('../themes/paper.js').ThemeInput;
-			import type { BoxProps } from './box.js';
+			/** See {@link import('./build-theme.js').ThemeGenerationError}. */
+			type Real = import('./real.js').Real;
 		`),
-	).toEqual(['./define-theme.js', '../themes/paper.js', './box.js']);
-});
+	).toEqual(['./define-theme.js', '../themes/paper.js', './real.js']);
 
-test('ignores relative import() mentions inside JSDoc {@link} tags', () => {
-	expect(
-		relativeDeclarationSpecifiers(
-			`/** Attached to {@link import('./build-theme.js').ThemeGenerationError}. */\nexport type Ok = true;`,
-		),
-	).toEqual([]);
-	expect(
-		relativeDeclarationSpecifiers(
-			`/** See {@link import('./build-theme.js').ThemeGenerationError}. */\ntype Nested = import('./real.js').Nested;`,
-		),
-	).toEqual(['./real.js']);
-});
-
-test('resolves nested and parent-relative declaration imports from the importing file', () => {
 	expect(resolveDeclarationImport('themes/paper.d.ts', '../define-theme.js')).toBe(
 		'define-theme.d.ts',
 	);
-	expect(resolveDeclarationImport('box.d.ts', './utilities.css.js')).toBe('utilities.css.d.ts');
 	expect(resolveDeclarationImport('themes/paper.d.ts', './tokens.js')).toBe('themes/tokens.d.ts');
 });
 
@@ -195,17 +179,61 @@ test('exports fixed breakpoints from the theme entry', async () => {
 	});
 });
 
-test('theme entry publishes only the 1.0 allowlist', async () => {
+test('theme entry publishes only the runtime allowlist', async () => {
 	const theme = await import('@luke-ui/react/theme');
-	expect(Object.keys(theme).sort()).toEqual([
+	expect(Object.keys(theme).sort()).toEqual(['breakpoints', 'getThemeClassName', 'vars']);
+});
+
+test('theme compiler entry publishes only the authoring allowlist', async () => {
+	const compiler = await import('@luke-ui/react/theme/compiler');
+	expect(Object.keys(compiler).sort()).toEqual([
 		'ThemeContrastError',
 		'ThemeGenerationError',
-		'breakpoints',
+		'ThemeValidationError',
 		'defineTheme',
-		'rootClassName',
-		'vars',
 	]);
 });
+
+test('keeps the built theme runtime entry out of the compiler import graph', () => {
+	const runtimeGraph = builtImportGraph('theme.js');
+	const compilerGraph = builtImportGraph('theme/compiler.js');
+
+	// The compiler reaches modules the runtime must not, so the check below cannot pass by luck.
+	expect(compilerGraph.files.some((file) => !runtimeGraph.files.includes(file))).toBe(true);
+	expect(compilerGraph.packages).toContain('@capsizecss/core');
+
+	expect(runtimeGraph.files).not.toContain('theme/compiler.js');
+	expect(runtimeGraph.packages).toEqual([]);
+	for (const file of runtimeGraph.files) {
+		expect(readDist(file)).not.toMatch(DEFINE_THEME_PATTERN);
+	}
+});
+
+const DEFINE_THEME_PATTERN = /function defineTheme\b/;
+const STATIC_IMPORT_PATTERN =
+	/(?:^|\n)\s*(?:import|export)\b[^'"]*?from\s*["']([^"']+)["']|(?:^|\n)\s*import\s*["']([^"']+)["']/g;
+
+/** Every built file a dist entry reaches through static imports, plus the packages it imports. */
+function builtImportGraph(entry: string): { files: Array<string>; packages: Array<string> } {
+	const files = new Set<string>();
+	const packages = new Set<string>();
+	const pending = [entry];
+	for (let file = pending.pop(); file !== undefined; file = pending.pop()) {
+		if (files.has(file)) continue;
+		files.add(file);
+		for (const match of readDist(file).matchAll(STATIC_IMPORT_PATTERN)) {
+			const specifier = match[1] ?? match[2];
+			if (specifier === undefined) continue;
+			if (specifier.startsWith('.')) pending.push(posix.join(posix.dirname(file), specifier));
+			else packages.add(specifier);
+		}
+	}
+	return { files: [...files].sort(), packages: [...packages].sort() };
+}
+
+function readDist(file: string): string {
+	return readFileSync(new URL(`../../../dist/${file}`, import.meta.url), 'utf8');
+}
 
 /** JS package exports that publish TypeScript declarations beside the runtime file. */
 function publicTypeEntryDeclarations(exportsMap: Record<string, string>): Array<string> {

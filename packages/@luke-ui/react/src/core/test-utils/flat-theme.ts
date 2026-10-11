@@ -1,5 +1,5 @@
-import { defineTheme } from '@luke-ui/react/theme';
-import { theme as tactileTheme } from '@luke-ui/react/themes/tactile';
+import type { ExtendingThemeInput } from '@luke-ui/react/theme/compiler';
+import { tactileTheme } from '../../theme/__fixtures__/tactile.js';
 
 const NO_DEPTH = {
 	floating: 'none',
@@ -10,15 +10,10 @@ const NO_DEPTH = {
 };
 const NO_FINISH = { raised: 'none', recessed: 'none', resting: 'none' };
 
-/** The flat fixture's identity class. `defineTheme` derives it from the fixture name. */
-export const flatThemeClassName = 'luke-ui-theme-flat-fixture';
-
-/** Builds the flat fixture: Tactile's colours with every `depth` and `controlFinish` value `none`. */
-export function buildFlatThemeStylesheet(): string {
-	return defineTheme({
-		controlFinish: { dark: NO_FINISH, light: NO_FINISH },
-		depth: { dark: NO_DEPTH, light: NO_DEPTH },
-		extends: tactileTheme,
-		name: 'flat-fixture',
-	});
-}
+/** The flat fixture: Tactile's colours with every `depth` and `controlFinish` value `none`. */
+export const flatTheme: ExtendingThemeInput = {
+	controlFinish: { dark: NO_FINISH, light: NO_FINISH },
+	depth: { dark: NO_DEPTH, light: NO_DEPTH },
+	extends: tactileTheme,
+	name: 'flat-fixture',
+};

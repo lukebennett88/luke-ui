@@ -46,7 +46,9 @@ export function expectedInlinedExampleBlock(
 	src: string,
 ): { content: string; repoRelativePath: string } {
 	const sourceDir = SOURCE_DIRS_BY_TAG[tagName];
-	const repoRelativePath = `apps/docs/${sourceDir}/${src}.tsx`;
+	// A `.ts` sample names its extension. Every other `src` is a `.tsx` file.
+	const file = src.endsWith('.ts') ? src : `${src}.tsx`;
+	const repoRelativePath = `apps/docs/${sourceDir}/${file}`;
 
 	return {
 		repoRelativePath,

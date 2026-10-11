@@ -19,7 +19,8 @@
 - `src/core/` holds implementation, styles, test helpers, and their co-located tests and fixtures.
 - `src/exports/` holds the thin public modules that pack publishes for each package subpath. Use
   explicit named exports only. See [`docs/PUBLIC_API.md`](../../docs/PUBLIC_API.md).
-- `src/theme/` holds the theme compiler, foundations, and bundled themes in `bundles/`.
+- `src/theme/` holds the theme compiler, foundations, and the visual suite's theme fixtures in
+  `__fixtures__/`. Tactile and Paper ship from `packages/@luke-ui/theme-*`.
 - `src/shared/` holds low-level primitives with no domain of their own, such as the class-name
   constants and the typed object helpers. It exists so a zone never has to duplicate a value or
   reach across a forbidden edge to use one. It stays deliberately small. Do not put component code,

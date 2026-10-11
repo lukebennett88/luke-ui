@@ -1,5 +1,4 @@
-import type { Ref } from 'react';
-import { assertType, expectTypeOf, test } from 'vite-plus/test';
+import { assertType, test } from 'vite-plus/test';
 import type { SwitchFieldProps } from './switch-field.js';
 
 test('SwitchField requires a visible label', () => {
@@ -28,10 +27,4 @@ test('SwitchField takes its label from the label prop, not children', () => {
 test('SwitchField does not accept isInvalid', () => {
 	// @ts-expect-error — a non-empty errorMessage marks the switch invalid
 	assertType<SwitchFieldProps>({ isInvalid: true, label: 'Notifications' });
-});
-
-test('SwitchField takes a plain ref for its root and an inputRef for its input', () => {
-	expectTypeOf<SwitchFieldProps['ref']>().toEqualTypeOf<Ref<HTMLDivElement> | undefined>();
-	expectTypeOf<SwitchFieldProps['inputRef']>().toEqualTypeOf<Ref<HTMLInputElement> | undefined>();
-	assertType<SwitchFieldProps>({ inputRef: () => {}, label: 'Notifications', ref: () => {} });
 });

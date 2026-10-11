@@ -58,15 +58,20 @@ published code that needs a small part of a package whose install would cost con
 that part. To bundle a dependency, list it in `devDependencies` and in `deps.onlyBundle` in
 `packages/@luke-ui/react/vite.config.ts`. The build fails when it bundles a package that
 `deps.onlyBundle` does not list. It records each bundled version in `inlinedDependencies` in
-`package.json`.
+`package.json`. Paper and Tactile inline `@capsizecss/metrics` the same way, through
+`deps.onlyBundle` in `packages/@luke-ui/theme-build/theme-package.ts`.
 
 ## Changesets
 
 `@luke-ui/react` is unpublished at version `0.0.0`. `@luke-ui/rainbow-sprinkles` is a publishable
 0.x support package used by `@luke-ui/react` at runtime. It is not part of the stable Luke UI 1.x
 consumer API. Publish it with React whenever React depends on a Rainbow version that is not yet on
-the registry. `apps/docs` and `@luke-ui/playground-core` are private. Before `1.0.0` no pull request
-needs a changeset, including one that moves a runtime or peer dependency.
+the registry. `@luke-ui/theme-paper` and `@luke-ui/theme-tactile` are unpublished 0.x theme packages
+with `@luke-ui/react` as a peer dependency. Their final peer ranges belong to
+[#721](https://github.com/lukebennett88/luke-ui/issues/721). `apps/docs`,
+`@luke-ui/playground-core`, and `@luke-ui/theme-build`, the build the two theme packages share, are
+private. Before `1.0.0` no pull request needs a changeset, including one that moves a runtime or
+peer dependency.
 
 The `needs-changeset` label in `.github/renovate.json5` is advance notice. It marks packages that
 will be runtime, peer, or bundled dependencies of the published package at `1.0.0`. Re-sync that
