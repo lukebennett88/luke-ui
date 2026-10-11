@@ -130,6 +130,27 @@ test('ignores invalid presentation without clearing earlier values', () => {
 	expect(absent.style).toBeUndefined();
 });
 
+test('keeps optional presentation optional, including unknown-length array tails', () => {
+	const optional: { className?: string; style?: { color: string } } = {};
+	const absent = mergeProps({}, optional);
+	expectTypeOf(absent.className).toEqualTypeOf<string | undefined>();
+	expectTypeOf(absent.style).toEqualTypeOf<Record<string, unknown> | undefined>();
+
+	const tail: Array<{ className: string; style: { color: string } }> = [];
+	const empty = mergeProps({}, {}, ...tail);
+	expectTypeOf(empty.className).toEqualTypeOf<string | undefined>();
+	expectTypeOf(empty.style).toEqualTypeOf<Record<string, unknown> | undefined>();
+});
+
+test('types optional event handlers conservatively and retains their argument contract', () => {
+	const optional: { onClick?: (event: string) => string } = {};
+	const absent = mergeProps(optional, optional);
+	expectTypeOf(absent.onClick).toEqualTypeOf<((event: string) => void) | undefined>();
+
+	const retained = mergeProps({ onClick: (_event: string) => 'value' }, optional);
+	expectTypeOf(retained.onClick).toEqualTypeOf<(event: string) => void>();
+});
+
 test('rejects incompatible event-handler argument contracts', () => {
 	const incompatible = mergeProps(
 		{ onClick: (_event: string) => undefined },

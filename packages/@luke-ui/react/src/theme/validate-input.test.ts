@@ -24,9 +24,14 @@ function themeWithTypography(typography: unknown): ThemeInput {
 }
 
 describe('font family validation', () => {
-	// One case per distinct rejection message class.
+	// One case per rejection-message class, plus one representative per UNSAFE_FAMILY_PATTERN arm.
 	const rejected = [
 		["'Inter'; color: red", 'must not contain'],
+		// An open comment hides every declaration after it, so the theme loses all its tokens.
+		['Inter/*', 'must not contain'],
+		// A backslash escapes the `;` or closing quote after it, so later declarations are lost.
+		['Inter\\', 'must not contain'],
+		['Inter\nsans-serif', 'must not contain'],
 		// A browser drops an invalid `font-family` list whole, so the stack's fallbacks are lost too.
 		["'Inter, sans-serif", 'must be a comma-separated list'],
 		['  ', 'must be a non-empty CSS font-family stack'],
@@ -47,6 +52,13 @@ describe('font family validation', () => {
 
 	it('accepts quoted names with punctuation, generic families, and a quote of the other kind inside a name', () => {
 		const family = `"Font's Name", 'Other "Quoted" Name', "Font, Inc", 'Star*Name', system-ui, sans-serif`;
+		expect(() =>
+			defineTheme(themeWithTypography({ fonts: { body: { ...interFont, family } } })),
+		).not.toThrow();
+	});
+
+	it('accepts unquoted multiword family names, including ones that end with a keyword', () => {
+		const family = '-apple-system, BlinkMacSystemFont, Noto Sans CJK JP, Pro Serif, sans-serif';
 		expect(() =>
 			defineTheme(themeWithTypography({ fonts: { body: { ...interFont, family } } })),
 		).not.toThrow();
