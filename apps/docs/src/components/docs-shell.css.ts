@@ -1,5 +1,5 @@
 import { vars } from '@luke-ui/react/theme';
-import { style } from '@vanilla-extract/css';
+import { createVar, style } from '@vanilla-extract/css';
 import { docsSidebarMinInlineSize, docsTocMinInlineSize } from '../lib/docs-container-queries.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
@@ -97,13 +97,55 @@ export const mobileTrigger = style({
 	},
 });
 
+// Same overlay roles as `MobileOverlay` and docs search. The helpers in the package are private.
+const enterTiming = `${vars.motion.duration.enter} ${vars.motion.easing.standard}`;
+const exitTiming = `${vars.motion.duration.exit} ${vars.motion.easing.exit}`;
+
+const scrimEnter = `opacity ${enterTiming}`;
+const scrimExit = `opacity ${exitTiming}`;
+const drawerEnter = `translate ${enterTiming}`;
+const drawerExit = `translate ${exitTiming}`;
+
+// Off-screen toward the inline-end edge. Physical `translate` needs the sign flipped in RTL.
+const drawerOffset = createVar();
+
+// The scrim is a pseudo-element because the panel is the overlay's child. Fading the overlay itself
+// would multiply into the panel's opacity.
 export const drawerOverlay = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.overlay.backdrop,
 			inset: 0,
 			position: 'fixed',
 			zIndex: 100,
+			selectors: {
+				'&::before': {
+					backgroundColor: vars.color.overlay.backdrop,
+					content: '""',
+					inset: 0,
+					position: 'absolute',
+					transition: scrimEnter,
+				},
+				'&[data-entering]::before': {
+					opacity: 0,
+				},
+				'&[data-exiting]': {
+					pointerEvents: 'none',
+				},
+				'&[data-exiting]::before': {
+					opacity: 0,
+					transition: scrimExit,
+				},
+			},
+			'@media': {
+				// Reduced motion must repeat `none` on each selector, or the state rules win.
+				'(prefers-reduced-motion: reduce)': {
+					selectors: {
+						'&::before': { transition: 'none' },
+						'&[data-entering]::before': { opacity: 1, transition: 'none' },
+						'&[data-exiting]::before': { opacity: 1, transition: 'none' },
+					},
+				},
+			},
 		},
 	},
 });
@@ -116,6 +158,31 @@ export const drawerModal = style({
 			boxShadow: vars.depth.overlay,
 			inlineSize: 'min(22rem, 90vw)',
 			marginInlineStart: 'auto',
+			position: 'relative',
+			transition: drawerEnter,
+			translate: 'none',
+			vars: { [drawerOffset]: '100%' },
+			selectors: {
+				'&:dir(rtl)': {
+					vars: { [drawerOffset]: '-100%' },
+				},
+				'&[data-entering]': {
+					translate: `${drawerOffset} 0`,
+				},
+				'&[data-exiting]': {
+					transition: drawerExit,
+					translate: `${drawerOffset} 0`,
+				},
+			},
+			'@media': {
+				'(prefers-reduced-motion: reduce)': {
+					transition: 'none',
+					selectors: {
+						'&[data-entering]': { transition: 'none', translate: 'none' },
+						'&[data-exiting]': { transition: 'none', translate: 'none' },
+					},
+				},
+			},
 		},
 	},
 });

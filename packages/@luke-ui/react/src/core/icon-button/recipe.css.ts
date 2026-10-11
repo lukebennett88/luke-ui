@@ -8,6 +8,16 @@ export const iconButtonReset = style({
 });
 
 export const iconButtonIcon = recipe({
+	base: {
+		transitionDuration: vars.motion.duration.feedback,
+		transitionProperty: 'opacity',
+		transitionTimingFunction: vars.motion.easing.standard,
+		'@media': {
+			'(prefers-reduced-motion: reduce)': {
+				transition: 'none',
+			},
+		},
+	},
 	defaultVariants: { isPending: false },
 	variants: {
 		isPending: {

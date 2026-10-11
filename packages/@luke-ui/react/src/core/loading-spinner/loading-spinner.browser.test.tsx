@@ -1,8 +1,9 @@
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties, ReactNode } from 'react';
-import { test } from 'vite-plus/test';
+import { afterEach, expect, test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { emulateReducedMotion } from '../test-utils/emulate-media.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -58,6 +59,40 @@ test('the LoadingSpinner scene has no axe violations', async () => {
 	const { container } = render(<LoadingSpinnerScene />);
 
 	await expectNoAxeViolations(container);
+});
+
+afterEach(async () => {
+	await emulateReducedMotion(false);
+});
+
+test('animates the root and the indicator by default', () => {
+	const { container } = render(<LoadingSpinner />);
+
+	const root = container.querySelector('[role="status"]');
+	const indicator = container.querySelector('circle');
+	if (!(root instanceof HTMLElement) || indicator === null) {
+		throw new Error('Expected a LoadingSpinner root and indicator.');
+	}
+
+	expect(getComputedStyle(root).animationName).not.toBe('none');
+	expect(getComputedStyle(indicator).animationName).not.toBe('none');
+});
+
+test('stops rotating and keeps a static arc under prefers-reduced-motion: reduce', async () => {
+	await emulateReducedMotion(true);
+
+	const { container } = render(<LoadingSpinner />);
+
+	const root = container.querySelector('[role="status"]');
+	const indicator = container.querySelector('circle');
+	if (!(root instanceof HTMLElement) || indicator === null) {
+		throw new Error('Expected a LoadingSpinner root and indicator.');
+	}
+
+	expect(getComputedStyle(root).animationName).toBe('none');
+	expect(getComputedStyle(indicator).animationName).toBe('none');
+	expect(getComputedStyle(indicator).strokeDasharray.replaceAll('px', '')).toBe('25, 100');
+	expect(getComputedStyle(indicator).strokeDashoffset.replaceAll('px', '')).toBe('0');
 });
 
 test('sizes and colors', { tags: ['visual'] }, async () => {
