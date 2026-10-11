@@ -2,6 +2,8 @@ import { Button } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { Heading } from '@luke-ui/react/heading';
+import { IconButton } from '@luke-ui/react/icon-button';
+import { Link } from '@luke-ui/react/link';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
 import { SelectItem } from '@luke-ui/react/primitives/select';
 import { SelectField } from '@luke-ui/react/select-field';
@@ -167,6 +169,30 @@ test('lets Luke UI components keep their own appearance beside native markup', (
 	expect(button.borderTopStyle).toBe('solid');
 	expect(button.borderTopWidth).toBe('0px');
 });
+
+for (const size of ['medium', 'small'] as const) {
+	test(`gives a ${size} Button, IconButton, and button Link one box model without user agent padding`, () => {
+		const { locator } = render(
+			<div>
+				<Button size={size}>Save</Button>
+				<IconButton aria-label="Add" icon="add" size={size} />
+				<Link appearance="button" href="#save" size={size}>
+					Save
+				</Link>
+			</div>,
+		);
+		const button = locator.getByRole('button', { name: 'Save' }).element();
+		const iconButton = locator.getByRole('button', { name: 'Add' }).element();
+		const link = locator.getByRole('link', { name: 'Save' }).element();
+
+		for (const element of [button, iconButton, link]) {
+			expect(getComputedStyle(element).paddingBlock).toBe('0px');
+			expect(element.getBoundingClientRect().height).toBe(link.getBoundingClientRect().height);
+		}
+		expect(getComputedStyle(button).paddingInline).toBe(getComputedStyle(link).paddingInline);
+		expect(getComputedStyle(iconButton).paddingInline).toBe('0px');
+	});
+}
 
 test('paints <body> with the theme baseline, and the canvas follows it', () => {
 	render(<p>Short page</p>);

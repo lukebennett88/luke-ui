@@ -70,6 +70,8 @@ export const buttonRecipeInternal = recipe({
 				lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 				minBlockSize: MIN_TARGET_SIZE,
 				minInlineSize: MIN_TARGET_SIZE,
+				// `buttonSize()` sets the inline padding. A native `<button>` has block padding too.
+				paddingBlock: 0,
 				position: 'relative',
 				textDecoration: 'none',
 				whiteSpace: 'nowrap',
