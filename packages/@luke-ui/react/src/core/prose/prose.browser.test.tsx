@@ -389,6 +389,209 @@ test('keeps pre chrome outside a not-prose boundary', () => {
 	expect(plain.paddingInlineStart).toBe('0px');
 });
 
+const headingLevels = [1, 2, 3, 4, 5, 6] as const;
+
+function typeMetrics(element: Element) {
+	const style = getComputedStyle(element);
+	return {
+		blockSize: element.getBoundingClientRect().height,
+		fontFamily: style.fontFamily,
+		fontSize: style.fontSize,
+		fontWeight: style.fontWeight,
+		letterSpacing: style.letterSpacing,
+		lineHeight: style.lineHeight,
+	};
+}
+
+// Plain markup from a CMS must look like the component. The block size proves the trims match.
+for (const level of headingLevels) {
+	test(`gives a plain h${level} the type style of Heading level ${level}`, () => {
+		const Plain = `h${level}` as const;
+		const { locator } = render(
+			<Prose>
+				<Plain>Plain heading</Plain>
+				<Heading level={level}>Plain heading</Heading>
+			</Prose>,
+		);
+		const root = locator.element();
+
+		expect(typeMetrics(query(root, `${Plain}:not([class])`))).toEqual(
+			typeMetrics(query(root, `${Plain}[class]`)),
+		);
+	});
+}
+
+test('gives a plain p the type style of Text', () => {
+	const { locator } = render(
+		<Prose>
+			<p>Plain paragraph</p>
+			<Text elementType="p">Plain paragraph</Text>
+		</Prose>,
+	);
+	const root = locator.element();
+
+	expect(typeMetrics(query(root, 'p:not([class])'))).toEqual(typeMetrics(query(root, 'p[class]')));
+});
+
+// A component keeps its own props inside Prose. The block size proves the trims match too.
+const overrides = [
+	{
+		name: 'Heading with shouldDisableTrim',
+		node: (
+			<Heading level={2} shouldDisableTrim>
+				Override
+			</Heading>
+		),
+	},
+	{
+		name: 'Heading with typography display',
+		node: (
+			<Heading level={2} typography="display">
+				Override
+			</Heading>
+		),
+	},
+	{
+		name: 'Text with typography lead',
+		node: (
+			<Text elementType="p" typography="lead">
+				Override
+			</Text>
+		),
+	},
+	{
+		name: 'Text with lineClamp',
+		node: (
+			<Text elementType="p" lineClamp={2}>
+				Override
+			</Text>
+		),
+	},
+];
+
+for (const { name, node } of overrides) {
+	test(`keeps the props of a ${name} inside Prose`, () => {
+		const { locator } = render(
+			<div>
+				<Prose>{node}</Prose>
+				{node}
+			</div>,
+		);
+		const [inside, outside] = locator.element().querySelectorAll('h2, p');
+
+		expect(typeMetrics(inside!)).toEqual(typeMetrics(outside!));
+		expect(getComputedStyle(inside!, '::before').content).toBe(
+			getComputedStyle(outside!, '::before').content,
+		);
+	});
+}
+
+test('leaves a plain heading inside a not-prose boundary unstyled', () => {
+	const { locator } = render(
+		<div>
+			<Prose>
+				<div className="not-prose">
+					<h2>Heading</h2>
+				</div>
+			</Prose>
+			<h2>Heading</h2>
+		</div>,
+	);
+	const [inside, outside] = locator.element().querySelectorAll('h2');
+
+	expect(typeMetrics(inside!)).toEqual(typeMetrics(outside!));
+});
+
+// A list marker and a cell baseline align to the first box, which the trim box would take.
+test('gives a loose list item the block size of a tight one', () => {
+	const { locator } = render(
+		<Prose>
+			<ul>
+				<li>
+					<p>Item</p>
+				</li>
+				<li>Item</li>
+			</ul>
+		</Prose>,
+	);
+	const [loose, tight] = locator.element().querySelectorAll('li');
+
+	expect(loose!.getBoundingClientRect().height).toBe(tight!.getBoundingClientRect().height);
+});
+
+test('aligns the text of a paragraph cell with a plain cell', () => {
+	const { locator } = render(
+		<Prose>
+			<table>
+				<tbody>
+					<tr>
+						<td>
+							<p>Cell</p>
+						</td>
+						<td>Cell</td>
+					</tr>
+				</tbody>
+			</table>
+		</Prose>,
+	);
+	const [paragraphCell, plainCell] = locator.element().querySelectorAll('td');
+	const textTop = (cell: Element) => {
+		const range = new Range();
+		range.selectNodeContents(cell.querySelector('p') ?? cell);
+		return range.getBoundingClientRect().top;
+	};
+
+	expect(textTop(paragraphCell!)).toBe(textTop(plainCell!));
+});
+
+// A Prose below a not-prose element and a Prose inside a Prose both start a scope.
+const proseBoundaries = [
+	{
+		name: 'a Prose inside a not-prose element',
+		node: (
+			<Prose>
+				<div className="not-prose">
+					<Prose>
+						<h2>Heading</h2>
+						<p>Paragraph</p>
+					</Prose>
+				</div>
+			</Prose>
+		),
+	},
+	{
+		name: 'a Prose inside a Prose',
+		node: (
+			<Prose>
+				<Prose>
+					<h2>Heading</h2>
+					<p>Paragraph</p>
+				</Prose>
+			</Prose>
+		),
+	},
+];
+
+for (const { name, node } of proseBoundaries) {
+	test(`styles plain elements in ${name} like Heading and Text`, () => {
+		const { locator } = render(
+			<div>
+				{node}
+				<Heading level={2}>Heading</Heading>
+				<Text elementType="p">Paragraph</Text>
+			</div>,
+		);
+		const root = locator.element();
+
+		expect(typeMetrics(query(root, 'h2:not([class])'))).toEqual(
+			typeMetrics(query(root, 'h2[class]')),
+		);
+		expect(typeMetrics(query(root, 'p:not([class])'))).toEqual(
+			typeMetrics(query(root, 'p[class]')),
+		);
+	});
+}
+
 const document = (
 	<Prose>
 		<Heading level={2}>Choosing a spacing scale</Heading>

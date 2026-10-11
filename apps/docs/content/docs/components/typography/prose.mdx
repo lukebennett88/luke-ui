@@ -1,15 +1,22 @@
 ---
 title: Prose
-description: Spacing and element styles for long-form content.
+description: Type, spacing, and element styles for long-form HTML content.
 source: packages/@luke-ui/react/src/exports/prose.ts
 ---
 
-`Prose` styles rendered Markdown, MDX, or CMS content. It spaces the blocks and styles lists, code
-blocks, tables, rules, and media. It does not set a content width or style headings and paragraphs,
-so map those elements to [Heading](/components/typography/heading) and
-[Text](/components/typography/text).
+`Prose` styles long-form content written as plain HTML, such as rendered Markdown or CMS output.
+Write headings, paragraphs, lists, code blocks, and tables as native elements. Headings and
+paragraphs get the same type styles as [Heading](/components/typography/heading) and
+[Text](/components/typography/text). `Prose` spaces the blocks and does not set a content width.
 
 <ExampleBlock src="prose/basic" title="Prose: Basic" />
+
+## Heading and Text
+
+Use `Heading` or `Text` for an element that needs a prop, such as a different type style or colour.
+They keep their own props inside `Prose`, and `Prose` still spaces them.
+
+<ExampleBlock src="prose/heading-and-text" title="Prose: Heading and Text" />
 
 ## Lists
 
