@@ -68,8 +68,9 @@ export default defineConfig({
 		},
 		overrides: [
 			{
-				// The Prose code example focuses a scrollable native `pre` with `tabIndex={0}`.
-				files: ['apps/docs/src/examples/prose/code.tsx'],
+				// Docs examples are copyable source. Allow intentional `tabIndex={0}` on scrollable
+				// non-interactive elements without suppression comments in the published samples.
+				files: ['apps/docs/src/examples/**/*.{ts,tsx}'],
 				rules: {
 					'jsx-a11y/no-noninteractive-tabindex': 'off',
 				},

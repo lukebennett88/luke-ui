@@ -1,5 +1,4 @@
 import { Prose } from '@luke-ui/react/prose';
-import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
@@ -11,11 +10,6 @@ export default () => {
 					src="https://images.unsplash.com/photo-1479030160180-b1860951d696?auto=format&fit=crop&w=1200&q=80"
 					width={1200}
 				/>
-				<figcaption>
-					<Text color="secondary" elementType="span" typography="caption">
-						Warm rock walls and a narrow strip of sky.
-					</Text>
-				</figcaption>
 			</figure>
 		</Prose>
 	);
