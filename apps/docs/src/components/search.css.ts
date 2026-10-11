@@ -1,13 +1,11 @@
 import { vars } from '@luke-ui/react/theme';
-import { cx } from '@luke-ui/react/utils';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { createVar, globalStyle, style } from '@vanilla-extract/css';
+import { overlayMotion } from '../lib/overlay-motion.js';
 import { DOCS_SEARCH_FIELD_VT_SHARE_CLASS } from './search-view-transition.js';
 
 export const searchAnchorHeightVar = createVar();
 
-const overlayEnter = cx('opacity', vars.motion.duration.enter, vars.motion.easing.standard);
-const overlayExit = cx('opacity', vars.motion.duration.exit, vars.motion.easing.exit);
 const panelResultsEnter = `max-block-size ${vars.motion.duration.enter} ${vars.motion.easing.standard}, opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}`;
 const panelResultsExit = `max-block-size ${vars.motion.duration.exit} ${vars.motion.easing.exit}, opacity ${vars.motion.duration.exit} ${vars.motion.easing.exit}`;
 
@@ -39,25 +37,6 @@ globalStyle(`::view-transition-new(.${DOCS_SEARCH_FIELD_VT_SHARE_CLASS})`, {
 	animationTimingFunction: vtShareEasing,
 	...vtShareReducedMotion,
 });
-
-const reducedMotionOverlay = {
-	'@media': {
-		'(prefers-reduced-motion: reduce)': {
-			transition: 'none',
-			selectors: {
-				'&[data-entering]': {
-					opacity: 1,
-					transition: 'none',
-				},
-				'&[data-exiting]': {
-					opacity: 1,
-					pointerEvents: 'none',
-					transition: 'none',
-				},
-			},
-		},
-	},
-} as const satisfies ComplexStyleRule;
 
 const reducedMotionNoTransition = {
 	'@media': {
@@ -150,22 +129,17 @@ export const triggerTrack = style({
 export const overlay = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.overlay.backdrop,
-			inset: 0,
-			position: 'fixed',
-			transition: overlayEnter,
-			zIndex: 100,
-			selectors: {
-				'&[data-entering]': {
-					opacity: 0,
+			...overlayMotion({
+				hidden: { opacity: 0 },
+				properties: ['opacity'],
+				rule: {
+					backgroundColor: vars.color.overlay.backdrop,
+					inset: 0,
+					position: 'fixed',
+					zIndex: 100,
+					selectors: { '&[data-exiting]': { pointerEvents: 'none' } },
 				},
-				'&[data-exiting]': {
-					opacity: 0,
-					pointerEvents: 'none',
-					transition: overlayExit,
-				},
-			},
-			...reducedMotionOverlay,
+			}),
 		},
 	},
 });

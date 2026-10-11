@@ -71,7 +71,7 @@ export function Link(props: LinkProps): JSX.Element {
 				>
 					{(renderProps) => (
 						<span className={buttonContent()}>
-							<span className={buttonLabel({ hasAdornments: true, isPending: false })}>
+							<span className={buttonLabel({ hasAdornments: true })}>
 								{startContent}
 								<Text elementType="span" lineClamp shouldInheritFont>
 									{typeof children === 'function' ? children(renderProps) : children}

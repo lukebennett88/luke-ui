@@ -7,16 +7,6 @@ export const iconButtonReset = style({
 	paddingInline: 0,
 });
 
-export const iconButtonIcon = recipe({
-	defaultVariants: { isPending: false },
-	variants: {
-		isPending: {
-			false: {},
-			true: { opacity: 0 },
-		},
-	},
-});
-
 export const iconButtonRecipe = recipe({
 	variants: {
 		size: {
