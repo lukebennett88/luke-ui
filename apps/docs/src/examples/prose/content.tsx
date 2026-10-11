@@ -24,7 +24,6 @@ export default () => {
 					</Text>
 				</figcaption>
 			</figure>
-			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable pre */}
 			<pre tabIndex={0}>
 				<code>
 					{'.card { padding-inline: var(--luke-space-sp16); margin-block: var(--luke-space-sp8); }'}
