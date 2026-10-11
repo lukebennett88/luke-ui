@@ -68,6 +68,14 @@ export default defineConfig({
 		},
 		overrides: [
 			{
+				// Docs examples are copyable source. Allow intentional `tabIndex={0}` on scrollable
+				// non-interactive elements without suppression comments in the published samples.
+				files: ['apps/docs/src/examples/**/*.{ts,tsx}'],
+				rules: {
+					'jsx-a11y/no-noninteractive-tabindex': 'off',
+				},
+			},
+			{
 				excludeFiles: [
 					'packages/@luke-ui/react/src/theme/**',
 					'packages/@luke-ui/react/src/core/styles/**',

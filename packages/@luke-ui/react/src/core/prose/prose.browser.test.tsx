@@ -6,8 +6,12 @@ import { Prose, proseRecipe } from '@luke-ui/react/prose';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
 import { expect, test } from 'vite-plus/test';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
+
+const swatch =
+	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='64'%3E%3Crect width='320' height='64' fill='%23888'/%3E%3C/svg%3E";
 
 function query(root: Element, selector: string) {
 	const element = root.querySelector(selector);
@@ -273,8 +277,117 @@ test('lets utility classes override Prose margins', () => {
 	expect(margin(query(locator.element(), '[data-testid="utility"]'))).toBe('8px');
 });
 
-const swatch =
-	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='64'%3E%3Crect width='320' height='64' fill='%23888'/%3E%3C/svg%3E";
+test('fits media inside a narrow prose column', async () => {
+	const { locator } = render(
+		<Prose style={{ inlineSize: 160 }}>
+			<img alt="" height={64} src={swatch} width={320} />
+			<picture>
+				<img alt="" height={64} src={swatch} width={320} />
+			</picture>
+			<video aria-label="Animation" height={64} muted poster={swatch} width={320} />
+		</Prose>,
+	);
+	const root = query(locator.element(), 'div');
+	const rootBounds = root.getBoundingClientRect();
+	await Promise.all([...root.querySelectorAll('img')].map((img) => img.decode()));
+
+	for (const media of root.querySelectorAll('img, picture, video')) {
+		const bounds = media.getBoundingClientRect();
+		expect(bounds.right).toBeLessThanOrEqual(rootBounds.right + 1);
+	}
+
+	for (const media of root.querySelectorAll('img, video')) {
+		const bounds = media.getBoundingClientRect();
+		expect(bounds.width / bounds.height).toBeCloseTo(5, 0);
+	}
+});
+
+test('scrolls long preformatted lines without widening a narrow grid column', async () => {
+	const code = 'padding-inline: var(--luke-space-sp16);'.repeat(5);
+	const { locator, user } = render(
+		<Prose style={{ display: 'grid', inlineSize: 160 }}>
+			<button type="button">Before code</button>
+			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable pre */}
+			<pre tabIndex={0}>
+				<code>{code}</code>
+			</pre>
+		</Prose>,
+	);
+	const root = query(locator.element(), 'div');
+	const pre = query(root, 'pre');
+
+	expect(pre.getBoundingClientRect().right).toBeLessThanOrEqual(
+		root.getBoundingClientRect().right + 1,
+	);
+	expect(pre.scrollWidth).toBeGreaterThan(pre.clientWidth);
+
+	locator.getByRole('button', { name: 'Before code' }).element().focus();
+	await user.tab();
+	expect(pre).toHaveFocus();
+	await user.keyboard('{ArrowRight}');
+	await expect.poll(() => pre.scrollLeft).toBeGreaterThan(0);
+});
+
+test('preserves whitespace in multiline pre code', () => {
+	const { locator } = render(
+		<Prose>
+			<pre>
+				<code>{'first line\nsecond line'}</code>
+			</pre>
+		</Prose>,
+	);
+	expect(getComputedStyle(query(locator.element(), 'pre')).whiteSpace).toBe('pre');
+});
+
+test('styles table headers and body cells', () => {
+	const { locator } = render(
+		<Prose style={{ inlineSize: 160 }}>
+			<table>
+				<thead>
+					<tr>
+						<th scope="col">Step</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<th scope="row">Small</th>
+						<td>8px</td>
+					</tr>
+				</tbody>
+			</table>
+		</Prose>,
+	);
+	const root = locator.element();
+	const columnHeader = query(root, 'thead th');
+	const rowHeader = query(root, 'tbody th');
+	const cell = query(root, 'tbody td');
+
+	expect(query(root, 'table').getBoundingClientRect().width).toBeCloseTo(160, 0);
+	expect(getComputedStyle(columnHeader).verticalAlign).toBe('bottom');
+	expect(getComputedStyle(columnHeader).textAlign).toBe('start');
+	expect(getComputedStyle(rowHeader).verticalAlign).not.toBe('bottom');
+	expect(getComputedStyle(cell).verticalAlign).toBe('baseline');
+	expect(getComputedStyle(cell).paddingInlineStart).toBe('12px');
+});
+
+test('keeps pre chrome outside a not-prose boundary', () => {
+	const { locator } = render(
+		<Prose>
+			<pre data-testid="styled">code</pre>
+			<div className="not-prose">
+				<pre data-testid="plain">code</pre>
+			</div>
+		</Prose>,
+	);
+	const root = locator.element();
+	const styled = getComputedStyle(query(root, '[data-testid="styled"]'));
+	const plain = getComputedStyle(query(root, '[data-testid="plain"]'));
+
+	expect(styled.overflowX).toBe('auto');
+	expect(styled.paddingInlineStart).toBe('16px');
+	expect(plain.overflowX).not.toBe('auto');
+	expect(plain.paddingInlineStart).toBe('0px');
+});
 
 const document = (
 	<Prose>
@@ -333,9 +446,10 @@ const document = (
 		</Blockquote>
 
 		<Heading level={4}>Reading a token</Heading>
-		<Text elementType="pre">
-			<Code>{'padding-inline: var(--luke-space-sp16);'}</Code>
-		</Text>
+		{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable pre */}
+		<pre tabIndex={0}>
+			<code>{'padding-inline: var(--luke-space-sp16);\nmargin-block: 0;'}</code>
+		</pre>
 		<img alt="" height={64} src={swatch} width={320} />
 		<picture>
 			<img alt="" height={64} src={swatch} width={320} />
@@ -345,7 +459,11 @@ const document = (
 		<table>
 			<thead>
 				<tr>
-					<th scope="col">Step</th>
+					<th scope="col">
+						Step
+						<br />
+						name
+					</th>
 					<th scope="col">Value</th>
 				</tr>
 			</thead>
@@ -353,6 +471,8 @@ const document = (
 				<tr>
 					<td>
 						<Code>sp8</Code>
+						<br />
+						Small gap
 					</td>
 					<td>8px</td>
 				</tr>
@@ -363,6 +483,12 @@ const document = (
 					<td>24px</td>
 				</tr>
 			</tbody>
+			<tfoot>
+				<tr>
+					<td>Total steps</td>
+					<td>2</td>
+				</tr>
+			</tfoot>
 		</table>
 
 		<hr />
@@ -398,9 +524,15 @@ const document = (
 	</Prose>
 );
 
+test('the prose document has no axe violations', async () => {
+	const { container } = render(<Stack width="18rem">{document}</Stack>);
+
+	await expectNoAxeViolations(container);
+});
+
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
-		const { locator } = render(<Stack width="40rem">{document}</Stack>, { appearance });
+		const { locator } = render(<Stack width="18rem">{document}</Stack>, { appearance });
 
 		await captureVisualAppearance(locator, 'prose/kitchen-sink', appearance);
 	}

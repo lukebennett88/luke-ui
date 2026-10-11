@@ -20,6 +20,30 @@ in every browser.
 
 <ExampleBlock src="prose/lists" title="Prose: Lists" />
 
+## Media
+
+Images and videos shrink to fit the content width without changing their proportions.
+
+<ExampleBlock src="prose/media" title="Prose: Media" />
+
+## Code blocks
+
+Use native `<pre><code>` for code blocks and [Code](/components/typography/code) for inline
+fragments. Long code lines scroll inside `pre`. Add `tabIndex={0}` to an overflowing `pre` so it can
+receive keyboard focus.
+
+<ExampleBlock src="prose/code" title="Prose: Code blocks" />
+
+## Tables
+
+Tables fill the available width but can overflow when their content is too wide. Wrap wide tables in
+[ScrollFade](/components/layout/scroll-fade) with an accessible name.
+
+The scroll wrapper needs its own spacing. After a paragraph, set `marginBlockStart="sp40"` on the
+wrapper to match the usual `Prose` gap.
+
+<ExampleBlock src="prose/wide-table" title="Prose: Wide table" />
+
 ## Opting out
 
 Add the `not-prose` class to an element to keep `Prose` spacing, list styles, and table padding off

@@ -58,8 +58,23 @@ proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space.sp16 });
 proseStyle('hr + *', { marginBlockStart: vars.space.sp64 });
 
 proseStyle('img, picture, video', { display: 'block' });
+proseStyle('img, video', { blockSize: 'auto', maxInlineSize: '100%' });
+proseStyle('picture', { maxInlineSize: '100%' });
 proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 	marginBlockStart: 0,
+});
+
+proseStyle('pre', {
+	backgroundColor: vars.color.background.neutral.subtle.rest,
+	border: `1px solid ${vars.color.border.decorative}`,
+	borderRadius: vars.radius.control,
+	fontFamily: vars.font.family.code,
+	maxInlineSize: '100%',
+	minInlineSize: 0,
+	overflowX: 'auto',
+	paddingBlock: vars.space.sp12,
+	paddingInline: vars.space.sp16,
+	whiteSpace: 'pre',
 });
 
 // Markers are restated so a framework reset below Luke UI, such as Tailwind Preflight, cannot
@@ -79,10 +94,21 @@ proseStyle('hr', {
 	border: 'none',
 	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
 });
-proseStyle('table', { borderCollapse: 'collapse', borderSpacing: 0 });
+proseStyle('table', {
+	borderCollapse: 'collapse',
+	borderSpacing: 0,
+	inlineSize: '100%',
+});
 proseStyle('th, td', { paddingBlock: vars.space.sp8, paddingInline: vars.space.sp12 });
 proseStyle('caption, th', { textAlign: 'start' });
-proseStyle('thead th', { borderBlockEnd: `1px solid ${vars.color.border.decorative}` });
+proseStyle('thead th', {
+	borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+	verticalAlign: 'bottom',
+});
+proseStyle('tbody td', { verticalAlign: 'baseline' });
+proseStyle('tbody tr + tr, tfoot', {
+	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
+});
 
 proseBoundaryGapStyle(['h1'], vars.space.sp40);
 proseBoundaryGapStyle(['h2'], vars.space.sp32);
