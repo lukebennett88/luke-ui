@@ -41,7 +41,7 @@ Authors use this before finishing. Reviewers use it on the diff.
       ([Component tests](../../../docs/TESTING.md#component-tests))
 - [ ] Tests assert computed styles only when layout is the contract.
       ([Component tests](../../../docs/TESTING.md#component-tests))
-- [ ] Parameterised tests use `for…of` with the distinguishing value in the title, never
+- [ ] In component tests, use `for…of` with the distinguishing value in the test title. Do not use
       `test.each`, `it.each`, or `describe.each`.
       ([Component tests](../../../docs/TESTING.md#component-tests))
 - [ ] No result depends on timing, test order, or leftover state.
