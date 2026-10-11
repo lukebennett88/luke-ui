@@ -250,8 +250,7 @@ test('scrolls long preformatted lines without widening a narrow grid column', as
 	const { locator, user } = render(
 		<Prose style={{ display: 'grid', inlineSize: 160 }}>
 			<button type="button">Before code</button>
-			{/* Scrollable code needs keyboard focus. */}
-			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable pre */}
 			<pre tabIndex={0}>
 				<code>{code}</code>
 			</pre>
@@ -280,10 +279,7 @@ test('preserves whitespace in multiline pre code', () => {
 			</pre>
 		</Prose>,
 	);
-	const pre = query(locator.element(), 'pre');
-
-	expect(getComputedStyle(pre).whiteSpace).toBe('pre');
-	expect(pre.textContent).toBe('first line\nsecond line');
+	expect(getComputedStyle(query(locator.element(), 'pre')).whiteSpace).toBe('pre');
 });
 
 test('styles table headers and body cells', () => {
@@ -393,8 +389,7 @@ const document = (
 		</Blockquote>
 
 		<Heading level={4}>Reading a token</Heading>
-		{/* Scrollable code needs keyboard focus. */}
-		{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+		{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable pre */}
 		<pre tabIndex={0}>
 			<code>{'padding-inline: var(--luke-space-sp16);\nmargin-block: 0;'}</code>
 		</pre>

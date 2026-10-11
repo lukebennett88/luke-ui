@@ -59,7 +59,6 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 	marginBlockStart: 0,
 });
 
-// Native `<pre><code>` for blocks. `Code` stays inline and is not reset here.
 proseStyle('pre', {
 	backgroundColor: vars.color.background.neutral.subtle.rest,
 	border: `1px solid ${vars.color.border.decorative}`,

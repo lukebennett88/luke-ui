@@ -23,11 +23,14 @@ Images and videos shrink to the content width. Use a native `<pre><code>` for co
 [Code](/components/typography/code) for inline fragments. Long lines scroll inside the `pre`. When a
 block overflows, set `tabIndex={0}` on that `pre` so it can take keyboard focus.
 
-Tables fill the content width and separate body rows and footers. Wide tables are not clipped or
-wrapped. Wrap a table in [ScrollFade](/components/layout/scroll-fade) or another inline-axis scroll
-container when the content can overflow.
+<ExampleBlock src="prose/content" title="Prose: Media and code" />
 
-<ExampleBlock src="prose/content" title="Prose: Media, code, and tables" />
+Tables fill the content width and separate body rows and footers. Wide tables are not clipped or
+wrapped. Wrap a table in [ScrollFade](/components/layout/scroll-fade) with an accessible name when
+the content can overflow. `Prose` spaces `table` elements, not scroll wrappers, so put the table gap
+on the wrapper (`marginBlockStart="sp40"` after a paragraph).
+
+<ExampleBlock src="prose/wide-table" title="Prose: Wide table" />
 
 ## Opting out
 
