@@ -2,7 +2,8 @@
 
 This is the only normative documentation guide for the repository. It covers MDX pages in the hosted
 docs app, JSDoc, code comments, READMEs, and the internal guides in `docs/`. Package-level
-`AGENTS.md` files must not restate these rules. Point here instead.
+`AGENTS.md` files and the skills in `.agents/skills/` must not restate these rules. Point here
+instead.
 
 ## Authoring checklist
 
@@ -10,7 +11,7 @@ docs app, JSDoc, code comments, READMEs, and the internal guides in `docs/`. Pac
   [`apps/docs/content/docs/components/actions/button.mdx`](../apps/docs/content/docs/components/actions/button.mdx)
   as the exemplar for a component guide.
 - Run `pnpm run check` from the repo root. It includes `check:docs`.
-- Update or delete docs that describe code in the same change as the code.
+- Update or delete docs and skills that describe code in the same change as the code.
 - Generated docs output comes from the docs `generate` script in `apps/docs/package.json`. Do not
   hand-edit those files.
 - Schema-owned files such as `apps/docs/PRODUCT.md` keep the headings the schema requires. Edit the
@@ -565,11 +566,12 @@ Docs must stay factually accurate. No authored doc should keep a stale path, com
 export, type, snippet, or cross-reference.
 
 This applies to comments, JSDoc, MDX files in `apps/docs/content/docs/`, `README.md`, package
-READMEs, and files in `docs/`.
+READMEs, files in `docs/`, and skills in `.agents/skills/`.
 
-- Update or delete docs that describe code in the same change as the code.
+- Update or delete docs and skills that describe code in the same change as the code.
 - When you move, rename, or remove a file, script, command, export, or symbol, search docs for old
   references.
+- When you rename or remove a heading in `docs/`, search `.agents/skills/` for links to it.
 - Prefer generated or source-owned content over hand-maintained lists that mirror code.
 - Reference stable paths, commands, and headings. Do not pin docs to line numbers, generated class
   names, or exact command output.
