@@ -13,7 +13,7 @@ export default () => {
 				/>
 				<figcaption>
 					<Text color="secondary" elementType="span" typography="caption">
-						Canyon walls framing the sky.
+						Warm rock walls and a narrow strip of sky.
 					</Text>
 				</figcaption>
 			</figure>

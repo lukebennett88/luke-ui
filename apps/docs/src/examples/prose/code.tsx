@@ -9,11 +9,10 @@ export default () => {
 				Use <Code>Code</Code> for a short inline fragment.
 			</Text>
 			<pre tabIndex={0}>
-				<code>
-					{
-						'<Prose>\n  <Heading level={2}>A heading</Heading>\n  <Text elementType="p">A paragraph in the document.</Text>\n</Prose>'
-					}
-				</code>
+				<code>{`<Prose>
+  <Heading level={2}>A heading</Heading>
+  <Text elementType="p">A paragraph in the document.</Text>
+</Prose>`}</code>
 			</pre>
 		</Prose>
 	);
