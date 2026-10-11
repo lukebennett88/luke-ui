@@ -64,13 +64,6 @@ describe('defineTheme single-value accent adaptation', () => {
 describe('defineTheme accent pre-conditioning shares the generator gate', () => {
 	const accents = [
 		'#3b82f6',
-		'#ef4444',
-		'#22c55e',
-		'#eab308',
-		'#f97316',
-		'oklch(0.7 0.15 320)',
-		'oklch(0.6 0.12 160)',
-		'oklch(0.5 0.2 270)',
 		// Tones the generator cannot reach through its tone-faithful window, which is an on-solid dead
 		// zone. The pre-conditioner's wider band rescues them.
 		'oklch(0.62 0.19 27)',

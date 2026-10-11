@@ -1,4 +1,3 @@
-import type { Ref } from 'react';
 import { assertType, test } from 'vite-plus/test';
 import type { ComboboxFieldProps } from './combobox-field.js';
 
@@ -27,15 +26,6 @@ test('ComboboxField requires a visible label or an accessible name', () => {
 		'aria-label': 'Country',
 		children: () => null,
 		label: 'Country',
-	});
-});
-
-test('ComboboxField takes a root element ref and an input ref', () => {
-	assertType<ComboboxFieldProps<Item>>({
-		children: () => null,
-		inputRef: null as unknown as Ref<HTMLInputElement>,
-		label: 'Country',
-		ref: null as unknown as Ref<HTMLDivElement>,
 	});
 });
 

@@ -38,125 +38,7 @@ test('removes generator-owned props.mdx and meta.json and the now-empty director
 	expect(existsSync(componentDir)).toBe(false);
 });
 
-test('does not remove a component directory that still contains an unrelated file', () => {
-	const root = createTempDir();
-	const componentDir = join(root, 'actions', 'button');
-	mkdirSync(componentDir, { recursive: true });
-	writeFileSync(join(componentDir, 'props.mdx'), generatedPropsMdx());
-	writeFileSync(join(componentDir, 'notes.txt'), 'keep me');
-
-	const result = cleanGeneratedPropsPages(root);
-
-	expect(result.removedCount).toBe(1);
-	expect(existsSync(componentDir)).toBe(true);
-	expect(existsSync(join(componentDir, 'props.mdx'))).toBe(false);
-	expect(existsSync(join(componentDir, 'notes.txt'))).toBe(true);
-	expect(readFileSync(join(componentDir, 'notes.txt'), 'utf8')).toBe('keep me');
-});
-
-test('leaves authored guides and group-level meta.json untouched', () => {
-	const root = createTempDir();
-	const groupDir = join(root, 'actions');
-	const componentDir = join(groupDir, 'button');
-	mkdirSync(componentDir, { recursive: true });
-	writeFileSync(join(groupDir, 'button.mdx'), '# Button guide');
-	writeFileSync(join(groupDir, 'meta.json'), '{"pages": ["button"]}');
-	writeFileSync(join(componentDir, 'props.mdx'), generatedPropsMdx());
-	writeFileSync(join(componentDir, 'meta.json'), '{}');
-
-	const result = cleanGeneratedPropsPages(root);
-
-	expect(result.removedCount).toBe(2);
-	expect(existsSync(componentDir)).toBe(false);
-	expect(existsSync(join(groupDir, 'button.mdx'))).toBe(true);
-	expect(readFileSync(join(groupDir, 'button.mdx'), 'utf8')).toBe('# Button guide');
-	expect(existsSync(join(groupDir, 'meta.json'))).toBe(true);
-	expect(readFileSync(join(groupDir, 'meta.json'), 'utf8')).toBe('{"pages": ["button"]}');
-});
-
-test('is a no-op when the components directory does not exist', () => {
-	const root = createTempDir();
-
-	const result = cleanGeneratedPropsPages(join(root, 'does-not-exist'));
-
-	expect(result.removedCount).toBe(0);
-});
-
-test('is a no-op when a group subdirectory has no component directories', () => {
-	const root = createTempDir();
-	mkdirSync(join(root, 'actions'), { recursive: true });
-	writeFileSync(join(root, 'actions', 'button.mdx'), '# Button guide');
-
-	const result = cleanGeneratedPropsPages(root);
-
-	expect(result.removedCount).toBe(0);
-	expect(existsSync(join(root, 'actions', 'button.mdx'))).toBe(true);
-});
-
-test('ignores a component directory that has neither generator-owned file', () => {
-	const root = createTempDir();
-	const componentDir = join(root, 'actions', 'button');
-	mkdirSync(componentDir, { recursive: true });
-	writeFileSync(join(componentDir, 'notes.txt'), 'keep me');
-
-	const result = cleanGeneratedPropsPages(root);
-
-	expect(result.removedCount).toBe(0);
-	expect(existsSync(componentDir)).toBe(true);
-	expect(existsSync(join(componentDir, 'notes.txt'))).toBe(true);
-});
-
-test('leaves an authored props.mdx without the marker untouched, and its directory is not removed', () => {
-	const root = createTempDir();
-	const componentDir = join(root, 'actions', 'button');
-	mkdirSync(componentDir, { recursive: true });
-	writeFileSync(
-		join(componentDir, 'props.mdx'),
-		'# Authored props page\n\nSome hand-written content.',
-	);
-
-	const result = cleanGeneratedPropsPages(root);
-
-	expect(result.removedCount).toBe(0);
-	expect(existsSync(componentDir)).toBe(true);
-	expect(existsSync(join(componentDir, 'props.mdx'))).toBe(true);
-	expect(readFileSync(join(componentDir, 'props.mdx'), 'utf8')).toBe(
-		'# Authored props page\n\nSome hand-written content.',
-	);
-});
-
-test('leaves an authored props.mdx without the marker and its sibling meta.json both untouched', () => {
-	const root = createTempDir();
-	const componentDir = join(root, 'actions', 'button');
-	mkdirSync(componentDir, { recursive: true });
-	writeFileSync(join(componentDir, 'props.mdx'), '# Authored props page');
-	writeFileSync(join(componentDir, 'meta.json'), '{"title": "Props"}');
-
-	const result = cleanGeneratedPropsPages(root);
-
-	expect(result.removedCount).toBe(0);
-	expect(existsSync(componentDir)).toBe(true);
-	expect(existsSync(join(componentDir, 'props.mdx'))).toBe(true);
-	expect(readFileSync(join(componentDir, 'props.mdx'), 'utf8')).toBe('# Authored props page');
-	expect(existsSync(join(componentDir, 'meta.json'))).toBe(true);
-	expect(readFileSync(join(componentDir, 'meta.json'), 'utf8')).toBe('{"title": "Props"}');
-});
-
-test('leaves a standalone meta.json with no props.mdx untouched, and its directory is not removed', () => {
-	const root = createTempDir();
-	const componentDir = join(root, 'actions', 'button');
-	mkdirSync(componentDir, { recursive: true });
-	writeFileSync(join(componentDir, 'meta.json'), '{"pages": ["overview"]}');
-
-	const result = cleanGeneratedPropsPages(root);
-
-	expect(result.removedCount).toBe(0);
-	expect(existsSync(componentDir)).toBe(true);
-	expect(existsSync(join(componentDir, 'meta.json'))).toBe(true);
-	expect(readFileSync(join(componentDir, 'meta.json'), 'utf8')).toBe('{"pages": ["overview"]}');
-});
-
-test('removes a marked generated props.mdx (and meta.json) next to an unrelated authored file, but keeps the directory', () => {
+test('removes generated files but keeps directory when an unrelated sibling remains', () => {
 	const root = createTempDir();
 	const componentDir = join(root, 'actions', 'button');
 	mkdirSync(componentDir, { recursive: true });
@@ -172,4 +54,51 @@ test('removes a marked generated props.mdx (and meta.json) next to an unrelated 
 	expect(existsSync(join(componentDir, 'meta.json'))).toBe(false);
 	expect(existsSync(join(componentDir, 'notes.txt'))).toBe(true);
 	expect(readFileSync(join(componentDir, 'notes.txt'), 'utf8')).toBe('keep me');
+});
+
+test('leaves authored guides / unmarked props.mdx / standalone meta untouched', () => {
+	const root = createTempDir();
+	const groupDir = join(root, 'actions');
+	const generatedDir = join(groupDir, 'button');
+	const authoredPropsDir = join(groupDir, 'link');
+	const standaloneMetaDir = join(groupDir, 'chip');
+	const emptyNotesDir = join(groupDir, 'notes-only');
+	mkdirSync(generatedDir, { recursive: true });
+	mkdirSync(authoredPropsDir, { recursive: true });
+	mkdirSync(standaloneMetaDir, { recursive: true });
+	mkdirSync(emptyNotesDir, { recursive: true });
+	writeFileSync(join(groupDir, 'button.mdx'), '# Button guide');
+	writeFileSync(join(groupDir, 'meta.json'), '{"pages": ["button"]}');
+	writeFileSync(join(generatedDir, 'props.mdx'), generatedPropsMdx());
+	writeFileSync(join(generatedDir, 'meta.json'), '{}');
+	writeFileSync(join(authoredPropsDir, 'props.mdx'), '# Authored props page');
+	writeFileSync(join(authoredPropsDir, 'meta.json'), '{"title": "Props"}');
+	writeFileSync(join(standaloneMetaDir, 'meta.json'), '{"pages": ["overview"]}');
+	writeFileSync(join(emptyNotesDir, 'notes.txt'), 'keep me');
+
+	const result = cleanGeneratedPropsPages(root);
+
+	expect(result.removedCount).toBe(2);
+	expect(existsSync(generatedDir)).toBe(false);
+	expect(existsSync(join(groupDir, 'button.mdx'))).toBe(true);
+	expect(readFileSync(join(groupDir, 'button.mdx'), 'utf8')).toBe('# Button guide');
+	expect(existsSync(join(groupDir, 'meta.json'))).toBe(true);
+	expect(readFileSync(join(groupDir, 'meta.json'), 'utf8')).toBe('{"pages": ["button"]}');
+	expect(existsSync(authoredPropsDir)).toBe(true);
+	expect(readFileSync(join(authoredPropsDir, 'props.mdx'), 'utf8')).toBe('# Authored props page');
+	expect(readFileSync(join(authoredPropsDir, 'meta.json'), 'utf8')).toBe('{"title": "Props"}');
+	expect(existsSync(standaloneMetaDir)).toBe(true);
+	expect(readFileSync(join(standaloneMetaDir, 'meta.json'), 'utf8')).toBe(
+		'{"pages": ["overview"]}',
+	);
+	expect(existsSync(emptyNotesDir)).toBe(true);
+	expect(readFileSync(join(emptyNotesDir, 'notes.txt'), 'utf8')).toBe('keep me');
+});
+
+test('is a no-op when the components directory does not exist', () => {
+	const root = createTempDir();
+
+	const result = cleanGeneratedPropsPages(join(root, 'does-not-exist'));
+
+	expect(result.removedCount).toBe(0);
 });

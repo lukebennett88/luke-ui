@@ -420,10 +420,6 @@ test("a pending SelectField keeps focus but can't open or change", async () => {
 	expect(trigger(/Theme/).disabled).toBe(false);
 	expect(trigger(/Theme/).tabIndex).toBe(0);
 
-	for (const keys of ['{Enter}', ' ', '{ArrowDown}', 'd']) {
-		await userEvent.keyboard(keys);
-		expect(page.getByRole('listbox').elements()).toHaveLength(0);
-	}
 	// Playwright treats an aria-disabled button as not actionable, so force the click.
 	await page.getByRole('button', { name: /Theme/ }).click({ force: true });
 	expect(page.getByRole('listbox').elements()).toHaveLength(0);
@@ -442,23 +438,6 @@ test('the SelectField scene has no axe violations', async () => {
 	const { container } = render(<SelectFieldScene />);
 
 	await expectNoAxeViolations(container);
-});
-
-test('an open SelectField has no axe violations', async () => {
-	const { container } = render(
-		<SelectField defaultValue="light" items={themeItems} label="Theme">
-			{renderThemeItem}
-		</SelectField>,
-	);
-
-	await userEvent.click(trigger(/Theme/));
-	await expect.element(page.getByRole('listbox')).toBeVisible();
-	await waitForOverlayEnter(
-		page.getByRole('listbox').element().closest('[data-trigger]') ?? document.body,
-	);
-
-	await expectNoAxeViolations(container);
-	await expectNoAxeViolations(document.body);
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {

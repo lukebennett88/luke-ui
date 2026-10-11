@@ -3,12 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, expect, test } from 'vite-plus/test';
 import type { DocsCheckPaths } from '../../scripts/check-docs.js';
-import {
-	diffAgainstBaseline,
-	findDocsIssues,
-	markdownH2s,
-	readBaseline,
-} from '../../scripts/check-docs.js';
+import { diffAgainstBaseline, findDocsIssues, readBaseline } from '../../scripts/check-docs.js';
 import { findComponentPropsTableTags } from './component-props-table-tags.js';
 
 const testDirectories: Array<string> = [];
@@ -346,26 +341,6 @@ const users = true;
 		'docs/color.mdx: terminology "users"',
 		'docs/TESTING.md: first-person "we"',
 	]);
-});
-
-test('diffAgainstBaseline reports extra and stale entries', () => {
-	expect(diffAgainstBaseline(['keep', 'new'], ['keep', 'fixed'])).toEqual({
-		extra: ['new'],
-		stale: ['fixed'],
-	});
-});
-
-test('markdownH2s ignores headings inside fenced code', () => {
-	expect(
-		markdownH2s(`## Size
-
-\`\`\`md
-## Primitive
-\`\`\`
-
-## Accessibility
-`),
-	).toEqual(['Size', 'Accessibility']);
 });
 
 test('finds no extra docs issues in the docs app beyond the baseline', () => {

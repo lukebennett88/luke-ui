@@ -67,13 +67,6 @@ not as inline string constants.
 
 See [TESTING.md](TESTING.md) for test type, placement, and writing rules.
 
-Short version:
-
-- Use the smallest test surface that proves the behaviour.
-- Colocate tests with the source they cover.
-- Test through public APIs and role-based queries.
-- Start bug fixes with a failing test that reproduces the bug.
-
 ## Components
 
 Components wrap `react-aria-components` and use `composeRenderProps` for styling.
