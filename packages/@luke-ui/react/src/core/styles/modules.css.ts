@@ -25,7 +25,7 @@ import '../loading-skeleton/styles.css.js';
 import '../loading-spinner/recipe.css.js';
 import '../overlays/mobile-overlay.css.js';
 import '../prose/recipe.css.js';
-import '../styles/pending-spinner-overlay.css.js';
+import '../pending-spinner/styles.css.js';
 import '../track/recipe.css.js';
 import '../grid/recipe.css.js';
 import '../scroll-fade/recipe.css.js';

@@ -104,7 +104,6 @@ const surfaceRtl = {
 // Only the root runs the animation; descendants inherit `sheenPositionVar`. Not `!important` so the
 // reduced-motion override below can turn it off.
 const sheen = {
-	animationDelay: '0.5s',
 	animationDuration: '3s',
 	animationIterationCount: 'infinite',
 	animationName: skeletonAnimationName,

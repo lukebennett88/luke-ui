@@ -1,19 +1,17 @@
 import type { JSX, ReactNode } from 'react';
+import { cx } from '../../shared/utils/utils.js';
 import type { ButtonPresentationProps } from '../action-presentation.js';
-import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
+import { PendingSpinner } from '../pending-spinner/pending-spinner.js';
+import { pendingContent } from '../pending-spinner/styles.css.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/button.js';
 import { Button as PrimitiveButton } from '../primitives/button/button.js';
-import { pendingSpinnerOverlay } from '../styles/pending-spinner-overlay.css.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import type { PressAction } from '../use-press-action/use-press-action.js';
 import { usePressAction } from '../use-press-action/use-press-action.js';
-import type { ButtonLabelVariants } from './styles.css.js';
 import { buttonContent, buttonLabel } from './styles.css.js';
-
-interface ButtonLabelRecipeProps extends NonNullable<ButtonLabelVariants> {}
 
 type ButtonContentProps =
 	| {
@@ -48,7 +46,7 @@ type _ButtonProps = _ButtonOmit &
 		 * immediately. Prefer `pressAction` for Button-owned operations.
 		 * @default false
 		 */
-		isPending?: ButtonLabelRecipeProps['isPending'];
+		isPending?: boolean;
 		/**
 		 * Button-owned operation run as a React Action. The button becomes pending automatically until
 		 * the Action settles. `onPress` handles the interaction. `pressAction` performs the resulting
@@ -97,13 +95,9 @@ export function Button(props: ButtonProps): JSX.Element {
 			>
 				{(renderProps) => (
 					<>
-						{showSpinner && (
-							<span aria-hidden className={pendingSpinnerOverlay()}>
-								<LoadingSpinner aria-hidden />
-							</span>
-						)}
+						{showSpinner && <PendingSpinner />}
 						<Text
-							className={buttonLabel({ isPending: showSpinner })}
+							className={pendingContent({ isPending: showSpinner })}
 							elementType="span"
 							shouldInheritFont
 							textDecoration="inherit"
@@ -125,12 +119,13 @@ export function Button(props: ButtonProps): JSX.Element {
 		>
 			{(renderProps) => (
 				<span className={buttonContent()}>
-					{showSpinner && (
-						<span aria-hidden className={pendingSpinnerOverlay()}>
-							<LoadingSpinner aria-hidden />
-						</span>
-					)}
-					<span className={buttonLabel({ hasAdornments: true, isPending: showSpinner })}>
+					{showSpinner && <PendingSpinner />}
+					<span
+						className={cx(
+							pendingContent({ isPending: showSpinner }),
+							buttonLabel({ hasAdornments: true }),
+						)}
+					>
 						{startContent}
 						<Text elementType="span" lineClamp shouldInheritFont>
 							{typeof children === 'function' ? children(renderProps) : children}

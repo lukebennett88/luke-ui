@@ -144,8 +144,9 @@ test('uses the effective writing direction for sheen travel under nested dir ove
 	const ltrBaseline = inlineSkeletonSurface(locator.getByText('ltr baseline').element());
 	const rtlBaseline = inlineSkeletonSurface(locator.getByText('rtl baseline').element());
 
-	// Past the 0.5s delay, mid-cycle, so LTR/RTL positions differ and stay still for the assert.
-	pauseSheenAt(2000);
+	// Paused at 1500ms, where LTR and RTL positions differ. At 2000ms the linear sheen reaches 0%,
+	// where both directions coincide.
+	pauseSheenAt(1500);
 
 	expect(sheenPositionX(rtlThenLtr)).toBe(sheenPositionX(ltrBaseline));
 	expect(sheenPositionX(ltrThenRtl)).toBe(sheenPositionX(rtlBaseline));

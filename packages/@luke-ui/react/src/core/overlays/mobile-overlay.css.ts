@@ -1,7 +1,7 @@
 import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import { style } from '../styles/layered-style.css.js';
-import { overlayEnterTransition, overlayExitTransition } from '../styles/overlay-motion.js';
+import { overlayMotion } from '../styles/overlay-motion.js';
 
 const trayPaddingBlockEnd = createVar();
 
@@ -24,107 +24,75 @@ const keyboardInset = `calc(100dvh - var(--visual-viewport-height))`;
 const safeAreaInset = `env(safe-area-inset-bottom, 0px)`;
 const trayPaddingBlockEndValue = `calc(max(${keyboardInset}, ${safeAreaInset}) + 100vh)`;
 
-// The sheet and its scrim are overlays, so they take the shared overlay motion roles. See
-// `styles/overlay-motion.ts` for the roles and the reduced-motion rule that follows from them.
-const scrimTransition = overlayEnterTransition(['opacity']);
-const scrimExitTransition = overlayExitTransition(['opacity']);
-
-const trayTransition = overlayEnterTransition(['opacity', 'translate']);
-const trayExitTransition = overlayExitTransition(['opacity', 'translate']);
-const trayReducedTransition = overlayEnterTransition(['opacity']);
-const trayReducedExitTransition = overlayExitTransition(['opacity']);
-
 /** Based on Apache-2.0 React Spectrum `Tray.tsx` and `tray/index.css`. */
-export const mobileOverlay = style({
-	backgroundColor: vars.color.overlay.backdrop,
-	blockSize: '100dvh',
-	insetInline: 0,
-	position: 'absolute',
-	transition: scrimTransition,
-	// Nothing else in this package sets a competing z-index, so this is not calibrated
-	// against anything of ours. It is a floor meant to sit above consumer page content.
-	zIndex: 100,
-
-	// The scrim only fades, so it keeps its transition under reduced motion.
-	selectors: {
-		'&[data-entering]': {
-			opacity: 0,
+export const mobileOverlay = style(
+	overlayMotion({
+		hidden: { opacity: 0 },
+		properties: ['opacity'],
+		rule: {
+			backgroundColor: vars.color.overlay.backdrop,
+			blockSize: '100dvh',
+			insetInline: 0,
+			position: 'absolute',
+			// Nothing else in this package sets a competing z-index, so this is not calibrated
+			// against anything of ours. It is a floor meant to sit above consumer page content.
+			zIndex: 100,
 		},
-		'&[data-exiting]': {
-			opacity: 0,
-			transition: scrimExitTransition,
-		},
-	},
-});
+	}),
+);
 
-export const mobileModal = style({
-	backgroundColor: vars.color.surface.overlay,
-	blockSize: `calc(var(--visual-viewport-height) - ${trayInsetBlockStart})`,
-	borderEndEndRadius: 0,
-	borderEndStartRadius: 0,
-	borderStartEndRadius: vars.radius.overlay,
-	borderStartStartRadius: vars.radius.overlay,
-	borderStyle: 'solid',
-	borderWidth: trayBorderWidth,
-	// Physical on purpose, paired with `top` below. The two preserve an intended over-constraint
-	// that logical block insets would resolve from the wrong edge on a content-box element.
-	bottom: '-100vh',
-	boxShadow: vars.depth.floating,
-	boxSizing: 'content-box',
-	display: 'flex',
-	flexDirection: 'column',
-	insetInline: 0,
-	// The tray is absolutely positioned, so auto inline margins centre it against the
-	// zero inline insets once the cap starts clamping its width.
-	marginInline: 'auto',
-	maxInlineSize: trayMaxContentInlineSize,
-	overflow: 'hidden',
-	paddingBlockEnd: trayPaddingBlockEnd,
-	position: 'absolute',
-	// Physical on purpose, paired with `bottom` above. See the note there.
-	top: trayInsetBlockStart,
-	transition: trayTransition,
-	translate: 'none',
-	vars: {
-		[trayPaddingBlockEnd]: trayPaddingBlockEndValue,
-	},
+export const mobileModal = style(
+	overlayMotion({
+		hidden: { opacity: 0, translate: '0 calc(100% - 100vh)' },
+		properties: ['opacity', 'translate'],
+		rule: {
+			backgroundColor: vars.color.surface.overlay,
+			blockSize: `calc(var(--visual-viewport-height) - ${trayInsetBlockStart})`,
+			borderEndEndRadius: 0,
+			borderEndStartRadius: 0,
+			borderStartEndRadius: vars.radius.overlay,
+			borderStartStartRadius: vars.radius.overlay,
+			borderStyle: 'solid',
+			borderWidth: trayBorderWidth,
+			// Physical on purpose, paired with `top` below. The two preserve an intended over-constraint
+			// that logical block insets would resolve from the wrong edge on a content-box element.
+			bottom: '-100vh',
+			boxShadow: vars.depth.floating,
+			boxSizing: 'content-box',
+			display: 'flex',
+			flexDirection: 'column',
+			insetInline: 0,
+			// The tray is absolutely positioned, so auto inline margins centre it against the
+			// zero inline insets once the cap starts clamping its width.
+			marginInline: 'auto',
+			maxInlineSize: trayMaxContentInlineSize,
+			overflow: 'hidden',
+			paddingBlockEnd: trayPaddingBlockEnd,
+			position: 'absolute',
+			// Physical on purpose, paired with `bottom` above. See the note there.
+			top: trayInsetBlockStart,
+			translate: 'none',
+			vars: {
+				[trayPaddingBlockEnd]: trayPaddingBlockEndValue,
+			},
 
-	selectors: {
-		'&[data-entering]': {
-			opacity: 0,
-			translate: '0 calc(100% - 100vh)',
-		},
-		'&[data-exiting]': {
-			opacity: 0,
-			transition: trayExitTransition,
-			translate: '0 calc(100% - 100vh)',
-		},
-	},
-
-	'@media': {
-		'(forced-colors: active)': {
-			backgroundColor: 'Canvas',
-			borderColor: 'CanvasText',
-			boxShadow: 'none',
-			forcedColorAdjust: 'auto',
-		},
-		// The fade stays and the slide goes. See `styles/overlay-motion.ts`.
-		'(prefers-reduced-motion: reduce)': {
-			transition: trayReducedTransition,
-
-			selectors: {
-				'&[data-entering]': { translate: 'none' },
-				'&[data-exiting]': { transition: trayReducedExitTransition, translate: 'none' },
+			'@media': {
+				'(forced-colors: active)': {
+					backgroundColor: 'Canvas',
+					borderColor: 'CanvasText',
+					boxShadow: 'none',
+					forcedColorAdjust: 'auto',
+				},
+				// Past the cap the tray is inset from the viewport edges, so its bottom corners are
+				// no longer flush and have to be rounded like the top ones.
+				[`(width > ${trayMaxInlineSize})`]: {
+					borderEndEndRadius: vars.radius.overlay,
+					borderEndStartRadius: vars.radius.overlay,
+				},
 			},
 		},
-		// Past the cap the tray is inset from the viewport edges, so its bottom corners are
-		// no longer flush and have to be rounded like the top ones.
-		[`(width > ${trayMaxInlineSize})`]: {
-			borderEndEndRadius: vars.radius.overlay,
-			borderEndStartRadius: vars.radius.overlay,
-		},
-	},
-});
+	}),
+);
 
 export const mobileDialog = style({
 	display: 'flex',

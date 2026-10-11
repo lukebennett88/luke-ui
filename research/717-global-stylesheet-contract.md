@@ -215,6 +215,7 @@ One indicator per control:
 | Switch thumb                                                                  | The thumb stops sliding and stretching. Its colour transition stays.                          |
 | Combobox and Select popovers                                                  | Opacity fades stay. Movement is removed, including on `[data-entering]` and `[data-exiting]`. |
 | Mobile tray and scrim                                                         | Opacity fades stay. The tray no longer slides.                                                |
+| Button and IconButton pending state                                           | The cross-fade between the spinner and the content it covers stays.                           |
 | LoadingSpinner                                                                | Rotation and rubber-band animation stop. A fixed arc remains so the busy state stays visible. |
 | LoadingSkeleton                                                               | The sheen stops and the placeholder surface stays.                                            |
 | ScrollFade                                                                    | Exempt: scroll-linked, not time-based.                                                        |

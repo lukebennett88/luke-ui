@@ -8,6 +8,7 @@ import {
 	docsTabletMaxInlineSize,
 	docsTabletMinInlineSize,
 } from '../lib/docs-container-queries.js';
+import { overlayMotion } from '../lib/overlay-motion.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
 export const header = style({
@@ -180,16 +181,25 @@ export const mobileThemeTrigger = style({
 export const appearancePopover = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.overlay,
-			border: `1px solid ${vars.color.border.decorative}`,
-			borderRadius: vars.radius.surface,
-			boxShadow: vars.depth.floating,
-			maxInlineSize: 'calc(100vw - 2rem)',
-			padding: vars.space.sp8,
-			zIndex: 50,
+			// The popover opens below its trigger, so it settles down from just above.
+			...overlayMotion({
+				hidden: { opacity: 0, translate: '0 -4px' },
+				properties: ['opacity', 'translate'],
+				rule: {
+					backgroundColor: vars.color.surface.overlay,
+					border: `1px solid ${vars.color.border.decorative}`,
+					borderRadius: vars.radius.surface,
+					boxShadow: vars.depth.floating,
+					maxInlineSize: 'calc(100vw - 2rem)',
+					padding: vars.space.sp8,
+					translate: 'none',
+					zIndex: 50,
+				},
+			}),
 		},
 	},
 });
+
 export const appearanceDialog = style({
 	'@layer': {
 		components: {},

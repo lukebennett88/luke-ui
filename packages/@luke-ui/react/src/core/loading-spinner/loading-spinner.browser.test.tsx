@@ -65,22 +65,34 @@ test('the LoadingSpinner scene has no axe violations', async () => {
 	await expectNoAxeViolations(container);
 });
 
-test('shows a static fixed arc under prefers-reduced-motion: reduce', async () => {
-	const { container } = render(<LoadingSpinner aria-label="Loading" />);
-	const spinner = container.querySelector('[role="status"]');
-	if (!(spinner instanceof HTMLElement)) throw new Error('Expected the loading status.');
-	const indicator = spinner.querySelector('circle');
-	if (indicator == null) throw new Error('Expected the spinner indicator circle.');
+test('animates the root and the indicator by default', () => {
+	const { container } = render(<LoadingSpinner />);
 
-	expect(getComputedStyle(spinner).animationName).not.toBe('none');
+	const root = container.querySelector('[role="status"]');
+	const indicator = container.querySelector('circle');
+	if (!(root instanceof HTMLElement) || indicator === null) {
+		throw new Error('Expected a LoadingSpinner root and indicator.');
+	}
+
+	expect(getComputedStyle(root).animationName).not.toBe('none');
 	expect(getComputedStyle(indicator).animationName).not.toBe('none');
+});
 
+test('stops rotating and keeps a static arc under prefers-reduced-motion: reduce', async () => {
 	await emulateReducedMotion(true);
 
-	expect(spinner).toHaveAccessibleName('Loading');
-	expect(getComputedStyle(spinner).animationName).toBe('none');
+	const { container } = render(<LoadingSpinner />);
+
+	const root = container.querySelector('[role="status"]');
+	const indicator = container.querySelector('circle');
+	if (!(root instanceof HTMLElement) || indicator === null) {
+		throw new Error('Expected a LoadingSpinner root and indicator.');
+	}
+
+	expect(getComputedStyle(root).animationName).toBe('none');
 	expect(getComputedStyle(indicator).animationName).toBe('none');
-	expect(getComputedStyle(indicator).strokeDasharray).not.toBe('none');
+	expect(getComputedStyle(indicator).strokeDasharray.replaceAll('px', '')).toBe('25, 100');
+	expect(getComputedStyle(indicator).strokeDashoffset.replaceAll('px', '')).toBe('0');
 });
 
 test('sizes and colors', { tags: ['visual'] }, async () => {

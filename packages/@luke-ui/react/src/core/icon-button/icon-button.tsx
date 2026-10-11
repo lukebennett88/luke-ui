@@ -4,17 +4,17 @@ import { cx } from '../../shared/utils/utils.js';
 import type { IconButtonPresentationProps } from '../action-presentation.js';
 import type { IconName } from '../icon/icon.js';
 import { Icon } from '../icon/icon.js';
-import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
+import { PendingSpinner } from '../pending-spinner/pending-spinner.js';
+import { pendingContent } from '../pending-spinner/styles.css.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/button.js';
 import { Button } from '../primitives/button/button.js';
-import { pendingSpinnerOverlay } from '../styles/pending-spinner-overlay.css.js';
 import type { RequiredAccessibleName } from '../types/accessible-name.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import type { PressAction } from '../use-press-action/use-press-action.js';
 import { usePressAction } from '../use-press-action/use-press-action.js';
-import { iconButtonIcon, iconButtonRecipe, iconButtonReset } from './recipe.css.js';
+import { iconButtonRecipe, iconButtonReset } from './recipe.css.js';
 import { iconOnlyIconWrapper } from './styles.css.js';
 
 interface IconButtonBaseProps extends IconButtonPresentationProps {
@@ -88,14 +88,10 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 			size={size}
 			tone={tone}
 		>
-			{showSpinner && (
-				<span aria-hidden className={pendingSpinnerOverlay()}>
-					<LoadingSpinner aria-hidden />
-				</span>
-			)}
+			{showSpinner && <PendingSpinner />}
 			<span
 				aria-hidden
-				className={cx(iconOnlyIconWrapper, iconButtonIcon({ isPending: showSpinner }))}
+				className={cx(iconOnlyIconWrapper, pendingContent({ isPending: showSpinner }))}
 			>
 				{typeof icon === 'string' ? <Icon name={icon} /> : icon}
 			</span>

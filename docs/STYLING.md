@@ -195,7 +195,8 @@ never disables an application's animations. Under `@media (prefers-reduced-motio
 - Keep short non-spatial feedback: colour, border, shadow, and opacity transitions. Do not add a
   reduced-motion query that only removes them.
 - Remove spatial movement, scaling, pulsing, and looping, or replace it with a non-spatial change.
-  An overlay keeps its fade and loses its movement. See `core/styles/overlay-motion.ts`.
+  An overlay keeps its fade and loses its movement. Build overlay motion with `overlayMotion` from
+  `core/styles/overlay-motion.ts`, which generates those reduced-motion rules.
 - Keep loading states understandable. `LoadingSpinner` shows a static fixed arc. `LoadingSkeleton`
   keeps its static placeholder.
 - `ScrollFade`'s scroll-linked animation is exempt, because it tracks scroll position rather than

@@ -8,7 +8,7 @@ import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
 } from '../../styles/input-states.js';
-import { overlayEnterTransition, overlayExitTransition } from '../../styles/overlay-motion.js';
+import { overlayMotion } from '../../styles/overlay-motion.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
@@ -81,14 +81,6 @@ const comboboxActionStyles = {
 		[descendantDisabledSelector]: { color: vars.color.text.disabled },
 	},
 } satisfies StyleRule;
-
-// The popover is an overlay, so it takes the shared overlay motion roles. See
-// `styles/overlay-motion.ts` for the roles and the reduced-motion rule that follows from them.
-const popoverProperties = ['opacity', 'translate', 'box-shadow'];
-const popoverTransition = overlayEnterTransition(popoverProperties);
-const popoverExitTransition = overlayExitTransition(popoverProperties);
-const popoverReducedTransition = overlayEnterTransition(['opacity']);
-const popoverReducedExitTransition = overlayExitTransition(['opacity']);
 
 /**
  * Raw slotted config for the combobox anatomy.
@@ -189,48 +181,40 @@ const comboboxConfig = {
 			flexShrink: 0,
 			marginInlineStart: 'auto',
 		},
-		popover: {
-			'@media': {
-				'(forced-colors: active)': {
-					backgroundColor: 'Canvas',
-					borderColor: 'CanvasText',
-					boxShadow: 'none',
-					forcedColorAdjust: 'auto',
+		// The popover is an overlay, so it takes the shared overlay motion roles. See
+		// `styles/overlay-motion.ts` for the roles and the reduced-motion rule that follows from them.
+		popover: overlayMotion({
+			hidden: { opacity: 0 },
+			properties: ['opacity', 'translate', 'box-shadow'],
+			rule: {
+				'@media': {
+					'(forced-colors: active)': {
+						backgroundColor: 'Canvas',
+						borderColor: 'CanvasText',
+						boxShadow: 'none',
+						forcedColorAdjust: 'auto',
+					},
 				},
-				// The fade stays and the movement goes. See `styles/overlay-motion.ts`.
-				'(prefers-reduced-motion: reduce)': {
-					transition: popoverReducedTransition,
-					selectors: {
-						'&[data-entering]': { translate: 'none' },
-						'&[data-exiting]': { transition: popoverReducedExitTransition, translate: 'none' },
+				backgroundColor: vars.color.surface.overlay,
+				borderColor: vars.color.border.decorative,
+				borderRadius: vars.radius.surface,
+				borderStyle: 'solid',
+				borderWidth: '1px',
+				boxShadow: vars.depth.floating,
+				display: 'flex',
+				flexDirection: 'column',
+				inlineSize: 'var(--trigger-width)',
+				isolation: 'isolate',
+				minInlineSize: 'var(--trigger-width)',
+				overflow: 'hidden',
+
+				'@supports': {
+					'(min-block-size: calc-size(fit-content, size))': {
+						minBlockSize: 'calc-size(fit-content, min(size, 12em))',
 					},
 				},
 			},
-			backgroundColor: vars.color.surface.overlay,
-			borderColor: vars.color.border.decorative,
-			borderRadius: vars.radius.surface,
-			borderStyle: 'solid',
-			borderWidth: '1px',
-			boxShadow: vars.depth.floating,
-			display: 'flex',
-			flexDirection: 'column',
-			inlineSize: 'var(--trigger-width)',
-			isolation: 'isolate',
-			minInlineSize: 'var(--trigger-width)',
-			overflow: 'hidden',
-			transition: popoverTransition,
-
-			selectors: {
-				'&[data-entering]': { opacity: 0 },
-				'&[data-exiting]': { opacity: 0, transition: popoverExitTransition },
-			},
-
-			'@supports': {
-				'(min-block-size: calc-size(fit-content, size))': {
-					minBlockSize: 'calc-size(fit-content, min(size, 12em))',
-				},
-			},
-		},
+		}),
 		listBox: {
 			flex: 1,
 			inlineSize: '100%',
