@@ -1,5 +1,4 @@
 import { vars } from '../../theme/contract.css.js';
-import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /** Positioned wrapper for the button appearance, anchoring the absolute pending spinner. */
@@ -13,23 +12,12 @@ export const buttonContent = recipe({
 });
 
 /**
- * Hides the label while the pending spinner covers it. The button appearance also lays out
- * `startContent`/`endContent` around the label; the text appearance has no adornments.
+ * Lays out `startContent`/`endContent` around the label in the button appearance. The text
+ * appearance has no adornments.
  */
 export const buttonLabel = recipe({
-	base: {
-		transitionDuration: vars.motion.duration.feedback,
-		transitionProperty: 'opacity',
-		transitionTimingFunction: vars.motion.easing.standard,
-		'@media': {
-			'(prefers-reduced-motion: reduce)': {
-				transition: 'none',
-			},
-		},
-	},
 	defaultVariants: {
 		hasAdornments: false,
-		isPending: false,
 	},
 	variants: {
 		hasAdornments: {
@@ -41,13 +29,5 @@ export const buttonLabel = recipe({
 				minInlineSize: 0,
 			},
 		},
-		isPending: {
-			false: {},
-			true: {
-				opacity: 0,
-			},
-		},
 	},
 });
-
-export type ButtonLabelVariants = RecipeSelection<typeof buttonLabel>;

@@ -8,6 +8,7 @@ import {
 	docsTabletMaxInlineSize,
 	docsTabletMinInlineSize,
 } from '../lib/docs-container-queries.js';
+import { overlayMotion } from '../lib/overlay-motion.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
 export const header = style({
@@ -177,46 +178,24 @@ export const mobileThemeTrigger = style({
 	},
 });
 
-// Same overlay roles as the combobox popover and docs search. The package helpers are private.
-const popoverEnter = `opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}, translate ${vars.motion.duration.enter} ${vars.motion.easing.standard}`;
-const popoverExit = `opacity ${vars.motion.duration.exit} ${vars.motion.easing.exit}, translate ${vars.motion.duration.exit} ${vars.motion.easing.exit}`;
-
-// The popover opens below its trigger, so it settles down from just above.
-const popoverOffset = '0 -4px';
-
 export const appearancePopover = style({
 	'@layer': {
 		recipes: {
-			backgroundColor: vars.color.surface.overlay,
-			border: `1px solid ${vars.color.border.decorative}`,
-			borderRadius: vars.radius.surface,
-			boxShadow: vars.depth.floating,
-			maxInlineSize: 'calc(100vw - 2rem)',
-			padding: vars.space.sp8,
-			transition: popoverEnter,
-			translate: 'none',
-			zIndex: 50,
-			selectors: {
-				'&[data-entering]': {
-					opacity: 0,
-					translate: popoverOffset,
+			// The popover opens below its trigger, so it settles down from just above.
+			...overlayMotion({
+				hidden: { opacity: 0, translate: '0 -4px' },
+				properties: ['opacity', 'translate'],
+				rule: {
+					backgroundColor: vars.color.surface.overlay,
+					border: `1px solid ${vars.color.border.decorative}`,
+					borderRadius: vars.radius.surface,
+					boxShadow: vars.depth.floating,
+					maxInlineSize: 'calc(100vw - 2rem)',
+					padding: vars.space.sp8,
+					translate: 'none',
+					zIndex: 50,
 				},
-				'&[data-exiting]': {
-					opacity: 0,
-					transition: popoverExit,
-					translate: popoverOffset,
-				},
-			},
-			'@media': {
-				// Reduced motion must repeat `none` on each selector, or the state rules win.
-				'(prefers-reduced-motion: reduce)': {
-					transition: 'none',
-					selectors: {
-						'&[data-entering]': { opacity: 1, transition: 'none', translate: 'none' },
-						'&[data-exiting]': { opacity: 1, transition: 'none', translate: 'none' },
-					},
-				},
-			},
+			}),
 		},
 	},
 });

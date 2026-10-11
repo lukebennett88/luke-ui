@@ -7,26 +7,6 @@ export const iconButtonReset = style({
 	paddingInline: 0,
 });
 
-export const iconButtonIcon = recipe({
-	base: {
-		transitionDuration: vars.motion.duration.feedback,
-		transitionProperty: 'opacity',
-		transitionTimingFunction: vars.motion.easing.standard,
-		'@media': {
-			'(prefers-reduced-motion: reduce)': {
-				transition: 'none',
-			},
-		},
-	},
-	defaultVariants: { isPending: false },
-	variants: {
-		isPending: {
-			false: {},
-			true: { opacity: 0 },
-		},
-	},
-});
-
 export const iconButtonRecipe = recipe({
 	variants: {
 		size: {
