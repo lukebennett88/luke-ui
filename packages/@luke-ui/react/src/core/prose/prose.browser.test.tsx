@@ -10,6 +10,9 @@ import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
+const swatch =
+	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='64'%3E%3Crect width='320' height='64' fill='%23888'/%3E%3C/svg%3E";
+
 function query(root: Element, selector: string) {
 	const element = root.querySelector(selector);
 	if (element == null) throw new Error(`Expected a ${selector} in the document.`);
@@ -252,58 +255,86 @@ test('scrolls long preformatted lines without widening a narrow grid column', as
 			<pre tabIndex={0}>
 				<code>{code}</code>
 			</pre>
-			<Text elementType="pre" tabIndex={0}>
-				<Code>{code}</Code>
-			</Text>
 		</Prose>,
 	);
 	const root = query(locator.element(), 'div');
+	const pre = query(root, 'pre');
 
-	for (const pre of root.querySelectorAll('pre')) {
-		expect(pre.getBoundingClientRect().right).toBeLessThanOrEqual(
-			root.getBoundingClientRect().right + 1,
-		);
-		expect(pre.scrollWidth).toBeGreaterThan(pre.clientWidth);
-		pre.scrollLeft = 100;
-		expect(pre.scrollLeft).toBe(100);
-	}
+	expect(pre.getBoundingClientRect().right).toBeLessThanOrEqual(
+		root.getBoundingClientRect().right + 1,
+	);
+	expect(pre.scrollWidth).toBeGreaterThan(pre.clientWidth);
 
-	const firstPre = query(root, 'pre:first-of-type');
-	firstPre.scrollLeft = 0;
 	locator.getByRole('button', { name: 'Before code' }).element().focus();
 	await user.tab();
-	expect(firstPre).toHaveFocus();
+	expect(pre).toHaveFocus();
 	await user.keyboard('{ArrowRight}');
-	await expect.poll(() => firstPre.scrollLeft).toBeGreaterThan(0);
+	await expect.poll(() => pre.scrollLeft).toBeGreaterThan(0);
 });
 
-test('preserves line breaks in multiline Code inside pre', () => {
-	const code = 'first line\nsecond line';
+test('preserves whitespace in multiline pre code', () => {
 	const { locator } = render(
 		<Prose>
-			<Text elementType="pre">first line</Text>
-			<Text elementType="pre">{code}</Text>
-			<Text elementType="pre">
-				<Code>first line</Code>
-			</Text>
-			<Text elementType="pre">
-				<Code>{code}</Code>
-			</Text>
+			<pre>
+				<code>{'first line\nsecond line'}</code>
+			</pre>
+		</Prose>,
+	);
+	const pre = query(locator.element(), 'pre');
+
+	expect(getComputedStyle(pre).whiteSpace).toBe('pre');
+	expect(pre.textContent).toBe('first line\nsecond line');
+});
+
+test('styles table headers and body cells', () => {
+	const { locator } = render(
+		<Prose style={{ inlineSize: 160 }}>
+			<table>
+				<thead>
+					<tr>
+						<th scope="col">Step</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<th scope="row">Small</th>
+						<td>8px</td>
+					</tr>
+				</tbody>
+			</table>
 		</Prose>,
 	);
 	const root = locator.element();
-	const plainSingle = query(root, 'pre:nth-of-type(1)').getBoundingClientRect().height;
-	const plainMultiline = query(root, 'pre:nth-of-type(2)').getBoundingClientRect().height;
-	const composedSingle = query(root, 'pre:nth-of-type(3)').getBoundingClientRect().height;
-	const composedMultiline = query(root, 'pre:nth-of-type(4)').getBoundingClientRect().height;
+	const columnHeader = query(root, 'thead th');
+	const rowHeader = query(root, 'tbody th');
+	const cell = query(root, 'tbody td');
 
-	expect(plainMultiline).toBeGreaterThan(plainSingle);
-	expect(composedMultiline).toBeGreaterThan(composedSingle);
-	expect(composedMultiline).toBeCloseTo(plainMultiline, 0);
+	expect(query(root, 'table').getBoundingClientRect().width).toBeCloseTo(160, 0);
+	expect(getComputedStyle(columnHeader).verticalAlign).toBe('bottom');
+	expect(getComputedStyle(columnHeader).textAlign).toBe('start');
+	expect(getComputedStyle(rowHeader).verticalAlign).not.toBe('bottom');
+	expect(getComputedStyle(cell).verticalAlign).toBe('baseline');
+	expect(getComputedStyle(cell).paddingInlineStart).toBe('12px');
 });
 
-const swatch =
-	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='64'%3E%3Crect width='320' height='64' fill='%23888'/%3E%3C/svg%3E";
+test('keeps pre chrome outside a not-prose boundary', () => {
+	const { locator } = render(
+		<Prose>
+			<pre data-testid="styled">code</pre>
+			<div className="not-prose">
+				<pre data-testid="plain">code</pre>
+			</div>
+		</Prose>,
+	);
+	const root = locator.element();
+	const styled = getComputedStyle(query(root, '[data-testid="styled"]'));
+	const plain = getComputedStyle(query(root, '[data-testid="plain"]'));
+
+	expect(styled.overflowX).toBe('auto');
+	expect(styled.paddingInlineStart).toBe('16px');
+	expect(plain.overflowX).not.toBe('auto');
+	expect(plain.paddingInlineStart).toBe('0px');
+});
 
 const document = (
 	<Prose>
@@ -367,9 +398,6 @@ const document = (
 		<pre tabIndex={0}>
 			<code>{'padding-inline: var(--luke-space-sp16);\nmargin-block: 0;'}</code>
 		</pre>
-		<Text elementType="pre" tabIndex={0}>
-			<Code>{'padding-inline: var(--luke-space-sp16);\nmargin-block: 0;'}</Code>
-		</Text>
 		<img alt="" height={64} src={swatch} width={320} />
 		<picture>
 			<img alt="" height={64} src={swatch} width={320} />
