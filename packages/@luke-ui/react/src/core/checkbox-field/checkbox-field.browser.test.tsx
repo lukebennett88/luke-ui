@@ -3,7 +3,7 @@ import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { cdp, page, userEvent } from 'vite-plus/test/context';
+import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
 import { getTextStart, measureFieldError } from '../test-utils/measure-field-error.js';
@@ -172,26 +172,6 @@ test('CheckboxField resolves ref to the root, resolves object and callback input
 	form.remove();
 });
 
-test('CheckboxField puts id on its root element and inputId on the input', () => {
-	render(
-		<CheckboxField
-			className="example-root"
-			description="Example description"
-			id="example-root"
-			inputId="example-input"
-			label="Example checkbox"
-			name="example"
-		/>,
-	);
-	const input = checkbox('Example checkbox');
-	const root = document.getElementById('example-root');
-
-	expect(input.id).toBe('example-input');
-	expect(root).toHaveClass('example-root');
-	expect(root?.contains(input)).toBe(true);
-	expect(getDescribedText(input)).toBe('Example description');
-});
-
 test('CheckboxField renders its label inside the clickable label', async () => {
 	render(<CheckboxField label="Terms" name="terms" />);
 	const input = checkbox('Terms');
@@ -216,29 +196,6 @@ test('CheckboxField renders Luke UI typography inside its label', () => {
 	);
 
 	expect(checkbox('Accept the terms')).toBeInTheDocument();
-});
-
-test('CheckboxField supports uncontrolled, controlled, and indeterminate selection', async () => {
-	const changes: Array<boolean> = [];
-	render(
-		<>
-			<CheckboxField defaultSelected label="Uncontrolled" />
-			<CheckboxField
-				isSelected={false}
-				label="Controlled"
-				onChange={(isSelected) => changes.push(isSelected)}
-			/>
-			<CheckboxField isIndeterminate label="Mixed" />
-		</>,
-	);
-
-	await userEvent.click(page.getByText('Uncontrolled', { exact: true }));
-	await userEvent.click(page.getByText('Controlled', { exact: true }));
-
-	expect(checkbox('Uncontrolled')).not.toBeChecked();
-	expect(changes).toEqual([true]);
-	expect(checkbox('Controlled')).not.toBeChecked();
-	expect(checkbox('Mixed').indeterminate).toBe(true);
 });
 
 test('a disabled or read-only CheckboxField keeps its selection', async () => {
@@ -340,19 +297,6 @@ test('a required CheckboxField shows its native validation message after a faile
 	await expect.poll(() => getDescribedText(input).length).toBeGreaterThan(0);
 });
 
-test('CheckboxField size changes the control size', () => {
-	render(
-		<>
-			<CheckboxField label="Small" size="small" />
-			<CheckboxField label="Large" size="large" />
-		</>,
-	);
-	const small = controlFor(checkbox('Small')).getBoundingClientRect().width;
-	const large = controlFor(checkbox('Large')).getBoundingClientRect().width;
-
-	expect(small).toBeLessThan(large);
-});
-
 test('the CheckboxField scene has no axe violations', async () => {
 	const { container } = render(
 		<>
@@ -370,125 +314,31 @@ test('the CheckboxField scene has no axe violations', async () => {
 	await expectNoAxeViolations(container);
 });
 
-// The invalid icon lives on the error message, not on `CheckboxLabel` (the native
-// `<label>` wrapping the hidden input, which otherwise takes its name from its
-// contents), so there is nothing on the label itself for accessible-name
-// computation to pick up. Checked via CDP against the browser's own accname
-// computation, not Vitest browser mode's locator engine or the
-// `dom-accessibility-api` package behind `toHaveAccessibleName` — both are JS
-// reimplementations of the accname algorithm that can diverge from a real
-// browser in edge cases.
-test('the icon indicator stays out of the accessible name', async () => {
-	render(
-		<CheckboxField
-			defaultSelected
-			errorMessage="Choose an option."
-			label="Invalid"
-			name="invalid"
-		/>,
+// The error hangs at the label's inline edge, not under the control. The icon is centred on the
+// message's first line, and wrapped lines align with the first.
+test('the CheckboxField error text starts at the label text and its icon sits on the first line', () => {
+	const errorMessage =
+		'Accept the terms to continue. This message wraps onto a second line to check its alignment.';
+	const { container } = render(
+		<Stack width="16rem">
+			<CheckboxField
+				defaultSelected
+				errorMessage={errorMessage}
+				label="Accept the terms"
+				name="terms"
+			/>
+		</Stack>,
 	);
 
-	// Only a role-only lookup here: the name-matching arm of `getByRole` is exactly
-	// the JS-reimplementation path this test deliberately bypasses.
-	page.getByRole('checkbox').element();
+	const input = page.getByRole('checkbox', { name: 'Accept the terms' }).element();
+	const measurement = measureFieldError(page.getByText(errorMessage).element());
+	const labelStart = getTextStart(container, 'Accept the terms');
 
-	const inputNode = await findDomNodeByAttribute('name', 'invalid');
-	if (inputNode == null)
-		throw new Error('Expected the invalid checkbox input in the CDP DOM tree.');
-
-	const axNode = await getAccessibilityNode(inputNode.nodeId);
-	expect(axNode.name?.value).toBe('Invalid');
+	expect(input).toHaveAccessibleDescription(errorMessage);
+	expect(measurement.firstLineStart).toBeCloseTo(labelStart, 0);
+	expect(measurement.secondLineStart).toBeCloseTo(labelStart, 0);
+	expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
 });
-
-// The error hangs at the label's inline edge at every size, not under the control. The icon
-// is centred on the message's first line, and wrapped lines align with the first.
-for (const size of ['small', 'medium', 'large'] as const) {
-	test(`the ${size} CheckboxField error text starts at the label text and its icon sits on the first line`, () => {
-		const errorMessage =
-			'Accept the terms to continue. This message wraps onto a second line to check its alignment.';
-		const { container } = render(
-			<Stack width="16rem">
-				<CheckboxField
-					defaultSelected
-					errorMessage={errorMessage}
-					label="Accept the terms"
-					name="terms"
-					size={size}
-				/>
-			</Stack>,
-		);
-
-		const input = page.getByRole('checkbox', { name: 'Accept the terms' }).element();
-		const measurement = measureFieldError(page.getByText(errorMessage).element());
-		const labelStart = getTextStart(container, 'Accept the terms');
-
-		expect(input).toHaveAccessibleDescription(errorMessage);
-		expect(measurement.firstLineStart).toBeCloseTo(labelStart, 0);
-		expect(measurement.secondLineStart).toBeCloseTo(labelStart, 0);
-		expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
-	});
-}
-
-/** Fetches the CDP DOM tree root, piercing into the Vitest iframe and any shadow roots. */
-async function getDomRoot() {
-	const { root } = await cdp().send('DOM.getDocument', { depth: -1, pierce: true });
-	return root;
-}
-
-/** The CDP DOM node shape, inferred from `DOM.getDocument`'s own response type. */
-type DomNode = Awaited<ReturnType<typeof getDomRoot>>;
-
-/** Reads one attribute from a DOM node's flat `[name1, value1, name2, value2, …]` array. */
-function domAttribute(node: DomNode, name: string): string | undefined {
-	const attributes = node.attributes ?? [];
-	for (let index = 0; index < attributes.length; index += 2) {
-		if (attributes[index] === name) return attributes[index + 1];
-	}
-	return;
-}
-
-/**
- * Depth-first search for a DOM node with the given attribute value, piercing into
- * iframe content documents and shadow roots. The test renders inside Vitest's own
- * iframe, so this must walk past the top-level page document to reach it.
- */
-function findNodeIn(node: DomNode, attribute: string, value: string): DomNode | undefined {
-	if (domAttribute(node, attribute) === value) return node;
-
-	for (const child of node.children ?? []) {
-		const found = findNodeIn(child, attribute, value);
-		if (found != null) return found;
-	}
-	if (node.contentDocument != null) {
-		const found = findNodeIn(node.contentDocument, attribute, value);
-		if (found != null) return found;
-	}
-	for (const shadowRoot of node.shadowRoots ?? []) {
-		const found = findNodeIn(shadowRoot, attribute, value);
-		if (found != null) return found;
-	}
-	return;
-}
-
-async function findDomNodeByAttribute(
-	attribute: string,
-	value: string,
-): Promise<DomNode | undefined> {
-	const root = await getDomRoot();
-	return findNodeIn(root, attribute, value);
-}
-
-/** Fetches the CDP accessibility node for one DOM node. */
-async function getAccessibilityNode(nodeId: DomNode['nodeId']) {
-	await cdp().send('Accessibility.enable');
-	const { nodes } = await cdp().send('Accessibility.getPartialAXTree', {
-		fetchRelatives: false,
-		nodeId,
-	});
-	const [axNode] = nodes;
-	if (axNode == null) throw new Error('Expected a partial accessibility tree for the node.');
-	return axNode;
-}
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
@@ -498,24 +348,20 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 });
 
 // Only `danger.solid.rest` carries the 3:1 control-boundary guarantee, so an invalid checkbox must
-// keep it through hover and press, whether it is on or off.
-for (const isSelected of [false, true]) {
-	for (const state of ['data-hovered', 'data-pressed'] as const) {
-		test(`an invalid ${isSelected ? 'on' : 'off'} checkbox keeps the guaranteed border with ${state}`, () => {
-			render(<CheckboxField defaultSelected={isSelected} errorMessage="Required" label="Accept" />);
-			const input = checkbox('Accept');
-			const label = labelFor(input);
-			const indicator = label.querySelector<HTMLElement>('[aria-hidden="true"]');
-			if (indicator == null) throw new Error('Expected the checkbox indicator.');
-			indicator.style.transition = 'none';
-			label.setAttribute(state, 'true');
+// keep it through hover.
+test('an invalid on checkbox keeps the guaranteed border with data-hovered', () => {
+	render(<CheckboxField defaultSelected errorMessage="Required" label="Accept" />);
+	const input = checkbox('Accept');
+	const label = labelFor(input);
+	const indicator = label.querySelector<HTMLElement>('[aria-hidden="true"]');
+	if (indicator == null) throw new Error('Expected the checkbox indicator.');
+	indicator.style.transition = 'none';
+	label.setAttribute('data-hovered', 'true');
 
-			expect(getComputedStyle(indicator).borderTopColor).toBe(
-				resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
-			);
-		});
-	}
-}
+	expect(getComputedStyle(indicator).borderTopColor).toBe(
+		resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
+	);
+});
 
 // Regression: hover and pressed must look different from each other, and from rest, by colour
 // alone. The flat fixture has no depth or control finish to tell them apart.

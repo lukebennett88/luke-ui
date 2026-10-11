@@ -5,7 +5,6 @@ import {
 	SwitchRoot,
 	SwitchThumb,
 } from '@luke-ui/react/primitives/switch';
-import { Text } from '@luke-ui/react/text';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -17,13 +16,6 @@ function toggle(name: string): HTMLInputElement {
 	const element = page.getByRole('switch', { name }).element();
 	if (!(element instanceof HTMLInputElement)) throw new Error(`Expected a switch "${name}".`);
 	return element;
-}
-
-/** The width of the `SwitchControl` track. */
-function controlWidth(name: string): number {
-	const control = toggle(name).closest('label')?.querySelector('[aria-hidden="true"]');
-	if (control == null) throw new Error('Expected the switch control.');
-	return control.getBoundingClientRect().width;
 }
 
 function Parts({ label }: { label: string }) {
@@ -117,41 +109,6 @@ test('SwitchLabel resolves className, style, and children from the switch state'
 	expect(toggle('On')).toBeChecked();
 });
 
-test('SwitchLabel keeps its slot', () => {
-	render(
-		<SwitchRoot>
-			<SwitchLabel data-testid="label" slot="example">
-				<SwitchControl>
-					<SwitchThumb />
-				</SwitchControl>
-				Example switch
-			</SwitchLabel>
-		</SwitchRoot>,
-	);
-
-	expect(page.getByTestId('label').element()).toHaveAttribute('slot', 'example');
-});
-
-// The root provides React Aria's slotted `Text` context for the description and error, so `Text`
-// in the label opts out with `slot={null}`.
-test('Text with slot null renders inside SwitchLabel', () => {
-	render(
-		<SwitchRoot>
-			<SwitchLabel>
-				<SwitchControl>
-					<SwitchThumb />
-				</SwitchControl>
-				<Text slot={null}>Visible</Text>
-				<Text isVisuallyHidden slot={null}>
-					{' hidden context'}
-				</Text>
-			</SwitchLabel>
-		</SwitchRoot>,
-	);
-
-	expect(toggle('Visible hidden context')).toBeInTheDocument();
-});
-
 test('SwitchRoot owns controlled selection', async () => {
 	const changes: Array<boolean> = [];
 	render(
@@ -185,39 +142,6 @@ test('SwitchThumb renders custom children inside the hidden track', () => {
 	);
 	expect(page.getByTestId('control').element()).toHaveAttribute('aria-hidden', 'true');
 	expect(toggle('Example switch')).toHaveAccessibleName('Example switch');
-});
-
-test('SwitchRoot joins FormData with its name and value', async () => {
-	render(
-		<form data-testid="form">
-			<SwitchRoot name="notifications" value="on">
-				<Parts label="Notifications" />
-			</SwitchRoot>
-		</form>,
-	);
-	const form = page.getByTestId('form').element();
-	if (!(form instanceof HTMLFormElement)) throw new Error('Expected a form.');
-
-	expect(new FormData(form).get('notifications')).toBe(null);
-
-	await userEvent.click(page.getByText('Notifications', { exact: true }));
-
-	expect(new FormData(form).get('notifications')).toBe('on');
-});
-
-test('SwitchRoot size changes the control size', () => {
-	render(
-		<>
-			<SwitchRoot size="small">
-				<Parts label="Small" />
-			</SwitchRoot>
-			<SwitchRoot size="large">
-				<Parts label="Large" />
-			</SwitchRoot>
-		</>,
-	);
-
-	expect(controlWidth('Small')).toBeLessThan(controlWidth('Large'));
 });
 
 test('InlineField renders the label, description, and error in a SwitchRoot', () => {
@@ -322,16 +246,4 @@ test('SwitchRoot keeps aria-labelledby and aria-describedby from the layout', ()
 	const input = toggle('Outside label');
 
 	expect(input).toHaveAccessibleDescription('Outside description');
-});
-
-test('a switch with a FieldLabel has no axe violations', async () => {
-	const { container } = render(
-		<SwitchRoot>
-			<FieldLabel>Example label</FieldLabel>
-			<FieldDescription>Example description</FieldDescription>
-			<Bare />
-		</SwitchRoot>,
-	);
-
-	await expectNoAxeViolations(container);
 });

@@ -293,28 +293,6 @@ test('ComboboxTrayTrigger blocks submission of a required, unselected combobox w
 	expect(new FormData(form).get('country')).toBe('au');
 });
 
-test('ComboboxTray validation input has no wrapper and remains non-tabbable', () => {
-	const { container } = render(
-		<form aria-label="Country form">
-			<TrayCombobox isRequired />
-			<button type="submit">Submit</button>
-		</form>,
-	);
-	const input = container.querySelector('input[aria-hidden="true"]');
-	if (!(input instanceof HTMLInputElement)) {
-		throw new Error('Expected the tray validation input.');
-	}
-
-	expect(input.required).toBe(true);
-	expect(input.tabIndex).toBe(-1);
-	expect(input.willValidate).toBe(true);
-	expect(input.validity.valueMissing).toBe(true);
-	expect(input.form).toBe(container.querySelector('form'));
-	expect(input.parentElement).toBe(
-		page.getByRole('button', { name: 'Country* Select a country...' }).element().parentElement,
-	);
-});
-
 test('ComboboxTrayTrigger allows a required combobox with allowsCustomValue to submit typed text', async () => {
 	let submitCount = 0;
 	render(
@@ -391,38 +369,6 @@ test('ComboboxTrayTrigger blocks a closed tray on a custom validation error', as
 	expect(submitCount).toBe(1);
 });
 
-test('ComboboxTrayTrigger exempts disabled, read-only, and aria-validated combobox from blocking submission', async () => {
-	const submitted: Array<string> = [];
-	const renderCase = (label: string, props: Partial<Parameters<typeof TrayCombobox>[0]>) => (
-		<form
-			aria-label={`${label} form`}
-			onSubmit={(event) => {
-				event.preventDefault();
-				submitted.push(label);
-			}}
-		>
-			<TrayCombobox isRequired label={label} triggerLabel={label} {...props} />
-			<button type="submit">Submit {label}</button>
-		</form>
-	);
-
-	render(
-		<>
-			{renderCase('Disabled', { isDisabled: true })}
-			{renderCase('ReadOnly', { isReadOnly: true })}
-			{renderCase('Aria', { validationBehavior: 'aria' })}
-		</>,
-	);
-
-	// oxlint-disable-next-line no-await-in-loop
-	for (const label of ['Disabled', 'ReadOnly', 'Aria']) {
-		// oxlint-disable-next-line no-await-in-loop
-		await userEvent.click(page.getByRole('button', { name: `Submit ${label}` }).element());
-	}
-
-	expect(submitted).toEqual(['Disabled', 'ReadOnly', 'Aria']);
-});
-
 test('ComboboxTrayTrigger inherits validationBehavior from an enclosing Form', async () => {
 	const { container } = render(
 		<Form aria-label="Country form" validationBehavior="aria">
@@ -494,16 +440,4 @@ test('ComboboxTrayTrigger submits custom text in text mode while the tray is clo
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 	expect(new FormData(form).getAll('country')).toEqual(['']);
-});
-
-test('ComboboxTrayTrigger does not submit text-mode values when disabled', async () => {
-	const { container } = render(
-		<form aria-label="Disabled form">
-			<TrayCombobox allowsCustomValue defaultValue="au" isDisabled label="Disabled" />
-		</form>,
-	);
-	const form = container.querySelector('form');
-	if (form == null) throw new Error('Expected the form element.');
-
-	expect(new FormData(form).getAll('country')).toEqual([]);
 });

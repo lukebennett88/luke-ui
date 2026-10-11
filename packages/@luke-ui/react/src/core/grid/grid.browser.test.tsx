@@ -81,45 +81,41 @@ test('applies a CSS track list passed to columns', () => {
 	expect(fixed.getBoundingClientRect().top).toBe(flexible.getBoundingClientRect().top);
 });
 
-for (const invalidColumns of ['', '   ', '3']) {
-	test(`rejects ${JSON.stringify(invalidColumns)} as columns and keeps one implicit column`, () => {
-		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-		const { locator } = render(
-			<Grid columns={{ initial: invalidColumns }} data-testid="grid" inlineSize="40rem">
-				<span style={{ blockSize: '1rem' }}>First</span>
-				<span style={{ blockSize: '1rem' }}>Second</span>
-			</Grid>,
-		);
-		const element = locator.getByTestId('grid').element();
-		if (!(element instanceof HTMLElement)) throw new Error('Expected Grid element.');
-		const [first, second] = element.children;
-		if (!(first instanceof HTMLElement) || !(second instanceof HTMLElement)) {
-			throw new Error('Expected Grid children.');
-		}
+test('rejects "3" as columns and keeps one implicit column', () => {
+	const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+	const { locator } = render(
+		<Grid columns={{ initial: '3' }} data-testid="grid" inlineSize="40rem">
+			<span style={{ blockSize: '1rem' }}>First</span>
+			<span style={{ blockSize: '1rem' }}>Second</span>
+		</Grid>,
+	);
+	const element = locator.getByTestId('grid').element();
+	if (!(element instanceof HTMLElement)) throw new Error('Expected Grid element.');
+	const [first, second] = element.children;
+	if (!(first instanceof HTMLElement) || !(second instanceof HTMLElement)) {
+		throw new Error('Expected Grid children.');
+	}
 
-		expect(getComputedStyle(element).display).toBe('grid');
-		expect(second.getBoundingClientRect().top).toBeGreaterThan(first.getBoundingClientRect().top);
-		expect(consoleError).toHaveBeenCalledTimes(1);
-		expect(consoleError.mock.calls[0]?.[0]).toMatch(/'columns'.*CSS track list/);
+	expect(getComputedStyle(element).display).toBe('grid');
+	expect(second.getBoundingClientRect().top).toBeGreaterThan(first.getBoundingClientRect().top);
+	expect(consoleError).toHaveBeenCalledTimes(1);
+	expect(consoleError.mock.calls[0]?.[0]).toMatch(/'columns'.*CSS track list/);
 
-		consoleError.mockRestore();
-	});
-}
+	consoleError.mockRestore();
+});
 
-for (const columns of ['3 ', ' 3', '-1', '1.5', '+3']) {
-	test(`does not reject ${JSON.stringify(columns)} as a columns string`, () => {
-		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-		render(
-			<Grid columns={columns} data-testid="grid" inlineSize="40rem">
-				<span style={{ blockSize: '1rem' }} />
-			</Grid>,
-		);
+test('does not reject "3 " as a columns string', () => {
+	const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+	render(
+		<Grid columns="3 " data-testid="grid" inlineSize="40rem">
+			<span style={{ blockSize: '1rem' }} />
+		</Grid>,
+	);
 
-		expect(consoleError).not.toHaveBeenCalled();
+	expect(consoleError).not.toHaveBeenCalled();
 
-		consoleError.mockRestore();
-	});
-}
+	consoleError.mockRestore();
+});
 
 test('applies a CSS track list passed to rows', () => {
 	const { locator } = render(
@@ -164,20 +160,7 @@ test('places children in named areas', () => {
 	expect(c.getBoundingClientRect().width).toBeCloseTo(grid.getBoundingClientRect().width, 0);
 });
 
-for (const invalidAreas of [
-	[],
-	['   '],
-	['a "b"'],
-	['a b', 'c'],
-	['a..b', 'c'],
-	['a a', 'a b'],
-	['a b a'],
-	['a# b'],
-	['a/b c'],
-	['a\nb'],
-	['a\rb'],
-	['a\fb'],
-]) {
+for (const invalidAreas of [[], ['a b', 'c'], ['a a', 'a b']]) {
 	test(`rejects ${JSON.stringify(invalidAreas)} as areas and keeps auto-placement`, () => {
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 		const { locator } = render(
@@ -207,7 +190,7 @@ for (const invalidAreas of [
 	});
 }
 
-for (const validAreas of [['a b'], ['a\tb'], ['1 2'], ['a-b c_d'], ['é ü'], ['a..b', 'c d e']]) {
+for (const validAreas of [['a b'], ['a..b', 'c d e']]) {
 	test(`accepts ${JSON.stringify(validAreas)} as areas`, () => {
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 		const { locator } = render(

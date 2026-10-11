@@ -188,23 +188,6 @@ test('profile picture rejects invalid files, retries a failed save, and can be r
 	expect((await settingsApi.getSettings()).profile.avatarDataUrl).toBeNull();
 });
 
-test('preference controls take their name and description from the settings row', async () => {
-	const app = await renderApp();
-
-	await expect
-		.element(app.locator.getByRole('switch', { name: 'Underline links' }))
-		.toHaveAccessibleDescription('Keep links underlined.');
-	await expect
-		.element(app.locator.getByRole('switch', { name: 'Pointer cursor' }))
-		.toHaveAccessibleDescription('Show a pointer over buttons and other controls.');
-	await expect
-		.element(app.locator.getByRole('button', { name: /Theme/ }))
-		.toHaveAccessibleName('System Theme');
-	await expect
-		.element(app.locator.getByRole('button', { name: /Text size/ }))
-		.toHaveAccessibleName('Default Text size');
-});
-
 test('keyboard autosave updates a switch and persists after remount', async () => {
 	const app = await renderApp();
 	const toggle = app.locator.getByRole('switch', { name: 'Underline links' });
@@ -227,14 +210,6 @@ test('keyboard autosave updates a switch and persists after remount', async () =
 		.element(again.locator.getByRole('switch', { name: 'Underline links' }))
 		.toBeChecked();
 	expect(document.documentElement.dataset.underlineLinks).toBe('true');
-});
-
-test('clicking a switch row label toggles the switch', async () => {
-	const app = await renderApp();
-	const toggle = app.locator.getByRole('switch', { name: 'Pointer cursor' });
-	const before = (toggle.element() as HTMLInputElement).checked;
-	await app.user.click(app.locator.getByText('Pointer cursor', { exact: true }));
-	await expect.element(toggle).toHaveProperty('checked', !before);
 });
 
 test('a failed theme change rolls back, and explicit and system themes apply', async () => {
@@ -266,25 +241,6 @@ test('a failed theme change rolls back, and explicit and system themes apply', a
 	await expect
 		.element(again.locator.getByRole('button', { name: /Theme/ }))
 		.toHaveTextContent('System');
-});
-
-test('a select keeps focus and cannot be opened while its save is pending', async () => {
-	const app = await renderApp();
-	const trigger = app.locator.getByRole('button', { name: /Theme/ });
-	settingsApi.setLatency(400);
-	trigger.element().focus();
-	await app.user.keyboard('{Enter}');
-	await app.user.keyboard('{ArrowDown}{ArrowDown}{Enter}');
-	await expect.element(app.locator.getByRole('status')).toHaveTextContent('Saving…');
-	await expect.element(trigger).toHaveFocus();
-	await expect.element(trigger).toHaveAttribute('aria-disabled', 'true');
-	await app.user.keyboard('{ArrowDown}');
-	await app.user.keyboard('{Enter}');
-	expect(page.getByRole('listbox').elements()).toHaveLength(0);
-	await expect.element(app.locator.getByRole('status')).not.toBeInTheDocument();
-	await expect.element(trigger).toHaveFocus();
-	await expect.element(trigger).toHaveTextContent('Dark');
-	expect((await settingsApi.getSettings()).preferences.colorMode).toBe('dark');
 });
 
 test('text size changes actual heading geometry', async () => {

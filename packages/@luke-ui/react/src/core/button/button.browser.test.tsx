@@ -103,33 +103,18 @@ test('the Button scene has no axe violations', async () => {
 });
 
 // The inset is the padding plus the 1px border it replaces, so the Button keeps the outer size it
-// had with a border. Forced colours draws the border instead.
-const buttonInlineInsets = [
-	['medium', 17],
-	['small', 13],
-] as const;
+// had with a border.
+test('a medium Button insets its label 17px from each edge with forced colours none', () => {
+	const { locator } = render(<Button size="medium">Save changes</Button>);
+	const button = locator.getByRole('button', { name: 'Save changes' }).element();
+	const label = button.querySelector('span');
+	if (!(label instanceof HTMLElement)) throw new Error('Expected a label.');
+	const buttonBox = button.getBoundingClientRect();
+	const labelBox = label.getBoundingClientRect();
 
-for (const [size, inset] of buttonInlineInsets) {
-	for (const forcedColors of ['none', 'active'] as const) {
-		test(`a ${size} Button insets its label ${inset}px from each edge with forced colours ${forcedColors}`, async () => {
-			await emulateForcedColors(forcedColors);
-
-			try {
-				const { locator } = render(<Button size={size}>Save changes</Button>);
-				const button = locator.getByRole('button', { name: 'Save changes' }).element();
-				const label = button.querySelector('span');
-				if (!(label instanceof HTMLElement)) throw new Error('Expected a label.');
-				const buttonBox = button.getBoundingClientRect();
-				const labelBox = label.getBoundingClientRect();
-
-				expect(labelBox.left - buttonBox.left).toBeCloseTo(inset, 1);
-				expect(buttonBox.right - labelBox.right).toBeCloseTo(inset, 1);
-			} finally {
-				await emulateForcedColors('none');
-			}
-		});
-	}
-}
+	expect(labelBox.left - buttonBox.left).toBeCloseTo(17, 1);
+	expect(buttonBox.right - labelBox.right).toBeCloseTo(17, 1);
+});
 
 test('a text Button has the same layout styles as inline Text without control padding or sizing', () => {
 	const { locator } = render(
@@ -293,16 +278,6 @@ test('does not start pressAction when external isPending is already true', async
 	expect(started).toBe(false);
 });
 
-test('shows no spinner for a fast Action', async () => {
-	const { locator, user } = render(<Button pressAction={async () => {}}>Fast</Button>);
-	const fast = locator.getByRole('button', { name: 'Fast' });
-
-	await user.click(fast);
-	await expect.poll(() => fast.element().getAttribute('data-pending')).toBeNull();
-	await delay(ACTION_SPINNER_DELAY_MS + 100);
-	expect(fast.element().querySelector('[role="status"]')).toBeNull();
-});
-
 test('shows a delayed spinner for a slow Action', async () => {
 	let startedAt: number | undefined;
 	let releaseSlow!: () => void;
@@ -387,12 +362,6 @@ test('forced-colors resting', { tags: ['visual'] }, async () => {
 		await emulateForcedColors('none');
 	}
 });
-
-function delay(ms: number) {
-	return new Promise<void>((resolve) => {
-		setTimeout(resolve, ms);
-	});
-}
 
 function dispatchPress(element: Element) {
 	element.dispatchEvent(

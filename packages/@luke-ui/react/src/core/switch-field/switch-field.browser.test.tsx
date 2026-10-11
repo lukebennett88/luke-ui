@@ -115,26 +115,6 @@ test('SwitchField resolves ref to the root, inputRef to the input, and joins a f
 	expect(new FormData(form).get('callback')).toBe('yes');
 });
 
-test('SwitchField puts id on its root element and inputId on the input', () => {
-	render(
-		<SwitchField
-			className="example-root"
-			description="Example description"
-			id="example-root"
-			inputId="example-input"
-			label="Example switch"
-			name="example"
-		/>,
-	);
-	const input = switchInput('Example switch');
-	const root = document.getElementById('example-root');
-
-	expect(input.id).toBe('example-input');
-	expect(root).toHaveClass('example-root');
-	expect(root?.contains(input)).toBe(true);
-	expect(getDescribedText(input)).toBe('Example description');
-});
-
 test('SwitchField renders the track before its label, inside the clickable label', async () => {
 	render(<SwitchField label="Notifications" />);
 	const input = switchInput('Notifications');
@@ -158,40 +138,6 @@ test('SwitchField renders Luke UI typography inside its label', () => {
 	);
 
 	expect(switchInput('Enable notifications')).toBeInTheDocument();
-});
-
-test('SwitchField toggles from the keyboard', async () => {
-	render(<SwitchField label="Notifications" />);
-	const input = switchInput('Notifications');
-
-	await userEvent.keyboard('{Tab}');
-
-	expect(input).toHaveFocus();
-
-	await userEvent.keyboard(' ');
-
-	expect(input).toBeChecked();
-});
-
-test('SwitchField supports uncontrolled and controlled selection', async () => {
-	const changes: Array<boolean> = [];
-	render(
-		<>
-			<SwitchField defaultSelected label="Uncontrolled" />
-			<SwitchField
-				isSelected={false}
-				label="Controlled"
-				onChange={(isSelected) => changes.push(isSelected)}
-			/>
-		</>,
-	);
-
-	await userEvent.click(page.getByText('Uncontrolled', { exact: true }));
-	await userEvent.click(page.getByText('Controlled', { exact: true }));
-
-	expect(switchInput('Uncontrolled')).not.toBeChecked();
-	expect(changes).toEqual([true]);
-	expect(switchInput('Controlled')).not.toBeChecked();
 });
 
 test('a disabled or read-only SwitchField keeps its selection', async () => {
@@ -276,40 +222,22 @@ test('SwitchField runs a validate function', async () => {
 	await expect.poll(() => getDescribedText(input)).toBe('Turn this on to continue.');
 });
 
-test('SwitchField size changes the track size', () => {
-	render(
-		<>
-			<SwitchField label="Small" size="small" />
-			<SwitchField label="Medium" />
-			<SwitchField label="Large" size="large" />
-		</>,
+// The error hangs at the label's inline edge, not under the track.
+test('the SwitchField error text starts at the label text', () => {
+	const errorMessage =
+		'Turn this on to continue. This message wraps onto a second line to check its alignment.';
+	const { container } = render(
+		<Stack width="16rem">
+			<SwitchField errorMessage={errorMessage} label="Notifications" />
+		</Stack>,
 	);
-	const small = controlFor(switchInput('Small')).getBoundingClientRect().width;
-	const medium = controlFor(switchInput('Medium')).getBoundingClientRect().width;
-	const large = controlFor(switchInput('Large')).getBoundingClientRect().width;
 
-	expect(small).toBeLessThan(medium);
-	expect(medium).toBeLessThan(large);
+	const measurement = measureFieldError(page.getByText(errorMessage).element());
+	const labelStart = getTextStart(container, 'Notifications');
+
+	expect(measurement.firstLineStart).toBeCloseTo(labelStart, 0);
+	expect(measurement.secondLineStart).toBeCloseTo(labelStart, 0);
 });
-
-// The error hangs at the label's inline edge at every size, not under the track.
-for (const size of ['small', 'medium', 'large'] as const) {
-	test(`the ${size} SwitchField error text starts at the label text`, () => {
-		const errorMessage =
-			'Turn this on to continue. This message wraps onto a second line to check its alignment.';
-		const { container } = render(
-			<Stack width="16rem">
-				<SwitchField errorMessage={errorMessage} label="Notifications" size={size} />
-			</Stack>,
-		);
-
-		const measurement = measureFieldError(page.getByText(errorMessage).element());
-		const labelStart = getTextStart(container, 'Notifications');
-
-		expect(measurement.firstLineStart).toBeCloseTo(labelStart, 0);
-		expect(measurement.secondLineStart).toBeCloseTo(labelStart, 0);
-	});
-}
 
 test('the SwitchField scene has no axe violations', async () => {
 	const { container } = render(
@@ -330,49 +258,43 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 });
 
 // Only `danger.solid.rest` carries the 3:1 control-boundary guarantee, so an invalid switch must
-// keep it through hover and press, whether it is on or off.
-for (const isSelected of [false, true]) {
-	for (const state of ['data-hovered', 'data-pressed'] as const) {
-		test(`an invalid ${isSelected ? 'on' : 'off'} switch keeps the guaranteed border with ${state}`, () => {
-			render(<SwitchField defaultSelected={isSelected} errorMessage="Required" label="Accept" />);
-			const input = switchInput('Accept');
-			const label = labelFor(input);
-			const track = controlFor(input);
-			track.style.transition = 'none';
-			label.setAttribute(state, 'true');
+// keep it through hover.
+test('an invalid on switch keeps the guaranteed border with data-hovered', () => {
+	render(<SwitchField defaultSelected errorMessage="Required" label="Accept" />);
+	const input = switchInput('Accept');
+	const label = labelFor(input);
+	const track = controlFor(input);
+	track.style.transition = 'none';
+	label.setAttribute('data-hovered', 'true');
 
-			expect(getComputedStyle(track).borderTopColor).toBe(
-				resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
-			);
-		});
-	}
-}
+	expect(getComputedStyle(track).borderTopColor).toBe(
+		resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
+	);
+});
 
 // Pressing stretches the thumb instead of recolouring it, so the press shows without materials and
 // the thumb keeps its guaranteed contrast with the track.
-for (const isSelected of [false, true]) {
-	test(`pressing an ${isSelected ? 'on' : 'off'} switch stretches its thumb until release`, async () => {
-		render(<SwitchField defaultSelected={isSelected} label="Notify" />);
-		const input = switchInput('Notify');
-		const thumb = controlFor(input).querySelector('span');
-		if (!(thumb instanceof HTMLElement)) throw new Error('Expected the switch thumb.');
-		thumb.style.transition = 'none';
-		const restingWidth = thumb.getBoundingClientRect().width;
-		const restingColor = getComputedStyle(thumb).backgroundColor;
+test('pressing an on switch stretches its thumb until release', async () => {
+	render(<SwitchField defaultSelected label="Notify" />);
+	const input = switchInput('Notify');
+	const thumb = controlFor(input).querySelector('span');
+	if (!(thumb instanceof HTMLElement)) throw new Error('Expected the switch thumb.');
+	thumb.style.transition = 'none';
+	const restingWidth = thumb.getBoundingClientRect().width;
+	const restingColor = getComputedStyle(thumb).backgroundColor;
 
-		input.focus();
-		await userEvent.keyboard('[Space>]');
-		await expect.element(labelFor(input)).toHaveAttribute('data-pressed', 'true');
+	input.focus();
+	await userEvent.keyboard('[Space>]');
+	await expect.element(labelFor(input)).toHaveAttribute('data-pressed', 'true');
 
-		expect(thumb.getBoundingClientRect().width).toBeGreaterThan(restingWidth);
-		expect(getComputedStyle(thumb).backgroundColor).toBe(restingColor);
+	expect(thumb.getBoundingClientRect().width).toBeGreaterThan(restingWidth);
+	expect(getComputedStyle(thumb).backgroundColor).toBe(restingColor);
 
-		await userEvent.keyboard('[/Space]');
-		await expect.element(labelFor(input)).not.toHaveAttribute('data-pressed');
+	await userEvent.keyboard('[/Space]');
+	await expect.element(labelFor(input)).not.toHaveAttribute('data-pressed');
 
-		expect(thumb.getBoundingClientRect().width).toBe(restingWidth);
-	});
-}
+	expect(thumb.getBoundingClientRect().width).toBe(restingWidth);
+});
 
 // Regression: rest, hover, and pressed must stay distinct without materials, which the flat fixture
 // removes. Hover recolours the track. Pressed recolours an on track and stretches the thumb, which

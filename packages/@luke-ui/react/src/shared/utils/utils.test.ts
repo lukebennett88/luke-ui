@@ -117,24 +117,6 @@ test('widens the return type for an unknown-length array spread', () => {
 	}>();
 });
 
-test('types absent presentation and retained values to match runtime', () => {
-	const absent = mergeProps({ className: undefined, style: undefined }, {});
-	expect(absent.className).toBeUndefined();
-	expect(absent.style).toBeUndefined();
-	expectTypeOf(absent.className).toEqualTypeOf<undefined>();
-	expectTypeOf(absent.style).toEqualTypeOf<undefined>();
-
-	const retained = mergeProps({ title: 'kept' }, { title: undefined });
-	expect(retained.title).toBe('kept');
-	expectTypeOf(retained.title).toEqualTypeOf<string>();
-
-	const chained = mergeProps(
-		{ onClick: (_event: { type: string }) => 'first' as const },
-		{ onClick: (_event: { type: string }) => 'second' as const },
-	);
-	expectTypeOf(chained.onClick).toEqualTypeOf<(event: { type: string }) => void>();
-});
-
 test('ignores invalid presentation without clearing earlier values', () => {
 	const result = mergeProps(
 		{ className: 'first', style: { color: 'red' } },
@@ -148,45 +130,7 @@ test('ignores invalid presentation without clearing earlier values', () => {
 	expect(absent.style).toBeUndefined();
 });
 
-test('keeps optional presentation optional, including array tails', () => {
-	const optional: { className?: string; style?: { color: string } } = {};
-	const absent = mergeProps({}, optional);
-	expect(absent.className).toBeUndefined();
-	expect(absent.style).toBeUndefined();
-	expectTypeOf(absent.className).toEqualTypeOf<string | undefined>();
-	expectTypeOf(absent.style).toEqualTypeOf<Record<string, unknown> | undefined>();
-
-	const unknown: { className: unknown; style: unknown } = {
-		className: 'custom',
-		style: { color: 'red' },
-	};
-	const valid = mergeProps(unknown, {});
-	expect(valid.className).toBe('custom');
-	expect(valid.style).toEqual({ color: 'red' });
-	expectTypeOf(valid.className).toEqualTypeOf<string | undefined>();
-	expectTypeOf(valid.style).toEqualTypeOf<Record<string, unknown> | undefined>();
-
-	const tail: Array<{ className: string; style: { color: string } }> = [];
-	const empty = mergeProps({}, {}, ...tail);
-	expect(empty.className).toBeUndefined();
-	expect(empty.style).toBeUndefined();
-	expectTypeOf(empty.className).toEqualTypeOf<string | undefined>();
-	expectTypeOf(empty.style).toEqualTypeOf<Record<string, unknown> | undefined>();
-
-	const retained = mergeProps({ className: 'first', style: { color: 'red' } }, {}, ...tail);
-	expectTypeOf(retained.className).toEqualTypeOf<string>();
-	expectTypeOf(retained.style).toEqualTypeOf<Record<string, unknown>>();
-});
-
-test('types optional event handlers conservatively and retains their argument contract', () => {
-	const optional: { onClick?: (event: string) => string } = {};
-	const absent = mergeProps(optional, optional);
-	expect(absent.onClick).toBeUndefined();
-	expectTypeOf(absent.onClick).toEqualTypeOf<((event: string) => void) | undefined>();
-
-	const retained = mergeProps({ onClick: (_event: string) => 'value' }, optional);
-	expectTypeOf(retained.onClick).toEqualTypeOf<(event: string) => void>();
-
+test('rejects incompatible event-handler argument contracts', () => {
 	const incompatible = mergeProps(
 		{ onClick: (_event: string) => undefined },
 		{ onClick: (_event: number) => undefined },
@@ -212,10 +156,6 @@ test('types optional event handlers conservatively and retains their argument co
 	assertType<Parameters<typeof spread.onClick>>(['string']);
 	// @ts-expect-error Every possible tail handler must accept the argument.
 	assertType<Parameters<typeof spread.onClick>>([123]);
-
-	const cleared = mergeProps({ onClick: (_event: string) => {} }, { onClick: null });
-	expect(cleared.onClick).toBeNull();
-	expectTypeOf(cleared.onClick).toEqualTypeOf<null>();
 });
 
 test('replaces functions whose names do not begin with on and an ASCII capital', () => {

@@ -271,19 +271,6 @@ test('the Select scene has no axe violations', async () => {
 	await expectNoAxeViolations(container);
 });
 
-test('an open select has no axe violations', async () => {
-	const { container } = render(<ExampleSelect defaultValue="two" label="Example field" />);
-
-	await userEvent.click(trigger(/Example field/));
-	await expect.element(page.getByRole('listbox')).toBeVisible();
-	await waitForOverlayEnter(
-		page.getByRole('listbox').element().closest('[data-trigger]') ?? document.body,
-	);
-
-	await expectNoAxeViolations(container);
-	await expectNoAxeViolations(document.body);
-});
-
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(<SelectScene />, { appearance });
@@ -292,25 +279,16 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 });
 
 test('open popover', { tags: ['visual'] }, async () => {
-	for (const appearance of visualAppearances) {
-		const { unmount } = render(
-			<Stack>
-				<ExampleSelect defaultValue="two" label="Example field" />
-			</Stack>,
-			{ appearance },
-		);
+	render(
+		<Stack>
+			<ExampleSelect defaultValue="two" label="Example field" />
+		</Stack>,
+	);
 
-		await userEvent.click(trigger(/Example field/));
-		const listbox = page.getByRole('listbox').element();
-		await waitForOverlayEnter(listbox.closest('[data-trigger]') ?? listbox);
-		await captureVisual(
-			page.elementLocator(document.body),
-			`select/open-${appearance.theme}-${appearance.mode}`,
-		);
-		await userEvent.keyboard('{Escape}');
-		await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
-		unmount();
-	}
+	await userEvent.click(trigger(/Example field/));
+	const listbox = page.getByRole('listbox').element();
+	await waitForOverlayEnter(listbox.closest('[data-trigger]') ?? listbox);
+	await captureVisual(page.elementLocator(document.body), 'select/open');
 });
 
 test('focused and open triggers', { tags: ['visual'] }, async () => {

@@ -216,29 +216,27 @@ test('excludes a recipe variant type', () => {
 	expect(issues(fixture)).toEqual([]);
 });
 
-test('excludes a leaf type', () => {
-	const fixture = createFixture({
-		entry: "export { Button, type ButtonSize } from './button.js';\n",
-		files: {
-			'button.ts':
-				"export type ButtonSize = 'small' | 'large';\nexport function Button(size: ButtonSize) {}\n",
-		},
+for (const leafCase of [
+	{
+		button:
+			"export type ButtonSize = 'small' | 'large';\nexport function Button(size: ButtonSize) {}\n",
+		name: 'excludes a leaf type',
+	},
+	{
+		button:
+			"type Size = 'small' | 'large';\nexport type ButtonSize = Size;\nexport function Button(size: ButtonSize) {}\n",
+		name: 'excludes a leaf alias of a union',
+	},
+] as const) {
+	test(leafCase.name, () => {
+		const fixture = createFixture({
+			entry: "export { Button, type ButtonSize } from './button.js';\n",
+			files: { 'button.ts': leafCase.button },
+		});
+
+		expect(issues(fixture)).toEqual([]);
 	});
-
-	expect(issues(fixture)).toEqual([]);
-});
-
-test('excludes a leaf alias of a union', () => {
-	const fixture = createFixture({
-		entry: "export { Button, type ButtonSize } from './button.js';\n",
-		files: {
-			'button.ts':
-				"type Size = 'small' | 'large';\nexport type ButtonSize = Size;\nexport function Button(size: ButtonSize) {}\n",
-		},
-	});
-
-	expect(issues(fixture)).toEqual([]);
-});
+}
 
 test('requires an indirect alias that resolves to an object type', () => {
 	const fixture = createFixture({
