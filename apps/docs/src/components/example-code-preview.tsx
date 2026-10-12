@@ -47,7 +47,7 @@ export function ExampleCodePreview({
 				>
 					<Button
 						aria-expanded={isExpanded}
-						onPress={() => setIsExpanded(!isExpanded)}
+						onPress={() => setIsExpanded((prev) => !prev)}
 						size="small"
 					>
 						{isExpanded ? 'Collapse code' : 'Expand code'}

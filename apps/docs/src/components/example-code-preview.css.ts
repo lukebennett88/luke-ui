@@ -43,7 +43,6 @@ globalStyle(`${collapsible}${expanded} pre`, {
 	},
 });
 
-// Lets the row shrink below the source.
 globalStyle(`${collapsible} pre > code`, {
 	'@layer': {
 		components: {
