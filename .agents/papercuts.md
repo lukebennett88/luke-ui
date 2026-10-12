@@ -38,16 +38,6 @@ workflow would have prevented and that a check or a pointer would not handle bet
 approves skill additions and changes. Remove a skill when it is obsolete or when pilot or spot-check
 evidence shows it does not help. Silence in this log is not evidence.
 
-## Browser token-colour assertions depend on editor painting
-
-- **Seen:** 2026-10-12 (#793). A timeout-only fix was rejected during review.
-- **Where:** `apps/docs/src/lib/monaco-setup.browser.test.ts`,
-  [Component tests](../docs/TESTING.md#component-tests), and the
-  [write-tests workflow](skills/write-tests/SKILL.md#workflow).
-- **Problem:** Private DOM and colour polling made the theme contract depend on Monaco's lazy
-  rendering. Increasing the wait left that dependency in place despite the testing guide's rule
-  against computed appearance assertions.
-
 ## Theme watch rebuild leaves the stylesheet unchanged in CI
 
 - **Seen:** 2026-10-12 (#793),
