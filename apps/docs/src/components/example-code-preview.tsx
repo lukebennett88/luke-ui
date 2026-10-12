@@ -148,7 +148,7 @@ function isUnderSiteHeader(sourceElement: HTMLElement) {
 
 /** Live bottom edge of the sticky docs header, or the viewport top when the shell is absent. */
 function siteHeaderBottom() {
-	const header = document.querySelector<HTMLElement>('#docs-shell > header');
+	const header = document.querySelector<HTMLElement>('#docs-shell [data-docs-sticky-header]');
 	return header?.getBoundingClientRect().bottom ?? 0;
 }
 

@@ -32,53 +32,57 @@ export function DocsSiteNav({ tree }: { tree: Root }) {
 	}
 
 	return (
-		<SiteNav className={styles.header} hasSidebarNavigation>
-			<DialogTrigger isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-				{/* No bars/menu glyph in the Luke UI set; match the Theme labelled control. */}
-				<Button className={styles.mobileTrigger} prominence="low" size="small">
-					Menu
-				</Button>
-				<ModalOverlay className={styles.drawerOverlay} isDismissable>
-					<Modal className={styles.drawerModal}>
-						<Dialog aria-label="Docs navigation" className={styles.drawerDialog}>
-							{({ close }) => (
-								<Stack gap="sp16" {...docsNavPaneProps}>
-									<Box alignItems="center" display="flex" justifyContent="space-between">
-										<Text elementType="span" fontWeight="heading">
-											Navigation
-										</Text>
-										<IconButton
-											aria-label="Close docs navigation"
-											icon="close"
-											onPress={close}
-											size="small"
-										/>
-									</Box>
-									<Stack
-										elementType="nav"
-										aria-label="Site"
-										gap="sp4"
-										paddingBlockEnd="sp16"
-										style={drawerSiteNavBorder}
-									>
-										{siteDestinations.map((destination) => (
-											<DocsNavLink
-												href={destination.url}
-												isCurrent={destination === activeDestination}
-												key={destination.url}
-												onNavigate={close}
+		<div className={styles.header} data-docs-sticky-header>
+			<div className={styles.headerTransition}>
+				<SiteNav hasSidebarNavigation>
+					<DialogTrigger isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+						{/* No bars/menu glyph in the Luke UI set; match the Theme labelled control. */}
+						<Button className={styles.mobileTrigger} prominence="low" size="small">
+							Menu
+						</Button>
+						<ModalOverlay className={styles.drawerOverlay} isDismissable>
+							<Modal className={styles.drawerModal}>
+								<Dialog aria-label="Docs navigation" className={styles.drawerDialog}>
+									{({ close }) => (
+										<Stack gap="sp16" {...docsNavPaneProps}>
+											<Box alignItems="center" display="flex" justifyContent="space-between">
+												<Text elementType="span" fontWeight="heading">
+													Navigation
+												</Text>
+												<IconButton
+													aria-label="Close docs navigation"
+													icon="close"
+													onPress={close}
+													size="small"
+												/>
+											</Box>
+											<Stack
+												elementType="nav"
+												aria-label="Site"
+												gap="sp4"
+												paddingBlockEnd="sp16"
+												style={drawerSiteNavBorder}
 											>
-												{destination.label}
-											</DocsNavLink>
-										))}
-									</Stack>
-									<DocsNav onNavigate={close} tree={tree} />
-								</Stack>
-							)}
-						</Dialog>
-					</Modal>
-				</ModalOverlay>
-			</DialogTrigger>
-		</SiteNav>
+												{siteDestinations.map((destination) => (
+													<DocsNavLink
+														href={destination.url}
+														isCurrent={destination === activeDestination}
+														key={destination.url}
+														onNavigate={close}
+													>
+														{destination.label}
+													</DocsNavLink>
+												))}
+											</Stack>
+											<DocsNav onNavigate={close} tree={tree} />
+										</Stack>
+									)}
+								</Dialog>
+							</Modal>
+						</ModalOverlay>
+					</DialogTrigger>
+				</SiteNav>
+			</div>
+		</div>
 	);
 }

@@ -36,9 +36,19 @@ export const header = style({
 			gridArea: 'header',
 			insetBlockStart: 0,
 			position: 'sticky',
-			// Own group in the view-transition layer so example morphs cannot paint over it.
-			viewTransitionName: DOCS_SITE_HEADER_VT_NAME,
 			zIndex: 10,
+		},
+	},
+});
+
+/**
+ * Named snapshot host inside the sticky shell slot. `view-transition-name` on the sticky element
+ * itself prevents sticking, so the name lives on this inner wrapper instead.
+ */
+export const headerTransition = style({
+	'@layer': {
+		components: {
+			viewTransitionName: DOCS_SITE_HEADER_VT_NAME,
 		},
 	},
 });

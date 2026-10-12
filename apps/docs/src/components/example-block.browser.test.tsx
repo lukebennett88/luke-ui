@@ -534,19 +534,19 @@ test('collapsing long source keeps the toggle where the reader left it', async (
 	expect(sourceElement().getBoundingClientRect().bottom).toBeLessThan(
 		control.getBoundingClientRect().top + 24,
 	);
-	// Measure at press time, because the click may scroll the toggle further into view first.
+	// Prefer keyboard activation: a pointer click can scroll the toggle under the sticky header
+	// and leave too little scroll room for full compensation.
+	control.focus();
 	let topAtPress: number | undefined;
 	control.addEventListener(
-		'pointerdown',
+		'keydown',
 		() => {
 			topAtPress = control.getBoundingClientRect().top;
 		},
 		{ once: true },
 	);
 
-	await act(async () => {
-		await userEvent.click(collapse);
-	});
+	await pressKey('{Enter}');
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
 	assert(topAtPress != null, 'expected the toggle to be pressed');
 	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
@@ -593,11 +593,13 @@ test('collapsing source whose top is still visible keeps the content above it in
 
 test('collapsing under a taller-than-default sticky header still keeps the toggle in place', async () => {
 	// Taller than SITE_HEADER_BLOCK_SIZE so a fixed-rem assumption would skip compensation while the
-	// source top sits under the real header. Keep the expanded block short enough that the toggle
-	// stays on screen in that scroll position; use the keyboard so Playwright does not scroll first.
+	// source top sits under the real header. Space above the example leaves enough scroll room to
+	// compensate; keep the expanded block short enough that the toggle stays on screen.
 	await renderSourcePreview({
 		headerBlockSize: '8rem',
 		lineCount: 40,
+		withHeading: true,
+		withSpaceAbove: '40rem',
 		withSpaceBelow: true,
 		withStickyHeader: true,
 	});
@@ -621,6 +623,10 @@ test('collapsing under a taller-than-default sticky header still keeps the toggl
 	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(header.getBoundingClientRect().bottom);
 	expect(control.getBoundingClientRect().bottom).toBeLessThan(window.innerHeight);
 	expect(control.getBoundingClientRect().top).toBeGreaterThan(header.getBoundingClientRect().bottom);
+	// Compensation scrolls up by the collapse delta; there must be room above the current scroll.
+	expect(window.scrollY).toBeGreaterThan(
+		control.getBoundingClientRect().top - sourceElement().getBoundingClientRect().top,
+	);
 
 	control.focus();
 	let topAtPress: number | undefined;
@@ -644,6 +650,7 @@ test('collapsing under a taller-than-default sticky header still keeps the toggl
 test('keyboard collapse of a long example under the sticky header keeps the toggle in place', async () => {
 	await renderSourcePreview({ lineCount: 200, withSpaceBelow: true, withStickyHeader: true });
 	const expand = page.getByRole('button', { name: 'Expand code' });
+	await expect.element(expand).toBeVisible();
 	expand.element().focus();
 	await pressKey('{Enter}');
 	const collapse = page.getByRole('button', { name: 'Collapse code' });
@@ -721,15 +728,16 @@ test('example expand/collapse morph stays under the sticky header throughout the
 	}
 	for (const [index, codeZ] of codeZs.entries()) {
 		const headerZ = Number.parseInt(headerZs[index] ?? '0', 10);
-		const codeValue = codeZ === 'auto' ? 0 : Number.parseInt(codeZ, 10);
+		const codeValue = !codeZ || codeZ === 'auto' ? 0 : Number.parseInt(codeZ, 10);
+		expect(Number.isFinite(codeValue)).toBe(true);
 		expect(headerZ).toBeGreaterThan(codeValue);
 	}
 
 	// After the transition, the live sticky header still wins hit-testing in its band.
 	const headerBox = header.getBoundingClientRect();
-	expect(document.elementFromPoint(headerBox.left + headerBox.width / 2, headerBox.top + 8)).toBe(
-		header,
-	);
+	const hit = document.elementFromPoint(headerBox.left + headerBox.width / 2, headerBox.top + 8);
+	expect(hit).toBeTruthy();
+	expect(header.contains(hit) || hit === header).toBe(true);
 });
 
 test('narrow viewport collapse under the sticky header keeps the toggle in place', async () => {
@@ -751,17 +759,16 @@ test('narrow viewport collapse under the sticky header keeps the toggle in place
 	});
 	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(header.getBoundingClientRect().bottom);
 
+	control.focus();
 	let topAtPress: number | undefined;
 	control.addEventListener(
-		'pointerdown',
+		'keydown',
 		() => {
 			topAtPress = control.getBoundingClientRect().top;
 		},
 		{ once: true },
 	);
-	await act(async () => {
-		await userEvent.click(collapse);
-	});
+	await pressKey('{Enter}');
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
 	assert(topAtPress != null, 'expected the toggle to be pressed');
 	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
@@ -780,17 +787,16 @@ test('reduced-motion collapse under the sticky header keeps the toggle in place'
 		top: control.getBoundingClientRect().top - (header.getBoundingClientRect().bottom + 16),
 	});
 
+	control.focus();
 	let topAtPress: number | undefined;
 	control.addEventListener(
-		'pointerdown',
+		'keydown',
 		() => {
 			topAtPress = control.getBoundingClientRect().top;
 		},
 		{ once: true },
 	);
-	await act(async () => {
-		await userEvent.click(collapse);
-	});
+	await pressKey('{Enter}');
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
 	assert(topAtPress != null, 'expected the toggle to be pressed');
 	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
@@ -862,6 +868,7 @@ async function renderSourcePreview({
 	viewportWidth = 1000,
 	withHeading = false,
 	withNextControl = false,
+	withSpaceAbove,
 	withSpaceBelow = false,
 	withStickyHeader = false,
 }: {
@@ -871,6 +878,7 @@ async function renderSourcePreview({
 	viewportWidth?: number;
 	withHeading?: boolean;
 	withNextControl?: boolean;
+	withSpaceAbove?: string;
 	withSpaceBelow?: boolean;
 	withStickyHeader?: boolean;
 } = {}) {
@@ -878,6 +886,7 @@ async function renderSourcePreview({
 	const source = Array.from({ length: lineCount }, () => 'const value = 1;').join('\n');
 	const preview = (
 		<>
+			{withSpaceAbove ? <div style={{ blockSize: withSpaceAbove }} /> : null}
 			{withHeading ? <h2 style={{ blockSize: '20rem', margin: 0 }}>Example heading</h2> : null}
 			<ExampleCodePreview html={`<code>${source}</code>`} source={source} title="Source sizing" />
 			{withNextControl ? <button type="button">Next example</button> : null}
@@ -891,8 +900,9 @@ async function renderSourcePreview({
 			<Provider spritesheetHref={spriteSheetHref}>
 				{withStickyHeader ? (
 					<div className={shellStyles.shell} id="docs-shell">
-						<header
+						<div
 							className={shellStyles.header}
+							data-docs-sticky-header
 							style={
 								headerBlockSize
 									? {
@@ -903,8 +913,10 @@ async function renderSourcePreview({
 									: { backgroundColor: 'Canvas', minBlockSize: SITE_HEADER_BLOCK_SIZE }
 							}
 						>
-							Sticky docs header
-						</header>
+							<div className={shellStyles.headerTransition}>
+								<header>Sticky docs header</header>
+							</div>
+						</div>
 						<main>{preview}</main>
 					</div>
 				) : (
@@ -916,7 +928,7 @@ async function renderSourcePreview({
 }
 
 function docsSiteHeader() {
-	const header = container?.querySelector<HTMLElement>('#docs-shell > header');
+	const header = container?.querySelector<HTMLElement>('#docs-shell [data-docs-sticky-header]');
 	assert(header, 'expected the sticky docs header');
 	return header;
 }
