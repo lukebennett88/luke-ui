@@ -1,15 +1,15 @@
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
-import { capsizeTrimVarName } from '../../theme/capsize-trim-vars.js';
 import { vars } from '../../theme/contract.css.js';
 import type { FontWeightRole, TypeStyle } from '../../theme/type-styles.js';
 import { fontWeightRoles, typeStyles } from '../../theme/type-styles.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
+import { typeStyleFontDeclarations, typeStyleTrimVars } from './type-style-declarations.js';
 
 /** Marks every element `textRecipe` styles, so the margin rule below can match it. */
-const textElementClassName = style({}, 'text');
+export const textElementClassName = style({}, 'text');
 
 // `Text` renders headings, paragraphs, and blockquotes, which have user agent margins. Spacing
 // between them belongs to layout, so `Text` removes them. `:where()` keeps this at zero
@@ -61,16 +61,10 @@ const weightVariants = Object.fromEntries(
 ) as Record<FontWeightRole, { fontWeight: string }>;
 
 const typographyVariants = Object.fromEntries(
-	typeStyles.map((typography) => [
-		typography,
-		{
-			fontFamily: vars.font[typography].fontFamily,
-			fontSize: vars.font[typography].fontSize,
-			letterSpacing: vars.font[typography].letterSpacing,
-			lineHeight: vars.font[typography].lineHeight,
-			vars: { [textLineHeight]: vars.font[typography].lineHeight },
-		},
-	]),
+	typeStyles.map((typography) => {
+		const declarations = typeStyleFontDeclarations(typography);
+		return [typography, { ...declarations, vars: { [textLineHeight]: declarations.lineHeight } }];
+	}),
 ) as Record<
 	TypeStyle,
 	{
@@ -83,11 +77,10 @@ const typographyVariants = Object.fromEntries(
 >;
 
 const typographyCompoundVariants = typeStyles.map((typography) => {
-	const { fontSize, lineHeight } = vars.font[typography];
+	const { fontSize, lineHeight } = typeStyleFontDeclarations(typography);
 	// The trims depend on the theme's font, so the theme stylesheet supplies them as private
 	// variables rather than public tokens.
-	const baselineTrim = `var(${capsizeTrimVarName(typography, 'baselineTrim')})`;
-	const capHeightTrim = `var(${capsizeTrimVarName(typography, 'capHeightTrim')})`;
+	const { baselineTrim, capHeightTrim } = typeStyleTrimVars(typography);
 	return {
 		style: createLayeredTextStyle({ baselineTrim, capHeightTrim, fontSize, lineHeight }),
 		// `shouldInheritFont: true` asks the browser to resolve font size and line height from

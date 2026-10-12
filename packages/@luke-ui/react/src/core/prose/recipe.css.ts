@@ -1,6 +1,15 @@
+import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
+import type { FontWeightRole, TypeStyle } from '../../theme/type-styles.js';
+import { typeStyleWeightRole } from '../../theme/type-styles.js';
+import {
+	headingDefaultFontWeight,
+	headingTypographyByLevel,
+} from '../heading/heading-typography.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import { recipe } from '../styles/recipe.js';
+import { textElementClassName } from '../text/recipe.css.js';
+import { typeStyleFontDeclarations, typeStyleTrimVars } from '../text/type-style-declarations.js';
 
 const proseScopeClassName = style({}, 'prose');
 
@@ -16,8 +25,13 @@ export const proseRecipe = recipe({ base: proseScopeClassName });
 // specificity, so recipe and utility classes win on specificity as well as on layer order.
 const proseScope = `(.${proseScopeClassName})`;
 
-function proseStyle(selector: string, rule: Parameters<typeof globalStyleInLayer>[2]) {
-	globalStyleInLayer('recipes', `:where(${selector})`, {
+function proseStyle(
+	selector: string,
+	rule: Parameters<typeof globalStyleInLayer>[2],
+	// A pseudo-element cannot sit inside `:where()`, so it follows it.
+	pseudoElement = '',
+) {
+	globalStyleInLayer('recipes', `:where(${selector})${pseudoElement}`, {
 		'@scope': { [`${proseScope} to (.not-prose)`]: rule },
 	});
 }
@@ -94,10 +108,16 @@ proseStyle('hr', {
 	border: 'none',
 	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
 });
+// A table scrolls inside its own box only as a block, so a narrow table takes its content width
+// instead of filling the line. `fit-content` rather than `max-content`, so a table of wrapping text
+// does not widen an auto-sized grid or flex track. CMS markup can't wrap a table in a scroller.
 proseStyle('table', {
 	borderCollapse: 'collapse',
 	borderSpacing: 0,
-	inlineSize: '100%',
+	display: 'block',
+	inlineSize: 'fit-content',
+	maxInlineSize: '100%',
+	overflowX: 'auto',
 });
 proseStyle('th, td', { paddingBlock: vars.space.sp8, paddingInline: vars.space.sp12 });
 proseStyle('caption, th', { textAlign: 'start' });
@@ -109,6 +129,72 @@ proseStyle('tbody td', { verticalAlign: 'baseline' });
 proseStyle('tbody tr + tr, tfoot', {
 	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
 });
+
+// Plain headings and paragraphs get the type style `Heading` and `Text` give them, trim included.
+// `Heading` and `Text` carry `textElementClassName` and are excluded, so they keep their own props.
+// The level map, the weight roles, and the font and trim declarations belong to `Heading` and
+// `Text`, so nothing here names a type style or a weight.
+interface PlainElement {
+	element: string;
+	typography: TypeStyle;
+	weightRole: FontWeightRole;
+}
+const plainElements: ReadonlyArray<PlainElement> = [
+	...(Object.entries(headingTypographyByLevel) as Array<[string, TypeStyle]>).map(
+		([level, typography]) => {
+			return { element: `h${level}`, typography, weightRole: headingDefaultFontWeight };
+		},
+	),
+	{ element: 'p', typography: 'body', weightRole: typeStyleWeightRole.body },
+];
+
+// `:is()` shares the exclusion across a list, and `:where()` keeps the whole match at zero
+// specificity.
+function plain(elements: ReadonlyArray<string>) {
+	if (elements.length === 1) return `${elements[0]}:not(.${textElementClassName})`;
+
+	return `:is(${elements.join(',')}):not(.${textElementClassName})`;
+}
+
+function groupElementsBy<Key extends string>(key: (entry: PlainElement) => Key) {
+	const groups = new Map<Key, Array<string>>();
+	for (const entry of plainElements) {
+		const group = groups.get(key(entry));
+		if (group) group.push(entry.element);
+		else groups.set(key(entry), [entry.element]);
+	}
+
+	return groups;
+}
+
+// Each font rule hands its Capsize trims to the single pair of pseudo-element rules below.
+const capHeightTrim = createVar();
+const baselineTrim = createVar();
+
+for (const [typography, elements] of groupElementsBy((entry) => entry.typography)) {
+	const trims = typeStyleTrimVars(typography);
+	proseStyle(plain(elements), {
+		...typeStyleFontDeclarations(typography),
+		vars: { [baselineTrim]: trims.baselineTrim, [capHeightTrim]: trims.capHeightTrim },
+	});
+}
+for (const [weightRole, elements] of groupElementsBy((entry) => entry.weightRole)) {
+	proseStyle(plain(elements), { fontWeight: vars.font.weight[weightRole] });
+}
+
+// A list marker and a cell baseline align to the first box, and the trim box comes first, so a
+// paragraph directly in `li`, `td`, or `th` skips the trim.
+const trimmedElements = `${plain(plainElements.map(({ element }) => element))}:not(:is(li, td, th) > *)`;
+proseStyle(
+	trimmedElements,
+	{ content: "''", display: 'table', marginBlockEnd: capHeightTrim },
+	'::before',
+);
+proseStyle(
+	trimmedElements,
+	{ content: "''", display: 'table', marginBlockStart: baselineTrim },
+	'::after',
+);
 
 proseBoundaryGapStyle(['h1'], vars.space.sp40);
 proseBoundaryGapStyle(['h2'], vars.space.sp32);

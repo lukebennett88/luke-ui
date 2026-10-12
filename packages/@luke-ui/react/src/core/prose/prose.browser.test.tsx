@@ -328,6 +328,36 @@ test('scrolls long preformatted lines without widening a narrow grid column', as
 	await expect.poll(() => pre.scrollLeft).toBeGreaterThan(0);
 });
 
+test('scrolls a wide table inside a narrow container', async () => {
+	const { locator, user } = render(
+		<Prose style={{ inlineSize: 160 }}>
+			<button type="button">Before table</button>
+			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable table */}
+			<table tabIndex={0}>
+				<tbody>
+					<tr>
+						<td>{'A long cell that needs more room than the column. '.repeat(3)}</td>
+						<td>Second cell</td>
+					</tr>
+				</tbody>
+			</table>
+		</Prose>,
+	);
+	const root = query(locator.element(), 'div');
+	const table = query(root, 'table');
+
+	expect(table.getBoundingClientRect().right).toBeLessThanOrEqual(
+		root.getBoundingClientRect().right + 1,
+	);
+	expect(table.scrollWidth).toBeGreaterThan(table.clientWidth);
+
+	locator.getByRole('button', { name: 'Before table' }).element().focus();
+	await user.tab();
+	expect(table).toHaveFocus();
+	await user.keyboard('{ArrowRight}');
+	await expect.poll(() => table.scrollLeft).toBeGreaterThan(0);
+});
+
 test('preserves whitespace in multiline pre code', () => {
 	const { locator } = render(
 		<Prose>
@@ -362,7 +392,7 @@ test('styles table headers and body cells', () => {
 	const rowHeader = query(root, 'tbody th');
 	const cell = query(root, 'tbody td');
 
-	expect(query(root, 'table').getBoundingClientRect().width).toBeCloseTo(160, 0);
+	expect(query(root, 'table').getBoundingClientRect().width).toBeLessThan(160);
 	expect(getComputedStyle(columnHeader).verticalAlign).toBe('bottom');
 	expect(getComputedStyle(columnHeader).textAlign).toBe('start');
 	expect(getComputedStyle(rowHeader).verticalAlign).not.toBe('bottom');
@@ -389,19 +419,221 @@ test('keeps pre chrome outside a not-prose boundary', () => {
 	expect(plain.paddingInlineStart).toBe('0px');
 });
 
+const headingLevels = [1, 2, 3, 4, 5, 6] as const;
+
+function typeMetrics(element: Element) {
+	const style = getComputedStyle(element);
+	return {
+		blockSize: element.getBoundingClientRect().height,
+		fontFamily: style.fontFamily,
+		fontSize: style.fontSize,
+		fontWeight: style.fontWeight,
+		letterSpacing: style.letterSpacing,
+		lineHeight: style.lineHeight,
+	};
+}
+
+// Plain markup from a CMS must look like the component. Height checks the trimmed block size.
+// Visual coverage protects trim placement.
+for (const level of headingLevels) {
+	test(`gives a plain h${level} the type style of Heading level ${level}`, () => {
+		const Plain = `h${level}` as const;
+		const { locator } = render(
+			<Prose>
+				<Plain>Plain heading</Plain>
+				<Heading level={level}>Plain heading</Heading>
+			</Prose>,
+		);
+		const root = locator.element();
+
+		expect(typeMetrics(query(root, `${Plain}:not([class])`))).toEqual(
+			typeMetrics(query(root, `${Plain}[class]`)),
+		);
+	});
+}
+
+test('gives a plain p the type style of Text', () => {
+	const { locator } = render(
+		<Prose>
+			<p>Plain paragraph</p>
+			<Text elementType="p">Plain paragraph</Text>
+		</Prose>,
+	);
+	const root = locator.element();
+
+	expect(typeMetrics(query(root, 'p:not([class])'))).toEqual(typeMetrics(query(root, 'p[class]')));
+});
+
+// A component keeps its own props inside Prose. The block size proves the trims match too.
+const overrides = [
+	{
+		name: 'Heading with shouldDisableTrim',
+		node: (
+			<Heading level={2} shouldDisableTrim>
+				Override
+			</Heading>
+		),
+	},
+	{
+		name: 'Heading with typography display',
+		node: (
+			<Heading level={2} typography="display">
+				Override
+			</Heading>
+		),
+	},
+	{
+		name: 'Text with typography lead',
+		node: (
+			<Text elementType="p" typography="lead">
+				Override
+			</Text>
+		),
+	},
+	{
+		name: 'Text with lineClamp',
+		node: (
+			<Text elementType="p" lineClamp={2}>
+				Override
+			</Text>
+		),
+	},
+];
+
+for (const { name, node } of overrides) {
+	test(`keeps the props of a ${name} inside Prose`, () => {
+		const { locator } = render(
+			<div>
+				<Prose>{node}</Prose>
+				{node}
+			</div>,
+		);
+		const [inside, outside] = locator.element().querySelectorAll('h2, p');
+
+		expect(typeMetrics(inside!)).toEqual(typeMetrics(outside!));
+		expect(getComputedStyle(inside!, '::before').content).toBe(
+			getComputedStyle(outside!, '::before').content,
+		);
+	});
+}
+
+test('leaves a plain heading inside a not-prose boundary unstyled', () => {
+	const { locator } = render(
+		<div>
+			<Prose>
+				<div className="not-prose">
+					<h2>Heading</h2>
+				</div>
+			</Prose>
+			<h2>Heading</h2>
+		</div>,
+	);
+	const [inside, outside] = locator.element().querySelectorAll('h2');
+
+	expect(typeMetrics(inside!)).toEqual(typeMetrics(outside!));
+});
+
+// A list marker and a cell baseline align to the first box, which the trim box would take.
+test('gives a loose list item the block size of a tight one', () => {
+	const { locator } = render(
+		<Prose>
+			<ul>
+				<li>
+					<p>Item</p>
+				</li>
+				<li>Item</li>
+			</ul>
+		</Prose>,
+	);
+	const [loose, tight] = locator.element().querySelectorAll('li');
+
+	expect(loose!.getBoundingClientRect().height).toBe(tight!.getBoundingClientRect().height);
+});
+
+test('aligns the text of a paragraph cell with a plain cell', () => {
+	const { locator } = render(
+		<Prose>
+			<table>
+				<tbody>
+					<tr>
+						<td>
+							<p>Cell</p>
+						</td>
+						<td>Cell</td>
+					</tr>
+				</tbody>
+			</table>
+		</Prose>,
+	);
+	const [paragraphCell, plainCell] = locator.element().querySelectorAll('td');
+	const textTop = (cell: Element) => {
+		const range = new Range();
+		range.selectNodeContents(cell.querySelector('p') ?? cell);
+		return range.getBoundingClientRect().top;
+	};
+
+	expect(textTop(paragraphCell!)).toBe(textTop(plainCell!));
+});
+
+// A Prose below a not-prose element and a Prose inside a Prose both start a scope.
+const proseBoundaries = [
+	{
+		name: 'a Prose inside a not-prose element',
+		node: (
+			<Prose>
+				<div className="not-prose">
+					<Prose>
+						<h2>Heading</h2>
+						<p>Paragraph</p>
+					</Prose>
+				</div>
+			</Prose>
+		),
+	},
+	{
+		name: 'a Prose inside a Prose',
+		node: (
+			<Prose>
+				<Prose>
+					<h2>Heading</h2>
+					<p>Paragraph</p>
+				</Prose>
+			</Prose>
+		),
+	},
+];
+
+for (const { name, node } of proseBoundaries) {
+	test(`styles plain elements in ${name} like Heading and Text`, () => {
+		const { locator } = render(
+			<div>
+				{node}
+				<Heading level={2}>Heading</Heading>
+				<Text elementType="p">Paragraph</Text>
+			</div>,
+		);
+		const root = locator.element();
+
+		expect(typeMetrics(query(root, 'h2:not([class])'))).toEqual(
+			typeMetrics(query(root, 'h2[class]')),
+		);
+		expect(typeMetrics(query(root, 'p:not([class])'))).toEqual(
+			typeMetrics(query(root, 'p[class]')),
+		);
+	});
+}
+
 const document = (
 	<Prose>
-		<Heading level={2}>Choosing a spacing scale</Heading>
-		<Text elementType="p">
+		<h1>Choosing a spacing scale</h1>
+		<p>
 			A spacing scale trades range for consistency. Nine steps cover a component library without
 			offering two values a designer cannot tell apart.
-		</Text>
-		<Text elementType="p">
-			Every step below is a token. Reach for the nearest one rather than a raw pixel value.
-		</Text>
+		</p>
+		<p>Every step below is a token. Reach for the nearest one rather than a raw pixel value.</p>
 
-		<Heading level={3}>Picking a step</Heading>
-		<Text elementType="p">Work outwards from the tightest gap the layout needs.</Text>
+		<h2>Picking a step</h2>
+		<p>Work outwards from the tightest gap the layout needs.</p>
 		<ol>
 			<li>Measure the smallest gap in the design.</li>
 			<li>
@@ -414,14 +646,14 @@ const document = (
 			<li>Use that step everywhere the same relationship appears.</li>
 		</ol>
 
-		<Heading level={4}>Rounding in practice</Heading>
+		<h3>Rounding in practice</h3>
 		<ul>
 			<li>
-				<Text elementType="p">A loose item holds more than one paragraph.</Text>
-				<Text elementType="p">The second takes a tighter gap than a document paragraph.</Text>
+				<p>A loose item holds more than one paragraph.</p>
+				<p>The second takes a tighter gap than a document paragraph.</p>
 			</li>
 			<li>
-				<Text elementType="p">Each item keeps the list rhythm.</Text>
+				<p>Each item keeps the list rhythm.</p>
 			</li>
 		</ul>
 		<ol type="1">
@@ -445,7 +677,7 @@ const document = (
 			near it in obstinacy.
 		</Blockquote>
 
-		<Heading level={4}>Reading a token</Heading>
+		<h4>Reading a token</h4>
 		{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable pre */}
 		<pre tabIndex={0}>
 			<code>{'padding-inline: var(--luke-space-sp16);\nmargin-block: 0;'}</code>
@@ -460,9 +692,11 @@ const document = (
 			<thead>
 				<tr>
 					<th scope="col">
-						Step
-						<br />
-						name
+						<p>
+							Step
+							<br />
+							name
+						</p>
 					</th>
 					<th scope="col">Value</th>
 				</tr>
@@ -470,11 +704,15 @@ const document = (
 			<tbody>
 				<tr>
 					<td>
-						<Code>sp8</Code>
-						<br />
-						Small gap
+						<p>
+							<Code>sp8</Code>
+							<br />
+							Small gap
+						</p>
 					</td>
-					<td>8px</td>
+					<td>
+						<p>8px</p>
+					</td>
 				</tr>
 				<tr>
 					<td>
@@ -493,7 +731,7 @@ const document = (
 
 		<hr />
 
-		<Heading level={3}>Terms</Heading>
+		<h5>Terms</h5>
 		<dl>
 			<dt>
 				<Text elementType="span" fontWeight="emphasis">
@@ -513,6 +751,7 @@ const document = (
 			</dd>
 		</dl>
 
+		<h6>Scale specimen</h6>
 		<figure>
 			<img alt="" height={64} src={swatch} width={320} />
 			<figcaption>
