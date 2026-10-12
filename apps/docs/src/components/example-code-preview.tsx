@@ -4,7 +4,6 @@ import { cx } from '@luke-ui/react/utils';
 import {
 	addTransitionType,
 	startTransition,
-	useId,
 	useLayoutEffect,
 	useReducer,
 	useRef,
@@ -25,7 +24,6 @@ export function ExampleCodePreview({
 	const [{ focus, mode }, dispatch] = useReducer(sourceReducer, initialSourceState);
 	const sourceRef = useRef<HTMLPreElement>(null);
 	const copyButtonRef = useRef<HTMLButtonElement>(null);
-	const codeId = useId();
 	const isExpanded = mode === 'expanded';
 	const canExpand = mode === 'collapsed' || isExpanded;
 	const isClipped = !isExpanded;
@@ -71,9 +69,8 @@ export function ExampleCodePreview({
 		<ViewTransition default="none" update={styles.codeUpdate}>
 			<Box
 				backgroundColor="surface.subdued"
-				id={codeId}
 				overflow="hidden"
-				paddingBlockEnd={canExpand ? 'sp40' : undefined}
+				paddingBlockEnd={canExpand ? 'sp48' : undefined}
 				position="relative"
 			>
 				{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
@@ -84,7 +81,6 @@ export function ExampleCodePreview({
 					html={html}
 					sourceRef={sourceRef}
 					viewportClassName={cx(
-						styles.codeViewport,
 						isClipped && styles.codeViewportCollapsed,
 						canExpand && isClipped && styles.codeViewportFade,
 					)}
@@ -103,8 +99,6 @@ export function ExampleCodePreview({
 						}}
 					>
 						<Button
-							aria-controls={codeId}
-							aria-expanded={isExpanded}
 							// React ignores the blur from unmounting, so this only sees focus moving away.
 							onBlur={() => dispatch({ type: 'toggleBlurred' })}
 							onFocus={() => dispatch({ type: 'toggleFocused' })}
@@ -128,12 +122,12 @@ export function ExampleCodePreview({
 }
 
 /**
- * Whether the collapsed clip cuts off source lines. Returns `undefined` while the clip is not
- * applied (for example when a resize callback fires for the expanded DOM just as a collapse is
+ * Whether the collapsed clip (`overflow-y: clip`) cuts off source lines. Returns `undefined` while
+ * the clip is not applied (for example when a resize callback fires for the expanded DOM just as a collapse is
  * queued), because that measurement says nothing about the collapsed source.
  */
 function measureIsClipped(sourceElement: HTMLElement) {
-	if (getComputedStyle(sourceElement).overflowY !== 'hidden') return undefined;
+	if (getComputedStyle(sourceElement).overflowY !== 'clip') return undefined;
 	return sourceElement.scrollHeight > sourceElement.clientHeight + 1;
 }
 

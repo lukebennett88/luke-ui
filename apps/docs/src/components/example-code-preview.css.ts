@@ -51,24 +51,17 @@ globalStyle(
 	},
 );
 
-/** Reveal the full source when expanded, without CodeBlock's default height cap. */
-export const codeViewport = style({
-	'@layer': {
-		utilities: {
-			maxBlockSize: 'none',
-		},
-	},
-});
-
 export const codeViewportCollapsed = style({});
 export const codeViewportFade = style({});
 
-// Clip the source itself so keyboard scrolling cannot reveal hidden lines.
+// Clip the source vertically so keyboard scrolling cannot reveal hidden lines. `clip`, unlike
+// `hidden`, is not a scroll container, so find-in-page cannot scroll clipped lines into view
+// either. Horizontal scrolling stays with the viewport.
 globalStyle(`${codeViewportCollapsed} pre`, {
 	'@layer': {
 		components: {
 			maxBlockSize: collapsedSourceMaxBlockSize,
-			overflow: 'hidden',
+			overflowY: 'clip',
 		},
 	},
 });

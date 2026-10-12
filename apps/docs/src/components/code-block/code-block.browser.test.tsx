@@ -95,6 +95,39 @@ test('updates scroll accessibility when the mounted source and label change', as
 	expect(viewport).not.toHaveAttribute('aria-label');
 });
 
+test('a tall standalone fence grows to its natural height and only scrolls sideways', async () => {
+	await page.viewport(400, 600);
+	const lines = Array.from({ length: 80 }, (_, index) => `const value${index} = ${index};`);
+	lines[40] = `const long = '${'x'.repeat(200)}';`;
+	renderCodeBlock(<CodeBlock allowCopy={false} code={lines.join('\n')} title="Tall" />);
+	const viewport = container?.querySelector('pre')?.parentElement;
+	assert(viewport != null, 'Expected a scroll viewport');
+
+	const region = page.getByRole('region', { name: 'Tall' });
+	await expect.element(region).toBeVisible();
+	expect(viewport.getBoundingClientRect().height).toBeGreaterThan(window.innerHeight);
+	expect(viewport.clientHeight).toBe(viewport.scrollHeight);
+	expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth);
+	expect(viewport).toHaveAttribute('tabindex', '0');
+
+	region.element().focus();
+	await userEvent.keyboard('{ArrowRight}');
+	await expect.poll(() => viewport.scrollLeft).toBeGreaterThan(0);
+	expect(viewport.scrollTop).toBe(0);
+});
+
+test('keeps the focus ring visible on a standalone horizontally scrollable fence', async () => {
+	await page.viewport(320, 720);
+	renderCodeBlock(<CodeBlock allowCopy={false} code={'x'.repeat(200)} title="Source" />);
+	const viewport = page.getByRole('region', { name: 'Source' }).element();
+	expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth);
+
+	// Keyboard input makes programmatic focus show its ring.
+	await userEvent.keyboard('{Shift}');
+	viewport.focus();
+	expectFocusRingUnclipped(viewport);
+});
+
 test('updates scroll accessibility when the viewport narrows and widens', async () => {
 	await page.viewport(1000, 800);
 	renderCodeBlock(<CodeBlock allowCopy={false} code={'x'.repeat(80)} title="Source" />);
@@ -312,4 +345,31 @@ function rerenderCodeBlock(node: ReactNode) {
 
 function assert(condition: boolean, message: string): asserts condition {
 	if (!condition) throw new Error(message);
+}
+
+/** Asserts the focus ring is drawn and no overflow ancestor clips it. */
+function expectFocusRingUnclipped(element: HTMLElement | SVGElement) {
+	expect(element).toHaveFocus();
+	expect(element.matches(':focus-visible')).toBe(true);
+	const { outlineOffset, outlineWidth } = getComputedStyle(element);
+	const extent = Math.max(0, Number.parseFloat(outlineOffset) + Number.parseFloat(outlineWidth));
+	const rect = element.getBoundingClientRect();
+	// Room between the ring and each overflow clip edge. Negative means the ring is cut off.
+	const gaps: Array<number> = [];
+	for (
+		let ancestor = element.parentElement;
+		ancestor && ancestor !== container;
+		ancestor = ancestor.parentElement
+	) {
+		const { overflowX, overflowY } = getComputedStyle(ancestor);
+		const clip = ancestor.getBoundingClientRect();
+		if (overflowX !== 'visible') {
+			gaps.push(rect.left - extent - clip.left, clip.right - (rect.right + extent));
+		}
+		if (overflowY !== 'visible') {
+			gaps.push(rect.top - extent - clip.top, clip.bottom - (rect.bottom + extent));
+		}
+	}
+	expect(gaps.length).toBeGreaterThan(0);
+	expect(Math.min(...gaps)).toBeGreaterThanOrEqual(-0.5);
 }

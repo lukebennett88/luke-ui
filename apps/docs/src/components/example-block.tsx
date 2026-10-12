@@ -6,7 +6,7 @@ import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import type { ComponentProps, ComponentType, JSX, ReactNode } from 'react';
-import { Suspense, use } from 'react';
+import { Suspense, use, useId } from 'react';
 import type { HighlightedSource } from '../lib/highlighted-source.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
 import { DocsLink } from './docs-link.js';
@@ -113,9 +113,12 @@ type ExampleFrameProps = {
 };
 
 function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps) {
+	const titleId = useId();
+
 	return (
 		<Box
 			aria-label={ariaLabel}
+			aria-labelledby={ariaLabel ? undefined : titleId}
 			borderColor="decorative"
 			borderRadius="control"
 			borderStyle="solid"
@@ -123,7 +126,7 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 			className="not-prose"
 			data-example-frame
 			marginBlock="sp16"
-			role={ariaLabel ? 'region' : undefined}
+			role={ariaLabel ? 'region' : 'group'}
 			style={{ isolation: 'isolate' }}
 		>
 			<Box
@@ -141,7 +144,7 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 				}}
 			>
 				<Box flex="1 1 auto" minInlineSize={0}>
-					<Text color="secondary" elementType="div" typography="label">
+					<Text color="secondary" elementType="div" id={titleId} typography="label">
 						{title}
 					</Text>
 				</Box>

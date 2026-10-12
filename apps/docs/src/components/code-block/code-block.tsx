@@ -1,9 +1,10 @@
 import { IconButton } from '@luke-ui/react/icon-button';
+import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import { useObjectRef } from '@react-aria/utils';
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from 'react';
-import { useCallback, useEffect, useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 import * as styles from './code-block.css.js';
 
 type FigureProps = ComponentPropsWithoutRef<'figure'>;
@@ -14,21 +15,18 @@ interface CodeBlockState {
 	copyStatus: CopyStatus;
 	/** Counts copy attempts so copying again during feedback restarts the timer. */
 	copyAttempt: number;
-	isScrollable: boolean;
 }
 
 type CodeBlockEvent =
 	| { type: 'copySucceeded' }
 	| { type: 'copyFailed' }
-	| { type: 'copyFeedbackExpired' }
-	| { type: 'overflowChanged'; isScrollable: boolean };
+	| { type: 'copyFeedbackExpired' };
 
 const COPY_FEEDBACK_MS = 1500;
 
 const initialState: CodeBlockState = {
 	copyStatus: 'idle',
 	copyAttempt: 0,
-	isScrollable: false,
 };
 
 export interface CodeBlockProps extends Omit<FigureProps, 'children'> {
@@ -81,28 +79,7 @@ export function CodeBlock({
 }: CodeBlockProps) {
 	const allowCopy = allowCopyProp !== false && allowCopyProp !== 'false';
 	const sourceElementRef = useObjectRef(sourceRef);
-	const [{ copyAttempt, copyStatus, isScrollable }, dispatch] = useReducer(
-		codeBlockReducer,
-		initialState,
-	);
-	const viewportRef = useCallback(
-		(node: HTMLDivElement | null) => {
-			if (!node) return;
-			const update = () => {
-				dispatch({
-					type: 'overflowChanged',
-					isScrollable: isOverflowing(node),
-				});
-			};
-
-			update();
-			const observer = new ResizeObserver(update);
-			observer.observe(node);
-			if (sourceElementRef.current) observer.observe(sourceElementRef.current);
-			return () => observer.disconnect();
-		},
-		[sourceElementRef],
-	);
+	const [{ copyAttempt, copyStatus }, dispatch] = useReducer(codeBlockReducer, initialState);
 
 	useEffect(() => {
 		if (copyStatus === 'idle') return;
@@ -162,16 +139,13 @@ export function CodeBlock({
 			{showOverlayCopy && copyControl != null ? (
 				<div className={cx(styles.actions, styles.overlayActions)}>{copyControl}</div>
 			) : null}
-			<div
-				aria-label={isScrollable ? viewportLabel : undefined}
+			<ScrollFade
+				aria-label={viewportLabel}
 				className={cx(
 					styles.viewport,
 					showOverlayCopy && styles.viewportWithOverlayCopy,
 					viewportClassName,
 				)}
-				ref={viewportRef}
-				role={isScrollable ? 'region' : undefined}
-				tabIndex={isScrollable ? 0 : undefined}
 			>
 				{html != null ? (
 					// Shiki escapes source before the highlight plugin emits this markup.
@@ -185,7 +159,7 @@ export function CodeBlock({
 						{code != null ? <code>{code}</code> : children}
 					</pre>
 				)}
-			</div>
+			</ScrollFade>
 			{allowCopy ? (
 				<VisuallyHidden aria-live="polite" elementType="p" role="status">
 					{liveMessage}
@@ -203,14 +177,7 @@ function codeBlockReducer(state: CodeBlockState, event: CodeBlockEvent): CodeBlo
 			return { ...state, copyStatus: 'error', copyAttempt: state.copyAttempt + 1 };
 		case 'copyFeedbackExpired':
 			return { ...state, copyStatus: 'idle' };
-		case 'overflowChanged':
-			if (state.isScrollable === event.isScrollable) return state;
-			return { ...state, isScrollable: event.isScrollable };
 	}
-}
-
-function isOverflowing(node: HTMLElement) {
-	return node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1;
 }
 
 function resolveCopyText({
