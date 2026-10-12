@@ -19,12 +19,14 @@ occurrence instead of a new entry. Add one dated occurrence per independent task
 evidence, such as `2026-10-11 (#801)`. Retries within one task count once. Several PRs on the same
 date count separately. Silence does not mean an entry is resolved.
 
-**Scope.** Fix small friction within the current task rather than logging it as unresolved debt.
-Always log an observed guidance failure, even when the code is corrected, because the guidance gap
-remains. Do not make unrelated fixes under cover of recording a papercut. Commit an entry
-separately, for example `Record papercut: <symptom>`, and mention it in the PR. Run
-`pnpm run fix:format-root` before committing. When resolving a conflict in this file, keep both
-additions. A session that can't commit reports its findings in its final message.
+**Scope.** Fix small friction in the current task rather than logging it as unresolved debt. When a
+task or PR fixes a symptom, remove its entry in the same change, or do not add one. When existing
+guidance or a skill should have prevented a mistake, log the guidance gap even after you fix the
+code, unless the same change also fixes the guidance. Do not make unrelated fixes under cover of
+recording a papercut. Commit an entry separately, for example `Record papercut: <symptom>`, and
+mention it in the PR. Run `pnpm run fix:format-root` before committing. When resolving a conflict in
+this file, keep both additions. A session that can't commit reports its findings in its final
+message.
 
 **Triage.** Mention it in your final message when this file reaches 10 entries, or when one entry
 reaches 3 occurrences. At 10 entries, triage the whole log. At 3 occurrences, triage that entry.
