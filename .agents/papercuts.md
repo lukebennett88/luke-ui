@@ -38,15 +38,6 @@ workflow would have prevented and that a check or a pointer would not handle bet
 approves skill additions and changes. Remove a skill when it is obsolete or when pilot or spot-check
 evidence shows it does not help. Silence in this log is not evidence.
 
-## Theme watch rebuild leaves the stylesheet unchanged in CI
-
-- **Seen:** 2026-10-12 (#793),
-  [component-tests job 114654361037](https://github.com/lukebennett88/luke-ui/actions/runs/38201061242/job/114654361037).
-- **Where:** `packages/@luke-ui/theme-build/theme-package.test.ts` and the
-  [theme build contract](../docs/TESTING.md#theme-build).
-- **Problem:** The first rebuild kept `0.25rem` instead of the expected `0.4375rem`. The same run
-  reported that packing failed because the tarball file was missing.
-
 ## Visual compare fails while the main baseline run is still in progress
 
 - Seen: 2026-10-12 (#782, #783, #785, #792). `visual-ci resolve-baseline` exited with "The newest

@@ -85,7 +85,7 @@ catalog:
   node-html-parser: ^9.0.4
   oxc-parser: ^0.153.0
   oxc-transform-react: ^0.153.0
-  pixelmatch: ^7.2.0
+  pixelmatch: ^8.0.0
   playwright: '^1.64.0'
   prettier: ^3.9.9
   pngjs: ^7.0.0
