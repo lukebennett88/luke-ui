@@ -37,3 +37,12 @@ archives them. Never delete an entry only because it is old.
 workflow would have prevented and that a check or a pointer would not handle better. The maintainer
 approves skill additions and changes. Remove a skill when it is obsolete or when pilot or spot-check
 evidence shows it does not help. Silence in this log is not evidence.
+
+## Theme watch rebuild leaves the stylesheet unchanged in CI
+
+- **Seen:** 2026-10-12 (#793),
+  [component-tests job 114654361037](https://github.com/lukebennett88/luke-ui/actions/runs/38201061242/job/114654361037).
+- **Where:** `packages/@luke-ui/theme-build/theme-package.test.ts` and the
+  [theme build contract](../docs/TESTING.md#theme-build).
+- **Problem:** The first rebuild kept `0.25rem` instead of the expected `0.4375rem`. The same run
+  reported that packing failed because the tarball file was missing.
