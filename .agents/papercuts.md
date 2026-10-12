@@ -46,3 +46,22 @@ evidence shows it does not help. Silence in this log is not evidence.
   [theme build contract](../docs/TESTING.md#theme-build).
 - **Problem:** The first rebuild kept `0.25rem` instead of the expected `0.4375rem`. The same run
   reported that packing failed because the tarball file was missing.
+
+## Visual compare fails while the main baseline run is still in progress
+
+- Seen: 2026-10-12 (#782, #783, #785, #792). `visual-ci resolve-baseline` exited with "The newest
+  Visual baseline run on `main` is in_progress. Wait for … then re-run this job." Re-run after the
+  baseline finished passed compare.
+- Where: `.github/workflows/visual-regression.yml` Resolve baseline step; docs/VISUAL_TESTING.md.
+- Problem: Parallel Renovate PRs that touch the lockfile all start compare while a main Visual
+  baseline run is still uploading, so every PR fails the same way until someone re-runs the job.
+
+## Renovate rewrote `devEngines.runtime` from `24.x` to an exact Node version
+
+- Seen: 2026-10-12 (#783). Renovate's non-major PR changed `"version": "24.x"` to
+  `"version": "24.21.0"` and the lockfile `specifier` to `runtime:24.21.0`.
+- Where: root `package.json` `devEngines.runtime`; docs/DEPENDENCIES.md Tooling versions;
+  `.github/renovate.json5` custom regex manager for node.
+- Problem: The documented contract is `<major>.x`, and the regex manager is supposed to keep that
+  form with `rangeStrategy: 'replace'`. The non-major group still rewrote the field to an exact
+  version, so the PR had to be corrected by hand.

@@ -125,7 +125,7 @@ export function ProfileAvatarSection({
 					/>
 					<MenuTrigger>
 						<RacButton
-							aria-label="Profile picture"
+							aria-label={`${getInitials(profile.displayName)} Profile picture`}
 							className={styles.avatarButton}
 							data-pending={isAvatarPending || undefined}
 							isPending={isAvatarPending}

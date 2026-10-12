@@ -148,7 +148,7 @@ test('change email validates, keeps the dialog open on failure, and restores foc
 
 test('profile picture rejects invalid files, retries a failed save, and can be removed', async () => {
 	const app = await renderApp(['/settings/profile']);
-	const avatar = app.locator.getByRole('button', { name: 'Profile picture', exact: true });
+	const avatar = app.locator.getByRole('button', { name: 'BJ Profile picture', exact: true });
 	await expect.element(avatar).toHaveTextContent('BJ');
 	const input = app.locator.getByLabelText('Upload profile picture');
 	await input.upload(new File(['<svg/>'], 'picture.svg', { type: 'image/svg+xml' }));
@@ -183,7 +183,7 @@ test('profile picture rejects invalid files, retries a failed save, and can be r
 	app.unmount();
 	const again = await renderApp(['/settings/profile']);
 	await expect
-		.element(again.locator.getByRole('button', { name: 'Profile picture', exact: true }))
+		.element(again.locator.getByRole('button', { name: 'BJ Profile picture', exact: true }))
 		.toHaveTextContent('BJ');
 	expect((await settingsApi.getSettings()).profile.avatarDataUrl).toBeNull();
 });
