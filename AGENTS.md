@@ -56,7 +56,9 @@
 
 - When your current task runs into repository friction or technical debt you can point to, record it
   in `.agents/papercuts.md`. Read its header first.
+- When your task or PR fixes the symptom, remove its entry in the same change, or do not add one.
 - When a user or reviewer corrects a mistake that existing guidance or a skill should have
-  prevented, record the gap there too, even after you fix the mistake.
+  prevented, record the gap there too, even after you fix the mistake, unless the same change also
+  updates the guidance.
 - Recording a papercut is allowed in any PR, as a separate commit. It is not permission to fix the
   problem. If you can't commit, report it in your final message.

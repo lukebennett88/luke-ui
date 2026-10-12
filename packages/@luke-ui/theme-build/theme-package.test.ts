@@ -53,6 +53,9 @@ beforeAll(async () => {
 			peerDependencies: { '@luke-ui/react': '*' },
 			private: true,
 			type: 'module',
+			// `vp pack` runs `npm pack`, which rejects a package with no version. That failure can
+			// leave `stylesheet.css` built from the previous input.
+			version: '0.0.0',
 		}),
 		'src/index.ts': `import { getThemeClassName } from '@luke-ui/react/theme';
 import { THEME_NAME } from './name.js';
