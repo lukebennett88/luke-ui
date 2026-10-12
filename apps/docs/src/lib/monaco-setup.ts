@@ -5,10 +5,13 @@
  * client-only code — it touches `self` at module scope.
  */
 import { loader } from '@monaco-editor/react';
+import { shikiToMonaco } from '@shikijs/monaco';
 import * as monaco from 'monaco-editor';
+import { createHighlighterCore } from 'shiki/core';
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
+import tsx from 'shiki/langs/tsx.mjs';
+import { toHighContrastMonacoTheme } from './monaco-theme.js';
 import { SHIKI_THEME_REGISTRATIONS } from './shiki-theme.js';
-
-const [githubLight, githubDark] = SHIKI_THEME_REGISTRATIONS;
 
 self.MonacoEnvironment = {
 	getWorker: (_workerId, label) => {
@@ -34,70 +37,16 @@ monaco.editor.addKeybindingRule({
 	keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL,
 });
 
-const MONACO_COLOR_KEYS = [
-	'editor.background',
-	'editor.foreground',
-	'editor.lineHighlightBackground',
-	'editor.selectionBackground',
-	'editorBracketMatch.background',
-	'editorBracketMatch.border',
-	'editorCursor.foreground',
-	'editorHoverWidget.background',
-	'editorLineNumber.activeForeground',
-	'editorLineNumber.foreground',
-	'editorSuggestWidget.selectedBackground',
-	'editorWidget.background',
-	'editorWidget.border',
-	'scrollbarSlider.activeBackground',
-	'scrollbarSlider.background',
-	'scrollbarSlider.hoverBackground',
-] as const;
-
 /**
  * Monaco themes derived from the docs Shiki registrations, so the playground
  * matches highlighted code elsewhere on the site. The editor pane backgrounds
  * in `routes/playground/index.tsx` mirror each theme's `editor.background`.
+ * Defined by {@link ensurePlaygroundMonaco}.
  */
 export const monacoThemes = {
 	dark: 'github-dark-high-contrast',
 	light: 'github-light-high-contrast',
 } as const;
-
-monaco.editor.defineTheme(monacoThemes.light, shikiToMonacoTheme(githubLight, 'vs'));
-monaco.editor.defineTheme(monacoThemes.dark, shikiToMonacoTheme(githubDark, 'vs-dark'));
-
-function shikiToMonacoTheme(
-	theme: typeof githubLight,
-	base: 'vs' | 'vs-dark',
-): monaco.editor.IStandaloneThemeData {
-	const themeColors = theme.colors ?? {};
-	const colors: Record<string, string> = {};
-	for (const key of MONACO_COLOR_KEYS) {
-		const color = themeColors[key];
-		if (color) colors[key] = color;
-	}
-
-	const rules: Array<monaco.editor.ITokenThemeRule> = [];
-	const defaultForeground = themeColors['editor.foreground'];
-	if (defaultForeground) {
-		// Token rule colors are hex digits without the leading `#`.
-		rules.push({ foreground: defaultForeground.replace('#', ''), token: '' });
-	}
-	for (const { scope, settings } of theme.tokenColors ?? []) {
-		if (!settings?.foreground) continue;
-		const foreground = settings.foreground.replace('#', '');
-		const scopes = typeof scope === 'string' ? [scope] : (scope ?? []);
-		for (const token of scopes) {
-			rules.push({
-				foreground,
-				token,
-				...(settings.fontStyle ? { fontStyle: settings.fontStyle } : {}),
-			});
-		}
-	}
-
-	return { base, colors, inherit: true, rules };
-}
 
 const { typescriptDefaults } = monaco.typescript;
 
@@ -129,5 +78,36 @@ export async function loadPlaygroundTypes(): Promise<void> {
 		}
 	} catch {
 		isTypesLoaded = false;
+	}
+}
+
+let ready: Promise<void> | undefined;
+
+/**
+ * Tokenizes Monaco with Shiki's TSX grammar and defines {@link monacoThemes}.
+ * Await it before creating an editor. Runs once.
+ */
+export function ensurePlaygroundMonaco(): Promise<void> {
+	ready ??= setUpHighlighting().catch((error: unknown) => {
+		ready = undefined;
+		throw error;
+	});
+	return ready;
+}
+
+async function setUpHighlighting(): Promise<void> {
+	const highlighter = await createHighlighterCore({
+		engine: createJavaScriptRegexEngine(),
+		// Playground models use Monaco's `typescript` language with a `.tsx` path,
+		// so the TSX grammar is registered under that language id.
+		langs: tsx.map((lang) => ({ ...lang, name: 'typescript' })),
+		themes: SHIKI_THEME_REGISTRATIONS,
+	});
+	shikiToMonaco(highlighter, monaco);
+
+	// `shikiToMonaco` defines `vs` / `vs-dark` themes. Redefine them on
+	// high-contrast bases so selected text stays readable.
+	for (const name of Object.values(monacoThemes)) {
+		monaco.editor.defineTheme(name, toHighContrastMonacoTheme(highlighter.getTheme(name)));
 	}
 }
