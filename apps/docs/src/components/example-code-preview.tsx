@@ -1,8 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { cx } from '@luke-ui/react/utils';
-import { assignInlineVars } from '@vanilla-extract/dynamic';
-import { startTransition, useLayoutEffect, useReducer, useRef, useState } from 'react';
+import { startTransition, useLayoutEffect, useReducer, useRef } from 'react';
 import { CodeBlock } from './code-block/code-block.js';
 import * as styles from './example-code-preview.css.js';
 
@@ -19,12 +18,12 @@ export function ExampleCodePreview({
 	const sourceRef = useRef<HTMLPreElement>(null);
 	const copyButtonRef = useRef<HTMLButtonElement>(null);
 	const toggleRef = useRef<HTMLButtonElement>(null);
-	/** Viewport top of the toggle when a collapse was requested. */
-	const collapseToggleTopRef = useRef<number | null>(null);
-	const [sourceClipBlockSizes, setSourceClipBlockSizes] = useState<{
-		collapsed: number;
-		expanded: number;
-	} | null>(null);
+	/**
+	 * Viewport top to hold the toggle at while max-block-size animates. The height change would
+	 * move the frame bottom; scrolling by the same delta keeps the control still so the clip
+	 * window opens and closes against a fixed sill.
+	 */
+	const pinnedToggleTopRef = useRef<number | null>(null);
 	const isExpanded = mode === 'expanded';
 	const canExpand = mode === 'collapsed' || isExpanded;
 	const isClipped = !isExpanded;
@@ -36,13 +35,6 @@ export function ExampleCodePreview({
 		const update = () => {
 			const isClipped = measureIsClipped(sourceElement);
 			if (isClipped != null) dispatch({ isClipped, type: 'measured' });
-			const collapsed = measureCollapsedSourceBlockSize(sourceElement);
-			if (collapsed != null) {
-				setSourceClipBlockSizes({
-					collapsed,
-					expanded: measureExpandedSourceBlockSize(sourceElement),
-				});
-			}
 		};
 
 		const observer = new ResizeObserver(update);
@@ -55,8 +47,9 @@ export function ExampleCodePreview({
 		};
 	}, []);
 
-	// Collapsed styles can land without a size change (for example after
-	// shrinking typography while expanded). Remeasure once they apply.
+	// Collapsed styles can land without a size change (for example after shrinking typography while
+	// expanded). Remeasure once they apply. Clip is judged from content vs the collapsed line budget,
+	// so a mid-flight max-block-size does not look like a fit.
 	useLayoutEffect(() => {
 		if (mode !== 'collapsed') return;
 		const sourceElement = sourceRef.current;
@@ -64,25 +57,67 @@ export function ExampleCodePreview({
 
 		const isClipped = measureIsClipped(sourceElement);
 		if (isClipped != null) dispatch({ isClipped, type: 'measured' });
-		const collapsed = measureCollapsedSourceBlockSize(sourceElement);
-		if (collapsed != null) {
-			setSourceClipBlockSizes({
-				collapsed,
-				expanded: measureExpandedSourceBlockSize(sourceElement),
-			});
-		}
 	}, [mode]);
 
-	// Collapsing shrinks the source above the toggle without changing the page scroll. When the
-	// reader has scrolled past the source's top, scroll by the toggle's shift so they keep their
-	// place. Native scroll anchoring picks a source line that the collapse clips, so it cannot do
-	// this. While the top is still visible, the press skips recording and the page stays put.
+	// Keep the toggle still while height transitions. `interpolate-size` animates max-block-size
+	// between the collapsed length and `none`; each frame, scroll by the sill's drift so it stays
+	// put while bottom lines are clipped or disclosed. Keyword size transitions are not always
+	// exposed via `getAnimations()`, so pin for the enter duration instead of trusting that API.
 	useLayoutEffect(() => {
-		const topBefore = collapseToggleTopRef.current;
-		collapseToggleTopRef.current = null;
+		const pinnedTop = pinnedToggleTopRef.current;
 		const toggle = toggleRef.current;
-		if (mode !== 'collapsed' || topBefore == null || !toggle) return;
-		window.scrollBy({ behavior: 'instant', top: toggle.getBoundingClientRect().top - topBefore });
+		const sourceElement = sourceRef.current;
+		if (pinnedTop == null || !toggle || !sourceElement) return;
+
+		let frameId = 0;
+		let finished = false;
+		const durationMs = Number.parseFloat(getComputedStyle(sourceElement).transitionDuration);
+		// Computed transition-duration is seconds (e.g. `0.25s`). Fall back to one frame when 0.
+		const pinForMs = Number.isFinite(durationMs) ? Math.max(durationMs * 1000, 16) : 250;
+		const startedAt = performance.now();
+
+		const pinToggle = () => {
+			const delta = toggle.getBoundingClientRect().top - pinnedTop;
+			if (Math.abs(delta) >= 0.5) {
+				window.scrollBy({ behavior: 'instant', top: delta });
+			}
+		};
+
+		const stop = () => {
+			if (finished) return;
+			finished = true;
+			cancelAnimationFrame(frameId);
+			pinToggle();
+			// A newer press may have replaced the pin target while this transition was ending.
+			if (pinnedToggleTopRef.current === pinnedTop) {
+				pinnedToggleTopRef.current = null;
+			}
+		};
+
+		const tick = () => {
+			pinToggle();
+			if (performance.now() - startedAt < pinForMs + 32) {
+				frameId = requestAnimationFrame(tick);
+				return;
+			}
+			stop();
+		};
+
+		pinToggle();
+		frameId = requestAnimationFrame(tick);
+
+		const onEnd = (event: TransitionEvent) => {
+			if (event.target === sourceElement && event.propertyName === 'max-block-size') stop();
+		};
+		sourceElement.addEventListener('transitionend', onEnd);
+		sourceElement.addEventListener('transitioncancel', onEnd);
+
+		return () => {
+			finished = true;
+			cancelAnimationFrame(frameId);
+			sourceElement.removeEventListener('transitionend', onEnd);
+			sourceElement.removeEventListener('transitioncancel', onEnd);
+		};
 	}, [mode]);
 
 	// The reducer asks for this only after a focused collapse control has unmounted.
@@ -92,15 +127,6 @@ export function ExampleCodePreview({
 		dispatch({ type: 'focusRestored' });
 	}, [focus]);
 
-	const sourceClipStyle =
-		canExpand && sourceClipBlockSizes != null
-			? assignInlineVars({
-					[styles.sourceMaxBlockSizeVar]: `${
-						isExpanded ? sourceClipBlockSizes.expanded : sourceClipBlockSizes.collapsed
-					}px`,
-				})
-			: undefined;
-
 	return (
 		<Box
 			backgroundColor="surface.subdued"
@@ -108,7 +134,6 @@ export function ExampleCodePreview({
 			overflow="hidden"
 			paddingBlockEnd={canExpand ? 'sp48' : undefined}
 			position="relative"
-			style={sourceClipStyle}
 		>
 			{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
 			<CodeBlock
@@ -118,11 +143,8 @@ export function ExampleCodePreview({
 				html={html}
 				sourceRef={sourceRef}
 				viewportClassName={cx(
-					// Clip while measuring and before pixel sizes land. Once expand/collapse is
-					// available, keep an explicit max-block-size in both states so height can transition.
-					canExpand && sourceClipBlockSizes != null
-						? styles.codeViewportAnimatable
-						: isClipped && styles.codeViewportCollapsedFallback,
+					canExpand && styles.codeViewportAnimatable,
+					isClipped && styles.codeViewportCollapsed,
 					canExpand && isClipped && styles.codeViewportFade,
 				)}
 				viewportLabel={`${title} code`}
@@ -145,10 +167,7 @@ export function ExampleCodePreview({
 						onFocus={() => dispatch({ type: 'toggleFocused' })}
 						onPress={(event) => {
 							const target = event.target;
-							collapseToggleTopRef.current =
-								isExpanded && sourceRef.current && isUnderSiteHeader(sourceRef.current)
-									? target.getBoundingClientRect().top
-									: null;
+							pinnedToggleTopRef.current = target.getBoundingClientRect().top;
 							// Commit after this activation's keyup listeners so a focus move during
 							// the same Enter can still decide whether to restore Copy.
 							startTransition(() => {
@@ -167,35 +186,31 @@ export function ExampleCodePreview({
 	);
 }
 
-/** Whether the reader has scrolled the source's top edge up under the sticky docs header. */
-function isUnderSiteHeader(sourceElement: HTMLElement) {
-	return sourceElement.getBoundingClientRect().top < siteHeaderBottom();
-}
-
-/** Live bottom edge of the sticky docs header, or the viewport top when the shell is absent. */
-function siteHeaderBottom() {
-	const header = document.querySelector<HTMLElement>('#docs-shell [data-docs-sticky-header]');
-	return header?.getBoundingClientRect().bottom ?? 0;
-}
-
-function measureExpandedSourceBlockSize(sourceElement: HTMLElement) {
-	return sourceElement.scrollHeight;
-}
-
-function measureCollapsedSourceBlockSize(sourceElement: HTMLElement) {
-	const lineHeight = Number.parseFloat(getComputedStyle(sourceElement).lineHeight);
-	if (!Number.isFinite(lineHeight)) return null;
-	return lineHeight * styles.collapsedSourceLineCount;
-}
-
 /**
- * Whether the collapsed clip (`overflow-y: clip`) cuts off source lines. Returns `undefined` while
- * the clip is not applied (for example when a resize callback fires for the expanded DOM just as a collapse is
- * queued), because that measurement says nothing about the collapsed source.
+ * Whether the collapsed clip would cut off source lines. Uses content size vs the CSS collapsed
+ * budget (a non-animated custom property) rather than `clientHeight`, so an in-flight
+ * `max-block-size` interpolation cannot look like a fit. Returns `undefined` while the clip is
+ * not applied (for example when a resize callback fires for the expanded DOM just as a collapse is
+ * queued).
  */
 function measureIsClipped(sourceElement: HTMLElement) {
 	if (getComputedStyle(sourceElement).overflowY !== 'clip') return undefined;
+	const collapsedMax = measureCollapsedMaxBlockSizePx(sourceElement);
+	if (collapsedMax != null) {
+		return sourceElement.scrollHeight > collapsedMax + 1;
+	}
 	return sourceElement.scrollHeight > sourceElement.clientHeight + 1;
+}
+
+/** Resolved px for the collapsed budget custom property (not the in-flight max-block-size). */
+function measureCollapsedMaxBlockSizePx(sourceElement: HTMLElement) {
+	const varReference = styles.collapsedSourceMaxBlockSizeVar;
+	const probe = sourceElement.ownerDocument.createElement('div');
+	probe.style.cssText = `position:absolute;visibility:hidden;block-size:${varReference};`;
+	sourceElement.append(probe);
+	const size = Number.parseFloat(getComputedStyle(probe).blockSize);
+	probe.remove();
+	return Number.isFinite(size) ? size : null;
 }
 
 interface SourceState {

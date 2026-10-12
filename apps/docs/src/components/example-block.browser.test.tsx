@@ -552,10 +552,11 @@ test('collapsing long source keeps the toggle where the reader left it', async (
 	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
 });
 
-test('collapsing source whose top is still visible keeps the content above it in place', async () => {
+test('collapsing with the source top still visible keeps the toggle stationary', async () => {
 	await renderSourcePreview({
 		lineCount: 16,
 		withHeading: true,
+		withSpaceAbove: '40rem',
 		withSpaceBelow: true,
 		withStickyHeader: true,
 	});
@@ -565,30 +566,33 @@ test('collapsing source whose top is still visible keeps the content above it in
 	});
 	const collapse = page.getByRole('button', { name: 'Collapse code' });
 	await expect.element(collapse).toBeVisible();
-	// Scroll partway down the heading so a compensating scroll would be able to move it, while the
-	// source top stays below the sticky header.
-	window.scrollTo({ behavior: 'instant', top: 200 });
-	const heading = page.getByRole('heading', { name: 'Example heading' }).element();
+	const control = collapse.element();
 	const headerBottom = docsSiteHeader().getBoundingClientRect().bottom;
+	// Expanding scroll-pins the sill, which can lift the source under the header. Reposition so the
+	// source top is visible again, with room above to pin on collapse.
+	window.scrollBy({
+		behavior: 'instant',
+		top: sourceElement().getBoundingClientRect().top - (headerBottom + 24),
+	});
 	expect(sourceElement().getBoundingClientRect().top).toBeGreaterThan(headerBottom);
-	expect(collapse.element().getBoundingClientRect().bottom).toBeLessThan(window.innerHeight);
-	// Press with the keyboard: a pointer click makes Playwright scroll the toggle to the top of the
-	// viewport first, which is not the reader's scroll. Measure the moment the key goes down.
-	collapse.element().focus();
-	let headingTopAtPress: number | undefined;
-	collapse.element().addEventListener(
+	expect(control.getBoundingClientRect().bottom).toBeLessThan(window.innerHeight);
+	expect(window.scrollY).toBeGreaterThan(
+		control.getBoundingClientRect().top - sourceElement().getBoundingClientRect().top,
+	);
+	control.focus();
+	let topAtPress: number | undefined;
+	control.addEventListener(
 		'keydown',
 		() => {
-			headingTopAtPress = heading.getBoundingClientRect().top;
+			topAtPress = control.getBoundingClientRect().top;
 		},
 		{ once: true },
 	);
 
 	await pressKey('{Enter}');
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	assert(headingTopAtPress != null, 'expected the toggle to be pressed');
-	expect(window.scrollY).toBe(200);
-	expect(Math.abs(heading.getBoundingClientRect().top - headingTopAtPress)).toBeLessThanOrEqual(1);
+	assert(topAtPress != null, 'expected the toggle to be pressed');
+	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
 });
 
 test('collapsing under a taller-than-default sticky header still keeps the toggle in place', async () => {
@@ -683,44 +687,62 @@ test('keyboard collapse of a long example under the sticky header keeps the togg
 	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
 });
 
-test('expand and collapse animate height with the toggle on the frame and code pinned to the top', async () => {
-	await renderSourcePreview({ lineCount: 40, withSpaceBelow: true });
+test('expand and collapse keep the toggle still while height clips bottom lines', async () => {
+	// Space above leaves room to scroll-pin the toggle while the clip window closes upward.
+	await renderSourcePreview({ lineCount: 40, withSpaceAbove: '40rem', withSpaceBelow: true });
 	const expand = page.getByRole('button', { name: 'Expand code' });
 	await expect.element(expand).toBeVisible();
 	const source = sourceElement();
 	const frame = container?.querySelector<HTMLElement>('[data-example-code-frame]');
 	assert(frame, 'expected the example code frame');
-	const collapsedSourceBottom = source.getBoundingClientRect().bottom;
 	const collapsedHeight = source.getBoundingClientRect().height;
 	expect(source.scrollHeight).toBeGreaterThan(source.clientHeight + 1);
 
 	expand.element().focus();
+	let expandToggleTop: number | undefined;
+	expand.element().addEventListener(
+		'keydown',
+		() => {
+			expandToggleTop = expand.element().getBoundingClientRect().top;
+		},
+		{ once: true },
+	);
 	await pressKey('{Enter}');
 	const collapse = page.getByRole('button', { name: 'Collapse code' });
 	await expect.element(collapse).toBeVisible();
 	await expect
 		.poll(() => source.getBoundingClientRect().height)
 		.toBeGreaterThan(collapsedHeight + 40);
-	const expandedSourceTop = source.getBoundingClientRect().top;
+	assert(expandToggleTop != null, 'expected expand to be pressed');
+	expect(
+		Math.abs(collapse.element().getBoundingClientRect().top - expandToggleTop),
+	).toBeLessThanOrEqual(1);
 	const expandedToggle = collapse.element();
 	expect(expandedToggle.getBoundingClientRect().bottom).toBeLessThanOrEqual(
 		frame.getBoundingClientRect().bottom + 1,
 	);
-	expect(source.getBoundingClientRect().bottom).toBeGreaterThan(collapsedSourceBottom + 40);
 
-	const sourceTopAtPress = source.getBoundingClientRect().top;
+	const toggleTopAtPress = expandedToggle.getBoundingClientRect().top;
+	const heightAtPress = source.getBoundingClientRect().height;
+	const toggleTops: Array<number> = [];
 	const toggleBottomGaps: Array<number> = [];
-	const sourceTops: Array<number> = [];
-	const sourceBottoms: Array<number> = [];
+	const sourceHeights: Array<number> = [];
 	const onToggle = () => {
+		const startedAt = performance.now();
 		const sample = () => {
-			const animations = source.getAnimations({ subtree: true });
+			toggleTops.push(expandedToggle.getBoundingClientRect().top);
 			toggleBottomGaps.push(
 				frame.getBoundingClientRect().bottom - expandedToggle.getBoundingClientRect().bottom,
 			);
-			sourceTops.push(source.getBoundingClientRect().top);
-			sourceBottoms.push(source.getBoundingClientRect().bottom);
-			if (animations.length > 0) {
+			sourceHeights.push(source.getBoundingClientRect().height);
+			// Collapse commits inside startTransition; keep sampling until height has moved or the
+			// enter window has elapsed. Keyword size transitions may not appear in getAnimations().
+			const heightDropped = source.getBoundingClientRect().height < heightAtPress - 20;
+			if (!heightDropped && performance.now() - startedAt < 1000) {
+				requestAnimationFrame(sample);
+				return;
+			}
+			if (performance.now() - startedAt < 300) {
 				requestAnimationFrame(sample);
 			}
 		};
@@ -731,22 +753,21 @@ test('expand and collapse animate height with the toggle on the frame and code p
 	await pressKey('{Enter}');
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
 	await expect.poll(() => source.getBoundingClientRect().height).toBeCloseTo(collapsedHeight, 0);
-	expect(Math.abs(source.getBoundingClientRect().top - sourceTopAtPress)).toBeLessThanOrEqual(1);
-	expect(Math.abs(source.getBoundingClientRect().top - expandedSourceTop)).toBeLessThanOrEqual(1);
+	expect(
+		Math.abs(expand.element().getBoundingClientRect().top - toggleTopAtPress),
+	).toBeLessThanOrEqual(1);
 	expect(source.scrollHeight).toBeGreaterThan(source.clientHeight + 1);
 	// Later lines sit below the collapsed clip once the height has settled.
 	expect(source.getBoundingClientRect().bottom).toBeLessThan(
 		source.getBoundingClientRect().top + source.scrollHeight - 8,
 	);
-	// Toggle stays on the frame bottom while height animates; source top stays put so bottom
-	// lines are what disappear.
-	expect(toggleBottomGaps.length).toBeGreaterThan(0);
+	await expect.poll(() => sourceHeights.length).toBeGreaterThan(0);
+	await expect.poll(() => heightAtPress - Math.min(...sourceHeights)).toBeGreaterThan(20);
+	for (const top of toggleTops) {
+		expect(Math.abs(top - toggleTopAtPress)).toBeLessThanOrEqual(2);
+	}
 	expect(Math.max(...toggleBottomGaps)).toBeLessThan(24);
 	expect(Math.min(...toggleBottomGaps)).toBeGreaterThan(-2);
-	for (const top of sourceTops) {
-		expect(Math.abs(top - sourceTopAtPress)).toBeLessThanOrEqual(2);
-	}
-	expect(Math.max(...sourceBottoms) - Math.min(...sourceBottoms)).toBeGreaterThan(20);
 });
 
 test('narrow viewport collapse under the sticky header keeps the toggle in place', async () => {
