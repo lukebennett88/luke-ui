@@ -68,25 +68,25 @@ catalog:
   '@vanilla-extract/recipes': ^0.5.7
   '@vanilla-extract/rollup-plugin': ^1.5.4
   '@vanilla-extract/vite-plugin': ^5.2.6
-  '@vitejs/plugin-react': ^6.1.1
+  '@vitejs/plugin-react': ^6.1.2
   '@vitest/browser-playwright': 5.0.1
   '@vitest/coverage-v8': 5.0.1
   '@vitest/ui': 5.0.1
-  axe-core: ^4.13.0
+  axe-core: ^4.14.0
   csstype: ^3.2.3
   eslint-plugin-react-hooks: ^7.1.1
   fumadocs-core: ^16.16.2
   fumadocs-mdx: ^15.4.6
   fumadocs-typescript: ^5.4.1
   fumadocs-ui: ^16.16.2
-  knip: ^6.39.0
+  knip: ^6.40.0
   lz-string: ^1.5.0
   monaco-editor: ^0.57.0
   node-html-parser: ^9.0.4
-  oxc-parser: ^0.152.0
-  oxc-transform-react: ^0.152.0
+  oxc-parser: ^0.153.0
+  oxc-transform-react: ^0.153.0
   pixelmatch: ^7.2.0
-  playwright: '^1.63.0'
+  playwright: '^1.64.0'
   prettier: ^3.9.9
   pngjs: ^7.0.0
   lightningcss: ^1.33.0
@@ -97,7 +97,7 @@ catalog:
   react-dom: ^19.3.0
   react-error-boundary: ^6.1.6
   react-hook-form: ^7.89.0
-  react-resizable-panels: ^4.14.1
+  react-resizable-panels: ^4.14.3
   react-router: ^8.4.0
   serve: ^14.2.6
   shiki: ^4.5.0
