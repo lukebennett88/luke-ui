@@ -81,7 +81,6 @@ export function ExampleCodePreview({
 					html={html}
 					sourceRef={sourceRef}
 					viewportClassName={cx(
-						styles.codeViewport,
 						isClipped && styles.codeViewportCollapsed,
 						canExpand && isClipped && styles.codeViewportFade,
 					)}

@@ -51,17 +51,6 @@ globalStyle(
 	},
 );
 
-/** The viewport sits flush with the clipped example frame, so its focus ring is drawn inside its edges. */
-export const codeViewport = style({
-	'@layer': {
-		utilities: {
-			selectors: {
-				'&:focus-visible': { outlineOffset: '-2px' },
-			},
-		},
-	},
-});
-
 export const codeViewportCollapsed = style({});
 export const codeViewportFade = style({});
 

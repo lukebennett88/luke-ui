@@ -111,6 +111,12 @@ export const viewport = style({
 			minInlineSize: 0,
 			paddingBlock: vars.space.sp12,
 			paddingInline: vars.space.sp16,
+			selectors: {
+				// The figure (and flush example parents) clip overflow, so inset the global ring.
+				'&:focus-visible': {
+					outlineOffset: '-2px',
+				},
+			},
 		},
 	},
 });
