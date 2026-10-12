@@ -108,19 +108,9 @@ export const overlayActions = style({
 export const viewport = style({
 	'@layer': {
 		components: {
-			maxBlockSize: '37.5rem',
 			minInlineSize: 0,
-			overflow: 'auto',
 			paddingBlock: vars.space.sp12,
 			paddingInline: vars.space.sp16,
-			selectors: {
-				'&:focus-visible': {
-					outlineColor: vars.color.border.focus,
-					outlineOffset: '-2px',
-					outlineStyle: 'solid',
-					outlineWidth: '2px',
-				},
-			},
 		},
 	},
 });

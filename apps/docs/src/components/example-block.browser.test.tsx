@@ -40,6 +40,7 @@ test('shows a named loading state in a frame that reserves the preview space', (
 	renderExample(exampleTitle);
 
 	const loadingState = page.getByRole('region', { name: loadingLabel });
+	expect(page.getByRole('group', { name: exampleTitle }).query()).toBeNull();
 	expect(page.getByText(exampleTitle, { exact: true })).toBeVisible();
 	expect(page.getByRole('status', { name: loadingLabel })).toBeVisible();
 	expect(loadingState.element().getBoundingClientRect().height).toBeGreaterThanOrEqual(96);
@@ -261,6 +262,33 @@ test('shows source by default and expands it by keyboard while retaining control
 		.toBeCloseTo(collapsedHeight, 0);
 });
 
+test('keeps the focus rings of code controls inside the example frame', async () => {
+	await page.viewport(400, 800);
+	await renderExampleBlock({ width: 360 });
+	const expand = page.getByRole('button', { name: 'Expand code' });
+	await expect.element(expand).toBeVisible();
+	// Keyboard input makes programmatic focus show its ring.
+	await userEvent.keyboard('{Shift}');
+
+	const copy = page.getByRole('button', { name: 'Copy', exact: true }).element();
+	copy.focus();
+	expectFocusRingUnclipped(copy);
+	expand.element().focus();
+	expectFocusRingUnclipped(expand.element());
+
+	await act(async () => {
+		await userEvent.click(expand);
+	});
+	const collapse = page.getByRole('button', { name: 'Collapse code' });
+	await expect.element(collapse).toBeVisible();
+	await userEvent.keyboard('{Shift}');
+	collapse.element().focus();
+	expectFocusRingUnclipped(collapse.element());
+	const viewport = codeRegion('Box: Responsive layout code');
+	viewport.focus();
+	expectFocusRingUnclipped(viewport);
+});
+
 test('copies the complete source from both collapsed and expanded previews', async () => {
 	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 	await page.viewport(1000, 800);
@@ -285,33 +313,54 @@ test('copies the complete source from both collapsed and expanded previews', asy
 	expect(writeText).toHaveBeenLastCalledWith(responsiveLayoutSource.trim());
 });
 
-test('keyboard scrolls long lines while collapsed and expanded without revealing clipped lines', async () => {
+test('collapsed source leaves the accessibility tree and tab order', async () => {
 	await page.viewport(400, 800);
 	await renderExampleBlock({ width: 360 });
-	const viewport = page.getByRole('region', { name: 'Box: Responsive layout code' }).element();
+	const codeLabel = 'Box: Responsive layout code';
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+
+	// Role queries ignore `inert`, so assert the inert state that removes the region from AT.
+	expect(codeRegion(codeLabel).inert).toBe(true);
+
 	const copy = page.getByRole('button', { name: 'Copy', exact: true }).element();
+	copy.focus();
+	await userEvent.tab();
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toHaveFocus();
+});
+
+test('expanded source is a keyboard-scrollable region that does not reveal clipped lines', async () => {
+	await page.viewport(400, 800);
+	await renderExampleBlock({ width: 360 });
+	const copy = page.getByRole('button', { name: 'Copy', exact: true }).element();
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
+	});
+	await expect.element(page.getByRole('button', { name: 'Collapse code' })).toBeVisible();
+
+	const viewport = codeRegion('Box: Responsive layout code');
+	expect(viewport.inert).toBe(false);
 	copy.focus();
 	await userEvent.tab();
 	await expect.element(viewport).toHaveFocus();
 	await userEvent.keyboard('{ArrowRight}');
 	await expect.poll(() => viewport.scrollLeft).toBeGreaterThan(0);
-	await userEvent.keyboard('{ArrowDown}');
-	expect(viewport.scrollTop).toBe(0);
-
-	await userEvent.tab();
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toHaveFocus();
-	await act(async () => {
-		await userEvent.keyboard('{Enter}');
-	});
-	await expect.element(page.getByRole('button', { name: 'Collapse code' })).toBeVisible();
-	await userEvent.tab({ shift: true });
-	await expect.element(viewport).toHaveFocus();
-	viewport.scrollLeft = 0;
-	await userEvent.keyboard('{ArrowRight}');
-	await expect.poll(() => viewport.scrollLeft).toBeGreaterThan(0);
 	expect(viewport.scrollHeight).toBeLessThanOrEqual(viewport.clientHeight + 1);
-	await userEvent.tab({ shift: true });
-	await expect.element(copy).toHaveFocus();
+
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Collapse code' }));
+	});
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	expect(viewport.inert).toBe(true);
+	expect(viewport.scrollTop).toBe(0);
+});
+
+test('names a loaded frame as a group by its title', async () => {
+	await renderExampleBlock();
+	expect(
+		page.getByRole('group', { exact: true, name: 'Box: Responsive layout' }).query(),
+	).toBeTruthy();
+	expect(page.getByRole('region', { name: 'Loading', exact: false }).query()).toBeNull();
 });
 
 test('omits expand controls when the source already fits the collapsed preview', async () => {
@@ -507,6 +556,39 @@ async function renderSourcePreview({ withNextControl = false } = {}) {
 			</Provider>,
 		);
 	});
+}
+
+function codeRegion(name: string) {
+	const region = page.getByRole('region', { name }).element();
+	assert(region instanceof HTMLElement, 'expected code region');
+	return region;
+}
+
+/** Asserts the focus ring is drawn and no overflow ancestor clips it. */
+function expectFocusRingUnclipped(element: HTMLElement | SVGElement) {
+	expect(element).toHaveFocus();
+	expect(element.matches(':focus-visible')).toBe(true);
+	const { outlineOffset, outlineWidth } = getComputedStyle(element);
+	const extent = Math.max(0, Number.parseFloat(outlineOffset) + Number.parseFloat(outlineWidth));
+	const rect = element.getBoundingClientRect();
+	// Room between the ring and each overflow clip edge. Negative means the ring is cut off.
+	const gaps: Array<number> = [];
+	for (
+		let ancestor = element.parentElement;
+		ancestor && ancestor !== container;
+		ancestor = ancestor.parentElement
+	) {
+		const { overflowX, overflowY } = getComputedStyle(ancestor);
+		const clip = ancestor.getBoundingClientRect();
+		if (overflowX !== 'visible') {
+			gaps.push(rect.left - extent - clip.left, clip.right - (rect.right + extent));
+		}
+		if (overflowY !== 'visible') {
+			gaps.push(rect.top - extent - clip.top, clip.bottom - (rect.bottom + extent));
+		}
+	}
+	expect(gaps.length).toBeGreaterThan(0);
+	expect(Math.min(...gaps)).toBeGreaterThanOrEqual(-0.5);
 }
 
 function sourceElement() {

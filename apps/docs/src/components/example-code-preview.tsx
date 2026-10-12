@@ -73,7 +73,7 @@ export function ExampleCodePreview({
 				backgroundColor="surface.subdued"
 				id={codeId}
 				overflow="hidden"
-				paddingBlockEnd={canExpand ? 'sp40' : undefined}
+				paddingBlockEnd={canExpand ? 'sp48' : undefined}
 				position="relative"
 			>
 				{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
@@ -88,6 +88,7 @@ export function ExampleCodePreview({
 						isClipped && styles.codeViewportCollapsed,
 						canExpand && isClipped && styles.codeViewportFade,
 					)}
+					viewportInert={mode === 'collapsed'}
 					viewportLabel={`${title} code`}
 				/>
 				{canExpand ? (

@@ -51,11 +51,17 @@ globalStyle(
 	},
 );
 
-/** Reveal the full source when expanded, without CodeBlock's default height cap. */
+/**
+ * Reveal the full source when expanded, without CodeBlock's default height cap. The viewport sits
+ * flush with the clipped example frame, so its focus ring is drawn inside its edges.
+ */
 export const codeViewport = style({
 	'@layer': {
 		utilities: {
 			maxBlockSize: 'none',
+			selectors: {
+				'&:focus-visible': { outlineOffset: '-2px' },
+			},
 		},
 	},
 });
