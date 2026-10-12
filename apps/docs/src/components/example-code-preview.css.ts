@@ -1,5 +1,6 @@
 import { vars } from '@luke-ui/react/theme';
 import { globalStyle, style } from '@vanilla-extract/css';
+import { DOCS_SITE_HEADER_VT_NAME } from './site-header-view-transition.js';
 
 /** Six caption lines. Viewport padding remains outside the clipped source. */
 const collapsedSourceMaxBlockSize = `calc(${vars.font.caption.lineHeight} * 6)`;
@@ -25,6 +26,19 @@ globalStyle(
 		'@layer': {
 			components: {
 				animation: 'none',
+			},
+		},
+	},
+);
+
+// Named example groups paint above the root snapshot. Raise the sticky header's group so the morph
+// cannot cover it. Scoped to this transition type so search-field morphs are unaffected.
+globalStyle(
+	`:root:active-view-transition-type(${codeTransitionType})::view-transition-group(${DOCS_SITE_HEADER_VT_NAME})`,
+	{
+		'@layer': {
+			components: {
+				zIndex: 10,
 			},
 		},
 	},

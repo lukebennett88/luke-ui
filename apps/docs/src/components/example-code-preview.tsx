@@ -11,7 +11,6 @@ import {
 } from 'react';
 import { CodeBlock } from './code-block/code-block.js';
 import * as styles from './example-code-preview.css.js';
-import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
 export function ExampleCodePreview({
 	html,
@@ -142,11 +141,15 @@ export function ExampleCodePreview({
 	);
 }
 
-/** Whether the reader has scrolled the source's top edge up under the fixed site header. */
+/** Whether the reader has scrolled the source's top edge up under the sticky docs header. */
 function isUnderSiteHeader(sourceElement: HTMLElement) {
-	const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
-	const headerBottom = Number.parseFloat(SITE_HEADER_BLOCK_SIZE) * rootFontSize;
-	return sourceElement.getBoundingClientRect().top < headerBottom;
+	return sourceElement.getBoundingClientRect().top < siteHeaderBottom();
+}
+
+/** Live bottom edge of the sticky docs header, or the viewport top when the shell is absent. */
+function siteHeaderBottom() {
+	const header = document.querySelector<HTMLElement>('#docs-shell > header');
+	return header?.getBoundingClientRect().bottom ?? 0;
 }
 
 /**

@@ -1,8 +1,9 @@
 import { vars } from '@luke-ui/react/theme';
-import { createVar, style } from '@vanilla-extract/css';
+import { createVar, globalStyle, style } from '@vanilla-extract/css';
 import { docsSidebarMinInlineSize, docsTocMinInlineSize } from '../lib/docs-container-queries.js';
 import { overlayMotion } from '../lib/overlay-motion.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
+import { DOCS_SITE_HEADER_VT_NAME } from './site-header-view-transition.js';
 
 export const shell = style({
 	'@layer': {
@@ -35,10 +36,37 @@ export const header = style({
 			gridArea: 'header',
 			insetBlockStart: 0,
 			position: 'sticky',
+			// Own group in the view-transition layer so example morphs cannot paint over it.
+			viewTransitionName: DOCS_SITE_HEADER_VT_NAME,
 			zIndex: 10,
 		},
 	},
 });
+
+// Keep the header still while named example groups morph. Z-index among groups is raised only for
+// the example-code transition type in `example-code-preview.css.ts`, so search morphs stay free to
+// paint through the header's excluded search-field hole.
+globalStyle(`::view-transition-group(${DOCS_SITE_HEADER_VT_NAME})`, {
+	'@layer': {
+		components: {
+			animation: 'none',
+		},
+	},
+});
+
+globalStyle(
+	[
+		`::view-transition-old(${DOCS_SITE_HEADER_VT_NAME})`,
+		`::view-transition-new(${DOCS_SITE_HEADER_VT_NAME})`,
+	].join(', '),
+	{
+		'@layer': {
+			components: {
+				animation: 'none',
+			},
+		},
+	},
+);
 
 export const sidebar = style({
 	'@layer': {
