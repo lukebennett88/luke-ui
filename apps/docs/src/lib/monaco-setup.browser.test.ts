@@ -2,7 +2,9 @@ import * as monaco from 'monaco-editor';
 import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { ensurePlaygroundMonaco, monacoThemes } from './monaco-setup.js';
 
-const SOURCE = ['const answer = 42;', 'const label = "text";'].join('\n');
+// Keep tokens on one line. Under CI load a second view-line can stay untokenized long
+// enough for the light-theme string assertion to time out while line-one tokens pass.
+const SOURCE = 'const answer = 42; const label = "text";';
 
 // GitHub high-contrast token colours, not Monaco's `vs` / `vs-dark` defaults.
 const palettes = {
@@ -45,6 +47,7 @@ async function renderEditor(mode: keyof typeof palettes) {
 		theme: monacoThemes[mode],
 		value: SOURCE,
 	});
+	created.layout();
 	editor = created;
 	const root = container;
 
