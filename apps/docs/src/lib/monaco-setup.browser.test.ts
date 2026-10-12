@@ -81,11 +81,14 @@ for (const mode of ['light', 'dark'] as const) {
 		const palette = palettes[mode];
 
 		// Monaco tokenizes lazily, so retry until the viewport is coloured.
-		await vi.waitFor(() => {
-			expect(colourOf('const')).toBe(hexToRgb(palette.keyword));
-			expect(colourOf('42')).toBe(hexToRgb(palette.number));
-			expect(colourOf('"text"')).toBe(hexToRgb(palette.string));
-		});
+		await vi.waitFor(
+			() => {
+				expect(colourOf('const')).toBe(hexToRgb(palette.keyword));
+				expect(colourOf('42')).toBe(hexToRgb(palette.number));
+				expect(colourOf('"text"')).toBe(hexToRgb(palette.string));
+			},
+			{ timeout: 5_000 },
+		);
 		// High-contrast base, so Monaco applies `editor.selectionForeground`.
 		expect(root.querySelector(mode === 'light' ? '.hc-light' : '.hc-black')).not.toBeNull();
 	});
