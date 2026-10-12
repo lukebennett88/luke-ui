@@ -14,12 +14,10 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, assert, expect, test, vi } from 'vite-plus/test';
 import { cdp, commands, page, userEvent } from 'vite-plus/test/context';
 import responsiveLayoutSource from '../examples/box/responsive-layout.tsx?raw';
-import * as shellStyles from './docs-shell.css.js';
 import { ExampleBlock, ExampleLoadingState } from './example-block.js';
 import { ExampleCodePreview } from './example-code-preview.js';
 import * as styles from './example-preview.css.js';
 import { ExamplePreview } from './example-preview.js';
-import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 import { DocsThemeRoot } from './theme-controls.js';
 
 let container: HTMLElement | undefined;
@@ -37,7 +35,6 @@ afterEach(async () => {
 	vi.restoreAllMocks();
 	vi.useRealTimers();
 	await emulateReducedMotion(false);
-	await page.viewport(1000, 800);
 });
 
 test('shows a named loading state in a frame that reserves the preview space', () => {
@@ -391,496 +388,44 @@ test('omits expand controls when the source already fits the collapsed preview',
 	expect(page.getByRole('button', { name: 'Copy' })).toBeVisible();
 });
 
-test('keeps expanded source collapsible when its typography changes to fit', async () => {
-	await page.viewport(1000, 800);
-	const source = Array.from({ length: 20 }, () => 'const value = 1;').join('\n');
-	container = document.body.appendChild(document.createElement('div'));
-	root = createRoot(container);
-	act(() => {
-		root?.render(
-			<Provider spritesheetHref={spriteSheetHref}>
-				<ExampleCodePreview html={`<code>${source}</code>`} source={source} title="Source sizing" />
-			</Provider>,
+for (const motion of ['full', 'reduced'] as const) {
+	test(`collapsing a long example keeps its toggle where the reader pressed it with ${motion} motion`, async () => {
+		await emulateReducedMotion(motion === 'reduced');
+		await renderLongSourcePreview();
+		const control = page.getByRole('button', { name: 'Expand code' }).element();
+		assert(control instanceof HTMLElement, 'expected the code toggle');
+		// Click synchronously so the height transition is still running when the test inspects it.
+		act(() => control.click());
+		await Promise.all(
+			sourceElement()
+				.getAnimations()
+				.map((animation) => animation.finished),
 		);
+
+		// A reader who reaches the end of a long example sees its last lines and the toggle.
+		control.scrollIntoView({ behavior: 'instant', block: 'center' });
+		const topAtPress = control.getBoundingClientRect().top;
+		// The clipped source ends just above the toggle at every point of the collapse.
+		const sourceGap = () =>
+			control.getBoundingClientRect().top - sourceElement().getBoundingClientRect().bottom;
+		const gapAtPress = sourceGap();
+		act(() => control.click());
+		expect(control).toHaveTextContent('Expand code');
+
+		const transitions = sourceElement().getAnimations();
+		expect(transitions).toHaveLength(motion === 'reduced' ? 0 : 1);
+		for (const transition of transitions) {
+			transition.pause();
+			transition.currentTime = Number(transition.effect?.getComputedTiming().duration) / 2;
+			expect(control.getBoundingClientRect().top).toBeCloseTo(topAtPress, 0);
+			expect(sourceGap()).toBeCloseTo(gapAtPress, 0);
+			transition.finish();
+		}
+		expect(control.getBoundingClientRect().top).toBeCloseTo(topAtPress, 0);
+		expect(sourceGap()).toBeCloseTo(gapAtPress, 0);
+		expect(sourceElement().scrollHeight).toBeGreaterThan(sourceElement().clientHeight);
 	});
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	await act(async () => {
-		await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
-	});
-	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toBeVisible();
-	const pre = container.querySelector('pre');
-	assert(pre, 'expected source element');
-	pre.style.fontSize = '1px';
-	pre.style.lineHeight = '1px';
-	// Border box stays at the collapsed floor while animatable; content size is what fits.
-	await expect.poll(() => sourceContentBlockSize(pre)).toBeLessThan(30);
-	expect(collapse).not.toHaveAttribute('aria-expanded');
-	await act(async () => {
-		await userEvent.click(collapse);
-	});
-	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeNull();
-	await expect.poll(() => collapse.query()).toBeNull();
-
-	pre.style.removeProperty('font-size');
-	pre.style.removeProperty('line-height');
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-});
-
-test('collapsed source drops its toggle when typography makes it fit, and restores it after', async () => {
-	await renderSourcePreview();
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	expect(sourceElement().scrollHeight).toBeGreaterThan(sourceElement().clientHeight + 1);
-
-	shrinkTypography(sourceElement());
-	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeNull();
-	expect(sourceElement().scrollHeight).toBeLessThanOrEqual(sourceElement().clientHeight + 1);
-
-	sourceElement().style.removeProperty('font-size');
-	sourceElement().style.removeProperty('line-height');
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-});
-
-test('collapsing clipped source with Enter keeps focus on the toggle', async () => {
-	await renderSourcePreview();
-	const expand = page.getByRole('button', { name: 'Expand code' });
-	await expect.element(expand).toBeVisible();
-	expand.element().focus();
-	await pressKey('{Enter}');
-	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toHaveFocus();
-
-	await pressKey('{Enter}');
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toHaveFocus();
-});
-
-test('collapsing source that now fits with Enter moves focus to Copy', async () => {
-	await renderSourcePreview();
-	const expand = page.getByRole('button', { name: 'Expand code' });
-	await expect.element(expand).toBeVisible();
-	expand.element().focus();
-	await pressKey('{Enter}');
-	await expect.element(page.getByRole('button', { name: 'Collapse code' })).toHaveFocus();
-	shrinkTypography(sourceElement());
-	await expect.poll(() => sourceContentBlockSize(sourceElement())).toBeLessThan(30);
-
-	await pressKey('{Enter}');
-	await expect.poll(() => page.getByRole('button', { name: 'Collapse code' }).query()).toBeNull();
-	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeNull();
-	await expect.element(page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN })).toHaveFocus();
-});
-
-test('collapse with Enter respects focus moving away before commit', async () => {
-	await renderSourcePreview({ withNextControl: true });
-	const expand = page.getByRole('button', { name: 'Expand code' });
-	await expect.element(expand).toBeVisible();
-	expand.element().focus();
-	await pressKey('{Enter}');
-	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toHaveFocus();
-	shrinkTypography(sourceElement());
-	await expect.poll(() => sourceContentBlockSize(sourceElement())).toBeLessThan(30);
-
-	const next = page.getByRole('button', { name: 'Next example' }).element();
-	// Redirect focus during the native activation event, before another browser task can run.
-	collapse.element().addEventListener('keyup', () => next.focus(), { once: true });
-	vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', false);
-	await userEvent.keyboard('{Enter}');
-	await expect.poll(() => collapse.query()).toBeNull();
-	await expect.element(page.getByRole('button', { name: 'Next example' })).toHaveFocus();
-});
-
-test('collapse with Enter respects focus returning before commit', async () => {
-	await renderSourcePreview({ withNextControl: true });
-	const expand = page.getByRole('button', { name: 'Expand code' });
-	await expect.element(expand).toBeVisible();
-	expand.element().focus();
-	await pressKey('{Enter}');
-	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toHaveFocus();
-	shrinkTypography(sourceElement());
-	await expect.poll(() => sourceContentBlockSize(sourceElement())).toBeLessThan(30);
-
-	const control = collapse.element();
-	const next = page.getByRole('button', { name: 'Next example' }).element();
-	control.addEventListener(
-		'keyup',
-		() => {
-			next.focus();
-			control.focus();
-		},
-		{ once: true },
-	);
-	vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', false);
-	await userEvent.keyboard('{Enter}');
-	await expect.poll(() => collapse.query()).toBeNull();
-	await expect.element(page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN })).toHaveFocus();
-});
-
-test('collapsing long source keeps the toggle where the reader left it', async () => {
-	await renderSourcePreview({ lineCount: 200, withSpaceBelow: true, withStickyHeader: true });
-	await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
-	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toBeVisible();
-	const control = collapse.element();
-	const header = docsSiteHeader();
-	// Scroll the expanded source under the sticky header so only the toggle remains in view.
-	window.scrollBy({
-		behavior: 'instant',
-		top: control.getBoundingClientRect().top - (header.getBoundingClientRect().bottom + 16),
-	});
-	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(
-		header.getBoundingClientRect().bottom,
-	);
-	expect(sourceElement().getBoundingClientRect().bottom).toBeLessThan(
-		control.getBoundingClientRect().top + 24,
-	);
-	// Prefer keyboard activation: a pointer click can scroll the toggle under the sticky header
-	// and leave too little scroll room for full compensation.
-	control.focus();
-	let topAtPress: number | undefined;
-	control.addEventListener(
-		'keydown',
-		() => {
-			topAtPress = control.getBoundingClientRect().top;
-		},
-		{ once: true },
-	);
-
-	await pressKey('{Enter}');
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	assert(topAtPress != null, 'expected the toggle to be pressed');
-	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
-});
-
-test('collapsing with the source top still visible keeps the toggle stationary', async () => {
-	await renderSourcePreview({
-		lineCount: 16,
-		withHeading: true,
-		withSpaceAbove: '40rem',
-		withSpaceBelow: true,
-		withStickyHeader: true,
-	});
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	await act(async () => {
-		await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
-	});
-	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toBeVisible();
-	const control = collapse.element();
-	const headerBottom = docsSiteHeader().getBoundingClientRect().bottom;
-	// Expanding scroll-pins the sill, which can lift the source under the header. Reposition so the
-	// source top is visible again, with room above to pin on collapse.
-	window.scrollBy({
-		behavior: 'instant',
-		top: sourceElement().getBoundingClientRect().top - (headerBottom + 24),
-	});
-	expect(sourceElement().getBoundingClientRect().top).toBeGreaterThan(headerBottom);
-	expect(control.getBoundingClientRect().bottom).toBeLessThan(window.innerHeight);
-	expect(window.scrollY).toBeGreaterThan(
-		control.getBoundingClientRect().top - sourceElement().getBoundingClientRect().top,
-	);
-	control.focus();
-	let topAtPress: number | undefined;
-	control.addEventListener(
-		'keydown',
-		() => {
-			topAtPress = control.getBoundingClientRect().top;
-		},
-		{ once: true },
-	);
-
-	await pressKey('{Enter}');
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	assert(topAtPress != null, 'expected the toggle to be pressed');
-	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
-});
-
-test('collapsing under a taller-than-default sticky header still keeps the toggle in place', async () => {
-	// Taller than SITE_HEADER_BLOCK_SIZE so a fixed-rem assumption would skip compensation while the
-	// source top sits under the real header. Space above the example leaves enough scroll room to
-	// compensate; keep the expanded block short enough that the toggle stays on screen.
-	await renderSourcePreview({
-		headerBlockSize: '8rem',
-		lineCount: 40,
-		withHeading: true,
-		withSpaceAbove: '40rem',
-		withSpaceBelow: true,
-		withStickyHeader: true,
-	});
-	await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
-	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toBeVisible();
-	const control = collapse.element();
-	const header = docsSiteHeader();
-	const headerBox = header.getBoundingClientRect();
-	const assumedHeaderBottom =
-		Number.parseFloat(SITE_HEADER_BLOCK_SIZE) *
-		Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
-	expect(headerBox.height).toBeGreaterThan(assumedHeaderBottom + 8);
-
-	const targetSourceTop = (assumedHeaderBottom + headerBox.bottom) / 2;
-	window.scrollBy({
-		behavior: 'instant',
-		top: sourceElement().getBoundingClientRect().top - targetSourceTop,
-	});
-	expect(sourceElement().getBoundingClientRect().top).toBeGreaterThan(assumedHeaderBottom);
-	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(
-		header.getBoundingClientRect().bottom,
-	);
-	expect(control.getBoundingClientRect().bottom).toBeLessThan(window.innerHeight);
-	expect(control.getBoundingClientRect().top).toBeGreaterThan(
-		header.getBoundingClientRect().bottom,
-	);
-	// Compensation scrolls up by the collapse delta; there must be room above the current scroll.
-	expect(window.scrollY).toBeGreaterThan(
-		control.getBoundingClientRect().top - sourceElement().getBoundingClientRect().top,
-	);
-
-	control.focus();
-	let topAtPress: number | undefined;
-	control.addEventListener(
-		'keydown',
-		() => {
-			topAtPress = control.getBoundingClientRect().top;
-			expect(sourceElement().getBoundingClientRect().top).toBeGreaterThan(assumedHeaderBottom);
-			expect(sourceElement().getBoundingClientRect().top).toBeLessThan(
-				header.getBoundingClientRect().bottom,
-			);
-		},
-		{ once: true },
-	);
-	await pressKey('{Enter}');
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	assert(topAtPress != null, 'expected the toggle to be pressed');
-	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
-});
-
-test('keyboard collapse of a long example under the sticky header keeps the toggle in place', async () => {
-	await renderSourcePreview({ lineCount: 200, withSpaceBelow: true, withStickyHeader: true });
-	const expand = page.getByRole('button', { name: 'Expand code' });
-	await expect.element(expand).toBeVisible();
-	expand.element().focus();
-	await pressKey('{Enter}');
-	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toHaveFocus();
-	const control = collapse.element();
-	const header = docsSiteHeader();
-	window.scrollBy({
-		behavior: 'instant',
-		top: control.getBoundingClientRect().top - (header.getBoundingClientRect().bottom + 16),
-	});
-	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(
-		header.getBoundingClientRect().bottom,
-	);
-
-	let topAtPress: number | undefined;
-	control.addEventListener(
-		'keydown',
-		() => {
-			topAtPress = control.getBoundingClientRect().top;
-		},
-		{ once: true },
-	);
-	await pressKey('{Enter}');
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toHaveFocus();
-	assert(topAtPress != null, 'expected the toggle to be pressed');
-	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
-});
-
-test('expand and collapse keep the toggle still while height clips bottom lines', async () => {
-	// Space above leaves room to scroll-pin the toggle while the clip window closes upward.
-	await renderSourcePreview({ lineCount: 40, withSpaceAbove: '40rem', withSpaceBelow: true });
-	const expand = page.getByRole('button', { name: 'Expand code' });
-	await expect.element(expand).toBeVisible();
-	const source = sourceElement();
-	const frame = container?.querySelector<HTMLElement>('[data-example-code-frame]');
-	assert(frame, 'expected the example code frame');
-	const collapsedHeight = source.getBoundingClientRect().height;
-	expect(source.scrollHeight).toBeGreaterThan(source.clientHeight + 1);
-
-	expand.element().focus();
-	let expandToggleTop: number | undefined;
-	expand.element().addEventListener(
-		'keydown',
-		() => {
-			expandToggleTop = expand.element().getBoundingClientRect().top;
-		},
-		{ once: true },
-	);
-	await pressKey('{Enter}');
-	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toBeVisible();
-	await expect
-		.poll(() => source.getBoundingClientRect().height)
-		.toBeGreaterThan(collapsedHeight + 40);
-	assert(expandToggleTop != null, 'expected expand to be pressed');
-	expect(
-		Math.abs(collapse.element().getBoundingClientRect().top - expandToggleTop),
-	).toBeLessThanOrEqual(1);
-	const expandedToggle = collapse.element();
-	expect(expandedToggle.getBoundingClientRect().bottom).toBeLessThanOrEqual(
-		frame.getBoundingClientRect().bottom + 1,
-	);
-
-	let toggleTopAtPress = expandedToggle.getBoundingClientRect().top;
-	let heightAtPress = source.getBoundingClientRect().height;
-	const toggleTops: Array<number> = [];
-	const toggleBottomGaps: Array<number> = [];
-	const sourceHeights: Array<number> = [];
-	// Sample from keyup — React Aria fires onPress then, which is when scroll-pinning starts.
-	const onToggle = () => {
-		toggleTopAtPress = expandedToggle.getBoundingClientRect().top;
-		heightAtPress = source.getBoundingClientRect().height;
-		const startedAt = performance.now();
-		const sample = () => {
-			toggleTops.push(expandedToggle.getBoundingClientRect().top);
-			toggleBottomGaps.push(
-				frame.getBoundingClientRect().bottom - expandedToggle.getBoundingClientRect().bottom,
-			);
-			sourceHeights.push(source.getBoundingClientRect().height);
-			// Keep sampling until height has moved or the enter window has elapsed.
-			const heightDropped = source.getBoundingClientRect().height < heightAtPress - 20;
-			if (!heightDropped && performance.now() - startedAt < 1000) {
-				requestAnimationFrame(sample);
-				return;
-			}
-			if (performance.now() - startedAt < 300) {
-				requestAnimationFrame(sample);
-			}
-		};
-		requestAnimationFrame(sample);
-	};
-	expandedToggle.addEventListener('keyup', onToggle, { once: true });
-	expandedToggle.focus();
-	await pressKey('{Enter}');
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	await expect.poll(() => source.getBoundingClientRect().height).toBeCloseTo(collapsedHeight, 0);
-	expect(
-		Math.abs(expand.element().getBoundingClientRect().top - toggleTopAtPress),
-	).toBeLessThanOrEqual(1);
-	expect(source.scrollHeight).toBeGreaterThan(source.clientHeight + 1);
-	// Later lines sit below the collapsed clip once the height has settled.
-	expect(source.getBoundingClientRect().bottom).toBeLessThan(
-		source.getBoundingClientRect().top + source.scrollHeight - 8,
-	);
-	await expect.poll(() => sourceHeights.length).toBeGreaterThan(0);
-	await expect.poll(() => heightAtPress - Math.min(...sourceHeights)).toBeGreaterThan(20);
-	for (const top of toggleTops) {
-		expect(Math.abs(top - toggleTopAtPress)).toBeLessThanOrEqual(2);
-	}
-	expect(Math.max(...toggleBottomGaps)).toBeLessThan(24);
-	expect(Math.min(...toggleBottomGaps)).toBeGreaterThan(-2);
-});
-
-test('narrow viewport collapse under the sticky header keeps the toggle in place', async () => {
-	await renderSourcePreview({
-		lineCount: 200,
-		viewportWidth: 390,
-		viewportHeight: 800,
-		withSpaceBelow: true,
-		withStickyHeader: true,
-	});
-	await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
-	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toBeVisible();
-	const control = collapse.element();
-	const header = docsSiteHeader();
-	window.scrollBy({
-		behavior: 'instant',
-		top: control.getBoundingClientRect().top - (header.getBoundingClientRect().bottom + 16),
-	});
-	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(
-		header.getBoundingClientRect().bottom,
-	);
-
-	control.focus();
-	let topAtPress: number | undefined;
-	control.addEventListener(
-		'keydown',
-		() => {
-			topAtPress = control.getBoundingClientRect().top;
-		},
-		{ once: true },
-	);
-	await pressKey('{Enter}');
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	assert(topAtPress != null, 'expected the toggle to be pressed');
-	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
-});
-
-test('reduced-motion collapse under the sticky header keeps the toggle in place', async () => {
-	await emulateReducedMotion(true);
-	await renderSourcePreview({ lineCount: 200, withSpaceBelow: true, withStickyHeader: true });
-	await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
-	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toBeVisible();
-	const control = collapse.element();
-	const header = docsSiteHeader();
-	window.scrollBy({
-		behavior: 'instant',
-		top: control.getBoundingClientRect().top - (header.getBoundingClientRect().bottom + 16),
-	});
-
-	control.focus();
-	let topAtPress: number | undefined;
-	control.addEventListener(
-		'keydown',
-		() => {
-			topAtPress = control.getBoundingClientRect().top;
-		},
-		{ once: true },
-	);
-	await pressKey('{Enter}');
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	assert(topAtPress != null, 'expected the toggle to be pressed');
-	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
-});
-
-test('typography changes without interaction do not move focus', async () => {
-	await renderSourcePreview();
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
-	const collapse = page.getByRole('button', { name: 'Collapse code' });
-	await expect.element(collapse).toBeVisible();
-	collapse.element().focus();
-	const pre = sourceElement();
-
-	// The source now fits, but the expanded toggle stays until someone collapses it.
-	shrinkTypography(pre);
-	await expect.poll(() => sourceContentBlockSize(pre)).toBeLessThan(30);
-	await expect.element(collapse).toHaveFocus();
-
-	// Collapsing removes the toggle and hands focus to Copy. Growing the source again must leave it
-	// there while the expand control comes back.
-	await pressKey('{Enter}');
-	await expect.poll(() => collapse.query()).toBeNull();
-	const copy = page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN });
-	await expect.element(copy).toHaveFocus();
-	pre.style.removeProperty('font-size');
-	pre.style.removeProperty('line-height');
-	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	await expect.element(copy).toHaveFocus();
-});
-
-test('a surviving collapse does not restore focus after a later typography change', async () => {
-	await renderSourcePreview({ withNextControl: true });
-	const expand = page.getByRole('button', { name: 'Expand code' });
-	await expect.element(expand).toBeVisible();
-	expand.element().focus();
-	await pressKey('{Enter}');
-	await expect.element(page.getByRole('button', { name: 'Collapse code' })).toHaveFocus();
-	await pressKey('{Enter}');
-	await expect.element(expand).toHaveFocus();
-
-	await userEvent.tab();
-	await expect.element(page.getByRole('button', { name: 'Next example' })).toHaveFocus();
-	await userEvent.tab({ shift: true });
-	await expect.element(expand).toHaveFocus();
-	shrinkTypography(sourceElement());
-	await expect.poll(() => expand.query()).toBeNull();
-	expect(document.activeElement).toBe(document.body);
-});
+}
 
 test('narrowing the preview panel flips a responsive example below its container breakpoint', async () => {
 	await page.viewport(1000, 800);
@@ -896,74 +441,34 @@ test('narrowing the preview panel flips a responsive example below its container
 	await expect.poll(flexDirection).toBe('column');
 });
 
-async function renderSourcePreview({
-	headerBlockSize,
-	lineCount = 20,
-	viewportHeight = 800,
-	viewportWidth = 1000,
-	withHeading = false,
-	withNextControl = false,
-	withSpaceAbove,
-	withSpaceBelow = false,
-	withStickyHeader = false,
-}: {
-	headerBlockSize?: string;
-	lineCount?: number;
-	viewportHeight?: number;
-	viewportWidth?: number;
-	withHeading?: boolean;
-	withNextControl?: boolean;
-	withSpaceAbove?: string;
-	withSpaceBelow?: boolean;
-	withStickyHeader?: boolean;
-} = {}) {
-	await page.viewport(viewportWidth, viewportHeight);
-	const source = Array.from({ length: lineCount }, () => 'const value = 1;').join('\n');
-	const preview = (
-		<>
-			{withSpaceAbove ? <div style={{ blockSize: withSpaceAbove }} /> : null}
-			{withHeading ? <h2 style={{ blockSize: '20rem', margin: 0 }}>Example heading</h2> : null}
-			<ExampleCodePreview html={`<code>${source}</code>`} source={source} title="Source sizing" />
-			{withNextControl ? <button type="button">Next example</button> : null}
-			{withSpaceBelow ? <div style={{ blockSize: '100vh' }} /> : null}
-		</>
+/** Renders a 200-line example under a sticky header, with page content above and below it. */
+async function renderLongSourcePreview() {
+	await page.viewport(1000, 800);
+	const source = Array.from({ length: 200 }, (_, index) => `const line${index} = ${index};`).join(
+		'\n',
 	);
 	container = document.body.appendChild(document.createElement('div'));
 	root = createRoot(container);
 	act(() => {
 		root?.render(
 			<Provider spritesheetHref={spriteSheetHref}>
-				{withStickyHeader ? (
-					<div className={shellStyles.shell} id="docs-shell">
-						<header
-							className={shellStyles.header}
-							data-docs-sticky-header
-							style={
-								headerBlockSize
-									? {
-											backgroundColor: 'Canvas',
-											blockSize: headerBlockSize,
-											minBlockSize: headerBlockSize,
-										}
-									: { backgroundColor: 'Canvas', minBlockSize: SITE_HEADER_BLOCK_SIZE }
-							}
-						>
-							Sticky docs header
-						</header>
-						<main>{preview}</main>
-					</div>
-				) : (
-					preview
-				)}
+				<header
+					style={{
+						backgroundColor: 'Canvas',
+						blockSize: '3.5rem',
+						insetBlockStart: 0,
+						position: 'sticky',
+						zIndex: 10,
+					}}
+				>
+					Sticky docs header
+				</header>
+				<p style={{ blockSize: '50vh' }}>Content above the example.</p>
+				<ExampleCodePreview html={`<code>${source}</code>`} source={source} title="Long source" />
+				<p style={{ blockSize: '100vh' }}>Content below the example.</p>
 			</Provider>,
 		);
 	});
-}
-
-function docsSiteHeader() {
-	const header = container?.querySelector<HTMLElement>('#docs-shell [data-docs-sticky-header]');
-	assert(header, 'expected the sticky docs header');
-	return header;
 }
 
 async function emulateReducedMotion(reduce: boolean) {
@@ -1009,26 +514,6 @@ function sourceElement() {
 	const pre = container?.querySelector('pre');
 	assert(pre, 'expected source element');
 	return pre;
-}
-
-/** Content height inside the pre, ignoring the collapsed min-block-size floor. */
-function sourceContentBlockSize(pre: HTMLElement) {
-	const content = pre.firstElementChild;
-	if (content instanceof HTMLElement) {
-		return content.getBoundingClientRect().height;
-	}
-	return pre.scrollHeight;
-}
-
-function shrinkTypography(pre: HTMLElement) {
-	pre.style.fontSize = '1px';
-	pre.style.lineHeight = '1px';
-}
-
-async function pressKey(key: string) {
-	await act(async () => {
-		await userEvent.keyboard(key);
-	});
 }
 
 function renderExample(title: string) {

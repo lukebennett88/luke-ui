@@ -39,8 +39,6 @@ export interface CodeBlockProps extends Omit<FigureProps, 'children'> {
 	children?: ReactNode;
 	/** Plain source. Prefer this over children when the text is a string constant. */
 	code?: string;
-	/** Ref for the copy button, when the copy control is shown. */
-	copyButtonRef?: Ref<HTMLButtonElement>;
 	/** Exact clipboard payload when rendered markup should not define what is copied. */
 	copyText?: string;
 	/** Drop outer margin and frame chrome so the block can sit flush under an example frame. */
@@ -52,8 +50,6 @@ export interface CodeBlockProps extends Omit<FigureProps, 'children'> {
 	sourceRef?: Ref<HTMLPreElement>;
 	/** Optional caption shown above the code. */
 	title?: string;
-	/** Class for the scroll region when its parent owns source clipping. */
-	viewportClassName?: string;
 	/** Accessible name for the scroll region. Defaults to the title or "Code". */
 	viewportLabel?: string;
 }
@@ -67,13 +63,11 @@ export function CodeBlock({
 	children,
 	className,
 	code,
-	copyButtonRef,
 	copyText,
 	flush = false,
 	html,
 	sourceRef,
 	title,
-	viewportClassName,
 	viewportLabel = title ?? 'Code',
 	...figureProps
 }: CodeBlockProps) {
@@ -112,7 +106,6 @@ export function CodeBlock({
 			aria-label={copyStatus === 'copied' ? 'Copied' : 'Copy'}
 			icon={copyStatus === 'copied' ? 'check' : 'copy'}
 			onPress={handleCopy}
-			ref={copyButtonRef}
 			prominence="low"
 			size="small"
 			tone="neutral"
@@ -141,11 +134,7 @@ export function CodeBlock({
 			) : null}
 			<ScrollFade
 				aria-label={viewportLabel}
-				className={cx(
-					styles.viewport,
-					showOverlayCopy && styles.viewportWithOverlayCopy,
-					viewportClassName,
-				)}
+				className={cx(styles.viewport, showOverlayCopy && styles.viewportWithOverlayCopy)}
 			>
 				{html != null ? (
 					// Shiki escapes source before the highlight plugin emits this markup.

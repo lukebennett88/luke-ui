@@ -32,7 +32,7 @@ export function DocsSiteNav({ tree }: { tree: Root }) {
 	}
 
 	return (
-		<SiteNav className={styles.header} data-docs-sticky-header hasSidebarNavigation>
+		<SiteNav className={styles.header} hasSidebarNavigation>
 			<DialogTrigger isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
 				{/* No bars/menu glyph in the Luke UI set; match the Theme labelled control. */}
 				<Button className={styles.mobileTrigger} prominence="low" size="small">

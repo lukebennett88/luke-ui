@@ -1,75 +1,65 @@
 import { vars } from '@luke-ui/react/theme';
-import { createVar, globalStyle, style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 
-/** Six caption lines. Viewport padding remains outside the clipped source. */
-const collapsedSourceLineCount = 6;
-const collapsedSourceMaxBlockSize = `calc(${vars.font.caption.lineHeight} * ${collapsedSourceLineCount})`;
+/** Source lines the collapsed preview shows. Viewport padding remains outside the clipped source. */
+export const collapsedLineCount = 6;
 
-/**
- * Collapsed preview budget. Floors the grid child (so `0fr` settles at six lines) and is read from
- * JS for clip measurement (so an in-flight track size cannot look like a fit).
- */
-export const collapsedSourceMaxBlockSizeVar = createVar();
-
-export const codeViewportCollapsed = style({});
-export const codeViewportFade = style({});
+export const expanded = style({});
 
 /**
- * Grid accordion on the scrollport: `0fr` ↔ `1fr` interpolates to content height without
- * `interpolate-size` (see https://css-tricks.com/css-grid-can-do-auto-height-transitions/).
+ * A code block whose source collapses to its first lines. Collapsing clips those lines, so scroll
+ * anchoring skips the whole block and anchors to the toggle below it instead. That keeps the
+ * toggle still while the block resizes.
  */
-export const codeViewportAnimatable = style({
+export const collapsible = style({
 	'@layer': {
 		components: {
-			vars: {
-				[collapsedSourceMaxBlockSizeVar]: collapsedSourceMaxBlockSize,
-			},
+			overflowAnchor: 'none',
+		},
+	},
+});
+
+// The source row grows from `0fr` to `1fr`, which interpolates to the content height without
+// measuring it. The `pre` is the grid container, so its clip edge follows the animated height and
+// the bottom lines are disclosed or clipped in step with the frame. `clip`, unlike `hidden`, is not
+// a scroll container, so keyboard scrolling and find-in-page cannot reveal clipped lines.
+// Horizontal scrolling stays with the viewport.
+globalStyle(`${collapsible} pre`, {
+	'@layer': {
+		components: {
 			display: 'grid',
-			gridTemplateRows: '1fr',
-			// Accordion height is one of the few layout animations Emil's recipe allows; keep it short.
-			transitionDuration: vars.motion.duration.enter,
-			transitionProperty: 'grid-template-rows',
-			transitionTimingFunction: vars.motion.easing.standard,
-			selectors: {
-				[`&${codeViewportCollapsed}`]: {
-					gridTemplateRows: '0fr',
-				},
-			},
+			gridTemplateRows: '0fr',
+			minBlockSize: `calc(${vars.font.caption.lineHeight} * ${collapsedLineCount})`,
+			overflowY: 'clip',
+			transition: `grid-template-rows ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
 			'@media': {
 				'(prefers-reduced-motion: reduce)': {
-					transitionDuration: '0.01ms',
+					transition: 'none',
 				},
 			},
 		},
 	},
 });
 
-// Grid item: non-visible overflow lets `0fr` shrink past content. The collapsed budget is a constant
-// floor so the preview shows six lines and the 0fr↔1fr transition does not dip through height 0.
-globalStyle(`${codeViewportAnimatable} pre`, {
+globalStyle(`${collapsible}${expanded} pre`, {
 	'@layer': {
 		components: {
-			minBlockSize: collapsedSourceMaxBlockSizeVar,
-			overflowY: 'clip',
+			gridTemplateRows: '1fr',
 		},
 	},
 });
 
-// Fits / unmeasured: no grid transition — just a static clip to the collapsed budget.
-globalStyle(`${codeViewportCollapsed}:not(${codeViewportAnimatable}) pre`, {
+// Let the row shrink below the source. The lines overflow it into the `pre`, which clips them.
+globalStyle(`${collapsible} pre > code`, {
 	'@layer': {
 		components: {
-			vars: {
-				[collapsedSourceMaxBlockSizeVar]: collapsedSourceMaxBlockSize,
-			},
-			maxBlockSize: collapsedSourceMaxBlockSize,
-			overflowY: 'clip',
+			minBlockSize: 0,
 		},
 	},
 });
 
 // Keep the scroll region's focus ring and copy control outside the text fade.
-globalStyle(`${codeViewportFade} pre`, {
+globalStyle(`${collapsible}:not(${expanded}) pre`, {
 	'@layer': {
 		components: {
 			maskImage: 'linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%)',
