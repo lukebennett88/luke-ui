@@ -16,12 +16,12 @@ import { cdp, commands, page, userEvent } from 'vite-plus/test/context';
 import responsiveLayoutSource from '../examples/box/responsive-layout.tsx?raw';
 import * as shellStyles from './docs-shell.css.js';
 import { ExampleBlock, ExampleLoadingState } from './example-block.js';
-import { ExampleCodePreview } from './example-code-preview.js';
 import * as codePreviewStyles from './example-code-preview.css.js';
+import { ExampleCodePreview } from './example-code-preview.js';
 import * as styles from './example-preview.css.js';
 import { ExamplePreview } from './example-preview.js';
-import { DOCS_SITE_HEADER_VT_NAME } from './site-header-view-transition.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
+import { DOCS_SITE_HEADER_VT_NAME } from './site-header-view-transition.js';
 import { DocsThemeRoot } from './theme-controls.js';
 
 let container: HTMLElement | undefined;
@@ -530,7 +530,9 @@ test('collapsing long source keeps the toggle where the reader left it', async (
 		behavior: 'instant',
 		top: control.getBoundingClientRect().top - (header.getBoundingClientRect().bottom + 16),
 	});
-	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(header.getBoundingClientRect().bottom);
+	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(
+		header.getBoundingClientRect().bottom,
+	);
 	expect(sourceElement().getBoundingClientRect().bottom).toBeLessThan(
 		control.getBoundingClientRect().top + 24,
 	);
@@ -620,9 +622,13 @@ test('collapsing under a taller-than-default sticky header still keeps the toggl
 		top: sourceElement().getBoundingClientRect().top - targetSourceTop,
 	});
 	expect(sourceElement().getBoundingClientRect().top).toBeGreaterThan(assumedHeaderBottom);
-	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(header.getBoundingClientRect().bottom);
+	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(
+		header.getBoundingClientRect().bottom,
+	);
 	expect(control.getBoundingClientRect().bottom).toBeLessThan(window.innerHeight);
-	expect(control.getBoundingClientRect().top).toBeGreaterThan(header.getBoundingClientRect().bottom);
+	expect(control.getBoundingClientRect().top).toBeGreaterThan(
+		header.getBoundingClientRect().bottom,
+	);
 	// Compensation scrolls up by the collapse delta; there must be room above the current scroll.
 	expect(window.scrollY).toBeGreaterThan(
 		control.getBoundingClientRect().top - sourceElement().getBoundingClientRect().top,
@@ -661,7 +667,9 @@ test('keyboard collapse of a long example under the sticky header keeps the togg
 		behavior: 'instant',
 		top: control.getBoundingClientRect().top - (header.getBoundingClientRect().bottom + 16),
 	});
-	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(header.getBoundingClientRect().bottom);
+	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(
+		header.getBoundingClientRect().bottom,
+	);
 
 	let topAtPress: number | undefined;
 	control.addEventListener(
@@ -688,7 +696,9 @@ test('example expand/collapse morph stays under the sticky header throughout the
 		top:
 			collapse.element().getBoundingClientRect().top - (header.getBoundingClientRect().bottom + 16),
 	});
-	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(header.getBoundingClientRect().bottom);
+	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(
+		header.getBoundingClientRect().bottom,
+	);
 
 	const headerZs: Array<string> = [];
 	const codeZs: Array<string> = [];
@@ -757,7 +767,9 @@ test('narrow viewport collapse under the sticky header keeps the toggle in place
 		behavior: 'instant',
 		top: control.getBoundingClientRect().top - (header.getBoundingClientRect().bottom + 16),
 	});
-	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(header.getBoundingClientRect().bottom);
+	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(
+		header.getBoundingClientRect().bottom,
+	);
 
 	control.focus();
 	let topAtPress: number | undefined;
