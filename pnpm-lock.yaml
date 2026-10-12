@@ -176,9 +176,6 @@ catalogs:
     '@capsizecss/unpack':
       specifier: ^4.0.1
       version: 4.0.1
-    '@catppuccin/palette':
-      specifier: ^1.8.0
-      version: 1.8.0
     '@changesets/cli':
       specifier: ^3.0.3
       version: 3.0.3
@@ -200,6 +197,9 @@ catalogs:
     '@rolldown/pluginutils':
       specifier: ^1.0.1
       version: 1.0.1
+    '@shikijs/monaco':
+      specifier: ^4.5.0
+      version: 4.5.0
     '@tailwindcss/vite':
       specifier: ^4.3.3
       version: 4.3.3
@@ -444,9 +444,6 @@ importers:
 
   apps/docs:
     dependencies:
-      '@catppuccin/palette':
-        specifier: 'catalog:'
-        version: 1.8.0
       '@hookform/resolvers':
         specifier: 'catalog:'
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv@8.18.0)(react-hook-form@7.89.0(@types/react@19.3.0)(react@19.3.0))(zod@4.6.5)
@@ -468,6 +465,9 @@ importers:
       '@react-aria/utils':
         specifier: 'catalog:'
         version: 3.34.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@shikijs/monaco':
+        specifier: 'catalog:'
+        version: 4.5.0
       '@tanstack/react-form':
         specifier: 'catalog:'
         version: 1.33.5(@tanstack/react-start@1.168.60(@voidzero-dev/vite-plus-core@1.0.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1))(esbuild@0.28.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rollup@4.63.6)(supports-color@7.2.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -525,6 +525,9 @@ importers:
       react-resizable-panels:
         specifier: 'catalog:'
         version: 4.14.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      shiki:
+        specifier: 'catalog:'
+        version: 4.5.0
       spin-doctor:
         specifier: 'catalog:'
         version: 0.0.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -577,9 +580,6 @@ importers:
       serve:
         specifier: 'catalog:'
         version: 14.2.6(supports-color@7.2.0)
-      shiki:
-        specifier: 'catalog:'
-        version: 4.5.0
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.3
@@ -1049,9 +1049,6 @@ packages:
   '@capsizecss/unpack@4.0.1':
     resolution: {integrity: sha512-CuNiSqg7+e1cO/GjffyMOm5Tt2jUF9CWHHnvQ/UkqvtkGfHdgwEC0wpmq7fkN3gxwpRnrAN0WzO3vREKmNolMQ==}
     engines: {node: '>=18'}
-
-  '@catppuccin/palette@1.8.0':
-    resolution: {integrity: sha512-qXhwKiLzQomUygUJYB36YAFgs+dET5bIocfkiaFIatQF5Pwc7L112TlF9P8J5Oqs3x3XTjYSucG0ncHXSCuk7Q==}
 
   '@changesets/apply-release-plan@8.1.1':
     resolution: {integrity: sha512-nk2Hbq3M9NeHMdaIRBDvawKrQJzXB9sGyBUE5yWnIKtvdcNCPj75zBekJYr0gTT2ecJH3eFeTrc8eisPImcv0Q==}
@@ -2990,6 +2987,10 @@ packages:
 
   '@shikijs/langs@4.5.0':
     resolution: {integrity: sha512-wwBTqwduXSz0X4v9Qa2EWeFaYJEw1clCncWjoRNQRbVDu3SPRTRWucnouYapKj3b8Q+sk/41Vbc4B5c8nuYzLA==}
+    engines: {node: '>=20'}
+
+  '@shikijs/monaco@4.5.0':
+    resolution: {integrity: sha512-IT9y3yYmFHCIAhjNZ5VZ4M8uuRkvjZVQs6YMNBbvBECC01bUkiVvrK3cmVo3WHEWQIlf/zuP7BW+CSKknAATMQ==}
     engines: {node: '>=20'}
 
   '@shikijs/primitive@4.5.0':
@@ -6605,8 +6606,6 @@ snapshots:
     dependencies:
       fontkitten: 1.0.3
 
-  '@catppuccin/palette@1.8.0': {}
-
   '@changesets/apply-release-plan@8.1.1':
     dependencies:
       '@changesets/config': 4.0.1
@@ -8013,6 +8012,12 @@ snapshots:
   '@shikijs/langs@4.5.0':
     dependencies:
       '@shikijs/types': 4.5.0
+
+  '@shikijs/monaco@4.5.0':
+    dependencies:
+      '@shikijs/core': 4.5.0
+      '@shikijs/types': 4.5.0
+      '@shikijs/vscode-textmate': 10.0.2
 
   '@shikijs/primitive@4.5.0':
     dependencies:

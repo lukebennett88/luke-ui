@@ -1,5 +1,5 @@
-import githubDark from 'shiki/themes/github-dark.mjs';
-import githubLight from 'shiki/themes/github-light.mjs';
+import githubDark from 'shiki/themes/github-dark-high-contrast.mjs';
+import githubLight from 'shiki/themes/github-light-high-contrast.mjs';
 
 export const SHIKI_THEME_REGISTRATIONS: [typeof githubLight, typeof githubDark] = [
 	githubLight,
@@ -7,7 +7,8 @@ export const SHIKI_THEME_REGISTRATIONS: [typeof githubLight, typeof githubDark] 
 ];
 
 /**
- * These Shiki themes apply to MDX fences, examples, and samples.
+ * These Shiki themes apply to MDX fences, examples, and samples. The Monaco
+ * playground derives its themes from the same registrations.
  *
  * Theme order controls Shiki's generated classes and custom properties.
  */

@@ -1,6 +1,6 @@
 import '../../styles/app.css';
 import { decodeCodeHash } from '@luke-ui/playground-core/hash';
-import { act } from 'react';
+import { act, Suspense } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
@@ -31,7 +31,7 @@ function viewText(): string {
 
 test('monaco fills the editor pane and format updates source through onChange', async () => {
 	let hash = window.location.hash;
-	renderPlayground(badlyFormatted, (code) => {
+	await renderPlayground(badlyFormatted, (code) => {
 		hash = `#${encodeDocsPlaygroundHash(code)}`;
 		history.replaceState(null, '', hash);
 	});
@@ -71,7 +71,7 @@ test('monaco fills the editor pane and format updates source through onChange', 
 
 test('the save shortcut formats through the Monaco provider and onChange', async () => {
 	const onChangeCalls: Array<string> = [];
-	renderPlayground(badlyFormatted, (code) => onChangeCalls.push(code));
+	await renderPlayground(badlyFormatted, (code) => onChangeCalls.push(code));
 
 	await expect
 		.poll(() => monacoEditor()?.getBoundingClientRect().height ?? 0, { timeout: 30_000 })
@@ -86,12 +86,12 @@ test('the save shortcut formats through the Monaco provider and onChange', async
 		.toBe(true);
 }, 60_000);
 
-function renderPlayground(defaultValue: string, onChange: (code: string) => void) {
+async function renderPlayground(defaultValue: string, onChange: (code: string) => void) {
 	container = document.body.appendChild(document.createElement('div'));
 	container.className = 'h-[480px] min-h-0 overflow-hidden';
 	root = createRoot(container);
 
-	act(() => {
+	await act(async () => {
 		root?.render(<Harness defaultValue={defaultValue} onChange={onChange} />);
 	});
 }
@@ -105,7 +105,10 @@ function Harness({
 }) {
 	return (
 		<div className="h-full min-h-0">
-			<PlaygroundEditor defaultValue={defaultValue} onChange={onChange} showLoadingPill={false} />
+			{/* The editor suspends until Monaco's themes and tokenizer are ready. */}
+			<Suspense fallback={null}>
+				<PlaygroundEditor defaultValue={defaultValue} onChange={onChange} showLoadingPill={false} />
+			</Suspense>
 		</div>
 	);
 }
