@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { cx } from '@luke-ui/react/utils';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
-import { useLayoutEffect, useReducer, useRef, useState } from 'react';
+import { startTransition, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import { CodeBlock } from './code-block/code-block.js';
 import * as styles from './example-code-preview.css.js';
 
@@ -144,12 +144,17 @@ export function ExampleCodePreview({
 						onBlur={() => dispatch({ type: 'toggleBlurred' })}
 						onFocus={() => dispatch({ type: 'toggleFocused' })}
 						onPress={(event) => {
-							const hadFocus = event.target === document.activeElement;
+							const target = event.target;
 							collapseToggleTopRef.current =
 								isExpanded && sourceRef.current && isUnderSiteHeader(sourceRef.current)
-									? event.target.getBoundingClientRect().top
+									? target.getBoundingClientRect().top
 									: null;
-							dispatch(isExpanded ? { hadFocus, type: 'collapse' } : { type: 'expand' });
+							// Commit after this activation's keyup listeners so a focus move during
+							// the same Enter can still decide whether to restore Copy.
+							startTransition(() => {
+								const hadFocus = target === document.activeElement;
+								dispatch(isExpanded ? { hadFocus, type: 'collapse' } : { type: 'expand' });
+							});
 						}}
 						ref={toggleRef}
 						size="small"
