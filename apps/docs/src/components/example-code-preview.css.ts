@@ -51,14 +51,10 @@ globalStyle(
 	},
 );
 
-/**
- * Reveal the full source when expanded, without CodeBlock's default height cap. The viewport sits
- * flush with the clipped example frame, so its focus ring is drawn inside its edges.
- */
+/** The viewport sits flush with the clipped example frame, so its focus ring is drawn inside its edges. */
 export const codeViewport = style({
 	'@layer': {
 		utilities: {
-			maxBlockSize: 'none',
 			selectors: {
 				'&:focus-visible': { outlineOffset: '-2px' },
 			},
@@ -69,12 +65,14 @@ export const codeViewport = style({
 export const codeViewportCollapsed = style({});
 export const codeViewportFade = style({});
 
-// Clip the source itself so keyboard scrolling cannot reveal hidden lines.
+// Clip the source vertically so keyboard scrolling cannot reveal hidden lines. `clip`, unlike
+// `hidden`, is not a scroll container, so find-in-page cannot scroll clipped lines into view
+// either. Horizontal scrolling stays with the viewport.
 globalStyle(`${codeViewportCollapsed} pre`, {
 	'@layer': {
 		components: {
 			maxBlockSize: collapsedSourceMaxBlockSize,
-			overflow: 'hidden',
+			overflowY: 'clip',
 		},
 	},
 });

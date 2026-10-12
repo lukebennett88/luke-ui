@@ -228,16 +228,15 @@ test('shows source by default and expands it by keyboard while retaining control
 	};
 	const collapsedHeight = codeFigure().getBoundingClientRect().height;
 	const control = expand.element();
-	const codeId = control.getAttribute('aria-controls');
-	assert(codeId, 'expected the controlled source id');
-	const codeRegion = document.getElementById(codeId);
-	assert(codeRegion?.contains(codeFigure()), 'expected the control to target its source');
-	const regionRect = codeRegion?.getBoundingClientRect();
-	assert(regionRect, 'expected code region bounds');
+	const codeFrame = codeFigure().parentElement;
+	assert(codeFrame, 'expected the example code frame');
+	const regionRect = codeFrame.getBoundingClientRect();
 	const controlRect = control.getBoundingClientRect();
 	expect(controlRect.bottom).toBeLessThanOrEqual(regionRect.bottom + 1);
 	expect(controlRect.top).toBeGreaterThanOrEqual(regionRect.top - 1);
-	expect(control).toHaveAttribute('aria-expanded', 'false');
+	// The toggle is visual only: the full source is always in the accessibility tree.
+	expect(control).not.toHaveAttribute('aria-expanded');
+	expect(control).not.toHaveAttribute('aria-controls');
 	control.focus();
 
 	await act(async () => {
@@ -245,8 +244,8 @@ test('shows source by default and expands it by keyboard while retaining control
 	});
 	await expect.poll(() => page.getByRole('button', { name: 'Collapse code' }).query()).toBeTruthy();
 	await expect.element(control).toHaveFocus();
-	expect(control).toHaveAttribute('aria-expanded', 'true');
-	expect(control).toHaveAttribute('aria-controls', codeId);
+	expect(control).not.toHaveAttribute('aria-expanded');
+	expect(control).not.toHaveAttribute('aria-controls');
 	await expect
 		.poll(() => codeFigure().getBoundingClientRect().height)
 		.toBeGreaterThan(collapsedHeight);
@@ -256,7 +255,7 @@ test('shows source by default and expands it by keyboard while retaining control
 	});
 	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeTruthy();
 	await expect.element(control).toHaveFocus();
-	expect(control).toHaveAttribute('aria-expanded', 'false');
+	expect(control).not.toHaveAttribute('aria-expanded');
 	await expect
 		.poll(() => codeFigure().getBoundingClientRect().height)
 		.toBeCloseTo(collapsedHeight, 0);
@@ -313,17 +312,32 @@ test('copies the complete source from both collapsed and expanded previews', asy
 	expect(writeText).toHaveBeenLastCalledWith(responsiveLayoutSource.trim());
 });
 
-test('collapsed source leaves the accessibility tree and tab order', async () => {
+test('collapsed source stays in the accessibility tree and can be scrolled sideways by keyboard', async () => {
 	await page.viewport(400, 800);
 	await renderExampleBlock({ width: 360 });
 	const codeLabel = 'Box: Responsive layout code';
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
 
-	// Role queries ignore `inert`, so assert the inert state that removes the region from AT.
-	expect(codeRegion(codeLabel).inert).toBe(true);
+	// Role queries ignore `inert` and `aria-hidden`, so check the ancestors directly.
+	const viewport = codeRegion(codeLabel);
+	expect(viewport.closest('[inert], [aria-hidden="true"]')).toBeNull();
+	for (let node: Element | null = viewport; node; node = node.parentElement) {
+		expect(node.matches('[inert], [aria-hidden="true"]')).toBe(false);
+	}
+	const lines = sourceElement().textContent?.split('\n') ?? [];
+	expect(lines.length).toBeGreaterThan(6);
+	expect(sourceElement().textContent).toContain(lines[6] ?? '');
+	expect(sourceElement().scrollHeight).toBeGreaterThan(sourceElement().clientHeight);
 
 	const copy = page.getByRole('button', { name: 'Copy', exact: true }).element();
 	copy.focus();
+	await userEvent.tab();
+	await expect.element(viewport).toHaveFocus();
+	await userEvent.keyboard('{ArrowRight}');
+	await expect.poll(() => viewport.scrollLeft).toBeGreaterThan(0);
+	await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}');
+	expect(viewport.scrollTop).toBe(0);
+	expect(sourceElement().scrollTop).toBe(0);
 	await userEvent.tab();
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toHaveFocus();
 });
@@ -339,7 +353,6 @@ test('expanded source is a keyboard-scrollable region that does not reveal clipp
 	await expect.element(page.getByRole('button', { name: 'Collapse code' })).toBeVisible();
 
 	const viewport = codeRegion('Box: Responsive layout code');
-	expect(viewport.inert).toBe(false);
 	copy.focus();
 	await userEvent.tab();
 	await expect.element(viewport).toHaveFocus();
@@ -351,8 +364,9 @@ test('expanded source is a keyboard-scrollable region that does not reveal clipp
 		await userEvent.click(page.getByRole('button', { name: 'Collapse code' }));
 	});
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	expect(viewport.inert).toBe(true);
 	expect(viewport.scrollTop).toBe(0);
+	expect(sourceElement().scrollTop).toBe(0);
+	expect(viewport.closest('[inert], [aria-hidden="true"]')).toBeNull();
 });
 
 test('names a loaded frame as a group by its title', async () => {
@@ -396,7 +410,7 @@ test('keeps expanded source collapsible when its typography changes to fit', asy
 	pre.style.fontSize = '1px';
 	pre.style.lineHeight = '1px';
 	await expect.poll(() => pre.getBoundingClientRect().height).toBeLessThan(30);
-	expect(collapse).toHaveAttribute('aria-expanded', 'true');
+	expect(collapse).not.toHaveAttribute('aria-expanded');
 	await act(async () => {
 		await userEvent.click(collapse);
 	});
@@ -405,6 +419,20 @@ test('keeps expanded source collapsible when its typography changes to fit', asy
 
 	pre.style.removeProperty('font-size');
 	pre.style.removeProperty('line-height');
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+});
+
+test('collapsed source drops its toggle when typography makes it fit, and restores it after', async () => {
+	await renderSourcePreview();
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	expect(sourceElement().scrollHeight).toBeGreaterThan(sourceElement().clientHeight + 1);
+
+	shrinkTypography(sourceElement());
+	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeNull();
+	expect(sourceElement().scrollHeight).toBeLessThanOrEqual(sourceElement().clientHeight + 1);
+
+	sourceElement().style.removeProperty('font-size');
+	sourceElement().style.removeProperty('line-height');
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
 });
 

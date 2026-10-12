@@ -54,8 +54,6 @@ export interface CodeBlockProps extends Omit<FigureProps, 'children'> {
 	title?: string;
 	/** Class for the scroll region when its parent owns source clipping. */
 	viewportClassName?: string;
-	/** Removes the scroll region from the tab order and accessibility tree. Copy stays available. */
-	viewportInert?: boolean;
 	/** Accessible name for the scroll region. Defaults to the title or "Code". */
 	viewportLabel?: string;
 }
@@ -76,7 +74,6 @@ export function CodeBlock({
 	sourceRef,
 	title,
 	viewportClassName,
-	viewportInert,
 	viewportLabel = title ?? 'Code',
 	...figureProps
 }: CodeBlockProps) {
@@ -149,7 +146,6 @@ export function CodeBlock({
 					showOverlayCopy && styles.viewportWithOverlayCopy,
 					viewportClassName,
 				)}
-				inert={viewportInert}
 			>
 				{html != null ? (
 					// Shiki escapes source before the highlight plugin emits this markup.
