@@ -1,73 +1,58 @@
 import { vars } from '@luke-ui/react/theme';
 import { globalStyle, style } from '@vanilla-extract/css';
 
-/** Six caption lines. Viewport padding remains outside the clipped source. */
-const collapsedSourceMaxBlockSize = `calc(${vars.font.caption.lineHeight} * 6)`;
+export const collapsedLineCount = 6;
 
-export const codeTransitionType = 'luke-docs-example-code';
-export const codeUpdate = style({});
+export const expanded = style({});
 
-// Keep the surrounding article out of the code expansion crossfade.
-globalStyle(`:root:active-view-transition-type(${codeTransitionType})::view-transition-old(root)`, {
+export const collapsible = style({
 	'@layer': {
 		components: {
-			display: 'none',
+			// Collapsing clips lines the browser could otherwise anchor scrolling to. Opting the block
+			// out makes the toggle below it the anchor, so the toggle stays put.
+			overflowAnchor: 'none',
 		},
 	},
 });
 
-globalStyle(
-	[
-		`:root:active-view-transition-type(${codeTransitionType})::view-transition-group(root)`,
-		`:root:active-view-transition-type(${codeTransitionType})::view-transition-new(root)`,
-	].join(', '),
-	{
-		'@layer': {
-			components: {
-				animation: 'none',
-			},
-		},
-	},
-);
-
-globalStyle(
-	[
-		`::view-transition-group(.${codeUpdate})`,
-		`::view-transition-old(.${codeUpdate})`,
-		`::view-transition-new(.${codeUpdate})`,
-	].join(', '),
-	{
-		'@layer': {
-			components: {
-				animationDuration: vars.motion.duration.enter,
-				animationTimingFunction: vars.motion.easing.standard,
-				'@media': {
-					'(prefers-reduced-motion: reduce)': {
-						animationDuration: '0.01ms',
-					},
+// Animating rows between `0fr` and `1fr` reaches the content height without measuring it. The
+// `pre` is the grid so its clip edge moves with the animated height. `clip`, unlike `hidden`, is
+// not a scroll container, so keyboard scrolling and find-in-page cannot reveal clipped lines.
+globalStyle(`${collapsible} pre`, {
+	'@layer': {
+		components: {
+			display: 'grid',
+			gridTemplateRows: '0fr',
+			minBlockSize: `calc(${vars.font.caption.lineHeight} * ${collapsedLineCount})`,
+			overflowY: 'clip',
+			transition: `grid-template-rows ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
+			'@media': {
+				'(prefers-reduced-motion: reduce)': {
+					transition: 'none',
 				},
 			},
 		},
 	},
-);
+});
 
-export const codeViewportCollapsed = style({});
-export const codeViewportFade = style({});
-
-// Clip the source vertically so keyboard scrolling cannot reveal hidden lines. `clip`, unlike
-// `hidden`, is not a scroll container, so find-in-page cannot scroll clipped lines into view
-// either. Horizontal scrolling stays with the viewport.
-globalStyle(`${codeViewportCollapsed} pre`, {
+globalStyle(`${collapsible}${expanded} pre`, {
 	'@layer': {
 		components: {
-			maxBlockSize: collapsedSourceMaxBlockSize,
-			overflowY: 'clip',
+			gridTemplateRows: '1fr',
+		},
+	},
+});
+
+globalStyle(`${collapsible} pre > code`, {
+	'@layer': {
+		components: {
+			minBlockSize: 0,
 		},
 	},
 });
 
 // Keep the scroll region's focus ring and copy control outside the text fade.
-globalStyle(`${codeViewportFade} pre`, {
+globalStyle(`${collapsible}:not(${expanded}) pre`, {
 	'@layer': {
 		components: {
 			maskImage: 'linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%)',
