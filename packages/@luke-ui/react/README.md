@@ -21,8 +21,8 @@ theme's surface, text colour, and body font, and keeps native HTML presentation 
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';
-import '@luke-ui/theme-tactile/stylesheet.css';
 import '@luke-ui/theme-tactile/fonts.css';
+import '@luke-ui/theme-tactile/stylesheet.css';
 import { themeClassName } from '@luke-ui/theme-tactile';
 
 export function RootLayout() {

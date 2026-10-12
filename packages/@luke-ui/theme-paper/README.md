@@ -17,8 +17,8 @@ Inter font, or load Inter another way.
 
 ```ts
 import '@luke-ui/react/stylesheet.css';
-import '@luke-ui/theme-paper/stylesheet.css';
 import '@luke-ui/theme-paper/fonts.css';
+import '@luke-ui/theme-paper/stylesheet.css';
 ```
 
 Set the identity class on `<html>`. It is `luke-ui-theme-paper`, and the root entry exports it.
