@@ -48,13 +48,28 @@ async function renderEditor(mode: keyof typeof palettes) {
 	editor = created;
 	const root = container;
 
+	// Monaco may render a literal as one span or split it (e.g. quotes apart from the text).
+	// Match consecutive leaf spans on one line, so an untokenized whole-line span never matches.
 	function colourOf(text: string): string {
-		// Exact match: an untokenized line is one span holding the whole line.
-		const token = [...root.querySelectorAll('.view-line span span')].find(
-			(element) => element.textContent === text,
-		);
-		if (!token) throw new Error(`No rendered token "${text}"`);
-		return getComputedStyle(token).color;
+		for (const line of root.querySelectorAll('.view-line')) {
+			const leaves = [...line.querySelectorAll('span')].filter(
+				(span) => span.children.length === 0,
+			);
+			for (let start = 0; start < leaves.length; start++) {
+				let joined = '';
+				for (let end = start; end < leaves.length && text.startsWith(joined); end++) {
+					joined += leaves[end]?.textContent ?? '';
+					if (joined !== text) continue;
+					const colours = new Set(
+						leaves.slice(start, end + 1).map((span) => getComputedStyle(span).color),
+					);
+					const [colour] = colours;
+					if (colours.size === 1 && colour) return colour;
+					break;
+				}
+			}
+		}
+		throw new Error(`No uniformly coloured rendered token "${text}"`);
 	}
 
 	return { colourOf, created, root };
