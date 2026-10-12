@@ -38,6 +38,15 @@ workflow would have prevented and that a check or a pointer would not handle bet
 approves skill additions and changes. Remove a skill when it is obsolete or when pilot or spot-check
 evidence shows it does not help. Silence in this log is not evidence.
 
+## Theme watch rebuild leaves the stylesheet unchanged in CI
+
+- **Seen:** 2026-10-12 (#793),
+  [component-tests job 114654361037](https://github.com/lukebennett88/luke-ui/actions/runs/38201061242/job/114654361037).
+- **Where:** `packages/@luke-ui/theme-build/theme-package.test.ts` and the
+  [theme build contract](../docs/TESTING.md#theme-build).
+- **Problem:** The first rebuild kept `0.25rem` instead of the expected `0.4375rem`. The same run
+  reported that packing failed because the tarball file was missing.
+
 ## Visual compare fails while the main baseline run is still in progress
 
 - Seen: 2026-10-12 (#782, #783, #785, #792). `visual-ci resolve-baseline` exited with "The newest
@@ -56,14 +65,3 @@ evidence shows it does not help. Silence in this log is not evidence.
 - Problem: The documented contract is `<major>.x`, and the regex manager is supposed to keep that
   form with `rangeStrategy: 'replace'`. The non-major group still rewrote the field to an exact
   version, so the PR had to be corrected by hand.
-
-## Playground Monaco light-token test flakes under the full docs suite on CI
-
-- Seen: 2026-10-12 (#785, #792, and main Test for #790).
-  `playground light tokens use the GitHub high-contrast palette` failed with
-  `No uniformly coloured rendered token "text"` while the dark-token case passed; local solo and
-  full-suite runs passed.
-- Where: `apps/docs/src/lib/monaco-setup.browser.test.ts`; docs/TESTING.md Component tests.
-- Problem: Under CI load the light high-contrast theme can leave string quotes in separate spans or
-  take longer than the default `waitFor` timeout, so the assertion fails even when the theme is
-  correct.

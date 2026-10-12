@@ -13,6 +13,11 @@ const highlighter = await createHighlighterCore({
 const [light, dark] = SHIKI_THEME_REGISTRATIONS;
 const registrations = { dark, light };
 
+const palettes = {
+	dark: { keyword: 'ff9492', constant: '91cbff', string: 'addcff' },
+	light: { keyword: 'a0111f', constant: '023b95', string: '032563' },
+} as const;
+
 // Monaco only applies `editor.selectionForeground` on high-contrast bases.
 // On `vs` / `vs-dark` the opaque GitHub selection hides the selected text.
 const selections = {
@@ -21,6 +26,15 @@ const selections = {
 } as const;
 
 for (const mode of ['light', 'dark'] as const) {
+	test(`${mode} theme preserves the GitHub high-contrast token colours`, () => {
+		const theme = toHighContrastMonacoTheme(highlighter.getTheme(registrations[mode]));
+
+		expect(theme.inherit).toBe(false);
+		for (const [token, foreground] of Object.entries(palettes[mode])) {
+			expect(theme.rules).toContainEqual(expect.objectContaining({ token, foreground }));
+		}
+	});
+
 	test(`${mode} theme keeps readable selected text`, () => {
 		const theme = toHighContrastMonacoTheme(highlighter.getTheme(registrations[mode]));
 		const { background, base, foreground } = selections[mode];
