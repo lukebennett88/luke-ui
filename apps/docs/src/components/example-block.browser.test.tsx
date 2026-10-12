@@ -413,7 +413,8 @@ test('keeps expanded source collapsible when its typography changes to fit', asy
 	assert(pre, 'expected source element');
 	pre.style.fontSize = '1px';
 	pre.style.lineHeight = '1px';
-	await expect.poll(() => pre.getBoundingClientRect().height).toBeLessThan(30);
+	// Border box stays at the collapsed floor while animatable; content size is what fits.
+	await expect.poll(() => sourceContentBlockSize(pre)).toBeLessThan(30);
 	expect(collapse).not.toHaveAttribute('aria-expanded');
 	await act(async () => {
 		await userEvent.click(collapse);
@@ -461,7 +462,7 @@ test('collapsing source that now fits with Enter moves focus to Copy', async () 
 	await pressKey('{Enter}');
 	await expect.element(page.getByRole('button', { name: 'Collapse code' })).toHaveFocus();
 	shrinkTypography(sourceElement());
-	await expect.poll(() => sourceElement().getBoundingClientRect().height).toBeLessThan(30);
+	await expect.poll(() => sourceContentBlockSize(sourceElement())).toBeLessThan(30);
 
 	await pressKey('{Enter}');
 	await expect.poll(() => page.getByRole('button', { name: 'Collapse code' }).query()).toBeNull();
@@ -478,7 +479,7 @@ test('collapse with Enter respects focus moving away before commit', async () =>
 	const collapse = page.getByRole('button', { name: 'Collapse code' });
 	await expect.element(collapse).toHaveFocus();
 	shrinkTypography(sourceElement());
-	await expect.poll(() => sourceElement().getBoundingClientRect().height).toBeLessThan(30);
+	await expect.poll(() => sourceContentBlockSize(sourceElement())).toBeLessThan(30);
 
 	const next = page.getByRole('button', { name: 'Next example' }).element();
 	// Redirect focus during the native activation event, before another browser task can run.
@@ -498,7 +499,7 @@ test('collapse with Enter respects focus returning before commit', async () => {
 	const collapse = page.getByRole('button', { name: 'Collapse code' });
 	await expect.element(collapse).toHaveFocus();
 	shrinkTypography(sourceElement());
-	await expect.poll(() => sourceElement().getBoundingClientRect().height).toBeLessThan(30);
+	await expect.poll(() => sourceContentBlockSize(sourceElement())).toBeLessThan(30);
 
 	const control = collapse.element();
 	const next = page.getByRole('button', { name: 'Next example' }).element();
@@ -722,12 +723,15 @@ test('expand and collapse keep the toggle still while height clips bottom lines'
 		frame.getBoundingClientRect().bottom + 1,
 	);
 
-	const toggleTopAtPress = expandedToggle.getBoundingClientRect().top;
-	const heightAtPress = source.getBoundingClientRect().height;
+	let toggleTopAtPress = expandedToggle.getBoundingClientRect().top;
+	let heightAtPress = source.getBoundingClientRect().height;
 	const toggleTops: Array<number> = [];
 	const toggleBottomGaps: Array<number> = [];
 	const sourceHeights: Array<number> = [];
+	// Sample from keyup — React Aria fires onPress then, which is when scroll-pinning starts.
 	const onToggle = () => {
+		toggleTopAtPress = expandedToggle.getBoundingClientRect().top;
+		heightAtPress = source.getBoundingClientRect().height;
 		const startedAt = performance.now();
 		const sample = () => {
 			toggleTops.push(expandedToggle.getBoundingClientRect().top);
@@ -735,8 +739,7 @@ test('expand and collapse keep the toggle still while height clips bottom lines'
 				frame.getBoundingClientRect().bottom - expandedToggle.getBoundingClientRect().bottom,
 			);
 			sourceHeights.push(source.getBoundingClientRect().height);
-			// Collapse commits inside startTransition; keep sampling until height has moved or the
-			// enter window has elapsed. Keyword size transitions may not appear in getAnimations().
+			// Keep sampling until height has moved or the enter window has elapsed.
 			const heightDropped = source.getBoundingClientRect().height < heightAtPress - 20;
 			if (!heightDropped && performance.now() - startedAt < 1000) {
 				requestAnimationFrame(sample);
@@ -748,7 +751,7 @@ test('expand and collapse keep the toggle still while height clips bottom lines'
 		};
 		requestAnimationFrame(sample);
 	};
-	expandedToggle.addEventListener('keydown', onToggle, { once: true });
+	expandedToggle.addEventListener('keyup', onToggle, { once: true });
 	expandedToggle.focus();
 	await pressKey('{Enter}');
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
@@ -845,7 +848,7 @@ test('typography changes without interaction do not move focus', async () => {
 
 	// The source now fits, but the expanded toggle stays until someone collapses it.
 	shrinkTypography(pre);
-	await expect.poll(() => pre.getBoundingClientRect().height).toBeLessThan(30);
+	await expect.poll(() => sourceContentBlockSize(pre)).toBeLessThan(30);
 	await expect.element(collapse).toHaveFocus();
 
 	// Collapsing removes the toggle and hands focus to Copy. Growing the source again must leave it
@@ -1006,6 +1009,15 @@ function sourceElement() {
 	const pre = container?.querySelector('pre');
 	assert(pre, 'expected source element');
 	return pre;
+}
+
+/** Content height inside the pre, ignoring the collapsed min-block-size floor. */
+function sourceContentBlockSize(pre: HTMLElement) {
+	const content = pre.firstElementChild;
+	if (content instanceof HTMLElement) {
+		return content.getBoundingClientRect().height;
+	}
+	return pre.scrollHeight;
 }
 
 function shrinkTypography(pre: HTMLElement) {

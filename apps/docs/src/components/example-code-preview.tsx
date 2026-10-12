@@ -19,11 +19,13 @@ export function ExampleCodePreview({
 	const copyButtonRef = useRef<HTMLButtonElement>(null);
 	const toggleRef = useRef<HTMLButtonElement>(null);
 	/**
-	 * Viewport top to hold the toggle at while max-block-size animates. The height change would
-	 * move the frame bottom; scrolling by the same delta keeps the control still so the clip
-	 * window opens and closes against a fixed sill.
+	 * Viewport top to hold the toggle at while grid-template-rows animates. The height change
+	 * would move the frame bottom; scrolling by the same delta keeps the control still so the
+	 * clip window opens and closes against a fixed sill.
 	 */
 	const pinnedToggleTopRef = useRef<number | null>(null);
+	/** rAF id for the active sill pin (starts on press so startTransition cannot outrun it). */
+	const pinFrameRef = useRef(0);
 	const isExpanded = mode === 'expanded';
 	const canExpand = mode === 'collapsed' || isExpanded;
 	const isClipped = !isExpanded;
@@ -39,6 +41,11 @@ export function ExampleCodePreview({
 
 		const observer = new ResizeObserver(update);
 		observer.observe(sourceElement);
+		// Collapsed preview floors the pre with min-block-size, so typography changes that shrink
+		// content may not resize the pre itself — observe children (the content box) too.
+		for (const child of sourceElement.children) {
+			observer.observe(child);
+		}
 		// Measure on the next frame to avoid a render during effect setup.
 		const frame = requestAnimationFrame(update);
 		return () => {
@@ -49,7 +56,7 @@ export function ExampleCodePreview({
 
 	// Collapsed styles can land without a size change (for example after shrinking typography while
 	// expanded). Remeasure once they apply. Clip is judged from content vs the collapsed line budget,
-	// so a mid-flight max-block-size does not look like a fit.
+	// so a mid-flight grid row does not look like a fit.
 	useLayoutEffect(() => {
 		if (mode !== 'collapsed') return;
 		const sourceElement = sourceRef.current;
@@ -59,24 +66,27 @@ export function ExampleCodePreview({
 		if (isClipped != null) dispatch({ isClipped, type: 'measured' });
 	}, [mode]);
 
-	// Keep the toggle still while height transitions. `interpolate-size` animates max-block-size
-	// between the collapsed length and `none`; each frame, scroll by the sill's drift so it stays
-	// put while bottom lines are clipped or disclosed. Keyword size transitions are not always
-	// exposed via `getAnimations()`, so pin for the enter duration instead of trusting that API.
+	// Keep the toggle still while height transitions. The scrollport grid animates
+	// `grid-template-rows` between `0fr` (six-line floor on the child) and `1fr`; each frame,
+	// scroll by the sill's drift so it stays put while bottom lines are clipped or disclosed.
+	// Pinning begins in onPress (below) so startTransition cannot leave a gap before this effect.
 	useLayoutEffect(() => {
 		const pinnedTop = pinnedToggleTopRef.current;
 		const toggle = toggleRef.current;
 		const sourceElement = sourceRef.current;
-		if (pinnedTop == null || !toggle || !sourceElement) return;
+		const viewport = sourceElement?.parentElement;
+		if (pinnedTop == null || !toggle || !viewport) return;
 
-		let frameId = 0;
 		let finished = false;
-		const durationMs = Number.parseFloat(getComputedStyle(sourceElement).transitionDuration);
+		const durationMs = Number.parseFloat(getComputedStyle(viewport).transitionDuration);
 		// Computed transition-duration is seconds (e.g. `0.25s`). Fall back to one frame when 0.
 		const pinForMs = Number.isFinite(durationMs) ? Math.max(durationMs * 1000, 16) : 250;
 		const startedAt = performance.now();
 
+		const isCurrentPin = () => pinnedToggleTopRef.current === pinnedTop;
+
 		const pinToggle = () => {
+			if (!isCurrentPin()) return;
 			const delta = toggle.getBoundingClientRect().top - pinnedTop;
 			if (Math.abs(delta) >= 0.5) {
 				window.scrollBy({ behavior: 'instant', top: delta });
@@ -86,37 +96,36 @@ export function ExampleCodePreview({
 		const stop = () => {
 			if (finished) return;
 			finished = true;
-			cancelAnimationFrame(frameId);
 			pinToggle();
-			// A newer press may have replaced the pin target while this transition was ending.
-			if (pinnedToggleTopRef.current === pinnedTop) {
+			if (isCurrentPin()) {
 				pinnedToggleTopRef.current = null;
 			}
 		};
 
 		const tick = () => {
+			if (finished || !isCurrentPin()) return;
 			pinToggle();
 			if (performance.now() - startedAt < pinForMs + 32) {
-				frameId = requestAnimationFrame(tick);
+				pinFrameRef.current = requestAnimationFrame(tick);
 				return;
 			}
 			stop();
 		};
 
 		pinToggle();
-		frameId = requestAnimationFrame(tick);
+		pinFrameRef.current = requestAnimationFrame(tick);
 
+		// Only `transitionend` — reversing expand→collapse cancels the prior transition and would
+		// stop the pin while the new row animation is still running.
 		const onEnd = (event: TransitionEvent) => {
-			if (event.target === sourceElement && event.propertyName === 'max-block-size') stop();
+			if (event.target === viewport && event.propertyName === 'grid-template-rows') stop();
 		};
-		sourceElement.addEventListener('transitionend', onEnd);
-		sourceElement.addEventListener('transitioncancel', onEnd);
+		viewport.addEventListener('transitionend', onEnd);
 
 		return () => {
 			finished = true;
-			cancelAnimationFrame(frameId);
-			sourceElement.removeEventListener('transitionend', onEnd);
-			sourceElement.removeEventListener('transitioncancel', onEnd);
+			viewport.removeEventListener('transitionend', onEnd);
+			// Do not cancel pinFrameRef: a newer press may already own the loop.
 		};
 	}, [mode]);
 
@@ -167,7 +176,20 @@ export function ExampleCodePreview({
 						onFocus={() => dispatch({ type: 'toggleFocused' })}
 						onPress={(event) => {
 							const target = event.target;
-							pinnedToggleTopRef.current = target.getBoundingClientRect().top;
+							const pinnedTop = target.getBoundingClientRect().top;
+							pinnedToggleTopRef.current = pinnedTop;
+							// Pin immediately — collapse/expand commit inside startTransition below.
+							cancelAnimationFrame(pinFrameRef.current);
+							const eagerPin = () => {
+								const toggle = toggleRef.current;
+								if (pinnedToggleTopRef.current !== pinnedTop || !toggle) return;
+								const delta = toggle.getBoundingClientRect().top - pinnedTop;
+								if (Math.abs(delta) >= 0.5) {
+									window.scrollBy({ behavior: 'instant', top: delta });
+								}
+								pinFrameRef.current = requestAnimationFrame(eagerPin);
+							};
+							pinFrameRef.current = requestAnimationFrame(eagerPin);
 							// Commit after this activation's keyup listeners so a focus move during
 							// the same Enter can still decide whether to restore Copy.
 							startTransition(() => {
@@ -187,22 +209,31 @@ export function ExampleCodePreview({
 }
 
 /**
- * Whether the collapsed clip would cut off source lines. Uses content size vs the CSS collapsed
- * budget (a non-animated custom property) rather than `clientHeight`, so an in-flight
- * `max-block-size` interpolation cannot look like a fit. Returns `undefined` while the clip is
- * not applied (for example when a resize callback fires for the expanded DOM just as a collapse is
- * queued).
+ * Whether the collapsed clip would cut off source lines. Uses the content box (the inner `code`,
+ * not the pre's border box floored by min-block-size) vs the CSS collapsed budget, so an in-flight
+ * grid row cannot look like a fit. Returns `undefined` while the clip is not applied (for example
+ * when a resize callback fires for the expanded DOM just as a collapse is queued).
  */
 function measureIsClipped(sourceElement: HTMLElement) {
 	if (getComputedStyle(sourceElement).overflowY !== 'clip') return undefined;
+	const contentBlockSize = measureSourceContentBlockSizePx(sourceElement);
 	const collapsedMax = measureCollapsedMaxBlockSizePx(sourceElement);
 	if (collapsedMax != null) {
-		return sourceElement.scrollHeight > collapsedMax + 1;
+		return contentBlockSize > collapsedMax + 1;
 	}
-	return sourceElement.scrollHeight > sourceElement.clientHeight + 1;
+	return contentBlockSize > sourceElement.clientHeight + 1;
 }
 
-/** Resolved px for the collapsed budget custom property (not the in-flight max-block-size). */
+/** Content height inside the pre, ignoring the collapsed min-block-size floor on the pre itself. */
+function measureSourceContentBlockSizePx(sourceElement: HTMLElement) {
+	const content = sourceElement.firstElementChild;
+	if (content instanceof HTMLElement) {
+		return content.getBoundingClientRect().height;
+	}
+	return sourceElement.scrollHeight;
+}
+
+/** Resolved px for the collapsed budget custom property (not the in-flight grid track). */
 function measureCollapsedMaxBlockSizePx(sourceElement: HTMLElement) {
 	const varReference = styles.collapsedSourceMaxBlockSizeVar;
 	const probe = sourceElement.ownerDocument.createElement('div');

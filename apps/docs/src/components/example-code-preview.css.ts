@@ -6,35 +6,36 @@ const collapsedSourceLineCount = 6;
 const collapsedSourceMaxBlockSize = `calc(${vars.font.caption.lineHeight} * ${collapsedSourceLineCount})`;
 
 /**
- * Target collapsed max-block-size for measurement. Not animated, so JS can read the budget while
- * `max-block-size` interpolates between that length and `none`.
+ * Collapsed preview budget. Floors the grid child (so `0fr` settles at six lines) and is read from
+ * JS for clip measurement (so an in-flight track size cannot look like a fit).
  */
 export const collapsedSourceMaxBlockSizeVar = createVar();
 
-export const codeViewportAnimatable = style({});
 export const codeViewportCollapsed = style({});
 export const codeViewportFade = style({});
 
-// Clip the source and transition max-block-size between the collapsed length and `none`.
-// `interpolate-size: allow-keywords` lets Chromium animate that keyword; other engines snap.
-// Content stays top-aligned so bottom lines are what the window obscures and discloses; the
-// toggle is the sill below this clip, scroll-pinned in the component while height changes.
-globalStyle(`${codeViewportAnimatable} pre`, {
+/**
+ * Grid accordion on the scrollport: `0fr` ↔ `1fr` interpolates to content height without
+ * `interpolate-size` (see https://css-tricks.com/css-grid-can-do-auto-height-transitions/).
+ */
+export const codeViewportAnimatable = style({
 	'@layer': {
 		components: {
 			vars: {
 				[collapsedSourceMaxBlockSizeVar]: collapsedSourceMaxBlockSize,
 			},
-			maxBlockSize: 'none',
-			overflowY: 'clip',
+			display: 'grid',
+			gridTemplateRows: '1fr',
 			// Accordion height is one of the few layout animations Emil's recipe allows; keep it short.
 			transitionDuration: vars.motion.duration.enter,
-			transitionProperty: 'max-block-size',
+			transitionProperty: 'grid-template-rows',
 			transitionTimingFunction: vars.motion.easing.standard,
-			'@media': {
-				'(prefers-reduced-motion: no-preference)': {
-					interpolateSize: 'allow-keywords',
+			selectors: {
+				[`&${codeViewportCollapsed}`]: {
+					gridTemplateRows: '0fr',
 				},
+			},
+			'@media': {
 				'(prefers-reduced-motion: reduce)': {
 					transitionDuration: '0.01ms',
 				},
@@ -43,7 +44,19 @@ globalStyle(`${codeViewportAnimatable} pre`, {
 	},
 });
 
-globalStyle(`${codeViewportCollapsed} pre`, {
+// Grid item: non-visible overflow lets `0fr` shrink past content. The collapsed budget is a constant
+// floor so the preview shows six lines and the 0fr↔1fr transition does not dip through height 0.
+globalStyle(`${codeViewportAnimatable} pre`, {
+	'@layer': {
+		components: {
+			minBlockSize: collapsedSourceMaxBlockSizeVar,
+			overflowY: 'clip',
+		},
+	},
+});
+
+// Fits / unmeasured: no grid transition — just a static clip to the collapsed budget.
+globalStyle(`${codeViewportCollapsed}:not(${codeViewportAnimatable}) pre`, {
 	'@layer': {
 		components: {
 			vars: {
