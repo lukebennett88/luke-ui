@@ -212,7 +212,7 @@ test('a missing example stays readable at mobile width', async () => {
 	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
 });
 
-test('shows source by default and expands it by keyboard while retaining control focus', async () => {
+test('expands and collapses source by keyboard, reporting its state and keeping focus', async () => {
 	await page.viewport(1000, 800);
 	await renderExampleBlock({ src: 'box/responsive-layout', title: 'Box: Responsive layout' });
 
@@ -235,9 +235,7 @@ test('shows source by default and expands it by keyboard while retaining control
 	const controlRect = control.getBoundingClientRect();
 	expect(controlRect.bottom).toBeLessThanOrEqual(regionRect.bottom + 1);
 	expect(controlRect.top).toBeGreaterThanOrEqual(regionRect.top - 1);
-	// The toggle is visual only: the full source is always in the accessibility tree.
-	expect(control).not.toHaveAttribute('aria-expanded');
-	expect(control).not.toHaveAttribute('aria-controls');
+	expect(control).toHaveAttribute('aria-expanded', 'false');
 	control.focus();
 
 	await act(async () => {
@@ -245,8 +243,7 @@ test('shows source by default and expands it by keyboard while retaining control
 	});
 	await expect.poll(() => page.getByRole('button', { name: 'Collapse code' }).query()).toBeTruthy();
 	await expect.element(control).toHaveFocus();
-	expect(control).not.toHaveAttribute('aria-expanded');
-	expect(control).not.toHaveAttribute('aria-controls');
+	expect(control).toHaveAttribute('aria-expanded', 'true');
 	await expect
 		.poll(() => codeFigure().getBoundingClientRect().height)
 		.toBeGreaterThan(collapsedHeight);
@@ -256,7 +253,7 @@ test('shows source by default and expands it by keyboard while retaining control
 	});
 	await expect.poll(() => page.getByRole('button', { name: 'Expand code' }).query()).toBeTruthy();
 	await expect.element(control).toHaveFocus();
-	expect(control).not.toHaveAttribute('aria-expanded');
+	expect(control).toHaveAttribute('aria-expanded', 'false');
 	await expect
 		.poll(() => codeFigure().getBoundingClientRect().height)
 		.toBeCloseTo(collapsedHeight, 0);
@@ -394,18 +391,12 @@ for (const motion of ['full', 'reduced'] as const) {
 		await renderLongSourcePreview();
 		const control = page.getByRole('button', { name: 'Expand code' }).element();
 		assert(control instanceof HTMLElement, 'expected the code toggle');
-		// Click synchronously so the height transition is still running when the test inspects it.
+		// A synchronous click lets the test inspect the transition before it ends.
 		act(() => control.click());
-		await Promise.all(
-			sourceElement()
-				.getAnimations()
-				.map((animation) => animation.finished),
-		);
+		for (const transition of sourceElement().getAnimations()) transition.finish();
 
-		// A reader who reaches the end of a long example sees its last lines and the toggle.
 		control.scrollIntoView({ behavior: 'instant', block: 'center' });
 		const topAtPress = control.getBoundingClientRect().top;
-		// The clipped source ends just above the toggle at every point of the collapse.
 		const sourceGap = () =>
 			control.getBoundingClientRect().top - sourceElement().getBoundingClientRect().bottom;
 		const gapAtPress = sourceGap();
@@ -441,31 +432,20 @@ test('narrowing the preview panel flips a responsive example below its container
 	await expect.poll(flexDirection).toBe('column');
 });
 
-/** Renders a 200-line example under a sticky header, with page content above and below it. */
 async function renderLongSourcePreview() {
 	await page.viewport(1000, 800);
-	const source = Array.from({ length: 200 }, (_, index) => `const line${index} = ${index};`).join(
-		'\n',
-	);
+	const source = Array.from({ length: 200 }, () => 'const value = 1;').join('\n');
 	container = document.body.appendChild(document.createElement('div'));
 	root = createRoot(container);
 	act(() => {
 		root?.render(
 			<Provider spritesheetHref={spriteSheetHref}>
-				<header
-					style={{
-						backgroundColor: 'Canvas',
-						blockSize: '3.5rem',
-						insetBlockStart: 0,
-						position: 'sticky',
-						zIndex: 10,
-					}}
-				>
-					Sticky docs header
+				<header style={{ blockSize: '3.5rem', insetBlockStart: 0, position: 'sticky' }}>
+					Sticky header
 				</header>
-				<p style={{ blockSize: '50vh' }}>Content above the example.</p>
+				<p style={{ blockSize: '50vh' }}>Before</p>
 				<ExampleCodePreview html={`<code>${source}</code>`} source={source} title="Long source" />
-				<p style={{ blockSize: '100vh' }}>Content below the example.</p>
+				<p style={{ blockSize: '100vh' }}>After</p>
 			</Provider>,
 		);
 	});

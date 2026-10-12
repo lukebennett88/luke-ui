@@ -15,7 +15,7 @@ export function ExampleCodePreview({
 	title: string;
 }) {
 	const [isExpanded, setIsExpanded] = useState(false);
-	// Source lines never wrap, so the line count decides whether the collapsed preview clips.
+	// Lines never wrap, so the line count says whether the preview clips.
 	const canExpand = source.split('\n').length > styles.collapsedLineCount;
 
 	return (
@@ -45,7 +45,11 @@ export function ExampleCodePreview({
 						zIndex: 1,
 					}}
 				>
-					<Button onPress={() => setIsExpanded(!isExpanded)} size="small">
+					<Button
+						aria-expanded={isExpanded}
+						onPress={() => setIsExpanded(!isExpanded)}
+						size="small"
+					>
 						{isExpanded ? 'Collapse code' : 'Expand code'}
 					</Button>
 				</Box>

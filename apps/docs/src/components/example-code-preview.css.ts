@@ -1,29 +1,23 @@
 import { vars } from '@luke-ui/react/theme';
 import { globalStyle, style } from '@vanilla-extract/css';
 
-/** Source lines the collapsed preview shows. Viewport padding remains outside the clipped source. */
 export const collapsedLineCount = 6;
 
 export const expanded = style({});
 
-/**
- * A code block whose source collapses to its first lines. Collapsing clips those lines, so scroll
- * anchoring skips the whole block and anchors to the toggle below it instead. That keeps the
- * toggle still while the block resizes.
- */
 export const collapsible = style({
 	'@layer': {
 		components: {
+			// Collapsing clips lines the browser could otherwise anchor scrolling to. Opting the block
+			// out makes the toggle below it the anchor, so the toggle stays put.
 			overflowAnchor: 'none',
 		},
 	},
 });
 
-// The source row grows from `0fr` to `1fr`, which interpolates to the content height without
-// measuring it. The `pre` is the grid container, so its clip edge follows the animated height and
-// the bottom lines are disclosed or clipped in step with the frame. `clip`, unlike `hidden`, is not
-// a scroll container, so keyboard scrolling and find-in-page cannot reveal clipped lines.
-// Horizontal scrolling stays with the viewport.
+// Animating rows between `0fr` and `1fr` reaches the content height without measuring it. The
+// `pre` is the grid so its clip edge moves with the animated height. `clip`, unlike `hidden`, is
+// not a scroll container, so keyboard scrolling and find-in-page cannot reveal clipped lines.
 globalStyle(`${collapsible} pre`, {
 	'@layer': {
 		components: {
@@ -49,7 +43,7 @@ globalStyle(`${collapsible}${expanded} pre`, {
 	},
 });
 
-// Let the row shrink below the source. The lines overflow it into the `pre`, which clips them.
+// Lets the row shrink below the source.
 globalStyle(`${collapsible} pre > code`, {
 	'@layer': {
 		components: {
