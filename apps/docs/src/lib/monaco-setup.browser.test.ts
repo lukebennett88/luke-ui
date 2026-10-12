@@ -72,20 +72,34 @@ async function renderEditor(mode: keyof typeof palettes) {
 		throw new Error(`No uniformly coloured rendered token "${text}"`);
 	}
 
-	return { colourOf, created, root };
+	// String quotes can land in their own spans with a different colour from the body. Prefer the
+	// exact quoted match when it is uniform; otherwise take the body span colour.
+	function stringColourOf(quoted: string, body: string): string {
+		try {
+			return colourOf(quoted);
+		} catch {
+			return colourOf(body);
+		}
+	}
+
+	return { colourOf, created, root, stringColourOf };
 }
 
 for (const mode of ['light', 'dark'] as const) {
 	test(`playground ${mode} tokens use the GitHub high-contrast palette`, async () => {
-		const { colourOf, root } = await renderEditor(mode);
+		const { colourOf, root, stringColourOf } = await renderEditor(mode);
 		const palette = palettes[mode];
 
-		// Monaco tokenizes lazily, so retry until the viewport is coloured.
-		await vi.waitFor(() => {
-			expect(colourOf('const')).toBe(hexToRgb(palette.keyword));
-			expect(colourOf('42')).toBe(hexToRgb(palette.number));
-			expect(colourOf('"text"')).toBe(hexToRgb(palette.string));
-		});
+		// Monaco tokenizes lazily, so retry until the viewport is coloured. CI under a full docs
+		// suite needs more than the default 1s — light tokens especially.
+		await vi.waitFor(
+			() => {
+				expect(colourOf('const')).toBe(hexToRgb(palette.keyword));
+				expect(colourOf('42')).toBe(hexToRgb(palette.number));
+				expect(stringColourOf('"text"', 'text')).toBe(hexToRgb(palette.string));
+			},
+			{ timeout: 5_000 },
+		);
 		// High-contrast base, so Monaco applies `editor.selectionForeground`.
 		expect(root.querySelector(mode === 'light' ? '.hc-light' : '.hc-black')).not.toBeNull();
 	});
