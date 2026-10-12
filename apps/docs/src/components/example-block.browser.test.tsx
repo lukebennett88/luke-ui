@@ -512,6 +512,68 @@ test('collapse with Enter respects focus returning before commit', async () => {
 	await expect.element(page.getByRole('button', { name: COPY_BUTTON_NAME_PATTERN })).toHaveFocus();
 });
 
+test('collapsing long source keeps the toggle where the reader left it', async () => {
+	await renderSourcePreview({ lineCount: 200, withSpaceBelow: true });
+	await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
+	const collapse = page.getByRole('button', { name: 'Collapse code' });
+	await expect.element(collapse).toBeVisible();
+	const control = collapse.element();
+	// Scroll the expanded source above the viewport so only the toggle remains in view.
+	window.scrollBy({ behavior: 'instant', top: control.getBoundingClientRect().top - 16 });
+	expect(sourceElement().getBoundingClientRect().bottom).toBeLessThan(
+		control.getBoundingClientRect().top + 24,
+	);
+	// Measure at press time, because the click may scroll the toggle further into view first.
+	let topAtPress: number | undefined;
+	control.addEventListener(
+		'pointerdown',
+		() => {
+			topAtPress = control.getBoundingClientRect().top;
+		},
+		{ once: true },
+	);
+
+	await act(async () => {
+		await userEvent.click(collapse);
+	});
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	assert(topAtPress != null, 'expected the toggle to be pressed');
+	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
+});
+
+test('collapsing source whose top is still visible keeps the content above it in place', async () => {
+	await renderSourcePreview({ lineCount: 16, withHeading: true, withSpaceBelow: true });
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
+	});
+	const collapse = page.getByRole('button', { name: 'Collapse code' });
+	await expect.element(collapse).toBeVisible();
+	// Scroll partway down the heading so a compensating scroll would be able to move it, while the
+	// source top stays below the site header.
+	window.scrollTo({ behavior: 'instant', top: 200 });
+	const heading = page.getByRole('heading', { name: 'Example heading' }).element();
+	expect(sourceElement().getBoundingClientRect().top).toBeGreaterThan(56);
+	expect(collapse.element().getBoundingClientRect().bottom).toBeLessThan(window.innerHeight);
+	// Press with the keyboard: a pointer click makes Playwright scroll the toggle to the top of the
+	// viewport first, which is not the reader's scroll. Measure the moment the key goes down.
+	collapse.element().focus();
+	let headingTopAtPress: number | undefined;
+	collapse.element().addEventListener(
+		'keydown',
+		() => {
+			headingTopAtPress = heading.getBoundingClientRect().top;
+		},
+		{ once: true },
+	);
+
+	await pressKey('{Enter}');
+	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
+	assert(headingTopAtPress != null, 'expected the toggle to be pressed');
+	expect(window.scrollY).toBe(200);
+	expect(Math.abs(heading.getBoundingClientRect().top - headingTopAtPress)).toBeLessThanOrEqual(1);
+});
+
 test('typography changes without interaction do not move focus', async () => {
 	await renderSourcePreview();
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
@@ -571,16 +633,23 @@ test('narrowing the preview panel flips a responsive example below its container
 	await expect.poll(flexDirection).toBe('column');
 });
 
-async function renderSourcePreview({ withNextControl = false } = {}) {
+async function renderSourcePreview({
+	lineCount = 20,
+	withHeading = false,
+	withNextControl = false,
+	withSpaceBelow = false,
+} = {}) {
 	await page.viewport(1000, 800);
-	const source = Array.from({ length: 20 }, () => 'const value = 1;').join('\n');
+	const source = Array.from({ length: lineCount }, () => 'const value = 1;').join('\n');
 	container = document.body.appendChild(document.createElement('div'));
 	root = createRoot(container);
 	act(() => {
 		root?.render(
 			<Provider spritesheetHref={spriteSheetHref}>
+				{withHeading ? <h2 style={{ blockSize: '20rem', margin: 0 }}>Example heading</h2> : null}
 				<ExampleCodePreview html={`<code>${source}</code>`} source={source} title="Source sizing" />
 				{withNextControl ? <button type="button">Next example</button> : null}
+				{withSpaceBelow ? <div style={{ blockSize: '100vh' }} /> : null}
 			</Provider>,
 		);
 	});

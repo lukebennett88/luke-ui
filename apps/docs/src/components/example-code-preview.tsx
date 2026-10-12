@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { CodeBlock } from './code-block/code-block.js';
 import * as styles from './example-code-preview.css.js';
+import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
 export function ExampleCodePreview({
 	html,
@@ -24,6 +25,9 @@ export function ExampleCodePreview({
 	const [{ focus, mode }, dispatch] = useReducer(sourceReducer, initialSourceState);
 	const sourceRef = useRef<HTMLPreElement>(null);
 	const copyButtonRef = useRef<HTMLButtonElement>(null);
+	const toggleRef = useRef<HTMLButtonElement>(null);
+	/** Viewport top of the toggle when a collapse was requested. */
+	const collapseToggleTopRef = useRef<number | null>(null);
 	const isExpanded = mode === 'expanded';
 	const canExpand = mode === 'collapsed' || isExpanded;
 	const isClipped = !isExpanded;
@@ -56,6 +60,18 @@ export function ExampleCodePreview({
 
 		const isClipped = measureIsClipped(sourceElement);
 		if (isClipped != null) dispatch({ isClipped, type: 'measured' });
+	}, [mode]);
+
+	// Collapsing shrinks the source above the toggle without changing the page scroll. When the
+	// reader has scrolled past the source's top, scroll by the toggle's shift so they keep their
+	// place. Native scroll anchoring picks a source line that the collapse clips, so it cannot do
+	// this. While the top is still visible, the press skips recording and the page stays put.
+	useLayoutEffect(() => {
+		const topBefore = collapseToggleTopRef.current;
+		collapseToggleTopRef.current = null;
+		const toggle = toggleRef.current;
+		if (mode !== 'collapsed' || topBefore == null || !toggle) return;
+		window.scrollBy({ behavior: 'instant', top: toggle.getBoundingClientRect().top - topBefore });
 	}, [mode]);
 
 	// The reducer asks for this only after a focused collapse control has unmounted.
@@ -105,11 +121,16 @@ export function ExampleCodePreview({
 							onPress={(event) => {
 								// Read focus at press time. A view transition can move it to body before effects run.
 								const hadFocus = event.target === document.activeElement;
+								collapseToggleTopRef.current =
+									isExpanded && sourceRef.current && isUnderSiteHeader(sourceRef.current)
+										? event.target.getBoundingClientRect().top
+										: null;
 								startTransition(() => {
 									addTransitionType(styles.codeTransitionType);
 									dispatch(isExpanded ? { hadFocus, type: 'collapse' } : { type: 'expand' });
 								});
 							}}
+							ref={toggleRef}
 							size="small"
 						>
 							{isExpanded ? 'Collapse code' : 'Expand code'}
@@ -119,6 +140,13 @@ export function ExampleCodePreview({
 			</Box>
 		</ViewTransition>
 	);
+}
+
+/** Whether the reader has scrolled the source's top edge up under the fixed site header. */
+function isUnderSiteHeader(sourceElement: HTMLElement) {
+	const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+	const headerBottom = Number.parseFloat(SITE_HEADER_BLOCK_SIZE) * rootFontSize;
+	return sourceElement.getBoundingClientRect().top < headerBottom;
 }
 
 /**

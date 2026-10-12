@@ -30,22 +30,34 @@ globalStyle(
 	},
 );
 
+// The group morphs the example's size and position.
+globalStyle(`::view-transition-group(.${codeUpdate})`, {
+	'@layer': {
+		components: {
+			animationDuration: vars.motion.duration.enter,
+			animationTimingFunction: vars.motion.easing.standard,
+			'@media': {
+				'(prefers-reduced-motion: reduce)': {
+					animationDuration: '0.01ms',
+				},
+			},
+		},
+	},
+});
+
+// Snapshots keep their natural size and clip to the morphing group, so text is revealed rather
+// than stretched. They do not crossfade, so the content is not washed out mid-transition.
 globalStyle(
-	[
-		`::view-transition-group(.${codeUpdate})`,
-		`::view-transition-old(.${codeUpdate})`,
-		`::view-transition-new(.${codeUpdate})`,
-	].join(', '),
+	[`::view-transition-old(.${codeUpdate})`, `::view-transition-new(.${codeUpdate})`].join(', '),
 	{
 		'@layer': {
 			components: {
-				animationDuration: vars.motion.duration.enter,
-				animationTimingFunction: vars.motion.easing.standard,
-				'@media': {
-					'(prefers-reduced-motion: reduce)': {
-						animationDuration: '0.01ms',
-					},
-				},
+				animation: 'none',
+				blockSize: '100%',
+				mixBlendMode: 'normal',
+				objectFit: 'none',
+				objectPosition: 'top left',
+				overflow: 'clip',
 			},
 		},
 	},
