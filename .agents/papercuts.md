@@ -37,3 +37,33 @@ archives them. Never delete an entry only because it is old.
 workflow would have prevented and that a check or a pointer would not handle better. The maintainer
 approves skill additions and changes. Remove a skill when it is obsolete or when pilot or spot-check
 evidence shows it does not help. Silence in this log is not evidence.
+
+## Visual compare fails while the main baseline run is still in progress
+
+- Seen: 2026-10-12 (#782, #783, #785, #792). `visual-ci resolve-baseline` exited with "The newest
+  Visual baseline run on `main` is in_progress. Wait for … then re-run this job." Re-run after the
+  baseline finished passed compare.
+- Where: `.github/workflows/visual-regression.yml` Resolve baseline step; docs/VISUAL_TESTING.md.
+- Problem: Parallel Renovate PRs that touch the lockfile all start compare while a main Visual
+  baseline run is still uploading, so every PR fails the same way until someone re-runs the job.
+
+## Renovate rewrote `devEngines.runtime` from `24.x` to an exact Node version
+
+- Seen: 2026-10-12 (#783). Renovate's non-major PR changed `"version": "24.x"` to
+  `"version": "24.21.0"` and the lockfile `specifier` to `runtime:24.21.0`.
+- Where: root `package.json` `devEngines.runtime`; docs/DEPENDENCIES.md Tooling versions;
+  `.github/renovate.json5` custom regex manager for node.
+- Problem: The documented contract is `<major>.x`, and the regex manager is supposed to keep that
+  form with `rangeStrategy: 'replace'`. The non-major group still rewrote the field to an exact
+  version, so the PR had to be corrected by hand.
+
+## Playground Monaco light-token test flakes under the full docs suite on CI
+
+- Seen: 2026-10-12 (#785, #792, and main Test for #790).
+  `playground light tokens use the GitHub high-contrast palette` failed with
+  `No uniformly coloured rendered token "text"` while the dark-token case passed; local solo and
+  full-suite runs passed.
+- Where: `apps/docs/src/lib/monaco-setup.browser.test.ts`; docs/TESTING.md Component tests.
+- Problem: Under CI load the light high-contrast theme can leave string quotes in separate spans or
+  take longer than the default `waitFor` timeout, so the assertion fails even when the theme is
+  correct.
