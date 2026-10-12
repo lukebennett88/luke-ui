@@ -16,12 +16,10 @@ import { cdp, commands, page, userEvent } from 'vite-plus/test/context';
 import responsiveLayoutSource from '../examples/box/responsive-layout.tsx?raw';
 import * as shellStyles from './docs-shell.css.js';
 import { ExampleBlock, ExampleLoadingState } from './example-block.js';
-import * as codePreviewStyles from './example-code-preview.css.js';
 import { ExampleCodePreview } from './example-code-preview.js';
 import * as styles from './example-preview.css.js';
 import { ExamplePreview } from './example-preview.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
-import { DOCS_SITE_HEADER_VT_NAME } from './site-header-view-transition.js';
 import { DocsThemeRoot } from './theme-controls.js';
 
 let container: HTMLElement | undefined;
@@ -685,69 +683,70 @@ test('keyboard collapse of a long example under the sticky header keeps the togg
 	expect(Math.abs(control.getBoundingClientRect().top - topAtPress)).toBeLessThanOrEqual(1);
 });
 
-test('example expand/collapse morph stays under the sticky header throughout the view transition', async () => {
-	await renderSourcePreview({ lineCount: 200, withSpaceBelow: true, withStickyHeader: true });
-	await userEvent.click(page.getByRole('button', { name: 'Expand code' }));
+test('expand and collapse animate height with the toggle on the frame and code pinned to the top', async () => {
+	await renderSourcePreview({ lineCount: 40, withSpaceBelow: true });
+	const expand = page.getByRole('button', { name: 'Expand code' });
+	await expect.element(expand).toBeVisible();
+	const source = sourceElement();
+	const frame = container?.querySelector<HTMLElement>('[data-example-code-frame]');
+	assert(frame, 'expected the example code frame');
+	const collapsedSourceBottom = source.getBoundingClientRect().bottom;
+	const collapsedHeight = source.getBoundingClientRect().height;
+	expect(source.scrollHeight).toBeGreaterThan(source.clientHeight + 1);
+
+	expand.element().focus();
+	await pressKey('{Enter}');
 	const collapse = page.getByRole('button', { name: 'Collapse code' });
 	await expect.element(collapse).toBeVisible();
-	const header = docsSiteHeader();
-	window.scrollBy({
-		behavior: 'instant',
-		top:
-			collapse.element().getBoundingClientRect().top - (header.getBoundingClientRect().bottom + 16),
-	});
-	expect(sourceElement().getBoundingClientRect().top).toBeLessThan(
-		header.getBoundingClientRect().bottom,
+	await expect
+		.poll(() => source.getBoundingClientRect().height)
+		.toBeGreaterThan(collapsedHeight + 40);
+	const expandedSourceTop = source.getBoundingClientRect().top;
+	const expandedToggle = collapse.element();
+	expect(expandedToggle.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+		frame.getBoundingClientRect().bottom + 1,
 	);
+	expect(source.getBoundingClientRect().bottom).toBeGreaterThan(collapsedSourceBottom + 40);
 
-	const headerZs: Array<string> = [];
-	const codeZs: Array<string> = [];
-	const originalStartViewTransition = document.startViewTransition.bind(document);
-	vi.spyOn(document, 'startViewTransition').mockImplementation((update) => {
-		const transition = originalStartViewTransition(update);
-		void transition.ready.then(() => {
-			const sample = () => {
-				if (!document.documentElement.matches(':active-view-transition')) return;
-				headerZs.push(
-					getComputedStyle(
-						document.documentElement,
-						`::view-transition-group(${DOCS_SITE_HEADER_VT_NAME})`,
-					).zIndex,
-				);
-				codeZs.push(
-					getComputedStyle(
-						document.documentElement,
-						`::view-transition-group(.${codePreviewStyles.codeUpdate})`,
-					).zIndex,
-				);
+	const sourceTopAtPress = source.getBoundingClientRect().top;
+	const toggleBottomGaps: Array<number> = [];
+	const sourceTops: Array<number> = [];
+	const sourceBottoms: Array<number> = [];
+	const onToggle = () => {
+		const sample = () => {
+			const animations = source.getAnimations({ subtree: true });
+			toggleBottomGaps.push(
+				frame.getBoundingClientRect().bottom - expandedToggle.getBoundingClientRect().bottom,
+			);
+			sourceTops.push(source.getBoundingClientRect().top);
+			sourceBottoms.push(source.getBoundingClientRect().bottom);
+			if (animations.length > 0) {
 				requestAnimationFrame(sample);
-			};
-			sample();
-		});
-		return transition;
-	});
-
-	await act(async () => {
-		await userEvent.click(collapse);
-	});
-	await expect.poll(() => document.documentElement.matches(':active-view-transition')).toBe(false);
+			}
+		};
+		requestAnimationFrame(sample);
+	};
+	expandedToggle.addEventListener('keydown', onToggle, { once: true });
+	expandedToggle.focus();
+	await pressKey('{Enter}');
 	await expect.element(page.getByRole('button', { name: 'Expand code' })).toBeVisible();
-	expect(headerZs.length).toBeGreaterThan(0);
-	for (const headerZ of headerZs) {
-		expect(Number.parseInt(headerZ, 10)).toBeGreaterThanOrEqual(10);
+	await expect.poll(() => source.getBoundingClientRect().height).toBeCloseTo(collapsedHeight, 0);
+	expect(Math.abs(source.getBoundingClientRect().top - sourceTopAtPress)).toBeLessThanOrEqual(1);
+	expect(Math.abs(source.getBoundingClientRect().top - expandedSourceTop)).toBeLessThanOrEqual(1);
+	expect(source.scrollHeight).toBeGreaterThan(source.clientHeight + 1);
+	// Later lines sit below the collapsed clip once the height has settled.
+	expect(source.getBoundingClientRect().bottom).toBeLessThan(
+		source.getBoundingClientRect().top + source.scrollHeight - 8,
+	);
+	// Toggle stays on the frame bottom while height animates; source top stays put so bottom
+	// lines are what disappear.
+	expect(toggleBottomGaps.length).toBeGreaterThan(0);
+	expect(Math.max(...toggleBottomGaps)).toBeLessThan(24);
+	expect(Math.min(...toggleBottomGaps)).toBeGreaterThan(-2);
+	for (const top of sourceTops) {
+		expect(Math.abs(top - sourceTopAtPress)).toBeLessThanOrEqual(2);
 	}
-	for (const [index, codeZ] of codeZs.entries()) {
-		const headerZ = Number.parseInt(headerZs[index] ?? '0', 10);
-		const codeValue = !codeZ || codeZ === 'auto' ? 0 : Number.parseInt(codeZ, 10);
-		expect(Number.isFinite(codeValue)).toBe(true);
-		expect(headerZ).toBeGreaterThan(codeValue);
-	}
-
-	// After the transition, the live sticky header still wins hit-testing in its band.
-	const headerBox = header.getBoundingClientRect();
-	const hit = document.elementFromPoint(headerBox.left + headerBox.width / 2, headerBox.top + 8);
-	expect(hit).toBeTruthy();
-	expect(header.contains(hit) || hit === header).toBe(true);
+	expect(Math.max(...sourceBottoms) - Math.min(...sourceBottoms)).toBeGreaterThan(20);
 });
 
 test('narrow viewport collapse under the sticky header keeps the toggle in place', async () => {
@@ -912,7 +911,7 @@ async function renderSourcePreview({
 			<Provider spritesheetHref={spriteSheetHref}>
 				{withStickyHeader ? (
 					<div className={shellStyles.shell} id="docs-shell">
-						<div
+						<header
 							className={shellStyles.header}
 							data-docs-sticky-header
 							style={
@@ -925,10 +924,8 @@ async function renderSourcePreview({
 									: { backgroundColor: 'Canvas', minBlockSize: SITE_HEADER_BLOCK_SIZE }
 							}
 						>
-							<div className={shellStyles.headerTransition}>
-								<header>Sticky docs header</header>
-							</div>
-						</div>
+							Sticky docs header
+						</header>
 						<main>{preview}</main>
 					</div>
 				) : (

@@ -1,14 +1,8 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { cx } from '@luke-ui/react/utils';
-import {
-	addTransitionType,
-	startTransition,
-	useLayoutEffect,
-	useReducer,
-	useRef,
-	ViewTransition,
-} from 'react';
+import { assignInlineVars } from '@vanilla-extract/dynamic';
+import { useLayoutEffect, useReducer, useRef, useState } from 'react';
 import { CodeBlock } from './code-block/code-block.js';
 import * as styles from './example-code-preview.css.js';
 
@@ -27,6 +21,10 @@ export function ExampleCodePreview({
 	const toggleRef = useRef<HTMLButtonElement>(null);
 	/** Viewport top of the toggle when a collapse was requested. */
 	const collapseToggleTopRef = useRef<number | null>(null);
+	const [sourceClipBlockSizes, setSourceClipBlockSizes] = useState<{
+		collapsed: number;
+		expanded: number;
+	} | null>(null);
 	const isExpanded = mode === 'expanded';
 	const canExpand = mode === 'collapsed' || isExpanded;
 	const isClipped = !isExpanded;
@@ -38,6 +36,13 @@ export function ExampleCodePreview({
 		const update = () => {
 			const isClipped = measureIsClipped(sourceElement);
 			if (isClipped != null) dispatch({ isClipped, type: 'measured' });
+			const collapsed = measureCollapsedSourceBlockSize(sourceElement);
+			if (collapsed != null) {
+				setSourceClipBlockSizes({
+					collapsed,
+					expanded: measureExpandedSourceBlockSize(sourceElement),
+				});
+			}
 		};
 
 		const observer = new ResizeObserver(update);
@@ -59,6 +64,13 @@ export function ExampleCodePreview({
 
 		const isClipped = measureIsClipped(sourceElement);
 		if (isClipped != null) dispatch({ isClipped, type: 'measured' });
+		const collapsed = measureCollapsedSourceBlockSize(sourceElement);
+		if (collapsed != null) {
+			setSourceClipBlockSizes({
+				collapsed,
+				expanded: measureExpandedSourceBlockSize(sourceElement),
+			});
+		}
 	}, [mode]);
 
 	// Collapsing shrinks the source above the toggle without changing the page scroll. When the
@@ -80,64 +92,73 @@ export function ExampleCodePreview({
 		dispatch({ type: 'focusRestored' });
 	}, [focus]);
 
+	const sourceClipStyle =
+		canExpand && sourceClipBlockSizes != null
+			? assignInlineVars({
+					[styles.sourceMaxBlockSizeVar]: `${
+						isExpanded ? sourceClipBlockSizes.expanded : sourceClipBlockSizes.collapsed
+					}px`,
+				})
+			: undefined;
+
 	return (
-		<ViewTransition default="none" update={styles.codeUpdate}>
-			<Box
-				backgroundColor="surface.subdued"
-				overflow="hidden"
-				paddingBlockEnd={canExpand ? 'sp48' : undefined}
-				position="relative"
-			>
-				{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
-				<CodeBlock
-					copyButtonRef={copyButtonRef}
-					copyText={source}
-					flush
-					html={html}
-					sourceRef={sourceRef}
-					viewportClassName={cx(
-						isClipped && styles.codeViewportCollapsed,
-						canExpand && isClipped && styles.codeViewportFade,
-					)}
-					viewportLabel={`${title} code`}
-				/>
-				{canExpand ? (
-					<Box
-						display="flex"
-						insetBlockEnd="sp8"
-						insetInlineStart="50%"
-						justifyContent="center"
-						position="absolute"
-						style={{
-							transform: 'translateX(-50%)',
-							zIndex: 1,
+		<Box
+			backgroundColor="surface.subdued"
+			data-example-code-frame
+			overflow="hidden"
+			paddingBlockEnd={canExpand ? 'sp48' : undefined}
+			position="relative"
+			style={sourceClipStyle}
+		>
+			{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
+			<CodeBlock
+				copyButtonRef={copyButtonRef}
+				copyText={source}
+				flush
+				html={html}
+				sourceRef={sourceRef}
+				viewportClassName={cx(
+					// Clip while measuring and before pixel sizes land. Once expand/collapse is
+					// available, keep an explicit max-block-size in both states so height can transition.
+					canExpand && sourceClipBlockSizes != null
+						? styles.codeViewportAnimatable
+						: isClipped && styles.codeViewportCollapsedFallback,
+					canExpand && isClipped && styles.codeViewportFade,
+				)}
+				viewportLabel={`${title} code`}
+			/>
+			{canExpand ? (
+				<Box
+					display="flex"
+					insetBlockEnd="sp8"
+					insetInlineStart="50%"
+					justifyContent="center"
+					position="absolute"
+					style={{
+						transform: 'translateX(-50%)',
+						zIndex: 1,
+					}}
+				>
+					<Button
+						// React ignores the blur from unmounting, so this only sees focus moving away.
+						onBlur={() => dispatch({ type: 'toggleBlurred' })}
+						onFocus={() => dispatch({ type: 'toggleFocused' })}
+						onPress={(event) => {
+							const hadFocus = event.target === document.activeElement;
+							collapseToggleTopRef.current =
+								isExpanded && sourceRef.current && isUnderSiteHeader(sourceRef.current)
+									? event.target.getBoundingClientRect().top
+									: null;
+							dispatch(isExpanded ? { hadFocus, type: 'collapse' } : { type: 'expand' });
 						}}
+						ref={toggleRef}
+						size="small"
 					>
-						<Button
-							// React ignores the blur from unmounting, so this only sees focus moving away.
-							onBlur={() => dispatch({ type: 'toggleBlurred' })}
-							onFocus={() => dispatch({ type: 'toggleFocused' })}
-							onPress={(event) => {
-								// Read focus at press time. A view transition can move it to body before effects run.
-								const hadFocus = event.target === document.activeElement;
-								collapseToggleTopRef.current =
-									isExpanded && sourceRef.current && isUnderSiteHeader(sourceRef.current)
-										? event.target.getBoundingClientRect().top
-										: null;
-								startTransition(() => {
-									addTransitionType(styles.codeTransitionType);
-									dispatch(isExpanded ? { hadFocus, type: 'collapse' } : { type: 'expand' });
-								});
-							}}
-							ref={toggleRef}
-							size="small"
-						>
-							{isExpanded ? 'Collapse code' : 'Expand code'}
-						</Button>
-					</Box>
-				) : null}
-			</Box>
-		</ViewTransition>
+						{isExpanded ? 'Collapse code' : 'Expand code'}
+					</Button>
+				</Box>
+			) : null}
+		</Box>
 	);
 }
 
@@ -150,6 +171,16 @@ function isUnderSiteHeader(sourceElement: HTMLElement) {
 function siteHeaderBottom() {
 	const header = document.querySelector<HTMLElement>('#docs-shell [data-docs-sticky-header]');
 	return header?.getBoundingClientRect().bottom ?? 0;
+}
+
+function measureExpandedSourceBlockSize(sourceElement: HTMLElement) {
+	return sourceElement.scrollHeight;
+}
+
+function measureCollapsedSourceBlockSize(sourceElement: HTMLElement) {
+	const lineHeight = Number.parseFloat(getComputedStyle(sourceElement).lineHeight);
+	if (!Number.isFinite(lineHeight)) return null;
+	return lineHeight * styles.collapsedSourceLineCount;
 }
 
 /**

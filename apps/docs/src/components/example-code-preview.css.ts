@@ -1,93 +1,33 @@
 import { vars } from '@luke-ui/react/theme';
-import { globalStyle, style } from '@vanilla-extract/css';
-import { DOCS_SITE_HEADER_VT_NAME } from './site-header-view-transition.js';
+import { createVar, globalStyle, style } from '@vanilla-extract/css';
 
 /** Six caption lines. Viewport padding remains outside the clipped source. */
-const collapsedSourceMaxBlockSize = `calc(${vars.font.caption.lineHeight} * 6)`;
+export const collapsedSourceLineCount = 6;
+const collapsedSourceMaxBlockSize = `calc(${vars.font.caption.lineHeight} * ${collapsedSourceLineCount})`;
 
-export const codeTransitionType = 'luke-docs-example-code';
-export const codeUpdate = style({});
+/** Pixel max-block-size for the animating source clip. Set only while expand/collapse is available. */
+export const sourceMaxBlockSizeVar = createVar();
 
-// Keep the surrounding article out of the code expansion crossfade.
-globalStyle(`:root:active-view-transition-type(${codeTransitionType})::view-transition-old(root)`, {
-	'@layer': {
-		components: {
-			display: 'none',
-		},
-	},
-});
-
-globalStyle(
-	[
-		`:root:active-view-transition-type(${codeTransitionType})::view-transition-group(root)`,
-		`:root:active-view-transition-type(${codeTransitionType})::view-transition-new(root)`,
-	].join(', '),
-	{
-		'@layer': {
-			components: {
-				animation: 'none',
-			},
-		},
-	},
-);
-
-// Named example groups paint above the root snapshot. Raise the sticky header's group so the morph
-// cannot cover it. Scoped to this transition type so search-field morphs are unaffected.
-globalStyle(
-	`:root:active-view-transition-type(${codeTransitionType})::view-transition-group(${DOCS_SITE_HEADER_VT_NAME})`,
-	{
-		'@layer': {
-			components: {
-				zIndex: 10,
-			},
-		},
-	},
-);
-
-// The group morphs the example's size and position.
-globalStyle(`::view-transition-group(.${codeUpdate})`, {
-	'@layer': {
-		components: {
-			animationDuration: vars.motion.duration.enter,
-			animationTimingFunction: vars.motion.easing.standard,
-			'@media': {
-				'(prefers-reduced-motion: reduce)': {
-					animationDuration: '0.01ms',
-				},
-			},
-		},
-	},
-});
-
-// Snapshots keep their natural size and clip to the morphing group, so text is revealed rather
-// than stretched. They do not crossfade, so the content is not washed out mid-transition.
-globalStyle(
-	[`::view-transition-old(.${codeUpdate})`, `::view-transition-new(.${codeUpdate})`].join(', '),
-	{
-		'@layer': {
-			components: {
-				animation: 'none',
-				blockSize: '100%',
-				mixBlendMode: 'normal',
-				objectFit: 'none',
-				objectPosition: 'top left',
-				overflow: 'clip',
-			},
-		},
-	},
-);
-
-export const codeViewportCollapsed = style({});
+export const codeViewportAnimatable = style({});
 export const codeViewportFade = style({});
 
-// Clip the source vertically so keyboard scrolling cannot reveal hidden lines. `clip`, unlike
-// `hidden`, is not a scroll container, so find-in-page cannot scroll clipped lines into view
-// either. Horizontal scrolling stays with the viewport.
-globalStyle(`${codeViewportCollapsed} pre`, {
+// Clip and animate height on the source. Content stays top-aligned so the bottom lines are what
+// appear and disappear; the toggle sits on the frame below this clip. `max-block-size` (not
+// `block-size`) keeps short sources from being forced taller than their content.
+globalStyle(`${codeViewportAnimatable} pre`, {
 	'@layer': {
 		components: {
-			maxBlockSize: collapsedSourceMaxBlockSize,
+			maxBlockSize: sourceMaxBlockSizeVar,
 			overflowY: 'clip',
+			// Accordion height is one of the few layout animations Emil's recipe allows; keep it short.
+			transitionDuration: vars.motion.duration.enter,
+			transitionProperty: 'max-block-size',
+			transitionTimingFunction: vars.motion.easing.standard,
+			'@media': {
+				'(prefers-reduced-motion: reduce)': {
+					transitionDuration: '0.01ms',
+				},
+			},
 		},
 	},
 });
@@ -97,6 +37,18 @@ globalStyle(`${codeViewportFade} pre`, {
 	'@layer': {
 		components: {
 			maskImage: 'linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%)',
+		},
+	},
+});
+
+/** Fallback when the pixel measure has not landed yet. */
+export const codeViewportCollapsedFallback = style({});
+
+globalStyle(`${codeViewportCollapsedFallback} pre`, {
+	'@layer': {
+		components: {
+			maxBlockSize: collapsedSourceMaxBlockSize,
+			overflowY: 'clip',
 		},
 	},
 });

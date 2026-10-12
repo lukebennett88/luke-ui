@@ -1,9 +1,8 @@
 import { vars } from '@luke-ui/react/theme';
-import { createVar, globalStyle, style } from '@vanilla-extract/css';
+import { createVar, style } from '@vanilla-extract/css';
 import { docsSidebarMinInlineSize, docsTocMinInlineSize } from '../lib/docs-container-queries.js';
 import { overlayMotion } from '../lib/overlay-motion.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
-import { DOCS_SITE_HEADER_VT_NAME } from './site-header-view-transition.js';
 
 export const shell = style({
 	'@layer': {
@@ -40,43 +39,6 @@ export const header = style({
 		},
 	},
 });
-
-/**
- * Named snapshot host inside the sticky shell slot. `view-transition-name` on the sticky element
- * itself prevents sticking, so the name lives on this inner wrapper instead.
- */
-export const headerTransition = style({
-	'@layer': {
-		components: {
-			viewTransitionName: DOCS_SITE_HEADER_VT_NAME,
-		},
-	},
-});
-
-// Keep the header still while named example groups morph. Z-index among groups is raised only for
-// the example-code transition type in `example-code-preview.css.ts`, so search morphs stay free to
-// paint through the header's excluded search-field hole.
-globalStyle(`::view-transition-group(${DOCS_SITE_HEADER_VT_NAME})`, {
-	'@layer': {
-		components: {
-			animation: 'none',
-		},
-	},
-});
-
-globalStyle(
-	[
-		`::view-transition-old(${DOCS_SITE_HEADER_VT_NAME})`,
-		`::view-transition-new(${DOCS_SITE_HEADER_VT_NAME})`,
-	].join(', '),
-	{
-		'@layer': {
-			components: {
-				animation: 'none',
-			},
-		},
-	},
-);
 
 export const sidebar = style({
 	'@layer': {
