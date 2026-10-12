@@ -4,9 +4,11 @@
  * and on GitHub Pages without external requests. Import this module only from
  * client-only code — it touches `self` at module scope.
  */
-import { flavors } from '@catppuccin/palette';
 import { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
+import { SHIKI_THEME_REGISTRATIONS } from './shiki-theme.js';
+
+const [githubLight, githubDark] = SHIKI_THEME_REGISTRATIONS;
 
 self.MonacoEnvironment = {
 	getWorker: (_workerId, label) => {
@@ -32,66 +34,69 @@ monaco.editor.addKeybindingRule({
 	keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL,
 });
 
+const MONACO_COLOR_KEYS = [
+	'editor.background',
+	'editor.foreground',
+	'editor.lineHighlightBackground',
+	'editor.selectionBackground',
+	'editorBracketMatch.background',
+	'editorBracketMatch.border',
+	'editorCursor.foreground',
+	'editorHoverWidget.background',
+	'editorLineNumber.activeForeground',
+	'editorLineNumber.foreground',
+	'editorSuggestWidget.selectedBackground',
+	'editorWidget.background',
+	'editorWidget.border',
+	'scrollbarSlider.activeBackground',
+	'scrollbarSlider.background',
+	'scrollbarSlider.hoverBackground',
+] as const;
+
 /**
- * The official Catppuccin palette mapped onto Monaco's coarser token
- * vocabulary per the Catppuccin style guide (there is no official Monaco
- * port): mauve keywords, green strings, peach numbers, yellow
- * types/attributes, sky operators, overlay2 comments and punctuation,
- * rosewater cursor, overlay1 line numbers. The editor pane backgrounds in
- * `routes/playground/index.tsx` mirror `editor.background` (each flavor's
- * `base` color).
+ * Monaco themes derived from the docs Shiki registrations, so the playground
+ * matches highlighted code elsewhere on the site. The editor pane backgrounds
+ * in `routes/playground/index.tsx` mirror each theme's `editor.background`.
  */
 export const monacoThemes = {
-	dark: 'catppuccin-mocha',
-	light: 'catppuccin-latte',
+	dark: 'github-dark-high-contrast',
+	light: 'github-light-high-contrast',
 } as const;
 
-monaco.editor.defineTheme(monacoThemes.light, catppuccinTheme(flavors.latte, 'vs'));
-monaco.editor.defineTheme(monacoThemes.dark, catppuccinTheme(flavors.mocha, 'vs-dark'));
+monaco.editor.defineTheme(monacoThemes.light, shikiToMonacoTheme(githubLight, 'vs'));
+monaco.editor.defineTheme(monacoThemes.dark, shikiToMonacoTheme(githubDark, 'vs-dark'));
 
-function catppuccinTheme(
-	flavor: (typeof flavors)[keyof typeof flavors],
+function shikiToMonacoTheme(
+	theme: typeof githubLight,
 	base: 'vs' | 'vs-dark',
 ): monaco.editor.IStandaloneThemeData {
-	const colors = flavor.colors;
-	// Token rule colors are hex digits without the leading `#`.
-	const token = (color: { hex: string }) => color.hex.slice(1);
-	return {
-		base,
-		colors: {
-			'editor.background': colors.base.hex,
-			'editor.foreground': colors.text.hex,
-			'editor.lineHighlightBackground': `${colors.surface0.hex}4d`,
-			'editor.selectionBackground': `${colors.overlay2.hex}40`,
-			'editorBracketMatch.background': `${colors.surface0.hex}80`,
-			'editorBracketMatch.border': colors.surface2.hex,
-			'editorCursor.foreground': colors.rosewater.hex,
-			'editorHoverWidget.background': colors.mantle.hex,
-			'editorLineNumber.activeForeground': colors.lavender.hex,
-			'editorLineNumber.foreground': colors.overlay1.hex,
-			'editorSuggestWidget.selectedBackground': colors.surface0.hex,
-			'editorWidget.background': colors.mantle.hex,
-			'editorWidget.border': colors.surface0.hex,
-			'scrollbarSlider.activeBackground': `${colors.overlay2.hex}66`,
-			'scrollbarSlider.background': `${colors.overlay2.hex}33`,
-			'scrollbarSlider.hoverBackground': `${colors.overlay2.hex}4d`,
-		},
-		inherit: true,
-		rules: [
-			{ foreground: token(colors.text), token: '' },
-			{ fontStyle: 'italic', foreground: token(colors.overlay2), token: 'comment' },
-			{ foreground: token(colors.mauve), token: 'keyword' },
-			{ foreground: token(colors.green), token: 'string' },
-			{ foreground: token(colors.peach), token: 'number' },
-			{ foreground: token(colors.pink), token: 'regexp' },
-			{ foreground: token(colors.sky), token: 'operator' },
-			{ foreground: token(colors.overlay2), token: 'delimiter' },
-			{ foreground: token(colors.yellow), token: 'type.identifier' },
-			{ foreground: token(colors.blue), token: 'tag' },
-			{ foreground: token(colors.yellow), token: 'attribute.name' },
-			{ foreground: token(colors.green), token: 'attribute.value' },
-		],
-	};
+	const themeColors = theme.colors ?? {};
+	const colors: Record<string, string> = {};
+	for (const key of MONACO_COLOR_KEYS) {
+		const color = themeColors[key];
+		if (color) colors[key] = color;
+	}
+
+	const rules: Array<monaco.editor.ITokenThemeRule> = [];
+	const defaultForeground = themeColors['editor.foreground'];
+	if (defaultForeground) {
+		// Token rule colors are hex digits without the leading `#`.
+		rules.push({ foreground: defaultForeground.replace('#', ''), token: '' });
+	}
+	for (const { scope, settings } of theme.tokenColors ?? []) {
+		if (!settings?.foreground) continue;
+		const foreground = settings.foreground.replace('#', '');
+		const scopes = typeof scope === 'string' ? [scope] : (scope ?? []);
+		for (const token of scopes) {
+			rules.push({
+				foreground,
+				token,
+				...(settings.fontStyle ? { fontStyle: settings.fontStyle } : {}),
+			});
+		}
+	}
+
+	return { base, colors, inherit: true, rules };
 }
 
 const { typescriptDefaults } = monaco.typescript;

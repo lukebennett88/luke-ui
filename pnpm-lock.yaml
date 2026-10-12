@@ -176,9 +176,6 @@ catalogs:
     '@capsizecss/unpack':
       specifier: ^4.0.1
       version: 4.0.1
-    '@catppuccin/palette':
-      specifier: ^1.8.0
-      version: 1.8.0
     '@changesets/cli':
       specifier: ^3.0.3
       version: 3.0.3
@@ -444,9 +441,6 @@ importers:
 
   apps/docs:
     dependencies:
-      '@catppuccin/palette':
-        specifier: 'catalog:'
-        version: 1.8.0
       '@hookform/resolvers':
         specifier: 'catalog:'
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv@8.18.0)(react-hook-form@7.89.0(@types/react@19.3.0)(react@19.3.0))(zod@4.6.5)
@@ -1049,9 +1043,6 @@ packages:
   '@capsizecss/unpack@4.0.1':
     resolution: {integrity: sha512-CuNiSqg7+e1cO/GjffyMOm5Tt2jUF9CWHHnvQ/UkqvtkGfHdgwEC0wpmq7fkN3gxwpRnrAN0WzO3vREKmNolMQ==}
     engines: {node: '>=18'}
-
-  '@catppuccin/palette@1.8.0':
-    resolution: {integrity: sha512-qXhwKiLzQomUygUJYB36YAFgs+dET5bIocfkiaFIatQF5Pwc7L112TlF9P8J5Oqs3x3XTjYSucG0ncHXSCuk7Q==}
 
   '@changesets/apply-release-plan@8.1.1':
     resolution: {integrity: sha512-nk2Hbq3M9NeHMdaIRBDvawKrQJzXB9sGyBUE5yWnIKtvdcNCPj75zBekJYr0gTT2ecJH3eFeTrc8eisPImcv0Q==}
@@ -6604,8 +6595,6 @@ snapshots:
   '@capsizecss/unpack@4.0.1':
     dependencies:
       fontkitten: 1.0.3
-
-  '@catppuccin/palette@1.8.0': {}
 
   '@changesets/apply-release-plan@8.1.1':
     dependencies:

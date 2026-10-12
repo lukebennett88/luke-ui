@@ -35,7 +35,6 @@
 		"test": "vp test run --config vitest.config.ts"
 	},
 	"dependencies": {
-		"@catppuccin/palette": "catalog:",
 		"@hookform/resolvers": "catalog:",
 		"@luke-ui/playground-core": "workspace:*",
 		"@luke-ui/react": "workspace:*",
