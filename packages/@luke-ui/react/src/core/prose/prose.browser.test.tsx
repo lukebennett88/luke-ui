@@ -328,6 +328,36 @@ test('scrolls long preformatted lines without widening a narrow grid column', as
 	await expect.poll(() => pre.scrollLeft).toBeGreaterThan(0);
 });
 
+test('scrolls a wide table inside a narrow container', async () => {
+	const { locator, user } = render(
+		<Prose style={{ inlineSize: 160 }}>
+			<button type="button">Before table</button>
+			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable table */}
+			<table tabIndex={0}>
+				<tbody>
+					<tr>
+						<td>{'A long cell that needs more room than the column. '.repeat(3)}</td>
+						<td>Second cell</td>
+					</tr>
+				</tbody>
+			</table>
+		</Prose>,
+	);
+	const root = query(locator.element(), 'div');
+	const table = query(root, 'table');
+
+	expect(table.getBoundingClientRect().right).toBeLessThanOrEqual(
+		root.getBoundingClientRect().right + 1,
+	);
+	expect(table.scrollWidth).toBeGreaterThan(table.clientWidth);
+
+	locator.getByRole('button', { name: 'Before table' }).element().focus();
+	await user.tab();
+	expect(table).toHaveFocus();
+	await user.keyboard('{ArrowRight}');
+	await expect.poll(() => table.scrollLeft).toBeGreaterThan(0);
+});
+
 test('preserves whitespace in multiline pre code', () => {
 	const { locator } = render(
 		<Prose>
@@ -362,7 +392,7 @@ test('styles table headers and body cells', () => {
 	const rowHeader = query(root, 'tbody th');
 	const cell = query(root, 'tbody td');
 
-	expect(query(root, 'table').getBoundingClientRect().width).toBeCloseTo(160, 0);
+	expect(query(root, 'table').getBoundingClientRect().width).toBeLessThan(160);
 	expect(getComputedStyle(columnHeader).verticalAlign).toBe('bottom');
 	expect(getComputedStyle(columnHeader).textAlign).toBe('start');
 	expect(getComputedStyle(rowHeader).verticalAlign).not.toBe('bottom');
@@ -403,7 +433,8 @@ function typeMetrics(element: Element) {
 	};
 }
 
-// Plain markup from a CMS must look like the component. The block size proves the trims match.
+// Plain markup from a CMS must look like the component. Height checks the trimmed block size.
+// Visual coverage protects trim placement.
 for (const level of headingLevels) {
 	test(`gives a plain h${level} the type style of Heading level ${level}`, () => {
 		const Plain = `h${level}` as const;
@@ -594,17 +625,15 @@ for (const { name, node } of proseBoundaries) {
 
 const document = (
 	<Prose>
-		<Heading level={2}>Choosing a spacing scale</Heading>
-		<Text elementType="p">
+		<h1>Choosing a spacing scale</h1>
+		<p>
 			A spacing scale trades range for consistency. Nine steps cover a component library without
 			offering two values a designer cannot tell apart.
-		</Text>
-		<Text elementType="p">
-			Every step below is a token. Reach for the nearest one rather than a raw pixel value.
-		</Text>
+		</p>
+		<p>Every step below is a token. Reach for the nearest one rather than a raw pixel value.</p>
 
-		<Heading level={3}>Picking a step</Heading>
-		<Text elementType="p">Work outwards from the tightest gap the layout needs.</Text>
+		<h2>Picking a step</h2>
+		<p>Work outwards from the tightest gap the layout needs.</p>
 		<ol>
 			<li>Measure the smallest gap in the design.</li>
 			<li>
@@ -617,14 +646,14 @@ const document = (
 			<li>Use that step everywhere the same relationship appears.</li>
 		</ol>
 
-		<Heading level={4}>Rounding in practice</Heading>
+		<h3>Rounding in practice</h3>
 		<ul>
 			<li>
-				<Text elementType="p">A loose item holds more than one paragraph.</Text>
-				<Text elementType="p">The second takes a tighter gap than a document paragraph.</Text>
+				<p>A loose item holds more than one paragraph.</p>
+				<p>The second takes a tighter gap than a document paragraph.</p>
 			</li>
 			<li>
-				<Text elementType="p">Each item keeps the list rhythm.</Text>
+				<p>Each item keeps the list rhythm.</p>
 			</li>
 		</ul>
 		<ol type="1">
@@ -648,7 +677,7 @@ const document = (
 			near it in obstinacy.
 		</Blockquote>
 
-		<Heading level={4}>Reading a token</Heading>
+		<h4>Reading a token</h4>
 		{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable pre */}
 		<pre tabIndex={0}>
 			<code>{'padding-inline: var(--luke-space-sp16);\nmargin-block: 0;'}</code>
@@ -663,9 +692,11 @@ const document = (
 			<thead>
 				<tr>
 					<th scope="col">
-						Step
-						<br />
-						name
+						<p>
+							Step
+							<br />
+							name
+						</p>
 					</th>
 					<th scope="col">Value</th>
 				</tr>
@@ -673,11 +704,15 @@ const document = (
 			<tbody>
 				<tr>
 					<td>
-						<Code>sp8</Code>
-						<br />
-						Small gap
+						<p>
+							<Code>sp8</Code>
+							<br />
+							Small gap
+						</p>
 					</td>
-					<td>8px</td>
+					<td>
+						<p>8px</p>
+					</td>
 				</tr>
 				<tr>
 					<td>
@@ -696,7 +731,7 @@ const document = (
 
 		<hr />
 
-		<Heading level={3}>Terms</Heading>
+		<h5>Terms</h5>
 		<dl>
 			<dt>
 				<Text elementType="span" fontWeight="emphasis">
@@ -716,6 +751,7 @@ const document = (
 			</dd>
 		</dl>
 
+		<h6>Scale specimen</h6>
 		<figure>
 			<img alt="" height={64} src={swatch} width={320} />
 			<figcaption>

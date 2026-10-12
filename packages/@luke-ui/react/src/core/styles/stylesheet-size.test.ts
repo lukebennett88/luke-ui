@@ -2,7 +2,7 @@ import { gzipSync } from 'node:zlib';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 
-// Measured at 13123 gzip bytes (level 9). The ceiling keeps about 200 bytes of headroom for the
+// Measured at 13129 gzip bytes (level 9). The ceiling keeps about 200 bytes of headroom for the
 // remaining component migrations. If this fails, investigate what grew; don't raise the ceiling
 // without a reason.
 const maximumGzipBytes = 13_330;

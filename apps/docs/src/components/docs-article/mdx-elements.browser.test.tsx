@@ -1,5 +1,6 @@
 import '../../styles/app.css';
 import '@luke-ui/theme-tactile/stylesheet.css';
+import { Prose } from '@luke-ui/react/prose';
 import { Provider } from '@luke-ui/react/provider';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import {
@@ -258,7 +259,7 @@ test('renders a heading without an id as plain text', async () => {
 test('names a wide table as a focusable region once it overflows', async () => {
 	await page.viewport(400, 800);
 	await renderMdx(
-		<div style={{ inlineSize: '12rem' }}>
+		<Prose style={{ inlineSize: '12rem' }}>
 			<MdxTable>
 				<tbody>
 					<tr>
@@ -266,12 +267,17 @@ test('names a wide table as a focusable region once it overflows', async () => {
 					</tr>
 				</tbody>
 			</MdxTable>
-		</div>,
+		</Prose>,
 	);
 
 	const region = page.getByRole('region', { name: 'Scrollable table' });
 	await expect.element(region).toBeVisible();
 	expect(region.element().tabIndex).toBe(0);
+	// Prose makes a plain table scroll itself. The docs table leaves that to its ScrollFade.
+	const scroller = region.element();
+	const table = scroller.querySelector('table')!;
+	expect(scroller.scrollWidth).toBeGreaterThan(scroller.clientWidth);
+	expect(table.scrollWidth).toBe(table.clientWidth);
 });
 
 test('leaves fenced code as plain code and styles inline code', async () => {

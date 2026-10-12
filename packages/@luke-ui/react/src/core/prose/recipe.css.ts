@@ -108,10 +108,16 @@ proseStyle('hr', {
 	border: 'none',
 	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
 });
+// A table scrolls inside its own box only as a block, so a narrow table takes its content width
+// instead of filling the line. `fit-content` rather than `max-content`, so a table of wrapping text
+// does not widen an auto-sized grid or flex track. CMS markup can't wrap a table in a scroller.
 proseStyle('table', {
 	borderCollapse: 'collapse',
 	borderSpacing: 0,
-	inlineSize: '100%',
+	display: 'block',
+	inlineSize: 'fit-content',
+	maxInlineSize: '100%',
+	overflowX: 'auto',
 });
 proseStyle('th, td', { paddingBlock: vars.space.sp8, paddingInline: vars.space.sp12 });
 proseStyle('caption, th', { textAlign: 'start' });

@@ -117,7 +117,11 @@ export const tableScroll = style({
 export const table = style({
 	'@layer': {
 		components: {
+			// Prose makes plain tables scroll themselves. This one scrolls inside its ScrollFade.
+			display: 'table',
 			inlineSize: '100%',
+			maxInlineSize: 'none',
+			overflowX: 'visible',
 		},
 	},
 });

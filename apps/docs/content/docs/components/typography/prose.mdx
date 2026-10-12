@@ -28,13 +28,11 @@ removes list markers, such as Tailwind Preflight.
 
 ## Wide content
 
-Images and videos shrink to fit the content width. A long line in a code block scrolls inside the
-`pre`. Set `tabIndex={0}` on the `pre` so someone using a keyboard can scroll it.
+Images and videos shrink to fit the content width. A code block or table wider than the content
+scrolls sideways inside its own box. A table that fits takes the width of its content.
 
-A table grows past the content width when its columns need more room. Wrap it in
-[Scroll Fade](/components/layout/scroll-fade), which scrolls it in place and makes it a focusable,
-named region while it overflows. `Prose` spacing does not reach the wrapper, so set
-`marginBlockStart="sp40"` on it to match the gap before a table.
+When you control the markup, set `tabIndex={0}` on a `pre` or `table` so someone using a keyboard
+can scroll it in every browser.
 
 <ExampleBlock src="prose/wide-content" title="Prose: Wide content" />
 
