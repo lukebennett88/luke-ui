@@ -120,9 +120,9 @@ function Playground() {
 				orientation={isDesktop ? 'horizontal' : 'vertical'}
 				resizeTargetMinimumSize={RESIZE_TARGET_MINIMUM_SIZE}
 			>
-				{/* Pane backgrounds match the Catppuccin Latte/Mocha `editor.background` values in monaco-setup.ts. */}
+				{/* Pane backgrounds match the GitHub high-contrast light/dark `editor.background` values in monaco-setup.ts. */}
 				<Panel
-					className="min-h-0 bg-[#eff1f5] dark:bg-[#1e1e2e]"
+					className="min-h-0 bg-[#ffffff] dark:bg-[#0a0c10]"
 					defaultSize="50%"
 					minSize={160}
 					style={{ overflow: 'hidden' }}

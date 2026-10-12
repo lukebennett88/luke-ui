@@ -22,7 +22,7 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
 			{toSkeletonLines(code).map((line, index) => (
 				<div aria-hidden className="flex h-5 items-center" data-line key={index}>
 					<span
-						className="w-[3ch] shrink-0 text-right text-[#8c8fa1] dark:text-[#7f849c]"
+						className="w-[3ch] shrink-0 text-right text-[#88929d] dark:text-[#9ea7b3]"
 						data-line-number
 					>
 						{index + 1}

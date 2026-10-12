@@ -2,8 +2,8 @@ import { Button } from '@luke-ui/react/button';
 import type { OnMount } from '@monaco-editor/react';
 import Editor from '@monaco-editor/react';
 import type * as Monaco from 'monaco-editor';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { loadPlaygroundTypes, monacoThemes } from '../../lib/monaco-setup';
+import { use, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { ensurePlaygroundMonaco, loadPlaygroundTypes, monacoThemes } from '../../lib/monaco-setup';
 import { EditorSkeleton } from './editor-skeleton';
 import {
 	registerFormatDocumentKeybinding,
@@ -23,6 +23,8 @@ export default function PlaygroundEditor({
 	onChange,
 	showLoadingPill,
 }: PlaygroundEditorProps) {
+	// Suspends (showing the skeleton) until Monaco's themes and tokenizer exist.
+	use(ensurePlaygroundMonaco());
 	const theme = useSiteTheme();
 	const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
 	const [isFormatting, setIsFormatting] = useState(false);
