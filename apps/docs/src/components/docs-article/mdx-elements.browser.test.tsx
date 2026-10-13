@@ -35,6 +35,7 @@ afterEach(async () => {
 	container = undefined;
 	root = undefined;
 	vi.restoreAllMocks();
+	vi.useRealTimers();
 	await page.viewport(1024, 800);
 });
 
@@ -160,26 +161,28 @@ test('renders a link without an href as a placeholder anchor that keeps its attr
 });
 
 test('links a heading to its own anchor and copies the full URL with the hash', async () => {
+	// Fake only the revert timer: a real 1.5s timeout can fire before `expect.element` starts
+	// polling on a slow runner, so "Copied" is never observed.
+	vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 	await renderMdx(<H2 id="usage">Usage</H2>);
 
 	await expect.element(page.getByRole('link', { name: 'Usage' })).toHaveAttribute('href', '#usage');
 
-	// The copied state arrives after the clipboard promise settles, so keep `act` open past it.
 	await act(async () => {
 		await userEvent.click(page.getByRole('button', { name: 'Copy Anchor Link' }));
-		await new Promise((resolve) => setTimeout(resolve, 50));
 	});
 	const copiedUrl = new URL(writeText.mock.calls[0]?.[0] ?? '');
 	expect(copiedUrl.hash).toBe('#usage');
 	expect(copiedUrl.pathname).toBe(window.location.pathname);
 
-	const copied = page.getByRole('button', { name: 'Copied Anchor Link' });
-	await expect.element(copied).toBeVisible();
+	await expect.element(page.getByRole('button', { name: 'Copied Anchor Link' })).toBeVisible();
 	await expect.element(page.getByRole('status')).toHaveTextContent('Copied');
-	await expect
-		.element(page.getByRole('button', { name: 'Copy Anchor Link' }), { timeout: 3000 })
-		.toBeVisible();
+
+	await act(async () => {
+		vi.advanceTimersByTime(1500);
+	});
+	await expect.element(page.getByRole('button', { name: 'Copy Anchor Link' })).toBeVisible();
 });
 
 for (const [level, Heading] of [
@@ -199,9 +202,11 @@ for (const [level, Heading] of [
 		await userEvent.tab();
 		await expect.element(button).toHaveFocus();
 
+		// Fake only the revert timer after focus: a real 1.5s timeout can fire before
+		// `expect.element` starts polling on a slow runner, so "Copied" is never observed.
+		vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 		await act(async () => {
 			await userEvent.keyboard('{Enter}');
-			await new Promise((resolve) => setTimeout(resolve, 50));
 		});
 		await expect.element(page.getByRole('status')).toHaveTextContent('Copied');
 		await expect
