@@ -211,7 +211,16 @@ for (const appearance of visualAppearances) {
 test('optional-label', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(
-			<TextInputField label="Middle name" necessityIndicator="optional-label" />,
+			<Stack>
+				<TextInputField label="Middle name" necessityIndicator="optional-label" />
+				<TextInputField isDisabled label="Middle name" necessityIndicator="optional-label" />
+				<TextInputField
+					isDisabled
+					isRequired
+					label="Family name"
+					necessityIndicator="required-label"
+				/>
+			</Stack>,
 			{ appearance },
 		);
 		await captureVisualAppearance(locator, 'text-input-field/optional-label', appearance);

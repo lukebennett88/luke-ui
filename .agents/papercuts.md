@@ -81,3 +81,14 @@ evidence shows it does not help. Silence in this log is not evidence.
   docs/TESTING.md, "Component tests".
 - Problem: The assertion compares different font-family serializations, and the browser test fails
   on Chromium's returned value.
+
+## Code review recommends appearance assertions prohibited by testing guidance
+
+- Seen: 2026-10-13 (#802). Review of the Field necessity-marker colour change recommended
+  computed-style colour assertions for disabled textual markers. The corrected recommendation is to
+  extend existing visual captures instead.
+- Where: PR #802 review. Governing rule: docs/TESTING.md, "Component tests" (computed styles only
+  when layout is the contract); `.agents/skills/write-tests/SKILL.md` Reviewing.
+- Problem: Review still proposed a prohibited appearance assertion even though TESTING.md forbids
+  testing computed appearance unless layout is the contract, and the write-tests skill requires
+  reviewers to consult that guidance.

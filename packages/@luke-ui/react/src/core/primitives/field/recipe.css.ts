@@ -108,21 +108,27 @@ const fieldConfig = {
 	},
 	variants: {
 		necessityIndicator: {
-			'required-asterisk': {
-				necessityMarker: {
-					color: vars.color.foreground.danger.rest,
-				},
-			},
+			'required-asterisk': {},
 			'required-label': {
 				necessityMarker: {
 					color: vars.color.text.secondary,
 					fontWeight: vars.font.weight.body,
+					selectors: {
+						[`${dataDisabledSelector} &`]: {
+							color: 'inherit',
+						},
+					},
 				},
 			},
 			'optional-label': {
 				necessityMarker: {
 					color: vars.color.text.secondary,
 					fontWeight: vars.font.weight.body,
+					selectors: {
+						[`${dataDisabledSelector} &`]: {
+							color: 'inherit',
+						},
+					},
 				},
 			},
 		},
