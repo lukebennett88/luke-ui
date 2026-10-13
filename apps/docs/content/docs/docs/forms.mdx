@@ -36,10 +36,17 @@ an error message appears.
 Set `isRequired` when someone must complete a field. The browser blocks submission until the field
 has a value.
 
-Set `necessityIndicator="label"` to append “(required)” to a field label. The default indicator is
-an icon. A control without a visible label shows no indicator.
+Choose how a label marks that state with `necessityIndicator`:
 
-Read [Required fields](/components/forms/text-input-field#required-fields) for both indicators.
+- `'required-asterisk'` adds a visual `*` after a required label. Assistive technology reads
+  required state from the control, not from the marker.
+- `'required-label'` adds visible "(required)" after a required label. Assistive technology still
+  reads required state from the control.
+- `'optional-label'` adds "(optional)" after a definitely optional label. That text is part of the
+  accessible name.
+
+A field with only `aria-label` or `aria-labelledby` shows no marker and gets no "(optional)" suffix.
+When `necessityIndicator` is omitted, the field uses `'required-asterisk'`.
 
 ## Controlled and uncontrolled fields
 

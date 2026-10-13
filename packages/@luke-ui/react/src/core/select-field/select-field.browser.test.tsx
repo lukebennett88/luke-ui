@@ -1,10 +1,13 @@
 import { Button } from '@luke-ui/react/button';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
+import type { ReactElement } from 'react';
 import { act, createRef, useState } from 'react';
 import type { Key } from 'react-aria-components/Select';
+import { SelectContext } from 'react-aria-components/Select';
 import { expect, onTestFinished, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { expectAccessibleNameWords } from '../test-utils/expect-accessible-name-words.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
@@ -27,11 +30,30 @@ const themeItems: Array<ThemeItem> = [
 ];
 
 const renderThemeItem = (item: ThemeItem) => <SelectItem>{item.label}</SelectItem>;
+const VISIBLE_LABEL_PATTERN = /^Theme/;
 
 function trigger(name: RegExp | string): HTMLButtonElement {
 	const element = page.getByRole('button', { name }).element();
 	if (!(element instanceof HTMLButtonElement)) throw new Error(`Expected a button named ${name}.`);
 	return element;
+}
+
+/** The label that names a trigger, outside the trigger itself. */
+function labelFor(element: HTMLButtonElement): HTMLElement {
+	const label = element
+		.getAttribute('aria-labelledby')
+		?.split(' ')
+		.map((id) => document.getElementById(id))
+		.find((candidate) => candidate != null && !element.contains(candidate));
+	if (label == null) throw new Error('Expected a label for the trigger.');
+	return label;
+}
+
+/** The hidden native `<select>` React Aria renders in a select root for form submission. */
+function nativeSelect(rootId: string): HTMLSelectElement {
+	const select = document.getElementById(rootId)?.querySelector('select');
+	if (select == null) throw new Error(`Expected a native select in "${rootId}".`);
+	return select;
 }
 
 function SelectFieldScene() {
@@ -94,7 +116,7 @@ function SelectFieldScene() {
 				items={themeItems}
 				label="Required with a label"
 				name="required-label"
-				necessityIndicator="label"
+				necessityIndicator="required-label"
 				placeholder="Choose a theme"
 			>
 				{renderThemeItem}
@@ -148,31 +170,237 @@ test('SelectField adds aria-describedby to its own description', () => {
 	expect(getDescribedText(trigger(/Without one/))).toBe('External hint');
 });
 
-// The marker follows the last word of the label, so the accessible name has no space before it.
-test('SelectField marks a required field with an icon or a label', () => {
+const indicators = ['required-asterisk', 'required-label', 'optional-label'] as const;
+
+type RequiredNameCase = {
+	/** The field, with `isRequired` and a trigger named after "Theme". */
+	field: ReactElement;
+	/** Words the trigger's name must contain, in any order. */
+	expectedName: string;
+	/** An id from React Aria or the consumer that the trigger's `aria-labelledby` must keep. */
+	keptId: (element: HTMLButtonElement) => string;
+	title: string;
+};
+
+const visibleLabelId = () => page.getByText(VISIBLE_LABEL_PATTERN).element().id;
+
+const requiredNameCases: Array<RequiredNameCase> = [
+	...indicators.map((necessityIndicator) => ({
+		expectedName: 'Choose a theme Theme (required)',
+		field: (
+			<SelectField
+				isRequired
+				items={themeItems}
+				label="Theme"
+				necessityIndicator={necessityIndicator}
+				placeholder="Choose a theme"
+			>
+				{renderThemeItem}
+			</SelectField>
+		),
+		keptId: visibleLabelId,
+		title: `a visible label with necessityIndicator="${necessityIndicator}"`,
+	})),
+	{
+		expectedName: 'Choose a theme Theme (required)',
+		field: (
+			<SelectField aria-label="Theme" isRequired items={themeItems} placeholder="Choose a theme">
+				{renderThemeItem}
+			</SelectField>
+		),
+		keptId: (element) => element.id,
+		title: 'aria-label',
+	},
+	{
+		expectedName: 'Choose a theme Theme (required)',
+		field: (
+			<>
+				<span id="consumer-label">Theme</span>
+				<SelectField
+					aria-labelledby="consumer-label"
+					isRequired
+					items={themeItems}
+					placeholder="Choose a theme"
+				>
+					{renderThemeItem}
+				</SelectField>
+			</>
+		),
+		keptId: () => 'consumer-label',
+		title: 'aria-labelledby',
+	},
+	{
+		expectedName: 'Light Theme (required)',
+		field: (
+			<SelectField defaultValue="light" isRequired items={themeItems} label="Theme">
+				{renderThemeItem}
+			</SelectField>
+		),
+		keptId: visibleLabelId,
+		title: 'a visible label and a selected value',
+	},
+];
+
+for (const { expectedName, field, keptId, title } of requiredNameCases) {
+	test(`a required SelectField with ${title} adds "(required)" to the trigger's name once`, async () => {
+		render(field);
+		const element = trigger(/Theme/);
+		const ids = element.getAttribute('aria-labelledby')?.split(' ') ?? [];
+
+		await expectAccessibleNameWords(element, expectedName);
+		expect(ids).toContain(keptId(element));
+		expect(document.getElementById(ids.at(-1) ?? '')?.textContent).toBe('(required)');
+	});
+}
+
+test('an optional SelectField has no required cue in its name', async () => {
+	render(
+		<SelectField items={themeItems} label="Theme" placeholder="Choose a theme">
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	await expectAccessibleNameWords(trigger(/Theme/), 'Choose a theme Theme');
+});
+
+// Required markers are hidden from assistive technology; the trigger's cue supplies "(required)".
+test('SelectField marks a required field with its necessityIndicator', async () => {
 	render(
 		<>
-			<SelectField defaultValue="light" isRequired items={themeItems} label="Icon field">
+			<SelectField
+				defaultValue="light"
+				id="asterisk-root"
+				isRequired
+				items={themeItems}
+				label="Asterisk field"
+			>
 				{renderThemeItem}
 			</SelectField>
 			<SelectField
 				defaultValue="light"
+				id="text-root"
 				isRequired
 				items={themeItems}
 				label="Text field"
-				necessityIndicator="label"
+				necessityIndicator="required-label"
 			>
 				{renderThemeItem}
 			</SelectField>
-			<SelectField defaultValue="light" items={themeItems} label="Optional field">
+			<SelectField
+				defaultValue="light"
+				id="optional-root"
+				items={themeItems}
+				label="Optional field"
+			>
 				{renderThemeItem}
 			</SelectField>
 		</>,
 	);
 
-	expect(trigger(/Icon field/)).toHaveAccessibleName('Light Icon field*');
-	expect(trigger(/Text field/)).toHaveAccessibleName('Light Text field(required)');
-	expect(trigger(/Optional field/)).toHaveAccessibleName('Light Optional field');
+	// The trigger is a button, so the hidden native select carries the required state.
+	expect(nativeSelect('asterisk-root')).toBeRequired();
+	expect(labelFor(trigger(/Asterisk field/)).textContent).toBe('Asterisk field\u00A0*');
+	await expectAccessibleNameWords(trigger(/Asterisk field/), 'Light Asterisk field (required)');
+	expect(nativeSelect('text-root')).toBeRequired();
+	expect(labelFor(trigger(/Text field/)).textContent).toBe('Text field\u00A0(required)');
+	await expectAccessibleNameWords(trigger(/Text field/), 'Light Text field (required)');
+	expect(nativeSelect('optional-root')).not.toBeRequired();
+	expect(labelFor(trigger(/Optional field/)).textContent).toBe('Optional field');
+	await expectAccessibleNameWords(trigger(/Optional field/), 'Light Optional field');
+});
+
+test('an optional SelectField with optional-label includes "(optional)" in its name once', async () => {
+	render(
+		<SelectField
+			defaultValue="light"
+			items={themeItems}
+			label="Theme"
+			necessityIndicator="optional-label"
+		>
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	expect(labelFor(trigger(/Theme/)).textContent).toBe('Theme\u00A0(optional)');
+	await expectAccessibleNameWords(trigger(/Theme/), 'Light Theme (optional)');
+});
+
+test('an aria-label SelectField with optional-label has no "(optional)" in its name', async () => {
+	render(
+		<SelectField
+			aria-label="Theme"
+			defaultValue="light"
+			items={themeItems}
+			necessityIndicator="optional-label"
+		>
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	await expectAccessibleNameWords(trigger(/Theme/), 'Light Theme');
+});
+
+test('an aria-labelledby SelectField with optional-label has no "(optional)" in its name', async () => {
+	render(
+		<>
+			<span id="theme-heading">Theme</span>
+			<SelectField
+				aria-labelledby="theme-heading"
+				defaultValue="light"
+				items={themeItems}
+				necessityIndicator="optional-label"
+			>
+				{renderThemeItem}
+			</SelectField>
+		</>,
+	);
+
+	await expectAccessibleNameWords(trigger(/Theme/), 'Light Theme');
+});
+
+const requiredSelectContext = { isRequired: true };
+
+test('a SelectField without isRequired keeps isRequired from React Aria context', async () => {
+	render(
+		<SelectContext.Provider value={requiredSelectContext}>
+			<SelectField
+				id="context-required"
+				items={themeItems}
+				label="Theme"
+				placeholder="Choose a theme"
+			>
+				{renderThemeItem}
+			</SelectField>
+		</SelectContext.Provider>,
+	);
+	const element = trigger(/Theme/);
+	const ids = element.getAttribute('aria-labelledby')?.split(' ') ?? [];
+
+	expect(nativeSelect('context-required')).toBeRequired();
+	expect(document.getElementById(ids.at(-1) ?? '')?.textContent).toBe('(required)');
+	await expectAccessibleNameWords(element, 'Choose a theme Theme (required)');
+});
+
+test('SelectContext isRequired suppresses optional-label on the visible label', () => {
+	render(
+		<SelectContext.Provider value={requiredSelectContext}>
+			<SelectField
+				defaultValue="light"
+				id="context-optional-label"
+				items={themeItems}
+				label="Theme"
+				necessityIndicator="optional-label"
+			>
+				{renderThemeItem}
+			</SelectField>
+		</SelectContext.Provider>,
+	);
+	const element = trigger(/Theme/);
+	const ids = element.getAttribute('aria-labelledby')?.split(' ') ?? [];
+
+	expect(nativeSelect('context-optional-label')).toBeRequired();
+	expect(labelFor(element).textContent).toBe('Theme');
+	expect(document.getElementById(ids.at(-1) ?? '')?.textContent).toBe('(required)');
 });
 
 test('an errorMessage marks the field invalid and describes the trigger with the error', () => {

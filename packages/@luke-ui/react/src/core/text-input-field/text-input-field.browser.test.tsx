@@ -1,9 +1,11 @@
 import { Icon } from '@luke-ui/react/icon';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { createRef } from 'react';
+import { TextFieldContext } from 'react-aria-components/TextField';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { expectAccessibleNameWords } from '../test-utils/expect-accessible-name-words.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
 import { measureFieldError } from '../test-utils/measure-field-error.js';
 import { render, visualAppearances } from '../test-utils/render.js';
@@ -96,6 +98,12 @@ function TextInputFieldScene() {
 	);
 }
 
+function textbox(name: string): HTMLInputElement {
+	const element = page.getByRole('textbox', { name }).element();
+	if (!(element instanceof HTMLInputElement)) throw new Error(`Expected an input "${name}".`);
+	return element;
+}
+
 // Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
 test('TextInputField resolves object and callback inputRef to the input', () => {
 	const inputRef = createRef<HTMLInputElement>();
@@ -139,8 +147,8 @@ test('a required field turns invalid only after a submit fails validation', asyn
 			<button type="submit">Submit</button>
 		</form>,
 	);
-	const email = page.getByRole('textbox', { name: 'Email*' }).element();
-	const username = page.getByRole('textbox', { name: 'Username*' }).element();
+	const email = page.getByRole('textbox', { name: 'Email' }).element();
+	const username = page.getByRole('textbox', { name: 'Username' }).element();
 
 	expect(email).not.toHaveAttribute('aria-invalid');
 	expect(username).not.toHaveAttribute('aria-invalid');
@@ -150,6 +158,124 @@ test('a required field turns invalid only after a submit fails validation', asyn
 	await expect.poll(() => email.getAttribute('aria-invalid')).toBe('true');
 	await expect.poll(() => username.getAttribute('aria-invalid')).toBe('true');
 	await expect.poll(() => getDescribedText(username).length).toBeGreaterThan(0);
+});
+
+// Required markers are hidden from assistive technology, so the name does not include them.
+test('a required TextInputField marks its label with its necessityIndicator', () => {
+	render(
+		<>
+			<TextInputField isRequired label="Required asterisk" />
+			<TextInputField isRequired label="Required words" necessityIndicator="required-label" />
+			<TextInputField label="Optional" />
+		</>,
+	);
+	const asterisk = textbox('Required asterisk');
+	const words = textbox('Required words');
+	const optional = textbox('Optional');
+
+	expect(asterisk).toBeRequired();
+	expect(asterisk.labels?.[0]?.textContent).toBe('Required asterisk\u00A0*');
+	expect(words).toBeRequired();
+	expect(words.labels?.[0]?.textContent).toBe('Required words\u00A0(required)');
+	expect(optional).not.toBeRequired();
+	expect(optional.labels?.[0]?.textContent).toBe('Optional');
+});
+
+test('an optional TextInputField with optional-label includes "(optional)" in its name', async () => {
+	render(<TextInputField label="Middle name" necessityIndicator="optional-label" />);
+
+	const input = textbox('Middle name (optional)');
+	expect(input).not.toBeRequired();
+	expect(input.labels?.[0]?.textContent).toBe('Middle name\u00A0(optional)');
+	await expectAccessibleNameWords(input, 'Middle name (optional)');
+});
+
+test('an aria-label TextInputField with optional-label has no "(optional)" in its name', async () => {
+	render(<TextInputField aria-label="Middle name" necessityIndicator="optional-label" />);
+
+	const input = textbox('Middle name');
+	expect(input.labels).toHaveLength(0);
+	await expectAccessibleNameWords(input, 'Middle name');
+});
+
+for (const appearance of visualAppearances) {
+	test(`an optional-label TextInputField has no axe violations in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { container } = render(
+			<TextInputField label="Middle name" necessityIndicator="optional-label" />,
+			{ appearance },
+		);
+		await expectNoAxeViolations(container);
+	});
+}
+
+test('optional-label', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<TextInputField label="Middle name" necessityIndicator="optional-label" />,
+			{ appearance },
+		);
+		await captureVisualAppearance(locator, 'text-input-field/optional-label', appearance);
+	}
+});
+
+const requiredTextFieldContext = { isRequired: true };
+
+test('a TextInputField without isRequired keeps isRequired from React Aria context', () => {
+	render(
+		<TextFieldContext.Provider value={requiredTextFieldContext}>
+			<TextInputField label="Email" />
+		</TextFieldContext.Provider>,
+	);
+
+	expect(textbox('Email')).toBeRequired();
+});
+
+// RAC mergeProps keeps context `isRequired` when the root omits the prop; FieldStateContext must
+// match so optional-label does not show "(optional)" on a required control.
+for (const { expectedLabel, necessityIndicator, title } of [
+	{
+		expectedLabel: 'Email\u00A0*',
+		necessityIndicator: undefined,
+		title: 'default required-asterisk',
+	},
+	{
+		expectedLabel: 'Email\u00A0*',
+		necessityIndicator: 'required-asterisk' as const,
+		title: 'explicit required-asterisk',
+	},
+	{
+		expectedLabel: 'Email',
+		necessityIndicator: 'optional-label' as const,
+		title: 'optional-label',
+	},
+]) {
+	test(`TextFieldContext isRequired drives the ${title} marker`, () => {
+		render(
+			<TextFieldContext.Provider value={requiredTextFieldContext}>
+				<TextInputField
+					label="Email"
+					{...(necessityIndicator == null ? {} : { necessityIndicator })}
+				/>
+			</TextFieldContext.Provider>,
+		);
+		const input = textbox('Email');
+
+		expect(input).toBeRequired();
+		expect(input.labels?.[0]?.textContent).toBe(expectedLabel);
+	});
+}
+
+test('an aria-labelledby TextInputField with optional-label has no "(optional)" in its name', async () => {
+	render(
+		<>
+			<span id="middle-name-heading">Middle name</span>
+			<TextInputField aria-labelledby="middle-name-heading" necessityIndicator="optional-label" />
+		</>,
+	);
+
+	const input = textbox('Middle name');
+	expect(input.labels).toHaveLength(0);
+	await expectAccessibleNameWords(input, 'Middle name');
 });
 
 test('an errorMessage marks the field invalid, describes it, and renders its markup', () => {

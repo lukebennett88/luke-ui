@@ -47,6 +47,12 @@ const wrappingErrorMessage =
 
 const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</ComboboxItem>;
 
+function combobox(name: string): HTMLInputElement {
+	const element = page.getByRole('combobox', { name }).element();
+	if (!(element instanceof HTMLInputElement)) throw new Error(`Expected a combobox "${name}".`);
+	return element;
+}
+
 // Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
 test('ComboboxField resolves object and callback inputRefs, submits its value, and fires onBlur', () => {
 	const inputRef = createRef<HTMLInputElement>();
@@ -319,6 +325,38 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 	await userEvent.click(page.getByRole('option', { name: 'Canada' }));
 
 	await expect.poll(() => new FormData(form).get('country')).toBe('ca');
+});
+
+// Required markers are hidden from assistive technology, so the name does not include them.
+test('a required ComboboxField marks its label with its necessityIndicator', () => {
+	render(
+		<>
+			<ComboboxField defaultItems={countryItems} isRequired label="Required asterisk">
+				{renderCountryItem}
+			</ComboboxField>
+			<ComboboxField
+				defaultItems={countryItems}
+				isRequired
+				label="Required words"
+				necessityIndicator="required-label"
+			>
+				{renderCountryItem}
+			</ComboboxField>
+			<ComboboxField defaultItems={countryItems} label="Optional">
+				{renderCountryItem}
+			</ComboboxField>
+		</>,
+	);
+	const asterisk = combobox('Required asterisk');
+	const words = combobox('Required words');
+	const optional = combobox('Optional');
+
+	expect(asterisk).toBeRequired();
+	expect(asterisk.labels?.[0]?.textContent).toBe('Required asterisk\u00A0*');
+	expect(words).toBeRequired();
+	expect(words.labels?.[0]?.textContent).toBe('Required words\u00A0(required)');
+	expect(optional).not.toBeRequired();
+	expect(optional.labels?.[0]?.textContent).toBe('Optional');
 });
 
 test('an unlabeled ComboboxField exposes aria-label on the combobox', () => {

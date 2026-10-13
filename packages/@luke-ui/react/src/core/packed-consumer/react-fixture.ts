@@ -85,6 +85,7 @@ import { Button } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Icon } from '@luke-ui/react/icon';
 import { Provider } from '@luke-ui/react/provider';
+import { SelectField, SelectItem } from '@luke-ui/react/select-field';
 import spritesheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { SwitchField } from '@luke-ui/react/switch-field';
 import { TextInputField } from '@luke-ui/react/text-input-field';
@@ -106,6 +107,12 @@ export function App({ onHydrated }) {
 			h(TextInputField, { label: 'Name' }),
 			h(CheckboxField, { label: 'Example checkbox' }),
 			h(SwitchField, { label: 'Example switch' }),
+			h(
+				SelectField,
+				{ isRequired: true, label: 'Country' },
+				h(SelectItem, { id: 'au' }, 'Australia'),
+				h(SelectItem, { id: 'nz' }, 'New Zealand'),
+			),
 			h(Button, null, 'Save'),
 		),
 	);

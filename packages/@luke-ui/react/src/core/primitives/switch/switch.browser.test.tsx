@@ -170,8 +170,31 @@ test('SwitchLabel draws no required marker', () => {
 			<Parts label="Required" />
 		</SwitchRoot>,
 	);
+	const input = toggle('Required');
 
-	expect(toggle('Required')).toHaveAccessibleName('Required');
+	expect(input).toBeRequired();
+	expect(input.closest('label')?.textContent).toBe('Required');
+});
+
+// The marker is hidden from assistive technology, so the label's text shows it and the name does not.
+test('a FieldLabel marks a required SwitchRoot', () => {
+	render(
+		<>
+			<SwitchRoot isRequired>
+				<FieldLabel data-testid="required-label">Required</FieldLabel>
+				<Bare />
+			</SwitchRoot>
+			<SwitchRoot>
+				<FieldLabel data-testid="optional-label">Optional</FieldLabel>
+				<Bare />
+			</SwitchRoot>
+		</>,
+	);
+
+	expect(toggle('Required')).toBeRequired();
+	expect(page.getByTestId('required-label').element().textContent).toBe('Required\u00A0*');
+	expect(toggle('Optional')).not.toBeRequired();
+	expect(page.getByTestId('optional-label').element().textContent).toBe('Optional');
 });
 
 test('a composed switch primitive has no axe violations', async () => {

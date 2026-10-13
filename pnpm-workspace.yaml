@@ -74,6 +74,7 @@ catalog:
   '@vitest/ui': 5.0.3
   axe-core: ^4.14.0
   csstype: ^3.2.3
+  dom-accessibility-api: ^0.7.1
   eslint-plugin-react-hooks: ^7.1.1
   fumadocs-core: ^16.16.2
   fumadocs-mdx: ^15.4.6

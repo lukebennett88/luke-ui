@@ -1,6 +1,7 @@
 import { mergeRefs } from '@react-aria/utils';
 import type { ComponentProps, JSX, ReactNode, Ref } from 'react';
-import { createContext, use } from 'react';
+import { createContext, use, useId } from 'react';
+import { ButtonContext } from 'react-aria-components/Button';
 import { PopoverContext } from 'react-aria-components/Popover';
 import type {
 	Key,
@@ -15,12 +16,14 @@ import {
 	ListBox as RacListBox,
 	Popover as RacPopover,
 	Select as RacSelect,
+	SelectContext,
 	SelectStateContext as RacSelectStateContext,
 	SelectValue as RacSelectValue,
 } from 'react-aria-components/Select';
 import { TextContext as RacTextContext } from 'react-aria-components/Text';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
+import { cx } from '../../../shared/utils/utils.js';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import { copyScopeColorMode } from '../../overlays/scope-color-mode.js';
@@ -30,6 +33,7 @@ import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxItemProps } from '../combobox/item.js';
 import { ComboboxItem } from '../combobox/item.js';
 import { comboboxRecipe } from '../combobox/styles.css.js';
+import { FieldStateContext } from '../field/label.js';
 import { rootIdProps } from '../root-id.js';
 import type { SelectSize } from './styles.css.js';
 import { selectRecipe } from './styles.css.js';
@@ -175,17 +179,23 @@ export type SelectItemProps<T extends object> = Prettify<
  * `id`, `className`, and `ref` target the root element. `triggerId` targets the trigger.
  */
 export function SelectRoot(props: SelectRootProps): JSX.Element {
-	const { className, id, size = 'medium', triggerId, ...selectProps } = props;
+	const { className, id, isRequired, size = 'medium', triggerId, ...selectProps } = props;
+	const selectContext = useSlottedContext(SelectContext, props.slot);
+	const resolvedIsRequired = isRequired ?? selectContext?.isRequired ?? false;
+	const fieldState = { isRequired: resolvedIsRequired };
 
 	return (
 		<SelectSizeContext.Provider value={size}>
-			<RacSelect
-				{...selectProps}
-				{...rootIdProps(id, triggerId)}
-				className={composeRenderProps(className, (renderedClassName) => {
-					return selectRecipe().root({ className: renderedClassName });
-				})}
-			/>
+			<FieldStateContext.Provider value={fieldState}>
+				<RacSelect
+					{...selectProps}
+					{...rootIdProps(id, triggerId)}
+					className={composeRenderProps(className, (renderedClassName) => {
+						return selectRecipe().root({ className: renderedClassName });
+					})}
+					isRequired={isRequired}
+				/>
+			</FieldStateContext.Provider>
 		</SelectSizeContext.Provider>
 	);
 }
@@ -193,10 +203,26 @@ export function SelectRoot(props: SelectRootProps): JSX.Element {
 /**
  * The button that opens the select and draws its control chrome. While the root is invalid it takes
  * the danger border. `FieldError` carries the error icon.
+ *
+ * When the root is required, it adds hidden `(required)` text to the trigger's accessible name.
  */
 export function SelectTrigger(props: SelectTriggerProps): JSX.Element {
 	const { children, className, ...buttonProps } = props;
 	const size = use(SelectSizeContext) ?? 'medium';
+	const isRequired = use(FieldStateContext)?.isRequired ?? false;
+	const cueId = useId();
+	const buttonContext = useSlottedContext(ButtonContext, buttonProps.slot);
+
+	// React Aria merges a local `aria-labelledby` over the one it resolves for the trigger, so
+	// rebuild the full list with the cue on the end.
+	const requiredWiring = isRequired
+		? {
+				'aria-labelledby': cx(
+					buttonProps['aria-labelledby'] ?? buttonContext?.['aria-labelledby'],
+					cueId,
+				),
+			}
+		: undefined;
 
 	// React Aria provides slotted `Text` context for the description and error, so a `Text` without
 	// a `slot` throws. The trigger has no slot, so clear the context for everything inside it.
@@ -208,12 +234,19 @@ export function SelectTrigger(props: SelectTriggerProps): JSX.Element {
 		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 			<RacButton
 				{...buttonProps}
+				{...requiredWiring}
 				className={composeRenderProps(className, (renderedClassName) => {
 					return selectRecipe({ size }).trigger({ className: renderedClassName });
 				})}
 			>
 				{triggerChildren}
 			</RacButton>
+			{isRequired ? (
+				/* aria-labelledby can reference hidden text without exposing a standalone cue. */
+				<span hidden id={cueId}>
+					(required)
+				</span>
+			) : null}
 		</IconSizeProvider>
 	);
 }

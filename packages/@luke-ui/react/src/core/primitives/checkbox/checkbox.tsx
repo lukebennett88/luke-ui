@@ -1,5 +1,6 @@
 import type { ComponentProps, JSX, Ref } from 'react';
-import { useId, useMemo } from 'react';
+import { useId } from 'react';
+import { CheckboxFieldContext } from 'react-aria-components';
 import type {
 	CheckboxButtonProps as RacCheckboxButtonProps,
 	CheckboxFieldProps as RacCheckboxFieldProps,
@@ -10,8 +11,10 @@ import {
 } from 'react-aria-components/Checkbox';
 import { LabelContext } from 'react-aria-components/Label';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { useSlottedContext } from 'react-aria-components/slots';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import { FieldStateContext } from '../field/label.js';
 import { fieldRecipe } from '../field/recipe.css.js';
 import { rootIdProps } from '../root-id.js';
 import type { CheckboxRecipeVariants } from './styles.css.js';
@@ -113,20 +116,26 @@ export type CheckboxIndicatorProps = Prettify<_CheckboxIndicatorProps>;
  * does not.
  */
 export function CheckboxRoot(props: CheckboxRootProps): JSX.Element {
-	const { className, id, inputId, size, ...restProps } = props;
+	const { className, id, inputId, isRequired, size, ...restProps } = props;
 	const generatedInputId = useId();
 	const resolvedInputId = inputId ?? generatedInputId;
-	const labelContext = useMemo(() => ({ htmlFor: resolvedInputId }), [resolvedInputId]);
+	const labelContext = { htmlFor: resolvedInputId };
+	const checkboxFieldContext = useSlottedContext(CheckboxFieldContext, props.slot);
+	const resolvedIsRequired = isRequired ?? checkboxFieldContext?.isRequired ?? false;
+	const fieldState = { isRequired: resolvedIsRequired };
 
 	return (
 		<LabelContext.Provider value={labelContext}>
-			<RacCheckboxField
-				{...restProps}
-				{...rootIdProps(id, resolvedInputId)}
-				className={composeRenderProps(className, (className) => {
-					return checkboxRecipe({ size }).root({ className });
-				})}
-			/>
+			<FieldStateContext.Provider value={fieldState}>
+				<RacCheckboxField
+					{...restProps}
+					{...rootIdProps(id, resolvedInputId)}
+					className={composeRenderProps(className, (className) => {
+						return checkboxRecipe({ size }).root({ className });
+					})}
+					isRequired={isRequired}
+				/>
+			</FieldStateContext.Provider>
 		</LabelContext.Provider>
 	);
 }

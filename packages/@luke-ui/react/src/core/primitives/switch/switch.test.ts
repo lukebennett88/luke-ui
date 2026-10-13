@@ -16,5 +16,5 @@ test('SwitchRoot owns ids through id and inputId, not render', () => {
 
 test('SwitchLabel has no necessity indicator', () => {
 	// @ts-expect-error — SwitchField owns the required marker
-	assertType<SwitchLabelProps>({ children: 'Notifications', necessityIndicator: 'label' });
+	assertType<SwitchLabelProps>({ children: 'Notifications', necessityIndicator: 'required-label' });
 });

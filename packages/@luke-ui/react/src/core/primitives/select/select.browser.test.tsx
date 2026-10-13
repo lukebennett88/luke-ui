@@ -88,6 +88,24 @@ function trigger(name: RegExp | string): HTMLButtonElement {
 	return element;
 }
 
+/** The label that names a trigger, outside the trigger itself. */
+function labelFor(element: HTMLButtonElement): HTMLElement {
+	const label = element
+		.getAttribute('aria-labelledby')
+		?.split(' ')
+		.map((id) => document.getElementById(id))
+		.find((candidate) => candidate != null && !element.contains(candidate));
+	if (label == null) throw new Error('Expected a label for the trigger.');
+	return label;
+}
+
+/** The hidden native `<select>` React Aria renders in a select root for form submission. */
+function nativeSelect(rootId: string): HTMLSelectElement {
+	const select = document.getElementById(rootId)?.querySelector('select');
+	if (select == null) throw new Error(`Expected a native select in "${rootId}".`);
+	return select;
+}
+
 test('SelectRoot puts id and ref on its root element, and triggerId and the trigger ref on the button', () => {
 	const rootRef = createRef<HTMLDivElement>();
 	const triggerRef = createRef<HTMLButtonElement>();
@@ -129,6 +147,22 @@ test('a SelectRoot is wired to its label and description with no manual ids', as
 		.element(page.getByRole('button', { exact: true, name: 'Example two Example field' }))
 		.toBeVisible();
 	expect(getDescribedText(trigger(/Example field/))).toBe('Example description');
+});
+
+// The marker is hidden from assistive technology, so the label's text shows it and the name does not.
+test('a FieldLabel marks a required SelectRoot', () => {
+	render(
+		<>
+			<ExampleSelect id="required-root" isRequired label="Required" />
+			<ExampleSelect id="optional-root" label="Optional" />
+		</>,
+	);
+
+	// The trigger is a button, so the hidden native select carries the required state.
+	expect(nativeSelect('required-root')).toBeRequired();
+	expect(labelFor(trigger(/Required/)).textContent).toBe('Required\u00A0*');
+	expect(nativeSelect('optional-root')).not.toBeRequired();
+	expect(labelFor(trigger(/Optional/)).textContent).toBe('Optional');
 });
 
 test('SelectIndicator shows a chevron and sets data-open while open, and children replace the chevron', async () => {

@@ -1,23 +1,49 @@
-import type { JSX, ReactNode } from 'react';
-import type { FieldNecessityIndicator } from './recipe.css.js';
+import type { ComponentProps, JSX } from 'react';
+import type { Prettify } from '../../types/prettify.js';
+import type { NecessityIndicator } from './label.js';
+import { NecessityMarker, useNecessityIndicator } from './label.js';
 import { fieldRecipe } from './recipe.css.js';
 
-interface InlineLabelTextProps {
-	/** The composed field's `label` content. */
-	children: ReactNode;
-	/** How a required control is marked. */
-	necessityIndicator: FieldNecessityIndicator | undefined;
+interface _InlineLabelTextProps extends ComponentProps<'span'> {
+	/**
+	 * Describes whether the associated control is required. It does not make the control required.
+	 * Inside a Luke UI control root, the root's required state wins.
+	 */
+	isRequired?: boolean;
+	/**
+	 * Controls the visible marker for required or optional controls.
+	 * @default 'required-asterisk'
+	 */
+	necessityIndicator?: NecessityIndicator;
 }
 
+/** Props for `InlineLabelText`. */
+export type InlineLabelTextProps = Prettify<_InlineLabelTextProps>;
+
 /**
- * The text of a composed inline field's label, such as `CheckboxField` or `SwitchField`. It is
- * private to the composed fields: primitive consumers own their label content.
+ * Label text for a custom checkbox or switch layout. Place it beside the control when the composed
+ * field's label order does not fit.
  *
- * It draws the required marker after the label's last inline content, so the marker follows the
- * final word when the label wraps.
+ * It draws a necessity marker from the surrounding control root, or from its own `isRequired` when
+ * there is no root.
  */
 export function InlineLabelText(props: InlineLabelTextProps): JSX.Element {
-	const { children, necessityIndicator = 'icon' } = props;
+	const {
+		children,
+		className,
+		isRequired,
+		necessityIndicator: necessityIndicatorProp,
+		...restProps
+	} = props;
+	const necessityIndicator = useNecessityIndicator(necessityIndicatorProp);
 
-	return <span className={fieldRecipe({ necessityIndicator }).inlineLabelText()}>{children}</span>;
+	return (
+		<span
+			{...restProps}
+			className={fieldRecipe({ necessityIndicator }).inlineLabelText({ className })}
+		>
+			{children}
+			<NecessityMarker isRequired={isRequired} necessityIndicator={necessityIndicator} />
+		</span>
+	);
 }

@@ -192,6 +192,8 @@ export default defineConfig({
 			'react/globals': 'error',
 			'react/immutability': 'error',
 			'react/incompatible-library': 'warn',
+			// The React Compiler memoises context values, so manual `useMemo` is redundant.
+			'react/jsx-no-constructed-context-values': 'off',
 			'react/no-array-index-key': 'off',
 			'react/preserve-manual-memoization': 'error',
 			'react/purity': 'error',
@@ -227,6 +229,7 @@ export default defineConfig({
 						'captureVisual',
 						'captureVisualAppearance',
 						'expect',
+						'expectAccessibleNameWords',
 						'expectForwardsDomProps',
 						'expectNoAxeViolations',
 						'expectTypeOf',

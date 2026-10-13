@@ -16,5 +16,5 @@ test('CheckboxRoot owns ids through id and inputId, not render', () => {
 
 test('CheckboxLabel has no necessity indicator', () => {
 	// @ts-expect-error — CheckboxField owns the required marker
-	assertType<CheckboxLabelProps>({ children: 'Terms', necessityIndicator: 'label' });
+	assertType<CheckboxLabelProps>({ children: 'Terms', necessityIndicator: 'required-label' });
 });

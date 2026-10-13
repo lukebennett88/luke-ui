@@ -2,6 +2,7 @@ import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
 import { createRef } from 'react';
+import { CheckboxFieldContext } from 'react-aria-components';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
@@ -118,6 +119,14 @@ function controlFor(input: HTMLInputElement): HTMLElement {
 	const control = labelFor(input).querySelector('[aria-hidden="true"]')?.parentElement;
 	if (control == null) throw new Error('Expected the checkbox control.');
 	return control;
+}
+
+/** A range from `start` to the end of a text node. */
+function textRange(text: Text, start: number): Range {
+	const range = document.createRange();
+	range.setStart(text, start);
+	range.setEnd(text, text.data.length);
+	return range;
 }
 
 test('CheckboxField resolves ref to the root, resolves object and callback inputRef to the control, participates in a form, and fires onBlur', () => {
@@ -241,30 +250,97 @@ test('the control renders before the label', () => {
 	expect(control.nextSibling?.textContent).toBe('Terms');
 });
 
-// The marker is CSS content with no DOM node, so the accessible name is how the tests observe it.
-// It follows the last word with no space before it.
+// The marker is hidden from assistive technology, so the label's text shows it and the name does not.
 test('a required CheckboxField marks its label with its necessityIndicator', () => {
 	render(
 		<>
-			<CheckboxField isRequired label="Checkbox icon" name="checkbox-icon" />
+			<CheckboxField isRequired label="Checkbox asterisk" name="checkbox-asterisk" />
 			<CheckboxField
 				isRequired
 				label="Checkbox words"
 				name="checkbox-words"
-				necessityIndicator="label"
+				necessityIndicator="required-label"
 			/>
 		</>,
 	);
+	const asterisk = checkbox('Checkbox asterisk');
+	const words = checkbox('Checkbox words');
 
-	expect(checkbox('Checkbox icon*')).toBeInTheDocument();
-	expect(checkbox('Checkbox words(required)')).toBeInTheDocument();
+	expect(asterisk).toBeRequired();
+	expect(labelFor(asterisk).textContent).toBe('Checkbox asterisk\u00A0*');
+	expect(words).toBeRequired();
+	expect(labelFor(words).textContent).toBe('Checkbox words\u00A0(required)');
 });
 
 test('an optional CheckboxField shows no marker', () => {
 	render(<CheckboxField label="Optional" name="optional" />);
+	const input = checkbox('Optional');
 
-	expect(checkbox('Optional')).toHaveAccessibleName('Optional');
+	expect(input).not.toBeRequired();
+	expect(labelFor(input).textContent).toBe('Optional');
 });
+
+const requiredCheckboxFieldContext = { isRequired: true };
+
+test('a CheckboxField without isRequired keeps isRequired from React Aria context', () => {
+	render(
+		<CheckboxFieldContext.Provider value={requiredCheckboxFieldContext}>
+			<CheckboxField label="Terms" necessityIndicator="optional-label" />
+			<CheckboxField label="Required asterisk" />
+		</CheckboxFieldContext.Provider>,
+	);
+	const optionalLabel = checkbox('Terms');
+	const asterisk = checkbox('Required asterisk');
+
+	expect(optionalLabel).toBeRequired();
+	expect(labelFor(optionalLabel).textContent).toBe('Terms');
+	expect(asterisk).toBeRequired();
+	expect(labelFor(asterisk).textContent).toBe('Required asterisk\u00A0*');
+});
+
+// Layout is the contract: in a container that only fits the label text, the label wraps before its
+// last word instead of leaving the marker alone on the next line.
+for (const { accessibleName, label, necessityIndicator, ...fieldProps } of [
+	{ accessibleName: 'Accept the terms', isRequired: true, label: 'Accept the terms' },
+	{
+		accessibleName: 'Accept the terms (optional)',
+		label: 'Accept the terms',
+		necessityIndicator: 'optional-label' as const,
+	},
+]) {
+	test(`the ${necessityIndicator ?? 'required-asterisk'} marker stays on the line of the last label word`, () => {
+		render(
+			<div data-testid="frame">
+				<CheckboxField
+					{...fieldProps}
+					label={label}
+					name="terms"
+					necessityIndicator={necessityIndicator}
+				/>
+			</div>,
+		);
+		const frame = page.getByTestId('frame').element();
+		if (!(frame instanceof HTMLElement)) throw new Error('Expected an HTML frame.');
+		const labelText = controlFor(checkbox(accessibleName)).nextElementSibling;
+		const text = labelText?.firstChild;
+		const marker = labelText?.lastElementChild;
+		// `Text` here is the Luke UI component, so check against the DOM's `Text` node type.
+		if (!(text instanceof window.Text) || marker == null) {
+			throw new Error('Expected text, then the marker.');
+		}
+
+		const textEnd = textRange(text, 0).getBoundingClientRect().right;
+		frame.style.inlineSize = `${Math.ceil(textEnd - frame.getBoundingClientRect().left)}px`;
+		const firstLine = textRange(text, 0).getClientRects()[0];
+		const lastWord = textRange(text, text.data.lastIndexOf(' ') + 1).getBoundingClientRect();
+		const markerBox = marker.getBoundingClientRect();
+		if (firstLine == null) throw new Error('Expected the label text to render.');
+
+		expect(lastWord.top).toBeGreaterThan(firstLine.top);
+		expect(markerBox.top).toBe(lastWord.top);
+		expect(markerBox.left).toBeGreaterThanOrEqual(lastWord.right - 1);
+	});
+}
 
 test('an errorMessage marks the checkbox invalid and shows the error under the label', () => {
 	render(<CheckboxField errorMessage="Choose an option." label="Terms" name="terms" />);
@@ -287,7 +363,7 @@ test('a required CheckboxField shows its native validation message after a faile
 			<button type="submit">Submit</button>
 		</form>,
 	);
-	const input = checkbox('Terms*');
+	const input = checkbox('Terms');
 
 	expect(input).not.toHaveAttribute('aria-invalid', 'true');
 
@@ -307,7 +383,7 @@ test('the CheckboxField scene has no axe violations', async () => {
 				isRequired
 				label="Required"
 			/>
-			<CheckboxField isRequired label="Required words" necessityIndicator="label" />
+			<CheckboxField isRequired label="Required words" necessityIndicator="required-label" />
 		</>,
 	);
 
@@ -395,7 +471,12 @@ test('necessity markers', { tags: ['visual'] }, async () => {
 	const { locator } = render(
 		<Stack>
 			<CheckboxField isRequired label="Accept the terms" name="icon" />
-			<CheckboxField isRequired label="Accept the terms" name="label" necessityIndicator="label" />
+			<CheckboxField
+				isRequired
+				label="Accept the terms"
+				name="label"
+				necessityIndicator="required-label"
+			/>
 			<CheckboxField
 				errorMessage="Choose an option."
 				isRequired
@@ -411,7 +492,7 @@ test('necessity markers', { tags: ['visual'] }, async () => {
 				isRequired
 				label="This required label wraps onto a second line so the marker follows."
 				name="wrapping-words"
-				necessityIndicator="label"
+				necessityIndicator="required-label"
 			/>
 		</Stack>,
 	);

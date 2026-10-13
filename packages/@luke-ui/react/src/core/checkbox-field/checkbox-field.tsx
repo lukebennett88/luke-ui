@@ -6,7 +6,7 @@ import {
 	CheckboxLabel,
 	CheckboxRoot,
 } from '../primitives/checkbox/checkbox.js';
-import type { FieldNecessityIndicator } from '../primitives/field/field.js';
+import type { NecessityIndicator } from '../primitives/field/field.js';
 import {
 	InlineField,
 	isInvalidFromErrorMessage,
@@ -32,10 +32,10 @@ interface _CheckboxFieldProps extends _CheckboxFieldOmit {
 	 */
 	label: Exclude<ReactNode, boolean | null | undefined>;
 	/**
-	 * How a required checkbox is marked.
-	 * @default 'icon'
+	 * Controls the visible marker for required or optional controls.
+	 * @default 'required-asterisk'
 	 */
-	necessityIndicator?: FieldNecessityIndicator;
+	necessityIndicator?: NecessityIndicator;
 }
 
 /** Props for `CheckboxField`. */

@@ -6,20 +6,29 @@ import type { FieldDescriptionProps } from './description.js';
 import { FieldDescription } from './description.js';
 import type { FieldErrorProps } from './error.js';
 import { FieldError } from './error.js';
+import type { InlineLabelTextProps } from './inline-label-text.js';
+import { InlineLabelText } from './inline-label-text.js';
 import {
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
 } from './is-invalid-from-error-message.js';
-import type { FieldLabelProps, FieldNecessityIndicator } from './label.js';
+import type { FieldLabelProps, NecessityIndicator } from './label.js';
 import { FieldLabel } from './label.js';
 import { fieldRecipe } from './recipe.css.js';
 import { Field as PrimitiveField } from './root.js';
 
-export type { FieldDescriptionProps, FieldErrorProps, FieldLabelProps, FieldNecessityIndicator };
+export type {
+	FieldDescriptionProps,
+	FieldErrorProps,
+	FieldLabelProps,
+	InlineLabelTextProps,
+	NecessityIndicator,
+};
 export {
 	FieldDescription,
 	FieldError,
 	FieldLabel,
+	InlineLabelText,
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
 };
@@ -28,8 +37,11 @@ export {
 interface FieldSlotContentProps {
 	/** Optional helper text shown below the control. */
 	description?: ReactNode;
-	/** Label necessity style. @default 'icon' */
-	necessityIndicator?: FieldNecessityIndicator;
+	/**
+	 * Controls the visible marker for required or optional controls.
+	 * @default 'required-asterisk'
+	 */
+	necessityIndicator?: NecessityIndicator;
 }
 
 /** Label, description, and error props for the `Field` primitive. */
@@ -84,14 +96,7 @@ export type FieldProps = Prettify<_FieldProps>;
  * alternatives, so do not render those parts inside a `Field`.
  */
 export function Field(props: FieldProps): JSX.Element {
-	const {
-		children,
-		description,
-		errorMessage,
-		label,
-		necessityIndicator = 'icon',
-		...restProps
-	} = props;
+	const { children, description, errorMessage, label, necessityIndicator, ...restProps } = props;
 
 	return (
 		<PrimitiveField {...restProps}>

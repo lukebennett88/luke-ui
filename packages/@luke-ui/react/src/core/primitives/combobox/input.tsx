@@ -80,6 +80,5 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 
 	if (!isTraySearch) return input;
 
-	// oxlint-disable-next-line react/jsx-no-constructed-context-values
 	return <InputContext.Provider value={trayContext}>{input}</InputContext.Provider>;
 }

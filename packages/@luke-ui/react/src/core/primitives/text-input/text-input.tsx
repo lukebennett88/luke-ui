@@ -5,7 +5,7 @@ import { Group as RacGroup } from 'react-aria-components/Group';
 import type { InputProps as RacInputProps } from 'react-aria-components/Input';
 import { InputContext, Input as RacInput } from 'react-aria-components/Input';
 import type { TextFieldProps as RacTextFieldProps } from 'react-aria-components/TextField';
-import { TextField as RacTextField } from 'react-aria-components/TextField';
+import { TextFieldContext, TextField as RacTextField } from 'react-aria-components/TextField';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import { cx } from '../../../shared/utils/utils.js';
@@ -13,6 +13,7 @@ import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import { FieldStateContext } from '../field/label.js';
 import { rootIdProps } from '../root-id.js';
 import type { TextInputSize } from './recipe.css.js';
 import { textInputRecipe } from './recipe.css.js';
@@ -188,18 +189,24 @@ export type TextInputSuffixProps = Prettify<ComponentProps<'span'>>;
  * `autoComplete`, `inputMode`, and `aria-label`, is a default that a part can override.
  */
 export function TextInputRoot(props: TextInputRootProps): JSX.Element {
-	const { className, id, inputId, size = 'medium', ...textFieldProps } = props;
+	const { className, id, inputId, isRequired, size = 'medium', ...textFieldProps } = props;
+	const textFieldContext = useSlottedContext(TextFieldContext, props.slot);
+	const resolvedIsRequired = isRequired ?? textFieldContext?.isRequired ?? false;
+	const fieldState = { isRequired: resolvedIsRequired };
 
 	return (
 		<TextInputRootContext.Provider value>
 			<TextInputSizeContext.Provider value={size}>
-				<RacTextField
-					{...textFieldProps}
-					{...rootIdProps(id, inputId)}
-					className={composeRenderProps(className, (value) => {
-						return textInputPartsRecipe().root({ className: value });
-					})}
-				/>
+				<FieldStateContext.Provider value={fieldState}>
+					<RacTextField
+						{...textFieldProps}
+						{...rootIdProps(id, inputId)}
+						className={composeRenderProps(className, (value) => {
+							return textInputPartsRecipe().root({ className: value });
+						})}
+						isRequired={isRequired}
+					/>
+				</FieldStateContext.Provider>
 			</TextInputSizeContext.Provider>
 		</TextInputRootContext.Provider>
 	);

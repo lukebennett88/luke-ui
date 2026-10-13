@@ -1,5 +1,5 @@
 import type { JSX, ReactNode } from 'react';
-import type { FieldNecessityIndicator } from '../primitives/field/field.js';
+import type { NecessityIndicator } from '../primitives/field/field.js';
 import {
 	InlineField,
 	isInvalidFromErrorMessage,
@@ -32,10 +32,10 @@ interface _SwitchFieldProps extends _SwitchFieldOmit {
 	 */
 	label: Exclude<ReactNode, boolean | null | undefined>;
 	/**
-	 * How a required switch is marked.
-	 * @default 'icon'
+	 * Controls the visible marker for required or optional controls.
+	 * @default 'required-asterisk'
 	 */
-	necessityIndicator?: FieldNecessityIndicator;
+	necessityIndicator?: NecessityIndicator;
 }
 
 /** Props for `SwitchField`. */

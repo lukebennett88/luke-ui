@@ -7,7 +7,6 @@ import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
 const dataDisabledSelector = '[data-disabled="true"]';
-const dataRequiredSelector = '[data-required="true"]';
 
 /**
  * Optional indentation for error messages that sit beneath a control+label row.
@@ -30,29 +29,6 @@ export const inlineControlGap = vars.space.sp8;
 /** Gap between the error icon and the message text that follows it. */
 const errorIconGap = vars.space.sp8;
 
-/** Required marker drawn after a label's last inline content: an asterisk. */
-const iconNecessityMarker = {
-	selectors: {
-		[`${dataRequiredSelector} &::after`]: {
-			color: vars.color.foreground.danger.rest,
-			content: '"*"',
-			marginInlineStart: vars.space.sp4,
-		},
-	},
-} as const;
-
-/** Required marker drawn after a label's last inline content: the word “(required)”. */
-const labelNecessityMarker = {
-	selectors: {
-		[`${dataRequiredSelector} &::after`]: {
-			color: vars.color.text.secondary,
-			content: '"(required)"',
-			fontWeight: vars.font.weight.body,
-			marginInlineStart: vars.space.sp4,
-		},
-	},
-} as const;
-
 /**
  * Inline size of the error icon's rail. It is `fieldMessageIndent` less the gap, so the rail plus
  * the gap spans the indent exactly and the message text starts at the label's inline edge. `max()`
@@ -65,8 +41,8 @@ const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px
  *
  * Slots: `root` (stacked layout), `inline` (inline-control layout), `label`, `inlineLabel` (the
  * clickable label of an inline control such as `CheckboxLabel`), `inlineLabelText` (the text of a
- * composed inline control's label, which carries the required marker), `message` (description/error
- * text), and `icon` (the error message's leading icon).
+ * composed inline control's label), `necessityMarker` (the required marker after a label's text),
+ * `message` (description/error text), and `icon` (the error message's leading icon).
  *
  * `FieldError` lays the error `message` out with `trackRecipe`'s `firstLine` rail alignment, which
  * centres the `icon` rail on the message's first line and keeps wrapped lines aligned with the
@@ -118,6 +94,7 @@ const fieldConfig = {
 			},
 		},
 		inlineLabelText: {},
+		necessityMarker: {},
 		message: {
 			...vars.font.label,
 			fontWeight: vars.font.weight.body,
@@ -126,18 +103,27 @@ const fieldConfig = {
 		icon: {},
 	},
 	defaultVariants: {
-		necessityIndicator: 'icon',
+		necessityIndicator: 'required-asterisk',
 		tone: 'description',
 	},
 	variants: {
 		necessityIndicator: {
-			icon: {
-				inlineLabelText: iconNecessityMarker,
-				label: iconNecessityMarker,
+			'required-asterisk': {
+				necessityMarker: {
+					color: vars.color.foreground.danger.rest,
+				},
 			},
-			label: {
-				inlineLabelText: labelNecessityMarker,
-				label: labelNecessityMarker,
+			'required-label': {
+				necessityMarker: {
+					color: vars.color.text.secondary,
+					fontWeight: vars.font.weight.body,
+				},
+			},
+			'optional-label': {
+				necessityMarker: {
+					color: vars.color.text.secondary,
+					fontWeight: vars.font.weight.body,
+				},
 			},
 		},
 		tone: {
@@ -172,9 +158,6 @@ const fieldConfig = {
  * Slotted recipe for the `Field` primitive.
  *
  * `fieldRecipe({ necessityIndicator, tone }).root() / .inline() / .label() / .inlineLabel() /
- * .inlineLabelText() / .message() / .icon()`.
+ * .inlineLabelText() / .necessityMarker() / .message() / .icon()`.
  */
 export const fieldRecipe = recipe(fieldConfig);
-
-/** Allowed `necessityIndicator` values for the field label. */
-export type FieldNecessityIndicator = keyof typeof fieldConfig.variants.necessityIndicator;

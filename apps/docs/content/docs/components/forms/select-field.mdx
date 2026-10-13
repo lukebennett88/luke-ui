@@ -37,7 +37,10 @@ selection yourself. `onChange` receives the selected key, or `null` when nothing
 ## Required fields
 
 Set `isRequired` to make a selection mandatory. Use `necessityIndicator` to choose how it appears
-beside the label.
+beside the label. Read [Required fields](/docs/forms#required-fields) for the indicator values.
+
+A required Select also announces “required” from a hidden cue on the trigger, including when
+`necessityIndicator` is `'optional-label'`.
 
 <ExampleBlock src="select-field/required" title="Select Field: Required" />
 
