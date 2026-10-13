@@ -23,11 +23,12 @@ HTML maps `ol` `type` to `list-style-type` through a presentational hint
 `list-style`, including Tailwind Preflight's `ol, ul { list-style: none }` in `base`, beats that
 hint. `Prose` restates the HTML rules in `luke-ui.recipes`:
 
-```94:104:packages/@luke-ui/react/src/core/prose/recipe.css.ts
+```94:105:packages/@luke-ui/react/src/core/prose/recipe.css.ts
 // Markers are restated so a framework reset below Luke UI, such as Tailwind Preflight, cannot
 // remove them. That reset also beats the HTML `type` hint, so typed lists restate the HTML rendering
 // rules for `type`. HTML matches `type` case-insensitively unless a selector uses the `s` flag.
-// Where `s` is unsupported (Chromium), those rules match nothing and the hint alone applies.
+// Where `s` is unsupported (Chromium), those typed rules match nothing. The presentational hint
+// remains, but an author list reset still beats it, so letter and roman markers stay `none`.
 proseStyle('ul, ol', { paddingInlineStart: vars.space.sp24 });
 proseStyle('ul', { listStyleType: 'disc' });
 proseStyle('ol:not([type]), ol[type="1"]', { listStyleType: 'decimal' });
@@ -53,9 +54,9 @@ and Safari 27+ do.
 | Playwright Chromium | HeadlessChrome/156.0.8078.4 | `false`                                  | `true`                                  |
 
 Can I use still marks Chrome through 157 and Edge through 154 as unsupported for the `s` modifier.
-Safari 27+ supports `s`. Stable Safari 27 still lacks modern typed `attr()` for arbitrary properties
-([Can I use css3-attr](https://caniuse.com/css3-attr)); typed `attr()` is in Safari Technology
-Preview only.
+Safari 27+ already supports `s`, so it restores letter and roman markers under a reset with the
+current Prose rules. A Chromium-only typed-`attr()` enhancement gated with `@supports` would not
+change Safari's path.
 
 ### Markers under a Preflight-shaped reset
 
@@ -81,14 +82,14 @@ The built stylesheet keeps the `s` selectors (`dist/stylesheet.css`). The gated 
 
 ### Approaches re-checked in Chrome 148 over a base reset
 
-| Approach                                                           | `a` / `A` / `i` / `I`                             | Meets constraints?                                                               |
-| ------------------------------------------------------------------ | ------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Current `[type="…" s]` rules                                       | `none` / `none` / `none` / `none`                 | Yes for Firefox/Safari; Chromium gap unchanged                                   |
-| `list-style-type: revert`                                          | all `decimal`                                     | No: loses letter and roman                                                       |
-| `list-style-type: revert-layer`                                    | all `none` (and `type="1"` also `none`)           | No: rolls back to Preflight                                                      |
-| Case-insensitive `[type="a"]` / `[type="A"]` pairs                 | last matching rule wins; both cases collapse      | No: loses case distinction                                                       |
-| Same CI rules with **no** reset                                    | `a`→`upper-alpha`, `i`→`upper-roman` (rule order) | No: breaks markers even without a reset                                          |
-| `attr(type type(<custom-ident>))` + `@counter-style a`/`A`/`i`/`I` | works for letter and roman                        | No for product: page-wide names; typed `attr()` still missing from stable Safari |
+| Approach                                                           | `a` / `A` / `i` / `I`                             | Meets constraints?                                                                  |
+| ------------------------------------------------------------------ | ------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Current `[type="…" s]` rules                                       | `none` / `none` / `none` / `none`                 | Yes for Firefox/Safari; Chromium gap unchanged                                      |
+| `list-style-type: revert`                                          | all `decimal`                                     | No: loses letter and roman                                                          |
+| `list-style-type: revert-layer`                                    | all `none` (and `type="1"` also `none`)           | No: rolls back to Preflight                                                         |
+| Case-insensitive `[type="a"]` / `[type="A"]` pairs                 | last matching rule wins; both cases collapse      | No: loses case distinction                                                          |
+| Same CI rules with **no** reset                                    | `a`→`upper-alpha`, `i`→`upper-roman` (rule order) | No: breaks markers even without a reset                                             |
+| `attr(type type(<custom-ident>))` + `@counter-style a`/`A`/`i`/`I` | works for letter and roman                        | No for product: page-wide counter-style names, collision risk, and added complexity |
 
 Extra attr() detail: `type="1"` is not a valid `<custom-ident>`, so a bare
 `list-style-type: attr(type type(<custom-ident>))` computed to the initial `disc` for `type="1"` in
@@ -104,10 +105,10 @@ Chrome 148. Any attr() path would still need the existing decimal rule (or an ex
 
 ## Tradeoffs
 
-| Choice                       | Upside                                                                                                                                                              | Downside                                                                                                                                                                                                                                          |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1 + 3 together (recommended) | Correct HTML case mapping; no global counter-style footprint; no reset-free regression; docs and tests already describe the gap; auto-heals when Chromium ships `s` | Chromium + Preflight (or any `base` list reset) still shows no letter/roman markers inside `Prose` until then                                                                                                                                     |
-| 2                            | Chromium markers restored under reset today                                                                                                                         | Reserves short, page-wide counter-style names; sticky once typed `attr()` is widely available; still useless on stable Safari, which already has `s`; needs careful gating so Firefox/Safari keep the `s` path; conflicts with the #770 rejection |
+| Choice                       | Upside                                                                                                                                                              | Downside                                                                                                                                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 + 3 together (recommended) | Correct HTML case mapping; no global counter-style footprint; no reset-free regression; docs and tests already describe the gap; auto-heals when Chromium ships `s` | Chromium + Preflight (or any `base` list reset) still shows no letter/roman markers inside `Prose` until then                                                                                                       |
+| 2                            | Chromium markers restored under reset today                                                                                                                         | Reserves short, page-wide `@counter-style` names with collision risk; adds gating and dual-path complexity next to the `s` rules; sticky once typed `attr()` is widely available; conflicts with the #770 rejection |
 
 A case-insensitive fallback is not a fourth option. It fails the “preserve uppercase/lowercase” and
 “behaviour without a reset” constraints in current Chromium.
