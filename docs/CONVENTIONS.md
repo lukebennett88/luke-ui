@@ -16,6 +16,11 @@ double quotes in JSX.
 `// oxlint-disable-next-line <plugin>/<rule>` directly above the offending line — the directive
 applies to the literal next line, so it cannot sit inside a multi-line comment.
 
+## React Compiler
+
+The package is built with the React Compiler, so do not add `useMemo`, `useCallback` or `memo` for
+performance. Pass plain objects as context values, because the compiler memoises them.
+
 ## Reuse
 
 Prefer utilities the repo already ships over hand-rolling: `cx` from `@luke-ui/react/utils` for

@@ -263,8 +263,10 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	],
 	'primitives/field.mdx::packages/@luke-ui/react/src/core/primitives/field/field.tsx::InlineFieldProps':
 		['description', 'errorMessage'],
+	'primitives/field.mdx::packages/@luke-ui/react/src/core/primitives/field/inline-label-text.tsx::InlineLabelTextProps':
+		['isRequired', 'necessityIndicator'],
 	'primitives/field.mdx::packages/@luke-ui/react/src/core/primitives/field/label.tsx::FieldLabelProps':
-		['htmlFor', 'necessityIndicator'],
+		['htmlFor', 'isRequired', 'necessityIndicator'],
 	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectIndicatorProps':
 		['children'],
 	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectItemProps':

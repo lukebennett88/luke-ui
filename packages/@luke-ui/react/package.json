@@ -131,6 +131,7 @@
 		"@vitest/coverage-v8": "catalog:",
 		"@vitest/ui": "catalog:",
 		"axe-core": "catalog:",
+		"dom-accessibility-api": "catalog:",
 		"lightningcss": "catalog:",
 		"node-html-parser": "catalog:",
 		"oxc-transform-react": "catalog:",

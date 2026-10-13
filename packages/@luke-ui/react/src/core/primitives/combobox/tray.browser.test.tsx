@@ -283,7 +283,7 @@ test('ComboboxTrayTrigger blocks submission of a required, unselected combobox w
 	expect(new FormData(form).getAll('country')).toHaveLength(1);
 
 	await userEvent.click(
-		page.getByRole('button', { name: 'Country* Select a country...' }).element(),
+		page.getByRole('button', { name: 'Country Select a country...' }).element(),
 	);
 	await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
@@ -308,16 +308,16 @@ test('ComboboxTrayTrigger allows a required combobox with allowsCustomValue to s
 		</form>,
 	);
 
-	await openTray('Country* Select a country...', 'Country*');
-	await enterTraySearch('Freedonia', 'Country*');
+	await openTray();
+	await enterTraySearch('Freedonia');
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
 	await userEvent.click(page.getByRole('button', { name: 'Submit' }).element());
 	expect(submitCount).toBe(1);
 
-	await openTray('Country* Select a country...', 'Country*');
-	await userEvent.clear(page.getByRole('searchbox', { name: 'Country*' }).element());
+	await openTray();
+	await userEvent.clear(page.getByRole('searchbox', { name: 'Country' }).element());
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
@@ -438,7 +438,7 @@ test('ComboboxTrayTrigger associates with an external form via the root form pro
 	expect(submitCount).toBe(0);
 
 	await userEvent.click(
-		page.getByRole('button', { name: 'Country* Select a country...' }).element(),
+		page.getByRole('button', { name: 'Country Select a country...' }).element(),
 	);
 	await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();

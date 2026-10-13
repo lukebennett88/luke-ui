@@ -1,6 +1,12 @@
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
-import { Field, FieldDescription, FieldError, FieldLabel } from '@luke-ui/react/primitives/field';
+import {
+	Field,
+	FieldDescription,
+	FieldError,
+	FieldLabel,
+	InlineLabelText,
+} from '@luke-ui/react/primitives/field';
 import {
 	TextInput,
 	TextInputControl,
@@ -66,6 +72,21 @@ function input(name: string): HTMLInputElement {
 	const element = page.getByRole('textbox', { name }).element();
 	if (!(element instanceof HTMLInputElement)) throw new Error(`Expected an input named "${name}".`);
 	return element;
+}
+
+/** The label connected to an input. */
+function labelFor(element: HTMLInputElement): HTMLLabelElement {
+	const label = element.labels?.[0];
+	if (label == null) throw new Error('Expected a label for the input.');
+	return label;
+}
+
+/** A range from `start` to the end of a text node. */
+function textRange(text: Text, start: number): Range {
+	const range = document.createRange();
+	range.setStart(text, start);
+	range.setEnd(text, text.data.length);
+	return range;
 }
 
 /** The `TextInputControl` around an input. Its parts are direct children of the control. */
@@ -218,11 +239,148 @@ test('a TextInput inside a TextInputRoot follows the root for disabled, read-onl
 
 	expect(input('Disabled')).toBeDisabled();
 	expect(input('Read-only')).toHaveAttribute('readonly');
-	expect(input('Mandatory*')).toBeRequired();
+	expect(input('Mandatory')).toBeRequired();
 	expect(input('Editable')).toBeEnabled();
 	expect(input('Editable')).not.toHaveAttribute('readonly');
 	expect(input('Editable')).not.toBeRequired();
 });
+
+// Required markers are hidden from assistive technology, so the name does not include them.
+test('a FieldLabel marks a required TextInputRoot with its necessityIndicator', () => {
+	render(
+		<>
+			<TextInputRoot isRequired>
+				<FieldLabel>Required asterisk</FieldLabel>
+				<TextInput />
+			</TextInputRoot>
+			<TextInputRoot isRequired>
+				<FieldLabel necessityIndicator="required-label">Required words</FieldLabel>
+				<TextInput />
+			</TextInputRoot>
+			<TextInputRoot>
+				<FieldLabel>Optional</FieldLabel>
+				<TextInput />
+			</TextInputRoot>
+		</>,
+	);
+
+	expect(input('Required asterisk')).toBeRequired();
+	expect(labelFor(input('Required asterisk')).textContent).toBe('Required asterisk\u00A0*');
+	expect(input('Required words')).toBeRequired();
+	expect(labelFor(input('Required words')).textContent).toBe('Required words\u00A0(required)');
+	expect(input('Optional')).not.toBeRequired();
+	expect(labelFor(input('Optional')).textContent).toBe('Optional');
+});
+
+test('a FieldLabel outside a control root uses its isRequired prop for markers', () => {
+	render(
+		<>
+			<FieldLabel data-testid="required" isRequired>
+				Required
+			</FieldLabel>
+			<FieldLabel data-testid="optional" isRequired={false} necessityIndicator="optional-label">
+				Optional
+			</FieldLabel>
+			<FieldLabel data-testid="unknown" necessityIndicator="optional-label">
+				Unknown
+			</FieldLabel>
+		</>,
+	);
+
+	expect(page.getByTestId('required').element().textContent).toBe('Required\u00A0*');
+	expect(page.getByTestId('optional').element().textContent).toBe('Optional\u00A0(optional)');
+	expect(page.getByTestId('unknown').element().textContent).toBe('Unknown');
+});
+
+test('an InlineLabelText outside a control root uses its isRequired prop for markers', () => {
+	render(
+		<>
+			<InlineLabelText data-testid="required" isRequired>
+				Required
+			</InlineLabelText>
+			<InlineLabelText
+				data-testid="optional"
+				isRequired={false}
+				necessityIndicator="optional-label"
+			>
+				Optional
+			</InlineLabelText>
+			<InlineLabelText data-testid="unknown" necessityIndicator="optional-label">
+				Unknown
+			</InlineLabelText>
+		</>,
+	);
+
+	expect(page.getByTestId('required').element().textContent).toBe('Required\u00A0*');
+	expect(page.getByTestId('optional').element().textContent).toBe('Optional\u00A0(optional)');
+	expect(page.getByTestId('unknown').element().textContent).toBe('Unknown');
+});
+
+test('a FieldLabel uses the control root required state over its isRequired prop', () => {
+	render(
+		<TextInputRoot isRequired>
+			<FieldLabel isRequired={false}>Conflict</FieldLabel>
+			<TextInput />
+		</TextInputRoot>,
+	);
+
+	expect(labelFor(input('Conflict')).textContent).toBe('Conflict\u00A0*');
+});
+
+test('a FieldLabel with a render prop still draws the marker and names the control', () => {
+	render(
+		<TextInputRoot isRequired>
+			{/* React Aria passes `htmlFor` in `props`, which the rule cannot see through the spread. */}
+			{/* oxlint-disable-next-line jsx-a11y/label-has-associated-control */}
+			<FieldLabel render={(props) => <label {...props} />}>Example field</FieldLabel>
+			<TextInput />
+		</TextInputRoot>,
+	);
+
+	expect(input('Example field')).toBeRequired();
+	expect(labelFor(input('Example field')).textContent).toBe('Example field\u00A0*');
+});
+
+// Layout is the contract: in a container that only fits the label text, the label wraps before its
+// last word instead of leaving the marker alone on the next line.
+for (const { accessibleName, isRequired, necessityIndicator } of [
+	{ accessibleName: 'Example wrapping label', isRequired: true },
+	{
+		accessibleName: 'Example wrapping label (optional)',
+		isRequired: false,
+		necessityIndicator: 'optional-label' as const,
+	},
+]) {
+	test(`the ${necessityIndicator ?? 'required-asterisk'} marker stays on the line of the last label word`, () => {
+		render(
+			<div data-testid="frame">
+				<TextInputRoot isRequired={isRequired}>
+					<FieldLabel necessityIndicator={necessityIndicator}>Example wrapping label</FieldLabel>
+					<TextInput />
+				</TextInputRoot>
+			</div>,
+		);
+		const frame = page.getByTestId('frame').element();
+		if (!(frame instanceof HTMLElement)) throw new Error('Expected an HTML frame.');
+		const label = labelFor(input(accessibleName));
+		const text = label.firstChild;
+		const marker = label.lastElementChild;
+		if (!(text instanceof Text) || marker == null) {
+			throw new Error('Expected text, then the marker.');
+		}
+
+		const textEnd = textRange(text, 0).getBoundingClientRect().right;
+		frame.style.inlineSize = `${Math.ceil(textEnd - frame.getBoundingClientRect().left)}px`;
+		const firstLine = textRange(text, 0).getClientRects()[0];
+		const lastWord = textRange(text, text.data.lastIndexOf(' ') + 1).getBoundingClientRect();
+		const markerBox = marker.getBoundingClientRect();
+		if (firstLine == null) throw new Error('Expected the label text to render.');
+
+		expect(lastWord.top).toBeGreaterThan(firstLine.top);
+		expect(markerBox.top).toBe(lastWord.top);
+		expect(markerBox.left).toBeGreaterThanOrEqual(lastWord.right - 1);
+	});
+}
 
 // `type`, `pattern`, `minLength`, and `maxLength` take part in the field's validation, so the root
 // owns them when a `TextInput` is inside a `TextInputRoot`.

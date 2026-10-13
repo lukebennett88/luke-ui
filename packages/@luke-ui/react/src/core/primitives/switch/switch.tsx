@@ -1,5 +1,6 @@
 import type { ComponentProps, JSX, Ref } from 'react';
-import { useId, useMemo } from 'react';
+import { useId } from 'react';
+import { SwitchFieldContext } from 'react-aria-components';
 import { LabelContext } from 'react-aria-components/Label';
 import type {
 	SwitchButtonProps as RacSwitchButtonProps,
@@ -10,8 +11,10 @@ import {
 	SwitchField as RacSwitchField,
 } from 'react-aria-components/Switch';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { useSlottedContext } from 'react-aria-components/slots';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import { FieldStateContext } from '../field/label.js';
 import { fieldRecipe } from '../field/recipe.css.js';
 import { rootIdProps } from '../root-id.js';
 import type { SwitchRecipeVariants } from './styles.css.js';
@@ -110,20 +113,26 @@ export type SwitchThumbProps = Prettify<_SwitchThumbProps>;
  * no ids to pass. A `FieldLabel` draws the required marker for `isRequired`. `SwitchLabel` does not.
  */
 export function SwitchRoot(props: SwitchRootProps): JSX.Element {
-	const { className, id, inputId, size, ...restProps } = props;
+	const { className, id, inputId, isRequired, size, ...restProps } = props;
 	const generatedInputId = useId();
 	const resolvedInputId = inputId ?? generatedInputId;
-	const labelContext = useMemo(() => ({ htmlFor: resolvedInputId }), [resolvedInputId]);
+	const labelContext = { htmlFor: resolvedInputId };
+	const switchFieldContext = useSlottedContext(SwitchFieldContext, props.slot);
+	const resolvedIsRequired = isRequired ?? switchFieldContext?.isRequired ?? false;
+	const fieldState = { isRequired: resolvedIsRequired };
 
 	return (
 		<LabelContext.Provider value={labelContext}>
-			<RacSwitchField
-				{...restProps}
-				{...rootIdProps(id, resolvedInputId)}
-				className={composeRenderProps(className, (className) => {
-					return switchRecipe({ size }).root({ className });
-				})}
-			/>
+			<FieldStateContext.Provider value={fieldState}>
+				<RacSwitchField
+					{...restProps}
+					{...rootIdProps(id, resolvedInputId)}
+					className={composeRenderProps(className, (className) => {
+						return switchRecipe({ size }).root({ className });
+					})}
+					isRequired={isRequired}
+				/>
+			</FieldStateContext.Provider>
 		</LabelContext.Provider>
 	);
 }

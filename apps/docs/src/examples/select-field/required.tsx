@@ -14,7 +14,7 @@ export default () => {
 			items={countries}
 			label="Work location"
 			name="workLocation"
-			necessityIndicator="icon"
+			necessityIndicator="required-asterisk"
 			placeholder="Choose a country"
 		>
 			{(item) => <SelectItem>{item.label}</SelectItem>}

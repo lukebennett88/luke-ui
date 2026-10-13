@@ -1,10 +1,12 @@
 import type { JSX, Ref } from 'react';
 import { useRef } from 'react';
 import type { Key, ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
-import { ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
+import { ComboBoxContext, ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { useSlottedContext } from 'react-aria-components/slots';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import { FieldStateContext } from '../field/label.js';
 import { rootIdProps } from '../root-id.js';
 import { ComboboxInputGroupContext } from './input-group-context.js';
 import { ComboboxSizeProvider } from './size-context.js';
@@ -106,22 +108,25 @@ export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX
 		className,
 		id,
 		inputId,
+		isRequired,
 		menuTrigger = 'focus',
 		ref,
 		size = 'medium',
 		...comboboxProps
 	} = props;
+	const comboBoxContext = useSlottedContext(ComboBoxContext, props.slot);
+	const resolvedIsRequired = isRequired ?? comboBoxContext?.isRequired ?? false;
+	const fieldState = { isRequired: resolvedIsRequired };
 
 	// Published for the tray validation and submission inputs. `ComboBoxStateContext` does not
 	// carry these props.
-	// oxlint-disable-next-line react/jsx-no-constructed-context-values
 	const validationContextValue = {
 		allowsCustomValue: comboboxProps.allowsCustomValue ?? false,
 		form: comboboxProps.form,
 		formValue: comboboxProps.formValue,
 		isDisabled: comboboxProps.isDisabled ?? false,
 		isReadOnly: comboboxProps.isReadOnly ?? false,
-		isRequired: comboboxProps.isRequired ?? false,
+		isRequired: resolvedIsRequired,
 		name: comboboxProps.name,
 		validationBehavior: comboboxProps.validationBehavior,
 	};
@@ -132,16 +137,19 @@ export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX
 		<ComboboxInputGroupContext.Provider value={inputGroupRef}>
 			<ComboboxSizeProvider size={size}>
 				<ComboboxValidationProvider value={validationContextValue}>
-					<RacComboBox
-						{...comboboxProps}
-						{...rootIdProps(id, inputId)}
-						allowsEmptyCollection={allowsEmptyCollection}
-						className={composeRenderProps(className, (renderedClassName) => {
-							return comboboxRecipe().root({ className: renderedClassName });
-						})}
-						menuTrigger={menuTrigger}
-						ref={ref}
-					/>
+					<FieldStateContext.Provider value={fieldState}>
+						<RacComboBox
+							{...comboboxProps}
+							{...rootIdProps(id, inputId)}
+							allowsEmptyCollection={allowsEmptyCollection}
+							className={composeRenderProps(className, (renderedClassName) => {
+								return comboboxRecipe().root({ className: renderedClassName });
+							})}
+							isRequired={isRequired}
+							menuTrigger={menuTrigger}
+							ref={ref}
+						/>
+					</FieldStateContext.Provider>
 				</ComboboxValidationProvider>
 			</ComboboxSizeProvider>
 		</ComboboxInputGroupContext.Provider>

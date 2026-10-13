@@ -379,6 +379,10 @@ Entrypoint: **retain**.
 | `InlineField`             | retain   | Place checkbox or switch description and error beneath its label text.                                                               |
 | `InlineFieldProps`        | retain   | Type an app wrapper around `InlineField`. Place checkbox or switch description and error beneath its label text.                     |
 
+> **Superseded by [#780](https://github.com/lukebennett88/luke-ui/issues/780):** the public type is
+> now `NecessityIndicator` (`'required-asterisk' \| 'required-label' \| 'optional-label'`). There is
+> no `FieldNecessityIndicator` alias.
+
 ### `@luke-ui/react/primitives/select`
 
 Source:
@@ -843,6 +847,10 @@ demonstrated use.
 
 `FieldNecessityIndicator` remains the shared public `icon | label` annotation. Accessible-name
 union, normalisation helpers, field recipe, slot functions and size/state context are private.
+
+> **Superseded by [#780](https://github.com/lukebennett88/luke-ui/issues/780):** the public type is
+> now `NecessityIndicator` (`'required-asterisk' \| 'required-label' \| 'optional-label'`). There is
+> no `FieldNecessityIndicator` alias.
 
 ### `primitives/text-input`
 

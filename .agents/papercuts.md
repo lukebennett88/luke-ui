@@ -58,3 +58,26 @@ evidence shows it does not help. Silence in this log is not evidence.
 - Problem: The documented contract is `<major>.x`, and the regex manager is supposed to keep that
   form with `rangeStrategy: 'replace'`. The non-major group still rewrote the field to an exact
   version, so the PR had to be corrected by hand.
+
+## The token board's visual capture renders two different ways on the same code
+
+- Seen: 2026-10-13 (#797). The Visual regression run for commit `42cf474f` (38333714238) and the run
+  for commit `c818adf3` (38338181845) produced byte-identical `theme/token-board-*` renders that
+  differ from the baseline. The run for commit `a2f12ba8` (38336322056) matched the baseline,
+  although that commit contains the same code as `42cf474f`. The token board imports no field
+  components.
+- Where: `packages/@luke-ui/react/src/theme/token-board.browser.test.tsx`. Governing rule:
+  docs/TESTING.md, "Remove nondeterminism. Do not add an allowance."
+- Problem: about 290k mismatched pixels across the whole board (anti-aliasing, not a shift) appear
+  on unrelated PRs, so reviewers must judge whether a token-board diff is real.
+
+## The font-family browser assertion disagrees with Chromium's computed serialization
+
+- Seen: 2026-10-13 (necessity-markers-dom cleanup). `TURBO_FORCE=true pnpm run test` failed at
+  `src/theme/font-family.browser.test.ts:76`: the assertion accepted
+  `-apple-system, BlinkMacSystemFont, Noto Sans CJK JP, sans-serif`, but Chromium returned
+  `-apple-system, "system-ui", "Noto Sans CJK JP", sans-serif`.
+- Where: `packages/@luke-ui/react/src/theme/font-family.browser.test.ts:76`. Governing rule:
+  docs/TESTING.md, "Component tests".
+- Problem: The assertion compares different font-family serializations, and the browser test fails
+  on Chromium's returned value.

@@ -162,6 +162,7 @@ for (const consumer of consumers) {
 				expect(markup).toContain('<button');
 				expect(markup).toContain('<input');
 				expect(markup).toContain('role="switch"');
+				expect(markup).toContain('(required)');
 
 				const server = await serveBuild(dir);
 				const browser = await chromium.launch();
@@ -182,6 +183,11 @@ for (const consumer of consumers) {
 						const root = document.getElementById('root');
 						const elements = [...(root?.querySelectorAll('*') ?? [])];
 						const serverElements = serverSnapshot?.elements ?? [];
+						const selectNameIds =
+							root
+								?.querySelector('[aria-haspopup="listbox"]')
+								?.getAttribute('aria-labelledby')
+								?.split(' ') ?? [];
 						return {
 							controls: {
 								buttons: root?.querySelectorAll('button').length,
@@ -194,6 +200,11 @@ for (const consumer of consumers) {
 								elements.length === serverElements.length &&
 								elements.every((element, index) => element === serverElements[index]),
 							recoverableErrors: hydration?.recoverableErrors,
+							selectName: {
+								ids: selectNameIds,
+								text: selectNameIds.map((id) => document.getElementById(id)?.textContent ?? null),
+								unresolved: selectNameIds.filter((id) => document.getElementById(id) == null),
+							},
 							textAfterHydration: root?.textContent,
 							serverText: serverSnapshot?.text,
 						};
@@ -201,13 +212,17 @@ for (const consumer of consumers) {
 
 					expect(result.recoverableErrors).toEqual([]);
 					expect(consoleErrors).toEqual([]);
-					expect(result.controls).toEqual({ buttons: 1, inputs: 3 });
+					expect(result.controls).toEqual({ buttons: 2, inputs: 3 });
 					// React Aria effects adjust attributes after hydration, so compare nodes, not markup.
 					// Every server element must survive in place: none replaced, added, or removed.
 					expect(result.keptServerElements).toBe(true);
 					expect(result.textAfterHydration).toBe(result.serverText);
 					// Each label resolves through server-generated ids, so it proves those ids hydrated intact.
 					expect(result.inputLabels).toEqual(['Name', 'Example checkbox', 'Example switch']);
+					// The Select's required cue is hidden text the trigger references by a server-generated id.
+					expect(result.serverText).toContain('(required)');
+					expect(result.selectName.unresolved).toEqual([]);
+					expect(result.selectName.text).toContain('(required)');
 
 					// Clicking the label text proves hydration attached each field's handlers.
 					await page.getByText('Example checkbox').click();

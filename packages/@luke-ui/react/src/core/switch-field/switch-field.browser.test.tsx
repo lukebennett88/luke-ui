@@ -157,19 +157,25 @@ test('a disabled or read-only SwitchField keeps its selection', async () => {
 	expect(changes).toEqual([]);
 });
 
-// The marker is CSS content with no DOM node, so the accessible name is how the tests observe it.
+// Required markers are hidden from assistive technology, so the name does not include them.
 test('a required SwitchField marks its label with its necessityIndicator', () => {
 	render(
 		<>
-			<SwitchField isRequired label="Switch icon" />
-			<SwitchField isRequired label="Switch words" necessityIndicator="label" />
+			<SwitchField isRequired label="Switch asterisk" />
+			<SwitchField isRequired label="Switch words" necessityIndicator="required-label" />
 			<SwitchField label="Optional" />
 		</>,
 	);
+	const asterisk = switchInput('Switch asterisk');
+	const words = switchInput('Switch words');
+	const optional = switchInput('Optional');
 
-	expect(switchInput('Switch icon*')).toBeInTheDocument();
-	expect(switchInput('Switch words(required)')).toBeInTheDocument();
-	expect(switchInput('Optional')).toHaveAccessibleName('Optional');
+	expect(asterisk).toBeRequired();
+	expect(labelFor(asterisk).textContent).toBe('Switch asterisk\u00A0*');
+	expect(words).toBeRequired();
+	expect(labelFor(words).textContent).toBe('Switch words\u00A0(required)');
+	expect(optional).not.toBeRequired();
+	expect(labelFor(optional).textContent).toBe('Optional');
 });
 
 test('an errorMessage marks the switch invalid and shows the error under the label', () => {
@@ -197,7 +203,7 @@ test('a required SwitchField shows its native validation message after a failed 
 			<button type="submit">Submit</button>
 		</form>,
 	);
-	const input = switchInput('Notifications*');
+	const input = switchInput('Notifications');
 
 	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
 
@@ -243,7 +249,7 @@ test('the SwitchField scene has no axe violations', async () => {
 	const { container } = render(
 		<>
 			<SwitchScene />
-			<SwitchField isRequired label="Required" necessityIndicator="label" />
+			<SwitchField isRequired label="Required" necessityIndicator="required-label" />
 		</>,
 	);
 
@@ -356,7 +362,7 @@ test('necessity markers', { tags: ['visual'] }, async () => {
 				isRequired
 				label="Enable notifications"
 				name="label"
-				necessityIndicator="label"
+				necessityIndicator="required-label"
 			/>
 			<SwitchField
 				errorMessage="Turn this on to continue."

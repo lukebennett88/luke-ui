@@ -6,8 +6,10 @@ export {
 	type FieldErrorProps,
 	FieldLabel,
 	type FieldLabelProps,
-	type FieldNecessityIndicator,
 	type FieldProps,
 	InlineField,
 	type InlineFieldProps,
+	InlineLabelText,
+	type InlineLabelTextProps,
+	type NecessityIndicator,
 } from '../../core/primitives/field/field.js';

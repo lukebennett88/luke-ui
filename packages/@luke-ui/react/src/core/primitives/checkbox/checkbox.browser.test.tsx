@@ -213,8 +213,31 @@ test('CheckboxLabel draws no required marker', () => {
 			<Parts label="Required" />
 		</CheckboxRoot>,
 	);
+	const input = checkbox('Required');
 
-	expect(checkbox('Required')).toHaveAccessibleName('Required');
+	expect(input).toBeRequired();
+	expect(input.closest('label')?.textContent).toBe('Required');
+});
+
+// The marker is hidden from assistive technology, so the label's text shows it and the name does not.
+test('a FieldLabel marks a required CheckboxRoot', () => {
+	render(
+		<>
+			<CheckboxRoot isRequired>
+				<FieldLabel data-testid="required-label">Required</FieldLabel>
+				<Bare />
+			</CheckboxRoot>
+			<CheckboxRoot>
+				<FieldLabel data-testid="optional-label">Optional</FieldLabel>
+				<Bare />
+			</CheckboxRoot>
+		</>,
+	);
+
+	expect(checkbox('Required')).toBeRequired();
+	expect(page.getByTestId('required-label').element().textContent).toBe('Required\u00A0*');
+	expect(checkbox('Optional')).not.toBeRequired();
+	expect(page.getByTestId('optional-label').element().textContent).toBe('Optional');
 });
 
 test('a composed checkbox primitive has no axe violations', async () => {
