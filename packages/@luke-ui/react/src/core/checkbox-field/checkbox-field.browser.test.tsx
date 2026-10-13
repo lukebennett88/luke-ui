@@ -468,35 +468,51 @@ test('rest, hover, and pressed stay distinct without materials', { tags: ['visua
 });
 
 test('necessity markers', { tags: ['visual'] }, async () => {
-	const { locator } = render(
-		<Stack>
-			<CheckboxField isRequired label="Accept the terms" name="icon" />
-			<CheckboxField
-				isRequired
-				label="Accept the terms"
-				name="label"
-				necessityIndicator="required-label"
-			/>
-			<CheckboxField
-				errorMessage="Choose an option."
-				isRequired
-				label="Accept the terms"
-				name="invalid"
-			/>
-			<CheckboxField
-				isRequired
-				label="This required label wraps onto a second line so the marker sits after its last word."
-				name="wrapping"
-			/>
-			<CheckboxField
-				isRequired
-				label="This required label wraps onto a second line so the marker follows."
-				name="wrapping-words"
-				necessityIndicator="required-label"
-			/>
-		</Stack>,
-	);
-	await captureVisual(locator, 'checkbox-field/necessity-markers');
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<Stack>
+				<CheckboxField isRequired label="Accept the terms" name="icon" />
+				<CheckboxField
+					isRequired
+					label="Accept the terms"
+					name="label"
+					necessityIndicator="required-label"
+				/>
+				<CheckboxField
+					isDisabled
+					isRequired
+					label="Accept the terms"
+					name="disabled-required"
+					necessityIndicator="required-label"
+				/>
+				<CheckboxField
+					isDisabled
+					label="Accept the terms"
+					name="disabled-optional"
+					necessityIndicator="optional-label"
+				/>
+				<CheckboxField
+					errorMessage="Choose an option."
+					isRequired
+					label="Accept the terms"
+					name="invalid"
+				/>
+				<CheckboxField
+					isRequired
+					label="This required label wraps onto a second line so the marker sits after its last word."
+					name="wrapping"
+				/>
+				<CheckboxField
+					isRequired
+					label="This required label wraps onto a second line so the marker follows."
+					name="wrapping-words"
+					necessityIndicator="required-label"
+				/>
+			</Stack>,
+			{ appearance },
+		);
+		await captureVisualAppearance(locator, 'checkbox-field/necessity-markers', appearance);
+	}
 });
 
 test('keyboard focus ring', { tags: ['visual'] }, async () => {

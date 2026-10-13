@@ -355,29 +355,45 @@ test('rest, hover, and pressed stay distinct without materials', { tags: ['visua
 });
 
 test('necessity markers', { tags: ['visual'] }, async () => {
-	const { locator } = render(
-		<Stack>
-			<SwitchField isRequired label="Enable notifications" name="icon" />
-			<SwitchField
-				isRequired
-				label="Enable notifications"
-				name="label"
-				necessityIndicator="required-label"
-			/>
-			<SwitchField
-				errorMessage="Turn this on to continue."
-				isRequired
-				label="Enable notifications"
-				name="invalid"
-			/>
-			<SwitchField
-				isRequired
-				label="This required label wraps onto a second line so the marker sits after its last word."
-				name="wrapping"
-			/>
-		</Stack>,
-	);
-	await captureVisual(locator, 'switch-field/necessity-markers');
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<Stack>
+				<SwitchField isRequired label="Enable notifications" name="icon" />
+				<SwitchField
+					isRequired
+					label="Enable notifications"
+					name="label"
+					necessityIndicator="required-label"
+				/>
+				<SwitchField
+					isDisabled
+					isRequired
+					label="Enable notifications"
+					name="disabled-required"
+					necessityIndicator="required-label"
+				/>
+				<SwitchField
+					isDisabled
+					label="Enable notifications"
+					name="disabled-optional"
+					necessityIndicator="optional-label"
+				/>
+				<SwitchField
+					errorMessage="Turn this on to continue."
+					isRequired
+					label="Enable notifications"
+					name="invalid"
+				/>
+				<SwitchField
+					isRequired
+					label="This required label wraps onto a second line so the marker sits after its last word."
+					name="wrapping"
+				/>
+			</Stack>,
+			{ appearance },
+		);
+		await captureVisualAppearance(locator, 'switch-field/necessity-markers', appearance);
+	}
 });
 
 test('keyboard focus ring', { tags: ['visual'] }, async () => {
