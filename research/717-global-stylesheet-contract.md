@@ -164,10 +164,13 @@ five. Chromium does not support `s` ([crbug 40667738](https://crbug.com/40667738
 returns there and the letter and roman lists keep the reset's `none`.
 
 Nothing simpler works in Chromium. `list-style-type: revert` rolls back past the hint to `decimal`,
-and `revert-layer` rolls back to the reset. A case-insensitive fallback would turn `A` and `I`
-lowercase even without a reset. Typed `attr()` with `@counter-style` names `a`, `A`, `i`, and `I`
-works in Chromium, but needs page-wide counter-style names and has no Safari support. #776 tracks
-the decision for 1.0.
+and `revert-layer` rolls back to the reset. A case-insensitive fallback collapses `a`/`A` and
+`i`/`I` even without a reset. Typed `attr()` with `@counter-style` names `a`, `A`, `i`, and `I`
+works in Chromium, but needs page-wide counter-style names, accepts collision risk, and adds a
+second path beside the `s` rules. Safari already supports `s`, so that enhancement would not be for
+Safari's benefit. Re-checked in Chrome 148 and Playwright Chromium 156 on 2026-10-13. The #776
+recommendation is to keep the documented limitation for 1.0 and wait for the `s` flag: see
+[776-typed-prose-list-markers.md](./776-typed-prose-list-markers.md).
 
 ### Focus indicators
 

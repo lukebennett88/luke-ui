@@ -94,7 +94,8 @@ proseStyle('pre', {
 // Markers are restated so a framework reset below Luke UI, such as Tailwind Preflight, cannot
 // remove them. That reset also beats the HTML `type` hint, so typed lists restate the HTML rendering
 // rules for `type`. HTML matches `type` case-insensitively unless a selector uses the `s` flag.
-// Where `s` is unsupported (Chromium), those rules match nothing and the hint alone applies.
+// Where `s` is unsupported (Chromium), those typed rules match nothing. The presentational hint
+// remains, but an author list reset still beats it, so letter and roman markers stay `none`.
 proseStyle('ul, ol', { paddingInlineStart: vars.space.sp24 });
 proseStyle('ul', { listStyleType: 'disc' });
 proseStyle('ol:not([type]), ol[type="1"]', { listStyleType: 'decimal' });
