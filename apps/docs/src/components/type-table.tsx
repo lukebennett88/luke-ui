@@ -1,5 +1,5 @@
 import { Box } from '@luke-ui/react/box';
-import { Cluster } from '@luke-ui/react/cluster';
+import { Code } from '@luke-ui/react/code';
 import { Grid } from '@luke-ui/react/grid';
 import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@luke-ui/react/link';
@@ -12,6 +12,9 @@ import { useState, useSyncExternalStore } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { Disclosure, DisclosurePanel } from 'react-aria-components/Disclosure';
 import * as styles from './type-table.css.js';
+
+/** Prop name / type columns shared by the header and each row trigger. */
+const PROP_TYPE_COLUMNS = '1fr 3fr';
 
 interface ParameterNode {
 	description: ReactNode;
@@ -60,18 +63,18 @@ export function TypeTable({
 			overflow="hidden"
 			padding="sp4"
 		>
-			<Cluster alignItems="center" paddingBlock="sp4" paddingInline="sp12">
-				<Text
-					className={styles.headerProp}
-					color="secondary"
-					elementType="span"
-					fontWeight="label"
-					typography="caption"
-				>
+			<Grid
+				alignItems="center"
+				columnGap="sp8"
+				columns={PROP_TYPE_COLUMNS}
+				paddingBlock="sp4"
+				paddingInline="sp12"
+			>
+				<Text color="secondary" elementType="span" fontWeight="label" typography="caption">
 					Prop
 				</Text>
 				<Text
-					className={styles.headerType}
+					className={styles.typeColumn}
 					color="secondary"
 					elementType="span"
 					fontWeight="label"
@@ -79,7 +82,7 @@ export function TypeTable({
 				>
 					Type
 				</Text>
-			</Cluster>
+			</Grid>
 			{Object.entries(type).map(([name, item]) => (
 				<TypeTableRow item={item} key={name} name={name} parentId={id} />
 			))}
@@ -144,12 +147,12 @@ function TypeTableRow({
 					railAlignment="center"
 					railEnd={<Icon aria-hidden className={styles.chevron} name="chevronDown" size="xsmall" />}
 				>
-					<Box alignItems="center" display="flex" minInlineSize="0">
-						<code className={cx(styles.propName, deprecated && styles.propNameDeprecated)}>
+					<Grid alignItems="center" columnGap="sp8" columns={PROP_TYPE_COLUMNS} minInlineSize="0">
+						<Code className={cx(styles.propName, deprecated && styles.propNameDeprecated)}>
 							{name}
 							{required ? null : '?'}
-						</code>
-						<span className={styles.propType}>
+						</Code>
+						<span className={styles.typeColumn}>
 							{typeDescriptionLink === undefined ? (
 								type
 							) : (
@@ -158,11 +161,17 @@ function TypeTableRow({
 								</Link>
 							)}
 						</span>
-					</Box>
+					</Grid>
 				</Track>
 			</Box>
 			<DisclosurePanel>
-				<Grid className={styles.panel} columns="1fr 3fr" gap="sp16" overflow="auto" padding="sp12">
+				<Grid
+					className={styles.panel}
+					columns={PROP_TYPE_COLUMNS}
+					gap="sp16"
+					overflow="auto"
+					padding="sp12"
+				>
 					{description === undefined || description === null || description === '' ? null : (
 						<Box className={styles.description} gridColumn="1 / -1">
 							{description}
@@ -199,7 +208,7 @@ function TypeTableRow({
 											</Text>
 										}
 									>
-										<div>{param.description}</div>
+										<Box minInlineSize="0">{param.description}</Box>
 									</Track>
 								))}
 							</Stack>

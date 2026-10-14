@@ -57,10 +57,10 @@ export const tableScroll = style({
 	},
 });
 
+/** Caption type + min width; Grid owns columns and cell padding. */
 export const table = style({
 	'@layer': {
 		components: {
-			borderCollapse: 'collapse',
 			fontSize: vars.font.caption.fontSize,
 			inlineSize: '100%',
 			lineHeight: vars.font.caption.lineHeight,
@@ -72,6 +72,9 @@ export const table = style({
 export const tableWithSamples = style({
 	'@layer': {
 		components: {
+			fontSize: vars.font.caption.fontSize,
+			inlineSize: '100%',
+			lineHeight: vars.font.caption.lineHeight,
 			minInlineSize: '40rem',
 		},
 	},
@@ -88,24 +91,6 @@ export const tableHeaderRow = style({
 	},
 });
 
-export const sampleHeaderCell = style({
-	'@layer': {
-		components: {
-			inlineSize: '8rem',
-		},
-	},
-});
-
-export const tableHeaderCell = style({
-	'@layer': {
-		components: {
-			fontWeight: vars.font.weight.label,
-			paddingBlock: vars.space.sp8,
-			paddingInline: vars.space.sp16,
-		},
-	},
-});
-
 export const tableRow = style({
 	'@layer': {
 		components: {
@@ -117,24 +102,6 @@ export const tableRow = style({
 					borderBlockEndWidth: 0,
 				},
 			},
-		},
-	},
-});
-
-export const tableCell = style({
-	'@layer': {
-		components: {
-			paddingBlock: vars.space.sp8,
-			paddingInline: vars.space.sp16,
-			verticalAlign: 'middle',
-		},
-	},
-});
-
-export const variableCode = style({
-	'@layer': {
-		components: {
-			color: vars.color.text.secondary,
 		},
 	},
 });

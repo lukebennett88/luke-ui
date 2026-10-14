@@ -7,7 +7,7 @@ const TYPE_TABLE_CONTAINER = 'luke-docs-type-table';
 /** Wide enough for the Prop and Type columns to sit side by side. */
 const TYPE_COLUMN_MIN_INLINE_SIZE = `${TYPE_TABLE_CONTAINER} (inline-size >= 1024px)`;
 
-/** Container query host + caption type; layout chrome lives on Box/Stack/Cluster/Grid. */
+/** Container query host + caption type; column tracks live on Grid. */
 export const root = style({
 	'@layer': {
 		components: {
@@ -20,20 +20,12 @@ export const root = style({
 	},
 });
 
-export const headerProp = style({
-	'@layer': {
-		components: {
-			flex: '0 0 25%',
-			minInlineSize: 'fit-content',
-			paddingInlineEnd: vars.space.sp8,
-		},
-	},
-});
-
-export const headerType = style({
+/** Shown beside Prop once the type-table container is wide enough. */
+export const typeColumn = style({
 	'@layer': {
 		components: {
 			display: 'none',
+			minInlineSize: 0,
 			'@container': {
 				[TYPE_COLUMN_MIN_INLINE_SIZE]: {
 					display: 'block',
@@ -66,7 +58,7 @@ export const row = style({
 	},
 });
 
-/** Button reset and interaction; Box/Cluster own padding and flex via renderRoot. */
+/** Button reset and interaction; Box owns padding via renderRoot. */
 export const trigger = style({
 	'@layer': {
 		components: {
@@ -93,13 +85,8 @@ export const propName = style({
 	'@layer': {
 		components: {
 			color: vars.color.text.primary,
-			flex: '0 0 25%',
-			fontFamily: vars.font.family.code,
-			fontSize: vars.font.caption.fontSize,
 			fontWeight: vars.font.weight.label,
-			lineHeight: vars.font.caption.lineHeight,
 			minInlineSize: 'fit-content',
-			paddingInlineEnd: vars.space.sp8,
 		},
 	},
 });
@@ -109,20 +96,6 @@ export const propNameDeprecated = style({
 		components: {
 			color: vars.color.text.secondary,
 			textDecoration: 'line-through',
-		},
-	},
-});
-
-export const propType = style({
-	'@layer': {
-		components: {
-			display: 'none',
-			minInlineSize: 0,
-			'@container': {
-				[TYPE_COLUMN_MIN_INLINE_SIZE]: {
-					display: 'block',
-				},
-			},
 		},
 	},
 });
