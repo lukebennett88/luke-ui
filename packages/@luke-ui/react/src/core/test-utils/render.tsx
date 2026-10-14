@@ -46,6 +46,7 @@ export type RenderResult = {
 	locator: Locator;
 	user: typeof userEvent;
 	unmount: () => void;
+	rerender: (node: ReactNode) => void;
 };
 
 export type HydrateResult = RenderResult & {
@@ -61,13 +62,18 @@ export function render(node: ReactNode, options?: { appearance?: VisualAppearanc
 	const root = createRoot(container);
 	trackMountedRender(container, root);
 
-	act(() => {
-		root.render(<Provider spritesheetHref={spritesheetHref}>{node}</Provider>);
-	});
+	function rerender(next: ReactNode) {
+		act(() => {
+			root.render(<Provider spritesheetHref={spritesheetHref}>{next}</Provider>);
+		});
+	}
+
+	rerender(node);
 
 	return {
 		container,
 		locator: page.elementLocator(container),
+		rerender,
 		unmount: () => unmount(container, root),
 		user: userEvent,
 	};
@@ -103,6 +109,11 @@ export function hydrate(
 		container,
 		locator: page.elementLocator(container),
 		recoverableErrors,
+		rerender: (next) => {
+			act(() => {
+				root.render(next);
+			});
+		},
 		unmount: () => unmount(container, root),
 		user: userEvent,
 	};

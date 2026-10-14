@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
+import { Form } from '@luke-ui/react/form';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
@@ -20,47 +21,54 @@ export default () => {
 
 	return (
 		<Stack gap="sp16" maxInlineSize="20rem">
-			<form onSubmit={form.handleSubmit(() => undefined)}>
+			<Form
+				necessityIndicator="required-label"
+				onSubmit={form.handleSubmit(() => undefined)}
+				validationBehavior="aria"
+			>
 				<Stack gap="sp16">
 					<Controller
 						control={form.control}
 						name="name"
-						render={({ field, fieldState }) => (
-							<Stack minBlockSize="5.5rem">
+						render={({ field, fieldState }) => {
+							return (
 								<TextInputField
 									errorMessage={fieldState.error?.message}
 									inputRef={field.ref}
+									isRequired
 									label="Name"
+									name={field.name}
 									onBlur={field.onBlur}
 									onChange={field.onChange}
-									validationBehavior="aria"
 									value={field.value}
 								/>
-							</Stack>
-						)}
+							);
+						}}
 					/>
 					<Controller
 						control={form.control}
 						name="email"
-						render={({ field, fieldState }) => (
-							<Stack minBlockSize="5.5rem">
+						render={({ field, fieldState }) => {
+							return (
 								<TextInputField
 									errorMessage={fieldState.error?.message}
 									inputRef={field.ref}
+									isRequired
 									label="Email"
+									name={field.name}
 									onBlur={field.onBlur}
 									onChange={field.onChange}
-									validationBehavior="aria"
+									type="email"
 									value={field.value}
 								/>
-							</Stack>
-						)}
+							);
+						}}
 					/>
 					<Cluster>
 						<Button type="submit">Create account</Button>
 					</Cluster>
 				</Stack>
-			</form>
+			</Form>
 			<Stack minBlockSize="1.5rem">
 				<Text elementType="p" role="status">
 					{form.formState.isSubmitSuccessful ? `Submitted: ${form.getValues('name')}` : '\u00a0'}

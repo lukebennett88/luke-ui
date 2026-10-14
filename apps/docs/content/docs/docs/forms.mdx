@@ -1,10 +1,12 @@
 ---
 title: Forms
 description:
-  Build an accessible native form from Luke UI's field components, and handle submit and reset.
+  Build an accessible form from Luke UI's Form and field components, and handle submit and reset.
 ---
 
-A Luke UI form uses the native HTML `<form>` element. Compose it from Luke UI fields and buttons.
+A Luke UI form uses [`Form`](/components/forms/form). Compose it from Luke UI fields and buttons.
+Put fields in a layout primitive such as [`Stack`](/components/layout/stack). `Form` is not a layout
+wrapper.
 
 <ExampleBlock src="forms/build-a-form" title="Forms: Build a form" />
 
@@ -33,20 +35,39 @@ an error message appears.
 
 ## Required fields
 
-Set `isRequired` when someone must complete a field. The browser blocks submission until the field
-has a value.
+Requiredness has three parts:
 
-Choose how a label marks that state with `necessityIndicator`:
+- **Semantics.** Set `isRequired` on each field that must be completed. With native validation, the
+  browser blocks submission while a required field is empty. When `validationBehavior="aria"` is
+  set, the control remains required, but the application or form library handles validation and
+  submission.
+- **Visible marker.** Choose how the label shows that state with `necessityIndicator`.
+- **Accessible name.** Required markers stay visual. Assistive technology reads required state from
+  the control. An optional marker with `'optional-label'` becomes part of the accessible name.
 
-- `'required-asterisk'` adds a visual `*` after a required label. Assistive technology reads
-  required state from the control, not from the marker.
-- `'required-label'` adds visible "(required)" after a required label. Assistive technology still
-  reads required state from the control.
-- `'optional-label'` adds "(optional)" after a definitely optional label. That text is part of the
-  accessible name.
+Choose a marker with `necessityIndicator`:
+
+- `'required-asterisk'` adds a visual `*` after a required label.
+- `'required-label'` adds visible "(required)" after a required label.
+- `'optional-label'` adds "(optional)" after a definitely optional label.
+
+Set `necessityIndicator` on [`Form`](/components/forms/form) to use the same convention across its
+fields. An individual field can override that setting. When neither the field nor its Form specifies
+an indicator, required labels display an asterisk.
 
 A field with only `aria-label` or `aria-labelledby` shows no marker and gets no "(optional)" suffix.
-When `necessityIndicator` is omitted, the field uses `'required-asterisk'`.
+
+When required fields use an asterisk, explain what the marker means near the start of the form. When
+using `'optional-label'`, explain that fields are required unless marked optional.
+`'required-label'` states requiredness in the label itself, so a separate legend is usually
+unnecessary. The indicator changes the label, not the field's required state.
+
+## Related fields
+
+Group related controls with a native `<fieldset>` and `<legend>` when they share one question or
+topic, such as a set of notification options. The legend names the group.
+
+<ExampleBlock src="forms/field-group" title="Forms: Related fields" />
 
 ## Controlled and uncontrolled fields
 
@@ -60,47 +81,54 @@ For a controlled `CheckboxField` or `SwitchField`, pass `isSelected` and `onChan
 
 ## Submit
 
-Pass `onSubmit` to the `<form>` element. Call `event.preventDefault()`, then read the values from
-`FormData`.
+Prefer Form's `action` for ordinary submissions. Pass a React Action, often from `useActionState`,
+so the handler receives `FormData` without a submit event. Use the pending flag for the submit
+[`Button`](/components/actions/button). After a successful Action, React resets uncontrolled fields.
+Return server errors from the Action and pass them through `validationErrors`. Read
+[Server validation](/docs/validation#server-validation) for that pattern.
 
-```tsx
-function handleSubmit(event: FormEvent<HTMLFormElement>) {
-	event.preventDefault();
-	const data = new FormData(event.currentTarget);
-	const email = data.get('email');
-}
-```
+Use `onSubmit` when the handler needs the submit event: calling `preventDefault`, reading the form
+element, or wiring a form library. Libraries such as React Hook Form and TanStack Form expect
+`onSubmit`. They own pending state and errors themselves. Read
+[React Hook Form](/docs/react-hook-form) and [TanStack Form](/docs/tanstack-form) for those
+integrations.
+
+React's [form Actions](https://react.dev/reference/react-dom/components/form#props) document
+`action` and pending behaviour in detail.
 
 Give the submit button `type="submit"`.
 
 ## Reset
 
-Give a button `type="reset"` to restore uncontrolled fields. The browser restores their starting
-values.
+Avoid a `type="reset"` button in ordinary forms. Someone can clear completed work by accident.
 
-An `onReset` handler must reset state that React owns.
+When a form genuinely needs to restore defaults, a reset control can be appropriate. The browser
+restores uncontrolled fields to their starting values. Controlled fields keep the state React owns,
+so an `onReset` handler must reset that state too.
 
-```tsx
-const INITIAL_EMAIL = '';
-const [email, setEmail] = useState(INITIAL_EMAIL);
+That is separate from the automatic reset after a successful Action, which restores uncontrolled
+fields without a reset button.
 
-<form onReset={() => setEmail(INITIAL_EMAIL)}>
-	<TextInputField label="Email address" name="email" onChange={setEmail} value={email} />
-	<Button type="reset">Reset</Button>
-</form>;
-```
+## Fields outside the form element
+
+A field outside the form element can participate in native submission through the HTML `form`
+attribute. That association does not establish React ancestry. If the field is outside `Form`'s
+React subtree, it does not inherit the shared necessity indicator, validation behaviour, or server
+errors. Set `necessityIndicator` and `validationBehavior` on the field itself, and pass server
+errors through its `errorMessage`.
 
 ## Validation
 
 Luke UI supports browser validation, custom validation, and server validation. The
-[Validation guide](/docs/validation) explains each approach.
+[Validation guide](/docs/validation) explains each approach, including focus after an unsuccessful
+submission.
 
 - Set native constraints such as `isRequired`, `minLength`, `pattern`, or `type="email"` for browser
   validation.
 - Pass `validate` for a custom rule. Pass a controlled `errorMessage` for feedback that must update
   on every keystroke.
-- Pass `validationErrors` to React Aria's `Form` for server errors. Key each error by the field
-  `name`.
+- Pass `validationErrors` to [`Form`](/components/forms/form) for server errors. Key each error by
+  the field `name`.
 
 Start with native form behaviour. When a form library owns the form state, read
 [React Hook Form](/docs/react-hook-form) or [TanStack Form](/docs/tanstack-form).

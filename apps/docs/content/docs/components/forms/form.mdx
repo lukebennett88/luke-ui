@@ -1,0 +1,48 @@
+---
+title: Form
+description: Groups fields for submission, validation, and a shared necessity indicator.
+source: packages/@luke-ui/react/src/exports/form.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/Form.html
+---
+
+`Form` groups fields for submission. Beyond a native HTML form, it shares a necessity indicator,
+validation behaviour, and server errors with nested Luke UI fields.
+
+Use a layout component such as [`Stack`](/components/layout/stack) to arrange its contents. Prefer
+`action` for ordinary submissions and `onSubmit` when you need the submit event or a form library.
+Read [Submit](/docs/forms#submit) for the differences.
+
+<ExampleBlock src="form/basic" title="Form: Basic" />
+
+## Necessity indicators
+
+Set `necessityIndicator` on `Form` to choose how nested fields identify required or optional values.
+A field's own `necessityIndicator` overrides the Form setting. When neither sets one, required
+labels display an asterisk.
+
+The indicator changes the label. It does not make a field required. Set `isRequired` on each
+required field.
+
+`Form` does not generate a legend that explains required or optional markers. Read
+[Required fields](/docs/forms#required-fields) for when to add one and how the three indicators
+differ.
+
+## Validation
+
+By default, native validation prevents submission when a field is invalid. Set
+`validationBehavior="aria"` when a form library handles validation. An individual field can override
+the Form setting.
+
+Pass server errors through `validationErrors`, keyed by each field's `name`.
+
+Read [Validation](/docs/validation) for validation rules, error precedence, and when messages appear
+or clear.
+
+## Accessibility
+
+Provide an accessible name for the form landmark when the page has more than one form, or when the
+form's purpose is not clear from surrounding content. Pass `aria-label` or `aria-labelledby`.
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/form/form.tsx" name="FormProps" />

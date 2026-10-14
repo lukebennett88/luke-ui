@@ -5,6 +5,9 @@
 Use strict TypeScript. Import types with `import type`. Local imports include the explicit `.js`
 extension.
 
+Only modules in `src/exports/` re-export symbols defined in another module. Internal code imports
+symbols directly from their defining modules.
+
 ## Formatting
 
 `oxfmt` owns formatting. The repo uses tabs, 100-column wrapping, single quotes in TypeScript, and

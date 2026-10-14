@@ -20,24 +20,38 @@ Set `isRequired` on `TextInputField`, `ComboboxField`, `SelectField`, `CheckboxF
 `pattern` on `TextInputField` to state a rule for the text. Pass `type="email"` or `type="url"` to
 check the value's format.
 
-Leave out `errorMessage`. The field renders the message the constraint produces. It appears on blur
-or on submit.
+Leave out `errorMessage`. The field renders the message the constraint produces. Constraint errors
+normally appear after someone blurs a field or submits the form.
 
 <ExampleBlock src="forms/constraint-validation" title="Validation: Constraint validation" />
 
-Pass `validationBehavior="native"` to block submission until every field passes. This is the
-default.
+Native validation is the default. It prevents form submission when a field fails validation, so a
+form-library submit handler never runs.
 
-Pass `validationBehavior="aria"` to mark an invalid field for assistive technology. The form still
-submits. Set this on every field a form library wraps, so the library stays the only thing deciding
-whether the form is valid. Native behaviour calls `setCustomValidity` on a rejected field, so the
-browser blocks the submit event and the library never runs.
+Set `validationBehavior="aria"` on [`Form`](/components/forms/form) when a form library owns
+validation. This lets the library receive the submit event and decide whether the form is valid. An
+individual field can override the Form setting.
+
+### Native validation messages
+
+Constraint messages come from the browser. They follow the browser or operating system language
+setting.
+
+Keep the browser message when it matches the product language and names the fix clearly enough. Pass
+your own copy when the message must use the field's wording, match a style guide, or name a product
+rule the browser cannot describe.
+
+On composed fields such as `TextInputField`, `errorMessage` is React content for a controlled error.
+To customise a constraint message from the field's validity state, compose the
+[field primitives](/components/primitives/field) and pass a render function to `FieldError`. For a
+rule the browser cannot check, prefer `validate` on the field instead.
 
 ## Custom validation
 
 Pass a `validate` function for a rule the browser cannot check, such as a reserved username. The
 function takes the value and returns the validation message, or `null` when the value is valid.
-Leave out `errorMessage`. The field renders the message `validate` returns.
+Leave out `errorMessage`. The field renders the message `validate` returns. Those messages normally
+appear after blur or submit, not between keystrokes.
 
 <ExampleBlock src="forms/custom-validation" title="Validation: Custom rule" />
 
@@ -47,15 +61,13 @@ messages, but the field does not render them as a list. It joins them with a spa
 a single run-on sentence, and even two short messages can fill two lines in a 288px-wide form
 column.
 
-With the default validation behaviour, the field shows the validation message when someone commits
-the value, for example on blur or submit, rather than between keystrokes.
-
 ## Realtime validation
 
 Pass a controlled `errorMessage` for feedback that must update on every keystroke, such as password
 strength. You decide validity here, not the field. Make the field controlled with `value` and
 `onChange`, and compute `errorMessage` from that value on every render. An absent message keeps the
-field valid, so `undefined`, `null`, `false`, and an empty string all mean no error.
+field valid, so `undefined`, `null`, `false`, and an empty string all mean no error. The message
+appears when the application supplies a non-empty value and clears when that message is removed.
 
 ```tsx
 const [password, setPassword] = useState('');
@@ -70,40 +82,50 @@ const isTooShort = password.length > 0 && password.length < 12;
 />;
 ```
 
-This is the exception. Constraint and `validate` messages normally appear after the value is
-committed. This does not distract someone while they type.
-
 ## Form libraries
 
 Pass the library's current error message as `errorMessage`. The field goes invalid as soon as the
-library reports one, and clears once the library clears it. Read
-[React Hook Form](/docs/react-hook-form) and [TanStack Form](/docs/tanstack-form) for the full
-setup, including `validationBehavior="aria"` so the library stays the only thing deciding whether
-the form is valid.
+library reports one, and clears once the library clears it. Set `validationBehavior="aria"` on
+`Form` so native validation does not block the library's submit handler.
+
+Read [React Hook Form](/docs/react-hook-form) and [TanStack Form](/docs/tanstack-form) for the full
+setup.
 
 ## Server validation
 
-Pass server errors through `Form` from `react-aria-components`. `@luke-ui/react` does not export
-`Form`, so import it separately.
+Pass server errors through Luke UI's [`Form`](/components/forms/form) as `validationErrors`, keyed
+by each field's `name`. Server errors appear immediately. Form clears a field's server error when
+the value is committed, for example when the field blurs after an edit.
 
-```tsx
-import { Form } from 'react-aria-components';
+A React Action can return those errors with the submitted values. Pass the Action to Form's
+`action`, feed `validationErrors` from `useActionState`, and restore each field with `defaultValue`
+so values survive an unsuccessful response. After a successful Action, React resets uncontrolled
+fields. Pass the pending state to the submit [`Button`](/components/actions/button).
 
-<Form validationErrors={{ username: 'That username is taken.' }}>
-	<TextInputField label="Username" name="username" />
-</Form>;
-```
+<ExampleBlock src="forms/server-validation" title="Validation: Server errors" />
 
-Pass `validationErrors` with an object keyed by each field's `name`. Each field shows its message as
-soon as you pass `validationErrors`. The message clears once someone changes the field's value.
+Try the username `admin` to see a server error. Change the value and leave the field to clear it,
+then choose another name to submit successfully.
 
-## When errors appear and clear
+A non-empty field-level `errorMessage` overrides that field's entry in `validationErrors`. Clearing
+the field error reveals the outstanding server error if the value has not been committed. Committing
+a new value also clears that field's server error.
 
-An error appears on blur or on submit. It never appears between keystrokes. An error clears as soon
-as the value changes.
+## Focus after validation
 
-The controlled `errorMessage` pattern in the realtime validation section is the exception. It
-updates on every keystroke because that is its purpose.
+With native validation, an unsuccessful submission focuses the first invalid field. Keep that
+default when each field's message is enough to fix the problem.
+
+Override it when the form shows an error summary, or when focus should land somewhere else first.
+Pass `onInvalid` on [`Form`](/components/forms/form) and call `preventDefault` to stop that focus
+move, then move focus yourself. See
+[React Aria's Form focus management](https://react-aria.adobe.com/Form#focus-management) for an
+error-summary pattern.
+
+Server errors from `validationErrors` appear after the Action returns. They do not use that
+invalid-event focus path. Form libraries often manage focus themselves. Read
+[React Hook Form](/docs/react-hook-form#focus-the-first-invalid-field) when that library owns
+validation.
 
 ## Always pair an invalid field with a message
 
@@ -139,7 +161,7 @@ An error message has two jobs: name the problem, and name the fix.
 
 <Cards>
 	<Card href="/docs/forms" title="Forms">
-		Build a native form from Luke UI fields.
+		Build a form from Luke UI Form and fields.
 	</Card>
 	<Card href="/docs/react-hook-form" title="React Hook Form">
 		Hand validity to React Hook Form with validationBehavior.

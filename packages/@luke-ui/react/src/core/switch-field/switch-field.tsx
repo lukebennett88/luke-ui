@@ -1,11 +1,11 @@
 import type { JSX, ReactNode } from 'react';
-import type { NecessityIndicator } from '../primitives/field/field.js';
+import { InlineField } from '../primitives/field/field.js';
+import { InlineLabelText } from '../primitives/field/inline-label-text.js';
 import {
-	InlineField,
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
-} from '../primitives/field/field.js';
-import { InlineLabelText } from '../primitives/field/inline-label-text.js';
+} from '../primitives/field/is-invalid-from-error-message.js';
+import type { NecessityIndicator } from '../primitives/field/necessity-context.js';
 import type { SwitchRootProps } from '../primitives/switch/switch.js';
 import {
 	SwitchControl,
@@ -32,8 +32,8 @@ interface _SwitchFieldProps extends _SwitchFieldOmit {
 	 */
 	label: Exclude<ReactNode, boolean | null | undefined>;
 	/**
-	 * Controls the visible marker for required or optional controls.
-	 * @default 'required-asterisk'
+	 * Controls how the label identifies required or optional values. Inherits from `Form`, or uses
+	 * `'required-asterisk'` when unset.
 	 */
 	necessityIndicator?: NecessityIndicator;
 }

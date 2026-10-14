@@ -19,11 +19,11 @@ import { ComboboxTrayTrigger } from '../primitives/combobox/tray-trigger.js';
 import { ComboboxTray } from '../primitives/combobox/tray.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
 import type { FieldAccessibleNameProps } from '../primitives/field/field.js';
+import { Field } from '../primitives/field/field.js';
 import {
-	Field,
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
-} from '../primitives/field/field.js';
+} from '../primitives/field/is-invalid-from-error-message.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 

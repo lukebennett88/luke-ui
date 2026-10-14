@@ -1,24 +1,17 @@
 import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
+import { Form } from '@luke-ui/react/form';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
-import type { FormEvent } from 'react';
-import { useState } from 'react';
+import { useActionState } from 'react';
 
 export default () => {
-	const [submittedEmail, setSubmittedEmail] = useState('');
-
-	function handleSubmit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		const data = new FormData(event.currentTarget);
-		const email = data.get('email');
-		setSubmittedEmail(typeof email === 'string' ? email : '');
-	}
+	const [submittedEmail, formAction, isPending] = useActionState(submitEmail, '');
 
 	return (
 		<Stack gap="sp16" maxInlineSize="22rem">
-			<form onReset={() => setSubmittedEmail('')} onSubmit={handleSubmit}>
+			<Form action={formAction} necessityIndicator="required-label">
 				<Stack gap="sp16">
 					<TextInputField
 						description="We will send the receipt to this address."
@@ -28,11 +21,12 @@ export default () => {
 						type="email"
 					/>
 					<Cluster gap="sp8">
-						<Button type="submit">Submit</Button>
-						<Button type="reset">Reset</Button>
+						<Button isPending={isPending} type="submit">
+							Submit
+						</Button>
 					</Cluster>
 				</Stack>
-			</form>
+			</Form>
 			<Stack minBlockSize="1.5rem">
 				<Text elementType="p" role="status">
 					{submittedEmail ? `Submitted: ${submittedEmail}` : '\u00a0'}
@@ -41,3 +35,8 @@ export default () => {
 		</Stack>
 	);
 };
+
+async function submitEmail(_previous: string, formData: FormData) {
+	const email = formData.get('email');
+	return typeof email === 'string' ? email : '';
+}

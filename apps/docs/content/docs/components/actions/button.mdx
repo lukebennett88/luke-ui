@@ -71,8 +71,8 @@ icons for you, so an `Icon` needs no `size` prop. Pass one only to override it. 
 `onPress` handles the interaction. `pressAction` performs the resulting operation. When both are
 set, `onPress` runs first, then `pressAction`.
 
-Prefer a native form Action when the operation is a form submission. Pass the form’s pending state
-to `Button`. This example uses React’s
+Prefer a React form Action when the operation is a form submission. Pass the Action to Luke UI's
+[`Form`](/components/forms/form) and the form's pending state to `Button`. This example uses React's
 [`useActionState`](https://react.dev/reference/react/useActionState).
 
 <ExampleBlock src="button/form-action" layout="centered" title="Button: Form action" />

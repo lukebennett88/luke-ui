@@ -2,44 +2,21 @@ import type { ComponentProps, JSX, ReactNode } from 'react';
 import type { RequiredAccessibleName } from '../../types/accessible-name.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import type { FieldDescriptionProps } from './description.js';
 import { FieldDescription } from './description.js';
 import type { FieldErrorProps } from './error.js';
 import { FieldError } from './error.js';
-import type { InlineLabelTextProps } from './inline-label-text.js';
-import { InlineLabelText } from './inline-label-text.js';
-import {
-	isInvalidFromErrorMessage,
-	normalizeErrorMessage,
-} from './is-invalid-from-error-message.js';
-import type { FieldLabelProps, NecessityIndicator } from './label.js';
 import { FieldLabel } from './label.js';
+import type { NecessityIndicator } from './necessity-context.js';
 import { fieldRecipe } from './recipe.css.js';
 import { Field as PrimitiveField } from './root.js';
-
-export type {
-	FieldDescriptionProps,
-	FieldErrorProps,
-	FieldLabelProps,
-	InlineLabelTextProps,
-	NecessityIndicator,
-};
-export {
-	FieldDescription,
-	FieldError,
-	FieldLabel,
-	InlineLabelText,
-	isInvalidFromErrorMessage,
-	normalizeErrorMessage,
-};
 
 /** Description and necessity props shared by field compositions. */
 interface FieldSlotContentProps {
 	/** Optional helper text shown below the control. */
 	description?: ReactNode;
 	/**
-	 * Controls the visible marker for required or optional controls.
-	 * @default 'required-asterisk'
+	 * Controls how the label identifies required or optional values. Inherits from `Form`, or uses
+	 * `'required-asterisk'` when unset.
 	 */
 	necessityIndicator?: NecessityIndicator;
 }

@@ -61,6 +61,14 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'validationBehavior',
 			'value',
 		],
+	'forms/form.mdx::packages/@luke-ui/react/src/core/form/form.tsx::FormProps': [
+		'action',
+		'necessityIndicator',
+		'onReset',
+		'onSubmit',
+		'validationBehavior',
+		'validationErrors',
+	],
 	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/combobox-field/combobox-field.tsx::ComboboxFieldProps':
 		[
 			'aria-label',

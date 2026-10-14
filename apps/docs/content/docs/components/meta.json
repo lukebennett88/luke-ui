@@ -15,6 +15,7 @@
 		"---Forms---",
 		"forms/checkbox-field",
 		"forms/combobox-field",
+		"forms/form",
 		"forms/select-field",
 		"forms/switch-field",
 		"forms/text-input-field",

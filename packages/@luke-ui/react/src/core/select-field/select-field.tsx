@@ -1,11 +1,11 @@
 import type { JSX, ReactNode, Ref } from 'react';
 import type { Key } from 'react-aria-components/Select';
 import type { FieldAccessibleNameProps } from '../primitives/field/field.js';
+import { Field } from '../primitives/field/field.js';
 import {
-	Field,
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
-} from '../primitives/field/field.js';
+} from '../primitives/field/is-invalid-from-error-message.js';
 import type {
 	SelectListBoxProps,
 	SelectRootProps,

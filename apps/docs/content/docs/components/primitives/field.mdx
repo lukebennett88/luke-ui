@@ -38,14 +38,12 @@ the control when clicked.
 
 ## Required fields
 
-`necessityIndicator` changes the visible marker on `FieldLabel` and `InlineLabelText`. It does not
-make the control required. Set `isRequired` on the control root, or `required` on a native control
-next to the label part.
+`necessityIndicator` controls the visible marker on `FieldLabel` and `InlineLabelText`. When
+omitted, it inherits from the surrounding [`Form`](/components/forms/form). Without either setting,
+required labels use `'required-asterisk'`.
 
-`'required-asterisk'` and `'required-label'` mark required labels. `'optional-label'` marks
-definitely optional labels and includes “(optional)” in the accessible name. A composed `Field`
-named only through `aria-label` or `aria-labelledby` has no `label` to render, so it shows no
-marker.
+The indicator does not make a control required. Set `isRequired` on the control root, or `required`
+on an associated native input.
 
 `isRequired` on `FieldLabel` or `InlineLabelText` describes the control's state for the marker. It
 does not set the control's required semantics. Place it on the label part next to a native control
@@ -58,7 +56,9 @@ with `required`. Inside a Luke UI control root, the root's required state wins.
 </label>
 ```
 
-Read [Required fields](/docs/forms#required-fields) for the three indicator values.
+A composed `Field` named only through `aria-label` or `aria-labelledby` has no `label` to render, so
+it shows no marker. Read [Required fields](/docs/forms#required-fields) for the three indicator
+values and when to add a legend.
 
 ## Validation messages
 

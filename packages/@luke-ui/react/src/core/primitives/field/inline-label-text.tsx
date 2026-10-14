@@ -1,7 +1,7 @@
 import type { ComponentProps, JSX } from 'react';
 import type { Prettify } from '../../types/prettify.js';
-import type { NecessityIndicator } from './label.js';
 import { NecessityMarker, useNecessityIndicator } from './label.js';
+import type { NecessityIndicator } from './necessity-context.js';
 import { fieldRecipe } from './recipe.css.js';
 
 interface _InlineLabelTextProps extends ComponentProps<'span'> {
@@ -11,8 +11,8 @@ interface _InlineLabelTextProps extends ComponentProps<'span'> {
 	 */
 	isRequired?: boolean;
 	/**
-	 * Controls the visible marker for required or optional controls.
-	 * @default 'required-asterisk'
+	 * Controls how the label identifies required or optional values. Inherits from `Form`, or uses
+	 * `'required-asterisk'` when unset.
 	 */
 	necessityIndicator?: NecessityIndicator;
 }

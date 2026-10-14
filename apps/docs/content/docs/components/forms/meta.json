@@ -1,4 +1,11 @@
 {
 	"title": "Forms",
-	"pages": ["checkbox-field", "combobox-field", "select-field", "switch-field", "text-input-field"]
+	"pages": [
+		"checkbox-field",
+		"combobox-field",
+		"form",
+		"select-field",
+		"switch-field",
+		"text-input-field"
+	]
 }

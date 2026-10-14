@@ -4,10 +4,9 @@ import type { LabelProps as RacLabelProps } from 'react-aria-components/Label';
 import { Label as RacLabel } from 'react-aria-components/Label';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import type { NecessityIndicator } from './necessity-context.js';
+import { FormNecessityContext } from './necessity-context.js';
 import { fieldRecipe } from './recipe.css.js';
-
-/** How a field shows whether its control is required or optional. */
-export type NecessityIndicator = 'required-asterisk' | 'required-label' | 'optional-label';
 
 interface FieldState {
 	isRequired: boolean;
@@ -23,8 +22,8 @@ interface FieldLabelStyleProps {
 	 */
 	isRequired?: boolean;
 	/**
-	 * Controls the visible marker for required or optional controls.
-	 * @default 'required-asterisk'
+	 * Controls how the label identifies required or optional values. Inherits from `Form`, or uses
+	 * `'required-asterisk'` when unset.
 	 */
 	necessityIndicator?: NecessityIndicator;
 }
@@ -67,9 +66,10 @@ export function FieldLabel(props: FieldLabelProps): JSX.Element {
 	);
 }
 
-/** Resolves the marker mode for a label part. */
+/** Resolves the marker mode for a label part: local prop, nearest Form, then the default. */
 export function useNecessityIndicator(prop: NecessityIndicator | undefined): NecessityIndicator {
-	return prop ?? 'required-asterisk';
+	const fromForm = use(FormNecessityContext);
+	return prop ?? fromForm ?? 'required-asterisk';
 }
 
 const NECESSITY_MARKER_TEXT = {
