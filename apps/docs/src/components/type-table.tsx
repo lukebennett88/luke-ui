@@ -5,6 +5,7 @@ import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@luke-ui/react/link';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
+import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, ReactNode } from 'react';
 import { useState, useSyncExternalStore } from 'react';
@@ -114,33 +115,52 @@ function TypeTableRow({
 	} = item;
 
 	return (
-		<Disclosure
+		<Box
 			className={styles.row}
-			id={rowId}
-			isExpanded={isExpanded}
-			onExpandedChange={(next) => {
-				if (next && rowId !== undefined) {
-					window.history.replaceState(null, '', `#${rowId}`);
-				}
-				setUserExpanded(next);
-			}}
+			overflow="hidden"
+			renderRoot={(domProps) => (
+				<Disclosure
+					{...domProps}
+					id={rowId}
+					isExpanded={isExpanded}
+					onExpandedChange={(next) => {
+						if (next && rowId !== undefined) {
+							window.history.replaceState(null, '', `#${rowId}`);
+						}
+						setUserExpanded(next);
+					}}
+				/>
+			)}
 		>
-			<RacButton className={styles.trigger} slot="trigger">
-				<code className={cx(styles.propName, deprecated && styles.propNameDeprecated)}>
-					{name}
-					{required ? null : '?'}
-				</code>
-				<span className={styles.propType}>
-					{typeDescriptionLink === undefined ? (
-						type
-					) : (
-						<Link appearance="text" className={styles.propTypeLink} href={typeDescriptionLink}>
-							{type}
-						</Link>
-					)}
-				</span>
-				<Icon aria-hidden className={styles.chevron} name="chevronDown" size="xsmall" />
-			</RacButton>
+			<Box
+				className={styles.trigger}
+				inlineSize="100%"
+				paddingBlock="sp8"
+				paddingInline="sp12"
+				renderRoot={(domProps) => <RacButton {...domProps} slot="trigger" />}
+			>
+				<Track
+					gap="sp8"
+					railAlignment="center"
+					railEnd={<Icon aria-hidden className={styles.chevron} name="chevronDown" size="xsmall" />}
+				>
+					<Box alignItems="center" display="flex" minInlineSize="0">
+						<code className={cx(styles.propName, deprecated && styles.propNameDeprecated)}>
+							{name}
+							{required ? null : '?'}
+						</code>
+						<span className={styles.propType}>
+							{typeDescriptionLink === undefined ? (
+								type
+							) : (
+								<Link appearance="text" className={styles.propTypeLink} href={typeDescriptionLink}>
+									{type}
+								</Link>
+							)}
+						</span>
+					</Box>
+				</Track>
+			</Box>
 			<DisclosurePanel>
 				<Grid className={styles.panel} columns="1fr 3fr" gap="sp16" overflow="auto" padding="sp12">
 					{description === undefined || description === null || description === '' ? null : (
@@ -169,12 +189,18 @@ function TypeTableRow({
 							<FieldLabel>Parameters</FieldLabel>
 							<Stack gap="sp8">
 								{parameters.map((param) => (
-									<Cluster alignItems="center" gap="sp4" key={param.name}>
-										<Text elementType="span" fontWeight="label" style={{ whiteSpace: 'nowrap' }}>
-											{param.name} -
-										</Text>
+									<Track
+										gap="sp4"
+										key={param.name}
+										railAlignment="center"
+										railStart={
+											<Text elementType="span" fontWeight="label" style={{ whiteSpace: 'nowrap' }}>
+												{param.name} -
+											</Text>
+										}
+									>
 										<div>{param.description}</div>
-									</Cluster>
+									</Track>
 								))}
 							</Stack>
 						</>
@@ -189,7 +215,7 @@ function TypeTableRow({
 					)}
 				</Grid>
 			</DisclosurePanel>
-		</Disclosure>
+		</Box>
 	);
 }
 

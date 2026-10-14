@@ -1,7 +1,7 @@
 import { vars } from '@luke-ui/react/theme';
 import { style } from '@vanilla-extract/css';
 
-/** Button reset and focus; Cluster owns gap, padding, and justification. */
+/** Button reset and focus; Box owns padding via renderRoot. */
 export const groupTrigger = style({
 	'@layer': {
 		components: {
@@ -9,10 +9,7 @@ export const groupTrigger = style({
 			borderStyle: 'none',
 			color: 'inherit',
 			cursor: 'pointer',
-			display: 'block',
 			font: 'inherit',
-			inlineSize: '100%',
-			padding: 0,
 			textAlign: 'start',
 			selectors: {
 				'&:focus-visible': {
@@ -28,7 +25,6 @@ export const groupChevron = style({
 	'@layer': {
 		components: {
 			color: vars.color.text.secondary,
-			flexShrink: 0,
 			transition: `transform ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
 			selectors: {
 				'[data-expanded] &': {

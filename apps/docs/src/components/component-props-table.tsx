@@ -1,8 +1,8 @@
 import { Box } from '@luke-ui/react/box';
-import { Cluster } from '@luke-ui/react/cluster';
 import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
+import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
@@ -58,29 +58,32 @@ function PropGroup({
 			borderStyle="solid"
 			borderWidth="thin"
 			overflow="hidden"
+			renderRoot={(domProps) => <Disclosure {...domProps} defaultExpanded={group.defaultOpen} />}
 		>
-			<Disclosure defaultExpanded={group.defaultOpen}>
-				<RacButton className={styles.groupTrigger} slot="trigger">
-					<Cluster
-						alignItems="center"
-						gap="sp8"
-						inlineSize="100%"
-						justifyContent="space-between"
-						paddingBlock="sp12"
-						paddingInline="sp16"
-					>
-						<Text elementType="span" fontWeight="emphasis" typography="caption">
-							{group.name}
-						</Text>
+			<Box
+				className={styles.groupTrigger}
+				inlineSize="100%"
+				paddingBlock="sp12"
+				paddingInline="sp16"
+				renderRoot={(domProps) => <RacButton {...domProps} slot="trigger" />}
+			>
+				<Track
+					gap="sp8"
+					railAlignment="center"
+					railEnd={
 						<Icon aria-hidden className={styles.groupChevron} name="chevronDown" size="small" />
-					</Cluster>
-				</RacButton>
-				<DisclosurePanel>
-					<Box className={styles.groupPanel} paddingBlockEnd="sp4" paddingInline="sp4">
-						<TypeTable type={type} />
-					</Box>
-				</DisclosurePanel>
-			</Disclosure>
+					}
+				>
+					<Text elementType="span" fontWeight="emphasis" typography="caption">
+						{group.name}
+					</Text>
+				</Track>
+			</Box>
+			<DisclosurePanel>
+				<Box className={styles.groupPanel} paddingBlockEnd="sp4" paddingInline="sp4">
+					<TypeTable type={type} />
+				</Box>
+			</DisclosurePanel>
 		</Box>
 	);
 }

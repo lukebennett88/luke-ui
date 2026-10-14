@@ -6,7 +6,7 @@ const motionSample = keyframes({
 	to: { transform: 'translateX(0.75rem)' },
 });
 
-/** Button reset and focus; Cluster owns gap and padding. */
+/** Button reset and focus; Box owns padding via renderRoot. */
 export const groupTrigger = style({
 	'@layer': {
 		components: {
@@ -14,12 +14,9 @@ export const groupTrigger = style({
 			borderStyle: 'none',
 			color: 'inherit',
 			cursor: 'pointer',
-			display: 'block',
 			fontSize: vars.font.body.fontSize,
 			fontWeight: vars.font.weight.emphasis,
-			inlineSize: '100%',
 			lineHeight: vars.font.body.lineHeight,
-			padding: 0,
 			textAlign: 'start',
 			selectors: {
 				'&:focus-visible': {
@@ -34,7 +31,6 @@ export const groupTrigger = style({
 export const groupChevron = style({
 	'@layer': {
 		components: {
-			flexShrink: 0,
 			transition: `transform ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
 			selectors: {
 				'[data-expanded] &': {

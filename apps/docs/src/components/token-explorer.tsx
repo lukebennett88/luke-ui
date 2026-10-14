@@ -1,11 +1,11 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
-import { Cluster } from '@luke-ui/react/cluster';
 import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { vars } from '@luke-ui/react/theme';
+import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
 import type { CSSProperties, JSX, ReactNode } from 'react';
 import { useState } from 'react';
@@ -42,7 +42,21 @@ export function TokenExplorer(): JSX.Element {
 
 	return (
 		<Stack className="not-prose" gap="sp16">
-			<Cluster gap="sp12">
+			<Track
+				gap="sp12"
+				railAlignment="center"
+				railEnd={
+					<Text
+						aria-live="polite"
+						color="secondary"
+						elementType="p"
+						fontVariantNumeric="tabular-nums"
+						typography="caption"
+					>
+						{countText}
+					</Text>
+				}
+			>
 				<Box flexGrow="1" minInlineSize="12rem">
 					<TextInputField
 						aria-label="Filter tokens by name"
@@ -53,18 +67,7 @@ export function TokenExplorer(): JSX.Element {
 						value={filter}
 					/>
 				</Box>
-				<Box marginInlineStart="auto">
-					<Text
-						aria-live="polite"
-						color="secondary"
-						elementType="p"
-						fontVariantNumeric="tabular-nums"
-						typography="caption"
-					>
-						{countText}
-					</Text>
-				</Box>
-			</Cluster>
+			</Track>
 
 			{groups.length === 0 ? (
 				<EmptyState onClear={() => setFilter('')} query={filter.trim()} />
@@ -97,57 +100,62 @@ function PurposeDetails({ group }: { group: TokenPurposeGroup }) {
 			borderStyle="solid"
 			borderWidth="thin"
 			overflow="hidden"
+			renderRoot={(domProps) => <Disclosure {...domProps} defaultExpanded />}
 		>
-			<Disclosure defaultExpanded>
-				<Heading level={3} style={{ margin: 0 }}>
-					<RacButton className={styles.groupTrigger} slot="trigger">
-						<Cluster
-							alignItems="center"
-							gap="sp8"
-							inlineSize="100%"
-							paddingBlock="sp12"
-							paddingInline="sp16"
-						>
-							<Icon aria-hidden className={styles.groupChevron} name="chevronRight" size="xsmall" />
-							{group.title}
-							<Box marginInlineStart="auto">
-								<Text
-									color="secondary"
-									elementType="span"
-									fontVariantNumeric="tabular-nums"
-									typography="caption"
-								>
-									{group.tokens.length}
-								</Text>
-							</Box>
-						</Cluster>
-					</RacButton>
-				</Heading>
-
-				<DisclosurePanel>
-					<Cluster
-						alignItems="baseline"
+			<Heading level={3} style={{ margin: 0 }}>
+				<Box
+					className={styles.groupTrigger}
+					inlineSize="100%"
+					paddingBlock="sp12"
+					paddingInline="sp16"
+					renderRoot={(domProps) => <RacButton {...domProps} slot="trigger" />}
+				>
+					<Track
 						gap="sp8"
-						justifyContent="space-between"
-						paddingBlock="sp12"
-						paddingInline="sp16"
+						railAlignment="center"
+						railEnd={
+							<Text
+								color="secondary"
+								elementType="span"
+								fontVariantNumeric="tabular-nums"
+								typography="caption"
+							>
+								{group.tokens.length}
+							</Text>
+						}
+						railStart={
+							<Icon aria-hidden className={styles.groupChevron} name="chevronRight" size="xsmall" />
+						}
+					>
+						{group.title}
+					</Track>
+				</Box>
+			</Heading>
+
+			<DisclosurePanel>
+				<Box paddingBlock="sp12" paddingInline="sp16">
+					<Track
+						gap="sp8"
+						railAlignment="firstLine"
+						railEnd={
+							group.related ? (
+								<DocsLink
+									className={styles.relatedLink}
+									params={{ _splat: group.related.splat }}
+									to="/$"
+								>
+									{group.related.label}
+								</DocsLink>
+							) : null
+						}
 					>
 						<Text color="secondary" typography="caption">
 							{group.description}
 						</Text>
-						{group.related ? (
-							<DocsLink
-								className={styles.relatedLink}
-								params={{ _splat: group.related.splat }}
-								to="/$"
-							>
-								{group.related.label}
-							</DocsLink>
-						) : null}
-					</Cluster>
-					<TokenTable showSamples={group.showSamples} tokens={group.tokens} />
-				</DisclosurePanel>
-			</Disclosure>
+					</Track>
+				</Box>
+				<TokenTable showSamples={group.showSamples} tokens={group.tokens} />
+			</DisclosurePanel>
 		</Box>
 	);
 }

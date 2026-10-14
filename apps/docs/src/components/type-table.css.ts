@@ -66,21 +66,15 @@ export const row = style({
 	},
 });
 
+/** Button reset and interaction; Box/Cluster own padding and flex via renderRoot. */
 export const trigger = style({
 	'@layer': {
 		components: {
-			alignItems: 'center',
 			backgroundColor: 'transparent',
 			borderStyle: 'none',
 			color: 'inherit',
 			cursor: 'pointer',
-			display: 'flex',
 			font: 'inherit',
-			inlineSize: '100%',
-			paddingBlock: vars.space.sp8,
-			paddingInline: vars.space.sp12,
-			paddingInlineEnd: vars.space.sp32,
-			position: 'relative',
 			textAlign: 'start',
 			selectors: {
 				'&:hover': {
@@ -143,18 +137,15 @@ export const propTypeLink = style({
 	},
 });
 
+/** Rotation only; Track owns placement in the end rail. */
 export const chevron = style({
 	'@layer': {
 		components: {
 			color: vars.color.text.secondary,
-			insetBlockStart: '50%',
-			insetInlineEnd: vars.space.sp8,
-			position: 'absolute',
-			transform: 'translateY(-50%)',
 			transition: `transform ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
 			selectors: {
 				[`${row}[data-expanded] &`]: {
-					transform: 'translateY(-50%) rotate(180deg)',
+					transform: 'rotate(180deg)',
 				},
 			},
 			'@media': {
