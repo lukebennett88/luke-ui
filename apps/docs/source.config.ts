@@ -5,6 +5,7 @@ import {
 	createFileSystemGeneratorCache,
 	createGenerator,
 	remarkAutoTypeTable,
+	type RemarkAutoTypeTableOptions,
 } from 'fumadocs-typescript';
 import * as z from 'zod';
 import { createComponentPropsGenerator } from './src/lib/create-component-props-generator.js';
@@ -12,6 +13,19 @@ import { inlineExampleSource } from './src/lib/inline-example-source';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
 import { stringifyComponentPropsTable } from './src/lib/stringify-component-props-table.js';
+
+/**
+ * Unified merges plugins by function identity and deep-merges their options. Two
+ * `[remarkAutoTypeTable, …]` entries therefore collapse into one config, so only the last tag name
+ * survives. Distinct attachers keep both `<component-props-table>` and `<auto-type-table>`.
+ */
+function remarkComponentPropsTable(options?: RemarkAutoTypeTableOptions) {
+	return remarkAutoTypeTable(options);
+}
+
+function remarkDocsAutoTypeTable(options?: RemarkAutoTypeTableOptions) {
+	return remarkAutoTypeTable(options);
+}
 
 export const docs = defineDocs({
 	dir: 'content/docs',
@@ -54,7 +68,7 @@ export default defineConfig({
 		remarkPlugins: (v) => [
 			...v,
 			[
-				remarkAutoTypeTable,
+				remarkComponentPropsTable,
 				{
 					generator: componentPropsGenerator,
 					name: 'component-props-table',
@@ -62,16 +76,16 @@ export default defineConfig({
 					outputName: 'ComponentPropsTable',
 					// Processed Markdown reads GeneratedDoc JSON from the `type` attribute.
 					remarkStringify: true,
-				},
+				} satisfies RemarkAutoTypeTableOptions,
 			],
 			[
-				remarkAutoTypeTable,
+				remarkDocsAutoTypeTable,
 				{
 					generator,
 					name: 'auto-type-table',
 					options: { basePath: repoRoot },
 					outputName: 'TypeTable',
-				},
+				} satisfies RemarkAutoTypeTableOptions,
 			],
 			remarkValidateExamples,
 		],
