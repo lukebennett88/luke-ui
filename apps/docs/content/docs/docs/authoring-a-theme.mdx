@@ -106,7 +106,9 @@ What each section inherits:
 - `color.surface` merges surface by surface. A surface replaces the base's surface whole.
 - `depth` and `controlFinish` merge per mode, then per rung.
 
-A value set to `undefined` counts as omitted and inherits.
+A section, role, or material rung set to `undefined` counts as omitted and inherits. An authored
+colour object replaces its whole role. Undefined sides follow that role's
+[adaptation or default rules](#define-the-input), rather than inheriting the base's sides.
 
 A theme may extend a theme that extends another. A cycle throws `ThemeValidationError` at path
 `extends`.
@@ -155,9 +157,6 @@ throws `ThemeValidationError` with all input problems together. Each entry in `i
 `theme` that contains it, its input-relative `path`, and a `message`. For example, an invalid accent
 side has path `color.accent.light`. An invalid base fails even when your theme overrides its value.
 The chain must provide both an accent and a body font.
-
-Fields set to `undefined` count as omitted, including sections, colour sides, and material rungs.
-Partial overrides keep the [inheritance rules](#extend-a-theme).
 
 The rules for colours and materials:
 

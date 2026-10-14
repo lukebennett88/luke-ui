@@ -284,70 +284,134 @@ describe('authored theme validation', () => {
 		};
 
 		expect(issuesOf(child)).toEqual([
-			{ theme: 'child', path: 'color.backdrop.dark', message: expect.any(String) },
-			{ theme: 'child', path: 'controlFinish.light.raised', message: expect.any(String) },
-			{ theme: 'child', path: 'radius.detail', message: expect.any(String) },
+			{
+				theme: 'child',
+				path: 'color.backdrop.dark',
+				message: expect.stringContaining('non-empty CSS colour'),
+			},
+			{
+				theme: 'child',
+				path: 'controlFinish.light.raised',
+				message: expect.stringContaining('background-image value without'),
+			},
+			{
+				theme: 'child',
+				path: 'radius.detail',
+				message: expect.stringContaining('pixels, 0 or greater'),
+			},
 			{ theme: 'Invalid Base', path: 'name', message: expect.stringContaining('kebab-case') },
 			{
 				theme: 'Invalid Base',
 				path: 'color.accent.light',
 				message: expect.stringContaining('cannot parse colour'),
 			},
-			{ theme: 'Invalid Base', path: 'color.neutralStyle', message: expect.any(String) },
-			{ theme: 'Invalid Base', path: 'depth.dark.overlay', message: expect.any(String) },
-			{ theme: 'Invalid Base', path: 'radius.control', message: expect.any(String) },
+			{
+				theme: 'Invalid Base',
+				path: 'color.neutralStyle',
+				message: expect.stringContaining('cool, neutral, or warm'),
+			},
+			{
+				theme: 'Invalid Base',
+				path: 'depth.dark.overlay',
+				message: expect.stringContaining('box-shadow value without'),
+			},
+			{
+				theme: 'Invalid Base',
+				path: 'radius.control',
+				message: expect.stringContaining('pixels, 0 or greater'),
+			},
 		]);
 	});
 
 	const malformed = [
-		['color', { color: null }],
-		['color.accent', { color: { accent: {} } }],
-		['color.neutral', { color: { neutral: [] } }],
-		['color.focus.light', { color: { focus: { light: 42 } } }],
-		['color.surface', { color: { surface: 'white' } }],
-		['color.surface.base', { color: { surface: { base: false } } }],
-		['color.surface.subdued', { color: { surface: { subdued: '#fff' } } }],
-		['color.surface.field', { color: { surface: { field: '#fff' } } }],
-		['color.surface.overlay', { color: { surface: { overlay: '#fff' } } }],
-		['depth', { depth: [] }],
-		['depth.dark', { depth: { dark: 'none' } }],
-		['controlFinish', { controlFinish: false }],
-		['controlFinish.light', { controlFinish: { light: null } }],
-		['radius', { radius: 4 }],
+		['color', { color: null }, 'must be an object'],
+		['color.accent', { color: { accent: {} } }, 'at least one of light or dark'],
+		['color.neutral', { color: { neutral: [] } }, 'colour string or a light/dark object'],
+		['color.focus.light', { color: { focus: { light: 42 } } }, 'must be a colour string'],
+		['color.surface', { color: { surface: 'white' } }, 'must be an object'],
+		[
+			'color.surface.base',
+			{ color: { surface: { base: false } } },
+			'colour string or a light/dark object',
+		],
+		[
+			'color.surface.subdued',
+			{ color: { surface: { subdued: '#fff' } } },
+			'must be a light/dark object',
+		],
+		[
+			'color.surface.field',
+			{ color: { surface: { field: '#fff' } } },
+			'must be a light/dark object',
+		],
+		[
+			'color.surface.overlay',
+			{ color: { surface: { overlay: '#fff' } } },
+			'must be a light/dark object',
+		],
+		['depth', { depth: [] }, 'must be an object'],
+		['depth.dark', { depth: { dark: 'none' } }, 'must be an object'],
+		['controlFinish', { controlFinish: false }, 'must be an object'],
+		['controlFinish.light', { controlFinish: { light: null } }, 'must be an object'],
+		['radius', { radius: 4 }, 'must be an object'],
 	] as const;
 
-	for (const [path, overrides] of malformed) {
+	for (const [path, overrides, message] of malformed) {
 		it(`rejects the malformed shape at ${path}`, () => {
 			const input = {
 				extends: base,
 				name: 'child',
 				...overrides,
 			} as unknown as ExtendingThemeInput;
-			expect(issuesOf(input)).toEqual([{ theme: 'child', path, message: expect.any(String) }]);
+			expect(issuesOf(input)).toEqual([
+				{ theme: 'child', path, message: expect.stringContaining(message) },
+			]);
 		});
 	}
 
 	const invalidValues = [
-		['color.accent.light', { color: { accent: { light: 'oklch(1.5 0.1 200)' } } }],
-		['color.neutral', { color: { neutral: `oklch(0.5 ${'9'.repeat(400)} 200)` } }],
-		['color.success.dark', { color: { success: { dark: `oklch(0.5 0.1 ${'9'.repeat(400)})` } } }],
-		['color.surface.field.dark', { color: { surface: { field: { dark: 'red' } } } }],
-		['color.info', { color: { info: 'oklch(0.5 -0.1 200)' } }],
-		['color.backdrop', { color: { backdrop: 'none{' } }],
-		['depth.light.resting', { depth: { light: { resting: '' } } }],
-		['controlFinish.dark.recessed', { controlFinish: { dark: { recessed: 42 } } }],
-		['radius.overlay', { radius: { overlay: Number.POSITIVE_INFINITY } }],
-		['radius.surface', { radius: { surface: '8' } }],
+		[
+			'color.accent.light',
+			{ color: { accent: { light: 'oklch(1.5 0.1 200)' } } },
+			'lightness must be 0-1',
+		],
+		[
+			'color.neutral',
+			{ color: { neutral: `oklch(0.5 ${'9'.repeat(400)} 200)` } },
+			'channels must be finite',
+		],
+		[
+			'color.success.dark',
+			{ color: { success: { dark: `oklch(0.5 0.1 ${'9'.repeat(400)})` } } },
+			'channels must be finite',
+		],
+		[
+			'color.surface.field.dark',
+			{ color: { surface: { field: { dark: 'red' } } } },
+			'cannot parse colour',
+		],
+		['color.info', { color: { info: 'oklch(0.5 -0.1 200)' } }, 'cannot parse colour'],
+		['color.backdrop', { color: { backdrop: 'none{' } }, 'CSS colour value without'],
+		['depth.light.resting', { depth: { light: { resting: '' } } }, 'non-empty CSS box-shadow'],
+		[
+			'controlFinish.dark.recessed',
+			{ controlFinish: { dark: { recessed: 42 } } },
+			'non-empty CSS background-image',
+		],
+		['radius.overlay', { radius: { overlay: Number.POSITIVE_INFINITY } }, 'pixels, 0 or greater'],
+		['radius.surface', { radius: { surface: '8' } }, 'pixels, 0 or greater'],
 	] as const;
 
-	for (const [path, overrides] of invalidValues) {
+	for (const [path, overrides, message] of invalidValues) {
 		it(`rejects an invalid authored value at ${path} before foundation generation`, () => {
 			const input = {
 				extends: base,
 				name: 'child',
 				...overrides,
 			} as unknown as ExtendingThemeInput;
-			expect(issuesOf(input)).toEqual([{ theme: 'child', path, message: expect.any(String) }]);
+			expect(issuesOf(input)).toEqual([
+				{ theme: 'child', path, message: expect.stringContaining(message) },
+			]);
 		});
 	}
 
@@ -380,7 +444,12 @@ describe('authored theme validation', () => {
 	it('treats undefined sections, roles, modes, and rungs as omitted across a chain', () => {
 		const authoredBase: ThemeInput = {
 			...base,
-			color: { ...base.color, neutralStyle: 'warm', backdrop: 'rgb(0 0 0 / 20%)' },
+			color: {
+				...base.color,
+				neutralStyle: 'warm',
+				backdrop: 'rgb(0 0 0 / 20%)',
+				info: { light: 'oklch(0.5 0.13 150)', dark: 'oklch(0.74 0.13 150)' },
+			},
 			depth: { light: { overlay: 'none' } },
 			controlFinish: { dark: { resting: 'linear-gradient(red, blue)' } },
 			radius: { control: 10 },
@@ -390,9 +459,8 @@ describe('authored theme validation', () => {
 				accent: undefined,
 				neutral: undefined,
 				neutralStyle: undefined,
-				surface: { base: undefined, subdued: { light: undefined, dark: undefined } },
 				backdrop: undefined,
-				info: { light: undefined, dark: undefined },
+				info: undefined,
 			},
 			controlFinish: { light: undefined, dark: { resting: undefined } },
 			depth: { dark: undefined, light: { overlay: undefined } },
@@ -409,6 +477,25 @@ describe('authored theme validation', () => {
 			radius: { control: undefined },
 		};
 		expect(defineTheme(undefinedOverrides)).toBe(defineTheme({ ...authoredBase, name: 'child' }));
+	});
+
+	it('replaces an inherited colour role with defaults when both authored sides are undefined', () => {
+		const authoredBase: ThemeInput = {
+			...base,
+			color: {
+				...base.color,
+				info: { light: 'oklch(0.5 0.13 150)', dark: 'oklch(0.74 0.13 150)' },
+			},
+		};
+		const defaultCss = defineTheme({ ...base, name: 'child' });
+		expect(defineTheme({ ...authoredBase, name: 'child' })).not.toBe(defaultCss);
+		expect(
+			defineTheme({
+				extends: authoredBase,
+				name: 'child',
+				color: { info: { light: undefined, dark: undefined } },
+			}),
+		).toBe(defaultCss);
 	});
 
 	it('emits an alpha backdrop verbatim and accepts safe material CSS and zero radii', () => {
