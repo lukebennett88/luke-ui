@@ -29,8 +29,9 @@ defaults. A `ThemeInput` includes:
 Most source colours accept one string or a `{ light, dark }` object. Either side of the object may
 be omitted. How each colour treats them differs:
 
-- `accent`, `neutral`, and `surface.base` adapt one string to each mode: they keep its hue and
-  chroma and choose a lightness for the mode. A missing side is adapted from the side you set.
+- `accent`, `neutral`, and `surface.base` adapt one string to each mode: they keep its hue, choose a
+  lightness for the mode, and may reduce its chroma to fit sRGB. A missing side is adapted from the
+  side you set.
 - `info`, `success`, `warning`, `danger`, `focus`, and `backdrop` use one string as written in both
   modes. A missing side uses Luke UI's default for that mode.
 - `surface.subdued`, `surface.field`, and `surface.overlay` take only the object, because one value
@@ -212,10 +213,10 @@ text, an icon, or one of the colours above.
 ### When an accent cannot be used
 
 Some lightnesses have no near-white or near-black text that reaches 4.5:1. When you author one
-accent string, `defineTheme` keeps its hue and chroma and searches for a lightness that works. It
-also adapts a missing mode from the accent side you set. An accent side you set explicitly bypasses
-this adaptation, so choose a lightness that works, or author one string and let `defineTheme` adapt
-it.
+accent string, `defineTheme` keeps its hue, searches for a lightness that works, and may reduce its
+chroma to fit sRGB. It also adapts a missing mode from the accent side you set. An accent side you
+set explicitly bypasses this adaptation, so choose a lightness that works, or author one string and
+let `defineTheme` adapt it.
 
 An explicit per-mode accent or a status colour can throw `ThemeGenerationError` when its solid
 colour cannot carry 4.5:1 `onSolid` text. The error names the failing `role` and `mode`.
