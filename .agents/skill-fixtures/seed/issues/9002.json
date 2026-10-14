@@ -1,0 +1,7 @@
+{
+	"number": 9002,
+	"title": "Field inherits necessity from Form",
+	"state": "OPEN",
+	"url": "https://example.invalid/issues/9002",
+	"body": "Parent: #9001.\n\nReady prerequisite. Implement Field necessity inheritance from Form.\n\n## Acceptance\n\n- Field reads necessity from the nearest Form context.\n- Existing Field unit behaviour stays covered.\n\nDo not close #9001 from this unit alone."
+}

@@ -1,0 +1,7 @@
+{
+	"number": 9001,
+	"title": "Parent: add form necessity indicator inheritance",
+	"state": "OPEN",
+	"url": "https://example.invalid/issues/9001",
+	"body": "Parent tracking issue.\n\n## Acceptance\n\n- [ ] Sub-issue 9002: Field inherits necessity from Form\n- [ ] Sub-issue 9003: Docs for necessity inheritance\n- [ ] Sub-issue 9004: Browser tests for nested Form\n\n## Sub-issues\n\n- #9002 Field inherits necessity from Form (OPEN, ready)\n- #9003 Docs for necessity inheritance (OPEN, blocked on #9002)\n- #9004 Browser tests for nested Form (OPEN, blocked on #9002)\n\nCompleting one sub-issue does not complete this parent."
+}

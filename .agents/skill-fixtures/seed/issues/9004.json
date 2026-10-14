@@ -1,0 +1,7 @@
+{
+	"number": 9004,
+	"title": "Browser tests for nested Form",
+	"state": "OPEN",
+	"url": "https://example.invalid/issues/9004",
+	"body": "Parent: #9001.\n\nBlocked on #9002. Add browser coverage for nested Form necessity inheritance."
+}
