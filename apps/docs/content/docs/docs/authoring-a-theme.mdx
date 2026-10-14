@@ -213,11 +213,15 @@ text, an icon, or one of the colours above.
 
 Some lightnesses have no near-white or near-black text that reaches 4.5:1. When you author one
 accent string, `defineTheme` keeps its hue and chroma and searches for a lightness that works. It
-throws if that adaptation finds no accessible lightness. An accent side you set explicitly is used
-as written, so choose a lightness that works, or author one string and let `defineTheme` adapt it.
+also adapts a missing mode from the accent side you set. An accent side you set explicitly bypasses
+this adaptation, so choose a lightness that works, or author one string and let `defineTheme` adapt
+it.
 
-`ThemeGenerationError` reports a resolved role whose solid colour cannot carry 4.5:1 `onSolid` text.
-These generation failures and `ThemeContrastError` are separate from input validation.
+An explicit per-mode accent or a status colour can throw `ThemeGenerationError` when its solid
+colour cannot carry 4.5:1 `onSolid` text. The error names the failing `role` and `mode`.
+`bestAttempt` records the closest solid colour and the contrast it reached. `diagnostics` contains
+the families completed in that mode before the failure. These generation failures and
+`ThemeContrastError` are separate from input validation.
 
 ## Continue learning
 

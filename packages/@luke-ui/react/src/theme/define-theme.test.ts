@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vite-plus/test';
+import { defineTheme, ThemeGenerationError } from '../exports/theme/compiler.js';
 import { paperTheme } from './__fixtures__/paper.js';
+import { UNSATISFIABLE_ON_SOLID } from './__fixtures__/radix-scales.js';
 import { tactileTheme } from './__fixtures__/tactile.js';
 import { splitBlocks, testTypography } from './__fixtures__/theme-css.js';
 import { compileTheme, ThemeContrastError } from './build-theme.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import type { ThemeInput } from './define-theme.js';
-import { defaultBackdrop, defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
+import { defaultBackdrop, defaultDepth, normalizeTheme } from './define-theme.js';
 import { defaultSourceColors } from './foundation.js';
 import { FAMILY_RUNG } from './scale.js';
 
@@ -29,7 +31,7 @@ function extractValue(block: string, varName: string): string {
 const ACCENT_SOLID = '--luke-color-background-accent-solid-rest';
 
 describe('defineTheme single-value accent adaptation', () => {
-	const accents = ['#3b82f6', 'oklch(0.7 0.15 320)'];
+	const accents = ['#3b82f6', 'oklch(0.7 0.15 320)', UNSATISFIABLE_ON_SOLID.source];
 
 	for (const accent of accents) {
 		it(`adapts ${accent} to an accessible light and dark accent via a per-mode search`, () => {
@@ -59,6 +61,41 @@ describe('defineTheme single-value accent adaptation', () => {
 			expect(movedFromSource).toBe(true);
 		});
 	}
+});
+
+describe('defineTheme explicit per-mode accent generation', () => {
+	it('reports the failed accent search and completed families through the public compiler error', () => {
+		const error = (() => {
+			try {
+				defineTheme({
+					color: { accent: { light: '#3b82f6', dark: UNSATISFIABLE_ON_SOLID.source } },
+					name: 'inaccessible-accent',
+					typography: testTypography,
+				});
+				return null;
+			} catch (caught) {
+				return caught;
+			}
+		})();
+		expect(error).toBeInstanceOf(ThemeGenerationError);
+		if (!(error instanceof ThemeGenerationError)) throw error;
+		expect(error.name).toBe('ThemeGenerationError');
+		expect(error.role).toBe('accent');
+		expect(error.mode).toBe('dark');
+		expect(error.bestAttempt.step).toBe(9);
+		expect(error.bestAttempt.onSolidRatio).toBeGreaterThan(1);
+		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
+		expect(error.bestAttempt.solid.l).toBe(error.bestAttempt.lightness);
+		expect(error.message).toContain(`${error.bestAttempt.onSolidRatio.toFixed(2)}:1`);
+		expect(error.diagnostics.role).toBe(error.role);
+		expect(error.diagnostics.mode).toBe(error.mode);
+		expect(Object.keys(error.diagnostics.completedFamilies)).toEqual(['neutral']);
+		expect(error.diagnostics.completedFamilies.neutral).toMatchObject({
+			mode: 'dark',
+			role: 'neutral',
+			solidAnchor: { satisfied: true },
+		});
+	});
 });
 
 describe('defineTheme accent pre-conditioning shares the generator gate', () => {
