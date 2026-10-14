@@ -1,9 +1,5 @@
 __screenshots__/
 .artifacts/
-.agents/skill-fixtures/.state/
-.agents/skill-fixtures/.disposable
-.agents/skill-fixtures/CONTEXT.md
-.agents/skill-fixtures/OWNERSHIP.md
 .claude/launch.json
 .claude/settings.local.json
 .claude/worktrees/

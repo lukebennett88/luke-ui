@@ -1,7 +1,0 @@
-{
-	"number": 9003,
-	"title": "Docs for necessity inheritance",
-	"state": "OPEN",
-	"url": "https://example.invalid/issues/9003",
-	"body": "Parent: #9001.\n\nBlocked on #9002. Document Form necessity inheritance after the behaviour lands."
-}

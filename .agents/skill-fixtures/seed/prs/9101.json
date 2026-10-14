@@ -1,7 +1,0 @@
-{
-	"number": 9101,
-	"title": "Document Field necessity markers",
-	"state": "OPEN",
-	"url": "https://example.invalid/pull/9101",
-	"body": "Closes #9001\n\nDraft body that still claims the parent is fully done. Refresh from the current docs-only diff."
-}
