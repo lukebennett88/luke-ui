@@ -1,10 +1,10 @@
 import { Grid } from '@luke-ui/react/grid';
 import { Heading, HeadingLevels } from '@luke-ui/react/heading';
 import { Stack } from '@luke-ui/react/stack';
-import { vars } from '@luke-ui/react/theme';
 import type { JSX } from 'react';
 import type { ComponentIndexGroup } from '../generated/components-index.generated.js';
 import { componentIndexGroups } from '../generated/components-index.generated.js';
+import * as styles from './components-index.css.js';
 import { DocsCard } from './docs-card.js';
 
 /**
@@ -23,14 +23,13 @@ export function ComponentsIndex(): JSX.Element {
 	);
 }
 
-const groupStyle = {
-	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
-	paddingBlockStart: vars.space.sp40,
-} as const;
-
 function CategoryGroup({ group, isFirst }: { group: ComponentIndexGroup; isFirst: boolean }) {
 	return (
-		<Stack elementType="section" gap="sp32" style={isFirst ? undefined : groupStyle}>
+		<Stack
+			className={isFirst ? undefined : styles.subsequentGroup}
+			elementType="section"
+			gap="sp32"
+		>
 			<Heading typography="heading4">{group.title}</Heading>
 			<HeadingLevels>
 				<Grid

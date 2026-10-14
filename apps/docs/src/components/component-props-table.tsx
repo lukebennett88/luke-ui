@@ -1,17 +1,14 @@
-import { Box } from '@luke-ui/react/box';
-import { Cluster } from '@luke-ui/react/cluster';
+import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
-import type { TypeNode } from 'fumadocs-ui/components/type-table';
-import { TypeTable } from 'fumadocs-ui/components/type-table';
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from 'fumadocs-ui/components/ui/collapsible';
 import type { ComponentProps } from 'react';
+import { Button as RacButton } from 'react-aria-components/Button';
+import { Disclosure, DisclosurePanel } from 'react-aria-components/Disclosure';
 import { groupPropNames, NATIVE_PROPS_FORWARDING_KEY } from '../lib/component-prop-groups.js';
+import * as styles from './component-props-table.css.js';
+import type { TypeNode } from './type-table.js';
+import { TypeTable } from './type-table.js';
 
 /** Grouped prop tables for a component guide's `## API` section. */
 export function ComponentPropsTable({
@@ -28,11 +25,11 @@ export function ComponentPropsTable({
 
 	return (
 		<Stack className={cx('not-prose', className)} gap="sp12" id={id} marginBlock="sp24" {...props}>
-			{nativePropsNote !== undefined ? (
-				<Text color="secondary" elementType="p" typography="caption">
+			{nativePropsNote === undefined ? null : (
+				<Text color="secondary" elementType="div" typography="caption">
 					{nativePropsNote}
 				</Text>
-			) : null}
+			)}
 			{groups.map((group) => (
 				<PropGroup
 					group={group}
@@ -52,54 +49,17 @@ function PropGroup({
 	type: Record<string, TypeNode>;
 }) {
 	return (
-		<Box
-			backgroundColor="surface.base"
-			borderColor="decorative"
-			borderRadius="surface"
-			borderStyle="solid"
-			borderWidth="thin"
-			renderRoot={(domProps) => <Collapsible {...domProps} defaultOpen={group.defaultOpen} />}
-		>
-			<Cluster
-				className="group text-start"
-				flexWrap="nowrap"
-				inlineSize="100%"
-				justifyContent="space-between"
-				paddingBlock="sp12"
-				paddingInline="sp16"
-				renderRoot={(domProps) => <CollapsibleTrigger {...domProps} />}
-			>
+		<Disclosure className={styles.group} defaultExpanded={group.defaultOpen}>
+			<RacButton className={styles.groupTrigger} slot="trigger">
 				<Text elementType="span" fontWeight="emphasis" typography="caption">
 					{group.name}
 				</Text>
-				<ChevronIcon />
-			</Cluster>
-			<Box
-				className="border-fd-border border-t"
-				paddingBlockEnd="sp4"
-				paddingInline="sp4"
-				renderRoot={(domProps) => <CollapsibleContent {...domProps} />}
-			>
+				<Icon aria-hidden className={styles.groupChevron} name="chevronDown" size="small" />
+			</RacButton>
+			<DisclosurePanel className={styles.groupPanel}>
 				<TypeTable type={type} />
-			</Box>
-		</Box>
-	);
-}
-
-function ChevronIcon() {
-	return (
-		<svg
-			aria-hidden
-			className="size-4 text-fd-muted-foreground transition-transform group-data-[state=open]:rotate-180"
-			fill="none"
-			stroke="currentColor"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			strokeWidth="2"
-			viewBox="0 0 24 24"
-		>
-			<path d="m6 9 6 6 6-6" />
-		</svg>
+			</DisclosurePanel>
+		</Disclosure>
 	);
 }
 

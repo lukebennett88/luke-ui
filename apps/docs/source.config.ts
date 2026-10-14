@@ -53,7 +53,6 @@ export default defineConfig({
 		},
 		remarkPlugins: (v) => [
 			...v,
-			[remarkAutoTypeTable, { generator, options: { basePath: repoRoot } }],
 			[
 				remarkAutoTypeTable,
 				{
@@ -63,6 +62,15 @@ export default defineConfig({
 					outputName: 'ComponentPropsTable',
 					// Processed Markdown reads GeneratedDoc JSON from the `type` attribute.
 					remarkStringify: true,
+				},
+			],
+			[
+				remarkAutoTypeTable,
+				{
+					generator,
+					name: 'auto-type-table',
+					options: { basePath: repoRoot },
+					outputName: 'TypeTable',
 				},
 			],
 			remarkValidateExamples,

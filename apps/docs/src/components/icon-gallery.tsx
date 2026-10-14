@@ -1,4 +1,5 @@
 import { Box } from '@luke-ui/react/box';
+import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Grid } from '@luke-ui/react/grid';
 import type { IconName, IconProps } from '@luke-ui/react/icon';
@@ -10,6 +11,7 @@ import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import type { JSX, ReactNode } from 'react';
 import { useDeferredValue, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import * as styles from './icon-gallery.css.js';
 import { TextToggleButtonGroup } from './playground/icon-toggle-button-group.js';
 
 type GalleryIconSize = NonNullable<IconProps['size']>;
@@ -32,18 +34,6 @@ interface CopyStatus {
 	name: IconName;
 	state: 'copied' | 'error';
 }
-
-/**
- * Shared treatment for the two per-cell copy buttons. Always visible, on every input method,
- * as part of the cell's ruled footer. The only state change is a tint on hover/focus-visible.
- */
-const COPY_BUTTON_CLASS_NAME = cx(
-	'flex h-7 min-w-0 items-center justify-center gap-1 whitespace-nowrap',
-	'font-medium text-[11px] text-fd-muted-foreground',
-	'hover:bg-fd-accent hover:text-fd-accent-foreground',
-	'focus-visible:bg-fd-accent focus-visible:text-fd-accent-foreground',
-	'transition-colors duration-150 motion-reduce:transition-none',
-);
 
 /** Searchable index of the first-party icon set, sized at the token you'll ship it at. */
 export function IconGallery(): JSX.Element {
@@ -131,7 +121,7 @@ export function IconGallery(): JSX.Element {
 					value={previewSize}
 				/>
 				<Text
-					className="ms-auto"
+					className={styles.count}
 					color="secondary"
 					elementType="p"
 					fontVariantNumeric="tabular-nums"
@@ -144,7 +134,7 @@ export function IconGallery(): JSX.Element {
 				</VisuallyHidden>
 			</Cluster>
 
-			<div className="overflow-hidden rounded-xl border border-fd-border">
+			<div className={styles.frame}>
 				{filteredNames.length === 0 ? (
 					<IconGalleryEmptyState onClear={handleClearFilter} query={filter.trim()} />
 				) : (
@@ -230,7 +220,7 @@ interface IconGalleryCellProps {
 /** One grid cell: a fixed-height glyph area, the name below it, and a ruled footer of two copy buttons. */
 function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryCellProps) {
 	return (
-		<div className="-mr-px -mb-px flex flex-col border-fd-border border-r border-b">
+		<div className={styles.cell}>
 			<Stack alignItems="center" gap="sp4" padding="sp8">
 				<Box
 					alignItems="center"
@@ -242,7 +232,7 @@ function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryC
 					<Icon name={name} size={previewSize} />
 				</Box>
 				<Text
-					className="w-full"
+					className={styles.iconName}
 					color="secondary"
 					elementType="span"
 					lineClamp={1}
@@ -253,7 +243,7 @@ function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryC
 					{name}
 				</Text>
 			</Stack>
-			<div className="grid grid-cols-2 border-fd-border border-t">
+			<div className={styles.copyRow}>
 				<CopyButton
 					copyStatus={copyStatus?.kind === 'jsx' ? copyStatus : null}
 					kind="jsx"
@@ -294,7 +284,7 @@ function CopyButton({ copyStatus, kind, name, onCopy }: CopyButtonProps) {
 	return (
 		<button
 			aria-label={accessibleLabel}
-			className={cx(COPY_BUTTON_CLASS_NAME, kind === 'jsx' && 'border-fd-border border-r')}
+			className={cx(styles.copyButton, kind === 'jsx' && styles.copyButtonDivider)}
 			onClick={() => onCopy(name, kind)}
 			type="button"
 		>
@@ -313,7 +303,7 @@ function IconGalleryEmptyState({ onClear, query }: IconGalleryEmptyStateProps) {
 	return (
 		<Stack
 			alignItems="center"
-			className="text-center"
+			className={styles.emptyState}
 			gap="sp12"
 			paddingBlock="sp64"
 			paddingInline="sp24"
@@ -321,16 +311,9 @@ function IconGalleryEmptyState({ onClear, query }: IconGalleryEmptyStateProps) {
 			<Text color="secondary" elementType="p" typography="caption">
 				No icon matches &quot;{query}&quot;
 			</Text>
-			<button
-				className={cx(
-					'rounded-md border border-fd-border px-3 py-1.5 font-medium text-fd-foreground text-sm',
-					'hover:bg-fd-accent hover:text-fd-accent-foreground',
-				)}
-				onClick={onClear}
-				type="button"
-			>
+			<Button onPress={onClear} size="small">
 				Clear filter
-			</button>
+			</Button>
 		</Stack>
 	);
 }
