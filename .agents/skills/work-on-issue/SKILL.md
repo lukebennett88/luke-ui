@@ -25,7 +25,9 @@ description: >-
    unrelated failure does not, as long as the rest of the change is verified and the pull request
    says so.
 6. Read the whole diff. When it changes public API, accessibility behaviour, or shared
-   infrastructure, review it with [review-pr](../review-pr/SKILL.md) and fix what the review finds.
+   infrastructure, review it with [review-pr](../review-pr/SKILL.md). Fix every blocking finding
+   before you open the pull request, and fix the small issues that are worth it. Mention a
+   deliberate deferral in the pull request only when it matters.
 7. Commit with a plain imperative subject, such as "Validate authored theme inputs before
    inheritance". Push the branch and open the pull request with [write-pr](../write-pr/SKILL.md).
 

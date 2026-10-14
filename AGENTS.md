@@ -56,6 +56,11 @@ documentation, tests, or both.
 
 ### Verification traps
 
+- A clean checkout can still be behind its remote, and a pull request's head can move after you read
+  it. Fetch, and read the head SHA again, before you review or build on a branch.
+- Do not use `git stash` to compare check results with and without a change. The stashed run leaves
+  `dist/` built from the wrong sources, Turbo caches it, and later runs fail with errors such as
+  `TS2307: Cannot find module '@luke-ui/react/box'`. Compare in a separate worktree instead.
 - Only the root `pnpm run check` runs `check:format-root`, which covers files outside packages such
   as `docs/*.md`, and knip (`check:cycles`, `check:unused`). If `check:format-root` fails on
   Markdown wrapping, run `pnpm run fix:format-root`. Do not re-wrap by hand.
