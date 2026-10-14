@@ -28,10 +28,9 @@ import { cx } from '../../../shared/utils/utils.js';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import {
-	availableInlineSizeForContainerPadding,
-	DEFAULT_OVERLAY_CONTAINER_PADDING,
-	useOverlayViewportInlineSize,
-} from '../../overlays/overlay-viewport-inline-size.js';
+	resolveOverlayContainerPadding,
+	useAvailableOverlayInlineSize,
+} from '../../overlays/available-overlay-inline-size.js';
 import { copyScopeColorMode } from '../../overlays/scope-color-mode.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
@@ -291,15 +290,13 @@ export function SelectIndicator(props: SelectIndicatorProps): JSX.Element {
 
 /** Popover surface for the listbox. */
 export function SelectPopover(props: SelectPopoverProps): JSX.Element {
-	const { containerPadding, offset = 4, ref, ...popoverProps } = props;
+	const { containerPadding: containerPaddingProp, offset = 4, ref, ...popoverProps } = props;
 	const popoverContext = useSlottedContext(PopoverContext);
-	const resolvedContainerPadding =
-		containerPadding ?? popoverContext?.containerPadding ?? DEFAULT_OVERLAY_CONTAINER_PADDING;
-	const viewportInlineSize = useOverlayViewportInlineSize();
-	const availableInlineSize = availableInlineSizeForContainerPadding(
-		resolvedContainerPadding,
-		viewportInlineSize,
+	const containerPadding = resolveOverlayContainerPadding(
+		containerPaddingProp,
+		popoverContext?.containerPadding,
 	);
+	const availableInlineSize = useAvailableOverlayInlineSize(containerPadding);
 
 	return (
 		<RacPopover
@@ -307,7 +304,7 @@ export function SelectPopover(props: SelectPopoverProps): JSX.Element {
 			className={composeRenderProps(popoverProps.className, (className) => {
 				return comboboxRecipe().popover({ className });
 			})}
-			containerPadding={resolvedContainerPadding}
+			containerPadding={containerPadding}
 			offset={offset}
 			ref={mergeRefs(ref, copyScopeColorMode(popoverContext?.triggerRef))}
 			style={composeRenderProps(popoverProps.style, (style) => ({

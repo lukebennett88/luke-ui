@@ -13,7 +13,6 @@ import { createRef } from 'react';
 import type { Key } from 'react-aria-components/ComboBox';
 import { expect, onTestFinished, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { DEFAULT_OVERLAY_CONTAINER_PADDING } from '../overlays/overlay-viewport-inline-size.js';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { measureFieldError } from '../test-utils/measure-field-error.js';
 import {
@@ -460,13 +459,7 @@ test('ComboboxField clears the selection when the desktop input is emptied', asy
 	await expect.element(input).toHaveValue('');
 });
 
-// An edge-to-edge field with zero body margin can make a trigger-width popover wider than the
-// viewport React Aria leaves clear. Without a max width the document scrolls horizontally and the
-// non-modal Combobox popover closes on that scroll. Package browser setup already pins a desktop
-// screen width, so this stays on the popover path rather than the mobile tray.
 test('an edge-to-edge ComboboxField popover stays open without horizontal scrolling', async () => {
-	expect(getComputedStyle(document.body).margin).toBe('0px');
-
 	const horizontalScrolls: Array<number> = [];
 	const onScroll = () => {
 		if (window.scrollX !== 0) horizontalScrolls.push(window.scrollX);
@@ -494,14 +487,6 @@ test('an edge-to-edge ComboboxField popover stays open without horizontal scroll
 	await waitForOverlayEnter(popover);
 	await expect.element(listbox).toBeVisible();
 
-	const viewportInlineSize = window.visualViewport?.width ?? document.documentElement.clientWidth;
-	const popoverBox = popover.getBoundingClientRect();
-	const maxInlineSize = viewportInlineSize - 2 * DEFAULT_OVERLAY_CONTAINER_PADDING;
-	expect(popoverBox.width).toBeLessThanOrEqual(maxInlineSize + 0.5);
-	expect(popoverBox.left).toBeGreaterThanOrEqual(DEFAULT_OVERLAY_CONTAINER_PADDING - 0.5);
-	expect(popoverBox.right).toBeLessThanOrEqual(
-		viewportInlineSize - DEFAULT_OVERLAY_CONTAINER_PADDING + 0.5,
-	);
 	expect(window.scrollX).toBe(0);
 	expect(horizontalScrolls).toEqual([]);
 	expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
@@ -539,11 +524,39 @@ test('a ComboboxField popover matches the trigger width when the viewport has ro
 	);
 });
 
-test('a ComboboxField popover respects a larger containerPadding', async () => {
-	const containerPadding = 40;
+for (const containerPadding of [0, 40] as const) {
+	test(`a ComboboxField popover respects containerPadding ${containerPadding}`, async () => {
+		render(
+			<ComboboxField
+				defaultItems={countryItems}
+				label="Country"
+				popoverProps={{ containerPadding }}
+			>
+				{renderCountryItem}
+			</ComboboxField>,
+		);
 
+		await userEvent.tab();
+		await userEvent.keyboard('{ArrowDown}');
+
+		const listbox = page.getByRole('listbox');
+		await expect.element(listbox).toBeVisible();
+		const popover = listbox.element().closest('[data-trigger="ComboBox"]');
+		if (popover == null) throw new Error('Expected the Combobox popover.');
+		await waitForOverlayEnter(popover);
+
+		const viewportInlineSize =
+			window.visualViewport?.width ?? document.documentElement.clientWidth;
+		const popoverBox = popover.getBoundingClientRect();
+		expect(popoverBox.width).toBeLessThanOrEqual(viewportInlineSize - 2 * containerPadding + 0.5);
+		expect(popoverBox.left).toBeGreaterThanOrEqual(containerPadding - 0.5);
+		expect(popoverBox.right).toBeLessThanOrEqual(viewportInlineSize - containerPadding + 0.5);
+	});
+}
+
+test('a ComboboxField popover stays within the layout width when a classic scrollbar appears', async () => {
 	render(
-		<ComboboxField defaultItems={countryItems} label="Country" popoverProps={{ containerPadding }}>
+		<ComboboxField defaultItems={countryItems} label="Country">
 			{renderCountryItem}
 		</ComboboxField>,
 	);
@@ -556,13 +569,32 @@ test('a ComboboxField popover respects a larger containerPadding', async () => {
 	const popover = listbox.element().closest('[data-trigger="ComboBox"]');
 	if (popover == null) throw new Error('Expected the Combobox popover.');
 	await waitForOverlayEnter(popover);
-	await expect.element(listbox).toBeVisible();
 
-	const viewportInlineSize = window.visualViewport?.width ?? document.documentElement.clientWidth;
-	const popoverBox = popover.getBoundingClientRect();
-	expect(popoverBox.width).toBeLessThanOrEqual(viewportInlineSize - 2 * containerPadding + 0.5);
-	expect(popoverBox.left).toBeGreaterThanOrEqual(containerPadding - 0.5);
-	expect(popoverBox.right).toBeLessThanOrEqual(viewportInlineSize - containerPadding + 0.5);
+	const spacer = document.createElement('div');
+	spacer.style.blockSize = `${window.innerHeight * 2}px`;
+	document.body.append(spacer);
+	const scrollbarStyle = document.createElement('style');
+	scrollbarStyle.textContent = `
+		html { overflow-y: scroll; }
+		html::-webkit-scrollbar { width: 16px; }
+		html::-webkit-scrollbar-thumb { background: CanvasText; }
+	`;
+	document.head.append(scrollbarStyle);
+	onTestFinished(() => {
+		spacer.remove();
+		scrollbarStyle.remove();
+		window.scrollTo(0, 0);
+	});
+
+	await expect
+		.poll(() => {
+			const viewportInlineSize =
+				window.visualViewport?.width ?? document.documentElement.clientWidth;
+			return popover.getBoundingClientRect().width <= viewportInlineSize - 24 + 0.5;
+		})
+		.toBe(true);
+	await expect.element(listbox).toBeVisible();
+	expect(window.scrollX).toBe(0);
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {

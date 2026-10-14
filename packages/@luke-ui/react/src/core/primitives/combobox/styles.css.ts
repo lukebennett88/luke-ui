@@ -16,10 +16,7 @@ import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
-/**
- * Cap for trigger-width popovers. Select and Combobox set this from the overlay viewport width and
- * the effective `containerPadding`, matching React Aria's positioning clearance.
- */
+/** Set by Select/Combobox popovers to the usable overlay inline size. */
 export const popoverAvailableInlineSizeVar = createVar();
 
 // React Aria publishes disabled and invalid state on the group, so those states
@@ -236,8 +233,7 @@ const comboboxConfig = {
 				inlineSize: 'var(--trigger-width)',
 				isolation: 'isolate',
 				maxInlineSize: popoverAvailableInlineSizeVar,
-				// `min-inline-size` wins over `max-inline-size` when both conflict, so the floor must
-				// also respect the usable viewport.
+				// CSS min wins over max when they conflict, so the floor needs the same cap.
 				minInlineSize: `min(var(--trigger-width), ${popoverAvailableInlineSizeVar})`,
 				overflow: 'hidden',
 

@@ -7,10 +7,9 @@ import { PopoverContext } from 'react-aria-components/Popover';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import {
-	availableInlineSizeForContainerPadding,
-	DEFAULT_OVERLAY_CONTAINER_PADDING,
-	useOverlayViewportInlineSize,
-} from '../../overlays/overlay-viewport-inline-size.js';
+	resolveOverlayContainerPadding,
+	useAvailableOverlayInlineSize,
+} from '../../overlays/available-overlay-inline-size.js';
 import { copyScopeColorMode } from '../../overlays/scope-color-mode.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
@@ -27,15 +26,13 @@ export type ComboboxPopoverProps = Prettify<_ComboboxPopoverProps>;
 
 /** Popover surface used for listbox content. */
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
-	const { containerPadding, ref, ...restProps } = props;
+	const { containerPadding: containerPaddingProp, ref, ...restProps } = props;
 	const popoverContext = useSlottedContext(PopoverContext);
-	const resolvedContainerPadding =
-		containerPadding ?? popoverContext?.containerPadding ?? DEFAULT_OVERLAY_CONTAINER_PADDING;
-	const viewportInlineSize = useOverlayViewportInlineSize();
-	const availableInlineSize = availableInlineSizeForContainerPadding(
-		resolvedContainerPadding,
-		viewportInlineSize,
+	const containerPadding = resolveOverlayContainerPadding(
+		containerPaddingProp,
+		popoverContext?.containerPadding,
 	);
+	const availableInlineSize = useAvailableOverlayInlineSize(containerPadding);
 
 	return (
 		<RacPopover
@@ -43,7 +40,7 @@ export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 			className={composeRenderProps(restProps.className, (className) => {
 				return comboboxRecipe().popover({ className });
 			})}
-			containerPadding={resolvedContainerPadding}
+			containerPadding={containerPadding}
 			ref={mergeRefs(ref, copyScopeColorMode(popoverContext?.triggerRef))}
 			style={composeRenderProps(restProps.style, (style) => ({
 				...style,

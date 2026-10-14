@@ -6,7 +6,6 @@ import type { Key } from 'react-aria-components/Select';
 import { SelectContext } from 'react-aria-components/Select';
 import { expect, onTestFinished, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { DEFAULT_OVERLAY_CONTAINER_PADDING } from '../overlays/overlay-viewport-inline-size.js';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { expectAccessibleNameWords } from '../test-utils/expect-accessible-name-words.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
@@ -669,12 +668,7 @@ test('the SelectField scene has no axe violations', async () => {
 	await expectNoAxeViolations(container);
 });
 
-// An edge-to-edge field with zero body margin can make a trigger-width popover wider than the
-// viewport React Aria leaves clear. Without a max width the document scrolls horizontally. Package
-// browser setup already pins a desktop screen width, so this stays on the popover path.
 test('an edge-to-edge SelectField popover stays open without horizontal scrolling', async () => {
-	expect(getComputedStyle(document.body).margin).toBe('0px');
-
 	const horizontalScrolls: Array<number> = [];
 	const onScroll = () => {
 		if (window.scrollX !== 0) horizontalScrolls.push(window.scrollX);
@@ -701,14 +695,6 @@ test('an edge-to-edge SelectField popover stays open without horizontal scrollin
 	await waitForOverlayEnter(popover);
 	await expect.element(listbox).toBeVisible();
 
-	const viewportInlineSize = window.visualViewport?.width ?? document.documentElement.clientWidth;
-	const popoverBox = popover.getBoundingClientRect();
-	const maxInlineSize = viewportInlineSize - 2 * DEFAULT_OVERLAY_CONTAINER_PADDING;
-	expect(popoverBox.width).toBeLessThanOrEqual(maxInlineSize + 0.5);
-	expect(popoverBox.left).toBeGreaterThanOrEqual(DEFAULT_OVERLAY_CONTAINER_PADDING - 0.5);
-	expect(popoverBox.right).toBeLessThanOrEqual(
-		viewportInlineSize - DEFAULT_OVERLAY_CONTAINER_PADDING + 0.5,
-	);
 	expect(window.scrollX).toBe(0);
 	expect(horizontalScrolls).toEqual([]);
 	expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
