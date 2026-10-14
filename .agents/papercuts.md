@@ -23,10 +23,21 @@ date count separately. Silence does not mean an entry is resolved.
 task or PR fixes a symptom, remove its entry in the same change, or do not add one. When existing
 guidance or a skill should have prevented a mistake, log the guidance gap even after you fix the
 code, unless the same change also fixes the guidance. Do not make unrelated fixes under cover of
-recording a papercut. Commit an entry separately, for example `Record papercut: <symptom>`, and
-mention it in the PR. Run `pnpm run fix:format-root` before committing. When resolving a conflict in
-this file, keep both additions. A session that can't commit reports its findings in its final
-message.
+recording a papercut. When committing is authorised, commit an entry separately, for example
+`Record papercut: <symptom>`, and mention it in the PR. Run `pnpm run fix:format-root` before
+committing. When resolving a conflict in this file, keep both additions. A session that can't commit
+reports its findings in its final message.
+
+**Handoff.** A guidance or workflow failure needs an observed mistake, the applicable rule, and the
+workflow requirement that should have prevented it. The first evidenced occurrence can qualify, even
+after correcting the defect. Do not infer that an agent read or misunderstood guidance; record the
+symptom and supported evidence. Read-only review, including self-review, reports the defect once and
+supplies a draft in the `Seen`/`Where`/`Problem` format, referencing the finding and any matching
+entry. Mark it **not recorded**. It never writes this log.
+
+Authorised implementation checks this log, records qualifying entries or occurrences, or explains
+why each omitted candidate does not qualify. Correcting code alone does not resolve a guidance
+failure. Log-only authority permits no code edits, commits, or pushes.
 
 **Triage.** Mention it in your final message when this file reaches 10 entries, or when one entry
 reaches 3 occurrences. At 10 entries, triage the whole log. At 3 occurrences, triage that entry.
@@ -35,10 +46,12 @@ issue before you open a new one. When you reject an entry because the intended b
 document the intended behaviour. Remove resolved, transferred, and rejected entries. Git history
 archives them. Never delete an entry only because it is old.
 
-**Skills.** Propose a new skill only during triage, with at least two observed corrections that a
-workflow would have prevented and that a check or a pointer would not handle better. The maintainer
-approves skill additions and changes. Remove a skill when it is obsolete or when pilot or spot-check
-evidence shows it does not help. Silence in this log is not evidence.
+**Skills.** Established, repeatable workflows may have proactive skills. Mistake-prevention skills
+need evidence from this log, reviews, or observed failures. Two corrections trigger consideration,
+not a prerequisite or automatic skill creation. Recurrence alone does not justify a skill. Prefer
+checks, better discovery, or improvements to existing guidance when they address the failure more
+directly. The maintainer approves skill additions and changes. Remove a skill when it is obsolete or
+when pilot or spot-check evidence shows it does not help. Silence in this log is not evidence.
 
 ## Visual compare fails while the main baseline run is still in progress
 

@@ -3,13 +3,15 @@ name: write-docs
 description: >-
   Write, change, or review documentation in the Luke UI repository, including pull requests that
   change it: MDX pages in apps/docs/content/docs, docs/*.md guides, READMEs, and JSDoc when it is
-  the main task or documents a new public export or prop.
+  the main task or documents a new public export or prop. Use when asked to write, update, or review
+  docs. Do not use to file issues, implement a tracked issue, or open a pull request.
 ---
 
 # Write docs
 
 [DOCUMENTATION.md](../../../docs/DOCUMENTATION.md) owns the documentation rules. This skill helps
-you apply them. When this skill and the guide disagree, the guide wins.
+you apply them. When this skill and the guide disagree, the guide wins. When invoked from a workflow
+skill, inherit that workflow's permission and safety boundaries.
 
 ## Workflow
 

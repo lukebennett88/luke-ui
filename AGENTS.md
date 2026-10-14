@@ -1,7 +1,20 @@
 # Luke UI agent guide
 
+Workflow and specialist skills live in `.agents/skills/`. Claude Code loads the same files through
+`.claude/skills`, a symlink to that directory.
+
 ## Task routing
 
+- Investigating or writing GitHub issues: follow
+  [.agents/skills/make-issue/SKILL.md](.agents/skills/make-issue/SKILL.md).
+- Implementing an issue and delivering a reviewable pull request: follow
+  [.agents/skills/work-on-issue/SKILL.md](.agents/skills/work-on-issue/SKILL.md). That request
+  authorises task-scoped commits, pushing the task branch, and opening its pull request.
+  Investigation, planning, and review do not. Honour narrower stopping points.
+- Creating or updating a pull request title and body: follow
+  [.agents/skills/write-pr/SKILL.md](.agents/skills/write-pr/SKILL.md).
+- Reviewing a pull request or diff: follow
+  [.agents/skills/review-pr/SKILL.md](.agents/skills/review-pr/SKILL.md).
 - Documentation, including pull request reviews that touch it: follow
   [.agents/skills/write-docs/SKILL.md](.agents/skills/write-docs/SKILL.md). This covers MDX pages in
   `apps/docs/content/docs/`, `docs/*.md`, READMEs, and JSDoc when it is the main task or documents a
@@ -54,11 +67,11 @@
 
 ## Papercuts
 
-- When your current task runs into repository friction or technical debt you can point to, record it
-  in `.agents/papercuts.md`. Read its header first.
+- When your current task runs into repository friction or technical debt you can point to, follow
+  [.agents/papercuts.md](.agents/papercuts.md). Read its header first.
 - When your task or PR fixes the symptom, remove its entry in the same change, or do not add one.
-- When a user or reviewer corrects a mistake that existing guidance or a skill should have
-  prevented, record the gap there too, even after you fix the mistake, unless the same change also
-  updates the guidance.
-- Recording a papercut is allowed in any PR, as a separate commit. It is not permission to fix the
-  problem. If you can't commit, report it in your final message.
+- When existing guidance or a skill should have prevented a mistake, follow the handoff in that
+  file. Review drafts stay **not recorded**. Authorised implementation records qualifying entries or
+  explains omissions.
+- Recording a papercut is allowed in any PR. When committing is authorised, use a separate commit.
+  It is not permission to fix the problem. If you can't commit, report it in your final message.

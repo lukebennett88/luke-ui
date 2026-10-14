@@ -3,14 +3,16 @@ name: write-tests
 description: >-
   Write, change, or review tests in the Luke UI repository, including pull requests that change
   them: *.test.ts, *.browser.test.tsx, test fixtures, accessibility checks, and visual regression
-  cases.
+  cases. Use when asked to write, update, or review tests. Do not use to file issues, implement a
+  tracked issue, or open a pull request.
 ---
 
 # Write tests
 
 [TESTING.md](../../../docs/TESTING.md) owns the testing rules. Read all of it before you write or
 review a test, and follow its links for specialist workflows such as visual regression. When this
-skill and the guide disagree, the guide wins.
+skill and the guide disagree, the guide wins. When invoked from a workflow skill, inherit that
+workflow's permission and safety boundaries.
 
 ## Workflow
 
