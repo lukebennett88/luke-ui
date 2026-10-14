@@ -304,14 +304,10 @@ for (const { control, name } of wrappedControls) {
 }
 
 test('shows virtual focus on a list box item without a second ring', async () => {
-	// Padding keeps the trigger-width popover inside the narrow test frame. An overflowing popover
-	// would scroll the page, and React Aria closes popovers on scroll.
 	const { container } = render(
-		<div style={{ padding: '1rem' }}>
-			<ComboboxField defaultItems={items} label="Combobox">
-				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-			</ComboboxField>
-		</div>,
+		<ComboboxField defaultItems={items} label="Combobox">
+			{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+		</ComboboxField>,
 	);
 	const input = page.getByRole('combobox').element();
 
@@ -350,11 +346,9 @@ test('leaves application animations and Luke UI feedback running under reduced m
 
 test('keeps overlay fades without movement under reduced motion', async () => {
 	render(
-		<div style={{ padding: '1rem' }}>
-			<SelectField items={items} label="Select">
-				{(item) => <SelectItem>{item.label}</SelectItem>}
-			</SelectField>
-		</div>,
+		<SelectField items={items} label="Select">
+			{(item) => <SelectItem>{item.label}</SelectItem>}
+		</SelectField>,
 	);
 	await emulateReducedMotion(true);
 

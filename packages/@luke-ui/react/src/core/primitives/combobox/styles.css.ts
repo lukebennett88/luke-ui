@@ -87,6 +87,11 @@ const comboboxActionStyles = {
 /** Marker class on every combobox and select item, for rules that reach into its content. */
 export const comboboxItemClassName = style({}, 'combobox-item');
 
+// React Aria's useOverlayPosition defaults `containerPadding` to 12px on each side. A trigger-width
+// popover that is wider than that padded viewport overflows the document, scrolls horizontally, and
+// (for the non-modal Combobox) closes on that scroll. Cap both sizes to the usable width.
+const popoverMaxInlineSize = 'calc(100vw - 24px)';
+
 // A selected item's `forced-color-adjust: none` inherits, so its content would keep author colours on
 // the `Highlight` fill: a `Text` keeps its theme colour and a `Kbd` its surface. Do for that content
 // what forced colours would have done. `!important` beats application and utility CSS, which ranks
@@ -228,7 +233,10 @@ const comboboxConfig = {
 				flexDirection: 'column',
 				inlineSize: 'var(--trigger-width)',
 				isolation: 'isolate',
-				minInlineSize: 'var(--trigger-width)',
+				maxInlineSize: popoverMaxInlineSize,
+				// `min-inline-size` wins over `max-inline-size` when both conflict, so the floor must
+				// also respect the usable viewport.
+				minInlineSize: `min(var(--trigger-width), ${popoverMaxInlineSize})`,
 				overflow: 'hidden',
 
 				'@supports': {
