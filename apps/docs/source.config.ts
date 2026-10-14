@@ -5,8 +5,8 @@ import {
 	createFileSystemGeneratorCache,
 	createGenerator,
 	remarkAutoTypeTable,
-	type RemarkAutoTypeTableOptions,
 } from 'fumadocs-typescript';
+import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import * as z from 'zod';
 import { createComponentPropsGenerator } from './src/lib/create-component-props-generator.js';
 import { inlineExampleSource } from './src/lib/inline-example-source';
