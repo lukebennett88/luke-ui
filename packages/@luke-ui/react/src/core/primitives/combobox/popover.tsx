@@ -1,8 +1,9 @@
 import { mergeRefs } from '@react-aria/utils';
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import type { JSX, Ref } from 'react';
+import { use } from 'react';
 import type { PopoverProps as RacPopoverProps } from 'react-aria-components/ComboBox';
-import { Popover as RacPopover } from 'react-aria-components/ComboBox';
+import { ComboBoxStateContext, Popover as RacPopover } from 'react-aria-components/ComboBox';
 import { PopoverContext } from 'react-aria-components/Popover';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
@@ -28,11 +29,15 @@ export type ComboboxPopoverProps = Prettify<_ComboboxPopoverProps>;
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 	const { containerPadding: containerPaddingProp, ref, ...restProps } = props;
 	const popoverContext = useSlottedContext(PopoverContext);
+	const comboBoxState = use(ComboBoxStateContext);
 	const containerPadding = resolveOverlayContainerPadding(
 		containerPaddingProp,
 		popoverContext?.containerPadding,
 	);
-	const availableInlineSize = useAvailableOverlayInlineSize(containerPadding);
+	const availableInlineSize = useAvailableOverlayInlineSize(
+		containerPadding,
+		comboBoxState?.isOpen === true,
+	);
 
 	return (
 		<RacPopover

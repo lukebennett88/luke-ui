@@ -292,11 +292,15 @@ export function SelectIndicator(props: SelectIndicatorProps): JSX.Element {
 export function SelectPopover(props: SelectPopoverProps): JSX.Element {
 	const { containerPadding: containerPaddingProp, offset = 4, ref, ...popoverProps } = props;
 	const popoverContext = useSlottedContext(PopoverContext);
+	const selectState = use(RacSelectStateContext);
 	const containerPadding = resolveOverlayContainerPadding(
 		containerPaddingProp,
 		popoverContext?.containerPadding,
 	);
-	const availableInlineSize = useAvailableOverlayInlineSize(containerPadding);
+	const availableInlineSize = useAvailableOverlayInlineSize(
+		containerPadding,
+		selectState?.isOpen === true,
+	);
 
 	return (
 		<RacPopover

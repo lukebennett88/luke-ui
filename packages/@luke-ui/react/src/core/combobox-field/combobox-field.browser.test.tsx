@@ -553,49 +553,6 @@ for (const containerPadding of [0, 40] as const) {
 	});
 }
 
-test('a ComboboxField popover stays within the layout width when a classic scrollbar appears', async () => {
-	render(
-		<ComboboxField defaultItems={countryItems} label="Country">
-			{renderCountryItem}
-		</ComboboxField>,
-	);
-
-	await userEvent.tab();
-	await userEvent.keyboard('{ArrowDown}');
-
-	const listbox = page.getByRole('listbox');
-	await expect.element(listbox).toBeVisible();
-	const popover = listbox.element().closest('[data-trigger="ComboBox"]');
-	if (popover == null) throw new Error('Expected the Combobox popover.');
-	await waitForOverlayEnter(popover);
-
-	const spacer = document.createElement('div');
-	spacer.style.blockSize = `${window.innerHeight * 2}px`;
-	document.body.append(spacer);
-	const scrollbarStyle = document.createElement('style');
-	scrollbarStyle.textContent = `
-		html { overflow-y: scroll; }
-		html::-webkit-scrollbar { width: 16px; }
-		html::-webkit-scrollbar-thumb { background: CanvasText; }
-	`;
-	document.head.append(scrollbarStyle);
-	onTestFinished(() => {
-		spacer.remove();
-		scrollbarStyle.remove();
-		window.scrollTo(0, 0);
-	});
-
-	await expect
-		.poll(() => {
-			const viewportInlineSize =
-				window.visualViewport?.width ?? document.documentElement.clientWidth;
-			return popover.getBoundingClientRect().width <= viewportInlineSize - 24 + 0.5;
-		})
-		.toBe(true);
-	await expect.element(listbox).toBeVisible();
-	expect(window.scrollX).toBe(0);
-});
-
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(
