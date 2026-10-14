@@ -1,13 +1,13 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Code } from '@luke-ui/react/code';
-import { Grid } from '@luke-ui/react/grid';
 import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { vars } from '@luke-ui/react/theme';
 import { Track } from '@luke-ui/react/track';
+import { cx } from '@luke-ui/react/utils';
 import type { CSSProperties, JSX, ReactNode } from 'react';
 import { useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
@@ -168,63 +168,46 @@ function TokenTable({
 	showSamples: boolean;
 	tokens: ReadonlyArray<ThemeToken>;
 }) {
-	const columns = showSamples
-		? '8rem minmax(0, 1fr) minmax(0, 1fr)'
-		: 'minmax(0, 1fr) minmax(0, 1fr)';
-
 	return (
 		<Box className={styles.tableScroll} overflowX="auto">
-			<Stack
-				aria-label="Theme tokens"
-				className={showSamples ? styles.tableWithSamples : styles.table}
-				role="table"
-			>
-				<Grid
-					alignItems="center"
-					className={styles.tableHeaderRow}
-					columns={columns}
-					paddingBlock="sp8"
-					paddingInline="sp16"
-					role="row"
-				>
-					{showSamples ? (
-						<Text elementType="span" fontWeight="label" role="columnheader" typography="caption">
-							Sample
-						</Text>
-					) : null}
-					<Text elementType="span" fontWeight="label" role="columnheader" typography="caption">
-						<Code>vars</Code> path
-					</Text>
-					<Text elementType="span" fontWeight="label" role="columnheader" typography="caption">
-						CSS variable
-					</Text>
-				</Grid>
-				{tokens.map((token) => (
-					<Grid
-						alignItems="center"
-						className={styles.tableRow}
-						columns={columns}
-						key={token.path}
-						paddingBlock="sp8"
-						paddingInline="sp16"
-						role="row"
-					>
+			<table className={cx(styles.table, showSamples && styles.tableWithSamples)}>
+				<thead>
+					<tr className={styles.tableHeaderRow}>
 						{showSamples ? (
-							<Box aria-hidden role="cell">
-								<TokenSample token={token} />
-							</Box>
+							<th className={cx(styles.tableHeaderCell, styles.sampleHeaderCell)} scope="col">
+								Sample
+							</th>
 						) : null}
-						<Box minInlineSize="0" role="cell">
-							<Code textWrap="pretty">{token.path}</Code>
-						</Box>
-						<Box minInlineSize="0" role="cell">
-							<Text color="secondary" elementType="span">
-								<Code textWrap="pretty">{token.variable}</Code>
-							</Text>
-						</Box>
-					</Grid>
-				))}
-			</Stack>
+						<th className={styles.tableHeaderCell} scope="col">
+							<Code>vars</Code> path
+						</th>
+						<th className={styles.tableHeaderCell} scope="col">
+							CSS variable
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{tokens.map((token) => (
+						<tr className={styles.tableRow} key={token.path}>
+							{showSamples ? (
+								<td className={styles.tableCell}>
+									<span aria-hidden>
+										<TokenSample token={token} />
+									</span>
+								</td>
+							) : null}
+							<td className={styles.tableCell}>
+								<Code textWrap="pretty">{token.path}</Code>
+							</td>
+							<td className={styles.tableCell}>
+								<Code className={styles.variableCode} textWrap="pretty">
+									{token.variable}
+								</Code>
+							</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
 		</Box>
 	);
 }
