@@ -545,8 +545,7 @@ for (const containerPadding of [0, 40] as const) {
 		if (popover == null) throw new Error('Expected the Combobox popover.');
 		await waitForOverlayEnter(popover);
 
-		const viewportInlineSize =
-			window.visualViewport?.width ?? document.documentElement.clientWidth;
+		const viewportInlineSize = window.visualViewport?.width ?? document.documentElement.clientWidth;
 		const popoverBox = popover.getBoundingClientRect();
 		expect(popoverBox.width).toBeLessThanOrEqual(viewportInlineSize - 2 * containerPadding + 0.5);
 		expect(popoverBox.left).toBeGreaterThanOrEqual(containerPadding - 0.5);
