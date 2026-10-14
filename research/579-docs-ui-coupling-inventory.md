@@ -141,8 +141,10 @@ Local `TypeTable` (`components/type-table.tsx`) replaces `fumadocs-ui/components
 keeps the generated `TypeNode` contract from `fumadocs-typescript` / `remarkAutoTypeTable`,
 including hash-open rows, optional `?`, deprecated strike-through, defaults, parameters, and
 returns. Prop groups in `ComponentPropsTable` and purpose groups in `TokenExplorer` use React Aria
-`Disclosure` with docs-local `.css.ts` chrome. Row and group labels avoid nested `<p>` so MDX
-descriptions cannot hydrate a paragraph inside a paragraph.
+`Disclosure` with Luke UI `Box`/`Stack`/`Cluster`/`Grid` for spacing and surface chrome. Docs-local
+`.css.ts` keeps interaction, container queries, one-sided borders, and table cell rules Box cannot
+express. Row and group labels avoid nested `<p>` so MDX descriptions cannot hydrate a paragraph
+inside a paragraph.
 
 `IconGallery`, `TokenExplorer`, and `ComponentsIndex` no longer use Tailwind utilities or `fd-*`
 tokens. Filtering, counts, copy feedback, empty states, disclosure semantics, and table headers

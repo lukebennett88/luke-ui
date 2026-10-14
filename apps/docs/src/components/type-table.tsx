@@ -1,5 +1,10 @@
+import { Box } from '@luke-ui/react/box';
+import { Cluster } from '@luke-ui/react/cluster';
+import { Grid } from '@luke-ui/react/grid';
 import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@luke-ui/react/link';
+import { Stack } from '@luke-ui/react/stack';
+import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, ReactNode } from 'react';
 import { useState, useSyncExternalStore } from 'react';
@@ -38,15 +43,46 @@ export function TypeTable({
 	type: Record<string, TypeNode>;
 } & ComponentProps<'div'>) {
 	return (
-		<div {...props} className={cx(styles.root, 'not-prose', className)} id={id}>
-			<div className={styles.header}>
-				<span className={styles.headerProp}>Prop</span>
-				<span className={styles.headerType}>Type</span>
-			</div>
+		<Box
+			{...props}
+			backgroundColor="surface.base"
+			borderColor="decorative"
+			borderRadius="surface"
+			borderStyle="solid"
+			borderWidth="thin"
+			className={cx(styles.root, 'not-prose', className)}
+			display="flex"
+			flexDirection="column"
+			gap="sp4"
+			id={id}
+			maxInlineSize="100%"
+			overflow="hidden"
+			padding="sp4"
+		>
+			<Cluster alignItems="center" paddingBlock="sp4" paddingInline="sp12">
+				<Text
+					className={styles.headerProp}
+					color="secondary"
+					elementType="span"
+					fontWeight="label"
+					typography="caption"
+				>
+					Prop
+				</Text>
+				<Text
+					className={styles.headerType}
+					color="secondary"
+					elementType="span"
+					fontWeight="label"
+					typography="caption"
+				>
+					Type
+				</Text>
+			</Cluster>
 			{Object.entries(type).map(([name, item]) => (
 				<TypeTableRow item={item} key={name} name={name} parentId={id} />
 			))}
-		</div>
+		</Box>
 	);
 }
 
@@ -106,44 +142,64 @@ function TypeTableRow({
 				<Icon aria-hidden className={styles.chevron} name="chevronDown" size="xsmall" />
 			</RacButton>
 			<DisclosurePanel>
-				<div className={styles.panel}>
+				<Grid className={styles.panel} columns="1fr 3fr" gap="sp16" overflow="auto" padding="sp12">
 					{description === undefined || description === null || description === '' ? null : (
-						<div className={styles.description}>{description}</div>
+						<Box className={styles.description} gridColumn="1 / -1">
+							{description}
+						</Box>
 					)}
 					{typeDescription === undefined ? null : (
 						<>
-							<div className={styles.fieldLabel}>Type</div>
-							<div className={styles.fieldValue}>{typeDescription}</div>
+							<FieldLabel>Type</FieldLabel>
+							<Box alignSelf="center" minInlineSize="0">
+								{typeDescription}
+							</Box>
 						</>
 					)}
 					{defaultValue === undefined ? null : (
 						<>
-							<div className={styles.fieldLabel}>Default</div>
-							<div className={styles.fieldValue}>{defaultValue}</div>
+							<FieldLabel>Default</FieldLabel>
+							<Box alignSelf="center" minInlineSize="0">
+								{defaultValue}
+							</Box>
 						</>
 					)}
 					{parameters.length === 0 ? null : (
 						<>
-							<div className={styles.fieldLabel}>Parameters</div>
-							<div className={styles.parameters}>
+							<FieldLabel>Parameters</FieldLabel>
+							<Stack gap="sp8">
 								{parameters.map((param) => (
-									<div className={styles.parameter} key={param.name}>
-										<span className={styles.parameterName}>{param.name} -</span>
+									<Cluster alignItems="center" gap="sp4" key={param.name}>
+										<Text elementType="span" fontWeight="label" style={{ whiteSpace: 'nowrap' }}>
+											{param.name} -
+										</Text>
 										<div>{param.description}</div>
-									</div>
+									</Cluster>
 								))}
-							</div>
+							</Stack>
 						</>
 					)}
 					{returns === undefined ? null : (
 						<>
-							<div className={styles.fieldLabel}>Returns</div>
-							<div className={styles.fieldValue}>{returns}</div>
+							<FieldLabel>Returns</FieldLabel>
+							<Box alignSelf="center" minInlineSize="0">
+								{returns}
+							</Box>
 						</>
 					)}
-				</div>
+				</Grid>
 			</DisclosurePanel>
 		</Disclosure>
+	);
+}
+
+function FieldLabel({ children }: { children: ReactNode }) {
+	return (
+		<Box paddingInlineEnd="sp8">
+			<Text color="secondary" elementType="div" typography="caption">
+				{children}
+			</Text>
+		</Box>
 	);
 }
 

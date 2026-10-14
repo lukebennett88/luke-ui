@@ -1,26 +1,7 @@
 import { vars } from '@luke-ui/react/theme';
 import { style } from '@vanilla-extract/css';
 
-export const count = style({
-	'@layer': {
-		components: {
-			marginInlineStart: 'auto',
-		},
-	},
-});
-
-export const frame = style({
-	'@layer': {
-		components: {
-			borderColor: vars.color.border.decorative,
-			borderRadius: vars.radius.surface,
-			borderStyle: 'solid',
-			borderWidth: '1px',
-			overflow: 'hidden',
-		},
-	},
-});
-
+/** Collapsed grid cell borders; Stack/Grid own the internal layout. */
 export const cell = style({
 	'@layer': {
 		components: {
@@ -30,30 +11,19 @@ export const cell = style({
 			borderInlineEndColor: vars.color.border.decorative,
 			borderInlineEndStyle: 'solid',
 			borderInlineEndWidth: '1px',
-			display: 'flex',
-			flexDirection: 'column',
 			marginBlockEnd: '-1px',
 			marginInlineEnd: '-1px',
 		},
 	},
 });
 
-export const iconName = style({
-	'@layer': {
-		components: {
-			inlineSize: '100%',
-		},
-	},
-});
-
+/** Top rule only; Grid owns the two-column copy footer. */
 export const copyRow = style({
 	'@layer': {
 		components: {
 			borderBlockStartColor: vars.color.border.decorative,
 			borderBlockStartStyle: 'solid',
 			borderBlockStartWidth: '1px',
-			display: 'grid',
-			gridTemplateColumns: '1fr 1fr',
 		},
 	},
 });
@@ -102,14 +72,6 @@ export const copyButtonDivider = style({
 			borderInlineEndColor: vars.color.border.decorative,
 			borderInlineEndStyle: 'solid',
 			borderInlineEndWidth: '1px',
-		},
-	},
-});
-
-export const emptyState = style({
-	'@layer': {
-		components: {
-			textAlign: 'center',
 		},
 	},
 });

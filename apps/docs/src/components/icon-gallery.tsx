@@ -120,21 +120,28 @@ export function IconGallery(): JSX.Element {
 					options={SIZE_OPTIONS}
 					value={previewSize}
 				/>
-				<Text
-					className={styles.count}
-					color="secondary"
-					elementType="p"
-					fontVariantNumeric="tabular-nums"
-					typography="caption"
-				>
-					{countText}
-				</Text>
+				<Box marginInlineStart="auto">
+					<Text
+						color="secondary"
+						elementType="p"
+						fontVariantNumeric="tabular-nums"
+						typography="caption"
+					>
+						{countText}
+					</Text>
+				</Box>
 				<VisuallyHidden aria-live="polite" elementType="p">
 					{deferredCountText}
 				</VisuallyHidden>
 			</Cluster>
 
-			<div className={styles.frame}>
+			<Box
+				borderColor="decorative"
+				borderRadius="surface"
+				borderStyle="solid"
+				borderWidth="thin"
+				overflow="hidden"
+			>
 				{filteredNames.length === 0 ? (
 					<IconGalleryEmptyState onClear={handleClearFilter} query={filter.trim()} />
 				) : (
@@ -150,7 +157,7 @@ export function IconGallery(): JSX.Element {
 						))}
 					</Grid>
 				)}
-			</div>
+			</Box>
 
 			<VisuallyHidden aria-live="polite" elementType="p">
 				{copyState.announcement}
@@ -220,7 +227,7 @@ interface IconGalleryCellProps {
 /** One grid cell: a fixed-height glyph area, the name below it, and a ruled footer of two copy buttons. */
 function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryCellProps) {
 	return (
-		<div className={styles.cell}>
+		<Stack className={styles.cell} gap="0">
 			<Stack alignItems="center" gap="sp4" padding="sp8">
 				<Box
 					alignItems="center"
@@ -231,19 +238,20 @@ function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryC
 				>
 					<Icon name={name} size={previewSize} />
 				</Box>
-				<Text
-					className={styles.iconName}
-					color="secondary"
-					elementType="span"
-					lineClamp={1}
-					textAlign="center"
-					title={name}
-					typography="caption"
-				>
-					{name}
-				</Text>
+				<Box inlineSize="100%">
+					<Text
+						color="secondary"
+						elementType="span"
+						lineClamp={1}
+						textAlign="center"
+						title={name}
+						typography="caption"
+					>
+						{name}
+					</Text>
+				</Box>
 			</Stack>
-			<div className={styles.copyRow}>
+			<Grid className={styles.copyRow} columns="1fr 1fr">
 				<CopyButton
 					copyStatus={copyStatus?.kind === 'jsx' ? copyStatus : null}
 					kind="jsx"
@@ -256,8 +264,8 @@ function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryC
 					name={name}
 					onCopy={onCopy}
 				/>
-			</div>
-		</div>
+			</Grid>
+		</Stack>
 	);
 }
 
@@ -301,14 +309,8 @@ interface IconGalleryEmptyStateProps {
 /** Real empty state inside the grid frame: names the query, offers a way back. */
 function IconGalleryEmptyState({ onClear, query }: IconGalleryEmptyStateProps) {
 	return (
-		<Stack
-			alignItems="center"
-			className={styles.emptyState}
-			gap="sp12"
-			paddingBlock="sp64"
-			paddingInline="sp24"
-		>
-			<Text color="secondary" elementType="p" typography="caption">
+		<Stack alignItems="center" gap="sp12" paddingBlock="sp64" paddingInline="sp24">
+			<Text color="secondary" elementType="p" textAlign="center" typography="caption">
 				No icon matches &quot;{query}&quot;
 			</Text>
 			<Button onPress={onClear} size="small">

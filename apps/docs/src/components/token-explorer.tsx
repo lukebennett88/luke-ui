@@ -53,16 +53,17 @@ export function TokenExplorer(): JSX.Element {
 						value={filter}
 					/>
 				</Box>
-				<Text
-					aria-live="polite"
-					className={styles.count}
-					color="secondary"
-					elementType="p"
-					fontVariantNumeric="tabular-nums"
-					typography="caption"
-				>
-					{countText}
-				</Text>
+				<Box marginInlineStart="auto">
+					<Text
+						aria-live="polite"
+						color="secondary"
+						elementType="p"
+						fontVariantNumeric="tabular-nums"
+						typography="caption"
+					>
+						{countText}
+					</Text>
+				</Box>
 			</Cluster>
 
 			{groups.length === 0 ? (
@@ -90,39 +91,64 @@ function matchGroups(query: string): ReadonlyArray<TokenPurposeGroup> {
 
 function PurposeDetails({ group }: { group: TokenPurposeGroup }) {
 	return (
-		<Disclosure className={styles.group} defaultExpanded>
-			<Heading className={styles.groupHeading} level={3}>
-				<RacButton className={styles.groupTrigger} slot="trigger">
-					<Icon aria-hidden className={styles.groupChevron} name="chevronRight" size="xsmall" />
-					{group.title}
-					<span className={styles.groupCount}>{group.tokens.length}</span>
-				</RacButton>
-			</Heading>
-
-			<DisclosurePanel className={styles.groupPanel}>
-				<Cluster
-					alignItems="baseline"
-					gap="sp8"
-					justifyContent="space-between"
-					paddingBlock="sp12"
-					paddingInline="sp16"
-				>
-					<Text color="secondary" typography="caption">
-						{group.description}
-					</Text>
-					{group.related ? (
-						<DocsLink
-							className={styles.relatedLink}
-							params={{ _splat: group.related.splat }}
-							to="/$"
+		<Box
+			borderColor="decorative"
+			borderRadius="surface"
+			borderStyle="solid"
+			borderWidth="thin"
+			overflow="hidden"
+		>
+			<Disclosure defaultExpanded>
+				<Heading level={3} style={{ margin: 0 }}>
+					<RacButton className={styles.groupTrigger} slot="trigger">
+						<Cluster
+							alignItems="center"
+							gap="sp8"
+							inlineSize="100%"
+							paddingBlock="sp12"
+							paddingInline="sp16"
 						>
-							{group.related.label}
-						</DocsLink>
-					) : null}
-				</Cluster>
-				<TokenTable showSamples={group.showSamples} tokens={group.tokens} />
-			</DisclosurePanel>
-		</Disclosure>
+							<Icon aria-hidden className={styles.groupChevron} name="chevronRight" size="xsmall" />
+							{group.title}
+							<Box marginInlineStart="auto">
+								<Text
+									color="secondary"
+									elementType="span"
+									fontVariantNumeric="tabular-nums"
+									typography="caption"
+								>
+									{group.tokens.length}
+								</Text>
+							</Box>
+						</Cluster>
+					</RacButton>
+				</Heading>
+
+				<DisclosurePanel>
+					<Cluster
+						alignItems="baseline"
+						gap="sp8"
+						justifyContent="space-between"
+						paddingBlock="sp12"
+						paddingInline="sp16"
+					>
+						<Text color="secondary" typography="caption">
+							{group.description}
+						</Text>
+						{group.related ? (
+							<DocsLink
+								className={styles.relatedLink}
+								params={{ _splat: group.related.splat }}
+								to="/$"
+							>
+								{group.related.label}
+							</DocsLink>
+						) : null}
+					</Cluster>
+					<TokenTable showSamples={group.showSamples} tokens={group.tokens} />
+				</DisclosurePanel>
+			</Disclosure>
+		</Box>
 	);
 }
 
@@ -134,7 +160,7 @@ function TokenTable({
 	tokens: ReadonlyArray<ThemeToken>;
 }) {
 	return (
-		<div className={styles.tableScroll}>
+		<Box className={styles.tableScroll} overflowX="auto">
 			<table className={cx(styles.table, showSamples && styles.tableWithSamples)}>
 				<thead>
 					<tr className={styles.tableHeaderRow}>
@@ -169,7 +195,7 @@ function TokenTable({
 					))}
 				</tbody>
 			</table>
-		</div>
+		</Box>
 	);
 }
 
@@ -180,13 +206,13 @@ function TokenSample({ token }: { token: ThemeToken }) {
 
 function SampleFrame({
 	children,
-	className,
+	gap,
 	justifyContent = 'center',
 	paddingInline,
 	style,
 }: {
 	children?: ReactNode;
-	className?: string;
+	gap?: 'sp8';
 	justifyContent?: 'center' | 'flex-start';
 	paddingInline?: 'sp8';
 	style?: CSSProperties;
@@ -194,9 +220,9 @@ function SampleFrame({
 	return (
 		<Box
 			alignItems="center"
-			className={className}
 			display="flex"
 			elementType="span"
+			gap={gap}
 			inlineSize="6rem"
 			justifyContent={justifyContent}
 			minBlockSize="2.5rem"
@@ -301,7 +327,7 @@ function SizeSample({ variable }: ThemeToken) {
 
 function InteractionSample({ variable }: ThemeToken) {
 	return (
-		<SampleFrame className={styles.samplePair}>
+		<SampleFrame gap="sp8">
 			<span
 				style={{
 					backgroundColor: vars.color.background.accent.solid.rest,
@@ -387,19 +413,15 @@ const FAMILY_SAMPLES: Record<ThemeTokenFamily, (token: ThemeToken) => ReactNode>
 
 function EmptyState({ onClear, query }: { onClear: () => void; query: string }) {
 	return (
-		<Stack
-			alignItems="center"
-			className={styles.emptyState}
-			gap="sp12"
-			paddingBlock="sp64"
-			paddingInline="sp24"
-		>
-			<Text color="secondary" elementType="p" typography="caption">
-				No token matches &quot;{query}&quot;
-			</Text>
-			<Button onPress={onClear} size="small">
-				Clear filter
-			</Button>
-		</Stack>
+		<Box borderColor="decorative" borderRadius="surface" borderStyle="solid" borderWidth="thin">
+			<Stack alignItems="center" gap="sp12" paddingBlock="sp64" paddingInline="sp24">
+				<Text color="secondary" elementType="p" textAlign="center" typography="caption">
+					No token matches &quot;{query}&quot;
+				</Text>
+				<Button onPress={onClear} size="small">
+					Clear filter
+				</Button>
+			</Stack>
+		</Box>
 	);
 }

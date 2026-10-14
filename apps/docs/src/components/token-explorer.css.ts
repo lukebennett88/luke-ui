@@ -6,50 +6,20 @@ const motionSample = keyframes({
 	to: { transform: 'translateX(0.75rem)' },
 });
 
-export const count = style({
-	'@layer': {
-		components: {
-			marginInlineStart: 'auto',
-		},
-	},
-});
-
-export const group = style({
-	'@layer': {
-		components: {
-			borderColor: vars.color.border.decorative,
-			borderRadius: vars.radius.surface,
-			borderStyle: 'solid',
-			borderWidth: '1px',
-			overflow: 'hidden',
-		},
-	},
-});
-
-export const groupHeading = style({
-	'@layer': {
-		components: {
-			margin: 0,
-		},
-	},
-});
-
+/** Button reset and focus; Cluster owns gap and padding. */
 export const groupTrigger = style({
 	'@layer': {
 		components: {
-			alignItems: 'center',
 			backgroundColor: 'transparent',
 			borderStyle: 'none',
 			color: 'inherit',
-			columnGap: vars.space.sp8,
 			cursor: 'pointer',
-			display: 'flex',
+			display: 'block',
 			fontSize: vars.font.body.fontSize,
 			fontWeight: vars.font.weight.emphasis,
 			inlineSize: '100%',
 			lineHeight: vars.font.body.lineHeight,
-			paddingBlock: vars.space.sp12,
-			paddingInline: vars.space.sp16,
+			padding: 0,
 			textAlign: 'start',
 			selectors: {
 				'&:focus-visible': {
@@ -67,7 +37,7 @@ export const groupChevron = style({
 			flexShrink: 0,
 			transition: `transform ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
 			selectors: {
-				[`${group}[data-expanded] &`]: {
+				'[data-expanded] &': {
 					transform: 'rotate(90deg)',
 				},
 			},
@@ -80,53 +50,13 @@ export const groupChevron = style({
 	},
 });
 
-export const groupCount = style({
-	'@layer': {
-		components: {
-			color: vars.color.text.secondary,
-			fontSize: vars.font.caption.fontSize,
-			fontVariantNumeric: 'tabular-nums',
-			fontWeight: vars.font.weight.body,
-			lineHeight: vars.font.caption.lineHeight,
-			marginInlineStart: 'auto',
-		},
-	},
-});
-
-export const groupPanel = style({
-	'@layer': {
-		components: {
-			borderBlockStartColor: vars.color.border.decorative,
-			borderBlockStartStyle: 'solid',
-			borderBlockStartWidth: '1px',
-		},
-	},
-});
-
-export const relatedLink = style({
-	'@layer': {
-		components: {
-			color: vars.color.text.secondary,
-			fontSize: vars.font.caption.fontSize,
-			lineHeight: vars.font.caption.lineHeight,
-			textUnderlineOffset: '0.25em',
-			selectors: {
-				'&:hover': {
-					color: vars.color.text.primary,
-					textDecoration: 'underline',
-				},
-			},
-		},
-	},
-});
-
+/** Top rule only; Box owns overflow scrolling. */
 export const tableScroll = style({
 	'@layer': {
 		components: {
 			borderBlockStartColor: vars.color.border.decorative,
 			borderBlockStartStyle: 'solid',
 			borderBlockStartWidth: '1px',
-			overflowX: 'auto',
 		},
 	},
 });
@@ -162,20 +92,20 @@ export const tableHeaderRow = style({
 	},
 });
 
+export const sampleHeaderCell = style({
+	'@layer': {
+		components: {
+			inlineSize: '8rem',
+		},
+	},
+});
+
 export const tableHeaderCell = style({
 	'@layer': {
 		components: {
 			fontWeight: vars.font.weight.label,
 			paddingBlock: vars.space.sp8,
 			paddingInline: vars.space.sp16,
-		},
-	},
-});
-
-export const sampleHeaderCell = style({
-	'@layer': {
-		components: {
-			inlineSize: '8rem',
 		},
 	},
 });
@@ -213,22 +143,19 @@ export const variableCode = style({
 	},
 });
 
-export const samplePair = style({
+export const relatedLink = style({
 	'@layer': {
 		components: {
-			columnGap: vars.space.sp8,
-		},
-	},
-});
-
-export const emptyState = style({
-	'@layer': {
-		components: {
-			borderColor: vars.color.border.decorative,
-			borderRadius: vars.radius.surface,
-			borderStyle: 'solid',
-			borderWidth: '1px',
-			textAlign: 'center',
+			color: vars.color.text.secondary,
+			fontSize: vars.font.caption.fontSize,
+			lineHeight: vars.font.caption.lineHeight,
+			textUnderlineOffset: '0.25em',
+			selectors: {
+				'&:hover': {
+					color: vars.color.text.primary,
+					textDecoration: 'underline',
+				},
+			},
 		},
 	},
 });

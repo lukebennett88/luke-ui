@@ -7,38 +7,15 @@ const TYPE_TABLE_CONTAINER = 'luke-docs-type-table';
 /** Wide enough for the Prop and Type columns to sit side by side. */
 const TYPE_COLUMN_MIN_INLINE_SIZE = `${TYPE_TABLE_CONTAINER} (inline-size >= 1024px)`;
 
+/** Container query host + caption type; layout chrome lives on Box/Stack/Cluster/Grid. */
 export const root = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.base,
-			borderColor: vars.color.border.decorative,
-			borderRadius: vars.radius.surface,
-			borderStyle: 'solid',
-			borderWidth: '1px',
 			color: vars.color.text.primary,
 			containerName: TYPE_TABLE_CONTAINER,
 			containerType: 'inline-size',
-			display: 'flex',
-			flexDirection: 'column',
 			fontSize: vars.font.caption.fontSize,
-			gap: vars.space.sp4,
 			lineHeight: vars.font.caption.lineHeight,
-			maxInlineSize: '100%',
-			overflow: 'hidden',
-			padding: vars.space.sp4,
-		},
-	},
-});
-
-export const header = style({
-	'@layer': {
-		components: {
-			alignItems: 'center',
-			color: vars.color.text.secondary,
-			display: 'flex',
-			fontWeight: vars.font.weight.label,
-			paddingBlock: vars.space.sp4,
-			paddingInline: vars.space.sp12,
 		},
 	},
 });
@@ -189,19 +166,15 @@ export const chevron = style({
 	},
 });
 
+/** Top rule only; Grid owns columns, gap, and padding. */
 export const panel = style({
 	'@layer': {
 		components: {
 			borderBlockStartColor: vars.color.border.decorative,
 			borderBlockStartStyle: 'solid',
 			borderBlockStartWidth: '1px',
-			display: 'grid',
 			fontSize: vars.font.caption.fontSize,
-			gap: vars.space.sp16,
-			gridTemplateColumns: '1fr 3fr',
 			lineHeight: vars.font.caption.lineHeight,
-			overflow: 'auto',
-			padding: vars.space.sp12,
 		},
 	},
 });
@@ -210,61 +183,11 @@ export const description = style({
 	'@layer': {
 		components: {
 			color: vars.color.text.primary,
-			gridColumn: '1 / -1',
 			selectors: {
 				'&:empty': {
 					display: 'none',
 				},
 			},
-		},
-	},
-});
-
-export const fieldLabel = style({
-	'@layer': {
-		components: {
-			color: vars.color.text.secondary,
-			paddingInlineEnd: vars.space.sp8,
-		},
-	},
-});
-
-export const fieldValue = style({
-	'@layer': {
-		components: {
-			alignSelf: 'center',
-			minInlineSize: 0,
-		},
-	},
-});
-
-export const parameters = style({
-	'@layer': {
-		components: {
-			display: 'flex',
-			flexDirection: 'column',
-			gap: vars.space.sp8,
-		},
-	},
-});
-
-export const parameter = style({
-	'@layer': {
-		components: {
-			alignItems: 'center',
-			columnGap: vars.space.sp4,
-			display: 'inline-flex',
-			flexWrap: 'wrap',
-			rowGap: vars.space.sp4,
-		},
-	},
-});
-
-export const parameterName = style({
-	'@layer': {
-		components: {
-			fontWeight: vars.font.weight.label,
-			whiteSpace: 'nowrap',
 		},
 	},
 });
