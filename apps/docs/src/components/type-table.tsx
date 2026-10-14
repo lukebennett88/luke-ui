@@ -1,6 +1,5 @@
 import { Box } from '@luke-ui/react/box';
 import { Code } from '@luke-ui/react/code';
-import { Grid } from '@luke-ui/react/grid';
 import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@luke-ui/react/link';
 import { Stack } from '@luke-ui/react/stack';
@@ -12,10 +11,8 @@ import type { ComponentProps, ReactNode } from 'react';
 import { useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { Disclosure, DisclosurePanel } from 'react-aria-components/Disclosure';
+import * as disclosureStyles from './docs-disclosure.css.js';
 import * as styles from './type-table.css.js';
-
-/** Expanded panel label / value columns (always two tracks). */
-const PANEL_COLUMNS = '1fr 3fr';
 
 interface ParameterNode {
 	description: ReactNode;
@@ -36,70 +33,50 @@ export interface TypeNode {
 }
 
 /**
- * Expandable prop/type reference table. Keeps the generated `TypeNode` contract; styling is
- * docs-local. Row labels use non-paragraph elements so MDX descriptions cannot nest `<p>` in `<p>`.
+ * Expandable prop/type reference list. Keeps the generated `TypeNode` contract. Types stay visible
+ * in every row at every width; `typeDescriptionLink` opens in the panel so it is never nested
+ * inside the disclosure button. Row labels avoid paragraphs so MDX cannot nest `<p>` in `<p>`.
  */
 export function TypeTable({
 	className,
 	id,
+	rowIdPrefix,
 	type,
 	...props
 }: {
+	/**
+	 * Prefix for hash-openable row ids (`${prefix}-${propName}`). Defaults to `id`. Pass this from
+	 * `ComponentPropsTable` so grouped tables share one hash namespace without duplicate DOM ids.
+	 */
+	rowIdPrefix?: string;
 	type: Record<string, TypeNode>;
 } & ComponentProps<'div'>) {
+	const hashPrefix = rowIdPrefix ?? id;
+
 	return (
-		<Box
+		<Stack
 			{...props}
-			backgroundColor="surface.base"
-			borderColor="decorative"
-			borderRadius="surface"
-			borderStyle="solid"
-			borderWidth="thin"
 			className={cx(styles.root, 'not-prose', className)}
-			display="flex"
-			flexDirection="column"
-			gap="sp4"
 			id={id}
 			maxInlineSize="100%"
-			overflow="hidden"
-			padding="sp4"
 		>
-			<Grid
-				alignItems="center"
-				className={styles.propTypeGrid}
-				columnGap="sp8"
-				paddingBlock="sp4"
-				paddingInline="sp12"
-			>
-				<Text color="secondary" fontWeight="label" typography="caption">
-					Prop
-				</Text>
-				<Text
-					className={styles.typeColumn}
-					color="secondary"
-					fontWeight="label"
-					typography="caption"
-				>
-					Type
-				</Text>
-			</Grid>
 			{Object.entries(type).map(([name, item]) => (
-				<TypeTableRow item={item} key={name} name={name} parentId={id} />
+				<TypeTableRow hashPrefix={hashPrefix} item={item} key={name} name={name} />
 			))}
-		</Box>
+		</Stack>
 	);
 }
 
 function TypeTableRow({
+	hashPrefix,
 	item,
 	name,
-	parentId,
 }: {
+	hashPrefix: string | undefined;
 	item: TypeNode;
 	name: string;
-	parentId: string | undefined;
 }) {
-	const rowId = parentId === undefined ? undefined : `${parentId}-${name}`;
+	const rowId = hashPrefix === undefined ? undefined : `${hashPrefix}-${name}`;
 	const navigate = useNavigate();
 	const hash = useRouterState({ select: (state) => state.location.hash });
 	// `null` means the reader has not toggled yet, so a matching URL hash can open the row.
@@ -118,12 +95,15 @@ function TypeTableRow({
 		typeDescriptionLink,
 	} = item;
 
-	const showTypeInPanel = typeDescription !== undefined || typeDescriptionLink !== undefined;
+	// Generator often puts a short kind (e.g. "union") in `type` and the readable signature in
+	// `typeDescription`. Prefer the signature in the trigger so types stay discoverable collapsed.
+	const triggerType = typeDescription ?? type;
+	// Panel Type row is only for the link — the signature already sits in the trigger.
+	const showTypeLink = typeDescriptionLink !== undefined;
 
 	return (
 		<Box
 			className={styles.row}
-			overflow="hidden"
 			renderRoot={(domProps) => (
 				<Disclosure
 					{...domProps}
@@ -139,86 +119,62 @@ function TypeTableRow({
 			)}
 		>
 			<Box
-				className={styles.trigger}
+				className={disclosureStyles.trigger}
 				inlineSize="100%"
 				paddingBlock="sp8"
-				paddingInline="sp12"
+				paddingInline="sp4"
 				renderRoot={(domProps) => <RacButton {...domProps} slot="trigger" />}
 			>
 				<Track
 					gap="sp8"
-					railAlignment="center"
-					railEnd={<Icon aria-hidden className={styles.chevron} name="chevronDown" size="xsmall" />}
+					railAlignment="firstLine"
+					railEnd={
+						<Icon
+							aria-hidden
+							className={disclosureStyles.chevronDown}
+							name="chevronDown"
+							size="xsmall"
+						/>
+					}
 				>
-					{/*
-					  Type stays plain text inside the trigger so a typeDescriptionLink cannot nest an
-					  interactive link inside the disclosure button. The link renders in the panel.
-					*/}
-					<Grid
-						alignItems="center"
-						className={styles.propTypeGrid}
-						columnGap="sp8"
-						minInlineSize="0"
-					>
+					<Stack gap="sp4" minInlineSize="0">
 						<Code className={cx(styles.propName, deprecated && styles.propNameDeprecated)}>
 							{name}
 							{required ? null : '?'}
 						</Code>
-						<span className={styles.typeColumn}>{type}</span>
-					</Grid>
+						{/* Plain text only — links belong in the panel. */}
+						<Text className={styles.propType} color="secondary" typography="caption">
+							{triggerType}
+						</Text>
+					</Stack>
 				</Track>
 			</Box>
 			<DisclosurePanel>
-				<Grid
-					className={styles.panel}
-					columns={PANEL_COLUMNS}
-					gap="sp16"
-					overflow="auto"
-					padding="sp12"
-				>
+				<Stack gap="sp8" paddingBlock="sp8" paddingInline="sp4" paddingInlineStart="sp8">
 					{description === undefined || description === null || description === '' ? null : (
-						<Box className={styles.description} gridColumn="1 / -1">
-							{description}
-						</Box>
+						<Box>{description}</Box>
 					)}
-					{showTypeInPanel ? (
-						<>
-							<FieldLabel>Type</FieldLabel>
-							<Box alignSelf="center" minInlineSize="0">
-								{typeDescriptionLink === undefined ? (
-									typeDescription
-								) : (
-									<Link
-										appearance="text"
-										className={styles.propTypeLink}
-										href={typeDescriptionLink}
-									>
-										{typeDescription ?? type}
-									</Link>
-								)}
-							</Box>
-						</>
+					{showTypeLink ? (
+						<DetailRow label="Type">
+							<Link appearance="text" className={styles.propTypeLink} href={typeDescriptionLink}>
+								{typeDescription ?? type}
+							</Link>
+						</DetailRow>
 					) : null}
 					{defaultValue === undefined ? null : (
-						<>
-							<FieldLabel>Default</FieldLabel>
-							<Box alignSelf="center" minInlineSize="0">
-								{defaultValue}
-							</Box>
-						</>
+						<DetailRow label="Default">{defaultValue}</DetailRow>
 					)}
 					{parameters.length === 0 ? null : (
-						<>
-							<FieldLabel>Parameters</FieldLabel>
-							<Stack gap="sp8">
+						<DetailRow label="Parameters">
+							<Stack gap="sp4">
 								{parameters.map((param) => (
 									<Track
 										gap="sp4"
 										key={param.name}
-										railAlignment="center"
+										railAlignment="firstLine"
 										railStart={
 											<Text fontWeight="label" style={{ whiteSpace: 'nowrap' }}>
-												{param.name} -
+												{param.name}
 											</Text>
 										}
 									>
@@ -226,28 +182,32 @@ function TypeTableRow({
 									</Track>
 								))}
 							</Stack>
-						</>
+						</DetailRow>
 					)}
-					{returns === undefined ? null : (
-						<>
-							<FieldLabel>Returns</FieldLabel>
-							<Box alignSelf="center" minInlineSize="0">
-								{returns}
-							</Box>
-						</>
-					)}
-				</Grid>
+					{returns === undefined ? null : <DetailRow label="Returns">{returns}</DetailRow>}
+				</Stack>
 			</DisclosurePanel>
 		</Box>
 	);
 }
 
-function FieldLabel({ children }: { children: ReactNode }) {
+function DetailRow({ children, label }: { children: ReactNode; label: string }) {
 	return (
-		<Box paddingInlineEnd="sp8">
-			<Text color="secondary" elementType="div" typography="caption">
-				{children}
-			</Text>
-		</Box>
+		<Track
+			gap="sp12"
+			railAlignment="firstLine"
+			railStart={
+				<Text
+					color="secondary"
+					fontWeight="label"
+					style={{ minInlineSize: '5.5rem' }}
+					typography="caption"
+				>
+					{label}
+				</Text>
+			}
+		>
+			<Box minInlineSize="0">{children}</Box>
+		</Track>
 	);
 }

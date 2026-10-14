@@ -14,8 +14,13 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, assert, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import { ComponentPropsTable } from './component-props-table.js';
 import { DocsThemeRoot } from './theme-controls.js';
 import { TypeTable } from './type-table.js';
+
+/** Matches the docs article `maxInlineSize` of `52rem` at a 16px root. */
+const ARTICLE_INLINE_SIZE = '832px';
+const MOBILE_INLINE_SIZE = '375px';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
@@ -28,7 +33,7 @@ afterEach(() => {
 });
 
 test('expands a prop row and keeps description text out of nested paragraphs', async () => {
-	await renderTable(
+	await renderWidget(
 		<TypeTable
 			id="api"
 			type={{
@@ -53,7 +58,7 @@ test('expands a prop row and keeps description text out of nested paragraphs', a
 });
 
 test('opens a row when the URL hash matches its id', async () => {
-	await renderTable(
+	await renderWidget(
 		<TypeTable
 			id="api"
 			type={{
@@ -66,30 +71,44 @@ test('opens a row when the URL hash matches its id', async () => {
 	await expect.element(page.getByText('From hash.')).toBeVisible();
 });
 
-test('uses one grid track for the prop row below the type-column breakpoint', async () => {
-	await renderTable(
+test('keeps prop types visible at the docs article width', async () => {
+	await renderWidget(
 		<TypeTable
 			id="api"
 			type={{
-				appearance: { type: '"solid" | "subtle"' },
+				appearance: {
+					type: 'union',
+					typeDescription: '"solid" | "subtle" | "text"',
+				},
 			}}
 		/>,
-		{ inlineSize: '480px' },
+		{ inlineSize: ARTICLE_INLINE_SIZE },
 	);
 
-	assert(container, 'expected a container');
-	const triggerGrid = container.querySelector('[class*="propTypeGrid"]');
-	assert(triggerGrid instanceof HTMLElement, 'expected prop/type grid');
-	const tracks = getComputedStyle(triggerGrid).gridTemplateColumns.trim().split(/\s+/);
-	expect(tracks).toHaveLength(1);
-	const typeColumn = triggerGrid.querySelector('[class*="typeColumn"]');
-	assert(typeColumn instanceof HTMLElement, 'expected type column');
-	expect(getComputedStyle(typeColumn).display).toBe('none');
-	await expect.element(page.getByRole('button', { name: /appearance/ })).toBeVisible();
+	await expect
+		.element(page.getByRole('button', { name: /appearance.*"solid" \| "subtle" \| "text"/ }))
+		.toBeVisible();
+});
+
+test('keeps prop types visible at a mobile width', async () => {
+	await renderWidget(
+		<TypeTable
+			id="api"
+			type={{
+				onPress: {
+					type: 'function',
+					typeDescription: '(event: PressEvent) => void',
+				},
+			}}
+		/>,
+		{ inlineSize: MOBILE_INLINE_SIZE },
+	);
+
+	await expect.element(page.getByRole('button', { name: /onPress.*PressEvent/ })).toBeVisible();
 });
 
 test('keeps typeDescriptionLink out of the disclosure trigger', async () => {
-	await renderTable(
+	await renderWidget(
 		<TypeTable
 			id="api"
 			type={{
@@ -100,15 +119,16 @@ test('keeps typeDescriptionLink out of the disclosure trigger', async () => {
 				},
 			}}
 		/>,
+		{ inlineSize: ARTICLE_INLINE_SIZE },
 	);
 
-	const trigger = page.getByRole('button', { name: /color/ });
 	assert(container, 'expected a container');
 	const triggerElement = container.querySelector('button');
 	assert(triggerElement, 'expected disclosure trigger');
 	expect(triggerElement.querySelector('a')).toBeNull();
+	expect(triggerElement.textContent).toContain('ColorToken');
 
-	await userEvent.click(trigger);
+	await userEvent.click(page.getByRole('button', { name: /color/ }));
 	const typeLink = page.getByRole('link', { name: 'ColorToken' });
 	await expect.element(typeLink).toBeVisible();
 
@@ -116,11 +136,33 @@ test('keeps typeDescriptionLink out of the disclosure trigger', async () => {
 	expect(document.activeElement).toBe(typeLink.element());
 });
 
-async function renderTable(
+test('opens a ComponentPropsTable row from the shared hash prefix', async () => {
+	await renderWidget(
+		<ComponentPropsTable
+			id="button-api"
+			type={{
+				label: {
+					description: 'Grouped hash target.',
+					type: 'string',
+				},
+				className: {
+					description: 'Other group prop.',
+					type: 'string',
+				},
+			}}
+		/>,
+		{ hash: 'button-api-label', inlineSize: ARTICLE_INLINE_SIZE },
+	);
+
+	await expect.element(page.getByText('Grouped hash target.')).toBeVisible();
+	await expect.element(page.getByText('string').first()).toBeVisible();
+});
+
+async function renderWidget(
 	children: ReactNode,
 	options: { hash?: string; inlineSize?: string } = {},
 ) {
-	const { hash, inlineSize = '1100px' } = options;
+	const { hash, inlineSize = ARTICLE_INLINE_SIZE } = options;
 	const rootRoute = createRootRoute({
 		component: () => (
 			<Provider spritesheetHref={spriteSheetHref}>

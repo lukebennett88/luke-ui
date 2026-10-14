@@ -1,109 +1,56 @@
 import { vars } from '@luke-ui/react/theme';
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
-// Named so shell-wide unnamed `@container` queries still resolve against `:root`.
-const TYPE_TABLE_CONTAINER = 'luke-docs-type-table';
-/** Wide enough for the Prop and Type columns to sit side by side. */
-const TYPE_COLUMN_MIN_INLINE_SIZE = `${TYPE_TABLE_CONTAINER} (inline-size >= 1024px)`;
-
-/** Container query host + caption type; column tracks live on Grid. */
+/**
+ * Caption metrics on the table root so Track `firstLine` rails share the same 1lh as prop/type
+ * text. Layout chrome lives on Stack/Track/Box.
+ */
 export const root = style({
 	'@layer': {
 		components: {
 			color: vars.color.text.primary,
-			containerName: TYPE_TABLE_CONTAINER,
-			containerType: 'inline-size',
 			fontSize: vars.font.caption.fontSize,
 			lineHeight: vars.font.caption.lineHeight,
 		},
 	},
 });
 
-/**
- * One track below the type-column breakpoint so Prop keeps the full row; two tracks when Type is
- * shown. Applied on Grid (which already sets `display: grid`).
- */
-export const propTypeGrid = style({
-	'@layer': {
-		components: {
-			gridTemplateColumns: 'minmax(0, 1fr)',
-			'@container': {
-				[TYPE_COLUMN_MIN_INLINE_SIZE]: {
-					gridTemplateColumns: '1fr 3fr',
-				},
-			},
-		},
-	},
-});
-
-/** Shown beside Prop once the type-table container is wide enough. */
-export const typeColumn = style({
-	'@layer': {
-		components: {
-			display: 'none',
-			minInlineSize: 0,
-			'@container': {
-				[TYPE_COLUMN_MIN_INLINE_SIZE]: {
-					display: 'block',
-				},
-			},
-		},
-	},
-});
-
+/** Row separator + hash scroll margin; expanded rows stay flat (no raised card). */
 export const row = style({
 	'@layer': {
 		components: {
-			borderColor: 'transparent',
-			borderRadius: vars.radius.control,
-			borderStyle: 'solid',
-			borderWidth: '1px',
-			overflow: 'hidden',
+			borderBlockEndColor: vars.color.border.decorative,
+			borderBlockEndStyle: 'solid',
+			borderBlockEndWidth: '1px',
 			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space.sp24})`,
 			selectors: {
+				'&:last-child': {
+					borderBlockEndWidth: 0,
+				},
 				'&[data-expanded]': {
-					backgroundColor: vars.color.surface.base,
-					borderColor: vars.color.border.decorative,
-					boxShadow: vars.depth.raised,
-				},
-				'&[data-expanded]:not(:last-child)': {
-					marginBlockEnd: vars.space.sp8,
+					backgroundColor: vars.color.surface.subdued,
 				},
 			},
 		},
 	},
 });
 
-/** Button reset and interaction; Box owns padding via renderRoot. */
-export const trigger = style({
-	'@layer': {
-		components: {
-			backgroundColor: 'transparent',
-			borderStyle: 'none',
-			color: 'inherit',
-			cursor: 'pointer',
-			font: 'inherit',
-			textAlign: 'start',
-			selectors: {
-				'&:hover': {
-					backgroundColor: vars.color.background.neutral.subtle.hover,
-				},
-				'&:focus-visible': {
-					outline: `2px solid ${vars.color.border.focus}`,
-					outlineOffset: '-2px',
-				},
-			},
-		},
-	},
-});
-
+/**
+ * Strip Code's chip chrome so prop names read as labels, not disabled inputs. Keep the code font
+ * and optical sizing from `Code`.
+ */
 export const propName = style({
 	'@layer': {
 		components: {
-			color: vars.color.text.primary,
+			backgroundColor: 'transparent',
+			borderColor: 'transparent',
+			borderRadius: 0,
+			borderStyle: 'none',
+			borderWidth: 0,
 			fontWeight: vars.font.weight.label,
-			minInlineSize: 'fit-content',
+			paddingBlock: 0,
+			paddingInline: 0,
 		},
 	},
 });
@@ -117,58 +64,55 @@ export const propNameDeprecated = style({
 	},
 });
 
+/**
+ * Long union types wrap instead of forcing horizontal scroll in the article column.
+ * Nested Shiki/`Code` chips are stripped via `globalStyle` below.
+ */
+export const propType = style({
+	'@layer': {
+		components: {
+			overflowWrap: 'anywhere',
+		},
+	},
+});
+
 export const propTypeLink = style({
 	'@layer': {
 		components: {
-			color: 'inherit',
-			textDecoration: 'underline',
 			textUnderlineOffset: '0.15em',
 		},
 	},
 });
 
-/** Rotation only; Track owns placement in the end rail. */
-export const chevron = style({
+const flatNestedCode = {
+	backgroundColor: 'transparent',
+	borderColor: 'transparent',
+	borderRadius: 0,
+	borderStyle: 'none',
+	borderWidth: 0,
+	fontSize: 'inherit',
+	lineHeight: 'inherit',
+	paddingBlock: 0,
+	paddingInline: 0,
+} as const;
+
+/** Generator `typeDescription` nodes often wrap Shiki/`Code` chips — flatten them. */
+globalStyle(`${propType} code`, {
 	'@layer': {
-		components: {
-			color: vars.color.text.secondary,
-			transition: `transform ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
-			selectors: {
-				[`${row}[data-expanded] &`]: {
-					transform: 'rotate(180deg)',
-				},
-			},
-			'@media': {
-				'(prefers-reduced-motion: reduce)': {
-					transition: 'none',
-				},
-			},
-		},
+		components: flatNestedCode,
 	},
 });
 
-/** Top rule only; Grid owns columns, gap, and padding. */
-export const panel = style({
+globalStyle(`${propTypeLink} code`, {
 	'@layer': {
 		components: {
-			borderBlockStartColor: vars.color.border.decorative,
-			borderBlockStartStyle: 'solid',
-			borderBlockStartWidth: '1px',
-			fontSize: vars.font.caption.fontSize,
-			lineHeight: vars.font.caption.lineHeight,
-		},
-	},
-});
-
-export const description = style({
-	'@layer': {
-		components: {
-			color: vars.color.text.primary,
-			selectors: {
-				'&:empty': {
-					display: 'none',
-				},
-			},
+			backgroundColor: 'transparent',
+			borderColor: 'transparent',
+			borderRadius: 0,
+			borderStyle: 'none',
+			borderWidth: 0,
+			paddingBlock: 0,
+			paddingInline: 0,
 		},
 	},
 });

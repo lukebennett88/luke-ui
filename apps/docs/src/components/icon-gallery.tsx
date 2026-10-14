@@ -143,16 +143,16 @@ export function IconGallery(): JSX.Element {
 				</Cluster>
 			</Track>
 
-			<Box
-				borderColor="decorative"
-				borderRadius="surface"
-				borderStyle="solid"
-				borderWidth="thin"
-				overflow="hidden"
-			>
-				{filteredNames.length === 0 ? (
-					<IconGalleryEmptyState onClear={handleClearFilter} query={filter.trim()} />
-				) : (
+			{filteredNames.length === 0 ? (
+				<IconGalleryEmptyState onClear={handleClearFilter} query={filter.trim()} />
+			) : (
+				<Box
+					borderColor="decorative"
+					borderRadius="surface"
+					borderStyle="solid"
+					borderWidth="thin"
+					overflow="hidden"
+				>
 					<Grid columns="repeat(auto-fit, minmax(min(8rem, 100%), 1fr))">
 						{filteredNames.map((name) => (
 							<IconGalleryCell
@@ -164,8 +164,8 @@ export function IconGallery(): JSX.Element {
 							/>
 						))}
 					</Grid>
-				)}
-			</Box>
+				</Box>
+			)}
 
 			<VisuallyHidden aria-live="polite" elementType="p">
 				{copyState.announcement}
@@ -317,7 +317,7 @@ interface IconGalleryEmptyStateProps {
 /** Real empty state inside the grid frame: names the query, offers a way back. */
 function IconGalleryEmptyState({ onClear, query }: IconGalleryEmptyStateProps) {
 	return (
-		<Stack alignItems="center" gap="sp12" paddingBlock="sp64" paddingInline="sp24">
+		<Stack alignItems="center" gap="sp12" paddingBlock="sp48" paddingInline="sp24">
 			<Text color="secondary" elementType="p" textAlign="center" typography="caption">
 				No icon matches &quot;{query}&quot;
 			</Text>

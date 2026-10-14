@@ -17,6 +17,7 @@ import type { ThemeToken, ThemeTokenFamily } from '../generated/token-reference.
 import { themeTokens } from '../generated/token-reference.generated.js';
 import type { TokenPurposeGroup } from '../lib/token-purpose-groups.js';
 import { tokenPurposeGroups } from '../lib/token-purpose-groups.js';
+import * as disclosureStyles from './docs-disclosure.css.js';
 import { DocsLink } from './docs-link.js';
 import * as styles from './token-explorer.css.js';
 
@@ -96,45 +97,43 @@ function matchGroups(query: string): ReadonlyArray<TokenPurposeGroup> {
 function PurposeDetails({ group }: { group: TokenPurposeGroup }) {
 	return (
 		<Box
-			borderColor="decorative"
-			borderRadius="surface"
-			borderStyle="solid"
-			borderWidth="thin"
-			overflow="hidden"
+			className={styles.group}
 			renderRoot={(domProps) => <Disclosure {...domProps} defaultExpanded />}
 		>
 			<Heading level={3} style={{ margin: 0 }}>
 				<Box
-					className={styles.groupTrigger}
+					className={disclosureStyles.trigger}
 					inlineSize="100%"
-					paddingBlock="sp12"
-					paddingInline="sp16"
+					paddingBlock="sp8"
+					paddingInline="sp4"
 					renderRoot={(domProps) => <RacButton {...domProps} slot="trigger" />}
 				>
 					<Track
 						gap="sp8"
-						railAlignment="center"
+						railAlignment="firstLine"
 						railEnd={
-							<Text
-								color="secondary"
-								elementType="span"
-								fontVariantNumeric="tabular-nums"
-								typography="caption"
-							>
+							<Text color="secondary" fontVariantNumeric="tabular-nums" typography="caption">
 								{group.tokens.length}
 							</Text>
 						}
 						railStart={
-							<Icon aria-hidden className={styles.groupChevron} name="chevronRight" size="xsmall" />
+							<Icon
+								aria-hidden
+								className={disclosureStyles.chevronEnd}
+								name="chevronRight"
+								size="xsmall"
+							/>
 						}
 					>
-						{group.title}
+						<Text fontWeight="emphasis" typography="caption">
+							{group.title}
+						</Text>
 					</Track>
 				</Box>
 			</Heading>
 
 			<DisclosurePanel>
-				<Box paddingBlock="sp12" paddingInline="sp16">
+				<Box paddingBlock="sp8" paddingInline="sp4">
 					<Track
 						gap="sp8"
 						railAlignment="firstLine"
@@ -426,15 +425,13 @@ const FAMILY_SAMPLES: Record<ThemeTokenFamily, (token: ThemeToken) => ReactNode>
 
 function EmptyState({ onClear, query }: { onClear: () => void; query: string }) {
 	return (
-		<Box borderColor="decorative" borderRadius="surface" borderStyle="solid" borderWidth="thin">
-			<Stack alignItems="center" gap="sp12" paddingBlock="sp64" paddingInline="sp24">
-				<Text color="secondary" elementType="p" textAlign="center" typography="caption">
-					No token matches &quot;{query}&quot;
-				</Text>
-				<Button onPress={onClear} size="small">
-					Clear filter
-				</Button>
-			</Stack>
-		</Box>
+		<Stack alignItems="center" gap="sp12" paddingBlock="sp48" paddingInline="sp24">
+			<Text color="secondary" elementType="p" textAlign="center" typography="caption">
+				No token matches &quot;{query}&quot;
+			</Text>
+			<Button onPress={onClear} size="small">
+				Clear filter
+			</Button>
+		</Stack>
 	);
 }

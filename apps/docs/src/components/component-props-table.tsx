@@ -9,6 +9,7 @@ import { Button as RacButton } from 'react-aria-components/Button';
 import { Disclosure, DisclosurePanel } from 'react-aria-components/Disclosure';
 import { groupPropNames, NATIVE_PROPS_FORWARDING_KEY } from '../lib/component-prop-groups.js';
 import * as styles from './component-props-table.css.js';
+import * as disclosureStyles from './docs-disclosure.css.js';
 import type { TypeNode } from './type-table.js';
 import { TypeTable } from './type-table.js';
 
@@ -26,7 +27,7 @@ export function ComponentPropsTable({
 	const nativePropsNote = type[NATIVE_PROPS_FORWARDING_KEY]?.description;
 
 	return (
-		<Stack className={cx('not-prose', className)} gap="sp12" id={id} marginBlock="sp24" {...props}>
+		<Stack className={cx('not-prose', className)} gap="sp8" id={id} marginBlock="sp24" {...props}>
 			{nativePropsNote === undefined ? null : (
 				<Text color="secondary" elementType="div" typography="caption">
 					{nativePropsNote}
@@ -36,6 +37,7 @@ export function ComponentPropsTable({
 				<PropGroup
 					group={group}
 					key={group.name}
+					rowIdPrefix={id}
 					type={pickGroupProps(type, new Set(group.props))}
 				/>
 			))}
@@ -45,44 +47,44 @@ export function ComponentPropsTable({
 
 function PropGroup({
 	group,
+	rowIdPrefix,
 	type,
 }: {
 	group: { defaultOpen: boolean; name: string; props: ReadonlyArray<string> };
+	rowIdPrefix: string;
 	type: Record<string, TypeNode>;
 }) {
 	return (
 		<Box
-			backgroundColor="surface.base"
-			borderColor="decorative"
-			borderRadius="surface"
-			borderStyle="solid"
-			borderWidth="thin"
-			overflow="hidden"
+			className={styles.group}
 			renderRoot={(domProps) => <Disclosure {...domProps} defaultExpanded={group.defaultOpen} />}
 		>
 			<Box
-				className={styles.groupTrigger}
+				className={disclosureStyles.trigger}
 				inlineSize="100%"
-				paddingBlock="sp12"
-				paddingInline="sp16"
+				paddingBlock="sp8"
+				paddingInline="sp4"
 				renderRoot={(domProps) => <RacButton {...domProps} slot="trigger" />}
 			>
 				<Track
 					gap="sp8"
-					railAlignment="center"
+					railAlignment="firstLine"
 					railEnd={
-						<Icon aria-hidden className={styles.groupChevron} name="chevronDown" size="small" />
+						<Icon
+							aria-hidden
+							className={disclosureStyles.chevronDown}
+							name="chevronDown"
+							size="xsmall"
+						/>
 					}
 				>
-					<Text elementType="span" fontWeight="emphasis" typography="caption">
+					<Text fontWeight="emphasis" typography="caption">
 						{group.name}
 					</Text>
 				</Track>
 			</Box>
 			<DisclosurePanel>
-				<Box className={styles.groupPanel} paddingBlockEnd="sp4" paddingInline="sp4">
-					<TypeTable type={type} />
-				</Box>
+				<TypeTable rowIdPrefix={rowIdPrefix} type={type} />
 			</DisclosurePanel>
 		</Box>
 	);

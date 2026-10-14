@@ -6,47 +6,23 @@ const motionSample = keyframes({
 	to: { transform: 'translateX(0.75rem)' },
 });
 
-/** Button reset and focus; Box owns padding via renderRoot. */
-export const groupTrigger = style({
+/** Flat purpose-group separator. */
+export const group = style({
 	'@layer': {
 		components: {
-			backgroundColor: 'transparent',
-			borderStyle: 'none',
-			color: 'inherit',
-			cursor: 'pointer',
-			fontSize: vars.font.body.fontSize,
-			fontWeight: vars.font.weight.emphasis,
-			lineHeight: vars.font.body.lineHeight,
-			textAlign: 'start',
+			borderBlockEndColor: vars.color.border.decorative,
+			borderBlockEndStyle: 'solid',
+			borderBlockEndWidth: '1px',
 			selectors: {
-				'&:focus-visible': {
-					outline: `2px solid ${vars.color.border.focus}`,
-					outlineOffset: '-2px',
+				'&:last-child': {
+					borderBlockEndWidth: 0,
 				},
 			},
 		},
 	},
 });
 
-export const groupChevron = style({
-	'@layer': {
-		components: {
-			transition: `transform ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
-			selectors: {
-				'[data-expanded] &': {
-					transform: 'rotate(90deg)',
-				},
-			},
-			'@media': {
-				'(prefers-reduced-motion: reduce)': {
-					transition: 'none',
-				},
-			},
-		},
-	},
-});
-
-/** Top rule only; Box owns overflow scrolling. */
+/** Top rule before the native token table. */
 export const tableScroll = style({
 	'@layer': {
 		components: {
@@ -101,7 +77,7 @@ export const tableHeaderCell = style({
 		components: {
 			fontWeight: vars.font.weight.label,
 			paddingBlock: vars.space.sp8,
-			paddingInline: vars.space.sp16,
+			paddingInline: vars.space.sp12,
 		},
 	},
 });
@@ -121,12 +97,12 @@ export const tableRow = style({
 	},
 });
 
-/** Cell padding and alignment; Box cannot render `th`/`td`. */
+/** Cell padding; Box cannot render `th`/`td`. */
 export const tableCell = style({
 	'@layer': {
 		components: {
 			paddingBlock: vars.space.sp8,
-			paddingInline: vars.space.sp16,
+			paddingInline: vars.space.sp12,
 			verticalAlign: 'middle',
 		},
 	},
