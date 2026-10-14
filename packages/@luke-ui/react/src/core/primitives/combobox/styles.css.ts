@@ -1,4 +1,5 @@
 import type { StyleRule } from '@vanilla-extract/css';
+import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { COMBOBOX_ACTION_SIZE } from '../../sizing/combobox-sizing.js';
@@ -14,6 +15,12 @@ import { overlayMotion } from '../../styles/overlay-motion.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+
+/**
+ * Cap for trigger-width popovers. Select and Combobox set this from the overlay viewport width and
+ * the effective `containerPadding`, matching React Aria's positioning clearance.
+ */
+export const popoverAvailableInlineSizeVar = createVar();
 
 // React Aria publishes disabled and invalid state on the group, so those states
 // do not need to probe descendants.
@@ -86,11 +93,6 @@ const comboboxActionStyles = {
 
 /** Marker class on every combobox and select item, for rules that reach into its content. */
 export const comboboxItemClassName = style({}, 'combobox-item');
-
-// React Aria's useOverlayPosition defaults `containerPadding` to 12px on each side. A trigger-width
-// popover that is wider than that padded viewport overflows the document, scrolls horizontally, and
-// (for the non-modal Combobox) closes on that scroll. Cap both sizes to the usable width.
-const popoverMaxInlineSize = 'calc(100vw - 24px)';
 
 // A selected item's `forced-color-adjust: none` inherits, so its content would keep author colours on
 // the `Highlight` fill: a `Text` keeps its theme colour and a `Kbd` its surface. Do for that content
@@ -233,10 +235,10 @@ const comboboxConfig = {
 				flexDirection: 'column',
 				inlineSize: 'var(--trigger-width)',
 				isolation: 'isolate',
-				maxInlineSize: popoverMaxInlineSize,
+				maxInlineSize: popoverAvailableInlineSizeVar,
 				// `min-inline-size` wins over `max-inline-size` when both conflict, so the floor must
 				// also respect the usable viewport.
-				minInlineSize: `min(var(--trigger-width), ${popoverMaxInlineSize})`,
+				minInlineSize: `min(var(--trigger-width), ${popoverAvailableInlineSizeVar})`,
 				overflow: 'hidden',
 
 				'@supports': {
