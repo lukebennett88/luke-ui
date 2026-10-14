@@ -1,29 +1,31 @@
 # Luke UI agent guide
 
-Workflow and specialist skills live in `.agents/skills/`. Claude Code loads the same files through
-`.claude/skills`, a symlink to that directory.
+## Skills
 
-## Task routing
+Skills in `.agents/skills/` hold this repository's workflows. Some agents discover them there, and
+others do not, so this list is the index. When a task matches a skill, read its whole `SKILL.md`
+before you start. A grep, an excerpt, or a skill listing is not a read.
 
-- Investigating or writing GitHub issues: follow
-  [.agents/skills/make-issue/SKILL.md](.agents/skills/make-issue/SKILL.md).
-- Implementing an issue and delivering a reviewable pull request: follow
-  [.agents/skills/work-on-issue/SKILL.md](.agents/skills/work-on-issue/SKILL.md). That request
-  authorises task-scoped commits, pushing the task branch, and opening its pull request.
-  Investigation, planning, and review do not. Honour narrower stopping points.
-- Creating or updating a pull request title and body: follow
+- Writing or investigating a GitHub issue:
+  [.agents/skills/write-issue/SKILL.md](.agents/skills/write-issue/SKILL.md).
+- Implementing an issue and opening its pull request:
+  [.agents/skills/work-on-issue/SKILL.md](.agents/skills/work-on-issue/SKILL.md).
+- Writing or updating a pull request title and body:
   [.agents/skills/write-pr/SKILL.md](.agents/skills/write-pr/SKILL.md).
-- Reviewing a pull request or diff: follow
+- Reviewing a pull request or a diff:
   [.agents/skills/review-pr/SKILL.md](.agents/skills/review-pr/SKILL.md).
-- Documentation, including pull request reviews that touch it: follow
+- Documentation, including pull request reviews that touch it:
   [.agents/skills/write-docs/SKILL.md](.agents/skills/write-docs/SKILL.md). This covers MDX pages in
   `apps/docs/content/docs/`, `docs/*.md`, READMEs, and JSDoc when it is the main task or documents a
   new public export or prop.
-- Writing, changing, or reviewing tests, including pull request reviews that touch them: follow
+- Writing, changing, or reviewing tests, including pull request reviews that touch them:
   [.agents/skills/write-tests/SKILL.md](.agents/skills/write-tests/SKILL.md).
-- Read the whole `SKILL.md` of every skill that applies before you write or review. To review a pull
-  request, first check whether its diff touches documentation, tests, or both. A grep, an excerpt,
-  or a skill listing is not a read.
+
+More than one skill can apply. To review a pull request, first check whether its diff touches
+documentation, tests, or both.
+
+## Task routing
+
 - Incidental edits to existing JSDoc or code comments:
   [docs/DOCUMENTATION.md#comments-and-jsdoc](docs/DOCUMENTATION.md#comments-and-jsdoc).
 - Writing or changing JavaScript, TypeScript, or TSX: [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
@@ -37,6 +39,10 @@ Workflow and specialist skills live in `.agents/skills/`. Claude Code loads the 
 
 ## Dev loop
 
+- Leave changes you did not make as you found them. Do not reset, clean, stash, or overwrite them,
+  and keep them out of your commits.
+- Report each check as passed, failed, pending, or not run. Say whether a result came from a local
+  run or from CI, and say why a check did not run.
 - Do not add a changeset before 1.0.0, even if changeset-bot asks for one. See
   [docs/DEPENDENCIES.md#changesets](docs/DEPENDENCIES.md#changesets).
 - When you change code, update or delete the docs and skills that describe it in the same change.
@@ -67,11 +73,11 @@ Workflow and specialist skills live in `.agents/skills/`. Claude Code loads the 
 
 ## Papercuts
 
-- When your current task runs into repository friction or technical debt you can point to, follow
-  [.agents/papercuts.md](.agents/papercuts.md). Read its header first.
+- When your current task runs into repository friction or technical debt you can point to, record it
+  in `.agents/papercuts.md`. Read its header first.
 - When your task or PR fixes the symptom, remove its entry in the same change, or do not add one.
-- When existing guidance or a skill should have prevented a mistake, follow the handoff in that
-  file. Review drafts stay **not recorded**. Authorised implementation records qualifying entries or
-  explains omissions.
-- Recording a papercut is allowed in any PR. When committing is authorised, use a separate commit.
-  It is not permission to fix the problem. If you can't commit, report it in your final message.
+- When a user or reviewer corrects a mistake that existing guidance or a skill should have
+  prevented, record the gap there too, even after you fix the mistake, unless the same change also
+  updates the guidance.
+- Recording a papercut is allowed in any PR, as a separate commit. It is not permission to fix the
+  problem. If you can't commit, report it in your final message.
