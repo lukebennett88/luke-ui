@@ -668,6 +668,43 @@ test('the SelectField scene has no axe violations', async () => {
 	await expectNoAxeViolations(container);
 });
 
+test('an edge-to-edge SelectField popover stays open without horizontal scrolling', async () => {
+	const horizontalScrolls: Array<number> = [];
+	const onScroll = () => {
+		if (window.scrollX !== 0) horizontalScrolls.push(window.scrollX);
+	};
+	window.addEventListener('scroll', onScroll, true);
+	onTestFinished(() => {
+		window.removeEventListener('scroll', onScroll, true);
+		window.scrollTo(0, 0);
+	});
+
+	render(
+		<SelectField items={themeItems} label="Theme" placeholder="Choose a theme">
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	await userEvent.tab();
+	await userEvent.keyboard('{ArrowDown}');
+
+	const listbox = page.getByRole('listbox');
+	await expect.element(listbox).toBeVisible();
+	const popover = listbox.element().closest('[data-trigger="Select"]');
+	if (popover == null) throw new Error('Expected the Select popover.');
+	await waitForOverlayEnter(popover);
+	await expect.element(listbox).toBeVisible();
+
+	expect(window.scrollX).toBe(0);
+	expect(horizontalScrolls).toEqual([]);
+	expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+		document.documentElement.clientWidth,
+	);
+
+	await userEvent.click(page.getByRole('option', { name: 'Dark' }).element());
+	expect(trigger(/Theme/)).toHaveTextContent('Dark');
+});
+
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(<SelectFieldScene />, { appearance });

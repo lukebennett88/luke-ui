@@ -11,7 +11,7 @@ import {
 import { Field } from '@luke-ui/react/primitives/field';
 import { createRef } from 'react';
 import type { Key } from 'react-aria-components/ComboBox';
-import { expect, test } from 'vite-plus/test';
+import { expect, onTestFinished, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { measureFieldError } from '../test-utils/measure-field-error.js';
@@ -458,6 +458,100 @@ test('ComboboxField clears the selection when the desktop input is emptied', asy
 	expect(changes).toEqual([null]);
 	await expect.element(input).toHaveValue('');
 });
+
+test('an edge-to-edge ComboboxField popover stays open without horizontal scrolling', async () => {
+	const horizontalScrolls: Array<number> = [];
+	const onScroll = () => {
+		if (window.scrollX !== 0) horizontalScrolls.push(window.scrollX);
+	};
+	window.addEventListener('scroll', onScroll, true);
+	onTestFinished(() => {
+		window.removeEventListener('scroll', onScroll, true);
+		window.scrollTo(0, 0);
+	});
+
+	render(
+		<ComboboxField defaultItems={countryItems} label="Country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+
+	await userEvent.tab();
+	await userEvent.keyboard('{ArrowDown}');
+
+	expect(page.getByRole('dialog').elements()).toHaveLength(0);
+	const listbox = page.getByRole('listbox');
+	await expect.element(listbox).toBeVisible();
+	const popover = listbox.element().closest('[data-trigger="ComboBox"]');
+	if (popover == null) throw new Error('Expected the Combobox popover.');
+	await waitForOverlayEnter(popover);
+	await expect.element(listbox).toBeVisible();
+
+	expect(window.scrollX).toBe(0);
+	expect(horizontalScrolls).toEqual([]);
+	expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+		document.documentElement.clientWidth,
+	);
+
+	await userEvent.click(page.getByRole('option', { name: 'Canada' }).element());
+	await expect.element(page.getByRole('combobox', { name: 'Country' })).toHaveValue('Canada');
+});
+
+test('a ComboboxField popover matches the trigger width when the viewport has room', async () => {
+	render(
+		<div style={{ padding: '1rem' }}>
+			<ComboboxField defaultItems={countryItems} label="Country">
+				{renderCountryItem}
+			</ComboboxField>
+		</div>,
+	);
+
+	const input = page.getByRole('combobox', { name: 'Country' }).element();
+	await userEvent.tab();
+	await userEvent.keyboard('{ArrowDown}');
+
+	const listbox = page.getByRole('listbox');
+	await expect.element(listbox).toBeVisible();
+	const popover = listbox.element().closest('[data-trigger="ComboBox"]');
+	if (popover == null) throw new Error('Expected the Combobox popover.');
+	await waitForOverlayEnter(popover);
+
+	const control = input.closest('[role="group"]');
+	if (control == null) throw new Error('Expected the Combobox control.');
+	expect(popover.getBoundingClientRect().width).toBeCloseTo(
+		control.getBoundingClientRect().width,
+		0,
+	);
+});
+
+for (const containerPadding of [0, 40] as const) {
+	test(`a ComboboxField popover respects containerPadding ${containerPadding}`, async () => {
+		render(
+			<ComboboxField
+				defaultItems={countryItems}
+				label="Country"
+				popoverProps={{ containerPadding }}
+			>
+				{renderCountryItem}
+			</ComboboxField>,
+		);
+
+		await userEvent.tab();
+		await userEvent.keyboard('{ArrowDown}');
+
+		const listbox = page.getByRole('listbox');
+		await expect.element(listbox).toBeVisible();
+		const popover = listbox.element().closest('[data-trigger="ComboBox"]');
+		if (popover == null) throw new Error('Expected the Combobox popover.');
+		await waitForOverlayEnter(popover);
+
+		const viewportInlineSize = window.visualViewport?.width ?? document.documentElement.clientWidth;
+		const popoverBox = popover.getBoundingClientRect();
+		expect(popoverBox.width).toBeLessThanOrEqual(viewportInlineSize - 2 * containerPadding + 0.5);
+		expect(popoverBox.left).toBeGreaterThanOrEqual(containerPadding - 0.5);
+		expect(popoverBox.right).toBeLessThanOrEqual(viewportInlineSize - containerPadding + 0.5);
+	});
+}
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {

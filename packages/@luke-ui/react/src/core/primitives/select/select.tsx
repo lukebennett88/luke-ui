@@ -1,4 +1,5 @@
 import { mergeRefs } from '@react-aria/utils';
+import { assignInlineVars } from '@vanilla-extract/dynamic';
 import type { ComponentProps, JSX, ReactNode, Ref } from 'react';
 import { createContext, use, useId } from 'react';
 import { ButtonContext } from 'react-aria-components/Button';
@@ -26,13 +27,17 @@ import { useSlottedContext } from 'react-aria-components/slots';
 import { cx } from '../../../shared/utils/utils.js';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
+import {
+	resolveOverlayContainerPadding,
+	useAvailableOverlayInlineSize,
+} from '../../overlays/available-overlay-inline-size.js';
 import { copyScopeColorMode } from '../../overlays/scope-color-mode.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxItemProps } from '../combobox/item.js';
 import { ComboboxItem } from '../combobox/item.js';
-import { comboboxRecipe } from '../combobox/styles.css.js';
+import { comboboxRecipe, popoverAvailableInlineSizeVar } from '../combobox/styles.css.js';
 import { FieldStateContext } from '../field/label.js';
 import { rootIdProps } from '../root-id.js';
 import type { SelectSize } from './styles.css.js';
@@ -285,8 +290,17 @@ export function SelectIndicator(props: SelectIndicatorProps): JSX.Element {
 
 /** Popover surface for the listbox. */
 export function SelectPopover(props: SelectPopoverProps): JSX.Element {
-	const { offset = 4, ref, ...popoverProps } = props;
+	const { containerPadding: containerPaddingProp, offset = 4, ref, ...popoverProps } = props;
 	const popoverContext = useSlottedContext(PopoverContext);
+	const selectState = use(RacSelectStateContext);
+	const containerPadding = resolveOverlayContainerPadding(
+		containerPaddingProp,
+		popoverContext?.containerPadding,
+	);
+	const availableInlineSize = useAvailableOverlayInlineSize(
+		containerPadding,
+		selectState?.isOpen === true,
+	);
 
 	return (
 		<RacPopover
@@ -294,8 +308,15 @@ export function SelectPopover(props: SelectPopoverProps): JSX.Element {
 			className={composeRenderProps(popoverProps.className, (className) => {
 				return comboboxRecipe().popover({ className });
 			})}
+			containerPadding={containerPadding}
 			offset={offset}
 			ref={mergeRefs(ref, copyScopeColorMode(popoverContext?.triggerRef))}
+			style={composeRenderProps(popoverProps.style, (style) => ({
+				...style,
+				...assignInlineVars({
+					[popoverAvailableInlineSizeVar]: `${availableInlineSize}px`,
+				}),
+			}))}
 		/>
 	);
 }

@@ -1,4 +1,5 @@
 import type { StyleRule } from '@vanilla-extract/css';
+import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { COMBOBOX_ACTION_SIZE } from '../../sizing/combobox-sizing.js';
@@ -14,6 +15,9 @@ import { overlayMotion } from '../../styles/overlay-motion.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+
+/** Set by Select/Combobox popovers to the usable overlay inline size. */
+export const popoverAvailableInlineSizeVar = createVar();
 
 // React Aria publishes disabled and invalid state on the group, so those states
 // do not need to probe descendants.
@@ -228,7 +232,9 @@ const comboboxConfig = {
 				flexDirection: 'column',
 				inlineSize: 'var(--trigger-width)',
 				isolation: 'isolate',
-				minInlineSize: 'var(--trigger-width)',
+				maxInlineSize: popoverAvailableInlineSizeVar,
+				// CSS min wins over max when they conflict, so the floor needs the same cap.
+				minInlineSize: `min(var(--trigger-width), ${popoverAvailableInlineSizeVar})`,
 				overflow: 'hidden',
 
 				'@supports': {
