@@ -113,13 +113,15 @@ evidence shows it does not help. Silence in this log is not evidence.
   docs group name rather than `group/name`, so generating into an existing group both scrambles
   navigation and fails inventory until the root meta is fixed by hand.
 
-## Theme authoring prose promises unchanged solid lightness
+## Theme authoring prose promises unchanged colour channels
 
 - Seen: 2026-10-14 (#800). The draft said "An accent side you set explicitly keeps its authored
   lightness". Review corrected it to "bypasses this adaptation" because the generator searches a
-  tone-faithful band and may move the solid anchor.
-- Where: `apps/docs/content/docs/docs/authoring-a-theme.mdx`, "When an accent cannot be used";
-  `packages/@luke-ui/react/src/theme/scale.ts`, `resolveSolidAnchor`. Governing rule:
+  tone-faithful band and may move the solid anchor. The #808 review also found both adaptation
+  descriptions promised preserved chroma, which sRGB gamut mapping can reduce.
+- Where: `apps/docs/content/docs/docs/authoring-a-theme.mdx`, "Define the input" and "When an accent
+  cannot be used"; `packages/@luke-ui/react/src/theme/scale.ts`, `resolveSolidAnchor`, and
+  `packages/@luke-ui/react/src/theme/color.ts`, `gamutMapOklch`. Governing rule:
   docs/DOCUMENTATION.md, "Review" and "Keeping docs current".
-- Problem: The draft conflated an unadapted source with an unchanged emitted solid, despite the
+- Problem: The prose overstated which authored colour channels are preserved, despite the
   documentation guide's factual accuracy requirement.
