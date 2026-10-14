@@ -1,6 +1,6 @@
+import { Cluster } from '@luke-ui/react/cluster';
 import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
-import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
 import { useRouterState } from '@tanstack/react-router';
 import type { ComponentProps } from 'react';
@@ -8,9 +8,18 @@ import { useEffect, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { groupPropNames, NATIVE_PROPS_FORWARDING_KEY } from '../lib/component-prop-groups.js';
 import * as styles from './component-props-table.css.js';
+import { InheritTypography } from './docs-article/mdx-elements.js';
+import * as disclosureStyles from './docs-disclosure.css.js';
 import * as tableStyles from './type-table.css.js';
 import type { PropTableLayout, TypeNode } from './type-table.js';
-import { getPropTableLayout, PropRows, PropTableFrame, PropTableHead } from './type-table.js';
+import {
+	CellText,
+	getPropTableLayout,
+	PropRows,
+	PropTableFrame,
+	PropTableHead,
+	TableBox,
+} from './type-table.js';
 
 /** Grouped prop table for a component guide's `## API` section. */
 export function ComponentPropsTable({
@@ -37,17 +46,17 @@ export function ComponentPropsTable({
 	}, [hash, id]);
 
 	return (
-		<Stack className={cx('not-prose', className)} gap="sp12" id={id} marginBlock="sp24" {...props}>
+		<Stack className={cx('not-prose', className)} gap="sp16" id={id} marginBlock="sp24" {...props}>
 			{nativePropsNote === undefined ? null : (
-				<Text color="secondary" elementType="div" typography="caption">
-					{nativePropsNote}
-				</Text>
+				<CellText color="secondary" elementType="div" fontWeight="body">
+					<InheritTypography>{nativePropsNote}</InheritTypography>
+				</CellText>
 			)}
 			<PropTableFrame>
 				<PropTableHead layout={layout} />
 				{groups.map((group) =>
 					group.name === 'Component props' ? (
-						<tbody key={group.name}>
+						<tbody className={tableStyles.bodyGroup} key={group.name}>
 							<PropRows hashPrefix={id} layout={layout} names={group.props} type={type} />
 						</tbody>
 					) : (
@@ -87,25 +96,42 @@ function PropGroup({
 		toggle !== null && toggle.atHash === hash ? toggle.open : group.defaultOpen || holdsHash;
 
 	return (
-		<tbody>
+		<tbody className={tableStyles.bodyGroup}>
 			<tr>
-				<td
-					className={cx(tableStyles.cell, styles.groupCell)}
+				<TableBox
+					as="td"
+					box={{ padding: '0' }}
+					className={tableStyles.cell}
 					colSpan={layout.columnCount}
 					data-row-end=""
 					data-ruled=""
 				>
-					<RacButton
-						aria-expanded={isExpanded}
-						className={styles.groupButton}
-						onPress={() => {
-							setToggle({ atHash: hash, open: !isExpanded });
-						}}
+					<Cluster
+						className={cx(disclosureStyles.trigger, styles.groupButtonExpanded)}
+						flexWrap="nowrap"
+						gap="sp4"
+						inlineSize="100%"
+						paddingBlock="sp12"
+						paddingInline="sp16"
+						renderRoot={(domProps) => (
+							<RacButton
+								{...domProps}
+								aria-expanded={isExpanded}
+								onPress={() => {
+									setToggle({ atHash: hash, open: !isExpanded });
+								}}
+							/>
+						)}
 					>
-						<Icon aria-hidden className={styles.groupChevron} name="chevronRight" size="xsmall" />
-						{group.name}
-					</RacButton>
-				</td>
+						<Icon
+							aria-hidden
+							className={disclosureStyles.chevronEnd}
+							name="chevronRight"
+							size="xsmall"
+						/>
+						<CellText fontWeight="emphasis">{group.name}</CellText>
+					</Cluster>
+				</TableBox>
 			</tr>
 			{isExpanded ? (
 				<PropRows hashPrefix={rowIdPrefix} layout={layout} names={group.props} type={type} />

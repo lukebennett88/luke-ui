@@ -33,7 +33,10 @@ export const trigger = style({
 	},
 });
 
-/** Start-rail chevron that rotates to point down when expanded. */
+/**
+ * Start-rail chevron that rotates to point down when expanded, from either a `data-expanded`
+ * ancestor or its own trigger's `aria-expanded`.
+ */
 export const chevronEnd = style({
 	'@layer': {
 		components: {
@@ -41,7 +44,7 @@ export const chevronEnd = style({
 			flexShrink: 0,
 			transition: `transform ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
 			selectors: {
-				'[data-expanded] &': {
+				'[data-expanded] &, [aria-expanded="true"] > &': {
 					transform: 'rotate(90deg)',
 				},
 			},

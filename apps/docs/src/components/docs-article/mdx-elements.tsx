@@ -152,6 +152,14 @@ function CopyAnchorButton({ id }: { id: string }) {
 // typography flags the paragraphs it receives so they inherit it.
 const InheritTypographyContext = createContext(false);
 
+/**
+ * Makes the MDX paragraphs inside it inherit the surrounding typography, colour, and weight instead
+ * of the body style. Wrap generated Markdown that a component sets in its own `Text`.
+ */
+export function InheritTypography({ children }: { children: ReactNode }) {
+	return <InheritTypographyContext value>{children}</InheritTypographyContext>;
+}
+
 export function MdxParagraph({ children }: Pick<ComponentPropsWithoutRef<'p'>, 'children'>) {
 	const shouldInheritFont = use(InheritTypographyContext);
 	return (
@@ -221,9 +229,7 @@ interface CardProps {
 export function Card({ children, description, href, title }: CardProps) {
 	return (
 		<DocsCard
-			description={
-				<InheritTypographyContext value>{description ?? children}</InheritTypographyContext>
-			}
+			description={<InheritTypography>{description ?? children}</InheritTypography>}
 			href={href}
 			title={title}
 		/>

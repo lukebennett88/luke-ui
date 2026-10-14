@@ -153,6 +153,13 @@ with `Track` for chevron/count rails. Token explorer keeps a native `<table>` (B
 `.css.ts` keeps interaction, container queries, and one-sided borders. Descriptions render in a
 `div`, so MDX paragraphs never nest inside a paragraph.
 
+The props table's styling lives on Luke UI primitives: `Box` through `renderRoot` for the table
+elements (padding, border, radius, surface fills), `Text` for every piece of text at the `label`
+type style, `Stack` and `Cluster` for descriptions, parameter lists, the name and required marker,
+and the group trigger. The remaining docs `.css.ts` rules each carry a `DS gap:` comment naming the
+missing capability: container queries, table layout, per-side borders, vertical alignment, scroll
+margin, a code font without a chip, and nested-code and paragraph flattening.
+
 `IconGallery`, `TokenExplorer`, and `ComponentsIndex` no longer use Tailwind utilities or `fd-*`
 tokens. Filtering, counts, copy feedback, empty states, disclosure semantics, and table headers
 remain. The shared playground `TextToggleButtonGroup` still carries utility classes; #676 owns that
