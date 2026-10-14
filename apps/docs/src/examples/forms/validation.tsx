@@ -2,6 +2,7 @@ import { Button } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Cluster } from '@luke-ui/react/cluster';
 import { ComboboxField, ComboboxItem } from '@luke-ui/react/combobox-field';
+import { Form } from '@luke-ui/react/form';
 import { Stack } from '@luke-ui/react/stack';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import type { SubmitEvent } from 'react';
@@ -35,38 +36,32 @@ export default () => {
 	}
 
 	return (
-		<form noValidate onSubmit={handleSubmit}>
+		<Form onSubmit={handleSubmit} validationBehavior="aria">
 			<Stack gap="sp16" maxInlineSize="20rem">
-				<Stack minBlockSize="5.5rem">
-					<TextInputField
-						errorMessage={errors.email}
-						label="Email address"
-						name="emailAddress"
-						placeholder="you@example.com"
-					/>
-				</Stack>
-				<Stack minBlockSize="5.5rem">
-					<ComboboxField
-						defaultItems={countries}
-						errorMessage={errors.country}
-						label="Work location"
-						name="country"
-						placeholder="Choose a country"
-					>
-						{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-					</ComboboxField>
-				</Stack>
-				<Stack minBlockSize="4.5rem">
-					<CheckboxField
-						errorMessage={errors.terms}
-						label="I accept the terms of service"
-						name="terms"
-					/>
-				</Stack>
+				<TextInputField
+					errorMessage={errors.email}
+					label="Email address"
+					name="emailAddress"
+					placeholder="you@example.com"
+				/>
+				<ComboboxField
+					defaultItems={countries}
+					errorMessage={errors.country}
+					label="Work location"
+					name="country"
+					placeholder="Choose a country"
+				>
+					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+				</ComboboxField>
+				<CheckboxField
+					errorMessage={errors.terms}
+					label="I accept the terms of service"
+					name="terms"
+				/>
 				<Cluster>
 					<Button type="submit">Create account</Button>
 				</Cluster>
 			</Stack>
-		</form>
+		</Form>
 	);
 };

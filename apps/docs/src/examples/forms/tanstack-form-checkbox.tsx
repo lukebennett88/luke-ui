@@ -1,6 +1,7 @@
 import { Button } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Cluster } from '@luke-ui/react/cluster';
+import { Form } from '@luke-ui/react/form';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
@@ -38,33 +39,36 @@ export default () => {
 
 	return (
 		<Stack gap="sp16" maxInlineSize="20rem">
-			<form
+			<Form
+				necessityIndicator="required-label"
 				onSubmit={(event) => {
 					event.preventDefault();
 					void form.handleSubmit();
 				}}
 				ref={formRef}
+				validationBehavior="aria"
 			>
 				<Stack gap="sp16">
 					<form.Field name="terms">
-						{(field) => (
-							<Stack minBlockSize="4.5rem">
+						{(field) => {
+							return (
 								<CheckboxField
 									errorMessage={field.state.meta.errors[0]?.message}
+									isRequired
 									isSelected={field.state.value}
 									label="I accept the terms of service"
+									name={field.name}
 									onBlur={field.handleBlur}
 									onChange={field.handleChange}
-									validationBehavior="aria"
 								/>
-							</Stack>
-						)}
+							);
+						}}
 					</form.Field>
 					<Cluster>
 						<Button type="submit">Continue</Button>
 					</Cluster>
 				</Stack>
-			</form>
+			</Form>
 			<Stack minBlockSize="1.5rem">
 				<Text elementType="p" role="status">
 					<form.Subscribe selector={(state) => state.isSubmitSuccessful}>

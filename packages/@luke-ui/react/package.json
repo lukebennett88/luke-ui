@@ -31,6 +31,7 @@
 		"./container": "./dist/container.js",
 		"./em": "./dist/em.js",
 		"./emoji": "./dist/emoji.js",
+		"./form": "./dist/form.js",
 		"./grid": "./dist/grid.js",
 		"./heading": "./dist/heading.js",
 		"./icon": "./dist/icon.js",

@@ -25,6 +25,7 @@ export const bundleBoundaries: Array<BundleBoundary> = [
 		exportName: 'Button',
 	},
 	{ composes: [], entry: 'box', exportName: 'Box' },
+	{ composes: [], entry: 'form', exportName: 'Form' },
 	{ composes: [], entry: 'theme', exportName: 'vars' },
 ];
 
@@ -83,6 +84,7 @@ import { Blockquote } from '@luke-ui/react/blockquote';
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
+import { Form } from '@luke-ui/react/form';
 import { Icon } from '@luke-ui/react/icon';
 import { Provider } from '@luke-ui/react/provider';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
@@ -104,7 +106,13 @@ export function App({ onHydrated }) {
 			{ display: 'flex', gap: 'sp8' },
 			h(Blockquote, null, 'Hello world'),
 			h(Icon, { name: 'chevronDown', 'aria-label': 'Expand' }),
-			h(TextInputField, { label: 'Name' }),
+			// Form and TextInputField come from separate published entrypoints so a duplicated
+			// context instance in the built package would fail to pass the optional marker.
+			h(
+				Form,
+				{ necessityIndicator: 'optional-label' },
+				h(TextInputField, { label: 'Name' }),
+			),
 			h(CheckboxField, { label: 'Example checkbox' }),
 			h(SwitchField, { label: 'Example switch' }),
 			h(

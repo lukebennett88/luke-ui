@@ -29,8 +29,16 @@ value types come from `defaultValues`, and TypeScript checks the schema against 
 
 ## Integrate components
 
-Give `form.Field` a `name` and a children function. Read the value from `field.state.value`, pass
-`field.handleChange` to `onChange`, and pass `field.handleBlur` to `onBlur`.
+Wrap the fields in Luke UI's [`Form`](/components/forms/form). Set `validationBehavior="aria"` so
+TanStack Form controls validation without browser submission blocking it. When every required field
+should show a clear marker, set `necessityIndicator="required-label"`.
+
+Give `form.Field` a `name` and a children function. Pass `field.state.value`, `field.handleChange`,
+and `field.handleBlur` to the control, and pass `field.name` as the HTML `name`. Set `isRequired` on
+fields the schema requires. Schema validation does not set required control semantics on its own.
+
+Pass the current validation message from `field.state.meta.errors` to `errorMessage`. A non-empty
+message marks the field invalid.
 
 <ExampleBlock src="forms/tanstack-form" title="TanStack Form: Text fields" />
 
@@ -38,34 +46,13 @@ A checkbox or switch reads its value from `isSelected`.
 
 <ExampleBlock src="forms/tanstack-form-checkbox" title="TanStack Form: Checkbox" />
 
-## Validation
-
-Read the message from `field.state.meta.errors` and pass it to `errorMessage`. The message marks the
-field invalid.
-
-```tsx
-<form.Field name="email">
-	{(field) => (
-		<TextInputField
-			errorMessage={field.state.meta.errors[0]?.message}
-			label="Email"
-			onBlur={field.handleBlur}
-			onChange={field.handleChange}
-			validationBehavior="aria"
-			value={field.state.value}
-		/>
-	)}
-</form.Field>
-```
-
-Set `validationBehavior="aria"` on every field a `form.Field` wraps. Read
-[Validation](/docs/validation#let-the-browser-validate) for why native behaviour blocks the submit
-event before the library can run.
+Read [Validation](/docs/validation) for more about error presentation. Read
+[Required fields](/docs/forms#required-fields) for necessity indicators.
 
 ## Focus the first invalid field
 
-TanStack Form leaves focus where it is after a failed submission. Hold a ref to the `<form>` element
-and search it for the first control marked `aria-invalid` from `onSubmitInvalid`.
+TanStack Form leaves focus where it is after a failed submission. Hold a ref to the Form element and
+search it for the first control marked `aria-invalid` from `onSubmitInvalid`.
 
 ```tsx
 const FOCUSABLE_SELECTOR =
@@ -93,20 +80,9 @@ takes a plain `ref`.
 
 ## Submitting data
 
-Call `form.handleSubmit()` from the form's `onSubmit`, after `event.preventDefault()`.
-
-```tsx
-<form
-	onSubmit={(event) => {
-		event.preventDefault();
-		void form.handleSubmit();
-	}}
-	ref={formRef}
->
-```
-
-TanStack Form runs the schema, then calls `onSubmit` with the values or `onSubmitInvalid` with the
-form API.
+Prevent the browser's default submission in Form's `onSubmit`, then call `form.handleSubmit()`.
+TanStack Form validates the values and calls `onSubmit` or `onSubmitInvalid`. Prefer `onSubmit` over
+Form's `action` for this integration, because the library needs the submit event.
 
 ## Continue learning
 

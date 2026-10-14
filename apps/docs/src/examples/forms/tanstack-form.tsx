@@ -1,5 +1,6 @@
 import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
+import { Form } from '@luke-ui/react/form';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
@@ -37,47 +38,52 @@ export default () => {
 
 	return (
 		<Stack gap="sp16" maxInlineSize="20rem">
-			<form
+			<Form
+				necessityIndicator="required-label"
 				onSubmit={(event) => {
 					event.preventDefault();
 					void form.handleSubmit();
 				}}
 				ref={formRef}
+				validationBehavior="aria"
 			>
 				<Stack gap="sp16">
 					<form.Field name="name">
-						{(field) => (
-							<Stack minBlockSize="5.5rem">
+						{(field) => {
+							return (
 								<TextInputField
 									errorMessage={field.state.meta.errors[0]?.message}
+									isRequired
 									label="Name"
+									name={field.name}
 									onBlur={field.handleBlur}
 									onChange={field.handleChange}
-									validationBehavior="aria"
 									value={field.state.value}
 								/>
-							</Stack>
-						)}
+							);
+						}}
 					</form.Field>
 					<form.Field name="email">
-						{(field) => (
-							<Stack minBlockSize="5.5rem">
+						{(field) => {
+							return (
 								<TextInputField
 									errorMessage={field.state.meta.errors[0]?.message}
+									isRequired
 									label="Email"
+									name={field.name}
 									onBlur={field.handleBlur}
 									onChange={field.handleChange}
-									validationBehavior="aria"
+									type="email"
 									value={field.state.value}
 								/>
-							</Stack>
-						)}
+							);
+						}}
 					</form.Field>
 					<Cluster>
 						<Button type="submit">Create account</Button>
 					</Cluster>
 				</Stack>
-			</form>
+			</Form>
 			<Stack minBlockSize="1.5rem">
 				<Text elementType="p" role="status">
 					<form.Subscribe selector={(state) => (state.isSubmitSuccessful ? state.values.name : '')}>

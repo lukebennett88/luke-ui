@@ -24,9 +24,15 @@ const form = useForm({
 
 ## Integrate components
 
-Wrap each control in `Controller`. Its `render` prop hands you `field` and `fieldState`. Pass
-`field.value`, `field.onChange`, and `field.onBlur` to the control, and give `field.ref` to
-`inputRef`.
+Wrap the fields in Luke UI's [`Form`](/components/forms/form). Set `validationBehavior="aria"` so
+React Hook Form controls validation without browser submission blocking it. When every required
+field should show a clear marker, set `necessityIndicator="required-label"`.
+
+Wrap each control in `Controller`. Pass `field.value`, `field.onChange`, and `field.onBlur` to the
+control, give `field.ref` to `inputRef`, and pass `field.name` as the HTML `name`. Set `isRequired`
+on fields the schema requires. Schema validation does not set required control semantics on its own.
+
+Pass `fieldState.error?.message` to `errorMessage`. A non-empty message marks the field invalid.
 
 <ExampleBlock src="forms/react-hook-form" title="React Hook Form: Controller" />
 
@@ -39,32 +45,8 @@ around the control, so `inputRef` is what reaches the input underneath. For `Sel
 library's ref through `triggerRef` to reach the trigger button. A primitive that renders the control
 itself, such as `ComboboxInput`, takes `field.ref` on `ref`.
 
-## Validation
-
-Read the message from `fieldState.error` and pass it to `errorMessage`. The message marks the field
-invalid.
-
-```tsx
-<Controller
-	control={form.control}
-	name="email"
-	render={({ field, fieldState }) => (
-		<TextInputField
-			errorMessage={fieldState.error?.message}
-			inputRef={field.ref}
-			label="Email"
-			onBlur={field.onBlur}
-			onChange={field.onChange}
-			validationBehavior="aria"
-			value={field.value}
-		/>
-	)}
-/>
-```
-
-Set `validationBehavior="aria"` on every field a `Controller` wraps. Read
-[Validation](/docs/validation#let-the-browser-validate) for why native behaviour blocks the submit
-event before the library can run.
+Read [Validation](/docs/validation) for controlled errors versus native validation. Read
+[Required fields](/docs/forms#required-fields) for necessity indicators.
 
 ## Focus the first invalid field
 
@@ -76,12 +58,9 @@ Set `shouldFocusError: false` on `useForm` to turn this off.
 
 ## Submitting data
 
-Wrap the submit handler in `form.handleSubmit`. It runs the schema first, then calls the handler
-with the values.
-
-```tsx
-<form onSubmit={form.handleSubmit((values) => saveAccount(values))}>
-```
+Pass `form.handleSubmit(onSubmit)` to Form's `onSubmit`. React Hook Form validates the fields before
+calling your handler. Prefer `onSubmit` over Form's `action` for this integration, because the
+library needs the submit event.
 
 ## Continue learning
 

@@ -1,11 +1,11 @@
 import type { JSX, ReactNode, Ref } from 'react';
 import type { InputProps as RacInputProps } from 'react-aria-components/Input';
 import type { FieldAccessibleNameProps } from '../primitives/field/field.js';
+import { Field } from '../primitives/field/field.js';
 import {
-	Field,
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
-} from '../primitives/field/field.js';
+} from '../primitives/field/is-invalid-from-error-message.js';
 import type { TextInputSize } from '../primitives/text-input/recipe.css.js';
 import type { TextInputRootProps } from '../primitives/text-input/text-input.js';
 import {

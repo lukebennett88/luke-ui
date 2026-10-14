@@ -31,6 +31,7 @@ const WORKSPACE_PROTOCOL_PATTERN = /^(?:catalog|file|link|portal|workspace):/;
 const ASSET_EXPORT_PATTERN = /\.(?:css|svg)$/;
 const CUSTOM_PROPERTY_PATTERN = /--luke-[a-z-]+:/;
 const SYMBOL_PATTERN = /<symbol\b[^>]*\bid="/;
+const WHITESPACE_PATTERN = /\s+/g;
 /** Every cascade layer the shared stylesheet uses, in precedence order. */
 const LAYER_ORDER = ['base', 'luke-ui', 'luke-ui.reset', 'luke-ui.recipes', 'luke-ui.utilities'];
 const MODULE_SCRIPT_PATTERN = /<script type="module"[^>]+src="\/assets\/[^"]+\.js"/;
@@ -163,6 +164,8 @@ for (const consumer of consumers) {
 				expect(markup).toContain('<input');
 				expect(markup).toContain('role="switch"');
 				expect(markup).toContain('(required)');
+				// Form necessity context must cross published entrypoints so the marker is SSR'd.
+				expect(markup).toContain('(optional)');
 
 				const server = await serveBuild(dir);
 				const browser = await chromium.launch();
@@ -218,9 +221,15 @@ for (const consumer of consumers) {
 					expect(result.keptServerElements).toBe(true);
 					expect(result.textAfterHydration).toBe(result.serverText);
 					// Each label resolves through server-generated ids, so it proves those ids hydrated intact.
-					expect(result.inputLabels).toEqual(['Name', 'Example checkbox', 'Example switch']);
+					// Normalise whitespace: the optional marker joins the label with a non-breaking space.
+					expect(
+						result.inputLabels.map((label) => {
+							return label?.replaceAll(WHITESPACE_PATTERN, ' ').trim();
+						}),
+					).toEqual(['Name (optional)', 'Example checkbox', 'Example switch']);
 					// The Select's required cue is hidden text the trigger references by a server-generated id.
 					expect(result.serverText).toContain('(required)');
+					expect(result.serverText).toContain('(optional)');
 					expect(result.selectName.unresolved).toEqual([]);
 					expect(result.selectName.text).toContain('(required)');
 
@@ -291,6 +300,16 @@ for (const consumer of consumers) {
 				}
 			},
 		);
+
+		test('a Form-only import does not retain field styling', { timeout: 60_000 }, () => {
+			const entry = boundaryEntry({ composes: [], entry: 'form', exportName: 'Form' });
+			const bundle = measureBundle(dir, entry);
+
+			expect(bundle.sources).toContain('@luke-ui/react/src/core/form/form.tsx');
+			expect(bundle.sources).not.toContain(
+				'@luke-ui/react/src/core/primitives/field/recipe.css.ts',
+			);
+		});
 
 		for (const boundary of bundleBoundaries) {
 			test(`keeps a ${boundary.exportName} import to its own code`, { timeout: 60_000 }, () => {

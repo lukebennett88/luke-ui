@@ -22,6 +22,7 @@ export default defineConfig({
 			'@vanilla-extract/recipes/createRuntimeFn',
 			'react-aria-components/Checkbox',
 			'react-aria-components/Dialog',
+			'react-aria-components/Form',
 			'react-aria-components/I18nProvider',
 			'react-aria-components/Link',
 			'react-aria-components/Menu',
