@@ -66,11 +66,15 @@ when pilot or spot-check evidence shows it does not help. Silence in this log is
 
 - Seen: 2026-10-12 (#783). Renovate's non-major PR changed `"version": "24.x"` to
   `"version": "24.21.0"` and the lockfile `specifier` to `runtime:24.21.0`.
+- Seen: 2026-10-14 (#805). `npx --yes @anthropic-ai/claude-code --help` from the repo root failed
+  with `EBADDEVENGINES Invalid semver version "24.21.0" does not match "v24.19.0"`. The same command
+  succeeded from `/tmp`, where the workspace `package.json` is not applied.
 - Where: root `package.json` `devEngines.runtime`; docs/DEPENDENCIES.md Tooling versions;
   `.github/renovate.json5` custom regex manager for node.
 - Problem: The documented contract is `<major>.x`, and the regex manager is supposed to keep that
   form with `rangeStrategy: 'replace'`. The non-major group still rewrote the field to an exact
-  version, so the PR had to be corrected by hand.
+  version, so the PR had to be corrected by hand. An exact pin also rejects nearby Node 24.x
+  runtimes that still match the documented `<major>.x` contract.
 
 ## The token board's visual capture renders two different ways on the same code
 
