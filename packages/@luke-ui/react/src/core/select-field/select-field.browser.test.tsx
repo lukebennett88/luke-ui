@@ -9,6 +9,7 @@ import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { expectAccessibleNameWords } from '../test-utils/expect-accessible-name-words.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
+import { DESKTOP_SCREEN_WIDTH, mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -666,6 +667,78 @@ test('the SelectField scene has no axe violations', async () => {
 	const { container } = render(<SelectFieldScene />);
 
 	await expectNoAxeViolations(container);
+});
+
+// An edge-to-edge field with zero body margin can make a trigger-width popover wider than the
+// viewport React Aria leaves clear. Without a max width the document scrolls horizontally. Desktop
+// screen width keeps this on the popover path rather than a mobile tray.
+test('an edge-to-edge SelectField popover stays open without horizontal scrolling', async () => {
+	mockScreenWidth(DESKTOP_SCREEN_WIDTH);
+	expect(getComputedStyle(document.body).margin).toBe('0px');
+
+	const horizontalScrolls: Array<number> = [];
+	const onScroll = () => {
+		if (window.scrollX !== 0) horizontalScrolls.push(window.scrollX);
+	};
+	window.addEventListener('scroll', onScroll, true);
+	onTestFinished(() => {
+		window.removeEventListener('scroll', onScroll, true);
+		window.scrollTo(0, 0);
+	});
+
+	render(
+		<SelectField items={themeItems} label="Theme" placeholder="Choose a theme">
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	await userEvent.tab();
+	await userEvent.keyboard('{ArrowDown}');
+
+	const listbox = page.getByRole('listbox');
+	await expect.element(listbox).toBeVisible();
+	const popover = listbox.element().closest('[data-trigger="Select"]');
+	if (popover == null) throw new Error('Expected the Select popover.');
+	await waitForOverlayEnter(popover);
+	await expect.element(listbox).toBeVisible();
+
+	const popoverBox = popover.getBoundingClientRect();
+	expect(popoverBox.left).toBeGreaterThanOrEqual(0);
+	expect(popoverBox.right).toBeLessThanOrEqual(document.documentElement.clientWidth);
+	expect(window.scrollX).toBe(0);
+	expect(horizontalScrolls).toEqual([]);
+	expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+		document.documentElement.clientWidth,
+	);
+
+	await userEvent.click(page.getByRole('option', { name: 'Dark' }).element());
+	expect(trigger(/Theme/)).toHaveTextContent('Dark');
+});
+
+test('a SelectField popover matches the trigger width when the viewport has room', async () => {
+	mockScreenWidth(DESKTOP_SCREEN_WIDTH);
+	render(
+		<div style={{ padding: '1rem' }}>
+			<SelectField items={themeItems} label="Theme" placeholder="Choose a theme">
+				{renderThemeItem}
+			</SelectField>
+		</div>,
+	);
+
+	const button = trigger(/Theme/);
+	await userEvent.tab();
+	await userEvent.keyboard('{ArrowDown}');
+
+	const listbox = page.getByRole('listbox');
+	await expect.element(listbox).toBeVisible();
+	const popover = listbox.element().closest('[data-trigger="Select"]');
+	if (popover == null) throw new Error('Expected the Select popover.');
+	await waitForOverlayEnter(popover);
+
+	expect(popover.getBoundingClientRect().width).toBeCloseTo(
+		button.getBoundingClientRect().width,
+		0,
+	);
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
