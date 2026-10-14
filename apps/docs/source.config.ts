@@ -13,6 +13,7 @@ import { inlineExampleSource } from './src/lib/inline-example-source';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
 import { stringifyComponentPropsTable } from './src/lib/stringify-component-props-table.js';
+import { stripOptionalUndefined } from './src/lib/strip-optional-undefined.js';
 
 /**
  * Unified merges plugins by function identity and deep-merges their options. Two
@@ -51,9 +52,11 @@ export const docs = defineDocs({
 
 const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
 
-const generator = createGenerator({
-	cache: createFileSystemGeneratorCache('.source/fumadocs-typescript'),
-});
+const generator = stripOptionalUndefined(
+	createGenerator({
+		cache: createFileSystemGeneratorCache('.source/fumadocs-typescript'),
+	}),
+);
 
 const componentPropsGenerator = createComponentPropsGenerator({
 	cache: createFileSystemGeneratorCache('.source/fumadocs-typescript'),

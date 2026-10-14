@@ -32,82 +32,107 @@ afterEach(() => {
 	root = undefined;
 });
 
-test('expands a prop row and keeps description text out of nested paragraphs', async () => {
+test('renders a semantic table with descriptions visible and no nested paragraphs', async () => {
 	await renderWidget(
 		<TypeTable
 			id="api"
 			type={{
 				label: {
 					default: '"Untitled"',
-					description: 'Visible label text.',
+					description: <p>Visible label text.</p>,
 					type: 'string',
 				},
 			}}
 		/>,
 	);
 
-	const trigger = page.getByRole('button', { name: /label/ });
-	await userEvent.click(trigger);
+	await expect.element(page.getByRole('table')).toBeVisible();
+	await expect.element(page.getByRole('columnheader', { name: 'Name' })).toBeVisible();
+	await expect.element(page.getByRole('columnheader', { name: 'Type' })).toBeVisible();
+	await expect.element(page.getByRole('columnheader', { name: 'Default' })).toBeVisible();
+	await expect.element(page.getByRole('rowheader', { name: 'label' })).toBeVisible();
 	await expect.element(page.getByText('Visible label text.')).toBeVisible();
-	await expect.element(page.getByText('Default')).toBeVisible();
-	await expect.element(page.getByText('"Untitled"')).toBeVisible();
+	await expect.element(page.getByRole('cell', { name: /"Untitled"/ })).toBeVisible();
 
 	assert(container, 'expected a container');
-	const nestedParagraphs = [...container.querySelectorAll('p p')];
-	expect(nestedParagraphs).toEqual([]);
+	expect(container.querySelectorAll('p p')).toHaveLength(0);
+	expect(container.querySelector('button')).toBeNull();
 });
 
-test('opens a row when the URL hash matches its id', async () => {
+test('shows the Default column only when a prop has a default', async () => {
+	await renderWidget(<TypeTable id="api" type={{ label: { type: 'string' } }} />);
+
+	await expect.element(page.getByRole('columnheader', { name: 'Type' })).toBeVisible();
+	expect(page.getByRole('columnheader', { name: 'Default' }).elements()).toHaveLength(0);
+});
+
+test('marks required props only when the table mixes required and optional props', async () => {
 	await renderWidget(
 		<TypeTable
 			id="api"
 			type={{
-				label: { description: 'From hash.', type: 'string' },
+				label: { required: true, type: 'string' },
+				size: { required: false, type: 'string' },
 			}}
 		/>,
-		{ hash: 'api-label' },
 	);
 
-	await expect.element(page.getByText('From hash.')).toBeVisible();
+	await expect.element(page.getByRole('img', { name: 'Required' })).toBeVisible();
+	expect(page.getByRole('img', { name: 'Required' }).elements()).toHaveLength(1);
 });
 
-test('keeps prop types visible at the docs article width', async () => {
-	await renderWidget(
-		<TypeTable
-			id="api"
-			type={{
-				appearance: {
-					type: 'union',
-					typeDescription: '"solid" | "subtle" | "text"',
-				},
-			}}
-		/>,
-		{ inlineSize: ARTICLE_INLINE_SIZE },
-	);
+test('omits the required marker when every prop is optional', async () => {
+	await renderWidget(<TypeTable id="api" type={{ label: { type: 'string' } }} />);
 
-	await expect
-		.element(page.getByRole('button', { name: /appearance.*"solid" \| "subtle" \| "text"/ }))
-		.toBeVisible();
+	expect(page.getByRole('img', { name: 'Required' }).elements()).toHaveLength(0);
 });
 
-test('keeps prop types visible at a mobile width', async () => {
+test('gives each prop row an id for hash links', async () => {
+	await renderWidget(<TypeTable id="api" type={{ label: { type: 'string' } }} />);
+
+	assert(container, 'expected a container');
+	const row = container.querySelector('#api-label');
+	expect(row?.tagName).toBe('TR');
+});
+
+for (const [width, inlineSize] of [
+	['the docs article width', ARTICLE_INLINE_SIZE],
+	['a mobile width', MOBILE_INLINE_SIZE],
+] as const) {
+	test(`keeps the type visible at ${width}`, async () => {
+		await renderWidget(
+			<TypeTable
+				id="api"
+				type={{
+					onPress: {
+						default: 'undefined',
+						description: 'Fires on press.',
+						type: 'function',
+						typeDescription: '(event: PressEvent) => void',
+					},
+				}}
+			/>,
+			{ inlineSize },
+		);
+
+		await expect.element(page.getByText('(event: PressEvent) => void')).toBeVisible();
+		await expect.element(page.getByText('Fires on press.')).toBeVisible();
+		assert(container, 'expected a container');
+		expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
+	});
+}
+
+test('stacks the columns and hides the header at a mobile width', async () => {
 	await renderWidget(
-		<TypeTable
-			id="api"
-			type={{
-				onPress: {
-					type: 'function',
-					typeDescription: '(event: PressEvent) => void',
-				},
-			}}
-		/>,
+		<TypeTable id="api" type={{ label: { default: '"Untitled"', type: 'string' } }} />,
 		{ inlineSize: MOBILE_INLINE_SIZE },
 	);
 
-	await expect.element(page.getByRole('button', { name: /onPress.*PressEvent/ })).toBeVisible();
+	expect(page.getByRole('columnheader', { name: 'Type' }).elements()).toHaveLength(0);
+	await expect.element(page.getByText('Default:')).toBeVisible();
 });
 
-test('keeps typeDescriptionLink out of the disclosure trigger', async () => {
+test('renders typeDescriptionLink as a link in the type cell', async () => {
 	await renderWidget(
 		<TypeTable
 			id="api"
@@ -119,43 +144,112 @@ test('keeps typeDescriptionLink out of the disclosure trigger', async () => {
 				},
 			}}
 		/>,
-		{ inlineSize: ARTICLE_INLINE_SIZE },
 	);
 
-	assert(container, 'expected a container');
-	const triggerElement = container.querySelector('button');
-	assert(triggerElement, 'expected disclosure trigger');
-	expect(triggerElement.querySelector('a')).toBeNull();
-	expect(triggerElement.textContent).toContain('ColorToken');
-
-	await userEvent.click(page.getByRole('button', { name: /color/ }));
-	const typeLink = page.getByRole('link', { name: 'ColorToken' });
-	await expect.element(typeLink).toBeVisible();
-
-	await userEvent.keyboard('{Tab}');
-	expect(document.activeElement).toBe(typeLink.element());
+	const link = page.getByRole('link', { name: 'ColorToken' });
+	await expect.element(link).toBeVisible();
+	expect(link.element().getAttribute('href')).toBe('/docs/tokens#color');
+	expect(link.element().closest('td')).not.toBeNull();
 });
 
-test('opens a ComponentPropsTable row from the shared hash prefix', async () => {
+test('lists parameters and returns under the description', async () => {
+	await renderWidget(
+		<TypeTable
+			id="api"
+			type={{
+				validate: {
+					description: 'Checks the value.',
+					parameters: [{ description: 'The current value.', name: 'value' }],
+					returns: 'An error message, or nothing.',
+					type: 'function',
+				},
+			}}
+		/>,
+	);
+
+	await expect.element(page.getByText('Parameters')).toBeVisible();
+	await expect.element(page.getByText(/The current value\./)).toBeVisible();
+	await expect.element(page.getByText('An error message, or nothing.')).toBeVisible();
+});
+
+test('shows Component props without a toggle and collapses the other groups', async () => {
 	await renderWidget(
 		<ComponentPropsTable
 			id="button-api"
 			type={{
-				label: {
-					description: 'Grouped hash target.',
-					type: 'string',
-				},
-				className: {
-					description: 'Other group prop.',
-					type: 'string',
-				},
+				label: { description: 'The label.', type: 'string' },
+				className: { description: 'Extra class.', type: 'string' },
 			}}
 		/>,
-		{ hash: 'button-api-label', inlineSize: ARTICLE_INLINE_SIZE },
 	);
 
-	await expect.element(page.getByText('Grouped hash target.')).toBeVisible();
-	await expect.element(page.getByText('string').first()).toBeVisible();
+	await expect.element(page.getByText('The label.')).toBeVisible();
+	const toggle = page.getByRole('button', { name: 'Styling' });
+	await expect.element(toggle).toHaveAttribute('aria-expanded', 'false');
+	expect(page.getByText('Extra class.').elements()).toHaveLength(0);
+	expect(page.getByRole('button', { name: 'Component props' }).elements()).toHaveLength(0);
+
+	await userEvent.click(toggle);
+	await expect.element(toggle).toHaveAttribute('aria-expanded', 'true');
+	await expect.element(page.getByText('Extra class.')).toBeVisible();
+
+	await userEvent.click(toggle);
+	await expect.element(toggle).toHaveAttribute('aria-expanded', 'false');
+	expect(page.getByText('Extra class.').elements()).toHaveLength(0);
+});
+
+test('expands the group that holds a prop named by the URL hash', async () => {
+	await renderWidget(
+		<ComponentPropsTable
+			id="button-api"
+			type={{
+				label: { type: 'string' },
+				className: { description: 'Extra class.', type: 'string' },
+			}}
+		/>,
+		{ hash: 'button-api-className' },
+	);
+
+	await expect
+		.element(page.getByRole('button', { name: 'Styling' }))
+		.toHaveAttribute('aria-expanded', 'true');
+	await expect.element(page.getByText('Extra class.')).toBeVisible();
+	assert(container, 'expected a container');
+	expect(container.querySelector('#button-api-className')?.tagName).toBe('TR');
+});
+
+test('computes the Default column and required marker across every group', async () => {
+	await renderWidget(
+		<ComponentPropsTable
+			id="button-api"
+			type={{
+				label: { required: true, type: 'string' },
+				onPress: { type: 'function' },
+				className: { default: '""', required: false, type: 'string' },
+			}}
+		/>,
+	);
+
+	await expect.element(page.getByRole('columnheader', { name: 'Default' })).toBeVisible();
+	await expect.element(page.getByRole('img', { name: 'Required' })).toBeVisible();
+});
+
+test('lists props in the order of their group', async () => {
+	await renderWidget(
+		<ComponentPropsTable
+			id="button-api"
+			type={{
+				size: { type: 'string' },
+				appearance: { type: 'string' },
+			}}
+		/>,
+	);
+
+	const names = page
+		.getByRole('rowheader')
+		.elements()
+		.map((element) => element.textContent);
+	expect(names).toEqual(['appearance', 'size']);
 });
 
 async function renderWidget(

@@ -1,17 +1,7 @@
-import { Box } from '@luke-ui/react/box';
-import { Code } from '@luke-ui/react/code';
-import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@luke-ui/react/link';
-import { Stack } from '@luke-ui/react/stack';
-import { Text } from '@luke-ui/react/text';
-import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
 import type { ComponentProps, ReactNode } from 'react';
-import { useState } from 'react';
-import { Button as RacButton } from 'react-aria-components/Button';
-import { Disclosure, DisclosurePanel } from 'react-aria-components/Disclosure';
-import * as disclosureStyles from './docs-disclosure.css.js';
+import { Fragment } from 'react';
 import * as styles from './type-table.css.js';
 
 interface ParameterNode {
@@ -32,10 +22,17 @@ export interface TypeNode {
 	typeDescriptionLink?: string;
 }
 
+/** Column and marker decisions that every row of one table shares. */
+export interface PropTableLayout {
+	columnCount: number;
+	showDefault: boolean;
+	showRequired: boolean;
+}
+
 /**
- * Expandable prop/type reference list. Keeps the generated `TypeNode` contract. Types stay visible
- * in every row at every width; `typeDescriptionLink` opens in the panel so it is never nested
- * inside the disclosure button. Row labels avoid paragraphs so MDX cannot nest `<p>` in `<p>`.
+ * API reference table in the style of React Aria's prop tables: one Name | Type | Default row per
+ * prop with its description beneath. Keeps the generated `TypeNode` contract. Everything is a
+ * plain table, so descriptions and types are readable without interaction at every width.
  */
 export function TypeTable({
 	className,
@@ -45,44 +42,110 @@ export function TypeTable({
 	...props
 }: {
 	/**
-	 * Prefix for hash-openable row ids (`${prefix}-${propName}`). Defaults to `id`. Pass this from
-	 * `ComponentPropsTable` so grouped tables share one hash namespace without duplicate DOM ids.
+	 * Prefix for hash-targetable row ids (`${prefix}-${propName}`). Defaults to `id`. Pass this from
+	 * `ComponentPropsTable` so grouped rows share one hash namespace without duplicate DOM ids.
 	 */
 	rowIdPrefix?: string;
 	type: Record<string, TypeNode>;
 } & ComponentProps<'div'>) {
-	const hashPrefix = rowIdPrefix ?? id;
+	const layout = getPropTableLayout(Object.values(type));
 
 	return (
-		<Stack
-			{...props}
-			className={cx(styles.root, 'not-prose', className)}
-			id={id}
-			maxInlineSize="100%"
-		>
-			{Object.entries(type).map(([name, item]) => (
-				<TypeTableRow hashPrefix={hashPrefix} item={item} key={name} name={name} />
-			))}
-		</Stack>
+		<PropTableFrame {...props} className={className} id={id}>
+			<PropTableHead layout={layout} />
+			<tbody>
+				<PropRows hashPrefix={rowIdPrefix ?? id} layout={layout} type={type} />
+			</tbody>
+		</PropTableFrame>
 	);
 }
 
-function TypeTableRow({
+/**
+ * Decides the Default column and the required marker over every prop the table will show, the way
+ * React Aria does: a Default column only when some prop has a default, and a required marker only
+ * when required and optional props are mixed.
+ */
+export function getPropTableLayout(nodes: ReadonlyArray<TypeNode>): PropTableLayout {
+	const showDefault = nodes.some((node) => node.default !== undefined);
+	const requiredCount = nodes.filter((node) => node.required === true).length;
+	return {
+		columnCount: showDefault ? 3 : 2,
+		showDefault,
+		showRequired: requiredCount > 0 && requiredCount < nodes.length,
+	};
+}
+
+/** The bordered, rounded table surface and the container that drives its narrow layout. */
+export function PropTableFrame({
+	children,
+	className,
+	...props
+}: { children: ReactNode } & ComponentProps<'div'>) {
+	return (
+		<div {...props} className={cx(styles.frame, 'not-prose', className)}>
+			<table className={styles.table}>{children}</table>
+		</div>
+	);
+}
+
+export function PropTableHead({ layout }: { layout: PropTableLayout }) {
+	return (
+		<Fragment>
+			<colgroup>
+				<col className={styles.nameColumn} />
+				<col />
+				{layout.showDefault ? <col className={styles.defaultColumn} /> : null}
+			</colgroup>
+			<thead className={styles.head}>
+				<tr>
+					<th className={styles.columnHeader} scope="col">
+						Name
+					</th>
+					<th className={styles.columnHeader} scope="col">
+						Type
+					</th>
+					{layout.showDefault ? (
+						<th className={styles.columnHeader} scope="col">
+							Default
+						</th>
+					) : null}
+				</tr>
+			</thead>
+		</Fragment>
+	);
+}
+
+/** Two rows per prop: name, type, and default, then the description when there is one. */
+export function PropRows({
+	hashPrefix,
+	layout,
+	names,
+	type,
+}: {
+	hashPrefix: string | undefined;
+	layout: PropTableLayout;
+	/** Which props to render, in order. Defaults to every key of `type`. */
+	names?: ReadonlyArray<string> | undefined;
+	type: Record<string, TypeNode>;
+}) {
+	return (names ?? Object.keys(type)).map((name) => {
+		const item = type[name];
+		if (item === undefined) return null;
+		return <PropRow hashPrefix={hashPrefix} item={item} key={name} layout={layout} name={name} />;
+	});
+}
+
+function PropRow({
 	hashPrefix,
 	item,
+	layout,
 	name,
 }: {
 	hashPrefix: string | undefined;
 	item: TypeNode;
+	layout: PropTableLayout;
 	name: string;
 }) {
-	const rowId = hashPrefix === undefined ? undefined : `${hashPrefix}-${name}`;
-	const navigate = useNavigate();
-	const hash = useRouterState({ select: (state) => state.location.hash });
-	// `null` means the reader has not toggled yet, so a matching URL hash can open the row.
-	const [userExpanded, setUserExpanded] = useState<boolean | null>(null);
-	const isExpanded = userExpanded ?? (rowId !== undefined && hash === rowId);
-
 	const {
 		default: defaultValue,
 		deprecated = false,
@@ -95,119 +158,94 @@ function TypeTableRow({
 		typeDescriptionLink,
 	} = item;
 
+	const hasDescription = !isEmpty(description);
+	const hasDetails = hasDescription || parameters.length > 0 || returns !== undefined;
+	const hasDefault = defaultValue !== undefined;
 	// Generator often puts a short kind (e.g. "union") in `type` and the readable signature in
-	// `typeDescription`. Prefer the signature in the trigger so types stay discoverable collapsed.
-	const triggerType = typeDescription ?? type;
-	// Panel Type row is only for the link — the signature already sits in the trigger.
-	const showTypeLink = typeDescriptionLink !== undefined;
+	// `typeDescription`. Prefer the signature so the type is always discoverable.
+	const shownType = typeDescription ?? type;
+	// The narrow layout hides a missing default, so the type cell then ends the stacked row.
+	const typeEndsRow = !layout.showDefault || !hasDefault;
+	const rowId = hashPrefix === undefined ? undefined : `${hashPrefix}-${name}`;
+	const cellProps = {
+		'data-described': hasDetails ? '' : undefined,
+		'data-ruled': hasDetails ? undefined : '',
+	};
 
 	return (
-		<Box
-			className={styles.row}
-			renderRoot={(domProps) => (
-				<Disclosure
-					{...domProps}
-					id={rowId}
-					isExpanded={isExpanded}
-					onExpandedChange={(next) => {
-						if (next && rowId !== undefined) {
-							void navigate({ hash: rowId, replace: true });
-						}
-						setUserExpanded(next);
-					}}
-				/>
-			)}
-		>
-			<Box
-				className={disclosureStyles.trigger}
-				inlineSize="100%"
-				paddingBlock="sp8"
-				paddingInline="sp4"
-				renderRoot={(domProps) => <RacButton {...domProps} slot="trigger" />}
-			>
-				<Track
-					gap="sp8"
-					railAlignment="firstLine"
-					railEnd={
-						<Icon
-							aria-hidden
-							className={disclosureStyles.chevronDown}
-							name="chevronDown"
-							size="xsmall"
-						/>
-					}
-				>
-					<Stack gap="sp4" minInlineSize="0">
-						<Code className={cx(styles.propName, deprecated && styles.propNameDeprecated)}>
-							{name}
-							{required ? null : '?'}
-						</Code>
-						{/* Plain text only — links belong in the panel. */}
-						<Text className={styles.propType} color="secondary" typography="caption">
-							{triggerType}
-						</Text>
-					</Stack>
-				</Track>
-			</Box>
-			<DisclosurePanel>
-				<Stack gap="sp8" paddingBlock="sp8" paddingInline="sp4" paddingInlineStart="sp8">
-					{description === undefined || description === null || description === '' ? null : (
-						<Box>{description}</Box>
-					)}
-					{showTypeLink ? (
-						<DetailRow label="Type">
-							<Link appearance="text" className={styles.propTypeLink} href={typeDescriptionLink}>
-								{typeDescription ?? type}
-							</Link>
-						</DetailRow>
+		<Fragment>
+			<tr className={styles.dataRow} id={rowId}>
+				<th {...cellProps} className={cx(styles.cell, styles.dataCell)} scope="row">
+					<span className={cx(styles.propName, deprecated && styles.propNameDeprecated)}>
+						{name}
+					</span>
+					{layout.showRequired && required ? (
+						<span aria-label="Required" className={styles.requiredMark} role="img">
+							*
+						</span>
 					) : null}
-					{defaultValue === undefined ? null : (
-						<DetailRow label="Default">{defaultValue}</DetailRow>
+				</th>
+				<td
+					{...cellProps}
+					className={cx(styles.cell, styles.dataCell, styles.propType)}
+					data-row-end={typeEndsRow ? '' : undefined}
+				>
+					{typeDescriptionLink === undefined ? (
+						shownType
+					) : (
+						<Link appearance="text" className={styles.propTypeLink} href={typeDescriptionLink}>
+							{shownType}
+						</Link>
 					)}
-					{parameters.length === 0 ? null : (
-						<DetailRow label="Parameters">
-							<Stack gap="sp4">
+				</td>
+				{layout.showDefault ? (
+					<td
+						{...cellProps}
+						className={cx(
+							styles.cell,
+							styles.dataCell,
+							styles.defaultCell,
+							hasDefault ? undefined : styles.emptyDefault,
+						)}
+						data-row-end=""
+					>
+						<span className={styles.defaultLabel}>Default: </span>
+						{hasDefault ? defaultValue : '—'}
+					</td>
+				) : null}
+			</tr>
+			{hasDetails ? (
+				<tr>
+					<td
+						className={cx(styles.cell, styles.descriptionCell)}
+						colSpan={layout.columnCount}
+						data-row-end=""
+						data-ruled=""
+					>
+						{hasDescription ? <div>{description}</div> : null}
+						{parameters.length === 0 ? null : (
+							<div className={styles.metaList}>
+								<span className={styles.metaLabel}>Parameters</span>
 								{parameters.map((param) => (
-									<Track
-										gap="sp4"
-										key={param.name}
-										railAlignment="firstLine"
-										railStart={
-											<Text fontWeight="label" style={{ whiteSpace: 'nowrap' }}>
-												{param.name}
-											</Text>
-										}
-									>
-										<Box minInlineSize="0">{param.description}</Box>
-									</Track>
+									<div key={param.name}>
+										<span className={styles.paramName}>{param.name}</span> {param.description}
+									</div>
 								))}
-							</Stack>
-						</DetailRow>
-					)}
-					{returns === undefined ? null : <DetailRow label="Returns">{returns}</DetailRow>}
-				</Stack>
-			</DisclosurePanel>
-		</Box>
+							</div>
+						)}
+						{returns === undefined ? null : (
+							<div className={styles.metaList}>
+								<span className={styles.metaLabel}>Returns</span>
+								<div>{returns}</div>
+							</div>
+						)}
+					</td>
+				</tr>
+			) : null}
+		</Fragment>
 	);
 }
 
-function DetailRow({ children, label }: { children: ReactNode; label: string }) {
-	return (
-		<Track
-			gap="sp12"
-			railAlignment="firstLine"
-			railStart={
-				<Text
-					color="secondary"
-					fontWeight="label"
-					style={{ minInlineSize: '5.5rem' }}
-					typography="caption"
-				>
-					{label}
-				</Text>
-			}
-		>
-			<Box minInlineSize="0">{children}</Box>
-		</Track>
-	);
+function isEmpty(node: ReactNode): boolean {
+	return node === undefined || node === null || node === '' || node === false;
 }

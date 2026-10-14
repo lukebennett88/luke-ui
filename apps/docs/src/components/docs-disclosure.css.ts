@@ -33,27 +33,6 @@ export const trigger = style({
 	},
 });
 
-/** End-rail chevron that flips when any ancestor Disclosure is expanded. */
-export const chevronDown = style({
-	'@layer': {
-		components: {
-			color: vars.color.text.secondary,
-			flexShrink: 0,
-			transition: `transform ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
-			selectors: {
-				'[data-expanded] &': {
-					transform: 'rotate(180deg)',
-				},
-			},
-			'@media': {
-				'(prefers-reduced-motion: reduce)': {
-					transition: 'none',
-				},
-			},
-		},
-	},
-});
-
 /** Start-rail chevron that rotates to point down when expanded. */
 export const chevronEnd = style({
 	'@layer': {
