@@ -7,14 +7,15 @@ import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import type { ComponentProps, ReactNode } from 'react';
-import { useState, useSyncExternalStore } from 'react';
+import { useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { Disclosure, DisclosurePanel } from 'react-aria-components/Disclosure';
 import * as styles from './type-table.css.js';
 
-/** Prop name / type columns shared by the header and each row trigger. */
-const PROP_TYPE_COLUMNS = '1fr 3fr';
+/** Expanded panel label / value columns (always two tracks). */
+const PANEL_COLUMNS = '1fr 3fr';
 
 interface ParameterNode {
 	description: ReactNode;
@@ -65,18 +66,17 @@ export function TypeTable({
 		>
 			<Grid
 				alignItems="center"
+				className={styles.propTypeGrid}
 				columnGap="sp8"
-				columns={PROP_TYPE_COLUMNS}
 				paddingBlock="sp4"
 				paddingInline="sp12"
 			>
-				<Text color="secondary" elementType="span" fontWeight="label" typography="caption">
+				<Text color="secondary" fontWeight="label" typography="caption">
 					Prop
 				</Text>
 				<Text
 					className={styles.typeColumn}
 					color="secondary"
-					elementType="span"
 					fontWeight="label"
 					typography="caption"
 				>
@@ -100,10 +100,11 @@ function TypeTableRow({
 	parentId: string | undefined;
 }) {
 	const rowId = parentId === undefined ? undefined : `${parentId}-${name}`;
-	const hash = useSyncExternalStore(subscribeToHash, getHashSnapshot, getServerHashSnapshot);
+	const navigate = useNavigate();
+	const hash = useRouterState({ select: (state) => state.location.hash });
 	// `null` means the reader has not toggled yet, so a matching URL hash can open the row.
 	const [userExpanded, setUserExpanded] = useState<boolean | null>(null);
-	const isExpanded = userExpanded ?? (rowId !== undefined && hash === `#${rowId}`);
+	const isExpanded = userExpanded ?? (rowId !== undefined && hash === rowId);
 
 	const {
 		default: defaultValue,
@@ -117,6 +118,8 @@ function TypeTableRow({
 		typeDescriptionLink,
 	} = item;
 
+	const showTypeInPanel = typeDescription !== undefined || typeDescriptionLink !== undefined;
+
 	return (
 		<Box
 			className={styles.row}
@@ -128,7 +131,7 @@ function TypeTableRow({
 					isExpanded={isExpanded}
 					onExpandedChange={(next) => {
 						if (next && rowId !== undefined) {
-							window.history.replaceState(null, '', `#${rowId}`);
+							void navigate({ hash: rowId, replace: true });
 						}
 						setUserExpanded(next);
 					}}
@@ -147,27 +150,28 @@ function TypeTableRow({
 					railAlignment="center"
 					railEnd={<Icon aria-hidden className={styles.chevron} name="chevronDown" size="xsmall" />}
 				>
-					<Grid alignItems="center" columnGap="sp8" columns={PROP_TYPE_COLUMNS} minInlineSize="0">
+					{/*
+					  Type stays plain text inside the trigger so a typeDescriptionLink cannot nest an
+					  interactive link inside the disclosure button. The link renders in the panel.
+					*/}
+					<Grid
+						alignItems="center"
+						className={styles.propTypeGrid}
+						columnGap="sp8"
+						minInlineSize="0"
+					>
 						<Code className={cx(styles.propName, deprecated && styles.propNameDeprecated)}>
 							{name}
 							{required ? null : '?'}
 						</Code>
-						<span className={styles.typeColumn}>
-							{typeDescriptionLink === undefined ? (
-								type
-							) : (
-								<Link appearance="text" className={styles.propTypeLink} href={typeDescriptionLink}>
-									{type}
-								</Link>
-							)}
-						</span>
+						<span className={styles.typeColumn}>{type}</span>
 					</Grid>
 				</Track>
 			</Box>
 			<DisclosurePanel>
 				<Grid
 					className={styles.panel}
-					columns={PROP_TYPE_COLUMNS}
+					columns={PANEL_COLUMNS}
 					gap="sp16"
 					overflow="auto"
 					padding="sp12"
@@ -177,14 +181,24 @@ function TypeTableRow({
 							{description}
 						</Box>
 					)}
-					{typeDescription === undefined ? null : (
+					{showTypeInPanel ? (
 						<>
 							<FieldLabel>Type</FieldLabel>
 							<Box alignSelf="center" minInlineSize="0">
-								{typeDescription}
+								{typeDescriptionLink === undefined ? (
+									typeDescription
+								) : (
+									<Link
+										appearance="text"
+										className={styles.propTypeLink}
+										href={typeDescriptionLink}
+									>
+										{typeDescription ?? type}
+									</Link>
+								)}
 							</Box>
 						</>
-					)}
+					) : null}
 					{defaultValue === undefined ? null : (
 						<>
 							<FieldLabel>Default</FieldLabel>
@@ -203,7 +217,7 @@ function TypeTableRow({
 										key={param.name}
 										railAlignment="center"
 										railStart={
-											<Text elementType="span" fontWeight="label" style={{ whiteSpace: 'nowrap' }}>
+											<Text fontWeight="label" style={{ whiteSpace: 'nowrap' }}>
 												{param.name} -
 											</Text>
 										}
@@ -236,19 +250,4 @@ function FieldLabel({ children }: { children: ReactNode }) {
 			</Text>
 		</Box>
 	);
-}
-
-function subscribeToHash(onStoreChange: () => void) {
-	window.addEventListener('hashchange', onStoreChange);
-	return () => {
-		window.removeEventListener('hashchange', onStoreChange);
-	};
-}
-
-function getHashSnapshot() {
-	return window.location.hash;
-}
-
-function getServerHashSnapshot() {
-	return '';
 }

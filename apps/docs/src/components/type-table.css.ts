@@ -20,6 +20,23 @@ export const root = style({
 	},
 });
 
+/**
+ * One track below the type-column breakpoint so Prop keeps the full row; two tracks when Type is
+ * shown. Applied on Grid (which already sets `display: grid`).
+ */
+export const propTypeGrid = style({
+	'@layer': {
+		components: {
+			gridTemplateColumns: 'minmax(0, 1fr)',
+			'@container': {
+				[TYPE_COLUMN_MIN_INLINE_SIZE]: {
+					gridTemplateColumns: '1fr 3fr',
+				},
+			},
+		},
+	},
+});
+
 /** Shown beside Prop once the type-table container is wide enough. */
 export const typeColumn = style({
 	'@layer': {
