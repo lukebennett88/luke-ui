@@ -96,12 +96,14 @@ room for additive extension after 1.0. Prefer extensibility over configurability
   present. Weights must be finite numbers from 1 to 1000. Don't compare `metrics.familyName` with
   the stack. The earlier `capHeight ≤ unitsPerEm` rule is withdrawn because fonts don't guarantee
   it.
-- **D43, D54 (revised in final review). Validate each input in an `extends` chain on its own,**
-  against the fields it authors, then check completeness (the required `body` font) after merging.
-  `ThemeValidationError.issues` is `ReadonlyArray<{ theme; path; message }>`, where `theme` is the
-  input being validated and `path` is a dot path within it. Per-input validation makes `theme` free
-  to report, so there's no merge tracking and no `inheritance` field. A parent with invalid font
-  data fails even if a child replaces it; #721 accounts for that in version ranges.
+- **D43, D54 (revised by #768). Validate each input in an `extends` chain on its own,** against
+  every field it authors, before merging. A parent with invalid data fails even if a child replaces
+  it. The chain must provide an accent and a body font. `ThemeValidationError.issues` remains
+  `ReadonlyArray<{ theme; path; message }>`, with input-relative paths and no merge tracking or
+  `inheritance` field. A cycle is reported at `extends`, independently of other input issues. The
+  [authoring validation section](../apps/docs/content/docs/docs/authoring-a-theme.mdx#validation)
+  owns the field rules. `validateFoundation` stays an internal guard for direct `buildTheme`
+  callers.
 - **Existing `ThemeContrastError` and `ThemeGenerationError` diagnostics are unchanged.**
 
 ## Generated CSS and colour modes

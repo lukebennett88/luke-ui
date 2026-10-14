@@ -176,7 +176,7 @@ describe('defineTheme backdrop validation', () => {
 				name: 'unsafe-backdrop',
 				typography: testTypography,
 			});
-		}).toThrow('light.color.backdrop: must be a non-empty CSS colour value');
+		}).toThrow('color.backdrop: must be a non-empty CSS colour value');
 	});
 });
 

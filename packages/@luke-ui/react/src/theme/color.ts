@@ -30,6 +30,11 @@ export function parseColor(input: string): Oklch {
 		if (l < 0 || l > 1) {
 			throw new Error(`cannot parse colour "${input}"; oklch lightness must be 0-1 or 0%-100%`);
 		}
+		if (isInvalidOklch({ l, c, h })) {
+			throw new Error(
+				`cannot parse colour "${input}"; oklch channels must be finite and chroma 0 or greater`,
+			);
+		}
 		return {
 			l,
 			c,
@@ -37,6 +42,23 @@ export function parseColor(input: string): Oklch {
 		};
 	}
 	throw new Error(`cannot parse colour "${input}"; expected #rgb, #rrggbb, or oklch(<l> <c> <h>)`);
+}
+
+/** Whether a colour has invalid channels, lightness outside 0-1, or negative chroma. */
+export function isInvalidOklch(value: unknown): boolean {
+	if (typeof value !== 'object' || value === null) return true;
+	const { l, c, h } = value as { c?: unknown; h?: unknown; l?: unknown };
+	return (
+		typeof l !== 'number' ||
+		typeof c !== 'number' ||
+		typeof h !== 'number' ||
+		!Number.isFinite(l) ||
+		!Number.isFinite(c) ||
+		!Number.isFinite(h) ||
+		l < 0 ||
+		l > 1 ||
+		c < 0
+	);
 }
 
 /**

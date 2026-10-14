@@ -76,7 +76,9 @@ evidence shows it does not help. Silence in this log is not evidence.
 - Seen: 2026-10-13 (necessity-markers-dom cleanup). `TURBO_FORCE=true pnpm run test` failed at
   `src/theme/font-family.browser.test.ts:76`: the assertion accepted
   `-apple-system, BlinkMacSystemFont, Noto Sans CJK JP, sans-serif`, but Chromium returned
-  `-apple-system, "system-ui", "Noto Sans CJK JP", sans-serif`.
+  `-apple-system, "system-ui", "Noto Sans CJK JP", sans-serif`. 2026-10-14 (#768): the same failure
+  reproduced on clean baseline `0b31387f` with
+  `TURBO_FORCE=true pnpm exec turbo run test:browser:run --filter=@luke-ui/react -- src/theme/font-family.browser.test.ts`.
 - Where: `packages/@luke-ui/react/src/theme/font-family.browser.test.ts:76`. Governing rule:
   docs/TESTING.md, "Component tests".
 - Problem: The assertion compares different font-family serializations, and the browser test fails

@@ -279,14 +279,9 @@ export const defaultBackdrop: Record<ColorMode, string> = {
 };
 
 /**
- * Compiles a curated {@link ThemeInput} into a complete static stylesheet. Validates each input in
- * the `extends` chain on its own, resolves the chain into one merged input, then normalises it into
- * the per-mode {@link ThemeFoundation} shape — adapting single-value accents and neutrals per mode,
- * resolving source colours and authored surfaces to {@link Oklch} once, and merging materials over
- * curated defaults — then delegates to {@link buildTheme}, whose build-time contrast validation stays
- * authoritative. Throws {@link ThemeValidationError} listing every invalid or missing field, throws
- * when a single-value accent has no accessible lightness in a mode, and (via `buildTheme`) throws
- * {@link ThemeContrastError} when any resolved pair misses WCAG 2.2 AA.
+ * Compiles a theme into static CSS. Throws {@link ThemeValidationError} for invalid authored fields
+ * anywhere in the `extends` chain, and contrast or generation errors when colours cannot meet the
+ * accessibility gates.
  */
 export function defineTheme(input: ThemeInput | ExtendingThemeInput): string {
 	const chain = collectThemeChain(input);

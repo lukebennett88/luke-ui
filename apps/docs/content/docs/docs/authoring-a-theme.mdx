@@ -106,9 +106,12 @@ What each section inherits:
 - `color.surface` merges surface by surface. A surface replaces the base's surface whole.
 - `depth` and `controlFinish` merge per mode, then per rung.
 
-A value set to `undefined` counts as omitted and inherits.
+A section, role, or material rung set to `undefined` counts as omitted and inherits. An authored
+colour object replaces its whole role. Undefined sides follow that role's
+[adaptation or default rules](#define-the-input), rather than inheriting the base's sides.
 
-A theme may extend a theme that extends another. A cycle throws.
+A theme may extend a theme that extends another. A cycle throws `ThemeValidationError` at path
+`extends`.
 
 An extending theme compiles to a complete stylesheet of its own, so load it instead of the base
 theme's stylesheet. It still names the base's fonts. When you extend Tactile or Paper, keep
@@ -149,10 +152,23 @@ as a virtual module. Import `virtual:theme.css` from the application entry.
 
 ## Validation
 
-`defineTheme` validates each input in an `extends` chain on its own, then checks the merged theme
-for a body font. It throws `ThemeValidationError` with every problem at once. Its `issues` list each
-one with the `theme` that contains it, the `path` within that theme, and a `message`. A base theme
-with an invalid font fails even when your theme replaces that font.
+`defineTheme` validates every authored field in each input of an `extends` chain before merging. It
+throws `ThemeValidationError` with all input problems together. Each entry in `issues` names the
+`theme` that contains it, its input-relative `path`, and a `message`. For example, an invalid accent
+side has path `color.accent.light`. An invalid base fails even when your theme overrides its value.
+The chain must provide both an accent and a body font.
+
+The rules for colours and materials:
+
+- Every input's `name` must be a kebab-case string.
+- Source colours other than `backdrop` must be `#rgb`, `#rrggbb`, or `oklch(<l> <c> <h>)` strings.
+  OKLCH channels must be finite, with lightness from 0 to 1 (or 0% to 100%) and chroma 0 or greater.
+- Colour roles accept the shapes described in [Define the input](#define-the-input). An accent
+  object must set at least one side.
+- `neutralStyle` must be `'cool'`, `'neutral'`, or `'warm'`, even when a neutral colour is set.
+- `depth`, `controlFinish`, and `backdrop` values must be non-empty strings without `;`, `{`, or
+  `}`. Backdrop values are emitted verbatim and may include alpha.
+- Radii must be finite numbers, 0 or greater.
 
 The rules for fonts:
 
@@ -195,11 +211,13 @@ text, an icon, or one of the colours above.
 
 ### When an accent cannot be used
 
-`defineTheme` throws `ThemeGenerationError` when a role's solid colour cannot carry 4.5:1 `onSolid`
-text. Some lightnesses have no near-white or near-black text that reaches 4.5:1. When you author one
-accent string, `defineTheme` keeps its hue and chroma and searches for a lightness that works. An
-accent side you set explicitly is used as written, so choose a lightness that works, or author one
-string and let `defineTheme` adapt it.
+Some lightnesses have no near-white or near-black text that reaches 4.5:1. When you author one
+accent string, `defineTheme` keeps its hue and chroma and searches for a lightness that works. It
+throws if that adaptation finds no accessible lightness. An accent side you set explicitly is used
+as written, so choose a lightness that works, or author one string and let `defineTheme` adapt it.
+
+`ThemeGenerationError` reports a resolved role whose solid colour cannot carry 4.5:1 `onSolid` text.
+These generation failures and `ThemeContrastError` are separate from input validation.
 
 ## Continue learning
 
