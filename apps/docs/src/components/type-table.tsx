@@ -1,14 +1,18 @@
-import type { BoxProps } from '@luke-ui/react/box';
-import { Box } from '@luke-ui/react/box';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Link } from '@luke-ui/react/link';
 import { Stack } from '@luke-ui/react/stack';
-import type { TextProps } from '@luke-ui/react/text';
-import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
-import type { ComponentProps, HTMLAttributes, ReactNode } from 'react';
-import { createElement, Fragment } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
+import { Fragment } from 'react';
 import { InheritTypography } from './docs-article/mdx-elements.js';
+import * as referenceStyles from './reference-table.css.js';
+import {
+	CellText,
+	ReferenceHeaderCell,
+	ReferenceTableFrame,
+	ReferenceTableHeader,
+	TableBox,
+} from './reference-table.js';
 import * as styles from './type-table.css.js';
 
 interface ParameterNode {
@@ -58,12 +62,12 @@ export function TypeTable({
 	const layout = getPropTableLayout(Object.values(type));
 
 	return (
-		<PropTableFrame {...props} className={className} id={id}>
+		<ReferenceTableFrame {...props} className={className} id={id}>
 			<PropTableHead layout={layout} />
-			<tbody className={styles.bodyGroup}>
+			<tbody className={referenceStyles.bodyGroup}>
 				<PropRows hashPrefix={rowIdPrefix ?? id} layout={layout} type={type} />
 			</tbody>
-		</PropTableFrame>
+		</ReferenceTableFrame>
 	);
 }
 
@@ -82,108 +86,23 @@ export function getPropTableLayout(nodes: ReadonlyArray<TypeNode>): PropTableLay
 	};
 }
 
-type TableElementType = 'col' | 'colgroup' | 'table' | 'tbody' | 'td' | 'th' | 'thead' | 'tr';
-
-/** Utility props of `Box`, without its element and DOM props. */
-type BoxUtilityProps = Omit<
-	BoxProps,
-	keyof HTMLAttributes<HTMLElement> | 'elementType' | 'ref' | 'renderRoot'
->;
-
-/**
- * `Box` for a table element. Table elements are not `elementType` options, so this renders one
- * through `renderRoot`. Utility props go in `box`. DOM props such as `scope` and `colSpan` go on the
- * returned element, where `Box` does not apply them.
- */
-export function TableBox({
-	as,
-	box,
-	children,
-	className,
-	...elementProps
-}: {
-	as: TableElementType;
-	box?: BoxUtilityProps;
-	colSpan?: number;
-	scope?: 'col' | 'row';
-} & Omit<HTMLAttributes<HTMLElement>, 'color'>) {
-	return (
-		<Box
-			{...box}
-			className={className}
-			renderRoot={(domProps) => createElement(as, { ...elementProps, ...domProps })}
-		>
-			{children}
-		</Box>
-	);
-}
-
-/** Cell text: the label type style without cap-height trim, which would distort table rows. */
-export function CellText(props: TextProps) {
-	return <Text shouldDisableTrim typography="label" {...props} />;
-}
-
-/** The bordered, rounded table surface and the container that drives its narrow layout. */
-export function PropTableFrame({
-	children,
-	className,
-	...props
-}: { children: ReactNode } & ComponentProps<'div'>) {
-	return (
-		<Box {...props} className={cx(styles.frame, 'not-prose', className)} maxInlineSize="100%">
-			<TableBox
-				as="table"
-				box={{
-					backgroundColor: 'surface.base',
-					borderColor: 'decorative',
-					borderRadius: 'surface',
-					borderStyle: 'solid',
-					borderWidth: 'thin',
-					inlineSize: '100%',
-					overflow: 'hidden',
-				}}
-				className={styles.table}
-			>
-				{children}
-			</TableBox>
-		</Box>
-	);
-}
-
 export function PropTableHead({ layout }: { layout: PropTableLayout }) {
 	const headers = layout.showDefault ? ['Name', 'Type', 'Default'] : ['Name', 'Type'];
 
 	return (
 		<Fragment>
 			<colgroup>
-				<TableBox as="col" box={{ inlineSize: '30%' }} className={styles.hideNarrow} />
+				<TableBox as="col" box={{ inlineSize: '30%' }} className={referenceStyles.hideNarrow} />
 				<col />
 				{layout.showDefault ? (
-					<TableBox as="col" box={{ inlineSize: '20%' }} className={styles.hideNarrow} />
+					<TableBox as="col" box={{ inlineSize: '20%' }} className={referenceStyles.hideNarrow} />
 				) : null}
 			</colgroup>
-			<TableBox
-				as="thead"
-				box={{ backgroundColor: 'surface.subdued' }}
-				className={styles.hideNarrow}
-			>
-				<tr>
-					{headers.map((header) => (
-						<TableBox
-							as="th"
-							box={{ paddingBlock: 'sp8', paddingInline: 'sp16' }}
-							className={styles.cell}
-							data-ruled=""
-							key={header}
-							scope="col"
-						>
-							<CellText color="secondary" fontWeight="label">
-								{header}
-							</CellText>
-						</TableBox>
-					))}
-				</tr>
-			</TableBox>
+			<ReferenceTableHeader>
+				{headers.map((header) => (
+					<ReferenceHeaderCell key={header}>{header}</ReferenceHeaderCell>
+				))}
+			</ReferenceTableHeader>
 		</Fragment>
 	);
 }
@@ -246,7 +165,7 @@ function PropRow({
 		paddingBlockStart: 'sp16',
 		paddingInline: 'sp16',
 	} as const;
-	const cellClassName = cx(styles.cell, styles.stackedCell);
+	const cellClassName = cx(referenceStyles.cell, referenceStyles.stackedCell);
 	const ruled = hasDetails ? undefined : '';
 
 	return (
@@ -255,7 +174,7 @@ function PropRow({
 				<TableBox as="th" box={cellBox} className={cellClassName} data-ruled={ruled} scope="row">
 					<Cluster alignItems="baseline" flexWrap="nowrap" gap="sp4">
 						<CellText
-							className={styles.monospace}
+							className={referenceStyles.monospace}
 							color={deprecated ? 'secondary' : 'accent'}
 							fontWeight="label"
 							textDecoration={deprecated ? 'line-through' : 'none'}
@@ -276,7 +195,7 @@ function PropRow({
 					data-row-end={typeEndsRow ? '' : undefined}
 					data-ruled={ruled}
 				>
-					<CellText className={styles.monospace} fontWeight="body">
+					<CellText className={referenceStyles.monospace} fontWeight="body">
 						{typeDescriptionLink === undefined ? (
 							shownType
 						) : (
@@ -290,7 +209,7 @@ function PropRow({
 					<TableBox
 						as="td"
 						box={cellBox}
-						className={cx(cellClassName, hasDefault ? undefined : styles.hideNarrow)}
+						className={cx(cellClassName, hasDefault ? undefined : referenceStyles.hideNarrow)}
 						data-row-end=""
 						data-ruled={ruled}
 					>
@@ -298,7 +217,7 @@ function PropRow({
 							Default:{' '}
 						</CellText>
 						<CellText
-							className={styles.monospace}
+							className={referenceStyles.monospace}
 							color={hasDefault ? 'primary' : 'secondary'}
 							fontWeight="body"
 						>
@@ -330,7 +249,7 @@ function PropRow({
 									</CellText>
 									{parameters.map((param) => (
 										<CellText elementType="div" fontWeight="body" key={param.name}>
-											<CellText className={styles.monospace} fontWeight="label">
+											<CellText className={referenceStyles.monospace} fontWeight="label">
 												{param.name}
 											</CellText>{' '}
 											<InheritTypography>{param.description}</InheritTypography>

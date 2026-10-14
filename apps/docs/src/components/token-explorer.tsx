@@ -1,6 +1,7 @@
+import type { BoxProps } from '@luke-ui/react/box';
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
-import { Code } from '@luke-ui/react/code';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -9,7 +10,7 @@ import { vars } from '@luke-ui/react/theme';
 import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
 import type { CSSProperties, JSX, ReactNode } from 'react';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { Disclosure, DisclosurePanel } from 'react-aria-components/Disclosure';
 import { Heading } from 'react-aria-components/Heading';
@@ -19,19 +20,20 @@ import type { TokenPurposeGroup } from '../lib/token-purpose-groups.js';
 import { tokenPurposeGroups } from '../lib/token-purpose-groups.js';
 import * as disclosureStyles from './docs-disclosure.css.js';
 import { DocsLink } from './docs-link.js';
+import * as tableStyles from './reference-table.css.js';
+import {
+	CellText,
+	ReferenceHeaderCell,
+	ReferenceTableFrame,
+	ReferenceTableHeader,
+	TableBox,
+} from './reference-table.js';
 import * as styles from './token-explorer.css.js';
 
 const TOTAL_TOKEN_COUNT = themeTokens.length;
 const VARIABLE_BY_PATH = new Map(themeTokens.map((token) => [token.path, token.variable]));
 const FALLBACK_MOTION_DURATION = '0.9s';
 const FALLBACK_MOTION_EASING = 'ease-in-out';
-
-const stageStyle = {
-	borderColor: vars.color.border.decorative,
-	borderRadius: vars.radius.detail,
-	borderStyle: 'solid',
-	borderWidth: 1,
-} as const satisfies CSSProperties;
 
 /** Purpose-grouped index of every public token, sampled in the active theme. */
 export function TokenExplorer(): JSX.Element {
@@ -43,7 +45,7 @@ export function TokenExplorer(): JSX.Element {
 		query === '' ? `${TOTAL_TOKEN_COUNT} tokens` : `${matchCount} of ${TOTAL_TOKEN_COUNT}`;
 
 	return (
-		<Stack className="not-prose" gap="sp16">
+		<Stack className="not-prose" gap="sp16" marginBlockStart="sp16">
 			<Track
 				gap="sp12"
 				railAlignment="center"
@@ -53,7 +55,8 @@ export function TokenExplorer(): JSX.Element {
 						color="secondary"
 						elementType="p"
 						fontVariantNumeric="tabular-nums"
-						typography="caption"
+						fontWeight="body"
+						typography="label"
 					>
 						{countText}
 					</Text>
@@ -74,7 +77,11 @@ export function TokenExplorer(): JSX.Element {
 			{groups.length === 0 ? (
 				<EmptyState onClear={() => setFilter('')} query={filter.trim()} />
 			) : (
-				groups.map((group) => <PurposeDetails group={group} key={group.id} />)
+				<Stack gap="sp32">
+					{groups.map((group) => (
+						<PurposeDetails group={group} key={group.id} />
+					))}
+				</Stack>
 			)}
 		</Stack>
 	);
@@ -96,65 +103,56 @@ function matchGroups(query: string): ReadonlyArray<TokenPurposeGroup> {
 
 function PurposeDetails({ group }: { group: TokenPurposeGroup }) {
 	return (
-		<Box
-			className={styles.group}
-			renderRoot={(domProps) => <Disclosure {...domProps} defaultExpanded />}
-		>
-			<Heading level={3} style={{ margin: 0 }}>
-				<Box
+		<Box renderRoot={(domProps) => <Disclosure {...domProps} defaultExpanded />}>
+			<Box margin="0" renderRoot={(domProps) => <Heading {...domProps} level={3} />}>
+				<Cluster
+					alignItems="center"
 					className={disclosureStyles.trigger}
+					flexWrap="nowrap"
+					gap="sp8"
 					inlineSize="100%"
 					paddingBlock="sp8"
-					paddingInline="sp4"
 					renderRoot={(domProps) => <RacButton {...domProps} slot="trigger" />}
 				>
-					<Track
-						gap="sp8"
-						railAlignment="firstLine"
-						railEnd={
-							<Text color="secondary" fontVariantNumeric="tabular-nums" typography="caption">
-								{group.tokens.length}
-							</Text>
-						}
-						railStart={
-							<Icon
-								aria-hidden
-								className={disclosureStyles.chevronEnd}
-								name="chevronRight"
-								size="xsmall"
-							/>
-						}
-					>
-						<Text fontWeight="emphasis" typography="caption">
+					<Icon
+						aria-hidden
+						className={disclosureStyles.chevronEnd}
+						name="chevronRight"
+						size="xsmall"
+					/>
+					<Cluster alignItems="baseline" flexWrap="nowrap" gap="sp8">
+						<Text fontWeight="emphasis" typography="heading4">
 							{group.title}
 						</Text>
-					</Track>
-				</Box>
-			</Heading>
+						<Text
+							color="secondary"
+							fontVariantNumeric="tabular-nums"
+							fontWeight="body"
+							typography="label"
+						>
+							{group.tokens.length}
+						</Text>
+					</Cluster>
+				</Cluster>
+			</Box>
 
 			<DisclosurePanel>
-				<Box paddingBlock="sp8" paddingInline="sp4">
-					<Track
-						gap="sp8"
-						railAlignment="firstLine"
-						railEnd={
-							group.related ? (
-								<DocsLink
-									className={styles.relatedLink}
-									params={{ _splat: group.related.splat }}
-									to="/$"
-								>
+				<Stack gap="sp12">
+					<Text color="secondary" elementType="p" fontWeight="body" typography="label">
+						{group.description}
+						{group.related ? (
+							<Fragment>
+								{' '}
+								See{' '}
+								<DocsLink params={{ _splat: group.related.splat }} to="/$">
 									{group.related.label}
 								</DocsLink>
-							) : null
-						}
-					>
-						<Text color="secondary" typography="caption">
-							{group.description}
-						</Text>
-					</Track>
-				</Box>
-				<TokenTable showSamples={group.showSamples} tokens={group.tokens} />
+								.
+							</Fragment>
+						) : null}
+					</Text>
+					<TokenTable showSamples={group.showSamples} tokens={group.tokens} />
+				</Stack>
 			</DisclosurePanel>
 		</Box>
 	);
@@ -168,46 +166,59 @@ function TokenTable({
 	tokens: ReadonlyArray<ThemeToken>;
 }) {
 	return (
-		<Box className={styles.tableScroll} overflowX="auto">
-			<table className={cx(styles.table, showSamples && styles.tableWithSamples)}>
-				<thead>
-					<tr className={styles.tableHeaderRow}>
+		<ReferenceTableFrame>
+			<colgroup>
+				{showSamples ? (
+					<TableBox as="col" box={{ inlineSize: '8rem' }} className={tableStyles.hideNarrow} />
+				) : null}
+				<TableBox as="col" box={{ inlineSize: '45%' }} className={tableStyles.hideNarrow} />
+				<col />
+			</colgroup>
+			<ReferenceTableHeader>
+				{showSamples ? <ReferenceHeaderCell>Sample</ReferenceHeaderCell> : null}
+				<ReferenceHeaderCell>
+					<CellText className={tableStyles.monospace}>vars</CellText> path
+				</ReferenceHeaderCell>
+				<ReferenceHeaderCell>CSS variable</ReferenceHeaderCell>
+			</ReferenceTableHeader>
+			<tbody className={tableStyles.bodyGroupCentered}>
+				{tokens.map((token) => (
+					<tr key={token.path}>
 						{showSamples ? (
-							<th className={cx(styles.tableHeaderCell, styles.sampleHeaderCell)} scope="col">
-								Sample
-							</th>
+							<TokenCell>
+								<span aria-hidden>
+									<TokenSample token={token} />
+								</span>
+							</TokenCell>
 						) : null}
-						<th className={styles.tableHeaderCell} scope="col">
-							<Code>vars</Code> path
-						</th>
-						<th className={styles.tableHeaderCell} scope="col">
-							CSS variable
-						</th>
+						<TokenCell>
+							<CellText className={tableStyles.monospace} fontWeight="body">
+								{token.path}
+							</CellText>
+						</TokenCell>
+						<TokenCell isRowEnd>
+							<CellText className={tableStyles.monospace} color="secondary" fontWeight="body">
+								{token.variable}
+							</CellText>
+						</TokenCell>
 					</tr>
-				</thead>
-				<tbody>
-					{tokens.map((token) => (
-						<tr className={styles.tableRow} key={token.path}>
-							{showSamples ? (
-								<td className={styles.tableCell}>
-									<span aria-hidden>
-										<TokenSample token={token} />
-									</span>
-								</td>
-							) : null}
-							<td className={styles.tableCell}>
-								<Code textWrap="pretty">{token.path}</Code>
-							</td>
-							<td className={styles.tableCell}>
-								<Code className={styles.variableCode} textWrap="pretty">
-									{token.variable}
-								</Code>
-							</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</Box>
+				))}
+			</tbody>
+		</ReferenceTableFrame>
+	);
+}
+
+function TokenCell({ children, isRowEnd }: { children: ReactNode; isRowEnd?: boolean }) {
+	return (
+		<TableBox
+			as="td"
+			box={{ paddingBlock: 'sp8', paddingInline: 'sp16' }}
+			className={cx(tableStyles.cell, tableStyles.stackedCell)}
+			data-row-end={isRowEnd ? '' : undefined}
+			data-ruled=""
+		>
+			{children}
+		</TableBox>
 	);
 }
 
@@ -216,22 +227,32 @@ function TokenSample({ token }: { token: ThemeToken }) {
 	return <Sample {...token} />;
 }
 
+/** Static props that frame a sample on a bordered stage. */
+const STAGE = {
+	borderColor: 'decorative',
+	borderRadius: 'detail',
+	borderStyle: 'solid',
+	borderWidth: 'thin',
+} as const satisfies BoxProps;
+
 function SampleFrame({
 	children,
 	gap,
 	justifyContent = 'center',
 	paddingInline,
-	style,
+	stage,
 }: {
 	children?: ReactNode;
 	gap?: 'sp8';
 	justifyContent?: 'center' | 'flex-start';
 	paddingInline?: 'sp8';
-	style?: CSSProperties;
+	stage?: 'base' | 'subdued' | 'transparent';
 }): JSX.Element {
 	return (
 		<Box
+			{...(stage ? STAGE : undefined)}
 			alignItems="center"
+			backgroundColor={stage === 'base' || stage === 'subdued' ? `surface.${stage}` : undefined}
 			display="flex"
 			elementType="span"
 			gap={gap}
@@ -239,7 +260,6 @@ function SampleFrame({
 			justifyContent={justifyContent}
 			minBlockSize="2.5rem"
 			paddingInline={paddingInline}
-			style={style}
 		>
 			{children}
 		</Box>
@@ -248,9 +268,12 @@ function SampleFrame({
 
 function ColorSample({ variable }: ThemeToken) {
 	return (
-		<SampleFrame style={{ ...stageStyle, backgroundColor: vars.color.surface.base }}>
-			<span
-				style={{ alignSelf: 'stretch', backgroundColor: `var(${variable})`, inlineSize: '100%' }}
+		<SampleFrame stage="base">
+			<Box
+				alignSelf="stretch"
+				elementType="span"
+				inlineSize="100%"
+				style={{ backgroundColor: `var(${variable})` }}
 			/>
 		</SampleFrame>
 	);
@@ -258,15 +281,14 @@ function ColorSample({ variable }: ThemeToken) {
 
 function DepthSample({ variable }: ThemeToken) {
 	return (
-		<SampleFrame style={{ ...stageStyle, backgroundColor: vars.color.surface.subdued }}>
-			<span
-				style={{
-					backgroundColor: vars.color.surface.base,
-					blockSize: '1.5rem',
-					borderRadius: vars.radius.control,
-					boxShadow: `var(${variable})`,
-					inlineSize: '60%',
-				}}
+		<SampleFrame stage="subdued">
+			<Box
+				backgroundColor="surface.base"
+				blockSize="1.5rem"
+				borderRadius="control"
+				elementType="span"
+				inlineSize="60%"
+				style={{ boxShadow: `var(${variable})` }}
 			/>
 		</SampleFrame>
 	);
@@ -274,15 +296,14 @@ function DepthSample({ variable }: ThemeToken) {
 
 function FinishSample({ variable }: ThemeToken) {
 	return (
-		<SampleFrame style={{ ...stageStyle, backgroundColor: vars.color.surface.subdued }}>
-			<span
-				style={{
-					backgroundColor: vars.color.background.neutral.solid.rest,
-					backgroundImage: `var(${variable})`,
-					blockSize: '1.75rem',
-					borderRadius: vars.radius.control,
-					inlineSize: '70%',
-				}}
+		<SampleFrame stage="subdued">
+			<Box
+				backgroundColor="neutral.solid.rest"
+				blockSize="1.75rem"
+				borderRadius="control"
+				elementType="span"
+				inlineSize="70%"
+				style={{ backgroundImage: `var(${variable})` }}
 			/>
 		</SampleFrame>
 	);
@@ -291,16 +312,13 @@ function FinishSample({ variable }: ThemeToken) {
 function RadiusSample({ variable }: ThemeToken) {
 	return (
 		<SampleFrame>
-			<span
-				style={{
-					backgroundColor: vars.color.background.accent.subtle.rest,
-					blockSize: '2.5rem',
-					borderColor: vars.color.border.decorative,
-					borderRadius: `var(${variable})`,
-					borderStyle: 'solid',
-					borderWidth: 1,
-					inlineSize: '2.5rem',
-				}}
+			<Box
+				{...STAGE}
+				backgroundColor="accent.subtle.rest"
+				blockSize="2.5rem"
+				elementType="span"
+				inlineSize="2.5rem"
+				style={{ borderRadius: `var(${variable})` }}
 			/>
 		</SampleFrame>
 	);
@@ -308,15 +326,14 @@ function RadiusSample({ variable }: ThemeToken) {
 
 function SpaceSample({ variable }: ThemeToken) {
 	return (
-		<SampleFrame justifyContent="flex-start" paddingInline="sp8" style={stageStyle}>
-			<span
-				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
-					blockSize: '0.75rem',
-					borderRadius: vars.radius.detail,
-					inlineSize: `var(${variable})`,
-					maxInlineSize: '100%',
-				}}
+		<SampleFrame justifyContent="flex-start" paddingInline="sp8" stage="transparent">
+			<Box
+				backgroundColor="accent.solid.rest"
+				blockSize="0.75rem"
+				borderRadius="detail"
+				elementType="span"
+				maxInlineSize="100%"
+				style={{ inlineSize: `var(${variable})` }}
 			/>
 		</SampleFrame>
 	);
@@ -325,13 +342,11 @@ function SpaceSample({ variable }: ThemeToken) {
 function SizeSample({ variable }: ThemeToken) {
 	return (
 		<SampleFrame>
-			<span
-				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
-					blockSize: `var(${variable})`,
-					borderRadius: vars.radius.detail,
-					inlineSize: `var(${variable})`,
-				}}
+			<Box
+				backgroundColor="accent.solid.rest"
+				borderRadius="detail"
+				elementType="span"
+				style={{ blockSize: `var(${variable})`, inlineSize: `var(${variable})` }}
 			/>
 		</SampleFrame>
 	);
@@ -340,24 +355,22 @@ function SizeSample({ variable }: ThemeToken) {
 function InteractionSample({ variable }: ThemeToken) {
 	return (
 		<SampleFrame gap="sp8">
-			<span
-				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
-					blockSize: '1rem',
-					borderRadius: vars.radius.detail,
-					inlineSize: '1rem',
-				}}
-			/>
-			<span
-				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
-					blockSize: '1rem',
-					borderRadius: vars.radius.detail,
-					inlineSize: '1rem',
-					opacity: `var(${variable})`,
-				}}
-			/>
+			<InteractionDot />
+			<InteractionDot style={{ opacity: `var(${variable})` }} />
 		</SampleFrame>
+	);
+}
+
+function InteractionDot({ style }: { style?: CSSProperties }) {
+	return (
+		<Box
+			backgroundColor="accent.solid.rest"
+			blockSize="1rem"
+			borderRadius="detail"
+			elementType="span"
+			inlineSize="1rem"
+			style={style}
+		/>
 	);
 }
 
@@ -365,9 +378,14 @@ function MotionSample({ path, variable }: ThemeToken) {
 	const axis = path.split('.')[1];
 
 	return (
-		<SampleFrame style={stageStyle}>
-			<span
+		<SampleFrame stage="transparent">
+			<Box
+				backgroundColor="accent.solid.rest"
+				blockSize="1rem"
+				borderRadius="full"
 				className={styles.motionDot}
+				elementType="span"
+				inlineSize="1rem"
 				style={{
 					animationDuration: axis === 'duration' ? `var(${variable})` : FALLBACK_MOTION_DURATION,
 					animationTimingFunction: axis === 'easing' ? `var(${variable})` : FALLBACK_MOTION_EASING,
@@ -426,7 +444,7 @@ const FAMILY_SAMPLES: Record<ThemeTokenFamily, (token: ThemeToken) => ReactNode>
 function EmptyState({ onClear, query }: { onClear: () => void; query: string }) {
 	return (
 		<Stack alignItems="center" gap="sp12" paddingBlock="sp48" paddingInline="sp24">
-			<Text color="secondary" elementType="p" textAlign="center" typography="caption">
+			<Text color="secondary" elementType="p" textAlign="center" typography="label">
 				No token matches &quot;{query}&quot;
 			</Text>
 			<Button onPress={onClear} size="small">

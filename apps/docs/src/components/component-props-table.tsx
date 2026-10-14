@@ -10,16 +10,10 @@ import { groupPropNames, NATIVE_PROPS_FORWARDING_KEY } from '../lib/component-pr
 import * as styles from './component-props-table.css.js';
 import { InheritTypography } from './docs-article/mdx-elements.js';
 import * as disclosureStyles from './docs-disclosure.css.js';
-import * as tableStyles from './type-table.css.js';
+import * as tableStyles from './reference-table.css.js';
+import { CellText, ReferenceTableFrame, TableBox } from './reference-table.js';
 import type { PropTableLayout, TypeNode } from './type-table.js';
-import {
-	CellText,
-	getPropTableLayout,
-	PropRows,
-	PropTableFrame,
-	PropTableHead,
-	TableBox,
-} from './type-table.js';
+import { getPropTableLayout, PropRows, PropTableHead } from './type-table.js';
 
 /** Grouped prop table for a component guide's `## API` section. */
 export function ComponentPropsTable({
@@ -52,7 +46,7 @@ export function ComponentPropsTable({
 					<InheritTypography>{nativePropsNote}</InheritTypography>
 				</CellText>
 			)}
-			<PropTableFrame>
+			<ReferenceTableFrame>
 				<PropTableHead layout={layout} />
 				{groups.map((group) =>
 					group.name === 'Component props' ? (
@@ -70,7 +64,7 @@ export function ComponentPropsTable({
 						/>
 					),
 				)}
-			</PropTableFrame>
+			</ReferenceTableFrame>
 		</Stack>
 	);
 }

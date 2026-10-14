@@ -43,6 +43,17 @@ test('exposes a native token table with sample cells kept in the accessibility t
 	expect(sampleCell.querySelector('[aria-hidden]')).not.toBeNull();
 });
 
+test('aligns every column header to the start of its column', async () => {
+	await renderExplorer();
+
+	assert(container, 'expected a container');
+	const headers = container.querySelectorAll('th');
+	expect(headers.length).toBeGreaterThan(0);
+	for (const header of headers) {
+		expect(getComputedStyle(header).textAlign).toBe('start');
+	}
+});
+
 async function renderExplorer() {
 	const rootRoute = createRootRoute({
 		component: () => (

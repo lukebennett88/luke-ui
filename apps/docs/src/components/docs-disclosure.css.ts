@@ -1,13 +1,9 @@
 import { vars } from '@luke-ui/react/theme';
 import { style } from '@vanilla-extract/css';
 
-/**
- * Unstyled full-width disclosure trigger. Luke `Button` always applies control chrome, so docs
- * disclosures keep RAC `Button` via Box `renderRoot` and this reset.
- *
- * Caption metrics keep Track `firstLine` rails on the same 1lh as label/type text, even when the
- * trigger sits inside a heading.
- */
+// DS gap: Luke `Button` always draws control chrome, so there is no plain, unstyled button. Docs
+// disclosures keep RAC `Button` via `renderRoot` and reset the browser's button chrome here. The
+// hover fill is a state selector that Box fills cannot follow.
 export const trigger = style({
 	'@layer': {
 		components: {
@@ -15,11 +11,6 @@ export const trigger = style({
 			borderStyle: 'none',
 			color: 'inherit',
 			cursor: 'pointer',
-			fontFamily: 'inherit',
-			fontSize: vars.font.caption.fontSize,
-			fontWeight: 'inherit',
-			lineHeight: vars.font.caption.lineHeight,
-			textAlign: 'start',
 			selectors: {
 				'&:hover': {
 					backgroundColor: vars.color.background.neutral.subtle.hover,
@@ -33,10 +24,8 @@ export const trigger = style({
 	},
 });
 
-/**
- * Start-rail chevron that rotates to point down when expanded, from either a `data-expanded`
- * ancestor or its own trigger's `aria-expanded`.
- */
+// DS gap: Icon has no rotation or state-driven transform. The chevron points down when expanded,
+// from either a `data-expanded` ancestor or its own trigger's `aria-expanded`.
 export const chevronEnd = style({
 	'@layer': {
 		components: {

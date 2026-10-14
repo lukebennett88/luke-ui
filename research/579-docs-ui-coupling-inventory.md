@@ -148,17 +148,24 @@ group is the first body with no header, and each other group is its own body beh
 whose rows render only while expanded. A URL hash that targets a prop in a collapsed group expands
 it. Type links sit in the type cell. Optional props lose their redundant `| undefined` in the
 generator wrappers. Token explorer purpose groups use React Aria `Disclosure` via Box `renderRoot`,
-with `Track` for chevron/count rails. Token explorer keeps a native `<table>` (Box cannot render
-`th`/`td`); decorative samples use `aria-hidden` on the sample content, not the cell. Docs-local
-`.css.ts` keeps interaction, container queries, and one-sided borders. Descriptions render in a
-`div`, so MDX paragraphs never nest inside a paragraph.
+with a `Cluster` trigger (chevron, `Text` title, `Text` count) and `Stack` spacing. Token explorer
+tables use the same docs-local `reference-table` module as the props tables (`TableBox`, `CellText`,
+frame, header cells, rules, and the stacked narrow layout), so each group is a native `<table>` (Box
+cannot render `th`/`td`) in the props table's bordered frame. Paths and variables are plain
+monospace `Text`, not `Code` chips. Decorative samples use `aria-hidden` on the sample content, not
+the cell, and their static parts are Box props; only the token's own `var()` values stay inline.
+Descriptions render in a `div`, so MDX paragraphs never nest inside a paragraph.
 
-The props table's styling lives on Luke UI primitives: `Box` through `renderRoot` for the table
-elements (padding, border, radius, surface fills), `Text` for every piece of text at the `label`
-type style, `Stack` and `Cluster` for descriptions, parameter lists, the name and required marker,
-and the group trigger. The remaining docs `.css.ts` rules each carry a `DS gap:` comment naming the
-missing capability: container queries, table layout, per-side borders, vertical alignment, scroll
-margin, a code font without a chip, and nested-code and paragraph flattening.
+The shared table styling lives in `reference-table.tsx` and `reference-table.css.ts`, used by the
+props tables and the token explorer. The props table's styling lives on Luke UI primitives: `Box`
+through `renderRoot` for the table elements (padding, border, radius, surface fills), `Text` for
+every piece of text at the `label` type style, `Stack` and `Cluster` for descriptions, parameter
+lists, the name and required marker, and the group trigger. The remaining docs `.css.ts` rules each
+carry a `DS gap:` comment naming the missing capability: container queries, table layout, per-side
+borders, vertical alignment, scroll margin, a code font without a chip, and nested-code and
+paragraph flattening. The token explorer adds only the motion sample's keyframes with reduced
+motion, and the disclosure trigger reset (Luke `Button` has no plain variant) with the chevron's
+`aria-expanded` rotation.
 
 `IconGallery`, `TokenExplorer`, and `ComponentsIndex` no longer use Tailwind utilities or `fd-*`
 tokens. Filtering, counts, copy feedback, empty states, disclosure semantics, and table headers
