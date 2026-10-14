@@ -1,14 +1,11 @@
-/**
- * Validates an `extends` chain of theme-authoring inputs before it is merged. Each input is checked
- * on its own, against only the fields it sets, so an issue always names the input that contains it.
- * The one requirement that depends on the whole chain, a body font, is checked across all inputs.
- *
- * A chain that passes has a well-formed or absent `typography` on every input and a body font on at
- * least one, which is what `resolveThemeChain` relies on.
- */
+/** Validates authored theme fields before an `extends` chain is merged. */
 
+import { parseColor } from './color.js';
 import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
+import { SOURCE_COLOR_FIELDS, SURFACE_ROLES } from './foundation.js';
+import { getThemeClassName } from './theme-class-name.js';
 import { fontWeightRoles } from './type-styles.js';
+import { isInvalidRadius, isUnsafeCssValue } from './validate-foundation.js';
 
 /** One problem in a theme input. */
 interface ThemeValidationIssue {
@@ -41,8 +38,7 @@ export class ThemeValidationError extends Error {
 }
 
 /**
- * Checks every input in a chain, the outermost first, and that some input sets the required body
- * font. Returns every issue found, or an empty array.
+ * Checks authored fields and the required body font and accent across the chain.
  */
 export function validateThemeChain(
 	inputs: ReadonlyArray<ThemeInput | ExtendingThemeInput>,
@@ -56,7 +52,19 @@ export function validateThemeChain(
 			theme: String(outermost.name),
 		});
 	}
+	if (outermost !== undefined && !inputs.some(setsAccent)) {
+		issues.push({
+			message: 'is required. Set it on this theme or on a theme it extends.',
+			path: 'color.accent',
+			theme: String(outermost.name),
+		});
+	}
 	return issues;
+}
+
+function setsAccent(input: ThemeInput | ExtendingThemeInput): boolean {
+	const color: unknown = input.color;
+	return isRecord(color) && color.accent !== undefined;
 }
 
 /** Whether an input sets a body font, whatever its shape. `validateThemeInput` reports the shape. */
@@ -70,6 +78,31 @@ function validateThemeInput(input: ThemeInput | ExtendingThemeInput): Array<Them
 	const issues: Array<ThemeValidationIssue> = [];
 	function report(path: string, message: string) {
 		issues.push({ message, path, theme: String(input.name) });
+	}
+
+	if (typeof input.name !== 'string') {
+		report('name', 'must be a kebab-case string');
+	} else {
+		try {
+			getThemeClassName(input.name);
+		} catch (error) {
+			report('name', error instanceof Error ? error.message : String(error));
+		}
+	}
+	validateColors(input.color, report);
+	validateMaterials(input.depth, 'depth', 'box-shadow', report);
+	validateMaterials(input.controlFinish, 'controlFinish', 'background-image', report);
+	const radius: unknown = input.radius;
+	if (radius !== undefined) {
+		if (isRecord(radius)) {
+			for (const role of ['detail', 'control', 'surface', 'overlay'] as const) {
+				if (radius[role] !== undefined && isInvalidRadius(radius[role])) {
+					report(`radius.${role}`, 'must be a number of pixels, 0 or greater');
+				}
+			}
+		} else {
+			report('radius', 'must be an object');
+		}
 	}
 
 	const typography: unknown = input.typography;
@@ -107,6 +140,113 @@ function validateThemeInput(input: ThemeInput | ExtendingThemeInput): Array<Them
 		}
 	}
 	return issues;
+}
+
+function validateColors(color: unknown, report: (path: string, message: string) => void): void {
+	if (color === undefined) return;
+	if (!isRecord(color)) {
+		report('color', 'must be an object');
+		return;
+	}
+	for (const role of SOURCE_COLOR_FIELDS) {
+		validateColorRole(color[role], `color.${role}`, true, report);
+	}
+	if (
+		color.neutralStyle !== undefined &&
+		color.neutralStyle !== 'cool' &&
+		color.neutralStyle !== 'neutral' &&
+		color.neutralStyle !== 'warm'
+	) {
+		report('color.neutralStyle', 'must be cool, neutral, or warm');
+	}
+	validateColorRole(color.backdrop, 'color.backdrop', true, report);
+	const surface = color.surface;
+	if (surface === undefined) return;
+	if (!isRecord(surface)) {
+		report('color.surface', 'must be an object');
+		return;
+	}
+	for (const role of SURFACE_ROLES) {
+		validateColorRole(surface[role], `color.surface.${role}`, role === 'base', report);
+	}
+}
+
+function validateColorRole(
+	value: unknown,
+	path: string,
+	acceptsString: boolean,
+	report: (path: string, message: string) => void,
+): void {
+	if (value === undefined) return;
+	if (acceptsString && typeof value === 'string') {
+		validateColor(value, path, report);
+		return;
+	}
+	if (!isRecord(value)) {
+		report(
+			path,
+			acceptsString
+				? 'must be a colour string or a light/dark object'
+				: 'must be a light/dark object',
+		);
+		return;
+	}
+	if (path === 'color.accent' && value.light === undefined && value.dark === undefined) {
+		report(path, 'must provide a colour for at least one of light or dark');
+	}
+	for (const mode of ['light', 'dark'] as const) {
+		if (value[mode] !== undefined) validateColor(value[mode], `${path}.${mode}`, report);
+	}
+}
+
+function validateColor(
+	value: unknown,
+	path: string,
+	report: (path: string, message: string) => void,
+): void {
+	if (path === 'color.backdrop' || path.startsWith('color.backdrop.')) {
+		if (isUnsafeCssValue(value))
+			report(path, 'must be a non-empty CSS colour value without `;`, `{`, or `}`');
+		return;
+	}
+	if (typeof value !== 'string') {
+		report(path, 'must be a colour string');
+		return;
+	}
+	try {
+		parseColor(value);
+	} catch (error) {
+		report(path, error instanceof Error ? error.message : String(error));
+	}
+}
+
+function validateMaterials(
+	value: unknown,
+	path: string,
+	property: string,
+	report: (path: string, message: string) => void,
+): void {
+	if (value === undefined) return;
+	if (!isRecord(value)) {
+		report(path, 'must be an object');
+		return;
+	}
+	for (const mode of ['light', 'dark'] as const) {
+		const ladder = value[mode];
+		if (ladder === undefined) continue;
+		if (!isRecord(ladder)) {
+			report(`${path}.${mode}`, 'must be an object');
+			continue;
+		}
+		for (const [rung, css] of Object.entries(ladder)) {
+			if (css !== undefined && isUnsafeCssValue(css)) {
+				report(
+					`${path}.${mode}.${rung}`,
+					`must be a non-empty CSS ${property} value without \`;\`, \`{\`, or \`}\``,
+				);
+			}
+		}
+	}
 }
 
 /** The metrics Capsize needs to trim text. Each must be a finite number. */

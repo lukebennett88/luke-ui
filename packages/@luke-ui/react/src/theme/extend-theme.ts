@@ -9,6 +9,7 @@
 import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
 import type { ThemeFont, ThemeFontWeights } from './font.js';
 import { SURFACE_ROLES } from './foundation.js';
+import { ThemeValidationError } from './validate-input.js';
 
 /** Which colours a theme authored, and which it inherited. Carried by `ThemeContrastError`. */
 export interface ThemeInheritance {
@@ -63,14 +64,17 @@ export function resolveThemeChain(chain: ThemeChain): ResolvedThemeInput {
 	const [outermost] = inputs;
 	// Returns the object it was handed, so inheritance cannot affect a theme with no base.
 	if (outermost === undefined || outermost === base) return { inheritance: null, input: base };
-	// Fold from the innermost base outward, so every step merges over complete sections and
-	// `color.accent` is always present.
+	// Fold from the innermost base outward, replacing each authored colour role whole.
 	const innermostFirst = [...inputs].reverse();
 	let sections: ThemeSections = base;
 	for (const own of innermostFirst.slice(1)) {
 		sections = inheritSections(sections, own);
 	}
-	const merged: ThemeInput = { ...sections, typography: resolveTypography(innermostFirst) };
+	const merged: ThemeInput = {
+		...sections,
+		color: sections.color as ThemeInput['color'],
+		typography: resolveTypography(innermostFirst),
+	};
 	return {
 		inheritance: describeInheritance(
 			outermost,
@@ -105,10 +109,13 @@ export function collectThemeChain(input: ThemeInput | ExtendingThemeInput): Them
 	for (;;) {
 		if (seen.has(current)) {
 			const cycle = [...inputs, current].map((entry) => `"${entry.name}"`).join(' -> ');
-			throw new Error(
-				`Theme "${input.name}" has a cyclic extends chain: ${cycle}. ` +
-					'A theme cannot extend a theme that extends it.',
-			);
+			throw new ThemeValidationError([
+				{
+					message: `has a cyclic extends chain: ${cycle}. A theme cannot extend a theme that extends it.`,
+					path: 'extends',
+					theme: String(input.name),
+				},
+			]);
 		}
 		seen.add(current);
 		inputs.push(current);
@@ -118,7 +125,9 @@ export function collectThemeChain(input: ThemeInput | ExtendingThemeInput): Them
 }
 
 /** Every merged section but `typography`, which {@link resolveTypography} merges across the chain. */
-type ThemeSections = Omit<ThemeInput, 'extends' | 'typography'>;
+interface ThemeSections extends Omit<ThemeInput, 'extends' | 'typography' | 'color'> {
+	color?: Partial<ThemeInput['color']>;
+}
 
 /** Merges one input over already-merged sections, section by section. */
 function inheritSections(
@@ -140,25 +149,25 @@ function inheritSections(
  * role of its own, so a theme can replace one surface and inherit the rest.
  */
 function inheritColor(
-	base: ThemeInput['color'],
+	base: Partial<ThemeInput['color']> | undefined,
 	own: Partial<ThemeInput['color']> | undefined,
-): ThemeInput['color'] {
+): Partial<ThemeInput['color']> | undefined {
 	if (own === undefined) return base;
 	// `neutral` and `neutralStyle` are two spellings of one decision, and `resolveNeutral` prefers
 	// `neutral`. A theme that sets only `neutralStyle` must drop an inherited `neutral`, or the
 	// inherited value would win.
 	const ownNeutral = authorsNeutral(own);
 	return {
-		accent: own.accent ?? base.accent,
-		danger: own.danger ?? base.danger,
-		focus: own.focus ?? base.focus,
-		info: own.info ?? base.info,
-		neutral: ownNeutral ? own.neutral : base.neutral,
-		neutralStyle: ownNeutral ? own.neutralStyle : base.neutralStyle,
-		backdrop: own.backdrop ?? base.backdrop,
-		success: own.success ?? base.success,
-		surface: inheritSurface(base.surface, own.surface),
-		warning: own.warning ?? base.warning,
+		accent: own.accent ?? base?.accent,
+		danger: own.danger ?? base?.danger,
+		focus: own.focus ?? base?.focus,
+		info: own.info ?? base?.info,
+		neutral: ownNeutral ? own.neutral : base?.neutral,
+		neutralStyle: ownNeutral ? own.neutralStyle : base?.neutralStyle,
+		backdrop: own.backdrop ?? base?.backdrop,
+		success: own.success ?? base?.success,
+		surface: inheritSurface(base?.surface, own.surface),
+		warning: own.warning ?? base?.warning,
 	};
 }
 
