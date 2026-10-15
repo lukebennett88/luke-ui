@@ -9,6 +9,7 @@ import { playgroundScope } from '../../generated/playground-scope.generated';
 import { isPlaygroundAppearanceMessage } from '../../lib/playground-appearance-message.js';
 import { StoryWrapper } from '../../lib/story-wrapper';
 import { previewThemePrefs } from '../../lib/theme-prefs.js';
+import * as styles from './playground.css.js';
 
 type PreviewRun = { UserComponent: ComponentType; runId: number };
 
@@ -57,7 +58,7 @@ export default function PreviewRunner() {
 	if (!run) return null;
 
 	return (
-		<div className="flex min-h-dvh flex-col *:flex-1">
+		<div className={styles.previewRunner}>
 			<StoryWrapper>
 				<ErrorBoundary fallback={null} key={run.runId} onError={reportError}>
 					<run.UserComponent />

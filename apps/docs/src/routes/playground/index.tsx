@@ -16,6 +16,7 @@ import {
 	EditorSkeletonShapeScript,
 	LoadingPill,
 } from '../../components/playground/editor-skeleton';
+import * as styles from '../../components/playground/playground.css.js';
 import { PreviewToolbar } from '../../components/playground/preview-toolbar';
 import { RESIZE_TARGET_MINIMUM_SIZE } from '../../components/playground/resize-target';
 import { useIsDesktop } from '../../components/playground/use-is-desktop';
@@ -113,21 +114,21 @@ function Playground() {
 	};
 
 	return (
-		<div className="flex h-dvh flex-col">
+		<div className={styles.page}>
 			<SiteNav />
 			<Group
-				className="min-h-0 flex-1 flex-col! md:flex-row!"
+				className={styles.panelGroup}
 				orientation={isDesktop ? 'horizontal' : 'vertical'}
 				resizeTargetMinimumSize={RESIZE_TARGET_MINIMUM_SIZE}
 			>
 				{/* Pane backgrounds match the GitHub high-contrast light/dark `editor.background` values in monaco-setup.ts. */}
 				<Panel
-					className="min-h-0 bg-[#ffffff] dark:bg-[#0a0c10]"
+					className={styles.editorPanel}
 					defaultSize="50%"
 					minSize={160}
 					style={{ overflow: 'hidden' }}
 				>
-					<div className="h-full min-h-0">
+					<div className={styles.editorPanelBody}>
 						<ClientOnly
 							fallback={
 								<>
@@ -147,15 +148,9 @@ function Playground() {
 					</div>
 				</Panel>
 				{/* react-resizable-panels owns hit-testing and the resize cursor at the document level; the grab band is configured by resizeTargetMinimumSize on Group above. */}
-				<Separator
-					aria-label="Resize editor and preview panels"
-					className="block-px inline-auto after:block-1.5 after:inline-16 md:block-auto md:inline-px md:after:block-16 md:after:inline-1.5 relative z-10 shrink-0 bg-fd-border after:absolute after:inset-bs-[50%] after:inset-s-[50%] after:-translate-x-1/2 after:-translate-y-1/2 after:rounded-full after:bg-fd-muted-foreground/50 after:transition-colors after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65"
-				/>
+				<Separator aria-label="Resize editor and preview panels" className={styles.separator} />
 				<Panel
-					className={cx(
-						'relative flex min-h-0 flex-col',
-						isPreviewFullscreen && 'fixed! inset-0 z-50 size-auto! bg-fd-muted',
-					)}
+					className={cx(styles.previewPanel, isPreviewFullscreen && styles.previewPanelFullscreen)}
 					defaultSize="50%"
 					minSize={160}
 					style={{ overflow: 'hidden' }}
@@ -167,29 +162,23 @@ function Playground() {
 						viewportWidth={viewportWidth}
 					/>
 					{error === null ? null : (
-						<div
-							className="border-fd-border border-b bg-fd-card px-4 py-2 font-mono text-red-600 text-xs dark:text-red-400"
-							role="alert"
-						>
+						<div className={styles.compileError} role="alert">
 							{error}
 						</div>
 					)}
-					<div className="min-h-0 flex-1 overflow-auto bg-fd-muted/50 p-2 sm:p-3">
-						<div
-							className="relative mx-auto h-full overflow-hidden rounded-xl border border-fd-border bg-fd-background transition-[inline-size] duration-200"
-							style={{ inlineSize: viewportWidth, maxInlineSize: '100%' }}
-						>
+					<div className={styles.previewCanvas}>
+						<div className={styles.previewFrame} style={{ inlineSize: viewportWidth }}>
 							{/* Iframes swallow pointer events, which kills separator drags that cross into the preview — disable them while the separator is engaged. */}
 							<iframe
-								className="size-full border-0 [[data-group]:has([data-separator=active])_&]:pointer-events-none [[data-group]:has([data-separator=hover])_&]:pointer-events-none"
+								className={styles.previewIframe}
 								ref={iframeRef}
 								src={withBasePath('/playground/preview', import.meta.env.BASE_URL)}
 								title="Playground preview"
 							/>
 							<div
 								className={cx(
-									'absolute inset-0 flex items-center justify-center bg-fd-background/90 transition-[opacity,visibility] duration-200',
-									!showPreviewLoading && 'invisible opacity-0',
+									styles.previewLoading,
+									!showPreviewLoading && styles.previewLoadingHidden,
 								)}
 								role="status"
 							>

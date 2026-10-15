@@ -1,7 +1,9 @@
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import shapeScript from '../../generated/editor-skeleton-script.iife.js?raw';
 import { toSkeletonLines } from '../../lib/playground-editor-shape.js';
+import * as styles from './playground.css.js';
 
 /**
  * Placeholder that mirrors the code the editor is about to show: one bar per
@@ -14,26 +16,20 @@ import { toSkeletonLines } from '../../lib/playground-editor-shape.js';
  */
 export function EditorSkeleton({ code, showPill }: { code: string; showPill: boolean }) {
 	return (
-		<div
-			className="relative size-full overflow-hidden pt-3 font-mono text-[13px] leading-5"
-			role="status"
-		>
-			<span className="sr-only">Loading editor</span>
+		<div className={styles.editorSkeleton} role="status">
+			<VisuallyHidden>Loading editor</VisuallyHidden>
 			{toSkeletonLines(code).map((line, index) => (
-				<div aria-hidden className="flex h-5 items-center" data-line key={index}>
-					<span
-						className="w-[3ch] shrink-0 text-right text-[#88929d] dark:text-[#9ea7b3]"
-						data-line-number
-					>
+				<div aria-hidden className={styles.skeletonLine} data-line key={index}>
+					<span className={styles.skeletonLineNumber} data-line-number>
 						{index + 1}
 					</span>
-					<span className="min-w-0 flex-1 overflow-hidden pr-4 pl-2.5">
+					<span className={styles.skeletonLineContent}>
 						{line.length > 0 ? (
 							// Sized via custom properties (not style properties) so
 							// editor-skeleton-script.js can write byte-identical inline
 							// styles — camelCase style keys would trip hydration diffing.
 							<LoadingSkeleton
-								className="ms-(--indent) block h-3 w-(--length)"
+								className={styles.skeletonBar}
 								data-line-bar
 								style={{
 									// @ts-expect-error custom properties are not in the style type
@@ -46,10 +42,7 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
 				</div>
 			))}
 			{showPill ? (
-				<div
-					aria-hidden
-					className="pointer-events-none absolute inset-0 flex items-center justify-center"
-				>
+				<div aria-hidden className={styles.skeletonPillOverlay}>
 					<LoadingPill label="Loading editor" />
 				</div>
 			) : null}
@@ -74,7 +67,7 @@ export function EditorSkeletonShapeScript() {
 /** Shared loading indicator so the editor and preview speak the same language. */
 export function LoadingPill({ label }: { label: string }) {
 	return (
-		<div className="flex items-center gap-2 rounded-full border border-fd-border bg-fd-popover px-3 py-1.5 text-fd-muted-foreground text-xs">
+		<div className={styles.loadingPill}>
 			<LoadingSpinner aria-hidden size="small" />
 			<span>{label}</span>
 		</div>

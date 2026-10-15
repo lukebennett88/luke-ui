@@ -11,6 +11,7 @@ import {
 	runFormatDocument,
 } from './monaco-format.js';
 import { PlaygroundPaneToolbar } from './pane-toolbar.js';
+import * as styles from './playground.css.js';
 
 type PlaygroundEditorProps = {
 	defaultValue: string;
@@ -50,13 +51,13 @@ export default function PlaygroundEditor({
 	};
 
 	return (
-		<div className="flex h-full min-h-0 flex-col">
+		<div className={styles.editorShell}>
 			<PlaygroundPaneToolbar>
 				<Button isPending={isFormatting} onPress={() => void handleFormat()} size="small">
 					Format
 				</Button>
 			</PlaygroundPaneToolbar>
-			<div className="min-h-0 flex-1">
+			<div className={styles.editorMount}>
 				<Editor
 					defaultLanguage="typescript"
 					defaultValue={defaultValue}

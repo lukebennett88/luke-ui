@@ -5,6 +5,7 @@ import type { ComponentProps } from 'react';
 import type { Selection } from 'react-aria-components/GridList';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
 import { ToggleButtonGroup } from 'react-aria-components/ToggleButtonGroup';
+import * as styles from './icon-toggle-button-group.css.js';
 
 type IconToggleItem<Value extends string> = {
 	icon: IconName;
@@ -43,7 +44,7 @@ export function IconToggleButtonGroup<Value extends string>({
 	return (
 		<ToggleButtonGroup
 			aria-label={label}
-			className={GROUP_CLASS_NAME}
+			className={styles.group}
 			disallowEmptySelection
 			onSelectionChange={toSelectionChangeHandler(options, onChange)}
 			orientation="horizontal"
@@ -58,7 +59,7 @@ export function IconToggleButtonGroup<Value extends string>({
 					key={optionValue}
 					render={renderToggleButton}
 				>
-					<Icon className="size-4" name={icon} />
+					<Icon name={icon} size="xsmall" />
 				</ToggleButton>
 			))}
 		</ToggleButtonGroup>
@@ -78,7 +79,7 @@ export function TextToggleButtonGroup<Value extends string>({
 	return (
 		<ToggleButtonGroup
 			aria-label={label}
-			className={GROUP_CLASS_NAME}
+			className={styles.group}
 			disallowEmptySelection
 			onSelectionChange={toSelectionChangeHandler(options, onChange)}
 			orientation="horizontal"
@@ -98,8 +99,6 @@ export function TextToggleButtonGroup<Value extends string>({
 		</ToggleButtonGroup>
 	);
 }
-
-const GROUP_CLASS_NAME = 'flex items-center gap-2';
 
 function toggleButtonClassName() {
 	return buttonRecipe({
