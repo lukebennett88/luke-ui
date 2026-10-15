@@ -39,10 +39,12 @@ function proseLeaks(widget: Element) {
 		.filter((element) => element.closest('[data-prose-example]') == null)
 		.filter((element) => {
 			const style = getComputedStyle(element);
+			// Detect Prose-owned values, not UA defaults. Without Tailwind preflight, paragraphs and
+			// lists keep browser margins inside `not-prose`; Prose alone sets the 24px list indent
+			// and the sp12 item gap.
 			return (
-				style.marginBlockStart !== '0px' ||
-				(element.matches('ul') && style.listStyleType === 'disc') ||
-				(element.matches('ul, ol') && style.paddingInlineStart === '24px')
+				(element.matches('ul, ol') && style.paddingInlineStart === '24px') ||
+				(element.matches('li') && style.marginBlockStart === '12px')
 			);
 		})
 		.map((element) => element.outerHTML.slice(0, 80));

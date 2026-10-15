@@ -168,10 +168,13 @@ with and without the statement, against real Tailwind output.
 
 The docs app uses `@vanilla-extract/css` for docs-owned `.css.ts` files. Its Vite and Vitest configs
 run the Vanilla Extract plugin. Import a generated class from the component or route that applies
-it. The docs app declares the Tailwind order in `apps/docs/src/styles/app.css`. The root route
+it. The docs app stylesheet (`apps/docs/src/styles/app.css`) declares
+`@layer base, luke-ui, components;` and no longer imports Tailwind or Fumadocs CSS. The root route
 applies a `base`-layer class from `src/styles/docs-root.css.ts` to `<body>` for the page's flex
-layout. Docs-owned shell, navigation, search, and theme controls use `components`-layer classes,
-which outrank Luke UI. Docs code never writes to Luke UI's layers.
+layout. Docs-owned shell, navigation, search, playground, and theme controls use `components`-layer
+classes, which outrank Luke UI. Docs code never writes to Luke UI's layers. Tailwind remains in the
+docs build only for the consumer-integration fixtures and the teaching snippet in `styling.mdx`
+until #678 removes that residue.
 
 Author component CSS with one of:
 
