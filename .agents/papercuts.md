@@ -35,10 +35,12 @@ issue before you open a new one. When you reject an entry because the intended b
 document the intended behaviour. Remove resolved, transferred, and rejected entries. Git history
 archives them. Never delete an entry only because it is old.
 
-**Skills.** Propose a new skill only during triage, with at least two observed corrections that a
-workflow would have prevented and that a check or a pointer would not handle better. The maintainer
-approves skill additions and changes. Remove a skill when it is obsolete or when pilot or spot-check
-evidence shows it does not help. Silence in this log is not evidence.
+**Skills.** A skill for an established, repeatable workflow, such as writing a pull request, needs
+no entry here. Propose any other new skill during triage, with evidence of a failure that a workflow
+would have prevented and that a check or a pointer would not handle better. Two observed corrections
+are a reason to consider a skill, not a requirement for one. The maintainer approves skill additions
+and changes. Remove a skill when it is obsolete or when pilot or spot-check evidence shows it does
+not help. Silence in this log is not evidence.
 
 ## Visual compare fails while the main baseline run is still in progress
 
@@ -53,11 +55,15 @@ evidence shows it does not help. Silence in this log is not evidence.
 
 - Seen: 2026-10-12 (#783). Renovate's non-major PR changed `"version": "24.x"` to
   `"version": "24.21.0"` and the lockfile `specifier` to `runtime:24.21.0`.
+- Seen: 2026-10-14 (#805). `npx --yes @anthropic-ai/claude-code --help` from the repo root failed
+  with `EBADDEVENGINES Invalid semver version "24.21.0" does not match "v24.19.0"`. The same command
+  succeeded from `/tmp`, where the workspace `package.json` is not applied.
 - Where: root `package.json` `devEngines.runtime`; docs/DEPENDENCIES.md Tooling versions;
   `.github/renovate.json5` custom regex manager for node.
 - Problem: The documented contract is `<major>.x`, and the regex manager is supposed to keep that
   form with `rangeStrategy: 'replace'`. The non-major group still rewrote the field to an exact
-  version, so the PR had to be corrected by hand.
+  version, so the PR had to be corrected by hand. An exact pin also rejects nearby Node 24.x
+  runtimes that still match the documented `<major>.x` contract.
 
 ## The token board's visual capture renders two different ways on the same code
 
