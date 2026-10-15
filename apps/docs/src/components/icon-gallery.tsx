@@ -14,6 +14,7 @@ import type { JSX, ReactNode } from 'react';
 import { useDeferredValue, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import * as styles from './icon-gallery.css.js';
 import { TextToggleButtonGroup } from './playground/icon-toggle-button-group.js';
+import * as referenceStyles from './reference-table.css.js';
 
 type GalleryIconSize = NonNullable<IconProps['size']>;
 
@@ -104,16 +105,12 @@ export function IconGallery(): JSX.Element {
 	return (
 		<Stack className="not-prose" gap="sp16">
 			<Track
+				className={referenceStyles.filterTrackCaption}
 				gap="sp12"
-				railAlignment="center"
+				railAlignment="firstLine"
 				railEnd={
 					<>
-						<Text
-							color="secondary"
-							elementType="p"
-							fontVariantNumeric="tabular-nums"
-							typography="caption"
-						>
+						<Text color="secondary" fontVariantNumeric="tabular-nums" typography="caption">
 							{countText}
 						</Text>
 						<VisuallyHidden aria-live="polite" elementType="p">
@@ -249,7 +246,6 @@ function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryC
 				<Box inlineSize="100%">
 					<Text
 						color="secondary"
-						elementType="span"
 						lineClamp={1}
 						textAlign="center"
 						title={name}
@@ -298,14 +294,28 @@ function CopyButton({ copyStatus, kind, name, onCopy }: CopyButtonProps) {
 	})();
 
 	return (
-		<button
-			aria-label={accessibleLabel}
+		<Box
+			alignItems="center"
 			className={cx(styles.copyButton, kind === 'jsx' && styles.copyButtonDivider)}
-			onClick={() => onCopy(name, kind)}
-			type="button"
+			display="flex"
+			gap="sp4"
+			justifyContent="center"
+			minBlockSize="sp32"
+			minInlineSize="0"
+			padding="0"
+			renderRoot={(domProps) => (
+				<button
+					{...domProps}
+					aria-label={accessibleLabel}
+					onClick={() => onCopy(name, kind)}
+					type="button"
+				/>
+			)}
 		>
-			{label}
-		</button>
+			<Text fontWeight="label" typography="caption">
+				{label}
+			</Text>
+		</Box>
 	);
 }
 

@@ -28,23 +28,16 @@ export const copyRow = style({
 	},
 });
 
+/**
+ * RAC/browser button reset for the copy footer. Layout (flex, gap, min sizes) lives on Box.
+ * DS gap: Luke `Button` always draws control chrome; hover/focus fills need state selectors.
+ */
 export const copyButton = style({
 	'@layer': {
 		components: {
-			alignItems: 'center',
 			backgroundColor: 'transparent',
 			borderStyle: 'none',
 			color: vars.color.text.secondary,
-			columnGap: vars.space.sp4,
-			cursor: 'pointer',
-			display: 'flex',
-			fontSize: vars.font.caption.fontSize,
-			fontWeight: vars.font.weight.label,
-			justifyContent: 'center',
-			lineHeight: vars.font.caption.lineHeight,
-			minBlockSize: vars.space.sp32,
-			minInlineSize: 0,
-			padding: 0,
 			transition: `background-color ${vars.motion.duration.feedback} ${vars.motion.easing.standard}, color ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
 			whiteSpace: 'nowrap',
 			selectors: {

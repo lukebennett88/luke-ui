@@ -4,44 +4,16 @@ import type { TextProps } from '@luke-ui/react/text';
 import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, HTMLAttributes, ReactNode } from 'react';
-import { createElement } from 'react';
 import * as styles from './reference-table.css.js';
 
-type TableElementType = 'col' | 'colgroup' | 'table' | 'tbody' | 'td' | 'th' | 'thead' | 'tr';
-
-/** Utility props of `Box`, without its element and DOM props. */
-type BoxUtilityProps = Omit<
+/**
+ * Utility props of `Box`, without its element and DOM props. Table elements are not `elementType`
+ * options, so cells use `renderRoot` and keep Box spacing/colour props on the same object.
+ */
+export type TableElementBoxProps = Omit<
 	BoxProps,
 	keyof HTMLAttributes<HTMLElement> | 'elementType' | 'ref' | 'renderRoot'
 >;
-
-/**
- * `Box` for a table element. Table elements are not `elementType` options, so this renders one
- * through `renderRoot`. Utility props go in `box`. DOM props such as `scope` and `colSpan` go on the
- * returned element, where `Box` does not apply them.
- */
-export function TableBox({
-	as,
-	box,
-	children,
-	className,
-	...elementProps
-}: {
-	as: TableElementType;
-	box?: BoxUtilityProps;
-	colSpan?: number;
-	scope?: 'col' | 'row';
-} & Omit<HTMLAttributes<HTMLElement>, 'color'>) {
-	return (
-		<Box
-			{...box}
-			className={className}
-			renderRoot={(domProps) => createElement(as, { ...elementProps, ...domProps })}
-		>
-			{children}
-		</Box>
-	);
-}
 
 /** Cell text: the label type style without cap-height trim, which would distort table rows. */
 export function CellText(props: TextProps) {
@@ -56,47 +28,102 @@ export function ReferenceTableFrame({
 }: { children: ReactNode } & ComponentProps<'div'>) {
 	return (
 		<Box {...props} className={cx(styles.frame, 'not-prose', className)} maxInlineSize="100%">
-			<TableBox
-				as="table"
-				box={{
-					backgroundColor: 'surface.base',
-					borderColor: 'decorative',
-					borderRadius: 'surface',
-					borderStyle: 'solid',
-					borderWidth: 'thin',
-					inlineSize: '100%',
-					overflow: 'hidden',
-				}}
+			<Box
+				backgroundColor="surface.base"
+				borderColor="decorative"
+				borderRadius="surface"
+				borderStyle="solid"
+				borderWidth="thin"
 				className={styles.table}
+				inlineSize="100%"
+				overflow="hidden"
+				renderRoot={(domProps) => <table {...domProps} />}
 			>
 				{children}
-			</TableBox>
+			</Box>
 		</Box>
 	);
 }
 
-/** The subdued header row. The stacked narrow layout hides it. */
+/** The subdued header row. Narrow widths hide it visually but keep columnheaders for AT. */
 export function ReferenceTableHeader({ children }: { children: ReactNode }) {
 	return (
-		<TableBox as="thead" box={{ backgroundColor: 'surface.subdued' }} className={styles.hideNarrow}>
+		<Box
+			backgroundColor="surface.subdued"
+			className={styles.visuallyHiddenNarrow}
+			renderRoot={(domProps) => <thead {...domProps} />}
+		>
 			<tr>{children}</tr>
-		</TableBox>
+		</Box>
 	);
 }
 
 /** A start-aligned column header: secondary label-weight text with the table's cell padding. */
 export function ReferenceHeaderCell({ children }: { children: ReactNode }) {
 	return (
-		<TableBox
-			as="th"
-			box={{ paddingBlock: 'sp8', paddingInline: 'sp16' }}
-			className={styles.cell}
-			data-ruled=""
-			scope="col"
+		<Box
+			className={cx(styles.cell, styles.ruled)}
+			paddingBlock="sp8"
+			paddingInline="sp16"
+			renderRoot={(domProps) => <th {...domProps} scope="col" />}
 		>
 			<CellText color="secondary" fontWeight="label">
 				{children}
 			</CellText>
-		</TableBox>
+		</Box>
+	);
+}
+
+/** A data cell. Prefer this over inventing an `as` polymorphism helper. */
+export function TableCell({
+	children,
+	className,
+	colSpan,
+	...boxProps
+}: TableElementBoxProps & {
+	children?: ReactNode;
+	className?: string;
+	colSpan?: number;
+}) {
+	return (
+		<Box
+			{...boxProps}
+			className={className}
+			renderRoot={(domProps) => <td {...domProps} colSpan={colSpan} />}
+		>
+			{children}
+		</Box>
+	);
+}
+
+/** A row header cell (`th scope="row"`). */
+export function TableRowHeader({
+	children,
+	className,
+	...boxProps
+}: TableElementBoxProps & {
+	children?: ReactNode;
+	className?: string;
+}) {
+	return (
+		<Box
+			{...boxProps}
+			className={className}
+			renderRoot={(domProps) => <th {...domProps} scope="row" />}
+		>
+			{children}
+		</Box>
+	);
+}
+
+/** A `<col>` width hint. Hidden in the stacked layout with the columns it sizes. */
+export function TableColumn({
+	className,
+	...boxProps
+}: TableElementBoxProps & {
+	className?: string;
+}) {
+	return (
+		<Box {...boxProps} className={className} renderRoot={(domProps) => <col {...domProps} />} />
 	);
 }

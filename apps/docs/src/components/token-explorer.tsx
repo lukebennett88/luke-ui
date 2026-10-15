@@ -26,7 +26,8 @@ import {
 	ReferenceHeaderCell,
 	ReferenceTableFrame,
 	ReferenceTableHeader,
-	TableBox,
+	TableCell,
+	TableColumn,
 } from './reference-table.js';
 import * as styles from './token-explorer.css.js';
 
@@ -47,13 +48,13 @@ export function TokenExplorer(): JSX.Element {
 	return (
 		<Stack className="not-prose" gap="sp16" marginBlockStart="sp16">
 			<Track
+				className={tableStyles.filterTrack}
 				gap="sp12"
-				railAlignment="center"
+				railAlignment="firstLine"
 				railEnd={
 					<Text
 						aria-live="polite"
 						color="secondary"
-						elementType="p"
 						fontVariantNumeric="tabular-nums"
 						fontWeight="body"
 						typography="label"
@@ -168,10 +169,8 @@ function TokenTable({
 	return (
 		<ReferenceTableFrame>
 			<colgroup>
-				{showSamples ? (
-					<TableBox as="col" box={{ inlineSize: '8rem' }} className={tableStyles.hideNarrow} />
-				) : null}
-				<TableBox as="col" box={{ inlineSize: '45%' }} className={tableStyles.hideNarrow} />
+				{showSamples ? <TableColumn className={tableStyles.hideNarrow} inlineSize="8rem" /> : null}
+				<TableColumn className={tableStyles.hideNarrow} inlineSize="45%" />
 				<col />
 			</colgroup>
 			<ReferenceTableHeader>
@@ -210,15 +209,18 @@ function TokenTable({
 
 function TokenCell({ children, isRowEnd }: { children: ReactNode; isRowEnd?: boolean }) {
 	return (
-		<TableBox
-			as="td"
-			box={{ paddingBlock: 'sp8', paddingInline: 'sp16' }}
-			className={cx(tableStyles.cell, tableStyles.stackedCell)}
-			data-row-end={isRowEnd ? '' : undefined}
-			data-ruled=""
+		<TableCell
+			className={cx(
+				tableStyles.cell,
+				tableStyles.stackedCell,
+				tableStyles.ruled,
+				isRowEnd ? tableStyles.rowEnd : undefined,
+			)}
+			paddingBlock="sp8"
+			paddingInline="sp16"
 		>
 			{children}
-		</TableBox>
+		</TableCell>
 	);
 }
 

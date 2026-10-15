@@ -1,17 +1,19 @@
+import type { BoxProps } from '@luke-ui/react/box';
 import { Cluster } from '@luke-ui/react/cluster';
-import { Link } from '@luke-ui/react/link';
 import { Stack } from '@luke-ui/react/stack';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, ReactNode } from 'react';
 import { Fragment } from 'react';
-import { InheritTypography } from './docs-article/mdx-elements.js';
+import { InheritTypography, MdxLink } from './docs-article/mdx-elements.js';
 import * as referenceStyles from './reference-table.css.js';
 import {
 	CellText,
 	ReferenceHeaderCell,
 	ReferenceTableFrame,
 	ReferenceTableHeader,
-	TableBox,
+	TableCell,
+	TableColumn,
+	TableRowHeader,
 } from './reference-table.js';
 import * as styles from './type-table.css.js';
 
@@ -92,10 +94,10 @@ export function PropTableHead({ layout }: { layout: PropTableLayout }) {
 	return (
 		<Fragment>
 			<colgroup>
-				<TableBox as="col" box={{ inlineSize: '30%' }} className={referenceStyles.hideNarrow} />
+				<TableColumn className={referenceStyles.hideNarrow} inlineSize="30%" />
 				<col />
 				{layout.showDefault ? (
-					<TableBox as="col" box={{ inlineSize: '20%' }} className={referenceStyles.hideNarrow} />
+					<TableColumn className={referenceStyles.hideNarrow} inlineSize="20%" />
 				) : null}
 			</colgroup>
 			<ReferenceTableHeader>
@@ -164,14 +166,14 @@ function PropRow({
 		paddingBlockEnd: hasDetails ? '0' : 'sp16',
 		paddingBlockStart: 'sp16',
 		paddingInline: 'sp16',
-	} as const;
+	} as const satisfies Pick<BoxProps, 'paddingBlockEnd' | 'paddingBlockStart' | 'paddingInline'>;
 	const cellClassName = cx(referenceStyles.cell, referenceStyles.stackedCell);
-	const ruled = hasDetails ? undefined : '';
+	const ruledClassName = hasDetails ? undefined : referenceStyles.ruled;
 
 	return (
 		<Fragment>
 			<tr className={styles.dataRow} id={rowId}>
-				<TableBox as="th" box={cellBox} className={cellClassName} data-ruled={ruled} scope="row">
+				<TableRowHeader className={cx(cellClassName, ruledClassName)} {...cellBox}>
 					<Cluster alignItems="baseline" flexWrap="nowrap" gap="sp4">
 						<CellText
 							className={referenceStyles.monospace}
@@ -181,39 +183,37 @@ function PropRow({
 						>
 							{name}
 						</CellText>
-						{layout.showRequired && required ? (
-							<CellText aria-label="Required" color="secondary" role="img">
-								*
-							</CellText>
-						) : null}
+						{layout.showRequired && required ? <RequiredPropMarker /> : null}
 					</Cluster>
-				</TableBox>
-				<TableBox
-					as="td"
-					box={cellBox}
-					className={cellClassName}
-					data-row-end={typeEndsRow ? '' : undefined}
-					data-ruled={ruled}
+				</TableRowHeader>
+				<TableCell
+					className={cx(
+						cellClassName,
+						ruledClassName,
+						typeEndsRow ? referenceStyles.rowEnd : undefined,
+					)}
+					{...cellBox}
 				>
 					<CellText className={referenceStyles.monospace} fontWeight="body">
 						{typeDescriptionLink === undefined ? (
 							shownType
 						) : (
-							<Link appearance="text" href={typeDescriptionLink}>
-								{shownType}
-							</Link>
+							<MdxLink href={typeDescriptionLink}>{shownType}</MdxLink>
 						)}
 					</CellText>
-				</TableBox>
+				</TableCell>
 				{layout.showDefault ? (
-					<TableBox
-						as="td"
-						box={cellBox}
-						className={cx(cellClassName, hasDefault ? undefined : referenceStyles.hideNarrow)}
-						data-row-end=""
-						data-ruled={ruled}
+					<TableCell
+						className={cx(
+							cellClassName,
+							ruledClassName,
+							referenceStyles.rowEnd,
+							hasDefault ? undefined : referenceStyles.hideNarrow,
+						)}
+						{...cellBox}
 					>
-						<CellText className={styles.narrowOnly} fontWeight="label">
+						{/* Visual label for the stacked layout; the columnheader still names Default. */}
+						<CellText aria-hidden className={styles.narrowOnly} fontWeight="label">
 							Default:{' '}
 						</CellText>
 						<CellText
@@ -223,18 +223,17 @@ function PropRow({
 						>
 							{hasDefault ? defaultValue : '—'}
 						</CellText>
-					</TableBox>
+					</TableCell>
 				) : null}
 			</tr>
 			{hasDetails ? (
 				<tr>
-					<TableBox
-						as="td"
-						box={{ paddingBlockEnd: 'sp16', paddingBlockStart: 'sp4', paddingInline: 'sp16' }}
-						className={cellClassName}
+					<TableCell
+						className={cx(cellClassName, referenceStyles.ruled, referenceStyles.rowEnd)}
 						colSpan={layout.columnCount}
-						data-row-end=""
-						data-ruled=""
+						paddingBlockEnd="sp16"
+						paddingBlockStart="sp4"
+						paddingInline="sp16"
 					>
 						<Stack gap="sp8">
 							{hasDescription ? (
@@ -268,10 +267,23 @@ function PropRow({
 								</Stack>
 							)}
 						</Stack>
-					</TableBox>
+					</TableCell>
 				</tr>
 			) : null}
 		</Fragment>
+	);
+}
+
+/**
+ * Required marker for API tables. Luke UI's form `NecessityMarker` hides requiredness from AT
+ * because the control exposes it; a static props table has no control, so the marker must stay in
+ * the accessible name.
+ */
+function RequiredPropMarker() {
+	return (
+		<CellText aria-label="Required" color="secondary" role="img">
+			*
+		</CellText>
 	);
 }
 

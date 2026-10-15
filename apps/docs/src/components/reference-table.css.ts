@@ -1,4 +1,5 @@
 import { vars } from '@luke-ui/react/theme';
+import { visuallyHiddenStyle } from '@luke-ui/react/visually-hidden';
 import { globalStyle, style } from '@vanilla-extract/css';
 
 // Styles for the docs reference tables (the props tables and the token tables). Everything not
@@ -66,30 +67,63 @@ export const bodyGroupCentered = style({
 	},
 });
 
-// DS gap: Box has no per-side border props (the row rule is a block-end border), no textAlign, no
-// `:last-child` selectors, and no container-query display. A cell carries `data-ruled` when a rule
-// belongs under it and `data-row-end` when it is the last cell the narrow layout shows, which keeps
-// one rule under each stacked row. The last row of the last body never has a rule.
+// DS gap: Box has no textAlign or container-query display.
 export const cell = style({
 	'@layer': {
 		components: {
 			textAlign: 'start',
-			selectors: {
-				'&[data-ruled]': {
-					borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+			'@container': {
+				[NARROW]: {
+					display: 'block',
 				},
+			},
+		},
+	},
+});
+
+// DS gap: Box has no per-side border props. A ruled cell draws the row separator; the last row of
+// the last body never has a rule. In the stacked layout only the last visible cell of a prop keeps
+// the rule (see `rowEnd`).
+export const ruled = style({
+	'@layer': {
+		components: {
+			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+			selectors: {
 				'tbody:last-child > tr:last-child > &': {
 					borderBlockEnd: 'none',
 				},
 			},
 			'@container': {
 				[NARROW]: {
-					display: 'block',
-					selectors: {
-						'&[data-ruled]:not([data-row-end])': {
-							borderBlockEnd: 'none',
-						},
-					},
+					borderBlockEnd: 'none',
+				},
+			},
+		},
+	},
+});
+
+// DS gap: marks the last cell the narrow layout shows, so the stacked prop keeps one rule and end
+// padding under it.
+export const rowEnd = style({});
+
+globalStyle(`${ruled}${rowEnd}`, {
+	'@layer': {
+		components: {
+			'@container': {
+				[NARROW]: {
+					borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+				},
+			},
+		},
+	},
+});
+
+globalStyle(`tbody:last-child > tr:last-child > ${ruled}${rowEnd}`, {
+	'@layer': {
+		components: {
+			'@container': {
+				[NARROW]: {
+					borderBlockEnd: 'none',
 				},
 			},
 		},
@@ -110,9 +144,6 @@ export const stackedCell = style({
 						'&:first-child:not([colspan])': {
 							paddingBlockStart: vars.space.sp16,
 						},
-						'&[data-row-end][data-ruled]': {
-							paddingBlockEnd: vars.space.sp16,
-						},
 					},
 				},
 			},
@@ -120,14 +151,40 @@ export const stackedCell = style({
 	},
 });
 
-// DS gap: Box has no container-query display. The header, its columns, and a missing default have
-// no place in the stacked layout. This follows `cell` so `display: none` wins over `display: block`.
+globalStyle(`${stackedCell}${ruled}${rowEnd}`, {
+	'@layer': {
+		components: {
+			'@container': {
+				[NARROW]: {
+					paddingBlockEnd: vars.space.sp16,
+				},
+			},
+		},
+	},
+});
+
+// DS gap: Box has no container-query display. Columns and empty default cells have no place in the
+// stacked layout. This follows `cell` so `display: none` wins over `display: block`.
 export const hideNarrow = style({
 	'@layer': {
 		components: {
 			'@container': {
 				[NARROW]: {
 					display: 'none',
+				},
+			},
+		},
+	},
+});
+
+// DS gap: same as `hideNarrow`, but keeps the header in the accessibility tree so columnheader
+// associations survive the stacked layout. `display: none` would remove them.
+export const visuallyHiddenNarrow = style({
+	'@layer': {
+		components: {
+			'@container': {
+				[NARROW]: {
+					...visuallyHiddenStyle,
 				},
 			},
 		},
@@ -165,6 +222,26 @@ globalStyle(`${monospace} code`, {
 			lineHeight: 'inherit',
 			paddingBlock: 0,
 			paddingInline: 0,
+		},
+	},
+});
+
+/** Label metrics so Track `firstLine` rails share 1lh with token-explorer toolbar text. */
+export const filterTrack = style({
+	'@layer': {
+		components: {
+			fontSize: vars.font.label.fontSize,
+			lineHeight: vars.font.label.lineHeight,
+		},
+	},
+});
+
+/** Caption metrics for the icon-gallery filter toolbar. */
+export const filterTrackCaption = style({
+	'@layer': {
+		components: {
+			fontSize: vars.font.caption.fontSize,
+			lineHeight: vars.font.caption.lineHeight,
 		},
 	},
 });

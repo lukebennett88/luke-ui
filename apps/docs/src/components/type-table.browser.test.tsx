@@ -5,6 +5,7 @@ import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import {
 	createMemoryHistory,
 	createRootRoute,
+	createRoute,
 	createRouter,
 	RouterProvider,
 } from '@tanstack/react-router';
@@ -122,13 +123,18 @@ for (const [width, inlineSize] of [
 	});
 }
 
-test('stacks the columns and hides the header at a mobile width', async () => {
+test('keeps column headers accessible at a mobile width', async () => {
 	await renderWidget(
 		<TypeTable id="api" type={{ label: { default: '"Untitled"', type: 'string' } }} />,
 		{ inlineSize: MOBILE_INLINE_SIZE },
 	);
 
-	expect(page.getByRole('columnheader', { name: 'Type' }).elements()).toHaveLength(0);
+	// Narrow layout stacks cells visually, but columnheaders must stay in the accessibility tree
+	// (visually hidden, not `display: none`).
+	expect(page.getByRole('columnheader', { name: 'Name' }).elements()).toHaveLength(1);
+	expect(page.getByRole('columnheader', { name: 'Type' }).elements()).toHaveLength(1);
+	expect(page.getByRole('columnheader', { name: 'Default' }).elements()).toHaveLength(1);
+	await expect.element(page.getByRole('rowheader', { name: 'label' })).toBeVisible();
 	await expect.element(page.getByText('Default:')).toBeVisible();
 });
 
@@ -265,9 +271,14 @@ async function renderWidget(
 		),
 	});
 	const initialEntry = hash === undefined ? '/' : `/#${hash}`;
+	// DocsLink targets `/$` for internal typeDescriptionLink paths.
+	const splatRoute = createRoute({
+		getParentRoute: () => rootRoute,
+		path: '/$',
+	});
 	const router = createRouter({
 		history: createMemoryHistory({ initialEntries: [initialEntry] }),
-		routeTree: rootRoute,
+		routeTree: rootRoute.addChildren([splatRoute]),
 	});
 
 	container = document.body.appendChild(document.createElement('div'));

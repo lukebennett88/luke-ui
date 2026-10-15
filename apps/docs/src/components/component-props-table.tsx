@@ -11,7 +11,7 @@ import * as styles from './component-props-table.css.js';
 import { InheritTypography } from './docs-article/mdx-elements.js';
 import * as disclosureStyles from './docs-disclosure.css.js';
 import * as tableStyles from './reference-table.css.js';
-import { CellText, ReferenceTableFrame, TableBox } from './reference-table.js';
+import { CellText, ReferenceTableFrame, TableCell } from './reference-table.js';
 import type { PropTableLayout, TypeNode } from './type-table.js';
 import { getPropTableLayout, PropRows, PropTableHead } from './type-table.js';
 
@@ -92,13 +92,10 @@ function PropGroup({
 	return (
 		<tbody className={tableStyles.bodyGroup}>
 			<tr>
-				<TableBox
-					as="td"
-					box={{ padding: '0' }}
-					className={tableStyles.cell}
+				<TableCell
+					className={cx(tableStyles.cell, tableStyles.ruled, tableStyles.rowEnd)}
 					colSpan={layout.columnCount}
-					data-row-end=""
-					data-ruled=""
+					padding="0"
 				>
 					<Cluster
 						className={cx(disclosureStyles.trigger, styles.groupButtonExpanded)}
@@ -125,7 +122,7 @@ function PropGroup({
 						/>
 						<CellText fontWeight="emphasis">{group.name}</CellText>
 					</Cluster>
-				</TableBox>
+				</TableCell>
 			</tr>
 			{isExpanded ? (
 				<PropRows hashPrefix={rowIdPrefix} layout={layout} names={group.props} type={type} />

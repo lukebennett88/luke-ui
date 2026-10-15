@@ -10,7 +10,6 @@ export const trigger = style({
 			backgroundColor: 'transparent',
 			borderStyle: 'none',
 			color: 'inherit',
-			cursor: 'pointer',
 			selectors: {
 				'&:hover': {
 					backgroundColor: vars.color.background.neutral.subtle.hover,
