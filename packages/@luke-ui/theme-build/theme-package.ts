@@ -9,6 +9,7 @@
  * `stylesheet.css` from the built `dist/input.js`, the JavaScript consumers install.
  */
 
+import { randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -17,12 +18,6 @@ import { writeFile } from 'node:fs/promises';
 import type { UserConfig } from 'vite-plus';
 
 const require = createRequire(import.meta.url);
-
-/**
- * Counts the builds in this process. Node caches an imported module by URL, so each build imports
- * `input.js` under its own query, or a rebuild in watch mode would compile the first build's input.
- */
-let build = 0;
 
 export const themePackage: UserConfig = {
 	pack: {
@@ -55,8 +50,8 @@ export const themePackage: UserConfig = {
 				name: 'luke-ui-theme-stylesheet',
 				async writeBundle({ dir = 'dist' }) {
 					const input = pathToFileURL(path.resolve(dir, 'input.js'));
-					build += 1;
-					input.search = `build=${build}`;
+					// Bust Node's ESM URL cache. A counter resets when watch reloads this config.
+					input.search = `build=${randomUUID()}`;
 					const { theme } = await import(input.href);
 					await writeFile(path.resolve(dir, 'stylesheet.css'), defineTheme(theme));
 				},
