@@ -159,10 +159,7 @@ interface TokenRowProps {
 	token: ThemeToken;
 }
 
-/**
- * One token in a list: its sample, typed path, CSS variable, resolved value, and copy button.
- * The row's id is the target of a Find result.
- */
+/** One token in a list: its sample, typed path, CSS variable, resolved value, and copy button. */
 export function TokenRow({ sample, sampleInlineSize, token }: TokenRowProps) {
 	return (
 		<Grid

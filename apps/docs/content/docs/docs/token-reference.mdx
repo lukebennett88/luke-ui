@@ -3,10 +3,8 @@ title: Token reference
 description: Public CSS variables to build custom Luke UI elements.
 ---
 
+import { ColorFamily } from '../../../src/components/color-tokens';
 import { MotionTokens } from '../../../src/components/motion-tokens';
-import { NeutralColors } from '../../../src/components/neutral-colors';
-import { RoleColors } from '../../../src/components/role-colors';
-import { TokenFind } from '../../../src/components/token-find';
 import { DepthAndFinishTokens } from '../../../src/components/token-scales';
 import { InteractionTokens } from '../../../src/components/token-scales';
 import { RadiusTokens } from '../../../src/components/token-scales';
@@ -18,60 +16,38 @@ import { TypeStyleTable } from '../../../src/components/typography-tokens';
 `vars` is Luke UI's typed token contract, for custom elements that a component API or layout utility
 cannot express. Every path stays the same across themes, and its value follows the active theme
 identity and colour mode. Use the variable instead of copying its resolved value, which does not
-adapt.
+adapt. Copy a row's `vars` expression for TypeScript, or use its displayed `--luke-*` variable in
+CSS.
 
-Find a token by its typed path or CSS variable. Selecting a match jumps to that row. The catalogues
-stay fully visible.
+## Colour
 
-<TokenFind />
+### background
 
-## How token names work
+<ColorFamily family="background" />
 
-A colour path names the property, role, emphasis, and state. For example,
-`vars.color.background.warning.solid.hover` resolves to
-`var(--luke-color-background-warning-solid-hover)`. Copy a row's `vars` expression for TypeScript,
-or use its displayed `--luke-*` variable in CSS.
+### foreground
 
-Most other families name a role, such as `vars.radius.control` or `vars.depth.floating`. Space names
-its value, as in `vars.space.sp16`.
+<ColorFamily family="foreground" />
 
-## Colour roles
+### border
 
-Each role has six backgrounds, four foregrounds, and one border. The background ramps pair `subtle`
-and `solid` with `rest`, `hover`, and `pressed`. Use `foreground.onSolid` on that role's solid fill.
-Read [Colour](/docs/color#semantic-roles) to choose a role.
+<ColorFamily family="border" />
 
-### Neutral
+### surface
 
-<RoleColors colorRole="neutral" />
+<ColorFamily family="surface" />
 
-### Accent
+### text
 
-<RoleColors colorRole="accent" />
+<ColorFamily family="text" />
 
-### Info
+### overlay
 
-<RoleColors colorRole="info" />
+<ColorFamily family="overlay" />
 
-### Success
+### loadingSkeleton
 
-<RoleColors colorRole="success" />
-
-### Warning
-
-<RoleColors colorRole="warning" />
-
-### Danger
-
-<RoleColors colorRole="danger" />
-
-## Neutral colours
-
-Surfaces, text, and structural borders belong to no role. `border.control` and `border.controlHover`
-contrast with every surface. `border.decorative` is a separator with no contrast guarantee. Read
-[Colour](/docs/color#surfaces-and-content) to choose a surface.
-
-<NeutralColors />
+<ColorFamily family="loadingSkeleton" />
 
 ## Typography
 

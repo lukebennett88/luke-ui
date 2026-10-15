@@ -144,10 +144,10 @@ not help. Silence in this log is not evidence.
 
 ## An aria-label-only ComboboxField leaves its mobile tray dialog unnamed
 
-- Seen: 2026-10-15 (token catalogue redesign). `ComboboxField` with `aria-label="Find a token"`
-  named the searchbox, but the 390px mobile tray dialog had no accessible name. The page now uses
-  `label="Find a token"` to supply the label context the tray reads.
+- Seen: 2026-10-15 (token catalogue redesign). `ComboboxField` with `aria-label` named the
+  searchbox, but the 390px mobile tray dialog had no accessible name. A visible `label` supplies the
+  label context the tray reads.
 - Where: `packages/@luke-ui/react/src/core/primitives/combobox/tray.tsx` reads `LabelContext` for
-  the tray's name; `apps/docs/src/components/token-find.tsx` uses the labelled field.
+  the tray's name.
 - Problem: A valid field name supplied with `aria-label` does not reach the tray dialog, so
   consumers must use a visible label to name it.

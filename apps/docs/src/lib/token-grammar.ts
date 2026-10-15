@@ -13,36 +13,33 @@ import { themeTokens } from '../generated/token-reference.generated.js';
 export const ROLES = ['neutral', 'accent', 'info', 'success', 'warning', 'danger'] as const;
 export type Role = (typeof ROLES)[number];
 
-const ROLE_BACKGROUND_PATHS = [
-	'subtle.rest',
-	'subtle.hover',
-	'subtle.pressed',
-	'solid.rest',
-	'solid.hover',
-	'solid.pressed',
+/** Top-level branches under `vars.color`, in the order the reference page lists them. */
+export const COLOR_FAMILIES = [
+	'background',
+	'foreground',
+	'border',
+	'surface',
+	'text',
+	'overlay',
+	'loadingSkeleton',
 ] as const;
-const ROLE_FOREGROUND_PATHS = ['rest', 'hover', 'pressed', 'onSolid'] as const;
+export type ColorFamilyId = (typeof COLOR_FAMILIES)[number];
 
-interface RoleColorRow {
+const COLOR_FAMILY_SET: ReadonlySet<string> = new Set(COLOR_FAMILIES);
+
+interface ColorRoleGroup {
 	role: Role;
 	tokens: ReadonlyArray<ThemeToken>;
 }
 
-function roleColorPaths(role: Role): ReadonlyArray<string> {
-	return [
-		...ROLE_BACKGROUND_PATHS.map((suffix) => `color.background.${role}.${suffix}`),
-		...ROLE_FOREGROUND_PATHS.map((suffix) => `color.foreground.${role}.${suffix}`),
-		`color.border.${role}`,
-	];
-}
-
-const ROLE_PATHS = new Set(ROLES.flatMap(roleColorPaths));
-
-type NeutralColorGroupId = 'surfaces' | 'text' | 'borders' | 'other';
-
-interface NeutralColorGroup {
-	id: NeutralColorGroupId;
-	title: string;
+interface ColorFamilySection {
+	id: ColorFamilyId;
+	/**
+	 * Role subgroups for `background` and `foreground`. Other families stay a single list in
+	 * contract order.
+	 */
+	roles: ReadonlyArray<ColorRoleGroup> | null;
+	/** Flat token list when `roles` is null. Empty when tokens live under `roles`. */
 	tokens: ReadonlyArray<ThemeToken>;
 }
 
@@ -99,11 +96,10 @@ interface TokenScale {
 	tokens: ReadonlyArray<ThemeToken>;
 }
 
-type TokenSectionId = 'roleColors' | 'neutralColors' | 'typography' | 'scales';
+type TokenSectionId = 'colors' | 'typography' | 'scales';
 
 export interface TokenSections {
-	neutralColors: ReadonlyArray<NeutralColorGroup>;
-	roleColors: ReadonlyArray<RoleColorRow>;
+	colors: ReadonlyArray<ColorFamilySection>;
 	scales: Readonly<Record<ScaleId, TokenScale>>;
 	/** The section each token path belongs to. Every contract token has exactly one. */
 	sectionByPath: ReadonlyMap<string, TokenSectionId>;
@@ -138,51 +134,18 @@ export function buildTokenSections(tokens: ReadonlyArray<ThemeToken> = themeToke
 	const byPath = new Map(tokens.map((token) => [token.path, token]));
 
 	return {
-		neutralColors: buildNeutralColorGroups(tokens),
-		roleColors: buildRoleColorRows(byPath),
+		colors: buildColorFamilies(tokens),
 		scales: buildScales(tokens),
 		sectionByPath,
 		typography: buildTypography(tokens, byPath),
 	};
 }
 
-const NEUTRAL_GROUP_TITLES: Record<NeutralColorGroupId, string> = {
-	borders: 'Borders',
-	other: 'Other',
-	surfaces: 'Surfaces',
-	text: 'Text',
-};
-
-const NEUTRAL_GROUP_ORDER: ReadonlyArray<NeutralColorGroupId> = [
-	'surfaces',
-	'text',
-	'borders',
-	'other',
-];
-
-/** Structural borders. Role borders share `color.border` but belong to the role grid. */
-const STRUCTURAL_BORDERS: ReadonlySet<string> = new Set([
-	'decorative',
-	'control',
-	'controlHover',
-	'focus',
-]);
-
-/** Neutral colours outside the surface, text, and border families, listed so a new one must be placed. */
-const OTHER_NEUTRAL_PATHS: ReadonlySet<string> = new Set([
-	'color.overlay.backdrop',
-	'color.loadingSkeleton',
-]);
-
-function neutralColorGroupOf(path: string): NeutralColorGroupId | undefined {
-	const [family, section, leaf, ...rest] = path.split('.');
-	if (family !== 'color') return;
-	if (OTHER_NEUTRAL_PATHS.has(path)) return 'other';
-	if (leaf === undefined || rest.length > 0) return;
-	if (section === 'surface') return 'surfaces';
-	if (section === 'text') return 'text';
-	if (section === 'border' && STRUCTURAL_BORDERS.has(leaf)) return 'borders';
-	return;
+/** The `vars.color.<family>` branch a colour path belongs to. */
+function colorFamilyOf(path: string): ColorFamilyId | undefined {
+	const [root, family] = path.split('.');
+	if (root !== 'color' || family === undefined || !COLOR_FAMILY_SET.has(family)) return;
+	return family as ColorFamilyId;
 }
 
 const TYPE_STYLE_SET: ReadonlySet<string> = new Set(TYPE_STYLES);
@@ -220,44 +183,32 @@ function scaleOf(path: string): ScaleId | undefined {
 
 const SECTION_MATCHERS: ReadonlyArray<{ id: TokenSectionId; matches: (path: string) => boolean }> =
 	[
-		{ id: 'roleColors', matches: (path) => ROLE_PATHS.has(path) },
-		{ id: 'neutralColors', matches: (path) => neutralColorGroupOf(path) !== undefined },
+		{ id: 'colors', matches: (path) => colorFamilyOf(path) !== undefined },
 		{ id: 'typography', matches: (path) => typographyPartOf(path) !== undefined },
 		{ id: 'scales', matches: (path) => scaleOf(path) !== undefined },
 	];
 
-function buildRoleColorRows(byPath: ReadonlyMap<string, ThemeToken>): ReadonlyArray<RoleColorRow> {
-	const missing: Array<string> = [];
-	const rows = ROLES.map((role) => {
-		const tokens = roleColorPaths(role).flatMap((path) => {
-			const token = byPath.get(path);
-			if (token !== undefined) return [token];
-			missing.push(path);
-			return [];
-		});
-		return { role, tokens };
-	});
-
-	if (missing.length > 0)
-		throw new Error(`Role colour catalogue has no token for: ${missing.join(', ')}`);
-	return rows;
-}
-
-function buildNeutralColorGroups(
-	tokens: ReadonlyArray<ThemeToken>,
-): ReadonlyArray<NeutralColorGroup> {
-	const byGroup = new Map<NeutralColorGroupId, Array<ThemeToken>>(
-		NEUTRAL_GROUP_ORDER.map((id) => [id, []]),
-	);
+function buildColorFamilies(tokens: ReadonlyArray<ThemeToken>): ReadonlyArray<ColorFamilySection> {
+	const byFamily = new Map<ColorFamilyId, Array<ThemeToken>>(COLOR_FAMILIES.map((id) => [id, []]));
 	for (const token of tokens) {
-		const group = neutralColorGroupOf(token.path);
-		if (group !== undefined) byGroup.get(group)?.push(token);
+		const family = colorFamilyOf(token.path);
+		if (family !== undefined) byFamily.get(family)?.push(token);
 	}
-	return NEUTRAL_GROUP_ORDER.map((id) => ({
-		id,
-		title: NEUTRAL_GROUP_TITLES[id],
-		tokens: byGroup.get(id) ?? [],
-	}));
+
+	return COLOR_FAMILIES.map((id) => {
+		const familyTokens = byFamily.get(id) ?? [];
+		if (id === 'background' || id === 'foreground') {
+			return {
+				id,
+				roles: ROLES.map((role) => ({
+					role,
+					tokens: familyTokens.filter((token) => token.path.split('.')[2] === role),
+				})),
+				tokens: [],
+			};
+		}
+		return { id, roles: null, tokens: familyTokens };
+	});
 }
 
 function buildTypography(
@@ -311,3 +262,8 @@ function buildScales(tokens: ReadonlyArray<ThemeToken>): Readonly<Record<ScaleId
 }
 
 export const tokenSections: TokenSections = buildTokenSections();
+
+/** Capitalises a role id for a group label. */
+export function roleLabel(role: Role): string {
+	return `${role[0]?.toUpperCase() ?? ''}${role.slice(1)}`;
+}

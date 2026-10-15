@@ -40,7 +40,7 @@ export const group = style({
 });
 
 // DS gap: Box has no per-side border, sibling selector, or scroll margin props. A rule separates
-// rows, and Find targets clear the site header.
+// rows, and hash targets clear the site header.
 export const row = style({
 	'@layer': {
 		components: {
@@ -54,7 +54,7 @@ export const row = style({
 	},
 });
 
-// DS gap: Box has no scroll margin prop. Find targets clear the site header.
+// DS gap: Box has no scroll margin prop. Hash targets clear the site header.
 export const tile = style({
 	'@layer': {
 		components: {
