@@ -1,19 +1,21 @@
-import { Box } from '@luke-ui/react/box';
 import { Cluster } from '@luke-ui/react/cluster';
+import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
-import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
-import type { TypeNode } from 'fumadocs-ui/components/type-table';
-import { TypeTable } from 'fumadocs-ui/components/type-table';
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from 'fumadocs-ui/components/ui/collapsible';
+import { useRouterState } from '@tanstack/react-router';
 import type { ComponentProps } from 'react';
+import { useEffect, useState } from 'react';
+import { Button as RacButton } from 'react-aria-components/Button';
 import { groupPropNames, NATIVE_PROPS_FORWARDING_KEY } from '../lib/component-prop-groups.js';
+import * as styles from './component-props-table.css.js';
+import { InheritTypography } from './docs-article/mdx-elements.js';
+import * as disclosureStyles from './docs-disclosure.css.js';
+import * as tableStyles from './reference-table.css.js';
+import { CellText, ReferenceTableFrame, TableCell } from './reference-table.js';
+import type { PropTableLayout, TypeNode } from './type-table.js';
+import { getPropTableLayout, PropRows, PropTableHead } from './type-table.js';
 
-/** Grouped prop tables for a component guide's `## API` section. */
+/** Grouped prop table for a component guide's `## API` section. */
 export function ComponentPropsTable({
 	className,
 	id,
@@ -25,87 +27,106 @@ export function ComponentPropsTable({
 } & ComponentProps<'div'>) {
 	const groups = groupPropNames(Object.keys(type));
 	const nativePropsNote = type[NATIVE_PROPS_FORWARDING_KEY]?.description;
+	const hash = useRouterState({ select: (state) => state.location.hash });
+	// The marker entry is not a row, so it must not count towards the table-wide decisions.
+	const layout = getPropTableLayout(
+		groups.flatMap((group) => group.props.flatMap((name) => type[name] ?? [])),
+	);
+
+	useEffect(() => {
+		// Rows in a collapsed group do not exist when the browser first resolves the hash.
+		if (hash.startsWith(`${id}-`))
+			document.getElementById(hash)?.scrollIntoView({ behavior: 'instant' });
+	}, [hash, id]);
 
 	return (
-		<Stack className={cx('not-prose', className)} gap="sp12" id={id} marginBlock="sp24" {...props}>
-			{nativePropsNote !== undefined ? (
-				<Text color="secondary" elementType="p" typography="caption">
-					{nativePropsNote}
-				</Text>
-			) : null}
-			{groups.map((group) => (
-				<PropGroup
-					group={group}
-					key={group.name}
-					type={pickGroupProps(type, new Set(group.props))}
-				/>
-			))}
+		<Stack className={cx('not-prose', className)} gap="sp16" id={id} marginBlock="sp24" {...props}>
+			{nativePropsNote === undefined ? null : (
+				<CellText color="secondary" elementType="div" fontWeight="body">
+					<InheritTypography>{nativePropsNote}</InheritTypography>
+				</CellText>
+			)}
+			<ReferenceTableFrame>
+				<PropTableHead layout={layout} />
+				{groups.map((group) =>
+					group.name === 'Component props' ? (
+						<tbody className={tableStyles.bodyGroup} key={group.name}>
+							<PropRows hashPrefix={id} layout={layout} names={group.props} type={type} />
+						</tbody>
+					) : (
+						<PropGroup
+							group={group}
+							hash={hash}
+							key={group.name}
+							layout={layout}
+							rowIdPrefix={id}
+							type={type}
+						/>
+					),
+				)}
+			</ReferenceTableFrame>
 		</Stack>
 	);
 }
 
 function PropGroup({
 	group,
+	hash,
+	layout,
+	rowIdPrefix,
 	type,
 }: {
 	group: { defaultOpen: boolean; name: string; props: ReadonlyArray<string> };
+	hash: string;
+	layout: PropTableLayout;
+	rowIdPrefix: string;
 	type: Record<string, TypeNode>;
 }) {
-	return (
-		<Box
-			backgroundColor="surface.base"
-			borderColor="decorative"
-			borderRadius="surface"
-			borderStyle="solid"
-			borderWidth="thin"
-			renderRoot={(domProps) => <Collapsible {...domProps} defaultOpen={group.defaultOpen} />}
-		>
-			<Cluster
-				className="group text-start"
-				flexWrap="nowrap"
-				inlineSize="100%"
-				justifyContent="space-between"
-				paddingBlock="sp12"
-				paddingInline="sp16"
-				renderRoot={(domProps) => <CollapsibleTrigger {...domProps} />}
-			>
-				<Text elementType="span" fontWeight="emphasis" typography="caption">
-					{group.name}
-				</Text>
-				<ChevronIcon />
-			</Cluster>
-			<Box
-				className="border-fd-border border-t"
-				paddingBlockEnd="sp4"
-				paddingInline="sp4"
-				renderRoot={(domProps) => <CollapsibleContent {...domProps} />}
-			>
-				<TypeTable type={type} />
-			</Box>
-		</Box>
-	);
-}
+	// A reader's toggle holds until the hash changes, so a link to a prop in a collapsed group
+	// always reopens it.
+	const [toggle, setToggle] = useState<{ atHash: string; open: boolean } | null>(null);
+	const holdsHash = group.props.some((name) => `${rowIdPrefix}-${name}` === hash);
+	const isExpanded =
+		toggle !== null && toggle.atHash === hash ? toggle.open : group.defaultOpen || holdsHash;
 
-function ChevronIcon() {
 	return (
-		<svg
-			aria-hidden
-			className="size-4 text-fd-muted-foreground transition-transform group-data-[state=open]:rotate-180"
-			fill="none"
-			stroke="currentColor"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			strokeWidth="2"
-			viewBox="0 0 24 24"
-		>
-			<path d="m6 9 6 6 6-6" />
-		</svg>
+		<tbody className={tableStyles.bodyGroup}>
+			<tr>
+				<TableCell
+					className={cx(tableStyles.cell, tableStyles.ruled, tableStyles.rowEnd)}
+					colSpan={layout.columnCount}
+					padding="0"
+				>
+					<Cluster
+						className={cx(disclosureStyles.trigger, styles.groupButtonExpanded)}
+						flexWrap="nowrap"
+						gap="sp4"
+						inlineSize="100%"
+						paddingBlock="sp12"
+						paddingInline="sp16"
+						renderRoot={(domProps) => (
+							<RacButton
+								{...domProps}
+								aria-expanded={isExpanded}
+								onPress={() => {
+									setToggle({ atHash: hash, open: !isExpanded });
+								}}
+							/>
+						)}
+					>
+						<Icon
+							aria-hidden
+							className={disclosureStyles.chevronEnd}
+							name="chevronRight"
+							size="xsmall"
+						/>
+						<CellText fontWeight="emphasis">{group.name}</CellText>
+					</Cluster>
+				</TableCell>
+			</tr>
+			{isExpanded ? (
+				<PropRows hashPrefix={rowIdPrefix} layout={layout} names={group.props} type={type} />
+			) : null}
+		</tbody>
 	);
-}
-
-function pickGroupProps(
-	type: Record<string, TypeNode>,
-	names: ReadonlySet<string>,
-): Record<string, TypeNode> {
-	return Object.fromEntries(Object.entries(type).filter(([name]) => names.has(name)));
 }

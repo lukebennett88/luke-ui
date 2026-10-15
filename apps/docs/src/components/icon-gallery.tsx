@@ -1,4 +1,5 @@
 import { Box } from '@luke-ui/react/box';
+import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Grid } from '@luke-ui/react/grid';
 import type { IconName, IconProps } from '@luke-ui/react/icon';
@@ -6,11 +7,16 @@ import { Icon, iconNames } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
+import { vars } from '@luke-ui/react/theme';
+import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import type { JSX, ReactNode } from 'react';
 import { useDeferredValue, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { Button as RacButton } from 'react-aria-components/Button';
+import * as styles from './icon-gallery.css.js';
 import { TextToggleButtonGroup } from './playground/icon-toggle-button-group.js';
+import * as referenceStyles from './reference-table.css.js';
 
 type GalleryIconSize = NonNullable<IconProps['size']>;
 
@@ -32,18 +38,6 @@ interface CopyStatus {
 	name: IconName;
 	state: 'copied' | 'error';
 }
-
-/**
- * Shared treatment for the two per-cell copy buttons. Always visible, on every input method,
- * as part of the cell's ruled footer. The only state change is a tint on hover/focus-visible.
- */
-const COPY_BUTTON_CLASS_NAME = cx(
-	'flex h-7 min-w-0 items-center justify-center gap-1 whitespace-nowrap',
-	'font-medium text-[11px] text-fd-muted-foreground',
-	'hover:bg-fd-accent hover:text-fd-accent-foreground',
-	'focus-visible:bg-fd-accent focus-visible:text-fd-accent-foreground',
-	'transition-colors duration-150 motion-reduce:transition-none',
-);
 
 /** Searchable index of the first-party icon set, sized at the token you'll ship it at. */
 export function IconGallery(): JSX.Element {
@@ -112,42 +106,52 @@ export function IconGallery(): JSX.Element {
 
 	return (
 		<Stack className="not-prose" gap="sp16">
-			<Cluster gap="sp12">
-				<Box flexBasis="14rem" flexGrow="1" minInlineSize="12rem">
-					<TextInputField
-						aria-label="Filter icons by name"
-						inputRef={inputRef}
-						onChange={setFilter}
-						placeholder="Filter by name"
-						prefix={<Icon name="search" size="small" />}
-						size="small"
-						value={filter}
+			<Track
+				className={referenceStyles.filterTrackCaption}
+				gap="sp12"
+				railAlignment="firstLine"
+				railEnd={
+					<>
+						<Text color="secondary" fontVariantNumeric="tabular-nums" typography="caption">
+							{countText}
+						</Text>
+						<VisuallyHidden aria-live="polite" elementType="p">
+							{deferredCountText}
+						</VisuallyHidden>
+					</>
+				}
+			>
+				<Cluster gap="sp12">
+					<Box flexBasis="14rem" flexGrow="1" minInlineSize="12rem">
+						<TextInputField
+							aria-label="Filter icons by name"
+							inputRef={inputRef}
+							onChange={setFilter}
+							placeholder="Filter by name"
+							prefix={<Icon name="search" size="small" />}
+							size="small"
+							value={filter}
+						/>
+					</Box>
+					<TextToggleButtonGroup
+						label="Preview size"
+						onChange={setPreviewSize}
+						options={SIZE_OPTIONS}
+						value={previewSize}
 					/>
-				</Box>
-				<TextToggleButtonGroup
-					label="Preview size"
-					onChange={setPreviewSize}
-					options={SIZE_OPTIONS}
-					value={previewSize}
-				/>
-				<Text
-					className="ms-auto"
-					color="secondary"
-					elementType="p"
-					fontVariantNumeric="tabular-nums"
-					typography="caption"
-				>
-					{countText}
-				</Text>
-				<VisuallyHidden aria-live="polite" elementType="p">
-					{deferredCountText}
-				</VisuallyHidden>
-			</Cluster>
+				</Cluster>
+			</Track>
 
-			<div className="overflow-hidden rounded-xl border border-fd-border">
-				{filteredNames.length === 0 ? (
-					<IconGalleryEmptyState onClear={handleClearFilter} query={filter.trim()} />
-				) : (
+			{filteredNames.length === 0 ? (
+				<IconGalleryEmptyState onClear={handleClearFilter} query={filter.trim()} />
+			) : (
+				<Box
+					borderColor="decorative"
+					borderRadius="surface"
+					borderStyle="solid"
+					borderWidth="thin"
+					overflow="hidden"
+				>
 					<Grid columns="repeat(auto-fit, minmax(min(8rem, 100%), 1fr))">
 						{filteredNames.map((name) => (
 							<IconGalleryCell
@@ -159,8 +163,8 @@ export function IconGallery(): JSX.Element {
 							/>
 						))}
 					</Grid>
-				)}
-			</div>
+				</Box>
+			)}
 
 			<VisuallyHidden aria-live="polite" elementType="p">
 				{copyState.announcement}
@@ -230,7 +234,7 @@ interface IconGalleryCellProps {
 /** One grid cell: a fixed-height glyph area, the name below it, and a ruled footer of two copy buttons. */
 function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryCellProps) {
 	return (
-		<div className="-mr-px -mb-px flex flex-col border-fd-border border-r border-b">
+		<Stack className={styles.cell} gap="0">
 			<Stack alignItems="center" gap="sp4" padding="sp8">
 				<Box
 					alignItems="center"
@@ -241,19 +245,19 @@ function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryC
 				>
 					<Icon name={name} size={previewSize} />
 				</Box>
-				<Text
-					className="w-full"
-					color="secondary"
-					elementType="span"
-					lineClamp={1}
-					textAlign="center"
-					title={name}
-					typography="caption"
-				>
-					{name}
-				</Text>
+				<Box inlineSize="100%">
+					<Text
+						color="secondary"
+						lineClamp={1}
+						textAlign="center"
+						title={name}
+						typography="caption"
+					>
+						{name}
+					</Text>
+				</Box>
 			</Stack>
-			<div className="grid grid-cols-2 border-fd-border border-t">
+			<Grid className={styles.copyRow} columns="1fr 1fr">
 				<CopyButton
 					copyStatus={copyStatus?.kind === 'jsx' ? copyStatus : null}
 					kind="jsx"
@@ -266,8 +270,8 @@ function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryC
 					name={name}
 					onCopy={onCopy}
 				/>
-			</div>
-		</div>
+			</Grid>
+		</Stack>
 	);
 }
 
@@ -292,14 +296,29 @@ function CopyButton({ copyStatus, kind, name, onCopy }: CopyButtonProps) {
 	})();
 
 	return (
-		<button
-			aria-label={accessibleLabel}
-			className={cx(COPY_BUTTON_CLASS_NAME, kind === 'jsx' && 'border-fd-border border-r')}
-			onClick={() => onCopy(name, kind)}
-			type="button"
+		<Box
+			alignItems="center"
+			className={cx(styles.copyButton, kind === 'jsx' && styles.copyButtonDivider)}
+			display="flex"
+			gap="sp4"
+			justifyContent="center"
+			minBlockSize={vars.space.sp32}
+			minInlineSize="0"
+			padding="0"
+			renderRoot={(domProps) => (
+				<RacButton
+					{...domProps}
+					aria-label={accessibleLabel}
+					onPress={() => {
+						onCopy(name, kind);
+					}}
+				/>
+			)}
 		>
-			{label}
-		</button>
+			<Text fontWeight="label" typography="caption">
+				{label}
+			</Text>
+		</Box>
 	);
 }
 
@@ -311,26 +330,13 @@ interface IconGalleryEmptyStateProps {
 /** Real empty state inside the grid frame: names the query, offers a way back. */
 function IconGalleryEmptyState({ onClear, query }: IconGalleryEmptyStateProps) {
 	return (
-		<Stack
-			alignItems="center"
-			className="text-center"
-			gap="sp12"
-			paddingBlock="sp64"
-			paddingInline="sp24"
-		>
-			<Text color="secondary" elementType="p" typography="caption">
+		<Stack alignItems="center" gap="sp12" paddingBlock="sp48" paddingInline="sp24">
+			<Text color="secondary" elementType="p" textAlign="center" typography="caption">
 				No icon matches &quot;{query}&quot;
 			</Text>
-			<button
-				className={cx(
-					'rounded-md border border-fd-border px-3 py-1.5 font-medium text-fd-foreground text-sm',
-					'hover:bg-fd-accent hover:text-fd-accent-foreground',
-				)}
-				onClick={onClear}
-				type="button"
-			>
+			<Button onPress={onClear} size="small">
 				Clear filter
-			</button>
+			</Button>
 		</Stack>
 	);
 }

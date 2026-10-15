@@ -3,60 +3,101 @@ title: Token reference
 description: Public CSS variables to build custom Luke UI elements.
 ---
 
-import { TokenExplorer } from '../../../src/components/token-explorer';
+import { ColorFamily } from '../../../src/components/color-tokens';
+import { MotionTokens } from '../../../src/components/motion-tokens';
+import { DepthAndFinishTokens } from '../../../src/components/token-scales';
+import { InteractionTokens } from '../../../src/components/token-scales';
+import { RadiusTokens } from '../../../src/components/token-scales';
+import { SizingTokens } from '../../../src/components/token-scales';
+import { SpaceTokens } from '../../../src/components/token-scales';
+import { FontFamilyAndWeightTokens } from '../../../src/components/typography-tokens';
+import { TypeStyleTable } from '../../../src/components/typography-tokens';
 
-`vars` is Luke UI's typed public token contract. Each path resolves to a stable `--luke-*` CSS
-variable. For example, `vars.color.background.danger.solid.hover` resolves to
-`var(--luke-color-background-danger-solid-hover)`.
+## Colour
 
-Use these variables when a component API or layout utility cannot express a custom element. Some
-values vary by theme identity or colour mode, while others remain fixed. The token paths stay the
-same across bundled and custom themes.
+### background
 
-## Use semantic variables
+<ColorFamily family="background" />
 
-<ExampleBlock src="theming/semantic-variables" title="Token reference: Use semantic variables" />
+### foreground
 
-Choose the token whose name matches the element's role. A card might use `surface.subdued`,
-`radius.surface`, and `depth.resting`. A warning message might use the warning role's subtle
-background and foreground.
+<ColorFamily family="foreground" />
 
-## Choosing a scale
+### border
 
-Token families use different naming models. Spacing uses value-based keys such as `sp16` and `sp24`.
-Radius and depth use semantic roles. Use the public variable instead of copying its resolved CSS
-value.
+<ColorFamily family="border" />
 
-### Spacing
+### surface
 
-Spacing provides one scale for `gap`, `padding`, and `margin`. The number in each key reflects its
-value at the default 16px root and is emitted as `rem`.
+<ColorFamily family="surface" />
 
-<ExampleBlock src="overview/spacing-scale" title="Token reference: Spacing scale" />
+### text
 
-Read [Layout](/docs/layout#responsive-values) for breakpoint keys and how spacing values cascade.
+<ColorFamily family="text" />
 
-### Radius
+### overlay
 
-Radius provides five semantic roles. Choose the role that matches the element being rounded, such as
-`control` for an input or `surface` for a card.
+<ColorFamily family="overlay" />
 
-<ExampleBlock src="overview/radius-roles" title="Token reference: Radius roles" />
+### loadingSkeleton
 
-### Depth
+<ColorFamily family="loadingSkeleton" />
 
-Depth describes how a surface sits above or within the interface.
+## Typography
 
-<ExampleBlock src="overview/depth" title="Token reference: Depth scale" />
+Each type style is five tokens. Render text with `Text` or `Heading`, which also apply the style's
+trim, and use these tokens for an element they cannot render. Read
+[Typography](/docs/typography#typography-styles) to choose a style.
 
-Menus and dialogs both use `surface.overlay`. A menu adds `depth.floating`, while a dialog adds
-`depth.overlay`.
+<TypeStyleTable />
 
-Components already apply depth to their own states. Use these variables only for custom surfaces.
+The families and weights stay public for code surfaces and weight overrides.
 
-### Motion
+<FontFamilyAndWeightTokens />
 
-Motion provides three durations. Each duration is named for the role the movement plays.
+## Space
+
+Space is one scale for `gap`, `padding`, and `margin`. The number in each key is its value in pixels
+at a 16px root, and the token is emitted in `rem`. Read [Layout](/docs/layout#responsive-values) for
+breakpoint keys and how spacing values cascade.
+
+<SpaceTokens />
+
+## Radius
+
+Radius has five roles. Choose the role that matches the element you round, such as `control` for an
+input or `surface` for a card.
+
+<RadiusTokens />
+
+## Depth and finish
+
+Depth places a surface above or within the interface. Menus and dialogs both use `surface.overlay`.
+A menu adds `depth.floating`, and a dialog adds `depth.overlay`. A control finish is the face of a
+solid control fill, such as a solid button.
+
+Components already apply depth and finish to their own states. Use these tokens only for custom
+surfaces.
+
+<DepthAndFinishTokens />
+
+## Sizing
+
+Use a control size for the block size of a custom control, so it lines up with Luke UI controls of
+the same size.
+
+<SizingTokens />
+
+## Interaction
+
+Fade a custom control that is disabled or pending with `interaction.disabledOpacity`, as Luke UI
+controls do.
+
+<InteractionTokens />
+
+## Motion
+
+Each duration is named for the role the movement plays. Hover or focus a duration to play it.
 
 - `feedback` covers an in-place state change, such as hover, focus, or selection.
 - `enter` covers an element or an overlay that enters the interface.
@@ -64,12 +105,7 @@ Motion provides three durations. Each duration is named for the role the movemen
 
 Pair `easing.standard` with feedback and with entry. Pair `easing.exit` with a dismissal.
 
-## Browse the tokens
-
-The explorer lists every public token in the contract. Samples use the active identity and colour
-mode.
-
-<TokenExplorer />
+<MotionTokens />
 
 ## Continue learning
 

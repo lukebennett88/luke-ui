@@ -26,10 +26,9 @@ code > * {
 
 /**
  * Bridge Fumadocs structural colour variables to Luke UI stable tokens for the
- * Fumadocs UI components the docs still render: the type table and its
- * collapsible, and the Tailwind classes the example, icon gallery, and token
- * widgets use. Status and diff variables remain Fumadocs-owned. The variables resolve on the root
- * and again on each colour-mode scope, so a nested scope bridges its own token values.
+ * Tailwind classes the example frames and playground host still use (#675/#676).
+ * Status and diff variables remain Fumadocs-owned. The variables resolve on the root and again on
+ * each colour-mode scope, so a nested scope bridges its own token values.
  */
 :root,
 [data-color-mode] {
