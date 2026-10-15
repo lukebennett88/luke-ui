@@ -603,3 +603,56 @@ test('adornments join the accessible name only when they carry text', async () =
 	await expect.element(locator.getByRole('button', { name: 'Dismiss' })).toHaveFocus();
 	await expectNoAxeViolations(container);
 });
+
+test('adornments', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<Stack width="18rem">
+				<Heading level={2} startContent={<Icon name="checkCircle" />} typography="heading3">
+					Section heading that wraps
+				</Heading>
+				<Text
+					elementType="p"
+					endContent={<Kbd>Esc</Kbd>}
+					startContent={<Icon name="exclamationTriangle" size="small" />}
+				>
+					Example message that wraps onto a second line
+				</Text>
+				<Text
+					elementType="p"
+					endContent={<IconButton aria-label="Dismiss" icon="close" size="small" />}
+					typography="label"
+				>
+					https://example.com/a/very/long/unbroken/path
+				</Text>
+				<Text
+					elementType="div"
+					startContent={
+						<Box
+							backgroundColor="neutral.subtle.rest"
+							blockSize="2.5rem"
+							borderRadius="full"
+							display="inline-flex"
+							elementType="span"
+							inlineSize="2.5rem"
+						/>
+					}
+					typography="caption"
+				>
+					Caption beside an avatar taller than the line
+				</Text>
+				<Text elementType="p" lineClamp={1} startContent={<Icon name="bookOpen" size="small" />}>
+					Clamped text that is long enough to be truncated
+				</Text>
+				<div dir="rtl">
+					<Text elementType="p" startContent={<Icon name="checkCircle" size="small" />}>
+						نص طويل يلتف على سطرين
+					</Text>
+				</div>
+			</Stack>,
+			{ appearance },
+		);
+
+		await captureVisualAppearance(locator, 'text/adornments', appearance);
+	}
+});

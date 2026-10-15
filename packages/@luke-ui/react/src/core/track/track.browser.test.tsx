@@ -7,6 +7,7 @@ import { vars } from '@luke-ui/react/theme';
 import { Track } from '@luke-ui/react/track';
 import type { CSSProperties, ReactNode } from 'react';
 import { expect, test } from 'vite-plus/test';
+import type { VisualAppearance } from '../test-utils/render.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
 
@@ -242,7 +243,11 @@ function verticalCentre(element: Element): number {
 	return rect.top + rect.height / 2;
 }
 
-function renderCompound(title: ReactNode, avatarSize: '1.5rem' | '2.5rem') {
+function renderCompound(
+	title: ReactNode,
+	avatarSize: '1.5rem' | '2.5rem',
+	appearance?: VisualAppearance,
+) {
 	return render(
 		<Track
 			data-testid="track"
@@ -267,6 +272,7 @@ function renderCompound(title: ReactNode, avatarSize: '1.5rem' | '2.5rem') {
 				<Text typography="caption">Description that may wrap onto a second line of text</Text>
 			</Stack>
 		</Track>,
+		{ appearance },
 	);
 }
 
@@ -368,5 +374,17 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 			{ appearance },
 		);
 		await captureVisualAppearance(scene, 'track/kitchen-sink', appearance);
+	}
+});
+
+test('first baseline with compound content', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = renderCompound(
+			<Text fontWeight="emphasis">Notification title that wraps</Text>,
+			'2.5rem',
+			appearance,
+		);
+
+		await captureVisualAppearance(locator, 'track/first-baseline-compound', appearance);
 	}
 });
