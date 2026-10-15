@@ -71,8 +71,10 @@ request. Leave out any section that would be empty.
   means Changes needed.
 - **Spec**: each acceptance criterion that matters for this change as done, partial, or missing, and
   anything the issue did not ask for.
-- **Findings**: blocking findings first, then findings worth fixing. Give each one `file:line`, what
-  goes wrong, the evidence, and a direction for the fix.
+- **Findings**: label each finding **Blocking** or **Worth fixing**, not with another severity
+  scale, and list blocking findings first. Give each one `file:line`, what goes wrong, the evidence,
+  and a direction for the fix. Report every problem the change introduces as a finding, not as an
+  aside.
 - **Nits**: one line each, for small breaches of a written rule. Leave out preferences.
 - **Already on main**: problems the pull request did not cause. They do not affect the verdict.
   Search [papercuts.md](../../papercuts.md) and open issues first. Draft a papercut or a `Seen` line
