@@ -4,22 +4,15 @@ import { Icon } from '@luke-ui/react/icon';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { Text } from '@luke-ui/react/text';
-import { vars } from '@luke-ui/react/theme';
+import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, ComponentType, JSX, ReactNode } from 'react';
 import { Suspense, use, useId } from 'react';
 import type { HighlightedSource } from '../lib/highlighted-source.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
 import { DocsLink } from './docs-link.js';
+import * as styles from './example-block.css.js';
 import { ExampleCodePreview } from './example-code-preview.js';
 import { ExamplePreview } from './example-preview.js';
-
-/** Concentric with the frame's `borderRadius="control"` after the 1px border. */
-const INNER_RADIUS = `max(0px, calc(${vars.radius.control} - 1px))`;
-
-const frameEndRadiusStyle = {
-	borderEndEndRadius: INNER_RADIUS,
-	borderEndStartRadius: INNER_RADIUS,
-} as const;
 
 type ExampleBlockProps = {
 	src: string;
@@ -123,25 +116,20 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 			borderRadius="control"
 			borderStyle="solid"
 			borderWidth="thin"
-			className="not-prose"
+			className={cx(styles.frame, 'not-prose')}
 			data-example-frame
 			marginBlock="sp16"
 			role={ariaLabel ? 'region' : 'group'}
-			style={{ isolation: 'isolate' }}
 		>
 			<Box
 				alignItems="center"
 				backgroundColor="surface.base"
+				className={styles.frameHeader}
 				display="flex"
 				gap="sp8"
 				justifyContent="space-between"
 				paddingBlock="sp8"
 				paddingInline="sp16"
-				style={{
-					borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
-					borderStartEndRadius: INNER_RADIUS,
-					borderStartStartRadius: INNER_RADIUS,
-				}}
 			>
 				<Box flex="1 1 auto" minInlineSize={0}>
 					<Text color="secondary" elementType="div" id={titleId} typography="label">
@@ -154,7 +142,7 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 					</Box>
 				) : null}
 			</Box>
-			<Box overflow="hidden" style={frameEndRadiusStyle}>
+			<Box className={styles.frameBody} overflow="hidden">
 				{children}
 			</Box>
 		</Box>

@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Container } from '@luke-ui/react/container';
 import { Heading } from '@luke-ui/react/heading';
@@ -28,9 +29,11 @@ export function NotFound() {
 					<Heading level={1} typography="display">
 						Page not found
 					</Heading>
-					<Text className="max-w-xl" color="secondary" elementType="p" typography="lead">
-						Check the address, or search the docs.
-					</Text>
+					<Box maxInlineSize="36rem">
+						<Text color="secondary" elementType="p" typography="lead">
+							Check the address, or search the docs.
+						</Text>
+					</Box>
 					<Cluster gap="sp12">
 						<DocsLink appearance="button" prominence="high" to="/">
 							Go to home

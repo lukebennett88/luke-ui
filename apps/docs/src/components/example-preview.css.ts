@@ -92,6 +92,12 @@ export const previewGripState = style({
 		components: {
 			borderColor: vars.color.border.decorative,
 			boxShadow: vars.depth.resting,
+			color: vars.color.text.secondary,
+			pointerEvents: 'none',
+			transform: 'translate(-50%, -50%)',
+			transitionDuration: vars.motion.duration.enter,
+			transitionProperty: 'box-shadow, border-color',
+			transitionTimingFunction: vars.motion.easing.standard,
 			selectors: {
 				[`${previewSeparator}[data-separator=hover] &`]: {
 					borderColor: `color-mix(in oklab, ${vars.color.text.secondary} 80%, transparent)`,
@@ -101,6 +107,11 @@ export const previewGripState = style({
 				},
 				[`${previewSeparator}[data-separator=focus] &`]: {
 					boxShadow: `0 0 0 2px ${vars.color.border.focus}`,
+				},
+			},
+			'@media': {
+				'(prefers-reduced-motion: reduce)': {
+					transition: 'none',
 				},
 			},
 		},

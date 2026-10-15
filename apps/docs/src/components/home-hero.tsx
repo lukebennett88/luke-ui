@@ -32,6 +32,7 @@ export function HomeHero() {
 
 	return (
 		<Grid
+			alignItems="center"
 			columns={{
 				initial: 1,
 				bp768: 2,
@@ -44,9 +45,6 @@ export function HomeHero() {
 			paddingBlock={{
 				initial: 'sp64',
 				bp768: 'sp96',
-			}}
-			style={{
-				alignItems: 'center',
 			}}
 		>
 			<Stack gap="sp24">
@@ -96,7 +94,9 @@ export function HomeHero() {
 				gap="sp16"
 				padding="sp24"
 			>
-				<ThemeControls className="justify-self-start" />
+				<Box justifySelf="start">
+					<ThemeControls />
+				</Box>
 				<form onSubmit={handleSubmit}>
 					<Stack gap="sp16">
 						<TextInputField isRequired label="Name" name="name" />
