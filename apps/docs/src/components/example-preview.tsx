@@ -1,6 +1,5 @@
 import { Box } from '@luke-ui/react/box';
 import { createIcon } from '@luke-ui/react/icon';
-import { vars } from '@luke-ui/react/theme';
 import type { ComponentProps, ReactNode } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { GroupImperativeHandle } from 'react-resizable-panels';
@@ -130,16 +129,8 @@ function ExamplePreviewResizeGrip() {
 			justifyContent="center"
 			overflow="hidden"
 			position="absolute"
-			style={{
-				color: vars.color.text.secondary,
-				pointerEvents: 'none',
-				transform: 'translate(-50%, -50%)',
-				transitionDuration: vars.motion.duration.enter,
-				transitionProperty: 'box-shadow, border-color',
-				transitionTimingFunction: vars.motion.easing.standard,
-			}}
 		>
-			<GripIcon style={{ blockSize: '100%', inlineSize: '100%' }} />
+			<GripIcon className={styles.previewGripIcon} />
 		</Box>
 	);
 }

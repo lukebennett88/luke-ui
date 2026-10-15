@@ -5,8 +5,8 @@ import { Heading, HeadingLevels } from '@luke-ui/react/heading';
 import { Prose } from '@luke-ui/react/prose';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { vars } from '@luke-ui/react/theme';
 import type { ReactNode } from 'react';
+import * as styles from './home-features.css.js';
 
 interface FeatureCell {
 	description: ReactNode;
@@ -51,11 +51,6 @@ const FEATURES: ReadonlyArray<FeatureCell> = [
 	},
 ];
 
-const cellStyle = {
-	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
-	paddingBlockStart: vars.space.sp48,
-} as const;
-
 /** Plain heading-and-paragraph grid introducing the six Luke UI features. */
 export function HomeFeatures() {
 	return (
@@ -82,7 +77,7 @@ export function HomeFeatures() {
 							}}
 						>
 							{FEATURES.map((feature) => (
-								<Stack gap="sp16" key={feature.title} style={cellStyle}>
+								<Stack className={styles.featureCell} gap="sp16" key={feature.title}>
 									<Heading>{feature.title}</Heading>
 									<Text color="secondary" elementType="p">
 										{feature.description}
