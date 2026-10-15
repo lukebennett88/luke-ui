@@ -9,7 +9,7 @@ This page belongs to an exploratory spike for
 [Text](/components/typography/text) and [Heading](/components/typography/heading), and an
 experimental `railAlignment="firstBaseline"` on Track. None of them is settled API.
 
-Resize the window to see wrapping. The examples use the docs theme, its Inter webfont, and its
+Resize a preview to see wrapping. The examples use the docs theme, its Inter webfont, and its
 Capsize trims.
 
 ## How the candidates align
@@ -30,8 +30,9 @@ content beside the text can only match them by sharing the text's typography.
 
 ## Heading with a leading icon
 
-The heading is trimmed, wraps, and uses `heading3`. Track around the heading measures the wrong
-line. Track inside the heading works but needs `elementType="span"`. `startContent` needs neither.
+The heading is trimmed, wraps, and uses `heading3`. Track around the heading puts the icon about 4px
+below the first line. Track inside the heading comes within 1px but needs `elementType="span"`.
+`startContent` needs neither.
 
 <ExampleBlock src="first-line-alignment/heading-icon" title="First-line alignment: Heading icon" />
 
