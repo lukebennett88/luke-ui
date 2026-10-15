@@ -130,7 +130,7 @@ function ExamplePreviewResizeGrip() {
 			overflow="hidden"
 			position="absolute"
 		>
-			<GripIcon className={styles.previewGripIcon} />
+			<GripIcon style={{ blockSize: '100%', inlineSize: '100%' }} />
 		</Box>
 	);
 }

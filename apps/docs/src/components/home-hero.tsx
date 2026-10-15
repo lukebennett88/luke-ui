@@ -10,7 +10,6 @@ import type { SubmitEvent } from 'react';
 import { useTransition } from 'react';
 import { CodeBlock } from './code-block/code-block.js';
 import { DocsLink } from './docs-link.js';
-import * as styles from './home-hero.css.js';
 import { ThemeControls } from './theme-controls.js';
 
 const INSTALL_COMMAND = 'pnpm add @luke-ui/react react-aria-components';
@@ -33,7 +32,7 @@ export function HomeHero() {
 
 	return (
 		<Grid
-			className={styles.hero}
+			alignItems="center"
 			columns={{
 				initial: 1,
 				bp768: 2,
@@ -95,7 +94,9 @@ export function HomeHero() {
 				gap="sp16"
 				padding="sp24"
 			>
-				<ThemeControls className={styles.themeControls} />
+				<Box justifySelf="start">
+					<ThemeControls />
+				</Box>
 				<form onSubmit={handleSubmit}>
 					<Stack gap="sp16">
 						<TextInputField isRequired label="Name" name="name" />

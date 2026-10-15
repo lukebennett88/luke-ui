@@ -5,19 +5,6 @@ export const collapsedLineCount = 6;
 
 export const expanded = style({});
 
-export const expandToggle = style({
-	'@layer': {
-		components: {
-			insetBlockEnd: vars.space.sp8,
-			insetInlineStart: '50%',
-			justifyContent: 'center',
-			position: 'absolute',
-			transform: 'translateX(-50%)',
-			zIndex: 1,
-		},
-	},
-});
-
 export const collapsible = style({
 	'@layer': {
 		components: {

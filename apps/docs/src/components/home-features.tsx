@@ -77,7 +77,12 @@ export function HomeFeatures() {
 							}}
 						>
 							{FEATURES.map((feature) => (
-								<Stack className={styles.featureCell} gap="sp16" key={feature.title}>
+								<Stack
+									className={styles.featureCell}
+									gap="sp16"
+									key={feature.title}
+									paddingBlockStart="sp48"
+								>
 									<Heading>{feature.title}</Heading>
 									<Text color="secondary" elementType="p">
 										{feature.description}

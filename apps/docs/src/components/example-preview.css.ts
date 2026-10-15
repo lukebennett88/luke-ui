@@ -117,12 +117,3 @@ export const previewGripState = style({
 		},
 	},
 });
-
-export const previewGripIcon = style({
-	'@layer': {
-		components: {
-			blockSize: '100%',
-			inlineSize: '100%',
-		},
-	},
-});

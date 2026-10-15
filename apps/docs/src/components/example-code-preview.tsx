@@ -34,7 +34,17 @@ export function ExampleCodePreview({
 				viewportLabel={`${title} code`}
 			/>
 			{canExpand ? (
-				<Box className={styles.expandToggle} display="flex">
+				<Box
+					display="flex"
+					insetBlockEnd="sp8"
+					insetInlineStart="50%"
+					justifyContent="center"
+					position="absolute"
+					style={{
+						transform: 'translateX(-50%)',
+						zIndex: 1,
+					}}
+				>
 					<Button
 						aria-expanded={isExpanded}
 						onPress={() => setIsExpanded((prev) => !prev)}
