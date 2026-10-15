@@ -9,6 +9,7 @@ import { useRouterState } from '@tanstack/react-router';
 import type { Folder, Node, Root, Separator } from 'fumadocs-core/page-tree';
 import type { CSSProperties, ReactNode } from 'react';
 import { useId } from 'react';
+import { plainList } from '../styles/plain-list.css.js';
 import { DocsLink } from './docs-link.js';
 import * as styles from './docs-shell.css.js';
 
@@ -76,7 +77,14 @@ function NavList({
 	const entries = groupNavEntries(nodes);
 
 	return (
-		<Stack aria-labelledby={labelledBy} elementType="ul" gap="sp4">
+		<Stack
+			aria-labelledby={labelledBy}
+			className={plainList}
+			elementType="ul"
+			gap="sp4"
+			margin="0"
+			padding="0"
+		>
 			{entries.map((entry, index) => {
 				const isFirst = isTopLevel && index === 0;
 				if (entry.type === 'section') {

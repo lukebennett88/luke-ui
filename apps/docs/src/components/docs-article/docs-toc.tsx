@@ -8,6 +8,7 @@ import { useActiveAnchor } from 'fumadocs-core/toc';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { CSSProperties, ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
+import { plainList } from '../../styles/plain-list.css.js';
 import { docsNavPaneProps } from '../docs-nav.js';
 import * as styles from './docs-article.css.js';
 
@@ -92,7 +93,7 @@ function TocLinks({ onNavigate, toc }: { onNavigate?: () => void; toc: Array<TOC
 	const activeId = useActiveAnchor();
 
 	return (
-		<Box elementType="ul" style={tocListBorder}>
+		<Box className={plainList} elementType="ul" margin="0" padding="0" style={tocListBorder}>
 			{toc.map((item) => (
 				<Box elementType="li" key={item.url}>
 					<TocLink
