@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { Cluster } from '@luke-ui/react/cluster';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
@@ -21,11 +22,33 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
 		<div className={styles.editorSkeleton} role="status">
 			<VisuallyHidden>Loading editor</VisuallyHidden>
 			{toSkeletonLines(code).map((line, index) => (
-				<div aria-hidden className={styles.skeletonLine} data-line key={index}>
-					<span className={styles.skeletonLineNumber} data-line-number>
+				<Cluster
+					aria-hidden
+					alignItems="center"
+					blockSize="20px"
+					data-line
+					flexWrap="nowrap"
+					key={index}
+				>
+					<Box
+						className={styles.skeletonLineNumber}
+						data-line-number
+						elementType="span"
+						flexShrink="0"
+						inlineSize="3ch"
+					>
 						{index + 1}
-					</span>
-					<span className={styles.skeletonLineContent}>
+					</Box>
+					<Box
+						className={styles.skeletonLineContent}
+						elementType="span"
+						flexBasis="auto"
+						flexGrow="1"
+						flexShrink="1"
+						minInlineSize={0}
+						overflow="hidden"
+						paddingInlineEnd="sp16"
+					>
 						{line.length > 0 ? (
 							// Sized via custom properties (not style properties) so
 							// editor-skeleton-script.js can write byte-identical inline
@@ -40,8 +63,8 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
 								}}
 							/>
 						) : null}
-					</span>
-				</div>
+					</Box>
+				</Cluster>
 			))}
 			{showPill ? (
 				<Cluster aria-hidden className={styles.skeletonPillOverlay} justifyContent="center">

@@ -1,5 +1,5 @@
 import { vars } from '@luke-ui/react/theme';
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 import { docsTabletMinInlineSize } from '../../lib/docs-container-queries.js';
 import { monacoChromeColors } from '../../lib/shiki-theme.js';
 
@@ -275,23 +275,11 @@ export const editorSkeleton = style({
 	},
 });
 
-/** Monaco gutter metrics: keep digit rail and bar spacing byte-stable with the live editor. */
-export const skeletonLine = style({
-	'@layer': {
-		components: {
-			alignItems: 'center',
-			blockSize: '20px',
-			display: 'flex',
-		},
-	},
-});
-
+/** Gutter digit colour and end alignment — Box excludes typography. */
 export const skeletonLineNumber = style({
 	'@layer': {
 		components: {
 			color: monacoChromeColors.light.lineNumber,
-			flexShrink: 0,
-			inlineSize: '3ch',
 			textAlign: 'end',
 			selectors: {
 				':root.dark &': {
@@ -302,15 +290,10 @@ export const skeletonLineNumber = style({
 	},
 });
 
+/** Monaco gutter gap is 0.625rem, not a Luke UI space token. */
 export const skeletonLineContent = style({
 	'@layer': {
 		components: {
-			flexBasis: 'auto',
-			flexGrow: 1,
-			flexShrink: 1,
-			minInlineSize: 0,
-			overflow: 'hidden',
-			paddingInlineEnd: vars.space.sp16,
 			paddingInlineStart: '0.625rem',
 		},
 	},
@@ -333,6 +316,23 @@ export const skeletonPillOverlay = style({
 			inset: 0,
 			pointerEvents: 'none',
 			position: 'absolute',
+		},
+	},
+});
+
+/**
+ * Preview host for StoryWrapper. Stack owns the column; the direct child must flex-grow so the
+ * wrapper fills the iframe and keeps its overflow scrolling.
+ */
+export const previewRunner = style({});
+
+globalStyle(`${previewRunner} > *`, {
+	'@layer': {
+		components: {
+			flexBasis: 'auto',
+			flexGrow: 1,
+			flexShrink: 1,
+			minBlockSize: 0,
 		},
 	},
 });
