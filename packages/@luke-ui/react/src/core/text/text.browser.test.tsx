@@ -434,7 +434,12 @@ test('an adornment taller than the line grows the row and stays centred on the f
 	expect(verticalCentre(avatar)).toBeCloseTo(verticalCentre(cap), 0);
 });
 
-for (const direction of ['ltr', 'rtl'] as const) {
+const directions = [
+	{ direction: 'ltr', endEdge: 'right', startEdge: 'left' },
+	{ direction: 'rtl', endEdge: 'left', startEdge: 'right' },
+] as const;
+
+for (const { direction, endEdge, startEdge } of directions) {
 	test(`places startContent and endContent at the inline edges in ${direction}`, () => {
 		const { locator } = render(
 			<div dir={direction} style={{ inlineSize: '16rem' }}>
@@ -454,13 +459,8 @@ for (const direction of ['ltr', 'rtl'] as const) {
 		if (start == null) throw new Error('Expected an icon.');
 		const startRect = start.getBoundingClientRect();
 
-		if (direction === 'ltr') {
-			expect(startRect.left).toBeCloseTo(text.left, 0);
-			expect(end.right).toBeCloseTo(text.right, 0);
-		} else {
-			expect(startRect.right).toBeCloseTo(text.right, 0);
-			expect(end.left).toBeCloseTo(text.left, 0);
-		}
+		expect(startRect[startEdge]).toBeCloseTo(text[startEdge], 0);
+		expect(end[endEdge]).toBeCloseTo(text[endEdge], 0);
 	});
 }
 
