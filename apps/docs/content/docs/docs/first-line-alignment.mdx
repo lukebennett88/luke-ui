@@ -1,0 +1,138 @@
+---
+title: First-line alignment (spike)
+description: Compare Track with exploratory Text adornments for aligning content with a first line.
+---
+
+This page belongs to an exploratory spike for
+[#801](https://github.com/lukebennett88/luke-ui/issues/801). It compares the current
+[Track](/components/layout/track) with two candidates: `startContent` and `endContent` on
+[Text](/components/typography/text) and [Heading](/components/typography/heading), and an
+experimental `railAlignment="firstBaseline"` on Track. None of them is settled API.
+
+Resize the window to see wrapping. The examples use the docs theme, its Inter webfont, and its
+Capsize trims.
+
+## How the candidates align
+
+A first line has its own font size, line height, and trim. CSS cannot read those from a sibling, so
+content beside the text can only match them by sharing the text's typography.
+
+- **Track `firstLine`** sizes each rail to one line of Track's inherited line height. A child that
+  sets its own typography, such as a `Heading`, moves the line away from the rail. A trimmed child,
+  such as `Text` with `elementType="p"`, moves its first line up by its trim, even with the same
+  type style.
+- **Text adornments** render inside the text element, so they inherit its typography. A row aligned
+  on first baselines lines each adornment's line up with the text's first line, and a graphic is
+  centred on the capitals of that line.
+- **Track `firstBaseline`** uses the same row for compound content. Each rail is a line in Track's
+  inherited typography, aligned with the first baseline of the content, wherever it comes from. It
+  is exact when that first line uses Track's inherited font size.
+
+## Heading with a leading icon
+
+The heading is trimmed, wraps, and uses `heading3`. Track around the heading measures the wrong
+line. Track inside the heading works but needs `elementType="span"`. `startContent` needs neither.
+
+<ExampleBlock src="first-line-alignment/heading-icon" title="First-line alignment: Heading icon" />
+
+## Leading and trailing adornments
+
+`endContent` sits at the inline end of the row and lines up with the first line, like a trailing
+rail.
+
+<ExampleBlock
+	src="first-line-alignment/leading-trailing"
+	title="First-line alignment: Leading and trailing"
+/>
+
+## Graphics and text adornments
+
+A graphic, such as an icon or a status dot, is centred on the capitals of the first line. Text
+content keeps its own alignment, so a caption shares the baseline and `Kbd` keeps its own centring.
+
+<ExampleBlock
+	src="first-line-alignment/graphic-text"
+	title="First-line alignment: Graphics and text"
+/>
+
+## Compound content
+
+An avatar beside a title and a description is not one run of text, so Text adornments cannot hang
+the description under the title. A layout primitive is still needed here. `firstLine` lets the
+taller avatar overflow above the row. `start` aligns the avatar with the top of the content. The
+spike's `firstBaseline` centres the avatar and the dismiss button on the title's first line and
+grows the row to fit them.
+
+<ExampleBlock src="first-line-alignment/compound" title="First-line alignment: Compound content" />
+
+`firstBaseline` reads the font size Track inherits. With a `heading2` title in body context, the
+icon lands about 4px low. Wrapping Track in a `Text` with the title's style makes it exact, at the
+cost of stating the style twice.
+
+<ExampleBlock
+	src="first-line-alignment/compound-heading"
+	title="First-line alignment: Compound heading"
+/>
+
+## Trailing actions
+
+An `IconButton` in `endContent` lines up with the first line of a paragraph and joins its keyboard
+order after the text. A heading should not contain an action, because its text joins the heading's
+accessible name. Place the action beside the heading in a row aligned on baselines instead.
+
+<ExampleBlock src="first-line-alignment/action" title="First-line alignment: Trailing actions" />
+
+## Long text and line clamping
+
+The text shrinks below its longest word, so an unbroken URL wraps inside the row. `lineClamp` clamps
+the text and keeps the adornments.
+
+<ExampleBlock src="first-line-alignment/overflow" title="First-line alignment: Long text" />
+
+## Inline composition
+
+An inline `Text` with adornments sits on the baseline of the surrounding sentence. `Button` and
+`Link` with `appearance="button"` already take `startContent` and `endContent`.
+
+<ExampleBlock src="first-line-alignment/inline" title="First-line alignment: Inline" />
+
+## Right-to-left
+
+Adornments follow the logical inline direction, so `startContent` sits on the right.
+
+<ExampleBlock src="first-line-alignment/rtl" title="First-line alignment: Right-to-left" />
+
+## Type styles and icon sizes
+
+Each row pairs a type style with an icon size. Track centres the icon in one body line, and each
+trimmed paragraph moves up inside it, so the icon sits up to 8px below the first line.
+
+<ExampleBlock src="first-line-alignment/scale" title="First-line alignment: Type styles" />
+
+## Limitations
+
+These cases show where Text adornments fall short or behave in ways to weigh before adopting them.
+
+<ExampleBlock src="first-line-alignment/limitations" title="First-line alignment: Limitations" />
+
+- Text adornments hang one run of text. A second block, such as a description, does not hang.
+- `textAlign="center"` centres the text in the space beside the adornment, not as a group with it.
+- An icon taller than the line moves the first line down to stay centred on it.
+- An inline `Text` with adornments is one atomic box, so its words do not break across lines with
+  the sentence.
+- Adornments take phrasing content. A block element, such as a `div`, has no line to centre on.
+- Graphics move by the `cap` unit. A browser without it centres them on the x-height instead.
+
+## Continue learning
+
+<Cards>
+	<Card href="/components/typography/text" title="Text">
+		See `startContent` and `endContent` in the Text guide.
+	</Card>
+	<Card href="/components/layout/track" title="Track">
+		Compare Track's rail alignments.
+	</Card>
+	<Card href="/docs/typography" title="Typography">
+		Read how type styles and Capsize trims work.
+	</Card>
+</Cards>

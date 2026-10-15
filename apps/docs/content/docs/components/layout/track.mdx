@@ -36,6 +36,19 @@ alignment point.
 
 <ExampleBlock src="track/alignment" title="Track: Alignment" />
 
+For one run of text beside an icon, use `startContent` on
+[Text](/components/typography/text#adornments) instead. It reads the text's own typography.
+
+### First baseline
+
+`firstBaseline` is an exploratory alignment for compound content, such as an avatar beside a title
+and a description. Each rail is a line in Track's inherited typography. Track aligns that line with
+the first baseline of `children` and centres a graphic in the rail on its capitals. A rail taller
+than the line grows the row. It is exact when the first line of `children` uses Track's inherited
+font size. Compare the alignments in [First-line alignment](/docs/first-line-alignment).
+
+<ExampleBlock src="track/first-baseline" title="Track: First baseline" />
+
 ## Avatar and text
 
 <ExampleBlock src="track/avatar" title="Track: Avatar and text" />

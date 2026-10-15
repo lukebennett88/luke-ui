@@ -81,6 +81,24 @@ rendered text only, so avoid using uppercase styling as a substitute for a clear
 
 <ExampleBlock src="text/transform" title="Text: Transform and decoration" />
 
+## Adornments
+
+Pass `startContent` or `endContent` to place content before or after the text, aligned with its
+first line. Wrapped lines align with the text, not with the adornment. `endContent` sits at the
+inline end of the row. This is an exploratory API. Compare it with Track in
+[First-line alignment](/docs/first-line-alignment).
+
+<ExampleBlock src="text/adornments" title="Text: Adornments" />
+
+Adornments render inside the element and inherit its typography, so they line up with any type
+style. A graphic, such as an `Icon`, is centred on the capitals of the first line. Text, such as
+`Kbd`, keeps its own alignment. A graphic taller than the line moves the text down to stay centred
+on it.
+
+Adornments take phrasing content and are part of the element. Their text joins its accessible name.
+Do not put an action in a heading's adornments. Use them for one run of text. For an adornment
+beside several blocks, such as a title and a description, use [Track](/components/layout/track).
+
 ## API
 
 <component-props-table path="packages/@luke-ui/react/src/core/text/text.tsx" name="TextProps" />
