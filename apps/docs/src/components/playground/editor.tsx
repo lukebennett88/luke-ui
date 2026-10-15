@@ -1,4 +1,6 @@
+import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Stack } from '@luke-ui/react/stack';
 import type { OnMount } from '@monaco-editor/react';
 import Editor from '@monaco-editor/react';
 import type * as Monaco from 'monaco-editor';
@@ -50,13 +52,13 @@ export default function PlaygroundEditor({
 	};
 
 	return (
-		<div className="flex h-full min-h-0 flex-col">
+		<Stack blockSize="100%" minBlockSize={0}>
 			<PlaygroundPaneToolbar>
 				<Button isPending={isFormatting} onPress={() => void handleFormat()} size="small">
 					Format
 				</Button>
 			</PlaygroundPaneToolbar>
-			<div className="min-h-0 flex-1">
+			<Box flexBasis="auto" flexGrow="1" flexShrink="1" minBlockSize={0}>
 				<Editor
 					defaultLanguage="typescript"
 					defaultValue={defaultValue}
@@ -81,8 +83,8 @@ export default function PlaygroundEditor({
 					path="file:///playground/index.tsx"
 					theme={theme}
 				/>
-			</div>
-		</div>
+			</Box>
+		</Stack>
 	);
 }
 

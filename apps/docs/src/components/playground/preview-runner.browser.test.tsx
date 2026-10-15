@@ -138,6 +138,34 @@ test('compiles parent playground code and posts success', async () => {
 		.toEqual({ type: 'playground:success' });
 });
 
+test('lets StoryWrapper grow to fill the preview viewport height', async () => {
+	const messages = await runCodeInPreview(
+		'export default function Demo() { return <div>ok</div>; }',
+	);
+
+	await expect
+		.poll(() => messages.find((message) => message.type === 'playground:success'))
+		.toEqual({ type: 'playground:success' });
+
+	// DocsThemeRoot wraps PreviewRunner; the Stack with `previewRunner` is its child.
+	const themeRoot = container?.firstElementChild;
+	expect(themeRoot).toBeInstanceOf(HTMLElement);
+	const runner = themeRoot?.firstElementChild;
+	expect(runner).toBeInstanceOf(HTMLElement);
+	const storyWrapper = runner?.firstElementChild;
+	expect(storyWrapper).toBeInstanceOf(HTMLElement);
+
+	const runnerStyle = getComputedStyle(runner as HTMLElement);
+	expect(runnerStyle.display).toBe('flex');
+	expect(runnerStyle.flexDirection).toBe('column');
+	expect(runnerStyle.minBlockSize).toBe(`${window.innerHeight}px`);
+
+	const storyStyle = getComputedStyle(storyWrapper as HTMLElement);
+	expect(storyStyle.flexGrow).toBe('1');
+	expect(storyStyle.minBlockSize).toBe('0px');
+	expect(storyStyle.overflow).toBe('auto');
+});
+
 test('runs the Button tone example with the docs comparison helper', async () => {
 	const messages = await runCodeInPreview(toneSource);
 

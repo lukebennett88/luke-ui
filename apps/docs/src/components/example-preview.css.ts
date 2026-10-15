@@ -1,6 +1,6 @@
 import { vars } from '@luke-ui/react/theme';
 import { globalStyle, style } from '@vanilla-extract/css';
-import { DESKTOP_MEDIA_QUERY } from './playground/use-is-desktop.js';
+import { docsTabletMinWidthMedia } from '../lib/docs-container-queries.js';
 
 export const MIN_RESIZABLE_CARD_WIDTH = 640;
 const RESIZE_GUTTER_WIDTH = vars.space.sp24;
@@ -27,7 +27,7 @@ globalStyle(`${previewGroup} > [data-panel]:last-child`, {
 	'@layer': {
 		components: {
 			'@media': {
-				[DESKTOP_MEDIA_QUERY]: {
+				[docsTabletMinWidthMedia]: {
 					'@container': {
 						[previewCardResizable]: {
 							minInlineSize: `${OUTSIDE_STRIP_WIDTH} !important`,
@@ -44,7 +44,7 @@ export const previewCanvas = style({
 		components: {
 			containerType: 'inline-size',
 			'@media': {
-				[DESKTOP_MEDIA_QUERY]: {
+				[docsTabletMinWidthMedia]: {
 					'@container': {
 						[previewCardResizable]: {
 							paddingInlineEnd: RESIZE_GUTTER_WIDTH,
@@ -75,7 +75,7 @@ export const previewSeparator = style({
 			position: 'relative',
 			zIndex: 10,
 			'@media': {
-				[DESKTOP_MEDIA_QUERY]: {
+				[docsTabletMinWidthMedia]: {
 					'@container': {
 						[previewCardResizable]: {
 							display: 'block',

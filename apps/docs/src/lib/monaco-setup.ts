@@ -39,8 +39,8 @@ monaco.editor.addKeybindingRule({
 
 /**
  * Monaco themes derived from the docs Shiki registrations, so the playground
- * matches highlighted code elsewhere on the site. The editor pane backgrounds
- * in `routes/playground/index.tsx` mirror each theme's `editor.background`.
+ * matches highlighted code elsewhere on the site. Pane and skeleton chrome use
+ * `monacoChromeColors` from the same registrations.
  * Defined by {@link ensurePlaygroundMonaco}.
  */
 export const monacoThemes = {
