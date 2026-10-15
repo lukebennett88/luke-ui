@@ -7,11 +7,13 @@ import { Icon, iconNames } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
+import { vars } from '@luke-ui/react/theme';
 import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import type { JSX, ReactNode } from 'react';
 import { useDeferredValue, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { Button as RacButton } from 'react-aria-components/Button';
 import * as styles from './icon-gallery.css.js';
 import { TextToggleButtonGroup } from './playground/icon-toggle-button-group.js';
 import * as referenceStyles from './reference-table.css.js';
@@ -300,15 +302,16 @@ function CopyButton({ copyStatus, kind, name, onCopy }: CopyButtonProps) {
 			display="flex"
 			gap="sp4"
 			justifyContent="center"
-			minBlockSize="sp32"
+			minBlockSize={vars.space.sp32}
 			minInlineSize="0"
 			padding="0"
 			renderRoot={(domProps) => (
-				<button
+				<RacButton
 					{...domProps}
 					aria-label={accessibleLabel}
-					onClick={() => onCopy(name, kind)}
-					type="button"
+					onPress={() => {
+						onCopy(name, kind);
+					}}
 				/>
 			)}
 		>

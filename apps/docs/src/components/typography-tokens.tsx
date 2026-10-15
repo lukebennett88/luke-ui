@@ -2,8 +2,10 @@ import { Box } from '@luke-ui/react/box';
 import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
+import { vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
+import { Button as RacButton } from 'react-aria-components/Button';
 import type { ThemeToken } from '../generated/token-reference.generated.js';
 import type { TokenSections } from '../lib/token-grammar.js';
 import { tokenSections } from '../lib/token-grammar.js';
@@ -217,13 +219,15 @@ function TypeValueRow({ onCopy, status, token }: TypeValueRowProps) {
 					className={styles.typeCopyButton}
 					display="flex"
 					justifyContent="center"
+					minBlockSize={vars.space.sp32}
+					minInlineSize={vars.space.sp32}
 					renderRoot={(domProps) => (
-						<button
+						<RacButton
 							{...domProps}
 							aria-label={`Copy ${text}`}
-							onClick={() => onCopy(token, text)}
-							title={`Copy ${text}`}
-							type="button"
+							onPress={() => {
+								onCopy(token, text);
+							}}
 						/>
 					)}
 				>
