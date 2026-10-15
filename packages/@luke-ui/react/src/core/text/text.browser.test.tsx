@@ -350,6 +350,27 @@ for (const typography of typeStyles) {
 	}
 }
 
+for (const typography of ['caption', 'heading2'] as const) {
+	test(`centres an IconButton endContent on the first line of ${typography} text`, () => {
+		const { locator } = render(
+			<div style={{ inlineSize: '16rem' }}>
+				<Text
+					elementType="p"
+					endContent={<IconButton aria-label="Dismiss" icon="close" size="small" />}
+					typography={typography}
+				>
+					<span data-testid="cap" style={capProbeStyle} />
+					{wrappingCopy}
+				</Text>
+			</div>,
+		);
+		const button = locator.getByRole('button', { name: 'Dismiss' }).element();
+		const cap = locator.getByTestId('cap').element();
+
+		expect(verticalCentre(button)).toBeCloseTo(verticalCentre(cap), 0);
+	});
+}
+
 test('wrapped lines of adorned text align with the first line, not the adornment', () => {
 	const { container, locator } = render(
 		<div style={{ inlineSize: '12rem' }}>
