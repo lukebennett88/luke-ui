@@ -1,7 +1,10 @@
+import type { BlockquoteProps } from '@luke-ui/react/blockquote';
 import type { CodeProps } from '@luke-ui/react/code';
 import type { EmProps } from '@luke-ui/react/em';
 import type { EmojiProps } from '@luke-ui/react/emoji';
+import type { HeadingProps } from '@luke-ui/react/heading';
 import type { KbdProps } from '@luke-ui/react/kbd';
+import type { NumeralProps } from '@luke-ui/react/numeral';
 import type { QuoteProps } from '@luke-ui/react/quote';
 import type { StrongProps } from '@luke-ui/react/strong';
 import type { TextProps } from '@luke-ui/react/text';
@@ -27,4 +30,17 @@ test('inline typography takes no slot', () => {
 	assertType<QuoteProps>({ slot: 'description' });
 	// @ts-expect-error — inline typography never fills a React Aria text slot
 	assertType<StrongProps>({ slot: 'description' });
+});
+
+test('Text and Heading take adornments, Numeral and Blockquote do not', () => {
+	assertType<TextProps>({ endContent: 'End', startContent: 'Start' });
+	assertType<HeadingProps>({ endContent: 'End', startContent: 'Start' });
+	// @ts-expect-error — a formatted number has no adornments
+	assertType<NumeralProps>({ startContent: 'Start', value: 1 });
+	// @ts-expect-error — a formatted number has no adornments
+	assertType<NumeralProps>({ endContent: 'End', value: 1 });
+	// @ts-expect-error — a quotation has no adornments
+	assertType<BlockquoteProps>({ startContent: 'Start' });
+	// @ts-expect-error — a quotation has no adornments
+	assertType<BlockquoteProps>({ endContent: 'End' });
 });

@@ -4,7 +4,10 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { blockquoteRecipe } from './recipe.css.js';
 
-type _BlockquoteOmit = DistributiveOmit<TextProps, 'color' | 'elementType'>;
+type _BlockquoteOmit = DistributiveOmit<
+	TextProps,
+	'color' | 'elementType' | 'endContent' | 'startContent'
+>;
 
 interface _BlockquoteProps extends _BlockquoteOmit {}
 

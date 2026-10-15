@@ -1,15 +1,22 @@
+import { Box } from '@luke-ui/react/box';
 import { Code } from '@luke-ui/react/code';
 import { Em } from '@luke-ui/react/em';
 import { Emoji } from '@luke-ui/react/emoji';
+import { Heading } from '@luke-ui/react/heading';
+import { Icon } from '@luke-ui/react/icon';
+import { IconButton } from '@luke-ui/react/icon-button';
 import { Kbd } from '@luke-ui/react/kbd';
+import { Link } from '@luke-ui/react/link';
 import { Quote } from '@luke-ui/react/quote';
 import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
+import { createRef } from 'react';
 import { Menu, MenuItem } from 'react-aria-components/Menu';
 import { TextContext } from 'react-aria-components/Text';
 import { expect, test } from 'vite-plus/test';
 import { typeStyles } from '../../theme/type-styles.js';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
@@ -293,4 +300,285 @@ test('line clamp and transforms', { tags: ['visual'] }, async () => {
 	);
 
 	await captureVisual(locator, 'text/line-clamp-transforms');
+});
+
+// A zero-width box one cap height tall, sitting on the baseline, spans the capitals of its line.
+const capProbeStyle = {
+	blockSize: '1cap',
+	display: 'inline-block',
+	inlineSize: 0,
+} satisfies CSSProperties;
+
+const wrappingCopy = 'Example text that wraps onto several lines when the column is narrow';
+
+function verticalCentre(element: Element): number {
+	const rect = element.getBoundingClientRect();
+	return rect.top + rect.height / 2;
+}
+
+function lineRects(element: Element): Array<DOMRect> {
+	const range = document.createRange();
+	range.selectNodeContents(element);
+	return [...range.getClientRects()];
+}
+
+function querySvg(container: Element): SVGSVGElement {
+	const svg = container.querySelector('svg');
+	if (svg == null) throw new Error('Expected an icon.');
+	return svg;
+}
+
+for (const typography of typeStyles) {
+	for (const size of ['xsmall', 'medium', 'large'] as const) {
+		test(`centres a ${size} startContent icon on the first line of ${typography} text`, () => {
+			const { container, locator } = render(
+				<div style={{ inlineSize: '16rem' }}>
+					<Text
+						elementType="p"
+						startContent={<Icon name="checkCircle" size={size} />}
+						typography={typography}
+					>
+						<span data-testid="cap" style={capProbeStyle} />
+						{wrappingCopy}
+					</Text>
+				</div>,
+			);
+			const cap = locator.getByTestId('cap').element();
+
+			expect(verticalCentre(querySvg(container))).toBeCloseTo(verticalCentre(cap), 0);
+		});
+	}
+}
+
+test('wrapped lines of adorned text align with the first line, not the adornment', () => {
+	const { container, locator } = render(
+		<div style={{ inlineSize: '12rem' }}>
+			<Text elementType="p" startContent={<Icon name="checkCircle" />}>
+				<span data-testid="copy">{wrappingCopy}</span>
+			</Text>
+		</div>,
+	);
+	const lines = lineRects(locator.getByTestId('copy').element());
+	const [first] = lines;
+	if (first == null) throw new Error('Expected the copy to render.');
+
+	expect(lines.length).toBeGreaterThan(1);
+	expect(first.left).toBeGreaterThan(querySvg(container).getBoundingClientRect().right);
+	for (const line of lines) expect(line.left).toBeCloseTo(first.left, 0);
+});
+
+test('a trimmed Heading keeps its trim when it has startContent', () => {
+	const { locator } = render(
+		<Heading data-testid="heading" level={2} startContent={<Icon name="checkCircle" />}>
+			<span data-testid="cap" style={capProbeStyle} />
+			Section heading
+		</Heading>,
+	);
+	const heading = locator.getByTestId('heading').element();
+	const cap = locator.getByTestId('cap').element();
+
+	expect(cap.getBoundingClientRect().top).toBeCloseTo(heading.getBoundingClientRect().top, 0);
+	expect(cap.getBoundingClientRect().bottom).toBeCloseTo(heading.getBoundingClientRect().bottom, 0);
+});
+
+test('an adornment taller than the line grows the row and stays centred on the first line', () => {
+	const { locator } = render(
+		<Text
+			data-testid="text"
+			elementType="div"
+			shouldDisableTrim
+			startContent={
+				<Box
+					backgroundColor="neutral.subtle.rest"
+					blockSize="3rem"
+					borderRadius="full"
+					data-testid="avatar"
+					display="inline-flex"
+					elementType="span"
+					inlineSize="3rem"
+				/>
+			}
+			typography="caption"
+		>
+			<span data-testid="cap" style={capProbeStyle} />
+			Caption beside a large avatar
+		</Text>,
+	);
+	const text = locator.getByTestId('text').element().getBoundingClientRect();
+	const avatar = locator.getByTestId('avatar').element();
+	const cap = locator.getByTestId('cap').element();
+
+	expect(avatar.getBoundingClientRect().top).toBeGreaterThanOrEqual(text.top - 0.5);
+	expect(avatar.getBoundingClientRect().bottom).toBeLessThanOrEqual(text.bottom + 0.5);
+	expect(verticalCentre(avatar)).toBeCloseTo(verticalCentre(cap), 0);
+});
+
+for (const direction of ['ltr', 'rtl'] as const) {
+	test(`places startContent and endContent at the inline edges in ${direction}`, () => {
+		const { locator } = render(
+			<div dir={direction} style={{ inlineSize: '16rem' }}>
+				<Text
+					data-testid="text"
+					elementType="p"
+					endContent={<Kbd data-testid="end">Esc</Kbd>}
+					startContent={<Icon name="checkCircle" />}
+				>
+					Short
+				</Text>
+			</div>,
+		);
+		const text = locator.getByTestId('text').element().getBoundingClientRect();
+		const end = locator.getByTestId('end').element().getBoundingClientRect();
+		const start = locator.getByTestId('text').element().querySelector('svg');
+		if (start == null) throw new Error('Expected an icon.');
+		const startRect = start.getBoundingClientRect();
+
+		if (direction === 'ltr') {
+			expect(startRect.left).toBeCloseTo(text.left, 0);
+			expect(end.right).toBeCloseTo(text.right, 0);
+		} else {
+			expect(startRect.right).toBeCloseTo(text.right, 0);
+			expect(end.left).toBeCloseTo(text.left, 0);
+		}
+	});
+}
+
+test('long unbroken adorned text wraps inside the row', () => {
+	const { locator } = render(
+		<div style={{ inlineSize: '12rem' }}>
+			<Text
+				data-testid="text"
+				elementType="p"
+				endContent={<Icon data-testid="end" name="checkCircle" />}
+				startContent={<Icon name="checkCircle" />}
+			>
+				https://example.com/a/very/long/unbroken/path/that/would/otherwise/overflow
+			</Text>
+		</div>,
+	);
+	const text = locator.getByTestId('text').element();
+
+	expect(text.scrollWidth).toBeLessThanOrEqual(text.clientWidth);
+});
+
+test('lineClamp clamps adorned text and keeps the adornments', () => {
+	const { container, locator } = render(
+		<div style={{ inlineSize: '12rem' }}>
+			<Text
+				data-testid="text"
+				elementType="p"
+				lineClamp={1}
+				startContent={<Icon name="checkCircle" />}
+			>
+				<span data-testid="copy">{wrappingCopy}</span>
+			</Text>
+		</div>,
+	);
+	const copy = locator.getByTestId('copy').element();
+	const clamped = copy.parentElement;
+	if (clamped == null) throw new Error('Expected the clamped content.');
+	const tops = new Set(lineRects(copy).map((line) => Math.round(line.top)));
+
+	expect(tops.size).toBe(1);
+	expect(getComputedStyle(clamped).textOverflow).toBe('ellipsis');
+	expect(clamped.scrollWidth).toBeGreaterThan(clamped.clientWidth);
+	expect(querySvg(container).getBoundingClientRect().width).toBeGreaterThan(0);
+});
+
+test('an inline adorned Text sits on the baseline of the surrounding sentence', () => {
+	const { locator } = render(
+		<p style={{ margin: 0 }}>
+			<span data-testid="sentence" style={baselineMarkerStyle} />
+			Status:{' '}
+			<Text data-testid="inline" startContent={<Icon name="checkCircle" size="xsmall" />}>
+				<span data-testid="adorned" style={baselineMarkerStyle} />
+				Approved
+			</Text>{' '}
+			by the reviewer.
+		</p>,
+	);
+	const sentence = locator.getByTestId('sentence').element().getBoundingClientRect();
+	const adorned = locator.getByTestId('adorned').element().getBoundingClientRect();
+
+	expect(getComputedStyle(locator.getByTestId('inline').element()).display).toBe('inline-flex');
+	expect(adorned.bottom).toBeCloseTo(sentence.bottom, 0);
+});
+
+test('adorned Text keeps its root element, attributes, ref, and slot', async () => {
+	const ref = createRef<HTMLElement>();
+	const { locator } = render(
+		<Menu aria-label="Actions">
+			<MenuItem>
+				<Text slot="label">Save changes</Text>
+				<Text
+					className="custom"
+					data-testid="description"
+					elementType="p"
+					ref={ref}
+					slot="description"
+					startContent={<Icon name="checkCircle" />}
+					style={{ color: 'rgb(1, 2, 3)' }}
+				>
+					Updates the current document
+				</Text>
+			</MenuItem>
+		</Menu>,
+	);
+	const description = locator.getByTestId('description').element();
+
+	expect(description.tagName).toBe('P');
+	expect(ref.current).toBe(description);
+	expect(description.classList.contains('custom')).toBe(true);
+	expect(getComputedStyle(description).color).toBe('rgb(1, 2, 3)');
+	await expect
+		.element(locator.getByRole('menuitem'))
+		.toHaveAccessibleDescription('Updates the current document');
+});
+
+test('a visually hidden adorned Text stays hidden and named', async () => {
+	const { locator } = render(
+		<button type="button">
+			<Text isVisuallyHidden startContent={<Icon name="checkCircle" />}>
+				Save changes
+			</Text>
+		</button>,
+	);
+	const button = locator.getByRole('button', { name: 'Save changes' });
+
+	await expect.element(button).toBeInTheDocument();
+	expect(locator.getByText('Save changes').element().getBoundingClientRect().width).toBeLessThan(2);
+});
+
+test('adornments join the accessible name only when they carry text', async () => {
+	const { container, locator, user } = render(
+		<Box display="flex" flexDirection="column" gap="sp8">
+			<Heading level={2} startContent={<Icon name="checkCircle" />}>
+				Billing
+			</Heading>
+			<Heading endContent={<Kbd>Beta</Kbd>} level={2}>
+				Reports
+			</Heading>
+			<Link href="#docs">
+				<Text elementType="span" shouldInheritFont startContent={<Icon name="checkCircle" />}>
+					Documentation
+				</Text>
+			</Link>
+			<Text
+				elementType="p"
+				endContent={<IconButton aria-label="Dismiss" icon="close" size="small" />}
+				startContent={<Icon name="checkCircle" />}
+			>
+				{wrappingCopy}
+			</Text>
+		</Box>,
+	);
+
+	await expect.element(locator.getByRole('heading', { name: 'Billing' })).toBeInTheDocument();
+	await expect.element(locator.getByRole('heading', { name: 'Reports Beta' })).toBeInTheDocument();
+	const link = locator.getByRole('link', { name: 'Documentation' });
+	await user.keyboard('{Tab}');
+	await expect.element(link).toHaveFocus();
+	await user.keyboard('{Tab}');
+	await expect.element(locator.getByRole('button', { name: 'Dismiss' })).toHaveFocus();
+	await expectNoAxeViolations(container);
 });

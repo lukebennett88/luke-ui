@@ -12,7 +12,10 @@ export type NumeralAbbreviation = boolean | 'long';
 /** Fixed precision or `[min, max]` precision range. */
 export type NumeralPrecision = number | readonly [number, number];
 
-type _NumeralOmit = DistributiveOmit<TextProps, 'children' | 'textAlign' | 'fontVariantNumeric'>;
+type _NumeralOmit = DistributiveOmit<
+	TextProps,
+	'children' | 'endContent' | 'fontVariantNumeric' | 'startContent' | 'textAlign'
+>;
 interface _NumeralProps extends _NumeralOmit {
 	/** Enables compact notation (`1.2K`, `1.2 thousand`). */
 	abbreviate?: NumeralAbbreviation;

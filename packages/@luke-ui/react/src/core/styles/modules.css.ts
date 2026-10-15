@@ -11,6 +11,7 @@ import '../primitives/select/styles.css.js';
 import '../primitives/text-input/styles.css.js';
 import '../primitives/text-input/recipe.css.js';
 import '../text/recipe.css.js';
+import '../text/styles.css.js';
 import '../aspect-ratio/recipe.css.js';
 import '../blockquote/recipe.css.js';
 import '../container/recipe.css.js';

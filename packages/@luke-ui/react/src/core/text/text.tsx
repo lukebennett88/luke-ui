@@ -1,4 +1,6 @@
+import type { ReactNode } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
+import { cx } from '../../shared/utils/utils.js';
 import { typeStyleWeightRole } from '../../theme/type-styles.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
@@ -6,6 +8,7 @@ import type { Prettify } from '../types/prettify.js';
 import { visuallyHiddenStyle } from '../visually-hidden/visually-hidden-style.js';
 import type { TextRecipeVariants } from './recipe.css.js';
 import { textRecipe } from './recipe.css.js';
+import { textAdornedContent, textAdornment, textAdornmentRow } from './styles.css.js';
 
 interface TextStyleProps {
 	/**
@@ -13,6 +16,11 @@ interface TextStyleProps {
 	 * @default 'primary'
 	 */
 	color?: TextRecipeVariants['color'];
+	/**
+	 * Content after the text, at the inline end of the row. It is aligned with the text's first line
+	 * like `startContent`.
+	 */
+	endContent?: ReactNode;
 	/**
 	 * Sets font style.
 	 * @default 'default'
@@ -45,6 +53,13 @@ interface TextStyleProps {
 	 * @default false
 	 */
 	shouldInheritFont?: TextRecipeVariants['shouldInheritFont'];
+	/**
+	 * Content before the text, such as an `Icon`. A graphic is centred on the text's first line, and
+	 * wrapped lines align with the text, not with this content. A taller graphic grows the row rather
+	 * than overflowing it. It takes phrasing content and is part of the element, so its text joins
+	 * the element's accessible name.
+	 */
+	startContent?: ReactNode;
 	/**
 	 * Sets text alignment.
 	 * @default 'start'
@@ -114,6 +129,7 @@ export function Text(props: TextProps) {
 		className,
 		color,
 		elementType = 'span',
+		endContent,
 		fontStyle,
 		fontVariantNumeric,
 		fontWeight,
@@ -122,6 +138,7 @@ export function Text(props: TextProps) {
 		shouldDisableTrim,
 		shouldInheritFont,
 		slot,
+		startContent,
 		style,
 		textAlign,
 		textDecoration,
@@ -131,22 +148,30 @@ export function Text(props: TextProps) {
 		...racProps
 	} = props;
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
+	const hasAdornments = startContent != null || endContent != null;
+	const isBlockElement = blockTextElementTypes.has(elementType);
 	const resolvedTypography = typography ?? 'body';
 
 	const resolvedShouldDisableTrim: boolean = (() => {
 		if (hasLineClamp) return true;
+		// An inline adorned Text is itself the row, so trim boxes would become flex items.
+		if (hasAdornments && !isBlockElement) return true;
 		if (shouldDisableTrim !== undefined) return shouldDisableTrim;
-		return !blockTextElementTypes.has(elementType);
+		return !isBlockElement;
 	})();
 
 	const recipeClassName = textRecipe({
-		className,
+		className:
+			hasAdornments && !isBlockElement
+				? cx(textAdornmentRow({ isInline: true }), className)
+				: className,
 		color,
 		fontStyle,
 		fontVariantNumeric,
 		fontWeight:
 			fontWeight ?? (shouldInheritFont ? undefined : typeStyleWeightRole[resolvedTypography]),
-		lineClamp,
+		// An adorned Text clamps its content, not the row around it.
+		lineClamp: hasAdornments ? false : lineClamp,
 		shouldDisableTrim: resolvedShouldDisableTrim,
 		shouldInheritFont,
 		textAlign,
@@ -165,7 +190,45 @@ export function Text(props: TextProps) {
 			slot={slot}
 			style={isVisuallyHidden ? { ...visuallyHiddenStyle, ...style } : style}
 		>
-			{children}
+			{hasAdornments ? (
+				<TextAdornments
+					endContent={endContent}
+					isBlockElement={isBlockElement}
+					lineClamp={lineClamp}
+					startContent={startContent}
+				>
+					{children}
+				</TextAdornments>
+			) : (
+				children
+			)}
 		</RacText>
 	);
+}
+
+/** Lays out the adornments and the text. A block Text gets a row inside its trim boxes. */
+function TextAdornments({
+	children,
+	endContent,
+	isBlockElement,
+	lineClamp,
+	startContent,
+}: {
+	children: ReactNode;
+	endContent: ReactNode;
+	isBlockElement: boolean;
+	lineClamp: TextProps['lineClamp'];
+	startContent: ReactNode;
+}) {
+	const parts = (
+		<>
+			{startContent != null && <span className={textAdornment}>{startContent}</span>}
+			<span className={textAdornedContent({ lineClamp })}>{children}</span>
+			{endContent != null && <span className={textAdornment}>{endContent}</span>}
+		</>
+	);
+
+	if (!isBlockElement) return parts;
+
+	return <span className={textAdornmentRow({ isInline: false })}>{parts}</span>;
 }
