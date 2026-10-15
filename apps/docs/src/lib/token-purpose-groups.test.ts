@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { expect, test } from 'vite-plus/test';
 import { themeTokens } from '../generated/token-reference.generated.js';
 import { buildTokenPurposeGroups } from './token-purpose-groups.js';
@@ -37,4 +39,15 @@ test('routes colour families across surfaces, content, borders, and roles', () =
 	expect(
 		Object.fromEntries(COLOR_PURPOSE_ROUTES.map(([path]) => [path, purposeOf.get(path)])),
 	).toEqual(Object.fromEntries(COLOR_PURPOSE_ROUTES));
+});
+
+test('every related link points at an existing docs page', () => {
+	const related = buildTokenPurposeGroups().flatMap((group) =>
+		group.related ? [group.related] : [],
+	);
+	expect(related.length).toBeGreaterThan(0);
+	for (const { splat } of related) {
+		const page = new URL(`../../content/docs/${splat}.mdx`, import.meta.url);
+		expect(existsSync(fileURLToPath(page)), `${splat} has no MDX page`).toBe(true);
+	}
 });

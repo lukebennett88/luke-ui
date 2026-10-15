@@ -54,6 +54,17 @@ test('aligns every column header to the start of its column', async () => {
 	}
 });
 
+test('links related guides to their docs pages', async () => {
+	await renderExplorer();
+
+	await expect
+		.element(page.getByRole('link', { name: 'Colour' }).first())
+		.toHaveAttribute('href', '/docs/color');
+	await expect
+		.element(page.getByRole('link', { name: 'Typography' }).first())
+		.toHaveAttribute('href', '/docs/typography');
+});
+
 async function renderExplorer() {
 	const rootRoute = createRootRoute({
 		component: () => (

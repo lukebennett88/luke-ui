@@ -4,7 +4,8 @@ import { themeTokens } from '../generated/token-reference.generated.js';
 /** The docs page a group's tokens are explained on, linked instead of restated in the explorer. */
 interface TokenPurposeLink {
 	label: string;
-	splat: string;
+	/** Route splat, always under `docs/` so a related link cannot point at a root-level 404. */
+	splat: `docs/${string}`;
 }
 
 export interface TokenPurposeGroup {
@@ -25,7 +26,7 @@ const PURPOSE_DEFINITIONS = [
 		description:
 			'The base, subdued, field, and overlay surfaces, and the translucent backdrop behind a dialog.',
 		id: 'surfaces',
-		related: { label: 'Colour', splat: 'color' },
+		related: { label: 'Colour', splat: 'docs/color' },
 		showSamples: true,
 		title: 'Surfaces',
 	},
@@ -33,7 +34,7 @@ const PURPOSE_DEFINITIONS = [
 		description:
 			'Text colours, and the placeholder colour that stands in for content while it loads.',
 		id: 'content',
-		related: { label: 'Colour', splat: 'color' },
+		related: { label: 'Colour', splat: 'docs/color' },
 		showSamples: true,
 		title: 'Content',
 	},
@@ -41,7 +42,7 @@ const PURPOSE_DEFINITIONS = [
 		description:
 			'Border colours for decoration, guaranteed control boundaries and their hover, and the focus ring.',
 		id: 'borders',
-		related: { label: 'Colour', splat: 'color' },
+		related: { label: 'Colour', splat: 'docs/color' },
 		showSamples: true,
 		title: 'Borders',
 	},
@@ -49,14 +50,14 @@ const PURPOSE_DEFINITIONS = [
 		description:
 			'The six semantic roles. Every role carries the same backgrounds, foregrounds, and border.',
 		id: 'roles',
-		related: { label: 'Colour', splat: 'color' },
+		related: { label: 'Colour', splat: 'docs/color' },
 		showSamples: true,
 		title: 'Roles',
 	},
 	{
 		description: 'Type styles, font families, and weight roles.',
 		id: 'typography',
-		related: { label: 'Typography', splat: 'typography' },
+		related: { label: 'Typography', splat: 'docs/typography' },
 		showSamples: false,
 		title: 'Typography',
 	},

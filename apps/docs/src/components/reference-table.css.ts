@@ -136,10 +136,17 @@ export const hideNarrow = style({
 
 // DS gap: Text has no font family prop, and `Code` always draws a chip. Prop names, types, and
 // defaults want the code font without one.
+// DS gap: Box has no overflowWrap prop or container-query props. In the stacked layout a long
+// unbreakable CSS variable name would stretch the table past its frame, so it may break anywhere.
 export const monospace = style({
 	'@layer': {
 		components: {
 			fontFamily: vars.font.family.code,
+			'@container': {
+				[NARROW]: {
+					overflowWrap: 'anywhere',
+				},
+			},
 		},
 	},
 });
