@@ -2,8 +2,8 @@ import { Box } from '@luke-ui/react/box';
 import { Heading } from '@luke-ui/react/heading';
 import { Link } from '@luke-ui/react/link';
 import { Stack } from '@luke-ui/react/stack';
+import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
-import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
 import { useRouterState } from '@tanstack/react-router';
 import type { Folder, Node, Root, Separator } from 'fumadocs-core/page-tree';
@@ -230,28 +230,19 @@ function SectionHeading({
 	icon?: ReactNode;
 	id: string;
 }) {
-	const heading = (
-		<Heading
-			color="secondary"
-			fontWeight="label"
-			id={id}
-			level={2}
-			shouldDisableTrim
-			typography="caption"
-		>
-			{children}
-		</Heading>
-	);
-
 	return (
 		<Box {...navRowProps}>
-			{icon == null ? (
-				heading
-			) : (
-				<Track gap="sp8" railAlignment="firstLine" railStart={icon}>
-					{heading}
-				</Track>
-			)}
+			<Heading
+				color="secondary"
+				fontWeight="label"
+				id={id}
+				level={2}
+				shouldDisableTrim
+				startContent={icon}
+				typography="caption"
+			>
+				{children}
+			</Heading>
 		</Box>
 	);
 }
@@ -307,9 +298,9 @@ export function DocsNavLink({
 			{icon == null ? (
 				children
 			) : (
-				<Track gap="sp8" railAlignment="firstLine" railStart={icon}>
+				<Text elementType="span" shouldInheritFont startContent={icon}>
 					{children}
-				</Track>
+				</Text>
 			)}
 		</Box>
 	);

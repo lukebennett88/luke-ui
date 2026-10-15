@@ -4,7 +4,6 @@ import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
-import { Track } from '@luke-ui/react/track';
 import { useRouterState } from '@tanstack/react-router';
 import type { Folder, Item, Node, Root } from 'fumadocs-core/page-tree';
 import { findPath, flattenTree } from 'fumadocs-core/page-tree';
@@ -125,7 +124,9 @@ function PagerTitle({ direction, name }: { direction: PagerDirection; name: Reac
 	return (
 		<Text
 			elementType="div"
+			endContent={direction === 'next' ? chevron : undefined}
 			fontWeight="label"
+			startContent={direction === 'previous' ? chevron : undefined}
 			style={
 				direction === 'next'
 					? { marginInlineStart: 'auto', maxInlineSize: '100%', width: 'fit-content' }
@@ -133,16 +134,7 @@ function PagerTitle({ direction, name }: { direction: PagerDirection; name: Reac
 			}
 			typography="label"
 		>
-			<Track
-				gap="sp8"
-				railAlignment="firstLine"
-				railEnd={direction === 'next' ? chevron : undefined}
-				railStart={direction === 'previous' ? chevron : undefined}
-			>
-				<Text elementType="span" shouldInheritFont>
-					{name}
-				</Text>
-			</Track>
+			{name}
 		</Text>
 	);
 }
