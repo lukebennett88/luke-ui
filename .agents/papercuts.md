@@ -110,3 +110,23 @@ evidence shows it does not help. Silence in this log is not evidence.
   sidebar order. Sorting the entire `pages` array destroys that order, and the edit value is the
   docs group name rather than `group/name`, so generating into an existing group both scrambles
   navigation and fails inventory until the root meta is fixed by hand.
+
+## CSS length props accept spacing token keys
+
+- Seen: 2026-10-15 (#810). The new Typography copy button used `inlineSize="sp32"` and
+  `minBlockSize="sp32"`; those CSS length props accepted the invalid spacing key. This task's
+  handoff also flagged the same issue in `icon-gallery`.
+- Where: `apps/docs/src/components/typography-tokens.tsx`; `AGENTS.md` routes Box styling to
+  `docs/STYLING.md`.
+- Problem: TypeScript accepts a spacing token key where a CSS length is required, so the prop can
+  compile while producing an invalid CSS value.
+
+## An aria-label-only ComboboxField leaves its mobile tray dialog unnamed
+
+- Seen: 2026-10-15 (token catalogue redesign). `ComboboxField` with `aria-label="Find a token"`
+  named the searchbox, but the 390px mobile tray dialog had no accessible name. The page now uses
+  `label="Find a token"` to supply the label context the tray reads.
+- Where: `packages/@luke-ui/react/src/core/primitives/combobox/tray.tsx` reads `LabelContext` for
+  the tray's name; `apps/docs/src/components/token-find.tsx` uses the labelled field.
+- Problem: A valid field name supplied with `aria-label` does not reach the tray dialog, so
+  consumers must use a visible label to name it.
