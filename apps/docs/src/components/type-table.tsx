@@ -3,7 +3,7 @@ import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, ReactNode } from 'react';
-import { Fragment } from 'react';
+import { Fragment, useId } from 'react';
 import { InheritTypography, MdxLink } from './docs-article/mdx-elements.js';
 import * as referenceStyles from './reference-table.css.js';
 import {
@@ -160,7 +160,10 @@ function PropRow({
 	const shownType = typeDescription ?? type;
 	// The narrow layout hides a missing default, so the type cell then ends the stacked row.
 	const typeEndsRow = !layout.showDefault || !hasDefault;
-	const rowId = hashPrefix === undefined ? undefined : `${hashPrefix}-${name}`;
+	// Deep-link ids stay `${prefix}-${name}` when a table id exists. Without one, a stable React id
+	// still lets description cells point at their rowheader through `headers`.
+	const fallbackRowId = useId();
+	const rowId = hashPrefix === undefined ? fallbackRowId : `${hashPrefix}-${name}`;
 	// The description sits directly below, so the name and type hug it from the top.
 	const cellBox = {
 		paddingBlockEnd: hasDetails ? '0' : 'sp16',
@@ -173,8 +176,12 @@ function PropRow({
 	return (
 		<Fragment>
 			{/* Hash targets the rowheader so deep links and `headers=` share one id. */}
-			<tr className={styles.dataRow}>
-				<TableRowHeader className={cx(cellClassName, ruledClassName)} id={rowId} {...cellBox}>
+			<tr>
+				<TableRowHeader
+					className={cx(cellClassName, ruledClassName, styles.propHashTarget)}
+					id={rowId}
+					{...cellBox}
+				>
 					<Cluster alignItems="baseline" flexWrap="nowrap" gap="sp4">
 						<CellText
 							className={referenceStyles.monospace}

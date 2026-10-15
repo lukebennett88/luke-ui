@@ -97,6 +97,19 @@ test('gives each prop rowheader an id for hash links', async () => {
 	expect(rowHeader?.getAttribute('scope')).toBe('row');
 });
 
+test('hash targets clear the sticky site header', async () => {
+	await renderWidget(<TypeTable id="api" type={{ label: { type: 'string' } }} />);
+
+	assert(container, 'expected a container');
+	const rowHeader = container.querySelector('#api-label');
+	assert(rowHeader instanceof HTMLElement, 'expected a rowheader element');
+	expect(rowHeader.tagName).toBe('TH');
+	expect(getComputedStyle(rowHeader).scrollMarginBlockStart).not.toBe('0px');
+	const row = rowHeader.closest('tr');
+	assert(row, 'expected a table row');
+	expect(getComputedStyle(row).scrollMarginBlockStart).toBe('0px');
+});
+
 test('associates a description row with its prop rowheader', async () => {
 	await renderWidget(
 		<TypeTable
@@ -117,6 +130,29 @@ test('associates a description row with its prop rowheader', async () => {
 	assert(descriptionCell, 'expected a description cell');
 	expect(descriptionCell.getAttribute('headers')).toBe('api-label');
 	expect(descriptionCell.getAttribute('colspan')).toBe('2');
+});
+
+test('associates a description row when the table has no id', async () => {
+	await renderWidget(
+		<TypeTable
+			type={{
+				label: {
+					description: <p>Visible label text.</p>,
+					type: 'string',
+				},
+			}}
+		/>,
+	);
+
+	assert(container, 'expected a container');
+	const rowHeader = page.getByRole('rowheader', { name: 'label' }).element();
+	expect(rowHeader.tagName).toBe('TH');
+	const rowId = rowHeader.getAttribute('id');
+	assert(rowId, 'expected a generated rowheader id');
+	const descriptionCell = page.getByText('Visible label text.').element().closest('td');
+	assert(descriptionCell, 'expected a description cell');
+	expect(descriptionCell.getAttribute('headers')).toBe(rowId);
+	expect(container.querySelector(`#${CSS.escape(rowId)}`)).toBe(rowHeader);
 });
 
 for (const [width, inlineSize] of [

@@ -21,8 +21,9 @@ export const narrowOnly = style({
 	},
 });
 
-// DS gap: Box has no scrollMargin prop. Hash targets clear the sticky site header.
-export const dataRow = style({
+// DS gap: Box has no scrollMargin prop. Hash targets clear the sticky site header. Applied to the
+// rowheader `th`, which is the deep-link id, not the surrounding `tr`.
+export const propHashTarget = style({
 	'@layer': {
 		components: {
 			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space.sp24})`,
