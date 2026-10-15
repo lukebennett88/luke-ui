@@ -8,7 +8,6 @@ import {
 	typeForwardsDomProps,
 } from './component-prop-analysis.js';
 import { NATIVE_PROPS_FORWARDING_KEY, renderNativePropsNote } from './component-prop-groups.js';
-import { stripOptionalUndefined } from './strip-optional-undefined.js';
 
 interface GenerateDocumentationOptions {
 	basePath?: string;
@@ -16,7 +15,7 @@ interface GenerateDocumentationOptions {
 
 /** Wraps the fumadocs generator and removes generic DOM props from component Props tables. */
 export function createComponentPropsGenerator(options: GeneratorOptions = {}): Generator {
-	const generator = stripOptionalUndefined(createGenerator(options));
+	const generator = createGenerator(options);
 	const generateDocumentation = generator.generateDocumentation.bind(generator);
 
 	generator.generateDocumentation = async (file, name, generateOptions = {}) => {
