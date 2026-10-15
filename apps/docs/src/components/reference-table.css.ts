@@ -2,7 +2,7 @@ import { vars } from '@luke-ui/react/theme';
 import { visuallyHiddenStyle } from '@luke-ui/react/visually-hidden';
 import { globalStyle, style } from '@vanilla-extract/css';
 
-// Styles for the docs reference tables (the props tables and the token tables). Everything not
+// Styles for the docs reference tables. Everything not
 // expressed through `Box`, `Text`, `Stack`, or `Cluster` props lives here, and each rule names the
 // design system capability that is missing. These rules sit in the docs `components` layer, which
 // ranks above Luke UI's layers, so they also win over any Box prop.
@@ -54,15 +54,6 @@ export const bodyGroup = style({
 	'@layer': {
 		components: {
 			verticalAlign: 'top',
-		},
-	},
-});
-
-// DS gap: same as `bodyGroup`, centred. Token rows pair a taller sample with one line of text.
-export const bodyGroupCentered = style({
-	'@layer': {
-		components: {
-			verticalAlign: 'middle',
 		},
 	},
 });
@@ -222,16 +213,6 @@ globalStyle(`${monospace} code`, {
 			lineHeight: 'inherit',
 			paddingBlock: 0,
 			paddingInline: 0,
-		},
-	},
-});
-
-/** Label metrics so Track `firstLine` rails share 1lh with token-explorer toolbar text. */
-export const filterTrack = style({
-	'@layer': {
-		components: {
-			fontSize: vars.font.label.fontSize,
-			lineHeight: vars.font.label.lineHeight,
 		},
 	},
 });

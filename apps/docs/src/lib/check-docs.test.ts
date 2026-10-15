@@ -297,7 +297,7 @@ test('reports prose patterns outside code and ignores them inside fences', () =>
 title: Colour
 ---
 
-import { TokenExplorer } from './token-explorer';
+import { TokenFind } from './token-find';
 
 This is useful; do not keep the semicolon.
 

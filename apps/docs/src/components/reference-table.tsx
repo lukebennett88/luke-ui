@@ -79,17 +79,19 @@ export function TableCell({
 	children,
 	className,
 	colSpan,
+	id,
 	...boxProps
 }: TableElementBoxProps & {
 	children?: ReactNode;
 	className?: string;
 	colSpan?: number;
+	id?: string;
 }) {
 	return (
 		<Box
 			{...boxProps}
 			className={className}
-			renderRoot={(domProps) => <td {...domProps} colSpan={colSpan} />}
+			renderRoot={(domProps) => <td {...domProps} colSpan={colSpan} id={id} />}
 		>
 			{children}
 		</Box>
@@ -110,6 +112,28 @@ export function TableRowHeader({
 			{...boxProps}
 			className={className}
 			renderRoot={(domProps) => <th {...domProps} scope="row" />}
+		>
+			{children}
+		</Box>
+	);
+}
+
+/** A column header cell with Box spacing props. */
+export function TableHeaderCell({
+	children,
+	className,
+	scope = 'col',
+	...boxProps
+}: TableElementBoxProps & {
+	children?: ReactNode;
+	className?: string;
+	scope?: 'col' | 'row';
+}) {
+	return (
+		<Box
+			{...boxProps}
+			className={className}
+			renderRoot={(domProps) => <th {...domProps} scope={scope} />}
 		>
 			{children}
 		</Box>

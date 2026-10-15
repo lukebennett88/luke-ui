@@ -4,10 +4,10 @@ import { exampleBlockSources } from './example-block-sources.js';
 test('reads src from a multi-line ExampleBlock tag', () => {
 	expect(
 		exampleBlockSources(`<ExampleBlock
-	src="overview/radius-roles"
-	title="Token reference: Radius roles"
+	src="overview/role-colours"
+	title="Colour: Roles and modes"
 />`),
-	).toEqual(['overview/radius-roles']);
+	).toEqual(['overview/role-colours']);
 });
 
 test('does not take src from later markup after an ExampleBlock with no src', () => {
