@@ -2,7 +2,7 @@ import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import { recipe } from '../styles/recipe.js';
-import { lineClampVariants, textElementClassName } from './recipe.css.js';
+import { textElementClassName } from './recipe.css.js';
 
 /**
  * Lays out `startContent`, the text, and `endContent` in one row. Rows align on their first
@@ -50,10 +50,10 @@ export const textAdornment = style(
 );
 
 // Centres a graphic, such as an icon, on the cap height of the slot's line. `middle` centres the
-// margin box on the x-height. A bottom margin of `capOffset` moves the graphic up by half of it, so
-// it suits any font, and the line box still contains the graphic. Text
-// adornments, such as `Kbd`, keep their own alignment. Without `cap` unit support, the offset
-// falls back to its initial `0px` and the graphic stays centred on the x-height.
+// margin box on the x-height, and a bottom margin of `capOffset` moves the graphic up by half of it,
+// so it suits any font and the line box still contains the graphic. Text adornments, such as `Kbd`,
+// keep their own alignment. Without `cap` unit support, the offset falls back to its initial `0px`
+// and the graphic stays centred on the x-height.
 globalStyleInLayer(
 	'recipes',
 	`:where(.${textAdornment}) > :where(:not(.${textElementClassName}))`,
@@ -63,18 +63,17 @@ globalStyleInLayer(
 	},
 );
 
-/** The text between the adornments. It takes the remaining space and can shrink below its words. */
-export const textAdornedContent = recipe({
-	base: {
+/**
+ * The text between the adornments. It takes the remaining space and can shrink below its words.
+ * `Text` adds `textRecipe` classes that inherit the root's font, so a line clamp reuses Text's own
+ * clamp rules.
+ */
+export const textAdornedContent = style(
+	{
 		flexBasis: 'auto',
 		flexGrow: 1,
 		flexShrink: 1,
 		minInlineSize: 0,
 	},
-	defaultVariants: {
-		lineClamp: false,
-	},
-	variants: {
-		lineClamp: lineClampVariants,
-	},
-});
+	'text-adorned-content',
+);

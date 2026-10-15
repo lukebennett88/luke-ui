@@ -196,6 +196,7 @@ export function Text(props: TextProps) {
 					isBlockElement={isBlockElement}
 					lineClamp={lineClamp}
 					startContent={startContent}
+					textAlign={textAlign}
 				>
 					{children}
 				</TextAdornments>
@@ -213,17 +214,28 @@ function TextAdornments({
 	isBlockElement,
 	lineClamp,
 	startContent,
+	textAlign,
 }: {
 	children: ReactNode;
 	endContent: ReactNode;
 	isBlockElement: boolean;
 	lineClamp: TextProps['lineClamp'];
 	startContent: ReactNode;
+	textAlign: TextProps['textAlign'];
 }) {
+	// Inherits the root's font and colour, like Button's label, so `lineClamp` uses Text's rules.
+	const contentClassName = textRecipe({
+		className: textAdornedContent,
+		lineClamp,
+		shouldDisableTrim: true,
+		shouldInheritFont: true,
+		textAlign,
+	});
+
 	const parts = (
 		<>
 			{startContent != null && <span className={textAdornment}>{startContent}</span>}
-			<span className={textAdornedContent({ lineClamp })}>{children}</span>
+			<span className={contentClassName}>{children}</span>
 			{endContent != null && <span className={textAdornment}>{endContent}</span>}
 		</>
 	);

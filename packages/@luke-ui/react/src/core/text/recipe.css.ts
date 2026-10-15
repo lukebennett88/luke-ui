@@ -36,8 +36,7 @@ const lineClampMultiLine = (lines: number) => {
 	} satisfies ComplexStyleRule;
 };
 
-/** Line clamp styles by `lineClamp` value. `Text` also applies them to adorned content. */
-export const lineClampVariants = {
+const lineClampVariants = {
 	false: lineClampNone,
 	true: lineClampSingleLine,
 	1: lineClampSingleLine,
