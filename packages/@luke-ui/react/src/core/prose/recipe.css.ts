@@ -186,14 +186,16 @@ for (const [weightRole, elements] of groupElementsBy((entry) => entry.weightRole
 // A list marker and a cell baseline align to the first box, and the trim box comes first, so a
 // paragraph directly in `li`, `td`, or `th` skips the trim.
 const trimmedElements = `${plain(plainElements.map(({ element }) => element))}:not(:is(li, td, th) > *)`;
+// `flow-root` for the same reason as `Text`'s trim boxes: an empty table gives the element a
+// baseline at the trim box.
 proseStyle(
 	trimmedElements,
-	{ content: "''", display: 'table', marginBlockEnd: capHeightTrim },
+	{ content: "''", display: 'flow-root', marginBlockEnd: capHeightTrim },
 	'::before',
 );
 proseStyle(
 	trimmedElements,
-	{ content: "''", display: 'table', marginBlockStart: baselineTrim },
+	{ content: "''", display: 'flow-root', marginBlockStart: baselineTrim },
 	'::after',
 );
 

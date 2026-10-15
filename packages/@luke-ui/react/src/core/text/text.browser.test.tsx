@@ -185,6 +185,34 @@ test('Text on its own does not inherit case or numeric styling from the page', (
 	expect(styles.fontVariantNumeric).toBe('normal');
 });
 
+// The baseline of the line a zero-size inline-block sits on is its bottom edge.
+const baselineMarkerStyle = {
+	blockSize: 0,
+	display: 'inline-block',
+	inlineSize: 0,
+} satisfies CSSProperties;
+
+for (const typography of typeStyles) {
+	test(`trimmed ${typography} Text aligns by its first baseline in a baseline row`, () => {
+		const { locator } = render(
+			<div style={{ alignItems: 'baseline', display: 'flex', gap: '1rem', inlineSize: '20rem' }}>
+				<Text elementType="p" typography={typography}>
+					<span data-testid="trimmed" style={baselineMarkerStyle} />
+					Trimmed text that wraps onto a second line
+				</Text>
+				<Text>
+					<span data-testid="untrimmed" style={baselineMarkerStyle} />
+					Inline
+				</Text>
+			</div>,
+		);
+		const trimmed = locator.getByTestId('trimmed').element().getBoundingClientRect();
+		const untrimmed = locator.getByTestId('untrimmed').element().getBoundingClientRect();
+
+		expect(untrimmed.bottom).toBeCloseTo(trimmed.bottom, 0);
+	});
+}
+
 const rowStyle = {
 	alignItems: 'baseline',
 	display: 'flex',

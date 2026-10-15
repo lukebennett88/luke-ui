@@ -102,18 +102,21 @@ function createLayeredTextStyle({
 	fontSize: string;
 	lineHeight: string;
 }) {
+	// The trim boxes establish their own formatting context, so their negative margins cannot
+	// collapse through them. `flow-root` rather than Capsize's `table`: Chromium gives an empty table
+	// a baseline, which then becomes the element's first baseline and breaks baseline alignment.
 	return {
 		fontSize,
 		lineHeight,
 		selectors: {
 			'&::before': {
 				content: "''",
-				display: 'table',
+				display: 'flow-root',
 				marginBlockEnd: capHeightTrim,
 			},
 			'&::after': {
 				content: "''",
-				display: 'table',
+				display: 'flow-root',
 				marginBlockStart: baselineTrim,
 			},
 		},
