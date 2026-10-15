@@ -163,18 +163,18 @@ statements Vanilla Extract writes per module, so nothing creates a layer before 
 
 Applications that use Tailwind CSS v4 declare `@layer theme, base, luke-ui, components, utilities;`
 before any import. Without it, import order decides whether Tailwind's `utilities` or `luke-ui`
-comes later. `apps/docs/src/styles/tailwind-integration.browser.test.tsx` checks both import orders,
-with and without the statement, against real Tailwind output.
+comes later. Declare the order statement before any stylesheet import so both import orders keep
+Tailwind utilities above Luke UI.
 
 The docs app uses `@vanilla-extract/css` for docs-owned `.css.ts` files. Its Vite and Vitest configs
 run the Vanilla Extract plugin. Import a generated class from the component or route that applies
 it. The docs app stylesheet (`apps/docs/src/styles/app.css`) declares
-`@layer base, luke-ui, components;` and no longer imports Tailwind or Fumadocs CSS. The root route
+`@layer base, luke-ui, components;` and does not import Tailwind or Fumadocs CSS. The root route
 applies a `base`-layer class from `src/styles/docs-root.css.ts` to `<body>` for the page's flex
 layout. Docs-owned shell, navigation, search, playground, and theme controls use `components`-layer
-classes, which outrank Luke UI. Docs code never writes to Luke UI's layers. Tailwind remains in the
-docs build only for the consumer-integration fixtures and the teaching snippet in `styling.mdx`
-until #678 removes that residue.
+classes, which outrank Luke UI. Docs code never writes to Luke UI's layers. The
+`@import 'tailwindcss'` line in `apps/docs/content/docs/docs/styling.mdx` is a displayed teaching
+example for consumers, not a docs-app dependency.
 
 Author component CSS with one of:
 

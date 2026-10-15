@@ -527,7 +527,7 @@ function renderPreviewHarness({
 	act(() => {
 		root?.render(
 			<DocsThemeRoot>
-				<div id={withStickyHeader ? 'nd-notebook-layout' : undefined}>
+				<div>
 					{withStickyHeader ? (
 						<header
 							style={{

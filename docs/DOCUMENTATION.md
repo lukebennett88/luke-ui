@@ -366,6 +366,24 @@ mapping page URLs to files each have one owner in `apps/docs/src/lib/`.
 
 Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
 
+### Docs app architecture
+
+Visible docs UI is owned by Luke UI components and docs-local Vanilla Extract `.css.ts` files under
+`apps/docs/src/`. The app stylesheet imports Luke UI and theme stylesheets only. It does not import
+Tailwind or Fumadocs CSS.
+
+Fumadocs stays as non-visual infrastructure: MDX compilation (`fumadocs-mdx`), page tree and loaders
+(`fumadocs-core/source`), search index data (`fumadocs-core/search`), TypeScript prop extraction
+(`fumadocs-typescript`), and `RootProvider` from `fumadocs-ui/provider/tanstack` with search and
+theme UI disabled. Do not import Fumadocs UI components for chrome.
+
+Docs-local `.css.ts` is for structure the design system cannot express cleanly: container queries,
+separators, Monaco-matched surfaces, and similar. Prefer Luke UI layout primitives (`Box`, `Stack`,
+`Cluster`, `Grid`) for spacing and alignment.
+
+The playground host lives in `apps/docs/src/{routes,components}/playground/`. Compilation, hashing,
+formatting, and the iframe protocol live in the private `@luke-ui/playground-core` package.
+
 The package README links to the hosted docs, which also serve agents:
 
 - `/llms.txt`, an llmstxt.org index of every docs guide and every component guide.

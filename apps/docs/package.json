@@ -70,7 +70,6 @@
 	},
 	"devDependencies": {
 		"@capsizecss/metrics": "catalog:",
-		"@tailwindcss/vite": "catalog:",
 		"@tanstack/router-cli": "catalog:",
 		"@types/mdx": "catalog:",
 		"@types/node": "catalog:",
@@ -82,7 +81,6 @@
 		"axe-core": "catalog:",
 		"playwright": "catalog:",
 		"serve": "catalog:",
-		"tailwindcss": "catalog:",
 		"ts-morph": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:",

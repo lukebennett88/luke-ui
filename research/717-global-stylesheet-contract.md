@@ -247,12 +247,10 @@ One indicator per control:
   recipe and utility ownership, and each global rule's selector, media condition, and declarations.
 - `layer-order.browser.test.ts` checks precedence in Chromium with the built stylesheet, including
   important declarations and a consumer `base` write.
-- `apps/docs/src/styles/tailwind-integration.browser.test.tsx` loads real Tailwind v4 output with
-  the built stylesheet in both import orders, with and without the combined order statement. It
-  checks Preflight, `Box` utility props, Tailwind utilities and components against recipes,
-  unlayered CSS, important declarations, and typed lists. Without the statement and with Tailwind
-  first, `luke-ui` lands above Tailwind `utilities`. The test pins that failure mode so the
-  documented statement stays necessary.
+- Consumers that use Tailwind CSS v4 must declare
+  `@layer theme, base, luke-ui, components, utilities;` before any import. Without that statement,
+  importing Tailwind first can place `luke-ui` above Tailwind `utilities`. The docs app no longer
+  ships a live Tailwind fixture; [STYLING.md](../docs/STYLING.md) records the requirement.
 - `global-styles.browser.test.tsx` renders mixed native and Luke UI markup. It checks native
   presentation, the Button, IconButton, and button Link box model at both sizes, body painting,
   overrides, and nested repaint, one focus ring per control, virtual focus, and reduced motion. A
