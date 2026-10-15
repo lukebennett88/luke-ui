@@ -36,10 +36,11 @@ document the intended behaviour. Remove resolved, transferred, and rejected entr
 archives them. Never delete an entry only because it is old.
 
 **Skills.** A skill for an established, repeatable workflow, such as writing a pull request, needs
-no entry here. Propose any other new skill only during triage, with at least two observed
-corrections that a workflow would have prevented and that a check or a pointer would not handle
-better. The maintainer approves skill additions and changes. Remove a skill when it is obsolete or
-when pilot or spot-check evidence shows it does not help. Silence in this log is not evidence.
+no entry here. Propose any other new skill during triage, with evidence of a failure that a workflow
+would have prevented and that a check or a pointer would not handle better. Two observed corrections
+are a reason to consider a skill, not a requirement for one. The maintainer approves skill additions
+and changes. Remove a skill when it is obsolete or when pilot or spot-check evidence shows it does
+not help. Silence in this log is not evidence.
 
 ## Visual compare fails while the main baseline run is still in progress
 
