@@ -1,19 +1,39 @@
+import { vars } from '@luke-ui/react/theme';
 import type { ThemeToken } from '../generated/token-reference.generated.js';
 import { themeTokens } from '../generated/token-reference.generated.js';
 
 /*
  * The token contract as a grammar: which names exist and how their segments combine. The token
- * reference page renders these sections instead of one flat list. Everything here derives from the
- * generated contract data, and building the sections throws when a token is unclassified or
- * classified twice, so the page cannot quietly drift from the contract.
+ * reference page renders these sections instead of one flat list. Names come from the public `vars`
+ * object so an invalid or missing segment fails TypeScript. Building the sections still throws when
+ * generated data is unclassified or classified twice.
  *
  * Client-safe: no Node built-ins.
  */
 
-export const ROLES = ['neutral', 'accent', 'info', 'success', 'warning', 'danger'] as const;
-export type Role = (typeof ROLES)[number];
+/** Fails compilation when `List` omits any `Key`. Invalid extras are rejected by `satisfies`. */
+type AssertExhaustive<Key extends string, List extends ReadonlyArray<Key>> =
+	Exclude<Key, List[number]> extends never ? true : Exclude<Key, List[number]>;
 
-/** Top-level branches under `vars.color`, in the order the reference page lists them. */
+export type Role = keyof typeof vars.color.background;
+
+/** Semantic roles under `vars.color.background` / `foreground`, in contract order. */
+export const ROLES = [
+	'neutral',
+	'accent',
+	'info',
+	'success',
+	'warning',
+	'danger',
+] as const satisfies ReadonlyArray<Role>;
+true satisfies AssertExhaustive<Role, typeof ROLES>;
+
+export type ColorFamilyId = keyof typeof vars.color;
+
+/**
+ * Top-level branches under `vars.color`, in the order the reference page lists them. Not the
+ * declaration order of `themeContractTree.color`.
+ */
 export const COLOR_FAMILIES = [
 	'background',
 	'foreground',
@@ -22,10 +42,8 @@ export const COLOR_FAMILIES = [
 	'text',
 	'overlay',
 	'loadingSkeleton',
-] as const;
-export type ColorFamilyId = (typeof COLOR_FAMILIES)[number];
-
-const COLOR_FAMILY_SET: ReadonlySet<string> = new Set(COLOR_FAMILIES);
+] as const satisfies ReadonlyArray<ColorFamilyId>;
+true satisfies AssertExhaustive<ColorFamilyId, typeof COLOR_FAMILIES>;
 
 interface ColorRoleGroup {
 	role: Role;
@@ -43,6 +61,9 @@ interface ColorFamilySection {
 	tokens: ReadonlyArray<ThemeToken>;
 }
 
+type TypeStyleName = Exclude<keyof typeof vars.font, 'family' | 'weight'>;
+
+/** Public type styles, smallest first, matching `vars.font` style keys. */
 const TYPE_STYLES = [
 	'caption',
 	'label',
@@ -53,17 +74,20 @@ const TYPE_STYLES = [
 	'heading2',
 	'heading1',
 	'display',
-] as const;
-type TypeStyleName = (typeof TYPE_STYLES)[number];
+] as const satisfies ReadonlyArray<TypeStyleName>;
+true satisfies AssertExhaustive<TypeStyleName, typeof TYPE_STYLES>;
 
+type TypeProperty = keyof typeof vars.font.body;
+
+/** Leaves shared by every public type style on `vars.font.<style>`. */
 const TYPE_PROPERTIES = [
 	'fontFamily',
 	'fontSize',
 	'fontWeight',
 	'letterSpacing',
 	'lineHeight',
-] as const;
-type TypeProperty = (typeof TYPE_PROPERTIES)[number];
+] as const satisfies ReadonlyArray<TypeProperty>;
+true satisfies AssertExhaustive<TypeProperty, typeof TYPE_PROPERTIES>;
 
 interface TypeStyleRow {
 	style: TypeStyleName;
@@ -79,22 +103,39 @@ interface TypographySection {
 	weights: ReadonlyArray<ThemeToken>;
 }
 
-const SCALE_IDS = [
-	'space',
-	'radius',
-	'depth',
-	'controlFinish',
-	'controlSize',
-	'interaction',
-	'motionDuration',
-	'motionEasing',
-] as const;
-type ScaleId = (typeof SCALE_IDS)[number];
+/**
+ * Non-colour, non-type catalogue groups. `motion` on `vars` splits into duration and easing so each
+ * scale stays a single prefix.
+ */
+type ScaleId =
+	| Exclude<keyof typeof vars, 'color' | 'font' | 'motion'>
+	| 'motionDuration'
+	| 'motionEasing';
 
 interface TokenScale {
 	id: ScaleId;
 	tokens: ReadonlyArray<ThemeToken>;
 }
+
+/**
+ * Path prefix → scale id. Longest / most specific prefixes first. Each `ScaleId` appears once so a
+ * new `vars` root cannot land without a catalogue home.
+ */
+const SCALE_PREFIXES = [
+	['motion.duration.', 'motionDuration'],
+	['motion.easing.', 'motionEasing'],
+	['controlFinish.', 'controlFinish'],
+	['controlSize.', 'controlSize'],
+	['interaction.', 'interaction'],
+	['depth.', 'depth'],
+	['radius.', 'radius'],
+	['space.', 'space'],
+] as const satisfies ReadonlyArray<readonly [prefix: `${string}.`, scale: ScaleId]>;
+
+type ScaleIdFromPrefixes = (typeof SCALE_PREFIXES)[number][1];
+true satisfies AssertExhaustive<ScaleId, ReadonlyArray<ScaleIdFromPrefixes>>;
+
+const SCALE_IDS = SCALE_PREFIXES.map(([, scale]) => scale);
 
 type TokenSectionId = 'colors' | 'typography' | 'scales';
 
@@ -144,7 +185,7 @@ export function buildTokenSections(tokens: ReadonlyArray<ThemeToken> = themeToke
 /** The `vars.color.<family>` branch a colour path belongs to. */
 function colorFamilyOf(path: string): ColorFamilyId | undefined {
 	const [root, family] = path.split('.');
-	if (root !== 'color' || family === undefined || !COLOR_FAMILY_SET.has(family)) return;
+	if (root !== 'color' || family === undefined || !(family in vars.color)) return;
 	return family as ColorFamilyId;
 }
 
@@ -161,18 +202,6 @@ function typographyPartOf(path: string): TypographyPart | undefined {
 	if (TYPE_STYLE_SET.has(section) && TYPE_PROPERTY_SET.has(leaf)) return 'style';
 	return;
 }
-
-/** The scale each non-colour, non-type path prefix belongs to. Longest prefix first. */
-const SCALE_PREFIXES: ReadonlyArray<readonly [prefix: string, scale: ScaleId]> = [
-	['motion.duration.', 'motionDuration'],
-	['motion.easing.', 'motionEasing'],
-	['controlFinish.', 'controlFinish'],
-	['controlSize.', 'controlSize'],
-	['interaction.', 'interaction'],
-	['depth.', 'depth'],
-	['radius.', 'radius'],
-	['space.', 'space'],
-];
 
 function scaleOf(path: string): ScaleId | undefined {
 	for (const [prefix, scale] of SCALE_PREFIXES) {
