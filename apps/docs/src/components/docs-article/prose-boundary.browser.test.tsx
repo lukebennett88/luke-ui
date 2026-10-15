@@ -31,7 +31,8 @@ afterEach(() => {
 });
 
 // Elements Prose styles. A widget root that opts out must not carry these fingerprints.
-const PROSE_BLOCKS = 'p, ul, ol, li, dl, dt, dd, blockquote, pre, hr, figure, figcaption, table';
+const PROSE_BLOCKS =
+	'p, ul, ol, li, dl, dt, dd, blockquote, pre, hr, figure, figcaption, table, th, td';
 
 /** Prose-owned values that neither the UA nor typical widget chrome use without Preflight. */
 function hasProseFingerprint(element: Element): boolean {
@@ -151,7 +152,7 @@ test('still applies Prose rhythm to content around the widgets', async () => {
 			<table data-testid="table">
 				<tbody>
 					<tr>
-						<td>Cell</td>
+						<td data-testid="cell">Cell</td>
 					</tr>
 				</tbody>
 			</table>
@@ -167,8 +168,12 @@ test('still applies Prose rhythm to content around the widgets', async () => {
 	expect(getComputedStyle(widgetRoot('[data-testid="quote"]')).marginBlockStart).toBe('40px');
 	expect(getComputedStyle(widgetRoot('[data-testid="figure"]')).marginBlockStart).toBe('40px');
 	expect(getComputedStyle(widgetRoot('[data-testid="table"]')).display).toBe('block');
-	// Positive control: fingerprints that proseLeaks must keep detecting.
-	expect(proseLeaks(widgetRoot('[data-testid="article"]'))).not.toEqual([]);
+	const cell = widgetRoot('[data-testid="cell"]');
+	expect(getComputedStyle(cell).paddingBlock).toBe('8px');
+	expect(getComputedStyle(cell).paddingInline).toBe('12px');
+	// Positive control: fingerprints that proseLeaks must keep detecting, including cells.
+	const leaks = proseLeaks(widgetRoot('[data-testid="article"]'));
+	expect(leaks.some((html) => html.includes('data-testid="cell"'))).toBe(true);
 });
 
 async function renderInProse(children: ReactNode) {
