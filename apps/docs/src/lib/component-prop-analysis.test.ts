@@ -540,6 +540,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 		props: [
 			'color',
 			'elementType',
+			'endContent',
 			'fontStyle',
 			'fontVariantNumeric',
 			'fontWeight',
@@ -549,6 +550,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'shouldDisableTrim',
 			'shouldInheritFont',
 			'slot',
+			'startContent',
 			'textAlign',
 			'textDecoration',
 			'textTransform',

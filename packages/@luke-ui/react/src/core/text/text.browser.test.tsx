@@ -556,6 +556,23 @@ test('adorned Text keeps its root element, attributes, ref, and slot', async () 
 		.toHaveAccessibleDescription('Updates the current document');
 });
 
+test('adorned Text keeps its adornments when React Aria render replaces the root', () => {
+	const { container, locator } = render(
+		<Text
+			render={(domProps) => <mark {...domProps} data-testid="custom" />}
+			startContent={<Icon name="checkCircle" />}
+		>
+			Highlighted
+		</Text>,
+	);
+	const custom = locator.getByTestId('custom').element();
+
+	expect(custom.tagName).toBe('MARK');
+	expect(custom.textContent).toBe('Highlighted');
+	expect(custom.contains(querySvg(container))).toBe(true);
+	expect(getComputedStyle(custom).display).toBe('inline-flex');
+});
+
 test('a visually hidden adorned Text stays hidden and named', async () => {
 	const { locator } = render(
 		<button type="button">
