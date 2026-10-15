@@ -375,7 +375,8 @@ Tailwind or Fumadocs CSS.
 Fumadocs stays as non-visual infrastructure: MDX compilation (`fumadocs-mdx`), page tree and loaders
 (`fumadocs-core/source`), search index data (`fumadocs-core/search`), TypeScript prop extraction
 (`fumadocs-typescript`), and `RootProvider` from `fumadocs-ui/provider/tanstack` with search and
-theme UI disabled. Do not import Fumadocs UI components for chrome.
+theme UI disabled. Do not import Fumadocs UI components for chrome. The page-tree client may wrap
+item names in a `fd-page-tree-item-name` span; docs do not load Fumadocs CSS or style that class.
 
 Docs-local `.css.ts` is for structure the design system cannot express cleanly: container queries,
 separators, Monaco-matched surfaces, and similar. Prefer Luke UI layout primitives (`Box`, `Stack`,
