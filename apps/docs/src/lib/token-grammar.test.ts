@@ -64,3 +64,26 @@ test('colour family headings belong to the MDX table of contents', () => {
 	const headings = [...mdx.matchAll(COLOR_HEADING_PATTERN)].map(([, family]) => family);
 	expect(headings).toEqual([...COLOR_FAMILIES]);
 });
+
+for (const [prefix, scaleId] of [
+	['motion.duration.', 'motionDuration'],
+	['motion.easing.', 'motionEasing'],
+	['controlFinish.', 'controlFinish'],
+	['controlSize.', 'controlSize'],
+	['interaction.', 'interaction'],
+	['depth.', 'depth'],
+	['radius.', 'radius'],
+	['space.', 'space'],
+] as const) {
+	test(`${scaleId} tokens sit under ${prefix}`, () => {
+		const scale = buildTokenSections().scales[scaleId];
+		expect(scale.tokens.length).toBeGreaterThan(0);
+		expect(scale.tokens.every((token) => token.path.startsWith(prefix))).toBe(true);
+		expect(
+			themeTokens
+				.filter((token) => token.path.startsWith(prefix))
+				.map((token) => token.path)
+				.sort(),
+		).toEqual(scale.tokens.map((token) => token.path).sort());
+	});
+}

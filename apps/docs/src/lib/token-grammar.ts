@@ -103,14 +103,27 @@ interface TypographySection {
 	weights: ReadonlyArray<ThemeToken>;
 }
 
-/**
- * Non-colour, non-type catalogue groups. `motion` on `vars` splits into duration and easing so each
- * scale stays a single prefix.
- */
-type ScaleId =
-	| Exclude<keyof typeof vars, 'color' | 'font' | 'motion'>
-	| 'motionDuration'
-	| 'motionEasing';
+/** Top-level `vars` branches that are one flat catalogue scale each. */
+type ScaleRoot = Exclude<keyof typeof vars, 'color' | 'font' | 'motion'>;
+
+/** Branches under `vars.motion`. */
+type MotionBranch = Extract<keyof typeof vars.motion, string>;
+
+/** `vars.motion` splits into one scale per branch (`duration` → `motionDuration`, …). */
+type MotionScaleId = {
+	[K in MotionBranch]: `motion${Capitalize<K>}`;
+}[MotionBranch];
+
+type ScaleId = ScaleRoot | MotionScaleId;
+
+/** Valid `[path prefix, scale id]` pairs derived from `vars`. Wrong pairings fail `satisfies`. */
+type ScalePrefixEntry =
+	| {
+			[K in ScaleRoot]: readonly [`${K}.`, K];
+	  }[ScaleRoot]
+	| {
+			[K in MotionBranch]: readonly [`motion.${K}.`, `motion${Capitalize<K>}`];
+	  }[MotionBranch];
 
 interface TokenScale {
 	id: ScaleId;
@@ -130,7 +143,7 @@ const SCALE_PREFIXES = [
 	['depth.', 'depth'],
 	['radius.', 'radius'],
 	['space.', 'space'],
-] as const satisfies ReadonlyArray<readonly [prefix: `${string}.`, scale: ScaleId]>;
+] as const satisfies ReadonlyArray<ScalePrefixEntry>;
 
 type ScaleIdFromPrefixes = (typeof SCALE_PREFIXES)[number][1];
 true satisfies AssertExhaustive<ScaleId, ReadonlyArray<ScaleIdFromPrefixes>>;
