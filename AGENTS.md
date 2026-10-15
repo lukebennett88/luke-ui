@@ -1,16 +1,31 @@
 # Luke UI agent guide
 
-## Task routing
+## Skills
 
-- Documentation, including pull request reviews that touch it: follow
+Skills in `.agents/skills/` hold this repository's workflows. Some agents discover them there, and
+others do not, so this list is the index. When a task matches a skill, read its whole `SKILL.md`
+before you start. A grep, an excerpt, or a skill listing is not a read.
+
+- Writing or investigating a GitHub issue:
+  [.agents/skills/write-issue/SKILL.md](.agents/skills/write-issue/SKILL.md).
+- Implementing an issue and opening its pull request:
+  [.agents/skills/work-on-issue/SKILL.md](.agents/skills/work-on-issue/SKILL.md).
+- Writing or updating a pull request title and body:
+  [.agents/skills/write-pr/SKILL.md](.agents/skills/write-pr/SKILL.md).
+- Reviewing a pull request or a diff:
+  [.agents/skills/review-pr/SKILL.md](.agents/skills/review-pr/SKILL.md).
+- Documentation, including pull request reviews that touch it:
   [.agents/skills/write-docs/SKILL.md](.agents/skills/write-docs/SKILL.md). This covers MDX pages in
   `apps/docs/content/docs/`, `docs/*.md`, READMEs, and JSDoc when it is the main task or documents a
   new public export or prop.
-- Writing, changing, or reviewing tests, including pull request reviews that touch them: follow
+- Writing, changing, or reviewing tests, including pull request reviews that touch them:
   [.agents/skills/write-tests/SKILL.md](.agents/skills/write-tests/SKILL.md).
-- Read the whole `SKILL.md` of every skill that applies before you write or review. To review a pull
-  request, first check whether its diff touches documentation, tests, or both. A grep, an excerpt,
-  or a skill listing is not a read.
+
+More than one skill can apply. To review a pull request, first check whether its diff touches
+documentation, tests, or both.
+
+## Task routing
+
 - Incidental edits to existing JSDoc or code comments:
   [docs/DOCUMENTATION.md#comments-and-jsdoc](docs/DOCUMENTATION.md#comments-and-jsdoc).
 - Writing or changing JavaScript, TypeScript, or TSX: [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
@@ -24,6 +39,10 @@
 
 ## Dev loop
 
+- Leave changes you did not make as you found them. Do not reset, clean, stash, or overwrite them,
+  and keep them out of your commits.
+- Report each check as passed, failed, pending, or not run. Say whether a result came from a local
+  run or from CI, and say why a check did not run.
 - Do not add a changeset before 1.0.0, even if changeset-bot asks for one. See
   [docs/DEPENDENCIES.md#changesets](docs/DEPENDENCIES.md#changesets).
 - When you change code, update or delete the docs and skills that describe it in the same change.
@@ -37,6 +56,11 @@
 
 ### Verification traps
 
+- A clean checkout can still be behind its remote, and a pull request's head can move after you read
+  it. Fetch, and read the head SHA again, before you review or build on a branch.
+- Do not use `git stash` to compare check results with and without a change. The stashed run leaves
+  `dist/` built from the wrong sources, Turbo caches it, and later runs fail with errors such as
+  `TS2307: Cannot find module '@luke-ui/react/box'`. Compare in a separate worktree instead.
 - Only the root `pnpm run check` runs `check:format-root`, which covers files outside packages such
   as `docs/*.md`, and knip (`check:cycles`, `check:unused`). If `check:format-root` fails on
   Markdown wrapping, run `pnpm run fix:format-root`. Do not re-wrap by hand.
