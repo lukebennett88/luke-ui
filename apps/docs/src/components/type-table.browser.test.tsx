@@ -88,12 +88,35 @@ test('omits the required marker when every prop is optional', async () => {
 	expect(page.getByRole('img', { name: 'Required' }).elements()).toHaveLength(0);
 });
 
-test('gives each prop row an id for hash links', async () => {
+test('gives each prop rowheader an id for hash links', async () => {
 	await renderWidget(<TypeTable id="api" type={{ label: { type: 'string' } }} />);
 
 	assert(container, 'expected a container');
-	const row = container.querySelector('#api-label');
-	expect(row?.tagName).toBe('TR');
+	const rowHeader = container.querySelector('#api-label');
+	expect(rowHeader?.tagName).toBe('TH');
+	expect(rowHeader?.getAttribute('scope')).toBe('row');
+});
+
+test('associates a description row with its prop rowheader', async () => {
+	await renderWidget(
+		<TypeTable
+			id="api"
+			type={{
+				label: {
+					description: <p>Visible label text.</p>,
+					type: 'string',
+				},
+			}}
+		/>,
+	);
+
+	assert(container, 'expected a container');
+	const rowHeader = container.querySelector('#api-label');
+	expect(rowHeader?.tagName).toBe('TH');
+	const descriptionCell = page.getByText('Visible label text.').element().closest('td');
+	assert(descriptionCell, 'expected a description cell');
+	expect(descriptionCell.getAttribute('headers')).toBe('api-label');
+	expect(descriptionCell.getAttribute('colspan')).toBe('2');
 });
 
 for (const [width, inlineSize] of [
@@ -221,7 +244,7 @@ test('expands the group that holds a prop named by the URL hash', async () => {
 		.toHaveAttribute('aria-expanded', 'true');
 	await expect.element(page.getByText('Extra class.')).toBeVisible();
 	assert(container, 'expected a container');
-	expect(container.querySelector('#button-api-className')?.tagName).toBe('TR');
+	expect(container.querySelector('#button-api-className')?.tagName).toBe('TH');
 });
 
 test('computes the Default column and required marker across every group', async () => {

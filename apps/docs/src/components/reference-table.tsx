@@ -79,19 +79,22 @@ export function TableCell({
 	children,
 	className,
 	colSpan,
+	headers,
 	id,
 	...boxProps
 }: TableElementBoxProps & {
 	children?: ReactNode;
 	className?: string;
 	colSpan?: number;
+	/** Space-separated `th` ids this cell belongs to when `scope` alone is not enough. */
+	headers?: string;
 	id?: string;
 }) {
 	return (
 		<Box
 			{...boxProps}
 			className={className}
-			renderRoot={(domProps) => <td {...domProps} colSpan={colSpan} id={id} />}
+			renderRoot={(domProps) => <td {...domProps} colSpan={colSpan} headers={headers} id={id} />}
 		>
 			{children}
 		</Box>
@@ -102,16 +105,18 @@ export function TableCell({
 export function TableRowHeader({
 	children,
 	className,
+	id,
 	...boxProps
 }: TableElementBoxProps & {
 	children?: ReactNode;
 	className?: string;
+	id?: string;
 }) {
 	return (
 		<Box
 			{...boxProps}
 			className={className}
-			renderRoot={(domProps) => <th {...domProps} scope="row" />}
+			renderRoot={(domProps) => <th {...domProps} id={id} scope="row" />}
 		>
 			{children}
 		</Box>

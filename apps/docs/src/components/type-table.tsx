@@ -172,8 +172,9 @@ function PropRow({
 
 	return (
 		<Fragment>
-			<tr className={styles.dataRow} id={rowId}>
-				<TableRowHeader className={cx(cellClassName, ruledClassName)} {...cellBox}>
+			{/* Hash targets the rowheader so deep links and `headers=` share one id. */}
+			<tr className={styles.dataRow}>
+				<TableRowHeader className={cx(cellClassName, ruledClassName)} id={rowId} {...cellBox}>
 					<Cluster alignItems="baseline" flexWrap="nowrap" gap="sp4">
 						<CellText
 							className={referenceStyles.monospace}
@@ -228,9 +229,14 @@ function PropRow({
 			</tr>
 			{hasDetails ? (
 				<tr>
+					{/*
+					 * A second row has no `scope="row"` cell, so `headers` keeps the description under
+					 * the prop name for assistive technology (see HTML table headers).
+					 */}
 					<TableCell
 						className={cx(cellClassName, referenceStyles.ruled, referenceStyles.rowEnd)}
 						colSpan={layout.columnCount}
+						headers={rowId}
 						paddingBlockEnd="sp16"
 						paddingBlockStart="sp4"
 						paddingInline="sp16"
