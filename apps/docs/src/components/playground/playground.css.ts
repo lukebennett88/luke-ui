@@ -1,15 +1,7 @@
 import { vars } from '@luke-ui/react/theme';
 import { style } from '@vanilla-extract/css';
 import { docsTabletMinInlineSize } from '../../lib/docs-container-queries.js';
-
-/** Monaco github-light-high-contrast `editor.background`. */
-const MONACO_LIGHT_BACKGROUND = '#ffffff';
-/** Monaco github-dark-high-contrast `editor.background`. */
-const MONACO_DARK_BACKGROUND = '#0a0c10';
-/** Monaco light gutter digits. */
-const MONACO_LIGHT_LINE_NUMBER = '#88929d';
-/** Monaco dark gutter digits. */
-const MONACO_DARK_LINE_NUMBER = '#9ea7b3';
+import { monacoChromeColors } from '../../lib/shiki-theme.js';
 
 const SEPARATOR_THUMB_THICKNESS = '0.375rem';
 const SEPARATOR_THUMB_LENGTH = '4rem';
@@ -43,11 +35,11 @@ export const panelGroup = style({
 export const editorPanel = style({
 	'@layer': {
 		components: {
-			backgroundColor: MONACO_LIGHT_BACKGROUND,
+			backgroundColor: monacoChromeColors.light.background,
 			minBlockSize: 0,
 			selectors: {
 				':root.dark &': {
-					backgroundColor: MONACO_DARK_BACKGROUND,
+					backgroundColor: monacoChromeColors.dark.background,
 				},
 			},
 		},
@@ -297,13 +289,13 @@ export const skeletonLine = style({
 export const skeletonLineNumber = style({
 	'@layer': {
 		components: {
-			color: MONACO_LIGHT_LINE_NUMBER,
+			color: monacoChromeColors.light.lineNumber,
 			flexShrink: 0,
 			inlineSize: '3ch',
 			textAlign: 'end',
 			selectors: {
 				':root.dark &': {
-					color: MONACO_DARK_LINE_NUMBER,
+					color: monacoChromeColors.dark.lineNumber,
 				},
 			},
 		},
