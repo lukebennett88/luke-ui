@@ -46,6 +46,12 @@ const trackConfig = {
 				},
 				root: { alignItems: 'flex-start' },
 			},
+			// Spike for #801. Each rail is a line box in Track's inherited typography, and the row aligns
+			// that line's baseline with the first baseline of the centre, wherever it comes from, such
+			// as the title at the top of a stack. A graphic in a rail is centred on that line's cap
+			// height, and a taller one grows the row. Exact when the first line uses Track's inherited
+			// font size. Line height and Capsize trim do not affect it.
+			firstBaseline: { root: { alignItems: 'first baseline' } },
 			start: { root: { alignItems: 'flex-start' } },
 		},
 	},

@@ -1,7 +1,9 @@
 import type { HTMLAttributes, JSX, ReactNode, Ref } from 'react';
+import { cx } from '../../shared/utils/utils.js';
 import { Box } from '../box/box.js';
 import type { RequiredInitialResponsive } from '../styles/responsive.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
+import { textAdornment } from '../text/styles.css.js';
 import type { Prettify } from '../types/prettify.js';
 import type { TrackRecipeVariants } from './recipe.css.js';
 import { trackRecipe } from './recipe.css.js';
@@ -28,6 +30,10 @@ interface _TrackProps extends HTMLAttributes<HTMLElement> {
 	 *
 	 * `firstLine` uses Track's inherited line height. A different line height inside `children` does
 	 * not change the alignment point.
+	 *
+	 * `firstBaseline` is an exploratory alternative. It aligns each rail's line, in Track's inherited
+	 * typography, with the first baseline of `children`, and centres a graphic in a rail on that
+	 * line. It is exact when the first line of `children` uses Track's inherited font size.
 	 * @default start
 	 */
 	railAlignment?: NonNullable<TrackRecipeVariants>['railAlignment'];
@@ -58,6 +64,7 @@ export function Track(props: TrackProps): JSX.Element {
 
 	const WrapperElement: TrackWrapperElementType = Element === 'span' ? 'span' : 'div';
 	const { centre, rail, root } = trackRecipe({ isInline: Element === 'span', railAlignment });
+	const railClassName = railAlignment === 'firstBaseline' ? cx(rail(), textAdornment) : rail();
 
 	return (
 		<Box
@@ -67,9 +74,9 @@ export function Track(props: TrackProps): JSX.Element {
 			gap={gap}
 			ref={ref}
 		>
-			{railStart != null && <WrapperElement className={rail()}>{railStart}</WrapperElement>}
+			{railStart != null && <WrapperElement className={railClassName}>{railStart}</WrapperElement>}
 			<WrapperElement className={centre()}>{children}</WrapperElement>
-			{railEnd != null && <WrapperElement className={rail()}>{railEnd}</WrapperElement>}
+			{railEnd != null && <WrapperElement className={railClassName}>{railEnd}</WrapperElement>}
 		</Box>
 	);
 }
