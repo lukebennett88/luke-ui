@@ -30,23 +30,47 @@ afterEach(() => {
 	root = undefined;
 });
 
-// Elements Prose gives a block-start margin or list marker. A widget root that opts out must hold
-// none of them anywhere below it.
+// Elements Prose styles. A widget root that opts out must not carry these fingerprints.
 const PROSE_BLOCKS = 'p, ul, ol, li, dl, dt, dd, blockquote, pre, hr, figure, figcaption, table';
+
+/** Prose-owned values that neither the UA nor typical widget chrome use without Preflight. */
+function hasProseFingerprint(element: Element): boolean {
+	const style = getComputedStyle(element);
+	if (element.matches('ul, ol')) {
+		return style.paddingInlineStart === '24px';
+	}
+	if (element.matches('li')) {
+		return style.marginBlockStart === '12px';
+	}
+	if (element.matches('table')) {
+		// Prose forces `display: block` so a narrow table can scroll; the UA keeps `table`.
+		return style.display === 'block';
+	}
+	if (element.matches('th, td')) {
+		return style.paddingBlock === '8px' && style.paddingInline === '12px';
+	}
+	if (element.matches('pre')) {
+		return style.paddingBlock === '12px' && style.paddingInline === '16px';
+	}
+	if (element.matches('p')) {
+		// Capsize trim boxes are Prose-only on plain paragraphs.
+		const before = getComputedStyle(element, '::before');
+		return before.display === 'table' && before.content.includes('""');
+	}
+	if (element.matches('blockquote, figure')) {
+		// Prose sibling gaps (`* + blockquote|figure` → sp40). UA margins differ.
+		return style.marginBlockStart === '40px';
+	}
+	if (element.matches('hr')) {
+		return style.blockSize === '0px' && style.borderBlockStartStyle === 'solid';
+	}
+	return false;
+}
 
 function proseLeaks(widget: Element) {
 	return [...widget.querySelectorAll(PROSE_BLOCKS)]
 		.filter((element) => element.closest('[data-prose-example]') == null)
-		.filter((element) => {
-			const style = getComputedStyle(element);
-			// Detect Prose-owned values, not UA defaults. Without Tailwind preflight, paragraphs and
-			// lists keep browser margins inside `not-prose`; Prose alone sets the 24px list indent
-			// and the sp12 item gap.
-			return (
-				(element.matches('ul, ol') && style.paddingInlineStart === '24px') ||
-				(element.matches('li') && style.marginBlockStart === '12px')
-			);
-		})
+		.filter(hasProseFingerprint)
 		.map((element) => element.outerHTML.slice(0, 80));
 }
 
@@ -118,12 +142,33 @@ test('still applies Prose rhythm to content around the widgets', async () => {
 			<p data-testid="second">Second.</p>
 			<ul data-testid="list">
 				<li>One</li>
+				<li data-testid="second-item">Two</li>
 			</ul>
+			<blockquote data-testid="quote">Quoted.</blockquote>
+			<figure data-testid="figure">
+				<img alt="" height={1} src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width={1} />
+			</figure>
+			<table data-testid="table">
+				<tbody>
+					<tr>
+						<td>Cell</td>
+					</tr>
+				</tbody>
+			</table>
 		</>,
 	);
 
-	expect(getComputedStyle(widgetRoot('[data-testid="second"]')).marginBlockStart).toBe('32px');
+	const second = widgetRoot('[data-testid="second"]');
+	expect(getComputedStyle(second).marginBlockStart).toBe('32px');
+	expect(getComputedStyle(second, '::before').display).toBe('table');
 	expect(getComputedStyle(widgetRoot('[data-testid="list"]')).listStyleType).toBe('disc');
+	expect(getComputedStyle(widgetRoot('[data-testid="list"]')).paddingInlineStart).toBe('24px');
+	expect(getComputedStyle(widgetRoot('[data-testid="second-item"]')).marginBlockStart).toBe('12px');
+	expect(getComputedStyle(widgetRoot('[data-testid="quote"]')).marginBlockStart).toBe('40px');
+	expect(getComputedStyle(widgetRoot('[data-testid="figure"]')).marginBlockStart).toBe('40px');
+	expect(getComputedStyle(widgetRoot('[data-testid="table"]')).display).toBe('block');
+	// Positive control: fingerprints that proseLeaks must keep detecting.
+	expect(proseLeaks(widgetRoot('[data-testid="article"]'))).not.toEqual([]);
 });
 
 async function renderInProse(children: ReactNode) {
