@@ -1,5 +1,5 @@
 import { vars } from '@luke-ui/react/theme';
-import { globalStyle, style } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 import { docsTabletMinInlineSize } from '../../lib/docs-container-queries.js';
 
 /** Monaco github-light-high-contrast `editor.background`. */
@@ -14,25 +14,19 @@ const MONACO_DARK_LINE_NUMBER = '#9ea7b3';
 const SEPARATOR_THUMB_THICKNESS = '0.375rem';
 const SEPARATOR_THUMB_LENGTH = '4rem';
 
-export const page = style({
-	'@layer': {
-		components: {
-			display: 'flex',
-			flexDirection: 'column',
-			blockSize: '100dvh',
-		},
-	},
-});
-
 /**
  * CSS owns the visible flex direction so the desktop row layout is already correct while the
  * server-rendered vertical orientation waits for `useIsDesktop` to correct the panel behaviour.
+ * Layout primitives cannot express the `!important` + container-query flip against
+ * react-resizable-panels' inline orientation.
  */
 export const panelGroup = style({
 	'@layer': {
 		components: {
 			display: 'flex',
-			flex: '1 1 auto',
+			flexBasis: 'auto',
+			flexGrow: 1,
+			flexShrink: 1,
 			// Important so CSS wins over the inline flex-direction react-resizable-panels sets from
 			// its (possibly stale) orientation prop before `useIsDesktop` corrects it.
 			flexDirection: 'column !important' as 'column',
@@ -56,35 +50,6 @@ export const editorPanel = style({
 					backgroundColor: MONACO_DARK_BACKGROUND,
 				},
 			},
-		},
-	},
-});
-
-export const editorPanelBody = style({
-	'@layer': {
-		components: {
-			blockSize: '100%',
-			minBlockSize: 0,
-		},
-	},
-});
-
-export const editorShell = style({
-	'@layer': {
-		components: {
-			display: 'flex',
-			flexDirection: 'column',
-			blockSize: '100%',
-			minBlockSize: 0,
-		},
-	},
-});
-
-export const editorMount = style({
-	'@layer': {
-		components: {
-			flex: '1 1 auto',
-			minBlockSize: 0,
 		},
 	},
 });
@@ -149,8 +114,6 @@ export const separator = style({
 export const previewPanel = style({
 	'@layer': {
 		components: {
-			display: 'flex',
-			flexDirection: 'column',
 			minBlockSize: 0,
 			position: 'relative',
 		},
@@ -174,11 +137,8 @@ export const previewPanelFullscreen = style({
 export const paneToolbar = style({
 	'@layer': {
 		components: {
-			alignItems: 'center',
 			backgroundColor: vars.color.surface.base,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
-			display: 'flex',
-			flexShrink: 0,
 			minBlockSize: `calc(${vars.controlSize.small} + ${vars.space.sp8} * 2 + 1px)`,
 			paddingBlock: vars.space.sp8,
 			paddingInline: vars.space.sp8,
@@ -187,15 +147,6 @@ export const paneToolbar = style({
 					paddingInline: vars.space.sp12,
 				},
 			},
-		},
-	},
-});
-
-export const previewToolbar = style({
-	'@layer': {
-		components: {
-			gap: vars.space.sp8,
-			justifyContent: 'space-between',
 		},
 	},
 });
@@ -219,8 +170,6 @@ export const previewCanvas = style({
 	'@layer': {
 		components: {
 			backgroundColor: `color-mix(in srgb, ${vars.color.surface.subdued} 50%, transparent)`,
-			flex: '1 1 auto',
-			minBlockSize: 0,
 			overflow: 'auto',
 			padding: vars.space.sp8,
 			'@container': {
@@ -280,11 +229,8 @@ export const previewIframe = style({
 export const previewLoading = style({
 	'@layer': {
 		components: {
-			alignItems: 'center',
 			backgroundColor: `color-mix(in srgb, ${vars.color.surface.base} 90%, transparent)`,
-			display: 'flex',
 			inset: 0,
-			justifyContent: 'center',
 			position: 'absolute',
 			transition: `opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}, visibility ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
 			'@media': {
@@ -308,16 +254,13 @@ export const previewLoadingHidden = style({
 export const loadingPill = style({
 	'@layer': {
 		components: {
-			alignItems: 'center',
 			backgroundColor: vars.color.surface.overlay,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.full,
 			borderStyle: 'solid',
 			borderWidth: '1px',
 			color: vars.color.text.secondary,
-			display: 'flex',
 			fontSize: vars.font.caption.fontSize,
-			gap: vars.space.sp8,
 			lineHeight: vars.font.caption.lineHeight,
 			paddingBlock: vars.space.sp4,
 			paddingInline: vars.space.sp12,
@@ -340,6 +283,7 @@ export const editorSkeleton = style({
 	},
 });
 
+/** Monaco gutter metrics: keep digit rail and bar spacing byte-stable with the live editor. */
 export const skeletonLine = style({
 	'@layer': {
 		components: {
@@ -369,7 +313,9 @@ export const skeletonLineNumber = style({
 export const skeletonLineContent = style({
 	'@layer': {
 		components: {
-			flex: '1 1 auto',
+			flexBasis: 'auto',
+			flexGrow: 1,
+			flexShrink: 1,
 			minInlineSize: 0,
 			overflow: 'hidden',
 			paddingInlineEnd: vars.space.sp16,
@@ -392,30 +338,9 @@ export const skeletonBar = style({
 export const skeletonPillOverlay = style({
 	'@layer': {
 		components: {
-			alignItems: 'center',
-			display: 'flex',
 			inset: 0,
-			justifyContent: 'center',
 			pointerEvents: 'none',
 			position: 'absolute',
-		},
-	},
-});
-
-export const previewRunner = style({
-	'@layer': {
-		components: {
-			display: 'flex',
-			flexDirection: 'column',
-			minBlockSize: '100dvh',
-		},
-	},
-});
-
-globalStyle(`${previewRunner} > *`, {
-	'@layer': {
-		components: {
-			flex: '1 1 auto',
 		},
 	},
 });

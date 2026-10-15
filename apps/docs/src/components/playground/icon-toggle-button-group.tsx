@@ -1,11 +1,11 @@
 import { buttonRecipe } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
 import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
 import type { ComponentProps } from 'react';
 import type { Selection } from 'react-aria-components/GridList';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
 import { ToggleButtonGroup } from 'react-aria-components/ToggleButtonGroup';
-import * as styles from './icon-toggle-button-group.css.js';
 
 type IconToggleItem<Value extends string> = {
 	icon: IconName;
@@ -42,14 +42,20 @@ export function IconToggleButtonGroup<Value extends string>({
 	value,
 }: IconToggleButtonGroupProps<Value>) {
 	return (
-		<ToggleButtonGroup
-			aria-label={label}
-			className={styles.group}
-			disallowEmptySelection
-			onSelectionChange={toSelectionChangeHandler(options, onChange)}
-			orientation="horizontal"
-			selectedKeys={[value]}
-			selectionMode="single"
+		<Cluster
+			flexWrap="nowrap"
+			gap="sp8"
+			renderRoot={(domProps) => (
+				<ToggleButtonGroup
+					{...domProps}
+					aria-label={label}
+					disallowEmptySelection
+					onSelectionChange={toSelectionChangeHandler(options, onChange)}
+					orientation="horizontal"
+					selectedKeys={[value]}
+					selectionMode="single"
+				/>
+			)}
 		>
 			{options.map(({ icon, label: optionLabel, value: optionValue }) => (
 				<ToggleButton
@@ -62,7 +68,7 @@ export function IconToggleButtonGroup<Value extends string>({
 					<Icon name={icon} size="xsmall" />
 				</ToggleButton>
 			))}
-		</ToggleButtonGroup>
+		</Cluster>
 	);
 }
 
@@ -77,14 +83,20 @@ export function TextToggleButtonGroup<Value extends string>({
 	value,
 }: TextToggleButtonGroupProps<Value>) {
 	return (
-		<ToggleButtonGroup
-			aria-label={label}
-			className={styles.group}
-			disallowEmptySelection
-			onSelectionChange={toSelectionChangeHandler(options, onChange)}
-			orientation="horizontal"
-			selectedKeys={[value]}
-			selectionMode="single"
+		<Cluster
+			flexWrap="nowrap"
+			gap="sp8"
+			renderRoot={(domProps) => (
+				<ToggleButtonGroup
+					{...domProps}
+					aria-label={label}
+					disallowEmptySelection
+					onSelectionChange={toSelectionChangeHandler(options, onChange)}
+					orientation="horizontal"
+					selectedKeys={[value]}
+					selectionMode="single"
+				/>
+			)}
 		>
 			{options.map(({ label: optionLabel, value: optionValue }) => (
 				<ToggleButton
@@ -96,7 +108,7 @@ export function TextToggleButtonGroup<Value extends string>({
 					{optionLabel}
 				</ToggleButton>
 			))}
-		</ToggleButtonGroup>
+		</Cluster>
 	);
 }
 

@@ -5,6 +5,9 @@ import type {
 	PlaygroundResult,
 } from '@luke-ui/playground-core/protocol';
 import { createPlaygroundPageSession } from '@luke-ui/playground-core/protocol';
+import { Box } from '@luke-ui/react/box';
+import { Cluster } from '@luke-ui/react/cluster';
+import { Stack } from '@luke-ui/react/stack';
 import { cx } from '@luke-ui/react/utils';
 import { ClientOnly, createFileRoute } from '@tanstack/react-router';
 import type { RefObject } from 'react';
@@ -114,7 +117,7 @@ function Playground() {
 	};
 
 	return (
-		<div className={styles.page}>
+		<Stack blockSize="100dvh">
 			<SiteNav />
 			<Group
 				className={styles.panelGroup}
@@ -128,7 +131,7 @@ function Playground() {
 					minSize={160}
 					style={{ overflow: 'hidden' }}
 				>
-					<div className={styles.editorPanelBody}>
+					<Box blockSize="100%" minBlockSize={0}>
 						<ClientOnly
 							fallback={
 								<>
@@ -145,7 +148,7 @@ function Playground() {
 								/>
 							</Suspense>
 						</ClientOnly>
-					</div>
+					</Box>
 				</Panel>
 				{/* react-resizable-panels owns hit-testing and the resize cursor at the document level; the grab band is configured by resizeTargetMinimumSize on Group above. */}
 				<Separator aria-label="Resize editor and preview panels" className={styles.separator} />
@@ -155,40 +158,49 @@ function Playground() {
 					minSize={160}
 					style={{ overflow: 'hidden' }}
 				>
-					<PreviewToolbar
-						isFullscreen={isPreviewFullscreen}
-						onFullscreenChange={setIsPreviewFullscreen}
-						onViewportChange={setViewportWidth}
-						viewportWidth={viewportWidth}
-					/>
-					{error === null ? null : (
-						<div className={styles.compileError} role="alert">
-							{error}
-						</div>
-					)}
-					<div className={styles.previewCanvas}>
-						<div className={styles.previewFrame} style={{ inlineSize: viewportWidth }}>
-							{/* Iframes swallow pointer events, which kills separator drags that cross into the preview — disable them while the separator is engaged. */}
-							<iframe
-								className={styles.previewIframe}
-								ref={iframeRef}
-								src={withBasePath('/playground/preview', import.meta.env.BASE_URL)}
-								title="Playground preview"
-							/>
-							<div
-								className={cx(
-									styles.previewLoading,
-									!showPreviewLoading && styles.previewLoadingHidden,
-								)}
-								role="status"
-							>
-								<LoadingPill label="Loading preview" />
+					<Stack blockSize="100%" minBlockSize={0}>
+						<PreviewToolbar
+							isFullscreen={isPreviewFullscreen}
+							onFullscreenChange={setIsPreviewFullscreen}
+							onViewportChange={setViewportWidth}
+							viewportWidth={viewportWidth}
+						/>
+						{error === null ? null : (
+							<div className={styles.compileError} role="alert">
+								{error}
 							</div>
-						</div>
-					</div>
+						)}
+						<Box
+							className={styles.previewCanvas}
+							flexBasis="auto"
+							flexGrow="1"
+							flexShrink="1"
+							minBlockSize={0}
+						>
+							<div className={styles.previewFrame} style={{ inlineSize: viewportWidth }}>
+								{/* Iframes swallow pointer events, which kills separator drags that cross into the preview — disable them while the separator is engaged. */}
+								<iframe
+									className={styles.previewIframe}
+									ref={iframeRef}
+									src={withBasePath('/playground/preview', import.meta.env.BASE_URL)}
+									title="Playground preview"
+								/>
+								<Cluster
+									className={cx(
+										styles.previewLoading,
+										!showPreviewLoading && styles.previewLoadingHidden,
+									)}
+									justifyContent="center"
+									role="status"
+								>
+									<LoadingPill label="Loading preview" />
+								</Cluster>
+							</div>
+						</Box>
+					</Stack>
 				</Panel>
 			</Group>
-		</div>
+		</Stack>
 	);
 }
 

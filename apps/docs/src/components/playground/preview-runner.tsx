@@ -2,6 +2,8 @@ import { createPlaygroundCompiler } from '@luke-ui/playground-core/compiler';
 import { decodeCodeHash } from '@luke-ui/playground-core/hash';
 import type { PlaygroundPreviewMessage } from '@luke-ui/playground-core/protocol';
 import { isPlaygroundCodeMessage, isTrustedMessageSource } from '@luke-ui/playground-core/protocol';
+import { Box } from '@luke-ui/react/box';
+import { Stack } from '@luke-ui/react/stack';
 import type { ComponentType } from 'react';
 import { useEffect, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -9,7 +11,6 @@ import { playgroundScope } from '../../generated/playground-scope.generated';
 import { isPlaygroundAppearanceMessage } from '../../lib/playground-appearance-message.js';
 import { StoryWrapper } from '../../lib/story-wrapper';
 import { previewThemePrefs } from '../../lib/theme-prefs.js';
-import * as styles from './playground.css.js';
 
 type PreviewRun = { UserComponent: ComponentType; runId: number };
 
@@ -58,13 +59,15 @@ export default function PreviewRunner() {
 	if (!run) return null;
 
 	return (
-		<div className={styles.previewRunner}>
-			<StoryWrapper>
-				<ErrorBoundary fallback={null} key={run.runId} onError={reportError}>
-					<run.UserComponent />
-				</ErrorBoundary>
-			</StoryWrapper>
-		</div>
+		<Stack minBlockSize="100dvh">
+			<Box flexBasis="auto" flexGrow="1" flexShrink="1" minBlockSize={0}>
+				<StoryWrapper>
+					<ErrorBoundary fallback={null} key={run.runId} onError={reportError}>
+						<run.UserComponent />
+					</ErrorBoundary>
+				</StoryWrapper>
+			</Box>
+		</Stack>
 	);
 }
 

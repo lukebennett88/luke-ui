@@ -1,5 +1,7 @@
+import { Cluster } from '@luke-ui/react/cluster';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+import { Track } from '@luke-ui/react/track';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import shapeScript from '../../generated/editor-skeleton-script.iife.js?raw';
 import { toSkeletonLines } from '../../lib/playground-editor-shape.js';
@@ -42,9 +44,9 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
 				</div>
 			))}
 			{showPill ? (
-				<div aria-hidden className={styles.skeletonPillOverlay}>
+				<Cluster aria-hidden className={styles.skeletonPillOverlay} justifyContent="center">
 					<LoadingPill label="Loading editor" />
-				</div>
+				</Cluster>
 			) : null}
 		</div>
 	);
@@ -67,9 +69,13 @@ export function EditorSkeletonShapeScript() {
 /** Shared loading indicator so the editor and preview speak the same language. */
 export function LoadingPill({ label }: { label: string }) {
 	return (
-		<div className={styles.loadingPill}>
-			<LoadingSpinner aria-hidden size="small" />
-			<span>{label}</span>
-		</div>
+		<Track
+			className={styles.loadingPill}
+			gap="sp8"
+			railAlignment="firstLine"
+			railStart={<LoadingSpinner aria-hidden size="small" />}
+		>
+			{label}
+		</Track>
 	);
 }
