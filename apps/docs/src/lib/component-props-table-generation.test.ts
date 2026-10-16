@@ -118,3 +118,60 @@ test('does not mark an object-only type with the native-props entry', async () =
 		false,
 	);
 });
+
+test('preserves optional alias-of-union props instead of collapsing them to union', async () => {
+	const [doc] = await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'apps/docs/src/lib/__fixtures__/optional-alias-doc-props.ts',
+			name: 'OptionalAliasDocProps',
+		},
+		{ basePath: repoRoot },
+	);
+	const entriesByName = new Map((doc?.entries ?? []).map((entry) => [entry.name, entry] as const));
+
+	expect(entriesByName.get('aliased')).toEqual(
+		expect.objectContaining({
+			required: false,
+			simplifiedType: 'AliasOfUnion',
+			type: 'AliasOfUnion',
+		}),
+	);
+	expect(entriesByName.get('label')).toEqual(
+		expect.objectContaining({
+			required: false,
+			simplifiedType: 'string',
+			type: 'string',
+		}),
+	);
+	expect(entriesByName.get('requiredAliased')).toEqual(
+		expect.objectContaining({
+			required: true,
+			simplifiedType: 'AliasOfUnion',
+			type: 'AliasOfUnion',
+		}),
+	);
+});
+
+test('preserves declared aliases on Grid responsive layout props', async () => {
+	const [gridProps] = await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'packages/@luke-ui/react/src/core/grid/grid.tsx',
+			name: 'GridProps',
+		},
+		{ basePath: repoRoot },
+	);
+	const entriesByName = new Map(
+		(gridProps?.entries ?? []).map((entry) => [entry.name, entry] as const),
+	);
+
+	expect(entriesByName.get('columns')?.simplifiedType).toBe(
+		'RequiredInitialResponsiveValue<string | number>',
+	);
+	expect(entriesByName.get('columns')?.type).toBe(
+		'RequiredInitialResponsiveValue<string | number>',
+	);
+	expect(entriesByName.get('areas')?.simplifiedType).toBe(
+		'RequiredInitialResponsiveValue<readonly string[]>',
+	);
+	expect(entriesByName.get('rows')?.simplifiedType).toBe('RequiredInitialResponsiveValue<string>');
+});

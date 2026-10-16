@@ -8,6 +8,7 @@ import {
 	typeForwardsDomProps,
 } from './component-prop-analysis.js';
 import { NATIVE_PROPS_FORWARDING_KEY, renderNativePropsNote } from './component-prop-groups.js';
+import { improveGeneratedDocTypes } from './improve-generated-doc-types.js';
 
 interface GenerateDocumentationOptions {
 	basePath?: string;
@@ -22,7 +23,7 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 		const docs = await generateDocumentation(file, name, generateOptions);
 		const basePath = (generateOptions as GenerateDocumentationOptions).basePath;
 		if (name === undefined || file.path === undefined || basePath === undefined) {
-			return docs;
+			return docs.map(improveGeneratedDocTypes);
 		}
 
 		const repoRoot = basePath;
@@ -33,15 +34,17 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 			relativeRepoPath(repoRoot, file.path),
 			name,
 		);
-		if (declaration === undefined) return docs;
+		if (declaration === undefined) return docs.map(improveGeneratedDocTypes);
 
 		const reactSrcDir = lukeUiReactSrcDir(repoRoot);
 		const forwardsDomProps = typeForwardsDomProps(declaration, reactSrcDir);
 		return docs.map((doc) =>
-			markNativePropsForwarding(
-				filterGeneratedDoc(doc, declaration, reactSrcDir),
-				name,
-				forwardsDomProps,
+			improveGeneratedDocTypes(
+				markNativePropsForwarding(
+					filterGeneratedDoc(doc, declaration, reactSrcDir),
+					name,
+					forwardsDomProps,
+				),
 			),
 		);
 	};
