@@ -83,12 +83,24 @@ proseStyle('pre', {
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.control,
 	fontFamily: vars.font.family.code,
+	// Label matches inline `Code` at body size (`0.875em` of 16px) without the monospace optical
+	// correction reading large at the inherited body metrics.
+	fontSize: vars.font.label.fontSize,
+	lineHeight: vars.font.label.lineHeight,
 	maxInlineSize: '100%',
 	minInlineSize: 0,
 	overflowX: 'auto',
 	paddingBlock: vars.space.sp12,
 	paddingInline: vars.space.sp16,
 	whiteSpace: 'pre',
+});
+
+// Nested `code` keeps the pre metrics. Without a reset, the UA `font-family: monospace` on `code`
+// can replace the stack and trigger the nested-monospace size quirk Preflight used to correct.
+proseStyle('pre code', {
+	fontFamily: 'inherit',
+	fontSize: 'inherit',
+	lineHeight: 'inherit',
 });
 
 // Markers are restated so a framework reset below Luke UI, such as Tailwind Preflight, cannot

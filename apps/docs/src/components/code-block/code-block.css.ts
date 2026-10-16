@@ -13,8 +13,9 @@ export const root = style({
 			display: 'flex',
 			flexDirection: 'column',
 			fontFamily: vars.font.family.code,
-			fontSize: vars.font.caption.fontSize,
-			lineHeight: vars.font.caption.lineHeight,
+			// Label matches the old Fumadocs `text-sm` fence size and inline `Code` at body size.
+			fontSize: vars.font.label.fontSize,
+			lineHeight: vars.font.label.lineHeight,
 			// Own the figure margin; without Tailwind preflight the UA indent would show.
 			margin: 0,
 			maxInlineSize: '100%',
@@ -99,7 +100,7 @@ export const overlayActions = style({
 	'@layer': {
 		components: {
 			backgroundColor: vars.color.surface.subdued,
-			insetBlockStart: `calc(${vars.space.sp12} + (${vars.font.caption.lineHeight} / 2) - (${vars.controlSize.small} / 2))`,
+			insetBlockStart: `calc(${vars.space.sp12} + (${vars.font.label.lineHeight} / 2) - (${vars.controlSize.small} / 2))`,
 			insetInlineEnd: vars.space.sp8,
 			position: 'absolute',
 			zIndex: 1,
@@ -138,6 +139,10 @@ export const viewportWithOverlayCopy = style({
 export const pre = style({
 	'@layer': {
 		components: {
+			// Keep the figure's code stack; without Preflight the UA sets `font-family: monospace`.
+			fontFamily: 'inherit',
+			fontSize: 'inherit',
+			lineHeight: 'inherit',
 			// max-content so long lines widen the scrollport; min 100% so short blocks fill the frame.
 			inlineSize: 'max-content',
 			margin: 0,
@@ -169,7 +174,7 @@ globalStyle(`${pre} code`, {
 globalStyle(`${pre} code .line`, {
 	'@layer': {
 		components: {
-			minBlockSize: vars.font.caption.lineHeight,
+			minBlockSize: vars.font.label.lineHeight,
 		},
 	},
 });

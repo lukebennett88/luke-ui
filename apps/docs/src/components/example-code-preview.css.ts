@@ -23,7 +23,7 @@ globalStyle(`${collapsible} pre`, {
 		components: {
 			display: 'grid',
 			gridTemplateRows: '0fr',
-			minBlockSize: `calc(${vars.font.caption.lineHeight} * ${collapsedLineCount})`,
+			minBlockSize: `calc(${vars.font.label.lineHeight} * ${collapsedLineCount})`,
 			overflowY: 'clip',
 			transition: `grid-template-rows ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
 			'@media': {

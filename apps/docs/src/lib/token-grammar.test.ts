@@ -3,8 +3,31 @@ import { expect, test } from 'vite-plus/test';
 import { themeTokens } from '../generated/token-reference.generated.js';
 import { buildTokenSections, COLOR_FAMILIES, ROLES } from './token-grammar.js';
 
-const COLOR_HEADING_PATTERN =
-	/^### (background|foreground|border|surface|text|overlay|loadingSkeleton)$/gm;
+/** Title-case MDX headings for each colour family, in page order. */
+const COLOR_HEADINGS = [
+	'Background',
+	'Foreground',
+	'Border',
+	'Surface',
+	'Text',
+	'Overlay',
+	'Loading skeleton',
+] as const;
+
+const COLOR_HEADING_PATTERN = new RegExp(
+	`^### (${COLOR_HEADINGS.map((heading) => heading.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})$`,
+	'gm',
+);
+
+const COLOR_HEADING_TO_FAMILY = {
+	Background: 'background',
+	Foreground: 'foreground',
+	Border: 'border',
+	Surface: 'surface',
+	Text: 'text',
+	Overlay: 'overlay',
+	'Loading skeleton': 'loadingSkeleton',
+} as const satisfies Record<(typeof COLOR_HEADINGS)[number], (typeof COLOR_FAMILIES)[number]>;
 
 test('the catalogue covers every public token exactly once', () => {
 	const sections = buildTokenSections();
@@ -61,7 +84,9 @@ test('colour family headings belong to the MDX table of contents', () => {
 		new URL('../../content/docs/docs/token-reference.mdx', import.meta.url),
 		'utf8',
 	);
-	const headings = [...mdx.matchAll(COLOR_HEADING_PATTERN)].map(([, family]) => family);
+	const headings = [...mdx.matchAll(COLOR_HEADING_PATTERN)].map(
+		([, title]) => COLOR_HEADING_TO_FAMILY[title as keyof typeof COLOR_HEADING_TO_FAMILY],
+	);
 	expect(headings).toEqual([...COLOR_FAMILIES]);
 });
 
