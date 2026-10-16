@@ -861,6 +861,32 @@ test('adornments', { tags: ['visual'] }, async () => {
 						نص طويل يلتف على سطرين
 					</Text>
 				</div>
+				<Text elementType="p">
+					Read the{' '}
+					<Link href="#guide">
+						<Text endContent={<Icon name="externalLink" size="xsmall" />} shouldInheritFont>
+							migration guide
+						</Text>
+					</Link>{' '}
+					before you upgrade.
+				</Text>
+				<div dir="rtl">
+					<Link href="#rtl">
+						<Text shouldInheritFont startContent={<Icon name="bookOpen" size="xsmall" />}>
+							رابط مثال
+						</Text>
+					</Link>
+				</div>
+				<Link href="#block">
+					<Text
+						elementType="div"
+						shouldDisableTrim
+						shouldInheritFont
+						startContent={<Icon name="bookOpen" size="xsmall" />}
+					>
+						A block link that wraps onto a second line
+					</Text>
+				</Link>
 			</Stack>,
 			{ appearance },
 		);
