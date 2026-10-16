@@ -1,5 +1,7 @@
+import type { GeneratedDoc } from 'fumadocs-typescript';
+
 /**
- * Source-backed type definition carried from the docs generator into the API table and Markdown.
+ * Source-backed type definition carried from the docs generator into the API table.
  * Nested navigation beyond the linked root alias is follow-up #822.
  */
 export interface TypeDefinition {
@@ -14,23 +16,19 @@ export interface TypeDefinition {
 	filePath?: string;
 }
 
-/** Synthetic GeneratedDoc entry that carries the type-definition registry to the client table. */
-export const TYPE_DEFINITIONS_KEY = '__lukeTypeDefinitions';
-
-/** JSON payload stored on the reserved entry's `typeHref` (becomes `typeDescriptionLink`). */
+/** Build-time registry of linked type aliases for one generated props table. */
 export type TypeDefinitionsPayload = Record<string, TypeDefinition>;
 
-export function encodeTypeDefinitions(definitions: TypeDefinitionsPayload): string {
-	return JSON.stringify(definitions);
-}
+/**
+ * GeneratedDoc plus a side-channel registry. Definitions are not DocEntry rows — they must not appear
+ * in the props table, processed Markdown, or search indexes.
+ */
+export type EnrichedGeneratedDoc = GeneratedDoc & {
+	typeDefinitions?: TypeDefinitionsPayload;
+};
 
-export function decodeTypeDefinitions(payload: string | undefined): TypeDefinitionsPayload {
-	if (payload === undefined || payload.length === 0) return {};
-	try {
-		const parsed: unknown = JSON.parse(payload);
-		if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
-		return parsed as TypeDefinitionsPayload;
-	} catch {
-		return {};
-	}
-}
+/** Public URL prefix for per-table definition JSON written at MDX compile time. */
+export const TYPE_DEFINITIONS_PUBLIC_DIR = 'type-definitions';
+
+/** Former synthetic entry name; still filtered if an older cache produces it. */
+export const TYPE_DEFINITIONS_KEY = '__lukeTypeDefinitions';

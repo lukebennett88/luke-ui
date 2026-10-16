@@ -16,7 +16,6 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, assert, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { TYPE_DEFINITIONS_KEY } from '../lib/type-definition-model.js';
 import { ComponentPropsTable } from './component-props-table.js';
 import { DocsThemeRoot } from './theme-controls.js';
 import { TypeDefinitionsProvider, TypeTable } from './type-table.js';
@@ -381,22 +380,19 @@ test('falls back to plain text when a type reference has no definition', async (
 test('linked type popovers in a ComponentPropsTable have no axe violations', async () => {
 	await renderWidget(
 		<ComponentPropsTable
+			definitions={{
+				RequiredInitialResponsiveValue: {
+					definition:
+						'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<ResponsivePropValue<Value>>;',
+					name: 'RequiredInitialResponsiveValue',
+				},
+			}}
 			id="grid-api"
 			type={{
 				columns: {
 					description: 'Column tracks.',
 					type: 'RequiredInitialResponsiveValue<number | string>',
 					typeDescriptionLink: 'RequiredInitialResponsiveValue',
-				},
-				[TYPE_DEFINITIONS_KEY]: {
-					type: '',
-					typeDescriptionLink: JSON.stringify({
-						RequiredInitialResponsiveValue: {
-							definition:
-								'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<ResponsivePropValue<Value>>;',
-							name: 'RequiredInitialResponsiveValue',
-						},
-					}),
 				},
 			}}
 		/>,
@@ -406,12 +402,15 @@ test('linked type popovers in a ComponentPropsTable have no axe violations', asy
 		name: 'Show definition of RequiredInitialResponsiveValue',
 	});
 	await userEvent.click(trigger.element());
-	await expect
-		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
-		.toBeVisible();
+	const dialog = page.getByRole('dialog', {
+		name: 'Definition of RequiredInitialResponsiveValue',
+	});
+	await expect.element(dialog).toBeVisible();
 
+	// Popovers portal outside the render container — include both so the open overlay is checked
+	// without scanning Vitest's document chrome (which trips landmark rules).
 	assert(container, 'expected a container');
-	const results = await axe.run(container);
+	const results = await axe.run([container, dialog.element()]);
 	expect(
 		results.violations.map((violation) => ({
 			id: violation.id,

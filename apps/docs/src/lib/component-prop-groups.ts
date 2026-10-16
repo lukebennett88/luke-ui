@@ -17,8 +17,6 @@ export type PropGroupName = (typeof PROP_GROUP_ORDER)[number];
  */
 export const NATIVE_PROPS_FORWARDING_KEY = '__nativePropsForwarding';
 
-export { TYPE_DEFINITIONS_KEY };
-
 /** Sentence shown above a type's prop groups when it forwards native DOM and ARIA props. */
 export function renderNativePropsNote(typeName: string): string {
 	return `\`${typeName}\` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.`;

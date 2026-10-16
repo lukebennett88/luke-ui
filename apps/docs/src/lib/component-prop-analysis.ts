@@ -35,7 +35,7 @@ interface PropType {
 	isUnion: () => boolean;
 }
 
-export interface PropSymbol {
+interface PropSymbol {
 	getAliasedSymbol?: () => PropSymbol | undefined;
 	getDeclarations: () => ReadonlyArray<SyntaxNode>;
 	getName: () => string;

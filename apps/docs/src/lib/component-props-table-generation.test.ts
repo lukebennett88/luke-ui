@@ -2,9 +2,10 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
-import { NATIVE_PROPS_FORWARDING_KEY, TYPE_DEFINITIONS_KEY } from './component-prop-groups.js';
+import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
-import { decodeTypeDefinitions } from './type-definition-model.js';
+import type { EnrichedGeneratedDoc } from './type-definition-model.js';
+import { TYPE_DEFINITIONS_KEY } from './type-definition-model.js';
 
 const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
 const generator = createGenerator({
@@ -121,16 +122,16 @@ test('does not mark an object-only type with the native-props entry', async () =
 });
 
 test('preserves optional alias-of-union props instead of collapsing them to union', async () => {
-	const [doc] = await componentPropsGenerator.generateTypeTable(
+	const [doc] = (await componentPropsGenerator.generateTypeTable(
 		{
 			path: 'apps/docs/src/lib/__fixtures__/optional-alias-doc-props.ts',
 			name: 'OptionalAliasDocProps',
 		},
 		{ basePath: repoRoot },
-	);
+	)) as Array<EnrichedGeneratedDoc | undefined>;
 	const entriesByName = new Map((doc?.entries ?? []).map((entry) => [entry.name, entry] as const));
-	const definitions = decodeTypeDefinitions(entriesByName.get(TYPE_DEFINITIONS_KEY)?.typeHref);
 
+	expect(entriesByName.has(TYPE_DEFINITIONS_KEY)).toBe(false);
 	expect(entriesByName.get('aliased')).toEqual(
 		expect.objectContaining({
 			required: false,
@@ -162,23 +163,23 @@ test('preserves optional alias-of-union props instead of collapsing them to unio
 			typeHref: 'FixtureRenderProp',
 		}),
 	);
-	expect(definitions.AliasOfUnion?.definition).toContain('string | number');
-	expect(definitions.FixtureRenderProp?.definition).toContain('className');
+	expect(doc?.typeDefinitions?.AliasOfUnion?.definition).toContain('string | number');
+	expect(doc?.typeDefinitions?.FixtureRenderProp?.definition).toContain('className');
 });
 
 test('preserves declared aliases on Grid responsive layout props with definitions', async () => {
-	const [gridProps] = await componentPropsGenerator.generateTypeTable(
+	const [gridProps] = (await componentPropsGenerator.generateTypeTable(
 		{
 			path: 'packages/@luke-ui/react/src/core/grid/grid.tsx',
 			name: 'GridProps',
 		},
 		{ basePath: repoRoot },
-	);
+	)) as Array<EnrichedGeneratedDoc | undefined>;
 	const entriesByName = new Map(
 		(gridProps?.entries ?? []).map((entry) => [entry.name, entry] as const),
 	);
-	const definitions = decodeTypeDefinitions(entriesByName.get(TYPE_DEFINITIONS_KEY)?.typeHref);
 
+	expect(entriesByName.has(TYPE_DEFINITIONS_KEY)).toBe(false);
 	expect(entriesByName.get('columns')?.simplifiedType).toBe(
 		'RequiredInitialResponsiveValue<number | string>',
 	);
@@ -190,23 +191,22 @@ test('preserves declared aliases on Grid responsive layout props with definition
 		'RequiredInitialResponsiveValue<ReadonlyArray<string>>',
 	);
 	expect(entriesByName.get('rows')?.simplifiedType).toBe('RequiredInitialResponsiveValue<string>');
-	expect(definitions.RequiredInitialResponsiveValue?.definition).toContain(
+	expect(gridProps?.typeDefinitions?.RequiredInitialResponsiveValue?.definition).toContain(
 		'RequiredInitialResponsive',
 	);
 });
 
 test('links Button pressAction to the PressAction definition', async () => {
-	const [buttonProps] = await componentPropsGenerator.generateTypeTable(
+	const [buttonProps] = (await componentPropsGenerator.generateTypeTable(
 		{
 			path: 'packages/@luke-ui/react/src/core/button/button.tsx',
 			name: 'ButtonProps',
 		},
 		{ basePath: repoRoot },
-	);
+	)) as Array<EnrichedGeneratedDoc | undefined>;
 	const entriesByName = new Map(
 		(buttonProps?.entries ?? []).map((entry) => [entry.name, entry] as const),
 	);
-	const definitions = decodeTypeDefinitions(entriesByName.get(TYPE_DEFINITIONS_KEY)?.typeHref);
 
 	expect(entriesByName.get('pressAction')).toEqual(
 		expect.objectContaining({
@@ -215,7 +215,46 @@ test('links Button pressAction to the PressAction definition', async () => {
 			typeHref: 'PressAction',
 		}),
 	);
-	expect(definitions.PressAction?.definition).toMatch(/=> void \| Promise<void>/);
+	expect(buttonProps?.typeDefinitions?.PressAction?.definition).toMatch(/=> void \| Promise<void>/);
+});
+
+test('prefers non-never annotations across element/render union branches', async () => {
+	const [doc] = await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'apps/docs/src/lib/__fixtures__/union-branch-doc-props.ts',
+			name: 'UnionBranchDocProps',
+		},
+		{ basePath: repoRoot },
+	);
+	const entriesByName = new Map((doc?.entries ?? []).map((entry) => [entry.name, entry] as const));
+
+	expect(entriesByName.get('renderRoot')).toEqual(
+		expect.objectContaining({
+			simplifiedType: 'BranchRenderProp',
+			type: 'BranchRenderProp',
+			typeHref: 'BranchRenderProp',
+		}),
+	);
+	expect(entriesByName.get('elementType')?.type).toBe("'div' | 'span'");
+	expect(entriesByName.get('elementType')?.type).not.toBe('never');
+	expect(entriesByName.get('shared')).toEqual(
+		expect.objectContaining({
+			simplifiedType: 'SharedBranchAlias',
+			type: 'SharedBranchAlias',
+		}),
+	);
+
+	const [boxProps] = await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'packages/@luke-ui/react/src/core/box/box.tsx',
+			name: 'BoxProps',
+		},
+		{ basePath: repoRoot },
+	);
+	const boxByName = new Map((boxProps?.entries ?? []).map((entry) => [entry.name, entry] as const));
+	expect(boxByName.get('renderRoot')?.type).not.toBe('never');
+	expect(boxByName.get('renderRoot')?.type).toMatch(/domProps/);
+	expect(boxByName.get('elementType')?.type).toBe('BoxLikeElementType');
 });
 
 test('keeps optional and explicit-undefined props distinct', async () => {

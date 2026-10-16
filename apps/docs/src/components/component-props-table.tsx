@@ -7,7 +7,7 @@ import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { groupPropNames, NATIVE_PROPS_FORWARDING_KEY } from '../lib/component-prop-groups.js';
-import { decodeTypeDefinitions, TYPE_DEFINITIONS_KEY } from '../lib/type-definition-model.js';
+import type { TypeDefinitionsPayload } from '../lib/type-definition-model.js';
 import * as styles from './component-props-table.css.js';
 import { InheritTypography } from './docs-article/mdx-elements.js';
 import * as disclosureStyles from './docs-disclosure.css.js';
@@ -24,20 +24,21 @@ import {
 /** Grouped prop table for a component guide's `## API` section. */
 export function ComponentPropsTable({
 	className,
+	definitions,
+	definitionsHref,
 	id,
 	type,
 	...props
 }: {
+	/** Sync definitions for tests; production pages pass `definitionsHref` instead. */
+	definitions?: TypeDefinitionsPayload;
+	/** Page-level JSON asset written at MDX compile time. */
+	definitionsHref?: string;
 	id: string;
 	type: Record<string, TypeNode>;
 } & ComponentProps<'div'>) {
 	const groups = groupPropNames(Object.keys(type));
 	const nativePropsNote = type[NATIVE_PROPS_FORWARDING_KEY]?.description;
-	const definitions = decodeTypeDefinitions(
-		typeof type[TYPE_DEFINITIONS_KEY]?.typeDescriptionLink === 'string'
-			? type[TYPE_DEFINITIONS_KEY].typeDescriptionLink
-			: undefined,
-	);
 	const hash = useRouterState({ select: (state) => state.location.hash });
 	// The marker entry is not a row, so it must not count towards the table-wide decisions.
 	const layout = getPropTableLayout(
@@ -51,7 +52,7 @@ export function ComponentPropsTable({
 	}, [hash, id]);
 
 	return (
-		<TypeDefinitionsProvider definitions={definitions}>
+		<TypeDefinitionsProvider definitions={definitions} definitionsHref={definitionsHref}>
 			<Stack
 				className={cx('not-prose', className)}
 				gap="sp16"

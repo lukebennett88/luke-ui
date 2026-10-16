@@ -1,33 +1,41 @@
 import { isAbsolute, relative, resolve } from 'node:path';
 import type { DocEntry, GeneratedDoc } from 'fumadocs-typescript';
-import type { PropDeclaration, PropSymbol, SyntaxNode } from './component-prop-analysis.js';
-import type { TypeDefinition, TypeDefinitionsPayload } from './type-definition-model.js';
-import { encodeTypeDefinitions, TYPE_DEFINITIONS_KEY } from './type-definition-model.js';
+import type { PropDeclaration, SyntaxNode } from './component-prop-analysis.js';
+import type {
+	EnrichedGeneratedDoc,
+	TypeDefinition,
+	TypeDefinitionsPayload,
+} from './type-definition-model.js';
+import { TYPE_DEFINITIONS_KEY } from './type-definition-model.js';
 
 const KIND_LABELS = new Set(['union', 'object', 'intersection', 'tuple', 'array', 'function']);
 
 interface EnrichContext {
 	definitions: TypeDefinitionsPayload;
-	propsByName: Map<string, PropSymbol>;
+	/** Every written annotation for a prop across union branches, in encounter order. */
+	annotationsByName: Map<string, ReadonlyArray<SyntaxNode>>;
 	reactSrcDir: string;
 	repoRoot: string;
 }
 
 /**
- * Restores declared aliases for optional props, records whether `| undefined` is explicit in the
- * annotation, and collects source-backed definitions for linkable Luke UI type aliases.
+ * Restores declared aliases for optional props and collects source-backed definitions for linkable
+ * Luke UI type aliases. Definitions hang on the doc as `typeDefinitions`, not as a fake prop entry.
  */
 export function enrichGeneratedDocTypes(
 	doc: GeneratedDoc,
 	propsDeclaration: PropDeclaration | undefined,
 	reactSrcDir: string,
 	repoRoot: string,
-): GeneratedDoc {
+): EnrichedGeneratedDoc {
 	const definitions: TypeDefinitionsPayload = {};
-	const propsByName = propsDeclaration === undefined ? new Map() : propsByNameMap(propsDeclaration);
+	const annotationsByName =
+		propsDeclaration === undefined
+			? new Map<string, ReadonlyArray<SyntaxNode>>()
+			: annotationsByPropName(propsDeclaration);
 	const context: EnrichContext = {
+		annotationsByName,
 		definitions,
-		propsByName,
 		reactSrcDir: resolve(reactSrcDir),
 		repoRoot: resolve(repoRoot),
 	};
@@ -37,17 +45,15 @@ export function enrichGeneratedDocTypes(
 		return [enrichDocEntry(entry, context)];
 	});
 
+	const enriched: EnrichedGeneratedDoc = { ...doc, entries };
 	if (Object.keys(definitions).length > 0) {
-		entries.push(typeDefinitionsEntry(definitions));
+		enriched.typeDefinitions = definitions;
 	}
-
-	return { ...doc, entries };
+	return enriched;
 }
 
 function enrichDocEntry(entry: DocEntry, context: EnrichContext): DocEntry {
-	const prop = context.propsByName.get(entry.name);
-	const declarations = prop?.getDeclarations() ?? [];
-	const typeNode = firstTypeNode(declarations);
+	const typeNode = selectDeclaredTypeNode(context.annotationsByName.get(entry.name) ?? []);
 	const declaredText = typeNode?.getText().trim();
 
 	let type = entry.type;
@@ -192,35 +198,54 @@ export function annotationIncludesTopLevelUndefined(typeNode: SyntaxNode | undef
 	return false;
 }
 
-function firstTypeNode(declarations: ReadonlyArray<SyntaxNode>): SyntaxNode | undefined {
-	for (const declaration of declarations) {
-		const typeNode = declaration.getTypeNode?.();
-		if (typeNode !== undefined) return typeNode;
-	}
-	return;
+/**
+ * Picks the public annotation for a prop that may be declared on several union branches.
+ * Prefer a non-`never` annotation (Box-like `renderRoot` / `elementType` exclusivity), then an alias
+ * reference, then the first remaining written type.
+ */
+export function selectDeclaredTypeNode(
+	typeNodes: ReadonlyArray<SyntaxNode>,
+): SyntaxNode | undefined {
+	if (typeNodes.length === 0) return;
+	if (typeNodes.length === 1) return typeNodes[0];
+
+	const nonNever = typeNodes.filter((node) => !isNeverAnnotation(node));
+	const pool = nonNever.length > 0 ? nonNever : [...typeNodes];
+
+	const alias = pool.find((node) => rootTypeReference(node) !== undefined);
+	if (alias !== undefined) return alias;
+
+	return pool[0];
 }
 
-function propsByNameMap(declaration: PropDeclaration): Map<string, PropSymbol> {
+function isNeverAnnotation(typeNode: SyntaxNode): boolean {
+	if (typeNode.getKindName() === 'NeverKeyword') return true;
+	return typeNode.getType?.().isNever() === true;
+}
+
+/**
+ * Collects every written type annotation for each prop name across a union of constituents.
+ * Unlike a first-wins symbol map, this preserves branch-specific declarations such as
+ * `renderRoot?: never` vs `renderRoot: (…) => …`.
+ */
+function annotationsByPropName(
+	declaration: PropDeclaration,
+): Map<string, ReadonlyArray<SyntaxNode>> {
 	const type = declaration.getType();
 	const constituents = type.isUnion() ? type.getUnionTypes() : [type];
-	const props = new Map<string, PropSymbol>();
+	const annotations = new Map<string, Array<SyntaxNode>>();
+
 	for (const constituent of constituents) {
 		for (const prop of constituent.getProperties()) {
-			if (!props.has(prop.getName())) props.set(prop.getName(), prop);
+			const name = prop.getName();
+			const bucket = annotations.get(name) ?? [];
+			for (const propDeclaration of prop.getDeclarations()) {
+				const typeNode = propDeclaration.getTypeNode?.();
+				if (typeNode !== undefined) bucket.push(typeNode);
+			}
+			if (bucket.length > 0) annotations.set(name, bucket);
 		}
 	}
-	return props;
-}
 
-function typeDefinitionsEntry(definitions: TypeDefinitionsPayload): DocEntry {
-	return {
-		deprecated: false,
-		description: '',
-		name: TYPE_DEFINITIONS_KEY,
-		required: true,
-		simplifiedType: '',
-		tags: [],
-		type: '',
-		typeHref: encodeTypeDefinitions(definitions),
-	};
+	return annotations;
 }

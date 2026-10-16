@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pageSchema } from 'fumadocs-core/source/schema';
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
@@ -10,6 +11,7 @@ import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import * as z from 'zod';
 import { createComponentPropsGenerator } from './src/lib/create-component-props-generator.js';
 import { inlineExampleSource } from './src/lib/inline-example-source';
+import { remarkAttachTypeDefinitions } from './src/lib/remark-attach-type-definitions.js';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
 import { stringifyComponentPropsTable } from './src/lib/stringify-component-props-table.js';
@@ -49,6 +51,7 @@ export const docs = defineDocs({
 	},
 });
 
+const docsRoot = fileURLToPath(new URL('.', import.meta.url));
 const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
 
 const generator = createGenerator({
@@ -78,6 +81,9 @@ export default defineConfig({
 					remarkStringify: true,
 				} satisfies RemarkAutoTypeTableOptions,
 			],
+			// After ComponentPropsTable expansion: emit page-level definition assets and strip the
+			// registry from the GeneratedDoc JSON so it never reaches search or the props record.
+			[remarkAttachTypeDefinitions, { publicDir: resolve(docsRoot, 'public') }],
 			[
 				remarkDocsAutoTypeTable,
 				{
