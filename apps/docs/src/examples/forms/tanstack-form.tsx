@@ -9,7 +9,7 @@ import { useRef } from 'react';
 import * as z from 'zod';
 
 const schema = z.object({
-	email: z.email('Enter an email address in the form you@example.com.'),
+	email: z.email('Enter a valid email address.'),
 	name: z.string().min(1, 'Enter your name.'),
 });
 
@@ -69,7 +69,7 @@ export default () => {
 								<TextInputField
 									errorMessage={field.state.meta.errors[0]?.message}
 									isRequired
-									label="Email"
+									label="Email address"
 									name={field.name}
 									onBlur={field.handleBlur}
 									onChange={field.handleChange}
@@ -84,13 +84,13 @@ export default () => {
 					</Cluster>
 				</Stack>
 			</Form>
-			<Stack minBlockSize="1.5rem">
-				<Text elementType="p" role="status">
-					<form.Subscribe selector={(state) => (state.isSubmitSuccessful ? state.values.name : '')}>
-						{(submittedName) => (submittedName ? `Submitted: ${submittedName}` : '\u00a0')}
-					</form.Subscribe>
-				</Text>
-			</Stack>
+			<form.Subscribe selector={(state) => (state.isSubmitSuccessful ? state.values.name : '')}>
+				{(submittedName) => (
+					<Text elementType="p" isVisuallyHidden={!submittedName} role="status">
+						{submittedName ? `Account created for ${submittedName}.` : null}
+					</Text>
+				)}
+			</form.Subscribe>
 		</Stack>
 	);
 };

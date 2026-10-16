@@ -27,11 +27,9 @@ export default () => {
 		const email = typeof emailValue === 'string' ? emailValue : '';
 
 		setErrors({
-			country: data.get('country') ? undefined : 'Choose the country where you work.',
-			email: email.includes('@')
-				? undefined
-				: 'Enter an email address in the form you@example.com.',
-			terms: data.get('terms') ? undefined : 'Accept the terms of service before you continue.',
+			country: data.get('country') ? undefined : 'Choose your work location.',
+			email: email.includes('@') ? undefined : 'Enter a valid email address.',
+			terms: data.get('terms') ? undefined : 'Accept the terms before you continue.',
 		});
 	}
 

@@ -268,9 +268,6 @@ Use layout primitives for structure, not one-off wrappers.
 - Do not set `inlineSize="100%"` to fill the preview. A block-level example root already fills it.
 - Use `ExampleItem` from `#docs` for placeholder children in a layout example, so each child's box
   is visible.
-- When validation or status text adds or removes a message and would shift layout, reserve space at
-  the example with `minBlockSize` or a fixed status slot so the preview does not jump between
-  states.
 
 ### Prose around an example
 

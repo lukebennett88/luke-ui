@@ -15,6 +15,7 @@ const takenUsernames = new Set(['admin', 'root', 'support']);
 
 export default () => {
 	const [state, formAction, isPending] = useActionState(createAccount, {});
+	const isSuccess = Boolean(state.values?.username && !state.errors);
 
 	return (
 		<Stack gap="sp16" maxInlineSize="20rem">
@@ -33,13 +34,9 @@ export default () => {
 					</Cluster>
 				</Stack>
 			</Form>
-			<Stack minBlockSize="1.5rem">
-				<Text elementType="p" role="status">
-					{state.values?.username && !state.errors
-						? `Created account for ${state.values.username}.`
-						: '\u00a0'}
-				</Text>
-			</Stack>
+			<Text elementType="p" isVisuallyHidden={!isSuccess} role="status">
+				{isSuccess ? `Created account for ${state.values?.username}.` : null}
+			</Text>
 		</Stack>
 	);
 };

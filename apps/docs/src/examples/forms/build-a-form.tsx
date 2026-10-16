@@ -10,7 +10,7 @@ export default () => {
 	const [submittedEmail, formAction, isPending] = useActionState(submitEmail, '');
 
 	return (
-		<Stack gap="sp16" maxInlineSize="22rem">
+		<Stack gap="sp16" maxInlineSize="20rem">
 			<Form action={formAction} necessityIndicator="required-label">
 				<Stack gap="sp16">
 					<TextInputField
@@ -22,16 +22,14 @@ export default () => {
 					/>
 					<Cluster gap="sp8">
 						<Button isPending={isPending} type="submit">
-							Submit
+							Send receipt
 						</Button>
 					</Cluster>
 				</Stack>
 			</Form>
-			<Stack minBlockSize="1.5rem">
-				<Text elementType="p" role="status">
-					{submittedEmail ? `Submitted: ${submittedEmail}` : '\u00a0'}
-				</Text>
-			</Stack>
+			<Text elementType="p" isVisuallyHidden={!submittedEmail} role="status">
+				{submittedEmail ? `Receipt sent to ${submittedEmail}.` : null}
+			</Text>
 		</Stack>
 	);
 };
