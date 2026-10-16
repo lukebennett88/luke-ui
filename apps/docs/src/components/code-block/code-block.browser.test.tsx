@@ -281,6 +281,26 @@ test('opts out of prose inline-code chrome on the fence code element', () => {
 	expect(styles.backgroundColor).toBe('rgba(0, 0, 0, 0)');
 });
 
+// Label metrics and an inherited code stack: caption was too small next to body prose, and without
+// Tailwind Preflight the UA `font-family: monospace` on `pre`/`code` would replace the figure stack.
+test('keeps label metrics and the code font stack on the source pre', () => {
+	renderCodeBlock(<CodeBlock code={'const value = 1;'} />);
+
+	const figure = page.getByRole('button', { name: 'Copy' }).element().closest('figure');
+	assert(figure != null, 'Expected a figure ancestor');
+	const pre = figure.querySelector('pre');
+	assert(pre != null, 'Expected a pre element');
+	const code = pre.querySelector('code');
+	assert(code != null, 'Expected a code element');
+
+	for (const element of [figure, pre, code]) {
+		const styles = getComputedStyle(element);
+		expect(styles.fontSize).toBe('14px');
+		expect(styles.lineHeight).toBe('20px');
+		expect(styles.fontFamily).toMatch(/ui-monospace/i);
+	}
+});
+
 for (const copyCase of [
 	{ name: 'untitled overlay copy', title: undefined as string | undefined },
 	{ name: 'titled header copy', title: 'Source' },
