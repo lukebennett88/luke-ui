@@ -218,6 +218,47 @@ test('links Button pressAction to the PressAction definition', async () => {
 	expect(buttonProps?.typeDefinitions?.PressAction?.definition).toMatch(/=> void \| Promise<void>/);
 });
 
+test('prefers resolved callback signatures over indexed-access annotations', async () => {
+	const [buttonProps] = (await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'packages/@luke-ui/react/src/core/button/button.tsx',
+			name: 'ButtonProps',
+		},
+		{ basePath: repoRoot },
+	)) as Array<EnrichedGeneratedDoc | undefined>;
+	const buttonByName = new Map(
+		(buttonProps?.entries ?? []).map((entry) => [entry.name, entry] as const),
+	);
+	const onPress = buttonByName.get('onPress');
+	expect(onPress?.type).toMatch(/PressEvent/);
+	expect(onPress?.type).toMatch(/=>\s*void/);
+	expect(onPress?.type).not.toMatch(/RacButtonProps\s*\[\s*['"]onPress['"]\s*\]/);
+	expect(onPress?.simplifiedType).toBe(onPress?.type);
+	expect(onPress?.typeHref).toBeUndefined();
+	// Optional props keep optionality on the name, not as a trailing `| undefined`.
+	expect(onPress?.required).toBe(false);
+	expect(onPress?.type).not.toMatch(/\|\s*undefined$/);
+
+	const [textInputFieldProps] = (await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'packages/@luke-ui/react/src/core/text-input-field/text-input-field.tsx',
+			name: 'TextInputFieldProps',
+		},
+		{ basePath: repoRoot },
+	)) as Array<EnrichedGeneratedDoc | undefined>;
+	const fieldByName = new Map(
+		(textInputFieldProps?.entries ?? []).map((entry) => [entry.name, entry] as const),
+	);
+	const onChange = fieldByName.get('onChange');
+	expect(onChange?.type).toMatch(/value:\s*string/);
+	expect(onChange?.type).toMatch(/=>\s*void/);
+	expect(onChange?.type).not.toMatch(/RacTextFieldProps\s*\[\s*['"]onChange['"]\s*\]/);
+	expect(onChange?.simplifiedType).toBe(onChange?.type);
+	expect(onChange?.typeHref).toBeUndefined();
+	expect(onChange?.required).toBe(false);
+	expect(onChange?.type).not.toMatch(/\|\s*undefined$/);
+});
+
 test('prefers non-never annotations across element/render union branches', async () => {
 	const [doc] = await componentPropsGenerator.generateTypeTable(
 		{

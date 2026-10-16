@@ -59,30 +59,52 @@ function enrichDocEntry(entry: DocEntry, context: EnrichContext): DocEntry {
 	let simplifiedType = entry.simplifiedType;
 	let typeHref = entry.typeHref;
 
-	if (resolved.text !== undefined && resolved.text.length > 0) {
+	const useDeclaredAnnotation = shouldPreferDeclaredAnnotation(resolved);
+
+	if (useDeclaredAnnotation && resolved.text !== undefined) {
 		// Written annotations are the public contract. They never include the compiler's implied
 		// optional `| undefined`, and they keep aliases that fumadocs' simplifiedType drops. When
 		// union branches declare distinct valid types, `resolved.text` is their union — not one
 		// arbitrary branch.
 		type = resolved.text;
 		simplifiedType = resolved.text;
-	} else if (KIND_LABELS.has(simplifiedType) && entry.type.length > 0 && entry.type !== 'union') {
-		// No annotation available: prefer the full type string over a bare kind label, but do not
-		// strip `| undefined` — that would guess at optionality vs explicit undefined.
-		simplifiedType = entry.type;
-		type = entry.type;
+	} else if (
+		(KIND_LABELS.has(simplifiedType) || resolved.text !== undefined) &&
+		entry.type.length > 0 &&
+		entry.type !== 'union'
+	) {
+		// Prefer the resolved signature over a bare kind label or a low-readability annotation such
+		// as `RacButtonProps['onPress']`. Strip compiler-implied optional `| undefined` only when a
+		// written annotation existed and did not declare top-level undefined — otherwise leave
+		// fumadocs' string alone (no annotation to judge optionality against).
+		let display = entry.type;
+		if (
+			resolved.nodes.length > 0 &&
+			!entry.required &&
+			!resolved.nodes.some((node) => annotationIncludesTopLevelUndefined(node))
+		) {
+			display = stripTrailingOptionalUndefined(display);
+		}
+		type = display;
+		simplifiedType = display;
 	}
 
 	for (const typeNode of resolved.nodes) {
 		collectLinkedDefinition(typeNode, context);
 	}
-	// Only attach a clickable root when every distinct annotation shares one linkable alias.
-	if (resolved.singleLinkNode !== undefined) {
-		const linkedName = collectLinkedDefinition(resolved.singleLinkNode, context);
-		if (linkedName !== undefined) {
-			typeHref = linkedName;
+
+	if (useDeclaredAnnotation) {
+		// Only attach a clickable root when every distinct annotation shares one linkable alias.
+		if (resolved.singleLinkNode !== undefined) {
+			const linkedName = collectLinkedDefinition(resolved.singleLinkNode, context);
+			if (linkedName !== undefined) {
+				typeHref = linkedName;
+			}
+		} else if (resolved.nodes.length > 1) {
+			typeHref = undefined;
 		}
-	} else if (resolved.nodes.length > 1) {
+	} else {
+		// Indexed-access (and similar) annotations are not linkable Luke aliases.
 		typeHref = undefined;
 	}
 
@@ -100,6 +122,41 @@ function enrichDocEntry(entry: DocEntry, context: EnrichContext): DocEntry {
 		type,
 		...(typeHref === undefined ? { typeHref: undefined } : { typeHref }),
 	};
+}
+
+/**
+ * Keep source annotations when they name a useful alias or otherwise read better than the resolved
+ * type. Prefer fumadocs' resolved signature for indexed-access wrappers such as
+ * `RacButtonProps['onPress']`.
+ */
+export function shouldPreferDeclaredAnnotation(resolved: ResolvedDeclaredTypeAnnotations): boolean {
+	if (resolved.text === undefined || resolved.text.length === 0) return false;
+	if (resolved.nodes.length === 0) return false;
+	return !resolved.nodes.every(isLowReadabilityDeclaredType);
+}
+
+/** True for annotations that hide the real shape behind property lookup or similar opacity. */
+export function isLowReadabilityDeclaredType(typeNode: SyntaxNode): boolean {
+	const kind = typeNode.getKindName();
+	if (kind === 'IndexedAccessType') return true;
+	if (kind === 'ImportType' || kind === 'TypeQuery') return true;
+	if (kind === 'ParenthesizedType') {
+		const inner = typeNode.getTypeNode?.();
+		return inner !== undefined && isLowReadabilityDeclaredType(inner);
+	}
+	if (kind === 'UnionType') {
+		const members = typeNode.getTypeNodes?.() ?? [];
+		return members.length > 0 && members.every(isLowReadabilityDeclaredType);
+	}
+	return false;
+}
+
+/** Drop a trailing top-level `| undefined` that TypeScript adds for optional props. */
+export function stripTrailingOptionalUndefined(typeText: string): string {
+	if (typeText.endsWith(' | undefined')) {
+		return typeText.slice(0, -' | undefined'.length);
+	}
+	return typeText;
 }
 
 function collectLinkedDefinition(

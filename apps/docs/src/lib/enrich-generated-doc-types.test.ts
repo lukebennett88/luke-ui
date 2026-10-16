@@ -2,8 +2,11 @@ import { expect, test } from 'vite-plus/test';
 import type { SyntaxNode } from './component-prop-analysis.js';
 import {
 	annotationIncludesTopLevelUndefined,
+	isLowReadabilityDeclaredType,
 	resolveDeclaredTypeAnnotations,
 	selectDeclaredTypeNode,
+	shouldPreferDeclaredAnnotation,
+	stripTrailingOptionalUndefined,
 } from './enrich-generated-doc-types.js';
 
 function node(
@@ -113,4 +116,26 @@ test('resolveDeclaredTypeAnnotations keeps a shared identical annotation', () =>
 	expect(resolved.text).toBe('SharedBranchAlias');
 	expect(resolved.singleLinkNode?.getText()).toBe('SharedBranchAlias');
 	expect(resolved.nodes).toHaveLength(1);
+});
+
+test('indexed-access annotations are low-readability and lose to the resolved type', () => {
+	const indexed = node('IndexedAccessType', {
+		text: "RacButtonProps['onPress']",
+	});
+	expect(isLowReadabilityDeclaredType(indexed)).toBe(true);
+	expect(shouldPreferDeclaredAnnotation(resolveDeclaredTypeAnnotations([indexed]))).toBe(false);
+
+	const alias = node('TypeReference', {
+		text: 'PressAction',
+		typeName: 'PressAction',
+	});
+	expect(isLowReadabilityDeclaredType(alias)).toBe(false);
+	expect(shouldPreferDeclaredAnnotation(resolveDeclaredTypeAnnotations([alias]))).toBe(true);
+});
+
+test('stripTrailingOptionalUndefined removes only a trailing top-level undefined', () => {
+	expect(stripTrailingOptionalUndefined('((e: PressEvent) => void) | undefined')).toBe(
+		'((e: PressEvent) => void)',
+	);
+	expect(stripTrailingOptionalUndefined('string | number')).toBe('string | number');
 });
