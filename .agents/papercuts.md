@@ -41,3 +41,17 @@ would have prevented and that a check or a pointer would not handle better. Two 
 are a reason to consider a skill, not a requirement for one. The maintainer approves skill additions
 and changes. Remove a skill when it is obsolete or when pilot or spot-check evidence shows it does
 not help. Silence in this log is not evidence.
+
+## The ComboboxTray exiting-search test fails intermittently in the full suite
+
+- Seen: 2026-10-16 (#820). `TURBO_FORCE=true pnpm run test` failed once at
+  `ComboboxTray search field does not reopen the popover while the tray is exiting` with
+  `Cannot find element with locator: getByRole('searchbox', { name: 'Country' })`. The ARIA tree
+  showed only the closed field button. The same file then passed three runs in isolation, and the
+  next full run passed. The PR changes nothing under `packages/`. The PR's earlier verification at
+  `21205f6c` also reported one Combobox tray browser assertion that failed and then passed on retry.
+- Where: `packages/@luke-ui/react/src/core/primitives/combobox/tray.browser.test.tsx`. Governing
+  rule: `.agents/skills/write-tests/SKILL.md` quality checklist, "No result depends on timing, test
+  order, or leftover state."
+- Problem: The test's result depends on run conditions, so an unrelated change can fail the full
+  suite.
