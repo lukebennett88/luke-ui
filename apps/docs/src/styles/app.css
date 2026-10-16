@@ -1,7 +1,6 @@
 /*
  * Docs-owned styles land in `components`, above Luke UI. `base` stays below `luke-ui` so the
- * package's reserved slot is never created late. Tailwind and Fumadocs CSS are no longer imported
- * here; their Vite packages remain until #678 removes build/package residue.
+ * package's reserved slot is never created late.
  */
 @layer base, luke-ui, components;
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
- * Inlined from `fumadocs-ui/utils/use-copy-button` to drop the dependency —
+ * Local copy-feedback hook for docs chrome —
  * the hook is 24 lines and has no dependencies of its own.
  *
  * Tracks a transient "copied" state that flips back to `false` after 1.5s.

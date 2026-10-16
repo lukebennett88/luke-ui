@@ -43,6 +43,11 @@ setup so `useIsMobileDevice` stays desktop. Vitest's browser iframe is 414px wid
 mirrors that onto `screen.width`, which would otherwise look like a phone. Call `mockScreenWidth`
 for tray or mobile-modal cases. The docs app browser setup does not pin screen width.
 
+Cascade contracts that need a real third-party stylesheet live beside `layer-order.browser.test.ts`.
+`tailwind-integration.browser.test.tsx` is the Tailwind v4 consumer fixture. It runs in the
+`tailwind-integration` Vitest project so it can compile Tailwind without loading the default browser
+suite's global stylesheet.
+
 ## Accessibility
 
 Run axe with `expectNoAxeViolations` in component tests. Axe is a floor. Use behavioural assertions
