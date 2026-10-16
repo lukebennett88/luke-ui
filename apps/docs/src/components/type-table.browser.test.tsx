@@ -406,8 +406,9 @@ test('deferred definition fetch shows loading, then the definition', async () =>
 	await expect.element(page.getByText('Loading definition…')).toBeVisible();
 
 	assert(resolveFetch, 'expected fetch to start');
+	const completeFetch = resolveFetch;
 	await act(async () => {
-		resolveFetch(
+		completeFetch(
 			new Response(JSON.stringify({ RequiredInitialResponsiveValue: DEFERRED_DEFINITION }), {
 				headers: { 'Content-Type': 'application/json' },
 				status: 200,

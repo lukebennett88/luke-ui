@@ -251,8 +251,9 @@ test('prefers non-never annotations across element/render union branches', async
 		}),
 	);
 	expect(entriesByName.get('mode')?.typeHref).toBeUndefined();
-	expect(doc?.typeDefinitions?.ElementMode?.definition).toMatch(/ElementMode/);
-	expect(doc?.typeDefinitions?.RenderMode?.definition).toMatch(/RenderMode/);
+	const enriched = doc as EnrichedGeneratedDoc | undefined;
+	expect(enriched?.typeDefinitions?.ElementMode?.definition).toMatch(/ElementMode/);
+	expect(enriched?.typeDefinitions?.RenderMode?.definition).toMatch(/RenderMode/);
 
 	const [boxProps] = await componentPropsGenerator.generateTypeTable(
 		{
