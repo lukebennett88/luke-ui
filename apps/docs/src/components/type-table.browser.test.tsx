@@ -352,7 +352,8 @@ test('opens a type definition popover for a linked alias and restores focus on d
 	await expect
 		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
 		.not.toBeInTheDocument();
-	expect(document.activeElement).toBe(trigger.element());
+	// Match docs-shell/search: RAC FocusScope restores in a rAF after unmount.
+	await expect.element(trigger).toHaveFocus();
 });
 
 test('falls back to plain text when a type reference has no definition', async () => {
