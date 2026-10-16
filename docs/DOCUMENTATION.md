@@ -375,9 +375,8 @@ Fumadocs stays as non-visual infrastructure: MDX compilation (`fumadocs-mdx`), p
 theme UI disabled. Do not import Fumadocs UI components for chrome. The page-tree client may wrap
 item names in a `fd-page-tree-item-name` span. Docs do not load Fumadocs CSS or style that class.
 
-Docs-local `.css.ts` is for structure the design system cannot express cleanly: container queries,
-separators, Monaco-matched surfaces, and similar. Prefer Luke UI layout primitives (`Box`, `Stack`,
-`Cluster`, `Grid`) for spacing and alignment.
+[Docs app styling](STYLING.md#docs-app-styling) says when a docs-local `.css.ts` file is
+appropriate.
 
 The playground host lives in `apps/docs/src/{routes,components}/playground/`. Compilation, hashing,
 formatting, and the iframe protocol live in the private `@luke-ui/playground-core` package.

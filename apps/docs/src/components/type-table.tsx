@@ -18,6 +18,8 @@ import {
 import { LinkedType } from './type-popover.js';
 import * as styles from './type-table.css.js';
 
+const HREF_PATTERN = /^(?:[/#]|https?:)/;
+
 interface ParameterNode {
 	description: ReactNode;
 	name: string;
@@ -159,14 +161,10 @@ function PropRow({
 	// Generator often puts a short kind (e.g. "union") in `type` and the readable signature in
 	// `typeDescription`. Prefer the signature so the type is always discoverable.
 	const shownType = typeDescription ?? type;
+	// An authored `@fumadocsHref` gives a URL. The docs generator gives a linked alias name instead.
 	const typeContent = (() => {
 		if (typeDescriptionLink === undefined) return shownType;
-		if (
-			typeDescriptionLink.startsWith('/') ||
-			typeDescriptionLink.startsWith('#') ||
-			typeDescriptionLink.startsWith('http:') ||
-			typeDescriptionLink.startsWith('https:')
-		) {
+		if (HREF_PATTERN.test(typeDescriptionLink)) {
 			return <MdxLink href={typeDescriptionLink}>{shownType}</MdxLink>;
 		}
 		return <LinkedType typeName={typeDescriptionLink}>{shownType}</LinkedType>;

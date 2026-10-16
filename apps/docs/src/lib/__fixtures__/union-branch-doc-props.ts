@@ -15,7 +15,7 @@ interface ElementBranch {
 	/** Exclusive to the element branch — must not win over the render annotation. */
 	renderRoot?: never;
 	shared?: SharedBranchAlias;
-	/** Distinct valid annotation — must not collapse to a single branch's type. */
+	/** Distinct valid annotation — must not narrow to a single branch's type. */
 	mode?: ElementMode;
 }
 
@@ -29,6 +29,6 @@ interface RenderBranch {
 /**
  * Mirrors Box-like element/render exclusivity: the first union branch declares `renderRoot?: never`,
  * so a first-wins annotation picker would document `never` instead of the real render prop.
- * `mode` is declared as different valid aliases on each branch — docs must preserve both.
+ * `mode` is declared as different valid aliases on each branch, so docs must cover both.
  */
 export type UnionBranchDocProps = ElementBranch | RenderBranch;

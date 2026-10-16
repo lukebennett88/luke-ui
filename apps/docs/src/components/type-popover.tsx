@@ -5,84 +5,53 @@ import type { ReactNode } from 'react';
 import { use } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Popover } from 'react-aria-components/Popover';
-import type { TypeDefinitionsLoadState } from '../lib/type-definitions-load-state.js';
+import type { TypeDefinitionsContextValue } from './type-definitions-context.js';
 import { TypeDefinitionsContext } from './type-definitions-context.js';
 import * as styles from './type-popover.css.js';
 
-/** Links the root alias when a definition is available or loadable. */
-export function LinkedType({
-	children,
-	typeName,
-}: {
-	children: ReactNode;
-	typeName: string | undefined;
-}) {
-	const context = use(TypeDefinitionsContext);
-	if (context === null || typeName === undefined || !context.canLink(typeName)) {
-		return children;
-	}
-	return <TypePopover typeName={typeName}>{children}</TypePopover>;
-}
+/** Opens a type's source definition when the table's definitions asset holds it. */
+export function LinkedType({ children, typeName }: { children: ReactNode; typeName: string }) {
+	const typeDefinitions = use(TypeDefinitionsContext);
+	if (typeDefinitions === null || !typeDefinitions.names.has(typeName)) return children;
 
-/**
- * Clickable type name that reveals its source-backed TypeScript definition. Prefetches the page
- * asset on hover/focus; DialogTrigger stays uncontrolled so Escape restores focus.
- */
-function TypePopover({ children, typeName }: { children: ReactNode; typeName: string }) {
-	const context = use(TypeDefinitionsContext);
-	if (context === null) return children;
+	const { ensureLoaded, load } = typeDefinitions;
 
-	const { definitions, ensureLoaded, load } = context;
-	const definition = definitions[typeName];
-
-	const prefetch = () => {
-		if (definitions[typeName] !== undefined) return;
-		void ensureLoaded();
-	};
-
+	// The trigger loads the asset on hover, focus, or press. DialogTrigger stays uncontrolled so
+	// React Aria returns focus to the trigger when the popover closes.
 	return (
 		<DialogTrigger>
 			<Button
 				appearance="text"
 				aria-label={`Show definition of ${typeName}`}
 				className={styles.trigger}
-				onFocus={prefetch}
-				onHoverStart={prefetch}
-				onPress={prefetch}
+				onFocus={ensureLoaded}
+				onHoverStart={ensureLoaded}
+				onPress={ensureLoaded}
 			>
 				{children}
 			</Button>
 			<Popover className={styles.popover} placement="bottom start">
 				<Dialog aria-label={`Definition of ${typeName}`} className={styles.dialog}>
-					<TypePopoverBody
-						definition={definition?.definition}
-						ensureLoaded={ensureLoaded}
-						load={load}
-					/>
+					<DefinitionBody ensureLoaded={ensureLoaded} load={load} typeName={typeName} />
 				</Dialog>
 			</Popover>
 		</DialogTrigger>
 	);
 }
 
-function TypePopoverBody({
-	definition,
+function DefinitionBody({
 	ensureLoaded,
 	load,
-}: {
-	definition: string | undefined;
-	ensureLoaded: () => Promise<void>;
-	load: TypeDefinitionsLoadState;
-}) {
-	if (definition !== undefined) {
-		return (
-			<Text className={styles.definition} elementType="pre" typography="caption">
-				{definition}
-			</Text>
-		);
-	}
-
+	typeName,
+}: Pick<TypeDefinitionsContextValue, 'ensureLoaded' | 'load'> & { typeName: string }) {
 	switch (load.status) {
+		case 'idle':
+		case 'loading':
+			return (
+				<Text className={styles.definition} elementType="pre" typography="caption">
+					Loading definition…
+				</Text>
+			);
 		case 'error':
 			return (
 				<Stack gap="sp8">
@@ -91,28 +60,28 @@ function TypePopoverBody({
 					</Text>
 					<Button
 						aria-label="Retry loading definition"
+						onPress={ensureLoaded}
 						prominence="low"
 						size="small"
-						onPress={() => {
-							void ensureLoaded();
-						}}
 					>
 						Retry
 					</Button>
 				</Stack>
 			);
-		case 'ready':
-			return (
-				<Text color="secondary" typography="caption">
-					Definition not available.
-				</Text>
-			);
-		case 'idle':
-		case 'loading':
+		case 'ready': {
+			const definition = load.data[typeName]?.definition;
+			if (definition === undefined) {
+				return (
+					<Text color="secondary" typography="caption">
+						Definition not available.
+					</Text>
+				);
+			}
 			return (
 				<Text className={styles.definition} elementType="pre" typography="caption">
-					Loading definition…
+					{definition}
 				</Text>
 			);
+		}
 	}
 }

@@ -425,10 +425,11 @@ not set `cursor: pointer` on non-link interactive elements.
 
 ### Docs app styling
 
-In `apps/docs`, prefer Luke UI primitives (`Button`, `Text`, `Stack`, `Box`, and so on) for ordinary
-layout and chrome. Use Vanilla Extract only for behaviour or presentation those primitives cannot
-express, such as specialised interaction states, positioning, and motion. Do not recreate Button,
-Text, or Box styling in a docs `*.css.ts` file.
+In `apps/docs`, use Luke UI components and layout primitives (`Button`, `Text`, `Box`, `Stack`,
+`Cluster`, `Grid`) for ordinary chrome, spacing, and alignment. Use a docs-local `*.css.ts` file
+only for what they cannot express, such as container queries, separators, Monaco-matched surfaces,
+specialised interaction states, positioning, and motion. Do not recreate Button, Text, or Box
+styling in a docs `*.css.ts` file.
 
 ### Implementation rules
 

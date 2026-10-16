@@ -1,3 +1,4 @@
+/// <reference types="mdx" />
 import '../styles/app.css';
 import '@luke-ui/theme-tactile/stylesheet.css';
 import { Provider } from '@luke-ui/react/provider';
@@ -16,7 +17,6 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, assert, expect, test, vi } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { clearTypeDefinitionsCache } from '../lib/load-type-definitions.js';
 import { ComponentPropsTable } from './component-props-table.js';
 import { DocsThemeRoot } from './theme-controls.js';
 import { TypeDefinitionsProvider } from './type-definitions-context.js';
@@ -26,10 +26,15 @@ import { TypeTable } from './type-table.js';
 const ARTICLE_INLINE_SIZE = '832px';
 const MOBILE_INLINE_SIZE = '375px';
 
-const DEFERRED_DEFINITION = {
-	definition: 'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<Value>;',
-	name: 'RequiredInitialResponsiveValue',
-} as const;
+/** Real guides render their examples elsewhere. This suite needs only their API tables. */
+const GUIDE_COMPONENTS = { ComponentPropsTable, ExampleBlock: () => null };
+
+const PRESS_ACTION_DEFINITION_PATTERN = /^type PressAction = /;
+const RESPONSIVE_VALUE_DEFINITION_PATTERN =
+	/^type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive</;
+
+const SYNTHETIC_DEFINITION =
+	'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<Value>;';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
@@ -39,7 +44,6 @@ afterEach(() => {
 	container?.remove();
 	container = undefined;
 	root = undefined;
-	clearTypeDefinitionsCache();
 	vi.restoreAllMocks();
 });
 
@@ -328,12 +332,7 @@ test('lists props in the order of their group', async () => {
 });
 
 test('opens a type definition popover for a linked alias and restores focus on dismiss', async () => {
-	vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-		new Response(JSON.stringify({ RequiredInitialResponsiveValue: DEFERRED_DEFINITION }), {
-			headers: { 'Content-Type': 'application/json' },
-			status: 200,
-		}),
-	);
+	vi.spyOn(globalThis, 'fetch').mockResolvedValue(definitionsResponse());
 
 	await renderDeferredTypeTable('/type-definitions/focus.json');
 
@@ -352,6 +351,31 @@ test('opens a type definition popover for a linked alias and restores focus on d
 		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
 		.not.toBeInTheDocument();
 	// RAC FocusScope restores the trigger in a rAF after unmount.
+	await expect.element(trigger).toHaveFocus();
+});
+
+test('the Button guide opens PressAction from its generated definitions', async () => {
+	// The Button primitive guide also documents a `ButtonProps` from a `button.tsx`, which fumadocs
+	// gives the same table id. Compiling it too checks that each guide keeps its own definitions.
+	const { default: ButtonGuide } = await import('../../content/docs/components/actions/button.mdx');
+	await import('../../content/docs/components/primitives/button.mdx');
+	await renderWidget(<ButtonGuide components={GUIDE_COMPONENTS} />);
+
+	const { dialog, trigger } = await openDefinitionWithKeyboard('PressAction');
+	await expect.element(dialog.getByText(PRESS_ACTION_DEFINITION_PATTERN)).toBeVisible();
+	await userEvent.keyboard('{Escape}');
+	await expect.element(dialog).not.toBeInTheDocument();
+	await expect.element(trigger).toHaveFocus();
+});
+
+test('the Grid guide opens RequiredInitialResponsiveValue from its generated definitions', async () => {
+	const { default: GridGuide } = await import('../../content/docs/components/layout/grid.mdx');
+	await renderWidget(<GridGuide components={GUIDE_COMPONENTS} />);
+
+	const { dialog, trigger } = await openDefinitionWithKeyboard('RequiredInitialResponsiveValue');
+	await expect.element(dialog.getByText(RESPONSIVE_VALUE_DEFINITION_PATTERN)).toBeVisible();
+	await userEvent.keyboard('{Escape}');
+	await expect.element(dialog).not.toBeInTheDocument();
 	await expect.element(trigger).toHaveFocus();
 });
 
@@ -399,12 +423,7 @@ test('deferred definition fetch shows loading, then the definition', async () =>
 	assert(resolveFetch, 'expected fetch to start');
 	const completeFetch = resolveFetch;
 	await act(async () => {
-		completeFetch(
-			new Response(JSON.stringify({ RequiredInitialResponsiveValue: DEFERRED_DEFINITION }), {
-				headers: { 'Content-Type': 'application/json' },
-				status: 200,
-			}),
-		);
+		completeFetch(definitionsResponse());
 	});
 	await expect.element(page.getByText(/type RequiredInitialResponsiveValue/)).toBeVisible();
 	expect(fetchMock).toHaveBeenCalledWith('/type-definitions/loading.json');
@@ -417,10 +436,7 @@ test('deferred definition fetch shows a recoverable error and retries', async ()
 		if (!allowSuccess) {
 			return new Response('missing', { status: 404 });
 		}
-		return new Response(JSON.stringify({ RequiredInitialResponsiveValue: DEFERRED_DEFINITION }), {
-			headers: { 'Content-Type': 'application/json' },
-			status: 200,
-		});
+		return definitionsResponse();
 	});
 
 	await renderDeferredTypeTable('/type-definitions/retry.json', ['RequiredInitialResponsiveValue']);
@@ -441,12 +457,7 @@ test('deferred definition fetch shows a recoverable error and retries', async ()
 });
 
 test('deferred tables only link aliases registered in definitionNames', async () => {
-	const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-		new Response(JSON.stringify({ RequiredInitialResponsiveValue: DEFERRED_DEFINITION }), {
-			headers: { 'Content-Type': 'application/json' },
-			status: 200,
-		}),
-	);
+	const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(definitionsResponse());
 
 	await renderWidget(
 		<TypeDefinitionsProvider
@@ -507,21 +518,7 @@ test('deferred fetch that omits a registered alias settles without infinite load
 });
 
 test('linked type popovers in a ComponentPropsTable have no axe violations', async () => {
-	vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-		new Response(
-			JSON.stringify({
-				RequiredInitialResponsiveValue: {
-					definition:
-						'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<ResponsivePropValue<Value>>;',
-					name: 'RequiredInitialResponsiveValue',
-				},
-			}),
-			{
-				headers: { 'Content-Type': 'application/json' },
-				status: 200,
-			},
-		),
-	);
+	vi.spyOn(globalThis, 'fetch').mockResolvedValue(definitionsResponse());
 
 	await renderWidget(
 		<ComponentPropsTable
@@ -559,7 +556,7 @@ test('linked type popovers in a ComponentPropsTable have no axe violations', asy
 	).toEqual([]);
 });
 
-test('deferred fetch ignores a stale response after a newer href wins', async () => {
+test('ignores a response for an asset the table no longer uses', async () => {
 	const resolvers = new Map<string, (response: Response) => void>();
 	vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
 		const href = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
@@ -568,27 +565,27 @@ test('deferred fetch ignores a stale response after a newer href wins', async ()
 		});
 	});
 
-	const { rerender } = await renderDeferredTypeTableWithRerender('/type-definitions/stale-a.json');
+	function SwitchableAsset() {
+		const [href, setHref] = useState('/type-definitions/stale-a.json');
+		return (
+			<>
+				<button onClick={() => setHref('/type-definitions/stale-b.json')} type="button">
+					Use asset B
+				</button>
+				{deferredTypeTableTree(href)}
+			</>
+		);
+	}
+
+	await renderWidget(<SwitchableAsset />);
 	const trigger = page.getByRole('button', {
 		name: 'Show definition of RequiredInitialResponsiveValue',
 	});
 	await userEvent.click(trigger.element());
 	await expect.element(page.getByText('Loading definition…')).toBeVisible();
-	assert(resolvers.has('/type-definitions/stale-a.json'), 'expected fetch for stale-a');
-
-	// Close before swapping href so the next press opens B instead of toggling A shut.
 	await userEvent.keyboard('{Escape}');
-	await expect
-		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
-		.not.toBeInTheDocument();
-
-	await rerender(deferredTypeTableTree('/type-definitions/stale-b.json'));
-
-	await userEvent.click(
-		page
-			.getByRole('button', { name: 'Show definition of RequiredInitialResponsiveValue' })
-			.element(),
-	);
+	await userEvent.click(page.getByRole('button', { name: 'Use asset B' }).element());
+	await userEvent.click(trigger.element());
 	await expect.element(page.getByText('Loading definition…')).toBeVisible();
 
 	const resolveA = resolvers.get('/type-definitions/stale-a.json');
@@ -597,32 +594,12 @@ test('deferred fetch ignores a stale response after a newer href wins', async ()
 	assert(resolveB, 'expected fetch for stale-b');
 
 	await act(async () => {
-		resolveB(
-			new Response(
-				JSON.stringify({
-					RequiredInitialResponsiveValue: {
-						definition: 'type RequiredInitialResponsiveValue<Value> = "from-b";',
-						name: 'RequiredInitialResponsiveValue',
-					},
-				}),
-				{ headers: { 'Content-Type': 'application/json' }, status: 200 },
-			),
-		);
+		resolveB(definitionsResponse('type RequiredInitialResponsiveValue<Value> = "from-b";'));
 	});
 	await expect.element(page.getByText(/from-b/)).toBeVisible();
 
 	await act(async () => {
-		resolveA(
-			new Response(
-				JSON.stringify({
-					RequiredInitialResponsiveValue: {
-						definition: 'type RequiredInitialResponsiveValue<Value> = "from-a";',
-						name: 'RequiredInitialResponsiveValue',
-					},
-				}),
-				{ headers: { 'Content-Type': 'application/json' }, status: 200 },
-			),
-		);
+		resolveA(definitionsResponse('type RequiredInitialResponsiveValue<Value> = "from-a";'));
 	});
 	await expect.element(page.getByText(/from-b/)).toBeVisible();
 	expect(page.getByText(/from-a/).elements()).toHaveLength(0);
@@ -653,6 +630,18 @@ test('invalid definition JSON shows a recoverable error', async () => {
 		.toBeVisible();
 });
 
+/** Opens the first popover for `typeName` from its focused trigger with Enter. */
+async function openDefinitionWithKeyboard(typeName: string) {
+	const trigger = page.getByRole('button', { name: `Show definition of ${typeName}` }).first();
+	await expect.element(trigger).toBeVisible();
+	trigger.element().focus();
+	await userEvent.keyboard('{Enter}');
+
+	const dialog = page.getByRole('dialog', { name: `Definition of ${typeName}` });
+	await expect.element(dialog).toBeVisible();
+	return { dialog, trigger };
+}
+
 function deferredTypeTableTree(
 	definitionsHref: string,
 	definitionNames: ReadonlyArray<string> = ['RequiredInitialResponsiveValue'],
@@ -680,37 +669,26 @@ async function renderDeferredTypeTable(
 	await renderWidget(deferredTypeTableTree(definitionsHref, definitionNames));
 }
 
-async function renderDeferredTypeTableWithRerender(definitionsHref: string) {
-	return renderWidgetWithRerender(deferredTypeTableTree(definitionsHref));
+function definitionsResponse(definition = SYNTHETIC_DEFINITION) {
+	return new Response(
+		JSON.stringify({
+			RequiredInitialResponsiveValue: { definition, name: 'RequiredInitialResponsiveValue' },
+		}),
+		{ headers: { 'Content-Type': 'application/json' }, status: 200 },
+	);
 }
 
 async function renderWidget(
 	children: ReactNode,
 	options: { hash?: string; inlineSize?: string } = {},
 ) {
-	await renderWidgetWithRerender(children, options);
-}
-
-async function renderWidgetWithRerender(
-	children: ReactNode,
-	options: { hash?: string; inlineSize?: string } = {},
-) {
 	const { hash, inlineSize = ARTICLE_INLINE_SIZE } = options;
-	const childrenRef = { current: children };
-	let bump: (() => void) | undefined;
-
 	const rootRoute = createRootRoute({
-		component: function TestRoot() {
-			const [, setTick] = useState(0);
-			bump = () => {
-				setTick((tick) => tick + 1);
-			};
-			return (
-				<Provider spritesheetHref={spriteSheetHref}>
-					<DocsThemeRoot>{childrenRef.current}</DocsThemeRoot>
-				</Provider>
-			);
-		},
+		component: () => (
+			<Provider spritesheetHref={spriteSheetHref}>
+				<DocsThemeRoot>{children}</DocsThemeRoot>
+			</Provider>
+		),
 	});
 	const initialEntry = hash === undefined ? '/' : `/#${hash}`;
 	// DocsLink targets `/$` for internal typeDescriptionLink paths.
@@ -730,13 +708,4 @@ async function renderWidgetWithRerender(
 		root?.render(<RouterProvider router={router} />);
 		await router.load();
 	});
-
-	return {
-		rerender: async (next: ReactNode) => {
-			childrenRef.current = next;
-			await act(async () => {
-				bump?.();
-			});
-		},
-	};
 }

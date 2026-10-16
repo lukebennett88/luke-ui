@@ -2,7 +2,7 @@ import { vars } from '@luke-ui/react/theme';
 import { style } from '@vanilla-extract/css';
 import { overlayMotion } from '../lib/overlay-motion.js';
 
-/** Inline disclosure trigger that reads like linked code. */
+/** Underlines the type name so it reads as interactive without a link's pointer cursor. */
 export const trigger = style({
 	'@layer': {
 		components: {
@@ -21,6 +21,7 @@ export const trigger = style({
 export const popover = style({
 	'@layer': {
 		components: {
+			// The popover opens below its trigger, so it settles down from just above.
 			...overlayMotion({
 				hidden: { opacity: 0, translate: '0 -4px' },
 				properties: ['opacity', 'translate'],
@@ -29,7 +30,6 @@ export const popover = style({
 					border: `1px solid ${vars.color.border.decorative}`,
 					borderRadius: vars.radius.surface,
 					boxShadow: vars.depth.floating,
-					boxSizing: 'border-box',
 					maxInlineSize: 'min(36rem, calc(100vw - 2rem))',
 					maxBlockSize: 'min(24rem, calc(100vh - 4rem))',
 					overflow: 'auto',
@@ -42,6 +42,7 @@ export const popover = style({
 	},
 });
 
+/** The dialog takes focus when it opens. The popover surface already shows where focus went. */
 export const dialog = style({
 	'@layer': {
 		components: {
@@ -50,12 +51,11 @@ export const dialog = style({
 	},
 });
 
-/** Multi-line declaration text; Code is single-line by default. */
+/** Keeps the declaration's own line breaks and indentation. */
 export const definition = style({
 	'@layer': {
 		components: {
 			fontFamily: vars.font.family.code,
-			margin: 0,
 			overflowWrap: 'anywhere',
 			whiteSpace: 'pre-wrap',
 		},

@@ -1,17 +1,12 @@
 import type { TypeDefinitionsPayload } from './type-definition-model.js';
 import { parseTypeDefinitionsPayload } from './type-definition-model.js';
 
-const cache = new Map<string, Promise<TypeDefinitionsPayload>>();
+const requests = new Map<string, Promise<TypeDefinitionsPayload>>();
 
-/** Clears the in-memory fetch cache. Used by tests between deferred-load cases. */
-export function clearTypeDefinitionsCache(): void {
-	cache.clear();
-}
-
-/** Fetches one page-level type-definition asset, caching the in-flight/completed result. */
+/** Fetches one table's type-definition asset. Shares a request per href and forgets failures. */
 export function loadTypeDefinitions(href: string): Promise<TypeDefinitionsPayload> {
-	const cached = cache.get(href);
-	if (cached !== undefined) return cached;
+	const existing = requests.get(href);
+	if (existing !== undefined) return existing;
 
 	const request = fetch(href)
 		.then(async (response) => {
@@ -21,10 +16,10 @@ export function loadTypeDefinitions(href: string): Promise<TypeDefinitionsPayloa
 			return parseTypeDefinitionsPayload(await response.json());
 		})
 		.catch((error: unknown) => {
-			cache.delete(href);
+			requests.delete(href);
 			throw error;
 		});
 
-	cache.set(href, request);
+	requests.set(href, request);
 	return request;
 }

@@ -1,45 +1,33 @@
 import type { ReactNode } from 'react';
 import { createContext, useReducer } from 'react';
-import { withBasePath } from '../lib/base-path.js';
 import { loadTypeDefinitions } from '../lib/load-type-definitions.js';
-import type { TypeDefinitionsPayload } from '../lib/type-definition-model.js';
 import type { TypeDefinitionsLoadState } from '../lib/type-definitions-load-state.js';
 import { typeDefinitionsLoadReducer } from '../lib/type-definitions-load-state.js';
 
 export interface TypeDefinitionsContextValue {
-	canLink: (typeName: string) => boolean;
-	definitions: TypeDefinitionsPayload;
-	/** Settles without throwing; failures update `load`. */
+	/** Starts loading the definitions unless they are loading or loaded. Never rejects. */
 	ensureLoaded: () => Promise<void>;
 	load: TypeDefinitionsLoadState;
+	/** Aliases the definitions asset holds, known before it loads. */
+	names: ReadonlySet<string>;
 }
 
-/** Absent outside a provider: standalone tables render types as plain text. */
+/** Absent outside a provider, where tables render types as plain text. */
 export const TypeDefinitionsContext = createContext<TypeDefinitionsContextValue | null>(null);
 
-/** Loads page-level definition JSON for linked alias popovers. */
+/** Loads a props table's definitions asset for its linked type popovers. */
 export function TypeDefinitionsProvider({
 	children,
 	definitionNames,
 	definitionsHref,
 }: {
 	children: ReactNode;
-	/** Aliases present in the page asset. Required for deferred linking. */
-	definitionNames?: ReadonlyArray<string>;
-	definitionsHref?: string;
+	definitionNames: ReadonlyArray<string>;
+	definitionsHref: string;
 }) {
-	const resolvedHref =
-		definitionsHref === undefined
-			? undefined
-			: withBasePath(definitionsHref, import.meta.env.BASE_URL);
-
-	// Remount when the asset URL changes so load state resets without an effect.
+	// A new asset, such as after a dev rebuild, remounts the loader so its state starts over.
 	return (
-		<TypeDefinitionsLoader
-			key={resolvedHref ?? ''}
-			definitionNames={definitionNames}
-			href={resolvedHref}
-		>
+		<TypeDefinitionsLoader href={definitionsHref} key={definitionsHref} names={definitionNames}>
 			{children}
 		</TypeDefinitionsLoader>
 	);
@@ -47,44 +35,29 @@ export function TypeDefinitionsProvider({
 
 function TypeDefinitionsLoader({
 	children,
-	definitionNames,
 	href,
+	names,
 }: {
 	children: ReactNode;
-	definitionNames?: ReadonlyArray<string>;
-	href: string | undefined;
+	href: string;
+	names: ReadonlyArray<string>;
 }) {
 	const [load, dispatch] = useReducer(typeDefinitionsLoadReducer, { status: 'idle' });
 
-	const registeredNames =
-		definitionNames === undefined
-			? undefined
-			: new Set(definitionNames.filter((name) => name.length > 0));
+	async function ensureLoaded() {
+		if (load.status === 'loading' || load.status === 'ready') return;
 
-	const definitions = load.status === 'ready' ? load.data : {};
-
-	const ensureLoaded = async (): Promise<void> => {
-		if (href === undefined) return;
-		if (load.status === 'ready' && load.href === href) return;
-		if (load.status === 'loading' && load.href === href) return;
-
-		dispatch({ href, type: 'load-start' });
+		dispatch({ type: 'load-start' });
 		try {
-			const data = await loadTypeDefinitions(href);
-			dispatch({ data, href, type: 'load-success' });
-		} catch (error: unknown) {
+			dispatch({ data: await loadTypeDefinitions(href), type: 'load-success' });
+		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Failed to load type definitions';
-			dispatch({ href, message, type: 'load-error' });
+			dispatch({ message, type: 'load-error' });
 		}
-	};
-
-	const canLink = (typeName: string): boolean => {
-		if (definitions[typeName] !== undefined) return true;
-		return registeredNames !== undefined && registeredNames.has(typeName);
-	};
+	}
 
 	return (
-		<TypeDefinitionsContext.Provider value={{ canLink, definitions, ensureLoaded, load }}>
+		<TypeDefinitionsContext.Provider value={{ ensureLoaded, load, names: new Set(names) }}>
 			{children}
 		</TypeDefinitionsContext.Provider>
 	);

@@ -135,7 +135,6 @@ test('preserves optional alias-of-union props instead of collapsing them to unio
 			required: false,
 			simplifiedType: 'AliasOfUnion',
 			type: 'AliasOfUnion',
-			typeHref: 'AliasOfUnion',
 		}),
 	);
 	expect(entriesByName.get('label')).toEqual(
@@ -150,7 +149,6 @@ test('preserves optional alias-of-union props instead of collapsing them to unio
 			required: true,
 			simplifiedType: 'AliasOfUnion',
 			type: 'AliasOfUnion',
-			typeHref: 'AliasOfUnion',
 		}),
 	);
 	expect(entriesByName.get('render')).toEqual(
@@ -158,11 +156,10 @@ test('preserves optional alias-of-union props instead of collapsing them to unio
 			required: false,
 			simplifiedType: 'FixtureRenderProp',
 			type: 'FixtureRenderProp',
-			typeHref: 'FixtureRenderProp',
 		}),
 	);
-	expect(doc?.typeDefinitions?.AliasOfUnion?.definition).toContain('string | number');
-	expect(doc?.typeDefinitions?.FixtureRenderProp?.definition).toContain('className');
+	// Docs fixtures are not Luke UI source, so their aliases stay plain text.
+	expect(doc?.typeDefinitions).toBeUndefined();
 });
 
 test('preserves declared aliases on Grid responsive layout props with definitions', async () => {
@@ -213,6 +210,27 @@ test('links Button pressAction to the PressAction definition', async () => {
 		}),
 	);
 	expect(buttonProps?.typeDefinitions?.PressAction?.definition).toMatch(/=> void \| Promise<void>/);
+});
+
+test('shows the resolved type when Button presentation branches declare different types', async () => {
+	const [buttonProps] = await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'packages/@luke-ui/react/src/core/button/button.tsx',
+			name: 'ButtonProps',
+		},
+		{ basePath: repoRoot },
+	);
+	const entriesByName = new Map(
+		(buttonProps?.entries ?? []).map((entry) => [entry.name, entry] as const),
+	);
+
+	// The checker orders union members by type id, so compare the members.
+	expect(entriesByName.get('tone')?.simplifiedType.split(' | ').sort()).toEqual([
+		'"critical"',
+		'"neutral"',
+	]);
+	// `'low' | 'standard'` is a subset of `Prominence`, so the resolved union is the alias.
+	expect(entriesByName.get('prominence')?.simplifiedType).toBe('Prominence');
 });
 
 test('prefers resolved callback signatures over indexed-access annotations', async () => {
@@ -303,7 +321,6 @@ test('prefers non-never annotations across element/render union branches', async
 		expect.objectContaining({
 			simplifiedType: 'BranchRenderProp',
 			type: 'BranchRenderProp',
-			typeHref: 'BranchRenderProp',
 		}),
 	);
 	expect(entriesByName.get('elementType')?.type).toBe("'div' | 'span'");
@@ -314,17 +331,14 @@ test('prefers non-never annotations across element/render union branches', async
 			type: 'SharedBranchAlias',
 		}),
 	);
-	// Distinct valid aliases on each branch must not collapse to one branch's type.
+	// Branches that write different types fall back to the resolved type, which covers them all.
 	expect(entriesByName.get('mode')).toEqual(
 		expect.objectContaining({
-			simplifiedType: 'ElementMode | RenderMode',
-			type: 'ElementMode | RenderMode',
+			simplifiedType: '"element" | "render"',
+			type: '"element" | "render"',
 		}),
 	);
 	expect(entriesByName.get('mode')?.typeHref).toBeUndefined();
-	const enriched = doc as EnrichedGeneratedDoc | undefined;
-	expect(enriched?.typeDefinitions?.ElementMode?.definition).toMatch(/ElementMode/);
-	expect(enriched?.typeDefinitions?.RenderMode?.definition).toMatch(/RenderMode/);
 
 	const [boxProps] = await componentPropsGenerator.generateTypeTable(
 		{

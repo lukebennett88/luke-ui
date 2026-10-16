@@ -30,7 +30,9 @@ Do not use `useEffect` to reset state when a prop changes, or to mirror React st
 event handlers. Prefer remounting with `key`, deriving values during render, or reading values from
 the render that created the handler. Reserve effects for synchronising with systems outside React.
 
-The docs app is not split into Server Components. Do not add `'use client'` directives there.
+## Server Components
+
+The docs app does not use React Server Components. Do not add `'use client'` directives there.
 
 ## Reuse
 

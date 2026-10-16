@@ -14,7 +14,10 @@ interface GenerateDocumentationOptions {
 	basePath?: string;
 }
 
-/** Wraps the fumadocs generator and removes generic DOM props from component Props tables. */
+/**
+ * Wraps the fumadocs generator to remove generic DOM props from component Props tables and restore
+ * their declared types.
+ */
 export function createComponentPropsGenerator(options: GeneratorOptions = {}): Generator {
 	const generator = createGenerator(options);
 	const generateDocumentation = generator.generateDocumentation.bind(generator);
@@ -23,7 +26,7 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 		const docs = await generateDocumentation(file, name, generateOptions);
 		const basePath = (generateOptions as GenerateDocumentationOptions).basePath;
 		if (name === undefined || file.path === undefined || basePath === undefined) {
-			return docs.map((doc) => enrichGeneratedDocTypes(doc, undefined, '', basePath ?? ''));
+			return docs;
 		}
 
 		const repoRoot = basePath;
@@ -34,11 +37,9 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 			relativeRepoPath(repoRoot, file.path),
 			name,
 		);
-		const reactSrcDir = lukeUiReactSrcDir(repoRoot);
-		if (declaration === undefined) {
-			return docs.map((doc) => enrichGeneratedDocTypes(doc, undefined, reactSrcDir, repoRoot));
-		}
+		if (declaration === undefined) return docs;
 
+		const reactSrcDir = lukeUiReactSrcDir(repoRoot);
 		const forwardsDomProps = typeForwardsDomProps(declaration, reactSrcDir);
 		return docs.map((doc) =>
 			enrichGeneratedDocTypes(
@@ -49,7 +50,6 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 				),
 				declaration,
 				reactSrcDir,
-				repoRoot,
 			),
 		);
 	};

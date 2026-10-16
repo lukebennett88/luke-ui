@@ -28,11 +28,11 @@ export interface PropDeclaration extends SyntaxNode {
 
 /** A resolved type. `getUnionTypes` is empty unless `isUnion()`. */
 interface PropType {
-	getAliasSymbol?: () => PropSymbol | undefined;
+	getAliasSymbol: () => PropSymbol | undefined;
 	getProperties: () => ReadonlyArray<PropSymbol>;
 	getUnionTypes: () => ReadonlyArray<PropType>;
 	isNever: () => boolean;
-	isUndefined?: () => boolean;
+	isUndefined: () => boolean;
 	isUnion: () => boolean;
 }
 

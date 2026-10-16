@@ -1,6 +1,5 @@
 import type { GeneratedDoc } from 'fumadocs-typescript';
 import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
-import type { EnrichedGeneratedDoc } from './type-definition-model.js';
 
 interface MdastNode {
 	type: string;
@@ -36,7 +35,7 @@ export function stringifyComponentPropsTable(node: MdastNode): string | undefine
 	return generatedDocToMarkdown(readGeneratedDoc(node));
 }
 
-function generatedDocToMarkdown(doc: EnrichedGeneratedDoc): string {
+function generatedDocToMarkdown(doc: GeneratedDoc): string {
 	const rows: Array<[string, string, string]> = [['Prop', 'Type', 'Description']];
 	let nativePropsNote: string | undefined;
 
@@ -79,7 +78,7 @@ function isMdxJsxElement(node: MdastNode): node is MdxJsxElementNode {
 	return node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement';
 }
 
-function readGeneratedDoc(node: MdxJsxElementNode): EnrichedGeneratedDoc {
+function readGeneratedDoc(node: MdxJsxElementNode): GeneratedDoc {
 	const typeAttr = node.attributes.find((attr): attr is MdxJsxAttribute => {
 		return attr.type === 'mdxJsxAttribute' && attr.name === 'type';
 	});
@@ -98,7 +97,7 @@ function readGeneratedDoc(node: MdxJsxElementNode): EnrichedGeneratedDoc {
 	}
 
 	try {
-		return JSON.parse(expression) as EnrichedGeneratedDoc;
+		return JSON.parse(expression) as GeneratedDoc;
 	} catch (cause) {
 		throw new Error(
 			'<ComponentPropsTable>: processed Markdown `type` attribute is not valid GeneratedDoc JSON.',

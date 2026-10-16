@@ -9,7 +9,6 @@ import { defineConfig, lazyPlugins } from 'vite-plus';
 import { findMdxFiles } from './src/lib/docs-mdx-files.js';
 import { highlightSourcePlugin } from './src/lib/highlight-source-plugin.js';
 import { getMarkdownPagePath } from './src/lib/markdown-page-path.js';
-import { typeDefinitionsAssetsPlugin } from './src/lib/type-definitions-assets-plugin.js';
 
 // staticFunctionMiddleware hardcodes `/__tsr/staticServerFnCache/...` for the
 // client fetch URL with no base-path support. When deployed under a sub-path
@@ -35,7 +34,6 @@ const TRAILING_SLASH_PATTERN = /\/$/;
 // The dev server's origin, used when `SITE_URL` is unset.
 const LOCAL_SITE_URL = 'http://localhost:3000';
 
-const docsRoot = fileURLToPath(new URL('./', import.meta.url));
 const contentDocsDir = fileURLToPath(new URL('./content/docs/', import.meta.url));
 
 function getMarkdownPrerenderPages(): Array<{ path: string }> {
@@ -145,7 +143,6 @@ export default defineConfig(async () => {
 		],
 		plugins: lazyPlugins(async () => [
 			staticFunctionBasePathPlugin(),
-			typeDefinitionsAssetsPlugin({ docsRoot }),
 			highlightSourcePlugin(),
 			mdx(await import('./source.config')),
 			vanillaExtractPlugin(),

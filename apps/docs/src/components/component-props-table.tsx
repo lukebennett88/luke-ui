@@ -25,9 +25,9 @@ export function ComponentPropsTable({
 	type,
 	...props
 }: {
-	/** Build-time alias names in the deferred asset. Comma-separated from MDX. */
-	definitionNames?: string | ReadonlyArray<string>;
-	/** Page-level JSON asset written at MDX compile time. */
+	/** Aliases in the `definitionsHref` asset. Set by `remarkAttachTypeDefinitions`. */
+	definitionNames?: ReadonlyArray<string>;
+	/** URL of this table's type-definitions asset. Set by `remarkAttachTypeDefinitions`. */
 	definitionsHref?: string;
 	id: string;
 	type: Record<string, TypeNode>;
@@ -39,13 +39,6 @@ export function ComponentPropsTable({
 	const layout = getPropTableLayout(
 		groups.flatMap((group) => group.props.flatMap((name) => type[name] ?? [])),
 	);
-	const resolvedDefinitionNames = (() => {
-		if (definitionNames === undefined) return undefined;
-		if (typeof definitionNames === 'string') {
-			return definitionNames.split(',').filter((name) => name.length > 0);
-		}
-		return definitionNames;
-	})();
 
 	useEffect(() => {
 		// Rows in a collapsed group do not exist when the browser first resolves the hash.
@@ -53,43 +46,40 @@ export function ComponentPropsTable({
 			document.getElementById(hash)?.scrollIntoView({ behavior: 'instant' });
 	}, [hash, id]);
 
-	return (
-		<TypeDefinitionsProvider
-			definitionNames={resolvedDefinitionNames}
-			definitionsHref={definitionsHref}
-		>
-			<Stack
-				className={cx('not-prose', className)}
-				gap="sp16"
-				id={id}
-				marginBlock="sp24"
-				{...props}
-			>
-				{nativePropsNote === undefined ? null : (
-					<CellText color="secondary" elementType="div" fontWeight="body">
-						<InheritTypography>{nativePropsNote}</InheritTypography>
-					</CellText>
+	const table = (
+		<Stack className={cx('not-prose', className)} gap="sp16" id={id} marginBlock="sp24" {...props}>
+			{nativePropsNote === undefined ? null : (
+				<CellText color="secondary" elementType="div" fontWeight="body">
+					<InheritTypography>{nativePropsNote}</InheritTypography>
+				</CellText>
+			)}
+			<ReferenceTableFrame>
+				<PropTableHead layout={layout} />
+				{groups.map((group) =>
+					group.name === 'Component props' ? (
+						<tbody className={tableStyles.bodyGroup} key={group.name}>
+							<PropRows hashPrefix={id} layout={layout} names={group.props} type={type} />
+						</tbody>
+					) : (
+						<PropGroup
+							group={group}
+							hash={hash}
+							key={group.name}
+							layout={layout}
+							rowIdPrefix={id}
+							type={type}
+						/>
+					),
 				)}
-				<ReferenceTableFrame>
-					<PropTableHead layout={layout} />
-					{groups.map((group) =>
-						group.name === 'Component props' ? (
-							<tbody className={tableStyles.bodyGroup} key={group.name}>
-								<PropRows hashPrefix={id} layout={layout} names={group.props} type={type} />
-							</tbody>
-						) : (
-							<PropGroup
-								group={group}
-								hash={hash}
-								key={group.name}
-								layout={layout}
-								rowIdPrefix={id}
-								type={type}
-							/>
-						),
-					)}
-				</ReferenceTableFrame>
-			</Stack>
+			</ReferenceTableFrame>
+		</Stack>
+	);
+
+	if (definitionNames === undefined || definitionsHref === undefined) return table;
+
+	return (
+		<TypeDefinitionsProvider definitionNames={definitionNames} definitionsHref={definitionsHref}>
+			{table}
 		</TypeDefinitionsProvider>
 	);
 }

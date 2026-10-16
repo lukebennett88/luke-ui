@@ -1,4 +1,3 @@
-import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pageSchema } from 'fumadocs-core/source/schema';
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
@@ -15,7 +14,6 @@ import { remarkAttachTypeDefinitions } from './src/lib/remark-attach-type-defini
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
 import { stringifyComponentPropsTable } from './src/lib/stringify-component-props-table.js';
-import { TYPE_DEFINITIONS_DIR } from './src/lib/type-definition-model.js';
 
 /**
  * Unified merges plugins by function identity and deep-merges their options. Two
@@ -52,8 +50,8 @@ export const docs = defineDocs({
 	},
 });
 
-const docsRoot = fileURLToPath(new URL('.', import.meta.url));
 const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
+const typeDefinitionsDir = fileURLToPath(new URL('.source/type-definitions', import.meta.url));
 
 const generator = createGenerator({
 	cache: createFileSystemGeneratorCache('.source/fumadocs-typescript'),
@@ -82,12 +80,8 @@ export default defineConfig({
 					remarkStringify: true,
 				} satisfies RemarkAutoTypeTableOptions,
 			],
-			// After ComponentPropsTable expansion: emit page-level definition assets and strip the
-			// registry from the GeneratedDoc JSON so it never reaches search or the props record.
-			[
-				remarkAttachTypeDefinitions,
-				{ outputDir: resolve(docsRoot, '.source', TYPE_DEFINITIONS_DIR) },
-			],
+			// Runs after `<component-props-table>` expands, so the generated definitions exist.
+			[remarkAttachTypeDefinitions, { outputDir: typeDefinitionsDir }],
 			[
 				remarkDocsAutoTypeTable,
 				{
