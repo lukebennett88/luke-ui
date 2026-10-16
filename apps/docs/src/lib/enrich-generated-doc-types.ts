@@ -53,18 +53,19 @@ export function enrichGeneratedDocTypes(
 }
 
 function enrichDocEntry(entry: DocEntry, context: EnrichContext): DocEntry {
-	const typeNode = selectDeclaredTypeNode(context.annotationsByName.get(entry.name) ?? []);
-	const declaredText = typeNode?.getText().trim();
+	const resolved = resolveDeclaredTypeAnnotations(context.annotationsByName.get(entry.name) ?? []);
 
 	let type = entry.type;
 	let simplifiedType = entry.simplifiedType;
 	let typeHref = entry.typeHref;
 
-	if (declaredText !== undefined && declaredText.length > 0) {
-		// The property's written annotation is the public contract. It never includes the compiler's
-		// implied optional `| undefined`, and it keeps aliases that fumadocs' simplifiedType drops.
-		type = declaredText;
-		simplifiedType = declaredText;
+	if (resolved.text !== undefined && resolved.text.length > 0) {
+		// Written annotations are the public contract. They never include the compiler's implied
+		// optional `| undefined`, and they keep aliases that fumadocs' simplifiedType drops. When
+		// union branches declare distinct valid types, `resolved.text` is their union — not one
+		// arbitrary branch.
+		type = resolved.text;
+		simplifiedType = resolved.text;
 	} else if (KIND_LABELS.has(simplifiedType) && entry.type.length > 0 && entry.type !== 'union') {
 		// No annotation available: prefer the full type string over a bare kind label, but do not
 		// strip `| undefined` — that would guess at optionality vs explicit undefined.
@@ -72,9 +73,17 @@ function enrichDocEntry(entry: DocEntry, context: EnrichContext): DocEntry {
 		type = entry.type;
 	}
 
-	const linkedName = collectLinkedDefinition(typeNode, context);
-	if (linkedName !== undefined) {
-		typeHref = linkedName;
+	for (const typeNode of resolved.nodes) {
+		collectLinkedDefinition(typeNode, context);
+	}
+	// Only attach a clickable root when every distinct annotation shares one linkable alias.
+	if (resolved.singleLinkNode !== undefined) {
+		const linkedName = collectLinkedDefinition(resolved.singleLinkNode, context);
+		if (linkedName !== undefined) {
+			typeHref = linkedName;
+		}
+	} else if (resolved.nodes.length > 1) {
+		typeHref = undefined;
 	}
 
 	if (
@@ -89,7 +98,7 @@ function enrichDocEntry(entry: DocEntry, context: EnrichContext): DocEntry {
 		...entry,
 		simplifiedType,
 		type,
-		...(typeHref === undefined ? {} : { typeHref }),
+		...(typeHref === undefined ? { typeHref: undefined } : { typeHref }),
 	};
 }
 
@@ -198,24 +207,92 @@ export function annotationIncludesTopLevelUndefined(typeNode: SyntaxNode | undef
 	return false;
 }
 
+export interface ResolvedDeclaredTypeAnnotations {
+	/** Nodes to register definitions from (deduped by annotation text). */
+	nodes: ReadonlyArray<SyntaxNode>;
+	/**
+	 * Sole node to use for `typeHref` linking when every distinct annotation shares one root alias.
+	 * Absent when branches declare different valid shapes.
+	 */
+	singleLinkNode: SyntaxNode | undefined;
+	/**
+	 * Declared type text for the props table. A single shared annotation, or a `|`-joined union of
+	 * distinct valid annotations. Undefined when there are no written annotations.
+	 */
+	text: string | undefined;
+}
+
 /**
- * Picks the public annotation for a prop that may be declared on several union branches.
- * Prefer a non-`never` annotation (Box-like `renderRoot` / `elementType` exclusivity), then an alias
- * reference, then the first remaining written type.
+ * Resolves written annotations across union branches into documentation text.
+ *
+ * - Exclusivity (`never` vs a real type): keep the non-`never` annotation.
+ * - Identical annotations on every branch: keep that shared text.
+ * - Distinct valid annotations: join them as a union so docs do not narrow the public contract.
  */
-export function selectDeclaredTypeNode(
+export function resolveDeclaredTypeAnnotations(
 	typeNodes: ReadonlyArray<SyntaxNode>,
-): SyntaxNode | undefined {
-	if (typeNodes.length === 0) return;
-	if (typeNodes.length === 1) return typeNodes[0];
+): ResolvedDeclaredTypeAnnotations {
+	if (typeNodes.length === 0) {
+		return { nodes: [], singleLinkNode: undefined, text: undefined };
+	}
 
 	const nonNever = typeNodes.filter((node) => !isNeverAnnotation(node));
 	const pool = nonNever.length > 0 ? nonNever : [...typeNodes];
 
-	const alias = pool.find((node) => rootTypeReference(node) !== undefined);
-	if (alias !== undefined) return alias;
+	const uniqueByText = new Map<string, SyntaxNode>();
+	for (const node of pool) {
+		const text = node.getText().trim();
+		if (text.length === 0) continue;
+		if (!uniqueByText.has(text)) uniqueByText.set(text, node);
+	}
 
-	return pool[0];
+	if (uniqueByText.size === 0) {
+		return { nodes: [], singleLinkNode: undefined, text: undefined };
+	}
+
+	const nodes = [...uniqueByText.values()];
+	if (uniqueByText.size === 1) {
+		const node = nodes[0]!;
+		return {
+			nodes,
+			singleLinkNode: node,
+			text: node.getText().trim(),
+		};
+	}
+
+	const text = [...uniqueByText.keys()].map(parenthesizeForUnionMember).join(' | ');
+	const linkNames = new Set(
+		nodes
+			.map((node) => {
+				const reference = rootTypeReference(node);
+				return reference?.getTypeName?.()?.getText() ?? reference?.getText();
+			})
+			.filter((name): name is string => name !== undefined && name.length > 0),
+	);
+	// Only link when every distinct annotation is the same root alias (unusual, but safe).
+	const singleLinkNode =
+		linkNames.size === 1 && nodes.every((node) => rootTypeReference(node) !== undefined)
+			? nodes[0]
+			: undefined;
+
+	return { nodes, singleLinkNode, text };
+}
+
+/**
+ * @deprecated Prefer {@link resolveDeclaredTypeAnnotations}. Kept for exclusivity unit tests that
+ * assert the single surviving node after dropping `never` guards.
+ */
+export function selectDeclaredTypeNode(
+	typeNodes: ReadonlyArray<SyntaxNode>,
+): SyntaxNode | undefined {
+	const resolved = resolveDeclaredTypeAnnotations(typeNodes);
+	return resolved.nodes.length === 1 ? resolved.nodes[0] : undefined;
+}
+
+/** Wrap members that would be misparsed inside a larger union (functions, nested unions). */
+function parenthesizeForUnionMember(text: string): string {
+	if (text.includes('=>') || text.includes('|')) return `(${text})`;
+	return text;
 }
 
 function isNeverAnnotation(typeNode: SyntaxNode): boolean {

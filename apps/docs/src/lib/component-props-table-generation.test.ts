@@ -243,6 +243,16 @@ test('prefers non-never annotations across element/render union branches', async
 			type: 'SharedBranchAlias',
 		}),
 	);
+	// Distinct valid aliases on each branch must not collapse to one branch's type.
+	expect(entriesByName.get('mode')).toEqual(
+		expect.objectContaining({
+			simplifiedType: 'ElementMode | RenderMode',
+			type: 'ElementMode | RenderMode',
+		}),
+	);
+	expect(entriesByName.get('mode')?.typeHref).toBeUndefined();
+	expect(doc?.typeDefinitions?.ElementMode?.definition).toMatch(/ElementMode/);
+	expect(doc?.typeDefinitions?.RenderMode?.definition).toMatch(/RenderMode/);
 
 	const [boxProps] = await componentPropsGenerator.generateTypeTable(
 		{

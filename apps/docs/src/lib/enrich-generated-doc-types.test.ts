@@ -2,6 +2,7 @@ import { expect, test } from 'vite-plus/test';
 import type { SyntaxNode } from './component-prop-analysis.js';
 import {
 	annotationIncludesTopLevelUndefined,
+	resolveDeclaredTypeAnnotations,
 	selectDeclaredTypeNode,
 } from './enrich-generated-doc-types.js';
 
@@ -70,4 +71,46 @@ test('selectDeclaredTypeNode prefers non-never annotations across union branches
 	expect(selectDeclaredTypeNode([neverNode, primitiveNode])?.getText()).toBe('string');
 	expect(selectDeclaredTypeNode([aliasNode, neverNode])?.getText()).toBe('BranchRenderProp');
 	expect(selectDeclaredTypeNode([neverNode])?.getText()).toBe('never');
+});
+
+test('resolveDeclaredTypeAnnotations joins distinct valid branch annotations', () => {
+	const elementMode = node('TypeReference', { text: 'ElementMode', typeName: 'ElementMode' });
+	const renderMode = node('TypeReference', { text: 'RenderMode', typeName: 'RenderMode' });
+	const neverNode = node('NeverKeyword', { isNever: true, text: 'never' });
+
+	const resolved = resolveDeclaredTypeAnnotations([elementMode, renderMode]);
+	expect(resolved.text).toBe('ElementMode | RenderMode');
+	expect(resolved.singleLinkNode).toBeUndefined();
+	expect(resolved.nodes.map((entry) => entry.getText())).toEqual(['ElementMode', 'RenderMode']);
+
+	const withNever = resolveDeclaredTypeAnnotations([neverNode, elementMode, renderMode]);
+	expect(withNever.text).toBe('ElementMode | RenderMode');
+	expect(withNever.singleLinkNode).toBeUndefined();
+});
+
+test('resolveDeclaredTypeAnnotations parenthesizes function and nested-union members', () => {
+	const callback = node('FunctionType', {
+		text: '(props: { className?: string }) => null',
+	});
+	const alias = node('TypeReference', { text: 'SharedBranchAlias', typeName: 'SharedBranchAlias' });
+
+	expect(resolveDeclaredTypeAnnotations([callback, alias]).text).toBe(
+		'((props: { className?: string }) => null) | SharedBranchAlias',
+	);
+});
+
+test('resolveDeclaredTypeAnnotations keeps a shared identical annotation', () => {
+	const first = node('TypeReference', {
+		text: 'SharedBranchAlias',
+		typeName: 'SharedBranchAlias',
+	});
+	const second = node('TypeReference', {
+		text: 'SharedBranchAlias',
+		typeName: 'SharedBranchAlias',
+	});
+
+	const resolved = resolveDeclaredTypeAnnotations([first, second]);
+	expect(resolved.text).toBe('SharedBranchAlias');
+	expect(resolved.singleLinkNode?.getText()).toBe('SharedBranchAlias');
+	expect(resolved.nodes).toHaveLength(1);
 });
