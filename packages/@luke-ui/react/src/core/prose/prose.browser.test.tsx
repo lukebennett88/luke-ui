@@ -369,6 +369,24 @@ test('preserves whitespace in multiline pre code', () => {
 	expect(getComputedStyle(query(locator.element(), 'pre')).whiteSpace).toBe('pre');
 });
 
+test('gives pre and nested code label metrics and the code font stack', () => {
+	const { locator } = render(
+		<Prose>
+			<pre>
+				<code>{'const value = 1;'}</code>
+			</pre>
+		</Prose>,
+	);
+	const pre = query(locator.element(), 'pre');
+	const code = query(pre, 'code');
+	for (const element of [pre, code]) {
+		const styles = getComputedStyle(element);
+		expect(styles.fontSize).toBe('14px');
+		expect(styles.lineHeight).toBe('20px');
+		expect(styles.fontFamily).toMatch(/ui-monospace/i);
+	}
+});
+
 test('styles table headers and body cells', () => {
 	const { locator } = render(
 		<Prose style={{ inlineSize: 160 }}>
