@@ -47,6 +47,8 @@ not help. Silence in this log is not evidence.
 - Seen: 2026-10-12 (#782, #783, #785, #792). `visual-ci resolve-baseline` exited with "The newest
   Visual baseline run on `main` is in_progress. Wait for … then re-run this job." Re-run after the
   baseline finished passed compare.
+- Seen: 2026-10-16 (#816). The compare job for `7d0b2f9` exited with "The newest Visual baseline run
+  on `main` is in_progress" while the baseline for #814 was still running.
 - Where: `.github/workflows/visual-regression.yml` Resolve baseline step; docs/VISUAL_TESTING.md.
 - Problem: Parallel Renovate PRs that touch the lockfile all start compare while a main Visual
   baseline run is still uploading, so every PR fails the same way until someone re-runs the job.
