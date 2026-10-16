@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
-import { cx } from '../../shared/utils/utils.js';
 import { typeStyleWeightRole } from '../../theme/type-styles.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
@@ -8,7 +7,12 @@ import type { Prettify } from '../types/prettify.js';
 import { visuallyHiddenStyle } from '../visually-hidden/visually-hidden-style.js';
 import type { TextRecipeVariants } from './recipe.css.js';
 import { textRecipe } from './recipe.css.js';
-import { textAdornedContent, textAdornment, textAdornmentRow } from './styles.css.js';
+import {
+	textAdornedContent,
+	textAdornment,
+	textAdornmentRow,
+	textAdornmentSlot,
+} from './styles.css.js';
 
 interface TextStyleProps {
 	/**
@@ -17,8 +21,9 @@ interface TextStyleProps {
 	 */
 	color?: TextRecipeVariants['color'];
 	/**
-	 * Content after the text, at the inline end of the row. It is aligned with the text's first line
-	 * like `startContent`.
+	 * Content after the text, such as an `Icon` or `Kbd`, centred on the capitals of its line. A
+	 * block element type places it at the inline end of the first line. An inline element type
+	 * places it after the last word.
 	 */
 	endContent?: ReactNode;
 	/**
@@ -54,10 +59,10 @@ interface TextStyleProps {
 	 */
 	shouldInheritFont?: TextRecipeVariants['shouldInheritFont'];
 	/**
-	 * Content before the text, such as an `Icon`. A graphic is centred on the text's first line, and
-	 * wrapped lines align with the text, not with this content. A taller graphic grows the row rather
-	 * than overflowing it. It takes phrasing content and is part of the element, so its text joins
-	 * the element's accessible name.
+	 * Content before the text, such as an `Icon`, centred on the capitals of the first line. A block
+	 * element type hangs wrapped lines after it, and an adornment taller than the line grows the
+	 * text instead of overflowing it. An inline element type keeps it in the flow of the text.
+	 * Adornments are part of the element, so their text joins its accessible name.
 	 */
 	startContent?: ReactNode;
 	/**
@@ -102,6 +107,12 @@ interface _TextProps extends _TextOmit, TextStyleProps, DocumentedElementTypePro
 
 /** Props for the `Text` component. */
 export type TextProps = Prettify<_TextProps>;
+
+// Block text elements whose content model is flow content, so adorned text may hold blocks.
+const flowContentElementTypes = new Set<NonNullable<TextProps['elementType']>>([
+	'blockquote',
+	'div',
+]);
 
 const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
 	'blockquote',
@@ -150,28 +161,25 @@ export function Text(props: TextProps) {
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
 	const hasAdornments = startContent != null || endContent != null;
 	const isBlockElement = blockTextElementTypes.has(elementType);
+
+	const hasAdornmentRow = hasAdornments && isBlockElement;
 	const resolvedTypography = typography ?? 'body';
 
 	const resolvedShouldDisableTrim: boolean = (() => {
 		if (hasLineClamp) return true;
-		// An inline adorned Text is itself the row, so trim boxes would become flex items.
-		if (hasAdornments && !isBlockElement) return true;
 		if (shouldDisableTrim !== undefined) return shouldDisableTrim;
 		return !isBlockElement;
 	})();
 
 	const recipeClassName = textRecipe({
-		className:
-			hasAdornments && !isBlockElement
-				? cx(textAdornmentRow({ isInline: true }), className)
-				: className,
+		className,
 		color,
 		fontStyle,
 		fontVariantNumeric,
 		fontWeight:
 			fontWeight ?? (shouldInheritFont ? undefined : typeStyleWeightRole[resolvedTypography]),
-		// An adorned Text clamps its content, not the row around it.
-		lineClamp: hasAdornments ? false : lineClamp,
+		// A block adorned Text clamps its content, not the row around it.
+		lineClamp: hasAdornmentRow ? false : lineClamp,
 		shouldDisableTrim: resolvedShouldDisableTrim,
 		shouldInheritFont,
 		textAlign,
@@ -190,39 +198,57 @@ export function Text(props: TextProps) {
 			slot={slot}
 			style={isVisuallyHidden ? { ...visuallyHiddenStyle, ...style } : style}
 		>
-			{hasAdornments ? (
-				<TextAdornments
-					endContent={endContent}
-					isBlockElement={isBlockElement}
-					lineClamp={lineClamp}
-					startContent={startContent}
-					textAlign={textAlign}
-				>
-					{children}
-				</TextAdornments>
-			) : (
-				children
-			)}
+			{(() => {
+				if (!hasAdornments) return children;
+				if (!hasAdornmentRow) {
+					return (
+						<>
+							{startContent != null && (
+								<span className={textAdornment({ inlineSide: 'start' })}>{startContent}</span>
+							)}
+							{children}
+							{endContent != null && (
+								<span className={textAdornment({ inlineSide: 'end' })}>{endContent}</span>
+							)}
+						</>
+					);
+				}
+				return (
+					<TextAdornmentRow
+						endContent={endContent}
+						isFlowContent={flowContentElementTypes.has(elementType)}
+						lineClamp={lineClamp}
+						startContent={startContent}
+						textAlign={textAlign}
+					>
+						{children}
+					</TextAdornmentRow>
+				);
+			})()}
 		</RacText>
 	);
 }
 
-/** Lays out the adornments and the text. A block Text gets a row inside its trim boxes. */
-function TextAdornments({
+/**
+ * Lays out a block Text's adornments and text in a row inside its trim boxes. The wrappers match
+ * the root's content model, so a flow-content root can still hold blocks.
+ */
+function TextAdornmentRow({
 	children,
 	endContent,
-	isBlockElement,
+	isFlowContent,
 	lineClamp,
 	startContent,
 	textAlign,
 }: {
 	children: ReactNode;
 	endContent: ReactNode;
-	isBlockElement: boolean;
+	isFlowContent: boolean;
 	lineClamp: TextProps['lineClamp'];
 	startContent: ReactNode;
 	textAlign: TextProps['textAlign'];
 }) {
+	const Wrapper = isFlowContent ? 'div' : 'span';
 	// Inherits the root's font and colour, like Button's label, so `lineClamp` uses Text's rules.
 	const contentClassName = textRecipe({
 		className: textAdornedContent,
@@ -232,15 +258,19 @@ function TextAdornments({
 		textAlign,
 	});
 
-	const parts = (
-		<>
-			{startContent != null && <span className={textAdornment}>{startContent}</span>}
-			<span className={contentClassName}>{children}</span>
-			{endContent != null && <span className={textAdornment}>{endContent}</span>}
-		</>
+	return (
+		<Wrapper className={textAdornmentRow}>
+			{startContent != null && (
+				<Wrapper className={textAdornmentSlot}>
+					<span className={textAdornment()}>{startContent}</span>
+				</Wrapper>
+			)}
+			<Wrapper className={contentClassName}>{children}</Wrapper>
+			{endContent != null && (
+				<Wrapper className={textAdornmentSlot}>
+					<span className={textAdornment()}>{endContent}</span>
+				</Wrapper>
+			)}
+		</Wrapper>
 	);
-
-	if (!isBlockElement) return parts;
-
-	return <span className={textAdornmentRow({ isInline: false })}>{parts}</span>;
 }

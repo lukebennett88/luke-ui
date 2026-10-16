@@ -10,13 +10,16 @@ import { Link } from '@luke-ui/react/link';
 import { Quote } from '@luke-ui/react/quote';
 import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { createRef } from 'react';
 import { Menu, MenuItem } from 'react-aria-components/Menu';
 import { TextContext } from 'react-aria-components/Text';
 import { expect, test } from 'vite-plus/test';
+import type { Locator } from 'vite-plus/test/context';
+import { page } from 'vite-plus/test/context';
 import { typeStyles } from '../../theme/type-styles.js';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import type { RenderResult } from '../test-utils/render.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
@@ -520,23 +523,31 @@ test('lineClamp clamps adorned text and keeps the adornments', () => {
 	expect(querySvg(container).getBoundingClientRect().width).toBeGreaterThan(0);
 });
 
-test('an inline adorned Text sits on the baseline of the surrounding sentence', () => {
+test('an inline adorned Text flows with the surrounding sentence', () => {
 	const { locator } = render(
-		<p style={{ margin: 0 }}>
+		<p style={{ inlineSize: '12rem', margin: 0 }}>
 			<span data-testid="sentence" style={baselineMarkerStyle} />
 			Status:{' '}
 			<Text data-testid="inline" startContent={<Icon name="checkCircle" size="xsmall" />}>
 				<span data-testid="adorned" style={baselineMarkerStyle} />
-				Approved
+				<span data-testid="cap" style={capProbeStyle} />
+				Approved by the reviewer after a second look
 			</Text>{' '}
-			by the reviewer.
+			today.
 		</p>,
 	);
+	const inline = locator.getByTestId('inline').element();
 	const sentence = locator.getByTestId('sentence').element().getBoundingClientRect();
 	const adorned = locator.getByTestId('adorned').element().getBoundingClientRect();
+	const tops = new Set(lineRects(inline).map((line) => Math.round(line.top)));
 
-	expect(getComputedStyle(locator.getByTestId('inline').element()).display).toBe('inline-flex');
+	expect(getComputedStyle(inline).display).toBe('inline');
+	expect(tops.size).toBeGreaterThan(1);
 	expect(adorned.bottom).toBeCloseTo(sentence.bottom, 0);
+	expect(verticalCentre(querySvg(inline))).toBeCloseTo(
+		verticalCentre(locator.getByTestId('cap').element()),
+		0,
+	);
 });
 
 test('adorned Text keeps its root element, attributes, ref, and slot', async () => {
@@ -584,8 +595,178 @@ test('adorned Text keeps its adornments when React Aria render replaces the root
 	expect(custom.tagName).toBe('MARK');
 	expect(custom.textContent).toBe('Highlighted');
 	expect(custom.contains(querySvg(container))).toBe(true);
-	expect(getComputedStyle(custom).display).toBe('inline-flex');
 });
+
+const centredAdornments = [
+	{ element: <Kbd>Esc</Kbd>, name: 'Kbd' },
+	{ element: <span>12 items</span>, name: 'plain span' },
+	{
+		element: (
+			<Text color="secondary" typography="caption">
+				12 items
+			</Text>
+		),
+		name: 'caption Text',
+	},
+];
+
+for (const { element, name } of centredAdornments) {
+	test(`centres a ${name} endContent on the first line like a graphic`, () => {
+		const { locator } = render(
+			<div style={{ inlineSize: '14rem' }}>
+				<Text elementType="p" endContent={<span data-testid="end">{element}</span>}>
+					<span data-testid="cap" style={capProbeStyle} />
+					{wrappingCopy}
+				</Text>
+			</div>,
+		);
+		const end = locator.getByTestId('end').element();
+
+		expect(verticalCentre(end)).toBeCloseTo(
+			verticalCentre(locator.getByTestId('cap').element()),
+			0,
+		);
+	});
+}
+
+test('adorned Text wraps its content in elements its root may contain', () => {
+	const { locator } = render(
+		<div>
+			<Text data-testid="flow" elementType="div" startContent={<Icon name="checkCircle" />}>
+				<Text data-testid="paragraph" elementType="p">
+					Description
+				</Text>
+			</Text>
+			<Text data-testid="phrasing" elementType="p" startContent={<Icon name="checkCircle" />}>
+				<span data-testid="phrase">Phrase</span>
+			</Text>
+			<Text data-testid="inline" startContent={<Icon name="checkCircle" />}>
+				<span data-testid="inline-phrase">Inline</span>
+			</Text>
+		</div>,
+	);
+	const flow = locator.getByTestId('flow').element();
+	const paragraph = locator.getByTestId('paragraph').element();
+
+	for (
+		let node = paragraph.parentElement;
+		node !== flow && node != null;
+		node = node.parentElement
+	) {
+		expect(node.tagName).toBe('DIV');
+	}
+	expect(locator.getByTestId('phrasing').element().querySelector('div')).toBeNull();
+	expect(locator.getByTestId('inline-phrase').element().parentElement).toBe(
+		locator.getByTestId('inline').element(),
+	);
+});
+
+/** Screenshots `node` with and without its text decorations, after `act` runs. */
+async function decorationShots(
+	node: (style?: CSSProperties) => ReactNode,
+	act?: (locator: Locator, user: RenderResult['user']) => Promise<void>,
+) {
+	const shots: Array<string> = [];
+	for (const style of [undefined, { textDecorationLine: 'none' }] as const) {
+		const { locator, unmount, user } = render(
+			<div data-testid="frame" style={{ display: 'inline-block', padding: '0.5rem' }}>
+				{node(style)}
+			</div>,
+		);
+		if (act) await act(locator, user);
+		shots.push(
+			await page.screenshot({ element: locator.getByTestId('frame').element(), save: false }),
+		);
+		unmount();
+	}
+	return shots;
+}
+
+const underlinedLinks = [
+	{
+		link: (style?: CSSProperties) => (
+			<Link href="#plain" style={style}>
+				Example link
+			</Link>
+		),
+		name: 'a plain Link',
+	},
+	{
+		link: (style?: CSSProperties) => (
+			<Link href="#start" style={style}>
+				<Text shouldInheritFont startContent={<Icon name="bookOpen" size="xsmall" />}>
+					Example link
+				</Text>
+			</Link>
+		),
+		name: 'inline Text with startContent',
+	},
+	{
+		link: (style?: CSSProperties) => (
+			<Link href="#end" style={style}>
+				<Text endContent={<Icon name="externalLink" size="xsmall" />} shouldInheritFont>
+					Example link
+				</Text>
+			</Link>
+		),
+		name: 'inline Text with endContent',
+	},
+	{
+		link: (style?: CSSProperties) => (
+			<div dir="rtl">
+				<Link href="#rtl" style={style}>
+					<Text shouldInheritFont startContent={<Icon name="bookOpen" size="xsmall" />}>
+						رابط مثال
+					</Text>
+				</Link>
+			</div>
+		),
+		name: 'inline Text in RTL',
+	},
+	{
+		link: (style?: CSSProperties) => (
+			<Link href="#block" style={style}>
+				<Text
+					elementType="div"
+					shouldDisableTrim
+					shouldInheritFont
+					startContent={<Icon name="bookOpen" size="xsmall" />}
+				>
+					Example link
+				</Text>
+			</Link>
+		),
+		name: 'block Text with startContent',
+	},
+];
+
+for (const { link, name } of underlinedLinks) {
+	test(`a text Link keeps its underline around ${name}`, async () => {
+		const [decorated, undecorated] = await decorationShots(link);
+
+		expect(decorated).not.toBe(undecorated);
+	});
+}
+
+for (const state of ['hover', 'focus'] as const) {
+	test(`a low prominence Link underlines adorned text on ${state}`, async () => {
+		const [decorated, undecorated] = await decorationShots(
+			(style) => (
+				<Link href="#low" prominence="low" style={style}>
+					<Text shouldInheritFont startContent={<Icon name="bookOpen" size="xsmall" />}>
+						Example link
+					</Text>
+				</Link>
+			),
+			async (locator, user) => {
+				if (state === 'hover') await user.hover(locator.getByRole('link'));
+				else await user.keyboard('{Tab}');
+			},
+		);
+
+		expect(decorated).not.toBe(undecorated);
+	});
+}
 
 test('a visually hidden adorned Text stays hidden and named', async () => {
 	const { locator } = render(
