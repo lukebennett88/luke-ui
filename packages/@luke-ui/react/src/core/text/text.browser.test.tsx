@@ -523,6 +523,67 @@ test('lineClamp clamps adorned text and keeps the adornments', () => {
 	expect(querySvg(container).getBoundingClientRect().width).toBeGreaterThan(0);
 });
 
+test('lineClamp keeps two text lines while adornments stay on the first line', () => {
+	const { locator } = render(
+		<div style={{ inlineSize: '12rem' }}>
+			<Text
+				data-testid="text"
+				elementType="p"
+				endContent={<Icon name="checkCircle" />}
+				lineClamp={2}
+				startContent={<Icon name="checkCircle" />}
+			>
+				<span data-testid="cap" style={capProbeStyle} />
+				<span data-testid="copy">{wrappingCopy}</span>
+			</Text>
+		</div>,
+	);
+	const text = locator.getByTestId('text').element();
+	const clamped = locator.getByTestId('copy').element().parentElement;
+	if (clamped == null) throw new Error('Expected the clamped content.');
+
+	expect(text.getBoundingClientRect().height).toBeCloseTo(
+		2 * Number.parseFloat(getComputedStyle(text).lineHeight),
+		0,
+	);
+	expect(clamped.scrollHeight).toBeGreaterThan(clamped.clientHeight);
+	const icons = text.querySelectorAll('svg');
+	expect(icons).toHaveLength(2);
+	for (const icon of icons) {
+		expect(icon.getBoundingClientRect().width).toBeGreaterThan(0);
+		expect(verticalCentre(icon)).toBeCloseTo(
+			verticalCentre(locator.getByTestId('cap').element()),
+			0,
+		);
+	}
+});
+
+for (const elementType of ['span', 'p'] as const) {
+	test(`places endContent on the ${elementType === 'span' ? 'last' : 'first'} line of wrapped ${elementType} text`, () => {
+		const { locator } = render(
+			<div style={{ inlineSize: '12rem' }}>
+				<Text
+					data-testid="text"
+					elementType={elementType}
+					endContent={<Icon name="checkCircle" size="xsmall" />}
+				>
+					<span data-testid="first-cap" style={capProbeStyle} />
+					{wrappingCopy}
+					<span data-testid="last-cap" style={capProbeStyle} />
+				</Text>
+			</div>,
+		);
+		const first = locator.getByTestId('first-cap').element();
+		const last = locator.getByTestId('last-cap').element();
+
+		expect(verticalCentre(last)).toBeGreaterThan(verticalCentre(first));
+		expect(verticalCentre(querySvg(locator.getByTestId('text').element()))).toBeCloseTo(
+			verticalCentre(elementType === 'span' ? last : first),
+			0,
+		);
+	});
+}
+
 test('an inline adorned Text flows with the surrounding sentence', () => {
 	const { locator } = render(
 		<p style={{ inlineSize: '12rem', margin: 0 }}>

@@ -87,13 +87,18 @@ Pass `startContent` or `endContent` to place content before or after the text, s
 `Kbd`. Each adornment is centred on the capitals of its line. This is an exploratory API. Compare it
 with Track in [First-line alignment](/docs/first-line-alignment).
 
+Choose the element by the content's role. Keep the default `span` for an adornment inside a sentence
+or underlined external link. Its inline flow preserves the link's underline and does not hang
+wrapped lines: they may return beneath `startContent`, while `endContent` follows the final word.
+Use `p` for a standalone message. Use `div` for a navigation link or pager title, not `p`.
+`elementType` selects the adornment layout and trim inference. Changing CSS `display` alone selects
+neither.
+
 <ExampleBlock src="text/adornments" title="Text: Adornments" />
 
 With a block element type, the adornments and the text form a row. Wrapped lines align with the
 text, not with `startContent`, and `endContent` sits at the end of the first line. An adornment
-taller than the line moves the text down to stay centred on it. With an inline element type, the
-adornments stay in the flow of the text, so it breaks with its sentence and keeps a link's
-underline.
+taller than the line moves the text down to stay centred on it.
 
 Adornments take phrasing content and are part of the element. Their text joins its accessible name.
 Do not put an action in a heading's adornments. For an adornment beside several elements, such as a

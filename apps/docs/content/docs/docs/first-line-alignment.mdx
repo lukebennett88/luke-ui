@@ -12,6 +12,20 @@ settled API.
 Resize a preview to see wrapping. The examples use the docs theme, its Inter webfont, and its
 Capsize trims.
 
+## Choose the element by content
+
+Choose the element from the content's role. The default `span` keeps adornments in sentence flow and
+preserves an underlined link. Use `p` for a standalone message. Use `div` for a navigation link or
+pager title, not `p`. The docs navigation keeps section labels as headings and uses `div` for links
+and pager titles. `Text` infers trimming from `elementType`, so CSS `display: block` on a `span`
+does not select block trimming. See [Text adornments](/components/typography/text#adornments) for
+the usage guidance.
+
+<ExampleBlock
+	src="first-line-alignment/element-type"
+	title="First-line alignment: Inline and paragraph flow"
+/>
+
 ## How the candidates align
 
 A first line has its own font size, line height, and trim. CSS cannot read those from a sibling, so
@@ -26,8 +40,6 @@ content beside the text can only match them by sharing the text's typography.
   - A block element type, such as `p`, `div`, or a heading, lays the adornments and the text out in
     a row. Wrapped lines hang after `startContent`, and `endContent` sits at the end of the first
     line.
-  - An inline element type, such as the default `span`, keeps the adornments in the flow of the
-    text. The text breaks with its sentence, and a link's underline carries through it.
 
 ## Heading with a leading icon
 
@@ -124,11 +136,22 @@ These cases show where Text adornments fall short or behave in ways to weigh bef
 
 ## Measure in this browser
 
-These fixtures measure themselves once the fonts load. Each value is the distance from a graphic's
-centre to the centre of its line's capitals, or between two baselines, so open this page in another
-browser to compare.
+Each value is the distance from a graphic's centre to its line's capitals, or between two baselines.
+The readout waits for `document.fonts.ready` and records once per page load.
 
 <ExampleBlock src="first-line-alignment/readout" title="First-line alignment: Readout" />
+
+To compare a browser:
+
+1. Open `/docs/first-line-alignment` in the target browser and wait for the numeric readout and
+   environment row. Offsets near `0px` show closer measured alignment. Resize the span and paragraph
+   previews to compare inline wrapping with hanging lines and the position of `endContent`.
+2. In Inline composition, check the link underline at rest, on hover, and after focusing with Tab.
+   Inspect Long text and line clamping, Graphics and text, and Right-to-left. In DevTools, block
+   requests for Inter `.woff2` files and reload, then unblock them and reload again.
+3. Reload after changing fonts or the theme. The `1cap` probe reports the selected font's cap
+   geometry. It does not prove fallback metrics match the theme's Capsize trims or verify underline
+   painting.
 
 ## Continue learning
 
