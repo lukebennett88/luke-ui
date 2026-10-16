@@ -1,4 +1,5 @@
 import type { TypeDefinitionsPayload } from './type-definition-model.js';
+import { parseTypeDefinitionsPayload } from './type-definition-model.js';
 
 const cache = new Map<string, Promise<TypeDefinitionsPayload>>();
 
@@ -17,11 +18,7 @@ export function loadTypeDefinitions(href: string): Promise<TypeDefinitionsPayloa
 			if (!response.ok) {
 				throw new Error(`Failed to load type definitions from ${href} (${response.status})`);
 			}
-			const parsed: unknown = await response.json();
-			if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-				return {};
-			}
-			return parsed as TypeDefinitionsPayload;
+			return parseTypeDefinitionsPayload(await response.json());
 		})
 		.catch((error: unknown) => {
 			cache.delete(href);

@@ -18,8 +18,6 @@ import {
 import { LinkedType } from './type-popover.js';
 import * as styles from './type-table.css.js';
 
-export { TypeDefinitionsProvider } from './type-definitions-context.js';
-
 interface ParameterNode {
 	description: ReactNode;
 	name: string;
@@ -161,13 +159,18 @@ function PropRow({
 	// Generator often puts a short kind (e.g. "union") in `type` and the readable signature in
 	// `typeDescription`. Prefer the signature so the type is always discoverable.
 	const shownType = typeDescription ?? type;
-	const typeLinkIsNavigationTarget =
-		typeDescriptionLink !== undefined &&
-		(typeDescriptionLink.startsWith('/') ||
+	const typeContent = (() => {
+		if (typeDescriptionLink === undefined) return shownType;
+		if (
+			typeDescriptionLink.startsWith('/') ||
 			typeDescriptionLink.startsWith('#') ||
 			typeDescriptionLink.startsWith('http:') ||
-			typeDescriptionLink.startsWith('https:'));
-	const typeLinkIsNamedAlias = typeDescriptionLink !== undefined && !typeLinkIsNavigationTarget;
+			typeDescriptionLink.startsWith('https:')
+		) {
+			return <MdxLink href={typeDescriptionLink}>{shownType}</MdxLink>;
+		}
+		return <LinkedType typeName={typeDescriptionLink}>{shownType}</LinkedType>;
+	})();
 	// The narrow layout hides a missing default, so the type cell then ends the stacked row.
 	const typeEndsRow = !layout.showDefault || !hasDefault;
 	// Deep-link ids stay `${prefix}-${name}` when a table id exists. Without one, a stable React id
@@ -213,13 +216,7 @@ function PropRow({
 					{...cellBox}
 				>
 					<CellText className={referenceStyles.monospace} fontWeight="body">
-						{typeLinkIsNamedAlias ? (
-							<LinkedType typeName={typeDescriptionLink}>{shownType}</LinkedType>
-						) : typeLinkIsNavigationTarget && typeDescriptionLink !== undefined ? (
-							<MdxLink href={typeDescriptionLink}>{shownType}</MdxLink>
-						) : (
-							shownType
-						)}
+						{typeContent}
 					</CellText>
 				</TableCell>
 				{layout.showDefault ? (

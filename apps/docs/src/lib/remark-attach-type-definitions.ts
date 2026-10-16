@@ -25,10 +25,7 @@ interface MdxJsxFlowElement {
 	type: 'mdxJsxFlowElement';
 }
 
-/**
- * Writes one definition JSON asset per ComponentPropsTable and passes `definitionsHref` instead of
- * embedding the registry in the props `type` record (which also polluted search indexes).
- */
+/** Writes one definition JSON asset per ComponentPropsTable and attaches deferred-load props. */
 export function remarkAttachTypeDefinitions(options: { publicDir: string }) {
 	const outputDir = join(options.publicDir, TYPE_DEFINITIONS_PUBLIC_DIR);
 
@@ -72,8 +69,7 @@ export function remarkAttachTypeDefinitions(options: { publicDir: string }) {
 			const fileName = `${fileId}.json`;
 			writeFileSync(join(outputDir, fileName), `${JSON.stringify(definitions)}\n`);
 
-			// Root-relative public URL. TypeDefinitionsProvider prefixes import.meta.env.BASE_URL at
-			// fetch time so subpath deploys (VITE_BASE_URL) resolve correctly.
+			// Root-relative; the provider prefixes import.meta.env.BASE_URL for subpath deploys.
 			const href = `/${TYPE_DEFINITIONS_PUBLIC_DIR}/${fileName}`;
 			setStringAttribute(node, 'definitionsHref', href);
 			setStringAttribute(node, 'definitionNames', Object.keys(definitions).join(','));

@@ -11,7 +11,7 @@ import {
 } from '@tanstack/react-router';
 import axe from 'axe-core';
 import type { ReactNode } from 'react';
-import { act } from 'react';
+import { act, useState } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, assert, expect, test, vi } from 'vite-plus/test';
@@ -19,7 +19,8 @@ import { page, userEvent } from 'vite-plus/test/context';
 import { clearTypeDefinitionsCache } from '../lib/load-type-definitions.js';
 import { ComponentPropsTable } from './component-props-table.js';
 import { DocsThemeRoot } from './theme-controls.js';
-import { TypeDefinitionsProvider, TypeTable } from './type-table.js';
+import { TypeDefinitionsProvider } from './type-definitions-context.js';
+import { TypeTable } from './type-table.js';
 
 /** Matches the docs article `maxInlineSize` of `52rem` at a 16px root. */
 const ARTICLE_INLINE_SIZE = '832px';
@@ -327,24 +328,14 @@ test('lists props in the order of their group', async () => {
 });
 
 test('opens a type definition popover for a linked alias and restores focus on dismiss', async () => {
-	const definition = {
-		definition: 'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<Value>;',
-		name: 'RequiredInitialResponsiveValue',
-	};
-	await renderWidget(
-		<TypeDefinitionsProvider definitions={{ RequiredInitialResponsiveValue: definition }}>
-			<TypeTable
-				id="api"
-				type={{
-					columns: {
-						description: 'Column tracks.',
-						type: 'RequiredInitialResponsiveValue<number | string>',
-						typeDescriptionLink: 'RequiredInitialResponsiveValue',
-					},
-				}}
-			/>
-		</TypeDefinitionsProvider>,
+	vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+		new Response(JSON.stringify({ RequiredInitialResponsiveValue: DEFERRED_DEFINITION }), {
+			headers: { 'Content-Type': 'application/json' },
+			status: 200,
+		}),
 	);
+
+	await renderDeferredTypeTable('/type-definitions/focus.json');
 
 	const trigger = page.getByRole('button', {
 		name: 'Show definition of RequiredInitialResponsiveValue',
@@ -360,23 +351,21 @@ test('opens a type definition popover for a linked alias and restores focus on d
 	await expect
 		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
 		.not.toBeInTheDocument();
-	// Match docs-shell/search: RAC FocusScope restores in a rAF after unmount.
+	// RAC FocusScope restores the trigger in a rAF after unmount.
 	await expect.element(trigger).toHaveFocus();
 });
 
 test('falls back to plain text when a type reference has no definition', async () => {
 	await renderWidget(
-		<TypeDefinitionsProvider definitions={{}}>
-			<TypeTable
-				id="api"
-				type={{
-					value: {
-						type: 'Promise<string>',
-						typeDescriptionLink: 'Promise',
-					},
-				}}
-			/>
-		</TypeDefinitionsProvider>,
+		<TypeTable
+			id="api"
+			type={{
+				value: {
+					type: 'Promise<string>',
+					typeDescriptionLink: 'Promise',
+				},
+			}}
+		/>,
 	);
 
 	await expect.element(page.getByText('Promise<string>')).toBeVisible();
@@ -518,15 +507,26 @@ test('deferred fetch that omits a registered alias settles without infinite load
 });
 
 test('linked type popovers in a ComponentPropsTable have no axe violations', async () => {
-	await renderWidget(
-		<ComponentPropsTable
-			definitions={{
+	vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+		new Response(
+			JSON.stringify({
 				RequiredInitialResponsiveValue: {
 					definition:
 						'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<ResponsivePropValue<Value>>;',
 					name: 'RequiredInitialResponsiveValue',
 				},
-			}}
+			}),
+			{
+				headers: { 'Content-Type': 'application/json' },
+				status: 200,
+			},
+		),
+	);
+
+	await renderWidget(
+		<ComponentPropsTable
+			definitionNames={['RequiredInitialResponsiveValue']}
+			definitionsHref="/type-definitions/axe.json"
 			id="grid-api"
 			type={{
 				columns: {
@@ -546,9 +546,9 @@ test('linked type popovers in a ComponentPropsTable have no axe violations', asy
 		name: 'Definition of RequiredInitialResponsiveValue',
 	});
 	await expect.element(dialog).toBeVisible();
+	await expect.element(page.getByText(/type RequiredInitialResponsiveValue/)).toBeVisible();
 
-	// Popovers portal outside the render container — include both so the open overlay is checked
-	// without scanning Vitest's document chrome (which trips landmark rules).
+	// Include the portalled dialog; Vitest document chrome trips landmark rules.
 	assert(container, 'expected a container');
 	const results = await axe.run([container, dialog.element()]);
 	expect(
@@ -559,11 +559,105 @@ test('linked type popovers in a ComponentPropsTable have no axe violations', asy
 	).toEqual([]);
 });
 
-async function renderDeferredTypeTable(
+test('deferred fetch ignores a stale response after a newer href wins', async () => {
+	const resolvers = new Map<string, (response: Response) => void>();
+	vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
+		const href = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+		return new Promise((resolve) => {
+			resolvers.set(href, resolve);
+		});
+	});
+
+	const { rerender } = await renderDeferredTypeTableWithRerender('/type-definitions/stale-a.json');
+	const trigger = page.getByRole('button', {
+		name: 'Show definition of RequiredInitialResponsiveValue',
+	});
+	await userEvent.click(trigger.element());
+	await expect.element(page.getByText('Loading definition…')).toBeVisible();
+	assert(resolvers.has('/type-definitions/stale-a.json'), 'expected fetch for stale-a');
+
+	// Close before swapping href so the next press opens B instead of toggling A shut.
+	await userEvent.keyboard('{Escape}');
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.not.toBeInTheDocument();
+
+	await rerender(deferredTypeTableTree('/type-definitions/stale-b.json'));
+
+	await userEvent.click(
+		page
+			.getByRole('button', { name: 'Show definition of RequiredInitialResponsiveValue' })
+			.element(),
+	);
+	await expect.element(page.getByText('Loading definition…')).toBeVisible();
+
+	const resolveA = resolvers.get('/type-definitions/stale-a.json');
+	const resolveB = resolvers.get('/type-definitions/stale-b.json');
+	assert(resolveA, 'expected fetch for stale-a');
+	assert(resolveB, 'expected fetch for stale-b');
+
+	await act(async () => {
+		resolveB(
+			new Response(
+				JSON.stringify({
+					RequiredInitialResponsiveValue: {
+						definition: 'type RequiredInitialResponsiveValue<Value> = "from-b";',
+						name: 'RequiredInitialResponsiveValue',
+					},
+				}),
+				{ headers: { 'Content-Type': 'application/json' }, status: 200 },
+			),
+		);
+	});
+	await expect.element(page.getByText(/from-b/)).toBeVisible();
+
+	await act(async () => {
+		resolveA(
+			new Response(
+				JSON.stringify({
+					RequiredInitialResponsiveValue: {
+						definition: 'type RequiredInitialResponsiveValue<Value> = "from-a";',
+						name: 'RequiredInitialResponsiveValue',
+					},
+				}),
+				{ headers: { 'Content-Type': 'application/json' }, status: 200 },
+			),
+		);
+	});
+	await expect.element(page.getByText(/from-b/)).toBeVisible();
+	expect(page.getByText(/from-a/).elements()).toHaveLength(0);
+});
+
+test('invalid definition JSON shows a recoverable error', async () => {
+	// Fresh Response per call: failed loads drop the cache, and a reused body stream is already read.
+	vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+		Promise.resolve(
+			new Response(JSON.stringify({ Broken: { definition: 1, name: 'Broken' } }), {
+				headers: { 'Content-Type': 'application/json' },
+				status: 200,
+			}),
+		),
+	);
+
+	await renderDeferredTypeTable('/type-definitions/invalid.json');
+	const trigger = page.getByRole('button', {
+		name: 'Show definition of RequiredInitialResponsiveValue',
+	});
+	await userEvent.click(trigger.element());
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.toBeVisible();
+	await expect.element(page.getByText('Invalid type definitions payload')).toBeVisible();
+	await expect
+		.element(page.getByRole('button', { name: 'Retry loading definition' }))
+		.toBeVisible();
+});
+
+function deferredTypeTableTree(
 	definitionsHref: string,
 	definitionNames: ReadonlyArray<string> = ['RequiredInitialResponsiveValue'],
 ) {
-	await renderWidget(
+	return (
 		<TypeDefinitionsProvider definitionNames={definitionNames} definitionsHref={definitionsHref}>
 			<TypeTable
 				id="api"
@@ -575,21 +669,48 @@ async function renderDeferredTypeTable(
 					},
 				}}
 			/>
-		</TypeDefinitionsProvider>,
+		</TypeDefinitionsProvider>
 	);
+}
+
+async function renderDeferredTypeTable(
+	definitionsHref: string,
+	definitionNames: ReadonlyArray<string> = ['RequiredInitialResponsiveValue'],
+) {
+	await renderWidget(deferredTypeTableTree(definitionsHref, definitionNames));
+}
+
+async function renderDeferredTypeTableWithRerender(definitionsHref: string) {
+	return renderWidgetWithRerender(deferredTypeTableTree(definitionsHref));
 }
 
 async function renderWidget(
 	children: ReactNode,
 	options: { hash?: string; inlineSize?: string } = {},
 ) {
+	await renderWidgetWithRerender(children, options);
+}
+
+async function renderWidgetWithRerender(
+	children: ReactNode,
+	options: { hash?: string; inlineSize?: string } = {},
+) {
 	const { hash, inlineSize = ARTICLE_INLINE_SIZE } = options;
+	const childrenRef = { current: children };
+	let bump: (() => void) | undefined;
+
 	const rootRoute = createRootRoute({
-		component: () => (
-			<Provider spritesheetHref={spriteSheetHref}>
-				<DocsThemeRoot>{children}</DocsThemeRoot>
-			</Provider>
-		),
+		component: function TestRoot() {
+			const [, setTick] = useState(0);
+			bump = () => {
+				setTick((tick) => tick + 1);
+			};
+			return (
+				<Provider spritesheetHref={spriteSheetHref}>
+					<DocsThemeRoot>{childrenRef.current}</DocsThemeRoot>
+				</Provider>
+			);
+		},
 	});
 	const initialEntry = hash === undefined ? '/' : `/#${hash}`;
 	// DocsLink targets `/$` for internal typeDescriptionLink paths.
@@ -609,4 +730,13 @@ async function renderWidget(
 		root?.render(<RouterProvider router={router} />);
 		await router.load();
 	});
+
+	return {
+		rerender: async (next: ReactNode) => {
+			childrenRef.current = next;
+			await act(async () => {
+				bump?.();
+			});
+		},
+	};
 }

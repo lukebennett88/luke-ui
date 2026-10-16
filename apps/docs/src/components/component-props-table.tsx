@@ -7,36 +7,26 @@ import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { groupPropNames, NATIVE_PROPS_FORWARDING_KEY } from '../lib/component-prop-groups.js';
-import type { TypeDefinitionsPayload } from '../lib/type-definition-model.js';
 import * as styles from './component-props-table.css.js';
 import { InheritTypography } from './docs-article/mdx-elements.js';
 import * as disclosureStyles from './docs-disclosure.css.js';
 import * as tableStyles from './reference-table.css.js';
 import { CellText, ReferenceTableFrame, TableCell } from './reference-table.js';
+import { TypeDefinitionsProvider } from './type-definitions-context.js';
 import type { PropTableLayout, TypeNode } from './type-table.js';
-import {
-	getPropTableLayout,
-	PropRows,
-	PropTableHead,
-	TypeDefinitionsProvider,
-} from './type-table.js';
+import { getPropTableLayout, PropRows, PropTableHead } from './type-table.js';
 
 /** Grouped prop table for a component guide's `## API` section. */
 export function ComponentPropsTable({
 	className,
 	definitionNames,
-	definitions,
 	definitionsHref,
 	id,
 	type,
 	...props
 }: {
-	/**
-	 * Build-time alias names present in the deferred asset. Comma-separated when emitted from MDX.
-	 */
+	/** Build-time alias names in the deferred asset. Comma-separated from MDX. */
 	definitionNames?: string | ReadonlyArray<string>;
-	/** Sync definitions for tests; production pages pass `definitionsHref` instead. */
-	definitions?: TypeDefinitionsPayload;
 	/** Page-level JSON asset written at MDX compile time. */
 	definitionsHref?: string;
 	id: string;
@@ -66,7 +56,6 @@ export function ComponentPropsTable({
 	return (
 		<TypeDefinitionsProvider
 			definitionNames={resolvedDefinitionNames}
-			definitions={definitions}
 			definitionsHref={definitionsHref}
 		>
 			<Stack
