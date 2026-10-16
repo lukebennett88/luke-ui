@@ -395,7 +395,9 @@ test('deferred definition fetch shows loading, then the definition', async () =>
 			}),
 	);
 
-	await renderDeferredTypeTable('/type-definitions/loading.json');
+	await renderDeferredTypeTable('/type-definitions/loading.json', [
+		'RequiredInitialResponsiveValue',
+	]);
 	const trigger = page.getByRole('button', {
 		name: 'Show definition of RequiredInitialResponsiveValue',
 	});
@@ -432,7 +434,7 @@ test('deferred definition fetch shows a recoverable error and retries', async ()
 		});
 	});
 
-	await renderDeferredTypeTable('/type-definitions/retry.json');
+	await renderDeferredTypeTable('/type-definitions/retry.json', ['RequiredInitialResponsiveValue']);
 	const trigger = page.getByRole('button', {
 		name: 'Show definition of RequiredInitialResponsiveValue',
 	});
@@ -447,6 +449,72 @@ test('deferred definition fetch shows a recoverable error and retries', async ()
 	allowSuccess = true;
 	await userEvent.click(page.getByRole('button', { name: 'Retry loading definition' }).element());
 	await expect.element(page.getByText(/type RequiredInitialResponsiveValue/)).toBeVisible();
+});
+
+test('deferred tables only link aliases registered in definitionNames', async () => {
+	const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+		new Response(JSON.stringify({ RequiredInitialResponsiveValue: DEFERRED_DEFINITION }), {
+			headers: { 'Content-Type': 'application/json' },
+			status: 200,
+		}),
+	);
+
+	await renderWidget(
+		<TypeDefinitionsProvider
+			definitionNames={['RequiredInitialResponsiveValue']}
+			definitionsHref="/type-definitions/registered-only.json"
+		>
+			<TypeTable
+				id="api"
+				type={{
+					columns: {
+						description: 'Column tracks.',
+						type: 'RequiredInitialResponsiveValue<number | string>',
+						typeDescriptionLink: 'RequiredInitialResponsiveValue',
+					},
+					fallback: {
+						description: 'Unresolved external.',
+						type: 'Promise<string>',
+						typeDescriptionLink: 'Promise',
+					},
+				}}
+			/>
+		</TypeDefinitionsProvider>,
+	);
+
+	await expect
+		.element(
+			page.getByRole('button', { name: 'Show definition of RequiredInitialResponsiveValue' }),
+		)
+		.toBeVisible();
+	expect(page.getByRole('button', { name: /Show definition of Promise/ }).elements()).toHaveLength(
+		0,
+	);
+	await expect.element(page.getByText('Promise<string>')).toBeVisible();
+	expect(fetchMock).not.toHaveBeenCalled();
+});
+
+test('deferred fetch that omits a registered alias settles without infinite loading', async () => {
+	const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+		new Response(JSON.stringify({}), {
+			headers: { 'Content-Type': 'application/json' },
+			status: 200,
+		}),
+	);
+
+	await renderDeferredTypeTable('/type-definitions/empty-asset.json', [
+		'RequiredInitialResponsiveValue',
+	]);
+	const trigger = page.getByRole('button', {
+		name: 'Show definition of RequiredInitialResponsiveValue',
+	});
+	await userEvent.click(trigger.element());
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.toBeVisible();
+	await expect.element(page.getByText('Definition not available.')).toBeVisible();
+	expect(page.getByText('Loading definition…').elements()).toHaveLength(0);
+	expect(fetchMock).toHaveBeenCalledWith('/type-definitions/empty-asset.json');
 });
 
 test('linked type popovers in a ComponentPropsTable have no axe violations', async () => {
@@ -491,9 +559,12 @@ test('linked type popovers in a ComponentPropsTable have no axe violations', asy
 	).toEqual([]);
 });
 
-async function renderDeferredTypeTable(definitionsHref: string) {
+async function renderDeferredTypeTable(
+	definitionsHref: string,
+	definitionNames: ReadonlyArray<string> = ['RequiredInitialResponsiveValue'],
+) {
 	await renderWidget(
-		<TypeDefinitionsProvider definitionsHref={definitionsHref}>
+		<TypeDefinitionsProvider definitionNames={definitionNames} definitionsHref={definitionsHref}>
 			<TypeTable
 				id="api"
 				type={{

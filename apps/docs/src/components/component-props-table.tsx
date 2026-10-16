@@ -24,12 +24,17 @@ import {
 /** Grouped prop table for a component guide's `## API` section. */
 export function ComponentPropsTable({
 	className,
+	definitionNames,
 	definitions,
 	definitionsHref,
 	id,
 	type,
 	...props
 }: {
+	/**
+	 * Build-time alias names present in the deferred asset. Comma-separated when emitted from MDX.
+	 */
+	definitionNames?: string | ReadonlyArray<string>;
 	/** Sync definitions for tests; production pages pass `definitionsHref` instead. */
 	definitions?: TypeDefinitionsPayload;
 	/** Page-level JSON asset written at MDX compile time. */
@@ -44,6 +49,12 @@ export function ComponentPropsTable({
 	const layout = getPropTableLayout(
 		groups.flatMap((group) => group.props.flatMap((name) => type[name] ?? [])),
 	);
+	const resolvedDefinitionNames =
+		definitionNames === undefined
+			? undefined
+			: typeof definitionNames === 'string'
+				? definitionNames.split(',').filter((name) => name.length > 0)
+				: definitionNames;
 
 	useEffect(() => {
 		// Rows in a collapsed group do not exist when the browser first resolves the hash.
@@ -52,7 +63,11 @@ export function ComponentPropsTable({
 	}, [hash, id]);
 
 	return (
-		<TypeDefinitionsProvider definitions={definitions} definitionsHref={definitionsHref}>
+		<TypeDefinitionsProvider
+			definitionNames={resolvedDefinitionNames}
+			definitions={definitions}
+			definitionsHref={definitionsHref}
+		>
 			<Stack
 				className={cx('not-prose', className)}
 				gap="sp16"

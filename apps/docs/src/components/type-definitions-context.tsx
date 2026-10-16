@@ -35,10 +35,16 @@ export const TypeDefinitionsContext = createContext<TypeDefinitionsContextValue>
  */
 export function TypeDefinitionsProvider({
 	children,
+	definitionNames,
 	definitions: syncDefinitions,
 	definitionsHref,
 }: {
 	children: ReactNode;
+	/**
+	 * Build-time list of aliases present in the page asset. Required for deferred linking so
+	 * `canLink` does not treat every name as loadable whenever `definitionsHref` is set.
+	 */
+	definitionNames?: ReadonlyArray<string>;
 	definitions?: TypeDefinitionsPayload;
 	definitionsHref?: string;
 }) {
@@ -59,6 +65,11 @@ export function TypeDefinitionsProvider({
 
 	const definitions =
 		syncDefinitions ?? (fetched !== null && fetched.href === resolvedHref ? fetched.data : {});
+
+	const registeredNames =
+		definitionNames === undefined
+			? undefined
+			: new Set(definitionNames.filter((name) => name.length > 0));
 
 	const ensureLoaded = async (): Promise<TypeDefinitionsPayload> => {
 		if (syncDefinitions !== undefined) return syncDefinitions;
@@ -87,8 +98,10 @@ export function TypeDefinitionsProvider({
 
 	const canLink = (typeName: string): boolean => {
 		if (definitions[typeName] !== undefined) return true;
-		// Build-time `typeHref` is only set when a definition was collected; the page asset holds it.
-		return definitionsHref !== undefined;
+		// Only names registered at build time may open a deferred popover. A bare `definitionsHref`
+		// must not make every `typeDescriptionLink` look loadable.
+		if (registeredNames !== undefined && registeredNames.has(typeName)) return true;
+		return false;
 	};
 
 	return (

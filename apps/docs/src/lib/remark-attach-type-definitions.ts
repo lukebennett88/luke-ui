@@ -77,21 +77,27 @@ export function remarkAttachTypeDefinitions(options: { publicDir: string }) {
 			// Root-relative public URL. TypeDefinitionsProvider prefixes import.meta.env.BASE_URL at
 			// fetch time so subpath deploys (VITE_BASE_URL) resolve correctly.
 			const href = `/${TYPE_DEFINITIONS_PUBLIC_DIR}/${fileName}`;
-			const existing = node.attributes.find(
-				(attr): attr is MdxJsxAttribute =>
-					attr.type === 'mdxJsxAttribute' && 'name' in attr && attr.name === 'definitionsHref',
-			);
-			if (existing !== undefined) {
-				existing.value = href;
-			} else {
-				node.attributes.push({
-					name: 'definitionsHref',
-					type: 'mdxJsxAttribute',
-					value: href,
-				});
-			}
+			setStringAttribute(node, 'definitionsHref', href);
+			// Build-time allowlist so the client only links aliases that exist in this asset.
+			setStringAttribute(node, 'definitionNames', Object.keys(definitions).join(','));
 		});
 	};
+}
+
+function setStringAttribute(node: MdxJsxFlowElement, name: string, value: string): void {
+	const existing = node.attributes.find(
+		(attr): attr is MdxJsxAttribute =>
+			attr.type === 'mdxJsxAttribute' && 'name' in attr && attr.name === name,
+	);
+	if (existing !== undefined) {
+		existing.value = value;
+		return;
+	}
+	node.attributes.push({
+		name,
+		type: 'mdxJsxAttribute',
+		value,
+	});
 }
 
 function collectDefinitions(doc: EnrichedGeneratedDoc): TypeDefinitionsPayload {

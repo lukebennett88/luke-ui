@@ -54,6 +54,8 @@ function TypePopover({ children, typeName }: { children: ReactNode; typeName: st
 								Retry
 							</RacButton>
 						</div>
+					) : loadStatus === 'ready' ? (
+						<p className={styles.loadErrorMessage}>Definition not available.</p>
 					) : (
 						<pre className={styles.definition}>Loading definition…</pre>
 					)}
