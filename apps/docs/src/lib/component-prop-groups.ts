@@ -1,3 +1,5 @@
+import { TYPE_DEFINITIONS_KEY } from './type-definition-model.js';
+
 export const PROP_GROUP_ORDER = [
 	'Component props',
 	'Events',
@@ -14,6 +16,8 @@ export type PropGroupName = (typeof PROP_GROUP_ORDER)[number];
  * type forwards native DOM props, since the record otherwise holds only documented prop entries.
  */
 export const NATIVE_PROPS_FORWARDING_KEY = '__nativePropsForwarding';
+
+export { TYPE_DEFINITIONS_KEY };
 
 /** Sentence shown above a type's prop groups when it forwards native DOM and ARIA props. */
 export function renderNativePropsNote(typeName: string): string {
@@ -78,7 +82,7 @@ export function groupPropNames(names: ReadonlyArray<string>): ReadonlyArray<{
 	const buckets = new Map<PropGroupName, Array<string>>();
 
 	for (const name of names) {
-		if (name === NATIVE_PROPS_FORWARDING_KEY) continue;
+		if (name === NATIVE_PROPS_FORWARDING_KEY || name === TYPE_DEFINITIONS_KEY) continue;
 		const group = classifyPropGroup(name);
 		const bucket = buckets.get(group) ?? [];
 		bucket.push(name);

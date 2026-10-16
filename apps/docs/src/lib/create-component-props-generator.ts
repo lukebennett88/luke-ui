@@ -8,7 +8,7 @@ import {
 	typeForwardsDomProps,
 } from './component-prop-analysis.js';
 import { NATIVE_PROPS_FORWARDING_KEY, renderNativePropsNote } from './component-prop-groups.js';
-import { improveGeneratedDocTypes } from './improve-generated-doc-types.js';
+import { enrichGeneratedDocTypes } from './enrich-generated-doc-types.js';
 
 interface GenerateDocumentationOptions {
 	basePath?: string;
@@ -23,7 +23,7 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 		const docs = await generateDocumentation(file, name, generateOptions);
 		const basePath = (generateOptions as GenerateDocumentationOptions).basePath;
 		if (name === undefined || file.path === undefined || basePath === undefined) {
-			return docs.map(improveGeneratedDocTypes);
+			return docs.map((doc) => enrichGeneratedDocTypes(doc, undefined, '', basePath ?? ''));
 		}
 
 		const repoRoot = basePath;
@@ -34,17 +34,22 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 			relativeRepoPath(repoRoot, file.path),
 			name,
 		);
-		if (declaration === undefined) return docs.map(improveGeneratedDocTypes);
-
 		const reactSrcDir = lukeUiReactSrcDir(repoRoot);
+		if (declaration === undefined) {
+			return docs.map((doc) => enrichGeneratedDocTypes(doc, undefined, reactSrcDir, repoRoot));
+		}
+
 		const forwardsDomProps = typeForwardsDomProps(declaration, reactSrcDir);
 		return docs.map((doc) =>
-			improveGeneratedDocTypes(
+			enrichGeneratedDocTypes(
 				markNativePropsForwarding(
 					filterGeneratedDoc(doc, declaration, reactSrcDir),
 					name,
 					forwardsDomProps,
 				),
+				declaration,
+				reactSrcDir,
+				repoRoot,
 			),
 		);
 	};

@@ -2,8 +2,9 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
-import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
+import { NATIVE_PROPS_FORWARDING_KEY, TYPE_DEFINITIONS_KEY } from './component-prop-groups.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
+import { decodeTypeDefinitions } from './type-definition-model.js';
 
 const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
 const generator = createGenerator({
@@ -128,12 +129,14 @@ test('preserves optional alias-of-union props instead of collapsing them to unio
 		{ basePath: repoRoot },
 	);
 	const entriesByName = new Map((doc?.entries ?? []).map((entry) => [entry.name, entry] as const));
+	const definitions = decodeTypeDefinitions(entriesByName.get(TYPE_DEFINITIONS_KEY)?.typeHref);
 
 	expect(entriesByName.get('aliased')).toEqual(
 		expect.objectContaining({
 			required: false,
 			simplifiedType: 'AliasOfUnion',
 			type: 'AliasOfUnion',
+			typeHref: 'AliasOfUnion',
 		}),
 	);
 	expect(entriesByName.get('label')).toEqual(
@@ -148,11 +151,22 @@ test('preserves optional alias-of-union props instead of collapsing them to unio
 			required: true,
 			simplifiedType: 'AliasOfUnion',
 			type: 'AliasOfUnion',
+			typeHref: 'AliasOfUnion',
 		}),
 	);
+	expect(entriesByName.get('render')).toEqual(
+		expect.objectContaining({
+			required: false,
+			simplifiedType: 'FixtureRenderProp',
+			type: 'FixtureRenderProp',
+			typeHref: 'FixtureRenderProp',
+		}),
+	);
+	expect(definitions.AliasOfUnion?.definition).toContain('string | number');
+	expect(definitions.FixtureRenderProp?.definition).toContain('className');
 });
 
-test('preserves declared aliases on Grid responsive layout props', async () => {
+test('preserves declared aliases on Grid responsive layout props with definitions', async () => {
 	const [gridProps] = await componentPropsGenerator.generateTypeTable(
 		{
 			path: 'packages/@luke-ui/react/src/core/grid/grid.tsx',
@@ -163,15 +177,84 @@ test('preserves declared aliases on Grid responsive layout props', async () => {
 	const entriesByName = new Map(
 		(gridProps?.entries ?? []).map((entry) => [entry.name, entry] as const),
 	);
+	const definitions = decodeTypeDefinitions(entriesByName.get(TYPE_DEFINITIONS_KEY)?.typeHref);
 
 	expect(entriesByName.get('columns')?.simplifiedType).toBe(
-		'RequiredInitialResponsiveValue<string | number>',
+		'RequiredInitialResponsiveValue<number | string>',
 	);
 	expect(entriesByName.get('columns')?.type).toBe(
-		'RequiredInitialResponsiveValue<string | number>',
+		'RequiredInitialResponsiveValue<number | string>',
 	);
+	expect(entriesByName.get('columns')?.typeHref).toBe('RequiredInitialResponsiveValue');
 	expect(entriesByName.get('areas')?.simplifiedType).toBe(
-		'RequiredInitialResponsiveValue<readonly string[]>',
+		'RequiredInitialResponsiveValue<ReadonlyArray<string>>',
 	);
 	expect(entriesByName.get('rows')?.simplifiedType).toBe('RequiredInitialResponsiveValue<string>');
+	expect(definitions.RequiredInitialResponsiveValue?.definition).toContain(
+		'RequiredInitialResponsive',
+	);
+});
+
+test('links Button pressAction to the PressAction definition', async () => {
+	const [buttonProps] = await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'packages/@luke-ui/react/src/core/button/button.tsx',
+			name: 'ButtonProps',
+		},
+		{ basePath: repoRoot },
+	);
+	const entriesByName = new Map(
+		(buttonProps?.entries ?? []).map((entry) => [entry.name, entry] as const),
+	);
+	const definitions = decodeTypeDefinitions(entriesByName.get(TYPE_DEFINITIONS_KEY)?.typeHref);
+
+	expect(entriesByName.get('pressAction')).toEqual(
+		expect.objectContaining({
+			simplifiedType: 'PressAction',
+			type: 'PressAction',
+			typeHref: 'PressAction',
+		}),
+	);
+	expect(definitions.PressAction?.definition).toMatch(/=> void \| Promise<void>/);
+});
+
+test('keeps optional and explicit-undefined props distinct', async () => {
+	const [doc] = await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'apps/docs/src/lib/__fixtures__/optionality-doc-props.ts',
+			name: 'OptionalityDocProps',
+		},
+		{ basePath: repoRoot },
+	);
+	const entriesByName = new Map((doc?.entries ?? []).map((entry) => [entry.name, entry] as const));
+
+	expect(entriesByName.get('first')).toEqual(
+		expect.objectContaining({
+			required: false,
+			simplifiedType: 'string',
+			type: 'string',
+		}),
+	);
+	expect(entriesByName.get('second')).toEqual(
+		expect.objectContaining({
+			required: false,
+			simplifiedType: 'string | undefined',
+			type: 'string | undefined',
+		}),
+	);
+	expect(entriesByName.get('third')).toEqual(
+		expect.objectContaining({
+			required: true,
+			simplifiedType: 'string | undefined',
+			type: 'string | undefined',
+		}),
+	);
+	expect(entriesByName.get('nested')?.type).toBe('AliasHoldingUndefined');
+	expect(entriesByName.get('nested')?.type).not.toMatch(/ \| undefined$/);
+	expect(entriesByName.get('external')).toEqual(
+		expect.objectContaining({
+			type: 'Promise<string>',
+		}),
+	);
+	expect(entriesByName.get('external')?.typeHref).toBeUndefined();
 });

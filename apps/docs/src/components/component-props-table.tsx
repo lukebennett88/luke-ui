@@ -7,13 +7,19 @@ import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { groupPropNames, NATIVE_PROPS_FORWARDING_KEY } from '../lib/component-prop-groups.js';
+import { decodeTypeDefinitions, TYPE_DEFINITIONS_KEY } from '../lib/type-definition-model.js';
 import * as styles from './component-props-table.css.js';
 import { InheritTypography } from './docs-article/mdx-elements.js';
 import * as disclosureStyles from './docs-disclosure.css.js';
 import * as tableStyles from './reference-table.css.js';
 import { CellText, ReferenceTableFrame, TableCell } from './reference-table.js';
 import type { PropTableLayout, TypeNode } from './type-table.js';
-import { getPropTableLayout, PropRows, PropTableHead } from './type-table.js';
+import {
+	getPropTableLayout,
+	PropRows,
+	PropTableHead,
+	TypeDefinitionsProvider,
+} from './type-table.js';
 
 /** Grouped prop table for a component guide's `## API` section. */
 export function ComponentPropsTable({
@@ -27,6 +33,11 @@ export function ComponentPropsTable({
 } & ComponentProps<'div'>) {
 	const groups = groupPropNames(Object.keys(type));
 	const nativePropsNote = type[NATIVE_PROPS_FORWARDING_KEY]?.description;
+	const definitions = decodeTypeDefinitions(
+		typeof type[TYPE_DEFINITIONS_KEY]?.typeDescriptionLink === 'string'
+			? type[TYPE_DEFINITIONS_KEY].typeDescriptionLink
+			: undefined,
+	);
 	const hash = useRouterState({ select: (state) => state.location.hash });
 	// The marker entry is not a row, so it must not count towards the table-wide decisions.
 	const layout = getPropTableLayout(
@@ -40,32 +51,40 @@ export function ComponentPropsTable({
 	}, [hash, id]);
 
 	return (
-		<Stack className={cx('not-prose', className)} gap="sp16" id={id} marginBlock="sp24" {...props}>
-			{nativePropsNote === undefined ? null : (
-				<CellText color="secondary" elementType="div" fontWeight="body">
-					<InheritTypography>{nativePropsNote}</InheritTypography>
-				</CellText>
-			)}
-			<ReferenceTableFrame>
-				<PropTableHead layout={layout} />
-				{groups.map((group) =>
-					group.name === 'Component props' ? (
-						<tbody className={tableStyles.bodyGroup} key={group.name}>
-							<PropRows hashPrefix={id} layout={layout} names={group.props} type={type} />
-						</tbody>
-					) : (
-						<PropGroup
-							group={group}
-							hash={hash}
-							key={group.name}
-							layout={layout}
-							rowIdPrefix={id}
-							type={type}
-						/>
-					),
+		<TypeDefinitionsProvider definitions={definitions}>
+			<Stack
+				className={cx('not-prose', className)}
+				gap="sp16"
+				id={id}
+				marginBlock="sp24"
+				{...props}
+			>
+				{nativePropsNote === undefined ? null : (
+					<CellText color="secondary" elementType="div" fontWeight="body">
+						<InheritTypography>{nativePropsNote}</InheritTypography>
+					</CellText>
 				)}
-			</ReferenceTableFrame>
-		</Stack>
+				<ReferenceTableFrame>
+					<PropTableHead layout={layout} />
+					{groups.map((group) =>
+						group.name === 'Component props' ? (
+							<tbody className={tableStyles.bodyGroup} key={group.name}>
+								<PropRows hashPrefix={id} layout={layout} names={group.props} type={type} />
+							</tbody>
+						) : (
+							<PropGroup
+								group={group}
+								hash={hash}
+								key={group.name}
+								layout={layout}
+								rowIdPrefix={id}
+								type={type}
+							/>
+						),
+					)}
+				</ReferenceTableFrame>
+			</Stack>
+		</TypeDefinitionsProvider>
 	);
 }
 

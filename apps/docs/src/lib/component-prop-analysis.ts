@@ -22,19 +22,20 @@ interface PropSourceFile {
  * `interface`. The analysis reads it two ways: `getType()` for the flattened prop list the table
  * renders, and the syntax tree beneath it for *how* each prop got there.
  */
-interface PropDeclaration extends SyntaxNode {
+export interface PropDeclaration extends SyntaxNode {
 	getType: () => PropType;
 }
 
 /** A resolved type. `getUnionTypes` is empty unless `isUnion()`. */
 interface PropType {
+	getAliasSymbol?: () => PropSymbol | undefined;
 	getProperties: () => ReadonlyArray<PropSymbol>;
 	getUnionTypes: () => ReadonlyArray<PropType>;
 	isNever: () => boolean;
 	isUnion: () => boolean;
 }
 
-interface PropSymbol {
+export interface PropSymbol {
 	getAliasedSymbol?: () => PropSymbol | undefined;
 	getDeclarations: () => ReadonlyArray<SyntaxNode>;
 	getName: () => string;
@@ -45,7 +46,7 @@ interface PropSymbol {
  * `getKindName`/`getStart`/`getSourceFile` is optional because it exists on only some kinds; the
  * walk switches on `getKindName()` before reaching for the rest.
  */
-interface SyntaxNode {
+export interface SyntaxNode {
 	/** `ExpressionWithTypeArguments` only: the referenced name, e.g. `Pick` in `extends Pick<…>`. */
 	getExpression?: () => SyntaxNode;
 	/**
@@ -57,7 +58,7 @@ interface SyntaxNode {
 	getKindName: () => string;
 	/** `InterfaceDeclaration` and `TypeLiteral`: own (syntactically declared) members. */
 	getMembers?: () => ReadonlyArray<SyntaxNode>;
-	/** `InterfaceDeclaration` only. */
+	/** `InterfaceDeclaration` and `TypeAliasDeclaration`. */
 	getName?: () => string | undefined;
 	getSourceFile: () => PropSourceFile;
 	getStart: () => number;

@@ -9,15 +9,17 @@ import {
 	createRouter,
 	RouterProvider,
 } from '@tanstack/react-router';
+import axe from 'axe-core';
 import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, assert, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import { TYPE_DEFINITIONS_KEY } from '../lib/type-definition-model.js';
 import { ComponentPropsTable } from './component-props-table.js';
 import { DocsThemeRoot } from './theme-controls.js';
-import { TypeTable } from './type-table.js';
+import { TypeDefinitionsProvider, TypeTable } from './type-table.js';
 
 /** Matches the docs article `maxInlineSize` of `52rem` at a 16px root. */
 const ARTICLE_INLINE_SIZE = '832px';
@@ -315,6 +317,107 @@ test('lists props in the order of their group', async () => {
 		.elements()
 		.map((element) => element.textContent);
 	expect(names).toEqual(['appearance', 'size']);
+});
+
+test('opens a type definition popover for a linked alias and restores focus on dismiss', async () => {
+	const definition = {
+		definition: 'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<Value>;',
+		name: 'RequiredInitialResponsiveValue',
+	};
+	await renderWidget(
+		<TypeDefinitionsProvider definitions={{ RequiredInitialResponsiveValue: definition }}>
+			<TypeTable
+				id="api"
+				type={{
+					columns: {
+						description: 'Column tracks.',
+						type: 'RequiredInitialResponsiveValue<number | string>',
+						typeDescriptionLink: 'RequiredInitialResponsiveValue',
+					},
+				}}
+			/>
+		</TypeDefinitionsProvider>,
+	);
+
+	const trigger = page.getByRole('button', {
+		name: 'Show definition of RequiredInitialResponsiveValue',
+	});
+	await expect.element(trigger).toBeVisible();
+	await userEvent.click(trigger.element());
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.toBeVisible();
+	await expect.element(page.getByText(/type RequiredInitialResponsiveValue/)).toBeVisible();
+
+	await userEvent.keyboard('{Escape}');
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.not.toBeInTheDocument();
+	expect(document.activeElement).toBe(trigger.element());
+});
+
+test('falls back to plain text when a type reference has no definition', async () => {
+	await renderWidget(
+		<TypeDefinitionsProvider definitions={{}}>
+			<TypeTable
+				id="api"
+				type={{
+					value: {
+						type: 'Promise<string>',
+						typeDescriptionLink: 'Promise',
+					},
+				}}
+			/>
+		</TypeDefinitionsProvider>,
+	);
+
+	await expect.element(page.getByText('Promise<string>')).toBeVisible();
+	expect(page.getByRole('button', { name: /Show definition of Promise/ }).elements()).toHaveLength(
+		0,
+	);
+	expect(page.getByRole('link').elements()).toHaveLength(0);
+});
+
+test('linked type popovers in a ComponentPropsTable have no axe violations', async () => {
+	await renderWidget(
+		<ComponentPropsTable
+			id="grid-api"
+			type={{
+				columns: {
+					description: 'Column tracks.',
+					type: 'RequiredInitialResponsiveValue<number | string>',
+					typeDescriptionLink: 'RequiredInitialResponsiveValue',
+				},
+				[TYPE_DEFINITIONS_KEY]: {
+					type: '',
+					typeDescriptionLink: JSON.stringify({
+						RequiredInitialResponsiveValue: {
+							definition:
+								'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<ResponsivePropValue<Value>>;',
+							name: 'RequiredInitialResponsiveValue',
+						},
+					}),
+				},
+			}}
+		/>,
+	);
+
+	const trigger = page.getByRole('button', {
+		name: 'Show definition of RequiredInitialResponsiveValue',
+	});
+	await userEvent.click(trigger.element());
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.toBeVisible();
+
+	assert(container, 'expected a container');
+	const results = await axe.run(container);
+	expect(
+		results.violations.map((violation) => ({
+			id: violation.id,
+			nodes: violation.nodes.map((node) => node.html),
+		})),
+	).toEqual([]);
 });
 
 async function renderWidget(
