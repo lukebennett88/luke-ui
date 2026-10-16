@@ -26,9 +26,7 @@ afterEach(() => {
 test('a colour row copies its full typed path', async () => {
 	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 	await renderReference();
-	await expect
-		.element(page.getByText('vars.color.background.neutral.subtle.rest'))
-		.toBeVisible();
+	await expect.element(page.getByText('vars.color.background.neutral.subtle.rest')).toBeVisible();
 	await act(async () => {
 		await userEvent.click(
 			page.getByRole('button', { name: 'Copy vars.color.background.neutral.subtle.rest' }),
