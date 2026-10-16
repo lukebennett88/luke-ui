@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { visit } from 'unist-util-visit';
 import type { EnrichedGeneratedDoc } from './type-definition-model.js';
-import { TYPE_DEFINITIONS_PUBLIC_DIR } from './type-definition-model.js';
+import { TYPE_DEFINITIONS_DIR } from './type-definition-model.js';
 
 interface MdxJsxAttributeValueExpression {
 	data?: {
@@ -25,9 +25,26 @@ interface MdxJsxFlowElement {
 	type: 'mdxJsxFlowElement';
 }
 
-/** Writes one definition JSON asset per ComponentPropsTable and attaches deferred-load props. */
-export function remarkAttachTypeDefinitions(options: { publicDir: string }) {
-	const outputDir = join(options.publicDir, TYPE_DEFINITIONS_PUBLIC_DIR);
+/** Output dirs already cleared in this process so incremental plugin recreation cannot wipe assets. */
+const cleanedOutputDirs = new Set<string>();
+
+/** Clears the once-per-process clean guard. Used by unit tests. */
+export function resetTypeDefinitionsOutputCleanGuardForTests(): void {
+	cleanedOutputDirs.clear();
+}
+
+/**
+ * Writes one definition JSON asset per ComponentPropsTable under `.source/type-definitions` and
+ * attaches deferred-load props. Clears each output directory once per process so a full MDX pass
+ * cannot leave obsolete files from a previous run.
+ */
+export function remarkAttachTypeDefinitions(options: { outputDir: string }) {
+	const outputDir = options.outputDir;
+	if (!cleanedOutputDirs.has(outputDir)) {
+		rmSync(outputDir, { recursive: true, force: true });
+		cleanedOutputDirs.add(outputDir);
+	}
+	mkdirSync(outputDir, { recursive: true });
 
 	return (tree: { type: string }) => {
 		visit(tree, 'mdxJsxFlowElement', (node: MdxJsxFlowElement) => {
@@ -64,13 +81,12 @@ export function remarkAttachTypeDefinitions(options: { publicDir: string }) {
 
 			if (Object.keys(definitions).length === 0) return;
 
-			mkdirSync(outputDir, { recursive: true });
 			const fileId = createHash('sha1').update(doc.id).digest('hex').slice(0, 16);
 			const fileName = `${fileId}.json`;
 			writeFileSync(join(outputDir, fileName), `${JSON.stringify(definitions)}\n`);
 
 			// Root-relative; the provider prefixes import.meta.env.BASE_URL for subpath deploys.
-			const href = `/${TYPE_DEFINITIONS_PUBLIC_DIR}/${fileName}`;
+			const href = `/${TYPE_DEFINITIONS_DIR}/${fileName}`;
 			setStringAttribute(node, 'definitionsHref', href);
 			setStringAttribute(node, 'definitionNames', Object.keys(definitions).join(','));
 		});

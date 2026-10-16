@@ -70,16 +70,16 @@ test('ignores a stale success while a different href is still loading', () => {
 	expect(state).toEqual({ href: '/b.json', status: 'loading' });
 });
 
-test('ignores a stale error after reset', () => {
+test('ignores a stale error after a newer load starts', () => {
 	let state = typeDefinitionsLoadReducer(
 		{ status: 'idle' },
 		{ href: '/a.json', type: 'load-start' },
 	);
-	state = typeDefinitionsLoadReducer(state, { type: 'reset' });
+	state = typeDefinitionsLoadReducer(state, { href: '/b.json', type: 'load-start' });
 	state = typeDefinitionsLoadReducer(state, {
 		href: '/a.json',
 		message: 'gone',
 		type: 'load-error',
 	});
-	expect(state).toEqual({ status: 'idle' });
+	expect(state).toEqual({ href: '/b.json', status: 'loading' });
 });

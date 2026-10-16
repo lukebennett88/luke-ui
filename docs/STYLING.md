@@ -418,6 +418,18 @@ contracts: `createSprinkles` passes through own enumerable string-keyed non-util
 `vars` keep their semantic paths and CSS custom property names. Recipes return class strings.
 Generated CSS keeps its cascade layers and source order.
 
+### Cursor
+
+Only links use `cursor: pointer`. Buttons and other controls keep the platform default cursor. Do
+not set `cursor: pointer` on non-link interactive elements.
+
+### Docs app styling
+
+In `apps/docs`, prefer Luke UI primitives (`Button`, `Text`, `Stack`, `Box`, and so on) for ordinary
+layout and chrome. Use Vanilla Extract only for behaviour or presentation those primitives cannot
+express, such as specialised interaction states, positioning, and motion. Do not recreate Button,
+Text, or Box styling in a docs `*.css.ts` file.
+
 ### Implementation rules
 
 - Use CSS logical properties such as `margin-inline-start`, `block-size`, and `inset-inline`.

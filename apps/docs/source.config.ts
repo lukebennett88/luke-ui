@@ -15,6 +15,7 @@ import { remarkAttachTypeDefinitions } from './src/lib/remark-attach-type-defini
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
 import { stringifyComponentPropsTable } from './src/lib/stringify-component-props-table.js';
+import { TYPE_DEFINITIONS_DIR } from './src/lib/type-definition-model.js';
 
 /**
  * Unified merges plugins by function identity and deep-merges their options. Two
@@ -83,7 +84,10 @@ export default defineConfig({
 			],
 			// After ComponentPropsTable expansion: emit page-level definition assets and strip the
 			// registry from the GeneratedDoc JSON so it never reaches search or the props record.
-			[remarkAttachTypeDefinitions, { publicDir: resolve(docsRoot, 'public') }],
+			[
+				remarkAttachTypeDefinitions,
+				{ outputDir: resolve(docsRoot, '.source', TYPE_DEFINITIONS_DIR) },
+			],
 			[
 				remarkDocsAutoTypeTable,
 				{

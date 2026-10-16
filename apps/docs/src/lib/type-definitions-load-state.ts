@@ -9,8 +9,7 @@ export type TypeDefinitionsLoadState =
 export type TypeDefinitionsLoadAction =
 	| { href: string; type: 'load-start' }
 	| { data: TypeDefinitionsPayload; href: string; type: 'load-success' }
-	| { href: string; message: string; type: 'load-error' }
-	| { type: 'reset' };
+	| { href: string; message: string; type: 'load-error' };
 
 /**
  * Advances deferred definition loading. Success and error only apply while that exact href is
@@ -21,8 +20,6 @@ export function typeDefinitionsLoadReducer(
 	action: TypeDefinitionsLoadAction,
 ): TypeDefinitionsLoadState {
 	switch (action.type) {
-		case 'reset':
-			return { status: 'idle' };
 		case 'load-start':
 			return { href: action.href, status: 'loading' };
 		case 'load-success':

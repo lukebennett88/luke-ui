@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createContext, useEffect, useReducer, useRef } from 'react';
+import { createContext, useReducer } from 'react';
 import { withBasePath } from '../lib/base-path.js';
 import { loadTypeDefinitions } from '../lib/load-type-definitions.js';
 import type { TypeDefinitionsPayload } from '../lib/type-definition-model.js';
@@ -33,16 +33,28 @@ export function TypeDefinitionsProvider({
 			? undefined
 			: withBasePath(definitionsHref, import.meta.env.BASE_URL);
 
+	// Remount when the asset URL changes so load state resets without an effect.
+	return (
+		<TypeDefinitionsLoader
+			key={resolvedHref ?? ''}
+			definitionNames={definitionNames}
+			href={resolvedHref}
+		>
+			{children}
+		</TypeDefinitionsLoader>
+	);
+}
+
+function TypeDefinitionsLoader({
+	children,
+	definitionNames,
+	href,
+}: {
+	children: ReactNode;
+	definitionNames?: ReadonlyArray<string>;
+	href: string | undefined;
+}) {
 	const [load, dispatch] = useReducer(typeDefinitionsLoadReducer, { status: 'idle' });
-	const loadRef = useRef(load);
-
-	useEffect(() => {
-		loadRef.current = load;
-	}, [load]);
-
-	useEffect(() => {
-		dispatch({ type: 'reset' });
-	}, [resolvedHref]);
 
 	const registeredNames =
 		definitionNames === undefined
@@ -52,11 +64,9 @@ export function TypeDefinitionsProvider({
 	const definitions = load.status === 'ready' ? load.data : {};
 
 	const ensureLoaded = async (): Promise<void> => {
-		if (resolvedHref === undefined) return;
-		const href = resolvedHref;
-		const current = loadRef.current;
-		if (current.status === 'ready' && current.href === href) return;
-		if (current.status === 'loading' && current.href === href) return;
+		if (href === undefined) return;
+		if (load.status === 'ready' && load.href === href) return;
+		if (load.status === 'loading' && load.href === href) return;
 
 		dispatch({ href, type: 'load-start' });
 		try {

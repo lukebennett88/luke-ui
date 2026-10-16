@@ -22,8 +22,11 @@ export type EnrichedGeneratedDoc = GeneratedDoc & {
 	typeDefinitions?: TypeDefinitionsPayload;
 };
 
-/** Public URL prefix for per-table definition JSON written at MDX compile time. */
-export const TYPE_DEFINITIONS_PUBLIC_DIR = 'type-definitions';
+/**
+ * URL segment and on-disk folder name for per-table definition JSON. Written under
+ * `apps/docs/.source/type-definitions` at MDX compile time and served at `/type-definitions/`.
+ */
+export const TYPE_DEFINITIONS_DIR = 'type-definitions';
 
 const typeDefinitionSchema = z.object({
 	definition: z.string(),
