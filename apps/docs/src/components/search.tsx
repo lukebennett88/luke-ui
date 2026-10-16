@@ -223,7 +223,6 @@ function WideSearchTrigger({ context }: { context: SearchContextValue }) {
 							className={styles.triggerTrack}
 							elementType="span"
 							gap="sp8"
-							railAlignment="center"
 							railEnd={<SearchShortcutLabel />}
 							railStart={<Icon name="search" />}
 						>

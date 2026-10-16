@@ -95,7 +95,6 @@ export function LoadingPill({ label }: { label: string }) {
 		<Track
 			className={styles.loadingPill}
 			gap="sp8"
-			railAlignment="firstLine"
 			railStart={<LoadingSpinner aria-hidden size="small" />}
 		>
 			{label}

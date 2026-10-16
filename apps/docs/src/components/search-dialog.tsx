@@ -108,7 +108,6 @@ export function DocsSearchDialog({
 						<Track
 							className={styles.inputRow}
 							gap="sp12"
-							railAlignment="center"
 							railEnd={
 								<Button
 									aria-label="Close search"

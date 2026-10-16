@@ -251,7 +251,7 @@ function SectionHeading({
 				{icon == null ? (
 					children
 				) : (
-					<Track elementType="span" gap="sp8" railAlignment="firstLine" railStart={icon}>
+					<Track elementType="span" gap="sp8" railStart={icon}>
 						{children}
 					</Track>
 				)}
@@ -311,7 +311,7 @@ export function DocsNavLink({
 			{icon == null ? (
 				children
 			) : (
-				<Track gap="sp8" railAlignment="firstLine" railStart={icon}>
+				<Track gap="sp8" railStart={icon}>
 					{children}
 				</Track>
 			)}

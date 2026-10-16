@@ -1,13 +1,13 @@
-import { getCentre, measureCapCentre } from './measure-cap-centre.js';
+import { measureCapCentre } from './measure-cap-centre.js';
 
 export interface FieldErrorMeasurement {
 	/** Vertical centre of the cap height of the first line of message text. */
 	capCentre: number;
 	/** Inline start of the first line of message text. */
 	firstLineStart: number;
-	/** Vertical centre of the drawn error glyph. */
+	/** Vertical centre of the error icon's rail, which centres the glyph. */
 	iconCentre: number;
-	/** Inline end of the error icon's box. */
+	/** Inline end of the error icon's rail. */
 	iconEnd: number;
 	/** Inline start of the second line of message text, when the message wraps. */
 	secondLineStart: number | undefined;
@@ -16,15 +16,13 @@ export interface FieldErrorMeasurement {
 /**
  * Measures a rendered `FieldError` from the element that holds its text, the one `getByText`
  * resolves for a plain message. The message is that element's parent, and the icon is its
- * first child, which wraps the box that draws the glyph.
+ * first child.
  */
 export function measureFieldError(textElement: Element): FieldErrorMeasurement {
-	const rail = textElement.parentElement?.firstElementChild;
-	if (rail == null || rail.getAttribute('aria-hidden') !== 'true') {
+	const icon = textElement.parentElement?.firstElementChild;
+	if (icon == null || icon.getAttribute('aria-hidden') !== 'true') {
 		throw new Error('Expected the error icon before the message text.');
 	}
-	const icon = rail.firstElementChild;
-	if (icon == null) throw new Error('Expected the error icon box inside its rail.');
 
 	const range = document.createRange();
 	range.selectNodeContents(textElement);
@@ -33,12 +31,11 @@ export function measureFieldError(textElement: Element): FieldErrorMeasurement {
 
 	const secondLine = otherLines.find((line) => line.top >= firstLine.bottom - 1);
 	const iconRect = icon.getBoundingClientRect();
-	const capCentre = measureCapCentre(textElement);
 
 	return {
-		capCentre,
+		capCentre: measureCapCentre(textElement),
 		firstLineStart: firstLine.left,
-		iconCentre: getCentre(icon),
+		iconCentre: iconRect.top + iconRect.height / 2,
 		iconEnd: iconRect.right,
 		secondLineStart: secondLine?.left,
 	};

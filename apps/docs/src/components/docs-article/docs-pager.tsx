@@ -135,7 +135,6 @@ function PagerTitle({ direction, name }: { direction: PagerDirection; name: Reac
 		>
 			<Track
 				gap="sp8"
-				railAlignment="firstLine"
 				railEnd={direction === 'next' ? chevron : undefined}
 				railStart={direction === 'previous' ? chevron : undefined}
 			>

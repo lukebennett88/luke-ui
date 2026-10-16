@@ -217,7 +217,6 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	'layout/track.mdx::packages/@luke-ui/react/src/core/track/track.tsx::TrackProps': [
 		'elementType',
 		'gap',
-		'railAlignment',
 		'railEnd',
 		'railStart',
 	],

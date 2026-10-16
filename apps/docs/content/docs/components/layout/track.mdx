@@ -21,37 +21,19 @@ wider. This avoids common layout blowouts with long or truncating content.
 Track does not apply wrapping or truncation itself. Content can still overflow when it has no way to
 wrap or otherwise constrain itself.
 
+Track places the items in a rail side by side. Wrap text and inline elements that must flow
+together, such as a phrase with a `Kbd`, in one element.
+
 ## Alignment
 
-Use `center` when the rail should align with the whole content block. When the content wraps, the
-rail is centred against the resulting block.
+Each rail is centred on the first line of `children`, so it stays beside that line when the content
+wraps. A rail taller than the first line makes the row taller.
 
-Use `firstLine` when the rail should stay aligned with the first line as the content wraps. This is
-useful for icons, avatars, and controls beside text. Use `start` or `end` when the rail should align
-with the start or end of the content block. `start` is the default.
+Track measures the first line with the font it inherits. When `children` starts with another type
+style, such as a `Heading`, the rail sits off-centre. Put the typography component around Track
+instead, and set `elementType="span"` on a Track inside a `Heading`.
 
-With `firstLine`, Track aligns each rail to the first baseline of `children`, then centres the rail
-on the cap height of Track's inherited font. A rail taller than the first line grows the row instead
-of overflowing it. The alignment holds for trimmed `Text`, multiline text, line clamping, and
-right-to-left text. A browser without the CSS `cap` unit centres the rail on the x-height instead.
-
-<ExampleBlock src="track/alignment" title="Track: Alignment" />
-
-## Typography
-
-The alignment is exact when the first line of `children` uses the typography that Track inherits.
-When the first line uses a different type style, put the typography element around Track so the
-rails inherit it. Pass `elementType="span"` to a Track inside `Heading`, so the heading keeps valid
-phrasing content. Pass `shouldInheritFont` to the `Text` inside Track so it keeps that font.
-
-A `Heading` passed directly as a child of Track still lines up with the heading's baseline. The rail
-centres on Track's own font, so it sits a few pixels low beside a large heading.
-
-Track aligns rails with the first line only. Track cannot render a typography element as its root,
-because trimmed `Text` and `Heading` draw their trim with extra boxes that Track's layout would
-treat as items.
-
-<ExampleBlock src="track/typography" title="Track: Typography" />
+<ExampleBlock src="track/heading" title="Track: Heading" />
 
 ## Avatar and text
 
@@ -65,10 +47,6 @@ Set `elementType="li"` when Track is a direct child of `ul` or `ol`.
 
 Set `elementType="span"` when Track needs to flow inside phrasing content. Its rails and `children`
 must also be valid phrasing content.
-
-A `span` Track is `inline-flex`, so it stays in one piece inside a sentence. It does not wrap with
-the surrounding text, and the underline of a surrounding link does not extend into it. Put a `Link`
-inside `children` instead of wrapping Track in one.
 
 <ExampleBlock src="track/element-span" title="Track: Inside phrasing content" />
 

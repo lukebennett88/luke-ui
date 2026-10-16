@@ -7,7 +7,6 @@ export default () => {
 	return (
 		<Track
 			gap="sp12"
-			railAlignment="center"
 			railStart={
 				<Box
 					backgroundColor="neutral.subtle.rest"

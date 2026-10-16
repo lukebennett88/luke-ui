@@ -109,7 +109,6 @@ export function IconGallery(): JSX.Element {
 			<Track
 				className={referenceStyles.filterTrackCaption}
 				gap="sp12"
-				railAlignment="firstLine"
 				railEnd={
 					<>
 						<Text color="secondary" fontVariantNumeric="tabular-nums" typography="caption">
