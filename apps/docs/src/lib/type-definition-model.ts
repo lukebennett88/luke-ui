@@ -29,6 +29,3 @@ export type EnrichedGeneratedDoc = GeneratedDoc & {
 
 /** Public URL prefix for per-table definition JSON written at MDX compile time. */
 export const TYPE_DEFINITIONS_PUBLIC_DIR = 'type-definitions';
-
-/** Former synthetic entry name; still filtered if an older cache produces it. */
-export const TYPE_DEFINITIONS_KEY = '__lukeTypeDefinitions';

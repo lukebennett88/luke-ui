@@ -1,5 +1,3 @@
-import { TYPE_DEFINITIONS_KEY } from './type-definition-model.js';
-
 export const PROP_GROUP_ORDER = [
 	'Component props',
 	'Events',
@@ -80,7 +78,7 @@ export function groupPropNames(names: ReadonlyArray<string>): ReadonlyArray<{
 	const buckets = new Map<PropGroupName, Array<string>>();
 
 	for (const name of names) {
-		if (name === NATIVE_PROPS_FORWARDING_KEY || name === TYPE_DEFINITIONS_KEY) continue;
+		if (name === NATIVE_PROPS_FORWARDING_KEY) continue;
 		const group = classifyPropGroup(name);
 		const bucket = buckets.get(group) ?? [];
 		bucket.push(name);

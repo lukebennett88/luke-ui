@@ -6,7 +6,6 @@ import type {
 	TypeDefinition,
 	TypeDefinitionsPayload,
 } from './type-definition-model.js';
-import { TYPE_DEFINITIONS_KEY } from './type-definition-model.js';
 
 const KIND_LABELS = new Set(['union', 'object', 'intersection', 'tuple', 'array', 'function']);
 
@@ -40,10 +39,7 @@ export function enrichGeneratedDocTypes(
 		repoRoot: resolve(repoRoot),
 	};
 
-	const entries = doc.entries.flatMap((entry) => {
-		if (entry.name === TYPE_DEFINITIONS_KEY) return [];
-		return [enrichDocEntry(entry, context)];
-	});
+	const entries = doc.entries.map((entry) => enrichDocEntry(entry, context));
 
 	const enriched: EnrichedGeneratedDoc = { ...doc, entries };
 	if (Object.keys(definitions).length > 0) {
@@ -62,10 +58,8 @@ function enrichDocEntry(entry: DocEntry, context: EnrichContext): DocEntry {
 	const useDeclaredAnnotation = shouldPreferDeclaredAnnotation(resolved);
 
 	if (useDeclaredAnnotation && resolved.text !== undefined) {
-		// Written annotations are the public contract. They never include the compiler's implied
-		// optional `| undefined`, and they keep aliases that fumadocs' simplifiedType drops. When
-		// union branches declare distinct valid types, `resolved.text` is their union — not one
-		// arbitrary branch.
+		// Written annotations keep aliases fumadocs drops and never include compiler-implied optional
+		// `| undefined`. Distinct valid branch annotations become a union.
 		type = resolved.text;
 		simplifiedType = resolved.text;
 	} else if (
@@ -74,19 +68,9 @@ function enrichDocEntry(entry: DocEntry, context: EnrichContext): DocEntry {
 		entry.type !== 'union'
 	) {
 		// Prefer the resolved signature over a bare kind label or a low-readability annotation such
-		// as `RacButtonProps['onPress']`. Strip compiler-implied optional `| undefined` only when a
-		// written annotation existed and did not declare top-level undefined — otherwise leave
-		// fumadocs' string alone (no annotation to judge optionality against).
-		let display = entry.type;
-		if (
-			resolved.nodes.length > 0 &&
-			!entry.required &&
-			!resolved.nodes.some((node) => annotationIncludesTopLevelUndefined(node))
-		) {
-			display = stripTrailingOptionalUndefined(display);
-		}
-		type = display;
-		simplifiedType = display;
+		// as `RacButtonProps['onPress']`.
+		type = displayResolvedType(entry, resolved.nodes);
+		simplifiedType = type;
 	}
 
 	for (const typeNode of resolved.nodes) {
@@ -94,7 +78,6 @@ function enrichDocEntry(entry: DocEntry, context: EnrichContext): DocEntry {
 	}
 
 	if (useDeclaredAnnotation) {
-		// Only attach a clickable root when every distinct annotation shares one linkable alias.
 		if (resolved.singleLinkNode !== undefined) {
 			const linkedName = collectLinkedDefinition(resolved.singleLinkNode, context);
 			if (linkedName !== undefined) {
@@ -104,7 +87,6 @@ function enrichDocEntry(entry: DocEntry, context: EnrichContext): DocEntry {
 			typeHref = undefined;
 		}
 	} else {
-		// Indexed-access (and similar) annotations are not linkable Luke aliases.
 		typeHref = undefined;
 	}
 
@@ -151,12 +133,47 @@ export function isLowReadabilityDeclaredType(typeNode: SyntaxNode): boolean {
 	return false;
 }
 
+/**
+ * Drop a trailing top-level `| undefined` only when it is compiler-implied optionality. When any
+ * written annotation admits undefined — via syntax or the checker type of an indexed access — keep
+ * it.
+ */
+function displayResolvedType(entry: DocEntry, annotationNodes: ReadonlyArray<SyntaxNode>): string {
+	let display = entry.type;
+	if (
+		annotationNodes.length > 0 &&
+		!entry.required &&
+		!annotationNodes.some((node) => declaredTypeAdmitsUndefined(node))
+	) {
+		display = stripTrailingOptionalUndefined(display);
+	}
+	return display;
+}
+
 /** Drop a trailing top-level `| undefined` that TypeScript adds for optional props. */
 export function stripTrailingOptionalUndefined(typeText: string): string {
 	if (typeText.endsWith(' | undefined')) {
 		return typeText.slice(0, -' | undefined'.length);
 	}
 	return typeText;
+}
+
+/**
+ * True when the written annotation admits `undefined` as a value: either a top-level
+ * `undefined` in the syntax, or a checker type that includes it (indexed access, aliases).
+ */
+export function declaredTypeAdmitsUndefined(typeNode: SyntaxNode): boolean {
+	if (annotationIncludesTopLevelUndefined(typeNode)) return true;
+	return typeAdmitsUndefined(typeNode.getType?.());
+}
+
+function typeAdmitsUndefined(
+	type: ReturnType<NonNullable<SyntaxNode['getType']>> | undefined,
+): boolean {
+	if (type === undefined) return false;
+	if (type.isUndefined?.() === true) return true;
+	if (!type.isUnion()) return false;
+	return type.getUnionTypes().some((member) => member.isUndefined?.() === true);
 }
 
 function collectLinkedDefinition(
@@ -211,7 +228,6 @@ function resolveLukeTypeAlias(
 		const aliased = symbol.getAliasedSymbol?.() ?? symbol;
 		candidates.push(...aliased.getDeclarations());
 	}
-	// Same-file exports cover fixtures and local aliases when the checker symbol is unavailable.
 	if (localName !== undefined && localName.length > 0) {
 		const local = reference.getSourceFile().getExportedDeclarations().get(localName)?.[0];
 		if (local !== undefined) candidates.push(local);
@@ -220,7 +236,6 @@ function resolveLukeTypeAlias(
 	for (const declaration of candidates) {
 		if (declaration.getKindName() !== 'TypeAliasDeclaration') continue;
 		const filePath = declaration.getSourceFile().getFilePath();
-		// Real package aliases and docs fixtures are linkable; node_modules stays plain text.
 		if (filePath.includes('/node_modules/')) continue;
 		if (
 			isInsideDir(filePath, reactSrcDir) ||
@@ -326,24 +341,12 @@ export function resolveDeclaredTypeAnnotations(
 			})
 			.filter((name): name is string => name !== undefined && name.length > 0),
 	);
-	// Only link when every distinct annotation is the same root alias (unusual, but safe).
 	const singleLinkNode =
 		linkNames.size === 1 && nodes.every((node) => rootTypeReference(node) !== undefined)
 			? nodes[0]
 			: undefined;
 
 	return { nodes, singleLinkNode, text };
-}
-
-/**
- * @deprecated Prefer {@link resolveDeclaredTypeAnnotations}. Kept for exclusivity unit tests that
- * assert the single surviving node after dropping `never` guards.
- */
-export function selectDeclaredTypeNode(
-	typeNodes: ReadonlyArray<SyntaxNode>,
-): SyntaxNode | undefined {
-	const resolved = resolveDeclaredTypeAnnotations(typeNodes);
-	return resolved.nodes.length === 1 ? resolved.nodes[0] : undefined;
 }
 
 /** Wrap members that would be misparsed inside a larger union (functions, nested unions). */

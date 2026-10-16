@@ -49,12 +49,13 @@ export function ComponentPropsTable({
 	const layout = getPropTableLayout(
 		groups.flatMap((group) => group.props.flatMap((name) => type[name] ?? [])),
 	);
-	const resolvedDefinitionNames =
-		definitionNames === undefined
-			? undefined
-			: typeof definitionNames === 'string'
-				? definitionNames.split(',').filter((name) => name.length > 0)
-				: definitionNames;
+	const resolvedDefinitionNames = (() => {
+		if (definitionNames === undefined) return undefined;
+		if (typeof definitionNames === 'string') {
+			return definitionNames.split(',').filter((name) => name.length > 0);
+		}
+		return definitionNames;
+	})();
 
 	useEffect(() => {
 		// Rows in a collapsed group do not exist when the browser first resolves the hash.

@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { visit } from 'unist-util-visit';
-import type { EnrichedGeneratedDoc, TypeDefinitionsPayload } from './type-definition-model.js';
-import { TYPE_DEFINITIONS_KEY, TYPE_DEFINITIONS_PUBLIC_DIR } from './type-definition-model.js';
+import type { EnrichedGeneratedDoc } from './type-definition-model.js';
+import { TYPE_DEFINITIONS_PUBLIC_DIR } from './type-definition-model.js';
 
 interface MdxJsxAttributeValueExpression {
 	data?: {
@@ -61,11 +61,9 @@ export function remarkAttachTypeDefinitions(options: { publicDir: string }) {
 				return;
 			}
 
-			const definitions = collectDefinitions(doc);
-			// Keep Markdown / search JSON free of the registry and any legacy synthetic entry.
-			const cleanedEntries = doc.entries.filter((entry) => entry.name !== TYPE_DEFINITIONS_KEY);
+			const definitions = doc.typeDefinitions ?? {};
 			const { typeDefinitions: _removed, ...rest } = doc;
-			expression.value = JSON.stringify({ ...rest, entries: cleanedEntries }, null, 2);
+			expression.value = JSON.stringify(rest, null, 2);
 
 			if (Object.keys(definitions).length === 0) return;
 
@@ -78,7 +76,6 @@ export function remarkAttachTypeDefinitions(options: { publicDir: string }) {
 			// fetch time so subpath deploys (VITE_BASE_URL) resolve correctly.
 			const href = `/${TYPE_DEFINITIONS_PUBLIC_DIR}/${fileName}`;
 			setStringAttribute(node, 'definitionsHref', href);
-			// Build-time allowlist so the client only links aliases that exist in this asset.
 			setStringAttribute(node, 'definitionNames', Object.keys(definitions).join(','));
 		});
 	};
@@ -98,18 +95,4 @@ function setStringAttribute(node: MdxJsxFlowElement, name: string, value: string
 		type: 'mdxJsxAttribute',
 		value,
 	});
-}
-
-function collectDefinitions(doc: EnrichedGeneratedDoc): TypeDefinitionsPayload {
-	if (doc.typeDefinitions !== undefined) return doc.typeDefinitions;
-
-	const legacy = doc.entries.find((entry) => entry.name === TYPE_DEFINITIONS_KEY);
-	if (legacy?.typeHref === undefined || legacy.typeHref.length === 0) return {};
-	try {
-		const parsed: unknown = JSON.parse(legacy.typeHref);
-		if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
-		return parsed as TypeDefinitionsPayload;
-	} catch {
-		return {};
-	}
 }

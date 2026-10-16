@@ -1,7 +1,6 @@
 import type { GeneratedDoc } from 'fumadocs-typescript';
 import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
 import type { EnrichedGeneratedDoc } from './type-definition-model.js';
-import { TYPE_DEFINITIONS_KEY } from './type-definition-model.js';
 
 interface MdastNode {
 	type: string;
@@ -42,7 +41,6 @@ function generatedDocToMarkdown(doc: EnrichedGeneratedDoc): string {
 	let nativePropsNote: string | undefined;
 
 	for (const entry of doc.entries) {
-		if (entry.name === TYPE_DEFINITIONS_KEY) continue;
 		if (entry.name === NATIVE_PROPS_FORWARDING_KEY) {
 			const note = entry.description.trim();
 			if (note.length > 0) nativePropsNote = note;

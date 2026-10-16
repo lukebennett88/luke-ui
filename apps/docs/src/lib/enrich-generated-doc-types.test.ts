@@ -2,9 +2,9 @@ import { expect, test } from 'vite-plus/test';
 import type { SyntaxNode } from './component-prop-analysis.js';
 import {
 	annotationIncludesTopLevelUndefined,
+	declaredTypeAdmitsUndefined,
 	isLowReadabilityDeclaredType,
 	resolveDeclaredTypeAnnotations,
-	selectDeclaredTypeNode,
 	shouldPreferDeclaredAnnotation,
 	stripTrailingOptionalUndefined,
 } from './enrich-generated-doc-types.js';
@@ -13,9 +13,11 @@ function node(
 	kind: string,
 	options: {
 		isNever?: boolean;
+		isUndefined?: boolean;
 		text?: string;
 		typeName?: string;
 		typeNodes?: ReadonlyArray<SyntaxNode>;
+		unionMembers?: ReadonlyArray<SyntaxNode>;
 	} = {},
 ): SyntaxNode {
 	return {
@@ -25,9 +27,11 @@ function node(
 		getText: () => options.text ?? kind,
 		getType: () => ({
 			getProperties: () => [],
-			getUnionTypes: () => [],
+			getUnionTypes: () =>
+				(options.unionMembers ?? []).map((member) => member.getType?.() ?? emptyType()),
 			isNever: () => options.isNever === true,
-			isUnion: () => false,
+			isUndefined: () => options.isUndefined === true,
+			isUnion: () => (options.unionMembers?.length ?? 0) > 0,
 		}),
 		getTypeName:
 			options.typeName === undefined
@@ -36,7 +40,18 @@ function node(
 						node('Identifier', {
 							text: options.typeName,
 						}),
+		getTypeNode: options.typeNodes === undefined ? undefined : () => options.typeNodes?.[0],
 		getTypeNodes: options.typeNodes === undefined ? undefined : () => options.typeNodes ?? [],
+	};
+}
+
+function emptyType() {
+	return {
+		getProperties: () => [],
+		getUnionTypes: () => [],
+		isNever: () => false,
+		isUndefined: () => false,
+		isUnion: () => false,
 	};
 }
 
@@ -62,7 +77,7 @@ test('annotationIncludesTopLevelUndefined detects only outer undefined constitue
 	).toBe(false);
 });
 
-test('selectDeclaredTypeNode prefers non-never annotations across union branches', () => {
+test('resolveDeclaredTypeAnnotations prefers non-never annotations across union branches', () => {
 	const neverNode = node('NeverKeyword', { isNever: true, text: 'never' });
 	const aliasNode = node('TypeReference', {
 		text: 'BranchRenderProp',
@@ -70,10 +85,10 @@ test('selectDeclaredTypeNode prefers non-never annotations across union branches
 	});
 	const primitiveNode = node('StringKeyword', { text: 'string' });
 
-	expect(selectDeclaredTypeNode([neverNode, aliasNode])?.getText()).toBe('BranchRenderProp');
-	expect(selectDeclaredTypeNode([neverNode, primitiveNode])?.getText()).toBe('string');
-	expect(selectDeclaredTypeNode([aliasNode, neverNode])?.getText()).toBe('BranchRenderProp');
-	expect(selectDeclaredTypeNode([neverNode])?.getText()).toBe('never');
+	expect(resolveDeclaredTypeAnnotations([neverNode, aliasNode]).text).toBe('BranchRenderProp');
+	expect(resolveDeclaredTypeAnnotations([neverNode, primitiveNode]).text).toBe('string');
+	expect(resolveDeclaredTypeAnnotations([aliasNode, neverNode]).text).toBe('BranchRenderProp');
+	expect(resolveDeclaredTypeAnnotations([neverNode]).text).toBe('never');
 });
 
 test('resolveDeclaredTypeAnnotations joins distinct valid branch annotations', () => {
@@ -131,6 +146,29 @@ test('indexed-access annotations are low-readability and lose to the resolved ty
 	});
 	expect(isLowReadabilityDeclaredType(alias)).toBe(false);
 	expect(shouldPreferDeclaredAnnotation(resolveDeclaredTypeAnnotations([alias]))).toBe(true);
+});
+
+test('declaredTypeAdmitsUndefined uses checker types when syntax has no undefined keyword', () => {
+	const plainIndexed = node('IndexedAccessType', {
+		text: "Holder['plain']",
+	});
+	expect(declaredTypeAdmitsUndefined(plainIndexed)).toBe(false);
+
+	const withUndefinedIndexed = node('IndexedAccessType', {
+		text: "Holder['withUndefined']",
+		unionMembers: [
+			node('StringKeyword', { text: 'string' }),
+			node('UndefinedKeyword', { isUndefined: true, text: 'undefined' }),
+		],
+	});
+	// The indexed node's getType is a union that includes undefined.
+	expect(declaredTypeAdmitsUndefined(withUndefinedIndexed)).toBe(true);
+
+	const writtenUnion = node('UnionType', {
+		text: 'string | undefined',
+		typeNodes: [node('StringKeyword', { text: 'string' }), node('UndefinedKeyword')],
+	});
+	expect(declaredTypeAdmitsUndefined(writtenUnion)).toBe(true);
 });
 
 test('stripTrailingOptionalUndefined removes only a trailing top-level undefined', () => {

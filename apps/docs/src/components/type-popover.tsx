@@ -1,10 +1,10 @@
-'use client';
-
+import { Stack } from '@luke-ui/react/stack';
 import type { ReactNode } from 'react';
 import { use } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Popover } from 'react-aria-components/Popover';
+import type { TypeDefinitionsLoadState } from './type-definitions-context.js';
 import { TypeDefinitionsContext } from './type-definitions-context.js';
 import * as styles from './type-popover.css.js';
 
@@ -14,14 +14,15 @@ import * as styles from './type-popover.css.js';
  * RAC keeps an uncontrolled DialogTrigger so Escape restores focus to the trigger.
  */
 function TypePopover({ children, typeName }: { children: ReactNode; typeName: string }) {
-	const { definitions, ensureLoaded, loadError, loadStatus } = use(TypeDefinitionsContext);
+	const context = use(TypeDefinitionsContext);
+	if (context === null) return children;
+
+	const { definitions, ensureLoaded, load } = context;
 	const definition = definitions[typeName];
 
 	const prefetch = () => {
 		if (definitions[typeName] !== undefined) return;
-		// ensureLoaded settles without throwing; still attach catch so a future change cannot leave
-		// an unhandled rejection from this fire-and-forget path.
-		void ensureLoaded().catch(() => {});
+		void ensureLoaded();
 	};
 
 	return (
@@ -37,32 +38,52 @@ function TypePopover({ children, typeName }: { children: ReactNode; typeName: st
 			</RacButton>
 			<Popover className={styles.popover} placement="bottom start">
 				<Dialog aria-label={`Definition of ${typeName}`} className={styles.dialog}>
-					{definition !== undefined ? (
-						<pre className={styles.definition}>{definition.definition}</pre>
-					) : loadStatus === 'error' ? (
-						<div className={styles.loadError}>
-							<p className={styles.loadErrorMessage}>
-								{loadError ?? "Couldn't load this definition."}
-							</p>
-							<RacButton
-								aria-label="Retry loading definition"
-								className={styles.retry}
-								onPress={() => {
-									void ensureLoaded().catch(() => {});
-								}}
-							>
-								Retry
-							</RacButton>
-						</div>
-					) : loadStatus === 'ready' ? (
-						<p className={styles.loadErrorMessage}>Definition not available.</p>
-					) : (
-						<pre className={styles.definition}>Loading definition…</pre>
-					)}
+					<TypePopoverBody
+						definition={definition?.definition}
+						ensureLoaded={ensureLoaded}
+						load={load}
+					/>
 				</Dialog>
 			</Popover>
 		</DialogTrigger>
 	);
+}
+
+function TypePopoverBody({
+	definition,
+	ensureLoaded,
+	load,
+}: {
+	definition: string | undefined;
+	ensureLoaded: () => Promise<void>;
+	load: TypeDefinitionsLoadState;
+}) {
+	if (definition !== undefined) {
+		return <pre className={styles.definition}>{definition}</pre>;
+	}
+
+	switch (load.status) {
+		case 'error':
+			return (
+				<Stack gap="sp8">
+					<p className={styles.statusMessage}>{load.message}</p>
+					<RacButton
+						aria-label="Retry loading definition"
+						className={styles.retry}
+						onPress={() => {
+							void ensureLoaded();
+						}}
+					>
+						Retry
+					</RacButton>
+				</Stack>
+			);
+		case 'ready':
+			return <p className={styles.statusMessage}>Definition not available.</p>;
+		case 'idle':
+		case 'loading':
+			return <pre className={styles.definition}>Loading definition…</pre>;
+	}
 }
 
 /** Renders a prop type, linking the root alias when a definition is available or loadable. */
@@ -73,7 +94,9 @@ export function LinkedType({
 	children: ReactNode;
 	typeName: string | undefined;
 }) {
-	const { canLink } = use(TypeDefinitionsContext);
-	if (typeName === undefined || !canLink(typeName)) return children;
+	const context = use(TypeDefinitionsContext);
+	if (context === null || typeName === undefined || !context.canLink(typeName)) {
+		return children;
+	}
 	return <TypePopover typeName={typeName}>{children}</TypePopover>;
 }

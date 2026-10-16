@@ -5,7 +5,6 @@ import { expect, test } from 'vite-plus/test';
 import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
 import type { EnrichedGeneratedDoc } from './type-definition-model.js';
-import { TYPE_DEFINITIONS_KEY } from './type-definition-model.js';
 
 const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
 const generator = createGenerator({
@@ -131,7 +130,6 @@ test('preserves optional alias-of-union props instead of collapsing them to unio
 	)) as Array<EnrichedGeneratedDoc | undefined>;
 	const entriesByName = new Map((doc?.entries ?? []).map((entry) => [entry.name, entry] as const));
 
-	expect(entriesByName.has(TYPE_DEFINITIONS_KEY)).toBe(false);
 	expect(entriesByName.get('aliased')).toEqual(
 		expect.objectContaining({
 			required: false,
@@ -179,7 +177,6 @@ test('preserves declared aliases on Grid responsive layout props with definition
 		(gridProps?.entries ?? []).map((entry) => [entry.name, entry] as const),
 	);
 
-	expect(entriesByName.has(TYPE_DEFINITIONS_KEY)).toBe(false);
 	expect(entriesByName.get('columns')?.simplifiedType).toBe(
 		'RequiredInitialResponsiveValue<number | string>',
 	);
@@ -235,9 +232,9 @@ test('prefers resolved callback signatures over indexed-access annotations', asy
 	expect(onPress?.type).not.toMatch(/RacButtonProps\s*\[\s*['"]onPress['"]\s*\]/);
 	expect(onPress?.simplifiedType).toBe(onPress?.type);
 	expect(onPress?.typeHref).toBeUndefined();
-	// Optional props keep optionality on the name, not as a trailing `| undefined`.
 	expect(onPress?.required).toBe(false);
-	expect(onPress?.type).not.toMatch(/\|\s*undefined$/);
+	// RAC's indexed onPress admits undefined in the value type, so keep it.
+	expect(onPress?.type).toMatch(/\|\s*undefined$/);
 
 	const [textInputFieldProps] = (await componentPropsGenerator.generateTypeTable(
 		{
@@ -256,7 +253,40 @@ test('prefers resolved callback signatures over indexed-access annotations', asy
 	expect(onChange?.simplifiedType).toBe(onChange?.type);
 	expect(onChange?.typeHref).toBeUndefined();
 	expect(onChange?.required).toBe(false);
-	expect(onChange?.type).not.toMatch(/\|\s*undefined$/);
+	expect(onChange?.type).toMatch(/\|\s*undefined$/);
+});
+
+test('keeps explicit undefined on indexed-access targets and strips only implied optionality', async () => {
+	const [doc] = (await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'apps/docs/src/lib/__fixtures__/indexed-access-doc-props.ts',
+			name: 'IndexedAccessDocProps',
+		},
+		{ basePath: repoRoot },
+	)) as Array<EnrichedGeneratedDoc | undefined>;
+	const entriesByName = new Map((doc?.entries ?? []).map((entry) => [entry.name, entry] as const));
+
+	expect(entriesByName.get('optionalPlain')).toEqual(
+		expect.objectContaining({
+			required: false,
+			simplifiedType: 'string',
+			type: 'string',
+		}),
+	);
+	expect(entriesByName.get('optionalWithUndefined')).toEqual(
+		expect.objectContaining({
+			required: false,
+			simplifiedType: 'string | undefined',
+			type: 'string | undefined',
+		}),
+	);
+	expect(entriesByName.get('requiredWithUndefined')).toEqual(
+		expect.objectContaining({
+			required: true,
+			simplifiedType: 'string | undefined',
+			type: 'string | undefined',
+		}),
+	);
 });
 
 test('prefers non-never annotations across element/render union branches', async () => {

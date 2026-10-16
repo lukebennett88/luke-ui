@@ -76,17 +76,7 @@ export const definition = style({
 	},
 });
 
-export const loadError = style({
-	'@layer': {
-		components: {
-			display: 'flex',
-			flexDirection: 'column',
-			gap: vars.space.sp8,
-		},
-	},
-});
-
-export const loadErrorMessage = style({
+export const statusMessage = style({
 	'@layer': {
 		components: {
 			color: vars.color.text.secondary,

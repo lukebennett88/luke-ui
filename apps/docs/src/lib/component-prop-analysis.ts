@@ -32,6 +32,7 @@ interface PropType {
 	getProperties: () => ReadonlyArray<PropSymbol>;
 	getUnionTypes: () => ReadonlyArray<PropType>;
 	isNever: () => boolean;
+	isUndefined?: () => boolean;
 	isUnion: () => boolean;
 }
 
