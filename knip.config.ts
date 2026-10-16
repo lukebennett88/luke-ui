@@ -49,9 +49,11 @@ export default {
 				'src/exports/**/*.ts',
 				'src/core/stylesheet.css.ts',
 				'src/core/styles/index.css.ts',
+				// Tailwind v4 consumer fixtures (`@import 'tailwindcss'`).
+				'src/core/styles/tailwind-fixtures/**/*.css',
 				'scripts/**/*.ts',
 			],
-			project: ['src/**/*.{ts,tsx}'],
+			project: ['src/**/*.{ts,tsx,css}'],
 		},
 		'packages/@luke-ui/theme-build': {
 			// Pack loads it for `publint: true` in the shared config, which knip does not trace.

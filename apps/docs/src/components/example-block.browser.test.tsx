@@ -527,9 +527,17 @@ function renderPreviewHarness({
 	act(() => {
 		root?.render(
 			<DocsThemeRoot>
-				<div id={withStickyHeader ? 'nd-notebook-layout' : undefined}>
+				<div>
 					{withStickyHeader ? (
-						<header className="sticky top-0 z-10 bg-fd-background" style={{ blockSize: '3.5rem' }}>
+						<header
+							style={{
+								backgroundColor: 'var(--luke-color-surface-base)',
+								blockSize: '3.5rem',
+								position: 'sticky',
+								top: 0,
+								zIndex: 10,
+							}}
+						>
 							Page header
 						</header>
 					) : null}

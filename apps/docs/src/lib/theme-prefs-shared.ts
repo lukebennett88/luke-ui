@@ -38,9 +38,10 @@ export function parseThemePrefs(
 }
 
 /**
- * Sets the identity class and colour mode on `root`. Fumadocs styles key off the `light`/`dark`
- * class, so it always gets the resolved mode. Luke UI keys off `data-color-mode`, which is set only
- * for an explicit choice: without it, the theme follows `prefers-color-scheme` itself.
+ * Sets the identity class and colour mode on `root`. The resolved `light`/`dark` class stays for
+ * Monaco and docs-owned selectors that mirror the active mode. Luke UI keys off `data-color-mode`,
+ * which is set only for an explicit choice: without it, the theme follows `prefers-color-scheme`
+ * itself.
  */
 export function applyThemePrefs(
 	root: HTMLElement,

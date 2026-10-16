@@ -1,20 +1,31 @@
+import { Cluster } from '@luke-ui/react/cluster';
 import { cx } from '@luke-ui/react/utils';
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
+import * as styles from './playground.css.js';
 
 type PlaygroundPaneToolbarProps = {
 	children: ReactNode;
 	className?: string;
+	gap?: ComponentProps<typeof Cluster>['gap'];
+	justifyContent?: ComponentProps<typeof Cluster>['justifyContent'];
 };
 
-const TOOLBAR_CLASS_NAME =
-	'flex shrink-0 items-center border-fd-border border-b bg-fd-background px-2 py-1.5 sm:px-3';
-
-/** IconToggleButtonGroup: size-8 buttons plus p-0.5 wrapper padding. */
-const MIN_BLOCK_SIZE_CLASS_NAME = 'min-block-[calc(2rem+--spacing(0.5)*2+--spacing(1.5)*2+1px)]';
-
 /** Shared toolbar chrome for editor and preview panes so bottom borders align. */
-export function PlaygroundPaneToolbar({ children, className }: PlaygroundPaneToolbarProps) {
+export function PlaygroundPaneToolbar({
+	children,
+	className,
+	gap,
+	justifyContent,
+}: PlaygroundPaneToolbarProps) {
 	return (
-		<div className={cx(TOOLBAR_CLASS_NAME, MIN_BLOCK_SIZE_CLASS_NAME, className)}>{children}</div>
+		<Cluster
+			className={cx(styles.paneToolbar, className)}
+			flexShrink="0"
+			flexWrap="nowrap"
+			gap={gap}
+			justifyContent={justifyContent}
+		>
+			{children}
+		</Cluster>
 	);
 }

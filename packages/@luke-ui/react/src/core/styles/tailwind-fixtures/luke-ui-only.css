@@ -1,0 +1,4 @@
+/* Theme CSS uses a relative path so this fixture does not create a React→theme workspace cycle.
+   Consumers import `@luke-ui/theme-tactile/stylesheet.css` instead. */
+@import '@luke-ui/react/stylesheet.css';
+@import '../../../../../theme-tactile/dist/stylesheet.css';

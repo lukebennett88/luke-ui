@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import tailwindcss from '@tailwindcss/vite';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
@@ -12,6 +13,8 @@ const recipeEngineSource = fileURLToPath(
 const repoRoot = path.resolve(dirname, '../../..');
 /** Its npm installs need network access, so it runs only with `test:consumer`. */
 const packedConsumerTests = 'src/core/packed-consumer/**';
+/** Compiles real Tailwind v4 CSS; keeps the default browser suite free of that plugin cost. */
+const tailwindIntegrationTests = 'src/core/styles/tailwind-integration.browser.test.tsx';
 const captureDir = process.env.VISUAL_CAPTURE_DIR;
 const visualFsAllow =
 	captureDir === undefined || captureDir === '' ? [repoRoot] : [repoRoot, path.resolve(captureDir)];
@@ -86,10 +89,26 @@ export default defineConfig({
 						instances: [{ browser: 'chromium' }],
 						provider: playwright({}),
 					},
+					exclude: [tailwindIntegrationTests],
 					include: ['src/**/*.browser.test.{ts,tsx}'],
 					name: 'browser',
 					setupFiles: ['./src/core/test-utils/render-setup.ts'],
 					tags: [{ description: 'Captures a screenshot for visual review.', name: 'visual' }],
+				},
+			},
+			{
+				extends: true,
+				plugins: [tailwindcss()],
+				test: {
+					browser: {
+						enabled: true,
+						headless: true,
+						instances: [{ browser: 'chromium' }],
+						provider: playwright({}),
+					},
+					include: [tailwindIntegrationTests],
+					name: 'tailwind-integration',
+					setupFiles: ['./src/core/styles/tailwind-integration-setup.ts'],
 				},
 			},
 		],

@@ -15,8 +15,8 @@ import orderedTailwindFirstCss from './tailwind-fixtures/ordered-tailwind-first.
 import unorderedLukeUiFirstCss from './tailwind-fixtures/unordered-luke-ui-first.css?inline';
 import unorderedTailwindFirstCss from './tailwind-fixtures/unordered-tailwind-first.css?inline';
 
-// Real Tailwind v4 output, compiled by the docs app's Tailwind Vite plugin, with the built Luke UI
-// stylesheet. Each scenario is one application stylesheet.
+// Real Tailwind v4 output with the built Luke UI stylesheet. Each scenario is one application
+// stylesheet. This suite owns its mount so the default browser setup's global stylesheet stays out.
 const scenarios = [
 	{
 		css: orderedTailwindFirstCss,

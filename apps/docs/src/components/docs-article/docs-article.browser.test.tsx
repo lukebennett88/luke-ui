@@ -164,6 +164,14 @@ test('lists nested headings in the table of contents beside the article', async 
 			getComputedStyle(navigation.getByRole('link', { name }).element()).paddingInlineStart,
 		);
 	expect(indent('Sizes')).toBeGreaterThan(indent('Usage'));
+
+	const tocList = navigation.element().querySelector('ul');
+	expect(tocList).not.toBeNull();
+	const tocListStyle = getComputedStyle(tocList as HTMLElement);
+	expect(tocListStyle.listStyleType).toBe('none');
+	expect(tocListStyle.marginTop).toBe('0px');
+	expect(tocListStyle.marginBottom).toBe('0px');
+	expect(tocListStyle.paddingInlineStart).toBe('0px');
 });
 
 test('shows a keyboard-operable disclosure instead of the column below the wide breakpoint', async () => {
@@ -179,6 +187,11 @@ test('shows a keyboard-operable disclosure instead of the column below the wide 
 	await userEvent.keyboard('{Enter}');
 	expect(details.open).toBe(true);
 	await expect.element(page.getByRole('link', { name: 'Usage' })).toBeVisible();
+
+	const mobileTocList = details.querySelector('ul');
+	expect(mobileTocList).not.toBeNull();
+	expect(getComputedStyle(mobileTocList as HTMLElement).listStyleType).toBe('none');
+	expect(getComputedStyle(mobileTocList as HTMLElement).paddingInlineStart).toBe('0px');
 
 	await userEvent.keyboard('{Escape}');
 	expect(details.open).toBe(false);

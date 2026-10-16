@@ -128,6 +128,15 @@ test('groups separator sections into nested lists and moves keyboard focus throu
 		Array.from(foundationsList!.querySelectorAll(':scope > li > a'), (link) => link.textContent),
 	).toEqual(['Composition']);
 
+	// Nested section lists must not pick up UA markers or indent without Preflight.
+	for (const list of navigation.element().querySelectorAll('ul')) {
+		const listStyle = getComputedStyle(list);
+		expect(listStyle.listStyleType).toBe('none');
+		expect(listStyle.marginTop).toBe('0px');
+		expect(listStyle.marginBottom).toBe('0px');
+		expect(listStyle.paddingInlineStart).toBe('0px');
+	}
+
 	expect(
 		Array.from(navigation.element().querySelectorAll('a'), (link) => link.textContent),
 	).toEqual(['Installation', 'Composition']);

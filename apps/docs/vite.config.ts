@@ -1,6 +1,5 @@
 import { relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import tailwindcss from '@tailwindcss/vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import react from '@vitejs/plugin-react';
@@ -91,11 +90,6 @@ export default defineConfig(async () => {
 				'@tanstack/react-router',
 				'@vanilla-extract/recipes',
 				'@vanilla-extract/recipes/createRuntimeFn',
-				// Fumadocs' chrome (search trigger, popover, sidebar) imports icons
-				// from lucide-react's barrel, which unbundled is ~1750 separate module
-				// requests. On the playground, which also loads Monaco, that exhausts
-				// the browser's connection pool and the page never hydrates.
-				'fumadocs-ui > lucide-react',
 				'monaco-editor',
 				'react-aria-components/Breadcrumbs',
 				'react-aria-components/Button',
@@ -151,7 +145,6 @@ export default defineConfig(async () => {
 			staticFunctionBasePathPlugin(),
 			highlightSourcePlugin(),
 			mdx(await import('./source.config')),
-			tailwindcss(),
 			vanillaExtractPlugin(),
 			tanstackStart({
 				pages: [
@@ -178,14 +171,6 @@ export default defineConfig(async () => {
 			react(),
 		]),
 		resolve: {
-			alias: {
-				'#recipe-engine': fileURLToPath(
-					new URL(
-						'../../packages/@luke-ui/react/src/core/styles/recipe-engine.ts',
-						import.meta.url,
-					),
-				),
-			},
 			tsconfigPaths: true,
 		},
 		server: {

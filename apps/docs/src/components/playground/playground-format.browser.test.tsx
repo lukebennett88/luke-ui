@@ -88,7 +88,7 @@ test('the save shortcut formats through the Monaco provider and onChange', async
 
 async function renderPlayground(defaultValue: string, onChange: (code: string) => void) {
 	container = document.body.appendChild(document.createElement('div'));
-	container.className = 'h-[480px] min-h-0 overflow-hidden';
+	container.style.cssText = 'block-size: 480px; min-block-size: 0; overflow: hidden';
 	root = createRoot(container);
 
 	await act(async () => {
@@ -104,7 +104,7 @@ function Harness({
 	onChange: (code: string) => void;
 }) {
 	return (
-		<div className="h-full min-h-0">
+		<div style={{ blockSize: '100%', minBlockSize: 0 }}>
 			{/* The editor suspends until Monaco's themes and tokenizer are ready. */}
 			<Suspense fallback={null}>
 				<PlaygroundEditor defaultValue={defaultValue} onChange={onChange} showLoadingPill={false} />

@@ -28,6 +28,13 @@ export const docsTabletMinInlineSize = atLeast(breakpoints.bp768);
 /** Below tablet. The header moves its destination links to their own row. */
 export const docsTabletMaxInlineSize = below(breakpoints.bp768);
 
+/**
+ * Viewport media query at the same tablet threshold as `docsTabletMinInlineSize`. Use this only
+ * when a rule sits inside a named `@container` and cannot measure the root — unnamed queries would
+ * resolve against the inner container instead.
+ */
+export const docsTabletMinWidthMedia = `(min-width: ${breakpoints.bp768}px)`;
+
 const DOCS_SIDEBAR_BREAKPOINT = breakpoints.bp1024;
 
 /** The docs shell breakpoint where the desktop sidebar replaces the mobile drawer. */

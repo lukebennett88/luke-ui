@@ -27,7 +27,7 @@ export function PreviewToolbar({
 	viewportWidth,
 }: PreviewToolbarProps) {
 	return (
-		<PlaygroundPaneToolbar className="justify-between gap-2">
+		<PlaygroundPaneToolbar gap="sp8" justifyContent="space-between">
 			<ViewportToggle onChange={onViewportChange} value={viewportWidth} />
 			<IconButton
 				aria-label={isFullscreen ? 'Exit fullscreen preview' : 'Enter fullscreen preview'}

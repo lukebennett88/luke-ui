@@ -15,6 +15,8 @@ export const root = style({
 			fontFamily: vars.font.family.code,
 			fontSize: vars.font.caption.fontSize,
 			lineHeight: vars.font.caption.lineHeight,
+			// Own the figure margin; without Tailwind preflight the UA indent would show.
+			margin: 0,
 			maxInlineSize: '100%',
 			overflow: 'hidden',
 			position: 'relative',

@@ -1,17 +1,14 @@
 /*
- * One order for Tailwind and Luke UI layers, before any import. Preflight lands in `base` below Luke
- * UI, and Tailwind utilities and docs-owned `components` styles land above it.
+ * Docs-owned styles land in `components`, above Luke UI. `base` stays below `luke-ui` so the
+ * package's reserved slot is never created late.
  */
-@layer theme, base, luke-ui, components, utilities;
+@layer base, luke-ui, components;
 
 @import '@luke-ui/react/stylesheet.css';
 @import '@luke-ui/theme-paper/stylesheet.css';
 @import '@luke-ui/theme-tactile/stylesheet.css';
 /* Paper and Tactile declare the same Inter face. Load it once for both. */
 @import '@luke-ui/theme-tactile/fonts.css';
-@import 'tailwindcss';
-@import 'fumadocs-ui/css/neutral.css';
-@import 'fumadocs-ui/css/preset.css';
 
 code > * {
 	tab-size: 2;
@@ -22,31 +19,4 @@ code > * {
 	html {
 		scroll-behavior: smooth;
 	}
-}
-
-/**
- * Bridge Fumadocs structural colour variables to Luke UI stable tokens for the
- * Tailwind classes the example frames and playground host still use (#675/#676).
- * Status and diff variables remain Fumadocs-owned. The variables resolve on the root and again on
- * each colour-mode scope, so a nested scope bridges its own token values.
- */
-:root,
-[data-color-mode] {
-	--color-fd-background: var(--luke-color-surface-base);
-	--color-fd-foreground: var(--luke-color-text-primary);
-	--color-fd-muted: var(--luke-color-surface-subdued);
-	--color-fd-muted-foreground: var(--luke-color-text-secondary);
-	--color-fd-popover: var(--luke-color-surface-overlay);
-	--color-fd-popover-foreground: var(--luke-color-text-primary);
-	--color-fd-card: var(--luke-color-surface-base);
-	--color-fd-card-foreground: var(--luke-color-text-primary);
-	--color-fd-border: var(--luke-color-border-decorative);
-	--color-fd-primary: var(--luke-color-background-accent-solid-rest);
-	--color-fd-primary-foreground: var(--luke-color-foreground-accent-on-solid);
-	--color-fd-secondary: var(--luke-color-surface-subdued);
-	--color-fd-secondary-foreground: var(--luke-color-text-primary);
-	--color-fd-accent: var(--luke-color-background-neutral-subtle-hover);
-	--color-fd-accent-foreground: var(--luke-color-text-primary);
-	--color-fd-ring: var(--luke-color-border-focus);
-	--color-fd-overlay: var(--luke-color-overlay-backdrop);
 }
