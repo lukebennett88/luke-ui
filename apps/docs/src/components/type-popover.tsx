@@ -35,9 +35,7 @@ function TypePopover({ children, typeName }: { children: ReactNode; typeName: st
 			</RacButton>
 			<Popover className={styles.popover} placement="bottom start">
 				<Dialog aria-label={`Definition of ${typeName}`} className={styles.dialog}>
-					<pre className={styles.definition}>
-						{definition?.definition ?? 'Loading definition…'}
-					</pre>
+					<pre className={styles.definition}>{definition?.definition ?? 'Loading definition…'}</pre>
 				</Dialog>
 			</Popover>
 		</DialogTrigger>
