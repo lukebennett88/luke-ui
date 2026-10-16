@@ -143,15 +143,14 @@ An error message has two jobs: name the problem, and name the fix.
 
 `errorMessage` takes any React content, so a message with a link or emphasis works directly.
 
-| Instead of             | Write                                               |
-| ---------------------- | --------------------------------------------------- |
-| Invalid input          | Enter an email address in the form you@example.com. |
-| This field is required | Choose the country where you work.                  |
-| Error                  | Passwords need at least 12 characters.              |
+| Instead of             | Write                                  |
+| ---------------------- | -------------------------------------- |
+| Invalid input          | Enter a valid email address.           |
+| This field is required | Choose a country.                      |
+| Error                  | Passwords need at least 12 characters. |
 
 - Say what to do next, not only what went wrong. "Choose a delivery date" beats "No date selected".
-- Use the field's own words. If the label says "Work location", the message says work location, not
-  region.
+- Use the field's own words. If the label says "Country", the message says country, not region.
 - Keep it to one sentence. A long message pushes the rest of the form down the page.
 - Describe what is wrong with the value. Do not blame the reader. "Enter a date after today" rather
   than "You entered an invalid date".

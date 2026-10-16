@@ -13,10 +13,13 @@ import * as z from 'zod';
 const DIGIT_PATTERN = /\d/;
 
 const schema = z.object({
-	email: z.email('Enter an email address in the form you@example.com.'),
-	password: z.string().refine((value) => value.length >= 8 && DIGIT_PATTERN.test(value), {
-		message: 'At least 8 characters, including a number.',
-	}),
+	email: z.email('Enter a valid email address.'),
+	password: z
+		.string()
+		.min(1, 'Enter a password.')
+		.refine((value) => value.length >= 8 && DIGIT_PATTERN.test(value), {
+			message: 'Use at least 8 characters, including a number.',
+		}),
 });
 
 export default () => {
@@ -42,7 +45,6 @@ export default () => {
 			borderStyle="solid"
 			borderWidth="thin"
 			boxShadow="raised"
-			inlineSize="100%"
 			marginInline="auto"
 			maxInlineSize="26rem"
 			// Utility props take an object keyed by breakpoint. Breakpoints are
@@ -70,11 +72,11 @@ export default () => {
 								errorMessage={fieldState.error?.message}
 								inputRef={field.ref}
 								isRequired
-								label="Email"
+								label="Email address"
 								name="email"
 								onBlur={field.onBlur}
 								onChange={field.onChange}
-								placeholder="Enter your email address"
+								placeholder="you@example.com"
 								type="email"
 								validationBehavior="aria"
 								value={field.value}

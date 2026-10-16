@@ -4,7 +4,7 @@ import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (
-		<Comparison direction="horizontal">
+		<Comparison align="center" direction="horizontal">
 			<ComparisonItem label="Primary">
 				<Text color="primary">
 					<Icon name="checkCircle" />

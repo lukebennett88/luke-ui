@@ -18,19 +18,17 @@ export default () => {
 	return (
 		<form onSubmit={handleSubmit}>
 			<Stack gap="sp16" maxInlineSize="20rem">
-				<Stack minBlockSize="5.5rem">
-					<SelectField
-						isRequired
-						items={countries}
-						label="Work location"
-						name="workLocation"
-						placeholder="Choose a country"
-					>
-						{(item) => <SelectItem>{item.label}</SelectItem>}
-					</SelectField>
-				</Stack>
+				<SelectField
+					isRequired
+					items={countries}
+					label="Country"
+					name="country"
+					placeholder="Choose a country"
+				>
+					{(item) => <SelectItem>{item.label}</SelectItem>}
+				</SelectField>
 				<Cluster>
-					<Button type="submit">Create account</Button>
+					<Button type="submit">Submit</Button>
 				</Cluster>
 			</Stack>
 		</form>
