@@ -33,6 +33,7 @@ const PRESS_ACTION_DEFINITION_PATTERN = /^type PressAction = /;
 const RESPONSIVE_VALUE_DEFINITION_PATTERN =
 	/^type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive</;
 
+const SYNTHETIC_TYPE = 'RequiredInitialResponsiveValue<number | string>';
 const SYNTHETIC_DEFINITION =
 	'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<Value>;';
 
@@ -337,9 +338,11 @@ test('opens a type definition popover for a linked alias and restores focus on d
 	await renderDeferredTypeTable('/type-definitions/focus.json');
 
 	const trigger = page.getByRole('button', {
-		name: 'Show definition of RequiredInitialResponsiveValue',
+		exact: true,
+		name: SYNTHETIC_TYPE,
 	});
 	await expect.element(trigger).toBeVisible();
+	await expect.element(trigger).toHaveAccessibleName(SYNTHETIC_TYPE);
 	await userEvent.click(trigger.element());
 	await expect
 		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
@@ -361,7 +364,7 @@ test('the Button guide opens PressAction from its generated definitions', async 
 	await import('../../content/docs/components/primitives/button.mdx');
 	await renderWidget(<ButtonGuide components={GUIDE_COMPONENTS} />);
 
-	const { dialog, trigger } = await openDefinitionWithKeyboard('PressAction');
+	const { dialog, trigger } = await openDefinitionWithKeyboard('PressAction', 'PressAction');
 	await expect.element(dialog.getByText(PRESS_ACTION_DEFINITION_PATTERN)).toBeVisible();
 	await userEvent.keyboard('{Escape}');
 	await expect.element(dialog).not.toBeInTheDocument();
@@ -372,7 +375,10 @@ test('the Grid guide opens RequiredInitialResponsiveValue from its generated def
 	const { default: GridGuide } = await import('../../content/docs/components/layout/grid.mdx');
 	await renderWidget(<GridGuide components={GUIDE_COMPONENTS} />);
 
-	const { dialog, trigger } = await openDefinitionWithKeyboard('RequiredInitialResponsiveValue');
+	const { dialog, trigger } = await openDefinitionWithKeyboard(
+		'RequiredInitialResponsiveValue',
+		'RequiredInitialResponsiveValue<number | string>',
+	);
 	await expect.element(dialog.getByText(RESPONSIVE_VALUE_DEFINITION_PATTERN)).toBeVisible();
 	await userEvent.keyboard('{Escape}');
 	await expect.element(dialog).not.toBeInTheDocument();
@@ -393,9 +399,7 @@ test('falls back to plain text when a type reference has no definition', async (
 	);
 
 	await expect.element(page.getByText('Promise<string>')).toBeVisible();
-	expect(page.getByRole('button', { name: /Show definition of Promise/ }).elements()).toHaveLength(
-		0,
-	);
+	expect(page.getByRole('button', { name: 'Promise<string>' }).elements()).toHaveLength(0);
 	expect(page.getByRole('link').elements()).toHaveLength(0);
 });
 
@@ -412,7 +416,8 @@ test('deferred definition fetch shows loading, then the definition', async () =>
 		'RequiredInitialResponsiveValue',
 	]);
 	const trigger = page.getByRole('button', {
-		name: 'Show definition of RequiredInitialResponsiveValue',
+		exact: true,
+		name: SYNTHETIC_TYPE,
 	});
 	await userEvent.click(trigger.element());
 	await expect
@@ -441,7 +446,8 @@ test('deferred definition fetch shows a recoverable error and retries', async ()
 
 	await renderDeferredTypeTable('/type-definitions/retry.json', ['RequiredInitialResponsiveValue']);
 	const trigger = page.getByRole('button', {
-		name: 'Show definition of RequiredInitialResponsiveValue',
+		exact: true,
+		name: SYNTHETIC_TYPE,
 	});
 	await userEvent.click(trigger.element());
 	await expect
@@ -469,7 +475,7 @@ test('deferred tables only link aliases registered in definitionNames', async ()
 				type={{
 					columns: {
 						description: 'Column tracks.',
-						type: 'RequiredInitialResponsiveValue<number | string>',
+						type: SYNTHETIC_TYPE,
 						typeDescriptionLink: 'RequiredInitialResponsiveValue',
 					},
 					fallback: {
@@ -483,13 +489,9 @@ test('deferred tables only link aliases registered in definitionNames', async ()
 	);
 
 	await expect
-		.element(
-			page.getByRole('button', { name: 'Show definition of RequiredInitialResponsiveValue' }),
-		)
+		.element(page.getByRole('button', { exact: true, name: SYNTHETIC_TYPE }))
 		.toBeVisible();
-	expect(page.getByRole('button', { name: /Show definition of Promise/ }).elements()).toHaveLength(
-		0,
-	);
+	expect(page.getByRole('button', { name: 'Promise<string>' }).elements()).toHaveLength(0);
 	await expect.element(page.getByText('Promise<string>')).toBeVisible();
 	expect(fetchMock).not.toHaveBeenCalled();
 });
@@ -506,7 +508,8 @@ test('deferred fetch that omits a registered alias settles without infinite load
 		'RequiredInitialResponsiveValue',
 	]);
 	const trigger = page.getByRole('button', {
-		name: 'Show definition of RequiredInitialResponsiveValue',
+		exact: true,
+		name: SYNTHETIC_TYPE,
 	});
 	await userEvent.click(trigger.element());
 	await expect
@@ -528,7 +531,7 @@ test('linked type popovers in a ComponentPropsTable have no axe violations', asy
 			type={{
 				columns: {
 					description: 'Column tracks.',
-					type: 'RequiredInitialResponsiveValue<number | string>',
+					type: SYNTHETIC_TYPE,
 					typeDescriptionLink: 'RequiredInitialResponsiveValue',
 				},
 			}}
@@ -536,7 +539,8 @@ test('linked type popovers in a ComponentPropsTable have no axe violations', asy
 	);
 
 	const trigger = page.getByRole('button', {
-		name: 'Show definition of RequiredInitialResponsiveValue',
+		exact: true,
+		name: SYNTHETIC_TYPE,
 	});
 	await userEvent.click(trigger.element());
 	const dialog = page.getByRole('dialog', {
@@ -579,7 +583,8 @@ test('ignores a response for an asset the table no longer uses', async () => {
 
 	await renderWidget(<SwitchableAsset />);
 	const trigger = page.getByRole('button', {
-		name: 'Show definition of RequiredInitialResponsiveValue',
+		exact: true,
+		name: SYNTHETIC_TYPE,
 	});
 	await userEvent.click(trigger.element());
 	await expect.element(page.getByText('Loading definition…')).toBeVisible();
@@ -618,7 +623,8 @@ test('invalid definition JSON shows a recoverable error', async () => {
 
 	await renderDeferredTypeTable('/type-definitions/invalid.json');
 	const trigger = page.getByRole('button', {
-		name: 'Show definition of RequiredInitialResponsiveValue',
+		exact: true,
+		name: SYNTHETIC_TYPE,
 	});
 	await userEvent.click(trigger.element());
 	await expect
@@ -630,10 +636,13 @@ test('invalid definition JSON shows a recoverable error', async () => {
 		.toBeVisible();
 });
 
-/** Opens the first popover for `typeName` from its focused trigger with Enter. */
-async function openDefinitionWithKeyboard(typeName: string) {
-	const trigger = page.getByRole('button', { name: `Show definition of ${typeName}` }).first();
-	await expect.element(trigger).toBeVisible();
+/**
+ * Opens a generated table's popover from its focused trigger with Enter. The trigger's accessible
+ * name must be its complete visible type, generic arguments included.
+ */
+async function openDefinitionWithKeyboard(typeName: string, visibleType: string) {
+	const trigger = page.getByRole('button', { exact: true, name: visibleType });
+	await expect.element(trigger).toHaveAccessibleName(visibleType);
 	trigger.element().focus();
 	await userEvent.keyboard('{Enter}');
 
@@ -653,7 +662,7 @@ function deferredTypeTableTree(
 				type={{
 					columns: {
 						description: 'Column tracks.',
-						type: 'RequiredInitialResponsiveValue<number | string>',
+						type: SYNTHETIC_TYPE,
 						typeDescriptionLink: 'RequiredInitialResponsiveValue',
 					},
 				}}

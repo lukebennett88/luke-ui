@@ -16,13 +16,13 @@ export function LinkedType({ children, typeName }: { children: ReactNode; typeNa
 
 	const { ensureLoaded, load } = typeDefinitions;
 
-	// The trigger loads the asset on hover, focus, or press. DialogTrigger stays uncontrolled so
-	// React Aria returns focus to the trigger when the popover closes.
+	// The visible type, generic arguments included, names the trigger. It loads the asset on hover,
+	// focus, or press. DialogTrigger stays uncontrolled so React Aria returns focus to the trigger
+	// when the popover closes.
 	return (
 		<DialogTrigger>
 			<Button
 				appearance="text"
-				aria-label={`Show definition of ${typeName}`}
 				className={styles.trigger}
 				onFocus={ensureLoaded}
 				onHoverStart={ensureLoaded}
