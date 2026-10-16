@@ -542,8 +542,8 @@ test('lineClamp keeps two text lines while adornments stay on the first line', (
 	const clamped = locator.getByTestId('copy').element().parentElement;
 	if (clamped == null) throw new Error('Expected the clamped content.');
 
-	expect(text.getBoundingClientRect().height).toBeCloseTo(
-		2 * Number.parseFloat(getComputedStyle(text).lineHeight),
+	expect(clamped.getBoundingClientRect().height).toBeCloseTo(
+		2 * Number.parseFloat(getComputedStyle(clamped).lineHeight),
 		0,
 	);
 	expect(clamped.scrollHeight).toBeGreaterThan(clamped.clientHeight);
