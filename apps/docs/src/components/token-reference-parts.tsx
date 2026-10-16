@@ -1,6 +1,7 @@
 import { Bleed } from '@luke-ui/react/bleed';
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Grid } from '@luke-ui/react/grid';
 import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
@@ -16,6 +17,8 @@ import { tokenRowId } from '../lib/token-navigation.js';
 import { useClipboardFeedback } from '../lib/use-clipboard-feedback.js';
 import { useTokenValue } from '../lib/use-token-value.js';
 import * as styles from './token-reference.css.js';
+
+type TokenCopyTarget = 'path' | 'variable';
 
 // Shared pieces of the token reference sections.
 
@@ -74,33 +77,65 @@ function TokenValue({ className, token, ...props }: TokenTextProps) {
 	);
 }
 
-/** Copies the full typed token path. The accessible name says what it copies. */
-function TokenCopyButton({ token }: { token: ThemeToken }) {
-	const { announcement, copy, status } = useClipboardFeedback<'token'>();
-	const text = `vars.${token.path}`;
-
-	const label = (() => {
-		if (status?.state === 'copied') return 'Copied';
-		if (status?.state === 'error') return 'Failed';
-		return 'Copy';
-	})();
+/**
+ * Copies the typed path or the CSS custom property. Each control's accessible name says which
+ * string it copies. Success is announced in a live region without moving focus.
+ */
+function TokenCopyControls({ token }: { token: ThemeToken }) {
+	const { announcement, copy, status } = useClipboardFeedback<TokenCopyTarget>();
+	const pathText = `vars.${token.path}`;
 
 	return (
 		<>
-			<Button
-				aria-label={`Copy ${text}`}
-				className={styles.tokenCopyButton}
-				onPress={() => void copy('token', text)}
-				prominence="low"
-				size="small"
-				startContent={<Icon name={status?.state === 'copied' ? 'check' : 'copy'} />}
-			>
-				{label}
-			</Button>
+			<Cluster gap="sp4">
+				<TokenCopyButton
+					accessibleName={`Copy ${pathText}`}
+					idleLabel="vars"
+					onCopy={() => void copy('path', pathText)}
+					state={status?.key === 'path' ? status.state : null}
+				/>
+				<TokenCopyButton
+					accessibleName={`Copy CSS ${token.variable}`}
+					idleLabel="CSS"
+					onCopy={() => void copy('variable', token.variable)}
+					state={status?.key === 'variable' ? status.state : null}
+				/>
+			</Cluster>
 			<VisuallyHidden aria-live="polite" elementType="span">
 				{announcement}
 			</VisuallyHidden>
 		</>
+	);
+}
+
+function TokenCopyButton({
+	accessibleName,
+	idleLabel,
+	onCopy,
+	state,
+}: {
+	accessibleName: string;
+	idleLabel: string;
+	onCopy: () => void;
+	state: 'copied' | 'error' | null;
+}) {
+	const label = (() => {
+		if (state === 'copied') return 'Copied';
+		if (state === 'error') return 'Failed';
+		return idleLabel;
+	})();
+
+	return (
+		<Button
+			aria-label={accessibleName}
+			className={styles.tokenCopyButton}
+			onPress={onCopy}
+			prominence="low"
+			size="small"
+			startContent={<Icon name={state === 'copied' ? 'check' : 'copy'} />}
+		>
+			{label}
+		</Button>
 	);
 }
 
@@ -159,7 +194,7 @@ interface TokenRowProps {
 	token: ThemeToken;
 }
 
-/** One token in a list: its sample, typed path, CSS variable, resolved value, and copy button. */
+/** One token in a list: its sample, typed path, CSS variable, resolved value, and copy controls. */
 export function TokenRow({ sample, sampleInlineSize, token }: TokenRowProps) {
 	return (
 		<Grid
@@ -172,7 +207,7 @@ export function TokenRow({ sample, sampleInlineSize, token }: TokenRowProps) {
 			columnGap="sp16"
 			columns={{
 				initial: 'minmax(0, 1fr) auto',
-				bp768: `${sampleInlineSize} minmax(0, 1fr) minmax(0, 13rem) 6rem`,
+				bp768: `${sampleInlineSize} minmax(0, 1fr) minmax(0, 13rem) auto`,
 			}}
 			elementType="li"
 			id={tokenRowId(token.path)}
@@ -198,7 +233,7 @@ export function TokenRow({ sample, sampleInlineSize, token }: TokenRowProps) {
 				<TokenValue elementType="p" token={token} typography="label" />
 			</Box>
 			<Box gridArea="copy" justifySelf="end">
-				<TokenCopyButton token={token} />
+				<TokenCopyControls token={token} />
 			</Box>
 		</Grid>
 	);
@@ -237,7 +272,7 @@ interface TokenTileProps {
 }
 
 /**
- * One token as a tile: a sample on a subdued stage, then its name, value, and copy button, each on
+ * One token as a tile: a sample on a subdued stage, then its name, value, and copy controls, each on
  * its own line so a narrow tile never splits a value.
  */
 export function TokenTile({ note, sample, token }: TokenTileProps) {
@@ -273,9 +308,9 @@ export function TokenTile({ note, sample, token }: TokenTileProps) {
 					</Text>
 				) : null}
 				<TokenValue elementType="p" token={token} typography="label" />
-				{/* The button's own inline padding pulls its icon in, so bleed by it to line up with the text. */}
+				{/* The buttons' own inline padding pulls their icons in, so bleed by it to line up with the text. */}
 				<Bleed inlineStart="sp12">
-					<TokenCopyButton token={token} />
+					<TokenCopyControls token={token} />
 				</Bleed>
 			</Stack>
 		</Box>

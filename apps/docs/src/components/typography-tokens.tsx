@@ -1,4 +1,5 @@
 import { Box } from '@luke-ui/react/box';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -17,13 +18,16 @@ import { TableCell, TableColumn, TableHeaderCell } from './reference-table.js';
 import { TokenGroup, TokenPanel, TokenPath, TokenRow } from './token-reference-parts.js';
 import * as styles from './token-reference.css.js';
 
+type TypeCopyTarget = 'path' | 'variable';
+type TypeCopyKey = `${string}:${TypeCopyTarget}`;
+
 type TypeStyleRow = TokenSections['typography']['styles'][number];
 type TypeStyleName = TypeStyleRow['style'];
 type TypeProperty = keyof TypeStyleRow['tokens'];
 
 /** Every type style as a specimen, followed by its five tokens and resolved values. */
 export function TypeStyleTable() {
-	const { announcement, copy, status } = useClipboardFeedback<string>();
+	const { announcement, copy, status } = useClipboardFeedback<TypeCopyKey>();
 
 	return (
 		<Box className={cx('not-prose', styles.typeFrame)} marginBlockStart="sp24">
@@ -39,13 +43,14 @@ export function TypeStyleTable() {
 			>
 				<caption>
 					<VisuallyHidden>
-						Type styles, smallest first. Use each row's copy control to copy its token.
+						Type styles, smallest first. Use each row's copy controls to copy its typed path or CSS
+						variable.
 					</VisuallyHidden>
 				</caption>
 				<colgroup>
 					<TableColumn />
 					<TableColumn inlineSize="1%" />
-					<TableColumn inlineSize="2.5rem" />
+					<TableColumn inlineSize="1%" />
 				</colgroup>
 				<Box
 					backgroundColor="surface.subdued"
@@ -76,7 +81,7 @@ export function TypeStyleTable() {
 						{TYPE_COLUMNS.map((property) => (
 							<TypeValueRow
 								key={property}
-								onCopy={(token, text) => void copy(token.path, text)}
+								onCopy={(key, text) => void copy(key, text)}
 								status={status}
 								token={row.tokens[property]}
 							/>
@@ -171,16 +176,17 @@ function TypeHeaderCell({
 }
 
 interface TypeValueRowProps {
-	onCopy: (token: ThemeToken, text: string) => void;
-	status: ClipboardFeedbackStatus<string> | null;
+	onCopy: (key: TypeCopyKey, text: string) => void;
+	status: ClipboardFeedbackStatus<TypeCopyKey> | null;
 	token: ThemeToken;
 }
 
-/** One type token, with its value and a single control for copying its typed path. */
+/** One type token, with its value and controls for copying its typed path or CSS variable. */
 function TypeValueRow({ onCopy, status, token }: TypeValueRowProps) {
 	const value = useTokenValue(token);
-	const text = `vars.${token.path}`;
-	const state = status?.key === token.path ? status.state : null;
+	const pathText = `vars.${token.path}`;
+	const pathKey: TypeCopyKey = `${token.path}:path`;
+	const variableKey: TypeCopyKey = `${token.path}:variable`;
 
 	return (
 		<tr className={styles.typeRow}>
@@ -214,27 +220,71 @@ function TypeValueRow({ onCopy, status, token }: TypeValueRowProps) {
 				paddingBlock="sp4"
 				paddingInline="sp4"
 			>
-				<Box
-					alignItems="center"
-					className={styles.typeCopyButton}
-					display="flex"
-					justifyContent="center"
-					minBlockSize={vars.space.sp32}
-					minInlineSize={vars.space.sp32}
-					renderRoot={(domProps) => (
-						<RacButton
-							{...domProps}
-							aria-label={`Copy ${text}`}
-							onPress={() => {
-								onCopy(token, text);
-							}}
-						/>
-					)}
-				>
-					<Icon aria-hidden name={COPY_ICONS[state ?? 'idle']} size="xsmall" />
-				</Box>
+				<Cluster gap="sp4" justifyContent="end">
+					<TypeCopyButton
+						accessibleName={`Copy ${pathText}`}
+						idleLabel="vars"
+						onCopy={() => {
+							onCopy(pathKey, pathText);
+						}}
+						state={status?.key === pathKey ? status.state : null}
+					/>
+					<TypeCopyButton
+						accessibleName={`Copy CSS ${token.variable}`}
+						idleLabel="CSS"
+						onCopy={() => {
+							onCopy(variableKey, token.variable);
+						}}
+						state={status?.key === variableKey ? status.state : null}
+					/>
+				</Cluster>
 			</TableCell>
 		</tr>
+	);
+}
+
+function TypeCopyButton({
+	accessibleName,
+	idleLabel,
+	onCopy,
+	state,
+}: {
+	accessibleName: string;
+	idleLabel: string;
+	onCopy: () => void;
+	state: 'copied' | 'error' | null;
+}) {
+	const label = (() => {
+		if (state === 'copied') return 'Copied';
+		if (state === 'error') return 'Failed';
+		return idleLabel;
+	})();
+
+	return (
+		<Box
+			alignItems="center"
+			className={styles.typeCopyButton}
+			display="flex"
+			gap="sp4"
+			justifyContent="center"
+			minBlockSize={vars.space.sp32}
+			minInlineSize={vars.space.sp32}
+			paddingInline="sp4"
+			renderRoot={(domProps) => (
+				<RacButton
+					{...domProps}
+					aria-label={accessibleName}
+					onPress={() => {
+						onCopy();
+					}}
+				/>
+			)}
+		>
+			<Icon aria-hidden name={COPY_ICONS[state ?? 'idle']} size="xsmall" />
+			<Text fontWeight="label" typography="caption">
+				{label}
+			</Text>
+		</Box>
 	);
 }
 

@@ -155,7 +155,7 @@ export const typeSpecimenRow = style({
 });
 
 // DS gap: Box has no container-query display or grid template. A narrow token row puts its full
-// name and CSS variable above the value and copy control.
+// name and CSS variable above the value and copy controls.
 export const typeRow = style({
 	'@layer': {
 		components: {
@@ -163,7 +163,7 @@ export const typeRow = style({
 				[TYPE_NARROW]: {
 					borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 					display: 'grid',
-					gridTemplateColumns: `minmax(0, 1fr) calc(${vars.space.sp48} + ${vars.space.sp8})`,
+					gridTemplateColumns: 'minmax(0, 1fr) auto',
 					selectors: {
 						'&:last-child': {
 							borderBlockEnd: 'none',
@@ -259,8 +259,8 @@ export const typeActionCell = style({
 	},
 });
 
-// DS gap: Box has no native button reset or hover background props. The icon control grows with the
-// narrow table layout; its native focus ring remains visible.
+// DS gap: Box has no native button reset or hover background props. The copy controls grow with the
+// narrow table layout; their native focus ring remains visible.
 export const typeCopyButton = style({
 	'@layer': {
 		components: {
@@ -268,9 +268,9 @@ export const typeCopyButton = style({
 			border: 'none',
 			borderRadius: vars.radius.control,
 			color: 'inherit',
-			inlineSize: vars.space.sp32,
 			minBlockSize: vars.space.sp32,
-			padding: 0,
+			minInlineSize: vars.space.sp32,
+			paddingBlock: 0,
 			selectors: {
 				'&:hover': {
 					backgroundColor: vars.color.background.neutral.subtle.hover,
@@ -281,8 +281,8 @@ export const typeCopyButton = style({
 			},
 			'@container': {
 				[TYPE_NARROW]: {
-					inlineSize: vars.space.sp48,
 					minBlockSize: vars.space.sp48,
+					minInlineSize: vars.space.sp48,
 				},
 			},
 		},
