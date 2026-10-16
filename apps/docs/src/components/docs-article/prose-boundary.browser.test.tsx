@@ -56,7 +56,7 @@ function hasProseFingerprint(element: Element): boolean {
 	if (element.matches('p')) {
 		// Capsize trim boxes are Prose-only on plain paragraphs.
 		const before = getComputedStyle(element, '::before');
-		return before.display === 'table' && before.content.includes('""');
+		return before.display === 'flow-root' && before.content.includes('""');
 	}
 	if (element.matches('blockquote, figure')) {
 		// Prose sibling gaps (`* + blockquote|figure` → sp40). UA margins differ.
@@ -161,7 +161,7 @@ test('still applies Prose rhythm to content around the widgets', async () => {
 
 	const second = widgetRoot('[data-testid="second"]');
 	expect(getComputedStyle(second).marginBlockStart).toBe('32px');
-	expect(getComputedStyle(second, '::before').display).toBe('table');
+	expect(getComputedStyle(second, '::before').display).toBe('flow-root');
 	expect(getComputedStyle(widgetRoot('[data-testid="list"]')).listStyleType).toBe('disc');
 	expect(getComputedStyle(widgetRoot('[data-testid="list"]')).paddingInlineStart).toBe('24px');
 	expect(getComputedStyle(widgetRoot('[data-testid="second-item"]')).marginBlockStart).toBe('12px');
