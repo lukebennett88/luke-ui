@@ -388,18 +388,32 @@ test('wrapped lines of adorned text align with the first line, not the adornment
 	for (const line of lines) expect(line.left).toBeCloseTo(first.left, 0);
 });
 
-test('a trimmed Heading keeps its trim when it has startContent', () => {
+// The trim depends on the rendered font matching the theme's Capsize metrics, which the test
+// runner does not guarantee, so compare with an unadorned twin rather than the element's edges.
+test('startContent does not change where a trimmed Heading trims', () => {
 	const { locator } = render(
-		<Heading data-testid="heading" level={2} startContent={<Icon name="checkCircle" />}>
-			<span data-testid="cap" style={capProbeStyle} />
-			Section heading
-		</Heading>,
+		<div>
+			<Heading data-testid="plain" level={2}>
+				<span data-testid="plain-cap" style={capProbeStyle} />
+				Section heading
+			</Heading>
+			<Heading data-testid="adorned" level={2} startContent={<Icon name="checkCircle" />}>
+				<span data-testid="adorned-cap" style={capProbeStyle} />
+				Section heading
+			</Heading>
+		</div>,
 	);
-	const heading = locator.getByTestId('heading').element();
-	const cap = locator.getByTestId('cap').element();
 
-	expect(cap.getBoundingClientRect().top).toBeCloseTo(heading.getBoundingClientRect().top, 0);
-	expect(cap.getBoundingClientRect().bottom).toBeCloseTo(heading.getBoundingClientRect().bottom, 0);
+	function insets(name: 'adorned' | 'plain') {
+		const heading = locator.getByTestId(name).element().getBoundingClientRect();
+		const cap = locator.getByTestId(`${name}-cap`).element().getBoundingClientRect();
+		return { blockEnd: heading.bottom - cap.bottom, blockStart: cap.top - heading.top };
+	}
+
+	const plain = insets('plain');
+	const adorned = insets('adorned');
+	expect(adorned.blockStart).toBeCloseTo(plain.blockStart, 0);
+	expect(adorned.blockEnd).toBeCloseTo(plain.blockEnd, 0);
 });
 
 test('an adornment taller than the line grows the row and stays centred on the first line', () => {
