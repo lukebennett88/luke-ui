@@ -26,8 +26,10 @@ interface _TrackProps extends HTMLAttributes<HTMLElement> {
 	/**
 	 * Cross-axis alignment of the rails.
 	 *
-	 * `firstLine` uses Track's inherited line height. A different line height inside `children` does
-	 * not change the alignment point.
+	 * `firstLine` centres each rail on the cap height of the first line of `children`, so a rail
+	 * taller than the line makes the row taller. The cap height comes from Track's inherited font, so
+	 * to align with a different type style, put that style on an element around Track, such as a
+	 * `Heading` around a `span` Track.
 	 * @default start
 	 */
 	railAlignment?: NonNullable<TrackRecipeVariants>['railAlignment'];
@@ -42,7 +44,12 @@ interface _TrackProps extends HTMLAttributes<HTMLElement> {
 /** Props for `Track`. */
 export type TrackProps = Prettify<_TrackProps>;
 
-/** Aligns optional rails with flexible content on the inline axis. */
+/**
+ * Aligns optional rails with flexible content on the inline axis.
+ *
+ * With `railAlignment="firstLine"`, the typography element goes around Track, not inside it, for
+ * example `<Heading level={2}><Track elementType="span" …>Title</Track></Heading>`.
+ */
 export function Track(props: TrackProps): JSX.Element {
 	const {
 		children,
@@ -57,7 +64,17 @@ export function Track(props: TrackProps): JSX.Element {
 	} = props;
 
 	const WrapperElement: TrackWrapperElementType = Element === 'span' ? 'span' : 'div';
-	const { centre, rail, root } = trackRecipe({ isInline: Element === 'span', railAlignment });
+	const { centre, rail, railContent, root } = trackRecipe({
+		isInline: Element === 'span',
+		railAlignment,
+	});
+
+	const isFirstLine = railAlignment === 'firstLine';
+	const renderRail = (content: ReactNode) => (
+		<WrapperElement className={rail()}>
+			{isFirstLine ? <WrapperElement className={railContent()}>{content}</WrapperElement> : content}
+		</WrapperElement>
+	);
 
 	return (
 		<Box
@@ -67,9 +84,9 @@ export function Track(props: TrackProps): JSX.Element {
 			gap={gap}
 			ref={ref}
 		>
-			{railStart != null && <WrapperElement className={rail()}>{railStart}</WrapperElement>}
+			{railStart != null && renderRail(railStart)}
 			<WrapperElement className={centre()}>{children}</WrapperElement>
-			{railEnd != null && <WrapperElement className={rail()}>{railEnd}</WrapperElement>}
+			{railEnd != null && renderRail(railEnd)}
 		</Box>
 	);
 }

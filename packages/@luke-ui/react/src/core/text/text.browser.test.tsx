@@ -10,6 +10,7 @@ import { Menu, MenuItem } from 'react-aria-components/Menu';
 import { TextContext } from 'react-aria-components/Text';
 import { expect, test } from 'vite-plus/test';
 import { typeStyles } from '../../theme/type-styles.js';
+import { measureBaseline } from '../test-utils/measure-cap-centre.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
@@ -42,6 +43,27 @@ test('Text slot null opts out of surrounding slotted text context', () => {
 	);
 
 	expect(locator.getByText('Opted out label').element().tagName).toBe('SPAN');
+});
+
+test('trimmed block Text shares a baseline with a sibling in a baseline-aligned flex row', async () => {
+	// Chromium takes a block's first baseline from an empty `display: table` trim box, which would
+	// push the trimmed text away from its siblings' baseline.
+	const { container } = render(
+		<div style={{ alignItems: 'baseline', display: 'flex', gap: '8px' }}>
+			<Text data-testid="trimmed" elementType="p">
+				Trimmed paragraph
+			</Text>
+			<span data-testid="untrimmed" style={{ font: 'inherit' }}>
+				Untrimmed span
+			</span>
+		</div>,
+	);
+	await document.fonts.ready;
+	const trimmed = container.querySelector('[data-testid="trimmed"]');
+	const untrimmed = container.querySelector('[data-testid="untrimmed"]');
+	if (trimmed == null || untrimmed == null) throw new Error('Expected both text elements.');
+
+	expect(Math.abs(measureBaseline(trimmed) - measureBaseline(untrimmed))).toBeLessThanOrEqual(0.5);
 });
 
 // Inline typography sits inside a field's label, description, or error, where React Aria provides

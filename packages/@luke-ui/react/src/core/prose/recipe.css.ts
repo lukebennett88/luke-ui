@@ -184,16 +184,17 @@ for (const [weightRole, elements] of groupElementsBy((entry) => entry.weightRole
 }
 
 // A list marker and a cell baseline align to the first box, and the trim box comes first, so a
-// paragraph directly in `li`, `td`, or `th` skips the trim.
+// paragraph directly in `li`, `td`, or `th` skips the trim. The trim boxes are `flow-root`, not
+// `table`, to match `Text`: Chromium takes a block's first baseline from an empty `table` box.
 const trimmedElements = `${plain(plainElements.map(({ element }) => element))}:not(:is(li, td, th) > *)`;
 proseStyle(
 	trimmedElements,
-	{ content: "''", display: 'table', marginBlockEnd: capHeightTrim },
+	{ content: "''", display: 'flow-root', marginBlockEnd: capHeightTrim },
 	'::before',
 );
 proseStyle(
 	trimmedElements,
-	{ content: "''", display: 'table', marginBlockStart: baselineTrim },
+	{ content: "''", display: 'flow-root', marginBlockStart: baselineTrim },
 	'::after',
 );
 

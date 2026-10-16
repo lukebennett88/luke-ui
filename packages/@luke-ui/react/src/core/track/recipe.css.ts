@@ -25,6 +25,8 @@ const trackConfig = {
 			minInlineSize: 0,
 		},
 		rail: {},
+		// Rendered only for `firstLine`, so no other alignment styles it.
+		railContent: {},
 		root: {},
 	},
 	variants: {
@@ -36,15 +38,21 @@ const trackConfig = {
 		railAlignment: {
 			center: { root: { alignItems: 'center' } },
 			end: { root: { alignItems: 'flex-end' } },
-			// `1lh` uses Track's inherited line-height, not the rendered line-height of centre
-			// children. A fixed block size keeps a taller rail centred on the first line.
+			// Baseline alignment puts each rail wrapper's baseline on the centre's first baseline, whatever
+			// trim, line height, or font size the centre uses. The wrapper's one line box holds
+			// `railContent`, which `vertical-align: middle` centres on the x-height. The bottom margin of
+			// cap height minus x-height lifts that centre onto half the cap height. A rail taller than the
+			// line grows the row. `cap` and `ex` resolve in Track's inherited font, so a different type
+			// style belongs on an element around Track. Without `cap` support the margin is dropped and
+			// the rail centres on the x-height.
 			firstLine: {
-				rail: {
+				railContent: {
 					alignItems: 'center',
-					blockSize: '1lh',
-					display: 'flex',
+					display: 'inline-flex',
+					marginBlockEnd: 'calc(1cap - 1ex)',
+					verticalAlign: 'middle',
 				},
-				root: { alignItems: 'flex-start' },
+				root: { alignItems: 'baseline' },
 			},
 			start: { root: { alignItems: 'flex-start' } },
 		},

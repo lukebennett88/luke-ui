@@ -30,11 +30,28 @@ Use `firstLine` when the rail should stay aligned with the first line as the con
 useful for icons, avatars, and controls beside text. Use `start` or `end` when the rail should align
 with the start or end of the content block. `start` is the default.
 
-`firstLine` works best when Track and its content inherit the same line height. A child with a
-different line height, such as a `Heading` or differently sized `Text`, does not change the rail's
-alignment point.
+With `firstLine`, Track aligns each rail to the first baseline of `children`, then centres the rail
+on the cap height of Track's inherited font. A rail taller than the first line grows the row instead
+of overflowing it. The alignment holds for trimmed `Text`, multiline text, line clamping, and
+right-to-left text. A browser without the CSS `cap` unit centres the rail on the x-height instead.
 
 <ExampleBlock src="track/alignment" title="Track: Alignment" />
+
+## Typography
+
+The alignment is exact when the first line of `children` uses the typography that Track inherits.
+When the first line uses a different type style, put the typography element around Track so the
+rails inherit it. Pass `elementType="span"` to a Track inside `Heading`, so the heading keeps valid
+phrasing content. Pass `shouldInheritFont` to the `Text` inside Track so it keeps that font.
+
+A `Heading` passed directly as a child of Track still lines up with the heading's baseline. The rail
+centres on Track's own font, so it sits a few pixels low beside a large heading.
+
+Track aligns rails with the first line only. Track cannot render a typography element as its root,
+because trimmed `Text` and `Heading` draw their trim with extra boxes that Track's layout would
+treat as items.
+
+<ExampleBlock src="track/typography" title="Track: Typography" />
 
 ## Avatar and text
 
@@ -48,6 +65,10 @@ Set `elementType="li"` when Track is a direct child of `ul` or `ol`.
 
 Set `elementType="span"` when Track needs to flow inside phrasing content. Its rails and `children`
 must also be valid phrasing content.
+
+A `span` Track is `inline-flex`, so it stays in one piece inside a sentence. It does not wrap with
+the surrounding text, and the underline of a surrounding link does not extend into it. Put a `Link`
+inside `children` instead of wrapping Track in one.
 
 <ExampleBlock src="track/element-span" title="Track: Inside phrasing content" />
 

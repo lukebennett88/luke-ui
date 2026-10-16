@@ -30,7 +30,7 @@ export const inlineControlGap = vars.space.sp8;
 const errorIconGap = vars.space.sp8;
 
 /**
- * Inline size of the error icon's rail. It is `fieldMessageIndent` less the gap, so the rail plus
+ * Inline size of the error icon's box. It is `fieldMessageIndent` less the gap, so the rail plus
  * the gap spans the indent exactly and the message text starts at the label's inline edge. `max()`
  * floors the rail at the icon's own size when no indent is set.
  */
@@ -45,8 +45,9 @@ const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px
  * `message` (description/error text), and `icon` (the error message's leading icon).
  *
  * `FieldError` lays the error `message` out with `trackRecipe`'s `firstLine` rail alignment, which
- * centres the `icon` rail on the message's first line and keeps wrapped lines aligned with the
- * text. This recipe supplies the rail's size and glyph.
+ * centres the `icon` on the cap height of the message's first line and keeps wrapped lines aligned
+ * with the text. The `icon` slot is the rail's inner `railContent` element, so this recipe supplies
+ * its size and glyph.
  */
 const fieldConfig = {
 	slots: {
@@ -145,6 +146,8 @@ const fieldConfig = {
 						'(forced-colors: active)': { backgroundColor: 'CanvasText' },
 					},
 					backgroundColor: vars.color.foreground.danger.rest,
+					// The box is as tall as the glyph, so its centre is the glyph's centre.
+					blockSize: ICON_SIZES.xsmall,
 					inlineSize: errorIconRailInlineSize,
 					maskImage: iconMaskUrls.exclamationTriangle,
 					maskPosition: 'center',

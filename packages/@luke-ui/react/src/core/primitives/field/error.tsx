@@ -12,10 +12,11 @@ export type FieldErrorProps = Prettify<RacFieldErrorProps>;
 /**
  * Validation message for a field, shown with a leading error icon while the field is invalid.
  *
- * The icon is centred on the message's first line. Wrapped lines align with the text, not the icon.
+ * The icon is centred on the cap height of the message's first line. Wrapped lines align with the
+ * text, not the icon.
  */
 export function FieldError(props: FieldErrorProps): JSX.Element {
-	const { centre, rail, root } = trackRecipe({ railAlignment: 'firstLine' });
+	const { centre, rail, railContent, root } = trackRecipe({ railAlignment: 'firstLine' });
 	const { icon, message } = fieldRecipe({ tone: 'error' });
 
 	return (
@@ -35,7 +36,9 @@ export function FieldError(props: FieldErrorProps): JSX.Element {
 
 				return (
 					<>
-						<span aria-hidden="true" className={rail({ className: icon() })} />
+						<span aria-hidden="true" className={rail()}>
+							<span className={railContent({ className: icon() })} />
+						</span>
 						<span className={centre()}>{content}</span>
 					</>
 				);

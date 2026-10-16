@@ -238,28 +238,24 @@ function SectionHeading({
 	icon?: ReactNode;
 	id: string;
 }) {
-	const heading = (
-		<Heading
-			color="secondary"
-			fontWeight="label"
-			id={id}
-			level={2}
-			shouldDisableTrim
-			typography="caption"
-		>
-			{children}
-		</Heading>
-	);
-
 	return (
 		<Box {...navRowProps}>
-			{icon == null ? (
-				heading
-			) : (
-				<Track gap="sp8" railAlignment="firstLine" railStart={icon}>
-					{heading}
-				</Track>
-			)}
+			<Heading
+				color="secondary"
+				fontWeight="label"
+				id={id}
+				level={2}
+				shouldDisableTrim
+				typography="caption"
+			>
+				{icon == null ? (
+					children
+				) : (
+					<Track elementType="span" gap="sp8" railAlignment="firstLine" railStart={icon}>
+						{children}
+					</Track>
+				)}
+			</Heading>
 		</Box>
 	);
 }
