@@ -14,6 +14,7 @@ catalogMode: strict
 peerDependencyRules:
   allowedVersions:
     '@joshwooding/vite-plugin-react-docgen-typescript>vite': ^8.0.0
+    '@tailwindcss/vite>vite': ^8.0.0
     vite: '*'
     vitest: '*'
 
@@ -50,6 +51,7 @@ catalog:
   '@shikijs/monaco': ^4.5.0
   '@tanstack/react-query': ^5.104.1
   '@rolldown/pluginutils': ^1.0.1
+  '@tailwindcss/vite': ^4.3.3
   '@tanstack/react-form': ^1.33.5
   '@tanstack/react-router': ^1.170.41
   '@tanstack/react-start': ^1.168.60
@@ -102,6 +104,7 @@ catalog:
   shiki: ^4.5.0
   spin-doctor: ^0.0.1
   sucrase: ^3.35.1
+  tailwindcss: ^4.3.3
   ts-morph: ^28.0.0
   tsx: ^4.23.15
   turbo: ^2.11.7

@@ -233,11 +233,11 @@ One indicator per control:
 - **Application CSS.** Unlayered CSS and any layer declared after `luke-ui` beat Luke UI. `base`
   stays below it, so a framework reset in `base` cannot override recipes. Preflight still changes
   native HTML on its own, for example list markers and heading sizes.
-- **Docs app.** `apps/docs` declares the Tailwind order. Docs-owned shell styles use `components`,
-  docs utilities use `utilities`, and the root layout stays in `base`. The Fumadocs colour bridge
-  uses `:root, [data-color-mode]`, so it resolves per mode scope. Dark mode paints the page with
-  `surface.base`, and docs styles that set `text-decoration: none` on Luke UI links, such as the
-  sidebar navigation, win over the link's focus-visible underline. The focus ring is unchanged.
+- **Docs app.** `apps/docs` declares `@layer base, luke-ui, components;` and does not import
+  Tailwind. Docs-owned shell styles use `components`, and the root layout stays in `base`. Dark mode
+  paints the page with `surface.base`, and docs styles that set `text-decoration: none` on Luke UI
+  links, such as the sidebar navigation, win over the link's focus-visible underline. The focus ring
+  is unchanged.
 - **Reference app.** Its global styles stay unlayered and override the body baseline on purpose.
 
 ## Testing
@@ -249,8 +249,10 @@ One indicator per control:
   important declarations and a consumer `base` write.
 - Consumers that use Tailwind CSS v4 must declare
   `@layer theme, base, luke-ui, components, utilities;` before any import. Without that statement,
-  importing Tailwind first can place `luke-ui` above Tailwind `utilities`. The docs app no longer
-  ships a live Tailwind fixture; [STYLING.md](../docs/STYLING.md) records the requirement.
+  importing Tailwind first can place `luke-ui` above Tailwind `utilities`.
+  `tailwind-integration.browser.test.tsx` compiles real Tailwind v4 fixtures for both import orders
+  and checks Preflight, utilities, `Box`, `!important`, and Prose list markers. See
+  [STYLING.md](../docs/STYLING.md).
 - `global-styles.browser.test.tsx` renders mixed native and Luke UI markup. It checks native
   presentation, the Button, IconButton, and button Link box model at both sizes, body painting,
   overrides, and nested repaint, one focus ring per control, virtual focus, and reduced motion. A

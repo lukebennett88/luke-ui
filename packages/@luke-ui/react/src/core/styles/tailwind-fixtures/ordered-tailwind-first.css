@@ -1,0 +1,14 @@
+@layer theme, base, luke-ui, components, utilities;
+
+@import 'tailwindcss' source(none);
+@import '@luke-ui/react/stylesheet.css';
+@import '../../../../../theme-tactile/dist/stylesheet.css';
+
+/* Only the classes the integration test uses. */
+@source inline("p-[11px] p-[3px] bg-[rgb(7,8,9)]!");
+
+@layer components {
+	.tw-component {
+		padding: 5px;
+	}
+}

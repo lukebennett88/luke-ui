@@ -164,7 +164,9 @@ statements Vanilla Extract writes per module, so nothing creates a layer before 
 Applications that use Tailwind CSS v4 declare `@layer theme, base, luke-ui, components, utilities;`
 before any import. Without it, import order decides whether Tailwind's `utilities` or `luke-ui`
 comes later. Declare the order statement before any stylesheet import so both import orders keep
-Tailwind utilities above Luke UI.
+Tailwind utilities above Luke UI. `tailwind-integration.browser.test.tsx` compiles real Tailwind v4
+fixtures for both import orders, Preflight against recipes, utility and `Box` overrides, normal and
+`!important` cascade, and Prose list markers under Preflight.
 
 The docs app uses `@vanilla-extract/css` for docs-owned `.css.ts` files. Its Vite and Vitest configs
 run the Vanilla Extract plugin. Import a generated class from the component or route that applies

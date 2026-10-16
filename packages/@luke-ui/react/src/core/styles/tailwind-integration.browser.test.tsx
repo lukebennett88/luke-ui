@@ -1,0 +1,238 @@
+import { Box } from '@luke-ui/react/box';
+import { Button, buttonRecipe } from '@luke-ui/react/button';
+import { Heading } from '@luke-ui/react/heading';
+import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
+import { Prose } from '@luke-ui/react/prose';
+import { TextInputField } from '@luke-ui/react/text-input-field';
+import type { ReactNode } from 'react';
+import { act } from 'react';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
+import { afterEach, describe, expect, test } from 'vite-plus/test';
+import lukeUiOnlyCss from './tailwind-fixtures/luke-ui-only.css?inline';
+import orderedLukeUiFirstCss from './tailwind-fixtures/ordered-luke-ui-first.css?inline';
+import orderedTailwindFirstCss from './tailwind-fixtures/ordered-tailwind-first.css?inline';
+import unorderedLukeUiFirstCss from './tailwind-fixtures/unordered-luke-ui-first.css?inline';
+import unorderedTailwindFirstCss from './tailwind-fixtures/unordered-tailwind-first.css?inline';
+
+// Real Tailwind v4 output with the built Luke UI stylesheet. Each scenario is one application
+// stylesheet. This suite owns its mount so the default browser setup's global stylesheet stays out.
+const scenarios = [
+	{
+		css: orderedTailwindFirstCss,
+		isTailwindAboveLukeUi: true,
+		name: 'with the order statement, Tailwind first',
+	},
+	{
+		css: orderedLukeUiFirstCss,
+		isTailwindAboveLukeUi: true,
+		name: 'with the order statement, Luke UI first',
+	},
+	// Luke UI declares `base` and `luke-ui` first, so Tailwind's layers land above it.
+	{
+		css: unorderedLukeUiFirstCss,
+		isTailwindAboveLukeUi: true,
+		name: 'without the order statement, Luke UI first',
+	},
+	// Tailwind creates `utilities` first, so `luke-ui` lands above it. The order statement fixes this.
+	{
+		css: unorderedTailwindFirstCss,
+		isTailwindAboveLukeUi: false,
+		name: 'without the order statement, Tailwind first',
+	},
+] as const;
+
+let root: Root | undefined;
+let container: HTMLElement | undefined;
+const styles: Array<HTMLStyleElement> = [];
+
+function cleanup() {
+	if (root) act(() => root?.unmount());
+	container?.remove();
+	for (const style of styles) style.remove();
+	styles.length = 0;
+	root = undefined;
+	container = undefined;
+}
+
+afterEach(cleanup);
+
+function loadCss(css: string) {
+	const style = document.head.appendChild(document.createElement('style'));
+	style.textContent = css;
+	styles.push(style);
+}
+
+function mount(node: ReactNode): HTMLElement {
+	const host = document.body.appendChild(document.createElement('div'));
+	container = host;
+	root = createRoot(host);
+	act(() => {
+		root?.render(node);
+	});
+	return host;
+}
+
+function renderHost() {
+	mount(
+		<div>
+			<Heading data-testid="heading" level={2}>
+				Heading
+			</Heading>
+			<Button data-testid="button">Plain</Button>
+			<TextInputField label="Name" />
+			<Button className="p-[11px]" data-testid="tailwind-button">
+				Utility
+			</Button>
+			<Button className="app-override" data-testid="app-button">
+				App CSS
+			</Button>
+			<Button className="bg-[rgb(7,8,9)]!" data-testid="important-button">
+				Important
+			</Button>
+			<Box className={buttonRecipe()} data-testid="box-button" padding="sp4">
+				Box
+			</Box>
+			<div className="tw-component p-[3px]" data-testid="tailwind-component" />
+			<LoadingSkeleton className="bg-[rgb(7,8,9)]!" data-testid="skeleton" isLoading>
+				Loading
+			</LoadingSkeleton>
+		</div>,
+	);
+}
+
+function byTestId(id: string): HTMLElement {
+	const element = container?.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+	if (element == null) throw new Error(`Expected [data-testid="${id}"].`);
+	return element;
+}
+
+// Border style is left out: Preflight's `border: 0 solid` changes it on elements whose recipe sets
+// no border, without drawing one.
+const recipeProperties = [
+	'backgroundColor',
+	'blockSize',
+	'borderTopWidth',
+	'boxShadow',
+	'display',
+	'fontSize',
+	'fontWeight',
+	'lineHeight',
+	'marginBlockStart',
+	'paddingInlineStart',
+] as const;
+
+function recipeStyles() {
+	const input = container?.querySelector('input');
+	if (input == null) throw new Error('Expected the text input.');
+	const elements: Record<'button' | 'heading' | 'input', Element> = {
+		button: byTestId('button'),
+		heading: byTestId('heading'),
+		input,
+	};
+	const result: Record<string, Record<string, string>> = {};
+	for (const [name, element] of Object.entries(elements)) {
+		const computed = getComputedStyle(element);
+		result[name] = Object.fromEntries(recipeProperties.map((key) => [key, computed[key]]));
+	}
+	return result;
+}
+
+/** Luke UI's own appearance with no Tailwind loaded. */
+function baselineRecipeStyles() {
+	loadCss(lukeUiOnlyCss);
+	renderHost();
+	const baseline = recipeStyles();
+	cleanup();
+	return baseline;
+}
+
+for (const scenario of scenarios) {
+	describe(`${scenario.name}`, () => {
+		test('Preflight leaves Luke UI component recipes intact', () => {
+			const baseline = baselineRecipeStyles();
+			loadCss(scenario.css);
+			renderHost();
+
+			expect(recipeStyles()).toEqual(baseline);
+		});
+
+		test('Box utility props override conflicting recipe styles', () => {
+			loadCss(scenario.css);
+			renderHost();
+
+			expect(getComputedStyle(byTestId('box-button')).paddingInlineStart).toBe('4px');
+		});
+
+		test(`Tailwind utilities ${scenario.isTailwindAboveLukeUi ? 'override' : 'lose to'} Luke UI declarations`, () => {
+			loadCss(scenario.css);
+			renderHost();
+
+			expect(getComputedStyle(byTestId('tailwind-button')).paddingInlineStart).toBe(
+				scenario.isTailwindAboveLukeUi
+					? '11px'
+					: getComputedStyle(byTestId('button')).paddingInlineStart,
+			);
+		});
+
+		test('Tailwind utilities outrank Tailwind components', () => {
+			loadCss(scenario.css);
+			renderHost();
+
+			expect(getComputedStyle(byTestId('tailwind-component')).paddingInlineStart).toBe('3px');
+		});
+
+		test('unlayered application CSS overrides Luke UI', () => {
+			loadCss(scenario.css);
+			loadCss('.app-override { padding-inline: 9px; }');
+			renderHost();
+
+			expect(getComputedStyle(byTestId('app-button')).paddingInlineStart).toBe('9px');
+		});
+
+		test('an important Tailwind utility beats normal Luke UI declarations', () => {
+			loadCss(scenario.css);
+			renderHost();
+
+			expect(getComputedStyle(byTestId('important-button')).backgroundColor).toBe('rgb(7, 8, 9)');
+		});
+
+		test(`an important utility ${scenario.isTailwindAboveLukeUi ? 'loses to' : 'beats'} the important LoadingSkeleton surface`, () => {
+			loadCss(scenario.css);
+			renderHost();
+
+			const background = getComputedStyle(byTestId('skeleton')).backgroundColor;
+			expect(background === 'rgb(7, 8, 9)', `skeleton background was ${background}`).toBe(
+				!scenario.isTailwindAboveLukeUi,
+			);
+		});
+	});
+}
+
+// Preflight's `list-style: none` beats the HTML `type` hint. Prose restates the HTML rules for
+// `type`, which need the `s` selector flag to tell `a` from `A`. Without it, only `type="1"` returns.
+const listTypes = ['1', 'a', 'A', 'i', 'I'] as const;
+
+for (const scenario of scenarios.filter((entry) => entry.isTailwindAboveLukeUi)) {
+	test(`${scenario.name}: Prose restores typed ordered-list markers under Preflight`, () => {
+		loadCss(scenario.css);
+		const host = mount(
+			<Prose>
+				{listTypes.map((type) => (
+					<ol key={type} type={type}>
+						<li>{type}</li>
+					</ol>
+				))}
+			</Prose>,
+		);
+		const hasCaseSensitiveSelectors = CSS.supports('selector([type="A" s])');
+
+		expect(
+			[...host.querySelectorAll('ol')].map((ol) => getComputedStyle(ol).listStyleType),
+		).toEqual(
+			hasCaseSensitiveSelectors
+				? ['decimal', 'lower-alpha', 'upper-alpha', 'lower-roman', 'upper-roman']
+				: ['decimal', 'none', 'none', 'none', 'none'],
+		);
+	});
+}
