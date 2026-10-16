@@ -1,6 +1,6 @@
 export interface FieldErrorMeasurement {
-	/** Vertical centre of the first line of message text. */
-	firstLineCentre: number;
+	/** Vertical centre of the first line's capitals. */
+	firstLineCapCentre: number;
 	/** Inline start of the first line of message text. */
 	firstLineStart: number;
 	/** Vertical centre of the error icon's rail, which centres the glyph. */
@@ -13,14 +13,24 @@ export interface FieldErrorMeasurement {
 
 /**
  * Measures a rendered `FieldError` from the element that holds its text, the one `getByText`
- * resolves for a plain message. The message is that element's parent, and the icon is its
- * first child.
+ * resolves for a plain message. A zero-width cap-height probe measures its first line.
  */
 export function measureFieldError(textElement: Element): FieldErrorMeasurement {
-	const icon = textElement.parentElement?.firstElementChild;
+	const icon = textElement.parentElement?.firstElementChild?.querySelector('[aria-hidden="true"]');
 	if (icon == null || icon.getAttribute('aria-hidden') !== 'true') {
 		throw new Error('Expected the error icon before the message text.');
 	}
+
+	const capProbe = document.createElement('span');
+	Object.assign(capProbe.style, {
+		blockSize: '1cap',
+		display: 'inline-block',
+		inlineSize: '0',
+		verticalAlign: 'baseline',
+	});
+	textElement.prepend(capProbe);
+	const capRect = capProbe.getBoundingClientRect();
+	capProbe.remove();
 
 	const range = document.createRange();
 	range.selectNodeContents(textElement);
@@ -31,7 +41,7 @@ export function measureFieldError(textElement: Element): FieldErrorMeasurement {
 	const iconRect = icon.getBoundingClientRect();
 
 	return {
-		firstLineCentre: firstLine.top + firstLine.height / 2,
+		firstLineCapCentre: capRect.top + capRect.height / 2,
 		firstLineStart: firstLine.left,
 		iconCentre: iconRect.top + iconRect.height / 2,
 		iconEnd: iconRect.right,

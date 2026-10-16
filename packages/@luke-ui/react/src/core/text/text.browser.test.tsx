@@ -8,13 +8,14 @@ import { IconButton } from '@luke-ui/react/icon-button';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Link } from '@luke-ui/react/link';
 import { Quote } from '@luke-ui/react/quote';
+import { Stack as LayoutStack } from '@luke-ui/react/stack';
 import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties, ReactNode } from 'react';
 import { createRef } from 'react';
 import { Menu, MenuItem } from 'react-aria-components/Menu';
 import { TextContext } from 'react-aria-components/Text';
-import { expect, test } from 'vite-plus/test';
+import { expect, test, vi } from 'vite-plus/test';
 import type { Locator } from 'vite-plus/test/context';
 import { page } from 'vite-plus/test/context';
 import { typeStyles } from '../../theme/type-styles.js';
@@ -140,6 +141,20 @@ test('ordinary Text remains a single React Aria Text root', () => {
 	expect(text.tagName).toBe('SPAN');
 	expect(container.firstElementChild).toBe(text);
 	expect(container.childElementCount).toBe(1);
+});
+
+test('Text ignores adornment spacing when it has no adornments', () => {
+	const { locator } = render(
+		<Text data-testid="text" elementType="div" gap="sp32">
+			<Text data-testid="content">Plain content</Text>
+		</Text>,
+	);
+	const text = locator.getByTestId('text').element();
+	const content = locator.getByTestId('content').element();
+
+	expect(text.children).toHaveLength(1);
+	expect(content.parentElement).toBe(text);
+	expect(text.hasAttribute('gap')).toBe(false);
 });
 
 // `shouldInheritFont` inherits `textTransform` and `fontVariantNumeric` along with the other font
@@ -955,3 +970,350 @@ test('adornments', { tags: ['visual'] }, async () => {
 		await captureVisualAppearance(locator, 'text/adornments', appearance);
 	}
 });
+
+for (const elementType of ['span', 'p'] as const) {
+	for (const direction of ['ltr', 'rtl'] as const) {
+		for (const gap of [undefined, '0', 'sp12'] as const) {
+			test(`${elementType} adornments use ${gap ?? 'default'} spacing in ${direction}`, () => {
+				const { locator } = render(
+					<div dir={direction}>
+						<Text
+							data-testid="text"
+							elementType={elementType}
+							endContent={<Icon name="checkCircle" />}
+							gap={gap}
+							startContent={<Icon name="checkCircle" />}
+						>
+							<span data-testid="copy">Content</span>
+						</Text>
+					</div>,
+				);
+				const root = locator.getByTestId('text').element();
+				const copy = locator.getByTestId('copy').element();
+				const [start, end] = root.querySelectorAll('svg');
+				if (start == null || end == null) throw new Error('Expected two icons.');
+				const startRect = start.getBoundingClientRect();
+				const endRect = end.getBoundingClientRect();
+				const content = elementType === 'span' ? copy : copy.parentElement;
+				if (content == null) throw new Error('Expected content.');
+				const contentRect = content.getBoundingClientRect();
+				const expected = (() => {
+					if (gap === '0') return 0;
+					if (gap === 'sp12') return 12;
+					return elementType === 'span' ? 4 : 8;
+				})();
+
+				expect(root.hasAttribute('gap')).toBe(false);
+				expect(
+					direction === 'ltr'
+						? contentRect.left - startRect.right
+						: startRect.left - contentRect.right,
+				).toBeCloseTo(expected, 0);
+				expect(
+					direction === 'ltr' ? endRect.left - contentRect.right : contentRect.left - endRect.right,
+				).toBeCloseTo(expected, 0);
+			});
+		}
+	}
+}
+
+for (const elementType of ['span', 'p'] as const) {
+	test(`${elementType} adornment gaps respond to the root container`, async () => {
+		const { container, locator } = render(
+			<Text
+				elementType={elementType}
+				endContent={<Icon name="checkCircle" />}
+				gap={{ initial: '0', bp640: 'sp12' }}
+				startContent={<Icon name="checkCircle" />}
+			>
+				<span data-testid="copy">Responsive gap</span>
+			</Text>,
+		);
+		try {
+			for (const { width, expected } of [
+				{ width: 500, expected: 0 },
+				{ width: 800, expected: 12 },
+			]) {
+				await page.viewport(width, 800);
+				await expect
+					.poll(() => {
+						const copy = locator.getByTestId('copy').element();
+						const content = elementType === 'span' ? copy : copy.parentElement;
+						if (content == null) throw new Error('Expected content.');
+						return (
+							content.getBoundingClientRect().left -
+							querySvg(container).getBoundingClientRect().right
+						);
+					})
+					.toBeCloseTo(expected, 0);
+			}
+		} finally {
+			await page.viewport(1024, 800);
+		}
+	});
+}
+
+function Avatar(props: { size?: string }) {
+	const { size = '2.5rem' } = props;
+	return (
+		<Box
+			aria-label="Example avatar"
+			backgroundColor="neutral.subtle.rest"
+			blockSize={size}
+			borderRadius="full"
+			data-testid="avatar"
+			display="inline-flex"
+			elementType="span"
+			inlineSize={size}
+			role="img"
+		/>
+	);
+}
+
+test('compound content centres both adornments on its title’s capitals', async () => {
+	const { container, locator } = render(
+		<Text
+			data-testid="text"
+			elementType="div"
+			endContent={<IconButton aria-label="Dismiss" icon="close" />}
+			gap="sp12"
+			startContent={<Avatar />}
+			style={{ inlineSize: '18rem' }}
+		>
+			<LayoutStack gap="sp4">
+				<Text data-testid="title" fontWeight="emphasis">
+					<span data-testid="cap" style={capProbeStyle} />
+					Notification title
+				</Text>
+				<Text color="secondary" data-testid="description" typography="caption">
+					Description that may wrap onto multiple lines
+				</Text>
+			</LayoutStack>
+		</Text>,
+	);
+	const cap = verticalCentre(locator.getByTestId('cap').element());
+	const title = locator.getByTestId('title').element();
+	const description = locator.getByTestId('description').element();
+	const dismiss = locator.getByRole('button', { name: 'Dismiss' });
+
+	expect(verticalCentre(locator.getByTestId('avatar').element())).toBeCloseTo(cap, 0);
+	expect(verticalCentre(dismiss.element())).toBeCloseTo(cap, 0);
+	expect(description.getBoundingClientRect().left).toBeCloseTo(
+		title.getBoundingClientRect().left,
+		0,
+	);
+	await expectNoAxeViolations(container);
+});
+
+for (const typography of ['caption', 'label', 'heading3'] as const) {
+	test(`compound content centres adornments on a ${typography} title that inherits the root typography`, () => {
+		const { container, locator } = render(
+			<Text
+				elementType="div"
+				endContent={<IconButton aria-label="Dismiss" icon="close" />}
+				startContent={<Icon name="bookOpen" />}
+				style={{ inlineSize: '16rem' }}
+				typography={typography}
+			>
+				<LayoutStack gap="sp4">
+					<Text shouldInheritFont>
+						<span data-testid="cap" style={capProbeStyle} />
+						Notification title
+					</Text>
+					<Text color="secondary" typography="caption">
+						Description that may wrap onto multiple lines
+					</Text>
+				</LayoutStack>
+			</Text>,
+		);
+		const cap = verticalCentre(locator.getByTestId('cap').element());
+
+		expect(verticalCentre(querySvg(container))).toBeCloseTo(cap, 0);
+		expect(verticalCentre(locator.getByRole('button', { name: 'Dismiss' }).element())).toBeCloseTo(
+			cap,
+			0,
+		);
+	});
+}
+
+test('compound content aligns an adornment that mounts after the content', () => {
+	function Example({ hasEnd }: { hasEnd: boolean }) {
+		return (
+			<Text
+				elementType="div"
+				endContent={hasEnd ? <Icon name="checkCircle" /> : undefined}
+				startContent={<Icon name="bookOpen" />}
+			>
+				<LayoutStack gap="sp4">
+					<Text>
+						<span data-testid="cap" style={capProbeStyle} />
+						Primary title
+					</Text>
+					<Text typography="caption">Description</Text>
+				</LayoutStack>
+			</Text>
+		);
+	}
+	const { container, locator, rerender } = render(<Example hasEnd={false} />);
+	rerender(<Example hasEnd />);
+	const end = [...container.querySelectorAll('svg')].at(-1);
+	if (end == null) throw new Error('Expected the end icon.');
+
+	expect(verticalCentre(end)).toBeCloseTo(verticalCentre(locator.getByTestId('cap').element()), 0);
+});
+
+test('compound content preserves intrinsic adornments while shrinking long text', () => {
+	const { locator } = render(
+		<Text
+			data-testid="text"
+			elementType="div"
+			endContent={<span data-testid="end" style={{ display: 'block', inlineSize: '4rem' }} />}
+			gap="sp8"
+			startContent={<span data-testid="start" style={{ display: 'block', inlineSize: '4rem' }} />}
+			style={{ inlineSize: '12rem' }}
+		>
+			<LayoutStack gap="sp4">
+				<Text data-testid="title">
+					Anunbrokenstringoftextthatwouldotherwiseforcetherowtooverflowitscontainer
+				</Text>
+				<Text typography="caption">Description</Text>
+			</LayoutStack>
+		</Text>,
+	);
+	const text = locator.getByTestId('text').element();
+
+	expect(locator.getByTestId('start').element().getBoundingClientRect().width).toBeCloseTo(64, 0);
+	expect(locator.getByTestId('end').element().getBoundingClientRect().width).toBeCloseTo(64, 0);
+	expect(locator.getByTestId('title').element().getBoundingClientRect().width).toBeLessThan(64);
+	expect(text.scrollWidth).toBeLessThanOrEqual(text.clientWidth);
+});
+
+test('a large compound avatar grows the row and preserves keyboard access to its trailing action', async () => {
+	const { container, locator, user } = render(
+		<Text
+			data-testid="text"
+			elementType="div"
+			endContent={<IconButton aria-label="Dismiss" icon="close" />}
+			gap="sp12"
+			shouldDisableTrim
+			startContent={<Avatar size="3rem" />}
+			style={{ inlineSize: '18rem' }}
+			typography="heading3"
+		>
+			<LayoutStack gap="sp4">
+				<Heading level={3} shouldInheritFont>
+					<span data-testid="cap" style={capProbeStyle} />
+					Account notification
+				</Heading>
+				<Text color="secondary" typography="caption">
+					A description that wraps beneath the title
+				</Text>
+			</LayoutStack>
+		</Text>,
+	);
+	const text = locator.getByTestId('text').element().getBoundingClientRect();
+	const avatar = locator.getByTestId('avatar').element();
+	const cap = verticalCentre(locator.getByTestId('cap').element());
+	const action = locator.getByRole('button', { name: 'Dismiss' });
+
+	expect(avatar.getBoundingClientRect().top).toBeGreaterThanOrEqual(text.top - 0.5);
+	expect(avatar.getBoundingClientRect().bottom).toBeLessThanOrEqual(text.bottom + 0.5);
+	expect(verticalCentre(avatar)).toBeCloseTo(cap, 0);
+	expect(verticalCentre(action.element())).toBeCloseTo(cap, 0);
+	await user.keyboard('{Tab}');
+	await expect.element(action).toHaveFocus();
+	await expectNoAxeViolations(container);
+});
+
+const primaryTextWarning = /shouldInheritFont/;
+
+test('a development warning names the fix when the first line of compound content uses another typography', () => {
+	const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+	try {
+		const { rerender } = render(
+			<Text elementType="div" startContent={<Icon name="bookOpen" />}>
+				<LayoutStack gap="sp4">
+					<Heading level={3}>Notification title</Heading>
+					<Text typography="caption">Description</Text>
+				</LayoutStack>
+			</Text>,
+		);
+		rerender(
+			<Text elementType="div" startContent={<Icon name="bookOpen" />}>
+				<LayoutStack gap="sp4">
+					<Heading level={3}>Updated title</Heading>
+					<Text typography="caption">Description</Text>
+				</LayoutStack>
+			</Text>,
+		);
+		const warnings = consoleError.mock.calls.filter(([message]) => {
+			return typeof message === 'string' && primaryTextWarning.test(message);
+		});
+
+		expect(warnings).toHaveLength(1);
+		expect(warnings[0]?.[0]).toMatch(/font-size/);
+		expect(warnings[0]?.[0]).toMatch(/`typography`/);
+	} finally {
+		consoleError.mockRestore();
+	}
+});
+
+for (const { name, node } of [
+	{
+		name: 'a body title in a body Text',
+		node: (
+			<Text
+				elementType="div"
+				endContent={<IconButton aria-label="Dismiss" icon="close" />}
+				gap="sp12"
+				startContent={<Avatar />}
+			>
+				<LayoutStack gap="sp4">
+					<Text fontWeight="emphasis">Notification title</Text>
+					<Text color="secondary" typography="caption">
+						Description that may wrap onto multiple lines
+					</Text>
+				</LayoutStack>
+			</Text>
+		),
+	},
+	{
+		name: 'a title that inherits the root typography',
+		node: (
+			<Text elementType="div" startContent={<Icon name="bookOpen" />} typography="heading3">
+				<LayoutStack gap="sp4">
+					<Heading level={3} shouldInheritFont>
+						Notification title
+					</Heading>
+					<Text typography="caption">Description</Text>
+				</LayoutStack>
+			</Text>
+		),
+	},
+	{
+		name: 'a hidden caption before the title',
+		node: (
+			<Text elementType="div" startContent={<Icon name="bookOpen" />}>
+				<span aria-hidden="true">
+					<Text typography="caption">Hidden hint</Text>
+				</span>
+				<Text>Notification title</Text>
+			</Text>
+		),
+	},
+]) {
+	test(`compound content with ${name} logs no development warning`, () => {
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+		try {
+			render(node);
+
+			expect(
+				consoleError.mock.calls.filter(([message]) => {
+					return typeof message === 'string' && primaryTextWarning.test(message);
+				}),
+			).toHaveLength(0);
+		} finally {
+			consoleError.mockRestore();
+		}
+	});
+}

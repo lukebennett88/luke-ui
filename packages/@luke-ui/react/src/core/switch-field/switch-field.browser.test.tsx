@@ -229,7 +229,7 @@ test('SwitchField runs a validate function', async () => {
 });
 
 // The error hangs at the label's inline edge, not under the track.
-test('the SwitchField error text starts at the label text', () => {
+test('the SwitchField error text starts at the label and its icon centres on the capitals', () => {
 	const errorMessage =
 		'Turn this on to continue. This message wraps onto a second line to check its alignment.';
 	const { container } = render(
@@ -243,6 +243,7 @@ test('the SwitchField error text starts at the label text', () => {
 
 	expect(measurement.firstLineStart).toBeCloseTo(labelStart, 0);
 	expect(measurement.secondLineStart).toBeCloseTo(labelStart, 0);
+	expect(Math.abs(measurement.iconCentre - measurement.firstLineCapCentre)).toBeLessThan(1);
 });
 
 test('the SwitchField scene has no axe violations', async () => {

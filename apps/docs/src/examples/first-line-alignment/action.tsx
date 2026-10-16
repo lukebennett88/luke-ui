@@ -4,7 +4,6 @@ import { Heading } from '@luke-ui/react/heading';
 import { Icon } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Text } from '@luke-ui/react/text';
-import { Track } from '@luke-ui/react/track';
 import { Comparison, ComparisonItem } from '#docs';
 
 const dismiss = <IconButton aria-label="Dismiss" icon="close" prominence="low" size="small" />;
@@ -12,19 +11,7 @@ const dismiss = <IconButton aria-label="Dismiss" icon="close" prominence="low" s
 export default () => {
 	return (
 		<Comparison direction="horizontal">
-			<ComparisonItem label="Current: Track">
-				<Box maxInlineSize="18rem">
-					<Track
-						gap="sp8"
-						railAlignment="firstLine"
-						railEnd={dismiss}
-						railStart={<Icon name="checkCircle" size="small" />}
-					>
-						<Text elementType="p">Example message that wraps onto a second line</Text>
-					</Track>
-				</Box>
-			</ComparisonItem>
-			<ComparisonItem label="Proposed: endContent">
+			<ComparisonItem label="endContent">
 				<Box maxInlineSize="18rem">
 					<Text
 						elementType="p"
@@ -35,7 +22,7 @@ export default () => {
 					</Text>
 				</Box>
 			</ComparisonItem>
-			<ComparisonItem label="Proposed: heading beside an action">
+			<ComparisonItem label="heading beside an action">
 				<Box
 					alignItems="baseline"
 					display="flex"

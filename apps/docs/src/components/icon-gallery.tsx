@@ -8,7 +8,6 @@ import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { vars } from '@luke-ui/react/theme';
-import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import type { JSX, ReactNode } from 'react';
@@ -16,7 +15,6 @@ import { useDeferredValue, useEffect, useMemo, useReducer, useRef, useState } fr
 import { Button as RacButton } from 'react-aria-components/Button';
 import * as styles from './icon-gallery.css.js';
 import { TextToggleButtonGroup } from './playground/icon-toggle-button-group.js';
-import * as referenceStyles from './reference-table.css.js';
 
 type GalleryIconSize = NonNullable<IconProps['size']>;
 
@@ -106,41 +104,37 @@ export function IconGallery(): JSX.Element {
 
 	return (
 		<Stack className="not-prose" gap="sp16">
-			<Track
-				className={referenceStyles.filterTrackCaption}
-				gap="sp12"
-				railAlignment="firstLine"
-				railEnd={
-					<>
-						<Text color="secondary" fontVariantNumeric="tabular-nums" typography="caption">
-							{countText}
-						</Text>
-						<VisuallyHidden aria-live="polite" elementType="p">
-							{deferredCountText}
-						</VisuallyHidden>
-					</>
-				}
-			>
-				<Cluster gap="sp12">
-					<Box flexBasis="14rem" flexGrow="1" minInlineSize="12rem">
-						<TextInputField
-							aria-label="Filter icons by name"
-							inputRef={inputRef}
-							onChange={setFilter}
-							placeholder="Filter by name"
-							prefix={<Icon name="search" size="small" />}
-							size="small"
-							value={filter}
+			<Cluster flexWrap="nowrap" gap="sp12">
+				<Box flexGrow="1" minInlineSize={0}>
+					<Cluster gap="sp12">
+						<Box flexBasis="14rem" flexGrow="1" minInlineSize="12rem">
+							<TextInputField
+								aria-label="Filter icons by name"
+								inputRef={inputRef}
+								onChange={setFilter}
+								placeholder="Filter by name"
+								prefix={<Icon name="search" size="small" />}
+								size="small"
+								value={filter}
+							/>
+						</Box>
+						<TextToggleButtonGroup
+							label="Preview size"
+							onChange={setPreviewSize}
+							options={SIZE_OPTIONS}
+							value={previewSize}
 						/>
-					</Box>
-					<TextToggleButtonGroup
-						label="Preview size"
-						onChange={setPreviewSize}
-						options={SIZE_OPTIONS}
-						value={previewSize}
-					/>
-				</Cluster>
-			</Track>
+					</Cluster>
+				</Box>
+				<Box flexShrink="0">
+					<Text color="secondary" fontVariantNumeric="tabular-nums" typography="caption">
+						{countText}
+					</Text>
+					<VisuallyHidden aria-live="polite" elementType="p">
+						{deferredCountText}
+					</VisuallyHidden>
+				</Box>
+			</Cluster>
 
 			{filteredNames.length === 0 ? (
 				<IconGalleryEmptyState onClear={handleClearFilter} query={filter.trim()} />

@@ -14,7 +14,7 @@ export type NumeralPrecision = number | readonly [number, number];
 
 type _NumeralOmit = DistributiveOmit<
 	TextProps,
-	'children' | 'endContent' | 'fontVariantNumeric' | 'startContent' | 'textAlign'
+	'children' | 'endContent' | 'fontVariantNumeric' | 'gap' | 'startContent' | 'textAlign'
 >;
 interface _NumeralProps extends _NumeralOmit {
 	/** Enables compact notation (`1.2K`, `1.2 thousand`). */

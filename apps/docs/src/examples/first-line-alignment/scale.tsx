@@ -3,31 +3,12 @@ import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
 import type { TextProps } from '@luke-ui/react/text';
 import { Text } from '@luke-ui/react/text';
-import { Track } from '@luke-ui/react/track';
 import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (
 		<Comparison direction="horizontal">
-			<ComparisonItem label="Current: Track around Text">
-				<Stack gap="sp24" maxInlineSize="14rem">
-					{rows.map(({ size, typography }) => {
-						return (
-							<Track
-								gap="sp8"
-								key={typography}
-								railAlignment="firstLine"
-								railStart={<Icon name="checkCircle" size={size} />}
-							>
-								<Text elementType="p" typography={typography}>
-									{`${typography} that wraps`}
-								</Text>
-							</Track>
-						);
-					})}
-				</Stack>
-			</ComparisonItem>
-			<ComparisonItem label="Proposed: startContent">
+			<ComparisonItem label="startContent">
 				<Stack gap="sp24" maxInlineSize="14rem">
 					{rows.map(({ size, typography }) => {
 						return (

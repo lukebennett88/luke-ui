@@ -6,7 +6,7 @@ import { Text } from '@luke-ui/react/text';
 export default () => {
 	return (
 		<Stack gap="sp16" maxInlineSize="18rem">
-			<Text elementType="p" startContent={<Icon name="checkCircle" size="small" />}>
+			<Text elementType="p" gap="sp12" startContent={<Icon name="checkCircle" size="small" />}>
 				Example message that wraps onto a second line
 			</Text>
 			<Link href="#navigation">

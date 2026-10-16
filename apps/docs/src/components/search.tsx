@@ -1,8 +1,9 @@
+import { Box } from '@luke-ui/react/box';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Icon } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Button } from '@luke-ui/react/primitives/button';
-import { Track } from '@luke-ui/react/track';
 import type { ReactNode, RefObject } from 'react';
 import {
 	createContext,
@@ -219,16 +220,18 @@ function WideSearchTrigger({ context }: { context: SearchContextValue }) {
 						prominence="low"
 						size="small"
 					>
-						<Track
-							className={styles.triggerTrack}
-							elementType="span"
-							gap="sp8"
-							railAlignment="center"
-							railEnd={<SearchShortcutLabel />}
-							railStart={<Icon name="search" />}
-						>
-							<span className={styles.triggerPlaceholder}>Search</span>
-						</Track>
+						<Cluster className={styles.triggerRow} elementType="span" flexWrap="nowrap" gap="sp8">
+							<Icon name="search" />
+							<Box
+								className={styles.triggerPlaceholder}
+								elementType="span"
+								flexGrow="1"
+								minInlineSize={0}
+							>
+								Search
+							</Box>
+							<SearchShortcutLabel />
+						</Cluster>
 					</Button>
 				</ViewTransition>
 			)}

@@ -61,7 +61,6 @@
 		"./text-input-field": "./dist/text-input-field.js",
 		"./theme": "./dist/theme.js",
 		"./theme/compiler": "./dist/theme/compiler.js",
-		"./track": "./dist/track.js",
 		"./utils": "./dist/utils.js",
 		"./visually-hidden": "./dist/visually-hidden.js",
 		"./package.json": "./package.json",

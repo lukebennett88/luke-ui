@@ -79,16 +79,14 @@ test('declares @luke-ui/rainbow-sprinkles as a runtime dependency', () => {
 	expect('@luke-ui/rainbow-sprinkles' in (packageJson.devDependencies ?? {})).toBe(false);
 });
 
-test('sprinkles runtime imports published rainbow-sprinkles create-runtime-fn', async () => {
-	const entry = await readFile(new URL('../../../dist/box.js', import.meta.url), 'utf8');
-	const chunkSpecifier = entry.match(/from\s+["'](\.\/box-[^"']+)["']/)?.[1];
-	expect(chunkSpecifier).toBeTypeOf('string');
-	const source = await readFile(
-		new URL(chunkSpecifier!, new URL('../../../dist/', import.meta.url)),
-		'utf8',
-	);
-	expect(source).toContain('@luke-ui/rainbow-sprinkles/create-runtime-fn');
-	expect(source).not.toContain('#rainbow-sprinkles-runtime');
+test('sprinkles runtime imports published rainbow-sprinkles create-runtime-fn', () => {
+	// The sprinkles runtime can sit in a chunk shared with other entries, so follow the graph.
+	const boxGraph = builtImportGraph('box.js');
+
+	expect(boxGraph.packages).toContain('@luke-ui/rainbow-sprinkles/create-runtime-fn');
+	for (const file of boxGraph.files) {
+		expect(readDist(file)).not.toContain('#rainbow-sprinkles-runtime');
+	}
 });
 
 test('public JS/TS export declaration closures do not import styling engines', async () => {

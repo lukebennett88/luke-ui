@@ -35,6 +35,16 @@ test('inline typography takes no slot', () => {
 test('Text and Heading take adornments, Numeral and Blockquote do not', () => {
 	assertType<TextProps>({ endContent: 'End', startContent: 'Start' });
 	assertType<HeadingProps>({ endContent: 'End', startContent: 'Start' });
+	assertType<TextProps>({ gap: 'sp12', startContent: 'Start' });
+	assertType<HeadingProps>({ gap: { initial: '0', bp640: 'sp12' }, startContent: 'Start' });
+	// @ts-expect-error — responsive spacing needs an initial value
+	assertType<TextProps>({ gap: { bp640: 'sp12' } });
+	// @ts-expect-error — gap accepts spacing tokens, not arbitrary CSS lengths
+	assertType<TextProps>({ gap: '12px' });
+	// @ts-expect-error — a formatted number has no adornment spacing
+	assertType<NumeralProps>({ gap: 'sp12', value: 1 });
+	// @ts-expect-error — a quotation has no adornment spacing
+	assertType<BlockquoteProps>({ gap: 'sp12' });
 	// @ts-expect-error — a formatted number has no adornments
 	assertType<NumeralProps>({ startContent: 'Start', value: 1 });
 	// @ts-expect-error — a formatted number has no adornments

@@ -5,16 +5,17 @@ Branch evidence for [#711](https://github.com/lukebennett88/luke-ui/issues/711) 
 [docs/PUBLIC_API.md](../docs/PUBLIC_API.md) contains the durable rules.
 
 **Retain** keeps an independently useful public contract. **Change** keeps the export but changes
-its contract in this PR. **Private** removes an export from package entrypoints. A later issue owns
-only the explicitly deferred redesign, not an undecided visibility decision.
+its contract in this PR. **Private** removes an export from package entrypoints. **Remove** records
+a superseding removal. A later issue owns only the explicitly deferred redesign, not an undecided
+visibility decision.
 
 Evidence comes from the current package `exports` map, every module in `src/exports/`, and the
 implementation, public types, recipes and theme contract those modules reference. Paths in the
-inventory are relative to `packages/@luke-ui/react/`. Every listed entrypoint is retained. Each
-symbol has its own decision and consumer use below. There is no root entrypoint or primitives
-barrel. Inherited DOM props remain supported through the declared upstream/native prop type, rather
-than being duplicated here. The component tables record Luke UI additions, constraints, state
-ownership and defaults that affect behaviour or presentation.
+inventory are relative to `packages/@luke-ui/react/`. Each entrypoint records its current decision,
+including superseding removals. Each symbol has its own decision and consumer use below. There is no
+root entrypoint or primitives barrel. Inherited DOM props remain supported through the declared
+upstream/native prop type, rather than being duplicated here. The component tables record Luke UI
+additions, constraints, state ownership and defaults that affect behaviour or presentation.
 
 ## Settled boundaries
 
@@ -596,13 +597,13 @@ and `./stylesheet.css` and `./fonts.css`.
 
 ### `@luke-ui/react/track`
 
-Source: [src/exports/track.ts](../packages/@luke-ui/react/src/exports/track.ts). Entrypoint:
-**retain**.
+Entrypoint: **removed** by #801. The retain decision is superseded. Use `Text` or `Heading` with
+`startContent` and `endContent` for first-line alignment. Use `Box` or `Cluster` for general layout.
 
-| Symbol       | Decision | Independent consumer use                                                                |
-| ------------ | -------- | --------------------------------------------------------------------------------------- |
-| `Track`      | retain   | Align intrinsic rails with flexible inline content.                                     |
-| `TrackProps` | retain   | Type an app wrapper around `Track`. Align intrinsic rails with flexible inline content. |
+| Symbol       | Decision | Independent consumer use                                   |
+| ------------ | -------- | ---------------------------------------------------------- |
+| `Track`      | remove   | Superseded by typography adornments and layout primitives. |
+| `TrackProps` | remove   | Removed with the component.                                |
 
 ### `@luke-ui/react/utils`
 
@@ -693,11 +694,10 @@ controlled/uncontrolled state, RAC slots or separately replaceable parts.
 
 ### Other layout and content roots
 
-| Component    | Specific contract, presentation and defaults                                                                                                                                                                                                                                                       | State, slot, element and ref ownership                                                                                                                                                                                                                                                                      |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Track`      | `railStart` and `railEnd` are optional intrinsic-width ReactNode content. `children` uses remaining space. `gap` is optional spacing/responsive value requiring `initial`. `railAlignment`: `start` (default), `center`, `firstLine`. First-line alignment uses the Track's inherited line height. | Native root attributes and `ref:HTMLElement`; `elementType=div`, choices `div`, `li`, `span`. `span` uses span wrappers, other roots use div wrappers. No `renderRoot`, state or RAC slot. Rails and centre wrappers remain component-owned; the anatomy-coupled recipe stays private.                      |
-| `ScrollFade` | Required accessible name via exactly one of `aria-label`/`aria-labelledby`. `axis`: `inline` (default) or `block`. Accepts shared layout props except `overflow`, `overflowX`, `overflowY`.                                                                                                        | Always a `div`; `ref` reaches the scrollport. Luke UI owns scrolling, `role`, `tabIndex` and measured fade direction. Region semantics and `tabIndex=0` appear only during overflow. No public control pair, `elementType`, `renderRoot` or RAC slot. Measurement state/attributes and recipe stay private. |
-| `Prose`      | Native div props, children, className, style and div ref. Long-form spacing, list treatment, rules and table treatment follow the recipe. No variant defaults.                                                                                                                                     | Always a div, no state, `slot`, `elementType` or render callback. Consumer owns the content markup; retain its standalone scope recipe.                                                                                                                                                                     |
+| Component    | Specific contract, presentation and defaults                                                                                                                                                | State, slot, element and ref ownership                                                                                                                                                                                                                                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ScrollFade` | Required accessible name via exactly one of `aria-label`/`aria-labelledby`. `axis`: `inline` (default) or `block`. Accepts shared layout props except `overflow`, `overflowX`, `overflowY`. | Always a `div`; `ref` reaches the scrollport. Luke UI owns scrolling, `role`, `tabIndex` and measured fade direction. Region semantics and `tabIndex=0` appear only during overflow. No public control pair, `elementType`, `renderRoot` or RAC slot. Measurement state/attributes and recipe stay private. |
+| `Prose`      | Native div props, children, className, style and div ref. Long-form spacing, list treatment, rules and table treatment follow the recipe. No variant defaults.                              | Always a div, no state, `slot`, `elementType` or render callback. Consumer owns the content markup; retain its standalone scope recipe.                                                                                                                                                                     |
 
 ### Actions and links
 
@@ -843,7 +843,7 @@ demonstrated use.
 | `InlineField`      | Required ReactNode children; optional description/errorMessage and native div props.                                                                                                                                | Presentation div/ref places description and always-present error under a checkbox or switch label. No control state or root replacement.                                                                                                                            |
 | `FieldLabel`       | RAC Label props including htmlFor, elementType and RAC render; necessityIndicator icon/label, icon default.                                                                                                         | Default label tied to the surrounding semantic control root. No explicit public ref prop is declared. Native label slot attribute follows RAC Label context.                                                                                                        |
 | `FieldDescription` | RAC Text props with explicit id. Omit caller slot. Retain elementType and RAC render.                                                                                                                               | Defaults to span, forces slot='description' to join the field's aria-describedby wiring. No explicit public ref prop is declared.                                                                                                                                   |
-| `FieldError`       | RAC FieldError props, children node or validation-state function, state styling; absent content falls back to native validation message.                                                                            | Default div with a leading decorative icon and message wrapper. RAC root render retained. No explicit public ref prop is declared. Error/description colours and marker mechanics are owned; no public tone or field recipe.                                        |
+| `FieldError`       | RAC FieldError props, children node or validation-state function, state styling; absent content falls back to native validation message.                                                                            | Fixed div root with a leading decorative icon as a Text adornment. RAC root render retained. `ref` reaches the root. Error/description colours and marker mechanics are owned; no public tone or field recipe.                                                      |
 
 `FieldNecessityIndicator` remains the shared public `icon | label` annotation. Accessible-name
 union, normalisation helpers, field recipe, slot functions and size/state context are private.
@@ -1111,8 +1111,8 @@ export names internally; that does not publish them through the package map.
 | `GridRecipeVariants`                                                   | private              | Follows the private display-only recipe; use GridProps.                                                                                      |
 | `aspectRatioRecipe`                                                    | private              | Depends on direct media-child rules. Use AspectRatio.                                                                                        |
 | `AspectRatioRecipeVariants`                                            | private              | Follows the private media-frame recipe; use AspectRatioProps.                                                                                |
-| `trackRecipe`                                                          | private              | Requires centre/rail/root anatomy. Use Track's rail content API.                                                                             |
-| `TrackRecipeVariants`                                                  | private              | Follows private Track recipe; use TrackProps.                                                                                                |
+| `trackRecipe`                                                          | removed              | Removed with Track by #801.                                                                                                                  |
+| `TrackRecipeVariants`                                                  | removed              | Removed with Track by #801.                                                                                                                  |
 | `containerRecipe`                                                      | private              | Coupled to Container's fixed/arbitrary size resolution. Use Container.                                                                       |
 | `ContainerRecipeVariants`                                              | private              | Follows the private container recipe; use ContainerProps.                                                                                    |
 | `scrollFadeRecipe`                                                     | private              | Requires owned scrollport/overflow measurement. Use ScrollFade.                                                                              |

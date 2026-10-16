@@ -116,7 +116,7 @@ export const fieldMorphHost = style({
 	},
 });
 
-export const triggerTrack = style({
+export const triggerRow = style({
 	'@layer': {
 		components: {
 			inlineSize: '100%',

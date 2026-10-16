@@ -323,11 +323,11 @@ const AUDITED_TYPES: ReadonlyArray<{
 		visible: ['elementType', 'id', 'render'],
 	},
 	{
-		// `FieldError` styles RAC's field error slot, so it documents the same element-choice contract.
+		// `FieldError` owns its `div` root, so it drops RAC's element choice. `ref` reaches that root.
 		forwardsDomProps: true,
 		name: 'FieldErrorProps',
 		path: 'packages/@luke-ui/react/src/core/primitives/field/error.tsx',
-		visible: ['elementType', 'render'],
+		visible: ['ref', 'render'],
 	},
 	{
 		// The guide teaches `elementType` for a screen-reader-only heading, `isFocusable` for focus
@@ -544,6 +544,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'fontStyle',
 			'fontVariantNumeric',
 			'fontWeight',
+			'gap',
 			'isVisuallyHidden',
 			'lineClamp',
 			'render',

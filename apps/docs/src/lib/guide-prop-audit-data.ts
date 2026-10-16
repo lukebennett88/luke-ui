@@ -214,13 +214,6 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'gap',
 		'renderRoot',
 	],
-	'layout/track.mdx::packages/@luke-ui/react/src/core/track/track.tsx::TrackProps': [
-		'elementType',
-		'gap',
-		'railAlignment',
-		'railEnd',
-		'railStart',
-	],
 	'layout/visually-hidden.mdx::packages/@luke-ui/react/src/core/visually-hidden/visually-hidden.tsx::VisuallyHiddenProps':
 		['elementType', 'isFocusable', 'ref', 'renderRoot'],
 	'primitives/button.mdx::packages/@luke-ui/react/src/core/primitives/button/button.tsx::ButtonProps':
@@ -365,7 +358,10 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	'typography/heading.mdx::packages/@luke-ui/react/src/core/heading/heading-context.tsx::HeadingLevelsProps':
 		['base'],
 	'typography/heading.mdx::packages/@luke-ui/react/src/core/heading/heading.tsx::HeadingProps': [
+		'endContent',
+		'gap',
 		'level',
+		'startContent',
 		'typography',
 	],
 	'typography/kbd.mdx::packages/@luke-ui/react/src/core/kbd/kbd.tsx::KbdProps': [],
@@ -392,12 +388,16 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	],
 	'typography/text.mdx::packages/@luke-ui/react/src/core/text/text.tsx::TextProps': [
 		'elementType',
+		'endContent',
 		'fontVariantNumeric',
 		'fontWeight',
+		'gap',
 		'isVisuallyHidden',
 		'lineClamp',
 		'shouldDisableTrim',
+		'shouldInheritFont',
 		'slot',
+		'startContent',
 		'textAlign',
 		'textDecoration',
 		'textTransform',

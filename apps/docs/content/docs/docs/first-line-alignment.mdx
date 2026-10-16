@@ -1,55 +1,34 @@
 ---
-title: First-line alignment (spike)
-description: Compare Track with exploratory Text adornments for aligning content with a first line.
+title: First-line alignment
+description: Compare typography adornments with general layout alignment.
 ---
 
-This page belongs to an exploratory spike for
-[#801](https://github.com/lukebennett88/luke-ui/issues/801). It compares the current
-[Track](/components/layout/track) with `startContent` and `endContent` on
-[Text](/components/typography/text) and [Heading](/components/typography/heading). Neither is
-settled API.
+Use `startContent` and `endContent` on [Text](/components/typography/text#adornments) or
+[Heading](/components/typography/heading#adornments) to align an icon, avatar, or control with the
+capitals of the first line. Use [Box](/components/layout/box) or
+[Cluster](/components/layout/cluster) when the whole content box determines the alignment.
 
 Resize a preview to see wrapping. The examples use the docs theme, its Inter webfont, and its
 Capsize trims.
 
-## Element type
+## Inline and block flow
 
-The default `span` keeps adornments in sentence flow. Block element types hang wrapped lines after
-`startContent`. See [Text adornments](/components/typography/text#adornments) for element choice and
-trimming guidance.
+The default `span` keeps adornments in sentence flow. Its wrapped lines may return beneath the
+leading adornment, and its trailing adornment follows the final word. Block element types hang
+wrapped lines after `startContent` and keep `endContent` beside the first line.
 
 <ExampleBlock
 	src="first-line-alignment/element-type"
 	title="First-line alignment: Inline and paragraph flow"
 />
 
-## How the candidates align
-
-A first line has its own font size, line height, and trim. CSS cannot read those from a sibling, so
-content beside the text can only match them by sharing the text's typography.
-
-- **Track `firstLine`** sizes each rail to one line of Track's inherited line height. A child that
-  sets its own typography, such as a `Heading`, moves the line away from the rail. A trimmed child,
-  such as `Text` with `elementType="p"`, moves its first line up by its trim, even with the same
-  type style.
-- **Text adornments** render inside the text element, so they inherit its typography. Each adornment
-  sits in a box centred on the capitals of its line, whatever it contains.
-  - A block element type, such as `p`, `div`, or a heading, lays the adornments and the text out in
-    a row. Wrapped lines hang after `startContent`, and `endContent` sits at the end of the first
-    line.
-
 ## Heading with a leading icon
 
-The heading is trimmed, wraps, and uses `heading3`. Track around the heading puts the icon about 4px
-below the first line. Track inside the heading comes within 1px but needs `elementType="span"`.
-`startContent` needs neither.
+The icon follows the heading's typography and trim when the heading wraps.
 
 <ExampleBlock src="first-line-alignment/heading-icon" title="First-line alignment: Heading icon" />
 
 ## Leading and trailing adornments
-
-`endContent` sits at the inline end of the row and lines up with the first line, like a trailing
-rail.
 
 <ExampleBlock
 	src="first-line-alignment/leading-trailing"
@@ -58,8 +37,8 @@ rail.
 
 ## Graphics and text adornments
 
-Adornments centre on the capitals of the first line. The examples use an icon, a status dot, `Kbd`,
-and a caption.
+The examples use an icon, a status dot, `Kbd`, and a caption. Each adornment is centred on the
+capitals of the first line.
 
 <ExampleBlock
 	src="first-line-alignment/graphic-text"
@@ -68,32 +47,32 @@ and a caption.
 
 ## Compound content
 
-An avatar beside a title and a description is not one run of text, so the description does not hang
-under the title. Track still lays this out. `firstLine` lets the taller avatar overflow above the
-row. `start` aligns the avatar with the top of the content, and `center` with its middle.
+Use `Text elementType="div"` around a `Stack` for a title and description beside adornments. The
+adornments follow the outer Text's typography, so set the title's style as `typography` on the outer
+Text and set `shouldInheritFont` on the title. The description stays in the same content column.
+[Text](/components/typography/text#compound-content) explains the rule. Clamp a title or description
+on its own Text rather than clamping the compound wrapper.
 
 <ExampleBlock src="first-line-alignment/compound" title="First-line alignment: Compound content" />
 
 ## Trailing actions
 
-An `IconButton` in `endContent` lines up with the first line of a paragraph and joins its keyboard
-order after the text. A heading should not contain an action, because its text joins the heading's
-accessible name. Place the action beside the heading in a row aligned on baselines instead.
+An `IconButton` in a paragraph's `endContent` joins its keyboard order after the text. Place a
+heading's action beside the heading, because action text inside a heading joins its accessible name.
 
 <ExampleBlock src="first-line-alignment/action" title="First-line alignment: Trailing actions" />
 
 ## Long text and line clamping
 
-The text shrinks below its longest word, so an unbroken URL wraps inside the row. `lineClamp` clamps
-the text and keeps the adornments.
+An unbroken URL wraps inside the available text width. `lineClamp` clamps a text run and keeps its
+adornments visible.
 
 <ExampleBlock src="first-line-alignment/overflow" title="First-line alignment: Long text" />
 
 ## Inline composition
 
-An inline `Text` with adornments stays in its sentence and breaks across lines with it. Track as a
-`span` is one box, so a text link around it loses its underline. `Button` and `Link` with
-`appearance="button"` already take `startContent` and `endContent`.
+Keep the default `span` inside an underlined text link so the text stays in inline flow. `Button`
+and `Link` with `appearance="button"` have their own adornment props.
 
 <ExampleBlock src="first-line-alignment/inline" title="First-line alignment: Inline" />
 
@@ -105,34 +84,42 @@ Adornments follow the logical inline direction, so `startContent` sits on the ri
 
 ## Type styles and icon sizes
 
-Each row pairs a type style with an icon size. Track centres the icon in one body line, and each
-trimmed paragraph moves up inside it, so the icon sits up to 8px below the first line.
-
 <ExampleBlock src="first-line-alignment/scale" title="First-line alignment: Type styles" />
 
-## A row nested in the text
+## Spacing
 
-A narrower alternative leaves `Text` unchanged and nests a row inside it, as Track does with
-`elementType="span"`. The nested row cannot be clamped by the outer `Text`, measures the wrong line
-when its content sets its own typography, and stops a link's underline.
+`gap` accepts a spacing token or responsive values with `initial`. The default is `sp4` for inline
+text and `sp8` for block text. Responsive values follow the nearest ancestor size container. See
+[Responsive values](/docs/layout#responsive-values).
 
-<ExampleBlock src="first-line-alignment/narrower" title="First-line alignment: Nested row" />
+<ExampleBlock src="first-line-alignment/gap" title="First-line alignment: Spacing" />
+
+## General layout alignment
+
+Use `Box` to align the edges or centres of whole content boxes. Use `Cluster` when the items should
+wrap. Choose semantic elements such as `li` when the row belongs to a list.
+
+<ExampleBlock src="first-line-alignment/layout" title="First-line alignment: General layout" />
 
 ## Limitations
 
 <ExampleBlock src="first-line-alignment/limitations" title="First-line alignment: Limitations" />
 
-- Adornments hang the text of their own element. A description in a sibling element does not hang.
-- Inline text does not hang. Its wrapped lines start under the adornment, as in a sentence.
-- `textAlign="center"` centres the text in the space beside the adornment, not as a group with it.
-- An icon taller than the line moves the first line down to stay centred on it.
-- Adornments sit in a `span`, so they take phrasing content.
-- Adornments move by the `cap` unit. A browser without it centres them on the x-height instead.
+- A separate sibling description does not hang under a title's text. Put both in a compound Text
+  when they need the same content column.
+- Inline text does not hang. Its wrapped lines may start under the adornment.
+- `textAlign="center"` centres the text in the space beside the adornment.
+- An adornment taller than the first line moves the text down to stay centred on it.
+- Adornments take phrasing content. Use a layout primitive for arbitrary block content beside text.
+- A browser without the `cap` unit centres adornments on the x-height instead.
+- Compound adornments centre on the first line only when it uses the outer Text's typography. They
+  do not align independently with several text runs.
 
 ## Measure in this browser
 
 Each value is the distance from a graphic's centre to its line's capitals, or between two baselines.
-The readout waits for `document.fonts.ready` and records once per page load.
+The compound fixtures measure the avatar against a cap probe in a title that uses the outer Text's
+typography. The readout waits for `document.fonts.ready` and records once per page load.
 
 <ExampleBlock src="first-line-alignment/readout" title="First-line alignment: Readout" />
 
@@ -142,8 +129,9 @@ To compare a browser:
    environment row. Offsets near `0px` show closer measured alignment. Resize the span and paragraph
    previews to compare inline wrapping with hanging lines and the position of `endContent`.
 2. In Inline composition, check the link underline at rest, on hover, and after focusing with Tab.
-   Inspect Long text and line clamping, Graphics and text, and Right-to-left. In DevTools, block
-   requests for Inter `.woff2` files and reload, then unblock them and reload again.
+   Inspect Compound content, Long text and line clamping, Graphics and text, Spacing, and
+   Right-to-left. In DevTools, block requests for Inter `.woff2` files and reload, then unblock them
+   and reload again.
 3. Reload after changing fonts or the theme. The `1cap` probe reports the selected font's cap
    geometry. It does not prove fallback metrics match the theme's Capsize trims or verify underline
    painting.
@@ -152,10 +140,10 @@ To compare a browser:
 
 <Cards>
 	<Card href="/components/typography/text" title="Text">
-		See `startContent` and `endContent` in the Text guide.
+		Choose inline, paragraph, or compound content.
 	</Card>
-	<Card href="/components/layout/track" title="Track">
-		Compare Track's rail alignments.
+	<Card href="/docs/layout" title="Layout">
+		Choose a layout primitive and responsive spacing.
 	</Card>
 	<Card href="/docs/typography" title="Typography">
 		Read how type styles and Capsize trims work.

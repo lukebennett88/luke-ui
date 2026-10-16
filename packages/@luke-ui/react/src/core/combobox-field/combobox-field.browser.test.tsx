@@ -245,7 +245,7 @@ test('the ComboboxField error icon is centred on the first line and wrapped line
 	const measurement = measureFieldError(page.getByText(wrappingErrorMessage).element());
 
 	expect(input).toHaveAccessibleDescription(wrappingErrorMessage);
-	expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
+	expect(Math.abs(measurement.iconCentre - measurement.firstLineCapCentre)).toBeLessThan(1);
 	expect(measurement.secondLineStart).toBeDefined();
 	expect(measurement.secondLineStart).toBeCloseTo(measurement.firstLineStart, 0);
 });

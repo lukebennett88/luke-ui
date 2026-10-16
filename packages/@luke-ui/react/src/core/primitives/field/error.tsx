@@ -1,45 +1,55 @@
-import type { JSX } from 'react';
+import type { JSX, Ref } from 'react';
 import type { FieldErrorProps as RacFieldErrorProps } from 'react-aria-components/FieldError';
 import { FieldError as RacFieldError } from 'react-aria-components/FieldError';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import { trackRecipe } from '../../track/recipe.css.js';
+import { Text } from '../../text/text.js';
+import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { fieldRecipe } from './recipe.css.js';
 
+type _FieldErrorOmit = DistributiveOmit<RacFieldErrorProps, 'elementType'>;
+
+interface _FieldErrorProps extends _FieldErrorOmit {
+	/** Ref to the message element. */
+	ref?: Ref<HTMLDivElement>;
+}
+
 /** Props for `FieldError`. */
-export type FieldErrorProps = Prettify<RacFieldErrorProps>;
+export type FieldErrorProps = Prettify<_FieldErrorProps>;
 
 /**
  * Validation message for a field, shown with a leading error icon while the field is invalid.
  *
- * The icon is centred on the message's first line. Wrapped lines align with the text, not the icon.
+ * The icon is centred on the first line's capitals. Wrapped lines align with the message text. The
+ * message renders a `div`, so it can hold block content such as a list.
  */
 export function FieldError(props: FieldErrorProps): JSX.Element {
-	const { centre, rail, root } = trackRecipe({ railAlignment: 'firstLine' });
-	const { icon, message } = fieldRecipe({ tone: 'error' });
+	const { render, ...otherProps } = props;
 
 	return (
 		<RacFieldError
-			{...props}
-			// The message is the Track root. Its children are one `centre` element, not a flex item
-			// per child, so a message with mixed inline content (text, a link, emphasis) flows as one
-			// run of text. React Aria also accepts a render function here, and a message with no
-			// children falls back to the field's native validation message.
-			className={composeRenderProps(props.className, (className) => {
-				return message({ className: root({ className }) });
-			})}
-		>
-			{composeRenderProps(props.children, (children, { defaultChildren }) => {
-				const content = children ?? defaultChildren;
-				if (content == null) return null;
-
+			{...otherProps}
+			elementType="div"
+			// React Aria resolves the state-aware props, the native validation message, and the id
+			// that describes the control. `Text` renders that root with the icon as its adornment.
+			render={(domProps, state) => {
 				return (
-					<>
-						<span aria-hidden="true" className={rail({ className: icon() })} />
-						<span className={centre()}>{content}</span>
-					</>
+					<Text
+						{...domProps}
+						color="danger"
+						elementType="div"
+						fontWeight="body"
+						// The icon's inline size assumes this gap. See `errorIconGap`.
+						gap="sp8"
+						render={render == null ? undefined : (textProps) => render(textProps, state)}
+						shouldDisableTrim
+						slot={null}
+						startContent={
+							<span aria-hidden="true" className={fieldRecipe({ tone: 'error' }).icon()} />
+						}
+						typography="label"
+					/>
 				);
-			})}
-		</RacFieldError>
+			}}
+		/>
 	);
 }

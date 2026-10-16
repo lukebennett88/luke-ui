@@ -26,7 +26,7 @@ export const inlineFieldIndent = createVar();
 /** Gap between an inline control and its label text. */
 export const inlineControlGap = vars.space.sp8;
 
-/** Gap between the error icon and the message text that follows it. */
+/** Gap between the error icon and the message text. `FieldError` passes the same gap to `Text`. */
 const errorIconGap = vars.space.sp8;
 
 /**
@@ -42,11 +42,11 @@ const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px
  * Slots: `root` (stacked layout), `inline` (inline-control layout), `label`, `inlineLabel` (the
  * clickable label of an inline control such as `CheckboxLabel`), `inlineLabelText` (the text of a
  * composed inline control's label), `necessityMarker` (the required marker after a label's text),
- * `message` (description/error text), and `icon` (the error message's leading icon).
+ * `message` (description text), and `icon` (the error message's leading icon).
  *
- * `FieldError` lays the error `message` out with `trackRecipe`'s `firstLine` rail alignment, which
- * centres the `icon` rail on the message's first line and keeps wrapped lines aligned with the
- * text. This recipe supplies the rail's size and glyph.
+ * `FieldError` is a `Text` with the icon as its start adornment. `Text` sets the message's
+ * typography, centres the icon on the first line's capitals, and keeps wrapped lines aligned with
+ * the text. This recipe supplies the icon's size and glyph.
  */
 const fieldConfig = {
 	slots: {
@@ -145,15 +145,12 @@ const fieldConfig = {
 						'(forced-colors: active)': { backgroundColor: 'CanvasText' },
 					},
 					backgroundColor: vars.color.foreground.danger.rest,
+					blockSize: ICON_SIZES.xsmall,
 					inlineSize: errorIconRailInlineSize,
 					maskImage: iconMaskUrls.exclamationTriangle,
 					maskPosition: 'center',
 					maskRepeat: 'no-repeat',
 					maskSize: ICON_SIZES.xsmall,
-				},
-				message: {
-					color: vars.color.foreground.danger.rest,
-					gap: errorIconGap,
 				},
 			},
 		},

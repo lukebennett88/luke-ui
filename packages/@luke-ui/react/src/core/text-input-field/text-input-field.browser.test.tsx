@@ -307,7 +307,7 @@ test('an errorMessage marks the field invalid, describes it, and renders its mar
 	expect(page.getByText('terms').element().tagName).toBe('STRONG');
 });
 
-test('the error icon is centred on the first line and wrapped lines align with the text', () => {
+test('the error icon is centred on the first line’s capitals and wrapped lines align with the text', () => {
 	render(
 		<Stack width="14rem">
 			<TextInputField errorMessage={wrappingErrorMessage} label="Email" name="email" />
@@ -318,7 +318,7 @@ test('the error icon is centred on the first line and wrapped lines align with t
 	const measurement = measureFieldError(page.getByText(wrappingErrorMessage).element());
 
 	expect(input).toHaveAccessibleDescription(wrappingErrorMessage);
-	expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
+	expect(Math.abs(measurement.iconCentre - measurement.firstLineCapCentre)).toBeLessThan(1);
 	expect(measurement.firstLineStart).toBeGreaterThanOrEqual(measurement.iconEnd);
 	expect(measurement.secondLineStart).toBeDefined();
 	expect(measurement.secondLineStart).toBeCloseTo(measurement.firstLineStart, 0);
@@ -349,7 +349,7 @@ test('a message with mixed inline content flows as one run beside the icon', () 
 	expect(input).toHaveAccessibleDescription(
 		'Enter an email address in the form name@example.com with no spaces.',
 	);
-	expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
+	expect(Math.abs(measurement.iconCentre - measurement.firstLineCapCentre)).toBeLessThan(1);
 	expect(measurement.secondLineStart).toBeCloseTo(measurement.firstLineStart, 0);
 });
 

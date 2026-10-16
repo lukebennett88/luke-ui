@@ -84,25 +84,45 @@ rendered text only, so avoid using uppercase styling as a substitute for a clear
 ## Adornments
 
 Pass `startContent` or `endContent` to place content before or after the text, such as an icon or a
-`Kbd`. Each adornment is centred on the capitals of its line. This is an exploratory API. Compare it
-with Track in [First-line alignment](/docs/first-line-alignment).
+`Kbd`. Each adornment is centred on the capitals of its first line. Compare compositions in
+[First-line alignment](/docs/first-line-alignment).
 
-Choose the element by the content's role. Keep the default `span` for an adornment inside a sentence
-or underlined external link. Its inline flow preserves the link's underline and does not hang
-wrapped lines: they may return beneath `startContent`, while `endContent` follows the final word.
-Use `p` for a standalone message. Use `div` for a navigation link or pager title, not `p`.
-`elementType` selects the adornment layout and trim inference. Changing CSS `display` alone selects
-neither.
+Keep the default `span` inside a sentence or an underlined external link. Its inline flow preserves
+the link's underline. Wrapped lines may return beneath `startContent`, and `endContent` follows the
+final word. Use `p` for a standalone message. Use `div` for a navigation link, pager title, or
+compound content. `elementType` selects the adornment layout and trim inference. Changing CSS
+`display` alone selects neither.
 
 <ExampleBlock src="text/adornments" title="Text: Adornments" />
 
-With a block element type, the adornments and the text form a row. Wrapped lines align with the
-text, not with `startContent`, and `endContent` sits at the end of the first line. An adornment
-taller than the line moves the text down to stay centred on it.
+With a block element type, wrapped lines align with the text, and `endContent` sits at the end of
+the first line. An adornment taller than the line moves the text down to stay centred on it.
+
+Set `gap` to a spacing token to change the space beside the adornments. It defaults to `sp4` for
+inline text and `sp8` for block text. Responsive values require `initial` and follow the
+[layout breakpoints](/docs/layout#responsive-values).
 
 Adornments take phrasing content and are part of the element. Their text joins its accessible name.
-Do not put an action in a heading's adornments. For an adornment beside several elements, such as a
-title and a description, use [Track](/components/layout/track).
+Place an action beside a heading rather than inside its adornments.
+
+## Compound content
+
+Use `elementType="div"` with a `Stack` for a title and description. The adornments follow the outer
+Text's typography, the same as for a single run of text, so the first line of the content must use
+that typography. A nested Text in the default `body` style aligns with a `body` outer Text, whatever
+its `fontWeight`.
+
+<ExampleBlock src="text/compound" title="Text: Compound content" />
+
+When the first line needs another style, set `typography` on the outer Text and set
+`shouldInheritFont` on the nested Text that renders that line. In development, Text logs an error
+when the first line's font differs from the outer Text's.
+
+<ExampleBlock src="text/compound-typography" title="Text: Compound content typography" />
+
+Set `lineClamp` on each text run that needs truncation. A compound wrapper does not clamp its nested
+blocks as one text run. Use [Box](/components/layout/box) or [Cluster](/components/layout/cluster)
+when alignment should follow the whole content box or the items should wrap.
 
 ## API
 

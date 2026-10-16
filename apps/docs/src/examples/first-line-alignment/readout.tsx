@@ -5,7 +5,6 @@ import { IconButton } from '@luke-ui/react/icon-button';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { Track } from '@luke-ui/react/track';
 import type { CSSProperties, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -97,11 +96,24 @@ const baselineProbe = {
 
 const cap = <span data-cap style={capProbe} />;
 
+const avatar = (
+	<Box
+		aria-hidden="true"
+		backgroundColor="neutral.subtle.rest"
+		blockSize="2.5rem"
+		borderRadius="full"
+		data-graphic
+		display="inline-flex"
+		elementType="span"
+		inlineSize="2.5rem"
+	/>
+);
+
 type Result = { name: string; offset: number };
 
 const centreCases: Array<{ name: string; node: ReactNode }> = [
 	{
-		name: 'Proposed: Heading startContent',
+		name: 'Heading startContent',
 		node: (
 			<Heading level={3} startContent={<Icon name="checkCircle" />} typography="heading3">
 				{cap}Section heading that wraps
@@ -109,7 +121,7 @@ const centreCases: Array<{ name: string; node: ReactNode }> = [
 		),
 	},
 	{
-		name: 'Proposed: label Text with Kbd',
+		name: 'label Text with Kbd',
 		node: (
 			<Text
 				elementType="p"
@@ -122,7 +134,7 @@ const centreCases: Array<{ name: string; node: ReactNode }> = [
 		),
 	},
 	{
-		name: 'Proposed: caption with a tall icon',
+		name: 'caption with a tall icon',
 		node: (
 			<Text elementType="p" startContent={<Icon name="checkCircle" />} typography="caption">
 				{cap}Caption text beside a medium icon
@@ -130,7 +142,7 @@ const centreCases: Array<{ name: string; node: ReactNode }> = [
 		),
 	},
 	{
-		name: 'Proposed: inline in a sentence',
+		name: 'inline in a sentence',
 		node: (
 			<Text elementType="p">
 				Status: <Text startContent={<Icon name="checkCircle" size="xsmall" />}>{cap}Approved</Text>{' '}
@@ -139,7 +151,7 @@ const centreCases: Array<{ name: string; node: ReactNode }> = [
 		),
 	},
 	{
-		name: 'Proposed: IconButton endContent',
+		name: 'IconButton endContent',
 		node: (
 			<Text
 				elementType="p"
@@ -150,25 +162,41 @@ const centreCases: Array<{ name: string; node: ReactNode }> = [
 		),
 	},
 	{
-		name: 'Current: Track around Heading',
+		name: 'Compound: avatar beside a body title',
 		node: (
-			<Track gap="sp8" railAlignment="firstLine" railStart={<Icon name="checkCircle" />}>
-				<Heading level={3} typography="heading3">
-					{cap}Section heading that wraps
-				</Heading>
-			</Track>
+			<Text
+				elementType="div"
+				endContent={<IconButton aria-label="Dismiss" icon="close" prominence="low" size="small" />}
+				gap="sp12"
+				startContent={avatar}
+			>
+				<Stack gap="sp4">
+					<Text fontWeight="emphasis">{cap}Notification title</Text>
+					<Text color="secondary" typography="caption">
+						Description that may wrap onto multiple lines
+					</Text>
+				</Stack>
+			</Text>
 		),
 	},
 	{
-		name: 'Current: Track around a paragraph',
+		name: 'Compound: avatar beside a heading3 title',
 		node: (
-			<Track
-				gap="sp8"
-				railAlignment="firstLine"
-				railStart={<Icon name="checkCircle" size="small" />}
+			<Text
+				elementType="div"
+				endContent={<IconButton aria-label="Dismiss" icon="close" prominence="low" size="small" />}
+				startContent={avatar}
+				typography="heading3"
 			>
-				<Text elementType="p">{cap}Example message that wraps onto a second line</Text>
-			</Track>
+				<Stack gap="sp8">
+					<Text elementType="p" shouldInheritFont>
+						{cap}Title in the outer Text's typography
+					</Text>
+					<Text color="secondary" elementType="p" typography="caption">
+						Description below the primary text
+					</Text>
+				</Stack>
+			</Text>
 		),
 	},
 ];
@@ -188,7 +216,10 @@ function measure(root: HTMLElement): Array<Result> {
 			];
 		}
 		const capElement = fixture.querySelector('[data-cap]');
-		const graphic = fixture.querySelector('button') ?? fixture.querySelector('svg');
+		const graphic =
+			fixture.querySelector('[data-graphic]') ??
+			fixture.querySelector('button') ??
+			fixture.querySelector('svg');
 		if (capElement == null || graphic == null) return [];
 		return [{ name, offset: centreOf(graphic) - centreOf(capElement) }];
 	});

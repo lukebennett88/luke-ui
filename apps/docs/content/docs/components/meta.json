@@ -28,7 +28,6 @@
 		"layout/grid",
 		"layout/scroll-fade",
 		"layout/stack",
-		"layout/track",
 		"layout/visually-hidden",
 		"---Typography---",
 		"typography/blockquote",

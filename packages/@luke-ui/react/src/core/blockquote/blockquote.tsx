@@ -6,7 +6,7 @@ import { blockquoteRecipe } from './recipe.css.js';
 
 type _BlockquoteOmit = DistributiveOmit<
 	TextProps,
-	'color' | 'elementType' | 'endContent' | 'startContent'
+	'color' | 'elementType' | 'endContent' | 'gap' | 'startContent'
 >;
 
 interface _BlockquoteProps extends _BlockquoteOmit {}

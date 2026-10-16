@@ -392,7 +392,7 @@ test('the CheckboxField scene has no axe violations', async () => {
 
 // The error hangs at the label's inline edge, not under the control. The icon is centred on the
 // message's first line, and wrapped lines align with the first.
-test('the CheckboxField error text starts at the label text and its icon sits on the first line', () => {
+test('the CheckboxField error text starts at the label text and its icon centres on the first line’s capitals', () => {
 	const errorMessage =
 		'Accept the terms to continue. This message wraps onto a second line to check its alignment.';
 	const { container } = render(
@@ -413,7 +413,7 @@ test('the CheckboxField error text starts at the label text and its icon sits on
 	expect(input).toHaveAccessibleDescription(errorMessage);
 	expect(measurement.firstLineStart).toBeCloseTo(labelStart, 0);
 	expect(measurement.secondLineStart).toBeCloseTo(labelStart, 0);
-	expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
+	expect(Math.abs(measurement.iconCentre - measurement.firstLineCapCentre)).toBeLessThan(1);
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {

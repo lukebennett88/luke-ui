@@ -1,6 +1,11 @@
 import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
+import { cx } from '../../shared/utils/utils.js';
 import { typeStyleWeightRole } from '../../theme/type-styles.js';
+import type { RequiredInitialResponsive } from '../styles/responsive.js';
+import type { SprinklesProps } from '../styles/utilities.css.js';
+import { createSprinkles } from '../styles/utilities.css.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -21,9 +26,9 @@ interface TextStyleProps {
 	 */
 	color?: TextRecipeVariants['color'];
 	/**
-	 * Content after the text, such as an `Icon` or `Kbd`, centred on the capitals of its line. A
-	 * block element type places it at the inline end of the first line. An inline element type
-	 * places it after the last word.
+	 * Content after the text, such as an `Icon`, `Kbd`, or `IconButton`, centred on the capitals of
+	 * its line in this Text's typography. A block element type places it at the inline end of the
+	 * first line. An inline element type places it after the last word.
 	 */
 	endContent?: ReactNode;
 	/**
@@ -42,6 +47,11 @@ interface TextStyleProps {
 	 */
 	fontWeight?: TextRecipeVariants['fontWeight'];
 	/**
+	 * Space between each adornment and the text, as a spacing token or a responsive object of them.
+	 * When omitted, block element types use `sp8` and inline element types use `sp4`.
+	 */
+	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
+	/**
 	 * Hides text visually while keeping it accessible.
 	 * @default false
 	 */
@@ -59,10 +69,13 @@ interface TextStyleProps {
 	 */
 	shouldInheritFont?: TextRecipeVariants['shouldInheritFont'];
 	/**
-	 * Content before the text, such as an `Icon`, centred on the capitals of the first line. A block
-	 * element type hangs wrapped lines after it, and an adornment taller than the line grows the
-	 * text instead of overflowing it. An inline element type keeps it in the flow of the text.
-	 * Adornments are part of the element, so their text joins its accessible name.
+	 * Content before the text, such as an `Icon` or an avatar, centred on the capitals of the first
+	 * line in this Text's typography. A block element type hangs wrapped lines after it, and an
+	 * adornment taller than the line grows the text instead of overflowing it. An inline element type
+	 * keeps it in the flow of the text. With `div` or `blockquote` content, the first line must use
+	 * this Text's typography: set `typography` here and `shouldInheritFont` on the nested text that
+	 * renders that line. Adornments are part of the element, so their text joins its accessible
+	 * name.
 	 */
 	startContent?: ReactNode;
 	/**
@@ -125,6 +138,7 @@ export function Text(props: TextProps) {
 		fontStyle,
 		fontVariantNumeric,
 		fontWeight,
+		gap,
 		isVisuallyHidden = false,
 		lineClamp,
 		shouldDisableTrim,
@@ -181,6 +195,7 @@ export function Text(props: TextProps) {
 		>
 			<TextContent
 				endContent={endContent}
+				gap={gap}
 				hasAdornmentRow={hasAdornmentRow}
 				isFlowContent={flowContentElementTypes.has(elementType)}
 				lineClamp={lineClamp}
@@ -216,30 +231,92 @@ const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
 function TextContent({
 	children,
 	endContent,
+	gap,
 	hasAdornmentRow,
 	isFlowContent,
 	lineClamp,
 	startContent,
 	textAlign,
-}: Pick<TextProps, 'children' | 'endContent' | 'lineClamp' | 'startContent' | 'textAlign'> & {
+}: Pick<
+	TextProps,
+	'children' | 'endContent' | 'gap' | 'lineClamp' | 'startContent' | 'textAlign'
+> & {
 	hasAdornmentRow: boolean;
 	isFlowContent: boolean;
 }) {
 	if (startContent == null && endContent == null) return children;
 	if (!hasAdornmentRow) {
+		const startGap = createSprinkles({ marginInlineEnd: gap });
+		const endGap = createSprinkles({ marginInlineStart: gap });
 		return (
 			<>
 				{startContent != null && (
-					<span className={textAdornment({ inlineSide: 'start' })}>{startContent}</span>
+					<span
+						{...startGap}
+						className={textAdornment({
+							className: startGap.className,
+							inlineSide: 'start',
+						})}
+					>
+						{startContent}
+					</span>
 				)}
 				{children}
 				{endContent != null && (
-					<span className={textAdornment({ inlineSide: 'end' })}>{endContent}</span>
+					<span
+						{...endGap}
+						className={textAdornment({
+							className: endGap.className,
+							inlineSide: 'end',
+						})}
+					>
+						{endContent}
+					</span>
 				)}
 			</>
 		);
 	}
 
+	return (
+		<BlockTextContent
+			endContent={endContent}
+			gap={gap}
+			isFlowContent={isFlowContent}
+			lineClamp={lineClamp}
+			startContent={startContent}
+			textAlign={textAlign}
+		>
+			{children}
+		</BlockTextContent>
+	);
+}
+
+function BlockTextContent({
+	children,
+	endContent,
+	gap,
+	isFlowContent,
+	lineClamp,
+	startContent,
+	textAlign,
+}: Pick<
+	TextProps,
+	'children' | 'endContent' | 'gap' | 'lineClamp' | 'startContent' | 'textAlign'
+> & {
+	isFlowContent: boolean;
+}) {
+	const contentRef = useRef<HTMLElement | null>(null);
+	useLayoutEffect(() => {
+		try {
+			if (process.env.NODE_ENV !== 'production' && isFlowContent) {
+				warnOnMismatchedPrimaryText(contentRef.current);
+			}
+		} catch (error) {
+			// Without a bundler that replaces `process.env.NODE_ENV`, `process` may be undefined. The
+			// whole check sits inside `try` so a production build folds it away.
+			if (!(error instanceof ReferenceError)) throw error;
+		}
+	}, [isFlowContent]);
 	const Wrapper = isFlowContent ? 'div' : 'span';
 	// Inherits the root's font and colour, like Button's label, so `lineClamp` uses Text's rules.
 	const contentClassName = textRecipe({
@@ -249,15 +326,24 @@ function TextContent({
 		shouldInheritFont: true,
 		textAlign,
 	});
+	const rowGap = createSprinkles({ gap });
 
 	return (
-		<Wrapper className={textAdornmentRow}>
+		<Wrapper {...rowGap} className={cx(textAdornmentRow, rowGap.className)}>
 			{startContent != null && (
 				<Wrapper className={textAdornmentSlot}>
 					<span className={textAdornment()}>{startContent}</span>
 				</Wrapper>
 			)}
-			<Wrapper className={contentClassName}>{children}</Wrapper>
+			<Wrapper
+				className={contentClassName}
+				// A callback ref types the content as `HTMLElement` for both wrapper tags.
+				ref={(element: HTMLElement | null) => {
+					contentRef.current = element;
+				}}
+			>
+				{children}
+			</Wrapper>
 			{endContent != null && (
 				<Wrapper className={textAdornmentSlot}>
 					<span className={textAdornment()}>{endContent}</span>
@@ -265,4 +351,47 @@ function TextContent({
 			)}
 		</Wrapper>
 	);
+}
+
+const warnedRoots = new WeakSet<Element>();
+const fontMetricProperties = ['font-family', 'font-size', 'line-height'];
+
+/**
+ * Development check for a flow root: its adornments follow the root's typography, so its first
+ * rendered text must use the same font metrics for the adornments to centre on that line.
+ */
+function warnOnMismatchedPrimaryText(content: HTMLElement | null): void {
+	const root = content?.parentElement?.parentElement;
+	if (content == null || root == null || warnedRoots.has(root)) return;
+	const primary = findPrimaryTextElement(content);
+	if (primary == null) return;
+
+	const rootStyle = getComputedStyle(root);
+	const primaryStyle = getComputedStyle(primary);
+	const mismatches = fontMetricProperties.filter((property) => {
+		return rootStyle.getPropertyValue(property) !== primaryStyle.getPropertyValue(property);
+	});
+	if (mismatches.length === 0) return;
+
+	warnedRoots.add(root);
+	// oxlint-disable-next-line no-console -- development-only guidance, stripped from production builds
+	console.error(
+		`Text: the first text inside this adorned <${root.localName}> has a different ${mismatches.join(', ')} from the Text, so the adornments do not centre on its first line. Adornments follow the Text's own typography. Set \`typography\` on the Text to the first line's style, and set \`shouldInheritFont\` on the text that renders that line.`,
+		root,
+	);
+}
+
+// Text that never renders a visible first line, such as an icon's title or a hidden hint.
+const ignoredTextSelector = 'svg, [hidden], [aria-hidden="true"]';
+
+function findPrimaryTextElement(content: HTMLElement): Element | null {
+	const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+	for (let node = walker.nextNode(); node != null; node = walker.nextNode()) {
+		const element = node.parentElement;
+		if (element == null || node.textContent?.trim() === '') continue;
+		if (element.closest(ignoredTextSelector) != null) continue;
+		if (element.getClientRects().length === 0) continue;
+		return element;
+	}
+	return null;
 }

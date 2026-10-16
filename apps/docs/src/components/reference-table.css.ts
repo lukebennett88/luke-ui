@@ -216,13 +216,3 @@ globalStyle(`${monospace} code`, {
 		},
 	},
 });
-
-/** Caption metrics for the icon-gallery filter toolbar. */
-export const filterTrackCaption = style({
-	'@layer': {
-		components: {
-			fontSize: vars.font.caption.fontSize,
-			lineHeight: vars.font.caption.lineHeight,
-		},
-	},
-});

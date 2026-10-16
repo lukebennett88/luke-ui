@@ -24,6 +24,13 @@ applies to the literal next line, so it cannot sit inside a multi-line comment.
 The package is built with the React Compiler, so do not add `useMemo`, `useCallback` or `memo` for
 performance. Pass plain objects as context values, because the compiler memoises them.
 
+## Development-only code
+
+Put a development-only check, such as a `console.error` warning, inside
+`if (process.env.NODE_ENV !== 'production')` within a `try` whose `catch` rethrows anything but a
+`ReferenceError`. A consumer's bundler replaces the condition and drops the whole `try` from a
+production build, and the `catch` keeps it from throwing where `process` is undefined.
+
 ## Reuse
 
 Prefer utilities the repo already ships over hand-rolling: `cx` from `@luke-ui/react/utils` for

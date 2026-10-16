@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Cluster } from '@luke-ui/react/cluster';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
-import { Track } from '@luke-ui/react/track';
+import { Text } from '@luke-ui/react/text';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import shapeScript from '../../generated/editor-skeleton-script.iife.js?raw';
 import { toSkeletonLines } from '../../lib/playground-editor-shape.js';
@@ -92,13 +92,15 @@ export function EditorSkeletonShapeScript() {
 /** Shared loading indicator so the editor and preview speak the same language. */
 export function LoadingPill({ label }: { label: string }) {
 	return (
-		<Track
+		<Text
 			className={styles.loadingPill}
-			gap="sp8"
-			railAlignment="firstLine"
-			railStart={<LoadingSpinner aria-hidden size="small" />}
+			color="secondary"
+			elementType="div"
+			shouldDisableTrim
+			startContent={<LoadingSpinner aria-hidden size="small" />}
+			typography="caption"
 		>
 			{label}
-		</Track>
+		</Text>
 	);
 }
