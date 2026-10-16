@@ -42,67 +42,6 @@ are a reason to consider a skill, not a requirement for one. The maintainer appr
 and changes. Remove a skill when it is obsolete or when pilot or spot-check evidence shows it does
 not help. Silence in this log is not evidence.
 
-## Visual compare fails while the main baseline run is still in progress
-
-- Seen: 2026-10-12 (#782, #783, #785, #792). `visual-ci resolve-baseline` exited with "The newest
-  Visual baseline run on `main` is in_progress. Wait for … then re-run this job." Re-run after the
-  baseline finished passed compare.
-- Where: `.github/workflows/visual-regression.yml` Resolve baseline step; docs/VISUAL_TESTING.md.
-- Problem: Parallel Renovate PRs that touch the lockfile all start compare while a main Visual
-  baseline run is still uploading, so every PR fails the same way until someone re-runs the job.
-
-## Renovate rewrote `devEngines.runtime` from `24.x` to an exact Node version
-
-- Seen: 2026-10-12 (#783). Renovate's non-major PR changed `"version": "24.x"` to
-  `"version": "24.21.0"` and the lockfile `specifier` to `runtime:24.21.0`.
-- Seen: 2026-10-14 (#805). `npx --yes @anthropic-ai/claude-code --help` from the repo root failed
-  with `EBADDEVENGINES Invalid semver version "24.21.0" does not match "v24.19.0"`. The same command
-  succeeded from `/tmp`, where the workspace `package.json` is not applied.
-- Where: root `package.json` `devEngines.runtime`; docs/DEPENDENCIES.md Tooling versions;
-  `.github/renovate.json5` custom regex manager for node.
-- Problem: The documented contract is `<major>.x`, and the regex manager is supposed to keep that
-  form with `rangeStrategy: 'replace'`. The non-major group still rewrote the field to an exact
-  version, so the PR had to be corrected by hand. An exact pin also rejects nearby Node 24.x
-  runtimes that still match the documented `<major>.x` contract.
-
-## The token board's visual capture renders two different ways on the same code
-
-- Seen: 2026-10-13 (#797). The Visual regression run for commit `42cf474f` (38333714238) and the run
-  for commit `c818adf3` (38338181845) produced byte-identical `theme/token-board-*` renders that
-  differ from the baseline. The run for commit `a2f12ba8` (38336322056) matched the baseline,
-  although that commit contains the same code as `42cf474f`. The token board imports no field
-  components.
-- Where: `packages/@luke-ui/react/src/theme/token-board.browser.test.tsx`. Governing rule:
-  docs/TESTING.md, "Remove nondeterminism. Do not add an allowance."
-- Problem: about 290k mismatched pixels across the whole board (anti-aliasing, not a shift) appear
-  on unrelated PRs, so reviewers must judge whether a token-board diff is real.
-
-## The font-family browser assertion disagrees with Chromium's computed serialization
-
-- Seen: 2026-10-13 (necessity-markers-dom cleanup). `TURBO_FORCE=true pnpm run test` failed at
-  `src/theme/font-family.browser.test.ts:76`: the assertion accepted
-  `-apple-system, BlinkMacSystemFont, Noto Sans CJK JP, sans-serif`, but Chromium returned
-  `-apple-system, "system-ui", "Noto Sans CJK JP", sans-serif`. 2026-10-14 (#768): the same failure
-  reproduced on clean baseline `0b31387f` with
-  `TURBO_FORCE=true pnpm exec turbo run test:browser:run --filter=@luke-ui/react -- src/theme/font-family.browser.test.ts`.
-  2026-10-14 (#800): `TURBO_FORCE=true pnpm run test` returned the same failure (528 browser tests
-  passed, 1 failed, 73 skipped). The assertion also failed on clean baseline `b8a982be`.
-- Where: `packages/@luke-ui/react/src/theme/font-family.browser.test.ts:76`. Governing rule:
-  docs/TESTING.md, "Component tests".
-- Problem: The assertion compares different font-family serializations, and the browser test fails
-  on Chromium's returned value.
-
-## Code review recommends appearance assertions prohibited by testing guidance
-
-- Seen: 2026-10-13 (#802). Review of the Field necessity-marker colour change recommended
-  computed-style colour assertions for disabled textual markers. The corrected recommendation is to
-  extend existing visual captures instead.
-- Where: PR #802 review. Governing rule: docs/TESTING.md, "Component tests" (computed styles only
-  when layout is the contract); `.agents/skills/write-tests/SKILL.md` Reviewing.
-- Problem: Review still proposed a prohibited appearance assertion even though TESTING.md forbids
-  testing computed appearance unless layout is the contract, and the write-tests skill requires
-  reviewers to consult that guidance.
-
 ## Component generator sorts the whole root components meta pages list
 
 - Seen: 2026-10-13 (Form PR 2 for #796). `pnpm run generate:component --args form forms No` rewrote
@@ -118,19 +57,6 @@ not help. Silence in this log is not evidence.
   sidebar order. Sorting the entire `pages` array destroys that order, and the edit value is the
   docs group name rather than `group/name`, so generating into an existing group both scrambles
   navigation and fails inventory until the root meta is fixed by hand.
-
-## Theme authoring prose promises unchanged colour channels
-
-- Seen: 2026-10-14 (#800). The draft said "An accent side you set explicitly keeps its authored
-  lightness". Review corrected it to "bypasses this adaptation" because the generator searches a
-  tone-faithful band and may move the solid anchor. The #808 review also found both adaptation
-  descriptions promised preserved chroma, which sRGB gamut mapping can reduce.
-- Where: `apps/docs/content/docs/docs/authoring-a-theme.mdx`, "Define the input" and "When an accent
-  cannot be used"; `packages/@luke-ui/react/src/theme/scale.ts`, `resolveSolidAnchor`, and
-  `packages/@luke-ui/react/src/theme/color.ts`, `gamutMapOklch`. Governing rule:
-  docs/DOCUMENTATION.md, "Review" and "Keeping docs current".
-- Problem: The prose overstated which authored colour channels are preserved, despite the
-  documentation guide's factual accuracy requirement.
 
 ## CSS length props accept spacing token keys
 
@@ -151,3 +77,17 @@ not help. Silence in this log is not evidence.
   the tray's name.
 - Problem: A valid field name supplied with `aria-label` does not reach the tray dialog, so
   consumers must use a visible label to name it.
+
+## Agent submitted review-bound code that ignored existing CONVENTIONS or DOCUMENTATION rules
+
+- Seen: 2026-10-16 (#820). Nested ternaries in type-cell / definition-name resolution where
+  `docs/CONVENTIONS.md` requires an IIFE or early returns; historical and compatibility comments
+  (`#822` narration, pre-1.0 definition-key shims) where `docs/DOCUMENTATION.md` forbids
+  session-history and obsolete-compat prose.
+- Where: `apps/docs/src/components/type-table.tsx`,
+  `apps/docs/src/components/type-definitions-context.tsx`, related docs type-definition modules.
+  Governing rules: `docs/CONVENTIONS.md` Code style; `docs/DOCUMENTATION.md` (no session-history
+  prose; keep docs current).
+- Problem: Written rules already forbade the patterns, but the agent still shipped them into review,
+  so a human had to restate the guides. Prevention is stronger review-skill enforcement or a check,
+  not more prose in the same guides.
