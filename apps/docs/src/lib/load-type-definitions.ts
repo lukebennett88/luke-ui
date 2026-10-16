@@ -2,6 +2,11 @@ import type { TypeDefinitionsPayload } from './type-definition-model.js';
 
 const cache = new Map<string, Promise<TypeDefinitionsPayload>>();
 
+/** Clears the in-memory fetch cache. Used by tests between deferred-load cases. */
+export function clearTypeDefinitionsCache(): void {
+	cache.clear();
+}
+
 /** Fetches one page-level type-definition asset, caching the in-flight/completed result. */
 export function loadTypeDefinitions(href: string): Promise<TypeDefinitionsPayload> {
 	const cached = cache.get(href);

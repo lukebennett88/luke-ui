@@ -74,6 +74,8 @@ export function remarkAttachTypeDefinitions(options: { publicDir: string }) {
 			const fileName = `${fileId}.json`;
 			writeFileSync(join(outputDir, fileName), `${JSON.stringify(definitions)}\n`);
 
+			// Root-relative public URL. TypeDefinitionsProvider prefixes import.meta.env.BASE_URL at
+			// fetch time so subpath deploys (VITE_BASE_URL) resolve correctly.
 			const href = `/${TYPE_DEFINITIONS_PUBLIC_DIR}/${fileName}`;
 			const existing = node.attributes.find(
 				(attr): attr is MdxJsxAttribute =>
