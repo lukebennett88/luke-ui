@@ -32,7 +32,9 @@ test('a colour row copies its full typed path', async () => {
 		);
 	});
 	expect(writeText).toHaveBeenCalledWith('vars.color.background.neutral.subtle.rest');
-	await expect.element(page.getByText('--luke-color-background-neutral-subtle-rest')).toBeVisible();
+	await expect
+		.element(page.getByText('vars.color.background.neutral.subtle.rest'))
+		.toBeVisible();
 });
 
 test('a typography token copies its typed path', async () => {

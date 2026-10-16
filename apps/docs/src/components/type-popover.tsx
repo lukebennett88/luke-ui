@@ -11,35 +11,39 @@ import * as styles from './type-popover.css.js';
 
 /**
  * Clickable type name that reveals its source-backed TypeScript definition in an accessible
- * popover. Loads the page-level definition asset on first open when it is not already in memory.
+ * popover. Prefetches the page-level definition asset on hover/focus; RAC keeps an uncontrolled
+ * DialogTrigger so Escape restores focus to the trigger.
  */
 function TypePopover({ children, typeName }: { children: ReactNode; typeName: string }) {
 	const { definitions, ensureLoaded } = use(TypeDefinitionsContext);
 	const [definition, setDefinition] = useState<TypeDefinition | undefined>(
 		() => definitions[typeName],
 	);
-	const [isOpen, setIsOpen] = useState(false);
+
+	const shownDefinition = definitions[typeName] ?? definition;
+
+	const prefetch = () => {
+		void ensureLoaded().then((loaded) => {
+			setDefinition(loaded[typeName]);
+		});
+	};
 
 	return (
-		<DialogTrigger
-			isOpen={isOpen}
-			onOpenChange={(open) => {
-				if (open) {
-					void ensureLoaded().then((loaded) => {
-						setDefinition(loaded[typeName]);
-						setIsOpen(true);
-					});
-					return;
-				}
-				setIsOpen(false);
-			}}
-		>
-			<RacButton aria-label={`Show definition of ${typeName}`} className={styles.trigger}>
+		<DialogTrigger>
+			<RacButton
+				aria-label={`Show definition of ${typeName}`}
+				className={styles.trigger}
+				onFocus={prefetch}
+				onHoverStart={prefetch}
+				onPress={prefetch}
+			>
 				{children}
 			</RacButton>
 			<Popover className={styles.popover} placement="bottom start">
 				<Dialog aria-label={`Definition of ${typeName}`} className={styles.dialog}>
-					<pre className={styles.definition}>{definition?.definition ?? 'Loading definition…'}</pre>
+					<pre className={styles.definition}>
+						{shownDefinition?.definition ?? 'Loading definition…'}
+					</pre>
 				</Dialog>
 			</Popover>
 		</DialogTrigger>
