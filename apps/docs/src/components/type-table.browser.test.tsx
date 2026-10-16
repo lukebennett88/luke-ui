@@ -14,8 +14,9 @@ import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import { afterEach, assert, expect, test } from 'vite-plus/test';
+import { afterEach, assert, expect, test, vi } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import { clearTypeDefinitionsCache } from '../lib/load-type-definitions.js';
 import { ComponentPropsTable } from './component-props-table.js';
 import { DocsThemeRoot } from './theme-controls.js';
 import { TypeDefinitionsProvider, TypeTable } from './type-table.js';
@@ -23,6 +24,11 @@ import { TypeDefinitionsProvider, TypeTable } from './type-table.js';
 /** Matches the docs article `maxInlineSize` of `52rem` at a 16px root. */
 const ARTICLE_INLINE_SIZE = '832px';
 const MOBILE_INLINE_SIZE = '375px';
+
+const DEFERRED_DEFINITION = {
+	definition: 'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<Value>;',
+	name: 'RequiredInitialResponsiveValue',
+} as const;
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
@@ -32,6 +38,8 @@ afterEach(() => {
 	container?.remove();
 	container = undefined;
 	root = undefined;
+	clearTypeDefinitionsCache();
+	vi.restoreAllMocks();
 });
 
 test('renders a semantic table with descriptions visible and no nested paragraphs', async () => {
@@ -378,6 +386,68 @@ test('falls back to plain text when a type reference has no definition', async (
 	expect(page.getByRole('link').elements()).toHaveLength(0);
 });
 
+test('deferred definition fetch shows loading, then the definition', async () => {
+	let resolveFetch: ((response: Response) => void) | undefined;
+	const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(
+		() =>
+			new Promise((resolve) => {
+				resolveFetch = resolve;
+			}),
+	);
+
+	await renderDeferredTypeTable('/type-definitions/loading.json');
+	const trigger = page.getByRole('button', {
+		name: 'Show definition of RequiredInitialResponsiveValue',
+	});
+	await userEvent.click(trigger.element());
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.toBeVisible();
+	await expect.element(page.getByText('Loading definition…')).toBeVisible();
+
+	assert(resolveFetch, 'expected fetch to start');
+	await act(async () => {
+		resolveFetch(
+			new Response(JSON.stringify({ RequiredInitialResponsiveValue: DEFERRED_DEFINITION }), {
+				headers: { 'Content-Type': 'application/json' },
+				status: 200,
+			}),
+		);
+	});
+	await expect.element(page.getByText(/type RequiredInitialResponsiveValue/)).toBeVisible();
+	expect(fetchMock).toHaveBeenCalledWith('/type-definitions/loading.json');
+});
+
+test('deferred definition fetch shows a recoverable error and retries', async () => {
+	// Prefetch runs on hover/focus/press, so keep failing until Retry flips this flag.
+	let allowSuccess = false;
+	const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+		if (!allowSuccess) {
+			return new Response('missing', { status: 404 });
+		}
+		return new Response(JSON.stringify({ RequiredInitialResponsiveValue: DEFERRED_DEFINITION }), {
+			headers: { 'Content-Type': 'application/json' },
+			status: 200,
+		});
+	});
+
+	await renderDeferredTypeTable('/type-definitions/retry.json');
+	const trigger = page.getByRole('button', {
+		name: 'Show definition of RequiredInitialResponsiveValue',
+	});
+	await userEvent.click(trigger.element());
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.toBeVisible();
+	await expect.element(page.getByText(/Failed to load type definitions/)).toBeVisible();
+	expect(fetchMock.mock.calls.length).toBeGreaterThan(0);
+	expect(fetchMock).toHaveBeenCalledWith('/type-definitions/retry.json');
+
+	allowSuccess = true;
+	await userEvent.click(page.getByRole('button', { name: 'Retry loading definition' }).element());
+	await expect.element(page.getByText(/type RequiredInitialResponsiveValue/)).toBeVisible();
+});
+
 test('linked type popovers in a ComponentPropsTable have no axe violations', async () => {
 	await renderWidget(
 		<ComponentPropsTable
@@ -419,6 +489,23 @@ test('linked type popovers in a ComponentPropsTable have no axe violations', asy
 		})),
 	).toEqual([]);
 });
+
+async function renderDeferredTypeTable(definitionsHref: string) {
+	await renderWidget(
+		<TypeDefinitionsProvider definitionsHref={definitionsHref}>
+			<TypeTable
+				id="api"
+				type={{
+					columns: {
+						description: 'Column tracks.',
+						type: 'RequiredInitialResponsiveValue<number | string>',
+						typeDescriptionLink: 'RequiredInitialResponsiveValue',
+					},
+				}}
+			/>
+		</TypeDefinitionsProvider>,
+	);
+}
 
 async function renderWidget(
 	children: ReactNode,

@@ -76,6 +76,55 @@ export const definition = style({
 	},
 });
 
+export const loadError = style({
+	'@layer': {
+		components: {
+			display: 'flex',
+			flexDirection: 'column',
+			gap: vars.space.sp8,
+		},
+	},
+});
+
+export const loadErrorMessage = style({
+	'@layer': {
+		components: {
+			color: vars.color.text.secondary,
+			fontFamily: vars.font.family.body,
+			fontSize: vars.font.caption.fontSize,
+			lineHeight: vars.font.caption.lineHeight,
+			margin: 0,
+		},
+	},
+});
+
+export const retry = style({
+	'@layer': {
+		components: {
+			alignSelf: 'start',
+			backgroundColor: vars.color.background.neutral.subtle.rest,
+			borderRadius: vars.radius.control,
+			borderStyle: 'none',
+			color: vars.color.text.primary,
+			cursor: 'pointer',
+			fontFamily: vars.font.family.body,
+			fontSize: vars.font.caption.fontSize,
+			lineHeight: vars.font.caption.lineHeight,
+			paddingBlock: vars.space.sp4,
+			paddingInline: vars.space.sp8,
+			selectors: {
+				'&:hover': {
+					backgroundColor: vars.color.background.neutral.subtle.hover,
+				},
+				'&:focus-visible': {
+					outline: `2px solid ${vars.color.border.focus}`,
+					outlineOffset: '2px',
+				},
+			},
+		},
+	},
+});
+
 globalStyle(`${definition} code`, {
 	'@layer': {
 		components: {

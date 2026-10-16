@@ -14,12 +14,14 @@ import * as styles from './type-popover.css.js';
  * RAC keeps an uncontrolled DialogTrigger so Escape restores focus to the trigger.
  */
 function TypePopover({ children, typeName }: { children: ReactNode; typeName: string }) {
-	const { definitions, ensureLoaded } = use(TypeDefinitionsContext);
+	const { definitions, ensureLoaded, loadError, loadStatus } = use(TypeDefinitionsContext);
 	const definition = definitions[typeName];
 
 	const prefetch = () => {
 		if (definitions[typeName] !== undefined) return;
-		void ensureLoaded();
+		// ensureLoaded settles without throwing; still attach catch so a future change cannot leave
+		// an unhandled rejection from this fire-and-forget path.
+		void ensureLoaded().catch(() => {});
 	};
 
 	return (
@@ -35,7 +37,26 @@ function TypePopover({ children, typeName }: { children: ReactNode; typeName: st
 			</RacButton>
 			<Popover className={styles.popover} placement="bottom start">
 				<Dialog aria-label={`Definition of ${typeName}`} className={styles.dialog}>
-					<pre className={styles.definition}>{definition?.definition ?? 'Loading definition…'}</pre>
+					{definition !== undefined ? (
+						<pre className={styles.definition}>{definition.definition}</pre>
+					) : loadStatus === 'error' ? (
+						<div className={styles.loadError}>
+							<p className={styles.loadErrorMessage}>
+								{loadError ?? "Couldn't load this definition."}
+							</p>
+							<RacButton
+								aria-label="Retry loading definition"
+								className={styles.retry}
+								onPress={() => {
+									void ensureLoaded().catch(() => {});
+								}}
+							>
+								Retry
+							</RacButton>
+						</div>
+					) : (
+						<pre className={styles.definition}>Loading definition…</pre>
+					)}
 				</Dialog>
 			</Popover>
 		</DialogTrigger>
