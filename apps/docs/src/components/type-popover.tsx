@@ -58,12 +58,7 @@ function DefinitionBody({
 					<Text color="secondary" typography="caption">
 						{load.message}
 					</Text>
-					<Button
-						aria-label="Retry loading definition"
-						onPress={ensureLoaded}
-						prominence="low"
-						size="small"
-					>
+					<Button onPress={ensureLoaded} prominence="low" size="small">
 						Retry
 					</Button>
 				</Stack>

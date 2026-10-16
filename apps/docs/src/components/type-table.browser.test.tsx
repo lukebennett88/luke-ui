@@ -458,7 +458,7 @@ test('deferred definition fetch shows a recoverable error and retries', async ()
 	expect(fetchMock).toHaveBeenCalledWith('/type-definitions/retry.json');
 
 	allowSuccess = true;
-	await userEvent.click(page.getByRole('button', { name: 'Retry loading definition' }).element());
+	await userEvent.click(page.getByRole('button', { exact: true, name: 'Retry' }).element());
 	await expect.element(page.getByText(/type RequiredInitialResponsiveValue/)).toBeVisible();
 });
 
@@ -631,9 +631,7 @@ test('invalid definition JSON shows a recoverable error', async () => {
 		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
 		.toBeVisible();
 	await expect.element(page.getByText('Invalid type definitions payload')).toBeVisible();
-	await expect
-		.element(page.getByRole('button', { name: 'Retry loading definition' }))
-		.toBeVisible();
+	await expect.element(page.getByRole('button', { exact: true, name: 'Retry' })).toBeVisible();
 });
 
 /**
