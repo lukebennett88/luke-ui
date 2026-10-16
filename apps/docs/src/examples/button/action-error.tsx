@@ -7,13 +7,11 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 export default () => {
 	return (
-		<Stack minBlockSize="4.5rem">
-			<ErrorBoundary FallbackComponent={ErrorFallback}>
-				<Cluster>
-					<Button pressAction={save}>Save changes</Button>
-				</Cluster>
-			</ErrorBoundary>
-		</Stack>
+		<ErrorBoundary FallbackComponent={ErrorFallback}>
+			<Cluster>
+				<Button pressAction={save}>Save changes</Button>
+			</Cluster>
+		</ErrorBoundary>
 	);
 };
 
@@ -21,7 +19,7 @@ async function save() {
 	await new Promise((resolve) => {
 		setTimeout(resolve, 400);
 	});
-	throw new Error('Could not save changes');
+	throw new Error('Your changes were not saved.');
 }
 
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {

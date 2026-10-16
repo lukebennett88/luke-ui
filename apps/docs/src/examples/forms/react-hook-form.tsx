@@ -9,7 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const schema = z.object({
-	email: z.email('Enter an email address in the form you@example.com.'),
+	email: z.email('Enter a valid email address.'),
 	name: z.string().min(1, 'Enter your name.'),
 });
 
@@ -54,7 +54,7 @@ export default () => {
 									errorMessage={fieldState.error?.message}
 									inputRef={field.ref}
 									isRequired
-									label="Email"
+									label="Email address"
 									name={field.name}
 									onBlur={field.onBlur}
 									onChange={field.onChange}
@@ -69,11 +69,11 @@ export default () => {
 					</Cluster>
 				</Stack>
 			</Form>
-			<Stack minBlockSize="1.5rem">
-				<Text elementType="p" role="status">
-					{form.formState.isSubmitSuccessful ? `Submitted: ${form.getValues('name')}` : '\u00a0'}
-				</Text>
-			</Stack>
+			<Text elementType="p" isVisuallyHidden={!form.formState.isSubmitSuccessful} role="status">
+				{form.formState.isSubmitSuccessful
+					? `Account created for ${form.getValues('name')}.`
+					: null}
+			</Text>
 		</Stack>
 	);
 };

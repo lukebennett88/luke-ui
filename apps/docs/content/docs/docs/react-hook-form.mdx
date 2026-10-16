@@ -12,7 +12,7 @@ takes the form's value types from the Zod schema, so no hand-written type repeat
 
 ```tsx
 const schema = z.object({
-	email: z.email('Enter an email address in the form you@example.com.'),
+	email: z.email('Enter a valid email address.'),
 	name: z.string().min(1, 'Enter your name.'),
 });
 

@@ -10,7 +10,7 @@ import * as z from 'zod';
 
 const schema = z.object({
 	terms: z.boolean().refine((accepted) => accepted, {
-		error: 'Accept the terms of service before you continue.',
+		error: 'Accept the terms before you continue.',
 	}),
 });
 
@@ -51,11 +51,9 @@ export default () => {
 					</Cluster>
 				</Stack>
 			</Form>
-			<Stack minBlockSize="1.5rem">
-				<Text elementType="p" role="status">
-					{form.formState.isSubmitSuccessful ? 'Terms accepted.' : '\u00a0'}
-				</Text>
-			</Stack>
+			<Text elementType="p" isVisuallyHidden={!form.formState.isSubmitSuccessful} role="status">
+				{form.formState.isSubmitSuccessful ? 'Terms accepted.' : null}
+			</Text>
 		</Stack>
 	);
 };

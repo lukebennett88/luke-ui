@@ -12,11 +12,9 @@ export default () => {
 	return (
 		<form onSubmit={handleSubmit}>
 			<Stack gap="sp16" maxInlineSize="20rem">
-				<Stack minBlockSize="5.5rem">
-					<TextInputField isRequired label="Email address" name="emailAddress" type="email" />
-				</Stack>
+				<TextInputField isRequired label="Email address" name="emailAddress" type="email" />
 				<Cluster>
-					<Button type="submit">Create account</Button>
+					<Button type="submit">Submit</Button>
 				</Cluster>
 			</Stack>
 		</form>

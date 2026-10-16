@@ -1,6 +1,7 @@
 import { Bleed } from '@luke-ui/react/bleed';
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Code } from '@luke-ui/react/code';
 import { Grid } from '@luke-ui/react/grid';
 import { Icon } from '@luke-ui/react/icon';
 import { Stack } from '@luke-ui/react/stack';
@@ -33,7 +34,7 @@ function TokenName({ className, token, ...props }: TokenTextProps) {
 /** The typed token path, with break opportunities after its dots. */
 export function TokenPath({ path }: { path: string }) {
 	return (
-		<>
+		<Code>
 			vars.
 			{path.split('.').map((segment, index) => (
 				<Fragment key={`${index}-${segment}`}>
@@ -42,7 +43,7 @@ export function TokenPath({ path }: { path: string }) {
 					{segment}
 				</Fragment>
 			))}
-		</>
+		</Code>
 	);
 }
 
@@ -59,19 +60,9 @@ function TokenVariable({ className, token, ...props }: TokenTextProps) {
  * The token's resolved value in the active theme, with tabular numerals. Shows a dash until the page
  * has hydrated and can read the theme.
  */
-function TokenValue({ className, token, ...props }: TokenTextProps) {
+function TokenValue({ token, ...props }: TokenTextProps) {
 	const value = useTokenValue(token);
-	return (
-		<Text
-			className={cx(styles.code, className)}
-			color="secondary"
-			fontVariantNumeric="tabular-nums"
-			shouldDisableTrim
-			{...props}
-		>
-			{value === null || value === '' ? '—' : value}
-		</Text>
-	);
+	return <Code {...props}>{value === null || value === '' ? '—' : value}</Code>;
 }
 
 /** Copies the full typed token path. The accessible name says what it copies. */
@@ -192,7 +183,6 @@ export function TokenRow({ sample, sampleInlineSize, token }: TokenRowProps) {
 			</Box>
 			<Stack gap="sp8" gridArea="name" minInlineSize="0">
 				<TokenName elementType="p" token={token} typography="label" />
-				<TokenVariable elementType="p" token={token} typography="caption" />
 			</Stack>
 			<Box gridArea="value" minInlineSize="0">
 				<TokenValue elementType="p" token={token} typography="label" />

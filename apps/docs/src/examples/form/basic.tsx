@@ -29,8 +29,8 @@ export default () => {
 					</Cluster>
 				</Stack>
 			</Form>
-			<Text elementType="p" role="status">
-				{submitted ? `Submitted: ${submitted}` : '\u00a0'}
+			<Text elementType="p" isVisuallyHidden={!submitted} role="status">
+				{submitted ? `Submitted: ${submitted}` : null}
 			</Text>
 		</Stack>
 	);

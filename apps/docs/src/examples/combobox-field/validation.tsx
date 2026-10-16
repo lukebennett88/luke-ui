@@ -19,19 +19,17 @@ export default () => {
 	return (
 		<form onSubmit={handleSubmit}>
 			<Stack gap="sp16" maxInlineSize="20rem">
-				<Stack minBlockSize="5.5rem">
-					<ComboboxField
-						defaultItems={countries}
-						isRequired
-						label="Work location"
-						name="country"
-						placeholder="Choose a country"
-					>
-						{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-					</ComboboxField>
-				</Stack>
+				<ComboboxField
+					defaultItems={countries}
+					isRequired
+					label="Country"
+					name="country"
+					placeholder="Choose a country"
+				>
+					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+				</ComboboxField>
 				<Cluster>
-					<Button type="submit">Create account</Button>
+					<Button type="submit">Submit</Button>
 				</Cluster>
 			</Stack>
 		</form>
