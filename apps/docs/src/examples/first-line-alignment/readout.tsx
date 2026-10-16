@@ -9,6 +9,79 @@ import { Track } from '@luke-ui/react/track';
 import type { CSSProperties, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
+export default () => {
+	const fixtures = useRef<HTMLElement>(null);
+	const [results, setResults] = useState<Array<Result>>([]);
+	const [environment, setEnvironment] = useState('');
+
+	useEffect(() => {
+		let isActive = true;
+		void document.fonts.ready.then(() => {
+			const root = fixtures.current;
+			if (!isActive || root == null) return;
+			setResults(measure(root));
+			setEnvironment(
+				[
+					navigator.userAgent,
+					`cap unit: ${CSS.supports('block-size', '1cap') ? 'yes' : 'no'}`,
+					`first baseline: ${CSS.supports('align-items', 'first baseline') ? 'yes' : 'no'}`,
+				].join(' · '),
+			);
+		});
+		return () => {
+			isActive = false;
+		};
+	}, []);
+
+	return (
+		<Stack gap="sp24">
+			<Stack gap="sp8">
+				{results.map(({ name, offset }) => {
+					return (
+						<Text key={name} typography="label">
+							{name}:{' '}
+							<Text
+								color={Math.abs(offset) <= 0.5 ? 'success' : 'danger'}
+								fontVariantNumeric="tabular-nums"
+								typography="label"
+							>
+								{`${offset >= 0 ? '+' : ''}${offset.toFixed(2)}px`}
+							</Text>
+						</Text>
+					);
+				})}
+				<Text color="secondary" typography="caption">
+					{environment}
+				</Text>
+			</Stack>
+			<Stack gap="sp16" maxInlineSize="16rem" ref={fixtures}>
+				{centreCases.map(({ name, node }) => {
+					return (
+						<div data-case={name} key={name}>
+							{node}
+						</div>
+					);
+				})}
+				<Box
+					alignItems="baseline"
+					data-case="Capsize: trimmed Heading beside Text"
+					display="flex"
+					gap="sp8"
+				>
+					<Heading level={3} typography="heading3">
+						<span data-baseline style={baselineProbe} />
+						Trimmed
+					</Heading>
+					<Text>
+						<span data-baseline style={baselineProbe} />
+						untrimmed
+					</Text>
+				</Box>
+			</Stack>
+		</Stack>
+	);
+};
+
 // A zero-width box one cap height tall, sitting on the baseline, spans the capitals of its line.
 const capProbe = {
 	blockSize: '1cap',
@@ -99,75 +172,6 @@ const centreCases: Array<{ name: string; node: ReactNode }> = [
 		),
 	},
 ];
-
-export default () => {
-	const fixtures = useRef<HTMLElement>(null);
-	const [results, setResults] = useState<Array<Result>>([]);
-	const [environment, setEnvironment] = useState('');
-
-	useEffect(() => {
-		let isActive = true;
-		void document.fonts.ready.then(() => {
-			const root = fixtures.current;
-			if (!isActive || root == null) return;
-			setResults(measure(root));
-			setEnvironment(
-				[
-					navigator.userAgent,
-					`cap unit: ${CSS.supports('block-size', '1cap') ? 'yes' : 'no'}`,
-					`first baseline: ${CSS.supports('align-items', 'first baseline') ? 'yes' : 'no'}`,
-				].join(' · '),
-			);
-		});
-		return () => {
-			isActive = false;
-		};
-	}, []);
-
-	return (
-		<Stack gap="sp24">
-			<Stack gap="sp8">
-				{results.map(({ name, offset }) => (
-					<Text key={name} typography="label">
-						{name}:{' '}
-						<Text
-							color={Math.abs(offset) <= 0.5 ? 'success' : 'danger'}
-							fontVariantNumeric="tabular-nums"
-							typography="label"
-						>
-							{`${offset >= 0 ? '+' : ''}${offset.toFixed(2)}px`}
-						</Text>
-					</Text>
-				))}
-				<Text color="secondary" typography="caption">
-					{environment}
-				</Text>
-			</Stack>
-			<Stack gap="sp16" maxInlineSize="16rem" ref={fixtures}>
-				{centreCases.map(({ name, node }) => (
-					<div data-case={name} key={name}>
-						{node}
-					</div>
-				))}
-				<Box
-					alignItems="baseline"
-					data-case="Capsize: trimmed Heading beside Text"
-					display="flex"
-					gap="sp8"
-				>
-					<Heading level={3} typography="heading3">
-						<span data-baseline style={baselineProbe} />
-						Trimmed
-					</Heading>
-					<Text>
-						<span data-baseline style={baselineProbe} />
-						untrimmed
-					</Text>
-				</Box>
-			</Stack>
-		</Stack>
-	);
-};
 
 /** Offsets of each fixture: a graphic's centre from its line's capitals, or two baselines apart. */
 function measure(root: HTMLElement): Array<Result> {

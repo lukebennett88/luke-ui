@@ -12,14 +12,11 @@ settled API.
 Resize a preview to see wrapping. The examples use the docs theme, its Inter webfont, and its
 Capsize trims.
 
-## Choose the element by content
+## Element type
 
-Choose the element from the content's role. The default `span` keeps adornments in sentence flow and
-preserves an underlined link. Use `p` for a standalone message. Use `div` for a navigation link or
-pager title, not `p`. The docs navigation keeps section labels as headings and uses `div` for links
-and pager titles. `Text` infers trimming from `elementType`, so CSS `display: block` on a `span`
-does not select block trimming. See [Text adornments](/components/typography/text#adornments) for
-the usage guidance.
+The default `span` keeps adornments in sentence flow. Block element types hang wrapped lines after
+`startContent`. See [Text adornments](/components/typography/text#adornments) for element choice and
+trimming guidance.
 
 <ExampleBlock
 	src="first-line-alignment/element-type"
@@ -61,8 +58,8 @@ rail.
 
 ## Graphics and text adornments
 
-Every adornment is centred the same way: an icon, a status dot, `Kbd`, and a caption all centre on
-the capitals of the first line.
+Adornments centre on the capitals of the first line. The examples use an icon, a status dot, `Kbd`,
+and a caption.
 
 <ExampleBlock
 	src="first-line-alignment/graphic-text"
@@ -122,8 +119,6 @@ when its content sets its own typography, and stops a link's underline.
 <ExampleBlock src="first-line-alignment/narrower" title="First-line alignment: Nested row" />
 
 ## Limitations
-
-These cases show where Text adornments fall short or behave in ways to weigh before adopting them.
 
 <ExampleBlock src="first-line-alignment/limitations" title="First-line alignment: Limitations" />
 

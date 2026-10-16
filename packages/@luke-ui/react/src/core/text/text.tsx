@@ -108,25 +108,6 @@ interface _TextProps extends _TextOmit, TextStyleProps, DocumentedElementTypePro
 /** Props for the `Text` component. */
 export type TextProps = Prettify<_TextProps>;
 
-// Block text elements whose content model is flow content, so adorned text may hold blocks.
-const flowContentElementTypes = new Set<NonNullable<TextProps['elementType']>>([
-	'blockquote',
-	'div',
-]);
-
-const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
-	'blockquote',
-	'div',
-	'h1',
-	'h2',
-	'h3',
-	'h4',
-	'h5',
-	'h6',
-	'p',
-	'pre',
-]);
-
 /**
  * Styled text with semantic typography styles and colour controls.
  *
@@ -198,56 +179,67 @@ export function Text(props: TextProps) {
 			slot={slot}
 			style={isVisuallyHidden ? { ...visuallyHiddenStyle, ...style } : style}
 		>
-			{(() => {
-				if (!hasAdornments) return children;
-				if (!hasAdornmentRow) {
-					return (
-						<>
-							{startContent != null && (
-								<span className={textAdornment({ inlineSide: 'start' })}>{startContent}</span>
-							)}
-							{children}
-							{endContent != null && (
-								<span className={textAdornment({ inlineSide: 'end' })}>{endContent}</span>
-							)}
-						</>
-					);
-				}
-				return (
-					<TextAdornmentRow
-						endContent={endContent}
-						isFlowContent={flowContentElementTypes.has(elementType)}
-						lineClamp={lineClamp}
-						startContent={startContent}
-						textAlign={textAlign}
-					>
-						{children}
-					</TextAdornmentRow>
-				);
-			})()}
+			<TextContent
+				endContent={endContent}
+				hasAdornmentRow={hasAdornmentRow}
+				isFlowContent={flowContentElementTypes.has(elementType)}
+				lineClamp={lineClamp}
+				startContent={startContent}
+				textAlign={textAlign}
+			>
+				{children}
+			</TextContent>
 		</RacText>
 	);
 }
 
-/**
- * Lays out a block Text's adornments and text in a row inside its trim boxes. The wrappers match
- * the root's content model, so a flow-content root can still hold blocks.
- */
-function TextAdornmentRow({
+// Block text elements whose content model is flow content, so adorned text may hold blocks.
+const flowContentElementTypes = new Set<NonNullable<TextProps['elementType']>>([
+	'blockquote',
+	'div',
+]);
+
+const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
+	'blockquote',
+	'div',
+	'h1',
+	'h2',
+	'h3',
+	'h4',
+	'h5',
+	'h6',
+	'p',
+	'pre',
+]);
+
+/** Keeps inline adornments in text flow and block adornments inside the root's trim boxes. */
+function TextContent({
 	children,
 	endContent,
+	hasAdornmentRow,
 	isFlowContent,
 	lineClamp,
 	startContent,
 	textAlign,
-}: {
-	children: ReactNode;
-	endContent: ReactNode;
+}: Pick<TextProps, 'children' | 'endContent' | 'lineClamp' | 'startContent' | 'textAlign'> & {
+	hasAdornmentRow: boolean;
 	isFlowContent: boolean;
-	lineClamp: TextProps['lineClamp'];
-	startContent: ReactNode;
-	textAlign: TextProps['textAlign'];
 }) {
+	if (startContent == null && endContent == null) return children;
+	if (!hasAdornmentRow) {
+		return (
+			<>
+				{startContent != null && (
+					<span className={textAdornment({ inlineSide: 'start' })}>{startContent}</span>
+				)}
+				{children}
+				{endContent != null && (
+					<span className={textAdornment({ inlineSide: 'end' })}>{endContent}</span>
+				)}
+			</>
+		);
+	}
+
 	const Wrapper = isFlowContent ? 'div' : 'span';
 	// Inherits the root's font and colour, like Button's label, so `lineClamp` uses Text's rules.
 	const contentClassName = textRecipe({
