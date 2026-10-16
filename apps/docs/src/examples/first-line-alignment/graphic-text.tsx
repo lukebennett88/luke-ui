@@ -8,10 +8,10 @@ export default () => {
 	return (
 		<Stack gap="sp16" maxInlineSize="20rem">
 			<Text elementType="p" endContent={<Icon name="chevronRight" size="xsmall" />}>
-				Graphic: centred on the capitals
+				Icon: centred on the capitals
 			</Text>
 			<Text elementType="p" endContent={<Kbd>⌘K</Kbd>}>
-				Kbd: keeps its own alignment
+				Kbd: centred the same way
 			</Text>
 			<Text
 				elementType="p"
@@ -21,7 +21,7 @@ export default () => {
 					</Text>
 				}
 			>
-				Text: shares the baseline
+				Text: centred the same way
 			</Text>
 			<Text
 				elementType="p"

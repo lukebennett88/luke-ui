@@ -44,9 +44,9 @@ export default () => {
 					</Track>
 				</Box>
 			</ComparisonItem>
-			<ComparisonItem label="Spike: firstBaseline">
+			<ComparisonItem label="Current: center">
 				<Box maxInlineSize="18rem" paddingBlockStart="sp16">
-					<Track gap="sp12" railAlignment="firstBaseline" railEnd={dismiss} railStart={avatar}>
+					<Track gap="sp12" railAlignment="center" railEnd={dismiss} railStart={avatar}>
 						{content}
 					</Track>
 				</Box>

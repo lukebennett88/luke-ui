@@ -35,14 +35,10 @@ export default () => {
 					</Text>
 				</Box>
 			</ComparisonItem>
-			<ComparisonItem label="Inline adorned text does not break">
+			<ComparisonItem label="Inline text does not hang">
 				<Box maxInlineSize="14rem">
-					<Text elementType="p">
-						A sentence with{' '}
-						<Text startContent={<Icon name="checkCircle" size="xsmall" />}>
-							adorned words that stay together
-						</Text>{' '}
-						inside it.
+					<Text startContent={<Icon name="checkCircle" size="xsmall" />}>
+						Inline text wraps under its adornment, like an icon in a sentence
 					</Text>
 				</Box>
 			</ComparisonItem>

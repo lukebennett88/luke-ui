@@ -1,13 +1,7 @@
-import { Box } from '@luke-ui/react/box';
 import { Heading } from '@luke-ui/react/heading';
-import { IconButton } from '@luke-ui/react/icon-button';
-import { Stack } from '@luke-ui/react/stack';
-import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { Track } from '@luke-ui/react/track';
-import type { CSSProperties, ReactNode } from 'react';
 import { expect, test } from 'vite-plus/test';
-import type { VisualAppearance } from '../test-utils/render.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
 
@@ -231,101 +225,6 @@ test('keeps rail order logical under RTL, putting railStart on the inline-start 
 	expect(start.getBoundingClientRect().left).toBeGreaterThan(end.getBoundingClientRect().left);
 });
 
-// A zero-width box one cap height tall, sitting on the baseline, spans the capitals of its line.
-const capProbeStyle = {
-	blockSize: '1cap',
-	display: 'inline-block',
-	inlineSize: 0,
-} satisfies CSSProperties;
-
-function verticalCentre(element: Element): number {
-	const rect = element.getBoundingClientRect();
-	return rect.top + rect.height / 2;
-}
-
-function renderCompound(
-	title: ReactNode,
-	avatarSize: '1.5rem' | '2.5rem',
-	appearance?: VisualAppearance,
-) {
-	return render(
-		<Track
-			data-testid="track"
-			gap="sp12"
-			railAlignment="firstBaseline"
-			railEnd={<IconButton aria-label="Dismiss" icon="close" prominence="low" size="small" />}
-			railStart={
-				<Box
-					backgroundColor="neutral.subtle.rest"
-					blockSize={avatarSize}
-					borderRadius="full"
-					data-testid="avatar"
-					display="inline-flex"
-					elementType="span"
-					inlineSize={avatarSize}
-				/>
-			}
-			style={{ inlineSize: '20rem' }}
-		>
-			<Stack gap="sp4">
-				{title}
-				<Text typography="caption">Description that may wrap onto a second line of text</Text>
-			</Stack>
-		</Track>,
-		{ appearance },
-	);
-}
-
-for (const avatarSize of ['1.5rem', '2.5rem'] as const) {
-	test(`firstBaseline centres ${avatarSize} rails on the first line of a stacked title`, () => {
-		const { locator } = renderCompound(
-			<Text fontWeight="emphasis">
-				<span data-testid="cap" style={capProbeStyle} />
-				Notification title
-			</Text>,
-			avatarSize,
-		);
-		const cap = verticalCentre(locator.getByTestId('cap').element());
-		const avatar = locator.getByTestId('avatar').element();
-		const track = locator.getByTestId('track').element();
-
-		expect(verticalCentre(avatar)).toBeCloseTo(cap, 0);
-		expect(verticalCentre(locator.getByRole('button', { name: 'Dismiss' }).element())).toBeCloseTo(
-			cap,
-			0,
-		);
-		// A rail taller than the line grows the row instead of overflowing it.
-		expect(avatar.getBoundingClientRect().top).toBeGreaterThanOrEqual(
-			track.getBoundingClientRect().top - 0.5,
-		);
-	});
-}
-
-test('firstBaseline follows the title when Track inherits the title typography', () => {
-	const { locator } = render(
-		<Text elementType="div" shouldDisableTrim typography="heading2">
-			<Track
-				gap="sp12"
-				railAlignment="firstBaseline"
-				railStart={<IconButton aria-label="Dismiss" icon="close" size="small" />}
-			>
-				<Stack gap="sp4">
-					<Heading level={2}>
-						<span data-testid="cap" style={capProbeStyle} />
-						Section title
-					</Heading>
-					<Text>Description</Text>
-				</Stack>
-			</Track>
-		</Text>,
-	);
-
-	expect(verticalCentre(locator.getByRole('button', { name: 'Dismiss' }).element())).toBeCloseTo(
-		verticalCentre(locator.getByTestId('cap').element()),
-		0,
-	);
-});
-
 const itemStyle = {
 	backgroundColor: vars.color.surface.base,
 	borderRadius: vars.radius.detail,
@@ -374,17 +273,5 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 			{ appearance },
 		);
 		await captureVisualAppearance(scene, 'track/kitchen-sink', appearance);
-	}
-});
-
-test('first baseline with compound content', { tags: ['visual'] }, async () => {
-	for (const appearance of visualAppearances) {
-		const { locator } = renderCompound(
-			<Text fontWeight="emphasis">Notification title that wraps</Text>,
-			'2.5rem',
-			appearance,
-		);
-
-		await captureVisualAppearance(locator, 'track/first-baseline-compound', appearance);
 	}
 });

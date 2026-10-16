@@ -298,7 +298,7 @@ export function DocsNavLink({
 			{icon == null ? (
 				children
 			) : (
-				<Text elementType="span" shouldInheritFont startContent={icon}>
+				<Text elementType="div" shouldDisableTrim shouldInheritFont startContent={icon}>
 					{children}
 				</Text>
 			)}
