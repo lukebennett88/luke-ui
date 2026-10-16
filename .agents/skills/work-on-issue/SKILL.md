@@ -17,7 +17,9 @@ Use `git` and `gh` when they are available. Equivalent tools and connectors are 
    existing branch or pull request for this issue. When it doesn't, ask before you start.
 3. Work in a worktree for this task. Reuse one that already exists for the same issue or pull
    request. Otherwise create one from `origin/main`, or from the base branch the request names, and
-   install dependencies in it with `pnpm install`.
+   install dependencies in it with `pnpm install`. Uncommitted changes in a reused worktree are part
+   of the work you are resuming, so build on them and commit them with it. Ask about any that don't
+   fit the issue.
 4. Name the branch `luke/<issue-number>-<short-slug>`, for example
    `luke/768-theme-input-validation`. The prefix names the person responsible for the code, whoever
    wrote it. Never use an agent's name, such as `claude/` or `cursor/`.
