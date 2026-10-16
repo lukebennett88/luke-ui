@@ -24,6 +24,16 @@ applies to the literal next line, so it cannot sit inside a multi-line comment.
 The package is built with the React Compiler, so do not add `useMemo`, `useCallback` or `memo` for
 performance. Pass plain objects as context values, because the compiler memoises them.
 
+## Effects
+
+Do not use `useEffect` to reset state when a prop changes, or to mirror React state into a ref for
+event handlers. Prefer remounting with `key`, deriving values during render, or reading values from
+the render that created the handler. Reserve effects for synchronising with systems outside React.
+
+## Server Components
+
+The docs app does not use React Server Components. Do not add `'use client'` directives there.
+
 ## Reuse
 
 Prefer utilities the repo already ships over hand-rolling: `cx` from `@luke-ui/react/utils` for

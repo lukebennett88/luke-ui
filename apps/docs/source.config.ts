@@ -10,6 +10,7 @@ import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import * as z from 'zod';
 import { createComponentPropsGenerator } from './src/lib/create-component-props-generator.js';
 import { inlineExampleSource } from './src/lib/inline-example-source';
+import { remarkAttachTypeDefinitions } from './src/lib/remark-attach-type-definitions.js';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
 import { stringifyComponentPropsTable } from './src/lib/stringify-component-props-table.js';
@@ -50,6 +51,7 @@ export const docs = defineDocs({
 });
 
 const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
+const typeDefinitionsDir = fileURLToPath(new URL('.source/type-definitions', import.meta.url));
 
 const generator = createGenerator({
 	cache: createFileSystemGeneratorCache('.source/fumadocs-typescript'),
@@ -78,6 +80,8 @@ export default defineConfig({
 					remarkStringify: true,
 				} satisfies RemarkAutoTypeTableOptions,
 			],
+			// Runs after `<component-props-table>` expands, so the generated definitions exist.
+			[remarkAttachTypeDefinitions, { outputDir: typeDefinitionsDir }],
 			[
 				remarkDocsAutoTypeTable,
 				{

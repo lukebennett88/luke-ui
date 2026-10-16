@@ -15,7 +15,10 @@ import {
 	TableColumn,
 	TableRowHeader,
 } from './reference-table.js';
+import { LinkedType } from './type-popover.js';
 import * as styles from './type-table.css.js';
+
+const HREF_PATTERN = /^(?:[/#]|https?:)/;
 
 interface ParameterNode {
 	description: ReactNode;
@@ -158,6 +161,14 @@ function PropRow({
 	// Generator often puts a short kind (e.g. "union") in `type` and the readable signature in
 	// `typeDescription`. Prefer the signature so the type is always discoverable.
 	const shownType = typeDescription ?? type;
+	// An authored `@fumadocsHref` gives a URL. The docs generator gives a linked alias name instead.
+	const typeContent = (() => {
+		if (typeDescriptionLink === undefined) return shownType;
+		if (HREF_PATTERN.test(typeDescriptionLink)) {
+			return <MdxLink href={typeDescriptionLink}>{shownType}</MdxLink>;
+		}
+		return <LinkedType typeName={typeDescriptionLink}>{shownType}</LinkedType>;
+	})();
 	// The narrow layout hides a missing default, so the type cell then ends the stacked row.
 	const typeEndsRow = !layout.showDefault || !hasDefault;
 	// Deep-link ids stay `${prefix}-${name}` when a table id exists. Without one, a stable React id
@@ -203,11 +214,7 @@ function PropRow({
 					{...cellBox}
 				>
 					<CellText className={referenceStyles.monospace} fontWeight="body">
-						{typeDescriptionLink === undefined ? (
-							shownType
-						) : (
-							<MdxLink href={typeDescriptionLink}>{shownType}</MdxLink>
-						)}
+						{typeContent}
 					</CellText>
 				</TableCell>
 				{layout.showDefault ? (

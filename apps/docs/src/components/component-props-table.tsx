@@ -12,16 +12,23 @@ import { InheritTypography } from './docs-article/mdx-elements.js';
 import * as disclosureStyles from './docs-disclosure.css.js';
 import * as tableStyles from './reference-table.css.js';
 import { CellText, ReferenceTableFrame, TableCell } from './reference-table.js';
+import { TypeDefinitionsProvider } from './type-definitions-context.js';
 import type { PropTableLayout, TypeNode } from './type-table.js';
 import { getPropTableLayout, PropRows, PropTableHead } from './type-table.js';
 
 /** Grouped prop table for a component guide's `## API` section. */
 export function ComponentPropsTable({
 	className,
+	definitionNames,
+	definitionsHref,
 	id,
 	type,
 	...props
 }: {
+	/** Aliases in the `definitionsHref` asset. Set by `remarkAttachTypeDefinitions`. */
+	definitionNames?: ReadonlyArray<string>;
+	/** URL of this table's type-definitions asset. Set by `remarkAttachTypeDefinitions`. */
+	definitionsHref?: string;
 	id: string;
 	type: Record<string, TypeNode>;
 } & ComponentProps<'div'>) {
@@ -39,7 +46,7 @@ export function ComponentPropsTable({
 			document.getElementById(hash)?.scrollIntoView({ behavior: 'instant' });
 	}, [hash, id]);
 
-	return (
+	const table = (
 		<Stack className={cx('not-prose', className)} gap="sp16" id={id} marginBlock="sp24" {...props}>
 			{nativePropsNote === undefined ? null : (
 				<CellText color="secondary" elementType="div" fontWeight="body">
@@ -66,6 +73,14 @@ export function ComponentPropsTable({
 				)}
 			</ReferenceTableFrame>
 		</Stack>
+	);
+
+	if (definitionNames === undefined || definitionsHref === undefined) return table;
+
+	return (
+		<TypeDefinitionsProvider definitionNames={definitionNames} definitionsHref={definitionsHref}>
+			{table}
+		</TypeDefinitionsProvider>
 	);
 }
 

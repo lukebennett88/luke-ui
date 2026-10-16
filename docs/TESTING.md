@@ -24,6 +24,10 @@ Assert observable public behaviour. Prefer roles and accessible names, `userEven
 Do not test private functions, implementation details, or computed appearance. Use computed styles
 only when layout is the contract.
 
+Do not add production props, context defaults, or code paths that exist only to make tests easier.
+Exercise the real loading and rendering path, and supply fixtures through the same seams the product
+uses.
+
 Do not use `test.each`, `it.each`, or `describe.each`. Parameterise with a `for…of` loop that calls
 `test()` (or `describe()`) inside, and put the distinguishing value in the title:
 

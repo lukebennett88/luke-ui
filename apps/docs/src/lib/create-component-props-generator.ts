@@ -8,12 +8,16 @@ import {
 	typeForwardsDomProps,
 } from './component-prop-analysis.js';
 import { NATIVE_PROPS_FORWARDING_KEY, renderNativePropsNote } from './component-prop-groups.js';
+import { enrichGeneratedDocTypes } from './enrich-generated-doc-types.js';
 
 interface GenerateDocumentationOptions {
 	basePath?: string;
 }
 
-/** Wraps the fumadocs generator and removes generic DOM props from component Props tables. */
+/**
+ * Wraps the fumadocs generator to remove generic DOM props from component Props tables and restore
+ * their declared types.
+ */
 export function createComponentPropsGenerator(options: GeneratorOptions = {}): Generator {
 	const generator = createGenerator(options);
 	const generateDocumentation = generator.generateDocumentation.bind(generator);
@@ -38,10 +42,14 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 		const reactSrcDir = lukeUiReactSrcDir(repoRoot);
 		const forwardsDomProps = typeForwardsDomProps(declaration, reactSrcDir);
 		return docs.map((doc) =>
-			markNativePropsForwarding(
-				filterGeneratedDoc(doc, declaration, reactSrcDir),
-				name,
-				forwardsDomProps,
+			enrichGeneratedDocTypes(
+				markNativePropsForwarding(
+					filterGeneratedDoc(doc, declaration, reactSrcDir),
+					name,
+					forwardsDomProps,
+				),
+				declaration,
+				reactSrcDir,
 			),
 		);
 	};

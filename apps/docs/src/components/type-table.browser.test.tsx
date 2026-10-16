@@ -1,3 +1,4 @@
+/// <reference types="mdx" />
 import '../styles/app.css';
 import '@luke-ui/theme-tactile/stylesheet.css';
 import { Provider } from '@luke-ui/react/provider';
@@ -9,19 +10,32 @@ import {
 	createRouter,
 	RouterProvider,
 } from '@tanstack/react-router';
+import axe from 'axe-core';
 import type { ReactNode } from 'react';
-import { act } from 'react';
+import { act, useState } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import { afterEach, assert, expect, test } from 'vite-plus/test';
+import { afterEach, assert, expect, test, vi } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { ComponentPropsTable } from './component-props-table.js';
 import { DocsThemeRoot } from './theme-controls.js';
+import { TypeDefinitionsProvider } from './type-definitions-context.js';
 import { TypeTable } from './type-table.js';
 
 /** Matches the docs article `maxInlineSize` of `52rem` at a 16px root. */
 const ARTICLE_INLINE_SIZE = '832px';
 const MOBILE_INLINE_SIZE = '375px';
+
+/** Real guides render their examples elsewhere. This suite needs only their API tables. */
+const GUIDE_COMPONENTS = { ComponentPropsTable, ExampleBlock: () => null };
+
+const PRESS_ACTION_DEFINITION_PATTERN = /^type PressAction = /;
+const RESPONSIVE_VALUE_DEFINITION_PATTERN =
+	/^type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive</;
+
+const SYNTHETIC_TYPE = 'RequiredInitialResponsiveValue<number | string>';
+const SYNTHETIC_DEFINITION =
+	'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<Value>;';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
@@ -31,6 +45,7 @@ afterEach(() => {
 	container?.remove();
 	container = undefined;
 	root = undefined;
+	vi.restoreAllMocks();
 });
 
 test('renders a semantic table with descriptions visible and no nested paragraphs', async () => {
@@ -316,6 +331,359 @@ test('lists props in the order of their group', async () => {
 		.map((element) => element.textContent);
 	expect(names).toEqual(['appearance', 'size']);
 });
+
+test('opens a type definition popover for a linked alias and restores focus on dismiss', async () => {
+	vi.spyOn(globalThis, 'fetch').mockResolvedValue(definitionsResponse());
+
+	await renderDeferredTypeTable('/type-definitions/focus.json');
+
+	const trigger = page.getByRole('button', {
+		exact: true,
+		name: SYNTHETIC_TYPE,
+	});
+	await expect.element(trigger).toBeVisible();
+	await expect.element(trigger).toHaveAccessibleName(SYNTHETIC_TYPE);
+	await userEvent.click(trigger.element());
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.toBeVisible();
+	await expect.element(page.getByText(/type RequiredInitialResponsiveValue/)).toBeVisible();
+
+	await userEvent.keyboard('{Escape}');
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.not.toBeInTheDocument();
+	// RAC FocusScope restores the trigger in a rAF after unmount.
+	await expect.element(trigger).toHaveFocus();
+});
+
+test('the Button guide opens PressAction from its generated definitions', async () => {
+	// The Button primitive guide also documents a `ButtonProps` from a `button.tsx`, which fumadocs
+	// gives the same table id. Compiling it too checks that each guide keeps its own definitions.
+	const { default: ButtonGuide } = await import('../../content/docs/components/actions/button.mdx');
+	await import('../../content/docs/components/primitives/button.mdx');
+	await renderWidget(<ButtonGuide components={GUIDE_COMPONENTS} />);
+
+	const { dialog, trigger } = await openDefinitionWithKeyboard('PressAction', 'PressAction');
+	await expect.element(dialog.getByText(PRESS_ACTION_DEFINITION_PATTERN)).toBeVisible();
+	await userEvent.keyboard('{Escape}');
+	await expect.element(dialog).not.toBeInTheDocument();
+	await expect.element(trigger).toHaveFocus();
+});
+
+test('the Grid guide opens RequiredInitialResponsiveValue from its generated definitions', async () => {
+	const { default: GridGuide } = await import('../../content/docs/components/layout/grid.mdx');
+	await renderWidget(<GridGuide components={GUIDE_COMPONENTS} />);
+
+	const { dialog, trigger } = await openDefinitionWithKeyboard(
+		'RequiredInitialResponsiveValue',
+		'RequiredInitialResponsiveValue<number | string>',
+	);
+	await expect.element(dialog.getByText(RESPONSIVE_VALUE_DEFINITION_PATTERN)).toBeVisible();
+	await userEvent.keyboard('{Escape}');
+	await expect.element(dialog).not.toBeInTheDocument();
+	await expect.element(trigger).toHaveFocus();
+});
+
+test('falls back to plain text when a type reference has no definition', async () => {
+	await renderWidget(
+		<TypeTable
+			id="api"
+			type={{
+				value: {
+					type: 'Promise<string>',
+					typeDescriptionLink: 'Promise',
+				},
+			}}
+		/>,
+	);
+
+	await expect.element(page.getByText('Promise<string>')).toBeVisible();
+	expect(page.getByRole('button', { name: 'Promise<string>' }).elements()).toHaveLength(0);
+	expect(page.getByRole('link').elements()).toHaveLength(0);
+});
+
+test('deferred definition fetch shows loading, then the definition', async () => {
+	let resolveFetch: ((response: Response) => void) | undefined;
+	const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(
+		() =>
+			new Promise((resolve) => {
+				resolveFetch = resolve;
+			}),
+	);
+
+	await renderDeferredTypeTable('/type-definitions/loading.json', [
+		'RequiredInitialResponsiveValue',
+	]);
+	const trigger = page.getByRole('button', {
+		exact: true,
+		name: SYNTHETIC_TYPE,
+	});
+	await userEvent.click(trigger.element());
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.toBeVisible();
+	await expect.element(page.getByText('Loading definition…')).toBeVisible();
+
+	assert(resolveFetch, 'expected fetch to start');
+	const completeFetch = resolveFetch;
+	await act(async () => {
+		completeFetch(definitionsResponse());
+	});
+	await expect.element(page.getByText(/type RequiredInitialResponsiveValue/)).toBeVisible();
+	expect(fetchMock).toHaveBeenCalledWith('/type-definitions/loading.json');
+});
+
+test('deferred definition fetch shows a recoverable error and retries', async () => {
+	// Prefetch runs on hover/focus/press, so keep failing until Retry flips this flag.
+	let allowSuccess = false;
+	const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+		if (!allowSuccess) {
+			return new Response('missing', { status: 404 });
+		}
+		return definitionsResponse();
+	});
+
+	await renderDeferredTypeTable('/type-definitions/retry.json', ['RequiredInitialResponsiveValue']);
+	const trigger = page.getByRole('button', {
+		exact: true,
+		name: SYNTHETIC_TYPE,
+	});
+	await userEvent.click(trigger.element());
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.toBeVisible();
+	await expect.element(page.getByText(/Failed to load type definitions/)).toBeVisible();
+	expect(fetchMock.mock.calls.length).toBeGreaterThan(0);
+	expect(fetchMock).toHaveBeenCalledWith('/type-definitions/retry.json');
+
+	allowSuccess = true;
+	await userEvent.click(page.getByRole('button', { exact: true, name: 'Retry' }).element());
+	await expect.element(page.getByText(/type RequiredInitialResponsiveValue/)).toBeVisible();
+});
+
+test('deferred tables only link aliases registered in definitionNames', async () => {
+	const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(definitionsResponse());
+
+	await renderWidget(
+		<TypeDefinitionsProvider
+			definitionNames={['RequiredInitialResponsiveValue']}
+			definitionsHref="/type-definitions/registered-only.json"
+		>
+			<TypeTable
+				id="api"
+				type={{
+					columns: {
+						description: 'Column tracks.',
+						type: SYNTHETIC_TYPE,
+						typeDescriptionLink: 'RequiredInitialResponsiveValue',
+					},
+					fallback: {
+						description: 'Unresolved external.',
+						type: 'Promise<string>',
+						typeDescriptionLink: 'Promise',
+					},
+				}}
+			/>
+		</TypeDefinitionsProvider>,
+	);
+
+	await expect
+		.element(page.getByRole('button', { exact: true, name: SYNTHETIC_TYPE }))
+		.toBeVisible();
+	expect(page.getByRole('button', { name: 'Promise<string>' }).elements()).toHaveLength(0);
+	await expect.element(page.getByText('Promise<string>')).toBeVisible();
+	expect(fetchMock).not.toHaveBeenCalled();
+});
+
+test('deferred fetch that omits a registered alias settles without infinite loading', async () => {
+	const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+		new Response(JSON.stringify({}), {
+			headers: { 'Content-Type': 'application/json' },
+			status: 200,
+		}),
+	);
+
+	await renderDeferredTypeTable('/type-definitions/empty-asset.json', [
+		'RequiredInitialResponsiveValue',
+	]);
+	const trigger = page.getByRole('button', {
+		exact: true,
+		name: SYNTHETIC_TYPE,
+	});
+	await userEvent.click(trigger.element());
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.toBeVisible();
+	await expect.element(page.getByText('Definition not available.')).toBeVisible();
+	expect(page.getByText('Loading definition…').elements()).toHaveLength(0);
+	expect(fetchMock).toHaveBeenCalledWith('/type-definitions/empty-asset.json');
+});
+
+test('linked type popovers in a ComponentPropsTable have no axe violations', async () => {
+	vi.spyOn(globalThis, 'fetch').mockResolvedValue(definitionsResponse());
+
+	await renderWidget(
+		<ComponentPropsTable
+			definitionNames={['RequiredInitialResponsiveValue']}
+			definitionsHref="/type-definitions/axe.json"
+			id="grid-api"
+			type={{
+				columns: {
+					description: 'Column tracks.',
+					type: SYNTHETIC_TYPE,
+					typeDescriptionLink: 'RequiredInitialResponsiveValue',
+				},
+			}}
+		/>,
+	);
+
+	const trigger = page.getByRole('button', {
+		exact: true,
+		name: SYNTHETIC_TYPE,
+	});
+	await userEvent.click(trigger.element());
+	const dialog = page.getByRole('dialog', {
+		name: 'Definition of RequiredInitialResponsiveValue',
+	});
+	await expect.element(dialog).toBeVisible();
+	await expect.element(page.getByText(/type RequiredInitialResponsiveValue/)).toBeVisible();
+
+	// Include the portalled dialog; Vitest document chrome trips landmark rules.
+	assert(container, 'expected a container');
+	const results = await axe.run([container, dialog.element()]);
+	expect(
+		results.violations.map((violation) => ({
+			id: violation.id,
+			nodes: violation.nodes.map((node) => node.html),
+		})),
+	).toEqual([]);
+});
+
+test('ignores a response for an asset the table no longer uses', async () => {
+	const resolvers = new Map<string, (response: Response) => void>();
+	vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
+		const href = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+		return new Promise((resolve) => {
+			resolvers.set(href, resolve);
+		});
+	});
+
+	function SwitchableAsset() {
+		const [href, setHref] = useState('/type-definitions/stale-a.json');
+		return (
+			<>
+				<button onClick={() => setHref('/type-definitions/stale-b.json')} type="button">
+					Use asset B
+				</button>
+				{deferredTypeTableTree(href)}
+			</>
+		);
+	}
+
+	await renderWidget(<SwitchableAsset />);
+	const trigger = page.getByRole('button', {
+		exact: true,
+		name: SYNTHETIC_TYPE,
+	});
+	await userEvent.click(trigger.element());
+	await expect.element(page.getByText('Loading definition…')).toBeVisible();
+	await userEvent.keyboard('{Escape}');
+	await userEvent.click(page.getByRole('button', { name: 'Use asset B' }).element());
+	await userEvent.click(trigger.element());
+	await expect.element(page.getByText('Loading definition…')).toBeVisible();
+
+	const resolveA = resolvers.get('/type-definitions/stale-a.json');
+	const resolveB = resolvers.get('/type-definitions/stale-b.json');
+	assert(resolveA, 'expected fetch for stale-a');
+	assert(resolveB, 'expected fetch for stale-b');
+
+	await act(async () => {
+		resolveB(definitionsResponse('type RequiredInitialResponsiveValue<Value> = "from-b";'));
+	});
+	await expect.element(page.getByText(/from-b/)).toBeVisible();
+
+	await act(async () => {
+		resolveA(definitionsResponse('type RequiredInitialResponsiveValue<Value> = "from-a";'));
+	});
+	await expect.element(page.getByText(/from-b/)).toBeVisible();
+	expect(page.getByText(/from-a/).elements()).toHaveLength(0);
+});
+
+test('invalid definition JSON shows a recoverable error', async () => {
+	// Fresh Response per call: failed loads drop the cache, and a reused body stream is already read.
+	vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+		Promise.resolve(
+			new Response(JSON.stringify({ Broken: { definition: 1, name: 'Broken' } }), {
+				headers: { 'Content-Type': 'application/json' },
+				status: 200,
+			}),
+		),
+	);
+
+	await renderDeferredTypeTable('/type-definitions/invalid.json');
+	const trigger = page.getByRole('button', {
+		exact: true,
+		name: SYNTHETIC_TYPE,
+	});
+	await userEvent.click(trigger.element());
+	await expect
+		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
+		.toBeVisible();
+	await expect.element(page.getByText('Invalid type definitions payload')).toBeVisible();
+	await expect.element(page.getByRole('button', { exact: true, name: 'Retry' })).toBeVisible();
+});
+
+/**
+ * Opens a generated table's popover from its focused trigger with Enter. The trigger's accessible
+ * name must be its complete visible type, generic arguments included.
+ */
+async function openDefinitionWithKeyboard(typeName: string, visibleType: string) {
+	const trigger = page.getByRole('button', { exact: true, name: visibleType });
+	await expect.element(trigger).toHaveAccessibleName(visibleType);
+	trigger.element().focus();
+	await userEvent.keyboard('{Enter}');
+
+	const dialog = page.getByRole('dialog', { name: `Definition of ${typeName}` });
+	await expect.element(dialog).toBeVisible();
+	return { dialog, trigger };
+}
+
+function deferredTypeTableTree(
+	definitionsHref: string,
+	definitionNames: ReadonlyArray<string> = ['RequiredInitialResponsiveValue'],
+) {
+	return (
+		<TypeDefinitionsProvider definitionNames={definitionNames} definitionsHref={definitionsHref}>
+			<TypeTable
+				id="api"
+				type={{
+					columns: {
+						description: 'Column tracks.',
+						type: SYNTHETIC_TYPE,
+						typeDescriptionLink: 'RequiredInitialResponsiveValue',
+					},
+				}}
+			/>
+		</TypeDefinitionsProvider>
+	);
+}
+
+async function renderDeferredTypeTable(
+	definitionsHref: string,
+	definitionNames: ReadonlyArray<string> = ['RequiredInitialResponsiveValue'],
+) {
+	await renderWidget(deferredTypeTableTree(definitionsHref, definitionNames));
+}
+
+function definitionsResponse(definition = SYNTHETIC_DEFINITION) {
+	return new Response(
+		JSON.stringify({
+			RequiredInitialResponsiveValue: { definition, name: 'RequiredInitialResponsiveValue' },
+		}),
+		{ headers: { 'Content-Type': 'application/json' }, status: 200 },
+	);
+}
 
 async function renderWidget(
 	children: ReactNode,
