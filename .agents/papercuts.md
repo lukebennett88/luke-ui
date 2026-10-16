@@ -89,6 +89,10 @@ not help. Silence in this log is not evidence.
   `TURBO_FORCE=true pnpm exec turbo run test:browser:run --filter=@luke-ui/react -- src/theme/font-family.browser.test.ts`.
   2026-10-14 (#800): `TURBO_FORCE=true pnpm run test` returned the same failure (528 browser tests
   passed, 1 failed, 73 skipped). The assertion also failed on clean baseline `b8a982be`.
+- Seen: 2026-10-16 (#816). The full PR test had 628 browser passes, 1 failure, and 74 skipped.
+  `TURBO_FORCE=true pnpm exec turbo run test:browser:run --filter=@luke-ui/react -- src/theme/font-family.browser.test.ts`
+  reproduced the failure on clean base `58770ff6` (20 passed, 1 failed): the expected value included
+  `BlinkMacSystemFont`, while Chromium 156 returned quoted `"system-ui"`.
 - Where: `packages/@luke-ui/react/src/theme/font-family.browser.test.ts:76`. Governing rule:
   docs/TESTING.md, "Component tests".
 - Problem: The assertion compares different font-family serializations, and the browser test fails
