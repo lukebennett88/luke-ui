@@ -34,8 +34,8 @@ function isLinkedTypeDefinitions(value: unknown): value is LinkedTypeDefinitions
 	return Object.values(value).every(
 		(entry) =>
 			isRecord(entry) &&
-			(entry.definition === undefined || typeof entry.definition === 'string') &&
-			(entry.resolved === undefined || typeof entry.resolved === 'string'),
+			(entry.definition === undefined || Array.isArray(entry.definition)) &&
+			(entry.resolved === undefined || Array.isArray(entry.resolved)),
 	);
 }
 

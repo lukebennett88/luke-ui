@@ -99,15 +99,16 @@ test('processed Markdown lists the Grid and Stack type definitions after their t
 		'##### `RequiredInitialResponsiveValue`\n\n```ts\ntype RequiredInitialResponsiveValue<Value>',
 	);
 	expect(definitions).toContain('Refers to `RequiredInitialResponsive` and `ResponsivePropValue`.');
+	// Code blocks keep the build's line breaks, the same tokens the popover shows.
 	expect(definitions).toContain(
-		'```ts\n"bp640" | "bp768" | "bp1024" | "bp1280" | "bp1536" | "initial"\n```',
+		'```ts\n"bp640"\n  | "bp768"\n  | "bp1024"\n  | "bp1280"\n  | "bp1536"\n  | "initial"\n```',
 	);
 	expect(grid).not.toContain('&#x22;');
 
 	const stack = await processedApi(['components', 'layout', 'stack']);
 	expect(stack).toContain("`RequiredInitialResponsive<SprinklesProps['gap']>`");
 	expect(stack).toMatch(
-		/##### `SprinklesProps\['gap'\]`\n\nResolves to:\n\n```ts\nResponsiveValue<"0" \| "sp4" \|/,
+		/##### `SprinklesProps\['gap'\]`\n\nResolves to:\n\n```ts\nResponsiveValue<"0"\n {2}\| "sp4"\n {2}\|/,
 	);
 });
 
@@ -146,7 +147,7 @@ test(
 test('stringify lists Luke UI definitions before external types and labels shared names', () => {
 	const typeDefinitions: TypeDefinitionsPayload = {
 		KeyboardEvent: {
-			definition: 'type KeyboardEvent = BaseEvent<ReactKeyboardEvent<any>>;',
+			definition: ['type KeyboardEvent = BaseEvent<ReactKeyboardEvent<any>>;'],
 			module: '@react-types/shared',
 			name: 'KeyboardEvent',
 			references: ['KeyboardEvent (@types/react)'],
@@ -159,14 +160,31 @@ test('stringify lists Luke UI definitions before external types and labels share
 			source: 'index.d.ts',
 		},
 		Size: {
-			definition: "type Size = 'small' | 'medium';",
+			definition: [
+				['k', 'type'],
+				' ',
+				['t', 'Size'],
+				' = ',
+				['s', "'small'"],
+				' |\u2060\u00a0',
+				['s', "'medium'"],
+				';',
+			],
 			name: 'Size',
 			references: [],
 		},
 		"Spacing['gap']": {
 			name: "Spacing['gap']",
 			references: ['Size'],
-			resolved: '"sp4" | "sp8" | undefined',
+			resolved: [
+				['s', '"sp4"'],
+				1,
+				'|\u2060\u00a0',
+				['s', '"sp8"'],
+				1,
+				'|\u2060\u00a0',
+				['k', 'undefined'],
+			],
 		},
 	};
 
@@ -188,7 +206,9 @@ type Size = 'small' | 'medium';
 Resolves to:
 
 \`\`\`ts
-"sp4" | "sp8" | undefined
+"sp4"
+  | "sp8"
+  | undefined
 \`\`\`
 
 Refers to \`Size\`.
@@ -214,7 +234,7 @@ test('stringify fences a definition longer than the backtick runs inside it', ()
 	const markdown = stringifyComponentPropsTable(
 		tableNode(
 			{ entries: [], name: 'Props' },
-			{ Example: { definition, name: 'Example', references: [] } },
+			{ Example: { definition: [definition], name: 'Example', references: [] } },
 		),
 	);
 

@@ -1,7 +1,7 @@
 import { expect, test } from 'vite-plus/test';
 import { typeDefinitionsLoadReducer } from './type-definitions-load-state.js';
 
-const data = { A: { definition: 'type A = string;', name: 'A', references: [] } };
+const data = { A: { definition: ['type A = string;'] } };
 
 test('settles a load that is in flight', () => {
 	const loading = typeDefinitionsLoadReducer({ status: 'idle' }, { type: 'load-start' });

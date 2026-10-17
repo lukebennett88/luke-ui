@@ -4,16 +4,14 @@ import { ts } from 'ts-morph';
 import { createTypeDefinitionCollector } from './collect-type-definitions.js';
 import type { PropDeclaration, SyntaxNode } from './component-prop-analysis.js';
 import type { EnrichedGeneratedDoc } from './type-definition-model.js';
-
-/** Bare kind names fumadocs can put in `simplifiedType` in place of a readable signature. */
-const KIND_LABELS = new Set(['union', 'object', 'intersection', 'tuple', 'array', 'function']);
-
-const TRAILING_UNDEFINED = ' | undefined';
+import type { TypeToken } from './type-tokens.js';
+import { typeTokensToText } from './type-tokens.js';
 
 /**
- * Restores the declared type of each prop, links Luke UI type aliases to their source declarations,
- * and collects the definitions of the types each shown signature names. The definitions travel on
- * the doc as `typeDefinitions`, not as a prop entry.
+ * Formats each prop's declared type, or its resolved type when no single annotation describes it,
+ * and collects the definitions of the types those signatures name. The formatted rows travel on the
+ * doc as `typeTokens` and the definitions as `typeDefinitions`, not as prop entries. Each row's text
+ * is its tokens on one line.
  */
 export function enrichGeneratedDocTypes(
 	doc: GeneratedDoc,
@@ -29,6 +27,13 @@ export function enrichGeneratedDocTypes(
 		enclosingDeclaration: declarationNode,
 		packageDir: dirname(reactSrcDir),
 	});
+	const typeTokens: Record<string, Array<TypeToken>> = {};
+
+	function withTokens(entry: DocEntry, tokens: Array<TypeToken>): DocEntry {
+		typeTokens[entry.name] = tokens;
+		const text = typeTokensToText(tokens, { multiline: false });
+		return { ...entry, simplifiedType: text, type: text };
+	}
 
 	const entries = doc.entries.map((entry) => {
 		const annotations = annotationsByName.get(entry.name) ?? [];
@@ -37,47 +42,34 @@ export function enrichGeneratedDocTypes(
 		// An indexed access such as `RacButtonProps['onPress']` hides the shape, so the resolved
 		// signature reads better there.
 		if (declared !== undefined && !isLowReadabilityAnnotation(declared)) {
-			const text = declared.getText().trim();
-			const linkedKey = collector.addTypeNode(declared.compilerNode as ts.TypeNode);
-
-			return {
-				...entry,
-				simplifiedType: text,
-				type: text,
-				typeHref: linkedKey ?? entry.typeHref,
-			};
+			return withTokens(entry, collector.addTypeNode(declared.compilerNode as ts.TypeNode));
 		}
 
-		const resolvedEntry = withResolvedType(entry, annotations);
 		const prop = checker.getPropertyOfType(declaredType, entry.name);
-		if (prop === undefined) return resolvedEntry;
+		if (prop === undefined) return entry;
 
-		// The resolved type can still show a Luke UI alias, such as `Prominence` where union branches
-		// declare different subsets of it, so the row links the same way a written alias does.
-		const linkedKey = collector.addType(checker.getTypeOfSymbolAtLocation(prop, declarationNode), {
-			// A simplified row such as `ResponsiveValue<union>` shows only its alias.
-			typeArguments: resolvedEntry.simplifiedType === resolvedEntry.type,
+		const tokens = collector.addType(checker.getTypeOfSymbolAtLocation(prop, declarationNode), {
+			omitUndefined: impliesUndefined(entry, annotations),
 		});
-		const linkedName =
-			linkedKey === undefined ? undefined : collector.definitions()?.[linkedKey]?.name;
-		// Fumadocs prints the shown text in its own program, so link only when it names the same type.
-		if (linkedName === undefined || !resolvedEntry.simplifiedType.startsWith(linkedName)) {
-			return resolvedEntry;
-		}
-		return { ...resolvedEntry, typeHref: linkedKey };
+		return tokens === undefined ? entry : withTokens(entry, tokens);
 	});
 
 	const typeDefinitions = collector.definitions();
-	if (typeDefinitions === undefined) return { ...doc, entries };
-	return { ...doc, entries, typeDefinitions };
+	return {
+		...doc,
+		entries,
+		...(typeDefinitions === undefined ? {} : { typeDefinitions }),
+		...(Object.keys(typeTokens).length === 0 ? {} : { typeTokens }),
+	};
 }
 
-function withResolvedType(entry: DocEntry, annotations: ReadonlyArray<SyntaxNode>): DocEntry {
-	if (annotations.length === 0 && !KIND_LABELS.has(entry.simplifiedType)) return entry;
-	if (entry.type.length === 0 || entry.type === 'union') return entry;
-
-	const type = resolvedTypeText(entry, annotations);
-	return { ...entry, simplifiedType: type, type };
+/**
+ * True when the `undefined` in an optional prop's resolved type comes only from the `?`. It stays
+ * when a written annotation admits `undefined` itself.
+ */
+function impliesUndefined(entry: DocEntry, annotationNodes: ReadonlyArray<SyntaxNode>): boolean {
+	if (entry.required || annotationNodes.length === 0) return false;
+	return !annotationNodes.some(annotationAdmitsUndefined);
 }
 
 /**
@@ -144,18 +136,6 @@ function isLowReadabilityAnnotation(typeNode: SyntaxNode): boolean {
 		default:
 			return false;
 	}
-}
-
-/**
- * fumadocs' resolved type, minus the trailing `| undefined` TypeScript adds to an optional prop.
- * The suffix stays when a written annotation admits `undefined` itself.
- */
-function resolvedTypeText(entry: DocEntry, annotationNodes: ReadonlyArray<SyntaxNode>): string {
-	if (entry.required || annotationNodes.length === 0) return entry.type;
-	if (annotationNodes.some(annotationAdmitsUndefined)) return entry.type;
-	if (!entry.type.endsWith(TRAILING_UNDEFINED)) return entry.type;
-
-	return entry.type.slice(0, -TRAILING_UNDEFINED.length);
 }
 
 /**

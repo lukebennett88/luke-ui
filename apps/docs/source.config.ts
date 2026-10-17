@@ -29,6 +29,15 @@ function remarkDocsAutoTypeTable(options?: RemarkAutoTypeTableOptions) {
 	return remarkAutoTypeTable(options);
 }
 
+function plainTypeText(type: string) {
+	return {
+		children: [{ type: 'text' as const, value: type }],
+		properties: {},
+		tagName: 'code',
+		type: 'element' as const,
+	};
+}
+
 export const docs = defineDocs({
 	dir: 'content/docs',
 	docs: {
@@ -81,6 +90,9 @@ export default defineConfig({
 					outputName: 'ComponentPropsTable',
 					// Processed Markdown reads GeneratedDoc JSON from the `type` attribute.
 					remarkStringify: true,
+					// Rows show the generator's formatted `typeTokens`, so the text fumadocs renders is
+					// only their fallback and needs no highlighting.
+					renderType: plainTypeText,
 				} satisfies RemarkAutoTypeTableOptions,
 			],
 			// Runs after `<component-props-table>` expands, so the generated definitions exist.

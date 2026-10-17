@@ -1,12 +1,25 @@
 import type { GeneratedDoc } from 'fumadocs-typescript';
 import * as z from 'zod';
+import type { TypeTokens } from './type-tokens.js';
+import { TYPE_TOKEN_KINDS } from './type-tokens.js';
+
+const tokenKindSchema = z.enum(TYPE_TOKEN_KINDS);
+
+const typeTokensSchema = z.array(
+	z.union([
+		z.number().int().nonnegative(),
+		z.string(),
+		z.tuple([tokenKindSchema, z.string()]),
+		z.tuple([tokenKindSchema, z.string(), z.string()]),
+	]),
+);
 
 const typeDefinitionSchema = z.object({
 	/**
-	 * TypeScript source of the declaration. Absent for an indexed access, which has no declaration of
-	 * its own, and for an external type that is not a short type alias.
+	 * The formatted declaration. Absent for an indexed access, which has no declaration of its own, and
+	 * for an external type that is not a short type alias.
 	 */
-	definition: z.string().optional(),
+	definition: typeTokensSchema.optional(),
 	/** Package that declares an external type, such as `react-aria-components`. Absent for Luke UI. */
 	module: z.string().optional(),
 	/** Declared type name, or indexed access text such as `SprinklesProps['gap']`. */
@@ -17,7 +30,7 @@ const typeDefinitionSchema = z.object({
 	 * The checker's expansion, kept when the declaration alone does not show the accepted values,
 	 * such as `keyof typeof responsiveConditions`.
 	 */
-	resolved: z.string().optional(),
+	resolved: typeTokensSchema.optional(),
 	/** File that declares an external type, relative to its package root. */
 	source: z.string().optional(),
 	/** Other names the signatures and definitions write for this type, such as an import's alias. */
@@ -41,6 +54,8 @@ export type TypeDefinitionsPayload = z.infer<typeof typeDefinitionsPayloadSchema
  */
 export type EnrichedGeneratedDoc = GeneratedDoc & {
 	typeDefinitions?: TypeDefinitionsPayload;
+	/** Each row's formatted type, keyed by prop name. Rows without one show their text. */
+	typeTokens?: Record<string, TypeTokens>;
 };
 
 /** Validates a generated model at build time, or throws. The browser never loads this schema. */
@@ -51,7 +66,8 @@ export function parseTypeDefinitionsPayload(value: unknown): TypeDefinitionsPayl
 }
 
 /**
- * One table's JSON asset: only the types its rows link to, with only the text a popover shows. The
- * browser imports this module for types alone, so the schema above stays out of its bundle.
+ * One table's JSON asset: the Luke UI types a popover can open, from a row or from another
+ * definition, with only the tokens a popover shows. The browser imports this module for types alone,
+ * so the schema above stays out of its bundle.
  */
 export type LinkedTypeDefinitions = Record<string, Pick<TypeDefinition, 'definition' | 'resolved'>>;

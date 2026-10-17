@@ -2,6 +2,8 @@ import type { GeneratedDoc } from 'fumadocs-typescript';
 import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
 import type { ComponentPropsTableData } from './remark-attach-type-definitions.js';
 import type { TypeDefinition, TypeDefinitionsPayload } from './type-definition-model.js';
+import type { TypeTokens } from './type-tokens.js';
+import { typeTokensToText } from './type-tokens.js';
 
 interface MdastNode {
 	type: string;
@@ -73,7 +75,7 @@ function typeDefinitionsToMarkdown(typeDefinitions: TypeDefinitionsPayload): str
 			const file = definition.source === undefined ? '' : ` (\`${definition.source}\`)`;
 			parts.push(`Declared in ${packageLink}${file}.`);
 		}
-		if (definition.definition !== undefined) parts.push(codeBlock(definition.definition));
+		if (definition.definition !== undefined) parts.push(tokensBlock(definition.definition));
 		if (
 			definition.module === undefined &&
 			definition.definition === undefined &&
@@ -83,7 +85,7 @@ function typeDefinitionsToMarkdown(typeDefinitions: TypeDefinitionsPayload): str
 		}
 		if (definition.resolved !== undefined) {
 			parts.push(definition.definition === undefined ? 'Resolves to:' : 'Which resolves to:');
-			parts.push(codeBlock(definition.resolved));
+			parts.push(tokensBlock(definition.resolved));
 		}
 		if (definition.references.length > 0) {
 			const labels = definition.references.map((reference) => {
@@ -106,6 +108,11 @@ function typeDefinitionsToMarkdown(typeDefinitions: TypeDefinitionsPayload): str
 function typeLabel(key: string, definition: TypeDefinition): string {
 	if (key === definition.name) return `\`${definition.name}\``;
 	return `\`${definition.name}\` from \`${definition.module ?? '@luke-ui/react'}\``;
+}
+
+/** Formatted tokens with their line breaks, as the popover shows them. */
+function tokensBlock(tokens: TypeTokens): string {
+	return codeBlock(typeTokensToText(tokens, { multiline: true }));
 }
 
 /** A TypeScript code block whose fence is longer than any backtick run inside it. */

@@ -1,6 +1,9 @@
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 import { ts } from 'ts-morph';
+import { createTypeTokenPrinter } from './print-type-tokens.js';
 import type { TypeDefinition, TypeDefinitionsPayload } from './type-definition-model.js';
+import type { TypeToken } from './type-tokens.js';
+import { typeTokensToText } from './type-tokens.js';
 
 /**
  * The flags fumadocs prints prop types with, so a walked node names what the table shows.
@@ -31,7 +34,6 @@ const NODE_MODULES_SEGMENT = `${sep}node_modules${sep}`;
 const TYPESCRIPT_LIB_PATTERN = /[/\\]node_modules[/\\]typescript[/\\]lib[/\\]/;
 const SCOPED_PACKAGE_PATTERN = /^@[^/]+\/[^/]+/;
 const UNSCOPED_PACKAGE_PATTERN = /^[^/]+/;
-const LEADING_WHITESPACE_PATTERN = /^[\t ]*/;
 
 /** Declaration kinds that give a named type a definition. */
 const NAMED_TYPE_KINDS = new Set([
@@ -51,17 +53,13 @@ const OPAQUE_TYPE_KINDS = new Set([
 ]);
 
 export interface TypeDefinitionCollector {
+	/** Records the named types a written annotation refers to, and returns it formatted. */
+	addTypeNode: (node: ts.TypeNode) => Array<TypeToken>;
 	/**
-	 * Records the named types a written annotation refers to. Returns the key the row links to, as
-	 * `linkedKey` describes.
+	 * Records the named types the checker prints for a resolved type, and returns it formatted. With
+	 * `omitUndefined`, the `undefined` TypeScript adds to an optional prop is left out.
 	 */
-	addTypeNode: (node: ts.TypeNode) => string | undefined;
-	/**
-	 * Records the named types the checker prints for a resolved type, and returns the key the row
-	 * links to. With `typeArguments: false`, only the root types are recorded, for a row whose shown
-	 * text collapses their arguments, such as `ResponsiveValue<union>`.
-	 */
-	addType: (type: ts.Type, options?: { typeArguments?: boolean }) => string | undefined;
+	addType: (type: ts.Type, options: { omitUndefined: boolean }) => Array<TypeToken> | undefined;
 	/** The recorded definitions in order of first reference, or `undefined` when there are none. */
 	definitions: () => TypeDefinitionsPayload | undefined;
 }
@@ -72,9 +70,10 @@ type SymbolResolver = (name: ts.Identifier) => ts.Symbol | undefined;
  * Collects the definitions a props table's signatures refer to.
  *
  * Luke UI types, declared anywhere in the `@luke-ui/react` package at `packageDir`, are followed
- * through their definitions until every Luke UI name in the payload has its own key. External types record their package and declaring file. A short
- * external type alias also keeps its declaration, but the names in it are not followed further.
- * TypeScript's own library types are left out, like primitive keywords.
+ * through their definitions until every Luke UI name in the payload has its own key. External types
+ * record their package and declaring file. A short external type alias also keeps its declaration,
+ * but the names in it are not followed further. TypeScript's own library types are left out, like
+ * primitive keywords. Each type name in a formatted type carries the key of its definition.
  */
 export function createTypeDefinitionCollector({
 	checker,
@@ -94,6 +93,24 @@ export function createTypeDefinitionCollector({
 	// name's symbol on the identifier itself.
 	const resolveWritten: SymbolResolver = (name) => checker.getSymbolAtLocation(name);
 	const resolveBuilt: SymbolResolver = (name) => (name as { symbol?: ts.Symbol }).symbol;
+
+	// Printing follows the walk that registered every key, so each type name finds its definition.
+	const typePrinter = createTypeTokenPrinter({
+		keyFor(node) {
+			if (ts.isIndexedAccessTypeNode(node)) {
+				const key = indexedAccessKey(node);
+				return key !== undefined && entries.has(key) ? key : undefined;
+			}
+			const name = referencedName(node);
+			if (name === undefined) return;
+			// Only nodes parsed from source have a position the checker can resolve from.
+			const symbol = resolveBuilt(name) ?? (name.pos >= 0 ? resolveWritten(name) : undefined);
+			const declaration =
+				symbol === undefined ? undefined : namedTypeDeclaration(aliasTarget(symbol));
+			return declaration === undefined ? undefined : keysByDeclaration.get(declaration);
+		},
+		sourceFile: enclosingDeclaration.getSourceFile(),
+	});
 
 	/**
 	 * `expand: false` names external types without expanding them. `shown` marks names a row
@@ -162,23 +179,27 @@ export function createTypeDefinitionCollector({
 
 	function expandDeclaration(key: string, declaration: ts.Declaration, origin: Origin): void {
 		const entry = entries.get(key)!;
-		const text = declarationText(declaration);
 
 		if (origin.kind === 'external') {
 			if (!ts.isTypeAliasDeclaration(declaration)) return;
-			if (text.length > MAX_EXTERNAL_DEFINITION_LENGTH) return;
 
-			entry.definition = text;
 			visit(declaration.type, resolveWritten, entry.references, { expand: false, shown: false });
 			removeReference(entry.references, key);
+			const definition = typePrinter.declaration(declaration);
+			if (
+				typeTokensToText(definition, { multiline: false }).length > MAX_EXTERNAL_DEFINITION_LENGTH
+			) {
+				return;
+			}
+			entry.definition = definition;
 			return;
 		}
 
-		entry.definition = text;
 		ts.forEachChild(declaration, (child) =>
 			visit(child, resolveWritten, entry.references, { expand: true, shown: false }),
 		);
 		removeReference(entry.references, key);
+		entry.definition = typePrinter.declaration(declaration);
 
 		if (!ts.isTypeAliasDeclaration(declaration) || declaration.typeParameters !== undefined) return;
 		if (!containsOpaqueSyntax(declaration.type)) return;
@@ -201,7 +222,7 @@ export function createTypeDefinitionCollector({
 			return;
 		}
 
-		const key = `${target!.getName()}['${node.indexType.literal.text}']`;
+		const key = indexedAccessKey(node)!;
 		if (entries.has(key)) return key;
 
 		const entry: TypeDefinition = { name: key, references: [] };
@@ -219,15 +240,15 @@ export function createTypeDefinitionCollector({
 		enclosing: ts.Node,
 		extraFlags = ts.NodeBuilderFlags.None,
 	): void {
-		// The printed text and the walked references come from the same built node.
+		// The printed tokens and the walked references come from the same built node.
 		const node = buildTypeNode(type, enclosing, PRINTED_TYPE_FLAGS | extraFlags);
 		if (node === undefined) return;
 
 		const text = printer.printNode(ts.EmitHint.Unspecified, node, enclosing.getSourceFile());
 		if (text.length > MAX_RESOLVED_LENGTH) return;
 
-		entry.resolved = text;
 		visit(node, resolveBuilt, entry.references, { expand: true, shown: false });
+		entry.resolved = typePrinter.type(node);
 	}
 
 	/**
@@ -265,26 +286,16 @@ export function createTypeDefinitionCollector({
 		return transformed[0];
 	}
 
-	/**
-	 * The Luke UI type a row's shown signature names at its root, which the row links to however the
-	 * prop was declared. An `undefined` member, written or added for an optional prop, does not change
-	 * which type the row shows. External types and type parameters do not link.
-	 */
-	function linkedKey(node: ts.TypeNode, resolveSymbol: SymbolResolver): string | undefined {
-		const members = rootMembers(node).filter(
-			(member) => member.kind !== ts.SyntaxKind.UndefinedKeyword,
-		);
-		if (members.length !== 1) return;
-
-		const name = referencedName(members[0]!);
-		const symbol = name === undefined ? undefined : resolveSymbol(name);
-		const declaration =
-			symbol === undefined ? undefined : namedTypeDeclaration(aliasTarget(symbol));
-		const key = declaration === undefined ? undefined : keysByDeclaration.get(declaration);
-		const entry = key === undefined ? undefined : entries.get(key);
-		if (entry === undefined || entry.module !== undefined) return;
-
-		return entry.definition === undefined && entry.resolved === undefined ? undefined : key;
+	/** The key of a string-literal indexed access on a Luke UI type, such as `SprinklesProps['gap']`. */
+	function indexedAccessKey(node: ts.IndexedAccessTypeNode): string | undefined {
+		if (!ts.isTypeReferenceNode(node.objectType)) return;
+		if (!ts.isLiteralTypeNode(node.indexType) || !ts.isStringLiteral(node.indexType.literal))
+			return;
+		const name = referencedName(node.objectType);
+		if (name === undefined || name.pos < 0) return;
+		const symbol = checker.getSymbolAtLocation(name);
+		if (symbol === undefined) return;
+		return `${aliasTarget(symbol).getName()}['${node.indexType.literal.text}']`;
 	}
 
 	function aliasTarget(symbol: ts.Symbol): ts.Symbol {
@@ -301,24 +312,17 @@ export function createTypeDefinitionCollector({
 	}
 
 	return {
-		addType(type, { typeArguments = true } = {}) {
-			const node = buildTypeNode(type, enclosingDeclaration, PRINTED_TYPE_FLAGS);
-			if (node === undefined) return;
+		addType(type, { omitUndefined }) {
+			const built = buildTypeNode(type, enclosingDeclaration, PRINTED_TYPE_FLAGS);
+			if (built === undefined) return;
 
-			if (typeArguments) {
-				visit(node, resolveBuilt, [], { expand: true, shown: true });
-			} else {
-				for (const member of rootMembers(node)) {
-					const name = referencedName(member);
-					const symbol = name === undefined ? undefined : resolveBuilt(name);
-					if (symbol !== undefined) addSymbol(symbol, { expand: true, shown: true });
-				}
-			}
-			return linkedKey(node, resolveBuilt);
+			const node = omitUndefined ? withoutUndefined(built) : built;
+			visit(node, resolveBuilt, [], { expand: true, shown: true });
+			return typePrinter.type(node);
 		},
 		addTypeNode(node) {
 			visit(node, resolveWritten, [], { expand: true, shown: true });
-			return linkedKey(node, resolveWritten);
+			return typePrinter.type(node);
 		},
 		definitions() {
 			if (entries.size === 0) return;
@@ -371,13 +375,19 @@ function namedTypeDeclaration(symbol: ts.Symbol): ts.Declaration | undefined {
 	return symbol.declarations?.find((node) => NAMED_TYPE_KINDS.has(node.kind));
 }
 
-/** A union's members, or the type itself, without wrapping parentheses. */
-function rootMembers(node: ts.TypeNode): ReadonlyArray<ts.TypeNode> {
-	if (ts.isParenthesizedTypeNode(node)) return rootMembers(node.type);
-	if (!ts.isUnionTypeNode(node)) return [node];
-	return node.types.flatMap((member) =>
-		ts.isParenthesizedTypeNode(member) ? rootMembers(member.type) : [member],
-	);
+/**
+ * A built union without its `undefined` member, or its one remaining member. TypeScript adds
+ * `undefined` to an optional prop's type, and the row's `?` already says it.
+ */
+function withoutUndefined(node: ts.TypeNode): ts.TypeNode {
+	if (!ts.isUnionTypeNode(node)) return node;
+	const members = node.types.filter((member) => member.kind !== ts.SyntaxKind.UndefinedKeyword);
+	if (members.length === node.types.length) return node;
+	if (members.length === 1) {
+		const [member] = members;
+		return ts.isParenthesizedTypeNode(member!) ? member.type : member!;
+	}
+	return ts.factory.updateUnionTypeNode(node, ts.factory.createNodeArray(members));
 }
 
 /** Keeps a name an import gives the type, such as `CSSProperties` for csstype's `Properties`. */
@@ -398,37 +408,6 @@ function referencedName(node: ts.Node): ts.Identifier | undefined {
 	if (ts.isQualifiedName(name)) return name.right;
 	if (ts.isPropertyAccessExpression(name)) return name.name as ts.Identifier;
 	return;
-}
-
-/**
- * Declaration source without `export` or `declare`, which say nothing about the type. Continuation
- * lines lose the declaration's own indentation, such as a `declare namespace` body's.
- */
-function declarationText(declaration: ts.Declaration): string {
-	const modifiers = ts.canHaveModifiers(declaration) ? (ts.getModifiers(declaration) ?? []) : [];
-	const dropped = modifiers.filter(
-		(modifier) =>
-			modifier.kind === ts.SyntaxKind.ExportKeyword ||
-			modifier.kind === ts.SyntaxKind.DeclareKeyword,
-	);
-	const sourceFile = declaration.getSourceFile();
-	const declarationStart = declaration.getStart();
-	const start = dropped.length > 0 ? dropped.at(-1)!.end : declarationStart;
-	const text = sourceFile.text.slice(start, declaration.end).trim();
-
-	const { line } = sourceFile.getLineAndCharacterOfPosition(declarationStart);
-	const lineStart = sourceFile.getPositionOfLineAndCharacter(line, 0);
-	const indentation = LEADING_WHITESPACE_PATTERN.exec(
-		sourceFile.text.slice(lineStart, declarationStart),
-	)![0];
-	if (indentation.length === 0) return text;
-
-	return text
-		.split('\n')
-		.map((textLine) =>
-			textLine.startsWith(indentation) ? textLine.slice(indentation.length) : textLine,
-		)
-		.join('\n');
 }
 
 function containsOpaqueSyntax(node: ts.Node): boolean {

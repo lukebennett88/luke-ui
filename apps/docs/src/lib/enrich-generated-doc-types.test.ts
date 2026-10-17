@@ -45,42 +45,31 @@ const SOURCE = `
 `;
 
 test('links a Luke UI alias however the prop declares it', () => {
-	const entries = enrichedEntries('Props');
+	const rows = enrichedRows('Props');
 
 	// Written directly, inherited, generic, and with an explicit `undefined`.
-	expect(entries.get('tone')).toEqual(
-		expect.objectContaining({ simplifiedType: 'Tone', typeHref: 'Tone' }),
-	);
-	expect(entries.get('wrapped')).toEqual(
-		expect.objectContaining({ simplifiedType: 'Wrapped<number>', typeHref: 'Wrapped' }),
-	);
-	expect(entries.get('callback')).toEqual(
-		expect.objectContaining({ simplifiedType: 'Callback | undefined', typeHref: 'Callback' }),
-	);
+	expect(rows.get('tone')).toEqual({ links: ['Tone'], text: 'Tone' });
+	expect(rows.get('wrapped')).toEqual({ links: ['Wrapped'], text: 'Wrapped<number>' });
+	expect(rows.get('callback')).toEqual({ links: ['Callback'], text: 'Callback | undefined' });
 	// The branches write different types, so the row shows the resolved type, which is the alias.
-	expect(entries.get('prominence')).toEqual(
-		expect.objectContaining({ simplifiedType: 'Prominence', typeHref: 'Prominence' }),
-	);
+	expect(rows.get('prominence')).toEqual({ links: ['Prominence'], text: 'Prominence' });
 });
 
-test('leaves external types, type parameters, and unions of aliases unlinked', () => {
-	const entries = enrichedEntries('Props');
-	const genericEntries = enrichedEntries('GenericProps');
+test('links each Luke UI name in a signature, but not external types or type parameters', () => {
+	const rows = enrichedRows('Props');
+	const genericRows = enrichedRows('GenericProps');
 
-	expect(entries.get('external')?.simplifiedType).toBe('External');
-	expect(entries.get('external')?.typeHref).toBeUndefined();
-	expect(entries.get('mixed')?.simplifiedType).toBe('Tone | Callback');
-	expect(entries.get('mixed')?.typeHref).toBeUndefined();
-	expect(entries.get('kind')?.typeHref).toBeUndefined();
-	expect(genericEntries.get('items')?.simplifiedType).toBe('ReadonlyArray<T>');
-	expect(genericEntries.get('items')?.typeHref).toBeUndefined();
+	expect(rows.get('mixed')).toEqual({ links: ['Tone', 'Callback'], text: 'Tone | Callback' });
+	expect(rows.get('external')).toEqual({ links: [], text: 'External' });
+	expect(rows.get('kind')).toEqual({ links: [], text: '"full" | "low"' });
+	expect(genericRows.get('items')).toEqual({ links: [], text: 'ReadonlyArray<T>' });
 });
 
 /**
- * Runs enrichment on fumadocs-shaped entries. Fumadocs prints each prop's type with
- * `typeToString`, so the entries do the same.
+ * Runs enrichment on fumadocs-shaped entries, and gives each row's text and the Luke UI types its
+ * tokens link. Fumadocs prints each prop's type with `typeToString`, so the entries do the same.
  */
-function enrichedEntries(typeName: string): Map<string, DocEntry> {
+function enrichedRows(typeName: string): Map<string, { links: Array<string>; text: string }> {
 	const project = new Project({ compilerOptions: { strict: true }, useInMemoryFileSystem: true });
 	project.createSourceFile(
 		'/repo/node_modules/external/index.d.ts',
@@ -115,5 +104,13 @@ function enrichedEntries(typeName: string): Map<string, DocEntry> {
 		`${PACKAGE_DIR}/src`,
 		checker,
 	);
-	return new Map(doc.entries.map((entry) => [entry.name, entry]));
+	return new Map(
+		doc.entries.map((entry) => {
+			const links = (doc.typeTokens?.[entry.name] ?? []).flatMap((token) => {
+				if (!Array.isArray(token) || token[2] === undefined) return [];
+				return doc.typeDefinitions?.[token[2]]?.module === undefined ? [token[2]] : [];
+			});
+			return [entry.name, { links, text: entry.simplifiedType }];
+		}),
+	);
 }

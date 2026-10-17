@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
-import type { DocEntry } from 'fumadocs-typescript';
 import { visit } from 'unist-util-visit';
 import type {
 	EnrichedGeneratedDoc,
@@ -41,9 +40,10 @@ export interface ComponentPropsTableData {
 
 /**
  * Moves each expanded `<ComponentPropsTable>`'s type definitions out of the page. The model is
- * validated here, at build time. The types the table's rows link to go into a JSON file that the
- * page imports with `?url`, with only the text a popover shows. The table fetches it when a reader
- * first opens a type.
+ * validated here, at build time. The Luke UI types a popover can open, from a row or from another
+ * definition, go into a JSON file that the page imports with `?url`, with only the tokens a popover
+ * shows. The table fetches it when a reader first opens a type. Each row's formatted type stays in
+ * the page as the `typeTokens` prop, because the table renders without JavaScript.
  *
  * Each file is named by a hash of its contents, so two tables share a file only when their
  * definitions are identical. Vite emits only the files a page imports, so files that earlier runs
@@ -60,14 +60,23 @@ export function remarkAttachTypeDefinitions({ outputDir }: { outputDir: string }
 			if (node.name !== 'ComponentPropsTable') return;
 
 			const expression = typeExpression(node);
-			const { typeDefinitions = {}, ...doc } = JSON.parse(expression.value) as EnrichedGeneratedDoc;
+			const {
+				typeDefinitions = {},
+				typeTokens,
+				...doc
+			} = JSON.parse(expression.value) as EnrichedGeneratedDoc;
 			expression.value = JSON.stringify(doc, null, 2);
 
+			if (typeTokens !== undefined) {
+				node.attributes.push(
+					expressionAttribute('typeTokens', JSON.stringify(typeTokens), jsonToEstree(typeTokens)),
+				);
+			}
 			if (Object.keys(typeDefinitions).length === 0) return;
 
 			const model = parseTypeDefinitionsPayload(typeDefinitions);
 			node.data = { ...node.data, typeDefinitions: model };
-			const linked = linkedTypeDefinitions(doc.entries, model);
+			const linked = localTypeDefinitions(model);
 			const names = Object.keys(linked);
 			if (names.length === 0) return;
 
@@ -98,22 +107,17 @@ function typeExpression(node: MdxJsxFlowElement): MdxJsxAttributeValueExpression
 	throw new Error('<ComponentPropsTable> needs a `type` expression with GeneratedDoc JSON.');
 }
 
-/** The types the rows link to, in row order, with only the text a popover shows. */
-function linkedTypeDefinitions(
-	entries: ReadonlyArray<DocEntry>,
-	model: TypeDefinitionsPayload,
-): LinkedTypeDefinitions {
+/**
+ * The Luke UI types with something to show, in the model's order, with only the tokens a popover
+ * shows. External types stay plain text in the browser.
+ */
+function localTypeDefinitions(model: TypeDefinitionsPayload): LinkedTypeDefinitions {
 	const linked: LinkedTypeDefinitions = {};
-	for (const { typeHref } of entries) {
-		// An authored `@fumadocsHref` URL is not a model key, so it stays a plain link.
-		if (typeHref === undefined || typeHref in linked) continue;
-		const definition = model[typeHref];
-		if (definition === undefined) continue;
-		if (definition.definition === undefined && definition.resolved === undefined) continue;
-
-		linked[typeHref] = {
-			...(definition.definition === undefined ? {} : { definition: definition.definition }),
-			...(definition.resolved === undefined ? {} : { resolved: definition.resolved }),
+	for (const [key, { definition, module, resolved }] of Object.entries(model)) {
+		if (module !== undefined || (definition === undefined && resolved === undefined)) continue;
+		linked[key] = {
+			...(definition === undefined ? {} : { definition }),
+			...(resolved === undefined ? {} : { resolved }),
 		};
 	}
 	return linked;
@@ -177,4 +181,24 @@ function expressionAttribute(name: string, source: string, expression: unknown):
 			value: source,
 		},
 	};
+}
+
+/** JSON data as the estree MDX compiles, for an expression attribute. */
+function jsonToEstree(value: unknown): unknown {
+	if (Array.isArray(value)) return { elements: value.map(jsonToEstree), type: 'ArrayExpression' };
+	if (typeof value === 'object' && value !== null) {
+		return {
+			properties: Object.entries(value).map(([key, item]) => ({
+				computed: false,
+				key: { type: 'Literal', value: key },
+				kind: 'init',
+				method: false,
+				shorthand: false,
+				type: 'Property',
+				value: jsonToEstree(item),
+			})),
+			type: 'ObjectExpression',
+		};
+	}
+	return { type: 'Literal', value };
 }

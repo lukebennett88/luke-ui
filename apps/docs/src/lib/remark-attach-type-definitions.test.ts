@@ -8,6 +8,7 @@ import { createComponentPropsGenerator } from './create-component-props-generato
 import { remarkAttachTypeDefinitions } from './remark-attach-type-definitions.js';
 import { stringifyComponentPropsTable } from './stringify-component-props-table.js';
 import type { EnrichedGeneratedDoc } from './type-definition-model.js';
+import { typeTokensToText } from './type-tokens.js';
 
 const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
 const componentPropsGenerator = createComponentPropsGenerator({
@@ -42,34 +43,34 @@ test(
 			{ path: join(outputDir, 'grid.mdx') },
 		);
 
-		// The HTML table fetches this asset when a reader opens a linked type. It holds the types the rows
-		// link to, and nothing else, with the model's text for each.
+		// The HTML table fetches this asset when a reader opens a linked type. It holds every Luke UI type
+		// with a definition, so links inside a definition open too, and nothing else.
 		const [assetName] = readdirSync(outputDir).filter((name) => name.endsWith('.json'));
 		const asset = JSON.parse(readFileSync(join(outputDir, assetName!), 'utf8')) as Record<
 			string,
 			unknown
 		>;
-		const linkedNames = [
-			...new Set(
-				gridProps!.entries.flatMap((entry) =>
-					entry.typeHref !== undefined && model![entry.typeHref] !== undefined
-						? [entry.typeHref]
-						: [],
-				),
-			),
-		];
-		expect(linkedNames).toEqual(
-			expect.arrayContaining(['BoxLikeElementType', 'RequiredInitialResponsiveValue']),
+		const lukeEntries = Object.entries(model!).filter(
+			([, definition]) =>
+				definition.module === undefined &&
+				(definition.definition !== undefined || definition.resolved !== undefined),
 		);
 		expect(asset).toEqual(
 			Object.fromEntries(
-				linkedNames.map((name) => {
-					const { definition, resolved } = model![name]!;
-					return [name, { definition, resolved }];
-				}),
+				lukeEntries.map(([name, { definition, resolved }]) => [name, { definition, resolved }]),
 			),
 		);
-		expect(JSON.parse(attributeSource(node, 'definitionNames')!)).toEqual(linkedNames);
+		expect(Object.keys(asset)).toEqual(
+			expect.arrayContaining([
+				'BoxLikeElementType',
+				'RequiredInitialResponsiveValue',
+				'ResponsiveCondition',
+			]),
+		);
+		expect(JSON.parse(attributeSource(node, 'definitionNames')!)).toEqual(Object.keys(asset));
+		// Each row's tokens stay in the page, so the table renders before the asset loads.
+		expect(JSON.parse(attributeSource(node, 'typeTokens')!)).toEqual(gridProps!.typeTokens);
+		expect(attributeSource(node, 'type')).not.toContain('typeTokens');
 		expect(attributeSource(node, 'type')).not.toContain('typeDefinitions');
 
 		const markdown = stringifyComponentPropsTable(node);
@@ -80,8 +81,10 @@ test(
 		const missingFromMarkdown = Object.values(model!)
 			.flatMap((definition) => [
 				`##### \`${definition.name}\``,
-				...[definition.definition, definition.resolved].flatMap((code) =>
-					code === undefined ? [] : [`\`\`\`ts\n${code}\n\`\`\``],
+				...[definition.definition, definition.resolved].flatMap((tokens) =>
+					tokens === undefined
+						? []
+						: [`\`\`\`ts\n${typeTokensToText(tokens, { multiline: true })}\n\`\`\``],
 				),
 			])
 			.filter((snippet) => !markdown?.includes(snippet));

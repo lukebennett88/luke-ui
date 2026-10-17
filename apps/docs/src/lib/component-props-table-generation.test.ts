@@ -5,6 +5,8 @@ import { expect, test } from 'vite-plus/test';
 import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
 import type { EnrichedGeneratedDoc } from './type-definition-model.js';
+import type { TypeTokens } from './type-tokens.js';
+import { typeTokensToText } from './type-tokens.js';
 
 const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
 const generator = createGenerator({
@@ -188,12 +190,12 @@ test('preserves declared aliases on Grid responsive layout props with definition
 	expect(entriesByName.get('columns')?.type).toBe(
 		'RequiredInitialResponsiveValue<number | string>',
 	);
-	expect(entriesByName.get('columns')?.typeHref).toBe('RequiredInitialResponsiveValue');
+	expect(lukeLinks(gridProps, 'columns')).toEqual(['RequiredInitialResponsiveValue']);
 	expect(entriesByName.get('areas')?.simplifiedType).toBe(
 		'RequiredInitialResponsiveValue<ReadonlyArray<string>>',
 	);
 	expect(entriesByName.get('rows')?.simplifiedType).toBe('RequiredInitialResponsiveValue<string>');
-	expect(gridProps?.typeDefinitions?.RequiredInitialResponsiveValue?.definition).toContain(
+	expect(text(gridProps?.typeDefinitions?.RequiredInitialResponsiveValue?.definition)).toContain(
 		'RequiredInitialResponsive',
 	);
 });
@@ -211,24 +213,22 @@ test('links Button pressAction and prominence to their definitions', async () =>
 	);
 
 	expect(entriesByName.get('pressAction')).toEqual(
-		expect.objectContaining({
-			simplifiedType: 'PressAction',
-			type: 'PressAction',
-			typeHref: 'PressAction',
-		}),
+		expect.objectContaining({ simplifiedType: 'PressAction', type: 'PressAction' }),
 	);
-	expect(buttonProps?.typeDefinitions?.PressAction?.definition).toMatch(/=> void \| Promise<void>/);
+	expect(lukeLinks(buttonProps, 'pressAction')).toEqual(['PressAction']);
+	expect(text(buttonProps?.typeDefinitions?.PressAction?.definition)).toMatch(
+		/=> void \| Promise<void>/,
+	);
 	// Presentation branches declare different subsets of Prominence, so the row shows the resolved
 	// alias. It links the same way as an alias the prop writes.
-	expect(entriesByName.get('prominence')).toEqual(
-		expect.objectContaining({ simplifiedType: 'Prominence', typeHref: 'Prominence' }),
-	);
-	expect(buttonProps?.typeDefinitions?.Prominence?.definition).toBe(
+	expect(entriesByName.get('prominence')?.simplifiedType).toBe('Prominence');
+	expect(lukeLinks(buttonProps, 'prominence')).toEqual(['Prominence']);
+	expect(text(buttonProps?.typeDefinitions?.Prominence?.definition)).toBe(
 		"type Prominence = 'low' | 'standard' | 'high';",
 	);
 	// External render-prop aliases stay plain text.
-	expect(entriesByName.get('children')?.typeHref).toBeUndefined();
-	expect(entriesByName.get('onPress')?.typeHref).toBeUndefined();
+	expect(lukeLinks(buttonProps, 'children')).toEqual([]);
+	expect(lukeLinks(buttonProps, 'onPress')).toEqual([]);
 });
 
 test('shows the resolved type when Button presentation branches declare different types', async () => {
@@ -268,7 +268,7 @@ test('prefers resolved callback signatures over indexed-access annotations', asy
 	expect(onPress?.type).toMatch(/=>\s*void/);
 	expect(onPress?.type).not.toMatch(/RacButtonProps\s*\[\s*['"]onPress['"]\s*\]/);
 	expect(onPress?.simplifiedType).toBe(onPress?.type);
-	expect(onPress?.typeHref).toBeUndefined();
+	expect(lukeLinks(buttonProps, 'onPress')).toEqual([]);
 	expect(onPress?.required).toBe(false);
 	// RAC's indexed onPress admits undefined in the value type, so keep it.
 	expect(onPress?.type).toMatch(/\|\s*undefined$/);
@@ -288,7 +288,7 @@ test('prefers resolved callback signatures over indexed-access annotations', asy
 	expect(onChange?.type).toMatch(/=>\s*void/);
 	expect(onChange?.type).not.toMatch(/RacTextFieldProps\s*\[\s*['"]onChange['"]\s*\]/);
 	expect(onChange?.simplifiedType).toBe(onChange?.type);
-	expect(onChange?.typeHref).toBeUndefined();
+	expect(lukeLinks(textInputFieldProps, 'onChange')).toEqual([]);
 	expect(onChange?.required).toBe(false);
 	expect(onChange?.type).toMatch(/\|\s*undefined$/);
 });
@@ -421,7 +421,7 @@ test('closes Grid definitions over every Luke UI type they name', async () => {
 	const definitions = gridProps?.typeDefinitions ?? {};
 
 	expectClosedDefinitions(gridProps);
-	expect(definitions.RequiredInitialResponsiveValue).toEqual({
+	expect(asText(definitions.RequiredInitialResponsiveValue)).toEqual({
 		definition: expect.stringMatching(/^type RequiredInitialResponsiveValue<Value> =/),
 		name: 'RequiredInitialResponsiveValue',
 		references: ['RequiredInitialResponsive', 'ResponsivePropValue'],
@@ -429,7 +429,7 @@ test('closes Grid definitions over every Luke UI type they name', async () => {
 	expect(definitions.ResponsivePropValue?.references).toEqual(['ResponsiveCondition']);
 	// The declaration reads `keyof typeof responsiveConditions`, so the breakpoint names come from
 	// the checker. They are sorted, because the checker's order depends on the order pages compile in.
-	expect(definitions.ResponsiveCondition).toEqual(
+	expect(asText(definitions.ResponsiveCondition)).toEqual(
 		expect.objectContaining({
 			definition: 'type ResponsiveCondition = keyof typeof responsiveConditions;',
 			resolved: '"bp640" | "bp768" | "bp1024" | "bp1280" | "bp1536" | "initial"',
@@ -456,14 +456,14 @@ test("expands Stack gap's indexed access to the accepted spacing tokens", async 
 	expect(stackProps?.entries.find((entry) => entry.name === 'gap')?.simplifiedType).toBe(
 		"RequiredInitialResponsive<SprinklesProps['gap']>",
 	);
-	expect(definitions["SprinklesProps['gap']"]).toEqual({
+	expect(asText(definitions["SprinklesProps['gap']"])).toEqual({
 		name: "SprinklesProps['gap']",
 		references: ['ResponsiveValue'],
 		resolved: expect.stringMatching(/^ResponsiveValue<"0" \| "sp4" \| .*"sp96"> \| undefined$/),
 	});
 	// The indexed access stands in for SprinklesProps, whose own definition shows no values.
 	expect(definitions.SprinklesProps).toBeUndefined();
-	expect(definitions.BreakpointName?.resolved).toBe(
+	expect(text(definitions.BreakpointName?.resolved)).toBe(
 		'"bp640" | "bp768" | "bp1024" | "bp1280" | "bp1536" | "initial"',
 	);
 });
@@ -481,7 +481,7 @@ test('shows render props with their arguments and names their external definitio
 	expect(buttonProps?.entries.find((entry) => entry.name === 'children')?.simplifiedType).toBe(
 		'ChildrenOrFunction<ButtonRenderProps>',
 	);
-	expect(definitions.ChildrenOrFunction).toEqual({
+	expect(asText(definitions.ChildrenOrFunction)).toEqual({
 		definition: expect.stringMatching(/^type ChildrenOrFunction<T> = ReactNode \| \(\(values: T/),
 		module: 'react-aria-components',
 		name: 'ChildrenOrFunction',
@@ -495,7 +495,7 @@ test('shows render props with their arguments and names their external definitio
 		references: [],
 		source: expect.stringMatching(/\.d\.ts$/),
 	});
-	expect(definitions.PressAction).toEqual({
+	expect(asText(definitions.PressAction)).toEqual({
 		definition: 'type PressAction = () => void | Promise<void>;',
 		name: 'PressAction',
 		references: [],
@@ -529,8 +529,10 @@ test('defines generated Luke UI types such as IconName with their accepted value
 
 	expectClosedDefinitions(iconButtonProps);
 	expect(iconName?.module).toBeUndefined();
-	expect(iconName?.definition).toBe('type IconName = (typeof iconNames)[number];');
-	expect(iconName?.resolved).toMatch(/^"add" \| "arrowDown" \| "[A-Za-z]+"( \| "[A-Za-z]+")*$/);
+	expect(text(iconName?.definition)).toBe('type IconName = (typeof iconNames)[number];');
+	expect(text(iconName?.resolved)).toMatch(
+		/^"add" \| "arrowDown" \| "[A-Za-z]+"( \| "[A-Za-z]+")*$/,
+	);
 });
 
 test('records the name an import gives an external type', async () => {
@@ -558,7 +560,7 @@ async function generateEnrichedDoc(path: string, name: string) {
 	return doc;
 }
 
-/** Every reference and every row link names a key the definitions hold. */
+/** Every reference, and every type name a row or definition links, names a key the definitions hold. */
 function expectClosedDefinitions(doc: EnrichedGeneratedDoc | undefined) {
 	const definitions = doc?.typeDefinitions ?? {};
 	const missingReferences = Object.entries(definitions).flatMap(([key, definition]) =>
@@ -566,11 +568,47 @@ function expectClosedDefinitions(doc: EnrichedGeneratedDoc | undefined) {
 			definitions[reference] === undefined ? [`${key} -> ${reference}`] : [],
 		),
 	);
-	const unlinkedProps = (doc?.entries ?? []).flatMap((entry) => {
-		if (entry.typeHref === undefined) return [];
-		return definitions[entry.typeHref]?.definition === undefined ? [entry.name] : [];
-	});
+	const missingLinks = [
+		...Object.values(doc?.typeTokens ?? {}),
+		...Object.values(definitions).flatMap((definition) => [
+			definition.definition ?? [],
+			definition.resolved ?? [],
+		]),
+	]
+		.flatMap(linkedKeys)
+		.filter((key) => definitions[key] === undefined);
 
 	expect(missingReferences).toEqual([]);
-	expect(unlinkedProps).toEqual([]);
+	expect(missingLinks).toEqual([]);
+}
+
+/** Tokens on one line, as Markdown table cells show them. */
+function text(tokens: TypeTokens | undefined): string | undefined {
+	return tokens === undefined ? undefined : typeTokensToText(tokens, { multiline: false });
+}
+
+/** A definition with its tokens as one-line text, for readable comparisons. */
+function asText<Definition extends { definition?: TypeTokens; resolved?: TypeTokens }>(
+	definition: Definition | undefined,
+) {
+	if (definition === undefined) return;
+	const { definition: declared, resolved, ...rest } = definition;
+	return {
+		...rest,
+		...(declared === undefined ? {} : { definition: text(declared) }),
+		...(resolved === undefined ? {} : { resolved: text(resolved) }),
+	};
+}
+
+function linkedKeys(tokens: TypeTokens): Array<string> {
+	return tokens.flatMap((token) =>
+		Array.isArray(token) && token[2] !== undefined ? [token[2]] : [],
+	);
+}
+
+/** The Luke UI types a row's tokens link, which the browser opens in a popover. */
+function lukeLinks(doc: EnrichedGeneratedDoc | undefined, prop: string): Array<string> {
+	return linkedKeys(doc?.typeTokens?.[prop] ?? []).filter(
+		(key) => doc?.typeDefinitions?.[key]?.module === undefined,
+	);
 }

@@ -481,11 +481,17 @@ type alias also keeps its declaration. When a Luke UI declaration hides its valu
 `keyof typeof responsiveConditions` does, the list adds the type TypeScript resolves it to. Do not
 write type definitions by hand.
 
-In the HTML table, a row whose type starts with a Luke UI type opens that type in a popover, whether
-the prop writes the alias or the type resolves to it. The popover shows the same declaration and
-resolved type as the Markdown. The build validates the definitions and writes each table's linked
-types to a separate JSON file, which the browser fetches when someone first reaches a linked type.
-Page JavaScript carries neither those definitions nor the processed Markdown.
+The build formats each row type and each definition once, following React Aria's type layout. A
+union or intersection of more than two members, and a parameter list of more than two parameters,
+puts each item on its own indented line. An object type puts each member on its own line. Named
+types stay named. Markdown table cells show the same type on one line, and Markdown code blocks keep
+the line breaks.
+
+In the HTML table, each Luke UI type name in a row type opens that type's declaration, and the type
+it resolves to, in a popover. Luke UI names inside the popover open their own definitions in the
+same popover, and breadcrumbs go back. The build validates the definitions and writes each table's
+Luke UI definitions to a separate JSON file, which the browser fetches when someone first reaches a
+linked type. Page JavaScript carries neither those definitions nor the processed Markdown.
 
 `check:docs` requires `## API` to be the last heading on a guide that declares `source:`, requires
 at least one `component-props-table` tag inside it, and rejects a tag placed anywhere else on the
