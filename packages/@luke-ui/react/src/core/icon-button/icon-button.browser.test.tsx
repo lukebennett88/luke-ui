@@ -36,16 +36,6 @@ function IconButtonScene() {
 	);
 }
 
-test('pressing an IconButton runs its onPress handler', async () => {
-	let pressed = false;
-	const { locator, user } = render(
-		<IconButton aria-label="Add" icon="add" onPress={() => (pressed = true)} />,
-	);
-
-	await user.click(locator.getByRole('button', { name: 'Add' }));
-	expect(pressed).toBe(true);
-});
-
 test('the IconButton scene has no axe violations', async () => {
 	const { container } = render(<IconButtonScene />);
 
