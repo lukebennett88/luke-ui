@@ -16,7 +16,7 @@ export function ColorFamily({ family }: { family: ColorFamilyId }) {
 
 	if (section.roles !== null) {
 		return (
-			<TokenPanel>
+			<TokenPanel sampleInlineSize={SAMPLE_INLINE_SIZE}>
 				{section.roles.map(({ role, tokens }) => (
 					<TokenGroup key={role} label={roleLabel(role)}>
 						{tokens.map((token) => (
@@ -34,7 +34,7 @@ export function ColorFamily({ family }: { family: ColorFamilyId }) {
 	}
 
 	return (
-		<TokenPanel>
+		<TokenPanel sampleInlineSize={SAMPLE_INLINE_SIZE}>
 			<TokenList>
 				{section.tokens.map((token) => (
 					<TokenRow

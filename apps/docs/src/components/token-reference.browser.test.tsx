@@ -33,6 +33,9 @@ test('a colour row copies its full typed path', async () => {
 		);
 	});
 	expect(writeText).toHaveBeenCalledWith('vars.color.background.neutral.subtle.rest');
+	await expect
+		.element(page.getByText('Copied vars.color.background.neutral.subtle.rest'))
+		.toBeVisible();
 });
 
 test('a typography token copies its typed path', async () => {
@@ -42,7 +45,7 @@ test('a typography token copies its typed path', async () => {
 		await userEvent.click(page.getByRole('button', { name: 'Copy vars.font.caption.fontSize' }));
 	});
 	expect(writeText).toHaveBeenCalledWith('vars.font.caption.fontSize');
-	await expect.element(page.getByText('--luke-font-caption-font-size')).toBeVisible();
+	await expect.element(page.getByText('Copied vars.font.caption.fontSize')).toBeVisible();
 });
 
 test('the token reference tables have no axe violations', async () => {

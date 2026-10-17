@@ -1,27 +1,22 @@
 import { Box } from '@luke-ui/react/box';
 import { Cluster } from '@luke-ui/react/cluster';
-import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
-import { useId } from 'react';
 import { tokenSections } from '../lib/token-grammar.js';
-import {
-	TokenList,
-	TokenPanel,
-	TokenRow,
-	TokenTile,
-	TokenTileGrid,
-} from './token-reference-parts.js';
+import { TokenGroup, TokenList, TokenPanel, TokenRow } from './token-reference-parts.js';
 
 // The scale sections of the token reference. Each sample applies the token it shows, through the
 // token's own CSS variable, so it follows the active theme.
 
 const { scales } = tokenSections;
 
+const RADIUS_SAMPLE_SIZE = '4.5rem';
+const DEPTH_FINISH_SAMPLE_SIZE = '5rem';
+
 /** The space scale, each step as a bar at its true width. */
 export function SpaceTokens() {
 	return (
-		<TokenPanel>
+		<TokenPanel sampleInlineSize="6rem">
 			<TokenList>
 				{scales.space.tokens.map((token) => (
 					<TokenRow
@@ -55,28 +50,29 @@ const RADIUS_NOTES: Record<string, string> = {
 /** The radius roles, each on a shape large enough to tell the steps apart. */
 export function RadiusTokens() {
 	return (
-		<Box marginBlockStart="sp24">
-			<TokenTileGrid>
+		<TokenPanel sampleInlineSize={RADIUS_SAMPLE_SIZE}>
+			<TokenList>
 				{scales.radius.tokens.map((token) => (
-					<TokenTile
+					<TokenRow
 						key={token.path}
 						note={RADIUS_NOTES[token.path]}
 						sample={
 							<Box
 								backgroundColor="accent.subtle.rest"
-								blockSize="4.5rem"
+								blockSize={RADIUS_SAMPLE_SIZE}
 								borderColor="accent"
 								borderStyle="solid"
 								borderWidth="thin"
-								inlineSize="4.5rem"
+								inlineSize={RADIUS_SAMPLE_SIZE}
 								style={{ borderRadius: `var(${token.variable})` }}
 							/>
 						}
+						sampleInlineSize={RADIUS_SAMPLE_SIZE}
 						token={token}
 					/>
 				))}
-			</TokenTileGrid>
-		</Box>
+			</TokenList>
+		</TokenPanel>
 	);
 }
 
@@ -85,63 +81,63 @@ export function RadiusTokens() {
  * on a solid fill the size of a control.
  */
 export function DepthAndFinishTokens() {
-	const depthLabelId = useId();
-	const finishLabelId = useId();
-
 	return (
-		<Stack className="not-prose" gap="sp24" marginBlockStart="sp24">
-			<Stack gap="sp12">
-				<Text color="secondary" elementType="p" id={depthLabelId} typography="caption">
-					Depth
-				</Text>
-				<TokenTileGrid labelledBy={depthLabelId}>
-					{scales.depth.tokens.map((token) => (
-						<TokenTile
-							key={token.path}
-							sample={
+		<TokenPanel sampleInlineSize={DEPTH_FINISH_SAMPLE_SIZE}>
+			<TokenGroup label="Depth">
+				{scales.depth.tokens.map((token) => (
+					<TokenRow
+						key={token.path}
+						sample={
+							<Box
+								alignItems="center"
+								backgroundColor="surface.subdued"
+								blockSize="4rem"
+								borderRadius="detail"
+								display="flex"
+								inlineSize={DEPTH_FINISH_SAMPLE_SIZE}
+								justifyContent="center"
+								padding="sp8"
+							>
 								<Box
 									backgroundColor="surface.base"
-									blockSize="4rem"
+									blockSize="2.75rem"
 									borderRadius="surface"
-									inlineSize="70%"
+									inlineSize="85%"
 									style={{ boxShadow: `var(${token.variable})` }}
 								/>
-							}
-							token={token}
-						/>
-					))}
-				</TokenTileGrid>
-			</Stack>
-			<Stack gap="sp12">
-				<Text color="secondary" elementType="p" id={finishLabelId} typography="caption">
-					Control finish
-				</Text>
-				<TokenTileGrid labelledBy={finishLabelId}>
-					{scales.controlFinish.tokens.map((token) => (
-						<TokenTile
-							key={token.path}
-							sample={
-								<Box
-									backgroundColor="neutral.solid.rest"
-									blockSize={vars.controlSize.medium}
-									borderRadius="control"
-									inlineSize="6rem"
-									style={{ backgroundImage: `var(${token.variable})` }}
-								/>
-							}
-							token={token}
-						/>
-					))}
-				</TokenTileGrid>
-			</Stack>
-		</Stack>
+							</Box>
+						}
+						sampleInlineSize={DEPTH_FINISH_SAMPLE_SIZE}
+						token={token}
+					/>
+				))}
+			</TokenGroup>
+			<TokenGroup label="Control finish">
+				{scales.controlFinish.tokens.map((token) => (
+					<TokenRow
+						key={token.path}
+						sample={
+							<Box
+								backgroundColor="neutral.solid.rest"
+								blockSize={vars.controlSize.medium}
+								borderRadius="control"
+								inlineSize={DEPTH_FINISH_SAMPLE_SIZE}
+								style={{ backgroundImage: `var(${token.variable})` }}
+							/>
+						}
+						sampleInlineSize={DEPTH_FINISH_SAMPLE_SIZE}
+						token={token}
+					/>
+				))}
+			</TokenGroup>
+		</TokenPanel>
 	);
 }
 
 /** The control heights, each as a bar at its true block size. */
 export function SizingTokens() {
 	return (
-		<TokenPanel>
+		<TokenPanel sampleInlineSize="4rem">
 			<TokenList>
 				{scales.controlSize.tokens.map((token) => (
 					<TokenRow
@@ -169,7 +165,7 @@ export function SizingTokens() {
 /** The disabled fade, applied to a sample control beside one at rest. */
 export function InteractionTokens() {
 	return (
-		<TokenPanel>
+		<TokenPanel sampleInlineSize="10rem">
 			<TokenList>
 				{scales.interaction.tokens.map((token) => (
 					<TokenRow

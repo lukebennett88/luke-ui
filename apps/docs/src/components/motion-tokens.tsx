@@ -1,6 +1,9 @@
 import { Box } from '@luke-ui/react/box';
+import { SwitchField } from '@luke-ui/react/switch-field';
+import { Text } from '@luke-ui/react/text';
+import type { CSSProperties, ReactNode } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import type { ThemeToken } from '../generated/token-reference.generated.js';
-import { parseCubicBezier } from '../lib/cubic-bezier.js';
 import { tokenSections } from '../lib/token-grammar.js';
 import { useTokenValue } from '../lib/use-token-value.js';
 import { TokenGroup, TokenPanel, TokenRow } from './token-reference-parts.js';
@@ -12,50 +15,161 @@ const MOTION_TREATMENTS = [
 	{ id: 'motionExit', label: 'Exit' },
 ] as const;
 
+/** Shared motion-sample loop length in milliseconds (matches the CSS sample cycle). */
+const MOTION_SAMPLE_CYCLE_MS = 1_000;
+
+const DURATION_MS_PATTERN = /^([\d.]+)ms$/;
+
 /**
- * The three motion treatments. Each group shows that treatment's duration and easing together. A
- * duration plays when someone hovers, focuses, or taps its row, and holds still under reduced
- * motion. An easing is plotted as its curve.
+ * The three motion treatments. Each table shows that treatment's duration and easing together, with
+ * its own Animate switch and shared cycle so the dots stay aligned. Duration crossings reflect each
+ * token inside that cycle; easing samples rest at both ends, then cross with the token curve. Loops
+ * pause offscreen and when Animate is off.
  */
 export function MotionTokens() {
 	const { scales } = tokenSections;
+
 	return (
-		<TokenPanel>
+		<>
 			{MOTION_TREATMENTS.map(({ id, label }) => {
 				const tokens = scales[id].tokens;
 				const duration = tokens.find((token) => token.path.endsWith('.duration'));
 				const easing = tokens.find((token) => token.path.endsWith('.easing'));
+
 				return (
-					<TokenGroup key={id} label={label}>
-						{duration === undefined ? null : (
-							<TokenRow
-								sample={<DurationSample duration={duration} easing={easing} />}
-								sampleInlineSize={styles.MOTION_TRACK_SIZE}
-								token={duration}
-							/>
+					<MotionSampleTable key={id} label={label}>
+						{(playGeneration) => (
+							<>
+								{duration === undefined ? null : (
+									<TokenRow
+										key={duration.path}
+										sample={<DurationMotionSample key={playGeneration} token={duration} />}
+										sampleInlineSize={styles.MOTION_TRACK_SIZE}
+										token={duration}
+									/>
+								)}
+								{easing === undefined ? null : (
+									<TokenRow
+										key={easing.path}
+										sample={
+											<MotionSample
+												key={playGeneration}
+												dotClassName={styles.motionDotEasing}
+												style={{ animationTimingFunction: `var(${easing.variable})` }}
+											/>
+										}
+										sampleInlineSize={styles.MOTION_TRACK_SIZE}
+										token={easing}
+									/>
+								)}
+							</>
 						)}
-						{easing === undefined ? null : (
-							<TokenRow
-								sample={<EasingPlot token={easing} />}
-								sampleInlineSize="3.5rem"
-								token={easing}
-							/>
-						)}
-					</TokenGroup>
+					</MotionSampleTable>
 				);
 			})}
+		</>
+	);
+}
+
+/** One motion token table: in-view pausing, Animate switch, and remount sync for its samples. */
+function MotionSampleTable({
+	children,
+	label,
+}: {
+	children: (playGeneration: number) => ReactNode;
+	label: string;
+}) {
+	const prefersReducedMotion = usePrefersReducedMotion();
+	const [animateOverride, setAnimateOverride] = useState<boolean | null>(null);
+	const [playGeneration, setPlayGeneration] = useState(0);
+	const animate = animateOverride ?? !prefersReducedMotion;
+
+	return (
+		<TokenPanel sampleInlineSize={styles.MOTION_TRACK_SIZE}>
+			<div
+				className={styles.motionSamples}
+				data-animate={animate ? 'true' : 'false'}
+				ref={observeMotionSamplesInView}
+			>
+				<TokenGroup
+					control={
+						<SwitchField
+							isSelected={animate}
+							label={
+								<Text color="secondary" slot={null} typography="caption">
+									Animate
+								</Text>
+							}
+							onChange={(isSelected) => {
+								setAnimateOverride(isSelected);
+								if (isSelected) {
+									setPlayGeneration((generation) => generation + 1);
+								}
+							}}
+							size="small"
+						/>
+					}
+					label={label}
+				>
+					{children(playGeneration)}
+				</TokenGroup>
+			</div>
 		</TokenPanel>
 	);
 }
 
-/** A dot at the start of a track. It crosses the track over the treatment's duration and easing. */
-function DurationSample({
-	duration,
-	easing,
-}: {
-	duration: ThemeToken;
-	easing: ThemeToken | undefined;
-}) {
+/** Stable ref callback so IntersectionObserver is not recreated every render. */
+function observeMotionSamplesInView(node: HTMLDivElement | null) {
+	if (!node) {
+		return;
+	}
+
+	const observer = new IntersectionObserver(
+		([entry]) => {
+			if (entry) {
+				node.dataset.inView = entry.isIntersecting ? 'true' : 'false';
+			}
+		},
+		{ threshold: 0 },
+	);
+	observer.observe(node);
+	return () => {
+		observer.disconnect();
+	};
+}
+
+/** Duration dot whose crossing speed reflects the token within the shared sample cycle. */
+function DurationMotionSample({ token }: { token: ThemeToken }) {
+	const value = useTokenValue(token);
+	const milliseconds = parseDurationMilliseconds(value);
+	const style: CSSProperties =
+		milliseconds === null
+			? { animation: 'none' }
+			: { animationTimingFunction: durationSampleTiming(milliseconds) };
+
+	return <MotionSample dotClassName={styles.motionDotDuration} style={style} />;
+}
+
+/** Maps token duration to a linear() curve that completes travel early in the shared cycle. */
+function durationSampleTiming(milliseconds: number): string {
+	const percent = (milliseconds / MOTION_SAMPLE_CYCLE_MS) * 100;
+	// Stop positions must use %; unitless values invalidate the easing and browsers fall back to ease.
+	return `linear(0 0%, 1 ${percent}%, 1 100%)`;
+}
+
+function parseDurationMilliseconds(value: string | null): number | null {
+	if (value === null || value === '') {
+		return null;
+	}
+	const match = DURATION_MS_PATTERN.exec(value);
+	if (!match) {
+		return null;
+	}
+	return Number.parseFloat(match[1] ?? '');
+}
+
+/** A dot that loops a track. Callers set duration or easing on the dot via `style`. */
+function MotionSample({ dotClassName, style }: { dotClassName: string; style: CSSProperties }) {
 	return (
 		<Box
 			alignItems="center"
@@ -74,72 +188,36 @@ function DurationSample({
 				backgroundColor="accent.solid.rest"
 				blockSize={styles.MOTION_DOT_SIZE}
 				borderRadius="full"
-				className={styles.motionDot}
+				className={dotClassName}
 				inlineSize={styles.MOTION_DOT_SIZE}
 				insetInlineStart="0"
 				position="absolute"
-				style={{
-					transitionDuration: `var(${duration.variable})`,
-					...(easing === undefined ? {} : { transitionTimingFunction: `var(${easing.variable})` }),
-				}}
+				style={style}
 			/>
 		</Box>
 	);
 }
 
-/** The plot's size in CSS pixels. Its view box is 0 to 100 on each axis, with room for overshoot. */
-const PLOT_SIZE = 56;
-
-/**
- * The easing's curve from its resolved `cubic-bezier()` value: time runs left to right and
- * progress bottom to top. Dashed lines join each end to its control point. The plot is empty until
- * the page has hydrated and can read the value.
- */
-function EasingPlot({ token }: { token: ThemeToken }) {
-	const value = useTokenValue(token);
-	const curve = value === null ? null : parseCubicBezier(value);
-
-	return (
-		<svg className={styles.easingPlot} height={PLOT_SIZE} viewBox="-8 -8 116 116" width={PLOT_SIZE}>
-			<rect
-				className={styles.easingGuide}
-				height="100"
-				vectorEffect="non-scaling-stroke"
-				width="100"
-			/>
-			{curve === null ? null : (
-				<>
-					<line
-						className={styles.easingHandle}
-						vectorEffect="non-scaling-stroke"
-						x1="0"
-						x2={toX(curve[0])}
-						y1="100"
-						y2={toY(curve[1])}
-					/>
-					<line
-						className={styles.easingHandle}
-						vectorEffect="non-scaling-stroke"
-						x1="100"
-						x2={toX(curve[2])}
-						y1="0"
-						y2={toY(curve[3])}
-					/>
-					<path
-						className={styles.easingCurve}
-						d={`M 0 100 C ${toX(curve[0])} ${toY(curve[1])} ${toX(curve[2])} ${toY(curve[3])} 100 0`}
-						vectorEffect="non-scaling-stroke"
-					/>
-				</>
-			)}
-		</svg>
+function usePrefersReducedMotion(): boolean {
+	return useSyncExternalStore(
+		subscribeToPrefersReducedMotion,
+		getPrefersReducedMotionSnapshot,
+		getServerPrefersReducedMotionSnapshot,
 	);
 }
 
-function toX(time: number) {
-	return time * 100;
+function subscribeToPrefersReducedMotion(onStoreChange: () => void) {
+	const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+	media.addEventListener('change', onStoreChange);
+	return () => {
+		media.removeEventListener('change', onStoreChange);
+	};
 }
 
-function toY(progress: number) {
-	return 100 - progress * 100;
+function getPrefersReducedMotionSnapshot() {
+	return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function getServerPrefersReducedMotionSnapshot() {
+	return true;
 }
