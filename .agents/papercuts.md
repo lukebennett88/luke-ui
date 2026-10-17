@@ -163,3 +163,16 @@ not help. Silence in this log is not evidence.
 - Problem: AGENTS.md calls the two-argument command non-interactive, but the component generator has
   a third required prompt, and the primitive generator has two more, so the documented command fails
   for agents.
+
+## The code-block clipboard-failure test fails intermittently in docs-tests CI
+
+- Seen: 2026-10-17 (#854). CI `docs-tests` failed once at
+  `announces clipboard failure without claiming Copied` with
+  `expect(element).toMatchTextContent('Could not copy code')` and an empty status. The PR only
+  changes `reference-table.css.ts` and `type-table.browser.test.tsx`. The same test passed three
+  isolated local runs on the PR head.
+- Where: `apps/docs/src/components/code-block/code-block.browser.test.tsx`. Governing rule:
+  `.agents/skills/write-tests/SKILL.md` quality checklist, "No result depends on timing, test order,
+  or leftover state."
+- Problem: The test's result depends on run conditions, so an unrelated docs change can fail
+  `docs-tests`.
