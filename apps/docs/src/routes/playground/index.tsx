@@ -28,19 +28,31 @@ import { SiteNav } from '../../components/site-nav.js';
 import { useDocsTheme } from '../../components/theme-controls';
 import { withBasePath } from '../../lib/base-path.js';
 import { encodeDocsPlaygroundHash } from '../../lib/docs-playground-hash.js';
+import { resolvePageHeadMeta } from '../../lib/page-head.js';
 import type { PlaygroundAppearance } from '../../lib/playground-appearance-message.js';
 import { postPlaygroundAppearance } from '../../lib/playground-appearance-message.js';
 import rawDefaultCode from '../../lib/playground-default-code.tsx?raw';
+import { siteUrl } from '../../lib/site-url.js';
 
 const PlaygroundEditor = lazy(() => import('../../components/playground/editor'));
 
 const CODE_DEBOUNCE_MS = 300;
 
+const PLAYGROUND_DESCRIPTION = 'Edit and preview Luke UI components in the browser.';
+
 export const Route = createFileRoute('/playground/')({
 	component: Playground,
-	head: () => ({
-		meta: [{ title: 'Playground — Luke UI' }],
-	}),
+	head: () => {
+		const url = `${siteUrl()}/playground/`;
+		return {
+			links: [{ href: url, rel: 'canonical' }],
+			meta: resolvePageHeadMeta({
+				title: 'Playground | Luke UI',
+				description: PLAYGROUND_DESCRIPTION,
+				url,
+			}),
+		};
+	},
 });
 
 function Playground() {

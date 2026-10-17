@@ -6,9 +6,9 @@
  * so `apps/reference-app/public/_routes.json` excludes every path.
  */
 import { handleRequest, notFoundMarkdown } from '../apps/docs/src/lib/agent-negotiation.ts';
+import { resolveSiteUrl } from '../apps/docs/src/lib/resolve-site-url.ts';
 
 const MARKDOWN_EXTENSION_PATTERN = /\.md$/;
-const TRAILING_SLASH_PATTERN = /\/$/;
 
 /** Minimal local shape of Cloudflare Pages' static asset binding. */
 interface AssetsBinding {
@@ -18,8 +18,13 @@ interface AssetsBinding {
 /** Minimal local shape of Cloudflare Pages Functions' environment bindings. */
 interface Env {
 	ASSETS: AssetsBinding;
-	/** Canonical site URL, set as a Pages environment variable. */
+	/** Canonical site origin, set as a Pages environment variable. */
 	SITE_URL?: string;
+	/**
+	 * Vite-style base path with leading and trailing slashes, matching the
+	 * build-time `VITE_BASE_URL`. Unset means a root deployment (`/`).
+	 */
+	VITE_BASE_URL?: string;
 }
 
 /** Minimal local shape of Cloudflare Pages Functions' `EventContext`. */
@@ -65,14 +70,14 @@ function applyMarkdownNotFoundFallback(request: Request, env: Env, res: Response
 }
 
 /**
- * The `.md` route's 404 body for `url`, using the `SITE_URL` environment
- * variable for absolute links, or `url.origin` when it is unset or empty (a
- * local `wrangler pages dev` run with no `SITE_URL` binding).
+ * The `.md` route's 404 body for `url`, using the same origin and base path as
+ * `siteUrl()`: `SITE_URL` (or the request origin when unset) plus
+ * `VITE_BASE_URL` (or `/` when unset).
  */
 function markdownNotFoundResponse(url: URL, env: Env, method: string): Response {
 	const pathname = url.pathname.replace(MARKDOWN_EXTENSION_PATTERN, '');
-	const origin = (env.SITE_URL || url.origin).replace(TRAILING_SLASH_PATTERN, '');
-	return new Response(method === 'HEAD' ? null : notFoundMarkdown(pathname, origin), {
+	const site = resolveSiteUrl(env.SITE_URL || url.origin, env.VITE_BASE_URL || '/');
+	return new Response(method === 'HEAD' ? null : notFoundMarkdown(pathname, site), {
 		headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
 		status: 404,
 	});

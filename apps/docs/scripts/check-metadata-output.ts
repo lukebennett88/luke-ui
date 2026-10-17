@@ -3,13 +3,15 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { license } from '../../../packages/@luke-ui/react/package.json' with { type: 'json' };
+import { notFoundMarkdown } from '../src/lib/agent-negotiation.js';
 import { GITHUB_REPO_URL } from '../src/lib/github.js';
 import { HOME_INTRO } from '../src/lib/home-content.js';
+import { resolveSiteUrl } from '../src/lib/resolve-site-url.js';
 
 const output = fileURLToPath(new URL('../dist/client/', import.meta.url));
 const base = process.env.VITE_BASE_URL || '/';
 const origin = process.env.SITE_URL || 'https://ui.lukebennett.dev';
-const root = new URL(base, origin).href;
+const root = `${resolveSiteUrl(origin, base)}/`;
 const TAG_PATTERN = /<(?:meta|link)\b[^>]*>/g;
 const ATTRIBUTE_PATTERN = /([\w:-]+)="([^"]*)"/g;
 const JSON_LD_PATTERN = /<script\b[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs;
@@ -27,6 +29,11 @@ const pages = [
 		title: 'Button | Luke UI',
 		description: 'A labelled control for actions in an interface.',
 		markdown: 'components/actions/button.md',
+	},
+	{
+		path: 'playground/',
+		title: 'Playground | Luke UI',
+		description: 'Edit and preview Luke UI components in the browser.',
 	},
 ];
 
@@ -51,13 +58,21 @@ for (const page of pages) {
 			[{ content, property }],
 		);
 	}
-	assert.deepEqual(
-		tags.filter((tag) => tag.rel === 'alternate'),
-		[{ href: `${base}${page.markdown}`, rel: 'alternate', type: 'text/markdown' }],
-	);
 	assert.ok(read('sitemap.xml').includes(`<loc>${url}</loc>`));
-	assert.ok(read(page.markdown).length > 0);
-	if (page.path) {
+	if (page.markdown) {
+		assert.deepEqual(
+			tags.filter((tag) => tag.rel === 'alternate'),
+			[{ href: `${base}${page.markdown}`, rel: 'alternate', type: 'text/markdown' }],
+		);
+		assert.ok(read(page.markdown).length > 0);
+	} else {
+		assert.equal(
+			tags.filter((tag) => tag.rel === 'alternate').length,
+			0,
+			`${page.path} should not advertise a Markdown twin`,
+		);
+	}
+	if (page.path && page.markdown) {
 		assert.ok(read('llms.txt').includes(`${root}${page.markdown}`));
 		assert.equal([...html.matchAll(JSON_LD_PATTERN)].length, 0);
 	}
@@ -82,6 +97,11 @@ assert.equal(
 	false,
 );
 assert.equal([...read('404.html').matchAll(JSON_LD_PATTERN)].length, 0);
+
+const markdown404 = notFoundMarkdown('/missing', resolveSiteUrl(origin, base));
+assert.ok(markdown404.includes(`[llms.txt](${root}llms.txt)`));
+assert.ok(markdown404.includes(`[Sitemap](${root}sitemap.xml)`));
+assert.ok(markdown404.includes(`[Luke UI home](${root})`));
 
 for (const file of readdirSync(resolve(output, 'assets'), { encoding: 'utf8', recursive: true })) {
 	if (!file.endsWith('.js')) continue;
