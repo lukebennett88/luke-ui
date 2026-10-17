@@ -30,9 +30,9 @@ documentation, tests, or both.
   their subject. Keep technical rules in those guides and workflows in skills.
 - Preserve existing work and staging state. Do not reset, clean, stash, or overwrite it. Keep
   unrelated changes out of task commits.
-- Follow the request's scope and stopping point. Git and GitHub write authority for implementation
-  comes from [work-on-issue](.agents/skills/work-on-issue/SKILL.md#authority). Investigation,
-  planning, and review do not grant it.
+- Follow the request's scope and stopping point. Authority comes from the user's explicit request,
+  not skill discovery. See [work-on-issue](.agents/skills/work-on-issue/SKILL.md#authority) for
+  implementation permissions.
 - Report checks as **passed**, **failed**, **pending**, or **not run**, with the verified revision.
   Distinguish local runs from CI inspected and explain skipped or unavailable checks.
 - When a task encounters evidenced repository friction or a guidance violation, follow
