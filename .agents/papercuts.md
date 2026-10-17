@@ -85,7 +85,9 @@ not help. Silence in this log is not evidence.
   for commit `c818adf3` (38338181845) produced byte-identical `theme/token-board-*` renders that
   differ from the baseline. The run for commit `a2f12ba8` (38336322056) matched the baseline,
   although that commit contains the same code as `42cf474f`. The token board imports no field
-  components.
+  components. 2026-10-17 (#848, #849): both compares flagged all four `theme/token-board-*`
+  captures. Locally, two captures of the same commit differed by about 355k pixels each, and the
+  second matched a capture with an unrelated `Text` change byte for byte.
 - Where: `packages/@luke-ui/react/src/theme/token-board.browser.test.tsx`. Governing rule:
   docs/TESTING.md, "Remove nondeterminism. Do not add an allowance."
 - Problem: about 290k mismatched pixels across the whole board (anti-aliasing, not a shift) appear
