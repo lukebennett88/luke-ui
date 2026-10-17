@@ -4,14 +4,14 @@ import { Comparison, ComparisonItem } from '#docs';
 export default () => {
 	return (
 		<Comparison>
-			<ComparisonItem label="Small">
-				<CheckboxField defaultSelected label="Example checkbox" size="small" />
+			<ComparisonItem label="px16">
+				<CheckboxField defaultSelected label="Example checkbox" size="px16" />
 			</ComparisonItem>
-			<ComparisonItem label="Medium">
-				<CheckboxField defaultSelected label="Example checkbox" size="medium" />
+			<ComparisonItem label="px20">
+				<CheckboxField defaultSelected label="Example checkbox" size="px20" />
 			</ComparisonItem>
-			<ComparisonItem label="Large">
-				<CheckboxField defaultSelected label="Example checkbox" size="large" />
+			<ComparisonItem label="px24">
+				<CheckboxField defaultSelected label="Example checkbox" size="px24" />
 			</ComparisonItem>
 		</Comparison>
 	);

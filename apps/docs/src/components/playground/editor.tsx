@@ -54,7 +54,7 @@ export default function PlaygroundEditor({
 	return (
 		<Stack blockSize="100%" minBlockSize={0}>
 			<PlaygroundPaneToolbar>
-				<Button isPending={isFormatting} onPress={() => void handleFormat()} size="small">
+				<Button isPending={isFormatting} onPress={() => void handleFormat()} size="px32">
 					Format
 				</Button>
 			</PlaygroundPaneToolbar>

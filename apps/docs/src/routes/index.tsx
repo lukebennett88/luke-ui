@@ -34,7 +34,7 @@ function Home() {
 			<Container
 				elementType="main"
 				flexGrow="1"
-				maxInlineSize="ct1152"
+				maxInlineSize="px1152"
 				paddingInline={{
 					initial: 'sp16',
 					bp768: 'sp24',

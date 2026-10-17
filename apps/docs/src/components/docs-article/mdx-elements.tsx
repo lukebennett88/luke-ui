@@ -139,7 +139,7 @@ function CopyAnchorButton({ id }: { id: string }) {
 				icon={copied ? 'check' : <LinkIcon />}
 				onPress={onCopy}
 				prominence="low"
-				size="small"
+				size="px32"
 			/>
 			<VisuallyHidden aria-live="polite" role="status">
 				{copied ? 'Copied' : ''}

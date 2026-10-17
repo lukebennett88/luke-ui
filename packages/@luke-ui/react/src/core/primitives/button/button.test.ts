@@ -13,7 +13,7 @@ test('primitive Button retains React Aria render', () => {
 test('primitive Button supports ref and rejects unsupported prop combinations', () => {
 	assertType<ButtonProps>({ ref: null });
 	// @ts-expect-error — text Buttons do not use control sizing
-	assertType<ButtonProps>({ appearance: 'text', size: 'small' });
+	assertType<ButtonProps>({ appearance: 'text', size: 'px32' });
 	// @ts-expect-error — text Buttons do not use block layout
 	assertType<ButtonProps>({ appearance: 'text', isBlock: true });
 	// @ts-expect-error — critical text Buttons do not have high prominence

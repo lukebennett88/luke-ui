@@ -402,7 +402,7 @@ const comboboxConfig = {
 			whiteSpace: 'nowrap',
 		},
 	},
-	defaultVariants: { presentation: 'popover', size: 'medium' },
+	defaultVariants: { presentation: 'popover', size: 'px40' },
 	variants: {
 		presentation: {
 			popover: {},
@@ -420,18 +420,18 @@ const comboboxConfig = {
 			},
 		},
 		size: {
-			medium: {
+			px40: {
 				control: {
-					blockSize: vars.controlSize.medium,
+					blockSize: vars.controlSize.px40,
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
 				},
 				textInput: {
-					blockSize: vars.controlSize.medium,
+					blockSize: vars.controlSize.px40,
 					paddingInlineEnd: vars.space.sp12,
 					paddingInlineStart: vars.space.sp12,
 				},
 				loadMoreItem: {
-					minBlockSize: vars.controlSize.medium,
+					minBlockSize: vars.controlSize.px40,
 					paddingBlock: vars.space.sp8,
 					paddingInline: vars.space.sp12,
 				},
@@ -442,25 +442,25 @@ const comboboxConfig = {
 				item: {
 					...vars.font.label,
 					fontWeight: vars.font.weight.body,
-					minBlockSize: vars.controlSize.medium,
+					minBlockSize: vars.controlSize.px40,
 					paddingBlock: vars.space.sp8,
 					paddingInline: vars.space.sp12,
 				},
 			},
-			small: {
+			px32: {
 				control: {
-					blockSize: vars.controlSize.small,
+					blockSize: vars.controlSize.px32,
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 				},
 				textInput: {
-					blockSize: vars.controlSize.small,
+					blockSize: vars.controlSize.px32,
 					paddingInlineEnd: vars.space.sp8,
 					paddingInlineStart: vars.space.sp8,
 				},
 				loadMoreItem: {
-					minBlockSize: vars.controlSize.small,
+					minBlockSize: vars.controlSize.px32,
 					paddingBlock: vars.space.sp4,
 					paddingInline: vars.space.sp8,
 				},
@@ -471,7 +471,7 @@ const comboboxConfig = {
 				item: {
 					...vars.font.label,
 					fontWeight: vars.font.weight.body,
-					minBlockSize: vars.controlSize.small,
+					minBlockSize: vars.controlSize.px32,
 					paddingBlock: vars.space.sp4,
 					paddingInline: vars.space.sp12,
 				},
@@ -490,7 +490,7 @@ const comboboxConfig = {
 				inlineSize: COMBOBOX_ACTION_SIZE,
 				paddingInline: 0,
 			},
-			variants: { size: 'medium' },
+			variants: { size: 'px40' },
 		},
 		{
 			slots: ['trigger', 'clearButton'],
@@ -499,7 +499,7 @@ const comboboxConfig = {
 				inlineSize: MIN_TARGET_SIZE,
 				paddingInline: 0,
 			},
-			variants: { size: 'small' },
+			variants: { size: 'px32' },
 		},
 	],
 } as const satisfies SlottedConfigInput;

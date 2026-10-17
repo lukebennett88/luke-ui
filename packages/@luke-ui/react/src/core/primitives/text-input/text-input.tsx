@@ -63,7 +63,7 @@ interface _TextInputRootProps extends _TextInputRootOmit {
 	/**
 	 * Default size for the input and any `TextInputControl` inside the root. Either part can set
 	 * its own `size`.
-	 * @default 'medium'
+	 * @default 'px40'
 	 */
 	size?: TextInputSize;
 	/** Custom validation function run against the current value. Return a message, or `true`/`null` when valid. */
@@ -138,7 +138,7 @@ interface _TextInputProps extends _TextInputOmit {
 	/**
 	 * Sets the size of the input, overriding a surrounding `TextInputRoot`. Inside a
 	 * `TextInputControl`, the control sets the size instead.
-	 * @default 'medium'
+	 * @default 'px40'
 	 */
 	size?: TextInputSize;
 	/** The type of a standalone input, such as `email`. Inside a `TextInputRoot`, set `type` on the root. */
@@ -162,7 +162,7 @@ interface _TextInputControlProps extends _TextInputControlOmit {
 	className?: RacGroupProps['className'];
 	/**
 	 * Sets the size of the whole control, overriding a surrounding `TextInputRoot`.
-	 * @default 'medium'
+	 * @default 'px40'
 	 */
 	size?: TextInputSize;
 }
@@ -189,7 +189,7 @@ export type TextInputSuffixProps = Prettify<ComponentProps<'span'>>;
  * `autoComplete`, `inputMode`, and `aria-label`, is a default that a part can override.
  */
 export function TextInputRoot(props: TextInputRootProps): JSX.Element {
-	const { className, id, inputId, isRequired, size = 'medium', ...textFieldProps } = props;
+	const { className, id, inputId, isRequired, size = 'px40', ...textFieldProps } = props;
 	const textFieldContext = useSlottedContext(TextFieldContext, props.slot);
 	const resolvedIsRequired = isRequired ?? textFieldContext?.isRequired ?? false;
 	const fieldState = { isRequired: resolvedIsRequired };
@@ -293,7 +293,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
 
 				return textInputRecipe({
 					className: renderedClassName,
-					size: sizeProp ?? contextSize ?? 'medium',
+					size: sizeProp ?? contextSize ?? 'px40',
 				});
 			})}
 		/>
@@ -310,7 +310,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
  */
 export function TextInputControl(props: TextInputControlProps): JSX.Element {
 	const { className, size: sizeProp, ...groupProps } = props;
-	const size = sizeProp ?? use(TextInputSizeContext) ?? 'medium';
+	const size = sizeProp ?? use(TextInputSizeContext) ?? 'px40';
 
 	return (
 		<TextInputControlContext.Provider value>
@@ -336,7 +336,7 @@ export function TextInputControl(props: TextInputControlProps): JSX.Element {
 /** Content shown at the leading end of a `TextInputControl`, such as a currency symbol. */
 export function TextInputPrefix(props: TextInputPrefixProps): JSX.Element {
 	const { className, ...spanProps } = props;
-	const size = use(TextInputSizeContext) ?? 'medium';
+	const size = use(TextInputSizeContext) ?? 'px40';
 
 	return <span {...spanProps} className={textInputPartsRecipe({ size }).prefix({ className })} />;
 }
@@ -344,7 +344,7 @@ export function TextInputPrefix(props: TextInputPrefixProps): JSX.Element {
 /** Content shown at the trailing end of a `TextInputControl`, such as a unit or a button. */
 export function TextInputSuffix(props: TextInputSuffixProps): JSX.Element {
 	const { className, ...spanProps } = props;
-	const size = use(TextInputSizeContext) ?? 'medium';
+	const size = use(TextInputSizeContext) ?? 'px40';
 
 	return <span {...spanProps} className={textInputPartsRecipe({ size }).suffix({ className })} />;
 }

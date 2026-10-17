@@ -15,7 +15,7 @@ export function NotFound() {
 			<Container
 				elementType="main"
 				flexGrow="1"
-				maxInlineSize="ct1152"
+				maxInlineSize="px1152"
 				paddingBlock={{
 					initial: 'sp64',
 					bp768: 'sp96',

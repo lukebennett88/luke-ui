@@ -34,7 +34,7 @@ function CheckboxScene() {
 				description="Receive updates by email."
 				label="Email notifications"
 				name="description-small"
-				size="small"
+				size="px16"
 			/>
 			<CheckboxField
 				description="This supporting text wraps onto a second line and should still start at the field's inline edge, not under the label."
@@ -45,7 +45,7 @@ function CheckboxScene() {
 				description="Receive updates by email."
 				label="Email notifications"
 				name="description-large"
-				size="large"
+				size="px24"
 			/>
 			<CheckboxField
 				defaultSelected

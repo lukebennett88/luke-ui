@@ -49,8 +49,9 @@ Authors use this before finishing. Reviewers use it on the diff.
 
 ## Reviewing
 
-- Run `pnpm run check` and the affected tests first. Do not report what they already catch. Spend
-  the review on what they cannot.
+- Follow [review-pr's check boundaries](../review-pr/SKILL.md#checks), including when this skill is
+  used alone. Inspect existing results before running checks or affected tests in isolation. Spend
+  the review on what the checks cannot catch.
 - Support every finding with evidence. For a convention violation, cite the TESTING.md section that
   owns it, not this skill. For a bug, an accessibility failure, or a flaky test, give a
   reproduction, a failing assertion, or the failed run. Do not report a preference as a defect

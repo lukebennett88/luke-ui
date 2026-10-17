@@ -65,7 +65,7 @@ export function IconToggleButtonGroup<Value extends string>({
 					key={optionValue}
 					render={renderToggleButton}
 				>
-					<Icon name={icon} size="xsmall" />
+					<Icon name={icon} size="px16" />
 				</ToggleButton>
 			))}
 		</Cluster>
@@ -115,7 +115,7 @@ export function TextToggleButtonGroup<Value extends string>({
 function toggleButtonClassName() {
 	return buttonRecipe({
 		prominence: 'low',
-		size: 'small',
+		size: 'px32',
 		tone: 'neutral',
 	});
 }

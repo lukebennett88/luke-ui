@@ -46,8 +46,9 @@ Authors use this before finishing. Reviewers use it on the diff.
 
 ## Reviewing
 
-- Run `pnpm run check` first. Do not report what it already catches. Spend the review on what it
-  cannot.
+- Follow [review-pr's check boundaries](../review-pr/SKILL.md#checks), including when this skill is
+  used alone. Inspect existing check results first. Cover gaps with safe checks in isolation. Spend
+  the review on what the checks cannot catch.
 - Support every finding with evidence. For a convention violation, cite the DOCUMENTATION.md section
   that owns it, not this skill. For a defect without a written convention, such as a wrong
   statement, a broken link, or a rendering problem, show it. Do not report a preference as a defect

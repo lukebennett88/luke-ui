@@ -105,7 +105,7 @@ test('builds the public stylesheet with the layer and global-rule contract', () 
 	// Chromium folds the prefix away in cssText above. Assert the raw file so Safari's form cannot
 	// disappear while the contract still passes.
 	expect(builtCss).toContain('-webkit-text-size-adjust: 100%');
-	expectOwnedBy(rules, iconRecipe({ size: 'medium' }).split(' '), 'luke-ui.recipes');
+	expectOwnedBy(rules, iconRecipe({ size: 'px24' }).split(' '), 'luke-ui.recipes');
 });
 
 test('puts utility props in the utilities layer', () => {

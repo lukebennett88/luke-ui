@@ -125,7 +125,7 @@ describe('theme contract', () => {
 			'focus',
 		]);
 		expect(Object.keys(vars.controlFinish)).toEqual(['recessed', 'resting', 'raised']);
-		expect(Object.keys(vars.controlSize)).toEqual(['small', 'medium']);
+		expect(Object.keys(vars.controlSize)).toEqual(['px32', 'px40']);
 		for (const style of typeStyles) {
 			expect(Object.keys(vars.font[style]).sort()).toEqual([
 				'fontFamily',

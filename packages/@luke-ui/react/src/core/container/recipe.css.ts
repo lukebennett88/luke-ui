@@ -1,15 +1,11 @@
 import { createVar } from '@vanilla-extract/css';
-import { rem } from '../../theme/rem.js';
+import { literalScale } from '../../theme/literal-scale.js';
 import { recipe } from '../styles/recipe.js';
 
 /** Rem values for fixed `maxInlineSize` tokens on `Container`. */
-export const containerMaxInlineSizeTokens = {
-	ct448: rem(448),
-	ct672: rem(672),
-	ct896: rem(896),
-	ct1152: rem(1152),
-	ct1280: rem(1280),
-} as const;
+export const containerMaxInlineSizeTokens = literalScale('px', [
+	448, 672, 896, 1152, 1280,
+] as const);
 
 /**
  * Supplies `maxInlineSize` for token variants. Arbitrary values are set via `assignInlineVars`
@@ -27,11 +23,11 @@ export const containerRecipe = recipe({
 	},
 	variants: {
 		maxInlineSize: {
-			ct448: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.ct448 } },
-			ct672: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.ct672 } },
-			ct896: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.ct896 } },
-			ct1152: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.ct1152 } },
-			ct1280: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.ct1280 } },
+			px448: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.px448 } },
+			px672: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.px672 } },
+			px896: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.px896 } },
+			px1152: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.px1152 } },
+			px1280: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.px1280 } },
 		},
 	},
 });

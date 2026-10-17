@@ -42,7 +42,7 @@ export type IconLinkProps = Prettify<_IconLinkProps & IconLinkBaseProps & Requir
 
 /** Link that renders only an icon, for icon-only navigation. */
 export function IconLink(props: IconLinkProps): JSX.Element {
-	const { prominence = 'standard', icon, size = 'medium', ...restProps } = props;
+	const { prominence = 'standard', icon, size = 'px40', ...restProps } = props;
 
 	return (
 		<IconSizeProvider size={BUTTON_ICON_SIZE}>

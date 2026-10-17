@@ -189,36 +189,36 @@ const checkboxConfig = {
 		},
 	},
 	defaultVariants: {
-		size: 'medium',
+		size: 'px20',
 	},
 	variants: {
 		size: {
-			large: {
+			px24: {
 				root: {
 					vars: {
 						[checkboxControlSize]: FONT_METRIC_SCALE[20].lineHeight,
-						[checkboxGlyphSize]: ICON_SIZES.small,
-						[checkboxIndicatorSize]: ICON_SIZES.medium,
+						[checkboxGlyphSize]: ICON_SIZES.px20,
+						[checkboxIndicatorSize]: ICON_SIZES.px24,
 						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${inlineControlGap})`,
 					},
 				},
 			},
-			medium: {
+			px20: {
 				root: {
 					vars: {
 						[checkboxControlSize]: FONT_METRIC_SCALE[16].lineHeight,
-						[checkboxGlyphSize]: ICON_SIZES.xsmall,
-						[checkboxIndicatorSize]: ICON_SIZES.small,
+						[checkboxGlyphSize]: ICON_SIZES.px16,
+						[checkboxIndicatorSize]: ICON_SIZES.px20,
 						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${inlineControlGap})`,
 					},
 				},
 			},
-			small: {
+			px16: {
 				root: {
 					vars: {
-						[checkboxControlSize]: ICON_SIZES.small,
+						[checkboxControlSize]: ICON_SIZES.px20,
 						[checkboxGlyphSize]: FONT_METRIC_SCALE[12].fontSize,
-						[checkboxIndicatorSize]: ICON_SIZES.xsmall,
+						[checkboxIndicatorSize]: ICON_SIZES.px16,
 						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${inlineControlGap})`,
 					},
 				},

@@ -31,7 +31,7 @@ export function Button(props: ButtonProps): JSX.Element {
 		isBlock = false,
 		isDisabled = false,
 		isPending = false,
-		size = 'medium',
+		size = 'px40',
 		...restProps
 	} = props;
 

@@ -78,7 +78,7 @@ export function DocsTocBar({ toc }: { toc: Array<TOCItemType> }) {
 		<details className={styles.tocBar} ref={detailsRef}>
 			<summary className={styles.tocSummary}>
 				{TOC_LABEL}
-				<Icon className={styles.tocSummaryIcon} name="chevronDown" size="xsmall" />
+				<Icon className={styles.tocSummaryIcon} name="chevronDown" size="px16" />
 			</summary>
 			<nav aria-label={TOC_LABEL} className={styles.tocBarPanel}>
 				<Box paddingBlock="sp8">

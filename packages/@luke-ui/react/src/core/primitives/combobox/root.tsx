@@ -87,7 +87,7 @@ interface _ComboboxRootProps<T extends object>
 	/** Forwarded to the combobox root element. */
 	ref?: Ref<HTMLDivElement>;
 
-	/** Control size. @default 'medium' */
+	/** Control size. @default 'px40' */
 	size?: ComboboxSize;
 	/** The currently selected key (controlled). Pass `null` for no selection. */
 	value?: Key | null;
@@ -111,7 +111,7 @@ export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX
 		isRequired,
 		menuTrigger = 'focus',
 		ref,
-		size = 'medium',
+		size = 'px40',
 		...comboboxProps
 	} = props;
 	const comboBoxContext = useSlottedContext(ComboBoxContext, props.slot);

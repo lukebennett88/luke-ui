@@ -14,6 +14,6 @@ export const iconOnlyIconWrapper = style({
  * graphic box directly for a hand-authored custom icon such as a brand mark.
  */
 globalStyleInLayer('recipes', `${iconOnlyIconWrapper} > svg`, {
-	blockSize: ICON_SIZES.xsmall,
-	inlineSize: ICON_SIZES.xsmall,
+	blockSize: ICON_SIZES.px16,
+	inlineSize: ICON_SIZES.px16,
 });

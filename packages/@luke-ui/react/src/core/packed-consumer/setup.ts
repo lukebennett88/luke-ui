@@ -46,6 +46,8 @@ const VITE_SPEC =
  * `defineTheme` import bundles counts as theme generation.
  */
 const RUNTIME_THEME_MODULES = [
+	'@luke-ui/react/src/theme/literal-scale.ts',
+	'@luke-ui/react/src/theme/rem.ts',
 	'@luke-ui/react/src/theme/theme-class-name.ts',
 	'@luke-ui/react/src/theme/type-styles.ts',
 ];

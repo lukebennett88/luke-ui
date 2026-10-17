@@ -6,7 +6,7 @@ export default () => {
 	return (
 		<Cluster alignItems="center" gap="sp4">
 			<Text>Continue</Text>
-			<Icon name="externalLink" size="xsmall" />
+			<Icon name="externalLink" size="px16" />
 		</Cluster>
 	);
 };

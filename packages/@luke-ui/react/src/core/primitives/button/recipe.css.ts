@@ -25,7 +25,7 @@ export const buttonRecipeInternal = recipe({
 		appearance: 'button',
 		isBlock: false,
 		prominence: 'standard',
-		size: 'medium',
+		size: 'px40',
 		tone: 'neutral',
 	},
 	variants: {
@@ -132,8 +132,8 @@ export const buttonRecipeInternal = recipe({
 			high: {},
 		},
 		size: {
-			medium: {},
-			small: {},
+			px40: {},
+			px32: {},
 		},
 		tone: {
 			critical: {},
@@ -141,8 +141,8 @@ export const buttonRecipeInternal = recipe({
 		},
 	},
 	compoundVariants: [
-		buttonSize('medium'),
-		buttonSize('small'),
+		buttonSize('px40'),
+		buttonSize('px32'),
 		{
 			// Undoes `textRecipe`'s `minInlineSize: 0`, which lets a grid or flex parent collapse the
 			// button to one character per line. Must be a compound variant: `textRecipe`'s base and
@@ -230,8 +230,8 @@ function buttonAppearance(
 	];
 }
 
-function buttonSize(size: 'medium' | 'small') {
-	const paddingInline = size === 'medium' ? vars.space.sp16 : vars.space.sp12;
+function buttonSize(size: 'px40' | 'px32') {
+	const paddingInline = size === 'px40' ? vars.space.sp16 : vars.space.sp12;
 	// The extra 1px replaces the border. Forced colours draws the border, so it uses the plain padding.
 	const inset = {
 		'@media': {
@@ -241,16 +241,16 @@ function buttonSize(size: 'medium' | 'small') {
 	};
 	return {
 		style:
-			size === 'medium'
+			size === 'px40'
 				? {
 						...inset,
-						blockSize: vars.controlSize.medium,
+						blockSize: vars.controlSize.px40,
 						fontSize: FONT_METRIC_SCALE[14].fontSize,
 						gap: vars.space.sp8,
 					}
 				: {
 						...inset,
-						blockSize: vars.controlSize.small,
+						blockSize: vars.controlSize.px32,
 						fontSize: FONT_METRIC_SCALE[12].fontSize,
 						gap: vars.space.sp4,
 						letterSpacing: FONT_METRIC_SCALE[12].letterSpacing,

@@ -70,7 +70,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 	return (
 		<DialogTrigger isOpen={isOpen} onOpenChange={handleOpenChange}>
 			<RacButton aria-label="Change email" className={styles.emailEditButton}>
-				<Icon aria-hidden="true" name="edit" size="xsmall" />
+				<Icon aria-hidden="true" name="edit" size="px16" />
 			</RacButton>
 			<ModalOverlay
 				className={styles.dialogOverlay}
@@ -115,7 +115,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 										mutation.reset();
 									}}
 									placeholder="New email address"
-									size="small"
+									size="px32"
 									validationBehavior="aria"
 									value={draft}
 								/>
