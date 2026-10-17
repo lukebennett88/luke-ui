@@ -13,13 +13,14 @@ interface JsonArrayAddSortedEdit {
 
 /**
  * Inserts among entries that share `value`'s `group/` prefix. When none exist, inserts after
- * `sectionHeader` if provided and present; otherwise appends.
+ * `sectionHeader`. Throws when that header is absent so the page is never left under another
+ * section.
  */
 interface JsonArrayAddPrefixSortedEdit {
 	key: 'pages';
 	kind: 'array-add-prefix-sorted';
 	path: string;
-	sectionHeader?: string;
+	sectionHeader: string;
 	title: string;
 	value: string;
 }

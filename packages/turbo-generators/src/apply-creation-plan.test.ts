@@ -114,6 +114,41 @@ describe('applyCreationPlan json edits', () => {
 		);
 	});
 
+	it('rejects a missing section header instead of appending under another section', async () => {
+		const root = await createMetaFixture({
+			pages: ['---Actions---', 'actions/button', '---Primitives---', 'primitives/button'],
+			path: 'apps/docs/content/docs/components/meta.json',
+			title: 'Components',
+		});
+		const before = await readFile(
+			join(root, 'apps/docs/content/docs/components/meta.json'),
+			'utf8',
+		);
+
+		await expect(
+			applyCreationPlan(root, {
+				files: [],
+				importEdits: [],
+				jsonEdits: [
+					{
+						key: 'pages',
+						kind: 'array-add-prefix-sorted',
+						path: 'apps/docs/content/docs/components/meta.json',
+						sectionHeader: '---Feedback---',
+						title: 'Components',
+						value: 'feedback/status-badge',
+					},
+				],
+				textFileInserts: [],
+			}),
+		).rejects.toThrow(
+			'Cannot insert "feedback/status-badge": root components sidebar is missing section header "---Feedback---"',
+		);
+		await expect(
+			readFile(join(root, 'apps/docs/content/docs/components/meta.json'), 'utf8'),
+		).resolves.toBe(before);
+	});
+
 	it('appends a unique page without reordering existing entries', async () => {
 		const root = await createMetaFixture({
 			pages: ['button', 'checkbox', 'field', 'text-input', 'combobox'],

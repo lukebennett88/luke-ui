@@ -111,12 +111,16 @@ function appendUniquePage(pages: Array<string>, value: string): Array<string> {
 function insertSortedAmongPrefix(
 	pages: Array<string>,
 	value: string,
-	sectionHeader: string | undefined,
+	sectionHeader: string,
 ): Array<string> {
 	if (pages.includes(value)) return pages;
 
 	const separator = value.indexOf('/');
-	if (separator === -1) return appendUniquePage(pages, value);
+	if (separator === -1) {
+		throw new Error(
+			`Cannot insert "${value}" with prefix sorting: expected a group/name sidebar entry`,
+		);
+	}
 
 	const prefix = value.slice(0, separator + 1);
 	let first = -1;
@@ -128,9 +132,12 @@ function insertSortedAmongPrefix(
 	}
 
 	if (first === -1) {
-		if (sectionHeader === undefined) return appendUniquePage(pages, value);
 		const headerIndex = pages.indexOf(sectionHeader);
-		if (headerIndex === -1) return appendUniquePage(pages, value);
+		if (headerIndex === -1) {
+			throw new Error(
+				`Cannot insert "${value}": root components sidebar is missing section header "${sectionHeader}"`,
+			);
+		}
 		return [...pages.slice(0, headerIndex + 1), value, ...pages.slice(headerIndex + 1)];
 	}
 

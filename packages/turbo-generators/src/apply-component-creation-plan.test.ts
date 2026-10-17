@@ -38,7 +38,7 @@ describe('createComponent', () => {
 			),
 		).resolves.toContain('export function StatusBadge');
 		await expect(readJson(root, 'apps/docs/content/docs/components/meta.json')).resolves.toEqual({
-			pages: ['actions/button', 'feedback/status-badge'],
+			pages: ['---Actions---', 'actions/button', '---Feedback---', 'feedback/status-badge'],
 			title: 'Components',
 		});
 		await expect(
@@ -146,7 +146,7 @@ describe('createComponent', () => {
 		});
 	});
 
-	it('appends group/name when the docs group has no section or pages yet', async () => {
+	it('rejects a missing docs group section header instead of appending after another section', async () => {
 		const root = await createRepositoryFixture({
 			rootPages: [
 				'---Overview---',
@@ -158,8 +158,11 @@ describe('createComponent', () => {
 			],
 		});
 
-		await createComponent(root, { docsGroup: 'feedback', name: 'StatusBadge' });
-
+		await expect(
+			createComponent(root, { docsGroup: 'feedback', name: 'StatusBadge' }),
+		).rejects.toThrow(
+			'Cannot insert "feedback/status-badge": root components sidebar is missing section header "---Feedback---"',
+		);
 		await expect(readJson(root, 'apps/docs/content/docs/components/meta.json')).resolves.toEqual({
 			pages: [
 				'---Overview---',
@@ -168,7 +171,6 @@ describe('createComponent', () => {
 				'actions/button',
 				'---Primitives---',
 				'primitives/button',
-				'feedback/status-badge',
 			],
 			title: 'Components',
 		});
@@ -249,12 +251,14 @@ describe('createComponent', () => {
 		await expect(
 			readFile(join(root, 'apps/docs/content/docs/components/meta.json'), 'utf8'),
 		).resolves.toBe(
-			'{\n\t"pages": ["actions/button", "feedback/status-badge"],\n\t"title": "Components"\n}\n',
+			'{\n\t"pages": ["---Actions---", "actions/button", "---Feedback---", "feedback/status-badge"],\n\t"title": "Components"\n}\n',
 		);
 	});
 });
 
 const modulesRegistryPath = 'packages/@luke-ui/react/src/core/styles/modules.css.ts';
+
+const defaultRootPages = ['---Actions---', 'actions/button', '---Feedback---'] as const;
 
 async function createRepositoryFixture(options?: {
 	modulesRegistry?: string;
@@ -269,7 +273,7 @@ async function createRepositoryFixture(options?: {
 	await writeFile(
 		join(root, 'apps/docs/content/docs/components/meta.json'),
 		`${JSON.stringify(
-			{ pages: options?.rootPages ?? ['actions/button'], title: 'Components' },
+			{ pages: options?.rootPages ?? [...defaultRootPages], title: 'Components' },
 			null,
 			'\t',
 		)}\n`,
