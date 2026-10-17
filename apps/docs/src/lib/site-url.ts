@@ -1,8 +1,9 @@
+import { resolveSiteUrl } from './resolve-site-url.js';
+
 /**
- * The site's public origin, with no trailing slash, for absolute URLs in
- * `llms.txt`, `sitemap.xml`, `robots.txt`, and Markdown 404 bodies. It is the
- * `SITE_URL` build-time value, or `http://localhost:3000` when that is unset.
+ * The configured site origin and base path, without a trailing slash.
+ * Production defaults to `https://ui.lukebennett.dev`, development to `http://localhost:3000`.
  */
 export function siteUrl(): string {
-	return import.meta.env.SITE_URL;
+	return resolveSiteUrl(import.meta.env.SITE_URL, import.meta.env.BASE_URL);
 }

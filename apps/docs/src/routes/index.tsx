@@ -1,15 +1,22 @@
 import { Container } from '@luke-ui/react/container';
 import { HeadingLevels } from '@luke-ui/react/heading';
 import { createFileRoute } from '@tanstack/react-router';
+import type { SoftwareSourceCode, WithContext } from 'schema-dts';
+import { license } from '../../../../packages/@luke-ui/react/package.json';
 import { HomeFeatures } from '../components/home-features.js';
 import { HomeHero } from '../components/home-hero.js';
 import { SiteNav } from '../components/site-nav.js';
 import { withBasePath } from '../lib/base-path.js';
+import { GITHUB_REPO_URL } from '../lib/github.js';
+import { HOME_INTRO } from '../lib/home-content.js';
+import { resolvePageHeadMeta } from '../lib/page-head.js';
+import { siteUrl } from '../lib/site-url.js';
 
 export const Route = createFileRoute('/')({
 	component: Home,
 	head: () => ({
 		links: [
+			{ href: `${siteUrl()}/`, rel: 'canonical' },
 			{
 				href: withBasePath('/index.md', import.meta.env.BASE_URL),
 				rel: 'alternate',
@@ -17,13 +24,24 @@ export const Route = createFileRoute('/')({
 			},
 			{ href: withBasePath('/llms.txt', import.meta.env.BASE_URL), rel: 'describedby' },
 		],
-		meta: [
-			{ title: 'Luke UI' },
-			{
-				content: 'Luke UI is a React design system built on React Aria Components.',
-				name: 'description',
-			},
-		],
+		meta: resolvePageHeadMeta({ title: 'Luke UI', description: HOME_INTRO, url: `${siteUrl()}/` }),
+		scripts: import.meta.env.SSR
+			? [
+					{
+						type: 'application/ld+json',
+						children: JSON.stringify({
+							'@context': 'https://schema.org',
+							'@type': 'SoftwareSourceCode',
+							name: 'Luke UI',
+							description: HOME_INTRO,
+							url: `${siteUrl()}/`,
+							codeRepository: GITHUB_REPO_URL,
+							license: `https://spdx.org/licenses/${license}.html`,
+							programmingLanguage: 'TypeScript',
+						} satisfies WithContext<SoftwareSourceCode>).replaceAll('<', '\\u003c'),
+					},
+				]
+			: [],
 	}),
 });
 

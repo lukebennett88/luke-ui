@@ -405,7 +405,11 @@ The package README links to the hosted docs, which also serve agents:
 - Content negotiation: a request whose `Accept` header prefers `text/markdown` over HTML gets the
   page's Markdown instead of its HTML. Browsers get HTML as usual.
 - `/sitemap.xml` and `/robots.txt` for search engines and agents, built from the `SITE_URL`
-  build-time variable (falls back to `http://localhost:3000` locally).
+  build-time origin and `VITE_BASE_URL` base path. Production defaults to
+  `https://ui.lukebennett.dev` and development to `http://localhost:3000`. Set `SITE_URL` to
+  override the origin. Cloudflare Pages also reads `SITE_URL` (and `VITE_BASE_URL` for subpath
+  deploys) at request time for Markdown 404 links. Keep those bindings aligned with the build, or
+  absolute URLs drift from the custom host.
 - Each HTML page links to its Markdown twin (`<link rel="alternate" type="text/markdown">`) and to
   `/llms.txt` (`<link rel="describedby">`).
 
