@@ -9,19 +9,22 @@
 
 import type { IdentityPath } from './contract.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
+import { literalScale } from './literal-scale.js';
 import { MOTION_DURATION_SCALE } from './motion.js';
 import { pathEntry, pathRecord } from './path-record.js';
-import { rem } from './rem.js';
 import type { TypeStyle } from './type-styles.js';
 import { typeStyleMetricStep, typeStyles } from './type-styles.js';
+
+const controlSizeScale = literalScale('px', [32, 40] as const);
 
 /** Structural block sizes for the `px32` and `px40` controls. */
 export const CONTROL_SIZE_VALUES: {
 	[Path in Extract<IdentityPath, `controlSize.${string}`>]: string;
-} = {
-	'controlSize.px32': rem(32),
-	'controlSize.px40': rem(40),
-};
+} = pathRecord(
+	(Object.keys(controlSizeScale) as Array<keyof typeof controlSizeScale>).map((key) =>
+		pathEntry(`controlSize.${key}`, controlSizeScale[key]),
+	),
+);
 
 type FontValueLeaf = 'fontSize' | 'letterSpacing' | 'lineHeight';
 type FontValueKey = `font.${TypeStyle}.${FontValueLeaf}`;

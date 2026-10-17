@@ -5,7 +5,7 @@ globalStyle('html', {
 	fontSize: '87.5%',
 });
 
-globalStyle('html[data-font-size="px32"]', {
+globalStyle('html[data-font-size="small"]', {
 	fontSize: '81.25%',
 });
 

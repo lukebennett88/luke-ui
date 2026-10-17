@@ -247,11 +247,23 @@ test('text size changes actual heading geometry', async () => {
 	const app = await renderApp();
 	const heading = app.locator.getByRole('heading', { name: 'Preferences', level: 1 });
 	await expect.element(heading).toBeVisible();
-	const initialHeight = heading.element().getBoundingClientRect().height;
-	await chooseOption(app, 'Text size', 'Large');
+	const defaultHeight = heading.element().getBoundingClientRect().height;
+
+	await chooseOption(app, 'Text size', 'Small');
+	expect(document.documentElement.dataset.fontSize).toBe('small');
 	await expect
 		.poll(() => heading.element().getBoundingClientRect().height)
-		.toBeGreaterThan(initialHeight);
+		.toBeLessThan(defaultHeight);
+	const smallHeight = heading.element().getBoundingClientRect().height;
+
+	await chooseOption(app, 'Text size', 'Large');
+	expect(document.documentElement.dataset.fontSize).toBe('large');
+	await expect
+		.poll(() => heading.element().getBoundingClientRect().height)
+		.toBeGreaterThan(defaultHeight);
+	await expect
+		.poll(() => heading.element().getBoundingClientRect().height)
+		.toBeGreaterThan(smallHeight);
 });
 
 test('clearing saved settings waits for saves, cancels, retries failures, and restores defaults', async () => {
