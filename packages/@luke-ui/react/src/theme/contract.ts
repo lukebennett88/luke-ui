@@ -61,7 +61,8 @@ const fontStyleContract = Object.fromEntries(
 
 /**
  * Fixed spacing values selected from a 4px scale. Keys encode their step; values are emitted as
- * `rem` (16 → 1rem).
+ * `rem` (16 → 1rem). Temporary `sp*` naming — migrate to `literalScale('px', …)` before the next
+ * release (#847).
  */
 export const spaceScale = [
 	['sp4', rem(4)],
@@ -183,10 +184,10 @@ export const themeContractTree = {
 	},
 	/** The fixed spacing scale used by components and layout utilities. */
 	space: spaceContract,
-	/** Structural block sizes for small and medium controls. */
+	/** Structural block sizes for `px32` and `px40` controls. */
 	controlSize: {
-		small: null,
-		medium: null,
+		px32: null,
+		px40: null,
 	},
 	/** Interaction treatment shared by every control recipe. */
 	interaction: {

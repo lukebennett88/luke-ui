@@ -64,7 +64,7 @@ interface _CheckboxRootProps extends _CheckboxRootOmit {
 	/**
 	 * Visual size of the checkbox control.
 	 *
-	 * @default 'medium'
+	 * @default 'px20'
 	 */
 	size?: CheckboxRecipeVariants['size'];
 	/** Custom validation function run against the selection. Return a message, or `true`/`null` when valid. */

@@ -71,7 +71,7 @@ function TokenCopyButton({ token }: { token: ThemeToken }) {
 				icon={status?.state === 'copied' ? 'check' : 'copy'}
 				onPress={() => void copy('token', text)}
 				prominence="low"
-				size="small"
+				size="px32"
 				tone="neutral"
 			/>
 			<VisuallyHidden aria-live="polite" elementType="span">

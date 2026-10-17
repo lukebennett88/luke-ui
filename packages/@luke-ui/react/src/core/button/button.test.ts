@@ -10,7 +10,7 @@ test('Button supports ref and rejects unsupported prop combinations', () => {
 	// @ts-expect-error — high-level Button omits RAC render; use function children instead
 	assertType<ButtonProps>({ render: (props) => createElement('button', props) });
 	// @ts-expect-error — text Buttons wrap and do not use control sizing
-	assertType<ButtonProps>({ appearance: 'text', size: 'small' });
+	assertType<ButtonProps>({ appearance: 'text', size: 'px32' });
 	// @ts-expect-error — accent is not a consumer-selectable tone
 	assertType<ButtonProps>({ prominence: 'low', tone: 'accent' });
 	// @ts-expect-error — critical text Buttons do not have high prominence

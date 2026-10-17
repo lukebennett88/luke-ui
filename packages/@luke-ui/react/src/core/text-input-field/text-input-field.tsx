@@ -52,7 +52,7 @@ interface _TextInputFieldBaseProps extends _TextInputFieldOmit, DocumentedInputP
 	prefix?: ReactNode;
 	/** Forwarded to the field's root element. Use `inputRef` for the input. */
 	ref?: TextInputRootProps['ref'];
-	/** Control size. @default 'medium' */
+	/** Control size. @default 'px40' */
 	size?: TextInputSize;
 	/** Element shown after the input value. */
 	suffix?: ReactNode;
@@ -79,7 +79,7 @@ export function TextInputField(props: TextInputFieldProps): JSX.Element {
 		necessityIndicator,
 		placeholder,
 		prefix,
-		size = 'medium',
+		size = 'px40',
 		suffix,
 		...rootProps
 	} = props;

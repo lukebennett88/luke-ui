@@ -33,7 +33,7 @@ function TextInputScene() {
 		<Stack>
 			<TextInput aria-label="Standalone" defaultValue="Standalone" />
 			<TextInput aria-invalid aria-label="Standalone invalid" defaultValue="Invalid" />
-			<TextInput aria-label="Standalone small" defaultValue="Small" size="small" />
+			<TextInput aria-label="Standalone small" defaultValue="Small" size="px32" />
 			<TextInput aria-label="Standalone disabled" defaultValue="Unavailable" disabled />
 			<TextInput aria-label="Standalone read-only" defaultValue="Read only" readOnly />
 			<TextInputRoot defaultValue="nope" isInvalid name="inside-root">
@@ -56,10 +56,10 @@ function TextInputScene() {
 				</TextInputPrefix>
 				<TextInput aria-label="Search control" defaultValue="invoices" />
 				<TextInputSuffix>
-					<Button size="small">Clear</Button>
+					<Button size="px32">Clear</Button>
 				</TextInputSuffix>
 			</TextInputControl>
-			<TextInputControl size="small">
+			<TextInputControl size="px32">
 				<TextInputPrefix>$</TextInputPrefix>
 				<TextInput aria-invalid aria-label="Refund" defaultValue="-1" inputMode="decimal" />
 				<TextInputSuffix>USD</TextInputSuffix>
@@ -578,19 +578,19 @@ test('a part size overrides the root size, and a control sizes its input', () =>
 	render(
 		<>
 			<TextInput aria-label="Medium reference" />
-			<TextInput aria-label="Small reference" size="small" />
-			<TextInputRoot size="small">
+			<TextInput aria-label="Small reference" size="px32" />
+			<TextInputRoot size="px32">
 				<FieldLabel>Root small</FieldLabel>
 				<TextInput />
 			</TextInputRoot>
-			<TextInputRoot size="small">
+			<TextInputRoot size="px32">
 				<FieldLabel>Input medium</FieldLabel>
-				<TextInput size="medium" />
+				<TextInput size="px40" />
 			</TextInputRoot>
-			<TextInputRoot size="small">
+			<TextInputRoot size="px32">
 				<FieldLabel>Control medium</FieldLabel>
-				<TextInputControl size="medium">
-					<TextInput size="small" />
+				<TextInputControl size="px40">
+					<TextInput size="px32" />
 				</TextInputControl>
 			</TextInputRoot>
 		</>,

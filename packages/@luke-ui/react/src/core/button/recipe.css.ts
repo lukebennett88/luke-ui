@@ -11,7 +11,7 @@ export const buttonRecipe = withDefaultVariants<
 	appearance: 'button',
 	isBlock: false,
 	prominence: 'standard',
-	size: 'medium',
+	size: 'px40',
 	tone: 'neutral',
 });
 

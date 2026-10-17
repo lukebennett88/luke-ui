@@ -12,12 +12,15 @@ import type { IconSize } from '../types/icon-size.js';
  * `TextInputSize` (`primitives/text-input/recipe.css.ts`) derive from their recipe configs and must
  * stay equal to this union.
  */
-export type FieldControlSize = 'medium' | 'small';
+export type FieldControlSize = 'px32' | 'px40';
 
-/** Maps field control size to the icon size those controls provide. */
+/**
+ * Maps field control size to the icon size those controls provide: `px16` icons at `px32`, and
+ * `px20` icons at `px40`.
+ */
 export const FIELD_CONTROL_ICON_SIZE: Record<FieldControlSize, IconSize> = {
-	medium: 'small',
-	small: 'xsmall',
+	px32: 'px16',
+	px40: 'px20',
 };
 
 /**

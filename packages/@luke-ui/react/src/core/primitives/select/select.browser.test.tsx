@@ -69,13 +69,13 @@ function SelectScene() {
 			/>
 			<ExampleSelect isInvalid label="Invalid, no message" placeholder="Choose an option" />
 			<ExampleSelect defaultValue="two" isDisabled label="Disabled" />
-			<ExampleSelect defaultValue="two" label="Small" size="small" />
+			<ExampleSelect defaultValue="two" label="Small" size="px32" />
 			<ExampleSelect
 				defaultValue="two"
 				errorMessage="Choose a different option."
 				isInvalid
 				label="Invalid small"
-				size="small"
+				size="px32"
 			/>
 			<ExampleSelect isRequired label="Required" name="required" placeholder="Choose an option" />
 		</Stack>
@@ -246,7 +246,7 @@ test('SelectRoot sets the size of the trigger and of the items', async () => {
 	render(
 		<>
 			<ExampleSelect label="Medium" />
-			<ExampleSelect label="Small" size="small" />
+			<ExampleSelect label="Small" size="px32" />
 		</>,
 	);
 

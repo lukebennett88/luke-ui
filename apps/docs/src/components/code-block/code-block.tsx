@@ -107,7 +107,7 @@ export function CodeBlock({
 			icon={copyStatus === 'copied' ? 'check' : 'copy'}
 			onPress={handleCopy}
 			prominence="low"
-			size="small"
+			size="px32"
 			tone="neutral"
 		/>
 	) : null;

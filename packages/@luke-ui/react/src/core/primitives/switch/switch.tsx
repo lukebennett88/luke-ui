@@ -62,7 +62,7 @@ interface _SwitchRootProps extends _SwitchRootOmit {
 	/**
 	 * Visual size of the switch control.
 	 *
-	 * @default 'medium'
+	 * @default 'px20'
 	 */
 	size?: SwitchRecipeVariants['size'];
 	/** Custom validation function run against the selection. Return a message, or `true`/`null` when valid. */

@@ -155,7 +155,7 @@ function OpenInPlayground({ hash }: { hash: string }) {
 			appearance="button"
 			hash={hash}
 			prominence="low"
-			size="small"
+			size="px32"
 			startContent={<Icon name="externalLink" />}
 			target="_blank"
 			to="/playground"
@@ -169,12 +169,7 @@ function ExampleLoadingActions() {
 	return (
 		<Box alignItems="center" aria-hidden display="flex" flexShrink="0" gap="sp4" inert>
 			<LoadingSkeleton radius="control">
-				<Button
-					isDisabled
-					prominence="low"
-					size="small"
-					startContent={<Icon name="externalLink" />}
-				>
+				<Button isDisabled prominence="low" size="px32" startContent={<Icon name="externalLink" />}>
 					Open in playground
 				</Button>
 			</LoadingSkeleton>

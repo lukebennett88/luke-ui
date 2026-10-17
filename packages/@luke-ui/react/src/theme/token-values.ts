@@ -15,12 +15,12 @@ import { rem } from './rem.js';
 import type { TypeStyle } from './type-styles.js';
 import { typeStyleMetricStep, typeStyles } from './type-styles.js';
 
-/** Structural block sizes for the small and medium controls. */
+/** Structural block sizes for the `px32` and `px40` controls. */
 export const CONTROL_SIZE_VALUES: {
 	[Path in Extract<IdentityPath, `controlSize.${string}`>]: string;
 } = {
-	'controlSize.medium': rem(40),
-	'controlSize.small': rem(32),
+	'controlSize.px32': rem(32),
+	'controlSize.px40': rem(40),
 };
 
 type FontValueLeaf = 'fontSize' | 'letterSpacing' | 'lineHeight';

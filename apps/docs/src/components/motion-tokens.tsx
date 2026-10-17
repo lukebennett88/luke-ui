@@ -106,7 +106,7 @@ function MotionSampleTable({
 									setPlayGeneration((generation) => generation + 1);
 								}
 							}}
-							size="small"
+							size="px16"
 						/>
 					}
 					label={label}

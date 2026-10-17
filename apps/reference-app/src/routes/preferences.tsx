@@ -113,7 +113,7 @@ function SelectPreferenceRow({
 					if (key == null) return;
 					onSave({ [pref.key]: pref.parse(String(key)) });
 				}}
-				size="small"
+				size="px32"
 				triggerId={pref.id}
 				value={values[pref.key]}
 			>

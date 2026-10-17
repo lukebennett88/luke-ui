@@ -42,7 +42,7 @@ export function HomePage() {
 					paddingBlock={{ bp768: 'sp64', initial: 'sp32' }}
 					paddingInline={{ bp768: 'sp40', initial: 'sp16' }}
 				>
-					<Container maxInlineSize="ct672">
+					<Container maxInlineSize="px672">
 						<Stack alignItems="flex-start" gap="sp16">
 							<Heading level={1} shouldDisableTrim typography="heading2">
 								Welcome back, {firstName}

@@ -9,24 +9,24 @@ const options = [
 export default () => {
 	return (
 		<Comparison>
-			<ComparisonItem label="Small">
+			<ComparisonItem label="px32">
 				<SelectField
 					items={options}
 					label="Example field"
 					name="example"
 					placeholder="Choose an option"
-					size="small"
+					size="px32"
 				>
 					{(item) => <SelectItem>{item.label}</SelectItem>}
 				</SelectField>
 			</ComparisonItem>
-			<ComparisonItem label="Medium">
+			<ComparisonItem label="px40">
 				<SelectField
 					items={options}
 					label="Example field"
 					name="example"
 					placeholder="Choose an option"
-					size="medium"
+					size="px40"
 				>
 					{(item) => <SelectItem>{item.label}</SelectItem>}
 				</SelectField>

@@ -34,7 +34,7 @@ export function PreviewToolbar({
 				icon={isFullscreen ? 'minimize' : 'expand'}
 				onPress={() => onFullscreenChange((prev) => !prev)}
 				prominence="low"
-				size="small"
+				size="px32"
 			/>
 		</PlaygroundPaneToolbar>
 	);

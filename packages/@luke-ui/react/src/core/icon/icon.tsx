@@ -19,7 +19,7 @@ interface IconVariantProps extends NonNullable<IconRecipeVariants> {}
 interface IconStyleProps {
 	/**
 	 * Sets the icon size.
-	 * @default 'medium'
+	 * @default 'px24'
 	 */
 	size?: IconVariantProps['size'];
 }
@@ -80,7 +80,7 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 			viewBox ?? (typeof defaultViewBox === 'function' ? defaultViewBox(props) : defaultViewBox);
 		const resolvedPath = typeof path === 'function' ? path(props) : path;
 		const contextSize = useIconSizeContext();
-		const resolvedSize = size ?? contextSize ?? 'medium';
+		const resolvedSize = size ?? contextSize ?? 'px24';
 
 		const svgProps: React.SVGProps<SVGSVGElement> = {
 			'aria-hidden': ariaHidden,

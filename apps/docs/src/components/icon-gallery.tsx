@@ -21,10 +21,10 @@ import * as referenceStyles from './reference-table.css.js';
 type GalleryIconSize = NonNullable<IconProps['size']>;
 
 const SIZE_OPTIONS = [
-	{ label: 'XS', value: 'xsmall' },
-	{ label: 'S', value: 'small' },
-	{ label: 'M', value: 'medium' },
-	{ label: 'L', value: 'large' },
+	{ label: 'px16', value: 'px16' },
+	{ label: 'px20', value: 'px20' },
+	{ label: 'px24', value: 'px24' },
+	{ label: 'px32', value: 'px32' },
 ] as const satisfies ReadonlyArray<{ label: string; value: GalleryIconSize }>;
 
 /** How long a copy button shows its "Copied"/error feedback before reverting. */
@@ -42,7 +42,7 @@ interface CopyStatus {
 /** Searchable index of the first-party icon set, sized at the token you'll ship it at. */
 export function IconGallery(): JSX.Element {
 	const [filter, setFilter] = useState('');
-	const [previewSize, setPreviewSize] = useState<GalleryIconSize>('medium');
+	const [previewSize, setPreviewSize] = useState<GalleryIconSize>('px24');
 	const [copyState, dispatchCopy] = useReducer(copyReducer, {
 		announcement: '',
 		status: null,
@@ -115,8 +115,8 @@ export function IconGallery(): JSX.Element {
 								inputRef={inputRef}
 								onChange={setFilter}
 								placeholder="Filter by name"
-								prefix={<Icon name="search" size="small" />}
-								size="small"
+								prefix={<Icon name="search" size="px20" />}
+								size="px32"
 								value={filter}
 							/>
 						</Box>
@@ -330,7 +330,7 @@ function IconGalleryEmptyState({ onClear, query }: IconGalleryEmptyStateProps) {
 			<Text color="secondary" elementType="p" textAlign="center" typography="caption">
 				No icon matches &quot;{query}&quot;
 			</Text>
-			<Button onPress={onClear} size="small">
+			<Button onPress={onClear} size="px32">
 				Clear filter
 			</Button>
 		</Stack>

@@ -131,7 +131,7 @@ export const paneToolbar = style({
 		components: {
 			backgroundColor: vars.color.surface.base,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
-			minBlockSize: `calc(${vars.controlSize.small} + ${vars.space.sp8} * 2 + 1px)`,
+			minBlockSize: `calc(${vars.controlSize.px32} + ${vars.space.sp8} * 2 + 1px)`,
 			paddingBlock: vars.space.sp8,
 			paddingInline: vars.space.sp8,
 			'@container': {

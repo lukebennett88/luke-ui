@@ -5,7 +5,7 @@ import type { ComboboxSize } from './root.js';
 const ComboboxSizeContext = createContext<ComboboxSize | null>(null);
 
 export function useComboboxSize(size?: ComboboxSize): ComboboxSize {
-	return size ?? use(ComboboxSizeContext) ?? 'medium';
+	return size ?? use(ComboboxSizeContext) ?? 'px40';
 }
 
 export function ComboboxSizeProvider({

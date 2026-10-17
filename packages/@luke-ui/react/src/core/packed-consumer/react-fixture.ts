@@ -365,8 +365,8 @@ export const retainedTokens: Array<string> = [
 	vars.controlFinish.raised,
 	vars.depth.overlay,
 	vars.font.body.lineHeight,
-	vars.controlSize.small,
-	vars.controlSize.medium,
+	vars.controlSize.px32,
+	vars.controlSize.px40,
 	vars.radius.full,
 	vars.interaction.disabledOpacity,
 ];

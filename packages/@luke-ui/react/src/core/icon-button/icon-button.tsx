@@ -66,7 +66,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 		isPending = false,
 		onPress,
 		pressAction,
-		size = 'medium',
+		size = 'px40',
 		...buttonProps
 	} = props;
 	const {

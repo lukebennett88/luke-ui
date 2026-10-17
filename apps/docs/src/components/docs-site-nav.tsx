@@ -35,7 +35,7 @@ export function DocsSiteNav({ tree }: { tree: Root }) {
 		<SiteNav className={styles.header} hasSidebarNavigation>
 			<DialogTrigger isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
 				{/* No bars/menu glyph in the Luke UI set; match the Theme labelled control. */}
-				<Button className={styles.mobileTrigger} prominence="low" size="small">
+				<Button className={styles.mobileTrigger} prominence="low" size="px32">
 					Menu
 				</Button>
 				<ModalOverlay className={styles.drawerOverlay} isDismissable>
@@ -51,7 +51,7 @@ export function DocsSiteNav({ tree }: { tree: Root }) {
 											aria-label="Close docs navigation"
 											icon="close"
 											onPress={close}
-											size="small"
+											size="px32"
 										/>
 									</Box>
 									<Stack

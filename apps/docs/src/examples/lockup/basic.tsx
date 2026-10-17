@@ -14,7 +14,7 @@ export default () => {
 					Example message that wraps onto multiple lines when the available space is limited.
 				</LockupBody>
 				<LockupRail>
-					<IconButton aria-label="More options" icon="chevronDown" size="small" />
+					<IconButton aria-label="More options" icon="chevronDown" size="px32" />
 				</LockupRail>
 			</Lockup>
 		</Box>
