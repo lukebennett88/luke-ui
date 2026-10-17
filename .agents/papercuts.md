@@ -139,13 +139,3 @@ not help. Silence in this log is not evidence.
   `docs/STYLING.md`.
 - Problem: TypeScript accepts a spacing token key where a CSS length is required, so the prop can
   compile while producing an invalid CSS value.
-
-## An aria-label-only ComboboxField leaves its mobile tray dialog unnamed
-
-- Seen: 2026-10-15 (token catalogue redesign). `ComboboxField` with `aria-label` named the
-  searchbox, but the 390px mobile tray dialog had no accessible name. A visible `label` supplies the
-  label context the tray reads.
-- Where: `packages/@luke-ui/react/src/core/primitives/combobox/tray.tsx` reads `LabelContext` for
-  the tray's name.
-- Problem: A valid field name supplied with `aria-label` does not reach the tray dialog, so
-  consumers must use a visible label to name it.

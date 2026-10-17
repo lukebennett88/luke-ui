@@ -58,7 +58,8 @@ empty content, including a loading message or spinner.
 ## Tray presentation
 
 `ComboboxTray` shows options in a full-screen tray. Pair it with `ComboboxTrayTrigger` to show the
-current selection and open the tray.
+current selection and open the tray. The tray dialog takes its accessible name from the root: a
+connected label, or `aria-label` / `aria-labelledby` on `ComboboxRoot`.
 
 <ExampleBlock src="combobox-primitive/tray" title="Combobox primitives: Tray" />
 
