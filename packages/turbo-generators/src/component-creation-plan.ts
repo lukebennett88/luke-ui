@@ -121,10 +121,11 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 		jsonEdits: [
 			{
 				key: 'pages',
-				kind: 'array-add-sorted',
+				kind: 'array-add-prefix-sorted',
 				path: 'apps/docs/content/docs/components/meta.json',
+				sectionHeader: `---${toDisplayName(docsGroup)}---`,
 				title: toDisplayName(docsGroup),
-				value: docsGroup,
+				value: `${docsGroup}/${name}`,
 			},
 			{
 				key: 'pages',
