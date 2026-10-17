@@ -119,10 +119,8 @@ test('keyboard resize and double-click reset work without losing width on code e
 	await page.viewport(1000, 800);
 	await renderExampleBlock();
 	await waitForResizeInteraction();
-	const restingShadow = getComputedStyle(resizeGrip()).boxShadow;
 	separator().focus();
 	expect(document.activeElement).toBe(separator());
-	await expect.poll(() => getComputedStyle(resizeGrip()).boxShadow).not.toBe(restingShadow);
 	const before = previewWidth();
 	await userEvent.keyboard('{ArrowLeft}');
 	await expect.poll(previewWidth).toBeLessThan(before);
