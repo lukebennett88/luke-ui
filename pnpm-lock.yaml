@@ -708,13 +708,13 @@ importers:
       '@vanilla-extract/dynamic':
         specifier: 'catalog:'
         version: 2.1.5
+      csstype:
+        specifier: 'catalog:'
+        version: 3.2.3
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.1
-      csstype:
-        specifier: 'catalog:'
-        version: 3.2.3
       typescript:
         specifier: 'catalog:'
         version: 7.0.2

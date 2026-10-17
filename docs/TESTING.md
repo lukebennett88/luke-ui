@@ -103,9 +103,10 @@ leaves the harness out. Run it with `pnpm run test:consumer`. The `consumer-test
 every pull request.
 
 Keep it to the package boundary: tarball contents, dependencies, peers, assets, server rendering, a
-client build, hydration in Chromium, type checking, and what small imports bundle. For the theme
-packages it also runs the docs' `compile-theme.ts` sample with Node 24, checks each stylesheet rule
-by rule against the token contract, and renders the packages' Inter and a Lora display font from
+client build, hydration in Chromium, type checking, and what small imports bundle. Check installed
+support packages for undeclared JavaScript and declaration imports too. For the theme packages it
+also runs the docs' `compile-theme.ts` sample with Node 24, checks each stylesheet rule by rule
+against the token contract, and renders the packages' Inter and a Lora display font from
 `@fontsource/lora`. Component behaviour belongs in component tests.
 
 One consumer installs the lowest published version each peer range allows, and the first release of
