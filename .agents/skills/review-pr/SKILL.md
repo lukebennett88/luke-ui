@@ -49,8 +49,14 @@ These are easy to miss in this repository:
   assertion only when layout is the contract.
 - Browser and visual tests load Luke UI's stylesheet but no application CSS, so a green run says
   nothing about conflicts with an application's styles.
-- Luke UI is pre-1.0. Do not suggest a compatibility alias, or a new prop or wrapper for something
-  CSS already does.
+- Inspect added and changed comments for history or issue-number narration against
+  [Comments and JSDoc](../../../docs/DOCUMENTATION.md#comments-and-jsdoc).
+- Trace callers of added or changed production exports and branches. Flag those that exist only for
+  tests against [Component tests](../../../docs/TESTING.md#component-tests), including cache-reset
+  exports. These checks need judgement rather than a text-pattern lint rule.
+- Luke UI is pre-1.0. Inspect compatibility shims and aliases against
+  [PUBLIC_API.md](../../../docs/PUBLIC_API.md). Do not suggest a compatibility alias, or a new prop
+  or wrapper for something CSS already does.
 - Compare the pull request's verification claims with CI and with the commands that actually ran.
 
 Confirm behaviour when it matters and is practical. For a bug fix, show the bug on the base

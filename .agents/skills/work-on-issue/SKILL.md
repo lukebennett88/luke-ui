@@ -68,8 +68,12 @@ not open new issues for the parts you leave.
 1. Run tasks through Turbo from the repository root so their generate and build dependencies run.
    Before changing Turbo configuration or commands, read the installed package's bundled `docs/`,
    found with `node -p "require.resolve('turbo/package.json')"`.
-2. Before committing, run `pnpm run check`. It covers barrels, format (including root Markdown),
-   lint, types, docs, cycles, and unused code. For formatting failures, use
+2. When the diff adds or modifies JS/TS files, run
+   `pnpm exec vp lint --deny no-nested-ternary <changed-files>` from the repository root before
+   committing, passing every such file. This enforces
+   [Code style](../../../docs/CONVENTIONS.md#code-style) on the change without requiring unrelated
+   cleanup. Run `pnpm run check` for every change. It covers barrels, format (including root
+   Markdown), lint, types, docs, cycles, and unused code. For formatting failures, use
    `pnpm run fix:format-root` rather than re-wrapping Markdown by hand. Before opening the PR, run
    `TURBO_FORCE=true pnpm run test` separately. The environment variable forces execution across the
    cache shared by worktrees. `pnpm run test -- --force` does not force Turbo. Run the separate
@@ -81,10 +85,11 @@ not open new issues for the parts you leave.
    blocks the pull request. An unrelated failure does not, as long as the rest of the change is
    verified and the pull request says so. Compare in a separate worktree: stashing does not isolate
    generated build outputs or their cache.
-4. Read the whole diff. Review it with [review-pr](../review-pr/SKILL.md) when the risk warrants it,
-   for example a change to public API, accessibility behaviour, shared infrastructure, or complex
-   logic. Fix every blocking finding before you open the pull request, and fix the small issues that
-   are worth it.
+4. Read the whole diff. Apply the comment, compatibility, and test-only production code checks in
+   [review-pr](../review-pr/SKILL.md#review) before committing. Review it with
+   [review-pr](../review-pr/SKILL.md) when the risk warrants it, for example a change to public API,
+   accessibility behaviour, shared infrastructure, or complex logic. Fix every blocking finding
+   before you open the pull request, and fix the small issues that are worth it.
 
 After addressing review findings, check the current [papercut log](../../papercuts.md#handoff).
 Record qualifying candidates or recurring occurrences, or explain why each omitted candidate does
