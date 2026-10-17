@@ -144,7 +144,17 @@ interface _LockupElementProps extends _LockupElementOmit, LayoutProps, _LockupOw
 	elementType?: 'div' | 'li' | 'span';
 }
 
-interface _LockupRenderProps extends BoxLikeRenderProps, LayoutProps, _LockupOwnProps {}
+type _LockupRenderOmit = DistributiveOmit<BoxLikeRenderProps, 'renderRoot'>;
+
+interface _LockupRenderProps extends _LockupRenderOmit, LayoutProps, _LockupOwnProps {
+	/**
+	 * Passes resolved `children`, `className`, `style`, and a callback `ref` as `domProps`. The second
+	 * argument is an empty state object. Lockup lays the element out as a block-level flex container
+	 * unless it sits inside a `span` Lockup, so give an inline element `display: inline-flex`. Set
+	 * `elementType` on the parts inside it.
+	 */
+	renderRoot: BoxLikeRenderProps['renderRoot'];
+}
 
 /** Flex item utilities a rail owns, so it keeps its intrinsic inline size. */
 const railOwnedProperties = [
@@ -174,9 +184,7 @@ interface _LockupPartElementProps extends _LockupElementOmit {
 
 interface _LockupRailElementProps extends _LockupPartElementProps, _LockupRailLayoutProps {}
 
-type _LockupRailRenderOmit = DistributiveOmit<BoxLikeRenderProps, 'renderRoot'>;
-
-interface _LockupRailRenderProps extends _LockupRailRenderOmit, _LockupRailLayoutProps {
+interface _LockupRailRenderProps extends _LockupRenderOmit, _LockupRailLayoutProps {
 	/**
 	 * Passes resolved `children`, `className`, `style`, and a callback `ref` as `domProps`. The second
 	 * argument is an empty state object. Return a container element that can lay out flex items and

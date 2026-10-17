@@ -70,10 +70,15 @@ inside it, then render `span` elements. The content you pass must also be phrasi
 
 <ExampleBlock src="lockup/element-span" title="Lockup: Inside phrasing content" />
 
-Use `renderRoot` to render your own element for `Lockup`, `LockupRail`, or `LockupBody`. Lockup
-can't tell what kind of content your element allows, so set `elementType` on the parts inside it
-yourself. A `LockupRail` element must be a container, such as a `div` or `span`, not an image or
-other replaced element. Spread the `domProps` onto it and render its children.
+Use `renderRoot` to render your own element for `Lockup`, `LockupRail`, or `LockupBody`, and spread
+the `domProps` onto it. Lockup can't tell what your element is, so:
+
+- Set `elementType` on the parts inside your root, such as `span` inside an `a`.
+- Give an inline root, such as a link in running text, `display: inline-flex` with your own
+  `className` or `style`. Lockup lays out a root you render as a block-level flex container, unless
+  it sits inside a `span` Lockup.
+- Return a container for `LockupRail`, such as a `div` or `span`, and render its children. Put an
+  image inside the rail, not in its place.
 
 ## API
 

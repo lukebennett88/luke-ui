@@ -291,19 +291,21 @@ test('resolves a responsive gap against the container width', async () => {
 	}
 });
 
-for (const [elementType, partTagName] of [
-	['div', 'DIV'],
-	['li', 'DIV'],
-	['span', 'SPAN'],
+// Each root sits in a parent whose content model allows it.
+for (const [elementType, Parent, partTagName] of [
+	['div', 'div', 'DIV'],
+	['li', 'ul', 'DIV'],
+	['span', 'p', 'SPAN'],
 ] as const) {
 	test(`a ${elementType} Lockup renders ${partTagName.toLowerCase()} parts by default`, () => {
-		const lockup = (
-			<Lockup data-testid="lockup" elementType={elementType} gap="sp8">
-				<LockupRail>Rail</LockupRail>
-				<LockupBody>Body</LockupBody>
-			</Lockup>
+		const { container } = render(
+			<Parent>
+				<Lockup data-testid="lockup" elementType={elementType} gap="sp8">
+					<LockupRail>Rail</LockupRail>
+					<LockupBody>Body</LockupBody>
+				</Lockup>
+			</Parent>,
 		);
-		const { container } = render(elementType === 'li' ? <ul>{lockup}</ul> : <p>{lockup}</p>);
 		const root = getElement(container, 'lockup');
 
 		expect(root.tagName).toBe(elementType.toUpperCase());
@@ -349,6 +351,38 @@ test('renderRoot owns each part’s element and keeps its layout', () => {
 	expect(
 		offsetFromFirstLine(getElement(container, 'rail-content'), getElement(container, 'text')),
 	).toBeLessThanOrEqual(0.5);
+});
+
+test('a renderRoot Lockup is block-level unless it sits inside a span Lockup', () => {
+	function LinkLockup({ testId }: { testId: string }) {
+		return (
+			<Lockup
+				gap="sp4"
+				renderRoot={({ children, ...domProps }) => (
+					<a {...domProps} data-testid={testId} href="#example">
+						{children}
+					</a>
+				)}
+			>
+				<LockupBody elementType="span">Link</LockupBody>
+			</Lockup>
+		);
+	}
+	const { container } = render(
+		<>
+			<LinkLockup testId="flow" />
+			<p>
+				<Lockup elementType="span" gap="sp4">
+					<LockupBody>
+						<LinkLockup testId="phrasing" />
+					</LockupBody>
+				</Lockup>
+			</p>
+		</>,
+	);
+
+	expect(getComputedStyle(getElement(container, 'flow')).display).toBe('flex');
+	expect(getComputedStyle(getElement(container, 'phrasing')).display).toBe('inline-flex');
 });
 
 test('a rail ignores the flex item props it owns', () => {
