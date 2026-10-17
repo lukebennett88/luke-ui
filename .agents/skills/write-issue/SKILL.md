@@ -46,11 +46,36 @@ Leave out any section that has nothing in it.
 Keep large work in one issue, even when it needs several pull requests. Use native sub-issues only
 when parts need to be tracked separately. Do not create an epic or tracking issues by default.
 
+## Work context
+
+Classify the next useful action during issue triage and handoff. Apply exactly one work-context
+label to each actionable open issue, and to a PR when it helps select the next review or fix.
+
+| Label             | Next useful action                                                                                                                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `context:phone`   | Discuss requirements, research a decision, clarify acceptance criteria, delegate a sufficiently specified task, or review a PR remotely. The maintainer needs no local edit/test loop for that action. |
+| `context:desktop` | Work hands-on with a local development environment, fast edit/test feedback, device or browser testing, live visual assessment, debugging, or exploratory prototyping.                                 |
+
+A code task can be `context:phone` when the maintainer can delegate it and review the result
+remotely. Agent assistance does not make an action `context:phone` when the maintainer needs a
+running local environment to direct or verify it.
+
+Classify the next action, not all the work needed to close the issue. Replace the stale context
+label as work progresses, such as phone discussion, desktop implementation, then phone review. For
+blocked work, classify the next actual actionable step, such as discussing the blocker or reviewing
+a dependency. Do not imply that blocked implementation can proceed.
+
+Work context does not express priority, complexity, ownership, issue type, or agent readiness. Keep
+existing labels for those purposes. `ready-for-agent` means sufficiently specified for autonomous
+implementation, independently of work context. `claimed` continues to mean claimed. Revisit
+ambiguous classifications during regular triage instead of adding more context labels.
+
 ## Publish
 
 Return the title and body as a draft unless you are asked to create or edit the issue. Add the
-`ready-for-agent` label only when you are told the issue is ready for an agent, and add no other
-labels. After you create or edit an issue, read it back to confirm it.
+`ready-for-agent` label only when you are told the issue is ready for an agent. Apply the
+[work-context rules](#work-context), and add no other labels. After you create or edit an issue,
+read it back to confirm it.
 
 ## Update a resolved issue
 
