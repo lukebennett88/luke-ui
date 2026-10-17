@@ -242,22 +242,46 @@ test('ComboboxTrayTrigger cannot open a read-only or disabled combobox', async (
 });
 
 test('ComboboxTray search field does not reopen the popover while the tray is exiting', async () => {
-	render(<TrayCombobox />);
-	await openTray();
+	// Hold the exit window so the still-mounted search field can be clicked without racing the
+	// 150ms opacity fade. The transition is finished explicitly after the click assertion.
+	const exitHold = document.createElement('style');
+	exitHold.textContent = '[data-exiting] { transition-duration: 5s !important; }';
+	document.head.append(exitHold);
 
-	const searchbox = page.getByRole('searchbox', { name: 'Country' });
-	const dialog = page.getByRole('dialog');
-	const overlay = dialog.element().parentElement?.parentElement;
-	if (overlay == null) throw new Error('Expected the tray overlay structure.');
+	try {
+		render(<TrayCombobox />);
+		await openTray();
 
-	// Children stay mounted and clickable during the exit transition.
-	await userEvent.keyboard('{Escape}');
-	await expect.poll(() => overlay.hasAttribute('data-exiting')).toBe(true);
+		const searchboxElement = page.getByRole('searchbox', { name: 'Country' }).element();
+		const dialog = page.getByRole('dialog');
+		const overlay = dialog.element().parentElement?.parentElement;
+		if (overlay == null) throw new Error('Expected the tray overlay structure.');
 
-	// Playwright will not click an element mid-transition, so dispatch the event directly.
-	searchbox.element().dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+		await userEvent.keyboard('{Escape}');
+		await expect
+			.poll(() => overlay.hasAttribute('data-exiting') && searchboxElement.isConnected)
+			.toBe(true);
 
-	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+		// Playwright will not click an element mid-transition, so dispatch the event directly.
+		searchboxElement.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+		expect(overlay.hasAttribute('data-exiting')).toBe(true);
+		expect(
+			page.getByRole('button', { name: 'Country Select a country...' }).element(),
+		).toHaveAttribute('aria-expanded', 'false');
+
+		for (const animation of overlay.getAnimations({ subtree: true })) {
+			try {
+				animation.finish();
+			} catch {
+				// Already finished or not finishable.
+			}
+		}
+
+		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+	} finally {
+		exitHold.remove();
+	}
 });
 
 test('ComboboxTrayTrigger blocks submission of a required, unselected combobox while the tray is closed', async () => {

@@ -1,11 +1,12 @@
 /**
  * `defineTheme` accepts a family only when a browser reads it as a `font-family` list. A custom
  * property keeps any value, so these tests apply the generated token to a real `font-family`
- * declaration and compare it with the browser's own reading of the stack.
+ * declaration and compare computed stacks — not `style.fontFamily` vs `getComputedStyle`, which
+ * Chromium can serialise differently for the same list.
  */
 
 import { afterEach, describe, expect, it } from 'vite-plus/test';
-import { interFont } from './__fixtures__/theme-css.js';
+import { extractValue, interFont, splitBlocks } from './__fixtures__/theme-css.js';
 import { defineTheme } from './define-theme.js';
 import { codeFontFamilyStack } from './foundation.js';
 import { getThemeClassName } from './theme-class-name.js';
@@ -46,6 +47,16 @@ function browserReading(family: string): string {
 	return reference.style.fontFamily;
 }
 
+/** Computed `font-family` after setting `family` inline, or `''` when the browser drops it. */
+function browserComputedFamily(family: string): string {
+	const reference = document.createElement('span');
+	reference.style.fontFamily = family;
+	document.body.append(reference);
+	const value = getComputedStyle(reference).fontFamily;
+	reference.remove();
+	return value;
+}
+
 describe('an accepted family', () => {
 	const accepted = [
 		"'Inter', system-ui, sans-serif",
@@ -62,13 +73,18 @@ describe('an accepted family', () => {
 
 	for (const family of accepted) {
 		it(`sets font-family to ${JSON.stringify(family)} and keeps the declarations after it`, () => {
-			style.textContent = `${compile(family)}\nspan { font-family: var(--luke-font-family-body); }`;
+			const css = compile(family);
+			// Assert the generated declaration, not `getPropertyValue`, which trims CSS whitespace.
+			expect(extractValue(splitBlocks(css).themeWide, '--luke-font-family-body')).toBe(family);
+
+			style.textContent = `${css}\nspan { font-family: var(--luke-font-family-body); }`;
 			document.head.append(style);
 			document.documentElement.className = getThemeClassName(name);
 			document.body.append(probe);
 
 			const root = getComputedStyle(document.documentElement);
 			expect(browserReading(family)).not.toBe('');
+			// Computed stacks must match on the same API across Chromium builds.
 			expect({
 				code: root.getPropertyValue('--luke-font-family-code').trim(),
 				colorScheme: root.colorScheme,
@@ -76,7 +92,7 @@ describe('an accepted family', () => {
 			}).toEqual({
 				code: codeFontFamilyStack,
 				colorScheme: 'light',
-				fontFamily: browserReading(family),
+				fontFamily: browserComputedFamily(family),
 			});
 		});
 	}
