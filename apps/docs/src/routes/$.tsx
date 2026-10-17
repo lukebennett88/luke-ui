@@ -33,6 +33,7 @@ import { withBasePath } from '../lib/base-path.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
 import { markdownUrlForPage } from '../lib/markdown-page-path.js';
 import { resolvePageHeadMeta } from '../lib/page-head.js';
+import { siteUrl } from '../lib/site-url.js';
 import { source } from '../lib/source';
 
 const GITHUB_DOCS_URL = `${GITHUB_REPO_URL}/blob/main/apps/docs/content/docs`;
@@ -73,16 +74,20 @@ export const Route = createFileRoute('/$')({
 		return data;
 	},
 	head: ({ loaderData, match }) => ({
-		links: loaderData
-			? [
-					{ href: loaderData.markdownUrl, rel: 'alternate', type: 'text/markdown' },
-					{ href: withBasePath('/llms.txt', import.meta.env.BASE_URL), rel: 'describedby' },
-				]
-			: [],
+		links:
+			loaderData && match.status !== 'notFound'
+				? [
+						{ href: loaderData.url, rel: 'canonical' },
+						{ href: loaderData.markdownUrl, rel: 'alternate', type: 'text/markdown' },
+						{ href: withBasePath('/llms.txt', import.meta.env.BASE_URL), rel: 'describedby' },
+					]
+				: [],
 		// A thrown `notFound()` leaves `loaderData` undefined, so supply the 404 title directly
 		// instead of falling through to the root route's default title.
 		meta: resolvePageHeadMeta(
-			match.status === 'notFound' ? { description: null, title: 'Page not found' } : loaderData,
+			match.status === 'notFound'
+				? { description: null, title: 'Page not found | Luke UI' }
+				: loaderData,
 		),
 	}),
 });
@@ -127,7 +132,8 @@ const loader = createServerFn({
 			path: page.path,
 			reactAriaUrl: page.data.reactAria ?? null,
 			sourceUrl: page.data.source ? `${GITHUB_TREE_URL}/${page.data.source}` : null,
-			title: page.data.title,
+			title: `${page.data.title} | Luke UI`,
+			url: `${siteUrl()}${page.url.endsWith('/') ? page.url : `${page.url}/`}`,
 		};
 	});
 

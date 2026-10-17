@@ -11,7 +11,7 @@
 		"#docs": "./src/examples/docs.tsx"
 	},
 	"scripts": {
-		"build": "vp build && node scripts/write-not-found-page.ts",
+		"build": "vp build && node scripts/write-not-found-page.ts && tsx scripts/check-metadata-output.ts",
 		"check:docs": "tsx scripts/check-docs.ts",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
@@ -80,6 +80,7 @@
 		"@vitest/browser-playwright": "catalog:",
 		"axe-core": "catalog:",
 		"playwright": "catalog:",
+		"schema-dts": "catalog:",
 		"serve": "catalog:",
 		"ts-morph": "catalog:",
 		"tsx": "catalog:",
