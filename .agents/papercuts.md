@@ -182,19 +182,6 @@ not help. Silence in this log is not evidence.
   return JSX, so nothing in the repository's guidance steers a contributor away from a nested
   `render*()` helper.
 
-## Component browser tests cannot check layout that depends on real font metrics
-
-- Seen: 2026-10-16 (#824). Verifying that `display: flow-root` Capsize trims keep the same geometry
-  as `display: table` needed a temporary browser test that added an `@font-face` for the Tactile
-  package's Inter file. `render()` loads no fonts, so the fixtures' `'Inter'` family falls back to a
-  system font whose metrics don't match the Capsize trims the theme computes. 2026-10-17 (#848): the
-  extracted Text fix relied on the same uncommitted probe.
-- Where: `packages/@luke-ui/react/src/core/test-utils/render.tsx`. Governing guide: docs/TESTING.md,
-  "Visual regression" and "Package consumption".
-- Problem: Trim and cap-height alignment can only be checked against fallback-font metrics in the
-  browser suite, and `fonts.test.ts` checks trim values, not rendered geometry, so no committed test
-  covers trimmed text with the font its trims were computed for.
-
 ## The documented generator command stops at an unanswered prompt
 
 - Seen: 2026-10-17 (Lockup PR for #801). `pnpm run generate:component --args lockup layout`, the

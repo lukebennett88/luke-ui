@@ -118,6 +118,7 @@
 		"@arethetypeswrong/core": "catalog:",
 		"@capsizecss/metrics": "catalog:",
 		"@capsizecss/unpack": "catalog:",
+		"@fontsource-variable/inter": "catalog:",
 		"@fontsource/lora": "catalog:",
 		"@rolldown/pluginutils": "catalog:",
 		"@tailwindcss/vite": "catalog:",

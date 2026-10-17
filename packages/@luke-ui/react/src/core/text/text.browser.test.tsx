@@ -10,7 +10,8 @@ import { Menu, MenuItem } from 'react-aria-components/Menu';
 import { TextContext } from 'react-aria-components/Text';
 import { expect, test } from 'vite-plus/test';
 import { typeStyles } from '../../theme/type-styles.js';
-import { measureBaseline } from '../test-utils/measure-first-line.js';
+import { INTER_CAP_HEIGHT_EM, loadInter } from '../test-utils/load-inter.js';
+import { measureBaseline, measureLastBaseline } from '../test-utils/measure-first-line.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
@@ -61,6 +62,32 @@ test('trimmed block Text shares a baseline with a sibling in a baseline-aligned 
 
 	expect(Math.abs(trimmed - untrimmed)).toBeLessThanOrEqual(0.5);
 });
+
+// Layout follows the Capsize trims, which are computed from Inter's metrics. Without Inter loaded,
+// text falls back to a system font and the trims no longer match it.
+for (const typography of ['body', 'heading2'] as const) {
+	test(`${typography} Text is trimmed to its capitals and its last baseline in Inter`, async () => {
+		await loadInter();
+		const { locator } = render(
+			<div style={{ inlineSize: '16rem' }}>
+				<Text data-testid="text" elementType="p" typography={typography}>
+					This paragraph is long enough that it wraps across several lines in the fixed width.
+				</Text>
+			</div>,
+		);
+		const text = locator.getByTestId('text').element();
+		const { bottom, top } = text.getBoundingClientRect();
+		const firstBaseline = measureBaseline(text);
+		const lastBaseline = measureLastBaseline(text);
+		const fontSize = Number.parseFloat(getComputedStyle(text).fontSize);
+
+		expect(lastBaseline - firstBaseline).toBeGreaterThan(fontSize * 2);
+		expect(Math.abs(top - (firstBaseline - INTER_CAP_HEIGHT_EM * fontSize))).toBeLessThanOrEqual(
+			0.5,
+		);
+		expect(Math.abs(bottom - lastBaseline)).toBeLessThanOrEqual(0.5);
+	});
+}
 
 // Inline typography sits inside a field's label, description, or error, where React Aria provides
 // slotted text context. It never fills a slot.

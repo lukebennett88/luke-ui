@@ -12,16 +12,26 @@ export function measureBaseline(textElement: Element): number {
 	return measureProbe(textElement, '0').bottom;
 }
 
+/** Vertical position of the baseline of the last line of text in `textElement`. */
+export function measureLastBaseline(textElement: Element): number {
+	return measureProbe(textElement, '0', 'end').bottom;
+}
+
 /**
- * Measures a zero-width inline box placed on the baseline at the start of `textElement`'s first
- * line. It inherits the element's font. The probe is removed before returning.
+ * Measures a zero-width inline box placed on the baseline at the start or end of `textElement`'s
+ * text. It inherits the element's font. The probe is removed before returning.
  */
-function measureProbe(textElement: Element, blockSize: string): DOMRect {
+function measureProbe(
+	textElement: Element,
+	blockSize: string,
+	position: 'start' | 'end' = 'start',
+): DOMRect {
 	const probe = document.createElement('span');
 	probe.style.display = 'inline-block';
 	probe.style.inlineSize = '0';
 	probe.style.blockSize = blockSize;
-	textElement.prepend(probe);
+	if (position === 'end') textElement.append(probe);
+	else textElement.prepend(probe);
 	try {
 		return probe.getBoundingClientRect();
 	} finally {

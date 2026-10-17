@@ -15,7 +15,12 @@ import {
 	expectHtmlElement,
 	forwardedDomProps,
 } from '../test-utils/forwarding.js';
-import { measureCapCentre } from '../test-utils/measure-first-line.js';
+import { INTER_CAP_HEIGHT_EM, loadInter } from '../test-utils/load-inter.js';
+import {
+	measureBaseline,
+	measureCapCentre,
+	measureLastBaseline,
+} from '../test-utils/measure-first-line.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
 
@@ -45,7 +50,19 @@ function offsetFromFirstLine(element: Element, textElement: Element): number {
 	return Math.abs(centreOf(element) - measureCapCentre(textElement));
 }
 
-test('centres a rail on the cap height of the first line of wrapping text', () => {
+/**
+ * Distance between the centre of `rail` and the middle of the capital letters on `textElement`'s
+ * first line, where the capitals stand on the first baseline and rise by Inter's cap height. It
+ * uses Inter's published metrics, not the CSS `cap` unit that the layout under test relies on.
+ */
+function offsetFromInterCapCentre(rail: Element, textElement: Element): number {
+	const fontSize = Number.parseFloat(getComputedStyle(textElement).fontSize);
+	const capCentre = measureBaseline(textElement) - (INTER_CAP_HEIGHT_EM * fontSize) / 2;
+	return Math.abs(centreOf(rail) - capCentre);
+}
+
+test('centres a rail on the capitals of the first line of wrapping text in Inter', async () => {
+	await loadInter();
 	const { container } = render(
 		<Lockup gap="sp8" style={{ inlineSize: '8rem' }}>
 			<LockupRail>
@@ -59,11 +76,15 @@ test('centres a rail on the cap height of the first line of wrapping text', () =
 	const text = getElement(container, 'text');
 	const lineHeight = Number.parseFloat(getComputedStyle(text).lineHeight);
 
-	expect(text.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 2);
-	expect(offsetFromFirstLine(getElement(container, 'rail-content'), text)).toBeLessThanOrEqual(0.5);
+	// The body wraps, so a rail centred on the whole body would sit far from the first line.
+	expect(measureLastBaseline(text) - measureBaseline(text)).toBeGreaterThan(lineHeight * 2);
+	expect(offsetFromInterCapCentre(getElement(container, 'rail-content'), text)).toBeLessThanOrEqual(
+		0.5,
+	);
 });
 
-test('centres a rail on the first line of trimmed block Text', () => {
+test('centres a rail on the capitals of the first line of trimmed block Text in Inter', async () => {
+	await loadInter();
 	const { container } = render(
 		<Lockup gap="sp8" style={{ inlineSize: '14rem' }}>
 			<LockupRail>
@@ -78,28 +99,35 @@ test('centres a rail on the first line of trimmed block Text', () => {
 	);
 
 	expect(
-		offsetFromFirstLine(getElement(container, 'rail-content'), getElement(container, 'text')),
+		offsetFromInterCapCentre(getElement(container, 'rail-content'), getElement(container, 'text')),
 	).toBeLessThanOrEqual(0.5);
 });
 
-test('a rail taller than the first line makes the row taller and stays centred on that line', () => {
+test('a rail taller than the first line leads the row and stays centred on that line in Inter', async () => {
+	await loadInter();
 	const { container } = render(
-		<Lockup data-testid="lockup" gap="sp8">
+		<Lockup data-testid="lockup" gap="sp8" style={{ inlineSize: '14rem' }}>
 			<LockupRail>
 				<Square size="40px" />
 			</LockupRail>
 			<LockupBody>
-				<span data-testid="text">Short</span>
+				<Text data-testid="text" elementType="p">
+					{longText}
+				</Text>
 			</LockupBody>
 		</Lockup>,
 	);
 	const lockup = getElement(container, 'lockup').getBoundingClientRect();
 	const rail = getElement(container, 'rail-content');
 	const railRect = rail.getBoundingClientRect();
+	const text = getElement(container, 'text');
 
-	expect(railRect.top).toBeGreaterThanOrEqual(lockup.top);
+	// Trimmed text starts at its capitals, below the top of a rail this tall, so the rail sets the
+	// top of the row instead of overflowing it.
+	expect(text.getBoundingClientRect().top).toBeGreaterThan(railRect.top);
+	expect(railRect.top).toBeCloseTo(lockup.top, 0);
 	expect(railRect.bottom).toBeLessThanOrEqual(lockup.bottom);
-	expect(offsetFromFirstLine(rail, getElement(container, 'text'))).toBeLessThanOrEqual(0.5);
+	expect(offsetFromInterCapCentre(rail, text)).toBeLessThanOrEqual(0.5);
 });
 
 test('center centres a tall avatar rail on a two-line body', () => {
