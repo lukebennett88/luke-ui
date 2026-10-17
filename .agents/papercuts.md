@@ -123,7 +123,10 @@ not help. Silence in this log is not evidence.
   `apps/docs/content/docs/components/meta.json` so section headers and page entries were
   alphabetised, and added a bare `"forms"` entry. `check:docs` then reported
   `component-guide-inventory` mismatches for primitives and forms until the file was restored and
-  only `forms/form` was inserted.
+  only `forms/form` was inserted. 2026-10-17 (Lockup PR for #801):
+  `pnpm run generate:component --args lockup layout Yes` alphabetised the same file, added a bare
+  `"layout"` entry, and did not add `layout/lockup`. The file was restored and the entry added by
+  hand.
 - Where: `packages/turbo-generators/src/apply-creation-plan.ts` `array-add-sorted`;
   `packages/turbo-generators/src/component-creation-plan.ts` root `components/meta.json` edit.
   Governing rule: docs/COMPONENTS.md component creation; docs inventory in
@@ -165,3 +168,38 @@ not help. Silence in this log is not evidence.
   the tray's name.
 - Problem: A valid field name supplied with `aria-label` does not reach the tray dialog, so
   consumers must use a visible label to name it.
+
+## A component added a nested JSX-returning `render*()` helper
+
+- Seen: 2026-10-16 (#824). `Track` gained `const renderRail = (content) => <WrapperElement …>`
+  inside the component body, called as `renderRail(railStart)`. Review asked for plain declarative
+  JSX instead.
+- Where: `packages/@luke-ui/react/src/core/track/track.tsx` in #824. Governing guide:
+  docs/CONVENTIONS.md, "Code style" and "Components".
+- Problem: CONVENTIONS.md covers helpers, branching, and loops but says nothing about functions that
+  return JSX, so nothing in the repository's guidance steers a contributor away from a nested
+  `render*()` helper.
+
+## Component browser tests cannot check layout that depends on real font metrics
+
+- Seen: 2026-10-16 (#824). Verifying that `display: flow-root` Capsize trims keep the same geometry
+  as `display: table` needed a temporary browser test that added an `@font-face` for the Tactile
+  package's Inter file. `render()` loads no fonts, so the fixtures' `'Inter'` family falls back to a
+  system font whose metrics don't match the Capsize trims the theme computes. 2026-10-17 (#848): the
+  extracted Text fix relied on the same uncommitted probe.
+- Where: `packages/@luke-ui/react/src/core/test-utils/render.tsx`. Governing guide: docs/TESTING.md,
+  "Visual regression" and "Package consumption".
+- Problem: Trim and cap-height alignment can only be checked against fallback-font metrics in the
+  browser suite, and `fonts.test.ts` checks trim values, not rendered geometry, so no committed test
+  covers trimmed text with the font its trims were computed for.
+
+## The documented generator command stops at an unanswered prompt
+
+- Seen: 2026-10-17 (Lockup PR for #801). `pnpm run generate:component --args lockup layout`, the
+  command AGENTS.md gives, stopped at "Add visual coverage?" and crashed with `ERR_USE_AFTER_CLOSE`
+  in a non-interactive shell. `--args lockup layout Yes` ran. `true` was rejected as an invalid
+  choice.
+- Where: AGENTS.md "Task routing"; `packages/turbo-generators/config.ts` `visualCoverage` prompt.
+- Problem: AGENTS.md calls the two-argument command non-interactive, but the component generator has
+  a third required prompt, and the primitive generator has two more, so the documented command fails
+  for agents.
