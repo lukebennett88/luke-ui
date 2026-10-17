@@ -9,7 +9,10 @@ import type { TypeDefinitionsContextValue } from './type-definitions-context.js'
 import { TypeDefinitionsContext } from './type-definitions-context.js';
 import * as styles from './type-popover.css.js';
 
-/** Opens a type's source definition when the table's definitions asset holds it. */
+/**
+ * Opens a type's source definition, and what it resolves to, when the table's definitions asset holds
+ * them.
+ */
 export function LinkedType({ children, typeName }: { children: ReactNode; typeName: string }) {
 	const typeDefinitions = use(TypeDefinitionsContext);
 	if (typeDefinitions === null || !typeDefinitions.names.has(typeName)) return children;
@@ -64,18 +67,33 @@ function DefinitionBody({
 				</Stack>
 			);
 		case 'ready': {
-			const definition = load.data[typeName]?.definition;
-			if (definition === undefined) {
+			const { definition, resolved } = load.data[typeName] ?? {};
+			if (definition === undefined && resolved === undefined) {
 				return (
 					<Text color="secondary" typography="caption">
 						Definition not available.
 					</Text>
 				);
 			}
+			// The same text, in the same order, as the type definitions in the page's Markdown.
 			return (
-				<Text className={styles.definition} elementType="pre" typography="caption">
-					{definition}
-				</Text>
+				<Stack gap="sp8">
+					{definition === undefined ? null : (
+						<Text className={styles.definition} elementType="pre" typography="caption">
+							{definition}
+						</Text>
+					)}
+					{resolved === undefined ? null : (
+						<Stack gap="sp4">
+							<Text color="secondary" typography="caption">
+								{definition === undefined ? 'Resolves to:' : 'Which resolves to:'}
+							</Text>
+							<Text className={styles.definition} elementType="pre" typography="caption">
+								{resolved}
+							</Text>
+						</Stack>
+					)}
+				</Stack>
 			);
 		}
 	}

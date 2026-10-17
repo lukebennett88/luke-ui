@@ -31,6 +31,10 @@ const MOBILE_INLINE_SIZE = '375px';
 const GUIDE_COMPONENTS = { ComponentPropsTable, ExampleBlock: () => null, code: MdxCode };
 
 const PRESS_ACTION_DEFINITION_PATTERN = /^type PressAction = /;
+const PROMINENCE_DEFINITION_PATTERN = /^type Prominence = 'low' \| 'standard' \| 'high';$/;
+const BOX_ELEMENT_TYPE_DEFINITION_PATTERN = /^type BoxLikeElementType = keyof Pick</;
+const DEFINITIONS_ASSET_PATTERN = /\/type-definitions\/[0-9a-f]{16}\.json/;
+const BOX_ELEMENT_TYPE_RESOLVED_PATTERN = /^"article" \| "aside" \| .*"ul"$/;
 const RESPONSIVE_VALUE_DEFINITION_PATTERN =
 	/^type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive</;
 
@@ -402,18 +406,60 @@ test('opens a type definition popover for a linked alias and restores focus on d
 	await expect.element(trigger).toHaveFocus();
 });
 
-test('the Button guide opens PressAction from its generated definitions', async () => {
-	// The Button primitive guide also documents a `ButtonProps` from a `button.tsx`, which fumadocs
-	// gives the same table id. Compiling it too checks that each guide keeps its own definitions.
-	const { default: ButtonGuide } = await import('../../content/docs/components/actions/button.mdx');
-	await import('../../content/docs/components/primitives/button.mdx');
-	await renderWidget(<ButtonGuide components={GUIDE_COMPONENTS} />);
+// `pressAction` writes its alias. `prominence` gets `Prominence` from presentation branches that
+// declare different subsets of it, so the row shows the resolved alias. Both link.
+for (const { definitionPattern, typeName } of [
+	{ definitionPattern: PRESS_ACTION_DEFINITION_PATTERN, typeName: 'PressAction' },
+	{ definitionPattern: PROMINENCE_DEFINITION_PATTERN, typeName: 'Prominence' },
+]) {
+	test(`the Button guide opens ${typeName} from its generated definitions`, async () => {
+		// The Button primitive guide also documents a `ButtonProps` from a `button.tsx`, which fumadocs
+		// gives the same table id. Compiling it too checks that each guide keeps its own definitions.
+		const { default: ButtonGuide } =
+			await import('../../content/docs/components/actions/button.mdx');
+		await import('../../content/docs/components/primitives/button.mdx');
+		await renderWidget(<ButtonGuide components={GUIDE_COMPONENTS} />);
 
-	const { dialog, trigger } = await openDefinitionWithKeyboard('PressAction', 'PressAction');
-	await expect.element(dialog.getByText(PRESS_ACTION_DEFINITION_PATTERN)).toBeVisible();
-	await userEvent.keyboard('{Escape}');
-	await expect.element(dialog).not.toBeInTheDocument();
-	await expect.element(trigger).toHaveFocus();
+		const { dialog, trigger } = await openDefinitionWithKeyboard(typeName, typeName);
+		await expect.element(dialog.getByText(definitionPattern)).toBeVisible();
+		await userEvent.keyboard('{Escape}');
+		await expect.element(dialog).not.toBeInTheDocument();
+		await expect.element(trigger).toHaveFocus();
+	});
+}
+
+test('the Box guide shows a definition and the values it resolves to', async () => {
+	const { default: BoxGuide } = await import('../../content/docs/components/layout/box.mdx');
+	await renderWidget(<BoxGuide components={GUIDE_COMPONENTS} />);
+	// `elementType` sits in the collapsed Advanced group.
+	await userEvent.click(page.getByRole('button', { name: 'Advanced' }));
+
+	const { dialog } = await openDefinitionWithKeyboard('BoxLikeElementType', 'BoxLikeElementType');
+	await expect.element(dialog.getByText(BOX_ELEMENT_TYPE_DEFINITION_PATTERN)).toBeVisible();
+	await expect.element(dialog.getByText('Which resolves to:')).toBeVisible();
+	await expect.element(dialog.getByText(BOX_ELEMENT_TYPE_RESOLVED_PATTERN)).toBeVisible();
+});
+
+test('generated definitions load only when a reader reaches a linked type', async () => {
+	const fetchSpy = vi.spyOn(globalThis, 'fetch');
+	// Requests are cached per asset for the page's lifetime, so this test uses a guide whose asset no
+	// other test in this file loads.
+	const guide = await import('../../content/docs/components/layout/stack.mdx');
+	// The page module keeps processed Markdown, and with it the Markdown type definitions, server-side.
+	expect((guide as { _markdown?: unknown })._markdown).toBeUndefined();
+	await renderWidget(<guide.default components={GUIDE_COMPONENTS} />);
+
+	const trigger = page.getByRole('button', {
+		exact: true,
+		name: "RequiredInitialResponsive<SprinklesProps['gap']>",
+	});
+	await expect.element(trigger).toBeVisible();
+	expect(fetchSpy).not.toHaveBeenCalled();
+
+	trigger.element().focus();
+	await expect.poll(() => fetchSpy.mock.calls.length).toBe(1);
+	// The separately emitted, content-hashed asset that `remarkAttachTypeDefinitions` wrote.
+	expect(fetchSpy).toHaveBeenCalledWith(expect.stringMatching(DEFINITIONS_ASSET_PATTERN));
 });
 
 test('the Grid guide opens RequiredInitialResponsiveValue from its generated definitions', async () => {
@@ -428,6 +474,77 @@ test('the Grid guide opens RequiredInitialResponsiveValue from its generated def
 	await userEvent.keyboard('{Escape}');
 	await expect.element(dialog).not.toBeInTheDocument();
 	await expect.element(trigger).toHaveFocus();
+});
+
+test('shows resolved values for a type without a source definition', async () => {
+	vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+		jsonResponse({ "Spacing['gap']": { resolved: '"sp4" | "sp8" | undefined' } }),
+	);
+
+	await renderWidget(
+		<TypeDefinitionsProvider
+			definitionNames={["Spacing['gap']"]}
+			definitionsHref="/type-definitions/resolved-only.json"
+		>
+			<TypeTable
+				id="api"
+				type={{
+					gap: {
+						description: 'Space between children.',
+						type: "Spacing['gap']",
+						typeDescriptionLink: "Spacing['gap']",
+					},
+				}}
+			/>
+		</TypeDefinitionsProvider>,
+	);
+
+	const { dialog } = await openDefinitionWithKeyboard("Spacing['gap']", "Spacing['gap']");
+	await expect.element(dialog.getByText('Resolves to:')).toBeVisible();
+	await expect.element(dialog.getByText('"sp4" | "sp8" | undefined')).toBeVisible();
+	expect(dialog.getByText('Definition not available.').elements()).toHaveLength(0);
+});
+
+test('keeps a definition popover inside a mobile viewport and scrolls long values', async () => {
+	const longResolved = Array.from({ length: 300 }, (_, index) => `"value${index}"`).join(' | ');
+	vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+		jsonResponse({
+			LongUnion: {
+				definition: 'type LongUnion = keyof typeof longValues;',
+				resolved: longResolved,
+			},
+		}),
+	);
+
+	await renderWidget(
+		<TypeDefinitionsProvider
+			definitionNames={['LongUnion']}
+			definitionsHref="/type-definitions/long-union.json"
+		>
+			<TypeTable
+				id="api"
+				type={{
+					value: {
+						description: 'A long union.',
+						type: 'LongUnion',
+						typeDescriptionLink: 'LongUnion',
+					},
+				}}
+			/>
+		</TypeDefinitionsProvider>,
+		{ inlineSize: MOBILE_INLINE_SIZE },
+	);
+
+	const { dialog } = await openDefinitionWithKeyboard('LongUnion', 'LongUnion');
+	await expect.element(dialog.getByText(longResolved)).toBeVisible();
+	const popover = dialog.element().parentElement;
+	assert(popover, 'expected the popover around the dialog');
+	const { left, right } = popover.getBoundingClientRect();
+	expect(left).toBeGreaterThanOrEqual(0);
+	expect(right).toBeLessThanOrEqual(window.innerWidth);
+	// Long values wrap instead of widening the popover, which scrolls when they are taller than it.
+	expect(popover.scrollWidth).toBeLessThanOrEqual(popover.clientWidth);
+	expect(popover.scrollHeight).toBeGreaterThan(popover.clientHeight);
 });
 
 test('falls back to plain text when a type reference has no definition', async () => {
@@ -722,16 +839,14 @@ async function renderDeferredTypeTable(
 }
 
 function definitionsResponse(definition = SYNTHETIC_DEFINITION) {
-	return new Response(
-		JSON.stringify({
-			RequiredInitialResponsiveValue: {
-				definition,
-				name: 'RequiredInitialResponsiveValue',
-				references: [],
-			},
-		}),
-		{ headers: { 'Content-Type': 'application/json' }, status: 200 },
-	);
+	return jsonResponse({ RequiredInitialResponsiveValue: { definition } });
+}
+
+function jsonResponse(body: unknown) {
+	return new Response(JSON.stringify(body), {
+		headers: { 'Content-Type': 'application/json' },
+		status: 200,
+	});
 }
 
 async function renderWidget(

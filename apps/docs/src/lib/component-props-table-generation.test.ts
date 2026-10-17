@@ -14,6 +14,10 @@ const componentPropsGenerator = createComponentPropsGenerator({
 	cache: createFileSystemGeneratorCache(resolve(repoRoot, 'apps/docs/.source/fumadocs-typescript')),
 });
 
+// The first generator call in this file builds the shared ts-morph project, which is slow under
+// load. That test gets the same generous timeout as `component-prop-analysis.test.ts`.
+const TS_MORPH_TEST_TIMEOUT = 30_000;
+
 test('does not filter hand-authored theme type tables', async () => {
 	const [themeInput] = await generator.generateTypeTable(
 		{
@@ -26,23 +30,27 @@ test('does not filter hand-authored theme type tables', async () => {
 	expect(themeInput?.entries.length ?? 0).toBeGreaterThan(5);
 });
 
-test('filters generated component prop tables through the component props generator', async () => {
-	const [buttonProps] = await componentPropsGenerator.generateTypeTable(
-		{
-			path: 'packages/@luke-ui/react/src/core/button/button.tsx',
-			name: 'ButtonProps',
-		},
-		{ basePath: repoRoot },
-	);
+test(
+	'filters generated component prop tables through the component props generator',
+	async () => {
+		const [buttonProps] = await componentPropsGenerator.generateTypeTable(
+			{
+				path: 'packages/@luke-ui/react/src/core/button/button.tsx',
+				name: 'ButtonProps',
+			},
+			{ basePath: repoRoot },
+		);
 
-	expect(buttonProps?.entries.map((entry) => entry.name)).toEqual(
-		expect.arrayContaining(['onPress', 'appearance']),
-	);
-	const entryNames = buttonProps?.entries.map((entry) => entry.name) ?? [];
-	expect(entryNames).not.toContain('onClick');
-	expect(entryNames).not.toContain('onPointerMoveCapture');
-	expect(entryNames).not.toContain('itemProp');
-});
+		expect(buttonProps?.entries.map((entry) => entry.name)).toEqual(
+			expect.arrayContaining(['onPress', 'appearance']),
+		);
+		const entryNames = buttonProps?.entries.map((entry) => entry.name) ?? [];
+		expect(entryNames).not.toContain('onClick');
+		expect(entryNames).not.toContain('onPointerMoveCapture');
+		expect(entryNames).not.toContain('itemProp');
+	},
+	TS_MORPH_TEST_TIMEOUT,
+);
 
 test('keeps JSDoc descriptions for Button presentation props', async () => {
 	const [buttonProps] = await componentPropsGenerator.generateTypeTable(
@@ -190,7 +198,7 @@ test('preserves declared aliases on Grid responsive layout props with definition
 	);
 });
 
-test('links Button pressAction to the PressAction definition', async () => {
+test('links Button pressAction and prominence to their definitions', async () => {
 	const [buttonProps] = (await componentPropsGenerator.generateTypeTable(
 		{
 			path: 'packages/@luke-ui/react/src/core/button/button.tsx',
@@ -210,6 +218,17 @@ test('links Button pressAction to the PressAction definition', async () => {
 		}),
 	);
 	expect(buttonProps?.typeDefinitions?.PressAction?.definition).toMatch(/=> void \| Promise<void>/);
+	// Presentation branches declare different subsets of Prominence, so the row shows the resolved
+	// alias. It links the same way as an alias the prop writes.
+	expect(entriesByName.get('prominence')).toEqual(
+		expect.objectContaining({ simplifiedType: 'Prominence', typeHref: 'Prominence' }),
+	);
+	expect(buttonProps?.typeDefinitions?.Prominence?.definition).toBe(
+		"type Prominence = 'low' | 'standard' | 'high';",
+	);
+	// External render-prop aliases stay plain text.
+	expect(entriesByName.get('children')?.typeHref).toBeUndefined();
+	expect(entriesByName.get('onPress')?.typeHref).toBeUndefined();
 });
 
 test('shows the resolved type when Button presentation branches declare different types', async () => {

@@ -51,12 +51,16 @@ export const dialog = style({
 	},
 });
 
-/** Keeps the declaration's own line breaks and indentation. */
+/**
+ * Keeps the declaration's own line breaks and indentation. Source indents with tabs, which default to
+ * eight columns and would take most of a phone's width.
+ */
 export const definition = style({
 	'@layer': {
 		components: {
 			fontFamily: vars.font.family.code,
 			overflowWrap: 'anywhere',
+			tabSize: 2,
 			whiteSpace: 'pre-wrap',
 		},
 	},

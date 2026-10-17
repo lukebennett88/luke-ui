@@ -473,14 +473,19 @@ The prose on a table comes from JSDoc in the component's source, so a prop is do
 declared. When a type still accepts arbitrary DOM and ARIA attributes and event handlers, the table
 renders that note automatically. Do not write the note by hand.
 
-The generator also collects the definitions of the types each signature names. In the HTML table, a
-Luke UI type alias at the start of a signature opens its definition in a popover. The page's
-Markdown lists every collected type under `#### Type definitions` after the table. Luke UI types
-come first. The list includes each Luke UI type that another definition names, so every Luke UI name
-on the page has a definition. External types come last, with their package and declaring file. A
-short external type alias also keeps its declaration. When a Luke UI declaration hides its values,
-as `keyof typeof responsiveConditions` does, the list adds the type TypeScript resolves it to. Do
-not write type definitions by hand.
+The generator also collects the definitions of the types each signature names. The page's Markdown
+lists every collected type under `#### Type definitions` after the table. Luke UI types come first.
+The list includes each Luke UI type that another definition names, so every Luke UI name on the page
+has a definition. External types come last, with their package and declaring file. A short external
+type alias also keeps its declaration. When a Luke UI declaration hides its values, as
+`keyof typeof responsiveConditions` does, the list adds the type TypeScript resolves it to. Do not
+write type definitions by hand.
+
+In the HTML table, a row whose type starts with a Luke UI type opens that type in a popover, whether
+the prop writes the alias or the type resolves to it. The popover shows the same declaration and
+resolved type as the Markdown. The build validates the definitions and writes each table's linked
+types to a separate JSON file, which the browser fetches when someone first reaches a linked type.
+Page JavaScript carries neither those definitions nor the processed Markdown.
 
 `check:docs` requires `## API` to be the last heading on a guide that declares `source:`, requires
 at least one `component-props-table` tag inside it, and rejects a tag placed anywhere else on the

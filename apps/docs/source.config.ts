@@ -10,6 +10,7 @@ import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import * as z from 'zod';
 import { createComponentPropsGenerator } from './src/lib/create-component-props-generator.js';
 import { inlineExampleSource } from './src/lib/inline-example-source';
+import { rehypeServerOnlyMarkdown } from './src/lib/rehype-server-only-markdown.js';
 import { remarkAttachTypeDefinitions } from './src/lib/remark-attach-type-definitions.js';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
@@ -67,6 +68,8 @@ export default defineConfig({
 		rehypeCodeOptions: {
 			themes: SHIKI_THEMES,
 		},
+		// Page modules carry processed Markdown for the server only. See `rehypeServerOnlyMarkdown`.
+		rehypePlugins: (v) => [...v, rehypeServerOnlyMarkdown],
 		remarkPlugins: (v) => [
 			...v,
 			[

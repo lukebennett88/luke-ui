@@ -52,15 +52,16 @@ const OPAQUE_TYPE_KINDS = new Set([
 
 export interface TypeDefinitionCollector {
 	/**
-	 * Records the named types a written annotation refers to. Returns the key of the Luke UI type
-	 * alias at the annotation's root, which the row links to.
+	 * Records the named types a written annotation refers to. Returns the key the row links to, as
+	 * `linkedKey` describes.
 	 */
 	addTypeNode: (node: ts.TypeNode) => string | undefined;
 	/**
-	 * Records the named types the checker prints for a resolved type. With `typeArguments: false`,
-	 * only the type's own alias is recorded, for a row whose shown text collapses its arguments.
+	 * Records the named types the checker prints for a resolved type, and returns the key the row
+	 * links to. With `typeArguments: false`, only the root types are recorded, for a row whose shown
+	 * text collapses their arguments, such as `ResponsiveValue<union>`.
 	 */
-	addType: (type: ts.Type, options?: { typeArguments?: boolean }) => void;
+	addType: (type: ts.Type, options?: { typeArguments?: boolean }) => string | undefined;
 	/** The recorded definitions in order of first reference, or `undefined` when there are none. */
 	definitions: () => TypeDefinitionsPayload | undefined;
 }
@@ -127,7 +128,7 @@ export function createTypeDefinitionCollector({
 		symbol: ts.Symbol,
 		{ expand, shown }: { expand: boolean; shown: boolean },
 	): string | undefined {
-		const target = symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol;
+		const target = aliasTarget(symbol);
 		if (target.flags & ts.SymbolFlags.TypeParameter) return;
 		// A library type such as `HTMLElement` stays built-in even where a package merges into it.
 		if (target.declarations?.some((node) => isTypeScriptLib(node.getSourceFile().fileName))) return;
@@ -193,10 +194,7 @@ export function createTypeDefinitionCollector({
 
 		const name = referencedName(node.objectType);
 		const symbol = name === undefined ? undefined : checker.getSymbolAtLocation(name);
-		const target =
-			symbol !== undefined && symbol.flags & ts.SymbolFlags.Alias
-				? checker.getAliasedSymbol(symbol)
-				: symbol;
+		const target = symbol === undefined ? undefined : aliasTarget(symbol);
 		const declaration = target === undefined ? undefined : namedTypeDeclaration(target);
 		if (declaration === undefined) return;
 		if (declarationOrigin(declaration.getSourceFile().fileName, packageDir)?.kind !== 'local') {
@@ -267,6 +265,32 @@ export function createTypeDefinitionCollector({
 		return transformed[0];
 	}
 
+	/**
+	 * The Luke UI type a row's shown signature names at its root, which the row links to however the
+	 * prop was declared. An `undefined` member, written or added for an optional prop, does not change
+	 * which type the row shows. External types and type parameters do not link.
+	 */
+	function linkedKey(node: ts.TypeNode, resolveSymbol: SymbolResolver): string | undefined {
+		const members = rootMembers(node).filter(
+			(member) => member.kind !== ts.SyntaxKind.UndefinedKeyword,
+		);
+		if (members.length !== 1) return;
+
+		const name = referencedName(members[0]!);
+		const symbol = name === undefined ? undefined : resolveSymbol(name);
+		const declaration =
+			symbol === undefined ? undefined : namedTypeDeclaration(aliasTarget(symbol));
+		const key = declaration === undefined ? undefined : keysByDeclaration.get(declaration);
+		const entry = key === undefined ? undefined : entries.get(key);
+		if (entry === undefined || entry.module !== undefined) return;
+
+		return entry.definition === undefined && entry.resolved === undefined ? undefined : key;
+	}
+
+	function aliasTarget(symbol: ts.Symbol): ts.Symbol {
+		return symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol;
+	}
+
 	function uniqueKey(name: string, origin: Origin): string {
 		if (!entries.has(name)) return name;
 
@@ -278,35 +302,23 @@ export function createTypeDefinitionCollector({
 
 	return {
 		addType(type, { typeArguments = true } = {}) {
-			if (!typeArguments) {
-				// An optional prop's type is a union with `undefined`, so its alias sits on a member.
-				const members = type.isUnion() ? type.types : [type];
-				for (const member of members) {
-					if (member.aliasSymbol !== undefined) {
-						addSymbol(member.aliasSymbol, { expand: true, shown: true });
-					}
-				}
-				return;
-			}
 			const node = buildTypeNode(type, enclosingDeclaration, PRINTED_TYPE_FLAGS);
-			if (node !== undefined) visit(node, resolveBuilt, [], { expand: true, shown: true });
+			if (node === undefined) return;
+
+			if (typeArguments) {
+				visit(node, resolveBuilt, [], { expand: true, shown: true });
+			} else {
+				for (const member of rootMembers(node)) {
+					const name = referencedName(member);
+					const symbol = name === undefined ? undefined : resolveBuilt(name);
+					if (symbol !== undefined) addSymbol(symbol, { expand: true, shown: true });
+				}
+			}
+			return linkedKey(node, resolveBuilt);
 		},
 		addTypeNode(node) {
 			visit(node, resolveWritten, [], { expand: true, shown: true });
-
-			const root = rootTypeReference(node);
-			const name = root === undefined ? undefined : referencedName(root);
-			const symbol = name === undefined ? undefined : checker.getSymbolAtLocation(name);
-			const target =
-				symbol !== undefined && symbol.flags & ts.SymbolFlags.Alias
-					? checker.getAliasedSymbol(symbol)
-					: symbol;
-			const declaration = target === undefined ? undefined : namedTypeDeclaration(target);
-			if (declaration === undefined || !ts.isTypeAliasDeclaration(declaration)) return;
-
-			const key = keysByDeclaration.get(declaration);
-			const entry = key === undefined ? undefined : entries.get(key);
-			return entry?.module === undefined && entry?.definition !== undefined ? key : undefined;
+			return linkedKey(node, resolveWritten);
 		},
 		definitions() {
 			if (entries.size === 0) return;
@@ -359,9 +371,13 @@ function namedTypeDeclaration(symbol: ts.Symbol): ts.Declaration | undefined {
 	return symbol.declarations?.find((node) => NAMED_TYPE_KINDS.has(node.kind));
 }
 
-function rootTypeReference(node: ts.TypeNode): ts.TypeReferenceNode | undefined {
-	if (ts.isParenthesizedTypeNode(node)) return rootTypeReference(node.type);
-	return ts.isTypeReferenceNode(node) ? node : undefined;
+/** A union's members, or the type itself, without wrapping parentheses. */
+function rootMembers(node: ts.TypeNode): ReadonlyArray<ts.TypeNode> {
+	if (ts.isParenthesizedTypeNode(node)) return rootMembers(node.type);
+	if (!ts.isUnionTypeNode(node)) return [node];
+	return node.types.flatMap((member) =>
+		ts.isParenthesizedTypeNode(member) ? rootMembers(member.type) : [member],
+	);
 }
 
 /** Keeps a name an import gives the type, such as `CSSProperties` for csstype's `Properties`. */

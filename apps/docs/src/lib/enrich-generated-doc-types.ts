@@ -50,13 +50,21 @@ export function enrichGeneratedDocTypes(
 
 		const resolvedEntry = withResolvedType(entry, annotations);
 		const prop = checker.getPropertyOfType(declaredType, entry.name);
-		if (prop !== undefined) {
-			collector.addType(checker.getTypeOfSymbolAtLocation(prop, declarationNode), {
-				// A simplified row such as `ResponsiveValue<union>` shows only its alias.
-				typeArguments: resolvedEntry.simplifiedType === resolvedEntry.type,
-			});
+		if (prop === undefined) return resolvedEntry;
+
+		// The resolved type can still show a Luke UI alias, such as `Prominence` where union branches
+		// declare different subsets of it, so the row links the same way a written alias does.
+		const linkedKey = collector.addType(checker.getTypeOfSymbolAtLocation(prop, declarationNode), {
+			// A simplified row such as `ResponsiveValue<union>` shows only its alias.
+			typeArguments: resolvedEntry.simplifiedType === resolvedEntry.type,
+		});
+		const linkedName =
+			linkedKey === undefined ? undefined : collector.definitions()?.[linkedKey]?.name;
+		// Fumadocs prints the shown text in its own program, so link only when it names the same type.
+		if (linkedName === undefined || !resolvedEntry.simplifiedType.startsWith(linkedName)) {
+			return resolvedEntry;
 		}
-		return resolvedEntry;
+		return { ...resolvedEntry, typeHref: linkedKey };
 	});
 
 	const typeDefinitions = collector.definitions();

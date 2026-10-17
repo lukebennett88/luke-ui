@@ -1,8 +1,14 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
+import type { DocEntry } from 'fumadocs-typescript';
 import { visit } from 'unist-util-visit';
-import type { EnrichedGeneratedDoc, TypeDefinitionsPayload } from './type-definition-model.js';
+import type {
+	EnrichedGeneratedDoc,
+	LinkedTypeDefinitions,
+	TypeDefinitionsPayload,
+} from './type-definition-model.js';
+import { parseTypeDefinitionsPayload } from './type-definition-model.js';
 
 interface MdastRoot {
 	children: Array<unknown>;
@@ -34,15 +40,17 @@ export interface ComponentPropsTableData {
 }
 
 /**
- * Moves each expanded `<ComponentPropsTable>`'s type definitions into a JSON file that the page
- * imports with `?url`. The table then fetches its definitions when a reader first opens a type.
+ * Moves each expanded `<ComponentPropsTable>`'s type definitions out of the page. The model is
+ * validated here, at build time. The types the table's rows link to go into a JSON file that the
+ * page imports with `?url`, with only the text a popover shows. The table fetches it when a reader
+ * first opens a type.
  *
  * Each file is named by a hash of its contents, so two tables share a file only when their
  * definitions are identical. Vite emits only the files a page imports, so files that earlier runs
  * left in `outputDir` never ship.
  *
- * The same definitions stay on the node's `data`, where `stringifyComponentPropsTable` lists them
- * after the table in processed Markdown.
+ * The whole model stays on the node's `data`, where `stringifyComponentPropsTable` lists it after
+ * the table in processed Markdown.
  */
 export function remarkAttachTypeDefinitions({ outputDir }: { outputDir: string }) {
 	return (tree: MdastRoot, file: { path: string }) => {
@@ -57,14 +65,13 @@ export function remarkAttachTypeDefinitions({ outputDir }: { outputDir: string }
 
 			if (Object.keys(typeDefinitions).length === 0) return;
 
-			node.data = { ...node.data, typeDefinitions };
-			// Only a definition with source can open in a popover.
-			const names = Object.keys(typeDefinitions).filter(
-				(name) => typeDefinitions[name]?.definition !== undefined,
-			);
+			const model = parseTypeDefinitionsPayload(typeDefinitions);
+			node.data = { ...node.data, typeDefinitions: model };
+			const linked = linkedTypeDefinitions(doc.entries, model);
+			const names = Object.keys(linked);
 			if (names.length === 0) return;
 
-			const assetPath = writeDefinitionsAsset(outputDir, typeDefinitions);
+			const assetPath = writeDefinitionsAsset(outputDir, linked);
 			const identifier = `typeDefinitionsHref${imports.length}`;
 			imports.push(urlImport(identifier, importSpecifier(file.path, assetPath)));
 			node.attributes.push(
@@ -91,7 +98,28 @@ function typeExpression(node: MdxJsxFlowElement): MdxJsxAttributeValueExpression
 	throw new Error('<ComponentPropsTable> needs a `type` expression with GeneratedDoc JSON.');
 }
 
-function writeDefinitionsAsset(outputDir: string, definitions: TypeDefinitionsPayload): string {
+/** The types the rows link to, in row order, with only the text a popover shows. */
+function linkedTypeDefinitions(
+	entries: ReadonlyArray<DocEntry>,
+	model: TypeDefinitionsPayload,
+): LinkedTypeDefinitions {
+	const linked: LinkedTypeDefinitions = {};
+	for (const { typeHref } of entries) {
+		// An authored `@fumadocsHref` URL is not a model key, so it stays a plain link.
+		if (typeHref === undefined || typeHref in linked) continue;
+		const definition = model[typeHref];
+		if (definition === undefined) continue;
+		if (definition.definition === undefined && definition.resolved === undefined) continue;
+
+		linked[typeHref] = {
+			...(definition.definition === undefined ? {} : { definition: definition.definition }),
+			...(definition.resolved === undefined ? {} : { resolved: definition.resolved }),
+		};
+	}
+	return linked;
+}
+
+function writeDefinitionsAsset(outputDir: string, definitions: LinkedTypeDefinitions): string {
 	const json = `${JSON.stringify(definitions)}\n`;
 	const hash = createHash('sha256').update(json).digest('hex').slice(0, 16);
 	const assetPath = join(outputDir, `${hash}.json`);

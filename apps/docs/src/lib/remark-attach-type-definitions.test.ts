@@ -8,12 +8,15 @@ import { createComponentPropsGenerator } from './create-component-props-generato
 import { remarkAttachTypeDefinitions } from './remark-attach-type-definitions.js';
 import { stringifyComponentPropsTable } from './stringify-component-props-table.js';
 import type { EnrichedGeneratedDoc } from './type-definition-model.js';
-import { parseTypeDefinitionsPayload } from './type-definition-model.js';
 
 const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
 const componentPropsGenerator = createComponentPropsGenerator({
 	cache: createFileSystemGeneratorCache(resolve(repoRoot, 'apps/docs/.source/fumadocs-typescript')),
 });
+
+// The first generator call in this file builds the shared ts-morph project, which is slow under
+// load. That test gets the same generous timeout as `component-prop-analysis.test.ts`.
+const TS_MORPH_TEST_TIMEOUT = 30_000;
 
 let outputDir: string | undefined;
 
@@ -22,43 +25,85 @@ afterEach(() => {
 	outputDir = undefined;
 });
 
-test('gives the HTML definitions asset and processed Markdown the same type model', async () => {
-	const [gridProps] = (await componentPropsGenerator.generateTypeTable(
-		{ name: 'GridProps', path: 'packages/@luke-ui/react/src/core/grid/grid.tsx' },
-		{ basePath: repoRoot },
-	)) as Array<EnrichedGeneratedDoc | undefined>;
-	const model = gridProps?.typeDefinitions;
-	expect(model).toBeDefined();
+test(
+	'gives the HTML definitions asset and processed Markdown the same type model',
+	async () => {
+		const [gridProps] = (await componentPropsGenerator.generateTypeTable(
+			{ name: 'GridProps', path: 'packages/@luke-ui/react/src/core/grid/grid.tsx' },
+			{ basePath: repoRoot },
+		)) as Array<EnrichedGeneratedDoc | undefined>;
+		const model = gridProps?.typeDefinitions;
+		expect(model).toBeDefined();
 
-	outputDir = mkdtempSync(join(tmpdir(), 'type-definitions-'));
-	const node = componentPropsTableNode(gridProps!);
-	remarkAttachTypeDefinitions({ outputDir })(
-		{ children: [node], type: 'root' },
-		{ path: join(outputDir, 'grid.mdx') },
-	);
+		outputDir = mkdtempSync(join(tmpdir(), 'type-definitions-'));
+		const node = componentPropsTableNode(gridProps!);
+		remarkAttachTypeDefinitions({ outputDir })(
+			{ children: [node], type: 'root' },
+			{ path: join(outputDir, 'grid.mdx') },
+		);
 
-	// The HTML table fetches this asset when a reader opens a linked type.
-	const [assetName] = readdirSync(outputDir).filter((name) => name.endsWith('.json'));
-	const asset = parseTypeDefinitionsPayload(
-		JSON.parse(readFileSync(join(outputDir, assetName!), 'utf8')),
-	);
-	expect(asset).toEqual(model);
-	expect(attributeSource(node, 'definitionNames')).toContain('"RequiredInitialResponsiveValue"');
-	expect(attributeSource(node, 'type')).not.toContain('typeDefinitions');
-
-	const markdown = stringifyComponentPropsTable(node);
-	expect(markdown).toMatch(
-		/\| `columns\?` +\| `RequiredInitialResponsiveValue<number \\\| string>`/,
-	);
-	const missingFromMarkdown = Object.values(asset)
-		.flatMap((definition) => [
-			`##### \`${definition.name}\``,
-			...[definition.definition, definition.resolved].flatMap((code) =>
-				code === undefined ? [] : [`\`\`\`ts\n${code}\n\`\`\``],
+		// The HTML table fetches this asset when a reader opens a linked type. It holds the types the rows
+		// link to, and nothing else, with the model's text for each.
+		const [assetName] = readdirSync(outputDir).filter((name) => name.endsWith('.json'));
+		const asset = JSON.parse(readFileSync(join(outputDir, assetName!), 'utf8')) as Record<
+			string,
+			unknown
+		>;
+		const linkedNames = [
+			...new Set(
+				gridProps!.entries.flatMap((entry) =>
+					entry.typeHref !== undefined && model![entry.typeHref] !== undefined
+						? [entry.typeHref]
+						: [],
+				),
 			),
-		])
-		.filter((snippet) => !markdown?.includes(snippet));
-	expect(missingFromMarkdown).toEqual([]);
+		];
+		expect(linkedNames).toEqual(
+			expect.arrayContaining(['BoxLikeElementType', 'RequiredInitialResponsiveValue']),
+		);
+		expect(asset).toEqual(
+			Object.fromEntries(
+				linkedNames.map((name) => {
+					const { definition, resolved } = model![name]!;
+					return [name, { definition, resolved }];
+				}),
+			),
+		);
+		expect(JSON.parse(attributeSource(node, 'definitionNames')!)).toEqual(linkedNames);
+		expect(attributeSource(node, 'type')).not.toContain('typeDefinitions');
+
+		const markdown = stringifyComponentPropsTable(node);
+		expect(markdown).toMatch(
+			/\| `columns\?` +\| `RequiredInitialResponsiveValue<number \\\| string>`/,
+		);
+		// Markdown lists the whole model, so it holds every popover's text too.
+		const missingFromMarkdown = Object.values(model!)
+			.flatMap((definition) => [
+				`##### \`${definition.name}\``,
+				...[definition.definition, definition.resolved].flatMap((code) =>
+					code === undefined ? [] : [`\`\`\`ts\n${code}\n\`\`\``],
+				),
+			])
+			.filter((snippet) => !markdown?.includes(snippet));
+		expect(missingFromMarkdown).toEqual([]);
+	},
+	TS_MORPH_TEST_TIMEOUT,
+);
+
+test('rejects an invalid type model at build time', () => {
+	outputDir = mkdtempSync(join(tmpdir(), 'type-definitions-'));
+	const node = componentPropsTableNode({
+		entries: [],
+		name: 'Props',
+		typeDefinitions: { Broken: { definition: 1 } },
+	} as unknown as EnrichedGeneratedDoc);
+
+	expect(() =>
+		remarkAttachTypeDefinitions({ outputDir: outputDir! })(
+			{ children: [node], type: 'root' },
+			{ path: join(outputDir!, 'page.mdx') },
+		),
+	).toThrow('Invalid type definitions payload');
 });
 
 interface TableNode {

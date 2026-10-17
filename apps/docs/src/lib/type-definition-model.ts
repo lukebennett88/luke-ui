@@ -43,9 +43,15 @@ export type EnrichedGeneratedDoc = GeneratedDoc & {
 	typeDefinitions?: TypeDefinitionsPayload;
 };
 
-/** Parses a fetched JSON value into a type-definitions payload, or throws. */
+/** Validates a generated model at build time, or throws. The browser never loads this schema. */
 export function parseTypeDefinitionsPayload(value: unknown): TypeDefinitionsPayload {
 	const parsed = typeDefinitionsPayloadSchema.safeParse(value);
 	if (!parsed.success) throw new Error('Invalid type definitions payload');
 	return parsed.data;
 }
+
+/**
+ * One table's JSON asset: only the types its rows link to, with only the text a popover shows. The
+ * browser imports this module for types alone, so the schema above stays out of its bundle.
+ */
+export type LinkedTypeDefinitions = Record<string, Pick<TypeDefinition, 'definition' | 'resolved'>>;

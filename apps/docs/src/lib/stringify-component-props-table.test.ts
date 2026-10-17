@@ -19,6 +19,10 @@ const componentPropsGenerator = createComponentPropsGenerator({
 	cache: createFileSystemGeneratorCache(resolve(repoRoot, 'apps/docs/.source/fumadocs-typescript')),
 });
 
+// The first generator call in this file builds the shared ts-morph project, which is slow under
+// load. That test gets the same generous timeout as `component-prop-analysis.test.ts`.
+const TS_MORPH_TEST_TIMEOUT = 30_000;
+
 async function processedApi(slugs: Array<string>): Promise<string> {
 	const page = source.getPage(slugs);
 	expect(page).toBeDefined();
@@ -120,20 +124,24 @@ test('processed Markdown shows Button render props and callbacks with their defi
 	);
 });
 
-test('processed Markdown keeps optional and explicit-undefined props distinct', async () => {
-	const [doc] = await componentPropsGenerator.generateTypeTable(
-		{
-			name: 'OptionalityDocProps',
-			path: 'apps/docs/src/lib/__fixtures__/optionality-doc-props.ts',
-		},
-		{ basePath: repoRoot },
-	);
-	const markdown = stringifyComponentPropsTable(tableNode(doc));
+test(
+	'processed Markdown keeps optional and explicit-undefined props distinct',
+	async () => {
+		const [doc] = await componentPropsGenerator.generateTypeTable(
+			{
+				name: 'OptionalityDocProps',
+				path: 'apps/docs/src/lib/__fixtures__/optionality-doc-props.ts',
+			},
+			{ basePath: repoRoot },
+		);
+		const markdown = stringifyComponentPropsTable(tableNode(doc));
 
-	expect(markdown).toMatch(/\| `first\?` +\| `string` +\|/);
-	expect(markdown).toMatch(/\| `second\?` +\| `string \\\| undefined` +\|/);
-	expect(markdown).toMatch(/\| `third` +\| `string \\\| undefined` +\|/);
-});
+		expect(markdown).toMatch(/\| `first\?` +\| `string` +\|/);
+		expect(markdown).toMatch(/\| `second\?` +\| `string \\\| undefined` +\|/);
+		expect(markdown).toMatch(/\| `third` +\| `string \\\| undefined` +\|/);
+	},
+	TS_MORPH_TEST_TIMEOUT,
+);
 
 test('stringify lists Luke UI definitions before external types and labels shared names', () => {
 	const typeDefinitions: TypeDefinitionsPayload = {
