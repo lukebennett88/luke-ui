@@ -21,7 +21,10 @@ const MAX_RESOLVED_LENGTH = 400;
 /** Longest external type alias whose declaration is copied. Longer ones keep only their package. */
 const MAX_EXTERNAL_DEFINITION_LENGTH = 400;
 
-/** Bounds one table's definitions. Past it, names stay listed without their definitions. */
+/**
+ * Bounds the definitions one table expands through other definitions. Past it, those names stay
+ * listed without their definitions. A name a row signature shows is always expanded.
+ */
 const MAX_DEFINITIONS = 60;
 
 const NODE_MODULES_SEGMENT = `${sep}node_modules${sep}`;
@@ -48,8 +51,11 @@ const OPAQUE_TYPE_KINDS = new Set([
 ]);
 
 export interface TypeDefinitionCollector {
-	/** Records the named types a written annotation refers to. */
-	addTypeNode: (node: ts.TypeNode) => void;
+	/**
+	 * Records the named types a written annotation refers to. Returns the key of the Luke UI type
+	 * alias at the annotation's root, which the row links to.
+	 */
+	addTypeNode: (node: ts.TypeNode) => string | undefined;
 	/**
 	 * Records the named types the checker prints for a resolved type. With `typeArguments: false`,
 	 * only the type's own alias is recorded, for a row whose shown text collapses its arguments.
@@ -64,19 +70,19 @@ type SymbolResolver = (name: ts.Identifier) => ts.Symbol | undefined;
 /**
  * Collects the definitions a props table's signatures refer to.
  *
- * Luke UI types under `reactSrcDir` are followed through their definitions until every Luke UI name
- * in the payload has its own key. External types record their package and declaring file. A short
+ * Luke UI types, declared anywhere in the `@luke-ui/react` package at `packageDir`, are followed
+ * through their definitions until every Luke UI name in the payload has its own key. External types record their package and declaring file. A short
  * external type alias also keeps its declaration, but the names in it are not followed further.
  * TypeScript's own library types are left out, like primitive keywords.
  */
 export function createTypeDefinitionCollector({
 	checker,
 	enclosingDeclaration,
-	reactSrcDir,
+	packageDir,
 }: {
 	checker: ts.TypeChecker;
 	enclosingDeclaration: ts.Node;
-	reactSrcDir: string;
+	packageDir: string;
 }): TypeDefinitionCollector {
 	const entries = new Map<string, TypeDefinition>();
 	const keysByDeclaration = new Map<ts.Declaration, string>();
@@ -88,11 +94,15 @@ export function createTypeDefinitionCollector({
 	const resolveWritten: SymbolResolver = (name) => checker.getSymbolAtLocation(name);
 	const resolveBuilt: SymbolResolver = (name) => (name as { symbol?: ts.Symbol }).symbol;
 
+	/**
+	 * `expand: false` names external types without expanding them. `shown` marks names a row
+	 * signature shows, which are expanded past `MAX_DEFINITIONS`.
+	 */
 	function visit(
 		node: ts.Node,
 		resolveSymbol: SymbolResolver,
 		references: Array<string>,
-		expand: boolean,
+		{ expand, shown }: { expand: boolean; shown: boolean },
 	): void {
 		if (ts.isIndexedAccessTypeNode(node) && resolveSymbol === resolveWritten) {
 			const key = addIndexedAccess(node);
@@ -103,25 +113,29 @@ export function createTypeDefinitionCollector({
 		}
 
 		const name = referencedName(node);
-		if (name !== undefined) {
-			const symbol = resolveSymbol(name);
-			const key = symbol === undefined ? undefined : addSymbol(symbol, expand);
-			if (key !== undefined) addReference(references, key);
+		const symbol = name === undefined ? undefined : resolveSymbol(name);
+		const key = symbol === undefined ? undefined : addSymbol(symbol, { expand, shown });
+		if (key !== undefined) {
+			addReference(references, key);
+			recordWrittenName(entries.get(key)!, name!.text);
 		}
 
-		ts.forEachChild(node, (child) => visit(child, resolveSymbol, references, expand));
+		ts.forEachChild(node, (child) => visit(child, resolveSymbol, references, { expand, shown }));
 	}
 
-	function addSymbol(symbol: ts.Symbol, expand: boolean): string | undefined {
+	function addSymbol(
+		symbol: ts.Symbol,
+		{ expand, shown }: { expand: boolean; shown: boolean },
+	): string | undefined {
 		const target = symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol;
 		if (target.flags & ts.SymbolFlags.TypeParameter) return;
 		// A library type such as `HTMLElement` stays built-in even where a package merges into it.
 		if (target.declarations?.some((node) => isTypeScriptLib(node.getSourceFile().fileName))) return;
 
-		const declaration = target.declarations?.find((node) => NAMED_TYPE_KINDS.has(node.kind));
+		const declaration = namedTypeDeclaration(target);
 		if (declaration === undefined) return;
 
-		const origin = declarationOrigin(declaration.getSourceFile().fileName, reactSrcDir);
+		const origin = declarationOrigin(declaration.getSourceFile().fileName, packageDir);
 		if (origin === undefined) return;
 
 		const existingKey = keysByDeclaration.get(declaration);
@@ -137,9 +151,10 @@ export function createTypeDefinitionCollector({
 
 		// An external type found inside another external definition is named but not expanded.
 		const shouldExpand = origin.kind === 'local' || expand;
-		if (shouldExpand && !expandedDeclarations.has(declaration)) {
+		const withinBound = shown || entries.size <= MAX_DEFINITIONS;
+		if (shouldExpand && withinBound && !expandedDeclarations.has(declaration)) {
 			expandedDeclarations.add(declaration);
-			if (entries.size <= MAX_DEFINITIONS) expandDeclaration(key, declaration, origin);
+			expandDeclaration(key, declaration, origin);
 		}
 		return key;
 	}
@@ -153,13 +168,15 @@ export function createTypeDefinitionCollector({
 			if (text.length > MAX_EXTERNAL_DEFINITION_LENGTH) return;
 
 			entry.definition = text;
-			visit(declaration.type, resolveWritten, entry.references, false);
+			visit(declaration.type, resolveWritten, entry.references, { expand: false, shown: false });
 			removeReference(entry.references, key);
 			return;
 		}
 
 		entry.definition = text;
-		ts.forEachChild(declaration, (child) => visit(child, resolveWritten, entry.references, true));
+		ts.forEachChild(declaration, (child) =>
+			visit(child, resolveWritten, entry.references, { expand: true, shown: false }),
+		);
 		removeReference(entry.references, key);
 
 		if (!ts.isTypeAliasDeclaration(declaration) || declaration.typeParameters !== undefined) return;
@@ -180,9 +197,9 @@ export function createTypeDefinitionCollector({
 			symbol !== undefined && symbol.flags & ts.SymbolFlags.Alias
 				? checker.getAliasedSymbol(symbol)
 				: symbol;
-		const declaration = target?.declarations?.find((child) => NAMED_TYPE_KINDS.has(child.kind));
+		const declaration = target === undefined ? undefined : namedTypeDeclaration(target);
 		if (declaration === undefined) return;
-		if (declarationOrigin(declaration.getSourceFile().fileName, reactSrcDir)?.kind !== 'local') {
+		if (declarationOrigin(declaration.getSourceFile().fileName, packageDir)?.kind !== 'local') {
 			return;
 		}
 
@@ -212,7 +229,7 @@ export function createTypeDefinitionCollector({
 		if (text.length > MAX_RESOLVED_LENGTH) return;
 
 		entry.resolved = text;
-		visit(node, resolveBuilt, entry.references, true);
+		visit(node, resolveBuilt, entry.references, { expand: true, shown: false });
 	}
 
 	/**
@@ -265,15 +282,31 @@ export function createTypeDefinitionCollector({
 				// An optional prop's type is a union with `undefined`, so its alias sits on a member.
 				const members = type.isUnion() ? type.types : [type];
 				for (const member of members) {
-					if (member.aliasSymbol !== undefined) addSymbol(member.aliasSymbol, true);
+					if (member.aliasSymbol !== undefined) {
+						addSymbol(member.aliasSymbol, { expand: true, shown: true });
+					}
 				}
 				return;
 			}
 			const node = buildTypeNode(type, enclosingDeclaration, PRINTED_TYPE_FLAGS);
-			if (node !== undefined) visit(node, resolveBuilt, [], true);
+			if (node !== undefined) visit(node, resolveBuilt, [], { expand: true, shown: true });
 		},
 		addTypeNode(node) {
-			visit(node, resolveWritten, [], true);
+			visit(node, resolveWritten, [], { expand: true, shown: true });
+
+			const root = rootTypeReference(node);
+			const name = root === undefined ? undefined : referencedName(root);
+			const symbol = name === undefined ? undefined : checker.getSymbolAtLocation(name);
+			const target =
+				symbol !== undefined && symbol.flags & ts.SymbolFlags.Alias
+					? checker.getAliasedSymbol(symbol)
+					: symbol;
+			const declaration = target === undefined ? undefined : namedTypeDeclaration(target);
+			if (declaration === undefined || !ts.isTypeAliasDeclaration(declaration)) return;
+
+			const key = keysByDeclaration.get(declaration);
+			const entry = key === undefined ? undefined : entries.get(key);
+			return entry?.module === undefined && entry?.definition !== undefined ? key : undefined;
 		},
 		definitions() {
 			if (entries.size === 0) return;
@@ -285,14 +318,17 @@ export function createTypeDefinitionCollector({
 type Origin = { kind: 'external'; module: string; source: string } | { kind: 'local' };
 
 /**
- * Where a declaration comes from. Files that are neither Luke UI source nor an installed package,
- * such as docs test fixtures and TypeScript's own library, give `undefined`.
+ * Where a declaration comes from. Luke UI covers the whole package, including generated files such
+ * as `.generated/icon-data.ts`. Files that are neither Luke UI nor an installed package, such as
+ * docs test fixtures and TypeScript's own library, give `undefined`.
  */
-function declarationOrigin(fileName: string, reactSrcDir: string): Origin | undefined {
-	if (isInsideDir(fileName, reactSrcDir)) return { kind: 'local' };
+function declarationOrigin(fileName: string, packageDir: string): Origin | undefined {
+	const normalized = resolve(fileName);
+	if (isInsideDir(normalized, packageDir) && !normalized.includes(NODE_MODULES_SEGMENT)) {
+		return { kind: 'local' };
+	}
 	if (isTypeScriptLib(fileName)) return;
 
-	const normalized = resolve(fileName);
 	const index = normalized.lastIndexOf(NODE_MODULES_SEGMENT);
 	if (index === -1) return;
 
@@ -317,6 +353,21 @@ function isTypeScriptLib(fileName: string): boolean {
 function isInsideDir(filePath: string, dir: string): boolean {
 	const relativePath = relative(resolve(dir), resolve(filePath));
 	return relativePath !== '' && !relativePath.startsWith('..') && !isAbsolute(relativePath);
+}
+
+function namedTypeDeclaration(symbol: ts.Symbol): ts.Declaration | undefined {
+	return symbol.declarations?.find((node) => NAMED_TYPE_KINDS.has(node.kind));
+}
+
+function rootTypeReference(node: ts.TypeNode): ts.TypeReferenceNode | undefined {
+	if (ts.isParenthesizedTypeNode(node)) return rootTypeReference(node.type);
+	return ts.isTypeReferenceNode(node) ? node : undefined;
+}
+
+/** Keeps a name an import gives the type, such as `CSSProperties` for csstype's `Properties`. */
+function recordWrittenName(entry: TypeDefinition, writtenName: string): void {
+	if (writtenName === entry.name || entry.writtenAs?.includes(writtenName)) return;
+	entry.writtenAs = [...(entry.writtenAs ?? []), writtenName];
 }
 
 /** The identifier a type reference, heritage clause, or qualified name points at. */

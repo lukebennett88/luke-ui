@@ -62,7 +62,11 @@ function typeDefinitionsToMarkdown(typeDefinitions: TypeDefinitionsPayload): str
 
 	const sections = ordered.map((key) => {
 		const definition = typeDefinitions[key]!;
-		const parts = [`##### ${typeLabel(key, definition)}`];
+		const writtenAs =
+			definition.writtenAs === undefined
+				? ''
+				: ` (written as ${formatList(definition.writtenAs.map((name) => `\`${name}\``))})`;
+		const parts = [`##### ${typeLabel(key, definition)}${writtenAs}`];
 
 		if (definition.module !== undefined) {
 			const packageLink = `[\`${definition.module}\`](https://www.npmjs.com/package/${definition.module})`;
@@ -70,6 +74,13 @@ function typeDefinitionsToMarkdown(typeDefinitions: TypeDefinitionsPayload): str
 			parts.push(`Declared in ${packageLink}${file}.`);
 		}
 		if (definition.definition !== undefined) parts.push(codeBlock(definition.definition));
+		if (
+			definition.module === undefined &&
+			definition.definition === undefined &&
+			definition.resolved === undefined
+		) {
+			parts.push('Not expanded, because this table names more types than its definitions list.');
+		}
 		if (definition.resolved !== undefined) {
 			parts.push(definition.definition === undefined ? 'Resolves to:' : 'Which resolves to:');
 			parts.push(codeBlock(definition.resolved));
@@ -86,15 +97,15 @@ function typeDefinitionsToMarkdown(typeDefinitions: TypeDefinitionsPayload): str
 
 	return [
 		'#### Type definitions',
-		"Types named in this table's signatures and in the definitions below. TypeScript's built-in types, such as `Omit` and `ReadonlyArray`, are not listed.",
+		"These are the types that this table's signatures and the definitions below name. TypeScript's built-in types, such as `Omit` and `ReadonlyArray`, are not listed.",
 		...sections,
 	].join('\n\n');
 }
 
-/** The type's name, plus its package when another type in the table has the same name. */
+/** The type's name, plus its owner when another type in the table has the same name. */
 function typeLabel(key: string, definition: TypeDefinition): string {
-	if (key === definition.name || definition.module === undefined) return `\`${definition.name}\``;
-	return `\`${definition.name}\` from \`${definition.module}\``;
+	if (key === definition.name) return `\`${definition.name}\``;
+	return `\`${definition.name}\` from \`${definition.module ?? '@luke-ui/react'}\``;
 }
 
 /** A TypeScript code block whose fence is longer than any backtick run inside it. */

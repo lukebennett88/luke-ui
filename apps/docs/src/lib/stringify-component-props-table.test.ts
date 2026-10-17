@@ -167,7 +167,7 @@ test('stringify lists Luke UI definitions before external types and labels share
 
 #### Type definitions
 
-Types named in this table's signatures and in the definitions below. TypeScript's built-in types, such as \`Omit\` and \`ReadonlyArray\`, are not listed.
+These are the types that this table's signatures and the definitions below name. TypeScript's built-in types, such as \`Omit\` and \`ReadonlyArray\`, are not listed.
 
 ##### \`Size\`
 

@@ -501,6 +501,36 @@ test('leaves TypeScript library types out of the definitions', async () => {
 	expect(names).not.toContain('ReadonlyArray');
 });
 
+test('defines generated Luke UI types such as IconName with their accepted values', async () => {
+	const iconButtonProps = await generateEnrichedDoc(
+		'packages/@luke-ui/react/src/core/icon-button/icon-button.tsx',
+		'IconButtonProps',
+	);
+	const iconName = iconButtonProps?.typeDefinitions?.IconName;
+
+	expectClosedDefinitions(iconButtonProps);
+	expect(iconName?.module).toBeUndefined();
+	expect(iconName?.definition).toBe('type IconName = (typeof iconNames)[number];');
+	expect(iconName?.resolved).toMatch(/^"add" \| "arrowDown" \| "[A-Za-z]+"( \| "[A-Za-z]+")*$/);
+});
+
+test('records the name an import gives an external type', async () => {
+	const gridProps = await generateEnrichedDoc(
+		'packages/@luke-ui/react/src/core/grid/grid.tsx',
+		'GridProps',
+	);
+	const definitions = Object.values(gridProps?.typeDefinitions ?? {});
+
+	// `ScaleValue` imports csstype's `Properties` as `CSSProperties`, which React also declares.
+	expect(definitions).toContainEqual(
+		expect.objectContaining({
+			module: 'csstype',
+			name: 'Properties',
+			writtenAs: ['CSSProperties'],
+		}),
+	);
+});
+
 async function generateEnrichedDoc(path: string, name: string) {
 	const [doc] = (await componentPropsGenerator.generateTypeTable(
 		{ name, path },

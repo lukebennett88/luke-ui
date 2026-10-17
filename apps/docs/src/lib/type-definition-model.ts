@@ -20,6 +20,8 @@ const typeDefinitionSchema = z.object({
 	resolved: z.string().optional(),
 	/** File that declares an external type, relative to its package root. */
 	source: z.string().optional(),
+	/** Other names the signatures and definitions write for this type, such as an import's alias. */
+	writtenAs: z.array(z.string()).optional(),
 });
 
 const typeDefinitionsPayloadSchema = z.record(z.string(), typeDefinitionSchema);

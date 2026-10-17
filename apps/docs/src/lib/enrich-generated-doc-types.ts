@@ -1,4 +1,4 @@
-import { isAbsolute, relative, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import type { DocEntry, GeneratedDoc } from 'fumadocs-typescript';
 import { ts } from 'ts-morph';
 import { createTypeDefinitionCollector } from './collect-type-definitions.js';
@@ -27,7 +27,7 @@ export function enrichGeneratedDocTypes(
 	const collector = createTypeDefinitionCollector({
 		checker,
 		enclosingDeclaration: declarationNode,
-		reactSrcDir,
+		packageDir: dirname(reactSrcDir),
 	});
 
 	const entries = doc.entries.map((entry) => {
@@ -38,13 +38,13 @@ export function enrichGeneratedDocTypes(
 		// signature reads better there.
 		if (declared !== undefined && !isLowReadabilityAnnotation(declared)) {
 			const text = declared.getText().trim();
-			collector.addTypeNode(declared.compilerNode as ts.TypeNode);
+			const linkedKey = collector.addTypeNode(declared.compilerNode as ts.TypeNode);
 
 			return {
 				...entry,
 				simplifiedType: text,
 				type: text,
-				typeHref: lukeTypeAliasName(declared, reactSrcDir) ?? entry.typeHref,
+				typeHref: linkedKey ?? entry.typeHref,
 			};
 		}
 
@@ -160,43 +160,6 @@ function annotationAdmitsUndefined(typeNode: SyntaxNode): boolean {
 	if (type === undefined) return false;
 	if (type.isUndefined()) return true;
 	return type.isUnion() && type.getUnionTypes().some((member) => member.isUndefined());
-}
-
-/** The Luke UI type alias an annotation names at its root, which the row links to. */
-function lukeTypeAliasName(typeNode: SyntaxNode, reactSrcDir: string): string | undefined {
-	const reference = rootTypeReference(typeNode);
-	if (reference === undefined) return;
-
-	const typeName = reference.getTypeName?.();
-	const symbol =
-		typeName?.getSymbol?.() ?? reference.getSymbol?.() ?? reference.getType?.().getAliasSymbol();
-	const declarations = (symbol?.getAliasedSymbol?.() ?? symbol)?.getDeclarations() ?? [];
-
-	for (const declaration of declarations) {
-		if (declaration.getKindName() !== 'TypeAliasDeclaration') continue;
-		if (!isInsideDir(declaration.getSourceFile().getFilePath(), reactSrcDir)) continue;
-
-		const name = declaration.getName?.();
-		if (name !== undefined && name.length > 0) return name;
-	}
-	return;
-}
-
-function rootTypeReference(typeNode: SyntaxNode | undefined): SyntaxNode | undefined {
-	if (typeNode === undefined) return;
-	switch (typeNode.getKindName()) {
-		case 'TypeReference':
-			return typeNode;
-		case 'ParenthesizedType':
-			return rootTypeReference(typeNode.getTypeNode?.());
-		default:
-			return;
-	}
-}
-
-function isInsideDir(filePath: string, dir: string): boolean {
-	const relativePath = relative(resolve(dir), resolve(filePath));
-	return relativePath !== '' && !relativePath.startsWith('..') && !isAbsolute(relativePath);
 }
 
 function isNeverAnnotation(typeNode: SyntaxNode): boolean {
