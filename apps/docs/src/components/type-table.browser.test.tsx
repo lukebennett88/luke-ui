@@ -18,6 +18,7 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, assert, expect, test, vi } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { ComponentPropsTable } from './component-props-table.js';
+import { MdxCode } from './docs-article/mdx-elements.js';
 import { DocsThemeRoot } from './theme-controls.js';
 import { TypeDefinitionsProvider } from './type-definitions-context.js';
 import { TypeTable } from './type-table.js';
@@ -27,7 +28,7 @@ const ARTICLE_INLINE_SIZE = '832px';
 const MOBILE_INLINE_SIZE = '375px';
 
 /** Real guides render their examples elsewhere. This suite needs only their API tables. */
-const GUIDE_COMPONENTS = { ComponentPropsTable, ExampleBlock: () => null };
+const GUIDE_COMPONENTS = { ComponentPropsTable, ExampleBlock: () => null, code: MdxCode };
 
 const PRESS_ACTION_DEFINITION_PATTERN = /^type PressAction = /;
 const RESPONSIVE_VALUE_DEFINITION_PATTERN =
@@ -170,6 +171,10 @@ test('associates a description row when the table has no id', async () => {
 	expect(container.querySelector(`#${CSS.escape(rowId)}`)).toBe(rowHeader);
 });
 
+/** Long generated signature that stretches a phone viewport when wrapping fails. */
+const LONG_ALIGN_SELF_TYPE =
+	'ResponsiveValue<"auto" | "baseline" | "center" | "flex-end" | "flex-start" | "normal" | "stretch"> | undefined';
+
 for (const [width, inlineSize] of [
 	['the docs article width', ARTICLE_INLINE_SIZE],
 	['a mobile width', MOBILE_INLINE_SIZE],
@@ -196,6 +201,46 @@ for (const [width, inlineSize] of [
 		expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
 	});
 }
+
+test('keeps a long linked type from widening a mobile viewport', async () => {
+	vi.spyOn(globalThis, 'fetch').mockResolvedValue(definitionsResponse());
+
+	await renderWidget(
+		<TypeDefinitionsProvider
+			definitionNames={['ResponsiveValue']}
+			definitionsHref="/type-definitions/overflow.json"
+		>
+			<TypeTable
+				id="api"
+				type={{
+					alignSelf: {
+						description: 'Aligns this part on the cross axis.',
+						type: LONG_ALIGN_SELF_TYPE,
+						typeDescriptionLink: 'ResponsiveValue',
+					},
+				}}
+			/>
+		</TypeDefinitionsProvider>,
+		{ inlineSize: MOBILE_INLINE_SIZE },
+	);
+
+	await expect
+		.element(page.getByRole('button', { exact: true, name: LONG_ALIGN_SELF_TYPE }))
+		.toBeVisible();
+	assert(container, 'expected a container');
+	expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
+});
+
+test('keeps the Lockup guide API table from widening a mobile viewport', async () => {
+	const { default: LockupGuide } = await import('../../content/docs/components/layout/lockup.mdx');
+	await renderWidget(<LockupGuide components={GUIDE_COMPONENTS} />, {
+		inlineSize: MOBILE_INLINE_SIZE,
+	});
+
+	await expect.element(page.getByRole('rowheader', { name: 'alignSelf' })).toBeVisible();
+	assert(container, 'expected a container');
+	expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
+});
 
 test('keeps column headers accessible at a mobile width', async () => {
 	await renderWidget(
