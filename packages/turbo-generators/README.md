@@ -7,21 +7,8 @@ Custom generators for `turbo generate`.
 - `component`: Scaffolds a component, recipe, browser test, and hosted docs.
 - `primitive`: Scaffolds a primitive, recipe, browser test, and public export.
 
-The component generator asks for name, docs group, and whether to add visual coverage. The primitive
-generator asks for name, whether to add hosted docs, and whether to add visual coverage.
-
-Generated component and primitive folders use a named implementation file. Public modules live in
-`src/exports/`.
-
-Generated browser tests cover DOM forwarding and axe, with optional visual coverage and one
-behavioural TODO. See [`docs/TESTING.md`](../../docs/TESTING.md).
-
-## Usage
-
-```bash
-pnpm generate:component
-pnpm generate:primitive
-```
+See [Component creation](../../docs/COMPONENTS.md#component-creation) for commands, arguments, and
+scaffold rules, and [TESTING.md](../../docs/TESTING.md) for the generated tests' contracts.
 
 ## Structure
 

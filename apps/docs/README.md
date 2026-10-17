@@ -8,8 +8,10 @@ page-tree, search data, and type generation only. See
 
 ## Commands
 
+Run from the repository root:
+
 ```bash
-pnpm dev
-pnpm build
-pnpm check
+pnpm run dev:docs
+pnpm run build:docs
+pnpm run check
 ```

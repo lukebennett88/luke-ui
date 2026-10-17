@@ -6,20 +6,19 @@ packages (Tactile and Paper), and layout utilities that share a semantic token s
 ## Features
 
 - Custom themes compiled at build time, with light and dark modes and contrast validation
-- Static CSS with no runtime styling layer; theming does not require a React provider
+- Static CSS with no runtime styling layer. Theming does not require a React provider
 - Composed components, exported primitives, and React Aria Components underneath
 - Built-in async and loading states
 - Browser, custom, server, and form-library validation
 - Text trimming and automatic heading levels
-- Flexible rendering with `elementType` and `render`
+- Flexible rendering with `elementType`, `renderRoot`, named render callbacks, and React Aria's
+  `render`
 - Generated SVG icon spritesheet with type-safe icon names, plus `createIcon` for custom icons
 
 ## Documentation
 
-- **Type-checked examples.** Rendered examples are checked against the current public API.
-- **Live playground.** Write and preview Luke UI code with autocomplete and type errors.
-- **Generated prop tables.** Prop tables are generated from the public TypeScript and JSDoc
-  definitions, keeping them aligned with the package API.
+Rendered examples are typechecked against the public API. The live playground previews Luke UI code
+with autocomplete and type errors. Prop tables come from public TypeScript and JSDoc.
 
 ## Development
 
@@ -30,7 +29,7 @@ pnpm dev
 
 Useful repo commands:
 
-- `pnpm run check`: lint, format, and typecheck.
+- `pnpm run check`: barrels, format, lint, types, docs, cycles, and unused code.
 - `pnpm run build`: build all packages and apps.
 - `pnpm run test`: run tests.
 
@@ -51,13 +50,13 @@ Useful repo commands:
 - [Dependencies](docs/DEPENDENCIES.md): the catalog, the release quarantine, and Renovate.
 - [Documentation](docs/DOCUMENTATION.md): what to document, writing style, examples, and MDX
   structure.
+- [Public API](docs/PUBLIC_API.md): public exports, props, and types.
 - [Styling](docs/STYLING.md): cascade layers, recipes, and styling utilities.
 - [Testing](docs/TESTING.md): test type, placement, and writing rules.
 - [Visual testing](docs/VISUAL_TESTING.md): visual regression workflow.
 
 ## Contributing
 
-Run `pnpm run check` before committing.
-
-`@luke-ui/react` is not published before `1.0.0`, so changes do not need a changeset. See
-[docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) for the full rule.
+Start with the [agent guide and skill index](AGENTS.md). The
+[implementation workflow](.agents/skills/work-on-issue/SKILL.md) owns verification and task
+delivery. See [Changesets](docs/DEPENDENCIES.md#changesets) for release metadata.

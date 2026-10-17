@@ -15,8 +15,7 @@ qualifications and exceptions. When a skill and a guide disagree, the guide wins
   as the exemplar for a component guide.
 - Run `pnpm run check` from the repo root. It includes `check:docs`.
 - Update or delete docs and skills that describe code in the same change as the code.
-- Generated docs output comes from the docs `generate` script in `apps/docs/package.json`. Do not
-  hand-edit those files.
+- Follow [Where documentation lives](#where-documentation-lives) for generated output.
 - Schema-owned files such as `apps/docs/PRODUCT.md` keep the headings the schema requires. Edit the
   body. Leave those headings in place.
 
@@ -182,6 +181,17 @@ with a semicolon. An em dash is fine when it has a space on each side, as in `fo
 below it. Do not summarise a section at the end of it. When more than one page needs the same rule,
 explain it on the page that owns the topic and link to it from the others. An example may appear on
 exactly one page, because that is the mechanical handle on "say it once".
+
+### Editing prose
+
+Start with the claim or instruction. Cut empty introductions, staged questions, decorative
+contrasts, and conclusions that repeat the section. Use headings and lists when they help navigation
+or express real structure, rather than imposing the same shape on every passage.
+
+Keep facts, technical terms, useful context, uncertainty, and the author's voice within this guide's
+voice and punctuation rules. Do not invent names, quantities, timings, causes, or guarantees to make
+a vague claim sound specific. Check behavioural claims against the implementation. Flag unsupported
+claims or contradictions instead of silently resolving them. Leave already clear prose unchanged.
 
 ## Comments and JSDoc
 
@@ -377,6 +387,10 @@ item names in a `fd-page-tree-item-name` span. Docs do not load Fumadocs CSS or 
 
 [Docs app styling](STYLING.md#docs-app-styling) says when a docs-local `.css.ts` file is
 appropriate.
+
+A module imported by browser code must not import `node:fs` or `node:path`, including through
+`src/lib/`. These imports can leave an MDX body empty even when the page returns HTTP 200. Keep
+filesystem work in build-time or server modules.
 
 The playground host lives in `apps/docs/src/{routes,components}/playground/`. Compilation, hashing,
 formatting, and the iframe protocol live in the private `@luke-ui/playground-core` package.

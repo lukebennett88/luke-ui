@@ -13,6 +13,9 @@ are already made. It is not an implementation spec.
 
 Use `git` and `gh` when they are available. Equivalent tools and connectors are fine.
 
+Follow [DOCUMENTATION.md](../../../docs/DOCUMENTATION.md#writing-style) for prose, and consult the
+[repository guides](../../../README.md#repository-guides) that govern the problem.
+
 ## Before you write
 
 1. Search open and closed issues for the same problem or outcome. When an existing issue owns it,
