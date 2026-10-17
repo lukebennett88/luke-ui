@@ -94,7 +94,7 @@ export const tocSummaryIcon = style({
 	'@layer': {
 		components: {
 			marginInlineStart: 'auto',
-			transition: `transform ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
+			transition: `transform ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			'@media': {
 				'(prefers-reduced-motion: reduce)': {
 					transition: 'none',

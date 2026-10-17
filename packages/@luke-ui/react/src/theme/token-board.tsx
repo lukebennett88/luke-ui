@@ -372,9 +372,9 @@ function InteractionPreview({ path, varName }: LeafPreviewProps) {
 }
 
 function MotionPreview({ path, segments, varName }: LeafPreviewProps) {
-	// `motion.duration.feedback` and `motion.easing.standard` each drive one animation axis; the
-	// other axis takes a fixed, non-token value purely so the dot has something to animate along.
-	const axis = segments[1];
+	// `motion.<treatment>.duration` and `motion.<treatment>.easing` each drive one animation axis;
+	// the other axis takes a fixed, non-token value purely so the dot has something to animate along.
+	const axis = segments[2];
 	const duration = axis === 'duration' ? `var(${varName})` : fallbackMotionDuration;
 	const easing = axis === 'easing' ? `var(${varName})` : fallbackMotionEasing;
 

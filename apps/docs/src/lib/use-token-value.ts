@@ -103,7 +103,7 @@ function valueKindOf(token: ThemeToken): ValueKind {
 		case 'interaction':
 			return 'number';
 		case 'motion':
-			return token.path.startsWith('motion.duration.') ? 'duration' : 'easing';
+			return leaf === 'duration' ? 'duration' : 'easing';
 		case 'font':
 			if (leaf === 'fontFamily' || token.path.startsWith('font.family.')) return 'fontFamily';
 			if (leaf === 'fontSize' || leaf === 'lineHeight') return 'length';

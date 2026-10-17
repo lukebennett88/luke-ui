@@ -11,7 +11,7 @@ export const cardLink = style({
 			backgroundColor: vars.color.surface.base,
 			color: vars.color.text.primary,
 			textDecoration: 'none',
-			transition: `background-color ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
+			transition: `background-color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			selectors: {
 				'&:hover': {
 					// Soften the subtle hover ramp the way Fumadocs used accent/80.

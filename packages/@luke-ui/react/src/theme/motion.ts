@@ -1,9 +1,9 @@
 /**
- * The private numbered duration scale behind the public `motion.duration` roles. It is resolved in
+ * The private numbered duration scale behind the public motion treatments. It is resolved in
  * TypeScript and never emitted, so no `--luke-motion-duration-100` custom property exists.
  *
  * The keys are ordinal steps, not encoded millisecond values. Step 400 is the fourth step, and it
- * is not 400ms. The public semantic roles in `token-values.ts` map onto these steps.
+ * is not 400ms. The public treatments in `token-values.ts` map onto these steps.
  */
 
 /** An ordinal position on the private duration scale. */

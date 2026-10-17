@@ -53,13 +53,23 @@ export const INTERACTION_VALUES: {
 	'interaction.disabledOpacity': '0.55',
 };
 
-/** Durations and easing curves for interaction motion, named for the role each plays. */
+/**
+ * Private default decelerating curve shared by feedback and enter. Each treatment still emits its
+ * own public custom property so the curves can diverge later without an alias.
+ */
+const DECELERATE_EASING = 'cubic-bezier(0, 0, 0.4, 1)';
+
+/** Private accelerating curve for exit. */
+const ACCELERATE_EASING = 'cubic-bezier(0.3, 0, 1, 1)';
+
+/** Duration and easing for each public motion treatment. */
 export const MOTION_VALUES: {
 	[Path in Extract<IdentityPath, `motion.${string}`>]: string;
 } = {
-	'motion.duration.enter': MOTION_DURATION_SCALE[500],
-	'motion.duration.exit': MOTION_DURATION_SCALE[300],
-	'motion.duration.feedback': MOTION_DURATION_SCALE[200],
-	'motion.easing.exit': 'cubic-bezier(0.3, 0, 1, 1)',
-	'motion.easing.standard': 'cubic-bezier(0, 0, 0.4, 1)',
+	'motion.enter.duration': MOTION_DURATION_SCALE[500],
+	'motion.enter.easing': DECELERATE_EASING,
+	'motion.exit.duration': MOTION_DURATION_SCALE[300],
+	'motion.exit.easing': ACCELERATE_EASING,
+	'motion.feedback.duration': MOTION_DURATION_SCALE[200],
+	'motion.feedback.easing': DECELERATE_EASING,
 };

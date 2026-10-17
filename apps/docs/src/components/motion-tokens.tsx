@@ -6,40 +6,56 @@ import { useTokenValue } from '../lib/use-token-value.js';
 import { TokenGroup, TokenPanel, TokenRow } from './token-reference-parts.js';
 import * as styles from './token-reference.css.js';
 
+const MOTION_TREATMENTS = [
+	{ id: 'motionFeedback', label: 'Feedback' },
+	{ id: 'motionEnter', label: 'Enter' },
+	{ id: 'motionExit', label: 'Exit' },
+] as const;
+
 /**
- * The motion durations and easing curves. A duration plays when someone hovers, focuses, or taps
- * its row, and holds still under reduced motion. An easing is plotted as its curve.
+ * The three motion treatments. Each group shows that treatment's duration and easing together. A
+ * duration plays when someone hovers, focuses, or taps its row, and holds still under reduced
+ * motion. An easing is plotted as its curve.
  */
 export function MotionTokens() {
-	const { motionDuration, motionEasing } = tokenSections.scales;
+	const { scales } = tokenSections;
 	return (
 		<TokenPanel>
-			<TokenGroup label="Durations">
-				{motionDuration.tokens.map((token) => (
-					<TokenRow
-						key={token.path}
-						sample={<DurationSample token={token} />}
-						sampleInlineSize={styles.MOTION_TRACK_SIZE}
-						token={token}
-					/>
-				))}
-			</TokenGroup>
-			<TokenGroup label="Easing">
-				{motionEasing.tokens.map((token) => (
-					<TokenRow
-						key={token.path}
-						sample={<EasingPlot token={token} />}
-						sampleInlineSize="3.5rem"
-						token={token}
-					/>
-				))}
-			</TokenGroup>
+			{MOTION_TREATMENTS.map(({ id, label }) => {
+				const tokens = scales[id].tokens;
+				const duration = tokens.find((token) => token.path.endsWith('.duration'));
+				const easing = tokens.find((token) => token.path.endsWith('.easing'));
+				return (
+					<TokenGroup key={id} label={label}>
+						{duration === undefined ? null : (
+							<TokenRow
+								sample={<DurationSample duration={duration} easing={easing} />}
+								sampleInlineSize={styles.MOTION_TRACK_SIZE}
+								token={duration}
+							/>
+						)}
+						{easing === undefined ? null : (
+							<TokenRow
+								sample={<EasingPlot token={easing} />}
+								sampleInlineSize="3.5rem"
+								token={easing}
+							/>
+						)}
+					</TokenGroup>
+				);
+			})}
 		</TokenPanel>
 	);
 }
 
-/** A dot at the start of a track. It crosses the track over the token's duration. */
-function DurationSample({ token }: { token: ThemeToken }) {
+/** A dot at the start of a track. It crosses the track over the treatment's duration and easing. */
+function DurationSample({
+	duration,
+	easing,
+}: {
+	duration: ThemeToken;
+	easing: ThemeToken | undefined;
+}) {
 	return (
 		<Box
 			alignItems="center"
@@ -62,7 +78,12 @@ function DurationSample({ token }: { token: ThemeToken }) {
 				inlineSize={styles.MOTION_DOT_SIZE}
 				insetInlineStart="0"
 				position="absolute"
-				style={{ transitionDuration: `var(${token.variable})` }}
+				style={{
+					transitionDuration: `var(${duration.variable})`,
+					...(easing === undefined
+						? {}
+						: { transitionTimingFunction: `var(${easing.variable})` }),
+				}}
 			/>
 		</Box>
 	);

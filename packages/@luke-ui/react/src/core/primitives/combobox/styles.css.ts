@@ -70,9 +70,9 @@ const comboboxActionStyles = {
 	paddingBlock: 0,
 	...pressFeedback,
 	transform: 'none',
-	transitionDuration: vars.motion.duration.feedback,
+	transitionDuration: vars.motion.feedback.duration,
 	transitionProperty: 'background-color, color',
-	transitionTimingFunction: vars.motion.easing.standard,
+	transitionTimingFunction: vars.motion.feedback.easing,
 
 	selectors: {
 		'&[data-disabled="true"]': { cursor: 'not-allowed' },
@@ -158,9 +158,9 @@ const comboboxConfig = {
 			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 			minInlineSize: 0,
 			overflow: 'visible',
-			transitionDuration: vars.motion.duration.feedback,
+			transitionDuration: vars.motion.feedback.duration,
 			transitionProperty: 'background-color, border-color, box-shadow, color',
-			transitionTimingFunction: vars.motion.easing.standard,
+			transitionTimingFunction: vars.motion.feedback.easing,
 
 			// Precedence: invalid beats read-only and hover. Focus only adds the ring, so it composes
 			// with every state. Opening the popover adds no border state of its own.
@@ -334,9 +334,9 @@ const comboboxConfig = {
 			outline: 'none',
 			...pressFeedback,
 			transform: 'none',
-			transitionDuration: vars.motion.duration.feedback,
+			transitionDuration: vars.motion.feedback.duration,
 			transitionProperty: 'background-color, color, opacity',
-			transitionTimingFunction: vars.motion.easing.standard,
+			transitionTimingFunction: vars.motion.feedback.easing,
 
 			selectors: {
 				'&[data-disabled="true"]': {

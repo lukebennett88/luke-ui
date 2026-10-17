@@ -95,9 +95,9 @@ const switchConfig = {
 			// Centres the track on the label's first line, whatever the inherited line height.
 			marginBlock: `calc((${fallbackVar(textLineHeight, '1lh')} - ${trackBlockSize}) / 2)`,
 			paddingInline: thumbInset,
-			transitionDuration: vars.motion.duration.feedback,
+			transitionDuration: vars.motion.feedback.duration,
 			transitionProperty: 'background-color, background-image, border-color, box-shadow, opacity',
-			transitionTimingFunction: vars.motion.easing.standard,
+			transitionTimingFunction: vars.motion.feedback.easing,
 			selectors: {
 				'[data-disabled="true"] &': {
 					opacity: vars.interaction.disabledOpacity,
@@ -183,9 +183,9 @@ const switchConfig = {
 			inlineSize: thumbSize,
 			justifyContent: 'center',
 			marginInlineStart: 0,
-			transitionDuration: vars.motion.duration.feedback,
+			transitionDuration: vars.motion.feedback.duration,
 			transitionProperty: 'background-color, inline-size, margin-inline-start',
-			transitionTimingFunction: vars.motion.easing.standard,
+			transitionTimingFunction: vars.motion.feedback.easing,
 			selectors: {
 				// Pressing stretches the thumb rather than recolouring it, so it keeps its guaranteed
 				// contrast with the track and the press stays visible without materials.

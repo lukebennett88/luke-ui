@@ -62,9 +62,9 @@ const selectConfig = {
 			paddingBlock: 0,
 			...pressFeedback,
 			textAlign: 'start',
-			transitionDuration: vars.motion.duration.feedback,
+			transitionDuration: vars.motion.feedback.duration,
 			transitionProperty: 'background-color, border-color, box-shadow, color',
-			transitionTimingFunction: vars.motion.easing.standard,
+			transitionTimingFunction: vars.motion.feedback.easing,
 
 			selectors: {
 				'&[data-disabled="true"]': {

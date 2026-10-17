@@ -107,10 +107,10 @@ const checkboxConfig = {
 			inlineSize: checkboxIndicatorSize,
 			justifyContent: 'center',
 			lineHeight: 1,
-			transitionDuration: vars.motion.duration.feedback,
+			transitionDuration: vars.motion.feedback.duration,
 			transitionProperty:
 				'background-color, background-image, border-color, box-shadow, color, opacity',
-			transitionTimingFunction: vars.motion.easing.standard,
+			transitionTimingFunction: vars.motion.feedback.easing,
 			selectors: {
 				'&::after': {
 					content: '"✓"',

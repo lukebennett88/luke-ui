@@ -10,10 +10,10 @@ export const buttonRecipeInternal = recipe({
 	base: {
 		font: 'inherit',
 		...pressFeedback,
-		transitionDuration: vars.motion.duration.feedback,
+		transitionDuration: vars.motion.feedback.duration,
 		transitionProperty:
 			'background-color, border-color, box-shadow, color, opacity, text-decoration-color',
-		transitionTimingFunction: vars.motion.easing.standard,
+		transitionTimingFunction: vars.motion.feedback.easing,
 		selectors: {
 			'&[data-disabled="true"]': {
 				cursor: 'not-allowed',

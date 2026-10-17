@@ -91,8 +91,9 @@ test('colour family headings belong to the MDX table of contents', () => {
 });
 
 for (const [prefix, scaleId] of [
-	['motion.duration.', 'motionDuration'],
-	['motion.easing.', 'motionEasing'],
+	['motion.enter.', 'motionEnter'],
+	['motion.exit.', 'motionExit'],
+	['motion.feedback.', 'motionFeedback'],
 	['controlFinish.', 'controlFinish'],
 	['controlSize.', 'controlSize'],
 	['interaction.', 'interaction'],

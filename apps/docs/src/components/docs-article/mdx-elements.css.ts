@@ -71,7 +71,7 @@ export const headingCopyButton = style({
 			opacity: 0,
 			position: 'absolute',
 			translate: '0 -50%',
-			transition: `opacity ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
+			transition: `opacity ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			selectors: {
 				'&:hover': {
 					color: vars.color.text.primary,

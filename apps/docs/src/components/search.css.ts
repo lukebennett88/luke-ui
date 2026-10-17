@@ -6,11 +6,11 @@ import { DOCS_SEARCH_FIELD_VT_SHARE_CLASS } from './search-view-transition.js';
 
 export const searchAnchorHeightVar = createVar();
 
-const panelResultsEnter = `max-block-size ${vars.motion.duration.enter} ${vars.motion.easing.standard}, opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}`;
-const panelResultsExit = `max-block-size ${vars.motion.duration.exit} ${vars.motion.easing.exit}, opacity ${vars.motion.duration.exit} ${vars.motion.easing.exit}`;
+const panelResultsEnter = `max-block-size ${vars.motion.enter.duration} ${vars.motion.enter.easing}, opacity ${vars.motion.enter.duration} ${vars.motion.enter.easing}`;
+const panelResultsExit = `max-block-size ${vars.motion.exit.duration} ${vars.motion.exit.easing}, opacity ${vars.motion.exit.duration} ${vars.motion.exit.easing}`;
 
-const vtShareDuration = vars.motion.duration.enter;
-const vtShareEasing = vars.motion.easing.standard;
+const vtShareDuration = vars.motion.enter.duration;
+const vtShareEasing = vars.motion.enter.easing;
 
 const vtShareReducedMotion = {
 	'@media': {
@@ -70,9 +70,9 @@ export const trigger = style({
 			fontWeight: vars.font.weight.body,
 			justifyContent: 'flex-start',
 			textAlign: 'start',
-			transitionDuration: vars.motion.duration.feedback,
+			transitionDuration: vars.motion.feedback.duration,
 			transitionProperty: 'background-color, border-color, box-shadow, color',
-			transitionTimingFunction: vars.motion.easing.standard,
+			transitionTimingFunction: vars.motion.feedback.easing,
 			// The trigger reads as a search field, so it follows the field model: the hover border, and
 			// no button depth or fill changes. Focus keeps the Button's ring.
 			selectors: {

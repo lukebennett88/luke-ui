@@ -306,12 +306,11 @@ export const MOTION_DOT_SIZE = vars.space.sp12;
 
 // DS gap: Box has no transform or transition props, and Luke UI ships no motion sample. The dot
 // rests at the start of its track. It travels the track when someone hovers, focuses, or taps its
-// row, over the token's own duration (set inline) with the standard easing, and never loops.
+// row, over the treatment's own duration and easing (set inline), and never loops.
 export const motionDot = style({
 	'@layer': {
 		components: {
 			transitionProperty: 'transform',
-			transitionTimingFunction: vars.motion.easing.standard,
 			'@media': {
 				'(prefers-reduced-motion: reduce)': {
 					transition: 'none',
