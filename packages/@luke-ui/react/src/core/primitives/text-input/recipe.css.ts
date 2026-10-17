@@ -85,12 +85,12 @@ export const textInputRecipe = recipe({
 		},
 	},
 	defaultVariants: {
-		size: 'medium',
+		size: 'px40',
 	},
 	variants: {
 		size: {
-			medium: {
-				blockSize: vars.controlSize.medium,
+			px40: {
+				blockSize: vars.controlSize.px40,
 				fontSize: FONT_METRIC_SCALE[16].fontSize,
 				letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
 				lineHeight: FONT_METRIC_SCALE[16].lineHeight,
@@ -98,8 +98,8 @@ export const textInputRecipe = recipe({
 				paddingInlineStart: textInputInputPaddingInline,
 				vars: { [textInputInlinePadding]: vars.space.sp12 },
 			},
-			small: {
-				blockSize: vars.controlSize.small,
+			px32: {
+				blockSize: vars.controlSize.px32,
 				fontSize: FONT_METRIC_SCALE[14].fontSize,
 				letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 				lineHeight: FONT_METRIC_SCALE[14].lineHeight,

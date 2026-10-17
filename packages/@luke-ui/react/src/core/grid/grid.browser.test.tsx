@@ -272,7 +272,7 @@ test('resolves responsive columns against nested size containers', async () => {
 				<span style={{ blockSize: '1rem' }} />
 				<span style={{ blockSize: '1rem' }} />
 			</Grid>
-			<Container maxInlineSize="ct448">
+			<Container maxInlineSize="px448">
 				<Grid columns={{ initial: 1, bp768: '1fr 1fr 1fr 1fr' }} data-testid="nested" gap="sp8">
 					<span style={{ blockSize: '1rem' }} />
 					<span style={{ blockSize: '1rem' }} />

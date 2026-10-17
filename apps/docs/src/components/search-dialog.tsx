@@ -115,7 +115,7 @@ export function DocsSearchDialog({
 									inputClassName={styles.input}
 									placeholder="Search documentation"
 									prefix={<Icon name="search" />}
-									size="small"
+									size="px32"
 									type="search"
 								/>
 							</LockupBody>
@@ -125,7 +125,7 @@ export function DocsSearchDialog({
 									className={styles.close}
 									onPress={close}
 									prominence="low"
-									size="small"
+									size="px32"
 								>
 									<Kbd>Esc</Kbd>
 								</Button>
@@ -236,7 +236,7 @@ function ResultBody({ result }: { result: SortedResult }) {
 						{result.breadcrumbs.map((part, index) => (
 							<span key={index}>
 								{index > 0 ? (
-									<Icon className={styles.breadcrumbChevron} name="chevronRight" size="xsmall" />
+									<Icon className={styles.breadcrumbChevron} name="chevronRight" size="px16" />
 								) : null}
 								{plainText(part)}
 							</span>

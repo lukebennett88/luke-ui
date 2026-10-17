@@ -4,11 +4,11 @@ import { Comparison, ComparisonItem } from '#docs';
 export default () => {
 	return (
 		<Comparison>
-			<ComparisonItem label="Small">
-				<IconLink aria-label="Search" href="/docs/installation" icon="search" size="small" />
+			<ComparisonItem label="px32">
+				<IconLink aria-label="Search" href="/docs/installation" icon="search" size="px32" />
 			</ComparisonItem>
-			<ComparisonItem label="Medium">
-				<IconLink aria-label="Search" href="/docs/installation" icon="search" size="medium" />
+			<ComparisonItem label="px40">
+				<IconLink aria-label="Search" href="/docs/installation" icon="search" size="px40" />
 			</ComparisonItem>
 		</Comparison>
 	);

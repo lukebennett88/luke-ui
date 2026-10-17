@@ -34,7 +34,7 @@ const errorIconGap = vars.space.sp8;
  * the gap spans the indent exactly and the message text starts at the label's inline edge. `max()`
  * floors the rail at the icon's own size when no indent is set.
  */
-const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px')} - ${errorIconGap}), ${ICON_SIZES.xsmall})`;
+const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px')} - ${errorIconGap}), ${ICON_SIZES.px16})`;
 
 /**
  * Raw slotted config for the `Field` primitive.
@@ -146,12 +146,12 @@ const fieldConfig = {
 					},
 					backgroundColor: vars.color.foreground.danger.rest,
 					// The rail has no content to size it, and the mask paints only inside its box.
-					blockSize: ICON_SIZES.xsmall,
+					blockSize: ICON_SIZES.px16,
 					inlineSize: errorIconRailInlineSize,
 					maskImage: iconMaskUrls.exclamationTriangle,
 					maskPosition: 'center',
 					maskRepeat: 'no-repeat',
-					maskSize: ICON_SIZES.xsmall,
+					maskSize: ICON_SIZES.px16,
 				},
 				message: {
 					color: vars.color.foreground.danger.rest,

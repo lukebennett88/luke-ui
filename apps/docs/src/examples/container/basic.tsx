@@ -4,7 +4,7 @@ import { Container } from '@luke-ui/react/container';
 
 export default () => {
 	return (
-		<Container maxInlineSize="ct672" paddingInline="sp16">
+		<Container maxInlineSize="px672" paddingInline="sp16">
 			<Box
 				backgroundColor="surface.subdued"
 				borderColor="decorative"

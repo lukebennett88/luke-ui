@@ -19,12 +19,12 @@ API.
 
 ## Size
 
-Set `size` to `xsmall`, `small`, `medium`, or `large`. Each size is a theme token, not a pixel
-value. A custom theme can give each size a different value.
+Set `size` to a curated literal key: `px16`, `px20`, `px24`, or `px32`. Each key is that many CSS
+pixels at a 16px root, emitted as `rem`.
 
 <ExampleBlock src="icon/sizes" title="Icon: Sizes" />
 
-The default size is `medium`.
+The default size is `px24`.
 
 To give a group of icons the same size, put an `IconSizeProvider` around them. An icon that has its
 own `size` prop keeps that size.

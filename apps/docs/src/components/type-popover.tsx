@@ -58,7 +58,7 @@ function DefinitionBody({
 					<Text color="secondary" typography="caption">
 						{load.message}
 					</Text>
-					<Button onPress={ensureLoaded} prominence="low" size="small">
+					<Button onPress={ensureLoaded} prominence="low" size="px32">
 						Retry
 					</Button>
 				</Stack>

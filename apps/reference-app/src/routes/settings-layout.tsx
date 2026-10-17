@@ -100,7 +100,7 @@ export function SettingsLayout() {
 								appearance="button"
 								href="/"
 								prominence="low"
-								size="small"
+								size="px32"
 								startContent={<Icon name="chevronLeft" />}
 							>
 								Back to app
@@ -144,12 +144,12 @@ export function SettingsLayout() {
 								marginBlockEnd="sp16"
 							>
 								<RouterLink className={styles.mobileHeaderLink} to="/settings/menu">
-									<Icon name="chevronLeft" size="xsmall" />
+									<Icon name="chevronLeft" size="px16" />
 									Settings
 								</RouterLink>
 							</Box>
 						)}
-						<Container maxInlineSize="ct672">
+						<Container maxInlineSize="px672">
 							<Outlet
 								context={
 									{

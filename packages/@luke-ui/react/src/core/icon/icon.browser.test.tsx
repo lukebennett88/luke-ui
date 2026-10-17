@@ -17,7 +17,7 @@ const rowStyle = {
 	gap: '1rem',
 } satisfies CSSProperties;
 
-const sizes = variantValuesFor<typeof Icon, 'size'>()(['xsmall', 'small', 'medium', 'large']);
+const sizes = variantValuesFor<typeof Icon, 'size'>()(['px16', 'px20', 'px24', 'px32']);
 const names = variantValuesFor<typeof Icon, 'name'>()([
 	'add',
 	'checkCircle',

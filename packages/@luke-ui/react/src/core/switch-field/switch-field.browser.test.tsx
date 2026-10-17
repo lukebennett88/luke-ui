@@ -38,7 +38,7 @@ function SwitchScene() {
 				description="Receive updates by email."
 				label="Email notifications"
 				name="description-small"
-				size="small"
+				size="px16"
 			/>
 			<SwitchField
 				defaultSelected
@@ -50,7 +50,7 @@ function SwitchScene() {
 				description="Receive updates by email."
 				label="Email notifications"
 				name="description-large"
-				size="large"
+				size="px24"
 			/>
 			<Text elementType="div" typography="heading3">
 				<SwitchField

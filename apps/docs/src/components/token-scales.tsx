@@ -119,7 +119,7 @@ export function DepthAndFinishTokens() {
 						sample={
 							<Box
 								backgroundColor="neutral.solid.rest"
-								blockSize={vars.controlSize.medium}
+								blockSize={vars.controlSize.px40}
 								borderRadius="control"
 								inlineSize={DEPTH_FINISH_SAMPLE_SIZE}
 								style={{ backgroundImage: `var(${token.variable})` }}
@@ -191,7 +191,7 @@ function SampleControl({ label, opacity }: { label: string; opacity?: string }) 
 		<Box
 			alignItems="center"
 			backgroundColor="neutral.subtle.rest"
-			blockSize={vars.controlSize.small}
+			blockSize={vars.controlSize.px32}
 			borderColor="control"
 			borderRadius="control"
 			borderStyle="solid"

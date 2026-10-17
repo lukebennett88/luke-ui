@@ -8,11 +8,11 @@ import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
 
 const fixedSizes = [
-	['ct448', 448],
-	['ct672', 672],
-	['ct896', 896],
-	['ct1152', 1152],
-	['ct1280', 1280],
+	['px448', 448],
+	['px672', 672],
+	['px896', 896],
+	['px1152', 1152],
+	['px1280', 1280],
 ] as const;
 
 afterEach(async () => {
@@ -22,7 +22,7 @@ afterEach(async () => {
 test('uses its fixed maximum as a border-box width and centres by default', () => {
 	const { locator } = render(
 		<div data-testid="parent" style={{ inlineSize: '800px' }}>
-			<Container data-testid="container" maxInlineSize="ct672" paddingInline="sp16">
+			<Container data-testid="container" maxInlineSize="px672" paddingInline="sp16">
 				Content
 			</Container>
 		</div>,
@@ -58,7 +58,7 @@ for (const [maxInlineSize, expectedWidth] of fixedSizes) {
 test('lets marginInline override its default centring', () => {
 	const { locator } = render(
 		<div style={{ inlineSize: '800px' }}>
-			<Container data-testid="container" marginInline="0" maxInlineSize="ct448">
+			<Container data-testid="container" marginInline="0" maxInlineSize="px448">
 				Content
 			</Container>
 		</div>,
@@ -74,7 +74,7 @@ test('uses the nearest nested Container as the query boundary', async () => {
 	const { locator } = render(
 		<Container maxInlineSize="100%" paddingInline="sp16">
 			<Box data-testid="outer" display={{ initial: 'block', bp768: 'flex' }} />
-			<Container maxInlineSize="ct672">
+			<Container maxInlineSize="px672">
 				<Box data-testid="nested" display={{ initial: 'block', bp768: 'flex' }} />
 			</Container>
 		</Container>,
@@ -105,7 +105,7 @@ test('caps the border box at an arbitrary CSS maxInlineSize', () => {
 
 test('supports semantic and caller-owned elements', () => {
 	const semantic = render(
-		<Container aria-label="Page content" elementType="main" maxInlineSize="ct896">
+		<Container aria-label="Page content" elementType="main" maxInlineSize="px896">
 			Page content
 		</Container>,
 	);
@@ -115,7 +115,7 @@ test('supports semantic and caller-owned elements', () => {
 
 	const custom = render(
 		<Container
-			maxInlineSize="ct896"
+			maxInlineSize="px896"
 			renderRoot={(domProps) => <section {...domProps} data-testid="custom-container" />}
 		>
 			Custom content
@@ -127,7 +127,7 @@ test('supports semantic and caller-owned elements', () => {
 	expect(getComputedStyle(element).containerType).toBe('inline-size');
 });
 
-const sizes = ['ct448', 'ct672', 'ct896'] as const;
+const sizes = ['px448', 'px672', 'px896'] as const;
 
 test('fixed maximum inline sizes', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {

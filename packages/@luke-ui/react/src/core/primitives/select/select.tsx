@@ -104,7 +104,7 @@ interface _SelectRootProps extends _SelectRootOmit, SelectRootRedeclaredRACProps
 	ref?: Ref<HTMLDivElement>;
 	/**
 	 * Sets the size of the trigger, indicator, and items.
-	 * @default 'medium'
+	 * @default 'px40'
 	 */
 	size?: SelectSize;
 	/** Element id for the trigger button. The root generates one when omitted. */
@@ -184,7 +184,7 @@ export type SelectItemProps<T extends object> = Prettify<
  * `id`, `className`, and `ref` target the root element. `triggerId` targets the trigger.
  */
 export function SelectRoot(props: SelectRootProps): JSX.Element {
-	const { className, id, isRequired, size = 'medium', triggerId, ...selectProps } = props;
+	const { className, id, isRequired, size = 'px40', triggerId, ...selectProps } = props;
 	const selectContext = useSlottedContext(SelectContext, props.slot);
 	const resolvedIsRequired = isRequired ?? selectContext?.isRequired ?? false;
 	const fieldState = { isRequired: resolvedIsRequired };
@@ -213,7 +213,7 @@ export function SelectRoot(props: SelectRootProps): JSX.Element {
  */
 export function SelectTrigger(props: SelectTriggerProps): JSX.Element {
 	const { children, className, ...buttonProps } = props;
-	const size = use(SelectSizeContext) ?? 'medium';
+	const size = use(SelectSizeContext) ?? 'px40';
 	const isRequired = use(FieldStateContext)?.isRequired ?? false;
 	const cueId = useId();
 	const buttonContext = useSlottedContext(ButtonContext, buttonProps.slot);
@@ -341,7 +341,7 @@ export function SelectListBox<T extends object>(props: SelectListBoxProps<T>): J
  * the surrounding `SelectRoot`.
  */
 export function SelectItem<T extends object>(props: SelectItemProps<T>): JSX.Element {
-	const size = use(SelectSizeContext) ?? 'medium';
+	const size = use(SelectSizeContext) ?? 'px40';
 
 	return <ComboboxItem<T> {...props} size={size} />;
 }

@@ -120,7 +120,7 @@ function PagerLink({ direction, page }: { direction: PagerDirection; page: Item 
 function PagerTitle({ direction, name }: { direction: PagerDirection; name: ReactNode }) {
 	const chevron = (
 		<LockupRail>
-			<Icon className={styles.pagerIcon} name={pagerDirection[direction].chevron} size="xsmall" />
+			<Icon className={styles.pagerIcon} name={pagerDirection[direction].chevron} size="px16" />
 		</LockupRail>
 	);
 

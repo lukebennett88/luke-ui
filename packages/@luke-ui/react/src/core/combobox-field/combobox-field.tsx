@@ -98,7 +98,7 @@ interface _ComboboxFieldBaseProps<T extends object>
 	/** Forwarded to the field's root element. Use `inputRef` for the input. */
 	ref?: ComboboxRootProps<T>['ref'];
 
-	/** Control size. @default 'medium' */
+	/** Control size. @default 'px40' */
 	size?: ComboboxSize;
 }
 
@@ -128,7 +128,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		onLoadMore,
 		placeholder,
 		popoverProps,
-		size = 'medium',
+		size = 'px40',
 		...comboboxRootProps
 	} = props;
 
@@ -145,7 +145,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 
 		return (
 			<ComboboxLoadMoreItem isLoading={loadingState === 'loadingMore'} onLoadMore={onLoadMore}>
-				<LoadingSpinner aria-label="Loading more options..." size="small" />
+				<LoadingSpinner aria-label="Loading more options..." size="px20" />
 			</ComboboxLoadMoreItem>
 		);
 	})();
@@ -241,7 +241,7 @@ function ComboboxEmptyStateContent({
 	if (loadingState === 'loading' || loadingState === 'filtering') {
 		return (
 			<ComboboxEmptyState>
-				<LoadingSpinner aria-label="Loading options..." size="medium" />
+				<LoadingSpinner aria-label="Loading options..." size="px24" />
 			</ComboboxEmptyState>
 		);
 	}
