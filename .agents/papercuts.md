@@ -85,7 +85,9 @@ not help. Silence in this log is not evidence.
   for commit `c818adf3` (38338181845) produced byte-identical `theme/token-board-*` renders that
   differ from the baseline. The run for commit `a2f12ba8` (38336322056) matched the baseline,
   although that commit contains the same code as `42cf474f`. The token board imports no field
-  components.
+  components. 2026-10-17 (#848, #849): both compares flagged all four `theme/token-board-*`
+  captures. Locally, two captures of the same commit differed by about 355k pixels each, and the
+  second matched a capture with an unrelated `Text` change byte for byte.
 - Where: `packages/@luke-ui/react/src/theme/token-board.browser.test.tsx`. Governing rule:
   docs/TESTING.md, "Remove nondeterminism. Do not add an allowance."
 - Problem: about 290k mismatched pixels across the whole board (anti-aliasing, not a shift) appear
@@ -139,3 +141,25 @@ not help. Silence in this log is not evidence.
   `docs/STYLING.md`.
 - Problem: TypeScript accepts a spacing token key where a CSS length is required, so the prop can
   compile while producing an invalid CSS value.
+
+## A component added a nested JSX-returning `render*()` helper
+
+- Seen: 2026-10-16 (#824). `Track` gained `const renderRail = (content) => <WrapperElement …>`
+  inside the component body, called as `renderRail(railStart)`. Review asked for plain declarative
+  JSX instead.
+- Where: `packages/@luke-ui/react/src/core/track/track.tsx` in #824. Governing guide:
+  docs/CONVENTIONS.md, "Code style" and "Components".
+- Problem: CONVENTIONS.md covers helpers, branching, and loops but says nothing about functions that
+  return JSX, so nothing in the repository's guidance steers a contributor away from a nested
+  `render*()` helper.
+
+## The documented generator command stops at an unanswered prompt
+
+- Seen: 2026-10-17 (Lockup PR for #801). `pnpm run generate:component --args lockup layout`, the
+  command AGENTS.md gives, stopped at "Add visual coverage?" and crashed with `ERR_USE_AFTER_CLOSE`
+  in a non-interactive shell. `--args lockup layout Yes` ran. `true` was rejected as an invalid
+  choice.
+- Where: AGENTS.md "Task routing"; `packages/turbo-generators/config.ts` `visualCoverage` prompt.
+- Problem: AGENTS.md calls the two-argument command non-interactive, but the component generator has
+  a third required prompt, and the primitive generator has two more, so the documented command fails
+  for agents.

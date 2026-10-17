@@ -752,6 +752,9 @@ importers:
       '@capsizecss/unpack':
         specifier: 'catalog:'
         version: 4.0.1
+      '@fontsource-variable/inter':
+        specifier: 'catalog:'
+        version: 5.3.0
       '@fontsource/lora':
         specifier: 'catalog:'
         version: 5.3.0

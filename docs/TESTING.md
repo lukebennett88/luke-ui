@@ -42,6 +42,12 @@ for (const ratio of ratios) {
 Shared assertions take concrete elements and values. Keep the test, fixture, and contract choice in
 the component's test file.
 
+`render()` loads no font, and the fixture themes name `Inter`, so text uses whichever `Inter` the
+machine has installed or a fallback. A test whose layout depends on real font metrics, such as
+Capsize trims or the cap height, calls `await loadInter()` from `test-utils/load-inter.ts`. It loads
+the Inter file the theme packages ship for that test only. Compare positions with Inter's published
+metrics (`INTER_CAP_HEIGHT_EM`) and measured baselines, not with the CSS under test.
+
 Package component tests pin `window.screen.width` to a desktop value in `@luke-ui/react` browser
 setup so `useIsMobileDevice` stays desktop. Vitest's browser iframe is 414px wide. Playwright
 mirrors that onto `screen.width`, which would otherwise look like a phone. Call `mockScreenWidth`

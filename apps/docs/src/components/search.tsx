@@ -1,8 +1,8 @@
 import { Icon } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Kbd } from '@luke-ui/react/kbd';
+import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 import { Button } from '@luke-ui/react/primitives/button';
-import { Track } from '@luke-ui/react/track';
 import type { ReactNode, RefObject } from 'react';
 import {
 	createContext,
@@ -219,16 +219,22 @@ function WideSearchTrigger({ context }: { context: SearchContextValue }) {
 						prominence="low"
 						size="small"
 					>
-						<Track
-							className={styles.triggerTrack}
+						<Lockup
+							className={styles.triggerLockup}
 							elementType="span"
 							gap="sp8"
 							railAlignment="center"
-							railEnd={<SearchShortcutLabel />}
-							railStart={<Icon name="search" />}
 						>
-							<span className={styles.triggerPlaceholder}>Search</span>
-						</Track>
+							<LockupRail>
+								<Icon name="search" />
+							</LockupRail>
+							<LockupBody>
+								<span className={styles.triggerPlaceholder}>Search</span>
+							</LockupBody>
+							<LockupRail>
+								<SearchShortcutLabel />
+							</LockupRail>
+						</Lockup>
 					</Button>
 				</ViewTransition>
 			)}

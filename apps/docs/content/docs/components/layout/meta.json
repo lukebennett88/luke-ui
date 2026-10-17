@@ -7,9 +7,9 @@
 		"cluster",
 		"container",
 		"grid",
+		"lockup",
 		"scroll-fade",
 		"stack",
-		"track",
 		"visually-hidden"
 	]
 }

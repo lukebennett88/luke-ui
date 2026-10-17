@@ -413,7 +413,7 @@ test('the CheckboxField error text starts at the label text and its icon sits on
 	expect(input).toHaveAccessibleDescription(errorMessage);
 	expect(measurement.firstLineStart).toBeCloseTo(labelStart, 0);
 	expect(measurement.secondLineStart).toBeCloseTo(labelStart, 0);
-	expect(Math.abs(measurement.iconCentre - measurement.firstLineCentre)).toBeLessThan(1);
+	expect(Math.abs(measurement.iconCentre - measurement.capCentre)).toBeLessThanOrEqual(0.5);
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {

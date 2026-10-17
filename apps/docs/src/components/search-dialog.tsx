@@ -2,9 +2,9 @@ import { Button } from '@luke-ui/react/button';
 import { Code } from '@luke-ui/react/code';
 import { Icon } from '@luke-ui/react/icon';
 import { Kbd } from '@luke-ui/react/kbd';
+import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
-import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
 import type { NavigateOptions } from '@tanstack/react-router';
 import { useRouter } from '@tanstack/react-router';
@@ -105,11 +105,21 @@ export function DocsSearchDialog({
 			<div className={styles.panelFieldShell}>
 				<div className={styles.autocomplete}>
 					<Autocomplete inputValue={search} onInputChange={setSearch}>
-						<Track
-							className={styles.inputRow}
-							gap="sp12"
-							railAlignment="center"
-							railEnd={
+						<Lockup className={styles.inputRow} gap="sp12" railAlignment="center">
+							<LockupBody>
+								<TextInputField
+									aria-label="Search documentation"
+									autoComplete="off"
+									autoFocus // oxlint-disable-line jsx-a11y/no-autofocus -- Focus the field when the modal opens.
+									className={styles.field}
+									inputClassName={styles.input}
+									placeholder="Search documentation"
+									prefix={<Icon name="search" />}
+									size="small"
+									type="search"
+								/>
+							</LockupBody>
+							<LockupRail>
 								<Button
 									aria-label="Close search"
 									className={styles.close}
@@ -119,20 +129,8 @@ export function DocsSearchDialog({
 								>
 									<Kbd>Esc</Kbd>
 								</Button>
-							}
-						>
-							<TextInputField
-								aria-label="Search documentation"
-								autoComplete="off"
-								autoFocus // oxlint-disable-line jsx-a11y/no-autofocus -- Focus the field when the modal opens.
-								className={styles.field}
-								inputClassName={styles.input}
-								placeholder="Search documentation"
-								prefix={<Icon name="search" />}
-								size="small"
-								type="search"
-							/>
-						</Track>
+							</LockupRail>
+						</Lockup>
 						<div className={styles.panelResultsRegion}>
 							{/* Static empty copy: embedding the query would re-announce on every keystroke. */}
 							<Text

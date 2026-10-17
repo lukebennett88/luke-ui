@@ -44,9 +44,9 @@ const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px
  * composed inline control's label), `necessityMarker` (the required marker after a label's text),
  * `message` (description/error text), and `icon` (the error message's leading icon).
  *
- * `FieldError` lays the error `message` out with `trackRecipe`'s `firstLine` rail alignment, which
- * centres the `icon` rail on the message's first line and keeps wrapped lines aligned with the
- * text. This recipe supplies the rail's size and glyph.
+ * `FieldError` lays the error `message` out with `lockupRecipe`, which centres the `icon` rail on
+ * the message's first line and keeps wrapped lines aligned with the text. This recipe supplies the
+ * rail's size and glyph.
  */
 const fieldConfig = {
 	slots: {
@@ -145,6 +145,8 @@ const fieldConfig = {
 						'(forced-colors: active)': { backgroundColor: 'CanvasText' },
 					},
 					backgroundColor: vars.color.foreground.danger.rest,
+					// The rail has no content to size it, and the mask paints only inside its box.
+					blockSize: ICON_SIZES.xsmall,
 					inlineSize: errorIconRailInlineSize,
 					maskImage: iconMaskUrls.exclamationTriangle,
 					maskPosition: 'center',

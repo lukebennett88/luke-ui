@@ -4,11 +4,11 @@ import { Cluster } from '@luke-ui/react/cluster';
 import { Grid } from '@luke-ui/react/grid';
 import type { IconName, IconProps } from '@luke-ui/react/icon';
 import { Icon, iconNames } from '@luke-ui/react/icon';
+import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { vars } from '@luke-ui/react/theme';
-import { Track } from '@luke-ui/react/track';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import type { JSX, ReactNode } from 'react';
@@ -106,41 +106,37 @@ export function IconGallery(): JSX.Element {
 
 	return (
 		<Stack className="not-prose" gap="sp16">
-			<Track
-				className={referenceStyles.filterTrackCaption}
-				gap="sp12"
-				railAlignment="firstLine"
-				railEnd={
-					<>
-						<Text color="secondary" fontVariantNumeric="tabular-nums" typography="caption">
-							{countText}
-						</Text>
-						<VisuallyHidden aria-live="polite" elementType="p">
-							{deferredCountText}
-						</VisuallyHidden>
-					</>
-				}
-			>
-				<Cluster gap="sp12">
-					<Box flexBasis="14rem" flexGrow="1" minInlineSize="12rem">
-						<TextInputField
-							aria-label="Filter icons by name"
-							inputRef={inputRef}
-							onChange={setFilter}
-							placeholder="Filter by name"
-							prefix={<Icon name="search" size="small" />}
-							size="small"
-							value={filter}
+			<Lockup className={referenceStyles.filterToolbarCaption} gap="sp12" railAlignment="center">
+				<LockupBody>
+					<Cluster gap="sp12">
+						<Box flexBasis="14rem" flexGrow="1" minInlineSize="12rem">
+							<TextInputField
+								aria-label="Filter icons by name"
+								inputRef={inputRef}
+								onChange={setFilter}
+								placeholder="Filter by name"
+								prefix={<Icon name="search" size="small" />}
+								size="small"
+								value={filter}
+							/>
+						</Box>
+						<TextToggleButtonGroup
+							label="Preview size"
+							onChange={setPreviewSize}
+							options={SIZE_OPTIONS}
+							value={previewSize}
 						/>
-					</Box>
-					<TextToggleButtonGroup
-						label="Preview size"
-						onChange={setPreviewSize}
-						options={SIZE_OPTIONS}
-						value={previewSize}
-					/>
-				</Cluster>
-			</Track>
+					</Cluster>
+				</LockupBody>
+				<LockupRail>
+					<Text color="secondary" fontVariantNumeric="tabular-nums" typography="caption">
+						{countText}
+					</Text>
+					<VisuallyHidden aria-live="polite" elementType="p">
+						{deferredCountText}
+					</VisuallyHidden>
+				</LockupRail>
+			</Lockup>
 
 			{filteredNames.length === 0 ? (
 				<IconGalleryEmptyState onClear={handleClearFilter} query={filter.trim()} />
