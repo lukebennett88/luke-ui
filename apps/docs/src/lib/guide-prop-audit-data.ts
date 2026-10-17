@@ -214,12 +214,19 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'gap',
 		'renderRoot',
 	],
-	'layout/track.mdx::packages/@luke-ui/react/src/core/track/track.tsx::TrackProps': [
+	'layout/lockup.mdx::packages/@luke-ui/react/src/core/lockup/lockup.tsx::LockupProps': [
 		'elementType',
 		'gap',
 		'railAlignment',
-		'railEnd',
-		'railStart',
+		'renderRoot',
+	],
+	'layout/lockup.mdx::packages/@luke-ui/react/src/core/lockup/lockup.tsx::LockupRailProps': [
+		'elementType',
+		'renderRoot',
+	],
+	'layout/lockup.mdx::packages/@luke-ui/react/src/core/lockup/lockup.tsx::LockupBodyProps': [
+		'elementType',
+		'renderRoot',
 	],
 	'layout/visually-hidden.mdx::packages/@luke-ui/react/src/core/visually-hidden/visually-hidden.tsx::VisuallyHiddenProps':
 		['elementType', 'isFocusable', 'ref', 'renderRoot'],

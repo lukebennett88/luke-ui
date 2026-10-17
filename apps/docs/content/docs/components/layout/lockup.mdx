@@ -1,0 +1,99 @@
+---
+title: Lockup
+description: Place supporting content beside one flexible body that can wrap or truncate.
+source: packages/@luke-ui/react/src/exports/lockup.ts
+---
+
+`Lockup` places icons, avatars, actions, shortcut hints, and counts beside a body that can grow,
+wrap, or truncate. Read [Layout](/docs/layout) to choose a layout component.
+
+Put exactly one `LockupBody` inside `Lockup`, with any number of `LockupRail` siblings before or
+after it. Parts appear in DOM order, so the first part sits on the inline-start side in both
+left-to-right and right-to-left text.
+
+<ExampleBlock src="lockup/basic" title="Lockup: Basic" />
+
+## Rails and sizing
+
+A rail keeps its intrinsic inline size. The body takes the remaining space and can shrink below its
+content, so long text wraps or truncates instead of widening the row. Lockup does not truncate text
+itself.
+
+`gap` sets the same space between every pair of adjacent parts. For different spacing inside a rail,
+put a [Cluster](/components/layout/cluster) inside it.
+
+An empty rail still takes up a part and a gap. To leave a rail out, render the `LockupRail`
+conditionally, not only its children.
+
+## Rail content
+
+A rail holds supporting items, not running text. Pass a string, a number, or elements. Items in one
+rail sit side by side. To keep text and an element flowing together, such as a phrase with a `Kbd`,
+wrap them in one element.
+
+<ExampleBlock src="lockup/rail-content" title="Lockup: Rail content" />
+
+## Alignment
+
+`railAlignment` sets how rails line up with the body. `firstLine` is the default. It centres each
+rail on the first line of the body, so an icon stays beside that line when the text wraps. A rail
+taller than the first line makes the row taller. `center` centres each rail on the whole body.
+
+<ExampleBlock src="lockup/alignment" title="Lockup: Alignment" />
+
+Use `center` for an avatar beside a name and description, for controls, and for a body without a
+line of text to align with.
+
+<ExampleBlock src="lockup/avatar" title="Lockup: Avatar and text" />
+
+`firstLine` measures the first line with the typography Lockup inherits. When the body starts with
+another type style, such as a `Heading`, the rails sit off-centre. Put the typography component
+around Lockup instead, and set `elementType="span"` on a Lockup inside a `Heading`.
+
+<ExampleBlock src="lockup/heading" title="Lockup: Heading" />
+
+## Interactive content
+
+Put a link inside `LockupBody` and other controls in their own rails, as siblings of the link. Do
+not put a control inside another interactive element.
+
+<ExampleBlock src="lockup/interactive" title="Lockup: Interactive content" />
+
+## Choose the rendered element
+
+Set `elementType="li"` on a Lockup that is a direct child of `ul` or `ol`.
+
+<ExampleBlock src="lockup/element" title="Lockup: Choose the rendered element" />
+
+Set `elementType="span"` when Lockup sits inside phrasing content. Its parts, and any Lockup nested
+inside it, then render `span` elements. The content you pass must also be phrasing content.
+
+<ExampleBlock src="lockup/element-span" title="Lockup: Inside phrasing content" />
+
+Use `renderRoot` to render your own element for `Lockup`, `LockupRail`, or `LockupBody`. Lockup
+can't tell what kind of content your element allows, so set `elementType` on the parts inside it
+yourself. A `LockupRail` element must be a container, such as a `div` or `span`, not an image or
+other replaced element. Spread the `domProps` onto it and render its children.
+
+## API
+
+### LockupProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/lockup/lockup.tsx"
+	name="LockupProps"
+/>
+
+### LockupRailProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/lockup/lockup.tsx"
+	name="LockupRailProps"
+/>
+
+### LockupBodyProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/lockup/lockup.tsx"
+	name="LockupBodyProps"
+/>

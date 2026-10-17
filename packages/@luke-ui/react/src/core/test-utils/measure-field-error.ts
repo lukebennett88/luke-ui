@@ -1,6 +1,8 @@
+import { measureCapCentre } from './measure-first-line.js';
+
 export interface FieldErrorMeasurement {
-	/** Vertical centre of the first line of message text. */
-	firstLineCentre: number;
+	/** Vertical centre of the cap height of the first line of message text. */
+	capCentre: number;
 	/** Inline start of the first line of message text. */
 	firstLineStart: number;
 	/** Vertical centre of the error icon's rail, which centres the glyph. */
@@ -31,7 +33,7 @@ export function measureFieldError(textElement: Element): FieldErrorMeasurement {
 	const iconRect = icon.getBoundingClientRect();
 
 	return {
-		firstLineCentre: firstLine.top + firstLine.height / 2,
+		capCentre: measureCapCentre(textElement),
 		firstLineStart: firstLine.left,
 		iconCentre: iconRect.top + iconRect.height / 2,
 		iconEnd: iconRect.right,

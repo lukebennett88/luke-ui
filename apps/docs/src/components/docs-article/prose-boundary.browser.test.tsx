@@ -83,7 +83,7 @@ function widgetRoot(selector: string) {
 }
 
 test('keeps Prose rhythm off an ExampleBlock and its example', async () => {
-	await renderInProse(<ExampleBlock src="track/element" title="Track: Element" />);
+	await renderInProse(<ExampleBlock src="lockup/element" title="Lockup: Element" />);
 	const frame = widgetRoot('.not-prose');
 
 	expect(getComputedStyle(frame).marginBlockStart).toBe('16px');

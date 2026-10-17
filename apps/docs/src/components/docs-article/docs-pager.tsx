@@ -1,10 +1,10 @@
 import { Box } from '@luke-ui/react/box';
 import { Grid } from '@luke-ui/react/grid';
 import { Icon } from '@luke-ui/react/icon';
+import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
-import { Track } from '@luke-ui/react/track';
 import { useRouterState } from '@tanstack/react-router';
 import type { Folder, Item, Node, Root } from 'fumadocs-core/page-tree';
 import { findPath, flattenTree } from 'fumadocs-core/page-tree';
@@ -119,7 +119,9 @@ function PagerLink({ direction, page }: { direction: PagerDirection; page: Item 
 
 function PagerTitle({ direction, name }: { direction: PagerDirection; name: ReactNode }) {
 	const chevron = (
-		<Icon className={styles.pagerIcon} name={pagerDirection[direction].chevron} size="xsmall" />
+		<LockupRail>
+			<Icon className={styles.pagerIcon} name={pagerDirection[direction].chevron} size="xsmall" />
+		</LockupRail>
 	);
 
 	return (
@@ -133,16 +135,15 @@ function PagerTitle({ direction, name }: { direction: PagerDirection; name: Reac
 			}
 			typography="label"
 		>
-			<Track
-				gap="sp8"
-				railAlignment="firstLine"
-				railEnd={direction === 'next' ? chevron : undefined}
-				railStart={direction === 'previous' ? chevron : undefined}
-			>
-				<Text elementType="span" shouldInheritFont>
-					{name}
-				</Text>
-			</Track>
+			<Lockup gap="sp8">
+				{direction === 'previous' && chevron}
+				<LockupBody>
+					<Text elementType="span" shouldInheritFont>
+						{name}
+					</Text>
+				</LockupBody>
+				{direction === 'next' && chevron}
+			</Lockup>
 		</Text>
 	);
 }
