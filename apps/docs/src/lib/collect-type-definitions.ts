@@ -18,9 +18,6 @@ const printer = ts.createPrinter({ removeComments: true });
 
 const NULLISH_TYPES = new Set(['null', 'undefined']);
 
-/** Longest checker expansion kept as `resolved`. A longer one would bury the definition. */
-const MAX_RESOLVED_LENGTH = 400;
-
 /** Longest external type alias whose declaration is copied. Longer ones keep only their package. */
 const MAX_EXTERNAL_DEFINITION_LENGTH = 400;
 
@@ -243,9 +240,6 @@ export function createTypeDefinitionCollector({
 		// The printed tokens and the walked references come from the same built node.
 		const node = buildTypeNode(type, enclosing, PRINTED_TYPE_FLAGS | extraFlags);
 		if (node === undefined) return;
-
-		const text = printer.printNode(ts.EmitHint.Unspecified, node, enclosing.getSourceFile());
-		if (text.length > MAX_RESOLVED_LENGTH) return;
 
 		visit(node, resolveBuilt, entry.references, { expand: true, shown: false });
 		entry.resolved = typePrinter.type(node);

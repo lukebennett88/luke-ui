@@ -112,6 +112,26 @@ test('processed Markdown lists the Grid and Stack type definitions after their t
 	);
 });
 
+test('processed Markdown shows long resolved forms in full', async () => {
+	const grid = await processedApi(['components', 'layout', 'grid']);
+	const shape = grid.slice(grid.indexOf('##### `SprinklesPropsShape`'));
+	const resolved = shape.slice(shape.indexOf('Which resolves to:'), shape.indexOf('\n##### '));
+
+	// The mapped type hides which Sprinkles props exist. Its expansion lists every one with its values.
+	expect(resolved.length).toBeGreaterThan(400);
+	expect(resolved).toContain('  readonly alignContent?: ResponsiveValue<"center"\n    | "end"');
+	expect(resolved).toContain('  readonly justifyContent?: ResponsiveValue<');
+	expect(resolved).toContain('  readonly rowGap?: ResponsiveValue<');
+
+	const bleed = await processedApi(['components', 'layout', 'bleed']);
+	expect(bleed).toContain(
+		"##### `BleedSpaceProp`\n\n```ts\ntype BleedSpaceProp = ResponsivePropValue<'0' | SpaceStep>;\n```",
+	);
+	expect(bleed).toMatch(
+		/##### `SpaceStep`\n\n```ts\n[^`]+```\n\nWhich resolves to:\n\n```ts\n"sp4"\n/,
+	);
+});
+
 test('processed Markdown shows Button render props and callbacks with their definitions', async () => {
 	const button = await processedApi(['components', 'actions', 'button']);
 

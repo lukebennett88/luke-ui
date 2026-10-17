@@ -627,6 +627,30 @@ test('the Grid guide follows responsive types to the breakpoint names they accep
 	).toEqual(['RequiredInitialResponsiveValue', 'ResponsivePropValue', 'ResponsiveCondition']);
 });
 
+test('the Grid guide shows every Sprinkles prop a mapped type hides, scrolling on a phone', async () => {
+	const { default: GridGuide } = await import('../../content/docs/components/layout/grid.mdx');
+	await renderWidget(<GridGuide components={GUIDE_COMPONENTS} />, {
+		inlineSize: MOBILE_INLINE_SIZE,
+	});
+
+	await openDefinitionWithKeyboard('GridAlignmentProp');
+	await openNamedType('SprinklesProps');
+	await openNamedType('SprinklesPropsShape');
+
+	const dialog = page.getByRole('dialog', { name: 'Definition of SprinklesPropsShape' });
+	await expect.element(dialog.getByText('Which resolves to:')).toBeVisible();
+	const shown = visibleText(dialog.element() as HTMLElement);
+	expect(shown).toContain('readonly alignContent?: ResponsiveValue<"center"');
+	expect(shown).toContain('readonly rowGap?: ResponsiveValue<');
+
+	const popover = dialog.element().parentElement;
+	assert(popover, 'expected the popover around the dialog');
+	expect(popover.scrollWidth).toBeLessThanOrEqual(popover.clientWidth);
+	expect(popover.scrollHeight).toBeGreaterThan(popover.clientHeight);
+	assert(container, 'expected a container');
+	expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
+});
+
 test('keeps the Box guide token unions on separate lines without widening a mobile viewport', async () => {
 	const { default: BoxGuide } = await import('../../content/docs/components/layout/box.mdx');
 	await renderWidget(<BoxGuide components={GUIDE_COMPONENTS} />, {

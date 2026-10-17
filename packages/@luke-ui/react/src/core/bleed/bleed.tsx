@@ -7,7 +7,7 @@ import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
 import { resolveResponsiveCssProperty } from '../styles/responsive-css-property.js';
-import type { SprinklesProps } from '../styles/utilities.css.js';
+import type { ResponsivePropValue } from '../styles/responsive.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -79,7 +79,7 @@ export function Bleed({
 }
 
 /** A spacing token, or a responsive object keyed by breakpoint. */
-type BleedSpaceProp = NonNullable<SprinklesProps['padding']>;
+type BleedSpaceProp = ResponsivePropValue<'0' | SpaceStep>;
 
 interface _BleedSpaceProps {
 	/** Amount to extend from all four edges. Axis and edge props override this at the same breakpoint. */

@@ -71,6 +71,23 @@ test('links the Luke UI types a definition names, so a popover can open them in 
 	expect(text(definitions.Condition?.definition)).toBe("type Condition = 'initial' | 'wide';");
 });
 
+test('keeps the whole resolved form of a declaration, however long it is', () => {
+	const names = Array.from({ length: 40 }, (_, index) => `breakpoint${index}`);
+	const { annotation, collector } = collectorFor(`
+		const conditions = { ${names.map((name) => `${name}: true`).join(', ')} };
+		type Condition = keyof typeof conditions;
+		export interface Props {
+			condition?: Condition;
+		}
+	`);
+
+	collector.addTypeNode(annotation('condition'));
+	const resolved = text(collector.definitions()?.Condition?.resolved);
+
+	expect(resolved?.length).toBeGreaterThan(400);
+	expect(resolved?.split(' | ').sort()).toEqual(names.map((name) => `"${name}"`).sort());
+});
+
 function text(tokens: TypeTokens | undefined): string | undefined {
 	return tokens === undefined ? undefined : typeTokensToText(tokens, { multiline: false });
 }
