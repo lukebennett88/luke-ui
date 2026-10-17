@@ -30,6 +30,14 @@ applies to the literal next line, so it cannot sit inside a multi-line comment.
 The package is built with the React Compiler, so do not add `useMemo`, `useCallback` or `memo` for
 performance. Pass plain objects as context values, because the compiler memoises them.
 
+## State modelling
+
+Keep state that must transition together in one state value. For an async load, model status, data,
+and error as a discriminated union so impossible combinations cannot be represented. Keep
+independent state separate and derive values instead of storing duplicates. A single `useState` is
+sufficient when replacing the whole value keeps transitions clear. Use a reducer when named
+transitions make more complex update logic easier to follow.
+
 ## Effects
 
 Do not use `useEffect` to reset state when a prop changes, or to mirror React state into a ref for
