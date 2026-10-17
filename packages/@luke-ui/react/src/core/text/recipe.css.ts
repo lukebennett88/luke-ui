@@ -102,18 +102,22 @@ function createLayeredTextStyle({
 	fontSize: string;
 	lineHeight: string;
 }) {
+	// The trim boxes use `flow-root`, not `table`. Chromium takes the first baseline of a block
+	// from an empty `display: table` pseudo-element, which breaks baseline alignment beside trimmed
+	// text. `flow-root` still forms a formatting context, so the negative margins cannot collapse
+	// through the box.
 	return {
 		fontSize,
 		lineHeight,
 		selectors: {
 			'&::before': {
 				content: "''",
-				display: 'table',
+				display: 'flow-root',
 				marginBlockEnd: capHeightTrim,
 			},
 			'&::after': {
 				content: "''",
-				display: 'table',
+				display: 'flow-root',
 				marginBlockStart: baselineTrim,
 			},
 		},
