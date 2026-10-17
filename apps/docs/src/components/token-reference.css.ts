@@ -1,16 +1,77 @@
-import { vars } from '@luke-ui/react/theme';
+import { breakpoints, vars } from '@luke-ui/react/theme';
 import { visuallyHiddenStyle } from '@luke-ui/react/visually-hidden';
-import { globalStyle, style } from '@vanilla-extract/css';
+import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
-// DS gap: Text has no font family prop, and `Code` always draws a chip. Token names and values want
-// the code font without one. Box has no overflowWrap prop, and a long CSS variable name has no
-// break opportunity, so it may break anywhere rather than push the column wider than the page.
-export const code = style({
+/** Sticky token panel headers sit below the site header. */
+const TOKEN_REFERENCE_PANEL_HEADER_INSET = SITE_HEADER_BLOCK_SIZE;
+
+/** Viewport width below the token row's `bp768` grid. */
+const BELOW_TABLET = `(max-width: ${breakpoints.bp768 - 1}px)`;
+
+const PANEL_BORDER = `1px solid ${vars.color.border.decorative}`;
+
+// DS gap: Box has no overflowWrap prop. A long token path may break anywhere rather
+// than push the column wider than the page.
+export const tokenIdentification = style({
 	'@layer': {
 		components: {
-			fontFamily: vars.font.family.code,
 			overflowWrap: 'anywhere',
+		},
+	},
+});
+
+// DS gap: Box has no sticky positioning, z-index, or per-side border props. The header owns the
+// panel's top chrome (borders + outer top radius) so its fill is not clipped inside a parent
+// radius. Top radius stays constant while sticky.
+export const columnHeaderShell = style({
+	'@layer': {
+		components: {
+			backgroundColor: vars.color.surface.subdued,
+			borderBlockStart: PANEL_BORDER,
+			borderInlineEnd: PANEL_BORDER,
+			borderInlineStart: PANEL_BORDER,
+			borderStartEndRadius: vars.radius.surface,
+			borderStartStartRadius: vars.radius.surface,
+			insetBlockStart: TOKEN_REFERENCE_PANEL_HEADER_INSET,
+			position: 'sticky',
+			zIndex: 1,
+			'@media': {
+				[BELOW_TABLET]: {
+					...visuallyHiddenStyle,
+				},
+			},
+		},
+	},
+});
+
+// DS gap: Box has no per-side border props. A rule separates the header from the first row.
+export const columnHeader = style({
+	'@layer': {
+		components: {
+			borderBlockEnd: PANEL_BORDER,
+		},
+	},
+});
+
+// DS gap: Box has no per-side border or corner props. Body chrome sits under the sticky header:
+// side and bottom borders, bottom radii. Below tablet the sticky header is visually hidden, so the
+// body also draws the top border and top radii.
+export const panelBody = style({
+	'@layer': {
+		components: {
+			borderBlockEnd: PANEL_BORDER,
+			borderEndEndRadius: vars.radius.surface,
+			borderEndStartRadius: vars.radius.surface,
+			borderInlineEnd: PANEL_BORDER,
+			borderInlineStart: PANEL_BORDER,
+			'@media': {
+				[BELOW_TABLET]: {
+					borderBlockStart: PANEL_BORDER,
+					borderStartEndRadius: vars.radius.surface,
+					borderStartStartRadius: vars.radius.surface,
+				},
+			},
 		},
 	},
 });
@@ -54,15 +115,6 @@ export const row = style({
 	},
 });
 
-// DS gap: Box has no scroll margin prop. Hash targets clear the site header.
-export const tile = style({
-	'@layer': {
-		components: {
-			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space.sp24})`,
-		},
-	},
-});
-
 const TYPE_CONTAINER = 'token-type';
 /** Below this inline size each token name sits above its value and copy control. */
 const TYPE_NARROW = `${TYPE_CONTAINER} (inline-size < 40rem)`;
@@ -86,21 +138,28 @@ export const typeTable = style({
 		components: {
 			borderCollapse: 'separate',
 			borderSpacing: 0,
-			tableLayout: 'auto',
+			tableLayout: 'fixed',
 			'@container': {
 				[TYPE_NARROW]: {
 					display: 'block',
+					tableLayout: 'auto',
 				},
 			},
 		},
 	},
 });
 
-// DS gap: Box has no container-query display. The headers stay in the accessibility tree when the
-// rows stack.
+// DS gap: Box has no container-query display or viewport media queries. The visible sticky header
+// is `TokenColumnHeader`; this thead stays in the accessibility tree and shows below tablet when
+// the panel is wide enough for columns.
 export const typeHead = style({
 	'@layer': {
 		components: {
+			'@media': {
+				[`(min-width: ${breakpoints.bp768}px)`]: {
+					...visuallyHiddenStyle,
+				},
+			},
 			'@container': {
 				[TYPE_NARROW]: {
 					...visuallyHiddenStyle,
@@ -154,35 +213,20 @@ export const typeSpecimenRow = style({
 	},
 });
 
-// DS gap: Box has no container-query display or grid template. A narrow token row puts its full
-// name and CSS variable above the value and copy control.
+// DS gap: Box has no container-query display. A narrow token row stacks its token name above its
+// value.
 export const typeRow = style({
 	'@layer': {
 		components: {
 			'@container': {
 				[TYPE_NARROW]: {
 					borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
-					display: 'grid',
-					gridTemplateColumns: `minmax(0, 1fr) calc(${vars.space.sp48} + ${vars.space.sp8})`,
+					display: 'block',
 					selectors: {
 						'&:last-child': {
 							borderBlockEnd: 'none',
 						},
 					},
-				},
-			},
-		},
-	},
-});
-
-// DS gap: Button has no minBlockSize prop, so its target grows on narrow screens.
-export const tokenCopyButton = style({
-	'@layer': {
-		components: {
-			minBlockSize: vars.space.sp48,
-			'@media': {
-				'(min-width: 48rem)': {
-					minBlockSize: vars.space.sp32,
 				},
 			},
 		},
@@ -212,15 +256,13 @@ export const typeCell = style({
 	},
 });
 
-// DS gap: Box has no container-query grid placement. The token identification uses the full row;
-// the value stays in the first narrow column.
+// DS gap: Box has no container-query padding. Token identification padding on narrow screens.
 export const typeNameCell = style({
 	'@layer': {
 		components: {
 			paddingBlock: vars.space.sp8,
 			'@container': {
 				[TYPE_NARROW]: {
-					gridColumn: '1 / -1',
 					paddingBlock: vars.space.sp12,
 				},
 			},
@@ -228,8 +270,8 @@ export const typeNameCell = style({
 	},
 });
 
-// DS gap: Box has no container-query grid placement or white-space prop. The resolved value stays
-// compact on desktop and can wrap on narrow screens.
+// DS gap: Box has no container-query padding or white-space prop. The resolved value stays compact
+// on desktop and can wrap on narrow screens.
 export const typeValueCell = style({
 	'@layer': {
 		components: {
@@ -237,7 +279,6 @@ export const typeValueCell = style({
 			whiteSpace: 'nowrap',
 			'@container': {
 				[TYPE_NARROW]: {
-					gridColumn: '1',
 					paddingBlock: vars.space.sp12,
 					whiteSpace: 'normal',
 				},
@@ -246,149 +287,107 @@ export const typeValueCell = style({
 	},
 });
 
-// DS gap: Box has no container-query grid placement. The icon control sits beside the value.
-export const typeActionCell = style({
-	'@layer': {
-		components: {
-			'@container': {
-				[TYPE_NARROW]: {
-					gridColumn: '2',
-				},
-			},
-		},
-	},
-});
-
-// DS gap: Box has no native button reset or hover background props. The icon control grows with the
-// narrow table layout; its native focus ring remains visible.
-export const typeCopyButton = style({
-	'@layer': {
-		components: {
-			backgroundColor: 'transparent',
-			border: 'none',
-			borderRadius: vars.radius.control,
-			color: 'inherit',
-			inlineSize: vars.space.sp32,
-			minBlockSize: vars.space.sp32,
-			padding: 0,
-			selectors: {
-				'&:hover': {
-					backgroundColor: vars.color.background.neutral.subtle.hover,
-				},
-				'&:active': {
-					backgroundColor: vars.color.background.neutral.subtle.pressed,
-				},
-			},
-			'@container': {
-				[TYPE_NARROW]: {
-					inlineSize: vars.space.sp48,
-					minBlockSize: vars.space.sp48,
-				},
-			},
-		},
-	},
-});
-
-// DS gap: the copy column is an icon action, so its header stays available to assistive technology
-// without taking visual space.
-export const typeCopyHeader = style({
-	'@layer': {
-		components: {
-			...visuallyHiddenStyle,
-		},
-	},
-});
-
-/** The inline size of a duration sample's track. */
+/** The inline size of a motion sample's track. */
 export const MOTION_TRACK_SIZE = '6rem';
-/** The size of the dot that travels a duration sample's track. */
+/** The size of the dot that travels a motion sample's track. */
 export const MOTION_DOT_SIZE = vars.space.sp12;
 
-// DS gap: Box has no transform or transition props, and Luke UI ships no motion sample. The dot
-// rests at the start of its track. It travels the track when someone hovers, focuses, or taps its
-// row, over the token's own duration (set inline) with the standard easing, and never loops.
-export const motionDot = style({
-	'@layer': {
-		components: {
-			transitionProperty: 'transform',
-			transitionTimingFunction: vars.motion.easing.standard,
-			'@media': {
-				'(prefers-reduced-motion: reduce)': {
-					transition: 'none',
-				},
-			},
-		},
-	},
+const motionDotTravelDistance = `calc(${MOTION_TRACK_SIZE} - ${MOTION_DOT_SIZE})`;
+
+/** Shared motion-sample loop length so every dot in a table stays in sync. */
+const MOTION_SAMPLE_CYCLE = '1s';
+
+const motionDotAtStart = {
+	transform: 'translateX(0)',
+};
+
+const motionDotAtEnd = {
+	transform: `translateX(${motionDotTravelDistance})`,
+};
+
+/** Duration samples: travel the full track each half-cycle; timing is set inline per token. */
+const motionDotTravelDuration = keyframes({
+	from: motionDotAtStart,
+	to: motionDotAtEnd,
 });
 
-globalStyle(`${row}:hover ${motionDot}, ${row}:focus-within ${motionDot}`, {
-	'@layer': {
-		components: {
-			transform: `translateX(calc(${MOTION_TRACK_SIZE} - ${MOTION_DOT_SIZE}))`,
-			'@media': {
-				'(prefers-reduced-motion: reduce)': {
-					transform: 'none',
-				},
-			},
-		},
-	},
+/** Easing samples: ~30% travel each way so the curve is readable at a fixed cycle length. */
+const motionDotTravelEasing = keyframes({
+	'0%, 10%, 90%, 100%': motionDotAtStart,
+	'40%, 60%': motionDotAtEnd,
 });
 
 // DS gap: Box has no transform prop, and logical properties have no transform. The track runs
 // right to left in a right-to-left page.
-globalStyle(`[dir="rtl"] ${row}:hover ${motionDot}, [dir="rtl"] ${row}:focus-within ${motionDot}`, {
+const motionDotAtEndRtl = {
+	transform: `translateX(calc(-1 * ${motionDotTravelDistance}))`,
+};
+
+const motionDotTravelDurationRtl = keyframes({
+	from: motionDotAtStart,
+	to: motionDotAtEndRtl,
+});
+
+const motionDotTravelEasingRtl = keyframes({
+	'0%, 10%, 90%, 100%': motionDotAtStart,
+	'40%, 60%': motionDotAtEndRtl,
+});
+
+// DS gap: Box has no animation props, and Luke UI ships no motion sample. Duration samples
+// alternate along the track with a per-token linear() timing function inside MOTION_SAMPLE_CYCLE.
+// Easing samples rest at each end, cross over ~30% of the cycle, and set animation-timing-function
+// inline. Each table toggles motion with data-animate and pauses offscreen.
+export const motionSamples = style({
 	'@layer': {
 		components: {
-			transform: `translateX(calc(${MOTION_DOT_SIZE} - ${MOTION_TRACK_SIZE}))`,
-			'@media': {
-				'(prefers-reduced-motion: reduce)': {
-					transform: 'none',
+			display: 'block',
+		},
+	},
+});
+
+export const motionDotDuration = style({
+	'@layer': {
+		components: {
+			animationDirection: 'alternate',
+			animationDuration: MOTION_SAMPLE_CYCLE,
+			animationIterationCount: 'infinite',
+			animationName: motionDotTravelDuration,
+			selectors: {
+				':where([dir="rtl"]) &': {
+					animationName: motionDotTravelDurationRtl,
 				},
 			},
 		},
 	},
 });
 
-// DS gap: no primitive draws a chart, and SVG strokes take no Box props. The easing plot draws its
-// curve in the primary text colour over decorative guides.
-export const easingCurve = style({
+export const motionDotEasing = style({
 	'@layer': {
 		components: {
-			fill: 'none',
-			stroke: vars.color.text.primary,
-			strokeLinecap: 'round',
-			strokeWidth: 2,
+			animationDuration: MOTION_SAMPLE_CYCLE,
+			animationIterationCount: 'infinite',
+			animationName: motionDotTravelEasing,
+			selectors: {
+				':where([dir="rtl"]) &': {
+					animationName: motionDotTravelEasingRtl,
+				},
+			},
 		},
 	},
 });
 
-export const easingGuide = style({
-	'@layer': {
-		components: {
-			fill: 'none',
-			stroke: vars.color.border.decorative,
-			strokeWidth: 1,
-		},
-	},
+globalStyle(`${motionSamples}[data-animate='false'] ${motionDotDuration}`, {
+	animation: 'none',
 });
 
-export const easingHandle = style({
-	'@layer': {
-		components: {
-			fill: 'none',
-			stroke: vars.color.text.secondary,
-			strokeDasharray: '2 3',
-			strokeWidth: 1,
-		},
-	},
+globalStyle(`${motionSamples}[data-animate='false'] ${motionDotEasing}`, {
+	animation: 'none',
 });
 
-// DS gap: SVG has no Box props. The plot keeps its square shape at any inline size.
-export const easingPlot = style({
-	'@layer': {
-		components: {
-			display: 'block',
-			overflow: 'visible',
-		},
-	},
+globalStyle(`${motionSamples}:not([data-in-view='true']) ${motionDotDuration}`, {
+	animationPlayState: 'paused',
+});
+
+globalStyle(`${motionSamples}:not([data-in-view='true']) ${motionDotEasing}`, {
+	animationPlayState: 'paused',
 });

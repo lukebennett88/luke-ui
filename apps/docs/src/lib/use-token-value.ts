@@ -4,7 +4,8 @@ import { subscribeToThemePrefs } from './theme-prefs.js';
 
 /**
  * A token's resolved value in the active theme, written for reading: colours as hex (or `rgba()`
- * with alpha), lengths as `1rem · 16px`, durations in milliseconds, easings as `cubic-bezier()`,
+ * with alpha), space and radius lengths as their used value, typography sizes as their used value,
+ * durations in milliseconds, easings as `cubic-bezier()`,
  * font families as the first family name, and shadows as a short summary. Returns `null` before
  * hydration, because a static render has no theme to read.
  *
@@ -81,10 +82,18 @@ type ValueKind =
 	| 'easing'
 	| 'finish'
 	| 'fontFamily'
-	| 'length'
+	| 'usedLength'
 	| 'number'
 	| 'shadow'
 	| 'raw';
+
+/** CSS property used to read a token's used length in the probe. */
+function usedLengthPropertyOf(token: ThemeToken): 'fontSize' | 'inlineSize' | 'lineHeight' {
+	const leaf = token.path.split('.').at(-1) ?? '';
+	if (leaf === 'lineHeight') return 'lineHeight';
+	if (token.family === 'font') return 'fontSize';
+	return 'inlineSize';
+}
 
 /** Which reading a token gets, from its family and last path segment. */
 function valueKindOf(token: ThemeToken): ValueKind {
@@ -99,14 +108,14 @@ function valueKindOf(token: ThemeToken): ValueKind {
 		case 'radius':
 		case 'space':
 		case 'controlSize':
-			return 'length';
+			return 'usedLength';
 		case 'interaction':
 			return 'number';
 		case 'motion':
 			return token.path.startsWith('motion.duration.') ? 'duration' : 'easing';
 		case 'font':
 			if (leaf === 'fontFamily' || token.path.startsWith('font.family.')) return 'fontFamily';
-			if (leaf === 'fontSize' || leaf === 'lineHeight') return 'length';
+			if (leaf === 'fontSize' || leaf === 'lineHeight') return 'usedLength';
 			if (leaf === 'fontWeight' || token.path.startsWith('font.weight.')) return 'number';
 			return 'raw';
 	}
@@ -140,8 +149,8 @@ function resolveTokenValue(token: ThemeToken): string {
 	switch (valueKindOf(token)) {
 		case 'color':
 			return readColor(element, token.variable) ?? raw;
-		case 'length':
-			return describeLength(element, token.variable, raw);
+		case 'usedLength':
+			return readUsedLength(element, token.variable, usedLengthPropertyOf(token));
 		case 'duration':
 			return describeDuration(raw);
 		case 'easing':
@@ -187,14 +196,16 @@ function toHexByte(value: number) {
 	return value.toString(16).padStart(2, '0');
 }
 
-/** `1rem · 16px` for a relative length, or the length alone when it is already in pixels. */
-function describeLength(element: HTMLElement, variable: string, raw: string): string {
-	if (PX_LENGTH_PATTERN.test(raw) || raw === '0') return raw;
-	element.style.inlineSize = `var(${variable})`;
-	const pixels = Number.parseFloat(getComputedStyle(element).inlineSize);
-	element.style.inlineSize = '';
-	if (!Number.isFinite(pixels)) return raw;
-	return `${raw} · ${roundTo(pixels, 2)}px`;
+/** The used length after the theme resolves the token (for example `4px` or `0.75rem`). */
+function readUsedLength(
+	element: HTMLElement,
+	variable: string,
+	property: 'fontSize' | 'inlineSize' | 'lineHeight',
+): string {
+	element.style[property] = `var(${variable})`;
+	const computed = getComputedStyle(element)[property];
+	element.style[property] = '';
+	return computed;
 }
 
 function describeDuration(raw: string): string {
@@ -266,7 +277,6 @@ function roundTo(value: number, places: number) {
 	return Math.round(value * factor) / factor;
 }
 
-const PX_LENGTH_PATTERN = /^-?[\d.]+px$/;
 const DURATION_PATTERN = /^(-?[\d.]+)(ms|s)$/;
 const QUOTE_PATTERN = /["']/g;
 const INSET_PATTERN = /\binset\b/;

@@ -1,11 +1,10 @@
 import { Box } from '@luke-ui/react/box';
-import { Icon } from '@luke-ui/react/icon';
-import { Stack } from '@luke-ui/react/stack';
+import { Cluster } from '@luke-ui/react/cluster';
+import { Code } from '@luke-ui/react/code';
+import { IconButton } from '@luke-ui/react/icon-button';
 import { Text } from '@luke-ui/react/text';
-import { vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
-import { Button as RacButton } from 'react-aria-components/Button';
 import type { ThemeToken } from '../generated/token-reference.generated.js';
 import type { TokenSections } from '../lib/token-grammar.js';
 import { tokenSections } from '../lib/token-grammar.js';
@@ -14,7 +13,13 @@ import type { ClipboardFeedbackStatus } from '../lib/use-clipboard-feedback.js';
 import { useClipboardFeedback } from '../lib/use-clipboard-feedback.js';
 import { useTokenValue } from '../lib/use-token-value.js';
 import { TableCell, TableColumn, TableHeaderCell } from './reference-table.js';
-import { TokenGroup, TokenPanel, TokenPath, TokenRow } from './token-reference-parts.js';
+import {
+	TokenColumnHeader,
+	TokenGroup,
+	TokenPanel,
+	TokenPath,
+	TokenRow,
+} from './token-reference-parts.js';
 import * as styles from './token-reference.css.js';
 
 type TypeStyleRow = TokenSections['typography']['styles'][number];
@@ -26,63 +31,57 @@ export function TypeStyleTable() {
 	const { announcement, copy, status } = useClipboardFeedback<string>();
 
 	return (
-		<Box className={cx('not-prose', styles.typeFrame)} marginBlockStart="sp24">
-			<Box
-				borderColor="decorative"
-				borderRadius="surface"
-				borderStyle="solid"
-				borderWidth="thin"
-				className={styles.typeTable}
-				inlineSize="100%"
-				overflow="hidden"
-				renderRoot={(domProps) => <table {...domProps} />}
-			>
-				<caption>
-					<VisuallyHidden>
-						Type styles, smallest first. Use each row's copy control to copy its token.
-					</VisuallyHidden>
-				</caption>
-				<colgroup>
-					<TableColumn />
-					<TableColumn inlineSize="1%" />
-					<TableColumn inlineSize="2.5rem" />
-				</colgroup>
-				<Box
-					backgroundColor="surface.subdued"
-					className={styles.typeHead}
-					renderRoot={(domProps) => <thead {...domProps} />}
-				>
-					<tr>
-						<TypeHeaderCell>Token</TypeHeaderCell>
-						<TypeHeaderCell>Value</TypeHeaderCell>
-						<TypeHeaderCell isVisuallyHidden>Copy</TypeHeaderCell>
-					</tr>
-				</Box>
-				{tokenSections.typography.styles.map((row) => (
+		<Box className="not-prose" marginBlockStart="sp24">
+			<TokenColumnHeader />
+			<Box className={styles.panelBody}>
+				<Box className={styles.typeFrame}>
 					<Box
-						className={styles.typeGroup}
-						key={row.style}
-						renderRoot={(domProps) => <tbody {...domProps} />}
+						className={styles.typeTable}
+						inlineSize="100%"
+						renderRoot={(domProps) => <table {...domProps} />}
 					>
-						<tr className={styles.typeSpecimenRow}>
+						<caption>
+							<VisuallyHidden>
+								Type styles, smallest first. Use each row's copy control to copy its token.
+							</VisuallyHidden>
+						</caption>
+						<colgroup>
+							<TableColumn />
+							<TableColumn inlineSize="13rem" />
+						</colgroup>
+						<Box className={styles.typeHead} renderRoot={(domProps) => <thead {...domProps} />}>
+							<tr>
+								<TypeHeaderCell>Token</TypeHeaderCell>
+								<TypeHeaderCell>Value</TypeHeaderCell>
+							</tr>
+						</Box>
+						{tokenSections.typography.styles.map((row) => (
 							<Box
-								className={styles.typeSpecimen}
-								paddingInline="sp16"
-								renderRoot={(domProps) => <th {...domProps} colSpan={3} scope="rowgroup" />}
+								className={styles.typeGroup}
+								key={row.style}
+								renderRoot={(domProps) => <tbody {...domProps} />}
 							>
-								<Text typography={row.style}>{TYPE_STYLE_LABELS[row.style]}</Text>
+								<tr className={styles.typeSpecimenRow}>
+									<Box
+										className={styles.typeSpecimen}
+										paddingInline="sp16"
+										renderRoot={(domProps) => <th {...domProps} colSpan={2} scope="rowgroup" />}
+									>
+										<Text typography={row.style}>{TYPE_STYLE_LABELS[row.style]}</Text>
+									</Box>
+								</tr>
+								{TYPE_COLUMNS.map((property) => (
+									<TypeValueRow
+										key={property}
+										onCopy={(token, text) => void copy(token.path, text)}
+										status={status}
+										token={row.tokens[property]}
+									/>
+								))}
 							</Box>
-						</tr>
-						{TYPE_COLUMNS.map((property) => (
-							<TypeValueRow
-								key={property}
-								onCopy={(token, text) => void copy(token.path, text)}
-								status={status}
-								token={row.tokens[property]}
-							/>
 						))}
 					</Box>
-				))}
+				</Box>
 			</Box>
 			<VisuallyHidden aria-live="polite" elementType="p">
 				{announcement}
@@ -95,7 +94,7 @@ export function TypeStyleTable() {
 export function FontFamilyAndWeightTokens() {
 	const { families, weights } = tokenSections.typography;
 	return (
-		<TokenPanel>
+		<TokenPanel sampleInlineSize="3rem">
 			<TokenGroup label="Families">
 				{families.map((token) => (
 					<TokenRow
@@ -149,16 +148,10 @@ const TYPE_COLUMNS: ReadonlyArray<TypeProperty> = [
 	'fontFamily',
 ];
 
-function TypeHeaderCell({
-	children,
-	isVisuallyHidden = false,
-}: {
-	children: string;
-	isVisuallyHidden?: boolean;
-}) {
+function TypeHeaderCell({ children }: { children: string }) {
 	return (
 		<TableHeaderCell
-			className={cx(styles.typeCell, isVisuallyHidden && styles.typeCopyHeader)}
+			className={styles.typeCell}
 			paddingBlock="sp8"
 			paddingInline="sp16"
 			scope="col"
@@ -189,50 +182,28 @@ function TypeValueRow({ onCopy, status, token }: TypeValueRowProps) {
 				paddingInline="sp16"
 				renderRoot={(domProps) => <th {...domProps} id={tokenRowId(token.path)} scope="row" />}
 			>
-				<Stack gap="sp4">
-					<Text className={styles.code} elementType="p" shouldDisableTrim typography="label">
-						<TokenPath path={token.path} />
-					</Text>
-					<Text
-						className={styles.code}
-						color="secondary"
-						elementType="p"
-						shouldDisableTrim
-						typography="caption"
-					>
-						{token.variable}
-					</Text>
-				</Stack>
+				<Cluster alignItems="center" gap="sp8" minInlineSize="0">
+					<Box className={styles.tokenIdentification} minInlineSize="0">
+						<Text elementType="p" shouldDisableTrim typography="label">
+							<TokenPath path={token.path} />
+						</Text>
+					</Box>
+					<IconButton
+						aria-label={`Copy ${text}`}
+						icon={COPY_ICONS[state ?? 'idle']}
+						onPress={() => {
+							onCopy(token, text);
+						}}
+						prominence="low"
+						size="small"
+						tone="neutral"
+					/>
+				</Cluster>
 			</Box>
 			<TableCell className={cx(styles.typeCell, styles.typeValueCell)} paddingInline="sp16">
-				<Text fontVariantNumeric="tabular-nums" typography="label">
-					{value === null || value === '' ? '—' : value}
+				<Text fontVariantNumeric="tabular-nums" shouldDisableTrim typography="label">
+					<Code>{value === null || value === '' ? '—' : value}</Code>
 				</Text>
-			</TableCell>
-			<TableCell
-				className={cx(styles.typeCell, styles.typeActionCell)}
-				paddingBlock="sp4"
-				paddingInline="sp4"
-			>
-				<Box
-					alignItems="center"
-					className={styles.typeCopyButton}
-					display="flex"
-					justifyContent="center"
-					minBlockSize={vars.space.sp32}
-					minInlineSize={vars.space.sp32}
-					renderRoot={(domProps) => (
-						<RacButton
-							{...domProps}
-							aria-label={`Copy ${text}`}
-							onPress={() => {
-								onCopy(token, text);
-							}}
-						/>
-					)}
-				>
-					<Icon aria-hidden name={COPY_ICONS[state ?? 'idle']} size="xsmall" />
-				</Box>
 			</TableCell>
 		</tr>
 	);

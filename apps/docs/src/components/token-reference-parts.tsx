@@ -1,9 +1,8 @@
-import { Bleed } from '@luke-ui/react/bleed';
 import { Box } from '@luke-ui/react/box';
-import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Code } from '@luke-ui/react/code';
 import { Grid } from '@luke-ui/react/grid';
-import { Icon } from '@luke-ui/react/icon';
+import { IconButton } from '@luke-ui/react/icon-button';
 import { Stack } from '@luke-ui/react/stack';
 import type { TextProps } from '@luke-ui/react/text';
 import { Text } from '@luke-ui/react/text';
@@ -22,10 +21,10 @@ import * as styles from './token-reference.css.js';
 
 type TokenTextProps = Omit<TextProps, 'children'> & { token: ThemeToken };
 
-/** The full typed token path, in the code font. */
-function TokenName({ className, token, ...props }: TokenTextProps) {
+/** The full typed token path as a `Code` chip. */
+function TokenName({ token, ...props }: TokenTextProps) {
 	return (
-		<Text className={cx(styles.code, className)} shouldDisableTrim {...props}>
+		<Text shouldDisableTrim {...props}>
 			<TokenPath path={token.path} />
 		</Text>
 	);
@@ -47,22 +46,17 @@ export function TokenPath({ path }: { path: string }) {
 	);
 }
 
-/** The CSS custom property for use outside TypeScript. */
-function TokenVariable({ className, token, ...props }: TokenTextProps) {
-	return (
-		<Text className={cx(styles.code, className)} color="secondary" shouldDisableTrim {...props}>
-			{token.variable}
-		</Text>
-	);
-}
-
 /**
  * The token's resolved value in the active theme, with tabular numerals. Shows a dash until the page
  * has hydrated and can read the theme.
  */
 function TokenValue({ token, ...props }: TokenTextProps) {
 	const value = useTokenValue(token);
-	return <Code {...props}>{value === null || value === '' ? '—' : value}</Code>;
+	return (
+		<Text fontVariantNumeric="tabular-nums" shouldDisableTrim {...props}>
+			<Code>{value === null || value === '' ? '—' : value}</Code>
+		</Text>
+	);
 }
 
 /** Copies the full typed token path. The accessible name says what it copies. */
@@ -70,24 +64,16 @@ function TokenCopyButton({ token }: { token: ThemeToken }) {
 	const { announcement, copy, status } = useClipboardFeedback<'token'>();
 	const text = `vars.${token.path}`;
 
-	const label = (() => {
-		if (status?.state === 'copied') return 'Copied';
-		if (status?.state === 'error') return 'Failed';
-		return 'Copy';
-	})();
-
 	return (
 		<>
-			<Button
+			<IconButton
 				aria-label={`Copy ${text}`}
-				className={styles.tokenCopyButton}
+				icon={status?.state === 'copied' ? 'check' : 'copy'}
 				onPress={() => void copy('token', text)}
 				prominence="low"
 				size="small"
-				startContent={<Icon name={status?.state === 'copied' ? 'check' : 'copy'} />}
-			>
-				{label}
-			</Button>
+				tone="neutral"
+			/>
 			<VisuallyHidden aria-live="polite" elementType="span">
 				{announcement}
 			</VisuallyHidden>
@@ -95,32 +81,98 @@ function TokenCopyButton({ token }: { token: ThemeToken }) {
 	);
 }
 
-/** The single-border panel that holds a section's token rows. */
-export function TokenPanel({ children }: { children: ReactNode }) {
+/** The framed panel that holds a section's token rows. */
+export function TokenPanel({
+	children,
+	sampleInlineSize,
+}: {
+	children: ReactNode;
+	/** When set, the sticky header includes a sample column sized to match each `TokenRow`. */
+	sampleInlineSize?: string;
+}) {
 	return (
-		<Box
-			borderColor="decorative"
-			borderRadius="surface"
-			borderStyle="solid"
-			borderWidth="thin"
-			className="not-prose"
-			marginBlockStart="sp24"
-			overflow="hidden"
-		>
-			{children}
+		<Box className="not-prose" marginBlockStart="sp24">
+			<TokenColumnHeader sampleInlineSize={sampleInlineSize} />
+			<Box className={styles.panelBody}>{children}</Box>
 		</Box>
 	);
 }
 
+/** Named columns for a token row list at tablet and up. */
+export function TokenColumnHeader({
+	sampleInlineSize,
+	valueInlineSize = '13rem',
+}: {
+	sampleInlineSize?: string;
+	valueInlineSize?: string;
+}) {
+	const hasSample = sampleInlineSize !== undefined;
+
+	return (
+		<Grid
+			alignItems="center"
+			areas={
+				hasSample
+					? {
+							initial: ['sample sample', 'name name', 'value value'],
+							bp768: ['sample name value'],
+						}
+					: {
+							initial: ['name name', 'value value'],
+							bp768: ['name value'],
+						}
+			}
+			className={cx(styles.columnHeaderShell, styles.columnHeader)}
+			columnGap="sp16"
+			columns={{
+				initial: 'minmax(0, 1fr)',
+				bp768: hasSample
+					? `${sampleInlineSize} minmax(0, 1fr) minmax(0, ${valueInlineSize})`
+					: `minmax(0, 1fr) minmax(0, ${valueInlineSize})`,
+			}}
+			paddingBlock="sp8"
+			paddingInline="sp16"
+		>
+			{hasSample ? (
+				<Box gridArea="sample">
+					<VisuallyHidden>Sample</VisuallyHidden>
+				</Box>
+			) : null}
+			<Box gridArea="name">
+				<Text color="secondary" fontWeight="label" typography="label">
+					Token
+				</Text>
+			</Box>
+			<Box gridArea="value">
+				<Text color="secondary" fontWeight="label" typography="label">
+					Value
+				</Text>
+			</Box>
+		</Grid>
+	);
+}
+
 /** A labelled group of rows inside a panel, such as the text colours among the neutral colours. */
-export function TokenGroup({ children, label }: { children: ReactNode; label: string }) {
+export function TokenGroup({
+	children,
+	control,
+	label,
+}: {
+	children: ReactNode;
+	/** Optional control grouped with the label on the start edge. */
+	control?: ReactNode;
+	label: string;
+}) {
 	const labelId = useId();
 	return (
 		<Box className={styles.group}>
 			<Box paddingBlockEnd="sp4" paddingBlockStart="sp16" paddingInline="sp16">
-				<Text color="secondary" elementType="p" id={labelId} typography="caption">
-					{label}
-				</Text>
+				<Cluster alignItems="center" gap="sp12">
+					<Text color="secondary" elementType="p" id={labelId} typography="caption">
+						{label}
+					</Text>
+					{control}
+				</Cluster>
 			</Box>
 			<TokenList labelledBy={labelId}>{children}</TokenList>
 		</Box>
@@ -143,6 +195,8 @@ export function TokenList({ children, labelledBy }: { children: ReactNode; label
 }
 
 interface TokenRowProps {
+	/** When to use the token, in a few words. */
+	note?: string;
 	/** A picture of the value. It is hidden from assistive technology, because the value says it. */
 	sample: ReactNode;
 	/** The inline size of the sample column, so every row of a list lines up. */
@@ -150,20 +204,20 @@ interface TokenRowProps {
 	token: ThemeToken;
 }
 
-/** One token in a list: its sample, typed path, CSS variable, resolved value, and copy button. */
-export function TokenRow({ sample, sampleInlineSize, token }: TokenRowProps) {
+/** One token in a list: its sample, typed path, resolved value, and copy button. */
+export function TokenRow({ note, sample, sampleInlineSize, token }: TokenRowProps) {
 	return (
 		<Grid
 			alignItems="center"
 			areas={{
-				initial: ['sample copy', 'name name', 'value value'],
-				bp768: ['sample name value copy'],
+				initial: ['sample sample', 'name name', 'value value'],
+				bp768: ['sample name value'],
 			}}
 			className={styles.row}
 			columnGap="sp16"
 			columns={{
-				initial: 'minmax(0, 1fr) auto',
-				bp768: `${sampleInlineSize} minmax(0, 1fr) minmax(0, 13rem) 6rem`,
+				initial: 'minmax(0, 1fr)',
+				bp768: `${sampleInlineSize} minmax(0, 1fr) minmax(0, 13rem)`,
 			}}
 			elementType="li"
 			id={tokenRowId(token.path)}
@@ -181,93 +235,22 @@ export function TokenRow({ sample, sampleInlineSize, token }: TokenRowProps) {
 			>
 				{sample}
 			</Box>
-			<Stack gap="sp8" gridArea="name" minInlineSize="0">
-				<TokenName elementType="p" token={token} typography="label" />
-			</Stack>
+			<Box className={styles.tokenIdentification} gridArea="name" minInlineSize="0">
+				<Stack gap="sp4">
+					<Cluster alignItems="center" gap="sp8">
+						<TokenName elementType="p" token={token} typography="label" />
+						<TokenCopyButton token={token} />
+					</Cluster>
+					{note ? (
+						<Text color="secondary" elementType="p" typography="caption">
+							{note}
+						</Text>
+					) : null}
+				</Stack>
+			</Box>
 			<Box gridArea="value" minInlineSize="0">
 				<TokenValue elementType="p" token={token} typography="label" />
 			</Box>
-			<Box gridArea="copy" justifySelf="end">
-				<TokenCopyButton token={token} />
-			</Box>
 		</Grid>
-	);
-}
-
-/** A grid of token tiles, for samples that need room, such as shadows and radii. */
-export function TokenTileGrid({
-	children,
-	labelledBy,
-}: {
-	children: ReactNode;
-	labelledBy?: string;
-}) {
-	return (
-		<Grid
-			aria-labelledby={labelledBy}
-			className={cx('not-prose', styles.list)}
-			columns="repeat(auto-fill, minmax(min(16rem, 100%), 1fr))"
-			columnGap="sp16"
-			elementType="ul"
-			margin="0"
-			padding="0"
-			rowGap="sp24"
-		>
-			{children}
-		</Grid>
-	);
-}
-
-interface TokenTileProps {
-	/** When to use the token, in a few words. */
-	note?: string;
-	/** A picture of the value, drawn on a subdued stage. Hidden from assistive technology. */
-	sample: ReactNode;
-	token: ThemeToken;
-}
-
-/**
- * One token as a tile: a sample on a subdued stage, then its name, value, and copy button, each on
- * its own line so a narrow tile never splits a value.
- */
-export function TokenTile({ note, sample, token }: TokenTileProps) {
-	return (
-		<Box
-			borderRadius="surface"
-			className={styles.tile}
-			display="flex"
-			elementType="li"
-			flexDirection="column"
-			gap="sp12"
-			id={tokenRowId(token.path)}
-			padding="sp8"
-		>
-			<Box
-				alignItems="center"
-				aria-hidden
-				backgroundColor="surface.subdued"
-				borderRadius="surface"
-				display="flex"
-				justifyContent="center"
-				minBlockSize="7rem"
-				padding="sp16"
-			>
-				{sample}
-			</Box>
-			<Stack gap="sp8">
-				<TokenName elementType="p" token={token} typography="label" />
-				<TokenVariable elementType="p" token={token} typography="caption" />
-				{note ? (
-					<Text color="secondary" elementType="p" typography="caption">
-						{note}
-					</Text>
-				) : null}
-				<TokenValue elementType="p" token={token} typography="label" />
-				{/* The button's own inline padding pulls its icon in, so bleed by it to line up with the text. */}
-				<Bleed inlineStart="sp12">
-					<TokenCopyButton token={token} />
-				</Bleed>
-			</Stack>
-		</Box>
 	);
 }
