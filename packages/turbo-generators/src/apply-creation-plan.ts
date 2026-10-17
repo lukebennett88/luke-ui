@@ -94,7 +94,9 @@ async function applyJsonEdit(root: string, edit: CreationWork['jsonEdits'][numbe
 	const pages =
 		edit.kind === 'array-add-sorted'
 			? [...new Set([...currentPages, edit.value])].sort((a, b) => a.localeCompare(b))
-			: appendUniquePage(currentPages, edit.value);
+			: edit.kind === 'array-add-prefix-sorted'
+				? insertSortedAmongPrefix(currentPages, edit.value, edit.sectionHeader)
+				: appendUniquePage(currentPages, edit.value);
 	data[edit.key] = pages;
 	const raw = `${JSON.stringify(data, null, '\t')}\n`;
 	const formatted = await formatGeneratedContent(target, raw);
@@ -104,6 +106,44 @@ async function applyJsonEdit(root: string, edit: CreationWork['jsonEdits'][numbe
 function appendUniquePage(pages: Array<string>, value: string): Array<string> {
 	if (pages.includes(value)) return pages;
 	return [...pages, value];
+}
+
+function insertSortedAmongPrefix(
+	pages: Array<string>,
+	value: string,
+	sectionHeader: string | undefined,
+): Array<string> {
+	if (pages.includes(value)) return pages;
+
+	const separator = value.indexOf('/');
+	if (separator === -1) return appendUniquePage(pages, value);
+
+	const prefix = value.slice(0, separator + 1);
+	let first = -1;
+	let last = -1;
+	for (const [index, page] of pages.entries()) {
+		if (!page.startsWith(prefix)) continue;
+		if (first === -1) first = index;
+		last = index;
+	}
+
+	if (first === -1) {
+		if (sectionHeader === undefined) return appendUniquePage(pages, value);
+		const headerIndex = pages.indexOf(sectionHeader);
+		if (headerIndex === -1) return appendUniquePage(pages, value);
+		return [...pages.slice(0, headerIndex + 1), value, ...pages.slice(headerIndex + 1)];
+	}
+
+	let insertAt = last + 1;
+	for (let index = first; index <= last; index += 1) {
+		const page = pages[index];
+		if (page !== undefined && value.localeCompare(page) < 0) {
+			insertAt = index;
+			break;
+		}
+	}
+
+	return [...pages.slice(0, insertAt), value, ...pages.slice(insertAt)];
 }
 
 async function readJson(path: string, title: string): Promise<Record<string, unknown>> {

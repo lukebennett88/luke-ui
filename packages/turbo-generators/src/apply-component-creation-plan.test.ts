@@ -38,7 +38,7 @@ describe('createComponent', () => {
 			),
 		).resolves.toContain('export function StatusBadge');
 		await expect(readJson(root, 'apps/docs/content/docs/components/meta.json')).resolves.toEqual({
-			pages: ['actions', 'feedback'],
+			pages: ['actions/button', 'feedback/status-badge'],
 			title: 'Components',
 		});
 		await expect(
@@ -68,6 +68,110 @@ describe('createComponent', () => {
 				'utf8',
 			),
 		).rejects.toMatchObject({ code: 'ENOENT' });
+	});
+
+	it('inserts group/name into the root sidebar without sorting section markers', async () => {
+		const root = await createRepositoryFixture({
+			rootPages: [
+				'---Overview---',
+				'index',
+				'---Actions---',
+				'actions/button',
+				'---Forms---',
+				'forms/checkbox-field',
+				'forms/select-field',
+				'---Primitives---',
+				'primitives/button',
+			],
+		});
+
+		await createComponent(root, { docsGroup: 'forms', name: 'form' });
+
+		await expect(readJson(root, 'apps/docs/content/docs/components/meta.json')).resolves.toEqual({
+			pages: [
+				'---Overview---',
+				'index',
+				'---Actions---',
+				'actions/button',
+				'---Forms---',
+				'forms/checkbox-field',
+				'forms/form',
+				'forms/select-field',
+				'---Primitives---',
+				'primitives/button',
+			],
+			title: 'Components',
+		});
+		await expect(
+			readJson(root, 'apps/docs/content/docs/components/forms/meta.json'),
+		).resolves.toEqual({
+			pages: ['form'],
+			title: 'Forms',
+		});
+	});
+
+	it('places group/name after its section header when the group has no pages yet', async () => {
+		const root = await createRepositoryFixture({
+			rootPages: [
+				'---Overview---',
+				'index',
+				'---Actions---',
+				'actions/button',
+				'---Feedback---',
+				'---Primitives---',
+				'primitives/button',
+			],
+		});
+
+		await createComponent(root, { docsGroup: 'feedback', name: 'StatusBadge' });
+
+		await expect(readJson(root, 'apps/docs/content/docs/components/meta.json')).resolves.toEqual({
+			pages: [
+				'---Overview---',
+				'index',
+				'---Actions---',
+				'actions/button',
+				'---Feedback---',
+				'feedback/status-badge',
+				'---Primitives---',
+				'primitives/button',
+			],
+			title: 'Components',
+		});
+		await expect(
+			readJson(root, 'apps/docs/content/docs/components/feedback/meta.json'),
+		).resolves.toEqual({
+			pages: ['status-badge'],
+			title: 'Feedback',
+		});
+	});
+
+	it('appends group/name when the docs group has no section or pages yet', async () => {
+		const root = await createRepositoryFixture({
+			rootPages: [
+				'---Overview---',
+				'index',
+				'---Actions---',
+				'actions/button',
+				'---Primitives---',
+				'primitives/button',
+			],
+		});
+
+		await createComponent(root, { docsGroup: 'feedback', name: 'StatusBadge' });
+
+		await expect(readJson(root, 'apps/docs/content/docs/components/meta.json')).resolves.toEqual({
+			pages: [
+				'---Overview---',
+				'index',
+				'---Actions---',
+				'actions/button',
+				'---Primitives---',
+				'primitives/button',
+				'feedback/status-badge',
+			],
+			title: 'Components',
+		});
 	});
 
 	it('appends a generated recipe import after the existing imports', async () => {
@@ -144,13 +248,18 @@ describe('createComponent', () => {
 		).resolves.toBe('{\n\t"pages": ["status-badge"],\n\t"title": "Feedback"\n}\n');
 		await expect(
 			readFile(join(root, 'apps/docs/content/docs/components/meta.json'), 'utf8'),
-		).resolves.toBe('{\n\t"pages": ["actions", "feedback"],\n\t"title": "Components"\n}\n');
+		).resolves.toBe(
+			'{\n\t"pages": ["actions/button", "feedback/status-badge"],\n\t"title": "Components"\n}\n',
+		);
 	});
 });
 
 const modulesRegistryPath = 'packages/@luke-ui/react/src/core/styles/modules.css.ts';
 
-async function createRepositoryFixture(options?: { modulesRegistry?: string }): Promise<string> {
+async function createRepositoryFixture(options?: {
+	modulesRegistry?: string;
+	rootPages?: Array<string>;
+}): Promise<string> {
 	const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
 	roots.push(root);
 
@@ -159,7 +268,11 @@ async function createRepositoryFixture(options?: { modulesRegistry?: string }): 
 
 	await writeFile(
 		join(root, 'apps/docs/content/docs/components/meta.json'),
-		`${JSON.stringify({ pages: ['actions'], title: 'Components' }, null, '\t')}\n`,
+		`${JSON.stringify(
+			{ pages: options?.rootPages ?? ['actions/button'], title: 'Components' },
+			null,
+			'\t',
+		)}\n`,
 		'utf8',
 	);
 	await writeFile(
