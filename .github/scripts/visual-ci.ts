@@ -31,6 +31,21 @@ export type BaselineRun = {
 
 export type BaselineRunDecision = { ok: true; runId: number } | { ok: false; reason: string };
 
+/** GitHub Actions run statuses that mean the newest baseline is not finished yet. */
+const WAITABLE_BASELINE_STATUSES = new Set([
+	'queued',
+	'in_progress',
+	'pending',
+	'waiting',
+	'requested',
+]);
+
+/** Default poll spacing while the newest main baseline is still running. */
+export const DEFAULT_BASELINE_POLL_MS = 30_000;
+
+/** Bound on waiting for that single newest run before failing the compare job. */
+export const DEFAULT_BASELINE_TIMEOUT_MS = 25 * 60_000;
+
 const ARTIFACT_NAME = 'visual-baseline';
 const BASELINE_BRANCH = 'main';
 const WORKFLOW_FILE = 'visual-baseline.yml';
@@ -41,12 +56,21 @@ function fromRepoRoot(relativePath: string): string {
 	return path.join(repoRoot, ...relativePath.split('/'));
 }
 
+/** True when the newest baseline run is still queued or running. */
+export function isBaselineRunWaitable(status: string | null): boolean {
+	return status !== null && WAITABLE_BASELINE_STATUSES.has(status);
+}
+
 /**
  * Judges the single newest `visual-baseline.yml` run on `main`.
  *
  * The caller must pass the newest run unconditionally — never a run list
  * pre-filtered to successes. Falling back to an older green run would compare a
  * PR against a baseline that no longer reflects `main`.
+ *
+ * Call this only after the newest run has left a waitable status, or when
+ * reporting why a waitable run cannot be used yet. Prefer
+ * {@link waitForNewestBaseline} from the CLI so compare can wait in-process.
  */
 export function decideBaselineRun(
 	run: BaselineRun | undefined,
@@ -80,6 +104,104 @@ export function decideBaselineRun(
 /** GitHub answers 404 when the workflow file is absent from `main` (bootstrap). */
 export function isWorkflowMissingStatus(status: number): boolean {
 	return status === 404;
+}
+
+export type FetchNewestBaselineRun = () => Promise<BaselineRun | undefined | 'workflow-missing'>;
+
+export type WaitForNewestBaselineOptions = {
+	fetchNewest: FetchNewestBaselineRun;
+	runUrl: (runId: number) => string;
+	/** Resolves after `ms`. Tests inject a no-delay stub. */
+	sleep: (ms: number) => Promise<void>;
+	/** Milliseconds since an arbitrary epoch. Tests inject a controllable clock. */
+	now: () => number;
+	pollIntervalMs: number;
+	timeoutMs: number;
+	info?: (message: string) => void;
+};
+
+/**
+ * Waits for the single newest `main` Visual baseline run to finish, within a bound.
+ *
+ * Never substitutes an older successful run. Times out with diagnostics when that
+ * newest run stays waitable too long. Fails when it completes unsuccessfully.
+ */
+export async function waitForNewestBaseline(
+	options: WaitForNewestBaselineOptions,
+): Promise<number> {
+	const { fetchNewest, runUrl, sleep, now, pollIntervalMs, timeoutMs } = options;
+	const log = options.info ?? (() => {});
+	const deadline = now() + timeoutMs;
+	let waitedMs = 0;
+	let lastReportedStatus: string | null | undefined;
+
+	for (;;) {
+		// Sequential: each poll must see the previous wait finish before asking again.
+		// eslint-disable-next-line no-await-in-loop -- newest-run status only changes over time
+		const newestRun = await fetchNewest();
+
+		if (newestRun === 'workflow-missing') {
+			throw new Error(
+				'No Visual baseline workflow/run exists on `main` yet. After this PR merges, let the Visual baseline workflow run on `main`, then future PRs can compare against it.',
+			);
+		}
+
+		if (newestRun !== undefined && isBaselineRunWaitable(newestRun.status)) {
+			const remainingMs = deadline - now();
+			if (remainingMs <= 0) {
+				throw new Error(
+					`Timed out after ${formatDuration(waitedMs)} waiting for the newest Visual baseline run on \`main\` (${newestRun.status}). It is still running at ${runUrl(newestRun.id)}. Re-run this job once that run finishes; do not compare against an older baseline.`,
+				);
+			}
+
+			if (newestRun.status !== lastReportedStatus) {
+				log(
+					`Newest Visual baseline run ${newestRun.id} is ${newestRun.status}. Waiting up to ${formatDuration(remainingMs)} (poll every ${formatDuration(pollIntervalMs)}): ${runUrl(newestRun.id)}`,
+				);
+				lastReportedStatus = newestRun.status;
+			}
+
+			const sleepMs = Math.min(pollIntervalMs, remainingMs);
+			// eslint-disable-next-line no-await-in-loop -- bounded poll delay between status checks
+			await sleep(sleepMs);
+			waitedMs += sleepMs;
+			continue;
+		}
+
+		const decision = decideBaselineRun(newestRun, runUrl);
+		if (!decision.ok) {
+			throw new Error(decision.reason);
+		}
+
+		if (waitedMs > 0) {
+			log(
+				`Newest Visual baseline run ${decision.runId} completed successfully after ${formatDuration(waitedMs)}.`,
+			);
+		}
+
+		return decision.runId;
+	}
+}
+
+function formatDuration(ms: number): string {
+	if (ms < 1_000) return `${ms}ms`;
+	const seconds = Math.round(ms / 1_000);
+	if (seconds < 60) return `${seconds}s`;
+	const minutes = Math.floor(seconds / 60);
+	const rem = seconds % 60;
+	return rem === 0 ? `${minutes}m` : `${minutes}m ${rem}s`;
+}
+
+function readPositiveIntEnv(name: string, fallback: number): number {
+	const raw = process.env[name]?.trim();
+	if (raw === undefined || raw === '') return fallback;
+	const parsed = Number(raw);
+	if (!Number.isFinite(parsed) || parsed <= 0) {
+		throw new Error(
+			`${name} must be a positive number of milliseconds, got ${JSON.stringify(raw)}.`,
+		);
+	}
+	return parsed;
 }
 
 /** Captures a human must look at. The `review` job gates on this being non-zero. */
@@ -177,6 +299,12 @@ async function fetchNewestBaselineRun(
 	return data.workflow_runs[0];
 }
 
+function sleep(ms: number): Promise<void> {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
+}
+
 async function resolveBaseline() {
 	const token = requireEnv('GITHUB_TOKEN');
 	const [owner, repo] = requireEnv('GITHUB_REPOSITORY').split('/');
@@ -185,22 +313,24 @@ async function resolveBaseline() {
 	}
 
 	const runUrl = (runId: number) => `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
-	const newestRun = await fetchNewestBaselineRun(token, owner, repo);
 
-	if (newestRun === 'workflow-missing') {
-		fail(
-			'No Visual baseline workflow/run exists on `main` yet. After this PR merges, let the Visual baseline workflow run on `main`, then future PRs can compare against it.',
-		);
+	try {
+		const runId = await waitForNewestBaseline({
+			fetchNewest: () => fetchNewestBaselineRun(token, owner, repo),
+			runUrl,
+			sleep,
+			now: () => Date.now(),
+			pollIntervalMs: readPositiveIntEnv('VISUAL_BASELINE_WAIT_POLL_MS', DEFAULT_BASELINE_POLL_MS),
+			timeoutMs: readPositiveIntEnv('VISUAL_BASELINE_WAIT_TIMEOUT_MS', DEFAULT_BASELINE_TIMEOUT_MS),
+			info,
+		});
+
+		info(`Baseline from Visual baseline run ${runId}: ${runUrl(runId)}`);
+		info(`Artifact "${ARTIFACT_NAME}" will be downloaded by actions/download-artifact.`);
+		await writeOutput('run-id', runId);
+	} catch (error) {
+		fail(error instanceof Error ? error.message : String(error));
 	}
-
-	const decision = decideBaselineRun(newestRun, runUrl);
-	if (!decision.ok) {
-		fail(decision.reason);
-	}
-
-	info(`Baseline from Visual baseline run ${decision.runId}: ${runUrl(decision.runId)}`);
-	info(`Artifact "${ARTIFACT_NAME}" will be downloaded by actions/download-artifact.`);
-	await writeOutput('run-id', decision.runId);
 }
 
 async function checkCaptures() {
