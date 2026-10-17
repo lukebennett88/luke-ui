@@ -15,8 +15,8 @@ interface GenerateDocumentationOptions {
 }
 
 /**
- * Wraps the fumadocs generator to remove generic DOM props from component Props tables and restore
- * their declared types.
+ * Wraps the fumadocs generator to remove generic DOM props from component Props tables, restore their
+ * declared types, and collect the definitions those types name.
  */
 export function createComponentPropsGenerator(options: GeneratorOptions = {}): Generator {
 	const generator = createGenerator(options);
@@ -40,6 +40,7 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 		if (declaration === undefined) return docs;
 
 		const reactSrcDir = lukeUiReactSrcDir(repoRoot);
+		const checker = project.getTypeChecker().compilerObject;
 		const forwardsDomProps = typeForwardsDomProps(declaration, reactSrcDir);
 		return docs.map((doc) =>
 			enrichGeneratedDocTypes(
@@ -50,6 +51,7 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 				),
 				declaration,
 				reactSrcDir,
+				checker,
 			),
 		);
 	};

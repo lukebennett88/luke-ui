@@ -41,3 +41,23 @@ function requireThemeColor(theme: (typeof SHIKI_THEME_REGISTRATIONS)[number], ke
 	}
 	return value;
 }
+
+/**
+ * A TextMate scope's colour in each registered theme, such as `keyword` or `string`, for text that
+ * should match Shiki's highlighting without running Shiki.
+ */
+export function scopeColors(scope: string): { dark: string; light: string } {
+	return { dark: requireScopeColor(darkTheme, scope), light: requireScopeColor(lightTheme, scope) };
+}
+
+function requireScopeColor(
+	theme: (typeof SHIKI_THEME_REGISTRATIONS)[number],
+	scope: string,
+): string {
+	for (const { scope: scopes, settings } of theme.tokenColors ?? []) {
+		const listed = typeof scopes === 'string' ? [scopes] : (scopes ?? []);
+		if (listed.includes(scope) && typeof settings.foreground === 'string')
+			return settings.foreground;
+	}
+	throw new Error(`Missing ${scope} scope colour in ${theme.name}`);
+}

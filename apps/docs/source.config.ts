@@ -10,6 +10,7 @@ import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import * as z from 'zod';
 import { createComponentPropsGenerator } from './src/lib/create-component-props-generator.js';
 import { inlineExampleSource } from './src/lib/inline-example-source';
+import { rehypeServerOnlyMarkdown } from './src/lib/rehype-server-only-markdown.js';
 import { remarkAttachTypeDefinitions } from './src/lib/remark-attach-type-definitions.js';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
@@ -26,6 +27,15 @@ function remarkComponentPropsTable(options?: RemarkAutoTypeTableOptions) {
 
 function remarkDocsAutoTypeTable(options?: RemarkAutoTypeTableOptions) {
 	return remarkAutoTypeTable(options);
+}
+
+function plainTypeText(type: string) {
+	return {
+		children: [{ type: 'text' as const, value: type }],
+		properties: {},
+		tagName: 'code',
+		type: 'element' as const,
+	};
 }
 
 export const docs = defineDocs({
@@ -67,6 +77,8 @@ export default defineConfig({
 		rehypeCodeOptions: {
 			themes: SHIKI_THEMES,
 		},
+		// Page modules carry processed Markdown for the server only. See `rehypeServerOnlyMarkdown`.
+		rehypePlugins: (v) => [...v, rehypeServerOnlyMarkdown],
 		remarkPlugins: (v) => [
 			...v,
 			[
@@ -78,6 +90,9 @@ export default defineConfig({
 					outputName: 'ComponentPropsTable',
 					// Processed Markdown reads GeneratedDoc JSON from the `type` attribute.
 					remarkStringify: true,
+					// Rows show the generator's formatted `typeTokens`, so the text fumadocs renders is
+					// only their fallback and needs no highlighting.
+					renderType: plainTypeText,
 				} satisfies RemarkAutoTypeTableOptions,
 			],
 			// Runs after `<component-props-table>` expands, so the generated definitions exist.

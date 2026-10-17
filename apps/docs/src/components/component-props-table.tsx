@@ -7,6 +7,7 @@ import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { groupPropNames, NATIVE_PROPS_FORWARDING_KEY } from '../lib/component-prop-groups.js';
+import type { TypeTokens } from '../lib/type-tokens.js';
 import * as styles from './component-props-table.css.js';
 import { InheritTypography } from './docs-article/mdx-elements.js';
 import * as disclosureStyles from './docs-disclosure.css.js';
@@ -22,7 +23,8 @@ export function ComponentPropsTable({
 	definitionNames,
 	definitionsHref,
 	id,
-	type,
+	type: typeNodes,
+	typeTokens,
 	...props
 }: {
 	/** Aliases in the `definitionsHref` asset. Set by `remarkAttachTypeDefinitions`. */
@@ -31,7 +33,18 @@ export function ComponentPropsTable({
 	definitionsHref?: string;
 	id: string;
 	type: Record<string, TypeNode>;
+	/** Each row's formatted type. Set by `remarkAttachTypeDefinitions`. */
+	typeTokens?: Record<string, TypeTokens>;
 } & ComponentProps<'div'>) {
+	const type =
+		typeTokens === undefined
+			? typeNodes
+			: Object.fromEntries(
+					Object.entries(typeNodes).map(([name, node]) => [
+						name,
+						typeTokens[name] === undefined ? node : { ...node, typeTokens: typeTokens[name] },
+					]),
+				);
 	const groups = groupPropNames(Object.keys(type));
 	const nativePropsNote = type[NATIVE_PROPS_FORWARDING_KEY]?.description;
 	const hash = useRouterState({ select: (state) => state.location.hash });

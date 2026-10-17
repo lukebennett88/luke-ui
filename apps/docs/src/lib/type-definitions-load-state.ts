@@ -1,14 +1,14 @@
-import type { TypeDefinitionsPayload } from './type-definition-model.js';
+import type { LinkedTypeDefinitions } from './type-definition-model.js';
 
 export type TypeDefinitionsLoadState =
 	| { status: 'idle' }
 	| { status: 'loading' }
-	| { data: TypeDefinitionsPayload; status: 'ready' }
+	| { data: LinkedTypeDefinitions; status: 'ready' }
 	| { message: string; status: 'error' };
 
 export type TypeDefinitionsLoadAction =
 	| { type: 'load-start' }
-	| { data: TypeDefinitionsPayload; type: 'load-success' }
+	| { data: LinkedTypeDefinitions; type: 'load-success' }
 	| { message: string; type: 'load-error' };
 
 /** A load starts from idle or after an error, and settles only while it is in flight. */

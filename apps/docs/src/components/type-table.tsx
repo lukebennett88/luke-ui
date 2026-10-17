@@ -4,6 +4,7 @@ import { Stack } from '@luke-ui/react/stack';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, ReactNode } from 'react';
 import { Fragment, useId } from 'react';
+import type { TypeTokens } from '../lib/type-tokens.js';
 import { InheritTypography, MdxLink } from './docs-article/mdx-elements.js';
 import * as referenceStyles from './reference-table.css.js';
 import {
@@ -15,7 +16,7 @@ import {
 	TableColumn,
 	TableRowHeader,
 } from './reference-table.js';
-import { LinkedType } from './type-popover.js';
+import { TypeTokensView } from './type-popover.js';
 import * as styles from './type-table.css.js';
 
 const HREF_PATTERN = /^(?:[/#]|https?:)/;
@@ -36,6 +37,8 @@ export interface TypeNode {
 	type: ReactNode;
 	typeDescription?: ReactNode;
 	typeDescriptionLink?: string;
+	/** The build's formatted type, which the row shows in place of `type` when present. */
+	typeTokens?: TypeTokens;
 }
 
 /** Column and marker decisions that every row of one table shares. */
@@ -153,22 +156,24 @@ function PropRow({
 		type,
 		typeDescription,
 		typeDescriptionLink,
+		typeTokens,
 	} = item;
 
 	const hasDescription = !isEmpty(description);
 	const hasDetails = hasDescription || parameters.length > 0 || returns !== undefined;
 	const hasDefault = defaultValue !== undefined;
 	// Generator often puts a short kind (e.g. "union") in `type` and the readable signature in
-	// `typeDescription`. Prefer the signature so the type is always discoverable.
-	const shownType = typeDescription ?? type;
-	// An authored `@fumadocsHref` gives a URL. The docs generator gives a linked alias name instead.
-	const typeContent = (() => {
-		if (typeDescriptionLink === undefined) return shownType;
-		if (HREF_PATTERN.test(typeDescriptionLink)) {
-			return <MdxLink href={typeDescriptionLink}>{shownType}</MdxLink>;
-		}
-		return <LinkedType typeName={typeDescriptionLink}>{shownType}</LinkedType>;
-	})();
+	// `typeDescription`. Prefer the signature so the type is always discoverable. Formatted tokens,
+	// with their own links, replace both.
+	const shownType =
+		typeTokens === undefined ? (typeDescription ?? type) : <TypeTokensView tokens={typeTokens} />;
+	// An authored `@fumadocsHref` gives a URL for the whole type.
+	const typeContent =
+		typeDescriptionLink !== undefined && HREF_PATTERN.test(typeDescriptionLink) ? (
+			<MdxLink href={typeDescriptionLink}>{shownType}</MdxLink>
+		) : (
+			shownType
+		);
 	// The narrow layout hides a missing default, so the type cell then ends the stacked row.
 	const typeEndsRow = !layout.showDefault || !hasDefault;
 	// Deep-link ids stay `${prefix}-${name}` when a table id exists. Without one, a stable React id

@@ -17,10 +17,12 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, assert, expect, test, vi } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import type { TypeTokens } from '../lib/type-tokens.js';
 import { ComponentPropsTable } from './component-props-table.js';
 import { MdxCode } from './docs-article/mdx-elements.js';
 import { DocsThemeRoot } from './theme-controls.js';
 import { TypeDefinitionsProvider } from './type-definitions-context.js';
+import { TypeTokensView } from './type-popover.js';
 import { TypeTable } from './type-table.js';
 
 /** Matches the docs article `maxInlineSize` of `52rem` at a 16px root. */
@@ -31,10 +33,26 @@ const MOBILE_INLINE_SIZE = '375px';
 const GUIDE_COMPONENTS = { ComponentPropsTable, ExampleBlock: () => null, code: MdxCode };
 
 const PRESS_ACTION_DEFINITION_PATTERN = /^type PressAction = /;
+const OPERATOR_GLUE_PATTERN = /\u2060?\u00a0/g;
+const PROMINENCE_DEFINITION_PATTERN =
+	/^type Prominence = 'low'\s+\|\u2060\s'standard'\s+\|\u2060\s'high';$/;
+const BOX_ELEMENT_TYPE_DEFINITION_PATTERN = /^type BoxLikeElementType = keyof Pick</;
+const DEFINITIONS_ASSET_PATTERN = /\/type-definitions\/[0-9a-f]{16}\.json/;
+const BOX_ELEMENT_TYPE_RESOLVED_PATTERN = /^"article"\s+\|\u2060\s"aside"\s+\|\u2060\s[\s\S]*"ul"$/;
 const RESPONSIVE_VALUE_DEFINITION_PATTERN =
 	/^type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive</;
 
 const SYNTHETIC_TYPE = 'RequiredInitialResponsiveValue<number | string>';
+/** The tokens the build gives `SYNTHETIC_TYPE`. Only the type name is a link. */
+const SYNTHETIC_TOKENS: TypeTokens = [
+	['t', 'RequiredInitialResponsiveValue', 'RequiredInitialResponsiveValue'],
+	'<',
+	['k', 'number'],
+	' |\u2060\u00a0',
+	['k', 'string'],
+	'>',
+];
+const SYNTHETIC_TRIGGER = 'RequiredInitialResponsiveValue';
 const SYNTHETIC_DEFINITION =
 	'type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<Value>;';
 
@@ -174,6 +192,26 @@ test('associates a description row when the table has no id', async () => {
 /** Long generated signature that stretches a phone viewport when wrapping fails. */
 const LONG_ALIGN_SELF_TYPE =
 	'ResponsiveValue<"auto" | "baseline" | "center" | "flex-end" | "flex-start" | "normal" | "stretch"> | undefined';
+const ALIGN_SELF_VALUES = [
+	'auto',
+	'baseline',
+	'center',
+	'flex-end',
+	'flex-start',
+	'normal',
+	'stretch',
+];
+/** `LONG_ALIGN_SELF_TYPE` as the build formats it: one union member per line. */
+const LONG_ALIGN_SELF_TOKENS: TypeTokens = [
+	['t', 'ResponsiveValue', 'ResponsiveValue'],
+	'<',
+	...ALIGN_SELF_VALUES.flatMap((value, index): TypeTokens => [
+		...(index === 0 ? [] : [1, '|\u2060\u00a0']),
+		['s', `"${value}"`],
+	]),
+	'> |\u2060\u00a0',
+	['k', 'undefined'],
+];
 
 for (const [width, inlineSize] of [
 	['the docs article width', ARTICLE_INLINE_SIZE],
@@ -216,7 +254,7 @@ test('keeps a long linked type from widening a mobile viewport', async () => {
 					alignSelf: {
 						description: 'Aligns this part on the cross axis.',
 						type: LONG_ALIGN_SELF_TYPE,
-						typeDescriptionLink: 'ResponsiveValue',
+						typeTokens: LONG_ALIGN_SELF_TOKENS,
 					},
 				}}
 			/>
@@ -225,10 +263,70 @@ test('keeps a long linked type from widening a mobile viewport', async () => {
 	);
 
 	await expect
-		.element(page.getByRole('button', { exact: true, name: LONG_ALIGN_SELF_TYPE }))
+		.element(page.getByRole('button', { exact: true, name: 'ResponsiveValue' }))
 		.toBeVisible();
 	assert(container, 'expected a container');
 	expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
+});
+
+test('shows a long union in the type cell with one member per line', async () => {
+	await renderWidget(
+		<TypeTable
+			id="api"
+			type={{
+				alignSelf: {
+					description: 'Aligns this part on the cross axis.',
+					type: LONG_ALIGN_SELF_TYPE,
+					typeTokens: LONG_ALIGN_SELF_TOKENS,
+				},
+			}}
+		/>,
+	);
+
+	const cell = page.getByRole('cell').filter({ hasText: 'ResponsiveValue' }).first().element();
+	assert(cell instanceof HTMLElement, 'expected the type cell');
+	// The build's line breaks survive rendering, so each member starts its own indented line.
+	expect(visibleText(cell).split('\n')).toEqual([
+		'ResponsiveValue<"auto"',
+		...ALIGN_SELF_VALUES.slice(1, -1).map((value) => `  | "${value}"`),
+		'  | "stretch"> | undefined',
+	]);
+	// Without a definitions provider the type name is plain text, not a trigger.
+	expect(page.getByRole('button').elements()).toHaveLength(0);
+});
+
+test('wraps a union before its operator, never between the operator and its member', async () => {
+	await renderWidget(
+		<p>
+			<TypeTokensView
+				tokens={[
+					['t', 'ResponsiveValue'],
+					'<',
+					['s', '"0"'],
+					' |\u2060\u00a0',
+					['s', '"1"'],
+					'>',
+					' |\u2060\u00a0',
+					['k', 'undefined'],
+				]}
+			/>
+		</p>,
+	);
+	const member = page.getByText('undefined', { exact: true }).element();
+	const paragraph = member.closest('p');
+	assert(paragraph, 'expected the paragraph');
+	// Room for `ResponsiveValue<"0" | "1"> |` and its no-break space, but not the member after them.
+	const characterInlineSize = member.getBoundingClientRect().width / 'undefined'.length;
+	paragraph.style.inlineSize = `${characterInlineSize * 29.5}px`;
+
+	const operator = document.createRange();
+	const joiner = member.previousSibling;
+	assert(joiner instanceof Text, 'expected the operator before the member');
+	operator.setStart(joiner, 1);
+	operator.setEnd(joiner, 2);
+	const memberTop = member.getBoundingClientRect().top;
+	expect(memberTop).toBeGreaterThan(paragraph.getBoundingClientRect().top + 1);
+	expect(operator.getBoundingClientRect().top).toBeCloseTo(memberTop, 0);
 });
 
 test('keeps the Lockup guide API table from widening a mobile viewport', async () => {
@@ -384,10 +482,10 @@ test('opens a type definition popover for a linked alias and restores focus on d
 
 	const trigger = page.getByRole('button', {
 		exact: true,
-		name: SYNTHETIC_TYPE,
+		name: SYNTHETIC_TRIGGER,
 	});
 	await expect.element(trigger).toBeVisible();
-	await expect.element(trigger).toHaveAccessibleName(SYNTHETIC_TYPE);
+	await expect.element(trigger).toHaveAccessibleName(SYNTHETIC_TRIGGER);
 	await userEvent.click(trigger.element());
 	await expect
 		.element(page.getByRole('dialog', { name: 'Definition of RequiredInitialResponsiveValue' }))
@@ -402,32 +500,258 @@ test('opens a type definition popover for a linked alias and restores focus on d
 	await expect.element(trigger).toHaveFocus();
 });
 
-test('the Button guide opens PressAction from its generated definitions', async () => {
-	// The Button primitive guide also documents a `ButtonProps` from a `button.tsx`, which fumadocs
-	// gives the same table id. Compiling it too checks that each guide keeps its own definitions.
-	const { default: ButtonGuide } = await import('../../content/docs/components/actions/button.mdx');
-	await import('../../content/docs/components/primitives/button.mdx');
-	await renderWidget(<ButtonGuide components={GUIDE_COMPONENTS} />);
+// `pressAction` writes its alias. `prominence` gets `Prominence` from presentation branches that
+// declare different subsets of it, so the row shows the resolved alias. Both link.
+for (const { definitionPattern, typeName } of [
+	{ definitionPattern: PRESS_ACTION_DEFINITION_PATTERN, typeName: 'PressAction' },
+	{ definitionPattern: PROMINENCE_DEFINITION_PATTERN, typeName: 'Prominence' },
+]) {
+	test(`the Button guide opens ${typeName} from its generated definitions`, async () => {
+		// The Button primitive guide also documents a `ButtonProps` from a `button.tsx`, which fumadocs
+		// gives the same table id. Compiling it too checks that each guide keeps its own definitions.
+		const { default: ButtonGuide } =
+			await import('../../content/docs/components/actions/button.mdx');
+		await import('../../content/docs/components/primitives/button.mdx');
+		await renderWidget(<ButtonGuide components={GUIDE_COMPONENTS} />);
 
-	const { dialog, trigger } = await openDefinitionWithKeyboard('PressAction', 'PressAction');
-	await expect.element(dialog.getByText(PRESS_ACTION_DEFINITION_PATTERN)).toBeVisible();
-	await userEvent.keyboard('{Escape}');
-	await expect.element(dialog).not.toBeInTheDocument();
-	await expect.element(trigger).toHaveFocus();
+		const { dialog, trigger } = await openDefinitionWithKeyboard(typeName);
+		await expect.element(dialog.getByText(definitionPattern)).toBeVisible();
+		await userEvent.keyboard('{Escape}');
+		await expect.element(dialog).not.toBeInTheDocument();
+		await expect.element(trigger).toHaveFocus();
+	});
+}
+
+test('the Box guide shows a definition and the values it resolves to', async () => {
+	const { default: BoxGuide } = await import('../../content/docs/components/layout/box.mdx');
+	await renderWidget(<BoxGuide components={GUIDE_COMPONENTS} />);
+	// `elementType` sits in the collapsed Advanced group.
+	await userEvent.click(page.getByRole('button', { name: 'Advanced' }));
+
+	const { dialog } = await openDefinitionWithKeyboard('BoxLikeElementType');
+	await expect.element(dialog.getByText(BOX_ELEMENT_TYPE_DEFINITION_PATTERN)).toBeVisible();
+	await expect.element(dialog.getByText('Which resolves to:')).toBeVisible();
+	await expect.element(dialog.getByText(BOX_ELEMENT_TYPE_RESOLVED_PATTERN)).toBeVisible();
+});
+
+test('generated definitions load only when a reader reaches a linked type', async () => {
+	const fetchSpy = vi.spyOn(globalThis, 'fetch');
+	// Requests are cached per asset for the page's lifetime, so this test uses a guide whose asset no
+	// other test in this file loads.
+	const guide = await import('../../content/docs/components/layout/stack.mdx');
+	// The page module keeps processed Markdown, and with it the Markdown type definitions, server-side.
+	expect((guide as { _markdown?: unknown })._markdown).toBeUndefined();
+	await renderWidget(<guide.default components={GUIDE_COMPONENTS} />);
+
+	const trigger = page.getByRole('button', { exact: true, name: 'RequiredInitialResponsive' });
+	await expect.element(trigger).toBeVisible();
+	expect(fetchSpy).not.toHaveBeenCalled();
+
+	trigger.element().focus();
+	await expect.poll(() => fetchSpy.mock.calls.length).toBe(1);
+	// The separately emitted, content-hashed asset that `remarkAttachTypeDefinitions` wrote.
+	expect(fetchSpy).toHaveBeenCalledWith(expect.stringMatching(DEFINITIONS_ASSET_PATTERN));
 });
 
 test('the Grid guide opens RequiredInitialResponsiveValue from its generated definitions', async () => {
 	const { default: GridGuide } = await import('../../content/docs/components/layout/grid.mdx');
 	await renderWidget(<GridGuide components={GUIDE_COMPONENTS} />);
 
-	const { dialog, trigger } = await openDefinitionWithKeyboard(
-		'RequiredInitialResponsiveValue',
-		'RequiredInitialResponsiveValue<number | string>',
-	);
+	const { dialog, trigger } = await openDefinitionWithKeyboard('RequiredInitialResponsiveValue');
 	await expect.element(dialog.getByText(RESPONSIVE_VALUE_DEFINITION_PATTERN)).toBeVisible();
 	await userEvent.keyboard('{Escape}');
 	await expect.element(dialog).not.toBeInTheDocument();
 	await expect.element(trigger).toHaveFocus();
+});
+
+test('opens the types a definition names in the same popover and goes back with breadcrumbs', async () => {
+	vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+		jsonResponse({
+			Inner: { definition: [['k', 'type'], ' ', ['t', 'Inner'], ' = ', ['k', 'string'], ';'] },
+			Outer: {
+				definition: [['k', 'type'], ' ', ['t', 'Outer'], ' = ', ['t', 'Inner', 'Inner'], '[];'],
+			},
+		}),
+	);
+	await renderWidget(
+		<TypeDefinitionsProvider
+			definitionNames={['Inner', 'Outer']}
+			definitionsHref="/type-definitions/nested.json"
+		>
+			<TypeTable
+				id="api"
+				type={{ value: { type: 'Outer', typeTokens: [['t', 'Outer', 'Outer']] } }}
+			/>
+		</TypeDefinitionsProvider>,
+	);
+
+	const { trigger } = await openDefinitionWithKeyboard('Outer');
+	const nested = page.getByRole('dialog').getByRole('button', { exact: true, name: 'Inner' });
+	nested.element().focus();
+	await userEvent.keyboard('{Enter}');
+
+	// The popover now shows Inner, says so in its name, and takes focus so reading starts there.
+	const innerDialog = page.getByRole('dialog', { name: 'Definition of Inner' });
+	await expect.element(innerDialog).toHaveFocus();
+	await expect.element(innerDialog.getByText(/^type Inner = string;$/)).toBeVisible();
+	await expect
+		.element(innerDialog.getByRole('link', { name: 'Inner' }))
+		.toHaveAttribute('aria-current', 'page');
+
+	await userEvent.click(innerDialog.getByRole('link', { name: 'Outer' }));
+	const outerDialog = page.getByRole('dialog', { name: 'Definition of Outer' });
+	await expect.element(outerDialog.getByText(/^type Outer = Inner\[\];$/)).toBeVisible();
+
+	await userEvent.keyboard('{Escape}');
+	await expect.element(outerDialog).not.toBeInTheDocument();
+	await expect.element(trigger).toHaveFocus();
+});
+
+test('the Grid guide follows responsive types to the breakpoint names they accept', async () => {
+	const { default: GridGuide } = await import('../../content/docs/components/layout/grid.mdx');
+	await renderWidget(<GridGuide components={GUIDE_COMPONENTS} />);
+
+	await openDefinitionWithKeyboard('RequiredInitialResponsiveValue');
+	await openNamedType('ResponsivePropValue');
+	await openNamedType('ResponsiveCondition');
+
+	const dialog = page.getByRole('dialog', { name: 'Definition of ResponsiveCondition' });
+	await expect.element(dialog.getByText('Which resolves to:')).toBeVisible();
+	await expect.element(dialog.getByText('"bp640"', { exact: true })).toBeVisible();
+	await expect.element(dialog.getByText('"initial"', { exact: true })).toBeVisible();
+	expect(
+		dialog
+			.getByRole('link')
+			.elements()
+			.map((link) => link.textContent),
+	).toEqual(['RequiredInitialResponsiveValue', 'ResponsivePropValue', 'ResponsiveCondition']);
+});
+
+test('the Grid guide shows every Sprinkles prop a mapped type hides, scrolling on a phone', async () => {
+	const { default: GridGuide } = await import('../../content/docs/components/layout/grid.mdx');
+	await renderWidget(<GridGuide components={GUIDE_COMPONENTS} />, {
+		inlineSize: MOBILE_INLINE_SIZE,
+	});
+
+	await openDefinitionWithKeyboard('GridAlignmentProp');
+	await openNamedType('SprinklesProps');
+	await openNamedType('SprinklesPropsShape');
+
+	const dialog = page.getByRole('dialog', { name: 'Definition of SprinklesPropsShape' });
+	await expect.element(dialog.getByText('Which resolves to:')).toBeVisible();
+	const shown = visibleText(dialog.element() as HTMLElement);
+	expect(shown).toContain('readonly alignContent?: ResponsiveValue<"center"');
+	expect(shown).toContain('readonly rowGap?: ResponsiveValue<');
+
+	const popover = dialog.element().parentElement;
+	assert(popover, 'expected the popover around the dialog');
+	expect(popover.scrollWidth).toBeLessThanOrEqual(popover.clientWidth);
+	expect(popover.scrollHeight).toBeGreaterThan(popover.clientHeight);
+	assert(container, 'expected a container');
+	expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
+});
+
+test('keeps the Box guide token unions on separate lines without widening a mobile viewport', async () => {
+	const { default: BoxGuide } = await import('../../content/docs/components/layout/box.mdx');
+	await renderWidget(<BoxGuide components={GUIDE_COMPONENTS} />, {
+		inlineSize: MOBILE_INLINE_SIZE,
+	});
+
+	const row = page.getByRole('rowheader', { name: 'backgroundColor' });
+	await expect.element(row).toBeVisible();
+	const typeCell = row.element().nextElementSibling;
+	assert(typeCell instanceof HTMLElement, 'expected the type cell');
+	expect(visibleText(typeCell)).toContain(
+		'ResponsiveValue<"accent.solid.hover"\n  | "accent.solid.pressed"',
+	);
+	assert(container, 'expected a container');
+	expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
+});
+
+test('shows resolved values for a type without a source definition', async () => {
+	vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+		jsonResponse({
+			"Spacing['gap']": {
+				resolved: [
+					['s', '"sp4"'],
+					' |\u2060\u00a0',
+					['s', '"sp8"'],
+					' |\u2060\u00a0',
+					['k', 'undefined'],
+				],
+			},
+		}),
+	);
+
+	await renderWidget(
+		<TypeDefinitionsProvider
+			definitionNames={["Spacing['gap']"]}
+			definitionsHref="/type-definitions/resolved-only.json"
+		>
+			<TypeTable
+				id="api"
+				type={{
+					gap: {
+						description: 'Space between children.',
+						type: "Spacing['gap']",
+						typeTokens: [['t', "Spacing['gap']", "Spacing['gap']"]],
+					},
+				}}
+			/>
+		</TypeDefinitionsProvider>,
+	);
+
+	const { dialog } = await openDefinitionWithKeyboard("Spacing['gap']");
+	await expect.element(dialog.getByText('Resolves to:')).toBeVisible();
+	await expect
+		.element(dialog.getByText('"sp4" |\u2060\u00a0"sp8" |\u2060\u00a0undefined'))
+		.toBeVisible();
+	expect(dialog.getByText('Definition not available.').elements()).toHaveLength(0);
+});
+
+test('keeps a definition popover inside a mobile viewport and scrolls long values', async () => {
+	const longResolved = Array.from({ length: 300 }, (_, index): TypeTokens => [
+		...(index === 0 ? [] : [1, '|\u2060\u00a0']),
+		['s', `"value${index}"`],
+	]).flat();
+	vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+		jsonResponse({
+			LongUnion: {
+				definition: [['k', 'type'], ' ', ['t', 'LongUnion'], ' = ', ['k', 'keyof'], ' longValues;'],
+				resolved: longResolved,
+			},
+		}),
+	);
+
+	await renderWidget(
+		<TypeDefinitionsProvider
+			definitionNames={['LongUnion']}
+			definitionsHref="/type-definitions/long-union.json"
+		>
+			<TypeTable
+				id="api"
+				type={{
+					value: {
+						description: 'A long union.',
+						type: 'LongUnion',
+						typeTokens: [['t', 'LongUnion', 'LongUnion']],
+					},
+				}}
+			/>
+		</TypeDefinitionsProvider>,
+		{ inlineSize: MOBILE_INLINE_SIZE },
+	);
+
+	const { dialog } = await openDefinitionWithKeyboard('LongUnion');
+	await expect.element(dialog.getByText('"value0"', { exact: true })).toBeVisible();
+	const popover = dialog.element().parentElement;
+	assert(popover, 'expected the popover around the dialog');
+	const { left, right } = popover.getBoundingClientRect();
+	expect(left).toBeGreaterThanOrEqual(0);
+	expect(right).toBeLessThanOrEqual(window.innerWidth);
+	// Long values wrap instead of widening the popover, which scrolls when they are taller than it.
+	expect(popover.scrollWidth).toBeLessThanOrEqual(popover.clientWidth);
+	expect(popover.scrollHeight).toBeGreaterThan(popover.clientHeight);
 });
 
 test('falls back to plain text when a type reference has no definition', async () => {
@@ -437,14 +761,14 @@ test('falls back to plain text when a type reference has no definition', async (
 			type={{
 				value: {
 					type: 'Promise<string>',
-					typeDescriptionLink: 'Promise',
+					typeTokens: [['t', 'Promise', 'Promise'], '<', ['k', 'string'], '>'],
 				},
 			}}
 		/>,
 	);
 
-	await expect.element(page.getByText('Promise<string>')).toBeVisible();
-	expect(page.getByRole('button', { name: 'Promise<string>' }).elements()).toHaveLength(0);
+	await expect.element(page.getByText('Promise', { exact: true })).toBeVisible();
+	expect(page.getByRole('button').elements()).toHaveLength(0);
 	expect(page.getByRole('link').elements()).toHaveLength(0);
 });
 
@@ -462,7 +786,7 @@ test('deferred definition fetch shows loading, then the definition', async () =>
 	]);
 	const trigger = page.getByRole('button', {
 		exact: true,
-		name: SYNTHETIC_TYPE,
+		name: SYNTHETIC_TRIGGER,
 	});
 	await userEvent.click(trigger.element());
 	await expect
@@ -492,7 +816,7 @@ test('deferred definition fetch shows a recoverable error and retries', async ()
 	await renderDeferredTypeTable('/type-definitions/retry.json', ['RequiredInitialResponsiveValue']);
 	const trigger = page.getByRole('button', {
 		exact: true,
-		name: SYNTHETIC_TYPE,
+		name: SYNTHETIC_TRIGGER,
 	});
 	await userEvent.click(trigger.element());
 	await expect
@@ -521,12 +845,12 @@ test('deferred tables only link aliases registered in definitionNames', async ()
 					columns: {
 						description: 'Column tracks.',
 						type: SYNTHETIC_TYPE,
-						typeDescriptionLink: 'RequiredInitialResponsiveValue',
+						typeTokens: SYNTHETIC_TOKENS,
 					},
 					fallback: {
 						description: 'Unresolved external.',
 						type: 'Promise<string>',
-						typeDescriptionLink: 'Promise',
+						typeTokens: [['t', 'Promise', 'Promise'], '<', ['k', 'string'], '>'],
 					},
 				}}
 			/>
@@ -534,10 +858,10 @@ test('deferred tables only link aliases registered in definitionNames', async ()
 	);
 
 	await expect
-		.element(page.getByRole('button', { exact: true, name: SYNTHETIC_TYPE }))
+		.element(page.getByRole('button', { exact: true, name: SYNTHETIC_TRIGGER }))
 		.toBeVisible();
-	expect(page.getByRole('button', { name: 'Promise<string>' }).elements()).toHaveLength(0);
-	await expect.element(page.getByText('Promise<string>')).toBeVisible();
+	expect(page.getByRole('button', { name: 'Promise' }).elements()).toHaveLength(0);
+	await expect.element(page.getByText('Promise', { exact: true })).toBeVisible();
 	expect(fetchMock).not.toHaveBeenCalled();
 });
 
@@ -554,7 +878,7 @@ test('deferred fetch that omits a registered alias settles without infinite load
 	]);
 	const trigger = page.getByRole('button', {
 		exact: true,
-		name: SYNTHETIC_TYPE,
+		name: SYNTHETIC_TRIGGER,
 	});
 	await userEvent.click(trigger.element());
 	await expect
@@ -577,7 +901,7 @@ test('linked type popovers in a ComponentPropsTable have no axe violations', asy
 				columns: {
 					description: 'Column tracks.',
 					type: SYNTHETIC_TYPE,
-					typeDescriptionLink: 'RequiredInitialResponsiveValue',
+					typeTokens: SYNTHETIC_TOKENS,
 				},
 			}}
 		/>,
@@ -585,7 +909,7 @@ test('linked type popovers in a ComponentPropsTable have no axe violations', asy
 
 	const trigger = page.getByRole('button', {
 		exact: true,
-		name: SYNTHETIC_TYPE,
+		name: SYNTHETIC_TRIGGER,
 	});
 	await userEvent.click(trigger.element());
 	const dialog = page.getByRole('dialog', {
@@ -593,6 +917,11 @@ test('linked type popovers in a ComponentPropsTable have no axe violations', asy
 	});
 	await expect.element(dialog).toBeVisible();
 	await expect.element(page.getByText(/type RequiredInitialResponsiveValue/)).toBeVisible();
+
+	// Check the settled popover, not a frame of its fade-in, whose text is still translucent.
+	const popover = dialog.element().closest('[data-trigger]');
+	assert(popover instanceof HTMLElement, 'expected the popover');
+	await Promise.all(popover.getAnimations().map((animation) => animation.finished));
 
 	// Include the portalled dialog; Vitest document chrome trips landmark rules.
 	assert(container, 'expected a container');
@@ -608,7 +937,7 @@ test('linked type popovers in a ComponentPropsTable have no axe violations', asy
 test('ignores a response for an asset the table no longer uses', async () => {
 	const resolvers = new Map<string, (response: Response) => void>();
 	vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
-		const href = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+		const href = input instanceof Request ? input.url : String(input);
 		return new Promise((resolve) => {
 			resolvers.set(href, resolve);
 		});
@@ -629,7 +958,7 @@ test('ignores a response for an asset the table no longer uses', async () => {
 	await renderWidget(<SwitchableAsset />);
 	const trigger = page.getByRole('button', {
 		exact: true,
-		name: SYNTHETIC_TYPE,
+		name: SYNTHETIC_TRIGGER,
 	});
 	await userEvent.click(trigger.element());
 	await expect.element(page.getByText('Loading definition…')).toBeVisible();
@@ -669,7 +998,7 @@ test('invalid definition JSON shows a recoverable error', async () => {
 	await renderDeferredTypeTable('/type-definitions/invalid.json');
 	const trigger = page.getByRole('button', {
 		exact: true,
-		name: SYNTHETIC_TYPE,
+		name: SYNTHETIC_TRIGGER,
 	});
 	await userEvent.click(trigger.element());
 	await expect
@@ -680,18 +1009,28 @@ test('invalid definition JSON shows a recoverable error', async () => {
 });
 
 /**
- * Opens a generated table's popover from its focused trigger with Enter. The trigger's accessible
- * name must be its complete visible type, generic arguments included.
+ * Opens a type's popover from its focused trigger with Enter. Each linked type name is its own
+ * trigger, named by the type. The first one on the page is used when several rows name the type.
  */
-async function openDefinitionWithKeyboard(typeName: string, visibleType: string) {
-	const trigger = page.getByRole('button', { exact: true, name: visibleType });
-	await expect.element(trigger).toHaveAccessibleName(visibleType);
+async function openDefinitionWithKeyboard(typeName: string) {
+	const trigger = page.getByRole('button', { exact: true, name: typeName }).first();
+	await expect.element(trigger).toHaveAccessibleName(typeName);
 	trigger.element().focus();
 	await userEvent.keyboard('{Enter}');
 
 	const dialog = page.getByRole('dialog', { name: `Definition of ${typeName}` });
 	await expect.element(dialog).toBeVisible();
 	return { dialog, trigger };
+}
+
+/** Opens a type that the open popover's definition names, in the same popover. */
+async function openNamedType(typeName: string) {
+	await userEvent.click(
+		page.getByRole('dialog').getByRole('button', { exact: true, name: typeName }),
+	);
+	await expect
+		.element(page.getByRole('dialog', { name: `Definition of ${typeName}` }))
+		.toBeVisible();
 }
 
 function deferredTypeTableTree(
@@ -706,7 +1045,7 @@ function deferredTypeTableTree(
 					columns: {
 						description: 'Column tracks.',
 						type: SYNTHETIC_TYPE,
-						typeDescriptionLink: 'RequiredInitialResponsiveValue',
+						typeTokens: SYNTHETIC_TOKENS,
 					},
 				}}
 			/>
@@ -721,13 +1060,20 @@ async function renderDeferredTypeTable(
 	await renderWidget(deferredTypeTableTree(definitionsHref, definitionNames));
 }
 
+/** An element's rendered text, with the characters that keep `|` with its member as a space. */
+function visibleText(element: HTMLElement) {
+	return element.innerText.replace(OPERATOR_GLUE_PATTERN, ' ');
+}
+
 function definitionsResponse(definition = SYNTHETIC_DEFINITION) {
-	return new Response(
-		JSON.stringify({
-			RequiredInitialResponsiveValue: { definition, name: 'RequiredInitialResponsiveValue' },
-		}),
-		{ headers: { 'Content-Type': 'application/json' }, status: 200 },
-	);
+	return jsonResponse({ RequiredInitialResponsiveValue: { definition: [definition] } });
+}
+
+function jsonResponse(body: unknown) {
+	return new Response(JSON.stringify(body), {
+		headers: { 'Content-Type': 'application/json' },
+		status: 200,
+	});
 }
 
 async function renderWidget(

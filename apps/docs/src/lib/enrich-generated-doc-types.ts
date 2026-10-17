@@ -1,53 +1,75 @@
-import { isAbsolute, relative, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import type { DocEntry, GeneratedDoc } from 'fumadocs-typescript';
+import { ts } from 'ts-morph';
+import { createTypeDefinitionCollector } from './collect-type-definitions.js';
 import type { PropDeclaration, SyntaxNode } from './component-prop-analysis.js';
-import type { EnrichedGeneratedDoc, TypeDefinitionsPayload } from './type-definition-model.js';
-
-/** Bare kind names fumadocs can put in `simplifiedType` in place of a readable signature. */
-const KIND_LABELS = new Set(['union', 'object', 'intersection', 'tuple', 'array', 'function']);
-
-const TRAILING_UNDEFINED = ' | undefined';
+import type { EnrichedGeneratedDoc } from './type-definition-model.js';
+import type { TypeToken } from './type-tokens.js';
+import { typeTokensToText } from './type-tokens.js';
 
 /**
- * Restores the declared type of each prop and links Luke UI type aliases to their source
- * declarations. The definitions travel on the doc as `typeDefinitions`, not as a prop entry.
+ * Formats each prop's declared type, or its resolved type when no single annotation describes it,
+ * and collects the definitions of the types those signatures name. The formatted rows travel on the
+ * doc as `typeTokens` and the definitions as `typeDefinitions`, not as prop entries. Each row's text
+ * is its tokens on one line.
  */
 export function enrichGeneratedDocTypes(
 	doc: GeneratedDoc,
 	propsDeclaration: PropDeclaration,
 	reactSrcDir: string,
+	checker: ts.TypeChecker,
 ): EnrichedGeneratedDoc {
 	const annotationsByName = annotationsByPropName(propsDeclaration);
-	const definitions: TypeDefinitionsPayload = {};
+	const declarationNode = propsDeclaration.compilerNode;
+	const declaredType = checker.getTypeAtLocation(declarationNode);
+	const collector = createTypeDefinitionCollector({
+		checker,
+		enclosingDeclaration: declarationNode,
+		packageDir: dirname(reactSrcDir),
+	});
+	const typeTokens: Record<string, Array<TypeToken>> = {};
+
+	function withTokens(entry: DocEntry, tokens: Array<TypeToken>): DocEntry {
+		typeTokens[entry.name] = tokens;
+		const text = typeTokensToText(tokens, { multiline: false });
+		return { ...entry, simplifiedType: text, type: text };
+	}
 
 	const entries = doc.entries.map((entry) => {
 		const annotations = annotationsByName.get(entry.name) ?? [];
-		const declared = sharedAnnotation(annotations);
+		const declared = sharedAnnotation(annotations, propsDeclaration, checker);
 
 		// An indexed access such as `RacButtonProps['onPress']` hides the shape, so the resolved
 		// signature reads better there.
 		if (declared !== undefined && !isLowReadabilityAnnotation(declared)) {
-			const text = declared.getText().trim();
-			const alias = resolveLukeTypeAlias(declared, reactSrcDir);
-			if (alias !== undefined) definitions[alias.name] = alias;
-
-			return {
-				...entry,
-				simplifiedType: text,
-				type: text,
-				typeHref: alias?.name ?? entry.typeHref,
-			};
+			return withTokens(entry, collector.addTypeNode(declared.compilerNode as ts.TypeNode));
 		}
 
-		if (annotations.length === 0 && !KIND_LABELS.has(entry.simplifiedType)) return entry;
-		if (entry.type.length === 0 || entry.type === 'union') return entry;
+		const prop = checker.getPropertyOfType(declaredType, entry.name);
+		if (prop === undefined) return entry;
 
-		const type = resolvedTypeText(entry, annotations);
-		return { ...entry, simplifiedType: type, type };
+		const tokens = collector.addType(checker.getTypeOfSymbolAtLocation(prop, declarationNode), {
+			omitUndefined: impliesUndefined(entry, annotations),
+		});
+		return tokens === undefined ? entry : withTokens(entry, tokens);
 	});
 
-	if (Object.keys(definitions).length === 0) return { ...doc, entries };
-	return { ...doc, entries, typeDefinitions: definitions };
+	const typeDefinitions = collector.definitions();
+	return {
+		...doc,
+		entries,
+		...(typeDefinitions === undefined ? {} : { typeDefinitions }),
+		...(Object.keys(typeTokens).length === 0 ? {} : { typeTokens }),
+	};
+}
+
+/**
+ * True when the `undefined` in an optional prop's resolved type comes only from the `?`. It stays
+ * when a written annotation admits `undefined` itself.
+ */
+function impliesUndefined(entry: DocEntry, annotationNodes: ReadonlyArray<SyntaxNode>): boolean {
+	if (entry.required || annotationNodes.length === 0) return false;
+	return !annotationNodes.some(annotationAdmitsUndefined);
 }
 
 /**
@@ -55,13 +77,46 @@ export function enrichGeneratedDocTypes(
  * the prop, so it gives way to the branches with a real type. When branches write different types,
  * no one annotation describes the prop and fumadocs' resolved type is used instead.
  */
-function sharedAnnotation(typeNodes: ReadonlyArray<SyntaxNode>): SyntaxNode | undefined {
+function sharedAnnotation(
+	typeNodes: ReadonlyArray<SyntaxNode>,
+	propsDeclaration: PropDeclaration,
+	checker: ts.TypeChecker,
+): SyntaxNode | undefined {
 	const realNodes = typeNodes.filter((node) => !isNeverAnnotation(node));
 	const candidates = realNodes.length > 0 ? realNodes : typeNodes;
 	const texts = new Set(candidates.map((node) => node.getText().trim()));
 	if (texts.size !== 1 || texts.has('')) return;
 
-	return candidates[0];
+	const [candidate] = candidates;
+	if (namesOuterTypeParameter(candidate!.compilerNode, propsDeclaration.compilerNode, checker)) {
+		return;
+	}
+	return candidate;
+}
+
+/**
+ * True when an annotation names a type parameter of another generic declaration, such as `T` in
+ * React Aria's `children?: ChildrenOrFunction<T>`. The written text would show `T` where the props
+ * type supplies an argument, so the resolved type reads correctly and the annotation does not.
+ */
+function namesOuterTypeParameter(
+	node: ts.Node,
+	propsDeclaration: ts.Node,
+	checker: ts.TypeChecker,
+): boolean {
+	if (ts.isTypeReferenceNode(node)) {
+		const symbol = checker.getSymbolAtLocation(node.typeName);
+		const owner = symbol?.declarations?.[0]?.parent;
+		if (symbol !== undefined && symbol.flags & ts.SymbolFlags.TypeParameter) {
+			if (owner !== propsDeclaration) return true;
+		}
+	}
+	return (
+		ts.forEachChild(
+			node,
+			(child) => namesOuterTypeParameter(child, propsDeclaration, checker) || undefined,
+		) === true
+	);
 }
 
 function isLowReadabilityAnnotation(typeNode: SyntaxNode): boolean {
@@ -84,18 +139,6 @@ function isLowReadabilityAnnotation(typeNode: SyntaxNode): boolean {
 }
 
 /**
- * fumadocs' resolved type, minus the trailing `| undefined` TypeScript adds to an optional prop.
- * The suffix stays when a written annotation admits `undefined` itself.
- */
-function resolvedTypeText(entry: DocEntry, annotationNodes: ReadonlyArray<SyntaxNode>): string {
-	if (entry.required || annotationNodes.length === 0) return entry.type;
-	if (annotationNodes.some(annotationAdmitsUndefined)) return entry.type;
-	if (!entry.type.endsWith(TRAILING_UNDEFINED)) return entry.type;
-
-	return entry.type.slice(0, -TRAILING_UNDEFINED.length);
-}
-
-/**
  * True when the written annotation's own type includes `undefined`, whether written out or reached
  * through an indexed access such as `Holder['value']`. A nested `Foo<string | undefined>` does not
  * count.
@@ -105,49 +148,6 @@ function annotationAdmitsUndefined(typeNode: SyntaxNode): boolean {
 	if (type === undefined) return false;
 	if (type.isUndefined()) return true;
 	return type.isUnion() && type.getUnionTypes().some((member) => member.isUndefined());
-}
-
-/** The Luke UI type alias an annotation names, with its declaration as the definition. */
-function resolveLukeTypeAlias(
-	typeNode: SyntaxNode,
-	reactSrcDir: string,
-): { definition: string; name: string } | undefined {
-	const reference = rootTypeReference(typeNode);
-	if (reference === undefined) return;
-
-	const typeName = reference.getTypeName?.();
-	const symbol =
-		typeName?.getSymbol?.() ?? reference.getSymbol?.() ?? reference.getType?.().getAliasSymbol();
-	const declarations = (symbol?.getAliasedSymbol?.() ?? symbol)?.getDeclarations() ?? [];
-
-	for (const declaration of declarations) {
-		if (declaration.getKindName() !== 'TypeAliasDeclaration') continue;
-		if (!isInsideDir(declaration.getSourceFile().getFilePath(), reactSrcDir)) continue;
-
-		const name = declaration.getName?.();
-		if (name === undefined || name.length === 0) continue;
-
-		const text = declaration.getText().trim();
-		return { definition: text.startsWith('export ') ? text.slice('export '.length) : text, name };
-	}
-	return;
-}
-
-function rootTypeReference(typeNode: SyntaxNode | undefined): SyntaxNode | undefined {
-	if (typeNode === undefined) return;
-	switch (typeNode.getKindName()) {
-		case 'TypeReference':
-			return typeNode;
-		case 'ParenthesizedType':
-			return rootTypeReference(typeNode.getTypeNode?.());
-		default:
-			return;
-	}
-}
-
-function isInsideDir(filePath: string, dir: string): boolean {
-	const relativePath = relative(resolve(dir), resolve(filePath));
-	return relativePath !== '' && !relativePath.startsWith('..') && !isAbsolute(relativePath);
 }
 
 function isNeverAnnotation(typeNode: SyntaxNode): boolean {
