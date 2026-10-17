@@ -294,7 +294,7 @@ export const MOTION_DOT_SIZE = vars.space.sp12;
 
 const motionDotTravelDistance = `calc(${MOTION_TRACK_SIZE} - ${MOTION_DOT_SIZE})`;
 
-/** Shared motion-sample loop length so every dot in a table stays in sync. */
+/** Motion-sample loop length used by both duration and easing keyframes. */
 const MOTION_SAMPLE_CYCLE = '1s';
 
 const motionDotAtStart = {

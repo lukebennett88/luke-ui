@@ -22,9 +22,9 @@ const DURATION_MS_PATTERN = /^([\d.]+)ms$/;
 
 /**
  * The three motion treatments. Each table shows that treatment's duration and easing together, with
- * its own Animate switch and shared cycle so the dots stay aligned. Duration crossings reflect each
- * token inside that cycle; easing samples rest at both ends, then cross with the token curve. Loops
- * pause offscreen and when Animate is off.
+ * its own Animate switch. Duration crossings reflect each token inside a one-second half-cycle;
+ * easing samples rest at both ends, then cross with the token curve on their own one-second loop.
+ * Loops pause offscreen and when Animate is off.
  */
 export function MotionTokens() {
 	const { scales } = tokenSections;

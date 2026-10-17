@@ -104,10 +104,10 @@ controls do.
 ## Motion
 
 Choose a treatment: each pairs a duration with its easing. Each treatment table includes an Animate
-switch in the group header. Duration and easing samples share a one-second cycle so the loops stay
-aligned. Duration crossings take that token’s duration within the half-cycle. Easing samples use the
-same rest-and-cross pattern with that timing function on the travel segments. Turn Animate off to
-hold the dots still, or on again to restart that table in sync.
+switch in the group header. Duration samples alternate along the track, and each crossing takes that
+token’s duration within a one-second half-cycle. Easing samples rest at both ends, then cross with
+that timing function on the travel segments of their own one-second loop. Turn Animate off to hold
+the dots still, or on again to restart that table’s samples.
 
 - `feedback` covers an in-place state change, such as hover, focus, or selection.
 - `enter` covers an element or an overlay that enters the interface.

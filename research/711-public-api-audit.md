@@ -1054,8 +1054,8 @@ example, `vars.color.foreground.danger.onSolid` is `var(--luke-color-foreground-
 | `controlSize.{small,medium,minTarget,comboboxAction}`                                                                                                             | Align owned controls/actions with shared dimensions and minimum target. |
 | `interaction.disabledOpacity`                                                                                                                                     | Apply consistent disabled/pending treatment.                            |
 | `iconSize.{xsmall,small,medium,large}`                                                                                                                            | Align custom glyphs at 16/20/24/32 px emitted as rem.                   |
-| `motion.duration.{feedback,enter,exit}`                                                                                                                           | Apply interaction/entry/exit timing (200/500/300 ms).                   |
-| `motion.easing.{standard,exit}`                                                                                                                                   | Apply shared deceleration/acceleration curves.                          |
+| `motion.duration.{feedback,enter,exit}` (historical; now `motion.{feedback,enter,exit}.duration`)                                                                 | Apply interaction/entry/exit timing (200/500/300 ms).                   |
+| `motion.easing.{standard,exit}` (historical; now `motion.{feedback,enter,exit}.easing`)                                                                           | Apply shared deceleration/acceleration curves.                          |
 
 Only color, depth and actionControlFinish vary by colour mode. Other token families belong to theme
 identity. All CSS variables are public through vars even though generation helpers and contract-tree
