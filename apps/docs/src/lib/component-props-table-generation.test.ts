@@ -393,3 +393,135 @@ test('keeps optional and explicit-undefined props distinct', async () => {
 	);
 	expect(entriesByName.get('external')?.typeHref).toBeUndefined();
 });
+
+test('closes Grid definitions over every Luke UI type they name', async () => {
+	const gridProps = await generateEnrichedDoc(
+		'packages/@luke-ui/react/src/core/grid/grid.tsx',
+		'GridProps',
+	);
+	const definitions = gridProps?.typeDefinitions ?? {};
+
+	expectClosedDefinitions(gridProps);
+	expect(definitions.RequiredInitialResponsiveValue).toEqual({
+		definition: expect.stringMatching(/^type RequiredInitialResponsiveValue<Value> =/),
+		name: 'RequiredInitialResponsiveValue',
+		references: ['RequiredInitialResponsive', 'ResponsivePropValue'],
+	});
+	expect(definitions.ResponsivePropValue?.references).toEqual(['ResponsiveCondition']);
+	// The declaration reads `keyof typeof responsiveConditions`, so the breakpoint names come from
+	// the checker. They are sorted, because the checker's order depends on the order pages compile in.
+	expect(definitions.ResponsiveCondition).toEqual(
+		expect.objectContaining({
+			definition: 'type ResponsiveCondition = keyof typeof responsiveConditions;',
+			resolved: '"bp640" | "bp768" | "bp1024" | "bp1280" | "bp1536" | "initial"',
+		}),
+	);
+	// An indexed access such as `SprinklesProps['gap']` has only its resolved form.
+	const emptyLocalNames = Object.values(definitions).flatMap((definition) => {
+		if (definition.module !== undefined) return [];
+		return definition.definition === undefined && definition.resolved === undefined
+			? [definition.name]
+			: [];
+	});
+	expect(emptyLocalNames).toEqual([]);
+});
+
+test("expands Stack gap's indexed access to the accepted spacing tokens", async () => {
+	const stackProps = await generateEnrichedDoc(
+		'packages/@luke-ui/react/src/core/stack/stack.tsx',
+		'StackProps',
+	);
+	const definitions = stackProps?.typeDefinitions ?? {};
+
+	expectClosedDefinitions(stackProps);
+	expect(stackProps?.entries.find((entry) => entry.name === 'gap')?.simplifiedType).toBe(
+		"RequiredInitialResponsive<SprinklesProps['gap']>",
+	);
+	expect(definitions["SprinklesProps['gap']"]).toEqual({
+		name: "SprinklesProps['gap']",
+		references: ['ResponsiveValue'],
+		resolved: expect.stringMatching(/^ResponsiveValue<"0" \| "sp4" \| .*"sp96"> \| undefined$/),
+	});
+	// The indexed access stands in for SprinklesProps, whose own definition shows no values.
+	expect(definitions.SprinklesProps).toBeUndefined();
+	expect(definitions.BreakpointName?.resolved).toBe(
+		'"bp640" | "bp768" | "bp1024" | "bp1280" | "bp1536" | "initial"',
+	);
+});
+
+test('shows render props with their arguments and names their external definitions', async () => {
+	const buttonProps = await generateEnrichedDoc(
+		'packages/@luke-ui/react/src/core/button/button.tsx',
+		'ButtonProps',
+	);
+	const definitions = buttonProps?.typeDefinitions ?? {};
+
+	expectClosedDefinitions(buttonProps);
+	// React Aria writes `ChildrenOrFunction<T>` in a generic interface. The row shows the argument
+	// ButtonProps supplies.
+	expect(buttonProps?.entries.find((entry) => entry.name === 'children')?.simplifiedType).toBe(
+		'ChildrenOrFunction<ButtonRenderProps>',
+	);
+	expect(definitions.ChildrenOrFunction).toEqual({
+		definition: expect.stringMatching(/^type ChildrenOrFunction<T> = ReactNode \| \(\(values: T/),
+		module: 'react-aria-components',
+		name: 'ChildrenOrFunction',
+		references: ['ReactNode'],
+		source: expect.stringMatching(/\.d\.ts$/),
+	});
+	// An external interface names its package but not its members.
+	expect(definitions.ButtonRenderProps).toEqual({
+		module: 'react-aria-components',
+		name: 'ButtonRenderProps',
+		references: [],
+		source: expect.stringMatching(/\.d\.ts$/),
+	});
+	expect(definitions.PressAction).toEqual({
+		definition: 'type PressAction = () => void | Promise<void>;',
+		name: 'PressAction',
+		references: [],
+	});
+});
+
+test('leaves TypeScript library types out of the definitions', async () => {
+	const gridProps = await generateEnrichedDoc(
+		'packages/@luke-ui/react/src/core/grid/grid.tsx',
+		'GridProps',
+	);
+	const names = Object.values(gridProps?.typeDefinitions ?? {}).map(
+		(definition) => definition.name,
+	);
+
+	expect(gridProps?.entries.find((entry) => entry.name === 'ref')?.simplifiedType).toBe(
+		'Ref<HTMLElement>',
+	);
+	expect(names).toContain('Ref');
+	// React merges an empty `HTMLElement` into the DOM library's, which still owns the type.
+	expect(names).not.toContain('HTMLElement');
+	expect(names).not.toContain('ReadonlyArray');
+});
+
+async function generateEnrichedDoc(path: string, name: string) {
+	const [doc] = (await componentPropsGenerator.generateTypeTable(
+		{ name, path },
+		{ basePath: repoRoot },
+	)) as Array<EnrichedGeneratedDoc | undefined>;
+	return doc;
+}
+
+/** Every reference and every row link names a key the definitions hold. */
+function expectClosedDefinitions(doc: EnrichedGeneratedDoc | undefined) {
+	const definitions = doc?.typeDefinitions ?? {};
+	const missingReferences = Object.entries(definitions).flatMap(([key, definition]) =>
+		definition.references.flatMap((reference) =>
+			definitions[reference] === undefined ? [`${key} -> ${reference}`] : [],
+		),
+	);
+	const unlinkedProps = (doc?.entries ?? []).flatMap((entry) => {
+		if (entry.typeHref === undefined) return [];
+		return definitions[entry.typeHref]?.definition === undefined ? [entry.name] : [];
+	});
+
+	expect(missingReferences).toEqual([]);
+	expect(unlinkedProps).toEqual([]);
+}

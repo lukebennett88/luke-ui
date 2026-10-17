@@ -23,8 +23,14 @@ interface MdxJsxAttributeValueExpression {
 
 interface MdxJsxFlowElement {
 	attributes: Array<MdxJsxAttribute | { type: 'mdxJsxExpressionAttribute' }>;
+	data?: ComponentPropsTableData;
 	name?: string | null;
 	type: 'mdxJsxFlowElement';
+}
+
+/** Data the table node keeps for processed Markdown. MDX does not compile node data into the page. */
+export interface ComponentPropsTableData {
+	typeDefinitions?: TypeDefinitionsPayload;
 }
 
 /**
@@ -34,6 +40,9 @@ interface MdxJsxFlowElement {
  * Each file is named by a hash of its contents, so two tables share a file only when their
  * definitions are identical. Vite emits only the files a page imports, so files that earlier runs
  * left in `outputDir` never ship.
+ *
+ * The same definitions stay on the node's `data`, where `stringifyComponentPropsTable` lists them
+ * after the table in processed Markdown.
  */
 export function remarkAttachTypeDefinitions({ outputDir }: { outputDir: string }) {
 	return (tree: MdastRoot, file: { path: string }) => {
@@ -46,7 +55,13 @@ export function remarkAttachTypeDefinitions({ outputDir }: { outputDir: string }
 			const { typeDefinitions = {}, ...doc } = JSON.parse(expression.value) as EnrichedGeneratedDoc;
 			expression.value = JSON.stringify(doc, null, 2);
 
-			const names = Object.keys(typeDefinitions);
+			if (Object.keys(typeDefinitions).length === 0) return;
+
+			node.data = { ...node.data, typeDefinitions };
+			// Only a definition with source can open in a popover.
+			const names = Object.keys(typeDefinitions).filter(
+				(name) => typeDefinitions[name]?.definition !== undefined,
+			);
 			if (names.length === 0) return;
 
 			const assetPath = writeDefinitionsAsset(outputDir, typeDefinitions);

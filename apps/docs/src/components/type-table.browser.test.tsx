@@ -724,7 +724,11 @@ async function renderDeferredTypeTable(
 function definitionsResponse(definition = SYNTHETIC_DEFINITION) {
 	return new Response(
 		JSON.stringify({
-			RequiredInitialResponsiveValue: { definition, name: 'RequiredInitialResponsiveValue' },
+			RequiredInitialResponsiveValue: {
+				definition,
+				name: 'RequiredInitialResponsiveValue',
+				references: [],
+			},
 		}),
 		{ headers: { 'Content-Type': 'application/json' }, status: 200 },
 	);

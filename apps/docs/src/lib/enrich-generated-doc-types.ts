@@ -1,7 +1,9 @@
 import { isAbsolute, relative, resolve } from 'node:path';
 import type { DocEntry, GeneratedDoc } from 'fumadocs-typescript';
+import { ts } from 'ts-morph';
+import { createTypeDefinitionCollector } from './collect-type-definitions.js';
 import type { PropDeclaration, SyntaxNode } from './component-prop-analysis.js';
-import type { EnrichedGeneratedDoc, TypeDefinitionsPayload } from './type-definition-model.js';
+import type { EnrichedGeneratedDoc } from './type-definition-model.js';
 
 /** Bare kind names fumadocs can put in `simplifiedType` in place of a readable signature. */
 const KIND_LABELS = new Set(['union', 'object', 'intersection', 'tuple', 'array', 'function']);
@@ -9,45 +11,65 @@ const KIND_LABELS = new Set(['union', 'object', 'intersection', 'tuple', 'array'
 const TRAILING_UNDEFINED = ' | undefined';
 
 /**
- * Restores the declared type of each prop and links Luke UI type aliases to their source
- * declarations. The definitions travel on the doc as `typeDefinitions`, not as a prop entry.
+ * Restores the declared type of each prop, links Luke UI type aliases to their source declarations,
+ * and collects the definitions of the types each shown signature names. The definitions travel on
+ * the doc as `typeDefinitions`, not as a prop entry.
  */
 export function enrichGeneratedDocTypes(
 	doc: GeneratedDoc,
 	propsDeclaration: PropDeclaration,
 	reactSrcDir: string,
+	checker: ts.TypeChecker,
 ): EnrichedGeneratedDoc {
 	const annotationsByName = annotationsByPropName(propsDeclaration);
-	const definitions: TypeDefinitionsPayload = {};
+	const declarationNode = propsDeclaration.compilerNode;
+	const declaredType = checker.getTypeAtLocation(declarationNode);
+	const collector = createTypeDefinitionCollector({
+		checker,
+		enclosingDeclaration: declarationNode,
+		reactSrcDir,
+	});
 
 	const entries = doc.entries.map((entry) => {
 		const annotations = annotationsByName.get(entry.name) ?? [];
-		const declared = sharedAnnotation(annotations);
+		const declared = sharedAnnotation(annotations, propsDeclaration, checker);
 
 		// An indexed access such as `RacButtonProps['onPress']` hides the shape, so the resolved
 		// signature reads better there.
 		if (declared !== undefined && !isLowReadabilityAnnotation(declared)) {
 			const text = declared.getText().trim();
-			const alias = resolveLukeTypeAlias(declared, reactSrcDir);
-			if (alias !== undefined) definitions[alias.name] = alias;
+			collector.addTypeNode(declared.compilerNode as ts.TypeNode);
 
 			return {
 				...entry,
 				simplifiedType: text,
 				type: text,
-				typeHref: alias?.name ?? entry.typeHref,
+				typeHref: lukeTypeAliasName(declared, reactSrcDir) ?? entry.typeHref,
 			};
 		}
 
-		if (annotations.length === 0 && !KIND_LABELS.has(entry.simplifiedType)) return entry;
-		if (entry.type.length === 0 || entry.type === 'union') return entry;
-
-		const type = resolvedTypeText(entry, annotations);
-		return { ...entry, simplifiedType: type, type };
+		const resolvedEntry = withResolvedType(entry, annotations);
+		const prop = checker.getPropertyOfType(declaredType, entry.name);
+		if (prop !== undefined) {
+			collector.addType(checker.getTypeOfSymbolAtLocation(prop, declarationNode), {
+				// A simplified row such as `ResponsiveValue<union>` shows only its alias.
+				typeArguments: resolvedEntry.simplifiedType === resolvedEntry.type,
+			});
+		}
+		return resolvedEntry;
 	});
 
-	if (Object.keys(definitions).length === 0) return { ...doc, entries };
-	return { ...doc, entries, typeDefinitions: definitions };
+	const typeDefinitions = collector.definitions();
+	if (typeDefinitions === undefined) return { ...doc, entries };
+	return { ...doc, entries, typeDefinitions };
+}
+
+function withResolvedType(entry: DocEntry, annotations: ReadonlyArray<SyntaxNode>): DocEntry {
+	if (annotations.length === 0 && !KIND_LABELS.has(entry.simplifiedType)) return entry;
+	if (entry.type.length === 0 || entry.type === 'union') return entry;
+
+	const type = resolvedTypeText(entry, annotations);
+	return { ...entry, simplifiedType: type, type };
 }
 
 /**
@@ -55,13 +77,46 @@ export function enrichGeneratedDocTypes(
  * the prop, so it gives way to the branches with a real type. When branches write different types,
  * no one annotation describes the prop and fumadocs' resolved type is used instead.
  */
-function sharedAnnotation(typeNodes: ReadonlyArray<SyntaxNode>): SyntaxNode | undefined {
+function sharedAnnotation(
+	typeNodes: ReadonlyArray<SyntaxNode>,
+	propsDeclaration: PropDeclaration,
+	checker: ts.TypeChecker,
+): SyntaxNode | undefined {
 	const realNodes = typeNodes.filter((node) => !isNeverAnnotation(node));
 	const candidates = realNodes.length > 0 ? realNodes : typeNodes;
 	const texts = new Set(candidates.map((node) => node.getText().trim()));
 	if (texts.size !== 1 || texts.has('')) return;
 
-	return candidates[0];
+	const [candidate] = candidates;
+	if (namesOuterTypeParameter(candidate!.compilerNode, propsDeclaration.compilerNode, checker)) {
+		return;
+	}
+	return candidate;
+}
+
+/**
+ * True when an annotation names a type parameter of another generic declaration, such as `T` in
+ * React Aria's `children?: ChildrenOrFunction<T>`. The written text would show `T` where the props
+ * type supplies an argument, so the resolved type reads correctly and the annotation does not.
+ */
+function namesOuterTypeParameter(
+	node: ts.Node,
+	propsDeclaration: ts.Node,
+	checker: ts.TypeChecker,
+): boolean {
+	if (ts.isTypeReferenceNode(node)) {
+		const symbol = checker.getSymbolAtLocation(node.typeName);
+		const owner = symbol?.declarations?.[0]?.parent;
+		if (symbol !== undefined && symbol.flags & ts.SymbolFlags.TypeParameter) {
+			if (owner !== propsDeclaration) return true;
+		}
+	}
+	return (
+		ts.forEachChild(
+			node,
+			(child) => namesOuterTypeParameter(child, propsDeclaration, checker) || undefined,
+		) === true
+	);
 }
 
 function isLowReadabilityAnnotation(typeNode: SyntaxNode): boolean {
@@ -107,11 +162,8 @@ function annotationAdmitsUndefined(typeNode: SyntaxNode): boolean {
 	return type.isUnion() && type.getUnionTypes().some((member) => member.isUndefined());
 }
 
-/** The Luke UI type alias an annotation names, with its declaration as the definition. */
-function resolveLukeTypeAlias(
-	typeNode: SyntaxNode,
-	reactSrcDir: string,
-): { definition: string; name: string } | undefined {
+/** The Luke UI type alias an annotation names at its root, which the row links to. */
+function lukeTypeAliasName(typeNode: SyntaxNode, reactSrcDir: string): string | undefined {
 	const reference = rootTypeReference(typeNode);
 	if (reference === undefined) return;
 
@@ -125,10 +177,7 @@ function resolveLukeTypeAlias(
 		if (!isInsideDir(declaration.getSourceFile().getFilePath(), reactSrcDir)) continue;
 
 		const name = declaration.getName?.();
-		if (name === undefined || name.length === 0) continue;
-
-		const text = declaration.getText().trim();
-		return { definition: text.startsWith('export ') ? text.slice('export '.length) : text, name };
+		if (name !== undefined && name.length > 0) return name;
 	}
 	return;
 }

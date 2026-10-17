@@ -1,5 +1,7 @@
 import type { GeneratedDoc } from 'fumadocs-typescript';
 import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
+import type { ComponentPropsTableData } from './remark-attach-type-definitions.js';
+import type { TypeDefinition, TypeDefinitionsPayload } from './type-definition-model.js';
 
 interface MdastNode {
 	type: string;
@@ -23,16 +25,91 @@ interface MdxJsxExpressionAttribute {
 
 interface MdxJsxElementNode {
 	attributes: Array<MdxJsxAttribute | MdxJsxExpressionAttribute>;
+	data?: ComponentPropsTableData;
 	name?: string | null;
 	type: 'mdxJsxFlowElement' | 'mdxJsxTextElement';
 }
 
 const JSDOC_LINK_PATTERN = /{@link (?<link>[^}]*)}/g;
+const BACKTICK_RUN_PATTERN = /`+/g;
 
-/** remarkLLMs `stringify` hook for expanded `<ComponentPropsTable>` nodes. */
+/**
+ * remarkLLMs `stringify` hook for expanded `<ComponentPropsTable>` nodes. The table is followed by
+ * the definitions `remarkAttachTypeDefinitions` kept on the node, which the HTML table loads on
+ * demand instead.
+ */
 export function stringifyComponentPropsTable(node: MdastNode): string | undefined {
 	if (!isMdxJsxElement(node) || node.name !== 'ComponentPropsTable') return;
-	return generatedDocToMarkdown(readGeneratedDoc(node));
+
+	const table = generatedDocToMarkdown(readGeneratedDoc(node));
+	const typeDefinitions = node.data?.typeDefinitions;
+	if (typeDefinitions === undefined || Object.keys(typeDefinitions).length === 0) return table;
+
+	return `${table.trimEnd()}\n\n${typeDefinitionsToMarkdown(typeDefinitions)}`;
+}
+
+/**
+ * Lists every type in a table's definitions under its own heading, so a reader without the
+ * interactive popover can look up each name a signature or definition uses. Luke UI types come first,
+ * then external types with their package. Both keep the order they were first referenced in.
+ */
+function typeDefinitionsToMarkdown(typeDefinitions: TypeDefinitionsPayload): string {
+	const keys = Object.keys(typeDefinitions);
+	const ordered = [
+		...keys.filter((key) => typeDefinitions[key]!.module === undefined),
+		...keys.filter((key) => typeDefinitions[key]!.module !== undefined),
+	];
+
+	const sections = ordered.map((key) => {
+		const definition = typeDefinitions[key]!;
+		const parts = [`##### ${typeLabel(key, definition)}`];
+
+		if (definition.module !== undefined) {
+			const packageLink = `[\`${definition.module}\`](https://www.npmjs.com/package/${definition.module})`;
+			const file = definition.source === undefined ? '' : ` (\`${definition.source}\`)`;
+			parts.push(`Declared in ${packageLink}${file}.`);
+		}
+		if (definition.definition !== undefined) parts.push(codeBlock(definition.definition));
+		if (definition.resolved !== undefined) {
+			parts.push(definition.definition === undefined ? 'Resolves to:' : 'Which resolves to:');
+			parts.push(codeBlock(definition.resolved));
+		}
+		if (definition.references.length > 0) {
+			const labels = definition.references.map((reference) => {
+				const referenced = typeDefinitions[reference];
+				return referenced === undefined ? `\`${reference}\`` : typeLabel(reference, referenced);
+			});
+			parts.push(`Refers to ${formatList(labels)}.`);
+		}
+		return parts.join('\n\n');
+	});
+
+	return [
+		'#### Type definitions',
+		"Types named in this table's signatures and in the definitions below. TypeScript's built-in types, such as `Omit` and `ReadonlyArray`, are not listed.",
+		...sections,
+	].join('\n\n');
+}
+
+/** The type's name, plus its package when another type in the table has the same name. */
+function typeLabel(key: string, definition: TypeDefinition): string {
+	if (key === definition.name || definition.module === undefined) return `\`${definition.name}\``;
+	return `\`${definition.name}\` from \`${definition.module}\``;
+}
+
+/** A TypeScript code block whose fence is longer than any backtick run inside it. */
+function codeBlock(code: string): string {
+	const longestRun = Math.max(
+		0,
+		...(code.match(BACKTICK_RUN_PATTERN) ?? []).map((run) => run.length),
+	);
+	const fence = '`'.repeat(Math.max(3, longestRun + 1));
+	return `${fence}ts\n${code}\n${fence}`;
+}
+
+function formatList(items: ReadonlyArray<string>): string {
+	if (items.length <= 2) return items.join(' and ');
+	return `${items.slice(0, -1).join(', ')}, and ${items.at(-1)}`;
 }
 
 function generatedDocToMarkdown(doc: GeneratedDoc): string {
