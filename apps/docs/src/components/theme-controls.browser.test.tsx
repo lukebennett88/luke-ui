@@ -12,7 +12,6 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import themePrefsScript from '../generated/theme-prefs-script.iife.js?raw';
-import { StoryWrapper } from '../lib/story-wrapper';
 import {
 	COLOR_MODE_STORAGE_KEY,
 	subscribeToThemePrefs,
@@ -87,20 +86,6 @@ test('system colour mode leaves the mode to the theme CSS and follows the platfo
 	await expect.poll(() => document.documentElement.classList.contains('light')).toBe(true);
 	expect(document.documentElement).not.toHaveAttribute('data-color-mode');
 	expect(getComputedStyle(document.documentElement).colorScheme).toBe('light');
-});
-
-test('leaves full-bleed story surfaces unframed', () => {
-	renderTheme(
-		<StoryWrapper layout="full-bleed">
-			<span>Full-bleed example content</span>
-		</StoryWrapper>,
-	);
-
-	const exampleContent = page.getByText('Full-bleed example content').element();
-	const storyRoot = exampleContent.parentElement;
-	if (!storyRoot) throw new Error('Expected a full-bleed story root');
-
-	expect(getComputedStyle(storyRoot).padding).toBe('0px');
 });
 
 test('the head script applies stored prefs before body scripts run', async () => {

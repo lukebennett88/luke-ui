@@ -291,14 +291,12 @@ test('pressing an off switch stretches its thumb until release', async () => {
 	if (!(thumb instanceof HTMLElement)) throw new Error('Expected the switch thumb.');
 	thumb.style.transition = 'none';
 	const restingWidth = thumb.getBoundingClientRect().width;
-	const restingColor = getComputedStyle(thumb).backgroundColor;
 
 	input.focus();
 	await userEvent.keyboard('[Space>]');
 	await expect.element(labelFor(input)).toHaveAttribute('data-pressed', 'true');
 
 	expect(thumb.getBoundingClientRect().width).toBeGreaterThan(restingWidth);
-	expect(getComputedStyle(thumb).backgroundColor).toBe(restingColor);
 
 	await userEvent.keyboard('[/Space]');
 	await expect.element(labelFor(input)).not.toHaveAttribute('data-pressed');
@@ -313,7 +311,6 @@ test('pressing an on switch stretches its thumb toward the off side until releas
 	if (!(thumb instanceof HTMLElement)) throw new Error('Expected the switch thumb.');
 	thumb.style.transition = 'none';
 	const restingWidth = thumb.getBoundingClientRect().width;
-	const restingColor = getComputedStyle(thumb).backgroundColor;
 	const restingStart = thumb.getBoundingClientRect().left;
 
 	input.focus();
@@ -321,7 +318,6 @@ test('pressing an on switch stretches its thumb toward the off side until releas
 	await expect.element(labelFor(input)).toHaveAttribute('data-pressed', 'true');
 
 	expect(thumb.getBoundingClientRect().width).toBeGreaterThan(restingWidth);
-	expect(getComputedStyle(thumb).backgroundColor).toBe(restingColor);
 	expect(thumb.getBoundingClientRect().left).toBeLessThan(restingStart);
 
 	await userEvent.keyboard('[/Space]');

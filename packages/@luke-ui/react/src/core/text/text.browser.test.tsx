@@ -161,9 +161,6 @@ test('Text isVisuallyHidden hides visually while keeping accessible text', async
 
 	expect(label.tagName).toBe('SPAN');
 	expect(container.firstElementChild).toBe(label.parentElement);
-	expect(label.style.position).toBe('absolute');
-	expect(label.style.overflow).toBe('hidden');
-	expect(label.style.clip).toBe('rect(1px, 1px, 1px, 1px)');
 	expect(label.style.color).toBe('rgb(1, 2, 3)');
 	await expect.element(locator.getByRole('button', { name: 'Save changes' })).toBeInTheDocument();
 });

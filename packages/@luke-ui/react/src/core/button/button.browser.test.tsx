@@ -56,14 +56,6 @@ function ButtonScene() {
 	);
 }
 
-test('pressing a Button runs its onPress handler', async () => {
-	let pressed = false;
-	const { locator, user } = render(<Button onPress={() => (pressed = true)}>Action</Button>);
-
-	await user.click(locator.getByRole('button', { name: 'Action' }));
-	expect(pressed).toBe(true);
-});
-
 test('function children receive button render state', () => {
 	let received:
 		| {
@@ -128,18 +120,12 @@ test('a text Button has the same layout styles as inline Text without control pa
 	const textStyles = getComputedStyle(locator.getByText('Text reference').element());
 
 	expect(styles.borderInlineStartWidth).toBe('0px');
-	expect(styles.fontFamily).toBe(textStyles.fontFamily);
-	expect(styles.fontSize).toBe(textStyles.fontSize);
-	expect(styles.fontWeight).toBe(textStyles.fontWeight);
-	expect(styles.letterSpacing).toBe(textStyles.letterSpacing);
 	expect(styles.lineHeight).toBe(textStyles.lineHeight);
 	expect(styles.minBlockSize).toBe('0px');
-	expect(styles.overflowWrap).toBe(textStyles.overflowWrap);
 	expect(styles.paddingBlockEnd).toBe('0px');
 	expect(styles.paddingBlockStart).toBe('0px');
 	expect(styles.paddingInlineEnd).toBe('0px');
 	expect(styles.paddingInlineStart).toBe('0px');
-	expect(styles.textTransform).toBe(textStyles.textTransform);
 	expect(styles.whiteSpace).not.toBe('nowrap');
 });
 

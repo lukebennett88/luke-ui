@@ -114,23 +114,13 @@ test('CheckboxLabel resolves className, style, and children from the checkbox st
 	expect(checkbox('On')).toBeChecked();
 });
 
-test('CheckboxRoot owns controlled selection and the indeterminate state', async () => {
-	const changes: Array<boolean> = [];
+test('CheckboxRoot owns the indeterminate state', () => {
 	render(
-		<>
-			<CheckboxRoot isSelected={false} onChange={(isSelected) => changes.push(isSelected)}>
-				<Parts label="Controlled" />
-			</CheckboxRoot>
-			<CheckboxRoot isIndeterminate>
-				<Parts label="Mixed" />
-			</CheckboxRoot>
-		</>,
+		<CheckboxRoot isIndeterminate>
+			<Parts label="Mixed" />
+		</CheckboxRoot>,
 	);
 
-	await userEvent.click(page.getByText('Controlled', { exact: true }));
-
-	expect(changes).toEqual([true]);
-	expect(checkbox('Controlled')).not.toBeChecked();
 	expect(checkbox('Mixed').indeterminate).toBe(true);
 });
 

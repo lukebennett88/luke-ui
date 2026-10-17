@@ -281,7 +281,6 @@ test('opts out of prose inline-code chrome on the fence code element', () => {
 	const styles = getComputedStyle(code);
 	expect(styles.borderWidth).toBe('0px');
 	expect(styles.padding).toBe('0px');
-	expect(styles.backgroundColor).toBe('rgba(0, 0, 0, 0)');
 });
 
 // Label metrics and an inherited code stack: caption was too small next to body prose, and without

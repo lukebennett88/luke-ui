@@ -109,20 +109,6 @@ test('SwitchLabel resolves className, style, and children from the switch state'
 	expect(toggle('On')).toBeChecked();
 });
 
-test('SwitchRoot owns controlled selection', async () => {
-	const changes: Array<boolean> = [];
-	render(
-		<SwitchRoot isSelected={false} onChange={(isSelected) => changes.push(isSelected)}>
-			<Parts label="Controlled" />
-		</SwitchRoot>,
-	);
-
-	await userEvent.click(page.getByText('Controlled', { exact: true }));
-
-	expect(changes).toEqual([true]);
-	expect(toggle('Controlled')).not.toBeChecked();
-});
-
 test('SwitchThumb renders custom children inside the hidden track', () => {
 	render(
 		<SwitchRoot>

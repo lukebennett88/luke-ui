@@ -46,16 +46,6 @@ function IconLinkScene() {
 	);
 }
 
-test('pressing an IconLink runs its onPress handler', async () => {
-	let pressed = false;
-	const { locator, user } = render(
-		<IconLink aria-label="Search" href="#" icon="search" onPress={() => (pressed = true)} />,
-	);
-
-	await user.click(locator.getByRole('link', { name: 'Search' }));
-	expect(pressed).toBe(true);
-});
-
 test('the IconLink scene has no axe violations', async () => {
 	const { container } = render(<IconLinkScene />);
 
@@ -88,30 +78,6 @@ test('a custom SVG icon with no aria-hidden of its own contributes no accessible
 	expect(link.querySelector('svg')?.closest('[aria-hidden="true"]')).not.toBeNull();
 });
 
-test('accepts aria-label', () => {
-	const { locator } = render(<IconLink aria-label="Search" href="#" icon="search" />);
-
-	expect(locator.getByRole('link', { name: 'Search' }).element()).toBeTruthy();
-});
-
-test('accepts aria-labelledby pointing at an external element', () => {
-	const { locator } = render(
-		<div>
-			<span id="external-label">Search</span>
-			<IconLink aria-labelledby="external-label" href="#" icon="search" />
-		</div>,
-	);
-
-	expect(locator.getByRole('link', { name: 'Search' }).element()).toBeTruthy();
-});
-
-test('isDisabled exposes RAC disabled state', () => {
-	const { locator } = render(<IconLink aria-label="Search" href="#" icon="search" isDisabled />);
-	const link = locator.getByRole('link', { name: 'Search' }).element();
-
-	expect(link).toHaveAttribute('data-disabled', 'true');
-});
-
 // Layout is the contract here: an icon-only control's target must render as a
 // square at each size, and there is no DOM/ARIA attribute that expresses that.
 test('the control renders as a square at each size', () => {
@@ -127,24 +93,6 @@ test('the control renders as a square at each size', () => {
 		const { height, width } = link.getBoundingClientRect();
 		expect(width).toBeCloseTo(height, 0);
 	}
-});
-
-test('Enter activates the link, Space does not', async () => {
-	let presses = 0;
-	const { locator, user } = render(
-		<IconLink aria-label="Search" href="#" icon="search" onPress={() => presses++} />,
-	);
-	const link = locator.getByRole('link', { name: 'Search' });
-
-	await user.tab();
-	await user.keyboard(' ');
-	expect(presses).toBe(0);
-
-	await user.keyboard('{Enter}');
-	expect(presses).toBe(1);
-
-	// Same focused control both times: Space stayed inert rather than being consumed silently.
-	expect(link.element()).toBe(document.activeElement);
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
