@@ -112,7 +112,7 @@ outside it and each adds (0,0,1):
 | Rule                              | Sets                                                                                          |
 | --------------------------------- | --------------------------------------------------------------------------------------------- |
 | `*, *::before, *::after`          | `box-sizing: border-box`                                                                      |
-| `:root`                           | `container-type: inline-size`                                                                 |
+| `:root`                           | `container-type: inline-size`, `text-size-adjust: 100%`                                       |
 | `body`                            | `margin: 0`, base surface, text and accent colour, body font, and unitless `line-height: 1.5` |
 | `body [data-color-mode]`          | Base surface, text and accent colour, so a scope repaints with its own mode                   |
 | `button, input, select, textarea` | `font: inherit`, `margin: 0`                                                                  |
