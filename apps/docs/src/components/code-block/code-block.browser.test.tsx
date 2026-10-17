@@ -41,6 +41,9 @@ test('copies plain source including leading and trailing whitespace', async () =
 });
 
 test('announces clipboard failure without claiming Copied', async () => {
+	// Fake only the revert timer: a real 1.5s timeout can fire before `expect.element` starts
+	// polling on a slow runner, so "Could not copy code" is never observed.
+	vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 	vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('denied'));
 
 	renderCodeBlock(<CodeBlock code="const value = 1;" title="Source" />);

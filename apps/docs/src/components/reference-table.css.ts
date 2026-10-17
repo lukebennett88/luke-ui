@@ -185,11 +185,26 @@ export const visuallyHiddenNarrow = style({
 // DS gap: Text has no font family prop, and `Code` always draws a chip. Prop names, types, and
 // defaults want the code font without one.
 // DS gap: Box has no overflowWrap prop or container-query props. In the stacked layout a long
-// unbreakable CSS variable name would stretch the table past its frame, so it may break anywhere.
+// unbreakable type would stretch the table past its frame, so it may break anywhere. `anywhere`
+// (not `break-word`) must win on descendants too: Luke `Text`/`Code`/`Button` set `break-word`,
+// which ignores soft wraps when computing min-content, and `table-layout: auto` then widens the
+// table to that min-content.
 export const monospace = style({
 	'@layer': {
 		components: {
 			fontFamily: vars.font.family.code,
+			'@container': {
+				[NARROW]: {
+					overflowWrap: 'anywhere',
+				},
+			},
+		},
+	},
+});
+
+globalStyle(`${monospace} *`, {
+	'@layer': {
+		components: {
 			'@container': {
 				[NARROW]: {
 					overflowWrap: 'anywhere',
