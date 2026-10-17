@@ -211,12 +211,13 @@ test('paints <body> with the theme baseline, and the canvas follows it', () => {
 	expect(getComputedStyle(document.documentElement).backgroundColor).toBe('rgba(0, 0, 0, 0)');
 });
 
-test('keeps the authored root text size on phone-width viewports', () => {
-	render(<p>Phone width</p>);
+test('sets text-size-adjust to 100% on the document root', () => {
+	render(<p>Document root</p>);
 	const root = getComputedStyle(document.documentElement);
 
 	// Mobile Safari used to inflate text after docs dropped Tailwind Preflight. `100%` keeps the
-	// authored size without disabling user zoom (`none` would).
+	// authored size without disabling user zoom (`none` would). Chromium may report either the
+	// standard or prefixed property name.
 	const textSizeAdjust =
 		root.getPropertyValue('text-size-adjust') || root.getPropertyValue('-webkit-text-size-adjust');
 	expect(textSizeAdjust).toBe('100%');
