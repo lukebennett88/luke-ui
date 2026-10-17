@@ -119,25 +119,6 @@ not help. Silence in this log is not evidence.
   testing computed appearance unless layout is the contract, and the write-tests skill requires
   reviewers to consult that guidance.
 
-## Component generator sorts the whole root components meta pages list
-
-- Seen: 2026-10-13 (Form PR 2 for #796). `pnpm run generate:component --args form forms No` rewrote
-  `apps/docs/content/docs/components/meta.json` so section headers and page entries were
-  alphabetised, and added a bare `"forms"` entry. `check:docs` then reported
-  `component-guide-inventory` mismatches for primitives and forms until the file was restored and
-  only `forms/form` was inserted. 2026-10-17 (Lockup PR for #801):
-  `pnpm run generate:component --args lockup layout Yes` alphabetised the same file, added a bare
-  `"layout"` entry, and did not add `layout/lockup`. The file was restored and the entry added by
-  hand.
-- Where: `packages/turbo-generators/src/apply-creation-plan.ts` `array-add-sorted`;
-  `packages/turbo-generators/src/component-creation-plan.ts` root `components/meta.json` edit.
-  Governing rule: docs/COMPONENTS.md component creation; docs inventory in
-  `apps/docs/src/lib/component-guide-inventory.ts`.
-- Problem: Root metadata interleaves `---Section---` markers with `group/name` pages in a fixed
-  sidebar order. Sorting the entire `pages` array destroys that order, and the edit value is the
-  docs group name rather than `group/name`, so generating into an existing group both scrambles
-  navigation and fails inventory until the root meta is fixed by hand.
-
 ## Theme authoring prose promises unchanged colour channels
 
 - Seen: 2026-10-14 (#800). The draft said "An accent side you set explicitly keeps its authored
@@ -160,16 +141,6 @@ not help. Silence in this log is not evidence.
   `docs/STYLING.md`.
 - Problem: TypeScript accepts a spacing token key where a CSS length is required, so the prop can
   compile while producing an invalid CSS value.
-
-## An aria-label-only ComboboxField leaves its mobile tray dialog unnamed
-
-- Seen: 2026-10-15 (token catalogue redesign). `ComboboxField` with `aria-label` named the
-  searchbox, but the 390px mobile tray dialog had no accessible name. A visible `label` supplies the
-  label context the tray reads.
-- Where: `packages/@luke-ui/react/src/core/primitives/combobox/tray.tsx` reads `LabelContext` for
-  the tray's name.
-- Problem: A valid field name supplied with `aria-label` does not reach the tray dialog, so
-  consumers must use a visible label to name it.
 
 ## A component added a nested JSX-returning `render*()` helper
 

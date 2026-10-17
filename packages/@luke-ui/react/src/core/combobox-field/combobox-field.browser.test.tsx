@@ -327,6 +327,45 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 	await expect.poll(() => new FormData(form).get('country')).toBe('ca');
 });
 
+for (const naming of [
+	{
+		title: 'an aria-label',
+		props: { 'aria-label': 'Country' } as const,
+		triggerName: 'Australia',
+		fixture: null,
+	},
+	{
+		title: 'an aria-labelledby',
+		props: { 'aria-labelledby': 'country-heading' } as const,
+		triggerName: 'Australia',
+		// External name stays outside the modal portal so the dialog must resolve it by id.
+		fixture: <span id="country-heading">Country</span>,
+	},
+	{
+		title: 'a visible label',
+		props: { label: 'Country' } as const,
+		triggerName: 'Country Australia',
+		fixture: null,
+	},
+]) {
+	test(`ComboboxField names its mobile tray dialog from ${naming.title}`, async () => {
+		mockScreenWidth(MOBILE_SCREEN_WIDTH);
+		render(
+			<>
+				{naming.fixture}
+				<ComboboxField defaultItems={countryItems} defaultValue="au" {...naming.props}>
+					{renderCountryItem}
+				</ComboboxField>
+			</>,
+		);
+
+		await userEvent.click(page.getByRole('button', { name: naming.triggerName }));
+		const dialog = page.getByRole('dialog', { name: 'Country' });
+		await expect.element(dialog).toBeVisible();
+		await expect.element(page.getByRole('searchbox', { name: 'Country' })).toBeVisible();
+	});
+}
+
 // Required markers are hidden from assistive technology, so the name does not include them.
 test('a required ComboboxField marks its label with its necessityIndicator', () => {
 	render(
