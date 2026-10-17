@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { GeneratedDoc } from 'fumadocs-typescript';
+import type { ts } from 'ts-morph';
 import { Project } from 'ts-morph';
 
 export interface PropProject {
@@ -10,6 +11,7 @@ export interface PropProject {
 		options: { overwrite: boolean },
 	) => PropSourceFile;
 	getSourceFile: (path: string) => PropSourceFile | undefined;
+	getTypeChecker: () => { compilerObject: ts.TypeChecker };
 }
 
 interface PropSourceFile {
@@ -48,6 +50,8 @@ interface PropSymbol {
  * walk switches on `getKindName()` before reaching for the rest.
  */
 export interface SyntaxNode {
+	/** The TypeScript compiler node, for checker calls the ts-morph surface does not cover. */
+	compilerNode: ts.Node;
 	/** `ExpressionWithTypeArguments` only: the referenced name, e.g. `Pick` in `extends Pick<…>`. */
 	getExpression?: () => SyntaxNode;
 	/**
