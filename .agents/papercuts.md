@@ -57,3 +57,14 @@ would have prevented and that a check or a pointer would not handle better. Two 
 are a reason to consider a skill, not a requirement for one. The maintainer approves skill additions
 and changes. Remove a skill when it is obsolete or when pilot or spot-check evidence shows it does
 not help. Silence in this log is not evidence.
+
+## The README rendering summary omits React Aria's supported render API
+
+- Seen: 2026-10-17 (#858). The README feature list replaced `render` with `renderRoot` and named
+  callbacks. Review identified that React Aria's `render` remains supported and asked to retain it.
+- Where: `README.md`, Features. Governing rules: `docs/CONVENTIONS.md`, Element choice, and
+  `docs/DOCUMENTATION.md`, Editing prose (check behavioural claims against the implementation).
+  `.agents/skills/write-docs/SKILL.md` requires consulting the applicable documentation sections.
+- Problem: The agent-authored summary omitted a supported rendering API despite the applicable
+  guides. Correcting the feature list does not establish that the authoring workflow applies those
+  rules.
