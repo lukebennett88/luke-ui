@@ -2,8 +2,7 @@ import type { StyleRule } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 
 /*
- * Overlays take the enter and exit duration roles rather than the in-place feedback one. Entry
- * decelerates with the standard easing curve, while exit accelerates with the exit curve.
+ * Overlays take the enter and exit motion treatments rather than the in-place feedback one.
  *
  * `overlayMotion` builds the whole motion block for a React Aria overlay element: the rest
  * transition, the hidden values on `[data-entering]` and `[data-exiting]`, and the exit transition
@@ -86,9 +85,9 @@ function mergeRules<Generated extends Record<string, object>>(
 
 /**
  * A complete style rule for an overlay element, with motion applied to `rule`. Entry and exit use
- * the overlay duration roles. Reduced motion keeps the opacity fade and drops movement. The caller's
- * `selectors` and `@media` entries are merged into the generated ones, and declaring the same
- * property twice on one selector or media query throws, so no declaration is lost silently.
+ * the matching motion treatments. Reduced motion keeps the opacity fade and drops movement. The
+ * caller's `selectors` and `@media` entries are merged into the generated ones, and declaring the
+ * same property twice on one selector or media query throws, so no declaration is lost silently.
  *
  * The result keeps the literal type of `rule` instead of widening to `StyleRule`. A declaration
  * file that infers a recipe config from it then inlines that shape and does not import
@@ -101,13 +100,13 @@ export function overlayMotion<const Rule extends OverlayRule>({
 }: OverlayMotionOptions<Rule>) {
 	const enterTransition = transitionFor(
 		properties,
-		vars.motion.duration.enter,
-		vars.motion.easing.standard,
+		vars.motion.enter.duration,
+		vars.motion.enter.easing,
 	);
 	const exitTransition = transitionFor(
 		properties,
-		vars.motion.duration.exit,
-		vars.motion.easing.exit,
+		vars.motion.exit.duration,
+		vars.motion.exit.easing,
 	);
 	const generatedSelectors = {
 		'&[data-entering]': hidden,
@@ -115,10 +114,10 @@ export function overlayMotion<const Rule extends OverlayRule>({
 	} satisfies Selectors;
 	const fades = hidden.opacity !== undefined;
 	const reducedEnterTransition = fades
-		? transitionFor(['opacity'], vars.motion.duration.enter, vars.motion.easing.standard)
+		? transitionFor(['opacity'], vars.motion.enter.duration, vars.motion.enter.easing)
 		: 'none';
 	const reducedExitTransition = fades
-		? transitionFor(['opacity'], vars.motion.duration.exit, vars.motion.easing.exit)
+		? transitionFor(['opacity'], vars.motion.exit.duration, vars.motion.exit.easing)
 		: 'none';
 	const generatedMedia = {
 		'(prefers-reduced-motion: reduce)': {

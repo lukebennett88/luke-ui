@@ -9,51 +9,64 @@ import { useTokenValue } from '../lib/use-token-value.js';
 import { TokenGroup, TokenPanel, TokenRow } from './token-reference-parts.js';
 import * as styles from './token-reference.css.js';
 
+const MOTION_TREATMENTS = [
+	{ id: 'motionFeedback', label: 'Feedback' },
+	{ id: 'motionEnter', label: 'Enter' },
+	{ id: 'motionExit', label: 'Exit' },
+] as const;
+
 /** Shared motion-sample loop length in milliseconds (matches the CSS sample cycle). */
 const MOTION_SAMPLE_CYCLE_MS = 1_000;
 
 const DURATION_MS_PATTERN = /^([\d.]+)ms$/;
 
 /**
- * The motion durations and easing curves. Each table has its own Animate switch and shared cycle so
- * the dots stay aligned. Duration crossings reflect each token inside that cycle; easing samples
- * rest at both ends, then cross with the token curve. Loops pause offscreen and when Animate is off.
+ * The three motion treatments. Each table shows that treatment's duration and easing together, with
+ * its own Animate switch. Duration crossings reflect each token inside a one-second half-cycle;
+ * easing samples rest at both ends, then cross with the token curve on their own one-second loop.
+ * Loops pause offscreen and when Animate is off.
  */
 export function MotionTokens() {
-	const { motionDuration, motionEasing } = tokenSections.scales;
+	const { scales } = tokenSections;
 
 	return (
 		<>
-			<MotionSampleTable label="Durations">
-				{(playGeneration) =>
-					motionDuration.tokens.map((token) => (
-						<TokenRow
-							key={token.path}
-							sample={<DurationMotionSample key={playGeneration} token={token} />}
-							sampleInlineSize={styles.MOTION_TRACK_SIZE}
-							token={token}
-						/>
-					))
-				}
-			</MotionSampleTable>
-			<MotionSampleTable label="Easing">
-				{(playGeneration) =>
-					motionEasing.tokens.map((token) => (
-						<TokenRow
-							key={token.path}
-							sample={
-								<MotionSample
-									key={playGeneration}
-									dotClassName={styles.motionDotEasing}
-									style={{ animationTimingFunction: `var(${token.variable})` }}
-								/>
-							}
-							sampleInlineSize={styles.MOTION_TRACK_SIZE}
-							token={token}
-						/>
-					))
-				}
-			</MotionSampleTable>
+			{MOTION_TREATMENTS.map(({ id, label }) => {
+				const tokens = scales[id].tokens;
+				const duration = tokens.find((token) => token.path.endsWith('.duration'));
+				const easing = tokens.find((token) => token.path.endsWith('.easing'));
+
+				return (
+					<MotionSampleTable key={id} label={label}>
+						{(playGeneration) => (
+							<>
+								{duration === undefined ? null : (
+									<TokenRow
+										key={duration.path}
+										sample={<DurationMotionSample key={playGeneration} token={duration} />}
+										sampleInlineSize={styles.MOTION_TRACK_SIZE}
+										token={duration}
+									/>
+								)}
+								{easing === undefined ? null : (
+									<TokenRow
+										key={easing.path}
+										sample={
+											<MotionSample
+												key={playGeneration}
+												dotClassName={styles.motionDotEasing}
+												style={{ animationTimingFunction: `var(${easing.variable})` }}
+											/>
+										}
+										sampleInlineSize={styles.MOTION_TRACK_SIZE}
+										token={easing}
+									/>
+								)}
+							</>
+						)}
+					</MotionSampleTable>
+				);
+			})}
 		</>
 	);
 }

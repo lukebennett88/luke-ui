@@ -69,7 +69,7 @@ export const separator = style({
 				insetInlineStart: '50%',
 				position: 'absolute',
 				transform: 'translate(-50%, -50%)',
-				transition: `background-color ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
+				transition: `background-color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			},
 			selectors: {
 				'&[data-separator=active]::after': {
@@ -186,7 +186,7 @@ export const previewFrame = style({
 			maxInlineSize: '100%',
 			overflow: 'hidden',
 			position: 'relative',
-			transition: `inline-size ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
+			transition: `inline-size ${vars.motion.enter.duration} ${vars.motion.enter.easing}`,
 			'@media': {
 				'(prefers-reduced-motion: reduce)': {
 					transition: 'none',
@@ -224,7 +224,7 @@ export const previewLoading = style({
 			backgroundColor: `color-mix(in srgb, ${vars.color.surface.base} 90%, transparent)`,
 			inset: 0,
 			position: 'absolute',
-			transition: `opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}, visibility ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
+			transition: `opacity ${vars.motion.enter.duration} ${vars.motion.enter.easing}, visibility ${vars.motion.enter.duration} ${vars.motion.enter.easing}`,
 			'@media': {
 				'(prefers-reduced-motion: reduce)': {
 					transition: 'none',

@@ -29,8 +29,7 @@ interface OverlayMotionOptions {
 
 /**
  * A complete style rule for a React Aria overlay, popover or modal, with motion applied to `rule`.
- * Entry decelerates with the standard curve over the enter duration, and exit accelerates with the
- * exit curve over the exit duration.
+ * Entry and exit use the matching motion treatments.
  *
  * This is a copy of the package's private `overlay-motion.ts`, which the docs app cannot import.
  * The two share one API, and this copy adds `pseudo`.
@@ -46,14 +45,14 @@ export function overlayMotion({
 	pseudo,
 	rule,
 }: OverlayMotionOptions): StyleRule {
-	const enter = transitionFor(properties, vars.motion.duration.enter, vars.motion.easing.standard);
-	const exit = transitionFor(properties, vars.motion.duration.exit, vars.motion.easing.exit);
+	const enter = transitionFor(properties, vars.motion.enter.duration, vars.motion.enter.easing);
+	const exit = transitionFor(properties, vars.motion.exit.duration, vars.motion.exit.easing);
 	const fades = hidden.opacity !== undefined;
 	const reducedEnter = fades
-		? transitionFor(['opacity'], vars.motion.duration.enter, vars.motion.easing.standard)
+		? transitionFor(['opacity'], vars.motion.enter.duration, vars.motion.enter.easing)
 		: 'none';
 	const reducedExit = fades
-		? transitionFor(['opacity'], vars.motion.duration.exit, vars.motion.easing.exit)
+		? transitionFor(['opacity'], vars.motion.exit.duration, vars.motion.exit.easing)
 		: 'none';
 
 	const suffix = pseudo ?? '';

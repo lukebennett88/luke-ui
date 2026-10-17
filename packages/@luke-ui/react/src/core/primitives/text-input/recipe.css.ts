@@ -58,9 +58,9 @@ export const textInputRecipe = recipe({
 		borderWidth: '1px',
 		boxShadow: vars.depth.recessed,
 		fontFamily: vars.font.family.body,
-		transitionDuration: vars.motion.duration.feedback,
+		transitionDuration: vars.motion.feedback.duration,
 		transitionProperty: 'background-color, border-color, box-shadow, color',
-		transitionTimingFunction: vars.motion.easing.standard,
+		transitionTimingFunction: vars.motion.feedback.easing,
 
 		// Precedence: invalid beats read-only and hover. Focus only adds the ring, so it composes with
 		// every state.

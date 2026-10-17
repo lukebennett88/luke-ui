@@ -88,7 +88,7 @@ export const destination = style({
 			display: 'inline-flex',
 			fontSize: vars.font.label.fontSize,
 			textDecoration: 'none',
-			transition: `color ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
+			transition: `color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			selectors: {
 				'&:hover': {
 					color: vars.color.text.primary,

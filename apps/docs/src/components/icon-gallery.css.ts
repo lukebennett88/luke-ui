@@ -38,7 +38,7 @@ export const copyButton = style({
 			backgroundColor: 'transparent',
 			borderStyle: 'none',
 			color: vars.color.text.secondary,
-			transition: `background-color ${vars.motion.duration.feedback} ${vars.motion.easing.standard}, color ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
+			transition: `background-color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}, color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			whiteSpace: 'nowrap',
 			selectors: {
 				'&:hover, &:focus-visible': {

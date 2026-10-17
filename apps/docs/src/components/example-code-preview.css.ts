@@ -25,7 +25,7 @@ globalStyle(`${collapsible} pre`, {
 			gridTemplateRows: '0fr',
 			minBlockSize: `calc(${vars.font.label.lineHeight} * ${collapsedLineCount})`,
 			overflowY: 'clip',
-			transition: `grid-template-rows ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
+			transition: `grid-template-rows ${vars.motion.enter.duration} ${vars.motion.enter.easing}`,
 			'@media': {
 				'(prefers-reduced-motion: reduce)': {
 					transition: 'none',

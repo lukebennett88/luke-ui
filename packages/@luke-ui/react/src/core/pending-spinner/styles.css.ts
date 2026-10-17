@@ -5,9 +5,9 @@ import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
 // Both recipes fade opacity on the feedback role so the spinner and the content it covers
 // cross-fade. A fade is not movement, so it stays under reduced motion.
 const pendingFade = {
-	transitionDuration: vars.motion.duration.feedback,
+	transitionDuration: vars.motion.feedback.duration,
 	transitionProperty: 'opacity',
-	transitionTimingFunction: vars.motion.easing.standard,
+	transitionTimingFunction: vars.motion.feedback.easing,
 } as const;
 
 /**

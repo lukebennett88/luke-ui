@@ -30,7 +30,7 @@ export const chevronEnd = style({
 		components: {
 			color: vars.color.text.secondary,
 			flexShrink: 0,
-			transition: `transform ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
+			transition: `transform ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			selectors: {
 				'[data-expanded] &, [aria-expanded="true"] > &': {
 					transform: 'rotate(90deg)',

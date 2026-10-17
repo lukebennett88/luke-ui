@@ -103,17 +103,18 @@ controls do.
 
 ## Motion
 
-Each duration is named for the role the movement plays. Durations and Easing each include an Animate
-switch in the group header. Duration samples share a one-second cycle so the loops stay aligned, and
-each crossing takes that token’s duration within the half-cycle. Easing samples use the same
-rest-and-cross pattern with that timing function on the travel segments. Turn Animate off to hold
-the dots still, or on again to restart that table in sync.
+Choose a treatment: each pairs a duration with its easing. Each treatment table includes an Animate
+switch in the group header. Duration samples alternate along the track, and each crossing takes that
+token’s duration within a one-second half-cycle. Easing samples rest at both ends, then cross with
+that timing function on the travel segments of their own one-second loop. Turn Animate off to hold
+the dots still, or on again to restart that table’s samples.
 
 - `feedback` covers an in-place state change, such as hover, focus, or selection.
 - `enter` covers an element or an overlay that enters the interface.
 - `exit` covers an element or an overlay that leaves the interface.
 
-Pair `easing.standard` with feedback and with entry. Pair `easing.exit` with a dismissal.
+Use `vars.motion.<treatment>.duration` and `vars.motion.<treatment>.easing` together. Do not mix
+leaves from different treatments.
 
 <MotionTokens />
 

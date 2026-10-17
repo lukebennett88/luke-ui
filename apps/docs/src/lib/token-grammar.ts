@@ -106,10 +106,10 @@ interface TypographySection {
 /** Top-level `vars` branches that are one flat catalogue scale each. */
 type ScaleRoot = Exclude<keyof typeof vars, 'color' | 'font' | 'motion'>;
 
-/** Branches under `vars.motion`. */
+/** Treatments under `vars.motion`. */
 type MotionBranch = Extract<keyof typeof vars.motion, string>;
 
-/** `vars.motion` splits into one scale per branch (`duration` → `motionDuration`, …). */
+/** `vars.motion` splits into one scale per treatment (`feedback` → `motionFeedback`, …). */
 type MotionScaleId = {
 	[K in MotionBranch]: `motion${Capitalize<K>}`;
 }[MotionBranch];
@@ -135,8 +135,9 @@ interface TokenScale {
  * new `vars` root cannot land without a catalogue home.
  */
 const SCALE_PREFIXES = [
-	['motion.duration.', 'motionDuration'],
-	['motion.easing.', 'motionEasing'],
+	['motion.enter.', 'motionEnter'],
+	['motion.exit.', 'motionExit'],
+	['motion.feedback.', 'motionFeedback'],
 	['controlFinish.', 'controlFinish'],
 	['controlSize.', 'controlSize'],
 	['interaction.', 'interaction'],
@@ -296,8 +297,9 @@ function buildScales(tokens: ReadonlyArray<ThemeToken>): Readonly<Record<ScaleId
 		controlSize: scale('controlSize'),
 		depth: scale('depth'),
 		interaction: scale('interaction'),
-		motionDuration: scale('motionDuration'),
-		motionEasing: scale('motionEasing'),
+		motionEnter: scale('motionEnter'),
+		motionExit: scale('motionExit'),
+		motionFeedback: scale('motionFeedback'),
 		radius: scale('radius'),
 		space: scale('space'),
 	};

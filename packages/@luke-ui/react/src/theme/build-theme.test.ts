@@ -214,21 +214,25 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 
 describe('buildTheme public motion surface', () => {
 	// The numbered duration scale in `motion.ts` is private in the same sense as the 12-step colour
-	// scale: resolved in TypeScript and never published as a custom property. Only the three
-	// role-named durations reach the stylesheet, so a numbered variable here is a leak.
-	it('emits the three role-named durations and no numbered duration step', () => {
+	// scale: resolved in TypeScript and never published as a custom property. Only the six treatment
+	// leaves reach the stylesheet, so a numbered duration variable here is a leak.
+	it('emits six treatment leaves with distinct feedback and enter easing properties', () => {
 		for (const foundation of [tactileFoundation, paperFoundation]) {
 			const css = buildTheme(foundation);
-			const durationVarNames = [...css.matchAll(/--luke-motion-duration-[\w-]+/g)].map(
-				([varName]) => varName,
-			);
+			const motionVarNames = [...css.matchAll(/--luke-motion-[\w-]+/g)].map(([varName]) => varName);
 
-			expect([...new Set(durationVarNames)]).toEqual([
-				'--luke-motion-duration-feedback',
-				'--luke-motion-duration-enter',
-				'--luke-motion-duration-exit',
+			expect([...new Set(motionVarNames)].sort()).toEqual([
+				'--luke-motion-enter-duration',
+				'--luke-motion-enter-easing',
+				'--luke-motion-exit-duration',
+				'--luke-motion-exit-easing',
+				'--luke-motion-feedback-duration',
+				'--luke-motion-feedback-easing',
 			]);
+			expect(css).toContain('--luke-motion-feedback-easing:');
+			expect(css).toContain('--luke-motion-enter-easing:');
 			expect(css).not.toMatch(/--luke-motion-duration-\d/);
+			expect(css).not.toMatch(/--luke-motion-easing-/);
 		}
 	});
 });

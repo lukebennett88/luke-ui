@@ -194,24 +194,24 @@ export const themeContractTree = {
 		disabledOpacity: null,
 	},
 	/**
-	 * Luke UI-owned durations and easing curves for interaction motion. Each duration is named for
-	 * the role it plays rather than for its length, so a recipe states its intent and inherits the
-	 * timing.
+	 * Luke UI-owned motion treatments for interaction. Each treatment pairs a duration with its
+	 * easing, so a recipe selects feedback, enter, or exit and inherits both timing axes.
 	 */
 	motion: {
-		duration: {
-			/** Immediate in-place state feedback, such as hover, focus, checked, or selected. */
-			feedback: null,
-			/** An element or overlay that enters the interface. */
-			enter: null,
-			/** An element or overlay that leaves the interface. */
-			exit: null,
+		/** Immediate in-place state feedback, such as hover, focus, checked, or selected. */
+		feedback: {
+			duration: null,
+			easing: null,
 		},
-		easing: {
-			/** The decelerating curve for in-place feedback and for an element that enters. */
-			standard: null,
-			/** The accelerating curve for an element that leaves. */
-			exit: null,
+		/** An element or overlay that enters the interface. */
+		enter: {
+			duration: null,
+			easing: null,
+		},
+		/** An element or overlay that leaves the interface. */
+		exit: {
+			duration: null,
+			easing: null,
 		},
 	},
 };

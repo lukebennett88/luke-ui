@@ -227,7 +227,7 @@ export const avatarOverlay = style({
 	opacity: 0,
 	pointerEvents: 'none',
 	position: 'absolute',
-	transition: `opacity ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
+	transition: `opacity ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 	'@media': {
 		'(prefers-reduced-motion: reduce)': {
 			transition: 'none',

@@ -95,9 +95,9 @@ export const previewGripState = style({
 			color: vars.color.text.secondary,
 			pointerEvents: 'none',
 			transform: 'translate(-50%, -50%)',
-			transitionDuration: vars.motion.duration.enter,
+			transitionDuration: vars.motion.feedback.duration,
 			transitionProperty: 'box-shadow, border-color',
-			transitionTimingFunction: vars.motion.easing.standard,
+			transitionTimingFunction: vars.motion.feedback.easing,
 			selectors: {
 				[`${previewSeparator}[data-separator=hover] &`]: {
 					borderColor: `color-mix(in oklab, ${vars.color.text.secondary} 80%, transparent)`,
