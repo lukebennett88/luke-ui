@@ -211,6 +211,17 @@ test('paints <body> with the theme baseline, and the canvas follows it', () => {
 	expect(getComputedStyle(document.documentElement).backgroundColor).toBe('rgba(0, 0, 0, 0)');
 });
 
+test('keeps the authored root text size on phone-width viewports', () => {
+	render(<p>Phone width</p>);
+	const root = getComputedStyle(document.documentElement);
+
+	// Mobile Safari used to inflate text after docs dropped Tailwind Preflight. `100%` keeps the
+	// authored size without disabling user zoom (`none` would).
+	const textSizeAdjust =
+		root.getPropertyValue('text-size-adjust') || root.getPropertyValue('-webkit-text-size-adjust');
+	expect(textSizeAdjust).toBe('100%');
+});
+
 test('repaints <body> when the system colour mode changes', async () => {
 	render(<p>System mode</p>);
 	document.documentElement.removeAttribute('data-color-mode');

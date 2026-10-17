@@ -15,7 +15,13 @@ globalStyleInLayer('reset', ':where(*), :where(*)::before, :where(*)::after', {
 
 // Unnamed `@container` size queries measure the root. Containment stays on the root alone, so
 // those queries resolve against the same width everywhere in the document.
-globalStyleInLayer('reset', ':where(:root)', { containerType: 'inline-size' });
+// `text-size-adjust: 100%` stops Mobile Safari from inflating text on phone-width pages. Use
+// `100%`, not `none`, so user zoom still works. The `-webkit-` form is what Safari reads.
+globalStyleInLayer('reset', ':where(:root)', {
+	WebkitTextSizeAdjust: '100%',
+	containerType: 'inline-size',
+	textSizeAdjust: '100%',
+});
 
 /** Text, accent, and surface colours, repainted in every colour-mode scope. */
 const documentColors = {

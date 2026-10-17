@@ -19,7 +19,9 @@ const layerOrder = ['base', 'luke-ui', 'luke-ui.reset', 'luke-ui.recipes', 'luke
  */
 const globalRules = [
 	[':where(*), :where(*)::before, :where(*)::after', 'box-sizing: border-box;'],
-	[':where(:root)', 'container-type: inline-size;'],
+	// Chromium's cssText folds `-webkit-text-size-adjust` into `text-size-adjust`. The built
+	// stylesheet still emits both declarations so Safari reads the prefixed form.
+	[':where(:root)', 'container-type: inline-size; text-size-adjust: 100%;'],
 	[
 		':where(body)',
 		'accent-color: var(--luke-color-background-accent-solid-rest); background-color: var(--luke-color-surface-base); color: var(--luke-color-text-primary); font-family: var(--luke-font-body-font-family); font-size: var(--luke-font-body-font-size); font-weight: var(--luke-font-body-font-weight); letter-spacing: var(--luke-font-body-letter-spacing); line-height: 1.5; margin: 0px;',
