@@ -239,7 +239,10 @@ const BLOCK_COMMENT_PATTERN = /\/\*[\s\S]*?\*\//g;
 const JS_EXTENSION_PATTERN = /\.js$/;
 
 /** Every package imported by the JavaScript and declarations that the exports map reaches. */
-export function importedPackages({ contents, manifest }: PackedPackage): Set<string> {
+export function importedPackages({
+	contents,
+	manifest,
+}: Pick<PackedPackage, 'contents' | 'manifest'>): Set<string> {
 	const queue = Object.values(manifest.exports)
 		.filter((target) => target.endsWith('.js'))
 		.flatMap((target) => [target.slice(2), `${target.slice(2, -3)}.d.ts`]);

@@ -88,6 +88,26 @@ for (const consumer of consumers) {
 	describe(`consumer with ${consumer.label}`, () => {
 		const { dir, peers } = consumer;
 
+		test('support packages declare every dependency their JavaScript and types import', () => {
+			const supportPackages = Object.keys(react.manifest.dependencies ?? {}).filter((name) =>
+				name.startsWith('@luke-ui/'),
+			);
+			for (const name of supportPackages) {
+				const contents = path.join(dir, 'node_modules', name);
+				const manifest = readManifest(path.join(contents, 'package.json'));
+				const declared = new Set([
+					...Object.keys(manifest.dependencies ?? {}),
+					...Object.keys(manifest.peerDependencies ?? {}),
+				]);
+				expect({
+					name,
+					undeclared: [...importedPackages({ contents, manifest })].filter(
+						(dependency) => !declared.has(dependency),
+					),
+				}).toEqual({ name, undeclared: [] });
+			}
+		});
+
 		test('installs the package without workspace links', () => {
 			expect(path.relative(repoRoot, dir).startsWith('..')).toBe(true);
 

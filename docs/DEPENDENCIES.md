@@ -53,6 +53,9 @@ the published JavaScript or declarations import it. Keep build-time packages in 
 The packed-consumer harness in [TESTING.md](TESTING.md#package-consumption) fails on an undeclared
 import or an unused dependency.
 
+The dependency decisions and release findings from the package audit are in
+[research/719-package-release-audit.md](../research/719-package-release-audit.md).
+
 Prefer declaring a dependency to bundling it. Bundle one only for a concrete reason, such as
 published code that needs a small part of a package whose install would cost consumers far more than
 that part. To bundle a dependency, list it in `devDependencies` and in `deps.onlyBundle` in
