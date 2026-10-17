@@ -117,22 +117,6 @@ not help. Silence in this log is not evidence.
   testing computed appearance unless layout is the contract, and the write-tests skill requires
   reviewers to consult that guidance.
 
-## Component generator sorts the whole root components meta pages list
-
-- Seen: 2026-10-13 (Form PR 2 for #796). `pnpm run generate:component --args form forms No` rewrote
-  `apps/docs/content/docs/components/meta.json` so section headers and page entries were
-  alphabetised, and added a bare `"forms"` entry. `check:docs` then reported
-  `component-guide-inventory` mismatches for primitives and forms until the file was restored and
-  only `forms/form` was inserted.
-- Where: `packages/turbo-generators/src/apply-creation-plan.ts` `array-add-sorted`;
-  `packages/turbo-generators/src/component-creation-plan.ts` root `components/meta.json` edit.
-  Governing rule: docs/COMPONENTS.md component creation; docs inventory in
-  `apps/docs/src/lib/component-guide-inventory.ts`.
-- Problem: Root metadata interleaves `---Section---` markers with `group/name` pages in a fixed
-  sidebar order. Sorting the entire `pages` array destroys that order, and the edit value is the
-  docs group name rather than `group/name`, so generating into an existing group both scrambles
-  navigation and fails inventory until the root meta is fixed by hand.
-
 ## Theme authoring prose promises unchanged colour channels
 
 - Seen: 2026-10-14 (#800). The draft said "An accent side you set explicitly keeps its authored
