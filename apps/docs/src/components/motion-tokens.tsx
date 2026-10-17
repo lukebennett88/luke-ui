@@ -80,9 +80,7 @@ function DurationSample({
 				position="absolute"
 				style={{
 					transitionDuration: `var(${duration.variable})`,
-					...(easing === undefined
-						? {}
-						: { transitionTimingFunction: `var(${easing.variable})` }),
+					...(easing === undefined ? {} : { transitionTimingFunction: `var(${easing.variable})` }),
 				}}
 			/>
 		</Box>
