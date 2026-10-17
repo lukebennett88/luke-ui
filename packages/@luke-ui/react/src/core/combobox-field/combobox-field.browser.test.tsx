@@ -327,6 +327,33 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 	await expect.poll(() => new FormData(form).get('country')).toBe('ca');
 });
 
+for (const naming of [
+	{
+		title: 'an aria-label',
+		props: { 'aria-label': 'Country' } as const,
+		triggerName: 'Australia',
+	},
+	{
+		title: 'a visible label',
+		props: { label: 'Country' } as const,
+		triggerName: 'Country Australia',
+	},
+]) {
+	test(`ComboboxField names its mobile tray dialog from ${naming.title}`, async () => {
+		mockScreenWidth(MOBILE_SCREEN_WIDTH);
+		render(
+			<ComboboxField defaultItems={countryItems} defaultValue="au" {...naming.props}>
+				{renderCountryItem}
+			</ComboboxField>,
+		);
+
+		await userEvent.click(page.getByRole('button', { name: naming.triggerName }));
+		const dialog = page.getByRole('dialog', { name: 'Country' });
+		await expect.element(dialog).toBeVisible();
+		await expect.element(page.getByRole('searchbox', { name: 'Country' })).toBeVisible();
+	});
+}
+
 // Required markers are hidden from assistive technology, so the name does not include them.
 test('a required ComboboxField marks its label with its necessityIndicator', () => {
 	render(

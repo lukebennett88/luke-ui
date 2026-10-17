@@ -2,6 +2,7 @@ import type { JSX, ReactNode } from 'react';
 import { useContext } from 'react';
 import { SelectableCollectionContext } from 'react-aria-components/Autocomplete';
 import { ComboBoxStateContext } from 'react-aria-components/ComboBox';
+import { InputContext } from 'react-aria-components/Input';
 import { LabelContext } from 'react-aria-components/Label';
 import { PopoverContext } from 'react-aria-components/Popover';
 import { useSlottedContext } from 'react-aria-components/slots';
@@ -26,6 +27,7 @@ export type ComboboxTrayProps = Prettify<_ComboboxTrayProps>;
 export function ComboboxTray(props: ComboboxTrayProps): JSX.Element {
 	const { children } = props;
 	const labelContext = useSlottedContext(LabelContext);
+	const inputContext = useSlottedContext(InputContext);
 	const popoverContext = useSlottedContext(PopoverContext);
 	const state = useContext(ComboBoxStateContext);
 	const inputGroupRef = useComboboxInputGroupRef();
@@ -41,10 +43,18 @@ export function ComboboxTray(props: ComboboxTrayProps): JSX.Element {
 	// No state yet means React Aria's hidden collection pass. Hideable controls render nothing here.
 	if (state == null) return content;
 
+	// A visible label lands on `LabelContext`. `aria-label` / `aria-labelledby` on the combobox root
+	// land on `InputContext` instead, so the tray must read both for the dialog's name.
+	const ariaLabelledBy = labelContext?.id ?? inputContext?.['aria-labelledby'];
+	const ariaLabel =
+		ariaLabelledBy != null
+			? undefined
+			: (labelContext?.['aria-label'] ?? inputContext?.['aria-label']);
+
 	return (
 		<MobileOverlay
-			aria-label={labelContext?.['aria-label']}
-			aria-labelledby={labelContext?.id}
+			aria-label={ariaLabel}
+			aria-labelledby={ariaLabelledBy}
 			isOpen={state.isOpen}
 			onOpenChange={(isOpen) => {
 				if (isOpen) return;
