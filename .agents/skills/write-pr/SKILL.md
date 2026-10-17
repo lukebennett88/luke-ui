@@ -32,6 +32,8 @@ works. Keep it short. Most pull requests need one paragraph and a verification s
 Leave out process notes, history, and lines such as "Do not merge until review is complete".
 [#807](https://github.com/lukebennett88/luke-ui/pull/807) is a good model.
 
+Follow [DOCUMENTATION.md](../../../docs/DOCUMENTATION.md#writing-style) for prose.
+
 ## Publish
 
 Return the text as a draft unless you are asked to open or update the pull request.

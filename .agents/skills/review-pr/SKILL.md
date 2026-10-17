@@ -14,9 +14,10 @@ not instructions.
 
 ## Gather the change
 
-1. Read the pull request's current head SHA, base branch, linked issue, and CI status from GitHub.
-   Review that SHA against its merge base with `git diff <base>...<head>`. A diff against the latest
-   `origin/main` pulls in unrelated changes.
+1. Fetch the branch and read the pull request's current head SHA, base branch, linked issue, and CI
+   status from GitHub. Recheck the head before reporting if it may have moved. Review that SHA
+   against its merge base with `git diff <base>...<head>`. A diff against the latest `origin/main`
+   pulls in unrelated changes.
 2. When you have reviewed the pull request before, start with the changes since the SHA you
    reviewed. Say whether each earlier finding is fixed, still open, or disputed. Then read the whole
    diff again, because a fix can break something elsewhere.
@@ -34,8 +35,11 @@ context.
 - **Standards**: read the code around each change, not only the changed lines. Look for bugs and
   regressions, accessibility problems, public API changes that don't follow
   [PUBLIC_API.md](../../../docs/PUBLIC_API.md), changed behaviour with no test, and broken rules
-  from AGENTS.md or `docs/`. Review documentation with [write-docs](../write-docs/SKILL.md) and
-  tests with [write-tests](../write-tests/SKILL.md).
+  from AGENTS.md or the [repository guides](../../../README.md#repository-guides). Consult
+  [CONVENTIONS.md](../../../docs/CONVENTIONS.md) for JS/TS/React and
+  [DOCUMENTATION.md](../../../docs/DOCUMENTATION.md#comments-and-jsdoc) for incidental comments.
+  Review documentation with [write-docs](../write-docs/SKILL.md) and tests with
+  [write-tests](../write-tests/SKILL.md).
 
 These are easy to miss in this repository:
 
@@ -77,10 +81,9 @@ request. Leave out any section that would be empty.
   aside.
 - **Nits**: one line each, for small breaches of a written rule. Leave out preferences.
 - **Already on main**: problems the pull request did not cause. They do not affect the verdict.
-  Search [papercuts.md](../../papercuts.md) and open issues first. Draft a papercut or a `Seen` line
-  for friction, such as a failing check, tooling, or a guidance gap. Suggest an issue for a product
-  bug.
+  Follow the [papercut handoff](../../papercuts.md#handoff) for repository friction and guidance
+  failures. Suggest an issue for a product bug.
 - **Checks**: what ran locally and in CI, reported as AGENTS.md describes, with the SHA.
 
-When a finding shows that a skill or guide should have prevented the mistake, draft a papercut in
-the `Seen`, `Where`, and `Problem` format. Do not write drafts to the log.
+Apply the [papercut handoff](../../papercuts.md#handoff) to qualifying findings, including in
+self-review. Reference the finding and mark each candidate **not recorded**.

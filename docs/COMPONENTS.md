@@ -26,14 +26,17 @@ Do not add a root `@luke-ui/react/primitives` barrel. Import each primitive entr
 Use the component generator for new normal component entrypoints:
 
 ```sh
-pnpm run generate:component --args <name> <docs-group>
+pnpm run generate:component --args <name> <docs-group> <Yes|No>
 ```
 
 Use the primitive generator for new `@luke-ui/react/primitives/*` entrypoints:
 
 ```sh
-pnpm run generate:primitive --args <name>
+pnpm run generate:primitive --args <name> <Yes|No> <Yes|No>
 ```
+
+The final component argument chooses visual coverage. The primitive arguments choose hosted docs,
+then visual coverage. Pass the literal choice `Yes` or `No` for each to avoid interactive prompts.
 
 Creation rules live in `packages/turbo-generators/src/component-creation-plan.ts` and
 `primitive-creation-plan.ts`. Keep validation, defaults, and scaffold rules there so Turbo and Plop
@@ -52,6 +55,32 @@ Public subpath modules live under `src/exports/`. Single-segment subpaths use a 
 `src/exports/primitives/button.ts`. A component's implementation lives under `src/core/`. Support
 modules and multi-part primitives each keep their own file. Public entrypoints use explicit named
 exports. See [PUBLIC_API.md](PUBLIC_API.md) for the public surface rules.
+
+## Package structure
+
+- `src/core/` holds implementation, styles, helpers, and colocated tests and fixtures.
+- `src/exports/` holds the public modules. See [PUBLIC_API.md](PUBLIC_API.md#what-is-public).
+- `src/theme/` holds the compiler, foundations, and visual theme fixtures in `__fixtures__/`.
+  Published themes live in `packages/@luke-ui/theme-*`.
+- `src/shared/` holds small, domain-free primitives such as class-name constants and typed object
+  helpers. Keep component, compiler, and recipe logic in their own zones.
+
+`exports` may import from `core`, `theme`, and `shared`. `core` may import from `theme` and
+`shared`. `theme` may import from `shared`. `shared` imports from no other zone. Lint in the root
+`vite.config.ts` enforces the internal zone boundaries.
+
+A component directory contains `<component>.tsx`, `recipe.css.ts` for its public recipe,
+`styles.css.ts` when private styling is needed, and `<component>.browser.test.tsx` for behaviour,
+axe, and visual captures. Multi-part primitives keep a file per part.
+
+### Generated exports
+
+Do not hand-edit `package.json#exports`. `vp pack` derives exports from its `src/exports/` entry
+configuration during build. The `stylesheet` build entry is excluded from the public map with
+`exports.exclude` in the package's `vite.config.ts`.
+
+Vanilla Extract serialises recipes to `#recipe-engine`. Pack, Vitest, and the docs app alias it to
+`src/core/styles/recipe-engine.ts`. Pack bundles a relative runtime chunk. The specifier is private.
 
 ## Icons
 

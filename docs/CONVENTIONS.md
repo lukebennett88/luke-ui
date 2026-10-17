@@ -8,6 +8,10 @@ extension.
 Only modules in `src/exports/` re-export symbols defined in another module. Internal code imports
 symbols directly from their defining modules.
 
+Derive helper parameters and result types from existing props or domain types with `Pick`, indexed
+access, or `ComponentProps` when they describe the same contract. Keep an independent type when the
+helper has a different contract. Do not widen a public prop by copying its shape by hand.
+
 ## Formatting
 
 `oxfmt` owns formatting. The repo uses tabs, 100-column wrapping, single quotes in TypeScript, and
@@ -15,7 +19,9 @@ double quotes in JSX.
 
 ## Linting
 
-`oxlint` owns linting (via `vp lint`). To suppress a rule, explain why in a plain comment, then put
+`oxlint` owns linting (via `vp lint`). Configure rules in the `lint` block of the root
+`vite.config.ts`. Matching overrides for the same rule replace rather than merge with each other. To
+suppress a rule, explain why in a plain comment, then put
 `// oxlint-disable-next-line <plugin>/<rule>` directly above the offending line — the directive
 applies to the literal next line, so it cannot sit inside a multi-line comment.
 
@@ -88,6 +94,42 @@ See [TESTING.md](TESTING.md) for test type, placement, and writing rules.
 ## Components
 
 Components wrap `react-aria-components` and use `composeRenderProps` for styling.
+
+Use function components. Keep JSX inline, or extract a module-scope component rendered as `<Name />`
+when it needs its own structure. Do not define a component inside another component or call a nested
+`render*()` helper to produce JSX. Keep callbacks required by React Aria and Luke UI render-prop
+APIs, including `composeRenderProps`, `renderRoot`, and `render<Name>`.
+
+### Exported prop types
+
+For components in `@luke-ui/react`, define an internal `_ComponentProps` interface and export
+`ComponentProps` wrapped in `Prettify` from `src/core/types/prettify.ts`. Prefer `interface extends`
+over intersections for prop types so IDEs display them clearly.
+
+Extend the source type directly when inheriting its whole surface:
+
+```ts
+interface _CodeProps extends React.ComponentProps<'code'> {}
+
+export type CodeProps = Prettify<_CodeProps>;
+```
+
+When removing inherited props, declare a named `DistributiveOmit` alias before extending it.
+Interfaces cannot extend conditional types directly:
+
+```ts
+type _ComponentOmit = DistributiveOmit<SourceType, OmittedKeys>;
+
+interface _ComponentProps extends _ComponentOmit, StyleProps {
+	/** Documented prop. */
+	myProp?: string;
+}
+
+export type ComponentProps = Prettify<_ComponentProps>;
+```
+
+Use `DistributiveOmit` from `src/core/types/distributive-omit.ts` only when removing props. Its
+strict key constraint checks omitted keys. Do not use `DistributiveOmit<SourceType, never>`.
 
 ### Element choice
 
