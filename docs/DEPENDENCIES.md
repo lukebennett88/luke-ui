@@ -125,8 +125,10 @@ Renovate's npm manager reads `devEngines.runtime` natively (from Renovate 44.128
 does not add a custom manager for that field. The repo-wide `rangeStrategy: 'bump'` would raise
 `^24.0.0` on every in-range patch, so `.github/renovate.json5` disables non-major updates of the
 Node runtime range and only proposes major Node upgrades, grouped as `node` and never automerged.
-Monthly `lockFileMaintenance` can still refresh the resolved lockfile runtime. Renovate follows
-Node's release schedule and only proposes stable LTS lines for majors.
+The major rule uses `rangeStrategy: 'replace'` on its own `packageRules` entry: Renovate rejects
+combining `matchUpdateTypes` with `rangeStrategy` in the same rule. Monthly `lockFileMaintenance`
+can still refresh the resolved lockfile runtime. Renovate follows Node's release schedule and only
+proposes stable LTS lines for majors.
 
 Other tools, including Taze, may update the lower bound of a caret range when they bump Node. That
 is legitimate for those tools. When a routine dependency sweep should not change the Node minimum,
