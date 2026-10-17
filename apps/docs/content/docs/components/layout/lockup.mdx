@@ -70,6 +70,8 @@ inside it, then render `span` elements. The content you pass must also be phrasi
 
 <ExampleBlock src="lockup/element-span" title="Lockup: Inside phrasing content" />
 
+## Own the rendered elements
+
 Use `renderRoot` to render your own element for `Lockup`, `LockupRail`, or `LockupBody`, and spread
 the `domProps` onto it. Lockup can't tell what your element is, so:
 
@@ -79,6 +81,18 @@ the `domProps` onto it. Lockup can't tell what your element is, so:
   it sits inside a `span` Lockup.
 - Return a container for `LockupRail`, such as a `div` or `span`, and render its children. Put an
   image inside the rail, not in its place.
+
+Render a `figure` as the root and a `figcaption` as the body to caption an image. Set `margin="0"`
+to remove the figure's browser margin.
+
+<ExampleBlock src="lockup/render-root" title="Lockup: Own the root and body elements" />
+
+Render a rail as a `time` element so the date it shows carries a machine-readable value.
+
+<ExampleBlock src="lockup/render-rail" title="Lockup: Own a rail element" />
+
+Read [Composition](/docs/composition#render-a-different-dom-component) for the general `elementType`
+and `renderRoot` rule.
 
 ## API
 
