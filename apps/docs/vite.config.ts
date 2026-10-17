@@ -31,7 +31,7 @@ function staticFunctionBasePathPlugin(): Plugin {
 
 const TRAILING_SLASH_PATTERN = /\/$/;
 
-// The dev server's origin, used when `SITE_URL` is unset.
+// The dev server's origin, used when `SITE_URL` is unset in development.
 const LOCAL_SITE_URL = 'http://localhost:3000';
 
 const contentDocsDir = fileURLToPath(new URL('./content/docs/', import.meta.url));
@@ -51,10 +51,11 @@ function readBaseUrl(): string {
 	return value;
 }
 
-export default defineConfig(async () => {
+export default defineConfig(async ({ command }) => {
 	const markdownPrerenderPages = getMarkdownPrerenderPages();
 	const baseUrl = readBaseUrl();
-	const siteUrl = (process.env.SITE_URL || LOCAL_SITE_URL).replace(TRAILING_SLASH_PATTERN, '');
+	const defaultSiteUrl = command === 'build' ? 'https://ui.lukebennett.dev' : LOCAL_SITE_URL;
+	const siteUrl = (process.env.SITE_URL || defaultSiteUrl).replace(TRAILING_SLASH_PATTERN, '');
 
 	return {
 		// Allow overriding the base URL for deployments to sub-paths (e.g. GitHub Pages).
