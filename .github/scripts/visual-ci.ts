@@ -123,8 +123,11 @@ export type WaitForNewestBaselineOptions = {
 /**
  * Waits for the single newest `main` Visual baseline run to finish, within a bound.
  *
- * Never substitutes an older successful run. Times out with diagnostics when that
- * newest run stays waitable too long. Fails when it completes unsuccessfully.
+ * Always follows the current newest run: if a newer baseline starts while waiting,
+ * polling switches to it and says so. Never falls back to an older successful run.
+ * The original timeout deadline stays fixed when the newest run changes. Times out
+ * with diagnostics naming the run still awaited. Fails when that run completes
+ * unsuccessfully.
  */
 export async function waitForNewestBaseline(
 	options: WaitForNewestBaselineOptions,
@@ -133,6 +136,7 @@ export async function waitForNewestBaseline(
 	const log = options.info ?? (() => {});
 	const deadline = now() + timeoutMs;
 	let waitedMs = 0;
+	let lastReportedRunId: number | undefined;
 	let lastReportedStatus: string | null | undefined;
 
 	for (;;) {
@@ -154,10 +158,19 @@ export async function waitForNewestBaseline(
 				);
 			}
 
-			if (newestRun.status !== lastReportedStatus) {
-				log(
-					`Newest Visual baseline run ${newestRun.id} is ${newestRun.status}. Waiting up to ${formatDuration(remainingMs)} (poll every ${formatDuration(pollIntervalMs)}): ${runUrl(newestRun.id)}`,
-				);
+			const runChanged = lastReportedRunId !== undefined && newestRun.id !== lastReportedRunId;
+			const statusChanged = newestRun.status !== lastReportedStatus;
+			if (runChanged || statusChanged || lastReportedRunId === undefined) {
+				if (runChanged) {
+					log(
+						`Newest Visual baseline run changed from ${lastReportedRunId} to ${newestRun.id} (${newestRun.status}). Continuing to wait (${formatDuration(remainingMs)} remaining, poll every ${formatDuration(pollIntervalMs)}): ${runUrl(newestRun.id)}`,
+					);
+				} else {
+					log(
+						`Newest Visual baseline run ${newestRun.id} is ${newestRun.status}. Waiting up to ${formatDuration(remainingMs)} (poll every ${formatDuration(pollIntervalMs)}): ${runUrl(newestRun.id)}`,
+					);
+				}
+				lastReportedRunId = newestRun.id;
 				lastReportedStatus = newestRun.status;
 			}
 

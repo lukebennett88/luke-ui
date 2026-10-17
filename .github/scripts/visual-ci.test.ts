@@ -229,3 +229,56 @@ test('returns immediately when the newest baseline is already successful', async
 	expect(runId).toBe(5);
 	expect(clock.sleepCalls).toEqual([]);
 });
+
+test('switches to a newer in-progress run that appears while waiting, even when status matches', async () => {
+	const clock = createClock();
+	const logs: Array<string> = [];
+	const runId = await waitForNewestBaseline({
+		fetchNewest: sequenceFetch([
+			{ conclusion: null, id: 10, status: 'in_progress' },
+			{ conclusion: null, id: 20, status: 'in_progress' },
+			{ conclusion: 'success', id: 20, status: 'completed' },
+		]),
+		runUrl,
+		sleep: (ms) => clock.sleep(ms),
+		now: () => clock.now(),
+		pollIntervalMs: 1_000,
+		timeoutMs: 10_000,
+		info: (message) => logs.push(message),
+	});
+
+	expect(runId).toBe(20);
+	expect(
+		logs.some((line) => line.includes('changed from 10 to 20') && line.includes(runUrl(20))),
+	).toBe(true);
+	expect(logs.some((line) => line.includes('completed successfully') && line.includes('20'))).toBe(
+		true,
+	);
+});
+
+test('keeps the original timeout bound when a newer waitable run appears mid-wait', async () => {
+	const clock = createClock();
+	const logs: Array<string> = [];
+	let calls = 0;
+
+	await expect(
+		waitForNewestBaseline({
+			fetchNewest: async () => {
+				calls += 1;
+				if (calls === 1) {
+					return { conclusion: null, id: 10, status: 'in_progress' };
+				}
+				return { conclusion: null, id: 20, status: 'in_progress' };
+			},
+			runUrl,
+			sleep: (ms) => clock.sleep(ms),
+			now: () => clock.now(),
+			pollIntervalMs: 5_000,
+			timeoutMs: 12_000,
+			info: (message) => logs.push(message),
+		}),
+	).rejects.toThrow(/Timed out after .*20/);
+
+	expect(logs.some((line) => line.includes('changed from 10 to 20'))).toBe(true);
+	expect(clock.sleepCalls).toEqual([5_000, 5_000, 2_000]);
+});
