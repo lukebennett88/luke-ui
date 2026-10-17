@@ -105,9 +105,11 @@ an exclude list entry before they will install, which no amount of green CI will
 The root `package.json` `packageManager` field pins the exact pnpm version. Omitting the hash avoids
 Renovate's Corepack-based hash regeneration.
 
-The root `devEngines.runtime` field pins the project Node runtime, and `onFail: 'download'` makes
-pnpm provision it. pnpm resolves the `24.x` range to an exact version and records it in the
-lockfile, with a download and integrity hash for each platform.
+The root `devEngines.runtime` field declares the supported Node major as a conventional semver
+range, currently `^24.0.0`, with `onFail: 'download'`. That range is the minimum compatible Node
+version for this major, not a pin of the newest patch. pnpm resolves an exact runtime and records it
+in the lockfile (`node@runtime:…`), with a download and integrity hash for each platform. A newer
+Node 24 release does not, by itself, justify raising the minimum in the manifest.
 
 GitHub Actions sets up tooling with `pnpm/setup`. It installs the pnpm version from `packageManager`
 and the Node runtime from `devEngines.runtime`.
@@ -119,9 +121,17 @@ Bare `node` is project-aware only when pnpm's global Node shim is the `node` fou
 Cloudflare Pages keeps its host-level `NODE_VERSION=24` setting on the Pages project. Its build
 image does not document `devEngines.runtime` as a Node version selector.
 
-Renovate has no manager for `devEngines.runtime`, so `.github/renovate.json5` adds a `custom.regex`
-manager for it. The regex captures only the major before `.x`, so an update PR rewrites `24.x` to
-the next `<major>.x`. Renovate follows Node's release schedule and only proposes stable LTS lines.
+Renovate's npm manager reads `devEngines.runtime` natively (from Renovate 44.128.0). The repository
+does not add a custom manager for that field. The repo-wide `rangeStrategy: 'bump'` would raise
+`^24.0.0` on every in-range patch, so `.github/renovate.json5` disables non-major updates of the
+Node runtime range and only proposes major Node upgrades, grouped as `node` and never automerged.
+Monthly `lockFileMaintenance` can still refresh the resolved lockfile runtime. Renovate follows
+Node's release schedule and only proposes stable LTS lines for majors.
+
+Other tools, including Taze, may update the lower bound of a caret range when they bump Node. That
+is legitimate for those tools. When a routine dependency sweep should not change the Node minimum,
+exclude Node from that command (for example `taze major -w` with an ignore, or omit the runtime
+field from the update set).
 
 `@types/node` tracks that Node major. Renovate's `allowedVersions: '<25'` blocks newer majors, and
 an `overrides` entry forces every copy onto the catalog so optional peers cannot drift. When the

@@ -7,22 +7,6 @@
 	],
 	labels: ['dependencies'],
 
-	// Renovate has no manager for `devEngines.runtime`, the root `package.json` field that pins the
-	// Node runtime. This regex finds the `runtime` object whose `name` is `node` and captures only the
-	// major before `.x`, so an update rewrites the digits and keeps the `<major>.x` form.
-	customManagers: [
-		{
-			customType: 'regex',
-			managerFilePatterns: ['/^package\\.json$/'],
-			matchStrings: [
-				'"runtime"\\s*:\\s*\\{[^}]*?"name"\\s*:\\s*"node"[^}]*?"version"\\s*:\\s*"(?<currentValue>\\d+)\\.x"',
-			],
-			depNameTemplate: 'node',
-			datasourceTemplate: 'node-version',
-			versioningTemplate: 'node',
-		},
-	],
-
 	// pnpm refuses to resolve any release younger than `minimumReleaseAge: 4320` (3 days) in
 	// pnpm-workspace.yaml, so a PR raised for a fresher release cannot generate a lockfile.
 	minimumReleaseAge: '3 days',
@@ -121,17 +105,28 @@
 			automerge: false,
 		},
 		{
-			// The `devEngines.runtime` Node major from the regex manager above. `replace` swaps the major,
-			// where the top-level `bump` would rewrite it to an exact version. Renovate follows Node's
-			// release schedule and only proposes stable LTS lines.
-			matchManagers: ['custom.regex'],
-			matchDepNames: ['node'],
+			// Native npm support for `devEngines.runtime` (Renovate 44.128.0+). The repo-wide `bump`
+			// strategy would raise `^24.0.0` to `^24.x.y` on every patch. Without a traditional
+			// lockedVersion for this field, `update-lockfile` also falls back to `bump`, so disable
+			// non-major updates of the manifest range. Monthly `lockFileMaintenance` still refreshes
+			// the resolved `node@runtime:…` lockfile entry. Majors stay separately reviewable.
+			matchManagers: ['npm'],
+			matchDepTypes: ['devEngines.runtime'],
+			matchPackageNames: ['node'],
+			matchUpdateTypes: ['patch', 'minor'],
+			enabled: false,
+		},
+		{
+			matchManagers: ['npm'],
+			matchDepTypes: ['devEngines.runtime'],
+			matchPackageNames: ['node'],
+			matchUpdateTypes: ['major'],
 			groupName: 'node',
 			rangeStrategy: 'replace',
 			automerge: false,
 		},
 		{
-			// Keep `@types/node` on the Node major in root `devEngines.runtime` (`24.x`). Raise this bound
+			// Keep `@types/node` on the Node major in root `devEngines.runtime` (`^24`). Raise this bound
 			// and the catalog entry when that major moves.
 			matchPackageNames: ['@types/node'],
 			allowedVersions: '<25',

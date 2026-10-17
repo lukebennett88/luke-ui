@@ -12,6 +12,12 @@ The newest run must have succeeded and retain its artefact. Never fall back to a
 run: a stale baseline can pass an unchecked change. Re-run `Visual baseline` on `main` when the
 baseline is unavailable.
 
+When that newest run is still queued or in progress, `visual-ci resolve-baseline` waits for it
+in-process (25 minutes by default, polling every 30 seconds) and logs the run URL. Override the
+bound with `VISUAL_BASELINE_WAIT_TIMEOUT_MS` and `VISUAL_BASELINE_WAIT_POLL_MS` if needed. It fails
+when the wait times out, or when the newest run fails, is cancelled, or has no usable artefact. It
+does not switch to an older green run.
+
 ## Run locally
 
 ```sh
