@@ -42,11 +42,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --no-runtime
 
-      - name: Install Playwright Chromium
-        run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
+      # Chromium install and package build are independent after pnpm install.
+      - parallel:
+          - name: Install Playwright Chromium
+            run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
-      - name: Build packages
-        run: pnpm build:packages
+          - name: Build packages
+            run: pnpm build:packages
 
       - name: Render baseline captures
         env:

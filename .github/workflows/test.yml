@@ -42,11 +42,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --no-runtime
 
-      - name: Install Playwright Chromium
-        run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
+      # Chromium install and package build are independent after pnpm install.
+      - parallel:
+          - name: Install Playwright Chromium
+            run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
-      - name: Build package
-        run: pnpm build:packages
+          - name: Build package
+            run: pnpm build:packages
 
       - name: Run component tests
         run: pnpm --filter @luke-ui/react run test
@@ -74,11 +76,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --no-runtime
 
-      - name: Install Playwright Chromium
-        run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
+      - parallel:
+          - name: Install Playwright Chromium
+            run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
-      - name: Build package
-        run: pnpm build:packages
+          - name: Build package
+            run: pnpm build:packages
 
       - name: Run consumer tests
         run: pnpm --filter @luke-ui/react run test:consumer:run
@@ -105,11 +108,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --no-runtime
 
-      - name: Install Playwright Chromium
-        run: pnpm --filter docs exec playwright install --with-deps chromium
+      - parallel:
+          - name: Install Playwright Chromium
+            run: pnpm --filter docs exec playwright install --with-deps chromium
 
-      - name: Build package
-        run: pnpm build:packages
+          - name: Build package
+            run: pnpm build:packages
 
       - name: Generate docs app files
         run: pnpm --filter docs run generate
