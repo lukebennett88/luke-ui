@@ -46,12 +46,6 @@ function SwitchScene() {
 				label="Email notifications"
 				name="description-medium"
 			/>
-			<SwitchField
-				description="Receive updates by email."
-				label="Email notifications"
-				name="description-large"
-				size="px24"
-			/>
 			<Text elementType="div" typography="heading3">
 				<SwitchField
 					label="heading3: This label wraps to show that the track aligns with its first line."

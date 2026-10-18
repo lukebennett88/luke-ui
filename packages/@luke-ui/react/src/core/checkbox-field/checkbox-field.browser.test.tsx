@@ -42,12 +42,6 @@ function CheckboxScene() {
 				name="description-wrapping"
 			/>
 			<CheckboxField
-				description="Receive updates by email."
-				label="Email notifications"
-				name="description-large"
-				size="px24"
-			/>
-			<CheckboxField
 				defaultSelected
 				description="Receive updates by email."
 				errorMessage="Choose an option."

@@ -210,7 +210,6 @@ const switchConfig = {
 	},
 	variants: {
 		size: {
-			px24: { root: sizeVars(ICON_SIZES.px24) },
 			px20: { root: sizeVars(ICON_SIZES.px20) },
 			px16: { root: sizeVars(ICON_SIZES.px16) },
 		},

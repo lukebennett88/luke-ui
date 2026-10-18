@@ -10,9 +10,6 @@ export default () => {
 			<ComparisonItem label="px20">
 				<CheckboxField defaultSelected label="Example checkbox" size="px20" />
 			</ComparisonItem>
-			<ComparisonItem label="px24">
-				<CheckboxField defaultSelected label="Example checkbox" size="px24" />
-			</ComparisonItem>
 		</Comparison>
 	);
 };
