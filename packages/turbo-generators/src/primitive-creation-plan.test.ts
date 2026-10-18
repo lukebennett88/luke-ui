@@ -76,7 +76,7 @@ describe('createPrimitivePlan', () => {
 			'export type StatusBadgeProps = Prettify<_StatusBadgeProps>;',
 		);
 		expect(primitiveSource).toContain('/** Props for `StatusBadge`. */');
-		expect(primitiveSource).toContain('/** Renders a `div` with the primitive recipe class. */');
+		expect(primitiveSource).toContain('/** StatusBadge primitive. See `StatusBadgeProps`. */');
 		expect(primitiveSource).not.toContain('export interface StatusBadgeProps');
 		expect(recipeSource).toContain('export const statusBadgeRecipe = recipe({');
 		expect(recipeSource).toContain('base: {},');

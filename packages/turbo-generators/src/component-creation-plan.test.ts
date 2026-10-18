@@ -80,7 +80,7 @@ describe('createComponentPlan', () => {
 			'export type StatusBadgeProps = Prettify<_StatusBadgeProps>;',
 		);
 		expect(componentSource).toContain('/** Props for `StatusBadge`. */');
-		expect(componentSource).toContain('/** Renders a `div` with the component recipe class. */');
+		expect(componentSource).toContain('/** StatusBadge. See `StatusBadgeProps`. */');
 		expect(componentSource).not.toContain('export interface StatusBadgeProps');
 		expect(packageExportSource).toContain(
 			"export { StatusBadge, type StatusBadgeProps } from '../core/status-badge/status-badge.js';",

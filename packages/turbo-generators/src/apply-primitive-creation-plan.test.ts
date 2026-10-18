@@ -101,7 +101,7 @@ describe('createPrimitive', () => {
 				'/** Props for `StatusBadge`. */',
 				'export type StatusBadgeProps = Prettify<_StatusBadgeProps>;',
 				'',
-				'/** Renders a `div` with the primitive recipe class. */',
+				'/** StatusBadge primitive. See `StatusBadgeProps`. */',
 				'export function StatusBadge(props: StatusBadgeProps): JSX.Element {',
 				'\tconst { className, ...divProps } = props;',
 				'\treturn <div {...divProps} className={cx(statusBadgeRecipe(), className)} />;',

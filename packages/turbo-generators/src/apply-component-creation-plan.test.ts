@@ -285,7 +285,7 @@ describe('createComponent', () => {
 				'/** Props for `StatusBadge`. */',
 				'export type StatusBadgeProps = Prettify<_StatusBadgeProps>;',
 				'',
-				'/** Renders a `div` with the component recipe class. */',
+				'/** StatusBadge. See `StatusBadgeProps`. */',
 				'export function StatusBadge(props: StatusBadgeProps): JSX.Element {',
 				'\tconst { className, ...divProps } = props;',
 				'\treturn <div {...divProps} className={cx(statusBadgeRecipe(), className)} />;',
