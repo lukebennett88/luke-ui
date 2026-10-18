@@ -25,7 +25,9 @@ const LIVE_GENERATOR_CACHE_VERSION = '1';
  *
  * This wrapper keys the cache on a hash of the entry file plus its relative import graph, and uses a
  * fresh TypeScript project on each cache miss so the program always reads current sources. Creating
- * a project is cheap relative to type collection; cache hits skip that work entirely.
+ * a project is cheap relative to type collection; cache hits skip that work entirely. Overlapping
+ * cache misses share one reset-and-generate queue so concurrent tables cannot close a project still
+ * in use.
  */
 export function createLiveTypescriptGenerator(options: GeneratorOptions = {}): Generator {
 	const storage = resolveCache(options.cache);
@@ -42,6 +44,18 @@ export function createLiveTypescriptGenerator(options: GeneratorOptions = {}): G
 	});
 	const generateDocumentation = generator.generateDocumentation.bind(generator);
 
+	/** Serializes cache-miss work so overlapping resets cannot close a project still in use. */
+	let missQueue: Promise<unknown> = Promise.resolve();
+
+	function runExclusiveMiss<T>(work: () => Promise<T>): Promise<T> {
+		const run = missQueue.then(work, work);
+		missQueue = run.then(
+			() => undefined,
+			() => undefined,
+		);
+		return run;
+	}
+
 	generator.generateDocumentation = async (file, name, generateOptions = {}) => {
 		const fullPath = resolve(file.path);
 		const content = file.content ?? (await readFile(fullPath, 'utf8'));
@@ -56,15 +70,21 @@ export function createLiveTypescriptGenerator(options: GeneratorOptions = {}): G
 			if (cached !== undefined) return cached as Array<GeneratedDoc>;
 		}
 
-		// Drop the previous native program so primary and imported files are read from disk again.
-		await slot.reset();
+		return runExclusiveMiss(async () => {
+			// Another overlapping miss may have filled the cache while this request waited.
+			if (storage !== null && cacheKey !== undefined) {
+				const cached = await storage.read(cacheKey);
+				if (cached !== undefined) return cached as Array<GeneratedDoc>;
+			}
 
-		const docs = await generateDocumentation({ path: fullPath, content }, name, generateOptions);
+			await slot.reset();
+			const docs = await generateDocumentation({ path: fullPath, content }, name, generateOptions);
 
-		if (storage !== null && cacheKey !== undefined) {
-			await storage.write(cacheKey, docs);
-		}
-		return docs;
+			if (storage !== null && cacheKey !== undefined) {
+				await storage.write(cacheKey, docs);
+			}
+			return docs;
+		});
 	};
 
 	return generator;

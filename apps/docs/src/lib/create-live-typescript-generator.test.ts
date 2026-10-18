@@ -1,7 +1,6 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 import { createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
@@ -10,59 +9,120 @@ import type { EnrichedGeneratedDoc } from './type-definition-model.js';
 import { typeTokensToText } from './type-tokens.js';
 import { hashTypescriptSourceGraph } from './typescript-source-graph.js';
 
-const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
-const buttonRel = 'packages/@luke-ui/react/src/core/button/button.tsx';
-const buttonPath = resolve(repoRoot, buttonRel);
-const pressRel = 'packages/@luke-ui/react/src/core/use-press-action/use-press-action.ts';
-const pressPath = resolve(repoRoot, pressRel);
-const tsconfigPath = resolve(repoRoot, 'apps/docs/tsconfig.json');
 const timeout = 60_000;
 
-const pendingNeedle = '\t\tisPending?: boolean;';
-const pendingInjection = '\t\tpapercutProp?: string;\n\t\tisPending?: boolean;';
+const buttonSource = `import type { PressAction } from './press-action';
+
+export interface ButtonProps {
+	onPress?: PressAction;
+	isPending?: boolean;
+}
+
+export interface LinkProps {
+	href: string;
+	isPending?: boolean;
+}
+`;
+
+const pressActionSource = 'export type PressAction = () => void | Promise<void>;\n';
+
+interface LiveFixture {
+	root: string;
+	buttonRel: string;
+	buttonPath: string;
+	pressPath: string;
+	tsconfigPath: string;
+	cleanup: () => void;
+}
+
+function createLiveFixture(options: { pathSegment?: string } = {}): LiveFixture {
+	const segment = options.pathSegment ?? 'luke-live-';
+	const root = mkdtempSync(join(tmpdir(), segment));
+	const docsDir = join(root, 'apps', 'docs');
+	const fixtureDir = join(root, 'packages', '@luke-ui', 'react', 'src', 'core', 'fixture');
+	const pressDir = join(fixtureDir, 'press-action');
+	mkdirSync(docsDir, { recursive: true });
+	mkdirSync(pressDir, { recursive: true });
+
+	writeFileSync(
+		join(docsDir, 'tsconfig.json'),
+		`${JSON.stringify(
+			{
+				compilerOptions: {
+					jsx: 'react-jsx',
+					module: 'ESNext',
+					moduleResolution: 'bundler',
+					noEmit: true,
+					skipLibCheck: true,
+					strict: true,
+					target: 'ESNext',
+				},
+				include: ['**/*.ts', '**/*.tsx'],
+			},
+			null,
+			'\t',
+		)}\n`,
+	);
+	writeFileSync(join(pressDir, 'index.ts'), pressActionSource);
+	writeFileSync(join(fixtureDir, 'button.tsx'), buttonSource);
+
+	const buttonRel = 'packages/@luke-ui/react/src/core/fixture/button.tsx';
+	return {
+		root,
+		buttonRel,
+		buttonPath: join(root, buttonRel),
+		pressPath: join(pressDir, 'index.ts'),
+		tsconfigPath: join(docsDir, 'tsconfig.json'),
+		cleanup: () => {
+			rmSync(root, { recursive: true, force: true });
+		},
+	};
+}
+
+function injectPapercutProp(source: string): string {
+	return source.replace(
+		'\tisPending?: boolean;',
+		'\tpapercutProp?: string;\n\tisPending?: boolean;',
+	);
+}
 
 test('source graph hash changes when a relative import changes', () => {
-	const original = readFileSync(buttonPath, 'utf8');
-	const pressOriginal = readFileSync(pressPath, 'utf8');
-	const before = hashTypescriptSourceGraph(buttonPath, original);
-
-	writeFileSync(pressPath, `${pressOriginal}\n`);
+	const fixture = createLiveFixture();
 	try {
-		expect(hashTypescriptSourceGraph(buttonPath, original)).not.toBe(before);
+		const before = hashTypescriptSourceGraph(fixture.buttonPath, buttonSource);
+		writeFileSync(fixture.pressPath, `${pressActionSource}\n`);
+		expect(hashTypescriptSourceGraph(fixture.buttonPath, buttonSource)).not.toBe(before);
 	} finally {
-		writeFileSync(pressPath, pressOriginal);
+		fixture.cleanup();
 	}
 });
 
 test(
 	'live generator picks up a new prop after a disk edit without a new process',
 	async () => {
+		const fixture = createLiveFixture();
 		const cacheDir = mkdtempSync(join(tmpdir(), 'luke-live-ts-'));
-		const original = readFileSync(buttonPath, 'utf8');
-		const edited = original.replace(pendingNeedle, pendingInjection);
-		expect(edited).toContain('papercutProp');
-
-		const generator = createLiveTypescriptGenerator({
-			cache: createFileSystemGeneratorCache(cacheDir),
-			tsconfigPath,
-		});
-
-		const before = await generator.generateTypeTable(
-			{ path: buttonRel, name: 'ButtonProps' },
-			{ basePath: repoRoot },
-		);
-		expect(before[0]?.entries.some((entry) => entry.name === 'papercutProp')).toBe(false);
-
-		writeFileSync(buttonPath, edited);
 		try {
+			const generator = createLiveTypescriptGenerator({
+				cache: createFileSystemGeneratorCache(cacheDir),
+				tsconfigPath: fixture.tsconfigPath,
+			});
+
+			const before = await generator.generateTypeTable(
+				{ path: fixture.buttonRel, name: 'ButtonProps' },
+				{ basePath: fixture.root },
+			);
+			expect(before[0]?.entries.some((entry) => entry.name === 'papercutProp')).toBe(false);
+
+			writeFileSync(fixture.buttonPath, injectPapercutProp(buttonSource));
 			const after = await generator.generateTypeTable(
-				{ path: buttonRel, name: 'ButtonProps' },
-				{ basePath: repoRoot },
+				{ path: fixture.buttonRel, name: 'ButtonProps' },
+				{ basePath: fixture.root },
 			);
 			expect(after[0]?.entries.some((entry) => entry.name === 'papercutProp')).toBe(true);
 		} finally {
-			writeFileSync(buttonPath, original);
 			rmSync(cacheDir, { recursive: true, force: true });
+			fixture.cleanup();
 		}
 	},
 	timeout,
@@ -71,31 +131,29 @@ test(
 test(
 	'component props generator keeps a new prop after a disk edit on the same instance',
 	async () => {
+		const fixture = createLiveFixture();
 		const cacheDir = mkdtempSync(join(tmpdir(), 'luke-live-props-'));
-		const original = readFileSync(buttonPath, 'utf8');
-		const edited = original.replace(pendingNeedle, pendingInjection);
-
-		const generator = createComponentPropsGenerator({
-			cache: createFileSystemGeneratorCache(cacheDir),
-			tsconfigPath,
-		});
-
-		const before = await generator.generateTypeTable(
-			{ path: buttonRel, name: 'ButtonProps' },
-			{ basePath: repoRoot },
-		);
-		expect(before[0]?.entries.some((entry) => entry.name === 'papercutProp')).toBe(false);
-
-		writeFileSync(buttonPath, edited);
 		try {
+			const generator = createComponentPropsGenerator({
+				cache: createFileSystemGeneratorCache(cacheDir),
+				tsconfigPath: fixture.tsconfigPath,
+			});
+
+			const before = await generator.generateTypeTable(
+				{ path: fixture.buttonRel, name: 'ButtonProps' },
+				{ basePath: fixture.root },
+			);
+			expect(before[0]?.entries.some((entry) => entry.name === 'papercutProp')).toBe(false);
+
+			writeFileSync(fixture.buttonPath, injectPapercutProp(buttonSource));
 			const after = await generator.generateTypeTable(
-				{ path: buttonRel, name: 'ButtonProps' },
-				{ basePath: repoRoot },
+				{ path: fixture.buttonRel, name: 'ButtonProps' },
+				{ basePath: fixture.root },
 			);
 			expect(after[0]?.entries.some((entry) => entry.name === 'papercutProp')).toBe(true);
 		} finally {
-			writeFileSync(buttonPath, original);
 			rmSync(cacheDir, { recursive: true, force: true });
+			fixture.cleanup();
 		}
 	},
 	timeout,
@@ -104,40 +162,144 @@ test(
 test(
 	'component props generator refreshes an imported type definition after a disk edit',
 	async () => {
+		const fixture = createLiveFixture();
 		const cacheDir = mkdtempSync(join(tmpdir(), 'luke-live-dep-'));
-		const original = readFileSync(pressPath, 'utf8');
-		const edited = original.replace(
-			/export type PressAction\s*=\s*[^;]+;/,
-			'export type PressAction = (value: string) => void | Promise<void>;',
-		);
-		expect(edited).not.toBe(original);
-		expect(edited).toContain('(value: string)');
-
-		const generator = createComponentPropsGenerator({
-			cache: createFileSystemGeneratorCache(cacheDir),
-			tsconfigPath,
-		});
-
-		const before = await generator.generateTypeTable(
-			{ path: buttonRel, name: 'ButtonProps' },
-			{ basePath: repoRoot },
-		);
-		const definitionBefore = pressActionDefinitionText(before[0]);
-		expect(definitionBefore).toBeTruthy();
-		expect(definitionBefore).not.toContain('(value: string)');
-
-		writeFileSync(pressPath, edited);
 		try {
+			const generator = createComponentPropsGenerator({
+				cache: createFileSystemGeneratorCache(cacheDir),
+				tsconfigPath: fixture.tsconfigPath,
+			});
+
+			const before = await generator.generateTypeTable(
+				{ path: fixture.buttonRel, name: 'ButtonProps' },
+				{ basePath: fixture.root },
+			);
+			const definitionBefore = pressActionDefinitionText(before[0]);
+			expect(definitionBefore).toBeTruthy();
+			expect(definitionBefore).not.toContain('(value: string)');
+
+			writeFileSync(
+				fixture.pressPath,
+				'export type PressAction = (value: string) => void | Promise<void>;\n',
+			);
 			const after = await generator.generateTypeTable(
-				{ path: buttonRel, name: 'ButtonProps' },
-				{ basePath: repoRoot },
+				{ path: fixture.buttonRel, name: 'ButtonProps' },
+				{ basePath: fixture.root },
 			);
 			const definitionAfter = pressActionDefinitionText(after[0]);
 			expect(definitionAfter).toContain('(value: string)');
 			expect(definitionAfter).not.toBe(definitionBefore);
 		} finally {
-			writeFileSync(pressPath, original);
 			rmSync(cacheDir, { recursive: true, force: true });
+			fixture.cleanup();
+		}
+	},
+	timeout,
+);
+
+test(
+	'live generator serves simultaneous cold-cache requests without resetting under each other',
+	async () => {
+		const fixture = createLiveFixture();
+		const cacheDir = mkdtempSync(join(tmpdir(), 'luke-live-concurrent-'));
+		try {
+			const generator = createLiveTypescriptGenerator({
+				cache: createFileSystemGeneratorCache(cacheDir),
+				tsconfigPath: fixture.tsconfigPath,
+			});
+
+			const [buttonDocs, linkDocs, buttonAgain] = await Promise.all([
+				generator.generateTypeTable(
+					{ path: fixture.buttonRel, name: 'ButtonProps' },
+					{ basePath: fixture.root },
+				),
+				generator.generateTypeTable(
+					{ path: fixture.buttonRel, name: 'LinkProps' },
+					{ basePath: fixture.root },
+				),
+				generator.generateTypeTable(
+					{ path: fixture.buttonRel, name: 'ButtonProps' },
+					{ basePath: fixture.root },
+				),
+			]);
+
+			expect(buttonDocs[0]?.entries.some((entry) => entry.name === 'onPress')).toBe(true);
+			expect(linkDocs[0]?.entries.some((entry) => entry.name === 'href')).toBe(true);
+			expect(buttonAgain[0]?.entries.some((entry) => entry.name === 'onPress')).toBe(true);
+		} finally {
+			rmSync(cacheDir, { recursive: true, force: true });
+			fixture.cleanup();
+		}
+	},
+	timeout,
+);
+
+test(
+	'live generator invalidates concurrent requests after a source change',
+	async () => {
+		const fixture = createLiveFixture();
+		const cacheDir = mkdtempSync(join(tmpdir(), 'luke-live-invalidate-'));
+		try {
+			const generator = createLiveTypescriptGenerator({
+				cache: createFileSystemGeneratorCache(cacheDir),
+				tsconfigPath: fixture.tsconfigPath,
+			});
+
+			const warmed = await generator.generateTypeTable(
+				{ path: fixture.buttonRel, name: 'ButtonProps' },
+				{ basePath: fixture.root },
+			);
+			expect(warmed[0]?.entries.some((entry) => entry.name === 'papercutProp')).toBe(false);
+
+			writeFileSync(fixture.buttonPath, injectPapercutProp(buttonSource));
+			const [first, second] = await Promise.all([
+				generator.generateTypeTable(
+					{ path: fixture.buttonRel, name: 'ButtonProps' },
+					{ basePath: fixture.root },
+				),
+				generator.generateTypeTable(
+					{ path: fixture.buttonRel, name: 'ButtonProps' },
+					{ basePath: fixture.root },
+				),
+			]);
+
+			expect(first[0]?.entries.some((entry) => entry.name === 'papercutProp')).toBe(true);
+			expect(second[0]?.entries.some((entry) => entry.name === 'papercutProp')).toBe(true);
+		} finally {
+			rmSync(cacheDir, { recursive: true, force: true });
+			fixture.cleanup();
+		}
+	},
+	timeout,
+);
+
+test(
+	'component props generator invalidates visibility when the repo path contains spaces',
+	async () => {
+		const fixture = createLiveFixture({ pathSegment: 'luke live space ' });
+		const cacheDir = mkdtempSync(join(tmpdir(), 'luke-live-space-'));
+		try {
+			expect(fixture.root).toContain(' ');
+			const generator = createComponentPropsGenerator({
+				cache: createFileSystemGeneratorCache(cacheDir),
+				tsconfigPath: fixture.tsconfigPath,
+			});
+
+			const before = await generator.generateTypeTable(
+				{ path: fixture.buttonRel, name: 'ButtonProps' },
+				{ basePath: fixture.root },
+			);
+			expect(before[0]?.entries.some((entry) => entry.name === 'papercutProp')).toBe(false);
+
+			writeFileSync(fixture.buttonPath, injectPapercutProp(buttonSource));
+			const after = await generator.generateTypeTable(
+				{ path: fixture.buttonRel, name: 'ButtonProps' },
+				{ basePath: fixture.root },
+			);
+			expect(after[0]?.entries.some((entry) => entry.name === 'papercutProp')).toBe(true);
+		} finally {
+			rmSync(cacheDir, { recursive: true, force: true });
+			fixture.cleanup();
 		}
 	},
 	timeout,

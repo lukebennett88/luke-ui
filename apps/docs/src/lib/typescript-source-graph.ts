@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, extname, join, normalize } from 'node:path';
 
 const RELATIVE_SPECIFIER_PATTERN = /(?:from\s+|import\s*\(|require\s*\()\s*['"](\.[^'"]+)['"]/g;
@@ -91,7 +91,16 @@ function resolveRelativeModule(fromDir: string, specifier: string): string | und
 	}
 
 	for (const candidate of candidates) {
-		if (existsSync(candidate)) return normalize(candidate);
+		if (isExistingFile(candidate)) return normalize(candidate);
 	}
 	return undefined;
+}
+
+/** True for an on-disk file. Directories must not win over `index.ts` for extensionless imports. */
+function isExistingFile(filePath: string): boolean {
+	try {
+		return existsSync(filePath) && statSync(filePath).isFile();
+	} catch {
+		return false;
+	}
 }

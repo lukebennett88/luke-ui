@@ -166,12 +166,20 @@ function readSourceFile(project: PropProject, absolutePath: string): PropSourceF
 	});
 }
 
+/**
+ * Separates `reactSrcDir` from `nodeKey` in visibility-cache keys. Paths may contain spaces, so a
+ * space delimiter cannot round-trip; NUL cannot appear in a filesystem path.
+ */
+const VISIBLE_PROP_CACHE_SEPARATOR = '\0';
+
 /** Drops cached visibility results for declarations that lived in `absolutePath`. */
 function invalidateVisiblePropCachesForFile(absolutePath: string): void {
+	const declarationPrefix = `${absolutePath}:`;
 	for (const key of visiblePropNameSetCache.keys()) {
-		// Keys are `${reactSrcDir} ${filePath}:${start}`; a space never appears in either path.
-		const nodeKey = key.slice(key.indexOf(' ') + 1);
-		if (nodeKey === absolutePath || nodeKey.startsWith(`${absolutePath}:`)) {
+		const separatorIndex = key.indexOf(VISIBLE_PROP_CACHE_SEPARATOR);
+		if (separatorIndex === -1) continue;
+		const declarationKey = key.slice(separatorIndex + VISIBLE_PROP_CACHE_SEPARATOR.length);
+		if (declarationKey.startsWith(declarationPrefix)) {
 			visiblePropNameSetCache.delete(key);
 		}
 	}
@@ -575,19 +583,22 @@ function computeVisiblePropNameSet(declaration: PropDeclaration, reactSrcDir: st
  * `filterGeneratedDoc` and `typeForwardsDomProps` are called once per documented type with the same
  * declaration, and the structural walk (`walkOrigins`) is the expensive part of the computation — this
  * cache lets the second call reuse the first's result instead of re-walking the same syntax tree. The
- * key combines `reactSrcDir` with the declaration's `nodeKey` using a space, which cannot appear inside
- * a `nodeKey` (a `file:start` pair), so two different declarations or the same declaration analysed
- * against a different `reactSrcDir` never collide. The cache lives for the process lifetime.
- * `loadExportedPropDeclaration` clears entries for a file before re-reading it, so a `vp dev` edit
- * cannot keep an outdated visibility set under the same `file:start` key.
+ * key joins `reactSrcDir` and the declaration's `nodeKey` with a NUL separator so paths that contain
+ * spaces still round-trip. The cache lives for the process lifetime. `loadExportedPropDeclaration`
+ * clears entries for a file before re-reading it, so a `vp dev` edit cannot keep an outdated
+ * visibility set under the same `file:start` key.
  */
 const visiblePropNameSetCache = new Map<string, ReadonlySet<string>>();
+
+function visiblePropCacheKey(reactSrcDir: string, declaration: PropDeclaration): string {
+	return `${reactSrcDir}${VISIBLE_PROP_CACHE_SEPARATOR}${nodeKey(declaration)}`;
+}
 
 function visiblePropNameSet(
 	declaration: PropDeclaration,
 	reactSrcDir: string,
 ): ReadonlySet<string> {
-	const key = `${reactSrcDir} ${nodeKey(declaration)}`;
+	const key = visiblePropCacheKey(reactSrcDir, declaration);
 	const cached = visiblePropNameSetCache.get(key);
 	if (cached !== undefined) return cached;
 
