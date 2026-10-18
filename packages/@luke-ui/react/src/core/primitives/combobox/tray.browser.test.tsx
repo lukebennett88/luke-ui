@@ -12,7 +12,7 @@ import {
 } from '@luke-ui/react/primitives/combobox';
 import { Field } from '@luke-ui/react/primitives/field';
 import type { Ref } from 'react';
-import { act, createRef } from 'react';
+import { createRef } from 'react';
 import { Form } from 'react-aria-components/Form';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -252,7 +252,8 @@ test('ComboboxTray search field does not reopen the popover while the tray is ex
 		render(<TrayCombobox />);
 		await openTray();
 
-		const searchboxElement = page.getByRole('searchbox', { name: 'Country' }).element();
+		const searchbox = page.getByRole('searchbox', { name: 'Country' });
+		const searchboxElement = searchbox.element();
 		const dialog = page.getByRole('dialog');
 		const overlay = dialog.element().parentElement?.parentElement;
 		if (overlay == null) throw new Error('Expected the tray overlay structure.');
@@ -262,11 +263,8 @@ test('ComboboxTray search field does not reopen the popover while the tray is ex
 			.poll(() => overlay.hasAttribute('data-exiting') && searchboxElement.isConnected)
 			.toBe(true);
 
-		// Playwright will not click an element mid-transition, so dispatch the event directly.
-		// Flush React updates before asserting the tray stayed closed.
-		await act(async () => {
-			searchboxElement.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-		});
+		// Playwright refuses a normal click while the overlay is animating; force skips that check.
+		await searchbox.click({ force: true });
 
 		expect(overlay.hasAttribute('data-exiting')).toBe(true);
 		expect(
