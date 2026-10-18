@@ -84,6 +84,31 @@ describe('createPrimitive', () => {
 		await expect(
 			readFile(join(root, 'apps/docs/content/docs/components/primitives/status-badge.mdx'), 'utf8'),
 		).resolves.toContain('src="status-badge-primitive/basic"');
+
+		const primitiveSource = await readFile(
+			join(root, 'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.tsx'),
+			'utf8',
+		);
+		expect(primitiveSource).toBe(
+			[
+				"import type { ComponentProps, JSX } from 'react';",
+				"import { cx } from '../../../shared/utils/utils.js';",
+				"import type { Prettify } from '../../types/prettify.js';",
+				"import { statusBadgeRecipe } from './recipe.css.js';",
+				'',
+				"interface _StatusBadgeProps extends ComponentProps<'div'> {}",
+				'',
+				'/** Props for `StatusBadge`. */',
+				'export type StatusBadgeProps = Prettify<_StatusBadgeProps>;',
+				'',
+				'/** Renders a `div` with the primitive recipe class. */',
+				'export function StatusBadge(props: StatusBadgeProps): JSX.Element {',
+				'\tconst { className, ...divProps } = props;',
+				'\treturn <div {...divProps} className={cx(statusBadgeRecipe(), className)} />;',
+				'}',
+				'',
+			].join('\n'),
+		);
 	});
 
 	it('appends a generated recipe import after the existing imports', async () => {

@@ -254,6 +254,73 @@ describe('createComponent', () => {
 			'{\n\t"pages": ["---Actions---", "actions/button", "---Feedback---", "feedback/status-badge"],\n\t"title": "Components"\n}\n',
 		);
 	});
+
+	it('formats scaffold output to the exported-prop, JSDoc, example, and Accessibility conventions', async () => {
+		const root = await createRepositoryFixture({
+			rootPages: [
+				'---Actions---',
+				'actions/button',
+				'---Feedback---',
+				'---Forms---',
+				'---Layout---',
+			],
+		});
+
+		await createComponent(root, { docsGroup: 'feedback', name: 'StatusBadge' });
+		await createComponent(root, { docsGroup: 'layout', name: 'AuditProbe' });
+
+		const componentSource = await readFile(
+			join(root, 'packages/@luke-ui/react/src/core/status-badge/status-badge.tsx'),
+			'utf8',
+		);
+		expect(componentSource).toBe(
+			[
+				"import type { ComponentProps, JSX } from 'react';",
+				"import { cx } from '../../shared/utils/utils.js';",
+				"import type { Prettify } from '../types/prettify.js';",
+				"import { statusBadgeRecipe } from './recipe.css.js';",
+				'',
+				"interface _StatusBadgeProps extends ComponentProps<'div'> {}",
+				'',
+				'/** Props for `StatusBadge`. */',
+				'export type StatusBadgeProps = Prettify<_StatusBadgeProps>;',
+				'',
+				'/** Renders a `div` with the component recipe class. */',
+				'export function StatusBadge(props: StatusBadgeProps): JSX.Element {',
+				'\tconst { className, ...divProps } = props;',
+				'\treturn <div {...divProps} className={cx(statusBadgeRecipe(), className)} />;',
+				'}',
+				'',
+			].join('\n'),
+		);
+
+		await expect(
+			readFile(join(root, 'apps/docs/src/examples/status-badge/basic.tsx'), 'utf8'),
+		).resolves.toBe(
+			[
+				"import { StatusBadge } from '@luke-ui/react/status-badge';",
+				'',
+				'export default () => {',
+				'\treturn <StatusBadge>StatusBadge</StatusBadge>;',
+				'};',
+				'',
+			].join('\n'),
+		);
+
+		const feedbackGuide = await readFile(
+			join(root, 'apps/docs/content/docs/components/feedback/status-badge.mdx'),
+			'utf8',
+		);
+		expect(feedbackGuide).toContain('## Accessibility\n\n## API');
+		expect(feedbackGuide).not.toMatch(/## Accessibility\n\n[^#]/);
+
+		const layoutGuide = await readFile(
+			join(root, 'apps/docs/content/docs/components/layout/audit-probe.mdx'),
+			'utf8',
+		);
+		expect(layoutGuide).not.toContain('## Accessibility');
+		expect(layoutGuide).toContain('## API');
+	});
 });
 
 const modulesRegistryPath = 'packages/@luke-ui/react/src/core/styles/modules.css.ts';

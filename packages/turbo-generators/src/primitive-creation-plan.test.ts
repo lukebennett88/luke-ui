@@ -70,6 +70,14 @@ describe('createPrimitivePlan', () => {
 		)?.contents;
 
 		expect(primitiveSource).toContain('export function StatusBadge');
+		expect(primitiveSource).toContain("import type { Prettify } from '../../types/prettify.js';");
+		expect(primitiveSource).toContain('interface _StatusBadgeProps extends ComponentProps');
+		expect(primitiveSource).toContain(
+			'export type StatusBadgeProps = Prettify<_StatusBadgeProps>;',
+		);
+		expect(primitiveSource).toContain('/** Props for `StatusBadge`. */');
+		expect(primitiveSource).toContain('/** Renders a `div` with the primitive recipe class. */');
+		expect(primitiveSource).not.toContain('export interface StatusBadgeProps');
 		expect(recipeSource).toContain('export const statusBadgeRecipe = recipe({');
 		expect(recipeSource).toContain('base: {},');
 		expect(recipeSource).not.toContain('inline-flex');
@@ -88,6 +96,7 @@ describe('createPrimitivePlan', () => {
 			},
 		]);
 		expect(guide).toContain('src="status-badge-primitive/basic"');
+		expect(guide).not.toContain('## Accessibility');
 	});
 
 	it('omits hosted docs when docs are disabled', () => {
