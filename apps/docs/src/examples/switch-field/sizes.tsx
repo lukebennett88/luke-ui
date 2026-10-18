@@ -10,9 +10,6 @@ export default () => {
 			<ComparisonItem label="px20">
 				<SwitchField defaultSelected label="Example switch" size="px20" />
 			</ComparisonItem>
-			<ComparisonItem label="px24">
-				<SwitchField defaultSelected label="Example switch" size="px24" />
-			</ComparisonItem>
 		</Comparison>
 	);
 };

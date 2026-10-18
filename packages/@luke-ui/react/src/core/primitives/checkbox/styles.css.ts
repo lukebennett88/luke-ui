@@ -193,16 +193,6 @@ const checkboxConfig = {
 	},
 	variants: {
 		size: {
-			px24: {
-				root: {
-					vars: {
-						[checkboxControlSize]: FONT_METRIC_SCALE[20].lineHeight,
-						[checkboxGlyphSize]: ICON_SIZES.px20,
-						[checkboxIndicatorSize]: ICON_SIZES.px24,
-						[inlineFieldIndent]: `calc(${checkboxControlSize} + ${inlineControlGap})`,
-					},
-				},
-			},
 			px20: {
 				root: {
 					vars: {
