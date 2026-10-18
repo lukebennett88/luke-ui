@@ -42,21 +42,19 @@ describe('findTypeDefinitionLinkIssues', () => {
 		expect(findBuiltTypeDefinitionTables(root)).toHaveLength(2);
 	});
 
-	it("fails when a page loads another table's definitions, as in the #820 collision", () => {
+	it('fails when a page registers a name absent from its definitions asset', () => {
 		const root = createAssetsRoot();
-		// The Button guide expected PressAction, but the shared asset only held the primitive's
-		// Prominence definition — the popover then showed "Definition not available."
-		const primitiveOnlyAsset = writeAsset(root, {
+		const prominenceOnlyAsset = writeAsset(root, {
 			Prominence: { definition: [['k', 'type'], ' ', ['t', 'Prominence'], ';'] },
 		});
 		writePageModule(root, 'button-component.js', {
 			definitionNames: ['Prominence', 'PressAction'],
-			href: `/assets/${primitiveOnlyAsset}`,
+			href: `/assets/${prominenceOnlyAsset}`,
 			hrefVar: 'r',
 		});
 
 		expect(findTypeDefinitionLinkIssues(root)).toEqual([
-			`button-component.js: definitionNames includes "PressAction" absent from ${primitiveOnlyAsset}`,
+			`button-component.js: definitionNames includes "PressAction" absent from ${prominenceOnlyAsset}`,
 		]);
 	});
 
@@ -92,13 +90,12 @@ describe('findTypeDefinitionLinkIssues', () => {
 		]);
 	});
 
-	it('leaves intentional unresolved and external names out of definitionNames unchecked', () => {
+	it('only requires definitions for names listed in definitionNames', () => {
 		const root = createAssetsRoot();
 		const asset = writeAsset(root, {
 			PressAction: { definition: [['k', 'type'], ' ', ['t', 'PressAction'], ';'] },
 		});
-		// Row tokens may still name Promise or IntrinsicElements; only registered names are checked.
-		writePageModule(root, 'external-ok.js', {
+		writePageModule(root, 'registered-only.js', {
 			definitionNames: ['PressAction'],
 			href: `/assets/${asset}`,
 			hrefVar: 'r',
