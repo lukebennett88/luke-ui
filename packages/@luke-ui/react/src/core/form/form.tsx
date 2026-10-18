@@ -4,12 +4,18 @@ import type { FormProps as RacFormProps } from 'react-aria-components/Form';
 import { Form as RacForm } from 'react-aria-components/Form';
 import type { NecessityIndicator } from '../primitives/field/necessity-context.js';
 import { FormNecessityContext } from '../primitives/field/necessity-context.js';
+import { ControlSizeContext, useControlSize } from '../sizing/control-size-context.js';
+import type { ControlSize } from '../sizing/control-size.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 
 type _FormOmit = DistributiveOmit<RacFormProps, 'onSubmit'>;
 
 interface _FormProps extends _FormOmit {
+	/** Default recipe size for fields and actions. An explicit component size takes precedence.
+	 * @default 'medium'
+	 */
+	controlSize?: ControlSize;
 	/**
 	 * React form Action or URL for ordinary submissions. Prefer this over `onSubmit` when you do not
 	 * need the submit event.
@@ -43,27 +49,30 @@ interface _FormProps extends _FormOmit {
 export type FormProps = Prettify<_FormProps>;
 
 /**
- * Groups fields for submission and shares necessity indicators, validation behaviour, and server
- * errors.
+ * Groups fields for submission and shares control sizes, necessity indicators, validation behaviour,
+ * and server errors.
  *
  * Use a layout component such as `Stack` to arrange the fields.
  */
 export function Form(props: FormProps): JSX.Element {
-	const { children, className, necessityIndicator, onSubmit, ...restProps } = props;
+	const { children, className, controlSize, necessityIndicator, onSubmit, ...restProps } = props;
+	const size = useControlSize(controlSize);
 	const parentNecessityIndicator = use(FormNecessityContext);
 
 	// Always wrap so toggling the prop does not remount the form subtree. Pass through the parent
 	// value when unset so an unset Form does not shadow an outer Form.
 	return (
-		<FormNecessityContext value={necessityIndicator ?? parentNecessityIndicator}>
-			<RacForm
-				{...restProps}
-				className={className}
-				// React types submit as SubmitEvent; RAC still types onSubmit with deprecated FormEvent.
-				onSubmit={onSubmit as RacFormProps['onSubmit']}
-			>
-				{children}
-			</RacForm>
-		</FormNecessityContext>
+		<ControlSizeContext value={size}>
+			<FormNecessityContext value={necessityIndicator ?? parentNecessityIndicator}>
+				<RacForm
+					{...restProps}
+					className={className}
+					// React types submit as SubmitEvent; RAC still types onSubmit with deprecated FormEvent.
+					onSubmit={onSubmit as RacFormProps['onSubmit']}
+				>
+					{children}
+				</RacForm>
+			</FormNecessityContext>
+		</ControlSizeContext>
 	);
 }

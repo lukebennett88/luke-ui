@@ -212,6 +212,10 @@ for (const consumer of consumers) {
 								?.getAttribute('aria-labelledby')
 								?.split(' ') ?? [];
 						return {
+							inheritedActionClasses: root?.querySelector('[data-size-classes]')?.className,
+							expectedActionClasses: root
+								?.querySelector('[data-size-classes]')
+								?.getAttribute('data-size-classes'),
 							controls: {
 								buttons: root?.querySelectorAll('button').length,
 								inputs: root?.querySelectorAll('input').length,
@@ -236,6 +240,8 @@ for (const consumer of consumers) {
 					expect(result.recoverableErrors).toEqual([]);
 					expect(consoleErrors).toEqual([]);
 					expect(result.controls).toEqual({ buttons: 2, inputs: 3 });
+					expect(result.expectedActionClasses).toBeTruthy();
+					expect(result.inheritedActionClasses).toBe(result.expectedActionClasses);
 					// React Aria effects adjust attributes after hydration, so compare nodes, not markup.
 					// Every server element must survive in place: none replaced, added, or removed.
 					expect(result.keptServerElements).toBe(true);

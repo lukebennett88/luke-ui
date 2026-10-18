@@ -1,26 +1,15 @@
 import type { IconSize } from '../types/icon-size.js';
 
-/**
- * Size union shared by the field controls (`Combobox`, `Select`, `TextInput`).
- *
- * Named apart from the `vars.controlSize` theme token — that's the physical block-size
- * value shared by every sized control (buttons included); this is a type, scoped to the
- * field controls, so the two aren't mistaken for each other.
- *
- * This module is a leaf: it must never import recipe modules. `ComboboxSize`
- * (`primitives/combobox/styles.css.ts`), `SelectSize` (`primitives/select/styles.css.ts`), and
- * `TextInputSize` (`primitives/text-input/recipe.css.ts`) derive from their recipe configs and must
- * stay equal to this union.
- */
-export type FieldControlSize = 'px32' | 'px40';
+/** Complete recipe sizes shared by compatible controls and actions. */
+export type ControlSize = 'small' | 'medium';
 
 /**
- * Maps field control size to the icon size those controls provide: `px16` icons at `px32`, and
- * `px20` icons at `px40`.
+ * Maps field control size to the icon size those controls provide: `px16` icons at `small`, and
+ * `px20` icons at `medium`.
  */
-export const FIELD_CONTROL_ICON_SIZE: Record<FieldControlSize, IconSize> = {
-	px32: 'px16',
-	px40: 'px20',
+export const FIELD_CONTROL_ICON_SIZE: Record<ControlSize, IconSize> = {
+	small: 'px16',
+	medium: 'px20',
 };
 
 /**

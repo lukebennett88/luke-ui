@@ -255,7 +255,7 @@ a function that takes a variant selection plus optional `className` and returns 
 ```ts
 export const buttonRecipe = recipe({
 	base: {/* … */},
-	defaultVariants: { appearance: 'solid', size: 'px40', tone: 'neutral' },
+	defaultVariants: { appearance: 'solid', size: 'medium', tone: 'neutral' },
 	variants: {
 		appearance: { ghost: {}, solid: {}, subtle: {} },
 		size: {/* … */},
@@ -363,33 +363,30 @@ The runtime value is still a mutable `Set`.
 Spacing and gap properties use `0` or value-based keys such as `sp16` and `sp24`. Keys are emitted
 as `rem`. Margin also accepts `auto`. Enum-like properties use CSS-native values.
 
-### Literal size keys
+### Control recipe sizes
 
-Fixed measurements that do not vary by theme use curated `px*` keys, not T-shirt names. A key such
-as `px16` means 16 CSS pixels at a 16px root. Emit the style value with `rem` so root-font scaling
-still applies. The number always describes the component's own dimension: control block size for
-buttons and fields, indicator size for Checkbox, track block size for Switch, square size for Icon
-and LoadingSpinner, and maximum inline size for Container.
+Control `size` selects a complete recipe: `small` or `medium`. Buttons and fields retain their 32px
+and 40px geometry at a 16px root, while Checkbox and Switch retain their 16px and 20px indicators.
+Typography, icons, and alignment belong to each recipe. `medium` is the fallback. This contract
+supersedes the component naming policy in
+[#761](https://github.com/lukebennett88/luke-ui/issues/761).
 
-Build these scales with `literalScale` in `theme/literal-scale.ts`. Pass the numeric steps once. The
-helper derives both the key and the `rem` value (`16` → `px16: rem(16)`), so names cannot drift from
-values. Each component keeps a curated set of steps. Do not accept arbitrary lengths on every `size`
-prop. Never add `px`/`py` shorthand props: in Tailwind those names mean horizontal and vertical
-padding.
+`size` and `Form.controlSize` accept fixed scalar values. The internal `ControlSizeContext` carries
+semantic defaults for compatible fields and actions. Resolve an explicit component size first, then
+the nearest inherited default, then `medium`. Composed components must pass an omitted size through
+until the owning primitive resolves it. Control-specific contexts preserve explicit part overrides
+and carry resolved sizes through Select and Combobox portals.
 
-A prefix names the kind of value, not only the unit. Responsive condition keys stay `bp*` (CSS-pixel
-container-width thresholds from that width upwards). A declaration such as
-`{ initial: 'px8', bp768: 'px16' }` deliberately distinguishes a breakpoint condition from the
-length it selects.
+Independent Dialog surfaces must establish their own default, normally `medium`, when implemented in
+[#799](https://github.com/lukebennett88/luke-ui/issues/799). They must not inherit a trigger's
+control-size default accidentally.
 
-`sp*` spacing is the only intentional temporary exception. Migrate it to `px*` through the same
-helper before the next release ([#847](https://github.com/lukebennett88/luke-ui/issues/847)). Do not
-publish a version that mixes `px*` component sizes with `sp*` spacing keys.
+Icon and LoadingSpinner keep literal `px*` square sizes. Physical `vars.controlSize` tokens also
+keep their literal names. Build literal scales with `literalScale` in `theme/literal-scale.ts` so
+numeric keys and `rem` values cannot drift. Responsive conditions keep `bp*` names.
 
-Buttons provide `px16` icons and spinners at both `px32` and `px40`. Field controls provide `px16`
-icons at `px32` and `px20` icons at `px40`. Explicit `Icon` `size` overrides still win over context.
-Do not document a pairing between field or button height and Checkbox or Switch size: those
-indicators align to label line height, not a companion control.
+Buttons provide `px16` icons and spinners at both recipe sizes. Field controls provide `px16` icons
+at `small` and `px20` icons at `medium`. Explicit `Icon.size` overrides win over context.
 
 ### Responsive values
 

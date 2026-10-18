@@ -185,7 +185,7 @@ export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }
 				ref={(node) => {
 					compactTriggerRef.current = node;
 				}}
-				size="px32"
+				size="small"
 			/>
 		);
 	}
@@ -217,7 +217,7 @@ function WideSearchTrigger({ context }: { context: SearchContextValue }) {
 						isBlock
 						onPress={() => openSearch('wide')}
 						prominence="low"
-						size="px32"
+						size="small"
 					>
 						<Lockup
 							className={styles.triggerLockup}

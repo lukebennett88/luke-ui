@@ -7,6 +7,7 @@ import type { LinkPresentationProps } from '../action-presentation.js';
 import { buttonContent, buttonLabel } from '../button/styles.css.js';
 import { IconSizeProvider } from '../icon/icon-size-context.js';
 import { BUTTON_ICON_SIZE } from '../sizing/button-sizing.js';
+import { useControlSize } from '../sizing/control-size-context.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -49,10 +50,12 @@ export function Link(props: LinkProps): JSX.Element {
 		children,
 		endContent,
 		isBlock,
-		size,
+		size: sizeProp,
 		startContent,
 		...restProps
 	} = props;
+
+	const size = useControlSize(sizeProp);
 
 	if (appearance === 'button') {
 		return (

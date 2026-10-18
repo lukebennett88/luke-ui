@@ -8,6 +8,7 @@ import { PendingSpinner } from '../pending-spinner/pending-spinner.js';
 import { pendingContent } from '../pending-spinner/styles.css.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/button.js';
 import { Button } from '../primitives/button/button.js';
+import { useControlSize } from '../sizing/control-size-context.js';
 import type { RequiredAccessibleName } from '../types/accessible-name.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
@@ -66,9 +67,10 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 		isPending = false,
 		onPress,
 		pressAction,
-		size = 'px40',
+		size: sizeProp,
 		...buttonProps
 	} = props;
+	const size = useControlSize(sizeProp);
 	const {
 		isPendingState,
 		onPress: handlePress,

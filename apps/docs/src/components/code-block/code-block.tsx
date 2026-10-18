@@ -107,13 +107,12 @@ export function CodeBlock({
 			icon={copyStatus === 'copied' ? 'check' : 'copy'}
 			onPress={handleCopy}
 			prominence="low"
-			size="px32"
+			size="small"
 			tone="neutral"
 		/>
 	) : null;
 
-	const liveMessage =
-		copyStatus === 'copied' ? 'Copied' : copyStatus === 'error' ? 'Could not copy code' : '';
+	const liveMessage = { copied: 'Copied', error: 'Could not copy code', idle: '' }[copyStatus];
 
 	return (
 		// `not-prose` keeps Luke UI Prose spacing, list, and table rules out of the code block.

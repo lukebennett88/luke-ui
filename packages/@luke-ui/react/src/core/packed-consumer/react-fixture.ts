@@ -82,7 +82,7 @@ const SSR_OUTLET = '<!--ssr-outlet-->';
 const APP = `
 import { Blockquote } from '@luke-ui/react/blockquote';
 import { Box } from '@luke-ui/react/box';
-import { Button } from '@luke-ui/react/button';
+import { Button, buttonRecipe } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Form } from '@luke-ui/react/form';
 import { Icon } from '@luke-ui/react/icon';
@@ -106,12 +106,12 @@ export function App({ onHydrated }) {
 			{ display: 'flex', gap: 'sp8' },
 			h(Blockquote, null, 'Hello world'),
 			h(Icon, { name: 'chevronDown', 'aria-label': 'Expand' }),
-			// Form and TextInputField come from separate published entrypoints so a duplicated
-			// context instance in the built package would fail to pass the optional marker.
+			// Separate published entrypoints must share Form defaults for both fields and actions.
 			h(
 				Form,
-				{ necessityIndicator: 'optional-label' },
+				{ controlSize: 'small', necessityIndicator: 'optional-label' },
 				h(TextInputField, { label: 'Name' }),
+				h(Button, { 'data-size-classes': buttonRecipe({ size: 'small' }) }, 'Save'),
 			),
 			h(CheckboxField, { label: 'Example checkbox' }),
 			h(SwitchField, { label: 'Example switch' }),
@@ -121,7 +121,6 @@ export function App({ onHydrated }) {
 				h(SelectItem, { id: 'au' }, 'Australia'),
 				h(SelectItem, { id: 'nz' }, 'New Zealand'),
 			),
-			h(Button, null, 'Save'),
 		),
 	);
 }

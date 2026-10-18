@@ -25,7 +25,7 @@ export const buttonRecipeInternal = recipe({
 		appearance: 'button',
 		isBlock: false,
 		prominence: 'standard',
-		size: 'px40',
+		size: 'medium',
 		tone: 'neutral',
 	},
 	variants: {
@@ -132,8 +132,8 @@ export const buttonRecipeInternal = recipe({
 			high: {},
 		},
 		size: {
-			px40: {},
-			px32: {},
+			medium: {},
+			small: {},
 		},
 		tone: {
 			critical: {},
@@ -141,8 +141,8 @@ export const buttonRecipeInternal = recipe({
 		},
 	},
 	compoundVariants: [
-		buttonSize('px40'),
-		buttonSize('px32'),
+		buttonSize('medium'),
+		buttonSize('small'),
 		{
 			// Undoes `textRecipe`'s `minInlineSize: 0`, which lets a grid or flex parent collapse the
 			// button to one character per line. Must be a compound variant: `textRecipe`'s base and
@@ -230,8 +230,8 @@ function buttonAppearance(
 	];
 }
 
-function buttonSize(size: 'px40' | 'px32') {
-	const paddingInline = size === 'px40' ? vars.space.sp16 : vars.space.sp12;
+function buttonSize(size: 'medium' | 'small') {
+	const paddingInline = size === 'medium' ? vars.space.sp16 : vars.space.sp12;
 	// The extra 1px replaces the border. Forced colours draws the border, so it uses the plain padding.
 	const inset = {
 		'@media': {
@@ -241,7 +241,7 @@ function buttonSize(size: 'px40' | 'px32') {
 	};
 	return {
 		style:
-			size === 'px40'
+			size === 'medium'
 				? {
 						...inset,
 						blockSize: vars.controlSize.px40,
@@ -261,12 +261,11 @@ function buttonSize(size: 'px40' | 'px32') {
 }
 
 function textAppearance(tone: Tone, prominence: 'low' | 'standard' | 'high') {
-	const foreground =
-		tone === 'critical'
-			? vars.color.foreground.danger
-			: prominence === 'high'
-				? vars.color.foreground.accent
-				: vars.color.foreground.neutral;
+	const foreground = (() => {
+		if (tone === 'critical') return vars.color.foreground.danger;
+		if (prominence === 'high') return vars.color.foreground.accent;
+		return vars.color.foreground.neutral;
+	})();
 	// Critical and accent keep `foreground.pressed` even though it is barely perceptible: the role
 	// contract has no stronger rung, and `onSolid` is contrast-solved for solid fills.
 	const pressedColor =

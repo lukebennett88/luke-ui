@@ -1,11 +1,12 @@
 import type { JSX, ReactNode } from 'react';
 import { createContext, use } from 'react';
+import { useControlSize } from '../../sizing/control-size-context.js';
 import type { ComboboxSize } from './root.js';
 
 const ComboboxSizeContext = createContext<ComboboxSize | null>(null);
 
 export function useComboboxSize(size?: ComboboxSize): ComboboxSize {
-	return size ?? use(ComboboxSizeContext) ?? 'px40';
+	return useControlSize(size ?? use(ComboboxSizeContext) ?? undefined);
 }
 
 export function ComboboxSizeProvider({

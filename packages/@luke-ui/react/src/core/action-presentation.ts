@@ -21,9 +21,9 @@ export type ButtonPresentationProps =
 			prominence?: Prominence;
 			/**
 			 * Sets the size of the control.
-			 * @default px40
+			 * @default medium
 			 */
-			size?: 'px32' | 'px40';
+			size?: 'small' | 'medium';
 			/**
 			 * Sets the visual tone. Use `critical` for destructive actions.
 			 * @default neutral
@@ -103,9 +103,9 @@ export type LinkPresentationProps =
 			prominence?: Prominence;
 			/**
 			 * Sets the size of the control.
-			 * @default px40
+			 * @default medium
 			 */
-			size?: 'px32' | 'px40';
+			size?: 'small' | 'medium';
 	  };
 
 /** Visual presentation props accepted by IconButton. */
@@ -117,9 +117,9 @@ export interface IconButtonPresentationProps {
 	prominence?: Prominence;
 	/**
 	 * Sets the size of the control.
-	 * @default px40
+	 * @default medium
 	 */
-	size?: 'px32' | 'px40';
+	size?: 'small' | 'medium';
 	/**
 	 * Sets the visual tone. Use `critical` for destructive actions.
 	 * @default neutral
@@ -136,7 +136,7 @@ export interface IconLinkPresentationProps {
 	prominence?: Prominence;
 	/**
 	 * Sets the size of the control.
-	 * @default px40
+	 * @default medium
 	 */
-	size?: 'px32' | 'px40';
+	size?: 'small' | 'medium';
 }

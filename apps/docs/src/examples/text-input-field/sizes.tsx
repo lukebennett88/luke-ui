@@ -4,20 +4,20 @@ import { Comparison, ComparisonItem } from '#docs';
 export default () => {
 	return (
 		<Comparison>
-			<ComparisonItem label="px32">
+			<ComparisonItem label="small">
 				<TextInputField
 					label="Example field"
 					name="example"
 					placeholder="Example input"
-					size="px32"
+					size="small"
 				/>
 			</ComparisonItem>
-			<ComparisonItem label="px40">
+			<ComparisonItem label="medium">
 				<TextInputField
 					label="Example field"
 					name="example"
 					placeholder="Example input"
-					size="px40"
+					size="medium"
 				/>
 			</ComparisonItem>
 		</Comparison>

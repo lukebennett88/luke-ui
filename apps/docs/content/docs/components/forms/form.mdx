@@ -38,6 +38,14 @@ Pass server errors through `validationErrors`, keyed by each field's `name`.
 Read [Validation](/docs/validation) for validation rules, error precedence, and when messages appear
 or clear.
 
+## Control sizes
+
+Pass `controlSize="small"` for compact fields and actions. A component's explicit `size` takes
+precedence. Without an inherited default, controls use `medium`. Sizes select the whole control
+recipe, including its typography and icons.
+
+<ExampleBlock src="form/control-size" title="Form: Control sizes" />
+
 ## Accessibility
 
 Provide an accessible name for the form landmark when the page has more than one form, or when the

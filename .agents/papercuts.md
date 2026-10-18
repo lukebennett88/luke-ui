@@ -79,3 +79,13 @@ not help. Silence in this log is not evidence.
 - Problem: The agent-authored summary omitted a supported rendering API despite the applicable
   guides. Correcting the feature list does not establish that the authoring workflow applies those
   rules.
+
+## New feature documentation follows Accessibility
+
+- Seen: 2026-10-18 (#847). `pnpm run check` rejected a new Form control-size section after
+  Accessibility.
+- Where: `apps/docs/content/docs/components/forms/form.mdx`. `docs/DOCUMENTATION.md`, MDX page
+  structure, places feature sections before Accessibility. The write-docs workflow requires
+  consulting that guide before editing documentation.
+- Problem: The agent-authored section contradicted the required page order. Correcting the order
+  does not establish that documentation authoring applies the page-structure guidance.

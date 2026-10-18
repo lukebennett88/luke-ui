@@ -77,7 +77,7 @@ function PageActionLink({
 			href={href}
 			prominence="low"
 			rel="noreferrer noopener"
-			size="px32"
+			size="small"
 			startContent={icon ?? (iconName ? <Icon name={iconName} /> : null)}
 			target="_blank"
 		>
@@ -105,7 +105,7 @@ function CopyMarkdownButton({ markdownUrl }: { markdownUrl: string }) {
 		<Button
 			onPress={onCopy}
 			prominence="low"
-			size="px32"
+			size="small"
 			startContent={<Icon name={copied ? 'check' : 'copy'} />}
 			tone="neutral"
 		>

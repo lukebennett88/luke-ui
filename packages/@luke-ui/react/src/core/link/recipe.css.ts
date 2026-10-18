@@ -10,7 +10,7 @@ export const linkRecipe = withDefaultVariants<
 >(buttonRecipeInternal, {
 	appearance: 'text',
 	isBlock: false,
-	size: 'px40',
+	size: 'medium',
 	tone: 'neutral',
 	prominence: 'standard',
 });

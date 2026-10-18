@@ -86,11 +86,11 @@ test('slot functions append a consumer className', () => {
 });
 
 test('textInputRecipe styles a standalone input and appends a consumer className', () => {
-	const medium = textInputRecipe({ size: 'px40' });
+	const medium = textInputRecipe({ size: 'medium' });
 
 	expect(textInputRecipe()).toBe(medium);
-	expect(textInputRecipe({ size: 'px32' })).not.toBe(medium);
-	expect(textInputRecipe({ className: 'mine', size: 'px40' })).toBe(`${medium} mine`);
+	expect(textInputRecipe({ size: 'small' })).not.toBe(medium);
+	expect(textInputRecipe({ className: 'mine', size: 'medium' })).toBe(`${medium} mine`);
 });
 
 test('an unconditional compoundSlots entry applies to every listed slot and not to unlisted ones', () => {

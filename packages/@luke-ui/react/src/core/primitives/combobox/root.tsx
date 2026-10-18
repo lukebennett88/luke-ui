@@ -4,6 +4,7 @@ import type { Key, ComboBoxProps as RacComboBoxProps } from 'react-aria-componen
 import { ComboBoxContext, ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
+import { useControlSize } from '../../sizing/control-size-context.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { FieldStateContext } from '../field/label.js';
@@ -87,7 +88,7 @@ interface _ComboboxRootProps<T extends object>
 	/** Forwarded to the combobox root element. */
 	ref?: Ref<HTMLDivElement>;
 
-	/** Control size. @default 'px40' */
+	/** Control size. @default 'medium' */
 	size?: ComboboxSize;
 	/** The currently selected key (controlled). Pass `null` for no selection. */
 	value?: Key | null;
@@ -111,9 +112,10 @@ export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX
 		isRequired,
 		menuTrigger = 'focus',
 		ref,
-		size = 'px40',
+		size: sizeProp,
 		...comboboxProps
 	} = props;
+	const size = useControlSize(sizeProp);
 	const comboBoxContext = useSlottedContext(ComboBoxContext, props.slot);
 	const resolvedIsRequired = isRequired ?? comboBoxContext?.isRequired ?? false;
 	const fieldState = { isRequired: resolvedIsRequired };

@@ -16,7 +16,7 @@ export default () => {
 				</Stack>
 			</LockupBody>
 			<LockupRail>
-				<IconButton aria-label="More options" icon="chevronDown" size="px32" />
+				<IconButton aria-label="More options" icon="chevronDown" size="small" />
 			</LockupRail>
 		</Lockup>
 	);

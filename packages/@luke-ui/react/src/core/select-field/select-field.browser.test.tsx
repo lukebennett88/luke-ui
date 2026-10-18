@@ -89,7 +89,7 @@ function SelectFieldScene() {
 			>
 				{renderThemeItem}
 			</SelectField>
-			<SelectField defaultValue="light" items={themeItems} label="Small" name="small" size="px32">
+			<SelectField defaultValue="light" items={themeItems} label="Small" name="small" size="small">
 				{renderThemeItem}
 			</SelectField>
 			<SelectField
@@ -98,7 +98,7 @@ function SelectFieldScene() {
 				items={themeItems}
 				label="Invalid small"
 				name="invalid-small"
-				size="px32"
+				size="small"
 			>
 				{renderThemeItem}
 			</SelectField>

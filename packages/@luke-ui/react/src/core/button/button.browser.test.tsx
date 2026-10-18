@@ -97,7 +97,7 @@ test('the Button scene has no axe violations', async () => {
 // The inset is the padding plus the 1px border it replaces, so the Button keeps the outer size it
 // had with a border.
 test('a medium Button insets its label 17px from each edge with forced colours none', () => {
-	const { locator } = render(<Button size="px40">Save changes</Button>);
+	const { locator } = render(<Button size="medium">Save changes</Button>);
 	const button = locator.getByRole('button', { name: 'Save changes' }).element();
 	const label = button.querySelector('span');
 	if (!(label instanceof HTMLElement)) throw new Error('Expected a label.');

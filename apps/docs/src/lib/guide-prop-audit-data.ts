@@ -63,6 +63,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		],
 	'forms/form.mdx::packages/@luke-ui/react/src/core/form/form.tsx::FormProps': [
 		'action',
+		'controlSize',
 		'necessityIndicator',
 		'onReset',
 		'onSubmit',

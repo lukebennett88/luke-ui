@@ -97,7 +97,7 @@ function SiteWordmark() {
 function AppearancePopover() {
 	return (
 		<DialogTrigger>
-			<Button className={styles.mobileThemeTrigger} prominence="low" size="px32">
+			<Button className={styles.mobileThemeTrigger} prominence="low" size="small">
 				Theme
 			</Button>
 			<Popover className={styles.appearancePopover} placement="bottom end">
@@ -117,7 +117,7 @@ function RepositoryLink() {
 			icon={<GithubMark />}
 			prominence="low"
 			rel="noreferrer noopener"
-			size="px32"
+			size="small"
 			target="_blank"
 		/>
 	);

@@ -170,7 +170,7 @@ test('lets Luke UI components keep their own appearance beside native markup', (
 	expect(button.borderTopWidth).toBe('0px');
 });
 
-for (const size of ['px40', 'px32'] as const) {
+for (const size of ['medium', 'small'] as const) {
 	test(`gives a ${size} Button, IconButton, and button Link one box model without user agent padding`, () => {
 		const { locator } = render(
 			<div>

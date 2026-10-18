@@ -181,7 +181,7 @@ export function ProfileAvatarSection({
 					{avatarMutationError && avatarMutationVariables !== undefined ? (
 						<Button
 							onPress={() => void saveAvatar(avatarMutationVariables)}
-							size="px32"
+							size="small"
 							type="button"
 						>
 							Try again

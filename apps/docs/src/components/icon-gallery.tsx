@@ -116,7 +116,7 @@ export function IconGallery(): JSX.Element {
 								onChange={setFilter}
 								placeholder="Filter by name"
 								prefix={<Icon name="search" size="px20" />}
-								size="px32"
+								size="small"
 								value={filter}
 							/>
 						</Box>
@@ -330,7 +330,7 @@ function IconGalleryEmptyState({ onClear, query }: IconGalleryEmptyStateProps) {
 			<Text color="secondary" elementType="p" textAlign="center" typography="caption">
 				No icon matches &quot;{query}&quot;
 			</Text>
-			<Button onPress={onClear} size="px32">
+			<Button onPress={onClear} size="small">
 				Clear filter
 			</Button>
 		</Stack>

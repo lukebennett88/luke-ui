@@ -4,11 +4,11 @@ import { Comparison, ComparisonItem } from '#docs';
 export default () => {
 	return (
 		<Comparison>
-			<ComparisonItem label="px16">
-				<SwitchField defaultSelected label="Example switch" size="px16" />
+			<ComparisonItem label="small">
+				<SwitchField defaultSelected label="Example switch" size="small" />
 			</ComparisonItem>
-			<ComparisonItem label="px20">
-				<SwitchField defaultSelected label="Example switch" size="px20" />
+			<ComparisonItem label="medium">
+				<SwitchField defaultSelected label="Example switch" size="medium" />
 			</ComparisonItem>
 		</Comparison>
 	);
