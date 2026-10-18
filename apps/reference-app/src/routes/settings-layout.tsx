@@ -100,7 +100,7 @@ export function SettingsLayout() {
 								appearance="button"
 								href="/"
 								prominence="low"
-								size="px32"
+								size="small"
 								startContent={<Icon name="chevronLeft" />}
 							>
 								Back to app

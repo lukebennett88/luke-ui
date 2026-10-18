@@ -402,7 +402,7 @@ const comboboxConfig = {
 			whiteSpace: 'nowrap',
 		},
 	},
-	defaultVariants: { presentation: 'popover', size: 'px40' },
+	defaultVariants: { presentation: 'popover', size: 'medium' },
 	variants: {
 		presentation: {
 			popover: {},
@@ -420,7 +420,7 @@ const comboboxConfig = {
 			},
 		},
 		size: {
-			px40: {
+			medium: {
 				control: {
 					blockSize: vars.controlSize.px40,
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
@@ -447,7 +447,7 @@ const comboboxConfig = {
 					paddingInline: vars.space.sp12,
 				},
 			},
-			px32: {
+			small: {
 				control: {
 					blockSize: vars.controlSize.px32,
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
@@ -490,7 +490,7 @@ const comboboxConfig = {
 				inlineSize: COMBOBOX_ACTION_SIZE,
 				paddingInline: 0,
 			},
-			variants: { size: 'px40' },
+			variants: { size: 'medium' },
 		},
 		{
 			slots: ['trigger', 'clearButton'],
@@ -499,7 +499,7 @@ const comboboxConfig = {
 				inlineSize: MIN_TARGET_SIZE,
 				paddingInline: 0,
 			},
-			variants: { size: 'px32' },
+			variants: { size: 'small' },
 		},
 	],
 } as const satisfies SlottedConfigInput;

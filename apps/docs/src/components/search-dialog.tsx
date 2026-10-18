@@ -115,7 +115,7 @@ export function DocsSearchDialog({
 									inputClassName={styles.input}
 									placeholder="Search documentation"
 									prefix={<Icon name="search" />}
-									size="px32"
+									size="small"
 									type="search"
 								/>
 							</LockupBody>
@@ -125,7 +125,7 @@ export function DocsSearchDialog({
 									className={styles.close}
 									onPress={close}
 									prominence="low"
-									size="px32"
+									size="small"
 								>
 									<Kbd>Esc</Kbd>
 								</Button>

@@ -12,6 +12,7 @@ import { Icon } from '../icon/icon.js';
 import { linkCursor } from '../link/styles.css.js';
 import { buttonRecipeInternal } from '../primitives/button/recipe.css.js';
 import { BUTTON_ICON_SIZE } from '../sizing/button-sizing.js';
+import { useControlSize } from '../sizing/control-size-context.js';
 import type { RequiredAccessibleName } from '../types/accessible-name.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -42,7 +43,8 @@ export type IconLinkProps = Prettify<_IconLinkProps & IconLinkBaseProps & Requir
 
 /** Link that renders only an icon, for icon-only navigation. */
 export function IconLink(props: IconLinkProps): JSX.Element {
-	const { prominence = 'standard', icon, size = 'px40', ...restProps } = props;
+	const { prominence = 'standard', icon, size: sizeProp, ...restProps } = props;
+	const size = useControlSize(sizeProp);
 
 	return (
 		<IconSizeProvider size={BUTTON_ICON_SIZE}>

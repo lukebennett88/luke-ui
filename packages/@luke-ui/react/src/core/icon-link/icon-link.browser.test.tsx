@@ -35,9 +35,9 @@ function CustomStarIcon(): JSX.Element {
 function IconLinkScene() {
 	return (
 		<Grid columns={4}>
-			<IconLink aria-label="Add small" href="#" icon="add" size="px32" />
-			<IconLink aria-label="Add medium" href="#" icon="add" size="px40" />
-			<IconLink aria-label="Disabled" href="#" icon="delete" isDisabled size="px32" />
+			<IconLink aria-label="Add small" href="#" icon="add" size="small" />
+			<IconLink aria-label="Add medium" href="#" icon="add" size="medium" />
+			<IconLink aria-label="Disabled" href="#" icon="delete" isDisabled size="small" />
 			<IconLink aria-label="Custom icon" href="#" icon={<CustomStarIcon />} />
 			<IconLink aria-label="Standard" href="#" icon="add" />
 			<IconLink aria-label="Low" href="#" icon="add" prominence="low" />
@@ -83,8 +83,8 @@ test('a custom SVG icon with no aria-hidden of its own contributes no accessible
 test('the control renders as a square at each size', () => {
 	const { locator } = render(
 		<div>
-			<IconLink aria-label="Small" href="#" icon="search" size="px32" />
-			<IconLink aria-label="Medium" href="#" icon="search" size="px40" />
+			<IconLink aria-label="Small" href="#" icon="search" size="small" />
+			<IconLink aria-label="Medium" href="#" icon="search" size="medium" />
 		</div>,
 	);
 

@@ -12,6 +12,7 @@ import {
 } from 'react-aria-components/Switch';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
+import { useControlSize } from '../../sizing/control-size-context.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { FieldStateContext } from '../field/label.js';
@@ -62,7 +63,7 @@ interface _SwitchRootProps extends _SwitchRootOmit {
 	/**
 	 * Visual size of the switch control.
 	 *
-	 * @default 'px20'
+	 * @default 'medium'
 	 */
 	size?: SwitchRecipeVariants['size'];
 	/** Custom validation function run against the selection. Return a message, or `true`/`null` when valid. */
@@ -113,7 +114,8 @@ export type SwitchThumbProps = Prettify<_SwitchThumbProps>;
  * no ids to pass. A `FieldLabel` draws the required marker for `isRequired`. `SwitchLabel` does not.
  */
 export function SwitchRoot(props: SwitchRootProps): JSX.Element {
-	const { className, id, inputId, isRequired, size, ...restProps } = props;
+	const { className, id, inputId, isRequired, size: sizeProp, ...restProps } = props;
+	const size = useControlSize(sizeProp);
 	const generatedInputId = useId();
 	const resolvedInputId = inputId ?? generatedInputId;
 	const labelContext = { htmlFor: resolvedInputId };

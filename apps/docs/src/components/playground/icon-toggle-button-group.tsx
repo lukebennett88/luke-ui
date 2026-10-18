@@ -115,7 +115,7 @@ export function TextToggleButtonGroup<Value extends string>({
 function toggleButtonClassName() {
 	return buttonRecipe({
 		prominence: 'low',
-		size: 'px32',
+		size: 'small',
 		tone: 'neutral',
 	});
 }

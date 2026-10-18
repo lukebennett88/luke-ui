@@ -11,24 +11,24 @@ const options: Array<Option> = [
 export default () => {
 	return (
 		<Comparison>
-			<ComparisonItem label="px32">
+			<ComparisonItem label="small">
 				<ComboboxField
 					defaultItems={options}
 					label="Example field"
 					name="example"
 					placeholder="Choose an option"
-					size="px32"
+					size="small"
 				>
 					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 				</ComboboxField>
 			</ComparisonItem>
-			<ComparisonItem label="px40">
+			<ComparisonItem label="medium">
 				<ComboboxField
 					defaultItems={options}
 					label="Example field"
 					name="example"
 					placeholder="Choose an option"
-					size="px40"
+					size="medium"
 				>
 					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 				</ComboboxField>

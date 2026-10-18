@@ -107,17 +107,17 @@ const selectConfig = {
 			},
 		},
 	},
-	defaultVariants: { size: 'px40' },
+	defaultVariants: { size: 'medium' },
 	variants: {
 		size: {
-			px40: {
+			medium: {
 				trigger: {
 					blockSize: vars.controlSize.px40,
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
 					paddingInline: vars.space.sp12,
 				},
 			},
-			px32: {
+			small: {
 				trigger: {
 					blockSize: vars.controlSize.px32,
 					fontSize: FONT_METRIC_SCALE[14].fontSize,

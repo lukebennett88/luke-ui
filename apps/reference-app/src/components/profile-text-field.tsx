@@ -79,7 +79,7 @@ export function ProfileTextField({
 					setValidationError(undefined);
 					mutation.reset();
 				}}
-				size="px32"
+				size="small"
 				validationBehavior="aria"
 				value={draft ?? value}
 			>

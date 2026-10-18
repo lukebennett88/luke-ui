@@ -24,10 +24,10 @@ function UnlabelledCustomIcon(): JSX.Element {
 function IconButtonScene() {
 	return (
 		<Grid columns={4}>
-			<IconButton aria-label="Add small" icon="add" size="px32" />
-			<IconButton aria-label="Add medium" icon="add" size="px40" />
-			<IconButton aria-label="Disabled" icon="delete" isDisabled size="px32" />
-			<IconButton aria-label="Pending" icon="add" isPending size="px40" />
+			<IconButton aria-label="Add small" icon="add" size="small" />
+			<IconButton aria-label="Add medium" icon="add" size="medium" />
+			<IconButton aria-label="Disabled" icon="delete" isDisabled size="small" />
+			<IconButton aria-label="Pending" icon="add" isPending size="medium" />
 			<IconButton aria-label="Standard" icon="add" />
 			<IconButton aria-label="Low" icon="add" prominence="low" />
 			<IconButton aria-label="High" icon="add" prominence="high" />

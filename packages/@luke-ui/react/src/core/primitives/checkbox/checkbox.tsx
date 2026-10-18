@@ -12,6 +12,7 @@ import {
 import { LabelContext } from 'react-aria-components/Label';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
+import { useControlSize } from '../../sizing/control-size-context.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { FieldStateContext } from '../field/label.js';
@@ -64,7 +65,7 @@ interface _CheckboxRootProps extends _CheckboxRootOmit {
 	/**
 	 * Visual size of the checkbox control.
 	 *
-	 * @default 'px20'
+	 * @default 'medium'
 	 */
 	size?: CheckboxRecipeVariants['size'];
 	/** Custom validation function run against the selection. Return a message, or `true`/`null` when valid. */
@@ -116,7 +117,8 @@ export type CheckboxIndicatorProps = Prettify<_CheckboxIndicatorProps>;
  * does not.
  */
 export function CheckboxRoot(props: CheckboxRootProps): JSX.Element {
-	const { className, id, inputId, isRequired, size, ...restProps } = props;
+	const { className, id, inputId, isRequired, size: sizeProp, ...restProps } = props;
+	const size = useControlSize(sizeProp);
 	const generatedInputId = useId();
 	const resolvedInputId = inputId ?? generatedInputId;
 	const labelContext = { htmlFor: resolvedInputId };

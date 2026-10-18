@@ -195,7 +195,7 @@ function TypeValueRow({ onCopy, status, token }: TypeValueRowProps) {
 							onCopy(token, text);
 						}}
 						prominence="low"
-						size="px32"
+						size="small"
 						tone="neutral"
 					/>
 				</Cluster>

@@ -28,7 +28,7 @@ function TextInputFieldScene() {
 				label="Small"
 				name="small"
 				placeholder="Small"
-				size="px32"
+				size="small"
 			/>
 			<TextInputField
 				description="Medium control size."
@@ -36,7 +36,7 @@ function TextInputFieldScene() {
 				label="Medium"
 				name="medium"
 				placeholder="Medium"
-				size="px40"
+				size="medium"
 			/>
 			<TextInputField label="Amount" name="amount" placeholder="0.00" prefix="$" />
 			<TextInputField label="Total" name="total" placeholder="0.00" suffix="USD" />
@@ -53,7 +53,7 @@ function TextInputFieldScene() {
 				errorMessage="Please enter a valid email."
 				label="Invalid small"
 				name="invalid-small"
-				size="px32"
+				size="small"
 			/>
 			<TextInputField
 				defaultValue="0.00"

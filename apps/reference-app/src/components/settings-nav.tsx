@@ -35,7 +35,7 @@ export function SettingsNavSearch({
 			onChange={onChange}
 			placeholder="Search…"
 			prefix={<Icon name="search" size="px20" />}
-			size="px32"
+			size="small"
 			type="search"
 			value={value}
 		/>

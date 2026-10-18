@@ -410,7 +410,7 @@ test('an unlabeled ComboboxField exposes aria-label on the combobox', () => {
 
 // The clear and toggle buttons sit side by side, so WCAG 2.5.8's spacing exception cannot excuse a
 // target under 24px. Applications may set a root font size below 16px.
-for (const size of ['px32', 'px40'] as const) {
+for (const size of ['small', 'medium'] as const) {
 	test(`the ${size} ComboboxField action buttons stay at least 24px at a 13px root font size`, () => {
 		document.documentElement.style.fontSize = '13px';
 
@@ -645,7 +645,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					errorMessage="Choose a different country."
 					label="Invalid small"
 					name="invalid-small"
-					size="px32"
+					size="small"
 				>
 					{renderCountryItem}
 				</ComboboxField>
@@ -664,7 +664,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					label="Small"
 					name="small"
 					placeholder="Small"
-					size="px32"
+					size="small"
 				>
 					{renderCountryItem}
 				</ComboboxField>
@@ -673,19 +673,19 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					label="Medium"
 					name="medium"
 					placeholder="Medium"
-					size="px40"
+					size="medium"
 				>
 					{renderCountryItem}
 				</ComboboxField>
 				<ComboboxRoot
 					defaultItems={sceneCountryItems}
 					name="small-group-medium-trigger"
-					size="px32"
+					size="small"
 				>
 					<Field label="Small group, medium trigger">
 						<ComboboxControl>
 							<ComboboxInput placeholder="Select a country..." />
-							<ComboboxTrigger aria-label="Toggle medium trigger" size="px40">
+							<ComboboxTrigger aria-label="Toggle medium trigger" size="medium">
 								<Icon name="chevronDown" />
 							</ComboboxTrigger>
 						</ComboboxControl>

@@ -115,7 +115,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 										mutation.reset();
 									}}
 									placeholder="New email address"
-									size="px32"
+									size="small"
 									validationBehavior="aria"
 									value={draft}
 								/>

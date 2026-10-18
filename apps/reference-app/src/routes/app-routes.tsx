@@ -58,7 +58,7 @@ function RouteError() {
 	return (
 		<ErrorPage
 			action={
-				<Button onPress={() => window.location.reload()} size="px32">
+				<Button onPress={() => window.location.reload()} size="small">
 					Try again
 				</Button>
 			}

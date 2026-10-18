@@ -10,10 +10,10 @@ export const iconButtonReset = style({
 export const iconButtonRecipe = recipe({
 	variants: {
 		size: {
-			px40: {
+			medium: {
 				inlineSize: vars.controlSize.px40,
 			},
-			px32: {
+			small: {
 				inlineSize: vars.controlSize.px32,
 			},
 		},

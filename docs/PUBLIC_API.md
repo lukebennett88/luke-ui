@@ -117,6 +117,14 @@ does on `ComboboxField`.
 A default value is part of the public contract, so changing one is a breaking change. Document it
 with `@default`, as [DOCUMENTATION.md](DOCUMENTATION.md#comments-and-jsdoc) describes.
 
+### Control sizing
+
+Control `size` accepts `small` or `medium` and selects a complete component-owned recipe.
+`Form.controlSize` sets a default for compatible fields and actions. Explicit component sizes win,
+then the nearest inherited default, then `medium`. Both props are fixed scalars. Icon and
+LoadingSpinner keep literal square `px*` sizes. These decisions supersede the component sizing
+policy in [#761](https://github.com/lukebennett88/luke-ui/issues/761).
+
 ### State attributes
 
 A state attribute is public only when a guide documents it, as the Select primitive guide documents

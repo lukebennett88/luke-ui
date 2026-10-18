@@ -189,11 +189,11 @@ const checkboxConfig = {
 		},
 	},
 	defaultVariants: {
-		size: 'px20',
+		size: 'medium',
 	},
 	variants: {
 		size: {
-			px20: {
+			medium: {
 				root: {
 					vars: {
 						[checkboxControlSize]: FONT_METRIC_SCALE[16].lineHeight,
@@ -203,7 +203,7 @@ const checkboxConfig = {
 					},
 				},
 			},
-			px16: {
+			small: {
 				root: {
 					vars: {
 						[checkboxControlSize]: ICON_SIZES.px20,

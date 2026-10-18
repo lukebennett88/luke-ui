@@ -98,7 +98,7 @@ interface _ComboboxFieldBaseProps<T extends object>
 	/** Forwarded to the field's root element. Use `inputRef` for the input. */
 	ref?: ComboboxRootProps<T>['ref'];
 
-	/** Control size. @default 'px40' */
+	/** Control size. @default 'medium' */
 	size?: ComboboxSize;
 }
 
@@ -128,7 +128,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		onLoadMore,
 		placeholder,
 		popoverProps,
-		size = 'px40',
+		size,
 		...comboboxRootProps
 	} = props;
 
