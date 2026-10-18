@@ -61,7 +61,9 @@ These are easy to miss in this repository:
 
 Confirm behaviour when it matters and is practical. For a bug fix, show the bug on the base
 revision. For a visual or interaction change, try it in the Cloudflare preview when one exists,
-including with a keyboard. Report what you could not verify.
+including with a keyboard. When the diff changes generated documentation behaviour, such as props
+tables or type-definition assets, confirm the built or previewed docs output, not only source or
+mocked fixtures. Report what you could not verify.
 
 ## Checks
 

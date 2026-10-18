@@ -78,7 +78,10 @@ not open new issues for the parts you leave.
    `TURBO_FORCE=true pnpm run test` separately. The environment variable forces execution across the
    cache shared by worktrees. `pnpm run test -- --force` does not force Turbo. Run the separate
    suites in [TESTING.md](../../../docs/TESTING.md) that cover the change, including
-   `pnpm run test:consumer` for published package code, dependencies, or exports.
+   `pnpm run test:consumer` for published package code, dependencies, or exports. When the change
+   affects generated documentation behaviour, such as props tables or type-definition assets, also
+   run `pnpm run build:docs` so the production docs output is checked, including
+   `check:type-definition-links`.
 3. Before you call a failure unrelated, show that it also happens on the base revision under
    comparable conditions, and note the revision. Rerun only what you need. Existing evidence, such
    as a papercut entry or a failed CI run on the base, can be enough. A failure your change causes
