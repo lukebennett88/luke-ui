@@ -58,6 +58,17 @@ are a reason to consider a skill, not a requirement for one. The maintainer appr
 and changes. Remove a skill when it is obsolete or when pilot or spot-check evidence shows it does
 not help. Silence in this log is not evidence.
 
+## Generated scaffold JSDoc names the recipe class
+
+- Seen: 2026-10-18 (#870). Review of PR #870 found function-level JSDoc such as "Renders a `div`
+  with the component recipe class."
+- Where: `packages/turbo-generators/src/component-creation-plan.ts` and
+  `primitive-creation-plan.ts`. Governing rules: `docs/DOCUMENTATION.md`, Comments and JSDoc (public
+  docs explain observable behaviour). `.agents/skills/work-on-issue/SKILL.md` requires consulting
+  those guides before implementing.
+- Problem: Agent-authored generator output described an internal recipe detail in published JSDoc.
+  Correcting the wording does not establish that scaffold authoring applies those rules.
+
 ## The README rendering summary omits React Aria's supported render API
 
 - Seen: 2026-10-17 (#858). The README feature list replaced `render` with `renderRoot` and named
