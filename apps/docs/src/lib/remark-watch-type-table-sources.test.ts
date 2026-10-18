@@ -27,28 +27,35 @@ export interface ButtonProps {
 const pressActionSource = 'export type PressAction = () => void | Promise<void>;\n';
 
 interface WatchFixture {
+	/** Repo root: TypeScript sources and `basePath` for generators / the remark plugin. */
 	root: string;
+	/**
+	 * Vite `root`. Kept as `apps/docs` so TypeScript packages sit *outside* it; Vite's
+	 * `addWatchFile` then calls `watcher.add` (it skips paths already under the Vite root).
+	 */
+	viteRoot: string;
 	buttonRel: string;
 	buttonPath: string;
 	pressPath: string;
 	guidePath: string;
-	guideRel: string;
+	/** URL path for `transformRequest` (relative to `viteRoot`). */
+	guideModuleId: string;
 	tsconfigPath: string;
 	cleanup: () => void;
 }
 
 function createWatchFixture(): WatchFixture {
 	const root = mkdtempSync(join(tmpdir(), 'luke-type-table-watch-'));
-	const docsDir = join(root, 'apps', 'docs');
+	const viteRoot = join(root, 'apps', 'docs');
 	const fixtureDir = join(root, 'packages', '@luke-ui', 'react', 'src', 'core', 'fixture');
 	const pressDir = join(fixtureDir, 'press-action');
-	const contentDir = join(docsDir, 'content');
-	mkdirSync(docsDir, { recursive: true });
+	const contentDir = join(viteRoot, 'content');
+	mkdirSync(viteRoot, { recursive: true });
 	mkdirSync(pressDir, { recursive: true });
 	mkdirSync(contentDir, { recursive: true });
 
 	writeFileSync(
-		join(docsDir, 'tsconfig.json'),
+		join(viteRoot, 'tsconfig.json'),
 		`${JSON.stringify(
 			{
 				compilerOptions: {
@@ -70,8 +77,7 @@ function createWatchFixture(): WatchFixture {
 	writeFileSync(join(fixtureDir, 'button.tsx'), buttonSource);
 
 	const buttonRel = 'packages/@luke-ui/react/src/core/fixture/button.tsx';
-	const guideRel = 'apps/docs/content/guide.mdx';
-	const guidePath = join(root, guideRel);
+	const guidePath = join(contentDir, 'guide.mdx');
 	writeFileSync(
 		guidePath,
 		`## API
@@ -82,12 +88,13 @@ function createWatchFixture(): WatchFixture {
 
 	return {
 		root,
+		viteRoot,
 		buttonRel,
 		buttonPath: join(root, buttonRel),
 		pressPath: join(pressDir, 'index.ts'),
 		guidePath,
-		guideRel,
-		tsconfigPath: join(docsDir, 'tsconfig.json'),
+		guideModuleId: '/content/guide.mdx',
+		tsconfigPath: join(viteRoot, 'tsconfig.json'),
 		cleanup: () => {
 			rmSync(root, { recursive: true, force: true });
 		},
@@ -195,15 +202,20 @@ test(
 			cache: createFileSystemGeneratorCache(cacheDir),
 			tsconfigPath: fixture.tsconfigPath,
 		});
+		const fileUpdates = createViteFileUpdateGate();
 
 		const server = await createServer({
 			configFile: false,
 			plugins: [
+				fileUpdates.plugin,
 				{
 					name: 'luke-type-table-watch-regression',
 					async transform(this: { addWatchFile: (id: string) => void }, code, id) {
 						if (!id.endsWith('guide.mdx')) return null;
 
+						// Same bridge fumadocs-mdx uses: `_compiler.addDependency` → `addWatchFile`.
+						// Absolute package paths sit outside `viteRoot`, so Vite's ensureWatchedFile
+						// registers them on the watcher (in-root paths would be skipped).
 						remarkWatchTypeTableSources({ basePath: fixture.root })(typeTableTreeFromMdx(code), {
 							data: {
 								_compiler: {
@@ -228,7 +240,7 @@ test(
 					},
 				},
 			],
-			root: fixture.root,
+			root: fixture.viteRoot,
 			server: {
 				watch: {
 					// Polling keeps the regression stable under tmpdir watchers in CI/VMs.
@@ -240,24 +252,26 @@ test(
 
 		try {
 			await server.listen();
-			// Let chokidar finish its initial scan before the first transform registers watches.
-			await settleWatcher();
-			const moduleId = '/apps/docs/content/guide.mdx';
+			await waitForWatcherReady(server);
 
-			const before = await server.transformRequest(moduleId);
+			const before = await server.transformRequest(fixture.guideModuleId);
 			expect(before?.code).toBeDefined();
 			expect(before?.code).not.toContain('papercutProp');
 			expect(before?.code).toContain('isPending');
 			expectTypeTableWatchLink(server, fixture.buttonPath, fixture.guidePath);
 
-			const change = waitForWatchedChange(server, fixture.buttonPath);
+			const mdxModule = mdxModuleNode(server, fixture.guidePath);
+			const invalidationBefore = mdxModule.lastInvalidationTimestamp;
+			const processed = fileUpdates.waitFor(fixture.buttonPath);
 			writeFileSync(fixture.buttonPath, injectPapercutProp(buttonSource));
-			await change;
-			// Headless transformRequest does not always flush the same HMR reload path as a browser
-			// tab; invalidate the watched TypeScript module so its MDX importers re-transform.
-			invalidateModulesForFile(server, fixture.buttonPath);
+			await processed;
 
-			const after = await server.transformRequest(moduleId);
+			// Vite's watcher → moduleGraph.onFileChange must have invalidated the MDX importer.
+			// Without addWatchFile / importer links this timestamp stays put and the assertion fails.
+			expect(mdxModule.lastInvalidationTimestamp).toBeGreaterThan(invalidationBefore);
+			expect(mdxModule.transformResult).toBeNull();
+
+			const after = await server.transformRequest(fixture.guideModuleId);
 			expect(after?.code).toContain('papercutProp');
 			expect(after?.code).toContain('isPending');
 		} finally {
@@ -278,10 +292,12 @@ test(
 			cache: createFileSystemGeneratorCache(cacheDir),
 			tsconfigPath: fixture.tsconfigPath,
 		});
+		const fileUpdates = createViteFileUpdateGate();
 
 		const server = await createServer({
 			configFile: false,
 			plugins: [
+				fileUpdates.plugin,
 				{
 					name: 'luke-type-table-watch-dep-regression',
 					async transform(this: { addWatchFile: (id: string) => void }, code, id) {
@@ -310,7 +326,7 @@ test(
 					},
 				},
 			],
-			root: fixture.root,
+			root: fixture.viteRoot,
 			server: {
 				watch: {
 					interval: 50,
@@ -321,23 +337,27 @@ test(
 
 		try {
 			await server.listen();
-			await settleWatcher();
-			const moduleId = '/apps/docs/content/guide.mdx';
+			await waitForWatcherReady(server);
 
-			const before = await server.transformRequest(moduleId);
+			const before = await server.transformRequest(fixture.guideModuleId);
 			expect(before?.code).toBeDefined();
 			expect(before?.code).not.toContain('(value: string)');
+			expect(pressActionDefinitionTextFromModuleCode(before?.code)).toBeTruthy();
 			expectTypeTableWatchLink(server, fixture.pressPath, fixture.guidePath);
 
-			const change = waitForWatchedChange(server, fixture.pressPath);
+			const mdxModule = mdxModuleNode(server, fixture.guidePath);
+			const invalidationBefore = mdxModule.lastInvalidationTimestamp;
+			const processed = fileUpdates.waitFor(fixture.pressPath);
 			writeFileSync(
 				fixture.pressPath,
 				'export type PressAction = (value: string) => void | Promise<void>;\n',
 			);
-			await change;
-			invalidateModulesForFile(server, fixture.pressPath);
+			await processed;
 
-			const after = await server.transformRequest(moduleId);
+			expect(mdxModule.lastInvalidationTimestamp).toBeGreaterThan(invalidationBefore);
+			expect(mdxModule.transformResult).toBeNull();
+
+			const after = await server.transformRequest(fixture.guideModuleId);
 			expect(after?.code).toContain('(value: string)');
 		} finally {
 			await server.close();
@@ -348,10 +368,71 @@ test(
 	timeout,
 );
 
-function settleWatcher(): Promise<void> {
+/** Resolves when chokidar has finished its initial scan (or already has). */
+function waitForWatcherReady(server: ViteDevServer): Promise<void> {
+	const watcher = server.watcher as ViteDevServer['watcher'] & { _readyEmitted?: boolean };
+	if (watcher._readyEmitted) return Promise.resolve();
 	return new Promise((resolve) => {
-		setTimeout(resolve, 150);
+		watcher.once('ready', () => resolve());
 	});
+}
+
+function pressActionDefinitionTextFromModuleCode(code: string | undefined): string | undefined {
+	if (code === undefined) return undefined;
+	const match = /^export default (.*);\n$/.exec(code);
+	if (match?.[1] === undefined || match[1] === 'undefined') return undefined;
+	return JSON.parse(match[1]) as string;
+}
+
+/**
+ * Resolves after Vite finishes its own file-change pipeline for `filePath`.
+ * Vite awaits plugin `hotUpdate` only after `moduleGraph.onFileChange`, so this is later than a
+ * raw watcher `change` event and does not manually invalidate modules.
+ */
+function createViteFileUpdateGate(): {
+	plugin: {
+		name: string;
+		hotUpdate: (context: { file: string }) => void;
+	};
+	waitFor: (filePath: string) => Promise<void>;
+} {
+	const waiters = new Map<string, Array<() => void>>();
+
+	return {
+		plugin: {
+			name: 'luke-wait-for-vite-file-update',
+			hotUpdate({ file }) {
+				const key = normalize(file);
+				const pending = waiters.get(key);
+				if (pending === undefined) return;
+				waiters.delete(key);
+				for (const resolve of pending) resolve();
+			},
+		},
+		waitFor(filePath) {
+			const key = normalize(filePath);
+			return new Promise((resolve, reject) => {
+				const timer = setTimeout(() => {
+					const pending = waiters.get(key);
+					if (pending !== undefined) {
+						const remaining = pending.filter((entry) => entry !== settle);
+						if (remaining.length === 0) waiters.delete(key);
+						else waiters.set(key, remaining);
+					}
+					reject(new Error(`Timed out waiting for Vite to process change to ${key}`));
+				}, 10_000);
+
+				function settle() {
+					clearTimeout(timer);
+					resolve();
+				}
+
+				const pending = waiters.get(key) ?? [];
+				pending.push(settle);
+				waiters.set(key, pending);
+			});
+		},
+	};
 }
 
 function expectTypeTableWatchLink(
@@ -365,32 +446,13 @@ function expectTypeTableWatchLink(
 	expect(importers.some((importer) => importer.id === mdxPath)).toBe(true);
 }
 
-function invalidateModulesForFile(server: ViteDevServer, filePath: string): void {
-	for (const mod of server.moduleGraph.getModulesByFile(filePath) ?? []) {
-		server.moduleGraph.invalidateModule(mod);
-		for (const importer of mod.importers) {
-			server.moduleGraph.invalidateModule(importer);
-		}
+function mdxModuleNode(server: ViteDevServer, mdxPath: string) {
+	const byFile = server.moduleGraph.getModulesByFile(mdxPath);
+	const mod = byFile === undefined ? undefined : [...byFile][0];
+	if (mod === undefined) {
+		throw new Error(`Expected MDX module for ${mdxPath}`);
 	}
-}
-
-function waitForWatchedChange(server: ViteDevServer, filePath: string): Promise<void> {
-	const target = normalize(filePath);
-	return new Promise((resolve, reject) => {
-		const timer = setTimeout(() => {
-			server.watcher.off('change', onChange);
-			reject(new Error(`Timed out waiting for Vite to watch change to ${target}`));
-		}, 10_000);
-
-		function onChange(changedPath: string) {
-			if (normalize(changedPath) !== target) return;
-			clearTimeout(timer);
-			server.watcher.off('change', onChange);
-			resolve();
-		}
-
-		server.watcher.on('change', onChange);
-	});
+	return mod;
 }
 
 function pressActionDefinitionText(doc: EnrichedGeneratedDoc | undefined) {
