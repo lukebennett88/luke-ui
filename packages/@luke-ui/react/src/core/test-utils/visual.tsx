@@ -4,7 +4,7 @@ import type { Locator } from 'vite-plus/test/context';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { setEmulatedMediaFeature } from './emulate-media.js';
 import { peekEmulatedMediaFeatures } from './emulated-media.js';
-import { loadInter } from './load-inter.js';
+import { loadVisualFonts, pinCodeFamilyForCapture } from './load-inter.js';
 import { DESKTOP_SCREEN_WIDTH } from './mock-screen-width.js';
 import type { VisualAppearance } from './render.js';
 import { formatVisualCaptureName, formatVisualViewport } from './visual-capture-id.js';
@@ -265,12 +265,15 @@ export async function captureVisual(locator: Locator, id: string) {
 	) {
 		await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
 	}
-	// Pin Inter from the theme packages before the screenshot. Without it, Chromium picks a
-	// machine-local Inter or a fallback, and text anti-aliasing drifts across hosts and runs.
-	await loadInter();
+	// Browser setup already loads Inter and monospace before mount; await again so a capture that
+	// skips setup still rasterises from those faces rather than a machine-local install.
+	await loadVisualFonts();
 	if (document.fonts?.status !== 'loaded') {
 		await document.fonts.ready;
 	}
+	// Remap the theme code stack only for the screenshot so theme authoring tests still see the
+	// production monospace list. Restore after capture so later tests are unaffected.
+	const restoreCodeFamily = pinCodeFamilyForCapture();
 	const restoreMotion = await freezeMotionForCapture();
 	let isTall = false;
 	try {
@@ -302,6 +305,7 @@ export async function captureVisual(locator: Locator, id: string) {
 			await cdp().send('Emulation.clearDeviceMetricsOverride');
 		}
 		await restoreMotion();
+		restoreCodeFamily();
 		if (
 			window.innerWidth !== originalViewportWidth ||
 			window.innerHeight !== originalViewportHeight

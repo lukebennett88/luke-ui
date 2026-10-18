@@ -93,6 +93,7 @@ const previewFrameStyle = {
 } as const satisfies CSSProperties;
 
 const swatchLabelStyle = {
+	fontFamily: vars.font.family.body,
 	fontSize: vars.font.caption.fontSize,
 	fontWeight: vars.font.weight.label,
 	overflowWrap: 'anywhere',
@@ -100,7 +101,7 @@ const swatchLabelStyle = {
 
 const swatchVarStyle = {
 	color: vars.color.text.secondary,
-	fontFamily: 'ui-monospace, SFMono-Regular, Consolas, monospace',
+	fontFamily: vars.font.family.code,
 	fontSize: vars.font.caption.fontSize,
 	overflowWrap: 'anywhere',
 } as const satisfies CSSProperties;

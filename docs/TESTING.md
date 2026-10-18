@@ -42,10 +42,12 @@ for (const ratio of ratios) {
 Shared assertions take concrete elements and values. Keep the test, fixture, and contract choice in
 the component's test file.
 
-`render()` loads no font on its own, and the fixture themes name `Inter`. Visual captures call
-`loadInter()` from `test-utils/load-inter.ts` so text rasterises from the Inter file the theme
-packages ship, not from a machine-local install or fallback. A non-visual test whose layout depends
-on real font metrics, such as Capsize trims or the cap height, calls `await loadInter()` itself.
+Fixture themes name `Inter`. Browser setup awaits `loadVisualFonts()` from
+`test-utils/load-inter.ts` before each test so mounts share the Inter and JetBrains Mono files the
+suite pins, not a machine-local install or fallback. `captureVisual` awaits the same loader and
+temporarily remaps `--luke-font-family-code` to the pinned mono face for the screenshot only, so
+theme authoring tests still see the production code stack. A non-visual test whose layout depends on
+real font metrics, such as Capsize trims or the cap height, can still call `await loadInter()`.
 Compare positions with Inter's published metrics (`INTER_CAP_HEIGHT_EM`) and measured baselines, not
 with the CSS under test.
 
@@ -69,10 +71,9 @@ result.
 
 Visual cases are `visual`-tagged browser tests. `render()` compiles React-owned copies of the
 Tactile and Paper inputs from `src/theme/__fixtures__/`. Those copies can diverge from the published
-theme packages. `captureVisual` loads the pinned Inter file before each screenshot. Capture each
-visually meaningful component in its representative fixture across Tactile light, Tactile dark,
-Paper light, and Paper dark. This is not an exhaustive state matrix. Add another capture only for a
-materially different state.
+theme packages. Capture each visually meaningful component in its representative fixture across
+Tactile light, Tactile dark, Paper light, and Paper dark. This is not an exhaustive state matrix.
+Add another capture only for a materially different state.
 
 `flatAppearances` renders Tactile's colours with every depth and control finish set to `none`. Use
 it, outside the theme matrix, for a capture that proves states stay distinct without materials.

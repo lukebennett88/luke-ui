@@ -19,8 +19,8 @@ const FIXTURE_THEMES_STYLE_ID = 'luke-ui-fixture-themes';
 
 /**
  * Compiles every fixture theme and adds the stylesheets to the document once. The fixtures name
- * Inter; `render()` does not load a font file. Visual captures and metric-sensitive tests call
- * `loadInter()` so text uses the Inter file the theme packages ship.
+ * Inter; browser setup loads the pinned Inter and monospace faces before each test so mounts and
+ * captures share those metrics. Metric-sensitive tests can also call `loadInter()` / `loadVisualFonts()`.
  */
 export function installFixtureThemes(): void {
 	if (document.getElementById(FIXTURE_THEMES_STYLE_ID) !== null) return;
