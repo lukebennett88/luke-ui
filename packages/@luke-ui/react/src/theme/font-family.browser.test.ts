@@ -84,13 +84,17 @@ describe('an accepted family', () => {
 
 			const root = getComputedStyle(document.documentElement);
 			expect(browserReading(family)).not.toBe('');
-			// Computed stacks must match on the same API across Chromium builds.
+			// Assert the production code stack from generated CSS. Browser setup pins
+			// `--luke-font-family-code` live for visual determinism, so getPropertyValue would not
+			// show defineTheme's emitted value.
+			expect(extractValue(splitBlocks(css).themeWide, '--luke-font-family-code')).toBe(
+				codeFontFamilyStack,
+			);
+			// Computed body stacks must match on the same API across Chromium builds.
 			expect({
-				code: root.getPropertyValue('--luke-font-family-code').trim(),
 				colorScheme: root.colorScheme,
 				fontFamily: getComputedStyle(probe).fontFamily,
 			}).toEqual({
-				code: codeFontFamilyStack,
 				colorScheme: 'light',
 				fontFamily: browserComputedFamily(family),
 			});

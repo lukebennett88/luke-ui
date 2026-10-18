@@ -11,12 +11,13 @@ export const PINNED_MONO_FAMILY = 'JetBrains Mono';
 const PINNED_CODE_FAMILY_STYLE_ID = 'luke-ui-pinned-code-family';
 
 let visualFontsPromise: Promise<void> | undefined;
+let codeFamilyPinCount = 0;
 
 /**
  * Loads the Inter and JetBrains Mono files the visual suite pins. Safe to call more than once:
  * later calls reuse the same load. Faces stay for the worker lifetime so mounts and captures share
- * metrics. Does not remap `--luke-font-family-code`; call `pinCodeFamilyForCapture` around a
- * screenshot so theme authoring tests still see the production code stack.
+ * metrics. Pair with `pinCodeFamily` so `--luke-font-family-code` resolves to the pinned face from
+ * the first paint of a fixture.
  */
 export async function loadVisualFonts(): Promise<void> {
 	visualFontsPromise ??= loadVisualFontsOnce();
@@ -32,27 +33,31 @@ export async function loadInter(): Promise<void> {
 }
 
 /**
- * Remaps `--luke-font-family-code` to the pinned mono face for the duration of a visual capture.
- * Returns a restore function so non-visual theme tests keep reading the production stack.
+ * Remaps `--luke-font-family-code` to the pinned mono face. Nested calls share one stylesheet;
+ * each caller must invoke the returned restore exactly once. Browser setup pins before mount so
+ * fixtures measure against JetBrains Mono; `captureVisual` may pin again as a safety net.
  */
-export function pinCodeFamilyForCapture(): () => void {
-	const existing = document.getElementById(PINNED_CODE_FAMILY_STYLE_ID);
-	if (existing !== null) {
-		return () => {
-			existing.remove();
-		};
-	}
-
-	const style = document.createElement('style');
-	style.id = PINNED_CODE_FAMILY_STYLE_ID;
-	style.textContent = `
+export function pinCodeFamily(): () => void {
+	if (codeFamilyPinCount === 0) {
+		const style = document.createElement('style');
+		style.id = PINNED_CODE_FAMILY_STYLE_ID;
+		style.textContent = `
 html {
 	--luke-font-family-code: "${PINNED_MONO_FAMILY}", ui-monospace, monospace !important;
 }
 `;
-	document.head.append(style);
+		document.head.append(style);
+	}
+	codeFamilyPinCount += 1;
+
+	let released = false;
 	return () => {
-		style.remove();
+		if (released) return;
+		released = true;
+		codeFamilyPinCount -= 1;
+		if (codeFamilyPinCount === 0) {
+			document.getElementById(PINNED_CODE_FAMILY_STYLE_ID)?.remove();
+		}
 	};
 }
 

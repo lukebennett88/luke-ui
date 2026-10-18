@@ -4,7 +4,7 @@ import type { Locator } from 'vite-plus/test/context';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { setEmulatedMediaFeature } from './emulate-media.js';
 import { peekEmulatedMediaFeatures } from './emulated-media.js';
-import { loadVisualFonts, pinCodeFamilyForCapture } from './load-inter.js';
+import { loadVisualFonts, pinCodeFamily } from './load-inter.js';
 import { DESKTOP_SCREEN_WIDTH } from './mock-screen-width.js';
 import type { VisualAppearance } from './render.js';
 import { formatVisualCaptureName, formatVisualViewport } from './visual-capture-id.js';
@@ -265,18 +265,19 @@ export async function captureVisual(locator: Locator, id: string) {
 	) {
 		await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
 	}
-	// Browser setup already loads Inter and monospace before mount; await again so a capture that
-	// skips setup still rasterises from those faces rather than a machine-local install.
-	await loadVisualFonts();
-	if (document.fonts?.status !== 'loaded') {
-		await document.fonts.ready;
-	}
-	// Remap the theme code stack only for the screenshot so theme authoring tests still see the
-	// production monospace list. Restore after capture so later tests are unaffected.
-	const restoreCodeFamily = pinCodeFamilyForCapture();
-	const restoreMotion = await freezeMotionForCapture();
+	let restoreCodeFamily: (() => void) | undefined;
+	let restoreMotion: (() => Promise<void>) | undefined;
 	let isTall = false;
 	try {
+		// Browser setup already loads and pins fonts before mount; await/pin again so a capture
+		// that skips setup still rasterises from those faces rather than a machine-local install.
+		await loadVisualFonts();
+		if (document.fonts?.status !== 'loaded') {
+			await document.fonts.ready;
+		}
+		restoreCodeFamily = pinCodeFamily();
+		restoreMotion = await freezeMotionForCapture();
+
 		const viewportWidth = window.innerWidth;
 		const viewportHeight = window.innerHeight;
 		const viewport = formatVisualViewport(viewportWidth, viewportHeight);
@@ -300,21 +301,32 @@ export async function captureVisual(locator: Locator, id: string) {
 			.element(page.elementLocator(element))
 			.toMatchScreenshot(formatVisualCaptureName(id, viewport));
 	} finally {
-		if (isTall) {
-			await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
-			await cdp().send('Emulation.clearDeviceMetricsOverride');
+		// Nested finally so a throw during tall-scene restore or motion restore cannot skip the
+		// code-family unpin (or leave the pointer parked incorrectly).
+		try {
+			if (isTall) {
+				await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
+				await cdp().send('Emulation.clearDeviceMetricsOverride');
+			}
+		} finally {
+			try {
+				if (restoreMotion !== undefined) await restoreMotion();
+			} finally {
+				try {
+					restoreCodeFamily?.();
+				} finally {
+					if (
+						window.innerWidth !== originalViewportWidth ||
+						window.innerHeight !== originalViewportHeight
+					) {
+						await page.viewport(originalViewportWidth, originalViewportHeight);
+					}
+					// Park outside the viewport so the next capture does not inherit an accidental hover
+					// (text Links invert underline under `:hover` / `data-hovered`).
+					await parkPointer();
+				}
+			}
 		}
-		await restoreMotion();
-		restoreCodeFamily();
-		if (
-			window.innerWidth !== originalViewportWidth ||
-			window.innerHeight !== originalViewportHeight
-		) {
-			await page.viewport(originalViewportWidth, originalViewportHeight);
-		}
-		// Park outside the viewport so the next capture does not inherit an accidental hover
-		// (text Links invert underline under `:hover` / `data-hovered`).
-		await parkPointer();
 	}
 }
 
