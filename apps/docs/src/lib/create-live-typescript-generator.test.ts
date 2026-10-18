@@ -6,6 +6,8 @@ import { createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
 import { createLiveTypescriptGenerator } from './create-live-typescript-generator.js';
+import type { EnrichedGeneratedDoc } from './type-definition-model.js';
+import { typeTokensToText } from './type-tokens.js';
 import { hashTypescriptSourceGraph } from './typescript-source-graph.js';
 
 const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
@@ -100,17 +102,18 @@ test(
 );
 
 test(
-	'live generator invalidates when an imported type file changes',
+	'component props generator refreshes an imported type definition after a disk edit',
 	async () => {
 		const cacheDir = mkdtempSync(join(tmpdir(), 'luke-live-dep-'));
 		const original = readFileSync(pressPath, 'utf8');
 		const edited = original.replace(
 			/export type PressAction\s*=\s*[^;]+;/,
-			'export type PressAction = ((value: string) => void | Promise<void>) | undefined;',
+			'export type PressAction = (value: string) => void | Promise<void>;',
 		);
 		expect(edited).not.toBe(original);
+		expect(edited).toContain('(value: string)');
 
-		const generator = createLiveTypescriptGenerator({
+		const generator = createComponentPropsGenerator({
 			cache: createFileSystemGeneratorCache(cacheDir),
 			tsconfigPath,
 		});
@@ -119,7 +122,9 @@ test(
 			{ path: buttonRel, name: 'ButtonProps' },
 			{ basePath: repoRoot },
 		);
-		const typeBefore = before[0]?.entries.find((entry) => entry.name === 'pressAction')?.type;
+		const definitionBefore = pressActionDefinitionText(before[0]);
+		expect(definitionBefore).toBeTruthy();
+		expect(definitionBefore).not.toContain('(value: string)');
 
 		writeFileSync(pressPath, edited);
 		try {
@@ -127,8 +132,9 @@ test(
 				{ path: buttonRel, name: 'ButtonProps' },
 				{ basePath: repoRoot },
 			);
-			const typeAfter = after[0]?.entries.find((entry) => entry.name === 'pressAction')?.type;
-			expect(typeAfter).not.toBe(typeBefore);
+			const definitionAfter = pressActionDefinitionText(after[0]);
+			expect(definitionAfter).toContain('(value: string)');
+			expect(definitionAfter).not.toBe(definitionBefore);
 		} finally {
 			writeFileSync(pressPath, original);
 			rmSync(cacheDir, { recursive: true, force: true });
@@ -136,3 +142,9 @@ test(
 	},
 	timeout,
 );
+
+function pressActionDefinitionText(doc: EnrichedGeneratedDoc | undefined) {
+	const tokens = doc?.typeDefinitions?.PressAction?.definition;
+	if (tokens === undefined) return undefined;
+	return typeTokensToText(tokens, { multiline: true });
+}

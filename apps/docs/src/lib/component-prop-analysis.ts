@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import type { GeneratedDoc } from 'fumadocs-typescript';
 import type { ts } from 'ts-morph';
 import { Project } from 'ts-morph';
+import { collectTypescriptSourceGraph } from './typescript-source-graph.js';
 
 export interface PropProject {
 	createSourceFile: (
@@ -128,6 +129,19 @@ export function typeForwardsDomProps(declaration: PropDeclaration, reactSrcDir: 
 	);
 }
 
+/**
+ * Re-reads an entry file and its relative import graph into the shared ts-morph project. Without
+ * this, enrichment keeps first-read definitions for imported aliases after a disk edit in `vp dev`.
+ */
+function refreshPropProjectSourceGraph(project: PropProject, absoluteEntryPath: string): void {
+	if (!existsSync(absoluteEntryPath)) return;
+	const entryContent = readFileSync(absoluteEntryPath, 'utf8');
+	for (const filePath of collectTypescriptSourceGraph(absoluteEntryPath, entryContent).files) {
+		invalidateVisiblePropCachesForFile(filePath);
+		readSourceFile(project, filePath);
+	}
+}
+
 /** Loads an exported prop declaration from a repo-relative TypeScript path. */
 export function loadExportedPropDeclaration(
 	project: PropProject,
@@ -138,11 +152,11 @@ export function loadExportedPropDeclaration(
 	const absolutePath = resolve(repoRoot, repoRelativePath);
 	if (!existsSync(absolutePath)) return;
 
-	// Always re-read from disk. The shared project keeps the first parse of each path for the
-	// process lifetime; without a refresh, `vp dev` filters newly added props out of tables that
-	// fumadocs already regenerated from current sources.
-	invalidateVisiblePropCachesForFile(absolutePath);
-	const file = readSourceFile(project, absolutePath);
+	// Refresh the entry and its relative imports. The shared project keeps the first parse of each
+	// path for the process lifetime; without a refresh, `vp dev` filters newly added props out of
+	// tables and keeps stale imported type definitions after fumadocs regenerates.
+	refreshPropProjectSourceGraph(project, absolutePath);
+	const file = project.getSourceFile(absolutePath) ?? readSourceFile(project, absolutePath);
 	return file.getExportedDeclarations().get(exportName)?.[0];
 }
 

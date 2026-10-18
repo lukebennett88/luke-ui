@@ -8,7 +8,7 @@ import type {
 } from 'fumadocs-typescript';
 import { createGenerator, createProject, generateHash } from 'fumadocs-typescript';
 import { readFile } from 'node:fs/promises';
-import { hashTypescriptSourceGraph } from './typescript-source-graph.js';
+import { collectTypescriptSourceGraph } from './typescript-source-graph.js';
 
 /** Bump when the live-generator cache payload shape or key inputs change. */
 const LIVE_GENERATOR_CACHE_VERSION = '1';
@@ -45,7 +45,7 @@ export function createLiveTypescriptGenerator(options: GeneratorOptions = {}): G
 	generator.generateDocumentation = async (file, name, generateOptions = {}) => {
 		const fullPath = resolve(file.path);
 		const content = file.content ?? (await readFile(fullPath, 'utf8'));
-		const graphHash = hashTypescriptSourceGraph(fullPath, content);
+		const graphHash = collectTypescriptSourceGraph(fullPath, content).hash;
 		const cacheKey =
 			storage === null
 				? undefined

@@ -7,13 +7,18 @@ const RELATIVE_SPECIFIER_PATTERN = /(?:from\s+|import\s*\(|require\s*\()\s*['"](
 const SOURCE_EXTENSIONS = ['.ts', '.tsx', '.d.ts', '.js', '.jsx', '.mjs', '.cjs'] as const;
 
 /**
- * Content hash of a TypeScript entry file and the relative modules it pulls in. Used so generated
- * API tables invalidate when an imported type changes without the documented file changing.
+ * Absolute paths of a TypeScript entry file and the relative modules it pulls in, plus a content
+ * hash of that graph. Used so generated API tables invalidate when an imported type changes without
+ * the documented file changing, and so ts-morph can re-read the same set before enrichment.
  */
-export function hashTypescriptSourceGraph(entryPath: string, entryContent: string): string {
+export function collectTypescriptSourceGraph(
+	entryPath: string,
+	entryContent: string,
+): { files: ReadonlyArray<string>; hash: string } {
 	const hash = createHash('sha256');
 	const queue = [normalize(entryPath)];
 	const seen = new Set<string>();
+	const files: Array<string> = [];
 
 	while (queue.length > 0) {
 		const filePath = queue.pop();
@@ -23,6 +28,7 @@ export function hashTypescriptSourceGraph(entryPath: string, entryContent: strin
 		const content = filePath === normalize(entryPath) ? entryContent : readFileIfPresent(filePath);
 		if (content === undefined) continue;
 
+		files.push(filePath);
 		hash.update(filePath);
 		hash.update('\0');
 		hash.update(content);
@@ -34,7 +40,12 @@ export function hashTypescriptSourceGraph(entryPath: string, entryContent: strin
 		}
 	}
 
-	return hash.digest('hex');
+	return { files, hash: hash.digest('hex') };
+}
+
+/** Content hash of a TypeScript entry file and the relative modules it pulls in. */
+export function hashTypescriptSourceGraph(entryPath: string, entryContent: string): string {
+	return collectTypescriptSourceGraph(entryPath, entryContent).hash;
 }
 
 function readFileIfPresent(filePath: string): string | undefined {
