@@ -8,16 +8,15 @@ export const INTER_CAP_HEIGHT_EM = interMetrics.capHeight / interMetrics.unitsPe
 /** Family name registered for the pinned monospace face used in browser tests. */
 export const PINNED_MONO_FAMILY = 'JetBrains Mono';
 
-const PINNED_CODE_FAMILY_STYLE_ID = 'luke-ui-pinned-code-family';
+const PINNED_CODE_RENDERING_STYLE_ID = 'luke-ui-pinned-code-rendering';
 
 let visualFontsPromise: Promise<void> | undefined;
-let codeFamilyPinCount = 0;
 
 /**
  * Loads the Inter and JetBrains Mono files the visual suite pins. Safe to call more than once:
  * later calls reuse the same load. Faces stay for the worker lifetime so mounts and captures share
- * metrics. Pair with `pinCodeFamily` so `--luke-font-family-code` resolves to the pinned face from
- * the first paint of a fixture.
+ * metrics. Pair with `pinCodeFontRendering` so code text paints with JetBrains Mono without remapping
+ * `--luke-font-family-code`.
  */
 export async function loadVisualFonts(): Promise<void> {
 	visualFontsPromise ??= loadVisualFontsOnce();
@@ -33,31 +32,33 @@ export async function loadInter(): Promise<void> {
 }
 
 /**
- * Remaps `--luke-font-family-code` to the pinned mono face. Nested calls share one stylesheet;
- * each caller must invoke the returned restore exactly once. Browser setup pins before mount so
- * fixtures measure against JetBrains Mono; `captureVisual` may pin again as a safety net.
+ * Pins code *rendering* to the loaded JetBrains Mono face without remapping
+ * `--luke-font-family-code`. Token boards and theme tests can still read the production code stack
+ * from that custom property. Browser setup owns the single pin for each test; call the returned
+ * restore exactly once.
  */
-export function pinCodeFamily(): () => void {
-	if (codeFamilyPinCount === 0) {
-		const style = document.createElement('style');
-		style.id = PINNED_CODE_FAMILY_STYLE_ID;
-		style.textContent = `
-html {
-	--luke-font-family-code: "${PINNED_MONO_FAMILY}", ui-monospace, monospace !important;
+export function pinCodeFontRendering(): () => void {
+	if (document.getElementById(PINNED_CODE_RENDERING_STYLE_ID) !== null) {
+		throw new Error('Code font rendering is already pinned for this document');
+	}
+
+	const style = document.createElement('style');
+	style.id = PINNED_CODE_RENDERING_STYLE_ID;
+	// Element font-family, not the theme token: `!important` beats inline `var(--luke-font-family-code)`
+	// for painting while `getPropertyValue('--luke-font-family-code')` still returns the theme value.
+	// `code` / `pre` / `samp` only — not `kbd`, which must keep the body stack for product tests.
+	style.textContent = `
+code, samp, pre {
+	font-family: "${PINNED_MONO_FAMILY}", ui-monospace, monospace !important;
 }
 `;
-		document.head.append(style);
-	}
-	codeFamilyPinCount += 1;
+	document.head.append(style);
 
 	let released = false;
 	return () => {
 		if (released) return;
 		released = true;
-		codeFamilyPinCount -= 1;
-		if (codeFamilyPinCount === 0) {
-			document.getElementById(PINNED_CODE_FAMILY_STYLE_ID)?.remove();
-		}
+		style.remove();
 	};
 }
 

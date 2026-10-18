@@ -1,7 +1,26 @@
 import { expect, test } from 'vite-plus/test';
+import { PINNED_MONO_FAMILY } from '../core/test-utils/load-inter.js';
 import { render, visualAppearances } from '../core/test-utils/render.js';
 import { captureVisualAppearance } from '../core/test-utils/visual.js';
+import { codeFontFamilyStack } from './foundation.js';
 import { TokenBoard } from './token-board.js';
+
+test('token board displays the generated code font token while painting with the pinned face', async () => {
+	const { locator } = render(<TokenBoard />);
+	await expect.element(locator).toBeVisible();
+	await expect
+		.poll(() => locator.element().textContent?.includes('Resolving…') ?? true)
+		.toBe(false);
+
+	expect(locator.element().textContent).toContain(codeFontFamilyStack);
+	expect(
+		getComputedStyle(document.documentElement).getPropertyValue('--luke-font-family-code').trim(),
+	).toBe(codeFontFamilyStack);
+
+	const codeSample = locator.element().querySelector('code');
+	expect(codeSample).toBeInstanceOf(HTMLElement);
+	expect(getComputedStyle(codeSample as HTMLElement).fontFamily).toContain(PINNED_MONO_FAMILY);
+});
 
 // Captures every contract leaf, colour and non-colour alike, for both bundled themes and
 // modes, so any generator or semantic-mapping change produces an obvious, intentional diff

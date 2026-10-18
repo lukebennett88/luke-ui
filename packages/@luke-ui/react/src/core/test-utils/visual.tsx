@@ -4,7 +4,7 @@ import type { Locator } from 'vite-plus/test/context';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { setEmulatedMediaFeature } from './emulate-media.js';
 import { peekEmulatedMediaFeatures } from './emulated-media.js';
-import { loadVisualFonts, pinCodeFamily } from './load-inter.js';
+import { loadVisualFonts } from './load-inter.js';
 import { DESKTOP_SCREEN_WIDTH } from './mock-screen-width.js';
 import type { VisualAppearance } from './render.js';
 import { formatVisualCaptureName, formatVisualViewport } from './visual-capture-id.js';
@@ -206,6 +206,7 @@ export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 	await setEmulatedMediaFeature('prefers-reduced-motion', 'reduce');
 
 	const freezeMotion = document.createElement('style');
+	freezeMotion.id = 'luke-ui-capture-freeze-motion';
 	freezeMotion.textContent = `
 *, *::before, *::after {
 	animation-delay: 0s !important;
@@ -265,17 +266,15 @@ export async function captureVisual(locator: Locator, id: string) {
 	) {
 		await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
 	}
-	let restoreCodeFamily: (() => void) | undefined;
 	let restoreMotion: (() => Promise<void>) | undefined;
 	let isTall = false;
 	try {
-		// Browser setup already loads and pins fonts before mount; await/pin again so a capture
-		// that skips setup still rasterises from those faces rather than a machine-local install.
+		// Browser setup already loaded and pinned fonts before mount. Await the shared loader so a
+		// capture still waits for faces if setup was skipped; do not pin again.
 		await loadVisualFonts();
 		if (document.fonts?.status !== 'loaded') {
 			await document.fonts.ready;
 		}
-		restoreCodeFamily = pinCodeFamily();
 		restoreMotion = await freezeMotionForCapture();
 
 		const viewportWidth = window.innerWidth;
@@ -301,8 +300,8 @@ export async function captureVisual(locator: Locator, id: string) {
 			.element(page.elementLocator(element))
 			.toMatchScreenshot(formatVisualCaptureName(id, viewport));
 	} finally {
-		// Nested finally so a throw during tall-scene restore or motion restore cannot skip the
-		// code-family unpin (or leave the pointer parked incorrectly).
+		// Nested finally so a throw during tall-scene restore cannot skip motion restore (or leave
+		// the pointer parked incorrectly).
 		try {
 			if (isTall) {
 				await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
@@ -312,19 +311,15 @@ export async function captureVisual(locator: Locator, id: string) {
 			try {
 				if (restoreMotion !== undefined) await restoreMotion();
 			} finally {
-				try {
-					restoreCodeFamily?.();
-				} finally {
-					if (
-						window.innerWidth !== originalViewportWidth ||
-						window.innerHeight !== originalViewportHeight
-					) {
-						await page.viewport(originalViewportWidth, originalViewportHeight);
-					}
-					// Park outside the viewport so the next capture does not inherit an accidental hover
-					// (text Links invert underline under `:hover` / `data-hovered`).
-					await parkPointer();
+				if (
+					window.innerWidth !== originalViewportWidth ||
+					window.innerHeight !== originalViewportHeight
+				) {
+					await page.viewport(originalViewportWidth, originalViewportHeight);
 				}
+				// Park outside the viewport so the next capture does not inherit an accidental hover
+				// (text Links invert underline under `:hover` / `data-hovered`).
+				await parkPointer();
 			}
 		}
 	}

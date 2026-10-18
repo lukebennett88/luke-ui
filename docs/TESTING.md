@@ -42,14 +42,14 @@ for (const ratio of ratios) {
 Shared assertions take concrete elements and values. Keep the test, fixture, and contract choice in
 the component's test file.
 
-Fixture themes name `Inter`. Browser setup awaits `loadVisualFonts()` and pins
-`--luke-font-family-code` to JetBrains Mono before each test so mounts share those faces from the
-first paint. `captureVisual` awaits the same loader and may pin again (refcount). Nested finally
-blocks always release its pin. Theme authoring tests that assert the production code stack read it
-from generated CSS (`extractValue`), not from the live overridden custom property. A non-visual test
-whose layout depends on real font metrics, such as Capsize trims or the cap height, can still call
-`await loadInter()`. Compare positions with Inter's published metrics (`INTER_CAP_HEIGHT_EM`) and
-measured baselines, not with the CSS under test.
+Fixture themes name `Inter`. Browser setup awaits `loadVisualFonts()` and pins code _rendering_ to
+JetBrains Mono before each test (without remapping `--luke-font-family-code`) so mounts share those
+faces from the first paint. `captureVisual` awaits the same loader and does not pin again. Setup
+releases the pin in `afterEach` even when React unmount throws. Token boards and theme authoring
+tests can read the production code stack from the live custom property or from generated CSS
+(`extractValue`). A non-visual test whose layout depends on real font metrics, such as Capsize trims
+or the cap height, can still call `await loadInter()`. Compare positions with Inter's published
+metrics (`INTER_CAP_HEIGHT_EM`) and measured baselines, not with the CSS under test.
 
 Package component tests pin `window.screen.width` to a desktop value in `@luke-ui/react` browser
 setup so `useIsMobileDevice` stays desktop. Vitest's browser iframe is 414px wide. Playwright

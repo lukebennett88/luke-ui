@@ -19,9 +19,9 @@ const FIXTURE_THEMES_STYLE_ID = 'luke-ui-fixture-themes';
 
 /**
  * Compiles every fixture theme and adds the stylesheets to the document once. The fixtures name
- * Inter; browser setup loads the pinned Inter and monospace faces and remaps the theme code family
- * before each test so mounts and captures share those metrics. Metric-sensitive tests can also call
- * `loadInter()` / `loadVisualFonts()`.
+ * Inter; browser setup loads the pinned Inter and JetBrains Mono faces and pins code *rendering*
+ * before each test so mounts and captures share those metrics without remapping
+ * `--luke-font-family-code`. Metric-sensitive tests can also call `loadInter()` / `loadVisualFonts()`.
  */
 export function installFixtureThemes(): void {
 	if (document.getElementById(FIXTURE_THEMES_STYLE_ID) !== null) return;
