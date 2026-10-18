@@ -11,8 +11,9 @@
 		"#docs": "./src/examples/docs.tsx"
 	},
 	"scripts": {
-		"build": "vp build && node scripts/write-not-found-page.ts && tsx scripts/check-metadata-output.ts",
+		"build": "vp build && node scripts/write-not-found-page.ts && tsx scripts/check-metadata-output.ts && tsx scripts/check-type-definition-links.ts",
 		"check:docs": "tsx scripts/check-docs.ts",
+		"check:type-definition-links": "tsx scripts/check-type-definition-links.ts",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
 		"check:llms": "tsx scripts/check-llms-output.ts",
