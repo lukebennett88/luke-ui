@@ -4,6 +4,7 @@ import type { Locator } from 'vite-plus/test/context';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { setEmulatedMediaFeature } from './emulate-media.js';
 import { peekEmulatedMediaFeatures } from './emulated-media.js';
+import { loadInter } from './load-inter.js';
 import { DESKTOP_SCREEN_WIDTH } from './mock-screen-width.js';
 import type { VisualAppearance } from './render.js';
 import { formatVisualCaptureName, formatVisualViewport } from './visual-capture-id.js';
@@ -264,6 +265,9 @@ export async function captureVisual(locator: Locator, id: string) {
 	) {
 		await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
 	}
+	// Pin Inter from the theme packages before the screenshot. Without it, Chromium picks a
+	// machine-local Inter or a fallback, and text anti-aliasing drifts across hosts and runs.
+	await loadInter();
 	if (document.fonts?.status !== 'loaded') {
 		await document.fonts.ready;
 	}

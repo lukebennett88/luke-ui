@@ -19,7 +19,8 @@ const FIXTURE_THEMES_STYLE_ID = 'luke-ui-fixture-themes';
 
 /**
  * Compiles every fixture theme and adds the stylesheets to the document once. The fixtures name
- * Inter without loading it, so text renders in the fallback font, as it always has in this suite.
+ * Inter; `render()` does not load a font file. Visual captures and metric-sensitive tests call
+ * `loadInter()` so text uses the Inter file the theme packages ship.
  */
 export function installFixtureThemes(): void {
 	if (document.getElementById(FIXTURE_THEMES_STYLE_ID) !== null) return;

@@ -46,11 +46,12 @@ resumes only the exit animations the freeze paused. CSS exit transitions are sty
 reduced-motion recipe resets (`transition: none`) cannot cancel them mid-capture. Already-paused
 exit animations stay paused after restore.
 
-`captureVisual` skips no-op viewport resizes (React Aria closes popovers on document scroll),
-re-binds body/html locators immediately before the screenshot so live-region text changes cannot
-invalidate the locator, and parks the pointer outside the viewport after each capture. Browser tests
-also park the pointer in `afterEach` so a leftover cursor cannot leave text Links hovered (standard
-prominence removes the underline under hover).
+`captureVisual` loads the Inter file the theme packages ship before freezing motion, so text does
+not pick up a machine-local Inter or a fallback. It skips no-op viewport resizes (React Aria closes
+popovers on document scroll), re-binds body/html locators immediately before the screenshot so
+live-region text changes cannot invalidate the locator, and parks the pointer outside the viewport
+after each capture. Browser tests also park the pointer in `afterEach` so a leftover cursor cannot
+leave text Links hovered (standard prominence removes the underline under hover).
 
 ## Tall scenes
 
