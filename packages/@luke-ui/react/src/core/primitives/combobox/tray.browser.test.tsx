@@ -12,7 +12,7 @@ import {
 } from '@luke-ui/react/primitives/combobox';
 import { Field } from '@luke-ui/react/primitives/field';
 import type { Ref } from 'react';
-import { createRef } from 'react';
+import { act, createRef } from 'react';
 import { Form } from 'react-aria-components/Form';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -263,7 +263,10 @@ test('ComboboxTray search field does not reopen the popover while the tray is ex
 			.toBe(true);
 
 		// Playwright will not click an element mid-transition, so dispatch the event directly.
-		searchboxElement.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+		// Flush React updates before asserting the tray stayed closed.
+		await act(async () => {
+			searchboxElement.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+		});
 
 		expect(overlay.hasAttribute('data-exiting')).toBe(true);
 		expect(
