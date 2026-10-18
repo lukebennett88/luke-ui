@@ -138,7 +138,11 @@ export function loadExportedPropDeclaration(
 	const absolutePath = resolve(repoRoot, repoRelativePath);
 	if (!existsSync(absolutePath)) return;
 
-	const file = project.getSourceFile(absolutePath) ?? readSourceFile(project, absolutePath);
+	// Always re-read from disk. The shared project keeps the first parse of each path for the
+	// process lifetime; without a refresh, `vp dev` filters newly added props out of tables that
+	// fumadocs already regenerated from current sources.
+	invalidateVisiblePropCachesForFile(absolutePath);
+	const file = readSourceFile(project, absolutePath);
 	return file.getExportedDeclarations().get(exportName)?.[0];
 }
 
@@ -146,6 +150,17 @@ function readSourceFile(project: PropProject, absolutePath: string): PropSourceF
 	return project.createSourceFile(absolutePath, readFileSync(absolutePath, 'utf8'), {
 		overwrite: true,
 	});
+}
+
+/** Drops cached visibility results for declarations that lived in `absolutePath`. */
+function invalidateVisiblePropCachesForFile(absolutePath: string): void {
+	for (const key of visiblePropNameSetCache.keys()) {
+		// Keys are `${reactSrcDir} ${filePath}:${start}`; a space never appears in either path.
+		const nodeKey = key.slice(key.indexOf(' ') + 1);
+		if (nodeKey === absolutePath || nodeKey.startsWith(`${absolutePath}:`)) {
+			visiblePropNameSetCache.delete(key);
+		}
+	}
 }
 
 /**
@@ -548,9 +563,9 @@ function computeVisiblePropNameSet(declaration: PropDeclaration, reactSrcDir: st
  * cache lets the second call reuse the first's result instead of re-walking the same syntax tree. The
  * key combines `reactSrcDir` with the declaration's `nodeKey` using a space, which cannot appear inside
  * a `nodeKey` (a `file:start` pair), so two different declarations or the same declaration analysed
- * against a different `reactSrcDir` never collide. The cache lives for the process lifetime: within a
- * single build or test run the source files on disk don't change mid-run, so a stale entry surviving a
- * `readSourceFile` re-read (via `overwrite: true`) is not a concern here.
+ * against a different `reactSrcDir` never collide. The cache lives for the process lifetime.
+ * `loadExportedPropDeclaration` clears entries for a file before re-reading it, so a `vp dev` edit
+ * cannot keep an outdated visibility set under the same `file:start` key.
  */
 const visiblePropNameSetCache = new Map<string, ReadonlySet<string>>();
 

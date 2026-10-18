@@ -1,14 +1,11 @@
 import { fileURLToPath } from 'node:url';
 import { pageSchema } from 'fumadocs-core/source/schema';
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
-import {
-	createFileSystemGeneratorCache,
-	createGenerator,
-	remarkAutoTypeTable,
-} from 'fumadocs-typescript';
+import { createFileSystemGeneratorCache, remarkAutoTypeTable } from 'fumadocs-typescript';
 import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import * as z from 'zod';
 import { createComponentPropsGenerator } from './src/lib/create-component-props-generator.js';
+import { createLiveTypescriptGenerator } from './src/lib/create-live-typescript-generator.js';
 import { inlineExampleSource } from './src/lib/inline-example-source';
 import { rehypeServerOnlyMarkdown } from './src/lib/rehype-server-only-markdown.js';
 import { remarkAttachTypeDefinitions } from './src/lib/remark-attach-type-definitions.js';
@@ -63,12 +60,16 @@ export const docs = defineDocs({
 const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
 const typeDefinitionsDir = fileURLToPath(new URL('.source/type-definitions', import.meta.url));
 
-const generator = createGenerator({
+const docsTsconfigPath = fileURLToPath(new URL('./tsconfig.json', import.meta.url));
+
+const generator = createLiveTypescriptGenerator({
 	cache: createFileSystemGeneratorCache('.source/fumadocs-typescript'),
+	tsconfigPath: docsTsconfigPath,
 });
 
 const componentPropsGenerator = createComponentPropsGenerator({
 	cache: createFileSystemGeneratorCache('.source/fumadocs-typescript'),
+	tsconfigPath: docsTsconfigPath,
 });
 
 export default defineConfig({

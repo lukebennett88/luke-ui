@@ -1,5 +1,4 @@
 import type { GeneratedDoc, Generator, GeneratorOptions } from 'fumadocs-typescript';
-import { createGenerator } from 'fumadocs-typescript';
 import {
 	filterGeneratedDoc,
 	getSharedPropProject,
@@ -8,6 +7,7 @@ import {
 	typeForwardsDomProps,
 } from './component-prop-analysis.js';
 import { NATIVE_PROPS_FORWARDING_KEY, renderNativePropsNote } from './component-prop-groups.js';
+import { createLiveTypescriptGenerator } from './create-live-typescript-generator.js';
 import { enrichGeneratedDocTypes } from './enrich-generated-doc-types.js';
 
 interface GenerateDocumentationOptions {
@@ -19,7 +19,7 @@ interface GenerateDocumentationOptions {
  * declared types, and collect the definitions those types name.
  */
 export function createComponentPropsGenerator(options: GeneratorOptions = {}): Generator {
-	const generator = createGenerator(options);
+	const generator = createLiveTypescriptGenerator(options);
 	const generateDocumentation = generator.generateDocumentation.bind(generator);
 
 	generator.generateDocumentation = async (file, name, generateOptions = {}) => {
