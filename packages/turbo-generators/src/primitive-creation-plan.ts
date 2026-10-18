@@ -124,10 +124,15 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 function renderPrimitiveSource(input: { pascalName: string; recipeName: string }): string {
 	return `import type { ComponentProps, JSX } from 'react';
 import { cx } from '../../../shared/utils/utils.js';
+import type { Prettify } from '../../types/prettify.js';
 import { ${input.recipeName} } from './recipe.css.js';
 
-export interface ${input.pascalName}Props extends ComponentProps<'div'> {}
+interface _${input.pascalName}Props extends ComponentProps<'div'> {}
 
+/** Props for \`${input.pascalName}\`. */
+export type ${input.pascalName}Props = Prettify<_${input.pascalName}Props>;
+
+/** ${input.pascalName} primitive. See \`${input.pascalName}Props\`. */
 export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Element {
 	const { className, ...divProps } = props;
 	return <div {...divProps} className={cx(${input.recipeName}(), className)} />;

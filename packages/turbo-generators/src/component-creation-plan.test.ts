@@ -4,6 +4,7 @@ import { findComponentPropsTableTags } from '../../../apps/docs/src/lib/componen
 import {
 	COMPONENT_DEFAULTS,
 	createComponentPlan,
+	DOC_GROUPS,
 	parseComponentAnswers,
 } from './component-creation-plan.js';
 import { findUnresolvedImports } from './test-utils/find-unresolved-imports.js';
@@ -12,6 +13,8 @@ const validAnswers = {
 	docsGroup: 'feedback',
 	name: 'StatusBadge',
 } as const;
+
+const GROUPS_REQUIRING_ACCESSIBILITY = new Set(['actions', 'feedback', 'forms']);
 
 describe('parseComponentAnswers', () => {
 	it('rejects invalid docs group answers', () => {
@@ -71,6 +74,14 @@ describe('createComponentPlan', () => {
 		)?.contents;
 
 		expect(componentSource).not.toContain('export { statusBadgeRecipe');
+		expect(componentSource).toContain("import type { Prettify } from '../types/prettify.js';");
+		expect(componentSource).toContain('interface _StatusBadgeProps extends ComponentProps');
+		expect(componentSource).toContain(
+			'export type StatusBadgeProps = Prettify<_StatusBadgeProps>;',
+		);
+		expect(componentSource).toContain('/** Props for `StatusBadge`. */');
+		expect(componentSource).toContain('/** StatusBadge. See `StatusBadgeProps`. */');
+		expect(componentSource).not.toContain('export interface StatusBadgeProps');
 		expect(packageExportSource).toContain(
 			"export { StatusBadge, type StatusBadgeProps } from '../core/status-badge/status-badge.js';",
 		);
@@ -78,6 +89,15 @@ describe('createComponentPlan', () => {
 		expect(packageExportSource).not.toContain("from './index.js'");
 		expect(recipeSource).toContain('export const statusBadgeRecipe = recipe({');
 		expect(recipeSource).not.toContain('RecipeVariants');
+
+		const example = plan.files.find((file) =>
+			file.path.endsWith('status-badge/basic.tsx'),
+		)?.contents;
+		if (example === undefined) {
+			throw new Error('Expected the scaffold to write status-badge/basic.tsx.');
+		}
+		expect(example).toContain('export default () => {');
+		expect(example).not.toContain('export default function Basic');
 
 		const testSource = plan.files.find((file) =>
 			file.path.endsWith('status-badge.browser.test.tsx'),
@@ -98,6 +118,30 @@ describe('createComponentPlan', () => {
 		).flat();
 
 		expect(violations).toEqual([]);
+	});
+
+	it('includes Accessibility only for actions, feedback, and forms', () => {
+		const guides = DOC_GROUPS.map((docsGroup) => {
+			const plan = createComponentPlan({ docsGroup, name: 'StatusBadge' });
+			const guide = plan.files.find((file) =>
+				file.path.endsWith(`${docsGroup}/status-badge.mdx`),
+			)?.contents;
+			if (guide === undefined) {
+				throw new Error(`Expected the scaffold to write the ${docsGroup} guide.`);
+			}
+			return { docsGroup, guide };
+		});
+
+		expect(
+			guides
+				.filter(({ docsGroup }) => GROUPS_REQUIRING_ACCESSIBILITY.has(docsGroup))
+				.map(({ guide }) => guide.includes('## Accessibility\n\n## API')),
+		).toEqual([true, true, true]);
+		expect(
+			guides
+				.filter(({ docsGroup }) => !GROUPS_REQUIRING_ACCESSIBILITY.has(docsGroup))
+				.every(({ guide }) => !guide.includes('## Accessibility')),
+		).toBe(true);
 	});
 
 	it('rejects invalid component names before file writes', () => {

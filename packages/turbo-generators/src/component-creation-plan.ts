@@ -98,7 +98,7 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 			path: `apps/docs/src/examples/${name}/basic.tsx`,
 		},
 		{
-			contents: renderHostedDocsPage({ displayName, name, pascalName }),
+			contents: renderHostedDocsPage({ displayName, docsGroup, name, pascalName }),
 			path: `apps/docs/content/docs/components/${docsGroup}/${name}.mdx`,
 		},
 	];
@@ -148,10 +148,15 @@ function renderComponentSource(input: {
 }): string {
 	return `import type { ComponentProps, JSX } from 'react';
 import { cx } from '../../shared/utils/utils.js';
+import type { Prettify } from '../types/prettify.js';
 import { ${input.recipeName} } from './recipe.css.js';
 
-export interface ${input.pascalName}Props extends ComponentProps<'div'> {}
+interface _${input.pascalName}Props extends ComponentProps<'div'> {}
 
+/** Props for \`${input.pascalName}\`. */
+export type ${input.pascalName}Props = Prettify<_${input.pascalName}Props>;
+
+/** ${input.pascalName}. See \`${input.pascalName}Props\`. */
 export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Element {
 	const { className, ...divProps } = props;
 	return <div {...divProps} className={cx(${input.recipeName}(), className)} />;
@@ -167,9 +172,9 @@ function renderPackageExport(input: { name: string; pascalName: string }): strin
 function renderHostedExample(input: { name: string; pascalName: string }): string {
 	return `import { ${input.pascalName} } from '@luke-ui/react/${input.name}';
 
-export default function Basic() {
+export default () => {
 	return <${input.pascalName}>${input.pascalName}</${input.pascalName}>;
-}
+};
 `;
 }
 
@@ -257,8 +262,15 @@ ${placeholderTest}${visualTest}
 `;
 }
 
+const GROUPS_REQUIRING_ACCESSIBILITY = new Set<(typeof DOC_GROUPS)[number]>([
+	'actions',
+	'feedback',
+	'forms',
+]);
+
 function renderHostedDocsPage(input: {
 	displayName: string;
+	docsGroup: (typeof DOC_GROUPS)[number];
 	name: string;
 	pascalName: string;
 }): string {
@@ -267,6 +279,9 @@ function renderHostedDocsPage(input: {
 		name: `${input.pascalName}Props`,
 		path: propsPath,
 	});
+	const accessibilitySection = GROUPS_REQUIRING_ACCESSIBILITY.has(input.docsGroup)
+		? '## Accessibility\n\n'
+		: '';
 
 	return `---
 title: ${input.displayName}
@@ -278,7 +293,7 @@ source: packages/@luke-ui/react/src/exports/${input.name}.ts
 	title="${input.displayName}: Basic"
 />
 
-## API
+${accessibilitySection}## API
 
 ${propsTable}
 `;
