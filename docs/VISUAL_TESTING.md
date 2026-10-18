@@ -48,13 +48,16 @@ exit animations stay paused after restore.
 
 Browser setup loads the pinned Inter and JetBrains Mono faces and pins code _rendering_ (not the
 `--luke-font-family-code` token) before each test mounts, so fixtures and overlays measure against
-those faces from the first paint while token boards still show the production code stack.
-`captureVisual` awaits the same loader, owns motion freeze cleanup in nested finally blocks, and
-does not take a second font pin. It skips no-op viewport resizes (React Aria closes popovers on
-document scroll), re-binds body/html locators immediately before the screenshot so live-region text
-changes cannot invalidate the locator, and parks the pointer outside the viewport after each
-capture. Browser tests also park the pointer in `afterEach` so a leftover cursor cannot leave text
-Links hovered (standard prominence removes the underline under hover).
+those faces from the first paint while token boards still show the production code stack. The pin
+also covers TokenBoard font-family previews that apply the code token on a non-`code` host.
+`freezeMotionForCapture` restores reduced-motion, the freeze stylesheet, and exit locks if setup
+fails after installing them. `captureVisual` awaits the shared font loader, owns motion freeze
+cleanup in nested finally blocks, and does not take a second font pin. It skips no-op viewport
+resizes (React Aria closes popovers on document scroll), re-binds body/html locators immediately
+before the screenshot so live-region text changes cannot invalidate the locator, and parks the
+pointer outside the viewport after each capture. Browser tests also park the pointer in `afterEach`
+so a leftover cursor cannot leave text Links hovered (standard prominence removes the underline
+under hover).
 
 ## Tall scenes
 

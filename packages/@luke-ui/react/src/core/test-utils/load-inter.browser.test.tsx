@@ -19,23 +19,27 @@ test('Code mounts with the pinned mono face from browser setup', async () => {
 	).toBe(codeFontFamilyStack);
 });
 
-test('captureVisual releases motion freeze when getAnimations throws', async () => {
+test('captureVisual restores freeze state when getAnimations throws after freeze install', async () => {
 	const { locator } = render(<Code>capture freeze failure</Code>);
 	await expect.element(locator).toBeVisible();
 	const probe = locator.element().querySelector('code') ?? locator.element();
 
 	const originalGetAnimations = document.getAnimations.bind(document);
+	// Succeed until the freeze stylesheet is installed, then fail the post-freeze animation pass.
 	Object.defineProperty(document, 'getAnimations', {
 		configurable: true,
-		value: () => {
-			throw new Error('injected getAnimations failure');
+		value: (...args: Parameters<Document['getAnimations']>) => {
+			if (document.getElementById('luke-ui-capture-freeze-motion') !== null) {
+				throw new Error('injected getAnimations failure after freeze');
+			}
+			return originalGetAnimations(...args);
 		},
 	});
 
 	try {
 		await expect(
 			captureVisual(page.elementLocator(locator.element()), 'code/freeze-fail'),
-		).rejects.toThrow('injected getAnimations failure');
+		).rejects.toThrow('injected getAnimations failure after freeze');
 		expect(document.getElementById('luke-ui-capture-freeze-motion')).toBeNull();
 		expect(peekEmulatedMediaFeatures()['prefers-reduced-motion']).not.toBe('reduce');
 		// Setup still owns code rendering for the rest of the test.

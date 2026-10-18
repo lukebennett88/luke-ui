@@ -17,9 +17,10 @@ test('token board displays the generated code font token while painting with the
 		getComputedStyle(document.documentElement).getPropertyValue('--luke-font-family-code').trim(),
 	).toBe(codeFontFamilyStack);
 
-	const codeSample = locator.element().querySelector('code');
-	expect(codeSample).toBeInstanceOf(HTMLElement);
-	expect(getComputedStyle(codeSample as HTMLElement).fontFamily).toContain(PINNED_MONO_FAMILY);
+	// FontPreview paints font.family.code on a TextSample span, not a <code> host.
+	const codeFontPreview = locator.getByRole('img', { name: 'font.family.code sample' });
+	await expect.element(codeFontPreview).toBeVisible();
+	expect(getComputedStyle(codeFontPreview.element()).fontFamily).toContain(PINNED_MONO_FAMILY);
 });
 
 // Captures every contract leaf, colour and non-colour alike, for both bundled themes and

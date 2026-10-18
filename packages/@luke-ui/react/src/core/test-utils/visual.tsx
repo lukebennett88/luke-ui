@@ -198,16 +198,43 @@ export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 			if (!pausedByFreeze.includes(animation)) pausedByFreeze.push(animation);
 		}
 	};
-	collectPausedByFreeze(finishInFlightMotion());
-	// Lock before reduced-motion: recipes' `transition: none` would cancel paused CSS exits.
-	const exitStyleLocks = lockExitingCssTransitions();
 
-	const previousReducedMotion = peekEmulatedMediaFeatures()['prefers-reduced-motion'];
-	await setEmulatedMediaFeature('prefers-reduced-motion', 'reduce');
+	let exitStyleLocks: Array<ExitStyleLock> = [];
+	let previousReducedMotion: string | undefined;
+	let reducedMotionChanged = false;
+	let freezeMotion: HTMLStyleElement | undefined;
 
-	const freezeMotion = document.createElement('style');
-	freezeMotion.id = 'luke-ui-capture-freeze-motion';
-	freezeMotion.textContent = `
+	const restore = async () => {
+		freezeMotion?.remove();
+		freezeMotion = undefined;
+		if (reducedMotionChanged) {
+			await setEmulatedMediaFeature('prefers-reduced-motion', previousReducedMotion);
+			reducedMotionChanged = false;
+		}
+		clearExitStyleLocks(exitStyleLocks);
+		exitStyleLocks = [];
+		for (const animation of pausedByFreeze) {
+			try {
+				if (animation.playState === 'paused') animation.play();
+			} catch {
+				// Animation may have finished or been removed while frozen.
+			}
+		}
+	};
+
+	try {
+		collectPausedByFreeze(finishInFlightMotion());
+		// Lock before reduced-motion: recipes' `transition: none` would cancel paused CSS exits.
+		exitStyleLocks = lockExitingCssTransitions();
+
+		previousReducedMotion = peekEmulatedMediaFeatures()['prefers-reduced-motion'];
+		// Mark before await so a CDP failure after the merge still restores.
+		reducedMotionChanged = true;
+		await setEmulatedMediaFeature('prefers-reduced-motion', 'reduce');
+
+		freezeMotion = document.createElement('style');
+		freezeMotion.id = 'luke-ui-capture-freeze-motion';
+		freezeMotion.textContent = `
 *, *::before, *::after {
 	animation-delay: 0s !important;
 	animation-duration: 0s !important;
@@ -230,22 +257,15 @@ export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 	translate: none !important;
 }
 `;
-	document.head.append(freezeMotion);
-	await waitAnimationFrames();
-	collectPausedByFreeze(finishInFlightMotion());
-
-	return async () => {
-		freezeMotion.remove();
-		await setEmulatedMediaFeature('prefers-reduced-motion', previousReducedMotion);
-		clearExitStyleLocks(exitStyleLocks);
-		for (const animation of pausedByFreeze) {
-			try {
-				if (animation.playState === 'paused') animation.play();
-			} catch {
-				// Animation may have finished or been removed while frozen.
-			}
-		}
-	};
+		document.head.append(freezeMotion);
+		await waitAnimationFrames();
+		collectPausedByFreeze(finishInFlightMotion());
+		return restore;
+	} catch (error) {
+		// captureVisual only restores when this resolves; clean up partial freeze state here.
+		await restore();
+		throw error;
+	}
 }
 
 export async function captureVisual(locator: Locator, id: string) {

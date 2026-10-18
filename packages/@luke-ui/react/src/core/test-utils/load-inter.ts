@@ -46,9 +46,12 @@ export function pinCodeFontRendering(): () => void {
 	style.id = PINNED_CODE_RENDERING_STYLE_ID;
 	// Element font-family, not the theme token: `!important` beats inline `var(--luke-font-family-code)`
 	// for painting while `getPropertyValue('--luke-font-family-code')` still returns the theme value.
-	// `code` / `pre` / `samp` only — not `kbd`, which must keep the body stack for product tests.
+	// `code` / `pre` / `samp` — not `kbd`, which must keep the body stack for product tests.
+	// Also pin TokenBoard font.family.code TextSample spans (`fontFamily: var(--luke-font-family-code)`
+	// on a non-code host); without this the preview still paints the host monospace stack.
 	style.textContent = `
-code, samp, pre {
+code, samp, pre,
+[style*="--luke-font-family-code"] {
 	font-family: "${PINNED_MONO_FAMILY}", ui-monospace, monospace !important;
 }
 `;
