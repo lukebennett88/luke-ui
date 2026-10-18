@@ -39,7 +39,81 @@ describe('findTypeDefinitionLinkIssues', () => {
 		});
 
 		expect(findTypeDefinitionLinkIssues(root)).toEqual([]);
-		expect(findBuiltTypeDefinitionTables(root)).toHaveLength(2);
+		expect(findBuiltTypeDefinitionTables(root).tables).toHaveLength(2);
+	});
+
+	it('resolves definitions URLs that include a Vite base path', () => {
+		const root = createAssetsRoot();
+		const asset = writeAsset(root, {
+			PressAction: { definition: [['k', 'type'], ' ', ['t', 'PressAction'], ';'] },
+		});
+		writePageModule(root, 'base-path.js', {
+			definitionNames: ['PressAction'],
+			href: `/luke-ui/assets/${asset}`,
+			hrefVar: 'r',
+		});
+		writePageModule(root, 'base-path-imported.js', {
+			definitionNames: ['PressAction'],
+			href: `/luke-ui/assets/${asset}`,
+			hrefVar: 'n',
+			viaUrlModule: true,
+		});
+
+		expect(findTypeDefinitionLinkIssues(root)).toEqual([]);
+		expect(findBuiltTypeDefinitionTables(root).tables.map((table) => table.assetFile)).toEqual([
+			asset,
+			asset,
+		]);
+	});
+
+	it('discovers tables when other props sit between definitionsHref and definitionNames', () => {
+		const root = createAssetsRoot();
+		const asset = writeAsset(root, {
+			PressAction: { definition: [['k', 'type'], ' ', ['t', 'PressAction'], ';'] },
+			Prominence: { definition: [['k', 'type'], ' ', ['t', 'Prominence'], ';'] },
+		});
+		writeFileSync(
+			join(root, 'reordered.js'),
+			[
+				`var r=\`/assets/${asset}\`;`,
+				'function render(){',
+				`return {definitionsHref:r,id:"button-props",definitionNames:[\`Prominence\`,\`PressAction\`]}`,
+				'}',
+				'',
+			].join('\n'),
+		);
+
+		expect(findTypeDefinitionLinkIssues(root)).toEqual([]);
+		expect(findBuiltTypeDefinitionTables(root).tables).toEqual([
+			{
+				assetFile: asset,
+				definitionNames: ['Prominence', 'PressAction'],
+				pageModule: 'reordered.js',
+			},
+		]);
+	});
+
+	it('fails when a definitionNames array is present but cannot be paired with a table', () => {
+		const root = createAssetsRoot();
+		const asset = writeAsset(root, {
+			PressAction: { definition: [['k', 'type'], ' ', ['t', 'PressAction'], ';'] },
+		});
+		// One table is fully wired. A second definitionNames array is emitted without a parseable
+		// string list, so discovery discovers fewer tables than definitionNames markers — the shared
+		// asset would otherwise hide the gap.
+		writeFileSync(
+			join(root, 'partial.js'),
+			[
+				`var r=\`/assets/${asset}\`;`,
+				`function ok(){return {definitionsHref:r,definitionNames:[\`PressAction\`]}}`,
+				'function broken(){return {definitionsHref:r,id:"other",definitionNames:[PressAction]}}',
+				'',
+			].join('\n'),
+		);
+
+		expect(findTypeDefinitionLinkIssues(root)).toEqual([
+			'discovered 1 API table(s) but found 2 definitionNames array(s)',
+		]);
 	});
 
 	it('fails when a page registers a name absent from its definitions asset', () => {
@@ -87,6 +161,31 @@ describe('findTypeDefinitionLinkIssues', () => {
 
 		expect(findTypeDefinitionLinkIssues(root)).toEqual([
 			`stolen-hash.js: asset ${collidingName} content hash does not match its name`,
+		]);
+	});
+
+	it('fails when a registered definition has empty or malformed tokens', () => {
+		const root = createAssetsRoot();
+		const emptyAsset = writeAsset(root, {
+			PressAction: { definition: [] },
+		});
+		const malformedAsset = writeAsset(root, {
+			PressAction: { definition: [['x', 'PressAction']] },
+		});
+		writePageModule(root, 'empty-tokens.js', {
+			definitionNames: ['PressAction'],
+			href: `/assets/${emptyAsset}`,
+			hrefVar: 'r',
+		});
+		writePageModule(root, 'malformed-tokens.js', {
+			definitionNames: ['PressAction'],
+			href: `/assets/${malformedAsset}`,
+			hrefVar: 'r',
+		});
+
+		expect(findTypeDefinitionLinkIssues(root)).toEqual([
+			`empty-tokens.js: "PressAction" in ${emptyAsset} has empty or malformed definition tokens`,
+			`malformed-tokens.js: "PressAction" in ${malformedAsset} has empty or malformed definition tokens`,
 		]);
 	});
 
@@ -138,7 +237,7 @@ function writePageModule(
 ): void {
 	const names = options.definitionNames.map((name) => `\`${name}\``).join(',');
 	if (options.viaUrlModule) {
-		const urlModule = `${basenameHash(options.href)}-url.js`;
+		const urlModule = `${assetStem(options.href)}-url.js`;
 		writeFileSync(join(root, urlModule), `var e=\`${options.href}\`;export{e as t};\n`);
 		writeFileSync(
 			join(root, fileName),
@@ -161,6 +260,7 @@ function writePageModule(
 	);
 }
 
-function basenameHash(href: string): string {
-	return href.replace(/^\/assets\//, '').slice(0, 16);
+function assetStem(href: string): string {
+	const file = href.match(/\/assets\/([0-9a-f]{16}-[^/]+\.json)$/)?.[1] ?? href;
+	return file.slice(0, 16);
 }

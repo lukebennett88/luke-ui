@@ -15,7 +15,7 @@ if (issues.length > 0) {
 	}
 	process.exitCode = 1;
 } else {
-	const tables = findBuiltTypeDefinitionTables(clientAssetsDir);
+	const { tables } = findBuiltTypeDefinitionTables(clientAssetsDir);
 	const assets = new Set(tables.map((table) => table.assetFile));
 	// oxlint-disable-next-line no-console
 	console.log(
