@@ -470,9 +470,9 @@ You write the `## API` section yourself, the same as every other heading on a gu
 repo-relative file that exports it and `name` is the exported type name, for example `ButtonProps`.
 `remarkAutoTypeTable` expands the tag into the rendered table at MDX compile time, so it stays
 accurate to the type without a generation step. In `vp dev`, editing the documented file or a
-relative import it pulls in refreshes the table on the next MDX compile without restarting the
-server. A guide with one table has no extra heading above it. A guide with several tables adds a
-`### <TypeName>` heading above each one, in the order they appear.
+relative import it pulls in recompiles the MDX module and refreshes the table without touching the
+MDX file or restarting the server. A guide with one table has no extra heading above it. A guide
+with several tables adds a `### <TypeName>` heading above each one, in the order they appear.
 
 The prose on a table comes from JSDoc in the component's source, so a prop is documented where it is
 declared. When a type still accepts arbitrary DOM and ARIA attributes and event handlers, the table

@@ -1,4 +1,6 @@
-import { resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type {
 	Cache,
 	GeneratedDoc,
@@ -13,6 +15,9 @@ import { collectTypescriptSourceGraph } from './typescript-source-graph.js';
 /** Bump when the live-generator cache payload shape or key inputs change. */
 const LIVE_GENERATOR_CACHE_VERSION = '1';
 
+/** Matches upstream `createGenerator` cache keys so upgrades cannot reuse incompatible output. */
+const FUMADOCS_TYPESCRIPT_VERSION = readFumadocsTypescriptVersion();
+
 /**
  * Wraps `createGenerator` so API tables follow disk edits during `vp dev` without restarting.
  *
@@ -23,11 +28,11 @@ const LIVE_GENERATOR_CACHE_VERSION = '1';
  *    native TypeScript program on the old text — `getSourceFile` sees matching overlay/disk content
  *    and skips a snapshot update.
  *
- * This wrapper keys the cache on a hash of the entry file plus its relative import graph, and uses a
- * fresh TypeScript project on each cache miss so the program always reads current sources. Creating
- * a project is cheap relative to type collection; cache hits skip that work entirely. Overlapping
- * cache misses share one reset-and-generate queue so concurrent tables cannot close a project still
- * in use.
+ * This wrapper keys the cache on a hash of the entry file plus its relative import graph and the
+ * installed fumadocs-typescript version, and uses a fresh TypeScript project on each cache miss so
+ * the program always reads current sources. Creating a project is cheap relative to type
+ * collection; cache hits skip that work entirely. Overlapping cache misses share one
+ * reset-and-generate queue so concurrent tables cannot close a project still in use.
  */
 export function createLiveTypescriptGenerator(options: GeneratorOptions = {}): Generator {
 	const storage = resolveCache(options.cache);
@@ -63,7 +68,9 @@ export function createLiveTypescriptGenerator(options: GeneratorOptions = {}): G
 		const cacheKey =
 			storage === null
 				? undefined
-				: generateHash(`${fullPath}:${name ?? ''}:${graphHash}:${LIVE_GENERATOR_CACHE_VERSION}`);
+				: generateHash(
+						`${fullPath}:${name ?? ''}:${graphHash}:${FUMADOCS_TYPESCRIPT_VERSION}:${LIVE_GENERATOR_CACHE_VERSION}`,
+					);
 
 		if (storage !== null && cacheKey !== undefined) {
 			const cached = await storage.read(cacheKey);
@@ -161,4 +168,27 @@ function createProjectSlot(
 			await ensure();
 		},
 	};
+}
+
+function readFumadocsTypescriptVersion(): string {
+	const entryUrl = import.meta.resolve('fumadocs-typescript');
+	let dir = dirname(fileURLToPath(entryUrl));
+	for (;;) {
+		try {
+			const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as {
+				name?: string;
+				version?: string;
+			};
+			if (pkg.name === 'fumadocs-typescript' && typeof pkg.version === 'string') {
+				return pkg.version;
+			}
+		} catch {
+			// Keep walking toward the package root.
+		}
+		const parent = dirname(dir);
+		if (parent === dir) {
+			throw new Error('Could not resolve fumadocs-typescript package version');
+		}
+		dir = parent;
+	}
 }

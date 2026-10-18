@@ -10,6 +10,7 @@ import { inlineExampleSource } from './src/lib/inline-example-source';
 import { rehypeServerOnlyMarkdown } from './src/lib/rehype-server-only-markdown.js';
 import { remarkAttachTypeDefinitions } from './src/lib/remark-attach-type-definitions.js';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
+import { remarkWatchTypeTableSources } from './src/lib/remark-watch-type-table-sources.js';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
 import { stringifyComponentPropsTable } from './src/lib/stringify-component-props-table.js';
 
@@ -82,6 +83,8 @@ export default defineConfig({
 		rehypePlugins: (v) => [...v, rehypeServerOnlyMarkdown],
 		remarkPlugins: (v) => [
 			...v,
+			// Before type-table expansion so Vite watches the entry and its relative imports.
+			[remarkWatchTypeTableSources, { basePath: repoRoot }],
 			[
 				remarkComponentPropsTable,
 				{
