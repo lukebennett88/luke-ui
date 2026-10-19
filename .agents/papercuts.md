@@ -125,3 +125,13 @@ not help. Silence in this log is not evidence.
 - Problem: Both tests receive `undefined` from `server.moduleGraph.getModulesByFile(sourcePath)` and
   fail the module-count assertion. These baseline failures block a passing full test run; they do
   not establish whether hot reload itself fails.
+
+## Prose example adds unnecessary application context
+
+- Seen: 2026-10-19 (PR #895). The native-elements example introduced project setup and a search
+  shortcut. Review identified the unnecessary application context.
+- Where: `apps/docs/src/examples/prose/native-elements.tsx`. `docs/DOCUMENTATION.md`, Examples,
+  requires neutral or self-referential content without unnecessary application context. The
+  write-docs workflow requires consulting that guide before editing examples.
+- Problem: The agent-authored example contradicted the required content guidance. Correcting it does
+  not establish that example authoring applies the guidance.
