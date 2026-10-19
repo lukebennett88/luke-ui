@@ -103,10 +103,25 @@ not help. Silence in this log is not evidence.
 ## Theme builds refresh tracked dependency metadata
 
 - Seen: 2026-10-19 (#847). Building unchanged main `5ca271c` and both implementation worktrees
-  changed the Paper and Tactile manifests' recorded metrics version from `4.3.0` to `4.4.0`.
+  changed the Paper and Tactile manifests' recorded metrics version from `4.3.0` to `4.4.0`. Seen
+  again: 2026-10-19 (#873). Required check and consumer builds on `fa51e2ac` changed the same two
+  manifests from metrics `4.3.0` to `4.4.0`.
 - Where: `packages/@luke-ui/theme-paper/package.json` and
   `packages/@luke-ui/theme-tactile/package.json`, `inlinedDependencies`. The dependency update in
   #886 changed the installed version. AGENTS.md requires keeping unrelated changes out of task
   commits.
 - Problem: Required builds leave unrelated tracked changes behind, requiring authors to identify and
   restore the generated metadata before finishing their work.
+
+## Docs watcher tests cannot find type-source modules
+
+- Seen: 2026-10-19 (#873).
+  `pnpm exec turbo run test --filter=docs -- src/lib/remark-watch-type-table-sources.test.ts`
+  reproduced two failures and three passes on unchanged base `fa51e2ac`, matching the full test run.
+- Where: `apps/docs/src/lib/remark-watch-type-table-sources.test.ts:444`,
+  `expectTypeTableWatchLink`, called by the direct-source and imported-type MDX recompilation tests.
+  `docs/TESTING.md` requires reporting test results; the work-on-issue workflow requires reproducing
+  unrelated failures on the base revision.
+- Problem: Both tests receive `undefined` from `server.moduleGraph.getModulesByFile(sourcePath)` and
+  fail the module-count assertion. These baseline failures block a passing full test run; they do
+  not establish whether hot reload itself fails.
