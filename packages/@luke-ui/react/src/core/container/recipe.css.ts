@@ -8,7 +8,7 @@ export const containerMaxInlineSizeTokens = literalScale('container.', [
 ] as const);
 
 /** Maximum inline size selected by a preset. */
-export const containerMaxInlineSizeVar = createVar();
+const containerMaxInlineSizeVar = createVar();
 
 /** Recipe for a size container that constrains content inline size. */
 export const containerRecipe = recipe({
