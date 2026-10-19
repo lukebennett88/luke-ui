@@ -19,6 +19,12 @@ const LIVE_GENERATOR_CACHE_VERSION = '1';
 const FUMADOCS_TYPESCRIPT_VERSION = readFumadocsTypescriptVersion();
 
 /**
+ * Options for the live generator. Omits `project`: this wrapper owns the TypeScript process and
+ * replaces it after cache misses. Callers pass `tsconfigPath` (and optional cache) only.
+ */
+export type LiveTypescriptGeneratorOptions = Omit<GeneratorOptions, 'project'>;
+
+/**
  * Wraps `createGenerator` so API tables follow disk edits during `vp dev` without restarting.
  *
  * Two fumadocs-typescript behaviours otherwise keep stale output:
@@ -33,19 +39,22 @@ const FUMADOCS_TYPESCRIPT_VERSION = readFumadocsTypescriptVersion();
  * the program always reads current sources. Creating a project is cheap relative to type
  * collection; cache hits skip that work entirely. Overlapping cache misses share one
  * reset-and-generate queue so concurrent tables cannot close a project still in use.
+ *
+ * The project passed to `createGenerator` is a stable stand-in that delegates to the current native
+ * process. `createGenerator` only reads that object during generation (`await getProject()`), and
+ * this wrapper always `await`s `slot.reset()` on a cache miss before calling through — so the
+ * stand-in never needs to be a thenable, and TypeScript is not started at module load (knip and
+ * cycle checks import `source.config` from the repo root).
  */
-export function createLiveTypescriptGenerator(options: GeneratorOptions = {}): Generator {
+export function createLiveTypescriptGenerator(
+	options: LiveTypescriptGeneratorOptions = {},
+): Generator {
 	const storage = resolveCache(options.cache);
-	const projectOptions = {
-		tsconfigPath: options.tsconfigPath,
-	};
-	const slot = createProjectSlot(options.project, projectOptions);
+	const slot = createProjectSlot({ tsconfigPath: options.tsconfigPath });
 	const generator = createGenerator({
 		...options,
 		cache: false,
-		// Thenable so createGenerator can `await` it without booting TypeScript at module load
-		// (knip and cycle checks import source.config from the repo root).
-		project: slot.lazy as unknown as Project,
+		project: slot.project,
 	});
 	const generateDocumentation = generator.generateDocumentation.bind(generator);
 
@@ -97,74 +106,58 @@ export function createLiveTypescriptGenerator(options: GeneratorOptions = {}): G
 	return generator;
 }
 
-function resolveCache(cache: GeneratorOptions['cache']): Cache | null {
+function resolveCache(cache: LiveTypescriptGeneratorOptions['cache']): Cache | null {
 	if (cache === undefined || cache === false) return null;
 	return cache;
 }
 
 /**
- * Holds the fumadocs project behind a stable object so `createGenerator` can keep one `project`
- * reference while we replace the native TypeScript process after cache misses.
+ * Stable `Project` for `createGenerator`: methods forward to the current native process. Reset
+ * closes that process and creates a new one so disk edits are visible on the next generate.
  */
-function createProjectSlot(
-	initial: GeneratorOptions['project'],
-	projectOptions: { tsconfigPath?: string },
-) {
+function createProjectSlot(projectOptions: { tsconfigPath?: string }) {
 	let current: Project | undefined;
 	let boot: Promise<Project> | undefined;
 
 	async function ensure(): Promise<Project> {
 		if (current !== undefined) return current;
-		boot ??= Promise.resolve(initial ?? createProject(projectOptions)).then((project) => {
+		boot ??= createProject(projectOptions).then((project) => {
 			current = project;
 			return project;
 		});
 		return boot;
 	}
 
-	const proxy = {
+	function requireCurrent(): Project {
+		if (current === undefined) {
+			throw new Error('TypeScript project used before reset completed');
+		}
+		return current;
+	}
+
+	const project: Project = {
 		get api() {
-			if (current === undefined) {
-				throw new Error('TypeScript project used before it finished loading');
-			}
-			return current.api;
+			return requireCurrent().api;
 		},
 		get tsconfigPath() {
-			if (current === undefined) {
-				throw new Error('TypeScript project used before it finished loading');
-			}
-			return current.tsconfigPath;
+			return requireCurrent().tsconfigPath;
 		},
 		getSourceFile(filePath: string, content?: string) {
-			if (current === undefined) {
-				throw new Error('TypeScript project used before it finished loading');
-			}
-			return current.getSourceFile(filePath, content);
+			return requireCurrent().getSourceFile(filePath, content);
 		},
 		close() {
 			current?.close();
 			current = undefined;
 			boot = undefined;
 		},
-	} as Project;
+	};
 
 	return {
-		/** Starts `createProject` only when createGenerator first awaits the project. */
-		lazy: {
-			then(
-				onFulfilled?: ((value: Project) => unknown) | null,
-				onRejected?: ((reason: unknown) => unknown) | null,
-			) {
-				return ensure()
-					.then(() => proxy)
-					.then(onFulfilled, onRejected);
-			},
-		},
+		project,
 		async reset() {
 			current?.close();
 			current = undefined;
 			boot = undefined;
-			initial = undefined;
 			await ensure();
 		},
 	};

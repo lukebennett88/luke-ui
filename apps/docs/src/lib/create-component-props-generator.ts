@@ -1,4 +1,4 @@
-import type { GeneratedDoc, Generator, GeneratorOptions } from 'fumadocs-typescript';
+import type { GeneratedDoc, Generator } from 'fumadocs-typescript';
 import {
 	filterGeneratedDoc,
 	getSharedPropProject,
@@ -7,6 +7,7 @@ import {
 	typeForwardsDomProps,
 } from './component-prop-analysis.js';
 import { NATIVE_PROPS_FORWARDING_KEY, renderNativePropsNote } from './component-prop-groups.js';
+import type { LiveTypescriptGeneratorOptions } from './create-live-typescript-generator.js';
 import { createLiveTypescriptGenerator } from './create-live-typescript-generator.js';
 import { enrichGeneratedDocTypes } from './enrich-generated-doc-types.js';
 
@@ -18,7 +19,9 @@ interface GenerateDocumentationOptions {
  * Wraps the fumadocs generator to remove generic DOM props from component Props tables, restore their
  * declared types, and collect the definitions those types name.
  */
-export function createComponentPropsGenerator(options: GeneratorOptions = {}): Generator {
+export function createComponentPropsGenerator(
+	options: LiveTypescriptGeneratorOptions = {},
+): Generator {
 	const generator = createLiveTypescriptGenerator(options);
 	const generateDocumentation = generator.generateDocumentation.bind(generator);
 
