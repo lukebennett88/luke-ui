@@ -1,13 +1,18 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
+import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 import { visit } from 'unist-util-visit';
+import { stringifyComponentPropsTable } from './stringify-component-props-table.js';
 import type {
 	EnrichedGeneratedDoc,
 	LinkedTypeDefinitions,
 	TypeDefinitionsPayload,
 } from './type-definition-model.js';
 import { parseTypeDefinitionsPayload } from './type-definition-model.js';
+
+type ReplaceSourceFile = Parameters<typeof replaceSource>[0];
+type ReplaceSourceNode = Parameters<typeof replaceSource>[1];
 
 interface MdastRoot {
 	children: Array<unknown>;
@@ -49,14 +54,15 @@ export interface ComponentPropsTableData {
  * definitions are identical. Vite emits only the files a page imports, so files that earlier runs
  * left in `outputDir` never ship.
  *
- * The whole model stays on the node's `data`, where `stringifyComponentPropsTable` lists it after
- * the table in processed Markdown.
+ * The whole model stays on the node's `data`. `replaceSource` then records processed Markdown for
+ * the authored `<component-props-table>` node that `remarkAutoTypeTable` left as a nested root,
+ * including the definitions list that the HTML table loads on demand.
  */
 export function remarkAttachTypeDefinitions({ outputDir }: { outputDir: string }) {
 	return (tree: MdastRoot, file: { path: string }) => {
 		const imports: Array<unknown> = [];
 
-		visit(tree, 'mdxJsxFlowElement', (node: MdxJsxFlowElement) => {
+		visit(tree, 'mdxJsxFlowElement', (node: MdxJsxFlowElement, _index, parent) => {
 			if (node.name !== 'ComponentPropsTable') return;
 
 			const expression = typeExpression(node);
@@ -72,31 +78,57 @@ export function remarkAttachTypeDefinitions({ outputDir }: { outputDir: string }
 					expressionAttribute('typeTokens', JSON.stringify(typeTokens), jsonToEstree(typeTokens)),
 				);
 			}
-			if (Object.keys(typeDefinitions).length === 0) return;
+			if (Object.keys(typeDefinitions).length > 0) {
+				const model = parseTypeDefinitionsPayload(typeDefinitions);
+				node.data = { ...node.data, typeDefinitions: model };
+				const linked = localTypeDefinitions(model);
+				const names = Object.keys(linked);
+				if (names.length > 0) {
+					const assetPath = writeDefinitionsAsset(outputDir, linked);
+					const identifier = `typeDefinitionsHref${imports.length}`;
+					imports.push(urlImport(identifier, importSpecifier(file.path, assetPath)));
+					node.attributes.push(
+						expressionAttribute('definitionsHref', identifier, {
+							name: identifier,
+							type: 'Identifier',
+						}),
+						expressionAttribute('definitionNames', JSON.stringify(names), {
+							elements: names.map((name) => ({ type: 'Literal', value: name })),
+							type: 'ArrayExpression',
+						}),
+					);
+				}
+			}
 
-			const model = parseTypeDefinitionsPayload(typeDefinitions);
-			node.data = { ...node.data, typeDefinitions: model };
-			const linked = localTypeDefinitions(model);
-			const names = Object.keys(linked);
-			if (names.length === 0) return;
-
-			const assetPath = writeDefinitionsAsset(outputDir, linked);
-			const identifier = `typeDefinitionsHref${imports.length}`;
-			imports.push(urlImport(identifier, importSpecifier(file.path, assetPath)));
-			node.attributes.push(
-				expressionAttribute('definitionsHref', identifier, {
-					name: identifier,
-					type: 'Identifier',
-				}),
-				expressionAttribute('definitionNames', JSON.stringify(names), {
-					elements: names.map((name) => ({ type: 'Literal', value: name })),
-					type: 'ArrayExpression',
-				}),
-			);
+			recordProcessedMarkdown(file, parent);
 		});
 
 		tree.children.unshift(...imports);
 	};
+}
+
+/**
+ * Overrides the default `typeTableToMarkdown` text that `remarkAutoTypeTable` recorded, so native
+ * props forwarding is a note and type definitions follow the table.
+ */
+function recordProcessedMarkdown(file: object, parent: unknown) {
+	if (parent === undefined || parent === null || typeof parent !== 'object') return;
+	if (!('children' in parent) || !Array.isArray(parent.children)) return;
+
+	const tables = parent.children.filter(
+		(child): child is MdxJsxFlowElement =>
+			typeof child === 'object' &&
+			child !== null &&
+			(child as MdxJsxFlowElement).type === 'mdxJsxFlowElement' &&
+			(child as MdxJsxFlowElement).name === 'ComponentPropsTable',
+	);
+	if (tables.length === 0) return;
+
+	const markdown = tables
+		.map((table) => stringifyComponentPropsTable(table))
+		.filter((value): value is string => value !== undefined)
+		.join('\n\n');
+	replaceSource(file as ReplaceSourceFile, parent as ReplaceSourceNode, markdown);
 }
 
 function typeExpression(node: MdxJsxFlowElement): MdxJsxAttributeValueExpression {

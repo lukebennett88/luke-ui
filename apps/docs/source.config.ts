@@ -6,13 +6,12 @@ import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import * as z from 'zod';
 import { createComponentPropsGenerator } from './src/lib/create-component-props-generator.js';
 import { createLiveTypescriptGenerator } from './src/lib/create-live-typescript-generator.js';
-import { inlineExampleSource } from './src/lib/inline-example-source';
 import { rehypeServerOnlyMarkdown } from './src/lib/rehype-server-only-markdown.js';
 import { remarkAttachTypeDefinitions } from './src/lib/remark-attach-type-definitions.js';
+import { remarkInlineExampleSource } from './src/lib/remark-inline-example-source.js';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { remarkWatchTypeTableSources } from './src/lib/remark-watch-type-table-sources.js';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
-import { stringifyComponentPropsTable } from './src/lib/stringify-component-props-table.js';
 
 /**
  * Unified merges plugins by function identity and deep-merges their options. Two
@@ -40,9 +39,8 @@ export const docs = defineDocs({
 	dir: 'content/docs',
 	docs: {
 		postprocess: {
-			includeProcessedMarkdown: {
-				stringify: (node) => inlineExampleSource(node) ?? stringifyComponentPropsTable(node),
-			},
+			// Plugins record Markdown with `replaceSource` (Fumadocs 16.17+).
+			includeProcessedMarkdown: true,
 		},
 		schema: pageSchema.extend({
 			/**
@@ -110,6 +108,7 @@ export default defineConfig({
 					outputName: 'TypeTable',
 				} satisfies RemarkAutoTypeTableOptions,
 			],
+			remarkInlineExampleSource,
 			remarkValidateExamples,
 		],
 	},

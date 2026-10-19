@@ -59,9 +59,9 @@ export function expectedInlinedExampleBlock(
 const fileContentsCache = new Map<string, string>();
 
 /**
- * `stringify` hook for `remarkLLMs` that replaces `<ExampleBlock>` and `<SourceCodeBlock>` tags
- * with the source they render, so `llms-full.txt` carries real code instead of a literal tag.
- * Returns `undefined` for any other node so the default stringifier handles it.
+ * Markdown that replaces an `<ExampleBlock>` or `<SourceCodeBlock>` tag with the source it
+ * renders, so `llms-full.txt` carries real code instead of a literal tag. Returns `undefined` for
+ * any other node. `remarkInlineExampleSource` records this text with `replaceSource`.
  */
 export function inlineExampleSource(node: MdastNode): string | undefined {
 	if (!isMdxJsxElement(node)) return;
