@@ -99,3 +99,14 @@ not help. Silence in this log is not evidence.
   locators. The write-tests workflow requires reading that guide before authoring tests.
 - Problem: The agent-authored tests used DOM selectors despite available semantic locators.
   Correcting the tests does not establish that test authoring applies the locator guidance.
+
+## Theme builds refresh tracked dependency metadata
+
+- Seen: 2026-10-19 (#847). Building unchanged main `5ca271c` and both implementation worktrees
+  changed the Paper and Tactile manifests' recorded metrics version from `4.3.0` to `4.4.0`.
+- Where: `packages/@luke-ui/theme-paper/package.json` and
+  `packages/@luke-ui/theme-tactile/package.json`, `inlinedDependencies`. The dependency update in
+  #886 changed the installed version. AGENTS.md requires keeping unrelated changes out of task
+  commits.
+- Problem: Required builds leave unrelated tracked changes behind, requiring authors to identify and
+  restore the generated metadata before finishing their work.
