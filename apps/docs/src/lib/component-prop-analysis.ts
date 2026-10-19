@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import type { GeneratedDoc } from 'fumadocs-typescript';
 import type { ts } from 'ts-morph';
 import { Project } from 'ts-morph';
+import { collectTypescriptSourceGraph } from './typescript-source-graph.js';
 
 export interface PropProject {
 	createSourceFile: (
@@ -128,6 +129,19 @@ export function typeForwardsDomProps(declaration: PropDeclaration, reactSrcDir: 
 	);
 }
 
+/**
+ * Re-reads an entry file and its relative import graph into the shared ts-morph project. Without
+ * this, enrichment keeps first-read definitions for imported aliases after a disk edit in `vp dev`.
+ */
+function refreshPropProjectSourceGraph(project: PropProject, absoluteEntryPath: string): void {
+	if (!existsSync(absoluteEntryPath)) return;
+	const entryContent = readFileSync(absoluteEntryPath, 'utf8');
+	for (const filePath of collectTypescriptSourceGraph(absoluteEntryPath, entryContent).files) {
+		invalidateVisiblePropCachesForFile(filePath);
+		readSourceFile(project, filePath);
+	}
+}
+
 /** Loads an exported prop declaration from a repo-relative TypeScript path. */
 export function loadExportedPropDeclaration(
 	project: PropProject,
@@ -138,6 +152,10 @@ export function loadExportedPropDeclaration(
 	const absolutePath = resolve(repoRoot, repoRelativePath);
 	if (!existsSync(absolutePath)) return;
 
+	// Refresh the entry and its relative imports. The shared project keeps the first parse of each
+	// path for the process lifetime; without a refresh, `vp dev` filters newly added props out of
+	// tables and keeps stale imported type definitions after fumadocs regenerates.
+	refreshPropProjectSourceGraph(project, absolutePath);
 	const file = project.getSourceFile(absolutePath) ?? readSourceFile(project, absolutePath);
 	return file.getExportedDeclarations().get(exportName)?.[0];
 }
@@ -146,6 +164,25 @@ function readSourceFile(project: PropProject, absolutePath: string): PropSourceF
 	return project.createSourceFile(absolutePath, readFileSync(absolutePath, 'utf8'), {
 		overwrite: true,
 	});
+}
+
+/**
+ * Separates `reactSrcDir` from `nodeKey` in visibility-cache keys. Paths may contain spaces, so a
+ * space delimiter cannot round-trip; NUL cannot appear in a filesystem path.
+ */
+const VISIBLE_PROP_CACHE_SEPARATOR = '\0';
+
+/** Drops cached visibility results for declarations that lived in `absolutePath`. */
+function invalidateVisiblePropCachesForFile(absolutePath: string): void {
+	const declarationPrefix = `${absolutePath}:`;
+	for (const key of visiblePropNameSetCache.keys()) {
+		const separatorIndex = key.indexOf(VISIBLE_PROP_CACHE_SEPARATOR);
+		if (separatorIndex === -1) continue;
+		const declarationKey = key.slice(separatorIndex + VISIBLE_PROP_CACHE_SEPARATOR.length);
+		if (declarationKey.startsWith(declarationPrefix)) {
+			visiblePropNameSetCache.delete(key);
+		}
+	}
 }
 
 /**
@@ -546,19 +583,22 @@ function computeVisiblePropNameSet(declaration: PropDeclaration, reactSrcDir: st
  * `filterGeneratedDoc` and `typeForwardsDomProps` are called once per documented type with the same
  * declaration, and the structural walk (`walkOrigins`) is the expensive part of the computation — this
  * cache lets the second call reuse the first's result instead of re-walking the same syntax tree. The
- * key combines `reactSrcDir` with the declaration's `nodeKey` using a space, which cannot appear inside
- * a `nodeKey` (a `file:start` pair), so two different declarations or the same declaration analysed
- * against a different `reactSrcDir` never collide. The cache lives for the process lifetime: within a
- * single build or test run the source files on disk don't change mid-run, so a stale entry surviving a
- * `readSourceFile` re-read (via `overwrite: true`) is not a concern here.
+ * key joins `reactSrcDir` and the declaration's `nodeKey` with a NUL separator so paths that contain
+ * spaces still round-trip. The cache lives for the process lifetime. `loadExportedPropDeclaration`
+ * clears entries for a file before re-reading it, so a `vp dev` edit cannot keep an outdated
+ * visibility set under the same `file:start` key.
  */
 const visiblePropNameSetCache = new Map<string, ReadonlySet<string>>();
+
+function visiblePropCacheKey(reactSrcDir: string, declaration: PropDeclaration): string {
+	return `${reactSrcDir}${VISIBLE_PROP_CACHE_SEPARATOR}${nodeKey(declaration)}`;
+}
 
 function visiblePropNameSet(
 	declaration: PropDeclaration,
 	reactSrcDir: string,
 ): ReadonlySet<string> {
-	const key = `${reactSrcDir} ${nodeKey(declaration)}`;
+	const key = visiblePropCacheKey(reactSrcDir, declaration);
 	const cached = visiblePropNameSetCache.get(key);
 	if (cached !== undefined) return cached;
 
