@@ -27,8 +27,10 @@ applies to the literal next line, so it cannot sit inside a multi-line comment.
 
 ## React Compiler
 
-The package is built with the React Compiler, so do not add `useMemo`, `useCallback` or `memo` for
-performance. Pass plain objects as context values, because the compiler memoises them.
+`@luke-ui/react` is built with the React Compiler, so do not add `useMemo`, `useCallback`, or `memo`
+for performance. Pass plain objects as context values, because the compiler memoises them. The docs
+and reference apps are not compiled and may use `useMemo` / `useCallback` when those hooks earn
+their keep.
 
 ## State modelling
 

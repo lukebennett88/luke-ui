@@ -3,7 +3,7 @@ import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
 import type { ReactNode } from 'react';
-import { createContext, Fragment, use, useRef, useState } from 'react';
+import { createContext, Fragment, use, useCallback, useRef, useState } from 'react';
 import { Breadcrumb, Breadcrumbs } from 'react-aria-components/Breadcrumbs';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Link } from 'react-aria-components/Link';
@@ -108,10 +108,12 @@ function DefinitionDialog({
 	const dialogRef = useRef<HTMLElement>(null);
 	const current = trail.at(-1)!;
 
-	function showTrail(nextTrail: ReadonlyArray<string>) {
+	const showTrail = useCallback((nextTrail: ReadonlyArray<string>) => {
 		setTrail(nextTrail);
 		dialogRef.current?.focus();
-	}
+	}, []);
+
+	const openType = useCallback((name: string) => showTrail([...trail, name]), [showTrail, trail]);
 
 	return (
 		<Dialog aria-label={`Definition of ${current}`} className={styles.dialog} ref={dialogRef}>
@@ -127,7 +129,7 @@ function DefinitionDialog({
 						</Breadcrumb>
 					))}
 				</Breadcrumbs>
-				<OpenTypeContext.Provider value={(name) => showTrail([...trail, name])}>
+				<OpenTypeContext.Provider value={openType}>
 					<DefinitionBody ensureLoaded={ensureLoaded} load={load} typeName={current} />
 				</OpenTypeContext.Provider>
 			</Stack>

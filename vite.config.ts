@@ -77,12 +77,28 @@ export default defineConfig({
 		overrides: [
 			{
 				// Docs examples are copyable source. Allow intentional `tabIndex={0}` on scrollable
-				// non-interactive elements without suppression comments in the published samples.
-				// Demo iframes (e.g. YouTube in aspect-ratio) choose their own embed policy.
+				// non-interactive elements, and demo iframes, without suppression comments in the
+				// published samples.
 				files: ['apps/docs/src/examples/**/*.{ts,tsx}'],
 				rules: {
 					'jsx-a11y/no-noninteractive-tabindex': 'off',
 					'react/iframe-missing-sandbox': 'off',
+				},
+			},
+			{
+				// Only `@luke-ui/react` runs the React Compiler; use its dep analysis here.
+				files: ['packages/@luke-ui/react/src/**/*.{ts,tsx}'],
+				rules: {
+					'react/exhaustive-deps': 'off',
+					'react/exhaustive-effect-dependencies': 'error',
+					'react/memo-dependencies': 'error',
+					'react/preserve-manual-memoization': 'error',
+					'react/capitalized-calls': 'error',
+					// Compiler memoises context values.
+					'react/jsx-no-constructed-context-values': 'off',
+					'react-hooks-js/component-hook-factories': 'error',
+					'react-hooks-js/config': 'error',
+					'react-hooks-js/gating': 'error',
 				},
 			},
 			{
@@ -188,13 +204,6 @@ export default defineConfig({
 					'unicorn/consistent-function-scoping': 'off',
 				},
 			},
-			{
-				files: ['apps/docs/src/components/code-block/code-block.tsx'],
-				rules: {
-					// Copy feedback restarts its timer via `copyFeedbackKey`; the compiler treats that as an extra dep.
-					'react/exhaustive-effect-dependencies': 'off',
-				},
-			},
 		],
 		// Setting `plugins` replaces oxlint defaults, so include unicorn + oxc explicitly.
 		plugins: [
@@ -229,19 +238,21 @@ export default defineConfig({
 			'prefer-const': 'error',
 			'prefer-rest-params': 'error',
 			'prefer-spread': 'error',
-			// Oxlint has no native equivalent for these React Compiler rules yet; keep them on the JS plugin.
-			'react-hooks-js/component-hook-factories': 'error',
-			'react-hooks-js/config': 'error',
-			'react-hooks-js/gating': 'error',
+			// Classic hooks stay repo-wide. Compiler memoization / plugin rules: `@luke-ui/react` only.
+			'react-hooks-js/component-hook-factories': 'off',
+			'react-hooks-js/config': 'off',
+			'react-hooks-js/gating': 'off',
+			'react/capitalized-calls': 'off',
 			'react/error-boundaries': 'error',
 			'react/exhaustive-deps': 'error',
+			'react/exhaustive-effect-dependencies': 'off',
 			'react/globals': 'error',
+			'react/hooks': 'off',
 			'react/immutability': 'error',
 			'react/incompatible-library': 'error',
-			// The React Compiler memoises context values, so manual `useMemo` is redundant.
-			'react/jsx-no-constructed-context-values': 'off',
+			'react/memo-dependencies': 'off',
 			'react/no-array-index-key': 'off',
-			'react/preserve-manual-memoization': 'error',
+			'react/preserve-manual-memoization': 'off',
 			'react/purity': 'error',
 			'react/react-in-jsx-scope': 'off',
 			'react/refs': 'error',
