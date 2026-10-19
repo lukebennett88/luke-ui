@@ -9,10 +9,16 @@ The `Visual baseline` and `Visual regression` workflows render inside the same d
 Playwright container (image tag and digest in those workflow files, kept in sync with the Docker
 command below). That pins Chromium, OS libraries, and system fonts so baseline and compare share one
 rendering environment. GitHub-hosted `ubuntu-latest` alone is not stable enough for pixel
-screenshots.
+screenshots. Both workflows set `PLAYWRIGHT_BROWSERS_PATH=/ms-playwright`, and Turbo’s visual tasks
+pass that variable through so the test process uses the browsers baked into the image.
 
 The `Visual baseline` workflow renders `main` and uploads the `visual-baseline` artefact. Pull
 requests download the newest `main` run, render their branch, and compare it.
+
+After a rendering-environment change (for example moving baseline and compare into this container),
+the first compare against the previous host baseline can show large intentional diffs. Keep the
+usual review approval. Once that change merges, push or re-run `Visual baseline` on `main` so the
+next PRs compare against captures from the pinned container.
 
 The newest run must have succeeded and retain its artefact. Never fall back to an older successful
 run: a stale baseline can pass an unchecked change. Re-run `Visual baseline` on `main` when the

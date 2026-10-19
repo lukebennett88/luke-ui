@@ -55,6 +55,15 @@ jobs:
       - name: Build packages
         run: pnpm build:packages
 
+      - name: Confirm container browsers
+        run: |
+          echo "PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH}"
+          test "${PLAYWRIGHT_BROWSERS_PATH}" = '/ms-playwright'
+          ls "${PLAYWRIGHT_BROWSERS_PATH}"
+          # Fail early if Turbo would strip the path: the test process must see the same value.
+          pnpm exec turbo run test:visual:capture:run --dry-run=json >/dev/null
+          node -e "if (process.env.PLAYWRIGHT_BROWSERS_PATH !== '/ms-playwright') process.exit(1)"
+
       - name: Render baseline captures
         env:
           VISUAL_CAPTURE_DIR: ${{ github.workspace }}/.artifacts/visual-regression/baseline
