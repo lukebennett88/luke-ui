@@ -349,35 +349,50 @@ test('keeps the active result within the visible list while navigating and wraps
 	const list = page.getByRole('menu', { name: 'Search results' }).element();
 	expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
 
-	await userEvent.keyboard('{ArrowDown}'.repeat(10));
+	await moveActiveResult(input, 'ArrowDown', 10);
 	const option = page.getByRole('menuitem').nth(10).element();
-	expect(activeDescendantId(input)).toBe(option.id);
+	await expect.poll(() => activeDescendantId(input)).toBe(option.id);
 	await expectResultWithinList(option, list);
 	await expect.element(input).toHaveFocus();
 
 	await userEvent.keyboard('{ArrowUp}');
 	const previousElement = page.getByRole('menuitem').nth(9).element();
-	expect(activeDescendantId(input)).toBe(previousElement.id);
+	await expect.poll(() => activeDescendantId(input)).toBe(previousElement.id);
 	await expectResultWithinList(previousElement, list);
 	await expect.element(input).toHaveFocus();
 
 	// Wrap upward past the first item to the last.
-	await userEvent.keyboard('{ArrowUp}'.repeat(10));
+	await moveActiveResult(input, 'ArrowUp', 10);
 	const last = page
 		.getByRole('menuitem')
 		.nth(MANY_RESULTS_COUNT - 1)
 		.element();
-	expect(activeDescendantId(input)).toBe(last.id);
+	await expect.poll(() => activeDescendantId(input)).toBe(last.id);
 	await expectResultWithinList(last, list);
 	await expect.element(input).toHaveFocus();
 
 	// Wrap downward past the last item back to the first.
 	await userEvent.keyboard('{ArrowDown}');
 	const first = page.getByRole('menuitem').nth(0).element();
-	expect(activeDescendantId(input)).toBe(first.id);
+	await expect.poll(() => activeDescendantId(input)).toBe(first.id);
 	await expectResultWithinList(first, list);
 	await expect.element(input).toHaveFocus();
 });
+
+/** Presses an arrow key one step at a time so activedescendant can settle under CI load. */
+async function moveActiveResult(
+	input: ReturnType<typeof page.getByRole>,
+	key: 'ArrowDown' | 'ArrowUp',
+	steps: number,
+) {
+	for (let step = 0; step < steps; step++) {
+		const before = activeDescendantId(input);
+		// oxlint-disable-next-line no-await-in-loop -- each arrow must settle before the next
+		await userEvent.keyboard(`{${key}}`);
+		// oxlint-disable-next-line no-await-in-loop -- wait for activedescendant between steps
+		await expect.poll(() => activeDescendantId(input)).not.toBe(before);
+	}
+}
 
 async function expectResultWithinList(result: Element, list: Element) {
 	// The list expands during opening, so compare current bounds on each poll.

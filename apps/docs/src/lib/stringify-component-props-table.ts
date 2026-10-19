@@ -36,9 +36,9 @@ const JSDOC_LINK_PATTERN = /{@link (?<link>[^}]*)}/g;
 const BACKTICK_RUN_PATTERN = /`+/g;
 
 /**
- * remarkLLMs `stringify` hook for expanded `<ComponentPropsTable>` nodes. The table is followed by
- * the definitions `remarkAttachTypeDefinitions` kept on the node, which the HTML table loads on
- * demand instead.
+ * Processed Markdown for an expanded `<ComponentPropsTable>` node. The table is followed by the
+ * definitions `remarkAttachTypeDefinitions` kept on the node, which the HTML table loads on demand
+ * instead. `remarkAttachTypeDefinitions` records this text with `replaceSource`.
  */
 export function stringifyComponentPropsTable(node: MdastNode): string | undefined {
 	if (!isMdxJsxElement(node) || node.name !== 'ComponentPropsTable') return;
