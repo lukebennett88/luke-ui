@@ -17,20 +17,26 @@ export async function loadInter(): Promise<void> {
 	await interPromise;
 }
 
+/**
+ * Clears the memo so a test can exercise a fresh load. Production code must not call this.
+ */
+export function resetLoadInterMemoForTests(): void {
+	interPromise = undefined;
+}
+
 async function loadInterOnce(): Promise<void> {
-	const existing = [...document.fonts].find(
-		(face) => face.family === 'Inter' || face.family === '"Inter"',
-	);
-	if (existing !== undefined) {
-		if (existing.status !== 'loaded') await existing.loaded;
-	} else {
-		const face = new FontFace('Inter', `url(${interUrl})`, {
-			style: 'normal',
-			weight: '100 900',
-		});
-		document.fonts.add(face);
-		// Rejects when the file cannot be fetched or decoded, so a test never measures a fallback font.
-		await face.load();
+	// Always register and load the theme package file. An existing `Inter` face may be unloaded
+	// (awaiting `.loaded` without calling `.load()` hangs) or point at a different binary.
+	// Load only this face: `document.fonts.load('… Inter')` would also try to load other Inter
+	// faces and can hang or fail on an unloaded or broken registration.
+	const face = new FontFace('Inter', `url(${interUrl})`, {
+		style: 'normal',
+		weight: '100 900',
+	});
+	document.fonts.add(face);
+	// Rejects when the file cannot be fetched or decoded, so a test never measures a fallback font.
+	await face.load();
+	if (!document.fonts.check('16px Inter')) {
+		throw new Error('Inter did not become available after loading the theme font file.');
 	}
-	await document.fonts.load('16px Inter');
 }
