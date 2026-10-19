@@ -39,7 +39,13 @@ const DOCKER_MISSING = [
 export function containerCommand(command: VisualLocalCommand): string {
 	const captureOrCompare =
 		command === 'capture'
-			? 'VISUAL_CAPTURE_DIR=/work/.artifacts/visual-regression/baseline pnpm --filter @luke-ui/react run test:visual:capture'
+			? [
+					'capture_dir=$(mktemp -d /artifacts/baseline.XXXXXX)',
+					`trap 'rm -rf "$capture_dir"' EXIT`,
+					'VISUAL_CAPTURE_DIR="$capture_dir" pnpm --filter @luke-ui/react run test:visual:capture',
+					'rm -rf /artifacts/baseline',
+					'mv "$capture_dir" /artifacts/baseline',
+				].join('\n')
 			: 'pnpm --filter @luke-ui/react run test:visual';
 
 	return [
