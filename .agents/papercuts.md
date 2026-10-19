@@ -89,3 +89,13 @@ not help. Silence in this log is not evidence.
   consulting that guide before editing documentation.
 - Problem: The agent-authored section contradicted the required page order. Correcting the order
   does not establish that documentation authoring applies the page-structure guidance.
+
+## New layout tests locate named controls with DOM selectors
+
+- Seen: 2026-10-18 (#847). Self-review found new Button and Link inline-size tests using
+  `querySelector('button')` and `querySelector('a')` for named controls.
+- Where: `packages/@luke-ui/react/src/core/button/button.browser.test.tsx` and
+  `link/link.browser.test.tsx`. `docs/TESTING.md`, Component tests, prefers role and accessible-name
+  locators. The write-tests workflow requires reading that guide before authoring tests.
+- Problem: The agent-authored tests used DOM selectors despite available semantic locators.
+  Correcting the tests does not establish that test authoring applies the locator guidance.
