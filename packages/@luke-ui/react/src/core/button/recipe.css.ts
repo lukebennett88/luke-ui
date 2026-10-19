@@ -9,7 +9,7 @@ export const buttonRecipe = withDefaultVariants<
 	ButtonPresentationProps & RecipeComposition
 >(buttonRecipeInternal, {
 	appearance: 'button',
-	isBlock: false,
+	inlineSize: 'auto',
 	prominence: 'standard',
 	size: 'medium',
 	tone: 'neutral',

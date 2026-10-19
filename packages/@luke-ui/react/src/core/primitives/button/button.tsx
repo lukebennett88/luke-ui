@@ -29,7 +29,7 @@ export function Button(props: ButtonProps): JSX.Element {
 		tone = 'neutral',
 		prominence = 'standard',
 		children,
-		isBlock = false,
+		inlineSize = 'auto',
 		isDisabled = false,
 		isPending = false,
 		size: sizeProp,
@@ -45,7 +45,7 @@ export function Button(props: ButtonProps): JSX.Element {
 					return buttonRecipeInternal({
 						appearance,
 						className,
-						isBlock,
+						inlineSize,
 						prominence,
 						size,
 						tone,

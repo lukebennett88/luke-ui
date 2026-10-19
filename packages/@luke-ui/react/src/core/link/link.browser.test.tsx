@@ -118,3 +118,22 @@ test('forced-colors resting', { tags: ['visual'] }, async () => {
 		await emulateForcedColors('none');
 	}
 });
+
+test('Link preserves intrinsic and full inline sizing', () => {
+	render(
+		<div style={{ inlineSize: 320 }}>
+			<Link appearance="button" href="#" inlineSize="auto">
+				Continue auto
+			</Link>
+			<Link appearance="button" href="#" inlineSize="full">
+				Continue full
+			</Link>
+		</div>,
+	);
+	expect(
+		page.getByRole('link', { name: 'Continue auto' }).element().getBoundingClientRect().width,
+	).toBeLessThan(320);
+	expect(
+		page.getByRole('link', { name: 'Continue full' }).element().getBoundingClientRect().width,
+	).toBe(320);
+});

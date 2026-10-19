@@ -66,7 +66,7 @@ test('keeps JSDoc descriptions for Button presentation props', async () => {
 		(buttonProps?.entries ?? []).map((entry) => [entry.name, entry] as const),
 	);
 
-	for (const name of ['appearance', 'isBlock', 'prominence', 'size', 'tone'] as const) {
+	for (const name of ['appearance', 'inlineSize', 'prominence', 'size', 'tone'] as const) {
 		const entry = entriesByName.get(name);
 		expect(entry, `expected ${name} in ButtonProps`).toBeDefined();
 		expect(entry?.description?.trim().length ?? 0).toBeGreaterThan(0);

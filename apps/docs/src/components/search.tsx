@@ -214,7 +214,7 @@ function WideSearchTrigger({ context }: { context: SearchContextValue }) {
 					<Button
 						aria-label="Search documentation"
 						className={styles.trigger}
-						isBlock
+						inlineSize="full"
 						onPress={() => openSearch('wide')}
 						prominence="low"
 						size="small"

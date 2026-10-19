@@ -391,3 +391,18 @@ function dispatchPress(element: Element) {
 	);
 	element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
 }
+
+test('Button preserves intrinsic and full inline sizing', () => {
+	render(
+		<div style={{ inlineSize: 320 }}>
+			<Button inlineSize="auto">Save auto</Button>
+			<Button inlineSize="full">Save full</Button>
+		</div>,
+	);
+	expect(
+		page.getByRole('button', { name: 'Save auto' }).element().getBoundingClientRect().width,
+	).toBeLessThan(320);
+	expect(
+		page.getByRole('button', { name: 'Save full' }).element().getBoundingClientRect().width,
+	).toBe(320);
+});

@@ -9,7 +9,7 @@ export const linkRecipe = withDefaultVariants<
 	LinkPresentationProps & RecipeComposition
 >(buttonRecipeInternal, {
 	appearance: 'text',
-	isBlock: false,
+	inlineSize: 'auto',
 	size: 'medium',
 	tone: 'neutral',
 	prominence: 'standard',
