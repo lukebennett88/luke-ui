@@ -28,7 +28,8 @@ async function loadInterOnce(): Promise<void> {
 	// Always register and load the theme package file. An existing `Inter` face may be unloaded
 	// (awaiting `.loaded` without calling `.load()` hangs) or point at a different binary.
 	// Load only this face: `document.fonts.load('… Inter')` would also try to load other Inter
-	// faces and can hang or fail on an unloaded or broken registration.
+	// faces and can hang or fail on an unloaded or broken registration. Check this face's status
+	// rather than `document.fonts.check`, which can stay false while a broken Inter remains.
 	const face = new FontFace('Inter', `url(${interUrl})`, {
 		style: 'normal',
 		weight: '100 900',
@@ -36,7 +37,7 @@ async function loadInterOnce(): Promise<void> {
 	document.fonts.add(face);
 	// Rejects when the file cannot be fetched or decoded, so a test never measures a fallback font.
 	await face.load();
-	if (!document.fonts.check('16px Inter')) {
+	if (face.status !== 'loaded') {
 		throw new Error('Inter did not become available after loading the theme font file.');
 	}
 }
