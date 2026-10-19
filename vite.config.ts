@@ -78,11 +78,8 @@ export default defineConfig({
 			{
 				// Docs examples are copyable source. Allow intentional `tabIndex={0}` on scrollable
 				// non-interactive elements without suppression comments in the published samples.
-				// Example/playground previews embed arbitrary demo markup; sandbox policy is the author's choice.
-				files: [
-					'apps/docs/src/examples/**/*.{ts,tsx}',
-					'apps/docs/src/routes/playground/**/*.{ts,tsx}',
-				],
+				// Demo iframes (e.g. YouTube in aspect-ratio) choose their own embed policy.
+				files: ['apps/docs/src/examples/**/*.{ts,tsx}'],
 				rules: {
 					'jsx-a11y/no-noninteractive-tabindex': 'off',
 					'react/iframe-missing-sandbox': 'off',

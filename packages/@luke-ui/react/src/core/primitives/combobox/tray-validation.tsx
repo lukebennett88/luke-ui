@@ -44,8 +44,9 @@ export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.
 		allowsCustomValue && selectedValue === '' ? (state?.inputValue ?? '') : selectedValue;
 
 	useEffect(() => {
+		if (state?.isOpen) return;
 		ref.current?.setCustomValidity(customError);
-	}, [customError]);
+	}, [customError, state?.isOpen]);
 
 	if (state == null) return null;
 

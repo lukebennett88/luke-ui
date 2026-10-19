@@ -394,6 +394,38 @@ test('ComboboxTrayTrigger blocks a closed tray on a custom validation error', as
 	expect(submitCount).toBe(1);
 });
 
+test('ComboboxTrayTrigger keeps custom validity after remount when the message is unchanged', async () => {
+	let submitCount = 0;
+	const blockedMessage = 'That country is not allowed.';
+	render(
+		<form
+			aria-label="Country form"
+			onSubmit={(event) => {
+				event.preventDefault();
+				submitCount += 1;
+			}}
+		>
+			<TrayCombobox
+				defaultValue="au"
+				validate={({ value }) => (value === 'au' || value === 'ca' ? blockedMessage : null)}
+			/>
+			<button type="submit">Submit</button>
+		</form>,
+	);
+
+	await userEvent.click(page.getByRole('button', { name: 'Submit' }).element());
+	expect(submitCount).toBe(0);
+	await expect.element(page.getByText(blockedMessage)).toBeVisible();
+
+	await userEvent.click(page.getByRole('button', { name: 'Country Australia' }).element());
+	await userEvent.click(page.getByRole('option', { name: 'Canada' }).element());
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+
+	await userEvent.click(page.getByRole('button', { name: 'Submit' }).element());
+	expect(submitCount).toBe(0);
+	await expect.element(page.getByText(blockedMessage)).toBeVisible();
+});
+
 test('disabled, read-only, and aria-validated tray comboboxes do not block native submission', async () => {
 	const submitted: Array<string> = [];
 	const renderCase = (label: string, props: Partial<Parameters<typeof TrayCombobox>[0]>) => (
