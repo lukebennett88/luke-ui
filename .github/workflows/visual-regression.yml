@@ -19,6 +19,8 @@ concurrency:
 
 env:
   TURBO_TELEMETRY_DISABLED: '1'
+  # GitHub Actions may not preserve the image ENV; point at the browsers baked into the container.
+  PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
 
 jobs:
   compare:

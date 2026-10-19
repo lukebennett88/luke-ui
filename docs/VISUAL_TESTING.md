@@ -39,9 +39,11 @@ Host Chromium and system fonts can still differ from CI. For captures that must 
 and compare jobs, use the same digest-pinned Playwright image those workflows run in:
 
 ```sh
-docker run --rm --ipc=host -v "$PWD":/work -w /work \
+docker run --rm --ipc=host \
+  -e PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+  -v "$PWD":/work -w /work \
   mcr.microsoft.com/playwright:v1.64.0-jammy@sha256:c064e7f355d2dda32f669801a1b09e86a1e9252395c844d2cfbbe5c44acb9b79 \
-  bash -lc 'corepack enable && pnpm install --frozen-lockfile --no-runtime && pnpm build:packages && VISUAL_CAPTURE_DIR=.artifacts/visual-regression/baseline pnpm --filter @luke-ui/react run test:visual:capture'
+  bash -lc 'corepack enable && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install --frozen-lockfile --no-runtime && pnpm build:packages && VISUAL_CAPTURE_DIR=.artifacts/visual-regression/baseline pnpm --filter @luke-ui/react run test:visual:capture'
 ```
 
 Bump the image tag and digest together when the Playwright version in the catalog moves.
