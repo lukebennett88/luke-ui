@@ -42,17 +42,31 @@ Run the first command on `main`. `test:visual` writes expected, actual, and diff
 `summary.json` to `.artifacts/visual-regression`. Set `VISUAL_BASELINE_DIR` for another baseline.
 
 Host Chromium and system fonts can still differ from CI. For captures that must match the baseline
-and compare jobs, use the same digest-pinned Playwright image those workflows run in:
+and compare jobs, run the same digest-pinned Playwright image on `linux/amd64` (GitHub Actions’
+architecture). The command copies the tree into the container — skipping `node_modules`, `.git`, and
+`.artifacts` — so a Linux `pnpm install` cannot rewrite the host install. Screenshots are written to
+`.artifacts/visual-regression/baseline` on the host. The working tree is otherwise left alone.
 
 ```sh
-docker run --rm --ipc=host \
+mkdir -p .artifacts/visual-regression/baseline
+docker run --rm --ipc=host --platform linux/amd64 \
   -e PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-  -v "$PWD":/work -w /work \
+  -v "$PWD":/src:ro \
+  -v "$PWD/.artifacts/visual-regression/baseline":/out \
   mcr.microsoft.com/playwright:v1.64.0-jammy@sha256:c064e7f355d2dda32f669801a1b09e86a1e9252395c844d2cfbbe5c44acb9b79 \
-  bash -lc 'corepack enable && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install --frozen-lockfile --no-runtime && pnpm build:packages && VISUAL_CAPTURE_DIR=.artifacts/visual-regression/baseline pnpm --filter @luke-ui/react run test:visual:capture'
+  bash -lc 'set -eu
+    mkdir -p /work
+    tar -C /src --exclude=node_modules --exclude=.git --exclude=.artifacts -cf - . \
+      | tar -C /work -xf -
+    cd /work
+    corepack enable
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install --frozen-lockfile --no-runtime
+    pnpm build:packages
+    VISUAL_CAPTURE_DIR=/out pnpm --filter @luke-ui/react run test:visual:capture'
 ```
 
-Bump the image tag and digest together when the Playwright version in the catalog moves.
+Needs Docker (or a compatible engine) that can run `linux/amd64` images. On Apple Silicon that uses
+emulation. Bump the image tag and digest together when the Playwright version in the catalog moves.
 
 ## Review
 
