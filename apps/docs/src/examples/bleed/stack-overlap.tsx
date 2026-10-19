@@ -6,16 +6,16 @@ export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="Without bleed">
-				<Stack gap="sp16">
+				<Stack gap="space.16">
 					<ExampleItem>First item</ExampleItem>
 					<ExampleItem backgroundColor="info.subtle.rest">Middle item</ExampleItem>
 					<ExampleItem>Last item</ExampleItem>
 				</Stack>
 			</ComparisonItem>
 			<ComparisonItem label="With block bleed">
-				<Stack gap="sp16">
+				<Stack gap="space.16">
 					<ExampleItem>First item</ExampleItem>
-					<Bleed block="sp24" position="relative">
+					<Bleed block="space.24" position="relative">
 						<ExampleItem backgroundColor="info.subtle.rest">Middle item</ExampleItem>
 					</Bleed>
 					<ExampleItem>Last item</ExampleItem>

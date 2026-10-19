@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Stack gap="sp8">
+		<Stack gap="space.8">
 			<Text>
 				Fixed: <Numeral precision={2} value={98.7654} />
 			</Text>

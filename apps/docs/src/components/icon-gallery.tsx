@@ -105,10 +105,14 @@ export function IconGallery(): JSX.Element {
 	}
 
 	return (
-		<Stack className="not-prose" gap="sp16">
-			<Lockup className={referenceStyles.filterToolbarCaption} gap="sp12" railAlignment="center">
+		<Stack className="not-prose" gap="space.16">
+			<Lockup
+				className={referenceStyles.filterToolbarCaption}
+				gap="space.12"
+				railAlignment="center"
+			>
 				<LockupBody>
-					<Cluster gap="sp12">
+					<Cluster gap="space.12">
 						<Box flexBasis="14rem" flexGrow="1" minInlineSize="12rem">
 							<TextInputField
 								aria-label="Filter icons by name"
@@ -231,7 +235,7 @@ interface IconGalleryCellProps {
 function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryCellProps) {
 	return (
 		<Stack className={styles.cell} gap="0">
-			<Stack alignItems="center" gap="sp4" padding="sp8">
+			<Stack alignItems="center" gap="space.4" padding="space.8">
 				<Box
 					alignItems="center"
 					blockSize="5rem"
@@ -296,9 +300,9 @@ function CopyButton({ copyStatus, kind, name, onCopy }: CopyButtonProps) {
 			alignItems="center"
 			className={cx(styles.copyButton, kind === 'jsx' && styles.copyButtonDivider)}
 			display="flex"
-			gap="sp4"
+			gap="space.4"
 			justifyContent="center"
-			minBlockSize={vars.space.sp32}
+			minBlockSize={vars.space['32']}
 			minInlineSize="0"
 			padding="0"
 			renderRoot={(domProps) => (
@@ -326,7 +330,7 @@ interface IconGalleryEmptyStateProps {
 /** Real empty state inside the grid frame: names the query, offers a way back. */
 function IconGalleryEmptyState({ onClear, query }: IconGalleryEmptyStateProps) {
 	return (
-		<Stack alignItems="center" gap="sp12" paddingBlock="sp48" paddingInline="sp24">
+		<Stack alignItems="center" gap="space.12" paddingBlock="space.48" paddingInline="space.24">
 			<Text color="secondary" elementType="p" textAlign="center" typography="caption">
 				No icon matches &quot;{query}&quot;
 			</Text>

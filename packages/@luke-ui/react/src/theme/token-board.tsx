@@ -48,12 +48,12 @@ function humanizeSegment(segment: string): string {
 
 const boardStyle = {
 	display: 'grid',
-	gap: vars.space.sp32,
+	gap: vars.space['32'],
 } as const satisfies CSSProperties;
 
 const groupSectionStyle = {
 	display: 'grid',
-	gap: vars.space.sp12,
+	gap: vars.space['12'],
 } as const satisfies CSSProperties;
 
 const headingStyle = {
@@ -64,12 +64,12 @@ const headingStyle = {
 const swatchGridStyle = {
 	display: 'flex',
 	flexWrap: 'wrap',
-	gap: vars.space.sp12,
+	gap: vars.space['12'],
 } as const satisfies CSSProperties;
 
 const swatchCardStyle = {
 	display: 'grid',
-	gap: vars.space.sp4,
+	gap: vars.space['4'],
 	inlineSize: '9rem',
 	justifyItems: 'start',
 } as const satisfies CSSProperties;
@@ -315,7 +315,7 @@ function SpacePreview({ path, varName }: LeafPreviewProps) {
 				role="img"
 				style={{
 					backgroundColor: vars.color.background.accent.solid.rest,
-					blockSize: vars.space.sp12,
+					blockSize: vars.space['12'],
 					display: 'inline-block',
 					inlineSize: `var(${varName})`,
 				}}
@@ -353,14 +353,14 @@ function SizePreview({ path, varName }: LeafPreviewProps) {
 function InteractionPreview({ path, varName }: LeafPreviewProps) {
 	const swatch = {
 		backgroundColor: vars.color.background.accent.solid.rest,
-		blockSize: vars.space.sp24,
+		blockSize: vars.space['24'],
 		borderRadius: vars.radius.detail,
 		display: 'inline-block',
-		inlineSize: vars.space.sp24,
+		inlineSize: vars.space['24'],
 	} as const satisfies CSSProperties;
 
 	return (
-		<span style={{ ...previewFrameStyle, gap: vars.space.sp12 }}>
+		<span style={{ ...previewFrameStyle, gap: vars.space['12'] }}>
 			<span aria-hidden={true} style={swatch} />
 			<span
 				aria-label={`${path} sample`}
@@ -379,7 +379,9 @@ function MotionPreview({ path, segments, varName }: LeafPreviewProps) {
 	const easing = axis === 'easing' ? `var(${varName})` : fallbackMotionEasing;
 
 	return (
-		<span style={{ ...previewFrameStyle, justifyContent: 'center', paddingInline: vars.space.sp4 }}>
+		<span
+			style={{ ...previewFrameStyle, justifyContent: 'center', paddingInline: vars.space['4'] }}
+		>
 			<span
 				aria-label={`${path} sample`}
 				data-token-board-motion
@@ -391,10 +393,10 @@ function MotionPreview({ path, segments, varName }: LeafPreviewProps) {
 					animationName: 'luke-token-board-motion',
 					animationTimingFunction: easing,
 					backgroundColor: vars.color.background.accent.solid.rest,
-					blockSize: vars.space.sp16,
+					blockSize: vars.space['16'],
 					borderRadius: vars.radius.full,
 					display: 'inline-block',
-					inlineSize: vars.space.sp16,
+					inlineSize: vars.space['16'],
 				}}
 			/>
 		</span>

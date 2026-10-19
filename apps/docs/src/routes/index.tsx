@@ -52,10 +52,10 @@ function Home() {
 			<Container
 				elementType="main"
 				flexGrow="1"
-				maxInlineSize="px1152"
+				maxInlineSize="container.1152"
 				paddingInline={{
-					initial: 'sp16',
-					bp768: 'sp24',
+					initial: 'space.16',
+					bp768: 'space.24',
 				}}
 			>
 				<HeadingLevels base={1}>

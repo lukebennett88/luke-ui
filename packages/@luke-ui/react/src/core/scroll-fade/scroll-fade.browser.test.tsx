@@ -36,7 +36,12 @@ test('fitting div has no mask, tab stop, region role, or accessible name', async
 
 test('overflowing div applies accessible name with the automatic region role', async () => {
 	const { locator } = render(
-		<ScrollFade aria-label="Wide list" data-testid="scroll-fade" inlineSize="8rem" padding="sp8">
+		<ScrollFade
+			aria-label="Wide list"
+			data-testid="scroll-fade"
+			inlineSize="8rem"
+			padding="space.8"
+		>
 			<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 				Overflowing inline content for the mask
 			</span>
@@ -63,7 +68,7 @@ test('overflowing block content is keyboard-focusable with a region role and mas
 			blockSize="6rem"
 			data-testid="scroll-fade"
 			inlineSize="12rem"
-			padding="sp8"
+			padding="space.8"
 		>
 			<div style={{ blockSize: '18rem' }}>Overflowing block content for the mask</div>
 		</ScrollFade>,
@@ -144,7 +149,7 @@ for (const writingCase of [
 					blockSize="10rem"
 					data-testid="scroll-fade"
 					inlineSize="5rem"
-					padding="sp8"
+					padding="space.8"
 				>
 					<div style={{ inlineSize: '16rem', whiteSpace: 'nowrap' }}>
 						長いインライン内容 for logical overflow
@@ -174,7 +179,7 @@ test('inherited CSS direction updates the inline mask without remounting', async
 					aria-label="Direction switch"
 					data-testid="scroll-fade"
 					inlineSize="8rem"
-					padding="sp8"
+					padding="space.8"
 				>
 					<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 						Overflowing inline content for direction switch
@@ -199,7 +204,7 @@ test('inline scroll progression fades start then end across the scroll range', a
 			aria-label="Inline progression"
 			data-testid="scroll-fade"
 			inlineSize="10rem"
-			padding="sp8"
+			padding="space.8"
 		>
 			<span style={{ display: 'inline-block', inlineSize: '40rem', whiteSpace: 'nowrap' }}>
 				Overflowing inline content for scroll progression
@@ -220,7 +225,7 @@ test('block scroll progression fades start then end across the scroll range', as
 			blockSize="8rem"
 			data-testid="scroll-fade"
 			inlineSize="12rem"
-			padding="sp8"
+			padding="space.8"
 		>
 			<div style={{ blockSize: '40rem' }}>Overflowing block content for scroll progression</div>
 		</ScrollFade>,
@@ -237,9 +242,9 @@ test('scroll progression stays coherent when overflow is shorter than the reveal
 			aria-label="Short overflow"
 			data-testid="scroll-fade"
 			inlineSize="10rem"
-			padding="sp8"
+			padding="space.8"
 		>
-			{/* Viewport ~160px; content ~200px → overflow ~40px, well under sp96. */}
+			{/* Viewport ~160px; content ~200px → overflow ~40px, well under space.96. */}
 			<span style={{ display: 'inline-block', inlineSize: '12.5rem', whiteSpace: 'nowrap' }}>
 				Short overflow progression
 			</span>
@@ -260,7 +265,7 @@ test('focus-visible keeps the mask and a visible focus ring on the scrollport', 
 				aria-label="Focusable list"
 				data-testid="scroll-fade"
 				inlineSize="8rem"
-				padding="sp8"
+				padding="space.8"
 			>
 				<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 					Overflowing inline content for focus
@@ -284,7 +289,12 @@ test('focus-visible keeps the mask and a visible focus ring on the scrollport', 
 
 test('focusing an interactive descendant near a faded edge keeps the mask', async () => {
 	const { locator } = render(
-		<ScrollFade aria-label="Nested focus" data-testid="scroll-fade" inlineSize="8rem" padding="sp8">
+		<ScrollFade
+			aria-label="Nested focus"
+			data-testid="scroll-fade"
+			inlineSize="8rem"
+			padding="space.8"
+		>
 			<div style={{ display: 'flex', gap: '1rem', inlineSize: '24rem' }}>
 				<button type="button">Near start</button>
 				<span style={{ flex: 'none', inlineSize: '16rem' }}>Spacer</span>
@@ -389,7 +399,7 @@ test('SSR markup hydrates without mismatch and then measures overflow', async ()
 			aria-label="Hydrated list"
 			data-testid="scroll-fade"
 			inlineSize="8rem"
-			padding="sp8"
+			padding="space.8"
 		>
 			<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 				Overflowing inline content for hydration
@@ -426,7 +436,7 @@ test('fitting and overflowing ScrollFades have no axe violations', async () => {
 				aria-label="Overflows"
 				data-testid="overflowing-axe"
 				inlineSize="8rem"
-				padding="sp8"
+				padding="space.8"
 			>
 				<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 					Overflowing content for axe
@@ -451,7 +461,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 function ScrollFadeScene() {
 	return (
 		<Grid columns={2}>
-			<ScrollFade aria-label="Inline topics" inlineSize="10rem" padding="sp8">
+			<ScrollFade aria-label="Inline topics" inlineSize="10rem" padding="space.8">
 				<span style={{ display: 'inline-block', inlineSize: '22rem', whiteSpace: 'nowrap' }}>
 					Design tokens · Layout · Forms · Feedback · Typography
 				</span>
@@ -461,9 +471,9 @@ function ScrollFadeScene() {
 				axis="block"
 				blockSize="8rem"
 				inlineSize="12rem"
-				padding="sp8"
+				padding="space.8"
 			>
-				<div style={{ display: 'grid', gap: vars.space.sp8 }}>
+				<div style={{ display: 'grid', gap: vars.space['8'] }}>
 					{['Overview', 'Installation', 'Theming', 'Layout', 'Forms', 'Feedback'].map((item) => (
 						<Text key={item}>{item}</Text>
 					))}

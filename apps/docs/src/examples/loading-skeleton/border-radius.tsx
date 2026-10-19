@@ -8,7 +8,7 @@ export default () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
-		<Stack gap="sp16" maxInlineSize="20rem">
+		<Stack gap="space.16" maxInlineSize="20rem">
 			<CheckboxField isSelected={isLoading} label="Show loading state" onChange={setIsLoading} />
 			<LoadingSkeleton isLoading={isLoading} radius="control">
 				<TextInputField label="Email address" name="email" placeholder="you@example.com" />

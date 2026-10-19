@@ -34,7 +34,7 @@ test('flows children on the block axis with no gap by default', () => {
 test('keeps the block axis under RTL', () => {
 	const { locator } = render(
 		<div dir="rtl" style={{ blockSize: '6rem' }}>
-			<Stack data-testid="stack-rtl" gap="sp8">
+			<Stack data-testid="stack-rtl" gap="space.8">
 				<span style={{ blockSize: '1rem' }} />
 				<span style={{ blockSize: '1rem' }} />
 			</Stack>
@@ -58,7 +58,7 @@ test('keeps the block axis under RTL', () => {
 test('applies a responsive gap from its required initial value', async () => {
 	await page.viewport(breakpoints.bp640, 800);
 	const { locator } = render(
-		<Stack data-testid="stack" gap={{ initial: '0', bp768: 'sp8' }}>
+		<Stack data-testid="stack" gap={{ initial: '0', bp768: 'space.8' }}>
 			<span style={{ blockSize: '1rem' }} />
 			<span style={{ blockSize: '1rem' }} />
 		</Stack>,
@@ -80,21 +80,21 @@ const itemStyle = {
 	backgroundColor: vars.color.surface.base,
 	borderRadius: vars.radius.detail,
 	color: vars.color.text.primary,
-	paddingBlock: vars.space.sp8,
-	paddingInline: vars.space.sp12,
+	paddingBlock: vars.space['8'],
+	paddingInline: vars.space['12'],
 } as const;
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator: scene } = render(
-			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space.sp16 }}>
+			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space['16'] }}>
 				<Stack
-					gap="sp12"
+					gap="space.12"
 					style={{
 						backgroundColor: vars.color.surface.subdued,
 						borderRadius: vars.radius.surface,
 						color: vars.color.text.primary,
-						padding: vars.space.sp16,
+						padding: vars.space['16'],
 					}}
 				>
 					<span style={itemStyle}>Block axis</span>
@@ -102,12 +102,12 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				</Stack>
 				<Stack
 					alignItems="center"
-					gap="sp8"
+					gap="space.8"
 					style={{
 						backgroundColor: vars.color.surface.subdued,
 						borderRadius: vars.radius.surface,
 						color: vars.color.text.primary,
-						padding: vars.space.sp16,
+						padding: vars.space['16'],
 					}}
 				>
 					<span style={itemStyle}>Aligned</span>
@@ -120,7 +120,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 						backgroundColor: vars.color.surface.subdued,
 						borderRadius: vars.radius.surface,
 						color: vars.color.text.primary,
-						padding: vars.space.sp16,
+						padding: vars.space['16'],
 					}}
 				>
 					<span style={itemStyle}>Touching</span>
@@ -128,12 +128,12 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				</Stack>
 				<div dir="rtl">
 					<Stack
-						gap="sp8"
+						gap="space.8"
 						style={{
 							backgroundColor: vars.color.surface.subdued,
 							borderRadius: vars.radius.surface,
 							color: vars.color.text.primary,
-							padding: vars.space.sp16,
+							padding: vars.space['16'],
 						}}
 					>
 						<span style={itemStyle}>First</span>

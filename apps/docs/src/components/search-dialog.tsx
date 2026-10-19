@@ -105,7 +105,7 @@ export function DocsSearchDialog({
 			<div className={styles.panelFieldShell}>
 				<div className={styles.autocomplete}>
 					<Autocomplete inputValue={search} onInputChange={setSearch}>
-						<Lockup className={styles.inputRow} gap="sp12" railAlignment="center">
+						<Lockup className={styles.inputRow} gap="space.12" railAlignment="center">
 							<LockupBody>
 								<TextInputField
 									aria-label="Search documentation"

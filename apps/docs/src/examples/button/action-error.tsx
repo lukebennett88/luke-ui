@@ -26,7 +26,7 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 	const message = error instanceof Error ? error.message : 'Something went wrong';
 
 	return (
-		<Stack gap="sp12">
+		<Stack gap="space.12">
 			<Text color="danger" role="alert">
 				{message}
 			</Text>

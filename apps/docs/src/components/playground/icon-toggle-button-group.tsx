@@ -44,7 +44,7 @@ export function IconToggleButtonGroup<Value extends string>({
 	return (
 		<Cluster
 			flexWrap="nowrap"
-			gap="sp8"
+			gap="space.8"
 			renderRoot={(domProps) => (
 				<ToggleButtonGroup
 					{...domProps}
@@ -85,7 +85,7 @@ export function TextToggleButtonGroup<Value extends string>({
 	return (
 		<Cluster
 			flexWrap="nowrap"
-			gap="sp8"
+			gap="space.8"
 			renderRoot={(domProps) => (
 				<ToggleButtonGroup
 					{...domProps}

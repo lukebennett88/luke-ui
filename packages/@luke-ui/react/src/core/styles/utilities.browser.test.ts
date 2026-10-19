@@ -23,23 +23,23 @@ test('applies every retained breakpoint responsively', async () => {
 	const element = mount(
 		createSprinkles({
 			padding: {
-				initial: 'sp4',
-				bp640: 'sp8',
-				bp768: 'sp12',
-				bp1024: 'sp16',
-				bp1280: 'sp24',
-				bp1536: 'sp32',
+				initial: 'space.4',
+				bp640: 'space.8',
+				bp768: 'space.12',
+				bp1024: 'space.16',
+				bp1280: 'space.24',
+				bp1536: 'space.32',
 			},
 		}),
 	);
 
 	const viewports = [
-		{ width: 320, property: '--luke-space-sp4' },
-		{ width: breakpoints.bp640, property: '--luke-space-sp8' },
-		{ width: breakpoints.bp768, property: '--luke-space-sp12' },
-		{ width: breakpoints.bp1024, property: '--luke-space-sp16' },
-		{ width: breakpoints.bp1280, property: '--luke-space-sp24' },
-		{ width: breakpoints.bp1536, property: '--luke-space-sp32' },
+		{ width: 320, property: '--luke-space-ace.4' },
+		{ width: breakpoints.bp640, property: '--luke-space-ace.8' },
+		{ width: breakpoints.bp768, property: '--luke-space-ace.12' },
+		{ width: breakpoints.bp1024, property: '--luke-space-ace.16' },
+		{ width: breakpoints.bp1280, property: '--luke-space-ace.24' },
+		{ width: breakpoints.bp1536, property: '--luke-space-ace.32' },
 	] as const;
 
 	for (const viewport of viewports) {
@@ -58,11 +58,11 @@ test('resolves against a nearer explicit container instead of the root', async (
 	wrapper.style.containerType = 'inline-size';
 	wrapper.style.inlineSize = `${breakpoints.bp640 - 1}px`;
 
-	const generated = createSprinkles({ padding: { initial: 'sp4', bp640: 'sp8' } });
+	const generated = createSprinkles({ padding: { initial: 'space.4', bp640: 'space.8' } });
 	const element = mount(generated, wrapper);
 
 	const computedStyle = getComputedStyle(element);
-	expect(computedStyle.padding).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
+	expect(computedStyle.padding).toBe(resolvedCustomProperty(element, '--luke-space-ace.4'));
 });
 
 test('resolves against the root content box, not the viewport width', async () => {
@@ -73,11 +73,11 @@ test('resolves against the root content box, not the viewport width', async () =
 	const rootStyle = document.head.appendChild(document.createElement('style'));
 	rootStyle.textContent = ':root { padding-inline-end: 17px; }';
 
-	const generated = createSprinkles({ padding: { initial: 'sp4', bp640: 'sp8' } });
+	const generated = createSprinkles({ padding: { initial: 'space.4', bp640: 'space.8' } });
 	const element = mount(generated);
 
 	const computedStyle = getComputedStyle(element);
-	expect(computedStyle.padding).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
+	expect(computedStyle.padding).toBe(resolvedCustomProperty(element, '--luke-space-ace.4'));
 	rootStyle.remove();
 });
 
@@ -124,26 +124,30 @@ test('returns class and style output that merges with consumer props', () => {
 });
 
 test('columnGap overrides gap while rowGap keeps the shorthand', () => {
-	const element = mount(createSprinkles({ gap: 'sp8', columnGap: 'sp4' }));
+	const element = mount(createSprinkles({ gap: 'space.8', columnGap: 'space.4' }));
 	const computedStyle = getComputedStyle(element);
 
-	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
-	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-sp8'));
+	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-ace.4'));
+	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-ace.8'));
 });
 
 test('marginInlineStart overrides margin through the inline shorthand', () => {
 	const element = mount(
 		createSprinkles({
-			margin: 'sp16',
-			marginInline: 'sp8',
-			marginInlineStart: 'sp4',
+			margin: 'space.16',
+			marginInline: 'space.8',
+			marginInlineStart: 'space.4',
 		}),
 	);
 	const computedStyle = getComputedStyle(element);
 
-	expect(computedStyle.marginInlineStart).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
-	expect(computedStyle.marginInlineEnd).toBe(resolvedCustomProperty(element, '--luke-space-sp8'));
-	expect(computedStyle.marginBlockStart).toBe(resolvedCustomProperty(element, '--luke-space-sp16'));
+	expect(computedStyle.marginInlineStart).toBe(
+		resolvedCustomProperty(element, '--luke-space-ace.4'),
+	);
+	expect(computedStyle.marginInlineEnd).toBe(resolvedCustomProperty(element, '--luke-space-ace.8'));
+	expect(computedStyle.marginBlockStart).toBe(
+		resolvedCustomProperty(element, '--luke-space-ace.16'),
+	);
 });
 
 test('gridColumnStart overrides gridArea', () => {
@@ -160,25 +164,25 @@ test('gridColumnStart overrides gridArea', () => {
 test('a later responsive gap overrides a base columnGap on both axes', async () => {
 	const element = mount(
 		createSprinkles({
-			gap: { initial: 'sp8', bp768: 'sp24' },
-			columnGap: 'sp4',
+			gap: { initial: 'space.8', bp768: 'space.24' },
+			columnGap: 'space.4',
 		}),
 	);
 
 	await page.viewport(320, 800);
 	expect(getComputedStyle(element).rowGap).toBe(
-		resolvedCustomProperty(element, '--luke-space-sp8'),
+		resolvedCustomProperty(element, '--luke-space-ace.8'),
 	);
 	expect(getComputedStyle(element).columnGap).toBe(
-		resolvedCustomProperty(element, '--luke-space-sp4'),
+		resolvedCustomProperty(element, '--luke-space-ace.4'),
 	);
 
 	await page.viewport(breakpoints.bp768, 800);
 	expect(getComputedStyle(element).rowGap).toBe(
-		resolvedCustomProperty(element, '--luke-space-sp24'),
+		resolvedCustomProperty(element, '--luke-space-ace.24'),
 	);
 	expect(getComputedStyle(element).columnGap).toBe(
-		resolvedCustomProperty(element, '--luke-space-sp24'),
+		resolvedCustomProperty(element, '--luke-space-ace.24'),
 	);
 });
 
@@ -186,14 +190,14 @@ test('columnGap overrides gap when both are set at the same breakpoint', async (
 	await page.viewport(breakpoints.bp768, 800);
 	const element = mount(
 		createSprinkles({
-			gap: { bp768: 'sp24' },
-			columnGap: { bp768: 'sp4' },
+			gap: { bp768: 'space.24' },
+			columnGap: { bp768: 'space.4' },
 		}),
 	);
 	const computedStyle = getComputedStyle(element);
 
-	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-sp24'));
-	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-sp4'));
+	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-ace.24'));
+	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-ace.4'));
 });
 
 /**

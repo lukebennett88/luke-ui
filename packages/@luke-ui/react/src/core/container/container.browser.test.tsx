@@ -8,11 +8,11 @@ import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
 
 const fixedSizes = [
-	['px448', 448],
-	['px672', 672],
-	['px896', 896],
-	['px1152', 1152],
-	['px1280', 1280],
+	['container.448', 448],
+	['container.672', 672],
+	['container.896', 896],
+	['container.1152', 1152],
+	['container.1280', 1280],
 ] as const;
 
 afterEach(async () => {
@@ -22,7 +22,7 @@ afterEach(async () => {
 test('uses its fixed maximum as a border-box width and centres by default', () => {
 	const { locator } = render(
 		<div data-testid="parent" style={{ inlineSize: '800px' }}>
-			<Container data-testid="container" maxInlineSize="px672" paddingInline="sp16">
+			<Container data-testid="container" maxInlineSize="container.672" paddingInline="space.16">
 				Content
 			</Container>
 		</div>,
@@ -58,7 +58,7 @@ for (const [maxInlineSize, expectedWidth] of fixedSizes) {
 test('lets marginInline override its default centring', () => {
 	const { locator } = render(
 		<div style={{ inlineSize: '800px' }}>
-			<Container data-testid="container" marginInline="0" maxInlineSize="px448">
+			<Container data-testid="container" marginInline="0" maxInlineSize="container.448">
 				Content
 			</Container>
 		</div>,
@@ -72,9 +72,13 @@ test('lets marginInline override its default centring', () => {
 test('uses the nearest nested Container as the query boundary', async () => {
 	await page.viewport(1024, 800);
 	const { locator } = render(
-		<Container maxInlineSize="100%" paddingInline="sp16">
+		<Container
+			maxInlineSize="container.1280"
+			style={{ maxInlineSize: '100%' }}
+			paddingInline="space.16"
+		>
 			<Box data-testid="outer" display={{ initial: 'block', bp768: 'flex' }} />
-			<Container maxInlineSize="px672">
+			<Container maxInlineSize="container.672">
 				<Box data-testid="nested" display={{ initial: 'block', bp768: 'flex' }} />
 			</Container>
 		</Container>,
@@ -89,10 +93,14 @@ test('uses the nearest nested Container as the query boundary', async () => {
 	expect(getComputedStyle(nested).display).toBe('block');
 });
 
-test('caps the border box at an arbitrary CSS maxInlineSize', () => {
+test('style overrides the preset with a custom maximum inline size', () => {
 	const { locator } = render(
 		<div style={{ inlineSize: '800px' }}>
-			<Container data-testid="container" maxInlineSize="42rem">
+			<Container
+				data-testid="container"
+				maxInlineSize="container.448"
+				style={{ maxInlineSize: '42rem' }}
+			>
 				Content
 			</Container>
 		</div>,
@@ -105,7 +113,7 @@ test('caps the border box at an arbitrary CSS maxInlineSize', () => {
 
 test('supports semantic and caller-owned elements', () => {
 	const semantic = render(
-		<Container aria-label="Page content" elementType="main" maxInlineSize="px896">
+		<Container aria-label="Page content" elementType="main" maxInlineSize="container.896">
 			Page content
 		</Container>,
 	);
@@ -115,7 +123,7 @@ test('supports semantic and caller-owned elements', () => {
 
 	const custom = render(
 		<Container
-			maxInlineSize="px896"
+			maxInlineSize="container.896"
 			renderRoot={(domProps) => <section {...domProps} data-testid="custom-container" />}
 		>
 			Custom content
@@ -127,21 +135,21 @@ test('supports semantic and caller-owned elements', () => {
 	expect(getComputedStyle(element).containerType).toBe('inline-size');
 });
 
-const sizes = ['px448', 'px672', 'px896'] as const;
+const sizes = ['container.448', 'container.672', 'container.896'] as const;
 
 test('fixed maximum inline sizes', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator: scene } = render(
-			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space.sp12 }}>
+			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space['12'] }}>
 				{sizes.map((maxInlineSize) => (
-					<Container key={maxInlineSize} maxInlineSize={maxInlineSize} paddingInline="sp16">
+					<Container key={maxInlineSize} maxInlineSize={maxInlineSize} paddingInline="space.16">
 						<Box
 							backgroundColor="surface.base"
 							borderColor="decorative"
 							borderRadius="detail"
 							borderStyle="solid"
 							borderWidth="thin"
-							padding="sp12"
+							padding="space.12"
 						>
 							<Text>{maxInlineSize}</Text>
 						</Box>

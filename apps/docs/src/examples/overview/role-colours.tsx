@@ -24,8 +24,8 @@ export default () => {
 	const [role, setRole] = useState<Role>('warning');
 
 	return (
-		<Stack gap="sp16">
-			<Cluster aria-label="Semantic role" gap="sp8" role="group">
+		<Stack gap="space.16">
+			<Cluster aria-label="Semantic role" gap="space.8" role="group">
 				{(Object.keys(roles) as Array<Role>).map((option) => (
 					<Button
 						aria-pressed={role === option}
@@ -37,14 +37,14 @@ export default () => {
 					</Button>
 				))}
 			</Cluster>
-			<Grid columns="repeat(auto-fit, minmax(min(16rem, 100%), 1fr))" gap="sp12">
+			<Grid columns="repeat(auto-fit, minmax(min(16rem, 100%), 1fr))" gap="space.12">
 				{modes.map((mode) => (
 					<Box
 						data-color-mode={mode}
 						display="grid"
-						gap="sp8"
+						gap="space.8"
 						key={mode}
-						padding="sp12"
+						padding="space.12"
 						style={{
 							backgroundColor: vars.color.surface.base,
 							borderRadius: vars.radius.surface,
@@ -55,8 +55,8 @@ export default () => {
 						</Text>
 						<Box
 							display="grid"
-							gap="sp8"
-							padding="sp8"
+							gap="space.8"
+							padding="space.8"
 							style={{
 								backgroundColor: vars.color.surface.subdued,
 								border: `1px solid ${vars.color.border.decorative}`,
@@ -65,15 +65,15 @@ export default () => {
 						>
 							<Box
 								display="grid"
-								gap="sp4"
-								padding="sp12"
+								gap="space.4"
+								padding="space.12"
 								style={{
 									backgroundColor: vars.color.background[role].subtle.rest,
 									border: `1px solid ${vars.color.border[role]}`,
 									borderRadius: vars.radius.control,
 								}}
 							>
-								<Cluster alignItems="center" gap="sp4">
+								<Cluster alignItems="center" gap="space.4">
 									<Text
 										elementType="strong"
 										fontWeight="emphasis"
@@ -88,7 +88,7 @@ export default () => {
 											backgroundColor: vars.color.background[role].solid.rest,
 											borderRadius: vars.radius.full,
 											color: vars.color.foreground[role].onSolid,
-											padding: `${vars.space.sp4} ${vars.space.sp8}`,
+											padding: `${vars.space['4']} ${vars.space['8']}`,
 										}}
 										typography="caption"
 									>

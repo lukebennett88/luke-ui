@@ -8,7 +8,7 @@ export default () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
-		<Stack gap="sp16" maxInlineSize="28rem">
+		<Stack gap="space.16" maxInlineSize="28rem">
 			<CheckboxField isSelected={isLoading} label="Show loading state" onChange={setIsLoading} />
 			<Text>
 				<LoadingSkeleton isLoading={isLoading}>

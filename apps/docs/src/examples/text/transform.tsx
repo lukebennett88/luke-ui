@@ -3,7 +3,7 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Stack gap="sp12">
+		<Stack gap="space.12">
 			<Text textTransform="uppercase">Uppercase text</Text>
 			<Text textDecoration="underline">Underlined text</Text>
 		</Stack>

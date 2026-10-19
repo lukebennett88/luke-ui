@@ -51,25 +51,25 @@ proseStyle(
 	'p, h1, h2, h3, h4, h5, h6, ul, ol, li, dl, dt, dd, blockquote, pre, hr, figure, figcaption, table, img, picture, video',
 	{ margin: 0 },
 );
-proseStyle('* + p, * + ul, * + ol, * + dl, * + h1', { marginBlockStart: vars.space.sp32 });
-proseStyle('* + h2, * + hr', { marginBlockStart: vars.space.sp64 });
+proseStyle('* + p, * + ul, * + ol, * + dl, * + h1', { marginBlockStart: vars.space['32'] });
+proseStyle('* + h2, * + hr', { marginBlockStart: vars.space['64'] });
 proseStyle('* + h3, * + blockquote, * + table, * + figure, * + img, * + picture, * + video', {
-	marginBlockStart: vars.space.sp40,
+	marginBlockStart: vars.space['40'],
 });
-proseStyle('* + h4, * + h5, * + h6, * + pre', { marginBlockStart: vars.space.sp32 });
-proseStyle('* + li, * + dd', { marginBlockStart: vars.space.sp12 });
-proseStyle('* + dt', { marginBlockStart: vars.space.sp32 });
+proseStyle('* + h4, * + h5, * + h6, * + pre', { marginBlockStart: vars.space['32'] });
+proseStyle('* + li, * + dd', { marginBlockStart: vars.space['12'] });
+proseStyle('* + dt', { marginBlockStart: vars.space['32'] });
 proseStyle('* + figcaption, li > ul, li > ol, li > p + p', {
-	marginBlockStart: vars.space.sp16,
+	marginBlockStart: vars.space['16'],
 });
 
-proseStyle('h1 + *', { marginBlockStart: vars.space.sp40 });
-proseStyle('h1 + h2, h1 + hr', { marginBlockStart: vars.space.sp64 });
-proseStyle('h2 + *', { marginBlockStart: vars.space.sp32 });
-proseStyle('h3 + *', { marginBlockStart: vars.space.sp24 });
-proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space.sp16 });
+proseStyle('h1 + *', { marginBlockStart: vars.space['40'] });
+proseStyle('h1 + h2, h1 + hr', { marginBlockStart: vars.space['64'] });
+proseStyle('h2 + *', { marginBlockStart: vars.space['32'] });
+proseStyle('h3 + *', { marginBlockStart: vars.space['24'] });
+proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space['16'] });
 // A rule is a section break on both sides.
-proseStyle('hr + *', { marginBlockStart: vars.space.sp64 });
+proseStyle('hr + *', { marginBlockStart: vars.space['64'] });
 
 proseStyle('img, picture, video', { display: 'block' });
 proseStyle('img, video', { blockSize: 'auto', maxInlineSize: '100%' });
@@ -90,8 +90,8 @@ proseStyle('pre', {
 	maxInlineSize: '100%',
 	minInlineSize: 0,
 	overflowX: 'auto',
-	paddingBlock: vars.space.sp12,
-	paddingInline: vars.space.sp16,
+	paddingBlock: vars.space['12'],
+	paddingInline: vars.space['16'],
 	whiteSpace: 'pre',
 });
 
@@ -108,7 +108,7 @@ proseStyle('pre code', {
 // rules for `type`. HTML matches `type` case-insensitively unless a selector uses the `s` flag.
 // Where `s` is unsupported (Chromium), those typed rules match nothing. The presentational hint
 // remains, but an author list reset still beats it, so letter and roman markers stay `none`.
-proseStyle('ul, ol', { paddingInlineStart: vars.space.sp24 });
+proseStyle('ul, ol', { paddingInlineStart: vars.space['24'] });
 proseStyle('ul', { listStyleType: 'disc' });
 proseStyle('ol:not([type]), ol[type="1"]', { listStyleType: 'decimal' });
 proseStyle('ol[type="a" s]', { listStyleType: 'lower-alpha' });
@@ -132,7 +132,7 @@ proseStyle('table', {
 	maxInlineSize: '100%',
 	overflowX: 'auto',
 });
-proseStyle('th, td', { paddingBlock: vars.space.sp8, paddingInline: vars.space.sp12 });
+proseStyle('th, td', { paddingBlock: vars.space['8'], paddingInline: vars.space['12'] });
 proseStyle('caption, th', { textAlign: 'start' });
 proseStyle('thead th', {
 	borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
@@ -209,8 +209,8 @@ proseStyle(
 	'::after',
 );
 
-proseBoundaryGapStyle(['h1'], vars.space.sp40);
-proseBoundaryGapStyle(['h2'], vars.space.sp32);
-proseBoundaryGapStyle(['h3'], vars.space.sp24);
-proseBoundaryGapStyle(['h4', 'h5', 'h6'], vars.space.sp16);
-proseBoundaryGapStyle(['hr'], vars.space.sp64);
+proseBoundaryGapStyle(['h1'], vars.space['40']);
+proseBoundaryGapStyle(['h2'], vars.space['32']);
+proseBoundaryGapStyle(['h3'], vars.space['24']);
+proseBoundaryGapStyle(['h4', 'h5', 'h6'], vars.space['16']);
+proseBoundaryGapStyle(['hr'], vars.space['64']);

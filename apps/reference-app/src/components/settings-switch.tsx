@@ -33,7 +33,7 @@ export function SettingsSwitchRow({
 			isSelected={isChecked}
 			onChange={onChange}
 		>
-			<Stack flexGrow="1" gap="sp4" minInlineSize="0">
+			<Stack flexGrow="1" gap="space.4" minInlineSize="0">
 				<FieldLabel>{label}</FieldLabel>
 				{hint ? <FieldDescription>{hint}</FieldDescription> : null}
 			</Stack>

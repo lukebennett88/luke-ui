@@ -38,7 +38,7 @@ export default () => {
 	});
 
 	return (
-		<Stack gap="sp16" maxInlineSize="20rem">
+		<Stack gap="space.16" maxInlineSize="20rem">
 			<Form
 				necessityIndicator="required-label"
 				onSubmit={(event) => {
@@ -48,7 +48,7 @@ export default () => {
 				ref={formRef}
 				validationBehavior="aria"
 			>
-				<Stack gap="sp16">
+				<Stack gap="space.16">
 					<form.Field name="terms">
 						{(field) => {
 							return (

@@ -42,7 +42,7 @@ export function DocsSiteNav({ tree }: { tree: Root }) {
 					<Modal className={styles.drawerModal}>
 						<Dialog aria-label="Docs navigation" className={styles.drawerDialog}>
 							{({ close }) => (
-								<Stack gap="sp16" {...docsNavPaneProps}>
+								<Stack gap="space.16" {...docsNavPaneProps}>
 									<Box alignItems="center" display="flex" justifyContent="space-between">
 										<Text elementType="span" fontWeight="heading">
 											Navigation
@@ -57,8 +57,8 @@ export function DocsSiteNav({ tree }: { tree: Root }) {
 									<Stack
 										elementType="nav"
 										aria-label="Site"
-										gap="sp4"
-										paddingBlockEnd="sp16"
+										gap="space.4"
+										paddingBlockEnd="space.16"
 										style={drawerSiteNavBorder}
 									>
 										{siteDestinations.map((destination) => (

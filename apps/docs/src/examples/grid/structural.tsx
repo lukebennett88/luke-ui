@@ -6,7 +6,7 @@ export default () => {
 		<Grid
 			areas={['a a', 'b c', 'd d']}
 			columns="1fr 1fr"
-			gap="sp12"
+			gap="space.12"
 			minBlockSize="16rem"
 			rows="auto 1fr auto"
 		>

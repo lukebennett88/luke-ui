@@ -8,7 +8,7 @@ export default () => {
 		<Comparison>
 			<ComparisonItem label="First line">
 				<Box maxInlineSize="18rem">
-					<Lockup gap="sp8" railAlignment="firstLine">
+					<Lockup gap="space.8" railAlignment="firstLine">
 						<LockupRail>
 							<Icon name="checkCircle" />
 						</LockupRail>
@@ -20,7 +20,7 @@ export default () => {
 			</ComparisonItem>
 			<ComparisonItem label="Center">
 				<Box maxInlineSize="18rem">
-					<Lockup gap="sp8" railAlignment="center">
+					<Lockup gap="space.8" railAlignment="center">
 						<LockupRail>
 							<Icon name="checkCircle" />
 						</LockupRail>

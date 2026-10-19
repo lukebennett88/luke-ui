@@ -63,8 +63,8 @@ export function ReferenceHeaderCell({ children }: { children: ReactNode }) {
 	return (
 		<Box
 			className={cx(styles.cell, styles.ruled)}
-			paddingBlock="sp8"
-			paddingInline="sp16"
+			paddingBlock="space.8"
+			paddingInline="space.16"
 			renderRoot={(domProps) => <th {...domProps} scope="col" />}
 		>
 			<CellText color="secondary" fontWeight="label">

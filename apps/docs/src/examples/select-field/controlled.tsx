@@ -13,7 +13,7 @@ export default () => {
 	const [size, setSize] = useState<string | null>('default');
 
 	return (
-		<Stack gap="sp16" maxInlineSize="20rem">
+		<Stack gap="space.16" maxInlineSize="20rem">
 			<SelectField items={sizes} label="Text size" onChange={setSize} value={size}>
 				{(item) => <SelectItem>{item.label}</SelectItem>}
 			</SelectField>

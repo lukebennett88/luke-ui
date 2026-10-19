@@ -100,7 +100,7 @@ function MixedHost() {
 			</button>
 			<input aria-label="Native input" data-testid="native-input" defaultValue="Native" />
 			{/* Luke UI text is trimmed to its glyphs, so layout components own the spacing. */}
-			<Stack alignItems="start" gap="sp16" marginBlockStart="sp24">
+			<Stack alignItems="start" gap="space.16" marginBlockStart="space.24">
 				<Heading data-testid="luke-heading" level={2}>
 					Luke UI heading
 				</Heading>

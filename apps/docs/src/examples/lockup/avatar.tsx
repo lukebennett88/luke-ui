@@ -5,7 +5,7 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Lockup gap="sp12" railAlignment="center">
+		<Lockup gap="space.12" railAlignment="center">
 			<LockupRail>
 				<Box
 					backgroundColor="neutral.subtle.rest"
@@ -15,7 +15,7 @@ export default () => {
 				/>
 			</LockupRail>
 			<LockupBody>
-				<Stack gap="sp4">
+				<Stack gap="space.4">
 					<Text fontWeight="emphasis">Example name</Text>
 					<Text typography="caption">Example description</Text>
 				</Stack>

@@ -6,7 +6,7 @@ import type { ColorFamilyId, Role } from '../lib/token-grammar.js';
 import { roleLabel, tokenSections } from '../lib/token-grammar.js';
 import { TokenGroup, TokenList, TokenPanel, TokenRow } from './token-reference-parts.js';
 
-const SAMPLE_BLOCK_SIZE = vars.space.sp32;
+const SAMPLE_BLOCK_SIZE = vars.space['32'];
 const SAMPLE_INLINE_SIZE = '3.5rem';
 
 /** One `vars.color.<family>` branch, grouped by role when the contract nests roles. */
@@ -121,7 +121,7 @@ function ColorSample({
 		case 'loadingSkeleton':
 			return (
 				<Box
-					blockSize={vars.space.sp12}
+					blockSize={vars.space['12']}
 					borderRadius="detail"
 					inlineSize="100%"
 					style={{ backgroundColor: value }}

@@ -18,7 +18,7 @@ export const controls = style({
 		components: {
 			alignItems: 'center',
 			display: 'flex',
-			gap: vars.space.sp4,
+			gap: vars.space['4'],
 		},
 	},
 });

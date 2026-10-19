@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Stack gap="sp16" maxInlineSize="18rem">
+		<Stack gap="space.16" maxInlineSize="18rem">
 			<Text elementType="div" typography="caption">
 				<CheckboxField label="A longer label keeps its control aligned when it wraps." />
 			</Text>

@@ -8,7 +8,7 @@ export default () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
-		<Stack alignItems="flex-start" gap="sp16">
+		<Stack alignItems="flex-start" gap="space.16">
 			<LoadingSpinner aria-label="Saving changes" isLoading={isLoading}>
 				<Button>Save changes</Button>
 			</LoadingSpinner>

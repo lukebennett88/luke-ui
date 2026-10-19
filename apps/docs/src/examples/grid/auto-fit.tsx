@@ -3,7 +3,7 @@ import { ExampleItem } from '#docs';
 
 export default () => {
 	return (
-		<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" gap="sp12">
+		<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" gap="space.12">
 			<ExampleItem>First</ExampleItem>
 			<ExampleItem>Second</ExampleItem>
 			<ExampleItem>Third</ExampleItem>

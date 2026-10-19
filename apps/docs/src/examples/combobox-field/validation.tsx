@@ -18,7 +18,7 @@ export default () => {
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<Stack gap="sp16" maxInlineSize="20rem">
+			<Stack gap="space.16" maxInlineSize="20rem">
 				<ComboboxField
 					defaultItems={countries}
 					isRequired

@@ -108,7 +108,7 @@ test('processed Markdown lists the Grid and Stack type definitions after their t
 	const stack = await processedApi(['components', 'layout', 'stack']);
 	expect(stack).toContain("`RequiredInitialResponsive<SprinklesProps['gap']>`");
 	expect(stack).toMatch(
-		/##### `SprinklesProps\['gap'\]`\n\nResolves to:\n\n```ts\nResponsiveValue<"0"\n {2}\| "sp4"\n {2}\|/,
+		/##### `SprinklesProps\['gap'\]`\n\nResolves to:\n\n```ts\nResponsiveValue<"0"\n {2}\| "space.4"\n {2}\|/,
 	);
 });
 
@@ -125,10 +125,10 @@ test('processed Markdown shows long resolved forms in full', async () => {
 
 	const bleed = await processedApi(['components', 'layout', 'bleed']);
 	expect(bleed).toContain(
-		"##### `BleedSpaceProp`\n\n```ts\ntype BleedSpaceProp = ResponsivePropValue<'0' | SpaceStep>;\n```",
+		"##### `BleedSpaceProp`\n\n```ts\ntype BleedSpaceProp = ResponsivePropValue<'0' | `space.${SpaceStep}`>;\n```",
 	);
 	expect(bleed).toMatch(
-		/##### `SpaceStep`\n\n```ts\n[^`]+```\n\nWhich resolves to:\n\n```ts\n"sp4"\n/,
+		/##### `SpaceStep`\n\n```ts\n[^`]+```\n\nWhich resolves to:\n\n```ts\n"4"\n/,
 	);
 });
 
@@ -197,10 +197,10 @@ test('stringify lists Luke UI definitions before external types and labels share
 			name: "Spacing['gap']",
 			references: ['Size'],
 			resolved: [
-				['s', '"sp4"'],
+				['s', '"space.4"'],
 				1,
 				'|\u2060\u00a0',
-				['s', '"sp8"'],
+				['s', '"space.8"'],
 				1,
 				'|\u2060\u00a0',
 				['k', 'undefined'],
@@ -226,8 +226,8 @@ type Size = 'small' | 'medium';
 Resolves to:
 
 \`\`\`ts
-"sp4"
-  | "sp8"
+"space.4"
+  | "space.8"
   | undefined
 \`\`\`
 

@@ -231,7 +231,7 @@ function buttonAppearance(
 }
 
 function buttonSize(size: 'medium' | 'small') {
-	const paddingInline = size === 'medium' ? vars.space.sp16 : vars.space.sp12;
+	const paddingInline = size === 'medium' ? vars.space['16'] : vars.space['12'];
 	// The extra 1px replaces the border. Forced colours draws the border, so it uses the plain padding.
 	const inset = {
 		'@media': {
@@ -246,13 +246,13 @@ function buttonSize(size: 'medium' | 'small') {
 						...inset,
 						blockSize: vars.controlSize.px40,
 						fontSize: FONT_METRIC_SCALE[14].fontSize,
-						gap: vars.space.sp8,
+						gap: vars.space['8'],
 					}
 				: {
 						...inset,
 						blockSize: vars.controlSize.px32,
 						fontSize: FONT_METRIC_SCALE[12].fontSize,
-						gap: vars.space.sp4,
+						gap: vars.space['4'],
 						letterSpacing: FONT_METRIC_SCALE[12].letterSpacing,
 						lineHeight: FONT_METRIC_SCALE[12].lineHeight,
 					},

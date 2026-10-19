@@ -47,14 +47,14 @@ export function DocsArticle({
 				{hasToc ? <DocsTocBar toc={toc} /> : null}
 				<Box
 					paddingBlockEnd={{
-						initial: 'sp64',
-						bp768: 'sp96',
+						initial: 'space.64',
+						bp768: 'space.96',
 					}}
 					paddingBlockStart={docsContentPaddingBlockStart}
 					paddingInline={{
-						initial: 'sp16',
-						bp768: 'sp24',
-						bp1024: 'sp32',
+						initial: 'space.16',
+						bp768: 'space.24',
+						bp1024: 'space.32',
 					}}
 				>
 					<Box
@@ -62,8 +62,8 @@ export function DocsArticle({
 						elementType="article"
 						maxInlineSize={ARTICLE_MAX_INLINE_SIZE}
 					>
-						<Stack elementType="header" gap="sp24" marginBlockEnd="sp48">
-							<Stack gap="sp24">
+						<Stack elementType="header" gap="space.24" marginBlockEnd="space.48">
+							<Stack gap="space.24">
 								<Heading level={1}>{title}</Heading>
 								{description ? (
 									<Text color="secondary" elementType="p" typography="lead">

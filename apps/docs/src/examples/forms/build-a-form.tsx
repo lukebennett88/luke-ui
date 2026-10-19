@@ -10,9 +10,9 @@ export default () => {
 	const [submittedEmail, formAction, isPending] = useActionState(submitEmail, '');
 
 	return (
-		<Stack gap="sp16" maxInlineSize="20rem">
+		<Stack gap="space.16" maxInlineSize="20rem">
 			<Form action={formAction} necessityIndicator="required-label">
-				<Stack gap="sp16">
+				<Stack gap="space.16">
 					<TextInputField
 						description="We will send the receipt to this address."
 						isRequired
@@ -20,7 +20,7 @@ export default () => {
 						name="email"
 						type="email"
 					/>
-					<Cluster gap="sp8">
+					<Cluster gap="space.8">
 						<Button isPending={isPending} type="submit">
 							Send receipt
 						</Button>

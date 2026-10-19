@@ -174,7 +174,7 @@ export function ProfileAvatarSection({
 				{children}
 			</SettingsSection>
 			{avatarError ? (
-				<Cluster alignItems="center" gap="sp8">
+				<Cluster alignItems="center" gap="space.8">
 					<SettingsStatus role="alert" tone="danger">
 						{avatarError}
 					</SettingsStatus>

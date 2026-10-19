@@ -31,7 +31,7 @@ export function TypeStyleTable() {
 	const { announcement, copy, status } = useClipboardFeedback<string>();
 
 	return (
-		<Box className="not-prose" marginBlockStart="sp24">
+		<Box className="not-prose" marginBlockStart="space.24">
 			<TokenColumnHeader />
 			<Box className={styles.panelBody}>
 				<Box className={styles.typeFrame}>
@@ -64,7 +64,7 @@ export function TypeStyleTable() {
 								<tr className={styles.typeSpecimenRow}>
 									<Box
 										className={styles.typeSpecimen}
-										paddingInline="sp16"
+										paddingInline="space.16"
 										renderRoot={(domProps) => <th {...domProps} colSpan={2} scope="rowgroup" />}
 									>
 										<Text typography={row.style}>{TYPE_STYLE_LABELS[row.style]}</Text>
@@ -152,8 +152,8 @@ function TypeHeaderCell({ children }: { children: string }) {
 	return (
 		<TableHeaderCell
 			className={styles.typeCell}
-			paddingBlock="sp8"
-			paddingInline="sp16"
+			paddingBlock="space.8"
+			paddingInline="space.16"
 			scope="col"
 		>
 			<Text color="secondary" fontWeight="label" typography="label">
@@ -179,10 +179,10 @@ function TypeValueRow({ onCopy, status, token }: TypeValueRowProps) {
 		<tr className={styles.typeRow}>
 			<Box
 				className={cx(styles.typeCell, styles.typeNameCell)}
-				paddingInline="sp16"
+				paddingInline="space.16"
 				renderRoot={(domProps) => <th {...domProps} id={tokenRowId(token.path)} scope="row" />}
 			>
-				<Cluster alignItems="center" gap="sp8" minInlineSize="0">
+				<Cluster alignItems="center" gap="space.8" minInlineSize="0">
 					<Box className={styles.tokenIdentification} minInlineSize="0">
 						<Text elementType="p" shouldDisableTrim typography="label">
 							<TokenPath path={token.path} />
@@ -200,7 +200,7 @@ function TypeValueRow({ onCopy, status, token }: TypeValueRowProps) {
 					/>
 				</Cluster>
 			</Box>
-			<TableCell className={cx(styles.typeCell, styles.typeValueCell)} paddingInline="sp16">
+			<TableCell className={cx(styles.typeCell, styles.typeValueCell)} paddingInline="space.16">
 				<Text fontVariantNumeric="tabular-nums" shouldDisableTrim typography="label">
 					<Code>{value === null || value === '' ? '—' : value}</Code>
 				</Text>

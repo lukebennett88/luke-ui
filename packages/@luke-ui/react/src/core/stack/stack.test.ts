@@ -3,7 +3,7 @@ import type { StackProps } from './stack.js';
 
 test('Stack rejects the props it does not support', () => {
 	// @ts-expect-error — responsive gaps require an initial value
-	assertType<StackProps>({ gap: { bp768: 'sp16' } });
+	assertType<StackProps>({ gap: { bp768: 'space.16' } });
 	// @ts-expect-error — Stack does not expose Box appearance utilities
 	assertType<StackProps>({ backgroundColor: 'surface.base' });
 	// @ts-expect-error — Stack has no display prop

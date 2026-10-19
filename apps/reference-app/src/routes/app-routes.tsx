@@ -88,7 +88,13 @@ function ErrorPage({
 	title: string;
 }) {
 	return (
-		<Stack elementType="main" gap="sp16" marginInline="auto" maxInlineSize="32rem" padding="sp32">
+		<Stack
+			elementType="main"
+			gap="space.16"
+			marginInline="auto"
+			maxInlineSize="32rem"
+			padding="space.32"
+		>
 			<title>{title}</title>
 			<Heading level={1} shouldDisableTrim typography="heading3">
 				{title}

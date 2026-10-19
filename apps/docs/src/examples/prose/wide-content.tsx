@@ -11,7 +11,7 @@ export default () => {
 			borderStyle="solid"
 			borderWidth="thin"
 			maxInlineSize="18rem"
-			padding="sp12"
+			padding="space.12"
 		>
 			<Prose>
 				<Text elementType="p">Import each component from its own entry point.</Text>

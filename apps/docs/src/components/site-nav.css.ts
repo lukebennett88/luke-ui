@@ -20,12 +20,12 @@ export const header = style({
 			display: 'flex',
 			flexShrink: 0,
 			flexWrap: 'wrap',
-			gap: vars.space.sp12,
-			paddingInline: vars.space.sp16,
+			gap: vars.space['12'],
+			paddingInline: vars.space['16'],
 			'@container': {
 				[docsTabletMinInlineSize]: {
-					columnGap: vars.space.sp16,
-					paddingInline: vars.space.sp24,
+					columnGap: vars.space['16'],
+					paddingInline: vars.space['24'],
 				},
 			},
 		},
@@ -51,11 +51,11 @@ export const destinations = style({
 	'@layer': {
 		components: {
 			alignItems: 'center',
-			columnGap: vars.space.sp16,
+			columnGap: vars.space['16'],
 			display: 'flex',
 			inlineSize: '100%',
 			order: 1,
-			paddingBlockEnd: vars.space.sp8,
+			paddingBlockEnd: vars.space['8'],
 			'@container': {
 				[docsTabletMinInlineSize]: {
 					inlineSize: 'auto',
@@ -116,7 +116,7 @@ export const actions = style({
 	'@layer': {
 		components: {
 			alignItems: 'center',
-			columnGap: vars.space.sp8,
+			columnGap: vars.space['8'],
 			display: 'flex',
 			flexShrink: 0,
 			marginInlineStart: 'auto',
@@ -191,7 +191,7 @@ export const appearancePopover = style({
 					borderRadius: vars.radius.surface,
 					boxShadow: vars.depth.floating,
 					maxInlineSize: 'calc(100vw - 2rem)',
-					padding: vars.space.sp8,
+					padding: vars.space['8'],
 					translate: 'none',
 					zIndex: 50,
 				},

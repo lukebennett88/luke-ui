@@ -196,7 +196,7 @@ test('scrolls Shiki line spans across the full figure width under overlay copy',
 	await page.viewport(320, 720);
 
 	const longImport = `import { Box } from '@luke-ui/react/box';`;
-	const longBox = `<Box maxInlineSize="42rem" padding="sp24">`;
+	const longBox = `<Box maxInlineSize="42rem" padding="space.24">`;
 	const html = [
 		'<code class="shiki">',
 		`<span class="line">${longImport}</span>`,

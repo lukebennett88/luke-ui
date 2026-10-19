@@ -49,7 +49,7 @@ export function SettingsNav(props: SettingsNavProps) {
 
 	if (props.variant === 'menu') {
 		return (
-			<Stack gap="sp12">
+			<Stack gap="space.12">
 				<SettingsNavSearch onChange={setMenuQuery} value={menuQuery} />
 				<SettingsNavList items={filterSettingsNavItems(menuQuery)} variant="menu" />
 			</Stack>
@@ -57,7 +57,7 @@ export function SettingsNav(props: SettingsNavProps) {
 	}
 
 	return (
-		<Stack gap="sp16">
+		<Stack gap="space.16">
 			<SettingsNavList items={filterSettingsNavItems(props.query)} variant="sidebar" />
 		</Stack>
 	);
@@ -76,7 +76,7 @@ function SettingsNavList({
 		<Stack
 			aria-label={variant === 'menu' ? 'Settings menu' : 'Settings'}
 			elementType="nav"
-			gap="sp4"
+			gap="space.4"
 		>
 			<Text color="secondary" fontWeight="label" typography="label">
 				Personal

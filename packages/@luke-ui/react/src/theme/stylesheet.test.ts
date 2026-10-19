@@ -80,8 +80,11 @@ describe('buildTheme output', () => {
 		for (const foundation of [tactileFoundation, paperFoundation]) {
 			const { themeWide } = splitBlocks(buildTheme(foundation));
 			expect(
-				spaceScale.map(([step]) => [step, extractValue(themeWide, `--luke-space-${step}`)]),
-			).toEqual(spaceScale);
+				Object.entries(spaceScale).map(([step]) => [
+					step,
+					extractValue(themeWide, `--luke-space-${step}`),
+				]),
+			).toEqual(Object.entries(spaceScale));
 		}
 	});
 

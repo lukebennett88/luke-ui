@@ -24,10 +24,10 @@ const fieldMessageIndent = createVar();
 export const inlineFieldIndent = createVar();
 
 /** Gap between an inline control and its label text. */
-export const inlineControlGap = vars.space.sp8;
+export const inlineControlGap = vars.space['8'];
 
 /** Gap between the error icon and the message text that follows it. */
-const errorIconGap = vars.space.sp8;
+const errorIconGap = vars.space['8'];
 
 /**
  * Inline size of the error icon's rail. It is `fieldMessageIndent` less the gap, so the rail plus
@@ -53,13 +53,13 @@ const fieldConfig = {
 		root: {
 			display: 'flex',
 			flexDirection: 'column',
-			gap: vars.space.sp4,
+			gap: vars.space['4'],
 			minInlineSize: 0,
 		},
 		inline: {
 			display: 'flex',
 			flexDirection: 'column',
-			gap: vars.space.sp4,
+			gap: vars.space['4'],
 			minInlineSize: 0,
 			// The error hangs under the label text by the control root's `inlineFieldIndent`;
 			// descriptions stay at the field's inline edge.

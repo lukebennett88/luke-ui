@@ -9,9 +9,9 @@ export default () => {
 			borderColor="decorative"
 			borderStyle="solid"
 			borderWidth="thin"
-			padding="sp16"
+			padding="space.16"
 		>
-			<Bleed inlineStart="sp16">
+			<Bleed inlineStart="space.16">
 				<ExampleItem>Inline start edge</ExampleItem>
 			</Bleed>
 		</Box>

@@ -1,3 +1,4 @@
+import type { BoxProps } from '@luke-ui/react/box';
 import { Box } from '@luke-ui/react/box';
 import { Heading } from '@luke-ui/react/heading';
 import { Link } from '@luke-ui/react/link';
@@ -25,17 +26,18 @@ const navRowProps = {
 	borderRadius: 'control',
 	display: 'flex',
 	minBlockSize: '2rem',
-	paddingInline: 'sp8',
+	paddingInline: 'space.8',
 } as const;
 
 /** Top inset shared by the sidebar, article, and desktop TOC so the three columns line up. */
-export const docsContentPaddingBlockStart = 'sp48' as const satisfies keyof typeof vars.space;
+export const docsContentPaddingBlockStart =
+	'space.48' as const satisfies BoxProps['paddingBlockStart'];
 
 /** Outer inset for the desktop sidebar and mobile drawer panes. */
 export const docsNavPaneProps = {
-	paddingBlockEnd: 'sp32',
+	paddingBlockEnd: 'space.32',
 	paddingBlockStart: docsContentPaddingBlockStart,
-	paddingInline: 'sp16',
+	paddingInline: 'space.16',
 } as const;
 
 interface DocsNavProps {
@@ -81,7 +83,7 @@ function NavList({
 			aria-labelledby={labelledBy}
 			className={plainList}
 			elementType="ul"
-			gap="sp4"
+			gap="space.4"
 			margin="0"
 			padding="0"
 		>
@@ -220,8 +222,8 @@ function SectionFrame({ children, isFirst }: { children: ReactNode; isFirst: boo
 	return (
 		<Stack
 			elementType="li"
-			gap="sp4"
-			paddingBlock="sp16"
+			gap="space.4"
+			paddingBlock="space.16"
 			style={isFirst ? undefined : sectionBorder}
 		>
 			{children}
@@ -251,7 +253,7 @@ function SectionHeading({
 				{icon == null ? (
 					children
 				) : (
-					<Lockup elementType="span" gap="sp8">
+					<Lockup elementType="span" gap="space.8">
 						<LockupRail>{icon}</LockupRail>
 						<LockupBody>{children}</LockupBody>
 					</Lockup>
@@ -312,7 +314,7 @@ export function DocsNavLink({
 			{icon == null ? (
 				children
 			) : (
-				<Lockup gap="sp8">
+				<Lockup gap="space.8">
 					<LockupRail>{icon}</LockupRail>
 					<LockupBody>{children}</LockupBody>
 				</Lockup>

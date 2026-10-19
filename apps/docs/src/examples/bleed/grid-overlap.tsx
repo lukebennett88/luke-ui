@@ -10,14 +10,14 @@ export default () => {
 			borderColor="decorative"
 			borderStyle="solid"
 			borderWidth="thin"
-			padding="sp24"
+			padding="space.24"
 		>
-			<Grid columns={3} gap="sp8">
+			<Grid columns={3} gap="space.8">
 				<ExampleItem>1</ExampleItem>
 				<ExampleItem>2</ExampleItem>
 				<ExampleItem>3</ExampleItem>
 				<ExampleItem>4</ExampleItem>
-				<Bleed all="sp12" position="relative">
+				<Bleed all="space.12" position="relative">
 					<ExampleItem backgroundColor="info.subtle.rest" blockSize="100%">
 						5
 					</ExampleItem>

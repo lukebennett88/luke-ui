@@ -141,6 +141,8 @@ describe('theme contract', () => {
 	});
 
 	it('derives the spacing contract keys from the spacing scale', () => {
-		expect(Object.keys(themeContractTree.space)).toEqual(spaceScale.map(([step]) => step));
+		expect(Object.keys(themeContractTree.space)).toEqual(
+			Object.entries(spaceScale).map(([step]) => step),
+		);
 	});
 });

@@ -14,7 +14,7 @@ export function ProfilePage() {
 		<SettingsPage title="Profile">
 			<ProfileAvatarSection profile={profile}>
 				<SettingsRow label="Email">
-					<Cluster alignItems="center" gap="sp8">
+					<Cluster alignItems="center" gap="space.8">
 						<Text color="secondary">{profile.email}</Text>
 						<ChangeEmailDialog email={profile.email} />
 					</Cluster>

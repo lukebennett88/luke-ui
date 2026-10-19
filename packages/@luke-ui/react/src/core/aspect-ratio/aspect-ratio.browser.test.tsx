@@ -103,7 +103,7 @@ const mediaSrc = `data:image/svg+xml,${encodeURIComponent(
 test('media frame ratios and objectFit values', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator: scene } = render(
-			<div style={{ display: 'grid', gap: vars.space.sp16 }}>
+			<div style={{ display: 'grid', gap: vars.space['16'] }}>
 				{ratios.map((ratio) => (
 					<AspectRatio inlineSize="18rem" key={ratio} ratio={ratio}>
 						<img alt={`Ratio ${ratio}`} src={mediaSrc} />
