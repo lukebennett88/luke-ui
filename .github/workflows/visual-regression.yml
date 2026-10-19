@@ -26,8 +26,8 @@ jobs:
   compare:
     name: compare
     runs-on: ubuntu-latest
-    # Digest-pinned Playwright image (keep tag+digest in sync with visual-baseline.yml and
-    # docs/VISUAL_TESTING.md): same browser, OS fonts, and font rendering as baseline.
+    # Digest-pinned Playwright image (keep tag+digest in sync with PLAYWRIGHT_VISUAL_IMAGE in
+    # packages/@luke-ui/react/scripts/visual-regression-contract.ts and visual-baseline.yml).
     container:
       image: mcr.microsoft.com/playwright:v1.64.0-jammy@sha256:c064e7f355d2dda32f669801a1b09e86a1e9252395c844d2cfbbe5c44acb9b79
       options: --ipc=host

@@ -32,6 +32,8 @@
 		"test:consumer": "pnpm --filter=@luke-ui/react run test:consumer",
 		"test:integration": "turbo run test:integration",
 		"test:visual": "pnpm --filter=@luke-ui/react run test:visual",
+		"test:visual:docker": "pnpm --filter=@luke-ui/workflow-scripts run visual-local -- compare",
+		"test:visual:docker:capture": "pnpm --filter=@luke-ui/workflow-scripts run visual-local -- capture",
 		"version-packages": "changeset version"
 	},
 	"devDependencies": {

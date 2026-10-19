@@ -10,7 +10,8 @@
 		"fix:format": "vp fmt . --write",
 		"fix:lint": "vp lint . --type-aware --fix",
 		"test": "vp test run",
-		"visual-ci": "tsx visual-ci.ts"
+		"visual-ci": "tsx visual-ci.ts",
+		"visual-local": "tsx visual-local.ts"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:",

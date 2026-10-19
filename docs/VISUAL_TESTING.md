@@ -6,11 +6,13 @@ and comparison policy.
 ## Baseline
 
 The `Visual baseline` and `Visual regression` workflows render inside the same digest-pinned
-Playwright container (image tag and digest in those workflow files, kept in sync with the Docker
-command below). That pins Chromium, OS libraries, and system fonts so baseline and compare share one
-rendering environment. GitHub-hosted `ubuntu-latest` alone is not stable enough for pixel
-screenshots. Both workflows set `PLAYWRIGHT_BROWSERS_PATH=/ms-playwright`, and Turbo’s visual tasks
-pass that variable through so the test process uses the browsers baked into the image.
+Playwright container. The image string lives in `PLAYWRIGHT_VISUAL_IMAGE`
+(`packages/@luke-ui/react/scripts/visual-regression-contract.ts`). Both workflows pin that value,
+and a script test fails if they drift. That pins Chromium, OS libraries, and system fonts so
+baseline and compare share one rendering environment. GitHub-hosted `ubuntu-latest` alone is not
+stable enough for pixel screenshots. Both workflows set `PLAYWRIGHT_BROWSERS_PATH=/ms-playwright`,
+and Turbo’s visual tasks pass that variable through so the test process uses the browsers baked into
+the image.
 
 The `Visual baseline` workflow renders `main` and uploads the `visual-baseline` artefact. Pull
 requests download the newest `main` run, render their branch, and compare it.
@@ -32,6 +34,8 @@ does not switch to an older green run.
 
 ## Run locally
 
+Host Chromium (quick iteration, may differ from CI):
+
 ```sh
 VISUAL_CAPTURE_DIR=.artifacts/visual-regression/baseline \
   pnpm --filter @luke-ui/react run test:visual:capture
@@ -41,32 +45,19 @@ pnpm run test:visual
 Run the first command on `main`. `test:visual` writes expected, actual, and diff PNGs plus
 `summary.json` to `.artifacts/visual-regression`. Set `VISUAL_BASELINE_DIR` for another baseline.
 
-Host Chromium and system fonts can still differ from CI. For captures that must match the baseline
-and compare jobs, run the same digest-pinned Playwright image on `linux/amd64` (GitHub Actions’
-architecture). The command copies the tree into the container — skipping `node_modules`, `.git`, and
-`.artifacts` — so a Linux `pnpm install` cannot rewrite the host install. Screenshots are written to
-`.artifacts/visual-regression/baseline` on the host. The working tree is otherwise left alone.
+CI-parity Docker (same image and `linux/amd64` as the workflows). Needs Docker. On Apple Silicon
+that uses emulation. The CLI copies the tree into the container without `node_modules`, installs
+there, and bind-mounts only `.artifacts/visual-regression`, so the host install stays untouched.
 
 ```sh
-mkdir -p .artifacts/visual-regression/baseline
-docker run --rm --ipc=host --platform linux/amd64 \
-  -e PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-  -v "$PWD":/src:ro \
-  -v "$PWD/.artifacts/visual-regression/baseline":/out \
-  mcr.microsoft.com/playwright:v1.64.0-jammy@sha256:c064e7f355d2dda32f669801a1b09e86a1e9252395c844d2cfbbe5c44acb9b79 \
-  bash -lc 'set -eu
-    mkdir -p /work
-    tar -C /src --exclude=node_modules --exclude=.git --exclude=.artifacts -cf - . \
-      | tar -C /work -xf -
-    cd /work
-    corepack enable
-    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install --frozen-lockfile --no-runtime
-    pnpm build:packages
-    VISUAL_CAPTURE_DIR=/out pnpm --filter @luke-ui/react run test:visual:capture'
+pnpm run test:visual:docker:capture
+pnpm run test:visual:docker
 ```
 
-Needs Docker (or a compatible engine) that can run `linux/amd64` images. On Apple Silicon that uses
-emulation. Bump the image tag and digest together when the Playwright version in the catalog moves.
+`test:visual:docker:capture` writes baseline screenshots. Use it on `main`, or when deliberately
+replacing the baseline after a rendering-environment change. `test:visual:docker` captures current
+screenshots and compares them to the existing baseline without modifying it. Bump
+`PLAYWRIGHT_VISUAL_IMAGE` and the two workflow `image:` lines together when Playwright moves.
 
 ## Review
 

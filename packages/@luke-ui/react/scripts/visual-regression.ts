@@ -16,6 +16,10 @@ const BASELINE_MISSING = [
 	'No visual baseline found.',
 	'Run "Visual baseline" on `main`, or capture one locally:',
 	'',
+	'  pnpm run test:visual:docker:capture',
+	'',
+	'Host Chromium (may differ from CI):',
+	'',
 	`  VISUAL_CAPTURE_DIR=${VISUAL_BASELINE_DIR} pnpm --filter @luke-ui/react run test:visual:capture`,
 ].join('\n');
 
