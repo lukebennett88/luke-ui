@@ -10,10 +10,10 @@ export type ButtonPresentationProps =
 			 */
 			appearance?: 'button';
 			/**
-			 * Whether the control fills the available inline size.
-			 * @default false
+			 * Use `full` to fill the available inline size.
+			 * @default auto
 			 */
-			isBlock?: boolean;
+			inlineSize?: 'auto' | 'full';
 			/**
 			 * Controls the strength of the control's visual treatment, from low to high.
 			 * @default standard
@@ -36,7 +36,7 @@ export type ButtonPresentationProps =
 			 * @default button
 			 */
 			appearance: 'text';
-			isBlock?: never;
+			inlineSize?: never;
 			/**
 			 * Controls the strength of the control's visual treatment, from low to high.
 			 * @default standard
@@ -55,7 +55,7 @@ export type ButtonPresentationProps =
 			 * @default button
 			 */
 			appearance: 'text';
-			isBlock?: never;
+			inlineSize?: never;
 			/**
 			 * Controls the strength of the control's visual treatment, from low to high.
 			 * @default standard
@@ -77,7 +77,7 @@ export type LinkPresentationProps =
 			 * @default text
 			 */
 			appearance?: 'text';
-			isBlock?: never;
+			inlineSize?: never;
 			/**
 			 * Controls the strength of the control's visual treatment, from low to high.
 			 * @default standard
@@ -92,10 +92,10 @@ export type LinkPresentationProps =
 			 */
 			appearance: 'button';
 			/**
-			 * Whether the control fills the available inline size.
-			 * @default false
+			 * Use `full` to fill the available inline size.
+			 * @default auto
 			 */
-			isBlock?: boolean;
+			inlineSize?: 'auto' | 'full';
 			/**
 			 * Controls the strength of the control's visual treatment, from low to high.
 			 * @default standard

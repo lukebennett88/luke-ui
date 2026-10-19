@@ -49,7 +49,7 @@ export function Link(props: LinkProps): JSX.Element {
 		prominence = 'standard',
 		children,
 		endContent,
-		isBlock,
+		inlineSize,
 		size: sizeProp,
 		startContent,
 		...restProps
@@ -66,7 +66,7 @@ export function Link(props: LinkProps): JSX.Element {
 						return linkRecipe({
 							appearance: 'button',
 							className: cx(linkCursor, className),
-							isBlock,
+							inlineSize,
 							prominence,
 							size,
 						});

@@ -136,6 +136,12 @@ reference measurements emitted in `rem`. Custom lengths belong in CSS.
 Box for arbitrary maximum widths. These naming decisions supersede
 [#761](https://github.com/lukebennett88/luke-ui/issues/761).
 
+### Button inline sizing
+
+Button and button-shaped Link accept `inlineSize="auto" | "full"`. `auto` is intrinsic and `full`
+fills the available inline size. Text appearances do not accept this prop. IconButton and IconLink
+do not expose it. Custom widths belong in CSS.
+
 ### State attributes
 
 A state attribute is public only when a guide documents it, as the Select primitive guide documents

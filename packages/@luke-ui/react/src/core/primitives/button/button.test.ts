@@ -15,7 +15,7 @@ test('primitive Button supports ref and rejects unsupported prop combinations', 
 	// @ts-expect-error — text Buttons do not use control sizing
 	assertType<ButtonProps>({ appearance: 'text', size: 'small' });
 	// @ts-expect-error — text Buttons do not use block layout
-	assertType<ButtonProps>({ appearance: 'text', isBlock: true });
+	assertType<ButtonProps>({ appearance: 'text', inlineSize: 'full' });
 	// @ts-expect-error — critical text Buttons do not have high prominence
 	assertType<ButtonProps>({
 		appearance: 'text',

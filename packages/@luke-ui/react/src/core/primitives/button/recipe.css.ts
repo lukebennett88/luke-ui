@@ -23,7 +23,7 @@ export const buttonRecipeInternal = recipe({
 	},
 	defaultVariants: {
 		appearance: 'button',
-		isBlock: false,
+		inlineSize: 'auto',
 		prominence: 'standard',
 		size: 'medium',
 		tone: 'neutral',
@@ -122,9 +122,9 @@ export const buttonRecipeInternal = recipe({
 				},
 			],
 		},
-		isBlock: {
-			false: {},
-			true: { inlineSize: '100%' },
+		inlineSize: {
+			auto: {},
+			full: { inlineSize: '100%' },
 		},
 		prominence: {
 			low: {},

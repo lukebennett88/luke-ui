@@ -13,7 +13,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'appearance',
 		'tone',
 		'prominence',
-		'isBlock',
+		'inlineSize',
 		'isDisabled',
 		'isPending',
 		'pressAction',
@@ -232,7 +232,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	'layout/visually-hidden.mdx::packages/@luke-ui/react/src/core/visually-hidden/visually-hidden.tsx::VisuallyHiddenProps':
 		['elementType', 'isFocusable', 'ref', 'renderRoot'],
 	'primitives/button.mdx::packages/@luke-ui/react/src/core/primitives/button/button.tsx::ButtonProps':
-		['appearance', 'isBlock', 'isDisabled', 'isPending', 'size', 'tone'],
+		['appearance', 'inlineSize', 'isDisabled', 'isPending', 'size', 'tone'],
 	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxControlProps':
 		[],
 	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxIndicatorProps':

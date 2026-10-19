@@ -30,7 +30,7 @@ type ButtonContentProps =
 type _ButtonOmit = DistributiveOmit<
 	PrimitiveButtonProps,
 	| 'appearance'
-	| 'isBlock'
+	| 'inlineSize'
 	| 'isPending'
 	| 'prominence'
 	| 'render'
@@ -59,7 +59,7 @@ type _ButtonProps = _ButtonOmit &
 export type ButtonProps = Prettify<_ButtonProps & ButtonPresentationProps & ButtonContentProps>;
 
 /**
- * Button with appearance, tone, prominence, size, pending, and block options.
+ * Button with appearance, tone, prominence, size, pending, and inline-size options.
  * Button appearance truncates its label. Text appearance wraps with surrounding text. Shows a
  * spinner when pending.
  */
@@ -68,7 +68,7 @@ export function Button(props: ButtonProps): JSX.Element {
 		appearance = 'button',
 		children,
 		endContent,
-		isBlock: _isBlock,
+		inlineSize: _inlineSize,
 		isPending = false,
 		onPress,
 		pressAction,
@@ -157,7 +157,7 @@ function getPrimitivePresentationProps(props: ButtonPresentationProps): ButtonPr
 
 	return {
 		appearance: 'button',
-		isBlock: props.isBlock,
+		inlineSize: props.inlineSize,
 		prominence: props.prominence,
 		size: props.size,
 		tone: props.tone,
