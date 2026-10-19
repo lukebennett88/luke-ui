@@ -94,6 +94,9 @@ export default defineConfig({
 					'react/memo-dependencies': 'error',
 					'react/preserve-manual-memoization': 'error',
 					'react/capitalized-calls': 'error',
+					// Compiler-only: block syntax the compiler cannot handle and APIs that break memoisation.
+					'react/incompatible-library': 'error',
+					'react/unsupported-syntax': 'error',
 					// Compiler memoises context values.
 					'react/jsx-no-constructed-context-values': 'off',
 					'react-hooks-js/component-hook-factories': 'error',
@@ -249,7 +252,8 @@ export default defineConfig({
 			'react/globals': 'error',
 			'react/hooks': 'off',
 			'react/immutability': 'error',
-			'react/incompatible-library': 'error',
+			// Warn outside compiled code: flags libraries whose APIs break compiler memoisation.
+			'react/incompatible-library': 'warn',
 			'react/memo-dependencies': 'off',
 			'react/no-array-index-key': 'off',
 			'react/preserve-manual-memoization': 'off',
@@ -260,7 +264,8 @@ export default defineConfig({
 			'react/set-state-in-effect': 'error',
 			'react/set-state-in-render': 'error',
 			'react/static-components': 'error',
-			'react/unsupported-syntax': 'error',
+			// Off outside compiled code: only guards syntax the React Compiler cannot handle.
+			'react/unsupported-syntax': 'off',
 			'react/use-memo': 'error',
 			'sort-imports': 'off',
 			'typescript/array-type': ['error', { default: 'generic' }],

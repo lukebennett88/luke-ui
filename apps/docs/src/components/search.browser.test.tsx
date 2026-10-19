@@ -342,14 +342,18 @@ test('closes in one Escape press with text typed, and restores focus', async () 
 	await expect.element(trigger).toHaveFocus();
 });
 
-test('keeps the active result within the visible list while navigating and wraps at both ends', async () => {
+test('keeps the active result within the visible list after scrolling down', async () => {
 	await renderSearch();
 	const input = await openSearchDialog();
 	await typeSearchQuery(input, 'many');
+	await expect.element(page.getByRole('menuitem').nth(0)).toBeVisible();
 	const list = page.getByRole('menu', { name: 'Search results' }).element();
 	expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
 
-	await moveActiveResult(input, 'ArrowDown', 10);
+	const first = page.getByRole('menuitem').nth(0).element();
+	await expect.poll(() => activeDescendantId(input)).toBe(first.id);
+
+	await userEvent.keyboard('{ArrowDown}'.repeat(10));
 	const option = page.getByRole('menuitem').nth(10).element();
 	await expect.poll(() => activeDescendantId(input)).toBe(option.id);
 	await expectResultWithinList(option, list);
@@ -360,9 +364,19 @@ test('keeps the active result within the visible list while navigating and wraps
 	await expect.poll(() => activeDescendantId(input)).toBe(previousElement.id);
 	await expectResultWithinList(previousElement, list);
 	await expect.element(input).toHaveFocus();
+});
 
-	// Wrap upward past the first item to the last.
-	await moveActiveResult(input, 'ArrowUp', 10);
+test('wraps keyboard navigation from the first result to the last and back', async () => {
+	await renderSearch();
+	const input = await openSearchDialog();
+	await typeSearchQuery(input, 'many');
+	await expect.element(page.getByRole('menuitem').nth(0)).toBeVisible();
+	const list = page.getByRole('menu', { name: 'Search results' }).element();
+
+	const first = page.getByRole('menuitem').nth(0).element();
+	await expect.poll(() => activeDescendantId(input)).toBe(first.id);
+
+	await userEvent.keyboard('{ArrowUp}');
 	const last = page
 		.getByRole('menuitem')
 		.nth(MANY_RESULTS_COUNT - 1)
@@ -371,28 +385,11 @@ test('keeps the active result within the visible list while navigating and wraps
 	await expectResultWithinList(last, list);
 	await expect.element(input).toHaveFocus();
 
-	// Wrap downward past the last item back to the first.
 	await userEvent.keyboard('{ArrowDown}');
-	const first = page.getByRole('menuitem').nth(0).element();
 	await expect.poll(() => activeDescendantId(input)).toBe(first.id);
 	await expectResultWithinList(first, list);
 	await expect.element(input).toHaveFocus();
 });
-
-/** Presses an arrow key one step at a time so activedescendant can settle under CI load. */
-async function moveActiveResult(
-	input: ReturnType<typeof page.getByRole>,
-	key: 'ArrowDown' | 'ArrowUp',
-	steps: number,
-) {
-	for (let step = 0; step < steps; step++) {
-		const before = activeDescendantId(input);
-		// oxlint-disable-next-line no-await-in-loop -- each arrow must settle before the next
-		await userEvent.keyboard(`{${key}}`);
-		// oxlint-disable-next-line no-await-in-loop -- wait for activedescendant between steps
-		await expect.poll(() => activeDescendantId(input)).not.toBe(before);
-	}
-}
 
 async function expectResultWithinList(result: Element, list: Element) {
 	// The list expands during opening, so compare current bounds on each poll.
