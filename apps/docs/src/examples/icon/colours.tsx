@@ -16,27 +16,27 @@ export default () => {
 				</Text>
 			</ComparisonItem>
 			<ComparisonItem label="Accent">
-				<Text color="accent.rest">
+				<Text color="accent">
 					<Icon name="checkCircle" />
 				</Text>
 			</ComparisonItem>
 			<ComparisonItem label="Info">
-				<Text color="info.rest">
+				<Text color="info">
 					<Icon name="checkCircle" />
 				</Text>
 			</ComparisonItem>
 			<ComparisonItem label="Success">
-				<Text color="success.rest">
+				<Text color="success">
 					<Icon name="checkCircle" />
 				</Text>
 			</ComparisonItem>
 			<ComparisonItem label="Warning">
-				<Text color="warning.rest">
+				<Text color="warning">
 					<Icon name="checkCircle" />
 				</Text>
 			</ComparisonItem>
 			<ComparisonItem label="Danger">
-				<Text color="danger.rest">
+				<Text color="danger">
 					<Icon name="checkCircle" />
 				</Text>
 			</ComparisonItem>

@@ -1,6 +1,8 @@
 import { Heading, HeadingLevels, useHeadingLevel } from '@luke-ui/react/heading';
 import { expect, test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { INTER_CAP_HEIGHT_EM, loadInter } from '../test-utils/load-inter.js';
+import { measureBaseline } from '../test-utils/measure-first-line.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -61,6 +63,30 @@ test('Heading renderRoot owns a heading-level root without forcing span', () => 
 
 	expect(heading.tagName).toBe('H3');
 	expect(locator.getByRole('heading', { level: 3, name: 'Owned heading' }).element()).toBe(heading);
+});
+
+test('Heading renderRoot keeps Capsize trim by default', async () => {
+	await loadInter();
+	const { locator } = render(
+		<div style={{ inlineSize: '16rem' }}>
+			<Heading
+				level={2}
+				renderRoot={({ children, ...domProps }) => (
+					<h2 {...domProps} data-testid="heading-render">
+						{children}
+					</h2>
+				)}
+			>
+				Trimmed owned heading
+			</Heading>
+		</div>,
+	);
+	const heading = locator.getByTestId('heading-render').element();
+	const { top } = heading.getBoundingClientRect();
+	const firstBaseline = measureBaseline(heading);
+	const fontSize = Number.parseFloat(getComputedStyle(heading).fontSize);
+
+	expect(Math.abs(top - (firstBaseline - INTER_CAP_HEIGHT_EM * fontSize))).toBeLessThanOrEqual(0.5);
 });
 
 test('inherits the current HeadingLevels base without advancing it', async () => {

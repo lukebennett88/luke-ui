@@ -1,6 +1,6 @@
 import { useLocale } from 'react-aria-components/I18nProvider';
 import { useIsWithinHeading } from '../heading/heading-context.js';
-import type { TextProps } from '../text/text.js';
+import type { TextElementProps, TextProps } from '../text/text.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -12,7 +12,10 @@ export type NumeralAbbreviation = boolean | 'long';
 /** Fixed precision or `[min, max]` precision range. */
 export type NumeralPrecision = number | readonly [number, number];
 
-type _NumeralOmit = DistributiveOmit<TextProps, 'children' | 'fontVariantNumeric' | 'textAlign'>;
+type _NumeralOmit = DistributiveOmit<
+	TextElementProps,
+	'children' | 'fontVariantNumeric' | 'textAlign'
+>;
 
 type _NumeralProps = _NumeralOmit & {
 	/** Enables compact notation (`1.2K`, `1.2 thousand`). */
@@ -61,7 +64,6 @@ export function Numeral(props: NumeralProps) {
 		formatOptions,
 		locale,
 		precision,
-		renderRoot,
 		shouldDisableTrim,
 		unit,
 		value,
@@ -88,25 +90,17 @@ export function Numeral(props: NumeralProps) {
 
 	const content = getCachedNumberFormat(resolvedLocale, numeralFormatOptions).format(value);
 	const resolvedShouldDisableTrim = shouldDisableTrim ?? isWithinHeading;
-	const sharedTextProps = {
-		...textProps,
-		fontVariantNumeric,
-		shouldDisableTrim: resolvedShouldDisableTrim,
-		shouldInheritFont: isWithinHeading,
-		textAlign,
-		...(color === undefined ? {} : { color }),
-	};
-
-	if (renderRoot) {
-		return (
-			<Text renderRoot={renderRoot} {...sharedTextProps}>
-				{content}
-			</Text>
-		);
-	}
 
 	return (
-		<Text {...sharedTextProps} elementType={elementType}>
+		<Text
+			{...textProps}
+			elementType={elementType}
+			fontVariantNumeric={fontVariantNumeric}
+			shouldDisableTrim={resolvedShouldDisableTrim}
+			shouldInheritFont={isWithinHeading}
+			textAlign={textAlign}
+			{...(color === undefined ? {} : { color })}
+		>
 			{content}
 		</Text>
 	);

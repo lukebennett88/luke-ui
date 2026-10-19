@@ -5,9 +5,9 @@ import { assertType, expectTypeOf, test } from 'vite-plus/test';
 
 test('primitive Button exposes renderRoot instead of React Aria render', () => {
 	expectTypeOf<ButtonProps['renderRoot']>().toEqualTypeOf<RacButtonProps['render']>();
-	assertType<ButtonProps>({ renderRoot: (props, _state) => createElement('button', props) });
+	assertType<ButtonProps>({ renderRoot: (domProps, _state) => createElement('button', domProps) });
 	// @ts-expect-error — public root replacement is renderRoot, not React Aria render
-	assertType<ButtonProps>({ render: (props, _state) => createElement('button', props) });
+	assertType<ButtonProps>({ render: (domProps, _state) => createElement('button', domProps) });
 });
 
 test('primitive Button supports ref and rejects unsupported prop combinations', () => {

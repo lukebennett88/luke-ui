@@ -201,7 +201,7 @@ function PropRow({
 					<Cluster alignItems="baseline" flexWrap="nowrap" gap="space.4">
 						<CellText
 							className={referenceStyles.monospace}
-							color={deprecated ? 'secondary' : 'accent.rest'}
+							color={deprecated ? 'secondary' : 'accent'}
 							fontWeight="label"
 							textDecoration={deprecated ? 'line-through' : 'none'}
 						>

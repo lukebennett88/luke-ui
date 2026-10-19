@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import type { JSX, ReactElement } from 'react';
 import type { TextProps as RacTextProps } from 'react-aria-components/Text';
 import { Text as RacText } from 'react-aria-components/Text';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
@@ -22,13 +22,19 @@ interface FieldDescriptionElementProps extends FieldDescriptionSharedProps {
 	renderRoot?: never;
 }
 
+type FieldDescriptionResolvedRenderProps = JSX.IntrinsicElements['span'];
+
 interface FieldDescriptionRenderRootProps extends FieldDescriptionSharedProps {
 	/** Use `elementType` instead of `renderRoot` for a supported semantic element. */
 	elementType?: never;
 	/**
-	 * Passes resolved DOM props to a caller-owned description root element.
+	 * Passes resolved DOM props to a caller-owned description root. The second argument is an empty
+	 * state object.
 	 */
-	renderRoot: NonNullable<RacTextProps['render']>;
+	renderRoot: (
+		domProps: FieldDescriptionResolvedRenderProps,
+		state: Record<string, never>,
+	) => ReactElement;
 }
 
 /** Props for `FieldDescription`. */
@@ -48,7 +54,7 @@ export function FieldDescription(props: FieldDescriptionProps): JSX.Element {
 			{...restProps}
 			className={fieldRecipe({ tone: 'description' }).message({ className })}
 			elementType={renderRoot ? undefined : elementType}
-			render={renderRoot}
+			render={renderRoot ? (domProps) => renderRoot(domProps, {}) : undefined}
 			slot="description"
 		/>
 	);

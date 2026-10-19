@@ -37,6 +37,7 @@ export function Heading(props: HeadingProps) {
 		fontWeight = headingDefaultFontWeight,
 		level,
 		renderRoot,
+		shouldDisableTrim,
 		typography,
 		...textProps
 	} = props;
@@ -44,23 +45,30 @@ export function Heading(props: HeadingProps) {
 	const resolvedLevel = level ?? contextLevel;
 	const resolvedTypography = typography ?? headingTypographyByLevel[resolvedLevel];
 
-	return (
-		<HeadingPresenceProvider>
-			{renderRoot ? (
+	if (renderRoot) {
+		return (
+			<HeadingPresenceProvider>
+				{/* Headings are block text: keep Capsize trim unless the caller disables it. */}
 				<Text
 					fontWeight={fontWeight}
 					renderRoot={renderRoot}
+					shouldDisableTrim={shouldDisableTrim ?? false}
 					typography={resolvedTypography}
 					{...textProps}
 				/>
-			) : (
-				<Text
-					elementType={elementType || `h${resolvedLevel}`}
-					fontWeight={fontWeight}
-					typography={resolvedTypography}
-					{...textProps}
-				/>
-			)}
+			</HeadingPresenceProvider>
+		);
+	}
+
+	return (
+		<HeadingPresenceProvider>
+			<Text
+				elementType={elementType || `h${resolvedLevel}`}
+				fontWeight={fontWeight}
+				shouldDisableTrim={shouldDisableTrim}
+				typography={resolvedTypography}
+				{...textProps}
+			/>
 		</HeadingPresenceProvider>
 	);
 }

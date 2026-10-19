@@ -458,15 +458,15 @@ export const conflictingRoot: BoxProps = { elementType: 'section', renderRoot };
 export const invalidRenderState: Parameters<typeof renderRoot>[1] = { isHovered: true };
 // @ts-expect-error — Text renderRoot excludes elementType
 export const conflictingTextRoot: TextProps = { elementType: 'p', renderRoot: textRenderRoot };
-// @ts-expect-error — shorthand role colours are not part of Text.color
-export const shorthandTextColor: TextProps = { color: 'accent' };
+// @ts-expect-error — interactive hover tokens are not static Text colours
+export const interactiveTextColor: TextProps = { color: 'danger.hover' };
 export const textColors: Array<TextProps['color']> = [
 	'primary',
 	'secondary',
 	'disabled',
-	'neutral.rest',
+	'neutral',
+	'accent',
 	'accent.onSolid',
-	'danger.hover',
 ];
 export const headingDefaults: HeadingProps = { level: 1, children: 'Title' };
 

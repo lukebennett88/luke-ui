@@ -176,6 +176,46 @@ test('ordinary Text remains a single React Aria Text root', () => {
 	expect(container.childElementCount).toBe(1);
 });
 
+test('Text renderRoot stays hideable in React Aria hidden collections', async () => {
+	const { HiddenContext } = await import('../test-utils/react-aria-hidden.js');
+	const visible = render(
+		<Text renderRoot={(domProps) => <span {...domProps} data-testid="owned-visible" />}>
+			Visible
+		</Text>,
+	);
+	expect(visible.locator.getByTestId('owned-visible').element()).toBeInTheDocument();
+	visible.unmount();
+
+	const { container } = render(
+		<HiddenContext.Provider value={true}>
+			<Text renderRoot={(domProps) => <span {...domProps} data-testid="owned-hidden" />}>
+				Hidden copy
+			</Text>
+			<Text data-testid="plain-hidden">Plain hidden</Text>
+		</HiddenContext.Provider>,
+	);
+
+	expect(container.querySelector('[data-testid="owned-hidden"]')).toBeNull();
+	expect(container.querySelector('[data-testid="plain-hidden"]')).toBeNull();
+	expect(container.textContent).toBe('');
+});
+
+test('Text renderRoot receives an empty state object', () => {
+	let receivedState: unknown;
+	render(
+		<Text
+			renderRoot={(domProps, state) => {
+				receivedState = state;
+				return <span {...domProps} data-testid="stateful-text" />;
+			}}
+		>
+			Owned
+		</Text>,
+	);
+
+	expect(receivedState).toEqual({});
+});
+
 test('Text renderRoot owns a non-span root with slot, ref, and style merge', async () => {
 	const ref = createRef<HTMLElement>();
 	const elements: Array<HTMLElement | null> = [];
@@ -323,14 +363,28 @@ test('typography styles', { tags: ['visual'] }, async () => {
 					<Text color="primary">Primary</Text>
 					<Text color="secondary">Secondary</Text>
 					<Text color="disabled">Disabled</Text>
-					<Text color="accent.rest">Accent</Text>
-					<Text color="info.rest">Info</Text>
-					<Text color="success.rest">Success</Text>
-					<Text color="warning.rest">Warning</Text>
-					<Text color="danger.rest">Danger</Text>
-					<Box backgroundColor="neutral.solid.rest" padding="space.8">
-						<Text color="neutral.onSolid">Neutral on solid</Text>
-					</Box>
+					<Text color="neutral">Neutral</Text>
+					<Text color="accent">Accent</Text>
+					<Text color="info">Info</Text>
+					<Text color="success">Success</Text>
+					<Text color="warning">Warning</Text>
+					<Text color="danger">Danger</Text>
+				</div>
+				<div style={rowStyle}>
+					{(
+						[
+							['neutral', 'neutral.solid.rest', 'neutral.onSolid'],
+							['accent', 'accent.solid.rest', 'accent.onSolid'],
+							['info', 'info.solid.rest', 'info.onSolid'],
+							['success', 'success.solid.rest', 'success.onSolid'],
+							['warning', 'warning.solid.rest', 'warning.onSolid'],
+							['danger', 'danger.solid.rest', 'danger.onSolid'],
+						] as const
+					).map(([role, backgroundColor, color]) => (
+						<Box backgroundColor={backgroundColor} key={role} padding="space.8">
+							<Text color={color}>{role}.onSolid</Text>
+						</Box>
+					))}
 				</div>
 				<Text>Trimmed by default</Text>
 				<Text shouldDisableTrim>Trim disabled</Text>

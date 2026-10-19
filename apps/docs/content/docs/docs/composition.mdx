@@ -51,11 +51,13 @@ Give the custom component the same accessibility care as a normal component. Pre
 structure. Provide an accessible name. Keep keyboard and focus behaviour intact. Use a normal React
 element for surrounding content when no primitive is needed.
 
-## Render a different DOM component
+## Own a component root
 
-The Button primitive exposes `renderRoot` when you need a small implementation detail that the
-`Button` component API does not provide. Spread the supplied DOM props onto the expected `<button>`
-element type. Return one DOM root. Custom wrappers must pass the supplied `ref` to that element.
+The Button primitive exposes `renderRoot` when you need to own the rendered `<button>` — for example
+to apply motion — without changing the high-level `Button` API. Spread the supplied DOM props onto a
+`<button>`. Do not turn the button into a link. Use `Link` or `IconLink`, or style an owned element
+with `buttonRecipe`. Return one DOM root. Custom wrappers must pass the supplied `ref` to that
+element.
 
 <ExampleBlock
 	src="composition/animated-button"

@@ -21,18 +21,12 @@ text, or when it must reveal on focus.
 
 ## Colour
 
-`color` selects a theme text token or a role foreground token. The default is `primary`. Role values
-use the token leaf names, such as `accent.rest` or `danger.onSolid`. The `hover` and `pressed`
-leaves are static colours, not interactive styles. Use `onSolid` only on that role's solid
-background.
+`color` selects a theme text token (`primary`, `secondary`, `disabled`), a semantic role's rest
+foreground (`accent`, `danger`, …), or that role's `onSolid` leaf (`accent.onSolid`). The default is
+`primary`. Use `onSolid` only on that role's solid background. Interactive hover and pressed colours
+belong on components that own interaction state, not on static `Text.color`.
 
-```tsx
-<Text color="secondary">Supporting text</Text>
-<Text color="accent.rest">Accent text</Text>
-<Box backgroundColor="accent.solid.rest">
-	<Text color="accent.onSolid">Text on accent solid</Text>
-</Box>
-```
+<ExampleBlock src="text/colours" title="Text: Colours" />
 
 ## Element type
 

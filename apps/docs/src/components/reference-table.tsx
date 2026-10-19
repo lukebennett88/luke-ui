@@ -1,6 +1,6 @@
 import type { BoxProps } from '@luke-ui/react/box';
 import { Box } from '@luke-ui/react/box';
-import type { TextProps } from '@luke-ui/react/text';
+import type { TextElementProps } from '@luke-ui/react/text';
 import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, HTMLAttributes, ReactNode } from 'react';
@@ -16,7 +16,7 @@ export type TableElementBoxProps = Omit<
 >;
 
 /** Cell text: the label type style without cap-height trim, which would distort table rows. */
-export function CellText(props: Extract<TextProps, { renderRoot?: never }>) {
+export function CellText(props: Omit<TextElementProps, 'shouldDisableTrim' | 'typography'>) {
 	return <Text shouldDisableTrim typography="label" {...props} />;
 }
 

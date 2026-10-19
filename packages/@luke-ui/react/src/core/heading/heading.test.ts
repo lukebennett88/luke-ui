@@ -4,7 +4,7 @@ import { assertType, test } from 'vite-plus/test';
 
 test('Heading inherits Text renderRoot exclusivity and colour tokens', () => {
 	assertType<HeadingProps>({ color: 'secondary', level: 2 });
-	assertType<HeadingProps>({ color: 'accent.rest', typography: 'display' });
+	assertType<HeadingProps>({ color: 'accent', typography: 'display' });
 	assertType<HeadingProps>({
 		renderRoot: (domProps, _state) => createElement('h2', domProps),
 	});
@@ -13,6 +13,6 @@ test('Heading inherits Text renderRoot exclusivity and colour tokens', () => {
 		elementType: 'h2',
 		renderRoot: () => createElement('h2'),
 	});
-	// @ts-expect-error — shorthand role names are not part of the colour API
-	assertType<HeadingProps>({ color: 'accent' });
+	// @ts-expect-error — interactive hover tokens are not static Text colours
+	assertType<HeadingProps>({ color: 'accent.hover' });
 });

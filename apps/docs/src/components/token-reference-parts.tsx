@@ -4,7 +4,7 @@ import { Code } from '@luke-ui/react/code';
 import { Grid } from '@luke-ui/react/grid';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Stack } from '@luke-ui/react/stack';
-import type { TextProps } from '@luke-ui/react/text';
+import type { TextElementProps } from '@luke-ui/react/text';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
@@ -19,7 +19,6 @@ import * as styles from './token-reference.css.js';
 
 // Shared pieces of the token reference sections.
 
-type TextElementProps = Extract<TextProps, { renderRoot?: never }>;
 type TokenTextProps = Omit<TextElementProps, 'children'> & { token: ThemeToken };
 
 /** The full typed token path as a `Code` chip. */

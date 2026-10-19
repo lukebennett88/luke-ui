@@ -1,22 +1,21 @@
 import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode, Ref } from 'react';
 import type { TextProps as RacTextProps } from 'react-aria-components/Text';
-import { TextContext, Text as RacText } from 'react-aria-components/Text';
-import { useContextProps } from 'react-aria-components/slots';
+import { Text as RacText } from 'react-aria-components/Text';
 import { typeStyleWeightRole } from '../../theme/type-styles.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import type { UseRenderRef } from '../use-render/use-render.js';
-import { useRender } from '../use-render/use-render.js';
 import { visuallyHiddenStyle } from '../visually-hidden/visually-hidden-style.js';
 import type { TextRecipeVariants } from './recipe.css.js';
 import { textRecipe } from './recipe.css.js';
 
 interface TextStyleProps {
 	/**
-	 * Sets text colour from the theme text tokens (`primary`, `secondary`, `disabled`) or a role
-	 * foreground token such as `accent.rest` or `danger.onSolid`. `hover` and `pressed` select static
-	 * token values, not interactive styles. `onSolid` is contrast-guaranteed only over that role's
-	 * solid background.
+	 * Sets text colour from the theme text tokens (`primary`, `secondary`, `disabled`), a semantic
+	 * role's rest foreground (`accent`, `danger`, …), or that role's `onSolid` leaf
+	 * (`accent.onSolid`). `onSolid` is contrast-guaranteed only over that role's solid background.
+	 * Interactive hover and pressed colours belong on components that own interaction state, not on
+	 * static `Text.color`.
 	 * @default 'primary'
 	 */
 	color?: TextRecipeVariants['color'];
@@ -102,7 +101,7 @@ interface TextSharedProps extends _TextRacOmit, TextStyleProps {
 }
 
 /** Props when `Text` renders a supported element itself. */
-interface TextElementProps extends TextSharedProps {
+export interface TextElementProps extends TextSharedProps {
 	/**
 	 * Renders a different element type in place of the default. Use it to choose a semantic element
 	 * without changing the visual or accessibility treatment.
@@ -185,6 +184,7 @@ export function Text(props: TextProps) {
 		if (hasLineClamp) return true;
 		if (shouldDisableTrim !== undefined) return shouldDisableTrim;
 		// A caller-owned root is an unknown element type, so trim stays off unless asked for.
+		// Heading and other block owners that know their semantics pass `shouldDisableTrim={false}`.
 		if (ownsRoot) return true;
 		return !blockTextElementTypes.has(elementType);
 	})();
@@ -208,27 +208,19 @@ export function Text(props: TextProps) {
 
 	const resolvedStyle = isVisuallyHidden ? { ...visuallyHiddenStyle, ...style } : style;
 
-	if (renderRoot) {
-		return (
-			<TextOwnedRoot
-				className={recipeClassName}
-				racProps={racProps}
-				ref={ref}
-				renderRoot={renderRoot}
-				slot={slot}
-				style={resolvedStyle}
-			>
-				{children}
-			</TextOwnedRoot>
-		);
-	}
-
 	return (
 		<RacText
 			{...racProps}
 			className={recipeClassName}
-			elementType={elementType}
+			elementType={ownsRoot ? undefined : elementType}
 			ref={ref}
+			// Keep RAC Text (and `createHideableComponent`) as the root. Map Luke UI `renderRoot`
+			// onto RAC's internal `render` seam, always supplying `{}` as public state.
+			render={
+				renderRoot
+					? (domProps) => renderRoot({ ...domProps, ref: domProps.ref as UseRenderRef }, {})
+					: undefined
+			}
 			// @ts-expect-error — RAC TextProps omits null, which opts out of slotted context at runtime.
 			slot={slot}
 			style={resolvedStyle}
@@ -236,53 +228,4 @@ export function Text(props: TextProps) {
 			{children}
 		</RacText>
 	);
-}
-
-/**
- * Caller-owned `Text` root. Merges React Aria text slots, then renders through Luke UI `useRender`
- * so the returned tag is not constrained to RAC Text's default `span`.
- */
-function TextOwnedRoot(props: {
-	children?: ReactNode;
-	className: string;
-	racProps: _TextRacOmit;
-	ref?: Ref<HTMLElement>;
-	renderRoot: TextRenderRootProps['renderRoot'];
-	slot?: string | null;
-	style?: CSSProperties;
-}) {
-	const { children, className, racProps, ref, renderRoot, slot, style } = props;
-	const [contextProps, contextRef] = useContextProps(
-		{
-			...racProps,
-			children,
-			className,
-			slot,
-			style,
-		},
-		ref ?? null,
-		TextContext,
-	);
-	const {
-		children: resolvedChildren,
-		className: resolvedClassName,
-		slot: resolvedSlot,
-		style: resolvedStyle,
-		...domProps
-	} = contextProps;
-
-	return useRender({
-		defaultElementType: 'span',
-		props: {
-			...domProps,
-			children: resolvedChildren,
-			className: resolvedClassName,
-			// `slot={null}` opts out of context; HTML attributes only accept string slots.
-			...(resolvedSlot == null ? {} : { slot: resolvedSlot }),
-			style: resolvedStyle,
-		},
-		ref: contextRef,
-		renderRoot,
-		state: {},
-	});
 }

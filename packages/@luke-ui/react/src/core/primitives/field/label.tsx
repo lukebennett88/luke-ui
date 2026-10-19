@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import type { JSX, ReactElement } from 'react';
 import { createContext, use } from 'react';
 import type { LabelProps as RacLabelProps } from 'react-aria-components/Label';
 import { Label as RacLabel } from 'react-aria-components/Label';
@@ -42,13 +42,19 @@ interface FieldLabelElementProps extends FieldLabelSharedProps {
 	renderRoot?: never;
 }
 
+type FieldLabelResolvedRenderProps = JSX.IntrinsicElements['label'];
+
 interface FieldLabelRenderRootProps extends FieldLabelSharedProps {
 	/** Use `elementType` instead of `renderRoot` for a supported semantic element. */
 	elementType?: never;
 	/**
-	 * Passes resolved DOM props to a caller-owned label root element.
+	 * Passes resolved DOM props to a caller-owned label root. The second argument is an empty state
+	 * object. Keep rendering a `<label>`.
 	 */
-	renderRoot: NonNullable<RacLabelProps['render']>;
+	renderRoot: (
+		domProps: FieldLabelResolvedRenderProps,
+		state: Record<string, never>,
+	) => ReactElement;
 }
 
 /** Props for `FieldLabel`. */
@@ -81,7 +87,7 @@ export function FieldLabel(props: FieldLabelProps): JSX.Element {
 			{...restProps}
 			className={fieldRecipe({ necessityIndicator }).label({ className })}
 			elementType={renderRoot ? undefined : elementType}
-			render={renderRoot}
+			render={renderRoot ? (domProps) => renderRoot(domProps, {}) : undefined}
 		>
 			{children}
 			<NecessityMarker isRequired={isRequired} necessityIndicator={necessityIndicator} />

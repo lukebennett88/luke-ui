@@ -47,28 +47,33 @@ const lineClampVariants = {
 	5: lineClampMultiLine(5),
 } as const;
 
-const foregroundStates = ['rest', 'hover', 'pressed', 'onSolid'] as const;
+type TextColorVariant = { color: string };
 
-const foregroundColorVariants = Object.fromEntries(
-	SEMANTIC_ROLES.flatMap((role) =>
-		foregroundStates.map((state) => [
-			`${role}.${state}`,
-			{ color: vars.color.foreground[role][state] },
-		]),
-	),
-) as {
-	readonly [
-		Role in (typeof SEMANTIC_ROLES)[number] as `${Role}.${(typeof foregroundStates)[number]}`
-	]: {
-		color: string;
-	};
+type RoleColorVariants = {
+	readonly [Role in (typeof SEMANTIC_ROLES)[number]]: TextColorVariant;
+} & {
+	readonly [Role in (typeof SEMANTIC_ROLES)[number] as `${Role}.onSolid`]: TextColorVariant;
 };
+
+/** Role rest colours as bare role names, plus each role's `onSolid` leaf. */
+function buildRoleColorVariants(): RoleColorVariants {
+	const variants = {} as {
+		-readonly [Key in keyof RoleColorVariants]: RoleColorVariants[Key];
+	};
+
+	for (const role of SEMANTIC_ROLES) {
+		variants[role] = { color: vars.color.foreground[role].rest };
+		variants[`${role}.onSolid`] = { color: vars.color.foreground[role].onSolid };
+	}
+
+	return variants;
+}
 
 const colorVariants = {
 	primary: { color: vars.color.text.primary },
 	secondary: { color: vars.color.text.secondary },
 	disabled: { color: vars.color.text.disabled },
-	...foregroundColorVariants,
+	...buildRoleColorVariants(),
 } as const;
 
 const weightVariants = Object.fromEntries(

@@ -66,7 +66,7 @@ function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element 
 				borderWidth="thin"
 				padding="space.16"
 			>
-				<Text color="danger.rest" elementType="p">
+				<Text color="danger" elementType="p">
 					Failed to load example {component}/{name}: {result.error.message}
 				</Text>
 			</Box>

@@ -417,7 +417,9 @@ on its descendants would start measuring it.
 ### `renderRoot` on the button primitive
 
 High-level `Button` does not expose root replacement. Import the button primitive when you need
-`renderRoot` to own the button element. Combine `Box` or package-internal sprinkles with
+`renderRoot` to own the rendered button root — for example to apply motion while keeping a
+`<button>`. Do not use it to change the element into a link. Use `Link` or `IconLink` instead, or
+style an owned element with `buttonRecipe`. Combine `Box` or package-internal sprinkles with
 `mergeProps` so `className` and `style` merge correctly.
 
 ### Utility surface
