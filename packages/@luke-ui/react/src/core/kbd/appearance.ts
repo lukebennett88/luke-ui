@@ -1,3 +1,4 @@
+import type { StyleRule } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 
 export const kbdAppearance = {
@@ -24,4 +25,4 @@ export const kbdAppearance = {
 	verticalAlign: 'middle',
 	whiteSpace: 'nowrap',
 	wordSpacing: '0.08em',
-} as const;
+} as const satisfies StyleRule;

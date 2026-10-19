@@ -1,3 +1,4 @@
+import type { StyleRule } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 
 export const codeAppearance = {
@@ -12,4 +13,4 @@ export const codeAppearance = {
 	fontSize: '0.875em',
 	paddingBlock: '0.15em',
 	paddingInline: '0.3em',
-} as const;
+} as const satisfies StyleRule;
