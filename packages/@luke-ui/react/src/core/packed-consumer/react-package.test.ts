@@ -39,7 +39,7 @@ const MODULE_SCRIPT_PATTERN = /<script type="module"[^>]+src="\/assets\/[^"]+\.j
  * Styling authoring: the Vanilla Extract authoring API, and the Luke UI and Rainbow authoring
  * modules.
  */
-const STYLING_AUTHORING_PACKAGES = ['@vanilla-extract/css'];
+const STYLING_AUTHORING_PACKAGES = new Set(['@vanilla-extract/css']);
 const STYLING_AUTHORING_SOURCE_PATTERN =
 	/^@luke-ui\/(?:react\/src\/core\/styles\/recipe\.ts|rainbow-sprinkles\/.*\/define-(?:properties|sprinkles)\.[jt]s)$/;
 const LUKE_SOURCE_PATTERN = /^@luke-ui\/react\/src\//;
@@ -68,18 +68,16 @@ describe('the packed @luke-ui/react', () => {
 		const declared = [
 			...Object.keys(manifest.dependencies ?? {}),
 			...Object.keys(manifest.peerDependencies),
-		].sort();
-		const imported = [...importedPackages(react)].sort();
+		].toSorted();
+		const imported = [...importedPackages(react)].toSorted();
 
 		expect({ undeclared: imported.filter((name) => !declared.includes(name)) }).toEqual({
 			undeclared: [],
 		});
 		// React Aria Components renders through React DOM, so the peer keeps the application's copy.
-		const peersWithoutImports = ['react-dom'];
+		const peersWithoutImports = new Set(['react-dom']);
 		expect({
-			unused: declared.filter(
-				(name) => !imported.includes(name) && !peersWithoutImports.includes(name),
-			),
+			unused: declared.filter((name) => !imported.includes(name) && !peersWithoutImports.has(name)),
 		}).toEqual({ unused: [] });
 	});
 });
@@ -145,7 +143,7 @@ for (const consumer of consumers) {
 			);
 			const ownSizes = sizesOf(dir, ownLocations);
 			const largest = [...ownSizes]
-				.sort(([, a], [, b]) => b - a)
+				.toSorted(([, a], [, b]) => b - a)
 				.slice(0, 5)
 				.map(([location]) => location);
 
@@ -349,7 +347,7 @@ for (const consumer of consumers) {
 				expect(bundle.sources.some((source) => LUKE_SOURCE_PATTERN.test(source))).toBe(true);
 				expect({
 					stylingAuthoring: [
-						...bundle.packages.filter((name) => STYLING_AUTHORING_PACKAGES.includes(name)),
+						...bundle.packages.filter((name) => STYLING_AUTHORING_PACKAGES.has(name)),
 						...bundle.sources.filter((source) => STYLING_AUTHORING_SOURCE_PATTERN.test(source)),
 					],
 					themeGeneration: themeGenerationIn(bundle, consumer),

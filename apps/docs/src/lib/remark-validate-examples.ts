@@ -85,7 +85,7 @@ export function findOrphanedExamples({
 
 			return [relative(resolvedExamplesDir, examplePath)];
 		})
-		.sort();
+		.toSorted();
 }
 
 function findExampleFiles(directory: string): Array<string> {

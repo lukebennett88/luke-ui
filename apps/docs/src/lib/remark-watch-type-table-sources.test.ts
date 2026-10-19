@@ -442,7 +442,10 @@ function expectTypeTableWatchLink(
 ): void {
 	const modules = server.moduleGraph.getModulesByFile(sourcePath);
 	expect(modules?.size).toBeGreaterThan(0);
-	const importers = [...(modules ?? [])].flatMap((mod) => [...mod.importers]);
+	const importers = [];
+	for (const mod of modules ?? []) {
+		importers.push(...mod.importers);
+	}
 	expect(importers.some((importer) => importer.id === mdxPath)).toBe(true);
 }
 

@@ -3,6 +3,7 @@ import { makeIdFiltersToMatchWithQuery } from '@rolldown/pluginutils';
 import { vanillaExtractPlugin } from '@vanilla-extract/rollup-plugin';
 import react from '@vitejs/plugin-react';
 import { transformSync } from 'oxc-transform-react';
+import type { Severity } from 'oxc-transform-react';
 import type { Plugin } from 'vite-plus';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
@@ -29,6 +30,10 @@ const sourceModule = /\.[cm]?[jt]sx?$/;
 const vanillaExtractStyles = /\.css\.ts$/;
 const dependency = /\/node_modules\//;
 const VANILLA_EXTRACT_CSS_PATTERN = /^@vanilla-extract\/css(?:\/|$)/;
+
+function severityLabel(severity: Severity): string {
+	return severity;
+}
 
 export default defineConfig({
 	pack: {
@@ -127,7 +132,7 @@ function reactCompilerPlugin(): Plugin {
 
 				if (result.fatal) {
 					const errorMessages = result.errors.flatMap((error) => {
-						if (error.severity !== 'Error') return [];
+						if (severityLabel(error.severity) !== 'Error') return [];
 
 						return [error.codeframe ?? error.message];
 					});
@@ -135,7 +140,7 @@ function reactCompilerPlugin(): Plugin {
 				}
 
 				for (const error of result.errors) {
-					if (error.severity === 'Advice') continue;
+					if (severityLabel(error.severity) === 'Advice') continue;
 					this.warn(`${filename}: ${error.codeframe ?? error.message}`);
 				}
 

@@ -49,7 +49,7 @@ export function resolveResponsiveCssProperty<Value>(
 	}
 
 	if (typeof value !== 'object' || Array.isArray(value)) {
-		assignCondition('initial', value as Value);
+		assignCondition('initial', value);
 	} else {
 		const conditionValues = value as Partial<Record<ResponsiveCondition, Value | null>>;
 		for (const [condition, conditionValue] of typedEntries(conditionValues)) {

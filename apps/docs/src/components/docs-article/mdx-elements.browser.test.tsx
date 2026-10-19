@@ -127,7 +127,7 @@ test('merges an author rel into the external link safety tokens', async () => {
 	);
 
 	const rel = page.getByRole('link', { name: 'Merged' }).element().getAttribute('rel');
-	expect(rel?.split(' ').sort()).toEqual(['nofollow', 'noopener', 'noreferrer']);
+	expect(rel?.split(' ').toSorted()).toEqual(['nofollow', 'noopener', 'noreferrer']);
 });
 
 test('lets an author target and rel override the external link defaults', async () => {

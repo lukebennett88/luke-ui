@@ -132,7 +132,7 @@ export type WaitForNewestBaselineOptions = {
 export async function waitForNewestBaseline(
 	options: WaitForNewestBaselineOptions,
 ): Promise<number> {
-	const { fetchNewest, runUrl, sleep, now, pollIntervalMs, timeoutMs } = options;
+	const { fetchNewest, runUrl, sleep: delay, now, pollIntervalMs, timeoutMs } = options;
 	const log = options.info ?? (() => {});
 	const deadline = now() + timeoutMs;
 	let waitedMs = 0;
@@ -176,7 +176,7 @@ export async function waitForNewestBaseline(
 
 			const sleepMs = Math.min(pollIntervalMs, remainingMs);
 			// eslint-disable-next-line no-await-in-loop -- bounded poll delay between status checks
-			await sleep(sleepMs);
+			await delay(sleepMs);
 			waitedMs += sleepMs;
 			continue;
 		}

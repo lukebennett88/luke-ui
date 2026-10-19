@@ -745,7 +745,7 @@ for (const pinned of PINNED_VISIBLE_PROPS) {
 		async () => {
 			const { exportName, path, props } = pinned;
 			const names = await visiblePropNames(path, exportName);
-			expect([...names].sort()).toEqual([...props].sort());
+			expect([...names].toSorted()).toEqual([...props].toSorted());
 		},
 		TS_MORPH_TEST_TIMEOUT,
 	);

@@ -15,11 +15,11 @@ function validateUsername(value: string): string | null {
 	return null;
 }
 
-export default () => {
-	function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-		event.preventDefault();
-	}
+function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+	event.preventDefault();
+}
 
+export default () => {
 	return (
 		<Form onSubmit={handleSubmit}>
 			<Stack gap="space.16" maxInlineSize="20rem">

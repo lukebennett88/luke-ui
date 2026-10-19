@@ -24,6 +24,6 @@ test('walks nested .mdx files and skips other extensions', () => {
 	expect(
 		findMdxFiles(directory)
 			.map((file) => basename(file))
-			.sort(),
+			.toSorted(),
 	).toEqual(['button.mdx', 'index.mdx']);
 });

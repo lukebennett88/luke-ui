@@ -262,14 +262,14 @@ export function withDefaultVariants<
 	PublicInput extends Input = Input,
 	const Defaults extends Input = Input,
 >(
-	recipe: (input?: Input) => string,
+	baseRecipe: (input?: Input) => string,
 	checkedDefaults: Defaults & RejectUnknownKeys<Defaults, Input>,
 ): (input?: PublicInput) => string {
 	// The rejection map only exists to fail the call; past it, the defaults are an `Input`.
 	const defaults: Input = checkedDefaults;
-	const wrapped = applyDefaultVariants(recipe, defaults);
+	const wrapped = applyDefaultVariants(baseRecipe, defaults);
 
-	registerSerializer(wrapped, 'withDefaultVariants', [recipe, defaults]);
+	registerSerializer(wrapped, 'withDefaultVariants', [baseRecipe, defaults]);
 	return wrapped;
 }
 
@@ -430,11 +430,14 @@ function buildCompounds(
 	compoundSlots: ReadonlyArray<CompoundSlot<string, SlotVariantGroups<string>>>,
 	matches: (compound: CompoundSlot<string, SlotVariantGroups<string>>) => boolean,
 ): Array<BuiltCompoundSlot> {
-	return compoundSlots.filter(matches).map((compound) => ({
-		slots: compound.slots,
-		style: buildStyle(compound.style),
-		...(compound.variants === undefined ? {} : { variants: compound.variants }),
-	}));
+	return compoundSlots.filter(matches).map((compound) => {
+		const built: BuiltCompoundSlot = {
+			slots: compound.slots,
+			style: buildStyle(compound.style),
+		};
+		if (compound.variants !== undefined) built.variants = compound.variants;
+		return built;
+	});
 }
 
 function buildStyle(styleRule: RecipeStyleRule): string {

@@ -132,8 +132,8 @@ export function CheckboxRoot(props: CheckboxRootProps): JSX.Element {
 				<RacCheckboxField
 					{...restProps}
 					{...rootIdProps(id, resolvedInputId)}
-					className={composeRenderProps(className, (className) => {
-						return checkboxRecipe({ size }).root({ className });
+					className={composeRenderProps(className, (renderedClassName) => {
+						return checkboxRecipe({ size }).root({ className: renderedClassName });
 					})}
 					isRequired={isRequired}
 				/>
@@ -155,8 +155,8 @@ export function CheckboxLabel(props: CheckboxLabelProps): JSX.Element {
 	return (
 		<RacCheckboxButton
 			{...restProps}
-			className={composeRenderProps(className, (className) => {
-				return fieldRecipe().inlineLabel({ className });
+			className={composeRenderProps(className, (renderedClassName) => {
+				return fieldRecipe().inlineLabel({ className: renderedClassName });
 			})}
 		/>
 	);

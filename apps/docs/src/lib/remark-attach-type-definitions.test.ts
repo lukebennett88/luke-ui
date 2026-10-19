@@ -45,7 +45,7 @@ test(
 
 		// The HTML table fetches this asset when a reader opens a linked type. It holds every Luke UI type
 		// with a definition, so links inside a definition open too, and nothing else.
-		const [assetName] = readdirSync(outputDir).filter((name) => name.endsWith('.json'));
+		const assetName = readdirSync(outputDir).find((name) => name.endsWith('.json'));
 		const asset = JSON.parse(readFileSync(join(outputDir, assetName!), 'utf8')) as Record<
 			string,
 			unknown
@@ -79,14 +79,15 @@ test(
 		);
 		// Markdown lists the whole model, so it holds every popover's text too.
 		const missingFromMarkdown = Object.values(model!)
-			.flatMap((definition) => [
-				`##### \`${definition.name}\``,
-				...[definition.definition, definition.resolved].flatMap((tokens) =>
-					tokens === undefined
-						? []
-						: [`\`\`\`ts\n${typeTokensToText(tokens, { multiline: true })}\n\`\`\``],
+			.flatMap((definition) =>
+				[`##### \`${definition.name}\``].concat(
+					[definition.definition, definition.resolved].flatMap((tokens) =>
+						tokens === undefined
+							? []
+							: [`\`\`\`ts\n${typeTokensToText(tokens, { multiline: true })}\n\`\`\``],
+					),
 				),
-			])
+			)
 			.filter((snippet) => !markdown?.includes(snippet));
 		expect(missingFromMarkdown).toEqual([]);
 	},

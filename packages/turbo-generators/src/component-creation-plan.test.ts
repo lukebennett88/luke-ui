@@ -48,7 +48,7 @@ describe('createComponentPlan', () => {
 			packageDocsSlug: 'status-badge',
 			packageExportPath: './status-badge',
 		});
-		expect(plan.files.map((file) => file.path).sort()).toEqual([
+		expect(plan.files.map((file) => file.path).toSorted()).toEqual([
 			'apps/docs/content/docs/components/feedback/status-badge.mdx',
 			'apps/docs/src/examples/status-badge/basic.tsx',
 			'packages/@luke-ui/react/src/core/status-badge/recipe.css.ts',

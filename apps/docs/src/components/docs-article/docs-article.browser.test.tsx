@@ -216,7 +216,13 @@ test('renders no table of contents when the page has no headings', async () => {
 	expect(page.getByText('On this page')).not.toBeInTheDocument();
 });
 
-async function renderArticle({ pathname, toc }: { pathname: string; toc: Array<TOCItemType> }) {
+async function renderArticle({
+	pathname,
+	toc: tocItems,
+}: {
+	pathname: string;
+	toc: Array<TOCItemType>;
+}) {
 	if (root) act(() => root?.unmount());
 	container?.remove();
 	const rootRoute = createRootRoute({
@@ -229,7 +235,7 @@ async function renderArticle({ pathname, toc }: { pathname: string; toc: Array<T
 								actions={<button type="button">Action</button>}
 								description="How styling works."
 								title="Styling"
-								toc={toc}
+								toc={tocItems}
 								tree={tree}
 							>
 								<h2 id="usage">Usage</h2>

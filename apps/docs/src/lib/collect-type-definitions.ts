@@ -63,6 +63,8 @@ export interface TypeDefinitionCollector {
 
 type SymbolResolver = (name: ts.Identifier) => ts.Symbol | undefined;
 
+const resolveBuiltSymbol: SymbolResolver = (name) => (name as { symbol?: ts.Symbol }).symbol;
+
 /**
  * Collects the definitions a props table's signatures refer to.
  *
@@ -89,7 +91,7 @@ export function createTypeDefinitionCollector({
 	// builds for a resolved type have no position to resolve from, so the node builder records each
 	// name's symbol on the identifier itself.
 	const resolveWritten: SymbolResolver = (name) => checker.getSymbolAtLocation(name);
-	const resolveBuilt: SymbolResolver = (name) => (name as { symbol?: ts.Symbol }).symbol;
+	const resolveBuilt = resolveBuiltSymbol;
 
 	// Printing follows the walk that registered every key, so each type name finds its definition.
 	const typePrinter = createTypeTokenPrinter({

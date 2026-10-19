@@ -92,7 +92,7 @@ export function groupPropNames(names: ReadonlyArray<string>): ReadonlyArray<{
 			{
 				defaultOpen: name === 'Component props',
 				name,
-				props: [...props].sort((left, right) => left.localeCompare(right)),
+				props: [...props].toSorted((left, right) => left.localeCompare(right)),
 			},
 		];
 	});

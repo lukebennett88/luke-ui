@@ -27,7 +27,7 @@ function toSortedWords(name: string): Array<string> {
 	return name
 		.split(WHITESPACE_PATTERN)
 		.filter((word) => word !== '')
-		.sort();
+		.toSorted();
 }
 
 /** Reads the element's name from Chromium's own accessibility tree. */

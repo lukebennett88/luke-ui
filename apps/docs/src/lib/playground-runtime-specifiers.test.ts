@@ -14,7 +14,7 @@ test('documented examples that the playground cannot resolve use unsupported rel
 			const source = readFileSync(resolve(examplesDir, `${src}.tsx`), 'utf8');
 			return !canRunInPlayground(source, specifiers);
 		})
-		.sort();
+		.toSorted();
 
 	expect(unrunnable).toEqual([]);
 });

@@ -10,11 +10,11 @@ const countries = [
 	{ id: 'new-zealand', label: 'New Zealand' },
 ];
 
-export default () => {
-	function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-		event.preventDefault();
-	}
+function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+	event.preventDefault();
+}
 
+export default () => {
 	return (
 		<form onSubmit={handleSubmit}>
 			<Stack gap="space.16" maxInlineSize="20rem">

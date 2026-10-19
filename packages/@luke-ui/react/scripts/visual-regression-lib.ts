@@ -79,9 +79,8 @@ export async function assertCapturesPainted(directory: string) {
 	);
 
 	if (offenders.length > 0) {
-		offenders.sort();
 		throw new Error(
-			`Visual captures painted only part of their height (see #310): ${offenders.join(', ')}`,
+			`Visual captures painted only part of their height (see #310): ${offenders.toSorted().join(', ')}`,
 		);
 	}
 }
@@ -105,7 +104,7 @@ function isBottomBandUniform(png: PNG) {
 
 export async function compareCaptures(expectedDir: string, actualDir: string, outputDir: string) {
 	const [expected, actual] = await Promise.all([listPngs(expectedDir), listPngs(actualDir)]);
-	const ids = [...new Set([...expected.keys(), ...actual.keys()])].sort();
+	const ids = [...new Set([...expected.keys(), ...actual.keys()])].toSorted();
 	const results = await Promise.all(
 		ids.map((id) => compareCapture(id, expected.get(id), actual.get(id), outputDir)),
 	);

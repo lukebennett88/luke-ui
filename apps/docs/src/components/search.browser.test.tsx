@@ -18,9 +18,9 @@ import { page, userEvent } from 'vite-plus/test/context';
 import { DocsSearchProvider, DocsSearchTrigger } from './search.js';
 
 const { getSearchResults, MANY_RESULTS_COUNT } = vi.hoisted(() => {
-	const MANY_RESULTS_COUNT = 40;
+	const manyResultsCount = 40;
 
-	function getSearchResults(search: string) {
+	function mockSearchResults(search: string) {
 		switch (search) {
 			case 'button':
 				return [
@@ -63,7 +63,7 @@ const { getSearchResults, MANY_RESULTS_COUNT } = vi.hoisted(() => {
 					},
 				] as const;
 			case 'many':
-				return Array.from({ length: MANY_RESULTS_COUNT }, (_, index) => ({
+				return Array.from({ length: manyResultsCount }, (_, index) => ({
 					id: `result-${index}`,
 					url: `/docs/result-${index}`,
 					type: 'page' as const,
@@ -75,7 +75,7 @@ const { getSearchResults, MANY_RESULTS_COUNT } = vi.hoisted(() => {
 		}
 	}
 
-	return { getSearchResults, MANY_RESULTS_COUNT };
+	return { getSearchResults: mockSearchResults, MANY_RESULTS_COUNT: manyResultsCount };
 });
 
 vi.mock('fumadocs-core/search/client', async () => {

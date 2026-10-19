@@ -1,6 +1,6 @@
 /**
  * Bundles Monaco and its web workers into the site instead of using
- * @monaco-editor/react's default CDN loader, so the playground works offline
+ * the default CDN loader from `@monaco-editor/react`, so the playground works offline
  * and on GitHub Pages without external requests. Import this module only from
  * client-only code — it touches `self` at module scope.
  */
@@ -100,7 +100,7 @@ async function setUpHighlighting(): Promise<void> {
 		engine: createJavaScriptRegexEngine(),
 		// Playground models use Monaco's `typescript` language with a `.tsx` path,
 		// so the TSX grammar is registered under that language id.
-		langs: tsx.map((lang) => ({ ...lang, name: 'typescript' })),
+		langs: tsx.map((lang) => Object.assign({}, lang, { name: 'typescript' })),
 		themes: SHIKI_THEME_REGISTRATIONS,
 	});
 	shikiToMonaco(highlighter, monaco);

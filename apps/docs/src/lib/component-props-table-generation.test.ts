@@ -244,7 +244,7 @@ test('shows the resolved type when Button presentation branches declare differen
 	);
 
 	// The checker orders union members by type id, so compare the members.
-	expect(entriesByName.get('tone')?.simplifiedType.split(' | ').sort()).toEqual([
+	expect(entriesByName.get('tone')?.simplifiedType.split(' | ').toSorted()).toEqual([
 		'"critical"',
 		'"neutral"',
 	]);

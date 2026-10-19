@@ -103,7 +103,9 @@ describe('compileTheme diagnostics', () => {
 			const modeDiagnostics = diagnostics[mode];
 			expect(modeDiagnostics.mode).toBe(mode);
 			// A family diagnostic per role, and every scale role generated.
-			expect(Object.keys(modeDiagnostics.families).sort()).toEqual([...SEMANTIC_ROLES].sort());
+			expect(Object.keys(modeDiagnostics.families).toSorted()).toEqual(
+				[...SEMANTIC_ROLES].toSorted(),
+			);
 			expect(modeDiagnostics.families.accent.solidAnchor.satisfied).toBe(true);
 			// The base surface equals the resolved base anchor.
 			expect(modeDiagnostics.surfaces.base).toEqual(tactileFoundation[mode].color.surface.base);
@@ -221,7 +223,7 @@ describe('buildTheme public motion surface', () => {
 			const css = buildTheme(foundation);
 			const motionVarNames = [...css.matchAll(/--luke-motion-[\w-]+/g)].map(([varName]) => varName);
 
-			expect([...new Set(motionVarNames)].sort()).toEqual([
+			expect([...new Set(motionVarNames)].toSorted()).toEqual([
 				'--luke-motion-enter-duration',
 				'--luke-motion-enter-easing',
 				'--luke-motion-exit-duration',

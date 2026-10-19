@@ -75,7 +75,7 @@ export function packageExportSpecifiers(
 			if (typeof resolved !== 'string' || !isRunnableTarget(resolved)) return [];
 			return [subpath === '.' ? packageName : `${packageName}/${subpath.slice(2)}`];
 		})
-		.sort();
+		.toSorted();
 }
 
 export function canRunInPlayground(source: string, specifiers: ReadonlySet<string>): boolean {

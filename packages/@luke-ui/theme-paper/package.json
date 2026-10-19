@@ -49,6 +49,6 @@
 		"@luke-ui/react": "workspace:^"
 	},
 	"inlinedDependencies": {
-		"@capsizecss/metrics": "4.3.0"
+		"@capsizecss/metrics": "4.4.0"
 	}
 }

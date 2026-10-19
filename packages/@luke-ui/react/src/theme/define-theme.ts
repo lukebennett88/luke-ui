@@ -351,8 +351,8 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 	const neutral = resolveNeutral(color, mode);
 	const textPrimary = highContrastText(neutral, mode);
 	const colors: ThemeSourceColors = {
-		accent: resolveAdaptedRole(color.accent, mode, (source, mode, raw) => {
-			return adaptAccent(source, mode, raw, textPrimary);
+		accent: resolveAdaptedRole(color.accent, mode, (source, accentMode, raw) => {
+			return adaptAccent(source, accentMode, raw, textPrimary);
 		}),
 		neutral,
 		// Emitted verbatim; a single string applies to both modes, an omitted side falls back to the

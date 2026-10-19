@@ -81,7 +81,7 @@ function renderHost() {
 			</Heading>
 			<Button data-testid="button">Plain</Button>
 			<TextInputField label="Name" />
-			<Button className="p-[11px]" data-testid="tailwind-button">
+			<Button className="p-2.75" data-testid="tailwind-button">
 				Utility
 			</Button>
 			<Button className="app-override" data-testid="app-button">
@@ -93,7 +93,7 @@ function renderHost() {
 			<Box className={buttonRecipe()} data-testid="box-button" padding="space.4">
 				Box
 			</Box>
-			<div className="tw-component p-[3px]" data-testid="tailwind-component" />
+			<div className="tw-component p-0.75" data-testid="tailwind-component" />
 			<LoadingSkeleton className="bg-[rgb(7,8,9)]!" data-testid="skeleton" isLoading>
 				Loading
 			</LoadingSkeleton>
@@ -148,7 +148,7 @@ function baselineRecipeStyles() {
 }
 
 for (const scenario of scenarios) {
-	describe(`${scenario.name}`, () => {
+	describe(scenario.name, () => {
 		test('Preflight leaves Luke UI component recipes intact', () => {
 			const baseline = baselineRecipeStyles();
 			loadCss(scenario.css);

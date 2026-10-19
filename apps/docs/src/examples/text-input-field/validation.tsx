@@ -4,11 +4,11 @@ import { Stack } from '@luke-ui/react/stack';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import type { SubmitEvent } from 'react';
 
-export default () => {
-	function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-		event.preventDefault();
-	}
+function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+	event.preventDefault();
+}
 
+export default () => {
 	return (
 		<form onSubmit={handleSubmit}>
 			<Stack gap="space.16" maxInlineSize="20rem">

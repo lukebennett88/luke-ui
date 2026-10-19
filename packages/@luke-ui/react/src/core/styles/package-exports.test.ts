@@ -154,13 +154,13 @@ test('does not expose the private combobox styling recipe from the primitive ent
 test('exports the inline-control primitive parts without their anatomy-coupled recipes', async () => {
 	const checkbox = await import('@luke-ui/react/primitives/checkbox');
 	const switchPrimitives = await import('@luke-ui/react/primitives/switch');
-	expect(Object.keys(checkbox).sort()).toEqual([
+	expect(Object.keys(checkbox).toSorted()).toEqual([
 		'CheckboxControl',
 		'CheckboxIndicator',
 		'CheckboxLabel',
 		'CheckboxRoot',
 	]);
-	expect(Object.keys(switchPrimitives).sort()).toEqual([
+	expect(Object.keys(switchPrimitives).toSorted()).toEqual([
 		'SwitchControl',
 		'SwitchLabel',
 		'SwitchRoot',
@@ -181,12 +181,12 @@ test('exports fixed breakpoints from the theme entry', async () => {
 
 test('theme entry publishes only the runtime allowlist', async () => {
 	const theme = await import('@luke-ui/react/theme');
-	expect(Object.keys(theme).sort()).toEqual(['breakpoints', 'getThemeClassName', 'vars']);
+	expect(Object.keys(theme).toSorted()).toEqual(['breakpoints', 'getThemeClassName', 'vars']);
 });
 
 test('theme compiler entry publishes only the authoring allowlist', async () => {
 	const compiler = await import('@luke-ui/react/theme/compiler');
-	expect(Object.keys(compiler).sort()).toEqual([
+	expect(Object.keys(compiler).toSorted()).toEqual([
 		'ThemeContrastError',
 		'ThemeGenerationError',
 		'ThemeValidationError',
@@ -228,7 +228,7 @@ function builtImportGraph(entry: string): { files: Array<string>; packages: Arra
 			else packages.add(specifier);
 		}
 	}
-	return { files: [...files].sort(), packages: [...packages].sort() };
+	return { files: [...files].toSorted(), packages: [...packages].toSorted() };
 }
 
 function readDist(file: string): string {

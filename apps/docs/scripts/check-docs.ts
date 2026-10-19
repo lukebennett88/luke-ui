@@ -267,7 +267,7 @@ function findSharedExampleIssues(docsContentDir: string): Array<string> {
 	}
 
 	const issues: Array<string> = [];
-	for (const [src, pages] of [...pagesBySrc.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+	for (const [src, pages] of [...pagesBySrc.entries()].toSorted(([a], [b]) => a.localeCompare(b))) {
 		if (pages.size < 2) continue;
 		issues.push(`${src}: referenced from more than one page (${[...pages].join(', ')})`);
 	}

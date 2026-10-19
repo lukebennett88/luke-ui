@@ -344,7 +344,7 @@ for (const copyCase of [
 test('the CodeBlock scene has no axe violations', async () => {
 	renderCodeBlock(<CodeBlock code={'const example = "hello";'} title="Example" />);
 
-	const results = await axe.run(container!);
+	const results = await axe.run(container);
 	expect(
 		results.violations.map((violation) => ({
 			id: violation.id,

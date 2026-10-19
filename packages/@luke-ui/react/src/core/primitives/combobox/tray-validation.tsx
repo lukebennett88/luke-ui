@@ -30,8 +30,7 @@ export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.
 		validationBehavior ?? formContext?.validationBehavior ?? 'native';
 
 	// Disabled, read-only, and `aria` must leave constraint validation entirely.
-	const isValidated =
-		resolvedValidationBehavior === 'native' && isDisabled !== true && isReadOnly !== true;
+	const isValidated = resolvedValidationBehavior === 'native' && !isDisabled && !isReadOnly;
 
 	const customError = isValidated
 		? (state?.realtimeValidation.validationErrors.join(' ') ?? '')
@@ -46,7 +45,7 @@ export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.
 
 	useEffect(() => {
 		ref.current?.setCustomValidity(customError);
-	}, [customError, value]);
+	}, [customError]);
 
 	if (state == null) return null;
 
