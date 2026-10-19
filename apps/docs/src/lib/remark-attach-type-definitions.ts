@@ -61,6 +61,8 @@ export interface ComponentPropsTableData {
 export function remarkAttachTypeDefinitions({ outputDir }: { outputDir: string }) {
 	return (tree: MdastRoot, file: { path: string }) => {
 		const imports: Array<unknown> = [];
+		// One replaceSource per parent after every sibling table has its definitions attached.
+		const parentsToRecord = new Set<object>();
 
 		visit(tree, 'mdxJsxFlowElement', (node: MdxJsxFlowElement, _index, parent) => {
 			if (node.name !== 'ComponentPropsTable') return;
@@ -100,8 +102,14 @@ export function remarkAttachTypeDefinitions({ outputDir }: { outputDir: string }
 				}
 			}
 
-			recordProcessedMarkdown(file, parent);
+			if (parent !== undefined && parent !== null && typeof parent === 'object') {
+				parentsToRecord.add(parent);
+			}
 		});
+
+		for (const parent of parentsToRecord) {
+			recordProcessedMarkdown(file, parent);
+		}
 
 		tree.children.unshift(...imports);
 	};
