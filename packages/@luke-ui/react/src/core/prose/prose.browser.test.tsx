@@ -1,14 +1,17 @@
 import { Blockquote } from '@luke-ui/react/blockquote';
 import { Box } from '@luke-ui/react/box';
-import { Code } from '@luke-ui/react/code';
+import { Code, codeRecipe } from '@luke-ui/react/code';
 import { Heading } from '@luke-ui/react/heading';
+import { Kbd, kbdRecipe } from '@luke-ui/react/kbd';
+import { Link, linkRecipe } from '@luke-ui/react/link';
 import { Prose, proseRecipe } from '@luke-ui/react/prose';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
 import { expect, test } from 'vite-plus/test';
+import { cdp } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
-import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
+import { captureVisualAppearance, focusViaKeyboard, Stack } from '../test-utils/visual.js';
 
 const swatch =
 	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='64'%3E%3Crect width='320' height='64' fill='%23888'/%3E%3C/svg%3E";
@@ -299,6 +302,42 @@ test('fits media inside a narrow prose column', async () => {
 	for (const media of root.querySelectorAll('img, video')) {
 		const bounds = media.getBoundingClientRect();
 		expect(bounds.width / bounds.height).toBeCloseTo(5, 0);
+	}
+});
+
+for (const code of ['a command with several arguments '.repeat(4), 'longToken'.repeat(20)]) {
+	test(`wraps native inline code ${code.includes(' ') ? 'at spaces' : 'inside long tokens'}`, () => {
+		const { locator } = render(
+			<Prose style={{ display: 'grid', inlineSize: 160 }}>
+				<p>
+					Run <code>{code}</code> here.
+				</p>
+			</Prose>,
+		);
+		const root = query(locator.element(), 'div');
+		const range = new Range();
+		range.selectNodeContents(query(root, 'code'));
+
+		expect(range.getClientRects().length).toBeGreaterThan(1);
+		expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
+	});
+}
+
+test('keeps explicit component and recipe code on one line inside Prose', () => {
+	const { locator } = render(
+		<Prose style={{ inlineSize: 160 }}>
+			<p>
+				<Code>{'longToken'.repeat(20)}</Code>
+			</p>
+			<p>
+				<code className={codeRecipe()}>{'longToken'.repeat(20)}</code>
+			</p>
+		</Prose>,
+	);
+	for (const code of locator.element().querySelectorAll('code')) {
+		const range = new Range();
+		range.selectNodeContents(code);
+		expect(range.getClientRects().length).toBe(1);
 	}
 });
 
@@ -794,3 +833,130 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 		await captureVisualAppearance(locator, 'prose/kitchen-sink', appearance);
 	}
 });
+
+function NativeElementsScene() {
+	return (
+		<Stack width="20rem">
+			<Prose>
+				<p>
+					Native: <a href="#native">Read the guide</a>, <code>npm run build</code>, <kbd>⌘</kbd>{' '}
+					<kbd>K</kbd>.
+				</p>
+				<p>
+					Components: <Link href="#component">Read the guide</Link>, <Code>npm run build</Code>,{' '}
+					<Kbd>⌘</Kbd> <Kbd>K</Kbd>.
+				</p>
+				<blockquote>
+					<p>Keep the next step clear.</p>
+				</blockquote>
+				<Blockquote>Keep the next step clear.</Blockquote>
+				<p>
+					Wrapping: <code>{'unbrokenModuleName'.repeat(5)}</code>.
+				</p>
+				<pre>
+					<code>{'const moduleName = "unbrokenModuleName";'.repeat(3)}</code>
+				</pre>
+				<p>
+					Overrides:{' '}
+					<Link href="#override" prominence="low">
+						Read more
+					</Link>
+					,{' '}
+					<a className={linkRecipe({ prominence: 'high' })} href="#recipe">
+						Recipe link
+					</a>
+					, <code className={codeRecipe()}>one line</code>, <kbd className={kbdRecipe()}>Esc</kbd>.
+				</p>
+				<p>
+					<Link appearance="button" href="#button" prominence="high">
+						Open project
+					</Link>
+				</p>
+				<Blockquote typography="lead">A larger quotation.</Blockquote>
+				<p>
+					Text overrides:{' '}
+					<Text elementType="code" typography="lead" color="secondary">
+						plain code
+					</Text>
+					,{' '}
+					<Text elementType="kbd" typography="body">
+						Esc
+					</Text>
+					.
+				</p>
+				<Text elementType="blockquote" typography="lead">
+					An unaccented Text quotation.
+				</Text>
+				<div className="not-prose">
+					<p>
+						Boundary: <a href="#plain">Plain link</a>, <code>plain code</code>, <kbd>Esc</kbd>.
+					</p>
+					<blockquote>Plain quotation.</blockquote>
+					<Prose>
+						<p>
+							Nested: <a href="#nested">Read the guide</a>, <code>npm run build</code>,{' '}
+							<kbd>Esc</kbd>.
+						</p>
+						<blockquote>
+							<p>Prose applies again.</p>
+						</blockquote>
+					</Prose>
+				</div>
+			</Prose>
+		</Stack>
+	);
+}
+
+test('native elements', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator, unmount } = render(<NativeElementsScene />, { appearance });
+		await captureVisualAppearance(locator, 'prose/native-elements', appearance);
+		unmount();
+	}
+});
+
+for (const state of ['hover', 'pressed', 'focus'] as const) {
+	test(`native link ${state}`, { tags: ['visual'] }, async () => {
+		for (const appearance of visualAppearances) {
+			const { locator, user, unmount } = render(
+				<Stack width="20rem">
+					<Prose>
+						<p>
+							<a href="#guide">Read the guide</a>
+						</p>
+					</Prose>
+				</Stack>,
+				{ appearance },
+			);
+			const link = locator.getByRole('link', { name: 'Read the guide' });
+			if (state === 'focus') await focusViaKeyboard(link);
+			else await user.hover(link);
+			if (state === 'pressed') {
+				const bounds = link.element().getBoundingClientRect();
+				await cdp().send('Input.dispatchMouseEvent', {
+					type: 'mousePressed',
+					button: 'left',
+					buttons: 1,
+					clickCount: 1,
+					x: bounds.left + bounds.width / 2,
+					y: bounds.top + bounds.height / 2,
+				});
+			}
+			await expect.poll(() => link.element().matches(':active')).toBe(state === 'pressed');
+			try {
+				await captureVisualAppearance(locator, `prose/native-link-${state}`, appearance);
+			} finally {
+				if (state === 'pressed')
+					await cdp().send('Input.dispatchMouseEvent', {
+						type: 'mouseReleased',
+						button: 'left',
+						buttons: 0,
+						clickCount: 1,
+						x: -50,
+						y: -50,
+					});
+				unmount();
+			}
+		}
+	});
+}

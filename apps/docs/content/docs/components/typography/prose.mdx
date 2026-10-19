@@ -11,6 +11,19 @@ paragraphs get the same type styles as [Heading](/components/typography/heading)
 
 <ExampleBlock src="prose/basic" title="Prose: Basic" />
 
+## Native elements
+
+Native links, inline code, keyboard input, and blockquotes use the default visual treatments of
+[Link](/components/actions/link), [Code](/components/typography/code),
+[Kbd](/components/typography/kbd), and [Blockquote](/components/typography/blockquote). Links use
+the browser's hover, pressed, and keyboard focus states. Inline code wraps, including long unbroken
+tokens. Code inside `pre` keeps its whitespace and scrolls with the block.
+
+Use the dedicated components or their recipes when you need their props or variants. They keep their
+own appearance inside `Prose`.
+
+<ExampleBlock src="prose/native-elements" title="Prose: Native elements" />
+
 ## Heading and Text
 
 Use `Heading` or `Text` for an element that needs a prop, such as a different type style or colour.

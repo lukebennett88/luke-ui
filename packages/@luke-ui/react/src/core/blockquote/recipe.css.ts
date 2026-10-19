@@ -1,10 +1,10 @@
-import { vars } from '../../theme/contract.css.js';
+import { style } from '../styles/layered-style.css.js';
 import { recipe } from '../styles/recipe.js';
+import { blockquoteAppearance } from './appearance.js';
+
+export const blockquoteElementClassName = style({}, 'blockquote');
 
 /** Left-border accent. Type treatment comes from the composed `Text`. */
 export const blockquoteRecipe = recipe({
-	base: {
-		borderInlineStart: `3px solid ${vars.color.border.decorative}`,
-		paddingInlineStart: vars.space['16'],
-	},
+	base: [blockquoteElementClassName, blockquoteAppearance],
 });

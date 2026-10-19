@@ -2,10 +2,18 @@ import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import type { FontWeightRole, TypeStyle } from '../../theme/type-styles.js';
 import { typeStyleWeightRole } from '../../theme/type-styles.js';
+import { blockquoteAppearance } from '../blockquote/appearance.js';
+import { blockquoteElementClassName } from '../blockquote/recipe.css.js';
+import { codeAppearance } from '../code/appearance.js';
+import { codeElementClassName } from '../code/recipe.css.js';
 import {
 	headingDefaultFontWeight,
 	headingTypographyByLevel,
 } from '../heading/heading-typography.js';
+import { kbdAppearance } from '../kbd/appearance.js';
+import { kbdElementClassName } from '../kbd/recipe.css.js';
+import { actionElementClassName } from '../primitives/button/recipe.css.js';
+import { textActionAppearance } from '../primitives/button/text-action-appearance.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import { recipe } from '../styles/recipe.js';
 import { textElementClassName } from '../text/recipe.css.js';
@@ -77,6 +85,39 @@ proseStyle('picture', { maxInlineSize: '100%' });
 proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 	marginBlockStart: 0,
 });
+
+// Exclude recipe-owned elements: scope proximity otherwise beats equal-specificity recipes.
+const plainLink = `a[href]:not(.${actionElementClassName}):not(.${textElementClassName})`;
+const linkAppearance = textActionAppearance('neutral', 'standard');
+proseStyle(plainLink, {
+	...linkAppearance.rest,
+	font: 'inherit',
+	padding: 0,
+	textDecorationColor: 'currentColor',
+	transitionDuration: vars.motion.feedback.duration,
+	transitionProperty: 'color, text-decoration-color',
+	transitionTimingFunction: vars.motion.feedback.easing,
+	'@media': { '(forced-colors: active)': { color: 'LinkText', forcedColorAdjust: 'auto' } },
+});
+proseStyle(`${plainLink}:hover`, {
+	...linkAppearance.hover,
+	'@media': { '(forced-colors: active)': { color: 'LinkText' } },
+});
+proseStyle(`${plainLink}:active`, {
+	...linkAppearance.pressed,
+	'@media': { '(forced-colors: active)': { color: 'LinkText' } },
+});
+proseStyle(`${plainLink}:focus-visible`, linkAppearance.focus);
+proseStyle(`code:not(pre code):not(.${codeElementClassName}):not(.${textElementClassName})`, {
+	...codeAppearance,
+	whiteSpace: 'normal',
+	overflowWrap: 'anywhere',
+});
+proseStyle(`kbd:not(.${kbdElementClassName}):not(.${textElementClassName})`, kbdAppearance);
+proseStyle(
+	`blockquote:not(.${blockquoteElementClassName}):not(.${textElementClassName})`,
+	blockquoteAppearance,
+);
 
 proseStyle('pre', {
 	backgroundColor: vars.color.background.neutral.subtle.rest,

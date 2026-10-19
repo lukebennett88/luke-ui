@@ -1,26 +1,33 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
+import { style } from '../../styles/layered-style.css.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import { recipe } from '../../styles/recipe.js';
 import { textRecipe } from '../../text/recipe.css.js';
+import { textActionAppearance } from './text-action-appearance.js';
+
+export const actionElementClassName = style({}, 'action');
 
 /** Shared presentation recipe for Button and button-shaped Link. */
 export const buttonRecipeInternal = recipe({
-	base: {
-		font: 'inherit',
-		...pressFeedback,
-		transitionDuration: vars.motion.feedback.duration,
-		transitionProperty:
-			'background-color, border-color, box-shadow, color, opacity, text-decoration-color',
-		transitionTimingFunction: vars.motion.feedback.easing,
-		selectors: {
-			'&[data-disabled="true"]': {
-				cursor: 'not-allowed',
-				opacity: vars.interaction.disabledOpacity,
+	base: [
+		actionElementClassName,
+		{
+			font: 'inherit',
+			...pressFeedback,
+			transitionDuration: vars.motion.feedback.duration,
+			transitionProperty:
+				'background-color, border-color, box-shadow, color, opacity, text-decoration-color',
+			transitionTimingFunction: vars.motion.feedback.easing,
+			selectors: {
+				'&[data-disabled="true"]': {
+					cursor: 'not-allowed',
+					opacity: vars.interaction.disabledOpacity,
+				},
 			},
 		},
-	},
+	],
 	defaultVariants: {
 		appearance: 'button',
 		inlineSize: 'auto',
@@ -261,37 +268,24 @@ function buttonSize(size: 'medium' | 'small') {
 }
 
 function textAppearance(tone: Tone, prominence: 'low' | 'standard' | 'high') {
-	const foreground = (() => {
-		if (tone === 'critical') return vars.color.foreground.danger;
-		if (prominence === 'high') return vars.color.foreground.accent;
-		return vars.color.foreground.neutral;
-	})();
-	// Critical and accent keep `foreground.pressed` even though it is barely perceptible: the role
-	// contract has no stronger rung, and `onSolid` is contrast-solved for solid fills.
-	const pressedColor =
-		tone === 'critical' || prominence === 'high' ? foreground.pressed : vars.color.text.primary;
-	const restDecoration = prominence === 'low' ? 'none' : 'underline';
-	const hoverDecoration = prominence === 'low' ? 'underline' : 'none';
+	const appearance = textActionAppearance(tone, prominence);
 	return [
 		{
 			style: {
-				color: foreground.rest,
+				...appearance.rest,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
-						color: foreground.hover,
-						textDecoration: hoverDecoration,
+						...appearance.hover,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						color: pressedColor,
-						textDecoration: hoverDecoration,
+						...appearance.pressed,
 					},
 					// Declared last so focus-visible's underline beats the hover/pressed decoration
 					// above, even though all three selectors share the same specificity.
 					'&[data-focus-visible="true"]:not([data-disabled="true"])': {
-						textDecoration: 'underline',
+						...appearance.focus,
 					},
 				},
-				textDecoration: restDecoration,
 			},
 			variants: { appearance: 'text' as const, prominence, tone },
 		},
