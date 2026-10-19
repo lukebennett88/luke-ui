@@ -16,8 +16,7 @@ test('loads the theme Inter file even when an unloaded Inter face is already reg
 
 	expect(stuck.status).not.toBe('loaded');
 	const themeFaces = [...document.fonts].filter(
-		(face) =>
-			(face.family === 'Inter' || face.family === '"Inter"') && face.status === 'loaded',
+		(face) => (face.family === 'Inter' || face.family === '"Inter"') && face.status === 'loaded',
 	);
 	expect(themeFaces.length).toBeGreaterThan(0);
 });
