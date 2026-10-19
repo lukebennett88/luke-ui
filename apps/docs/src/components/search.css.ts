@@ -206,7 +206,7 @@ export const panelResultsRegion = style({
 			minBlockSize: 0,
 			opacity: 1,
 			overflow: 'hidden',
-			paddingBlockEnd: vars.space.sp8,
+			paddingBlockEnd: vars.space['8'],
 			transition: panelResultsEnter,
 			...reducedMotionNoTransition,
 		},
@@ -272,8 +272,8 @@ export const inputRow = style({
 			flexShrink: 0,
 			minBlockSize: searchAnchorHeightVar,
 			// Leaves room for the field's outset focus ring inside the panel's `overflow: hidden`.
-			paddingBlock: vars.space.sp12,
-			paddingInline: vars.space.sp12,
+			paddingBlock: vars.space['12'],
+			paddingInline: vars.space['12'],
 		},
 	},
 });
@@ -314,8 +314,8 @@ export const results = style({
 			flex: 1,
 			minBlockSize: 0,
 			overflowY: 'auto',
-			padding: vars.space.sp8,
-			scrollPaddingBlock: vars.space.sp8,
+			padding: vars.space['8'],
+			scrollPaddingBlock: vars.space['8'],
 			selectors: {
 				'&:empty': {
 					padding: 0,
@@ -328,8 +328,8 @@ export const results = style({
 export const resultSummary = style({
 	'@layer': {
 		components: {
-			paddingBlock: vars.space.sp12,
-			paddingInline: vars.space.sp16,
+			paddingBlock: vars.space['12'],
+			paddingInline: vars.space['16'],
 		},
 	},
 });
@@ -356,10 +356,10 @@ export const result = style({
 			display: 'flex',
 			flexDirection: 'column',
 			fontSize: vars.font.label.fontSize,
-			gap: vars.space.sp4,
+			gap: vars.space['4'],
 			lineHeight: vars.font.label.lineHeight,
-			paddingBlock: vars.space.sp12,
-			paddingInline: vars.space.sp8,
+			paddingBlock: vars.space['12'],
+			paddingInline: vars.space['8'],
 			textDecoration: 'none',
 		},
 	},
@@ -388,7 +388,7 @@ export const breadcrumbs = style({
 			alignItems: 'center',
 			color: vars.color.text.secondary,
 			display: 'inline-flex',
-			gap: vars.space.sp4,
+			gap: vars.space['4'],
 		},
 	},
 });
@@ -406,9 +406,9 @@ export const nestedResult = style({
 	'@layer': {
 		components: {
 			borderInlineStart: `1px solid ${vars.color.border.decorative}`,
-			marginInlineStart: vars.space.sp8,
-			paddingBlock: vars.space.sp8,
-			paddingInlineStart: vars.space.sp12,
+			marginInlineStart: vars.space['8'],
+			paddingBlock: vars.space['8'],
+			paddingInlineStart: vars.space['12'],
 		},
 	},
 });
@@ -452,8 +452,8 @@ export const highlight = style({
 export const empty = style({
 	'@layer': {
 		components: {
-			paddingBlock: vars.space.sp24,
-			paddingInline: vars.space.sp16,
+			paddingBlock: vars.space['24'],
+			paddingInline: vars.space['16'],
 			textAlign: 'center',
 		},
 	},

@@ -49,7 +49,7 @@ const selectConfig = {
 			color: vars.color.text.primary,
 			display: 'inline-flex',
 			fontFamily: vars.font.family.body,
-			gap: vars.space.sp8,
+			gap: vars.space['8'],
 			inlineSize: '100%',
 			isolation: 'isolate',
 			letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
@@ -114,7 +114,7 @@ const selectConfig = {
 				trigger: {
 					blockSize: vars.controlSize.px40,
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
-					paddingInline: vars.space.sp12,
+					paddingInline: vars.space['12'],
 				},
 			},
 			small: {
@@ -123,7 +123,7 @@ const selectConfig = {
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
-					paddingInline: vars.space.sp8,
+					paddingInline: vars.space['8'],
 				},
 			},
 		},

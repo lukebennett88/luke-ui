@@ -70,7 +70,7 @@ export const popover = style({
 					maxInlineSize: 'min(36rem, calc(100vw - 2rem))',
 					maxBlockSize: 'min(24rem, calc(100vh - 4rem))',
 					overflow: 'auto',
-					padding: vars.space.sp12,
+					padding: vars.space['12'],
 					translate: 'none',
 					zIndex: 50,
 				},
@@ -111,7 +111,7 @@ export const breadcrumbs = style({
 			flexWrap: 'wrap',
 			fontFamily: vars.font.family.code,
 			fontSize: vars.font.label.fontSize,
-			gap: vars.space.sp4,
+			gap: vars.space['4'],
 			lineHeight: vars.font.label.lineHeight,
 			listStyle: 'none',
 			margin: 0,
@@ -124,7 +124,7 @@ export const breadcrumb = style({
 	'@layer': {
 		components: {
 			display: 'flex',
-			gap: vars.space.sp4,
+			gap: vars.space['4'],
 			selectors: {
 				'&:not(:last-child)::after': {
 					color: vars.color.text.secondary,

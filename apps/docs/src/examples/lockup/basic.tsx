@@ -6,7 +6,7 @@ import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 export default () => {
 	return (
 		<Box maxInlineSize="20rem">
-			<Lockup gap="sp8">
+			<Lockup gap="space.8">
 				<LockupRail>
 					<Icon name="exclamationTriangle" />
 				</LockupRail>

@@ -268,7 +268,7 @@ test('lets utility classes override Prose margins', () => {
 	const { locator } = render(
 		<Prose>
 			<h2>Before.</h2>
-			<Box data-testid="utility" marginBlockStart="sp8">
+			<Box data-testid="utility" marginBlockStart="space.8">
 				Utility.
 			</Box>
 		</Prose>,
@@ -303,7 +303,7 @@ test('fits media inside a narrow prose column', async () => {
 });
 
 test('scrolls long preformatted lines without widening a narrow grid column', async () => {
-	const code = 'padding-inline: var(--luke-space-sp16);'.repeat(5);
+	const code = 'padding-inline: var(--luke-space-16);'.repeat(5);
 	const { locator, user } = render(
 		<Prose style={{ display: 'grid', inlineSize: 160 }}>
 			<button type="button">Before code</button>
@@ -698,7 +698,7 @@ const document = (
 		<h4>Reading a token</h4>
 		{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable pre */}
 		<pre tabIndex={0}>
-			<code>{'padding-inline: var(--luke-space-sp16);\nmargin-block: 0;'}</code>
+			<code>{'padding-inline: var(--luke-space-16);\nmargin-block: 0;'}</code>
 		</pre>
 		<img alt="" height={64} src={swatch} width={320} />
 		<picture>
@@ -723,7 +723,7 @@ const document = (
 				<tr>
 					<td>
 						<p>
-							<Code>sp8</Code>
+							<Code>space.8</Code>
 							<br />
 							Small gap
 						</p>
@@ -734,7 +734,7 @@ const document = (
 				</tr>
 				<tr>
 					<td>
-						<Code>sp24</Code>
+						<Code>space.24</Code>
 					</td>
 					<td>24px</td>
 				</tr>

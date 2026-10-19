@@ -18,9 +18,9 @@ export default () => {
 	const isSuccess = Boolean(state.values?.username && !state.errors);
 
 	return (
-		<Stack gap="sp16" maxInlineSize="20rem">
+		<Stack gap="space.16" maxInlineSize="20rem">
 			<Form action={formAction} necessityIndicator="required-label" validationErrors={state.errors}>
-				<Stack gap="sp16">
+				<Stack gap="space.16">
 					<TextInputField
 						defaultValue={state.values?.username}
 						isRequired

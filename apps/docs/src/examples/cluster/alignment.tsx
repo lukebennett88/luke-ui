@@ -3,7 +3,7 @@ import { ExampleItem } from '#docs';
 
 export default () => {
 	return (
-		<Cluster alignItems="flex-end" gap="sp8" justifyContent="space-between">
+		<Cluster alignItems="flex-end" gap="space.8" justifyContent="space-between">
 			<ExampleItem>Short item</ExampleItem>
 			<ExampleItem>
 				A taller item

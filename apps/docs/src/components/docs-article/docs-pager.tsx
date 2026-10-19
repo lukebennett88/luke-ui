@@ -23,12 +23,17 @@ export function DocsPager({ tree }: { tree: Root }) {
 	if (!previous && !next) return null;
 
 	return (
-		<Box elementType="footer" marginBlockStart="sp64" paddingBlockStart="sp32" style={footerRule}>
+		<Box
+			elementType="footer"
+			marginBlockStart="space.64"
+			paddingBlockStart="space.32"
+			style={footerRule}
+		>
 			<Grid
 				aria-label="Pagination"
 				columns="repeat(auto-fit, minmax(min(100%, 16rem), 1fr))"
 				elementType="nav"
-				gap="sp16"
+				gap="space.16"
 			>
 				{previous ? <PagerLink direction="previous" page={previous} /> : null}
 				{next ? <PagerLink direction="next" page={next} /> : null}
@@ -100,7 +105,7 @@ function PagerLink({ direction, page }: { direction: PagerDirection; page: Item 
 
 	return (
 		<DocsCardLink align={align} href={page.url}>
-			<Stack gap="sp12" minInlineSize="0">
+			<Stack gap="space.12" minInlineSize="0">
 				<PagerTitle direction={direction} name={page.name} />
 				<Text
 					color="secondary"
@@ -135,7 +140,7 @@ function PagerTitle({ direction, name }: { direction: PagerDirection; name: Reac
 			}
 			typography="label"
 		>
-			<Lockup gap="sp8">
+			<Lockup gap="space.8">
 				{direction === 'previous' && chevron}
 				<LockupBody>
 					<Text elementType="span" shouldInheritFont>

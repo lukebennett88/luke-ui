@@ -4,8 +4,8 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<ScrollFade aria-label="Example items" inlineSize="16rem" padding="sp12">
-			<Cluster flexWrap="nowrap" gap="sp16">
+		<ScrollFade aria-label="Example items" inlineSize="16rem" padding="space.12">
+			<Cluster flexWrap="nowrap" gap="space.16">
 				{['First item', 'Second item', 'Third item', 'Fourth item'].map((item) => (
 					<Text key={item} style={{ flex: 'none' }}>
 						{item}

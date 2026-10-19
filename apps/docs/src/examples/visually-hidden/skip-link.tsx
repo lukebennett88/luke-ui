@@ -7,7 +7,7 @@ import { ExampleItem } from '#docs';
 
 export default () => {
 	return (
-		<Stack alignItems="flex-start" gap="sp12">
+		<Stack alignItems="flex-start" gap="space.12">
 			<Text color="secondary" elementType="p" typography="caption">
 				Focus the button, then press Tab to reveal the skip link.
 			</Text>

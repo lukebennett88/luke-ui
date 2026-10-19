@@ -5,7 +5,7 @@ export default () => {
 	return (
 		<p>
 			Example text with{' '}
-			<Lockup elementType="span" gap="sp4">
+			<Lockup elementType="span" gap="space.4">
 				<LockupRail>
 					<Icon name="checkCircle" />
 				</LockupRail>

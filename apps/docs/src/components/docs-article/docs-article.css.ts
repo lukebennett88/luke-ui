@@ -13,13 +13,13 @@ export const TOC_BAR_BLOCK_SIZE = '3rem';
 
 // Keep in sync with the article content `paddingInline` on `DocsArticle` so the bar label lines up.
 const contentInlinePadding = {
-	paddingInline: vars.space.sp16,
+	paddingInline: vars.space['16'],
 	'@container': {
 		[docsTabletMinInlineSize]: {
-			paddingInline: vars.space.sp24,
+			paddingInline: vars.space['24'],
 		},
 		[docsSidebarMinInlineSize]: {
-			paddingInline: vars.space.sp32,
+			paddingInline: vars.space['32'],
 		},
 	},
 } as const satisfies ComplexStyleRule;
@@ -39,7 +39,7 @@ export const pagerIcon = style({
 	'@layer': {
 		components: {
 			flexShrink: 0,
-			marginInline: `calc(${vars.space.sp4} * -1)`,
+			marginInline: `calc(${vars.space['4']} * -1)`,
 			selectors: {
 				'&:dir(rtl)': {
 					transform: 'scaleX(-1)',
@@ -74,7 +74,7 @@ export const tocSummary = style({
 			alignItems: 'center',
 			blockSize: TOC_BAR_BLOCK_SIZE,
 			color: vars.color.text.primary,
-			columnGap: vars.space.sp8,
+			columnGap: vars.space['8'],
 			cursor: 'pointer',
 			display: 'flex',
 			fontSize: vars.font.label.fontSize,
@@ -123,11 +123,11 @@ export const tocBarPanel = style({
 			maxBlockSize: `min(24rem, calc(100dvh - ${SITE_HEADER_BLOCK_SIZE} - ${TOC_BAR_BLOCK_SIZE}))`,
 			overflowY: 'auto',
 			// Inline padding stays here so it tracks the article gutter via docs container queries.
-			paddingInline: vars.space.sp16,
+			paddingInline: vars.space['16'],
 			position: 'absolute',
 			'@container': {
 				[docsTabletMinInlineSize]: {
-					paddingInline: vars.space.sp24,
+					paddingInline: vars.space['24'],
 				},
 			},
 		},

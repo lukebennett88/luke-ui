@@ -11,7 +11,12 @@ import { responsiveConditions } from './responsive-conditions.js';
 // the contract removes its Box value too.
 
 /** Space steps plus `0`. `'0'` is quoted so declaration emit keeps it a string key. */
-const spaceScale = { '0': '0', ...vars.space } as const;
+const spaceScale = {
+	'0': '0',
+	...Object.fromEntries(typedEntries(vars.space).map(([step, value]) => [`space.${step}`, value])),
+} as { readonly [Step in keyof typeof vars.space as `space.${Step}`]: string } & {
+	readonly '0': '0';
+};
 
 const marginScale = { ...spaceScale, auto: 'auto' } as const;
 

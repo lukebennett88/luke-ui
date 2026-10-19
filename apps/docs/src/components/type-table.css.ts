@@ -26,7 +26,7 @@ export const narrowOnly = style({
 export const propHashTarget = style({
 	'@layer': {
 		components: {
-			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space.sp24})`,
+			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space['24']})`,
 		},
 	},
 });
@@ -46,7 +46,7 @@ globalStyle(`${richText} p`, {
 globalStyle(`${richText} p + p`, {
 	'@layer': {
 		components: {
-			marginBlockStart: vars.space.sp8,
+			marginBlockStart: vars.space['8'],
 		},
 	},
 });

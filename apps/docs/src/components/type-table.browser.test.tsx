@@ -673,9 +673,9 @@ test('shows resolved values for a type without a source definition', async () =>
 		jsonResponse({
 			"Spacing['gap']": {
 				resolved: [
-					['s', '"sp4"'],
+					['s', '"space.4"'],
 					' |\u2060\u00a0',
-					['s', '"sp8"'],
+					['s', '"space.8"'],
 					' |\u2060\u00a0',
 					['k', 'undefined'],
 				],
@@ -704,7 +704,7 @@ test('shows resolved values for a type without a source definition', async () =>
 	const { dialog } = await openDefinitionWithKeyboard("Spacing['gap']");
 	await expect.element(dialog.getByText('Resolves to:')).toBeVisible();
 	await expect
-		.element(dialog.getByText('"sp4" |\u2060\u00a0"sp8" |\u2060\u00a0undefined'))
+		.element(dialog.getByText('"space.4" |\u2060\u00a0"space.8" |\u2060\u00a0undefined'))
 		.toBeVisible();
 	expect(dialog.getByText('Definition not available.').elements()).toHaveLength(0);
 });

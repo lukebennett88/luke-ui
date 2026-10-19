@@ -29,7 +29,7 @@ export function Comparison({ align = 'start', children, direction = 'vertical' }
 	const Element = direction === 'vertical' ? Stack : Cluster;
 	return (
 		<ComparisonAlignContext.Provider value={align}>
-			<Element gap="sp16" inlineSize="max-content" marginInline="auto" maxInlineSize="100%">
+			<Element gap="space.16" inlineSize="max-content" marginInline="auto" maxInlineSize="100%">
 				{children}
 			</Element>
 		</ComparisonAlignContext.Provider>
@@ -40,7 +40,7 @@ export function ComparisonItem({ children, label }: ComparisonItemProps) {
 	const align = useContext(ComparisonAlignContext);
 
 	return (
-		<Stack alignItems={align === 'center' ? 'center' : 'stretch'} gap="sp4">
+		<Stack alignItems={align === 'center' ? 'center' : 'stretch'} gap="space.4">
 			<Text color="secondary" textAlign={align} typography="caption">
 				{label}
 			</Text>
@@ -58,7 +58,7 @@ export function ExampleItem(props: BoxProps) {
 			borderRadius="detail"
 			borderStyle="solid"
 			borderWidth="thin"
-			padding="sp12"
+			padding="space.12"
 			{...props}
 		/>
 	);

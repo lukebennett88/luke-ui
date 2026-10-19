@@ -79,7 +79,7 @@ export function Bleed({
 }
 
 /** A spacing token, or a responsive object keyed by breakpoint. */
-type BleedSpaceProp = ResponsivePropValue<'0' | SpaceStep>;
+type BleedSpaceProp = ResponsivePropValue<'0' | `space.${SpaceStep}`>;
 
 interface _BleedSpaceProps {
 	/** Amount to extend from all four edges. Axis and edge props override this at the same breakpoint. */
@@ -166,13 +166,17 @@ function resolveBleedValue(
 function formatBleedSpace(value: string | number): string {
 	// `calc(-1 * 0)` is a number, not a length, so the negated margin needs a unit.
 	if (value === '0') return '0px';
-	return isSpaceStep(value) ? vars.space[value] : String(value);
+	return isSpaceStep(value) ? vars.space[value.slice(6) as SpaceStep] : String(value);
 }
 
 function isBleedSpaceToken(value: string | number): boolean {
 	return value === '0' || isSpaceStep(value);
 }
 
-function isSpaceStep(value: string | number): value is SpaceStep {
-	return typeof value === 'string' && Object.hasOwn(vars.space, value);
+function isSpaceStep(value: string | number): value is `space.${SpaceStep}` {
+	return (
+		typeof value === 'string' &&
+		value.startsWith('space.') &&
+		Object.hasOwn(vars.space, value.slice(6))
+	);
 }

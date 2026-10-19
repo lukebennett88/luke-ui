@@ -6,9 +6,9 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Lockup gap="sp12">
+		<Lockup gap="space.12">
 			<LockupBody>
-				<Stack gap="sp4">
+				<Stack gap="space.4">
 					<Link href="#example-destination">Example destination</Link>
 					<Text color="secondary" typography="caption">
 						Example description

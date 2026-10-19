@@ -14,7 +14,7 @@ afterEach(async () => {
 
 test('creates equal explicit columns', () => {
 	const { locator } = render(
-		<Grid columns={3} data-testid="grid" gap="sp8" inlineSize="30rem">
+		<Grid columns={3} data-testid="grid" gap="space.8" inlineSize="30rem">
 			<span style={{ blockSize: '1rem' }} />
 			<span style={{ blockSize: '1rem' }} />
 			<span style={{ blockSize: '1rem' }} />
@@ -44,7 +44,7 @@ test('keeps consumer className and style alongside grid presentation', () => {
 			className="consumer-grid"
 			columns={2}
 			data-testid="grid"
-			gap="sp8"
+			gap="space.8"
 			inlineSize="20rem"
 			style={{ backgroundColor: 'rgb(4, 5, 6)', position: 'relative' }}
 		>
@@ -210,7 +210,7 @@ for (const validAreas of [['a b'], ['a..b', 'c d e']]) {
 
 test('lets columnGap override gap', () => {
 	const { locator } = render(
-		<Grid columnGap="sp24" columns={2} data-testid="grid" gap="sp8">
+		<Grid columnGap="space.24" columns={2} data-testid="grid" gap="space.8">
 			<span />
 			<span />
 		</Grid>,
@@ -225,7 +225,11 @@ test('lets columnGap override gap', () => {
 test('does not overflow a parent narrower than the auto-fit minimum', () => {
 	const { locator } = render(
 		<div data-testid="parent" style={{ inlineSize: '10rem' }}>
-			<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" data-testid="grid" gap="sp8">
+			<Grid
+				columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))"
+				data-testid="grid"
+				gap="space.8"
+			>
 				<span style={{ blockSize: '1rem' }}>Item</span>
 				<span style={{ blockSize: '1rem' }}>Item</span>
 			</Grid>
@@ -245,7 +249,7 @@ test('does not overflow a parent narrower than the auto-fit minimum', () => {
 
 test('lets children span tracks with Box grid-placement props', () => {
 	const { locator } = render(
-		<Grid columns={4} data-testid="grid" gap="sp8" inlineSize="40rem">
+		<Grid columns={4} data-testid="grid" gap="space.8" inlineSize="40rem">
 			<Box data-testid="wide" gridColumn="span 2" style={{ blockSize: '1rem' }} />
 			<span data-testid="narrow" style={{ blockSize: '1rem' }} />
 			<span style={{ blockSize: '1rem' }} />
@@ -265,15 +269,19 @@ test('lets children span tracks with Box grid-placement props', () => {
 test('resolves responsive columns against nested size containers', async () => {
 	await page.viewport(1024, 800);
 	const { locator } = render(
-		<Container maxInlineSize="100%" paddingInline="sp16">
-			<Grid columns={{ initial: 1, bp768: '1fr 1fr 1fr 1fr' }} data-testid="outer" gap="sp8">
+		<Container
+			maxInlineSize="container.1280"
+			style={{ maxInlineSize: '100%' }}
+			paddingInline="space.16"
+		>
+			<Grid columns={{ initial: 1, bp768: '1fr 1fr 1fr 1fr' }} data-testid="outer" gap="space.8">
 				<span style={{ blockSize: '1rem' }} />
 				<span style={{ blockSize: '1rem' }} />
 				<span style={{ blockSize: '1rem' }} />
 				<span style={{ blockSize: '1rem' }} />
 			</Grid>
-			<Container maxInlineSize="px448">
-				<Grid columns={{ initial: 1, bp768: '1fr 1fr 1fr 1fr' }} data-testid="nested" gap="sp8">
+			<Container maxInlineSize="container.448">
+				<Grid columns={{ initial: 1, bp768: '1fr 1fr 1fr 1fr' }} data-testid="nested" gap="space.8">
 					<span style={{ blockSize: '1rem' }} />
 					<span style={{ blockSize: '1rem' }} />
 					<span style={{ blockSize: '1rem' }} />
@@ -310,7 +318,7 @@ test('keeps responsive child spans inside the active column count', async () => 
 	await page.viewport(breakpoints.bp640, 800);
 	const { locator } = render(
 		<div style={{ inlineSize: '40rem' }}>
-			<Grid columns={{ initial: 2, bp768: 4 }} data-testid="grid" gap="sp8">
+			<Grid columns={{ initial: 2, bp768: 4 }} data-testid="grid" gap="space.8">
 				<Box
 					data-testid="span"
 					gridColumn={{ initial: 'span 2', bp768: 'span 2' }}
@@ -338,7 +346,7 @@ test('keeps responsive child spans inside the active column count', async () => 
 test('keeps the inline axis under RTL', () => {
 	const { locator } = render(
 		<div dir="rtl" style={{ inlineSize: '30rem' }}>
-			<Grid columns={3} data-testid="grid-rtl" gap="sp8">
+			<Grid columns={3} data-testid="grid-rtl" gap="space.8">
 				<span data-testid="rtl-first" style={{ blockSize: '1rem' }} />
 				<span data-testid="rtl-second" style={{ blockSize: '1rem' }} />
 				<span style={{ blockSize: '1rem' }} />
@@ -358,7 +366,7 @@ test('keeps the inline axis under RTL', () => {
 
 test('does not let long unbreakable content expand equal grid tracks', () => {
 	const { locator } = render(
-		<Grid columns={2} data-testid="grid" gap="sp8" inlineSize="20rem">
+		<Grid columns={2} data-testid="grid" gap="space.8" inlineSize="20rem">
 			<span data-testid="long">
 				supercalifragilisticexpialidocioussupercalifragilisticexpialidocious
 			</span>
@@ -378,22 +386,22 @@ const itemStyle = {
 	backgroundColor: vars.color.surface.base,
 	borderRadius: vars.radius.detail,
 	color: vars.color.text.primary,
-	paddingBlock: vars.space.sp8,
-	paddingInline: vars.space.sp12,
+	paddingBlock: vars.space['8'],
+	paddingInline: vars.space['12'],
 } as const;
 
 const sceneStyle = {
 	backgroundColor: vars.color.surface.subdued,
 	borderRadius: vars.radius.surface,
 	color: vars.color.text.primary,
-	padding: vars.space.sp16,
+	padding: vars.space['16'],
 } as const;
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator: scene } = render(
-			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space.sp16 }}>
-				<Grid columns={4} gap="sp8" style={{ ...sceneStyle, inlineSize: '36rem' }}>
+			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space['16'] }}>
+				<Grid columns={4} gap="space.8" style={{ ...sceneStyle, inlineSize: '36rem' }}>
 					<Box gridColumn="span 2" style={itemStyle}>
 						Wide
 					</Box>
@@ -407,7 +415,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				</Grid>
 				<Grid
 					columns="repeat(auto-fit, minmax(min(10rem, 100%), 1fr))"
-					gap="sp8"
+					gap="space.8"
 					style={{ ...sceneStyle, inlineSize: '36rem' }}
 				>
 					<span style={itemStyle}>Auto one</span>
@@ -418,7 +426,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				<Grid
 					areas={['a a b', 'c d b']}
 					columns="1fr 1fr 8rem"
-					gap="sp8"
+					gap="space.8"
 					rows="auto 4rem"
 					style={{ ...sceneStyle, inlineSize: '36rem' }}
 				>

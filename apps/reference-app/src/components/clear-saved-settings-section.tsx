@@ -38,6 +38,8 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 		},
 	});
 	const error = mutation.error instanceof Error ? mutation.error.message : undefined;
+	const pendingMessage = isPending ? 'Clearing…' : null;
+	const clearedMessage = mutation.isSuccess ? 'Saved settings cleared' : null;
 
 	async function clearSettings() {
 		if (!isOpen || isPending || isOtherMutationPending) return;
@@ -82,7 +84,7 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 									className={styles.dialog}
 									role="alertdialog"
 								>
-									<Stack gap="sp16">
+									<Stack gap="space.16">
 										<Heading level={2} shouldDisableTrim typography="heading3">
 											Clear saved settings?
 										</Heading>
@@ -90,7 +92,7 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 											Your profile and preferences will be removed from this browser. This cannot be
 											undone.
 										</Text>
-										<Stack gap={error || isPending || isOtherMutationPending ? 'sp8' : '0'}>
+										<Stack gap={error || isPending || isOtherMutationPending ? 'space.8' : '0'}>
 											<Text
 												color={error ? 'danger' : 'secondary'}
 												elementType="p"
@@ -99,10 +101,9 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 												shouldDisableTrim
 												typography="label"
 											>
-												{error ??
-													(isOtherMutationPending ? 'Saving…' : isPending ? 'Clearing…' : null)}
+												{error ?? (isOtherMutationPending ? 'Saving…' : pendingMessage)}
 											</Text>
-											<Cluster gap="sp8" justifyContent="flex-end">
+											<Cluster gap="space.8" justifyContent="flex-end">
 												<Button
 													isDisabled={isPending}
 													onPress={() => changeOpen(false)}
@@ -128,7 +129,7 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 				</SettingsRow>
 			</SettingsSection>
 			<SettingsStatus tone={mutation.isSuccess ? 'success' : undefined}>
-				{isOtherMutationPending ? 'Saving…' : mutation.isSuccess ? 'Saved settings cleared' : null}
+				{isOtherMutationPending ? 'Saving…' : clearedMessage}
 			</SettingsStatus>
 		</>
 	);

@@ -12,8 +12,8 @@ export default () => {
 			boxShadow="resting"
 			display="flex"
 			flexDirection="column"
-			gap="sp8"
-			padding="sp16"
+			gap="space.8"
+			padding="space.16"
 		>
 			<Text fontWeight="label">Card heading</Text>
 			<Text>Background, border, radius, and depth values applied together.</Text>

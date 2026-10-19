@@ -18,7 +18,7 @@ const subsequentGroupStyle = {
 export function ComponentsIndex(): JSX.Element {
 	return (
 		<HeadingLevels base={2}>
-			<Stack className="not-prose" gap="sp64" marginBlockStart="sp40">
+			<Stack className="not-prose" gap="space.64" marginBlockStart="space.40">
 				{componentIndexGroups.map((group, index) => (
 					<CategoryGroup group={group} isFirst={index === 0} key={group.title} />
 				))}
@@ -31,8 +31,8 @@ function CategoryGroup({ group, isFirst }: { group: ComponentIndexGroup; isFirst
 	return (
 		<Stack
 			elementType="section"
-			gap="sp32"
-			paddingBlockStart={isFirst ? undefined : 'sp40'}
+			gap="space.32"
+			paddingBlockStart={isFirst ? undefined : 'space.40'}
 			style={isFirst ? undefined : subsequentGroupStyle}
 		>
 			<Heading typography="heading4">{group.title}</Heading>
@@ -43,7 +43,7 @@ function CategoryGroup({ group, isFirst }: { group: ComponentIndexGroup; isFirst
 						bp768: 2,
 						bp1024: 3,
 					}}
-					gap="sp12"
+					gap="space.12"
 				>
 					{group.entries.map((entry) => (
 						<DocsCard

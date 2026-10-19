@@ -31,15 +31,15 @@ export function PageActions({
 	const showAllActions = mode === 'all';
 
 	return (
-		<Cluster gap="sp8" inlineSize="100%">
+		<Cluster gap="space.8" inlineSize="100%">
 			{showAllActions && reactAriaUrl ? (
 				<PageActionLink
 					href={reactAriaUrl}
 					icon={
 						<Box
-							blockSize={vars.space.sp16}
+							blockSize={vars.space['16']}
 							flexShrink="0"
-							inlineSize={vars.space.sp16}
+							inlineSize={vars.space['16']}
 							renderRoot={({ className, style }) => (
 								<ReactAriaMark className={className} style={style} />
 							)}

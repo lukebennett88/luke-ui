@@ -64,7 +64,7 @@ function offsetFromInterCapCentre(rail: Element, textElement: Element): number {
 test('centres a rail on the capitals of the first line of wrapping text in Inter', async () => {
 	await loadInter();
 	const { container } = render(
-		<Lockup gap="sp8" style={{ inlineSize: '8rem' }}>
+		<Lockup gap="space.8" style={{ inlineSize: '8rem' }}>
 			<LockupRail>
 				<Square size="1rem" />
 			</LockupRail>
@@ -86,7 +86,7 @@ test('centres a rail on the capitals of the first line of wrapping text in Inter
 test('centres a rail on the capitals of the first line of trimmed block Text in Inter', async () => {
 	await loadInter();
 	const { container } = render(
-		<Lockup gap="sp8" style={{ inlineSize: '14rem' }}>
+		<Lockup gap="space.8" style={{ inlineSize: '14rem' }}>
 			<LockupRail>
 				<Square size="1rem" />
 			</LockupRail>
@@ -106,7 +106,7 @@ test('centres a rail on the capitals of the first line of trimmed block Text in 
 test('a rail taller than the first line leads the row and stays centred on that line in Inter', async () => {
 	await loadInter();
 	const { container } = render(
-		<Lockup data-testid="lockup" gap="sp8" style={{ inlineSize: '14rem' }}>
+		<Lockup data-testid="lockup" gap="space.8" style={{ inlineSize: '14rem' }}>
 			<LockupRail>
 				<Square size="40px" />
 			</LockupRail>
@@ -132,12 +132,12 @@ test('a rail taller than the first line leads the row and stays centred on that 
 
 test('center centres a tall avatar rail on a two-line body', () => {
 	const { container } = render(
-		<Lockup gap="sp12" railAlignment="center">
+		<Lockup gap="space.12" railAlignment="center">
 			<LockupRail>
 				<Square size="3rem" testId="avatar" />
 			</LockupRail>
 			<LockupBody data-testid="body">
-				<Stack gap="sp4">
+				<Stack gap="space.4">
 					<Text fontWeight="emphasis">Example name</Text>
 					<Text typography="caption">Example description</Text>
 				</Stack>
@@ -152,7 +152,7 @@ test('center centres a tall avatar rail on a two-line body', () => {
 
 test('under center, a rail shorter than the cap height is as tall as its content', () => {
 	const { container } = render(
-		<Lockup gap="sp8" railAlignment="center">
+		<Lockup gap="space.8" railAlignment="center">
 			<LockupRail data-testid="rail">
 				<Square size="2px" />
 			</LockupRail>
@@ -165,7 +165,7 @@ test('under center, a rail shorter than the cap height is as tall as its content
 
 test('a phrase wrapped in one element keeps its whitespace and aligns with the first line', () => {
 	const { container } = render(
-		<Lockup gap="sp8" style={{ inlineSize: '16rem' }}>
+		<Lockup gap="space.8" style={{ inlineSize: '16rem' }}>
 			<LockupBody>
 				<span data-testid="text">{longText}</span>
 			</LockupBody>
@@ -192,7 +192,7 @@ test('a phrase wrapped in one element keeps its whitespace and aligns with the f
 
 test('an image inside a rail aligns with the first line', async () => {
 	const { container } = render(
-		<Lockup gap="sp8" style={{ inlineSize: '12rem' }}>
+		<Lockup gap="space.8" style={{ inlineSize: '12rem' }}>
 			<LockupRail>
 				<img alt="" data-testid="image" height={20} src={squareImage} width={20} />
 			</LockupRail>
@@ -209,7 +209,7 @@ test('an image inside a rail aligns with the first line', async () => {
 
 test('rails keep their inline size while the body shrinks and truncates inside the row', () => {
 	const { container } = render(
-		<Lockup data-testid="lockup" gap="sp8" style={{ inlineSize: '12rem' }}>
+		<Lockup data-testid="lockup" gap="space.8" style={{ inlineSize: '12rem' }}>
 			<LockupRail>
 				<Square size="2rem" testId="start" />
 			</LockupRail>
@@ -243,7 +243,7 @@ test('rails keep their inline size while the body shrinks and truncates inside t
 test('an absent rail leaves no part or gap, and several rails sit in DOM order', () => {
 	function Row({ hasRail }: { hasRail: boolean }) {
 		return (
-			<Lockup data-testid="lockup" gap="sp8">
+			<Lockup data-testid="lockup" gap="space.8">
 				{hasRail && (
 					<LockupRail>
 						<Square size="1rem" testId="first" />
@@ -279,7 +279,7 @@ test('an absent rail leaves no part or gap, and several rails sit in DOM order',
 test('places parts in DOM order under RTL', () => {
 	const { container } = render(
 		<div dir="rtl">
-			<Lockup gap="sp8">
+			<Lockup gap="space.8">
 				<LockupRail>
 					<Square size="1rem" testId="before" />
 				</LockupRail>
@@ -300,7 +300,7 @@ test('resolves a responsive gap against the container width', async () => {
 	const originalWidth = window.innerWidth;
 	const originalHeight = window.innerHeight;
 	const { container } = render(
-		<Lockup data-testid="lockup" gap={{ bp768: 'sp24', initial: 'sp8' }}>
+		<Lockup data-testid="lockup" gap={{ bp768: 'space.24', initial: 'space.8' }}>
 			<LockupRail>
 				<Square size="1rem" />
 			</LockupRail>
@@ -328,7 +328,7 @@ for (const [elementType, Parent, partTagName] of [
 	test(`a ${elementType} Lockup renders ${partTagName.toLowerCase()} parts by default`, () => {
 		const { container } = render(
 			<Parent>
-				<Lockup data-testid="lockup" elementType={elementType} gap="sp8">
+				<Lockup data-testid="lockup" elementType={elementType} gap="space.8">
 					<LockupRail>Rail</LockupRail>
 					<LockupBody>Body</LockupBody>
 				</Lockup>
@@ -345,9 +345,9 @@ for (const [elementType, Parent, partTagName] of [
 test('a nested Lockup inside a span Lockup renders phrasing content', () => {
 	const { container } = render(
 		<p>
-			<Lockup elementType="span" gap="sp4">
+			<Lockup elementType="span" gap="space.4">
 				<LockupBody>
-					<Lockup data-testid="nested" gap="sp4">
+					<Lockup data-testid="nested" gap="space.4">
 						<LockupRail>Rail</LockupRail>
 						<LockupBody>Body</LockupBody>
 					</Lockup>
@@ -363,7 +363,7 @@ test('a nested Lockup inside a span Lockup renders phrasing content', () => {
 
 test('renderRoot owns each part’s element and keeps its layout', () => {
 	const { container } = render(
-		<Lockup gap="sp8" renderRoot={(domProps) => <section {...domProps} data-testid="lockup" />}>
+		<Lockup gap="space.8" renderRoot={(domProps) => <section {...domProps} data-testid="lockup" />}>
 			<LockupRail renderRoot={(domProps) => <span {...domProps} data-testid="rail" />}>
 				<Square size="1rem" />
 			</LockupRail>
@@ -385,7 +385,7 @@ test('a renderRoot Lockup is block-level unless it sits inside a span Lockup', (
 	function LinkLockup({ testId }: { testId: string }) {
 		return (
 			<Lockup
-				gap="sp4"
+				gap="space.4"
 				renderRoot={({ children, ...domProps }) => (
 					<a {...domProps} data-testid={testId} href="#example">
 						{children}
@@ -400,7 +400,7 @@ test('a renderRoot Lockup is block-level unless it sits inside a span Lockup', (
 		<>
 			<LinkLockup testId="flow" />
 			<p>
-				<Lockup elementType="span" gap="sp4">
+				<Lockup elementType="span" gap="space.4">
 					<LockupBody>
 						<LinkLockup testId="phrasing" />
 					</LockupBody>
@@ -417,7 +417,7 @@ test('a rail ignores the flex item props it owns', () => {
 	// Cast past the types to prove the runtime drops a prop a JavaScript caller could still pass.
 	const railProps = { 'data-testid': 'rail', flexGrow: '1' } as LockupRailProps;
 	const { container } = render(
-		<Lockup gap="sp8" inlineSize="20rem">
+		<Lockup gap="space.8" inlineSize="20rem">
 			<LockupRail {...railProps}>
 				<Square size="1rem" />
 			</LockupRail>
@@ -458,21 +458,21 @@ const itemStyle = {
 	backgroundColor: vars.color.surface.base,
 	borderRadius: vars.radius.detail,
 	color: vars.color.text.primary,
-	paddingBlock: vars.space.sp8,
-	paddingInline: vars.space.sp12,
+	paddingBlock: vars.space['8'],
+	paddingInline: vars.space['12'],
 } as const;
 
 const rowStyle = {
 	backgroundColor: vars.color.surface.subdued,
 	borderRadius: vars.radius.surface,
 	color: vars.color.text.primary,
-	padding: vars.space.sp16,
+	padding: vars.space['16'],
 } as const;
 
 function LockupScene() {
 	return (
-		<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space.sp16 }}>
-			<Lockup gap="sp8" style={{ ...rowStyle, inlineSize: '20rem' }}>
+		<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space['16'] }}>
+			<Lockup gap="space.8" style={{ ...rowStyle, inlineSize: '20rem' }}>
 				<LockupRail>
 					<span style={itemStyle}>Rail</span>
 				</LockupRail>
@@ -481,7 +481,7 @@ function LockupScene() {
 					<span style={itemStyle}>Rail</span>
 				</LockupRail>
 			</Lockup>
-			<Lockup gap="sp8" style={{ ...rowStyle, inlineSize: '16rem' }}>
+			<Lockup gap="space.8" style={{ ...rowStyle, inlineSize: '16rem' }}>
 				<LockupRail>
 					<span style={{ ...itemStyle, blockSize: '3rem', display: 'block' }} />
 				</LockupRail>
@@ -489,21 +489,21 @@ function LockupScene() {
 					A tall rail stays centred on the first line and makes the row taller.
 				</LockupBody>
 			</Lockup>
-			<Lockup gap="sp12" railAlignment="center" style={{ ...rowStyle, inlineSize: '16rem' }}>
+			<Lockup gap="space.12" railAlignment="center" style={{ ...rowStyle, inlineSize: '16rem' }}>
 				<LockupRail>
 					<span
 						style={{ ...itemStyle, blockSize: '3rem', borderRadius: '50%', display: 'block' }}
 					/>
 				</LockupRail>
 				<LockupBody>
-					<Stack gap="sp4">
+					<Stack gap="space.4">
 						<Text fontWeight="emphasis">Centred on the whole body</Text>
 						<Text typography="caption">A second line</Text>
 					</Stack>
 				</LockupBody>
 			</Lockup>
 			<Heading level={2} style={{ ...rowStyle, inlineSize: '20rem' }}>
-				<Lockup elementType="span" gap="sp8">
+				<Lockup elementType="span" gap="space.8">
 					<LockupRail>
 						<span style={{ ...itemStyle, blockSize: '1rem', display: 'block' }} />
 					</LockupRail>
@@ -511,7 +511,7 @@ function LockupScene() {
 				</Lockup>
 			</Heading>
 			<div dir="rtl">
-				<Lockup gap="sp8" style={rowStyle}>
+				<Lockup gap="space.8" style={rowStyle}>
 					<LockupRail>
 						<span style={itemStyle}>Rail</span>
 					</LockupRail>

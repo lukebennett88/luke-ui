@@ -20,11 +20,11 @@ const ownedFlexItemProps = {
 } as const;
 
 test('Lockup parts accept the layout props they do not own', () => {
-	assertType<LockupProps>({ ...ownedFlexItemProps, minInlineSize: '0', padding: 'sp8' });
+	assertType<LockupProps>({ ...ownedFlexItemProps, minInlineSize: '0', padding: 'space.8' });
 	assertType<LockupRailProps>({ insetInlineStart: '0', minInlineSize: '0', position: 'relative' });
 	assertType<LockupBodyProps>({
 		maxInlineSize: '20rem',
-		paddingBlock: 'sp4',
+		paddingBlock: 'space.4',
 		position: 'relative',
 	});
 });
@@ -33,7 +33,7 @@ test('Lockup rejects the props it does not support', () => {
 	// @ts-expect-error — railAlignment is not responsive
 	assertType<LockupProps>({ railAlignment: { initial: 'center' } });
 	// @ts-expect-error — responsive gaps require an initial value
-	assertType<LockupProps>({ gap: { bp768: 'sp16' } });
+	assertType<LockupProps>({ gap: { bp768: 'space.16' } });
 	// @ts-expect-error — Lockup owns its flex layout
 	assertType<LockupProps>({ alignItems: 'center' });
 	// @ts-expect-error — elementType and renderRoot are mutually exclusive

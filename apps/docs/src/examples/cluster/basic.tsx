@@ -3,7 +3,7 @@ import { ExampleItem } from '#docs';
 
 export default () => {
 	return (
-		<Cluster gap="sp8" maxInlineSize="16rem">
+		<Cluster gap="space.8" maxInlineSize="16rem">
 			<ExampleItem>First item</ExampleItem>
 			<ExampleItem>Second item</ExampleItem>
 			<ExampleItem>Third item</ExampleItem>

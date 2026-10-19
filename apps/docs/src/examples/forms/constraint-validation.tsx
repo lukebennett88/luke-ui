@@ -7,7 +7,7 @@ import { TextInputField } from '@luke-ui/react/text-input-field';
 export default () => {
 	return (
 		<Form necessityIndicator="required-label">
-			<Stack gap="sp16" maxInlineSize="20rem">
+			<Stack gap="space.16" maxInlineSize="20rem">
 				<TextInputField isRequired label="Email address" name="emailAddress" type="email" />
 				<Cluster>
 					<Button type="submit">Create account</Button>

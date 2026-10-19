@@ -60,7 +60,13 @@ export function ComponentPropsTable({
 	}, [hash, id]);
 
 	const table = (
-		<Stack className={cx('not-prose', className)} gap="sp16" id={id} marginBlock="sp24" {...props}>
+		<Stack
+			className={cx('not-prose', className)}
+			gap="space.16"
+			id={id}
+			marginBlock="space.24"
+			{...props}
+		>
 			{nativePropsNote === undefined ? null : (
 				<CellText color="secondary" elementType="div" fontWeight="body">
 					<InheritTypography>{nativePropsNote}</InheritTypography>
@@ -128,10 +134,10 @@ function PropGroup({
 					<Cluster
 						className={cx(disclosureStyles.trigger, styles.groupButtonExpanded)}
 						flexWrap="nowrap"
-						gap="sp4"
+						gap="space.4"
 						inlineSize="100%"
-						paddingBlock="sp12"
-						paddingInline="sp16"
+						paddingBlock="space.12"
+						paddingInline="space.16"
 						renderRoot={(domProps) => (
 							<RacButton
 								{...domProps}

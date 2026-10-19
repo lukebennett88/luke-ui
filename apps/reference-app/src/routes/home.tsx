@@ -30,8 +30,8 @@ export function HomePage() {
 				className={styles.main}
 				elementType="main"
 				flexGrow="1"
-				marginBlock={{ bp768: 'sp8' }}
-				marginInline={{ bp768: 'sp8' }}
+				marginBlock={{ bp768: 'space.8' }}
+				marginInline={{ bp768: 'space.8' }}
 				minBlockSize={0}
 				overflow="hidden"
 			>
@@ -39,11 +39,11 @@ export function HomePage() {
 					blockSize="100%"
 					className={styles.mainScroll}
 					overflowY="auto"
-					paddingBlock={{ bp768: 'sp64', initial: 'sp32' }}
-					paddingInline={{ bp768: 'sp40', initial: 'sp16' }}
+					paddingBlock={{ bp768: 'space.64', initial: 'space.32' }}
+					paddingInline={{ bp768: 'space.40', initial: 'space.16' }}
 				>
-					<Container maxInlineSize="px672">
-						<Stack alignItems="flex-start" gap="sp16">
+					<Container maxInlineSize="container.672">
+						<Stack alignItems="flex-start" gap="space.16">
 							<Heading level={1} shouldDisableTrim typography="heading2">
 								Welcome back, {firstName}
 							</Heading>

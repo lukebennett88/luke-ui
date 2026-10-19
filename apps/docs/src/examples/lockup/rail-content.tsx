@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Lockup gap="sp8">
+		<Lockup gap="space.8">
 			<LockupBody>Example command</LockupBody>
 			<LockupRail>
 				<Text color="secondary" typography="caption">

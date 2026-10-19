@@ -32,7 +32,7 @@ export const root = style({
 export const mdxFence = style({
 	'@layer': {
 		components: {
-			marginBlockStart: vars.space.sp32,
+			marginBlockStart: vars.space['32'],
 		},
 	},
 });
@@ -56,10 +56,10 @@ export const header = style({
 			borderBlockEndStyle: 'solid',
 			borderBlockEndWidth: '1px',
 			display: 'flex',
-			gap: vars.space.sp8,
+			gap: vars.space['8'],
 			minBlockSize: vars.controlSize.px40,
-			paddingBlock: vars.space.sp4,
-			paddingInline: vars.space.sp12,
+			paddingBlock: vars.space['4'],
+			paddingInline: vars.space['12'],
 		},
 	},
 });
@@ -86,7 +86,7 @@ export const actions = style({
 			alignItems: 'center',
 			display: 'flex',
 			flexShrink: 0,
-			gap: vars.space.sp4,
+			gap: vars.space['4'],
 			marginInlineStart: 'auto',
 		},
 	},
@@ -100,8 +100,8 @@ export const overlayActions = style({
 	'@layer': {
 		components: {
 			backgroundColor: vars.color.surface.subdued,
-			insetBlockStart: `calc(${vars.space.sp12} + (${vars.font.label.lineHeight} / 2) - (${vars.controlSize.px32} / 2))`,
-			insetInlineEnd: vars.space.sp8,
+			insetBlockStart: `calc(${vars.space['12']} + (${vars.font.label.lineHeight} / 2) - (${vars.controlSize.px32} / 2))`,
+			insetInlineEnd: vars.space['8'],
 			position: 'absolute',
 			zIndex: 1,
 		},
@@ -112,8 +112,8 @@ export const viewport = style({
 	'@layer': {
 		components: {
 			minInlineSize: 0,
-			paddingBlock: vars.space.sp12,
-			paddingInline: vars.space.sp16,
+			paddingBlock: vars.space['12'],
+			paddingInline: vars.space['16'],
 			selectors: {
 				// The figure (and flush example parents) clip overflow, so inset the global ring.
 				'&:focus-visible': {
@@ -131,7 +131,7 @@ export const viewport = style({
 export const viewportWithOverlayCopy = style({
 	'@layer': {
 		components: {
-			paddingInlineEnd: vars.space.sp48,
+			paddingInlineEnd: vars.space['48'],
 		},
 	},
 });

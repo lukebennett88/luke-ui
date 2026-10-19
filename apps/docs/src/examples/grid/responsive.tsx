@@ -6,7 +6,7 @@ export default () => {
 		<Grid
 			areas={{ initial: ['a', 'b', 'c'], bp768: ['a b b', 'a c c'] }}
 			columns={{ initial: 1, bp768: '10rem 1fr 1fr' }}
-			gap="sp12"
+			gap="space.12"
 		>
 			<ExampleItem gridArea="a">Area A</ExampleItem>
 			<ExampleItem gridArea="b">Area B</ExampleItem>

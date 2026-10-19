@@ -14,8 +14,8 @@ afterEach(async () => {
 
 test('bleeds on the inline axis', () => {
 	const { locator } = render(
-		<div data-testid="parent" style={{ inlineSize: '200px', paddingInline: vars.space.sp32 }}>
-			<Bleed data-testid="bleed" inline="sp32">
+		<div data-testid="parent" style={{ inlineSize: '200px', paddingInline: vars.space['32'] }}>
+			<Bleed data-testid="bleed" inline="space.32">
 				Content
 			</Bleed>
 		</div>,
@@ -33,7 +33,7 @@ test('bleeds on the inline axis', () => {
 
 test('bleeds on all four edges', () => {
 	const { locator } = render(
-		<Bleed all="sp16" data-testid="bleed">
+		<Bleed all="space.16" data-testid="bleed">
 			Content
 		</Bleed>,
 	);
@@ -47,8 +47,8 @@ test('bleeds on all four edges', () => {
 
 test('bleeds on the block axis', () => {
 	const { locator } = render(
-		<div data-testid="parent" style={{ paddingBlock: vars.space.sp16 }}>
-			<Bleed block="sp16" data-testid="bleed">
+		<div data-testid="parent" style={{ paddingBlock: vars.space['16'] }}>
+			<Bleed block="space.16" data-testid="bleed">
 				Content
 			</Bleed>
 		</div>,
@@ -69,16 +69,16 @@ test('bleeds on each logical edge', () => {
 		<div
 			data-testid="parent"
 			style={{
-				paddingBlock: vars.space.sp24,
-				paddingInline: vars.space.sp32,
+				paddingBlock: vars.space['24'],
+				paddingInline: vars.space['32'],
 			}}
 		>
 			<Bleed
-				blockEnd="sp8"
-				blockStart="sp16"
+				blockEnd="space.8"
+				blockStart="space.16"
 				data-testid="bleed"
-				inlineEnd="sp24"
-				inlineStart="sp32"
+				inlineEnd="space.24"
+				inlineStart="space.32"
 			>
 				Content
 			</Bleed>
@@ -96,11 +96,11 @@ test('bleeds on each logical edge', () => {
 test('edge and axis props override broader shorthands at the same responsive condition', () => {
 	const { locator: edgeOverAxis } = render(
 		<Bleed
-			block="sp24"
-			blockStart="sp8"
+			block="space.24"
+			blockStart="space.8"
 			data-testid="edge-over-axis"
-			inline="sp32"
-			inlineStart="sp16"
+			inline="space.32"
+			inlineStart="space.16"
 		>
 			Content
 		</Bleed>,
@@ -116,11 +116,11 @@ test('edge and axis props override broader shorthands at the same responsive con
 
 	const { locator: overAll } = render(
 		<Bleed
-			all="sp32"
-			block="sp24"
-			blockEnd="sp8"
+			all="space.32"
+			block="space.24"
+			blockEnd="space.8"
 			data-testid="over-all"
-			inline="sp16"
+			inline="space.16"
 			inlineStart="0"
 		>
 			Content
@@ -138,7 +138,7 @@ test('resolves responsive bleed values', async () => {
 	await page.viewport(breakpoints.bp640, 800);
 	const { locator } = render(
 		<div style={{ containerType: 'inline-size', inlineSize: '100%' }}>
-			<Bleed data-testid="bleed" inline={{ initial: 'sp8', bp768: 'sp32' }}>
+			<Bleed data-testid="bleed" inline={{ initial: 'space.8', bp768: 'space.32' }}>
 				Content
 			</Bleed>
 		</div>,
@@ -156,10 +156,10 @@ test('later all values override direct axis and edge values and can reset them',
 	const { locator } = render(
 		<div style={{ containerType: 'inline-size', inlineSize: '100%' }}>
 			<Bleed
-				all={{ initial: 'sp8', bp768: 'sp32', bp1024: '0' }}
-				blockEnd="sp24"
+				all={{ initial: 'space.8', bp768: 'space.32', bp1024: '0' }}
+				blockEnd="space.24"
 				data-testid="bleed"
-				inline="sp16"
+				inline="space.16"
 			>
 				Content
 			</Bleed>
@@ -188,8 +188,8 @@ test('edge props override axis values per responsive condition', async () => {
 		<div style={{ containerType: 'inline-size', inlineSize: '100%' }}>
 			<Bleed
 				data-testid="bleed"
-				inline={{ initial: 'sp16', bp768: 'sp32' }}
-				inlineStart={{ bp768: 'sp8' }}
+				inline={{ initial: 'space.16', bp768: 'space.32' }}
+				inlineStart={{ bp768: 'space.8' }}
 			>
 				Content
 			</Bleed>
@@ -209,7 +209,7 @@ test('falls back to the axis value where a responsive edge value omits a breakpo
 	await page.viewport(breakpoints.bp640, 800);
 	const { locator } = render(
 		<div style={{ containerType: 'inline-size', inlineSize: '100%' }}>
-			<Bleed data-testid="bleed" inline="sp16" inlineStart={{ bp768: 'sp8' }}>
+			<Bleed data-testid="bleed" inline="space.16" inlineStart={{ bp768: 'space.8' }}>
 				Content
 			</Bleed>
 		</div>,
@@ -226,7 +226,11 @@ test('a direct edge value overrides only the initial axis value', async () => {
 	await page.viewport(breakpoints.bp640, 800);
 	const { locator } = render(
 		<div style={{ containerType: 'inline-size', inlineSize: '100%' }}>
-			<Bleed data-testid="bleed" inline={{ initial: 'sp16', bp768: 'sp32' }} inlineStart="sp8">
+			<Bleed
+				data-testid="bleed"
+				inline={{ initial: 'space.16', bp768: 'space.32' }}
+				inlineStart="space.8"
+			>
 				Content
 			</Bleed>
 		</div>,
@@ -246,7 +250,7 @@ test('reports an invalid value against the prop that received it', () => {
 
 	render(
 		// @ts-expect-error — a JavaScript caller can still pass a raw CSS length
-		<Bleed inline="16px" inlineStart="sp8">
+		<Bleed inline="16px" inlineStart="space.8">
 			Content
 		</Bleed>,
 	);
@@ -304,7 +308,7 @@ test('zero overrides a lower-priority margin', () => {
 
 test('keeps ordinary non-margin layout props', () => {
 	const { locator } = render(
-		<Bleed data-testid="bleed" inline="sp8" padding="sp12" position="relative">
+		<Bleed data-testid="bleed" inline="space.8" padding="space.12" position="relative">
 			Content
 		</Bleed>,
 	);
@@ -321,9 +325,9 @@ test('keeps inline-start bleed on the physical inline-start side under RTL', () 
 		<div
 			data-testid="parent"
 			dir="rtl"
-			style={{ inlineSize: '200px', paddingInline: vars.space.sp32 }}
+			style={{ inlineSize: '200px', paddingInline: vars.space['32'] }}
 		>
-			<Bleed data-testid="bleed" inlineStart="sp32">
+			<Bleed data-testid="bleed" inlineStart="space.32">
 				Content
 			</Bleed>
 		</div>,
@@ -343,11 +347,11 @@ test('maps block-start bleed under a vertical writing mode', () => {
 		<div
 			data-testid="parent"
 			style={{
-				paddingBlock: vars.space.sp16,
+				paddingBlock: vars.space['16'],
 				writingMode: 'vertical-rl',
 			}}
 		>
-			<Bleed blockStart="sp16" data-testid="bleed">
+			<Bleed blockStart="space.16" data-testid="bleed">
 				Content
 			</Bleed>
 		</div>,
@@ -365,7 +369,7 @@ test('maps block-start bleed under a vertical writing mode', () => {
 
 test('supports semantic and caller-owned elements', () => {
 	const semantic = render(
-		<Bleed aria-label="Bleed region" elementType="section" inline="sp16">
+		<Bleed aria-label="Bleed region" elementType="section" inline="space.16">
 			Section content
 		</Bleed>,
 	);
@@ -375,7 +379,7 @@ test('supports semantic and caller-owned elements', () => {
 
 	const custom = render(
 		<Bleed
-			inline="sp16"
+			inline="space.16"
 			renderRoot={(domProps) => <aside {...domProps} data-testid="custom-bleed" />}
 		>
 			Custom content
@@ -391,7 +395,7 @@ test('keeps consumer className and style alongside bleed presentation', () => {
 		<Bleed
 			className="consumer-bleed"
 			data-testid="bleed"
-			inline="sp16"
+			inline="space.16"
 			style={{ backgroundColor: 'rgb(1, 2, 3)', position: 'relative' }}
 		>
 			Content
@@ -416,8 +420,8 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					borderRadius: vars.radius.surface,
 					display: 'flex',
 					flexDirection: 'column',
-					gap: vars.space.sp16,
-					padding: vars.space.sp24,
+					gap: vars.space['16'],
+					padding: vars.space['24'],
 				}}
 			>
 				<Box
@@ -426,11 +430,11 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					borderRadius="detail"
 					borderStyle="solid"
 					borderWidth="thin"
-					padding="sp16"
+					padding="space.16"
 				>
 					<Text>Inset</Text>
-					<Bleed inline="sp16">
-						<Box backgroundColor="accent.subtle.rest" borderRadius="detail" padding="sp12">
+					<Bleed inline="space.16">
+						<Box backgroundColor="accent.subtle.rest" borderRadius="detail" padding="space.12">
 							<Text>Bleed inline</Text>
 						</Box>
 					</Bleed>
@@ -441,10 +445,10 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					borderRadius="detail"
 					borderStyle="solid"
 					borderWidth="thin"
-					padding="sp16"
+					padding="space.16"
 				>
-					<Bleed all="sp8" inlineStart="sp16">
-						<Box backgroundColor="accent.subtle.rest" borderRadius="detail" padding="sp12">
+					<Bleed all="space.8" inlineStart="space.16">
+						<Box backgroundColor="accent.subtle.rest" borderRadius="detail" padding="space.12">
 							<Text>Bleed edges</Text>
 						</Box>
 					</Bleed>

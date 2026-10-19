@@ -5,6 +5,6 @@ import { recipe } from '../styles/recipe.js';
 export const blockquoteRecipe = recipe({
 	base: {
 		borderInlineStart: `3px solid ${vars.color.border.decorative}`,
-		paddingInlineStart: vars.space.sp16,
+		paddingInlineStart: vars.space['16'],
 	},
 });

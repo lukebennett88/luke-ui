@@ -11,7 +11,7 @@ export default () => {
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<Stack gap="sp16" maxInlineSize="20rem">
+			<Stack gap="space.16" maxInlineSize="20rem">
 				<CheckboxField isRequired label="Example checkbox" />
 				<Cluster>
 					<Button type="submit">Submit</Button>

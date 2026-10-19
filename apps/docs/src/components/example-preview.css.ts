@@ -3,8 +3,8 @@ import { globalStyle, style } from '@vanilla-extract/css';
 import { docsTabletMinWidthMedia } from '../lib/docs-container-queries.js';
 
 export const MIN_RESIZABLE_CARD_WIDTH = 640;
-const RESIZE_GUTTER_WIDTH = vars.space.sp24;
-const OUTSIDE_STRIP_WIDTH = vars.space.sp12;
+const RESIZE_GUTTER_WIDTH = vars.space['24'];
+const OUTSIDE_STRIP_WIDTH = vars.space['12'];
 
 const PREVIEW_CARD_CONTAINER = 'example-preview-card';
 const previewCardResizable = `${PREVIEW_CARD_CONTAINER} (inline-size >= ${MIN_RESIZABLE_CARD_WIDTH}px)`;

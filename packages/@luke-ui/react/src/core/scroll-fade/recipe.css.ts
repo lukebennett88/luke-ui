@@ -12,17 +12,17 @@ import { recipe } from '../styles/recipe.js';
  */
 const scrollTimelineSupportQuery = '(animation-timeline: scroll())';
 
-/** Adaptive mask depth: a fraction of the scrollport, capped at `sp40`. */
-const maskSize = `min(12%, ${vars.space.sp40})`;
+/** Adaptive mask depth: a fraction of the scrollport, capped at `space.40`. */
+const maskSize = `min(12%, ${vars.space['40']})`;
 
 /** Scroll distance over which each edge fade eases in or out. */
-const revealDistance = vars.space.sp96;
+const revealDistance = vars.space['96'];
 
 /**
  * Extra mask coverage beyond the border box so the standard focus outline
  * (`outline-width` 2px + `outline-offset` 2px) stays in an opaque gutter and is not faded.
  */
-const focusRingGutter = vars.space.sp8;
+const focusRingGutter = vars.space['8'];
 
 const startFadeVar = createVar({
 	inherits: false,

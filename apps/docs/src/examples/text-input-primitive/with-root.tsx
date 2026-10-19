@@ -5,7 +5,7 @@ import { Stack } from '@luke-ui/react/stack';
 export default () => {
 	return (
 		<TextInputRoot name="email" type="email">
-			<Stack gap="sp4" maxInlineSize="20rem">
+			<Stack gap="space.4" maxInlineSize="20rem">
 				<FieldLabel>Email address</FieldLabel>
 				<TextInput placeholder="you@example.com" />
 				<FieldDescription>We send receipts to this address.</FieldDescription>

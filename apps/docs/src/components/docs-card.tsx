@@ -30,7 +30,7 @@ export function DocsCardLink({ align = 'start', children, href }: DocsCardLinkPr
 			borderWidth="thin"
 			className={cx(styles.cardLink, align === 'end' && styles.cardLinkAlignEnd)}
 			minInlineSize="0"
-			padding="sp16"
+			padding="space.16"
 			renderRoot={(domProps) => {
 				if (isExternal) {
 					return (
@@ -68,7 +68,7 @@ interface DocsCardProps {
 export function DocsCard({ description, href, title }: DocsCardProps) {
 	return (
 		<DocsCardLink href={href}>
-			<Stack gap="sp12">
+			<Stack gap="space.12">
 				<Heading fontWeight="label" typography="label">
 					{title}
 				</Heading>

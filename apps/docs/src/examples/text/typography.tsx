@@ -11,12 +11,12 @@ const typographyStyles = (Object.keys(vars.font) as Array<keyof typeof vars.font
 
 export default () => {
 	return (
-		<Stack gap="sp12">
+		<Stack gap="space.12">
 			<Box
 				alignItems="flex-end"
 				display="grid"
 				elementType="dl"
-				gap="sp12"
+				gap="space.12"
 				style={{ gridTemplateColumns: 'max-content minmax(0, 1fr)' }}
 			>
 				{typographyStyles.map((typography) => (

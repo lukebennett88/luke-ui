@@ -84,7 +84,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 						className={styles.dialog}
 					>
 						<form onSubmit={save}>
-							<Stack gap="sp16">
+							<Stack gap="space.16">
 								<Heading level={2} shouldDisableTrim typography="heading3">
 									Change email
 								</Heading>
@@ -119,7 +119,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 									validationBehavior="aria"
 									value={draft}
 								/>
-								<Stack gap={isSaving ? 'sp8' : '0'}>
+								<Stack gap={isSaving ? 'space.8' : '0'}>
 									<Text
 										color="secondary"
 										elementType="p"
@@ -130,7 +130,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 									>
 										{isSaving ? 'Saving…' : null}
 									</Text>
-									<Cluster gap="sp8" justifyContent="flex-end">
+									<Cluster gap="space.8" justifyContent="flex-end">
 										<Button
 											isDisabled={isSaving}
 											onPress={() => handleOpenChange(false)}

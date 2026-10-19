@@ -360,8 +360,19 @@ does not preserve symbol keys or non-enumerable properties.
 `createSprinkles.properties` is a `ReadonlySet` of utility keys for TypeScript inside the package.
 The runtime value is still a mutable `Set`.
 
-Spacing and gap properties use `0` or value-based keys such as `sp16` and `sp24`. Keys are emitted
-as `rem`. Margin also accepts `auto`. Enum-like properties use CSS-native values.
+Spacing and gap properties accept `"0"` or namespaced tokens such as `space.16`. Margin also accepts
+`auto`. Values stay token-based, including responsive objects. Custom CSS is the escape route.
+
+`vars.space['16']` is a fixed reference measurement: 1rem, or 16px at a 16px root. Generate the
+numeric keys and values together with `literalScale('', steps)`. Utilities add the `space.`
+namespace to those keys. Zero stays outside `vars.space`. Themes cannot redefine the numeric steps.
+This supersedes the spacing naming policy in
+[#761](https://github.com/lukebennett88/luke-ui/issues/761). Keep logical properties and `bp*`
+responsive conditions. Do not add `px`/`py` padding shorthands.
+
+Container accepts only `container.448`, `container.672`, `container.896`, `container.1152`, and
+`container.1280` presets. They select fixed `rem` maximum inline sizes. Custom widths belong in
+`style` or CSS. They do not need a separate theme variable family.
 
 ### Control recipe sizes
 

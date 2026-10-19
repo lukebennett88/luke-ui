@@ -7,7 +7,7 @@ export default () => {
 	return (
 		<Box maxInlineSize="18rem">
 			<Heading level={2}>
-				<Lockup elementType="span" gap="sp8">
+				<Lockup elementType="span" gap="space.8">
 					<LockupRail>
 						<Icon name="search" />
 					</LockupRail>

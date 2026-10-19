@@ -12,7 +12,7 @@ afterEach(async () => {
 
 test('flows children on the inline axis and wraps by default', () => {
 	const { locator } = render(
-		<Cluster data-testid="cluster" gap="sp12">
+		<Cluster data-testid="cluster" gap="space.12">
 			<span>First</span>
 			<span>Second</span>
 			<span>Third</span>
@@ -76,7 +76,7 @@ test('uses no gap by default and accepts alignment overrides', () => {
 
 test('wraps when children exceed the inline size', () => {
 	const { locator } = render(
-		<Cluster data-testid="cluster" gap="sp8" style={{ inlineSize: '8rem' }}>
+		<Cluster data-testid="cluster" gap="space.8" style={{ inlineSize: '8rem' }}>
 			<span style={{ inlineSize: '5rem' }}>First</span>
 			<span style={{ inlineSize: '5rem' }}>Second</span>
 		</Cluster>,
@@ -94,7 +94,7 @@ test('wraps when children exceed the inline size', () => {
 test('keeps the inline axis under RTL', () => {
 	const { locator } = render(
 		<div dir="rtl" style={{ inlineSize: '6rem' }}>
-			<Cluster data-testid="cluster-rtl" gap="sp8">
+			<Cluster data-testid="cluster-rtl" gap="space.8">
 				<span style={{ inlineSize: '1rem' }} />
 				<span style={{ inlineSize: '1rem' }} />
 			</Cluster>
@@ -123,7 +123,7 @@ test('keeps Cluster defaults below sparse responsive alignment overrides', async
 			alignItems={{ bp768: 'stretch' }}
 			data-testid="cluster"
 			flexWrap={{ bp768: 'nowrap' }}
-			gap={{ initial: '0', bp768: 'sp8' }}
+			gap={{ initial: '0', bp768: 'space.8' }}
 			justifyContent={{ bp768: 'center' }}
 		>
 			<span style={{ inlineSize: '1rem' }}>First</span>
@@ -153,22 +153,22 @@ const itemStyle = {
 	backgroundColor: vars.color.surface.base,
 	borderRadius: vars.radius.detail,
 	color: vars.color.text.primary,
-	paddingBlock: vars.space.sp8,
-	paddingInline: vars.space.sp12,
+	paddingBlock: vars.space['8'],
+	paddingInline: vars.space['12'],
 } as const;
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator: scene } = render(
-			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space.sp16 }}>
+			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space['16'] }}>
 				<Cluster
-					gap="sp8"
+					gap="space.8"
 					style={{
 						backgroundColor: vars.color.surface.subdued,
 						borderRadius: vars.radius.surface,
 						color: vars.color.text.primary,
 						inlineSize: '14rem',
-						padding: vars.space.sp16,
+						padding: vars.space['16'],
 					}}
 				>
 					<span style={itemStyle}>Wrapping</span>
@@ -179,13 +179,13 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				</Cluster>
 				<Cluster
 					alignItems="stretch"
-					gap="sp8"
+					gap="space.8"
 					justifyContent="space-between"
 					style={{
 						backgroundColor: vars.color.surface.subdued,
 						borderRadius: vars.radius.surface,
 						color: vars.color.text.primary,
-						padding: vars.space.sp16,
+						padding: vars.space['16'],
 					}}
 				>
 					<span style={itemStyle}>Start</span>
@@ -194,14 +194,14 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				<div dir="rtl">
 					<Cluster
 						elementType="ul"
-						gap="sp8"
+						gap="space.8"
 						style={{
 							backgroundColor: vars.color.surface.subdued,
 							borderRadius: vars.radius.surface,
 							color: vars.color.text.primary,
 							listStyle: 'none',
 							margin: 0,
-							padding: vars.space.sp16,
+							padding: vars.space['16'],
 						}}
 					>
 						<li style={itemStyle}>One</li>

@@ -39,20 +39,20 @@ export function HomeHero() {
 			}}
 			elementType="section"
 			gap={{
-				initial: 'sp40',
-				bp768: 'sp64',
+				initial: 'space.40',
+				bp768: 'space.64',
 			}}
 			paddingBlock={{
-				initial: 'sp64',
-				bp768: 'sp96',
+				initial: 'space.64',
+				bp768: 'space.96',
 			}}
 		>
-			<Stack gap="sp24">
+			<Stack gap="space.24">
 				<Heading typography="display">Luke UI</Heading>
 				<Text color="secondary" elementType="p" typography="lead">
 					Luke UI is a React design system built on React Aria Components.
 				</Text>
-				<Cluster gap="sp12">
+				<Cluster gap="space.12">
 					<DocsLink
 						appearance="button"
 						params={{
@@ -91,16 +91,16 @@ export function HomeHero() {
 				borderWidth="thin"
 				boxShadow="floating"
 				display="grid"
-				gap="sp16"
-				padding="sp24"
+				gap="space.16"
+				padding="space.24"
 			>
 				<Box justifySelf="start">
 					<ThemeControls />
 				</Box>
 				<form onSubmit={handleSubmit}>
-					<Stack gap="sp16">
+					<Stack gap="space.16">
 						<TextInputField isRequired label="Name" name="name" />
-						<Cluster gap="sp8">
+						<Cluster gap="space.8">
 							<Button isPending={isPending} prominence="high" type="submit">
 								Save changes
 							</Button>

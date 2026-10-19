@@ -4,7 +4,7 @@ import { vars } from '@luke-ui/react/theme';
 
 export default () => {
 	return (
-		<Container maxInlineSize="px672">
+		<Container maxInlineSize="container.672">
 			<AspectRatio elementType="figure" ratio="4 / 3">
 				<img
 					alt="Looking up between tall canyon walls at a strip of blue sky"

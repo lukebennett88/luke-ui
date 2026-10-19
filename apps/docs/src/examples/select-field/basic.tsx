@@ -9,7 +9,7 @@ const themes = [
 
 export default () => {
 	return (
-		<Stack gap="sp16" maxInlineSize="20rem">
+		<Stack gap="space.16" maxInlineSize="20rem">
 			<SelectField
 				defaultValue="system"
 				items={themes}

@@ -182,9 +182,9 @@ function PropRow({
 	const rowId = hashPrefix === undefined ? fallbackRowId : `${hashPrefix}-${name}`;
 	// The description sits directly below, so the name and type hug it from the top.
 	const cellBox = {
-		paddingBlockEnd: hasDetails ? '0' : 'sp16',
-		paddingBlockStart: 'sp16',
-		paddingInline: 'sp16',
+		paddingBlockEnd: hasDetails ? '0' : 'space.16',
+		paddingBlockStart: 'space.16',
+		paddingInline: 'space.16',
 	} as const satisfies Pick<BoxProps, 'paddingBlockEnd' | 'paddingBlockStart' | 'paddingInline'>;
 	const cellClassName = cx(referenceStyles.cell, referenceStyles.stackedCell);
 	const ruledClassName = hasDetails ? undefined : referenceStyles.ruled;
@@ -198,7 +198,7 @@ function PropRow({
 					id={rowId}
 					{...cellBox}
 				>
-					<Cluster alignItems="baseline" flexWrap="nowrap" gap="sp4">
+					<Cluster alignItems="baseline" flexWrap="nowrap" gap="space.4">
 						<CellText
 							className={referenceStyles.monospace}
 							color={deprecated ? 'secondary' : 'accent'}
@@ -256,18 +256,18 @@ function PropRow({
 						className={cx(cellClassName, referenceStyles.ruled, referenceStyles.rowEnd)}
 						colSpan={layout.columnCount}
 						headers={rowId}
-						paddingBlockEnd="sp16"
-						paddingBlockStart="sp4"
-						paddingInline="sp16"
+						paddingBlockEnd="space.16"
+						paddingBlockStart="space.4"
+						paddingInline="space.16"
 					>
-						<Stack gap="sp8">
+						<Stack gap="space.8">
 							{hasDescription ? (
 								<CellText className={styles.richText} elementType="div" fontWeight="body">
 									<InheritTypography>{description}</InheritTypography>
 								</CellText>
 							) : null}
 							{parameters.length === 0 ? null : (
-								<Stack gap="sp4">
+								<Stack gap="space.4">
 									<CellText color="secondary" fontWeight="label">
 										Parameters
 									</CellText>
@@ -282,7 +282,7 @@ function PropRow({
 								</Stack>
 							)}
 							{returns === undefined ? null : (
-								<Stack gap="sp4">
+								<Stack gap="space.4">
 									<CellText color="secondary" fontWeight="label">
 										Returns
 									</CellText>

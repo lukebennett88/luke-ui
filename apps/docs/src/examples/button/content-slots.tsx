@@ -5,7 +5,7 @@ import { Kbd } from '@luke-ui/react/kbd';
 
 export default () => {
 	return (
-		<Cluster alignItems="center" gap="sp16">
+		<Cluster alignItems="center" gap="space.16">
 			<Button startContent={<Icon name="add" />}>Add item</Button>
 			<Button endContent={<Kbd>⌘S</Kbd>}>Save</Button>
 		</Cluster>

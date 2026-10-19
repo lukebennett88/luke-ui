@@ -4,7 +4,7 @@ import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 
 export default () => {
 	return (
-		<Cluster gap="sp8">
+		<Cluster gap="space.8">
 			<LoadingSkeleton>
 				<Box blockSize="3rem" borderRadius="full" inlineSize="3rem" />
 			</LoadingSkeleton>

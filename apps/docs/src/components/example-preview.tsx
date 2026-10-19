@@ -87,7 +87,7 @@ export function ExamplePreview({
 }
 
 const MIN_PREVIEW_WIDTH = 320;
-// Match sp24 and sp12 in example-preview.css.ts.
+// Match space.24 and space.12 in example-preview.css.ts.
 const RESIZE_GUTTER_WIDTH = 24;
 const OUTSIDE_STRIP_WIDTH = 12;
 

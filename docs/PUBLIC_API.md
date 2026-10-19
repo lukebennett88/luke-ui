@@ -125,6 +125,17 @@ then the nearest inherited default, then `medium`. Both props are fixed scalars.
 LoadingSpinner keep literal square `px*` sizes. These decisions supersede the component sizing
 policy in [#761](https://github.com/lukebennett88/luke-ui/issues/761).
 
+### Spacing and Container presets
+
+Spacing props accept `space.4` through the curated `space.96` steps, plus string `"0"` and margin
+`auto`. Responsive values use the same tokens with `bp*` conditions. The matching variables are
+`vars.space['4']` through `vars.space['96']`, with no zero entry. Numerical steps are fixed
+reference measurements emitted in `rem`. Custom lengths belong in CSS.
+
+`Container.maxInlineSize` accepts only the five approved `container.*` presets. Use `style` for a
+custom maximum. These naming decisions supersede
+[#761](https://github.com/lukebennett88/luke-ui/issues/761).
+
 ### State attributes
 
 A state attribute is public only when a guide documents it, as the Select primitive guide documents

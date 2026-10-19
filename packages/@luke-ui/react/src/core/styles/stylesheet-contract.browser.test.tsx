@@ -109,7 +109,7 @@ test('builds the public stylesheet with the layer and global-rule contract', () 
 });
 
 test('puts utility props in the utilities layer', () => {
-	const { container } = render(<Box display="grid" padding="sp4" />);
+	const { container } = render(<Box display="grid" padding="space.4" />);
 	const { rules } = parseStylesheet(builtCss);
 
 	const classNames = container.firstElementChild?.className.split(' ') ?? [];
