@@ -89,8 +89,8 @@ export function SettingsStatus({
 }) {
 	if (children == null || children === false || children === '') return null;
 	const textColor: TextProps['color'] = (() => {
-		if (tone === 'danger') return 'danger';
-		if (tone === 'success') return 'success';
+		if (tone === 'danger') return 'danger.rest';
+		if (tone === 'success') return 'success.rest';
 		return 'secondary';
 	})();
 

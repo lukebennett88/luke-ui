@@ -13,7 +13,7 @@ import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxRecipe } from './styles.css.js';
 
-type _ComboboxInputOmit = DistributiveOmit<RacInputProps, 'className' | 'size'>;
+type _ComboboxInputOmit = DistributiveOmit<RacInputProps, 'className' | 'render' | 'size'>;
 interface _ComboboxInputProps extends _ComboboxInputOmit {
 	className?: RacInputProps['className'];
 	/**
@@ -21,6 +21,10 @@ interface _ComboboxInputProps extends _ComboboxInputOmit {
 	 * object, so form libraries that hand out callback refs work without a bridge.
 	 */
 	ref?: Ref<HTMLInputElement>;
+	/**
+	 * Passes resolved DOM props and input state to a caller-owned input root element.
+	 */
+	renderRoot?: RacInputProps['render'];
 	size?: ComboboxSize;
 }
 
@@ -33,7 +37,7 @@ export type ComboboxInputProps = Prettify<_ComboboxInputProps>;
  * tray is closed.
  */
 export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
-	const { onClick, ref, size: sizeProp, ...inputProps } = props;
+	const { onClick, ref, renderRoot, size: sizeProp, ...inputProps } = props;
 	const presentation = useComboboxPresentation();
 	const size = useComboboxSize(sizeProp);
 	const state = useContext(ComboBoxStateContext);
@@ -75,6 +79,7 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 			})}
 			onClick={handleClick}
 			ref={inputRef}
+			render={renderRoot}
 		/>
 	);
 

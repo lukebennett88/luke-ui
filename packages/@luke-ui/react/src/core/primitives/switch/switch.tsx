@@ -80,7 +80,9 @@ interface _SwitchRootProps extends _SwitchRootOmit {
 /** Props for `SwitchRoot`. */
 export type SwitchRootProps = Prettify<_SwitchRootProps>;
 
-interface _SwitchLabelProps extends RacSwitchButtonProps {
+type _SwitchLabelOmit = DistributiveOmit<RacSwitchButtonProps, 'render'>;
+
+interface _SwitchLabelProps extends _SwitchLabelOmit {
 	/**
 	 * `SwitchControl` plus textual, non-interactive label content, unless a `FieldLabel` supplies the
 	 * label. Pass a function to render from the switch state.
@@ -88,6 +90,10 @@ interface _SwitchLabelProps extends RacSwitchButtonProps {
 	children: RacSwitchButtonProps['children'];
 	/** Forwarded to the `<label>` element. */
 	ref?: Ref<HTMLLabelElement>;
+	/**
+	 * Passes resolved DOM props and switch state to a caller-owned label root element.
+	 */
+	renderRoot?: RacSwitchButtonProps['render'];
 }
 
 /** Props for `SwitchLabel`. */
@@ -147,7 +153,7 @@ export function SwitchRoot(props: SwitchRootProps): JSX.Element {
  * outside it.
  */
 export function SwitchLabel(props: SwitchLabelProps): JSX.Element {
-	const { className, ...restProps } = props;
+	const { className, renderRoot, ...restProps } = props;
 
 	return (
 		<RacSwitchButton
@@ -155,6 +161,7 @@ export function SwitchLabel(props: SwitchLabelProps): JSX.Element {
 			className={composeRenderProps(className, (className) => {
 				return fieldRecipe().inlineLabel({ className });
 			})}
+			render={renderRoot}
 		/>
 	);
 }

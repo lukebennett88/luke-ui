@@ -10,9 +10,13 @@ import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxRecipe } from './styles.css.js';
 
-type _ComboboxTriggerOmit = DistributiveOmit<RacButtonProps, 'className'>;
+type _ComboboxTriggerOmit = DistributiveOmit<RacButtonProps, 'className' | 'render'>;
 interface _ComboboxTriggerProps extends _ComboboxTriggerOmit {
 	className?: RacButtonProps['className'];
+	/**
+	 * Passes resolved DOM props and button state to a caller-owned trigger root element.
+	 */
+	renderRoot?: RacButtonProps['render'];
 	size?: ComboboxSize;
 }
 
@@ -21,7 +25,7 @@ export type ComboboxTriggerProps = Prettify<_ComboboxTriggerProps>;
 
 /** Trigger button used by combobox pattern. */
 export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {
-	const { size: sizeProp, ...buttonProps } = props;
+	const { renderRoot, size: sizeProp, ...buttonProps } = props;
 	const size = useComboboxSize(sizeProp);
 
 	// Nested icons follow this part's resolved size, including a local `size` override.
@@ -32,6 +36,7 @@ export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {
 				className={composeRenderProps(buttonProps.className, (className) => {
 					return comboboxRecipe({ size }).trigger({ className });
 				})}
+				render={renderRoot}
 			/>
 		</IconSizeProvider>
 	);

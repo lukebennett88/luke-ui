@@ -53,21 +53,21 @@ element for surrounding content when no primitive is needed.
 
 ## Render a different DOM component
 
-The Button primitive exposes React Aria's `render` when you need a small implementation detail that
-the `Button` component API does not provide. Spread the supplied DOM props onto the expected
-`<button>` element type. Return one DOM root. Custom wrappers must pass the supplied `ref` to that
-element.
+The Button primitive exposes `renderRoot` when you need a small implementation detail that the
+`Button` component API does not provide. Spread the supplied DOM props onto the expected `<button>`
+element type. Return one DOM root. Custom wrappers must pass the supplied `ref` to that element.
 
 <ExampleBlock
 	src="composition/animated-button"
 	title="Composition and customisation: Render a different DOM component"
 />
 
-The second `render` argument contains interaction state such as `isPressed`.
+The second `renderRoot` argument contains interaction state such as `isPressed`.
 
-For `Box`, use `elementType` for a supported structural element. It does not change the accepted DOM
-props. Use `renderRoot` when the callback must own the element and its DOM attributes. Do not
-combine `renderRoot` with `elementType`. Use `Link` and `Button` when you need their behaviour.
+For `Box` and `Text`, use `elementType` for a supported semantic or structural element. It does not
+change the accepted DOM props. Use `renderRoot` when the callback must own the element and its DOM
+attributes. Do not combine `renderRoot` with `elementType`. Use `Link` and `Button` when you need
+their behaviour.
 
 Read the [Box documentation](/components/layout/box) for the supported elements and the `renderRoot`
 callback's resolved props.

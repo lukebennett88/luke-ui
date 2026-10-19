@@ -27,7 +27,7 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 
 	return (
 		<Stack gap="space.12">
-			<Text color="danger" role="alert">
+			<Text color="danger.rest" role="alert">
 				{message}
 			</Text>
 			<Cluster>

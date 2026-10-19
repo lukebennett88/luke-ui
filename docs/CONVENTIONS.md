@@ -147,10 +147,10 @@ only the elements a component is designed to render.
 Use a dedicated component for element-specific behaviour or props. Use `Link` for links and `Button`
 for buttons.
 
-Use `renderRoot` for Luke UI-owned root replacement when the callback must own the element and its
-DOM attributes. Use `render<Name>` only for a deliberately replaceable named part. React Aria's own
-`render` stays `render` on primitives and other RAC-owned seams. Keep `elementType` and `renderRoot`
-mutually exclusive.
+Use `renderRoot` for public root replacement when the callback must own the element and its DOM
+attributes. Use `render<Name>` only for a deliberately replaceable named part. Do not expose React
+Aria's `render` on public component or primitive APIs. Keep it as an internal adaptation seam when
+wrapping RAC. Keep `elementType` and `renderRoot` mutually exclusive.
 
 Luke UI `renderRoot` and `render<Name>` callbacks receive `(domProps, state)`. The first argument
 contains resolved presentation props. Pass an empty object as the second argument when the component

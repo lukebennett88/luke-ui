@@ -13,11 +13,15 @@ import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxRecipe } from './styles.css.js';
 
-type _ComboboxControlOmit = DistributiveOmit<RacGroupProps, 'className'>;
+type _ComboboxControlOmit = DistributiveOmit<RacGroupProps, 'className' | 'render'>;
 interface _ComboboxControlProps extends _ComboboxControlOmit {
 	className?: RacGroupProps['className'];
 	/** Forwarded to the control's group element. */
 	ref?: Ref<HTMLDivElement>;
+	/**
+	 * Passes resolved DOM props and group state to a caller-owned control root element.
+	 */
+	renderRoot?: RacGroupProps['render'];
 	size?: ComboboxSize;
 }
 
@@ -30,7 +34,7 @@ export type ComboboxControlProps = Prettify<_ComboboxControlProps>;
  * takes a danger border.
  */
 export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
-	const { ref, size: sizeProp, ...groupProps } = props;
+	const { ref, renderRoot, size: sizeProp, ...groupProps } = props;
 	const presentation = useComboboxPresentation();
 	const size = useComboboxSize(sizeProp);
 	const inputGroupRef = useComboboxInputGroupRef();
@@ -55,6 +59,7 @@ export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 								return typeof merged === 'function' ? merged(element) : undefined;
 							}
 				}
+				render={renderRoot}
 			/>
 		</IconSizeProvider>
 	);

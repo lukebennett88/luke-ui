@@ -82,7 +82,9 @@ interface _CheckboxRootProps extends _CheckboxRootOmit {
 /** Props for `CheckboxRoot`. */
 export type CheckboxRootProps = Prettify<_CheckboxRootProps>;
 
-interface _CheckboxLabelProps extends RacCheckboxButtonProps {
+type _CheckboxLabelOmit = DistributiveOmit<RacCheckboxButtonProps, 'render'>;
+
+interface _CheckboxLabelProps extends _CheckboxLabelOmit {
 	/**
 	 * `CheckboxControl` plus textual, non-interactive label content, unless a `FieldLabel` supplies
 	 * the label. Pass a function to render from the checkbox state.
@@ -90,6 +92,10 @@ interface _CheckboxLabelProps extends RacCheckboxButtonProps {
 	children: RacCheckboxButtonProps['children'];
 	/** Forwarded to the `<label>` element. */
 	ref?: Ref<HTMLLabelElement>;
+	/**
+	 * Passes resolved DOM props and checkbox state to a caller-owned label root element.
+	 */
+	renderRoot?: RacCheckboxButtonProps['render'];
 }
 
 /** Props for `CheckboxLabel`. */
@@ -150,7 +156,7 @@ export function CheckboxRoot(props: CheckboxRootProps): JSX.Element {
  * buttons outside it.
  */
 export function CheckboxLabel(props: CheckboxLabelProps): JSX.Element {
-	const { className, ...restProps } = props;
+	const { className, renderRoot, ...restProps } = props;
 
 	return (
 		<RacCheckboxButton
@@ -158,6 +164,7 @@ export function CheckboxLabel(props: CheckboxLabelProps): JSX.Element {
 			className={composeRenderProps(className, (className) => {
 				return fieldRecipe().inlineLabel({ className });
 			})}
+			render={renderRoot}
 		/>
 	);
 }

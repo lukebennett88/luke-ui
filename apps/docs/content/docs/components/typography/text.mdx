@@ -19,12 +19,28 @@ keeps its React Aria Text root. There is no extra wrapper. Use
 [`VisuallyHidden`](/components/layout/visually-hidden) directly when the content is not typography
 text, or when it must reveal on focus.
 
+## Colour
+
+`color` selects a theme text token or a role foreground token. The default is `primary`. Role values
+use the token leaf names, such as `accent.rest` or `danger.onSolid`. The `hover` and `pressed`
+leaves are static colours, not interactive styles. Use `onSolid` only on that role's solid
+background.
+
+```tsx
+<Text color="secondary">Supporting text</Text>
+<Text color="accent.rest">Accent text</Text>
+<Box backgroundColor="accent.solid.rest">
+	<Text color="accent.onSolid">Text on accent solid</Text>
+</Box>
+```
+
 ## Element type
 
 `Text` renders React Aria's `Text` component, which uses a `span` by default. Set `elementType` to
 choose a semantic element without changing the type treatment. `Text` trims Capsize space on known
 block elements such as `p`, `div`, headings, and `blockquote`, and skips it for inline or unknown
-element types.
+element types. Use `renderRoot` instead of `elementType` when a callback must own the root element.
+The two props are mutually exclusive.
 
 ```tsx
 <Text elementType="p">A paragraph of supporting copy.</Text>

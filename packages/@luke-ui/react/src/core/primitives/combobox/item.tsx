@@ -19,10 +19,17 @@ import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxItemClassName, comboboxRecipe } from './styles.css.js';
 
-type _ComboboxItemOmit<T extends object> = DistributiveOmit<RacListBoxItemProps<T>, 'className'>;
+type _ComboboxItemOmit<T extends object> = DistributiveOmit<
+	RacListBoxItemProps<T>,
+	'className' | 'render'
+>;
 
 interface _ComboboxItemProps<T extends object> extends _ComboboxItemOmit<T> {
 	className?: RacListBoxItemProps<T>['className'];
+	/**
+	 * Passes resolved DOM props and item state to a caller-owned item root element.
+	 */
+	renderRoot?: RacListBoxItemProps<T>['render'];
 	size?: ComboboxSize;
 }
 
@@ -30,7 +37,7 @@ interface _ComboboxItemProps<T extends object> extends _ComboboxItemOmit<T> {
 export type ComboboxItemProps<T extends object> = Prettify<_ComboboxItemProps<T>>;
 
 export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX.Element {
-	const { size: sizeProp, ...itemProps } = props;
+	const { renderRoot, size: sizeProp, ...itemProps } = props;
 	const size = useComboboxSize(sizeProp);
 
 	return (
@@ -42,6 +49,7 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 			className={composeRenderProps(itemProps.className, (className) => {
 				return cx(comboboxItemClassName, comboboxRecipe({ size }).item({ className }));
 			})}
+			render={renderRoot}
 		>
 			{composeRenderProps(itemProps.children, (children, { isSelected }) => {
 				// RAC renders item content outside this component's original tree.
@@ -64,9 +72,16 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 	);
 }
 
-type _ComboboxLoadMoreItemOmit = DistributiveOmit<RacListBoxLoadMoreItemProps, 'className'>;
+type _ComboboxLoadMoreItemOmit = DistributiveOmit<
+	RacListBoxLoadMoreItemProps,
+	'className' | 'render'
+>;
 interface _ComboboxLoadMoreItemProps extends _ComboboxLoadMoreItemOmit {
 	className?: RacListBoxLoadMoreItemProps['className'];
+	/**
+	 * Passes resolved DOM props to a caller-owned load-more root element.
+	 */
+	renderRoot?: RacListBoxLoadMoreItemProps['render'];
 	size?: ComboboxSize;
 }
 
@@ -74,13 +89,14 @@ interface _ComboboxLoadMoreItemProps extends _ComboboxLoadMoreItemOmit {
 export type ComboboxLoadMoreItemProps = Prettify<_ComboboxLoadMoreItemProps>;
 
 export function ComboboxLoadMoreItem(props: ComboboxLoadMoreItemProps): JSX.Element {
-	const { size: sizeProp, ...loadMoreItemProps } = props;
+	const { renderRoot, size: sizeProp, ...loadMoreItemProps } = props;
 	const size = useComboboxSize(sizeProp);
 
 	return (
 		<RacListBoxLoadMoreItem
 			{...loadMoreItemProps}
 			className={comboboxRecipe({ size }).loadMoreItem({ className: loadMoreItemProps.className })}
+			render={renderRoot}
 		/>
 	);
 }

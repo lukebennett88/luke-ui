@@ -28,15 +28,31 @@ interface FieldLabelStyleProps {
 	necessityIndicator?: NecessityIndicator;
 }
 
-type _FieldLabelOmit = DistributiveOmit<RacLabelProps, 'htmlFor'>;
+type _FieldLabelOmit = DistributiveOmit<RacLabelProps, 'elementType' | 'htmlFor' | 'render'>;
 
-interface _FieldLabelProps extends _FieldLabelOmit, FieldLabelStyleProps {
+interface FieldLabelSharedProps extends _FieldLabelOmit, FieldLabelStyleProps {
 	/** Associates the label with a form control. */
 	htmlFor?: RacLabelProps['htmlFor'];
 }
 
+interface FieldLabelElementProps extends FieldLabelSharedProps {
+	/** Renders a different element type in place of the default. */
+	elementType?: RacLabelProps['elementType'];
+	/** Use `renderRoot` instead of `elementType` to own the rendered element. */
+	renderRoot?: never;
+}
+
+interface FieldLabelRenderRootProps extends FieldLabelSharedProps {
+	/** Use `elementType` instead of `renderRoot` for a supported semantic element. */
+	elementType?: never;
+	/**
+	 * Passes resolved DOM props to a caller-owned label root element.
+	 */
+	renderRoot: NonNullable<RacLabelProps['render']>;
+}
+
 /** Props for `FieldLabel`. */
-export type FieldLabelProps = Prettify<_FieldLabelProps>;
+export type FieldLabelProps = Prettify<FieldLabelElementProps | FieldLabelRenderRootProps>;
 
 /**
  * Styled label for form fields.
@@ -52,14 +68,21 @@ export function FieldLabel(props: FieldLabelProps): JSX.Element {
 	const {
 		children,
 		className,
+		elementType,
 		isRequired,
 		necessityIndicator: necessityIndicatorProp,
+		renderRoot,
 		...restProps
 	} = props;
 	const necessityIndicator = useNecessityIndicator(necessityIndicatorProp);
 
 	return (
-		<RacLabel {...restProps} className={fieldRecipe({ necessityIndicator }).label({ className })}>
+		<RacLabel
+			{...restProps}
+			className={fieldRecipe({ necessityIndicator }).label({ className })}
+			elementType={renderRoot ? undefined : elementType}
+			render={renderRoot}
+		>
 			{children}
 			<NecessityMarker isRequired={isRequired} necessityIndicator={necessityIndicator} />
 		</RacLabel>
@@ -72,12 +95,6 @@ export function useNecessityIndicator(prop: NecessityIndicator | undefined): Nec
 	return prop ?? fromForm ?? 'required-asterisk';
 }
 
-const NECESSITY_MARKER_TEXT = {
-	'required-asterisk': '*',
-	'required-label': '(required)',
-	'optional-label': '(optional)',
-} as const satisfies Record<NecessityIndicator, string>;
-
 /** Resolves requiredness, with the nearest control root taking precedence. */
 function useResolvedIsRequired(propIsRequired: boolean | undefined): boolean | undefined {
 	const context = use(FieldStateContext);
@@ -87,6 +104,12 @@ function useResolvedIsRequired(propIsRequired: boolean | undefined): boolean | u
 
 // Joins the marker to the label's last word without allowing a line break.
 const NON_BREAKING_SPACE = '\u00A0';
+
+const NECESSITY_MARKER_TEXT = {
+	'required-asterisk': '*',
+	'required-label': '(required)',
+	'optional-label': '(optional)',
+} as const satisfies Record<NecessityIndicator, string>;
 
 /**
  * Adds the configured required or optional marker after the label text. Required markers are hidden

@@ -44,6 +44,25 @@ test('keeps semantic heading level independent of visual type style', async () =
 		.toBeVisible();
 });
 
+test('Heading renderRoot owns a heading-level root without forcing span', () => {
+	const { locator } = render(
+		<Heading
+			level={3}
+			renderRoot={({ children, ...domProps }) => (
+				<h3 {...domProps} data-testid="owned-heading">
+					{children}
+				</h3>
+			)}
+		>
+			Owned heading
+		</Heading>,
+	);
+	const heading = locator.getByTestId('owned-heading').element();
+
+	expect(heading.tagName).toBe('H3');
+	expect(locator.getByRole('heading', { level: 3, name: 'Owned heading' }).element()).toBe(heading);
+});
+
 test('inherits the current HeadingLevels base without advancing it', async () => {
 	const { locator } = render(
 		<HeadingLevels base={2}>

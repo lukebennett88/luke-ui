@@ -11,8 +11,7 @@ packages (Tactile and Paper), and layout utilities that share a semantic token s
 - Built-in async and loading states
 - Browser, custom, server, and form-library validation
 - Text trimming and automatic heading levels
-- Flexible rendering with `elementType`, `renderRoot`, named render callbacks, and React Aria's
-  `render`
+- Flexible rendering with `elementType`, `renderRoot`, and named render callbacks
 - Generated SVG icon spritesheet with type-safe icon names, plus `createIcon` for custom icons
 
 ## Documentation

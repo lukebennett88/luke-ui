@@ -25,7 +25,7 @@ test('formats and typography', { tags: ['visual'] }, async () => {
 				</div>
 				<div style={{ inlineSize: '10rem' } satisfies CSSProperties}>
 					<Numeral
-						color="accent"
+						color="accent.rest"
 						fontWeight="emphasis"
 						textAlign="end"
 						typography="heading3"

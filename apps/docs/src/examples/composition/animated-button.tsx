@@ -4,7 +4,7 @@ import { mergeProps } from '@luke-ui/react/utils';
 export default () => {
 	return (
 		<Button
-			render={(domProps, { isHovered, isPressed }) => {
+			renderRoot={(domProps, { isHovered, isPressed }) => {
 				const scale: number = (() => {
 					if (isPressed) return 0.98;
 					if (isHovered) return 1.02;

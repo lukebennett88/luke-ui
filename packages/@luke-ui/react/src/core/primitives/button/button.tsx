@@ -11,12 +11,16 @@ import type { DocumentedPressProps } from '../../types/documented-rac-props.js';
 import type { Prettify } from '../../types/prettify.js';
 import { buttonRecipeInternal } from './recipe.css.js';
 
-type _ButtonOmit = DistributiveOmit<RacButtonProps, keyof DocumentedPressProps>;
+type _ButtonOmit = DistributiveOmit<RacButtonProps, keyof DocumentedPressProps | 'render'>;
 type _ButtonProps = _ButtonOmit &
 	ButtonPresentationProps &
 	DocumentedPressProps & {
 		/** Ref forwarded to the underlying button element. */
 		ref?: Ref<HTMLButtonElement>;
+		/**
+		 * Passes resolved DOM props and button state to a caller-owned root element.
+		 */
+		renderRoot?: RacButtonProps['render'];
 	};
 
 /** Props for the button primitive. */
@@ -32,6 +36,7 @@ export function Button(props: ButtonProps): JSX.Element {
 		inlineSize = 'auto',
 		isDisabled = false,
 		isPending = false,
+		renderRoot,
 		size: sizeProp,
 		...restProps
 	} = props;
@@ -53,6 +58,7 @@ export function Button(props: ButtonProps): JSX.Element {
 				})}
 				isDisabled={isDisabled}
 				isPending={isPending}
+				render={renderRoot}
 			>
 				{children}
 			</RacButton>

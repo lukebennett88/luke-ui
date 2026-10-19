@@ -414,11 +414,11 @@ A container query with no container never matches, so the style silently stays a
 not set `container-type` on an element below the root without naming the container: unnamed queries
 on its descendants would start measuring it.
 
-### React Aria `render` prop (button primitive)
+### `renderRoot` on the button primitive
 
-High-level `Button` does not expose RAC `render`. Import the button primitive when you need React
-Aria's `render` composition seam. Combine `Box` or package-internal sprinkles with `mergeProps` so
-`className` and `style` merge correctly.
+High-level `Button` does not expose root replacement. Import the button primitive when you need
+`renderRoot` to own the button element. Combine `Box` or package-internal sprinkles with
+`mergeProps` so `className` and `style` merge correctly.
 
 ### Utility surface
 

@@ -19,7 +19,8 @@ import * as styles from './token-reference.css.js';
 
 // Shared pieces of the token reference sections.
 
-type TokenTextProps = Omit<TextProps, 'children'> & { token: ThemeToken };
+type TextElementProps = Extract<TextProps, { renderRoot?: never }>;
+type TokenTextProps = Omit<TextElementProps, 'children'> & { token: ThemeToken };
 
 /** The full typed token path as a `Code` chip. */
 function TokenName({ token, ...props }: TokenTextProps) {

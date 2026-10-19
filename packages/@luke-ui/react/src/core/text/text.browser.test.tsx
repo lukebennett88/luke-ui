@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { Code } from '@luke-ui/react/code';
 import { Em } from '@luke-ui/react/em';
 import { Emoji } from '@luke-ui/react/emoji';
@@ -6,6 +7,7 @@ import { Quote } from '@luke-ui/react/quote';
 import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
+import { createRef } from 'react';
 import { Menu, MenuItem } from 'react-aria-components/Menu';
 import { TextContext } from 'react-aria-components/Text';
 import { expect, test } from 'vite-plus/test';
@@ -174,6 +176,65 @@ test('ordinary Text remains a single React Aria Text root', () => {
 	expect(container.childElementCount).toBe(1);
 });
 
+test('Text renderRoot owns a non-span root with slot, ref, and style merge', async () => {
+	const ref = createRef<HTMLElement>();
+	const elements: Array<HTMLElement | null> = [];
+	let cleanups = 0;
+	const { locator, unmount } = render(
+		<Menu aria-label="Actions">
+			<MenuItem>
+				<Text
+					className="consumer-class"
+					data-owned="yes"
+					isVisuallyHidden
+					ref={(element) => {
+						elements.push(element);
+						return () => {
+							cleanups += 1;
+						};
+					}}
+					renderRoot={(domProps) => <p {...domProps} data-testid="owned-text" />}
+					slot="label"
+					style={{ color: 'rgb(1, 2, 3)' }}
+					typography="label"
+				>
+					Owned label
+				</Text>
+				<Text color="secondary" slot="description">
+					Helper
+				</Text>
+			</MenuItem>
+		</Menu>,
+	);
+	const item = locator.getByRole('menuitem');
+	const owned = locator.getByTestId('owned-text').element();
+
+	expect(owned.tagName).toBe('P');
+	expect(owned.getAttribute('data-owned')).toBe('yes');
+	expect(owned.className).toContain('consumer-class');
+	expect(owned.style.color).toBe('rgb(1, 2, 3)');
+	expect(elements.at(-1)).toBe(owned);
+	await expect.element(item).toHaveAccessibleName('Owned label');
+	await expect.element(item).toHaveAccessibleDescription('Helper');
+
+	unmount();
+	expect(cleanups).toBeGreaterThanOrEqual(1);
+
+	const refResult = render(
+		<Text
+			ref={ref}
+			renderRoot={(domProps) => <strong {...domProps} data-testid="owned-strong" />}
+			slot={null}
+		>
+			Strong copy
+		</Text>,
+	);
+	expect(ref.current).toBe(refResult.locator.getByTestId('owned-strong').element());
+	expect(ref.current?.tagName).toBe('STRONG');
+	refResult.unmount();
+	expect(ref.current).toBeNull();
+});
+
 // `shouldInheritFont` inherits `textTransform` and `fontVariantNumeric` along with the other font
 // properties, and their variants default to emitting nothing. Without both halves, a composing
 // component would reset the surrounding uppercase and numeric styling to `none`/`normal`.
@@ -261,11 +322,15 @@ test('typography styles', { tags: ['visual'] }, async () => {
 				<div style={rowStyle}>
 					<Text color="primary">Primary</Text>
 					<Text color="secondary">Secondary</Text>
-					<Text color="accent">Accent</Text>
-					<Text color="info">Info</Text>
-					<Text color="success">Success</Text>
-					<Text color="warning">Warning</Text>
-					<Text color="danger">Danger</Text>
+					<Text color="disabled">Disabled</Text>
+					<Text color="accent.rest">Accent</Text>
+					<Text color="info.rest">Info</Text>
+					<Text color="success.rest">Success</Text>
+					<Text color="warning.rest">Warning</Text>
+					<Text color="danger.rest">Danger</Text>
+					<Box backgroundColor="neutral.solid.rest" padding="space.8">
+						<Text color="neutral.onSolid">Neutral on solid</Text>
+					</Box>
 				</div>
 				<Text>Trimmed by default</Text>
 				<Text shouldDisableTrim>Trim disabled</Text>

@@ -4,9 +4,8 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { blockquoteRecipe } from './recipe.css.js';
 
-type _BlockquoteOmit = DistributiveOmit<TextProps, 'color' | 'elementType'>;
-
-interface _BlockquoteProps extends _BlockquoteOmit {}
+// `TextProps` is a union (`elementType` vs `renderRoot`), so the omit stays a type alias.
+type _BlockquoteProps = DistributiveOmit<TextProps, 'color' | 'elementType'>;
 
 /** Props for the `Blockquote` component. */
 export type BlockquoteProps = Prettify<_BlockquoteProps>;
@@ -16,9 +15,19 @@ export type BlockquoteProps = Prettify<_BlockquoteProps>;
  * Accepts the typography and semantic font-weight props.
  */
 export function Blockquote(props: BlockquoteProps) {
-	const { children, className, ...textProps } = props;
+	const { children, className, renderRoot, ...textProps } = props;
+	const recipeClassName = blockquoteRecipe({ className });
+
+	if (renderRoot) {
+		return (
+			<Text className={recipeClassName} renderRoot={renderRoot} {...textProps}>
+				{children}
+			</Text>
+		);
+	}
+
 	return (
-		<Text {...textProps} className={blockquoteRecipe({ className })} elementType="blockquote">
+		<Text {...textProps} className={recipeClassName} elementType="blockquote">
 			{children}
 		</Text>
 	);

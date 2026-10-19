@@ -373,6 +373,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	'typography/heading.mdx::packages/@luke-ui/react/src/core/heading/heading-context.tsx::HeadingLevelsProps':
 		['base'],
 	'typography/heading.mdx::packages/@luke-ui/react/src/core/heading/heading.tsx::HeadingProps': [
+		'fontWeight',
 		'level',
 		'typography',
 	],
@@ -399,11 +400,13 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'textWrap',
 	],
 	'typography/text.mdx::packages/@luke-ui/react/src/core/text/text.tsx::TextProps': [
+		'color',
 		'elementType',
 		'fontVariantNumeric',
 		'fontWeight',
 		'isVisuallyHidden',
 		'lineClamp',
+		'renderRoot',
 		'shouldDisableTrim',
 		'slot',
 		'textAlign',

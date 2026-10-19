@@ -94,7 +94,7 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 										</Text>
 										<Stack gap={error || isPending || isOtherMutationPending ? 'space.8' : '0'}>
 											<Text
-												color={error ? 'danger' : 'secondary'}
+												color={error ? 'danger.rest' : 'secondary'}
 												elementType="p"
 												fontWeight="body"
 												role={error ? 'alert' : 'status'}

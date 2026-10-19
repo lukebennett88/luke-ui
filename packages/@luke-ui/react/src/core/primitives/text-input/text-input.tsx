@@ -99,7 +99,7 @@ type RootOwnedInputProp =
 
 type _TextInputOmit = DistributiveOmit<
 	RacInputProps,
-	'aria-label' | 'className' | 'inputMode' | 'size' | RootOwnedInputProp
+	'aria-label' | 'className' | 'inputMode' | 'render' | 'size' | RootOwnedInputProp
 >;
 
 interface _TextInputProps extends _TextInputOmit {
@@ -134,6 +134,10 @@ interface _TextInputProps extends _TextInputOmit {
 	 * object, so form libraries that hand out callback refs work without a bridge.
 	 */
 	ref?: Ref<HTMLInputElement>;
+	/**
+	 * Passes resolved DOM props and input state to a caller-owned input root element.
+	 */
+	renderRoot?: RacInputProps['render'];
 	/** Whether a standalone input is required. Inside a `TextInputRoot`, use `isRequired` on the root. */
 	required?: RacInputProps['required'];
 	/**
@@ -243,6 +247,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
 		name,
 		pattern,
 		readOnly,
+		renderRoot,
 		required,
 		size: sizeProp,
 		type,
@@ -299,6 +304,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
 					size: size,
 				});
 			})}
+			render={renderRoot}
 		/>
 	);
 }

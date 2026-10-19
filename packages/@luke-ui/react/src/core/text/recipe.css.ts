@@ -1,6 +1,7 @@
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
+import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import type { FontWeightRole, TypeStyle } from '../../theme/type-styles.js';
 import { fontWeightRoles, typeStyles } from '../../theme/type-styles.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
@@ -46,14 +47,28 @@ const lineClampVariants = {
 	5: lineClampMultiLine(5),
 } as const;
 
+const foregroundStates = ['rest', 'hover', 'pressed', 'onSolid'] as const;
+
+const foregroundColorVariants = Object.fromEntries(
+	SEMANTIC_ROLES.flatMap((role) =>
+		foregroundStates.map((state) => [
+			`${role}.${state}`,
+			{ color: vars.color.foreground[role][state] },
+		]),
+	),
+) as {
+	readonly [
+		Role in (typeof SEMANTIC_ROLES)[number] as `${Role}.${(typeof foregroundStates)[number]}`
+	]: {
+		color: string;
+	};
+};
+
 const colorVariants = {
-	accent: { color: vars.color.foreground.accent.rest },
-	danger: { color: vars.color.foreground.danger.rest },
-	info: { color: vars.color.foreground.info.rest },
 	primary: { color: vars.color.text.primary },
 	secondary: { color: vars.color.text.secondary },
-	success: { color: vars.color.foreground.success.rest },
-	warning: { color: vars.color.foreground.warning.rest },
+	disabled: { color: vars.color.text.disabled },
+	...foregroundColorVariants,
 } as const;
 
 const weightVariants = Object.fromEntries(

@@ -12,9 +12,13 @@ import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxRecipe } from './styles.css.js';
 
-type _ComboboxClearButtonOmit = DistributiveOmit<RacButtonProps, 'className' | 'slot'>;
+type _ComboboxClearButtonOmit = DistributiveOmit<RacButtonProps, 'className' | 'render' | 'slot'>;
 interface _ComboboxClearButtonProps extends _ComboboxClearButtonOmit {
 	className?: RacButtonProps['className'];
+	/**
+	 * Passes resolved DOM props and button state to a caller-owned clear-button root element.
+	 */
+	renderRoot?: RacButtonProps['render'];
 	size?: ComboboxSize;
 }
 
@@ -26,7 +30,7 @@ export type ComboboxClearButtonProps = Prettify<_ComboboxClearButtonProps>;
  * tray search is empty.
  */
 export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Element | null {
-	const { size: sizeProp, ...buttonProps } = props;
+	const { renderRoot, size: sizeProp, ...buttonProps } = props;
 	const presentation = useComboboxPresentation();
 	const size = useComboboxSize(sizeProp);
 	const state = useContext(ComboBoxStateContext);
@@ -55,6 +59,7 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 					state.setInputValue('');
 					buttonProps.onPress?.(event);
 				}}
+				render={renderRoot}
 				// Opt out of the ComboBox button slot so this does not toggle the popover.
 				slot={null}
 			/>

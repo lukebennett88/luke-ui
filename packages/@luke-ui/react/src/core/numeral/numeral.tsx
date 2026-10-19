@@ -12,8 +12,9 @@ export type NumeralAbbreviation = boolean | 'long';
 /** Fixed precision or `[min, max]` precision range. */
 export type NumeralPrecision = number | readonly [number, number];
 
-type _NumeralOmit = DistributiveOmit<TextProps, 'children' | 'textAlign' | 'fontVariantNumeric'>;
-interface _NumeralProps extends _NumeralOmit {
+type _NumeralOmit = DistributiveOmit<TextProps, 'children' | 'fontVariantNumeric' | 'textAlign'>;
+
+type _NumeralProps = _NumeralOmit & {
 	/** Enables compact notation (`1.2K`, `1.2 thousand`). */
 	abbreviate?: NumeralAbbreviation;
 	/** Currency code such as `USD`. */
@@ -40,7 +41,7 @@ interface _NumeralProps extends _NumeralOmit {
 	unit?: NonNullable<Intl.NumberFormatOptions['unit']>;
 	/** Number to format. */
 	value: number;
-}
+};
 
 /** Props for `Numeral`. */
 export type NumeralProps = Prettify<_NumeralProps>;
@@ -60,6 +61,7 @@ export function Numeral(props: NumeralProps) {
 		formatOptions,
 		locale,
 		precision,
+		renderRoot,
 		shouldDisableTrim,
 		unit,
 		value,
@@ -86,17 +88,25 @@ export function Numeral(props: NumeralProps) {
 
 	const content = getCachedNumberFormat(resolvedLocale, numeralFormatOptions).format(value);
 	const resolvedShouldDisableTrim = shouldDisableTrim ?? isWithinHeading;
+	const sharedTextProps = {
+		...textProps,
+		fontVariantNumeric,
+		shouldDisableTrim: resolvedShouldDisableTrim,
+		shouldInheritFont: isWithinHeading,
+		textAlign,
+		...(color === undefined ? {} : { color }),
+	};
+
+	if (renderRoot) {
+		return (
+			<Text renderRoot={renderRoot} {...sharedTextProps}>
+				{content}
+			</Text>
+		);
+	}
 
 	return (
-		<Text
-			{...textProps}
-			elementType={elementType}
-			fontVariantNumeric={fontVariantNumeric}
-			shouldDisableTrim={resolvedShouldDisableTrim}
-			shouldInheritFont={isWithinHeading}
-			textAlign={textAlign}
-			{...(color === undefined ? {} : { color })}
-		>
+		<Text {...sharedTextProps} elementType={elementType}>
 			{content}
 		</Text>
 	);

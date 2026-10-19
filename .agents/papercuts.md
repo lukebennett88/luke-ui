@@ -69,17 +69,6 @@ not help. Silence in this log is not evidence.
 - Problem: Agent-authored generator output described an internal recipe detail in published JSDoc.
   Correcting the wording does not establish that scaffold authoring applies those rules.
 
-## The README rendering summary omits React Aria's supported render API
-
-- Seen: 2026-10-17 (#858). The README feature list replaced `render` with `renderRoot` and named
-  callbacks. Review identified that React Aria's `render` remains supported and asked to retain it.
-- Where: `README.md`, Features. Governing rules: `docs/CONVENTIONS.md`, Element choice, and
-  `docs/DOCUMENTATION.md`, Editing prose (check behavioural claims against the implementation).
-  `.agents/skills/write-docs/SKILL.md` requires consulting the applicable documentation sections.
-- Problem: The agent-authored summary omitted a supported rendering API despite the applicable
-  guides. Correcting the feature list does not establish that the authoring workflow applies those
-  rules.
-
 ## New feature documentation follows Accessibility
 
 - Seen: 2026-10-18 (#847). `pnpm run check` rejected a new Form control-size section after

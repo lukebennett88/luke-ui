@@ -12,7 +12,7 @@ import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxListBoxOmit<T extends object> = DistributiveOmit<
 	RacListBoxProps<T>,
-	'dependencies' | 'items'
+	'dependencies' | 'items' | 'render'
 >;
 
 interface _ComboboxListBoxProps<T extends object> extends _ComboboxListBoxOmit<T> {
@@ -24,6 +24,10 @@ interface _ComboboxListBoxProps<T extends object> extends _ComboboxListBoxOmit<T
 	items?: Iterable<T>;
 	/** Optional content appended after the main collection, e.g. a load-more sentinel. */
 	loadMoreItem?: ReactNode;
+	/**
+	 * Passes resolved DOM props and listbox state to a caller-owned listbox root element.
+	 */
+	renderRoot?: RacListBoxProps<T>['render'];
 }
 
 /** Props for the styled listbox. */
@@ -34,7 +38,7 @@ export type ComboboxListBoxProps<T extends object> = Prettify<_ComboboxListBoxPr
  * contains its own scrolling, and selects options on press down.
  */
 export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>): JSX.Element {
-	const { children, dependencies, items, loadMoreItem, ...listBoxProps } = props;
+	const { children, dependencies, items, loadMoreItem, renderRoot, ...listBoxProps } = props;
 	const presentation = useComboboxPresentation();
 	const listBoxContext = useSlottedContext(ListBoxContext);
 	const collectionItems = items ?? listBoxContext?.items;
@@ -55,6 +59,7 @@ export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>
 			className={composeRenderProps(listBoxProps.className, (className) => {
 				return comboboxRecipe({ presentation }).listBox({ className });
 			})}
+			render={renderRoot}
 		>
 			{listBoxChildren}
 			{loadMoreItem}

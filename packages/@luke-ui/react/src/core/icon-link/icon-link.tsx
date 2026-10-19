@@ -24,7 +24,14 @@ interface IconLinkBaseProps extends IconLinkPresentationProps {
 
 type _IconLinkOmit = DistributiveOmit<
 	RacLinkProps,
-	'aria-label' | 'aria-labelledby' | 'children' | 'href' | 'isDisabled' | 'onPress' | 'slot'
+	| 'aria-label'
+	| 'aria-labelledby'
+	| 'children'
+	| 'href'
+	| 'isDisabled'
+	| 'onPress'
+	| 'render'
+	| 'slot'
 >;
 
 interface _IconLinkProps extends _IconLinkOmit {
@@ -36,6 +43,10 @@ interface _IconLinkProps extends _IconLinkOmit {
 	onPress?: RacLinkProps['onPress'];
 	/** Ref forwarded to the underlying anchor element. */
 	ref?: Ref<HTMLAnchorElement>;
+	/**
+	 * Passes resolved DOM props and link state to a caller-owned root element.
+	 */
+	renderRoot?: RacLinkProps['render'];
 }
 
 /** Props for the `IconLink` component. */
@@ -43,7 +54,7 @@ export type IconLinkProps = Prettify<_IconLinkProps & IconLinkBaseProps & Requir
 
 /** Link that renders only an icon, for icon-only navigation. */
 export function IconLink(props: IconLinkProps): JSX.Element {
-	const { prominence = 'standard', icon, size: sizeProp, ...restProps } = props;
+	const { prominence = 'standard', icon, renderRoot, size: sizeProp, ...restProps } = props;
 	const size = useControlSize(sizeProp);
 
 	return (
@@ -62,6 +73,7 @@ export function IconLink(props: IconLinkProps): JSX.Element {
 						size,
 					});
 				})}
+				render={renderRoot}
 			>
 				<span aria-hidden className={iconOnlyIconWrapper}>
 					{typeof icon === 'string' ? <Icon name={icon} /> : icon}

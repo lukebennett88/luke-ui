@@ -332,7 +332,7 @@ test('a FieldLabel with a render prop still draws the marker and names the contr
 		<TextInputRoot isRequired>
 			{/* React Aria passes `htmlFor` in `props`, which the rule cannot see through the spread. */}
 			{/* oxlint-disable-next-line jsx-a11y/label-has-associated-control */}
-			<FieldLabel render={(props) => <label {...props} />}>Example field</FieldLabel>
+			<FieldLabel renderRoot={(props) => <label {...props} />}>Example field</FieldLabel>
 			<TextInput />
 		</TextInputRoot>,
 	);

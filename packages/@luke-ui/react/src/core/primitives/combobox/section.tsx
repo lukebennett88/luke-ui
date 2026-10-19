@@ -10,11 +10,15 @@ import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxSectionOmit<T extends object> = DistributiveOmit<
 	RacListBoxSectionProps<T>,
-	'className'
+	'className' | 'render'
 >;
 
 interface _ComboboxSectionProps<T extends object> extends _ComboboxSectionOmit<T> {
 	className?: RacListBoxSectionProps<T>['className'];
+	/**
+	 * Passes resolved DOM props to a caller-owned section root element.
+	 */
+	renderRoot?: RacListBoxSectionProps<T>['render'];
 	title?: ReactNode;
 }
 
@@ -22,7 +26,7 @@ interface _ComboboxSectionProps<T extends object> extends _ComboboxSectionOmit<T
 export type ComboboxSectionProps<T extends object> = Prettify<_ComboboxSectionProps<T>>;
 
 export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>): JSX.Element {
-	const { children, className, title, ...sectionProps } = props;
+	const { children, className, renderRoot, title, ...sectionProps } = props;
 
 	const sectionClassName = cx(
 		comboboxSectionScopeClassName,
@@ -31,14 +35,14 @@ export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>
 
 	if (typeof children === 'function') {
 		return (
-			<RacListBoxSection {...sectionProps} className={sectionClassName}>
+			<RacListBoxSection {...sectionProps} className={sectionClassName} render={renderRoot}>
 				{children}
 			</RacListBoxSection>
 		);
 	}
 
 	return (
-		<RacListBoxSection {...sectionProps} className={sectionClassName}>
+		<RacListBoxSection {...sectionProps} className={sectionClassName} render={renderRoot}>
 			{title != null ? (
 				<RacHeader className={comboboxRecipe().sectionHeading()}>{title}</RacHeader>
 			) : null}
