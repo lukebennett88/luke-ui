@@ -34,12 +34,12 @@ test('applies every retained breakpoint responsively', async () => {
 	);
 
 	const viewports = [
-		{ width: 320, property: '--luke-space-ace.4' },
-		{ width: breakpoints.bp640, property: '--luke-space-ace.8' },
-		{ width: breakpoints.bp768, property: '--luke-space-ace.12' },
-		{ width: breakpoints.bp1024, property: '--luke-space-ace.16' },
-		{ width: breakpoints.bp1280, property: '--luke-space-ace.24' },
-		{ width: breakpoints.bp1536, property: '--luke-space-ace.32' },
+		{ width: 320, property: '--luke-space-4' },
+		{ width: breakpoints.bp640, property: '--luke-space-8' },
+		{ width: breakpoints.bp768, property: '--luke-space-12' },
+		{ width: breakpoints.bp1024, property: '--luke-space-16' },
+		{ width: breakpoints.bp1280, property: '--luke-space-24' },
+		{ width: breakpoints.bp1536, property: '--luke-space-32' },
 	] as const;
 
 	for (const viewport of viewports) {
@@ -62,7 +62,7 @@ test('resolves against a nearer explicit container instead of the root', async (
 	const element = mount(generated, wrapper);
 
 	const computedStyle = getComputedStyle(element);
-	expect(computedStyle.padding).toBe(resolvedCustomProperty(element, '--luke-space-ace.4'));
+	expect(computedStyle.padding).toBe(resolvedCustomProperty(element, '--luke-space-4'));
 });
 
 test('resolves against the root content box, not the viewport width', async () => {
@@ -77,7 +77,7 @@ test('resolves against the root content box, not the viewport width', async () =
 	const element = mount(generated);
 
 	const computedStyle = getComputedStyle(element);
-	expect(computedStyle.padding).toBe(resolvedCustomProperty(element, '--luke-space-ace.4'));
+	expect(computedStyle.padding).toBe(resolvedCustomProperty(element, '--luke-space-4'));
 	rootStyle.remove();
 });
 
@@ -127,8 +127,8 @@ test('columnGap overrides gap while rowGap keeps the shorthand', () => {
 	const element = mount(createSprinkles({ gap: 'space.8', columnGap: 'space.4' }));
 	const computedStyle = getComputedStyle(element);
 
-	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-ace.4'));
-	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-ace.8'));
+	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-4'));
+	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-8'));
 });
 
 test('marginInlineStart overrides margin through the inline shorthand', () => {
@@ -141,13 +141,9 @@ test('marginInlineStart overrides margin through the inline shorthand', () => {
 	);
 	const computedStyle = getComputedStyle(element);
 
-	expect(computedStyle.marginInlineStart).toBe(
-		resolvedCustomProperty(element, '--luke-space-ace.4'),
-	);
-	expect(computedStyle.marginInlineEnd).toBe(resolvedCustomProperty(element, '--luke-space-ace.8'));
-	expect(computedStyle.marginBlockStart).toBe(
-		resolvedCustomProperty(element, '--luke-space-ace.16'),
-	);
+	expect(computedStyle.marginInlineStart).toBe(resolvedCustomProperty(element, '--luke-space-4'));
+	expect(computedStyle.marginInlineEnd).toBe(resolvedCustomProperty(element, '--luke-space-8'));
+	expect(computedStyle.marginBlockStart).toBe(resolvedCustomProperty(element, '--luke-space-16'));
 });
 
 test('gridColumnStart overrides gridArea', () => {
@@ -170,19 +166,15 @@ test('a later responsive gap overrides a base columnGap on both axes', async () 
 	);
 
 	await page.viewport(320, 800);
-	expect(getComputedStyle(element).rowGap).toBe(
-		resolvedCustomProperty(element, '--luke-space-ace.8'),
-	);
+	expect(getComputedStyle(element).rowGap).toBe(resolvedCustomProperty(element, '--luke-space-8'));
 	expect(getComputedStyle(element).columnGap).toBe(
-		resolvedCustomProperty(element, '--luke-space-ace.4'),
+		resolvedCustomProperty(element, '--luke-space-4'),
 	);
 
 	await page.viewport(breakpoints.bp768, 800);
-	expect(getComputedStyle(element).rowGap).toBe(
-		resolvedCustomProperty(element, '--luke-space-ace.24'),
-	);
+	expect(getComputedStyle(element).rowGap).toBe(resolvedCustomProperty(element, '--luke-space-24'));
 	expect(getComputedStyle(element).columnGap).toBe(
-		resolvedCustomProperty(element, '--luke-space-ace.24'),
+		resolvedCustomProperty(element, '--luke-space-24'),
 	);
 });
 
@@ -196,8 +188,8 @@ test('columnGap overrides gap when both are set at the same breakpoint', async (
 	);
 	const computedStyle = getComputedStyle(element);
 
-	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-ace.24'));
-	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-ace.4'));
+	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-24'));
+	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-4'));
 });
 
 /**

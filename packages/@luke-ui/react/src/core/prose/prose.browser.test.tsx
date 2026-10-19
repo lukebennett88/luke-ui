@@ -303,7 +303,7 @@ test('fits media inside a narrow prose column', async () => {
 });
 
 test('scrolls long preformatted lines without widening a narrow grid column', async () => {
-	const code = 'padding-inline: var(--luke-space-ace.16);'.repeat(5);
+	const code = 'padding-inline: var(--luke-space-16);'.repeat(5);
 	const { locator, user } = render(
 		<Prose style={{ display: 'grid', inlineSize: 160 }}>
 			<button type="button">Before code</button>
@@ -698,7 +698,7 @@ const document = (
 		<h4>Reading a token</h4>
 		{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable pre */}
 		<pre tabIndex={0}>
-			<code>{'padding-inline: var(--luke-space-ace.16);\nmargin-block: 0;'}</code>
+			<code>{'padding-inline: var(--luke-space-16);\nmargin-block: 0;'}</code>
 		</pre>
 		<img alt="" height={64} src={swatch} width={320} />
 		<picture>
