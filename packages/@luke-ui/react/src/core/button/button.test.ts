@@ -1,5 +1,5 @@
 import { createElement } from 'react';
-import { assertType, test } from 'vite-plus/test';
+import { assertType, expectTypeOf, test } from 'vite-plus/test';
 import type { ButtonProps } from './button.js';
 
 test('Button supports ref and rejects unsupported prop combinations', () => {
@@ -19,4 +19,12 @@ test('Button supports ref and rejects unsupported prop combinations', () => {
 		prominence: 'high',
 		tone: 'critical',
 	});
+});
+
+test('Button accepts only automatic or full inline sizing for button appearances', () => {
+	expectTypeOf<ButtonProps['inlineSize']>().toEqualTypeOf<'auto' | 'full' | undefined>();
+	// @ts-expect-error — custom lengths belong in style
+	assertType<ButtonProps>({ appearance: 'button', inlineSize: '20rem' });
+	// @ts-expect-error — text appearances do not expose inline sizing
+	assertType<ButtonProps>({ appearance: 'text', inlineSize: 'full' });
 });

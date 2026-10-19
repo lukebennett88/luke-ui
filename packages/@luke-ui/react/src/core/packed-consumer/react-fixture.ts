@@ -412,6 +412,10 @@ export const withoutDisplay: ThemeInput = {
 
 export const customContainer = <Container maxInlineSize="container.448" style={{ maxInlineSize: '80ch' }}>Content</Container>;
 
+export const fullButton = <Button inlineSize="full">Continue</Button>;
+// @ts-expect-error — text actions do not accept inline sizing
+export const textButtonWidth = <Button appearance="text" inlineSize="full">Continue</Button>;
+
 // Box values follow the public token contract.
 export const retainedBoxValues: Array<BoxProps> = [
 	{ backgroundColor: 'surface.field', borderColor: 'controlHover', boxShadow: 'overlay' },

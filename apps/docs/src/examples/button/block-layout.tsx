@@ -4,7 +4,7 @@ import { Stack } from '@luke-ui/react/stack';
 export default () => {
 	return (
 		<Stack maxInlineSize="20rem">
-			<Button isBlock>Continue</Button>
+			<Button inlineSize="full">Continue</Button>
 		</Stack>
 	);
 };

@@ -41,7 +41,7 @@ type _IconButtonOmit = DistributiveOmit<
 	| 'aria-label'
 	| 'aria-labelledby'
 	| 'children'
-	| 'isBlock'
+	| 'inlineSize'
 	| 'isPending'
 	| 'prominence'
 	| 'render'
