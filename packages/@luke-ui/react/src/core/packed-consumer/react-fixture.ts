@@ -410,7 +410,8 @@ export const withoutDisplay: ThemeInput = {
 	typography: { fonts: { body, display: null } },
 };
 
-export const customContainer = <Container maxInlineSize="container.448" style={{ maxInlineSize: '80ch' }}>Content</Container>;
+export const presetContainer = <Container maxInlineSize="container.448">Content</Container>;
+export const customWidthBox = <Box maxInlineSize="80ch">Content</Box>;
 
 // Box values follow the public token contract.
 export const retainedBoxValues: Array<BoxProps> = [

@@ -245,24 +245,26 @@ test('a direct edge value overrides only the initial axis value', async () => {
 	expect(getComputedStyle(bleed).marginInlineEnd).toBe('-32px');
 });
 
-test('reports an invalid value against the prop that received it', () => {
-	const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+for (const value of ['16px', 'space.20', 'space.0', 0, 'constructor'] as const) {
+	test(`reports unsupported spacing ${JSON.stringify(value)} against the receiving prop`, () => {
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-	render(
-		// @ts-expect-error — a JavaScript caller can still pass a raw CSS length
-		<Bleed inline="16px" inlineStart="space.8">
-			Content
-		</Bleed>,
-	);
+		render(
+			// @ts-expect-error — JavaScript callers can still pass unsupported values
+			<Bleed inline={value} inlineStart="space.8">
+				Content
+			</Bleed>,
+		);
 
-	expect(consoleError).toHaveBeenCalled();
-	for (const call of consoleError.mock.calls) {
-		expect(call[0]).toContain("'inline'");
-		expect(call[0]).toContain('spacing token');
-	}
+		expect(consoleError).toHaveBeenCalled();
+		for (const call of consoleError.mock.calls) {
+			expect(call[0]).toContain("'inline'");
+			expect(call[0]).toContain('spacing token');
+		}
 
-	consoleError.mockRestore();
-});
+		consoleError.mockRestore();
+	});
+}
 
 test('reports an invalid all value against all', () => {
 	const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});

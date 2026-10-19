@@ -132,8 +132,8 @@ Spacing props accept `space.4` through the curated `space.96` steps, plus string
 `vars.space['4']` through `vars.space['96']`, with no zero entry. Numerical steps are fixed
 reference measurements emitted in `rem`. Custom lengths belong in CSS.
 
-`Container.maxInlineSize` accepts only the five approved `container.*` presets. Use `style` for a
-custom maximum. These naming decisions supersede
+`Container.maxInlineSize` is required and accepts only the five approved `container.*` presets. Use
+Box for arbitrary maximum widths. These naming decisions supersede
 [#761](https://github.com/lukebennett88/luke-ui/issues/761).
 
 ### State attributes

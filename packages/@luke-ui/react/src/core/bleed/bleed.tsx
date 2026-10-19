@@ -1,13 +1,13 @@
 import type { JSX } from 'react';
 import { mergeProps } from '../../shared/utils/merge-props.js';
 import { cx } from '../../shared/utils/utils.js';
-import { vars } from '../../theme/contract.css.js';
-import type { SpaceStep } from '../../theme/contract.js';
 import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
 import { resolveResponsiveCssProperty } from '../styles/responsive-css-property.js';
 import type { ResponsivePropValue } from '../styles/responsive.js';
+import type { SpaceToken } from '../styles/space-tokens.js';
+import { isSpaceToken, spaceTokens } from '../styles/space-tokens.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -79,7 +79,7 @@ export function Bleed({
 }
 
 /** A spacing token, or a responsive object keyed by breakpoint. */
-type BleedSpaceProp = ResponsivePropValue<'0' | `space.${SpaceStep}`>;
+type BleedSpaceProp = ResponsivePropValue<'0' | SpaceToken>;
 
 interface _BleedSpaceProps {
 	/** Amount to extend from all four edges. Axis and edge props override this at the same breakpoint. */
@@ -166,17 +166,9 @@ function resolveBleedValue(
 function formatBleedSpace(value: string | number): string {
 	// `calc(-1 * 0)` is a number, not a length, so the negated margin needs a unit.
 	if (value === '0') return '0px';
-	return isSpaceStep(value) ? vars.space[value.slice(6) as SpaceStep] : String(value);
+	return isSpaceToken(value) ? spaceTokens[value] : String(value);
 }
 
 function isBleedSpaceToken(value: string | number): boolean {
-	return value === '0' || isSpaceStep(value);
-}
-
-function isSpaceStep(value: string | number): value is `space.${SpaceStep}` {
-	return (
-		typeof value === 'string' &&
-		value.startsWith('space.') &&
-		Object.hasOwn(vars.space, value.slice(6))
-	);
+	return value === '0' || isSpaceToken(value);
 }

@@ -125,8 +125,9 @@ test('processed Markdown shows long resolved forms in full', async () => {
 
 	const bleed = await processedApi(['components', 'layout', 'bleed']);
 	expect(bleed).toContain(
-		"##### `BleedSpaceProp`\n\n```ts\ntype BleedSpaceProp = ResponsivePropValue<'0' | `space.${SpaceStep}`>;\n```",
+		"##### `BleedSpaceProp`\n\n```ts\ntype BleedSpaceProp = ResponsivePropValue<'0' | SpaceToken>;\n```",
 	);
+	expect(bleed).toContain('##### `SpaceToken`');
 	expect(bleed).toMatch(
 		/##### `SpaceStep`\n\n```ts\n[^`]+```\n\nWhich resolves to:\n\n```ts\n"4"\n/,
 	);

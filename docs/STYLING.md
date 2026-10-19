@@ -371,8 +371,9 @@ This supersedes the spacing naming policy in
 responsive conditions. Do not add `px`/`py` padding shorthands.
 
 Container accepts only `container.448`, `container.672`, `container.896`, `container.1152`, and
-`container.1280` presets. They select fixed `rem` maximum inline sizes. Custom widths belong in
-`style` or CSS. They do not need a separate theme variable family.
+`container.1280` presets. They select fixed `rem` maximum inline sizes and establish a local
+container-query boundary. Use Box for arbitrary widths. Container presets do not need a separate
+theme variable family.
 
 ### Control recipe sizes
 

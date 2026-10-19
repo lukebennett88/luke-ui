@@ -23,6 +23,14 @@ test('Bleed accepts spacing tokens and rejects raw lengths', () => {
 	assertType<BleedProps>({ inline: '16px' });
 	// @ts-expect-error — spacing keys are strings, so a number must not assign
 	assertType<BleedProps>({ block: 16 });
+	// @ts-expect-error — zero is a string token
+	assertType<BleedProps>({ all: 0 });
+	// @ts-expect-error — zero is outside the spacing namespace
+	assertType<BleedProps>({ all: 'space.0' });
+	// @ts-expect-error — only curated spacing steps are supported
+	assertType<BleedProps>({ all: 'space.20' });
+	// @ts-expect-error — spacing tokens use the public namespace
+	assertType<BleedProps>({ all: 'sp16' });
 	// @ts-expect-error — not a breakpoint
 	assertType<BleedProps>({ inline: { initial: 'space.4', tablet: 'space.16' } });
 });

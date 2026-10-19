@@ -72,11 +72,7 @@ test('lets marginInline override its default centring', () => {
 test('uses the nearest nested Container as the query boundary', async () => {
 	await page.viewport(1024, 800);
 	const { locator } = render(
-		<Container
-			maxInlineSize="container.1280"
-			style={{ maxInlineSize: '100%' }}
-			paddingInline="space.16"
-		>
+		<Container maxInlineSize="container.1280" paddingInline="space.16">
 			<Box data-testid="outer" display={{ initial: 'block', bp768: 'flex' }} />
 			<Container maxInlineSize="container.672">
 				<Box data-testid="nested" display={{ initial: 'block', bp768: 'flex' }} />
@@ -93,13 +89,13 @@ test('uses the nearest nested Container as the query boundary', async () => {
 	expect(getComputedStyle(nested).display).toBe('block');
 });
 
-test('style overrides the preset with a custom maximum inline size', () => {
+test('keeps the preset width while forwarding general style props', () => {
 	const { locator } = render(
 		<div style={{ inlineSize: '800px' }}>
 			<Container
 				data-testid="container"
 				maxInlineSize="container.448"
-				style={{ maxInlineSize: '42rem' }}
+				style={{ minBlockSize: '6rem' }}
 			>
 				Content
 			</Container>
@@ -108,7 +104,8 @@ test('style overrides the preset with a custom maximum inline size', () => {
 	const container = locator.getByTestId('container').element();
 	if (!(container instanceof HTMLElement)) throw new Error('Expected Container element.');
 
-	expect(container.getBoundingClientRect().width).toBe(672);
+	expect(container.getBoundingClientRect().width).toBe(448);
+	expect(container.getBoundingClientRect().height).toBe(96);
 });
 
 test('supports semantic and caller-owned elements', () => {

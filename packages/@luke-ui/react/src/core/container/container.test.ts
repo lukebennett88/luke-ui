@@ -15,9 +15,9 @@ test('Container rejects the props it does not support', () => {
 	assertType<ContainerProps>({ display: 'grid', maxInlineSize: 'container.672' });
 });
 
-test('Container accepts only approved presets while style accepts custom widths', () => {
-	assertType<ContainerProps>({ maxInlineSize: 'container.448', style: { maxInlineSize: '80ch' } });
-	// @ts-expect-error — arbitrary lengths belong in style
+test('Container accepts approved presets and general style props', () => {
+	assertType<ContainerProps>({ maxInlineSize: 'container.448', style: { minBlockSize: '6rem' } });
+	// @ts-expect-error — use Box for arbitrary maximum widths
 	assertType<ContainerProps>({ maxInlineSize: '80ch' });
 	// @ts-expect-error — physical keys are not container presets
 	assertType<ContainerProps>({ maxInlineSize: 'px672' });

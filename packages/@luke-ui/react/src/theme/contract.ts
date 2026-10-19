@@ -1,3 +1,4 @@
+import { typedEntries } from '../shared/utils/utils.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { literalScale } from './literal-scale.js';
 import type { TypeStyle } from './type-styles.js';
@@ -65,9 +66,10 @@ export const spaceScale = literalScale('', [4, 8, 12, 16, 24, 32, 40, 48, 64, 96
 /** Numeric key in the spacing variable contract. */
 export type SpaceStep = keyof typeof spaceScale;
 
-const spaceContract = Object.fromEntries(Object.keys(spaceScale).map((step) => [step, null])) as {
-	readonly [Step in SpaceStep]: null;
-};
+const spaceContract: Record<string, null> = {};
+for (const [step] of typedEntries(spaceScale)) {
+	spaceContract[step] = null;
+}
 
 /**
  * The theme token tree shared by the public `vars` contract and `buildTheme`, so typed paths and
@@ -168,7 +170,7 @@ export const themeContractTree = {
 		full: null,
 	},
 	/** The fixed spacing scale used by components and layout utilities. */
-	space: spaceContract,
+	space: spaceContract as { readonly [Step in SpaceStep]: null },
 	/** Structural block sizes for `px32` and `px40` controls. */
 	controlSize: {
 		px32: null,

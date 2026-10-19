@@ -207,4 +207,8 @@ test('spacing props keep namespaced tokens and string zero without arbitrary len
 	assertType<UtilityProps>({ gap: 'space.0' });
 	// @ts-expect-error — the variable key alone is not a public spacing value
 	assertType<UtilityProps>({ gap: '16' });
+	// @ts-expect-error — only curated spacing steps are supported
+	assertType<UtilityProps>({ padding: 'space.20' });
+	// @ts-expect-error — spacing tokens use the public namespace
+	assertType<UtilityProps>({ padding: 'sp16' });
 });

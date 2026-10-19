@@ -54,7 +54,7 @@ interface _ContainerElementProps
 
 interface _ContainerRenderProps extends BoxLikeRenderProps, _ContainerOmit, _ContainerLayoutProps {}
 
-/** Approved maximum inline-size presets. Use style for custom widths. */
+/** Approved maximum inline-size presets. Use Box for arbitrary widths. */
 type ContainerMaxInlineSize = keyof typeof containerMaxInlineSizeTokens;
 
 const containerOwnedProperties: ReadonlySet<PropertyKey> = new Set<_ContainerOwnedProperty>([
