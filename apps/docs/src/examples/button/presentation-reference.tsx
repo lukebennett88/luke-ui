@@ -5,8 +5,8 @@ import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (
-		<Stack gap="sp24">
-			<Stack gap="sp8">
+		<Stack gap="space.24">
+			<Stack gap="space.8">
 				<Text typography="label">Button</Text>
 				<Comparison>
 					<ComparisonItem label="Neutral · Low">
@@ -33,7 +33,7 @@ export default () => {
 					</ComparisonItem>
 				</Comparison>
 			</Stack>
-			<Stack gap="sp8">
+			<Stack gap="space.8">
 				<Text typography="label">Text</Text>
 				<Comparison>
 					<ComparisonItem label="Neutral · Low">

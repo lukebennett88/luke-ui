@@ -15,17 +15,17 @@ export function NotFound() {
 			<Container
 				elementType="main"
 				flexGrow="1"
-				maxInlineSize="px1152"
+				maxInlineSize="container.1152"
 				paddingBlock={{
-					initial: 'sp64',
-					bp768: 'sp96',
+					initial: 'space.64',
+					bp768: 'space.96',
 				}}
 				paddingInline={{
-					initial: 'sp16',
-					bp768: 'sp24',
+					initial: 'space.16',
+					bp768: 'space.24',
 				}}
 			>
-				<Stack alignItems="flex-start" gap="sp24">
+				<Stack alignItems="flex-start" gap="space.24">
 					<Heading level={1} typography="display">
 						Page not found
 					</Heading>
@@ -34,7 +34,7 @@ export function NotFound() {
 							Check the address, or search the docs.
 						</Text>
 					</Box>
-					<Cluster gap="sp12">
+					<Cluster gap="space.12">
 						<DocsLink appearance="button" prominence="high" to="/">
 							Go to home
 						</DocsLink>

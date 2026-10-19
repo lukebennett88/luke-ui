@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Stack gap="sp8">
+		<Stack gap="space.8">
 			<Text>
 				Short: <Numeral abbreviate value={12_345} />
 			</Text>

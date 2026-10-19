@@ -19,9 +19,9 @@ const tocListBorder = {
 } as const satisfies CSSProperties;
 
 const tocLinkPaddingInlineStart = {
-	top: 'sp12',
-	nested: 'sp24',
-	deep: 'sp40',
+	top: 'space.12',
+	nested: 'space.24',
+	deep: 'space.40',
 } as const;
 
 /** Sticky table of contents shown in its own column at wide viewports. */
@@ -33,8 +33,8 @@ export function DocsTocColumn({ toc }: { toc: Array<TOCItemType> }) {
 			className={styles.tocColumn}
 			elementType="nav"
 		>
-			<Stack gap="sp8">
-				<Box paddingInline="sp8">
+			<Stack gap="space.8">
+				<Box paddingInline="space.8">
 					<Text color="secondary" elementType="p" typography="label">
 						{TOC_LABEL}
 					</Text>
@@ -81,7 +81,7 @@ export function DocsTocBar({ toc }: { toc: Array<TOCItemType> }) {
 				<Icon className={styles.tocSummaryIcon} name="chevronDown" size="px16" />
 			</summary>
 			<nav aria-label={TOC_LABEL} className={styles.tocBarPanel}>
-				<Box paddingBlock="sp8">
+				<Box paddingBlock="space.8">
 					<TocLinks onNavigate={close} toc={toc} />
 				</Box>
 			</nav>
@@ -126,8 +126,8 @@ function TocLink({
 	return (
 		<Box
 			display="block"
-			paddingBlock="sp4"
-			paddingInlineEnd="sp8"
+			paddingBlock="space.4"
+			paddingInlineEnd="space.8"
 			paddingInlineStart={paddingInlineStart}
 			renderRoot={(domProps) => (
 				<a

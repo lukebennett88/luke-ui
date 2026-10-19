@@ -14,7 +14,7 @@ export default () => {
 				<CheckboxControl>
 					<CheckboxIndicator />
 				</CheckboxControl>
-				<Stack gap="sp4">
+				<Stack gap="space.4">
 					<Text slot={null} typography="label">
 						Example checkbox
 					</Text>

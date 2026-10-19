@@ -1,5 +1,6 @@
+import { typedEntries } from '../shared/utils/utils.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
-import { rem } from './rem.js';
+import { literalScale } from './literal-scale.js';
 import type { TypeStyle } from './type-styles.js';
 import { typeStyles } from './type-styles.js';
 
@@ -59,30 +60,16 @@ const fontStyleContract = Object.fromEntries(
 	typeStyles.map((style) => [style, { ...typeStyle }]),
 ) as { readonly [Style in TypeStyle]: typeof typeStyle };
 
-/**
- * Fixed spacing values selected from a 4px scale. Keys encode their step; values are emitted as
- * `rem` (16 → 1rem). Temporary `sp*` naming — migrate to `literalScale('px', …)` before the next
- * release (#847).
- */
-export const spaceScale = [
-	['sp4', rem(4)],
-	['sp8', rem(8)],
-	['sp12', rem(12)],
-	['sp16', rem(16)],
-	['sp24', rem(24)],
-	['sp32', rem(32)],
-	['sp40', rem(40)],
-	['sp48', rem(48)],
-	['sp64', rem(64)],
-	['sp96', rem(96)],
-] as const;
+/** Fixed spacing measurements. Numeric keys and rem values derive from the same steps. */
+export const spaceScale = literalScale('', [4, 8, 12, 16, 24, 32, 40, 48, 64, 96] as const);
 
-/** A spacing step key accepted by the layout APIs. */
-export type SpaceStep = (typeof spaceScale)[number][0];
+/** Numeric key in the spacing variable contract. */
+export type SpaceStep = keyof typeof spaceScale;
 
-const spaceContract = Object.fromEntries(spaceScale.map(([step]) => [step, null])) as {
-	readonly [Step in SpaceStep]: null;
-};
+const spaceContract: Record<string, null> = {};
+for (const [step] of typedEntries(spaceScale)) {
+	spaceContract[step] = null;
+}
 
 /**
  * The theme token tree shared by the public `vars` contract and `buildTheme`, so typed paths and
@@ -183,7 +170,7 @@ export const themeContractTree = {
 		full: null,
 	},
 	/** The fixed spacing scale used by components and layout utilities. */
-	space: spaceContract,
+	space: spaceContract as { readonly [Step in SpaceStep]: null },
 	/** Structural block sizes for `px32` and `px40` controls. */
 	controlSize: {
 		px32: null,

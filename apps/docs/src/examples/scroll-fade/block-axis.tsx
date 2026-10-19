@@ -9,9 +9,9 @@ export default () => {
 			axis="block"
 			blockSize="8.75rem"
 			inlineSize="20rem"
-			padding="sp12"
+			padding="space.12"
 		>
-			<Stack gap="sp12">
+			<Stack gap="space.12">
 				{['First item', 'Second item', 'Third item', 'Fourth item', 'Fifth item', 'Sixth item'].map(
 					(item) => (
 						<Text key={item}>{item}</Text>

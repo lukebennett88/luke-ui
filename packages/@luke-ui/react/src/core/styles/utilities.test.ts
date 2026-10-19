@@ -59,7 +59,7 @@ test('derives token-backed Box values from the public contract', () => {
 		...Object.entries(vars.color.border).map(
 			([key, value]) => ['borderColor', key, value] as const,
 		),
-		...Object.entries(vars.space).map(([key, value]) => ['gap', key, value] as const),
+		...Object.entries(vars.space).map(([key, value]) => ['gap', `space.${key}`, value] as const),
 	];
 
 	const mismatched = cases.filter(([property, key, value]) => {
@@ -164,7 +164,7 @@ test('alignment props accept start and end, which grid alignment uses', () => {
 
 test('responsive objects reject unknown breakpoints and off-scale values', () => {
 	// @ts-expect-error — not a breakpoint
-	assertType<UtilityProps['padding']>({ initial: 'sp4', tablet: 'sp16' });
+	assertType<UtilityProps['padding']>({ initial: 'space.4', tablet: 'space.16' });
 	// @ts-expect-error — the value must still be a space step at every breakpoint
 	assertType<UtilityProps['padding']>({ initial: '16px' });
 });
@@ -191,4 +191,24 @@ test('createSprinkles keeps non-utility props on the result and consumes the uti
 	expectTypeOf(result).not.toHaveProperty('display');
 	expect(Object.hasOwn(result, 'display')).toBe(false);
 	expect(result.id).toBe('root');
+});
+
+test('spacing props keep namespaced tokens and string zero without arbitrary lengths', () => {
+	assertType<UtilityProps>({
+		padding: { initial: 'space.4', bp768: 'space.16' },
+		margin: 'auto',
+		gap: '0',
+	});
+	// @ts-expect-error — spacing lengths belong in CSS
+	assertType<UtilityProps>({ padding: '1rem' });
+	// @ts-expect-error — zero is a string token
+	assertType<UtilityProps>({ gap: 0 });
+	// @ts-expect-error — zero is outside the spacing namespace
+	assertType<UtilityProps>({ gap: 'space.0' });
+	// @ts-expect-error — the variable key alone is not a public spacing value
+	assertType<UtilityProps>({ gap: '16' });
+	// @ts-expect-error — only curated spacing steps are supported
+	assertType<UtilityProps>({ padding: 'space.20' });
+	// @ts-expect-error — spacing tokens use the public namespace
+	assertType<UtilityProps>({ padding: 'sp16' });
 });

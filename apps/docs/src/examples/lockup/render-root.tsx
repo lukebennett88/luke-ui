@@ -3,7 +3,7 @@ import { vars } from '@luke-ui/react/theme';
 
 export default () => {
 	return (
-		<Lockup gap="sp12" margin="0" renderRoot={(domProps) => <figure {...domProps} />}>
+		<Lockup gap="space.12" margin="0" renderRoot={(domProps) => <figure {...domProps} />}>
 			<LockupRail>
 				<img
 					alt="Looking up between tall canyon walls at a strip of blue sky"

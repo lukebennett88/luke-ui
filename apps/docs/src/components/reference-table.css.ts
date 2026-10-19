@@ -122,7 +122,7 @@ globalStyle(`tbody:last-child > tr:last-child > ${ruled}${rowEnd}`, {
 });
 
 // DS gap: Box padding cannot change with a container query or a position in the row. Stacked cells
-// sit sp4 apart, with sp16 above the name and after the last line of a stacked row. A cell with a
+// sit space.4 apart, with space.16 above the name and after the last line of a stacked row. A cell with a
 // description below it is not the end of its row, and the description cell is not its start.
 export const stackedCell = style({
 	'@layer': {
@@ -130,10 +130,10 @@ export const stackedCell = style({
 			'@container': {
 				[NARROW]: {
 					paddingBlockEnd: 0,
-					paddingBlockStart: vars.space.sp4,
+					paddingBlockStart: vars.space['4'],
 					selectors: {
 						'&:first-child:not([colspan])': {
-							paddingBlockStart: vars.space.sp16,
+							paddingBlockStart: vars.space['16'],
 						},
 					},
 				},
@@ -147,7 +147,7 @@ globalStyle(`${stackedCell}${ruled}${rowEnd}`, {
 		components: {
 			'@container': {
 				[NARROW]: {
-					paddingBlockEnd: vars.space.sp16,
+					paddingBlockEnd: vars.space['16'],
 				},
 			},
 		},

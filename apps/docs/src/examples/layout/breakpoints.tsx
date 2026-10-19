@@ -10,7 +10,7 @@ export default () => {
 				.layout-breakpoints {
 					display: flex;
 					flex-direction: column;
-					gap: ${vars.space.sp12};
+					gap: ${vars.space['12']};
 				}
 
 				@container (inline-size >= ${breakpoints.bp768}px) {

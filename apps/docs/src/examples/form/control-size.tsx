@@ -6,7 +6,7 @@ import { TextInputField } from '@luke-ui/react/text-input-field';
 
 export default () => (
 	<Form controlSize="small">
-		<Stack gap="sp16">
+		<Stack gap="space.16">
 			<TextInputField label="Name" />
 			<CheckboxField label="Subscribe" />
 			<Button size="medium">Save</Button>

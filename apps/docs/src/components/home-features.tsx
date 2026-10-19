@@ -56,8 +56,8 @@ export function HomeFeatures() {
 	return (
 		<Box
 			paddingBlock={{
-				initial: 'sp64',
-				bp768: 'sp96',
+				initial: 'space.64',
+				bp768: 'space.96',
 			}}
 		>
 			<Prose>
@@ -70,18 +70,18 @@ export function HomeFeatures() {
 								bp768: 2,
 								bp1024: 3,
 							}}
-							gap="sp64"
+							gap="space.64"
 							marginBlockStart={{
-								initial: 'sp40',
-								bp768: 'sp48',
+								initial: 'space.40',
+								bp768: 'space.48',
 							}}
 						>
 							{FEATURES.map((feature) => (
 								<Stack
 									className={styles.featureCell}
-									gap="sp16"
+									gap="space.16"
 									key={feature.title}
-									paddingBlockStart="sp48"
+									paddingBlockStart="space.48"
 								>
 									<Heading>{feature.title}</Heading>
 									<Text color="secondary" elementType="p">

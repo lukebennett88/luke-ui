@@ -6,12 +6,16 @@ import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import type { Prettify } from '../types/prettify.js';
 import { layers } from './layers.css.js';
 import { responsiveConditions } from './responsive-conditions.js';
+import { spaceTokens } from './space-tokens.js';
 
 // Every token-backed scale below derives from the public `vars` contract, so a token removed from
 // the contract removes its Box value too.
 
 /** Space steps plus `0`. `'0'` is quoted so declaration emit keeps it a string key. */
-const spaceScale = { '0': '0', ...vars.space } as const;
+const spaceScale = {
+	'0': '0',
+	...spaceTokens,
+} as const;
 
 const marginScale = { ...spaceScale, auto: 'auto' } as const;
 

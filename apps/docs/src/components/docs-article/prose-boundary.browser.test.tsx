@@ -59,7 +59,7 @@ function hasProseFingerprint(element: Element): boolean {
 		return before.display === 'table' && before.content.includes('""');
 	}
 	if (element.matches('blockquote, figure')) {
-		// Prose sibling gaps (`* + blockquote|figure` → sp40). UA margins differ.
+		// Prose sibling gaps (`* + blockquote|figure` → space.40). UA margins differ.
 		return style.marginBlockStart === '40px';
 	}
 	if (element.matches('hr')) {

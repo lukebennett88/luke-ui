@@ -131,12 +131,12 @@ export const paneToolbar = style({
 		components: {
 			backgroundColor: vars.color.surface.base,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
-			minBlockSize: `calc(${vars.controlSize.px32} + ${vars.space.sp8} * 2 + 1px)`,
-			paddingBlock: vars.space.sp8,
-			paddingInline: vars.space.sp8,
+			minBlockSize: `calc(${vars.controlSize.px32} + ${vars.space['8']} * 2 + 1px)`,
+			paddingBlock: vars.space['8'],
+			paddingInline: vars.space['8'],
 			'@container': {
 				[docsTabletMinInlineSize]: {
-					paddingInline: vars.space.sp12,
+					paddingInline: vars.space['12'],
 				},
 			},
 		},
@@ -152,8 +152,8 @@ export const compileError = style({
 			fontFamily: vars.font.family.code,
 			fontSize: vars.font.caption.fontSize,
 			lineHeight: vars.font.caption.lineHeight,
-			paddingBlock: vars.space.sp8,
-			paddingInline: vars.space.sp16,
+			paddingBlock: vars.space['8'],
+			paddingInline: vars.space['16'],
 		},
 	},
 });
@@ -163,10 +163,10 @@ export const previewCanvas = style({
 		components: {
 			backgroundColor: `color-mix(in srgb, ${vars.color.surface.subdued} 50%, transparent)`,
 			overflow: 'auto',
-			padding: vars.space.sp8,
+			padding: vars.space['8'],
 			'@container': {
 				[docsTabletMinInlineSize]: {
-					padding: vars.space.sp12,
+					padding: vars.space['12'],
 				},
 			},
 		},
@@ -254,8 +254,8 @@ export const loadingPill = style({
 			color: vars.color.text.secondary,
 			fontSize: vars.font.caption.fontSize,
 			lineHeight: vars.font.caption.lineHeight,
-			paddingBlock: vars.space.sp4,
-			paddingInline: vars.space.sp12,
+			paddingBlock: vars.space['4'],
+			paddingInline: vars.space['12'],
 		},
 	},
 });
@@ -269,7 +269,7 @@ export const editorSkeleton = style({
 			inlineSize: '100%',
 			lineHeight: '20px',
 			overflow: 'hidden',
-			paddingBlockStart: vars.space.sp12,
+			paddingBlockStart: vars.space['12'],
 			position: 'relative',
 		},
 	},

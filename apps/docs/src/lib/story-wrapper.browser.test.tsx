@@ -33,7 +33,7 @@ test('default and explicit flow give block roots the available width', () => {
 
 test('flow gives an auto-fit Grid multiple tracks without explicit width', () => {
 	const { available, exampleRoot } = renderInWrapper(
-		<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" gap="sp12">
+		<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" gap="space.12">
 			<span>First</span>
 			<span>Second</span>
 			<span>Third</span>
@@ -50,7 +50,7 @@ test('flow gives an auto-fit Grid multiple tracks without explicit width', () =>
 test('flow gives an unsized form and nested Stack the available width', () => {
 	const { available, exampleRoot } = renderInWrapper(
 		<form>
-			<Stack gap="sp16">
+			<Stack gap="space.16">
 				<label htmlFor="form-name">Name</label>
 				<input id="form-name" />
 			</Stack>
@@ -80,7 +80,7 @@ test('centered keeps an intrinsic Button centred', () => {
 
 test('centered intentionally keeps an unsized auto-fit Grid intrinsic', () => {
 	const { available, exampleRoot } = renderInWrapper(
-		<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" gap="sp12">
+		<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" gap="space.12">
 			<span>First</span>
 			<span>Second</span>
 		</Grid>,
@@ -95,12 +95,12 @@ test('centered intentionally keeps an unsized auto-fit Grid intrinsic', () => {
 
 test('flow respects a max-inline-size cap without requiring full width', () => {
 	const wide = renderInWrapper(
-		<Stack gap="sp16" maxInlineSize="20rem">
+		<Stack gap="space.16" maxInlineSize="20rem">
 			<Button>Save</Button>
 		</Stack>,
 	);
 	const narrow = renderInWrapper(
-		<Stack gap="sp16" maxInlineSize="20rem">
+		<Stack gap="space.16" maxInlineSize="20rem">
 			<Button>Save</Button>
 		</Stack>,
 		{ containerWidth: 300 },
@@ -113,7 +113,7 @@ test('flow respects a max-inline-size cap without requiring full width', () => {
 test('flow retains deliberately narrow example sizing', () => {
 	const { exampleRoot } = renderInWrapper(
 		<div style={{ inlineSize: '10rem' }}>
-			<Grid columns="repeat(auto-fit, minmax(min(16rem, 100%), 1fr))" gap="sp12">
+			<Grid columns="repeat(auto-fit, minmax(min(16rem, 100%), 1fr))" gap="space.12">
 				<span>First</span>
 				<span>Second</span>
 			</Grid>

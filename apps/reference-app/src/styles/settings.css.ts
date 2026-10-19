@@ -13,14 +13,14 @@ export const shell = style({
 });
 
 export const sidebarHeader = style({
-	paddingInline: vars.space.sp12,
+	paddingInline: vars.space['12'],
 });
 
 export const sidebarScroll = style({
 	flexGrow: 1,
 	minBlockSize: 0,
 	overscrollBehavior: 'contain',
-	paddingInline: vars.space.sp12,
+	paddingInline: vars.space['12'],
 });
 
 export const skipLink = style({
@@ -31,8 +31,8 @@ export const skipLink = style({
 	color: vars.color.text.primary,
 	inlineSize: '1px',
 	overflow: 'hidden',
-	paddingBlock: vars.space.sp8,
-	paddingInline: vars.space.sp12,
+	paddingBlock: vars.space['8'],
+	paddingInline: vars.space['12'],
 	position: 'absolute',
 	selectors: {
 		'&:focus, &:focus-visible': {
@@ -40,8 +40,8 @@ export const skipLink = style({
 			clip: 'auto',
 			clipPath: 'none',
 			inlineSize: 'auto',
-			insetBlockStart: vars.space.sp8,
-			insetInlineStart: vars.space.sp8,
+			insetBlockStart: vars.space['8'],
+			insetInlineStart: vars.space['8'],
 			outline: `2px solid ${vars.color.border.focus}`,
 			outlineOffset: '2px',
 			overflow: 'visible',
@@ -57,10 +57,10 @@ export const navLink = style({
 	borderRadius: vars.radius.control,
 	color: vars.color.text.secondary,
 	display: 'flex',
-	gap: vars.space.sp8,
+	gap: vars.space['8'],
 	lineHeight: 1.35,
-	paddingBlock: vars.space.sp8,
-	paddingInline: vars.space.sp8,
+	paddingBlock: vars.space['8'],
+	paddingInline: vars.space['8'],
 	selectors: {
 		'&:focus-visible': {
 			outline: `2px solid ${vars.color.border.focus}`,
@@ -85,8 +85,8 @@ export const menuNavLink = style([
 		borderRadius: vars.radius.control,
 		color: vars.color.text.primary,
 		minBlockSize: '44px',
-		paddingBlock: vars.space.sp8,
-		paddingInline: vars.space.sp8,
+		paddingBlock: vars.space['8'],
+		paddingInline: vars.space['8'],
 		selectors: {
 			'&:hover': {
 				background: `color-mix(in oklab, ${vars.color.text.primary} 5%, transparent)`,
@@ -115,7 +115,7 @@ export const mobileHeaderLink = style({
 	alignItems: 'center',
 	color: vars.color.text.secondary,
 	display: 'inline-flex',
-	gap: vars.space.sp4,
+	gap: vars.space['4'],
 	minBlockSize: '44px',
 	selectors: {
 		'&:focus-visible': {
@@ -145,9 +145,9 @@ export const settingsRow = style({
 	alignItems: 'center',
 	borderBlockEnd: `1px solid color-mix(in oklab, ${vars.color.border.decorative} 85%, transparent)`,
 	display: 'flex',
-	gap: vars.space.sp12,
-	paddingBlock: vars.space.sp12,
-	paddingInline: vars.space.sp16,
+	gap: vars.space['12'],
+	paddingBlock: vars.space['12'],
+	paddingInline: vars.space['16'],
 	selectors: {
 		'&:last-child': {
 			borderBlockEnd: 'none',
@@ -257,7 +257,7 @@ export const menuPopover = style({
 	fontFamily: vars.font.family.body,
 	minInlineSize: '11rem',
 	overflow: 'auto',
-	paddingBlock: vars.space.sp4,
+	paddingBlock: vars.space['4'],
 	zIndex: 20,
 });
 
@@ -271,10 +271,10 @@ export const menuItem = style({
 	color: vars.color.text.primary,
 	cursor: 'default',
 	display: 'flex',
-	gap: vars.space.sp8,
+	gap: vars.space['8'],
 	outline: 'none',
-	paddingBlock: vars.space.sp8,
-	paddingInline: vars.space.sp12,
+	paddingBlock: vars.space['8'],
+	paddingInline: vars.space['12'],
 	selectors: {
 		'&[data-disabled]': {
 			opacity: vars.interaction.disabledOpacity,
@@ -337,7 +337,7 @@ export const profileFieldShell = style({
 	},
 	alignItems: 'center',
 	display: 'flex',
-	gap: vars.space.sp12,
+	gap: vars.space['12'],
 	inlineSize: '100%',
 	minInlineSize: 0,
 });
@@ -357,7 +357,7 @@ export const dialogOverlay = style({
 	inset: 0,
 	justifyContent: 'center',
 	overflowY: 'auto',
-	padding: vars.space.sp16,
+	padding: vars.space['16'],
 	position: 'fixed',
 	zIndex: 40,
 });
@@ -376,7 +376,7 @@ export const dialogModal = style({
 
 export const dialog = style({
 	outline: 'none',
-	padding: vars.space.sp24,
+	padding: vars.space['24'],
 });
 
 export const settingsSelect = style({

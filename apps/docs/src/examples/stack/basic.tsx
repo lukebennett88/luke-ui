@@ -3,7 +3,7 @@ import { ExampleItem } from '#docs';
 
 export default () => {
 	return (
-		<Stack gap="sp12">
+		<Stack gap="space.12">
 			<ExampleItem>First block item</ExampleItem>
 			<ExampleItem>Second block item</ExampleItem>
 			<ExampleItem>Third block item</ExampleItem>

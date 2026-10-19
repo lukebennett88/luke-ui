@@ -24,7 +24,7 @@ export function SpaceTokens() {
 						sample={
 							<Box
 								backgroundColor="accent.solid.rest"
-								blockSize={vars.space.sp12}
+								blockSize={vars.space['12']}
 								borderRadius="detail"
 								style={{ inlineSize: `var(${token.variable})` }}
 							/>
@@ -96,7 +96,7 @@ export function DepthAndFinishTokens() {
 								display="flex"
 								inlineSize={DEPTH_FINISH_SAMPLE_SIZE}
 								justifyContent="center"
-								padding="sp8"
+								padding="space.8"
 							>
 								<Box
 									backgroundColor="surface.base"
@@ -171,7 +171,7 @@ export function InteractionTokens() {
 					<TokenRow
 						key={token.path}
 						sample={
-							<Cluster flexWrap="nowrap" gap="sp8">
+							<Cluster flexWrap="nowrap" gap="space.8">
 								<SampleControl label="Rest" />
 								<SampleControl label="Disabled" opacity={`var(${token.variable})`} />
 							</Cluster>
@@ -197,7 +197,7 @@ function SampleControl({ label, opacity }: { label: string; opacity?: string }) 
 			borderStyle="solid"
 			borderWidth="thin"
 			display="flex"
-			paddingInline="sp8"
+			paddingInline="space.8"
 			style={opacity === undefined ? undefined : { opacity }}
 		>
 			<Text fontWeight="label" typography="caption">

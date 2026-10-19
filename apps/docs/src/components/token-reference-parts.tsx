@@ -91,7 +91,7 @@ export function TokenPanel({
 	sampleInlineSize?: string;
 }) {
 	return (
-		<Box className="not-prose" marginBlockStart="sp24">
+		<Box className="not-prose" marginBlockStart="space.24">
 			<TokenColumnHeader sampleInlineSize={sampleInlineSize} />
 			<Box className={styles.panelBody}>{children}</Box>
 		</Box>
@@ -123,15 +123,15 @@ export function TokenColumnHeader({
 						}
 			}
 			className={cx(styles.columnHeaderShell, styles.columnHeader)}
-			columnGap="sp16"
+			columnGap="space.16"
 			columns={{
 				initial: 'minmax(0, 1fr)',
 				bp768: hasSample
 					? `${sampleInlineSize} minmax(0, 1fr) minmax(0, ${valueInlineSize})`
 					: `minmax(0, 1fr) minmax(0, ${valueInlineSize})`,
 			}}
-			paddingBlock="sp8"
-			paddingInline="sp16"
+			paddingBlock="space.8"
+			paddingInline="space.16"
 		>
 			{hasSample ? (
 				<Box gridArea="sample">
@@ -166,8 +166,8 @@ export function TokenGroup({
 	const labelId = useId();
 	return (
 		<Box className={styles.group}>
-			<Box paddingBlockEnd="sp4" paddingBlockStart="sp16" paddingInline="sp16">
-				<Cluster alignItems="center" gap="sp12">
+			<Box paddingBlockEnd="space.4" paddingBlockStart="space.16" paddingInline="space.16">
+				<Cluster alignItems="center" gap="space.12">
 					<Text color="secondary" elementType="p" id={labelId} typography="caption">
 						{label}
 					</Text>
@@ -214,16 +214,16 @@ export function TokenRow({ note, sample, sampleInlineSize, token }: TokenRowProp
 				bp768: ['sample name value'],
 			}}
 			className={styles.row}
-			columnGap="sp16"
+			columnGap="space.16"
 			columns={{
 				initial: 'minmax(0, 1fr)',
 				bp768: `${sampleInlineSize} minmax(0, 1fr) minmax(0, 13rem)`,
 			}}
 			elementType="li"
 			id={tokenRowId(token.path)}
-			paddingBlock={{ initial: 'sp16', bp768: 'sp12' }}
-			paddingInline="sp16"
-			rowGap={{ initial: 'sp12', bp768: 'sp4' }}
+			paddingBlock={{ initial: 'space.16', bp768: 'space.12' }}
+			paddingInline="space.16"
+			rowGap={{ initial: 'space.12', bp768: 'space.4' }}
 		>
 			<Box
 				alignItems="center"
@@ -231,13 +231,13 @@ export function TokenRow({ note, sample, sampleInlineSize, token }: TokenRowProp
 				display="flex"
 				gridArea="sample"
 				inlineSize={sampleInlineSize}
-				minBlockSize={vars.space.sp32}
+				minBlockSize={vars.space['32']}
 			>
 				{sample}
 			</Box>
 			<Box className={styles.tokenIdentification} gridArea="name" minInlineSize="0">
-				<Stack gap="sp4">
-					<Cluster alignItems="center" gap="sp8">
+				<Stack gap="space.4">
+					<Cluster alignItems="center" gap="space.8">
 						<TokenName elementType="p" token={token} typography="label" />
 						<TokenCopyButton token={token} />
 					</Cluster>

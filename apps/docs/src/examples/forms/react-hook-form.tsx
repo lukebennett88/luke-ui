@@ -20,13 +20,13 @@ export default () => {
 	});
 
 	return (
-		<Stack gap="sp16" maxInlineSize="20rem">
+		<Stack gap="space.16" maxInlineSize="20rem">
 			<Form
 				necessityIndicator="required-label"
 				onSubmit={form.handleSubmit(() => undefined)}
 				validationBehavior="aria"
 			>
-				<Stack gap="sp16">
+				<Stack gap="space.16">
 					<Controller
 						control={form.control}
 						name="name"

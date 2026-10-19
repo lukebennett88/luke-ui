@@ -18,9 +18,9 @@ export default () => {
 	}
 
 	return (
-		<Stack gap="sp16" maxInlineSize="20rem">
+		<Stack gap="space.16" maxInlineSize="20rem">
 			<Form necessityIndicator="optional-label" onSubmit={handleSubmit}>
-				<Stack gap="sp16">
+				<Stack gap="space.16">
 					<Text elementType="p">All fields are required unless marked optional.</Text>
 					<TextInputField isRequired label="Family name" name="familyName" />
 					<TextInputField label="Middle name" name="middleName" />

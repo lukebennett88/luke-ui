@@ -115,7 +115,7 @@ function DefinitionDialog({
 
 	return (
 		<Dialog aria-label={`Definition of ${current}`} className={styles.dialog} ref={dialogRef}>
-			<Stack gap="sp8">
+			<Stack gap="space.8">
 				<Breadcrumbs
 					aria-label="Opened types"
 					className={styles.breadcrumbs}
@@ -150,7 +150,7 @@ function DefinitionBody({
 			);
 		case 'error':
 			return (
-				<Stack gap="sp8">
+				<Stack gap="space.8">
 					<Text color="secondary" typography="caption">
 						{load.message}
 					</Text>
@@ -170,14 +170,14 @@ function DefinitionBody({
 			}
 			// The same tokens, in the same order, as the type definitions in the page's Markdown.
 			return (
-				<Stack gap="sp8">
+				<Stack gap="space.8">
 					{definition === undefined ? null : (
 						<Text className={styles.definition} elementType="pre" typography="caption">
 							<TypeTokensView tokens={definition} />
 						</Text>
 					)}
 					{resolved === undefined ? null : (
-						<Stack gap="sp4">
+						<Stack gap="space.4">
 							<Text color="secondary" typography="caption">
 								{definition === undefined ? 'Resolves to:' : 'Which resolves to:'}
 							</Text>

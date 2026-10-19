@@ -15,10 +15,10 @@ export const heading = style({
 	'@layer': {
 		components: {
 			// Clears the sticky header, and below the table of contents breakpoint the sticky bar too.
-			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${TOC_BAR_BLOCK_SIZE} + ${vars.space.sp24})`,
+			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${TOC_BAR_BLOCK_SIZE} + ${vars.space['24']})`,
 			'@container': {
 				[docsTocMinInlineSize]: {
-					scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space.sp24})`,
+					scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space['24']})`,
 				},
 			},
 		},
@@ -32,7 +32,7 @@ export const headingAnchor = style({
 	'@layer': {
 		components: {
 			color: 'inherit',
-			marginInlineEnd: `calc(${vars.space.sp4} + ${MIN_TARGET_SIZE})`,
+			marginInlineEnd: `calc(${vars.space['4']} + ${MIN_TARGET_SIZE})`,
 			textDecoration: 'none',
 		},
 	},
@@ -104,11 +104,11 @@ export const tableScroll = style({
 		components: {
 			border: `1px solid ${vars.color.border.decorative}`,
 			borderRadius: vars.radius.surface,
-			marginBlockStart: vars.space.sp40,
+			marginBlockStart: vars.space['40'],
 			selectors: {
-				'h2 + &': { marginBlockStart: vars.space.sp32 },
-				'h3 + &': { marginBlockStart: vars.space.sp24 },
-				'h4 + &, h5 + &, h6 + &': { marginBlockStart: vars.space.sp16 },
+				'h2 + &': { marginBlockStart: vars.space['32'] },
+				'h3 + &': { marginBlockStart: vars.space['24'] },
+				'h4 + &, h5 + &, h6 + &': { marginBlockStart: vars.space['16'] },
 			},
 		},
 	},

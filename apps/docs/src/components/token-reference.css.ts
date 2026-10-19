@@ -105,7 +105,7 @@ export const group = style({
 export const row = style({
 	'@layer': {
 		components: {
-			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space.sp24})`,
+			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space['24']})`,
 			selectors: {
 				'& + &': {
 					borderBlockStart: `1px solid ${vars.color.border.decorative}`,
@@ -188,12 +188,12 @@ export const typeSpecimen = style({
 	'@layer': {
 		components: {
 			borderBlockStart: `1px solid ${vars.color.border.decorative}`,
-			paddingBlock: vars.space.sp12,
+			paddingBlock: vars.space['12'],
 			textAlign: 'start',
 			'@container': {
 				[TYPE_NARROW]: {
 					display: 'block',
-					paddingBlock: vars.space.sp16,
+					paddingBlock: vars.space['16'],
 				},
 			},
 		},
@@ -238,7 +238,7 @@ export const typeCell = style({
 	'@layer': {
 		components: {
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
-			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space.sp24})`,
+			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space['24']})`,
 			textAlign: 'start',
 			verticalAlign: 'middle',
 			selectors: {
@@ -260,10 +260,10 @@ export const typeCell = style({
 export const typeNameCell = style({
 	'@layer': {
 		components: {
-			paddingBlock: vars.space.sp8,
+			paddingBlock: vars.space['8'],
 			'@container': {
 				[TYPE_NARROW]: {
-					paddingBlock: vars.space.sp12,
+					paddingBlock: vars.space['12'],
 				},
 			},
 		},
@@ -275,11 +275,11 @@ export const typeNameCell = style({
 export const typeValueCell = style({
 	'@layer': {
 		components: {
-			paddingBlock: vars.space.sp8,
+			paddingBlock: vars.space['8'],
 			whiteSpace: 'nowrap',
 			'@container': {
 				[TYPE_NARROW]: {
-					paddingBlock: vars.space.sp12,
+					paddingBlock: vars.space['12'],
 					whiteSpace: 'normal',
 				},
 			},
@@ -290,7 +290,7 @@ export const typeValueCell = style({
 /** The inline size of a motion sample's track. */
 export const MOTION_TRACK_SIZE = '6rem';
 /** The size of the dot that travels a motion sample's track. */
-export const MOTION_DOT_SIZE = vars.space.sp12;
+export const MOTION_DOT_SIZE = vars.space['12'];
 
 const motionDotTravelDistance = `calc(${MOTION_TRACK_SIZE} - ${MOTION_DOT_SIZE})`;
 

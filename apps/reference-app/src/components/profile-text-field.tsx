@@ -83,7 +83,7 @@ export function ProfileTextField({
 				validationBehavior="aria"
 				value={draft ?? value}
 			>
-				<Stack flexGrow="1" gap="sp4" minInlineSize="0">
+				<Stack flexGrow="1" gap="space.4" minInlineSize="0">
 					<FieldLabel>{label}</FieldLabel>
 					{hint ? <FieldDescription>{hint}</FieldDescription> : null}
 				</Stack>
@@ -91,7 +91,7 @@ export function ProfileTextField({
 					<Stack
 						alignItems="flex-end"
 						className={styles.profileTextFieldControl}
-						gap="sp4"
+						gap="space.4"
 						minInlineSize="0"
 					>
 						<TextInputControl className={styles.profileTextField}>

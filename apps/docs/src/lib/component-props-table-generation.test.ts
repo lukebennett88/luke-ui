@@ -459,7 +459,9 @@ test("expands Stack gap's indexed access to the accepted spacing tokens", async 
 	expect(asText(definitions["SprinklesProps['gap']"])).toEqual({
 		name: "SprinklesProps['gap']",
 		references: ['ResponsiveValue'],
-		resolved: expect.stringMatching(/^ResponsiveValue<"0" \| "sp4" \| .*"sp96"> \| undefined$/),
+		resolved: expect.stringMatching(
+			/^ResponsiveValue<"0" \| "space.4" \| .*"space.96"> \| undefined$/,
+		),
 	});
 	// The indexed access stands in for SprinklesProps, whose own definition shows no values.
 	expect(definitions.SprinklesProps).toBeUndefined();

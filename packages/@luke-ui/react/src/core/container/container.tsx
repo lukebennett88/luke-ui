@@ -1,4 +1,3 @@
-import { assignInlineVars } from '@vanilla-extract/dynamic';
 import type { JSX } from 'react';
 import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
@@ -7,11 +6,8 @@ import type { SprinklesProps } from '../styles/utilities.css.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import {
-	containerMaxInlineSizeTokens,
-	containerMaxInlineSizeVar,
-	containerRecipe,
-} from './recipe.css.js';
+import type { containerMaxInlineSizeTokens } from './recipe.css.js';
+import { containerRecipe } from './recipe.css.js';
 
 /** Props for `Container`. */
 export type ContainerProps = Prettify<_ContainerElementProps | _ContainerRenderProps>;
@@ -25,24 +21,13 @@ export function Container({
 	style,
 	...props
 }: ContainerProps): JSX.Element {
-	const isMaxInlineSizeToken = isContainerMaxInlineSizeToken(maxInlineSize);
-	const maxInlineSizeToken = isMaxInlineSizeToken ? maxInlineSize : undefined;
-	const arbitraryMaxInlineSize = isMaxInlineSizeToken ? undefined : maxInlineSize;
-	const resolvedStyle = (() => {
-		if (arbitraryMaxInlineSize === undefined) return style;
-		return {
-			...assignInlineVars({ [containerMaxInlineSizeVar]: arbitraryMaxInlineSize }),
-			...style,
-		};
-	})();
-
 	return (
 		<Box
 			{...omitUnsupportedSprinklesProps(props, containerProperties)}
-			className={containerRecipe({ className, maxInlineSize: maxInlineSizeToken })}
+			className={containerRecipe({ className, maxInlineSize })}
 			marginInline={marginInline}
 			paddingInline={paddingInline}
-			style={resolvedStyle}
+			style={style}
 		/>
 	);
 }
@@ -69,10 +54,8 @@ interface _ContainerElementProps
 
 interface _ContainerRenderProps extends BoxLikeRenderProps, _ContainerOmit, _ContainerLayoutProps {}
 
-type ContainerMaxInlineSizeToken = keyof typeof containerMaxInlineSizeTokens;
-
-/** A fixed container size, or any CSS value `max-inline-size` accepts. */
-type ContainerMaxInlineSize = ContainerMaxInlineSizeToken | (string & {});
+/** Approved maximum inline-size presets. Use Box for arbitrary widths. */
+type ContainerMaxInlineSize = keyof typeof containerMaxInlineSizeTokens;
 
 const containerOwnedProperties: ReadonlySet<PropertyKey> = new Set<_ContainerOwnedProperty>([
 	'inlineSize',
@@ -84,10 +67,4 @@ const containerOwnedProperties: ReadonlySet<PropertyKey> = new Set<_ContainerOwn
 const containerProperties = new Set(layoutProperties);
 for (const property of containerOwnedProperties) {
 	containerProperties.delete(property);
-}
-
-function isContainerMaxInlineSizeToken(
-	maxInlineSize: ContainerMaxInlineSize,
-): maxInlineSize is ContainerMaxInlineSizeToken {
-	return Object.hasOwn(containerMaxInlineSizeTokens, maxInlineSize);
 }

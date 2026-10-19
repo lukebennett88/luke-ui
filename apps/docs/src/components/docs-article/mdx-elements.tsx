@@ -210,8 +210,8 @@ export function Cards({ className, ...props }: ComponentPropsWithoutRef<'div'>) 
 				{...props}
 				className={cx('not-prose', className)}
 				columns="repeat(auto-fit, minmax(min(100%, 20rem), 1fr))"
-				gap="sp12"
-				marginBlockStart="sp40"
+				gap="space.12"
+				marginBlockStart="space.40"
 			/>
 		</HeadingLevels>
 	);

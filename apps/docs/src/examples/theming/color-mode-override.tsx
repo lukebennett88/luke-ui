@@ -15,14 +15,14 @@ export default () => {
 			backgroundColor="surface.base"
 			color={vars.color.text.primary}
 			data-color-mode={parentMode}
-			padding="sp24"
+			padding="space.24"
 		>
-			<Stack gap="sp16">
-				<Stack gap="sp8">
+			<Stack gap="space.16">
+				<Stack gap="space.8">
 					<Text elementType="strong" fontWeight="emphasis" id={labelId}>
 						Parent colour mode
 					</Text>
-					<Cluster aria-labelledby={labelId} gap="sp8" role="group">
+					<Cluster aria-labelledby={labelId} gap="space.8" role="group">
 						{(['light', 'dark'] as const).map((option) => (
 							<Button
 								aria-pressed={parentMode === option}
@@ -42,7 +42,7 @@ export default () => {
 					borderStyle="solid"
 					borderWidth="thin"
 					color={vars.color.text.primary}
-					padding="sp16"
+					padding="space.16"
 				>
 					<Text>This panel follows the parent mode.</Text>
 				</Box>
@@ -54,7 +54,7 @@ export default () => {
 					borderWidth="thin"
 					color={vars.color.text.primary}
 					data-color-mode="dark"
-					padding="sp16"
+					padding="space.16"
 				>
 					<Text>This panel is fixed to dark mode.</Text>
 				</Box>

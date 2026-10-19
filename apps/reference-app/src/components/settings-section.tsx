@@ -8,7 +8,7 @@ import * as styles from '../styles/settings.css.js';
 
 export function SettingsPage({ children, title }: { children: ReactNode; title: string }) {
 	return (
-		<Stack gap="sp24">
+		<Stack gap="space.24">
 			<Heading level={1} shouldDisableTrim tabIndex={-1} typography="heading2">
 				{title}
 			</Heading>
@@ -19,7 +19,7 @@ export function SettingsPage({ children, title }: { children: ReactNode; title: 
 
 export function SettingsSection({ children, title }: { children: ReactNode; title?: string }) {
 	return (
-		<Stack elementType="section" gap="sp24" marginBlockEnd="sp32">
+		<Stack elementType="section" gap="space.24" marginBlockEnd="space.32">
 			{title ? (
 				<Heading level={2} shouldDisableTrim typography="lead">
 					{title}
@@ -63,7 +63,7 @@ export function SettingsRow({
 }) {
 	return (
 		<SettingsRowShell>
-			<Stack flexGrow="1" gap="sp4" minInlineSize="0">
+			<Stack flexGrow="1" gap="space.4" minInlineSize="0">
 				<Text id={labelId} typography="label">
 					{label}
 				</Text>
@@ -95,7 +95,7 @@ export function SettingsStatus({
 	})();
 
 	return (
-		<Box marginBlockStart="sp12">
+		<Box marginBlockStart="space.12">
 			<Text color={textColor} elementType="p" role={role} typography="caption">
 				{children}
 			</Text>

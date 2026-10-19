@@ -47,7 +47,7 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
 						flexShrink="1"
 						minInlineSize={0}
 						overflow="hidden"
-						paddingInlineEnd="sp16"
+						paddingInlineEnd="space.16"
 					>
 						{line.length > 0 ? (
 							// Sized via custom properties (not style properties) so
@@ -92,7 +92,7 @@ export function EditorSkeletonShapeScript() {
 /** Shared loading indicator so the editor and preview speak the same language. */
 export function LoadingPill({ label }: { label: string }) {
 	return (
-		<Lockup className={styles.loadingPill} gap="sp8">
+		<Lockup className={styles.loadingPill} gap="space.8">
 			<LockupRail>
 				<LoadingSpinner aria-hidden size="px20" />
 			</LockupRail>

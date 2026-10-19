@@ -12,7 +12,7 @@ const layoutToBoxProps = {
 		display: 'flex',
 		justifyContent: 'center',
 		minBlockSize: '6rem',
-		padding: 'sp32',
+		padding: 'space.32',
 		style: {
 			backgroundColor: vars.color.surface.base,
 			color: vars.color.text.primary,
@@ -20,7 +20,7 @@ const layoutToBoxProps = {
 	},
 	flow: {
 		minBlockSize: '6rem',
-		padding: 'sp32',
+		padding: 'space.32',
 		style: {
 			backgroundColor: vars.color.surface.base,
 			color: vars.color.text.primary,

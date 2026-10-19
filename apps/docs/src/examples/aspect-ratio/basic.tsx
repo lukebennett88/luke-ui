@@ -4,7 +4,7 @@ import { vars } from '@luke-ui/react/theme';
 
 export default () => {
 	return (
-		<Container maxInlineSize="px672">
+		<Container maxInlineSize="container.672">
 			<AspectRatio ratio="16 / 9">
 				<iframe
 					src="https://www.youtube.com/embed/K5uS5DIKQbU"

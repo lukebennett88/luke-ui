@@ -64,7 +64,7 @@ function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element 
 				borderRadius="control"
 				borderStyle="solid"
 				borderWidth="thin"
-				padding="sp16"
+				padding="space.16"
 			>
 				<Text color="danger" elementType="p">
 					Failed to load example {component}/{name}: {result.error.message}
@@ -118,7 +118,7 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 			borderWidth="thin"
 			className={cx(styles.frame, 'not-prose')}
 			data-example-frame
-			marginBlock="sp16"
+			marginBlock="space.16"
 			role={ariaLabel ? 'region' : 'group'}
 		>
 			<Box
@@ -126,10 +126,10 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 				backgroundColor="surface.base"
 				className={styles.frameHeader}
 				display="flex"
-				gap="sp8"
+				gap="space.8"
 				justifyContent="space-between"
-				paddingBlock="sp8"
-				paddingInline="sp16"
+				paddingBlock="space.8"
+				paddingInline="space.16"
 			>
 				<Box flex="1 1 auto" minInlineSize={0}>
 					<Text color="secondary" elementType="div" id={titleId} typography="label">
@@ -137,7 +137,7 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 					</Text>
 				</Box>
 				{actions != null ? (
-					<Box alignItems="center" display="flex" flexShrink="0" gap="sp4">
+					<Box alignItems="center" display="flex" flexShrink="0" gap="space.4">
 						{actions}
 					</Box>
 				) : null}
@@ -167,7 +167,7 @@ function OpenInPlayground({ hash }: { hash: string }) {
 
 function ExampleLoadingActions() {
 	return (
-		<Box alignItems="center" aria-hidden display="flex" flexShrink="0" gap="sp4" inert>
+		<Box alignItems="center" aria-hidden display="flex" flexShrink="0" gap="space.4" inert>
 			<LoadingSkeleton radius="control">
 				<Button
 					isDisabled

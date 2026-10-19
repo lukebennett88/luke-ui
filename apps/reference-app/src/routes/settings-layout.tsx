@@ -88,13 +88,13 @@ export function SettingsLayout() {
 					elementType="aside"
 					flexDirection="column"
 					flexShrink="0"
-					gap="sp24"
+					gap="space.24"
 					inlineSize="244px"
 					minBlockSize={0}
 					overflow="hidden"
-					paddingBlock="sp16"
+					paddingBlock="space.16"
 				>
-					<Stack className={styles.sidebarHeader} flexShrink="0" gap="sp12">
+					<Stack className={styles.sidebarHeader} flexShrink="0" gap="space.12">
 						<Box>
 							<Link
 								appearance="button"
@@ -119,8 +119,8 @@ export function SettingsLayout() {
 					elementType="main"
 					flexGrow="1"
 					id={MAIN_ID}
-					marginBlock={{ bp768: 'sp8' }}
-					marginInlineEnd={{ bp768: 'sp8' }}
+					marginBlock={{ bp768: 'space.8' }}
+					marginInlineEnd={{ bp768: 'space.8' }}
 					minBlockSize={0}
 					minInlineSize={0}
 					overflow="hidden"
@@ -131,17 +131,17 @@ export function SettingsLayout() {
 						className={styles.mainScroll}
 						overflowX="hidden"
 						overflowY="auto"
-						paddingBlockEnd={{ bp768: 'sp64', initial: 'sp48' }}
-						paddingBlockStart={{ bp768: 'sp64', initial: 'sp16' }}
-						paddingInline={{ bp768: 'sp40', initial: 'sp16' }}
+						paddingBlockEnd={{ bp768: 'space.64', initial: 'space.48' }}
+						paddingBlockStart={{ bp768: 'space.64', initial: 'space.16' }}
+						paddingInline={{ bp768: 'space.40', initial: 'space.16' }}
 						ref={mainRef}
 					>
 						{isMenu ? null : (
 							<Box
 								alignItems="center"
 								display={{ bp768: 'none', initial: 'flex' }}
-								gap="sp4"
-								marginBlockEnd="sp16"
+								gap="space.4"
+								marginBlockEnd="space.16"
 							>
 								<RouterLink className={styles.mobileHeaderLink} to="/settings/menu">
 									<Icon name="chevronLeft" size="px16" />
@@ -149,7 +149,7 @@ export function SettingsLayout() {
 								</RouterLink>
 							</Box>
 						)}
-						<Container maxInlineSize="px672">
+						<Container maxInlineSize="container.672">
 							<Outlet
 								context={
 									{
@@ -176,7 +176,7 @@ export function SettingsMenuPage() {
 	const profile = useQuery(settingsQueryOptions).data!.profile;
 
 	return (
-		<Stack gap="sp24">
+		<Stack gap="space.24">
 			<Heading level={1} shouldDisableTrim tabIndex={-1}>
 				Settings
 			</Heading>
@@ -188,7 +188,7 @@ export function SettingsMenuPage() {
 
 function AccountSummary({ profile }: { profile: Settings['profile'] }) {
 	return (
-		<Stack gap="sp4" minInlineSize="0">
+		<Stack gap="space.4" minInlineSize="0">
 			<Text fontWeight="label" lineClamp>
 				{profile.displayName}
 			</Text>

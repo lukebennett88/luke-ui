@@ -12,10 +12,10 @@ export default () => {
 
 	return (
 		<Form onSubmit={handleSubmit}>
-			<Stack gap="sp16" maxInlineSize="20rem">
+			<Stack gap="space.16" maxInlineSize="20rem">
 				<fieldset style={{ border: 'none', margin: 0, minInlineSize: 0, padding: 0 }}>
 					<legend>Email notifications</legend>
-					<Stack gap="sp12" paddingBlockStart="sp12">
+					<Stack gap="space.12" paddingBlockStart="space.12">
 						<CheckboxField defaultSelected label="Product updates" name="productUpdates" />
 						<CheckboxField defaultSelected label="Security alerts" name="securityAlerts" />
 						<CheckboxField label="Tips and tutorials" name="tips" />

@@ -4,14 +4,14 @@ import { Container } from '@luke-ui/react/container';
 
 export default () => {
 	return (
-		<Container maxInlineSize="px672" paddingInline="sp16">
+		<Container maxInlineSize="container.672" paddingInline="space.16">
 			<Box
 				backgroundColor="surface.subdued"
 				borderColor="decorative"
 				borderRadius="detail"
 				borderStyle="solid"
 				borderWidth="thin"
-				padding="sp16"
+				padding="space.16"
 			>
 				Content stays centred with a maximum inline size of <Code>42rem</Code>.
 			</Box>

@@ -5,6 +5,7 @@
  */
 
 import { precomputeValues } from '@capsizecss/core';
+import { typedEntries } from '../shared/utils/utils.js';
 import { capsizeTrimVarName } from './capsize-trim-vars.js';
 import type { IdentityPath, ModePath, SpaceStep } from './contract.js';
 import { flattenThemeContract, partitionContractPairs, spaceScale } from './contract.js';
@@ -143,7 +144,9 @@ function typeStyleValues<Field extends string>(
 }
 
 function spaceValues(): { [Step in SpaceStep as `space.${Step}`]: string } {
-	return pathRecord(spaceScale.map(([step, value]) => pathEntry(`space.${step}`, value)));
+	return pathRecord(
+		typedEntries(spaceScale).map(([step, value]) => pathEntry(`space.${step}`, value)),
+	);
 }
 
 /**

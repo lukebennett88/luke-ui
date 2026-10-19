@@ -90,7 +90,7 @@ function renderHost() {
 			<Button className="bg-[rgb(7,8,9)]!" data-testid="important-button">
 				Important
 			</Button>
-			<Box className={buttonRecipe()} data-testid="box-button" padding="sp4">
+			<Box className={buttonRecipe()} data-testid="box-button" padding="space.4">
 				Box
 			</Box>
 			<div className="tw-component p-[3px]" data-testid="tailwind-component" />

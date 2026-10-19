@@ -51,18 +51,18 @@ export default () => {
 			// container queries resolved against the theme root, so this follows the
 			// preview's inline size.
 			paddingBlock={{
-				initial: 'sp32',
-				bp768: 'sp64',
+				initial: 'space.32',
+				bp768: 'space.64',
 			}}
 			paddingInline={{
-				initial: 'sp24',
-				bp768: 'sp48',
+				initial: 'space.24',
+				bp768: 'space.48',
 			}}
 			renderRoot={(domProps) => <form {...domProps} onSubmit={handleSubmit} />}
 		>
-			<Stack gap="sp24">
+			<Stack gap="space.24">
 				<Heading level={2}>Sign in</Heading>
-				<Stack gap="sp16">
+				<Stack gap="space.16">
 					<Controller
 						control={form.control}
 						name="email"
@@ -105,14 +105,14 @@ export default () => {
 						)}
 					/>
 				</Stack>
-				<Cluster gap="sp12" justifyContent="flex-end">
+				<Cluster gap="space.12" justifyContent="flex-end">
 					<Button type="button">Create an account</Button>
 					<Button prominence="high" type="submit">
 						Sign in
 					</Button>
 				</Cluster>
 				{signedInAs ? (
-					<Box backgroundColor="success.subtle.rest" borderRadius="control" padding="sp12">
+					<Box backgroundColor="success.subtle.rest" borderRadius="control" padding="space.12">
 						<Text elementType="p">Signed in as {signedInAs}</Text>
 					</Box>
 				) : null}

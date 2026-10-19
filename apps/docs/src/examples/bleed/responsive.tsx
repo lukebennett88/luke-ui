@@ -10,12 +10,12 @@ export default () => {
 			borderColor="decorative"
 			borderStyle="solid"
 			borderWidth="thin"
-			paddingBlock="sp16"
-			paddingInline="sp16"
+			paddingBlock="space.16"
+			paddingInline="space.16"
 		>
-			<Stack gap="sp16">
+			<Stack gap="space.16">
 				<ExampleItem>Inset within the padding</ExampleItem>
-				<Bleed inline={{ initial: 'sp16', bp640: '0' }}>
+				<Bleed inline={{ initial: 'space.16', bp640: '0' }}>
 					<ExampleItem>Full bleed on narrow viewports, inset from bp640</ExampleItem>
 				</Bleed>
 			</Stack>

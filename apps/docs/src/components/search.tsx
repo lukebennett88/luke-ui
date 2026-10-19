@@ -222,7 +222,7 @@ function WideSearchTrigger({ context }: { context: SearchContextValue }) {
 						<Lockup
 							className={styles.triggerLockup}
 							elementType="span"
-							gap="sp8"
+							gap="space.8"
 							railAlignment="center"
 						>
 							<LockupRail>

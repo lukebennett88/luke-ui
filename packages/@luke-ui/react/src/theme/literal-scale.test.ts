@@ -26,15 +26,21 @@ describe('literalScale', () => {
 	});
 
 	it('accepts another prefix so spacing can reuse the same helper', () => {
-		const scale = literalScale('sp', [4, 8] as const);
+		const scale = literalScale('space.', [4, 8] as const);
 
 		expect(scale).toEqual({
-			sp4: rem(4),
-			sp8: rem(8),
+			'space.4': rem(4),
+			'space.8': rem(8),
 		});
 		expectTypeOf(scale).toEqualTypeOf<{
-			readonly sp4: `${string}rem`;
-			readonly sp8: `${string}rem`;
+			readonly 'space.4': `${string}rem`;
+			readonly 'space.8': `${string}rem`;
 		}>();
 	});
+});
+
+it('derives bare spacing variable keys and exact reference values together', () => {
+	const scale = literalScale('', [4, 16, 96] as const);
+	expect(scale).toEqual({ '4': '0.25rem', '16': '1rem', '96': '6rem' });
+	expectTypeOf<keyof typeof scale>().toEqualTypeOf<'4' | '16' | '96'>();
 });

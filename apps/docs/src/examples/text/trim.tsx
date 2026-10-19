@@ -14,9 +14,9 @@ export default () => {
 	const [isTrimmed, setIsTrimmed] = useState(true);
 
 	return (
-		<Stack gap="sp16">
+		<Stack gap="space.16">
 			<CheckboxField isSelected={isTrimmed} label="Trim text" onChange={setIsTrimmed} />
-			<Box paddingInline="sp12" style={lineBoxStyle}>
+			<Box paddingInline="space.12" style={lineBoxStyle}>
 				<Text elementType="div" shouldDisableTrim={!isTrimmed} typography="display">
 					Aa
 				</Text>

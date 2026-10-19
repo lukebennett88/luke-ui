@@ -22,7 +22,7 @@ export function ExampleCodePreview({
 		<Box
 			backgroundColor="surface.subdued"
 			overflow="hidden"
-			paddingBlockEnd={canExpand ? 'sp48' : undefined}
+			paddingBlockEnd={canExpand ? 'space.48' : undefined}
 			position="relative"
 		>
 			{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
@@ -36,7 +36,7 @@ export function ExampleCodePreview({
 			{canExpand ? (
 				<Box
 					display="flex"
-					insetBlockEnd="sp8"
+					insetBlockEnd="space.8"
 					insetInlineStart="50%"
 					justifyContent="center"
 					position="absolute"

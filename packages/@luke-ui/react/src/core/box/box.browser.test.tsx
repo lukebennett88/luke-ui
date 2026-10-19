@@ -60,7 +60,7 @@ test('renders semantic elements and a consumer-owned renderRoot prop', () => {
 test('consumer className and style win collisions on the ordinary element path', () => {
 	const ref = createRef<HTMLElement>();
 	const baseline = render(
-		<Box data-testid="box-baseline" display="flex" gap="sp16" inlineSize="12rem" />,
+		<Box data-testid="box-baseline" display="flex" gap="space.16" inlineSize="12rem" />,
 	);
 	const utilityClassName = baseline.locator.getByTestId('box-baseline').element().className;
 	baseline.unmount();
@@ -70,7 +70,7 @@ test('consumer className and style win collisions on the ordinary element path',
 			className="consumer-class"
 			data-testid="box-element"
 			display="flex"
-			gap="sp16"
+			gap="space.16"
 			id="box-root"
 			inlineSize="12rem"
 			ref={ref}
@@ -96,7 +96,7 @@ test('consumer className and style win collisions on the renderRoot callback pat
 		<Box
 			data-testid="box-baseline"
 			display="flex"
-			gap={{ initial: 'sp8', bp768: 'sp24' }}
+			gap={{ initial: 'space.8', bp768: 'space.24' }}
 			inlineSize="10rem"
 		/>,
 	);
@@ -108,7 +108,7 @@ test('consumer className and style win collisions on the renderRoot callback pat
 		<Box
 			className="consumer-class"
 			display="flex"
-			gap={{ initial: 'sp8', bp768: 'sp24' }}
+			gap={{ initial: 'space.8', bp768: 'space.24' }}
 			inlineSize="10rem"
 			ref={ref}
 			renderRoot={(domProps) => {
@@ -147,7 +147,7 @@ for (const [name, Component] of Object.entries({
 		const { locator, unmount } = render(
 			<Component
 				className="consumer-class"
-				maxInlineSize="40rem"
+				maxInlineSize="container.672"
 				ref={ref}
 				renderRoot={(...args) => {
 					const [domProps] = args;
@@ -221,8 +221,8 @@ test('layout', { tags: ['visual'] }, async () => {
 			<Box
 				display="flex"
 				flexDirection="column"
-				gap="sp8"
-				padding="sp16"
+				gap="space.8"
+				padding="space.16"
 				style={{
 					backgroundColor: vars.color.surface.subdued,
 					borderRadius: vars.radius.surface,
@@ -231,7 +231,7 @@ test('layout', { tags: ['visual'] }, async () => {
 				}}
 			>
 				<Box>Account</Box>
-				<Box display="flex" gap="sp8">
+				<Box display="flex" gap="space.8">
 					<Box>Profile</Box>
 					<Box>Security</Box>
 				</Box>

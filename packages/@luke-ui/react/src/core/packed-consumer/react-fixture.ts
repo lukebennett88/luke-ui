@@ -103,7 +103,7 @@ export function App({ onHydrated }) {
 		{ spritesheetHref },
 		h(
 			Box,
-			{ display: 'flex', gap: 'sp8' },
+			{ display: 'flex', gap: 'space.8' },
 			h(Blockquote, null, 'Hello world'),
 			h(Icon, { name: 'chevronDown', 'aria-label': 'Expand' }),
 			// Separate published entrypoints must share Form defaults for both fields and actions.
@@ -312,6 +312,7 @@ const TYPED_APP = `
 import { Blockquote } from '@luke-ui/react/blockquote';
 import { Box, type BoxProps } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Container } from '@luke-ui/react/container';
 import { Provider } from '@luke-ui/react/provider';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { breakpoints, getThemeClassName, vars } from '@luke-ui/react/theme';
@@ -367,6 +368,7 @@ export const retainedTokens: Array<string> = [
 	vars.controlSize.px32,
 	vars.controlSize.px40,
 	vars.radius.full,
+	vars.space['16'],
 	vars.interaction.disabledOpacity,
 ];
 // @ts-expect-error — replaced by color.surface.base
@@ -408,10 +410,13 @@ export const withoutDisplay: ThemeInput = {
 	typography: { fonts: { body, display: null } },
 };
 
+export const presetContainer = <Container maxInlineSize="container.448">Content</Container>;
+export const customWidthBox = <Box maxInlineSize="80ch">Content</Box>;
+
 // Box values follow the public token contract.
 export const retainedBoxValues: Array<BoxProps> = [
 	{ backgroundColor: 'surface.field', borderColor: 'controlHover', boxShadow: 'overlay' },
-	{ backgroundColor: 'warning.subtle.rest', borderRadius: 'full', gap: 'sp96' },
+	{ backgroundColor: 'warning.subtle.rest', borderRadius: 'full', gap: 'space.96' },
 ];
 // @ts-expect-error — removed with color.surface.canvas
 export const removedBoxSurface: BoxProps['backgroundColor'] = 'surface.canvas';
@@ -444,9 +449,9 @@ export const invalidRenderState: Parameters<typeof renderRoot>[1] = { isHovered:
 export function App({ spritesheetHref }: { spritesheetHref: string }) {
 	return (
 		<Provider spritesheetHref={spritesheetHref}>
-			<Box display="flex" gap="sp8">
+			<Box display="flex" gap="space.8">
 				<Blockquote>Hello</Blockquote>
-				<Box padding="sp16" renderRoot={renderRoot}>Owned root</Box>
+				<Box padding="space.16" renderRoot={renderRoot}>Owned root</Box>
 				<TextInputField label="Name" />
 				<Button onPress={() => {}}>Save</Button>
 			</Box>
