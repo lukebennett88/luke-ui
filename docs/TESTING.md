@@ -42,11 +42,15 @@ for (const ratio of ratios) {
 Shared assertions take concrete elements and values. Keep the test, fixture, and contract choice in
 the component's test file.
 
-`render()` loads no font, and the fixture themes name `Inter`, so text uses whichever `Inter` the
-machine has installed or a fallback. A test whose layout depends on real font metrics, such as
-Capsize trims or the cap height, calls `await loadInter()` from `test-utils/load-inter.ts`. It loads
-the Inter file the theme packages ship for that test only. Compare positions with Inter's published
-metrics (`INTER_CAP_HEIGHT_EM`) and measured baselines, not with the CSS under test.
+Fixture themes name `Inter`. Browser setup awaits `loadInter()` before each test so mounts use the
+Inter file the theme packages ship from the first paint, not a host fallback. `captureVisual` awaits
+the same loader. Code surfaces keep the production `--luke-font-family-code` stack. Do not override
+component font styles in the test harness. Visual baseline and compare jobs run in a digest-pinned
+Playwright container so browser, OS fonts, and font rendering stay aligned — see
+[`VISUAL_TESTING.md`](./VISUAL_TESTING.md). A non-visual test whose layout depends on real font
+metrics, such as Capsize trims or the cap height, can still call `await loadInter()`. Compare
+positions with Inter's published metrics (`INTER_CAP_HEIGHT_EM`) and measured baselines, not with
+the CSS under test.
 
 Package component tests pin `window.screen.width` to a desktop value in `@luke-ui/react` browser
 setup so `useIsMobileDevice` stays desktop. Vitest's browser iframe is 414px wide. Playwright
@@ -67,10 +71,10 @@ result.
 ## Visual regression
 
 Visual cases are `visual`-tagged browser tests. `render()` compiles React-owned copies of the
-Tactile and Paper inputs from `src/theme/__fixtures__/` and loads no fonts. Those copies can diverge
-from the published theme packages. Capture each visually meaningful component in its representative
-fixture across Tactile light, Tactile dark, Paper light, and Paper dark. This is not an exhaustive
-state matrix. Add another capture only for a materially different state.
+Tactile and Paper inputs from `src/theme/__fixtures__/`. Those copies can diverge from the published
+theme packages. Capture each visually meaningful component in its representative fixture across
+Tactile light, Tactile dark, Paper light, and Paper dark. This is not an exhaustive state matrix.
+Add another capture only for a materially different state.
 
 `flatAppearances` renders Tactile's colours with every depth and control finish set to `none`. Use
 it, outside the theme matrix, for a capture that proves states stay distinct without materials.

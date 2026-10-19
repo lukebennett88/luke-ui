@@ -4,6 +4,7 @@ import type { Locator } from 'vite-plus/test/context';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { setEmulatedMediaFeature } from './emulate-media.js';
 import { peekEmulatedMediaFeatures } from './emulated-media.js';
+import { loadInter } from './load-inter.js';
 import { DESKTOP_SCREEN_WIDTH } from './mock-screen-width.js';
 import type { VisualAppearance } from './render.js';
 import { formatVisualCaptureName, formatVisualViewport } from './visual-capture-id.js';
@@ -197,15 +198,43 @@ export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 			if (!pausedByFreeze.includes(animation)) pausedByFreeze.push(animation);
 		}
 	};
-	collectPausedByFreeze(finishInFlightMotion());
-	// Lock before reduced-motion: recipes' `transition: none` would cancel paused CSS exits.
-	const exitStyleLocks = lockExitingCssTransitions();
 
-	const previousReducedMotion = peekEmulatedMediaFeatures()['prefers-reduced-motion'];
-	await setEmulatedMediaFeature('prefers-reduced-motion', 'reduce');
+	let exitStyleLocks: Array<ExitStyleLock> = [];
+	let previousReducedMotion: string | undefined;
+	let reducedMotionChanged = false;
+	let freezeMotion: HTMLStyleElement | undefined;
 
-	const freezeMotion = document.createElement('style');
-	freezeMotion.textContent = `
+	const restore = async () => {
+		freezeMotion?.remove();
+		freezeMotion = undefined;
+		if (reducedMotionChanged) {
+			await setEmulatedMediaFeature('prefers-reduced-motion', previousReducedMotion);
+			reducedMotionChanged = false;
+		}
+		clearExitStyleLocks(exitStyleLocks);
+		exitStyleLocks = [];
+		for (const animation of pausedByFreeze) {
+			try {
+				if (animation.playState === 'paused') animation.play();
+			} catch {
+				// Animation may have finished or been removed while frozen.
+			}
+		}
+	};
+
+	try {
+		collectPausedByFreeze(finishInFlightMotion());
+		// Lock before reduced-motion: recipes' `transition: none` would cancel paused CSS exits.
+		exitStyleLocks = lockExitingCssTransitions();
+
+		previousReducedMotion = peekEmulatedMediaFeatures()['prefers-reduced-motion'];
+		// Mark before await so a CDP failure after the merge still restores.
+		reducedMotionChanged = true;
+		await setEmulatedMediaFeature('prefers-reduced-motion', 'reduce');
+
+		freezeMotion = document.createElement('style');
+		freezeMotion.id = 'luke-ui-capture-freeze-motion';
+		freezeMotion.textContent = `
 *, *::before, *::after {
 	animation-delay: 0s !important;
 	animation-duration: 0s !important;
@@ -228,22 +257,15 @@ export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 	translate: none !important;
 }
 `;
-	document.head.append(freezeMotion);
-	await waitAnimationFrames();
-	collectPausedByFreeze(finishInFlightMotion());
-
-	return async () => {
-		freezeMotion.remove();
-		await setEmulatedMediaFeature('prefers-reduced-motion', previousReducedMotion);
-		clearExitStyleLocks(exitStyleLocks);
-		for (const animation of pausedByFreeze) {
-			try {
-				if (animation.playState === 'paused') animation.play();
-			} catch {
-				// Animation may have finished or been removed while frozen.
-			}
-		}
-	};
+		document.head.append(freezeMotion);
+		await waitAnimationFrames();
+		collectPausedByFreeze(finishInFlightMotion());
+		return restore;
+	} catch (error) {
+		// captureVisual only restores when this resolves; clean up partial freeze state here.
+		await restore();
+		throw error;
+	}
 }
 
 export async function captureVisual(locator: Locator, id: string) {
@@ -264,12 +286,17 @@ export async function captureVisual(locator: Locator, id: string) {
 	) {
 		await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
 	}
-	if (document.fonts?.status !== 'loaded') {
-		await document.fonts.ready;
-	}
-	const restoreMotion = await freezeMotionForCapture();
+	let restoreMotion: (() => Promise<void>) | undefined;
 	let isTall = false;
 	try {
+		// Browser setup already loaded Inter before mount. Await again so a capture still waits if
+		// setup was skipped.
+		await loadInter();
+		if (document.fonts?.status !== 'loaded') {
+			await document.fonts.ready;
+		}
+		restoreMotion = await freezeMotionForCapture();
+
 		const viewportWidth = window.innerWidth;
 		const viewportHeight = window.innerHeight;
 		const viewport = formatVisualViewport(viewportWidth, viewportHeight);
@@ -293,20 +320,28 @@ export async function captureVisual(locator: Locator, id: string) {
 			.element(page.elementLocator(element))
 			.toMatchScreenshot(formatVisualCaptureName(id, viewport));
 	} finally {
-		if (isTall) {
-			await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
-			await cdp().send('Emulation.clearDeviceMetricsOverride');
+		// Nested finally so a throw during tall-scene restore cannot skip motion restore (or leave
+		// the pointer parked incorrectly).
+		try {
+			if (isTall) {
+				await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
+				await cdp().send('Emulation.clearDeviceMetricsOverride');
+			}
+		} finally {
+			try {
+				if (restoreMotion !== undefined) await restoreMotion();
+			} finally {
+				if (
+					window.innerWidth !== originalViewportWidth ||
+					window.innerHeight !== originalViewportHeight
+				) {
+					await page.viewport(originalViewportWidth, originalViewportHeight);
+				}
+				// Park outside the viewport so the next capture does not inherit an accidental hover
+				// (text Links invert underline under `:hover` / `data-hovered`).
+				await parkPointer();
+			}
 		}
-		await restoreMotion();
-		if (
-			window.innerWidth !== originalViewportWidth ||
-			window.innerHeight !== originalViewportHeight
-		) {
-			await page.viewport(originalViewportWidth, originalViewportHeight);
-		}
-		// Park outside the viewport so the next capture does not inherit an accidental hover
-		// (text Links invert underline under `:hover` / `data-hovered`).
-		await parkPointer();
 	}
 }
 

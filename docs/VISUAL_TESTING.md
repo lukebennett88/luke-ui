@@ -5,8 +5,22 @@ and comparison policy.
 
 ## Baseline
 
+The `Visual baseline` and `Visual regression` workflows render inside the same digest-pinned
+Playwright container. The image string lives in `PLAYWRIGHT_VISUAL_IMAGE`
+(`packages/@luke-ui/react/scripts/visual-regression-contract.ts`). Both workflows pin that value,
+and a script test fails if they drift. That pins Chromium, OS libraries, and system fonts so
+baseline and compare share one rendering environment. GitHub-hosted `ubuntu-latest` alone is not
+stable enough for pixel screenshots. Both workflows set `PLAYWRIGHT_BROWSERS_PATH=/ms-playwright`,
+and Turbo’s visual tasks pass that variable through so the test process uses the browsers baked into
+the image.
+
 The `Visual baseline` workflow renders `main` and uploads the `visual-baseline` artefact. Pull
 requests download the newest `main` run, render their branch, and compare it.
+
+After a rendering-environment change (for example moving baseline and compare into this container),
+the first compare against the previous host baseline can show large intentional diffs. Keep the
+usual review approval. Once that change merges, push or re-run `Visual baseline` on `main` so the
+next PRs compare against captures from the pinned container.
 
 The newest run must have succeeded and retain its artefact. Never fall back to an older successful
 run: a stale baseline can pass an unchecked change. Re-run `Visual baseline` on `main` when the
@@ -20,6 +34,8 @@ does not switch to an older green run.
 
 ## Run locally
 
+Host Chromium (quick iteration, may differ from CI):
+
 ```sh
 VISUAL_CAPTURE_DIR=.artifacts/visual-regression/baseline \
   pnpm --filter @luke-ui/react run test:visual:capture
@@ -28,6 +44,20 @@ pnpm run test:visual
 
 Run the first command on `main`. `test:visual` writes expected, actual, and diff PNGs plus
 `summary.json` to `.artifacts/visual-regression`. Set `VISUAL_BASELINE_DIR` for another baseline.
+
+CI-parity Docker (same image and `linux/amd64` as the workflows). Needs Docker. On Apple Silicon
+that uses emulation. The CLI copies the tree into the container without `node_modules`, installs
+there, and bind-mounts only `.artifacts/visual-regression`, so the host install stays untouched.
+
+```sh
+pnpm run test:visual:docker:capture
+pnpm run test:visual:docker
+```
+
+`test:visual:docker:capture` writes baseline screenshots. Use it on `main`, or when deliberately
+replacing the baseline after a rendering-environment change. `test:visual:docker` captures current
+screenshots and compares them to the existing baseline without modifying it. Bump
+`PLAYWRIGHT_VISUAL_IMAGE` and the two workflow `image:` lines together when Playwright moves.
 
 ## Review
 
@@ -46,11 +76,15 @@ resumes only the exit animations the freeze paused. CSS exit transitions are sty
 reduced-motion recipe resets (`transition: none`) cannot cancel them mid-capture. Already-paused
 exit animations stay paused after restore.
 
-`captureVisual` skips no-op viewport resizes (React Aria closes popovers on document scroll),
-re-binds body/html locators immediately before the screenshot so live-region text changes cannot
-invalidate the locator, and parks the pointer outside the viewport after each capture. Browser tests
-also park the pointer in `afterEach` so a leftover cursor cannot leave text Links hovered (standard
-prominence removes the underline under hover).
+Browser setup loads the theme Inter file before each test mounts so fixtures measure against that
+face from the first paint. Code surfaces keep the production monospace stack — the harness does not
+override component font styles. `freezeMotionForCapture` restores reduced-motion, the freeze
+stylesheet, and exit locks if setup fails after installing them. `captureVisual` awaits Inter, owns
+motion freeze cleanup in nested finally blocks, skips no-op viewport resizes (React Aria closes
+popovers on document scroll), re-binds body/html locators immediately before the screenshot so
+live-region text changes cannot invalidate the locator, and parks the pointer outside the viewport
+after each capture. Browser tests also park the pointer in `afterEach` so a leftover cursor cannot
+leave text Links hovered (standard prominence removes the underline under hover).
 
 ## Tall scenes
 
