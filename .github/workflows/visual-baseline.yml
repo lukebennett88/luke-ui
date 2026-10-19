@@ -27,6 +27,11 @@ jobs:
   baseline:
     name: baseline
     runs-on: ubuntu-latest
+    # Digest-pinned Playwright image (keep tag+digest in sync with visual-regression.yml and
+    # docs/VISUAL_TESTING.md): same browser, OS fonts, and font rendering as compare.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-jammy@sha256:c064e7f355d2dda32f669801a1b09e86a1e9252395c844d2cfbbe5c44acb9b79
+      options: --ipc=host
     permissions:
       contents: read
     steps:
@@ -40,15 +45,13 @@ jobs:
           install: false
 
       - name: Install dependencies
+        env:
+          # Browsers ship in the container; skip the npm postinstall download.
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
         run: pnpm install --frozen-lockfile --no-runtime
 
-      # Chromium install and package build are independent after pnpm install.
-      - parallel:
-          - name: Install Playwright Chromium
-            run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
-
-          - name: Build packages
-            run: pnpm build:packages
+      - name: Build packages
+        run: pnpm build:packages
 
       - name: Render baseline captures
         env:

@@ -4,7 +4,7 @@ import type { Locator } from 'vite-plus/test/context';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { setEmulatedMediaFeature } from './emulate-media.js';
 import { peekEmulatedMediaFeatures } from './emulated-media.js';
-import { loadVisualFonts } from './load-inter.js';
+import { loadInter } from './load-inter.js';
 import { DESKTOP_SCREEN_WIDTH } from './mock-screen-width.js';
 import type { VisualAppearance } from './render.js';
 import { formatVisualCaptureName, formatVisualViewport } from './visual-capture-id.js';
@@ -289,9 +289,9 @@ export async function captureVisual(locator: Locator, id: string) {
 	let restoreMotion: (() => Promise<void>) | undefined;
 	let isTall = false;
 	try {
-		// Browser setup already loaded and pinned fonts before mount. Await the shared loader so a
-		// capture still waits for faces if setup was skipped; do not pin again.
-		await loadVisualFonts();
+		// Browser setup already loaded Inter before mount. Await again so a capture still waits if
+		// setup was skipped.
+		await loadInter();
 		if (document.fonts?.status !== 'loaded') {
 			await document.fonts.ready;
 		}

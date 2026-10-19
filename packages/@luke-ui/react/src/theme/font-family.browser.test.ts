@@ -84,8 +84,7 @@ describe('an accepted family', () => {
 
 			const root = getComputedStyle(document.documentElement);
 			expect(browserReading(family)).not.toBe('');
-			// Production code stack from generated CSS and the live custom property (setup pins
-			// code *rendering*, not `--luke-font-family-code`).
+			// Code stack stays the production default; assert generated CSS and the live custom property.
 			expect(extractValue(splitBlocks(css).themeWide, '--luke-font-family-code')).toBe(
 				codeFontFamilyStack,
 			);

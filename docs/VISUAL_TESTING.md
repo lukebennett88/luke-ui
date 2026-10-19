@@ -5,6 +5,12 @@ and comparison policy.
 
 ## Baseline
 
+The `Visual baseline` and `Visual regression` workflows render inside the same digest-pinned
+Playwright container (image tag and digest in those workflow files, kept in sync with the Docker
+command below). That pins Chromium, OS libraries, and system fonts so baseline and compare share one
+rendering environment. GitHub-hosted `ubuntu-latest` alone is not stable enough for pixel
+screenshots.
+
 The `Visual baseline` workflow renders `main` and uploads the `visual-baseline` artefact. Pull
 requests download the newest `main` run, render their branch, and compare it.
 
@@ -29,6 +35,17 @@ pnpm run test:visual
 Run the first command on `main`. `test:visual` writes expected, actual, and diff PNGs plus
 `summary.json` to `.artifacts/visual-regression`. Set `VISUAL_BASELINE_DIR` for another baseline.
 
+Host Chromium and system fonts can still differ from CI. For captures that must match the baseline
+and compare jobs, use the same digest-pinned Playwright image those workflows run in:
+
+```sh
+docker run --rm --ipc=host -v "$PWD":/work -w /work \
+  mcr.microsoft.com/playwright:v1.64.0-jammy@sha256:c064e7f355d2dda32f669801a1b09e86a1e9252395c844d2cfbbe5c44acb9b79 \
+  bash -lc 'corepack enable && pnpm install --frozen-lockfile --no-runtime && pnpm build:packages && VISUAL_CAPTURE_DIR=.artifacts/visual-regression/baseline pnpm --filter @luke-ui/react run test:visual:capture'
+```
+
+Bump the image tag and digest together when the Playwright version in the catalog moves.
+
 ## Review
 
 Changed, added, and removed captures upload the `visual-regression-diff` artefact. The `review` job
@@ -46,18 +63,15 @@ resumes only the exit animations the freeze paused. CSS exit transitions are sty
 reduced-motion recipe resets (`transition: none`) cannot cancel them mid-capture. Already-paused
 exit animations stay paused after restore.
 
-Browser setup loads the pinned Inter and JetBrains Mono faces and pins code _rendering_ (not the
-`--luke-font-family-code` token) before each test mounts, so fixtures and overlays measure against
-those faces from the first paint while token boards still show the production code stack. The pin
-also covers TokenBoard font-family previews that apply the code token on a non-`code` host.
-`freezeMotionForCapture` restores reduced-motion, the freeze stylesheet, and exit locks if setup
-fails after installing them. `captureVisual` awaits the shared font loader, owns motion freeze
-cleanup in nested finally blocks, and does not take a second font pin. It skips no-op viewport
-resizes (React Aria closes popovers on document scroll), re-binds body/html locators immediately
-before the screenshot so live-region text changes cannot invalidate the locator, and parks the
-pointer outside the viewport after each capture. Browser tests also park the pointer in `afterEach`
-so a leftover cursor cannot leave text Links hovered (standard prominence removes the underline
-under hover).
+Browser setup loads the theme Inter file before each test mounts so fixtures measure against that
+face from the first paint. Code surfaces keep the production monospace stack — the harness does not
+override component font styles. `freezeMotionForCapture` restores reduced-motion, the freeze
+stylesheet, and exit locks if setup fails after installing them. `captureVisual` awaits Inter, owns
+motion freeze cleanup in nested finally blocks, skips no-op viewport resizes (React Aria closes
+popovers on document scroll), re-binds body/html locators immediately before the screenshot so
+live-region text changes cannot invalidate the locator, and parks the pointer outside the viewport
+after each capture. Browser tests also park the pointer in `afterEach` so a leftover cursor cannot
+leave text Links hovered (standard prominence removes the underline under hover).
 
 ## Tall scenes
 

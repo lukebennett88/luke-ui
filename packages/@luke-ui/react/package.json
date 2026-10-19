@@ -119,7 +119,6 @@
 		"@capsizecss/metrics": "catalog:",
 		"@capsizecss/unpack": "catalog:",
 		"@fontsource-variable/inter": "catalog:",
-		"@fontsource-variable/jetbrains-mono": "catalog:",
 		"@fontsource/lora": "catalog:",
 		"@rolldown/pluginutils": "catalog:",
 		"@tailwindcss/vite": "catalog:",

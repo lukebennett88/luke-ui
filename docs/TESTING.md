@@ -42,16 +42,15 @@ for (const ratio of ratios) {
 Shared assertions take concrete elements and values. Keep the test, fixture, and contract choice in
 the component's test file.
 
-Fixture themes name `Inter`. Browser setup awaits `loadVisualFonts()` and pins code _rendering_ to
-JetBrains Mono before each test (without remapping `--luke-font-family-code`) so mounts share those
-faces from the first paint. The pin covers `code` / `samp` / `pre` and elements that apply the code
-token via an inline `font-family: var(--luke-font-family-code)` (TokenBoard's font.family.code
-preview). `captureVisual` awaits the same loader and does not pin again. Setup releases the pin in
-`afterEach` even when React unmount throws. Token boards and theme authoring tests can read the
-production code stack from the live custom property or from generated CSS (`extractValue`). A
-non-visual test whose layout depends on real font metrics, such as Capsize trims or the cap height,
-can still call `await loadInter()`. Compare positions with Inter's published metrics
-(`INTER_CAP_HEIGHT_EM`) and measured baselines, not with the CSS under test.
+Fixture themes name `Inter`. Browser setup awaits `loadInter()` before each test so mounts use the
+Inter file the theme packages ship from the first paint, not a host fallback. `captureVisual` awaits
+the same loader. Code surfaces keep the production `--luke-font-family-code` stack. Do not override
+component font styles in the test harness. Visual baseline and compare jobs run in a digest-pinned
+Playwright container so browser, OS fonts, and font rendering stay aligned — see
+[`VISUAL_TESTING.md`](./VISUAL_TESTING.md). A non-visual test whose layout depends on real font
+metrics, such as Capsize trims or the cap height, can still call `await loadInter()`. Compare
+positions with Inter's published metrics (`INTER_CAP_HEIGHT_EM`) and measured baselines, not with
+the CSS under test.
 
 Package component tests pin `window.screen.width` to a desktop value in `@luke-ui/react` browser
 setup so `useIsMobileDevice` stays desktop. Vitest's browser iframe is 414px wide. Playwright
