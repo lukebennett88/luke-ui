@@ -78,6 +78,13 @@ jobs:
 
       - wait: [build]
 
+      - name: Confirm container browsers
+        run: |
+          echo "PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH}"
+          test "${PLAYWRIGHT_BROWSERS_PATH}" = '/ms-playwright'
+          ls "${PLAYWRIGHT_BROWSERS_PATH}"
+          ls -d "${PLAYWRIGHT_BROWSERS_PATH}"/chromium_headless_shell-*
+
       - name: Compare against the baseline
         run: pnpm --filter @luke-ui/react run test:visual
 

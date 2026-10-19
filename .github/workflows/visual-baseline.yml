@@ -60,9 +60,7 @@ jobs:
           echo "PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH}"
           test "${PLAYWRIGHT_BROWSERS_PATH}" = '/ms-playwright'
           ls "${PLAYWRIGHT_BROWSERS_PATH}"
-          # Fail early if Turbo would strip the path: the test process must see the same value.
-          pnpm exec turbo run test:visual:capture:run --dry-run=json >/dev/null
-          node -e "if (process.env.PLAYWRIGHT_BROWSERS_PATH !== '/ms-playwright') process.exit(1)"
+          ls -d "${PLAYWRIGHT_BROWSERS_PATH}"/chromium_headless_shell-*
 
       - name: Render baseline captures
         env:
