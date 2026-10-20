@@ -89,7 +89,7 @@
 		"fix:lint:types:unsafe": "vp lint src vite.config.ts vitest.config.ts --type-aware --tsconfig tsconfig.json --config ../../../.oxlintrc.types.json --fix --fix-suggestions --fix-dangerously && vp lint scripts --type-aware --tsconfig scripts/tsconfig.json --config ../../../.oxlintrc.types.json --fix --fix-suggestions --fix-dangerously",
 		"fix:lint:unsafe": "vp lint . --fix --fix-suggestions --fix-dangerously",
 		"generate:icons": "tsx scripts/build-icons.ts",
-		"test": "vp test run --project=unit --project=browser --project=tailwind-integration --tagsFilter='!visual'",
+		"test": "pnpm run test:unit && pnpm run test:browser",
 		"test:browser": "vp test run --project=browser --project=tailwind-integration --tagsFilter='!visual'",
 		"test:consumer": "vp test run --project=consumer",
 		"test:ui": "vp test --project=browser --ui",
