@@ -168,9 +168,16 @@ not help. Silence in this log is not evidence.
   `search.browser.test.tsx > keeps the active result within the visible list after scrolling down`
   at 15000ms, and the re-run timed out two search tests. Main run `39246923385` recorded one search
   timeout before the consolidated `nonvisual-tests` job existed, and the docs suite passes these
-  tests locally.
+  tests locally. Seen again: 2026-10-20 (#898). Serialised run `39364120362` and its re-run removed
+  the docs contention, but `@luke-ui/react`'s `tailwind-integration` browser project failed 2/2 with
+  `Failed to fetch dynamically imported module` from the Vitest browser server; that project passed
+  (31 tests) in parallel run `39361131113`. The workflow then split into per-suite jobs
+  (`react-tests`, `docs-tests`, `consumer-tests`, `package-tests`) so each suite gets its own
+  runner.
 - Where: `apps/docs/src/components/search.browser.test.tsx`, run by the `nonvisual-tests` job in
-  `.github/workflows/test.yml`. `docs/TESTING.md` requires reporting test results.
+  `.github/workflows/test.yml`, then by `docs-tests` after the split. `docs/TESTING.md` requires
+  reporting test results.
 - Problem: The search browser tests are load-sensitive. Running the browser suites in parallel on
-  one CI runner raised the timeout rate; serialising CI removes that contention but does not remove
-  the sensitivity.
+  one CI runner raised the timeout rate; serialising them on the same runner removed that contention
+  but starved the tailwind-integration browser project instead. One shared 4-vCPU runner is the
+  constraint in both shapes, and splitting jobs does not remove the underlying sensitivity.
