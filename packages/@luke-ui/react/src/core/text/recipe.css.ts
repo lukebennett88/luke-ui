@@ -1,7 +1,6 @@
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
-import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import type { FontWeightRole, TypeStyle } from '../../theme/type-styles.js';
 import { fontWeightRoles, typeStyles } from '../../theme/type-styles.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
@@ -47,33 +46,14 @@ const lineClampVariants = {
 	5: lineClampMultiLine(5),
 } as const;
 
-type TextColorVariant = { color: string };
-
-type RoleColorVariants = {
-	readonly [Role in (typeof SEMANTIC_ROLES)[number]]: TextColorVariant;
-} & {
-	readonly [Role in (typeof SEMANTIC_ROLES)[number] as `${Role}.onSolid`]: TextColorVariant;
-};
-
-/** Role rest colours as bare role names, plus each role's `onSolid` leaf. */
-function buildRoleColorVariants(): RoleColorVariants {
-	const variants = {} as {
-		-readonly [Key in keyof RoleColorVariants]: RoleColorVariants[Key];
-	};
-
-	for (const role of SEMANTIC_ROLES) {
-		variants[role] = { color: vars.color.foreground[role].rest };
-		variants[`${role}.onSolid`] = { color: vars.color.foreground[role].onSolid };
-	}
-
-	return variants;
-}
-
 const colorVariants = {
+	accent: { color: vars.color.foreground.accent.rest },
+	danger: { color: vars.color.foreground.danger.rest },
+	info: { color: vars.color.foreground.info.rest },
 	primary: { color: vars.color.text.primary },
 	secondary: { color: vars.color.text.secondary },
-	disabled: { color: vars.color.text.disabled },
-	...buildRoleColorVariants(),
+	success: { color: vars.color.foreground.success.rest },
+	warning: { color: vars.color.foreground.warning.rest },
 } as const;
 
 const weightVariants = Object.fromEntries(

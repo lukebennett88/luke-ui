@@ -1,4 +1,3 @@
-import { Box } from '@luke-ui/react/box';
 import { Code } from '@luke-ui/react/code';
 import { Em } from '@luke-ui/react/em';
 import { Emoji } from '@luke-ui/react/emoji';
@@ -362,29 +361,11 @@ test('typography styles', { tags: ['visual'] }, async () => {
 				<div style={rowStyle}>
 					<Text color="primary">Primary</Text>
 					<Text color="secondary">Secondary</Text>
-					<Text color="disabled">Disabled</Text>
-					<Text color="neutral">Neutral</Text>
 					<Text color="accent">Accent</Text>
 					<Text color="info">Info</Text>
 					<Text color="success">Success</Text>
 					<Text color="warning">Warning</Text>
 					<Text color="danger">Danger</Text>
-				</div>
-				<div style={rowStyle}>
-					{(
-						[
-							['neutral', 'neutral.solid.rest', 'neutral.onSolid'],
-							['accent', 'accent.solid.rest', 'accent.onSolid'],
-							['info', 'info.solid.rest', 'info.onSolid'],
-							['success', 'success.solid.rest', 'success.onSolid'],
-							['warning', 'warning.solid.rest', 'warning.onSolid'],
-							['danger', 'danger.solid.rest', 'danger.onSolid'],
-						] as const
-					).map(([role, backgroundColor, color]) => (
-						<Box backgroundColor={backgroundColor} key={role} padding="space.8">
-							<Text color={color}>{role}.onSolid</Text>
-						</Box>
-					))}
 				</div>
 				<Text>Trimmed by default</Text>
 				<Text shouldDisableTrim>Trim disabled</Text>

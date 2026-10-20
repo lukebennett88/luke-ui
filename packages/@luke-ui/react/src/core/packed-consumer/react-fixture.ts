@@ -458,16 +458,6 @@ export const conflictingRoot: BoxProps = { elementType: 'section', renderRoot };
 export const invalidRenderState: Parameters<typeof renderRoot>[1] = { isHovered: true };
 // @ts-expect-error — Text renderRoot excludes elementType
 export const conflictingTextRoot: TextProps = { elementType: 'p', renderRoot: textRenderRoot };
-// @ts-expect-error — interactive hover tokens are not static Text colours
-export const interactiveTextColor: TextProps = { color: 'danger.hover' };
-export const textColors: Array<TextProps['color']> = [
-	'primary',
-	'secondary',
-	'disabled',
-	'neutral',
-	'accent',
-	'accent.onSolid',
-];
 export const headingDefaults: HeadingProps = { level: 1, children: 'Title' };
 
 export function App({ spritesheetHref }: { spritesheetHref: string }) {

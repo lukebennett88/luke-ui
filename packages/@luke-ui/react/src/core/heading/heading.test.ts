@@ -2,7 +2,7 @@ import type { HeadingProps } from '@luke-ui/react/heading';
 import { createElement } from 'react';
 import { assertType, test } from 'vite-plus/test';
 
-test('Heading inherits Text renderRoot exclusivity and colour tokens', () => {
+test('Heading inherits Text renderRoot exclusivity', () => {
 	assertType<HeadingProps>({ color: 'secondary', level: 2 });
 	assertType<HeadingProps>({ color: 'accent', typography: 'display' });
 	assertType<HeadingProps>({
@@ -13,6 +13,4 @@ test('Heading inherits Text renderRoot exclusivity and colour tokens', () => {
 		elementType: 'h2',
 		renderRoot: () => createElement('h2'),
 	});
-	// @ts-expect-error — interactive hover tokens are not static Text colours
-	assertType<HeadingProps>({ color: 'accent.hover' });
 });

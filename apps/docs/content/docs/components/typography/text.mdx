@@ -19,15 +19,6 @@ keeps its React Aria Text root. There is no extra wrapper. Use
 [`VisuallyHidden`](/components/layout/visually-hidden) directly when the content is not typography
 text, or when it must reveal on focus.
 
-## Colour
-
-`color` selects a theme text token (`primary`, `secondary`, `disabled`), a semantic role's rest
-foreground (`accent`, `danger`, …), or that role's `onSolid` leaf (`accent.onSolid`). The default is
-`primary`. Use `onSolid` only on that role's solid background. Interactive hover and pressed colours
-belong on components that own interaction state, not on static `Text.color`.
-
-<ExampleBlock src="text/colours" title="Text: Colours" />
-
 ## Element type
 
 `Text` renders React Aria's `Text` component, which uses a `span` by default. Set `elementType` to

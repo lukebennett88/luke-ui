@@ -15,26 +15,6 @@ test('Text accepts named slots and null slot opt-out', () => {
 	assertType<TextProps>({ isVisuallyHidden: true, slot: 'label' });
 });
 
-test('Text color covers text tokens, role rest colours, and onSolid leaves', () => {
-	assertType<TextProps>({ color: 'primary' });
-	assertType<TextProps>({ color: 'secondary' });
-	assertType<TextProps>({ color: 'disabled' });
-	assertType<TextProps>({ color: 'neutral' });
-	assertType<TextProps>({ color: 'accent' });
-	assertType<TextProps>({ color: 'danger' });
-	assertType<TextProps>({ color: 'info' });
-	assertType<TextProps>({ color: 'success' });
-	assertType<TextProps>({ color: 'warning' });
-	assertType<TextProps>({ color: 'info.onSolid' });
-	assertType<TextProps>({ color: 'warning.onSolid' });
-	// @ts-expect-error — interactive hover tokens are not static Text colours
-	assertType<TextProps>({ color: 'accent.hover' });
-	// @ts-expect-error — interactive pressed tokens are not static Text colours
-	assertType<TextProps>({ color: 'danger.pressed' });
-	// @ts-expect-error — role rest is the bare role name, not a `.rest` suffix
-	assertType<TextProps>({ color: 'accent.rest' });
-});
-
 test('Text renderRoot receives resolved props and empty state', () => {
 	type RenderRoot = NonNullable<TextProps['renderRoot']>;
 	expectTypeOf<Parameters<RenderRoot>[1]>().toEqualTypeOf<Record<string, never>>();

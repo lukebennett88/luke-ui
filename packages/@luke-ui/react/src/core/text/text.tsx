@@ -11,11 +11,7 @@ import { textRecipe } from './recipe.css.js';
 
 interface TextStyleProps {
 	/**
-	 * Sets text colour from the theme text tokens (`primary`, `secondary`, `disabled`), a semantic
-	 * role's rest foreground (`accent`, `danger`, …), or that role's `onSolid` leaf
-	 * (`accent.onSolid`). `onSolid` is contrast-guaranteed only over that role's solid background.
-	 * Interactive hover and pressed colours belong on components that own interaction state, not on
-	 * static `Text.color`.
+	 * Sets text colour.
 	 * @default 'primary'
 	 */
 	color?: TextRecipeVariants['color'];
