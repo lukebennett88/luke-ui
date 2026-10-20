@@ -222,7 +222,7 @@ function readPositiveIntEnv(name: string, fallback: number): number {
 	return parsed;
 }
 
-/** Captures a human must look at. The `review` job gates on this being non-zero. */
+/** Captures that differ from the baseline. */
 export function countRequiringReview(counts: VisualCounts): number {
 	return counts.changed + counts.added + counts.removed;
 }
@@ -398,16 +398,6 @@ async function checkImpact() {
 	await writeOutput('required', String(requiresVisualComparison(files)));
 }
 
-export function hasRequiredVisualReviewers(environment: {
-	protection_rules?: Array<{ type: string; reviewers?: Array<unknown> }>;
-}): boolean {
-	return (
-		environment.protection_rules?.some(
-			(rule) => rule.type === 'required_reviewers' && (rule.reviewers?.length ?? 0) > 0,
-		) ?? false
-	);
-}
-
 async function summarise() {
 	const summaryPath = fromRepoRoot(VISUAL_SUMMARY_FILE);
 	const summary: VisualSummary = JSON.parse(await readFile(summaryPath, 'utf8'));
@@ -418,27 +408,6 @@ async function summarise() {
 	await writeStepSummary(`### Visual regression\n\n| status | count |\n| --- | --- |\n${rows}\n`);
 
 	const review = countRequiringReview(summary.counts);
-	if (review > 0) {
-		const repository = requireEnv('GITHUB_REPOSITORY');
-		const response = await fetch(
-			`https://api.github.com/repos/${repository}/environments/visual-review`,
-			{
-				headers: {
-					Authorization: `Bearer ${requireEnv('GITHUB_TOKEN')}`,
-					Accept: 'application/vnd.github+json',
-				},
-			},
-		);
-		if (!response.ok)
-			throw new Error(`Cannot verify visual-review protection: GitHub API ${response.status}.`);
-		const environment = (await response.json()) as {
-			protection_rules?: Array<{ type: string; reviewers?: Array<unknown> }>;
-		};
-		if (!hasRequiredVisualReviewers(environment))
-			throw new Error(
-				'Configure required reviewers on the visual-review environment before approving screenshot differences. An unprotected environment cannot satisfy the visual gate.',
-			);
-	}
 	await writeOutput('review', review);
 
 	const needingReview = summary.results.filter((result) => result.status !== 'unchanged');

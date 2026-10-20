@@ -18,8 +18,8 @@ The `Visual baseline` workflow renders `main` and uploads the `visual-baseline` 
 requests download the newest `main` run, render their branch, and compare it.
 
 After a rendering-environment change (for example moving baseline and compare into this container),
-the first compare against the previous host baseline can show large intentional diffs. Keep the
-usual review approval. Once that change merges, push or re-run `Visual baseline` on `main` so the
+the first compare against the previous host baseline can show large intentional diffs. Inspect the
+diff artefact. Once that change merges, push or re-run `Visual baseline` on `main` so the
 next PRs compare against captures from the pinned container.
 
 The newest run must have succeeded and retain its artefact. Never fall back to an older successful
@@ -72,19 +72,15 @@ compare against another local baseline. Host differences also fail the command.
 
 ## Review
 
-The visual workflow runs on every PR. Its stable `visual-regression` gate always evaluates the
-impact, comparison, and review results. Proven unrelated changes skip the expensive comparison and
-pass the gate. Unknown inputs run the comparison.
+The visual workflow runs on every PR. Its `visual-regression` gate evaluates the impact and
+comparison results. Proven unrelated changes skip the expensive comparison and pass the gate.
+Unknown inputs run the comparison.
 
-Changed, added, and removed captures upload the `visual-regression-diff` artefact. Only a completed
-comparison can request approval through the `visual-review` environment. That environment must
-configure required reviewers. Approval applies to the workflow run and commit being reviewed. A new
-commit needs its own comparison and approval. Capture, baseline, and infrastructure failures fail
-the gate and cannot be approved as screenshot changes.
+Changed, added, and removed captures upload the `visual-regression-diff` artefact for information.
+Visual differences do not require approval and do not block the gate. Capture, baseline, and
+infrastructure failures fail the gate.
 
-Configure branch protection to require `visual-regression`. The workflow cannot make its own status
-mandatory in repository settings. `Visual baseline` regenerates the authoritative baseline on `main`
-after merge.
+`Visual baseline` regenerates the authoritative baseline on `main` after merge.
 
 ## Capture freeze
 

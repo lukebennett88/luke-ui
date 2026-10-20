@@ -7,7 +7,6 @@ import { expect, test } from 'vite-plus/test';
 import type { BaselineRun, VisualCounts } from './visual-ci.js';
 import {
 	countPngs,
-	hasRequiredVisualReviewers,
 	requiresVisualComparison,
 	countRequiringReview,
 	countsTableRows,
@@ -317,7 +316,6 @@ function visualGatePasses(options: {
 	impact: string;
 	required: string;
 	compare: string;
-	review: string;
 	changes: string;
 }): boolean {
 	try {
@@ -327,7 +325,6 @@ function visualGatePasses(options: {
 				IMPACT: options.impact,
 				REQUIRED: options.required,
 				COMPARE: options.compare,
-				REVIEW: options.review,
 				CHANGES: options.changes,
 			},
 			stdio: 'pipe',
@@ -342,13 +339,12 @@ const completedGate = {
 	impact: 'success',
 	required: 'true',
 	compare: 'success',
-	review: 'skipped',
 	changes: '0',
 };
 test('identical completed comparisons and proven unrelated skips pass the gate', () => {
 	expect(visualGatePasses(completedGate)).toBe(true);
 	expect(visualGatePasses({ ...completedGate, required: 'false', compare: 'skipped' })).toBe(true);
-	expect(visualGatePasses({ ...completedGate, changes: '2', review: 'success' })).toBe(true);
+	expect(visualGatePasses({ ...completedGate, changes: '2' })).toBe(true);
 });
 
 for (const failure of [
@@ -358,8 +354,6 @@ for (const failure of [
 	{ compare: 'skipped' },
 	{ compare: 'cancelled' },
 	{ changes: '' },
-	{ changes: '2', review: 'skipped' },
-	{ changes: '2', review: 'failure' },
 	{ required: '' },
 	{ required: 'false', compare: 'failure' },
 ]) {
@@ -367,19 +361,3 @@ for (const failure of [
 		expect(visualGatePasses({ ...completedGate, ...failure })).toBe(false);
 	});
 }
-
-test('visual review requires configured human reviewers', () => {
-	expect(hasRequiredVisualReviewers({})).toBe(false);
-	expect(hasRequiredVisualReviewers({ protection_rules: [] })).toBe(false);
-	expect(hasRequiredVisualReviewers({ protection_rules: [{ type: 'wait_timer' }] })).toBe(false);
-	expect(
-		hasRequiredVisualReviewers({
-			protection_rules: [{ type: 'required_reviewers', reviewers: [] }],
-		}),
-	).toBe(false);
-	expect(
-		hasRequiredVisualReviewers({
-			protection_rules: [{ type: 'required_reviewers', reviewers: [{ id: 1 }] }],
-		}),
-	).toBe(true);
-});

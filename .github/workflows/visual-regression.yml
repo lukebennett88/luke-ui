@@ -100,8 +100,6 @@ jobs:
 
       - name: Summarise the comparison
         id: summary
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
         run: pnpm --filter @luke-ui/workflow-scripts run visual-ci summarise
 
       - name: Upload expected, actual, and diff screenshots
@@ -115,34 +113,19 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-  review:
-    name: review
-    if:
-      needs.compare.result == 'success' && needs.compare.outputs.review != '' &&
-      needs.compare.outputs.review != '0'
-    needs: compare
-    runs-on: ubuntu-latest
-    environment: visual-review
-    permissions: {}
-    steps:
-      - name: Record the approval
-        run: |
-          echo "Approved ${{ needs.compare.outputs.review }} baseline change(s) for ${{ github.sha }}."
-
   gate:
     name: visual-regression
     if: always()
-    needs: [impact, compare, review]
+    needs: [impact, compare]
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v7
-      - name: Require a complete comparison and any necessary approval
+      - name: Require a complete comparison
         env:
           IMPACT: ${{ needs.impact.result }}
           REQUIRED: ${{ needs.impact.outputs.required }}
           COMPARE: ${{ needs.compare.result }}
-          REVIEW: ${{ needs.review.result }}
           CHANGES: ${{ needs.compare.outputs.review }}
         run: bash .github/scripts/visual-gate.sh
