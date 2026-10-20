@@ -29,10 +29,10 @@ const counts = (overrides: Partial<VisualCounts> = {}): VisualCounts => ({
 
 test('accepts the newest run when it completed successfully', () => {
 	const decision = decideBaselineRun(
-		{ conclusion: 'success', id: 42, status: 'completed' },
+		{ conclusion: 'success', id: 42, run_attempt: 2, status: 'completed' },
 		runUrl,
 	);
-	expect(decision).toEqual({ ok: true, runId: 42 });
+	expect(decision).toEqual({ ok: true, runAttempt: 2, runId: 42 });
 });
 
 test('reports the bootstrap case when no run exists', () => {

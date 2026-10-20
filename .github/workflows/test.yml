@@ -45,7 +45,9 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
+      # Serialise suites on CI: parallel browser suites starve each other on one runner and
+      # time out the docs search tests.
       - name: Run every non-visual suite
-        run: pnpm exec turbo run test test:consumer test:integration --filter='!//'
+        run: pnpm exec turbo run test test:consumer test:integration --filter='!//' --concurrency=1
         env:
           LUKE_UI_REACT_SPEC: ${{ inputs.react-spec }}

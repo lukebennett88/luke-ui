@@ -44,7 +44,7 @@ Apple Silicon uses emulation. Missing Docker, an unavailable baseline, failed ca
 differences all fail the command. There is no host fallback.
 
 The CLI checks the newest `main` baseline workflow run on every comparison. That exact run must have
-succeeded and contain screenshots. Its downloaded artefact is cached by run ID under
+succeeded and contain screenshots. Its downloaded artefact is cached by run ID and attempt under
 `.artifacts/visual-regression/baseline-cache`. A new run refreshes the selected baseline. A newer
 failed or incomplete run fails even when an older baseline is cached.
 

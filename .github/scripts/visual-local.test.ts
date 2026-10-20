@@ -312,6 +312,54 @@ test('authoritative baseline cache downloads only the exact newest successful ru
 	}
 });
 
+test('authoritative baseline cache downloads a re-run attempt under the same run id', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'visual-baseline-rerun-'));
+	const downloads: Array<number> = [];
+	const options = {
+		cacheRoot: path.join(root, 'cache'),
+		baselineDir: path.join(root, 'baseline'),
+		async download(id: number, directory: string) {
+			downloads.push(id);
+			await writeFile(path.join(directory, 'capture.png'), `download-${downloads.length}`);
+		},
+	};
+	try {
+		// A missing attempt defaults to attempt 1, so an explicit attempt 1 reuses it.
+		await cacheAuthoritativeBaseline({
+			...options,
+			run: { id: 7, status: 'completed', conclusion: 'success' },
+		});
+		await cacheAuthoritativeBaseline({
+			...options,
+			run: { id: 7, run_attempt: 1, status: 'completed', conclusion: 'success' },
+		});
+		expect(downloads).toEqual([7]);
+		expect(await readFile(path.join(options.baselineDir, 'capture.png'), 'utf8')).toBe(
+			'download-1',
+		);
+
+		await cacheAuthoritativeBaseline({
+			...options,
+			run: { id: 7, run_attempt: 2, status: 'completed', conclusion: 'success' },
+		});
+		expect(downloads).toEqual([7, 7]);
+		expect(await readFile(path.join(options.baselineDir, 'capture.png'), 'utf8')).toBe(
+			'download-2',
+		);
+
+		await cacheAuthoritativeBaseline({
+			...options,
+			run: { id: 7, run_attempt: 2, status: 'completed', conclusion: 'success' },
+		});
+		expect(downloads).toEqual([7, 7]);
+		expect(await readFile(path.join(options.baselineDir, 'capture.png'), 'utf8')).toBe(
+			'download-2',
+		);
+	} finally {
+		await rm(root, { recursive: true, force: true });
+	}
+});
+
 test('an empty downloaded artifact cannot replace a usable baseline', async () => {
 	const root = await mkdtemp(path.join(tmpdir(), 'visual-baseline-empty-'));
 	try {

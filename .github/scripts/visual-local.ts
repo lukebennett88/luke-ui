@@ -258,7 +258,8 @@ export async function cacheAuthoritativeBaseline(options: {
 		(id) => `https://github.com/lukebennett88/luke-ui/actions/runs/${id}`,
 	);
 	if (!decision.ok) throw new Error(decision.reason);
-	const cached = path.join(options.cacheRoot, String(decision.runId));
+	// A re-run keeps the run ID but increments the attempt, so key by both.
+	const cached = path.join(options.cacheRoot, `${decision.runId}-attempt-${decision.runAttempt}`);
 	if (!(await hasPngs(cached))) {
 		const temporary = `${cached}.download-${process.pid}`;
 		await rm(temporary, { recursive: true, force: true });

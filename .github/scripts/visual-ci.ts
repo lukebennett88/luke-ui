@@ -28,9 +28,12 @@ export type BaselineRun = {
 	id: number;
 	status: string | null;
 	conclusion: string | null;
+	run_attempt?: number;
 };
 
-export type BaselineRunDecision = { ok: true; runId: number } | { ok: false; reason: string };
+export type BaselineRunDecision =
+	| { ok: true; runId: number; runAttempt: number }
+	| { ok: false; reason: string };
 
 /** GitHub Actions run statuses that mean the newest baseline is not finished yet. */
 const WAITABLE_BASELINE_STATUSES = new Set([
@@ -99,7 +102,8 @@ export function decideBaselineRun(
 		};
 	}
 
-	return { ok: true, runId: run.id };
+	// GitHub numbers a workflow run's first attempt as 1.
+	return { ok: true, runId: run.id, runAttempt: run.run_attempt ?? 1 };
 }
 
 /** GitHub answers 404 when the workflow file is absent from `main` (bootstrap). */
@@ -278,6 +282,7 @@ type WorkflowRunsResponse = {
 		id: number;
 		status: string | null;
 		conclusion: string | null;
+		run_attempt?: number;
 	}>;
 };
 

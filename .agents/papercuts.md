@@ -161,3 +161,16 @@ not help. Silence in this log is not evidence.
   consulting the applicable repository guides.
 - Problem: The agent-authored comment narrated session history despite the required guidance.
   Correcting the comment does not establish that comment authoring applies that rule.
+
+## Docs search browser tests time out under CI load
+
+- Seen: 2026-10-20 (#898). PR CI run `39361131113` timed out
+  `search.browser.test.tsx > keeps the active result within the visible list after scrolling down`
+  at 15000ms, and the re-run timed out two search tests. Main run `39246923385` recorded one search
+  timeout before the consolidated `nonvisual-tests` job existed, and the docs suite passes these
+  tests locally.
+- Where: `apps/docs/src/components/search.browser.test.tsx`, run by the `nonvisual-tests` job in
+  `.github/workflows/test.yml`. `docs/TESTING.md` requires reporting test results.
+- Problem: The search browser tests are load-sensitive. Running the browser suites in parallel on
+  one CI runner raised the timeout rate; serialising CI removes that contention but does not remove
+  the sensitivity.
