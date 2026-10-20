@@ -76,6 +76,10 @@ test('react browser tests build the theme-tactile stylesheet they import', () =>
 	expect(tasks['@luke-ui/react#test:browser']?.dependsOn).toContain('@luke-ui/theme-tactile#build');
 });
 
+test('react barrel checks wait for the generated dist imports they inspect', () => {
+	expect(turboConfig().tasks?.['@luke-ui/react#check:barrels']?.dependsOn).toContain('build');
+});
+
 test('tasks named test are never cached', () => {
 	const cached: Array<string> = [];
 

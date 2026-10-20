@@ -69,6 +69,9 @@
 		"@luke-ui/react#check:types": {
 			"dependsOn": ["build", "check:types:browser", "check:types:node"]
 		},
+		"@luke-ui/react#check:barrels": {
+			"dependsOn": ["build"]
+		},
 		"@luke-ui/playground-core#check:types": {
 			"dependsOn": ["check:types:browser", "check:types:node"]
 		},

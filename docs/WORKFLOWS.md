@@ -59,9 +59,8 @@ checks never apply fixes. Mutating tasks are never cached.
 `pnpm clean` also removes known tool caches and workspace dependencies. Neither command uses
 `git clean` or removes arbitrary ignored files.
 
-`pnpm clean:unsafe` previews every ignored path that a `git clean -fdX` would remove. Pass
-`--confirm` only after inspecting that preview. This includes ignored `.env` files and local
-settings.
+`pnpm clean:unsafe` opens Git's interactive ignored-file cleanup. Review the listed paths before
+choosing `clean`. The list includes ignored `.env` files and local settings.
 
 ## Task runner
 
@@ -69,6 +68,11 @@ Turbo owns dependency ordering, caching, and companion processes in `turbo.json`
 the public interface. Package scripts own the operations. Deterministic builds and derived
 generation can reuse task outputs. Tests always execute, as do watchers, fixers, scaffolding, and
 cleanup. Root-wide checks must hash repository-wide inputs when cached.
+
+Generator watch scripts use `tsx watch --include` for non-code inputs such as Markdown, SVG, package
+manifests, and workspace build outputs. Each companion watches only the inputs for its generated
+output, so an unrelated edit does not rerun every docs generator. Turbo's `with` relationship starts
+and stops these package watchers with the app.
 
 Vite+ remains the compiler, formatter, linter, packer, and test tool. Its task runner was evaluated
 against the installed version rather than selected from script counts. The

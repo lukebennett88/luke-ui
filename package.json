@@ -20,7 +20,7 @@
 		"check:unused:run": "knip",
 		"clean": "node .github/scripts/clean.ts",
 		"clean:build": "node .github/scripts/clean.ts --build",
-		"clean:unsafe": "node .github/scripts/clean.ts --unsafe",
+		"clean:unsafe": "git clean -i -dX",
 		"dev:docs": "turbo run dev --filter=docs --concurrency=16",
 		"dev:reference-app": "turbo run dev --filter=reference-app",
 		"fix": "turbo run //#fix:lint //#fix:format",

@@ -83,7 +83,6 @@ catalog:
   lz-string: ^1.5.0
   monaco-editor: ^0.57.0
   node-html-parser: ^9.0.4
-  nodemon: ^3.1.14
   oxc-parser: ^0.154.0
   oxc-transform-react: ^0.154.0
   pixelmatch: ^8.0.0
