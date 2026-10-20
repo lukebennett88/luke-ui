@@ -70,6 +70,12 @@ test('fix graph includes every package unsafe type-aware lint fix', () => {
 	expect(missingFixDependencies('fix:lint:types:unsafe', '//#fix:format:unsafe')).toEqual([]);
 });
 
+test('react browser tests build the theme-tactile stylesheet they import', () => {
+	const tasks = turboConfig().tasks ?? {};
+	expect(tasks['@luke-ui/react#test']?.dependsOn).toContain('@luke-ui/theme-tactile#build');
+	expect(tasks['@luke-ui/react#test:browser']?.dependsOn).toContain('@luke-ui/theme-tactile#build');
+});
+
 test('tasks named test are never cached', () => {
 	const cached: Array<string> = [];
 

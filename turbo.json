@@ -250,8 +250,14 @@
 		},
 		"@luke-ui/react#test": {
 			"cache": false,
-			"dependsOn": ["build", "^build"],
+			"dependsOn": ["build", "^build", "@luke-ui/theme-tactile#build"],
 			"passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"]
+		},
+		"@luke-ui/react#test:browser": {
+			"cache": false,
+			"dependsOn": ["build", "^build", "@luke-ui/theme-tactile#build"],
+			"outputs": [],
+			"passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH", "VISUAL_BASELINE_DIR", "VISUAL_CAPTURE_DIR"]
 		},
 		"@luke-ui/react#test:consumer": {
 			"cache": false,
