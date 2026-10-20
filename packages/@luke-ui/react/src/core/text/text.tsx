@@ -1,4 +1,4 @@
-import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode, Ref } from 'react';
+import type { CSSProperties, HTMLAttributes, JSX, ReactElement, ReactNode, Ref } from 'react';
 import type { TextProps as RacTextProps } from 'react-aria-components/Text';
 import { Text as RacText } from 'react-aria-components/Text';
 import { typeStyleWeightRole } from '../../theme/type-styles.js';
@@ -109,18 +109,16 @@ export interface TextElementProps extends TextSharedProps {
 }
 
 /** Resolved props handed to a caller-owned `renderRoot` element. */
-type TextResolvedRenderProps = HTMLAttributes<HTMLElement> & {
-	ref: UseRenderRef;
-};
+type TextResolvedRenderProps = Omit<HTMLAttributes<HTMLElement>, 'ref'> & { ref: UseRenderRef };
 
 /** Props when a caller owns the rendered element. */
-interface TextRenderRootProps extends TextSharedProps {
+export interface TextRenderRootProps extends TextSharedProps {
 	/** Use `elementType` instead of `renderRoot` for a supported semantic element. */
 	elementType?: never;
 	/**
 	 * Passes resolved DOM props, presentation, and a callback `ref` as `domProps`. The second
-	 * argument is an empty state object. Put element-specific DOM attributes on the element the
-	 * callback returns.
+	 * argument is an empty state object. `Text` callbacks return a `<span>`; use `elementType` for a
+	 * semantic element. `Heading` supplies its resolved heading element in the render state.
 	 */
 	renderRoot: (domProps: TextResolvedRenderProps, state: Record<string, never>) => ReactElement;
 }
@@ -149,11 +147,26 @@ const blockTextElementTypes = new Set<string>([
  * trim.
  */
 export function Text(props: TextProps) {
+	return (
+		<TextRoot
+			elementType={props.renderRoot ? 'span' : (props.elementType ?? 'span')}
+			props={props}
+		/>
+	);
+}
+
+/** React Aria Text root used by Text and Heading with an explicit expected element type. */
+export function TextRoot({
+	elementType,
+	props,
+}: {
+	elementType: string;
+	props: TextProps;
+}): JSX.Element {
 	const {
 		children,
 		className,
 		color,
-		elementType = 'span',
 		fontStyle,
 		fontVariantNumeric,
 		fontWeight,
@@ -173,7 +186,7 @@ export function Text(props: TextProps) {
 		...racProps
 	} = props;
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
-	const resolvedTypography = typography ?? 'body';
+	const resolvedTypography: NonNullable<TextRecipeVariants['typography']> = typography ?? 'body';
 	const ownsRoot = renderRoot != null;
 
 	const resolvedShouldDisableTrim: boolean = (() => {
@@ -208,15 +221,11 @@ export function Text(props: TextProps) {
 		<RacText
 			{...racProps}
 			className={recipeClassName}
-			elementType={ownsRoot ? undefined : elementType}
+			elementType={elementType}
 			ref={ref}
-			// Keep RAC Text (and `createHideableComponent`) as the root. Map Luke UI `renderRoot`
-			// onto RAC's internal `render` seam, always supplying `{}` as public state.
-			render={
-				renderRoot
-					? (domProps) => renderRoot({ ...domProps, ref: domProps.ref as UseRenderRef }, {})
-					: undefined
-			}
+			// RAC's render callback must return the element named by elementType. Text uses its
+			// default span; Heading supplies its resolved h1–h6 element through TextRoot.
+			render={renderRoot ? (domProps) => renderRoot(domProps, {}) : undefined}
 			// @ts-expect-error — RAC TextProps omits null, which opts out of slotted context at runtime.
 			slot={slot}
 			style={resolvedStyle}

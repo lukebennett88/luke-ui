@@ -1,13 +1,17 @@
-import type { HeadingProps } from '@luke-ui/react/heading';
+import type { HeadingProps, HeadingRenderRootState } from '@luke-ui/react/heading';
 import { createElement } from 'react';
-import { assertType, test } from 'vite-plus/test';
+import { assertType, expectTypeOf, test } from 'vite-plus/test';
 
 test('Heading inherits Text renderRoot exclusivity', () => {
 	assertType<HeadingProps>({ color: 'secondary', level: 2 });
 	assertType<HeadingProps>({ color: 'accent', typography: 'display' });
 	assertType<HeadingProps>({
-		renderRoot: (domProps, _state) => createElement('h2', domProps),
+		renderRoot: (domProps, { element }) => createElement(element, domProps),
 	});
+	expectTypeOf<HeadingRenderRootState>().toEqualTypeOf<{
+		element: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+		level: 1 | 2 | 3 | 4 | 5 | 6;
+	}>();
 	// @ts-expect-error — elementType and renderRoot are mutually exclusive
 	assertType<HeadingProps>({
 		elementType: 'h2',

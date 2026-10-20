@@ -16,7 +16,9 @@ export type TableElementBoxProps = Omit<
 >;
 
 /** Cell text: the label type style without cap-height trim, which would distort table rows. */
-export function CellText(props: Omit<TextElementProps, 'shouldDisableTrim' | 'typography'>) {
+export function CellText(
+	props: Omit<TextElementProps, 'renderRoot' | 'shouldDisableTrim' | 'typography'>,
+) {
 	return <Text shouldDisableTrim typography="label" {...props} />;
 }
 

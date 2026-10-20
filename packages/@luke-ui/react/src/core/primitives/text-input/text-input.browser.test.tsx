@@ -450,6 +450,31 @@ test('a TextInput inside a TextInputRoot adds its aria-describedby to the field 
 	expect(element).toHaveAccessibleDescription('Example description Example error Extra hint');
 });
 
+test('FieldError supports structured block content inside block containers', async () => {
+	const { locator } = render(
+		<TextInputRoot isInvalid>
+			<FieldLabel>Example field</FieldLabel>
+			<TextInput />
+			<FieldError>
+				<ul>
+					<li>Use at least eight characters.</li>
+					<li>Include a number.</li>
+				</ul>
+			</FieldError>
+		</TextInputRoot>,
+	);
+	const list = locator.getByRole('list').element();
+	const errorBody = locator.getByText('Use at least eight characters.').element().parentElement;
+	const errorRoot = errorBody?.parentElement;
+
+	expect(errorRoot?.tagName).toBe('DIV');
+	expect(list.parentElement?.tagName).toBe('DIV');
+	expect(list.closest('span')).toBeNull();
+	await expect
+		.element(locator.getByRole('textbox', { name: 'Example field' }))
+		.toHaveAccessibleDescription('Use at least eight characters. Include a number.');
+});
+
 test('a TextInput inside a TextInputRoot adds its aria-labelledby to the field label', () => {
 	render(
 		<>

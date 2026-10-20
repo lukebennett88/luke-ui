@@ -375,6 +375,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	'typography/heading.mdx::packages/@luke-ui/react/src/core/heading/heading.tsx::HeadingProps': [
 		'fontWeight',
 		'level',
+		'renderRoot',
 		'typography',
 	],
 	'typography/kbd.mdx::packages/@luke-ui/react/src/core/kbd/kbd.tsx::KbdProps': [],

@@ -10,10 +10,6 @@ const dirname =
 const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
 );
-const reactAriaHiddenSource = path.resolve(
-	dirname,
-	'node_modules/react-aria/dist/private/collections/Hidden.mjs',
-);
 const repoRoot = path.resolve(dirname, '../../..');
 
 /** Its npm installs need network access, so it runs only with `test:consumer`. */
@@ -45,9 +41,6 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			'#recipe-engine': recipeEngineSource,
-			// Point past the package re-export so tests can use `HiddenContext` from the same module
-			// instance React Aria Components closes over in `createHideableComponent`.
-			'react-aria/private/collections/Hidden': reactAriaHiddenSource,
 		},
 	},
 	server: {

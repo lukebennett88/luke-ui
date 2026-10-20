@@ -46,15 +46,15 @@ test('keeps semantic heading level independent of visual type style', async () =
 		.toBeVisible();
 });
 
-test('Heading renderRoot owns a heading-level root without forcing span', () => {
+test('Heading renderRoot receives the resolved level and owns its matching heading root', () => {
 	const { locator } = render(
 		<Heading
-			level={3}
-			renderRoot={({ children, ...domProps }) => (
-				<h3 {...domProps} data-testid="owned-heading">
+			renderRoot={({ children, ...domProps }, { element: Element }) => (
+				<Element {...domProps} data-testid="owned-heading">
 					{children}
-				</h3>
+				</Element>
 			)}
+			level={3}
 		>
 			Owned heading
 		</Heading>,
@@ -71,10 +71,10 @@ test('Heading renderRoot keeps Capsize trim by default', async () => {
 		<div style={{ inlineSize: '16rem' }}>
 			<Heading
 				level={2}
-				renderRoot={({ children, ...domProps }) => (
-					<h2 {...domProps} data-testid="heading-render">
+				renderRoot={({ children, ...domProps }, { element: Element }) => (
+					<Element {...domProps} data-testid="heading-render">
 						{children}
-					</h2>
+					</Element>
 				)}
 			>
 				Trimmed owned heading
@@ -117,6 +117,36 @@ test('nested HeadingLevels advance exactly one level for Heading', async () => {
 	await expect.element(locator.getByRole('heading', { level: 2, name: 'Outer' })).toBeVisible();
 	await expect.element(locator.getByRole('heading', { level: 3, name: 'Inner' })).toBeVisible();
 	await expect.element(locator.getByRole('heading', { level: 4, name: 'Deeper' })).toBeVisible();
+});
+
+test('Heading renderRoot keeps nested HeadingLevels semantics', async () => {
+	const { locator } = render(
+		<HeadingLevels base={2}>
+			<Heading renderRoot={(domProps, { element: Element }) => <Element {...domProps} />}>
+				Outer owned
+			</Heading>
+			<HeadingLevels>
+				<Heading renderRoot={(domProps, { element: Element }) => <Element {...domProps} />}>
+					Inner owned
+				</Heading>
+				<HeadingLevels>
+					<Heading renderRoot={(domProps, { element: Element }) => <Element {...domProps} />}>
+						Deeper owned
+					</Heading>
+				</HeadingLevels>
+			</HeadingLevels>
+		</HeadingLevels>,
+	);
+
+	await expect
+		.element(locator.getByRole('heading', { level: 2, name: 'Outer owned' }))
+		.toBeVisible();
+	await expect
+		.element(locator.getByRole('heading', { level: 3, name: 'Inner owned' }))
+		.toBeVisible();
+	await expect
+		.element(locator.getByRole('heading', { level: 4, name: 'Deeper owned' }))
+		.toBeVisible();
 });
 
 test('explicit level overrides context without changing siblings', async () => {

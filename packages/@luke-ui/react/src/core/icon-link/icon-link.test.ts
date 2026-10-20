@@ -4,6 +4,13 @@ import type { IconLinkProps } from './icon-link.js';
 test('IconLink supports ref and rejects unsupported props', () => {
 	assertType<IconLinkProps>({ 'aria-label': 'Add', href: '/settings', icon: 'add', ref: null });
 	assertType<IconLinkProps>({
+		'aria-label': 'Add',
+		href: '/settings',
+		icon: 'add',
+		// @ts-expect-error — IconLink has fixed link semantics and no React Aria render
+		render: () => null,
+	});
+	assertType<IconLinkProps>({
 		'aria-label': 'Delete',
 		href: '/settings',
 		icon: 'delete',

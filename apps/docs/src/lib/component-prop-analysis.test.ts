@@ -150,6 +150,7 @@ test(
 			'HeadingProps',
 		);
 		expect(names).toContain('level');
+		expect(names).toContain('renderRoot');
 		expect(names).toContain('typography');
 		expect(names).not.toContain('onClick');
 		expect(names).not.toContain('onPointerMoveCapture');

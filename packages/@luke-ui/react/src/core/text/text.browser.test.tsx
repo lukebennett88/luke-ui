@@ -9,7 +9,7 @@ import type { CSSProperties } from 'react';
 import { createRef } from 'react';
 import { Menu, MenuItem } from 'react-aria-components/Menu';
 import { TextContext } from 'react-aria-components/Text';
-import { expect, test } from 'vite-plus/test';
+import { expect, test, vi } from 'vite-plus/test';
 import { typeStyles } from '../../theme/type-styles.js';
 import { INTER_CAP_HEIGHT_EM, loadInter } from '../test-utils/load-inter.js';
 import { measureBaseline, measureLastBaseline } from '../test-utils/measure-first-line.js';
@@ -175,28 +175,23 @@ test('ordinary Text remains a single React Aria Text root', () => {
 	expect(container.childElementCount).toBe(1);
 });
 
-test('Text renderRoot stays hideable in React Aria hidden collections', async () => {
-	const { HiddenContext } = await import('../test-utils/react-aria-hidden.js');
-	const visible = render(
-		<Text renderRoot={(domProps) => <span {...domProps} data-testid="owned-visible" />}>
-			Visible
-		</Text>,
+test('Text renderRoot participates in a public React Aria menu collection', async () => {
+	const { locator } = render(
+		<Menu aria-label="Actions">
+			<MenuItem>
+				<Text
+					renderRoot={(domProps) => <span {...domProps} data-testid="owned-menu-label" />}
+					slot="label"
+				>
+					Save changes
+				</Text>
+			</MenuItem>
+		</Menu>,
 	);
-	expect(visible.locator.getByTestId('owned-visible').element()).toBeInTheDocument();
-	visible.unmount();
+	const item = locator.getByRole('menuitem');
 
-	const { container } = render(
-		<HiddenContext.Provider value={true}>
-			<Text renderRoot={(domProps) => <span {...domProps} data-testid="owned-hidden" />}>
-				Hidden copy
-			</Text>
-			<Text data-testid="plain-hidden">Plain hidden</Text>
-		</HiddenContext.Provider>,
-	);
-
-	expect(container.querySelector('[data-testid="owned-hidden"]')).toBeNull();
-	expect(container.querySelector('[data-testid="plain-hidden"]')).toBeNull();
-	expect(container.textContent).toBe('');
+	await expect.element(item).toHaveAccessibleName('Save changes');
+	expect(locator.getByTestId('owned-menu-label').element().tagName).toBe('SPAN');
 });
 
 test('Text renderRoot receives an empty state object', () => {
@@ -215,7 +210,20 @@ test('Text renderRoot receives an empty state object', () => {
 	expect(receivedState).toEqual({});
 });
 
-test('Text renderRoot owns a non-span root with slot, ref, and style merge', async () => {
+test('Text renderRoot returns the expected React Aria element without warnings', () => {
+	const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+	const { locator } = render(
+		<Text renderRoot={(domProps) => <span {...domProps} data-testid="contract-text" />}>
+			Owned
+		</Text>,
+	);
+
+	expect(locator.getByTestId('contract-text').element().tagName).toBe('SPAN');
+	expect(warning.mock.calls.flat().join(' ')).not.toContain('Unexpected DOM element returned');
+	warning.mockRestore();
+});
+
+test('Text renderRoot owns its span root with slot, ref, and style merge', async () => {
 	const ref = createRef<HTMLElement>();
 	const elements: Array<HTMLElement | null> = [];
 	let cleanups = 0;
@@ -232,7 +240,7 @@ test('Text renderRoot owns a non-span root with slot, ref, and style merge', asy
 							cleanups += 1;
 						};
 					}}
-					renderRoot={(domProps) => <p {...domProps} data-testid="owned-text" />}
+					renderRoot={(domProps) => <span {...domProps} data-testid="owned-text" />}
 					slot="label"
 					style={{ color: 'rgb(1, 2, 3)' }}
 					typography="label"
@@ -248,7 +256,7 @@ test('Text renderRoot owns a non-span root with slot, ref, and style merge', asy
 	const item = locator.getByRole('menuitem');
 	const owned = locator.getByTestId('owned-text').element();
 
-	expect(owned.tagName).toBe('P');
+	expect(owned.tagName).toBe('SPAN');
 	expect(owned.getAttribute('data-owned')).toBe('yes');
 	expect(owned.className).toContain('consumer-class');
 	expect(owned.style.color).toBe('rgb(1, 2, 3)');
@@ -262,14 +270,14 @@ test('Text renderRoot owns a non-span root with slot, ref, and style merge', asy
 	const refResult = render(
 		<Text
 			ref={ref}
-			renderRoot={(domProps) => <strong {...domProps} data-testid="owned-strong" />}
+			renderRoot={(domProps) => <span {...domProps} data-testid="owned-span" />}
 			slot={null}
 		>
 			Strong copy
 		</Text>,
 	);
-	expect(ref.current).toBe(refResult.locator.getByTestId('owned-strong').element());
-	expect(ref.current?.tagName).toBe('STRONG');
+	expect(ref.current).toBe(refResult.locator.getByTestId('owned-span').element());
+	expect(ref.current?.tagName).toBe('SPAN');
 	refResult.unmount();
 	expect(ref.current).toBeNull();
 });
