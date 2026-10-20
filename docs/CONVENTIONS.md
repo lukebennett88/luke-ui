@@ -162,9 +162,9 @@ Keep root replacement consistent: when a caller owns a Luke UI root, expose `ren
 Luke UI `(domProps, state)` contract. Keep React Aria's `render` only when a documented integration
 needs React Aria's host-prop merging while preserving its component semantics. `Link` uses this
 exception for MDX anchors, which merge authored anchor attributes with React Aria's resolved link
-props and preserve the root React Aria selects. Do not keep RAC `render` as a second root-replacement
-API or add it to wrappers without a demonstrated integration need. Prefer Luke UI `renderRoot` for
-Luke-owned layout and typography roots such as `Box` and `Text`.
+props and preserve the root React Aria selects. Do not keep RAC `render` as a second
+root-replacement API or add it to wrappers without a demonstrated integration need. Prefer Luke UI
+`renderRoot` for Luke-owned layout and typography roots such as `Box` and `Text`.
 
 Luke UI `renderRoot` and `render<Name>` callbacks receive `(domProps, state)`. The first argument
 contains resolved presentation props. Pass an empty object as the second argument when the component
