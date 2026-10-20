@@ -4,15 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'packages/@luke-ui/react/**'
-      - 'packages/@luke-ui/rainbow-sprinkles/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'package.json'
-      - '.github/scripts/**'
-      - '.github/workflows/visual-baseline.yml'
-      - '.github/workflows/visual-regression.yml'
   workflow_dispatch:
 
 concurrency:

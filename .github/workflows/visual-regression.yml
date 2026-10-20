@@ -2,15 +2,6 @@ name: Visual regression
 
 on:
   pull_request:
-    paths:
-      - 'packages/@luke-ui/react/**'
-      - 'packages/@luke-ui/rainbow-sprinkles/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'package.json'
-      - '.github/scripts/**'
-      - '.github/workflows/visual-baseline.yml'
-      - '.github/workflows/visual-regression.yml'
   workflow_dispatch:
 
 concurrency:
@@ -23,7 +14,30 @@ env:
   PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
 
 jobs:
+  impact:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      required: ${{ steps.impact.outputs.required }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: pnpm/setup@v3
+        with:
+          cache: true
+          install: false
+      - run: pnpm install --frozen-lockfile --no-runtime
+      - name: Identify visual inputs
+        id: impact
+        env:
+          VISUAL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: pnpm --filter @luke-ui/workflow-scripts run visual-ci impact
+
   compare:
+    needs: impact
+    if: needs.impact.outputs.required == 'true'
     name: compare
     runs-on: ubuntu-latest
     # Digest-pinned Playwright image (keep tag+digest in sync with PLAYWRIGHT_VISUAL_IMAGE in
@@ -51,12 +65,8 @@ jobs:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
         run: pnpm install --frozen-lockfile --no-runtime
 
-      # Overlap package build with baseline resolve/download.
-      # Download still waits on steps.baseline.outputs.run-id; compare waits on both.
       - name: Build packages
-        id: build
         run: pnpm build:packages
-        background: true
 
       - name: Resolve baseline
         id: baseline
@@ -76,8 +86,6 @@ jobs:
       - name: Fail when the baseline has no screenshots
         run: pnpm --filter @luke-ui/workflow-scripts run visual-ci check-captures
 
-      - wait: [build]
-
       - name: Confirm container browsers
         run: |
           echo "PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH}"
@@ -86,10 +94,14 @@ jobs:
           ls -d "${PLAYWRIGHT_BROWSERS_PATH}"/chromium_headless_shell-*
 
       - name: Compare against the baseline
-        run: pnpm --filter @luke-ui/react run test:visual
+        env:
+          VISUAL_REVIEW_MODE: '1'
+        run: pnpm --filter @luke-ui/react run test:visual:host
 
       - name: Summarise the comparison
         id: summary
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: pnpm --filter @luke-ui/workflow-scripts run visual-ci summarise
 
       - name: Upload expected, actual, and diff screenshots
@@ -105,7 +117,9 @@ jobs:
 
   review:
     name: review
-    if: needs.compare.outputs.review != '0'
+    if:
+      needs.compare.result == 'success' && needs.compare.outputs.review != '' &&
+      needs.compare.outputs.review != '0'
     needs: compare
     runs-on: ubuntu-latest
     environment: visual-review
@@ -114,3 +128,21 @@ jobs:
       - name: Record the approval
         run: |
           echo "Approved ${{ needs.compare.outputs.review }} baseline change(s) for ${{ github.sha }}."
+
+  gate:
+    name: visual-regression
+    if: always()
+    needs: [impact, compare, review]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - name: Require a complete comparison and any necessary approval
+        env:
+          IMPACT: ${{ needs.impact.result }}
+          REQUIRED: ${{ needs.impact.outputs.required }}
+          COMPARE: ${{ needs.compare.result }}
+          REVIEW: ${{ needs.review.result }}
+          CHANGES: ${{ needs.compare.outputs.review }}
+        run: bash .github/scripts/visual-gate.sh

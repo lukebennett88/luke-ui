@@ -5,20 +5,8 @@ import type * as ViteFmt from 'vite-plus/fmt';
 import * as z from 'zod';
 import type { CreationWork, PlanFile } from './creation-plan-types.js';
 
-// `config.ts` (this module's ultimate importer) is loaded by `@turbo/gen` through an esbuild
-// bundle (bundle:true, format:'cjs'). Two things break once that bundler actually traces into
-// real module content:
-//   - oxfmt's `format()` implementation contains its own dynamic `import()` calls for optional,
-//     uninstalled prettier plugins (Astro, Marko, Twig, ...). A statically analyzable
-//     `import('vite-plus/fmt')` lets esbuild trace into that file and fail the whole bundle
-//     trying to resolve those plugins.
-//   - `vite-plus`'s own published output reads `import.meta.url` at module scope. esbuild's
-//     node+cjs target replaces `import.meta` with `{}` instead of shimming it, so a statically
-//     bundled `import rootConfig from '../../../vite.config.js'` (which pulls in `defineConfig`
-//     from `vite-plus`) throws `createRequire(undefined)` at load time.
-// Routing both specifiers through a variable/expression (rather than a literal esbuild can trace)
-// hides them from static analysis, so they're left as real dynamic imports resolved by Node at
-// runtime, where both work correctly (genuine ESM, real `import.meta`, real installed packages).
+// Keep Vite+ imports dynamic so optional formatter plugins are resolved only when needed and
+// `import.meta.url` remains available in the native ESM runtime.
 async function loadFormat(): Promise<typeof ViteFmt> {
 	const specifier = 'vite-plus/fmt';
 	return import(specifier);
@@ -56,8 +44,8 @@ async function loadRootFmtConfig(): Promise<ViteFmt.FormatConfig | undefined> {
 	return cachedFmtConfig;
 }
 
-// Runs generated content through the repo's real formatter before it hits disk, so a freshly
-// scaffolded file never needs a hand edit to satisfy `check:format`/`check:format-root`.
+// Runs generated content through the repo's formatter before it hits disk, so a fresh scaffold
+// already satisfies the formatting checks.
 async function formatGeneratedContent(target: string, raw: string): Promise<string> {
 	const [{ format }, fmtConfig] = await Promise.all([loadFormat(), loadRootFmtConfig()]);
 	const result = await format(target, raw, fmtConfig);
@@ -72,6 +60,7 @@ async function formatGeneratedContent(target: string, raw: string): Promise<stri
 const docsMetaSchema = z.record(z.string(), z.unknown());
 
 export async function applyCreationPlan(root: string, plan: CreationWork): Promise<void> {
+	await validateObjectEntryEdits(root, plan.jsonEdits);
 	await Promise.all(plan.files.map((file) => writePlanFile(root, file)));
 	await Promise.all(plan.jsonEdits.map((edit) => applyJsonEdit(root, edit)));
 	await Promise.all(plan.textFileInserts.map((edit) => applyTextInsertEdit(root, edit)));
@@ -88,19 +77,47 @@ async function writePlanFile(root: string, file: PlanFile): Promise<void> {
 async function applyJsonEdit(root: string, edit: CreationWork['jsonEdits'][number]): Promise<void> {
 	const target = join(root, edit.path);
 	await mkdir(dirname(target), { recursive: true });
-	const data = await readJson(target, edit.title);
+	const data = await readJson(target, edit.kind === 'object-entry-add' ? 'React UI' : edit.title);
+	if (edit.kind === 'object-entry-add') {
+		const entries = z.record(z.string(), z.unknown()).parse(data[edit.key]);
+		data[edit.key] = { ...entries, [edit.entry]: edit.value };
+		const raw = JSON.stringify(data, null, '\t') + '\n';
+		const formatted = await formatGeneratedContent(target, raw);
+		await writeFile(target, formatted, 'utf8');
+		return;
+	}
+
 	const current = data[edit.key];
 	const currentPages = Array.isArray(current) ? current.filter(isString) : [];
-	const pages =
-		edit.kind === 'array-add-sorted'
-			? [...new Set([...currentPages, edit.value])].toSorted((a, b) => a.localeCompare(b))
-			: edit.kind === 'array-add-prefix-sorted'
-				? insertSortedAmongPrefix(currentPages, edit.value, edit.sectionHeader)
-				: appendUniquePage(currentPages, edit.value);
+	let pages: Array<string>;
+	if (edit.kind === 'array-add-sorted') {
+		pages = [...new Set([...currentPages, edit.value])].toSorted((a, b) => a.localeCompare(b));
+	} else if (edit.kind === 'array-add-prefix-sorted') {
+		pages = insertSortedAmongPrefix(currentPages, edit.value, edit.sectionHeader);
+	} else {
+		pages = appendUniquePage(currentPages, edit.value);
+	}
 	data[edit.key] = pages;
 	const raw = `${JSON.stringify(data, null, '\t')}\n`;
 	const formatted = await formatGeneratedContent(target, raw);
 	await writeFile(target, formatted, 'utf8');
+}
+
+async function validateObjectEntryEdits(
+	root: string,
+	edits: CreationWork['jsonEdits'],
+): Promise<void> {
+	await Promise.all(
+		edits.map(async (edit) => {
+			if (edit.kind !== 'object-entry-add') return;
+			const data = await readJson(join(root, edit.path), 'React package');
+			const entries = z.record(z.string(), z.unknown()).parse(data[edit.key]);
+			const current = entries[edit.entry];
+			if (current !== undefined && current !== edit.value) {
+				throw new Error('Cannot add export entry that already exists: ' + edit.entry);
+			}
+		}),
+	);
 }
 
 function appendUniquePage(pages: Array<string>, value: string): Array<string> {

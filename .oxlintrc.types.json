@@ -1,0 +1,43 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["typescript"],
+	"categories": {
+		"correctness": "off",
+		"suspicious": "off",
+		"pedantic": "off",
+		"perf": "off",
+		"style": "off",
+		"restriction": "off",
+		"nursery": "off"
+	},
+	"rules": {
+		"typescript/await-thenable": "deny",
+		"typescript/consistent-type-exports": [
+			"error",
+			{
+				"fixMixedExportsWithInlineTypeSpecifier": false
+			}
+		],
+		"typescript/no-array-delete": "deny",
+		"typescript/no-base-to-string": "deny",
+		"typescript/no-duplicate-type-constituents": "deny",
+		"typescript/no-floating-promises": "deny",
+		"typescript/no-for-in-array": "deny",
+		"typescript/no-implied-eval": "deny",
+		"typescript/no-meaningless-void-operator": "deny",
+		"typescript/no-misused-spread": "deny",
+		"typescript/no-redundant-type-constituents": "deny",
+		"typescript/no-unsafe-unary-minus": "deny",
+		"typescript/no-useless-default-assignment": "deny",
+		"typescript/require-array-sort-compare": "deny",
+		"typescript/restrict-template-expressions": "deny",
+		"typescript/unbound-method": "deny"
+	},
+	"ignorePatterns": [
+		"**/dist/**",
+		"**/.source/**",
+		"**/src/generated/**",
+		"**/routeTree.gen.ts",
+		"**/.generated/**"
+	]
+}

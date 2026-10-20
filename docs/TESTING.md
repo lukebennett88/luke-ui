@@ -133,9 +133,9 @@ Tactile, installs the tarballs with npm in directories outside the repository, s
 can satisfy an import, and builds each consumer once. The scenarios read those consumers and never
 install or build. `react-package.test.ts` covers React, `theme-packages.test.ts` the theme packages,
 and `fonts.test.ts` font loading and Capsize trims. The consumer files they need live in
-`react-fixture.ts` and `theme-fixture.ts`. The installs need network access, so `pnpm run test`
-leaves the harness out. Run it with `pnpm run test:consumer`. The `consumer-tests` CI job runs it on
-every pull request.
+`react-fixture.ts` and `theme-fixture.ts`. The installs need network access. `pnpm run test`
+includes the harness. Run it independently with `pnpm run test:consumer`. CI runs it on every pull
+request and on `main`.
 
 Keep it to the package boundary: tarball contents, dependencies, peers, assets, server rendering, a
 client build, hydration in Chromium, type checking, and what small imports bundle. Check installed
@@ -159,8 +159,8 @@ instead of the workspace build. That run skips the theme package checks and prin
 
 `packages/@luke-ui/theme-build/theme-package.test.ts` runs `vp pack --watch` with the shared theme
 build on a small theme package in a temporary directory. It edits the theme input twice and checks
-the stylesheet after each rebuild. Starting a watcher is slow, so `pnpm run test` leaves it out. Run
-it with `pnpm run test:integration`. The `component-tests` CI job runs it after the component tests.
+the stylesheet after each rebuild. `pnpm run test` includes this suite. Run it independently with
+`pnpm run test:integration`.
 
 ## Docs
 

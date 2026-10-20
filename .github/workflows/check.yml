@@ -13,9 +13,6 @@ concurrency:
 
 env:
   TURBO_TELEMETRY_DISABLED: '1'
-  # Optional Turborepo Remote Cache:
-  # TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  # TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
   check:
@@ -36,21 +33,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --no-runtime
 
-      - name: Run checks
-        env:
-          # Empty on push events; only read by --affected.
-          TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha }}
-          TURBO_SCM_HEAD: ${{ github.event.pull_request.head.sha }}
-        run: |
-          # `check` is the same turbo task the root `pnpm run check` script runs (`turbo run check
-          # check:cycles check:unused`), so CI and local checks are the same task graph — barrels,
-          # root format, package format, lint, and types. `--affected` is added here only as a PR
-          # speed optimisation and is never applied to the unscoped knip runs.
-          pnpm exec turbo run check ${{ github.event_name == 'pull_request' && '--affected' || '' }}
-          # knip is repo-wide, but --affected only selects packages whose own files
-          # changed, so it must run unscoped. Running it via turbo (rather than the
-          # bare `knip` script) pulls in its generate dependencies first.
-          pnpm exec turbo run check:cycles check:unused
-          pnpm exec turbo run test \
-            --filter=@luke-ui/turbo-generators \
-            --filter=@luke-ui/workflow-scripts
+      - name: Build all packages and applications
+        run: pnpm build
+
+      - name: Run complete checks
+        run: pnpm check
+
+      - name: Require checks to preserve tracked files
+        run: git diff --exit-code

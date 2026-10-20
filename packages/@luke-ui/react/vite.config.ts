@@ -63,13 +63,8 @@ export default defineConfig({
 			stylesheet: 'src/core/stylesheet.css.ts',
 			'theme/*': ['src/exports/theme/*.ts'],
 		},
-		exports: {
-			customExports: Object.fromEntries(
-				assetExports.map((path) => [path, `./dist/${path.slice(2)}`]),
-			),
-			// Built for extraction; not consumer subpaths.
-			exclude: ['stylesheet'],
-		},
+		// Public exports are authored alongside source; checks must not rewrite the manifest.
+		exports: false,
 		format: ['esm'],
 		outputOptions: {
 			assetFileNames: '[name][extname]',

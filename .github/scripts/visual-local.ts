@@ -1,12 +1,13 @@
 // Local CI-parity visual captures. Runs the pinned Playwright image on linux/amd64
 // without rewriting the host node_modules. Subcommands mirror the package scripts:
 //   capture — write baseline screenshots (explicit)
-//   compare — capture current and compare without modifying the baseline
+//   compare — fetch the newest main baseline, then capture and compare
 
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { mkdir, readdir } from 'node:fs/promises';
+import { cp, mkdir, readdir, readFile, rename, rm } from 'node:fs/promises';
 import {
 	PLAYWRIGHT_BROWSERS_PATH,
 	PLAYWRIGHT_VISUAL_IMAGE,
@@ -14,11 +15,14 @@ import {
 	VISUAL_ARTIFACTS_DIR,
 	VISUAL_BASELINE_DIR,
 } from '../../packages/@luke-ui/react/scripts/visual-regression-contract.js';
+import { decideBaselineRun } from './visual-ci.js';
+import type { BaselineRun } from './visual-ci.js';
 
 export type VisualLocalCommand = 'capture' | 'compare';
 
 export type VisualLocalDockerOptions = {
 	artifactsDir: string;
+	dependencyCacheKey?: string;
 	command: VisualLocalCommand;
 	hostGid?: number;
 	hostUid?: number;
@@ -84,18 +88,27 @@ export function containerCommand(command: VisualLocalCommand): string {
 					indent(ownership, '  '),
 					'}',
 					'trap cleanup EXIT',
-					'pnpm --filter @luke-ui/react run test:visual',
+					'pnpm --filter @luke-ui/react run test:visual:host',
 				].join('\n');
 
 	return [
-		'set -eu',
+		'set -euo pipefail',
 		'mkdir -p /work',
-		'tar -C /src --exclude=node_modules --exclude=.git --exclude=.artifacts -cf - . | tar -C /work -xf -',
+		'tar -C /src --exclude=node_modules --exclude=.git --exclude=.artifacts --exclude=dist --exclude=.turbo --exclude=.source --exclude=.generated --exclude=.vite --exclude=.output --exclude=.cache --exclude=.vinxi --exclude=.tanstack --exclude=apps/docs/src/generated --exclude=apps/docs/src/routeTree.gen.ts --exclude=packages/@luke-ui/react/src/generated --exclude=packages/@luke-ui/react/public/icons --exclude=packages/@luke-ui/react/spritesheet.svg -cf - . | tar -C /work -xf -',
 		'cd /work',
 		'mkdir -p /work/.artifacts',
 		'ln -sfn /artifacts /work/.artifacts/visual-regression',
 		'corepack enable',
+		'exec 9>/cache/install.lock',
+		'flock 9',
+		'if [ -f /cache/dependencies.tar ]; then',
+		'tar -xf /cache/dependencies.tar -C /work',
+		'else',
 		'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install --frozen-lockfile --no-runtime',
+		'find . -type d -name node_modules -prune -print0 | tar --null -T - -cf /cache/dependencies.tmp.tar',
+		'mv /cache/dependencies.tmp.tar /cache/dependencies.tar',
+		'fi',
+		'flock -u 9',
 		'pnpm build:packages',
 		captureOrCompare,
 	].join('\n');
@@ -137,6 +150,8 @@ export function buildDockerRunArgs(options: VisualLocalDockerOptions): Array<str
 		`${options.repoRoot}:/src:ro`,
 		'-v',
 		`${options.artifactsDir}:/artifacts`,
+		'-v',
+		`luke-ui-visual-${options.dependencyCacheKey ?? 'dependencies'}:/cache`,
 		image,
 		'bash',
 		'-lc',
@@ -189,24 +204,125 @@ function runDocker(args: Array<string>) {
 	}
 }
 
+/** Hash only native dependency inputs; generated outputs are rebuilt on every run. */
+export async function dependencyCacheKey(root: string): Promise<string> {
+	const manifests: Array<string> = ['pnpm-lock.yaml', 'pnpm-workspace.yaml'];
+	const ignoredDirectories = new Set([
+		'node_modules',
+		'.git',
+		'.artifacts',
+		'dist',
+		'.source',
+		'.generated',
+		'.output',
+		'.cache',
+		'.turbo',
+		'.vite',
+		'.tanstack',
+		'.vinxi',
+	]);
+	async function visit(directory: string) {
+		const entries = await readdir(path.join(root, directory), { withFileTypes: true });
+		await Promise.all(
+			entries.map(async (entry) => {
+				if (ignoredDirectories.has(entry.name)) return;
+				const relative = path.join(directory, entry.name);
+				if (entry.isDirectory()) await visit(relative);
+				else if (
+					entry.name === 'package.json' ||
+					entry.name === '.npmrc' ||
+					relative.startsWith('patches/')
+				)
+					manifests.push(relative);
+			}),
+		);
+	}
+	await visit('');
+	const hash = createHash('sha256')
+		.update(PLAYWRIGHT_VISUAL_IMAGE)
+		.update(PLAYWRIGHT_VISUAL_PLATFORM);
+	const files = manifests.sort();
+	const contents = await Promise.all(files.map((file) => readFile(path.join(root, file))));
+	for (const [index, file] of files.entries()) hash.update(file).update(contents[index]!);
+	return hash.digest('hex').slice(0, 32);
+}
+
+export async function cacheAuthoritativeBaseline(options: {
+	run: BaselineRun | undefined;
+	cacheRoot: string;
+	baselineDir: string;
+	download: (runId: number, directory: string) => Promise<void>;
+}): Promise<number> {
+	const decision = decideBaselineRun(
+		options.run,
+		(id) => `https://github.com/lukebennett88/luke-ui/actions/runs/${id}`,
+	);
+	if (!decision.ok) throw new Error(decision.reason);
+	const cached = path.join(options.cacheRoot, String(decision.runId));
+	if (!(await hasPngs(cached))) {
+		const temporary = `${cached}.download-${process.pid}`;
+		await rm(temporary, { recursive: true, force: true });
+		await mkdir(temporary, { recursive: true });
+		try {
+			await options.download(decision.runId, temporary);
+			if (!(await hasPngs(temporary)))
+				throw new Error('The newest main baseline artifact contains no PNG screenshots.');
+			await rm(cached, { recursive: true, force: true });
+			await rename(temporary, cached);
+		} finally {
+			await rm(temporary, { recursive: true, force: true });
+		}
+	}
+	await rm(options.baselineDir, { recursive: true, force: true });
+	await cp(cached, options.baselineDir, { recursive: true });
+	return decision.runId;
+}
+
+async function downloadAuthoritativeBaseline(artifactsDir: string, baselineDir: string) {
+	const repository = 'lukebennett88/luke-ui';
+	const response = JSON.parse(
+		execFileSync(
+			'gh',
+			[
+				'api',
+				`repos/${repository}/actions/workflows/visual-baseline.yml/runs?branch=main&per_page=1`,
+			],
+			{ encoding: 'utf8' },
+		),
+	) as { workflow_runs: Array<BaselineRun> };
+	const runId = await cacheAuthoritativeBaseline({
+		run: response.workflow_runs[0],
+		cacheRoot: path.join(artifactsDir, 'baseline-cache'),
+		baselineDir,
+		async download(id, directory) {
+			execFileSync(
+				'gh',
+				[
+					'run',
+					'download',
+					String(id),
+					'--repo',
+					repository,
+					'--name',
+					'visual-baseline',
+					'--dir',
+					directory,
+				],
+				{ stdio: 'inherit' },
+			);
+		},
+	});
+	info(`Authoritative main baseline: workflow run ${runId}.`);
+}
+
 async function main(command: VisualLocalCommand) {
 	const artifactsDir = path.join(repoRoot, ...VISUAL_ARTIFACTS_DIR.split('/'));
 	const baselineDir = path.join(repoRoot, ...VISUAL_BASELINE_DIR.split('/'));
 
 	await mkdir(artifactsDir, { recursive: true });
 
-	if (command === 'compare') {
-		if (!(await hasPngs(baselineDir))) {
-			fail(
-				[
-					'No visual baseline found under .artifacts/visual-regression/baseline.',
-					'Capture one first (on main, or after a rendering-environment change):',
-					'',
-					'  pnpm run test:visual:docker:capture',
-				].join('\n'),
-			);
-		}
-	}
+	runDocker(['info', '--format', '{{.ServerVersion}}']);
+	if (command === 'compare') await downloadAuthoritativeBaseline(artifactsDir, baselineDir);
 
 	if (command === 'capture') {
 		info(
@@ -221,6 +337,7 @@ async function main(command: VisualLocalCommand) {
 	runDocker(
 		buildDockerRunArgs({
 			artifactsDir,
+			dependencyCacheKey: await dependencyCacheKey(repoRoot),
 			command,
 			repoRoot,
 		}),

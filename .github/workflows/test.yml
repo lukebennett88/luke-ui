@@ -22,115 +22,8 @@ env:
   TURBO_TELEMETRY_DISABLED: '1'
 
 jobs:
-  component-tests:
-    name: component-tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Setup tooling
-        uses: pnpm/setup@v3
-        with:
-          cache: true
-          install: false
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --no-runtime
-
-      # Chromium install and package build are independent after pnpm install.
-      - parallel:
-          - name: Install Playwright Chromium
-            run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
-
-          - name: Build package
-            run: pnpm build:packages
-
-      - name: Run component tests
-        run: pnpm --filter @luke-ui/react run test
-
-      - name: Run theme build integration tests
-        run: pnpm --filter @luke-ui/theme-build run test:integration
-
-  consumer-tests:
-    name: consumer-tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Setup tooling
-        uses: pnpm/setup@v3
-        with:
-          cache: true
-          install: false
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --no-runtime
-
-      - parallel:
-          - name: Install Playwright Chromium
-            run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
-
-          - name: Build package
-            run: pnpm build:packages
-
-      - name: Run consumer tests
-        run: pnpm --filter @luke-ui/react run test:consumer:run
-        env:
-          LUKE_UI_REACT_SPEC: ${{ inputs.react-spec }}
-
-  docs-tests:
-    name: docs-tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Setup tooling
-        uses: pnpm/setup@v3
-        with:
-          cache: true
-          install: false
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --no-runtime
-
-      - parallel:
-          - name: Install Playwright Chromium
-            run: pnpm --filter docs exec playwright install --with-deps chromium
-
-          - name: Build package
-            run: pnpm build:packages
-
-      - name: Generate docs app files
-        run: pnpm --filter docs run generate
-
-      - name: Run docs tests
-        run: pnpm --filter docs run test
-
-      - name: Upload docs test failure screenshots
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: docs-test-failure-screenshots
-          path: apps/docs/.vitest/attachments
-          if-no-files-found: ignore
-
-  reference-app-tests:
-    name: reference-app-tests
+  nonvisual-tests:
+    name: nonvisual-tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -152,5 +45,7 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
-      - name: Run reference app tests
-        run: TURBO_FORCE=true pnpm exec turbo run test --filter=reference-app
+      - name: Run every non-visual suite
+        run: pnpm exec turbo run test test:consumer test:integration --filter='!//'
+        env:
+          LUKE_UI_REACT_SPEC: ${{ inputs.react-spec }}

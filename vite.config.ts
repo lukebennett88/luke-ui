@@ -10,7 +10,6 @@ export default defineConfig({
 			'**/.generated/entries.*',
 			'**/.generated/icon-data.*',
 			'**/*.hbs',
-			'packages/turbo-generators/templates/**',
 			'**/dist/**',
 			'**/routeTree.gen.ts',
 			'node_modules',
@@ -71,8 +70,8 @@ export default defineConfig({
 			},
 		],
 		options: {
-			typeAware: true,
-			typeCheck: true,
+			typeAware: false,
+			typeCheck: false,
 		},
 		overrides: [
 			{

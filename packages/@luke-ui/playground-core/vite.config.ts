@@ -22,6 +22,7 @@ export default defineConfig({
 			protocol: 'src/protocol.ts',
 			specifiers: 'src/specifiers.ts',
 		},
+		exports: false,
 		format: ['esm'],
 		platform: 'neutral',
 		// One output module per source module, so a consumer's bundler can still

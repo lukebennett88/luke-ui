@@ -37,12 +37,7 @@ export const themePackage: UserConfig = {
 		deps: { neverBundle: ['@luke-ui/react'], onlyBundle: ['@capsizecss/metrics'] },
 		dts: true,
 		entry: { index: 'src/index.ts', input: 'src/input.ts' },
-		exports: {
-			customExports: {
-				'./fonts.css': './dist/fonts.css',
-				'./stylesheet.css': './dist/stylesheet.css',
-			},
-		},
+		exports: false,
 		format: ['esm'],
 		platform: 'neutral',
 		plugins: [

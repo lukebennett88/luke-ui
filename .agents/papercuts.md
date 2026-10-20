@@ -118,6 +118,9 @@ not help. Silence in this log is not evidence.
 - Seen: 2026-10-19 (#873).
   `pnpm exec turbo run test --filter=docs -- src/lib/remark-watch-type-table-sources.test.ts`
   reproduced two failures and three passes on unchanged base `fa51e2ac`, matching the full test run.
+  Seen again: 2026-10-20 (#827). The full non-visual run failed the same two tests. An isolated
+  worktree at base `929277b0` reproduced two failures and three passes with the same focused
+  command.
   Seen again: 2026-10-21 (#880). The same two failures and three passes reproduced on unchanged
   `main` `b9e653f0` and in the #880 branch's full test run, where every other test passed.
 - Where: `apps/docs/src/lib/remark-watch-type-table-sources.test.ts:444`,

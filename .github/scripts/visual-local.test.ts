@@ -11,6 +11,8 @@ import {
 } from '../../packages/@luke-ui/react/scripts/visual-regression-contract.js';
 import {
 	artifactOwnershipCleanup,
+	cacheAuthoritativeBaseline,
+	dependencyCacheKey,
 	buildDockerRunArgs,
 	containerCommand,
 	dockerExitStatus,
@@ -24,10 +26,12 @@ async function runCaptureScript(options: {
 	artifacts: string;
 	bin: string;
 	pnpmBody: string;
+	realArchive?: boolean;
 	root: string;
 }): Promise<number> {
 	const stubBodies: Record<string, string> = {
 		chown: '#!/bin/sh\nexit 0\n',
+		flock: '#!/bin/sh\nexit 0\n',
 		corepack: '#!/bin/sh\nexit 0\n',
 		find: `#!/bin/sh
 # Enough of find for: find DIR -type f -name '*.png' -print -quit
@@ -49,8 +53,20 @@ done
 exit 0
 `,
 		pnpm: `#!/bin/sh\n${options.pnpmBody}`,
-		tar: '#!/bin/sh\nexit 0\n',
+		tar: `#!/bin/sh
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = -cf ] && [ "$2" != - ]; then touch "$2"; break; fi
+  shift
+done
+exit 0
+`,
 	};
+
+	if (options.realArchive) {
+		delete stubBodies.tar;
+		delete stubBodies.find;
+		await mkdir(path.join(options.root, 'src'), { recursive: true });
+	}
 
 	await Promise.all(
 		Object.entries(stubBodies).map(([command, body]) =>
@@ -58,9 +74,11 @@ exit 0
 		),
 	);
 
+	await mkdir(path.join(options.root, 'cache'), { recursive: true });
 	const script = containerCommand('capture')
+		.replaceAll('/cache', path.join(options.root, 'cache'))
 		.replaceAll('/work', path.join(options.root, 'work'))
-		.replaceAll('/src', path.join(options.root, 'src'))
+		.replaceAll('-C /src ', `-C ${path.join(options.root, 'src')} `)
 		.replaceAll('/artifacts', options.artifacts);
 
 	try {
@@ -105,6 +123,8 @@ test('docker args pin amd64, the contract image, browser path, and host ownershi
 		`${repoRoot}:/src:ro`,
 		'-v',
 		`${artifactsDir}:/artifacts`,
+		'-v',
+		'luke-ui-visual-dependencies:/cache',
 		PLAYWRIGHT_VISUAL_IMAGE,
 		'bash',
 		'-lc',
@@ -244,5 +264,141 @@ test('both visual workflows pin the contract Playwright image', async () => {
 	for (const text of workflows) {
 		expect(text).toContain(PLAYWRIGHT_VISUAL_IMAGE);
 		expect(text).toContain(`PLAYWRIGHT_BROWSERS_PATH: ${PLAYWRIGHT_BROWSERS_PATH}`);
+	}
+});
+
+test('authoritative baseline cache downloads only the exact newest successful run', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'visual-baseline-cache-'));
+	const downloads: Array<number> = [];
+	const options = {
+		cacheRoot: path.join(root, 'cache'),
+		baselineDir: path.join(root, 'baseline'),
+		async download(id: number, directory: string) {
+			downloads.push(id);
+			await writeFile(path.join(directory, 'capture.png'), String(id));
+		},
+	};
+	try {
+		await cacheAuthoritativeBaseline({
+			...options,
+			run: { id: 1, status: 'completed', conclusion: 'success' },
+		});
+		await cacheAuthoritativeBaseline({
+			...options,
+			run: { id: 1, status: 'completed', conclusion: 'success' },
+		});
+		expect(downloads).toEqual([1]);
+		await expect(
+			cacheAuthoritativeBaseline({
+				...options,
+				run: { id: 2, status: 'completed', conclusion: 'failure' },
+			}),
+		).rejects.toThrow('concluded failure');
+		await expect(
+			cacheAuthoritativeBaseline({
+				...options,
+				run: { id: 2, status: 'in_progress', conclusion: null },
+			}),
+		).rejects.toThrow('in_progress');
+		expect(downloads).toEqual([1]);
+		await cacheAuthoritativeBaseline({
+			...options,
+			run: { id: 3, status: 'completed', conclusion: 'success' },
+		});
+		expect(downloads).toEqual([1, 3]);
+		expect(await readFile(path.join(options.baselineDir, 'capture.png'), 'utf8')).toBe('3');
+	} finally {
+		await rm(root, { recursive: true, force: true });
+	}
+});
+
+test('an empty downloaded artifact cannot replace a usable baseline', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'visual-baseline-empty-'));
+	try {
+		const baselineDir = path.join(root, 'baseline');
+		await mkdir(baselineDir);
+		await writeFile(path.join(baselineDir, 'keep.png'), 'keep');
+		await expect(
+			cacheAuthoritativeBaseline({
+				baselineDir,
+				cacheRoot: path.join(root, 'cache'),
+				run: { id: 3, status: 'completed', conclusion: 'success' },
+				async download() {},
+			}),
+		).rejects.toThrow('no PNG screenshots');
+		expect(await readFile(path.join(baselineDir, 'keep.png'), 'utf8')).toBe('keep');
+	} finally {
+		await rm(root, { recursive: true, force: true });
+	}
+});
+
+test('native dependency cache invalidates for lockfiles and workspace manifests, not source', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'visual-dependency-key-'));
+	try {
+		await mkdir(path.join(root, 'packages', 'example'), { recursive: true });
+		await writeFile(path.join(root, 'pnpm-lock.yaml'), 'lock');
+		await writeFile(path.join(root, 'pnpm-workspace.yaml'), 'workspace');
+		await writeFile(path.join(root, 'package.json'), '{}');
+		await writeFile(path.join(root, 'packages', 'example', 'package.json'), '{}');
+		const first = await dependencyCacheKey(root);
+		await writeFile(path.join(root, 'source.ts'), 'source change');
+		await mkdir(path.join(root, 'dist'));
+		await writeFile(path.join(root, 'dist', 'package.json'), '{"generated":true}');
+		expect(await dependencyCacheKey(root)).toBe(first);
+		await writeFile(path.join(root, 'packages', 'example', 'package.json'), '{"name":"changed"}');
+		const manifestChange = await dependencyCacheKey(root);
+		expect(manifestChange).not.toBe(first);
+		await writeFile(path.join(root, 'pnpm-lock.yaml'), 'new lock');
+		expect(await dependencyCacheKey(root)).not.toBe(manifestChange);
+	} finally {
+		await rm(root, { recursive: true, force: true });
+	}
+});
+
+test('repeat Docker shell runs restore installed dependencies while rebuilding fresh sources', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'visual-native-cache-'));
+	const artifacts = path.join(root, 'artifacts');
+	const bin = path.join(root, 'bin');
+	try {
+		await mkdir(artifacts);
+		await mkdir(bin);
+		await mkdir(path.join(root, 'src', 'dist'), { recursive: true });
+		await mkdir(path.join(root, 'src', 'packages/@luke-ui/react/src/generated'), {
+			recursive: true,
+		});
+		await writeFile(path.join(root, 'src', 'dist', 'host-build.js'), 'host build');
+		await writeFile(
+			path.join(root, 'src', 'packages/@luke-ui/react/src/generated/icons.tsx'),
+			'host generation',
+		);
+		const options = {
+			root,
+			artifacts,
+			bin,
+			realArchive: true,
+			pnpmBody: `if [ "$1" = install ]; then
+  printf 'install\\n' >> '${root}/operations'
+  mkdir -p node_modules packages/example/node_modules
+  printf 'native dependency' > node_modules/native-marker
+  printf 'workspace dependency' > packages/example/node_modules/workspace-marker
+fi
+if [ "$1" = build:packages ]; then
+  test ! -e dist/host-build.js || exit 12
+  test ! -e packages/@luke-ui/react/src/generated/icons.tsx || exit 13
+  test -f node_modules/native-marker || exit 10
+  test -f packages/example/node_modules/workspace-marker || exit 11
+  printf 'build\\n' >> '${root}/operations'
+fi
+if [ -n "\${VISUAL_CAPTURE_DIR:-}" ]; then
+  printf 'fresh screenshot' > "$VISUAL_CAPTURE_DIR/current.png"
+fi
+`,
+		};
+		expect(await runCaptureScript(options)).toBe(0);
+		await rm(path.join(root, 'work'), { recursive: true, force: true });
+		expect(await runCaptureScript(options)).toBe(0);
+		expect(await readFile(path.join(root, 'operations'), 'utf8')).toBe('install\nbuild\nbuild\n');
+	} finally {
+		await rm(root, { recursive: true, force: true });
 	}
 });

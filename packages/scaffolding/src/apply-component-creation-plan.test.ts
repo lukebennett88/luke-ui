@@ -47,6 +47,9 @@ describe('createComponent', () => {
 			pages: ['status-badge'],
 			title: 'Feedback',
 		});
+		await expect(readJson(root, 'packages/@luke-ui/react/package.json')).resolves.toMatchObject({
+			exports: { './status-badge': './dist/status-badge.js' },
+		});
 		expect(await readFile(join(root, modulesRegistryPath), 'utf8')).toBe(
 			[
 				'// Style-producing modules in the shipped stylesheet.',
@@ -204,6 +207,22 @@ describe('createComponent', () => {
 		);
 	});
 
+	it('rejects a conflicting package export before writing scaffold files', async () => {
+		const root = await createRepositoryFixture({
+			packageExports: { './status-badge': './dist/other.js' },
+		});
+
+		await expect(
+			createComponent(root, { docsGroup: 'feedback', name: 'StatusBadge' }),
+		).rejects.toThrow('Cannot add export entry that already exists: ./status-badge');
+		await expect(
+			readFile(
+				join(root, 'packages/@luke-ui/react/src/core/status-badge/status-badge.tsx'),
+				'utf8',
+			),
+		).rejects.toMatchObject({ code: 'ENOENT' });
+	});
+
 	it('preserves the registry dependency order and appends the new import last', async () => {
 		const root = await createRepositoryFixture({
 			modulesRegistry: [
@@ -329,6 +348,7 @@ const defaultRootPages = ['---Actions---', 'actions/button', '---Feedback---'] a
 
 async function createRepositoryFixture(options?: {
 	modulesRegistry?: string;
+	packageExports?: Record<string, string>;
 	rootPages?: Array<string>;
 }): Promise<string> {
 	const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
@@ -336,6 +356,20 @@ async function createRepositoryFixture(options?: {
 
 	await mkdir(join(root, 'apps/docs/content/docs/components'), { recursive: true });
 	await mkdir(join(root, 'packages/@luke-ui/react/src/core/styles'), { recursive: true });
+	await writeFile(
+		join(root, 'packages/@luke-ui/react/package.json'),
+		`${JSON.stringify(
+			{
+				exports: options?.packageExports ?? {
+					'./button': './dist/button.js',
+					'./primitives/button': './dist/primitives/button.js',
+				},
+			},
+			null,
+			'\t',
+		)}\n`,
+		'utf8',
+	);
 
 	await writeFile(
 		join(root, 'apps/docs/content/docs/components/meta.json'),

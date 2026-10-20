@@ -3,6 +3,7 @@
 //   check-captures   — fail when a capture directory has no PNGs
 //   summarise        — turn summary.json into the job summary and review output
 
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { appendFile, readdir, readFile } from 'node:fs/promises';
@@ -360,6 +361,48 @@ async function checkCaptures() {
 	}
 }
 
+/** Only documentation and agent guidance are proven unrelated to package captures. */
+export function requiresVisualComparison(files: Array<string>): boolean {
+	return files.some(
+		(file) =>
+			!(
+				file === 'README.md' ||
+				file === 'AGENTS.md' ||
+				file.startsWith('.agents/') ||
+				file.startsWith('.changeset/') ||
+				(file.startsWith('docs/') && file.endsWith('.md'))
+			),
+	);
+}
+
+async function checkImpact() {
+	const base = process.env.VISUAL_BASE_SHA;
+	if (!base) {
+		await writeOutput('required', 'true');
+		return;
+	}
+	const files = execFileSync(
+		'git',
+		['diff', '--no-renames', '--name-only', '-z', `${base}...HEAD`],
+		{
+			encoding: 'utf8',
+		},
+	)
+		.split('\0')
+		.filter(Boolean);
+	await writeOutput('required', String(requiresVisualComparison(files)));
+}
+
+export function hasRequiredVisualReviewers(environment: {
+	protection_rules?: Array<{ type: string; reviewers?: Array<unknown> }>;
+}): boolean {
+	return (
+		environment.protection_rules?.some(
+			(rule) => rule.type === 'required_reviewers' && (rule.reviewers?.length ?? 0) > 0,
+		) ?? false
+	);
+}
+
 async function summarise() {
 	const summaryPath = fromRepoRoot(VISUAL_SUMMARY_FILE);
 	const summary: VisualSummary = JSON.parse(await readFile(summaryPath, 'utf8'));
@@ -370,6 +413,27 @@ async function summarise() {
 	await writeStepSummary(`### Visual regression\n\n| status | count |\n| --- | --- |\n${rows}\n`);
 
 	const review = countRequiringReview(summary.counts);
+	if (review > 0) {
+		const repository = requireEnv('GITHUB_REPOSITORY');
+		const response = await fetch(
+			`https://api.github.com/repos/${repository}/environments/visual-review`,
+			{
+				headers: {
+					Authorization: `Bearer ${requireEnv('GITHUB_TOKEN')}`,
+					Accept: 'application/vnd.github+json',
+				},
+			},
+		);
+		if (!response.ok)
+			throw new Error(`Cannot verify visual-review protection: GitHub API ${response.status}.`);
+		const environment = (await response.json()) as {
+			protection_rules?: Array<{ type: string; reviewers?: Array<unknown> }>;
+		};
+		if (!hasRequiredVisualReviewers(environment))
+			throw new Error(
+				'Configure required reviewers on the visual-review environment before approving screenshot differences. An unprotected environment cannot satisfy the visual gate.',
+			);
+	}
 	await writeOutput('review', review);
 
 	const needingReview = summary.results.filter((result) => result.status !== 'unchanged');
@@ -391,6 +455,9 @@ if (isCli) {
 	const command = process.argv.slice(2).find((arg) => arg !== '--');
 
 	switch (command) {
+		case 'impact':
+			await checkImpact();
+			break;
 		case 'resolve-baseline':
 			await resolveBaseline();
 			break;

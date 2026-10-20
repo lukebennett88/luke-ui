@@ -50,6 +50,12 @@ beforeAll(async () => {
 	const files = {
 		'package.json': JSON.stringify({
 			name: 'theme-watch-fixture',
+			exports: {
+				'.': './dist/index.js',
+				'./input': './dist/input.js',
+				'./fonts.css': './dist/fonts.css',
+				'./stylesheet.css': './dist/stylesheet.css',
+			},
 			peerDependencies: { '@luke-ui/react': '*' },
 			private: true,
 			type: 'module',
@@ -119,7 +125,9 @@ test(
 			process.stderr.write(`vp pack --watch output:\n${watchOutput}\n`);
 		});
 
+		const manifest = readFileSync(path.join(fixture, 'package.json'), 'utf8');
 		await expect.poll(stylesheetRadius, { ...REBUILD, message: 'initial build' }).toBe('0.25rem');
+		expect(readFileSync(path.join(fixture, 'package.json'), 'utf8')).toBe(manifest);
 
 		await writeFile(path.join(fixture, 'src', 'input.ts'), inputSource(7));
 		await expect.poll(stylesheetRadius, { ...REBUILD, message: 'first rebuild' }).toBe('0.4375rem');
@@ -128,5 +136,6 @@ test(
 		await expect
 			.poll(stylesheetRadius, { ...REBUILD, message: 'second rebuild' })
 			.toBe('0.6875rem');
+		expect(readFileSync(path.join(fixture, 'package.json'), 'utf8')).toBe(manifest);
 	},
 );

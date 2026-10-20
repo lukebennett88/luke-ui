@@ -1,10 +1,14 @@
+import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 import type { BaselineRun, VisualCounts } from './visual-ci.js';
 import {
 	countPngs,
+	hasRequiredVisualReviewers,
+	requiresVisualComparison,
 	countRequiringReview,
 	countsTableRows,
 	decideBaselineRun,
@@ -281,4 +285,101 @@ test('keeps the original timeout bound when a newer waitable run appears mid-wai
 
 	expect(logs.some((line) => line.includes('changed from 10 to 20'))).toBe(true);
 	expect(clock.sleepCalls).toEqual([5_000, 5_000, 2_000]);
+});
+
+for (const file of [
+	'vite.config.ts',
+	'turbo.json',
+	'packages/@luke-ui/theme-paper/src/theme.ts',
+	'packages/@luke-ui/react/src/core/button/button.tsx',
+	'pnpm-lock.yaml',
+	'.github/workflows/visual-regression.yml',
+	'unexpected-input',
+]) {
+	test(`requires visual comparison for ${file}`, () => {
+		expect(requiresVisualComparison([file])).toBe(true);
+	});
+}
+
+test('only proven unrelated guidance changes can skip comparison', () => {
+	expect(
+		requiresVisualComparison([
+			'README.md',
+			'docs/TESTING.md',
+			'.agents/skills/write-tests/SKILL.md',
+			'.changeset/new.md',
+		]),
+	).toBe(false);
+	expect(requiresVisualComparison(['README.md', 'vite.config.ts'])).toBe(true);
+});
+
+function visualGatePasses(options: {
+	impact: string;
+	required: string;
+	compare: string;
+	review: string;
+	changes: string;
+}): boolean {
+	try {
+		execFileSync('bash', [fileURLToPath(new URL('./visual-gate.sh', import.meta.url))], {
+			env: {
+				...process.env,
+				IMPACT: options.impact,
+				REQUIRED: options.required,
+				COMPARE: options.compare,
+				REVIEW: options.review,
+				CHANGES: options.changes,
+			},
+			stdio: 'pipe',
+		});
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+const completedGate = {
+	impact: 'success',
+	required: 'true',
+	compare: 'success',
+	review: 'skipped',
+	changes: '0',
+};
+test('identical completed comparisons and proven unrelated skips pass the gate', () => {
+	expect(visualGatePasses(completedGate)).toBe(true);
+	expect(visualGatePasses({ ...completedGate, required: 'false', compare: 'skipped' })).toBe(true);
+	expect(visualGatePasses({ ...completedGate, changes: '2', review: 'success' })).toBe(true);
+});
+
+for (const failure of [
+	{ impact: 'failure' },
+	{ impact: 'cancelled' },
+	{ compare: 'failure' },
+	{ compare: 'skipped' },
+	{ compare: 'cancelled' },
+	{ changes: '' },
+	{ changes: '2', review: 'skipped' },
+	{ changes: '2', review: 'failure' },
+	{ required: '' },
+	{ required: 'false', compare: 'failure' },
+]) {
+	test(`rejects incomplete gate prerequisites ${JSON.stringify(failure)}`, () => {
+		expect(visualGatePasses({ ...completedGate, ...failure })).toBe(false);
+	});
+}
+
+test('visual review requires configured human reviewers', () => {
+	expect(hasRequiredVisualReviewers({})).toBe(false);
+	expect(hasRequiredVisualReviewers({ protection_rules: [] })).toBe(false);
+	expect(hasRequiredVisualReviewers({ protection_rules: [{ type: 'wait_timer' }] })).toBe(false);
+	expect(
+		hasRequiredVisualReviewers({
+			protection_rules: [{ type: 'required_reviewers', reviewers: [] }],
+		}),
+	).toBe(false);
+	expect(
+		hasRequiredVisualReviewers({
+			protection_rules: [{ type: 'required_reviewers', reviewers: [{ id: 1 }] }],
+		}),
+	).toBe(true);
 });

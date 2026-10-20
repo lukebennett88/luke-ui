@@ -16,7 +16,7 @@ const BASELINE_MISSING = [
 	'No visual baseline found.',
 	'Run "Visual baseline" on `main`, or capture one locally:',
 	'',
-	'  pnpm run test:visual:docker:capture',
+	'  pnpm run test:visual:capture',
 	'',
 	'Host Chromium (may differ from CI):',
 	'',
@@ -47,6 +47,9 @@ log(
 	`${counts.changed} changed, ${counts.added} added, ${counts.removed} removed, ${counts.unchanged} unchanged`,
 );
 log(review > 0 ? `Expected/actual/diff PNGs: ${diffDir}` : 'No visual changes.');
+
+// CI reviews complete comparisons through its protected environment. Local differences fail.
+if (review > 0 && process.env.VISUAL_REVIEW_MODE !== '1') process.exitCode = 2;
 
 async function captureCurrent() {
 	await rm(currentDir, { force: true, recursive: true });

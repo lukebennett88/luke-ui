@@ -25,7 +25,7 @@ skill and the guide disagree, the guide wins.
 4. Write the smallest meaningful test. For a bug fix, write it first and watch it fail for the
    reason the bug describes.
 5. Remove nondeterminism, then verify:
-   - Run `TURBO_FORCE=true pnpm run test` and `pnpm run check` from the repo root.
+   - Run `pnpm run test` and `pnpm run check` from the repo root.
    - For a test that `pnpm run test` leaves out, run the command TESTING.md gives for it.
    - Report a run that could not start as not run, not as passing.
 

@@ -26,22 +26,22 @@ The theme source is `src/theme/input.ts`. A small Vite plugin in `vite.config.ts
 `virtual:reference-theme.css`. `index.html` sets the theme's identity class on `<html>`. Vite
 restarts the dev server when the theme source changes.
 
-The app imports `@luke-ui/react` from its built `dist`. Turbo builds the package on a clean
-checkout. Run commands from the repository root:
+The app imports `@luke-ui/react` from its built `dist`. Turbo builds prerequisites and starts the
+package watchers alongside the app. Component and generated-asset edits rebuild automatically. Run
+commands from the repository root:
 
 ```bash
 pnpm run dev:reference-app
-pnpm exec turbo run check:format check:lint check:types --filter=reference-app
-TURBO_FORCE=true pnpm exec turbo run test --filter=reference-app
+pnpm exec turbo run check:types --filter=reference-app
+pnpm test:reference-app
 pnpm run check
 ```
 
-Once `@luke-ui/react` is built, the package scripts also work directly:
+Package scripts perform individual operations. Use root commands to resolve their prerequisites:
 
 ```bash
-pnpm --filter=reference-app run dev
-pnpm --filter=reference-app run build
-pnpm --filter=reference-app run test
+pnpm build:reference-app
+pnpm check:lint
 ```
 
 The dev server runs at http://localhost:5174.
