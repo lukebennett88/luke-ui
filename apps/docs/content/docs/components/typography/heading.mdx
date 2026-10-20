@@ -25,6 +25,15 @@ children.
 
 Outside `HeadingLevels`, `Heading` falls back to `h2`. Nested contexts cap at `h6`.
 
+When `renderRoot` owns the heading, use the callback's `element` and `level` state to return the
+resolved heading tag. This preserves automatic levels inside nested `HeadingLevels` contexts.
+
+```tsx
+<Heading renderRoot={(domProps, { element: HeadingTag }) => <HeadingTag {...domProps} />}>
+	Account settings
+</Heading>
+```
+
 To read the current level in a custom heading-like component, use `useHeadingLevel`. Like `Heading`,
 it does not advance the level.
 

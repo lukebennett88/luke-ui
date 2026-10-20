@@ -99,7 +99,7 @@ type RootOwnedInputProp =
 
 type _TextInputOmit = DistributiveOmit<
 	RacInputProps,
-	'aria-label' | 'className' | 'inputMode' | 'size' | RootOwnedInputProp
+	'aria-label' | 'className' | 'inputMode' | 'render' | 'size' | RootOwnedInputProp
 >;
 
 interface _TextInputProps extends _TextInputOmit {

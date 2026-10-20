@@ -12,7 +12,7 @@ import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxRecipe } from './styles.css.js';
 
-type _ComboboxClearButtonOmit = DistributiveOmit<RacButtonProps, 'className' | 'slot'>;
+type _ComboboxClearButtonOmit = DistributiveOmit<RacButtonProps, 'className' | 'render' | 'slot'>;
 interface _ComboboxClearButtonProps extends _ComboboxClearButtonOmit {
 	className?: RacButtonProps['className'];
 	size?: ComboboxSize;

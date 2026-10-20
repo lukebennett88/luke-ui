@@ -6,9 +6,10 @@ import { Quote } from '@luke-ui/react/quote';
 import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
+import { createRef } from 'react';
 import { Menu, MenuItem } from 'react-aria-components/Menu';
 import { TextContext } from 'react-aria-components/Text';
-import { expect, test } from 'vite-plus/test';
+import { expect, test, vi } from 'vite-plus/test';
 import { typeStyles } from '../../theme/type-styles.js';
 import { INTER_CAP_HEIGHT_EM, loadInter } from '../test-utils/load-inter.js';
 import { measureBaseline, measureLastBaseline } from '../test-utils/measure-first-line.js';
@@ -172,6 +173,113 @@ test('ordinary Text remains a single React Aria Text root', () => {
 	expect(text.tagName).toBe('SPAN');
 	expect(container.firstElementChild).toBe(text);
 	expect(container.childElementCount).toBe(1);
+});
+
+test('Text renderRoot participates in a public React Aria menu collection', async () => {
+	const { locator } = render(
+		<Menu aria-label="Actions">
+			<MenuItem>
+				<Text
+					renderRoot={(domProps) => <span {...domProps} data-testid="owned-menu-label" />}
+					slot="label"
+				>
+					Save changes
+				</Text>
+			</MenuItem>
+		</Menu>,
+	);
+	const item = locator.getByRole('menuitem');
+
+	await expect.element(item).toHaveAccessibleName('Save changes');
+	expect(locator.getByTestId('owned-menu-label').element().tagName).toBe('SPAN');
+});
+
+test('Text renderRoot receives an empty state object', () => {
+	let receivedState: unknown;
+	render(
+		<Text
+			renderRoot={(domProps, state) => {
+				receivedState = state;
+				return <span {...domProps} data-testid="stateful-text" />;
+			}}
+		>
+			Owned
+		</Text>,
+	);
+
+	expect(receivedState).toEqual({});
+});
+
+test('Text renderRoot returns the expected React Aria element without warnings', () => {
+	const warning = vi.spyOn(console, 'warn');
+	const { locator } = render(
+		<Text renderRoot={(domProps) => <span {...domProps} data-testid="contract-text" />}>
+			Owned
+		</Text>,
+	);
+
+	expect(locator.getByTestId('contract-text').element().tagName).toBe('SPAN');
+	expect(warning.mock.calls.flat().join(' ')).not.toContain('Unexpected DOM element returned');
+	warning.mockRestore();
+});
+
+test('Text renderRoot owns its span root with slot, ref, and style merge', async () => {
+	const ref = createRef<HTMLElement>();
+	const elements: Array<HTMLElement | null> = [];
+	let cleanups = 0;
+	const { locator, unmount } = render(
+		<Menu aria-label="Actions">
+			<MenuItem>
+				<Text
+					className="consumer-class"
+					data-owned="yes"
+					isVisuallyHidden
+					ref={(element) => {
+						elements.push(element);
+						return () => {
+							cleanups += 1;
+						};
+					}}
+					renderRoot={(domProps) => <span {...domProps} data-testid="owned-text" />}
+					slot="label"
+					style={{ color: 'rgb(1, 2, 3)' }}
+					typography="label"
+				>
+					Owned label
+				</Text>
+				<Text color="secondary" slot="description">
+					Helper
+				</Text>
+			</MenuItem>
+		</Menu>,
+	);
+	const item = locator.getByRole('menuitem');
+	const owned = locator.getByTestId('owned-text').element();
+
+	expect(owned.tagName).toBe('SPAN');
+	expect(owned.getAttribute('data-owned')).toBe('yes');
+	expect(owned.className).toContain('consumer-class');
+	expect(owned.style.color).toBe('rgb(1, 2, 3)');
+	expect(elements.at(-1)).toBe(owned);
+	await expect.element(item).toHaveAccessibleName('Owned label');
+	await expect.element(item).toHaveAccessibleDescription('Helper');
+
+	unmount();
+	expect(cleanups).toBeGreaterThanOrEqual(1);
+
+	const refResult = render(
+		<Text
+			ref={ref}
+			renderRoot={(domProps) => <span {...domProps} data-testid="owned-span" />}
+			slot={null}
+		>
+			Strong copy
+		</Text>,
+	);
+	expect(ref.current).toBe(refResult.locator.getByTestId('owned-span').element());
+	expect(ref.current?.tagName).toBe('SPAN');
+	refResult.unmount();
+	expect(ref.current).toBeNull();
 });
 
 // `shouldInheritFont` inherits `textTransform` and `fontVariantNumeric` along with the other font

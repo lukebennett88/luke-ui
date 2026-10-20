@@ -12,7 +12,7 @@ import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxListBoxOmit<T extends object> = DistributiveOmit<
 	RacListBoxProps<T>,
-	'dependencies' | 'items'
+	'dependencies' | 'items' | 'render'
 >;
 
 interface _ComboboxListBoxProps<T extends object> extends _ComboboxListBoxOmit<T> {

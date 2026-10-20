@@ -1,12 +1,11 @@
-import type { TextProps } from '../text/text.js';
+import type { TextElementProps } from '../text/text.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { blockquoteRecipe } from './recipe.css.js';
 
-type _BlockquoteOmit = DistributiveOmit<TextProps, 'color' | 'elementType'>;
-
-interface _BlockquoteProps extends _BlockquoteOmit {}
+// Blockquote always renders `<blockquote>`; it does not expose root replacement.
+type _BlockquoteProps = DistributiveOmit<TextElementProps, 'color' | 'elementType'>;
 
 /** Props for the `Blockquote` component. */
 export type BlockquoteProps = Prettify<_BlockquoteProps>;

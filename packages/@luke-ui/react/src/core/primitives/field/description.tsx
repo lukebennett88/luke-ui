@@ -5,7 +5,10 @@ import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { fieldRecipe } from './recipe.css.js';
 
-type _FieldDescriptionOmit = DistributiveOmit<RacTextProps, 'id' | 'slot'>;
+type _FieldDescriptionOmit = DistributiveOmit<
+	RacTextProps,
+	'elementType' | 'id' | 'render' | 'slot'
+>;
 
 interface _FieldDescriptionProps extends _FieldDescriptionOmit {
 	/** Element id referenced by `aria-describedby` on the control. */

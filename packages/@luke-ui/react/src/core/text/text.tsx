@@ -1,8 +1,10 @@
+import type { CSSProperties, HTMLAttributes, JSX, ReactElement, ReactNode, Ref } from 'react';
+import type { TextProps as RacTextProps } from 'react-aria-components/Text';
 import { Text as RacText } from 'react-aria-components/Text';
 import { typeStyleWeightRole } from '../../theme/type-styles.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
-import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
+import type { UseRenderRef } from '../use-render/use-render.js';
 import { visuallyHiddenStyle } from '../visually-hidden/visually-hidden-style.js';
 import type { TextRecipeVariants } from './recipe.css.js';
 import { textRecipe } from './recipe.css.js';
@@ -73,22 +75,58 @@ interface TextStyleProps {
 	typography?: TextRecipeVariants['typography'];
 }
 
-type _TextOmit = DistributiveOmit<
-	React.ComponentProps<typeof RacText>,
-	'color' | keyof DocumentedElementTypeProps | 'slot'
+type _TextRacOmit = DistributiveOmit<
+	RacTextProps,
+	'children' | 'className' | 'color' | 'elementType' | 'render' | 'slot' | 'style'
 >;
-interface _TextProps extends _TextOmit, TextStyleProps, DocumentedElementTypeProps {
+
+interface TextSharedProps extends _TextRacOmit, TextStyleProps {
+	/** Content of the text element. */
+	children?: ReactNode;
+	/** Class name on the text root. */
+	className?: string;
+	/** Ref to the rendered text root. */
+	ref?: Ref<HTMLElement>;
 	/**
 	 * Connects text to a React Aria parent's named text slot. Pass `null` to opt out of surrounding
 	 * slotted text context.
 	 */
 	slot?: string | null;
+	/** Inline style on the text root. Wins over the visually-hidden styles when both apply. */
+	style?: CSSProperties;
+}
+
+/** Props when `Text` renders a supported element itself. */
+export interface TextElementProps extends TextSharedProps {
+	/**
+	 * Renders a different element type in place of the default. Use it to choose a semantic element
+	 * without changing the visual or accessibility treatment.
+	 * @default 'span'
+	 */
+	elementType?: RacTextProps['elementType'];
+	/** Use `renderRoot` instead of `elementType` to own the rendered element. */
+	renderRoot?: never;
+}
+
+/** Resolved props handed to a caller-owned `renderRoot` element. */
+type TextResolvedRenderProps = Omit<HTMLAttributes<HTMLElement>, 'ref'> & { ref: UseRenderRef };
+
+/** Props when a caller owns the rendered element. */
+export interface TextRenderRootProps extends TextSharedProps {
+	/** Use `elementType` instead of `renderRoot` for a supported semantic element. */
+	elementType?: never;
+	/**
+	 * Passes resolved DOM props, presentation, and a callback `ref` as `domProps`. The second
+	 * argument is an empty state object. `Text` callbacks return a `<span>`; use `elementType` for a
+	 * semantic element. `Heading` supplies its resolved heading element in the render state.
+	 */
+	renderRoot: (domProps: TextResolvedRenderProps, state: Record<string, never>) => ReactElement;
 }
 
 /** Props for the `Text` component. */
-export type TextProps = Prettify<_TextProps>;
+export type TextProps = Prettify<TextElementProps | TextRenderRootProps>;
 
-const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
+const blockTextElementTypes = new Set<string>([
 	'blockquote',
 	'div',
 	'h1',
@@ -109,16 +147,36 @@ const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
  * trim.
  */
 export function Text(props: TextProps) {
+	return (
+		<TextRoot
+			elementType={props.renderRoot ? 'span' : (props.elementType ?? 'span')}
+			props={props}
+		/>
+	);
+}
+
+/**
+ * React Aria Text root shared by `Text` and `Heading`. Callers pass the element React Aria should
+ * expect so a `renderRoot` callback can return that same tag without development warnings.
+ */
+export function TextRoot({
+	elementType,
+	props,
+}: {
+	elementType: string;
+	props: TextProps;
+}): JSX.Element {
 	const {
 		children,
 		className,
 		color,
-		elementType = 'span',
 		fontStyle,
 		fontVariantNumeric,
 		fontWeight,
 		isVisuallyHidden = false,
 		lineClamp,
+		ref,
+		renderRoot,
 		shouldDisableTrim,
 		shouldInheritFont,
 		slot,
@@ -131,11 +189,13 @@ export function Text(props: TextProps) {
 		...racProps
 	} = props;
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
-	const resolvedTypography = typography ?? 'body';
+	const resolvedTypography: NonNullable<TextRecipeVariants['typography']> = typography ?? 'body';
 
 	const resolvedShouldDisableTrim: boolean = (() => {
 		if (hasLineClamp) return true;
 		if (shouldDisableTrim !== undefined) return shouldDisableTrim;
+		// Infer from the element React Aria expects. Text `renderRoot` keeps `span` (no trim);
+		// Heading passes its resolved `h1`–`h6` (trim on).
 		return !blockTextElementTypes.has(elementType);
 	})();
 
@@ -156,14 +216,20 @@ export function Text(props: TextProps) {
 		typography: resolvedTypography,
 	});
 
+	const resolvedStyle = isVisuallyHidden ? { ...visuallyHiddenStyle, ...style } : style;
+
 	return (
 		<RacText
 			{...racProps}
 			className={recipeClassName}
 			elementType={elementType}
+			ref={ref}
+			// RAC's render callback must return the element named by elementType. Text uses its
+			// default span; Heading supplies its resolved h1–h6 element through TextRoot.
+			render={renderRoot ? (domProps) => renderRoot(domProps, {}) : undefined}
 			// @ts-expect-error — RAC TextProps omits null, which opts out of slotted context at runtime.
 			slot={slot}
-			style={isVisuallyHidden ? { ...visuallyHiddenStyle, ...style } : style}
+			style={resolvedStyle}
 		>
 			{children}
 		</RacText>

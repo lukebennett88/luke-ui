@@ -20,7 +20,7 @@ import { ComboboxTrayValidation } from './tray-validation.js';
 
 type _ComboboxTrayTriggerOmit = DistributiveOmit<
 	RacButtonProps,
-	'aria-expanded' | 'aria-haspopup' | 'children' | 'className' | 'slot'
+	'aria-expanded' | 'aria-haspopup' | 'children' | 'className' | 'render' | 'slot'
 >;
 
 interface _ComboboxTrayTriggerProps extends _ComboboxTrayTriggerOmit {

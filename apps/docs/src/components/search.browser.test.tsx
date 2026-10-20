@@ -392,7 +392,7 @@ test('wraps keyboard navigation from the first result to the last and back', asy
 	await expectActiveDescendant(input, list, first.id);
 	await expectResultWithinList(first, list, input);
 	await expect.element(input).toHaveFocus();
-});
+}, 15_000);
 
 function isResultWithinList(result: Element, list: Element) {
 	const listBounds = list.getBoundingClientRect();

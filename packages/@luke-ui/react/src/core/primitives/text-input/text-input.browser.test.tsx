@@ -327,12 +327,10 @@ test('a FieldLabel uses the control root required state over its isRequired prop
 	expect(labelFor(input('Conflict')).textContent).toBe('Conflict\u00A0*');
 });
 
-test('a FieldLabel with a render prop still draws the marker and names the control', () => {
+test('a FieldLabel draws the marker and names the control', () => {
 	render(
 		<TextInputRoot isRequired>
-			{/* React Aria passes `htmlFor` in `props`, which the rule cannot see through the spread. */}
-			{/* oxlint-disable-next-line jsx-a11y/label-has-associated-control */}
-			<FieldLabel render={(props) => <label {...props} />}>Example field</FieldLabel>
+			<FieldLabel>Example field</FieldLabel>
 			<TextInput />
 		</TextInputRoot>,
 	);
@@ -450,6 +448,31 @@ test('a TextInput inside a TextInputRoot adds its aria-describedby to the field 
 	const element = input('Example field');
 
 	expect(element).toHaveAccessibleDescription('Example description Example error Extra hint');
+});
+
+test('FieldError supports structured block content inside block containers', async () => {
+	const { locator } = render(
+		<TextInputRoot isInvalid>
+			<FieldLabel>Example field</FieldLabel>
+			<TextInput />
+			<FieldError>
+				<ul>
+					<li>Use at least eight characters.</li>
+					<li>Include a number.</li>
+				</ul>
+			</FieldError>
+		</TextInputRoot>,
+	);
+	const list = locator.getByRole('list').element();
+	const errorBody = locator.getByText('Use at least eight characters.').element().parentElement;
+	const errorRoot = errorBody?.parentElement;
+
+	expect(errorRoot?.tagName).toBe('DIV');
+	expect(list.parentElement?.tagName).toBe('DIV');
+	expect(list.closest('span')).toBeNull();
+	await expect
+		.element(locator.getByRole('textbox', { name: 'Example field' }))
+		.toHaveAccessibleDescription('Use at least eight characters. Include a number.');
 });
 
 test('a TextInput inside a TextInputRoot adds its aria-labelledby to the field label', () => {

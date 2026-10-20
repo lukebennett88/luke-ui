@@ -28,7 +28,7 @@ interface FieldLabelStyleProps {
 	necessityIndicator?: NecessityIndicator;
 }
 
-type _FieldLabelOmit = DistributiveOmit<RacLabelProps, 'htmlFor'>;
+type _FieldLabelOmit = DistributiveOmit<RacLabelProps, 'elementType' | 'htmlFor' | 'render'>;
 
 interface _FieldLabelProps extends _FieldLabelOmit, FieldLabelStyleProps {
 	/** Associates the label with a form control. */

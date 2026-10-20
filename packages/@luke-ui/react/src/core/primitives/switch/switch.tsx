@@ -80,7 +80,7 @@ interface _SwitchRootProps extends _SwitchRootOmit {
 /** Props for `SwitchRoot`. */
 export type SwitchRootProps = Prettify<_SwitchRootProps>;
 
-interface _SwitchLabelProps extends RacSwitchButtonProps {
+interface _SwitchLabelProps extends DistributiveOmit<RacSwitchButtonProps, 'render'> {
 	/**
 	 * `SwitchControl` plus textual, non-interactive label content, unless a `FieldLabel` supplies the
 	 * label. Pass a function to render from the switch state.

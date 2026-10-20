@@ -16,7 +16,10 @@ import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { comboboxRecipe, popoverAvailableInlineSizeVar } from './styles.css.js';
 
-type _ComboboxPopoverOmit = DistributiveOmit<RacPopoverProps, 'UNSTABLE_portalContainer'>;
+type _ComboboxPopoverOmit = DistributiveOmit<
+	RacPopoverProps,
+	'render' | 'UNSTABLE_portalContainer'
+>;
 interface _ComboboxPopoverProps extends _ComboboxPopoverOmit {
 	/** Forwarded to the popover's DOM element. */
 	ref?: Ref<HTMLElement>;

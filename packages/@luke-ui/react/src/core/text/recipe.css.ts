@@ -2,7 +2,7 @@ import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import type { FontWeightRole, TypeStyle } from '../../theme/type-styles.js';
-import { fontWeightRoles, typeStyles } from '../../theme/type-styles.js';
+import { typeStyles } from '../../theme/type-styles.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
@@ -56,16 +56,29 @@ const colorVariants = {
 	warning: { color: vars.color.foreground.warning.rest },
 } as const;
 
-const weightVariants = Object.fromEntries(
-	fontWeightRoles.map((fontWeight) => [fontWeight, { fontWeight: vars.font.weight[fontWeight] }]),
-) as Record<FontWeightRole, { fontWeight: string }>;
+const weightVariants = {
+	body: { fontWeight: vars.font.weight.body },
+	emphasis: { fontWeight: vars.font.weight.emphasis },
+	heading: { fontWeight: vars.font.weight.heading },
+	label: { fontWeight: vars.font.weight.label },
+} satisfies Record<FontWeightRole, { fontWeight: string }>;
 
-const typographyVariants = Object.fromEntries(
-	typeStyles.map((typography) => {
-		const declarations = typeStyleFontDeclarations(typography);
-		return [typography, { ...declarations, vars: { [textLineHeight]: declarations.lineHeight } }];
-	}),
-) as Record<
+function typographyVariant(typography: TypeStyle) {
+	const declarations = typeStyleFontDeclarations(typography);
+	return { ...declarations, vars: { [textLineHeight]: declarations.lineHeight } };
+}
+
+const typographyVariants = {
+	body: typographyVariant('body'),
+	caption: typographyVariant('caption'),
+	display: typographyVariant('display'),
+	heading1: typographyVariant('heading1'),
+	heading2: typographyVariant('heading2'),
+	heading3: typographyVariant('heading3'),
+	heading4: typographyVariant('heading4'),
+	label: typographyVariant('label'),
+	lead: typographyVariant('lead'),
+} satisfies Record<
 	TypeStyle,
 	{
 		fontFamily: string;

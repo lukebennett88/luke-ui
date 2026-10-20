@@ -3,16 +3,20 @@ import type { FieldErrorProps as RacFieldErrorProps } from 'react-aria-component
 import { FieldError as RacFieldError } from 'react-aria-components/FieldError';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { lockupRecipe } from '../../lockup/recipe.css.js';
+import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { fieldRecipe } from './recipe.css.js';
 
 /** Props for `FieldError`. */
-export type FieldErrorProps = Prettify<RacFieldErrorProps>;
+export type FieldErrorProps = Prettify<
+	DistributiveOmit<RacFieldErrorProps, 'elementType' | 'render'>
+>;
 
 /**
- * Validation message for a field, shown with a leading error icon while the field is invalid.
+ * Block validation content for a field, shown with a leading error icon while the field is invalid.
  *
- * The icon is centred on the message's first line. Wrapped lines align with the text, not the icon.
+ * Supports inline messages and structured content such as lists. The icon is centred on the first
+ * line, and wrapped lines align with the message rather than the icon.
  */
 export function FieldError(props: FieldErrorProps): JSX.Element {
 	const { body, rail, root } = lockupRecipe();
@@ -21,6 +25,7 @@ export function FieldError(props: FieldErrorProps): JSX.Element {
 	return (
 		<RacFieldError
 			{...props}
+			elementType="div"
 			// The message is the Lockup root. Its children are one `body` element, not a flex item
 			// per child, so a message with mixed inline content (text, a link, emphasis) flows as one
 			// run of text. React Aria also accepts a render function here, and a message with no
@@ -36,7 +41,7 @@ export function FieldError(props: FieldErrorProps): JSX.Element {
 				return (
 					<>
 						<span aria-hidden="true" className={rail({ className: icon() })} />
-						<span className={body()}>{content}</span>
+						<div className={body()}>{content}</div>
 					</>
 				);
 			})}

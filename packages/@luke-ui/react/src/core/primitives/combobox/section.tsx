@@ -10,7 +10,7 @@ import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxSectionOmit<T extends object> = DistributiveOmit<
 	RacListBoxSectionProps<T>,
-	'className'
+	'className' | 'render'
 >;
 
 interface _ComboboxSectionProps<T extends object> extends _ComboboxSectionOmit<T> {

@@ -13,7 +13,7 @@ import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxRecipe } from './styles.css.js';
 
-type _ComboboxInputOmit = DistributiveOmit<RacInputProps, 'className' | 'size'>;
+type _ComboboxInputOmit = DistributiveOmit<RacInputProps, 'className' | 'render' | 'size'>;
 interface _ComboboxInputProps extends _ComboboxInputOmit {
 	className?: RacInputProps['className'];
 	/**

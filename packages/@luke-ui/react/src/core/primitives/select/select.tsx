@@ -139,7 +139,10 @@ interface _SelectTriggerProps extends _SelectTriggerOmit {
 /** Props for `SelectTrigger`. */
 export type SelectTriggerProps = Prettify<_SelectTriggerProps>;
 
-interface _SelectValueProps<T extends object> extends RacSelectValueProps<T> {
+interface _SelectValueProps<T extends object> extends DistributiveOmit<
+	RacSelectValueProps<T>,
+	'render'
+> {
 	/** Forwarded to the value element. */
 	ref?: Ref<HTMLSpanElement>;
 }
@@ -155,7 +158,7 @@ interface _SelectIndicatorProps extends DistributiveOmit<ComponentProps<'span'>,
 /** Props for `SelectIndicator`. */
 export type SelectIndicatorProps = Prettify<_SelectIndicatorProps>;
 
-type _SelectPopoverOmit = DistributiveOmit<RacPopoverProps, 'UNSTABLE_portalContainer'>;
+type _SelectPopoverOmit = DistributiveOmit<RacPopoverProps, 'render' | 'UNSTABLE_portalContainer'>;
 
 interface _SelectPopoverProps extends _SelectPopoverOmit {
 	/**
@@ -171,7 +174,9 @@ interface _SelectPopoverProps extends _SelectPopoverOmit {
 export type SelectPopoverProps = Prettify<_SelectPopoverProps>;
 
 /** Props for `SelectListBox`. */
-export type SelectListBoxProps<T extends object> = Prettify<RacListBoxProps<T>>;
+export type SelectListBoxProps<T extends object> = Prettify<
+	DistributiveOmit<RacListBoxProps<T>, 'render'>
+>;
 
 /** Props for `SelectItem`. */
 export type SelectItemProps<T extends object> = Prettify<

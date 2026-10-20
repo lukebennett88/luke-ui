@@ -10,7 +10,7 @@ import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxRecipe } from './styles.css.js';
 
-type _ComboboxTriggerOmit = DistributiveOmit<RacButtonProps, 'className'>;
+type _ComboboxTriggerOmit = DistributiveOmit<RacButtonProps, 'className' | 'render'>;
 interface _ComboboxTriggerProps extends _ComboboxTriggerOmit {
 	className?: RacButtonProps['className'];
 	size?: ComboboxSize;

@@ -143,16 +143,30 @@ strict key constraint checks omitted keys. Do not use `DistributiveOmit<SourceTy
 
 ### Element choice
 
-Use `elementType` to change the semantic element without changing the accepted DOM props. Accept
-only the elements a component is designed to render.
+`elementType`, `renderRoot`, and `render<Part>` are **opt-in capabilities**, not universal component
+props. Consistent naming means that when a component exposes one of these seams, it uses the Luke UI
+name and `(domProps, state)` contract. It does not mean every component exposes them.
 
-Use a dedicated component for element-specific behaviour or props. Use `Link` for links and `Button`
-for buttons.
+Prefer recipes, dedicated components (`Link` for links, `Button` for buttons), and state-aware
+`className`/`style` over root replacement. Interactive controls keep fixed semantics unless a
+concrete composition need is demonstrated.
 
-Use `renderRoot` for Luke UI-owned root replacement when the callback must own the element and its
-DOM attributes. Use `render<Name>` only for a deliberately replaceable named part. React Aria's own
-`render` stays `render` on primitives and other RAC-owned seams. Keep `elementType` and `renderRoot`
-mutually exclusive.
+When polymorphism is justified:
+
+- Use `elementType` to choose a supported semantic or structural element without changing the
+  accepted DOM props. Accept only the elements that component is designed to render.
+- Use `renderRoot` when a caller must own the root element and its DOM attributes. Keep
+  `elementType` and `renderRoot` mutually exclusive.
+- Use `render<Name>` only for a deliberately replaceable named part. Do not conflate children-as-
+  function or state-aware `className`/`style` with root replacement.
+
+Keep root replacement consistent: when a caller owns a Luke UI root, expose `renderRoot` with the
+Luke UI `(domProps, state)` contract. Keep React Aria's `render` only when a documented integration
+needs React Aria's host-prop merging while preserving its component semantics. `Link` uses this
+exception for MDX anchors, which merge authored anchor attributes with React Aria's resolved link
+props and preserve the root React Aria selects. Do not keep RAC `render` as a second
+root-replacement API or add it to wrappers without a demonstrated integration need. Prefer Luke UI
+`renderRoot` for Luke-owned layout and typography roots such as `Box` and `Text`.
 
 Luke UI `renderRoot` and `render<Name>` callbacks receive `(domProps, state)`. The first argument
 contains resolved presentation props. Pass an empty object as the second argument when the component

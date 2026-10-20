@@ -313,7 +313,9 @@ import { Blockquote } from '@luke-ui/react/blockquote';
 import { Box, type BoxProps } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Container } from '@luke-ui/react/container';
+import { Heading, type HeadingProps } from '@luke-ui/react/heading';
 import { Provider } from '@luke-ui/react/provider';
+import { Text, type TextProps } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { breakpoints, getThemeClassName, vars } from '@luke-ui/react/theme';
 import {
@@ -445,10 +447,18 @@ const renderRoot: NonNullable<BoxProps['renderRoot']> = (domProps, state) => {
 	return <section {...domProps} data-state-keys={Object.keys(emptyState).length} />;
 };
 
+const textRenderRoot: NonNullable<TextProps['renderRoot']> = (domProps, state) => {
+	const emptyState: Record<string, never> = state;
+	return <span {...domProps} data-text-state-keys={Object.keys(emptyState).length} />;
+};
+
 // @ts-expect-error — renderRoot owns its element and excludes elementType
 export const conflictingRoot: BoxProps = { elementType: 'section', renderRoot };
 // @ts-expect-error — Box exposes no public render state properties
 export const invalidRenderState: Parameters<typeof renderRoot>[1] = { isHovered: true };
+// @ts-expect-error — Text renderRoot excludes elementType
+export const conflictingTextRoot: TextProps = { elementType: 'p', renderRoot: textRenderRoot };
+export const headingDefaults: HeadingProps = { level: 1, children: 'Title' };
 
 export function App({ spritesheetHref }: { spritesheetHref: string }) {
 	return (
@@ -456,6 +466,8 @@ export function App({ spritesheetHref }: { spritesheetHref: string }) {
 			<Box display="flex" gap="space.8">
 				<Blockquote>Hello</Blockquote>
 				<Box padding="space.16" renderRoot={renderRoot}>Owned root</Box>
+				<Heading level={2}>Heading</Heading>
+				<Text color="secondary" renderRoot={textRenderRoot}>Owned text</Text>
 				<TextInputField label="Name" />
 				<Button onPress={() => {}}>Save</Button>
 			</Box>

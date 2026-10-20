@@ -1,6 +1,6 @@
 import { useLocale } from 'react-aria-components/I18nProvider';
 import { useIsWithinHeading } from '../heading/heading-context.js';
-import type { TextProps } from '../text/text.js';
+import type { TextElementProps, TextProps } from '../text/text.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -12,8 +12,12 @@ export type NumeralAbbreviation = boolean | 'long';
 /** Fixed precision or `[min, max]` precision range. */
 export type NumeralPrecision = number | readonly [number, number];
 
-type _NumeralOmit = DistributiveOmit<TextProps, 'children' | 'textAlign' | 'fontVariantNumeric'>;
-interface _NumeralProps extends _NumeralOmit {
+type _NumeralOmit = DistributiveOmit<
+	TextElementProps,
+	'children' | 'fontVariantNumeric' | 'textAlign'
+>;
+
+type _NumeralProps = _NumeralOmit & {
 	/** Enables compact notation (`1.2K`, `1.2 thousand`). */
 	abbreviate?: NumeralAbbreviation;
 	/** Currency code such as `USD`. */
@@ -40,7 +44,7 @@ interface _NumeralProps extends _NumeralOmit {
 	unit?: NonNullable<Intl.NumberFormatOptions['unit']>;
 	/** Number to format. */
 	value: number;
-}
+};
 
 /** Props for `Numeral`. */
 export type NumeralProps = Prettify<_NumeralProps>;

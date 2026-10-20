@@ -13,7 +13,7 @@ import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxRecipe } from './styles.css.js';
 
-type _ComboboxControlOmit = DistributiveOmit<RacGroupProps, 'className'>;
+type _ComboboxControlOmit = DistributiveOmit<RacGroupProps, 'className' | 'render'>;
 interface _ComboboxControlProps extends _ComboboxControlOmit {
 	className?: RacGroupProps['className'];
 	/** Forwarded to the control's group element. */

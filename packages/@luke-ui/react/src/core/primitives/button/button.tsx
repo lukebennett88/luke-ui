@@ -11,7 +11,7 @@ import type { DocumentedPressProps } from '../../types/documented-rac-props.js';
 import type { Prettify } from '../../types/prettify.js';
 import { buttonRecipeInternal } from './recipe.css.js';
 
-type _ButtonOmit = DistributiveOmit<RacButtonProps, keyof DocumentedPressProps>;
+type _ButtonOmit = DistributiveOmit<RacButtonProps, 'render' | keyof DocumentedPressProps>;
 type _ButtonProps = _ButtonOmit &
 	ButtonPresentationProps &
 	DocumentedPressProps & {

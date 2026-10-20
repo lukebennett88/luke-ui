@@ -1,6 +1,8 @@
 import { Heading, HeadingLevels, useHeadingLevel } from '@luke-ui/react/heading';
-import { expect, test } from 'vite-plus/test';
+import { expect, test, vi } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { INTER_CAP_HEIGHT_EM, loadInter } from '../test-utils/load-inter.js';
+import { measureBaseline } from '../test-utils/measure-first-line.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -44,6 +46,52 @@ test('keeps semantic heading level independent of visual type style', async () =
 		.toBeVisible();
 });
 
+test('Heading renderRoot receives the resolved level and owns its matching heading root', () => {
+	const warning = vi.spyOn(console, 'warn');
+	const { locator } = render(
+		<Heading
+			renderRoot={({ children, ...domProps }, { element: HeadingTag }) => (
+				<HeadingTag {...domProps} data-testid="owned-heading">
+					{children}
+				</HeadingTag>
+			)}
+			level={3}
+		>
+			Owned heading
+		</Heading>,
+	);
+	const heading = locator.getByTestId('owned-heading').element();
+
+	expect(heading.tagName).toBe('H3');
+	expect(locator.getByRole('heading', { level: 3, name: 'Owned heading' }).element()).toBe(heading);
+	expect(warning.mock.calls.flat().join(' ')).not.toContain('Unexpected DOM element returned');
+	warning.mockRestore();
+});
+
+test('Heading renderRoot keeps Capsize trim by default', async () => {
+	await loadInter();
+	const { locator } = render(
+		<div style={{ inlineSize: '16rem' }}>
+			<Heading
+				level={2}
+				renderRoot={({ children, ...domProps }, { element: HeadingTag }) => (
+					<HeadingTag {...domProps} data-testid="heading-render">
+						{children}
+					</HeadingTag>
+				)}
+			>
+				Trimmed owned heading
+			</Heading>
+		</div>,
+	);
+	const heading = locator.getByTestId('heading-render').element();
+	const { top } = heading.getBoundingClientRect();
+	const firstBaseline = measureBaseline(heading);
+	const fontSize = Number.parseFloat(getComputedStyle(heading).fontSize);
+
+	expect(Math.abs(top - (firstBaseline - INTER_CAP_HEIGHT_EM * fontSize))).toBeLessThanOrEqual(0.5);
+});
+
 test('inherits the current HeadingLevels base without advancing it', async () => {
 	const { locator } = render(
 		<HeadingLevels base={2}>
@@ -72,6 +120,36 @@ test('nested HeadingLevels advance exactly one level for Heading', async () => {
 	await expect.element(locator.getByRole('heading', { level: 2, name: 'Outer' })).toBeVisible();
 	await expect.element(locator.getByRole('heading', { level: 3, name: 'Inner' })).toBeVisible();
 	await expect.element(locator.getByRole('heading', { level: 4, name: 'Deeper' })).toBeVisible();
+});
+
+test('Heading renderRoot keeps nested HeadingLevels semantics', async () => {
+	const { locator } = render(
+		<HeadingLevels base={2}>
+			<Heading renderRoot={(domProps, { element: HeadingTag }) => <HeadingTag {...domProps} />}>
+				Outer owned
+			</Heading>
+			<HeadingLevels>
+				<Heading renderRoot={(domProps, { element: HeadingTag }) => <HeadingTag {...domProps} />}>
+					Inner owned
+				</Heading>
+				<HeadingLevels>
+					<Heading renderRoot={(domProps, { element: HeadingTag }) => <HeadingTag {...domProps} />}>
+						Deeper owned
+					</Heading>
+				</HeadingLevels>
+			</HeadingLevels>
+		</HeadingLevels>,
+	);
+
+	await expect
+		.element(locator.getByRole('heading', { level: 2, name: 'Outer owned' }))
+		.toBeVisible();
+	await expect
+		.element(locator.getByRole('heading', { level: 3, name: 'Inner owned' }))
+		.toBeVisible();
+	await expect
+		.element(locator.getByRole('heading', { level: 4, name: 'Deeper owned' }))
+		.toBeVisible();
 });
 
 test('explicit level overrides context without changing siblings', async () => {
@@ -118,8 +196,8 @@ test('caps nested HeadingLevels at h6', async () => {
 
 test('useHeadingLevel reads the current level without advancing it', async () => {
 	function CurrentLevel({ label }: { label: string }) {
-		const { element: Element, level } = useHeadingLevel();
-		return <Element>{`${label} h${level}`}</Element>;
+		const { element: HeadingTag, level } = useHeadingLevel();
+		return <HeadingTag>{`${label} h${level}`}</HeadingTag>;
 	}
 
 	const { locator } = render(

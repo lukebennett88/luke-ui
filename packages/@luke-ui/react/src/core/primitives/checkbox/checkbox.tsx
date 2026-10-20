@@ -82,7 +82,7 @@ interface _CheckboxRootProps extends _CheckboxRootOmit {
 /** Props for `CheckboxRoot`. */
 export type CheckboxRootProps = Prettify<_CheckboxRootProps>;
 
-interface _CheckboxLabelProps extends RacCheckboxButtonProps {
+interface _CheckboxLabelProps extends DistributiveOmit<RacCheckboxButtonProps, 'render'> {
 	/**
 	 * `CheckboxControl` plus textual, non-interactive label content, unless a `FieldLabel` supplies
 	 * the label. Pass a function to render from the checkbox state.

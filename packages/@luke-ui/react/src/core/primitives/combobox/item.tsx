@@ -19,7 +19,10 @@ import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxItemClassName, comboboxRecipe } from './styles.css.js';
 
-type _ComboboxItemOmit<T extends object> = DistributiveOmit<RacListBoxItemProps<T>, 'className'>;
+type _ComboboxItemOmit<T extends object> = DistributiveOmit<
+	RacListBoxItemProps<T>,
+	'className' | 'render'
+>;
 
 interface _ComboboxItemProps<T extends object> extends _ComboboxItemOmit<T> {
 	className?: RacListBoxItemProps<T>['className'];
@@ -64,7 +67,10 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 	);
 }
 
-type _ComboboxLoadMoreItemOmit = DistributiveOmit<RacListBoxLoadMoreItemProps, 'className'>;
+type _ComboboxLoadMoreItemOmit = DistributiveOmit<
+	RacListBoxLoadMoreItemProps,
+	'className' | 'render'
+>;
 interface _ComboboxLoadMoreItemProps extends _ComboboxLoadMoreItemOmit {
 	className?: RacListBoxLoadMoreItemProps['className'];
 	size?: ComboboxSize;

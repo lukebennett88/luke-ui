@@ -9,7 +9,7 @@ import type { ControlSize } from '../sizing/control-size.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 
-type _FormOmit = DistributiveOmit<RacFormProps, 'onSubmit'>;
+type _FormOmit = DistributiveOmit<RacFormProps, 'onSubmit' | 'render'>;
 
 interface _FormProps extends _FormOmit {
 	/** Default recipe size for fields and actions. An explicit component size takes precedence.

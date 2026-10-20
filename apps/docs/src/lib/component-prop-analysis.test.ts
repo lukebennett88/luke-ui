@@ -150,6 +150,7 @@ test(
 			'HeadingProps',
 		);
 		expect(names).toContain('level');
+		expect(names).toContain('renderRoot');
 		expect(names).toContain('typography');
 		expect(names).not.toContain('onClick');
 		expect(names).not.toContain('onPointerMoveCapture');
@@ -295,7 +296,6 @@ const AUDITED_TYPES: ReadonlyArray<{
 			'placeholder',
 			'readOnly',
 			'ref',
-			'render',
 			'required',
 			'size',
 			'value',
@@ -309,25 +309,26 @@ const AUDITED_TYPES: ReadonlyArray<{
 		visible: ['cite', 'lineClamp', 'textWrap'],
 	},
 	{
-		// The field guide teaches connecting labels with `htmlFor`.
+		// The field guide teaches connecting labels with `htmlFor`. Field labels keep fixed semantics.
 		forwardsDomProps: true,
 		name: 'FieldLabelProps',
 		path: 'packages/@luke-ui/react/src/core/primitives/field/label.tsx',
-		visible: ['elementType', 'htmlFor', 'necessityIndicator', 'render'],
+		visible: ['htmlFor', 'necessityIndicator'],
 	},
 	{
 		// The field guide teaches connecting helper text with `id` and `aria-describedby`.
 		forwardsDomProps: true,
 		name: 'FieldDescriptionProps',
 		path: 'packages/@luke-ui/react/src/core/primitives/field/description.tsx',
-		visible: ['elementType', 'id', 'render'],
+		visible: ['id'],
 	},
 	{
-		// `FieldError` styles RAC's field error slot, so it documents the same element-choice contract.
+		// `FieldError` styles RAC's field error slot. Children may be a state function; root
+		// replacement is not public.
 		forwardsDomProps: true,
 		name: 'FieldErrorProps',
 		path: 'packages/@luke-ui/react/src/core/primitives/field/error.tsx',
-		visible: ['elementType', 'render'],
+		visible: [],
 	},
 	{
 		// The guide teaches `elementType` for a screen-reader-only heading, `isFocusable` for focus
@@ -538,6 +539,8 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 		name: 'TextProps',
 		path: 'packages/@luke-ui/react/src/core/text/text.tsx',
 		props: [
+			'children',
+			'className',
 			'color',
 			'elementType',
 			'fontStyle',
@@ -545,10 +548,12 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'fontWeight',
 			'isVisuallyHidden',
 			'lineClamp',
-			'render',
+			'ref',
+			'renderRoot',
 			'shouldDisableTrim',
 			'shouldInheritFont',
 			'slot',
+			'style',
 			'textAlign',
 			'textDecoration',
 			'textTransform',
@@ -627,7 +632,6 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'onPressUp',
 			'prominence',
 			'ref',
-			'render',
 			'size',
 			'slot',
 			'tone',
@@ -698,7 +702,6 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'onPressEnd',
 			'onPressStart',
 			'onPressUp',
-			'render',
 			'size',
 			'slot',
 			'type',
@@ -732,7 +735,6 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'onPressEnd',
 			'onPressStart',
 			'onPressUp',
-			'render',
 			'size',
 			'type',
 		],
