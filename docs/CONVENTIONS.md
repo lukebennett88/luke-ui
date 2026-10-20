@@ -158,10 +158,13 @@ When polymorphism is justified:
 - Use `render<Name>` only for a deliberately replaceable named part. Do not conflate children-as-
   function or state-aware `className`/`style` with root replacement.
 
-Do not rename React Aria's `render` to `renderRoot` just because a wrapper exists. Keep RAC `render`
-only where that seam is itself the demonstrated composition API (for example merging host attributes
-onto `Link`). Otherwise omit it. Prefer Luke UI `renderRoot` for Luke-owned layout and typography
-roots such as `Box` and `Text`.
+Keep root replacement consistent: when a caller owns a Luke UI root, expose `renderRoot` with the
+Luke UI `(domProps, state)` contract. Keep React Aria's `render` only when a documented integration
+needs React Aria's host-prop merging while preserving its component semantics. `Link` uses this
+exception for MDX anchors, which merge authored anchor attributes with React Aria's resolved link
+props and preserve the root React Aria selects. Do not keep RAC `render` as a second root-replacement
+API or add it to wrappers without a demonstrated integration need. Prefer Luke UI `renderRoot` for
+Luke-owned layout and typography roots such as `Box` and `Text`.
 
 Luke UI `renderRoot` and `render<Name>` callbacks receive `(domProps, state)`. The first argument
 contains resolved presentation props. Pass an empty object as the second argument when the component

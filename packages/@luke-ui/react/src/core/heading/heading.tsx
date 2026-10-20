@@ -10,7 +10,7 @@ export type { HeadingLevel } from './heading-context.js';
 export { HeadingLevels, useHeadingLevel } from './heading-context.js';
 
 /** Resolved heading semantics supplied to a caller-owned heading root. */
-export type HeadingRenderRootState = {
+type HeadingRenderRootState = {
 	element: `h${HeadingLevel}`;
 	level: HeadingLevel;
 };

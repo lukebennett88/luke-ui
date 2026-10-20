@@ -211,7 +211,7 @@ test('Text renderRoot receives an empty state object', () => {
 });
 
 test('Text renderRoot returns the expected React Aria element without warnings', () => {
-	const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+	const warning = vi.spyOn(console, 'warn');
 	const { locator } = render(
 		<Text renderRoot={(domProps) => <span {...domProps} data-testid="contract-text" />}>
 			Owned

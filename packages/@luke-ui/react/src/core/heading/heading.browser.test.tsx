@@ -47,7 +47,7 @@ test('keeps semantic heading level independent of visual type style', async () =
 });
 
 test('Heading renderRoot receives the resolved level and owns its matching heading root', () => {
-	const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+	const warning = vi.spyOn(console, 'warn');
 	const { locator } = render(
 		<Heading
 			renderRoot={({ children, ...domProps }, { element: HeadingTag }) => (

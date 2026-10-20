@@ -377,7 +377,7 @@ test('keeps the active result within the visible list while navigating and wraps
 	await expect.poll(() => activeDescendantId(input)).toBe(first.id);
 	await expectResultWithinList(first, list);
 	await expect.element(input).toHaveFocus();
-}, 30_000);
+}, 15_000);
 
 /** Presses an arrow key one step at a time so activedescendant can settle under CI load. */
 async function moveActiveResult(
