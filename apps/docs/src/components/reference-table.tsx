@@ -15,10 +15,13 @@ export type TableElementBoxProps = Omit<
 	keyof HTMLAttributes<HTMLElement> | 'elementType' | 'ref' | 'renderRoot'
 >;
 
-/** Cell text: the label type style without cap-height trim, which would distort table rows. */
-export function CellText(
-	props: Omit<TextElementProps, 'renderRoot' | 'shouldDisableTrim' | 'typography'>,
-) {
+/**
+ * Cell text: the label type style without cap-height trim, which would distort table rows.
+ *
+ * Keeps `elementType` so rich description cells can use a block container for MDX content. Omits
+ * `renderRoot`; table cells do not need caller-owned roots.
+ */
+export function CellText(props: Omit<TextElementProps, 'shouldDisableTrim' | 'typography'>) {
 	return <Text shouldDisableTrim typography="label" {...props} />;
 }
 

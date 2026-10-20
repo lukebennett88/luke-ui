@@ -155,7 +155,10 @@ export function Text(props: TextProps) {
 	);
 }
 
-/** React Aria Text root used by Text and Heading with an explicit expected element type. */
+/**
+ * React Aria Text root shared by `Text` and `Heading`. Callers pass the element React Aria should
+ * expect so a `renderRoot` callback can return that same tag without development warnings.
+ */
 export function TextRoot({
 	elementType,
 	props,
@@ -187,14 +190,12 @@ export function TextRoot({
 	} = props;
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
 	const resolvedTypography: NonNullable<TextRecipeVariants['typography']> = typography ?? 'body';
-	const ownsRoot = renderRoot != null;
 
 	const resolvedShouldDisableTrim: boolean = (() => {
 		if (hasLineClamp) return true;
 		if (shouldDisableTrim !== undefined) return shouldDisableTrim;
-		// A caller-owned root is an unknown element type, so trim stays off unless asked for.
-		// Heading and other block owners that know their semantics pass `shouldDisableTrim={false}`.
-		if (ownsRoot) return true;
+		// Infer from the element React Aria expects. Text `renderRoot` keeps `span` (no trim);
+		// Heading passes its resolved `h1`–`h6` (trim on).
 		return !blockTextElementTypes.has(elementType);
 	})();
 

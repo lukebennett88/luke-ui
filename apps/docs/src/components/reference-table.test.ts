@@ -5,7 +5,7 @@ import type { CellText } from './reference-table.js';
 
 type CellTextProps = ComponentProps<typeof CellText>;
 
-test('CellText supports block content without exposing renderRoot', () => {
+test('CellText allows elementType for block description content without renderRoot', () => {
 	assertType<CellTextProps>({ color: 'secondary' });
 	assertType<CellTextProps>({ elementType: 'div', children: createElement('ul') });
 	// @ts-expect-error — table cell text does not expose caller-owned roots

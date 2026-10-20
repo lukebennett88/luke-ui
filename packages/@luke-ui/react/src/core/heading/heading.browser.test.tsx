@@ -1,5 +1,5 @@
 import { Heading, HeadingLevels, useHeadingLevel } from '@luke-ui/react/heading';
-import { expect, test } from 'vite-plus/test';
+import { expect, test, vi } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { INTER_CAP_HEIGHT_EM, loadInter } from '../test-utils/load-inter.js';
 import { measureBaseline } from '../test-utils/measure-first-line.js';
@@ -47,12 +47,13 @@ test('keeps semantic heading level independent of visual type style', async () =
 });
 
 test('Heading renderRoot receives the resolved level and owns its matching heading root', () => {
+	const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
 	const { locator } = render(
 		<Heading
-			renderRoot={({ children, ...domProps }, { element: Element }) => (
-				<Element {...domProps} data-testid="owned-heading">
+			renderRoot={({ children, ...domProps }, { element: HeadingTag }) => (
+				<HeadingTag {...domProps} data-testid="owned-heading">
 					{children}
-				</Element>
+				</HeadingTag>
 			)}
 			level={3}
 		>
@@ -63,6 +64,8 @@ test('Heading renderRoot receives the resolved level and owns its matching headi
 
 	expect(heading.tagName).toBe('H3');
 	expect(locator.getByRole('heading', { level: 3, name: 'Owned heading' }).element()).toBe(heading);
+	expect(warning.mock.calls.flat().join(' ')).not.toContain('Unexpected DOM element returned');
+	warning.mockRestore();
 });
 
 test('Heading renderRoot keeps Capsize trim by default', async () => {
@@ -71,10 +74,10 @@ test('Heading renderRoot keeps Capsize trim by default', async () => {
 		<div style={{ inlineSize: '16rem' }}>
 			<Heading
 				level={2}
-				renderRoot={({ children, ...domProps }, { element: Element }) => (
-					<Element {...domProps} data-testid="heading-render">
+				renderRoot={({ children, ...domProps }, { element: HeadingTag }) => (
+					<HeadingTag {...domProps} data-testid="heading-render">
 						{children}
-					</Element>
+					</HeadingTag>
 				)}
 			>
 				Trimmed owned heading
@@ -122,15 +125,15 @@ test('nested HeadingLevels advance exactly one level for Heading', async () => {
 test('Heading renderRoot keeps nested HeadingLevels semantics', async () => {
 	const { locator } = render(
 		<HeadingLevels base={2}>
-			<Heading renderRoot={(domProps, { element: Element }) => <Element {...domProps} />}>
+			<Heading renderRoot={(domProps, { element: HeadingTag }) => <HeadingTag {...domProps} />}>
 				Outer owned
 			</Heading>
 			<HeadingLevels>
-				<Heading renderRoot={(domProps, { element: Element }) => <Element {...domProps} />}>
+				<Heading renderRoot={(domProps, { element: HeadingTag }) => <HeadingTag {...domProps} />}>
 					Inner owned
 				</Heading>
 				<HeadingLevels>
-					<Heading renderRoot={(domProps, { element: Element }) => <Element {...domProps} />}>
+					<Heading renderRoot={(domProps, { element: HeadingTag }) => <HeadingTag {...domProps} />}>
 						Deeper owned
 					</Heading>
 				</HeadingLevels>
@@ -193,8 +196,8 @@ test('caps nested HeadingLevels at h6', async () => {
 
 test('useHeadingLevel reads the current level without advancing it', async () => {
 	function CurrentLevel({ label }: { label: string }) {
-		const { element: Element, level } = useHeadingLevel();
-		return <Element>{`${label} h${level}`}</Element>;
+		const { element: HeadingTag, level } = useHeadingLevel();
+		return <HeadingTag>{`${label} h${level}`}</HeadingTag>;
 	}
 
 	const { locator } = render(

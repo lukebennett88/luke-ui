@@ -327,7 +327,7 @@ test('a FieldLabel uses the control root required state over its isRequired prop
 	expect(labelFor(input('Conflict')).textContent).toBe('Conflict\u00A0*');
 });
 
-test('a FieldLabel with a render prop still draws the marker and names the control', () => {
+test('a FieldLabel draws the marker and names the control', () => {
 	render(
 		<TextInputRoot isRequired>
 			<FieldLabel>Example field</FieldLabel>

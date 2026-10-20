@@ -75,7 +75,7 @@ export function Heading(props: HeadingProps) {
 						fontWeight,
 						renderRoot: (domProps) =>
 							renderRoot(domProps, { element: headingElement, level: resolvedLevel }),
-						shouldDisableTrim: shouldDisableTrim ?? false,
+						shouldDisableTrim,
 						typography: resolvedTypography,
 					}}
 				/>

@@ -33,7 +33,7 @@ test('Text renderRoot and elementType are mutually exclusive', () => {
 		elementType: 'p',
 		renderRoot: () => createElement('p'),
 	});
-	assertType<TextProps>({ id: 'copy', renderRoot: () => createElement('p') });
+	assertType<TextProps>({ id: 'copy', renderRoot: () => createElement('span') });
 	assertType<TextProps>({ elementType: 'p', id: 'copy' });
 });
 
