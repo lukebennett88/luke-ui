@@ -7,7 +7,7 @@ import { cx } from '@luke-ui/react/utils';
 import { useActiveAnchor } from 'fumadocs-core/toc';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { CSSProperties, ReactNode } from 'react';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { plainList } from '../../styles/plain-list.css.js';
 import { docsNavPaneProps } from '../docs-nav.js';
 import * as styles from './docs-article.css.js';
@@ -49,9 +49,9 @@ export function DocsTocColumn({ toc }: { toc: Array<TOCItemType> }) {
 export function DocsTocBar({ toc }: { toc: Array<TOCItemType> }) {
 	const detailsRef = useRef<HTMLDetailsElement>(null);
 
-	function close() {
+	const close = useCallback(() => {
 		if (detailsRef.current) detailsRef.current.open = false;
-	}
+	}, []);
 
 	// Escape closes the panel from anywhere inside it and returns focus to the summary. A press
 	// outside the disclosure closes it too, because the open panel overlays the article.
@@ -72,7 +72,7 @@ export function DocsTocBar({ toc }: { toc: Array<TOCItemType> }) {
 			details.removeEventListener('keydown', handleKeyDown);
 			document.removeEventListener('pointerdown', handlePointerDown);
 		};
-	}, []);
+	}, [close]);
 
 	return (
 		<details className={styles.tocBar} ref={detailsRef}>

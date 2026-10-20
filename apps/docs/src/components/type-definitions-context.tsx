@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createContext, useReducer } from 'react';
+import { createContext, useCallback, useMemo, useReducer } from 'react';
 import { loadTypeDefinitions } from '../lib/load-type-definitions.js';
 import type { TypeDefinitionsLoadState } from '../lib/type-definitions-load-state.js';
 import { typeDefinitionsLoadReducer } from '../lib/type-definitions-load-state.js';
@@ -44,7 +44,7 @@ function TypeDefinitionsLoader({
 }) {
 	const [load, dispatch] = useReducer(typeDefinitionsLoadReducer, { status: 'idle' });
 
-	async function ensureLoaded() {
+	const ensureLoaded = useCallback(async () => {
 		if (load.status === 'loading' || load.status === 'ready') return;
 
 		dispatch({ type: 'load-start' });
@@ -54,11 +54,15 @@ function TypeDefinitionsLoader({
 			const message = error instanceof Error ? error.message : 'Failed to load type definitions';
 			dispatch({ message, type: 'load-error' });
 		}
-	}
+	}, [href, load.status]);
+
+	const nameSet = useMemo(() => new Set(names), [names]);
+	const value = useMemo(
+		() => ({ ensureLoaded, load, names: nameSet }),
+		[ensureLoaded, load, nameSet],
+	);
 
 	return (
-		<TypeDefinitionsContext.Provider value={{ ensureLoaded, load, names: new Set(names) }}>
-			{children}
-		</TypeDefinitionsContext.Provider>
+		<TypeDefinitionsContext.Provider value={value}>{children}</TypeDefinitionsContext.Provider>
 	);
 }

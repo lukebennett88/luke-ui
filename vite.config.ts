@@ -24,13 +24,9 @@ export default defineConfig({
 		singleAttributePerLine: false,
 		singleQuote: true,
 		sortImports: {
-			customGroups: [
-				{ elementNamePattern: ['http://**', 'https://**'], groupName: 'url' },
-				{ elementNamePattern: ['*:*'], groupName: 'protocol' },
-			],
+			customGroups: [{ elementNamePattern: ['*:*'], groupName: 'protocol' }],
 			groups: [
 				['side_effect_style', 'side_effect'],
-				'url',
 				'protocol',
 				['builtin', 'external', 'type-builtin', 'type-external'],
 				['subpath', 'internal', 'type-subpath', 'type-internal'],
@@ -38,7 +34,6 @@ export default defineConfig({
 				'unknown',
 			],
 			ignoreCase: false,
-			internalPattern: ['@/', '#', '~'],
 			newlinesBetween: false,
 			sortSideEffects: true,
 		},
@@ -50,8 +45,21 @@ export default defineConfig({
 		categories: {
 			correctness: 'deny',
 			perf: 'deny',
+			suspicious: 'deny',
 		},
-		ignorePatterns: ['node_modules', '.source', '**/dist/**', '**/routeTree.gen.ts'],
+		env: {
+			browser: true,
+			builtin: true,
+			es2024: true,
+			node: true,
+		},
+		ignorePatterns: [
+			'**/node_modules/**',
+			'.source',
+			'**/dist/**',
+			'**/routeTree.gen.ts',
+			'**/*.tsbuildinfo',
+		],
 		jsPlugins: [
 			{
 				name: 'react-hooks-js',
@@ -69,10 +77,31 @@ export default defineConfig({
 		overrides: [
 			{
 				// Docs examples are copyable source. Allow intentional `tabIndex={0}` on scrollable
-				// non-interactive elements without suppression comments in the published samples.
+				// non-interactive elements, and demo iframes, without suppression comments in the
+				// published samples.
 				files: ['apps/docs/src/examples/**/*.{ts,tsx}'],
 				rules: {
 					'jsx-a11y/no-noninteractive-tabindex': 'off',
+					'react/iframe-missing-sandbox': 'off',
+				},
+			},
+			{
+				// Only `@luke-ui/react` runs the React Compiler; use its dep analysis here.
+				files: ['packages/@luke-ui/react/src/**/*.{ts,tsx}'],
+				rules: {
+					'react/exhaustive-deps': 'off',
+					'react/exhaustive-effect-dependencies': 'error',
+					'react/memo-dependencies': 'error',
+					'react/preserve-manual-memoization': 'error',
+					'react/capitalized-calls': 'error',
+					// Compiler-only: block syntax the compiler cannot handle and APIs that break memoisation.
+					'react/incompatible-library': 'error',
+					'react/unsupported-syntax': 'error',
+					// Compiler memoises context values.
+					'react/jsx-no-constructed-context-values': 'off',
+					'react-hooks-js/component-hook-factories': 'error',
+					'react-hooks-js/config': 'error',
+					'react-hooks-js/gating': 'error',
 				},
 			},
 			{
@@ -171,41 +200,76 @@ export default defineConfig({
 					],
 				},
 			},
+			{
+				files: ['**/*.{test,browser.test}.{ts,tsx}'],
+				rules: {
+					// Nested fixtures in tests often declare helpers that capture nothing; hoisting hurts readability.
+					'unicorn/consistent-function-scoping': 'off',
+				},
+			},
 		],
-		plugins: ['import', 'jsx-a11y', 'react', 'typescript', 'vitest'],
+		// Setting `plugins` replaces oxlint defaults, so include unicorn + oxc explicitly.
+		plugins: [
+			'import',
+			'jsdoc',
+			'jsx-a11y',
+			'node',
+			'oxc',
+			'react',
+			'typescript',
+			'unicorn',
+			'vitest',
+		],
+		// Categories deny correctness+perf. Rules below are exceptions, options, or non-category policies.
 		rules: {
 			curly: 'off',
 			'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
 			'import/no-duplicates': 'error',
+			'import/no-unassigned-import': ['error', { allow: ['**/*.css', '**/*.css.js'] }],
 			'jsdoc/check-access': 'error',
 			'jsdoc/check-property-names': 'error',
 			'jsdoc/check-tag-names': 'error',
 			'jsdoc/empty-tags': 'error',
+			'jsdoc/require-yields': 'off',
 			'jsx-a11y/prefer-tag-over-role': 'off',
-			'no-console': 'warn',
+			'no-console': 'error',
+			// Internal `_Prop` aliases, `__dirname`, and event-name prefixes are intentional.
+			'no-underscore-dangle': 'off',
 			'no-unused-vars': 'error',
-			// Oxlint has no native equivalent for these two rules yet; keep them on the JS plugin.
-			'react-hooks-js/config': 'error',
-			'react-hooks-js/gating': 'error',
+			'no-var': 'error',
+			'oxc/no-accumulating-spread': 'error',
+			'prefer-const': 'error',
+			'prefer-rest-params': 'error',
+			'prefer-spread': 'error',
+			// Classic hooks stay repo-wide. Compiler memoization / plugin rules: `@luke-ui/react` only.
+			'react-hooks-js/component-hook-factories': 'off',
+			'react-hooks-js/config': 'off',
+			'react-hooks-js/gating': 'off',
+			'react/capitalized-calls': 'off',
 			'react/error-boundaries': 'error',
-			'react/exhaustive-deps': 'warn',
+			'react/exhaustive-deps': 'error',
+			'react/exhaustive-effect-dependencies': 'off',
 			'react/globals': 'error',
+			'react/hooks': 'off',
 			'react/immutability': 'error',
+			// Warn outside compiled code: flags libraries whose APIs break compiler memoisation.
 			'react/incompatible-library': 'warn',
-			// The React Compiler memoises context values, so manual `useMemo` is redundant.
-			'react/jsx-no-constructed-context-values': 'off',
+			'react/memo-dependencies': 'off',
 			'react/no-array-index-key': 'off',
-			'react/preserve-manual-memoization': 'error',
+			'react/preserve-manual-memoization': 'off',
 			'react/purity': 'error',
+			'react/react-in-jsx-scope': 'off',
 			'react/refs': 'error',
 			'react/rules-of-hooks': 'error',
 			'react/set-state-in-effect': 'error',
 			'react/set-state-in-render': 'error',
 			'react/static-components': 'error',
-			'react/unsupported-syntax': 'warn',
+			// Off outside compiled code: only guards syntax the React Compiler cannot handle.
+			'react/unsupported-syntax': 'off',
 			'react/use-memo': 'error',
 			'sort-imports': 'off',
 			'typescript/array-type': ['error', { default: 'generic' }],
+			'typescript/consistent-return': 'off',
 			'typescript/consistent-type-exports': [
 				'error',
 				{ fixMixedExportsWithInlineTypeSpecifier: false },
@@ -219,6 +283,32 @@ export default defineConfig({
 			// shorthand by design. It matters most where a hand-written interface models an external
 			// API and a cast asserts the match, as the docs prop analysis does with ts-morph.
 			'typescript/method-signature-style': ['error', 'property'],
+			'typescript/no-explicit-any': 'off',
+			'typescript/no-generated-empty-object-type': 'off',
+			// Explicit default type args document selection mode (e.g. Combobox `'single'`).
+			'typescript/no-unnecessary-type-arguments': 'off',
+			// Theme/generics code uses intentional narrow casts; with `suspicious` enabled these fire too often.
+			'typescript/no-unnecessary-type-assertion': 'off',
+			'typescript/no-unnecessary-type-conversion': 'off',
+			'typescript/no-unnecessary-type-parameters': 'off',
+			'typescript/no-unsafe-type-assertion': 'off',
+			'unicorn/consistent-empty-array-spread': 'error',
+			'unicorn/no-abusive-eslint-disable': 'error',
+			'unicorn/no-array-reduce': 'error',
+			'unicorn/no-invalid-fetch-options': 'error',
+			'unicorn/no-typeof-undefined': 'error',
+			'unicorn/no-unnecessary-slice-end': 'error',
+			'unicorn/no-useless-promise-resolve-reject': 'error',
+			'unicorn/no-useless-spread': 'error',
+			// Image/media element handlers commonly use `onload` / `onerror` properties.
+			'unicorn/prefer-add-event-listener': 'off',
+			'unicorn/prefer-array-flat-map': 'error',
+			'unicorn/prefer-array-index-of': 'error',
+			'unicorn/prefer-array-some': 'error',
+			'unicorn/prefer-native-coercion-functions': 'error',
+			'unicorn/prefer-node-protocol': 'error',
+			'unicorn/prefer-optional-catch-binding': 'error',
+			'unicorn/prefer-set-size': 'error',
 			'vite-plus/prefer-vite-plus-imports': 'error',
 			'vitest/expect-expect': [
 				'error',
@@ -236,6 +326,8 @@ export default defineConfig({
 					],
 				},
 			],
+			// Table-driven suites pass string variables as titles; oxlint flags those even with `allowArguments`.
+			'vitest/valid-title': 'off',
 		},
 	},
 });

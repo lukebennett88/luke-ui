@@ -57,7 +57,11 @@ export function useDocsTheme() {
 		getThemePrefsSnapshot,
 		getServerThemePrefsSnapshot,
 	);
-	return { ...prefs, setColorModePreference, setThemeIdentity };
+	return {
+		...prefs,
+		setColorModePreference: persistColorModePreference,
+		setThemeIdentity: persistThemeIdentity,
+	};
 }
 
 const THEME_IDENTITIES = [
@@ -71,11 +75,11 @@ const COLOR_MODES = [
 	{ icon: 'circleHalf', label: 'System theme', value: 'system' },
 ] as const;
 
-function setThemeIdentity(themeIdentity: ThemeIdentity) {
+function persistThemeIdentity(themeIdentity: ThemeIdentity) {
 	writeThemePrefs({ themeIdentity });
 }
 
-function setColorModePreference(colorModePreference: ColorModePreference) {
+function persistColorModePreference(colorModePreference: ColorModePreference) {
 	writeThemePrefs({ colorModePreference });
 }
 

@@ -17,7 +17,7 @@ test('groups visible prop names for ComponentPropsTable rendering', () => {
 		'Forms',
 	]);
 	expect(groups[0]?.defaultOpen).toBe(true);
-	expect(groups.slice(1).every((group) => group.defaultOpen === false)).toBe(true);
+	expect(groups.slice(1).every((group) => !group.defaultOpen)).toBe(true);
 });
 
 test('classifies styling, accessibility, and advanced props into shared groups', () => {

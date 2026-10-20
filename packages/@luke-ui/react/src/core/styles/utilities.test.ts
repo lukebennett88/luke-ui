@@ -27,7 +27,7 @@ test('resolves backgroundColor and borderColor tokens to their theme variables',
 
 	// An unregistered token still yields a class, with the raw string assigned as the custom
 	// property value, so the contract is the `var(--luke-*)` references.
-	expect(Object.values(style ?? {}).sort()).toEqual([
+	expect(Object.values(style ?? {}).toSorted()).toEqual([
 		'var(--luke-color-background-accent-solid-rest)',
 		'var(--luke-color-border-focus)',
 	]);

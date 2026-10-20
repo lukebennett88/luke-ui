@@ -41,7 +41,7 @@ describe('createPrimitivePlan', () => {
 		expect(plan.expected).toEqual({
 			packageExportPath: './primitives/status-badge',
 		});
-		expect(plan.files.map((file) => file.path).sort()).toEqual([
+		expect(plan.files.map((file) => file.path).toSorted()).toEqual([
 			'apps/docs/content/docs/components/primitives/status-badge.mdx',
 			'apps/docs/src/examples/status-badge-primitive/basic.tsx',
 			'packages/@luke-ui/react/src/core/primitives/status-badge/recipe.css.ts',

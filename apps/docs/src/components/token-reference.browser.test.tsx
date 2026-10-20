@@ -50,7 +50,7 @@ test('a typography token copies its typed path', async () => {
 
 test('the token reference tables have no axe violations', async () => {
 	await renderReference();
-	const results = await axe.run(container!);
+	const results = await axe.run(container);
 	expect(
 		results.violations.map((violation) => ({
 			id: violation.id,

@@ -34,7 +34,7 @@ async function main() {
 	const svgFiles = fs
 		.readdirSync(INPUT_DIR)
 		.filter((f) => f.endsWith('.svg'))
-		.sort();
+		.toSorted();
 
 	if (svgFiles.length === 0) {
 		process.stdout.write(`No SVG files found in: ${INPUT_DIR}\n`);

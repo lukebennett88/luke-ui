@@ -37,10 +37,9 @@ function buildSections(origin: string): Array<LlmsIndexSection> {
 		source.getPages().map((page) => [page.path.replace(/\.mdx$/, ''), page] as const),
 	);
 
-	const docsGroups = parseMetaGroups(readMetaPages(docsMeta)).map((group) => ({
-		...group,
-		slugs: group.slugs.map((slug) => `docs/${slug}`),
-	}));
+	const docsGroups = parseMetaGroups(readMetaPages(docsMeta)).map((group) =>
+		Object.assign({}, group, { slugs: group.slugs.map((slug) => `docs/${slug}`) }),
+	);
 
 	const docsSections = docsGroups.map((group): LlmsIndexSection => ({
 		pages: group.slugs.flatMap((slug) => {

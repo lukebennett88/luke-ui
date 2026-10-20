@@ -121,6 +121,14 @@ jobs:
       - name: Run docs tests
         run: pnpm --filter docs run test
 
+      - name: Upload docs test failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-test-failure-screenshots
+          path: apps/docs/.vitest/attachments
+          if-no-files-found: ignore
+
   reference-app-tests:
     name: reference-app-tests
     runs-on: ubuntu-latest

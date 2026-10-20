@@ -45,12 +45,12 @@ const VITE_SPEC =
  * Theme modules that runtime code shares with theme generation. Every other theme module a
  * `defineTheme` import bundles counts as theme generation.
  */
-const RUNTIME_THEME_MODULES = [
+const RUNTIME_THEME_MODULES = new Set([
 	'@luke-ui/react/src/theme/literal-scale.ts',
 	'@luke-ui/react/src/theme/rem.ts',
 	'@luke-ui/react/src/theme/theme-class-name.ts',
 	'@luke-ui/react/src/theme/type-styles.ts',
-];
+]);
 const THEME_MODULE_PATTERN = /^@luke-ui\/react\/src\/theme\//;
 
 interface PeerSet {
@@ -172,7 +172,7 @@ async function createConsumer(
 		label: peerSet.label,
 		peers,
 		themeGenerationSources: measureBundle(dir, DEFINE_THEME_ENTRY).sources.filter(
-			(source) => THEME_MODULE_PATTERN.test(source) && !RUNTIME_THEME_MODULES.includes(source),
+			(source) => THEME_MODULE_PATTERN.test(source) && !RUNTIME_THEME_MODULES.has(source),
 		),
 		typescript,
 	};

@@ -48,21 +48,28 @@ describe('theme contract', () => {
 
 	it('gives every semantic role the same background, foreground, and border leaves', () => {
 		const leaf = (path: ModePath, varName: string): [ModePath, string] => [path, varName];
-		const expected = SEMANTIC_ROLES.flatMap((role) => [
-			leaf(`color.border.${role}`, `--luke-color-border-${role}`),
-			...(['subtle', 'solid'] as const).flatMap((prominence) => {
-				return (['rest', 'hover', 'pressed'] as const).map((state) => {
-					return leaf(
-						`color.background.${role}.${prominence}.${state}`,
-						`--luke-color-background-${role}-${prominence}-${state}`,
+		const expected = SEMANTIC_ROLES.flatMap((role) => {
+			const rows: Array<[ModePath, string]> = [
+				leaf(`color.border.${role}`, `--luke-color-border-${role}`),
+			];
+			for (const prominence of ['subtle', 'solid'] as const) {
+				for (const state of ['rest', 'hover', 'pressed'] as const) {
+					rows.push(
+						leaf(
+							`color.background.${role}.${prominence}.${state}`,
+							`--luke-color-background-${role}-${prominence}-${state}`,
+						),
 					);
-				});
-			}),
-			leaf(`color.foreground.${role}.rest`, `--luke-color-foreground-${role}-rest`),
-			leaf(`color.foreground.${role}.hover`, `--luke-color-foreground-${role}-hover`),
-			leaf(`color.foreground.${role}.pressed`, `--luke-color-foreground-${role}-pressed`),
-			leaf(`color.foreground.${role}.onSolid`, `--luke-color-foreground-${role}-on-solid`),
-		]);
+				}
+			}
+			rows.push(
+				leaf(`color.foreground.${role}.rest`, `--luke-color-foreground-${role}-rest`),
+				leaf(`color.foreground.${role}.hover`, `--luke-color-foreground-${role}-hover`),
+				leaf(`color.foreground.${role}.pressed`, `--luke-color-foreground-${role}-pressed`),
+				leaf(`color.foreground.${role}.onSolid`, `--luke-color-foreground-${role}-on-solid`),
+			);
+			return rows;
+		});
 		const rolePaths = new Set<string>(expected.map(([path]) => path));
 		const emitted = flattenThemeContract().filter(([path]) => {
 			return (
@@ -75,7 +82,7 @@ describe('theme contract', () => {
 		const byPath = (a: ReadonlyArray<string>, b: ReadonlyArray<string>) => {
 			return (a[0] ?? '').localeCompare(b[0] ?? '');
 		};
-		expect([...emitted].sort(byPath)).toEqual([...expected].sort(byPath));
+		expect([...emitted].toSorted(byPath)).toEqual([...expected].toSorted(byPath));
 	});
 
 	it('partitions identity and mode paths from the declared mode families', () => {
@@ -127,7 +134,7 @@ describe('theme contract', () => {
 		expect(Object.keys(vars.controlFinish)).toEqual(['recessed', 'resting', 'raised']);
 		expect(Object.keys(vars.controlSize)).toEqual(['px32', 'px40']);
 		for (const style of typeStyles) {
-			expect(Object.keys(vars.font[style]).sort()).toEqual([
+			expect(Object.keys(vars.font[style]).toSorted()).toEqual([
 				'fontFamily',
 				'fontSize',
 				'fontWeight',

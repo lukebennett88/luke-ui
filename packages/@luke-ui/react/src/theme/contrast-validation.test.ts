@@ -219,9 +219,11 @@ describe('contrast validation matrix', () => {
 					},
 				];
 			});
-			expect([...actualHard].map(pairKey).sort()).toEqual([...expected.hard].map(pairKey).sort());
-			expect([...actualAdvisory].map(pairKey).sort()).toEqual(
-				[...expected.advisory].map(pairKey).sort(),
+			expect([...actualHard].map(pairKey).toSorted()).toEqual(
+				[...expected.hard].map(pairKey).toSorted(),
+			);
+			expect([...actualAdvisory].map(pairKey).toSorted()).toEqual(
+				[...expected.advisory].map(pairKey).toSorted(),
 			);
 		}
 	});

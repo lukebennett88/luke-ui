@@ -68,7 +68,7 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 	path,
 	viewBox: defaultViewBox = ICON_VIEWBOX,
 }: CreateIconOptions<TProps>): (props: TProps) => JSX.Element {
-	return function Icon(props: TProps): JSX.Element {
+	return function CreatedIcon(props: TProps): JSX.Element {
 		const { 'aria-hidden': ariaHiddenProp, className, id, size, style, title, viewBox } = props;
 		// `aria-hidden={false}` and `aria-hidden="false"` are accepted by the prop
 		// type but must never reach the DOM, so any non-`true` value is treated as

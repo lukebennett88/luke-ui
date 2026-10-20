@@ -14,19 +14,19 @@ const CLIENT_ENTRY = resolve(docsSrcDir, 'components/component-props-table.tsx')
 const BUILD_ONLY_PACKAGES = ['fumadocs-typescript', 'ts-morph', 'typescript', 'zod'];
 
 /** Generator modules that analyse TypeScript or write assets at build time. */
-const BUILD_ONLY_MODULES = [
+const BUILD_ONLY_MODULES = new Set([
 	'lib/collect-type-definitions.ts',
 	'lib/component-prop-analysis.ts',
 	'lib/enrich-generated-doc-types.ts',
 	'lib/remark-attach-type-definitions.ts',
 	'lib/stringify-component-props-table.ts',
-];
+]);
 
 test('the API table loads type definitions without build-time dependencies', () => {
 	const { localModules, packages } = valueImportGraph(CLIENT_ENTRY);
 
 	expect(localModules).toContain('lib/load-type-definitions.ts');
-	expect(localModules.filter((path) => BUILD_ONLY_MODULES.includes(path))).toEqual([]);
+	expect(localModules.filter((path) => BUILD_ONLY_MODULES.has(path))).toEqual([]);
 	expect(
 		packages.filter(
 			(name) => name.startsWith('node:') || BUILD_ONLY_PACKAGES.some((pkg) => name === pkg),
@@ -64,7 +64,7 @@ function valueImportGraph(entry: string) {
 		}
 	}
 
-	return { localModules: [...localModules].sort(), packages: [...packages].sort() };
+	return { localModules: [...localModules].toSorted(), packages: [...packages].toSorted() };
 }
 
 function valueImportSpecifiers(file: string): Array<string> {

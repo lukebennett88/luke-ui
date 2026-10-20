@@ -39,6 +39,25 @@ const KEYWORD_KINDS = new Set([
  */
 const MAX_INLINE_ITEMS = 2;
 
+/** Comma-separated items that break onto indented lines, closing bracket on its own line, when long. */
+function printTypeTokenItems<Item>(
+	nodes: ReadonlyArray<Item>,
+	depth: number,
+	print: (node: Item, depth: number) => Array<TypeToken>,
+): Array<TypeToken> {
+	if (nodes.length <= MAX_INLINE_ITEMS) {
+		return nodes.flatMap((node, index) => [...(index === 0 ? [] : [', ']), ...print(node, depth)]);
+	}
+	return [
+		...nodes.flatMap((node, index) => [
+			...(index === 0 ? [] : [',']),
+			depth + 1,
+			...print(node, depth + 1),
+		]),
+		depth,
+	];
+}
+
 /**
  * Prints types as tokens with React Aria's layout: long lists put each later item on its own line,
  * object types put each member on its own line, and type arguments stay inline. `keyFor` gives the
@@ -87,7 +106,7 @@ export function createTypeTokenPrinter({
 			case ts.SyntaxKind.ArrayType:
 				return [...type((node as ts.ArrayTypeNode).elementType, depth), '[]'];
 			case ts.SyntaxKind.TupleType:
-				return ['[', ...items((node as ts.TupleTypeNode).elements, depth, type), ']'];
+				return ['[', ...printTypeTokenItems((node as ts.TupleTypeNode).elements, depth, type), ']'];
 			case ts.SyntaxKind.NamedTupleMember: {
 				const member = node as ts.NamedTupleMember;
 				return [
@@ -174,28 +193,6 @@ export function createTypeTokenPrinter({
 		});
 	}
 
-	/** Comma-separated items that break onto indented lines, closing bracket on its own line, when long. */
-	function items<Item>(
-		nodes: ReadonlyArray<Item>,
-		depth: number,
-		print: (node: Item, depth: number) => Array<TypeToken>,
-	): Array<TypeToken> {
-		if (nodes.length <= MAX_INLINE_ITEMS) {
-			return nodes.flatMap((node, index) => [
-				...(index === 0 ? [] : [', ']),
-				...print(node, depth),
-			]);
-		}
-		return [
-			...nodes.flatMap((node, index) => [
-				...(index === 0 ? [] : [',']),
-				depth + 1,
-				...print(node, depth + 1),
-			]),
-			depth,
-		];
-	}
-
 	function reference(
 		node: ts.TypeReferenceNode | ts.ExpressionWithTypeArguments,
 		depth: number,
@@ -250,7 +247,7 @@ export function createTypeTokenPrinter({
 		nodes: ReadonlyArray<ts.ParameterDeclaration>,
 		depth: number,
 	): Array<TypeToken> {
-		return ['(', ...items(nodes, depth, parameter), ')'];
+		return ['(', ...printTypeTokenItems(nodes, depth, parameter), ')'];
 	}
 
 	function parameter(node: ts.ParameterDeclaration, depth: number): Array<TypeToken> {
@@ -298,7 +295,7 @@ export function createTypeTokenPrinter({
 		if (ts.isIndexSignatureDeclaration(member)) {
 			return [
 				'[',
-				...items(member.parameters, depth, parameter),
+				...printTypeTokenItems(member.parameters, depth, parameter),
 				']: ',
 				...type(member.type, depth),
 			];
@@ -380,22 +377,18 @@ export function createTypeTokenPrinter({
 		}
 		if (ts.isInterfaceDeclaration(node)) {
 			const heritage = (node.heritageClauses ?? []).flatMap((clause) => clause.types);
+			const heritageTokens: Array<TypeToken> = [];
+			for (let index = 0; index < heritage.length; index++) {
+				const base = heritage[index]!;
+				if (index > 0) heritageTokens.push(', ');
+				heritageTokens.push(...type(base, 0));
+			}
 			return [
 				keyword('interface'),
 				' ',
 				['t', node.name.text],
 				...typeParameters(node.typeParameters, 0),
-				...(heritage.length === 0
-					? []
-					: [
-							' ',
-							keyword('extends'),
-							' ',
-							...heritage.flatMap((base, index) => [
-								...(index === 0 ? [] : [', ']),
-								...type(base, 0),
-							]),
-						]),
+				...(heritage.length === 0 ? [] : [' ', keyword('extends'), ' ', ...heritageTokens]),
 				' ',
 				...block(node.members, 0),
 			];

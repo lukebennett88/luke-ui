@@ -66,10 +66,11 @@ test('every authored guide/table pair has curated taught-prop metadata', () => {
 	}).toEqual({ missing: [], stale: [] });
 });
 
-for (const table of authoredTables.flatMap((table) => {
-	const props = GUIDE_TAUGHT_PROPS[guideTableKey(table.guide, table.path, table.name)];
+for (const table of authoredTables.flatMap((authoredTable) => {
+	const props =
+		GUIDE_TAUGHT_PROPS[guideTableKey(authoredTable.guide, authoredTable.path, authoredTable.name)];
 	if (props === undefined || props.length === 0) return [];
-	return [{ ...table, props }];
+	return [{ ...authoredTable, props }];
 })) {
 	test(
 		`${table.guide} teaches documented props on ${table.name}`,

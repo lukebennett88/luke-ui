@@ -3,7 +3,7 @@
 		"allowJs": true,
 		"forceConsistentCasingInFileNames": true,
 		"isolatedModules": true,
-		"lib": ["ES2022", "DOM"],
+		"lib": ["ES2023", "DOM"],
 		"module": "NodeNext",
 		"moduleDetection": "force",
 		"moduleResolution": "NodeNext",

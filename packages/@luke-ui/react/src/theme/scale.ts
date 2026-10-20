@@ -430,24 +430,28 @@ function resolveSolidAnchor(request: GenerateFamilyRequest): ResolvedAnchor {
 	}
 
 	const { best, bestAttemptLightness, bestAttemptRatio } = (() => {
-		let best: number | null = null;
+		let passingLightness: number | null = null;
 		let bestDistance = Number.POSITIVE_INFINITY;
-		let bestAttemptLightness = preferred;
-		let bestAttemptRatio = gateRatio(preferred);
+		let nearestLightness = preferred;
+		let nearestRatio = gateRatio(preferred);
 		for (const lightness of lightnessCandidates(low, high)) {
 			const ratio = gateRatio(lightness);
-			if (ratio > bestAttemptRatio) {
-				bestAttemptRatio = ratio;
-				bestAttemptLightness = lightness;
+			if (ratio > nearestRatio) {
+				nearestRatio = ratio;
+				nearestLightness = lightness;
 			}
 			if (ratio < ON_SOLID_TARGET) continue;
 			const distance = Math.abs(lightness - preferred);
 			if (distance < bestDistance) {
 				bestDistance = distance;
-				best = lightness;
+				passingLightness = lightness;
 			}
 		}
-		return { best, bestAttemptLightness, bestAttemptRatio };
+		return {
+			best: passingLightness,
+			bestAttemptLightness: nearestLightness,
+			bestAttemptRatio: nearestRatio,
+		};
 	})();
 	if (best === null) {
 		const solid = gamutMapOklch({

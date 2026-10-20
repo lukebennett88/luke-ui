@@ -178,7 +178,7 @@ fi
 			expect(await readdir(artifacts)).toEqual(['baseline']);
 			const screenshots = await Promise.all(
 				(await readdir(baseline))
-					.sort()
+					.toSorted()
 					.map(async (file) => [file, await readFile(path.join(baseline, file), 'utf8')]),
 			);
 			expect(screenshots).toEqual(

@@ -129,8 +129,8 @@ export function SwitchRoot(props: SwitchRootProps): JSX.Element {
 				<RacSwitchField
 					{...restProps}
 					{...rootIdProps(id, resolvedInputId)}
-					className={composeRenderProps(className, (className) => {
-						return switchRecipe({ size }).root({ className });
+					className={composeRenderProps(className, (renderedClassName) => {
+						return switchRecipe({ size }).root({ className: renderedClassName });
 					})}
 					isRequired={isRequired}
 				/>
@@ -152,8 +152,8 @@ export function SwitchLabel(props: SwitchLabelProps): JSX.Element {
 	return (
 		<RacSwitchButton
 			{...restProps}
-			className={composeRenderProps(className, (className) => {
-				return fieldRecipe().inlineLabel({ className });
+			className={composeRenderProps(className, (renderedClassName) => {
+				return fieldRecipe().inlineLabel({ className: renderedClassName });
 			})}
 		/>
 	);

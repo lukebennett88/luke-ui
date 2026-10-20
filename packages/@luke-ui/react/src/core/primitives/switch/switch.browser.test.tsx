@@ -123,9 +123,7 @@ test('SwitchThumb renders custom children inside the hidden track', () => {
 		</SwitchRoot>,
 	);
 
-	expect(page.getByTestId('thumb').element()).toContainElement(
-		page.getByTestId('glyph').element() as HTMLElement,
-	);
+	expect(page.getByTestId('thumb').element()).toContainElement(page.getByTestId('glyph').element());
 	expect(page.getByTestId('control').element()).toHaveAttribute('aria-hidden', 'true');
 	expect(toggle('Example switch')).toHaveAccessibleName('Example switch');
 });

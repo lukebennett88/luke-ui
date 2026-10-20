@@ -3,7 +3,7 @@ import { extname, resolve } from 'node:path';
 
 /** Absolute paths of every `.mdx` file under `contentDir`, sorted. */
 export function findMdxFiles(contentDir: string): Array<string> {
-	return walkMdxFiles(resolve(contentDir)).sort();
+	return walkMdxFiles(resolve(contentDir)).toSorted();
 }
 
 function walkMdxFiles(directory: string): Array<string> {

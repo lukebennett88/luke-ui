@@ -124,7 +124,7 @@ test('responsive conditions preserve breakpoint declaration order', async () => 
 	const expected = ['initial', ...Object.keys(breakpoints)];
 	const emittedOrder = expected
 		.map((name) => ({ index: getReadonlyPropertyPattern(name).exec(declaration)?.index, name }))
-		.sort((a, b) => (a.index ?? -1) - (b.index ?? -1))
+		.toSorted((a, b) => (a.index ?? -1) - (b.index ?? -1))
 		.map(({ name }) => name);
 
 	for (const name of expected) {

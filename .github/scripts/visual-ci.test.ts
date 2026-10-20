@@ -34,22 +34,22 @@ test('accepts the newest run when it completed successfully', () => {
 test('reports the bootstrap case when no run exists', () => {
 	const decision = decideBaselineRun(undefined, runUrl);
 	expect(decision.ok).toBe(false);
-	expect(decision.ok === false && decision.reason).toContain('After this PR merges');
+	expect(!decision.ok && decision.reason).toContain('After this PR merges');
 });
 
 test('rejects a newest run that is still in progress rather than using an older one', () => {
 	const decision = decideBaselineRun({ conclusion: null, id: 7, status: 'in_progress' }, runUrl);
 	expect(decision.ok).toBe(false);
-	expect(decision.ok === false && decision.reason).toContain('in_progress');
+	expect(!decision.ok && decision.reason).toContain('in_progress');
 	// The failing run's own URL, never an older green run's.
-	expect(decision.ok === false && decision.reason).toContain(runUrl(7));
+	expect(!decision.ok && decision.reason).toContain(runUrl(7));
 });
 
 test('rejects a newest run that failed rather than falling back to an older success', () => {
 	const decision = decideBaselineRun({ conclusion: 'failure', id: 9, status: 'completed' }, runUrl);
 	expect(decision.ok).toBe(false);
-	expect(decision.ok === false && decision.reason).toContain('failure');
-	expect(decision.ok === false && decision.reason).toContain(runUrl(9));
+	expect(!decision.ok && decision.reason).toContain('failure');
+	expect(!decision.ok && decision.reason).toContain(runUrl(9));
 });
 
 test('rejects a cancelled newest run', () => {
@@ -58,12 +58,12 @@ test('rejects a cancelled newest run', () => {
 		runUrl,
 	);
 	expect(decision.ok).toBe(false);
-	expect(decision.ok === false && decision.reason).toContain('cancelled');
+	expect(!decision.ok && decision.reason).toContain('cancelled');
 });
 
 test('checks status before conclusion so a queued run is not read as a failure', () => {
 	const decision = decideBaselineRun({ conclusion: null, id: 3, status: 'queued' }, runUrl);
-	expect(decision.ok === false && decision.reason).toContain('queued');
+	expect(!decision.ok && decision.reason).toContain('queued');
 });
 
 test('treats only 404 as the missing-workflow bootstrap case', () => {
@@ -138,7 +138,7 @@ function sequenceFetch(responses: Array<BaselineRun | undefined | 'workflow-miss
 		if (next === undefined && remaining.length === 0) {
 			throw new Error('fetchNewest called more times than stubbed responses');
 		}
-		return next as BaselineRun | undefined | 'workflow-missing';
+		return next;
 	};
 }
 

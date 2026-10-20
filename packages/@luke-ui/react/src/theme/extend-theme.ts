@@ -65,7 +65,7 @@ export function resolveThemeChain(chain: ThemeChain): ResolvedThemeInput {
 	// Returns the object it was handed, so inheritance cannot affect a theme with no base.
 	if (outermost === undefined || outermost === base) return { inheritance: null, input: base };
 	// Fold from the innermost base outward, replacing each authored colour role whole.
-	const innermostFirst = [...inputs].reverse();
+	const innermostFirst = inputs.toReversed();
 	let sections: ThemeSections = base;
 	for (const own of innermostFirst.slice(1)) {
 		sections = inheritSections(sections, own);

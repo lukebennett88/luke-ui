@@ -288,20 +288,20 @@ function buildScales(tokens: ReadonlyArray<ThemeToken>): Readonly<Record<ScaleId
 		const scale = scaleOf(token.path);
 		if (scale !== undefined) byScale.get(scale)?.push(token);
 	}
-	function scale(id: ScaleId): TokenScale {
+	function scaleFor(id: ScaleId): TokenScale {
 		return { id, tokens: byScale.get(id) ?? [] };
 	}
 
 	return {
-		controlFinish: scale('controlFinish'),
-		controlSize: scale('controlSize'),
-		depth: scale('depth'),
-		interaction: scale('interaction'),
-		motionEnter: scale('motionEnter'),
-		motionExit: scale('motionExit'),
-		motionFeedback: scale('motionFeedback'),
-		radius: scale('radius'),
-		space: scale('space'),
+		controlFinish: scaleFor('controlFinish'),
+		controlSize: scaleFor('controlSize'),
+		depth: scaleFor('depth'),
+		interaction: scaleFor('interaction'),
+		motionEnter: scaleFor('motionEnter'),
+		motionExit: scaleFor('motionExit'),
+		motionFeedback: scaleFor('motionFeedback'),
+		radius: scaleFor('radius'),
+		space: scaleFor('space'),
 	};
 }
 

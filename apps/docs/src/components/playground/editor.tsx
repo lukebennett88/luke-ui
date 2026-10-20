@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Stack } from '@luke-ui/react/stack';
 import type { OnMount } from '@monaco-editor/react';
-import Editor from '@monaco-editor/react';
+import { Editor } from '@monaco-editor/react';
 import type * as Monaco from 'monaco-editor';
 import { use, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { ensurePlaygroundMonaco, loadPlaygroundTypes, monacoThemes } from '../../lib/monaco-setup';

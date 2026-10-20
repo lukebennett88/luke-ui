@@ -243,9 +243,9 @@ export function importedPackages({
 	contents,
 	manifest,
 }: Pick<PackedPackage, 'contents' | 'manifest'>): Set<string> {
-	const queue = Object.values(manifest.exports)
-		.filter((target) => target.endsWith('.js'))
-		.flatMap((target) => [target.slice(2), `${target.slice(2, -3)}.d.ts`]);
+	const queue = Object.values(manifest.exports).flatMap((target) =>
+		target.endsWith('.js') ? [target.slice(2), `${target.slice(2, -3)}.d.ts`] : [],
+	);
 	const visited = new Set<string>();
 	const packages = new Set<string>();
 

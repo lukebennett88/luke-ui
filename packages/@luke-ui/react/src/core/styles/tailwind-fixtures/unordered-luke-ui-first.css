@@ -3,7 +3,7 @@
 @import 'tailwindcss' source(none);
 
 /* Only the classes the integration test uses. */
-@source inline("p-[11px] p-[3px] bg-[rgb(7,8,9)]!");
+@source inline("p-2.75 p-0.75 bg-[rgb(7,8,9)]!");
 
 @layer components {
 	.tw-component {

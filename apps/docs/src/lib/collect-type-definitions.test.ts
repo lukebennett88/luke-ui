@@ -85,7 +85,7 @@ test('keeps the whole resolved form of a declaration, however long it is', () =>
 	const resolved = text(collector.definitions()?.Condition?.resolved);
 
 	expect(resolved?.length).toBeGreaterThan(400);
-	expect(resolved?.split(' | ').sort()).toEqual(names.map((name) => `"${name}"`).sort());
+	expect(resolved?.split(' | ').toSorted()).toEqual(names.map((name) => `"${name}"`).toSorted());
 });
 
 function text(tokens: TypeTokens | undefined): string | undefined {

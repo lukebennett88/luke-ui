@@ -47,8 +47,9 @@ function splitInput(input: Record<string, unknown> | undefined): {
 
 /**
  * Runtime rebuild for a slotted recipe. Slots evaluate lazily.
+ * Path-imported by Vanilla Extract's function serializer.
  *
- * @public Path-imported by Vanilla Extract's function serializer.
+ * @public
  */
 export function createRecipe(descriptor: SlottedRecipeDescriptor) {
 	const slotEntries = Object.entries(descriptor.slots);
@@ -65,8 +66,9 @@ export function createRecipe(descriptor: SlottedRecipeDescriptor) {
 
 /**
  * Runtime rebuild for a single-part recipe. Appends consumer `className` after recipe classes.
+ * Path-imported by Vanilla Extract's function serializer.
  *
- * @public Path-imported by Vanilla Extract's function serializer.
+ * @public
  */
 export function createSingleRecipe(built: BuiltRecipe) {
 	return (input?: Record<string, unknown>): string => {
@@ -78,8 +80,9 @@ export function createSingleRecipe(built: BuiltRecipe) {
 /**
  * Runtime rebuild for `withDefaultVariants`. Fills each default the input leaves `undefined`, then
  * calls the wrapped recipe. The authoring wrapper in `recipe.ts` type-checks the defaults.
+ * Path-imported by Vanilla Extract's function serializer.
  *
- * @public Path-imported by Vanilla Extract's function serializer.
+ * @public
  */
 export function withDefaultVariants<Input extends object, PublicInput extends Input = Input>(
 	recipe: (input?: Input) => string,

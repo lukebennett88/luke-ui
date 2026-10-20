@@ -40,7 +40,7 @@ describe.skipIf(themes.length === 0)('fonts in a production build', () => {
 
 	test('renders a display font with the trims Capsize computes for it', async () => {
 		const { fontResponses, page } = await openFontPage(browser, `${server.url}display.html`);
-		expect([...fontResponses].sort((a, b) => a.font.localeCompare(b.font))).toEqual([
+		expect([...fontResponses].toSorted((a, b) => a.font.localeCompare(b.font))).toEqual([
 			{ font: 'inter', status: 200 },
 			{ font: 'lora', status: 200 },
 		]);

@@ -60,9 +60,9 @@ function findNeighbours(tree: Root, pathname: string): { next?: Item; previous?:
 		const path = findPath(current.children, isCurrentPage);
 		if (!path) continue;
 
-		const section = path
-			.filter((node): node is Folder => node.type === 'folder' && node.root === true)
-			.at(-1);
+		const section = path.findLast(
+			(node): node is Folder => node.type === 'folder' && node.root === true,
+		);
 		const pages = flattenTree(section ? [section] : current.children).filter(
 			(page) => !page.external,
 		);

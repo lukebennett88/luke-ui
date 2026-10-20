@@ -93,7 +93,7 @@ async function applyJsonEdit(root: string, edit: CreationWork['jsonEdits'][numbe
 	const currentPages = Array.isArray(current) ? current.filter(isString) : [];
 	const pages =
 		edit.kind === 'array-add-sorted'
-			? [...new Set([...currentPages, edit.value])].sort((a, b) => a.localeCompare(b))
+			? [...new Set([...currentPages, edit.value])].toSorted((a, b) => a.localeCompare(b))
 			: edit.kind === 'array-add-prefix-sorted'
 				? insertSortedAmongPrefix(currentPages, edit.value, edit.sectionHeader)
 				: appendUniquePage(currentPages, edit.value);

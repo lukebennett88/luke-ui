@@ -74,16 +74,16 @@ export function CodeBlock({
 	const allowCopy = allowCopyProp !== false && allowCopyProp !== 'false';
 	const sourceElementRef = useObjectRef(sourceRef);
 	const [{ copyAttempt, copyStatus }, dispatch] = useReducer(codeBlockReducer, initialState);
+	const copyFeedbackKey = copyStatus === 'idle' ? 'idle' : `${copyStatus}:${copyAttempt}`;
 
 	useEffect(() => {
-		if (copyStatus === 'idle') return;
+		if (copyFeedbackKey === 'idle') return;
 		const timeout = window.setTimeout(
 			() => dispatch({ type: 'copyFeedbackExpired' }),
 			COPY_FEEDBACK_MS,
 		);
 		return () => window.clearTimeout(timeout);
-		// `copyAttempt` restarts the timer when someone copies again during feedback.
-	}, [copyStatus, copyAttempt]);
+	}, [copyFeedbackKey]);
 
 	async function handleCopy() {
 		const text = resolveCopyText({

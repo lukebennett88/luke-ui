@@ -31,8 +31,8 @@ const COLOR_HEADING_TO_FAMILY = {
 
 test('the catalogue covers every public token exactly once', () => {
 	const sections = buildTokenSections();
-	expect([...sections.sectionByPath.keys()].sort()).toEqual(
-		themeTokens.map((token) => token.path).sort(),
+	expect([...sections.sectionByPath.keys()].toSorted()).toEqual(
+		themeTokens.map((token) => token.path).toSorted(),
 	);
 	expect(sections.sectionByPath.size).toBe(themeTokens.length);
 });
@@ -109,7 +109,7 @@ for (const [prefix, scaleId] of [
 			themeTokens
 				.filter((token) => token.path.startsWith(prefix))
 				.map((token) => token.path)
-				.sort(),
-		).toEqual(scale.tokens.map((token) => token.path).sort());
+				.toSorted(),
+		).toEqual(scale.tokens.map((token) => token.path).toSorted());
 	});
 }

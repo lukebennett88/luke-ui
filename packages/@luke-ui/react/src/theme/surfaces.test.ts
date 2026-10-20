@@ -15,7 +15,7 @@ describe('generateSurfaces', () => {
 
 	it('emits exactly the four surface roles', () => {
 		const surfaces = generateSurfaces({ mode: 'light', surface: { base: lightBase } });
-		expect(Object.keys(surfaces).sort()).toEqual(['base', 'field', 'overlay', 'subdued']);
+		expect(Object.keys(surfaces).toSorted()).toEqual(['base', 'field', 'overlay', 'subdued']);
 	});
 
 	describe('dark mode', () => {

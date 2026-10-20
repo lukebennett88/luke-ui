@@ -18,9 +18,9 @@ import { page, userEvent } from 'vite-plus/test/context';
 import { DocsSearchProvider, DocsSearchTrigger } from './search.js';
 
 const { getSearchResults, MANY_RESULTS_COUNT } = vi.hoisted(() => {
-	const MANY_RESULTS_COUNT = 40;
+	const manyResultsCount = 15;
 
-	function getSearchResults(search: string) {
+	function mockSearchResults(search: string) {
 		switch (search) {
 			case 'button':
 				return [
@@ -63,7 +63,7 @@ const { getSearchResults, MANY_RESULTS_COUNT } = vi.hoisted(() => {
 					},
 				] as const;
 			case 'many':
-				return Array.from({ length: MANY_RESULTS_COUNT }, (_, index) => ({
+				return Array.from({ length: manyResultsCount }, (_, index) => ({
 					id: `result-${index}`,
 					url: `/docs/result-${index}`,
 					type: 'page' as const,
@@ -75,7 +75,7 @@ const { getSearchResults, MANY_RESULTS_COUNT } = vi.hoisted(() => {
 		}
 	}
 
-	return { getSearchResults, MANY_RESULTS_COUNT };
+	return { getSearchResults: mockSearchResults, MANY_RESULTS_COUNT: manyResultsCount };
 });
 
 vi.mock('fumadocs-core/search/client', async () => {
@@ -342,65 +342,159 @@ test('closes in one Escape press with text typed, and restores focus', async () 
 	await expect.element(trigger).toHaveFocus();
 });
 
-test('keeps the active result within the visible list while navigating and wraps at both ends', async () => {
+test('keeps the active result within the visible list after scrolling down', async () => {
 	await renderSearch();
 	const input = await openSearchDialog();
 	await typeSearchQuery(input, 'many');
+	await expect.element(page.getByRole('menuitem').nth(0)).toBeVisible();
 	const list = page.getByRole('menu', { name: 'Search results' }).element();
 	expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
 
-	await moveActiveResult(input, 'ArrowDown', 10);
+	const first = page.getByRole('menuitem').nth(0).element();
+	await expectActiveDescendant(input, list, first.id);
+
+	const tenthBeforeNav = page.getByRole('menuitem').nth(10).element();
+	expect(isResultWithinList(tenthBeforeNav, list)).toBe(false);
+
+	await userEvent.keyboard('{ArrowDown}'.repeat(10));
 	const option = page.getByRole('menuitem').nth(10).element();
-	await expect.poll(() => activeDescendantId(input)).toBe(option.id);
-	await expectResultWithinList(option, list);
+	await expectActiveDescendant(input, list, option.id);
+	await expectResultWithinList(option, list, input);
 	await expect.element(input).toHaveFocus();
 
 	await userEvent.keyboard('{ArrowUp}');
 	const previousElement = page.getByRole('menuitem').nth(9).element();
-	await expect.poll(() => activeDescendantId(input)).toBe(previousElement.id);
-	await expectResultWithinList(previousElement, list);
+	await expectActiveDescendant(input, list, previousElement.id);
+	await expectResultWithinList(previousElement, list, input);
 	await expect.element(input).toHaveFocus();
+});
 
-	// Wrap upward past the first item to the last.
-	await moveActiveResult(input, 'ArrowUp', 10);
+test('wraps keyboard navigation from the first result to the last and back', async () => {
+	await renderSearch();
+	const input = await openSearchDialog();
+	await typeSearchQuery(input, 'many');
+	await expect.element(page.getByRole('menuitem').nth(0)).toBeVisible();
+	const list = page.getByRole('menu', { name: 'Search results' }).element();
+
+	const first = page.getByRole('menuitem').nth(0).element();
+	await expectActiveDescendant(input, list, first.id);
+
+	await userEvent.keyboard('{ArrowUp}');
 	const last = page
 		.getByRole('menuitem')
 		.nth(MANY_RESULTS_COUNT - 1)
 		.element();
-	await expect.poll(() => activeDescendantId(input)).toBe(last.id);
-	await expectResultWithinList(last, list);
+	await expectActiveDescendant(input, list, last.id);
+	await expectResultWithinList(last, list, input);
 	await expect.element(input).toHaveFocus();
 
-	// Wrap downward past the last item back to the first.
 	await userEvent.keyboard('{ArrowDown}');
-	const first = page.getByRole('menuitem').nth(0).element();
-	await expect.poll(() => activeDescendantId(input)).toBe(first.id);
-	await expectResultWithinList(first, list);
+	await expectActiveDescendant(input, list, first.id);
+	await expectResultWithinList(first, list, input);
 	await expect.element(input).toHaveFocus();
 });
 
-/** Presses an arrow key one step at a time so activedescendant can settle under CI load. */
-async function moveActiveResult(
+function isResultWithinList(result: Element, list: Element) {
+	const listBounds = list.getBoundingClientRect();
+	const resultBounds = result.getBoundingClientRect();
+	return resultBounds.top >= listBounds.top && resultBounds.bottom <= listBounds.bottom;
+}
+
+function captureSearchPollSnapshot(
 	input: ReturnType<typeof page.getByRole>,
-	key: 'ArrowDown' | 'ArrowUp',
-	steps: number,
+	list: Element,
+	expectedActiveDescendantId: string | undefined,
+	result?: Element,
 ) {
-	for (let step = 0; step < steps; step++) {
-		const before = activeDescendantId(input);
-		// oxlint-disable-next-line no-await-in-loop -- each arrow must settle before the next
-		await userEvent.keyboard(`{${key}}`);
-		// oxlint-disable-next-line no-await-in-loop -- wait for activedescendant between steps
-		await expect.poll(() => activeDescendantId(input)).not.toBe(before);
+	const active = document.activeElement;
+	const snapshot: Record<string, unknown> = {
+		expectedActiveDescendantId,
+		ariaActiveDescendant: activeDescendantId(input),
+		menuScroll: {
+			scrollTop: list.scrollTop,
+			scrollHeight: list.scrollHeight,
+			clientHeight: list.clientHeight,
+		},
+		activeElement: {
+			tag: active?.tagName ?? null,
+			role: active instanceof HTMLElement ? active.getAttribute('role') : null,
+		},
+	};
+	if (result) {
+		snapshot.bounds = {
+			list: list.getBoundingClientRect(),
+			result: result.getBoundingClientRect(),
+		};
+	}
+	return snapshot;
+}
+
+function formatSearchPollSnapshot(snapshot: Record<string, unknown>) {
+	return JSON.stringify(snapshot, rectReplacer, 2);
+}
+
+function rectReplacer(_key: string, value: unknown) {
+	return value instanceof DOMRect
+		? {
+				top: value.top,
+				right: value.right,
+				bottom: value.bottom,
+				left: value.left,
+				width: value.width,
+				height: value.height,
+			}
+		: value;
+}
+
+async function expectActiveDescendant(
+	input: ReturnType<typeof page.getByRole>,
+	list: Element,
+	expectedId: string,
+) {
+	let latest: Record<string, unknown> | undefined;
+	try {
+		await expect
+			.poll(() => {
+				latest = captureSearchPollSnapshot(input, list, expectedId);
+				return activeDescendantId(input);
+			})
+			.toBe(expectedId);
+	} catch (error) {
+		throw new Error(
+			`aria-activedescendant poll failed:\n${formatSearchPollSnapshot(latest ?? captureSearchPollSnapshot(input, list, expectedId))}`,
+			{ cause: error },
+		);
 	}
 }
 
-async function expectResultWithinList(result: Element, list: Element) {
+async function expectResultWithinList(
+	result: Element,
+	list: Element,
+	input?: ReturnType<typeof page.getByRole>,
+) {
 	// The list expands during opening, so compare current bounds on each poll.
-	await expect
-		.poll(() => {
-			const listBounds = list.getBoundingClientRect();
-			const resultBounds = result.getBoundingClientRect();
-			return resultBounds.top >= listBounds.top && resultBounds.bottom <= listBounds.bottom;
-		})
-		.toBe(true);
+	let latest: Record<string, unknown> | undefined;
+	try {
+		await expect
+			.poll(() => {
+				const within = isResultWithinList(result, list);
+				if (input) latest = captureSearchPollSnapshot(input, list, undefined, result);
+				return within;
+			})
+			.toBe(true);
+	} catch (error) {
+		const snapshot =
+			latest ??
+			(input
+				? captureSearchPollSnapshot(input, list, undefined, result)
+				: {
+						bounds: {
+							list: list.getBoundingClientRect(),
+							result: result.getBoundingClientRect(),
+						},
+					});
+		throw new Error(`result within list poll failed:\n${formatSearchPollSnapshot(snapshot)}`, {
+			cause: error,
+		});
+	}
 }
