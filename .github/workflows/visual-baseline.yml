@@ -67,6 +67,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: visual-baseline
+          overwrite: true
           path: .artifacts/visual-regression/baseline
           if-no-files-found: error
           retention-days: 90

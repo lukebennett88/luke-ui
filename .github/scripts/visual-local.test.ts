@@ -267,6 +267,15 @@ test('both visual workflows pin the contract Playwright image', async () => {
 	}
 });
 
+test('baseline upload replaces the artifact when a workflow run is re-run', async () => {
+	const workflow = await readFile(
+		path.join(repoRoot, '.github/workflows/visual-baseline.yml'),
+		'utf8',
+	);
+
+	expect(workflow).toMatch(/name: visual-baseline\n\s+overwrite: true/);
+});
+
 test('authoritative baseline cache downloads only the exact newest successful run', async () => {
 	const root = await mkdtemp(path.join(tmpdir(), 'visual-baseline-cache-'));
 	const downloads: Array<number> = [];

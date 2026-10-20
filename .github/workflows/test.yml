@@ -74,6 +74,15 @@ jobs:
       - name: Run docs tests
         run: pnpm exec turbo run test --filter=docs
 
+      - name: Upload docs browser-test screenshots
+        if: failure()
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-test-failure-screenshots
+          path: apps/docs/.vitest/attachments
+          if-no-files-found: ignore
+
   consumer-tests:
     name: consumer-tests
     runs-on: ubuntu-latest
