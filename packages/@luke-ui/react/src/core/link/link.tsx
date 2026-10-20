@@ -26,10 +26,7 @@ type LinkContentProps =
 			startContent?: never;
 	  };
 
-type _LinkOmit = DistributiveOmit<
-	RacLinkProps,
-	'href' | 'isDisabled' | 'onPress' | 'render' | 'slot'
->;
+type _LinkOmit = DistributiveOmit<RacLinkProps, 'href' | 'isDisabled' | 'onPress' | 'slot'>;
 
 interface _LinkProps extends _LinkOmit {
 	/** URL the Link points to. */
@@ -40,10 +37,6 @@ interface _LinkProps extends _LinkOmit {
 	onPress?: RacLinkProps['onPress'];
 	/** Ref forwarded to the underlying anchor element. */
 	ref?: Ref<HTMLAnchorElement>;
-	/**
-	 * Passes resolved DOM props and link state to a caller-owned root element.
-	 */
-	renderRoot?: RacLinkProps['render'];
 }
 
 /** Props for the `Link` component. */
@@ -57,7 +50,6 @@ export function Link(props: LinkProps): JSX.Element {
 		children,
 		endContent,
 		inlineSize,
-		renderRoot,
 		size: sizeProp,
 		startContent,
 		...restProps
@@ -79,7 +71,6 @@ export function Link(props: LinkProps): JSX.Element {
 							size,
 						});
 					})}
-					render={renderRoot}
 				>
 					{(renderProps) => (
 						<span className={buttonContent()}>
@@ -107,7 +98,6 @@ export function Link(props: LinkProps): JSX.Element {
 					prominence,
 				});
 			})}
-			render={renderRoot}
 		>
 			{children}
 		</RacLink>

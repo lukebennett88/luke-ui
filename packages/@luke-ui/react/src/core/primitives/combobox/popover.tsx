@@ -23,10 +23,6 @@ type _ComboboxPopoverOmit = DistributiveOmit<
 interface _ComboboxPopoverProps extends _ComboboxPopoverOmit {
 	/** Forwarded to the popover's DOM element. */
 	ref?: Ref<HTMLElement>;
-	/**
-	 * Passes resolved DOM props and popover state to a caller-owned popover root element.
-	 */
-	renderRoot?: RacPopoverProps['render'];
 }
 
 /** Props for the styled combobox popover. */
@@ -34,7 +30,7 @@ export type ComboboxPopoverProps = Prettify<_ComboboxPopoverProps>;
 
 /** Popover surface used for listbox content. */
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
-	const { containerPadding: containerPaddingProp, ref, renderRoot, ...restProps } = props;
+	const { containerPadding: containerPaddingProp, ref, ...restProps } = props;
 	const popoverContext = useSlottedContext(PopoverContext);
 	const comboBoxState = use(ComboBoxStateContext);
 	const containerPadding = resolveOverlayContainerPadding(
@@ -54,7 +50,6 @@ export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 			})}
 			containerPadding={containerPadding}
 			ref={mergeRefs(ref, copyScopeColorMode(popoverContext?.triggerRef))}
-			render={renderRoot}
 			style={composeRenderProps(restProps.style, (style) => ({
 				...style,
 				...assignInlineVars({

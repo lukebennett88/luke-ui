@@ -141,16 +141,27 @@ strict key constraint checks omitted keys. Do not use `DistributiveOmit<SourceTy
 
 ### Element choice
 
-Use `elementType` to change the semantic element without changing the accepted DOM props. Accept
-only the elements a component is designed to render.
+`elementType`, `renderRoot`, and `render<Part>` are **opt-in capabilities**, not universal component
+props. Consistent naming means that when a component exposes one of these seams, it uses the Luke UI
+name and `(domProps, state)` contract. It does not mean every component exposes them.
 
-Use a dedicated component for element-specific behaviour or props. Use `Link` for links and `Button`
-for buttons.
+Prefer recipes, dedicated components (`Link` for links, `Button` for buttons), and state-aware
+`className`/`style` over root replacement. Interactive controls keep fixed semantics unless a
+concrete composition need is demonstrated.
 
-Use `renderRoot` for public root replacement when the callback must own the element and its DOM
-attributes. Use `render<Name>` only for a deliberately replaceable named part. Do not expose React
-Aria's `render` on public component or primitive APIs. Keep it as an internal adaptation seam when
-wrapping RAC. Keep `elementType` and `renderRoot` mutually exclusive.
+When polymorphism is justified:
+
+- Use `elementType` to choose a supported semantic or structural element without changing the
+  accepted DOM props. Accept only the elements that component is designed to render.
+- Use `renderRoot` when a caller must own the root element and its DOM attributes. Keep
+  `elementType` and `renderRoot` mutually exclusive.
+- Use `render<Name>` only for a deliberately replaceable named part. Do not conflate children-as-
+  function or state-aware `className`/`style` with root replacement.
+
+Do not rename React Aria's `render` to `renderRoot` just because a wrapper exists. Keep RAC `render`
+only where that seam is itself the demonstrated composition API (for example merging host attributes
+onto `Link`). Otherwise omit it. Prefer Luke UI `renderRoot` for Luke-owned layout and typography
+roots such as `Box` and `Text`.
 
 Luke UI `renderRoot` and `render<Name>` callbacks receive `(domProps, state)`. The first argument
 contains resolved presentation props. Pass an empty object as the second argument when the component

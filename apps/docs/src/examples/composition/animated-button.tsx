@@ -1,24 +1,19 @@
 import { Button } from '@luke-ui/react/primitives/button';
-import { mergeProps } from '@luke-ui/react/utils';
 
 export default () => {
 	return (
 		<Button
-			renderRoot={(domProps, { isHovered, isPressed }) => {
+			style={({ isHovered, isPressed }) => {
 				const scale: number = (() => {
 					if (isPressed) return 0.98;
 					if (isHovered) return 1.02;
 					return 1;
 				})();
 
-				const buttonProps = mergeProps(domProps, {
-					style: {
-						transform: `scale(${scale})`,
-						transition: 'transform 100ms',
-					},
-				});
-
-				return <button {...buttonProps} />;
+				return {
+					transform: `scale(${scale})`,
+					transition: 'transform 100ms',
+				};
 			}}
 		>
 			Continue

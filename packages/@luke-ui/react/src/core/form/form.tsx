@@ -34,10 +34,6 @@ interface _FormProps extends _FormOmit {
 	 */
 	onSubmit?: SubmitEventHandler<HTMLFormElement>;
 	/**
-	 * Passes resolved DOM props to a caller-owned form root element.
-	 */
-	renderRoot?: RacFormProps['render'];
-	/**
 	 * Determines whether native validation can block submission. Use `'aria'` when a form library
 	 * handles validation.
 	 * @default 'native'
@@ -59,15 +55,7 @@ export type FormProps = Prettify<_FormProps>;
  * Use a layout component such as `Stack` to arrange the fields.
  */
 export function Form(props: FormProps): JSX.Element {
-	const {
-		children,
-		className,
-		controlSize,
-		necessityIndicator,
-		onSubmit,
-		renderRoot,
-		...restProps
-	} = props;
+	const { children, className, controlSize, necessityIndicator, onSubmit, ...restProps } = props;
 	const size = useControlSize(controlSize);
 	const parentNecessityIndicator = use(FormNecessityContext);
 
@@ -81,7 +69,6 @@ export function Form(props: FormProps): JSX.Element {
 					className={className}
 					// React types submit as SubmitEvent; RAC still types onSubmit with deprecated FormEvent.
 					onSubmit={onSubmit as RacFormProps['onSubmit']}
-					render={renderRoot}
 				>
 					{children}
 				</RacForm>

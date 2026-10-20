@@ -40,10 +40,10 @@ export function MdxLink({ children, href, ...props }: AnchorProps) {
 	if (href === undefined) return <a {...props}>{children}</a>;
 
 	// React Aria Components drops the anchor attributes it does not model, such as `title` and
-	// `aria-expanded`. `renderRoot` puts the author's attributes under the ones it keeps, so it still
+	// `aria-expanded`. `render` puts the author's attributes under the ones it keeps, so it still
 	// owns `href`, `rel`, `target`, handlers, and `ref`. Every branch below passes an `href`, so the
 	// `span` fallback only satisfies the render type.
-	const renderRoot: LinkProps['renderRoot'] = (domProps) =>
+	const render: LinkProps['render'] = (domProps) =>
 		'href' in domProps ? (
 			<a {...props} {...domProps}>
 				{domProps.children}
@@ -59,7 +59,7 @@ export function MdxLink({ children, href, ...props }: AnchorProps) {
 				{...props}
 				href={href}
 				rel={mergeRel(props.rel, target)}
-				renderRoot={renderRoot}
+				render={render}
 				target={target}
 			>
 				{children}
@@ -70,7 +70,7 @@ export function MdxLink({ children, href, ...props }: AnchorProps) {
 	// A same-page anchor needs no router. The browser scrolls to it.
 	if (href.startsWith('#')) {
 		return (
-			<LukeLink {...props} href={href} renderRoot={renderRoot}>
+			<LukeLink {...props} href={href} render={render}>
 				{children}
 			</LukeLink>
 		);
@@ -78,7 +78,7 @@ export function MdxLink({ children, href, ...props }: AnchorProps) {
 
 	const { hash, path } = splitHash(href);
 	return (
-		<DocsLink {...props} hash={hash} renderRoot={renderRoot} to={path}>
+		<DocsLink {...props} hash={hash} render={render} to={path}>
 			{children}
 		</DocsLink>
 	);

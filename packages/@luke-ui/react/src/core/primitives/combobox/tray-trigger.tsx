@@ -31,10 +31,6 @@ interface _ComboboxTrayTriggerProps extends _ComboboxTrayTriggerOmit {
 	placeholder?: string;
 	/** Forwarded to the underlying trigger `<button>`. */
 	ref?: Ref<HTMLButtonElement>;
-	/**
-	 * Passes resolved DOM props and button state to a caller-owned tray-trigger root element.
-	 */
-	renderRoot?: RacButtonProps['render'];
 	size?: ComboboxSize;
 }
 
@@ -46,15 +42,7 @@ export type ComboboxTrayTriggerProps = Prettify<_ComboboxTrayTriggerProps>;
  * renders the hidden validation and submission inputs.
  */
 export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Element | null {
-	const {
-		children,
-		isDisabled,
-		placeholder,
-		ref,
-		renderRoot,
-		size: sizeProp,
-		...buttonProps
-	} = props;
+	const { children, isDisabled, placeholder, ref, size: sizeProp, ...buttonProps } = props;
 	const size = useComboboxSize(sizeProp);
 	const labelContext = useSlottedContext(LabelContext);
 	const buttonContext = useSlottedContext(ButtonContext);
@@ -100,7 +88,6 @@ export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Elemen
 						buttonProps.onPress?.(event);
 					}}
 					ref={triggerRef}
-					render={renderRoot}
 					// Opt out of the ComboBox button slot so this does not also toggle the popover.
 					slot={null}
 				>

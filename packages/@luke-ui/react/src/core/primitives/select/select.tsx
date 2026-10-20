@@ -139,15 +139,12 @@ interface _SelectTriggerProps extends _SelectTriggerOmit {
 /** Props for `SelectTrigger`. */
 export type SelectTriggerProps = Prettify<_SelectTriggerProps>;
 
-type _SelectValueOmit<T extends object> = DistributiveOmit<RacSelectValueProps<T>, 'render'>;
-
-interface _SelectValueProps<T extends object> extends _SelectValueOmit<T> {
+interface _SelectValueProps<T extends object> extends DistributiveOmit<
+	RacSelectValueProps<T>,
+	'render'
+> {
 	/** Forwarded to the value element. */
 	ref?: Ref<HTMLSpanElement>;
-	/**
-	 * Passes resolved DOM props and select-value state to a caller-owned value root element.
-	 */
-	renderRoot?: RacSelectValueProps<T>['render'];
 }
 
 /** Props for `SelectValue`. */
@@ -171,26 +168,15 @@ interface _SelectPopoverProps extends _SelectPopoverOmit {
 	offset?: RacPopoverProps['offset'];
 	/** Forwarded to the popover's DOM element. */
 	ref?: Ref<HTMLElement>;
-	/**
-	 * Passes resolved DOM props and popover state to a caller-owned popover root element.
-	 */
-	renderRoot?: RacPopoverProps['render'];
 }
 
 /** Props for `SelectPopover`. */
 export type SelectPopoverProps = Prettify<_SelectPopoverProps>;
 
-type _SelectListBoxOmit<T extends object> = DistributiveOmit<RacListBoxProps<T>, 'render'>;
-
-interface _SelectListBoxProps<T extends object> extends _SelectListBoxOmit<T> {
-	/**
-	 * Passes resolved DOM props and listbox state to a caller-owned listbox root element.
-	 */
-	renderRoot?: RacListBoxProps<T>['render'];
-}
-
 /** Props for `SelectListBox`. */
-export type SelectListBoxProps<T extends object> = Prettify<_SelectListBoxProps<T>>;
+export type SelectListBoxProps<T extends object> = Prettify<
+	DistributiveOmit<RacListBoxProps<T>, 'render'>
+>;
 
 /** Props for `SelectItem`. */
 export type SelectItemProps<T extends object> = Prettify<
@@ -279,15 +265,12 @@ export function SelectTrigger(props: SelectTriggerProps): JSX.Element {
 
 /** The selected option, or the root's `placeholder` while nothing is selected. */
 export function SelectValue<T extends object>(props: SelectValueProps<T>): JSX.Element {
-	const { renderRoot, ...valueProps } = props;
-
 	return (
 		<RacSelectValue<T>
-			{...valueProps}
-			className={composeRenderProps(valueProps.className, (renderedClassName) => {
+			{...props}
+			className={composeRenderProps(props.className, (renderedClassName) => {
 				return selectRecipe().value({ className: renderedClassName });
 			})}
-			render={renderRoot}
 		/>
 	);
 }
@@ -314,13 +297,7 @@ export function SelectIndicator(props: SelectIndicatorProps): JSX.Element {
 
 /** Popover surface for the listbox. */
 export function SelectPopover(props: SelectPopoverProps): JSX.Element {
-	const {
-		containerPadding: containerPaddingProp,
-		offset = 4,
-		ref,
-		renderRoot,
-		...popoverProps
-	} = props;
+	const { containerPadding: containerPaddingProp, offset = 4, ref, ...popoverProps } = props;
 	const popoverContext = useSlottedContext(PopoverContext);
 	const selectState = use(RacSelectStateContext);
 	const containerPadding = resolveOverlayContainerPadding(
@@ -341,7 +318,6 @@ export function SelectPopover(props: SelectPopoverProps): JSX.Element {
 			containerPadding={containerPadding}
 			offset={offset}
 			ref={mergeRefs(ref, copyScopeColorMode(popoverContext?.triggerRef))}
-			render={renderRoot}
 			style={composeRenderProps(popoverProps.style, (style) => ({
 				...style,
 				...assignInlineVars({
@@ -357,15 +333,12 @@ export function SelectPopover(props: SelectPopoverProps): JSX.Element {
  * `SelectItem` children.
  */
 export function SelectListBox<T extends object>(props: SelectListBoxProps<T>): JSX.Element {
-	const { renderRoot, ...listBoxProps } = props;
-
 	return (
 		<RacListBox<T>
-			{...listBoxProps}
-			className={composeRenderProps(listBoxProps.className, (className) => {
+			{...props}
+			className={composeRenderProps(props.className, (className) => {
 				return comboboxRecipe().listBox({ className });
 			})}
-			render={renderRoot}
 		/>
 	);
 }

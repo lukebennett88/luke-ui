@@ -295,7 +295,6 @@ const AUDITED_TYPES: ReadonlyArray<{
 			'placeholder',
 			'readOnly',
 			'ref',
-			'renderRoot',
 			'required',
 			'size',
 			'value',
@@ -309,25 +308,26 @@ const AUDITED_TYPES: ReadonlyArray<{
 		visible: ['cite', 'lineClamp', 'textWrap'],
 	},
 	{
-		// The field guide teaches connecting labels with `htmlFor`.
+		// The field guide teaches connecting labels with `htmlFor`. Field labels keep fixed semantics.
 		forwardsDomProps: true,
 		name: 'FieldLabelProps',
 		path: 'packages/@luke-ui/react/src/core/primitives/field/label.tsx',
-		visible: ['elementType', 'htmlFor', 'necessityIndicator', 'renderRoot'],
+		visible: ['htmlFor', 'necessityIndicator'],
 	},
 	{
 		// The field guide teaches connecting helper text with `id` and `aria-describedby`.
 		forwardsDomProps: true,
 		name: 'FieldDescriptionProps',
 		path: 'packages/@luke-ui/react/src/core/primitives/field/description.tsx',
-		visible: ['elementType', 'id', 'renderRoot'],
+		visible: ['id'],
 	},
 	{
-		// `FieldError` styles RAC's field error slot, so it documents the same element-choice contract.
+		// `FieldError` styles RAC's field error slot. Children may be a state function; root
+		// replacement is not public.
 		forwardsDomProps: true,
 		name: 'FieldErrorProps',
 		path: 'packages/@luke-ui/react/src/core/primitives/field/error.tsx',
-		visible: ['elementType', 'renderRoot'],
+		visible: [],
 	},
 	{
 		// The guide teaches `elementType` for a screen-reader-only heading, `isFocusable` for focus
@@ -631,7 +631,6 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'onPressUp',
 			'prominence',
 			'ref',
-			'renderRoot',
 			'size',
 			'slot',
 			'tone',
@@ -702,7 +701,6 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'onPressEnd',
 			'onPressStart',
 			'onPressUp',
-			'renderRoot',
 			'size',
 			'slot',
 			'type',
@@ -736,7 +734,6 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'onPressEnd',
 			'onPressStart',
 			'onPressUp',
-			'renderRoot',
 			'size',
 			'type',
 		],

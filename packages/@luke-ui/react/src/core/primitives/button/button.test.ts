@@ -1,13 +1,12 @@
 import type { ButtonProps } from '@luke-ui/react/primitives/button';
-import { createElement } from 'react';
-import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
-import { assertType, expectTypeOf, test } from 'vite-plus/test';
+import { assertType, test } from 'vite-plus/test';
 
-test('primitive Button exposes renderRoot instead of React Aria render', () => {
-	expectTypeOf<ButtonProps['renderRoot']>().toEqualTypeOf<RacButtonProps['render']>();
-	assertType<ButtonProps>({ renderRoot: (domProps, _state) => createElement('button', domProps) });
-	// @ts-expect-error — public root replacement is renderRoot, not React Aria render
-	assertType<ButtonProps>({ render: (domProps, _state) => createElement('button', domProps) });
+test('primitive Button keeps a fixed button root', () => {
+	assertType<ButtonProps>({ ref: null });
+	// @ts-expect-error — interactive buttons do not expose root replacement
+	assertType<ButtonProps>({ render: () => null });
+	// @ts-expect-error — interactive buttons do not expose root replacement
+	assertType<ButtonProps>({ renderRoot: () => null });
 });
 
 test('primitive Button supports ref and rejects unsupported prop combinations', () => {

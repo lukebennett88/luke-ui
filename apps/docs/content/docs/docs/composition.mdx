@@ -51,25 +51,27 @@ Give the custom component the same accessibility care as a normal component. Pre
 structure. Provide an accessible name. Keep keyboard and focus behaviour intact. Use a normal React
 element for surrounding content when no primitive is needed.
 
-## Own a component root
+## Style from interaction state
 
-The Button primitive exposes `renderRoot` when you need to own the rendered `<button>` — for example
-to apply motion — without changing the high-level `Button` API. Spread the supplied DOM props onto a
-`<button>`. Do not turn the button into a link. Use `Link` or `IconLink`, or style an owned element
-with `buttonRecipe`. Return one DOM root. Custom wrappers must pass the supplied `ref` to that
-element.
+Interactive primitives keep fixed semantics. Prefer state-aware `className` and `style` over root
+replacement when you only need visual feedback. This example scales the button from press and hover
+state without replacing the `<button>`:
 
 <ExampleBlock
 	src="composition/animated-button"
-	title="Composition and customisation: Render a different DOM component"
+	title="Composition and customisation: Style from interaction state"
 />
 
-The second `renderRoot` argument contains interaction state such as `isPressed`.
+Do not turn a button into a link. Use `Link` or `IconLink`, or style an owned element with
+`buttonRecipe`.
 
-For `Box` and `Text`, use `elementType` for a supported semantic or structural element. It does not
-change the accepted DOM props. Use `renderRoot` when the callback must own the element and its DOM
-attributes. Do not combine `renderRoot` with `elementType`. Use `Link` and `Button` when you need
-their behaviour.
+## Own a layout or typography root
+
+`elementType` and `renderRoot` are opt-in. Layout primitives such as `Box`, and typography such as
+`Text` and `Heading`, expose them when choosing or owning the root is a real composition need. Use
+`elementType` for a supported semantic or structural element. Use `renderRoot` when a callback must
+own the element and its DOM attributes. Do not combine them. Interactive controls generally omit
+both.
 
 Read the [Box documentation](/components/layout/box) for the supported elements and the `renderRoot`
 callback's resolved props.

@@ -80,9 +80,7 @@ interface _SwitchRootProps extends _SwitchRootOmit {
 /** Props for `SwitchRoot`. */
 export type SwitchRootProps = Prettify<_SwitchRootProps>;
 
-type _SwitchLabelOmit = DistributiveOmit<RacSwitchButtonProps, 'render'>;
-
-interface _SwitchLabelProps extends _SwitchLabelOmit {
+interface _SwitchLabelProps extends DistributiveOmit<RacSwitchButtonProps, 'render'> {
 	/**
 	 * `SwitchControl` plus textual, non-interactive label content, unless a `FieldLabel` supplies the
 	 * label. Pass a function to render from the switch state.
@@ -90,10 +88,6 @@ interface _SwitchLabelProps extends _SwitchLabelOmit {
 	children: RacSwitchButtonProps['children'];
 	/** Forwarded to the `<label>` element. */
 	ref?: Ref<HTMLLabelElement>;
-	/**
-	 * Passes resolved DOM props and switch state to a caller-owned label root element.
-	 */
-	renderRoot?: RacSwitchButtonProps['render'];
 }
 
 /** Props for `SwitchLabel`. */
@@ -135,8 +129,8 @@ export function SwitchRoot(props: SwitchRootProps): JSX.Element {
 				<RacSwitchField
 					{...restProps}
 					{...rootIdProps(id, resolvedInputId)}
-					className={composeRenderProps(className, (className) => {
-						return switchRecipe({ size }).root({ className });
+					className={composeRenderProps(className, (renderedClassName) => {
+						return switchRecipe({ size }).root({ className: renderedClassName });
 					})}
 					isRequired={isRequired}
 				/>
@@ -153,15 +147,14 @@ export function SwitchRoot(props: SwitchRootProps): JSX.Element {
  * outside it.
  */
 export function SwitchLabel(props: SwitchLabelProps): JSX.Element {
-	const { className, renderRoot, ...restProps } = props;
+	const { className, ...restProps } = props;
 
 	return (
 		<RacSwitchButton
 			{...restProps}
-			className={composeRenderProps(className, (className) => {
-				return fieldRecipe().inlineLabel({ className });
+			className={composeRenderProps(className, (renderedClassName) => {
+				return fieldRecipe().inlineLabel({ className: renderedClassName });
 			})}
-			render={renderRoot}
 		/>
 	);
 }

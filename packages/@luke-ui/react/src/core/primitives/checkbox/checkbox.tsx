@@ -82,9 +82,7 @@ interface _CheckboxRootProps extends _CheckboxRootOmit {
 /** Props for `CheckboxRoot`. */
 export type CheckboxRootProps = Prettify<_CheckboxRootProps>;
 
-type _CheckboxLabelOmit = DistributiveOmit<RacCheckboxButtonProps, 'render'>;
-
-interface _CheckboxLabelProps extends _CheckboxLabelOmit {
+interface _CheckboxLabelProps extends DistributiveOmit<RacCheckboxButtonProps, 'render'> {
 	/**
 	 * `CheckboxControl` plus textual, non-interactive label content, unless a `FieldLabel` supplies
 	 * the label. Pass a function to render from the checkbox state.
@@ -92,10 +90,6 @@ interface _CheckboxLabelProps extends _CheckboxLabelOmit {
 	children: RacCheckboxButtonProps['children'];
 	/** Forwarded to the `<label>` element. */
 	ref?: Ref<HTMLLabelElement>;
-	/**
-	 * Passes resolved DOM props and checkbox state to a caller-owned label root element.
-	 */
-	renderRoot?: RacCheckboxButtonProps['render'];
 }
 
 /** Props for `CheckboxLabel`. */
@@ -138,8 +132,8 @@ export function CheckboxRoot(props: CheckboxRootProps): JSX.Element {
 				<RacCheckboxField
 					{...restProps}
 					{...rootIdProps(id, resolvedInputId)}
-					className={composeRenderProps(className, (className) => {
-						return checkboxRecipe({ size }).root({ className });
+					className={composeRenderProps(className, (renderedClassName) => {
+						return checkboxRecipe({ size }).root({ className: renderedClassName });
 					})}
 					isRequired={isRequired}
 				/>
@@ -156,15 +150,14 @@ export function CheckboxRoot(props: CheckboxRootProps): JSX.Element {
  * buttons outside it.
  */
 export function CheckboxLabel(props: CheckboxLabelProps): JSX.Element {
-	const { className, renderRoot, ...restProps } = props;
+	const { className, ...restProps } = props;
 
 	return (
 		<RacCheckboxButton
 			{...restProps}
-			className={composeRenderProps(className, (className) => {
-				return fieldRecipe().inlineLabel({ className });
+			className={composeRenderProps(className, (renderedClassName) => {
+				return fieldRecipe().inlineLabel({ className: renderedClassName });
 			})}
-			render={renderRoot}
 		/>
 	);
 }

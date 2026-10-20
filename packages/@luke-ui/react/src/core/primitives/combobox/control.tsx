@@ -18,10 +18,6 @@ interface _ComboboxControlProps extends _ComboboxControlOmit {
 	className?: RacGroupProps['className'];
 	/** Forwarded to the control's group element. */
 	ref?: Ref<HTMLDivElement>;
-	/**
-	 * Passes resolved DOM props and group state to a caller-owned control root element.
-	 */
-	renderRoot?: RacGroupProps['render'];
 	size?: ComboboxSize;
 }
 
@@ -34,7 +30,7 @@ export type ComboboxControlProps = Prettify<_ComboboxControlProps>;
  * takes a danger border.
  */
 export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
-	const { ref, renderRoot, size: sizeProp, ...groupProps } = props;
+	const { ref, size: sizeProp, ...groupProps } = props;
 	const presentation = useComboboxPresentation();
 	const size = useComboboxSize(sizeProp);
 	const inputGroupRef = useComboboxInputGroupRef();
@@ -59,7 +55,6 @@ export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 								return typeof merged === 'function' ? merged(element) : undefined;
 							}
 				}
-				render={renderRoot}
 			/>
 		</IconSizeProvider>
 	);

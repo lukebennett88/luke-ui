@@ -328,24 +328,13 @@ test('a FieldLabel uses the control root required state over its isRequired prop
 });
 
 test('a FieldLabel with a render prop still draws the marker and names the control', () => {
-	let receivedState: unknown;
 	render(
 		<TextInputRoot isRequired>
-			<FieldLabel
-				renderRoot={(domProps, state) => {
-					receivedState = state;
-					// React Aria passes `htmlFor` in `domProps`, which the rule cannot see through the spread.
-					// oxlint-disable-next-line jsx-a11y/label-has-associated-control
-					return <label {...domProps} />;
-				}}
-			>
-				Example field
-			</FieldLabel>
+			<FieldLabel>Example field</FieldLabel>
 			<TextInput />
 		</TextInputRoot>,
 	);
 
-	expect(receivedState).toEqual({});
 	expect(input('Example field')).toBeRequired();
 	expect(labelFor(input('Example field')).textContent).toBe('Example field\u00A0*');
 });

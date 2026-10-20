@@ -54,8 +54,9 @@ variants type for naming symmetry. [STYLING.md](STYLING.md#recipes) covers recip
 
 ## Composition props
 
-[CONVENTIONS.md](CONVENTIONS.md#element-choice) owns element choice: `elementType`, `renderRoot`,
-and `render<Part>`.
+[CONVENTIONS.md](CONVENTIONS.md#element-choice) owns element choice. `elementType`, `renderRoot`,
+and `render<Part>` are opt-in capabilities with consistent names when present — not props every
+component exposes.
 
 ### IDs and refs
 
@@ -87,9 +88,11 @@ the input, using `inputId` or a generated id, so the layout passes no ids.
 ### Primitives and composed components
 
 Primitives stay close to React Aria. Keep the wrapped component's state-aware `className` and
-`style`, events, refs, and `slot`, unless a prop conflicts with Luke UI's ownership rules. Expose
-root replacement as `renderRoot`, not React Aria's `render`. Composed components own the normal
-anatomy. Do not add escape hatches to them for custom anatomy that their primitives already support.
+`style`, events, refs, and `slot`, unless a prop conflicts with Luke UI's ownership rules. Do not
+expose root replacement on every RAC wrapper. Prefer recipes and state-aware styling. When Luke UI
+owns a demonstrated root-replacement seam, name it `renderRoot`. Keep RAC `render` only when that
+seam itself is the justified composition API. Composed components own the normal anatomy. Do not add
+escape hatches to them for custom anatomy that their primitives already support.
 
 ### `slot`
 
