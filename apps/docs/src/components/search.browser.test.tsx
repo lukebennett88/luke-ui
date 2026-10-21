@@ -346,20 +346,41 @@ test('closes in one Escape press with text typed, and restores focus', async () 
 	await expect.element(trigger).toHaveFocus();
 });
 
+// TEMP-DIAG: on-screen stage marker so the CI failure screenshot shows the
+// last completed operation. Remove before final.
+function stage(name: string) {
+	let el = document.getElementById('diag-stage');
+	if (!el) {
+		el = document.body.appendChild(document.createElement('div'));
+		el.id = 'diag-stage';
+		el.setAttribute(
+			'style',
+			'position:fixed;top:0;left:0;z-index:99999;pointer-events:none;background:yellow;color:black;font:12px monospace;padding:2px 6px;',
+		);
+	}
+	el.textContent = `STAGE:${name} active=${document.querySelector('input')?.getAttribute('aria-activedescendant') ?? '?'} focus=${document.activeElement?.getAttribute('role') ?? document.activeElement?.tagName ?? '?'}`;
+}
+
 test('keeps the active result within the visible list after scrolling down', async () => {
+	stage('start');
 	await renderSearch();
+	stage('rendered');
 	const input = await openSearchDialog();
+	stage('opened');
 	await typeSearchQuery(input, 'many');
+	stage('typed');
 	await expect.element(page.getByRole('menuitem').nth(0)).toBeVisible();
 	const list = page.getByRole('menu', { name: 'Search results' }).element();
 	expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
 
 	const first = page.getByRole('menuitem').nth(0).element();
 	await expectActiveDescendant(input, list, first.id);
+	stage('active0');
 	// Item heights set the scroll positions asserted below. Wait for the
 	// webfont to finish loading so a late swap cannot grow the items above
 	// the active result after it has been scrolled into view.
 	await document.fonts.ready;
+	stage('fonts');
 
 	const tenthBeforeNav = page.getByRole('menuitem').nth(10).element();
 	expect(isResultWithinList(tenthBeforeNav, list)).toBe(false);
@@ -376,17 +397,24 @@ test('keeps the active result within the visible list after scrolling down', asy
 		const expected = page.getByRole('menuitem').nth(index).element();
 		// oxlint-disable-next-line no-await-in-loop
 		await expectActiveDescendant(input, list, expected.id);
+		stage(`down-${index}`);
 	}
 	const option = page.getByRole('menuitem').nth(10).element();
 	await expectActiveDescendant(input, list, option.id);
 	await expectResultWithinList(option, list, input);
+	stage('within10');
 	await expect.element(input).toHaveFocus();
+	stage('focus10');
 
 	await userEvent.keyboard('{ArrowUp}');
+	stage('up-sent');
 	const previousElement = page.getByRole('menuitem').nth(9).element();
 	await expectActiveDescendant(input, list, previousElement.id);
+	stage('active9');
 	await expectResultWithinList(previousElement, list, input);
+	stage('within9');
 	await expect.element(input).toHaveFocus();
+	stage('done');
 });
 
 test('wraps keyboard navigation from the first result to the last and back', async () => {
