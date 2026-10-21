@@ -291,9 +291,7 @@ test('shows loading and error states without stale results', async () => {
 	expect(page.getByRole('menuitem').elements()).toHaveLength(0);
 });
 
-// Longer than the 1s poll default so a starved CI browser gets time to
-// land, but short enough that a stuck stage fails with the snapshot below
-// instead of consuming the whole test timeout.
+// Allow a busy CI browser to settle, with a snapshot if polling fails.
 const SEARCH_POLL_TIMEOUT_MS = 5_000;
 
 function activeDescendantId(input: ReturnType<typeof page.getByRole>) {
@@ -365,13 +363,8 @@ test('keeps the active result within the visible list after scrolling down', asy
 	const tenthBeforeNav = page.getByRole('menuitem').nth(10).element();
 	expect(isResultWithinList(tenthBeforeNav, list)).toBe(false);
 
-	// One keyboard call for all ten presses. Each keydown is a discrete
-	// native event that React flushes before the next arrives, so the moves
-	// land in order, and the polls below synchronise on the outcome.
-	// Awaiting a round trip per press made this the file's longest test
-	// under CI load: stage timings there showed the body completing every
-	// assertion in ~15.7s — just past the 15s limit — with seconds spent
-	// waiting on per-press round trips, not on any stuck operation.
+	// Batch the presses to minimise browser round trips.
+	// The polls below await the final selection and scroll position.
 	await userEvent.keyboard('{ArrowDown}'.repeat(10));
 	const option = page.getByRole('menuitem').nth(10).element();
 	await expectActiveDescendant(input, list, option.id);
@@ -464,11 +457,7 @@ function rectReplacer(_key: string, value: unknown) {
 		: value;
 }
 
-/**
- * Bounded in-page focus check. `expect.element(...).toHaveFocus()` retries
- * for roughly the whole test timeout, so a failure would surface only as
- * an opaque test timeout; this reports the element that actually has focus.
- */
+// Report the focused element if the bounded focus check fails.
 async function expectInputFocus(input: ReturnType<typeof page.getByRole>) {
 	try {
 		await expect

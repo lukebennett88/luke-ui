@@ -1,6 +1,6 @@
 import axe from 'axe-core';
 import { act } from 'react';
-import { expect, test, vi } from 'vite-plus/test';
+import { expect, onTestFinished, test, vi } from 'vite-plus/test';
 import { cdp, page } from 'vite-plus/test/context';
 import { settingsApi } from './api/settings-api.js';
 import { renderApp } from './test/render-app.js';
@@ -89,8 +89,8 @@ test('inline profile fields validate, save once while pending, retry failures, a
 	await expect.element(name).toHaveValue('Jordan Lee');
 	await expect.element(name).toHaveFocus();
 
-	const release = settingsApi.holdMutations();
-	const mutation = vi.spyOn(settingsApi, 'updateProfile');
+	const gate = deferMutation(settingsApi.updateProfile.bind(settingsApi));
+	const mutation = vi.spyOn(settingsApi, 'updateProfile').mockImplementationOnce(gate.run);
 	await app.user.keyboard('{Enter}');
 	await expect.element(name).toHaveAttribute('readonly');
 	await app.user.keyboard('{Escape}{Enter}');
@@ -100,7 +100,7 @@ test('inline profile fields validate, save once while pending, retry failures, a
 	await expect.element(name).toHaveAttribute('readonly');
 	// Still pending, so the remounted field shows the last persisted name.
 	await expect.element(name).toHaveValue('Boricio Jones');
-	release();
+	gate.release();
 	await expectProfileName(app, 'Jordan Lee');
 	await expect.element(name).not.toHaveAttribute('readonly');
 	expect(mutation).toHaveBeenCalledOnce();
@@ -192,8 +192,8 @@ test('keyboard autosave updates a switch and persists after remount', async () =
 	const app = await renderApp();
 	const toggle = app.locator.getByRole('switch', { name: 'Underline links' });
 	await expect.element(toggle).not.toBeChecked();
-	const release = settingsApi.holdMutations();
-	const mutation = vi.spyOn(settingsApi, 'updatePreferences');
+	const gate = deferMutation(settingsApi.updatePreferences.bind(settingsApi));
+	const mutation = vi.spyOn(settingsApi, 'updatePreferences').mockImplementationOnce(gate.run);
 	toggle.element().focus();
 	await app.user.keyboard(' ');
 	await expect.element(toggle).toBeChecked();
@@ -201,7 +201,7 @@ test('keyboard autosave updates a switch and persists after remount', async () =
 	await app.user.keyboard(' ');
 	await expect.element(toggle).toBeChecked();
 	expect(mutation).toHaveBeenCalledOnce();
-	release();
+	gate.release();
 	await expect.element(app.locator.getByRole('status')).not.toBeInTheDocument();
 	await expect.element(toggle).toHaveFocus();
 	app.unmount();
@@ -215,12 +215,13 @@ test('keyboard autosave updates a switch and persists after remount', async () =
 test('a failed theme change rolls back, and explicit and system themes apply', async () => {
 	const app = await renderApp();
 	const trigger = app.locator.getByRole('button', { name: /Theme/ });
-	const release = settingsApi.holdMutations();
+	const gate = deferMutation(settingsApi.updatePreferences.bind(settingsApi));
+	vi.spyOn(settingsApi, 'updatePreferences').mockImplementationOnce(gate.run);
 	settingsApi.setNextFailure('server');
 	await chooseOption(app, 'Theme', 'Dark');
 	await expect.poll(() => document.documentElement.dataset.colorMode).toBe('dark');
 	await expect.element(trigger).toHaveAttribute('aria-disabled', 'true');
-	release();
+	gate.release();
 	await expect
 		.element(app.locator.getByRole('alert'))
 		.toHaveTextContent('Could not save preferences. Try again.');
@@ -270,13 +271,14 @@ test('clearing saved settings waits for saves, cancels, retries failures, and re
 	await settingsApi.updateProfile({ displayName: 'Jordan Lee' });
 	await settingsApi.updatePreferences({ colorMode: 'dark' });
 	const app = await renderApp();
-	const release = settingsApi.holdMutations();
+	const gate = deferMutation(settingsApi.updatePreferences.bind(settingsApi));
+	vi.spyOn(settingsApi, 'updatePreferences').mockImplementationOnce(gate.run);
 	await chooseOption(app, 'Theme', 'Light');
 	await act(() => app.router.navigate('/settings/security'));
 	const trigger = app.locator.getByRole('button', { name: 'Clear saved settings' });
 	await expect.element(trigger).toBeDisabled();
 	await expect.element(app.locator.getByRole('status')).toHaveTextContent('Saving…');
-	release();
+	gate.release();
 	await expect.element(trigger).toBeEnabled();
 
 	await app.user.click(trigger);
@@ -292,12 +294,13 @@ test('clearing saved settings waits for saves, cancels, retries failures, and re
 	await expect
 		.element(dialog.getByRole('alert'))
 		.toHaveTextContent('Could not clear saved settings. Try again.');
-	const releaseClear = settingsApi.holdMutations();
+	const clearGate = deferMutation(settingsApi.clearLocalSettings.bind(settingsApi));
+	vi.spyOn(settingsApi, 'clearLocalSettings').mockImplementationOnce(clearGate.run);
 	await app.user.click(confirm);
 	await app.user.keyboard('{Escape}');
 	await expect.element(dialog).toBeVisible();
 	await expect.element(dialog.getByRole('button', { name: 'Cancel' })).toBeDisabled();
-	releaseClear();
+	clearGate.release();
 	await expect.element(app.locator.getByRole('status')).toHaveTextContent('Saved settings cleared');
 	await expect.element(trigger).toHaveFocus();
 
@@ -390,4 +393,27 @@ async function expectAccessible(container: HTMLElement) {
 			nodes: violation.nodes.map((node) => ({ html: node.html, checks: node.any })),
 		})),
 	).toEqual([]);
+}
+
+function deferMutation<Args extends Array<unknown>, Result>(
+	mutation: (...args: Args) => Promise<Result>,
+) {
+	let release = () => {};
+	const gate = new Promise<void>((resolve) => {
+		release = resolve;
+	});
+	const pending: Array<Promise<Result>> = [];
+	onTestFinished(async () => {
+		release();
+		await Promise.allSettled(pending);
+		settingsApi.reset();
+	});
+	return {
+		release,
+		run(this: void, ...args: Args) {
+			const result = gate.then(() => mutation(...args));
+			pending.push(result);
+			return result;
+		},
+	};
 }

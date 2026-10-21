@@ -81,9 +81,9 @@ that.
   polling and execution limits protect against hangs. They are not themselves a reason to fail a
   review. Do not inflate a timeout to hide a slow or broken dependency, and give any unusually large
   deadline a comment saying what slow step it covers.
-- Send discrete inputs one at a time when each depends on the previous one's effect, and wait for
-  the observable effect before sending the next. A batched sequence can dispatch faster than the
-  component commits state, which loses inputs a real user could not lose.
+- Wait for an input's observable effect before sending the next input when it depends on that
+  effect. Independent native discrete key events can be batched when the test asserts the final
+  outcome.
 - Use browser animation APIs and frame synchronisation only where rendering or animation genuinely
   matters. Prefer explicit animation completion over guessed milliseconds.
 - Choose the smallest test that proves Luke UI's own contract. Avoid waiting for a large integration

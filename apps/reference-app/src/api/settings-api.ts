@@ -21,18 +21,15 @@ class SettingsMutationError extends Error {
 
 type ApiControls = {
 	failure: ApiFailure;
-	gate: Promise<void> | null;
 	latencyMs: number;
-	releaseGate: (() => void) | null;
 };
 
-const controls: ApiControls = { failure: 'none', gate: null, latencyMs: 280, releaseGate: null };
+const controls: ApiControls = { failure: 'none', latencyMs: 280 };
 
 export const settingsApi = {
 	async clearLocalSettings(): Promise<void> {
 		const invocation = consumeControls();
 		await wait(invocation.latencyMs);
-		await invocation.gate;
 		checkFailure(invocation.failure, 'Could not clear saved settings. Try again.');
 		try {
 			localStorage.removeItem(STORAGE_KEY);
@@ -44,29 +41,10 @@ export const settingsApi = {
 		await wait(controls.latencyMs);
 		return readRaw();
 	},
-	/**
-	 * Holds mutations until the returned release is called, so tests can
-	 * observe a pending state for as long as they need without a real-time
-	 * latency. Interactive use keeps the default latency below.
-	 */
-	holdMutations() {
-		controls.gate = new Promise<void>((resolve) => {
-			controls.releaseGate = resolve;
-		});
-		return () => {
-			const release = controls.releaseGate;
-			controls.gate = null;
-			controls.releaseGate = null;
-			release?.();
-		};
-	},
 	reset() {
 		localStorage.removeItem(STORAGE_KEY);
 		controls.failure = 'none';
-		controls.gate = null;
 		controls.latencyMs = 280;
-		controls.releaseGate?.();
-		controls.releaseGate = null;
 	},
 	setLatency(ms: number) {
 		controls.latencyMs = Math.max(0, ms);
@@ -78,7 +56,6 @@ export const settingsApi = {
 	async updatePreferences(patch: Partial<Preferences>): Promise<Settings> {
 		const invocation = consumeControls();
 		await wait(invocation.latencyMs);
-		await invocation.gate;
 		checkFailure(invocation.failure, 'Could not save preferences. Try again.');
 		const parsed = preferenceUpdateSchema.safeParse(patch);
 		if (!parsed.success) {
@@ -94,7 +71,6 @@ export const settingsApi = {
 	async updateProfile(patch: ProfileUpdate): Promise<Settings> {
 		const invocation = consumeControls();
 		await wait(invocation.latencyMs);
-		await invocation.gate;
 		checkFailure(invocation.failure, 'Could not save profile. Try again.');
 		const parsed = profileUpdateSchema.safeParse(patch);
 		if (!parsed.success) {
