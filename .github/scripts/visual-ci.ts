@@ -27,9 +27,12 @@ export type BaselineRun = {
 	id: number;
 	status: string | null;
 	conclusion: string | null;
+	run_attempt?: number;
 };
 
-export type BaselineRunDecision = { ok: true; runId: number } | { ok: false; reason: string };
+export type BaselineRunDecision =
+	| { ok: true; runId: number; runAttempt: number }
+	| { ok: false; reason: string };
 
 /** GitHub Actions run statuses that mean the newest baseline is not finished yet. */
 const WAITABLE_BASELINE_STATUSES = new Set([
@@ -98,7 +101,8 @@ export function decideBaselineRun(
 		};
 	}
 
-	return { ok: true, runId: run.id };
+	// GitHub numbers a workflow run's first attempt as 1.
+	return { ok: true, runId: run.id, runAttempt: run.run_attempt ?? 1 };
 }
 
 /** GitHub answers 404 when the workflow file is absent from `main` (bootstrap). */
@@ -277,6 +281,7 @@ type WorkflowRunsResponse = {
 		id: number;
 		status: string | null;
 		conclusion: string | null;
+		run_attempt?: number;
 	}>;
 };
 
@@ -360,6 +365,16 @@ async function checkCaptures() {
 	}
 }
 
+export function hasRequiredVisualReviewers(environment: {
+	protection_rules?: Array<{ type: string; reviewers?: Array<unknown> }>;
+}): boolean {
+	return (
+		environment.protection_rules?.some(
+			(rule) => rule.type === 'required_reviewers' && (rule.reviewers?.length ?? 0) > 0,
+		) ?? false
+	);
+}
+
 async function summarise() {
 	const summaryPath = fromRepoRoot(VISUAL_SUMMARY_FILE);
 	const summary: VisualSummary = JSON.parse(await readFile(summaryPath, 'utf8'));
@@ -370,6 +385,27 @@ async function summarise() {
 	await writeStepSummary(`### Visual regression\n\n| status | count |\n| --- | --- |\n${rows}\n`);
 
 	const review = countRequiringReview(summary.counts);
+	if (review > 0) {
+		const repository = requireEnv('GITHUB_REPOSITORY');
+		const response = await fetch(
+			`https://api.github.com/repos/${repository}/environments/visual-review`,
+			{
+				headers: {
+					Authorization: `Bearer ${requireEnv('GITHUB_TOKEN')}`,
+					Accept: 'application/vnd.github+json',
+				},
+			},
+		);
+		if (!response.ok)
+			throw new Error(`Cannot verify visual-review protection: GitHub API ${response.status}.`);
+		const environment = (await response.json()) as {
+			protection_rules?: Array<{ type: string; reviewers?: Array<unknown> }>;
+		};
+		if (!hasRequiredVisualReviewers(environment))
+			throw new Error(
+				'Configure required reviewers on the visual-review environment before approving screenshot differences. An unprotected environment cannot satisfy the visual gate.',
+			);
+	}
 	await writeOutput('review', review);
 
 	const needingReview = summary.results.filter((result) => result.status !== 'unchanged');

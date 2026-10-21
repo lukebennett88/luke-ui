@@ -4,15 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'packages/@luke-ui/react/**'
-      - 'packages/@luke-ui/rainbow-sprinkles/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'package.json'
-      - '.github/scripts/**'
-      - '.github/workflows/visual-baseline.yml'
-      - '.github/workflows/visual-regression.yml'
   workflow_dispatch:
 
 concurrency:
@@ -76,6 +67,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: visual-baseline
+          overwrite: true
           path: .artifacts/visual-regression/baseline
           if-no-files-found: error
           retention-days: 90

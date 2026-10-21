@@ -135,7 +135,7 @@ install or build. `react-package.test.ts` covers React, `theme-packages.test.ts`
 and `fonts.test.ts` font loading and Capsize trims. The consumer files they need live in
 `react-fixture.ts` and `theme-fixture.ts`. The comprehensive `pnpm test` includes the harness and
 requires network access. Run it separately with `pnpm test:consumer`. The `consumer-tests` CI job
-runs it on every pull request.
+runs it on every pull request and on `main`.
 
 Keep it to the package boundary: tarball contents, dependencies, peers, assets, server rendering, a
 client build, hydration in Chromium, type checking, and what small imports bundle. Check installed
@@ -160,8 +160,7 @@ instead of the workspace build. That run skips the theme package checks and prin
 `packages/@luke-ui/theme-build/theme-package.test.ts` runs `vp pack --watch` with the shared theme
 build on a small theme package in a temporary directory. It edits the theme input twice and checks
 the stylesheet after each rebuild. The comprehensive `pnpm test` includes this suite. Run it
-separately with `pnpm test:integration`. The `component-tests` CI job runs it after the component
-tests.
+separately with `pnpm test:integration`. The `package-tests` CI job runs it.
 
 ## Docs
 

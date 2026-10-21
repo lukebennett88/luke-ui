@@ -34,35 +34,58 @@ does not switch to an older green run.
 
 ## Run locally
 
-Host Chromium (quick iteration, may differ from CI):
+```sh
+pnpm test:visual
+```
+
+This authoritative comparison also runs as part of `pnpm test`. It requires Docker with
+`linux/amd64` support and an authenticated `gh` CLI with access to repository Actions artefacts.
+Apple Silicon uses emulation. Missing Docker, an unavailable baseline, failed captures, and visual
+differences all fail the command. There is no host fallback.
+
+The CLI checks the newest `main` baseline workflow run on every comparison and downloads its
+artefact fresh. It reports the selected run and attempt, validates that the download contains PNGs,
+then replaces the local baseline. There is no persistent baseline cache or fallback to older
+captures. The baseline workflow overwrites its named artefact on re-runs, so a run ID selects the
+current successful attempt's artefact.
+
+The container receives current source without host dependencies or build outputs. A Docker volume
+reuses pnpm's content-addressed package store, and each run performs a frozen install before
+building packages and capturing fresh screenshots inside the container. It never reuses host builds
+or task-result caches.
+
+Expected, actual, and diff PNGs plus `summary.json` are written to `.artifacts/visual-regression`.
+`pnpm test:visual:capture` explicitly captures a local baseline in Docker. An authoritative compare
+still selects the newest successful `main` workflow artefact rather than accepting that local
+replacement. Bump `PLAYWRIGHT_VISUAL_IMAGE` and both workflow `image:` lines together when
+Playwright moves.
+
+For quick, non-authoritative iteration with host Chromium:
 
 ```sh
 VISUAL_CAPTURE_DIR=.artifacts/visual-regression/baseline \
   pnpm --filter @luke-ui/react run test:visual:capture
-pnpm run test:visual:host
+pnpm test:visual:host
 ```
 
-Run the first command on `main`. `test:visual:host` writes expected, actual, and diff PNGs plus
-`summary.json` to `.artifacts/visual-regression`. Set `VISUAL_BASELINE_DIR` for another baseline.
-
-CI-parity Docker (same image and `linux/amd64` as the workflows). Needs Docker. On Apple Silicon
-that uses emulation. The CLI copies the tree into the container without `node_modules`, installs
-there, and bind-mounts only `.artifacts/visual-regression`, so the host install stays untouched.
-
-```sh
-pnpm run test:visual:capture
-pnpm run test:visual
-```
-
-`test:visual:capture` writes baseline screenshots. Use it on `main`, or when deliberately replacing
-the baseline after a rendering-environment change. `test:visual` captures current screenshots and
-compares them to the existing baseline without modifying it. Bump `PLAYWRIGHT_VISUAL_IMAGE` and the
-two workflow `image:` lines together when Playwright moves.
+Run the capture on `main`. Host font rendering can differ from CI. Set `VISUAL_BASELINE_DIR` to
+compare against another local baseline. Host differences also fail the command.
 
 ## Review
 
-Changed, added, and removed captures upload the `visual-regression-diff` artefact. The `review` job
-waits at the `visual-review` environment when that environment has a required reviewer.
+The visual workflow runs the Docker comparison on every PR. Its stable `visual-regression` gate
+requires a completed comparison and any needed approval. Infrastructure and capture failures fail
+the gate.
+
+Changed, added, and removed captures upload the `visual-regression-diff` artefact. Only a completed
+comparison can request approval through the `visual-review` environment. That environment must
+configure required reviewers. Approval applies to the workflow run and commit being reviewed. A new
+commit needs its own comparison and approval. Capture, baseline, and infrastructure failures fail
+the gate and cannot be approved as screenshot changes.
+
+Configure branch protection to require `visual-regression`. The workflow cannot make its own status
+mandatory in repository settings. `Visual baseline` regenerates the authoritative baseline on `main`
+after merge.
 
 ## Capture freeze
 

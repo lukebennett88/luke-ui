@@ -48,6 +48,9 @@ log(
 );
 log(review > 0 ? `Expected/actual/diff PNGs: ${diffDir}` : 'No visual changes.');
 
+// CI reviews complete comparisons through its protected environment. Local differences fail.
+if (review > 0 && process.env.VISUAL_REVIEW_MODE !== '1') process.exitCode = 2;
+
 async function captureCurrent() {
 	await rm(currentDir, { force: true, recursive: true });
 	await mkdir(currentDir, { recursive: true });
