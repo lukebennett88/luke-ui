@@ -6,6 +6,7 @@ import {
 	ComboboxListBox,
 	ComboboxPopover,
 	ComboboxRoot,
+	ComboboxTrigger,
 } from '@luke-ui/react/primitives/combobox';
 import { Field } from '@luke-ui/react/primitives/field';
 import { createRef } from 'react';
@@ -40,6 +41,30 @@ function controlElement() {
 	if (control === null) throw new Error('Expected the combobox control group.');
 	return control;
 }
+
+// Layout is the contract: the input is the control's first child, so only its inline-start
+// corners touch the control's curved border and take its inner radius.
+test('ComboboxInput rounds only the corners that touch the control', () => {
+	render(
+		<ComboboxRoot defaultItems={items}>
+			<Field label="Country">
+				<ComboboxControl>
+					<ComboboxInput />
+					<ComboboxTrigger aria-label="Toggle options" />
+				</ComboboxControl>
+			</Field>
+		</ComboboxRoot>,
+	);
+	const element = page.getByRole('combobox', { name: 'Country' }).element();
+	const outerRadius = Number.parseFloat(getComputedStyle(controlElement()).borderTopLeftRadius);
+	const inner = `${outerRadius - 1}px`;
+	const style = getComputedStyle(element);
+
+	expect(style.borderStartStartRadius).toBe(inner);
+	expect(style.borderEndStartRadius).toBe(inner);
+	expect(style.borderStartEndRadius).toBe('0px');
+	expect(style.borderEndEndRadius).toBe('0px');
+});
 
 test('ComboboxControl forwards a callback ref to its group and clears it on unmount', () => {
 	const ref = vi.fn<(element: HTMLDivElement | null) => void>();

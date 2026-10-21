@@ -20,6 +20,39 @@ export const textInputInlinePadding = createVar();
 export const textInputInvalidPaddingAdjust = createVar();
 export const textInputInputPaddingInline = `calc(${textInputInlinePadding} - ${fallbackVar(textInputInvalidPaddingAdjust, '0px')})`;
 
+/** Fills painted by the browser (`:autofill`) or a password manager (1Password's marker). */
+export const filledInputSelectors = ':autofill, :-webkit-autofill, [data-com-onepassword-filled]';
+
+/**
+ * Repaint for an externally filled input. The fill itself cannot be reliably overridden, and an
+ * extension stylesheet is unlayered, so a large inset shadow in the field surface paints over it.
+ */
+export const filledInputStyle = {
+	WebkitTextFillColor: vars.color.text.primary,
+	backgroundColor: vars.color.surface.field,
+	boxShadow: `inset 0 0 0 1000px ${vars.color.surface.field}`,
+	caretColor: vars.color.text.primary,
+	color: vars.color.text.primary,
+} as const satisfies StyleRule;
+
+/** Inner radius of a control with a 1px border, floored so a square theme stays square. */
+const controlInnerRadius = `max(0px, calc(${vars.radius.control} - 1px))`;
+
+/**
+ * Corners for an input inside a control. A square corner would paint over the control's curved
+ * border where they touch, so the input rounds only the side that is first or last in the control.
+ */
+export const controlInputCornerSelectors = {
+	'&:first-child': {
+		borderEndStartRadius: controlInnerRadius,
+		borderStartStartRadius: controlInnerRadius,
+	},
+	'&:last-child': {
+		borderEndEndRadius: controlInnerRadius,
+		borderStartEndRadius: controlInnerRadius,
+	},
+} as const satisfies Record<string, StyleRule>;
+
 /** Styles every text input shares, whether it draws its own chrome or sits inside a control. */
 export const textInputInputBase = {
 	appearance: 'none',
@@ -44,6 +77,9 @@ export const textInputInputBase = {
 			color: vars.color.text.secondary,
 			opacity: 1,
 		},
+		// `:where()` keeps this at class specificity, so the state selectors below and in the
+		// standalone recipe (disabled, invalid) still win where they set the same properties.
+		[`&:where(${filledInputSelectors})`]: filledInputStyle,
 		'&:where([data-disabled="true"], :disabled)': {
 			color: vars.color.text.disabled,
 			cursor: 'not-allowed',
@@ -216,6 +252,11 @@ export const textInputInControlClassName = style(
 		lineHeight: 'inherit',
 		paddingInlineEnd: textInputInlinePadding,
 		paddingInlineStart: textInputInlinePadding,
+
+		selectors: {
+			...textInputInputBase.selectors,
+			...controlInputCornerSelectors,
+		},
 	},
 	'text-input-in-control',
 );

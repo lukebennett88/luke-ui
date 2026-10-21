@@ -14,6 +14,7 @@ import {
 	TextInputRoot,
 	TextInputSuffix,
 } from '@luke-ui/react/primitives/text-input';
+import { vars } from '@luke-ui/react/theme';
 import { useState } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -145,6 +146,108 @@ test('a focused invalid TextInput keeps its size and text position in forced col
 	} finally {
 		await emulateForcedColors('none');
 	}
+});
+
+/** The computed `box-shadow` of a probe painted with `shadow` in the same theme scope. */
+function resolvedBoxShadow(scope: Element, shadow: string): string {
+	const probe = scope.appendChild(document.createElement('span'));
+	probe.style.boxShadow = shadow;
+	const resolved = getComputedStyle(probe).boxShadow;
+	probe.remove();
+	return resolved;
+}
+
+// Appearance is the contract: a fill painted by a password manager must not show as a square
+// light fill over the field surface, and a filled invalid input keeps its danger ring.
+test('a password-manager-filled TextInput repaints the fill with the field surface', async () => {
+	const { container } = render(
+		<>
+			<TextInput aria-label="Filled standalone" defaultValue="Luke" />
+			<TextInput aria-invalid aria-label="Filled invalid" defaultValue="nope" />
+			<TextInputControl>
+				<TextInput aria-label="Filled in control" defaultValue="Luke" />
+			</TextInputControl>
+		</>,
+	);
+	// 1Password marks a filled input with this attribute and paints its own background.
+	for (const name of ['Filled standalone', 'Filled invalid', 'Filled in control']) {
+		input(name).setAttribute('data-com-onepassword-filled', 'light');
+	}
+	const fieldFill = `inset 0 0 0 1000px ${vars.color.surface.field}`;
+
+	// `box-shadow` transitions, so poll until the repaint settles.
+	await expect
+		.poll(() => getComputedStyle(input('Filled standalone')).boxShadow)
+		.toBe(resolvedBoxShadow(container, fieldFill));
+	await expect
+		.poll(() => getComputedStyle(input('Filled in control')).boxShadow)
+		.toBe(resolvedBoxShadow(container, fieldFill));
+	await expect
+		.poll(() => getComputedStyle(input('Filled invalid')).boxShadow)
+		.toBe(
+			resolvedBoxShadow(
+				container,
+				`inset 0 0 0 1px ${vars.color.background.danger.solid.rest}, ${fieldFill}`,
+			),
+		);
+	const filledStyle = getComputedStyle(input('Filled in control'));
+	expect(filledStyle.getPropertyValue('-webkit-text-fill-color')).toBe(
+		getComputedStyle(input('Filled in control')).color,
+	);
+	expect(filledStyle.caretColor).toBe(filledStyle.color);
+});
+
+// Layout is the contract: a square input corner would paint over the control's curved border,
+// so an input rounds only the corners that touch the control (its inner radius).
+test('a TextInput in a control rounds only the corners that touch the control', () => {
+	render(
+		<>
+			<TextInput aria-label="Standalone reference" />
+			<TextInputControl>
+				<TextInput aria-label="Sole input" />
+			</TextInputControl>
+			<TextInputControl>
+				<TextInputPrefix>$</TextInputPrefix>
+				<TextInput aria-label="After prefix" />
+			</TextInputControl>
+			<TextInputControl>
+				<TextInput aria-label="Before suffix" />
+				<TextInputSuffix>USD</TextInputSuffix>
+			</TextInputControl>
+			<TextInputControl>
+				<TextInputPrefix>$</TextInputPrefix>
+				<TextInput aria-label="Between parts" />
+				<TextInputSuffix>USD</TextInputSuffix>
+			</TextInputControl>
+		</>,
+	);
+	const outerRadius = Number.parseFloat(
+		getComputedStyle(controlFor('Sole input')).borderTopLeftRadius,
+	);
+	const inner = `${outerRadius - 1}px`;
+
+	/** Radii in start-start, end-start, start-end, end-end order. */
+	function radii(name: string): Array<string> {
+		const style = getComputedStyle(input(name));
+		return [
+			style.borderStartStartRadius,
+			style.borderEndStartRadius,
+			style.borderStartEndRadius,
+			style.borderEndEndRadius,
+		];
+	}
+
+	expect(radii('Sole input')).toEqual([inner, inner, inner, inner]);
+	expect(radii('After prefix')).toEqual(['0px', '0px', inner, inner]);
+	expect(radii('Before suffix')).toEqual([inner, inner, '0px', '0px']);
+	expect(radii('Between parts')).toEqual(['0px', '0px', '0px', '0px']);
+	// A standalone input draws its own chrome, so it keeps the full outer radius.
+	expect(radii('Standalone reference')).toEqual([
+		`${outerRadius}px`,
+		`${outerRadius}px`,
+		`${outerRadius}px`,
+		`${outerRadius}px`,
+	]);
 });
 
 test('a TextInput inside a TextInputRoot is wired to its label, description, and error with no manual ids', () => {

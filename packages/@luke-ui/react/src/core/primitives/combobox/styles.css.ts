@@ -15,6 +15,11 @@ import { overlayMotion } from '../../styles/overlay-motion.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+import {
+	controlInputCornerSelectors,
+	filledInputSelectors,
+	filledInputStyle,
+} from '../text-input/styles.css.js';
 
 /** Set by Select/Combobox popovers to the usable overlay inline size. */
 export const popoverAvailableInlineSizeVar = createVar();
@@ -200,6 +205,10 @@ const comboboxConfig = {
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
 				},
+				// Same contract as a text input in a control: an external fill must not paint a
+				// square over the control's rounded chrome.
+				[`&:where(${filledInputSelectors})`]: filledInputStyle,
+				...controlInputCornerSelectors,
 			},
 		},
 		trigger: { marginInlineEnd: vars.space['4'], marginInlineStart: vars.space['4'] },
