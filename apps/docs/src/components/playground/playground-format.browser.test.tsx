@@ -34,8 +34,10 @@ function viewText(): string {
 // deadline. It is a deadline only: the test proceeds as soon as the editor
 // is ready, and nothing sits through it.
 const MONACO_READY_TIMEOUT_MS = 30_000;
-// Formatting runs in a Monaco worker, so its outcome gets its own deadline
-// (the default poll deadline is too short for a cold worker in CI).
+// Editor readiness does not load the formatter: Prettier and its plugins
+// are dynamically imported on the first format (see
+// `@luke-ui/playground-core/format`), so format outcomes keep their own
+// deadline for that cold load in CI. Later formats reuse the loaded modules.
 const FORMAT_TIMEOUT_MS = 10_000;
 // Covers the readiness deadline plus the format/undo round-trips after it.
 const MONACO_TEST_TIMEOUT_MS = MONACO_READY_TIMEOUT_MS + 15_000;
@@ -72,8 +74,10 @@ test(
 
 		await userEvent.click(formatButton);
 
-		await expect.poll(() => viewText()).toContain(formatted);
-		await expect.poll(() => decodeCodeHash(hash) ?? '').toContain(formatted);
+		await expect.poll(() => viewText(), { timeout: FORMAT_TIMEOUT_MS }).toContain(formatted);
+		await expect
+			.poll(() => decodeCodeHash(hash) ?? '', { timeout: FORMAT_TIMEOUT_MS })
+			.toContain(formatted);
 
 		await userEvent.click(monacoEditor()!);
 		await userEvent.keyboard(ctrlCmd('z'));
@@ -95,8 +99,12 @@ test(
 		await userEvent.click(monacoEditor()!);
 		await userEvent.keyboard(ctrlCmd('s'));
 
-		await expect.poll(() => viewText()).toContain(formatted);
-		await expect.poll(() => onChangeCalls.some((code) => code.includes(formatted))).toBe(true);
+		await expect.poll(() => viewText(), { timeout: FORMAT_TIMEOUT_MS }).toContain(formatted);
+		await expect
+			.poll(() => onChangeCalls.some((code) => code.includes(formatted)), {
+				timeout: FORMAT_TIMEOUT_MS,
+			})
+			.toBe(true);
 	},
 	MONACO_TEST_TIMEOUT_MS,
 );
