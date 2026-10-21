@@ -87,7 +87,7 @@ export default () => {
 										style={{
 											backgroundColor: vars.color.background[role].solid.rest,
 											borderRadius: vars.radius.full,
-											color: vars.color.foreground[role].onSolid,
+											color: vars.color.foreground[role].onSolid.primary,
 											padding: `${vars.space['4']} ${vars.space['8']}`,
 										}}
 										typography="caption"

@@ -79,7 +79,7 @@ export class ThemeContrastError extends Error {
 				...failures.map((failure) => {
 					return (
 						`${failure.mode}: ${failure.foreground} on ${failure.background} — ` +
-						`${failure.ratio.toFixed(2)}:1 < ${failure.required}:1`
+						`${failure.ratio.toFixed(3)}:1 < ${failure.required}:1`
 					);
 				}),
 				...inheritanceLines(inheritance),

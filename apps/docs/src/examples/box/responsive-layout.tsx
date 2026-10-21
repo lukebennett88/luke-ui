@@ -27,7 +27,7 @@ function Item() {
 			<Text
 				elementType="span"
 				fontWeight="label"
-				style={{ color: vars.color.foreground.neutral.onSolid }}
+				style={{ color: vars.color.foreground.neutral.onSolid.primary }}
 			>
 				Item
 			</Text>

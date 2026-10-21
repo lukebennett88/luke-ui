@@ -157,7 +157,11 @@ describe('mapSemanticColors', () => {
 					expect(result[`color.foreground.${role}.pressed`]).toBe(
 						formatOklch(mixInteractionState(foreground, textPrimary, INTERACTION_PRESSED_STRENGTH)),
 					);
-					expect(result[`color.foreground.${role}.onSolid`]).toBe(formatOklch(family.contrast));
+					for (const hierarchy of ['primary', 'secondary'] as const) {
+						expect(result[`color.foreground.${role}.onSolid.${hierarchy}`]).toBe(
+							formatOklch(family.contrast),
+						);
+					}
 					expect(result[`color.border.${role}`]).toBe(formatOklch(family[FAMILY_RUNG.border]));
 				}
 			});

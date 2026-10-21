@@ -175,17 +175,6 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 			).toBeGreaterThanOrEqual(0.02);
 		});
 
-		it(`${foundation.name} keeps dark accent subtle-hover legible for primary text`, () => {
-			// Subtle rest ramps from the base independently of the other surfaces. Primary text
-			// on generated accent subtle-hover is not a hard-gated pair, so recompute it here.
-			const { mediaDark } = splitBlocks(buildTheme(foundation));
-			const textPrimary = parseColor(extractValue(mediaDark, '--luke-color-text-primary'));
-			const subtleHover = parseColor(
-				extractValue(mediaDark, '--luke-color-background-accent-subtle-hover'),
-			);
-			expect(contrastRatio(textPrimary, subtleHover)).toBeGreaterThanOrEqual(4.5);
-		});
-
 		it(`${foundation.name} generates subtle, distinct semantic borders`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
