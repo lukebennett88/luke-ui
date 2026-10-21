@@ -158,3 +158,16 @@ not help. Silence in this log is not evidence.
   consulting the applicable repository guides.
 - Problem: The agent-authored comment narrated session history despite the required guidance.
   Correcting the comment does not establish that comment authoring applies that rule.
+
+## Browser tests cannot read private Vanilla Extract variable names
+
+- Seen: 2026-10-21 (#899 Part 2). A Box browser test imported a `createVar` from source to read a
+  foreground override. The test got `--foreground-primary__1ax6uuc0`, while the built stylesheet the
+  test renders with declared `--_1msi2lw0`, so every read fell back to its default.
+- Where: `packages/@luke-ui/react/src/core/test-utils/render.tsx` loads
+  `@luke-ui/react/stylesheet.css` from `dist`, while a test's own imports of a `.css.ts` module are
+  compiled with debug identifiers. A `.css.ts` module that exports a function also fails to load in
+  a browser test. `docs/TESTING.md` does not mention either constraint.
+- Problem: A test that renders with the built stylesheet cannot read a private custom property
+  created in a `.css.ts` module unless its name is stable, so authors find out only after the
+  assertions fail.
