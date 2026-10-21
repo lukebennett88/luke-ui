@@ -50,15 +50,14 @@ export const settingsApi = {
 	 * latency. Interactive use keeps the default latency below.
 	 */
 	holdMutations() {
-		let releaseGate!: () => void;
 		controls.gate = new Promise<void>((resolve) => {
-			releaseGate = resolve;
+			controls.releaseGate = resolve;
 		});
-		controls.releaseGate = releaseGate;
 		return () => {
+			const release = controls.releaseGate;
 			controls.gate = null;
 			controls.releaseGate = null;
-			releaseGate();
+			release?.();
 		};
 	},
 	reset() {

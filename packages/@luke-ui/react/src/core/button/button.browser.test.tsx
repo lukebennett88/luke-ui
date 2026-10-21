@@ -3,7 +3,7 @@ import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
 import { act } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { expect, onTestFinished, test, vi } from 'vite-plus/test';
+import { assert, expect, onTestFinished, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { watchSpinner } from '../test-utils/action-spinner.js';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
@@ -181,11 +181,13 @@ test('a text Button in a flex parent is not collapsed to a single character per 
 
 test('runs onPress before pressAction and tracks Action pending', async () => {
 	const order: Array<string> = [];
-	let release!: () => void;
+	let release: (() => void) | undefined;
 	const gate = new Promise<void>((resolve) => {
 		release = resolve;
 	});
-	onTestFinished(release);
+	onTestFinished(() => {
+		release?.();
+	});
 
 	const { locator, user } = render(
 		<Button
@@ -206,17 +208,20 @@ test('runs onPress before pressAction and tracks Action pending', async () => {
 	expect(order).toEqual(['onPress', 'pressAction']);
 	expect(button.element().getAttribute('data-pending')).toBe('true');
 
+	assert(release, 'expected the Action gate to be set');
 	release();
 	await expect.poll(() => button.element().getAttribute('data-pending')).toBeNull();
 });
 
 test('suppresses a same-tick second Action start', async () => {
 	let starts = 0;
-	let release!: () => void;
+	let release: (() => void) | undefined;
 	const gate = new Promise<void>((resolve) => {
 		release = resolve;
 	});
-	onTestFinished(release);
+	onTestFinished(() => {
+		release?.();
+	});
 
 	const { locator } = render(
 		<Button
@@ -240,6 +245,7 @@ test('suppresses a same-tick second Action start', async () => {
 	expect(starts).toBe(1);
 	expect(button.getAttribute('data-pending')).toBe('true');
 
+	assert(release, 'expected the Action gate to be set');
 	release();
 	await expect.poll(() => button.getAttribute('data-pending')).toBeNull();
 });
@@ -275,11 +281,13 @@ test('shows no spinner for a fast Action', async () => {
 	onTestFinished(() => {
 		vi.useRealTimers();
 	});
-	let release!: () => void;
+	let release: (() => void) | undefined;
 	const gate = new Promise<void>((resolve) => {
 		release = resolve;
 	});
-	onTestFinished(release);
+	onTestFinished(() => {
+		release?.();
+	});
 
 	const { locator, user } = render(
 		<Button
@@ -300,6 +308,7 @@ test('shows no spinner for a fast Action', async () => {
 
 	// Finish before the delay elapses, then run the clock past it: a late
 	// spinner would have to appear now if completion had not cancelled it.
+	assert(release, 'expected the fast Action gate to be set');
 	release();
 	await expect.poll(() => fast.element().getAttribute('data-pending')).toBeNull();
 	act(() => {
@@ -316,11 +325,13 @@ test('shows a delayed spinner for a slow Action', async () => {
 	onTestFinished(() => {
 		vi.useRealTimers();
 	});
-	let releaseSlow!: () => void;
+	let releaseSlow: (() => void) | undefined;
 	const slowGate = new Promise<void>((resolve) => {
 		releaseSlow = resolve;
 	});
-	onTestFinished(releaseSlow);
+	onTestFinished(() => {
+		releaseSlow?.();
+	});
 
 	const { locator, user } = render(
 		<Button
@@ -351,6 +362,7 @@ test('shows a delayed spinner for a slow Action', async () => {
 	});
 	await expect.poll(spinner.appearedAt).toBeDefined();
 
+	assert(releaseSlow, 'expected the slow Action gate to be set');
 	releaseSlow();
 	await expect.poll(() => slow.element().getAttribute('data-pending')).toBeNull();
 });

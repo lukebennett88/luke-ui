@@ -3,7 +3,7 @@ import { decodeCodeHash } from '@luke-ui/playground-core/hash';
 import { act, Suspense } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import { afterEach, expect, test } from 'vite-plus/test';
+import { afterEach, assert, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { encodeDocsPlaygroundHash } from '../../lib/docs-playground-hash.js';
 
@@ -79,7 +79,9 @@ test(
 			.poll(() => decodeCodeHash(hash) ?? '', { timeout: FORMAT_TIMEOUT_MS })
 			.toContain(formatted);
 
-		await userEvent.click(monacoEditor()!);
+		const editor = monacoEditor();
+		assert(editor, 'expected the Monaco editor to be mounted');
+		await userEvent.click(editor);
 		await userEvent.keyboard(ctrlCmd('z'));
 		await expect
 			.poll(() => viewText(), { timeout: FORMAT_TIMEOUT_MS })
@@ -96,7 +98,9 @@ test(
 
 		await expectEditorReady();
 
-		await userEvent.click(monacoEditor()!);
+		const editor = monacoEditor();
+		assert(editor, 'expected the Monaco editor to be mounted');
+		await userEvent.click(editor);
 		await userEvent.keyboard(ctrlCmd('s'));
 
 		await expect.poll(() => viewText(), { timeout: FORMAT_TIMEOUT_MS }).toContain(formatted);

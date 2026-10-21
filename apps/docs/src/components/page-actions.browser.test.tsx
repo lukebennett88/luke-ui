@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import { afterEach, expect, test, vi } from 'vite-plus/test';
+import { afterEach, assert, expect, test, vi } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { StoryWrapper } from '../lib/story-wrapper';
 import { PageActions } from './page-actions';
@@ -105,13 +105,14 @@ test('does not claim success when the markdown fetch 404s', async () => {
 	// the test. Await that rejection as the explicit failure outcome: only
 	// once it has fired is the operation complete, so the label's final
 	// state (not its state after an arbitrary delay) proves it never flips.
-	let onUnhandledRejection!: (event: PromiseRejectionEvent) => void;
+	let onUnhandledRejection: ((event: PromiseRejectionEvent) => void) | undefined;
 	const rejection = new Promise<PromiseRejectionEvent>((resolve) => {
 		onUnhandledRejection = (event: PromiseRejectionEvent) => {
 			event.preventDefault();
 			resolve(event);
 		};
 	});
+	assert(onUnhandledRejection, 'expected the rejection handler to be set');
 	window.addEventListener('unhandledrejection', onUnhandledRejection);
 
 	try {
@@ -124,8 +125,8 @@ test('does not claim success when the markdown fetch 404s', async () => {
 		await userEvent.click(page.getByRole('button', { name: 'Copy Markdown' }));
 
 		const event = await rejection;
-		expect(event.reason).toBeInstanceOf(Error);
-		expect((event.reason as Error).message).toContain('404');
+		assert(event.reason instanceof Error, 'expected the rejection reason to be an Error');
+		expect(event.reason.message).toContain('404');
 		expect(page.getByRole('button', { name: 'Copied' })).not.toBeInTheDocument();
 		await expect.element(page.getByRole('button', { name: 'Copy Markdown' })).toBeVisible();
 	} finally {
