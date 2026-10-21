@@ -779,7 +779,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 test('filled kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(<FilledScene value="Autofilled text" />, { appearance });
-		await fillInputs(textboxes(locator), 'password-manager');
+		await fillInputs(textboxes(locator), 'password-manager', appearance.mode);
 		await captureVisualAppearance(locator, 'text-input/filled-kitchen-sink', appearance);
 	}
 });

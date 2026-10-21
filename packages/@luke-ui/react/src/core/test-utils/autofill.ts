@@ -1,8 +1,8 @@
 import { expect } from 'vite-plus/test';
 import { cdp, page } from 'vite-plus/test/context';
 
-/** Square paint an unlayered extension stylesheet adds to a filled input. */
-const extensionPaint = 'rgb(160, 200, 255)';
+/** Square paint an unlayered extension stylesheet adds to a filled input, by colour mode. */
+const extensionPaint = { dark: 'rgb(40, 56, 90)', light: 'rgb(160, 200, 255)' };
 
 /**
  * Chromium can re-rasterise an antialiased edge, or anything in a translucent (disabled) layer, a
@@ -12,16 +12,17 @@ const rasterNoise = 2;
 
 /**
  * Fill inputs as `source` does (1Password's marker, or Chromium's native `:autofill` state), then
- * add the square paint an extension stylesheet puts on a filled input.
+ * add the square paint an extension stylesheet puts on a filled input in `mode`.
  */
 export async function fillInputs(
 	inputs: Array<HTMLInputElement>,
 	source: 'password-manager' | 'native',
+	mode: 'light' | 'dark' = 'light',
 ) {
 	if (source === 'native') await forceAutofill(inputs);
 	for (const input of inputs) {
-		if (source === 'password-manager') input.setAttribute('data-com-onepassword-filled', 'light');
-		input.style.setProperty('background-color', extensionPaint, 'important');
+		if (source === 'password-manager') input.setAttribute('data-com-onepassword-filled', mode);
+		input.style.setProperty('background-color', extensionPaint[mode], 'important');
 	}
 }
 
