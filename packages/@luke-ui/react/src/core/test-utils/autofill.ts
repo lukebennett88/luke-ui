@@ -16,10 +16,11 @@ export function fillAsPasswordManager(inputs: Array<HTMLInputElement>, mode: str
  * Fill `inputs` from `source` (1Password's marker, or Chromium's native `:autofill` state), paint
  * each as an extension stylesheet does, and compare `scene` with its unfilled render.
  *
- * Away from the text, every pixel must be unchanged: the fill shows nowhere, and borders, depth,
- * rings, state styles, and adornments stay as they were. Each input's solid glyph pixels keep their
- * colour, so the text stays legible. Glyph edges blend with what is under the text and aren't
- * compared.
+ * - Away from the text, every pixel is unchanged: the fill shows nowhere, and borders, depth,
+ *   rings, state styles, and adornments stay as they were.
+ * - Each input's text keeps its unfilled colour.
+ * - Adding the extension paint leaves each input's solid glyph pixels unchanged, so no fill shows
+ *   through the text. Glyph edges blend with what is under the text and aren't compared.
  */
 export async function expectFillPreservesControls(
 	scene: Element,
@@ -29,9 +30,14 @@ export async function expectFillPreservesControls(
 	const unfilled = await renderedPixels(scene);
 	const textless = await withTextFill(inputs, 'transparent', () => renderedPixels(scene));
 	const marked = await withTextFill(inputs, markerText, () => renderedPixels(scene));
+	const unfilledText = inputs.map((input) => getComputedStyle(input).webkitTextFillColor);
 	if (source === 'native') await forceAutofill(inputs);
 	for (const input of inputs) {
 		if (source === 'password-manager') input.setAttribute('data-com-onepassword-filled', 'light');
+	}
+	// The browser's own fill, without the extension paint, for comparison under the text.
+	const unpainted = await renderedPixels(scene);
+	for (const input of inputs) {
 		input.style.setProperty('background-color', extensionPaint, 'important');
 	}
 	const filled = await renderedPixels(scene);
@@ -76,10 +82,26 @@ export async function expectFillPreservesControls(
 	}
 	expect(changedAwayFromText, 'controls changed away from the text').toEqual({});
 
+	// Forced colours paint system colours that computed styles don't report, so there the solid
+	// glyph pixels show the colour. Elsewhere the computed colour does, however the browser
+	// rasterises text that clips a background.
+	const forcedColours = matchMedia('(forced-colors: active)').matches;
 	const recolouredText = regions
-		.filter((region) => !solidTextKept(region.input, marked, textless, unfilled, filled))
+		.filter((region, index) =>
+			forcedColours
+				? solidTextChange(region.input, marked, textless, unfilled, unpainted) > region.tolerance
+				: getComputedStyle(inputs[index]!).webkitTextFillColor !== unfilledText[index],
+		)
 		.map(({ name }) => name);
-	expect(recolouredText, 'inputs whose solid text changed').toEqual([]);
+	expect(recolouredText, 'inputs whose text colour changed').toEqual([]);
+
+	// The largest change under solid glyph pixels when the paint is added, by input.
+	const paintUnderText: Record<string, number> = {};
+	for (const region of regions) {
+		const distance = solidTextChange(region.input, marked, textless, unpainted, filled);
+		if (distance > region.tolerance) paintUnderText[region.name] = distance;
+	}
+	expect(paintUnderText, 'inputs whose text shows the paint').toEqual({});
 }
 
 /**
@@ -176,15 +198,15 @@ function textMask(marked: Pixels, textless: Pixels): Uint8Array {
 
 /**
  * The pixels where the marker text is strongest are fully covered by glyphs, so nothing under the
- * text shows through them. There the filled text must match the unfilled text exactly.
+ * text can show through them. Returns the largest change at those pixels from `before` to `after`.
  */
-function solidTextKept(
+function solidTextChange(
 	region: Box,
 	marked: Pixels,
 	textless: Pixels,
-	unfilled: Pixels,
-	filled: Pixels,
-) {
+	before: Pixels,
+	after: Pixels,
+): number {
 	let strongest = 0;
 	const solid: Array<number> = [];
 	for (let y = region.top; y < region.bottom; y++) {
@@ -198,7 +220,8 @@ function solidTextKept(
 			if (strength === strongest && strength > 0) solid.push(index);
 		}
 	}
-	return solid.length > 0 && solid.every((index) => samePixel(unfilled.data, filled.data, index));
+	if (solid.length === 0) return Number.POSITIVE_INFINITY;
+	return Math.max(...solid.map((index) => pixelDistance(before.data, after.data, index)));
 }
 
 function pixelDistance(a: Uint8ClampedArray, b: Uint8ClampedArray, index: number): number {
