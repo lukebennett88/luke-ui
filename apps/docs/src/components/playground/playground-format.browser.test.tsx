@@ -32,9 +32,11 @@ function viewText(): string {
 // Cold-loading the real Monaco editor (core, workers, tokenizer) is the
 // slow integration step in CI, so readiness gets one generous failure
 // deadline. It is a deadline only: the test proceeds as soon as the editor
-// is ready, and nothing sits through it. Format and undo outcomes after
-// readiness are local operations and use the default poll deadline.
+// is ready, and nothing sits through it.
 const MONACO_READY_TIMEOUT_MS = 30_000;
+// Formatting runs in a Monaco worker, so its outcome gets its own deadline
+// (the default poll deadline is too short for a cold worker in CI).
+const FORMAT_TIMEOUT_MS = 10_000;
 // Covers the readiness deadline plus the format/undo round-trips after it.
 const MONACO_TEST_TIMEOUT_MS = MONACO_READY_TIMEOUT_MS + 15_000;
 
@@ -75,7 +77,9 @@ test(
 
 		await userEvent.click(monacoEditor()!);
 		await userEvent.keyboard(ctrlCmd('z'));
-		await expect.poll(() => viewText()).toContain('playgroundFormatTest=(x)=>x');
+		await expect
+			.poll(() => viewText(), { timeout: FORMAT_TIMEOUT_MS })
+			.toContain('playgroundFormatTest=(x)=>x');
 	},
 	MONACO_TEST_TIMEOUT_MS,
 );
