@@ -40,7 +40,8 @@
 		"fix:lint": "vp lint . --fix",
 		"fix:lint:types": "vp lint . --type-aware --tsconfig tsconfig.json --fix",
 		"fix:lint:types:unsafe": "vp lint . --type-aware --tsconfig tsconfig.json --fix --fix-suggestions --fix-dangerously",
-		"fix:lint:unsafe": "vp lint . --fix --fix-suggestions --fix-dangerously"
+		"fix:lint:unsafe": "vp lint . --fix --fix-suggestions --fix-dangerously",
+		"test": "vp test run"
 	},
 	"devDependencies": {
 		"@capsizecss/metrics": "catalog:",
