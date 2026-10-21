@@ -42,45 +42,53 @@ export async function expectFillPreservesControls(
 
 	const sceneBox = scene.getBoundingClientRect();
 	const scale = unfilled.width / sceneBox.width;
-	const regions = inputs.map((input) => {
-		const box = input.getBoundingClientRect();
+	const toPixels = (element: Element): Box => {
+		const box = element.getBoundingClientRect();
 		return {
-			name: inputName(input),
-			tolerance: Number(getComputedStyle(input).opacity) < 1 ? 2 : rasterNoise,
 			left: Math.floor((box.left - sceneBox.left) * scale),
 			top: Math.floor((box.top - sceneBox.top) * scale),
 			right: Math.ceil((box.right - sceneBox.left) * scale),
 			bottom: Math.ceil((box.bottom - sceneBox.top) * scale),
 		};
+	};
+	const regions = inputs.map((input) => {
+		const layer = translucentLayer(input, scene);
+		return {
+			name: inputName(input),
+			input: toPixels(input),
+			control: toPixels(layer ?? input.closest('[role="group"]') ?? input),
+			tolerance: layer ? translucentRasterNoise : rasterNoise,
+		};
 	});
 	const text = textMask(marked, textless);
 
-	const changedAwayFromText = new Set<string>();
+	// The largest change away from the text, by input, so a failure shows how far it is off.
+	const changedAwayFromText: Record<string, number> = {};
 	for (let index = 0; index < text.length; index++) {
 		if (text[index] === 1 || samePixel(unfilled.data, filled.data, index)) continue;
 		const x = index % unfilled.width;
 		const y = Math.floor(index / unfilled.width);
-		const region = regions.find(
-			({ left, top, right, bottom }) => x >= left && x < right && y >= top && y < bottom,
-		);
-		const tolerance = region?.tolerance ?? rasterNoise;
-		if (pixelDistance(unfilled.data, filled.data, index) <= tolerance) continue;
-		changedAwayFromText.add(region?.name ?? 'outside the inputs');
+		const region = regions.find(({ control }) => contains(control, x, y));
+		const distance = pixelDistance(unfilled.data, filled.data, index);
+		if (distance <= (region?.tolerance ?? rasterNoise)) continue;
+		const name = region?.name ?? 'outside the inputs';
+		changedAwayFromText[name] = Math.max(changedAwayFromText[name] ?? 0, distance);
 	}
-	expect([...changedAwayFromText], 'controls changed away from the text').toEqual([]);
+	expect(changedAwayFromText, 'controls changed away from the text').toEqual({});
 
 	const recolouredText = regions
-		.filter((region) => !solidTextKept(region, marked, textless, unfilled, filled))
+		.filter((region) => !solidTextKept(region.input, marked, textless, unfilled, filled))
 		.map(({ name }) => name);
 	expect(recolouredText, 'inputs whose solid text changed').toEqual([]);
 }
 
 /**
  * Chromium can re-rasterise an antialiased border or ring a level away after the fill changes the
- * inputs' paint, and a translucent (disabled) input by up to two. A visible fill differs by dozens
- * of levels, even at disabled opacity.
+ * inputs' paint, and a control inside a translucent (disabled) layer by up to two. A visible fill
+ * differs by dozens of levels, even at disabled opacity.
  */
 const rasterNoise = 1;
+const translucentRasterNoise = 2;
 
 interface Pixels {
 	data: Uint8ClampedArray;
@@ -88,13 +96,28 @@ interface Pixels {
 	height: number;
 }
 
-interface Region {
-	name: string;
-	tolerance: number;
+interface Box {
 	left: number;
 	top: number;
 	right: number;
 	bottom: number;
+}
+
+function contains(box: Box, x: number, y: number): boolean {
+	return x >= box.left && x < box.right && y >= box.top && y < box.bottom;
+}
+
+/** The outermost element inside `scene` that renders the input below full opacity, if any. */
+function translucentLayer(input: Element, scene: Element): Element | undefined {
+	let layer: Element | undefined;
+	for (
+		let element: Element | null = input;
+		element && element !== scene;
+		element = element.parentElement
+	) {
+		if (Number(getComputedStyle(element).opacity) < 1) layer = element;
+	}
+	return layer;
 }
 
 function inputName(input: HTMLInputElement): string {
@@ -156,7 +179,7 @@ function textMask(marked: Pixels, textless: Pixels): Uint8Array {
  * text shows through them. There the filled text must match the unfilled text exactly.
  */
 function solidTextKept(
-	region: Region,
+	region: Box,
 	marked: Pixels,
 	textless: Pixels,
 	unfilled: Pixels,
