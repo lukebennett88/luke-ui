@@ -3,9 +3,9 @@ import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
 import { act } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { expect, onTestFinished, test } from 'vite-plus/test';
+import { expect, onTestFinished, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
-import { expectDelayedSpinner, watchSpinner } from '../test-utils/action-spinner.js';
+import { watchSpinner } from '../test-utils/action-spinner.js';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
@@ -265,20 +265,57 @@ test('does not start pressAction when external isPending is already true', async
 });
 
 test('shows no spinner for a fast Action', async () => {
-	const { locator, user } = render(<Button pressAction={async () => {}}>Fast</Button>);
+	// Control both the Action's completion and the spinner-delay clock, so
+	// "fast" means finished before the delay by construction, not by a
+	// real-time race. Fake only the timer the spinner delay uses; Vitest's
+	// browser polling and `userEvent` keep their own timer references.
+	vi.useFakeTimers({
+		toFake: ['setTimeout', 'clearTimeout'],
+	});
+	onTestFinished(() => {
+		vi.useRealTimers();
+	});
+	let release!: () => void;
+	const gate = new Promise<void>((resolve) => {
+		release = resolve;
+	});
+	onTestFinished(release);
+
+	const { locator, user } = render(
+		<Button
+			pressAction={async () => {
+				await gate;
+			}}
+		>
+			Fast
+		</Button>,
+	);
 	const fast = locator.getByRole('button', { name: 'Fast' });
 	const spinner = watchSpinner(fast.element());
 
-	await user.click(fast);
+	await act(async () => {
+		await user.click(fast);
+	});
+	expect(fast.element().getAttribute('data-pending')).toBe('true');
+
+	// Finish before the delay elapses, then run the clock past it: a late
+	// spinner would have to appear now if completion had not cancelled it.
+	release();
 	await expect.poll(() => fast.element().getAttribute('data-pending')).toBeNull();
-	// Wait out the spinner delay so a late flash would still be observed.
-	await delay(ACTION_SPINNER_DELAY_MS);
+	act(() => {
+		vi.advanceTimersByTime(ACTION_SPINNER_DELAY_MS + 1);
+	});
 	expect(spinner.appearedAt()).toBeUndefined();
 	expect(fast.element().querySelector('[role="status"]')).toBeNull();
 });
 
 test('shows a delayed spinner for a slow Action', async () => {
-	let startedAt: number | undefined;
+	// Advance a fake clock to the delay boundary instead of measuring
+	// wall-clock elapsed time, which depends on machine scheduling.
+	vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+	onTestFinished(() => {
+		vi.useRealTimers();
+	});
 	let releaseSlow!: () => void;
 	const slowGate = new Promise<void>((resolve) => {
 		releaseSlow = resolve;
@@ -288,7 +325,6 @@ test('shows a delayed spinner for a slow Action', async () => {
 	const { locator, user } = render(
 		<Button
 			pressAction={async () => {
-				startedAt = performance.now();
 				await slowGate;
 			}}
 		>
@@ -298,10 +334,22 @@ test('shows a delayed spinner for a slow Action', async () => {
 	const slow = locator.getByRole('button', { name: 'Slow' });
 	const spinner = watchSpinner(slow.element());
 
-	await user.click(slow);
+	await act(async () => {
+		await user.click(slow);
+	});
 	expect(slow.element().getAttribute('data-pending')).toBe('true');
+	expect(spinner.appearedAt()).toBeUndefined();
 
-	await expectDelayedSpinner(spinner, () => startedAt, ACTION_SPINNER_DELAY_MS);
+	act(() => {
+		vi.advanceTimersByTime(ACTION_SPINNER_DELAY_MS - 1);
+	});
+	expect(spinner.appearedAt()).toBeUndefined();
+	expect(slow.element().querySelector('[role="status"]')).toBeNull();
+
+	act(() => {
+		vi.advanceTimersByTime(1);
+	});
+	await expect.poll(spinner.appearedAt).toBeDefined();
 
 	releaseSlow();
 	await expect.poll(() => slow.element().getAttribute('data-pending')).toBeNull();
@@ -361,12 +409,6 @@ test('forced-colors resting', { tags: ['visual'] }, async () => {
 		await emulateForcedColors('none');
 	}
 });
-
-function delay(ms: number) {
-	return new Promise<void>((resolve) => {
-		setTimeout(resolve, ms);
-	});
-}
 
 function dispatchPress(element: Element) {
 	element.dispatchEvent(

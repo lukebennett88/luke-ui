@@ -356,7 +356,19 @@ test('keeps the active result within the visible list after scrolling down', asy
 	const tenthBeforeNav = page.getByRole('menuitem').nth(10).element();
 	expect(isResultWithinList(tenthBeforeNav, list)).toBe(false);
 
-	await userEvent.keyboard('{ArrowDown}'.repeat(10));
+	// Send one key at a time and wait for its observable effect. A batched
+	// `'{ArrowDown}'.repeat(10)` can dispatch the next key before React Aria
+	// has committed the previous move, so a press is lost and the poll for the
+	// tenth result waits out the test timeout (the CI failure screenshots all
+	// show the ninth result still active).
+	for (let index = 1; index <= 10; index += 1) {
+		// Each press must take effect before the next is sent.
+		// oxlint-disable-next-line no-await-in-loop
+		await userEvent.keyboard('{ArrowDown}');
+		const expected = page.getByRole('menuitem').nth(index).element();
+		// oxlint-disable-next-line no-await-in-loop
+		await expectActiveDescendant(input, list, expected.id);
+	}
 	const option = page.getByRole('menuitem').nth(10).element();
 	await expectActiveDescendant(input, list, option.id);
 	await expectResultWithinList(option, list, input);

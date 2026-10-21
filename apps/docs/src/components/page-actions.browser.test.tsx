@@ -102,10 +102,16 @@ test('does not claim success when the markdown fetch 404s', async () => {
 	// `useCopyButton` has no `onRejected` handler, so the rejection this
 	// throw produces surfaces as an unhandled rejection rather than being
 	// caught anywhere — that is the exact behaviour under test, not a bug in
-	// the test. Mark it handled so it doesn't fail the run.
-	const onUnhandledRejection = (event: PromiseRejectionEvent) => {
-		event.preventDefault();
-	};
+	// the test. Await that rejection as the explicit failure outcome: only
+	// once it has fired is the operation complete, so the label's final
+	// state (not its state after an arbitrary delay) proves it never flips.
+	let onUnhandledRejection!: (event: PromiseRejectionEvent) => void;
+	const rejection = new Promise<PromiseRejectionEvent>((resolve) => {
+		onUnhandledRejection = (event: PromiseRejectionEvent) => {
+			event.preventDefault();
+			resolve(event);
+		};
+	});
 	window.addEventListener('unhandledrejection', onUnhandledRejection);
 
 	try {
@@ -117,9 +123,9 @@ test('does not claim success when the markdown fetch 404s', async () => {
 		});
 		await userEvent.click(page.getByRole('button', { name: 'Copy Markdown' }));
 
-		// Give the rejected promise a tick to settle, then confirm the label
-		// never flips.
-		await new Promise((resolve) => setTimeout(resolve, 100));
+		const event = await rejection;
+		expect(event.reason).toBeInstanceOf(Error);
+		expect((event.reason as Error).message).toContain('404');
 		expect(page.getByRole('button', { name: 'Copied' })).not.toBeInTheDocument();
 		await expect.element(page.getByRole('button', { name: 'Copy Markdown' })).toBeVisible();
 	} finally {

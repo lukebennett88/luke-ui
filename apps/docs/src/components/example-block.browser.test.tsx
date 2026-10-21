@@ -597,11 +597,18 @@ async function renderExampleBlock({
 	// The example module loads lazily behind Suspense. Poll inside repeated
 	// `act` calls so the render React performs when the module resolves stays
 	// wrapped, rather than waiting for it outside `act` and racing React's own
-	// microtask continuation.
+	// microtask continuation. The wait is bounded: a module that never
+	// resolves fails here with the rendered state, instead of hanging the test.
+	const deadline = Date.now() + 10_000;
 	while (
 		!container.querySelector('[data-panel]') &&
 		!container.textContent?.includes('Failed to load example')
 	) {
+		if (Date.now() > deadline) {
+			throw new Error(
+				`Timed out waiting for the example module to load. Rendered: ${container.textContent ?? ''}`,
+			);
+		}
 		// Each iteration must wait for the previous one before checking again,
 		// so the resolution this polls for stays wrapped in `act`.
 		// oxlint-disable-next-line no-await-in-loop

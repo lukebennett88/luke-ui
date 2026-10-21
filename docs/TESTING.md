@@ -62,6 +62,37 @@ Cascade contracts that need a real third-party stylesheet live beside `layer-ord
 `tailwind-integration` Vitest project so it can compile Tailwind without loading the default browser
 suite's global stylesheet.
 
+## Timing and synchronisation
+
+Almost never sleep in a test. Do not use `setTimeout`, a fixed `delay()`, or an arbitrary frame
+count to "give something time". Identify the event or observable state the test needs, then wait for
+that.
+
+- For asynchronous behaviour, control completion (for example with a promise gate or an injected
+  clock) or assert the observable result with the browser/test framework's polling assertions. Avoid
+  new test-only production APIs, and do not test implementation details.
+- Treat negative assertions specially: an absence observed after an arbitrary delay does not prove
+  something will never happen. Control the event or clock, or assert the completed operation and its
+  final state — for a failure, await the failure outcome itself.
+- Use fake time when elapsed time is the contract (debouncing, temporary feedback, spinner
+  thresholds, timeout handling). Advance it deliberately, test the boundary when it matters, and
+  restore real timers after the test.
+- Distinguish a wait's maximum failure deadline from a delay the test must sit through. Bounded
+  polling and execution limits protect against hangs. They are not themselves a reason to fail a
+  review. Do not inflate a timeout to hide a slow or broken dependency, and give any unusually large
+  deadline a comment saying what slow step it covers.
+- Send discrete inputs one at a time when each depends on the previous one's effect, and wait for
+  the observable effect before sending the next. A batched sequence can dispatch faster than the
+  component commits state, which loses inputs a real user could not lose.
+- Use browser animation APIs and frame synchronisation only where rendering or animation genuinely
+  matters. Prefer explicit animation completion over guessed milliseconds.
+- Choose the smallest test that proves Luke UI's own contract. Avoid waiting for a large integration
+  path when a smaller component test can establish the behaviour.
+
+Legitimate deadlines stay: packed-consumer and theme-build execution limits, feedback-expiry tests
+on a fake clock, and visual-capture animation waits all guard real work. This section bans guessed
+durations, not `timeout`, `expect.poll`, or fake timers as such.
+
 ## Accessibility
 
 Run axe with `expectNoAxeViolations` in component tests. Axe is a floor. Use behavioural assertions

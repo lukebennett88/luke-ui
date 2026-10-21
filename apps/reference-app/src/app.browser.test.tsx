@@ -41,7 +41,6 @@ test('home opens settings, desktop navigation follows the URL, and Back to app r
 test('a direct load of / applies persisted appearance and profile data before the first paint', async () => {
 	await settingsApi.updatePreferences({ colorMode: 'dark' });
 	await settingsApi.updateProfile({ displayName: 'Ada Lovelace' });
-	settingsApi.setLatency(280);
 	const app = await renderApp(['/']);
 	const heading = app.locator.getByRole('heading', { level: 1 });
 	expect(heading.element().textContent).toBe('Welcome back, Ada');
@@ -90,7 +89,7 @@ test('inline profile fields validate, save once while pending, retry failures, a
 	await expect.element(name).toHaveValue('Jordan Lee');
 	await expect.element(name).toHaveFocus();
 
-	settingsApi.setLatency(800);
+	const release = settingsApi.holdMutations();
 	const mutation = vi.spyOn(settingsApi, 'updateProfile');
 	await app.user.keyboard('{Enter}');
 	await expect.element(name).toHaveAttribute('readonly');
@@ -99,11 +98,12 @@ test('inline profile fields validate, save once while pending, retry failures, a
 	await act(() => app.router.navigate('/settings/preferences'));
 	await act(() => app.router.navigate('/settings/profile'));
 	await expect.element(name).toHaveAttribute('readonly');
+	// Still pending, so the remounted field shows the last persisted name.
+	await expect.element(name).toHaveValue('Boricio Jones');
+	release();
 	await expectProfileName(app, 'Jordan Lee');
 	await expect.element(name).not.toHaveAttribute('readonly');
 	expect(mutation).toHaveBeenCalledOnce();
-
-	settingsApi.setLatency(0);
 	app.unmount();
 	const again = await renderApp(['/settings/profile']);
 	await expectProfileName(again, 'Jordan Lee');
@@ -192,7 +192,7 @@ test('keyboard autosave updates a switch and persists after remount', async () =
 	const app = await renderApp();
 	const toggle = app.locator.getByRole('switch', { name: 'Underline links' });
 	await expect.element(toggle).not.toBeChecked();
-	settingsApi.setLatency(500);
+	const release = settingsApi.holdMutations();
 	const mutation = vi.spyOn(settingsApi, 'updatePreferences');
 	toggle.element().focus();
 	await app.user.keyboard(' ');
@@ -201,9 +201,9 @@ test('keyboard autosave updates a switch and persists after remount', async () =
 	await app.user.keyboard(' ');
 	await expect.element(toggle).toBeChecked();
 	expect(mutation).toHaveBeenCalledOnce();
+	release();
 	await expect.element(app.locator.getByRole('status')).not.toBeInTheDocument();
 	await expect.element(toggle).toHaveFocus();
-	settingsApi.setLatency(0);
 	app.unmount();
 	const again = await renderApp();
 	await expect
@@ -215,11 +215,12 @@ test('keyboard autosave updates a switch and persists after remount', async () =
 test('a failed theme change rolls back, and explicit and system themes apply', async () => {
 	const app = await renderApp();
 	const trigger = app.locator.getByRole('button', { name: /Theme/ });
-	settingsApi.setLatency(1200);
+	const release = settingsApi.holdMutations();
 	settingsApi.setNextFailure('server');
 	await chooseOption(app, 'Theme', 'Dark');
 	await expect.poll(() => document.documentElement.dataset.colorMode).toBe('dark');
 	await expect.element(trigger).toHaveAttribute('aria-disabled', 'true');
+	release();
 	await expect
 		.element(app.locator.getByRole('alert'))
 		.toHaveTextContent('Could not save preferences. Try again.');
@@ -227,7 +228,6 @@ test('a failed theme change rolls back, and explicit and system themes apply', a
 	await expect.element(trigger).toHaveFocus();
 	await expect.poll(() => getComputedStyle(document.documentElement).colorScheme).toBe('light');
 
-	settingsApi.setLatency(0);
 	await chooseOption(app, 'Theme', 'Dark');
 	await expect.poll(() => getComputedStyle(document.documentElement).colorScheme).toBe('dark');
 	expect((await settingsApi.getSettings()).preferences.colorMode).toBe('dark');
@@ -270,14 +270,14 @@ test('clearing saved settings waits for saves, cancels, retries failures, and re
 	await settingsApi.updateProfile({ displayName: 'Jordan Lee' });
 	await settingsApi.updatePreferences({ colorMode: 'dark' });
 	const app = await renderApp();
-	settingsApi.setLatency(500);
+	const release = settingsApi.holdMutations();
 	await chooseOption(app, 'Theme', 'Light');
 	await act(() => app.router.navigate('/settings/security'));
 	const trigger = app.locator.getByRole('button', { name: 'Clear saved settings' });
 	await expect.element(trigger).toBeDisabled();
 	await expect.element(app.locator.getByRole('status')).toHaveTextContent('Saving…');
+	release();
 	await expect.element(trigger).toBeEnabled();
-	settingsApi.setLatency(0);
 
 	await app.user.click(trigger);
 	await app.user.click(page.getByRole('button', { name: 'Cancel' }));
@@ -292,14 +292,14 @@ test('clearing saved settings waits for saves, cancels, retries failures, and re
 	await expect
 		.element(dialog.getByRole('alert'))
 		.toHaveTextContent('Could not clear saved settings. Try again.');
-	settingsApi.setLatency(500);
+	const releaseClear = settingsApi.holdMutations();
 	await app.user.click(confirm);
 	await app.user.keyboard('{Escape}');
 	await expect.element(dialog).toBeVisible();
 	await expect.element(dialog.getByRole('button', { name: 'Cancel' })).toBeDisabled();
+	releaseClear();
 	await expect.element(app.locator.getByRole('status')).toHaveTextContent('Saved settings cleared');
 	await expect.element(trigger).toHaveFocus();
-	settingsApi.setLatency(0);
 
 	await act(() => app.router.navigate('/settings/profile'));
 	await expect

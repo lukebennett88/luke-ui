@@ -25,7 +25,7 @@ test('fitting div has no mask, tab stop, region role, or accessible name', async
 			Fits
 		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element());
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), false);
 
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
@@ -108,7 +108,7 @@ test('region role and accessible name appear together when a fitting div overflo
 	}
 
 	const { locator } = render(<Fixture />);
-	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element());
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), false);
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
 	expect(element.hasAttribute('aria-label')).toBe(false);
@@ -329,7 +329,7 @@ test('nested intrinsic image load updates overflow from fitting to overflowing',
 			</div>
 		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element());
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), false);
 	expect(element.tabIndex).toBe(-1);
 	expect(getComputedStyle(element).maskImage).toBe('none');
 
@@ -340,13 +340,13 @@ test('nested intrinsic image load updates overflow from fitting to overflowing',
 	if (!(image instanceof HTMLImageElement)) throw new Error('Expected HTMLImageElement.');
 
 	await loadImageSource(image, tallSvg);
-	await waitForAttribute(element, 'role', 'region');
+	await expect.poll(() => element.getAttribute('role')).toBe('region');
 	expect(element.tabIndex).toBe(0);
 	expect(element.getAttribute('aria-label')).toBe('Image list');
 	expectMaskToward(element, 'bottom');
 
 	await loadImageSource(image, tinySvg);
-	await waitForAttribute(element, 'role', null);
+	await expect.poll(() => element.getAttribute('role')).toBeNull();
 	expect(element.tabIndex).toBe(-1);
 	expect(getComputedStyle(element).maskImage).toBe('none');
 });
@@ -366,7 +366,7 @@ test('descendant Web Animations size change updates overflow accessibility witho
 			</div>
 		</ScrollFade>,
 	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element());
+	const element = await waitForScrollport(locator.getByTestId('scroll-fade').element(), false);
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
 
@@ -379,7 +379,7 @@ test('descendant Web Animations size change updates overflow accessibility witho
 		duration: 1,
 		fill: 'forwards',
 	}).finished;
-	await waitForAttribute(element, 'role', 'region');
+	await expect.poll(() => element.getAttribute('role')).toBe('region');
 	expect(element.tabIndex).toBe(0);
 	expect(element.getAttribute('aria-label')).toBe('Animated list');
 
@@ -387,7 +387,7 @@ test('descendant Web Animations size change updates overflow accessibility witho
 		duration: 1,
 		fill: 'forwards',
 	}).finished;
-	await waitForAttribute(element, 'role', null);
+	await expect.poll(() => element.getAttribute('role')).toBeNull();
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
 });
@@ -446,7 +446,7 @@ test('fitting and overflowing ScrollFades have no axe violations', async () => {
 		</>,
 	);
 
-	await waitForScrollport(locator.getByTestId('fitting-axe').element());
+	await waitForScrollport(locator.getByTestId('fitting-axe').element(), false);
 	await waitForScrollport(locator.getByTestId('overflowing-axe').element(), true);
 	await expectNoAxeViolations(container);
 });
@@ -496,24 +496,6 @@ function loadImageSource(image: HTMLImageElement, src: string): Promise<void> {
 			once: true,
 		});
 		image.src = src;
-	});
-}
-
-function waitForAttribute(element: HTMLElement, name: string, value: string | null): Promise<void> {
-	if (element.getAttribute(name) === value) return Promise.resolve();
-	return new Promise((resolve, reject) => {
-		const timeoutId = window.setTimeout(() => {
-			observer.disconnect();
-			reject(new Error(`Timed out waiting for ${name}=${String(value)}.`));
-		}, 2000);
-		const observer = new MutationObserver(() => {
-			if (element.getAttribute(name) === value) {
-				window.clearTimeout(timeoutId);
-				observer.disconnect();
-				resolve();
-			}
-		});
-		observer.observe(element, { attributes: true, attributeFilter: [name] });
 	});
 }
 
@@ -604,17 +586,13 @@ async function assertBlockProgression(element: HTMLElement, maxScroll: number): 
 		.toEqual({ start: true, end: false });
 }
 
-async function waitForScrollport(node: Element, shouldOverflow?: boolean): Promise<HTMLElement> {
+async function waitForScrollport(node: Element, shouldOverflow: boolean): Promise<HTMLElement> {
 	if (!(node instanceof HTMLElement)) throw new Error('Expected ScrollFade element.');
 
-	const deadline = Date.now() + 2000;
-	while (Date.now() < deadline) {
-		const overflows = node.tabIndex === 0;
-		if (shouldOverflow === undefined || overflows === shouldOverflow) return node;
-		await new Promise((resolve) => requestAnimationFrame(resolve));
-	}
-
-	throw new Error(
-		`Timed out waiting for ScrollFade overflow=${String(shouldOverflow)} (tabIndex=${String(node.tabIndex)}).`,
-	);
+	// Initial overflow is measured synchronously in a layout effect during
+	// `render()`; later changes arrive through ResizeObserver/rAF. Poll the
+	// observable overflow state (tabIndex mirrors it) with the framework's
+	// bounded poll instead of a bespoke frame/deadline loop.
+	await expect.poll(() => node.tabIndex === 0).toBe(shouldOverflow);
+	return node;
 }
