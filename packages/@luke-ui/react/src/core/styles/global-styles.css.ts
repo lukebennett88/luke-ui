@@ -29,8 +29,8 @@ globalStyleInLayer('reset', ':where(:root)', {
  * colour-mode scope repaints them.
  */
 const documentColors = {
-	...surfaceStyle('surface.base'),
 	accentColor: vars.color.background.accent.solid.rest,
+	...surfaceStyle('surface.base'),
 };
 
 // `<body>` carries the inherited baseline, so portals rendered into it need nothing extra. Its
