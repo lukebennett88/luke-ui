@@ -1,4 +1,4 @@
-import { expect, onTestFinished } from 'vite-plus/test';
+import { onTestFinished } from 'vite-plus/test';
 
 /**
  * Records when a `[role="status"]` spinner first appears inside `element`.
@@ -18,25 +18,4 @@ export function watchSpinner(element: Element) {
 	onTestFinished(() => observer.disconnect());
 
 	return { appearedAt: () => appearedAt };
-}
-
-/**
- * Asserts that a spinner appeared no sooner than `delayMs` after the Action started.
- *
- * The 1ms tolerance covers clock granularity. Do not add a tight upper bound, because scheduling
- * delays can be arbitrary.
- */
-export async function expectDelayedSpinner(
-	spinner: ReturnType<typeof watchSpinner>,
-	startedAt: () => number | undefined,
-	delayMs: number,
-) {
-	await expect.poll(spinner.appearedAt).toBeDefined();
-	const started = startedAt();
-	const appeared = spinner.appearedAt();
-	if (started === undefined || appeared === undefined) {
-		throw new Error('Expected the Action to start and the spinner to appear.');
-	}
-
-	expect(appeared - started).toBeGreaterThanOrEqual(delayMs - 1);
 }

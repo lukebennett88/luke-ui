@@ -44,7 +44,9 @@ Authors use this before finishing. Reviewers use it on the diff.
 - [ ] In component tests, use `for…of` with the distinguishing value in the test title. Do not use
       `test.each`, `it.each`, or `describe.each`.
       ([Component tests](../../../docs/TESTING.md#component-tests))
-- [ ] No result depends on timing, test order, or leftover state.
+- [ ] No result depends on timing, test order, or leftover state. No guessed sleeps; synchronise on
+      an observable state, a controlled completion, or a fake clock, per
+      [Timing and synchronisation](../../../docs/TESTING.md#timing-and-synchronisation).
 - [ ] The tests ran for real, or the report says why they did not.
 
 ## Reviewing

@@ -3,7 +3,7 @@ import { decodeCodeHash } from '@luke-ui/playground-core/hash';
 import { act, Suspense } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import { afterEach, expect, test } from 'vite-plus/test';
+import { afterEach, assert, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { encodeDocsPlaygroundHash } from '../../lib/docs-playground-hash.js';
 
@@ -29,62 +29,89 @@ function viewText(): string {
 	return (document.querySelector('.view-lines')?.textContent ?? '').replace(/\u00a0/g, ' ');
 }
 
-test('monaco fills the editor pane and format updates source through onChange', async () => {
-	let hash = window.location.hash;
-	await renderPlayground(badlyFormatted, (code) => {
-		hash = `#${encodeDocsPlaygroundHash(code)}`;
-		history.replaceState(null, '', hash);
-	});
+// Cold-loading the real Monaco editor (core, workers, tokenizer) is the
+// slow integration step in CI, so readiness gets one generous failure
+// deadline. It is a deadline only: the test proceeds as soon as the editor
+// is ready, and nothing sits through it.
+const MONACO_READY_TIMEOUT_MS = 30_000;
+// Editor readiness does not load the formatter: Prettier and its plugins
+// are dynamically imported on the first format (see
+// `@luke-ui/playground-core/format`), so format outcomes keep their own
+// deadline for that cold load in CI. Later formats reuse the loaded modules.
+const FORMAT_TIMEOUT_MS = 10_000;
+// Covers the readiness deadline plus the format/undo round-trips after it.
+const MONACO_TEST_TIMEOUT_MS = MONACO_READY_TIMEOUT_MS + 15_000;
 
-	const formatButton = page.getByRole('button', { name: 'Format' });
-	await expect.element(formatButton).toBeVisible();
-
-	await expect
-		.poll(() => monacoEditor()?.getBoundingClientRect().height ?? 0, { timeout: 30_000 })
-		.toBeGreaterThan(100);
-
+/** Waits until Monaco has mounted, filled its pane, and shown the source. */
+async function expectEditorReady() {
 	const editorPane = () => monacoEditor()?.parentElement;
 	await expect
 		.poll(
 			() => {
 				const editorHeight = monacoEditor()?.getBoundingClientRect().height ?? 0;
 				const paneHeight = editorPane()?.getBoundingClientRect().height ?? 0;
-				return paneHeight > 0 ? editorHeight / paneHeight : 0;
+				const fillsPane = paneHeight > 0 && editorHeight / paneHeight > 0.8;
+				const showsSource = viewText().includes('playgroundFormatTest');
+				return fillsPane && showsSource;
 			},
-			{ timeout: 30_000 },
+			{ timeout: MONACO_READY_TIMEOUT_MS },
 		)
-		.toBeGreaterThan(0.8);
-
-	await expect
-		.poll(() => document.querySelector('.view-lines')?.textContent ?? '', { timeout: 30_000 })
-		.toContain('playgroundFormatTest');
-
-	await userEvent.click(formatButton);
-
-	await expect.poll(() => viewText(), { timeout: 10_000 }).toContain(formatted);
-	await expect.poll(() => decodeCodeHash(hash) ?? '', { timeout: 10_000 }).toContain(formatted);
-
-	await userEvent.click(monacoEditor()!);
-	await userEvent.keyboard(ctrlCmd('z'));
-	await expect.poll(() => viewText(), { timeout: 10_000 }).toContain('playgroundFormatTest=(x)=>x');
-}, 60_000);
-
-test('the save shortcut formats through the Monaco provider and onChange', async () => {
-	const onChangeCalls: Array<string> = [];
-	await renderPlayground(badlyFormatted, (code) => onChangeCalls.push(code));
-
-	await expect
-		.poll(() => monacoEditor()?.getBoundingClientRect().height ?? 0, { timeout: 30_000 })
-		.toBeGreaterThan(100);
-
-	await userEvent.click(monacoEditor()!);
-	await userEvent.keyboard(ctrlCmd('s'));
-
-	await expect.poll(() => viewText(), { timeout: 10_000 }).toContain(formatted);
-	await expect
-		.poll(() => onChangeCalls.some((code) => code.includes(formatted)), { timeout: 10_000 })
 		.toBe(true);
-}, 60_000);
+}
+
+test(
+	'monaco fills the editor pane and format updates source through onChange',
+	async () => {
+		let hash = window.location.hash;
+		await renderPlayground(badlyFormatted, (code) => {
+			hash = `#${encodeDocsPlaygroundHash(code)}`;
+			history.replaceState(null, '', hash);
+		});
+
+		const formatButton = page.getByRole('button', { name: 'Format' });
+		await expect.element(formatButton).toBeVisible();
+		await expectEditorReady();
+
+		await userEvent.click(formatButton);
+
+		await expect.poll(() => viewText(), { timeout: FORMAT_TIMEOUT_MS }).toContain(formatted);
+		await expect
+			.poll(() => decodeCodeHash(hash) ?? '', { timeout: FORMAT_TIMEOUT_MS })
+			.toContain(formatted);
+
+		const editor = monacoEditor();
+		assert(editor, 'expected the Monaco editor to be mounted');
+		await userEvent.click(editor);
+		await userEvent.keyboard(ctrlCmd('z'));
+		await expect
+			.poll(() => viewText(), { timeout: FORMAT_TIMEOUT_MS })
+			.toContain('playgroundFormatTest=(x)=>x');
+	},
+	MONACO_TEST_TIMEOUT_MS,
+);
+
+test(
+	'the save shortcut formats through the Monaco provider and onChange',
+	async () => {
+		const onChangeCalls: Array<string> = [];
+		await renderPlayground(badlyFormatted, (code) => onChangeCalls.push(code));
+
+		await expectEditorReady();
+
+		const editor = monacoEditor();
+		assert(editor, 'expected the Monaco editor to be mounted');
+		await userEvent.click(editor);
+		await userEvent.keyboard(ctrlCmd('s'));
+
+		await expect.poll(() => viewText(), { timeout: FORMAT_TIMEOUT_MS }).toContain(formatted);
+		await expect
+			.poll(() => onChangeCalls.some((code) => code.includes(formatted)), {
+				timeout: FORMAT_TIMEOUT_MS,
+			})
+			.toBe(true);
+	},
+	MONACO_TEST_TIMEOUT_MS,
+);
 
 async function renderPlayground(defaultValue: string, onChange: (code: string) => void) {
 	container = document.body.appendChild(document.createElement('div'));

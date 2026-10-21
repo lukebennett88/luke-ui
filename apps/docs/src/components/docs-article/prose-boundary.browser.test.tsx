@@ -202,7 +202,14 @@ async function renderInProse(children: ReactNode) {
 		await router.load();
 	});
 	// Example modules load lazily behind Suspense, so keep wrapping the wait in `act`.
+	// Bound it so a module that never resolves fails instead of hanging the test.
+	const deadline = Date.now() + 10_000;
 	while (container.querySelector('[role="region"][aria-label^="Loading"]') != null) {
+		if (Date.now() > deadline) {
+			throw new Error(
+				`Timed out waiting for the example module to load. Rendered: ${container.textContent ?? ''}`,
+			);
+		}
 		// oxlint-disable-next-line no-await-in-loop
 		await act(async () => {
 			await new Promise((resolve) => setTimeout(resolve, 10));

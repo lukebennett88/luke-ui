@@ -291,6 +291,9 @@ test('shows loading and error states without stale results', async () => {
 	expect(page.getByRole('menuitem').elements()).toHaveLength(0);
 });
 
+// Allow a busy CI browser to settle, with a snapshot if polling fails.
+const SEARCH_POLL_TIMEOUT_MS = 5_000;
+
 function activeDescendantId(input: ReturnType<typeof page.getByRole>) {
 	return input.element().getAttribute('aria-activedescendant');
 }
@@ -342,6 +345,7 @@ test('closes in one Escape press with text typed, and restores focus', async () 
 	await expect.element(trigger).toHaveFocus();
 });
 
+// Allow browser round trips under CI load. Behavioural polls stay bounded at 5 seconds.
 test('keeps the active result within the visible list after scrolling down', async () => {
 	await renderSearch();
 	const input = await openSearchDialog();
@@ -352,22 +356,28 @@ test('keeps the active result within the visible list after scrolling down', asy
 
 	const first = page.getByRole('menuitem').nth(0).element();
 	await expectActiveDescendant(input, list, first.id);
+	// Item heights set the scroll positions asserted below. Wait for the
+	// webfont to finish loading so a late swap cannot grow the items above
+	// the active result after it has been scrolled into view.
+	await document.fonts.ready;
 
 	const tenthBeforeNav = page.getByRole('menuitem').nth(10).element();
 	expect(isResultWithinList(tenthBeforeNav, list)).toBe(false);
 
+	// Batch the presses to minimise browser round trips.
+	// The polls below await the final selection and scroll position.
 	await userEvent.keyboard('{ArrowDown}'.repeat(10));
 	const option = page.getByRole('menuitem').nth(10).element();
 	await expectActiveDescendant(input, list, option.id);
 	await expectResultWithinList(option, list, input);
-	await expect.element(input).toHaveFocus();
+	await expectInputFocus(input);
 
 	await userEvent.keyboard('{ArrowUp}');
 	const previousElement = page.getByRole('menuitem').nth(9).element();
 	await expectActiveDescendant(input, list, previousElement.id);
 	await expectResultWithinList(previousElement, list, input);
-	await expect.element(input).toHaveFocus();
-});
+	await expectInputFocus(input);
+}, 30_000);
 
 test('wraps keyboard navigation from the first result to the last and back', async () => {
 	await renderSearch();
@@ -378,6 +388,8 @@ test('wraps keyboard navigation from the first result to the last and back', asy
 
 	const first = page.getByRole('menuitem').nth(0).element();
 	await expectActiveDescendant(input, list, first.id);
+	// See the scrolling test above: scroll assertions need final item heights.
+	await document.fonts.ready;
 
 	await userEvent.keyboard('{ArrowUp}');
 	const last = page
@@ -446,6 +458,23 @@ function rectReplacer(_key: string, value: unknown) {
 		: value;
 }
 
+// Report the focused element if the bounded focus check fails.
+async function expectInputFocus(input: ReturnType<typeof page.getByRole>) {
+	try {
+		await expect
+			.poll(() => document.activeElement === input.element(), {
+				timeout: SEARCH_POLL_TIMEOUT_MS,
+			})
+			.toBe(true);
+	} catch (error) {
+		const active = document.activeElement;
+		throw new Error(
+			`focus poll failed: active=${active?.tagName ?? 'null'} role=${active?.getAttribute('role') ?? 'null'} id=${active?.id ?? 'null'} aria-label=${active?.getAttribute('aria-label') ?? 'null'} input-id=${input.element().id} connected=${String(input.element().isConnected)}`,
+			{ cause: error },
+		);
+	}
+}
+
 async function expectActiveDescendant(
 	input: ReturnType<typeof page.getByRole>,
 	list: Element,
@@ -454,10 +483,13 @@ async function expectActiveDescendant(
 	let latest: Record<string, unknown> | undefined;
 	try {
 		await expect
-			.poll(() => {
-				latest = captureSearchPollSnapshot(input, list, expectedId);
-				return activeDescendantId(input);
-			})
+			.poll(
+				() => {
+					latest = captureSearchPollSnapshot(input, list, expectedId);
+					return activeDescendantId(input);
+				},
+				{ timeout: SEARCH_POLL_TIMEOUT_MS },
+			)
 			.toBe(expectedId);
 	} catch (error) {
 		throw new Error(
@@ -476,11 +508,14 @@ async function expectResultWithinList(
 	let latest: Record<string, unknown> | undefined;
 	try {
 		await expect
-			.poll(() => {
-				const within = isResultWithinList(result, list);
-				if (input) latest = captureSearchPollSnapshot(input, list, undefined, result);
-				return within;
-			})
+			.poll(
+				() => {
+					const within = isResultWithinList(result, list);
+					if (input) latest = captureSearchPollSnapshot(input, list, undefined, result);
+					return within;
+				},
+				{ timeout: SEARCH_POLL_TIMEOUT_MS },
+			)
 			.toBe(true);
 	} catch (error) {
 		const snapshot =
