@@ -358,7 +358,26 @@ function stage(name: string) {
 			'position:fixed;top:0;left:0;z-index:99999;pointer-events:none;background:yellow;color:black;font:12px monospace;padding:2px 6px;',
 		);
 	}
-	el.textContent = `STAGE:${name} active=${document.querySelector('input')?.getAttribute('aria-activedescendant') ?? '?'} focus=${document.activeElement?.getAttribute('role') ?? document.activeElement?.tagName ?? '?'}`;
+	const text = `STAGE:${name} active=${document.querySelector('input')?.getAttribute('aria-activedescendant') ?? '?'} focus=${document.activeElement?.getAttribute('role') ?? document.activeElement?.tagName ?? '?'} scrollTop=${document.querySelector('[role="menu"]')?.scrollTop ?? '?'}`;
+	el.textContent = text;
+	console.error(text);
+}
+
+async function expectInputFocus(input: ReturnType<typeof page.getByRole>) {
+	// TEMP-DIAG (also candidate fix): bounded poll that reports who actually
+	// has focus, instead of an element assertion that can retry until the
+	// test timeout and hide the state.
+	try {
+		await expect
+			.poll(() => document.activeElement === input.element(), { timeout: SEARCH_POLL_TIMEOUT_MS })
+			.toBe(true);
+	} catch (error) {
+		const active = document.activeElement;
+		throw new Error(
+			`focus poll failed: active=${active?.tagName ?? 'null'} role=${active?.getAttribute('role') ?? 'null'} id=${active?.id ?? 'null'} aria-label=${active?.getAttribute('aria-label') ?? 'null'} input-id=${input.element().id} connected=${String(input.element().isConnected)}`,
+			{ cause: error },
+		);
+	}
 }
 
 test('keeps the active result within the visible list after scrolling down', async () => {
@@ -391,6 +410,7 @@ test('keeps the active result within the visible list after scrolling down', asy
 	// tenth result waits out the test timeout (the CI failure screenshots all
 	// show the ninth result still active).
 	for (let index = 1; index <= 10; index += 1) {
+		stage(`send-down-${index}`);
 		// Each press must take effect before the next is sent.
 		// oxlint-disable-next-line no-await-in-loop
 		await userEvent.keyboard('{ArrowDown}');
@@ -403,9 +423,11 @@ test('keeps the active result within the visible list after scrolling down', asy
 	await expectActiveDescendant(input, list, option.id);
 	await expectResultWithinList(option, list, input);
 	stage('within10');
-	await expect.element(input).toHaveFocus();
+	stage('focus10-check');
+	await expectInputFocus(input);
 	stage('focus10');
 
+	stage('send-up');
 	await userEvent.keyboard('{ArrowUp}');
 	stage('up-sent');
 	const previousElement = page.getByRole('menuitem').nth(9).element();
@@ -413,7 +435,8 @@ test('keeps the active result within the visible list after scrolling down', asy
 	stage('active9');
 	await expectResultWithinList(previousElement, list, input);
 	stage('within9');
-	await expect.element(input).toHaveFocus();
+	stage('focus9-check');
+	await expectInputFocus(input);
 	stage('done');
 });
 
