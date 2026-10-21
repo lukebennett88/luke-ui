@@ -8,6 +8,7 @@ import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 const UTILITIES_CSS_PATTERN = /utilities\.css-[A-Za-z0-9_-]+/;
 const INDEX_SIGNATURE_PATTERN = /\[\s*\w+\s*:\s*string\s*\]/;
 const BACKGROUND_COLOR_TOKEN_PATTERN = /type BackgroundColorToken = ([^;]+);/;
+const BACKGROUND_COLOR_PROP_PATTERN = /backgroundColor\?: ([^;]+);/;
 const NUMERIC_ZERO_PATTERN = /(^|[{;\s])0:/;
 const READONLY_PROPERTY_PATTERN_CACHE = new Map<string, RegExp>();
 
@@ -73,7 +74,8 @@ test('the zero space key stays a quoted string in declaration emit', async () =>
 
 test('backgroundColor is keyed by tokens, not by an index signature', async () => {
 	const declaration = await readUtilitiesDeclaration();
-	const emitted = propertyType(declaration, 'backgroundColor');
+	const emitted = BACKGROUND_COLOR_PROP_PATTERN.exec(declaration)?.[1] ?? '';
+	expect(emitted, 'no backgroundColor prop found').toBeTruthy();
 
 	expect(emitted, 'backgroundColor widened to an index signature').not.toMatch(
 		INDEX_SIGNATURE_PATTERN,
@@ -86,11 +88,11 @@ test('backgroundColor is keyed by tokens, not by an index signature', async () =
 	expect(tokenSource, 'no token vocabulary found for backgroundColor').toBeTruthy();
 
 	const mentionsRoles =
-		SEMANTIC_ROLES.every((role) => tokenSource.includes(`"${role}.subtle.rest"`)) ||
-		(tokenSource.includes('SemanticRole') &&
-			tokenSource.includes('ProminenceLevel') &&
-			tokenSource.includes('InteractionState'));
+		SEMANTIC_ROLES.every((role) => tokenSource.includes(`"${role}.subtle"`)) ||
+		(tokenSource.includes('SemanticRole') && tokenSource.includes('ProminenceLevel'));
 	expect(mentionsRoles, `backgroundColor lost its role tokens: ${tokenSource}`).toBe(true);
+	// Box takes resting fills only. Interaction states stay recipe tokens.
+	expect(tokenSource).not.toMatch(/\.(rest|hover|pressed)"|InteractionState/);
 
 	const mentionsSurfaces =
 		tokenSource.includes('surface.') || tokenSource.includes('"surface.base"');

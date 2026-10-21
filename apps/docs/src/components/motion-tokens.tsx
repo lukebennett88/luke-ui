@@ -179,13 +179,13 @@ function MotionSample({ dotClassName, style }: { dotClassName: string; style: CS
 			position="relative"
 		>
 			<Box
-				backgroundColor="neutral.subtle.rest"
+				backgroundColor="neutral.subtle"
 				blockSize="0.25rem"
 				borderRadius="full"
 				inlineSize="100%"
 			/>
 			<Box
-				backgroundColor="accent.solid.rest"
+				backgroundColor="accent.solid"
 				blockSize={styles.MOTION_DOT_SIZE}
 				borderRadius="full"
 				className={dotClassName}
