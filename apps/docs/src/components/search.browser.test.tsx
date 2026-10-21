@@ -291,8 +291,9 @@ test('shows loading and error states without stale results', async () => {
 	expect(page.getByRole('menuitem').elements()).toHaveLength(0);
 });
 
-// Bounded so a stuck stage fails with the snapshot below instead of
-// consuming the whole test timeout, which hid which stage hung in CI.
+// Longer than the 1s poll default so a starved CI browser gets time to
+// land, but short enough that a stuck stage fails with the snapshot below
+// instead of consuming the whole test timeout.
 const SEARCH_POLL_TIMEOUT_MS = 5_000;
 
 function activeDescendantId(input: ReturnType<typeof page.getByRole>) {
@@ -346,98 +347,42 @@ test('closes in one Escape press with text typed, and restores focus', async () 
 	await expect.element(trigger).toHaveFocus();
 });
 
-// TEMP-DIAG: on-screen stage marker so the CI failure screenshot shows the
-// last completed operation. Remove before final.
-function stage(name: string) {
-	let el = document.getElementById('diag-stage');
-	if (!el) {
-		el = document.body.appendChild(document.createElement('div'));
-		el.id = 'diag-stage';
-		el.setAttribute(
-			'style',
-			'position:fixed;top:0;left:0;z-index:99999;pointer-events:none;background:yellow;color:black;font:12px monospace;padding:2px 6px;',
-		);
-	}
-	const text = `STAGE:${name} active=${document.querySelector('input')?.getAttribute('aria-activedescendant') ?? '?'} focus=${document.activeElement?.getAttribute('role') ?? document.activeElement?.tagName ?? '?'} scrollTop=${document.querySelector('[role="menu"]')?.scrollTop ?? '?'}`;
-	el.textContent = text;
-	console.error(text);
-}
-
-async function expectInputFocus(input: ReturnType<typeof page.getByRole>) {
-	// TEMP-DIAG (also candidate fix): bounded poll that reports who actually
-	// has focus, instead of an element assertion that can retry until the
-	// test timeout and hide the state.
-	try {
-		await expect
-			.poll(() => document.activeElement === input.element(), { timeout: SEARCH_POLL_TIMEOUT_MS })
-			.toBe(true);
-	} catch (error) {
-		const active = document.activeElement;
-		throw new Error(
-			`focus poll failed: active=${active?.tagName ?? 'null'} role=${active?.getAttribute('role') ?? 'null'} id=${active?.id ?? 'null'} aria-label=${active?.getAttribute('aria-label') ?? 'null'} input-id=${input.element().id} connected=${String(input.element().isConnected)}`,
-			{ cause: error },
-		);
-	}
-}
-
 test('keeps the active result within the visible list after scrolling down', async () => {
-	stage('start');
 	await renderSearch();
-	stage('rendered');
 	const input = await openSearchDialog();
-	stage('opened');
 	await typeSearchQuery(input, 'many');
-	stage('typed');
 	await expect.element(page.getByRole('menuitem').nth(0)).toBeVisible();
 	const list = page.getByRole('menu', { name: 'Search results' }).element();
 	expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
 
 	const first = page.getByRole('menuitem').nth(0).element();
 	await expectActiveDescendant(input, list, first.id);
-	stage('active0');
 	// Item heights set the scroll positions asserted below. Wait for the
 	// webfont to finish loading so a late swap cannot grow the items above
 	// the active result after it has been scrolled into view.
 	await document.fonts.ready;
-	stage('fonts');
 
 	const tenthBeforeNav = page.getByRole('menuitem').nth(10).element();
 	expect(isResultWithinList(tenthBeforeNav, list)).toBe(false);
 
-	// Send one key at a time and wait for its observable effect. A batched
-	// `'{ArrowDown}'.repeat(10)` can dispatch the next key before React Aria
-	// has committed the previous move, so a press is lost and the poll for the
-	// tenth result waits out the test timeout (the CI failure screenshots all
-	// show the ninth result still active).
-	for (let index = 1; index <= 10; index += 1) {
-		stage(`send-down-${index}`);
-		// Each press must take effect before the next is sent.
-		// oxlint-disable-next-line no-await-in-loop
-		await userEvent.keyboard('{ArrowDown}');
-		const expected = page.getByRole('menuitem').nth(index).element();
-		// oxlint-disable-next-line no-await-in-loop
-		await expectActiveDescendant(input, list, expected.id);
-		stage(`down-${index}`);
-	}
+	// One keyboard call for all ten presses. Each keydown is a discrete
+	// native event that React flushes before the next arrives, so the moves
+	// land in order, and the polls below synchronise on the outcome.
+	// Awaiting a round trip per press made this the file's longest test
+	// under CI load: stage timings there showed the body completing every
+	// assertion in ~15.7s — just past the 15s limit — with seconds spent
+	// waiting on per-press round trips, not on any stuck operation.
+	await userEvent.keyboard('{ArrowDown}'.repeat(10));
 	const option = page.getByRole('menuitem').nth(10).element();
 	await expectActiveDescendant(input, list, option.id);
 	await expectResultWithinList(option, list, input);
-	stage('within10');
-	stage('focus10-check');
 	await expectInputFocus(input);
-	stage('focus10');
 
-	stage('send-up');
 	await userEvent.keyboard('{ArrowUp}');
-	stage('up-sent');
 	const previousElement = page.getByRole('menuitem').nth(9).element();
 	await expectActiveDescendant(input, list, previousElement.id);
-	stage('active9');
 	await expectResultWithinList(previousElement, list, input);
-	stage('within9');
-	stage('focus9-check');
 	await expectInputFocus(input);
-	stage('done');
 });
 
 test('wraps keyboard navigation from the first result to the last and back', async () => {
@@ -517,6 +462,27 @@ function rectReplacer(_key: string, value: unknown) {
 				height: value.height,
 			}
 		: value;
+}
+
+/**
+ * Bounded in-page focus check. `expect.element(...).toHaveFocus()` retries
+ * for roughly the whole test timeout, so a failure would surface only as
+ * an opaque test timeout; this reports the element that actually has focus.
+ */
+async function expectInputFocus(input: ReturnType<typeof page.getByRole>) {
+	try {
+		await expect
+			.poll(() => document.activeElement === input.element(), {
+				timeout: SEARCH_POLL_TIMEOUT_MS,
+			})
+			.toBe(true);
+	} catch (error) {
+		const active = document.activeElement;
+		throw new Error(
+			`focus poll failed: active=${active?.tagName ?? 'null'} role=${active?.getAttribute('role') ?? 'null'} id=${active?.id ?? 'null'} aria-label=${active?.getAttribute('aria-label') ?? 'null'} input-id=${input.element().id} connected=${String(input.element().isConnected)}`,
+			{ cause: error },
+		);
+	}
 }
 
 async function expectActiveDescendant(
