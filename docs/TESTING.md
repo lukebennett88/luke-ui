@@ -162,6 +162,11 @@ build on a small theme package in a temporary directory. It edits the theme inpu
 the stylesheet after each rebuild. The comprehensive `pnpm test` includes this suite. Run it
 separately with `pnpm test:integration`. The `package-tests` CI job runs it.
 
+The React theme tests compile the copies in `src/theme/__fixtures__/`, not the published inputs.
+Each theme package's `src/input.test.ts` compiles its published input with the public `defineTheme`,
+so a contract or gate change that rejects Paper or Tactile fails there too. Tactile's test also
+checks the custom-canvas contrast failures against the published input.
+
 ## Docs
 
 Docs examples must type-check and build. They are not another test corpus.
