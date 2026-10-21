@@ -20,6 +20,47 @@ export const textInputInlinePadding = createVar();
 export const textInputInvalidPaddingAdjust = createVar();
 export const textInputInputPaddingInline = `calc(${textInputInlinePadding} - ${fallbackVar(textInputInvalidPaddingAdjust, '0px')})`;
 
+/** Fills painted by the browser (`:autofill`) or a password manager (1Password's marker). */
+export const filledInputSelectors = ':autofill, :-webkit-autofill, [data-com-onepassword-filled]';
+
+/**
+ * An externally filled input inside a control, which draws the field itself. The fill's
+ * `!important` background can't be overridden, so it is clipped to the text, where the text covers
+ * it.
+ *
+ * A standalone input draws its own field with its background, so it keeps the fill instead,
+ * inside its own rounded border.
+ */
+export const filledInputStyle = { backgroundClip: 'text' } as const satisfies StyleRule;
+
+/**
+ * Browser autofill also sets `color` with `!important`, which no author colour can override, so
+ * the text fill restores ours. A consumer's own colour can't survive it. A password manager's fill
+ * leaves `color` alone, so its text keeps the input's colour, a consumer's included.
+ */
+export const autofilledInputSelector = ':where(:autofill, :-webkit-autofill)';
+
+export const autofilledInputStyle = {
+	'@media': {
+		'(forced-colors: active)': {
+			WebkitTextFillColor: 'currentColor',
+			caretColor: 'currentColor',
+		},
+	},
+	WebkitTextFillColor: vars.color.text.primary,
+	caretColor: vars.color.text.primary,
+} as const satisfies StyleRule;
+
+/** A disabled autofilled input keeps its disabled text. */
+export const autofilledDisabledInputSelector = `${autofilledInputSelector}:where([data-disabled="true"], :disabled)`;
+
+export const autofilledDisabledInputStyle = {
+	'@media': {
+		'(forced-colors: active)': { WebkitTextFillColor: 'GrayText' },
+	},
+	WebkitTextFillColor: vars.color.text.disabled,
+} as const satisfies StyleRule;
+
 /** Styles every text input shares, whether it draws its own chrome or sits inside a control. */
 export const textInputInputBase = {
 	appearance: 'none',
@@ -216,6 +257,18 @@ export const textInputInControlClassName = style(
 		lineHeight: 'inherit',
 		paddingInlineEnd: textInputInlinePadding,
 		paddingInlineStart: textInputInlinePadding,
+
+		selectors: {
+			...textInputInputBase.selectors,
+			[`&:where(${filledInputSelectors})`]: filledInputStyle,
+			[`&${autofilledInputSelector}`]: autofilledInputStyle,
+			// Forced colours show a disabled input's text in FieldText inside a control, not the
+			// GrayText of a standalone input, so the filled text follows its current colour.
+			[`&${autofilledDisabledInputSelector}`]: {
+				...autofilledDisabledInputStyle,
+				'@media': { '(forced-colors: active)': { WebkitTextFillColor: 'currentColor' } },
+			},
+		},
 	},
 	'text-input-in-control',
 );

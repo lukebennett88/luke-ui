@@ -15,6 +15,14 @@ import { overlayMotion } from '../../styles/overlay-motion.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+import {
+	autofilledDisabledInputSelector,
+	autofilledDisabledInputStyle,
+	autofilledInputSelector,
+	autofilledInputStyle,
+	filledInputSelectors,
+	filledInputStyle,
+} from '../text-input/styles.css.js';
 
 /** Set by Select/Combobox popovers to the usable overlay inline size. */
 export const popoverAvailableInlineSizeVar = createVar();
@@ -196,6 +204,10 @@ const comboboxConfig = {
 
 			selectors: {
 				'&::placeholder': { color: vars.color.text.secondary, opacity: 1 },
+				// Same contract as a text input: an external fill must not paint over the control.
+				[`&:where(${filledInputSelectors})`]: filledInputStyle,
+				[`&${autofilledInputSelector}`]: autofilledInputStyle,
+				[`&${autofilledDisabledInputSelector}`]: autofilledDisabledInputStyle,
 				'&:where([data-disabled="true"], :disabled)': {
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
