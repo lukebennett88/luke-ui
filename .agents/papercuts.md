@@ -137,3 +137,24 @@ not help. Silence in this log is not evidence.
   write-docs workflow requires consulting that guide before editing examples.
 - Problem: The agent-authored example contradicted the required content guidance. Correcting it does
   not establish that example authoring applies the guidance.
+
+## Production settings API adds a control used only by tests
+
+- Seen: 2026-10-21 (PR #903, #880). Review of `748dc121` found `holdMutations` and three mutation
+  waits with callers only in browser tests.
+- Where: `apps/reference-app/src/api/settings-api.ts` and `app.browser.test.tsx`. `docs/TESTING.md`,
+  Component tests, forbids production APIs that exist only to make tests easier. The write-tests
+  workflow requires reading that guide before authoring tests.
+- Problem: The agent-authored timing cleanup added a production control solely for tests despite the
+  required guidance. Correcting the implementation does not establish that test authoring applies
+  that rule.
+
+## Search test comments narrate investigation history
+
+- Seen: 2026-10-21 (PR #903, #880). Review of `748dc121` found a keyboard-navigation comment
+  describing prior browser round trips and a 15.7-second investigation timing.
+- Where: `apps/docs/src/components/search.browser.test.tsx`. `docs/DOCUMENTATION.md`, Comments and
+  JSDoc, requires comments to explain code without its history. The review-pr workflow requires
+  consulting the applicable repository guides.
+- Problem: The agent-authored comment narrated session history despite the required guidance.
+  Correcting the comment does not establish that comment authoring applies that rule.
