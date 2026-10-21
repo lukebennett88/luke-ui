@@ -18,7 +18,7 @@ import { useState } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import type { Locator } from 'vite-plus/test/context';
-import { expectFillKeepsTextAndBorder, fillAsPasswordManager } from '../../test-utils/autofill.js';
+import { expectFillPreservesControls, fillAsPasswordManager } from '../../test-utils/autofill.js';
 import { expectNoAxeViolations } from '../../test-utils/axe.js';
 import { getDescribedText } from '../../test-utils/get-described-text.js';
 import { render, visualAppearances } from '../../test-utils/render.js';
@@ -214,12 +214,12 @@ function textboxes(locator: Locator): Array<HTMLInputElement> {
 
 for (const source of ['password-manager', 'native'] as const) {
 	for (const forcedColors of ['none', 'active'] as const) {
-		test(`a TextInput filled by ${source} keeps its text and border, forced colours ${forcedColors}`, async () => {
+		test(`a TextInput filled by ${source} keeps the control and its text, forced colours ${forcedColors}`, async () => {
 			await emulateForcedColors(forcedColors);
 			const restoreMotion = await freezeMotionForCapture();
 			try {
 				const { locator } = render(<FilledTextInputScene />);
-				await expectFillKeepsTextAndBorder(textboxes(locator), source);
+				await expectFillPreservesControls(locator.element(), textboxes(locator), source);
 			} finally {
 				await restoreMotion();
 				await emulateForcedColors('none');
@@ -246,59 +246,6 @@ test('a disabled TextInput that is not filled keeps a consumer text colour', () 
 	} finally {
 		sheet.remove();
 	}
-});
-
-// Layout is the contract: a square input corner would paint over the control's curved border,
-// so an input rounds only the corners that touch the control (its inner radius).
-test('a TextInput in a control rounds only the corners that touch the control', () => {
-	render(
-		<>
-			<TextInput aria-label="Standalone reference" />
-			<TextInputControl>
-				<TextInput aria-label="Sole input" />
-			</TextInputControl>
-			<TextInputControl>
-				<TextInputPrefix>$</TextInputPrefix>
-				<TextInput aria-label="After prefix" />
-			</TextInputControl>
-			<TextInputControl>
-				<TextInput aria-label="Before suffix" />
-				<TextInputSuffix>USD</TextInputSuffix>
-			</TextInputControl>
-			<TextInputControl>
-				<TextInputPrefix>$</TextInputPrefix>
-				<TextInput aria-label="Between parts" />
-				<TextInputSuffix>USD</TextInputSuffix>
-			</TextInputControl>
-		</>,
-	);
-	const outerRadius = Number.parseFloat(
-		getComputedStyle(controlFor('Sole input')).borderTopLeftRadius,
-	);
-	const inner = `${outerRadius - 1}px`;
-
-	/** Radii in start-start, end-start, start-end, end-end order. */
-	function radii(name: string): Array<string> {
-		const style = getComputedStyle(input(name));
-		return [
-			style.borderStartStartRadius,
-			style.borderEndStartRadius,
-			style.borderStartEndRadius,
-			style.borderEndEndRadius,
-		];
-	}
-
-	expect(radii('Sole input')).toEqual([inner, inner, inner, inner]);
-	expect(radii('After prefix')).toEqual(['0px', '0px', inner, inner]);
-	expect(radii('Before suffix')).toEqual([inner, inner, '0px', '0px']);
-	expect(radii('Between parts')).toEqual(['0px', '0px', '0px', '0px']);
-	// A standalone input draws its own chrome, so it keeps the full outer radius.
-	expect(radii('Standalone reference')).toEqual([
-		`${outerRadius}px`,
-		`${outerRadius}px`,
-		`${outerRadius}px`,
-		`${outerRadius}px`,
-	]);
 });
 
 test('a TextInput inside a TextInputRoot is wired to its label, description, and error with no manual ids', () => {

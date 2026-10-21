@@ -24,8 +24,9 @@ export const textInputInputPaddingInline = `calc(${textInputInlinePadding} - ${f
 export const filledInputSelectors = ':autofill, :-webkit-autofill, [data-com-onepassword-filled]';
 
 /**
- * Repaint for an externally filled input. The fill itself cannot be reliably overridden, and an
- * extension stylesheet is unlayered, so a large inset shadow in the field surface paints over it.
+ * An externally filled input. The fill's `!important` background can't be overridden, so it is
+ * clipped to the text, where the opaque text fill covers it. The fill also sets `color`, so the
+ * text fill restores ours. Borders, shadows, and state styles are left alone.
  */
 export const filledInputStyle = {
 	'@media': {
@@ -35,14 +36,13 @@ export const filledInputStyle = {
 		},
 	},
 	WebkitTextFillColor: vars.color.text.primary,
-	backgroundColor: vars.color.surface.field,
-	boxShadow: `inset 0 0 0 1000px ${vars.color.surface.field}`,
+	backgroundClip: 'text',
 	caretColor: vars.color.text.primary,
 } as const satisfies StyleRule;
 
 /**
- * A disabled filled input keeps its disabled text over the repaint above. Only filled inputs set a
- * text fill, so a consumer `color` still reaches a disabled input that isn't filled.
+ * A disabled filled input keeps its disabled text. Only filled inputs set a text fill, so a
+ * consumer `color` still reaches a disabled input that isn't filled.
  */
 export const filledDisabledInputSelector = `:where(${filledInputSelectors}):where([data-disabled="true"], :disabled)`;
 
@@ -52,24 +52,6 @@ export const filledDisabledInputStyle = {
 	},
 	WebkitTextFillColor: vars.color.text.disabled,
 } as const satisfies StyleRule;
-
-/** Inner radius of a control with a 1px border, floored so a square theme stays square. */
-const controlInnerRadius = `max(0px, calc(${vars.radius.control} - 1px))`;
-
-/**
- * Corners for an input inside a control. A square corner would paint over the control's curved
- * border where they touch, so the input rounds only the side that is first or last in the control.
- */
-export const controlInputCornerSelectors = {
-	'&:first-child': {
-		borderEndStartRadius: controlInnerRadius,
-		borderStartStartRadius: controlInnerRadius,
-	},
-	'&:last-child': {
-		borderEndEndRadius: controlInnerRadius,
-		borderStartEndRadius: controlInnerRadius,
-	},
-} as const satisfies Record<string, StyleRule>;
 
 /** Styles every text input shares, whether it draws its own chrome or sits inside a control. */
 export const textInputInputBase = {
@@ -95,14 +77,9 @@ export const textInputInputBase = {
 			color: vars.color.text.secondary,
 			opacity: 1,
 		},
-		// `:where()` keeps this at class specificity, so the state selectors below and in the
-		// standalone recipe (disabled, invalid) still win where they set the same properties.
 		[`&:where(${filledInputSelectors})`]: filledInputStyle,
 		[`&${filledDisabledInputSelector}`]: filledDisabledInputStyle,
 		'&:where([data-disabled="true"], :disabled)': {
-			'@media': {
-				'(forced-colors: active)': { color: 'GrayText' },
-			},
 			color: vars.color.text.disabled,
 			cursor: 'not-allowed',
 		},
@@ -277,7 +254,12 @@ export const textInputInControlClassName = style(
 
 		selectors: {
 			...textInputInputBase.selectors,
-			...controlInputCornerSelectors,
+			// Forced colours show a disabled input's text in FieldText inside a control, not the
+			// GrayText of a standalone input, so the filled text follows its current colour.
+			[`&${filledDisabledInputSelector}`]: {
+				...filledDisabledInputStyle,
+				'@media': { '(forced-colors: active)': { WebkitTextFillColor: 'currentColor' } },
+			},
 		},
 	},
 	'text-input-in-control',

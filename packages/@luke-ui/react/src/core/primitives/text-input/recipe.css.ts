@@ -5,8 +5,6 @@ import { composeInputStateSelectors } from '../../styles/input-states.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import { recipe } from '../../styles/recipe.js';
 import {
-	filledInputSelectors,
-	filledInputStyle,
 	textInputInlinePadding,
 	textInputInputBase,
 	textInputInputPaddingInline,
@@ -79,18 +77,10 @@ export const textInputRecipe = recipe({
 			[input.readOnly]: {
 				boxShadow: 'none',
 			},
-			[`${input.readOnly}:where(${filledInputSelectors})`]: {
-				boxShadow: filledInputStyle.boxShadow,
-			},
 			// After `readOnly`, so a read-only invalid input keeps its cue.
 			[input.invalid]: {
 				borderColor: vars.color.background.danger.solid.rest,
 				boxShadow: `inset 0 0 0 1px ${vars.color.background.danger.solid.rest}`,
-			},
-			// The invalid shadow above would replace the filled repaint, so restate both: the
-			// danger ring over the field fill. Equal specificity, later in source order wins.
-			[`${input.invalid}:where(${filledInputSelectors})`]: {
-				boxShadow: `inset 0 0 0 1px ${vars.color.background.danger.solid.rest}, inset 0 0 0 1000px ${vars.color.surface.field}`,
 			},
 		},
 	},

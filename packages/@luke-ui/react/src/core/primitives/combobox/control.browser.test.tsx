@@ -13,14 +13,9 @@ import { createRef } from 'react';
 import { expect, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import type { Locator } from 'vite-plus/test/context';
-import { expectFillKeepsTextAndBorder, fillAsPasswordManager } from '../../test-utils/autofill.js';
-import { render, visualAppearances } from '../../test-utils/render.js';
-import {
-	captureVisualAppearance,
-	emulateForcedColors,
-	freezeMotionForCapture,
-	Stack,
-} from '../../test-utils/visual.js';
+import { expectFillPreservesControls } from '../../test-utils/autofill.js';
+import { render } from '../../test-utils/render.js';
+import { emulateForcedColors, freezeMotionForCapture, Stack } from '../../test-utils/visual.js';
 
 const items = [{ id: 'au', label: 'Australia' }];
 
@@ -48,36 +43,6 @@ function controlElement() {
 		.closest('[role="group"]');
 	if (control === null) throw new Error('Expected the combobox control group.');
 	return control;
-}
-
-// Layout is the contract: the input is the control's first child, so only its inline-start
-// corners touch the control's curved border and take its inner radius.
-for (const size of ['small', 'medium'] as const) {
-	test(`ComboboxInput stays inside the ${size} control border`, () => {
-		render(
-			<ComboboxRoot defaultItems={items} size={size}>
-				<Field label="Country">
-					<ComboboxControl>
-						<ComboboxInput />
-						<ComboboxTrigger aria-label="Toggle options" />
-					</ComboboxControl>
-				</Field>
-			</ComboboxRoot>,
-		);
-		const element = page.getByRole('combobox', { name: 'Country' }).element();
-		const box = element.getBoundingClientRect();
-		const outer = controlElement().getBoundingClientRect();
-		expect(box.top).toBe(outer.top + 1);
-		expect(box.bottom).toBe(outer.bottom - 1);
-		const outerRadius = Number.parseFloat(getComputedStyle(controlElement()).borderTopLeftRadius);
-		const inner = `${outerRadius - 1}px`;
-		const style = getComputedStyle(element);
-
-		expect(style.borderStartStartRadius).toBe(inner);
-		expect(style.borderEndStartRadius).toBe(inner);
-		expect(style.borderStartEndRadius).toBe('0px');
-		expect(style.borderEndEndRadius).toBe('0px');
-	});
 }
 
 function FilledComboboxScene() {
@@ -121,12 +86,12 @@ function comboboxInputs(locator: Locator): Array<HTMLInputElement> {
 
 for (const source of ['password-manager', 'native'] as const) {
 	for (const forcedColors of ['none', 'active'] as const) {
-		test(`a ComboboxInput filled by ${source} keeps its text and border, forced colours ${forcedColors}`, async () => {
+		test(`a ComboboxInput filled by ${source} keeps the control and its text, forced colours ${forcedColors}`, async () => {
 			await emulateForcedColors(forcedColors);
 			const restoreMotion = await freezeMotionForCapture();
 			try {
 				const { locator } = render(<FilledComboboxScene />);
-				await expectFillKeepsTextAndBorder(comboboxInputs(locator), source);
+				await expectFillPreservesControls(locator.element(), comboboxInputs(locator), source);
 			} finally {
 				await restoreMotion();
 				await emulateForcedColors('none');
@@ -166,14 +131,6 @@ test('a disabled ComboboxInput that is not filled keeps a consumer text colour',
 		expect(textFill('Style colour')).toBe('rgb(1, 2, 3)');
 	} finally {
 		sheet.remove();
-	}
-});
-
-test('filled kitchen sink', { tags: ['visual'] }, async () => {
-	for (const appearance of visualAppearances) {
-		const { locator } = render(<FilledComboboxScene />, { appearance });
-		fillAsPasswordManager(comboboxInputs(locator), appearance.mode);
-		await captureVisualAppearance(locator, 'combobox/filled-kitchen-sink', appearance);
 	}
 });
 

@@ -16,7 +16,6 @@ import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import {
-	controlInputCornerSelectors,
 	filledDisabledInputSelector,
 	filledDisabledInputStyle,
 	filledInputSelectors,
@@ -185,7 +184,6 @@ const comboboxConfig = {
 			},
 		},
 		textInput: {
-			blockSize: '100%',
 			appearance: 'none',
 			backgroundColor: 'transparent',
 			border: 'none',
@@ -204,15 +202,13 @@ const comboboxConfig = {
 
 			selectors: {
 				'&::placeholder': { color: vars.color.text.secondary, opacity: 1 },
-				// Same contract as a text input in a control: an external fill must not paint a
-				// square over the control's rounded chrome.
+				// Same contract as a text input: an external fill must not paint over the control.
 				[`&:where(${filledInputSelectors})`]: filledInputStyle,
 				[`&${filledDisabledInputSelector}`]: filledDisabledInputStyle,
 				'&:where([data-disabled="true"], :disabled)': {
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
 				},
-				...controlInputCornerSelectors,
 			},
 		},
 		trigger: { marginInlineEnd: vars.space['4'], marginInlineStart: vars.space['4'] },
@@ -439,6 +435,7 @@ const comboboxConfig = {
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
 				},
 				textInput: {
+					blockSize: vars.controlSize.px40,
 					paddingInlineEnd: vars.space['12'],
 					paddingInlineStart: vars.space['12'],
 				},
@@ -467,6 +464,7 @@ const comboboxConfig = {
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 				},
 				textInput: {
+					blockSize: vars.controlSize.px32,
 					paddingInlineEnd: vars.space['8'],
 					paddingInlineStart: vars.space['8'],
 				},
