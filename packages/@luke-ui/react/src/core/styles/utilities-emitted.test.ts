@@ -8,7 +8,8 @@ import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 const UTILITIES_CSS_PATTERN = /utilities\.css-[A-Za-z0-9_-]+/;
 const INDEX_SIGNATURE_PATTERN = /\[\s*\w+\s*:\s*string\s*\]/;
 const BACKGROUND_COLOR_TOKEN_PATTERN = /type BackgroundColorToken = ([^;]+);/;
-const BACKGROUND_COLOR_PROP_PATTERN = /backgroundColor\?: ([^;]+);/;
+const BACKGROUND_COLOR_SCALE_PATTERN = /backgroundColor: ([^;]+);/;
+const BACKGROUND_COLOR_CLASSES_PATTERN = /declare const backgroundColorClasses: ([^;]+);/;
 const NUMERIC_ZERO_PATTERN = /(^|[{;\s])0:/;
 const READONLY_PROPERTY_PATTERN_CACHE = new Map<string, RegExp>();
 
@@ -74,17 +75,16 @@ test('the zero space key stays a quoted string in declaration emit', async () =>
 
 test('backgroundColor is keyed by tokens, not by an index signature', async () => {
 	const declaration = await readUtilitiesDeclaration();
-	const emitted = BACKGROUND_COLOR_PROP_PATTERN.exec(declaration)?.[1] ?? '';
-	expect(emitted, 'no backgroundColor prop found').toBeTruthy();
-
-	expect(emitted, 'backgroundColor widened to an index signature').not.toMatch(
+	// The prop's scale is the paired class map, keyed by the background token alias.
+	const emitted = BACKGROUND_COLOR_SCALE_PATTERN.exec(declaration)?.[1] ?? '';
+	expect(emitted, 'no backgroundColor scale found').toContain('backgroundColorClasses');
+	const classes = BACKGROUND_COLOR_CLASSES_PATTERN.exec(declaration)?.[1] ?? '';
+	expect(classes, 'backgroundColor widened to an index signature').not.toMatch(
 		INDEX_SIGNATURE_PATTERN,
 	);
-	expect(emitted.trim()).not.toBe('true');
+	expect(classes).toContain('Record<BackgroundColorToken, string>');
 
-	// Declaration emit may inline the type or retain its alias.
-	const alias = BACKGROUND_COLOR_TOKEN_PATTERN.exec(declaration)?.[1] ?? '';
-	const tokenSource = emitted.includes('"') ? emitted : alias;
+	const tokenSource = BACKGROUND_COLOR_TOKEN_PATTERN.exec(declaration)?.[1] ?? '';
 	expect(tokenSource, 'no token vocabulary found for backgroundColor').toBeTruthy();
 
 	const mentionsRoles =

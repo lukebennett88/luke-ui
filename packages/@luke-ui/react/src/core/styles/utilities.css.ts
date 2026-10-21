@@ -270,16 +270,18 @@ type ResponsiveValue<Value> =
 			[Condition in BreakpointName]?: Value | null;
 	  };
 
+/**
+ * Every utility's scale. `backgroundColor` comes from paired classes, not a Sprinkles scale. The
+ * indexed access keeps docs listing its values rather than an alias name.
+ */
+type UtilityScales = typeof dynamicProperties & {
+	backgroundColor: (typeof backgroundColorClasses)['initial'];
+};
+
 type SprinklesPropsShape = {
-	[Property in keyof typeof dynamicProperties]?: ResponsiveValue<
-		ScaleValue<Property, (typeof dynamicProperties)[Property]>
+	[Property in keyof UtilityScales]?: ResponsiveValue<
+		ScaleValue<Property, UtilityScales[Property]>
 	>;
-} & {
-	/**
-	 * A standard surface or a role's resting fill. It also sets the text colour that content inside
-	 * inherits. Omit it to keep the inherited colour.
-	 */
-	backgroundColor?: ResponsiveValue<BackgroundColorToken>;
 };
 
 /**
