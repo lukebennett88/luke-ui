@@ -57,7 +57,9 @@ async function walkPngs(root: string, visitor: (file: string, captureName: strin
 // Detects #310: tall captures with an unpainted bottom band.
 export async function assertCapturesPainted(directory: string) {
 	const viewportCaptures: Array<{ file: string; id: string; viewportHeight: number }> = [];
+	let captureCount = 0;
 	await walkPngs(directory, (file, captureName) => {
+		captureCount += 1;
 		const identity = parseVisualCaptureIdentity(captureName);
 		if (identity === undefined) return;
 		viewportCaptures.push({
@@ -66,6 +68,10 @@ export async function assertCapturesPainted(directory: string) {
 			viewportHeight: identity.viewportHeight,
 		});
 	});
+
+	if (captureCount === 0) {
+		throw new Error(`No visual captures found in ${directory}: capture wrote no screenshots.`);
+	}
 
 	const offenders: Array<string> = [];
 	await Promise.all(
