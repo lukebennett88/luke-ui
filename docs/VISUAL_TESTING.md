@@ -18,9 +18,9 @@ The `Visual baseline` workflow renders `main` and uploads the `visual-baseline` 
 requests download the newest `main` run, render their branch, and compare it.
 
 After a rendering-environment change (for example moving baseline and compare into this container),
-the first compare against the previous host baseline can show large intentional diffs. Keep the
-usual review approval. Once that change merges, push or re-run `Visual baseline` on `main` so the
-next PRs compare against captures from the pinned container.
+the first compare against the previous host baseline can show large intentional diffs. Once that
+change merges, push or re-run `Visual baseline` on `main` so the next PRs compare against captures
+from the pinned container.
 
 The newest run must have succeeded and retain its artefact. Never fall back to an older successful
 run: a stale baseline can pass an unchecked change. Re-run `Visual baseline` on `main` when the
@@ -78,14 +78,13 @@ The visual workflow reports its stable `visual-regression` gate on every PR. A n
 diff check skips rendering only when every changed path is in the finite list of existing prose and
 guidance files. Missing diff data and every uncertain path require comparison. The baseline workflow
 uses the same paths as `paths-ignore`, so prose-only pushes do not create runs without capture
-artefacts. Manual baseline dispatch always renders. Relevant changes require a completed comparison
-and any needed approval. The gate fails when comparison or workflow infrastructure fails.
+artefacts. Manual baseline dispatch always renders. Relevant changes require a completed comparison.
+The gate fails when comparison or workflow infrastructure fails.
 
-Changed, added, and removed captures upload the `visual-regression-diff` artefact. Only a completed
-comparison can request approval through the `visual-review` environment. That environment must
-configure required reviewers. Approval applies to the workflow run and commit being reviewed. A new
-commit needs its own comparison and approval. Capture, baseline, and infrastructure failures fail
-the gate and cannot be approved as screenshot changes.
+Screenshot differences do not fail the gate. The compare job lists each changed, added, and removed
+capture in its job summary and adds a warning annotation to the pull request. It uploads the
+expected, actual, and diff PNGs as the `visual-regression-diff` artefact. Check those diffs before
+you merge. Capture, baseline, and infrastructure failures still fail the gate.
 
 Configure branch protection to require `visual-regression`. The workflow cannot make its own status
 mandatory in repository settings. `Visual baseline` regenerates the authoritative baseline on `main`
