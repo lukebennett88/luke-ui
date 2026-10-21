@@ -11,6 +11,7 @@ export default defineConfig({
 			'create-runtime-fn': 'src/create-runtime-fn.ts',
 			index: 'src/index.ts',
 		},
+		exports: true,
 		format: ['esm'],
 		platform: 'neutral',
 		// Keep modules separate so React's create-runtime-fn import stays a thin dependency.

@@ -1,25 +1,56 @@
 {
 	"$schema": "./node_modules/turbo/schema.json",
 	"agentGuidance": false,
+	"globalDependencies": ["vite.config.ts"],
 	"tasks": {
-		"@luke-ui/react#check:lint": {
-			"dependsOn": ["build", "generate"]
+		"@luke-ui/playground-core#check:lint:types": {
+			"dependsOn": ["^build", "check:lint:types:node"]
+		},
+		"@luke-ui/playground-core#check:types": {
+			"dependsOn": ["check:types:browser", "check:types:node"]
+		},
+		"@luke-ui/react#check:barrels": {
+			"dependsOn": ["build"]
+		},
+		"@luke-ui/react#check:lint:types": {
+			"dependsOn": ["build", "check:lint:types:node"]
 		},
 		"@luke-ui/react#check:types": {
+			"dependsOn": ["build", "check:types:browser", "check:types:node"]
+		},
+		"@luke-ui/react#check:types:browser": {
 			"dependsOn": ["build", "^build"]
 		},
-		"@luke-ui/react#fix:lint": {
-			"dependsOn": ["build", "generate"]
+		"@luke-ui/react#dev": {
+			"cache": false,
+			"dependsOn": ["build"],
+			"persistent": true,
+			"with": ["dev:icons", "@luke-ui/rainbow-sprinkles#dev"]
+		},
+		"@luke-ui/react#fix:lint:types": {
+			"cache": false,
+			"dependsOn": ["build"]
+		},
+		"@luke-ui/react#fix:lint:types:unsafe": {
+			"cache": false,
+			"dependsOn": ["build"]
+		},
+		"@luke-ui/react#generate": {
+			"dependsOn": ["generate:icons"]
+		},
+		"@luke-ui/react#test": {
+			"cache": false,
+			"dependsOn": ["build", "@luke-ui/theme-tactile#build"],
+			"passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"]
+		},
+		"@luke-ui/react#test:browser:run": {
+			"cache": false,
+			"dependsOn": ["build", "@luke-ui/theme-tactile#build"],
+			"passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"]
 		},
 		"@luke-ui/react#test:consumer:run": {
 			"cache": false,
-			"dependsOn": [
-				"build",
-				"^build",
-				"@luke-ui/theme-paper#build",
-				"@luke-ui/theme-tactile#build"
-			],
-			"outputs": [],
+			"dependsOn": ["build", "@luke-ui/theme-paper#build", "@luke-ui/theme-tactile#build"],
 			"passThroughEnv": [
 				"LUKE_UI_REACT_SPEC",
 				"PLAYWRIGHT_BROWSERS_PATH",
@@ -35,25 +66,45 @@
 				"npm_config_*"
 			]
 		},
-		"@luke-ui/react#test": {
-			"dependsOn": ["build", "^build", "generate"],
-			"outputs": []
+		"@luke-ui/react#test:ui:run": {
+			"cache": false,
+			"dependsOn": ["build"],
+			"persistent": true,
+			"with": ["dev"]
 		},
-		"//#check:cycles": {
-			"cache": true,
+		"@luke-ui/react#test:unit": {
+			"cache": false,
+			"dependsOn": ["build"]
+		},
+		"@luke-ui/react#test:visual:capture:run": {
+			"cache": false,
+			"dependsOn": ["build"],
+			"passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH", "VISUAL_CAPTURE_DIR"]
+		},
+		"@luke-ui/react#test:visual:run": {
+			"cache": false,
+			"dependsOn": ["build"],
+			"passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH", "VISUAL_BASELINE_DIR", "VISUAL_CAPTURE_DIR"]
+		},
+		"@luke-ui/react#test:watch:run": {
+			"cache": false,
+			"dependsOn": ["build"],
+			"persistent": true,
+			"with": ["dev"]
+		},
+		"@luke-ui/theme-build#test:integration": {
+			"cache": false,
+			"dependsOn": ["^build"]
+		},
+		"//#check:cycles:run": {
+			"cache": false,
 			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]
 		},
-		"//#check:format-root": {
-			"cache": true
-		},
-		"//#check:unused": {
-			"cache": true,
+		"//#check:unused:run": {
+			"cache": false,
 			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]
 		},
-		"//#fix:format-root": {
-			"cache": false
-		},
-		"//#fix:unused": {
+		"//#fix:unused:run": {
 			"cache": false,
 			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]
 		},
@@ -61,163 +112,171 @@
 			"dependsOn": ["^build", "generate"],
 			"env": ["SITE_URL", "VITE_BASE_URL"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
-			"outputs": ["dist/**", ".output/**", ".source/**"]
-		},
-		"check": {
-			"dependsOn": [
-				"check:barrels",
-				"check:docs",
-				"check:format",
-				"//#check:format-root",
-				"check:lint",
-				"check:llms",
-				"check:types"
-			]
+			"outputs": ["dist/**", ".output/**"]
 		},
 		"check:barrels": {
 			"dependsOn": ["generate"]
 		},
 		"check:docs": {
-			"cache": true,
 			"inputs": [
 				"$TURBO_DEFAULT$",
 				"$TURBO_ROOT$/docs/**",
 				"$TURBO_ROOT$/packages/@luke-ui/react/package.json",
-				"$TURBO_ROOT$/packages/@luke-ui/react/src/**/*.ts",
-				"$TURBO_ROOT$/packages/@luke-ui/react/src/**/*.tsx"
+				"$TURBO_ROOT$/packages/@luke-ui/react/src/**"
 			]
 		},
-		"check:format": {
+		"check:format": {},
+		"check:lint": {},
+		"check:lint:types": {
 			"dependsOn": ["generate", "^build"]
 		},
-		"check:lint": {
+		"check:lint:types:node": {
 			"dependsOn": ["generate", "^build"]
 		},
-		"check:llms": {},
 		"check:types": {
 			"dependsOn": ["generate", "^build"]
 		},
-		"clean": {
+		"check:types:browser": {
+			"dependsOn": ["generate", "^build"]
+		},
+		"check:types:node": {
+			"dependsOn": ["generate", "^build"]
+		},
+		"clean:build": {
 			"cache": false
 		},
 		"dev": {
 			"cache": false,
-			"dependsOn": ["generate", "^build"],
+			"dependsOn": ["build"],
 			"persistent": true
 		},
-		"docs#build": {
-			"dependsOn": ["docs#generate", "^build"],
-			"env": ["SITE_URL", "VITE_BASE_URL"],
-			"outputs": [".output/**", ".source/**", "dist/**"]
+		"dev:components-index": {
+			"cache": false,
+			"dependsOn": ["generate"],
+			"persistent": true
 		},
-		"docs#check:format": {
-			"dependsOn": ["docs#generate", "^build"]
+		"dev:icons": {
+			"cache": false,
+			"dependsOn": ["generate:icons"],
+			"persistent": true
 		},
-		"docs#check:lint": {
-			"dependsOn": ["docs#generate", "^build"]
+		"dev:playground:scope": {
+			"cache": false,
+			"dependsOn": ["generate"],
+			"persistent": true
+		},
+		"dev:playground:types": {
+			"cache": false,
+			"dependsOn": ["generate"],
+			"persistent": true
+		},
+		"dev:scripts": {
+			"cache": false,
+			"dependsOn": ["generate"],
+			"persistent": true
+		},
+		"dev:token-reference": {
+			"cache": false,
+			"dependsOn": ["generate"],
+			"persistent": true
 		},
 		"docs#check:llms": {
-			"dependsOn": ["docs#build"]
-		},
-		"docs#check:types": {
-			"dependsOn": ["docs#generate", "^build"]
+			"dependsOn": ["build"]
 		},
 		"docs#clean:generated-props": {
 			"cache": false
 		},
 		"docs#dev": {
 			"cache": false,
-			"dependsOn": ["docs#generate", "^build"],
-			"persistent": true
-		},
-		"docs#generate": {
-			"cache": true,
-			"dependsOn": ["docs#clean:generated-props", "^build"],
-			"outputs": ["src/routeTree.gen.ts", "src/generated/**"]
-		},
-		"fix": {
-			"cache": false,
-			"dependsOn": ["fix:format", "fix:lint"]
-		},
-		"fix:format": {
-			"cache": false,
-			"dependsOn": ["generate", "^build"]
-		},
-		"fix:lint": {
-			"cache": false,
-			"dependsOn": ["generate", "^build"]
-		},
-		"fix:unsafe": {
-			"cache": false,
-			"dependsOn": ["generate", "^build"]
-		},
-		"generate": {
-			"dependsOn": ["^generate"],
-			"inputs": [
-				"$TURBO_DEFAULT$",
-				"!dist/**",
-				"!.generated/**",
-				"!**/*.test.ts",
-				"!**/*.test.tsx"
-			],
-			"outputs": [".generated/**", "src/routeTree.gen.ts"]
-		},
-		"test": {
-			"dependsOn": ["^build", "generate"],
-			"outputs": []
-		},
-		"test:browser:run": {
-			"cache": false,
-			"dependsOn": ["build"],
-			"outputs": []
-		},
-		"test:consumer:run": {
-			"cache": false,
-			"dependsOn": ["build", "^build"],
-			"outputs": [],
-			"passThroughEnv": [
-				"LUKE_UI_REACT_SPEC",
-				"PLAYWRIGHT_BROWSERS_PATH",
-				"HTTP_PROXY",
-				"HTTPS_PROXY",
-				"NO_PROXY",
-				"http_proxy",
-				"https_proxy",
-				"no_proxy",
-				"NODE_EXTRA_CA_CERTS",
-				"SSL_CERT_FILE",
-				"NPM_CONFIG_*",
-				"npm_config_*"
+			"dependsOn": ["generate", "^build"],
+			"persistent": true,
+			"with": [
+				"@luke-ui/react#dev",
+				"@luke-ui/theme-paper#dev",
+				"@luke-ui/theme-tactile#dev",
+				"@luke-ui/playground-core#dev",
+				"dev:scripts",
+				"dev:components-index",
+				"dev:token-reference",
+				"dev:playground:scope",
+				"dev:playground:types"
 			]
 		},
-		"test:integration": {
+		"docs#generate": {
+			"dependsOn": [
+				"clean:generated-props",
+				"generate:mdx",
+				"generate:routes",
+				"generate:components-index",
+				"generate:token-reference",
+				"generate:playground:scope",
+				"generate:playground:types",
+				"generate:scripts"
+			]
+		},
+		"fix:format": {
+			"cache": false
+		},
+		"fix:lint": {
+			"cache": false
+		},
+		"fix:lint:types": {
 			"cache": false,
+			"dependsOn": ["generate", "^build"]
+		},
+		"fix:lint:types:unsafe": {
+			"cache": false,
+			"dependsOn": ["generate", "^build"]
+		},
+		"fix:lint:unsafe": {
+			"cache": false
+		},
+		"generate": {
+			"dependsOn": ["^generate"]
+		},
+		"generate:components-index": {
+			"inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/@luke-ui/react/package.json"],
+			"outputs": ["src/generated/components-index.generated.ts"]
+		},
+		"generate:icons": {
+			"inputs": ["icons/**", "scripts/build-icons.ts", "package.json"],
+			"outputs": [".generated/**"]
+		},
+		"generate:mdx": {
+			"dependsOn": ["clean:generated-props"],
+			"outputs": [".source/**"]
+		},
+		"generate:playground:scope": {
 			"dependsOn": ["^build"],
-			"outputs": []
+			"inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/@luke-ui/react/package.json"],
+			"outputs": ["src/generated/playground-scope.generated.ts"]
 		},
-		"test:ui:run": {
+		"generate:playground:types": {
+			"dependsOn": ["^build"],
+			"outputs": ["src/generated/playground-types.generated.json"]
+		},
+		"generate:routes": {
+			"outputs": ["src/routeTree.gen.ts"]
+		},
+		"generate:scripts": {
+			"dependsOn": ["^build"],
+			"outputs": ["src/generated/*.iife.js"]
+		},
+		"generate:token-reference": {
+			"dependsOn": ["^build"],
+			"inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/@luke-ui/react/src/theme/**"],
+			"outputs": ["src/generated/token-reference.generated.ts"]
+		},
+		"reference-app#dev": {
 			"cache": false,
-			"dependsOn": ["build"],
+			"dependsOn": ["generate", "^build"],
 			"persistent": true,
-			"with": ["dev"]
+			"with": ["@luke-ui/react#dev"]
 		},
-		"test:visual:capture:run": {
+		"test": {
 			"cache": false,
-			"dependsOn": ["build"],
-			"outputs": [],
-			"passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH", "VISUAL_CAPTURE_DIR"]
-		},
-		"test:visual:run": {
-			"cache": false,
-			"dependsOn": ["build"],
-			"outputs": [],
-			"passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH", "VISUAL_BASELINE_DIR", "VISUAL_CAPTURE_DIR"]
-		},
-		"test:watch:run": {
-			"cache": false,
-			"dependsOn": ["build"],
-			"persistent": true,
-			"with": ["dev"]
+			"dependsOn": ["^build", "generate"],
+			"passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"]
 		}
 	}
 }

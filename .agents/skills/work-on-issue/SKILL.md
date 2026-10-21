@@ -74,10 +74,9 @@ not open new issues for the parts you leave.
    [Code style](../../../docs/CONVENTIONS.md#code-style) on the change without requiring unrelated
    cleanup. Run `pnpm run check` for every change. It covers barrels, format (including root
    Markdown), lint, types, docs, cycles, and unused code. For formatting failures, use
-   `pnpm run fix:format-root` rather than re-wrapping Markdown by hand. Before opening the PR, run
-   `TURBO_FORCE=true pnpm run test` separately. The environment variable forces execution across the
-   cache shared by worktrees. `pnpm run test -- --force` does not force Turbo. Run the separate
-   suites in [TESTING.md](../../../docs/TESTING.md) that cover the change, including
+   `pnpm run fix:format` rather than re-wrapping Markdown by hand. Before opening the PR, run
+   `pnpm run test` separately; Turbo test tasks are configured not to cache results. Run the
+   separate suites in [TESTING.md](../../../docs/TESTING.md) that cover the change, including
    `pnpm run test:consumer` for published package code, dependencies, or exports. When the change
    affects generated documentation behaviour, such as props tables or type-definition assets, also
    run `pnpm run build:docs` so the production docs output is checked, including

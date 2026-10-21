@@ -16,7 +16,7 @@ const BASELINE_MISSING = [
 	'No visual baseline found.',
 	'Run "Visual baseline" on `main`, or capture one locally:',
 	'',
-	'  pnpm run test:visual:docker:capture',
+	'  pnpm run test:visual:capture',
 	'',
 	'Host Chromium (may differ from CI):',
 	'',

@@ -4,8 +4,8 @@
  *
  * Reads the docs specifier list from `docs-playground-specifiers.ts`, so new
  * `@luke-ui/react` subpaths and the shared third-party allowlist stay aligned,
- * and renders it with `@luke-ui/playground-core/generate`. Runs via the `generate:playground` script (wired into `docs#generate`
- * in turbo.json), so dev and build always regenerate it.
+ * and renders it with `@luke-ui/playground-core/generate`. The `generate:playground:scope` script
+ * is a prerequisite of `docs#generate`, so dev and build prepare it automatically.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';

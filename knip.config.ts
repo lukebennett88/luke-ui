@@ -20,10 +20,11 @@ export default {
 				'src/routes/**/*.ts',
 				'src/routes/**/*.tsx',
 				'src/examples/**/*',
+				// Entry only: Knip has no CSS compiler to trace its imports.
 				'src/styles/app.css',
 				'content/**/*.mdx',
 			],
-			project: ['src/**/*.{ts,tsx,css}', 'content/**/*.mdx'],
+			project: ['src/**/*.{ts,tsx}', 'content/**/*.mdx'],
 		},
 		'apps/reference-app': {
 			entry: ['src/**/*.browser.test.tsx'],

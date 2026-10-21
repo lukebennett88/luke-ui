@@ -1,4 +1,6 @@
-import { defineTheme } from '@luke-ui/react/theme/compiler';
+import { randomUUID } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
+import type * as ThemeCompiler from '@luke-ui/react/theme/compiler';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite-plus';
@@ -52,7 +54,15 @@ function referenceTheme(): Plugin {
 	const id = 'virtual:reference-theme.css';
 	const resolvedId = `\0${id}`;
 	return {
-		load: (loadId) => (loadId === resolvedId ? defineTheme(referenceThemeInput) : undefined),
+		async load(loadId) {
+			if (loadId !== resolvedId) return;
+			const compiler = new URL(import.meta.resolve('@luke-ui/react/theme/compiler'));
+			this.addWatchFile(fileURLToPath(compiler));
+			// Refresh Node's cached compiler when the workspace build changes.
+			compiler.search = `build=${randomUUID()}`;
+			const { defineTheme }: typeof ThemeCompiler = await import(compiler.href);
+			return defineTheme(referenceThemeInput);
+		},
 		name: 'reference-theme',
 		resolveId: (source) => (source === id ? resolvedId : undefined),
 	};

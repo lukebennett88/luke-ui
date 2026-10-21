@@ -10,7 +10,6 @@ export default defineConfig({
 			'**/.generated/entries.*',
 			'**/.generated/icon-data.*',
 			'**/*.hbs',
-			'packages/turbo-generators/templates/**',
 			'**/dist/**',
 			'**/routeTree.gen.ts',
 			'node_modules',
@@ -71,8 +70,8 @@ export default defineConfig({
 			},
 		],
 		options: {
-			typeAware: true,
-			typeCheck: true,
+			typeAware: false,
+			typeCheck: false,
 		},
 		overrides: [
 			{
@@ -269,11 +268,6 @@ export default defineConfig({
 			'react/use-memo': 'error',
 			'sort-imports': 'off',
 			'typescript/array-type': ['error', { default: 'generic' }],
-			'typescript/consistent-return': 'off',
-			'typescript/consistent-type-exports': [
-				'error',
-				{ fixMixedExportsWithInlineTypeSpecifier: false },
-			],
 			'typescript/consistent-type-imports': [
 				'error',
 				{ fixStyle: 'separate-type-imports', prefer: 'type-imports' },
@@ -284,14 +278,6 @@ export default defineConfig({
 			// API and a cast asserts the match, as the docs prop analysis does with ts-morph.
 			'typescript/method-signature-style': ['error', 'property'],
 			'typescript/no-explicit-any': 'off',
-			'typescript/no-generated-empty-object-type': 'off',
-			// Explicit default type args document selection mode (e.g. Combobox `'single'`).
-			'typescript/no-unnecessary-type-arguments': 'off',
-			// Theme/generics code uses intentional narrow casts; with `suspicious` enabled these fire too often.
-			'typescript/no-unnecessary-type-assertion': 'off',
-			'typescript/no-unnecessary-type-conversion': 'off',
-			'typescript/no-unnecessary-type-parameters': 'off',
-			'typescript/no-unsafe-type-assertion': 'off',
 			'unicorn/consistent-empty-array-spread': 'error',
 			'unicorn/no-abusive-eslint-disable': 'error',
 			'unicorn/no-array-reduce': 'error',
@@ -329,5 +315,44 @@ export default defineConfig({
 			// Table-driven suites pass string variables as titles; oxlint flags those even with `allowArguments`.
 			'vitest/valid-title': 'off',
 		},
+		// The root check handles syntax rules once. Scoped tasks add only type-aware diagnostics.
+		...(process.argv.includes('--type-aware')
+			? {
+					categories: {
+						correctness: 'off',
+						perf: 'off',
+						suspicious: 'off',
+					},
+					jsPlugins: [],
+					overrides: [],
+					plugins: ['typescript'],
+					rules: {
+						'typescript/await-thenable': 'deny',
+						'typescript/consistent-type-exports': [
+							'error',
+							{
+								fixMixedExportsWithInlineTypeSpecifier: false,
+							},
+						],
+						'typescript/no-array-delete': 'deny',
+						'typescript/no-base-to-string': 'deny',
+						'typescript/no-duplicate-type-constituents': 'deny',
+						'typescript/no-floating-promises': 'deny',
+						'typescript/no-for-in-array': 'deny',
+						'typescript/no-implied-eval': 'deny',
+						'typescript/no-meaningless-void-operator': 'deny',
+						'typescript/no-misused-spread': 'deny',
+						'typescript/no-redundant-type-constituents': 'deny',
+						'typescript/no-unsafe-unary-minus': 'deny',
+						'typescript/no-useless-default-assignment': 'deny',
+						'typescript/require-array-sort-compare': 'deny',
+						'typescript/restrict-template-expressions': 'deny',
+						'typescript/unbound-method': 'deny',
+						'typescript/no-unnecessary-boolean-literal-compare': 'deny',
+						'typescript/no-unnecessary-template-expression': 'deny',
+						'typescript/no-unsafe-enum-comparison': 'deny',
+					},
+				}
+			: {}),
 	},
 });

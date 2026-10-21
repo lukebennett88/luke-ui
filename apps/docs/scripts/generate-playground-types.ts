@@ -12,7 +12,7 @@
  * `@luke-ui/playground-core/generate`. This script owns the Luke UI package,
  * the type-dependency allowlist, and the docs helpers file.
  *
- * Runs via the `generate:playground` script (wired into `docs#generate` in
+ * Runs via the `generate:playground:types` script (wired into `docs#generate` in
  * turbo.json). Requires @luke-ui/react to be built first (dist/*.d.ts).
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';

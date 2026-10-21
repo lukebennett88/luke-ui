@@ -13,7 +13,7 @@ import { randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { defineTheme } from '@luke-ui/react/theme/compiler';
+import type * as ThemeCompiler from '@luke-ui/react/theme/compiler';
 import { writeFile } from 'node:fs/promises';
 import type { UserConfig } from 'vite-plus';
 
@@ -47,12 +47,18 @@ export const themePackage: UserConfig = {
 		platform: 'neutral',
 		plugins: [
 			{
+				buildStart() {
+					this.addWatchFile(fileURLToPath(import.meta.resolve('@luke-ui/react/theme/compiler')));
+				},
 				name: 'luke-ui-theme-stylesheet',
 				async writeBundle({ dir = 'dist' }) {
 					const input = pathToFileURL(path.resolve(dir, 'input.js'));
-					// Bust Node's ESM URL cache. A counter resets when watch reloads this config.
+					// Node caches imports by URL. Each rebuild needs the current input and compiler.
 					input.search = `build=${randomUUID()}`;
+					const compiler = new URL(import.meta.resolve('@luke-ui/react/theme/compiler'));
+					compiler.search = input.search;
 					const { theme } = await import(input.href);
+					const { defineTheme }: typeof ThemeCompiler = await import(compiler.href);
 					await writeFile(path.resolve(dir, 'stylesheet.css'), defineTheme(theme));
 				},
 			},
