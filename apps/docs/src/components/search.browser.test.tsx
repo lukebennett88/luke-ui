@@ -291,6 +291,10 @@ test('shows loading and error states without stale results', async () => {
 	expect(page.getByRole('menuitem').elements()).toHaveLength(0);
 });
 
+// Bounded so a stuck stage fails with the snapshot below instead of
+// consuming the whole test timeout, which hid which stage hung in CI.
+const SEARCH_POLL_TIMEOUT_MS = 5_000;
+
 function activeDescendantId(input: ReturnType<typeof page.getByRole>) {
 	return input.element().getAttribute('aria-activedescendant');
 }
@@ -472,10 +476,13 @@ async function expectActiveDescendant(
 	let latest: Record<string, unknown> | undefined;
 	try {
 		await expect
-			.poll(() => {
-				latest = captureSearchPollSnapshot(input, list, expectedId);
-				return activeDescendantId(input);
-			})
+			.poll(
+				() => {
+					latest = captureSearchPollSnapshot(input, list, expectedId);
+					return activeDescendantId(input);
+				},
+				{ timeout: SEARCH_POLL_TIMEOUT_MS },
+			)
 			.toBe(expectedId);
 	} catch (error) {
 		throw new Error(
@@ -494,11 +501,14 @@ async function expectResultWithinList(
 	let latest: Record<string, unknown> | undefined;
 	try {
 		await expect
-			.poll(() => {
-				const within = isResultWithinList(result, list);
-				if (input) latest = captureSearchPollSnapshot(input, list, undefined, result);
-				return within;
-			})
+			.poll(
+				() => {
+					const within = isResultWithinList(result, list);
+					if (input) latest = captureSearchPollSnapshot(input, list, undefined, result);
+					return within;
+				},
+				{ timeout: SEARCH_POLL_TIMEOUT_MS },
+			)
 			.toBe(true);
 	} catch (error) {
 		const snapshot =
