@@ -10,13 +10,13 @@ import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
-import { contextualForeground } from '../styles/surface.js';
 import {
 	expectForwardsDomProps,
 	expectHtmlElement,
 	forwardedDomProps,
 } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
+import { pairedColors, resolvedColor, surfaceColors } from '../test-utils/surface-colors.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
 
 test('Box forwards className, data attributes, id, and ref to its element', () => {
@@ -218,8 +218,6 @@ function expectConsumerClassAfterUtilities(className: string, utilityClassName: 
 	}
 }
 
-type SemanticRole = (typeof SEMANTIC_ROLES)[number];
-
 const RESTING_BACKGROUNDS = [
 	...(['base', 'subdued', 'field', 'overlay'] as const).map(
 		(surface) => `surface.${surface}` as const,
@@ -228,63 +226,6 @@ const RESTING_BACKGROUNDS = [
 ];
 
 type RestingBackground = (typeof RESTING_BACKGROUNDS)[number];
-
-const FOREGROUND_SLOTS = ['primary', 'secondary', ...SEMANTIC_ROLES] as const;
-
-/** The computed colour `value` resolves to inside `parent`, for comparing with computed styles. */
-function resolvedColor(value: string, parent: Element): string {
-	const probe = parent.appendChild(document.createElement('span'));
-	probe.style.color = value;
-	const color = getComputedStyle(probe).color;
-	probe.remove();
-	return color;
-}
-
-/** The fill, text colour, and contextual foreground slots `element` computes. */
-function surfaceColors(element: HTMLElement) {
-	const computed = getComputedStyle(element);
-	return {
-		background: computed.backgroundColor,
-		color: computed.color,
-		foreground: Object.fromEntries(
-			FOREGROUND_SLOTS.map((slot) => [slot, resolvedColor(contextualForeground(slot), element)]),
-		),
-	};
-}
-
-/** The colours `background` pairs with, resolved in `element`'s own colour mode. */
-function pairedColors(element: HTMLElement, background: RestingBackground) {
-	const [group, level] = background.split('.') as [string, string];
-	let fill: string;
-	let slots: Record<(typeof FOREGROUND_SLOTS)[number], string>;
-	if (group === 'surface') {
-		fill = vars.color.surface[level as keyof typeof vars.color.surface];
-	} else {
-		fill = vars.color.background[group as SemanticRole][level as 'subtle' | 'solid'].rest;
-	}
-	if (level === 'solid') {
-		const { onSolid } = vars.color.foreground[group as SemanticRole];
-		slots = {
-			primary: onSolid.primary,
-			secondary: onSolid.secondary,
-			...Object.fromEntries(SEMANTIC_ROLES.map((role) => [role, onSolid.primary])),
-		} as typeof slots;
-	} else {
-		slots = {
-			primary: vars.color.text.primary,
-			secondary: vars.color.text.secondary,
-			...Object.fromEntries(SEMANTIC_ROLES.map((role) => [role, vars.color.foreground[role].rest])),
-		} as typeof slots;
-	}
-
-	return {
-		background: resolvedColor(fill, element),
-		color: resolvedColor(slots.primary, element),
-		foreground: Object.fromEntries(
-			FOREGROUND_SLOTS.map((slot) => [slot, resolvedColor(slots[slot], element)]),
-		),
-	};
-}
 
 function byTestId(container: HTMLElement, id: string): HTMLElement {
 	const element = container.querySelector<HTMLElement>(`[data-testid="${id}"]`);
