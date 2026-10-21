@@ -4,15 +4,29 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'packages/@luke-ui/react/**'
-      - 'packages/@luke-ui/rainbow-sprinkles/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'package.json'
-      - '.github/scripts/**'
-      - '.github/workflows/visual-baseline.yml'
-      - '.github/workflows/visual-regression.yml'
+    # Keep fewer than 300 exact paths so GitHub's diff limit cannot hide a rendering input.
+    # Skip the whole run so the newest baseline run still owns a capture artefact.
+    paths-ignore:
+      - AGENTS.md
+      - README.md
+      - docs/COMPONENTS.md
+      - docs/CONVENTIONS.md
+      - docs/DEPENDENCIES.md
+      - docs/DOCUMENTATION.md
+      - docs/PUBLIC_API.md
+      - docs/STYLING.md
+      - docs/TESTING.md
+      - docs/THEME_COLOUR_GENERATION.md
+      - docs/VISUAL_TESTING.md
+      - docs/WORKFLOWS.md
+      - .agents/papercuts.md
+      - .agents/skills/review-pr/SKILL.md
+      - .agents/skills/work-on-issue/SKILL.md
+      - .agents/skills/write-docs/SKILL.md
+      - .agents/skills/write-issue/SKILL.md
+      - .agents/skills/write-pr/SKILL.md
+      - .agents/skills/write-tests/SKILL.md
+      - .changeset/README.md
   workflow_dispatch:
 
 concurrency:
@@ -76,6 +90,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: visual-baseline
+          overwrite: true
           path: .artifacts/visual-regression/baseline
           if-no-files-found: error
           retention-days: 90

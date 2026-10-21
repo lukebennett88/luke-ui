@@ -1,12 +1,12 @@
 // Local CI-parity visual captures. Runs the pinned Playwright image on linux/amd64
 // without rewriting the host node_modules. Subcommands mirror the package scripts:
 //   capture — write baseline screenshots (explicit)
-//   compare — capture current and compare without modifying the baseline
+//   compare — fetch the newest main baseline, then capture and compare
 
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { mkdir, readdir } from 'node:fs/promises';
+import { cp, mkdir, readdir, rename, rm, stat } from 'node:fs/promises';
 import {
 	PLAYWRIGHT_BROWSERS_PATH,
 	PLAYWRIGHT_VISUAL_IMAGE,
@@ -14,6 +14,8 @@ import {
 	VISUAL_ARTIFACTS_DIR,
 	VISUAL_BASELINE_DIR,
 } from '../../packages/@luke-ui/react/scripts/visual-regression-contract.js';
+import { decideBaselineRun } from './visual-ci.js';
+import type { BaselineRun } from './visual-ci.js';
 
 export type VisualLocalCommand = 'capture' | 'compare';
 
@@ -84,20 +86,72 @@ export function containerCommand(command: VisualLocalCommand): string {
 					indent(ownership, '  '),
 					'}',
 					'trap cleanup EXIT',
-					'pnpm --filter @luke-ui/react run test:visual',
+					'pnpm --filter @luke-ui/react run test:visual:run',
 				].join('\n');
 
 	return [
-		'set -eu',
+		'set -euo pipefail',
 		'mkdir -p /work',
-		'tar -C /src --exclude=node_modules --exclude=.git --exclude=.artifacts -cf - . | tar -C /work -xf -',
+		'tar -C /src --exclude=node_modules --exclude=.git --exclude=.artifacts --exclude=dist --exclude=.turbo --exclude=.source --exclude=.generated --exclude=.vite --exclude=.output --exclude=.cache --exclude=.vinxi --exclude=.tanstack --exclude=apps/docs/src/generated --exclude=apps/docs/src/routeTree.gen.ts --exclude=packages/@luke-ui/react/src/generated --exclude=packages/@luke-ui/react/public/icons --exclude=packages/@luke-ui/react/spritesheet.svg -cf - . | tar -C /work -xf -',
 		'cd /work',
 		'mkdir -p /work/.artifacts',
 		'ln -sfn /artifacts /work/.artifacts/visual-regression',
 		'corepack enable',
-		'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install --frozen-lockfile --no-runtime',
+		dependencyInstallCommand(),
 		'pnpm build:packages',
 		captureOrCompare,
+	].join('\n');
+}
+
+// Hash install inputs before generation or build can write anything into the tree.
+function dependencyInstallCommand(): string {
+	const install = 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install --frozen-lockfile --no-runtime';
+	const keyScript = [
+		'const { createHash } = require("node:crypto");',
+		'const fs = require("node:fs");',
+		'const path = require("node:path");',
+		'const hash = createHash("sha256");',
+		`hash.update(JSON.stringify(["v1", process.env.VISUAL_INSTALL_IMAGE, process.env.VISUAL_INSTALL_PLATFORM, process.platform, process.arch, "${install}"]));`,
+		'const inputs = new Set(["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", ".npmrc", ".pnpmfile.cjs", ".pnpmfile.mjs", "pnpmfile.cjs", "pnpmfile.mjs"]);',
+		'function visit(directory, isPatch = false) {',
+		'  for (const entry of fs.readdirSync(directory, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {',
+		'    const file = path.join(directory, entry.name);',
+		'    const patch = isPatch || entry.name === "patches";',
+		'    if (entry.isDirectory()) visit(file, patch);',
+		'    else if (entry.isFile() && (patch || inputs.has(entry.name))) {',
+		'      hash.update(file); hash.update("\\0"); hash.update(fs.readFileSync(file)); hash.update("\\0");',
+		'    }',
+		'  }',
+		'}',
+		'visit(".");',
+		'process.stdout.write(hash.digest("hex"));',
+	].join('\n');
+
+	return [
+		`dependency_key=$(node -e '${keyScript}')`,
+		'mkdir -p /cache',
+		'dependency_archive="/cache/$dependency_key.tar"',
+		'dependencies_restored=',
+		'if [ -f "$dependency_archive" ]; then',
+		'  if tar -xf "$dependency_archive" && [ -d node_modules ]; then',
+		'    dependencies_restored=1',
+		'    echo "Reusing Docker dependency install $dependency_key."',
+		'  else',
+		'    rm -f "$dependency_archive"',
+		'    find . -type d -name node_modules -prune -exec rm -rf {} +',
+		'  fi',
+		'fi',
+		'if [ -z "$dependencies_restored" ]; then',
+		'  echo "Installing Docker dependencies for $dependency_key."',
+		`  ${install}`,
+		'  dependency_temporary=$(mktemp /cache/dependencies.XXXXXX)',
+		'  if find . -type d -name node_modules -prune -print0 | tar --null -T - -cf "$dependency_temporary"; then',
+		'    mv "$dependency_temporary" "$dependency_archive"',
+		'  else',
+		'    rm -f "$dependency_temporary"',
+		'    exit 1',
+		'  fi',
+		'fi',
 	].join('\n');
 }
 
@@ -126,6 +180,10 @@ export function buildDockerRunArgs(options: VisualLocalDockerOptions): Array<str
 		platform,
 		'-e',
 		`PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH}`,
+		'-e',
+		`VISUAL_INSTALL_IMAGE=${image}`,
+		'-e',
+		`VISUAL_INSTALL_PLATFORM=${platform}`,
 	];
 
 	if (hostUser !== undefined) {
@@ -137,6 +195,10 @@ export function buildDockerRunArgs(options: VisualLocalDockerOptions): Array<str
 		`${options.repoRoot}:/src:ro`,
 		'-v',
 		`${options.artifactsDir}:/artifacts`,
+		'-v',
+		'luke-ui-visual-pnpm-store:/root/.local/share/pnpm/store',
+		'-v',
+		'luke-ui-visual-dependencies:/cache',
 		image,
 		'bash',
 		'-lc',
@@ -165,7 +227,11 @@ async function hasPngs(directory: string): Promise<boolean> {
 	const entries = await readdir(directory, { recursive: true, withFileTypes: true }).catch(
 		() => [],
 	);
-	return entries.some((entry) => entry.isFile() && entry.name.endsWith('.png'));
+	const pngFiles = entries.filter((entry) => entry.isFile() && entry.name.endsWith('.png'));
+	const metadata = await Promise.all(
+		pngFiles.map((entry) => stat(path.join(entry.parentPath, entry.name))),
+	);
+	return metadata.some((file) => file.size > 0);
 }
 
 function fail(message: string): never {
@@ -189,24 +255,95 @@ function runDocker(args: Array<string>) {
 	}
 }
 
+export async function downloadAuthoritativeBaseline(options: {
+	run: BaselineRun | undefined;
+	baselineDir: string;
+	download: (runId: number, directory: string) => Promise<void>;
+}): Promise<{ runId: number; runAttempt: number }> {
+	const decision = decideBaselineRun(
+		options.run,
+		(id) => `https://github.com/lukebennett88/luke-ui/actions/runs/${id}`,
+	);
+	if (!decision.ok) throw new Error(decision.reason);
+	const cache = path.join(
+		`${options.baselineDir}.cache`,
+		`${decision.runId}-${decision.runAttempt}`,
+	);
+	const temporary = `${options.baselineDir}.download-${process.pid}`;
+	await rm(temporary, { recursive: true, force: true });
+	try {
+		if (!(await hasPngs(cache))) {
+			await mkdir(temporary, { recursive: true });
+			info(
+				`Downloading main baseline: workflow run ${decision.runId}, attempt ${decision.runAttempt}.`,
+			);
+			await options.download(decision.runId, temporary);
+			if (!(await hasPngs(temporary)))
+				throw new Error('The newest main baseline artifact contains no PNG screenshots.');
+			await mkdir(path.dirname(cache), { recursive: true });
+			await rm(cache, { recursive: true, force: true });
+			await rename(temporary, cache);
+		} else {
+			info(
+				`Reusing main baseline: workflow run ${decision.runId}, attempt ${decision.runAttempt}.`,
+			);
+		}
+		// Keep explicit local captures separate from the authoritative cache.
+		await cp(cache, temporary, { recursive: true });
+		await rm(options.baselineDir, { recursive: true, force: true });
+		await rename(temporary, options.baselineDir);
+	} finally {
+		await rm(temporary, { recursive: true, force: true });
+	}
+	return { runId: decision.runId, runAttempt: decision.runAttempt };
+}
+
+async function downloadNewestBaseline(baselineDir: string) {
+	const repository = 'lukebennett88/luke-ui';
+	const response = JSON.parse(
+		execFileSync(
+			'gh',
+			[
+				'api',
+				`repos/${repository}/actions/workflows/visual-baseline.yml/runs?branch=main&per_page=1`,
+			],
+			{ encoding: 'utf8' },
+		),
+	) as { workflow_runs: Array<BaselineRun> };
+	const selected = await downloadAuthoritativeBaseline({
+		run: response.workflow_runs[0],
+		baselineDir,
+		async download(id, directory) {
+			execFileSync(
+				'gh',
+				[
+					'run',
+					'download',
+					String(id),
+					'--repo',
+					repository,
+					'--name',
+					'visual-baseline',
+					'--dir',
+					directory,
+				],
+				{ stdio: 'inherit' },
+			);
+		},
+	});
+	info(
+		`Authoritative main baseline: workflow run ${selected.runId}, attempt ${selected.runAttempt}.`,
+	);
+}
+
 async function main(command: VisualLocalCommand) {
 	const artifactsDir = path.join(repoRoot, ...VISUAL_ARTIFACTS_DIR.split('/'));
 	const baselineDir = path.join(repoRoot, ...VISUAL_BASELINE_DIR.split('/'));
 
 	await mkdir(artifactsDir, { recursive: true });
 
-	if (command === 'compare') {
-		if (!(await hasPngs(baselineDir))) {
-			fail(
-				[
-					'No visual baseline found under .artifacts/visual-regression/baseline.',
-					'Capture one first (on main, or after a rendering-environment change):',
-					'',
-					'  pnpm run test:visual:capture',
-				].join('\n'),
-			);
-		}
-	}
+	runDocker(['info', '--format', '{{.ServerVersion}}']);
+	if (command === 'compare') await downloadNewestBaseline(baselineDir);
 
 	if (command === 'capture') {
 		info(

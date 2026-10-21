@@ -22,8 +22,8 @@ env:
   TURBO_TELEMETRY_DISABLED: '1'
 
 jobs:
-  component-tests:
-    name: component-tests
+  react-tests:
+    name: react-tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -45,16 +45,43 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
-      - name: Run component tests
+      - name: Run react tests
         run: pnpm exec turbo run test --filter=@luke-ui/react
 
-      - name: Run theme build integration tests
-        run: pnpm exec turbo run test:integration --filter=@luke-ui/theme-build
+  docs-tests:
+    name: docs-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
-      - name: Run package tests
-        run:
-          pnpm exec turbo run test --filter=@luke-ui/playground-core
-          --filter=@luke-ui/rainbow-sprinkles
+      - name: Setup tooling
+        uses: pnpm/setup@v3
+        with:
+          cache: true
+          install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --no-runtime
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter docs exec playwright install --with-deps chromium
+
+      - name: Run docs tests
+        run: pnpm exec turbo run test --filter=docs
+
+      - name: Upload docs browser-test screenshots
+        if: failure()
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-test-failure-screenshots
+          path: apps/docs/.vitest/attachments
+          if-no-files-found: ignore
 
   consumer-tests:
     name: consumer-tests
@@ -84,8 +111,8 @@ jobs:
         env:
           LUKE_UI_REACT_SPEC: ${{ inputs.react-spec }}
 
-  docs-tests:
-    name: docs-tests
+  package-tests:
+    name: package-tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -104,43 +131,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --no-runtime
 
-      - name: Install Playwright Chromium
-        run: pnpm --filter docs exec playwright install --with-deps chromium
-
-      - name: Run docs tests
-        run: pnpm exec turbo run test --filter=docs
-
-      - name: Upload docs test failure screenshots
-        if: failure()
-        continue-on-error: true
-        uses: actions/upload-artifact@v7
-        with:
-          name: docs-test-failure-screenshots
-          path: apps/docs/.vitest/attachments
-          if-no-files-found: ignore
-
-  reference-app-tests:
-    name: reference-app-tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Setup tooling
-        uses: pnpm/setup@v3
-        with:
-          cache: true
-          install: false
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --no-runtime
-
+      # reference-app runs a Playwright browser project.
       - name: Install Playwright Chromium
         run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
-      - name: Run reference app tests
-        run: pnpm exec turbo run test --filter=reference-app
+      - name: Run package tests
+        run: |
+          pnpm exec turbo run test \
+            --filter=./packages/** \
+            --filter=!@luke-ui/react \
+            --filter=./.github/scripts \
+            --filter=reference-app
+          pnpm exec turbo run test:integration --filter=@luke-ui/theme-build

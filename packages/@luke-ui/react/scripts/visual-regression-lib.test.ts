@@ -196,6 +196,12 @@ test('rejects a tall capture whose bottom decile never painted', async () => {
 	await expect(assertCapturesPainted(root)).rejects.toThrow(/#310.*tall \(1024x900\)/s);
 });
 
+test('rejects a capture directory with no screenshots', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'visual-painted-'));
+
+	await expect(assertCapturesPainted(root)).rejects.toThrow(/capture wrote no screenshots/);
+});
+
 test('accepts a tall capture whose bottom decile painted', async () => {
 	const root = await mkdtemp(path.join(tmpdir(), 'visual-painted-'));
 	const width = 1024;
