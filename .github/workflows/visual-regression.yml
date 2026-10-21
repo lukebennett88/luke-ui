@@ -14,8 +14,27 @@ env:
   PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
 
 jobs:
+  impact:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      required: ${{ steps.impact.outputs.required }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Check visual impact
+        id: impact
+        run: node .github/scripts/visual-impact.ts
+
   compare:
     name: compare
+    needs: impact
+    if: needs.impact.outputs.required == 'true'
     runs-on: ubuntu-latest
     # Digest-pinned Playwright image (keep tag+digest in sync with PLAYWRIGHT_VISUAL_IMAGE in
     # packages/@luke-ui/react/scripts/visual-regression-contract.ts and visual-baseline.yml).
@@ -109,7 +128,7 @@ jobs:
   gate:
     name: visual-regression
     if: always()
-    needs: [compare, review]
+    needs: [impact, compare, review]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -117,6 +136,8 @@ jobs:
       - uses: actions/checkout@v7
       - name: Require a complete comparison and any necessary approval
         env:
+          IMPACT: ${{ needs.impact.result }}
+          REQUIRED: ${{ needs.impact.outputs.required }}
           COMPARE: ${{ needs.compare.result }}
           REVIEW: ${{ needs.review.result }}
           CHANGES: ${{ needs.compare.outputs.review }}

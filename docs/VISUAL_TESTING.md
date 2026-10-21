@@ -43,16 +43,17 @@ This authoritative comparison also runs as part of `pnpm test`. It requires Dock
 Apple Silicon uses emulation. Missing Docker, an unavailable baseline, failed captures, and visual
 differences all fail the command. There is no host fallback.
 
-The CLI checks the newest `main` baseline workflow run on every comparison and downloads its
-artefact fresh. It reports the selected run and attempt, validates that the download contains PNGs,
-then replaces the local baseline. There is no persistent baseline cache or fallback to older
-captures. The baseline workflow overwrites its named artefact on re-runs, so a run ID selects the
-current successful attempt's artefact.
+The CLI checks the newest `main` baseline workflow run on every comparison. It reuses a cached
+baseline only when its run ID and attempt match that successful run and the cache contains PNGs.
+Otherwise, it downloads and validates that run's artefact before replacing the local baseline. It
+never falls back to an older run. Explicit local captures stay separate from the authoritative
+cache.
 
 The container receives current source without host dependencies or build outputs. A Docker volume
-reuses pnpm's content-addressed package store, and each run performs a frozen install before
-building packages and capturing fresh screenshots inside the container. It never reuses host builds
-or task-result caches.
+stores dependency installs keyed by the pinned image, platform, lockfile, workspace and install
+configuration, package manifests, hooks, and patches. A warm run restores that install and skips
+dependency installation, then builds packages and captures fresh screenshots inside the container.
+It never reuses host builds or task-result caches.
 
 Expected, actual, and diff PNGs plus `summary.json` are written to `.artifacts/visual-regression`.
 `pnpm test:visual:capture` explicitly captures a local baseline in Docker. An authoritative compare
@@ -73,9 +74,12 @@ compare against another local baseline. Host differences also fail the command.
 
 ## Review
 
-The visual workflow runs the Docker comparison on every PR. Its stable `visual-regression` gate
-requires a completed comparison and any needed approval. Infrastructure and capture failures fail
-the gate.
+The visual workflow reports its stable `visual-regression` gate on every PR. A native Node and Git
+diff check skips rendering only when every changed path is in the finite list of existing prose and
+guidance files. Missing diff data and every uncertain path require comparison. The baseline workflow
+uses the same paths as `paths-ignore`, so prose-only pushes do not create runs without capture
+artefacts. Manual baseline dispatch always renders. Relevant changes require a completed comparison
+and any needed approval. The gate fails when comparison or workflow infrastructure fails.
 
 Changed, added, and removed captures upload the `visual-regression-diff` artefact. Only a completed
 comparison can request approval through the `visual-review` environment. That environment must

@@ -6,7 +6,7 @@
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { mkdir, readdir, rename, rm } from 'node:fs/promises';
+import { cp, mkdir, readdir, rename, rm, stat } from 'node:fs/promises';
 import {
 	PLAYWRIGHT_BROWSERS_PATH,
 	PLAYWRIGHT_VISUAL_IMAGE,
@@ -97,9 +97,61 @@ export function containerCommand(command: VisualLocalCommand): string {
 		'mkdir -p /work/.artifacts',
 		'ln -sfn /artifacts /work/.artifacts/visual-regression',
 		'corepack enable',
-		'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install --frozen-lockfile --no-runtime',
+		dependencyInstallCommand(),
 		'pnpm build:packages',
 		captureOrCompare,
+	].join('\n');
+}
+
+// Hash install inputs before generation or build can write anything into the tree.
+function dependencyInstallCommand(): string {
+	const install = 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install --frozen-lockfile --no-runtime';
+	const keyScript = [
+		'const { createHash } = require("node:crypto");',
+		'const fs = require("node:fs");',
+		'const path = require("node:path");',
+		'const hash = createHash("sha256");',
+		`hash.update(JSON.stringify(["v1", process.env.VISUAL_INSTALL_IMAGE, process.env.VISUAL_INSTALL_PLATFORM, process.platform, process.arch, "${install}"]));`,
+		'const inputs = new Set(["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", ".npmrc", ".pnpmfile.cjs", ".pnpmfile.mjs", "pnpmfile.cjs", "pnpmfile.mjs"]);',
+		'function visit(directory, isPatch = false) {',
+		'  for (const entry of fs.readdirSync(directory, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {',
+		'    const file = path.join(directory, entry.name);',
+		'    const patch = isPatch || entry.name === "patches";',
+		'    if (entry.isDirectory()) visit(file, patch);',
+		'    else if (entry.isFile() && (patch || inputs.has(entry.name))) {',
+		'      hash.update(file); hash.update("\\0"); hash.update(fs.readFileSync(file)); hash.update("\\0");',
+		'    }',
+		'  }',
+		'}',
+		'visit(".");',
+		'process.stdout.write(hash.digest("hex"));',
+	].join('\n');
+
+	return [
+		`dependency_key=$(node -e '${keyScript}')`,
+		'mkdir -p /cache',
+		'dependency_archive="/cache/$dependency_key.tar"',
+		'dependencies_restored=',
+		'if [ -f "$dependency_archive" ]; then',
+		'  if tar -xf "$dependency_archive" && [ -d node_modules ]; then',
+		'    dependencies_restored=1',
+		'    echo "Reusing Docker dependency install $dependency_key."',
+		'  else',
+		'    rm -f "$dependency_archive"',
+		'    find . -type d -name node_modules -prune -exec rm -rf {} +',
+		'  fi',
+		'fi',
+		'if [ -z "$dependencies_restored" ]; then',
+		'  echo "Installing Docker dependencies for $dependency_key."',
+		`  ${install}`,
+		'  dependency_temporary=$(mktemp /cache/dependencies.XXXXXX)',
+		'  if find . -type d -name node_modules -prune -print0 | tar --null -T - -cf "$dependency_temporary"; then',
+		'    mv "$dependency_temporary" "$dependency_archive"',
+		'  else',
+		'    rm -f "$dependency_temporary"',
+		'    exit 1',
+		'  fi',
+		'fi',
 	].join('\n');
 }
 
@@ -128,6 +180,10 @@ export function buildDockerRunArgs(options: VisualLocalDockerOptions): Array<str
 		platform,
 		'-e',
 		`PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH}`,
+		'-e',
+		`VISUAL_INSTALL_IMAGE=${image}`,
+		'-e',
+		`VISUAL_INSTALL_PLATFORM=${platform}`,
 	];
 
 	if (hostUser !== undefined) {
@@ -141,6 +197,8 @@ export function buildDockerRunArgs(options: VisualLocalDockerOptions): Array<str
 		`${options.artifactsDir}:/artifacts`,
 		'-v',
 		'luke-ui-visual-pnpm-store:/root/.local/share/pnpm/store',
+		'-v',
+		'luke-ui-visual-dependencies:/cache',
 		image,
 		'bash',
 		'-lc',
@@ -169,7 +227,11 @@ async function hasPngs(directory: string): Promise<boolean> {
 	const entries = await readdir(directory, { recursive: true, withFileTypes: true }).catch(
 		() => [],
 	);
-	return entries.some((entry) => entry.isFile() && entry.name.endsWith('.png'));
+	const pngFiles = entries.filter((entry) => entry.isFile() && entry.name.endsWith('.png'));
+	const metadata = await Promise.all(
+		pngFiles.map((entry) => stat(path.join(entry.parentPath, entry.name))),
+	);
+	return metadata.some((file) => file.size > 0);
 }
 
 function fail(message: string): never {
@@ -203,13 +265,31 @@ export async function downloadAuthoritativeBaseline(options: {
 		(id) => `https://github.com/lukebennett88/luke-ui/actions/runs/${id}`,
 	);
 	if (!decision.ok) throw new Error(decision.reason);
+	const cache = path.join(
+		`${options.baselineDir}.cache`,
+		`${decision.runId}-${decision.runAttempt}`,
+	);
 	const temporary = `${options.baselineDir}.download-${process.pid}`;
 	await rm(temporary, { recursive: true, force: true });
-	await mkdir(temporary, { recursive: true });
 	try {
-		await options.download(decision.runId, temporary);
-		if (!(await hasPngs(temporary)))
-			throw new Error('The newest main baseline artifact contains no PNG screenshots.');
+		if (!(await hasPngs(cache))) {
+			await mkdir(temporary, { recursive: true });
+			info(
+				`Downloading main baseline: workflow run ${decision.runId}, attempt ${decision.runAttempt}.`,
+			);
+			await options.download(decision.runId, temporary);
+			if (!(await hasPngs(temporary)))
+				throw new Error('The newest main baseline artifact contains no PNG screenshots.');
+			await mkdir(path.dirname(cache), { recursive: true });
+			await rm(cache, { recursive: true, force: true });
+			await rename(temporary, cache);
+		} else {
+			info(
+				`Reusing main baseline: workflow run ${decision.runId}, attempt ${decision.runAttempt}.`,
+			);
+		}
+		// Keep explicit local captures separate from the authoritative cache.
+		await cp(cache, temporary, { recursive: true });
 		await rm(options.baselineDir, { recursive: true, force: true });
 		await rename(temporary, options.baselineDir);
 	} finally {

@@ -286,11 +286,19 @@ test('keeps the original timeout bound when a newer waitable run appears mid-wai
 	expect(clock.sleepCalls).toEqual([5_000, 5_000, 2_000]);
 });
 
-function visualGatePasses(options: { compare: string; review: string; changes: string }): boolean {
+function visualGatePasses(options: {
+	impact: string;
+	required: string;
+	compare: string;
+	review: string;
+	changes: string;
+}): boolean {
 	try {
 		execFileSync('bash', [fileURLToPath(new URL('./visual-gate.sh', import.meta.url))], {
 			env: {
 				...process.env,
+				IMPACT: options.impact,
+				REQUIRED: options.required,
 				COMPARE: options.compare,
 				REVIEW: options.review,
 				CHANGES: options.changes,
@@ -304,6 +312,8 @@ function visualGatePasses(options: { compare: string; review: string; changes: s
 }
 
 const completedGate = {
+	impact: 'success',
+	required: 'true',
 	compare: 'success',
 	review: 'skipped',
 	changes: '0',
@@ -313,13 +323,39 @@ test('an identical completed comparison passes the gate without review', () => {
 	expect(visualGatePasses({ ...completedGate, changes: '2', review: 'success' })).toBe(true);
 });
 
+test('a proven unrelated change passes only when comparison and review were skipped', () => {
+	const unrelated = { ...completedGate, required: 'false', compare: 'skipped', changes: '' };
+	expect(visualGatePasses(unrelated)).toBe(true);
+	expect(visualGatePasses({ ...unrelated, changes: '2' })).toBe(false);
+	for (const impact of ['failure', 'cancelled', 'skipped', '']) {
+		expect(visualGatePasses({ ...unrelated, impact })).toBe(false);
+	}
+	for (const result of ['success', 'failure', 'cancelled', '']) {
+		expect(visualGatePasses({ ...unrelated, compare: result })).toBe(false);
+		expect(visualGatePasses({ ...unrelated, review: result })).toBe(false);
+	}
+});
+
 for (const failure of [
+	{ impact: 'failure' },
+	{ impact: 'skipped' },
+	{ impact: 'cancelled' },
+	{ impact: '' },
+	{ required: '' },
+	{ required: 'unknown' },
 	{ compare: 'failure' },
 	{ compare: 'skipped' },
 	{ compare: 'cancelled' },
 	{ changes: '' },
+	{ changes: '-1' },
+	{ changes: 'NaN' },
+	{ review: 'failure' },
+	{ review: 'cancelled' },
+	{ review: '' },
 	{ changes: '2', review: 'skipped' },
 	{ changes: '2', review: 'failure' },
+	{ changes: '2', review: 'cancelled' },
+	{ changes: '2', review: '' },
 ]) {
 	test(`rejects incomplete gate prerequisites ${JSON.stringify(failure)}`, () => {
 		expect(visualGatePasses({ ...completedGate, ...failure })).toBe(false);
