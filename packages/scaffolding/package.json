@@ -1,5 +1,5 @@
 {
-	"name": "@luke-ui/turbo-generators",
+	"name": "@luke-ui/scaffolding",
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
@@ -12,8 +12,8 @@
 		"fix:lint:types": "vp lint . --type-aware --tsconfig tsconfig.json --fix",
 		"fix:lint:types:unsafe": "vp lint . --type-aware --tsconfig tsconfig.json --fix --fix-suggestions --fix-dangerously",
 		"fix:lint:unsafe": "vp lint . --fix --fix-suggestions --fix-dangerously",
-		"generate:component": "tsx scripts/generate.ts component",
-		"generate:primitive": "tsx scripts/generate.ts primitive",
+		"scaffold:component": "tsx scripts/generate.ts component",
+		"scaffold:primitive": "tsx scripts/generate.ts primitive",
 		"test": "vp test run"
 	},
 	"dependencies": {},

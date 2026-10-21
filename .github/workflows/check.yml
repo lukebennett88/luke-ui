@@ -41,8 +41,7 @@ jobs:
 
       - name: Run tooling tests
         run: >-
-          pnpm exec turbo run test --filter=@luke-ui/turbo-generators
-          --filter=@luke-ui/workflow-scripts
+          pnpm exec turbo run test --filter=@luke-ui/scaffolding --filter=@luke-ui/workflow-scripts
 
       - name: Require checks to preserve tracked files
         run: git diff --exit-code

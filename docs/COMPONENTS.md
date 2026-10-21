@@ -26,21 +26,22 @@ Do not add a root `@luke-ui/react/primitives` barrel. Import each primitive entr
 Use the component generator for new normal component entrypoints:
 
 ```sh
-pnpm run generate:component --args <name> <docs-group> <Yes|No>
+pnpm run scaffold:component --args <name> <docs-group> <Yes|No>
 ```
 
 Use the primitive generator for new `@luke-ui/react/primitives/*` entrypoints:
 
 ```sh
-pnpm run generate:primitive --args <name> <Yes|No> <Yes|No>
+pnpm run scaffold:primitive --args <name> <Yes|No> <Yes|No>
 ```
 
 The final component argument chooses visual coverage. The primitive arguments choose hosted docs,
 then visual coverage. Pass the literal choice `Yes` or `No` for each to avoid interactive prompts.
 
-Creation rules live in `packages/turbo-generators/src/component-creation-plan.ts` and
-`primitive-creation-plan.ts`. Keep validation, defaults, and scaffold rules there so Turbo and Plop
-share them. Only components accept documentation groups.
+Creation rules live in `packages/scaffolding/src/component-creation-plan.ts` and
+`primitive-creation-plan.ts`. Keep validation, defaults, and scaffold rules in those modules. Omit
+`--args` and the values to answer interactive prompts. Add `--dry-run` after the arguments to list
+planned files without writing them. Only components accept documentation groups.
 
 The component generator creates the component guide's primary
 `apps/docs/src/examples/<component>/basic.tsx` example and references it with `ExampleBlock`. The
@@ -75,9 +76,10 @@ axe, and visual captures. Multi-part primitives keep a file per part.
 
 ### Generated exports
 
-Do not hand-edit `package.json#exports`. `vp pack` derives exports from its `src/exports/` entry
-configuration during build. The `stylesheet` build entry is excluded from the public map with
-`exports.exclude` in the package's `vite.config.ts`.
+The React package's `package.json#exports` map is the public subpath contract. Component and
+primitive scaffolding adds the source entry and its `./dist/` target together. `vp pack` builds
+those entries but does not rewrite the export map. Keep the `stylesheet` build entry excluded from
+the public map in the package's `vite.config.ts`.
 
 Vanilla Extract serialises recipes to `#recipe-engine`. Pack, Vitest, and the docs app alias it to
 `src/core/styles/recipe-engine.ts`. Pack bundles a relative runtime chunk. The specifier is private.

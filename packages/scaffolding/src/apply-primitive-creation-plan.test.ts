@@ -69,6 +69,9 @@ describe('createPrimitive', () => {
 			pages: ['button', 'checkbox', 'field', 'text-input', 'combobox', 'status-badge'],
 			title: 'Primitives',
 		});
+		await expect(readJson(root, 'packages/@luke-ui/react/package.json')).resolves.toMatchObject({
+			exports: { './primitives/status-badge': './dist/primitives/status-badge.js' },
+		});
 		await expect(
 			readFile(join(root, 'apps/docs/src/examples/status-badge-primitive/basic.tsx'), 'utf8'),
 		).resolves.toBe(
@@ -182,12 +185,29 @@ describe('createPrimitive', () => {
 			title: 'Primitives',
 		});
 	});
+
+	it('rejects a conflicting package export before writing scaffold files', async () => {
+		const root = await createRepositoryFixture({
+			packageExports: { './primitives/status-badge': './dist/other.js' },
+		});
+
+		await expect(createPrimitive(root, { name: 'StatusBadge' })).rejects.toThrow(
+			'Cannot add export entry that already exists: ./primitives/status-badge',
+		);
+		await expect(
+			readFile(
+				join(root, 'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.tsx'),
+				'utf8',
+			),
+		).rejects.toMatchObject({ code: 'ENOENT' });
+	});
 });
 
 const modulesRegistryPath = 'packages/@luke-ui/react/src/core/styles/modules.css.ts';
 
 async function createRepositoryFixture(options?: {
 	modulesRegistry?: string;
+	packageExports?: Record<string, string>;
 	primitivesMeta?: { pages: Array<string>; title: string };
 }): Promise<string> {
 	const root = await mkdtemp(join(tmpdir(), 'primitive-plan-'));
@@ -195,6 +215,20 @@ async function createRepositoryFixture(options?: {
 
 	await mkdir(join(root, 'apps/docs/content/docs/components/primitives'), { recursive: true });
 	await mkdir(join(root, 'packages/@luke-ui/react/src/core/styles'), { recursive: true });
+	await writeFile(
+		join(root, 'packages/@luke-ui/react/package.json'),
+		`${JSON.stringify(
+			{
+				exports: options?.packageExports ?? {
+					'./button': './dist/button.js',
+					'./primitives/button': './dist/primitives/button.js',
+				},
+			},
+			null,
+			'\t',
+		)}\n`,
+		'utf8',
+	);
 
 	await writeFile(
 		join(root, 'apps/docs/content/docs/components/primitives/meta.json'),
