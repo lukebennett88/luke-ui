@@ -12,12 +12,8 @@ import { Field } from '@luke-ui/react/primitives/field';
 import { createRef } from 'react';
 import { expect, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
-import {
-	expectAutofillBackgroundHidden,
-	expectSameInputText,
-	forceAutofill,
-	inputTextPixels,
-} from '../../test-utils/autofill.js';
+import type { Locator } from 'vite-plus/test/context';
+import { expectFillKeepsTextAndBorder, fillAsPasswordManager } from '../../test-utils/autofill.js';
 import { render, visualAppearances } from '../../test-utils/render.js';
 import {
 	captureVisualAppearance,
@@ -113,59 +109,73 @@ function FilledComboboxScene() {
 	);
 }
 
+function comboboxInputs(locator: Locator): Array<HTMLInputElement> {
+	return locator
+		.getByRole('combobox')
+		.elements()
+		.map((target) => {
+			if (!(target instanceof HTMLInputElement)) throw new Error('Expected an input.');
+			return target;
+		});
+}
+
 for (const source of ['password-manager', 'native'] as const) {
-	for (const appearance of visualAppearances) {
-		for (const forcedColors of ['none', 'active'] as const) {
-			test(
-				`filled comboboxes (${source}): ${appearance.theme} ${appearance.mode}, forced colors ${forcedColors}`,
-				{ tags: ['visual'] },
-				async () => {
-					await emulateForcedColors(forcedColors);
-					const restoreMotion = await freezeMotionForCapture();
-					try {
-						const { locator } = render(<FilledComboboxScene />, { appearance });
-						const inputs = locator
-							.getByRole('combobox')
-							.elements()
-							.map((target) => {
-								if (!(target instanceof HTMLInputElement)) throw new Error('Expected an input.');
-								return target;
-							});
-						const references = new Map<HTMLInputElement, Uint8ClampedArray>();
-						for (const target of inputs) references.set(target, await inputTextPixels(target));
-						if (source === 'native') await forceAutofill(inputs);
-						for (const target of inputs) {
-							const text = references.get(target);
-							if (text === undefined) throw new Error('Expected reference text pixels.');
-							if (source === 'password-manager') {
-								target.setAttribute('data-com-onepassword-filled', appearance.mode);
-							}
-							expectSameInputText(
-								await inputTextPixels(target),
-								text,
-								target.getAttribute('aria-label') ??
-									target.getAttribute('aria-labelledby') ??
-									'Input',
-							);
-							const control = target.closest('[role="group"]');
-							if (control === null) throw new Error('Expected a control.');
-							await expectAutofillBackgroundHidden(target, control);
-							target.style.setProperty('background-color', 'rgb(160, 200, 255)', 'important');
-						}
-						await captureVisualAppearance(
-							locator,
-							`combobox/filled-${source}-${forcedColors}`,
-							appearance,
-						);
-					} finally {
-						await restoreMotion();
-						await emulateForcedColors('none');
-					}
-				},
-			);
-		}
+	for (const forcedColors of ['none', 'active'] as const) {
+		test(`a ComboboxInput filled by ${source} keeps its text and border, forced colours ${forcedColors}`, async () => {
+			await emulateForcedColors(forcedColors);
+			const restoreMotion = await freezeMotionForCapture();
+			try {
+				const { locator } = render(<FilledComboboxScene />);
+				await expectFillKeepsTextAndBorder(comboboxInputs(locator), source);
+			} finally {
+				await restoreMotion();
+				await emulateForcedColors('none');
+			}
+		});
 	}
 }
+
+test('a disabled ComboboxInput that is not filled keeps a consumer text colour', () => {
+	const sheet = document.createElement('style');
+	sheet.textContent = '.consumer-colour { color: rgb(4, 5, 6); }';
+	document.head.append(sheet);
+	try {
+		render(
+			<>
+				<ComboboxRoot defaultItems={items} isDisabled>
+					<Field label="Class colour">
+						<ComboboxControl>
+							<ComboboxInput className="consumer-colour" />
+						</ComboboxControl>
+					</Field>
+				</ComboboxRoot>
+				<ComboboxRoot defaultItems={items} isDisabled>
+					<Field label="Style colour">
+						<ComboboxControl>
+							<ComboboxInput style={{ color: 'rgb(1, 2, 3)' }} />
+						</ComboboxControl>
+					</Field>
+				</ComboboxRoot>
+			</>,
+		);
+		const textFill = (name: string) =>
+			getComputedStyle(page.getByRole('combobox', { name }).element()).webkitTextFillColor;
+
+		// The text paints in the text fill colour, which follows `color` unless a rule sets it.
+		expect(textFill('Class colour')).toBe('rgb(4, 5, 6)');
+		expect(textFill('Style colour')).toBe('rgb(1, 2, 3)');
+	} finally {
+		sheet.remove();
+	}
+});
+
+test('filled kitchen sink', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(<FilledComboboxScene />, { appearance });
+		fillAsPasswordManager(comboboxInputs(locator), appearance.mode);
+		await captureVisualAppearance(locator, 'combobox/filled-kitchen-sink', appearance);
+	}
+});
 
 test('ComboboxControl forwards a callback ref to its group and clears it on unmount', () => {
 	const ref = vi.fn<(element: HTMLDivElement | null) => void>();

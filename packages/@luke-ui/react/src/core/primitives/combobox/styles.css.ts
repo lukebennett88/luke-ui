@@ -17,6 +17,8 @@ import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import {
 	controlInputCornerSelectors,
+	filledDisabledInputSelector,
+	filledDisabledInputStyle,
 	filledInputSelectors,
 	filledInputStyle,
 } from '../text-input/styles.css.js';
@@ -205,11 +207,8 @@ const comboboxConfig = {
 				// Same contract as a text input in a control: an external fill must not paint a
 				// square over the control's rounded chrome.
 				[`&:where(${filledInputSelectors})`]: filledInputStyle,
+				[`&${filledDisabledInputSelector}`]: filledDisabledInputStyle,
 				'&:where([data-disabled="true"], :disabled)': {
-					'@media': {
-						'(forced-colors: active)': { WebkitTextFillColor: 'GrayText' },
-					},
-					WebkitTextFillColor: vars.color.text.disabled,
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
 				},

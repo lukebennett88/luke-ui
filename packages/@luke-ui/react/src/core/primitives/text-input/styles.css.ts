@@ -40,6 +40,19 @@ export const filledInputStyle = {
 	caretColor: vars.color.text.primary,
 } as const satisfies StyleRule;
 
+/**
+ * A disabled filled input keeps its disabled text over the repaint above. Only filled inputs set a
+ * text fill, so a consumer `color` still reaches a disabled input that isn't filled.
+ */
+export const filledDisabledInputSelector = `:where(${filledInputSelectors}):where([data-disabled="true"], :disabled)`;
+
+export const filledDisabledInputStyle = {
+	'@media': {
+		'(forced-colors: active)': { WebkitTextFillColor: 'GrayText' },
+	},
+	WebkitTextFillColor: vars.color.text.disabled,
+} as const satisfies StyleRule;
+
 /** Inner radius of a control with a 1px border, floored so a square theme stays square. */
 const controlInnerRadius = `max(0px, calc(${vars.radius.control} - 1px))`;
 
@@ -85,11 +98,11 @@ export const textInputInputBase = {
 		// `:where()` keeps this at class specificity, so the state selectors below and in the
 		// standalone recipe (disabled, invalid) still win where they set the same properties.
 		[`&:where(${filledInputSelectors})`]: filledInputStyle,
+		[`&${filledDisabledInputSelector}`]: filledDisabledInputStyle,
 		'&:where([data-disabled="true"], :disabled)': {
 			'@media': {
-				'(forced-colors: active)': { WebkitTextFillColor: 'GrayText' },
+				'(forced-colors: active)': { color: 'GrayText' },
 			},
-			WebkitTextFillColor: vars.color.text.disabled,
 			color: vars.color.text.disabled,
 			cursor: 'not-allowed',
 		},
