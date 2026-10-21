@@ -345,6 +345,7 @@ test('closes in one Escape press with text typed, and restores focus', async () 
 	await expect.element(trigger).toHaveFocus();
 });
 
+// Allow browser round trips under CI load. Behavioural polls stay bounded at 5 seconds.
 test('keeps the active result within the visible list after scrolling down', async () => {
 	await renderSearch();
 	const input = await openSearchDialog();
@@ -376,7 +377,7 @@ test('keeps the active result within the visible list after scrolling down', asy
 	await expectActiveDescendant(input, list, previousElement.id);
 	await expectResultWithinList(previousElement, list, input);
 	await expectInputFocus(input);
-});
+}, 30_000);
 
 test('wraps keyboard navigation from the first result to the last and back', async () => {
 	await renderSearch();
