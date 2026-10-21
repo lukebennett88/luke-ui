@@ -46,14 +46,17 @@ const roleBackground = {
 };
 
 /**
- * The content capabilities every semantic role gets. `onSolid` is a single contrast-solved colour
- * for that role's solid fill, not a state ramp.
+ * The content capabilities every semantic role gets. Both on-solid hierarchy leaves are
+ * contrast-solved for that role's solid rest, hover, and pressed fills. They may share a colour.
  */
 const roleForeground = {
 	rest: null,
 	hover: null,
 	pressed: null,
-	onSolid: null,
+	onSolid: {
+		primary: null,
+		secondary: null,
+	},
 };
 
 const fontStyleContract = Object.fromEntries(
@@ -313,7 +316,8 @@ function isContractNode(value: unknown): value is Record<string, unknown> {
 
 /**
  * Builds the stable `--luke-*` CSS variable name for a contract path's segments, for example
- * `['color', 'foreground', 'danger', 'onSolid']` becomes `--luke-color-foreground-danger-on-solid`.
+ * `['color', 'foreground', 'danger', 'onSolid', 'primary']` becomes
+ * `--luke-color-foreground-danger-on-solid-primary`.
  */
 export function themeVarName(segments: Array<string>): string {
 	return `--luke-${segments.map(kebabCaseSegment).join('-')}`;

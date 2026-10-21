@@ -100,7 +100,7 @@ const checkboxConfig = {
 			borderStyle: 'solid',
 			borderWidth: '1px',
 			boxShadow: vars.depth.recessed,
-			color: vars.color.foreground.accent.onSolid,
+			color: vars.color.foreground.accent.onSolid.primary,
 			display: 'inline-flex',
 			fontSize: checkboxGlyphSize,
 			fontWeight: vars.font.weight.heading,
@@ -163,7 +163,7 @@ const checkboxConfig = {
 					{
 						backgroundColor: vars.color.background.danger.solid.rest,
 						borderColor: vars.color.background.danger.solid.rest,
-						color: vars.color.foreground.danger.onSolid,
+						color: vars.color.foreground.danger.onSolid.primary,
 					},
 				// Only `danger.solid.rest` is a guaranteed 3:1 boundary, so an invalid box keeps it through
 				// hover and press. The fill carries the feedback instead.

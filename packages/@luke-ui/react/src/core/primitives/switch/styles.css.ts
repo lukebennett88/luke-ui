@@ -193,14 +193,14 @@ const switchConfig = {
 					inlineSize: `calc(${thumbSize} + ${thumbStretch})`,
 				},
 				'[data-selected="true"] &': {
-					backgroundColor: vars.color.foreground.accent.onSolid,
+					backgroundColor: vars.color.foreground.accent.onSolid.primary,
 					marginInlineStart: thumbTravel,
 				},
 				[pressed('[data-selected="true"]')]: {
 					marginInlineStart: `calc(${thumbTravel} - ${thumbStretch})`,
 				},
 				'[data-invalid="true"][data-selected="true"] &': {
-					backgroundColor: vars.color.foreground.danger.onSolid,
+					backgroundColor: vars.color.foreground.danger.onSolid.primary,
 				},
 			},
 		},

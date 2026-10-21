@@ -20,7 +20,7 @@ export interface ThemeContrastFailure {
 	foreground: string;
 	/** The colour mode the pair was generated for. */
 	mode: 'light' | 'dark';
-	/** The contrast ratio achieved by the best attempt. */
+	/** The contrast ratio of the emitted, rounded, gamut-mapped colours. */
 	ratio: number;
 	/** The WCAG 2.2 AA ratio the pair must reach. */
 	required: number;
@@ -38,8 +38,9 @@ type ColorPath = keyof SemanticColorValues;
  * {@link ContrastCheck}; failing hard pairs populate `failures`, which `compileTheme` throws.
  *
  * Content and controls can sit on any of the four surfaces, so every surface gate covers all four.
- * Hard at 4.5:1: primary and secondary text, and each role's rest, hover, and pressed foreground
- * (also against that role's subtle fills); each role's on-solid foreground against its solid fills.
+ * Hard at 4.5:1: primary and secondary text and each role's rest, hover, and pressed foreground
+ * against all four surfaces and every role's subtle fills. Both on-solid hierarchy leaves are gated
+ * against their role's solid fills.
  * Hard at 3:1: the focus ring, the control border and its hover, and `danger.solid.rest`, the
  * invalid control boundary. Only danger is gated as a boundary: the other roles' solid fills are
  * solved for on-solid text and `warning` lands well under 3:1 in light mode.
@@ -72,23 +73,28 @@ export function validateContrast(
 		'color.surface.overlay',
 	] as const satisfies ReadonlyArray<ColorPath>;
 
-	for (const text of ['color.text.primary', 'color.text.secondary'] as const) {
-		for (const surface of surfacePaths) check(text, surface, TEXT_RATIO, true);
-	}
-	for (const role of SEMANTIC_ROLES) {
-		const subtleBackgrounds = (['rest', 'hover', 'pressed'] as const).map((state) => {
+	const subtleBackgrounds = SEMANTIC_ROLES.flatMap((role) => {
+		return (['rest', 'hover', 'pressed'] as const).map((state) => {
 			return `color.background.${role}.subtle.${state}` as const;
 		});
+	});
+	const textBackgrounds = [...surfacePaths, ...subtleBackgrounds];
+	for (const text of ['color.text.primary', 'color.text.secondary'] as const) {
+		for (const background of textBackgrounds) check(text, background, TEXT_RATIO, true);
+	}
+	for (const role of SEMANTIC_ROLES) {
 		for (const state of ['rest', 'hover', 'pressed'] as const) {
-			for (const background of [...surfacePaths, ...subtleBackgrounds]) {
+			for (const background of textBackgrounds) {
 				check(`color.foreground.${role}.${state}`, background, TEXT_RATIO, true);
 			}
-			check(
-				`color.foreground.${role}.onSolid`,
-				`color.background.${role}.solid.${state}`,
-				TEXT_RATIO,
-				true,
-			);
+			for (const hierarchy of ['primary', 'secondary'] as const) {
+				check(
+					`color.foreground.${role}.onSolid.${hierarchy}`,
+					`color.background.${role}.solid.${state}`,
+					TEXT_RATIO,
+					true,
+				);
+			}
 		}
 	}
 	const boundaries = [

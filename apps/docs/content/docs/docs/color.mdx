@@ -72,17 +72,20 @@ vars.color.background.warning.solid.hover;
 vars.color.background.warning.solid.pressed;
 ```
 
-Use a role's `rest`, `hover`, and `pressed` foreground on any surface or on that role's subtle
-background. Use `onSolid` on that role's solid backgrounds:
+Use a role's `rest`, `hover`, and `pressed` foreground on any standard surface or any role's subtle
+background. Use `onSolid.primary` or `onSolid.secondary` on that role's solid backgrounds:
 
 ```tsx
 vars.color.foreground.warning.rest;
 vars.color.foreground.warning.hover;
 vars.color.foreground.warning.pressed;
-vars.color.foreground.warning.onSolid;
+vars.color.foreground.warning.onSolid.primary;
+vars.color.foreground.warning.onSolid.secondary;
 ```
 
-`onSolid` has no states. It reads against `solid.rest`, `solid.hover`, and `solid.pressed`.
+`onSolid.primary` and `onSolid.secondary` each reach at least 4.5:1 against `solid.rest`,
+`solid.hover`, and `solid.pressed`. Both currently resolve to the same literal colour. Secondary
+guarantees an accessible selection on the solid background, not visible de-emphasis.
 
 Built-in controls select these tokens for hover and pressed. Custom interactive elements should do
 the same.

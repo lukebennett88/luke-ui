@@ -26,9 +26,13 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    every colour contract leaf onto a family step, a generated surface, or a generated interaction
    state, and passes the authored backdrop through. Neutral step 12 becomes `text.primary`.
 6. Runs the full WCAG 2.2 validation matrix (`validateContrast`), which stays authoritative and
-   throws `ThemeContrastError` on a hard-gate miss. Validation measures semantic token
-   relationships, including each role's rest, hover, and pressed foregrounds against its subtle
-   ramp, and `onSolid` against solid rest, hover, and pressed.
+   throws `ThemeContrastError` on a hard-gate miss. Validation measures semantic token relationships
+   using final emitted, rounded, and gamut-mapped colours. Both global text hierarchy colours are
+   checked against every standard surface and all 18 subtle backgrounds. All six roles' three
+   foreground states are checked against every standard surface and all 18 subtle backgrounds (324
+   subtle pairs per mode). Both `onSolid.primary` and `onSolid.secondary` are checked against their
+   role's solid rest, hover, and pressed fills. The two on-solid leaves initially emit the same
+   literal resolved colour. New cross-role failures are rejected without automatic repair.
 
 `compileTheme` returns `{ css, diagnostics }`. `ThemeDiagnostics` records everything the pipeline
 resolved (both modes' families, surfaces, solid-anchor search, and contrast checks) for tooling.

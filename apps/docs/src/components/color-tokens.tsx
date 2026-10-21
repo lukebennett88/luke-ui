@@ -79,7 +79,7 @@ function ColorSample({
 				<Box
 					alignItems="center"
 					backgroundColor={
-						token.path.endsWith('.onSolid') && role !== undefined
+						token.path.includes('.onSolid.') && role !== undefined
 							? `${role}.solid.rest`
 							: 'surface.base'
 					}

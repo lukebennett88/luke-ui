@@ -220,7 +220,7 @@ export const avatarOverlay = style({
 	alignItems: 'center',
 	background: 'color-mix(in oklab, black 45%, transparent)',
 	borderRadius: vars.radius.full,
-	color: vars.color.foreground.neutral.onSolid,
+	color: vars.color.foreground.neutral.onSolid.primary,
 	display: 'flex',
 	inset: 0,
 	justifyContent: 'center',
