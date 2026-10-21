@@ -33,7 +33,19 @@ interface JsonArrayAppendUniqueEdit {
 	value: string;
 }
 
-type JsonEdit = JsonArrayAddSortedEdit | JsonArrayAddPrefixSortedEdit | JsonArrayAppendUniqueEdit;
+interface JsonObjectEntryEdit {
+	entry: string;
+	key: 'exports';
+	kind: 'object-entry-add';
+	path: string;
+	value: string;
+}
+
+type JsonEdit =
+	| JsonArrayAddSortedEdit
+	| JsonArrayAddPrefixSortedEdit
+	| JsonArrayAppendUniqueEdit
+	| JsonObjectEntryEdit;
 
 interface TextFileInsertEdit {
 	kind: 'text-insert';

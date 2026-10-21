@@ -106,17 +106,26 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 				path: 'packages/@luke-ui/react/src/core/styles/modules.css.ts',
 			},
 		],
-		jsonEdits: input.docs
-			? [
-					{
-						key: 'pages',
-						kind: 'array-add-append-unique',
-						path: 'apps/docs/content/docs/components/primitives/meta.json',
-						title: 'Primitives',
-						value: name,
-					},
-				]
-			: [],
+		jsonEdits: [
+			{
+				entry: `./primitives/${name}`,
+				key: 'exports',
+				kind: 'object-entry-add',
+				path: 'packages/@luke-ui/react/package.json',
+				value: `./dist/primitives/${name}.js`,
+			},
+			...(input.docs
+				? [
+						{
+							key: 'pages',
+							kind: 'array-add-append-unique',
+							path: 'apps/docs/content/docs/components/primitives/meta.json',
+							title: 'Primitives',
+							value: name,
+						} as const,
+					]
+				: []),
+		],
 		textFileInserts: [],
 	};
 }

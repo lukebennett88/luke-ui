@@ -68,8 +68,7 @@ export default {
 			entry: ['src/index.ts', 'src/input.ts'],
 			project: ['src/**/*.ts'],
 		},
-		'packages/turbo-generators': {
-			entry: ['config.ts'],
+		'packages/scaffolding': {
 			project: ['**/*.ts'],
 		},
 	},

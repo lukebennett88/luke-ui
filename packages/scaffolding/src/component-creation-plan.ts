@@ -120,6 +120,13 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 		],
 		jsonEdits: [
 			{
+				entry: `./${name}`,
+				key: 'exports',
+				kind: 'object-entry-add',
+				path: 'packages/@luke-ui/react/package.json',
+				value: `./dist/${name}.js`,
+			},
+			{
 				key: 'pages',
 				kind: 'array-add-prefix-sorted',
 				path: 'apps/docs/content/docs/components/meta.json',
