@@ -6,6 +6,7 @@ import type { RecipeSelection } from '../../styles/recipe-types.js';
 import { recipe } from '../../styles/recipe.js';
 import {
 	filledInputSelectors,
+	filledInputStyle,
 	textInputInlinePadding,
 	textInputInputBase,
 	textInputInputPaddingInline,
@@ -77,6 +78,9 @@ export const textInputRecipe = recipe({
 			// Read-only drops the inset depth. The hover selector already excludes it.
 			[input.readOnly]: {
 				boxShadow: 'none',
+			},
+			[`${input.readOnly}:where(${filledInputSelectors})`]: {
+				boxShadow: filledInputStyle.boxShadow,
 			},
 			// After `readOnly`, so a read-only invalid input keeps its cue.
 			[input.invalid]: {

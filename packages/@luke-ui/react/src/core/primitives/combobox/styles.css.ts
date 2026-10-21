@@ -183,6 +183,7 @@ const comboboxConfig = {
 			},
 		},
 		textInput: {
+			blockSize: '100%',
 			appearance: 'none',
 			backgroundColor: 'transparent',
 			border: 'none',
@@ -201,13 +202,17 @@ const comboboxConfig = {
 
 			selectors: {
 				'&::placeholder': { color: vars.color.text.secondary, opacity: 1 },
-				'&:where([data-disabled="true"], :disabled)': {
-					color: vars.color.text.disabled,
-					cursor: 'not-allowed',
-				},
 				// Same contract as a text input in a control: an external fill must not paint a
 				// square over the control's rounded chrome.
 				[`&:where(${filledInputSelectors})`]: filledInputStyle,
+				'&:where([data-disabled="true"], :disabled)': {
+					'@media': {
+						'(forced-colors: active)': { WebkitTextFillColor: 'GrayText' },
+					},
+					WebkitTextFillColor: vars.color.text.disabled,
+					color: vars.color.text.disabled,
+					cursor: 'not-allowed',
+				},
 				...controlInputCornerSelectors,
 			},
 		},
@@ -435,7 +440,6 @@ const comboboxConfig = {
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
 				},
 				textInput: {
-					blockSize: vars.controlSize.px40,
 					paddingInlineEnd: vars.space['12'],
 					paddingInlineStart: vars.space['12'],
 				},
@@ -464,7 +468,6 @@ const comboboxConfig = {
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 				},
 				textInput: {
-					blockSize: vars.controlSize.px32,
 					paddingInlineEnd: vars.space['8'],
 					paddingInlineStart: vars.space['8'],
 				},

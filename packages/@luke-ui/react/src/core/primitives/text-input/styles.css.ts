@@ -28,11 +28,16 @@ export const filledInputSelectors = ':autofill, :-webkit-autofill, [data-com-one
  * extension stylesheet is unlayered, so a large inset shadow in the field surface paints over it.
  */
 export const filledInputStyle = {
+	'@media': {
+		'(forced-colors: active)': {
+			WebkitTextFillColor: 'currentColor',
+			caretColor: 'currentColor',
+		},
+	},
 	WebkitTextFillColor: vars.color.text.primary,
 	backgroundColor: vars.color.surface.field,
 	boxShadow: `inset 0 0 0 1000px ${vars.color.surface.field}`,
 	caretColor: vars.color.text.primary,
-	color: vars.color.text.primary,
 } as const satisfies StyleRule;
 
 /** Inner radius of a control with a 1px border, floored so a square theme stays square. */
@@ -81,6 +86,10 @@ export const textInputInputBase = {
 		// standalone recipe (disabled, invalid) still win where they set the same properties.
 		[`&:where(${filledInputSelectors})`]: filledInputStyle,
 		'&:where([data-disabled="true"], :disabled)': {
+			'@media': {
+				'(forced-colors: active)': { WebkitTextFillColor: 'GrayText' },
+			},
+			WebkitTextFillColor: vars.color.text.disabled,
 			color: vars.color.text.disabled,
 			cursor: 'not-allowed',
 		},

@@ -14,10 +14,15 @@ import {
 	TextInputRoot,
 	TextInputSuffix,
 } from '@luke-ui/react/primitives/text-input';
-import { vars } from '@luke-ui/react/theme';
 import { useState } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import {
+	expectAutofillBackgroundHidden,
+	expectSameInputText,
+	forceAutofill,
+	inputTextPixels,
+} from '../../test-utils/autofill.js';
 import { expectNoAxeViolations } from '../../test-utils/axe.js';
 import { getDescribedText } from '../../test-utils/get-described-text.js';
 import { render, visualAppearances } from '../../test-utils/render.js';
@@ -26,6 +31,7 @@ import {
 	captureVisualAppearance,
 	emulateForcedColors,
 	focusViaKeyboard,
+	freezeMotionForCapture,
 	Stack,
 } from '../../test-utils/visual.js';
 
@@ -148,54 +154,109 @@ test('a focused invalid TextInput keeps its size and text position in forced col
 	}
 });
 
-/** The computed `box-shadow` of a probe painted with `shadow` in the same theme scope. */
-function resolvedBoxShadow(scope: Element, shadow: string): string {
-	const probe = scope.appendChild(document.createElement('span'));
-	probe.style.boxShadow = shadow;
-	const resolved = getComputedStyle(probe).boxShadow;
-	probe.remove();
-	return resolved;
+function FilledTextInputScene({ size }: { size: 'small' | 'medium' }) {
+	return (
+		<Stack>
+			<TextInput aria-label={`${size} default`} defaultValue="Autofilled text" size={size} />
+			<TextInput
+				aria-invalid
+				aria-label={`${size} invalid`}
+				defaultValue="Autofilled text"
+				size={size}
+			/>
+			<TextInput
+				aria-label={`${size} read-only`}
+				defaultValue="Autofilled text"
+				readOnly
+				size={size}
+			/>
+			<TextInput
+				aria-invalid
+				aria-label={`${size} read-only invalid`}
+				defaultValue="Autofilled text"
+				readOnly
+				size={size}
+			/>
+			<TextInput
+				aria-label={`${size} disabled`}
+				defaultValue="Autofilled text"
+				disabled
+				size={size}
+			/>
+			<TextInputControl size={size}>
+				<TextInput aria-label={`${size} before suffix`} defaultValue="Autofilled text" />
+				<TextInputSuffix>USD</TextInputSuffix>
+			</TextInputControl>
+			<TextInputControl size={size}>
+				<TextInputPrefix>$</TextInputPrefix>
+				<TextInput aria-label={`${size} after prefix`} defaultValue="Autofilled text" />
+			</TextInputControl>
+			<TextInputControl size={size}>
+				<TextInput
+					aria-label={`${size} disabled control`}
+					defaultValue="Autofilled text"
+					disabled
+				/>
+			</TextInputControl>
+		</Stack>
+	);
 }
 
-// Appearance is the contract: a fill painted by a password manager must not show as a square
-// light fill over the field surface, and a filled invalid input keeps its danger ring.
-test('a password-manager-filled TextInput repaints the fill with the field surface', async () => {
-	const { container } = render(
-		<>
-			<TextInput aria-label="Filled standalone" defaultValue="Luke" />
-			<TextInput aria-invalid aria-label="Filled invalid" defaultValue="nope" />
-			<TextInputControl>
-				<TextInput aria-label="Filled in control" defaultValue="Luke" />
-			</TextInputControl>
-		</>,
-	);
-	// 1Password marks a filled input with this attribute and paints its own background.
-	for (const name of ['Filled standalone', 'Filled invalid', 'Filled in control']) {
-		input(name).setAttribute('data-com-onepassword-filled', 'light');
+for (const size of ['small', 'medium'] as const) {
+	for (const source of ['password-manager', 'native'] as const) {
+		for (const appearance of visualAppearances) {
+			for (const forcedColors of ['none', 'active'] as const) {
+				test(
+					`filled inputs ${size} (${source}): ${appearance.theme} ${appearance.mode}, forced colors ${forcedColors}`,
+					{ tags: ['visual'] },
+					async () => {
+						await emulateForcedColors(forcedColors);
+						const restoreMotion = await freezeMotionForCapture();
+						try {
+							const { locator } = render(<FilledTextInputScene size={size} />, { appearance });
+							const inputs = locator
+								.getByRole('textbox')
+								.elements()
+								.map((target) => {
+									if (!(target instanceof HTMLInputElement)) throw new Error('Expected an input.');
+									return target;
+								});
+							const references = new Map<HTMLInputElement, Uint8ClampedArray>();
+							for (const target of inputs) references.set(target, await inputTextPixels(target));
+							if (source === 'native') await forceAutofill(inputs);
+							for (const target of inputs) {
+								const text = references.get(target);
+								if (text === undefined) throw new Error('Expected reference text pixels.');
+								if (source === 'password-manager') {
+									target.setAttribute('data-com-onepassword-filled', appearance.mode);
+								}
+								expectSameInputText(
+									await inputTextPixels(target),
+									text,
+									target.getAttribute('aria-label') ??
+										target.getAttribute('aria-labelledby') ??
+										'Input',
+								);
+								const control = target.closest('[role="group"]') ?? target;
+								await expectAutofillBackgroundHidden(target, control);
+								// Leave the simulated extension paint in the visual capture too.
+								target.style.setProperty('background-color', 'rgb(160, 200, 255)', 'important');
+							}
+							await captureVisualAppearance(
+								locator,
+								`text-input/filled-${size}-${source}-${forcedColors}`,
+								appearance,
+							);
+						} finally {
+							await restoreMotion();
+							await emulateForcedColors('none');
+						}
+					},
+				);
+			}
+		}
 	}
-	const fieldFill = `inset 0 0 0 1000px ${vars.color.surface.field}`;
-
-	// `box-shadow` transitions, so poll until the repaint settles.
-	await expect
-		.poll(() => getComputedStyle(input('Filled standalone')).boxShadow)
-		.toBe(resolvedBoxShadow(container, fieldFill));
-	await expect
-		.poll(() => getComputedStyle(input('Filled in control')).boxShadow)
-		.toBe(resolvedBoxShadow(container, fieldFill));
-	await expect
-		.poll(() => getComputedStyle(input('Filled invalid')).boxShadow)
-		.toBe(
-			resolvedBoxShadow(
-				container,
-				`inset 0 0 0 1px ${vars.color.background.danger.solid.rest}, ${fieldFill}`,
-			),
-		);
-	const filledStyle = getComputedStyle(input('Filled in control'));
-	expect(filledStyle.getPropertyValue('-webkit-text-fill-color')).toBe(
-		getComputedStyle(input('Filled in control')).color,
-	);
-	expect(filledStyle.caretColor).toBe(filledStyle.color);
-});
+}
 
 // Layout is the contract: a square input corner would paint over the control's curved border,
 // so an input rounds only the corners that touch the control (its inner radius).
