@@ -4,9 +4,14 @@
 	"type": "module",
 	"scripts": {
 		"check:format": "vp fmt . --check",
-		"check:lint": "vp lint . --type-aware",
+		"check:lint": "vp lint .",
+		"check:lint:types": "vp lint . --type-aware --tsconfig tsconfig.json",
+		"check:types": "tsc --noEmit -p tsconfig.json",
 		"fix:format": "vp fmt . --write",
-		"fix:lint": "vp lint . --type-aware --fix",
+		"fix:lint": "vp lint . --fix",
+		"fix:lint:types": "vp lint . --type-aware --tsconfig tsconfig.json --fix",
+		"fix:lint:types:unsafe": "vp lint . --type-aware --tsconfig tsconfig.json --fix --fix-suggestions --fix-dangerously",
+		"fix:lint:unsafe": "vp lint . --fix --fix-suggestions --fix-dangerously",
 		"generate:component": "tsx scripts/generate.ts component",
 		"generate:primitive": "tsx scripts/generate.ts primitive",
 		"test": "vp test run"

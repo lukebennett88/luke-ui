@@ -202,7 +202,7 @@ async function main(command: VisualLocalCommand) {
 					'No visual baseline found under .artifacts/visual-regression/baseline.',
 					'Capture one first (on main, or after a rendering-environment change):',
 					'',
-					'  pnpm run test:visual:docker:capture',
+					'  pnpm run test:visual:capture',
 				].join('\n'),
 			);
 		}

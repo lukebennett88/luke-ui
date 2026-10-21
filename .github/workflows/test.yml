@@ -42,19 +42,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --no-runtime
 
-      # Chromium install and package build are independent after pnpm install.
-      - parallel:
-          - name: Install Playwright Chromium
-            run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
-
-          - name: Build package
-            run: pnpm build:packages
+      - name: Install Playwright Chromium
+        run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
       - name: Run component tests
-        run: pnpm --filter @luke-ui/react run test
+        run: pnpm exec turbo run test --filter=@luke-ui/react
 
       - name: Run theme build integration tests
-        run: pnpm --filter @luke-ui/theme-build run test:integration
+        run: pnpm exec turbo run test:integration --filter=@luke-ui/theme-build
+
+      - name: Run package tests
+        run:
+          pnpm exec turbo run test --filter=@luke-ui/playground-core
+          --filter=@luke-ui/rainbow-sprinkles
 
   consumer-tests:
     name: consumer-tests
@@ -76,15 +76,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --no-runtime
 
-      - parallel:
-          - name: Install Playwright Chromium
-            run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
-
-          - name: Build package
-            run: pnpm build:packages
+      - name: Install Playwright Chromium
+        run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
       - name: Run consumer tests
-        run: pnpm --filter @luke-ui/react run test:consumer:run
+        run: pnpm test:consumer
         env:
           LUKE_UI_REACT_SPEC: ${{ inputs.react-spec }}
 
@@ -108,21 +104,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --no-runtime
 
-      - parallel:
-          - name: Install Playwright Chromium
-            run: pnpm --filter docs exec playwright install --with-deps chromium
-
-          - name: Build package
-            run: pnpm build:packages
-
-      - name: Generate docs app files
-        run: pnpm --filter docs run generate
+      - name: Install Playwright Chromium
+        run: pnpm --filter docs exec playwright install --with-deps chromium
 
       - name: Run docs tests
-        run: pnpm --filter docs run test
+        run: pnpm exec turbo run test --filter=docs
 
       - name: Upload docs test failure screenshots
         if: failure()
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: docs-test-failure-screenshots
@@ -153,4 +143,4 @@ jobs:
         run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
       - name: Run reference app tests
-        run: TURBO_FORCE=true pnpm exec turbo run test --filter=reference-app
+        run: pnpm exec turbo run test --filter=reference-app

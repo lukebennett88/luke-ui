@@ -23,14 +23,18 @@ with autocomplete and type errors. Prop tables come from public TypeScript and J
 
 ```sh
 pnpm install
-pnpm dev
+pnpm dev:docs
 ```
 
 Useful repo commands:
 
 - `pnpm run check`: barrels, format, lint, types, docs, cycles, and unused code.
 - `pnpm run build`: build all packages and apps.
-- `pnpm run test`: run tests.
+- `pnpm run test`: run the repository test suites.
+- `pnpm run dev:reference-app`: develop the consumer reference app.
+
+See [Workflows](docs/WORKFLOWS.md) for focused commands, generation, fixing, cleaning, and task
+orchestration.
 
 ## Stack
 
@@ -53,6 +57,7 @@ Useful repo commands:
 - [Styling](docs/STYLING.md): cascade layers, recipes, and styling utilities.
 - [Testing](docs/TESTING.md): test type, placement, and writing rules.
 - [Visual testing](docs/VISUAL_TESTING.md): visual regression workflow.
+- [Workflows](docs/WORKFLOWS.md): commands, prerequisites, task orchestration, and CI.
 
 ## Contributing
 

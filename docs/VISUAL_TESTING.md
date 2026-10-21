@@ -39,10 +39,10 @@ Host Chromium (quick iteration, may differ from CI):
 ```sh
 VISUAL_CAPTURE_DIR=.artifacts/visual-regression/baseline \
   pnpm --filter @luke-ui/react run test:visual:capture
-pnpm run test:visual
+pnpm run test:visual:host
 ```
 
-Run the first command on `main`. `test:visual` writes expected, actual, and diff PNGs plus
+Run the first command on `main`. `test:visual:host` writes expected, actual, and diff PNGs plus
 `summary.json` to `.artifacts/visual-regression`. Set `VISUAL_BASELINE_DIR` for another baseline.
 
 CI-parity Docker (same image and `linux/amd64` as the workflows). Needs Docker. On Apple Silicon
@@ -50,14 +50,14 @@ that uses emulation. The CLI copies the tree into the container without `node_mo
 there, and bind-mounts only `.artifacts/visual-regression`, so the host install stays untouched.
 
 ```sh
-pnpm run test:visual:docker:capture
-pnpm run test:visual:docker
+pnpm run test:visual:capture
+pnpm run test:visual
 ```
 
-`test:visual:docker:capture` writes baseline screenshots. Use it on `main`, or when deliberately
-replacing the baseline after a rendering-environment change. `test:visual:docker` captures current
-screenshots and compares them to the existing baseline without modifying it. Bump
-`PLAYWRIGHT_VISUAL_IMAGE` and the two workflow `image:` lines together when Playwright moves.
+`test:visual:capture` writes baseline screenshots. Use it on `main`, or when deliberately replacing
+the baseline after a rendering-environment change. `test:visual` captures current screenshots and
+compares them to the existing baseline without modifying it. Bump `PLAYWRIGHT_VISUAL_IMAGE` and the
+two workflow `image:` lines together when Playwright moves.
 
 ## Review
 
