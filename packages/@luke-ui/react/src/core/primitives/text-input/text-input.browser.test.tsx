@@ -283,6 +283,37 @@ test('a disabled TextInput that is not filled keeps a consumer text colour', () 
 	}
 });
 
+// A password manager's fill leaves `color` alone, unlike browser autofill, which forces it.
+for (const disabled of [false, true]) {
+	test(`a${disabled ? ' disabled' : ''} TextInput in a control keeps a consumer text colour when a password manager fills it`, async () => {
+		const sheet = document.createElement('style');
+		sheet.textContent = '.consumer-colour { color: rgb(4, 5, 6); }';
+		document.head.append(sheet);
+		try {
+			render(
+				<>
+					<TextInputControl>
+						<TextInput aria-label="Class colour" className="consumer-colour" disabled={disabled} />
+					</TextInputControl>
+					<TextInputControl>
+						<TextInput
+							aria-label="Style colour"
+							disabled={disabled}
+							style={{ color: 'rgb(1, 2, 3)' }}
+						/>
+					</TextInputControl>
+				</>,
+			);
+			await fillInputs([input('Class colour'), input('Style colour')], 'password-manager');
+
+			expect(getComputedStyle(input('Class colour')).webkitTextFillColor).toBe('rgb(4, 5, 6)');
+			expect(getComputedStyle(input('Style colour')).webkitTextFillColor).toBe('rgb(1, 2, 3)');
+		} finally {
+			sheet.remove();
+		}
+	});
+}
+
 test('a TextInput inside a TextInputRoot is wired to its label, description, and error with no manual ids', () => {
 	render(
 		<TextInputRoot isInvalid>

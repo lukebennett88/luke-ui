@@ -16,8 +16,10 @@ import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import {
-	filledDisabledInputSelector,
-	filledDisabledInputStyle,
+	autofilledDisabledInputSelector,
+	autofilledDisabledInputStyle,
+	autofilledInputSelector,
+	autofilledInputStyle,
 	filledInputSelectors,
 	filledInputStyle,
 } from '../text-input/styles.css.js';
@@ -204,7 +206,8 @@ const comboboxConfig = {
 				'&::placeholder': { color: vars.color.text.secondary, opacity: 1 },
 				// Same contract as a text input: an external fill must not paint over the control.
 				[`&:where(${filledInputSelectors})`]: filledInputStyle,
-				[`&${filledDisabledInputSelector}`]: filledDisabledInputStyle,
+				[`&${autofilledInputSelector}`]: autofilledInputStyle,
+				[`&${autofilledDisabledInputSelector}`]: autofilledDisabledInputStyle,
 				'&:where([data-disabled="true"], :disabled)': {
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',

@@ -149,6 +149,46 @@ test('a disabled ComboboxInput that is not filled keeps a consumer text colour',
 	}
 });
 
+// A password manager's fill leaves `color` alone, unlike browser autofill, which forces it.
+for (const disabled of [false, true]) {
+	test(`a${disabled ? ' disabled' : ''} ComboboxInput keeps a consumer text colour when a password manager fills it`, async () => {
+		const sheet = document.createElement('style');
+		sheet.textContent = '.consumer-colour { color: rgb(4, 5, 6); }';
+		document.head.append(sheet);
+		try {
+			render(
+				<>
+					<ComboboxRoot defaultItems={items} isDisabled={disabled}>
+						<Field label="Class colour">
+							<ComboboxControl>
+								<ComboboxInput className="consumer-colour" />
+							</ComboboxControl>
+						</Field>
+					</ComboboxRoot>
+					<ComboboxRoot defaultItems={items} isDisabled={disabled}>
+						<Field label="Style colour">
+							<ComboboxControl>
+								<ComboboxInput style={{ color: 'rgb(1, 2, 3)' }} />
+							</ComboboxControl>
+						</Field>
+					</ComboboxRoot>
+				</>,
+			);
+			const combobox = (name: string) => {
+				const element = page.getByRole('combobox', { name }).element();
+				if (!(element instanceof HTMLInputElement)) throw new Error('Expected an input.');
+				return element;
+			};
+			await fillInputs([combobox('Class colour'), combobox('Style colour')], 'password-manager');
+
+			expect(getComputedStyle(combobox('Class colour')).webkitTextFillColor).toBe('rgb(4, 5, 6)');
+			expect(getComputedStyle(combobox('Style colour')).webkitTextFillColor).toBe('rgb(1, 2, 3)');
+		} finally {
+			sheet.remove();
+		}
+	});
+}
+
 test('ComboboxControl forwards a callback ref to its group and clears it on unmount', () => {
 	const ref = vi.fn<(element: HTMLDivElement | null) => void>();
 	const { unmount } = render(<PopoverCombobox controlRef={ref} />);

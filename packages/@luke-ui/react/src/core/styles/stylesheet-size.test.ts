@@ -2,7 +2,7 @@ import { gzipSync } from 'node:zlib';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 
-// Measured at 13542 gzip bytes (level 9), including the autofill and password-manager fill
+// Measured at 13541 gzip bytes (level 9), including the autofill and password-manager fill
 // treatments. The ceiling keeps about 200 bytes of headroom. If this fails, investigate what grew;
 // don't raise the ceiling without a reason.
 const maximumGzipBytes = 13_740;
