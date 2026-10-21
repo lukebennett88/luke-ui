@@ -352,6 +352,10 @@ test('keeps the active result within the visible list after scrolling down', asy
 
 	const first = page.getByRole('menuitem').nth(0).element();
 	await expectActiveDescendant(input, list, first.id);
+	// Item heights set the scroll positions asserted below. Wait for the
+	// webfont to finish loading so a late swap cannot grow the items above
+	// the active result after it has been scrolled into view.
+	await document.fonts.ready;
 
 	const tenthBeforeNav = page.getByRole('menuitem').nth(10).element();
 	expect(isResultWithinList(tenthBeforeNav, list)).toBe(false);
@@ -390,6 +394,8 @@ test('wraps keyboard navigation from the first result to the last and back', asy
 
 	const first = page.getByRole('menuitem').nth(0).element();
 	await expectActiveDescendant(input, list, first.id);
+	// See the scrolling test above: scroll assertions need final item heights.
+	await document.fonts.ready;
 
 	await userEvent.keyboard('{ArrowUp}');
 	const last = page
