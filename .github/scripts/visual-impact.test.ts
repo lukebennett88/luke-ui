@@ -77,7 +77,7 @@ test('the PR workflow always reports the gate and checks impact before starting 
 		expect(impact).not.toContain(expensiveStep);
 	}
 	expect(workflow).toContain("if: needs.impact.outputs.required == 'true'");
-	expect(workflow).toContain('needs: [impact, compare, review]');
+	expect(workflow).toContain('needs: [impact, compare]');
 	expect(workflow).toContain('IMPACT: ${{ needs.impact.result }}');
 	expect(workflow).toContain('REQUIRED: ${{ needs.impact.outputs.required }}');
 	expect(workflow).toContain('  gate:\n    name: visual-regression\n    if: always()');

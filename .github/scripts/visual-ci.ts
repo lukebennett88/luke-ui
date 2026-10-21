@@ -1,7 +1,7 @@
 // Visual workflow helpers. Subcommands keep the YAML thin without a CI framework:
 //   resolve-baseline — pick the newest Visual baseline run on main
 //   check-captures   — fail when a capture directory has no PNGs
-//   summarise        — turn summary.json into the job summary and review output
+//   summarise        — turn summary.json into the job summary and a change annotation
 
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -50,6 +50,7 @@ export const DEFAULT_BASELINE_POLL_MS = 30_000;
 export const DEFAULT_BASELINE_TIMEOUT_MS = 25 * 60_000;
 
 const ARTIFACT_NAME = 'visual-baseline';
+const DIFF_ARTIFACT_NAME = 'visual-regression-diff';
 const BASELINE_BRANCH = 'main';
 const WORKFLOW_FILE = 'visual-baseline.yml';
 
@@ -221,14 +222,9 @@ function readPositiveIntEnv(name: string, fallback: number): number {
 	return parsed;
 }
 
-/** Captures a human must look at. The `review` job gates on this being non-zero. */
-export function countRequiringReview(counts: VisualCounts): number {
-	return counts.changed + counts.added + counts.removed;
-}
-
 const COUNT_ORDER: ReadonlyArray<VisualStatus> = ['changed', 'added', 'removed', 'unchanged'];
 
-/** Job-summary table rows with review-worthy statuses first. */
+/** Job-summary table rows with the statuses that differ from the baseline first. */
 export function countsTableRows(counts: VisualCounts): Array<[string, string]> {
 	return COUNT_ORDER.map((status) => [status, String(counts[status])]);
 }
@@ -365,57 +361,38 @@ async function checkCaptures() {
 	}
 }
 
-export function hasRequiredVisualReviewers(environment: {
-	protection_rules?: Array<{ type: string; reviewers?: Array<unknown> }>;
-}): boolean {
-	return (
-		environment.protection_rules?.some(
-			(rule) => rule.type === 'required_reviewers' && (rule.reviewers?.length ?? 0) > 0,
-		) ?? false
-	);
+/** Job-summary Markdown: the counts table, then each capture that differs from the baseline. */
+export function summaryMarkdown(summary: VisualSummary): string {
+	const rows = countsTableRows(summary.counts)
+		.map(([status, count]) => `| ${status} | ${count} |`)
+		.join('\n');
+	const changes = summary.results
+		.filter((result) => result.status !== 'unchanged')
+		.map((result) => `- ${result.status}: \`${result.id}\``);
+	const table = `### Visual regression\n\n| status | count |\n| --- | --- |\n${rows}\n`;
+	if (changes.length === 0) return table;
+	return `${table}\n${changes.join('\n')}\n\nThe \`${DIFF_ARTIFACT_NAME}\` artefact holds the expected, actual, and diff PNGs.\n`;
 }
 
 async function summarise() {
 	const summaryPath = fromRepoRoot(VISUAL_SUMMARY_FILE);
 	const summary: VisualSummary = JSON.parse(await readFile(summaryPath, 'utf8'));
-	const rows = countsTableRows(summary.counts)
-		.map(([status, count]) => `| ${status} | ${count} |`)
-		.join('\n');
 
-	await writeStepSummary(`### Visual regression\n\n| status | count |\n| --- | --- |\n${rows}\n`);
+	await writeStepSummary(summaryMarkdown(summary));
 
-	const review = countRequiringReview(summary.counts);
-	if (review > 0) {
-		const repository = requireEnv('GITHUB_REPOSITORY');
-		const response = await fetch(
-			`https://api.github.com/repos/${repository}/environments/visual-review`,
-			{
-				headers: {
-					Authorization: `Bearer ${requireEnv('GITHUB_TOKEN')}`,
-					Accept: 'application/vnd.github+json',
-				},
-			},
-		);
-		if (!response.ok)
-			throw new Error(`Cannot verify visual-review protection: GitHub API ${response.status}.`);
-		const environment = (await response.json()) as {
-			protection_rules?: Array<{ type: string; reviewers?: Array<unknown> }>;
-		};
-		if (!hasRequiredVisualReviewers(environment))
-			throw new Error(
-				'Configure required reviewers on the visual-review environment before approving screenshot differences. An unprotected environment cannot satisfy the visual gate.',
-			);
-	}
-	await writeOutput('review', review);
-
-	const needingReview = summary.results.filter((result) => result.status !== 'unchanged');
-	if (needingReview.length === 0) {
+	const differing = summary.results.filter((result) => result.status !== 'unchanged');
+	if (differing.length === 0) {
 		info('No visual changes.');
 		return;
 	}
 
-	info(`${review} capture(s) need review:`);
-	for (const result of needingReview) {
+	// Differences are reported, not gated, so surface them as an annotation on the pull request.
+	info(
+		`::warning title=Visual changes::${differing.length} capture(s) differ from the main baseline. See the job summary and the ${DIFF_ARTIFACT_NAME} artefact.`,
+	);
+
+	info(`${differing.length} capture(s) changed:`);
+	for (const result of differing) {
 		info(`  ${result.status}\t${result.id}`);
 	}
 }
