@@ -7,12 +7,11 @@ import { expect, test } from 'vite-plus/test';
 import type { BaselineRun, VisualCounts } from './visual-ci.js';
 import {
 	countPngs,
-	hasRequiredVisualReviewers,
-	countRequiringReview,
 	countsTableRows,
 	decideBaselineRun,
 	isBaselineRunWaitable,
 	isWorkflowMissingStatus,
+	summaryMarkdown,
 	waitForNewestBaseline,
 } from './visual-ci.js';
 
@@ -85,17 +84,35 @@ test('marks queued and in-progress baseline statuses as waitable', () => {
 	expect(isBaselineRunWaitable(null)).toBe(false);
 });
 
-test('counts every status that needs review and excludes unchanged', () => {
-	expect(countRequiringReview(counts({ added: 2, changed: 3, removed: 1, unchanged: 100 }))).toBe(
-		6,
-	);
+test('summarises an identical comparison as the counts table alone', () => {
+	const markdown = summaryMarkdown({
+		counts: counts({ unchanged: 2 }),
+		results: [
+			{ id: 'button/theme-matrix-paper-light', status: 'unchanged' },
+			{ id: 'button/theme-matrix-paper-dark', status: 'unchanged' },
+		],
+	});
+	expect(markdown).toContain('| unchanged | 2 |');
+	expect(markdown).not.toContain('button/theme-matrix');
+	expect(markdown).not.toContain('visual-regression-diff');
 });
 
-test('reports zero to review when everything is unchanged', () => {
-	expect(countRequiringReview(counts({ unchanged: 154 }))).toBe(0);
+test('lists each differing capture and points at the diff artefact', () => {
+	const markdown = summaryMarkdown({
+		counts: counts({ added: 1, changed: 1, unchanged: 1 }),
+		results: [
+			{ id: 'theme/token-board-paper-light', status: 'changed' },
+			{ id: 'button/theme-matrix-paper-light', status: 'unchanged' },
+			{ id: 'card/theme-matrix-paper-light', status: 'added' },
+		],
+	});
+	expect(markdown).toContain('- changed: `theme/token-board-paper-light`');
+	expect(markdown).toContain('- added: `card/theme-matrix-paper-light`');
+	expect(markdown).not.toContain('button/theme-matrix-paper-light');
+	expect(markdown).toContain('`visual-regression-diff` artefact');
 });
 
-test('renders the counts table with the review-worthy statuses first', () => {
+test('renders the counts table with the differing statuses first', () => {
 	expect(countsTableRows(counts({ added: 1, changed: 2, removed: 3, unchanged: 4 }))).toEqual([
 		['changed', '2'],
 		['added', '1'],
@@ -286,13 +303,7 @@ test('keeps the original timeout bound when a newer waitable run appears mid-wai
 	expect(clock.sleepCalls).toEqual([5_000, 5_000, 2_000]);
 });
 
-function visualGatePasses(options: {
-	impact: string;
-	required: string;
-	compare: string;
-	review: string;
-	changes: string;
-}): boolean {
+function visualGatePasses(options: { impact: string; required: string; compare: string }): boolean {
 	try {
 		execFileSync('bash', [fileURLToPath(new URL('./visual-gate.sh', import.meta.url))], {
 			env: {
@@ -300,8 +311,6 @@ function visualGatePasses(options: {
 				IMPACT: options.impact,
 				REQUIRED: options.required,
 				COMPARE: options.compare,
-				REVIEW: options.review,
-				CHANGES: options.changes,
 			},
 			stdio: 'pipe',
 		});
@@ -311,28 +320,20 @@ function visualGatePasses(options: {
 	}
 }
 
-const completedGate = {
-	impact: 'success',
-	required: 'true',
-	compare: 'success',
-	review: 'skipped',
-	changes: '0',
-};
-test('an identical completed comparison passes the gate without review', () => {
+const completedGate = { impact: 'success', required: 'true', compare: 'success' };
+
+test('a completed comparison passes the gate whatever it found', () => {
 	expect(visualGatePasses(completedGate)).toBe(true);
-	expect(visualGatePasses({ ...completedGate, changes: '2', review: 'success' })).toBe(true);
 });
 
-test('a proven unrelated change passes only when comparison and review were skipped', () => {
-	const unrelated = { ...completedGate, required: 'false', compare: 'skipped', changes: '' };
+test('a proven unrelated change passes only when comparison was skipped', () => {
+	const unrelated = { ...completedGate, required: 'false', compare: 'skipped' };
 	expect(visualGatePasses(unrelated)).toBe(true);
-	expect(visualGatePasses({ ...unrelated, changes: '2' })).toBe(false);
 	for (const impact of ['failure', 'cancelled', 'skipped', '']) {
 		expect(visualGatePasses({ ...unrelated, impact })).toBe(false);
 	}
 	for (const result of ['success', 'failure', 'cancelled', '']) {
 		expect(visualGatePasses({ ...unrelated, compare: result })).toBe(false);
-		expect(visualGatePasses({ ...unrelated, review: result })).toBe(false);
 	}
 });
 
@@ -346,34 +347,9 @@ for (const failure of [
 	{ compare: 'failure' },
 	{ compare: 'skipped' },
 	{ compare: 'cancelled' },
-	{ changes: '' },
-	{ changes: '-1' },
-	{ changes: 'NaN' },
-	{ review: 'failure' },
-	{ review: 'cancelled' },
-	{ review: '' },
-	{ changes: '2', review: 'skipped' },
-	{ changes: '2', review: 'failure' },
-	{ changes: '2', review: 'cancelled' },
-	{ changes: '2', review: '' },
+	{ compare: '' },
 ]) {
 	test(`rejects incomplete gate prerequisites ${JSON.stringify(failure)}`, () => {
 		expect(visualGatePasses({ ...completedGate, ...failure })).toBe(false);
 	});
 }
-
-test('visual review requires configured human reviewers', () => {
-	expect(hasRequiredVisualReviewers({})).toBe(false);
-	expect(hasRequiredVisualReviewers({ protection_rules: [] })).toBe(false);
-	expect(hasRequiredVisualReviewers({ protection_rules: [{ type: 'wait_timer' }] })).toBe(false);
-	expect(
-		hasRequiredVisualReviewers({
-			protection_rules: [{ type: 'required_reviewers', reviewers: [] }],
-		}),
-	).toBe(false);
-	expect(
-		hasRequiredVisualReviewers({
-			protection_rules: [{ type: 'required_reviewers', reviewers: [{ id: 1 }] }],
-		}),
-	).toBe(true);
-});

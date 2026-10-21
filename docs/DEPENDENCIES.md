@@ -100,9 +100,10 @@ Only `type definitions` automerges: non-major `@types/*` updates, excluding `@ty
 `@types/react-dom`, which have to land with the `react` major they describe. Type packages ship
 nothing to consumers, and a bad bump fails `check:types`.
 
-Everything else is merged by hand. Two reasons. Visual regression gates on a manual approval
-environment, so a change to rendered output should be looked at. And a share of pull requests need
-an exclude list entry before they will install, which no amount of green CI will produce.
+Everything else is merged by hand. Two reasons. Visual regression reports screenshot differences
+without failing, so someone has to look at a change to rendered output before it merges. And a share
+of pull requests need an exclude list entry before they will install, which no amount of green CI
+will produce.
 
 ## Tooling versions
 
