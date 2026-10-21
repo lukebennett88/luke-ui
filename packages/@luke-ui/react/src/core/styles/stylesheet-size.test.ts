@@ -2,7 +2,7 @@ import { gzipSync } from 'node:zlib';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 
-// Measured at 14412 gzip bytes (level 9), including shared Prose element treatments and Box's
+// Measured at 14449 gzip bytes (level 9), including shared Prose element treatments and Box's
 // paired background classes for every resting background and responsive condition. The ceiling
 // keeps about 200 bytes of headroom. If this fails, investigate what grew; don't raise the ceiling
 // without a reason.

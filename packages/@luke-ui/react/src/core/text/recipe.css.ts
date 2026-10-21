@@ -6,6 +6,7 @@ import { typeStyles } from '../../theme/type-styles.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
+import { contextualForeground } from '../styles/surface.js';
 import { typeStyleFontDeclarations, typeStyleTrimVars } from './type-style-declarations.js';
 
 /** Marks every element `textRecipe` styles, so the margin rule below can match it. */
@@ -46,14 +47,18 @@ const lineClampVariants = {
 	5: lineClampMultiLine(5),
 } as const;
 
+// Each colour reads the nearest recognised surface, so `primary` resets to that surface's primary
+// and a semantic role keeps its hue on a standard surface or subtle fill but reads on-solid primary
+// on a solid fill. With no `color`, Text sets none and inherits.
 const colorVariants = {
-	accent: { color: vars.color.foreground.accent.rest },
-	danger: { color: vars.color.foreground.danger.rest },
-	info: { color: vars.color.foreground.info.rest },
-	primary: { color: vars.color.text.primary },
-	secondary: { color: vars.color.text.secondary },
-	success: { color: vars.color.foreground.success.rest },
-	warning: { color: vars.color.foreground.warning.rest },
+	accent: { color: contextualForeground('accent') },
+	danger: { color: contextualForeground('danger') },
+	info: { color: contextualForeground('info') },
+	neutral: { color: contextualForeground('neutral') },
+	primary: { color: contextualForeground('primary') },
+	secondary: { color: contextualForeground('secondary') },
+	success: { color: contextualForeground('success') },
+	warning: { color: contextualForeground('warning') },
 } as const;
 
 const weightVariants = {
@@ -141,7 +146,6 @@ export const textRecipe = recipe({
 	base: [
 		textElementClassName,
 		{
-			color: vars.color.text.primary,
 			fontFamily: vars.font.family.body,
 			// `Text` renders untransformed text with the font's default numerals unless asked otherwise.
 			// These sit in the base rather than in a default variant so `shouldInheritFont` can override
@@ -193,7 +197,6 @@ export const textRecipe = recipe({
 		shouldInheritFont: {
 			false: {},
 			true: {
-				color: 'inherit',
 				fontFamily: 'inherit',
 				fontSize: 'inherit',
 				fontStyle: 'inherit',

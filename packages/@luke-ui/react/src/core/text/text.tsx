@@ -11,8 +11,8 @@ import { textRecipe } from './recipe.css.js';
 
 interface TextStyleProps {
 	/**
-	 * Sets text colour.
-	 * @default 'primary'
+	 * Sets text colour from the nearest Luke UI background. On a solid background, every semantic
+	 * role reads as that background's primary colour. Omit it to inherit the surrounding colour.
 	 */
 	color?: TextRecipeVariants['color'];
 	/**
@@ -43,7 +43,7 @@ interface TextStyleProps {
 	 */
 	shouldDisableTrim?: TextRecipeVariants['shouldDisableTrim'];
 	/**
-	 * Makes text inherit its surrounding font and colour styles.
+	 * Makes text inherit its surrounding font styles. Colour always inherits unless `color` is set.
 	 * @default false
 	 */
 	shouldInheritFont?: TextRecipeVariants['shouldInheritFont'];

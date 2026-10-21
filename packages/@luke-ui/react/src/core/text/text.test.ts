@@ -51,3 +51,24 @@ test('inline typography takes no slot', () => {
 	// @ts-expect-error — inline typography never fills a React Aria text slot
 	assertType<StrongProps>({ slot: 'description' });
 });
+
+test('Text colour offers the contextual hierarchy and semantic roles only', () => {
+	for (const color of [
+		'primary',
+		'secondary',
+		'neutral',
+		'accent',
+		'info',
+		'success',
+		'warning',
+		'danger',
+	] as const) {
+		assertType<TextProps>({ color });
+	}
+	// @ts-expect-error — disabled is component-owned state, not a Text colour
+	assertType<TextProps>({ color: 'disabled' });
+	// @ts-expect-error — interaction states stay recipe tokens
+	assertType<TextProps>({ color: 'accent.hover' });
+	// @ts-expect-error — on-solid is chosen by the surface, not by Text
+	assertType<TextProps>({ color: 'onSolid' });
+});
