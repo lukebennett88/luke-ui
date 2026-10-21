@@ -24,9 +24,12 @@ export const textInputInputPaddingInline = `calc(${textInputInlinePadding} - ${f
 export const filledInputSelectors = ':autofill, :-webkit-autofill, [data-com-onepassword-filled]';
 
 /**
- * An externally filled input. The fill's `!important` background can't be overridden, so it is
- * clipped to the text, where the opaque text fill covers it. The fill also sets `color`, so the
- * text fill restores ours. Borders, shadows, and state styles are left alone.
+ * An externally filled input inside a control, which draws the field itself. The fill's
+ * `!important` background can't be overridden, so it is clipped to the text, where the opaque text
+ * fill covers it. The fill also sets `color`, so the text fill restores ours.
+ *
+ * A standalone input draws its own field with its background, so it keeps the fill instead,
+ * inside its own rounded border.
  */
 export const filledInputStyle = {
 	'@media': {
@@ -77,8 +80,6 @@ export const textInputInputBase = {
 			color: vars.color.text.secondary,
 			opacity: 1,
 		},
-		[`&:where(${filledInputSelectors})`]: filledInputStyle,
-		[`&${filledDisabledInputSelector}`]: filledDisabledInputStyle,
 		'&:where([data-disabled="true"], :disabled)': {
 			color: vars.color.text.disabled,
 			cursor: 'not-allowed',
@@ -254,6 +255,7 @@ export const textInputInControlClassName = style(
 
 		selectors: {
 			...textInputInputBase.selectors,
+			[`&:where(${filledInputSelectors})`]: filledInputStyle,
 			// Forced colours show a disabled input's text in FieldText inside a control, not the
 			// GrayText of a standalone input, so the filled text follows its current colour.
 			[`&${filledDisabledInputSelector}`]: {

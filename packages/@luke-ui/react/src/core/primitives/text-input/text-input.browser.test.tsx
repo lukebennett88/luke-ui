@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import {
@@ -18,7 +19,7 @@ import { useState } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import type { Locator } from 'vite-plus/test/context';
-import { expectFillPreservesControls, fillAsPasswordManager } from '../../test-utils/autofill.js';
+import { expectRenderUnchanged, fillInputs, renderedPixels } from '../../test-utils/autofill.js';
 import { expectNoAxeViolations } from '../../test-utils/axe.js';
 import { getDescribedText } from '../../test-utils/get-described-text.js';
 import { render, visualAppearances } from '../../test-utils/render.js';
@@ -150,82 +151,116 @@ test('a focused invalid TextInput keeps its size and text position in forced col
 	}
 });
 
-function FilledTextInputScene() {
+/** Filled inputs, standalone and in controls, on a surface that contrasts with the field. */
+function FilledScene({ value }: { value?: string }) {
 	return (
-		<Stack>
-			{(['small', 'medium'] as const).map((size) => (
-				<Stack key={size}>
-					<TextInput aria-label={`${size} default`} defaultValue="Autofilled text" size={size} />
-					<TextInput
-						aria-invalid
-						aria-label={`${size} invalid`}
-						defaultValue="Autofilled text"
-						size={size}
-					/>
-					<TextInput
-						aria-label={`${size} read-only`}
-						defaultValue="Autofilled text"
-						readOnly
-						size={size}
-					/>
-					<TextInput
-						aria-invalid
-						aria-label={`${size} read-only invalid`}
-						defaultValue="Autofilled text"
-						readOnly
-						size={size}
-					/>
-					<TextInput
-						aria-label={`${size} disabled`}
-						defaultValue="Autofilled text"
-						disabled
-						size={size}
-					/>
-					<TextInputControl size={size}>
-						<TextInput aria-label={`${size} before suffix`} defaultValue="Autofilled text" />
-						<TextInputSuffix>USD</TextInputSuffix>
-					</TextInputControl>
-					<TextInputControl size={size}>
-						<TextInputPrefix>$</TextInputPrefix>
-						<TextInput aria-label={`${size} after prefix`} defaultValue="Autofilled text" />
-					</TextInputControl>
-					<TextInputControl size={size}>
-						<TextInput
-							aria-label={`${size} disabled control`}
-							defaultValue="Autofilled text"
-							disabled
-						/>
-					</TextInputControl>
-				</Stack>
-			))}
-		</Stack>
+		<Box backgroundColor="surface.subdued" padding="space.24">
+			<Stack>
+				<TextInput aria-label="Standalone" defaultValue={value} />
+				<TextInput aria-invalid aria-label="Standalone invalid" defaultValue={value} />
+				<TextInput aria-label="Standalone read-only" defaultValue={value} readOnly />
+				<TextInputControl>
+					<TextInput aria-label="Before suffix" defaultValue={value} />
+					<TextInputSuffix>USD</TextInputSuffix>
+				</TextInputControl>
+				<TextInputControl>
+					<TextInputPrefix>$</TextInputPrefix>
+					<TextInput aria-invalid aria-label="Invalid after prefix" defaultValue={value} />
+				</TextInputControl>
+				<TextInputControl size="small">
+					<TextInput aria-label="Small read-only" defaultValue={value} readOnly />
+				</TextInputControl>
+				<TextInputControl>
+					<TextInput aria-label="Disabled" defaultValue={value} disabled />
+				</TextInputControl>
+			</Stack>
+		</Box>
 	);
 }
 
-function textboxes(locator: Locator): Array<HTMLInputElement> {
+function textboxes(locator: Locator, filter: (field: HTMLInputElement) => boolean = () => true) {
 	return locator
 		.getByRole('textbox')
 		.elements()
 		.map((target) => {
 			if (!(target instanceof HTMLInputElement)) throw new Error('Expected an input.');
 			return target;
-		});
+		})
+		.filter(filter);
 }
 
+const inControl = (field: HTMLInputElement) => field.closest('[role="group"]') !== null;
+
+// The inputs are empty, so a fill clipped to the text paints nothing. Anything that changes is the
+// fill showing over the control.
 for (const source of ['password-manager', 'native'] as const) {
 	for (const forcedColors of ['none', 'active'] as const) {
-		test(`a TextInput filled by ${source} keeps the control and its text, forced colours ${forcedColors}`, async () => {
+		test(`a TextInput in a control filled by ${source} paints nothing over it, forced colours ${forcedColors}`, async () => {
 			await emulateForcedColors(forcedColors);
 			const restoreMotion = await freezeMotionForCapture();
 			try {
-				const { locator } = render(<FilledTextInputScene />);
-				await expectFillPreservesControls(locator.element(), textboxes(locator), source);
+				const { locator } = render(<FilledScene />);
+				await expectRenderUnchanged(locator.element(), () =>
+					fillInputs(textboxes(locator, inControl), source),
+				);
 			} finally {
 				await restoreMotion();
 				await emulateForcedColors('none');
 			}
 		});
 	}
+}
+
+for (const source of ['password-manager', 'native'] as const) {
+	test(`a TextInput in a control filled by ${source} keeps its text colour`, async () => {
+		const { locator } = render(<FilledScene />);
+		const inputs = textboxes(locator, inControl);
+		const textFill = () => inputs.map((field) => getComputedStyle(field).webkitTextFillColor);
+		const unfilled = textFill();
+		await fillInputs(inputs, source);
+
+		expect(textFill()).toEqual(unfilled);
+	});
+}
+
+// A standalone input draws its own field, so the fill shows there, but never as the surface behind.
+for (const source of ['password-manager', 'native'] as const) {
+	test(`a standalone TextInput filled by ${source} keeps a field apart from the surface`, async () => {
+		const { locator } = render(<FilledScene value="Autofilled text" />);
+		const found = locator.element().firstElementChild;
+		if (found === null) throw new Error('Expected the surface.');
+		const surface: Element = found;
+		const inputs = textboxes(locator, (field) => !inControl(field));
+
+		/** Each field's colour at its empty inline end, and the surface's colour beside it. */
+		async function fieldSurfaceSamples() {
+			const pixels = await renderedPixels(surface);
+			const box = surface.getBoundingClientRect();
+			const at = (x: number, y: number) => {
+				const offset =
+					(Math.round((y - box.top) * pixels.scale) * pixels.width +
+						Math.round((x - box.left) * pixels.scale)) *
+					4;
+				return Array.from(pixels.data.slice(offset, offset + 3));
+			};
+			return inputs.map((field) => {
+				const { right, top, height } = field.getBoundingClientRect();
+				const y = top + height / 2;
+				return { field: at(right - 6, y), surface: at(right + 12, y) };
+			});
+		}
+		const distance = (a: Array<number>, b: Array<number>) =>
+			Math.max(...a.map((channel, index) => Math.abs(channel - b[index]!)));
+
+		const before = await fieldSurfaceSamples();
+		await fillInputs(inputs, source);
+		const after = await fieldSurfaceSamples();
+
+		for (const [index, { field, surface: beside }] of after.entries()) {
+			expect(beside, 'surface beside the input').toEqual(before[index]!.surface);
+			expect(distance(field, beside), 'field against the surface').toBeGreaterThan(8);
+		}
+	});
 }
 
 test('a disabled TextInput that is not filled keeps a consumer text colour', () => {
@@ -743,8 +778,8 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 
 test('filled kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
-		const { locator } = render(<FilledTextInputScene />, { appearance });
-		fillAsPasswordManager(textboxes(locator), appearance.mode);
+		const { locator } = render(<FilledScene value="Autofilled text" />, { appearance });
+		await fillInputs(textboxes(locator), 'password-manager');
 		await captureVisualAppearance(locator, 'text-input/filled-kitchen-sink', appearance);
 	}
 });
@@ -753,8 +788,8 @@ test('filled forced-colors states', { tags: ['visual'] }, async () => {
 	await emulateForcedColors('active');
 
 	try {
-		const { locator } = render(<FilledTextInputScene />);
-		fillAsPasswordManager(textboxes(locator), 'light');
+		const { locator } = render(<FilledScene value="Autofilled text" />);
+		await fillInputs(textboxes(locator), 'password-manager');
 		await captureVisual(locator, 'text-input/filled-forced-colors-states');
 	} finally {
 		await emulateForcedColors('none');

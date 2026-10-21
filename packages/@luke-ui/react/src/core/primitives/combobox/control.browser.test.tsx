@@ -13,7 +13,7 @@ import { createRef } from 'react';
 import { expect, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import type { Locator } from 'vite-plus/test/context';
-import { expectFillPreservesControls } from '../../test-utils/autofill.js';
+import { expectRenderUnchanged, fillInputs } from '../../test-utils/autofill.js';
 import { render } from '../../test-utils/render.js';
 import { emulateForcedColors, freezeMotionForCapture, Stack } from '../../test-utils/visual.js';
 
@@ -53,7 +53,6 @@ function FilledComboboxScene() {
 					{(['default', 'invalid', 'read-only', 'disabled'] as const).map((state) => (
 						<ComboboxRoot
 							key={state}
-							defaultInputValue="Autofilled text"
 							defaultItems={items}
 							isDisabled={state === 'disabled'}
 							isInvalid={state === 'invalid'}
@@ -84,20 +83,36 @@ function comboboxInputs(locator: Locator): Array<HTMLInputElement> {
 		});
 }
 
+// The inputs are empty, so a fill clipped to the text paints nothing. Anything that changes is the
+// fill showing over the control.
 for (const source of ['password-manager', 'native'] as const) {
 	for (const forcedColors of ['none', 'active'] as const) {
-		test(`a ComboboxInput filled by ${source} keeps the control and its text, forced colours ${forcedColors}`, async () => {
+		test(`a ComboboxInput filled by ${source} paints nothing over its control, forced colours ${forcedColors}`, async () => {
 			await emulateForcedColors(forcedColors);
 			const restoreMotion = await freezeMotionForCapture();
 			try {
 				const { locator } = render(<FilledComboboxScene />);
-				await expectFillPreservesControls(locator.element(), comboboxInputs(locator), source);
+				await expectRenderUnchanged(locator.element(), () =>
+					fillInputs(comboboxInputs(locator), source),
+				);
 			} finally {
 				await restoreMotion();
 				await emulateForcedColors('none');
 			}
 		});
 	}
+}
+
+for (const source of ['password-manager', 'native'] as const) {
+	test(`a ComboboxInput filled by ${source} keeps its text colour`, async () => {
+		const { locator } = render(<FilledComboboxScene />);
+		const inputs = comboboxInputs(locator);
+		const textFill = () => inputs.map((field) => getComputedStyle(field).webkitTextFillColor);
+		const unfilled = textFill();
+		await fillInputs(inputs, source);
+
+		expect(textFill()).toEqual(unfilled);
+	});
 }
 
 test('a disabled ComboboxInput that is not filled keeps a consumer text colour', () => {
