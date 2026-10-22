@@ -102,6 +102,9 @@ proseStyle(plainLink, {
 	transitionTimingFunction: vars.motion.feedback.easing,
 	'@media': { '(forced-colors: active)': { color: 'LinkText', forcedColorAdjust: 'auto' } },
 });
+// The label weight lifts a link above body text. In text that is already heavier, the link keeps
+// that weight rather than turning lighter than the words around it.
+proseStyle(`:is(h1, h2, h3, h4, h5, h6, strong, b, th) ${plainLink}`, { fontWeight: 'inherit' });
 proseStyle(`${plainLink}:hover`, {
 	...linkAppearance.hover,
 	'@media': { '(forced-colors: active)': { color: 'LinkText' } },

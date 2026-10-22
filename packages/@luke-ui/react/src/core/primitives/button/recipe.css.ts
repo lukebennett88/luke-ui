@@ -190,8 +190,8 @@ type ButtonSurface = 'transparent' | 'subtle' | 'solid';
 /**
  * A button's fill in each interaction state, paired with its foreground context through
  * `surfaceStyle`. A transparent button paints nothing at rest, so it reads the surrounding context,
- * and its hover and pressed fills establish a subtle one. A critical tone keeps the danger hue on a subtle fill or
- * a surrounding surface, and reads on-solid primary on a solid one.
+ * and its hover and pressed fills establish a subtle one. A critical tone keeps the danger hue on a
+ * subtle fill or a surrounding surface, and reads on-solid primary on a solid one.
  */
 function buttonAppearance(
 	tone: Tone,

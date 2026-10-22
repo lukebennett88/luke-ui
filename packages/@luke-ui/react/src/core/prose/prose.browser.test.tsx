@@ -879,6 +879,32 @@ for (const appearance of visualAppearances) {
 	});
 }
 
+test('a native link in heavier text keeps that weight', () => {
+	const { locator } = render(
+		<Prose>
+			<h2>
+				Read <a href="#guide">the guide</a>
+			</h2>
+			<p>
+				<strong>
+					Read <a href="#notes">the notes</a>
+				</strong>
+			</p>
+		</Prose>,
+	);
+	const weights = ['the guide', 'the notes'].map((name) => {
+		const link = locator.getByRole('link', { name }).element();
+		return {
+			link: getComputedStyle(link).fontWeight,
+			name,
+			text: link.parentElement && getComputedStyle(link.parentElement).fontWeight,
+		};
+	});
+
+	expect(weights).toEqual(weights.map(({ name, text }) => ({ link: text, name, text })));
+	expect(weights.map(({ text }) => Number(text))).toEqual([600, 700]);
+});
+
 test('a native link stays underlined in LinkText in forced colours', async () => {
 	await emulateForcedColors('active');
 
