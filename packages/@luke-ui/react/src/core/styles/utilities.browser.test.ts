@@ -4,7 +4,7 @@ import { page } from 'vite-plus/test/context';
 import { mergeProps } from '../../shared/utils/merge-props.js';
 import { breakpoints } from '../../theme/breakpoints.js';
 import { fixtureThemeClassName } from '../test-utils/fixture-themes.js';
-import { createSprinkles } from './create-sprinkles.js';
+import { createSprinkles } from './utilities.css.js';
 
 const mounted: Array<HTMLElement> = [];
 
