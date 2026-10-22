@@ -119,7 +119,10 @@ not help. Silence in this log is not evidence.
   `pnpm exec turbo run test --filter=docs -- src/lib/remark-watch-type-table-sources.test.ts`
   reproduced two failures and three passes on unchanged base `fa51e2ac`, matching the full test run.
   Seen again: 2026-10-21 (#880). The same two failures and three passes reproduced on unchanged
-  `main` `b9e653f0` and in the #880 branch's full test run, where every other test passed.
+  `main` `b9e653f0` and in the #880 branch's full test run, where every other test passed. Seen
+  again: 2026-10-22 (#899 review fixes). Both watcher failures reproduced on unchanged `b693c949`
+  and in the task checkout. The focused docs run had 23 passes and two failures, both with
+  `undefined` at the same module-count assertion.
 - Where: `apps/docs/src/lib/remark-watch-type-table-sources.test.ts:444`,
   `expectTypeTableWatchLink`, called by the direct-source and imported-type MDX recompilation tests.
   `docs/TESTING.md` requires reporting test results; the work-on-issue workflow requires reproducing
