@@ -238,6 +238,10 @@ Build every recipe with the internal `recipe()` engine from `core/styles/recipe.
 public package entry. `recipe()` wraps every base, variant, and compound-variant style in the
 `recipes` layer.
 
+A public recipe that maps one of its values onto a different value of a shared recipe is a plain
+function in `recipe.ts` that calls the shared recipe. `linkRecipe` maps a text Link's public `text`
+appearance onto the shared action recipe's `link` appearance, so text Buttons keep their own.
+
 Pass optional `className` into the recipe. It appends after the recipe's own classes:
 
 ```tsx
