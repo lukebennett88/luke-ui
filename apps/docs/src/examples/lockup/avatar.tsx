@@ -10,7 +10,10 @@ export default () => {
 				<Box
 					backgroundColor="neutral.subtle"
 					blockSize="3rem"
+					borderColor="decorative"
 					borderRadius="full"
+					borderStyle="solid"
+					borderWidth="thin"
 					inlineSize="3rem"
 				/>
 			</LockupRail>

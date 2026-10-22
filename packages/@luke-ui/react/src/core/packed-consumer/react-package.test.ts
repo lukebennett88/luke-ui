@@ -184,6 +184,7 @@ for (const consumer of consumers) {
 				expect(markup).toContain('(required)');
 				// Form necessity context must cross published entrypoints so the marker is SSR'd.
 				expect(markup).toContain('(optional)');
+				expect(markup).toContain('Contextual text');
 
 				const server = await serveBuild(dir);
 				const browser = await chromium.launch();
@@ -230,6 +231,25 @@ for (const consumer of consumers) {
 								text: selectNameIds.map((id) => document.getElementById(id)?.textContent ?? null),
 								unresolved: selectNameIds.filter((id) => document.getElementById(id) == null),
 							},
+							contextualColors: (() => {
+								const fill = root?.querySelector('[data-testid="solid-fill"]');
+								const text = root?.querySelector('[data-testid="contextual-text"]');
+								if (fill == null || text == null) return null;
+								const probe = fill.appendChild(document.createElement('span'));
+								probe.style.backgroundColor = 'var(--luke-color-background-accent-solid-rest)';
+								probe.style.color = 'var(--luke-color-foreground-accent-on-solid-primary)';
+								const expected = getComputedStyle(probe);
+								const colors = {
+									expectedBackground: expected.backgroundColor,
+									expectedText: expected.color,
+									fillBackground: getComputedStyle(fill).backgroundColor,
+									text: getComputedStyle(text).color,
+								};
+								probe.style.color = 'var(--luke-color-foreground-danger-rest)';
+								const dangerHue = getComputedStyle(probe).color;
+								probe.remove();
+								return { ...colors, dangerHue };
+							})(),
 							textAfterHydration: root?.textContent,
 							serverText: serverSnapshot?.text,
 						};
@@ -244,6 +264,13 @@ for (const consumer of consumers) {
 					// Every server element must survive in place: none replaced, added, or removed.
 					expect(result.keptServerElements).toBe(true);
 					expect(result.textAfterHydration).toBe(result.serverText);
+					// The theme package and the React stylesheet pair a solid fill with its text after
+					// hydration: a danger Text reads the fill's on-solid primary, not the danger hue.
+					expect(result.contextualColors?.text).not.toBe(result.contextualColors?.dangerHue);
+					expect(result.contextualColors?.fillBackground).toBe(
+						result.contextualColors?.expectedBackground,
+					);
+					expect(result.contextualColors?.text).toBe(result.contextualColors?.expectedText);
 					// Each label resolves through server-generated ids, so it proves those ids hydrated intact.
 					// Normalise whitespace: the optional marker joins the label with a non-breaking space.
 					expect(

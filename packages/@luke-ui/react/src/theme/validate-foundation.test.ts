@@ -81,4 +81,39 @@ describe('buildTheme foundation validation', () => {
 			'dark.depth.resting: must be a non-empty CSS box-shadow value',
 		);
 	});
+
+	describe('label weight', () => {
+		function withWeights(fontWeight: { body?: number; label?: number }): ThemeFoundation {
+			return {
+				...tactileFoundation,
+				name: 'weights',
+				typography: { ...tactileFoundation.typography, fontWeight },
+			};
+		}
+
+		it('accepts a label exactly 100 heavier than body, and the defaults', () => {
+			expect(() => buildTheme(withWeights({ body: 300, label: 400 }))).not.toThrow();
+			expect(() => buildTheme(withWeights({}))).not.toThrow();
+		});
+
+		it('rejects a label 99 heavier than body', () => {
+			expect(() => buildTheme(withWeights({ body: 400, label: 499 }))).toThrow(
+				'typography.fontWeight.label: must be at least 100 heavier than typography.fontWeight.body (label is 499, body is 400)',
+			);
+		});
+
+		it('rejects a label equal to or lighter than body', () => {
+			expect(() => buildTheme(withWeights({ body: 500, label: 500 }))).toThrow(
+				'(label is 500, body is 500)',
+			);
+			expect(() => buildTheme(withWeights({ body: 600, label: 400 }))).toThrow(
+				'(label is 400, body is 600)',
+			);
+		});
+
+		it('checks against the default for an unset role', () => {
+			expect(() => buildTheme(withWeights({ body: 450 }))).toThrow('(label is 500, body is 450)');
+			expect(() => buildTheme(withWeights({ label: 450 }))).toThrow('(label is 450, body is 400)');
+		});
+	});
 });

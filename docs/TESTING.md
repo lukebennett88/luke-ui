@@ -62,6 +62,13 @@ Cascade contracts that need a real third-party stylesheet live beside `layer-ord
 `tailwind-integration` Vitest project so it can compile Tailwind without loading the default browser
 suite's global stylesheet.
 
+Browser tests render with the built `@luke-ui/react/stylesheet.css` from `dist`, but a test's own
+imports of `.css.ts` modules compile with debug identifiers. A `createVar` imported into a test
+therefore names a different custom property from the one the built stylesheet declares. When a test
+must read a private custom property, give it a stable name in source, as `core/styles/surface.ts`
+does for its `--luke-internal-foreground-*` overrides, and import helpers from a plain `.ts` module.
+A `.css.ts` module that exports a function fails to load in a browser test.
+
 ## Timing and synchronisation
 
 Almost never sleep in a test. Do not use `setTimeout`, a fixed `delay()`, or an arbitrary frame
@@ -97,15 +104,17 @@ durations, not `timeout`, `expect.poll`, or fake timers as such.
 
 Run axe with `expectNoAxeViolations` in component tests. Axe is a floor. Use behavioural assertions
 for accessibility contracts it cannot express. Gradients can produce an `incomplete` colour-contrast
-result.
+result. To check text over a gradient or a translucent layer, such as the control finish, measure
+the screenshot pixels behind it with `lowestRenderedTextContrast`.
 
 ## Visual regression
 
 Visual cases are `visual`-tagged browser tests. `render()` compiles React-owned copies of the
 Tactile and Paper inputs from `src/theme/__fixtures__/`. Those copies can diverge from the published
-theme packages. Capture each visually meaningful component in its representative fixture across
-Tactile light, Tactile dark, Paper light, and Paper dark. This is not an exhaustive state matrix.
-Add another capture only for a materially different state.
+theme packages, except in their solid fills, on-solid text, and control finish, which the
+packed-consumer harness requires to match. Capture each visually meaningful component in its
+representative fixture across Tactile light, Tactile dark, Paper light, and Paper dark. This is not
+an exhaustive state matrix. Add another capture only for a materially different state.
 
 `flatAppearances` renders Tactile's colours with every depth and control finish set to `none`. Use
 it, outside the theme matrix, for a capture that proves states stay distinct without materials.

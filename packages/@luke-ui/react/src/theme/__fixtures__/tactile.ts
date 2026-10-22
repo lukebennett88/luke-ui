@@ -3,12 +3,14 @@ import type { ThemeInput } from '../define-theme.js';
 
 /**
  * The visual-test copy of Tactile, the theme `@luke-ui/theme-tactile` publishes. The two inputs are
- * independent and may diverge. Tactile has a teal accent, a neutral near-white light canvas, lighter
- * chromatic dark surfaces, and a restrained material lit from above. Both modes are authored
- * explicitly, so `defineTheme` uses each side as written.
+ * independent and may diverge, except that the packed-consumer harness requires matching solid
+ * fills, on-solid text, and control finish. Tactile has a teal accent, a neutral near-white light
+ * canvas, lighter chromatic dark surfaces, and a restrained material lit from above. Both modes are
+ * authored explicitly, so `defineTheme` uses each side as written.
  */
 export const tactileTheme: ThemeInput = {
-	// A solid face is lighter at the top and slightly darker at the bottom. Pressed reverses it.
+	// A solid face is lighter at the top and slightly darker at the bottom. Pressed reverses it. The
+	// light highlights stay faint enough to keep on-solid text above 4.5:1 where they overlap it.
 	controlFinish: {
 		dark: {
 			raised:
@@ -21,11 +23,11 @@ export const tactileTheme: ThemeInput = {
 		},
 		light: {
 			raised:
-				'linear-gradient(to bottom, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0) 60%, ' +
+				'linear-gradient(to bottom, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0) 60%, ' +
 				'rgb(0 0 0 / 0.03))',
 			recessed: 'linear-gradient(to bottom, rgb(0 0 0 / 0.07), rgb(0 0 0 / 0) 55%)',
 			resting:
-				'linear-gradient(to bottom, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0) 60%, ' +
+				'linear-gradient(to bottom, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0) 60%, ' +
 				'rgb(0 0 0 / 0.05))',
 		},
 	},

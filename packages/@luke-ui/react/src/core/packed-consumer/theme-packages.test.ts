@@ -4,8 +4,11 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { fromFile } from '@capsizecss/unpack/fs';
 import { describe, expect, inject, test } from 'vite-plus/test';
+import { paperTheme } from '../../theme/__fixtures__/paper.js';
+import { tactileTheme } from '../../theme/__fixtures__/tactile.js';
 import { findTokenCompatibilityProblems } from '../../theme/__fixtures__/token-compatibility.js';
 import type { ThemeInput } from '../../theme/define-theme.js';
+import { defineTheme } from '../../theme/define-theme.js';
 import {
 	builtAssets,
 	importedPackages,
@@ -24,8 +27,34 @@ const NODE_24_OR_LATER_PATTERN = /^v(?:2[4-9]|[3-9]\d)\./;
 const THEME_INPUT_SOURCE_PATTERN = /^@luke-ui\/theme-[a-z]+\/dist\/input\.js$/;
 const FONT_ASSET_PATTERN = /^(.+)-[\w-]{8}\.woff2$/;
 const FONT_WEIGHT_RANGE_PATTERN = /font-weight:\s*(\d+)\s+(\d+);/;
+/** The declarations a solid control's text contrast depends on: its fill, its text, and its finish. */
+const SOLID_CONTROL_DECLARATION_PATTERN =
+	/--luke-(?:control-finish-\w+|color-background-\w+-solid-\w+|color-foreground-\w+-on-solid-\w+): [^;]+;/g;
+
+/**
+ * The React test fixtures render the browser suite, including its measurement of text over the
+ * control finish, so each must match the published theme wherever that measurement depends on it.
+ */
+const FIXTURE_INPUTS: Record<string, ThemeInput> = {
+	'@luke-ui/theme-paper': paperTheme,
+	'@luke-ui/theme-tactile': tactileTheme,
+};
 
 describe.skipIf(themes.length === 0)('the packed theme packages', () => {
+	const fixtureThemes = themes.flatMap((theme) => {
+		const input = FIXTURE_INPUTS[theme.manifest.name];
+		return input ? [{ contents: theme.contents, input, name: theme.manifest.name }] : [];
+	});
+	for (const { contents, input, name } of fixtureThemes) {
+		test(`${name} ships the solid fills, on-solid text, and control finish its test fixture renders`, () => {
+			const published = readFileSync(path.join(contents, 'dist', 'stylesheet.css'), 'utf8');
+			const rendered = solidControlDeclarations(defineTheme(input));
+
+			expect(rendered).not.toEqual([]);
+			expect(solidControlDeclarations(published)).toEqual(rendered);
+		});
+	}
+
 	for (const theme of themes) {
 		const { contents, files, manifest } = theme;
 
@@ -164,3 +193,7 @@ describe.skipIf(themes.length === 0)('the packed theme packages', () => {
 		});
 	}
 });
+
+function solidControlDeclarations(css: string): Array<string> {
+	return [...css.matchAll(SOLID_CONTROL_DECLARATION_PATTERN)].map(([declaration]) => declaration);
+}

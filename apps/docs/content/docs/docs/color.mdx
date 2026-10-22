@@ -109,12 +109,52 @@ Behind each role, the theme generator builds a numeric colour scale. It is not e
 has no public token. Use the semantic roles in your application, and use `defineTheme` with source
 colours to author a theme.
 
+## Text on a background
+
+A Luke UI background sets the text colour for everything inside it. A `Box` with `backgroundColor`
+is one. So are the surfaces components paint, such as a Button fill, a field, a popover, and a code
+chip. Each sets the text colour to its readable primary, which an `Icon` inside inherits, and tells
+`Text` and `Heading` inside it which colours are readable:
+
+| Background               | `primary` and `secondary`                     | A role, such as `color="danger"` |
+| ------------------------ | --------------------------------------------- | -------------------------------- |
+| A surface, `surface.*`   | `text.primary` and `text.secondary`           | The role's foreground            |
+| Any role's `subtle` fill | `text.primary` and `text.secondary`           | The role's foreground            |
+| A role's `solid` fill    | That role's `onSolid.primary` and `secondary` | That role's `onSolid.primary`    |
+
+A role keeps its hue on another role's subtle fill. The theme compiler checks every pairing in the
+table at 4.5:1 in both colour modes, and a theme that misses one does not compile. Pairings outside
+the table are not checked, such as disabled text and text on a background from your own CSS. A
+nested background sets a new context. A `Box` without `backgroundColor` keeps the surrounding one.
+An element with `data-color-mode` sets the context again in its own mode.
+
+`Box` takes each role's resting `subtle` and `solid` fill. Interactive components own the hover and
+pressed fills and pair them for you.
+
+### Custom surfaces
+
+To make a custom element a Luke UI background, set `backgroundColor` on a `Box` that also carries
+your class. Put both on the same element rather than wrapping one in the other.
+
+```tsx
+<Box backgroundColor="accent.solid" className={styles.card}>
+	<Heading>Example heading</Heading>
+	<Text>Inherits the fill's readable colour.</Text>
+</Box>
+```
+
+A background from your own CSS, such as `vars.color.background.accent.solid.rest`, sets no text
+colour and does not change which colours `Text` reads. Nor does an image, a gradient, a translucent
+colour, or CSS that overrides a `Box` background. Luke UI does not detect whether a background is
+dark. Set the text colour in the same CSS and check its contrast yourself.
+
 ## Disabled and loading states
 
 Use the component's disabled or loading API when it has one. Those states account for interaction
 and accessibility as well as colour. Disabled is a state, not a palette: interactive controls fade
-with reduced opacity, and only field text recolours, through the public `text.disabled` role. The
-public `loadingSkeleton` role is available when you build an equivalent custom element.
+with reduced opacity, and only field text recolours, through the public `text.disabled` role. On a
+solid fill, disabled field text uses the fill's `onSolid.secondary` instead. The public
+`loadingSkeleton` role is available when you build an equivalent custom element.
 
 ## Continue learning
 

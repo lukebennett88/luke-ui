@@ -267,8 +267,8 @@ for (const appearance of visualAppearances) {
 		expect(getComputedStyle(byTestId('secondary')).color).toBe(
 			resolvedColor(tokens.secondary, byTestId('secondary')),
 		);
-		// A semantic role on a solid background reads as its on-solid primary.
 		expect(byTestId('render-root').tagName).toBe('H4');
+		// A semantic role on a solid background reads as its on-solid primary.
 		expect(getComputedStyle(byTestId('render-root')).color).toBe(
 			resolvedColor(tokens.success, byTestId('render-root')),
 		);

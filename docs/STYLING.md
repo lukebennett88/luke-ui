@@ -435,10 +435,12 @@ inline `Code` does inside `pre`. The checkbox box pairs its fills so the check m
 primary. The switch track and thumb and the loading skeleton paint fills that hold no text, so they
 keep their own compiler-gated or placeholder colours.
 
-A role's colour can collapse to on-solid primary, so no component relies on hue alone. Text Links
-use the label font weight and belong inline with lighter surrounding text. Low prominence adds an
-underline on hover, focus, and press. Standard and high prominence stay underlined. A field error
-pairs its message with an icon and the field's invalid state and description.
+A role's colour can collapse to on-solid primary, so a state cue cannot be hue alone. Text Links use
+the label font weight and belong inline with lighter surrounding text. Low prominence adds an
+underline on hover, focus, and press. Standard and high prominence stay underlined. Hover and press
+thicken the underline, so the state change shows without colour. A field error pairs its message
+text with a leading icon that is hidden from assistive technology, so the error does not rely on the
+danger colour.
 
 `Box` applies the pairing from one utilities-layer class per resting background and responsive
 condition. Its values are the standard surfaces and each role's resting `subtle` and `solid` fill.

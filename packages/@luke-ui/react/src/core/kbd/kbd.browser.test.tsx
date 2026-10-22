@@ -3,6 +3,7 @@ import { Code } from '@luke-ui/react/code';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Text } from '@luke-ui/react/text';
 import { expect, test } from 'vite-plus/test';
+import { expectAxeContrastPasses } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { pairedColors, surfaceColors } from '../test-utils/surface-colors.js';
 
@@ -76,7 +77,7 @@ test('Kbd uses the body font family, not the code font used by Code', async () =
 });
 
 for (const appearance of visualAppearances) {
-	test(`Kbd establishes its own key-chip context on a solid fill in ${appearance.theme} ${appearance.mode}`, () => {
+	test(`Kbd establishes its own key-chip context on a solid fill in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { container } = render(
 			<Box backgroundColor="danger.solid" padding="space.8">
 				<Text>
@@ -88,5 +89,6 @@ for (const appearance of visualAppearances) {
 		const kbd = getKbdElement(container);
 
 		expect(surfaceColors(kbd)).toEqual(pairedColors(kbd, 'surface.subdued'));
+		await expectAxeContrastPasses(container);
 	});
 }

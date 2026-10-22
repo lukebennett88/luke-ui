@@ -75,7 +75,10 @@ declares `'Inter Variable'`. Until a font loads, text renders in the next font o
 [Typography](/docs/typography#fonts) for how that affects trims.
 
 `typography.fontWeight` sets the `body`, `label`, `heading`, and `emphasis` weights, which default
-to 400, 500, 600, and 700.
+to 400, 500, 600, and 700. Keep `label` at least 100 heavier than `body`. A low-prominence text Link
+has no underline at rest, and on a solid fill its colour matches the text around it, so the label
+weight is what shows it is a link. `defineTheme` throws when the resolved `label` weight is less
+than 100 above `body`, including a weight inherited from the theme you extend.
 
 ### Surfaces
 
@@ -182,6 +185,8 @@ The rules for fonts:
 - The other metrics must be finite numbers. `unitsPerEm`, `capHeight`, and `ascent` must be
   positive, `descent` 0 or less, and `lineGap` 0 or more.
 - Font weights must be numbers from 1 to 1000.
+- The resolved `label` weight must be at least 100 heavier than `body`. An omitted weight uses the
+  inherited value, then the default.
 
 ## Contrast validation
 
@@ -210,6 +215,10 @@ ratio, and required ratio for every failing pair. Validation uses the final roun
 into the sRGB gamut. Custom themes that previously compiled may fail the cross-role subtle checks.
 Adjust the authored sources or surfaces to satisfy every pairing. The compiler does not repair
 cross-role failures.
+
+Validation does not see `controlFinish`. A solid control paints its finish over the solid fill and
+under its `onSolid` text, so a highlight on a dark fill, or a shade on a light one, lowers the
+text's contrast. Keep each finish faint enough that the text still reaches 4.5:1 over it.
 
 Role borders, such as `color.border.accent`, and `color.border.decorative` never fail validation.
 Never rely on one alone to show a required state such as selected, invalid, or checked. Pair it with
