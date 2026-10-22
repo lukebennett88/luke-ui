@@ -113,7 +113,8 @@ function mapRoleColorValues(families: Record<FamilyRole, ScaleFamily>): {
 				pathEntry(`color.foreground.${role}.rest`, foreground.rest),
 				pathEntry(`color.foreground.${role}.hover`, foreground.hover),
 				pathEntry(`color.foreground.${role}.pressed`, foreground.pressed),
-				pathEntry(`color.foreground.${role}.onSolid`, formatOklch(family.contrast)),
+				pathEntry(`color.foreground.${role}.onSolid.primary`, formatOklch(family.contrast)),
+				pathEntry(`color.foreground.${role}.onSolid.secondary`, formatOklch(family.contrast)),
 				pathEntry(`color.border.${role}`, formatOklch(family[FAMILY_RUNG.border])),
 			];
 		}),

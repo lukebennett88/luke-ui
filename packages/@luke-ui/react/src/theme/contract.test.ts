@@ -66,7 +66,14 @@ describe('theme contract', () => {
 				leaf(`color.foreground.${role}.rest`, `--luke-color-foreground-${role}-rest`),
 				leaf(`color.foreground.${role}.hover`, `--luke-color-foreground-${role}-hover`),
 				leaf(`color.foreground.${role}.pressed`, `--luke-color-foreground-${role}-pressed`),
-				leaf(`color.foreground.${role}.onSolid`, `--luke-color-foreground-${role}-on-solid`),
+				leaf(
+					`color.foreground.${role}.onSolid.primary`,
+					`--luke-color-foreground-${role}-on-solid-primary`,
+				),
+				leaf(
+					`color.foreground.${role}.onSolid.secondary`,
+					`--luke-color-foreground-${role}-on-solid-secondary`,
+				),
 			);
 			return rows;
 		});
