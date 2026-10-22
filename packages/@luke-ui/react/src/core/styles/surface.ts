@@ -1,11 +1,16 @@
+import { createGlobalVar, fallbackVar } from '@vanilla-extract/css';
+import { typedEntries } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
-import type { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
+import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
-type InteractionState = 'rest' | 'hover' | 'pressed';
 
 /** The readable primary and secondary colours, and one readable colour per semantic role. */
 type ForegroundSlot = 'primary' | 'secondary' | SemanticRole;
+
+const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
+
+type InteractionState = (typeof INTERACTION_STATES)[number];
 
 /**
  * A recognised opaque background: a standard surface, or a role's subtle or solid fill in one of
@@ -13,15 +18,23 @@ type ForegroundSlot = 'primary' | 'secondary' | SemanticRole;
  */
 export type SurfaceBackground =
 	| `surface.${keyof typeof vars.color.surface}`
-	| `${SemanticRole}.${'subtle' | 'solid'}.${'rest' | 'hover' | 'pressed'}`;
+	| `${SemanticRole}.${'subtle' | 'solid'}.${InteractionState}`;
+
+type SurfaceStyle = {
+	backgroundColor: string;
+	color: string;
+	vars: Record<string, string>;
+};
 
 // The foreground a solid fill sets for its descendants. Standard surfaces and subtle fills use the
 // global neutral hierarchy and keep each role's resting hue, so they reset these overrides and every
-// read falls back to the theme token on the reading element. The names are stable, like the Capsize
-// trims, so tests that load the built stylesheet can read them.
-const primaryOverride = '--luke-internal-foreground-primary';
-const secondaryOverride = '--luke-internal-foreground-secondary';
-const toneOverride = '--luke-internal-foreground-tone';
+// read falls back to the theme token on the reading element. The names are global rather than
+// hashed, like the Capsize trims, so tests that load the built stylesheet can read them.
+const foregroundOverride = {
+	primary: createGlobalVar('luke-internal-foreground-primary'),
+	secondary: createGlobalVar('luke-internal-foreground-secondary'),
+	tone: createGlobalVar('luke-internal-foreground-tone'),
+};
 
 /**
  * The colour the nearest recognised surface establishes for `slot`. On a standard surface or any
@@ -36,9 +49,11 @@ export function contextualForeground(
 	slot: ForegroundSlot,
 	state: InteractionState = 'rest',
 ): string {
-	if (slot === 'primary') return `var(${primaryOverride}, ${vars.color.text.primary})`;
-	if (slot === 'secondary') return `var(${secondaryOverride}, ${vars.color.text.secondary})`;
-	return `var(${toneOverride}, ${vars.color.foreground[slot][state]})`;
+	if (slot === 'primary') return fallbackVar(foregroundOverride.primary, vars.color.text.primary);
+	if (slot === 'secondary') {
+		return fallbackVar(foregroundOverride.secondary, vars.color.text.secondary);
+	}
+	return fallbackVar(foregroundOverride.tone, vars.color.foreground[slot][state]);
 }
 
 /**
@@ -48,7 +63,7 @@ export function contextualForeground(
  * disabled treatment carries the state.
  */
 export function contextualDisabledForeground(): string {
-	return `var(${secondaryOverride}, ${vars.color.text.disabled})`;
+	return fallbackVar(foregroundOverride.secondary, vars.color.text.disabled);
 }
 
 /**
@@ -61,32 +76,10 @@ export function contextualDisabledForeground(): string {
  * colour-mode scope must declare the neutral context again, or it would inherit the outer mode's
  * colours.
  */
-export function surfaceStyle(background: SurfaceBackground): {
-	backgroundColor: string;
-	color: string;
-	vars: Record<string, string>;
-} {
-	const [group, level, state] = background.split('.') as [string, string, string | undefined];
-	if (group === 'surface') {
-		return neutralContext(vars.color.surface[level as keyof typeof vars.color.surface]);
-	}
-
-	const role = group as SemanticRole;
-	const prominence = level as 'subtle' | 'solid';
-	const backgroundColor =
-		vars.color.background[role][prominence][state as 'rest' | 'hover' | 'pressed'];
-	if (prominence === 'subtle') return neutralContext(backgroundColor);
-
-	const { onSolid } = vars.color.foreground[role];
-	return {
-		backgroundColor,
-		color: onSolid.primary,
-		vars: {
-			[primaryOverride]: onSolid.primary,
-			[secondaryOverride]: onSolid.secondary,
-			[toneOverride]: onSolid.primary,
-		},
-	};
+export function surfaceStyle(background: SurfaceBackground): SurfaceStyle {
+	const pairing = surfaceStyles.get(background);
+	if (!pairing) throw new Error(`No foreground pairing for the ${background} background.`);
+	return pairing;
 }
 
 /**
@@ -94,30 +87,51 @@ export function surfaceStyle(background: SurfaceBackground): {
  * inside a code block. The element turns transparent and takes its parent's colour and foreground
  * context again.
  */
-export function transparentSurfaceStyle(): {
-	backgroundColor: string;
-	color: string;
-	vars: Record<string, string>;
-} {
+export function transparentSurfaceStyle(): SurfaceStyle {
 	return {
 		backgroundColor: 'transparent',
 		color: 'inherit',
 		vars: {
-			[primaryOverride]: 'inherit',
-			[secondaryOverride]: 'inherit',
-			[toneOverride]: 'inherit',
+			[foregroundOverride.primary]: 'inherit',
+			[foregroundOverride.secondary]: 'inherit',
+			[foregroundOverride.tone]: 'inherit',
 		},
 	};
 }
 
-function neutralContext(backgroundColor: string) {
+function neutralContext(backgroundColor: string): SurfaceStyle {
 	return {
 		backgroundColor,
 		color: vars.color.text.primary,
 		vars: {
-			[primaryOverride]: 'initial',
-			[secondaryOverride]: 'initial',
-			[toneOverride]: 'initial',
+			[foregroundOverride.primary]: 'initial',
+			[foregroundOverride.secondary]: 'initial',
+			[foregroundOverride.tone]: 'initial',
 		},
 	};
+}
+
+function solidContext(role: SemanticRole, backgroundColor: string): SurfaceStyle {
+	const { onSolid } = vars.color.foreground[role];
+	return {
+		backgroundColor,
+		color: onSolid.primary,
+		vars: {
+			[foregroundOverride.primary]: onSolid.primary,
+			[foregroundOverride.secondary]: onSolid.secondary,
+			[foregroundOverride.tone]: onSolid.primary,
+		},
+	};
+}
+
+const surfaceStyles = new Map<SurfaceBackground, SurfaceStyle>();
+for (const [surface, backgroundColor] of typedEntries(vars.color.surface)) {
+	surfaceStyles.set(`surface.${surface}`, neutralContext(backgroundColor));
+}
+for (const role of SEMANTIC_ROLES) {
+	const { subtle, solid } = vars.color.background[role];
+	for (const state of INTERACTION_STATES) {
+		surfaceStyles.set(`${role}.subtle.${state}`, neutralContext(subtle[state]));
+		surfaceStyles.set(`${role}.solid.${state}`, solidContext(role, solid[state]));
+	}
 }

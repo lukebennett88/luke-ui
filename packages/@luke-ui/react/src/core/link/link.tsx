@@ -11,7 +11,7 @@ import { useControlSize } from '../sizing/control-size-context.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { linkRecipe } from './recipe.css.js';
+import { linkRecipe } from './recipe.js';
 import { linkCursor } from './styles.css.js';
 
 type LinkContentProps =

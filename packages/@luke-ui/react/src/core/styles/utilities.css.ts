@@ -55,29 +55,29 @@ type BreakpointName = keyof typeof responsiveConditions;
 
 /**
  * One utilities-layer class per background and condition. Each pairs the fill with its text colour
- * and foreground context. Emit conditions first so wider breakpoints win when both match.
+ * and foreground context. Conditions are the outer loop, so each breakpoint's rules follow the
+ * narrower breakpoints' rules and win when both match. `initial` comes first, so its class is each
+ * token's default.
  */
-const backgroundColorValues = (() => {
-	const values: Record<string, { default: string; conditions: Record<string, string> }> = {};
-
-	for (const [condition, query] of typedEntries(responsiveConditions)) {
-		for (const [token, background] of backgroundColors) {
-			const rule = surfaceStyle(background);
-			const conditionalRule =
-				'@container' in query ? { '@container': { [query['@container']]: rule } } : rule;
-			const className = style(
-				{ '@layer': { [layers.utilities]: conditionalRule } },
-				`backgroundColor-${token.replace('.', '-')}-${condition}`,
-			);
-			const value: (typeof values)[string] = values[token] ?? { default: '', conditions: {} };
-			if (condition === 'initial') value.default = className;
-			value.conditions[condition] = className;
-			values[token] = value;
-		}
+const backgroundColorValues: Partial<
+	Record<
+		BackgroundColorToken,
+		{ default: string; conditions: Partial<Record<BreakpointName, string>> }
+	>
+> = {};
+for (const [condition, query] of typedEntries(responsiveConditions)) {
+	for (const [token, background] of backgroundColors) {
+		const rule = surfaceStyle(background);
+		const conditionalRule =
+			'@container' in query ? { '@container': { [query['@container']]: rule } } : rule;
+		const className = style(
+			{ '@layer': { [layers.utilities]: conditionalRule } },
+			`backgroundColor-${token.replace('.', '-')}-${condition}`,
+		);
+		const value = (backgroundColorValues[token] ??= { default: className, conditions: {} });
+		value.conditions[condition] = className;
 	}
-
-	return values;
-})();
+}
 
 /** Property scales shared by the runtime config and the public prop types. */
 const dynamicProperties = {

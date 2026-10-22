@@ -14,7 +14,7 @@ export const solidStatesFixture = style({
 	},
 });
 
-/** Transparent at rest and a subtle fill on hover and press, like a ghost control. */
+/** Transparent at rest and a subtle fill on hover and press, like a low-prominence Button. */
 export const transparentToSubtleFixture = style({
 	backgroundColor: 'transparent',
 	selectors: {

@@ -14,6 +14,40 @@ const enabled = ':not([data-disabled="true"]):not([data-pending="true"])';
 const hovered = `&[data-hovered="true"]${enabled}`;
 const pressed = `&[data-pressed="true"]${enabled}`;
 
+const textBase = [
+	textRecipe({ shouldDisableTrim: true, shouldInheritFont: true }),
+	{
+		'@media': {
+			'(forced-colors: active)': {
+				color: 'LinkText',
+				forcedColorAdjust: 'auto',
+				selectors: {
+					'&[data-disabled="true"]': {
+						color: 'GrayText',
+						opacity: 1,
+					},
+				},
+			},
+		},
+		appearance: 'none',
+		backgroundColor: 'transparent',
+		backgroundImage: 'none',
+		border: 0,
+		borderRadius: 0,
+		boxShadow: 'none',
+		// `inline`, not `inline-block`: a text Link must break across lines mid-label inside a
+		// paragraph. A native `<button>` computes `inline-block` either way, so Button is
+		// unaffected.
+		display: 'inline',
+		minBlockSize: 0,
+		padding: 0,
+		position: 'relative',
+		textAlign: 'start',
+		textDecorationColor: 'currentColor',
+		verticalAlign: 'baseline',
+	},
+] as const;
+
 /** Shared presentation recipe for Button and button-shaped Link. */
 export const buttonRecipeInternal = recipe({
 	base: [
@@ -36,7 +70,6 @@ export const buttonRecipeInternal = recipe({
 	defaultVariants: {
 		appearance: 'button',
 		inlineSize: 'auto',
-		kind: 'action',
 		prominence: 'standard',
 		size: 'medium',
 		tone: 'neutral',
@@ -101,48 +134,13 @@ export const buttonRecipeInternal = recipe({
 					},
 				},
 			},
-			text: [
-				textRecipe({ shouldDisableTrim: true, shouldInheritFont: true }),
-				{
-					'@media': {
-						'(forced-colors: active)': {
-							color: 'LinkText',
-							forcedColorAdjust: 'auto',
-							selectors: {
-								'&[data-disabled="true"]': {
-									color: 'GrayText',
-									opacity: 1,
-								},
-							},
-						},
-					},
-					appearance: 'none',
-					backgroundColor: 'transparent',
-					backgroundImage: 'none',
-					border: 0,
-					borderRadius: 0,
-					boxShadow: 'none',
-					// `inline`, not `inline-block`: a text Link must break across lines mid-label inside a
-					// paragraph. A native `<button>` computes `inline-block` either way, so Button is
-					// unaffected.
-					display: 'inline',
-					minBlockSize: 0,
-					padding: 0,
-					position: 'relative',
-					textAlign: 'start',
-					textDecorationColor: 'currentColor',
-					verticalAlign: 'baseline',
-				},
-			],
+			// A text Button and a text Link share this base. Each takes its own colour and decoration below.
+			link: textBase,
+			text: textBase,
 		},
 		inlineSize: {
 			auto: {},
 			full: { inlineSize: '100%' },
-		},
-		// Private. Link sets `link` for its text weight and decoration.
-		kind: {
-			action: {},
-			link: {},
 		},
 		prominence: {
 			low: {},
@@ -161,25 +159,24 @@ export const buttonRecipeInternal = recipe({
 	compoundVariants: [
 		buttonSize('medium'),
 		buttonSize('small'),
-		{
-			// Undoes `textRecipe`'s `minInlineSize: 0`, which lets a grid or flex parent collapse the
-			// button to one character per line. Must be a compound variant: `textRecipe`'s base and
-			// this recipe's variants emit into separate same-named `recipes` layer blocks, so only a
-			// style from this recipe's own call reliably lands last.
-			style: { minInlineSize: 'auto' },
-			variants: { appearance: 'text' as const },
-		},
-		...buttonAppearance('neutral', 'low', 'ghost'),
+		// Undoes `textRecipe`'s `minInlineSize: 0`, which lets a grid or flex parent collapse the
+		// button to one character per line. Must be a compound variant: `textRecipe`'s base and this
+		// recipe's variants emit into separate same-named `recipes` layer blocks, so only a style from
+		// this recipe's own call reliably lands last.
+		...(['link', 'text'] as const).map((appearance) => {
+			return { style: { minInlineSize: 'auto' }, variants: { appearance } };
+		}),
+		...buttonAppearance('neutral', 'low', 'transparent'),
 		...buttonAppearance('neutral', 'standard', 'subtle'),
 		...buttonAppearance('neutral', 'high', 'solid', 'accent'),
-		...buttonAppearance('critical', 'low', 'ghost'),
+		...buttonAppearance('critical', 'low', 'transparent'),
 		...buttonAppearance('critical', 'standard', 'subtle'),
 		...buttonAppearance('critical', 'high', 'solid'),
-		...textAppearance('action', 'neutral', 'low'),
-		...textAppearance('action', 'neutral', 'standard'),
-		...textAppearance('action', 'neutral', 'high'),
-		...textAppearance('action', 'critical', 'low'),
-		...textAppearance('action', 'critical', 'standard'),
+		...textAppearance('text', 'neutral', 'low'),
+		...textAppearance('text', 'neutral', 'standard'),
+		...textAppearance('text', 'neutral', 'high'),
+		...textAppearance('text', 'critical', 'low'),
+		...textAppearance('text', 'critical', 'standard'),
 		...textAppearance('link', 'neutral', 'low'),
 		...textAppearance('link', 'neutral', 'standard'),
 		...textAppearance('link', 'neutral', 'high'),
@@ -188,12 +185,12 @@ export const buttonRecipeInternal = recipe({
 
 type Tone = 'neutral' | 'critical';
 type BackgroundTone = 'neutral' | 'danger' | 'accent';
-type ButtonSurface = 'ghost' | 'subtle' | 'solid';
+type ButtonSurface = 'transparent' | 'subtle' | 'solid';
 
 /**
  * A button's fill in each interaction state, paired with its foreground context through
- * `surfaceStyle`. A ghost paints nothing at rest, so it reads the surrounding context, and its hover
- * and pressed fills establish a subtle one. A critical tone keeps the danger hue on a subtle fill or
+ * `surfaceStyle`. A transparent button paints nothing at rest, so it reads the surrounding context,
+ * and its hover and pressed fills establish a subtle one. A critical tone keeps the danger hue on a subtle fill or
  * a surrounding surface, and reads on-solid primary on a solid one.
  */
 function buttonAppearance(
@@ -204,7 +201,7 @@ function buttonAppearance(
 ) {
 	const toneColor = tone === 'critical' ? { color: contextualForeground('danger') } : ({} as const);
 
-	if (surface === 'ghost') {
+	if (surface === 'transparent') {
 		return [
 			{
 				style: {
@@ -293,31 +290,33 @@ function buttonSize(size: 'medium' | 'small') {
 }
 
 function textAppearance(
-	kind: 'action' | 'link',
+	appearance: 'link' | 'text',
 	tone: Tone,
 	prominence: 'low' | 'standard' | 'high',
 ) {
-	const appearance =
-		kind === 'link' ? textLinkAppearance(tone, prominence) : textActionAppearance(tone, prominence);
+	const states =
+		appearance === 'link'
+			? textLinkAppearance(tone, prominence)
+			: textActionAppearance(tone, prominence);
 	return [
 		{
 			style: {
-				...appearance.rest,
+				...states.rest,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
-						...appearance.hover,
+						...states.hover,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						...appearance.pressed,
+						...states.pressed,
 					},
 					// Declared last so focus-visible's underline beats the hover/pressed decoration
 					// above, even though all three selectors share the same specificity.
 					'&[data-focus-visible="true"]:not([data-disabled="true"])': {
-						...appearance.focus,
+						...states.focus,
 					},
 				},
 			},
-			variants: { appearance: 'text' as const, kind, prominence, tone },
+			variants: { appearance, prominence, tone },
 		},
 	];
 }
