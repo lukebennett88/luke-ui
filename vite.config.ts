@@ -306,6 +306,7 @@ export default defineConfig({
 						'captureVisualAppearance',
 						'expect',
 						'expectAccessibleNameWords',
+						'expectEveryTextToPassContrast',
 						'expectRenderUnchanged',
 						'expectForwardsDomProps',
 						'expectNoAxeViolations',
