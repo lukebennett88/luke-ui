@@ -46,25 +46,25 @@ for (const appearance of visualAppearances) {
 	test(`a transparent fill that turns subtle establishes the neutral context in ${name}`, () => {
 		const { container } = render(
 			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
-				<div className={transparentToSubtleFixture} data-testid="ghost">
+				<div className={transparentToSubtleFixture} data-testid="control">
 					<span data-testid="label">Cancel</span>
 				</div>
 			</Box>,
 			{ appearance },
 		);
 		const parent = byTestId(container, 'parent');
-		const ghost = byTestId(container, 'ghost');
+		const control = byTestId(container, 'control');
 		const label = byTestId(container, 'label');
 
-		// At rest the ghost paints nothing, so it keeps the solid parent's context.
-		expect(surfaceColors(ghost)).toEqual({
+		// At rest the control paints nothing, so it keeps the solid parent's context.
+		expect(surfaceColors(control)).toEqual({
 			...pairedColors(parent, 'success.solid'),
 			background: TRANSPARENT,
 		});
-		ghost.toggleAttribute('data-hovered', true);
-		expect(surfaceColors(ghost)).toEqual(pairedColors(ghost, 'neutral.subtle.hover'));
-		ghost.toggleAttribute('data-pressed', true);
-		expect(surfaceColors(ghost)).toEqual(pairedColors(ghost, 'neutral.subtle.pressed'));
+		control.toggleAttribute('data-hovered', true);
+		expect(surfaceColors(control)).toEqual(pairedColors(control, 'neutral.subtle.hover'));
+		control.toggleAttribute('data-pressed', true);
+		expect(surfaceColors(control)).toEqual(pairedColors(control, 'neutral.subtle.pressed'));
 		expect(surfaceColors(label)).toEqual({
 			...pairedColors(label, 'neutral.subtle.pressed'),
 			background: TRANSPARENT,
