@@ -139,8 +139,7 @@ export const buttonRecipeInternal = recipe({
 			auto: {},
 			full: { inlineSize: '100%' },
 		},
-		// Private. Link sets `link`, so its text appearance stays underlined in every state while a
-		// text Button keeps its own decoration.
+		// Private. Link sets `link` for its text weight and decoration.
 		kind: {
 			action: {},
 			link: {},

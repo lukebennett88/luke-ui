@@ -93,8 +93,8 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 const plainLink = `a[href]:not(.${actionElementClassName}):not(.${textElementClassName})`;
 const linkAppearance = textLinkAppearance('neutral', 'standard');
 proseStyle(plainLink, {
-	...linkAppearance.rest,
 	font: 'inherit',
+	...linkAppearance.rest,
 	padding: 0,
 	textDecorationColor: 'currentColor',
 	transitionDuration: vars.motion.feedback.duration,

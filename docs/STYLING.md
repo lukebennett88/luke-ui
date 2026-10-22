@@ -431,9 +431,10 @@ its fills so the check mark reads on-solid primary. The switch track and thumb a
 skeleton paint fills that hold no text, so they keep their own compiler-gated or placeholder
 colours.
 
-A role's colour can collapse to on-solid primary, so no component relies on hue alone. Text links
-stay underlined at rest, hover, and press. A field error pairs its message with an icon and the
-field's invalid state and description.
+A role's colour can collapse to on-solid primary, so no component relies on hue alone. Text Links
+use the label font weight and belong inline with lighter surrounding text. Low prominence adds an
+underline on hover, focus, and press. Standard and high prominence stay underlined. A field error
+pairs its message with an icon and the field's invalid state and description.
 
 `Box` applies the pairing from one utilities-layer class per resting background and responsive
 condition. Its values are the standard surfaces and each role's resting `subtle` and `solid` fill.

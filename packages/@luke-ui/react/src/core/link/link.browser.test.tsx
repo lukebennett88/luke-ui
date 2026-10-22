@@ -148,9 +148,8 @@ test('Link preserves intrinsic and full inline sizing', () => {
 
 const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
 
-// A text Link never relies on hue alone: it stays underlined whatever its state or background.
 for (const prominence of ['low', 'standard', 'high'] as const) {
-	test(`a ${prominence} text Link stays underlined at rest, hover, and press`, () => {
+	test(`a ${prominence} text Link has weight 500 and solid underlines in its active states`, async () => {
 		const { locator } = render(
 			<Link href="#" prominence={prominence}>
 				Destination
@@ -162,18 +161,38 @@ for (const prominence of ['low', 'standard', 'high'] as const) {
 			const styles = getComputedStyle(link);
 			return {
 				followsText: styles.textDecorationColor === styles.color,
+				fontWeight: styles.fontWeight,
 				line: styles.textDecorationLine,
 				style: styles.textDecorationStyle,
 				thickness: styles.textDecorationThickness,
 			};
 		});
-		const restStyle = prominence === 'low' ? 'dotted' : 'solid';
+		const restLine = prominence === 'low' ? 'none' : 'underline';
 
-		expect(rest).toEqual({ ...rest, followsText: true, line: 'underline', style: restStyle });
+		expect(rest).toEqual({
+			...rest,
+			followsText: true,
+			fontWeight: '500',
+			line: restLine,
+			style: 'solid',
+		});
 		// Hover and press show without colour: a thicker, solid underline.
-		expect(hover).toEqual({ ...hover, followsText: true, line: 'underline', style: 'solid' });
+		expect(hover).toEqual({
+			...hover,
+			followsText: true,
+			fontWeight: '500',
+			line: 'underline',
+			style: 'solid',
+		});
 		expect(pressed).toEqual(hover);
 		expect(hover?.thickness).not.toBe(rest?.thickness);
+
+		setInteractionState(link, 'rest');
+		await focusViaKeyboard(locator.getByRole('link', { name: 'Destination' }));
+		const focused = getComputedStyle(link);
+		expect(focused.fontWeight).toBe('500');
+		expect(focused.textDecorationLine).toBe('underline');
+		expect(focused.textDecorationStyle).toBe('solid');
 	});
 }
 
@@ -222,7 +241,7 @@ for (const appearance of visualAppearances) {
 	});
 }
 
-test('a text Link stays underlined in LinkText in forced colours', async () => {
+test('a low text Link uses LinkText and underlines active states in forced colours', async () => {
 	await emulateForcedColors('active');
 
 	try {
@@ -241,9 +260,9 @@ test('a text Link stays underlined in LinkText in forced colours', async () => {
 		});
 
 		expect(actual).toEqual(
-			INTERACTION_STATES.map(() => ({
+			INTERACTION_STATES.map((state) => ({
 				color: resolvedColor('LinkText', link),
-				line: 'underline',
+				line: state === 'rest' ? 'none' : 'underline',
 			})),
 		);
 	} finally {

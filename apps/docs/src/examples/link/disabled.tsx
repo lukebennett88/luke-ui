@@ -1,9 +1,14 @@
 import { Link } from '@luke-ui/react/link';
+import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Link href="#example-destination" isDisabled>
-			Example destination
-		</Link>
+		<Text>
+			Open the{' '}
+			<Link href="#example-destination" isDisabled>
+				example destination
+			</Link>
+			.
+		</Text>
 	);
 };

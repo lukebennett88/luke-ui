@@ -3,10 +3,7 @@ import { buttonRecipeInternal } from '../primitives/button/recipe.css.js';
 import type { RecipeComposition } from '../styles/recipe-types.js';
 import { withDefaultVariants } from '../styles/recipe.js';
 
-/**
- * Recipe for Link's supported appearance and prominence variants. A text Link stays underlined at
- * rest, hover, and press.
- */
+/** Recipe for Link's supported appearance and prominence variants. */
 export const linkRecipe = withDefaultVariants<
 	NonNullable<Parameters<typeof buttonRecipeInternal>[0]>,
 	LinkPresentationProps & RecipeComposition

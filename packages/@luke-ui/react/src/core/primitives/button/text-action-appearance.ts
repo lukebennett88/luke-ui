@@ -1,3 +1,4 @@
+import { vars } from '../../../theme/contract.css.js';
 import { contextualForeground } from '../../styles/surface.js';
 
 /**
@@ -25,10 +26,10 @@ export function textActionAppearance(
 }
 
 /**
- * Colours and decoration for a text link: a text action's colours, underlined at rest, hover, and
- * press, so the link never depends on hue alone. That matters most on a solid fill, where every hue
- * collapses to the fill's on-solid primary. Low prominence draws a dotted underline at rest. Hover
- * and press thicken a solid one, so the state change shows without colour.
+ * Colours, weight, and decoration for a text link. The weight is the theme's label weight. Low
+ * prominence adds a solid underline on hover, focus, and press. Standard and high prominence stay
+ * underlined in every state. Hover and press thicken the underline, so the state change shows
+ * without colour.
  */
 export function textLinkAppearance(
 	tone: 'neutral' | 'critical',
@@ -43,8 +44,9 @@ export function textLinkAppearance(
 	return {
 		rest: {
 			color: rest.color,
-			textDecorationLine: 'underline',
-			textDecorationStyle: prominence === 'low' ? 'dotted' : 'solid',
+			fontWeight: vars.font.weight.label,
+			textDecorationLine: prominence === 'low' ? 'none' : 'underline',
+			textDecorationStyle: 'solid',
 			textDecorationThickness: 'auto',
 		},
 		hover: { color: hover.color, ...active },
