@@ -187,3 +187,16 @@ not help. Silence in this log is not evidence.
   requires consulting that guide for JS/TS changes.
 - Problem: The agent-authored helper hand-rolled class joining despite the required guidance.
   Removing the helper does not establish that implementation applies that rule.
+
+## A browser test suppressed lint with an ESLint directive
+
+- Seen: 2026-10-22 (PR #911, #899 Part 5). Review of `f7612f6` found
+  `// eslint-disable-next-line no-await-in-loop -- …` in a Button contrast test.
+- Where: `packages/@luke-ui/react/src/core/button/button.browser.test.tsx`. `docs/CONVENTIONS.md`,
+  Linting, says oxlint owns linting and to suppress a rule with a plain comment and
+  `// oxlint-disable-next-line <plugin>/<rule>`. The root `vite.config.ts` already turns
+  `no-await-in-loop` off for these browser tests. The work-on-issue workflow requires consulting
+  that guide for JS/TS changes.
+- Problem: The agent-authored suppression used another linter's syntax for a rule that was already
+  off, despite the required guidance. Removing it does not establish that test authoring applies
+  that rule.
