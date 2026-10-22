@@ -344,7 +344,6 @@ for (const { backgroundColor, steps } of responsiveCases) {
 
 		try {
 			for (const step of steps) {
-				// eslint-disable-next-line no-await-in-loop -- viewport changes must be observed in order
 				await page.viewport(step.width, 800);
 				expect(surfaceColors(element)).toEqual(pairedColors(element, step.background));
 			}
