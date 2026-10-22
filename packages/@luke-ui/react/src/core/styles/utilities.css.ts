@@ -38,48 +38,46 @@ type BackgroundColorToken =
 	| `${SemanticRole}.${ProminenceLevel}`
 	| `surface.${keyof typeof vars.color.surface}`;
 
-/** The resting fill a Box background token paints. */
-function restingBackground(token: BackgroundColorToken): SurfaceBackground {
-	if (token.startsWith('surface.')) return token as `surface.${keyof typeof vars.color.surface}`;
-	return `${token as `${SemanticRole}.${ProminenceLevel}`}.rest`;
-}
-
-const backgroundColorTokens: ReadonlyArray<BackgroundColorToken> = [
+const backgroundColors = [
 	...SEMANTIC_ROLES.flatMap((role) => {
-		return PROMINENCE_LEVELS.map((prominence): BackgroundColorToken => `${role}.${prominence}`);
+		return PROMINENCE_LEVELS.map((prominence) => {
+			return [`${role}.${prominence}`, `${role}.${prominence}.rest`] as const;
+		});
 	}),
-	...Object.keys(vars.color.surface).map((surface) => `surface.${surface}` as BackgroundColorToken),
-];
+	...typedEntries(vars.color.surface).map(([surface]) => {
+		return [`surface.${surface}`, `surface.${surface}`] as const;
+	}),
+] satisfies ReadonlyArray<readonly [BackgroundColorToken, SurfaceBackground]>;
+
+const backgroundColorTokens = backgroundColors.map(([token]) => token);
 
 type BreakpointName = keyof typeof responsiveConditions;
 
 /**
  * One utilities-layer class per background and condition. Each pairs the fill with its text colour
- * and foreground context, so a responsive background changes them together. Conditions are the
- * outer loop, so each breakpoint's rules follow the narrower breakpoints' rules and win when both
- * match.
+ * and foreground context. Conditions are the outer loop, so each breakpoint's rules follow the
+ * narrower breakpoints' rules and win when both match. `initial` comes first, so its class is each
+ * token's default.
  */
-export const backgroundColorClasses = Object.fromEntries(
-	typedEntries(responsiveConditions).map(([condition, query]) => {
-		return [
-			condition,
-			Object.fromEntries(
-				backgroundColorTokens.map((token) => {
-					const rule = surfaceStyle(restingBackground(token));
-					const conditionalRule =
-						'@container' in query ? { '@container': { [query['@container']]: rule } } : rule;
-					return [
-						token,
-						style(
-							{ '@layer': { [layers.utilities]: conditionalRule } },
-							`backgroundColor-${token.replace('.', '-')}-${condition}`,
-						),
-					];
-				}),
-			),
-		];
-	}),
-) as Record<BreakpointName, Record<BackgroundColorToken, string>>;
+const backgroundColorValues: Partial<
+	Record<
+		BackgroundColorToken,
+		{ default: string; conditions: Partial<Record<BreakpointName, string>> }
+	>
+> = {};
+for (const [condition, query] of typedEntries(responsiveConditions)) {
+	for (const [token, background] of backgroundColors) {
+		const rule = surfaceStyle(background);
+		const conditionalRule =
+			'@container' in query ? { '@container': { [query['@container']]: rule } } : rule;
+		const className = style(
+			{ '@layer': { [layers.utilities]: conditionalRule } },
+			`backgroundColor-${token.replace('.', '-')}-${condition}`,
+		);
+		const value = (backgroundColorValues[token] ??= { default: className, conditions: {} });
+		value.conditions[condition] = className;
+	}
+}
 
 /** Property scales shared by the runtime config and the public prop types. */
 const dynamicProperties = {
@@ -271,12 +269,11 @@ type ResponsiveValue<Value> =
 	  };
 
 /**
- * Every utility's scale. `backgroundColor` comes from paired classes, not a Sprinkles scale. The
- * indexed access keeps docs listing its values rather than an alias name.
+ * Every utility's scale. Background values select paired classes. Keep their token keys here
+ * so public declarations and docs do not depend on the styling engine's config.
  */
-type UtilityScales = typeof dynamicProperties & {
-	backgroundColor: (typeof backgroundColorClasses)['initial'];
-};
+type UtilityScales = typeof dynamicProperties &
+	Record<'backgroundColor', Record<(typeof backgroundColorTokens)[number], string>>;
 
 type SprinklesPropsShape = {
 	[Property in keyof UtilityScales]?: ResponsiveValue<
@@ -301,17 +298,26 @@ type CreateSprinklesResult<Props extends object> = {
  * non-utility props pass through. Generated `className` and `style` replace input keys of those
  * names.
  */
-export type CreateSprinkles = {
+type CreateSprinkles = {
 	<Props extends SprinklesProps>(props: Props): CreateSprinklesResult<Props>;
 	readonly properties: ReadonlySet<keyof SprinklesProps>;
 };
 
-/** Every utility except `backgroundColor`, which `createSprinkles` adds from its paired classes. */
-export const sprinkles = defineSprinkles(
+/** Package-internal utilities, including paired background classes. */
+export const createSprinkles: CreateSprinkles = defineSprinkles(
 	defineProperties({
 		'@layer': layers.utilities,
 		conditions: responsiveConditions,
 		defaultCondition: 'initial',
 		dynamicProperties,
 	}),
+	{
+		config: {
+			backgroundColor: {
+				name: 'backgroundColor',
+				staticScale: backgroundColorTokens,
+				values: backgroundColorValues,
+			},
+		},
+	},
 );

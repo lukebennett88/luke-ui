@@ -2,10 +2,8 @@ import { gzipSync } from 'node:zlib';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 
-// Measured at 14550 gzip bytes (level 9), including the autofill and password-manager fill
-// treatments and Box's paired background classes for every resting background and responsive
-// condition. The ceiling keeps about 200 bytes of headroom. If this fails, investigate what grew;
-// don't raise the ceiling without a reason.
+// Gzip bytes at level 9. Set the ceiling about 200 bytes above the measured size when you raise it.
+// If this fails, investigate what grew, and raise the ceiling only for growth you intend.
 const maximumGzipBytes = 14_750;
 
 test('keeps the public stylesheet within its size budget', async () => {
