@@ -5,9 +5,12 @@ import { visibleTextElements } from './axe.js';
  * The lowest WCAG contrast ratio between a visible text element's colour inside `element` and any
  * pixel painted behind that text. It screenshots `element` with its text hidden, so it measures
  * what axe cannot: text over a gradient or a translucent layer, such as the control finish.
+ *
+ * Hiding a text element also hides its own fill, so the text must sit inside the element that
+ * paints the fill, as a Button's label does.
  */
 export async function lowestRenderedTextContrast(element: HTMLElement): Promise<number> {
-	const texts = visibleTextElements(element);
+	const texts = visibleTextElements(element).filter((text) => text instanceof HTMLElement);
 	const visibilities = texts.map((text) => text.style.visibility);
 	for (const text of texts) text.style.visibility = 'hidden';
 	let screenshot: string;
