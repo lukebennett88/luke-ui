@@ -210,6 +210,42 @@ describe('theme inheritance', () => {
 		});
 	});
 
+	it('rejects a label too close to body when a child overrides only body', () => {
+		const base: ThemeInput = {
+			color: { accent: '#3b82f6' },
+			name: 'weight-base',
+			typography: { fonts: { body: interFont }, fontWeight: { body: 300, label: 400 } },
+		};
+
+		expect(() =>
+			defineTheme({
+				extends: base,
+				name: 'weight-child',
+				typography: { fontWeight: { body: 350 } },
+			}),
+		).toThrow(
+			'typography.fontWeight.label: must be at least 100 heavier than typography.fontWeight.body (label is 400, body is 350)',
+		);
+	});
+
+	it('rejects a label too close to body when a child overrides only label', () => {
+		const base: ThemeInput = {
+			color: { accent: '#3b82f6' },
+			name: 'weight-base',
+			typography: { fonts: { body: interFont }, fontWeight: { body: 300, label: 400 } },
+		};
+
+		expect(() =>
+			defineTheme({
+				extends: base,
+				name: 'weight-child',
+				typography: { fontWeight: { label: 380 } },
+			}),
+		).toThrow(
+			'typography.fontWeight.label: must be at least 100 heavier than typography.fontWeight.body (label is 380, body is 300)',
+		);
+	});
+
 	it('keeps a null display font through a chain of three and resolves it after the merge', () => {
 		const root: ThemeInput = {
 			color: { accent: '#3b82f6' },

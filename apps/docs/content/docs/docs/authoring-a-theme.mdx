@@ -77,7 +77,8 @@ declares `'Inter Variable'`. Until a font loads, text renders in the next font o
 `typography.fontWeight` sets the `body`, `label`, `heading`, and `emphasis` weights, which default
 to 400, 500, 600, and 700. Keep `label` at least 100 heavier than `body`. A low-prominence text Link
 has no underline at rest, and on a solid fill its colour matches the text around it, so the label
-weight is what shows it is a link. Validation does not check this.
+weight is what shows it is a link. `defineTheme` throws when the resolved `label` weight is less
+than 100 above `body`, including a weight inherited from the theme you extend.
 
 ### Surfaces
 
@@ -184,6 +185,8 @@ The rules for fonts:
 - The other metrics must be finite numbers. `unitsPerEm`, `capHeight`, and `ascent` must be
   positive, `descent` 0 or less, and `lineGap` 0 or more.
 - Font weights must be numbers from 1 to 1000.
+- The resolved `label` weight must be at least 100 heavier than `body`. An omitted weight uses the
+  inherited value, then the default.
 
 ## Contrast validation
 
