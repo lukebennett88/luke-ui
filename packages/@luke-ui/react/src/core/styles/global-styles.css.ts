@@ -45,8 +45,9 @@ globalStyleInLayer('reset', ':where(body)', {
 
 // A colour-mode scope gets new token values, but inherited properties, including a solid fill's
 // foreground overrides, keep the values its parent computed. Repaint the scope so its own text,
-// foreground context, and surface follow its mode. The theme sets `color-scheme`. `<body>` takes its colours from the rule above.
-// `<html>` stays unpainted so the body background reaches the canvas.
+// foreground context, and surface follow its mode. The theme sets `color-scheme`. `<body>` takes
+// its colours from the rule above. `<html>` stays unpainted so the body background reaches the
+// canvas.
 globalStyleInLayer(
 	'reset',
 	":where(body [data-color-mode='light'], body [data-color-mode='dark'])",

@@ -62,6 +62,13 @@ Cascade contracts that need a real third-party stylesheet live beside `layer-ord
 `tailwind-integration` Vitest project so it can compile Tailwind without loading the default browser
 suite's global stylesheet.
 
+Browser tests render with the built `@luke-ui/react/stylesheet.css` from `dist`, but a test's own
+imports of `.css.ts` modules compile with debug identifiers. A `createVar` imported into a test
+therefore names a different custom property from the one the built stylesheet declares. When a test
+must read a private custom property, give it a stable name in source, as `core/styles/surface.ts`
+does for its `--luke-internal-foreground-*` overrides, and import helpers from a plain `.ts` module.
+A `.css.ts` module that exports a function fails to load in a browser test.
+
 ## Timing and synchronisation
 
 Almost never sleep in a test. Do not use `setTimeout`, a fixed `delay()`, or an arbitrary frame
