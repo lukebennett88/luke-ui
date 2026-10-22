@@ -57,6 +57,14 @@ These are easy to miss in this repository:
 - Luke UI is pre-1.0. Inspect compatibility shims and aliases against
   [PUBLIC_API.md](../../../docs/PUBLIC_API.md). Do not suggest a compatibility alias, or a new prop
   or wrapper for something CSS already does.
+- Combine class names with `cx` from `@luke-ui/react/utils`, not a template string or `join`
+  ([Reuse](../../../docs/CONVENTIONS.md#reuse)).
+- Browser tests locate a named control by role and accessible name, not with `querySelector`
+  ([Component tests](../../../docs/TESTING.md#component-tests)).
+- Examples carry no application context they do not need
+  ([What to show](../../../docs/DOCUMENTATION.md#what-to-show)).
+- Scaffold and generator templates emit published JSDoc. It describes behaviour, not recipe classes
+  or other internals ([Comments and JSDoc](../../../docs/DOCUMENTATION.md#comments-and-jsdoc)).
 - Compare the pull request's verification claims with CI and with the commands that actually ran.
 
 Confirm behaviour when it matters and is practical. For a bug fix, show the bug on the base

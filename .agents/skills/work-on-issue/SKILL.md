@@ -86,12 +86,15 @@ not open new issues for the parts you leave.
    as a papercut entry or a failed CI run on the base, can be enough. A failure your change causes
    blocks the pull request. An unrelated failure does not, as long as the rest of the change is
    verified and the pull request says so. Compare in a separate worktree: stashing does not isolate
-   generated build outputs or their cache.
-4. Read the whole diff. Apply the comment, compatibility, and test-only production code checks in
-   [review-pr](../review-pr/SKILL.md#review) before committing. Review it with
-   [review-pr](../review-pr/SKILL.md) when the risk warrants it, for example a change to public API,
-   accessibility behaviour, shared infrastructure, or complex logic. Fix every blocking finding
-   before you open the pull request, and fix the small issues that are worth it.
+   generated build outputs or their cache. To undo your own edit or remove a probe file, edit or
+   delete that file by path. Do not run `git stash`, `git checkout -- <path>`, `git restore`,
+   `git reset`, or `git clean` in a task checkout, even on your own uncommitted changes: each can
+   discard other work in progress.
+4. Read the whole diff. Apply the easy-to-miss checks in [review-pr](../review-pr/SKILL.md#review)
+   before committing. Review it with [review-pr](../review-pr/SKILL.md) when the risk warrants it,
+   for example a change to public API, accessibility behaviour, shared infrastructure, or complex
+   logic. Fix every blocking finding before you open the pull request, and fix the small issues that
+   are worth it.
 
 After addressing review findings, check the current [papercut log](../../papercuts.md#handoff).
 Record qualifying candidates or recurring occurrences, or explain why each omitted candidate does
