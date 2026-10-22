@@ -4,6 +4,7 @@ import { focusRing } from '../../styles/focus-ring.js';
 import { composeInputStateSelectors } from '../../styles/input-states.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import { recipe } from '../../styles/recipe.js';
+import { surfaceStyle } from '../../styles/surface.js';
 import {
 	textInputInlinePadding,
 	textInputInputBase,
@@ -51,7 +52,7 @@ export const textInputRecipe = recipe({
 			},
 		},
 		...textInputInputBase,
-		backgroundColor: vars.color.surface.field,
+		...surfaceStyle('surface.field'),
 		borderColor: vars.color.border.control,
 		borderRadius: vars.radius.control,
 		borderStyle: 'solid',

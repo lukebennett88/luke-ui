@@ -1,5 +1,7 @@
+import { Box } from '@luke-ui/react/box';
 import { Icon } from '@luke-ui/react/icon';
 import { TextInputField } from '@luke-ui/react/text-input-field';
+import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { TextFieldContext } from 'react-aria-components/TextField';
 import { expect, test } from 'vite-plus/test';
@@ -9,6 +11,7 @@ import { expectAccessibleNameWords } from '../test-utils/expect-accessible-name-
 import { getDescribedText } from '../test-utils/get-described-text.js';
 import { measureFieldError } from '../test-utils/measure-field-error.js';
 import { render, visualAppearances } from '../test-utils/render.js';
+import { pairedColors, resolvedColor, surfaceColors } from '../test-utils/surface-colors.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -385,6 +388,127 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 			</Stack>,
 		);
 		await captureVisual(locator, 'text-input-field/forced-colors-states');
+	} finally {
+		await emulateForcedColors('none');
+	}
+});
+
+/** The error message root and its decorative icon, from the element holding the message text. */
+function fieldErrorParts(text: string) {
+	const body = page.getByText(text).element();
+	const message = body.parentElement;
+	const icon = message?.firstElementChild;
+	if (message == null || icon == null || icon.getAttribute('aria-hidden') !== 'true') {
+		throw new Error('Expected an error message with a leading icon.');
+	}
+	return { icon, message };
+}
+
+function fieldLabel(container: HTMLElement): HTMLElement {
+	const label = container.querySelector('label');
+	if (label === null) throw new Error('Expected a field label.');
+	return label;
+}
+
+for (const appearance of visualAppearances) {
+	const name = `${appearance.theme} ${appearance.mode}`;
+
+	test(`field text reads a solid fill while the control keeps its field surface in ${name}`, () => {
+		const { container } = render(
+			<Box backgroundColor="accent.solid" data-testid="parent" padding="space.8">
+				<TextInputField description="Used for receipts." label="Email" name="email" />
+			</Box>,
+			{ appearance },
+		);
+		const parent = page.getByTestId('parent').element();
+		const { foreground } = pairedColors(parent, 'accent.solid');
+		const input = page.getByRole('textbox', { name: 'Email' }).element();
+		const control = input.parentElement;
+		if (control === null) throw new Error('Expected the input control.');
+
+		expect(getComputedStyle(fieldLabel(container)).color).toBe(foreground.primary);
+		expect(getComputedStyle(page.getByText('Used for receipts.').element()).color).toBe(
+			foreground.secondary,
+		);
+		expect(surfaceColors(control)).toEqual(pairedColors(control, 'surface.field'));
+	});
+
+	// On a solid fill the danger hue collapses to on-solid primary, so the icon shape, the message,
+	// and the field's invalid state and description carry the error rather than the colour.
+	test(`an error keeps its meaning when its hue collapses on a solid fill in ${name}`, () => {
+		render(
+			<Box backgroundColor="danger.solid" data-testid="parent" padding="space.8">
+				<TextInputField errorMessage="Enter a valid email." label="Email" name="email" />
+			</Box>,
+			{ appearance },
+		);
+		const parent = page.getByTestId('parent').element();
+		const input = page.getByRole('textbox', { name: 'Email' }).element();
+		const { icon, message } = fieldErrorParts('Enter a valid email.');
+		const messageColor = getComputedStyle(message).color;
+
+		expect(messageColor).toBe(pairedColors(parent, 'danger.solid').foreground.primary);
+		expect(getComputedStyle(icon).backgroundColor).toBe(messageColor);
+		expect(getComputedStyle(icon).maskImage).not.toBe('none');
+		expect(input).toHaveAttribute('aria-invalid', 'true');
+		expect(input).toHaveAccessibleDescription('Enter a valid email.');
+	});
+
+	test(`an error keeps its danger hue on another role's subtle fill in ${name}`, () => {
+		render(
+			<Box backgroundColor="success.subtle" padding="space.8">
+				<TextInputField errorMessage="Enter a valid email." label="Email" name="email" />
+			</Box>,
+			{ appearance },
+		);
+		const { icon, message } = fieldErrorParts('Enter a valid email.');
+		const danger = resolvedColor(vars.color.foreground.danger.rest, message);
+
+		expect(getComputedStyle(message).color).toBe(danger);
+		expect(getComputedStyle(icon).backgroundColor).toBe(danger);
+	});
+
+	test(`a disabled label stays readable on a solid fill in ${name}`, () => {
+		const { container } = render(
+			<>
+				<Box backgroundColor="accent.solid" data-testid="solid" padding="space.8">
+					<TextInputField isDisabled label="On solid" name="solid" />
+				</Box>
+				<Box backgroundColor="surface.subdued" data-testid="surface" padding="space.8">
+					<TextInputField isDisabled label="On surface" name="surface" />
+				</Box>
+			</>,
+			{ appearance },
+		);
+		const [onSolid, onSurface] = container.querySelectorAll('label');
+		if (onSolid === undefined || onSurface === undefined) throw new Error('Expected two labels.');
+
+		expect(getComputedStyle(onSolid).color).toBe(
+			pairedColors(page.getByTestId('solid').element(), 'accent.solid').foreground.secondary,
+		);
+		expect(getComputedStyle(onSurface).color).toBe(
+			resolvedColor(vars.color.text.disabled, onSurface),
+		);
+	});
+}
+
+test('an error keeps a solid icon and system text in forced colours', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		render(
+			<Box backgroundColor="danger.solid" padding="space.8">
+				<TextInputField errorMessage="Enter a valid email." label="Email" name="email" />
+			</Box>,
+		);
+		const input = page.getByRole('textbox', { name: 'Email' }).element();
+		const { icon, message } = fieldErrorParts('Enter a valid email.');
+		const canvasText = resolvedColor('CanvasText', message);
+
+		expect(getComputedStyle(message).color).toBe(canvasText);
+		expect(getComputedStyle(icon).backgroundColor).toBe(canvasText);
+		expect(input).toHaveAttribute('aria-invalid', 'true');
+		expect(input).toHaveAccessibleDescription('Enter a valid email.');
 	} finally {
 		await emulateForcedColors('none');
 	}

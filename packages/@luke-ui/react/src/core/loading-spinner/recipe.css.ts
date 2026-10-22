@@ -1,10 +1,10 @@
 import { keyframes } from '@vanilla-extract/css';
-import { vars } from '../../theme/contract.css.js';
 import { iconSizeVariants } from '../icon/recipe.css.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
+import { contextualForeground } from '../styles/surface.js';
 
 const rotationDuration = '1.2s';
 // 2× spin so the dash cycle and rotation stay phase-locked.
@@ -92,14 +92,15 @@ const loadingSpinnerConfig = {
 		},
 	},
 	variants: {
+		// Each colour reads the nearest recognised surface, like `Text`'s colours.
 		color: {
-			accent: { root: { color: vars.color.foreground.accent.rest } },
-			danger: { root: { color: vars.color.foreground.danger.rest } },
-			info: { root: { color: vars.color.foreground.info.rest } },
-			primary: { root: { color: vars.color.text.primary } },
-			secondary: { root: { color: vars.color.text.secondary } },
-			success: { root: { color: vars.color.foreground.success.rest } },
-			warning: { root: { color: vars.color.foreground.warning.rest } },
+			accent: { root: { color: contextualForeground('accent') } },
+			danger: { root: { color: contextualForeground('danger') } },
+			info: { root: { color: contextualForeground('info') } },
+			primary: { root: { color: contextualForeground('primary') } },
+			secondary: { root: { color: contextualForeground('secondary') } },
+			success: { root: { color: contextualForeground('success') } },
+			warning: { root: { color: contextualForeground('warning') } },
 		},
 		size: {
 			px32: { root: iconSizeVariants.px32 },

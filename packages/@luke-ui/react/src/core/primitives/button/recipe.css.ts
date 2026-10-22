@@ -4,10 +4,15 @@ import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
 import { style } from '../../styles/layered-style.css.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import { recipe } from '../../styles/recipe.js';
+import { contextualForeground, surfaceStyle } from '../../styles/surface.js';
 import { textRecipe } from '../../text/recipe.css.js';
-import { textActionAppearance } from './text-action-appearance.js';
+import { textActionAppearance, textLinkAppearance } from './text-action-appearance.js';
 
 export const actionElementClassName = style({}, 'action');
+
+const enabled = ':not([data-disabled="true"]):not([data-pending="true"])';
+const hovered = `&[data-hovered="true"]${enabled}`;
+const pressed = `&[data-pressed="true"]${enabled}`;
 
 /** Shared presentation recipe for Button and button-shaped Link. */
 export const buttonRecipeInternal = recipe({
@@ -31,6 +36,7 @@ export const buttonRecipeInternal = recipe({
 	defaultVariants: {
 		appearance: 'button',
 		inlineSize: 'auto',
+		kind: 'action',
 		prominence: 'standard',
 		size: 'medium',
 		tone: 'neutral',
@@ -133,6 +139,12 @@ export const buttonRecipeInternal = recipe({
 			auto: {},
 			full: { inlineSize: '100%' },
 		},
+		// Private. Link sets `link`, so its text appearance stays underlined in every state while a
+		// text Button keeps its own decoration.
+		kind: {
+			action: {},
+			link: {},
+		},
 		prominence: {
 			low: {},
 			standard: {},
@@ -158,40 +170,42 @@ export const buttonRecipeInternal = recipe({
 			style: { minInlineSize: 'auto' },
 			variants: { appearance: 'text' as const },
 		},
-		...buttonAppearance('neutral', 'low', 'ghost', vars.color.text.primary),
-		...buttonAppearance('neutral', 'standard', 'subtle', vars.color.text.primary),
-		...buttonAppearance(
-			'neutral',
-			'high',
-			'solid',
-			vars.color.foreground.accent.onSolid.primary,
-			'accent',
-		),
-		...buttonAppearance('critical', 'low', 'ghost', vars.color.foreground.danger.rest),
-		...buttonAppearance('critical', 'standard', 'subtle', vars.color.foreground.danger.rest),
-		...buttonAppearance('critical', 'high', 'solid', vars.color.foreground.danger.onSolid.primary),
-		...textAppearance('neutral', 'low'),
-		...textAppearance('neutral', 'standard'),
-		...textAppearance('neutral', 'high'),
-		...textAppearance('critical', 'low'),
-		...textAppearance('critical', 'standard'),
+		...buttonAppearance('neutral', 'low', 'ghost'),
+		...buttonAppearance('neutral', 'standard', 'subtle'),
+		...buttonAppearance('neutral', 'high', 'solid', 'accent'),
+		...buttonAppearance('critical', 'low', 'ghost'),
+		...buttonAppearance('critical', 'standard', 'subtle'),
+		...buttonAppearance('critical', 'high', 'solid'),
+		...textAppearance('action', 'neutral', 'low'),
+		...textAppearance('action', 'neutral', 'standard'),
+		...textAppearance('action', 'neutral', 'high'),
+		...textAppearance('action', 'critical', 'low'),
+		...textAppearance('action', 'critical', 'standard'),
+		...textAppearance('link', 'neutral', 'low'),
+		...textAppearance('link', 'neutral', 'standard'),
+		...textAppearance('link', 'neutral', 'high'),
 	],
 });
 
 type Tone = 'neutral' | 'critical';
-type BackgroundTone = Tone | 'accent';
+type BackgroundTone = 'neutral' | 'danger' | 'accent';
 type ButtonSurface = 'ghost' | 'subtle' | 'solid';
-type Background = (typeof vars.color.background)['neutral'];
 
+/**
+ * A button's fill in each interaction state, paired with its foreground context through
+ * `surfaceStyle`. A ghost paints nothing at rest, so it reads the surrounding context, and its hover
+ * and pressed fills establish a subtle one. A critical tone keeps the danger hue on a subtle fill or
+ * a surrounding surface, and reads on-solid primary on a solid one.
+ */
 function buttonAppearance(
 	tone: Tone,
 	prominence: 'low' | 'standard' | 'high',
 	surface: ButtonSurface,
-	color: string,
-	backgroundTone: BackgroundTone = tone,
+	backgroundTone: BackgroundTone = tone === 'critical' ? 'danger' : 'neutral',
 ) {
+	const toneColor = tone === 'critical' ? { color: contextualForeground('danger') } : ({} as const);
+
 	if (surface === 'ghost') {
-		const subtle = backgroundForTone(tone).subtle;
 		return [
 			{
 				style: {
@@ -199,14 +213,17 @@ function buttonAppearance(
 					backgroundImage: 'none',
 					borderColor: 'transparent',
 					boxShadow: 'none',
-					color,
+					color: contextualForeground('primary'),
+					...toneColor,
 					selectors: {
-						'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-							backgroundColor: subtle.hover,
+						[hovered]: {
+							...surfaceStyle(`${backgroundTone}.subtle.hover`),
+							...toneColor,
 							boxShadow: vars.depth.raised,
 						},
-						'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-							backgroundColor: subtle.pressed,
+						[pressed]: {
+							...surfaceStyle(`${backgroundTone}.subtle.pressed`),
+							...toneColor,
 							boxShadow: vars.depth.recessed,
 						},
 					},
@@ -216,7 +233,8 @@ function buttonAppearance(
 		];
 	}
 
-	const ramp = backgroundForTone(surface === 'subtle' ? 'neutral' : backgroundTone)[surface];
+	// A subtle button always uses the neutral fill; only its text takes the tone.
+	const fill = surface === 'subtle' ? 'neutral' : backgroundTone;
 	const isSolid = surface === 'solid';
 	return [
 		{
@@ -224,16 +242,18 @@ function buttonAppearance(
 				'@media': {
 					'(forced-colors: active)': { backgroundImage: 'none' },
 				},
-				backgroundColor: ramp.rest,
+				...surfaceStyle(`${fill}.${surface}.rest`),
+				...toneColor,
 				backgroundImage: isSolid ? vars.controlFinish.resting : 'none',
-				color,
 				selectors: {
-					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: ramp.hover,
+					[hovered]: {
+						...surfaceStyle(`${fill}.${surface}.hover`),
+						...toneColor,
 						backgroundImage: isSolid ? vars.controlFinish.raised : 'none',
 					},
-					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: ramp.pressed,
+					[pressed]: {
+						...surfaceStyle(`${fill}.${surface}.pressed`),
+						...toneColor,
 						backgroundImage: isSolid ? vars.controlFinish.recessed : 'none',
 					},
 				},
@@ -273,8 +293,13 @@ function buttonSize(size: 'medium' | 'small') {
 	};
 }
 
-function textAppearance(tone: Tone, prominence: 'low' | 'standard' | 'high') {
-	const appearance = textActionAppearance(tone, prominence);
+function textAppearance(
+	kind: 'action' | 'link',
+	tone: Tone,
+	prominence: 'low' | 'standard' | 'high',
+) {
+	const appearance =
+		kind === 'link' ? textLinkAppearance(tone, prominence) : textActionAppearance(tone, prominence);
 	return [
 		{
 			style: {
@@ -293,11 +318,7 @@ function textAppearance(tone: Tone, prominence: 'low' | 'standard' | 'high') {
 					},
 				},
 			},
-			variants: { appearance: 'text' as const, prominence, tone },
+			variants: { appearance: 'text' as const, kind, prominence, tone },
 		},
 	];
-}
-
-function backgroundForTone(tone: BackgroundTone): Background {
-	return tone === 'critical' ? vars.color.background.danger : vars.color.background[tone];
 }

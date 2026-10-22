@@ -5,6 +5,7 @@ import { ICON_SIZES } from '../../sizing/icon-sizing.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+import { contextualDisabledForeground, contextualForeground } from '../../styles/surface.js';
 
 const dataDisabledSelector = '[data-disabled="true"]';
 
@@ -39,6 +40,9 @@ const errorIconRailInlineSize = `max(calc(${fallbackVar(fieldMessageIndent, '0px
 /**
  * Raw slotted config for the `Field` primitive.
  *
+ * A field's text sits on whatever surface surrounds the field, so every colour reads that
+ * surface's foreground context: readable on a solid fill as well as a standard surface.
+ *
  * Slots: `root` (stacked layout), `inline` (inline-control layout), `label`, `inlineLabel` (the
  * clickable label of an inline control such as `CheckboxLabel`), `inlineLabelText` (the text of a
  * composed inline control's label), `necessityMarker` (the required marker after a label's text),
@@ -68,13 +72,13 @@ const fieldConfig = {
 			},
 		},
 		label: {
-			color: vars.color.text.primary,
+			color: contextualForeground('primary'),
 			...vars.font.label,
 			minInlineSize: 0,
 
 			selectors: {
 				[`${dataDisabledSelector} &`]: {
-					color: vars.color.text.disabled,
+					color: contextualDisabledForeground(),
 				},
 			},
 		},
@@ -88,7 +92,7 @@ const fieldConfig = {
 			...pressFeedback,
 			selectors: {
 				[`&${dataDisabledSelector}`]: {
-					color: vars.color.text.disabled,
+					color: contextualDisabledForeground(),
 					cursor: 'not-allowed',
 				},
 			},
@@ -111,7 +115,7 @@ const fieldConfig = {
 			'required-asterisk': {},
 			'required-label': {
 				necessityMarker: {
-					color: vars.color.text.secondary,
+					color: contextualForeground('secondary'),
 					fontWeight: vars.font.weight.body,
 					selectors: {
 						[`${dataDisabledSelector} &`]: {
@@ -122,7 +126,7 @@ const fieldConfig = {
 			},
 			'optional-label': {
 				necessityMarker: {
-					color: vars.color.text.secondary,
+					color: contextualForeground('secondary'),
 					fontWeight: vars.font.weight.body,
 					selectors: {
 						[`${dataDisabledSelector} &`]: {
@@ -135,7 +139,7 @@ const fieldConfig = {
 		tone: {
 			description: {
 				message: {
-					color: vars.color.text.secondary,
+					color: contextualForeground('secondary'),
 				},
 			},
 			error: {
@@ -144,7 +148,9 @@ const fieldConfig = {
 						// `CanvasText` keeps the icon solid when author colours are ignored.
 						'(forced-colors: active)': { backgroundColor: 'CanvasText' },
 					},
-					backgroundColor: vars.color.foreground.danger.rest,
+					// The icon follows the message colour, which collapses to on-solid primary on a solid
+					// fill. The icon's shape and the message text carry the error, never the hue alone.
+					backgroundColor: 'currentColor',
 					// The rail has no content to size it, and the mask paints only inside its box.
 					blockSize: ICON_SIZES.px16,
 					inlineSize: errorIconRailInlineSize,
@@ -154,7 +160,7 @@ const fieldConfig = {
 					maskSize: ICON_SIZES.px16,
 				},
 				message: {
-					color: vars.color.foreground.danger.rest,
+					color: contextualForeground('danger'),
 					gap: errorIconGap,
 				},
 			},

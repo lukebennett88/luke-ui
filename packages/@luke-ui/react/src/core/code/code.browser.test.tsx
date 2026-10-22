@@ -1,7 +1,9 @@
+import { Box } from '@luke-ui/react/box';
 import { Code } from '@luke-ui/react/code';
 import { Text } from '@luke-ui/react/text';
 import { expect, test } from 'vite-plus/test';
 import { render, visualAppearances } from '../test-utils/render.js';
+import { pairedColors, surfaceColors } from '../test-utils/surface-colors.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
 const LONG_CONTENT =
@@ -109,3 +111,47 @@ test('long content states', { tags: ['visual'] }, async () => {
 
 	await captureVisual(locator, 'code/long-content');
 });
+
+for (const appearance of visualAppearances) {
+	const name = `${appearance.theme} ${appearance.mode}`;
+
+	// The chip is a neutral subtle fill, so it reads the neutral hierarchy rather than inheriting a
+	// solid fill's on-solid colour onto a neutral background.
+	test(`Code establishes its own chip context on a solid fill in ${name}`, () => {
+		const { container } = render(
+			<Box backgroundColor="accent.solid" padding="space.8">
+				<Text>
+					Run <Code>pnpm install</Code>
+				</Text>
+			</Box>,
+			{ appearance },
+		);
+		const code = getCodeElement(container);
+
+		expect(surfaceColors(code)).toEqual(pairedColors(code, 'neutral.subtle.rest'));
+	});
+
+	test(`Code inside a code block draws no second chip in ${name}`, () => {
+		const { container } = render(
+			<Box backgroundColor="accent.solid" padding="space.8">
+				<pre data-testid="block">
+					<Code>{'const a = 1;\nconst b = 2;'}</Code>
+				</pre>
+			</Box>,
+			{ appearance },
+		);
+		const block = container.querySelector('pre');
+		if (block === null) throw new Error('Expected a pre element.');
+		const code = getCodeElement(container);
+		const styles = getComputedStyle(code);
+
+		expect(surfaceColors(code)).toEqual({
+			...surfaceColors(block),
+			background: 'rgba(0, 0, 0, 0)',
+		});
+		expect(styles.borderTopStyle).toBe('none');
+		expect(styles.paddingInlineStart).toBe('0px');
+		expect(styles.fontSize).toBe(getComputedStyle(block).fontSize);
+		expect(styles.whiteSpace).toBe(getComputedStyle(block).whiteSpace);
+	});
+}

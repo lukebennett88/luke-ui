@@ -2,6 +2,7 @@ import { vars } from '../../theme/contract.css.js';
 import type { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
+type InteractionState = 'rest' | 'hover' | 'pressed';
 
 /** The readable primary and secondary colours, and one readable colour per semantic role. */
 type ForegroundSlot = 'primary' | 'secondary' | SemanticRole;
@@ -24,13 +25,30 @@ const toneOverride = '--luke-internal-foreground-tone';
 
 /**
  * The colour the nearest recognised surface establishes for `slot`. On a standard surface or any
- * subtle fill, the global neutral hierarchy and the role's resting hue. On a solid fill, that
- * role's on-solid leaves, with every semantic role resolving to on-solid primary.
+ * subtle fill, the global neutral hierarchy and the role's hue in `state`. On a solid fill, that
+ * role's on-solid leaves, with every semantic role in every state resolving to on-solid primary.
+ *
+ * `state` applies to the semantic roles, for an interactive foreground such as a text action's
+ * hover colour. The compiler gates every role's states against every subtle fill, so each stays
+ * readable. Primary and secondary have no states.
  */
-export function contextualForeground(slot: ForegroundSlot): string {
+export function contextualForeground(
+	slot: ForegroundSlot,
+	state: InteractionState = 'rest',
+): string {
 	if (slot === 'primary') return `var(${primaryOverride}, ${vars.color.text.primary})`;
 	if (slot === 'secondary') return `var(${secondaryOverride}, ${vars.color.text.secondary})`;
-	return `var(${toneOverride}, ${vars.color.foreground[slot].rest})`;
+	return `var(${toneOverride}, ${vars.color.foreground[slot][state]})`;
+}
+
+/**
+ * The colour of disabled text that sits on whatever surface surrounds it, such as a field label.
+ * On a standard surface or any subtle fill, the theme's disabled token. On a solid fill, which has
+ * no disabled leaf, the fill's on-solid secondary, so the text stays readable and the control's own
+ * disabled treatment carries the state.
+ */
+export function contextualDisabledForeground(): string {
+	return `var(${secondaryOverride}, ${vars.color.text.disabled})`;
 }
 
 /**
@@ -67,6 +85,27 @@ export function surfaceStyle(background: SurfaceBackground): {
 			[primaryOverride]: onSolid.primary,
 			[secondaryOverride]: onSolid.secondary,
 			[toneOverride]: onSolid.primary,
+		},
+	};
+}
+
+/**
+ * Undoes `surfaceStyle` on an element that stops painting a fill in some state, such as inline code
+ * inside a code block. The element turns transparent and takes its parent's colour and foreground
+ * context again.
+ */
+export function transparentSurfaceStyle(): {
+	backgroundColor: string;
+	color: string;
+	vars: Record<string, string>;
+} {
+	return {
+		backgroundColor: 'transparent',
+		color: 'inherit',
+		vars: {
+			[primaryOverride]: 'inherit',
+			[secondaryOverride]: 'inherit',
+			[toneOverride]: 'inherit',
 		},
 	};
 }

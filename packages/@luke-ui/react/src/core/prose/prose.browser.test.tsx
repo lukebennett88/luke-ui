@@ -11,7 +11,18 @@ import { expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
-import { captureVisualAppearance, focusViaKeyboard, Stack } from '../test-utils/visual.js';
+import {
+	pairedColors,
+	resolvedColor,
+	settledSurfaceColors,
+	surfaceColors,
+} from '../test-utils/surface-colors.js';
+import {
+	captureVisualAppearance,
+	emulateForcedColors,
+	focusViaKeyboard,
+	Stack,
+} from '../test-utils/visual.js';
 
 const swatch =
 	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='64'%3E%3Crect width='320' height='64' fill='%23888'/%3E%3C/svg%3E";
@@ -960,3 +971,161 @@ for (const state of ['hover', 'pressed', 'focus'] as const) {
 		}
 	});
 }
+
+async function pressPointer(element: Element) {
+	const bounds = element.getBoundingClientRect();
+	await cdp().send('Input.dispatchMouseEvent', {
+		type: 'mousePressed',
+		button: 'left',
+		buttons: 1,
+		clickCount: 1,
+		x: bounds.left + bounds.width / 2,
+		y: bounds.top + bounds.height / 2,
+	});
+}
+
+async function releasePointer() {
+	await cdp().send('Input.dispatchMouseEvent', {
+		type: 'mouseReleased',
+		button: 'left',
+		buttons: 0,
+		clickCount: 1,
+		x: -50,
+		y: -50,
+	});
+}
+
+/** Reads `read` for a native link at rest, hovered, and pressed with the real pointer. */
+async function inEveryLinkState<Value>(
+	link: ReturnType<typeof render>['locator'],
+	user: ReturnType<typeof render>['user'],
+	read: () => Value,
+): Promise<Array<Value>> {
+	const rest = read();
+	await user.hover(link);
+	await expect.poll(() => link.element().matches(':hover')).toBe(true);
+	const hover = read();
+	await pressPointer(link.element());
+	try {
+		await expect.poll(() => link.element().matches(':active')).toBe(true);
+		return [rest, hover, read()];
+	} finally {
+		await releasePointer();
+	}
+}
+
+for (const appearance of visualAppearances) {
+	const name = `${appearance.theme} ${appearance.mode}`;
+
+	test(`raw code, kbd, and pre establish their own context on a solid fill in ${name}`, () => {
+		const { container } = render(
+			<Box backgroundColor="accent.solid" padding="space.8">
+				<Prose>
+					<p>
+						Run <code data-testid="code">pnpm install</code> or press{' '}
+						<kbd data-testid="kbd">Enter</kbd>.
+					</p>
+					<pre data-testid="pre">
+						<code data-testid="pre-code">pnpm install</code>
+					</pre>
+				</Prose>
+			</Box>,
+			{ appearance },
+		);
+		const code = query(container, '[data-testid="code"]');
+		const kbd = query(container, '[data-testid="kbd"]');
+		const pre = query(container, '[data-testid="pre"]');
+		const preCode = query(container, '[data-testid="pre-code"]');
+
+		expect(surfaceColors(code)).toEqual(pairedColors(code, 'neutral.subtle.rest'));
+		expect(surfaceColors(kbd)).toEqual(pairedColors(kbd, 'surface.subdued'));
+		expect(surfaceColors(pre)).toEqual(pairedColors(pre, 'neutral.subtle.rest'));
+		// Code inside the block takes the block's colours and draws no chip of its own.
+		expect(surfaceColors(preCode)).toEqual({
+			...surfaceColors(pre),
+			background: 'rgba(0, 0, 0, 0)',
+		});
+		expect(getComputedStyle(preCode).borderTopStyle).toBe('none');
+	});
+
+	test(`Code inside a Prose code block draws no second chip in ${name}`, () => {
+		const { container } = render(
+			<Prose>
+				<pre data-testid="pre">
+					<Code>pnpm install</Code>
+				</pre>
+			</Prose>,
+			{ appearance },
+		);
+		const pre = query(container, '[data-testid="pre"]');
+		const code = query(pre, 'code');
+
+		expect(surfaceColors(code)).toEqual({
+			...surfaceColors(pre),
+			background: 'rgba(0, 0, 0, 0)',
+		});
+		expect(getComputedStyle(code).borderTopStyle).toBe('none');
+		expect(getComputedStyle(code).paddingInlineStart).toBe('0px');
+	});
+
+	test(`a native link stays underlined in the solid fill's colour in every state in ${name}`, async () => {
+		const { locator, user } = render(
+			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
+				<Prose>
+					<p>
+						<a href="#guide">Read the guide</a>
+					</p>
+				</Prose>
+			</Box>,
+			{ appearance },
+		);
+		const link = locator.getByRole('link', { name: 'Read the guide' });
+		const { primary } = pairedColors(
+			locator.getByTestId('parent').element(),
+			'success.solid',
+		).foreground;
+
+		const states = await inEveryLinkState(link, user, () => {
+			const { color } = settledSurfaceColors(link.element());
+			const styles = getComputedStyle(link.element());
+			return { color, decoration: styles.textDecorationColor, line: styles.textDecorationLine };
+		});
+
+		expect(states).toEqual(
+			['rest', 'hover', 'pressed'].map(() => ({
+				color: primary,
+				decoration: primary,
+				line: 'underline',
+			})),
+		);
+	});
+}
+
+test('a native link stays underlined in LinkText in forced colours', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const { locator, user } = render(
+			<Prose>
+				<p>
+					<a href="#guide">Read the guide</a>
+				</p>
+			</Prose>,
+		);
+		const link = locator.getByRole('link', { name: 'Read the guide' });
+
+		const states = await inEveryLinkState(link, user, () => {
+			const styles = getComputedStyle(link.element());
+			return { color: styles.color, line: styles.textDecorationLine };
+		});
+
+		expect(states).toEqual(
+			['rest', 'hover', 'pressed'].map(() => ({
+				color: resolvedColor('LinkText', link.element()),
+				line: 'underline',
+			})),
+		);
+	} finally {
+		await emulateForcedColors('none');
+	}
+});

@@ -13,9 +13,10 @@ import {
 import { kbdAppearance } from '../kbd/appearance.js';
 import { kbdElementClassName } from '../kbd/recipe.css.js';
 import { actionElementClassName } from '../primitives/button/recipe.css.js';
-import { textActionAppearance } from '../primitives/button/text-action-appearance.js';
+import { textLinkAppearance } from '../primitives/button/text-action-appearance.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import { recipe } from '../styles/recipe.js';
+import { surfaceStyle } from '../styles/surface.js';
 import { textElementClassName } from '../text/recipe.css.js';
 import { typeStyleFontDeclarations, typeStyleTrimVars } from '../text/type-style-declarations.js';
 
@@ -86,9 +87,11 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 	marginBlockStart: 0,
 });
 
-// Exclude recipe-owned elements: scope proximity otherwise beats equal-specificity recipes.
+// Exclude recipe-owned elements: scope proximity otherwise beats equal-specificity recipes. A plain
+// link looks like a standard text `Link`: underlined in every state, in the surrounding context's
+// colours.
 const plainLink = `a[href]:not(.${actionElementClassName}):not(.${textElementClassName})`;
-const linkAppearance = textActionAppearance('neutral', 'standard');
+const linkAppearance = textLinkAppearance('neutral', 'standard');
 proseStyle(plainLink, {
 	...linkAppearance.rest,
 	font: 'inherit',
@@ -119,8 +122,10 @@ proseStyle(
 	blockquoteAppearance,
 );
 
+// A code block is a neutral subtle fill with its own foreground context, like inline `Code`. Code
+// inside it takes the block's colours and draws no chip of its own.
 proseStyle('pre', {
-	backgroundColor: vars.color.background.neutral.subtle.rest,
+	...surfaceStyle('neutral.subtle.rest'),
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.control,
 	fontFamily: vars.font.family.code,

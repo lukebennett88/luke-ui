@@ -5,6 +5,7 @@ import { descendantDisabledSelector } from '../../styles/input-states.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+import { surfaceStyle } from '../../styles/surface.js';
 
 const notDisabled = ':not([data-disabled="true"])';
 const rootInvalid = `[data-invalid="true"] &${notDisabled}`;
@@ -40,13 +41,12 @@ const selectConfig = {
 			},
 			alignItems: 'center',
 			appearance: 'none',
-			backgroundColor: vars.color.surface.field,
+			...surfaceStyle('surface.field'),
 			borderColor: vars.color.border.control,
 			borderRadius: vars.radius.control,
 			borderStyle: 'solid',
 			borderWidth: '1px',
 			boxShadow: vars.depth.recessed,
-			color: vars.color.text.primary,
 			display: 'inline-flex',
 			fontFamily: vars.font.family.body,
 			gap: vars.space['8'],

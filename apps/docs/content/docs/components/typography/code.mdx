@@ -11,8 +11,10 @@ code semantics to assistive technology, and applies the theme's monospace code f
 
 ## In context
 
-`Code` is inline, so it inherits the surrounding size and colour and stays on one line by default.
-Pass `lineClamp` of 2 or more, or pass `textWrap`, when the content should wrap.
+`Code` is inline, so it inherits the surrounding size and stays on one line by default. Pass
+`lineClamp` of 2 or more, or pass `textWrap`, when the content should wrap. Its neutral chip sets
+its own text colour, so it stays readable on a solid background. Inside a `pre` code block, `Code`
+draws no chip and takes the block's colour and metrics.
 
 <ExampleBlock src="code/in-context" title="Code: In context" />
 

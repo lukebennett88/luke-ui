@@ -1,6 +1,8 @@
+import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
+import { vars } from '@luke-ui/react/theme';
 import { act } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { assert, expect, onTestFinished, test, vi } from 'vite-plus/test';
@@ -8,6 +10,13 @@ import { page } from 'vite-plus/test/context';
 import { watchSpinner } from '../test-utils/action-spinner.js';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
+import type { PairedBackground } from '../test-utils/surface-colors.js';
+import {
+	pairedColors,
+	resolvedColor,
+	setInteractionState,
+	settledSurfaceColors,
+} from '../test-utils/surface-colors.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -459,4 +468,174 @@ test('Button preserves intrinsic and full inline sizing', () => {
 	expect(
 		page.getByRole('button', { name: 'Save full' }).element().getBoundingClientRect().width,
 	).toBe(320);
+});
+
+const TRANSPARENT = 'rgba(0, 0, 0, 0)';
+const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
+
+type InteractionState = (typeof INTERACTION_STATES)[number];
+
+const buttonFills = [
+	{
+		fill: (state: InteractionState) => (state === 'rest' ? null : `neutral.subtle.${state}`),
+		label: 'Neutral low',
+		prominence: 'low',
+		tone: 'neutral',
+	},
+	{
+		fill: (state: InteractionState) => `neutral.subtle.${state}`,
+		label: 'Neutral standard',
+		prominence: 'standard',
+		tone: 'neutral',
+	},
+	{
+		fill: (state: InteractionState) => `accent.solid.${state}`,
+		label: 'Neutral high',
+		prominence: 'high',
+		tone: 'neutral',
+	},
+	{
+		fill: (state: InteractionState) => (state === 'rest' ? null : `danger.subtle.${state}`),
+		label: 'Critical low',
+		prominence: 'low',
+		tone: 'critical',
+	},
+	{
+		fill: (state: InteractionState) => `neutral.subtle.${state}`,
+		label: 'Critical standard',
+		prominence: 'standard',
+		tone: 'critical',
+	},
+	{
+		fill: (state: InteractionState) => `danger.solid.${state}`,
+		label: 'Critical high',
+		prominence: 'high',
+		tone: 'critical',
+	},
+] as const satisfies ReadonlyArray<{
+	fill: (state: InteractionState) => PairedBackground | null;
+	label: string;
+	prominence: 'low' | 'standard' | 'high';
+	tone: 'neutral' | 'critical';
+}>;
+
+for (const appearance of visualAppearances) {
+	const name = `${appearance.theme} ${appearance.mode}`;
+
+	// The parent is another role's solid fill, so a resting ghost shows it reads the surrounding
+	// context and every other fill shows it establishes its own.
+	test(`Button fills pair with their foreground in every interaction state in ${name}`, () => {
+		const { locator } = render(
+			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
+				{buttonFills.map(({ label, prominence, tone }) => (
+					<Button key={label} prominence={prominence} tone={tone}>
+						{label}
+					</Button>
+				))}
+			</Box>,
+			{ appearance },
+		);
+		const parent = locator.getByTestId('parent').element();
+
+		for (const { fill, label, tone } of buttonFills) {
+			const button = locator.getByRole('button', { name: label }).element();
+			const actual = INTERACTION_STATES.map((state) => {
+				setInteractionState(button, state);
+				return { state, ...settledSurfaceColors(button) };
+			});
+			const expected = INTERACTION_STATES.map((state) => {
+				const background = fill(state);
+				const paired =
+					background === null
+						? { ...pairedColors(parent, 'success.solid'), background: TRANSPARENT }
+						: pairedColors(button, background);
+				// A critical tone reads the context's danger colour instead of its primary.
+				const color = tone === 'critical' ? paired.foreground.danger : paired.color;
+				return { state, ...paired, color };
+			});
+
+			expect(actual).toEqual(expected);
+		}
+	});
+
+	test(`text Button colours read the surrounding surface in every state in ${name}`, () => {
+		const { locator } = render(
+			<>
+				<Box backgroundColor="accent.solid" padding="space.8">
+					<Button appearance="text" prominence="high">
+						On solid
+					</Button>
+				</Box>
+				<Box backgroundColor="success.subtle" padding="space.8">
+					<Button appearance="text" prominence="low" tone="critical">
+						On subtle
+					</Button>
+				</Box>
+			</>,
+			{ appearance },
+		);
+		const onSolid = locator.getByRole('button', { name: 'On solid' }).element();
+		const onSubtle = locator.getByRole('button', { name: 'On subtle' }).element();
+		const solidForeground = pairedColors(onSolid, 'accent.solid').foreground;
+
+		const actual = INTERACTION_STATES.map((state) => {
+			setInteractionState(onSolid, state);
+			setInteractionState(onSubtle, state);
+			return {
+				onSolid: settledSurfaceColors(onSolid).color,
+				onSubtle: settledSurfaceColors(onSubtle).color,
+				state,
+			};
+		});
+
+		expect(actual).toEqual(
+			INTERACTION_STATES.map((state) => ({
+				onSolid: solidForeground.accent,
+				onSubtle: resolvedColor(vars.color.foreground.danger[state], onSubtle),
+				state,
+			})),
+		);
+	});
+}
+
+// A text Button is not a link, so it keeps its own decoration rather than a link's underline.
+for (const { prominence, rest, active } of [
+	{ prominence: 'low', rest: 'none', active: 'underline' },
+	{ prominence: 'standard', rest: 'underline', active: 'none' },
+	{ prominence: 'high', rest: 'underline', active: 'none' },
+] as const) {
+	test(`a ${prominence} text Button keeps its own underline toggle`, () => {
+		const { locator } = render(
+			<Button appearance="text" prominence={prominence}>
+				Save
+			</Button>,
+		);
+		const button = locator.getByRole('button', { name: 'Save' }).element();
+		const decorations = INTERACTION_STATES.map((state) => {
+			setInteractionState(button, state);
+			return getComputedStyle(button).textDecorationLine;
+		});
+
+		expect(decorations).toEqual([rest, active, active]);
+	});
+}
+
+test('a Button on a solid fill takes system colours in forced colours', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const { locator } = render(
+			<Box backgroundColor="accent.solid" padding="space.8">
+				<Button prominence="high">Save</Button>
+			</Box>,
+		);
+		const button = locator.getByRole('button', { name: 'Save' }).element();
+
+		expect(settledSurfaceColors(button)).toMatchObject({
+			background: resolvedColor('ButtonFace', button),
+			color: resolvedColor('ButtonText', button),
+		});
+	} finally {
+		await emulateForcedColors('none');
+	}
 });

@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import {
 	ComboboxControl,
@@ -21,7 +22,13 @@ import type { ReactNode } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { MOBILE_SCREEN_WIDTH, mockScreenWidth } from '../test-utils/mock-screen-width.js';
-import { render } from '../test-utils/render.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import {
+	pairedColors,
+	setInteractionState,
+	settledSurfaceColors,
+	surfaceColors,
+} from '../test-utils/surface-colors.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 
 const items = [
@@ -227,3 +234,51 @@ test('overlay surfaces keep their own background inside a repainted scope', asyn
 
 	expect(getComputedStyle(overlay).backgroundColor).toBe(expected);
 });
+
+/** The element that paints the overlay surface: the popover, or the tray's sheet. */
+function overlaySurface(kind: OverlayKind, overlay: HTMLElement): HTMLElement {
+	if (kind !== 'combobox tray') return overlay;
+	const sheet = document.querySelector(OVERLAY_SELECTOR[kind])?.parentElement;
+	if (sheet == null) throw new Error('expected the tray sheet');
+	return sheet;
+}
+
+for (const appearance of visualAppearances) {
+	const name = `${appearance.theme} ${appearance.mode}`;
+	const otherMode = appearance.mode === 'light' ? 'dark' : 'light';
+
+	for (const kind of overlayKinds) {
+		// The trigger sits on a solid fill in the opposite colour mode. The portalled surface must
+		// establish its own neutral context in that mode, not inherit the page's or the fill's.
+		test(`the ${kind} pairs its surface and items with their foreground in ${name}`, async () => {
+			if (kind === 'combobox tray') mockScreenWidth(MOBILE_SCREEN_WIDTH);
+			render(
+				<div data-color-mode={otherMode}>
+					<Box backgroundColor="accent.solid" padding="space.8">
+						<Overlay kind={kind} />
+					</Box>
+				</div>,
+				{ appearance },
+			);
+
+			const surface = overlaySurface(kind, await openOverlay(kind));
+			const option = page.getByRole('option', { name: 'Option one' }).element();
+
+			expect(settledSurfaceColors(surface)).toEqual(pairedColors(surface, 'surface.overlay'));
+			expect(surfaceColors(option).color).toBe(pairedColors(option, 'surface.overlay').color);
+			const itemStates = [
+				{ background: 'neutral.subtle.hover', isSelected: false, state: 'hover' },
+				{ background: 'neutral.subtle.pressed', isSelected: false, state: 'pressed' },
+				{ background: 'accent.subtle.rest', isSelected: true, state: 'rest' },
+				{ background: 'accent.subtle.hover', isSelected: true, state: 'hover' },
+			] as const;
+			const actual = itemStates.map(({ isSelected, state }) => {
+				setInteractionState(option, state);
+				option.setAttribute('data-selected', String(isSelected));
+				return settledSurfaceColors(option);
+			});
+
+			expect(actual).toEqual(itemStates.map(({ background }) => pairedColors(option, background)));
+		});
+	}
+}
