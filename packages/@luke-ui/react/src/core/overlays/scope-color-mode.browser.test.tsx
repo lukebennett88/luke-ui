@@ -19,7 +19,7 @@ import {
 } from '@luke-ui/react/primitives/select';
 import { SelectField } from '@luke-ui/react/select-field';
 import type { ReactNode } from 'react';
-import { afterEach, expect, test } from 'vite-plus/test';
+import { afterEach, expect, onTestFinished, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { MOBILE_SCREEN_WIDTH, mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render, visualAppearances } from '../test-utils/render.js';
@@ -281,4 +281,30 @@ for (const appearance of visualAppearances) {
 			expect(actual).toEqual(itemStates.map(({ background }) => pairedColors(option, background)));
 		});
 	}
+}
+
+// The private foreground overrides a solid fill sets. Their names are stable so tests that load the
+// built stylesheet can set them.
+const FOREGROUND_OVERRIDES = [
+	'--luke-internal-foreground-primary',
+	'--luke-internal-foreground-secondary',
+	'--luke-internal-foreground-tone',
+];
+
+for (const kind of overlayKinds) {
+	// Portals usually inherit the body's neutral context, which would hide a surface that forgot its
+	// own resets. A solid context on the body makes the inherited context wrong on purpose.
+	test(`the ${kind} establishes its own foreground slots rather than inheriting them`, async () => {
+		for (const name of FOREGROUND_OVERRIDES)
+			document.body.style.setProperty(name, 'rgb(255, 0, 0)');
+		onTestFinished(() => {
+			for (const name of FOREGROUND_OVERRIDES) document.body.style.removeProperty(name);
+		});
+		renderOverlay(kind, (overlay) => overlay);
+
+		const surface = overlaySurface(kind, await openOverlay(kind));
+
+		expect(surface).not.toHaveAttribute('data-color-mode');
+		expect(settledSurfaceColors(surface)).toEqual(pairedColors(surface, 'surface.overlay'));
+	});
 }
