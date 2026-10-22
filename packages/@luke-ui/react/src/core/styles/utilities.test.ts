@@ -2,7 +2,7 @@ import { assertType, expect, expectTypeOf, test } from 'vite-plus/test';
 import type { BoxProps } from '../../../dist/box.js';
 import { vars } from '../../theme/contract.css.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
-import { createSprinkles } from './create-sprinkles.js';
+import { createSprinkles } from './utilities.css.js';
 import type { SprinklesProps } from './utilities.css.js';
 
 type UtilityProps = NonNullable<BoxProps>;
@@ -36,6 +36,7 @@ test('gives every resting background its own class and no inline value', () => {
 	];
 
 	const classNames = tokens.map((backgroundColor) => {
+		assertType<UtilityProps['backgroundColor']>(backgroundColor);
 		const { className, style } = createSprinkles({ backgroundColor });
 		expect(style).toEqual({});
 		return className;
@@ -83,6 +84,7 @@ test('derives token-backed Box values from the public contract', () => {
 test('passes through own enumerable string-keyed non-utility props', () => {
 	const result = createSprinkles({
 		'data-testid': 'box',
+		backgroundColor: 'accent.solid',
 		display: 'flex',
 		id: 'layout-root',
 		role: 'group',
@@ -93,8 +95,14 @@ test('passes through own enumerable string-keyed non-utility props', () => {
 		id: 'layout-root',
 		role: 'group',
 	});
-	expect(result.className.length).toBeGreaterThan(0);
+	expect(result.className.split(' ')).toEqual(
+		expect.arrayContaining([
+			createSprinkles({ display: 'flex' }).className,
+			createSprinkles({ backgroundColor: 'accent.solid' }).className,
+		]),
+	);
 	expect('display' in result).toBe(false);
+	expect('backgroundColor' in result).toBe(false);
 });
 
 test('replaces input className and style with generated output', () => {
@@ -202,8 +210,14 @@ test('createSprinkles.properties is a read-only Set contract', () => {
 });
 
 test('createSprinkles keeps non-utility props on the result and consumes the utility ones', () => {
-	const result = createSprinkles({ 'data-testid': 'box', display: 'flex', id: 'root' });
+	const result = createSprinkles({
+		'data-testid': 'box',
+		backgroundColor: 'surface.base',
+		display: 'flex',
+		id: 'root',
+	});
 	expectTypeOf(result).not.toHaveProperty('display');
+	expectTypeOf(result).not.toHaveProperty('backgroundColor');
 	expect(Object.hasOwn(result, 'display')).toBe(false);
 	expect(result.id).toBe('root');
 });
