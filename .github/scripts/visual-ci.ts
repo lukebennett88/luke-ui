@@ -146,7 +146,7 @@ export async function waitForNewestBaseline(
 
 	for (;;) {
 		// Sequential: each poll must see the previous wait finish before asking again.
-		// eslint-disable-next-line no-await-in-loop -- newest-run status only changes over time
+		// oxlint-disable-next-line no-await-in-loop
 		const newestRun = await fetchNewest();
 
 		if (newestRun === 'workflow-missing') {
@@ -180,7 +180,8 @@ export async function waitForNewestBaseline(
 			}
 
 			const sleepMs = Math.min(pollIntervalMs, remainingMs);
-			// eslint-disable-next-line no-await-in-loop -- bounded poll delay between status checks
+			// Wait between status checks before fetching the next run.
+			// oxlint-disable-next-line no-await-in-loop
 			await delay(sleepMs);
 			waitedMs += sleepMs;
 			continue;

@@ -30,6 +30,7 @@ function createPrettierFormattingProvider(): Monaco.languages.DocumentFormatting
 				const formatted = await formatDocsPlaygroundSource(original);
 				return documentFormattingEdits(original, formatted, model.getFullModelRange());
 			} catch (error) {
+				// Report formatting failures without interrupting the editor.
 				// oxlint-disable-next-line no-console
 				console.warn('[playground] Format failed: Prettier could not load.', error);
 				return [];
@@ -79,6 +80,7 @@ export async function runFormatDocument(
 	try {
 		await action.run();
 	} catch (error) {
+		// Report formatting failures without interrupting the editor.
 		// oxlint-disable-next-line no-console
 		console.warn('[playground] Format document action failed.', error);
 	}

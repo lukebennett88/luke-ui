@@ -10,6 +10,7 @@ const isMain =
 
 if (isMain) {
 	const { removedCount } = cleanGeneratedPropsPages(componentsDir);
+	// Report command progress and diagnostics in the terminal.
 	// oxlint-disable-next-line no-console
 	console.log(
 		removedCount > 0

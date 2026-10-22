@@ -65,7 +65,8 @@ export function KitchenSinkDocument() {
 			</Blockquote>
 
 			<h4>Reading a token</h4>
-			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable pre */}
+			{/* Scrollable content needs keyboard focus. */}
+			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
 			<pre tabIndex={0}>
 				<code>{'padding-inline: var(--luke-space-16);\nmargin-block: 0;'}</code>
 			</pre>

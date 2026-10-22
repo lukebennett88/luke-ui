@@ -210,6 +210,7 @@ async function renderInProse(children: ReactNode) {
 				`Timed out waiting for the example module to load. Rendered: ${container.textContent ?? ''}`,
 			);
 		}
+		// Keep each polling update inside act before checking again.
 		// oxlint-disable-next-line no-await-in-loop
 		await act(async () => {
 			await new Promise((resolve) => setTimeout(resolve, 10));

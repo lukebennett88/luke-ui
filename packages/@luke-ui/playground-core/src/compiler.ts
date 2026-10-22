@@ -38,7 +38,6 @@ export function createPlaygroundCompiler(scope: PlaygroundScope): {
 
 		const module: { exports: { default?: unknown } } = { exports: {} };
 		// The playground executes code from its editor or URL hash.
-		// oxlint-disable-next-line typescript/no-implied-eval
 		new Function('require', 'module', 'exports', compiled)(requireModule, module, module.exports);
 
 		const component = module.exports.default;

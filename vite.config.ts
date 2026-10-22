@@ -70,6 +70,8 @@ export default defineConfig({
 			},
 		],
 		options: {
+			// Type-only passes do not see the syntax diagnostics suppressed by inline directives.
+			reportUnusedDisableDirectives: process.argv.includes('--type-aware') ? 'off' : 'error',
 			typeAware: false,
 			typeCheck: false,
 		},
@@ -326,7 +328,13 @@ export default defineConfig({
 						suspicious: 'off',
 					},
 					jsPlugins: [],
-					overrides: [],
+					overrides: [
+						{
+							// The playground compiler intentionally executes editor code with new Function.
+							files: ['packages/@luke-ui/playground-core/src/compiler.ts'],
+							rules: { 'typescript/no-implied-eval': 'off' },
+						},
+					],
 					plugins: ['typescript'],
 					rules: {
 						'typescript/await-thenable': 'deny',

@@ -110,7 +110,9 @@ export function DocsSearchDialog({
 								<TextInputField
 									aria-label="Search documentation"
 									autoComplete="off"
-									autoFocus // oxlint-disable-line jsx-a11y/no-autofocus -- Focus the field when the modal opens.
+									// Focus the search field when the modal opens.
+									// oxlint-disable-next-line jsx-a11y/no-autofocus
+									autoFocus
 									className={styles.field}
 									inputClassName={styles.input}
 									placeholder="Search documentation"

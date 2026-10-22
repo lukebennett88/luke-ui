@@ -83,10 +83,7 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
  * as `document.currentScript.previousElementSibling`.
  */
 export function EditorSkeletonShapeScript() {
-	return (
-		// oxlint-disable-next-line react/no-danger -- static, fully inlined script; nothing user-controlled beyond digits.
-		<script dangerouslySetInnerHTML={{ __html: shapeScript }} />
-	);
+	return <script dangerouslySetInnerHTML={{ __html: shapeScript }} />;
 }
 
 /** Shared loading indicator so the editor and preview speak the same language. */

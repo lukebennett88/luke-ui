@@ -177,7 +177,8 @@ function handleEntry(
 		}
 	}
 
-	// eslint-disable-next-line no-console
+	// Report invalid styling values to the application developer.
+	// oxlint-disable-next-line no-console
 	console.error(
 		`Rainbow Sprinkles: invalid value provided to prop '${propName}'. Expected one of ${
 			hasValues(propertyConfig)

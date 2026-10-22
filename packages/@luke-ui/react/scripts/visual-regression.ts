@@ -78,6 +78,7 @@ async function hasPngs(directory: string): Promise<boolean> {
 }
 
 function log(message: string) {
+	// Report command progress and diagnostics in the terminal.
 	// oxlint-disable-next-line no-console
 	console.log(message);
 }

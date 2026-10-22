@@ -351,7 +351,8 @@ test('scrolls long preformatted lines without widening a narrow grid column', as
 	const { locator, user } = render(
 		<Prose style={{ display: 'grid', inlineSize: 160 }}>
 			<button type="button">Before code</button>
-			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable pre */}
+			{/* Scrollable content needs keyboard focus. */}
+			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
 			<pre tabIndex={0}>
 				<code>{code}</code>
 			</pre>
@@ -376,7 +377,8 @@ test('scrolls a wide table inside a narrow container', async () => {
 	const { locator, user } = render(
 		<Prose style={{ inlineSize: 160 }}>
 			<button type="button">Before table</button>
-			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable table */}
+			{/* Scrollable content needs keyboard focus. */}
+			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
 			<table tabIndex={0}>
 				<tbody>
 					<tr>

@@ -10,6 +10,7 @@ const issues = findTypeDefinitionLinkIssues(clientAssetsDir);
 
 if (issues.length > 0) {
 	for (const issue of issues) {
+		// Report command progress and diagnostics in the terminal.
 		// oxlint-disable-next-line no-console
 		console.error(`check:type-definition-links: ${issue}`);
 	}
@@ -17,6 +18,7 @@ if (issues.length > 0) {
 } else {
 	const { tables } = findBuiltTypeDefinitionTables(clientAssetsDir);
 	const assets = new Set(tables.map((table) => table.assetFile));
+	// Report command progress and diagnostics in the terminal.
 	// oxlint-disable-next-line no-console
 	console.log(
 		`check:type-definition-links: ${String(tables.length)} API table(s) across ${String(assets.size)} definition asset(s) passed at ${resolve(clientAssetsDir)}`,

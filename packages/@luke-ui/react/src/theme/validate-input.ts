@@ -260,6 +260,7 @@ const OPTIONAL_METRICS = ['xHeight', 'xWidthAvg'] as const;
  * block delimiter, the start of a tag, a control character, a backslash, which can escape the
  * closing quote or `;`, or a comment delimiter, which can hide every declaration after it.
  */
+// Reject control characters before font-family values reach CSS.
 // oxlint-disable-next-line eslint/no-control-regex
 const UNSAFE_FAMILY_PATTERN = /[;{}<\\\u0000-\u001F\u007F]|\/\*|\*\//;
 
