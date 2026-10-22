@@ -3,7 +3,8 @@ import type { ThemeInput } from '../define-theme.js';
 
 /**
  * The visual-test copy of Paper, the materially minimal theme `@luke-ui/theme-paper` publishes. The
- * two inputs are independent and may diverge. Its light mode approximates the flat,
+ * two inputs are independent and may diverge, except that the packed-consumer harness requires
+ * matching solid fills, on-solid text, and control finish. Its light mode approximates the flat,
  * hairline-bordered Luke UI look with the blue `#185281`-family accent and explicitly authored status
  * colours; its dark mode is net-new and lets the `info`, `success`, and `warning` roles fall back to
  * the curated mode defaults (their dark sides are omitted).

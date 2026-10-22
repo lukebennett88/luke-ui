@@ -111,9 +111,10 @@ the screenshot pixels behind it with `lowestRenderedTextContrast`.
 
 Visual cases are `visual`-tagged browser tests. `render()` compiles React-owned copies of the
 Tactile and Paper inputs from `src/theme/__fixtures__/`. Those copies can diverge from the published
-theme packages. Capture each visually meaningful component in its representative fixture across
-Tactile light, Tactile dark, Paper light, and Paper dark. This is not an exhaustive state matrix.
-Add another capture only for a materially different state.
+theme packages, except in their solid fills, on-solid text, and control finish, which the
+packed-consumer harness requires to match. Capture each visually meaningful component in its
+representative fixture across Tactile light, Tactile dark, Paper light, and Paper dark. This is not
+an exhaustive state matrix. Add another capture only for a materially different state.
 
 `flatAppearances` renders Tactile's colours with every depth and control finish set to `none`. Use
 it, outside the theme matrix, for a capture that proves states stay distinct without materials.

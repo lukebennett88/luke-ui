@@ -3,7 +3,8 @@ import type { ThemeInput } from '../define-theme.js';
 
 /**
  * The visual-test copy of Tactile, the theme `@luke-ui/theme-tactile` publishes. The two inputs are
- * independent and may diverge. Tactile has a teal accent, a neutral near-white light canvas, lighter
+ * independent and may diverge, except that the packed-consumer harness requires matching solid
+ * fills, on-solid text, and control finish. Tactile has a teal accent, a neutral near-white light canvas, lighter
  * chromatic dark surfaces, and a restrained material lit from above. Both modes are authored
  * explicitly, so `defineTheme` uses each side as written.
  */
