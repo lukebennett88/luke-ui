@@ -8,8 +8,8 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { assert, expect, onTestFinished, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { watchSpinner } from '../test-utils/action-spinner.js';
-import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { render, visualAppearances } from '../test-utils/render.js';
+import { expectEveryTextToPassContrast, expectNoAxeViolations } from '../test-utils/axe.js';
+import { flatAppearances, render, visualAppearances } from '../test-utils/render.js';
 import type { PairedBackground } from '../test-utils/surface-colors.js';
 import {
 	pairedColors,
@@ -524,8 +524,8 @@ for (const appearance of visualAppearances) {
 
 	// The parent is another role's solid fill, so a resting ghost shows it reads the surrounding
 	// context and every other fill shows it establishes its own.
-	test(`Button fills pair with their foreground in every interaction state in ${name}`, async () => {
-		const { container, locator } = render(
+	test(`Button fills pair with their foreground in every interaction state in ${name}`, () => {
+		const { locator } = render(
 			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
 				{buttonFills.map(({ label, prominence, tone }) => (
 					<Button key={label} prominence={prominence} tone={tone}>
@@ -536,8 +536,6 @@ for (const appearance of visualAppearances) {
 			{ appearance },
 		);
 		const parent = locator.getByTestId('parent').element();
-		// axe checks the resting contrast from the rendered colours.
-		await expectNoAxeViolations(container);
 
 		for (const { fill, label, tone } of buttonFills) {
 			const button = locator.getByRole('button', { name: label }).element();
@@ -597,6 +595,39 @@ for (const appearance of visualAppearances) {
 				state,
 			})),
 		);
+	});
+}
+
+// axe measures each Button's text against its rendered fill in every state. It cannot measure text
+// over the control finish's gradient, so the flat appearances, which have no finish, measure the
+// solid fills.
+for (const appearance of [...visualAppearances, ...flatAppearances]) {
+	const hasFinish = appearance.theme !== 'flat';
+	const measured = buttonFills.filter(({ prominence }) => !hasFinish || prominence !== 'high');
+
+	test(`Button text passes axe contrast on ${hasFinish ? 'ghost and subtle' : 'every'} fill in every state in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { container, locator } = render(
+			<Box backgroundColor="success.solid" padding="space.8">
+				{measured.map(({ label, prominence, tone }) => (
+					<Button key={label} prominence={prominence} tone={tone}>
+						{label}
+					</Button>
+				))}
+			</Box>,
+			{ appearance },
+		);
+		const buttons = measured.map(({ label }) =>
+			locator.getByRole('button', { name: label }).element(),
+		);
+
+		for (const state of INTERACTION_STATES) {
+			for (const button of buttons) {
+				setInteractionState(button, state);
+				settledSurfaceColors(button);
+			}
+			// eslint-disable-next-line no-await-in-loop -- each state must be measured before the next
+			await expectEveryTextToPassContrast(container);
+		}
 	});
 }
 

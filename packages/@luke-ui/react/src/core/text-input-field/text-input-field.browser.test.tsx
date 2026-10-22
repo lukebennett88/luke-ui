@@ -6,7 +6,7 @@ import { createRef } from 'react';
 import { TextFieldContext } from 'react-aria-components/TextField';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { expectEveryTextToPassContrast, expectNoAxeViolations } from '../test-utils/axe.js';
 import { expectAccessibleNameWords } from '../test-utils/expect-accessible-name-words.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
 import { measureFieldError } from '../test-utils/measure-field-error.js';
@@ -431,7 +431,7 @@ for (const appearance of visualAppearances) {
 			foreground.secondary,
 		);
 		expect(surfaceColors(control)).toEqual(pairedColors(control, 'surface.field'));
-		await expectNoAxeViolations(container);
+		await expectEveryTextToPassContrast(container);
 	});
 
 	// On a solid fill the danger hue collapses to on-solid primary, so the icon shape, the message,
@@ -453,7 +453,7 @@ for (const appearance of visualAppearances) {
 		expect(getComputedStyle(icon).maskImage).not.toBe('none');
 		expect(input).toHaveAttribute('aria-invalid', 'true');
 		expect(input).toHaveAccessibleDescription('Enter a valid email.');
-		await expectNoAxeViolations(container);
+		await expectEveryTextToPassContrast(container);
 	});
 
 	test(`an error keeps its danger hue on another role's subtle fill in ${name}`, () => {
