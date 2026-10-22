@@ -24,11 +24,11 @@ const globalRules = [
 	[':where(:root)', 'container-type: inline-size; text-size-adjust: 100%;'],
 	[
 		':where(body)',
-		'accent-color: var(--luke-color-background-accent-solid-rest); background-color: var(--luke-color-surface-base); color: var(--luke-color-text-primary); font-family: var(--luke-font-body-font-family); font-size: var(--luke-font-body-font-size); font-weight: var(--luke-font-body-font-weight); letter-spacing: var(--luke-font-body-letter-spacing); line-height: 1.5; margin: 0px;',
+		'--luke-internal-foreground-primary: initial; --luke-internal-foreground-secondary: initial; --luke-internal-foreground-tone: initial; accent-color: var(--luke-color-background-accent-solid-rest); background-color: var(--luke-color-surface-base); color: var(--luke-color-text-primary); font-family: var(--luke-font-body-font-family); font-size: var(--luke-font-body-font-size); font-weight: var(--luke-font-body-font-weight); letter-spacing: var(--luke-font-body-letter-spacing); line-height: 1.5; margin: 0px;',
 	],
 	[
 		':where(body [data-color-mode="light"], body [data-color-mode="dark"])',
-		'accent-color: var(--luke-color-background-accent-solid-rest); background-color: var(--luke-color-surface-base); color: var(--luke-color-text-primary);',
+		'--luke-internal-foreground-primary: initial; --luke-internal-foreground-secondary: initial; --luke-internal-foreground-tone: initial; accent-color: var(--luke-color-background-accent-solid-rest); background-color: var(--luke-color-surface-base); color: var(--luke-color-text-primary);',
 	],
 	[':where(button, input, select, textarea)', 'font: inherit; margin: 0px;'],
 	[

@@ -8,7 +8,7 @@ export default () => {
 		<Lockup gap="space.12" railAlignment="center">
 			<LockupRail>
 				<Box
-					backgroundColor="neutral.subtle.rest"
+					backgroundColor="neutral.subtle"
 					blockSize="3rem"
 					borderRadius="full"
 					inlineSize="3rem"

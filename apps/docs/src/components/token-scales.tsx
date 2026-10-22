@@ -23,7 +23,7 @@ export function SpaceTokens() {
 						key={token.path}
 						sample={
 							<Box
-								backgroundColor="accent.solid.rest"
+								backgroundColor="accent.solid"
 								blockSize={vars.space['12']}
 								borderRadius="detail"
 								style={{ inlineSize: `var(${token.variable})` }}
@@ -58,7 +58,7 @@ export function RadiusTokens() {
 						note={RADIUS_NOTES[token.path]}
 						sample={
 							<Box
-								backgroundColor="accent.subtle.rest"
+								backgroundColor="accent.subtle"
 								blockSize={RADIUS_SAMPLE_SIZE}
 								borderColor="accent"
 								borderStyle="solid"
@@ -118,7 +118,7 @@ export function DepthAndFinishTokens() {
 						key={token.path}
 						sample={
 							<Box
-								backgroundColor="neutral.solid.rest"
+								backgroundColor="neutral.solid"
 								blockSize={vars.controlSize.px40}
 								borderRadius="control"
 								inlineSize={DEPTH_FINISH_SAMPLE_SIZE}
@@ -144,7 +144,7 @@ export function SizingTokens() {
 						key={token.path}
 						sample={
 							<Box
-								backgroundColor="accent.subtle.rest"
+								backgroundColor="accent.subtle"
 								borderColor="accent"
 								borderRadius="control"
 								borderStyle="solid"
@@ -190,7 +190,7 @@ function SampleControl({ label, opacity }: { label: string; opacity?: string }) 
 	return (
 		<Box
 			alignItems="center"
-			backgroundColor="neutral.subtle.rest"
+			backgroundColor="neutral.subtle"
 			blockSize={vars.controlSize.px32}
 			borderColor="control"
 			borderRadius="control"

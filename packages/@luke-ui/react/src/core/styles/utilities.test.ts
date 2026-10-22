@@ -1,8 +1,9 @@
 import { assertType, expect, expectTypeOf, test } from 'vite-plus/test';
 import type { BoxProps } from '../../../dist/box.js';
 import { vars } from '../../theme/contract.css.js';
-import type { SprinklesProps } from './utilities.css.js';
+import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import { createSprinkles } from './utilities.css.js';
+import type { SprinklesProps } from './utilities.css.js';
 
 type UtilityProps = NonNullable<BoxProps>;
 
@@ -19,36 +20,47 @@ test('exposes the responsive layout and appearance property surface', () => {
 	expect(createSprinkles.properties).not.toContain('fontSize');
 });
 
-test('resolves backgroundColor and borderColor tokens to their theme variables', () => {
-	const { style } = createSprinkles({
-		backgroundColor: 'accent.solid.rest',
-		borderColor: 'focus',
-	});
+test('resolves borderColor tokens to their theme variables', () => {
+	const { style } = createSprinkles({ borderColor: 'focus' });
 
-	// An unregistered token still yields a class, with the raw string assigned as the custom
-	// property value, so the contract is the `var(--luke-*)` references.
-	expect(Object.values(style ?? {}).toSorted()).toEqual([
-		'var(--luke-color-background-accent-solid-rest)',
-		'var(--luke-color-border-focus)',
-	]);
+	expect(Object.values(style ?? {})).toEqual(['var(--luke-color-border-focus)']);
 });
 
-// Surfaces are opaque backgrounds. The translucent scrim is excluded.
-test('resolves every surface background token to its theme variable', () => {
-	const surfaces = ['base', 'subdued', 'field', 'overlay'] as const;
+// The fill and its foreground context come from one class, never an inline value.
+test('gives every resting background its own class and no inline value', () => {
+	const tokens = [
+		...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid`] as const),
+		...(['base', 'subdued', 'field', 'overlay'] as const).map((surface) => {
+			return `surface.${surface}` as const;
+		}),
+	];
 
-	// A missing token still returns a class with the raw string, so assert the generated variable.
-	const resolved = surfaces.map((surface) => {
-		const { style } = createSprinkles({ backgroundColor: `surface.${surface}` });
-		return [surface, Object.values(style ?? {})] as const;
+	const classNames = tokens.map((backgroundColor) => {
+		assertType<UtilityProps['backgroundColor']>(backgroundColor);
+		const { className, style } = createSprinkles({ backgroundColor });
+		expect(style).toEqual({});
+		return className;
 	});
 
-	expect(Object.fromEntries(resolved)).toEqual({
-		base: ['var(--luke-color-surface-base)'],
-		field: ['var(--luke-color-surface-field)'],
-		overlay: ['var(--luke-color-surface-overlay)'],
-		subdued: ['var(--luke-color-surface-subdued)'],
-	});
+	expect(classNames.every(Boolean)).toBe(true);
+	expect(new Set(classNames).size).toBe(tokens.length);
+});
+
+test('gives each responsive background condition its own class', () => {
+	const initial = createSprinkles({ backgroundColor: 'accent.solid' }).className;
+	const responsive = createSprinkles({
+		backgroundColor: { initial: 'accent.solid', bp768: 'surface.base', bp1024: null },
+	}).className.split(' ');
+
+	expect(responsive).toHaveLength(2);
+	expect(responsive[0]).toBe(initial);
+	expect(responsive[1]).not.toBe(createSprinkles({ backgroundColor: 'surface.base' }).className);
+});
+
+test('an omitted background adds no class', () => {
+	expect(createSprinkles({ backgroundColor: undefined }).className).toBe('');
+	expect(createSprinkles({ backgroundColor: null }).className).toBe('');
+	expect(createSprinkles({ backgroundColor: {} }).className).toBe('');
 });
 
 // Box is a second way into the token contract, so its token-backed values follow `vars`.
@@ -72,6 +84,7 @@ test('derives token-backed Box values from the public contract', () => {
 test('passes through own enumerable string-keyed non-utility props', () => {
 	const result = createSprinkles({
 		'data-testid': 'box',
+		backgroundColor: 'accent.solid',
 		display: 'flex',
 		id: 'layout-root',
 		role: 'group',
@@ -82,8 +95,14 @@ test('passes through own enumerable string-keyed non-utility props', () => {
 		id: 'layout-root',
 		role: 'group',
 	});
-	expect(result.className.length).toBeGreaterThan(0);
+	expect(result.className.split(' ')).toEqual(
+		expect.arrayContaining([
+			createSprinkles({ display: 'flex' }).className,
+			createSprinkles({ backgroundColor: 'accent.solid' }).className,
+		]),
+	);
 	expect('display' in result).toBe(false);
+	expect('backgroundColor' in result).toBe(false);
 });
 
 test('replaces input className and style with generated output', () => {
@@ -131,9 +150,13 @@ test('backgroundColor rejects anything but a namespaced role or surface token', 
 	// @ts-expect-error — not a token, and would be allowed by a widened `Record<string, string>`
 	assertType<UtilityProps['backgroundColor']>('rebeccapurple');
 	// @ts-expect-error — unknown role
-	assertType<UtilityProps['backgroundColor']>('magenta.solid.rest');
-	// @ts-expect-error — unknown state
-	assertType<UtilityProps['backgroundColor']>('accent.solid.disabled');
+	assertType<UtilityProps['backgroundColor']>('magenta.solid');
+	// @ts-expect-error — Box exposes the resting fill only
+	assertType<UtilityProps['backgroundColor']>('accent.solid.rest');
+	// @ts-expect-error — interaction states stay recipe tokens
+	assertType<UtilityProps['backgroundColor']>('accent.subtle.hover');
+	// @ts-expect-error — interaction states stay recipe tokens
+	assertType<UtilityProps['backgroundColor']>('danger.solid.pressed');
 	// @ts-expect-error — a translucent scrim is not an opaque surface fill
 	assertType<UtilityProps['backgroundColor']>('overlay.backdrop');
 	// @ts-expect-error — surfaces are namespaced, so the bare name must not assign
@@ -187,8 +210,14 @@ test('createSprinkles.properties is a read-only Set contract', () => {
 });
 
 test('createSprinkles keeps non-utility props on the result and consumes the utility ones', () => {
-	const result = createSprinkles({ 'data-testid': 'box', display: 'flex', id: 'root' });
+	const result = createSprinkles({
+		'data-testid': 'box',
+		backgroundColor: 'surface.base',
+		display: 'flex',
+		id: 'root',
+	});
 	expectTypeOf(result).not.toHaveProperty('display');
+	expectTypeOf(result).not.toHaveProperty('backgroundColor');
 	expect(Object.hasOwn(result, 'display')).toBe(false);
 	expect(result.id).toBe('root');
 });

@@ -8,7 +8,7 @@ export default () => {
 			<ComparisonItem label="Without bleed">
 				<Stack gap="space.16">
 					<ExampleItem>First item</ExampleItem>
-					<ExampleItem backgroundColor="info.subtle.rest">Middle item</ExampleItem>
+					<ExampleItem backgroundColor="info.subtle">Middle item</ExampleItem>
 					<ExampleItem>Last item</ExampleItem>
 				</Stack>
 			</ComparisonItem>
@@ -16,7 +16,7 @@ export default () => {
 				<Stack gap="space.16">
 					<ExampleItem>First item</ExampleItem>
 					<Bleed block="space.24" position="relative">
-						<ExampleItem backgroundColor="info.subtle.rest">Middle item</ExampleItem>
+						<ExampleItem backgroundColor="info.subtle">Middle item</ExampleItem>
 					</Bleed>
 					<ExampleItem>Last item</ExampleItem>
 				</Stack>

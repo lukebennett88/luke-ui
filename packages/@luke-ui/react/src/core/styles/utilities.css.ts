@@ -1,4 +1,5 @@
 import { defineProperties, defineSprinkles } from '@luke-ui/rainbow-sprinkles';
+import { style } from '@vanilla-extract/css';
 import type { Properties as CSSProperties } from 'csstype';
 import { typedEntries } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
@@ -7,6 +8,8 @@ import type { Prettify } from '../types/prettify.js';
 import { layers } from './layers.css.js';
 import { responsiveConditions } from './responsive-conditions.js';
 import { spaceTokens } from './space-tokens.js';
+import type { SurfaceBackground } from './surface.js';
+import { surfaceStyle } from './surface.js';
 
 // Every token-backed scale below derives from the public `vars` contract, so a token removed from
 // the contract removes its Box value too.
@@ -23,30 +26,58 @@ const marginScale = { ...spaceScale, auto: 'auto' } as const;
 const borderWidthScale = { none: '0', thin: '1px', thick: '2px' } as const;
 
 const PROMINENCE_LEVELS = ['subtle', 'solid'] as const;
-const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
 
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
 type ProminenceLevel = (typeof PROMINENCE_LEVELS)[number];
-type InteractionState = (typeof INTERACTION_STATES)[number];
 
-/** Background tokens, excluding the translucent backdrop. */
+/**
+ * Resting role fills and the standard surfaces, excluding the translucent backdrop. Hover and
+ * pressed fills stay theme tokens for recipes.
+ */
 type BackgroundColorToken =
-	| `${SemanticRole}.${ProminenceLevel}.${InteractionState}`
+	| `${SemanticRole}.${ProminenceLevel}`
 	| `surface.${keyof typeof vars.color.surface}`;
 
-/** Background tokens for semantic roles and surfaces. */
-const backgroundColorScale = Object.fromEntries([
+const backgroundColors = [
 	...SEMANTIC_ROLES.flatMap((role) => {
-		return PROMINENCE_LEVELS.flatMap((prominence) => {
-			return INTERACTION_STATES.map((state): [BackgroundColorToken, string] => {
-				return [`${role}.${prominence}.${state}`, vars.color.background[role][prominence][state]];
-			});
+		return PROMINENCE_LEVELS.map((prominence) => {
+			return [`${role}.${prominence}`, `${role}.${prominence}.rest`] as const;
 		});
 	}),
-	...typedEntries(vars.color.surface).map(([surface, value]): [BackgroundColorToken, string] => {
-		return [`surface.${surface}`, value];
+	...typedEntries(vars.color.surface).map(([surface]) => {
+		return [`surface.${surface}`, `surface.${surface}`] as const;
 	}),
-]) as Record<BackgroundColorToken, string>;
+] satisfies ReadonlyArray<readonly [BackgroundColorToken, SurfaceBackground]>;
+
+const backgroundColorTokens = backgroundColors.map(([token]) => token);
+
+type BreakpointName = keyof typeof responsiveConditions;
+
+/**
+ * One utilities-layer class per background and condition. Each pairs the fill with its text colour
+ * and foreground context. Conditions are the outer loop, so each breakpoint's rules follow the
+ * narrower breakpoints' rules and win when both match. `initial` comes first, so its class is each
+ * token's default.
+ */
+const backgroundColorValues: Partial<
+	Record<
+		BackgroundColorToken,
+		{ default: string; conditions: Partial<Record<BreakpointName, string>> }
+	>
+> = {};
+for (const [condition, query] of typedEntries(responsiveConditions)) {
+	for (const [token, background] of backgroundColors) {
+		const rule = surfaceStyle(background);
+		const conditionalRule =
+			'@container' in query ? { '@container': { [query['@container']]: rule } } : rule;
+		const className = style(
+			{ '@layer': { [layers.utilities]: conditionalRule } },
+			`backgroundColor-${token.replace('.', '-')}-${condition}`,
+		);
+		const value = (backgroundColorValues[token] ??= { default: className, conditions: {} });
+		value.conditions[condition] = className;
+	}
+}
 
 /** Property scales shared by the runtime config and the public prop types. */
 const dynamicProperties = {
@@ -81,7 +112,6 @@ const dynamicProperties = {
 		normal: 'normal',
 		stretch: 'stretch',
 	},
-	backgroundColor: backgroundColorScale,
 	blockSize: true,
 	// `control` and `controlHover` are guaranteed 3:1 boundaries; the role borders are decorative.
 	borderColor: vars.color.border,
@@ -214,8 +244,6 @@ const dynamicProperties = {
 	rowGap: spaceScale,
 } as const;
 
-type BreakpointName = keyof typeof responsiveConditions;
-
 /**
  * Value accepted by one utility property. Constrained scales use their keys. Unconstrained
  * (`true`) properties keep the previous Rainbow Sprinkles contract: the csstype value for that
@@ -240,9 +268,16 @@ type ResponsiveValue<Value> =
 			[Condition in BreakpointName]?: Value | null;
 	  };
 
+/**
+ * Every utility's scale. Background values select paired classes. Keep their token keys here
+ * so public declarations and docs do not depend on the styling engine's config.
+ */
+type UtilityScales = typeof dynamicProperties &
+	Record<'backgroundColor', Record<(typeof backgroundColorTokens)[number], string>>;
+
 type SprinklesPropsShape = {
-	[Property in keyof typeof dynamicProperties]?: ResponsiveValue<
-		ScaleValue<Property, (typeof dynamicProperties)[Property]>
+	[Property in keyof UtilityScales]?: ResponsiveValue<
+		ScaleValue<Property, UtilityScales[Property]>
 	>;
 };
 
@@ -268,11 +303,21 @@ type CreateSprinkles = {
 	readonly properties: ReadonlySet<keyof SprinklesProps>;
 };
 
-export const createSprinkles = defineSprinkles(
+/** Package-internal utilities, including paired background classes. */
+export const createSprinkles: CreateSprinkles = defineSprinkles(
 	defineProperties({
 		'@layer': layers.utilities,
 		conditions: responsiveConditions,
 		defaultCondition: 'initial',
 		dynamicProperties,
 	}),
-) as CreateSprinkles;
+	{
+		config: {
+			backgroundColor: {
+				name: 'backgroundColor',
+				staticScale: backgroundColorTokens,
+				values: backgroundColorValues,
+			},
+		},
+	},
+);

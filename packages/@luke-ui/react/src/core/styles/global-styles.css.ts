@@ -1,6 +1,7 @@
 import { vars } from '../../theme/contract.css.js';
 import { focusRing } from './focus-ring.js';
 import { globalStyleInLayer } from './layered-style.css.js';
+import { surfaceStyle } from './surface.js';
 
 // The global stylesheet: every rule here applies to the whole document. Keep it to rules that
 // correct a cross-browser difference or replace a default almost every application overrides,
@@ -23,11 +24,13 @@ globalStyleInLayer('reset', ':where(:root)', {
 	textSizeAdjust: '100%',
 });
 
-/** Text, accent, and surface colours, repainted in every colour-mode scope. */
+/**
+ * The base surface with its text colour and foreground context, plus the accent colour. Every
+ * colour-mode scope repaints them.
+ */
 const documentColors = {
 	accentColor: vars.color.background.accent.solid.rest,
-	backgroundColor: vars.color.surface.base,
-	color: vars.color.text.primary,
+	...surfaceStyle('surface.base'),
 };
 
 // `<body>` carries the inherited baseline, so portals rendered into it need nothing extra. Its
@@ -40,10 +43,10 @@ globalStyleInLayer('reset', ':where(body)', {
 	margin: 0,
 });
 
-// A colour-mode scope gets new token values, but inherited properties keep the values its parent
-// computed. Repaint the scope so its own text and surface follow its mode. The theme sets
-// `color-scheme`. `<body>` takes its colours from the rule above. `<html>` stays unpainted so the
-// body background reaches the canvas.
+// A colour-mode scope gets new token values, but inherited properties, including a solid fill's
+// foreground overrides, keep the values its parent computed. Repaint the scope so its own text,
+// foreground context, and surface follow its mode. The theme sets `color-scheme`. `<body>` takes its colours from the rule above.
+// `<html>` stays unpainted so the body background reaches the canvas.
 globalStyleInLayer(
 	'reset',
 	":where(body [data-color-mode='light'], body [data-color-mode='dark'])",

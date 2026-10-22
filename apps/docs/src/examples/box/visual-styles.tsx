@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 export default () => {
 	return (
 		<Box
-			backgroundColor="success.subtle.rest"
+			backgroundColor="success.subtle"
 			borderColor="decorative"
 			borderRadius="control"
 			borderStyle="solid"

@@ -6,8 +6,7 @@ import { breakpoints } from '../../theme/breakpoints.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 
 const UTILITIES_CSS_PATTERN = /utilities\.css-[A-Za-z0-9_-]+/;
-const INDEX_SIGNATURE_PATTERN = /\[\s*\w+\s*:\s*string\s*\]/;
-const BACKGROUND_COLOR_TOKEN_PATTERN = /type BackgroundColorToken = ([^;]+);/;
+const BACKGROUND_INTERACTION_STATE_PATTERN = /\.(rest|hover|pressed)["']/;
 const NUMERIC_ZERO_PATTERN = /(^|[{;\s])0:/;
 const READONLY_PROPERTY_PATTERN_CACHE = new Map<string, RegExp>();
 
@@ -71,33 +70,21 @@ test('the zero space key stays a quoted string in declaration emit', async () =>
 	expect(missing).toEqual([]);
 });
 
-test('backgroundColor is keyed by tokens, not by an index signature', async () => {
+test('backgroundColor preserves its resting role and surface token vocabulary', async () => {
 	const declaration = await readUtilitiesDeclaration();
-	const emitted = propertyType(declaration, 'backgroundColor');
+	const tokens = [
+		...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid`]),
+		...['base', 'subdued', 'field', 'overlay'].map((surface) => `surface.${surface}`),
+	];
+	const missingTokens = tokens.filter((token) => {
+		return !declaration.includes(`'${token}'`) && !declaration.includes(`"${token}"`);
+	});
 
-	expect(emitted, 'backgroundColor widened to an index signature').not.toMatch(
-		INDEX_SIGNATURE_PATTERN,
-	);
-	expect(emitted.trim()).not.toBe('true');
-
-	// Declaration emit may inline the type or retain its alias.
-	const alias = BACKGROUND_COLOR_TOKEN_PATTERN.exec(declaration)?.[1] ?? '';
-	const tokenSource = emitted.includes('"') ? emitted : alias;
-	expect(tokenSource, 'no token vocabulary found for backgroundColor').toBeTruthy();
-
-	const mentionsRoles =
-		SEMANTIC_ROLES.every((role) => tokenSource.includes(`"${role}.subtle.rest"`)) ||
-		(tokenSource.includes('SemanticRole') &&
-			tokenSource.includes('ProminenceLevel') &&
-			tokenSource.includes('InteractionState'));
-	expect(mentionsRoles, `backgroundColor lost its role tokens: ${tokenSource}`).toBe(true);
-
-	const mentionsSurfaces =
-		tokenSource.includes('surface.') || tokenSource.includes('"surface.base"');
-	expect(mentionsSurfaces, `backgroundColor lost its surface tokens: ${tokenSource}`).toBe(true);
-
+	expect(missingTokens).toEqual([]);
+	// Box takes resting fills only. Interaction states stay recipe tokens.
+	expect(declaration).not.toMatch(BACKGROUND_INTERACTION_STATE_PATTERN);
 	// A translucent scrim is not an opaque fill.
-	expect(tokenSource).not.toContain('overlay.backdrop');
+	expect(declaration).not.toContain('overlay.backdrop');
 });
 
 test('constrained appearance props do not accept arbitrary CSS values', async () => {

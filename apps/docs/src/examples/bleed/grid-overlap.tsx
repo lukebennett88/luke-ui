@@ -18,7 +18,7 @@ export default () => {
 				<ExampleItem>3</ExampleItem>
 				<ExampleItem>4</ExampleItem>
 				<Bleed all="space.12" position="relative">
-					<ExampleItem backgroundColor="info.subtle.rest" blockSize="100%">
+					<ExampleItem backgroundColor="info.subtle" blockSize="100%">
 						5
 					</ExampleItem>
 				</Bleed>

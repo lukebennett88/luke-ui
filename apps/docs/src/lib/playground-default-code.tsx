@@ -112,7 +112,7 @@ export default () => {
 					</Button>
 				</Cluster>
 				{signedInAs ? (
-					<Box backgroundColor="success.subtle.rest" borderRadius="control" padding="space.12">
+					<Box backgroundColor="success.subtle" borderRadius="control" padding="space.12">
 						<Text elementType="p">Signed in as {signedInAs}</Text>
 					</Box>
 				) : null}

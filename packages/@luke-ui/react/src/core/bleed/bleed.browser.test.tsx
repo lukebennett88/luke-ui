@@ -436,7 +436,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				>
 					<Text>Inset</Text>
 					<Bleed inline="space.16">
-						<Box backgroundColor="accent.subtle.rest" borderRadius="detail" padding="space.12">
+						<Box backgroundColor="accent.subtle" borderRadius="detail" padding="space.12">
 							<Text>Bleed inline</Text>
 						</Box>
 					</Bleed>
@@ -450,7 +450,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					padding="space.16"
 				>
 					<Bleed all="space.8" inlineStart="space.16">
-						<Box backgroundColor="accent.subtle.rest" borderRadius="detail" padding="space.12">
+						<Box backgroundColor="accent.subtle" borderRadius="detail" padding="space.12">
 							<Text>Bleed edges</Text>
 						</Box>
 					</Bleed>

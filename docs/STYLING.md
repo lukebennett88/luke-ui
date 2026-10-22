@@ -92,8 +92,9 @@ explicit scope wins by inheritance. Every mode rule declares every mode token an
 `color-scheme`. The output is unlayered.
 
 `core/styles/global-styles.css.ts` paints `<body>` and repaints each scope below `<body>` with the
-scope's text colour, accent colour, and base surface, because inherited properties would otherwise
-keep the parent's computed values. See [Global styles](#global-styles).
+scope's base surface, its text colour and foreground context, and its accent colour, because
+inherited properties would otherwise keep the parent's computed values. See
+[Global styles](#global-styles) and [Surface pairing](#surface-pairing).
 
 Overlays portal to `<body>`, outside the trigger's scope. `copyScopeColorMode` in
 `core/overlays/scope-color-mode.ts` is a callback ref that copies the trigger's scoped mode onto the
@@ -109,14 +110,14 @@ in `luke-ui.reset`. Each uses `:where()`, so the selector contributes no specifi
 Pseudo-elements are invalid inside `:where()`, so the box-sizing rule lists `::before` and `::after`
 outside it and each adds (0,0,1):
 
-| Rule                              | Sets                                                                                          |
-| --------------------------------- | --------------------------------------------------------------------------------------------- |
-| `*, *::before, *::after`          | `box-sizing: border-box`                                                                      |
-| `:root`                           | `container-type: inline-size`, `text-size-adjust: 100%`                                       |
-| `body`                            | `margin: 0`, base surface, text and accent colour, body font, and unitless `line-height: 1.5` |
-| `body [data-color-mode]`          | Base surface, text and accent colour, so a scope repaints with its own mode                   |
-| `button, input, select, textarea` | `font: inherit`, `margin: 0`                                                                  |
-| `:focus-visible`                  | The themed focus ring, with `Highlight` under forced colours                                  |
+| Rule                              | Sets                                                                                        |
+| --------------------------------- | ------------------------------------------------------------------------------------------- |
+| `*, *::before, *::after`          | `box-sizing: border-box`                                                                    |
+| `:root`                           | `container-type: inline-size`, `text-size-adjust: 100%`                                     |
+| `body`                            | `margin: 0`, paired base surface, accent colour, body font, and unitless `line-height: 1.5` |
+| `body [data-color-mode]`          | Paired base surface and accent colour, so a scope repaints with its own mode                |
+| `button, input, select, textarea` | `font: inherit`, `margin: 0`                                                                |
+| `:focus-visible`                  | The themed focus ring, with `Highlight` under forced colours                                |
 
 A global rule must correct a cross-browser difference or replace a default almost every application
 overrides, without erasing native structure such as heading sizes, list markers, table spacing, or
@@ -347,7 +348,8 @@ specificity. That tradeoff is acceptable because utilities are already the highe
 hatch inside the package.
 
 `Box` from `@luke-ui/react/box` is the public escape hatch for layout and appearance. It excludes
-typography and text colour. Use `Text` or `Heading` for those.
+typography and has no text colour prop. Use `Text` or `Heading` for those. Its `backgroundColor`
+sets the text colour that the background pairs with. See [Surface pairing](#surface-pairing).
 
 Do not add style props to every component. Keep component props on variants and behaviour.
 
@@ -399,6 +401,27 @@ numeric keys and `rem` values cannot drift. Responsive conditions keep `bp*` nam
 
 Buttons provide `px16` icons and spinners at both recipe sizes. Field controls provide `px16` icons
 at `small` and `px20` icons at `medium`. Explicit `Icon.size` overrides win over context.
+
+### Surface pairing
+
+`core/styles/surface.ts` pairs a recognised opaque background with its foreground.
+`surfaceStyle(background)` returns the fill, `color` set to contextual primary, and the private
+`--luke-internal-foreground-*` overrides. Spread it into the same rule, condition, or state selector
+that sets the background, and never set a recognised background without it.
+`contextualForeground(slot)` reads `primary`, `secondary`, or a role's colour from the nearest
+surface.
+
+Standard surfaces and subtle fills reset the overrides, so a read falls back to the global neutral
+hierarchy, or to the role's resting hue, on the reading element. The theme compiler gates those
+pairs against every subtle fill, including other roles' fills. A solid fill sets the overrides to
+its role's on-solid leaves, and every role reads on-solid primary. An override resolves on the
+element that declares it, so the global styles reset the overrides in every colour-mode scope.
+
+`Box` applies the pairing from one utilities-layer class per resting background and responsive
+condition. Its values are the standard surfaces and each role's resting `subtle` and `solid` fill.
+Hover and pressed fills stay theme tokens for recipes. A background that does not come from the
+pairing, such as `backgroundColor: vars.…` in custom CSS, an image, or a gradient, establishes no
+foreground context.
 
 ### Responsive values
 

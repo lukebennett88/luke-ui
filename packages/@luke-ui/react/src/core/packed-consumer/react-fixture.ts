@@ -422,7 +422,7 @@ export const textButtonWidth = <Button appearance="text" inlineSize="full">Conti
 // Box values follow the public token contract.
 export const retainedBoxValues: Array<BoxProps> = [
 	{ backgroundColor: 'surface.field', borderColor: 'controlHover', boxShadow: 'overlay' },
-	{ backgroundColor: 'warning.subtle.rest', borderRadius: 'full', gap: 'space.96' },
+	{ backgroundColor: 'warning.subtle', borderRadius: 'full', gap: 'space.96' },
 ];
 // @ts-expect-error — removed with color.surface.canvas
 export const removedBoxSurface: BoxProps['backgroundColor'] = 'surface.canvas';
