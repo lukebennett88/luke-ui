@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Code } from '@luke-ui/react/code';
 import { Text } from '@luke-ui/react/text';
 import { expect, test } from 'vite-plus/test';
-import { expectEveryTextToPassContrast } from '../test-utils/axe.js';
+import { expectAxeContrastPasses } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { pairedColors, surfaceColors } from '../test-utils/surface-colors.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
@@ -130,7 +130,7 @@ for (const appearance of visualAppearances) {
 		const code = getCodeElement(container);
 
 		expect(surfaceColors(code)).toEqual(pairedColors(code, 'neutral.subtle.rest'));
-		await expectEveryTextToPassContrast(container);
+		await expectAxeContrastPasses(container);
 	});
 
 	test(`Code inside a code block draws no second chip in ${name}`, () => {

@@ -13,7 +13,7 @@ export async function expectNoAxeViolations(container: HTMLElement) {
 }
 
 /** Elements that hold visible text directly, the nodes axe's colour-contrast rule evaluates. */
-function visibleTextElements(container: HTMLElement): Array<Element> {
+export function visibleTextElements(container: HTMLElement): Array<Element> {
 	return [...container.querySelectorAll('*')].filter((element) => {
 		const holdsText = [...element.childNodes].some((node) => {
 			return node.nodeType === Node.TEXT_NODE && node.textContent?.trim() !== '';
@@ -29,7 +29,7 @@ function visibleTextElements(container: HTMLElement): Array<Element> {
  * `container`. Zero violations alone is not enough: axe reports a node it cannot measure, such as
  * text over a gradient, as incomplete, and skips a node it does not recognise as text.
  */
-export async function expectEveryTextToPassContrast(container: HTMLElement) {
+export async function expectAxeContrastPasses(container: HTMLElement) {
 	const results = await axe.run(container, { runOnly: ['color-contrast'] });
 	const nodes = (outcome: 'incomplete' | 'passes' | 'violations') => {
 		return results[outcome].flatMap((rule) => rule.nodes);

@@ -8,7 +8,8 @@ import type { ThemeInput } from '../define-theme.js';
  * explicitly, so `defineTheme` uses each side as written.
  */
 export const tactileTheme: ThemeInput = {
-	// A solid face is lighter at the top and slightly darker at the bottom. Pressed reverses it.
+	// A solid face is lighter at the top and slightly darker at the bottom. Pressed reverses it. The
+	// light highlights stay faint enough to keep on-solid text above 4.5:1 where they overlap it.
 	controlFinish: {
 		dark: {
 			raised:
@@ -21,11 +22,11 @@ export const tactileTheme: ThemeInput = {
 		},
 		light: {
 			raised:
-				'linear-gradient(to bottom, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0) 60%, ' +
+				'linear-gradient(to bottom, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0) 60%, ' +
 				'rgb(0 0 0 / 0.03))',
 			recessed: 'linear-gradient(to bottom, rgb(0 0 0 / 0.07), rgb(0 0 0 / 0) 55%)',
 			resting:
-				'linear-gradient(to bottom, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0) 60%, ' +
+				'linear-gradient(to bottom, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0) 60%, ' +
 				'rgb(0 0 0 / 0.05))',
 		},
 	},

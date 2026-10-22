@@ -3,7 +3,7 @@ import { Code } from '@luke-ui/react/code';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Text } from '@luke-ui/react/text';
 import { expect, test } from 'vite-plus/test';
-import { expectEveryTextToPassContrast } from '../test-utils/axe.js';
+import { expectAxeContrastPasses } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { pairedColors, surfaceColors } from '../test-utils/surface-colors.js';
 
@@ -89,6 +89,6 @@ for (const appearance of visualAppearances) {
 		const kbd = getKbdElement(container);
 
 		expect(surfaceColors(kbd)).toEqual(pairedColors(kbd, 'surface.subdued'));
-		await expectEveryTextToPassContrast(container);
+		await expectAxeContrastPasses(container);
 	});
 }

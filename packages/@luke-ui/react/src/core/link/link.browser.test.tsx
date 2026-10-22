@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
-import { expectEveryTextToPassContrast, expectNoAxeViolations } from '../test-utils/axe.js';
+import { expectAxeContrastPasses, expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	pairedColors,
@@ -219,7 +219,7 @@ for (const appearance of visualAppearances) {
 		const onSolid = locator.getByRole('link', { name: 'On solid' }).element();
 		const onSubtle = locator.getByRole('link', { name: 'On subtle' }).element();
 		const solidForeground = pairedColors(onSolid, 'danger.solid').foreground;
-		await expectEveryTextToPassContrast(container);
+		await expectAxeContrastPasses(container);
 
 		const actual = INTERACTION_STATES.map((state) => {
 			setInteractionState(onSolid, state);

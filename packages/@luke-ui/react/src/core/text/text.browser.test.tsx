@@ -14,7 +14,7 @@ import { TextContext } from 'react-aria-components/Text';
 import { expect, test, vi } from 'vite-plus/test';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import { typeStyles } from '../../theme/type-styles.js';
-import { expectEveryTextToPassContrast } from '../test-utils/axe.js';
+import { expectAxeContrastPasses } from '../test-utils/axe.js';
 import { INTER_CAP_HEIGHT_EM, loadInter } from '../test-utils/load-inter.js';
 import { measureBaseline, measureLastBaseline } from '../test-utils/measure-first-line.js';
 import { render, visualAppearances } from '../test-utils/render.js';
@@ -689,7 +689,7 @@ for (const appearance of visualAppearances) {
 			{ appearance },
 		);
 
-		await expectEveryTextToPassContrast(container);
+		await expectAxeContrastPasses(container);
 	});
 }
 

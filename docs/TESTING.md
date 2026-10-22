@@ -104,7 +104,8 @@ durations, not `timeout`, `expect.poll`, or fake timers as such.
 
 Run axe with `expectNoAxeViolations` in component tests. Axe is a floor. Use behavioural assertions
 for accessibility contracts it cannot express. Gradients can produce an `incomplete` colour-contrast
-result.
+result. To check text over a gradient or a translucent layer, such as the control finish, measure
+the screenshot pixels behind it with `lowestRenderedTextContrast`.
 
 ## Visual regression
 

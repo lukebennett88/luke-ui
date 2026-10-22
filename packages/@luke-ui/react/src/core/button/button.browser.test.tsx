@@ -8,8 +8,9 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { assert, expect, onTestFinished, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { watchSpinner } from '../test-utils/action-spinner.js';
-import { expectEveryTextToPassContrast, expectNoAxeViolations } from '../test-utils/axe.js';
+import { expectAxeContrastPasses, expectNoAxeViolations } from '../test-utils/axe.js';
 import { flatAppearances, render, visualAppearances } from '../test-utils/render.js';
+import { lowestRenderedTextContrast } from '../test-utils/rendered-contrast.js';
 import type { PairedBackground } from '../test-utils/surface-colors.js';
 import {
 	pairedColors,
@@ -599,13 +600,11 @@ for (const appearance of visualAppearances) {
 }
 
 // axe measures each Button's text against its rendered fill in every state. It cannot measure text
-// over the control finish's gradient, so the flat appearances, which have no finish, measure the
-// solid fills.
-for (const appearance of [...visualAppearances, ...flatAppearances]) {
-	const hasFinish = appearance.theme !== 'flat';
-	const measured = buttonFills.filter(({ prominence }) => !hasFinish || prominence !== 'high');
+// over the control finish's gradient, so it leaves solid Buttons to the rendered measurement below.
+for (const appearance of visualAppearances) {
+	const measured = buttonFills.filter(({ prominence }) => prominence !== 'high');
 
-	test(`Button text passes axe contrast on ${hasFinish ? 'ghost and subtle' : 'every'} fill in every state in ${appearance.theme} ${appearance.mode}`, async () => {
+	test(`Button text passes axe contrast on transparent and subtle fills in every state in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { container, locator } = render(
 			<Box backgroundColor="success.solid" padding="space.8">
 				{measured.map(({ label, prominence, tone }) => (
@@ -625,9 +624,45 @@ for (const appearance of [...visualAppearances, ...flatAppearances]) {
 				setInteractionState(button, state);
 				settledSurfaceColors(button);
 			}
-			// eslint-disable-next-line no-await-in-loop -- each state must be measured before the next
-			await expectEveryTextToPassContrast(container);
+			await expectAxeContrastPasses(container);
 		}
+	});
+}
+
+// Measures each label against the pixels painted behind it, including the control finish, which the
+// theme compiler's contrast gates do not see.
+for (const appearance of [...visualAppearances, ...flatAppearances]) {
+	test(`Button text keeps 4.5:1 contrast over its painted fill in every state in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { locator } = render(
+			<Box backgroundColor="success.solid" padding="space.8">
+				{buttonFills.map(({ label, prominence, tone }) => (
+					<Button key={label} prominence={prominence} tone={tone}>
+						{label}
+					</Button>
+				))}
+			</Box>,
+			{ appearance },
+		);
+		const buttons = buttonFills.map(({ label }) => ({
+			button: locator.getByRole('button', { name: label }).element(),
+			label,
+		}));
+
+		const lowContrast: Array<{ contrast: number; label: string; state: InteractionState }> = [];
+		for (const state of INTERACTION_STATES) {
+			for (const { button } of buttons) {
+				setInteractionState(button, state);
+				settledSurfaceColors(button);
+			}
+			for (const { button, label } of buttons) {
+				assert(button instanceof HTMLElement);
+				const contrast = await lowestRenderedTextContrast(button);
+				if (contrast < 4.5)
+					lowContrast.push({ contrast: Number(contrast.toFixed(2)), label, state });
+			}
+		}
+
+		expect(lowContrast).toEqual([]);
 	});
 }
 
