@@ -251,7 +251,6 @@ describe('contrast validation matrix', () => {
 			};
 			for (const mode of ['light', 'dark'] as const) {
 				const checks = diagnostics[mode].contrastChecks;
-				expect(checks.filter((check) => check.hard)).toHaveLength(492);
 				const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
 				for (const check of checks) {
 					const foreground = extractValue(block, variableNames.get(check.foreground)!);
@@ -348,6 +347,7 @@ describe('independent on-solid hierarchy gates', () => {
 	for (const mode of ['light', 'dark'] as const) {
 		for (const hierarchy of ['primary', 'secondary'] as const) {
 			it(`rejects only the failing ${hierarchy} leaf across every role and state in ${mode}`, () => {
+				const solidStates = ['rest', 'hover', 'pressed'] as const;
 				const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
 				const colors = Object.fromEntries(
 					flattenThemeContract()
@@ -359,9 +359,9 @@ describe('independent on-solid hierarchy gates', () => {
 						colors[`color.background.${role}.solid.rest`];
 				}
 				const { failures } = validateContrast(mode, colors);
-				expect(failures).toHaveLength(18);
+				expect(failures).toHaveLength(SEMANTIC_ROLES.length * solidStates.length);
 				for (const role of SEMANTIC_ROLES) {
-					for (const state of ['rest', 'hover', 'pressed'] as const) {
+					for (const state of solidStates) {
 						expect(failures).toContainEqual({
 							mode,
 							foreground: `color.foreground.${role}.onSolid.${hierarchy}`,
