@@ -522,8 +522,8 @@ const buttonFills = [
 for (const appearance of visualAppearances) {
 	const name = `${appearance.theme} ${appearance.mode}`;
 
-	// The parent is another role's solid fill, so a resting ghost shows it reads the surrounding
-	// context and every other fill shows it establishes its own.
+	// The parent is another role's solid fill, so a resting low-prominence Button shows it reads the
+	// surrounding context and every other fill shows it establishes its own.
 	test(`Button fills pair with their foreground in every interaction state in ${name}`, () => {
 		const { locator } = render(
 			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
