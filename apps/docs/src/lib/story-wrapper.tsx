@@ -8,15 +8,15 @@ type Layout = 'flow' | 'centered' | 'full-bleed';
 const layoutToBoxProps = {
 	centered: {
 		alignItems: 'center',
+		backgroundColor: 'surface.base',
 		display: 'flex',
 		justifyContent: 'center',
 		minBlockSize: '6rem',
-		backgroundColor: 'surface.base',
 		padding: 'space.32',
 	},
 	flow: {
-		minBlockSize: '6rem',
 		backgroundColor: 'surface.base',
+		minBlockSize: '6rem',
 		padding: 'space.32',
 	},
 	'full-bleed': {},
