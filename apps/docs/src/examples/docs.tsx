@@ -29,7 +29,13 @@ export function Comparison({ align = 'start', children, direction = 'vertical' }
 	const Element = direction === 'vertical' ? Stack : Cluster;
 	return (
 		<ComparisonAlignContext.Provider value={align}>
-			<Element gap="space.16" inlineSize="max-content" marginInline="auto" maxInlineSize="100%">
+			<Element
+				alignItems={direction === 'horizontal' ? 'start' : undefined}
+				gap="space.16"
+				inlineSize="max-content"
+				marginInline="auto"
+				maxInlineSize="100%"
+			>
 				{children}
 			</Element>
 		</ComparisonAlignContext.Provider>

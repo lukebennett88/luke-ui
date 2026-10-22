@@ -1,22 +1,62 @@
 import { Box } from '@luke-ui/react/box';
-import { Stack } from '@luke-ui/react/stack';
 import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
+import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (
-		<Stack gap="space.12">
-			<Box backgroundColor="accent.solid" display="grid" gap="space.8" padding="space.16">
-				<Text>Inherited primary</Text>
-				<Text color="secondary">Secondary</Text>
-				<Text color="danger">Danger</Text>
-			</Box>
-			<Box backgroundColor="accent.subtle" padding="space.16">
-				<Text color="danger">Danger</Text>
-			</Box>
-			<Text color="secondary">
-				Secondary with <Strong>strong emphasis</Strong>
-			</Text>
-		</Stack>
+		<Comparison>
+			<ComparisonItem label="Surface">
+				<Box
+					backgroundColor="surface.subdued"
+					borderRadius="surface"
+					columnGap="space.24"
+					display="flex"
+					flexWrap="wrap"
+					padding="space.16"
+					rowGap="space.8"
+				>
+					<Specimens />
+				</Box>
+			</ComparisonItem>
+			<ComparisonItem label="Subtle fill">
+				<Box
+					backgroundColor="accent.subtle"
+					borderRadius="surface"
+					columnGap="space.24"
+					display="flex"
+					flexWrap="wrap"
+					padding="space.16"
+					rowGap="space.8"
+				>
+					<Specimens />
+				</Box>
+			</ComparisonItem>
+			<ComparisonItem label="Solid fill">
+				<Box
+					backgroundColor="accent.solid"
+					borderRadius="surface"
+					columnGap="space.24"
+					display="flex"
+					flexWrap="wrap"
+					padding="space.16"
+					rowGap="space.8"
+				>
+					<Specimens />
+				</Box>
+			</ComparisonItem>
+		</Comparison>
 	);
 };
+
+function Specimens() {
+	return (
+		<>
+			<Text>Inherited</Text>
+			<Text color="secondary">Secondary</Text>
+			<Text color="danger">
+				Danger with <Strong>emphasis</Strong>
+			</Text>
+		</>
+	);
+}
