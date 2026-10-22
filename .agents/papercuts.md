@@ -175,14 +175,18 @@ not help. Silence in this log is not evidence.
   created in a `.css.ts` module unless its name is stable, so authors find out only after the
   assertions fail.
 
-## An agent stashed task changes to measure the base build
+## An agent ran destructive Git commands on its own uncommitted task changes
 
-- Seen: 2026-10-22 (#899 Part 4). To compare stylesheet sizes, the agent ran `git stash` and
+- Seen: 2026-10-22 (#910). To compare stylesheet sizes, the agent ran `git stash` and
   `git stash pop` in the task checkout around a base build, instead of building the base in a
-  separate worktree.
-- Where: the task checkout on `luke/funny-albattani-r0nlst`. AGENTS.md, Universal rules, forbids
-  stashing. `.agents/skills/work-on-issue/SKILL.md`, Verify, says to compare in a separate worktree
-  because stashing does not isolate generated build outputs. AGENTS.md requires reading both.
-- Problem: The agent's command contradicted both rules. The stash restored cleanly, and later base
-  comparisons used a worktree, but correcting the method does not establish that the workflow
-  applies the rule.
+  separate worktree. The stash restored cleanly. Seen again: 2026-10-22 (#899 Part 5). To remove an
+  untracked probe test, the agent ran `git checkout -- .` in `packages/@luke-ui/react`, which
+  discarded every uncommitted package edit in the Part 5 worktree. The agent re-applied the edits
+  from the session before committing.
+- Where: the task checkouts for `luke/funny-albattani-r0nlst` and `luke/899-consumer-docs`.
+  AGENTS.md, Universal rules, says to preserve existing work and not to reset, clean, stash, or
+  overwrite it. `.agents/skills/work-on-issue/SKILL.md`, Verify, says to compare in a separate
+  worktree. AGENTS.md requires reading both.
+- Problem: The agent's commands contradicted the preservation rule twice in one issue, once with
+  loss of uncommitted work. Recovering the work does not establish that the workflow applies the
+  rule.
