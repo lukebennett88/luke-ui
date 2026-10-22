@@ -3,7 +3,6 @@ import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { vars } from '@luke-ui/react/theme';
 import { useId, useState } from 'react';
 
 export default () => {
@@ -11,12 +10,7 @@ export default () => {
 	const labelId = useId();
 
 	return (
-		<Box
-			backgroundColor="surface.base"
-			color={vars.color.text.primary}
-			data-color-mode={parentMode}
-			padding="space.24"
-		>
+		<Box backgroundColor="surface.base" data-color-mode={parentMode} padding="space.24">
 			<Stack gap="space.16">
 				<Stack gap="space.8">
 					<Text elementType="strong" fontWeight="emphasis" id={labelId}>
@@ -41,7 +35,6 @@ export default () => {
 					borderRadius="surface"
 					borderStyle="solid"
 					borderWidth="thin"
-					color={vars.color.text.primary}
 					padding="space.16"
 				>
 					<Text>This panel follows the parent mode.</Text>
@@ -52,7 +45,6 @@ export default () => {
 					borderRadius="surface"
 					borderStyle="solid"
 					borderWidth="thin"
-					color={vars.color.text.primary}
 					data-color-mode="dark"
 					padding="space.16"
 				>

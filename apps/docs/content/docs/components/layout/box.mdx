@@ -72,10 +72,9 @@ component API for interaction states and typography.
 
 `backgroundColor` takes a standard surface, such as `surface.base`, or a role's resting fill, such
 as `accent.subtle` or `accent.solid`. The background also sets the text colour that content inside
-the Box inherits. Without `backgroundColor`, a Box keeps the colour it inherits. Set the background
-on the element that needs it, alongside your own `className`, rather than on a wrapper. A background
-from your own CSS, an image, or a gradient does not change the text colour, so check that content's
-contrast yourself.
+the Box inherits. Without `backgroundColor`, a Box keeps the colour it inherits. Read
+[Colour](/docs/color#text-on-a-background) for the colours text reads on each background, and for
+custom surfaces.
 
 `borderColor="control"` is a guaranteed control boundary that reaches 3:1 against every surface. The
 role colours, such as `borderColor="warning"`, are decorative tints. Do not rely on one alone to

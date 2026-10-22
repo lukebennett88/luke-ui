@@ -102,6 +102,10 @@ The public `vars` token contract lets an application-owned element follow the ac
 
 <SourceCodeBlock src="styling/semantic-variables" />
 
+A background you set with `vars` does not set the text colour for `Text` inside it, so set the
+colour in the same rule. Use a `Box` `backgroundColor` when the element should set it for you. Read
+[Colour](/docs/color#custom-surfaces) for the difference.
+
 The token contract is public. Component selectors, generated palette values, and theme
 implementation details are not. See the [token reference](/docs/token-reference) for the full
 contract.

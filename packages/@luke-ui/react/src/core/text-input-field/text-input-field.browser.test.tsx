@@ -413,7 +413,7 @@ function fieldLabel(container: HTMLElement): HTMLElement {
 for (const appearance of visualAppearances) {
 	const name = `${appearance.theme} ${appearance.mode}`;
 
-	test(`field text reads a solid fill while the control keeps its field surface in ${name}`, () => {
+	test(`field text reads a solid fill while the control keeps its field surface in ${name}`, async () => {
 		const { container } = render(
 			<Box backgroundColor="accent.solid" data-testid="parent" padding="space.8">
 				<TextInputField description="Used for receipts." label="Email" name="email" />
@@ -431,12 +431,13 @@ for (const appearance of visualAppearances) {
 			foreground.secondary,
 		);
 		expect(surfaceColors(control)).toEqual(pairedColors(control, 'surface.field'));
+		await expectNoAxeViolations(container);
 	});
 
 	// On a solid fill the danger hue collapses to on-solid primary, so the icon shape, the message,
 	// and the field's invalid state and description carry the error rather than the colour.
-	test(`an error keeps its meaning when its hue collapses on a solid fill in ${name}`, () => {
-		render(
+	test(`an error keeps its meaning when its hue collapses on a solid fill in ${name}`, async () => {
+		const { container } = render(
 			<Box backgroundColor="danger.solid" data-testid="parent" padding="space.8">
 				<TextInputField errorMessage="Enter a valid email." label="Email" name="email" />
 			</Box>,
@@ -452,6 +453,7 @@ for (const appearance of visualAppearances) {
 		expect(getComputedStyle(icon).maskImage).not.toBe('none');
 		expect(input).toHaveAttribute('aria-invalid', 'true');
 		expect(input).toHaveAccessibleDescription('Enter a valid email.');
+		await expectNoAxeViolations(container);
 	});
 
 	test(`an error keeps its danger hue on another role's subtle fill in ${name}`, () => {

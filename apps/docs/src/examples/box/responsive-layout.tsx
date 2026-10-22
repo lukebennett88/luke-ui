@@ -1,6 +1,5 @@
 import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
-import { vars } from '@luke-ui/react/theme';
 
 export default () => {
 	return (
@@ -15,20 +14,14 @@ function Item() {
 	return (
 		<Box
 			alignItems="center"
+			backgroundColor="neutral.solid"
 			display="flex"
+			flex={1}
 			justifyContent="center"
+			minBlockSize="4rem"
 			padding="space.16"
-			style={{
-				backgroundColor: vars.color.background.neutral.solid.rest,
-				flex: 1,
-				minBlockSize: '4rem',
-			}}
 		>
-			<Text
-				elementType="span"
-				fontWeight="label"
-				style={{ color: vars.color.foreground.neutral.onSolid.primary }}
-			>
+			<Text elementType="span" fontWeight="label">
 				Item
 			</Text>
 		</Box>

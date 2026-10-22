@@ -5,6 +5,7 @@ import { Cluster } from '@luke-ui/react/cluster';
 import { Container } from '@luke-ui/react/container';
 import { Grid } from '@luke-ui/react/grid';
 import { Stack } from '@luke-ui/react/stack';
+import { Text } from '@luke-ui/react/text';
 import { breakpoints, vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
@@ -456,3 +457,43 @@ test('layout', { tags: ['visual'] }, async () => {
 		await captureVisualAppearance(scene, 'box/layout', appearance);
 	}
 });
+
+for (const appearance of visualAppearances) {
+	// A container query changes the fill's category, so the descendant Text must change with it.
+	test(`a container-query background hands its context to descendant Text in ${appearance.theme} ${appearance.mode}`, () => {
+		const { container } = render(
+			<>
+				{[breakpoints.bp768 - 1, breakpoints.bp768].map((inlineSize) => (
+					<div
+						key={inlineSize}
+						style={{ containerType: 'inline-size', inlineSize: `${inlineSize}px` }}
+					>
+						<Box
+							backgroundColor={{ initial: 'danger.subtle', bp768: 'accent.solid' }}
+							data-testid={`fill-${inlineSize}`}
+						>
+							<Text color="danger" data-testid={`text-${inlineSize}`}>
+								Danger
+							</Text>
+						</Box>
+					</div>
+				))}
+			</>,
+			{ appearance },
+		);
+		const narrow = byTestId(container, `fill-${breakpoints.bp768 - 1}`);
+		const wide = byTestId(container, `fill-${breakpoints.bp768}`);
+
+		expect({
+			narrow: surfaceColors(narrow),
+			narrowText: getComputedStyle(byTestId(container, `text-${breakpoints.bp768 - 1}`)).color,
+			wide: surfaceColors(wide),
+			wideText: getComputedStyle(byTestId(container, `text-${breakpoints.bp768}`)).color,
+		}).toEqual({
+			narrow: pairedColors(narrow, 'danger.subtle'),
+			narrowText: pairedColors(narrow, 'danger.subtle').foreground.danger,
+			wide: pairedColors(wide, 'accent.solid'),
+			wideText: pairedColors(wide, 'accent.solid').foreground.danger,
+		});
+	});
+}

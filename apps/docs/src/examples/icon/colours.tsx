@@ -15,6 +15,11 @@ export default () => {
 					<Icon name="checkCircle" />
 				</Text>
 			</ComparisonItem>
+			<ComparisonItem label="Neutral">
+				<Text color="neutral">
+					<Icon name="checkCircle" />
+				</Text>
+			</ComparisonItem>
 			<ComparisonItem label="Accent">
 				<Text color="accent">
 					<Icon name="checkCircle" />

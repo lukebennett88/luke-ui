@@ -90,6 +90,7 @@ import { Provider } from '@luke-ui/react/provider';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
 import spritesheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { SwitchField } from '@luke-ui/react/switch-field';
+import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { createElement as h, useEffect } from 'react';
 
@@ -121,6 +122,12 @@ export function App({ onHydrated }) {
 				h(SelectItem, { id: 'au' }, 'Australia'),
 				h(SelectItem, { id: 'nz' }, 'New Zealand'),
 			),
+			// A solid fill must hand its readable colours to Text across the published entrypoints.
+			h(
+				Box,
+				{ backgroundColor: 'accent.solid', 'data-testid': 'solid-fill' },
+				h(Text, { color: 'danger', 'data-testid': 'contextual-text' }, 'Contextual text'),
+			),
 		),
 	);
 }
@@ -129,6 +136,7 @@ export function App({ onHydrated }) {
 /** The hydration entry. It records recoverable errors, then marks the first client commit. */
 const ENTRY_CLIENT = `
 import '@luke-ui/react/stylesheet.css';
+import '@luke-ui/theme-tactile/stylesheet.css';
 import { createElement as h } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { App } from './app.js';
@@ -157,7 +165,7 @@ export function render() {
 
 /** The inline script snapshots the server DOM before the deferred module script hydrates it. */
 const CLIENT_HTML = `<!doctype html>
-<html lang="en">
+<html class="luke-ui-theme-tactile" lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<title>Luke UI consumer</title>

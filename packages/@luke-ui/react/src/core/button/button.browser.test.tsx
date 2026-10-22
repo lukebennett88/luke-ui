@@ -524,8 +524,8 @@ for (const appearance of visualAppearances) {
 
 	// The parent is another role's solid fill, so a resting ghost shows it reads the surrounding
 	// context and every other fill shows it establishes its own.
-	test(`Button fills pair with their foreground in every interaction state in ${name}`, () => {
-		const { locator } = render(
+	test(`Button fills pair with their foreground in every interaction state in ${name}`, async () => {
+		const { container, locator } = render(
 			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
 				{buttonFills.map(({ label, prominence, tone }) => (
 					<Button key={label} prominence={prominence} tone={tone}>
@@ -536,6 +536,8 @@ for (const appearance of visualAppearances) {
 			{ appearance },
 		);
 		const parent = locator.getByTestId('parent').element();
+		// axe checks the resting contrast from the rendered colours.
+		await expectNoAxeViolations(container);
 
 		for (const { fill, label, tone } of buttonFills) {
 			const button = locator.getByRole('button', { name: label }).element();

@@ -12,13 +12,20 @@ import { createRef } from 'react';
 import { Menu, MenuItem } from 'react-aria-components/Menu';
 import { TextContext } from 'react-aria-components/Text';
 import { expect, test, vi } from 'vite-plus/test';
+import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import { typeStyles } from '../../theme/type-styles.js';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { INTER_CAP_HEIGHT_EM, loadInter } from '../test-utils/load-inter.js';
 import { measureBaseline, measureLastBaseline } from '../test-utils/measure-first-line.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import type { ForegroundSlot, PairedBackground } from '../test-utils/surface-colors.js';
 import { pairedTokens, resolvedColor } from '../test-utils/surface-colors.js';
-import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
+import {
+	captureVisual,
+	captureVisualAppearance,
+	emulateForcedColors,
+	Stack,
+} from '../test-utils/visual.js';
 
 const slottedTextContext = { slots: { description: {}, errorMessage: {} } };
 
@@ -647,4 +654,67 @@ test('line clamp and transforms', { tags: ['visual'] }, async () => {
 	);
 
 	await captureVisual(locator, 'text/line-clamp-transforms');
+});
+
+// Every background a Box can paint: the four surfaces and each role's resting fills.
+const EVERY_BACKGROUND = [
+	'surface.base',
+	'surface.subdued',
+	'surface.field',
+	'surface.overlay',
+	...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid`] as const),
+] as const satisfies ReadonlyArray<PairedBackground>;
+
+for (const appearance of visualAppearances) {
+	// axe measures the rendered colours, independent of the token pairing the other tests compare.
+	test(`every Text colour passes axe contrast on every background in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { container } = render(
+			<Stack>
+				{EVERY_BACKGROUND.map((background) => (
+					<Box
+						backgroundColor={background}
+						display="flex"
+						flexWrap="wrap"
+						gap="space.12"
+						key={background}
+					>
+						{TEXT_COLORS.map((color) => (
+							<Text color={color} key={color}>
+								{`${color} on ${background}`}
+							</Text>
+						))}
+					</Box>
+				))}
+			</Stack>,
+			{ appearance },
+		);
+
+		await expectNoAxeViolations(container);
+	});
+}
+
+test('Text on a solid fill takes the system colours in forced colours', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const { container } = render(
+			<Box backgroundColor="accent.solid" data-testid="fill" padding="space.8">
+				<Text color="danger" data-testid="text">
+					Danger
+				</Text>
+			</Box>,
+		);
+		const fill = byTestId(container, 'fill');
+		const text = byTestId(container, 'text');
+
+		expect({
+			background: getComputedStyle(fill).backgroundColor,
+			color: getComputedStyle(text).color,
+		}).toEqual({
+			background: resolvedColor('Canvas', fill),
+			color: resolvedColor('CanvasText', text),
+		});
+	} finally {
+		await emulateForcedColors('none');
+	}
 });

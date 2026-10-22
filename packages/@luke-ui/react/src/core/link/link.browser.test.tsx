@@ -199,8 +199,8 @@ for (const prominence of ['low', 'standard', 'high'] as const) {
 for (const appearance of visualAppearances) {
 	const name = `${appearance.theme} ${appearance.mode}`;
 
-	test(`a text Link reads the surrounding surface in every state in ${name}`, () => {
-		const { locator } = render(
+	test(`a text Link reads the surrounding surface in every state in ${name}`, async () => {
+		const { container, locator } = render(
 			<>
 				<Box backgroundColor="danger.solid" padding="space.8">
 					<Link href="#" prominence="high">
@@ -218,6 +218,7 @@ for (const appearance of visualAppearances) {
 		const onSolid = locator.getByRole('link', { name: 'On solid' }).element();
 		const onSubtle = locator.getByRole('link', { name: 'On subtle' }).element();
 		const solidForeground = pairedColors(onSolid, 'danger.solid').foreground;
+		await expectNoAxeViolations(container);
 
 		const actual = INTERACTION_STATES.map((state) => {
 			setInteractionState(onSolid, state);
