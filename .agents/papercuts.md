@@ -57,3 +57,30 @@ would have prevented and that a check or a pointer would not handle better. Two 
 are a reason to consider a skill, not a requirement for one. The maintainer approves skill additions
 and changes. Remove a skill when it is obsolete or when pilot or spot-check evidence shows it does
 not help. Silence in this log is not evidence.
+
+## Production settings API adds a control used only by tests
+
+- Seen: 2026-10-21 (PR #903, #880). Review of `748dc121` found `holdMutations` and three mutation
+  waits with callers only in browser tests.
+- Where: `apps/reference-app/src/api/settings-api.ts` and `app.browser.test.tsx`. `docs/TESTING.md`,
+  Component tests, forbids production APIs that exist only to make tests easier. The write-tests
+  workflow requires reading that guide before authoring tests.
+- Problem: The agent-authored timing cleanup added a production control solely for tests despite the
+  required guidance. review-pr's easy-to-miss list and work-on-issue's pre-commit step already name
+  the rule, so pointing to it again is not a remedy. Correcting the implementation does not
+  establish that test authoring applies that rule.
+
+## Agent-authored comments narrate history
+
+- Seen: 2026-10-21 (PR #903, #880). Review of `748dc121` found a keyboard-navigation comment
+  describing prior browser round trips and a 15.7-second investigation timing. Seen again:
+  2026-10-22 (PR #911, #899 Part 5). Review of `ecf1ea9` found a Link test comment opening "#899
+  asks text Links to stay underlined", citing the issue to justify the rule.
+- Where: `apps/docs/src/components/search.browser.test.tsx` and
+  `packages/@luke-ui/react/src/core/link/link.browser.test.tsx`. `docs/DOCUMENTATION.md`, Comments
+  and JSDoc, requires comments to explain code without its history. The review-pr workflow requires
+  consulting the applicable repository guides.
+- Problem: Agent-authored comments narrated history despite the required guidance. review-pr's
+  easy-to-miss list and work-on-issue's pre-commit step already name the rule, so pointing to it
+  again is not a remedy. Correcting the comments does not establish that comment authoring applies
+  the rule.
