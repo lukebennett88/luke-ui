@@ -272,8 +272,8 @@ test('a low text Link uses LinkText and underlines active states in forced colou
 	}
 });
 
-// #899 asks text Links to stay underlined at rest. Low prominence is the agreed exception: at rest it
-// has no underline and stands out from the body text around it by weight instead. On a solid fill
+// Text Links stay underlined at rest, except at low prominence: at rest it has no underline and
+// stands out from the body text around it by weight instead. On a solid fill
 // its colour matches that text, so weight is the only resting cue there.
 const LOW_LINK_BACKGROUNDS = ['surface.base', 'accent.subtle', 'accent.solid'] as const;
 
