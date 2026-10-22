@@ -48,6 +48,25 @@ Set `fontWeight` only when you need to override the style's weight. Themes expos
 Use a larger style such as `display` or `heading1` for prominent content that is not a heading, such
 as a large status value.
 
+## Colour
+
+Omit `color` to inherit the surrounding colour. Set `color` to `primary`, `secondary`, or a semantic
+role: `neutral`, `accent`, `info`, `success`, `warning`, or `danger`. Each value reads the nearest
+Luke UI background, such as a Box `backgroundColor`. On a standard surface or a subtle fill, a role
+keeps its hue. On a solid fill, every role reads as that fill's primary colour, because the theme
+guarantees contrast only for that fill's own foreground.
+
+```tsx
+<Box backgroundColor="accent.solid" padding="space.16">
+	<Text>Readable by default</Text>
+	<Text color="secondary">Contextual secondary</Text>
+	<Text color="danger">Readable on the solid fill</Text>
+</Box>
+```
+
+`secondary` guarantees readable contrast, not visible de-emphasis. On a solid fill it can match
+`primary`. Typography props such as `typography` and `shouldInheritFont` never change the colour.
+
 ## Alignment
 
 Set `textAlign` when the layout needs a different inline alignment.

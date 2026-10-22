@@ -1,9 +1,11 @@
+import { Box } from '@luke-ui/react/box';
 import { Heading, HeadingLevels, useHeadingLevel } from '@luke-ui/react/heading';
 import { expect, test, vi } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { INTER_CAP_HEIGHT_EM, loadInter } from '../test-utils/load-inter.js';
 import { measureBaseline } from '../test-utils/measure-first-line.js';
 import { render, visualAppearances } from '../test-utils/render.js';
+import { pairedTokens, resolvedColor } from '../test-utils/surface-colors.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -233,3 +235,42 @@ test('truncated heading', { tags: ['visual'] }, async () => {
 
 	await captureVisual(locator, 'heading/truncated');
 });
+
+for (const appearance of visualAppearances) {
+	test(`Heading colour follows the nearest background in ${appearance.theme} ${appearance.mode}`, () => {
+		const { container } = render(
+			<Box backgroundColor="danger.solid" data-testid="solid">
+				<Heading data-testid="inherited" level={2}>
+					Account settings
+				</Heading>
+				<Heading color="secondary" data-testid="secondary" level={3}>
+					Supporting heading
+				</Heading>
+				<Heading
+					color="success"
+					level={4}
+					renderRoot={(domProps, { element: Element }) => (
+						<Element {...domProps} data-testid="render-root" />
+					)}
+				>
+					Owned heading
+				</Heading>
+			</Box>,
+			{ appearance },
+		);
+		const byTestId = (id: string) => container.querySelector(`[data-testid="${id}"]`)!;
+		const tokens = pairedTokens('danger.solid');
+
+		expect(getComputedStyle(byTestId('inherited')).color).toBe(
+			getComputedStyle(byTestId('solid')).color,
+		);
+		expect(getComputedStyle(byTestId('secondary')).color).toBe(
+			resolvedColor(tokens.secondary, byTestId('secondary')),
+		);
+		// A semantic role on a solid background reads as its on-solid primary.
+		expect(byTestId('render-root').tagName).toBe('H4');
+		expect(getComputedStyle(byTestId('render-root')).color).toBe(
+			resolvedColor(tokens.success, byTestId('render-root')),
+		);
+	});
+}

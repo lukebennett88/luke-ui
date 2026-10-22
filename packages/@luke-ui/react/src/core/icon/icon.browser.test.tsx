@@ -1,9 +1,12 @@
+import { Box } from '@luke-ui/react/box';
 import { Icon } from '@luke-ui/react/icon';
+import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
-import { test } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
+import { pairedTokens, resolvedColor } from '../test-utils/surface-colors.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -66,3 +69,34 @@ test('semantic content inheritance', { tags: ['visual'] }, async () => {
 		await captureVisualAppearance(locator, 'icon/content-inheritance', appearance);
 	}
 });
+
+for (const appearance of visualAppearances) {
+	test(`Icon paints in the surrounding contextual colour in ${appearance.theme} ${appearance.mode}`, () => {
+		const { container } = render(
+			<>
+				<Box backgroundColor="accent.solid">
+					<Icon id="on-solid-icon" name="add" />
+				</Box>
+				<Box backgroundColor="warning.subtle">
+					<Text color="danger" data-testid="danger-text">
+						<Icon name="closeCircle" />
+					</Text>
+				</Box>
+			</>,
+			{ appearance },
+		);
+		const onSolid = container.querySelector('#on-solid-icon');
+		const dangerText = container.querySelector('[data-testid="danger-text"]');
+		const dangerIcon = dangerText?.querySelector('svg');
+		if (!(onSolid instanceof SVGElement) || !(dangerIcon instanceof SVGElement)) {
+			throw new Error('Expected both icons.');
+		}
+
+		expect(getComputedStyle(onSolid).fill).toBe(
+			resolvedColor(pairedTokens('accent.solid').primary, onSolid.parentElement!),
+		);
+		expect(getComputedStyle(dangerIcon).fill).toBe(
+			resolvedColor(pairedTokens('warning.subtle').danger, dangerText!),
+		);
+	});
+}

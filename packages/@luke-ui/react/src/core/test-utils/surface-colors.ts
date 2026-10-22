@@ -11,7 +11,7 @@ export type PairedBackground = SurfaceBackground | `${SemanticRole}.${'subtle' |
 /** Every contextual foreground slot, in a stable order. */
 const FOREGROUND_SLOTS = ['primary', 'secondary', ...SEMANTIC_ROLES] as const;
 
-type ForegroundSlot = (typeof FOREGROUND_SLOTS)[number];
+export type ForegroundSlot = (typeof FOREGROUND_SLOTS)[number];
 
 /** The computed colour `value` resolves to inside `parent`, for comparing with computed styles. */
 export function resolvedColor(value: string, parent: Element): string {
@@ -35,7 +35,7 @@ export function surfaceColors(element: Element) {
 }
 
 /** The theme token each foreground slot reads on `background`. */
-function pairedTokens(background: PairedBackground): Record<ForegroundSlot, string> {
+export function pairedTokens(background: PairedBackground): Record<ForegroundSlot, string> {
 	const [group, level] = background.split('.') as [string, string];
 	if (level === 'solid') {
 		const { onSolid } = vars.color.foreground[group as SemanticRole];

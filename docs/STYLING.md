@@ -409,7 +409,8 @@ at `small` and `px20` icons at `medium`. Explicit `Icon.size` overrides win over
 `--luke-internal-foreground-*` overrides. Spread it into the same rule, condition, or state selector
 that sets the background, and never set a recognised background without it.
 `contextualForeground(slot)` reads `primary`, `secondary`, or a role's colour from the nearest
-surface.
+surface. `Text`'s `color` values use it. `Text` without `color`, and typography composed on it such
+as `Strong`, set no colour and inherit.
 
 Standard surfaces and subtle fills reset the overrides, so a read falls back to the global neutral
 hierarchy, or to the role's resting hue, on the reading element. The theme compiler gates those

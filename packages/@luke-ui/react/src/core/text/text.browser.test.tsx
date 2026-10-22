@@ -1,7 +1,9 @@
+import { Box } from '@luke-ui/react/box';
 import { Code } from '@luke-ui/react/code';
 import { Em } from '@luke-ui/react/em';
 import { Emoji } from '@luke-ui/react/emoji';
 import { Kbd } from '@luke-ui/react/kbd';
+import { Numeral } from '@luke-ui/react/numeral';
 import { Quote } from '@luke-ui/react/quote';
 import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
@@ -14,6 +16,8 @@ import { typeStyles } from '../../theme/type-styles.js';
 import { INTER_CAP_HEIGHT_EM, loadInter } from '../test-utils/load-inter.js';
 import { measureBaseline, measureLastBaseline } from '../test-utils/measure-first-line.js';
 import { render, visualAppearances } from '../test-utils/render.js';
+import type { ForegroundSlot, PairedBackground } from '../test-utils/surface-colors.js';
+import { pairedTokens, resolvedColor } from '../test-utils/surface-colors.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
 const slottedTextContext = { slots: { description: {}, errorMessage: {} } };
@@ -333,6 +337,234 @@ test('Text on its own does not inherit case or numeric styling from the page', (
 	const styles = getComputedStyle(text);
 	expect(styles.textTransform).toBe('none');
 	expect(styles.fontVariantNumeric).toBe('normal');
+});
+
+const TEXT_COLORS = [
+	'primary',
+	'secondary',
+	'neutral',
+	'accent',
+	'info',
+	'success',
+	'warning',
+	'danger',
+] as const satisfies ReadonlyArray<ForegroundSlot>;
+
+const CONTEXT_BACKGROUNDS = [
+	'surface.base',
+	'surface.subdued',
+	'neutral.subtle',
+	'danger.subtle',
+	'accent.solid',
+	'warning.solid',
+] as const satisfies ReadonlyArray<PairedBackground>;
+
+function byTestId(container: HTMLElement, id: string): HTMLElement {
+	const element = container.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+	if (element === null) throw new Error(`Expected [data-testid="${id}"].`);
+	return element;
+}
+
+function colorOf(element: Element): string {
+	return getComputedStyle(element).color;
+}
+
+for (const appearance of visualAppearances) {
+	const name = `${appearance.theme} ${appearance.mode}`;
+
+	test(`Text without a colour inherits the surrounding colour in ${name}`, () => {
+		const { container } = render(
+			<>
+				<Box backgroundColor="accent.solid" data-testid="solid">
+					<Text data-testid="on-solid">On solid</Text>
+				</Box>
+				<Box backgroundColor="warning.subtle" data-testid="subtle">
+					<Text data-testid="on-subtle">On subtle</Text>
+				</Box>
+				<span data-testid="custom" style={{ color: 'rgb(1, 2, 3)' }}>
+					<Text data-testid="in-custom">In custom colour</Text>
+				</span>
+			</>,
+			{ appearance },
+		);
+
+		for (const [parent, text] of [
+			['solid', 'on-solid'],
+			['subtle', 'on-subtle'],
+			['custom', 'in-custom'],
+		] as const) {
+			expect(colorOf(byTestId(container, text))).toBe(colorOf(byTestId(container, parent)));
+		}
+	});
+
+	test(`explicit Text colours resolve against the nearest background in ${name}`, () => {
+		const { container } = render(
+			<>
+				{CONTEXT_BACKGROUNDS.map((background) => (
+					<Box backgroundColor={background} key={background}>
+						{TEXT_COLORS.map((color) => (
+							<Text color={color} data-testid={`${background} ${color}`} key={color}>
+								{color}
+							</Text>
+						))}
+					</Box>
+				))}
+			</>,
+			{ appearance },
+		);
+
+		for (const background of CONTEXT_BACKGROUNDS) {
+			const tokens = pairedTokens(background);
+			for (const color of TEXT_COLORS) {
+				const text = byTestId(container, `${background} ${color}`);
+				expect(colorOf(text)).toBe(resolvedColor(tokens[color], text));
+			}
+		}
+		// A semantic role keeps its hue on a subtle fill but collapses on a solid one.
+		const subtleDanger = byTestId(container, 'neutral.subtle danger');
+		const solidDanger = byTestId(container, 'accent.solid danger');
+		expect(colorOf(subtleDanger)).not.toBe(colorOf(byTestId(container, 'neutral.subtle primary')));
+		expect(colorOf(solidDanger)).toBe(colorOf(byTestId(container, 'accent.solid primary')));
+	});
+
+	test(`Text colours follow nested backgrounds and colour-mode scopes in ${name}`, () => {
+		const scopeMode = appearance.mode === 'light' ? 'dark' : 'light';
+		const { container } = render(
+			<Box backgroundColor="success.solid" padding="space.8">
+				<span style={{ color: 'rgb(1, 2, 3)' }}>
+					<Text color="primary" data-testid="reset-primary">
+						Primary
+					</Text>
+				</span>
+				<Box backgroundColor="info.subtle" data-testid="subtle" padding="space.8">
+					<Text color="danger" data-testid="subtle-danger">
+						Danger
+					</Text>
+					<Box backgroundColor="danger.solid" data-testid="inner-solid" padding="space.8">
+						<Text color="secondary" data-testid="inner-secondary">
+							Secondary
+						</Text>
+					</Box>
+				</Box>
+				<div data-color-mode={scopeMode} data-testid="scope">
+					<Text color="secondary" data-testid="scope-secondary">
+						Scoped
+					</Text>
+				</div>
+			</Box>,
+			{ appearance },
+		);
+		const resetPrimary = byTestId(container, 'reset-primary');
+		const subtleDanger = byTestId(container, 'subtle-danger');
+		const innerSecondary = byTestId(container, 'inner-secondary');
+		const scopeSecondary = byTestId(container, 'scope-secondary');
+
+		// Explicit primary ignores the custom colour between it and the background.
+		expect(colorOf(resetPrimary)).toBe(
+			resolvedColor(pairedTokens('success.solid').primary, resetPrimary),
+		);
+		expect(colorOf(subtleDanger)).toBe(
+			resolvedColor(pairedTokens('info.subtle').danger, subtleDanger),
+		);
+		expect(colorOf(innerSecondary)).toBe(
+			resolvedColor(pairedTokens('danger.solid').secondary, innerSecondary),
+		);
+		expect(colorOf(scopeSecondary)).toBe(
+			resolvedColor(pairedTokens('surface.base').secondary, scopeSecondary),
+		);
+		expect(colorOf(scopeSecondary)).not.toBe(
+			resolvedColor(pairedTokens('surface.base').secondary, byTestId(container, 'subtle')),
+		);
+	});
+
+	test(`font and style overrides never reset colour in ${name}`, () => {
+		const { container } = render(
+			<Box backgroundColor="accent.solid" data-testid="solid">
+				<Text data-testid="inherit-font" shouldInheritFont>
+					Inherited font
+				</Text>
+				<Text color="secondary" data-testid="inherit-font-secondary" shouldInheritFont>
+					Inherited font, secondary
+				</Text>
+				<Text
+					data-testid="styled"
+					fontStyle="italic"
+					fontWeight="heading"
+					textTransform="uppercase"
+					typography="heading2"
+				>
+					Styled
+				</Text>
+				<Text color="danger" data-testid="inline-style" style={{ color: 'rgb(1, 2, 3)' }}>
+					Inline style
+				</Text>
+			</Box>,
+			{ appearance },
+		);
+		const solid = byTestId(container, 'solid');
+		const inheritFontSecondary = byTestId(container, 'inherit-font-secondary');
+
+		expect(colorOf(byTestId(container, 'inherit-font'))).toBe(colorOf(solid));
+		expect(colorOf(byTestId(container, 'styled'))).toBe(colorOf(solid));
+		expect(colorOf(inheritFontSecondary)).toBe(
+			resolvedColor(pairedTokens('accent.solid').secondary, inheritFontSecondary),
+		);
+		expect(colorOf(byTestId(container, 'inline-style'))).toBe('rgb(1, 2, 3)');
+	});
+
+	test(`typography-only components keep the colour around them in ${name}`, () => {
+		const { container } = render(
+			<Box backgroundColor="neutral.subtle">
+				<Text color="secondary" data-testid="secondary">
+					Supporting <Strong>strong</Strong> <Em>em</Em> <Quote>quote</Quote>{' '}
+					<Emoji emoji="👋" label="Wave" /> <Numeral value={42} />
+				</Text>
+				<Text color="danger" data-testid="danger">
+					Error <Strong>strong</Strong>
+				</Text>
+			</Box>,
+			{ appearance },
+		);
+
+		for (const id of ['secondary', 'danger']) {
+			const text = byTestId(container, id);
+			const descendants = text.querySelectorAll('strong, em, q, [role="img"], span span');
+			expect(descendants.length).toBeGreaterThan(0);
+			for (const descendant of descendants) {
+				expect(colorOf(descendant)).toBe(colorOf(text));
+			}
+		}
+		expect(colorOf(byTestId(container, 'secondary'))).not.toBe(
+			colorOf(byTestId(container, 'danger')),
+		);
+	});
+}
+
+test('contextual colours', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator: scene } = render(
+			<Stack>
+				{CONTEXT_BACKGROUNDS.map((background) => (
+					<Box
+						backgroundColor={background}
+						display="flex"
+						flexWrap="wrap"
+						gap="space.12"
+						key={background}
+						padding="space.8"
+					>
+						{TEXT_COLORS.map((color) => (
+							<Text color={color} key={color}>
+								{color}
+							</Text>
+						))}
+					</Box>
+				))}
+			</Stack>,
+			{ appearance },
+		);
+		await captureVisualAppearance(scene, 'text/contextual-colours', appearance);
+	}
 });
 
 const rowStyle = {
