@@ -123,7 +123,8 @@ chip. Each sets the text colour to its readable primary, which an `Icon` inside 
 | A role's `solid` fill    | That role's `onSolid.primary` and `secondary` | That role's `onSolid.primary`    |
 
 A role keeps its hue on another role's subtle fill. The theme compiler checks every pairing in the
-table at 4.5:1 in both colour modes, so a theme that compiles has no unreadable combination. A
+table at 4.5:1 in both colour modes, and a theme that misses one does not compile. Pairings outside
+the table are not checked, such as disabled text and text on a background from your own CSS. A
 nested background sets a new context. A `Box` without `backgroundColor` keeps the surrounding one.
 An element with `data-color-mode` sets the context again in its own mode.
 
