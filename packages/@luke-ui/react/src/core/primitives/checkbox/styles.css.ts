@@ -6,6 +6,7 @@ import { focusRing } from '../../styles/focus-ring.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+import { surfaceStyle } from '../../styles/surface.js';
 import { textLineHeight } from '../../text/recipe.css.js';
 import { inlineControlGap, inlineFieldIndent } from '../field/recipe.css.js';
 
@@ -87,9 +88,10 @@ const checkboxConfig = {
 				},
 			},
 			// Unchecked, the box is a field part; checked, a solid fill with the control finish. Hover
-			// and pressed change colour, so they stay distinct without materials.
+			// and pressed change colour, so they stay distinct without materials. Every fill pairs with
+			// its foreground context, so the glyph reads the fill's primary: on-solid primary once checked.
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.field,
+			...surfaceStyle('surface.field'),
 			backgroundImage: 'none',
 			// The finish spans the border too. From the padding box it would tile into the border and
 			// repeat its lit top along the bottom edge.
@@ -100,7 +102,6 @@ const checkboxConfig = {
 			borderStyle: 'solid',
 			borderWidth: '1px',
 			boxShadow: vars.depth.recessed,
-			color: vars.color.foreground.accent.onSolid.primary,
 			display: 'inline-flex',
 			fontSize: checkboxGlyphSize,
 			fontWeight: vars.font.weight.heading,
@@ -108,8 +109,8 @@ const checkboxConfig = {
 			justifyContent: 'center',
 			lineHeight: 1,
 			transitionDuration: vars.motion.feedback.duration,
-			transitionProperty:
-				'background-color, background-image, border-color, box-shadow, color, opacity',
+			// No `color`: the glyph appears with its fill's colour, not fading from the unchecked one.
+			transitionProperty: 'background-color, background-image, border-color, box-shadow, opacity',
 			transitionTimingFunction: vars.motion.feedback.easing,
 			selectors: {
 				'&::after': {
@@ -124,11 +125,11 @@ const checkboxConfig = {
 					borderColor: vars.color.border.controlHover,
 				},
 				[pressed()]: {
-					backgroundColor: vars.color.background.neutral.subtle.pressed,
+					...surfaceStyle('neutral.subtle.pressed'),
 					borderColor: vars.color.border.controlHover,
 				},
 				'[data-indeterminate="true"] &': {
-					backgroundColor: vars.color.background.accent.solid.rest,
+					...surfaceStyle('accent.solid.rest'),
 					backgroundImage: vars.controlFinish.resting,
 					borderColor: vars.color.background.accent.solid.rest,
 					boxShadow: 'none',
@@ -141,7 +142,7 @@ const checkboxConfig = {
 					borderColor: vars.color.background.danger.solid.rest,
 				},
 				'[data-selected="true"] &': {
-					backgroundColor: vars.color.background.accent.solid.rest,
+					...surfaceStyle('accent.solid.rest'),
 					backgroundImage: vars.controlFinish.resting,
 					borderColor: vars.color.background.accent.solid.rest,
 					boxShadow: 'none',
@@ -150,39 +151,38 @@ const checkboxConfig = {
 					opacity: 1,
 				},
 				[`${hovered('[data-selected="true"]')}, ${hovered('[data-indeterminate="true"]')}`]: {
-					backgroundColor: vars.color.background.accent.solid.hover,
+					...surfaceStyle('accent.solid.hover'),
 					backgroundImage: vars.controlFinish.raised,
 					borderColor: vars.color.background.accent.solid.hover,
 				},
 				[`${pressed('[data-selected="true"]')}, ${pressed('[data-indeterminate="true"]')}`]: {
-					backgroundColor: vars.color.background.accent.solid.pressed,
+					...surfaceStyle('accent.solid.pressed'),
 					backgroundImage: vars.controlFinish.recessed,
 					borderColor: vars.color.background.accent.solid.pressed,
 				},
 				'[data-invalid="true"][data-selected="true"] &, [data-invalid="true"][data-indeterminate="true"] &':
 					{
-						backgroundColor: vars.color.background.danger.solid.rest,
+						...surfaceStyle('danger.solid.rest'),
 						borderColor: vars.color.background.danger.solid.rest,
-						color: vars.color.foreground.danger.onSolid.primary,
 					},
 				// Only `danger.solid.rest` is a guaranteed 3:1 boundary, so an invalid box keeps it through
 				// hover and press. The fill carries the feedback instead.
 				[hovered('[data-invalid="true"]')]: {
-					backgroundColor: vars.color.background.danger.subtle.hover,
+					...surfaceStyle('danger.subtle.hover'),
 					borderColor: vars.color.background.danger.solid.rest,
 				},
 				[pressed('[data-invalid="true"]')]: {
-					backgroundColor: vars.color.background.danger.subtle.pressed,
+					...surfaceStyle('danger.subtle.pressed'),
 					borderColor: vars.color.background.danger.solid.rest,
 				},
 				[`${hovered('[data-invalid="true"][data-selected="true"]')}, ${hovered('[data-invalid="true"][data-indeterminate="true"]')}`]:
 					{
-						backgroundColor: vars.color.background.danger.solid.hover,
+						...surfaceStyle('danger.solid.hover'),
 						borderColor: vars.color.background.danger.solid.rest,
 					},
 				[`${pressed('[data-invalid="true"][data-selected="true"]')}, ${pressed('[data-invalid="true"][data-indeterminate="true"]')}`]:
 					{
-						backgroundColor: vars.color.background.danger.solid.pressed,
+						...surfaceStyle('danger.solid.pressed'),
 						borderColor: vars.color.background.danger.solid.rest,
 					},
 			},

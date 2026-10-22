@@ -71,3 +71,26 @@ export function pairedColors(element: Element, background: PairedBackground) {
 		),
 	};
 }
+
+/**
+ * `surfaceColors` once running colour transitions finish. Controls transition their fill and text
+ * colour, so a state change reads the end value rather than an interpolated one.
+ */
+export function settledSurfaceColors(element: Element) {
+	// `getAnimations()` flushes style first, so it includes any transition the last change started.
+	for (const animation of document.getAnimations()) {
+		if (animation instanceof CSSTransition) animation.finish();
+	}
+	return surfaceColors(element);
+}
+
+/**
+ * Sets the state attributes React Aria puts on a pressable element. Toggling them directly isolates
+ * the styling contract each state selects from React Aria's pointer handling, which it owns.
+ */
+export function setInteractionState(element: Element, state: 'rest' | 'hover' | 'pressed'): void {
+	if (state === 'rest') element.removeAttribute('data-hovered');
+	else element.setAttribute('data-hovered', 'true');
+	if (state === 'pressed') element.setAttribute('data-pressed', 'true');
+	else element.removeAttribute('data-pressed');
+}

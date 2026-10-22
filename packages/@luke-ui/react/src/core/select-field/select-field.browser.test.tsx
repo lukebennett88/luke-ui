@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
 import type { ReactElement } from 'react';
@@ -10,6 +11,7 @@ import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { expectAccessibleNameWords } from '../test-utils/expect-accessible-name-words.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
 import { render, visualAppearances } from '../test-utils/render.js';
+import { pairedColors, surfaceColors } from '../test-utils/surface-colors.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -735,3 +737,19 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 		await emulateForcedColors('none');
 	}
 });
+
+for (const appearance of visualAppearances) {
+	test(`the Select trigger keeps its field surface on a solid fill in ${appearance.theme} ${appearance.mode}`, () => {
+		render(
+			<Box backgroundColor="accent.solid" padding="space.8">
+				<SelectField items={themeItems} label="Theme">
+					{renderThemeItem}
+				</SelectField>
+			</Box>,
+			{ appearance },
+		);
+		const button = trigger(/Theme/);
+
+		expect(surfaceColors(button)).toEqual(pairedColors(button, 'surface.field'));
+	});
+}

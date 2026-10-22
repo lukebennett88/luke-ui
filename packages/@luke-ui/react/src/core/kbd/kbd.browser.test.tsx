@@ -1,8 +1,10 @@
+import { Box } from '@luke-ui/react/box';
 import { Code } from '@luke-ui/react/code';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Text } from '@luke-ui/react/text';
 import { expect, test } from 'vite-plus/test';
-import { render } from '../test-utils/render.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { pairedColors, surfaceColors } from '../test-utils/surface-colors.js';
 
 function getKbdElement(container: HTMLElement): HTMLElement {
 	const target = container.querySelector('kbd');
@@ -72,3 +74,19 @@ test('Kbd uses the body font family, not the code font used by Code', async () =
 
 	expect(getComputedStyle(kbd).fontFamily).not.toBe(getComputedStyle(code).fontFamily);
 });
+
+for (const appearance of visualAppearances) {
+	test(`Kbd establishes its own key-chip context on a solid fill in ${appearance.theme} ${appearance.mode}`, () => {
+		const { container } = render(
+			<Box backgroundColor="danger.solid" padding="space.8">
+				<Text>
+					Press <Kbd>Enter</Kbd>
+				</Text>
+			</Box>,
+			{ appearance },
+		);
+		const kbd = getKbdElement(container);
+
+		expect(surfaceColors(kbd)).toEqual(pairedColors(kbd, 'surface.subdued'));
+	});
+}

@@ -1,9 +1,6 @@
-import { Blockquote } from '@luke-ui/react/blockquote';
 import { Box } from '@luke-ui/react/box';
 import { Code, codeRecipe } from '@luke-ui/react/code';
 import { Heading } from '@luke-ui/react/heading';
-import { Kbd, kbdRecipe } from '@luke-ui/react/kbd';
-import { Link, linkRecipe } from '@luke-ui/react/link';
 import { Prose, proseRecipe } from '@luke-ui/react/prose';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
@@ -11,10 +8,19 @@ import { expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
-import { captureVisualAppearance, focusViaKeyboard, Stack } from '../test-utils/visual.js';
-
-const swatch =
-	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='64'%3E%3Crect width='320' height='64' fill='%23888'/%3E%3C/svg%3E";
+import {
+	pairedColors,
+	resolvedColor,
+	settledSurfaceColors,
+	surfaceColors,
+} from '../test-utils/surface-colors.js';
+import {
+	captureVisualAppearance,
+	emulateForcedColors,
+	focusViaKeyboard,
+	Stack,
+} from '../test-utils/visual.js';
+import { KitchenSinkDocument, NativeElementsScene, swatch } from './prose.fixtures.js';
 
 function query(root: Element, selector: string) {
 	const element = root.querySelector(selector);
@@ -101,7 +107,6 @@ const nativeTypedMarkers = ['decimal', 'lower-alpha', 'upper-alpha', 'lower-roma
 
 /** A `list-style: none` reset below Luke UI, as Tailwind Preflight writes it. */
 function addListReset() {
-	// This file's `document` is a fixture, so reach the page document explicitly.
 	const style = globalThis.document.head.appendChild(globalThis.document.createElement('style'));
 	style.textContent = '@layer base { ol, ul { list-style: none; } }';
 	return style;
@@ -680,232 +685,28 @@ for (const { name, node } of proseBoundaries) {
 	});
 }
 
-const document = (
-	<Prose>
-		<h1>Choosing a spacing scale</h1>
-		<p>
-			A spacing scale trades range for consistency. Nine steps cover a component library without
-			offering two values a designer cannot tell apart.
-		</p>
-		<p>Every step below is a token. Reach for the nearest one rather than a raw pixel value.</p>
-
-		<h2>Picking a step</h2>
-		<p>Work outwards from the tightest gap the layout needs.</p>
-		<ol>
-			<li>Measure the smallest gap in the design.</li>
-			<li>
-				Round it to the nearest step.
-				<ul>
-					<li>Round down inside a control.</li>
-					<li>Round up between sections.</li>
-				</ul>
-			</li>
-			<li>Use that step everywhere the same relationship appears.</li>
-		</ol>
-
-		<h3>Rounding in practice</h3>
-		<ul>
-			<li>
-				<p>A loose item holds more than one paragraph.</p>
-				<p>The second takes a tighter gap than a document paragraph.</p>
-			</li>
-			<li>
-				<p>Each item keeps the list rhythm.</p>
-			</li>
-		</ul>
-		<ol type="1">
-			<li>Decimal markers.</li>
-		</ol>
-		<ol type="a">
-			<li>Lower-alpha markers.</li>
-		</ol>
-		<ol type="A">
-			<li>Upper-alpha markers.</li>
-		</ol>
-		<ol type="i">
-			<li>Lower-roman markers.</li>
-		</ol>
-		<ol type="I">
-			<li>Upper-roman markers.</li>
-		</ol>
-
-		<Blockquote>
-			Perfect typography is certainly the most elusive of all arts. Sculpture in stone alone comes
-			near it in obstinacy.
-		</Blockquote>
-
-		<h4>Reading a token</h4>
-		{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable pre */}
-		<pre tabIndex={0}>
-			<code>{'padding-inline: var(--luke-space-16);\nmargin-block: 0;'}</code>
-		</pre>
-		<img alt="" height={64} src={swatch} width={320} />
-		<picture>
-			<img alt="" height={64} src={swatch} width={320} />
-		</picture>
-		<video aria-label="Spacing scale animation" height={64} muted poster={swatch} width={320} />
-
-		<table>
-			<thead>
-				<tr>
-					<th scope="col">
-						<p>
-							Step
-							<br />
-							name
-						</p>
-					</th>
-					<th scope="col">Value</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>
-						<p>
-							<Code>space.8</Code>
-							<br />
-							Small gap
-						</p>
-					</td>
-					<td>
-						<p>8px</p>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<Code>space.24</Code>
-					</td>
-					<td>24px</td>
-				</tr>
-			</tbody>
-			<tfoot>
-				<tr>
-					<td>Total steps</td>
-					<td>2</td>
-				</tr>
-			</tfoot>
-		</table>
-
-		<hr />
-
-		<h5>Terms</h5>
-		<dl>
-			<dt>
-				<Text elementType="span" fontWeight="emphasis">
-					Step
-				</Text>
-			</dt>
-			<dd>
-				<Text elementType="span">One named value on the scale.</Text>
-			</dd>
-			<dt>
-				<Text elementType="span" fontWeight="emphasis">
-					Gap
-				</Text>
-			</dt>
-			<dd>
-				<Text elementType="span">The measured distance between two boxes.</Text>
-			</dd>
-		</dl>
-
-		<h6>Scale specimen</h6>
-		<figure>
-			<img alt="" height={64} src={swatch} width={320} />
-			<figcaption>
-				<Text color="secondary" elementType="span" typography="caption">
-					Grouping changes with distance alone.
-				</Text>
-			</figcaption>
-		</figure>
-	</Prose>
-);
-
 test('the prose document has no axe violations', async () => {
-	const { container } = render(<Stack width="18rem">{document}</Stack>);
+	const { container } = render(
+		<Stack width="18rem">
+			<KitchenSinkDocument />
+		</Stack>,
+	);
 
 	await expectNoAxeViolations(container);
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
-		const { locator } = render(<Stack width="18rem">{document}</Stack>, { appearance });
+		const { locator } = render(
+			<Stack width="18rem">
+				<KitchenSinkDocument />
+			</Stack>,
+			{ appearance },
+		);
 
 		await captureVisualAppearance(locator, 'prose/kitchen-sink', appearance);
 	}
 });
-
-function NativeElementsScene() {
-	return (
-		<Stack width="20rem">
-			<Prose>
-				<p>
-					Native: <a href="#native">Read the guide</a>, <code>npm run build</code>, <kbd>⌘</kbd>{' '}
-					<kbd>K</kbd>.
-				</p>
-				<p>
-					Components: <Link href="#component">Read the guide</Link>, <Code>npm run build</Code>,{' '}
-					<Kbd>⌘</Kbd> <Kbd>K</Kbd>.
-				</p>
-				<blockquote>
-					<p>Keep the next step clear.</p>
-				</blockquote>
-				<Blockquote>Keep the next step clear.</Blockquote>
-				<p>
-					Wrapping: <code>{'unbrokenModuleName'.repeat(5)}</code>.
-				</p>
-				<pre>
-					<code>{'const moduleName = "unbrokenModuleName";'.repeat(3)}</code>
-				</pre>
-				<p>
-					Overrides:{' '}
-					<Link href="#override" prominence="low">
-						Read more
-					</Link>
-					,{' '}
-					<a className={linkRecipe({ prominence: 'high' })} href="#recipe">
-						Recipe link
-					</a>
-					, <code className={codeRecipe()}>one line</code>, <kbd className={kbdRecipe()}>Esc</kbd>.
-				</p>
-				<p>
-					<Link appearance="button" href="#button" prominence="high">
-						Open project
-					</Link>
-				</p>
-				<Blockquote typography="lead">A larger quotation.</Blockquote>
-				<p>
-					Text overrides:{' '}
-					<Text elementType="code" typography="lead" color="secondary">
-						plain code
-					</Text>
-					,{' '}
-					<Text elementType="kbd" typography="body">
-						Esc
-					</Text>
-					.
-				</p>
-				<Text elementType="blockquote" typography="lead">
-					An unaccented Text quotation.
-				</Text>
-				<div className="not-prose">
-					<p>
-						Boundary: <a href="#plain">Plain link</a>, <code>plain code</code>, <kbd>Esc</kbd>.
-					</p>
-					<blockquote>Plain quotation.</blockquote>
-					<Prose>
-						<p>
-							Nested: <a href="#nested">Read the guide</a>, <code>npm run build</code>,{' '}
-							<kbd>Esc</kbd>.
-						</p>
-						<blockquote>
-							<p>Prose applies again.</p>
-						</blockquote>
-					</Prose>
-				</div>
-			</Prose>
-		</Stack>
-	);
-}
 
 test('native elements', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
@@ -931,32 +732,204 @@ for (const state of ['hover', 'pressed', 'focus'] as const) {
 			const link = locator.getByRole('link', { name: 'Read the guide' });
 			if (state === 'focus') await focusViaKeyboard(link);
 			else await user.hover(link);
-			if (state === 'pressed') {
-				const bounds = link.element().getBoundingClientRect();
-				await cdp().send('Input.dispatchMouseEvent', {
-					type: 'mousePressed',
-					button: 'left',
-					buttons: 1,
-					clickCount: 1,
-					x: bounds.left + bounds.width / 2,
-					y: bounds.top + bounds.height / 2,
-				});
-			}
+			if (state === 'pressed') await pressPointer(link.element());
 			await expect.poll(() => link.element().matches(':active')).toBe(state === 'pressed');
 			try {
 				await captureVisualAppearance(locator, `prose/native-link-${state}`, appearance);
 			} finally {
-				if (state === 'pressed')
-					await cdp().send('Input.dispatchMouseEvent', {
-						type: 'mouseReleased',
-						button: 'left',
-						buttons: 0,
-						clickCount: 1,
-						x: -50,
-						y: -50,
-					});
+				if (state === 'pressed') await releasePointer();
 				unmount();
 			}
 		}
 	});
 }
+
+async function pressPointer(element: Element) {
+	const bounds = element.getBoundingClientRect();
+	await cdp().send('Input.dispatchMouseEvent', {
+		type: 'mousePressed',
+		button: 'left',
+		buttons: 1,
+		clickCount: 1,
+		x: bounds.left + bounds.width / 2,
+		y: bounds.top + bounds.height / 2,
+	});
+}
+
+async function releasePointer() {
+	await cdp().send('Input.dispatchMouseEvent', {
+		type: 'mouseReleased',
+		button: 'left',
+		buttons: 0,
+		clickCount: 1,
+		x: -50,
+		y: -50,
+	});
+}
+
+/** Reads `read` for a native link at rest, hovered, and pressed with the real pointer. */
+async function inEveryLinkState<Value>(
+	link: ReturnType<typeof render>['locator'],
+	user: ReturnType<typeof render>['user'],
+	read: () => Value,
+): Promise<Array<Value>> {
+	const rest = read();
+	await user.hover(link);
+	await expect.poll(() => link.element().matches(':hover')).toBe(true);
+	const hover = read();
+	await pressPointer(link.element());
+	try {
+		await expect.poll(() => link.element().matches(':active')).toBe(true);
+		return [rest, hover, read()];
+	} finally {
+		await releasePointer();
+	}
+}
+
+for (const appearance of visualAppearances) {
+	const name = `${appearance.theme} ${appearance.mode}`;
+
+	test(`raw code, kbd, and pre establish their own context on a solid fill in ${name}`, () => {
+		const { container } = render(
+			<Box backgroundColor="accent.solid" padding="space.8">
+				<Prose>
+					<p>
+						Run <code data-testid="code">pnpm install</code> or press{' '}
+						<kbd data-testid="kbd">Enter</kbd>.
+					</p>
+					<pre data-testid="pre">
+						<code data-testid="pre-code">pnpm install</code>
+					</pre>
+				</Prose>
+			</Box>,
+			{ appearance },
+		);
+		const code = query(container, '[data-testid="code"]');
+		const kbd = query(container, '[data-testid="kbd"]');
+		const pre = query(container, '[data-testid="pre"]');
+		const preCode = query(container, '[data-testid="pre-code"]');
+
+		expect(surfaceColors(code)).toEqual(pairedColors(code, 'neutral.subtle.rest'));
+		expect(surfaceColors(kbd)).toEqual(pairedColors(kbd, 'surface.subdued'));
+		expect(surfaceColors(pre)).toEqual(pairedColors(pre, 'neutral.subtle.rest'));
+		// Code inside the block takes the block's colours and draws no chip of its own.
+		expect(surfaceColors(preCode)).toEqual({
+			...surfaceColors(pre),
+			background: 'rgba(0, 0, 0, 0)',
+		});
+		expect(getComputedStyle(preCode).borderTopStyle).toBe('none');
+	});
+
+	test(`Code inside a Prose code block draws no second chip in ${name}`, () => {
+		const { container } = render(
+			<Prose>
+				<pre data-testid="pre">
+					<Code>pnpm install</Code>
+				</pre>
+			</Prose>,
+			{ appearance },
+		);
+		const pre = query(container, '[data-testid="pre"]');
+		const code = query(pre, 'code');
+
+		expect(surfaceColors(code)).toEqual({
+			...surfaceColors(pre),
+			background: 'rgba(0, 0, 0, 0)',
+		});
+		expect(getComputedStyle(code).borderTopStyle).toBe('none');
+		expect(getComputedStyle(code).paddingInlineStart).toBe('0px');
+	});
+
+	test(`a native link stays underlined in the solid fill's colour in every state in ${name}`, async () => {
+		const { locator, user } = render(
+			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
+				<Prose>
+					<p>
+						<a href="#guide">Read the guide</a>
+					</p>
+				</Prose>
+			</Box>,
+			{ appearance },
+		);
+		const link = locator.getByRole('link', { name: 'Read the guide' });
+		const { primary } = pairedColors(
+			locator.getByTestId('parent').element(),
+			'success.solid',
+		).foreground;
+
+		const states = await inEveryLinkState(link, user, () => {
+			const { color } = settledSurfaceColors(link.element());
+			const styles = getComputedStyle(link.element());
+			return {
+				color,
+				decoration: styles.textDecorationColor,
+				fontWeight: styles.fontWeight,
+				line: styles.textDecorationLine,
+			};
+		});
+
+		expect(states).toEqual(
+			['rest', 'hover', 'pressed'].map(() => ({
+				color: primary,
+				decoration: primary,
+				fontWeight: '500',
+				line: 'underline',
+			})),
+		);
+	});
+}
+
+test('a native link in heavier text keeps that weight', () => {
+	const { locator } = render(
+		<Prose>
+			<h2>
+				Read <a href="#guide">the guide</a>
+			</h2>
+			<p>
+				<strong>
+					Read <a href="#notes">the notes</a>
+				</strong>
+			</p>
+		</Prose>,
+	);
+	const weights = ['the guide', 'the notes'].map((name) => {
+		const link = locator.getByRole('link', { name }).element();
+		return {
+			link: getComputedStyle(link).fontWeight,
+			name,
+			text: link.parentElement && getComputedStyle(link.parentElement).fontWeight,
+		};
+	});
+
+	expect(weights).toEqual(weights.map(({ name, text }) => ({ link: text, name, text })));
+	expect(weights.map(({ text }) => Number(text))).toEqual([600, 700]);
+});
+
+test('a native link stays underlined in LinkText in forced colours', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const { locator, user } = render(
+			<Prose>
+				<p>
+					<a href="#guide">Read the guide</a>
+				</p>
+			</Prose>,
+		);
+		const link = locator.getByRole('link', { name: 'Read the guide' });
+
+		const states = await inEveryLinkState(link, user, () => {
+			const styles = getComputedStyle(link.element());
+			return { color: styles.color, line: styles.textDecorationLine };
+		});
+
+		expect(states).toEqual(
+			['rest', 'hover', 'pressed'].map(() => ({
+				color: resolvedColor('LinkText', link.element()),
+				line: 'underline',
+			})),
+		);
+	} finally {
+		await emulateForcedColors('none');
+	}
+});

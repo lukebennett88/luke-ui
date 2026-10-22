@@ -238,6 +238,10 @@ Build every recipe with the internal `recipe()` engine from `core/styles/recipe.
 public package entry. `recipe()` wraps every base, variant, and compound-variant style in the
 `recipes` layer.
 
+A public recipe that maps one of its values onto a different value of a shared recipe is a plain
+function in `recipe.ts` that calls the shared recipe. `linkRecipe` maps a text Link's public `text`
+appearance onto the shared action recipe's `link` appearance, so text Buttons keep their own.
+
 Pass optional `className` into the recipe. It appends after the recipe's own classes:
 
 ```tsx
@@ -258,7 +262,7 @@ export const buttonRecipe = recipe({
 	base: {/* … */},
 	defaultVariants: { appearance: 'solid', size: 'medium', tone: 'neutral' },
 	variants: {
-		appearance: { ghost: {}, solid: {}, subtle: {} },
+		appearance: { solid: {}, subtle: {}, transparent: {} },
 		size: {/* … */},
 		tone: { accent: {}, danger: {}, neutral: {} },
 	},
@@ -417,6 +421,24 @@ hierarchy, or to the role's resting hue, on the reading element. The theme compi
 pairs against every subtle fill, including other roles' fills. A solid fill sets the overrides to
 its role's on-solid leaves, and every role reads on-solid primary. An override resolves on the
 element that declares it, so the global styles reset the overrides in every colour-mode scope.
+
+Component recipes use the same mechanism. A control pairs its fill in every interaction state, so a
+solid Button keeps its on-solid context from rest to pressed. A fill that appears only on hover or
+press, such as a low-prominence Button's, establishes a subtle context while it shows. Text a
+component draws on whatever surface surrounds it, such as a field's label, description, and error, a
+text action, or a native link in Prose, reads `contextualForeground`. Its `state` argument gives a
+role's hover or pressed hue, which collapses to on-solid primary on a solid fill.
+`contextualDisabledForeground()` gives such text the disabled token on a standard surface or subtle
+fill, and on-solid secondary on a solid fill, which has no disabled leaf.
+`transparentSurfaceStyle()` hands an element that stops painting back to its parent's context, as
+inline `Code` does inside `pre`. The checkbox box pairs its fills so the check mark reads on-solid
+primary. The switch track and thumb and the loading skeleton paint fills that hold no text, so they
+keep their own compiler-gated or placeholder colours.
+
+A role's colour can collapse to on-solid primary, so no component relies on hue alone. Text Links
+use the label font weight and belong inline with lighter surrounding text. Low prominence adds an
+underline on hover, focus, and press. Standard and high prominence stay underlined. A field error
+pairs its message with an icon and the field's invalid state and description.
 
 `Box` applies the pairing from one utilities-layer class per resting background and responsive
 condition. Its values are the standard surfaces and each role's resting `subtle` and `solid` fill.

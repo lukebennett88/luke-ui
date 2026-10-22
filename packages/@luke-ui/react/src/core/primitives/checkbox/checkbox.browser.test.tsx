@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import {
 	CheckboxControl,
 	CheckboxIndicator,
@@ -10,12 +11,19 @@ import {
 	FieldLabel,
 	InlineField,
 } from '@luke-ui/react/primitives/field';
+import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../../test-utils/axe.js';
 import { getDescribedText } from '../../test-utils/get-described-text.js';
-import { render } from '../../test-utils/render.js';
+import { render, visualAppearances } from '../../test-utils/render.js';
+import type { PairedBackground } from '../../test-utils/surface-colors.js';
+import {
+	pairedColors,
+	resolvedColor,
+	settledSurfaceColors,
+} from '../../test-utils/surface-colors.js';
 
 function checkbox(name: string): HTMLInputElement {
 	const element = page.getByRole('checkbox', { name }).element();
@@ -303,3 +311,45 @@ test('CheckboxRoot keeps aria-labelledby and aria-describedby from the layout', 
 
 	expect(input).toHaveAccessibleDescription('Outside description');
 });
+
+for (const appearance of visualAppearances) {
+	// The box's fill establishes the glyph's colour, so the check mark reads on-solid primary once
+	// checked, whatever surface the checkbox sits on.
+	test(`the checkbox box pairs each fill with its glyph colour in ${appearance.theme} ${appearance.mode}`, () => {
+		const { container } = render(
+			<Box backgroundColor="success.solid" padding="space.8">
+				<CheckboxRoot>
+					<Parts label="Plain" />
+				</CheckboxRoot>
+				<CheckboxRoot defaultSelected>
+					<Parts label="Checked" />
+				</CheckboxRoot>
+				<CheckboxRoot defaultSelected isInvalid>
+					<Parts label="Invalid" />
+				</CheckboxRoot>
+			</Box>,
+			{ appearance },
+		);
+		const indicators = [...container.querySelectorAll('[aria-hidden="true"]')];
+		const backgrounds: ReadonlyArray<PairedBackground> = [
+			'surface.field',
+			'accent.solid.rest',
+			'danger.solid.rest',
+		];
+
+		expect(indicators.map((indicator) => settledSurfaceColors(indicator))).toEqual(
+			indicators.map((indicator, index) =>
+				pairedColors(indicator, backgrounds[index] ?? 'surface.field'),
+			),
+		);
+		// The check mark is the indicator's text, so it shows the checked fills' on-solid primary.
+		expect(
+			indicators.slice(1).map((indicator) => getComputedStyle(indicator, '::after').color),
+		).toEqual(
+			[
+				vars.color.foreground.accent.onSolid.primary,
+				vars.color.foreground.danger.onSolid.primary,
+			].map((token) => resolvedColor(token, container)),
+		);
+	});
+}

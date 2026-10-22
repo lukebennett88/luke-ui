@@ -119,7 +119,10 @@ not help. Silence in this log is not evidence.
   `pnpm exec turbo run test --filter=docs -- src/lib/remark-watch-type-table-sources.test.ts`
   reproduced two failures and three passes on unchanged base `fa51e2ac`, matching the full test run.
   Seen again: 2026-10-21 (#880). The same two failures and three passes reproduced on unchanged
-  `main` `b9e653f0` and in the #880 branch's full test run, where every other test passed.
+  `main` `b9e653f0` and in the #880 branch's full test run, where every other test passed. Seen
+  again: 2026-10-22 (#899 review fixes). Both watcher failures reproduced on unchanged `b693c949`
+  and in the task checkout. The focused docs run had 23 passes and two failures, both with
+  `undefined` at the same module-count assertion.
 - Where: `apps/docs/src/lib/remark-watch-type-table-sources.test.ts:444`,
   `expectTypeTableWatchLink`, called by the direct-source and imported-type MDX recompilation tests.
   `docs/TESTING.md` requires reporting test results; the work-on-issue workflow requires reproducing
@@ -171,6 +174,18 @@ not help. Silence in this log is not evidence.
 - Problem: A test that renders with the built stylesheet cannot read a private custom property
   created in a `.css.ts` module unless its name is stable, so authors find out only after the
   assertions fail.
+
+## An agent stashed task changes to measure the base build
+
+- Seen: 2026-10-22 (#899 Part 4). To compare stylesheet sizes, the agent ran `git stash` and
+  `git stash pop` in the task checkout around a base build, instead of building the base in a
+  separate worktree.
+- Where: the task checkout on `luke/funny-albattani-r0nlst`. AGENTS.md, Universal rules, forbids
+  stashing. `.agents/skills/work-on-issue/SKILL.md`, Verify, says to compare in a separate worktree
+  because stashing does not isolate generated build outputs. AGENTS.md requires reading both.
+- Problem: The agent's command contradicted both rules. The stash restored cleanly, and later base
+  comparisons used a worktree, but correcting the method does not establish that the workflow
+  applies the rule.
 
 ## Class names joined with a template string instead of `cx`
 

@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { ComboboxField, ComboboxItem } from '@luke-ui/react/combobox-field';
 import { Icon } from '@luke-ui/react/icon';
 import {
@@ -21,6 +22,7 @@ import {
 	mockScreenWidth,
 } from '../test-utils/mock-screen-width.js';
 import { render, visualAppearances } from '../test-utils/render.js';
+import { pairedColors, surfaceColors } from '../test-utils/surface-colors.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 
@@ -755,4 +757,21 @@ async function waitForMobileTrayToSettle() {
 	expect(window.innerWidth).toBe(MOBILE_SCREEN_WIDTH);
 	expect(window.innerHeight).toBe(700);
 	expect(window.matchMedia('(width > 450px)').matches).toBe(false);
+}
+
+for (const appearance of visualAppearances) {
+	test(`the combobox control keeps its field surface on a solid fill in ${appearance.theme} ${appearance.mode}`, () => {
+		render(
+			<Box backgroundColor="accent.solid" padding="space.8">
+				<ComboboxField defaultItems={countryItems} label="Country">
+					{renderCountryItem}
+				</ComboboxField>
+			</Box>,
+			{ appearance },
+		);
+		const control = combobox('Country').parentElement;
+		if (control === null) throw new Error('Expected the combobox control.');
+
+		expect(surfaceColors(control)).toEqual(pairedColors(control, 'surface.field'));
+	});
 }

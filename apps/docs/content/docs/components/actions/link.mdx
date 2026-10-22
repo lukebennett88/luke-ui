@@ -8,22 +8,25 @@ reactAria: https://react-spectrum.adobe.com/react-aria/Link.html
 `Link` navigates to another URL or route. Use [`Button`](/components/actions/button) for an action
 such as saving, submitting, or opening a dialog.
 
-<ExampleBlock src="link/basic" layout="centered" title="Link: Basic" />
+<ExampleBlock src="link/basic" title="Link: Basic" />
 
 ## Appearance
 
-`text` is the default. Use it in prose and navigation lists. Set `appearance="button"` when the
-destination needs a button-shaped call to action. A button-shaped Link remains a link and keeps its
-native navigation behaviour.
+`text` is the default. Text Links use the theme's label weight, `500` by default, to stand out from
+the surrounding text. Use them only inline within text that has a lighter weight, such as body text.
+Set `appearance="button"` when the destination needs a button-shaped call to action. A button-shaped
+Link remains a link and keeps its native navigation behaviour.
 
 <ExampleBlock src="link/appearance" title="Link: Appearance" />
 
 ## Prominence
 
-`standard` is the default. Choose `low` for quiet navigation and `high` for a primary destination.
-High prominence uses the theme’s primary accent treatment. Standard and high prominence text Links
-are underlined at rest and drop the underline on hover and press. Low prominence does the opposite.
-Focus always underlines, and press shifts the text colour.
+`standard` is the default. Choose `low` for a secondary destination and `high` for a primary
+destination. High prominence uses the theme’s primary accent treatment. Low text Links have no
+underline at rest and show a solid underline on hover, focus, and press. Standard and high text
+Links stay underlined in every state. Hover and press draw a thicker underline, and press also
+shifts the text colour. On a solid background, every prominence takes the background's readable text
+colour.
 
 <ExampleBlock src="link/prominence" title="Link: Prominence" />
 
@@ -36,7 +39,7 @@ Focus always underlines, and press shifts the text colour.
 Set `isDisabled` only when a destination is temporarily unavailable. Disabled links cannot receive
 focus or respond to activation. Explain why nearby when someone needs that information.
 
-<ExampleBlock src="link/disabled" layout="centered" title="Link: Disabled" />
+<ExampleBlock src="link/disabled" title="Link: Disabled" />
 
 ## Accessibility
 

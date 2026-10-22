@@ -15,6 +15,7 @@ import { overlayMotion } from '../../styles/overlay-motion.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+import { surfaceStyle } from '../../styles/surface.js';
 import {
 	autofilledDisabledInputSelector,
 	autofilledDisabledInputStyle,
@@ -84,14 +85,8 @@ const comboboxActionStyles = {
 
 	selectors: {
 		'&[data-disabled="true"]': { cursor: 'not-allowed' },
-		'&[data-hovered="true"]:not([data-disabled="true"])': {
-			backgroundColor: vars.color.background.accent.subtle.hover,
-			color: vars.color.text.primary,
-		},
-		'&[data-pressed="true"]:not([data-disabled="true"])': {
-			backgroundColor: vars.color.background.accent.subtle.pressed,
-			color: vars.color.text.primary,
-		},
+		'&[data-hovered="true"]:not([data-disabled="true"])': surfaceStyle('accent.subtle.hover'),
+		'&[data-pressed="true"]:not([data-disabled="true"])': surfaceStyle('accent.subtle.pressed'),
 		[descendantDisabledSelector]: { color: vars.color.text.disabled },
 	},
 } satisfies StyleRule;
@@ -150,13 +145,12 @@ const comboboxConfig = {
 				},
 			},
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.field,
+			...surfaceStyle('surface.field'),
 			borderColor: vars.color.border.control,
 			borderRadius: vars.radius.control,
 			borderStyle: 'solid',
 			borderWidth: '1px',
 			boxShadow: vars.depth.recessed,
-			color: vars.color.text.primary,
 			cursor: 'text',
 			display: 'inline-flex',
 			fontFamily: vars.font.family.body,
@@ -234,7 +228,7 @@ const comboboxConfig = {
 						forcedColorAdjust: 'auto',
 					},
 				},
-				backgroundColor: vars.color.surface.overlay,
+				...surfaceStyle('surface.overlay'),
 				borderColor: vars.color.border.decorative,
 				borderRadius: vars.radius.surface,
 				borderStyle: 'solid',
@@ -356,31 +350,24 @@ const comboboxConfig = {
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
-				'&[data-focused="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
-					backgroundColor: vars.color.background.neutral.subtle.rest,
-				},
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
-					backgroundColor: vars.color.background.neutral.subtle.hover,
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
-					backgroundColor: vars.color.background.neutral.subtle.pressed,
-				},
-				'&[data-focus-visible="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.background.accent.subtle.hover,
-				},
+				'&[data-focused="true"]:not([data-disabled="true"]):not([data-selected="true"])':
+					surfaceStyle('neutral.subtle.rest'),
+				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-selected="true"])':
+					surfaceStyle('neutral.subtle.hover'),
+				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-selected="true"])':
+					surfaceStyle('neutral.subtle.pressed'),
+				'&[data-focus-visible="true"]:not([data-disabled="true"])':
+					surfaceStyle('accent.subtle.hover'),
 				'&[data-selected="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.background.accent.subtle.rest,
+					...surfaceStyle('accent.subtle.rest'),
 					fontWeight: vars.font.weight.label,
 				},
-				'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.background.accent.subtle.hover,
-				},
-				'&[data-pressed="true"][data-selected="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.background.accent.subtle.pressed,
-				},
-				'&[data-selected="true"][data-focus-visible="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.background.accent.subtle.pressed,
-				},
+				'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])':
+					surfaceStyle('accent.subtle.hover'),
+				'&[data-pressed="true"][data-selected="true"]:not([data-disabled="true"])':
+					surfaceStyle('accent.subtle.pressed'),
+				'&[data-selected="true"][data-focus-visible="true"]:not([data-disabled="true"])':
+					surfaceStyle('accent.subtle.pressed'),
 			},
 		},
 		trayTrigger: {

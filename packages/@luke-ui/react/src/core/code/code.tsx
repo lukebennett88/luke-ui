@@ -27,9 +27,9 @@ interface _CodeProps extends _CodeOmit, CodeStyleProps {}
 export type CodeProps = Prettify<_CodeProps>;
 
 /**
- * Marks a short fragment of computer code as `<code>`. Inherits surrounding size and colour,
- * applies the code font with an optical size correction, and stays on one line unless `lineClamp`
- * or `textWrap` wraps it.
+ * Marks a short fragment of computer code as `<code>`. Inherits surrounding size, draws a neutral
+ * chip that sets its own readable colour, applies the code font with an optical size correction,
+ * and stays on one line unless `lineClamp` or `textWrap` wraps it. Inside `pre`, it draws no chip.
  *
  * It never fills a React Aria text slot, so it renders inside a field's label, description, or
  * error message.

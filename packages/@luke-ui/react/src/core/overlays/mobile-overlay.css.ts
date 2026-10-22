@@ -2,6 +2,7 @@ import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import { style } from '../styles/layered-style.css.js';
 import { overlayMotion } from '../styles/overlay-motion.js';
+import { surfaceStyle } from '../styles/surface.js';
 
 const trayPaddingBlockEnd = createVar();
 
@@ -41,12 +42,14 @@ export const mobileOverlay = style(
 	}),
 );
 
+const overlaySurface = surfaceStyle('surface.overlay');
+
 export const mobileModal = style(
 	overlayMotion({
 		hidden: { opacity: 0, translate: '0 calc(100% - 100vh)' },
 		properties: ['opacity', 'translate'],
 		rule: {
-			backgroundColor: vars.color.surface.overlay,
+			...overlaySurface,
 			blockSize: `calc(var(--visual-viewport-height) - ${trayInsetBlockStart})`,
 			borderEndEndRadius: 0,
 			borderEndStartRadius: 0,
@@ -72,7 +75,9 @@ export const mobileModal = style(
 			// Physical on purpose, paired with `bottom` above. See the note there.
 			top: trayInsetBlockStart,
 			translate: 'none',
+			// Keeps the surface's foreground resets: a second `vars` would replace them.
 			vars: {
+				...overlaySurface.vars,
 				[trayPaddingBlockEnd]: trayPaddingBlockEndValue,
 			},
 

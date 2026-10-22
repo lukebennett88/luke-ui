@@ -1,15 +1,16 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
+import { surfaceStyle } from '../styles/surface.js';
 
+/** A key chip. Its subdued surface sets its own foreground context, whatever surrounds it. */
 export const kbdAppearance = {
+	...surfaceStyle('surface.subdued'),
 	alignItems: 'center',
-	backgroundColor: vars.color.surface.subdued,
 	blockSize: 'fit-content',
 	borderColor: vars.color.border.decorative,
 	borderRadius: vars.radius.control,
 	borderStyle: 'solid',
 	borderWidth: '1px',
-	color: vars.color.text.primary,
 	display: 'inline-flex',
 	flexShrink: 0,
 	fontFamily: vars.font.family.body,

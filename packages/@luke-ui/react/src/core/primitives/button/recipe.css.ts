@@ -4,10 +4,49 @@ import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
 import { style } from '../../styles/layered-style.css.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import { recipe } from '../../styles/recipe.js';
+import { contextualForeground, surfaceStyle } from '../../styles/surface.js';
 import { textRecipe } from '../../text/recipe.css.js';
-import { textActionAppearance } from './text-action-appearance.js';
+import { textActionAppearance, textLinkAppearance } from './text-action-appearance.js';
 
 export const actionElementClassName = style({}, 'action');
+
+const enabled = ':not([data-disabled="true"]):not([data-pending="true"])';
+const hovered = `&[data-hovered="true"]${enabled}`;
+const pressed = `&[data-pressed="true"]${enabled}`;
+
+const textBase = [
+	textRecipe({ shouldDisableTrim: true, shouldInheritFont: true }),
+	{
+		'@media': {
+			'(forced-colors: active)': {
+				color: 'LinkText',
+				forcedColorAdjust: 'auto',
+				selectors: {
+					'&[data-disabled="true"]': {
+						color: 'GrayText',
+						opacity: 1,
+					},
+				},
+			},
+		},
+		appearance: 'none',
+		backgroundColor: 'transparent',
+		backgroundImage: 'none',
+		border: 0,
+		borderRadius: 0,
+		boxShadow: 'none',
+		// `inline`, not `inline-block`: a text Link must break across lines mid-label inside a
+		// paragraph. A native `<button>` computes `inline-block` either way, so Button is
+		// unaffected.
+		display: 'inline',
+		minBlockSize: 0,
+		padding: 0,
+		position: 'relative',
+		textAlign: 'start',
+		textDecorationColor: 'currentColor',
+		verticalAlign: 'baseline',
+	},
+] as const;
 
 /** Shared presentation recipe for Button and button-shaped Link. */
 export const buttonRecipeInternal = recipe({
@@ -95,39 +134,9 @@ export const buttonRecipeInternal = recipe({
 					},
 				},
 			},
-			text: [
-				textRecipe({ shouldDisableTrim: true, shouldInheritFont: true }),
-				{
-					'@media': {
-						'(forced-colors: active)': {
-							color: 'LinkText',
-							forcedColorAdjust: 'auto',
-							selectors: {
-								'&[data-disabled="true"]': {
-									color: 'GrayText',
-									opacity: 1,
-								},
-							},
-						},
-					},
-					appearance: 'none',
-					backgroundColor: 'transparent',
-					backgroundImage: 'none',
-					border: 0,
-					borderRadius: 0,
-					boxShadow: 'none',
-					// `inline`, not `inline-block`: a text Link must break across lines mid-label inside a
-					// paragraph. A native `<button>` computes `inline-block` either way, so Button is
-					// unaffected.
-					display: 'inline',
-					minBlockSize: 0,
-					padding: 0,
-					position: 'relative',
-					textAlign: 'start',
-					textDecorationColor: 'currentColor',
-					verticalAlign: 'baseline',
-				},
-			],
+			// A text Button and a text Link share this base. Each takes its own colour and decoration below.
+			link: textBase,
+			text: textBase,
 		},
 		inlineSize: {
 			auto: {},
@@ -150,48 +159,49 @@ export const buttonRecipeInternal = recipe({
 	compoundVariants: [
 		buttonSize('medium'),
 		buttonSize('small'),
-		{
-			// Undoes `textRecipe`'s `minInlineSize: 0`, which lets a grid or flex parent collapse the
-			// button to one character per line. Must be a compound variant: `textRecipe`'s base and
-			// this recipe's variants emit into separate same-named `recipes` layer blocks, so only a
-			// style from this recipe's own call reliably lands last.
-			style: { minInlineSize: 'auto' },
-			variants: { appearance: 'text' as const },
-		},
-		...buttonAppearance('neutral', 'low', 'ghost', vars.color.text.primary),
-		...buttonAppearance('neutral', 'standard', 'subtle', vars.color.text.primary),
-		...buttonAppearance(
-			'neutral',
-			'high',
-			'solid',
-			vars.color.foreground.accent.onSolid.primary,
-			'accent',
-		),
-		...buttonAppearance('critical', 'low', 'ghost', vars.color.foreground.danger.rest),
-		...buttonAppearance('critical', 'standard', 'subtle', vars.color.foreground.danger.rest),
-		...buttonAppearance('critical', 'high', 'solid', vars.color.foreground.danger.onSolid.primary),
-		...textAppearance('neutral', 'low'),
-		...textAppearance('neutral', 'standard'),
-		...textAppearance('neutral', 'high'),
-		...textAppearance('critical', 'low'),
-		...textAppearance('critical', 'standard'),
+		// Undoes `textRecipe`'s `minInlineSize: 0`, which lets a grid or flex parent collapse the
+		// button to one character per line. Must be a compound variant: `textRecipe`'s base and this
+		// recipe's variants emit into separate same-named `recipes` layer blocks, so only a style from
+		// this recipe's own call reliably lands last.
+		...(['link', 'text'] as const).map((appearance) => {
+			return { style: { minInlineSize: 'auto' }, variants: { appearance } };
+		}),
+		...buttonAppearance('neutral', 'low', 'transparent'),
+		...buttonAppearance('neutral', 'standard', 'subtle'),
+		...buttonAppearance('neutral', 'high', 'solid', 'accent'),
+		...buttonAppearance('critical', 'low', 'transparent'),
+		...buttonAppearance('critical', 'standard', 'subtle'),
+		...buttonAppearance('critical', 'high', 'solid'),
+		...textAppearance('text', 'neutral', 'low'),
+		...textAppearance('text', 'neutral', 'standard'),
+		...textAppearance('text', 'neutral', 'high'),
+		...textAppearance('text', 'critical', 'low'),
+		...textAppearance('text', 'critical', 'standard'),
+		...textAppearance('link', 'neutral', 'low'),
+		...textAppearance('link', 'neutral', 'standard'),
+		...textAppearance('link', 'neutral', 'high'),
 	],
 });
 
 type Tone = 'neutral' | 'critical';
-type BackgroundTone = Tone | 'accent';
-type ButtonSurface = 'ghost' | 'subtle' | 'solid';
-type Background = (typeof vars.color.background)['neutral'];
+type BackgroundTone = 'neutral' | 'danger' | 'accent';
+type ButtonSurface = 'transparent' | 'subtle' | 'solid';
 
+/**
+ * A button's fill in each interaction state, paired with its foreground context through
+ * `surfaceStyle`. A transparent button paints nothing at rest, so it reads the surrounding context,
+ * and its hover and pressed fills establish a subtle one. A critical tone keeps the danger hue on a
+ * subtle fill or a surrounding surface, and reads on-solid primary on a solid one.
+ */
 function buttonAppearance(
 	tone: Tone,
 	prominence: 'low' | 'standard' | 'high',
 	surface: ButtonSurface,
-	color: string,
-	backgroundTone: BackgroundTone = tone,
+	backgroundTone: BackgroundTone = tone === 'critical' ? 'danger' : 'neutral',
 ) {
-	if (surface === 'ghost') {
-		const subtle = backgroundForTone(tone).subtle;
+	const toneColor = tone === 'critical' ? { color: contextualForeground('danger') } : ({} as const);
+
+	if (surface === 'transparent') {
 		return [
 			{
 				style: {
@@ -199,14 +209,17 @@ function buttonAppearance(
 					backgroundImage: 'none',
 					borderColor: 'transparent',
 					boxShadow: 'none',
-					color,
+					color: contextualForeground('primary'),
+					...toneColor,
 					selectors: {
-						'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-							backgroundColor: subtle.hover,
+						[hovered]: {
+							...surfaceStyle(`${backgroundTone}.subtle.hover`),
+							...toneColor,
 							boxShadow: vars.depth.raised,
 						},
-						'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-							backgroundColor: subtle.pressed,
+						[pressed]: {
+							...surfaceStyle(`${backgroundTone}.subtle.pressed`),
+							...toneColor,
 							boxShadow: vars.depth.recessed,
 						},
 					},
@@ -216,7 +229,8 @@ function buttonAppearance(
 		];
 	}
 
-	const ramp = backgroundForTone(surface === 'subtle' ? 'neutral' : backgroundTone)[surface];
+	// A subtle button always uses the neutral fill; only its text takes the tone.
+	const fill = surface === 'subtle' ? 'neutral' : backgroundTone;
 	const isSolid = surface === 'solid';
 	return [
 		{
@@ -224,16 +238,18 @@ function buttonAppearance(
 				'@media': {
 					'(forced-colors: active)': { backgroundImage: 'none' },
 				},
-				backgroundColor: ramp.rest,
+				...surfaceStyle(`${fill}.${surface}.rest`),
+				...toneColor,
 				backgroundImage: isSolid ? vars.controlFinish.resting : 'none',
-				color,
 				selectors: {
-					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: ramp.hover,
+					[hovered]: {
+						...surfaceStyle(`${fill}.${surface}.hover`),
+						...toneColor,
 						backgroundImage: isSolid ? vars.controlFinish.raised : 'none',
 					},
-					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: ramp.pressed,
+					[pressed]: {
+						...surfaceStyle(`${fill}.${surface}.pressed`),
+						...toneColor,
 						backgroundImage: isSolid ? vars.controlFinish.recessed : 'none',
 					},
 				},
@@ -273,31 +289,34 @@ function buttonSize(size: 'medium' | 'small') {
 	};
 }
 
-function textAppearance(tone: Tone, prominence: 'low' | 'standard' | 'high') {
-	const appearance = textActionAppearance(tone, prominence);
+function textAppearance(
+	appearance: 'link' | 'text',
+	tone: Tone,
+	prominence: 'low' | 'standard' | 'high',
+) {
+	const states =
+		appearance === 'link'
+			? textLinkAppearance(tone, prominence)
+			: textActionAppearance(tone, prominence);
 	return [
 		{
 			style: {
-				...appearance.rest,
+				...states.rest,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
-						...appearance.hover,
+						...states.hover,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						...appearance.pressed,
+						...states.pressed,
 					},
 					// Declared last so focus-visible's underline beats the hover/pressed decoration
 					// above, even though all three selectors share the same specificity.
 					'&[data-focus-visible="true"]:not([data-disabled="true"])': {
-						...appearance.focus,
+						...states.focus,
 					},
 				},
 			},
-			variants: { appearance: 'text' as const, prominence, tone },
+			variants: { appearance, prominence, tone },
 		},
 	];
-}
-
-function backgroundForTone(tone: BackgroundTone): Background {
-	return tone === 'critical' ? vars.color.background.danger : vars.color.background[tone];
 }

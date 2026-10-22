@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties, ReactNode } from 'react';
@@ -5,6 +6,7 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { emulateReducedMotion } from '../test-utils/emulate-media.js';
 import { render, visualAppearances } from '../test-utils/render.js';
+import { pairedColors, resolvedColor } from '../test-utils/surface-colors.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -158,3 +160,31 @@ test('theme matrix', { tags: ['visual'] }, async () => {
 		await captureVisualAppearance(locator, 'loading-spinner/theme-matrix', appearance);
 	}
 });
+
+for (const appearance of visualAppearances) {
+	test(`a coloured spinner reads the surrounding surface in ${appearance.theme} ${appearance.mode}`, () => {
+		const { container } = render(
+			<>
+				<Box backgroundColor="accent.solid" data-testid="solid" padding="space.8">
+					<LoadingSpinner aria-label="On solid" color="danger" />
+				</Box>
+				<Box backgroundColor="success.subtle" padding="space.8">
+					<LoadingSpinner aria-label="On subtle" color="danger" />
+				</Box>
+			</>,
+			{ appearance },
+		);
+		const [onSolid, onSubtle] = container.querySelectorAll('[role="status"]');
+		const solid = container.querySelector('[data-testid="solid"]');
+		if (onSolid === undefined || onSubtle === undefined || solid === null) {
+			throw new Error('Expected two spinners and the solid fill.');
+		}
+
+		expect(getComputedStyle(onSolid).color).toBe(
+			pairedColors(solid, 'accent.solid').foreground.danger,
+		);
+		expect(getComputedStyle(onSubtle).color).toBe(
+			resolvedColor(vars.color.foreground.danger.rest, onSubtle),
+		);
+	});
+}

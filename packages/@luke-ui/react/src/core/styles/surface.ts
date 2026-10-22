@@ -10,13 +10,15 @@ type ForegroundSlot = 'primary' | 'secondary' | SemanticRole;
 
 const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
 
+type InteractionState = (typeof INTERACTION_STATES)[number];
+
 /**
  * A recognised opaque background: a standard surface, or a role's subtle or solid fill in one of
  * its interaction states.
  */
 export type SurfaceBackground =
 	| `surface.${keyof typeof vars.color.surface}`
-	| `${SemanticRole}.${'subtle' | 'solid'}.${(typeof INTERACTION_STATES)[number]}`;
+	| `${SemanticRole}.${'subtle' | 'solid'}.${InteractionState}`;
 
 type SurfaceStyle = {
 	backgroundColor: string;
@@ -36,15 +38,32 @@ const foregroundOverride = {
 
 /**
  * The colour the nearest recognised surface establishes for `slot`. On a standard surface or any
- * subtle fill, the global neutral hierarchy and the role's resting hue. On a solid fill, that
- * role's on-solid leaves, with every semantic role resolving to on-solid primary.
+ * subtle fill, the global neutral hierarchy and the role's hue in `state`. On a solid fill, that
+ * role's on-solid leaves, with every semantic role in every state resolving to on-solid primary.
+ *
+ * `state` applies to the semantic roles, for an interactive foreground such as a text action's
+ * hover colour. The compiler gates every role's states against every subtle fill, so each stays
+ * readable. Primary and secondary have no states.
  */
-export function contextualForeground(slot: ForegroundSlot): string {
+export function contextualForeground(
+	slot: ForegroundSlot,
+	state: InteractionState = 'rest',
+): string {
 	if (slot === 'primary') return fallbackVar(foregroundOverride.primary, vars.color.text.primary);
 	if (slot === 'secondary') {
 		return fallbackVar(foregroundOverride.secondary, vars.color.text.secondary);
 	}
-	return fallbackVar(foregroundOverride.tone, vars.color.foreground[slot].rest);
+	return fallbackVar(foregroundOverride.tone, vars.color.foreground[slot][state]);
+}
+
+/**
+ * The colour of disabled text that sits on whatever surface surrounds it, such as a field label.
+ * On a standard surface or any subtle fill, the theme's disabled token. On a solid fill, which has
+ * no disabled leaf, the fill's on-solid secondary, so the text stays readable and the control's own
+ * disabled treatment carries the state.
+ */
+export function contextualDisabledForeground(): string {
+	return fallbackVar(foregroundOverride.secondary, vars.color.text.disabled);
 }
 
 /**
@@ -61,6 +80,23 @@ export function surfaceStyle(background: SurfaceBackground): SurfaceStyle {
 	const pairing = surfaceStyles.get(background);
 	if (!pairing) throw new Error(`No foreground pairing for the ${background} background.`);
 	return pairing;
+}
+
+/**
+ * Undoes `surfaceStyle` on an element that stops painting a fill in some state, such as inline code
+ * inside a code block. The element turns transparent and takes its parent's colour and foreground
+ * context again.
+ */
+export function transparentSurfaceStyle(): SurfaceStyle {
+	return {
+		backgroundColor: 'transparent',
+		color: 'inherit',
+		vars: {
+			[foregroundOverride.primary]: 'inherit',
+			[foregroundOverride.secondary]: 'inherit',
+			[foregroundOverride.tone]: 'inherit',
+		},
+	};
 }
 
 function neutralContext(backgroundColor: string): SurfaceStyle {
