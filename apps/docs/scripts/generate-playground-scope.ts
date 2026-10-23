@@ -21,8 +21,6 @@ const output = renderPlaygroundScopeModule(specifiers);
 
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, output);
-// Report command progress and diagnostics in the terminal.
-// oxlint-disable-next-line no-console
 console.log(
 	`generate-playground-scope: wrote ${specifiers.length} modules to src/generated/playground-scope.generated.ts`,
 );

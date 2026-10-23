@@ -110,8 +110,6 @@ for (const file of readdirSync(resolve(output, 'assets'), { encoding: 'utf8', re
 	assert.ok(!js.includes('schema-dts'), `schema-dts reached client asset ${file}`);
 }
 
-// Report command progress and diagnostics in the terminal.
-// oxlint-disable-next-line no-console
 console.log(`check:metadata: generated HTML, discovery URLs and client assets passed for ${root}`);
 
 function read(path: string): string {

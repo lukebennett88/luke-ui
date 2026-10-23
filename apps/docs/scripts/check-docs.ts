@@ -341,33 +341,21 @@ if (isMain) {
 
 	if (extra.length > 0 || stale.length > 0) {
 		if (extra.length > 0) {
-			// Report command progress and diagnostics in the terminal.
-			// oxlint-disable-next-line no-console
 			console.error('Docs convention violations not in the baseline:');
 			for (const issue of extra) {
-				// Report command progress and diagnostics in the terminal.
-				// oxlint-disable-next-line no-console
 				console.error(`  ${issue}`);
 			}
 		}
 		if (stale.length > 0) {
-			// Report command progress and diagnostics in the terminal.
-			// oxlint-disable-next-line no-console
 			console.error('Baseline entries that no longer occur (remove them from the baseline):');
 			for (const issue of stale) {
-				// Report command progress and diagnostics in the terminal.
-				// oxlint-disable-next-line no-console
 				console.error(`  ${issue}`);
 			}
 		}
 		process.exitCode = 1;
 	} else if (issues.length > 0) {
-		// Report command progress and diagnostics in the terminal.
-		// oxlint-disable-next-line no-console
 		console.log(`check:docs: ${issues.length} known violation(s) match the baseline.`);
 	} else {
-		// Report command progress and diagnostics in the terminal.
-		// oxlint-disable-next-line no-console
 		console.log('check:docs: no violations.');
 	}
 }

@@ -10,8 +10,6 @@ const isMain =
 
 if (isMain) {
 	const { removedCount } = cleanGeneratedPropsPages(componentsDir);
-	// Report command progress and diagnostics in the terminal.
-	// oxlint-disable-next-line no-console
 	console.log(
 		removedCount > 0
 			? `clean-generated-props-pages: removed ${removedCount} stale file(s) from the retired props-page generator.`

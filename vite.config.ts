@@ -77,6 +77,13 @@ export default defineConfig({
 		},
 		overrides: [
 			{
+				// CLI scripts use console output to report progress and diagnostics.
+				files: ['**/scripts/**/*.ts'],
+				rules: {
+					'no-console': 'off',
+				},
+			},
+			{
 				// Docs examples are copyable source. Allow intentional `tabIndex={0}` on scrollable
 				// non-interactive elements, and demo iframes, without suppression comments in the
 				// published samples.

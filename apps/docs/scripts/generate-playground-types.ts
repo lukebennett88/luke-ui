@@ -42,8 +42,6 @@ const reactPackageJson = reactPackageJsonSchema.parse(
 );
 const reactDistDir = join(reactPackageDir, 'dist');
 if (!existsSync(reactDistDir)) {
-	// Report command progress and diagnostics in the terminal.
-	// oxlint-disable-next-line no-console
 	console.error(
 		'generate-playground-types: packages/@luke-ui/react/dist is missing — build it first',
 	);
@@ -94,8 +92,6 @@ const files = typeMap.files();
 const output = JSON.stringify(files);
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, output);
-// Report command progress and diagnostics in the terminal.
-// oxlint-disable-next-line no-console
 console.log(
 	`generate-playground-types: wrote ${Object.keys(files).length} files (${(output.length / 1024 / 1024).toFixed(1)}MB raw) to src/generated/playground-types.generated.json`,
 );
