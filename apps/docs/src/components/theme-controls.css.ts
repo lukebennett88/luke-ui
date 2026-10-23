@@ -19,6 +19,7 @@ export const controls = style({
 			alignItems: 'center',
 			display: 'flex',
 			gap: vars.space['4'],
+			justifyContent: 'space-between',
 		},
 	},
 });

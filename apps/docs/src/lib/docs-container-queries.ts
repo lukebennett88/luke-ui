@@ -25,8 +25,6 @@ function below(inlineSize: number) {
 
 /** Tablet and up. Header spacing and the content gutter widen here. */
 export const docsTabletMinInlineSize = atLeast(breakpoints.bp768);
-/** Below tablet. The header moves its destination links to their own row. */
-export const docsTabletMaxInlineSize = below(breakpoints.bp768);
 
 /**
  * Viewport media query at the same tablet threshold as `docsTabletMinInlineSize`. Use this only
@@ -44,11 +42,6 @@ export const docsSidebarMaxInlineSize = below(DOCS_SIDEBAR_BREAKPOINT);
 
 /** The docs shell breakpoint where the table of contents moves into its own column. */
 export const docsTocMinInlineSize = atLeast(breakpoints.bp1280);
-
-/** Builds a condition at an exact inline size, for a layout that fits at a measured width. */
-export const docsMinInlineSize = atLeast;
-/** Builds a condition below an exact inline size, for a layout that fits at a measured width. */
-export const docsMaxInlineSize = below;
 
 /**
  * Whether the docs shell is in its sidebar layout. CSS hides the drawer trigger by itself. JS

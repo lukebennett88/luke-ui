@@ -9,6 +9,7 @@ import { useRouterState } from '@tanstack/react-router';
 import type { Folder, Item, Node, Root } from 'fumadocs-core/page-tree';
 import { findPath, flattenTree } from 'fumadocs-core/page-tree';
 import type { CSSProperties, ReactNode } from 'react';
+import { normalisePathname } from '../../lib/page-section.js';
 import { DocsCardLink } from '../docs-card.js';
 import * as styles from './docs-article.css.js';
 
@@ -45,12 +46,6 @@ export function DocsPager({ tree }: { tree: Root }) {
 const footerRule = {
 	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
 } as const satisfies CSSProperties;
-
-const TRAILING_SLASH_PATTERN = /\/+$/;
-
-function normalisePathname(pathname: string) {
-	return pathname.replace(TRAILING_SLASH_PATTERN, '') || '/';
-}
 
 function findNeighbours(tree: Root, pathname: string): { next?: Item; previous?: Item } {
 	const url = normalisePathname(pathname);

@@ -26,6 +26,19 @@ export const root = style({
 });
 
 /**
+ * A titled block reads as a bar over a body: the root paints the lighter body (so ScrollFade's
+ * edge mask fades into the same colour) and the header repaints `surface.subdued`. Untitled blocks
+ * keep the all-subdued root, which also backs the overlay copy.
+ */
+export const titled = style({
+	'@layer': {
+		components: {
+			backgroundColor: vars.color.surface.base,
+		},
+	},
+});
+
+/**
  * Vertical rhythm for code blocks in MDX flow. A `not-prose` root gets no Prose margin, so the
  * block supplies its own; a parent Stack/Cluster owns spacing elsewhere.
  */
@@ -48,10 +61,18 @@ export const flush = style({
 	},
 });
 
+/**
+ * Inline start matches the viewport (`space.16`) so the caption lines up with the code text.
+ * Copy button inset: measured `radius.surface` is 12px in Tactile and Paper; `radius.control` is
+ * 8px in Tactile and 4px in Paper. A 4px inset nests concentrically in Tactile (12 - 4 = 8) and is
+ * 3px off in Paper, while an 8px inset would be 5px off in Tactile (12 - 8 = 4), so the 40px
+ * header keeps a 4px inset on the top, inline-end and bottom edges (`headerWithActions`).
+ */
 export const header = style({
 	'@layer': {
 		components: {
 			alignItems: 'center',
+			backgroundColor: vars.color.surface.subdued,
 			borderBlockEndColor: vars.color.border.decorative,
 			borderBlockEndStyle: 'solid',
 			borderBlockEndWidth: '1px',
@@ -59,7 +80,16 @@ export const header = style({
 			gap: vars.space['8'],
 			minBlockSize: vars.controlSize.px40,
 			paddingBlock: vars.space['4'],
-			paddingInline: vars.space['12'],
+			paddingInline: vars.space['16'],
+		},
+	},
+});
+
+/** Inline-end inset equals the block inset around the copy button (`space.4`). */
+export const headerWithActions = style({
+	'@layer': {
+		components: {
+			paddingInlineEnd: vars.space['4'],
 		},
 	},
 });

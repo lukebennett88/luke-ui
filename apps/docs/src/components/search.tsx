@@ -159,7 +159,7 @@ function subscribeToMacKeyboardPlatform() {
 	return () => {};
 }
 
-function getIsMacKeyboardPlatformSnapshot() {
+export function getIsMacKeyboardPlatformSnapshot() {
 	return /Mac|iPhone|iPad|iPod/.test(navigator.platform);
 }
 

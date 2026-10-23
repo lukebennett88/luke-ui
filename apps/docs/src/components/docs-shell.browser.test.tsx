@@ -14,8 +14,9 @@ import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import { afterEach, expect, test } from 'vite-plus/test';
+import { afterEach, assert, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import { SIDEBAR_STORAGE_KEY } from '../lib/sidebar-prefs-shared.js';
 import { DocsShell } from './docs-shell.js';
 import { DocsSearchProvider } from './search.js';
 import { DocsThemeRoot } from './theme-controls.js';
@@ -61,6 +62,7 @@ afterEach(async () => {
 	container?.remove();
 	localStorage.clear();
 	document.documentElement.dir = '';
+	delete document.documentElement.dataset.docsSidebar;
 	container = undefined;
 	root = undefined;
 	await page.viewport(1024, 800);
@@ -336,15 +338,234 @@ test('closes the mobile drawer when the viewport crosses into the desktop layout
 	await expect.element(navigation.getByRole('link', { name: 'Composition' })).toHaveFocus();
 });
 
+test('keeps search and theme in the header while the sidebar shows', async () => {
+	await page.viewport(1280, 800);
+	await renderShell('/docs/installation');
+
+	const sidebar = getSidebar();
+	const header = page.getByRole('banner');
+	await expect.element(sidebar).toBeVisible();
+	const search = header.getByRole('button', { name: 'Open Search' });
+	await expect.element(search).toBeVisible();
+	expect(sidebar.contains(search.element())).toBe(false);
+	await expect.element(header.getByRole('button', { name: 'Theme' })).toBeVisible();
+	await expect
+		.element(page.getByRole('radiogroup', { name: 'Theme profile' }))
+		.not.toBeInTheDocument();
+	await expect
+		.element(header.getByRole('navigation', { name: 'Site' }).getByRole('link', { name: 'Docs' }))
+		.toHaveAttribute('aria-current', 'page');
+	await act(async () => {
+		search.element().focus();
+		await userEvent.keyboard('{Enter}');
+	});
+	await expect.element(page.getByRole('dialog', { name: 'Search documentation' })).toBeVisible();
+	await act(async () => {
+		await userEvent.keyboard('{Escape}');
+	});
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+	await expect.element(search).toHaveFocus();
+});
+
+test('hides the sidebar from its toggle, keeps header search, and remembers the choice', async () => {
+	await page.viewport(1280, 800);
+	await renderShell('/docs/installation');
+
+	const hide = page.getByRole('button', { name: 'Hide sidebar' });
+	await expect.element(hide).toHaveAttribute('aria-expanded', 'true');
+	await expect.element(hide).toHaveAttribute('aria-controls', getSidebar().id);
+
+	await act(async () => {
+		await userEvent.click(hide);
+	});
+
+	const show = page.getByRole('button', { name: 'Show sidebar' });
+	await expect.element(show).toHaveAttribute('aria-expanded', 'false');
+	await expect.element(show).toHaveFocus();
+	await expect.element(getSidebar()).not.toBeVisible();
+	expect(localStorage.getItem(SIDEBAR_STORAGE_KEY)).toBe('collapsed');
+	expect(document.documentElement).toHaveAttribute('data-docs-sidebar', 'collapsed');
+	const header = page.getByRole('banner');
+	await expect.element(header.getByRole('button', { name: 'Open Search' })).toBeVisible();
+	await expect.element(header.getByRole('button', { name: 'Theme' })).toBeVisible();
+
+	await act(async () => {
+		await userEvent.click(show);
+	});
+
+	await expect.element(page.getByRole('button', { name: 'Hide sidebar' })).toBeVisible();
+	await expect.element(getSidebar()).toBeVisible();
+	expect(localStorage.getItem(SIDEBAR_STORAGE_KEY)).toBe('expanded');
+	expect(document.documentElement).not.toHaveAttribute('data-docs-sidebar');
+});
+
+for (const direction of ['ltr', 'rtl']) {
+	test(`moves the sidebar toggle beside the wordmark when collapsed in ${direction}`, async () => {
+		await page.viewport(1280, 800);
+		document.documentElement.dir = direction;
+		await renderShell('/docs/installation');
+
+		const sidebar = getSidebar();
+		const width = sidebar.getBoundingClientRect().width;
+		const toggleControl = page.getByRole('button', { name: 'Hide sidebar' }).element();
+		const search = page.getByRole('button', { name: 'Open Search' }).element();
+		await act(async () => {
+			await userEvent.click(page.getByRole('button', { name: 'Hide sidebar' }));
+		});
+
+		expect(sidebar.inert).toBe(true);
+		const motion = [
+			...sidebar.getAnimations(),
+			...toggleControl.getAnimations(),
+			...(search.parentElement?.getAnimations() ?? []),
+		];
+		expect(motion.length).toBeGreaterThan(0);
+		for (const animation of motion) {
+			animation.pause();
+			animation.currentTime = Number(animation.effect?.getTiming().duration) / 2;
+		}
+		expect(Number(getComputedStyle(sidebar).opacity)).toBeGreaterThan(0);
+		expect(Number(getComputedStyle(sidebar).opacity)).toBeLessThan(1);
+		expect(sidebar.getBoundingClientRect().width).toBe(width);
+		await expect.element(search).toBeVisible();
+		const toggleRect = toggleControl.getBoundingClientRect();
+		const searchRect = search.getBoundingClientRect();
+		expect(
+			direction === 'rtl' ? toggleRect.left - searchRect.right : searchRect.left - toggleRect.right,
+		).toBeCloseTo(16, 0);
+		for (const animation of motion) animation.play();
+		await expect.element(sidebar).not.toBeVisible();
+		const toggle = page.getByRole('button', { name: 'Show sidebar' }).element();
+		const wordmark = page.getByRole('banner').getByRole('link', { name: 'Luke UI' }).element();
+		await expect
+			.poll(() => {
+				const logo = wordmark.getBoundingClientRect();
+				const button = toggle.getBoundingClientRect();
+				return direction === 'rtl' ? logo.left - button.right : button.left - logo.right;
+			})
+			.toBeCloseTo(4, 0);
+		await expect.element(toggle).toHaveFocus();
+	});
+}
+
+test('renders collapsed when the head script already collapsed the sidebar', async () => {
+	await page.viewport(1280, 800);
+	document.documentElement.dataset.docsSidebar = 'collapsed';
+	await renderShell('/docs/installation');
+
+	await expect
+		.element(page.getByRole('button', { name: 'Show sidebar' }))
+		.toHaveAttribute('aria-expanded', 'false');
+	await expect.element(getSidebar()).not.toBeVisible();
+});
+
+test('offers no sidebar toggle below the sidebar layout, and keeps theme controls in the drawer', async () => {
+	await page.viewport(390, 800);
+	await renderShell('/docs/installation');
+
+	await expect.element(page.getByRole('button', { name: /sidebar/ })).not.toBeInTheDocument();
+	await expect.element(page.getByRole('button', { name: 'Theme' })).not.toBeInTheDocument();
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Menu' }));
+	});
+	const dialog = page.getByRole('dialog', { name: 'Docs navigation' });
+	await expect.element(dialog.getByRole('radiogroup', { name: 'Theme profile' })).toBeVisible();
+	await expect.element(dialog.getByRole('radiogroup', { name: 'Colour mode' })).toBeVisible();
+});
+
+test('aligns the drawer title with the site wordmark', async () => {
+	await page.viewport(390, 800);
+	await renderShell('/docs/installation');
+
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Menu' }));
+	});
+	const wordmark = page.getByRole('banner').getByRole('link', { name: 'Luke UI' }).element();
+	const title = page
+		.getByRole('dialog', { name: 'Docs navigation' })
+		.getByText('Navigation')
+		.element();
+	const wordmarkBox = wordmark.getBoundingClientRect();
+	const titleBox = title.getBoundingClientRect();
+
+	expect(getComputedStyle(title).fontSize).toBe(getComputedStyle(wordmark).fontSize);
+	expect(titleBox.top + titleBox.height / 2).toBeCloseTo(
+		wordmarkBox.top + wordmarkBox.height / 2,
+		0,
+	);
+});
+
+test('pins the theme controls to the bottom of the mobile drawer', async () => {
+	await page.viewport(390, 500);
+	const tallTree: PageTree = {
+		name: 'Docs',
+		children: [
+			{
+				type: 'folder',
+				name: <span>Documentation</span>,
+				root: true,
+				children: [
+					{ type: 'separator', name: 'Overview' },
+					...Array.from({ length: 40 }, (_, index) => ({
+						type: 'page' as const,
+						name: `Guide ${index}`,
+						url: `/docs/guide-${index}`,
+					})),
+				],
+			},
+		],
+	};
+	await renderAt(
+		'/docs/guide-0',
+		<DocsShell tree={tallTree}>
+			<main>Article</main>
+		</DocsShell>,
+	);
+
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Menu' }));
+	});
+	const dialog = page.getByRole('dialog', { name: 'Docs navigation' }).element();
+	const themeProfile = page.getByRole('radiogroup', { name: 'Theme profile' }).element();
+	const footer = themeProfile.parentElement?.parentElement;
+	assert(footer instanceof HTMLElement, 'expected the drawer footer');
+	const scrollBody = footer.previousElementSibling;
+	assert(scrollBody instanceof HTMLElement, 'expected the scrollable drawer body');
+
+	const dialogBox = dialog.getBoundingClientRect();
+	const themeBefore = themeProfile.getBoundingClientRect();
+	expect(themeBefore.bottom).toBeLessThanOrEqual(dialogBox.bottom);
+	expect(themeBefore.top).toBeGreaterThan(dialogBox.top + dialogBox.height / 2);
+	expect(scrollBody.scrollHeight).toBeGreaterThan(scrollBody.clientHeight);
+
+	scrollBody.scrollTop = scrollBody.scrollHeight;
+	expect(themeProfile.getBoundingClientRect().top).toBeCloseTo(themeBefore.top, 0);
+});
+
+function getSidebar() {
+	const sidebar = document.getElementById('docs-sidebar');
+	if (!sidebar) throw new Error('Expected the docs sidebar.');
+	return sidebar;
+}
+
+async function renderShell(pathname: string) {
+	await renderAt(
+		pathname,
+		<DocsShell tree={tree}>
+			<main>Article</main>
+		</DocsShell>,
+	);
+}
+
 async function renderAt(pathname: string, children: ReactNode) {
 	const rootRoute = createRootRoute({
 		component: () => (
 			<RootProvider search={{ enabled: false }} theme={{ enabled: false }}>
-				<DocsSearchProvider>
-					<Provider spritesheetHref={spriteSheetHref}>
+				<Provider spritesheetHref={spriteSheetHref}>
+					<DocsSearchProvider>
 						<DocsThemeRoot>{children}</DocsThemeRoot>
-					</Provider>
-				</DocsSearchProvider>
+					</DocsSearchProvider>
+				</Provider>
 			</RootProvider>
 		),
 	});

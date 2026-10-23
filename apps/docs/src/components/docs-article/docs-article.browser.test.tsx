@@ -81,6 +81,27 @@ test('renders the title, description, and actions inside one main landmark with 
 	expect(page.getByRole('main').element().contains(article.element())).toBe(true);
 });
 
+test('names the page section above the title without joining the heading', async () => {
+	await renderArticle({ pathname: '/docs/styling', sectionName: 'Foundations', toc });
+
+	const article = page.getByRole('article');
+	const heading = article.getByRole('heading', { level: 1, name: 'Styling' });
+	const eyebrow = article.getByText('Foundations', { exact: true });
+	await expect.element(eyebrow).toBeVisible();
+	expect(eyebrow.element().tagName).toBe('P');
+	expect(eyebrow.element().nextElementSibling).toBe(heading.element());
+	// Uppercase is presentation only, so the DOM keeps the section's own casing.
+	expect(eyebrow.element().textContent).toBe('Foundations');
+});
+
+test('renders no eyebrow for a page outside the sections', async () => {
+	await renderArticle({ pathname: '/docs/styling', toc });
+
+	const heading = page.getByRole('heading', { level: 1, name: 'Styling' });
+	await expect.element(heading).toBeVisible();
+	expect(heading.element().previousElementSibling).toBeNull();
+});
+
 test('links to the previous and next page in sidebar order', async () => {
 	await renderArticle({ pathname: '/docs/styling', toc });
 
@@ -218,9 +239,11 @@ test('renders no table of contents when the page has no headings', async () => {
 
 async function renderArticle({
 	pathname,
+	sectionName = null,
 	toc: tocItems,
 }: {
 	pathname: string;
+	sectionName?: string | null;
 	toc: Array<TOCItemType>;
 }) {
 	if (root) act(() => root?.unmount());
@@ -234,6 +257,7 @@ async function renderArticle({
 							<DocsArticle
 								actions={<button type="button">Action</button>}
 								description="How styling works."
+								sectionName={sectionName}
 								title="Styling"
 								toc={tocItems}
 								tree={tree}

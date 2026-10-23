@@ -119,11 +119,17 @@ export function CodeBlock({
 		// `dir="ltr"` matches Fumadocs: scroll and overlay copy stay physical-right in RTL docs.
 		<figure
 			{...figureProps}
-			className={cx(styles.root, 'not-prose', flush && styles.flush, className)}
+			className={cx(
+				styles.root,
+				'not-prose',
+				title != null && styles.titled,
+				flush && styles.flush,
+				className,
+			)}
 			dir="ltr"
 		>
 			{title != null ? (
-				<div className={styles.header}>
+				<div className={cx(styles.header, copyControl != null && styles.headerWithActions)}>
 					<figcaption className={styles.title}>{title}</figcaption>
 					{copyControl != null ? <div className={styles.actions}>{copyControl}</div> : null}
 				</div>
