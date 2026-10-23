@@ -48,29 +48,46 @@ test('names the theme class on the document, and follows a change of theme', asy
 	expect(document.documentElement).toHaveClass(THEME_IDENTITY_CLASS_NAMES.paper);
 });
 
-test('Discard clears the name and resets the size', async () => {
+test('Reset restores the default name and size', async () => {
 	renderShowcase();
 	const showcase = getShowcase();
-	const name = showcase.getByRole('textbox', { name: 'Name' });
+	const name = showcase.getByRole('textbox', { name: /Name/ });
 	const size = showcase.getByRole('button', { name: /Size/ });
 	await userEvent.fill(name, 'Ada');
 	await userEvent.click(size);
 	await userEvent.click(page.getByRole('option', { name: 'Large' }));
 	await expect.element(size).toHaveTextContent('Large');
 
-	await userEvent.click(showcase.getByRole('button', { name: 'Discard' }));
+	await userEvent.click(showcase.getByRole('button', { name: 'Reset' }));
 
 	await expect.element(name).toHaveValue('');
 	await expect.element(size).toHaveTextContent('Medium');
 });
 
-test('Keep editing moves focus to the name', async () => {
+test('saving with an empty name shows the validation error', async () => {
 	renderShowcase();
 	const showcase = getShowcase();
 
-	await userEvent.click(showcase.getByRole('button', { name: 'Keep editing' }));
+	await userEvent.click(showcase.getByRole('button', { name: 'Save changes' }));
 
-	await expect.element(showcase.getByRole('textbox', { name: 'Name' })).toHaveFocus();
+	await expect.element(showcase.getByRole('textbox', { name: /Name/ })).toBeInvalid();
+	await expect.element(showcase.getByRole('button', { name: 'Save changes' })).not.toBeDisabled();
+});
+
+test('saving a valid name holds the button pending, then settles', async () => {
+	renderShowcase();
+	const showcase = getShowcase();
+	await userEvent.fill(showcase.getByRole('textbox', { name: /Name/ }), 'Ada');
+
+	await userEvent.click(showcase.getByRole('button', { name: 'Save changes' }));
+
+	await expect
+		.element(showcase.getByRole('button', { name: 'Save changes' }))
+		.toHaveAttribute('aria-disabled', 'true');
+	await expect
+		.element(showcase.getByRole('button', { name: 'Save changes' }), { timeout: 3000 })
+		.not.toHaveAttribute('aria-disabled', 'true');
+	await expect.element(showcase.getByRole('textbox', { name: /Name/ })).toHaveValue('Ada');
 });
 
 /** Each control with the public tokens its annotations name, in reading order. */
@@ -78,7 +95,7 @@ const ANNOTATED_CONTROLS = [
 	{
 		description: 'color.border.control Field border radius.control Control corners',
 		role: 'textbox',
-		name: 'Name',
+		name: /Name/,
 		tokens: ['color.border.control', 'radius.control'],
 	},
 	{
@@ -90,14 +107,14 @@ const ANNOTATED_CONTROLS = [
 	{
 		description: 'color.background.neutral.subtle.rest Standard prominence',
 		role: 'button',
-		name: 'Keep editing',
+		name: 'Reset',
 		tokens: ['color.background.neutral.subtle.rest'],
 	},
 	{
-		description: 'color.background.danger.solid.rest Critical, high prominence',
+		description: 'color.background.accent.solid.rest High prominence',
 		role: 'button',
-		name: 'Discard',
-		tokens: ['color.background.danger.solid.rest'],
+		name: 'Save changes',
+		tokens: ['color.background.accent.solid.rest'],
 	},
 ] as const;
 
@@ -134,13 +151,52 @@ test('the showcase has no axe violations', async () => {
 	).toEqual([]);
 });
 
+for (const inlineSize of ['34rem', '20rem']) {
+	test(`stacked at ${inlineSize}: notes sit below tokens and nothing overlaps`, async () => {
+		renderShowcase(inlineSize);
+		await expect.element(getShowcase()).toBeVisible();
+		const scope = container as HTMLElement;
+		const rect = (element: Element) => element.getBoundingClientRect();
+		const intersects = (a: DOMRect, b: DOMRect) =>
+			a.left < b.right - 0.5 &&
+			b.left < a.right - 0.5 &&
+			a.top < b.bottom - 0.5 &&
+			b.top < a.bottom - 0.5;
+		const tokens = [...scope.querySelectorAll('[id$="-token"]')];
+		const notes = [...scope.querySelectorAll('[id$="-note"]')];
+		expect(tokens).toHaveLength(6);
+		expect(notes).toHaveLength(6);
+		for (const [index, token] of tokens.entries()) {
+			const note = notes[index] as Element;
+			expect(intersects(rect(token), rect(note))).toBe(false);
+			// The note follows its token directly, with a small gap.
+			const gap = rect(note).top - rect(token).bottom;
+			expect(gap).toBeGreaterThanOrEqual(0);
+			expect(gap).toBeLessThanOrEqual(8);
+		}
+		const controls = [
+			...scope.querySelectorAll('input, button[type="reset"], button[type="submit"]'),
+			...scope.querySelectorAll('button[aria-haspopup]'),
+		];
+		expect(controls.length).toBeGreaterThanOrEqual(4);
+		for (const annotation of tokens.map((token) => token.parentElement?.parentElement)) {
+			for (const control of controls) {
+				expect(intersects(rect(annotation as Element), rect(control))).toBe(false);
+			}
+		}
+		const save = [...scope.querySelectorAll('button[type="submit"]')][0] as HTMLElement;
+		expect(save.scrollWidth).toBeLessThanOrEqual(save.clientWidth);
+		expect(scope.scrollWidth).toBeLessThanOrEqual(scope.clientWidth);
+	});
+}
+
 function getShowcase() {
 	return page.getByRole('region', { name: 'Token specimen' });
 }
 
-function renderShowcase() {
+function renderShowcase(inlineSize = '38rem') {
 	container = document.body.appendChild(document.createElement('div'));
-	container.style.maxInlineSize = '38rem';
+	container.style.maxInlineSize = inlineSize;
 	root = createRoot(container);
 	act(() => {
 		root?.render(

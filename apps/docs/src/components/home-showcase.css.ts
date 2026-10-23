@@ -1,6 +1,6 @@
 import { vars } from '@luke-ui/react/theme';
 import type { StyleRule } from '@vanilla-extract/css';
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 import type { ThemeIdentity } from '../lib/theme-prefs-shared.js';
 import { THEME_IDENTITY_CLASS_NAMES } from '../lib/theme-prefs-shared.js';
 
@@ -76,31 +76,75 @@ export const plate = layer({
 	'@container': {
 		[NARROW]: {
 			columnGap: vars.space['16'],
+			// Each annotation spans two rows (token, note) shared with its neighbour, so the notes
+			// sit level even when one token wraps further than the other.
 			gridTemplateAreas: `
 				"name name"
 				"aName bName"
+				"aName bName"
 				"size size"
+				"aSize bSize"
 				"aSize bSize"
 				"actions actions"
 				"aActions bActions"
+				"aActions bActions"
 			`,
 			gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
-			paddingBlockEnd: vars.space['24'],
+			paddingBlockEnd: 0,
 			paddingBlockStart: vars.space['24'],
-			rowGap: vars.space['12'],
+			rowGap: 0,
 		},
 	},
 });
 
+// Wide, the validation message hangs in the row gap, so showing it moves nothing. Narrow, the
+// annotation sits right below the field, so the message takes its own space instead.
+const nameArea = layer({
+	gridArea: 'name',
+	position: 'relative',
+	'@container': { [NARROW]: { marginBlockEnd: vars.space['8'] } },
+});
+
+globalStyle(`${nameArea} [slot="errorMessage"]`, {
+	'@layer': {
+		components: {
+			insetBlockStart: '100%',
+			insetInline: 0,
+			position: 'absolute',
+			'@container': { [NARROW]: { insetBlockStart: 'auto', position: 'static' } },
+		},
+	},
+});
+
+// Narrow, the buttons fill the same two columns as the annotations below them.
+const actionsArea = layer({
+	display: 'flex',
+	gap: vars.space['8'],
+	gridArea: 'actions',
+	justifyContent: 'center',
+	'@container': {
+		[NARROW]: {
+			columnGap: vars.space['16'],
+			display: 'grid',
+			gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+			marginBlockEnd: vars.space['8'],
+		},
+	},
+});
+
+globalStyle(`${actionsArea} > *`, {
+	'@layer': {
+		components: { '@container': { [NARROW]: { inlineSize: '100%' } } },
+	},
+});
+
 export const area = {
-	name: layer({ gridArea: 'name' }),
-	size: layer({ gridArea: 'size' }),
-	actions: layer({
-		display: 'grid',
-		gap: vars.space['8'],
-		gridArea: 'actions',
-		gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+	name: nameArea,
+	size: layer({
+		gridArea: 'size',
+		'@container': { [NARROW]: { marginBlockEnd: vars.space['8'] } },
 	}),
+	actions: actionsArea,
 	aName: layer({ gridArea: 'aName' }),
 	bName: layer({ gridArea: 'bName' }),
 	aSize: layer({ gridArea: 'aSize' }),
@@ -122,10 +166,12 @@ export const annotation = layer({
 	position: 'relative',
 	'@container': {
 		[NARROW]: {
-			alignItems: 'flex-start',
-			alignSelf: 'start',
+			alignItems: 'start',
+			alignSelf: 'stretch',
 			blockSize: 'auto',
-			marginBlockEnd: vars.space['12'],
+			display: 'grid',
+			gridTemplateRows: 'subgrid',
+			marginBlockEnd: vars.space['24'],
 		},
 	},
 });
@@ -145,7 +191,7 @@ export const label = layer({
 	minInlineSize: 0,
 	position: 'relative',
 	'@container': {
-		[NARROW]: { flexShrink: 1 },
+		[NARROW]: { display: 'contents' },
 	},
 });
 
@@ -160,6 +206,7 @@ export const token = layer({
 	fontSize: vars.font.caption.fontSize,
 	lineHeight: vars.font.caption.lineHeight,
 	maxInlineSize: '21ch',
+	'@container': { [NARROW]: { gridRow: 1 } },
 });
 
 export const note = layer({
@@ -172,7 +219,12 @@ export const note = layer({
 	position: 'absolute',
 	whiteSpace: 'nowrap',
 	'@container': {
-		[NARROW]: { marginBlockStart: vars.space['4'], position: 'static', whiteSpace: 'normal' },
+		[NARROW]: {
+			gridRow: 2,
+			marginBlockStart: vars.space['4'],
+			position: 'static',
+			whiteSpace: 'normal',
+		},
 	},
 });
 

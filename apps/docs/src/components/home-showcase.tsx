@@ -6,7 +6,7 @@ import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { cx } from '@luke-ui/react/utils';
 import type { SubmitEvent } from 'react';
-import { Fragment, useId, useRef, useState, useSyncExternalStore } from 'react';
+import { Fragment, useId, useState, useSyncExternalStore, useTransition } from 'react';
 import { THEME_IDENTITY_CLASS_NAMES } from '../lib/theme-prefs-shared.js';
 import * as styles from './home-showcase.css.js';
 import { getIsMacKeyboardPlatformSnapshot } from './search.js';
@@ -19,11 +19,24 @@ import { ThemeControls } from './theme-controls.js';
 export function HomeShowcase() {
 	const [name, setName] = useState('');
 	const [size, setSize] = useState<SizeKey>(DEFAULT_SIZE);
-	const nameRef = useRef<HTMLInputElement>(null);
+	const [isPending, startTransition] = useTransition();
 	const id = useId();
 	// A control's description reads each of its annotations' token, then note.
 	const describedBy = (...areas: Array<AnnotationArea>) =>
 		areas.flatMap((area) => [`${id}-${area}-token`, `${id}-${area}-note`]).join(' ');
+
+	// `onSubmit` rather than a form Action, so React never resets the fields after saving.
+	function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+		event.preventDefault();
+		startTransition(async () => {
+			await delay(1000);
+		});
+	}
+
+	function handleReset() {
+		setName('');
+		setSize(DEFAULT_SIZE);
+	}
 
 	return (
 		<section aria-label="Token specimen" className={styles.root}>
@@ -37,12 +50,12 @@ export function HomeShowcase() {
 					))}
 				</span>
 			</div>
-			<Form controlSize="small" onSubmit={preventSubmit}>
+			<Form controlSize="small" onReset={handleReset} onSubmit={handleSubmit}>
 				<div className={styles.plate}>
 					<div className={styles.area.name}>
 						<TextInputField
 							aria-describedby={describedBy('aName', 'bName')}
-							inputRef={nameRef}
+							isRequired
 							label="Name"
 							name="name"
 							onChange={setName}
@@ -66,26 +79,17 @@ export function HomeShowcase() {
 					<Annotation area="aSize" idPrefix={id} />
 					<Annotation area="bSize" idPrefix={id} />
 					<div className={styles.area.actions}>
-						<Button
-							aria-describedby={describedBy('aActions')}
-							inlineSize="full"
-							onPress={() => nameRef.current?.focus()}
-							size="small"
-						>
-							Keep editing
+						<Button aria-describedby={describedBy('aActions')} size="small" type="reset">
+							Reset
 						</Button>
 						<Button
 							aria-describedby={describedBy('bActions')}
-							inlineSize="full"
-							onPress={() => {
-								setName('');
-								setSize(DEFAULT_SIZE);
-							}}
+							isPending={isPending}
 							prominence="high"
 							size="small"
-							tone="critical"
+							type="submit"
 						>
-							Discard
+							Save changes
 						</Button>
 					</div>
 					<Annotation area="aActions" idPrefix={id} />
@@ -131,7 +135,7 @@ const ANNOTATIONS = {
 	aSize: { note: 'Small control height', token: 'controlSize.px32' },
 	bSize: { note: 'Chevron', token: 'color.text.secondary' },
 	aActions: { note: 'Standard prominence', token: 'color.background.neutral.subtle.rest' },
-	bActions: { note: 'Critical, high prominence', token: 'color.background.danger.solid.rest' },
+	bActions: { note: 'High prominence', token: 'color.background.accent.solid.rest' },
 } as const satisfies Record<string, { note: string; token: string }>;
 
 function Annotation({ area, idPrefix }: { area: AnnotationArea; idPrefix: string }) {
@@ -171,8 +175,11 @@ type SizeKey = (typeof SIZES)[number]['id'];
 
 const DEFAULT_SIZE: SizeKey = 'medium';
 
-function preventSubmit(event: SubmitEvent<HTMLFormElement>) {
-	event.preventDefault();
+/** Stands in for a real submission's latency. */
+async function delay(ms: number) {
+	await new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
 }
 
 function subscribeToNothing() {
