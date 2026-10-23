@@ -1,8 +1,6 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Stack } from '@luke-ui/react/stack';
-import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { useRouterState } from '@tanstack/react-router';
 import type { Root } from 'fumadocs-core/page-tree';
@@ -18,7 +16,7 @@ import {
 	writeIsSidebarCollapsed,
 } from '../lib/sidebar-prefs.js';
 import { getActiveSiteDestination, siteDestinations } from '../lib/site-destinations.js';
-import { DocsNav, DocsNavLink, docsNavPaneProps } from './docs-nav.js';
+import { DocsNav, DocsNavLink } from './docs-nav.js';
 import * as styles from './docs-shell.css.js';
 import { DocsSearchTrigger } from './search.js';
 import { SidebarIcon } from './sidebar-icon.js';
@@ -38,19 +36,26 @@ const drawerSectionBorder = {
 	borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 } as const satisfies CSSProperties;
 
+/** Inset for the scrollable drawer body; the footer owns its own padding. */
+const drawerBodyPadding = {
+	paddingBlockEnd: 'space.16',
+	paddingInline: 'space.16',
+} as const;
+
 /**
- * The docs header. In the sidebar layout it holds the sidebar toggle, and the search and theme
- * controls join it only while the sidebar is collapsed. Below that layout a drawer holds the site
- * and docs navigation.
+ * The docs header keeps search beside the sidebar toggle. Below the sidebar layout a drawer holds
+ * the site and docs navigation and theme controls.
  */
 export function DocsSiteNav({ tree }: { tree: Root }) {
 	return (
 		<SiteHeader className={styles.header}>
 			<div className={styles.headerStart}>
-				<SiteWordmark />
-				<SidebarToggle />
-				<div className={styles.headerSearch}>
-					<DocsSearchTrigger isCompact />
+				<div className={styles.headerBrand}>
+					<SiteWordmark />
+					<SidebarToggle />
+					<div className={styles.headerSearch}>
+						<DocsSearchTrigger isCompact />
+					</div>
 				</div>
 			</div>
 			<SiteDestinations className={styles.headerDestinations} />
@@ -105,41 +110,41 @@ function NavigationDrawer({ tree }: { tree: Root }) {
 				<Modal className={styles.drawerModal}>
 					<Dialog aria-label="Docs navigation" className={styles.drawerDialog}>
 						{({ close }) => (
-							<Stack gap="space.16" {...docsNavPaneProps}>
-								<Box alignItems="center" display="flex" justifyContent="space-between">
-									<Text elementType="span" fontWeight="heading">
-										Navigation
-									</Text>
+							<>
+								<div className={styles.drawerHeader}>
+									<span className={styles.drawerTitle}>Navigation</span>
 									<IconButton
 										aria-label="Close docs navigation"
 										icon="close"
 										onPress={close}
 										size="small"
 									/>
-								</Box>
-								<Stack
-									elementType="nav"
-									aria-label="Site"
-									gap="space.4"
-									paddingBlockEnd="space.16"
-									style={drawerSectionBorder}
-								>
-									{siteDestinations.map((destination) => (
-										<DocsNavLink
-											href={destination.url}
-											isCurrent={destination === activeDestination}
-											key={destination.url}
-											onNavigate={close}
-										>
-											{destination.label}
-										</DocsNavLink>
-									))}
-								</Stack>
-								<Box paddingBlockEnd="space.16" style={drawerSectionBorder}>
+								</div>
+								<Stack className={styles.drawerBody} gap="space.16" {...drawerBodyPadding}>
+									<Stack
+										elementType="nav"
+										aria-label="Site"
+										gap="space.4"
+										paddingBlockEnd="space.16"
+										style={drawerSectionBorder}
+									>
+										{siteDestinations.map((destination) => (
+											<DocsNavLink
+												href={destination.url}
+												isCurrent={destination === activeDestination}
+												key={destination.url}
+												onNavigate={close}
+											>
+												{destination.label}
+											</DocsNavLink>
+										))}
+									</Stack>
 									<DocsNav onNavigate={close} tree={tree} />
-								</Box>
-								<ThemeControls />
-							</Stack>
+								</Stack>
+								<div className={styles.drawerFooter}>
+									<ThemeControls />
+								</div>
+							</>
 						)}
 					</Dialog>
 				</Modal>

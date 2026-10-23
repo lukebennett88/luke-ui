@@ -9,7 +9,6 @@ export const SIDEBAR_STORAGE_KEY = 'luke-ui-docs-sidebar';
 
 /** `<html>` carries `data-docs-sidebar="collapsed"` while the docs sidebar is hidden. */
 export const SIDEBAR_COLLAPSED_SELECTOR = 'html[data-docs-sidebar="collapsed"]';
-export const SIDEBAR_EXPANDED_SELECTOR = 'html:not([data-docs-sidebar="collapsed"])';
 
 /** Parses a stored value, treating a missing or unknown value as expanded. */
 export function parseIsSidebarCollapsed(value: string | null): boolean {

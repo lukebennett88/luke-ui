@@ -5,7 +5,6 @@ import { style } from '@vanilla-extract/css';
 export const insetPanel = style({
 	'@layer': {
 		components: {
-			borderStartEndRadius: vars.radius.surface,
 			borderStartStartRadius: vars.radius.surface,
 		},
 	},

@@ -25,18 +25,15 @@ interface SiteNavProps {
 export function SiteNav({ hideActiveDestination = false }: SiteNavProps) {
 	return (
 		<SiteHeader>
-			<SiteWordmark />
+			<div className={styles.start}>
+				<SiteWordmark />
+				<DocsSearchTrigger isCompact />
+			</div>
 			<SiteDestinations
 				className={styles.destinations}
 				hideActiveDestination={hideActiveDestination}
 			/>
 			<div className={styles.actions}>
-				<div className={styles.wideSearch}>
-					<DocsSearchTrigger />
-				</div>
-				<div className={styles.compactSearch}>
-					<DocsSearchTrigger isCompact />
-				</div>
 				<AppearancePopover />
 				<RepositoryLink />
 			</div>
@@ -96,7 +93,10 @@ function DestinationLink({
 			className={cx(styles.destination, isActive && styles.activeDestination)}
 			to={destination.url}
 		>
-			{destination.label}
+			<span aria-hidden="true" className={styles.destinationWidth}>
+				{destination.label}
+			</span>
+			<span className={styles.destinationLabel}>{destination.label}</span>
 		</DocsLink>
 	);
 }
@@ -117,7 +117,7 @@ export function SiteWordmark() {
 export function AppearancePopover({ className }: { className?: string }) {
 	return (
 		<DialogTrigger>
-			<Button className={className} prominence="low" size="small">
+			<Button className={className} prominence="low">
 				Theme
 			</Button>
 			<Popover className={styles.appearancePopover} placement="bottom end">

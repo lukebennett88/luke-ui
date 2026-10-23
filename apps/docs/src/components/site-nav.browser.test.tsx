@@ -7,6 +7,7 @@ import {
 	createRootRoute,
 	createRouter,
 	RouterProvider,
+	useRouterState,
 } from '@tanstack/react-router';
 import type { Root as PageTree } from 'fumadocs-core/page-tree';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
@@ -41,6 +42,7 @@ afterEach(async () => {
 	if (root) act(() => root?.unmount());
 	container?.remove();
 	localStorage.clear();
+	delete document.documentElement.dataset.docsSidebar;
 	container = undefined;
 	root = undefined;
 	await page.viewport(1024, 800);
@@ -56,6 +58,40 @@ test('marks only the current destination on desktop and keeps search available',
 	expect(getCurrentLinks()).toHaveLength(1);
 	await expect.element(page.getByRole('button', { name: /Search/ })).toBeVisible();
 });
+
+test('keeps the global header sticky on the landing page', async () => {
+	await page.viewport(1024, 800);
+	await renderAt('/', <SiteNav />);
+
+	const headerStyle = getComputedStyle(page.getByRole('banner').element());
+	expect(headerStyle.position).toBe('sticky');
+	expect(headerStyle.insetBlockStart).toBe('0px');
+});
+
+for (const pathname of ['/docs/installation', '/components', '/playground']) {
+	test(`keeps destination widths and positions stable when ${pathname} is active`, async () => {
+		await page.viewport(1280, 800);
+		const router = await renderAt('/', <SiteNav />);
+		const nav = page.getByRole('navigation', { name: 'Site' });
+		const inactiveRects = nav
+			.getByRole('link')
+			.elements()
+			.map((link) => {
+				return link.getBoundingClientRect();
+			});
+		await act(async () => {
+			await router.navigate({ to: pathname });
+		});
+
+		expect(getCurrentLinks()).toHaveLength(1);
+		for (const [index, link] of nav.getByRole('link').elements().entries()) {
+			const inactiveRect = inactiveRects[index];
+			const activeRect = link.getBoundingClientRect();
+			expect(activeRect.width).toBeCloseTo(inactiveRect?.width ?? 0, 1);
+			expect(activeRect.left).toBeCloseTo(inactiveRect?.left ?? 0, 1);
+		}
+	});
+}
 
 for (const width of [768, 800, 1100]) {
 	test(`keeps the landing page header on one row at ${width}px`, async () => {
@@ -79,6 +115,26 @@ for (const width of [768, 800, 1100]) {
 		for (const centre of centres) {
 			expect(Math.abs(centre - (centres[0] ?? 0))).toBeLessThanOrEqual(2);
 		}
+	});
+}
+
+for (const width of [1024, 1280, 1440]) {
+	test(`keeps header destinations and actions in place across page and sidebar changes at ${width}px`, async () => {
+		await page.viewport(width, 800);
+		const router = await renderAt('/', <HeaderFixture />);
+		const homeRects = getHeaderControlRects();
+		expect(page.getByRole('banner').element().getBoundingClientRect().height).toBe(56);
+		const pathname: string = '/docs/installation';
+		await act(async () => {
+			await router.navigate({ to: pathname });
+		});
+		expect(getHeaderControlRects()).toEqual(homeRects);
+		expect(page.getByRole('banner').element().getBoundingClientRect().height).toBe(56);
+		await act(async () => {
+			await userEvent.click(page.getByRole('button', { name: 'Hide sidebar' }));
+		});
+		await expect.element(page.getByRole('button', { name: 'Open Search' })).toBeVisible();
+		expect(getHeaderControlRects()).toEqual(homeRects);
 	});
 }
 
@@ -170,6 +226,7 @@ async function renderAt(pathname: string, children: ReactNode) {
 		root?.render(<RouterProvider router={router} />);
 		await router.load();
 	});
+	return router;
 }
 
 function getCurrentLinks() {
@@ -177,4 +234,23 @@ function getCurrentLinks() {
 		.getByRole('link')
 		.elements()
 		.filter((link) => link.getAttribute('aria-current') === 'page');
+}
+
+function HeaderFixture() {
+	const pathname = useRouterState({ select: (state) => state.location.pathname });
+	return pathname === '/' ? <SiteNav /> : <DocsSiteNav tree={tree} />;
+}
+
+function getHeaderControlRects() {
+	const header = page.getByRole('banner');
+	return [
+		header.getByRole('link', { name: 'Docs', exact: true }),
+		header.getByRole('link', { name: 'Components', exact: true }),
+		header.getByRole('link', { name: 'Playground', exact: true }),
+		header.getByRole('button', { name: 'Theme' }),
+		header.getByRole('link', { name: 'GitHub repository' }),
+	].map((locator) => {
+		const rect = locator.element().getBoundingClientRect();
+		return { left: rect.left, width: rect.width, top: rect.top, height: rect.height };
+	});
 }

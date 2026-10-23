@@ -43,11 +43,6 @@ export const docsSidebarMaxInlineSize = below(DOCS_SIDEBAR_BREAKPOINT);
 /** The docs shell breakpoint where the table of contents moves into its own column. */
 export const docsTocMinInlineSize = atLeast(breakpoints.bp1280);
 
-/** Builds a condition at an exact inline size, for a layout that fits at a measured width. */
-export const docsMinInlineSize = atLeast;
-/** Builds a condition below an exact inline size, for a layout that fits at a measured width. */
-export const docsMaxInlineSize = below;
-
 /**
  * Whether the docs shell is in its sidebar layout. CSS hides the drawer trigger by itself. JS
  * needs this to close an open modal drawer when the layout crosses into the sidebar layout,

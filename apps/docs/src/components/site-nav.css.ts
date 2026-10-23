@@ -1,11 +1,6 @@
 import { vars } from '@luke-ui/react/theme';
 import { style } from '@vanilla-extract/css';
-import {
-	docsMaxInlineSize,
-	docsMinInlineSize,
-	docsSidebarMinInlineSize,
-	docsTabletMinInlineSize,
-} from '../lib/docs-container-queries.js';
+import { docsTabletMinInlineSize } from '../lib/docs-container-queries.js';
 import { overlayMotion } from '../lib/overlay-motion.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
@@ -16,6 +11,7 @@ export const siteGutter = {
 } as const;
 
 // The header sits on the page chrome with no border: the content panel below it carries the edge.
+// Sticky on every surface that uses SiteHeader (home, playground, 404, and docs).
 export const header = style({
 	'@layer': {
 		components: {
@@ -24,7 +20,10 @@ export const header = style({
 			flexShrink: 0,
 			flexWrap: 'wrap',
 			gap: vars.space['12'],
+			insetBlockStart: 0,
 			paddingInline: siteGutter.initial,
+			position: 'sticky',
+			zIndex: 10,
 			'@container': {
 				[docsTabletMinInlineSize]: {
 					columnGap: vars.space['24'],
@@ -46,6 +45,16 @@ export const wordmark = style({
 			minBlockSize: SITE_HEADER_BLOCK_SIZE,
 			textDecoration: 'none',
 			whiteSpace: 'nowrap',
+		},
+	},
+});
+
+export const start = style({
+	'@layer': {
+		components: {
+			alignItems: 'center',
+			columnGap: vars.space['16'],
+			display: 'flex',
 		},
 	},
 });
@@ -78,7 +87,7 @@ export const destination = style({
 		components: {
 			alignItems: 'center',
 			color: vars.color.text.secondary,
-			display: 'inline-flex',
+			display: 'inline-grid',
 			fontSize: vars.font.label.fontSize,
 			textDecoration: 'none',
 			transition: `color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
@@ -105,6 +114,27 @@ export const activeDestination = style({
 	},
 });
 
+export const destinationLabel = style({
+	'@layer': {
+		components: {
+			gridArea: '1 / 1',
+		},
+	},
+});
+
+// Reserve the bold label's intrinsic width before the destination becomes active.
+export const destinationWidth = style([
+	destinationLabel,
+	{
+		'@layer': {
+			components: {
+				fontWeight: vars.font.weight.emphasis,
+				visibility: 'hidden',
+			},
+		},
+	},
+]);
+
 export const actions = style({
 	'@layer': {
 		components: {
@@ -117,37 +147,6 @@ export const actions = style({
 			'@container': {
 				[docsTabletMinInlineSize]: {
 					marginInlineStart: 0,
-				},
-			},
-		},
-	},
-});
-
-/** Min width where the labelled wide search fits beside destination links on one header row. */
-const WIDE_SEARCH_MIN_WIDTH_PX = 840;
-
-export const wideSearch = style({
-	'@layer': {
-		components: {
-			inlineSize: '10rem',
-			'@container': {
-				[docsMaxInlineSize(WIDE_SEARCH_MIN_WIDTH_PX)]: {
-					display: 'none',
-				},
-				[docsSidebarMinInlineSize]: {
-					inlineSize: '14rem',
-				},
-			},
-		},
-	},
-});
-
-export const compactSearch = style({
-	'@layer': {
-		components: {
-			'@container': {
-				[docsMinInlineSize(WIDE_SEARCH_MIN_WIDTH_PX)]: {
-					display: 'none',
 				},
 			},
 		},
