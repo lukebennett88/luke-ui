@@ -154,7 +154,6 @@ function validateBlockCounts(
 }
 
 if (!existsSync(builtOutputPath)) {
-	// oxlint-disable-next-line no-console
 	console.error(
 		`check:llms: no built output at ${builtOutputPath}. Run "pnpm run build:docs" first.`,
 	);
@@ -185,16 +184,13 @@ problems.push(...validateBlockContents(parsedBlocks, expectedBlocks));
 problems.push(...validateBlockCounts(parsedBlocks, expectedBlocks));
 
 if (problems.length > 0) {
-	// oxlint-disable-next-line no-console
 	console.error('check:llms: llms-full.txt is missing or has incorrect inlined example source.');
 	for (const problem of problems) {
-		// oxlint-disable-next-line no-console
 		console.error(`  ${problem}`);
 	}
 	process.exit(1);
 }
 
-// oxlint-disable-next-line no-console
 console.log(
 	`check:llms: llms-full.txt inlines ${parsedBlocks.length} example block(s) with source ` +
 		'contents matching their files (after trimEnd()), no bare tags found.',

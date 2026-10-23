@@ -64,6 +64,5 @@ if (process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(
 	const output = generateTokenReference();
 	mkdirSync(dirname(outputPath), { recursive: true });
 	writeFileSync(outputPath, output);
-	// oxlint-disable-next-line no-console
 	console.log(`generate-token-reference: wrote ${flattenThemeContract().length} token entries`);
 }

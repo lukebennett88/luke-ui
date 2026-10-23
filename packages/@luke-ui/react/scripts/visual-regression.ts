@@ -78,6 +78,5 @@ async function hasPngs(directory: string): Promise<boolean> {
 }
 
 function log(message: string) {
-	// oxlint-disable-next-line no-console
 	console.log(message);
 }

@@ -20,8 +20,10 @@ double quotes in JSX.
 ## Linting
 
 `oxlint` owns linting (via `vp lint`). Configure rules in the `lint` block of the root
-`vite.config.ts`. Matching overrides for the same rule replace rather than merge with each other. To
-suppress a rule, explain why in a plain comment, then put
+`vite.config.ts`. The syntax pass reports unused disable directives as errors. Type-only passes do
+not repeat that check because they do not run the syntax rules. Use a scoped configuration override
+for an intentional exception to a type-aware rule. Matching overrides for the same rule replace
+rather than merge with each other. To suppress a rule, explain why in a plain comment, then put
 `// oxlint-disable-next-line <plugin>/<rule>` directly above the offending line — the directive
 applies to the literal next line, so it cannot sit inside a multi-line comment.
 

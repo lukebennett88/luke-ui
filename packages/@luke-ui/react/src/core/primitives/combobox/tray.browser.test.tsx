@@ -449,9 +449,7 @@ test('disabled, read-only, and aria-validated tray comboboxes do not block nativ
 		</>,
 	);
 
-	// oxlint-disable-next-line no-await-in-loop
 	for (const label of ['Disabled', 'ReadOnly', 'Aria']) {
-		// oxlint-disable-next-line no-await-in-loop
 		await userEvent.click(page.getByRole('button', { name: `Submit ${label}` }).element());
 	}
 

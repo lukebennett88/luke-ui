@@ -116,6 +116,5 @@ if (process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(
 	mkdirSync(dirname(outputPath), { recursive: true });
 	writeFileSync(outputPath, output);
 	const entryCount = readGroups(componentsDir).flatMap((group) => group.entries).length;
-	// oxlint-disable-next-line no-console
 	console.log(`generate-components-index: wrote ${entryCount} entries`);
 }

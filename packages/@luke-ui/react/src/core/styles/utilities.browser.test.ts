@@ -43,7 +43,8 @@ test('applies every retained breakpoint responsively', async () => {
 	] as const;
 
 	for (const viewport of viewports) {
-		// eslint-disable-next-line no-await-in-loop -- viewport changes must be observed in order
+		// Observe each viewport change before applying the next.
+		// oxlint-disable-next-line no-await-in-loop
 		await page.viewport(viewport.width, 800);
 		const computedStyle = getComputedStyle(element);
 		expect(computedStyle.padding).toBe(resolvedCustomProperty(element, viewport.property));

@@ -176,7 +176,8 @@ async function promptAnswers(
 	try {
 		let name = '';
 		for (;;) {
-			// eslint-disable-next-line no-await-in-loop -- prompts must be asked one at a time
+			// Ask each prompt after the previous answer.
+			// oxlint-disable-next-line no-await-in-loop
 			name = await ask(
 				`${kind === 'component' ? 'Component' : 'Primitive'} name (PascalCase or kebab-case): `,
 			);
@@ -218,7 +219,8 @@ async function choose<T extends string>(
 		`${label}: ${choices.map((choice, index) => `${index + 1}) ${choice}`).join('  ')}\n`,
 	);
 	for (;;) {
-		// eslint-disable-next-line no-await-in-loop -- prompts must be asked one at a time
+		// Ask each prompt after the previous answer.
+		// oxlint-disable-next-line no-await-in-loop
 		const answer = await ask(`${label} [${defaultChoice}]: `);
 		if (answer === '') return defaultChoice;
 		const choice = choices.find((item, index) => item === answer || String(index + 1) === answer);
@@ -234,7 +236,8 @@ async function yesNo(
 ): Promise<boolean> {
 	const defaultLabel = defaultValue ? 'Yes' : 'No';
 	for (;;) {
-		// eslint-disable-next-line no-await-in-loop -- prompts must be asked one at a time
+		// Ask each prompt after the previous answer.
+		// oxlint-disable-next-line no-await-in-loop
 		const answer = await ask(`${label} (Yes/No) [${defaultLabel}]: `);
 		if (answer === '') return defaultValue;
 		try {

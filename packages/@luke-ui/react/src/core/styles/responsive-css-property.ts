@@ -38,7 +38,8 @@ export function resolveResponsiveCssProperty<Value>(
 
 	function assignCondition(condition: ResponsiveCondition, conditionValue: Value): void {
 		if (!isValid(conditionValue)) {
-			// oxlint-disable-next-line no-console -- match Rainbow Sprinkles invalid-value reporting
+			// Match Rainbow Sprinkles reporting for invalid styling values.
+			// oxlint-disable-next-line no-console
 			console.error(
 				`Invalid value provided to '${options.propName}'. Expected ${options.expectedValueDescription ?? 'a valid value'}. Received: ${JSON.stringify(conditionValue)}.`,
 			);

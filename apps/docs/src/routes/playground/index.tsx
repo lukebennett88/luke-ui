@@ -191,7 +191,8 @@ function Playground() {
 						>
 							<div className={styles.previewFrame} style={{ inlineSize: viewportWidth }}>
 								{/* Iframes swallow pointer events, which kills separator drags that cross into the preview — disable them while the separator is engaged. */}
-								{/* oxlint-disable-next-line react/iframe-missing-sandbox -- same-origin executable preview; real isolation needs a separate origin */}
+								{/* The executable preview needs same-origin access to its parent. */}
+								{/* oxlint-disable-next-line react/iframe-missing-sandbox */}
 								<iframe
 									className={styles.previewIframe}
 									ref={iframeRef}

@@ -29,8 +29,6 @@ export function RootLayout() {
 	}, [preferences]);
 
 	return (
-		// React Router passes its `useHref` hook by reference; RAC calls it internally.
-		// oxlint-disable-next-line react/hooks -- hook reference is the supported RouterProvider API
 		<RouterProvider navigate={navigate} useHref={useHref}>
 			<Provider spritesheetHref={spritesheetHref}>
 				<Outlet />
