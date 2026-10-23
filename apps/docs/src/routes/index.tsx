@@ -51,7 +51,7 @@ export const Route = createFileRoute('/')({
 
 // A plain Box rather than Container: Container establishes a query container, and the hero and card
 // grid columns should follow the viewport like the rest of the frame. From the sidebar breakpoint the
-// hero splits into the copy and the token specimen.
+// hero splits into the copy and the interactive example.
 function Home() {
 	return (
 		<SiteFrame>
