@@ -21,6 +21,8 @@ interface DocsArticleProps {
 	/** Rendered below the description, such as the page actions. */
 	actions: ReactNode;
 	description: ReactNode;
+	/** The sidebar section the page belongs to, shown above the title. */
+	sectionName: string | null;
 	title: ReactNode;
 	toc: Array<TOCItemType>;
 	/** Page tree that orders the previous and next links. */
@@ -29,12 +31,13 @@ interface DocsArticleProps {
 
 /**
  * One documentation page: title block, MDX body, previous and next links, and the table of
- * contents. It renders into the `main` and `toc` areas of `DocsShell`.
+ * contents. It renders into the `main` and `toc` areas of `DocsShell`'s content panel.
  */
 export function DocsArticle({
 	actions,
 	children,
 	description,
+	sectionName,
 	title,
 	toc,
 	tree,
@@ -64,7 +67,20 @@ export function DocsArticle({
 					>
 						<Stack elementType="header" gap="space.24" marginBlockEnd="space.48">
 							<Stack gap="space.24">
-								<Heading level={1}>{title}</Heading>
+								<Stack gap="space.16">
+									{sectionName == null ? null : (
+										<Text
+											className={styles.eyebrow}
+											color="accent"
+											elementType="p"
+											fontWeight="emphasis"
+											typography="label"
+										>
+											{sectionName}
+										</Text>
+									)}
+									<Heading level={1}>{title}</Heading>
+								</Stack>
 								{description ? (
 									<Text color="secondary" elementType="p" typography="lead">
 										{description}

@@ -1,13 +1,18 @@
 /**
- * Applies the stored theme prefs to `<html>` before first paint. A storage read failure falls back
- * to the defaults; the prefs are always applied, so a failure still resolves `system` from
- * `prefers-color-scheme` and sets the `<html>` classes and attributes.
+ * Applies the stored theme prefs and the docs sidebar pref to `<html>` before first paint. A storage
+ * read failure falls back to the defaults; the prefs are always applied, so a failure still resolves
+ * `system` from `prefers-color-scheme` and sets the `<html>` classes and attributes.
  *
  * Compiled by `vp pack` (tsdown, IIFE, minified) into `src/generated/theme-prefs-script.iife.js`
  * during `docs#generate`, then inlined via a `?raw` import in `__root.tsx` and rendered as an inline
  * `<head>` script.
  */
 
+import {
+	applySidebarCollapsed,
+	parseIsSidebarCollapsed,
+	SIDEBAR_STORAGE_KEY,
+} from './sidebar-prefs-shared.js';
 import {
 	applyThemePrefs,
 	COLOR_MODE_STORAGE_KEY,
@@ -18,9 +23,11 @@ import {
 
 let themeIdentity: string | null = null;
 let colorMode: string | null = null;
+let sidebar: string | null = null;
 try {
 	themeIdentity = localStorage.getItem(THEME_IDENTITY_STORAGE_KEY);
 	colorMode = localStorage.getItem(COLOR_MODE_STORAGE_KEY);
+	sidebar = localStorage.getItem(SIDEBAR_STORAGE_KEY);
 } catch {
 	// Storage can be unavailable, for example in some private windows.
 }
@@ -29,3 +36,4 @@ applyThemePrefs(
 	parseThemePrefs(themeIdentity, colorMode),
 	THEME_IDENTITY_CLASS_NAMES,
 );
+applySidebarCollapsed(document.documentElement, parseIsSidebarCollapsed(sidebar));

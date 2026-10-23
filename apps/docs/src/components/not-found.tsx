@@ -5,16 +5,13 @@ import { Heading } from '@luke-ui/react/heading';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { DocsLink } from './docs-link.js';
-import { SiteNav } from './site-nav.js';
+import { SiteFrame } from './site-frame.js';
 
-/** 404 page shown for any unmatched route, matching the home hero's spacing and CTA pairing. */
+/** 404 page shown for any unmatched route, in the home page's frame and spacing. */
 export function NotFound() {
 	return (
-		<>
-			<SiteNav hideActiveDestination />
+		<SiteFrame hideActiveDestination>
 			<Container
-				elementType="main"
-				flexGrow="1"
 				maxInlineSize="container.1152"
 				paddingBlock={{
 					initial: 'space.64',
@@ -51,6 +48,6 @@ export function NotFound() {
 					</Cluster>
 				</Stack>
 			</Container>
-		</>
+		</SiteFrame>
 	);
 }

@@ -1,14 +1,16 @@
-import { Container } from '@luke-ui/react/container';
-import { HeadingLevels } from '@luke-ui/react/heading';
+import { Box } from '@luke-ui/react/box';
+import { Heading, HeadingLevels } from '@luke-ui/react/heading';
+import { Stack } from '@luke-ui/react/stack';
+import { Text } from '@luke-ui/react/text';
 import { createFileRoute } from '@tanstack/react-router';
 import type { SoftwareSourceCode, WithContext } from 'schema-dts';
 import { license } from '../../../../packages/@luke-ui/react/package.json';
-import { HomeFeatures } from '../components/home-features.js';
-import { HomeHero } from '../components/home-hero.js';
-import { SiteNav } from '../components/site-nav.js';
+import { CodeBlock } from '../components/code-block/code-block.js';
+import { HomeSectionLinks } from '../components/home-section-links.js';
+import { SiteFrame } from '../components/site-frame.js';
 import { withBasePath } from '../lib/base-path.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
-import { HOME_INTRO } from '../lib/home-content.js';
+import { HOME_INTRO, INSTALL_COMMAND } from '../lib/home-content.js';
 import { resolvePageHeadMeta } from '../lib/page-head.js';
 import { siteUrl } from '../lib/site-url.js';
 
@@ -45,24 +47,51 @@ export const Route = createFileRoute('/')({
 	}),
 });
 
+// A plain Box rather than Container: Container establishes a query container, and the card grid's
+// columns should follow the viewport like the rest of the frame.
 function Home() {
 	return (
-		<>
-			<SiteNav />
-			<Container
-				elementType="main"
-				flexGrow="1"
-				maxInlineSize="container.1152"
+		<SiteFrame>
+			<Box
+				marginInline="auto"
+				maxInlineSize="72rem"
+				paddingBlock={{
+					initial: 'space.64',
+					bp768: 'space.96',
+				}}
 				paddingInline={{
 					initial: 'space.16',
-					bp768: 'space.24',
+					bp768: 'space.32',
+					bp1024: 'space.48',
 				}}
 			>
 				<HeadingLevels base={1}>
-					<HomeHero />
-					<HomeFeatures />
+					<Stack gap="space.24">
+						<Heading typography="display">Luke UI</Heading>
+						<Text color="secondary" elementType="p" typography="lead">
+							{HOME_INTRO}
+						</Text>
+						<Box
+							maxInlineSize={{
+								initial: '100%',
+								bp768: '28rem',
+							}}
+						>
+							<CodeBlock code={INSTALL_COMMAND} title="Terminal" />
+						</Box>
+					</Stack>
+					<HeadingLevels>
+						<Box
+							marginBlockStart={{
+								initial: 'space.64',
+								bp768: 'space.96',
+							}}
+						>
+							<HomeSectionLinks />
+						</Box>
+					</HeadingLevels>
 				</HeadingLevels>
-			</Container>
-		</>
+			</Box>
+		</SiteFrame>
 	);
 }

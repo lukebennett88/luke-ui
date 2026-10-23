@@ -3,29 +3,32 @@ import { style } from '@vanilla-extract/css';
 import {
 	docsMaxInlineSize,
 	docsMinInlineSize,
-	docsSidebarMaxInlineSize,
 	docsSidebarMinInlineSize,
-	docsTabletMaxInlineSize,
 	docsTabletMinInlineSize,
 } from '../lib/docs-container-queries.js';
 import { overlayMotion } from '../lib/overlay-motion.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
+/** Inline padding of the header row. Docs panels that sit beside the header edge reuse it. */
+export const siteGutter = {
+	initial: vars.space['16'],
+	tablet: vars.space['24'],
+} as const;
+
+// The header sits on the page chrome with no border: the content panel below it carries the edge.
 export const header = style({
 	'@layer': {
 		components: {
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.base,
-			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 			display: 'flex',
 			flexShrink: 0,
 			flexWrap: 'wrap',
 			gap: vars.space['12'],
-			paddingInline: vars.space['16'],
+			paddingInline: siteGutter.initial,
 			'@container': {
 				[docsTabletMinInlineSize]: {
-					columnGap: vars.space['16'],
-					paddingInline: vars.space['24'],
+					columnGap: vars.space['24'],
+					paddingInline: siteGutter.tablet,
 				},
 			},
 		},
@@ -47,6 +50,7 @@ export const wordmark = style({
 	},
 });
 
+// Below tablet the links take their own row under the wordmark and actions.
 export const destinations = style({
 	'@layer': {
 		components: {
@@ -59,21 +63,10 @@ export const destinations = style({
 			'@container': {
 				[docsTabletMinInlineSize]: {
 					inlineSize: 'auto',
+					marginInlineStart: 'auto',
 					minBlockSize: SITE_HEADER_BLOCK_SIZE,
 					order: 0,
 					paddingBlockEnd: 0,
-				},
-			},
-		},
-	},
-});
-
-export const destinationsWithSidebar = style({
-	'@layer': {
-		components: {
-			'@container': {
-				[docsSidebarMaxInlineSize]: {
-					display: 'none',
 				},
 			},
 		},
@@ -121,6 +114,11 @@ export const actions = style({
 			flexShrink: 0,
 			marginInlineStart: 'auto',
 			minBlockSize: SITE_HEADER_BLOCK_SIZE,
+			'@container': {
+				[docsTabletMinInlineSize]: {
+					marginInlineStart: 0,
+				},
+			},
 		},
 	},
 });
@@ -143,34 +141,12 @@ export const wideSearch = style({
 		},
 	},
 });
+
 export const compactSearch = style({
 	'@layer': {
 		components: {
 			'@container': {
 				[docsMinInlineSize(WIDE_SEARCH_MIN_WIDTH_PX)]: {
-					display: 'none',
-				},
-			},
-		},
-	},
-});
-export const desktopTheme = style({
-	'@layer': {
-		components: {
-			'@container': {
-				[docsTabletMaxInlineSize]: {
-					display: 'none',
-				},
-			},
-		},
-	},
-});
-
-export const mobileThemeTrigger = style({
-	'@layer': {
-		components: {
-			'@container': {
-				[docsTabletMinInlineSize]: {
 					display: 'none',
 				},
 			},
@@ -197,11 +173,5 @@ export const appearancePopover = style({
 				},
 			}),
 		},
-	},
-});
-
-export const appearanceDialog = style({
-	'@layer': {
-		components: {},
 	},
 });

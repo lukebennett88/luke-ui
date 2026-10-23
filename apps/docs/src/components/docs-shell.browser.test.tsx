@@ -16,6 +16,7 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import { SIDEBAR_STORAGE_KEY } from '../lib/sidebar-prefs-shared.js';
 import { DocsShell } from './docs-shell.js';
 import { DocsSearchProvider } from './search.js';
 import { DocsThemeRoot } from './theme-controls.js';
@@ -61,6 +62,7 @@ afterEach(async () => {
 	container?.remove();
 	localStorage.clear();
 	document.documentElement.dir = '';
+	delete document.documentElement.dataset.docsSidebar;
 	container = undefined;
 	root = undefined;
 	await page.viewport(1024, 800);
@@ -335,6 +337,109 @@ test('closes the mobile drawer when the viewport crosses into the desktop layout
 	});
 	await expect.element(navigation.getByRole('link', { name: 'Composition' })).toHaveFocus();
 });
+
+test('keeps search and theme controls in the sidebar, not the header, while it shows', async () => {
+	await page.viewport(1280, 800);
+	await renderShell('/docs/installation');
+
+	const sidebar = getSidebar();
+	const header = page.getByRole('banner');
+	await expect.element(sidebar).toBeVisible();
+	await expect.element(page.getByRole('button', { name: 'Search documentation' })).toBeVisible();
+	expect(
+		sidebar.contains(page.getByRole('button', { name: 'Search documentation' }).element()),
+	).toBe(true);
+	expect(sidebar.contains(page.getByRole('radiogroup', { name: 'Theme profile' }).element())).toBe(
+		true,
+	);
+	await expect.element(header.getByRole('button', { name: 'Open Search' })).not.toBeInTheDocument();
+	await expect.element(header.getByRole('button', { name: 'Theme' })).not.toBeInTheDocument();
+
+	// The footer stacks the colour-mode group below the identity group without overflowing.
+	const identity = page.getByRole('radiogroup', { name: 'Theme profile' }).element();
+	const colourMode = page.getByRole('radiogroup', { name: 'Colour mode' }).element();
+	const footer = sidebar.lastElementChild;
+	if (!footer) throw new Error('Expected the sidebar footer.');
+	expect(colourMode.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+		identity.getBoundingClientRect().bottom,
+	);
+	expect(footer.scrollWidth).toBeLessThanOrEqual(footer.clientWidth);
+	await expect
+		.element(header.getByRole('navigation', { name: 'Site' }).getByRole('link', { name: 'Docs' }))
+		.toHaveAttribute('aria-current', 'page');
+});
+
+test('hides the sidebar from its toggle, moves search and theme into the header, and remembers the choice', async () => {
+	await page.viewport(1280, 800);
+	await renderShell('/docs/installation');
+
+	const hide = page.getByRole('button', { name: 'Hide sidebar' });
+	await expect.element(hide).toHaveAttribute('aria-expanded', 'true');
+	await expect.element(hide).toHaveAttribute('aria-controls', getSidebar().id);
+
+	await act(async () => {
+		await userEvent.click(hide);
+	});
+
+	const show = page.getByRole('button', { name: 'Show sidebar' });
+	await expect.element(show).toHaveAttribute('aria-expanded', 'false');
+	await expect.element(show).toHaveFocus();
+	expect(getSidebar()).not.toBeVisible();
+	expect(localStorage.getItem(SIDEBAR_STORAGE_KEY)).toBe('collapsed');
+	expect(document.documentElement).toHaveAttribute('data-docs-sidebar', 'collapsed');
+	const header = page.getByRole('banner');
+	await expect.element(header.getByRole('button', { name: 'Open Search' })).toBeVisible();
+	await expect.element(header.getByRole('button', { name: 'Theme' })).toBeVisible();
+
+	await act(async () => {
+		await userEvent.click(show);
+	});
+
+	await expect.element(page.getByRole('button', { name: 'Hide sidebar' })).toBeVisible();
+	expect(getSidebar()).toBeVisible();
+	expect(localStorage.getItem(SIDEBAR_STORAGE_KEY)).toBe('expanded');
+	expect(document.documentElement).not.toHaveAttribute('data-docs-sidebar');
+});
+
+test('renders collapsed when the head script already collapsed the sidebar', async () => {
+	await page.viewport(1280, 800);
+	document.documentElement.dataset.docsSidebar = 'collapsed';
+	await renderShell('/docs/installation');
+
+	await expect
+		.element(page.getByRole('button', { name: 'Show sidebar' }))
+		.toHaveAttribute('aria-expanded', 'false');
+	expect(getSidebar()).not.toBeVisible();
+});
+
+test('offers no sidebar toggle below the sidebar layout, and keeps theme controls in the drawer', async () => {
+	await page.viewport(390, 800);
+	await renderShell('/docs/installation');
+
+	await expect.element(page.getByRole('button', { name: /sidebar/ })).not.toBeInTheDocument();
+	await expect.element(page.getByRole('button', { name: 'Theme' })).not.toBeInTheDocument();
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Menu' }));
+	});
+	const dialog = page.getByRole('dialog', { name: 'Docs navigation' });
+	await expect.element(dialog.getByRole('radiogroup', { name: 'Theme profile' })).toBeVisible();
+	await expect.element(dialog.getByRole('radiogroup', { name: 'Colour mode' })).toBeVisible();
+});
+
+function getSidebar() {
+	const sidebar = document.getElementById('docs-sidebar');
+	if (!sidebar) throw new Error('Expected the docs sidebar.');
+	return sidebar;
+}
+
+async function renderShell(pathname: string) {
+	await renderAt(
+		pathname,
+		<DocsShell tree={tree}>
+			<main>Article</main>
+		</DocsShell>,
+	);
+}
 
 async function renderAt(pathname: string, children: ReactNode) {
 	const rootRoute = createRootRoute({

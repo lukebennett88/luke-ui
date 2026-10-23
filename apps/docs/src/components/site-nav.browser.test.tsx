@@ -57,21 +57,22 @@ test('marks only the current destination on desktop and keeps search available',
 	await expect.element(page.getByRole('button', { name: /Search/ })).toBeVisible();
 });
 
-for (const width of [768, 800]) {
+for (const width of [768, 800, 1100]) {
 	test(`keeps the landing page header on one row at ${width}px`, async () => {
 		await page.viewport(width, 800);
 		await renderAt('/', <SiteNav />);
 
 		const siteNav = page.getByRole('navigation', { name: 'Site' });
 		const search = page.getByRole('button', { name: /Search/ });
-		const themeProfile = page.getByRole('radiogroup', { name: 'Theme profile' });
+		const theme = page.getByRole('button', { name: 'Theme' });
+		const repository = page.getByRole('link', { name: 'GitHub repository' });
 
 		await expect.element(siteNav).toBeVisible();
 		await expect.element(search).toBeVisible();
-		await expect.element(themeProfile).toBeVisible();
+		await expect.element(theme).toBeVisible();
 
 		// Everything sharing a centre line proves the header did not wrap onto a second row.
-		const centres = [siteNav, search, themeProfile].map((locator) => {
+		const centres = [siteNav, search, theme, repository].map((locator) => {
 			const rect = locator.element().getBoundingClientRect();
 			return rect.top + rect.height / 2;
 		});
@@ -80,6 +81,25 @@ for (const width of [768, 800]) {
 		}
 	});
 }
+
+test('keeps the theme controls in a popover instead of the header row', async () => {
+	await page.viewport(1280, 800);
+	await renderAt('/', <SiteNav />);
+
+	await expect
+		.element(page.getByRole('radiogroup', { name: 'Theme profile' }))
+		.not.toBeInTheDocument();
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Theme' }));
+	});
+	await expect
+		.element(
+			page.getByRole('dialog', { name: 'Appearance' }).getByRole('radiogroup', {
+				name: 'Theme profile',
+			}),
+		)
+		.toBeVisible();
+});
 
 test('offers search and theme controls from the mobile bar with no destination active on the landing page', async () => {
 	await page.viewport(390, 800);

@@ -33,6 +33,7 @@ import { withBasePath } from '../lib/base-path.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
 import { markdownUrlForPage } from '../lib/markdown-page-path.js';
 import { resolvePageHeadMeta } from '../lib/page-head.js';
+import { findPageSectionName } from '../lib/page-section.js';
 import { siteUrl } from '../lib/site-url.js';
 import { source } from '../lib/source';
 
@@ -122,15 +123,17 @@ const loader = createServerFn({
 		if (!page) throw notFound();
 
 		const markdownPath = markdownUrlForPage(page.url);
+		const pageTree = source.getPageTree();
 
 		return {
 			description: page.data.description ?? null,
 			githubUrl: `${GITHUB_DOCS_URL}/${page.path}`,
 			markdownUrl: withBasePath(markdownPath, import.meta.env.BASE_URL),
 			pageActions: page.data.pageActions ?? 'all',
-			pageTree: await source.serializePageTree(source.getPageTree()),
+			pageTree: await source.serializePageTree(pageTree),
 			path: page.path,
 			reactAriaUrl: page.data.reactAria ?? null,
+			sectionName: findPageSectionName(pageTree, page.url),
 			sourceUrl: page.data.source ? `${GITHUB_TREE_URL}/${page.data.source}` : null,
 			title: `${page.data.title} | Luke UI`,
 			url: `${siteUrl()}${page.url.endsWith('/') ? page.url : `${page.url}/`}`,
@@ -145,11 +148,13 @@ const clientLoader = browserCollections.docs.createClientLoader({
 			markdownUrl: string;
 			pageActions: PageActionsMode;
 			reactAriaUrl: string | null;
+			sectionName: string | null;
 			sourceUrl: string | null;
 			tree: PageTree;
 		},
 	) {
-		const { githubUrl, markdownUrl, pageActions, reactAriaUrl, sourceUrl, tree } = props;
+		const { githubUrl, markdownUrl, pageActions, reactAriaUrl, sectionName, sourceUrl, tree } =
+			props;
 		return (
 			<DocsArticle
 				actions={
@@ -162,6 +167,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
 					/>
 				}
 				description={frontmatter.description}
+				sectionName={sectionName}
 				title={frontmatter.title}
 				toc={toc}
 				tree={tree}
@@ -183,6 +189,7 @@ function Page() {
 					markdownUrl: data.markdownUrl,
 					pageActions: data.pageActions,
 					reactAriaUrl: data.reactAriaUrl,
+					sectionName: data.sectionName,
 					sourceUrl: data.sourceUrl,
 					tree: data.pageTree,
 				})}

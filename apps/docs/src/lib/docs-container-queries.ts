@@ -25,8 +25,6 @@ function below(inlineSize: number) {
 
 /** Tablet and up. Header spacing and the content gutter widen here. */
 export const docsTabletMinInlineSize = atLeast(breakpoints.bp768);
-/** Below tablet. The header moves its destination links to their own row. */
-export const docsTabletMaxInlineSize = below(breakpoints.bp768);
 
 /**
  * Viewport media query at the same tablet threshold as `docsTabletMinInlineSize`. Use this only

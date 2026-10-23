@@ -1,8 +1,9 @@
+import type { BoxProps } from '@luke-ui/react/box';
+import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { IconLink } from '@luke-ui/react/icon-link';
 import { cx } from '@luke-ui/react/utils';
 import { useLinkProps, useRouterState } from '@tanstack/react-router';
-import type { ComponentProps } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Popover } from 'react-aria-components/Popover';
 import { GITHUB_REPO_URL } from '../lib/github.js';
@@ -13,36 +14,22 @@ import { DocsSearchTrigger } from './search.js';
 import * as styles from './site-nav.css.js';
 import { ThemeControls } from './theme-controls.js';
 
-interface SiteNavProps extends ComponentProps<'header'> {
-	hasSidebarNavigation?: boolean;
+interface SiteNavProps {
 	hideActiveDestination?: boolean;
 }
 
-export function SiteNav({
-	children,
-	className,
-	hasSidebarNavigation = false,
-	hideActiveDestination = false,
-	...props
-}: SiteNavProps) {
-	const pathname = useRouterState({ select: (state) => state.location.pathname });
-	const activeDestination = hideActiveDestination ? undefined : getActiveSiteDestination(pathname);
-
+/**
+ * The header for pages without the docs sidebar: the home page, the playground, and the 404 page.
+ * `DocsSiteNav` composes the same parts around the sidebar.
+ */
+export function SiteNav({ hideActiveDestination = false }: SiteNavProps) {
 	return (
-		<header {...props} className={cx(styles.header, className)}>
+		<SiteHeader>
 			<SiteWordmark />
-			<nav
-				aria-label="Site"
-				className={cx(styles.destinations, hasSidebarNavigation && styles.destinationsWithSidebar)}
-			>
-				{siteDestinations.map((destination) => (
-					<DestinationLink
-						destination={destination}
-						isActive={destination === activeDestination}
-						key={destination.url}
-					/>
-				))}
-			</nav>
+			<SiteDestinations
+				className={styles.destinations}
+				hideActiveDestination={hideActiveDestination}
+			/>
 			<div className={styles.actions}>
 				<div className={styles.wideSearch}>
 					<DocsSearchTrigger />
@@ -50,14 +37,46 @@ export function SiteNav({
 				<div className={styles.compactSearch}>
 					<DocsSearchTrigger isCompact />
 				</div>
-				<div className={styles.desktopTheme}>
-					<ThemeControls />
-				</div>
 				<AppearancePopover />
 				<RepositoryLink />
-				{children}
 			</div>
-		</header>
+		</SiteHeader>
+	);
+}
+
+/** The opaque header row on the page chrome. */
+export function SiteHeader({ children, className }: Pick<BoxProps, 'children' | 'className'>) {
+	return (
+		<Box
+			backgroundColor="surface.subdued"
+			className={cx(styles.header, className)}
+			elementType="header"
+		>
+			{children}
+		</Box>
+	);
+}
+
+export function SiteDestinations({
+	className,
+	hideActiveDestination = false,
+}: {
+	className?: string;
+	hideActiveDestination?: boolean;
+}) {
+	const pathname = useRouterState({ select: (state) => state.location.pathname });
+	const activeDestination = hideActiveDestination ? undefined : getActiveSiteDestination(pathname);
+
+	return (
+		<nav aria-label="Site" className={className}>
+			{siteDestinations.map((destination) => (
+				<DestinationLink
+					destination={destination}
+					isActive={destination === activeDestination}
+					key={destination.url}
+				/>
+			))}
+		</nav>
 	);
 }
 
@@ -85,7 +104,7 @@ function DestinationLink({
 // TanStack's `useLinkProps` returns DOM event handlers that RAC's `Link` cannot accept, so the
 // wordmark stays a raw `<a>`. It also overrides `aria-current`: TanStack marks the home route as
 // current, while the other destinations use custom matching.
-function SiteWordmark() {
+export function SiteWordmark() {
 	const linkProps = useLinkProps({ to: '/' });
 	return (
 		<a {...linkProps} aria-current={undefined} className={styles.wordmark} data-status={undefined}>
@@ -94,14 +113,15 @@ function SiteWordmark() {
 	);
 }
 
-function AppearancePopover() {
+/** A labelled button that opens the theme controls in a popover. */
+export function AppearancePopover({ className }: { className?: string }) {
 	return (
 		<DialogTrigger>
-			<Button className={styles.mobileThemeTrigger} prominence="low" size="small">
+			<Button className={className} prominence="low" size="small">
 				Theme
 			</Button>
 			<Popover className={styles.appearancePopover} placement="bottom end">
-				<Dialog aria-label="Appearance" className={styles.appearanceDialog}>
+				<Dialog aria-label="Appearance">
 					<ThemeControls />
 				</Dialog>
 			</Popover>
@@ -109,7 +129,7 @@ function AppearancePopover() {
 	);
 }
 
-function RepositoryLink() {
+export function RepositoryLink() {
 	return (
 		<IconLink
 			aria-label="GitHub repository"

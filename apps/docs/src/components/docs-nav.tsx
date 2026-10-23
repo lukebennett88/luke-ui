@@ -29,11 +29,11 @@ const navRowProps = {
 	paddingInline: 'space.8',
 } as const;
 
-/** Top inset shared by the sidebar, article, and desktop TOC so the three columns line up. */
+/** Top inset shared by the article and desktop TOC so the two columns line up. */
 export const docsContentPaddingBlockStart =
 	'space.48' as const satisfies BoxProps['paddingBlockStart'];
 
-/** Outer inset for the desktop sidebar and mobile drawer panes. */
+/** Outer inset for the mobile drawer and desktop TOC panes. */
 export const docsNavPaneProps = {
 	paddingBlockEnd: 'space.32',
 	paddingBlockStart: docsContentPaddingBlockStart,

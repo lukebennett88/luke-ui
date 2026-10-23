@@ -34,6 +34,17 @@ export const article = style({
 	},
 });
 
+// The section name above the page title. The DOM keeps its normal case for assistive technology
+// and copied text.
+export const eyebrow = style({
+	'@layer': {
+		components: {
+			letterSpacing: '0.05em',
+			textTransform: 'uppercase',
+		},
+	},
+});
+
 // A chevron points along the inline axis, so it flips with the writing direction.
 export const pagerIcon = style({
 	'@layer': {

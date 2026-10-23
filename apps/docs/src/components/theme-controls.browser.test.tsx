@@ -12,6 +12,7 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import themePrefsScript from '../generated/theme-prefs-script.iife.js?raw';
+import { SIDEBAR_STORAGE_KEY } from '../lib/sidebar-prefs-shared.js';
 import {
 	COLOR_MODE_STORAGE_KEY,
 	subscribeToThemePrefs,
@@ -100,6 +101,22 @@ test('the head script applies stored prefs before body scripts run', async () =>
 	expect(html.style.colorScheme).toBe('');
 });
 
+test('the head script collapses the docs sidebar before paint when stored', async () => {
+	localStorage.setItem(SIDEBAR_STORAGE_KEY, 'collapsed');
+
+	const html = await loadHeadScriptDocument();
+
+	expect(html).toHaveAttribute('data-docs-sidebar', 'collapsed');
+});
+
+test('the head script leaves the docs sidebar expanded by default', async () => {
+	localStorage.setItem(SIDEBAR_STORAGE_KEY, 'expanded');
+
+	const html = await loadHeadScriptDocument();
+
+	expect(html).not.toHaveAttribute('data-docs-sidebar');
+});
+
 test('the head script leaves the system preference to the theme CSS', async () => {
 	await emulateColorScheme('dark');
 
@@ -112,11 +129,13 @@ test('the head script leaves the system preference to the theme CSS', async () =
 
 test('the head script still applies prefs when localStorage throws', async () => {
 	await emulateColorScheme('dark');
+	localStorage.setItem(SIDEBAR_STORAGE_KEY, 'collapsed');
 
 	const html = await loadHeadScriptDocument({ throwOnGetItem: true });
 
 	expect(html).toHaveClass(tactileThemeClassName, 'dark');
 	expect(html).not.toHaveAttribute('data-color-mode');
+	expect(html).not.toHaveAttribute('data-docs-sidebar');
 	expect(html.style.colorScheme).toBe('');
 });
 
