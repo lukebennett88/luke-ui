@@ -1,4 +1,5 @@
 import { Box } from '@luke-ui/react/box';
+import { Grid } from '@luke-ui/react/grid';
 import { Heading, HeadingLevels } from '@luke-ui/react/heading';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -7,6 +8,7 @@ import type { SoftwareSourceCode, WithContext } from 'schema-dts';
 import { license } from '../../../../packages/@luke-ui/react/package.json';
 import { CodeBlock } from '../components/code-block/code-block.js';
 import { HomeSectionLinks } from '../components/home-section-links.js';
+import { HomeShowcase, SearchShortcut } from '../components/home-showcase.js';
 import { SiteFrame } from '../components/site-frame.js';
 import { withBasePath } from '../lib/base-path.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
@@ -47,8 +49,9 @@ export const Route = createFileRoute('/')({
 	}),
 });
 
-// A plain Box rather than Container: Container establishes a query container, and the card grid's
-// columns should follow the viewport like the rest of the frame.
+// A plain Box rather than Container: Container establishes a query container, and the hero and card
+// grid columns should follow the viewport like the rest of the frame. From the sidebar breakpoint the
+// hero splits into the copy and the token specimen.
 function Home() {
 	return (
 		<SiteFrame>
@@ -58,6 +61,7 @@ function Home() {
 				paddingBlock={{
 					initial: 'space.64',
 					bp768: 'space.96',
+					bp1024: 'space.64',
 				}}
 				paddingInline={{
 					initial: 'space.16',
@@ -66,20 +70,36 @@ function Home() {
 				}}
 			>
 				<HeadingLevels base={1}>
-					<Stack gap="space.24">
-						<Heading typography="display">Luke UI</Heading>
-						<Text color="secondary" elementType="p" typography="lead">
-							{HOME_INTRO}
-						</Text>
-						<Box
-							maxInlineSize={{
-								initial: '100%',
-								bp768: '28rem',
-							}}
-						>
-							<CodeBlock code={INSTALL_COMMAND} title="Terminal" />
-						</Box>
-					</Stack>
+					<Grid
+						alignItems="center"
+						columns={{
+							initial: 1,
+							bp1024: 'minmax(0, 2fr) minmax(0, 3fr)',
+						}}
+						gap={{
+							initial: 'space.48',
+							bp1024: 'space.40',
+						}}
+					>
+						<Stack gap="space.24">
+							<Heading typography="display">Luke UI</Heading>
+							<Text color="secondary" elementType="p" typography="lead">
+								{HOME_INTRO}
+							</Text>
+							<Box
+								maxInlineSize={{
+									initial: '100%',
+									bp768: '28rem',
+								}}
+							>
+								<CodeBlock code={INSTALL_COMMAND} title="Terminal" />
+							</Box>
+							<SearchShortcut />
+						</Stack>
+						<HeadingLevels>
+							<HomeShowcase />
+						</HeadingLevels>
+					</Grid>
 					<HeadingLevels>
 						<Box
 							marginBlockStart={{
