@@ -27,6 +27,7 @@ import {
 	captureVisual,
 	captureVisualAppearance,
 	focusViaKeyboard,
+	parkPointer,
 	pressPointer,
 	releasePointer,
 	Stack,
@@ -730,19 +731,74 @@ function option(name: string) {
 	return page.getByRole('option', { name });
 }
 
-async function openCountryListByKeyboard() {
-	await focusViaKeyboard(page.getByRole('combobox', { name: 'Country' }));
-	await userEvent.keyboard('{ArrowDown}');
+/** The one option React Aria marks active. */
+function activeOption(): HTMLElement {
+	const active = page
+		.getByRole('option')
+		.elements()
+		.filter((element) => element.hasAttribute('data-focused'));
+	const [element] = active;
+	if (active.length !== 1 || !(element instanceof HTMLElement)) {
+		throw new Error(`Expected one active option, found ${active.length}.`);
+	}
+	return element;
+}
+
+async function waitForListBox() {
 	const listbox = page.getByRole('listbox');
 	await expect.element(listbox).toBeVisible();
 	await waitForOverlayEnter(listbox.element().closest('[data-trigger]') ?? listbox.element());
 }
 
-// Real focus stays in the input, so its ring shows beside the active option's ring. Hover moves
-// neither focus nor the ring.
+test('the active ComboboxField option is the input’s active descendant, and Enter selects it', async () => {
+	render(
+		<ComboboxField defaultItems={sceneCountryItems} label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	const input = combobox('Country');
+
+	await focusViaKeyboard(page.getByRole('combobox', { name: 'Country' }));
+	await userEvent.keyboard('{ArrowDown}');
+	await waitForListBox();
+	await userEvent.keyboard('{ArrowDown}');
+	await expect.poll(() => input.getAttribute('aria-activedescendant')).toBeTruthy();
+
+	const active = activeOption();
+	expect(input).toHaveFocus();
+	expect(input.getAttribute('aria-activedescendant')).toBe(active.id);
+	const name = active.textContent;
+	await userEvent.keyboard('{Enter}');
+	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
+	expect(input).toHaveValue(name);
+});
+
+test('after the pointer leaves a ComboboxField list, Enter selects the option it left active', async () => {
+	render(
+		<ComboboxField defaultItems={sceneCountryItems} label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	const input = combobox('Country');
+
+	await userEvent.click(page.getByRole('button', { name: /Country/ }));
+	await waitForListBox();
+	await userEvent.hover(option('New Zealand'));
+	await expect.element(option('New Zealand')).toHaveAttribute('data-focused', 'true');
+	await parkPointer();
+	await expect.element(option('New Zealand')).not.toHaveAttribute('data-hovered');
+
+	expect(activeOption()).toBe(option('New Zealand').element());
+	expect(input.getAttribute('aria-activedescendant')).toBe(option('New Zealand').element().id);
+	await userEvent.keyboard('{Enter}');
+	expect(input).toHaveValue('New Zealand');
+});
+
+// Real focus stays in the input, so its ring shows beside the active option's fill. During keyboard
+// navigation a stationary pointer leaves the active option where the keyboard put it.
 for (const appearance of visualAppearances) {
 	test(
-		`option keyboard focus and hover in ${appearance.theme} ${appearance.mode}`,
+		`option states in ${appearance.theme} ${appearance.mode}`,
 		{ tags: ['visual'] },
 		async () => {
 			render(
@@ -758,64 +814,38 @@ for (const appearance of visualAppearances) {
 			);
 			const suffix = `${appearance.theme}-${appearance.mode}`;
 
-			await openCountryListByKeyboard();
-			await expect.element(option('New Zealand')).toHaveAttribute('data-focus-visible', 'true');
+			await focusViaKeyboard(page.getByRole('combobox', { name: 'Country' }));
+			await userEvent.keyboard('{ArrowDown}');
+			await waitForListBox();
+			await expect.element(option('New Zealand')).toHaveAttribute('data-focused', 'true');
 			await userEvent.hover(option('Australia'));
 			await expect.element(option('Australia')).toHaveAttribute('data-hovered', 'true');
+			await expect.element(option('New Zealand')).toHaveAttribute('data-focused', 'true');
 			await captureVisual(
 				page.elementLocator(document.body),
-				`combobox-field/option-focus-${suffix}`,
+				`combobox-field/option-active-${suffix}`,
 			);
 
 			await userEvent.keyboard('{ArrowUp}');
-			await expect.element(option('Canada')).toHaveAttribute('data-focus-visible', 'true');
-			await userEvent.hover(option('United States'));
-			await expect.element(option('United States')).toHaveAttribute('data-hovered', 'true');
+			await expect.element(option('Canada')).toHaveAttribute('data-focused', 'true');
 			await captureVisual(
 				page.elementLocator(document.body),
-				`combobox-field/option-selected-focus-${suffix}`,
+				`combobox-field/option-selected-active-${suffix}`,
 			);
 
-			await userEvent.keyboard('{ArrowUp}');
-			await expect.element(option('Australia')).toHaveAttribute('data-focus-visible', 'true');
-			await userEvent.hover(option('Canada'));
-			await expect.element(option('Canada')).toHaveAttribute('data-hovered', 'true');
-			await captureVisual(
-				page.elementLocator(document.body),
-				`combobox-field/option-selected-hover-${suffix}`,
-			);
+			await pressPointer(option('Australia').element());
+			try {
+				await expect.element(option('Australia')).toHaveAttribute('data-pressed', 'true');
+				await expect.element(option('Australia')).toHaveAttribute('data-focused', 'true');
+				await captureVisual(
+					page.elementLocator(document.body),
+					`combobox-field/option-active-pressed-${suffix}`,
+				);
+			} finally {
+				await releasePointer();
+			}
 		},
 	);
-}
-
-for (const name of ['Australia', 'Canada']) {
-	test(`pressed option ${name}`, { tags: ['visual'] }, async () => {
-		render(
-			<ComboboxField
-				defaultItems={sceneCountryItems}
-				defaultValue="ca"
-				label="Country"
-				name="country"
-			>
-				{renderCountryItem}
-			</ComboboxField>,
-		);
-
-		await userEvent.click(page.getByRole('button', { name: /Country/ }));
-		const listbox = page.getByRole('listbox');
-		await expect.element(listbox).toBeVisible();
-		await waitForOverlayEnter(listbox.element().closest('[data-trigger]') ?? listbox.element());
-		await pressPointer(option(name).element());
-		try {
-			await expect.element(option(name)).toHaveAttribute('data-pressed', 'true');
-			await captureVisual(
-				page.elementLocator(document.body),
-				`combobox-field/option-pressed-${name.toLowerCase()}`,
-			);
-		} finally {
-			await releasePointer();
-		}
-	});
 }
 
 test('mobile tray', { tags: ['visual'] }, async () => {
@@ -840,8 +870,8 @@ test('mobile tray', { tags: ['visual'] }, async () => {
 		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray');
 
 		await userEvent.keyboard('{ArrowDown}');
-		await expect.element(option('Australia')).toHaveAttribute('data-focus-visible', 'true');
-		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray-option-focus');
+		await expect.element(option('Australia')).toHaveAttribute('data-focused', 'true');
+		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray-option-active');
 	} finally {
 		// Screen width resets in render-setup `beforeEach`.
 		await page.viewport(DESKTOP_SCREEN_WIDTH, 800);

@@ -739,9 +739,10 @@ async function waitForListBox() {
 	await waitForOverlayEnter(listbox.element().closest('[data-trigger]') ?? listbox.element());
 }
 
-test('keyboard-focused option', { tags: ['visual'] }, async () => {
+// Select moves real DOM focus onto the active option. The list box names no active descendant.
+test('the active SelectField option takes DOM focus, and Enter selects it', async () => {
 	render(
-		<SelectField defaultValue="dark" items={themeItems} label="Theme" name="theme">
+		<SelectField items={themeItems} label="Theme" name="theme" placeholder="Choose a theme">
 			{renderThemeItem}
 		</SelectField>,
 	);
@@ -749,17 +750,17 @@ test('keyboard-focused option', { tags: ['visual'] }, async () => {
 	await focusViaKeyboard(page.getByRole('button', { name: /Theme/ }));
 	await userEvent.keyboard('{ArrowDown}');
 	await waitForListBox();
-	await expect.element(option('Dark')).toHaveAttribute('data-focus-visible', 'true');
-	await captureVisual(page.elementLocator(document.body), 'select-field/option-keyboard-selected');
+	await userEvent.keyboard('{ArrowDown}');
+	await expect.element(option('Light')).toHaveFocus();
 
-	await userEvent.keyboard('{ArrowUp}');
-	await expect.element(option('Light')).toHaveAttribute('data-focus-visible', 'true');
-	await captureVisual(page.elementLocator(document.body), 'select-field/option-keyboard');
+	expect(option('Light').element()).toHaveAttribute('data-focused', 'true');
+	expect(page.getByRole('listbox').element()).not.toHaveAttribute('aria-activedescendant');
+	await userEvent.keyboard('{Enter}');
+	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
+	expect(trigger(/Theme/)).toHaveTextContent('Light');
 });
 
-// Select moves focus to the option under the pointer, but only keyboard focus draws the ring. The
-// option the pointer left keeps focus without a highlight until a key moves focus on.
-test('pointer hover, pointer leave, then ArrowDown', { tags: ['visual'] }, async () => {
+test('after the pointer leaves a SelectField list, Enter selects the option it left active', async () => {
 	render(
 		<SelectField defaultValue="dark" items={themeItems} label="Theme" name="theme">
 			{renderThemeItem}
@@ -769,20 +770,64 @@ test('pointer hover, pointer leave, then ArrowDown', { tags: ['visual'] }, async
 	await userEvent.click(trigger(/Theme/));
 	await waitForListBox();
 	await userEvent.hover(option('System'));
-	await expect.element(option('System')).toHaveAttribute('data-focused', 'true');
-	await captureVisual(page.elementLocator(document.body), 'select-field/option-pointer-hover');
-
+	await expect.element(option('System')).toHaveFocus();
 	await parkPointer();
 	await expect.element(option('System')).not.toHaveAttribute('data-hovered');
-	await captureVisual(page.elementLocator(document.body), 'select-field/option-pointer-left');
 
-	await userEvent.keyboard('{ArrowDown}');
-	await expect.element(option('Light')).toHaveAttribute('data-focus-visible', 'true');
-	await captureVisual(
-		page.elementLocator(document.body),
-		'select-field/option-arrow-after-pointer',
-	);
+	expect(option('System').element()).toHaveFocus();
+	expect(option('System').element()).toHaveAttribute('data-focused', 'true');
+	await userEvent.keyboard('{Enter}');
+	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
+	expect(trigger(/Theme/)).toHaveTextContent('System');
 });
+
+test('active option by keyboard', { tags: ['visual'] }, async () => {
+	render(
+		<SelectField defaultValue="dark" items={themeItems} label="Theme" name="theme">
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	await focusViaKeyboard(page.getByRole('button', { name: /Theme/ }));
+	await userEvent.keyboard('{ArrowDown}');
+	await waitForListBox();
+	await expect.element(option('Dark')).toHaveFocus();
+	await captureVisual(page.elementLocator(document.body), 'select-field/option-selected-active');
+
+	await userEvent.keyboard('{ArrowUp}');
+	await expect.element(option('Light')).toHaveFocus();
+	await captureVisual(page.elementLocator(document.body), 'select-field/option-active');
+});
+
+// The pointer moves the active option, and the option it leaves stays active until a key moves on.
+test(
+	'active option by pointer, after the pointer leaves, then ArrowDown',
+	{ tags: ['visual'] },
+	async () => {
+		render(
+			<SelectField defaultValue="dark" items={themeItems} label="Theme" name="theme">
+				{renderThemeItem}
+			</SelectField>,
+		);
+
+		await userEvent.click(trigger(/Theme/));
+		await waitForListBox();
+		await userEvent.hover(option('System'));
+		await expect.element(option('System')).toHaveFocus();
+		await captureVisual(page.elementLocator(document.body), 'select-field/option-pointer-active');
+
+		await parkPointer();
+		await expect.element(option('System')).not.toHaveAttribute('data-hovered');
+		await captureVisual(page.elementLocator(document.body), 'select-field/option-pointer-left');
+
+		await userEvent.keyboard('{ArrowDown}');
+		await expect.element(option('Light')).toHaveFocus();
+		await captureVisual(
+			page.elementLocator(document.body),
+			'select-field/option-arrow-after-pointer',
+		);
+	},
+);
 
 test('forced-colors states', { tags: ['visual'] }, async () => {
 	await emulateForcedColors('active');

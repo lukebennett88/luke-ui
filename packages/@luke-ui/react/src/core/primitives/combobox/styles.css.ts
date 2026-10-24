@@ -5,7 +5,7 @@ import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { COMBOBOX_ACTION_SIZE } from '../../sizing/combobox-sizing.js';
 import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
 import { classSelector } from '../../styles/class-selector.js';
-import { focusRing, insetFocusRing } from '../../styles/focus-ring.js';
+import { focusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
@@ -94,13 +94,13 @@ const comboboxActionStyles = {
 /** Marker class on every combobox and select item, for rules that reach into its content. */
 export const comboboxItemClassName = style({}, 'combobox-item');
 
-// A selected item's `forced-color-adjust: none` inherits, so its content would keep author colours on
+// The active item's `forced-color-adjust: none` inherits, so its content would keep author colours on
 // the `Highlight` fill: a `Text` keeps its theme colour and a `Kbd` its surface. Do for that content
 // what forced colours would have done. `!important` beats application and utility CSS, which ranks
 // below every Luke UI layer under `!important`.
 globalStyleInLayer(
 	'recipes',
-	`${classSelector(comboboxItemClassName)}[data-selected="true"]:not([data-disabled="true"]) *`,
+	`${classSelector(comboboxItemClassName)}[data-focused="true"]:not([data-disabled="true"]) *`,
 	{
 		'@media': {
 			'(forced-colors: active)': {
@@ -298,25 +298,17 @@ const comboboxConfig = {
 					forcedColorAdjust: 'auto',
 					selectors: {
 						'&[data-disabled="true"]': { color: 'GrayText', opacity: 1 },
-						'&[data-focus-visible="true"]:not([data-disabled="true"])': insetFocusRing('Highlight'),
 						// A forced-colours backplate would paint `Canvas` behind the label and hide the
-						// `HighlightText` on it, so the selected item opts out and sets both colours. The list
-						// repeats every selected-state selector below so author colours never show through.
+						// `HighlightText` on it, so the active item opts out and sets both colours. The list
+						// repeats every active-state selector below so author colours never show through.
 						// The opt-out inherits, so the `comboboxItemClassName` rule resets the item's content.
 						[[
-							'&[data-selected="true"]:not([data-disabled="true"])',
-							'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])',
-							'&[data-pressed="true"][data-selected="true"]:not([data-disabled="true"])',
+							'&[data-focused="true"]:not([data-disabled="true"])',
+							'&[data-focused="true"][data-pressed="true"]:not([data-disabled="true"])',
 						].join(', ')]: {
 							backgroundColor: 'Highlight',
 							color: 'HighlightText',
 							forcedColorAdjust: 'none',
-						},
-						// A `Highlight` ring would vanish into the fill, and a `HighlightText` ring at the
-						// edge would merge with the `Canvas` around the item. Inset it inside the fill.
-						'&[data-selected="true"][data-focus-visible="true"]:not([data-disabled="true"])': {
-							outlineColor: 'HighlightText',
-							outlineOffset: '-4px',
 						},
 					},
 				},
@@ -338,30 +330,18 @@ const comboboxConfig = {
 			transitionProperty: 'background-color, color, opacity',
 			transitionTimingFunction: vars.motion.feedback.easing,
 
-			// Collection-item states: fills show hover, press, and selection, and only keyboard or
-			// assistive-technology focus draws the ring, over whatever fill the item has. Select moves
-			// focus on pointer hover, so `data-focused` alone stays unstyled.
+			// React Aria moves the one active item (`data-focused`) with the pointer and the keyboard,
+			// so its solid fill is the focus indicator and the item draws no ring. Selection shows only
+			// the check, and hover alone has no style.
 			selectors: {
 				'&[data-disabled="true"]': {
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-selected="true"])':
-					surfaceStyle('neutral.subtle.hover'),
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-selected="true"])':
-					surfaceStyle('neutral.subtle.pressed'),
-				'&[data-selected="true"]:not([data-disabled="true"])': {
-					...surfaceStyle('accent.subtle.rest'),
-					fontWeight: vars.font.weight.label,
-				},
-				'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])':
-					surfaceStyle('accent.subtle.hover'),
-				'&[data-pressed="true"][data-selected="true"]:not([data-disabled="true"])':
-					surfaceStyle('accent.subtle.pressed'),
-				'&[data-focus-visible="true"]:not([data-disabled="true"])': insetFocusRing(
-					vars.color.border.focus,
-				),
+				'&[data-focused="true"]:not([data-disabled="true"])': surfaceStyle('accent.solid.rest'),
+				'&[data-focused="true"][data-pressed="true"]:not([data-disabled="true"])':
+					surfaceStyle('accent.solid.pressed'),
 			},
 		},
 		trayTrigger: {

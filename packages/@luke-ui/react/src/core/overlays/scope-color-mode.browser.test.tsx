@@ -27,7 +27,6 @@ import {
 	pairedColors,
 	setInteractionState,
 	settledSurfaceColors,
-	surfaceColors,
 } from '../test-utils/surface-colors.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 
@@ -265,16 +264,19 @@ for (const appearance of visualAppearances) {
 			const option = page.getByRole('option', { name: 'Option one' }).element();
 
 			expect(settledSurfaceColors(surface)).toEqual(pairedColors(surface, 'surface.overlay'));
-			expect(surfaceColors(option).color).toBe(pairedColors(option, 'surface.overlay').color);
+			// Hover alone has no style, so the item keeps the overlay's foreground.
+			option.removeAttribute('data-focused');
+			setInteractionState(option, 'hover');
+			expect(settledSurfaceColors(option).color).toBe(
+				pairedColors(option, 'surface.overlay').color,
+			);
 			const itemStates = [
-				{ background: 'neutral.subtle.hover', isSelected: false, state: 'hover' },
-				{ background: 'neutral.subtle.pressed', isSelected: false, state: 'pressed' },
-				{ background: 'accent.subtle.rest', isSelected: true, state: 'rest' },
-				{ background: 'accent.subtle.hover', isSelected: true, state: 'hover' },
+				{ background: 'accent.solid.rest', state: 'rest' },
+				{ background: 'accent.solid.pressed', state: 'pressed' },
 			] as const;
-			const actual = itemStates.map(({ isSelected, state }) => {
+			const actual = itemStates.map(({ state }) => {
+				option.setAttribute('data-focused', 'true');
 				setInteractionState(option, state);
-				option.setAttribute('data-selected', String(isSelected));
 				return settledSurfaceColors(option);
 			});
 
