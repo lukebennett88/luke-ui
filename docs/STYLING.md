@@ -132,7 +132,9 @@ decision record is
 Only the native `:focus-visible` pseudo-class draws the global ring. React Aria also sets
 `data-focus-visible` on wrappers such as labels and groups, so a recipe that wants a ring from that
 attribute draws it on the element that should show it. Keep exactly one focus indicator per control.
-Remove an `outline: none` only when nothing else would draw a second ring.
+Remove an `outline: none` only when nothing else would draw a second ring. A Combobox's active
+option is a separate target from its input, so it draws its own ring. See
+[Collection-item states](#collection-item-states).
 
 ## Cascade layers
 
@@ -340,6 +342,36 @@ Do not widen a state with `:has()` when the group already exposes data attribute
 `data-disabled` and `data-invalid`. Probing descendants cannot tell a disabled control from one that
 only contains a disabled button. Use `descendantDisabledSelector` to style a part when an ancestor
 control is disabled.
+
+### Collection-item states
+
+Collection items, such as list box options, share one state model. Menu items and grid rows will
+follow it too. Checkbox, Switch, and Tabs keep their own patterns. The combobox recipe's `item` slot
+implements the model, and `SelectItem` reuses that slot.
+
+| State              | Treatment                                                        |
+| ------------------ | ---------------------------------------------------------------- |
+| Hovered            | `neutral.subtle.hover`                                           |
+| Pressed            | `neutral.subtle.pressed`                                         |
+| Selected           | `accent.subtle.rest`, the check icon, and the label font weight  |
+| Selected + hovered | `accent.subtle.hover`                                            |
+| Selected + pressed | `accent.subtle.pressed`                                          |
+| Focus-visible      | An inset ring in `border.focus`, over whatever fill the item has |
+| Focused alone      | No styling                                                       |
+
+Fills show pointer interaction and selection. Only `data-focus-visible` draws the ring.
+`insetFocusRing` from `core/styles/focus-ring.ts` keeps it inside the item, so items packed edge to
+edge never cover each other's ring. React Aria sets `data-focus-visible` for any non-pointer
+modality, including assistive technology. Do not style `data-focused` on its own. Select moves focus
+to the option under the pointer, so a `data-focused` fill would stay on the last hovered option
+after the pointer leaves the list.
+
+Combobox keeps real focus in its input and moves virtual focus through the options. The input ring
+shows where typing goes, and the active option's ring shows which option Enter chooses. Both show at
+once.
+
+The compiler gates `border.focus` at 3:1 against the four surfaces only. Measure the ring against
+each fill in the table when a theme or fill changes.
 
 ## Styling utilities
 

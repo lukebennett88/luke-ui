@@ -315,7 +315,7 @@ for (const { control, name } of wrappedControls) {
 	});
 }
 
-test('shows virtual focus on a list box item without a second ring', async () => {
+test('shows virtual focus on a list box item with one ring of its own', async () => {
 	const { container } = render(
 		<ComboboxField defaultItems={items} label="Combobox">
 			{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
@@ -328,13 +328,12 @@ test('shows virtual focus on a list box item without a second ring', async () =>
 	const option = page.getByRole('option', { name: 'Option one' });
 	await expect.element(option).toHaveAttribute('data-focus-visible', 'true');
 
-	// DOM focus stays on the input, so the option shows focus with its background alone.
+	// DOM focus stays on the input, which keeps its own ring. The option draws the only ring in the
+	// list, and the global `:focus-visible` rule adds none.
 	expect(input).toHaveFocus();
-	expect(getComputedStyle(option.element()).outlineStyle).toBe('none');
-	expect(getComputedStyle(option.element()).backgroundColor).not.toBe(
-		getComputedStyle(page.getByRole('option', { name: 'Option two' }).element()).backgroundColor,
-	);
 	expect(visibleRings(container)).toHaveLength(1);
+	const listbox = page.getByRole('listbox').element();
+	expect(visibleRings(listbox)).toEqual([option.element()]);
 });
 
 test('leaves application animations and Luke UI feedback running under reduced motion', async () => {

@@ -32,6 +32,30 @@ export async function parkPointer() {
 	});
 }
 
+/** Hold the primary button down over the centre of `element`, so it shows its pressed state. */
+export async function pressPointer(element: Element) {
+	const bounds = element.getBoundingClientRect();
+	await cdp().send('Input.dispatchMouseEvent', {
+		type: 'mousePressed',
+		button: 'left',
+		buttons: 1,
+		clickCount: 1,
+		x: bounds.left + bounds.width / 2,
+		y: bounds.top + bounds.height / 2,
+	});
+}
+
+/** Release the pointer outside the viewport, so the press ends without activating anything. */
+export async function releasePointer() {
+	await cdp().send('Input.dispatchMouseEvent', {
+		type: 'mouseReleased',
+		button: 'left',
+		buttons: 0,
+		clickCount: 1,
+		...parkedPointerCoordinates(),
+	});
+}
+
 type InlinePropertySnapshot = {
 	property: string;
 	/** Whether the property was present on the element's inline style before the lock. */

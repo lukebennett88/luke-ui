@@ -5,7 +5,6 @@ import { Prose, proseRecipe } from '@luke-ui/react/prose';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { cdp } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
@@ -18,6 +17,8 @@ import {
 	captureVisualAppearance,
 	emulateForcedColors,
 	focusViaKeyboard,
+	pressPointer,
+	releasePointer,
 	Stack,
 } from '../test-utils/visual.js';
 import { KitchenSinkDocument, NativeElementsScene, swatch } from './prose.fixtures.js';
@@ -743,29 +744,6 @@ for (const state of ['hover', 'pressed', 'focus'] as const) {
 				unmount();
 			}
 		}
-	});
-}
-
-async function pressPointer(element: Element) {
-	const bounds = element.getBoundingClientRect();
-	await cdp().send('Input.dispatchMouseEvent', {
-		type: 'mousePressed',
-		button: 'left',
-		buttons: 1,
-		clickCount: 1,
-		x: bounds.left + bounds.width / 2,
-		y: bounds.top + bounds.height / 2,
-	});
-}
-
-async function releasePointer() {
-	await cdp().send('Input.dispatchMouseEvent', {
-		type: 'mouseReleased',
-		button: 'left',
-		buttons: 0,
-		clickCount: 1,
-		x: -50,
-		y: -50,
 	});
 }
 

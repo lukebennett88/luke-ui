@@ -16,6 +16,8 @@ import {
 	captureVisual,
 	captureVisualAppearance,
 	emulateForcedColors,
+	focusViaKeyboard,
+	parkPointer,
 	Stack,
 } from '../test-utils/visual.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
@@ -725,6 +727,61 @@ test('open popover', { tags: ['visual'] }, async () => {
 	const listbox = page.getByRole('listbox').element();
 	await waitForOverlayEnter(listbox.closest('[data-trigger]') ?? listbox);
 	await captureVisual(page.elementLocator(document.body), 'select-field/open');
+});
+
+function option(name: string) {
+	return page.getByRole('option', { name });
+}
+
+async function waitForListBox() {
+	const listbox = page.getByRole('listbox');
+	await expect.element(listbox).toBeVisible();
+	await waitForOverlayEnter(listbox.element().closest('[data-trigger]') ?? listbox.element());
+}
+
+test('keyboard-focused option', { tags: ['visual'] }, async () => {
+	render(
+		<SelectField defaultValue="dark" items={themeItems} label="Theme" name="theme">
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	await focusViaKeyboard(page.getByRole('button', { name: /Theme/ }));
+	await userEvent.keyboard('{ArrowDown}');
+	await waitForListBox();
+	await expect.element(option('Dark')).toHaveAttribute('data-focus-visible', 'true');
+	await captureVisual(page.elementLocator(document.body), 'select-field/option-keyboard-selected');
+
+	await userEvent.keyboard('{ArrowUp}');
+	await expect.element(option('Light')).toHaveAttribute('data-focus-visible', 'true');
+	await captureVisual(page.elementLocator(document.body), 'select-field/option-keyboard');
+});
+
+// Select moves focus to the option under the pointer, but only keyboard focus draws the ring. The
+// option the pointer left keeps focus without a highlight until a key moves focus on.
+test('pointer hover, pointer leave, then ArrowDown', { tags: ['visual'] }, async () => {
+	render(
+		<SelectField defaultValue="dark" items={themeItems} label="Theme" name="theme">
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	await userEvent.click(trigger(/Theme/));
+	await waitForListBox();
+	await userEvent.hover(option('System'));
+	await expect.element(option('System')).toHaveAttribute('data-focused', 'true');
+	await captureVisual(page.elementLocator(document.body), 'select-field/option-pointer-hover');
+
+	await parkPointer();
+	await expect.element(option('System')).not.toHaveAttribute('data-hovered');
+	await captureVisual(page.elementLocator(document.body), 'select-field/option-pointer-left');
+
+	await userEvent.keyboard('{ArrowDown}');
+	await expect.element(option('Light')).toHaveAttribute('data-focus-visible', 'true');
+	await captureVisual(
+		page.elementLocator(document.body),
+		'select-field/option-arrow-after-pointer',
+	);
 });
 
 test('forced-colors states', { tags: ['visual'] }, async () => {

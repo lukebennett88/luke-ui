@@ -23,7 +23,14 @@ import {
 } from '../test-utils/mock-screen-width.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { pairedColors, surfaceColors } from '../test-utils/surface-colors.js';
-import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
+import {
+	captureVisual,
+	captureVisualAppearance,
+	focusViaKeyboard,
+	pressPointer,
+	releasePointer,
+	Stack,
+} from '../test-utils/visual.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 
 type CountryItem = {
@@ -719,6 +726,98 @@ test('open popover', { tags: ['visual'] }, async () => {
 	await captureVisual(page.elementLocator(document.body), 'combobox-field/open');
 });
 
+function option(name: string) {
+	return page.getByRole('option', { name });
+}
+
+async function openCountryListByKeyboard() {
+	await focusViaKeyboard(page.getByRole('combobox', { name: 'Country' }));
+	await userEvent.keyboard('{ArrowDown}');
+	const listbox = page.getByRole('listbox');
+	await expect.element(listbox).toBeVisible();
+	await waitForOverlayEnter(listbox.element().closest('[data-trigger]') ?? listbox.element());
+}
+
+// Real focus stays in the input, so its ring shows beside the active option's ring. Hover moves
+// neither focus nor the ring.
+for (const appearance of visualAppearances) {
+	test(
+		`option keyboard focus and hover in ${appearance.theme} ${appearance.mode}`,
+		{ tags: ['visual'] },
+		async () => {
+			render(
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					defaultValue="ca"
+					label="Country"
+					name="country"
+				>
+					{renderCountryItem}
+				</ComboboxField>,
+				{ appearance },
+			);
+			const suffix = `${appearance.theme}-${appearance.mode}`;
+
+			await openCountryListByKeyboard();
+			await expect.element(option('New Zealand')).toHaveAttribute('data-focus-visible', 'true');
+			await userEvent.hover(option('Australia'));
+			await expect.element(option('Australia')).toHaveAttribute('data-hovered', 'true');
+			await captureVisual(
+				page.elementLocator(document.body),
+				`combobox-field/option-focus-${suffix}`,
+			);
+
+			await userEvent.keyboard('{ArrowUp}');
+			await expect.element(option('Canada')).toHaveAttribute('data-focus-visible', 'true');
+			await userEvent.hover(option('United States'));
+			await expect.element(option('United States')).toHaveAttribute('data-hovered', 'true');
+			await captureVisual(
+				page.elementLocator(document.body),
+				`combobox-field/option-selected-focus-${suffix}`,
+			);
+
+			await userEvent.keyboard('{ArrowUp}');
+			await expect.element(option('Australia')).toHaveAttribute('data-focus-visible', 'true');
+			await userEvent.hover(option('Canada'));
+			await expect.element(option('Canada')).toHaveAttribute('data-hovered', 'true');
+			await captureVisual(
+				page.elementLocator(document.body),
+				`combobox-field/option-selected-hover-${suffix}`,
+			);
+		},
+	);
+}
+
+for (const name of ['Australia', 'Canada']) {
+	test(`pressed option ${name}`, { tags: ['visual'] }, async () => {
+		render(
+			<ComboboxField
+				defaultItems={sceneCountryItems}
+				defaultValue="ca"
+				label="Country"
+				name="country"
+			>
+				{renderCountryItem}
+			</ComboboxField>,
+		);
+
+		await userEvent.click(page.getByRole('button', { name: /Country/ }));
+		const listbox = page.getByRole('listbox');
+		await expect.element(listbox).toBeVisible();
+		await waitForOverlayEnter(listbox.element().closest('[data-trigger]') ?? listbox.element());
+		await pressPointer(option(name).element());
+		try {
+			await expect.element(option(name)).toHaveAttribute('data-pressed', 'true');
+			await captureVisual(
+				page.elementLocator(document.body),
+				`combobox-field/option-pressed-${name.toLowerCase()}`,
+			);
+		} finally {
+			await releasePointer();
+		}
+	});
+}
+
 test('mobile tray', { tags: ['visual'] }, async () => {
 	await page.viewport(MOBILE_SCREEN_WIDTH, 700);
 	mockScreenWidth(MOBILE_SCREEN_WIDTH);
@@ -739,6 +838,10 @@ test('mobile tray', { tags: ['visual'] }, async () => {
 		await userEvent.click(page.getByRole('button', { name: 'Country Select a country...' }));
 		await waitForMobileTrayToSettle();
 		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray');
+
+		await userEvent.keyboard('{ArrowDown}');
+		await expect.element(option('Australia')).toHaveAttribute('data-focus-visible', 'true');
+		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray-option-focus');
 	} finally {
 		// Screen width resets in render-setup `beforeEach`.
 		await page.viewport(DESKTOP_SCREEN_WIDTH, 800);
