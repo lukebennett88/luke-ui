@@ -15,6 +15,7 @@ import type { ThemeFoundation } from './foundation.js';
 import { codeFontFamilyStack, defaultFontWeights, defaultRadius } from './foundation.js';
 import { pathEntry, pathRecord } from './path-record.js';
 import { rem } from './rem.js';
+import { subtleAnchorVarName } from './subtle-anchor-vars.js';
 import { getThemeClassName } from './theme-class-name.js';
 import {
 	CONTROL_SIZE_VALUES,
@@ -42,6 +43,7 @@ export function assembleStylesheet(
 	foundation: ThemeFoundation,
 	lightValues: Record<ModePath, string>,
 	darkValues: Record<ModePath, string>,
+	overlaySubtle: Record<ColorMode, Record<string, string>>,
 ): string {
 	const { identityPairs, modePairs } = partitionContractPairs(flattenThemeContract());
 
@@ -49,8 +51,14 @@ export function assembleStylesheet(
 		...declarations(identityPairs, buildIdentityValues(foundation)),
 		...capsizeTrimDeclarations(foundation.typography.fonts),
 	];
-	const lightDeclarations = ['color-scheme: light;', ...declarations(modePairs, lightValues)];
-	const darkDeclarations = ['color-scheme: dark;', ...declarations(modePairs, darkValues)];
+	const lightDeclarations = [
+		'color-scheme: light;',
+		...anchoredDeclarations(declarations(modePairs, lightValues), overlaySubtle.light),
+	];
+	const darkDeclarations = [
+		'color-scheme: dark;',
+		...anchoredDeclarations(declarations(modePairs, darkValues), overlaySubtle.dark),
+	];
 
 	// The identity lives on `<html>` only. `:where(html)` keeps the base rules at (0,1,0), so the
 	// explicit attribute rules, (0,2,0) whether the attribute sits on `<html>` or below it, beat the
@@ -181,6 +189,32 @@ function declarations<Path extends string>(
 		if (value === undefined) throw new Error(`buildTheme did not generate a value for "${path}"`);
 		return `${varName}: ${value};`;
 	});
+}
+
+const SUBTLE_DECLARATION = /^--luke-color-background-([a-z]+)-subtle-(rest|hover|pressed): (.+);$/;
+
+/**
+ * SPIKE #925. Rewrites each public subtle declaration to read through the surface anchor, falling
+ * back to its base-anchored value, and appends the private base and overlay sets.
+ */
+function anchoredDeclarations(
+	lines: Array<string>,
+	overlay: Record<string, string>,
+): Array<string> {
+	const privateSets: Array<string> = [];
+	const rewritten = lines.map((line) => {
+		const match = SUBTLE_DECLARATION.exec(line);
+		if (match === null) return line;
+		const [, role = '', state = '', value = ''] = match;
+		const overlayValue = overlay[`${role}.${state}`];
+		if (overlayValue === undefined) throw new Error(`no overlay subtle value for ${role}.${state}`);
+		privateSets.push(
+			`${subtleAnchorVarName('base', role, state)}: ${value};`,
+			`${subtleAnchorVarName('overlay', role, state)}: ${overlayValue};`,
+		);
+		return `--luke-color-background-${role}-subtle-${state}: var(${subtleAnchorVarName('anchor', role, state)}, ${value});`;
+	});
+	return [...rewritten, ...privateSets];
 }
 
 function indent(line: string): string {

@@ -2,6 +2,7 @@ import { createGlobalVar, fallbackVar } from '@vanilla-extract/css';
 import { typedEntries } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
+import { subtleAnchorVarName } from '../../theme/subtle-anchor-vars.js';
 
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
 
@@ -124,9 +125,33 @@ function solidContext(role: SemanticRole, backgroundColor: string): SurfaceStyle
 	};
 }
 
+/**
+ * SPIKE #925. A standard surface also picks the subtle-fill set its descendants paint with:
+ * `surface.overlay` points the public subtle variables at the overlay-anchored set, and every other
+ * surface points them back at the base set, so a standard surface nested in an overlay cancels the
+ * remap. The anchor makes the theme's own declaration follow on an element that is also a colour
+ * mode scope, where the unlayered theme rule wins over this layered one.
+ */
+function standardSurfaceContext(
+	surface: keyof typeof vars.color.surface,
+	backgroundColor: string,
+): SurfaceStyle {
+	const context = neutralContext(backgroundColor);
+	const set = surface === 'overlay' ? 'overlay' : 'base';
+	for (const role of SEMANTIC_ROLES) {
+		for (const state of INTERACTION_STATES) {
+			const target = `var(${subtleAnchorVarName(set, role, state)})`;
+			context.vars[subtleAnchorVarName('anchor', role, state)] =
+				surface === 'overlay' ? target : 'initial';
+			context.vars[`--luke-color-background-${role}-subtle-${state}`] = target;
+		}
+	}
+	return context;
+}
+
 const surfaceStyles = new Map<SurfaceBackground, SurfaceStyle>();
 for (const [surface, backgroundColor] of typedEntries(vars.color.surface)) {
-	surfaceStyles.set(`surface.${surface}`, neutralContext(backgroundColor));
+	surfaceStyles.set(`surface.${surface}`, standardSurfaceContext(surface, backgroundColor));
 }
 for (const role of SEMANTIC_ROLES) {
 	const { subtle, solid } = vars.color.background[role];

@@ -14,7 +14,7 @@ import type { ThemeFoundation, ThemeModeFoundation } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import { generateFamilyWithDiagnostics, highContrastText, ScaleGenerationError } from './scale.js';
 import type { SemanticColorValues } from './semantic-map.js';
-import { mapSemanticColors } from './semantic-map.js';
+import { mapOverlaySubtleValues, mapSemanticColors } from './semantic-map.js';
 import { assembleStylesheet } from './stylesheet.js';
 import type { GeneratedSurfaces } from './surfaces.js';
 import { generateSurfaces } from './surfaces.js';
@@ -44,7 +44,10 @@ export function compileTheme(foundation: ThemeFoundation): {
 	const failures = [...light.failures, ...dark.failures];
 	if (failures.length > 0) throw new ThemeContrastError(failures);
 	return {
-		css: assembleStylesheet(foundation, light.values, dark.values),
+		css: assembleStylesheet(foundation, light.values, dark.values, {
+			dark: dark.overlaySubtle,
+			light: light.overlaySubtle,
+		}),
 		diagnostics: { dark: dark.diagnostics, light: light.diagnostics },
 	};
 }
@@ -139,11 +142,15 @@ type ColorMode = 'light' | 'dark';
 interface ModeValues {
 	diagnostics: ThemeModeDiagnostics;
 	failures: Array<ThemeContrastFailure>;
+	overlaySubtle: Record<string, string>;
 	values: Record<ModePath, string>;
 }
 
 function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): ModeValues {
-	const { colorValues, familyDiagnostics, surfaces } = buildModeColors(mode, modeFoundation);
+	const { colorValues, familyDiagnostics, overlaySubtle, surfaces } = buildModeColors(
+		mode,
+		modeFoundation,
+	);
 	const { checks, failures } = validateContrast(mode, colorValues);
 	const values: Record<ModePath, string> = {
 		...colorValues,
@@ -159,6 +166,7 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 	return {
 		diagnostics: { contrastChecks: checks, families: familyDiagnostics, mode, surfaces },
 		failures,
+		overlaySubtle,
 		values,
 	};
 }
@@ -166,6 +174,7 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 interface ModeColors {
 	colorValues: SemanticColorValues;
 	familyDiagnostics: Record<FamilyRole, FamilyDiagnostics>;
+	overlaySubtle: Record<string, string>;
 	surfaces: GeneratedSurfaces;
 }
 
@@ -223,5 +232,6 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		backdrop: modeFoundation.color.backdrop,
 		surfaces,
 	});
-	return { colorValues, familyDiagnostics, surfaces };
+	const overlaySubtle = mapOverlaySubtleValues(mode, families, surfaces);
+	return { colorValues, familyDiagnostics, overlaySubtle, surfaces };
 }

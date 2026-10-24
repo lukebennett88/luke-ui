@@ -1,0 +1,629 @@
+note: You are running `vp test` as a Vite+ built-in command. If you meant to run the test npm script, use `vpr test` instead.
+
+ RUN  v5.0.5 /home/user/luke-ui/packages/@luke-ui/react
+      API started at http://localhost:51204/
+
+ ❯ |unit| src/theme/contrast-validation.test.ts (15 tests | 7 failed) 95ms
+   ❯ contrast validation matrix (3)
+     × records the complete hard and advisory matrix for tactile 14ms
+     × records the complete hard and advisory matrix for paper 10ms
+     × records the complete hard and advisory matrix for custom-matrix 5ms
+   ❯ independent on-solid hierarchy gates (4)
+     × rejects only the failing primary leaf across every role and state in light 3ms
+     × rejects only the failing secondary leaf across every role and state in light 2ms
+     × rejects only the failing primary leaf across every role and state in dark 1ms
+     × rejects only the failing secondary leaf across every role and state in dark 1ms
+ ❯ |unit| src/theme/stylesheet.test.ts (14 tests | 4 failed) 184ms
+   ❯ buildTheme output (8)
+     × declares every tactile token once in each rule, with no token references 43ms
+     × declares every paper token once in each rule, with no token references 14ms
+     × emits every colour value in OKLCH 17ms
+   ❯ extending themes (1)
+     × compiles an extending theme to a standalone stylesheet with every token 11ms
+ ❯ |unit| src/core/styles/stylesheet-size.test.ts (1 test | 1 failed) 13ms
+   × keeps the public stylesheet within its size budget 11ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| src/theme/contrast-validation.test.ts > contrast validation matrix > records the complete hard and advisory matrix for tactile
+Error: cannot parse colour "var(--luke-internal-subtle-anchor-neutral-rest, oklch(0.955 0 0))"; expected #rgb, #rrggbb, or oklch(<l> <c> <h>)
+ ❯ parseColor src/theme/color.ts:44:8
+     42|   };
+     43|  }
+     44|  throw new Error(`cannot parse colour "${input}"; expected #rgb, #rrgg…
+       |        ^
+     45| }
+     46|
+ ❯ src/theme/contrast-validation.test.ts:258:69
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ FAIL  |unit| src/theme/contrast-validation.test.ts > contrast validation matrix > records the complete hard and advisory matrix for paper
+Error: cannot parse colour "var(--luke-internal-subtle-anchor-neutral-rest, oklch(0.97 0 0))"; expected #rgb, #rrggbb, or oklch(<l> <c> <h>)
+ ❯ parseColor src/theme/color.ts:44:8
+     42|   };
+     43|  }
+     44|  throw new Error(`cannot parse colour "${input}"; expected #rgb, #rrgg…
+       |        ^
+     45| }
+     46|
+ ❯ src/theme/contrast-validation.test.ts:258:69
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/12]⎯
+
+ FAIL  |unit| src/theme/contrast-validation.test.ts > contrast validation matrix > records the complete hard and advisory matrix for custom-matrix
+Error: cannot parse colour "var(--luke-internal-subtle-anchor-neutral-rest, oklch(0.955 0.0028 70))"; expected #rgb, #rrggbb, or oklch(<l> <c> <h>)
+ ❯ parseColor src/theme/color.ts:44:8
+     42|   };
+     43|  }
+     44|  throw new Error(`cannot parse colour "${input}"; expected #rgb, #rrgg…
+       |        ^
+     45| }
+     46|
+ ❯ src/theme/contrast-validation.test.ts:258:69
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/12]⎯
+
+ FAIL  |unit| src/theme/contrast-validation.test.ts > independent on-solid hierarchy gates > rejects only the failing primary leaf across every role and state in light
+ FAIL  |unit| src/theme/contrast-validation.test.ts > independent on-solid hierarchy gates > rejects only the failing secondary leaf across every role and state in light
+Error: cannot parse colour "var(--luke-internal-subtle-anchor-neutral-rest, oklch(0.955 0 0))"; expected #rgb, #rrggbb, or oklch(<l> <c> <h>)
+ ❯ parseColor src/theme/color.ts:44:8
+     42|   };
+     43|  }
+     44|  throw new Error(`cannot parse colour "${input}"; expected #rgb, #rrgg…
+       |        ^
+     45| }
+     46|
+ ❯ colorAt src/theme/contrast-validation.ts:60:10
+ ❯ check src/theme/contrast-validation.ts:63:52
+ ❯ validateContrast src/theme/contrast-validation.ts:83:45
+ ❯ src/theme/contrast-validation.test.ts:361:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/12]⎯
+
+ FAIL  |unit| src/theme/contrast-validation.test.ts > independent on-solid hierarchy gates > rejects only the failing primary leaf across every role and state in dark
+ FAIL  |unit| src/theme/contrast-validation.test.ts > independent on-solid hierarchy gates > rejects only the failing secondary leaf across every role and state in dark
+Error: cannot parse colour "var(--luke-internal-subtle-anchor-neutral-rest, oklch(0.29 0.0042 210))"; expected #rgb, #rrggbb, or oklch(<l> <c> <h>)
+ ❯ parseColor src/theme/color.ts:44:8
+     42|   };
+     43|  }
+     44|  throw new Error(`cannot parse colour "${input}"; expected #rgb, #rrgg…
+       |        ^
+     45| }
+     46|
+ ❯ colorAt src/theme/contrast-validation.ts:60:10
+ ❯ check src/theme/contrast-validation.ts:63:52
+ ❯ validateContrast src/theme/contrast-validation.ts:83:45
+ ❯ src/theme/contrast-validation.test.ts:361:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/12]⎯
+
+ FAIL  |unit| src/theme/stylesheet.test.ts > buildTheme output > declares every tactile token once in each rule, with no token references
+ FAIL  |unit| src/theme/stylesheet.test.ts > buildTheme output > declares every paper token once in each rule, with no token references
+AssertionError: expected [ …(216) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "baseLight: --luke-internal-subtle-base-neutral-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-neutral-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-base-neutral-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-neutral-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-base-neutral-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-neutral-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-base-accent-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-accent-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-base-accent-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-accent-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-base-accent-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-accent-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-base-info-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-info-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-base-info-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-info-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-base-info-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-info-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-base-success-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-success-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-base-success-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-success-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-base-success-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-success-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-base-warning-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-warning-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-base-warning-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-warning-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-base-warning-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-warning-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-base-danger-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-danger-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-base-danger-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-danger-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-base-danger-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-danger-pressed is not a contract token",
++   "baseLight: --luke-color-background-neutral-subtle-rest references another token",
++   "baseLight: --luke-color-background-neutral-subtle-hover references another token",
++   "baseLight: --luke-color-background-neutral-subtle-pressed references another token",
++   "baseLight: --luke-color-background-accent-subtle-rest references another token",
++   "baseLight: --luke-color-background-accent-subtle-hover references another token",
++   "baseLight: --luke-color-background-accent-subtle-pressed references another token",
++   "baseLight: --luke-color-background-info-subtle-rest references another token",
++   "baseLight: --luke-color-background-info-subtle-hover references another token",
++   "baseLight: --luke-color-background-info-subtle-pressed references another token",
++   "baseLight: --luke-color-background-success-subtle-rest references another token",
++   "baseLight: --luke-color-background-success-subtle-hover references another token",
++   "baseLight: --luke-color-background-success-subtle-pressed references another token",
++   "baseLight: --luke-color-background-warning-subtle-rest references another token",
++   "baseLight: --luke-color-background-warning-subtle-hover references another token",
++   "baseLight: --luke-color-background-warning-subtle-pressed references another token",
++   "baseLight: --luke-color-background-danger-subtle-rest references another token",
++   "baseLight: --luke-color-background-danger-subtle-hover references another token",
++   "baseLight: --luke-color-background-danger-subtle-pressed references another token",
++   "explicitDark: --luke-internal-subtle-base-neutral-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-neutral-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-neutral-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-neutral-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-neutral-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-neutral-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-accent-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-accent-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-accent-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-accent-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-accent-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-accent-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-info-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-info-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-info-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-info-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-info-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-info-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-success-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-success-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-success-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-success-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-success-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-success-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-warning-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-warning-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-warning-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-warning-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-warning-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-warning-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-danger-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-danger-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-danger-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-danger-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-danger-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-danger-pressed is not a contract token",
++   "explicitDark: --luke-color-background-neutral-subtle-rest references another token",
++   "explicitDark: --luke-color-background-neutral-subtle-hover references another token",
++   "explicitDark: --luke-color-background-neutral-subtle-pressed references another token",
++   "explicitDark: --luke-color-background-accent-subtle-rest references another token",
++   "explicitDark: --luke-color-background-accent-subtle-hover references another token",
++   "explicitDark: --luke-color-background-accent-subtle-pressed references another token",
++   "explicitDark: --luke-color-background-info-subtle-rest references another token",
++   "explicitDark: --luke-color-background-info-subtle-hover references another token",
++   "explicitDark: --luke-color-background-info-subtle-pressed references another token",
++   "explicitDark: --luke-color-background-success-subtle-rest references another token",
++   "explicitDark: --luke-color-background-success-subtle-hover references another token",
++   "explicitDark: --luke-color-background-success-subtle-pressed references another token",
++   "explicitDark: --luke-color-background-warning-subtle-rest references another token",
++   "explicitDark: --luke-color-background-warning-subtle-hover references another token",
++   "explicitDark: --luke-color-background-warning-subtle-pressed references another token",
++   "explicitDark: --luke-color-background-danger-subtle-rest references another token",
++   "explicitDark: --luke-color-background-danger-subtle-hover references another token",
++   "explicitDark: --luke-color-background-danger-subtle-pressed references another token",
++   "explicitLight: --luke-internal-subtle-base-neutral-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-neutral-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-neutral-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-neutral-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-neutral-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-neutral-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-accent-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-accent-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-accent-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-accent-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-accent-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-accent-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-info-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-info-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-info-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-info-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-info-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-info-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-success-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-success-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-success-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-success-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-success-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-success-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-warning-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-warning-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-warning-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-warning-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-warning-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-warning-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-danger-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-danger-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-danger-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-danger-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-danger-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-danger-pressed is not a contract token",
++   "explicitLight: --luke-color-background-neutral-subtle-rest references another token",
++   "explicitLight: --luke-color-background-neutral-subtle-hover references another token",
++   "explicitLight: --luke-color-background-neutral-subtle-pressed references another token",
++   "explicitLight: --luke-color-background-accent-subtle-rest references another token",
++   "explicitLight: --luke-color-background-accent-subtle-hover references another token",
++   "explicitLight: --luke-color-background-accent-subtle-pressed references another token",
++   "explicitLight: --luke-color-background-info-subtle-rest references another token",
++   "explicitLight: --luke-color-background-info-subtle-hover references another token",
++   "explicitLight: --luke-color-background-info-subtle-pressed references another token",
++   "explicitLight: --luke-color-background-success-subtle-rest references another token",
++   "explicitLight: --luke-color-background-success-subtle-hover references another token",
++   "explicitLight: --luke-color-background-success-subtle-pressed references another token",
++   "explicitLight: --luke-color-background-warning-subtle-rest references another token",
++   "explicitLight: --luke-color-background-warning-subtle-hover references another token",
++   "explicitLight: --luke-color-background-warning-subtle-pressed references another token",
++   "explicitLight: --luke-color-background-danger-subtle-rest references another token",
++   "explicitLight: --luke-color-background-danger-subtle-hover references another token",
++   "explicitLight: --luke-color-background-danger-subtle-pressed references another token",
++   "systemDark: --luke-internal-subtle-base-neutral-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-neutral-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-base-neutral-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-neutral-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-base-neutral-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-neutral-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-base-accent-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-accent-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-base-accent-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-accent-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-base-accent-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-accent-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-base-info-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-info-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-base-info-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-info-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-base-info-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-info-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-base-success-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-success-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-base-success-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-success-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-base-success-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-success-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-base-warning-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-warning-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-base-warning-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-warning-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-base-warning-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-warning-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-base-danger-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-danger-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-base-danger-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-danger-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-base-danger-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-danger-pressed is not a contract token",
++   "systemDark: --luke-color-background-neutral-subtle-rest references another token",
++   "systemDark: --luke-color-background-neutral-subtle-hover references another token",
++   "systemDark: --luke-color-background-neutral-subtle-pressed references another token",
++   "systemDark: --luke-color-background-accent-subtle-rest references another token",
++   "systemDark: --luke-color-background-accent-subtle-hover references another token",
++   "systemDark: --luke-color-background-accent-subtle-pressed references another token",
++   "systemDark: --luke-color-background-info-subtle-rest references another token",
++   "systemDark: --luke-color-background-info-subtle-hover references another token",
++   "systemDark: --luke-color-background-info-subtle-pressed references another token",
++   "systemDark: --luke-color-background-success-subtle-rest references another token",
++   "systemDark: --luke-color-background-success-subtle-hover references another token",
++   "systemDark: --luke-color-background-success-subtle-pressed references another token",
++   "systemDark: --luke-color-background-warning-subtle-rest references another token",
++   "systemDark: --luke-color-background-warning-subtle-hover references another token",
++   "systemDark: --luke-color-background-warning-subtle-pressed references another token",
++   "systemDark: --luke-color-background-danger-subtle-rest references another token",
++   "systemDark: --luke-color-background-danger-subtle-hover references another token",
++   "systemDark: --luke-color-background-danger-subtle-pressed references another token",
++ ]
+
+ ❯ src/theme/stylesheet.test.ts:61:84
+     59|  for (const foundation of [tactileFoundation, paperFoundation]) {
+     60|   it(`declares every ${foundation.name} token once in each rule, with …
+     61|    expect(findTokenCompatibilityProblems(buildTheme(foundation), found…
+       |                                                                                    ^
+     62|   });
+     63|  }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/12]⎯
+
+ FAIL  |unit| src/theme/stylesheet.test.ts > buildTheme output > emits every colour value in OKLCH
+AssertionError: expected [ …(18) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "--luke-color-background-neutral-subtle-rest",
++   "--luke-color-background-neutral-subtle-hover",
++   "--luke-color-background-neutral-subtle-pressed",
++   "--luke-color-background-accent-subtle-rest",
++   "--luke-color-background-accent-subtle-hover",
++   "--luke-color-background-accent-subtle-pressed",
++   "--luke-color-background-info-subtle-rest",
++   "--luke-color-background-info-subtle-hover",
++   "--luke-color-background-info-subtle-pressed",
++   "--luke-color-background-success-subtle-rest",
++   "--luke-color-background-success-subtle-hover",
++   "--luke-color-background-success-subtle-pressed",
++   "--luke-color-background-warning-subtle-rest",
++   "--luke-color-background-warning-subtle-hover",
++   "--luke-color-background-warning-subtle-pressed",
++   "--luke-color-background-danger-subtle-rest",
++   "--luke-color-background-danger-subtle-hover",
++   "--luke-color-background-danger-subtle-pressed",
++ ]
+
+ ❯ src/theme/stylesheet.test.ts:75:21
+     73|     (varName) => !extractValue(block, varName).startsWith('oklch('),
+     74|    );
+     75|    expect(nonOklch).toEqual([]);
+       |                     ^
+     76|   }
+     77|  });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/12]⎯
+
+ FAIL  |unit| src/theme/stylesheet.test.ts > extending themes > compiles an extending theme to a standalone stylesheet with every token
+AssertionError: expected [ …(216) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "baseLight: --luke-internal-subtle-base-neutral-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-neutral-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-base-neutral-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-neutral-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-base-neutral-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-neutral-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-base-accent-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-accent-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-base-accent-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-accent-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-base-accent-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-accent-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-base-info-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-info-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-base-info-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-info-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-base-info-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-info-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-base-success-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-success-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-base-success-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-success-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-base-success-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-success-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-base-warning-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-warning-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-base-warning-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-warning-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-base-warning-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-warning-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-base-danger-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-danger-rest is not a contract token",
++   "baseLight: --luke-internal-subtle-base-danger-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-danger-hover is not a contract token",
++   "baseLight: --luke-internal-subtle-base-danger-pressed is not a contract token",
++   "baseLight: --luke-internal-subtle-overlay-danger-pressed is not a contract token",
++   "baseLight: --luke-color-background-neutral-subtle-rest references another token",
++   "baseLight: --luke-color-background-neutral-subtle-hover references another token",
++   "baseLight: --luke-color-background-neutral-subtle-pressed references another token",
++   "baseLight: --luke-color-background-accent-subtle-rest references another token",
++   "baseLight: --luke-color-background-accent-subtle-hover references another token",
++   "baseLight: --luke-color-background-accent-subtle-pressed references another token",
++   "baseLight: --luke-color-background-info-subtle-rest references another token",
++   "baseLight: --luke-color-background-info-subtle-hover references another token",
++   "baseLight: --luke-color-background-info-subtle-pressed references another token",
++   "baseLight: --luke-color-background-success-subtle-rest references another token",
++   "baseLight: --luke-color-background-success-subtle-hover references another token",
++   "baseLight: --luke-color-background-success-subtle-pressed references another token",
++   "baseLight: --luke-color-background-warning-subtle-rest references another token",
++   "baseLight: --luke-color-background-warning-subtle-hover references another token",
++   "baseLight: --luke-color-background-warning-subtle-pressed references another token",
++   "baseLight: --luke-color-background-danger-subtle-rest references another token",
++   "baseLight: --luke-color-background-danger-subtle-hover references another token",
++   "baseLight: --luke-color-background-danger-subtle-pressed references another token",
++   "explicitDark: --luke-internal-subtle-base-neutral-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-neutral-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-neutral-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-neutral-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-neutral-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-neutral-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-accent-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-accent-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-accent-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-accent-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-accent-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-accent-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-info-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-info-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-info-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-info-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-info-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-info-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-success-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-success-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-success-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-success-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-success-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-success-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-warning-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-warning-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-warning-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-warning-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-warning-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-warning-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-danger-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-danger-rest is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-danger-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-danger-hover is not a contract token",
++   "explicitDark: --luke-internal-subtle-base-danger-pressed is not a contract token",
++   "explicitDark: --luke-internal-subtle-overlay-danger-pressed is not a contract token",
++   "explicitDark: --luke-color-background-neutral-subtle-rest references another token",
++   "explicitDark: --luke-color-background-neutral-subtle-hover references another token",
++   "explicitDark: --luke-color-background-neutral-subtle-pressed references another token",
++   "explicitDark: --luke-color-background-accent-subtle-rest references another token",
++   "explicitDark: --luke-color-background-accent-subtle-hover references another token",
++   "explicitDark: --luke-color-background-accent-subtle-pressed references another token",
++   "explicitDark: --luke-color-background-info-subtle-rest references another token",
++   "explicitDark: --luke-color-background-info-subtle-hover references another token",
++   "explicitDark: --luke-color-background-info-subtle-pressed references another token",
++   "explicitDark: --luke-color-background-success-subtle-rest references another token",
++   "explicitDark: --luke-color-background-success-subtle-hover references another token",
++   "explicitDark: --luke-color-background-success-subtle-pressed references another token",
++   "explicitDark: --luke-color-background-warning-subtle-rest references another token",
++   "explicitDark: --luke-color-background-warning-subtle-hover references another token",
++   "explicitDark: --luke-color-background-warning-subtle-pressed references another token",
++   "explicitDark: --luke-color-background-danger-subtle-rest references another token",
++   "explicitDark: --luke-color-background-danger-subtle-hover references another token",
++   "explicitDark: --luke-color-background-danger-subtle-pressed references another token",
++   "explicitLight: --luke-internal-subtle-base-neutral-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-neutral-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-neutral-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-neutral-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-neutral-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-neutral-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-accent-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-accent-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-accent-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-accent-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-accent-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-accent-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-info-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-info-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-info-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-info-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-info-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-info-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-success-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-success-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-success-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-success-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-success-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-success-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-warning-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-warning-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-warning-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-warning-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-warning-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-warning-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-danger-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-danger-rest is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-danger-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-danger-hover is not a contract token",
++   "explicitLight: --luke-internal-subtle-base-danger-pressed is not a contract token",
++   "explicitLight: --luke-internal-subtle-overlay-danger-pressed is not a contract token",
++   "explicitLight: --luke-color-background-neutral-subtle-rest references another token",
++   "explicitLight: --luke-color-background-neutral-subtle-hover references another token",
++   "explicitLight: --luke-color-background-neutral-subtle-pressed references another token",
++   "explicitLight: --luke-color-background-accent-subtle-rest references another token",
++   "explicitLight: --luke-color-background-accent-subtle-hover references another token",
++   "explicitLight: --luke-color-background-accent-subtle-pressed references another token",
++   "explicitLight: --luke-color-background-info-subtle-rest references another token",
++   "explicitLight: --luke-color-background-info-subtle-hover references another token",
++   "explicitLight: --luke-color-background-info-subtle-pressed references another token",
++   "explicitLight: --luke-color-background-success-subtle-rest references another token",
++   "explicitLight: --luke-color-background-success-subtle-hover references another token",
++   "explicitLight: --luke-color-background-success-subtle-pressed references another token",
++   "explicitLight: --luke-color-background-warning-subtle-rest references another token",
++   "explicitLight: --luke-color-background-warning-subtle-hover references another token",
++   "explicitLight: --luke-color-background-warning-subtle-pressed references another token",
++   "explicitLight: --luke-color-background-danger-subtle-rest references another token",
++   "explicitLight: --luke-color-background-danger-subtle-hover references another token",
++   "explicitLight: --luke-color-background-danger-subtle-pressed references another token",
++   "systemDark: --luke-internal-subtle-base-neutral-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-neutral-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-base-neutral-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-neutral-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-base-neutral-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-neutral-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-base-accent-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-accent-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-base-accent-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-accent-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-base-accent-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-accent-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-base-info-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-info-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-base-info-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-info-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-base-info-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-info-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-base-success-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-success-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-base-success-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-success-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-base-success-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-success-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-base-warning-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-warning-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-base-warning-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-warning-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-base-warning-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-warning-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-base-danger-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-danger-rest is not a contract token",
++   "systemDark: --luke-internal-subtle-base-danger-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-danger-hover is not a contract token",
++   "systemDark: --luke-internal-subtle-base-danger-pressed is not a contract token",
++   "systemDark: --luke-internal-subtle-overlay-danger-pressed is not a contract token",
++   "systemDark: --luke-color-background-neutral-subtle-rest references another token",
++   "systemDark: --luke-color-background-neutral-subtle-hover references another token",
++   "systemDark: --luke-color-background-neutral-subtle-pressed references another token",
++   "systemDark: --luke-color-background-accent-subtle-rest references another token",
++   "systemDark: --luke-color-background-accent-subtle-hover references another token",
++   "systemDark: --luke-color-background-accent-subtle-pressed references another token",
++   "systemDark: --luke-color-background-info-subtle-rest references another token",
++   "systemDark: --luke-color-background-info-subtle-hover references another token",
++   "systemDark: --luke-color-background-info-subtle-pressed references another token",
++   "systemDark: --luke-color-background-success-subtle-rest references another token",
++   "systemDark: --luke-color-background-success-subtle-hover references another token",
++   "systemDark: --luke-color-background-success-subtle-pressed references another token",
++   "systemDark: --luke-color-background-warning-subtle-rest references another token",
++   "systemDark: --luke-color-background-warning-subtle-hover references another token",
++   "systemDark: --luke-color-background-warning-subtle-pressed references another token",
++   "systemDark: --luke-color-background-danger-subtle-rest references another token",
++   "systemDark: --luke-color-background-danger-subtle-hover references another token",
++   "systemDark: --luke-color-background-danger-subtle-pressed references another token",
++ ]
+
+ ❯ src/theme/stylesheet.test.ts:197:58
+    195|   const css = defineTheme({ extends: tactileTheme, name: 'product' });
+    196|
+    197|   expect(findTokenCompatibilityProblems(css, 'product')).toEqual([]);
+       |                                                          ^
+    198|   expect(css).not.toContain('luke-ui-theme-tactile');
+    199|  });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/12]⎯
+
+ FAIL  |unit| src/core/styles/stylesheet-size.test.ts > keeps the public stylesheet within its size budget
+AssertionError: gzip stylesheet size: expected 18016 to be less than or equal to 15250
+ ❯ src/core/styles/stylesheet-size.test.ts:12:80
+     10|  const stylesheet = await readFile(new URL('../../../dist/stylesheet.c…
+     11|
+     12|  expect(gzipSync(stylesheet, { level: 9 }).byteLength, 'gzip styleshee…
+       |                                                                                ^
+     13|   maximumGzipBytes,
+     14|  );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/12]⎯
+
+
+ Test Files  3 failed | 58 passed (61)
+      Tests  12 failed | 380 passed (392)
+   Start at  04:28:53
+   Duration  5.77s (transform 41%, tests 39%, import 17%, worker 3%)
+

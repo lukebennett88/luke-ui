@@ -88,7 +88,12 @@ export default defineConfig({
 						},
 						headless: true,
 						instances: [{ browser: 'chromium' }],
-						provider: playwright({}),
+						// SPIKE #925: the sandbox ships a different Chromium build than the pinned Playwright.
+						provider: playwright(
+							process.env.PW_CHROMIUM
+								? { launchOptions: { executablePath: process.env.PW_CHROMIUM } }
+								: {},
+						),
 					},
 					exclude: [tailwindIntegrationTests],
 					include: ['src/**/*.browser.test.{ts,tsx}'],

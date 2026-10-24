@@ -1,0 +1,2838 @@
+[
+	{
+		"label": "combobox popover data-color-mode",
+		"theme": "tactile",
+		"mode": "light",
+		"attr": null
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "combobox popover unselected option",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.955 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 10.78,
+				"variable": "oklch(0.9222 0 0)",
+				"background": "oklch(0.9222 0 0)",
+				"dComputed": 0.078,
+				"dPainted": 0.078,
+				"paintedL": 0.922
+			},
+			"pressed": {
+				"textContrast": 9.71,
+				"variable": "oklch(0.8895 0 0)",
+				"background": "oklch(0.8895 0 0)",
+				"dComputed": 0.111,
+				"dPainted": 0.112,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "combobox popover selected option",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 12.05,
+				"variable": "oklch(0.955 0.0248 200)",
+				"background": "oklch(0.955 0.0248 200)",
+				"dComputed": 0.051,
+				"dPainted": 0.051,
+				"paintedL": 0.956
+			},
+			"hover": {
+				"textContrast": 10.84,
+				"variable": "oklch(0.9222 0.0235 200)",
+				"background": "oklch(0.9222 0.0235 200)",
+				"dComputed": 0.081,
+				"dPainted": 0.082,
+				"paintedL": 0.921
+			},
+			"pressed": {
+				"textContrast": 9.79,
+				"variable": "oklch(0.8895 0.0223 200)",
+				"background": "oklch(0.8895 0.0223 200)",
+				"dComputed": 0.113,
+				"dPainted": 0.114,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "select popover unselected option",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.955 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 10.78,
+				"variable": "oklch(0.9222 0 0)",
+				"background": "oklch(0.9222 0 0)",
+				"dComputed": 0.078,
+				"dPainted": 0.078,
+				"paintedL": 0.922
+			},
+			"pressed": {
+				"textContrast": 9.71,
+				"variable": "oklch(0.8895 0 0)",
+				"background": "oklch(0.8895 0 0)",
+				"dComputed": 0.111,
+				"dPainted": 0.112,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "select popover selected option",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 12.05,
+				"variable": "oklch(0.955 0.0248 200)",
+				"background": "oklch(0.955 0.0248 200)",
+				"dComputed": 0.051,
+				"dPainted": 0.051,
+				"paintedL": 0.956
+			},
+			"hover": {
+				"textContrast": 10.84,
+				"variable": "oklch(0.9222 0.0235 200)",
+				"background": "oklch(0.9222 0.0235 200)",
+				"dComputed": 0.081,
+				"dPainted": 0.082,
+				"paintedL": 0.921
+			},
+			"pressed": {
+				"textContrast": 9.79,
+				"variable": "oklch(0.8895 0.0223 200)",
+				"background": "oklch(0.8895 0.0223 200)",
+				"dComputed": 0.113,
+				"dPainted": 0.114,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "combobox tray unselected option",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.955 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 10.78,
+				"variable": "oklch(0.9222 0 0)",
+				"background": "oklch(0.9222 0 0)",
+				"dComputed": 0.078,
+				"dPainted": 0.078,
+				"paintedL": 0.922
+			},
+			"pressed": {
+				"textContrast": 9.71,
+				"variable": "oklch(0.8895 0 0)",
+				"background": "oklch(0.8895 0 0)",
+				"dComputed": 0.111,
+				"dPainted": 0.112,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "combobox tray selected option",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 12.05,
+				"variable": "oklch(0.955 0.0248 200)",
+				"background": "oklch(0.955 0.0248 200)",
+				"dComputed": 0.051,
+				"dPainted": 0.051,
+				"paintedL": 0.956
+			},
+			"hover": {
+				"textContrast": 10.84,
+				"variable": "oklch(0.9222 0.0235 200)",
+				"background": "oklch(0.9222 0.0235 200)",
+				"dComputed": 0.081,
+				"dPainted": 0.082,
+				"paintedL": 0.921
+			},
+			"pressed": {
+				"textContrast": 9.79,
+				"variable": "oklch(0.8895 0.0223 200)",
+				"background": "oklch(0.8895 0.0223 200)",
+				"dComputed": 0.113,
+				"dPainted": 0.114,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "reference dialog (as written) low Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.955 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 10.78,
+				"variable": "oklch(0.9222 0 0)",
+				"background": "oklch(0.9222 0 0)",
+				"dComputed": 0.078,
+				"dPainted": 0.078,
+				"paintedL": 0.922
+			},
+			"pressed": {
+				"textContrast": 9.71,
+				"variable": "oklch(0.8895 0 0)",
+				"background": "oklch(0.8895 0 0)",
+				"dComputed": 0.111,
+				"dPainted": 0.112,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "app-CSS dialog low Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.955 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 10.78,
+				"variable": "oklch(0.9222 0 0)",
+				"background": "oklch(0.9222 0 0)",
+				"dComputed": 0.078,
+				"dPainted": 0.078,
+				"paintedL": 0.922
+			},
+			"pressed": {
+				"textContrast": 9.71,
+				"variable": "oklch(0.8895 0 0)",
+				"background": "oklch(0.8895 0 0)",
+				"dComputed": 0.111,
+				"dPainted": 0.112,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "app-CSS dialog standard Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 11.92,
+				"variable": "oklch(0.955 0 0)",
+				"background": "oklch(0.955 0 0)",
+				"dComputed": 0.045,
+				"dPainted": 0.045,
+				"paintedL": 0.955
+			},
+			"hover": {
+				"textContrast": 10.78,
+				"variable": "oklch(0.9222 0 0)",
+				"background": "oklch(0.9222 0 0)",
+				"dComputed": 0.078,
+				"dPainted": 0.078,
+				"paintedL": 0.922
+			},
+			"pressed": {
+				"textContrast": 9.71,
+				"variable": "oklch(0.8895 0 0)",
+				"background": "oklch(0.8895 0 0)",
+				"dComputed": 0.111,
+				"dPainted": 0.112,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "Box dialog low Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.955 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 10.78,
+				"variable": "oklch(0.9222 0 0)",
+				"background": "oklch(0.9222 0 0)",
+				"dComputed": 0.078,
+				"dPainted": 0.078,
+				"paintedL": 0.922
+			},
+			"pressed": {
+				"textContrast": 9.71,
+				"variable": "oklch(0.8895 0 0)",
+				"background": "oklch(0.8895 0 0)",
+				"dComputed": 0.111,
+				"dPainted": 0.112,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "Box dialog standard Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 11.92,
+				"variable": "oklch(0.955 0 0)",
+				"background": "oklch(0.955 0 0)",
+				"dComputed": 0.045,
+				"dPainted": 0.045,
+				"paintedL": 0.955
+			},
+			"hover": {
+				"textContrast": 10.78,
+				"variable": "oklch(0.9222 0 0)",
+				"background": "oklch(0.9222 0 0)",
+				"dComputed": 0.078,
+				"dPainted": 0.078,
+				"paintedL": 0.922
+			},
+			"pressed": {
+				"textContrast": 9.71,
+				"variable": "oklch(0.8895 0 0)",
+				"background": "oklch(0.8895 0 0)",
+				"dComputed": 0.111,
+				"dPainted": 0.112,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "Box dialog > Box surface.base low Button",
+		"surface": "oklch(0.985 0 0)",
+		"surfacePaintedL": 0.985,
+		"states": {
+			"rest": {
+				"textContrast": 13.01,
+				"variable": "oklch(0.955 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.985
+			},
+			"hover": {
+				"textContrast": 10.78,
+				"variable": "oklch(0.9222 0 0)",
+				"background": "oklch(0.9222 0 0)",
+				"dComputed": 0.063,
+				"dPainted": 0.063,
+				"paintedL": 0.922
+			},
+			"pressed": {
+				"textContrast": 9.71,
+				"variable": "oklch(0.8895 0 0)",
+				"background": "oklch(0.8895 0 0)",
+				"dComputed": 0.096,
+				"dPainted": 0.097,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "Box surface.base inside overlay",
+		"expected": "base",
+		"colorMode": "light",
+		"subtle": {
+			"neutral.rest": "oklch(0.955 0 0)",
+			"neutral.hover": "oklch(0.9222 0 0)",
+			"neutral.pressed": "oklch(0.8895 0 0)",
+			"accent.rest": "oklch(0.955 0.0248 200)",
+			"accent.hover": "oklch(0.9222 0.0235 200)",
+			"accent.pressed": "oklch(0.8895 0.0223 200)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "Box dialog > Box surface.subdued low Button",
+		"surface": "oklch(0.965 0 0)",
+		"surfacePaintedL": 0.964,
+		"states": {
+			"rest": {
+				"textContrast": 12.24,
+				"variable": "oklch(0.955 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.964
+			},
+			"hover": {
+				"textContrast": 10.78,
+				"variable": "oklch(0.9222 0 0)",
+				"background": "oklch(0.9222 0 0)",
+				"dComputed": 0.043,
+				"dPainted": 0.042,
+				"paintedL": 0.922
+			},
+			"pressed": {
+				"textContrast": 9.71,
+				"variable": "oklch(0.8895 0 0)",
+				"background": "oklch(0.8895 0 0)",
+				"dComputed": 0.076,
+				"dPainted": 0.076,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "Box surface.subdued inside overlay",
+		"expected": "base",
+		"colorMode": "light",
+		"subtle": {
+			"neutral.rest": "oklch(0.955 0 0)",
+			"neutral.hover": "oklch(0.9222 0 0)",
+			"neutral.pressed": "oklch(0.8895 0 0)",
+			"accent.rest": "oklch(0.955 0.0248 200)",
+			"accent.hover": "oklch(0.9222 0.0235 200)",
+			"accent.pressed": "oklch(0.8895 0.0223 200)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "Box dialog > Box surface.field low Button",
+		"surface": "oklch(0.985 0 0)",
+		"surfacePaintedL": 0.985,
+		"states": {
+			"rest": {
+				"textContrast": 13.01,
+				"variable": "oklch(0.955 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.985
+			},
+			"hover": {
+				"textContrast": 10.78,
+				"variable": "oklch(0.9222 0 0)",
+				"background": "oklch(0.9222 0 0)",
+				"dComputed": 0.063,
+				"dPainted": 0.063,
+				"paintedL": 0.922
+			},
+			"pressed": {
+				"textContrast": 9.71,
+				"variable": "oklch(0.8895 0 0)",
+				"background": "oklch(0.8895 0 0)",
+				"dComputed": 0.096,
+				"dPainted": 0.097,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "Box surface.field inside overlay",
+		"expected": "base",
+		"colorMode": "light",
+		"subtle": {
+			"neutral.rest": "oklch(0.955 0 0)",
+			"neutral.hover": "oklch(0.9222 0 0)",
+			"neutral.pressed": "oklch(0.8895 0 0)",
+			"accent.rest": "oklch(0.955 0.0248 200)",
+			"accent.hover": "oklch(0.9222 0.0235 200)",
+			"accent.pressed": "oklch(0.8895 0.0223 200)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "Box dialog content",
+		"expected": "overlay",
+		"colorMode": "light",
+		"subtle": {
+			"neutral.rest": "oklch(0.955 0 0)",
+			"neutral.hover": "oklch(0.9222 0 0)",
+			"neutral.pressed": "oklch(0.8895 0 0)",
+			"accent.rest": "oklch(0.955 0.0248 200)",
+			"accent.hover": "oklch(0.9222 0.0235 200)",
+			"accent.pressed": "oklch(0.8895 0.0223 200)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"label": "combobox popover data-color-mode",
+		"theme": "tactile",
+		"mode": "dark",
+		"attr": null
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "combobox popover unselected option",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 10.58,
+				"variable": "oklch(0.29 0.0042 210)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.32
+			},
+			"hover": {
+				"textContrast": 10.52,
+				"variable": "oklch(0.3225 0.0043 210)",
+				"background": "oklch(0.3225 0.0043 210)",
+				"dComputed": 0.011,
+				"dPainted": 0.011,
+				"paintedL": 0.322
+			},
+			"pressed": {
+				"textContrast": 9.32,
+				"variable": "oklch(0.355 0.0045 210)",
+				"background": "oklch(0.355 0.0045 210)",
+				"dComputed": 0.037,
+				"dPainted": 0.036,
+				"paintedL": 0.354
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "combobox popover selected option",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 11.65,
+				"variable": "oklch(0.29 0.028 200)",
+				"background": "oklch(0.29 0.028 200)",
+				"dComputed": 0.033,
+				"dPainted": 0.031,
+				"paintedL": 0.291
+			},
+			"hover": {
+				"textContrast": 10.37,
+				"variable": "oklch(0.3225 0.0269 200.12)",
+				"background": "oklch(0.3225 0.0269 200.12)",
+				"dComputed": 0.013,
+				"dPainted": 0.013,
+				"paintedL": 0.323
+			},
+			"pressed": {
+				"textContrast": 9.18,
+				"variable": "oklch(0.355 0.0259 200.26)",
+				"background": "oklch(0.355 0.0259 200.26)",
+				"dComputed": 0.037,
+				"dPainted": 0.037,
+				"paintedL": 0.355
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "select popover unselected option",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 10.58,
+				"variable": "oklch(0.29 0.0042 210)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.32
+			},
+			"hover": {
+				"textContrast": 10.52,
+				"variable": "oklch(0.3225 0.0043 210)",
+				"background": "oklch(0.3225 0.0043 210)",
+				"dComputed": 0.011,
+				"dPainted": 0.011,
+				"paintedL": 0.322
+			},
+			"pressed": {
+				"textContrast": 9.32,
+				"variable": "oklch(0.355 0.0045 210)",
+				"background": "oklch(0.355 0.0045 210)",
+				"dComputed": 0.037,
+				"dPainted": 0.036,
+				"paintedL": 0.354
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "select popover selected option",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 11.65,
+				"variable": "oklch(0.29 0.028 200)",
+				"background": "oklch(0.29 0.028 200)",
+				"dComputed": 0.033,
+				"dPainted": 0.031,
+				"paintedL": 0.291
+			},
+			"hover": {
+				"textContrast": 10.37,
+				"variable": "oklch(0.3225 0.0269 200.12)",
+				"background": "oklch(0.3225 0.0269 200.12)",
+				"dComputed": 0.013,
+				"dPainted": 0.013,
+				"paintedL": 0.323
+			},
+			"pressed": {
+				"textContrast": 9.18,
+				"variable": "oklch(0.355 0.0259 200.26)",
+				"background": "oklch(0.355 0.0259 200.26)",
+				"dComputed": 0.037,
+				"dPainted": 0.037,
+				"paintedL": 0.355
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "combobox tray unselected option",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 10.58,
+				"variable": "oklch(0.29 0.0042 210)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.32
+			},
+			"hover": {
+				"textContrast": 10.52,
+				"variable": "oklch(0.3225 0.0043 210)",
+				"background": "oklch(0.3225 0.0043 210)",
+				"dComputed": 0.011,
+				"dPainted": 0.011,
+				"paintedL": 0.322
+			},
+			"pressed": {
+				"textContrast": 9.32,
+				"variable": "oklch(0.355 0.0045 210)",
+				"background": "oklch(0.355 0.0045 210)",
+				"dComputed": 0.037,
+				"dPainted": 0.036,
+				"paintedL": 0.354
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "combobox tray selected option",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 11.65,
+				"variable": "oklch(0.29 0.028 200)",
+				"background": "oklch(0.29 0.028 200)",
+				"dComputed": 0.033,
+				"dPainted": 0.031,
+				"paintedL": 0.291
+			},
+			"hover": {
+				"textContrast": 10.37,
+				"variable": "oklch(0.3225 0.0269 200.12)",
+				"background": "oklch(0.3225 0.0269 200.12)",
+				"dComputed": 0.013,
+				"dPainted": 0.013,
+				"paintedL": 0.323
+			},
+			"pressed": {
+				"textContrast": 9.18,
+				"variable": "oklch(0.355 0.0259 200.26)",
+				"background": "oklch(0.355 0.0259 200.26)",
+				"dComputed": 0.037,
+				"dPainted": 0.037,
+				"paintedL": 0.355
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "reference dialog (as written) low Button",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 10.58,
+				"variable": "oklch(0.29 0.0042 210)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.32
+			},
+			"hover": {
+				"textContrast": 10.52,
+				"variable": "oklch(0.3225 0.0043 210)",
+				"background": "oklch(0.3225 0.0043 210)",
+				"dComputed": 0.011,
+				"dPainted": 0.011,
+				"paintedL": 0.322
+			},
+			"pressed": {
+				"textContrast": 9.32,
+				"variable": "oklch(0.355 0.0045 210)",
+				"background": "oklch(0.355 0.0045 210)",
+				"dComputed": 0.037,
+				"dPainted": 0.036,
+				"paintedL": 0.354
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "app-CSS dialog low Button",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 10.58,
+				"variable": "oklch(0.29 0.0042 210)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.32
+			},
+			"hover": {
+				"textContrast": 10.52,
+				"variable": "oklch(0.3225 0.0043 210)",
+				"background": "oklch(0.3225 0.0043 210)",
+				"dComputed": 0.011,
+				"dPainted": 0.011,
+				"paintedL": 0.322
+			},
+			"pressed": {
+				"textContrast": 9.32,
+				"variable": "oklch(0.355 0.0045 210)",
+				"background": "oklch(0.355 0.0045 210)",
+				"dComputed": 0.037,
+				"dPainted": 0.036,
+				"paintedL": 0.354
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "app-CSS dialog standard Button",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 11.8,
+				"variable": "oklch(0.29 0.0042 210)",
+				"background": "oklch(0.29 0.0042 210)",
+				"dComputed": 0.032,
+				"dPainted": 0.032,
+				"paintedL": 0.29
+			},
+			"hover": {
+				"textContrast": 10.52,
+				"variable": "oklch(0.3225 0.0043 210)",
+				"background": "oklch(0.3225 0.0043 210)",
+				"dComputed": 0.011,
+				"dPainted": 0.011,
+				"paintedL": 0.322
+			},
+			"pressed": {
+				"textContrast": 9.32,
+				"variable": "oklch(0.355 0.0045 210)",
+				"background": "oklch(0.355 0.0045 210)",
+				"dComputed": 0.037,
+				"dPainted": 0.036,
+				"paintedL": 0.354
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "Box dialog low Button",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 10.58,
+				"variable": "oklch(0.29 0.0042 210)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.32
+			},
+			"hover": {
+				"textContrast": 10.52,
+				"variable": "oklch(0.3225 0.0043 210)",
+				"background": "oklch(0.3225 0.0043 210)",
+				"dComputed": 0.011,
+				"dPainted": 0.011,
+				"paintedL": 0.322
+			},
+			"pressed": {
+				"textContrast": 9.32,
+				"variable": "oklch(0.355 0.0045 210)",
+				"background": "oklch(0.355 0.0045 210)",
+				"dComputed": 0.037,
+				"dPainted": 0.036,
+				"paintedL": 0.354
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "Box dialog standard Button",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 11.8,
+				"variable": "oklch(0.29 0.0042 210)",
+				"background": "oklch(0.29 0.0042 210)",
+				"dComputed": 0.032,
+				"dPainted": 0.032,
+				"paintedL": 0.29
+			},
+			"hover": {
+				"textContrast": 10.52,
+				"variable": "oklch(0.3225 0.0043 210)",
+				"background": "oklch(0.3225 0.0043 210)",
+				"dComputed": 0.011,
+				"dPainted": 0.011,
+				"paintedL": 0.322
+			},
+			"pressed": {
+				"textContrast": 9.32,
+				"variable": "oklch(0.355 0.0045 210)",
+				"background": "oklch(0.355 0.0045 210)",
+				"dComputed": 0.037,
+				"dPainted": 0.036,
+				"paintedL": 0.354
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "Box dialog > Box surface.base low Button",
+		"surface": "oklch(0.25 0.015 210)",
+		"surfacePaintedL": 0.251,
+		"states": {
+			"rest": {
+				"textContrast": 13.31,
+				"variable": "oklch(0.29 0.0042 210)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.251
+			},
+			"hover": {
+				"textContrast": 10.52,
+				"variable": "oklch(0.3225 0.0043 210)",
+				"background": "oklch(0.3225 0.0043 210)",
+				"dComputed": 0.073,
+				"dPainted": 0.073,
+				"paintedL": 0.322
+			},
+			"pressed": {
+				"textContrast": 9.32,
+				"variable": "oklch(0.355 0.0045 210)",
+				"background": "oklch(0.355 0.0045 210)",
+				"dComputed": 0.106,
+				"dPainted": 0.103,
+				"paintedL": 0.354
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "Box surface.base inside overlay",
+		"expected": "base",
+		"colorMode": "dark",
+		"subtle": {
+			"neutral.rest": "oklch(0.29 0.0042 210)",
+			"neutral.hover": "oklch(0.3225 0.0043 210)",
+			"neutral.pressed": "oklch(0.355 0.0045 210)",
+			"accent.rest": "oklch(0.29 0.028 200)",
+			"accent.hover": "oklch(0.3225 0.0269 200.12)",
+			"accent.pressed": "oklch(0.355 0.0259 200.26)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "Box dialog > Box surface.subdued low Button",
+		"surface": "oklch(0.22 0.015 210)",
+		"surfacePaintedL": 0.221,
+		"states": {
+			"rest": {
+				"textContrast": 14.42,
+				"variable": "oklch(0.29 0.0042 210)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.221
+			},
+			"hover": {
+				"textContrast": 10.52,
+				"variable": "oklch(0.3225 0.0043 210)",
+				"background": "oklch(0.3225 0.0043 210)",
+				"dComputed": 0.103,
+				"dPainted": 0.102,
+				"paintedL": 0.322
+			},
+			"pressed": {
+				"textContrast": 9.32,
+				"variable": "oklch(0.355 0.0045 210)",
+				"background": "oklch(0.355 0.0045 210)",
+				"dComputed": 0.135,
+				"dPainted": 0.133,
+				"paintedL": 0.354
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "Box surface.subdued inside overlay",
+		"expected": "base",
+		"colorMode": "dark",
+		"subtle": {
+			"neutral.rest": "oklch(0.29 0.0042 210)",
+			"neutral.hover": "oklch(0.3225 0.0043 210)",
+			"neutral.pressed": "oklch(0.355 0.0045 210)",
+			"accent.rest": "oklch(0.29 0.028 200)",
+			"accent.hover": "oklch(0.3225 0.0269 200.12)",
+			"accent.pressed": "oklch(0.355 0.0259 200.26)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "Box dialog > Box surface.field low Button",
+		"surface": "oklch(0.225 0.015 210)",
+		"surfacePaintedL": 0.226,
+		"states": {
+			"rest": {
+				"textContrast": 14.23,
+				"variable": "oklch(0.29 0.0042 210)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.226
+			},
+			"hover": {
+				"textContrast": 10.52,
+				"variable": "oklch(0.3225 0.0043 210)",
+				"background": "oklch(0.3225 0.0043 210)",
+				"dComputed": 0.098,
+				"dPainted": 0.097,
+				"paintedL": 0.322
+			},
+			"pressed": {
+				"textContrast": 9.32,
+				"variable": "oklch(0.355 0.0045 210)",
+				"background": "oklch(0.355 0.0045 210)",
+				"dComputed": 0.13,
+				"dPainted": 0.128,
+				"paintedL": 0.354
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "Box surface.field inside overlay",
+		"expected": "base",
+		"colorMode": "dark",
+		"subtle": {
+			"neutral.rest": "oklch(0.29 0.0042 210)",
+			"neutral.hover": "oklch(0.3225 0.0043 210)",
+			"neutral.pressed": "oklch(0.355 0.0045 210)",
+			"accent.rest": "oklch(0.29 0.028 200)",
+			"accent.hover": "oklch(0.3225 0.0269 200.12)",
+			"accent.pressed": "oklch(0.355 0.0259 200.26)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "Box dialog content",
+		"expected": "overlay",
+		"colorMode": "dark",
+		"subtle": {
+			"neutral.rest": "oklch(0.29 0.0042 210)",
+			"neutral.hover": "oklch(0.3225 0.0043 210)",
+			"neutral.pressed": "oklch(0.355 0.0045 210)",
+			"accent.rest": "oklch(0.29 0.028 200)",
+			"accent.hover": "oklch(0.3225 0.0269 200.12)",
+			"accent.pressed": "oklch(0.355 0.0259 200.26)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"label": "combobox popover data-color-mode",
+		"theme": "paper",
+		"mode": "light",
+		"attr": null
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "combobox popover unselected option",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.97 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 11.29,
+				"variable": "oklch(0.9365 0 0)",
+				"background": "oklch(0.9365 0 0)",
+				"dComputed": 0.064,
+				"dPainted": 0.063,
+				"paintedL": 0.937
+			},
+			"pressed": {
+				"textContrast": 10.19,
+				"variable": "oklch(0.903 0 0)",
+				"background": "oklch(0.903 0 0)",
+				"dComputed": 0.097,
+				"dPainted": 0.096,
+				"paintedL": 0.904
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "combobox popover selected option",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 12.43,
+				"variable": "oklch(0.97 0.015 247.47)",
+				"background": "oklch(0.97 0.015 247.47)",
+				"dComputed": 0.034,
+				"dPainted": 0.035,
+				"paintedL": 0.969
+			},
+			"hover": {
+				"textContrast": 11.28,
+				"variable": "oklch(0.9365 0.0142 247.47)",
+				"background": "oklch(0.9365 0.0142 247.47)",
+				"dComputed": 0.065,
+				"dPainted": 0.065,
+				"paintedL": 0.936
+			},
+			"pressed": {
+				"textContrast": 10.18,
+				"variable": "oklch(0.903 0.0135 247.47)",
+				"background": "oklch(0.903 0.0135 247.47)",
+				"dComputed": 0.098,
+				"dPainted": 0.098,
+				"paintedL": 0.903
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "select popover unselected option",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.97 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 11.29,
+				"variable": "oklch(0.9365 0 0)",
+				"background": "oklch(0.9365 0 0)",
+				"dComputed": 0.064,
+				"dPainted": 0.063,
+				"paintedL": 0.937
+			},
+			"pressed": {
+				"textContrast": 10.19,
+				"variable": "oklch(0.903 0 0)",
+				"background": "oklch(0.903 0 0)",
+				"dComputed": 0.097,
+				"dPainted": 0.096,
+				"paintedL": 0.904
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "select popover selected option",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 12.43,
+				"variable": "oklch(0.97 0.015 247.47)",
+				"background": "oklch(0.97 0.015 247.47)",
+				"dComputed": 0.034,
+				"dPainted": 0.035,
+				"paintedL": 0.969
+			},
+			"hover": {
+				"textContrast": 11.28,
+				"variable": "oklch(0.9365 0.0142 247.47)",
+				"background": "oklch(0.9365 0.0142 247.47)",
+				"dComputed": 0.065,
+				"dPainted": 0.065,
+				"paintedL": 0.936
+			},
+			"pressed": {
+				"textContrast": 10.18,
+				"variable": "oklch(0.903 0.0135 247.47)",
+				"background": "oklch(0.903 0.0135 247.47)",
+				"dComputed": 0.098,
+				"dPainted": 0.098,
+				"paintedL": 0.903
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "combobox tray unselected option",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.97 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 11.29,
+				"variable": "oklch(0.9365 0 0)",
+				"background": "oklch(0.9365 0 0)",
+				"dComputed": 0.064,
+				"dPainted": 0.063,
+				"paintedL": 0.937
+			},
+			"pressed": {
+				"textContrast": 10.19,
+				"variable": "oklch(0.903 0 0)",
+				"background": "oklch(0.903 0 0)",
+				"dComputed": 0.097,
+				"dPainted": 0.096,
+				"paintedL": 0.904
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "combobox tray selected option",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 12.43,
+				"variable": "oklch(0.97 0.015 247.47)",
+				"background": "oklch(0.97 0.015 247.47)",
+				"dComputed": 0.034,
+				"dPainted": 0.035,
+				"paintedL": 0.969
+			},
+			"hover": {
+				"textContrast": 11.28,
+				"variable": "oklch(0.9365 0.0142 247.47)",
+				"background": "oklch(0.9365 0.0142 247.47)",
+				"dComputed": 0.065,
+				"dPainted": 0.065,
+				"paintedL": 0.936
+			},
+			"pressed": {
+				"textContrast": 10.18,
+				"variable": "oklch(0.903 0.0135 247.47)",
+				"background": "oklch(0.903 0.0135 247.47)",
+				"dComputed": 0.098,
+				"dPainted": 0.098,
+				"paintedL": 0.903
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "reference dialog (as written) low Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.97 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 11.29,
+				"variable": "oklch(0.9365 0 0)",
+				"background": "oklch(0.9365 0 0)",
+				"dComputed": 0.064,
+				"dPainted": 0.063,
+				"paintedL": 0.937
+			},
+			"pressed": {
+				"textContrast": 10.19,
+				"variable": "oklch(0.903 0 0)",
+				"background": "oklch(0.903 0 0)",
+				"dComputed": 0.097,
+				"dPainted": 0.096,
+				"paintedL": 0.904
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "app-CSS dialog low Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.97 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 11.29,
+				"variable": "oklch(0.9365 0 0)",
+				"background": "oklch(0.9365 0 0)",
+				"dComputed": 0.064,
+				"dPainted": 0.063,
+				"paintedL": 0.937
+			},
+			"pressed": {
+				"textContrast": 10.19,
+				"variable": "oklch(0.903 0 0)",
+				"background": "oklch(0.903 0 0)",
+				"dComputed": 0.097,
+				"dPainted": 0.096,
+				"paintedL": 0.904
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "app-CSS dialog standard Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 12.46,
+				"variable": "oklch(0.97 0 0)",
+				"background": "oklch(0.97 0 0)",
+				"dComputed": 0.03,
+				"dPainted": 0.03,
+				"paintedL": 0.97
+			},
+			"hover": {
+				"textContrast": 11.29,
+				"variable": "oklch(0.9365 0 0)",
+				"background": "oklch(0.9365 0 0)",
+				"dComputed": 0.064,
+				"dPainted": 0.063,
+				"paintedL": 0.937
+			},
+			"pressed": {
+				"textContrast": 10.19,
+				"variable": "oklch(0.903 0 0)",
+				"background": "oklch(0.903 0 0)",
+				"dComputed": 0.097,
+				"dPainted": 0.096,
+				"paintedL": 0.904
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "Box dialog low Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.97 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 11.29,
+				"variable": "oklch(0.9365 0 0)",
+				"background": "oklch(0.9365 0 0)",
+				"dComputed": 0.064,
+				"dPainted": 0.063,
+				"paintedL": 0.937
+			},
+			"pressed": {
+				"textContrast": 10.19,
+				"variable": "oklch(0.903 0 0)",
+				"background": "oklch(0.903 0 0)",
+				"dComputed": 0.097,
+				"dPainted": 0.096,
+				"paintedL": 0.904
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "Box dialog standard Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 12.46,
+				"variable": "oklch(0.97 0 0)",
+				"background": "oklch(0.97 0 0)",
+				"dComputed": 0.03,
+				"dPainted": 0.03,
+				"paintedL": 0.97
+			},
+			"hover": {
+				"textContrast": 11.29,
+				"variable": "oklch(0.9365 0 0)",
+				"background": "oklch(0.9365 0 0)",
+				"dComputed": 0.064,
+				"dPainted": 0.063,
+				"paintedL": 0.937
+			},
+			"pressed": {
+				"textContrast": 10.19,
+				"variable": "oklch(0.903 0 0)",
+				"background": "oklch(0.903 0 0)",
+				"dComputed": 0.097,
+				"dPainted": 0.096,
+				"paintedL": 0.904
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "Box dialog > Box surface.base low Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.97 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 11.29,
+				"variable": "oklch(0.9365 0 0)",
+				"background": "oklch(0.9365 0 0)",
+				"dComputed": 0.064,
+				"dPainted": 0.063,
+				"paintedL": 0.937
+			},
+			"pressed": {
+				"textContrast": 10.19,
+				"variable": "oklch(0.903 0 0)",
+				"background": "oklch(0.903 0 0)",
+				"dComputed": 0.097,
+				"dPainted": 0.096,
+				"paintedL": 0.904
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "Box surface.base inside overlay",
+		"expected": "base",
+		"colorMode": "light",
+		"subtle": {
+			"neutral.rest": "oklch(0.97 0 0)",
+			"neutral.hover": "oklch(0.9365 0 0)",
+			"neutral.pressed": "oklch(0.903 0 0)",
+			"accent.rest": "oklch(0.97 0.015 247.47)",
+			"accent.hover": "oklch(0.9365 0.0142 247.47)",
+			"accent.pressed": "oklch(0.903 0.0135 247.47)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "Box dialog > Box surface.subdued low Button",
+		"surface": "oklch(0.98 0 0)",
+		"surfacePaintedL": 0.979,
+		"states": {
+			"rest": {
+				"textContrast": 12.79,
+				"variable": "oklch(0.97 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.979
+			},
+			"hover": {
+				"textContrast": 11.29,
+				"variable": "oklch(0.9365 0 0)",
+				"background": "oklch(0.9365 0 0)",
+				"dComputed": 0.043,
+				"dPainted": 0.042,
+				"paintedL": 0.937
+			},
+			"pressed": {
+				"textContrast": 10.19,
+				"variable": "oklch(0.903 0 0)",
+				"background": "oklch(0.903 0 0)",
+				"dComputed": 0.077,
+				"dPainted": 0.075,
+				"paintedL": 0.904
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "Box surface.subdued inside overlay",
+		"expected": "base",
+		"colorMode": "light",
+		"subtle": {
+			"neutral.rest": "oklch(0.97 0 0)",
+			"neutral.hover": "oklch(0.9365 0 0)",
+			"neutral.pressed": "oklch(0.903 0 0)",
+			"accent.rest": "oklch(0.97 0.015 247.47)",
+			"accent.hover": "oklch(0.9365 0.0142 247.47)",
+			"accent.pressed": "oklch(0.903 0.0135 247.47)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "Box dialog > Box surface.field low Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.97 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 11.29,
+				"variable": "oklch(0.9365 0 0)",
+				"background": "oklch(0.9365 0 0)",
+				"dComputed": 0.064,
+				"dPainted": 0.063,
+				"paintedL": 0.937
+			},
+			"pressed": {
+				"textContrast": 10.19,
+				"variable": "oklch(0.903 0 0)",
+				"background": "oklch(0.903 0 0)",
+				"dComputed": 0.097,
+				"dPainted": 0.096,
+				"paintedL": 0.904
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "Box surface.field inside overlay",
+		"expected": "base",
+		"colorMode": "light",
+		"subtle": {
+			"neutral.rest": "oklch(0.97 0 0)",
+			"neutral.hover": "oklch(0.9365 0 0)",
+			"neutral.pressed": "oklch(0.903 0 0)",
+			"accent.rest": "oklch(0.97 0.015 247.47)",
+			"accent.hover": "oklch(0.9365 0.0142 247.47)",
+			"accent.pressed": "oklch(0.903 0.0135 247.47)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "Box dialog content",
+		"expected": "overlay",
+		"colorMode": "light",
+		"subtle": {
+			"neutral.rest": "oklch(0.97 0 0)",
+			"neutral.hover": "oklch(0.9365 0 0)",
+			"neutral.pressed": "oklch(0.903 0 0)",
+			"accent.rest": "oklch(0.97 0.015 247.47)",
+			"accent.hover": "oklch(0.9365 0.0142 247.47)",
+			"accent.pressed": "oklch(0.903 0.0135 247.47)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"label": "combobox popover data-color-mode",
+		"theme": "paper",
+		"mode": "dark",
+		"attr": null
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "combobox popover unselected option",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 11.78,
+				"variable": "oklch(0.26 0.0028 250)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.291
+			},
+			"hover": {
+				"textContrast": 11.7,
+				"variable": "oklch(0.294 0.0029 250)",
+				"background": "oklch(0.294 0.0029 250)",
+				"dComputed": 0.008,
+				"dPainted": 0.006,
+				"paintedL": 0.293
+			},
+			"pressed": {
+				"textContrast": 10.29,
+				"variable": "oklch(0.328 0.003 250)",
+				"background": "oklch(0.328 0.003 250)",
+				"dComputed": 0.039,
+				"dPainted": 0.038,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "combobox popover selected option",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 13.03,
+				"variable": "oklch(0.26 0.0308 250)",
+				"background": "oklch(0.26 0.0308 250)",
+				"dComputed": 0.037,
+				"dPainted": 0.038,
+				"paintedL": 0.259
+			},
+			"hover": {
+				"textContrast": 11.58,
+				"variable": "oklch(0.294 0.0295 250)",
+				"background": "oklch(0.294 0.0295 250)",
+				"dComputed": 0.02,
+				"dPainted": 0.021,
+				"paintedL": 0.295
+			},
+			"pressed": {
+				"textContrast": 10.3,
+				"variable": "oklch(0.328 0.0282 250)",
+				"background": "oklch(0.328 0.0282 250)",
+				"dComputed": 0.042,
+				"dPainted": 0.041,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "select popover unselected option",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 11.78,
+				"variable": "oklch(0.26 0.0028 250)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.291
+			},
+			"hover": {
+				"textContrast": 11.7,
+				"variable": "oklch(0.294 0.0029 250)",
+				"background": "oklch(0.294 0.0029 250)",
+				"dComputed": 0.008,
+				"dPainted": 0.006,
+				"paintedL": 0.293
+			},
+			"pressed": {
+				"textContrast": 10.29,
+				"variable": "oklch(0.328 0.003 250)",
+				"background": "oklch(0.328 0.003 250)",
+				"dComputed": 0.039,
+				"dPainted": 0.038,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "select popover selected option",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 13.03,
+				"variable": "oklch(0.26 0.0308 250)",
+				"background": "oklch(0.26 0.0308 250)",
+				"dComputed": 0.037,
+				"dPainted": 0.038,
+				"paintedL": 0.259
+			},
+			"hover": {
+				"textContrast": 11.58,
+				"variable": "oklch(0.294 0.0295 250)",
+				"background": "oklch(0.294 0.0295 250)",
+				"dComputed": 0.02,
+				"dPainted": 0.021,
+				"paintedL": 0.295
+			},
+			"pressed": {
+				"textContrast": 10.3,
+				"variable": "oklch(0.328 0.0282 250)",
+				"background": "oklch(0.328 0.0282 250)",
+				"dComputed": 0.042,
+				"dPainted": 0.041,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "combobox tray unselected option",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 11.78,
+				"variable": "oklch(0.26 0.0028 250)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.291
+			},
+			"hover": {
+				"textContrast": 11.7,
+				"variable": "oklch(0.294 0.0029 250)",
+				"background": "oklch(0.294 0.0029 250)",
+				"dComputed": 0.008,
+				"dPainted": 0.006,
+				"paintedL": 0.293
+			},
+			"pressed": {
+				"textContrast": 10.29,
+				"variable": "oklch(0.328 0.003 250)",
+				"background": "oklch(0.328 0.003 250)",
+				"dComputed": 0.039,
+				"dPainted": 0.038,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "combobox tray selected option",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 13.03,
+				"variable": "oklch(0.26 0.0308 250)",
+				"background": "oklch(0.26 0.0308 250)",
+				"dComputed": 0.037,
+				"dPainted": 0.038,
+				"paintedL": 0.259
+			},
+			"hover": {
+				"textContrast": 11.58,
+				"variable": "oklch(0.294 0.0295 250)",
+				"background": "oklch(0.294 0.0295 250)",
+				"dComputed": 0.02,
+				"dPainted": 0.021,
+				"paintedL": 0.295
+			},
+			"pressed": {
+				"textContrast": 10.3,
+				"variable": "oklch(0.328 0.0282 250)",
+				"background": "oklch(0.328 0.0282 250)",
+				"dComputed": 0.042,
+				"dPainted": 0.041,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "reference dialog (as written) low Button",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 11.78,
+				"variable": "oklch(0.26 0.0028 250)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.291
+			},
+			"hover": {
+				"textContrast": 11.7,
+				"variable": "oklch(0.294 0.0029 250)",
+				"background": "oklch(0.294 0.0029 250)",
+				"dComputed": 0.008,
+				"dPainted": 0.006,
+				"paintedL": 0.293
+			},
+			"pressed": {
+				"textContrast": 10.29,
+				"variable": "oklch(0.328 0.003 250)",
+				"background": "oklch(0.328 0.003 250)",
+				"dComputed": 0.039,
+				"dPainted": 0.038,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "app-CSS dialog low Button",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 11.78,
+				"variable": "oklch(0.26 0.0028 250)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.291
+			},
+			"hover": {
+				"textContrast": 11.7,
+				"variable": "oklch(0.294 0.0029 250)",
+				"background": "oklch(0.294 0.0029 250)",
+				"dComputed": 0.008,
+				"dPainted": 0.006,
+				"paintedL": 0.293
+			},
+			"pressed": {
+				"textContrast": 10.29,
+				"variable": "oklch(0.328 0.003 250)",
+				"background": "oklch(0.328 0.003 250)",
+				"dComputed": 0.039,
+				"dPainted": 0.038,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "app-CSS dialog standard Button",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 13.02,
+				"variable": "oklch(0.26 0.0028 250)",
+				"background": "oklch(0.26 0.0028 250)",
+				"dComputed": 0.031,
+				"dPainted": 0.032,
+				"paintedL": 0.26
+			},
+			"hover": {
+				"textContrast": 11.7,
+				"variable": "oklch(0.294 0.0029 250)",
+				"background": "oklch(0.294 0.0029 250)",
+				"dComputed": 0.008,
+				"dPainted": 0.006,
+				"paintedL": 0.293
+			},
+			"pressed": {
+				"textContrast": 10.29,
+				"variable": "oklch(0.328 0.003 250)",
+				"background": "oklch(0.328 0.003 250)",
+				"dComputed": 0.039,
+				"dPainted": 0.038,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "Box dialog low Button",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 11.78,
+				"variable": "oklch(0.26 0.0028 250)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.291
+			},
+			"hover": {
+				"textContrast": 11.7,
+				"variable": "oklch(0.294 0.0029 250)",
+				"background": "oklch(0.294 0.0029 250)",
+				"dComputed": 0.008,
+				"dPainted": 0.006,
+				"paintedL": 0.293
+			},
+			"pressed": {
+				"textContrast": 10.29,
+				"variable": "oklch(0.328 0.003 250)",
+				"background": "oklch(0.328 0.003 250)",
+				"dComputed": 0.039,
+				"dPainted": 0.038,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "Box dialog standard Button",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 13.02,
+				"variable": "oklch(0.26 0.0028 250)",
+				"background": "oklch(0.26 0.0028 250)",
+				"dComputed": 0.031,
+				"dPainted": 0.032,
+				"paintedL": 0.26
+			},
+			"hover": {
+				"textContrast": 11.7,
+				"variable": "oklch(0.294 0.0029 250)",
+				"background": "oklch(0.294 0.0029 250)",
+				"dComputed": 0.008,
+				"dPainted": 0.006,
+				"paintedL": 0.293
+			},
+			"pressed": {
+				"textContrast": 10.29,
+				"variable": "oklch(0.328 0.003 250)",
+				"background": "oklch(0.328 0.003 250)",
+				"dComputed": 0.039,
+				"dPainted": 0.038,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "Box dialog > Box surface.base low Button",
+		"surface": "oklch(0.22 0.01 250)",
+		"surfacePaintedL": 0.22,
+		"states": {
+			"rest": {
+				"textContrast": 14.5,
+				"variable": "oklch(0.26 0.0028 250)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.22
+			},
+			"hover": {
+				"textContrast": 11.7,
+				"variable": "oklch(0.294 0.0029 250)",
+				"background": "oklch(0.294 0.0029 250)",
+				"dComputed": 0.074,
+				"dPainted": 0.073,
+				"paintedL": 0.293
+			},
+			"pressed": {
+				"textContrast": 10.29,
+				"variable": "oklch(0.328 0.003 250)",
+				"background": "oklch(0.328 0.003 250)",
+				"dComputed": 0.108,
+				"dPainted": 0.109,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "Box surface.base inside overlay",
+		"expected": "base",
+		"colorMode": "dark",
+		"subtle": {
+			"neutral.rest": "oklch(0.26 0.0028 250)",
+			"neutral.hover": "oklch(0.294 0.0029 250)",
+			"neutral.pressed": "oklch(0.328 0.003 250)",
+			"accent.rest": "oklch(0.26 0.0308 250)",
+			"accent.hover": "oklch(0.294 0.0295 250)",
+			"accent.pressed": "oklch(0.328 0.0282 250)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "Box dialog > Box surface.subdued low Button",
+		"surface": "oklch(0.19 0.01 250)",
+		"surfacePaintedL": 0.189,
+		"states": {
+			"rest": {
+				"textContrast": 15.49,
+				"variable": "oklch(0.26 0.0028 250)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.189
+			},
+			"hover": {
+				"textContrast": 11.7,
+				"variable": "oklch(0.294 0.0029 250)",
+				"background": "oklch(0.294 0.0029 250)",
+				"dComputed": 0.104,
+				"dPainted": 0.104,
+				"paintedL": 0.293
+			},
+			"pressed": {
+				"textContrast": 10.29,
+				"variable": "oklch(0.328 0.003 250)",
+				"background": "oklch(0.328 0.003 250)",
+				"dComputed": 0.138,
+				"dPainted": 0.14,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "Box surface.subdued inside overlay",
+		"expected": "base",
+		"colorMode": "dark",
+		"subtle": {
+			"neutral.rest": "oklch(0.26 0.0028 250)",
+			"neutral.hover": "oklch(0.294 0.0029 250)",
+			"neutral.pressed": "oklch(0.328 0.003 250)",
+			"accent.rest": "oklch(0.26 0.0308 250)",
+			"accent.hover": "oklch(0.294 0.0295 250)",
+			"accent.pressed": "oklch(0.328 0.0282 250)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "Box dialog > Box surface.field low Button",
+		"surface": "oklch(0.195 0.01 250)",
+		"surfacePaintedL": 0.194,
+		"states": {
+			"rest": {
+				"textContrast": 15.33,
+				"variable": "oklch(0.26 0.0028 250)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.194
+			},
+			"hover": {
+				"textContrast": 11.7,
+				"variable": "oklch(0.294 0.0029 250)",
+				"background": "oklch(0.294 0.0029 250)",
+				"dComputed": 0.099,
+				"dPainted": 0.099,
+				"paintedL": 0.293
+			},
+			"pressed": {
+				"textContrast": 10.29,
+				"variable": "oklch(0.328 0.003 250)",
+				"background": "oklch(0.328 0.003 250)",
+				"dComputed": 0.133,
+				"dPainted": 0.134,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "Box surface.field inside overlay",
+		"expected": "base",
+		"colorMode": "dark",
+		"subtle": {
+			"neutral.rest": "oklch(0.26 0.0028 250)",
+			"neutral.hover": "oklch(0.294 0.0029 250)",
+			"neutral.pressed": "oklch(0.328 0.003 250)",
+			"accent.rest": "oklch(0.26 0.0308 250)",
+			"accent.hover": "oklch(0.294 0.0295 250)",
+			"accent.pressed": "oklch(0.328 0.0282 250)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "Box dialog content",
+		"expected": "overlay",
+		"colorMode": "dark",
+		"subtle": {
+			"neutral.rest": "oklch(0.26 0.0028 250)",
+			"neutral.hover": "oklch(0.294 0.0029 250)",
+			"neutral.pressed": "oklch(0.328 0.003 250)",
+			"accent.rest": "oklch(0.26 0.0308 250)",
+			"accent.hover": "oklch(0.294 0.0295 250)",
+			"accent.pressed": "oklch(0.328 0.0282 250)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "dark-scoped popover element (on light page)",
+		"expected": "overlay",
+		"colorMode": "dark",
+		"subtle": {
+			"neutral.rest": "oklch(0.26 0.0028 250)",
+			"neutral.hover": "oklch(0.294 0.0029 250)",
+			"neutral.pressed": "oklch(0.328 0.003 250)",
+			"accent.rest": "oklch(0.26 0.0308 250)",
+			"accent.hover": "oklch(0.294 0.0295 250)",
+			"accent.pressed": "oklch(0.328 0.0282 250)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "dark-scoped combobox popover on light page unselected option",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 11.78,
+				"variable": "oklch(0.26 0.0028 250)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.291
+			},
+			"hover": {
+				"textContrast": 11.7,
+				"variable": "oklch(0.294 0.0029 250)",
+				"background": "oklch(0.294 0.0029 250)",
+				"dComputed": 0.008,
+				"dPainted": 0.006,
+				"paintedL": 0.293
+			},
+			"pressed": {
+				"textContrast": 10.29,
+				"variable": "oklch(0.328 0.003 250)",
+				"background": "oklch(0.328 0.003 250)",
+				"dComputed": 0.039,
+				"dPainted": 0.038,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "dark-scoped combobox popover on light page selected option",
+		"surface": "oklch(0.29 0.01 250)",
+		"surfacePaintedL": 0.291,
+		"states": {
+			"rest": {
+				"textContrast": 13.03,
+				"variable": "oklch(0.26 0.0308 250)",
+				"background": "oklch(0.26 0.0308 250)",
+				"dComputed": 0.037,
+				"dPainted": 0.038,
+				"paintedL": 0.259
+			},
+			"hover": {
+				"textContrast": 11.58,
+				"variable": "oklch(0.294 0.0295 250)",
+				"background": "oklch(0.294 0.0295 250)",
+				"dComputed": 0.02,
+				"dPainted": 0.021,
+				"paintedL": 0.295
+			},
+			"pressed": {
+				"textContrast": 10.3,
+				"variable": "oklch(0.328 0.0282 250)",
+				"background": "oklch(0.328 0.0282 250)",
+				"dComputed": 0.042,
+				"dPainted": 0.041,
+				"paintedL": 0.328
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "dialog content (RAC Modal does not copy the scope)",
+		"expected": "n/a",
+		"colorMode": "light",
+		"subtle": {
+			"neutral.rest": "oklch(0.97 0 0)",
+			"neutral.hover": "oklch(0.9365 0 0)",
+			"neutral.pressed": "oklch(0.903 0 0)",
+			"accent.rest": "oklch(0.97 0.015 247.47)",
+			"accent.hover": "oklch(0.9365 0.0142 247.47)",
+			"accent.pressed": "oklch(0.903 0.0135 247.47)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "dark-scoped popover element (on light page)",
+		"expected": "overlay",
+		"colorMode": "dark",
+		"subtle": {
+			"neutral.rest": "oklch(0.29 0.0042 210)",
+			"neutral.hover": "oklch(0.3225 0.0043 210)",
+			"neutral.pressed": "oklch(0.355 0.0045 210)",
+			"accent.rest": "oklch(0.29 0.028 200)",
+			"accent.hover": "oklch(0.3225 0.0269 200.12)",
+			"accent.pressed": "oklch(0.355 0.0259 200.26)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "dark-scoped combobox popover on light page unselected option",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 10.58,
+				"variable": "oklch(0.29 0.0042 210)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.32
+			},
+			"hover": {
+				"textContrast": 10.52,
+				"variable": "oklch(0.3225 0.0043 210)",
+				"background": "oklch(0.3225 0.0043 210)",
+				"dComputed": 0.011,
+				"dPainted": 0.011,
+				"paintedL": 0.322
+			},
+			"pressed": {
+				"textContrast": 9.32,
+				"variable": "oklch(0.355 0.0045 210)",
+				"background": "oklch(0.355 0.0045 210)",
+				"dComputed": 0.037,
+				"dPainted": 0.036,
+				"paintedL": 0.354
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "dark-scoped combobox popover on light page selected option",
+		"surface": "oklch(0.32 0.015 210)",
+		"surfacePaintedL": 0.32,
+		"states": {
+			"rest": {
+				"textContrast": 11.65,
+				"variable": "oklch(0.29 0.028 200)",
+				"background": "oklch(0.29 0.028 200)",
+				"dComputed": 0.033,
+				"dPainted": 0.031,
+				"paintedL": 0.291
+			},
+			"hover": {
+				"textContrast": 10.37,
+				"variable": "oklch(0.3225 0.0269 200.12)",
+				"background": "oklch(0.3225 0.0269 200.12)",
+				"dComputed": 0.013,
+				"dPainted": 0.013,
+				"paintedL": 0.323
+			},
+			"pressed": {
+				"textContrast": 9.18,
+				"variable": "oklch(0.355 0.0259 200.26)",
+				"background": "oklch(0.355 0.0259 200.26)",
+				"dComputed": 0.037,
+				"dPainted": 0.037,
+				"paintedL": 0.355
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "dialog content (RAC Modal does not copy the scope)",
+		"expected": "n/a",
+		"colorMode": "light",
+		"subtle": {
+			"neutral.rest": "oklch(0.955 0 0)",
+			"neutral.hover": "oklch(0.9222 0 0)",
+			"neutral.pressed": "oklch(0.8895 0 0)",
+			"accent.rest": "oklch(0.955 0.0248 200)",
+			"accent.hover": "oklch(0.9222 0.0235 200)",
+			"accent.pressed": "oklch(0.8895 0.0223 200)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "dark",
+		"label": "light scope inside dark overlay",
+		"expected": "light base",
+		"colorMode": "light",
+		"subtle": {
+			"neutral.rest": "oklch(0.955 0 0)",
+			"neutral.hover": "oklch(0.9222 0 0)",
+			"neutral.pressed": "oklch(0.8895 0 0)",
+			"accent.rest": "oklch(0.955 0.0248 200)",
+			"accent.hover": "oklch(0.9222 0.0235 200)",
+			"accent.pressed": "oklch(0.8895 0.0223 200)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "tactile",
+		"mode": "light",
+		"label": "light scope inside dark overlay low Button",
+		"surface": "oklch(0.985 0 0)",
+		"surfacePaintedL": 0.985,
+		"states": {
+			"rest": {
+				"textContrast": 13.01,
+				"variable": "oklch(0.955 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 0.985
+			},
+			"hover": {
+				"textContrast": 10.78,
+				"variable": "oklch(0.9222 0 0)",
+				"background": "oklch(0.9222 0 0)",
+				"dComputed": 0.063,
+				"dPainted": 0.063,
+				"paintedL": 0.922
+			},
+			"pressed": {
+				"textContrast": 9.71,
+				"variable": "oklch(0.8895 0 0)",
+				"background": "oklch(0.8895 0 0)",
+				"dComputed": 0.096,
+				"dPainted": 0.097,
+				"paintedL": 0.888
+			}
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "dark",
+		"label": "light scope inside dark overlay",
+		"expected": "light base",
+		"colorMode": "light",
+		"subtle": {
+			"neutral.rest": "oklch(0.97 0 0)",
+			"neutral.hover": "oklch(0.9365 0 0)",
+			"neutral.pressed": "oklch(0.903 0 0)",
+			"accent.rest": "oklch(0.97 0.015 247.47)",
+			"accent.hover": "oklch(0.9365 0.0142 247.47)",
+			"accent.pressed": "oklch(0.903 0.0135 247.47)"
+		},
+		"base": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		},
+		"overlay": {
+			"neutral.rest": "",
+			"neutral.hover": "",
+			"neutral.pressed": "",
+			"accent.rest": "",
+			"accent.hover": "",
+			"accent.pressed": ""
+		}
+	},
+	{
+		"variant": "baseline",
+		"theme": "paper",
+		"mode": "light",
+		"label": "light scope inside dark overlay low Button",
+		"surface": "oklch(1 0 0)",
+		"surfacePaintedL": 1,
+		"states": {
+			"rest": {
+				"textContrast": 13.58,
+				"variable": "oklch(0.97 0 0)",
+				"background": "rgba(0, 0, 0, 0)",
+				"dComputed": 0,
+				"dPainted": 0,
+				"paintedL": 1
+			},
+			"hover": {
+				"textContrast": 11.29,
+				"variable": "oklch(0.9365 0 0)",
+				"background": "oklch(0.9365 0 0)",
+				"dComputed": 0.064,
+				"dPainted": 0.063,
+				"paintedL": 0.937
+			},
+			"pressed": {
+				"textContrast": 10.19,
+				"variable": "oklch(0.903 0 0)",
+				"background": "oklch(0.903 0 0)",
+				"dComputed": 0.097,
+				"dPainted": 0.096,
+				"paintedL": 0.904
+			}
+		}
+	}
+]
