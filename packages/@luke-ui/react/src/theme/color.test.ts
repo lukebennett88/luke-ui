@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { contrastRatio, formatOklch, gamutMapOklch, mixOklab, parseColor } from './color.js';
+import {
+	compositeOver,
+	contrastRatio,
+	formatOklch,
+	gamutMapOklch,
+	mixOklab,
+	oklabDistance,
+	oklchToSrgb,
+	parseColor,
+	parseColorWithAlpha,
+} from './color.js';
 
 describe('parseColor', () => {
 	it('round-trips a hex colour through OKLCH formatting', () => {
@@ -21,6 +31,50 @@ describe('parseColor', () => {
 		expect(() => parseColor('rgb(0, 0, 0)')).toThrow(/cannot parse colour/);
 		expect(() => parseColor('oklch(1.5 0.1 200)')).toThrow(/lightness/);
 		expect(() => parseColor('oklch(0.5 0.1 200 / 0.5)')).toThrow(/cannot parse colour/);
+	});
+});
+
+describe('parseColorWithAlpha', () => {
+	it('reads the alpha channel of an emitted translucent colour', () => {
+		const { alpha, color } = parseColorWithAlpha('oklch(0.5 0.1 200 / 0.045)');
+		expect(alpha).toBe(0.045);
+		expect(color).toEqual(parseColor('oklch(0.5 0.1 200)'));
+	});
+
+	it('round-trips formatOklch output with alpha', () => {
+		const color = parseColor('oklch(0.62 0.12 140)');
+		expect(parseColorWithAlpha(formatOklch(color, 0.08))).toEqual({ alpha: 0.08, color });
+	});
+
+	it('treats an opaque colour as alpha 1', () => {
+		expect(parseColorWithAlpha('#ffffff').alpha).toBe(1);
+	});
+
+	it('rejects an alpha above 1', () => {
+		expect(() => parseColorWithAlpha('oklch(0.5 0.1 200 / 1.5)')).toThrow(/alpha/);
+	});
+});
+
+describe('compositeOver', () => {
+	it('blends gamma-encoded sRGB channels, as browsers paint', () => {
+		const grey = compositeOver(parseColor('#000000'), parseColor('#ffffff'), 0.5);
+		for (const channel of oklchToSrgb(grey)) expect(channel).toBeCloseTo(0.5, 5);
+	});
+
+	it('returns the background at alpha 0 and the tint at alpha 1', () => {
+		const background = parseColor('#0160ae');
+		const tint = parseColor('#e5484d');
+		expect(oklabDistance(compositeOver(background, tint, 0), background)).toBeLessThan(1e-6);
+		expect(oklabDistance(compositeOver(background, tint, 1), tint)).toBeLessThan(1e-6);
+	});
+});
+
+describe('oklabDistance', () => {
+	it('measures the lightness difference between two greys', () => {
+		expect(oklabDistance(parseColor('oklch(0.2 0 0)'), parseColor('oklch(0.5 0 0)'))).toBeCloseTo(
+			0.3,
+			10,
+		);
 	});
 });
 

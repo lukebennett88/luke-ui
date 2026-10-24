@@ -55,3 +55,29 @@ export const SEMANTIC_ROLES = [
 	'warning',
 	'danger',
 ] as const;
+
+/**
+ * The smallest OKLab step the subtle-fill generator (`subtle-fill.ts`) keeps between neighbouring
+ * states on every standard surface: from the bare surface to rest, rest to hover, and hover to
+ * pressed. A state whose fitted alpha falls short is raised until the step clears on all four
+ * surfaces, so state order stays visible as well as numerically correct. The generator's other
+ * perceptual target is the role's opaque subtle colour over `surface.base`, which it fits first.
+ *
+ * Today's opaque fills step about 0.03 on `base`. This sits well below that so it only moves themes
+ * far from the shipped ones, and the move is recorded as a residual in the compiler diagnostics.
+ */
+export const SUBTLE_FILL_MIN_STEP = 0.01;
+
+/**
+ * The calibrated floor for every subtle-fill step on every standard surface, in OKLab: about one
+ * just-noticeable difference. Paper, Tactile, and the fixture themes must clear it in tests. A custom
+ * theme that misses it compiles, and the compiler diagnostics report the weak step.
+ */
+export const SUBTLE_FILL_STEP_FLOOR = 0.02;
+
+/**
+ * The largest OKLab difference the shipped themes' tests accept between a composited subtle fill over
+ * `surface.base` and the opaque colour it reproduces. A single tint gains chroma as its alpha rises,
+ * while the opaque hover and pressed colours lose it, so chromatic roles cannot match exactly.
+ */
+export const SUBTLE_FILL_MAX_RESIDUAL = 0.03;

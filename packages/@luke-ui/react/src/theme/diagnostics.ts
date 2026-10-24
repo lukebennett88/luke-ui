@@ -7,7 +7,9 @@
  */
 
 import type { Oklch } from './color.js';
+import type { SurfaceRole } from './foundation.js';
 import type { FamilyRole, ScaleFamily, ScaleStep } from './scale.js';
+import type { SubtleFill, SubtleFillState, SubtleFillTargets } from './subtle-fill.js';
 import type { GeneratedSurfaces } from './surfaces.js';
 
 /** A chroma reduction forced by sRGB gamut mapping on one generated rung. */
@@ -57,6 +59,44 @@ export interface FamilyDiagnostics {
 	source: Oklch;
 }
 
+/** One subtle-fill state composited over one surface. */
+export interface SubtleFillLayer {
+	/** The colour the fill paints over the surface. */
+	color: Oklch;
+	/** OKLab distance from the bare surface. */
+	distance: number;
+	/** OKLab distance from the previous state, or from the bare surface for `rest`. */
+	step: number;
+}
+
+/** A subtle-fill step below `SUBTLE_FILL_STEP_FLOOR` on one surface. */
+export interface WeakSubtleFillStep {
+	/** The state whose step from the previous state, or from the surface for `rest`, is weak. */
+	state: SubtleFillState;
+	/** The OKLab step it reached. */
+	step: number;
+	/** The surface the step was measured on. */
+	surface: SurfaceRole;
+}
+
+/**
+ * Everything the subtle-fill generator ({@link import('./subtle-fill.js').generateSubtleFill})
+ * derived for one role in one mode: the emitted tint and alphas, how closely they reproduce the opaque
+ * targets over `surface.base`, and how every state lands on each standard surface.
+ */
+export interface SubtleFillDiagnostics extends SubtleFill {
+	/** Every composited state on each standard surface. */
+	layers: Record<SurfaceRole, Record<SubtleFillState, SubtleFillLayer>>;
+	/** States whose alpha was raised past the best fit to keep the minimum step on every surface. */
+	raised: Array<SubtleFillState>;
+	/** OKLab distance between each composited state over `surface.base` and its opaque target. */
+	residual: Record<SubtleFillState, number>;
+	/** The opaque colours the fit reproduces over `surface.base`. */
+	targets: SubtleFillTargets;
+	/** Steps below the calibrated floor. Reported, never a compile failure. */
+	weakSteps: Array<WeakSubtleFillStep>;
+}
+
 /**
  * One WCAG pair the semantic validation matrix checked while compiling a theme mode. Records the
  * factual ratio, whether it clears the required minimum, and whether the compiler treats it as a hard
@@ -89,6 +129,8 @@ export interface ThemeModeDiagnostics {
 	families: Record<FamilyRole, FamilyDiagnostics>;
 	/** The colour mode the diagnostics describe. */
 	mode: 'light' | 'dark';
+	/** Each role's translucent subtle fill: its tint, alphas, residuals, and composited layers. */
+	subtleFills: Record<FamilyRole, SubtleFillDiagnostics>;
 	/** The four surfaces the mode resolved from its base and any authored surfaces. */
 	surfaces: GeneratedSurfaces;
 }

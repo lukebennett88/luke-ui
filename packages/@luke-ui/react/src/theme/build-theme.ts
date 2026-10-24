@@ -5,6 +5,7 @@ import { validateContrast } from './contrast-validation.js';
 import { controlHoverBorder, solveControlBorder } from './control-border.js';
 import type {
 	FamilyDiagnostics,
+	SubtleFillDiagnostics,
 	ThemeDiagnostics,
 	ThemeGenerationDiagnostics,
 	ThemeModeDiagnostics,
@@ -12,10 +13,16 @@ import type {
 import type { ThemeInheritance } from './extend-theme.js';
 import type { ThemeFoundation, ThemeModeFoundation } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
-import { generateFamilyWithDiagnostics, highContrastText, ScaleGenerationError } from './scale.js';
+import {
+	FAMILY_RUNG,
+	generateFamilyWithDiagnostics,
+	highContrastText,
+	ScaleGenerationError,
+} from './scale.js';
 import type { SemanticColorValues } from './semantic-map.js';
 import { mapSemanticColors } from './semantic-map.js';
 import { assembleStylesheet } from './stylesheet.js';
+import { generateSubtleFill, subtleFillTargets } from './subtle-fill.js';
 import type { GeneratedSurfaces } from './surfaces.js';
 import { generateSurfaces } from './surfaces.js';
 import { validateFoundation } from './validate-foundation.js';
@@ -143,7 +150,10 @@ interface ModeValues {
 }
 
 function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): ModeValues {
-	const { colorValues, familyDiagnostics, surfaces } = buildModeColors(mode, modeFoundation);
+	const { colorValues, familyDiagnostics, subtleFills, surfaces } = buildModeColors(
+		mode,
+		modeFoundation,
+	);
 	const { checks, failures } = validateContrast(mode, colorValues);
 	const values: Record<ModePath, string> = {
 		...colorValues,
@@ -157,7 +167,13 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		'depth.resting': modeFoundation.depth.resting,
 	};
 	return {
-		diagnostics: { contrastChecks: checks, families: familyDiagnostics, mode, surfaces },
+		diagnostics: {
+			contrastChecks: checks,
+			families: familyDiagnostics,
+			mode,
+			subtleFills,
+			surfaces,
+		},
 		failures,
 		values,
 	};
@@ -166,12 +182,14 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 interface ModeColors {
 	colorValues: SemanticColorValues;
 	familyDiagnostics: Record<FamilyRole, FamilyDiagnostics>;
+	subtleFills: Record<FamilyRole, SubtleFillDiagnostics>;
 	surfaces: GeneratedSurfaces;
 }
 
 /**
  * Runs the v2 colour pipeline for one mode: take the resolved source colours and base surface,
- * generate the six scale families, resolve the four surfaces, and apply the semantic map.
+ * generate the six scale families, resolve the four surfaces, fit each role's translucent subtle
+ * fill, and apply the semantic map.
  * Rethrows a scale-level {@link ScaleGenerationError} as a {@link ThemeGenerationError} carrying
  * the families it had already resolved.
  */
@@ -215,13 +233,21 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		neutral: families.neutral,
 		surfaces: [surfaces.base, surfaces.subdued, surfaces.field, surfaces.overlay],
 	});
+	const subtleFills = {} as Record<FamilyRole, SubtleFillDiagnostics>;
+	for (const role of SEMANTIC_ROLES) {
+		subtleFills[role] = generateSubtleFill({
+			surfaces,
+			targets: subtleFillTargets(families[role], families.neutral[FAMILY_RUNG.textPrimary]),
+		});
+	}
 	const colorValues = mapSemanticColors({
 		controlBorder,
 		controlHoverBorder: controlHoverBorder(controlBorder, mode),
 		families,
 		focus: source.focus,
 		backdrop: modeFoundation.color.backdrop,
+		subtleFills,
 		surfaces,
 	});
-	return { colorValues, familyDiagnostics, surfaces };
+	return { colorValues, familyDiagnostics, subtleFills, surfaces };
 }

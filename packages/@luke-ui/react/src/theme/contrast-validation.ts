@@ -5,7 +5,7 @@
  */
 
 import type { Oklch } from './color.js';
-import { contrastRatio, parseColor } from './color.js';
+import { compositeOver, contrastRatio, parseColorWithAlpha } from './color.js';
 import { SEMANTIC_ROLES, TEXT_RATIO, UI_RATIO } from './contrast-policy.js';
 import type { ContrastCheck } from './diagnostics.js';
 import type { SemanticColorValues } from './semantic-map.js';
@@ -47,6 +47,11 @@ type ColorPath = keyof SemanticColorValues;
  *
  * Role borders are decorative tints, measured but not gated, so a component must never rely on one
  * alone for a required state.
+ *
+ * Subtle fills are translucent. Until the composited matrix lands
+ * ([#916](https://github.com/lukebennett88/luke-ui/issues/916)), each one is measured as it paints
+ * over `surface.base`, the surface its alpha was fitted against. The other three surfaces, stacked
+ * fills, and fills over solids are not checked yet.
  */
 export function validateContrast(
 	mode: ColorMode,
@@ -54,10 +59,15 @@ export function validateContrast(
 ): ValidationResult {
 	const failures: Array<ThemeContrastFailure> = [];
 	const checks: Array<ContrastCheck> = [];
-	const colorAt = (path: ColorPath): Oklch => {
+	const parsedAt = (path: ColorPath) => {
 		const value = colorValues[path];
 		if (value === undefined) throw new Error(`buildTheme did not generate "${path}"`);
-		return parseColor(value);
+		return parseColorWithAlpha(value);
+	};
+	const base = parsedAt('color.surface.base').color;
+	const colorAt = (path: ColorPath): Oklch => {
+		const { alpha, color } = parsedAt(path);
+		return alpha < 1 ? compositeOver(base, color, alpha) : color;
 	};
 	function check(foreground: ColorPath, background: ColorPath, required: number, hard: boolean) {
 		const ratio = contrastRatio(colorAt(foreground), colorAt(background));

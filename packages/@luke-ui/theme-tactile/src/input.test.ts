@@ -35,14 +35,14 @@ describe('custom canvases that extend the published input', () => {
 			base: 'oklch(0.94 0 30)',
 			foreground: 'color.foreground.success.rest',
 			background: 'color.background.danger.subtle.pressed',
-			ratio: 4.467,
+			ratio: 4.433,
 		},
 		{
 			mode: 'dark',
 			base: 'oklch(0.28 0 30)',
 			foreground: 'color.foreground.danger.rest',
 			background: 'color.background.success.subtle.pressed',
-			ratio: 4.393,
+			ratio: 4.38,
 		},
 	] as const) {
 		test(`rejects the ${mode} canvas only for cross-role subtle contrast`, () => {

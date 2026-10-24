@@ -9,7 +9,7 @@ import {
 	testTypography,
 } from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeContrastError } from './build-theme.js';
-import { contrastRatio, parseColor } from './color.js';
+import { compositeOver, contrastRatio, parseColor, parseColorWithAlpha } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { SEMANTIC_ROLES, TEXT_RATIO, UI_RATIO } from './contrast-policy.js';
 import { validateContrast } from './contrast-validation.js';
@@ -252,10 +252,13 @@ describe('contrast validation matrix', () => {
 			for (const mode of ['light', 'dark'] as const) {
 				const checks = diagnostics[mode].contrastChecks;
 				const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
+				const base = extractValue(block, variableNames.get('color.surface.base')!);
 				for (const check of checks) {
 					const foreground = extractValue(block, variableNames.get(check.foreground)!);
 					const background = extractValue(block, variableNames.get(check.background)!);
-					expect(check.ratio).toBe(contrastRatio(parseColor(foreground), parseColor(background)));
+					expect(check.ratio).toBe(
+						contrastRatio(parseColor(foreground), paintedOverBase(background, base)),
+					);
 				}
 				const actualHard = checks.flatMap((check) => {
 					if (!check.hard) return [];
@@ -290,6 +293,12 @@ describe('contrast validation matrix', () => {
 	}
 });
 
+// Translucent subtle fills are measured as they paint over `surface.base`.
+function paintedOverBase(value: string, base: string) {
+	const { alpha, color } = parseColorWithAlpha(value);
+	return alpha === 1 ? color : compositeOver(parseColor(base), color, alpha);
+}
+
 describe('custom-canvas cross-role contrast', () => {
 	for (const { mode, base, foreground, background, ratio } of [
 		{
@@ -297,14 +306,14 @@ describe('custom-canvas cross-role contrast', () => {
 			base: 'oklch(0.94 0 30)',
 			foreground: 'color.foreground.success.rest',
 			background: 'color.background.danger.subtle.pressed',
-			ratio: 4.467,
+			ratio: 4.433,
 		},
 		{
 			mode: 'dark',
 			base: 'oklch(0.28 0 30)',
 			foreground: 'color.foreground.danger.rest',
 			background: 'color.background.success.subtle.pressed',
-			ratio: 4.393,
+			ratio: 4.38,
 		},
 	] as const) {
 		it(`rejects the Tactile ${mode} custom canvas for cross-role contrast`, () => {

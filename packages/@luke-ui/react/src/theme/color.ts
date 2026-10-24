@@ -44,6 +44,21 @@ export function parseColor(input: string): Oklch {
 	throw new Error(`cannot parse colour "${input}"; expected #rgb, #rrggbb, or oklch(<l> <c> <h>)`);
 }
 
+/**
+ * Parses an emitted theme colour: anything {@link parseColor} accepts, plus an `oklch()` value with
+ * a `/ <alpha>` channel. Alpha is 1 for an opaque colour.
+ */
+export function parseColorWithAlpha(input: string): { alpha: number; color: Oklch } {
+	const match = OKLCH_ALPHA_PATTERN.exec(input.trim());
+	if (match === null) return { alpha: 1, color: parseColor(input) };
+	const [, opaque, alphaText] = match;
+	const alpha = Number(alphaText);
+	if (opaque === undefined || !Number.isFinite(alpha) || alpha < 0 || alpha > 1) {
+		throw new Error(`cannot parse colour "${input}"; oklch alpha must be 0-1`);
+	}
+	return { alpha, color: parseColor(`${opaque})`) };
+}
+
 /** Whether a colour has invalid channels, lightness outside 0-1, or negative chroma. */
 export function isInvalidOklch(value: unknown): boolean {
 	if (typeof value !== 'object' || value === null) return true;
@@ -74,6 +89,39 @@ export function mixOklab(a: Oklch, b: Oklch, amountOfB: number): Oklch {
 		a: from.a * (1 - t) + to.a * t,
 		b: from.b * (1 - t) + to.b * t,
 	});
+}
+
+/**
+ * Composites `tint` at `alpha` over the opaque `background` the way browsers paint it: a per-channel
+ * blend of gamma-encoded sRGB values. Both colours are gamut-mapped into sRGB first.
+ */
+export function compositeOver(background: Oklch, tint: Oklch, alpha: number): Oklch {
+	const t = clampUnit(alpha);
+	const under = oklchToSrgb(background);
+	const over = oklchToSrgb(tint);
+	return srgbToOklch([
+		under[0] * (1 - t) + over[0] * t,
+		under[1] * (1 - t) + over[1] * t,
+		under[2] * (1 - t) + over[2] * t,
+	]);
+}
+
+/** Euclidean distance between two colours in OKLab, the theme compiler's perceptual difference. */
+export function oklabDistance(a: Oklch, b: Oklch): number {
+	const from = oklchToOklab(a);
+	const to = oklchToOklab(b);
+	return Math.hypot(from.l - to.l, from.a - to.a, from.b - to.b);
+}
+
+/** A colour's gamma-encoded sRGB channels, 0 to 1, after CSS-style gamut mapping. */
+export function oklchToSrgb(color: Oklch): SrgbTriple {
+	const [r, g, b] = oklchToLinearSrgb(gamutMapOklch(color));
+	return [linearToSrgb(r), linearToSrgb(g), linearToSrgb(b)];
+}
+
+/** Converts gamma-encoded sRGB channels, 0 to 1, to OKLCH. */
+export function srgbToOklch(rgb: SrgbTriple): Oklch {
+	return linearSrgbToOklch([srgbToLinear(rgb[0]), srgbToLinear(rgb[1]), srgbToLinear(rgb[2])]);
 }
 
 /**
@@ -158,10 +206,12 @@ interface Oklab {
 	b: number;
 }
 
-type SrgbTriple = [number, number, number];
+/** Gamma-encoded or linear sRGB red, green, and blue channels. */
+export type SrgbTriple = [number, number, number];
 
 const HEX_PATTERN = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 const OKLCH_PATTERN = /^oklch\(\s*(\d*\.?\d+)(%?)\s+(\d*\.?\d+)\s+(\d*\.?\d+)(?:deg)?\s*\)$/i;
+const OKLCH_ALPHA_PATTERN = /^(oklch\([^/)]*?)\s*\/\s*(\d*\.?\d+)\s*\)$/i;
 const GAMUT_EPSILON = 0.000001;
 
 function parseHex(hex: string): SrgbTriple {
@@ -191,6 +241,11 @@ function trimNumber(value: number, digits: number): string {
 
 function srgbToLinear(channel: number): number {
 	return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+}
+
+function linearToSrgb(channel: number): number {
+	const clamped = clampUnit(channel);
+	return clamped <= 0.0031308 ? clamped * 12.92 : 1.055 * clamped ** (1 / 2.4) - 0.055;
 }
 
 function isInSrgbGamut(color: Oklch): boolean {

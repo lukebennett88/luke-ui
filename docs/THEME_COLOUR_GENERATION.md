@@ -22,20 +22,25 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    adjusted for contrast. Validation throws instead, and the author can set the surface.
 4. Solves `border.control` against all four surfaces (`control-border.ts`), and derives
    `border.controlHover` from it by a fixed per-mode lightness offset.
-5. Applies the one default semantic mapping (`semantic-map.ts`'s `mapSemanticColors`) that aliases
-   every colour contract leaf onto a family step, a generated surface, or a generated interaction
-   state, and passes the authored backdrop through. Neutral step 12 becomes `text.primary`.
-6. Runs the full WCAG 2.2 validation matrix (`validateContrast`), which stays authoritative and
+5. Fits each role's translucent subtle fill (`subtle-fill.ts`'s `generateSubtleFill`) against the
+   resolved surfaces. See [Translucent subtle fills](#translucent-subtle-fills).
+6. Applies the one default semantic mapping (`semantic-map.ts`'s `mapSemanticColors`) that aliases
+   every colour contract leaf onto a family step, a generated surface, a generated interaction
+   state, or a subtle fill, and passes the authored backdrop through. Neutral step 12 becomes
+   `text.primary`.
+7. Runs the full WCAG 2.2 validation matrix (`validateContrast`), which stays authoritative and
    throws `ThemeContrastError` on a hard-gate miss. Validation measures semantic token relationships
-   using final emitted, rounded, and gamut-mapped colours. Both global text hierarchy colours are
-   checked against every standard surface and all 18 subtle backgrounds. All six roles' three
-   foreground states are checked against every standard surface and all 18 subtle backgrounds (324
-   subtle pairs per mode). Both `onSolid.primary` and `onSolid.secondary` are checked against their
-   role's solid rest, hover, and pressed fills. The two on-solid leaves initially emit the same
-   literal resolved colour. New cross-role failures are rejected without automatic repair.
+   using final emitted, rounded, and gamut-mapped colours. A translucent subtle fill is measured as
+   it paints over `surface.base`. Both global text hierarchy colours are checked against every
+   standard surface and all 18 subtle backgrounds. All six roles' three foreground states are
+   checked against every standard surface and all 18 subtle backgrounds (324 subtle pairs per mode).
+   Both `onSolid.primary` and `onSolid.secondary` are checked against their role's solid rest,
+   hover, and pressed fills. The two on-solid leaves initially emit the same literal resolved
+   colour. New cross-role failures are rejected without automatic repair.
 
 `compileTheme` returns `{ css, diagnostics }`. `ThemeDiagnostics` records everything the pipeline
-resolved (both modes' families, surfaces, solid-anchor search, and contrast checks) for tooling.
+resolved (both modes' families, surfaces, solid-anchor search, subtle fills, and contrast checks)
+for tooling.
 
 ## The v2 repaint is expected
 
@@ -141,18 +146,53 @@ loading state against typical surfaces.
 Hover and pressed colours are public semantic tokens, generated at theme compile time. Hover mixes
 the resting colour 5% toward `text.primary` in OKLab. Pressed mixes it 10% toward the same target.
 Those strengths are fixed. If a solid cannot carry readable on-solid text across the three states,
-the solid-anchor search adapts the resting colour rather than changing the mix strengths.
+the solid-anchor search adapts the resting colour rather than changing the mix strengths. For subtle
+fills, these mixes produce the opaque colours the translucent fill reproduces over `surface.base`.
 
 Recipes select those tokens. They do not emit `color-mix()` or call a runtime helper. Theme authors
-do not author hover or pressed colours. There is no public overlay hover, pressed, or tint API.
-`color.overlay.backdrop` is the authored modal dimming layer. `color.surface.overlay` is the opaque
-surface for detached content such as menus, popovers, and dialogs.
+do not author hover or pressed colours, or a subtle fill's tint or alpha. There is no public overlay
+hover, pressed, or tint API. `color.overlay.backdrop` is the authored modal dimming layer.
+`color.surface.overlay` is the opaque surface for detached content such as menus, popovers, and
+dialogs.
 
 `validateContrast` measures the emitted token pairs. It does not catalogue first-party components.
 
-## Alpha is deferred
+## Translucent subtle fills
 
-The private scale intentionally has no alpha (transparent) track yet. Adding one later is
-structurally non-breaking (it does not require a contract shape change), but consuming it in any
-mapped leaf **will** be a visible change to that leaf's rendered colour — plan a review pass the
-same way as any other repaint, not as a silent patch.
+Every role's `color.background.<role>.subtle.{rest,hover,pressed}` is translucent in both modes: one
+tint colour per role, at a rising alpha per state. An opaque fill tuned against `surface.base`
+crosses a surface that is lighter or darker than `base`. In dark mode, `overlay` sits 0.07 above
+`base`, so an opaque hover landed on the overlay itself. A translucent fill moves every surface by
+nearly the same amount, so a state reads the same on `base`, `subdued`, `field`, and `overlay`.
+
+`generateSubtleFill` derives the tint and alphas per theme, mode, and role:
+
+1. Its targets are the opaque colours the role would otherwise emit: the family's subtle rung, and
+   that rung mixed toward `text.primary` for hover and pressed.
+2. Browsers composite a translucent colour by blending gamma-encoded sRGB channels, so every
+   composite of one tint over `base` lies on a straight line in that space. The fit takes the
+   least-squares direction of the targets' offsets from `base` and places the tint where that line
+   leaves the sRGB cube. The most distant tint needs the least alpha, which keeps the fill's effect
+   nearly the same on every surface.
+3. Each state's alpha, on the three-decimal grid the stylesheet emits, is the one whose composite
+   over `base` matches the target's OKLab lightness, with OKLab distance breaking ties. Text
+   contrast follows lightness, so chroma carries the residual.
+4. A state whose step from the state below it (or from the bare surface, for rest) is under
+   `SUBTLE_FILL_MIN_STEP` on any standard surface has its alpha raised until it clears. Every state
+   paints the same tint at a higher alpha, so rest, hover, and pressed stay ordered by distance from
+   every surface.
+
+All differences are OKLab distances. `contrast-policy.ts` declares the minimum step the generator
+keeps, the calibrated floor the shipped and fixture themes must clear in tests
+(`SUBTLE_FILL_STEP_FLOOR`), and the residual those tests accept over `base`
+(`SUBTLE_FILL_MAX_RESIDUAL`). A custom theme below the floor compiles. The diagnostics report it.
+
+A single tint gains chroma as its alpha rises, while the opaque hover and pressed colours lose it,
+so chromatic roles cannot reproduce today's colours exactly. Neutral matches to within 0.006. The
+shipped chromatic roles miss by up to 0.03, mostly at rest, with lightness within 0.001. The
+diagnostics record each role's tint, alphas, residuals, any raised state, every composited layer,
+and any step below the floor. They hide no compromise.
+
+Validation of the composited result over the other surfaces, over stacked fills, and over solid
+fills, including the state-order gate, belongs to
+[#916](https://github.com/lukebennett88/luke-ui/issues/916).

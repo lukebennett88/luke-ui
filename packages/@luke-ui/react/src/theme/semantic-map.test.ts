@@ -14,6 +14,9 @@ import {
 	mixInteractionState,
 } from './scale.js';
 import { mapSemanticColors } from './semantic-map.js';
+import type { SubtleFill } from './subtle-fill.js';
+import { generateSubtleFill, subtleFillTargets } from './subtle-fill.js';
+import type { GeneratedSurfaces } from './surfaces.js';
 import { generateSurfaces } from './surfaces.js';
 
 type ColorMode = 'light' | 'dark';
@@ -83,6 +86,21 @@ function buildFamilies(mode: ColorMode, background: Oklch): Record<FamilyRole, S
 	};
 }
 
+function buildSubtleFills(
+	families: Record<FamilyRole, ScaleFamily>,
+	surfaces: GeneratedSurfaces,
+): Record<FamilyRole, SubtleFill> {
+	const textPrimary = families.neutral[FAMILY_RUNG.textPrimary];
+	return Object.fromEntries(
+		SEMANTIC_ROLES.map((role) => {
+			return [
+				role,
+				generateSubtleFill({ surfaces, targets: subtleFillTargets(families[role], textPrimary) }),
+			];
+		}),
+	) as unknown as Record<FamilyRole, SubtleFill>;
+}
+
 describe('mapSemanticColors', () => {
 	describe('correctness', () => {
 		for (const mode of MODES) {
@@ -93,12 +111,14 @@ describe('mapSemanticColors', () => {
 				const backdrop = 'oklch(0 0 0 / 0.45)';
 				const controlBorder = CONTROL_BORDER[mode];
 
+				const subtleFills = buildSubtleFills(families, surfaces);
 				const result = mapSemanticColors({
 					backdrop,
 					controlBorder,
 					controlHoverBorder: CONTROL_HOVER_BORDER[mode],
 					families,
 					focus: FOCUS,
+					subtleFills,
 					surfaces,
 				});
 
@@ -130,19 +150,18 @@ describe('mapSemanticColors', () => {
 				expect(result['color.border.focus']).toBe(formatOklch(FOCUS));
 
 				// The shared contract: identical rest / hover / pressed mapping for every semantic role.
+				// Subtle fills paint the role's one tint at each state's alpha.
 				for (const role of SEMANTIC_ROLES) {
 					const family = families[role];
 					const textPrimary = families.neutral[FAMILY_RUNG.textPrimary];
-					const subtle = family[FAMILY_RUNG.subtle];
+					const { alpha, tint } = subtleFills[role];
 					const solid = family[FAMILY_RUNG.solid];
 					const foreground = family[FAMILY_RUNG.foreground];
-					expect(result[`color.background.${role}.subtle.rest`]).toBe(formatOklch(subtle));
-					expect(result[`color.background.${role}.subtle.hover`]).toBe(
-						formatOklch(mixInteractionState(subtle, textPrimary, INTERACTION_HOVER_STRENGTH)),
-					);
-					expect(result[`color.background.${role}.subtle.pressed`]).toBe(
-						formatOklch(mixInteractionState(subtle, textPrimary, INTERACTION_PRESSED_STRENGTH)),
-					);
+					for (const state of ['rest', 'hover', 'pressed'] as const) {
+						expect(result[`color.background.${role}.subtle.${state}`]).toBe(
+							formatOklch(tint, alpha[state]),
+						);
+					}
 					expect(result[`color.background.${role}.solid.rest`]).toBe(formatOklch(solid));
 					expect(result[`color.background.${role}.solid.hover`]).toBe(
 						formatOklch(mixInteractionState(solid, textPrimary, INTERACTION_HOVER_STRENGTH)),
@@ -188,6 +207,7 @@ describe('mapSemanticColors', () => {
 					controlHoverBorder: CONTROL_HOVER_BORDER[mode],
 					families,
 					focus: FOCUS,
+					subtleFills: buildSubtleFills(families, surfaces),
 					surfaces,
 				});
 
@@ -212,6 +232,7 @@ describe('mapSemanticColors', () => {
 				controlHoverBorder: CONTROL_HOVER_BORDER.light,
 				families,
 				focus: FOCUS,
+				subtleFills: buildSubtleFills(families, surfaces),
 				surfaces,
 			});
 
