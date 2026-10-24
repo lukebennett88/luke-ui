@@ -15,6 +15,7 @@ import { overlayMotion } from '../../styles/overlay-motion.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+import { stateLayer } from '../../styles/state-layer.js';
 import { surfaceStyle } from '../../styles/surface.js';
 import {
 	autofilledDisabledInputSelector,
@@ -352,20 +353,29 @@ const comboboxConfig = {
 				},
 				'&[data-focused="true"]:not([data-disabled="true"]):not([data-selected="true"])':
 					surfaceStyle('neutral.subtle.rest'),
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-selected="true"])':
-					surfaceStyle('neutral.subtle.hover'),
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-selected="true"])':
-					surfaceStyle('neutral.subtle.pressed'),
+				// SPIKE #925 fallback: state layers over the overlay, not base-tuned opaque fills.
+				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
+					backgroundColor: 'transparent',
+					backgroundImage: stateLayer('hover'),
+				},
+				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
+					backgroundColor: 'transparent',
+					backgroundImage: stateLayer('pressed'),
+				},
 				'&[data-focus-visible="true"]:not([data-disabled="true"])':
 					surfaceStyle('accent.subtle.hover'),
 				'&[data-selected="true"]:not([data-disabled="true"])': {
 					...surfaceStyle('accent.subtle.rest'),
 					fontWeight: vars.font.weight.label,
 				},
-				'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])':
-					surfaceStyle('accent.subtle.hover'),
-				'&[data-pressed="true"][data-selected="true"]:not([data-disabled="true"])':
-					surfaceStyle('accent.subtle.pressed'),
+				'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])': {
+					...surfaceStyle('accent.subtle.rest'),
+					backgroundImage: stateLayer('hover'),
+				},
+				'&[data-pressed="true"][data-selected="true"]:not([data-disabled="true"])': {
+					...surfaceStyle('accent.subtle.rest'),
+					backgroundImage: stateLayer('pressed'),
+				},
 				'&[data-selected="true"][data-focus-visible="true"]:not([data-disabled="true"])':
 					surfaceStyle('accent.subtle.pressed'),
 			},

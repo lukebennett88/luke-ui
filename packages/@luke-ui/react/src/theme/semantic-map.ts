@@ -11,7 +11,7 @@
  */
 
 import type { Oklch } from './color.js';
-import { clampUnit, formatOklch, gamutMapOklch } from './color.js';
+import { formatOklch } from './color.js';
 import type { ModePath } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { pathEntry, pathRecord } from './path-record.js';
@@ -127,31 +127,4 @@ function interactionStates(rest: Oklch, toward: Oklch) {
 		hover: formatOklch(mixInteractionState(rest, toward, INTERACTION_HOVER_STRENGTH)),
 		pressed: formatOklch(mixInteractionState(rest, toward, INTERACTION_PRESSED_STRENGTH)),
 	};
-}
-
-/**
- * SPIKE #925. The 18 subtle fills re-anchored to `surface.overlay`, keyed `<role>.<state>`. In dark
- * mode each resting fill moves by the overlay's lightness offset from `base`, and hover and pressed
- * mix from that rest exactly as the public states do. Light mode overlays are not inverted, so the
- * set equals the public values there.
- */
-export function mapOverlaySubtleValues(
-	mode: 'light' | 'dark',
-	families: Record<FamilyRole, ScaleFamily>,
-	surfaces: GeneratedSurfaces,
-): Record<string, string> {
-	const textPrimary = families.neutral[FAMILY_RUNG.textPrimary];
-	const offset = mode === 'dark' ? surfaces.overlay.l - surfaces.base.l : 0;
-	return Object.fromEntries(
-		SEMANTIC_ROLES.flatMap((role) => {
-			const rest = families[role][FAMILY_RUNG.subtle];
-			const lifted = gamutMapOklch({ ...rest, l: clampUnit(rest.l + offset) });
-			const states = interactionStates(lifted, textPrimary);
-			return [
-				[`${role}.rest`, states.rest],
-				[`${role}.hover`, states.hover],
-				[`${role}.pressed`, states.pressed],
-			];
-		}),
-	);
 }

@@ -2,7 +2,6 @@ import { createGlobalVar, fallbackVar } from '@vanilla-extract/css';
 import { typedEntries } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
-import { subtleAnchorVarName } from '../../theme/subtle-anchor-vars.js';
 
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
 
@@ -31,6 +30,31 @@ type SurfaceStyle = {
 // global neutral hierarchy and keep each role's resting hue, so they reset these overrides and every
 // read falls back to the theme token on the reading element. The names are global rather than
 // hashed, like the Capsize trims, so tests that load the built stylesheet can read them.
+/**
+ * SPIKE #925 fallback: what a transparent control paints in a state while it sits on a solid fill,
+ * where a translucent layer would cut on-solid contrast. Unset everywhere else.
+ */
+export function solidStateFill(tone: 'neutral' | 'danger', state: 'hover' | 'pressed'): string {
+	return `--luke-internal-solid-state-fill-${tone}-${state}`;
+}
+
+/** SPIKE #925 fallback: the text that `solidStateFill`'s chip pairs with. */
+export function solidStateText(tone: 'neutral' | 'danger'): string {
+	return `--luke-internal-solid-state-text-${tone}`;
+}
+
+const STATE_LAYER_TONES = ['neutral', 'danger'] as const;
+
+function solidStateVars(value: (tone: 'neutral' | 'danger', slot: string) => string) {
+	return Object.fromEntries(
+		STATE_LAYER_TONES.flatMap((tone) => [
+			[solidStateFill(tone, 'hover'), value(tone, 'hover')],
+			[solidStateFill(tone, 'pressed'), value(tone, 'pressed')],
+			[solidStateText(tone), value(tone, 'text')],
+		]),
+	);
+}
+
 const foregroundOverride = {
 	primary: createGlobalVar('luke-internal-foreground-primary'),
 	secondary: createGlobalVar('luke-internal-foreground-secondary'),
@@ -108,6 +132,7 @@ function neutralContext(backgroundColor: string): SurfaceStyle {
 			[foregroundOverride.primary]: 'initial',
 			[foregroundOverride.secondary]: 'initial',
 			[foregroundOverride.tone]: 'initial',
+			...solidStateVars(() => 'initial'),
 		},
 	};
 }
@@ -121,37 +146,17 @@ function solidContext(role: SemanticRole, backgroundColor: string): SurfaceStyle
 			[foregroundOverride.primary]: onSolid.primary,
 			[foregroundOverride.secondary]: onSolid.secondary,
 			[foregroundOverride.tone]: onSolid.primary,
+			...solidStateVars((tone, slot) => {
+				if (slot === 'text') return tone === 'danger' ? vars.color.foreground.danger.rest : vars.color.text.primary;
+				return vars.color.background[tone].subtle[slot as 'hover' | 'pressed'];
+			}),
 		},
 	};
 }
 
-/**
- * SPIKE #925. A standard surface also picks the subtle-fill set its descendants paint with:
- * `surface.overlay` points the public subtle variables at the overlay-anchored set, and every other
- * surface points them back at the base set, so a standard surface nested in an overlay cancels the
- * remap. The anchor makes the theme's own declaration follow on an element that is also a colour
- * mode scope, where the unlayered theme rule wins over this layered one.
- */
-function standardSurfaceContext(
-	surface: keyof typeof vars.color.surface,
-	backgroundColor: string,
-): SurfaceStyle {
-	const context = neutralContext(backgroundColor);
-	const set = surface === 'overlay' ? 'overlay' : 'base';
-	for (const role of SEMANTIC_ROLES) {
-		for (const state of INTERACTION_STATES) {
-			const target = `var(${subtleAnchorVarName(set, role, state)})`;
-			context.vars[subtleAnchorVarName('anchor', role, state)] =
-				surface === 'overlay' ? target : 'initial';
-			context.vars[`--luke-color-background-${role}-subtle-${state}`] = target;
-		}
-	}
-	return context;
-}
-
 const surfaceStyles = new Map<SurfaceBackground, SurfaceStyle>();
 for (const [surface, backgroundColor] of typedEntries(vars.color.surface)) {
-	surfaceStyles.set(`surface.${surface}`, standardSurfaceContext(surface, backgroundColor));
+	surfaceStyles.set(`surface.${surface}`, neutralContext(backgroundColor));
 }
 for (const role of SEMANTIC_ROLES) {
 	const { subtle, solid } = vars.color.background[role];

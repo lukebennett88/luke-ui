@@ -1,0 +1,402 @@
+note: You are running `vp test` as a Vite+ built-in command. If you meant to run the test npm script, use `vpr test` instead.
+
+ RUN  v5.0.5 /home/user/luke-ui/packages/@luke-ui/react
+      API started at http://localhost:51204/
+
+4:37:08 AM [vite] (client) dependency optimized: react-aria-components
+4:37:08 AM [vite] (client) optimized dependencies changed. reloading
+
+[vitest] Vite unexpectedly reloaded a test. This may cause tests to fail, lead to flaky behaviour or duplicated test runs.
+For a stable experience, add the newly optimized dependencies to your config's `optimizeDeps.include` field manually.
+
+4:37:13 AM [vite] (client) dependency optimized: react-aria-components/Switch
+4:37:13 AM [vite] (client) optimized dependencies changed. reloading
+
+[vitest] Vite unexpectedly reloaded a test. This may cause tests to fail, lead to flaky behaviour or duplicated test runs.
+For a stable experience, add the newly optimized dependencies to your config's `optimizeDeps.include` field manually.
+
+ ❯ |browser (chromium)| src/core/button/button.browser.test.tsx (39 tests | 8 failed | 3 skipped) 16628ms
+   × Button fills pair with their foreground in every interaction state in tactile light 127ms
+   × Button fills pair with their foreground in every interaction state in tactile dark 179ms
+   × Button fills pair with their foreground in every interaction state in paper light 145ms
+   × Button fills pair with their foreground in every interaction state in paper dark 120ms
+   × Button text passes axe contrast on transparent and subtle fills in every state in tactile light 135ms
+   × Button text passes axe contrast on transparent and subtle fills in every state in tactile dark 132ms
+   × Button text passes axe contrast on transparent and subtle fills in every state in paper light 132ms
+   × Button text passes axe contrast on transparent and subtle fills in every state in paper dark 119ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |browser (chromium)| src/core/button/button.browser.test.tsx > Button fills pair with their foreground in every interaction state in tactile light
+AssertionError: expected [ { state: 'rest', …(3) }, …(2) ] to deeply equal [ { state: 'rest', …(3) }, …(2) ]
+
+Failure screenshot:
+  - .vitest/attachments/failure-screenshots/button.browser.test.tsx/Button-fills-pair-with-their-foreground-in-every-interaction-state-in-tactile-light.png
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -13,35 +13,35 @@[39m
+[2m        "warning": "oklch(0.985 0 150)",[22m
+[2m      },[22m
+[2m      "state": "rest",[22m
+[2m    },[22m
+[2m    {[22m
+[32m-     "background": "oklch(0.9222 0 0)",[39m
+[31m+     "background": "rgba(0, 0, 0, 0)",[39m
+[2m      "color": "oklch(0.3 0 0)",[22m
+[2m      "foreground": {[22m
+[32m-       "accent": "oklch(0.45 0.0486 200)",[39m
+[32m-       "danger": "oklch(0.45 0.099 27)",[39m
+[32m-       "info": "oklch(0.45 0.088 255)",[39m
+[32m-       "neutral": "oklch(0.45 0 0)",[39m
+[32m-       "primary": "oklch(0.3 0 0)",[39m
+[32m-       "secondary": "oklch(0.45 0 0)",[39m
+[32m-       "success": "oklch(0.45 0.0715 150)",[39m
+[32m-       "warning": "oklch(0.45 0.077 75)",[39m
+[31m+       "accent": "oklch(0.985 0 150)",[39m
+[31m+       "danger": "oklch(0.985 0 150)",[39m
+[31m+       "info": "oklch(0.985 0 150)",[39m
+[31m+       "neutral": "oklch(0.985 0 150)",[39m
+[31m+       "primary": "oklch(0.985 0 150)",[39m
+[31m+       "secondary": "oklch(0.985 0 150)",[39m
+[31m+       "success": "oklch(0.985 0 150)",[39m
+[31m+       "warning": "oklch(0.985 0 150)",[39m
+[2m      },[22m
+[2m      "state": "hover",[22m
+[2m    },[22m
+[2m    {[22m
+[32m-     "background": "oklch(0.8895 0 0)",[39m
+[31m+     "background": "rgba(0, 0, 0, 0)",[39m
+[2m      "color": "oklch(0.3 0 0)",[22m
+[2m      "foreground": {[22m
+[32m-       "accent": "oklch(0.45 0.0486 200)",[39m
+[32m-       "danger": "oklch(0.45 0.099 27)",[39m
+[32m-       "info": "oklch(0.45 0.088 255)",[39m
+[32m-       "neutral": "oklch(0.45 0 0)",[39m
+[32m-       "primary": "oklch(0.3 0 0)",[39m
+[32m-       "secondary": "oklch(0.45 0 0)",[39m
+[32m-       "success": "oklch(0.45 0.0715 150)",[39m
+[32m-       "warning": "oklch(0.45 0.077 75)",[39m
+[31m+       "accent": "oklch(0.985 0 150)",[39m
+[31m+       "danger": "oklch(0.985 0 150)",[39m
+[31m+       "info": "oklch(0.985 0 150)",[39m
+[31m+       "neutral": "oklch(0.985 0 150)",[39m
+[31m+       "primary": "oklch(0.985 0 150)",[39m
+[31m+       "secondary": "oklch(0.985 0 150)",[39m
+[31m+       "success": "oklch(0.985 0 150)",[39m
+[31m+       "warning": "oklch(0.985 0 150)",[39m
+[2m      },[22m
+[2m      "state": "pressed",[22m
+[2m    },[22m
+[2m  ][22m
+
+ ❯ src/core/button/button.browser.test.tsx:558:19
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:4125:35
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5242:26
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5730:20
+ ❯ runWithCancel node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5725:10
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5714:20
+ ❯ runWithTimeout node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5678:10
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:6250:64
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  |browser (chromium)| src/core/button/button.browser.test.tsx > Button fills pair with their foreground in every interaction state in tactile dark
+AssertionError: expected [ { state: 'rest', …(3) }, …(2) ] to deeply equal [ { state: 'rest', …(3) }, …(2) ]
+
+Failure screenshot:
+  - .vitest/attachments/failure-screenshots/button.browser.test.tsx/Button-fills-pair-with-their-foreground-in-every-interaction-state-in-tactile-dark.png
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -13,35 +13,35 @@[39m
+[2m        "warning": "oklch(0.18 0.01 150)",[22m
+[2m      },[22m
+[2m      "state": "rest",[22m
+[2m    },[22m
+[2m    {[22m
+[32m-     "background": "oklch(0.3225 0.0043 210)",[39m
+[31m+     "background": "rgba(0, 0, 0, 0)",[39m
+[2m      "color": "oklch(0.94 0.0067 210)",[22m
+[2m      "foreground": {[22m
+[32m-       "accent": "oklch(0.76 0.055 200)",[39m
+[32m-       "danger": "oklch(0.76 0.088 25)",[39m
+[32m-       "info": "oklch(0.76 0.0715 255)",[39m
+[32m-       "neutral": "oklch(0.76 0.0083 210)",[39m
+[32m-       "primary": "oklch(0.94 0.0067 210)",[39m
+[32m-       "secondary": "oklch(0.76 0.0083 210)",[39m
+[32m-       "success": "oklch(0.76 0.0715 150)",[39m
+[32m-       "warning": "oklch(0.76 0.0715 80)",[39m
+[31m+       "accent": "oklch(0.18 0.01 150)",[39m
+[31m+       "danger": "oklch(0.18 0.01 150)",[39m
+[31m+       "info": "oklch(0.18 0.01 150)",[39m
+[31m+       "neutral": "oklch(0.18 0.01 150)",[39m
+[31m+       "primary": "oklch(0.18 0.01 150)",[39m
+[31m+       "secondary": "oklch(0.18 0.01 150)",[39m
+[31m+       "success": "oklch(0.18 0.01 150)",[39m
+[31m+       "warning": "oklch(0.18 0.01 150)",[39m
+[2m      },[22m
+[2m      "state": "hover",[22m
+[2m    },[22m
+[2m    {[22m
+[32m-     "background": "oklch(0.355 0.0045 210)",[39m
+[31m+     "background": "rgba(0, 0, 0, 0)",[39m
+[2m      "color": "oklch(0.94 0.0067 210)",[22m
+[2m      "foreground": {[22m
+[32m-       "accent": "oklch(0.76 0.055 200)",[39m
+[32m-       "danger": "oklch(0.76 0.088 25)",[39m
+[32m-       "info": "oklch(0.76 0.0715 255)",[39m
+[32m-       "neutral": "oklch(0.76 0.0083 210)",[39m
+[32m-       "primary": "oklch(0.94 0.0067 210)",[39m
+[32m-       "secondary": "oklch(0.76 0.0083 210)",[39m
+[32m-       "success": "oklch(0.76 0.0715 150)",[39m
+[32m-       "warning": "oklch(0.76 0.0715 80)",[39m
+[31m+       "accent": "oklch(0.18 0.01 150)",[39m
+[31m+       "danger": "oklch(0.18 0.01 150)",[39m
+[31m+       "info": "oklch(0.18 0.01 150)",[39m
+[31m+       "neutral": "oklch(0.18 0.01 150)",[39m
+[31m+       "primary": "oklch(0.18 0.01 150)",[39m
+[31m+       "secondary": "oklch(0.18 0.01 150)",[39m
+[31m+       "success": "oklch(0.18 0.01 150)",[39m
+[31m+       "warning": "oklch(0.18 0.01 150)",[39m
+[2m      },[22m
+[2m      "state": "pressed",[22m
+[2m    },[22m
+[2m  ][22m
+
+ ❯ src/core/button/button.browser.test.tsx:558:19
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:4125:35
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5242:26
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5730:20
+ ❯ runWithCancel node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5725:10
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5714:20
+ ❯ runWithTimeout node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5678:10
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:6250:64
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  |browser (chromium)| src/core/button/button.browser.test.tsx > Button fills pair with their foreground in every interaction state in paper light
+AssertionError: expected [ { state: 'rest', …(3) }, …(2) ] to deeply equal [ { state: 'rest', …(3) }, …(2) ]
+
+Failure screenshot:
+  - .vitest/attachments/failure-screenshots/button.browser.test.tsx/Button-fills-pair-with-their-foreground-in-every-interaction-state-in-paper-light.png
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -13,35 +13,35 @@[39m
+[2m        "warning": "oklch(0.985 0 137.4)",[22m
+[2m      },[22m
+[2m      "state": "rest",[22m
+[2m    },[22m
+[2m    {[22m
+[32m-     "background": "oklch(0.9365 0 0)",[39m
+[31m+     "background": "rgba(0, 0, 0, 0)",[39m
+[2m      "color": "oklch(0.3 0 0)",[22m
+[2m      "foreground": {[22m
+[32m-       "accent": "oklch(0.45 0.0536 247.47)",[39m
+[32m-       "danger": "oklch(0.45 0.1039 24.44)",[39m
+[32m-       "info": "oklch(0.45 0.1185 266.66)",[39m
+[32m-       "neutral": "oklch(0.45 0 0)",[39m
+[32m-       "primary": "oklch(0.3 0 0)",[39m
+[32m-       "secondary": "oklch(0.45 0 0)",[39m
+[32m-       "success": "oklch(0.45 0.0658 137.4)",[39m
+[32m-       "warning": "oklch(0.45 0.0808 76.41)",[39m
+[31m+       "accent": "oklch(0.985 0 137.4)",[39m
+[31m+       "danger": "oklch(0.985 0 137.4)",[39m
+[31m+       "info": "oklch(0.985 0 137.4)",[39m
+[31m+       "neutral": "oklch(0.985 0 137.4)",[39m
+[31m+       "primary": "oklch(0.985 0 137.4)",[39m
+[31m+       "secondary": "oklch(0.985 0 137.4)",[39m
+[31m+       "success": "oklch(0.985 0 137.4)",[39m
+[31m+       "warning": "oklch(0.985 0 137.4)",[39m
+[2m      },[22m
+[2m      "state": "hover",[22m
+[2m    },[22m
+[2m    {[22m
+[32m-     "background": "oklch(0.903 0 0)",[39m
+[31m+     "background": "rgba(0, 0, 0, 0)",[39m
+[2m      "color": "oklch(0.3 0 0)",[22m
+[2m      "foreground": {[22m
+[32m-       "accent": "oklch(0.45 0.0536 247.47)",[39m
+[32m-       "danger": "oklch(0.45 0.1039 24.44)",[39m
+[32m-       "info": "oklch(0.45 0.1185 266.66)",[39m
+[32m-       "neutral": "oklch(0.45 0 0)",[39m
+[32m-       "primary": "oklch(0.3 0 0)",[39m
+[32m-       "secondary": "oklch(0.45 0 0)",[39m
+[32m-       "success": "oklch(0.45 0.0658 137.4)",[39m
+[32m-       "warning": "oklch(0.45 0.0808 76.41)",[39m
+[31m+       "accent": "oklch(0.985 0 137.4)",[39m
+[31m+       "danger": "oklch(0.985 0 137.4)",[39m
+[31m+       "info": "oklch(0.985 0 137.4)",[39m
+[31m+       "neutral": "oklch(0.985 0 137.4)",[39m
+[31m+       "primary": "oklch(0.985 0 137.4)",[39m
+[31m+       "secondary": "oklch(0.985 0 137.4)",[39m
+[31m+       "success": "oklch(0.985 0 137.4)",[39m
+[31m+       "warning": "oklch(0.985 0 137.4)",[39m
+[2m      },[22m
+[2m      "state": "pressed",[22m
+[2m    },[22m
+[2m  ][22m
+
+ ❯ src/core/button/button.browser.test.tsx:558:19
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:4125:35
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5242:26
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5730:20
+ ❯ runWithCancel node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5725:10
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5714:20
+ ❯ runWithTimeout node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5678:10
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:6250:64
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  |browser (chromium)| src/core/button/button.browser.test.tsx > Button fills pair with their foreground in every interaction state in paper dark
+AssertionError: expected [ { state: 'rest', …(3) }, …(2) ] to deeply equal [ { state: 'rest', …(3) }, …(2) ]
+
+Failure screenshot:
+  - .vitest/attachments/failure-screenshots/button.browser.test.tsx/Button-fills-pair-with-their-foreground-in-every-interaction-state-in-paper-dark.png
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -13,35 +13,35 @@[39m
+[2m        "warning": "oklch(0.18 0.01 150)",[22m
+[2m      },[22m
+[2m      "state": "rest",[22m
+[2m    },[22m
+[2m    {[22m
+[32m-     "background": "oklch(0.294 0.0029 250)",[39m
+[31m+     "background": "rgba(0, 0, 0, 0)",[39m
+[2m      "color": "oklch(0.94 0.0045 250)",[22m
+[2m      "foreground": {[22m
+[32m-       "accent": "oklch(0.76 0.0605 250)",[39m
+[32m-       "danger": "oklch(0.76 0.088 25)",[39m
+[32m-       "info": "oklch(0.76 0.0715 255)",[39m
+[32m-       "neutral": "oklch(0.76 0.0055 250)",[39m
+[32m-       "primary": "oklch(0.94 0.0045 250)",[39m
+[32m-       "secondary": "oklch(0.76 0.0055 250)",[39m
+[32m-       "success": "oklch(0.76 0.0715 150)",[39m
+[32m-       "warning": "oklch(0.76 0.0715 80)",[39m
+[31m+       "accent": "oklch(0.18 0.01 150)",[39m
+[31m+       "danger": "oklch(0.18 0.01 150)",[39m
+[31m+       "info": "oklch(0.18 0.01 150)",[39m
+[31m+       "neutral": "oklch(0.18 0.01 150)",[39m
+[31m+       "primary": "oklch(0.18 0.01 150)",[39m
+[31m+       "secondary": "oklch(0.18 0.01 150)",[39m
+[31m+       "success": "oklch(0.18 0.01 150)",[39m
+[31m+       "warning": "oklch(0.18 0.01 150)",[39m
+[2m      },[22m
+[2m      "state": "hover",[22m
+[2m    },[22m
+[2m    {[22m
+[32m-     "background": "oklch(0.328 0.003 250)",[39m
+[31m+     "background": "rgba(0, 0, 0, 0)",[39m
+[2m      "color": "oklch(0.94 0.0045 250)",[22m
+[2m      "foreground": {[22m
+[32m-       "accent": "oklch(0.76 0.0605 250)",[39m
+[32m-       "danger": "oklch(0.76 0.088 25)",[39m
+[32m-       "info": "oklch(0.76 0.0715 255)",[39m
+[32m-       "neutral": "oklch(0.76 0.0055 250)",[39m
+[32m-       "primary": "oklch(0.94 0.0045 250)",[39m
+[32m-       "secondary": "oklch(0.76 0.0055 250)",[39m
+[32m-       "success": "oklch(0.76 0.0715 150)",[39m
+[32m-       "warning": "oklch(0.76 0.0715 80)",[39m
+[31m+       "accent": "oklch(0.18 0.01 150)",[39m
+[31m+       "danger": "oklch(0.18 0.01 150)",[39m
+[31m+       "info": "oklch(0.18 0.01 150)",[39m
+[31m+       "neutral": "oklch(0.18 0.01 150)",[39m
+[31m+       "primary": "oklch(0.18 0.01 150)",[39m
+[31m+       "secondary": "oklch(0.18 0.01 150)",[39m
+[31m+       "success": "oklch(0.18 0.01 150)",[39m
+[31m+       "warning": "oklch(0.18 0.01 150)",[39m
+[2m      },[22m
+[2m      "state": "pressed",[22m
+[2m    },[22m
+[2m  ][22m
+
+ ❯ src/core/button/button.browser.test.tsx:558:19
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:4125:35
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5242:26
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5730:20
+ ❯ runWithCancel node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5725:10
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5714:20
+ ❯ runWithTimeout node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5678:10
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:6250:64
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  |browser (chromium)| src/core/button/button.browser.test.tsx > Button text passes axe contrast on transparent and subtle fills in every state in tactile light
+ FAIL  |browser (chromium)| src/core/button/button.browser.test.tsx > Button text passes axe contrast on transparent and subtle fills in every state in tactile dark
+ FAIL  |browser (chromium)| src/core/button/button.browser.test.tsx > Button text passes axe contrast on transparent and subtle fills in every state in paper light
+ FAIL  |browser (chromium)| src/core/button/button.browser.test.tsx > Button text passes axe contrast on transparent and subtle fills in every state in paper dark
+AssertionError: expected { Object (incomplete, unevaluated, ...) } to deeply equal { incomplete: [], …(2) }
+
+Failure screenshots:
+  - .vitest/attachments/failure-screenshots/button.browser.test.tsx/Button-text-passes-axe-contrast-on-transparent-and-subtle-fills-in-every-state-in-tactile-light.png
+  - .vitest/attachments/failure-screenshots/button.browser.test.tsx/Button-text-passes-axe-contrast-on-transparent-and-subtle-fills-in-every-state-in-tactile-dark.png
+  - .vitest/attachments/failure-screenshots/button.browser.test.tsx/Button-text-passes-axe-contrast-on-transparent-and-subtle-fills-in-every-state-in-paper-light.png
+  - .vitest/attachments/failure-screenshots/button.browser.test.tsx/Button-text-passes-axe-contrast-on-transparent-and-subtle-fills-in-every-state-in-paper-dark.png
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "incomplete": [],[39m
+[32m-   "unevaluated": [],[39m
+[31m+   "incomplete": [[39m
+[31m+     {[39m
+[31m+       "html": "<span class=\"xrxret2 xrxret0 xrxret14 xrxret1a xrxretc xrxrete xrxretw xrxreth xrxretk xrxret1g xrxret5 xrxretm\">Neutral low</span>",[39m
+[31m+       "reason": "Element's background color could not be determined due to a background gradient",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "html": "<span class=\"xrxret2 xrxret0 xrxret14 xrxret1a xrxretc xrxrete xrxretw xrxreth xrxretk xrxret1g xrxret5 xrxretm\">Neutral standard</span>",[39m
+[31m+       "reason": "Element's background color could not be determined due to a background gradient",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "html": "<span class=\"xrxret2 xrxret0 xrxret14 xrxret1a xrxretc xrxrete xrxretw xrxreth xrxretk xrxret1g xrxret5 xrxretm\">Critical low</span>",[39m
+[31m+       "reason": "Element's background color could not be determined due to a background gradient",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "html": "<span class=\"xrxret2 xrxret0 xrxret14 xrxret1a xrxretc xrxrete xrxretw xrxreth xrxretk xrxret1g xrxret5 xrxretm\">Critical standard</span>",[39m
+[31m+       "reason": "Element's background color could not be determined due to a background gradient",[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "unevaluated": [[39m
+[31m+     "<span class=\"xrxret2 xrxret0 xrxret14 xrxret1a xrxretc xrxrete xrxretw xrxreth xrxretk xrxret1g xrxret5 xrxretm\">Neutral low</span>",[39m
+[31m+     "<span class=\"xrxret2 xrxret0 xrxret14 xrxret1a xrxretc xrxrete xrxretw xrxreth xrxretk xrxret1g xrxret5 xrxretm\">Neutral standard</span>",[39m
+[31m+     "<span class=\"xrxret2 xrxret0 xrxret14 xrxret1a xrxretc xrxrete xrxretw xrxreth xrxretk xrxret1g xrxret5 xrxretm\">Critical low</span>",[39m
+[31m+     "<span class=\"xrxret2 xrxret0 xrxret14 xrxret1a xrxretc xrxrete xrxretw xrxreth xrxretk xrxret1g xrxret5 xrxretm\">Critical standard</span>",[39m
+[31m+   ],[39m
+[2m    "violations": [],[22m
+[2m  }[22m
+
+ ❯ expectAxeContrastPasses src/core/test-utils/axe.ts:50:5
+ ❯ src/core/button/button.browser.test.tsx:627:4
+ ❯ node_modules/.vite/vitest/ef98362b8a6b0c8cd804b0d227aa1ffeaba89786/deps/plugins.DPQHVT0p-BzMD_BH3.js?v=86c9fc8b:5242:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Failed to run the test /home/user/luke-ui/packages/@luke-ui/react/src/core/primitives/switch/switch.browser.test.tsx.
+ ❯ ../../../node_modules/.pnpm/vitest@5.0.5_@arethetypeswrong+core@0.18.5_@types+node@24.19.2_@vitest+browser-playwrig_031d10211a1f554608b56804e42139cd/node_modules/vitest/dist/chunks/index.1TqnEahn.js:4757:17
+ ❯ process.processTicksAndRejections node:internal/process/task_queues:104:5
+
+Caused by: Error: The iframe "/home/user/luke-ui/packages/@luke-ui/react/src/core/primitives/switch/switch.browser.test.tsx" did not become ready within 60000ms. The tester likely failed to initialize, check the browser console for errors.
+ ❯ ../../../../../../__vitest_browser__/orchestrator-C2U7TVD1.js:198:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed | 7 passed (12)
+      Tests  8 failed | 194 passed | 20 skipped (222)
+     Errors  1 error
+   Start at  04:36:54
+   Duration  83.98s (tests 47%, worker 44%, import 7%, setup 2%)
+

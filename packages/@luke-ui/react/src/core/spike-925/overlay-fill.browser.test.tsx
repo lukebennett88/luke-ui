@@ -462,6 +462,33 @@ function BoxDialog({ children }: { children?: ReactNode }) {
 	);
 }
 
+// Page surfaces outside any overlay: residuals against today's base-tuned fills, and the
+// fallback's layer over a solid fill.
+for (const appearance of visualAppearances) {
+	test(`Buttons on page surfaces ${slug(appearance)}`, async () => {
+		render(
+			<Stack gap="space.8">
+				{(['surface.base', 'surface.subdued', 'accent.solid'] as const).map((background) => (
+					<Box backgroundColor={background} data-spike-surface={background} key={background} padding="space.8">
+						<Cluster gap="space.8">
+							<Button prominence="low">{`Low on ${background}`}</Button>
+							<Button>{`Standard on ${background}`}</Button>
+						</Cluster>
+					</Box>
+				))}
+			</Stack>,
+			{ appearance },
+		);
+		for (const background of ['surface.base', 'surface.subdued', 'accent.solid'] as const) {
+			for (const kind of ['Low', 'Standard'] as const) {
+				const button = page.getByRole('button', { name: `${kind} on ${background}` }).element() as HTMLElement;
+				const box = button.closest('[data-spike-surface]') as HTMLElement;
+				await measureStates(`page ${background} ${kind.toLowerCase()} Button`, appearance, button, box, 'neutral');
+			}
+		}
+	});
+}
+
 // Proof 1 and 2b: a dark scope on a light page. The popover copies `data-color-mode="dark"`, so the
 // unlayered theme rule redeclares every subtle token on the overlay element itself.
 for (const theme of ['paper', 'tactile'] as const) {

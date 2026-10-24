@@ -4,6 +4,11 @@ import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
 import { style } from '../../styles/layered-style.css.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import { recipe } from '../../styles/recipe.js';
+import {
+	stateLayer,
+	transparentStateLayer,
+	transparentStateText,
+} from '../../styles/state-layer.js';
 import { contextualForeground, surfaceStyle } from '../../styles/surface.js';
 import { textRecipe } from '../../text/recipe.css.js';
 import { textActionAppearance, textLinkAppearance } from './text-action-appearance.js';
@@ -211,15 +216,23 @@ function buttonAppearance(
 					boxShadow: 'none',
 					color: contextualForeground('primary'),
 					...toneColor,
+					// SPIKE #925 fallback: a state layer over whatever is behind, so the button keeps the
+					// surrounding foreground context instead of pairing an opaque subtle fill.
 					selectors: {
 						[hovered]: {
-							...surfaceStyle(`${backgroundTone}.subtle.hover`),
-							...toneColor,
+							...transparentStateLayer('hover', backgroundTone === 'danger' ? 'danger' : 'neutral'),
+							color: transparentStateText(
+								backgroundTone === 'danger' ? 'danger' : 'neutral',
+								tone === 'critical' ? contextualForeground('danger') : contextualForeground('primary'),
+							),
 							boxShadow: vars.depth.raised,
 						},
 						[pressed]: {
-							...surfaceStyle(`${backgroundTone}.subtle.pressed`),
-							...toneColor,
+							...transparentStateLayer('pressed', backgroundTone === 'danger' ? 'danger' : 'neutral'),
+							color: transparentStateText(
+								backgroundTone === 'danger' ? 'danger' : 'neutral',
+								tone === 'critical' ? contextualForeground('danger') : contextualForeground('primary'),
+							),
 							boxShadow: vars.depth.recessed,
 						},
 					},
@@ -242,15 +255,16 @@ function buttonAppearance(
 				...toneColor,
 				backgroundImage: isSolid ? vars.controlFinish.resting : 'none',
 				selectors: {
+					// SPIKE #925 fallback: a subtle button keeps its resting fill and adds a state layer.
 					[hovered]: {
-						...surfaceStyle(`${fill}.${surface}.hover`),
+						...surfaceStyle(`${fill}.${surface}.${isSolid ? 'hover' : 'rest'}`),
 						...toneColor,
-						backgroundImage: isSolid ? vars.controlFinish.raised : 'none',
+						backgroundImage: isSolid ? vars.controlFinish.raised : stateLayer('hover'),
 					},
 					[pressed]: {
-						...surfaceStyle(`${fill}.${surface}.pressed`),
+						...surfaceStyle(`${fill}.${surface}.${isSolid ? 'pressed' : 'rest'}`),
 						...toneColor,
-						backgroundImage: isSolid ? vars.controlFinish.recessed : 'none',
+						backgroundImage: isSolid ? vars.controlFinish.recessed : stateLayer('pressed'),
 					},
 				},
 			},
