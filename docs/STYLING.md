@@ -132,7 +132,8 @@ decision record is
 Only the native `:focus-visible` pseudo-class draws the global ring. React Aria also sets
 `data-focus-visible` on wrappers such as labels and groups, so a recipe that wants a ring from that
 attribute draws it on the element that should show it. Keep exactly one focus indicator per control.
-Remove an `outline: none` only when nothing else would draw a second ring.
+Remove an `outline: none` only when nothing else would draw a second ring. A dropdown's active
+option shows focus with a fill, not a ring. See [Dropdown option states](#dropdown-option-states).
 
 ## Cascade layers
 
@@ -340,6 +341,30 @@ Do not widen a state with `:has()` when the group already exposes data attribute
 `data-disabled` and `data-invalid`. Probing descendants cannot tell a disabled control from one that
 only contains a disabled button. Use `descendantDisabledSelector` to style a part when an ancestor
 control is disabled.
+
+### Dropdown option states
+
+Select and Combobox options share one state model, from React Aria's Vanilla CSS dropdown. The
+combobox recipe's `item` slot implements it, and `SelectItem` reuses that slot. A standalone list
+box and other collections need their own decision.
+
+| State                   | Treatment                                           |
+| ----------------------- | --------------------------------------------------- |
+| Active (`data-focused`) | `accent.solid.rest` with the on-solid foreground    |
+| Active + pressed        | `accent.solid.pressed` with the on-solid foreground |
+| Selected                | The check icon only, with no fill or extra weight   |
+| Hovered but not active  | No style                                            |
+
+React Aria moves the one active option with the pointer and the keyboard. It moves with the pointer
+only while focus is not visible, so a stationary pointer does not take the active option back during
+keyboard navigation. The active fill is the focus indicator, so options draw no ring. Select moves
+real DOM focus onto the active option. Combobox keeps real focus in its input, which keeps its own
+ring, and names the active option with `aria-activedescendant`. Under forced colours the active
+option uses `Highlight` and `HighlightText`, and selection stays the check.
+
+Because the fill marks focus, the compiler gates `accent.solid.rest` and `accent.solid.pressed` at
+3:1 against `surface.overlay`. See
+[Border contrast policy](THEME_COLOUR_GENERATION.md#border-contrast-policy).
 
 ## Styling utilities
 

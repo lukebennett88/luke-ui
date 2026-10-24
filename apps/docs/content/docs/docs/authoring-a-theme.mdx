@@ -209,6 +209,11 @@ At 3:1, against every surface:
 - `color.border.control` and `color.border.controlHover`, the boundary of a form control.
 - `color.background.danger.solid.rest`, the boundary of an invalid control.
 
+At 3:1, against `surface.overlay`:
+
+- `color.background.accent.solid.rest` and `color.background.accent.solid.pressed`, the active
+  option in a Select or Combobox list.
+
 If any pair fails, `defineTheme` throws `ThemeContrastError` instead of returning CSS. Its
 `failures` array names the colour mode, foreground and background tokens with their states, achieved
 ratio, and required ratio for every failing pair. Validation uses the final rounded colours mapped

@@ -58,6 +58,28 @@ describe('buildTheme contrast failures', () => {
 		);
 	});
 
+	it('rejects an accent whose solid fill fades into the overlay', () => {
+		const accent = resolvedColor('#fde68a');
+		const error = buildFailures({
+			...tactileFoundation,
+			light: {
+				...tactileFoundation.light,
+				color: { ...tactileFoundation.light.color, accent },
+			},
+			name: 'pale-accent',
+		});
+		const failures = error.failures.filter((candidate) => {
+			return candidate.background === 'color.surface.overlay';
+		});
+		expect(failures.map((failure) => failure.foreground)).toEqual(
+			expect.arrayContaining(['color.background.accent.solid.rest']),
+		);
+		for (const failure of failures) {
+			expect(failure.mode).toBe('light');
+			expect(failure.ratio).toBeLessThan(UI_RATIO);
+		}
+	});
+
 	it('rejects a pair that passes before emission but fails after rounding', () => {
 		const focus = resolvedColor('oklch(0.658255 0 0)');
 		const base = tactileFoundation.light.color.surface.base;
@@ -223,6 +245,13 @@ describe('contrast validation matrix', () => {
 			hard.push({
 				background,
 				foreground: 'color.background.danger.solid.rest',
+				required: UI_RATIO,
+			});
+		}
+		for (const state of ['rest', 'pressed']) {
+			hard.push({
+				background: 'color.surface.overlay',
+				foreground: `color.background.accent.solid.${state}`,
 				required: UI_RATIO,
 			});
 		}
