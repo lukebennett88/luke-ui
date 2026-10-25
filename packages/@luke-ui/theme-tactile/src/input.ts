@@ -31,7 +31,7 @@ export const theme: ThemeInput = {
 		},
 	},
 	color: {
-		accent: { dark: 'oklch(0.75 0.1 200)', light: 'oklch(0.52 0.11 200)' },
+		accent: { dark: 'oklch(0.45 0.1 200)', light: 'oklch(0.52 0.11 200)' },
 		neutral: { dark: 'oklch(0.25 0.015 210)', light: 'oklch(0.985 0 0)' },
 	},
 	// Raised rungs: a faint top highlight and blurred shadows; a zero-blur offset would read as a

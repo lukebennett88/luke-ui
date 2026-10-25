@@ -31,7 +31,7 @@ export const paperTheme: ThemeInput = {
 		},
 	},
 	color: {
-		accent: { dark: 'oklch(0.7 0.11 250)', light: '#185281' },
+		accent: { dark: 'oklch(0.48 0.11 250)', light: '#185281' },
 		// Feedback colours are authored for light only; the omitted dark sides default per mode.
 		danger: { light: '#c0262e' },
 		info: { light: '#1d39c4' },
