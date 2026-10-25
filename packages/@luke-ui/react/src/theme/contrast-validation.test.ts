@@ -58,25 +58,48 @@ describe('buildTheme contrast failures', () => {
 		);
 	});
 
-	it('rejects an accent whose solid fill fades into the overlay', () => {
-		const accent = resolvedColor('#fde68a');
-		const error = buildFailures({
-			...tactileFoundation,
-			light: {
-				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, accent },
-			},
-			name: 'pale-accent',
-		});
-		const failures = error.failures.filter((candidate) => {
-			return candidate.background === 'color.surface.overlay';
-		});
-		expect(failures.map((failure) => failure.foreground)).toEqual(
-			expect.arrayContaining(['color.background.accent.solid.rest']),
-		);
-		for (const failure of failures) {
-			expect(failure.mode).toBe('light');
-			expect(failure.ratio).toBeLessThan(UI_RATIO);
+	it('accepts pale and deep accents whose solids may fail 3:1 against the overlay', () => {
+		// The active option's focus chrome is an inset outline on the solid fill, gated against that
+		// fill (and already covered at 4.5:1 by the on-solid text gates), not against the list surface.
+		for (const [name, accent] of [
+			['pale-accent', resolvedColor('#fde68a')],
+			['deep-accent', resolvedColor('oklch(0.48 0.11 250)')],
+		] as const) {
+			const { diagnostics } = compileTheme({
+				...tactileFoundation,
+				dark: {
+					...tactileFoundation.dark,
+					color: { ...tactileFoundation.dark.color, accent },
+				},
+				light: {
+					...tactileFoundation.light,
+					color: { ...tactileFoundation.light.color, accent },
+				},
+				name,
+			});
+			for (const mode of ['light', 'dark'] as const) {
+				const outlineChecks = diagnostics[mode].contrastChecks.filter((check) => {
+					return (
+						check.foreground === 'color.foreground.accent.onSolid.primary' &&
+						(check.background === 'color.background.accent.solid.rest' ||
+							check.background === 'color.background.accent.solid.pressed') &&
+						check.required === UI_RATIO
+					);
+				});
+				expect(outlineChecks).toHaveLength(2);
+				for (const check of outlineChecks) {
+					expect(check.hard).toBe(true);
+					expect(check.passes).toBe(true);
+					expect(check.ratio).toBeGreaterThanOrEqual(UI_RATIO);
+				}
+				expect(
+					diagnostics[mode].contrastChecks.some(
+						(check) =>
+							check.background === 'color.surface.overlay' &&
+							check.foreground.startsWith('color.background.accent.solid.'),
+					),
+				).toBe(false);
+			}
 		}
 	});
 
@@ -250,8 +273,8 @@ describe('contrast validation matrix', () => {
 		}
 		for (const state of ['rest', 'pressed']) {
 			hard.push({
-				background: 'color.surface.overlay',
-				foreground: `color.background.accent.solid.${state}`,
+				background: `color.background.accent.solid.${state}`,
+				foreground: 'color.foreground.accent.onSolid.primary',
 				required: UI_RATIO,
 			});
 		}
@@ -373,34 +396,68 @@ describe('custom-canvas cross-role contrast', () => {
 
 describe('independent on-solid hierarchy gates', () => {
 	const blocks = splitBlocks(buildTheme(tactileFoundation));
+	const solidStates = ['rest', 'hover', 'pressed'] as const;
+
+	function modeColors(mode: 'light' | 'dark'): SemanticColorValues {
+		const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
+		return Object.fromEntries(
+			flattenThemeContract()
+				.filter(([path]) => path.startsWith('color.'))
+				.map(([path, variable]) => [path, extractValue(block, variable)]),
+		) as SemanticColorValues;
+	}
+
 	for (const mode of ['light', 'dark'] as const) {
-		for (const hierarchy of ['primary', 'secondary'] as const) {
-			it(`rejects only the failing ${hierarchy} leaf across every role and state in ${mode}`, () => {
-				const solidStates = ['rest', 'hover', 'pressed'] as const;
-				const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
-				const colors = Object.fromEntries(
-					flattenThemeContract()
-						.filter(([path]) => path.startsWith('color.'))
-						.map(([path, variable]) => [path, extractValue(block, variable)]),
-				) as SemanticColorValues;
-				for (const role of SEMANTIC_ROLES) {
-					colors[`color.foreground.${role}.onSolid.${hierarchy}`] =
-						colors[`color.background.${role}.solid.rest`];
+		it(`rejects only the failing primary leaf across every role and state in ${mode}`, () => {
+			const colors = modeColors(mode);
+			for (const role of SEMANTIC_ROLES) {
+				colors[`color.foreground.${role}.onSolid.primary`] =
+					colors[`color.background.${role}.solid.rest`];
+			}
+			const { failures } = validateContrast(mode, colors);
+			// Accent on-solid primary is also gated at 3:1 for the dropdown inset outline.
+			expect(failures).toHaveLength(SEMANTIC_ROLES.length * solidStates.length + 2);
+			for (const role of SEMANTIC_ROLES) {
+				for (const state of solidStates) {
+					expect(failures).toContainEqual({
+						mode,
+						foreground: `color.foreground.${role}.onSolid.primary`,
+						background: `color.background.${role}.solid.${state}`,
+						ratio: expect.any(Number),
+						required: TEXT_RATIO,
+					});
 				}
-				const { failures } = validateContrast(mode, colors);
-				expect(failures).toHaveLength(SEMANTIC_ROLES.length * solidStates.length);
-				for (const role of SEMANTIC_ROLES) {
-					for (const state of solidStates) {
-						expect(failures).toContainEqual({
-							mode,
-							foreground: `color.foreground.${role}.onSolid.${hierarchy}`,
-							background: `color.background.${role}.solid.${state}`,
-							ratio: expect.any(Number),
-							required: TEXT_RATIO,
-						});
-					}
+			}
+			for (const state of ['rest', 'pressed'] as const) {
+				expect(failures).toContainEqual({
+					mode,
+					foreground: 'color.foreground.accent.onSolid.primary',
+					background: `color.background.accent.solid.${state}`,
+					ratio: expect.any(Number),
+					required: UI_RATIO,
+				});
+			}
+		});
+
+		it(`rejects only the failing secondary leaf across every role and state in ${mode}`, () => {
+			const colors = modeColors(mode);
+			for (const role of SEMANTIC_ROLES) {
+				colors[`color.foreground.${role}.onSolid.secondary`] =
+					colors[`color.background.${role}.solid.rest`];
+			}
+			const { failures } = validateContrast(mode, colors);
+			expect(failures).toHaveLength(SEMANTIC_ROLES.length * solidStates.length);
+			for (const role of SEMANTIC_ROLES) {
+				for (const state of solidStates) {
+					expect(failures).toContainEqual({
+						mode,
+						foreground: `color.foreground.${role}.onSolid.secondary`,
+						background: `color.background.${role}.solid.${state}`,
+						ratio: expect.any(Number),
+						required: TEXT_RATIO,
+					});
 				}
-			});
-		}
+			}
+		});
 	}
 });

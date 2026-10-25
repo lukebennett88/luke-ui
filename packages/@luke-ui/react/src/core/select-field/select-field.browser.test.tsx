@@ -753,8 +753,13 @@ test('the active SelectField option takes DOM focus, and Enter selects it', asyn
 	await userEvent.keyboard('{ArrowDown}');
 	await expect.element(option('Light')).toHaveFocus();
 
-	expect(option('Light').element()).toHaveAttribute('data-focused', 'true');
+	const active = option('Light').element();
+	expect(active).toHaveAttribute('data-focused', 'true');
 	expect(page.getByRole('listbox').element()).not.toHaveAttribute('aria-activedescendant');
+	const activeStyles = getComputedStyle(active);
+	expect(activeStyles.outlineStyle).toBe('solid');
+	expect(activeStyles.outlineWidth).toBe('2px');
+	expect(activeStyles.outlineOffset).toBe('-2px');
 	await userEvent.keyboard('{Enter}');
 	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
 	expect(trigger(/Theme/)).toHaveTextContent('Light');

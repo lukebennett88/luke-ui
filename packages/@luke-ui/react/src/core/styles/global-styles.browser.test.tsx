@@ -315,7 +315,7 @@ for (const { control, name } of wrappedControls) {
 	});
 }
 
-test('shows virtual focus on a list box item without a second ring', async () => {
+test('shows virtual focus on a list box item with an inset outline beside the input ring', async () => {
 	const { container } = render(
 		<ComboboxField defaultItems={items} label="Combobox">
 			{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
@@ -328,12 +328,17 @@ test('shows virtual focus on a list box item without a second ring', async () =>
 	const option = page.getByRole('option', { name: 'Option one' });
 	await expect.element(option).toHaveAttribute('data-focus-visible', 'true');
 
-	// DOM focus stays on the input, so the option shows focus with its background alone.
+	// DOM focus stays on the input (its ring). The active option uses a solid fill plus an inset
+	// outline, not a second global focus ring.
 	expect(input).toHaveFocus();
-	expect(getComputedStyle(option.element()).outlineStyle).toBe('none');
-	expect(getComputedStyle(option.element()).backgroundColor).not.toBe(
+	const optionStyles = getComputedStyle(option.element());
+	expect(optionStyles.outlineStyle).toBe('solid');
+	expect(optionStyles.outlineWidth).toBe('2px');
+	expect(optionStyles.outlineOffset).toBe('-2px');
+	expect(optionStyles.backgroundColor).not.toBe(
 		getComputedStyle(page.getByRole('option', { name: 'Option two' }).element()).backgroundColor,
 	);
+	// `visibleRings` skips clipped popover content, so it still reports only the input ring.
 	expect(visibleRings(container)).toHaveLength(1);
 });
 

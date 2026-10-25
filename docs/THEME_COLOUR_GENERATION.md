@@ -88,10 +88,11 @@ advisory group. Every gate covers all four surfaces: forms, links, and semantic 
   well under 3:1 in light mode.
 - `color.border.focus` is a hard gate against all four surfaces. The keyboard-focus ring stays
   build-time validated at ≥3:1.
-- `color.background.accent.solid.rest` and `color.background.accent.solid.pressed` are hard gates
-  against `color.surface.overlay` only. The active Select or Combobox option uses them as its focus
-  indicator, and dropdowns render on the overlay. The gate is not a general solid-background
-  guarantee, and the compiler never changes an authored accent to pass it.
+- `color.foreground.accent.onSolid.primary` is also a hard gate at 3:1 against
+  `color.background.accent.solid.rest` and `color.background.accent.solid.pressed`. The active
+  Select or Combobox option draws a 2px inset outline in that on-solid colour on those fills, so the
+  adjacent colour is the solid, not the list surface. The same pairs already clear 4.5:1 as on-solid
+  text. The compiler never changes an authored accent to pass a gate.
 - `color.border.decorative` is not checked. It is a deliberately subtle, Radix-style separator below
   3:1.
 - Every semantic role border (`color.border.<role>`, all six roles) is a decorative tint with an

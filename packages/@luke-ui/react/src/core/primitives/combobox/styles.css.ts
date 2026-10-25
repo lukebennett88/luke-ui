@@ -309,6 +309,8 @@ const comboboxConfig = {
 							backgroundColor: 'Highlight',
 							color: 'HighlightText',
 							forcedColorAdjust: 'none',
+							outline: '2px solid HighlightText',
+							outlineOffset: '-2px',
 						},
 					},
 				},
@@ -327,21 +329,28 @@ const comboboxConfig = {
 			...pressFeedback,
 			transform: 'none',
 			transitionDuration: vars.motion.feedback.duration,
-			transitionProperty: 'background-color, color, opacity',
+			transitionProperty: 'background-color, color, opacity, outline-color',
 			transitionTimingFunction: vars.motion.feedback.easing,
 
-			// React Aria moves the one active item (`data-focused`) with the pointer and the keyboard,
-			// so its solid fill is the focus indicator and the item draws no ring. Selection shows only
-			// the check, and hover alone has no style.
+			// React Aria moves the one active item (`data-focused`) with the pointer and the keyboard.
+			// The solid fill plus a 2px inset outline in the on-solid foreground mark focus. Selection
+			// shows only the check, and hover alone has no style.
 			selectors: {
 				'&[data-disabled="true"]': {
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
-				'&[data-focused="true"]:not([data-disabled="true"])': surfaceStyle('accent.solid.rest'),
-				'&[data-focused="true"][data-pressed="true"]:not([data-disabled="true"])':
-					surfaceStyle('accent.solid.pressed'),
+				'&[data-focused="true"]:not([data-disabled="true"])': {
+					...surfaceStyle('accent.solid.rest'),
+					outline: `2px solid ${vars.color.foreground.accent.onSolid.primary}`,
+					outlineOffset: '-2px',
+				},
+				'&[data-focused="true"][data-pressed="true"]:not([data-disabled="true"])': {
+					...surfaceStyle('accent.solid.pressed'),
+					outline: `2px solid ${vars.color.foreground.accent.onSolid.primary}`,
+					outlineOffset: '-2px',
+				},
 			},
 		},
 		trayTrigger: {

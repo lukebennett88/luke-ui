@@ -767,6 +767,10 @@ test('the active ComboboxField option is the input’s active descendant, and En
 	const active = activeOption();
 	expect(input).toHaveFocus();
 	expect(input.getAttribute('aria-activedescendant')).toBe(active.id);
+	const activeStyles = getComputedStyle(active);
+	expect(activeStyles.outlineStyle).toBe('solid');
+	expect(activeStyles.outlineWidth).toBe('2px');
+	expect(activeStyles.outlineOffset).toBe('-2px');
 	const name = active.textContent;
 	await userEvent.keyboard('{Enter}');
 	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
