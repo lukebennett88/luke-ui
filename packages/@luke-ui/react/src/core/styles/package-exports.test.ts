@@ -189,7 +189,6 @@ test('theme compiler entry publishes only the authoring allowlist', async () => 
 	expect(Object.keys(compiler).toSorted()).toEqual([
 		'ThemeContrastError',
 		'ThemeGenerationError',
-		'ThemeInteractionTintError',
 		'ThemeValidationError',
 		'defineTheme',
 	]);

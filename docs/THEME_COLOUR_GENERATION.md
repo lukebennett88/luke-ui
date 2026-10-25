@@ -155,13 +155,14 @@ emits per mode (`--luke-internal-interaction-tint-hover` and `-pressed`). Light 
 Dark mode uses white. Strengths target today's neutral subtle hover and pressed over `surface.base`,
 then scale under a contrast cap so every supported foreground stays at 4.5:1 over every surface and
 subtle rest with the tint on top. Visibility floors in `contrast-policy.ts` reject a theme that can
-only pass by making hover or pressed invisible. Compositing for that solve uses encoded sRGB,
+only pass by making hover or pressed invisible: the hover floor applies on `surface.base`, and the
+hover-to-pressed floor applies on all four surfaces. Compositing for that solve uses encoded sRGB,
 matching CSS.
 
-A translucent tint over a solid fill can drop on-solid text below AA when the solid carries dark
-on-solid text in light mode. Low Buttons therefore fall back to an opaque subtle chip on solids
-(`solidStateFill` / `solidStateText` from the surface pairing). Standard Buttons keep their resting
-subtle fill plus the tint. The public replacement for consumers is tracked in #927.
+A translucent tint has too little visible difference between hover and pressed on some solid fills.
+Low Buttons therefore use an opaque subtle chip on solids (`solidStateFill` / `solidStateText` from
+the surface pairing). Standard Buttons keep their resting subtle fill plus the tint. The public
+replacement for consumers is tracked in #927.
 
 Theme authors do not author hover, pressed, or tint colours. `color.overlay.backdrop` is the
 authored modal dimming layer. `color.surface.overlay` is the opaque surface for detached content

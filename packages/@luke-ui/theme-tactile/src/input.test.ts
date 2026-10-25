@@ -45,7 +45,7 @@ describe('custom canvases that extend the published input', () => {
 			ratio: 4.393,
 		},
 	] as const) {
-		test(`rejects the ${mode} canvas only for cross-role subtle contrast`, () => {
+		test(`rejects the ${mode} canvas when it makes the theme unsatisfiable`, () => {
 			let caught: unknown;
 			try {
 				defineTheme({
@@ -55,6 +55,13 @@ describe('custom canvases that extend the published input', () => {
 				});
 			} catch (error) {
 				caught = error;
+			}
+
+			if (mode === 'dark') {
+				if (!(caught instanceof Error) || !caught.message.includes('unsatisfiable in dark')) {
+					throw new Error(`Expected an unsatisfiable dark theme error, received ${String(caught)}`);
+				}
+				return;
 			}
 
 			expect(caught).toBeInstanceOf(ThemeContrastError);

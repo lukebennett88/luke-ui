@@ -11,10 +11,10 @@ import {
 	TEXT_RATIO,
 } from './contrast-policy.js';
 import { controlHoverBorder, solveControlBorder } from './control-border.js';
-import { normalizeTheme } from './define-theme.js';
+import { defineTheme, normalizeTheme } from './define-theme.js';
 import { interactionTintVarName } from './interaction-tint-vars.js';
 import { solveInteractionTints, ThemeInteractionTintError } from './interaction-tints.js';
-import { generateFamilyWithDiagnostics, highContrastText } from './scale.js';
+import { generateFamilyWithDiagnostics, highContrastText, oklabDeltaE } from './scale.js';
 import { mapSemanticColors } from './semantic-map.js';
 import { generateSurfaces } from './surfaces.js';
 
@@ -34,7 +34,18 @@ describe('solveInteractionTints', () => {
 		it(`keeps ${name} tint visibility above the calibrated floors`, () => {
 			const foundation = normalizeTheme(input);
 			for (const mode of ['light', 'dark'] as const) {
-				const tints = solveInteractionTints(mode, modeColorValues(foundation, mode));
+				const values = modeColorValues(foundation, mode);
+				const tints = solveInteractionTints(mode, values);
+				const tint = mode === 'dark' ? { l: 1, c: 0, h: 0 } : { l: 0, c: 0, h: 0 };
+				for (const surface of ['base', 'subdued', 'field', 'overlay'] as const) {
+					const background = parseColor(values[`color.surface.${surface}`]);
+					const hover = compositeEncodedSrgb(tint, background, tints.hoverAlpha);
+					const pressed = compositeEncodedSrgb(tint, background, tints.pressedAlpha);
+					expect(oklabDeltaE(background, hover)).toBeGreaterThan(0);
+					expect(oklabDeltaE(hover, pressed)).toBeGreaterThanOrEqual(
+						INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
+					);
+				}
 				expect(tints.hoverVisibility).toBeGreaterThanOrEqual(INTERACTION_HOVER_VISIBILITY);
 				expect(tints.hoverToPressedVisibility).toBeGreaterThanOrEqual(
 					INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
@@ -72,6 +83,16 @@ describe('solveInteractionTints', () => {
 		}
 
 		expect(() => solveInteractionTints('dark', colorValues)).toThrow(ThemeInteractionTintError);
+	});
+
+	it('rejects a custom theme whose dark overlay leaves no visible contrast-safe tint', () => {
+		const theme = (lightness: number) => ({
+			color: { surface: { overlay: { dark: `oklch(${lightness} 0.01 250)` } } },
+			extends: paperTheme,
+			name: 'contrast-edge',
+		});
+		expect(() => defineTheme(theme(0.32))).not.toThrow();
+		expect(() => defineTheme(theme(0.33))).toThrow(ThemeInteractionTintError);
 	});
 });
 

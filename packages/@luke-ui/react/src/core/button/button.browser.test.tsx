@@ -7,8 +7,17 @@ import { act } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { assert, expect, onTestFinished, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
+import { parseColor } from '../../theme/color.js';
+import { INTERACTION_HOVER_TO_PRESSED_VISIBILITY } from '../../theme/contrast-policy.js';
+import { oklabDeltaE } from '../../theme/scale.js';
 import { watchSpinner } from '../test-utils/action-spinner.js';
-import { expectAxeContrastPasses, expectNoAxeViolations } from '../test-utils/axe.js';
+import { renderedPixels } from '../test-utils/autofill.js';
+import {
+	expectAxeContrastPasses,
+	expectNoAxeViolations,
+	visibleTextElements,
+} from '../test-utils/axe.js';
+import { emulateReducedMotion } from '../test-utils/emulate-media.js';
 import { flatAppearances, render, visualAppearances } from '../test-utils/render.js';
 import { lowestRenderedTextContrast } from '../test-utils/rendered-contrast.js';
 import type { PairedBackground } from '../test-utils/surface-colors.js';
@@ -24,6 +33,9 @@ import {
 	emulateForcedColors,
 	focusViaKeyboard,
 	Grid,
+	parkPointer,
+	pressPointer,
+	releasePointer,
 } from '../test-utils/visual.js';
 
 /** Intended Action spinner delay (~300ms). Kept in the test so production timing drifts fail. */
@@ -722,7 +734,13 @@ test('a Button on a solid fill takes system colours in forced colours', async ()
 
 // Adaptive hover and pressed must stay visible on every standard surface, including overlays an
 // application paints with `surface.overlay` without going through `Box`.
-for (const appearance of visualAppearances) {
+const adaptiveAppearances = [
+	...visualAppearances,
+	{ mode: 'light', theme: 'contrastEdge' },
+	{ mode: 'dark', theme: 'contrastEdge' },
+] as const;
+
+for (const appearance of adaptiveAppearances) {
 	const surfaces = ['surface.base', 'surface.subdued', 'surface.field', 'surface.overlay'] as const;
 
 	test(`low and standard Buttons keep 4.5:1 text over adaptive states on every surface in ${appearance.theme} ${appearance.mode}`, async () => {
@@ -789,7 +807,61 @@ for (const appearance of visualAppearances) {
 
 const solidRoles = ['accent', 'info', 'success', 'warning', 'danger', 'neutral'] as const;
 
-for (const appearance of visualAppearances) {
+async function renderedButtonFill(button: HTMLElement) {
+	const texts = visibleTextElements(button).filter((text) => text instanceof HTMLElement);
+	const visibilities = texts.map((text) => text.style.visibility);
+	for (const text of texts) text.style.visibility = 'hidden';
+	try {
+		const pixels = await renderedPixels(button);
+		const x = Math.floor(pixels.width / 2);
+		const y = Math.floor(pixels.height / 2);
+		const offset = (y * pixels.width + x) * 4;
+		const hex = [0, 1, 2]
+			.map((channel) => (pixels.data[offset + channel] ?? 0).toString(16).padStart(2, '0'))
+			.join('');
+		return parseColor(`#${hex}`);
+	} finally {
+		for (const [index, text] of texts.entries()) text.style.visibility = visibilities[index] ?? '';
+	}
+}
+
+for (const appearance of adaptiveAppearances) {
+	test(`low Buttons show a pressed step inside every role solid in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { locator } = render(
+			<>
+				{solidRoles.map((role) => (
+					<Box key={role} backgroundColor={`${role}.solid`} data-testid={role} padding="space.8">
+						<Button prominence="low">Neutral low in {role}</Button>
+						<Button prominence="low" tone="critical">
+							Critical low in {role}
+						</Button>
+					</Box>
+				))}
+			</>,
+			{ appearance },
+		);
+		const misses: Array<{ role: string; tone: string; visibility: number }> = [];
+		for (const role of solidRoles) {
+			for (const tone of ['Neutral', 'Critical']) {
+				const button = locator.getByRole('button', { name: `${tone} low in ${role}` }).element();
+				assert(button instanceof HTMLElement);
+				setInteractionState(button, 'hover');
+				settledSurfaceColors(button);
+				const hover = await renderedButtonFill(button);
+				setInteractionState(button, 'pressed');
+				settledSurfaceColors(button);
+				const pressed = await renderedButtonFill(button);
+				const visibility = oklabDeltaE(hover, pressed);
+				if (visibility < INTERACTION_HOVER_TO_PRESSED_VISIBILITY) {
+					misses.push({ role, tone, visibility: Number(visibility.toFixed(3)) });
+				}
+			}
+		}
+		expect(misses).toEqual([]);
+	});
+}
+
+for (const appearance of adaptiveAppearances) {
 	test(`low Buttons keep 4.5:1 text over adaptive states inside every role solid in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { locator } = render(
 			<>
@@ -850,10 +922,102 @@ test('forced colours clear the adaptive state layer on a low Button', async () =
 	}
 });
 
+test('adaptive Button layer transitions normally and changes immediately with reduced motion', async () => {
+	const { locator } = render(<Button prominence="low">Cancel</Button>);
+	const button = locator.getByRole('button', { name: 'Cancel' }).element();
+	const layerProperty = '--luke-interaction-state-layer';
+	getComputedStyle(button);
+	setInteractionState(button, 'hover');
+	await expect
+		.poll(() =>
+			button.getAnimations().some((animation) => {
+				return animation instanceof CSSTransition && animation.transitionProperty === layerProperty;
+			}),
+		)
+		.toBe(true);
+	settledSurfaceColors(button);
+
+	await emulateReducedMotion(true);
+	try {
+		setInteractionState(button, 'pressed');
+		const style = getComputedStyle(button);
+		expect(style.transitionProperty).not.toContain(layerProperty);
+		expect(style.getPropertyValue(layerProperty)).toBe(
+			resolvedColor('var(--luke-internal-interaction-tint-pressed)', button),
+		);
+		expect(
+			button.getAnimations().some((animation) => {
+				return animation instanceof CSSTransition && animation.transitionProperty === layerProperty;
+			}),
+		).toBe(false);
+	} finally {
+		await emulateReducedMotion(false);
+	}
+});
+
+for (const appearance of visualAppearances) {
+	test(`pointer and keyboard input paint adaptive hover and pressed states in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { locator, user } = render(
+			<div
+				style={{
+					backgroundColor: vars.color.surface.overlay,
+					color: vars.color.text.primary,
+					padding: vars.space['16'],
+				}}
+			>
+				<Button prominence="low">Cancel</Button>
+			</div>,
+			{ appearance },
+		);
+		const target = locator.getByRole('button', { name: 'Cancel' });
+		const button = target.element();
+		assert(button instanceof HTMLElement);
+		await parkPointer();
+		settledSurfaceColors(button);
+		const rest = await renderedButtonFill(button);
+		await user.hover(target);
+		await expect.poll(() => button.hasAttribute('data-hovered')).toBe(true);
+		settledSurfaceColors(button);
+		const hover = await renderedButtonFill(button);
+		await pressPointer(button);
+		try {
+			await expect.poll(() => button.hasAttribute('data-pressed')).toBe(true);
+			settledSurfaceColors(button);
+			const pressed = await renderedButtonFill(button);
+			expect(oklabDeltaE(rest, hover)).toBeGreaterThan(0);
+			expect(oklabDeltaE(hover, pressed)).toBeGreaterThanOrEqual(
+				INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
+			);
+		} finally {
+			await releasePointer();
+		}
+		await parkPointer();
+		button.blur();
+		await focusViaKeyboard(target);
+		await user.keyboard('[Space>]');
+		try {
+			await expect.poll(() => button.hasAttribute('data-pressed')).toBe(true);
+			settledSurfaceColors(button);
+			const keyboardPressed = await renderedButtonFill(button);
+			expect(oklabDeltaE(hover, keyboardPressed)).toBeGreaterThanOrEqual(
+				INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
+			);
+		} finally {
+			await user.keyboard('[/Space]');
+		}
+	});
+}
+
 test('kitchen sink on overlay', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(
-			<Box backgroundColor="surface.overlay" padding="space.16">
+			<div
+				style={{
+					backgroundColor: vars.color.surface.overlay,
+					color: vars.color.text.primary,
+					padding: vars.space['16'],
+				}}
+			>
 				<Grid columns={3}>
 					<Button prominence="low">Cancel</Button>
 					<Button>Standard</Button>
@@ -866,7 +1030,7 @@ test('kitchen sink on overlay', { tags: ['visual'] }, async () => {
 						Critical high
 					</Button>
 				</Grid>
-			</Box>,
+			</div>,
 			{ appearance },
 		);
 		const cancel = locator.getByRole('button', { name: 'Cancel' }).element();

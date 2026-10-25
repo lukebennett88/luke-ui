@@ -9,6 +9,7 @@ import { gamutMapOklch, parseColor } from './color.js';
 import type { ThemeInput } from './define-theme.js';
 import { defaultBackdrop, defaultDepth, normalizeTheme } from './define-theme.js';
 import { defaultSourceColors } from './foundation.js';
+import { ThemeInteractionTintError } from './interaction-tints.js';
 import { FAMILY_RUNG } from './scale.js';
 
 const VAR_VALUE_PATTERN_CACHE = new Map<string, RegExp>();
@@ -326,15 +327,25 @@ describe('normalizeTheme carries authored surfaces', () => {
 	it('emits an authored surface exactly and generates the others from the base', () => {
 		const blocks = splitBlocks(
 			defineTheme({
-				color: { accent: '#3b82f6', surface: { subdued: { light: 'oklch(0.92 0 0)' } } },
+				color: { accent: '#3b82f6', surface: { subdued: { light: 'oklch(0.985 0 0)' } } },
 				name: 'authored-subdued',
 				typography: testTypography,
 			}),
 		);
-		expect(extractValue(blocks.baseLight, '--luke-color-surface-subdued')).toBe('oklch(0.92 0 0)');
+		expect(extractValue(blocks.baseLight, '--luke-color-surface-subdued')).toBe('oklch(0.985 0 0)');
 		expect(extractValue(blocks.baseLight, '--luke-color-surface-field')).toBe(
 			extractValue(blocks.baseLight, '--luke-color-surface-base'),
 		);
+	});
+
+	it('rejects an authored surface that leaves the hover-to-pressed step below the visibility floor', () => {
+		expect(() =>
+			defineTheme({
+				color: { accent: '#3b82f6', surface: { subdued: { light: 'oklch(0.92 0 0)' } } },
+				name: 'invisible-subdued',
+				typography: testTypography,
+			}),
+		).toThrow(ThemeInteractionTintError);
 	});
 
 	it('lets an author replace a generated surface that fails a contrast gate', () => {

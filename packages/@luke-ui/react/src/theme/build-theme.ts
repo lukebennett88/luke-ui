@@ -11,8 +11,8 @@ import type {
 } from './diagnostics.js';
 import type { ThemeInheritance } from './extend-theme.js';
 import type { ThemeFoundation, ThemeModeFoundation } from './foundation.js';
+import { ThemeInteractionTintError, solveInteractionTints } from './interaction-tints.js';
 import type { InteractionTintPair } from './interaction-tints.js';
-import { solveInteractionTints } from './interaction-tints.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import { generateFamilyWithDiagnostics, highContrastText, ScaleGenerationError } from './scale.js';
 import type { SemanticColorValues } from './semantic-map.js';
@@ -21,8 +21,6 @@ import { assembleStylesheet } from './stylesheet.js';
 import type { GeneratedSurfaces } from './surfaces.js';
 import { generateSurfaces } from './surfaces.js';
 import { validateFoundation } from './validate-foundation.js';
-
-export { ThemeInteractionTintError } from './interaction-tints.js';
 
 /**
  * Compiles a theme foundation into a complete static stylesheet plus its {@link ThemeDiagnostics}.
@@ -47,6 +45,8 @@ export function compileTheme(foundation: ThemeFoundation): {
 	const dark = buildModeValues('dark', foundation.dark);
 	const failures = [...light.failures, ...dark.failures];
 	if (failures.length > 0) throw new ThemeContrastError(failures);
+	if (light.interactionTintError !== null) throw light.interactionTintError;
+	if (dark.interactionTintError !== null) throw dark.interactionTintError;
 	return {
 		css: assembleStylesheet(foundation, light.values, dark.values, {
 			dark: dark.interactionTints,
@@ -146,6 +146,7 @@ type ColorMode = 'light' | 'dark';
 interface ModeValues {
 	diagnostics: ThemeModeDiagnostics;
 	failures: Array<ThemeContrastFailure>;
+	interactionTintError: ThemeInteractionTintError | null;
 	interactionTints: InteractionTintPair;
 	values: Record<ModePath, string>;
 }
@@ -166,13 +167,20 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 	};
 	// Tint strengths assume every gated opaque pair already clears AA. Skip the solve when this
 	// mode already failed contrast so `ThemeContrastError` reports those pairs first.
-	const interactionTints =
-		failures.length === 0
-			? solveInteractionTints(mode, colorValues)
-			: placeholderInteractionTints();
+	let interactionTintError: ThemeInteractionTintError | null = null;
+	let interactionTints = placeholderInteractionTints();
+	if (failures.length === 0) {
+		try {
+			interactionTints = solveInteractionTints(mode, colorValues);
+		} catch (error) {
+			if (!(error instanceof ThemeInteractionTintError)) throw error;
+			interactionTintError = error;
+		}
+	}
 	return {
 		diagnostics: { contrastChecks: checks, families: familyDiagnostics, mode, surfaces },
 		failures,
+		interactionTintError,
 		interactionTints,
 		values,
 	};

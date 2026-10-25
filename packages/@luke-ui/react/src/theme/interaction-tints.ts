@@ -1,7 +1,7 @@
 /**
  * Solves the one adaptive interaction tint pair per colour mode: black in light, white in dark.
  * Alphas target today's opaque subtle hover and pressed over `surface.base`, then cap so every
- * gated foreground stays at AA over every surface, subtle rest, and solid fill with the tint on
+ * gated foreground stays at AA over every surface and subtle rest with the tint on
  * top. Visibility floors in `contrast-policy.ts` reject a theme that can only pass by making the
  * states invisible. Compositing uses encoded sRGB, matching CSS.
  */
@@ -94,6 +94,12 @@ export class ThemeInteractionTintError extends Error {
 const WHITE: Oklch = { l: 1, c: 0, h: 0 };
 const BLACK: Oklch = { l: 0, c: 0, h: 0 };
 const ALPHA_SEARCH_STEPS = 1000;
+const TINT_SURFACES = [
+	'color.surface.base',
+	'color.surface.subdued',
+	'color.surface.field',
+	'color.surface.overlay',
+] as const satisfies ReadonlyArray<keyof SemanticColorValues>;
 
 /**
  * Solves hover and pressed tint strengths for one mode from its emitted colour values. Throws
@@ -144,15 +150,21 @@ export function solveInteractionTints(
 			reason: `hover visibility ${hoverVisibility.toFixed(3)} over surface.base is below the ${INTERACTION_HOVER_VISIBILITY} floor`,
 		});
 	}
-	if (hoverToPressedVisibility < INTERACTION_HOVER_TO_PRESSED_VISIBILITY) {
-		throw new ThemeInteractionTintError({
-			mode,
-			maxAlpha,
-			targetHoverAlpha,
-			targetPressedAlpha,
-			limitingMiss,
-			reason: `hover-to-pressed visibility ${hoverToPressedVisibility.toFixed(3)} over surface.base is below the ${INTERACTION_HOVER_TO_PRESSED_VISIBILITY} floor`,
-		});
+	for (const surface of TINT_SURFACES) {
+		const background = colorAt(colorValues, surface);
+		const hover = compositeEncodedSrgb(tint, background, hoverAlpha);
+		const pressed = compositeEncodedSrgb(tint, background, pressedAlpha);
+		const visibility = oklabDeltaE(hover, pressed);
+		if (visibility < INTERACTION_HOVER_TO_PRESSED_VISIBILITY) {
+			throw new ThemeInteractionTintError({
+				mode,
+				maxAlpha,
+				targetHoverAlpha,
+				targetPressedAlpha,
+				limitingMiss,
+				reason: `hover-to-pressed visibility ${visibility.toFixed(3)} over ${surface} is below the ${INTERACTION_HOVER_TO_PRESSED_VISIBILITY} floor`,
+			});
+		}
 	}
 
 	return {
@@ -200,9 +212,7 @@ function alphaMatchingTarget(source: Oklch, destination: Oklch, target: Oklch): 
 
 /**
  * Largest alpha where every supported pair still clears {@link TEXT_RATIO}: surface and subtle-rest
- * text hierarchy colours with the tint on top. On-solid pairs are omitted: a translucent tint over
- * a solid can fail AA when the solid carries dark on-solid text, so transparent controls use an
- * opaque subtle chip on solids instead (`solidStateFill`).
+ * text with the tint on top. Low Buttons use the paired opaque chip inside a solid fill.
  */
 function contrastCapAlpha(
 	mode: ColorMode,
@@ -261,16 +271,10 @@ function tintContrastPairs(): Array<{
 	background: keyof SemanticColorValues;
 	foreground: keyof SemanticColorValues;
 }> {
-	const surfaces = [
-		'color.surface.base',
-		'color.surface.subdued',
-		'color.surface.field',
-		'color.surface.overlay',
-	] as const satisfies ReadonlyArray<keyof SemanticColorValues>;
 	const subtleRests = SEMANTIC_ROLES.map((role) => {
 		return `color.background.${role}.subtle.rest` as const;
 	});
-	const surfaceBackgrounds = [...surfaces, ...subtleRests];
+	const surfaceBackgrounds = [...TINT_SURFACES, ...subtleRests];
 	const surfaceForegrounds = [
 		'color.text.primary',
 		'color.text.secondary',

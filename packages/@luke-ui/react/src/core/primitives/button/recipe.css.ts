@@ -84,6 +84,10 @@ export const buttonRecipeInternal = recipe({
 		appearance: {
 			button: {
 				'@media': {
+					'(prefers-reduced-motion: reduce)': {
+						transitionProperty:
+							'background-color, border-color, box-shadow, color, opacity, text-decoration-color',
+					},
 					'(forced-colors: active)': {
 						backgroundColor: 'ButtonFace',
 						backgroundImage: 'none',

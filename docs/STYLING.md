@@ -203,8 +203,9 @@ wrapped children use `!important` in `recipes` for that reason.
 Each component owns its reduced-motion behaviour. The stylesheet has no global motion rule, so it
 never disables an application's animations. Under `@media (prefers-reduced-motion: reduce)`:
 
-- Keep short non-spatial feedback: colour, border, shadow, and opacity transitions. Do not add a
-  reduced-motion query that only removes them.
+- Keep short non-spatial feedback: colour, border, shadow, and opacity transitions. Button
+  interaction states settle immediately so its registered state layer does not blend between hover
+  and pressed.
 - Remove spatial movement, scaling, pulsing, and looping, or replace it with a non-spatial change.
   An overlay keeps its fade and loses its movement. Build overlay motion with `overlayMotion` from
   `core/styles/overlay-motion.ts`, which generates those reduced-motion rules.
@@ -457,8 +458,8 @@ adaptive state layer in `core/styles/state-layer.css.ts`: a registered `<color>`
 the first `background-image` layer over a transparent or resting subtle fill, so they keep the
 surrounding foreground context (or the resting subtle pairing) while hover and pressed stay visible
 on every surface, including app-painted overlays. On a solid fill, a low Button falls back to an
-opaque subtle chip the pairing sets, because a translucent tint can cut on-solid text below AA.
-Forced colours clear the layer. See
+opaque subtle chip the pairing sets, because the shared tint's hover-to-pressed step is too small on
+some solid fills. The paired chip keeps text contrast on solids. Forced colours clear the layer. See
 [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md#interaction-states) for how the compiler
 solves the tint pair. Text a component draws on whatever surface surrounds it, such as a field's
 label, description, and error, a text action, or a native link in Prose, reads
