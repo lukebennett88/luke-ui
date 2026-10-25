@@ -36,6 +36,36 @@ const foregroundOverride = {
 	tone: createGlobalVar('luke-internal-foreground-tone'),
 };
 
+type SolidStateTone = 'neutral' | 'danger';
+
+/**
+ * Opaque subtle hover or pressed fill a transparent control paints while it sits on a solid. A
+ * translucent tint over a solid cuts on-solid text below AA when the solid carries dark on-solid
+ * text in light mode (#925). Unset on standard surfaces and subtle fills.
+ */
+export function solidStateFill(tone: SolidStateTone, state: 'hover' | 'pressed'): string {
+	return `--luke-internal-solid-state-fill-${tone}-${state}`;
+}
+
+/** Text colour that pairs with {@link solidStateFill}'s chip. */
+export function solidStateText(tone: SolidStateTone): string {
+	return `--luke-internal-solid-state-text-${tone}`;
+}
+
+const SOLID_STATE_TONES = ['neutral', 'danger'] as const;
+
+function solidStateVars(
+	value: (tone: SolidStateTone, slot: 'hover' | 'pressed' | 'text') => string,
+) {
+	return Object.fromEntries(
+		SOLID_STATE_TONES.flatMap((tone) => [
+			[solidStateFill(tone, 'hover'), value(tone, 'hover')],
+			[solidStateFill(tone, 'pressed'), value(tone, 'pressed')],
+			[solidStateText(tone), value(tone, 'text')],
+		]),
+	);
+}
+
 /**
  * The colour the nearest recognised surface establishes for `slot`. On a standard surface or any
  * subtle fill, the global neutral hierarchy and the role's hue in `state`. On a solid fill, that
@@ -107,6 +137,7 @@ function neutralContext(backgroundColor: string): SurfaceStyle {
 			[foregroundOverride.primary]: 'initial',
 			[foregroundOverride.secondary]: 'initial',
 			[foregroundOverride.tone]: 'initial',
+			...solidStateVars(() => 'initial'),
 		},
 	};
 }
@@ -120,6 +151,12 @@ function solidContext(role: SemanticRole, backgroundColor: string): SurfaceStyle
 			[foregroundOverride.primary]: onSolid.primary,
 			[foregroundOverride.secondary]: onSolid.secondary,
 			[foregroundOverride.tone]: onSolid.primary,
+			...solidStateVars((tone, slot) => {
+				if (slot === 'text') {
+					return tone === 'danger' ? vars.color.foreground.danger.rest : vars.color.text.primary;
+				}
+				return vars.color.background[tone].subtle[slot];
+			}),
 		},
 	};
 }

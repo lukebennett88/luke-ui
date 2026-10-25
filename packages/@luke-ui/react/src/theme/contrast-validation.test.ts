@@ -18,6 +18,7 @@ import type { ThemeFoundation } from './foundation.js';
 import type { SemanticColorValues } from './semantic-map.js';
 
 const REST_FOREGROUND_PATTERN = /^color\.foreground\.\w+\.rest$/;
+const ROLE_FOREGROUND_PATTERN = /^color\.foreground\.\w+\.(rest|hover|pressed)$/;
 const PRESSED_SUBTLE_BACKGROUND_PATTERN = /^color\.background\.\w+\.subtle\.pressed$/;
 
 describe('buildTheme contrast failures', () => {
@@ -352,11 +353,13 @@ describe('custom-canvas cross-role contrast', () => {
 			ratio: 4.467,
 		},
 		{
+			// Raising dark step-11 text to 0.79 (#925) cleared the previous 0.28 canvas miss; 0.31
+			// still fails a cross-role subtle pair.
 			mode: 'dark',
-			base: 'oklch(0.28 0 30)',
-			foreground: 'color.foreground.danger.rest',
+			base: 'oklch(0.31 0 30)',
+			foreground: 'color.foreground.warning.rest',
 			background: 'color.background.success.subtle.pressed',
-			ratio: 4.393,
+			ratio: 4.491,
 		},
 	] as const) {
 		it(`rejects the Tactile ${mode} custom canvas for cross-role contrast`, () => {
@@ -382,7 +385,9 @@ describe('custom-canvas cross-role contrast', () => {
 			// These canvases passed all earlier gates; every failure must be cross-role subtle text.
 			for (const failure of caught.failures) {
 				expect(failure.mode).toBe(mode);
-				expect(failure.foreground).toMatch(REST_FOREGROUND_PATTERN);
+				expect(failure.foreground).toMatch(
+					mode === 'light' ? REST_FOREGROUND_PATTERN : ROLE_FOREGROUND_PATTERN,
+				);
 				expect(failure.background).toMatch(PRESSED_SUBTLE_BACKGROUND_PATTERN);
 				expect(failure.foreground.split('.')[2]).not.toBe(failure.background.split('.')[2]);
 				expect(caught.message).toContain(

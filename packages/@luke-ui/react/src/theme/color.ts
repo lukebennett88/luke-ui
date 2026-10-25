@@ -143,6 +143,22 @@ export function formatOklch(color: Oklch, alpha?: number): string {
 	return `oklch(${l} ${c} ${h} / ${trimNumber(alpha, 3)})`;
 }
 
+/**
+ * Composites opaque `source` over opaque `destination` at `alpha` in encoded sRGB, matching CSS
+ * source-over for a translucent `background-image` over `background-color`. CSS does not linearise
+ * before this blend; a linear-light model overstates OKLab distances by about 4–5×.
+ */
+export function compositeEncodedSrgb(source: Oklch, destination: Oklch, alpha: number): Oklch {
+	const t = clampUnit(alpha);
+	const src = oklchToEncodedSrgb(gamutMapOklch(source));
+	const dst = oklchToEncodedSrgb(gamutMapOklch(destination));
+	return encodedSrgbToOklch([
+		src[0] * t + dst[0] * (1 - t),
+		src[1] * t + dst[1] * (1 - t),
+		src[2] * t + dst[2] * (1 - t),
+	]);
+}
+
 /** WCAG 2.2 relative luminance of the colour's sRGB-gamut-mapped equivalent. */
 function relativeLuminance(color: Oklch): number {
 	const [unclampedR, unclampedG, unclampedB] = oklchToLinearSrgb(gamutMapOklch(color));
@@ -191,6 +207,20 @@ function trimNumber(value: number, digits: number): string {
 
 function srgbToLinear(channel: number): number {
 	return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+}
+
+function linearToSrgb(channel: number): number {
+	const value = clampUnit(channel);
+	return value <= 0.0031308 ? 12.92 * value : 1.055 * value ** (1 / 2.4) - 0.055;
+}
+
+function oklchToEncodedSrgb(color: Oklch): SrgbTriple {
+	const [r, g, b] = oklchToLinearSrgb(color);
+	return [linearToSrgb(r), linearToSrgb(g), linearToSrgb(b)];
+}
+
+function encodedSrgbToOklch(rgb: SrgbTriple): Oklch {
+	return linearSrgbToOklch([srgbToLinear(rgb[0]), srgbToLinear(rgb[1]), srgbToLinear(rgb[2])]);
 }
 
 function isInSrgbGamut(color: Oklch): boolean {

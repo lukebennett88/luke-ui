@@ -326,12 +326,12 @@ describe('normalizeTheme carries authored surfaces', () => {
 	it('emits an authored surface exactly and generates the others from the base', () => {
 		const blocks = splitBlocks(
 			defineTheme({
-				color: { accent: '#3b82f6', surface: { subdued: { light: 'oklch(0.9 0 0)' } } },
+				color: { accent: '#3b82f6', surface: { subdued: { light: 'oklch(0.92 0 0)' } } },
 				name: 'authored-subdued',
 				typography: testTypography,
 			}),
 		);
-		expect(extractValue(blocks.baseLight, '--luke-color-surface-subdued')).toBe('oklch(0.9 0 0)');
+		expect(extractValue(blocks.baseLight, '--luke-color-surface-subdued')).toBe('oklch(0.92 0 0)');
 		expect(extractValue(blocks.baseLight, '--luke-color-surface-field')).toBe(
 			extractValue(blocks.baseLight, '--luke-color-surface-base'),
 		);
@@ -340,7 +340,8 @@ describe('normalizeTheme carries authored surfaces', () => {
 	it('lets an author replace a generated surface that fails a contrast gate', () => {
 		// A lighter dark base pushes the generated overlay, which sits above the base, under the text
 		// gate. The surface is reported rather than repaired, and authoring it clears its failures.
-		const base = { dark: 'oklch(0.33 0 0)', light: 'oklch(0.985 0 0)' };
+		// 0.36 is past the point where step-11 secondary (0.79 L) still clears AA on the overlay.
+		const base = { dark: 'oklch(0.36 0 0)', light: 'oklch(0.985 0 0)' };
 		function overlayFailures(surface: NonNullable<ThemeInput['color']['surface']>) {
 			try {
 				defineTheme({

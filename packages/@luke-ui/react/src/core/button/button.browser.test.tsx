@@ -478,13 +478,16 @@ type InteractionState = (typeof INTERACTION_STATES)[number];
 
 const buttonFills = [
 	{
-		fill: (state: InteractionState) => (state === 'rest' ? null : `neutral.subtle.${state}`),
+		// Low Buttons stay transparent and keep the surrounding context; hover and pressed paint
+		// the adaptive state layer rather than an opaque subtle fill.
+		fill: (_state: InteractionState) => null,
 		label: 'Neutral low',
 		prominence: 'low',
 		tone: 'neutral',
 	},
 	{
-		fill: (state: InteractionState) => `neutral.subtle.${state}`,
+		// Standard Buttons keep the resting subtle fill; hover and pressed add the state layer.
+		fill: (_state: InteractionState) => 'neutral.subtle.rest',
 		label: 'Neutral standard',
 		prominence: 'standard',
 		tone: 'neutral',
@@ -496,13 +499,13 @@ const buttonFills = [
 		tone: 'neutral',
 	},
 	{
-		fill: (state: InteractionState) => (state === 'rest' ? null : `danger.subtle.${state}`),
+		fill: (_state: InteractionState) => null,
 		label: 'Critical low',
 		prominence: 'low',
 		tone: 'critical',
 	},
 	{
-		fill: (state: InteractionState) => `neutral.subtle.${state}`,
+		fill: (_state: InteractionState) => 'neutral.subtle.rest',
 		label: 'Critical standard',
 		prominence: 'standard',
 		tone: 'critical',
@@ -523,8 +526,9 @@ const buttonFills = [
 for (const appearance of visualAppearances) {
 	const name = `${appearance.theme} ${appearance.mode}`;
 
-	// The parent is another role's solid fill, so a resting low-prominence Button shows it reads the
-	// surrounding context and every other fill shows it establishes its own.
+	// The parent is another role's solid fill. Low Buttons keep that context at rest; hover and
+	// pressed paint an opaque subtle chip so on-solid text contrast stays at AA. Standard Buttons
+	// keep a resting subtle pairing. High Buttons establish their own solid context.
 	test(`Button fills pair with their foreground in every interaction state in ${name}`, () => {
 		const { locator } = render(
 			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
@@ -538,13 +542,25 @@ for (const appearance of visualAppearances) {
 		);
 		const parent = locator.getByTestId('parent').element();
 
-		for (const { fill, label, tone } of buttonFills) {
+		for (const { fill, label, prominence, tone } of buttonFills) {
 			const button = locator.getByRole('button', { name: label }).element();
 			const actual = INTERACTION_STATES.map((state) => {
 				setInteractionState(button, state);
 				return { state, ...settledSurfaceColors(button) };
 			});
 			const expected = INTERACTION_STATES.map((state) => {
+				if (prominence === 'low' && state !== 'rest') {
+					const chipText =
+						tone === 'critical'
+							? resolvedColor(vars.color.foreground.danger.rest, button)
+							: resolvedColor(vars.color.text.primary, button);
+					return {
+						state,
+						...pairedColors(parent, 'success.solid'),
+						background: TRANSPARENT,
+						color: chipText,
+					};
+				}
 				const background = fill(state);
 				const paired =
 					background === null
@@ -599,12 +615,13 @@ for (const appearance of visualAppearances) {
 	});
 }
 
-// axe measures each Button's text against its rendered fill in every state. It cannot measure text
-// over the control finish's gradient, so it leaves solid Buttons to the rendered measurement below.
+// axe measures resting low and standard fills. Hover and pressed paint a translucent state layer
+// that axe reports as incomplete, so those states use `lowestRenderedTextContrast` below. Solid
+// Buttons use the control finish and are also measured there.
 for (const appearance of visualAppearances) {
 	const measured = buttonFills.filter(({ prominence }) => prominence !== 'high');
 
-	test(`Button text passes axe contrast on transparent and subtle fills in every state in ${appearance.theme} ${appearance.mode}`, async () => {
+	test(`Button text passes axe contrast on resting transparent and subtle fills in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { container, locator } = render(
 			<Box backgroundColor="success.solid" padding="space.8">
 				{measured.map(({ label, prominence, tone }) => (
@@ -615,17 +632,12 @@ for (const appearance of visualAppearances) {
 			</Box>,
 			{ appearance },
 		);
-		const buttons = measured.map(({ label }) =>
-			locator.getByRole('button', { name: label }).element(),
-		);
-
-		for (const state of INTERACTION_STATES) {
-			for (const button of buttons) {
-				setInteractionState(button, state);
-				settledSurfaceColors(button);
-			}
-			await expectAxeContrastPasses(container);
+		for (const { label } of measured) {
+			const button = locator.getByRole('button', { name: label }).element();
+			setInteractionState(button, 'rest');
+			settledSurfaceColors(button);
 		}
+		await expectAxeContrastPasses(container);
 	});
 }
 
@@ -705,5 +717,162 @@ test('a Button on a solid fill takes system colours in forced colours', async ()
 		});
 	} finally {
 		await emulateForcedColors('none');
+	}
+});
+
+// Adaptive hover and pressed must stay visible on every standard surface, including overlays an
+// application paints with `surface.overlay` without going through `Box`.
+for (const appearance of visualAppearances) {
+	const surfaces = ['surface.base', 'surface.subdued', 'surface.field', 'surface.overlay'] as const;
+
+	test(`low and standard Buttons keep 4.5:1 text over adaptive states on every surface in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { locator } = render(
+			<>
+				{surfaces.map((surface) => (
+					<Box key={surface} backgroundColor={surface} data-testid={surface} padding="space.8">
+						<Button prominence="low">Low on {surface}</Button>
+						<Button>Standard on {surface}</Button>
+						<Button prominence="low" tone="critical">
+							Critical low on {surface}
+						</Button>
+					</Box>
+				))}
+			</>,
+			{ appearance },
+		);
+
+		const lowContrast: Array<{
+			contrast: number;
+			label: string;
+			state: InteractionState;
+			surface: (typeof surfaces)[number];
+		}> = [];
+		const missingLayers: Array<{ label: string; state: InteractionState; surface: string }> = [];
+		for (const surface of surfaces) {
+			const region = locator.getByTestId(surface);
+			const buttons = [
+				region.getByRole('button', { name: `Low on ${surface}` }).element(),
+				region.getByRole('button', { name: `Standard on ${surface}` }).element(),
+				region.getByRole('button', { name: `Critical low on ${surface}` }).element(),
+			];
+			for (const state of INTERACTION_STATES) {
+				for (const button of buttons) {
+					setInteractionState(button, state);
+					if (state !== 'rest' && getComputedStyle(button).backgroundImage === 'none') {
+						missingLayers.push({
+							label: button.textContent ?? '',
+							state,
+							surface,
+						});
+					}
+				}
+				for (const button of buttons) settledSurfaceColors(button);
+				for (const button of buttons) {
+					assert(button instanceof HTMLElement);
+					const contrast = await lowestRenderedTextContrast(button);
+					if (contrast < 4.5) {
+						lowContrast.push({
+							contrast: Number(contrast.toFixed(2)),
+							label: button.textContent ?? '',
+							state,
+							surface,
+						});
+					}
+				}
+			}
+		}
+
+		expect(missingLayers).toEqual([]);
+		expect(lowContrast).toEqual([]);
+	});
+}
+
+const solidRoles = ['accent', 'info', 'success', 'warning', 'danger', 'neutral'] as const;
+
+for (const appearance of visualAppearances) {
+	test(`low Buttons keep 4.5:1 text over adaptive states inside every role solid in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { locator } = render(
+			<>
+				{solidRoles.map((role) => (
+					<Box key={role} backgroundColor={`${role}.solid`} data-testid={role} padding="space.8">
+						<Button prominence="low">Neutral low in {role}</Button>
+						<Button prominence="low" tone="critical">
+							Critical low in {role}
+						</Button>
+					</Box>
+				))}
+			</>,
+			{ appearance },
+		);
+		const lowContrast: Array<{
+			contrast: number;
+			label: string;
+			role: (typeof solidRoles)[number];
+			state: InteractionState;
+		}> = [];
+		for (const role of solidRoles) {
+			const region = locator.getByTestId(role);
+			const buttons = [
+				region.getByRole('button', { name: `Neutral low in ${role}` }).element(),
+				region.getByRole('button', { name: `Critical low in ${role}` }).element(),
+			];
+			for (const state of INTERACTION_STATES) {
+				for (const button of buttons) setInteractionState(button, state);
+				for (const button of buttons) settledSurfaceColors(button);
+				for (const button of buttons) {
+					assert(button instanceof HTMLElement);
+					const contrast = await lowestRenderedTextContrast(button);
+					if (contrast < 4.5) {
+						lowContrast.push({
+							contrast: Number(contrast.toFixed(2)),
+							label: button.textContent ?? '',
+							role,
+							state,
+						});
+					}
+				}
+			}
+		}
+		expect(lowContrast).toEqual([]);
+	});
+}
+
+test('forced colours clear the adaptive state layer on a low Button', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const { locator } = render(<Button prominence="low">Cancel</Button>);
+		const button = locator.getByRole('button', { name: 'Cancel' }).element();
+		setInteractionState(button, 'hover');
+		expect(getComputedStyle(button).backgroundImage).toBe('none');
+	} finally {
+		await emulateForcedColors('none');
+	}
+});
+
+test('kitchen sink on overlay', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<Box backgroundColor="surface.overlay" padding="space.16">
+				<Grid columns={3}>
+					<Button prominence="low">Cancel</Button>
+					<Button>Standard</Button>
+					<Button prominence="high">Save</Button>
+					<Button prominence="low" tone="critical">
+						Delete
+					</Button>
+					<Button tone="critical">Critical standard</Button>
+					<Button prominence="high" tone="critical">
+						Critical high
+					</Button>
+				</Grid>
+			</Box>,
+			{ appearance },
+		);
+		const cancel = locator.getByRole('button', { name: 'Cancel' }).element();
+		const standard = locator.getByRole('button', { name: 'Standard' }).element();
+		setInteractionState(cancel, 'hover');
+		setInteractionState(standard, 'pressed');
+		await captureVisualAppearance(locator, 'button/overlay-adaptive-states', appearance);
 	}
 });

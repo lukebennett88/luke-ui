@@ -35,6 +35,21 @@ export const RATIO_HEADROOM = 0.05;
 export const CONTRAST_SEARCH_STEP = 0.0025;
 
 /**
+ * Adaptive interaction tints (#925). One black (light) or white (dark) tint pair per theme mode is
+ * painted as a registered state layer. Strengths are solved in `interaction-tints.ts` so the
+ * composite over `surface.base` matches today's opaque subtle hover and pressed, then capped so
+ * every gated foreground stays at {@link TEXT_RATIO} over every surface, subtle rest, and solid
+ * fill with the tint on top. Floors below are OKLab ΔE over `surface.base` after that solve: they
+ * reject a theme that can only pass the contrast cap by making hover or pressed invisible. They are
+ * not absolute thresholds on every raised surface; a fixed tint is naturally smaller there.
+ */
+/** Minimum OKLab ΔE between `surface.base` and the hover tint composited over it. */
+export const INTERACTION_HOVER_VISIBILITY = 0.04;
+
+/** Minimum OKLab ΔE between the hover and pressed tints composited over `surface.base`. */
+export const INTERACTION_HOVER_TO_PRESSED_VISIBILITY = 0.025;
+
+/**
  * The canonical semantic roles, in contract order. Every role publishes the same visual slots —
  * background, foreground, on-solid, and border — so this one list drives family generation
  * (`scale.ts`), the semantic mapping (`semantic-map.ts`), the validation matrix
