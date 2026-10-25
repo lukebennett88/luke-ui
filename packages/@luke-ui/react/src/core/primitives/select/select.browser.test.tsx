@@ -390,7 +390,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 	}
 });
 
-// The selected option opts out of forced colours, and so does everything inside it. Its own label
+// The active option opts out of forced colours, and so does everything inside it. Its own label
 // would vanish behind the backplate, and nested content would keep author colours on the fill.
 test('forced-colors open popover', { tags: ['visual'] }, async () => {
 	await emulateForcedColors('active');
@@ -427,6 +427,10 @@ test('forced-colors open popover', { tags: ['visual'] }, async () => {
 		await waitForOverlayEnter(listbox.closest('[data-trigger]') ?? listbox);
 		await expect.element(page.getByRole('option', { name: /Example two/ })).toHaveFocus();
 		await captureVisual(page.elementLocator(document.body), 'select/forced-colors-open');
+
+		await userEvent.keyboard('{ArrowUp}');
+		await expect.element(page.getByRole('option', { name: 'Example one' })).toHaveFocus();
+		await captureVisual(page.elementLocator(document.body), 'select/forced-colors-open-active');
 	} finally {
 		await emulateForcedColors('none');
 	}

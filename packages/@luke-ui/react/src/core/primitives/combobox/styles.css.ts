@@ -94,13 +94,13 @@ const comboboxActionStyles = {
 /** Marker class on every combobox and select item, for rules that reach into its content. */
 export const comboboxItemClassName = style({}, 'combobox-item');
 
-// A selected item's `forced-color-adjust: none` inherits, so its content would keep author colours on
+// The active item's `forced-color-adjust: none` inherits, so its content would keep author colours on
 // the `Highlight` fill: a `Text` keeps its theme colour and a `Kbd` its surface. Do for that content
 // what forced colours would have done. `!important` beats application and utility CSS, which ranks
 // below every Luke UI layer under `!important`.
 globalStyleInLayer(
 	'recipes',
-	`${classSelector(comboboxItemClassName)}[data-selected="true"]:not([data-disabled="true"]) *`,
+	`${classSelector(comboboxItemClassName)}[data-focused="true"]:not([data-disabled="true"]) *`,
 	{
 		'@media': {
 			'(forced-colors: active)': {
@@ -298,31 +298,19 @@ const comboboxConfig = {
 					forcedColorAdjust: 'auto',
 					selectors: {
 						'&[data-disabled="true"]': { color: 'GrayText', opacity: 1 },
-						'&[data-focus-visible="true"]': {
-							outlineColor: 'Highlight',
-							outlineOffset: '-2px',
-							outlineStyle: 'solid',
-							outlineWidth: '2px',
-						},
 						// A forced-colours backplate would paint `Canvas` behind the label and hide the
-						// `HighlightText` on it, so the selected item opts out and sets both colours. The list
-						// repeats every selected-state selector below so author colours never show through.
+						// `HighlightText` on it, so the active item opts out and sets both colours. The list
+						// repeats every active-state selector below so author colours never show through.
 						// The opt-out inherits, so the `comboboxItemClassName` rule resets the item's content.
 						[[
-							'&[data-selected="true"]:not([data-disabled="true"])',
-							'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])',
-							'&[data-pressed="true"][data-selected="true"]:not([data-disabled="true"])',
-							'&[data-selected="true"][data-focus-visible="true"]:not([data-disabled="true"])',
+							'&[data-focused="true"]:not([data-disabled="true"])',
+							'&[data-focused="true"][data-pressed="true"]:not([data-disabled="true"])',
 						].join(', ')]: {
 							backgroundColor: 'Highlight',
 							color: 'HighlightText',
 							forcedColorAdjust: 'none',
-						},
-						// A `Highlight` ring would vanish into the fill, and a `HighlightText` ring at the
-						// edge would merge with the `Canvas` around the item. Inset it inside the fill.
-						'&[data-selected="true"][data-focus-visible="true"]:not([data-disabled="true"])': {
-							outlineColor: 'HighlightText',
-							outlineOffset: '-4px',
+							outline: '2px solid HighlightText',
+							outlineOffset: '-2px',
 						},
 					},
 				},
@@ -341,33 +329,28 @@ const comboboxConfig = {
 			...pressFeedback,
 			transform: 'none',
 			transitionDuration: vars.motion.feedback.duration,
-			transitionProperty: 'background-color, color, opacity',
+			transitionProperty: 'background-color, color, opacity, outline-color',
 			transitionTimingFunction: vars.motion.feedback.easing,
 
+			// React Aria moves the one active item (`data-focused`) with the pointer and the keyboard.
+			// The solid fill plus a 2px inset outline in the on-solid foreground mark focus. Selection
+			// shows only the check, and hover alone has no style.
 			selectors: {
 				'&[data-disabled="true"]': {
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
-				'&[data-focused="true"]:not([data-disabled="true"]):not([data-selected="true"])':
-					surfaceStyle('neutral.subtle.rest'),
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-selected="true"])':
-					surfaceStyle('neutral.subtle.hover'),
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-selected="true"])':
-					surfaceStyle('neutral.subtle.pressed'),
-				'&[data-focus-visible="true"]:not([data-disabled="true"])':
-					surfaceStyle('accent.subtle.hover'),
-				'&[data-selected="true"]:not([data-disabled="true"])': {
-					...surfaceStyle('accent.subtle.rest'),
-					fontWeight: vars.font.weight.label,
+				'&[data-focused="true"]:not([data-disabled="true"])': {
+					...surfaceStyle('accent.solid.rest'),
+					outline: `2px solid ${vars.color.foreground.accent.onSolid.primary}`,
+					outlineOffset: '-2px',
 				},
-				'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])':
-					surfaceStyle('accent.subtle.hover'),
-				'&[data-pressed="true"][data-selected="true"]:not([data-disabled="true"])':
-					surfaceStyle('accent.subtle.pressed'),
-				'&[data-selected="true"][data-focus-visible="true"]:not([data-disabled="true"])':
-					surfaceStyle('accent.subtle.pressed'),
+				'&[data-focused="true"][data-pressed="true"]:not([data-disabled="true"])': {
+					...surfaceStyle('accent.solid.pressed'),
+					outline: `2px solid ${vars.color.foreground.accent.onSolid.primary}`,
+					outlineOffset: '-2px',
+				},
 			},
 		},
 		trayTrigger: {

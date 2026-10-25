@@ -16,6 +16,8 @@ import {
 	captureVisual,
 	captureVisualAppearance,
 	emulateForcedColors,
+	focusViaKeyboard,
+	parkPointer,
 	Stack,
 } from '../test-utils/visual.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
@@ -726,6 +728,111 @@ test('open popover', { tags: ['visual'] }, async () => {
 	await waitForOverlayEnter(listbox.closest('[data-trigger]') ?? listbox);
 	await captureVisual(page.elementLocator(document.body), 'select-field/open');
 });
+
+function option(name: string) {
+	return page.getByRole('option', { name });
+}
+
+async function waitForListBox() {
+	const listbox = page.getByRole('listbox');
+	await expect.element(listbox).toBeVisible();
+	await waitForOverlayEnter(listbox.element().closest('[data-trigger]') ?? listbox.element());
+}
+
+// Select moves real DOM focus onto the active option. The list box names no active descendant.
+test('the active SelectField option takes DOM focus, and Enter selects it', async () => {
+	render(
+		<SelectField items={themeItems} label="Theme" name="theme" placeholder="Choose a theme">
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	await focusViaKeyboard(page.getByRole('button', { name: /Theme/ }));
+	await userEvent.keyboard('{ArrowDown}');
+	await waitForListBox();
+	await userEvent.keyboard('{ArrowDown}');
+	await expect.element(option('Light')).toHaveFocus();
+
+	const active = option('Light').element();
+	expect(active).toHaveAttribute('data-focused', 'true');
+	expect(page.getByRole('listbox').element()).not.toHaveAttribute('aria-activedescendant');
+	const activeStyles = getComputedStyle(active);
+	expect(activeStyles.outlineStyle).toBe('solid');
+	expect(activeStyles.outlineWidth).toBe('2px');
+	expect(activeStyles.outlineOffset).toBe('-2px');
+	await userEvent.keyboard('{Enter}');
+	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
+	expect(trigger(/Theme/)).toHaveTextContent('Light');
+});
+
+test('after the pointer leaves a SelectField list, Enter selects the option it left active', async () => {
+	render(
+		<SelectField defaultValue="dark" items={themeItems} label="Theme" name="theme">
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	await userEvent.click(trigger(/Theme/));
+	await waitForListBox();
+	await userEvent.hover(option('System'));
+	await expect.element(option('System')).toHaveFocus();
+	await parkPointer();
+	await expect.element(option('System')).not.toHaveAttribute('data-hovered');
+
+	expect(option('System').element()).toHaveFocus();
+	expect(option('System').element()).toHaveAttribute('data-focused', 'true');
+	await userEvent.keyboard('{Enter}');
+	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
+	expect(trigger(/Theme/)).toHaveTextContent('System');
+});
+
+test('active option by keyboard', { tags: ['visual'] }, async () => {
+	render(
+		<SelectField defaultValue="dark" items={themeItems} label="Theme" name="theme">
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	await focusViaKeyboard(page.getByRole('button', { name: /Theme/ }));
+	await userEvent.keyboard('{ArrowDown}');
+	await waitForListBox();
+	await expect.element(option('Dark')).toHaveFocus();
+	await captureVisual(page.elementLocator(document.body), 'select-field/option-selected-active');
+
+	await userEvent.keyboard('{ArrowUp}');
+	await expect.element(option('Light')).toHaveFocus();
+	await captureVisual(page.elementLocator(document.body), 'select-field/option-active');
+});
+
+// The pointer moves the active option, and the option it leaves stays active until a key moves on.
+test(
+	'active option by pointer, after the pointer leaves, then ArrowDown',
+	{ tags: ['visual'] },
+	async () => {
+		render(
+			<SelectField defaultValue="dark" items={themeItems} label="Theme" name="theme">
+				{renderThemeItem}
+			</SelectField>,
+		);
+
+		await userEvent.click(trigger(/Theme/));
+		await waitForListBox();
+		await userEvent.hover(option('System'));
+		await expect.element(option('System')).toHaveFocus();
+		await captureVisual(page.elementLocator(document.body), 'select-field/option-pointer-active');
+
+		await parkPointer();
+		await expect.element(option('System')).not.toHaveAttribute('data-hovered');
+		await captureVisual(page.elementLocator(document.body), 'select-field/option-pointer-left');
+
+		await userEvent.keyboard('{ArrowDown}');
+		await expect.element(option('Light')).toHaveFocus();
+		await captureVisual(
+			page.elementLocator(document.body),
+			'select-field/option-arrow-after-pointer',
+		);
+	},
+);
 
 test('forced-colors states', { tags: ['visual'] }, async () => {
 	await emulateForcedColors('active');
