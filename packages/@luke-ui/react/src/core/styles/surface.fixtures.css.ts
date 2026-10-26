@@ -1,4 +1,6 @@
 import { style } from './layered-style.css.js';
+import { interactionStateLayer } from './state-layer.css.js';
+import { adaptiveStateLayer } from './state-layer.js';
 import { surfaceStyle } from './surface.js';
 
 // Test-only fixtures. They live in `.css.ts` because `style()` needs a Vanilla Extract file scope.
@@ -17,9 +19,11 @@ export const solidStatesFixture = style({
 /** Transparent at rest and a subtle fill on hover and press, like a low-prominence Button. */
 export const transparentToSubtleFixture = style({
 	backgroundColor: 'transparent',
+	backgroundImage: `linear-gradient(${interactionStateLayer}, ${interactionStateLayer})`,
+	vars: { [interactionStateLayer]: 'transparent' },
 	selectors: {
-		'&[data-hovered]': surfaceStyle('neutral.subtle.hover'),
-		'&[data-pressed]': surfaceStyle('neutral.subtle.pressed'),
+		'&[data-hovered]': adaptiveStateLayer('hover'),
+		'&[data-pressed]': adaptiveStateLayer('pressed'),
 	},
 });
 

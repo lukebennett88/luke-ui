@@ -324,6 +324,7 @@ import { Container } from '@luke-ui/react/container';
 import { Heading, type HeadingProps } from '@luke-ui/react/heading';
 import { Provider } from '@luke-ui/react/provider';
 import { Text, type TextProps } from '@luke-ui/react/text';
+import { interactionState } from '@luke-ui/react/utils';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { breakpoints, getThemeClassName, vars } from '@luke-ui/react/theme';
 import {
@@ -359,6 +360,7 @@ export const validationIssues: ReadonlyArray<{ message: string; path: string; th
 export const fullMetrics: Partial<FontMetrics> = metrics;
 export const textColor: string = vars.color.text.primary;
 export const mobileBreakpoint: number = breakpoints.bp640;
+export const interactionHoverStyle = interactionState('hover');
 
 // The 1.0 token contract: retained paths compile, and removed pre-1.0 paths do not.
 export const retainedTokens: Array<string> = [
@@ -367,9 +369,9 @@ export const retainedTokens: Array<string> = [
 	vars.color.surface.field,
 	vars.color.surface.overlay,
 	vars.color.border.control,
-	vars.color.border.controlHover,
 	vars.color.border.warning,
-	vars.color.background.neutral.subtle.pressed,
+	vars.interaction.tint.hover,
+	vars.interaction.tint.pressed,
 	vars.color.text.disabled,
 	vars.color.loadingSkeleton,
 	vars.controlFinish.raised,
@@ -381,6 +383,8 @@ export const retainedTokens: Array<string> = [
 	vars.space['16'],
 	vars.interaction.disabledOpacity,
 ];
+// @ts-expect-error — adaptive subtle states use vars.interaction.tint
+export const removedSubtleHover = vars.color.background.neutral.subtle.hover;
 // @ts-expect-error — replaced by color.surface.base
 export const removedCanvas = vars.color.surface.canvas;
 // @ts-expect-error — removed surface
@@ -429,9 +433,13 @@ export const textButtonWidth = <Button appearance="text" inlineSize="full">Conti
 
 // Box values follow the public token contract.
 export const retainedBoxValues: Array<BoxProps> = [
-	{ backgroundColor: 'surface.field', borderColor: 'controlHover', boxShadow: 'overlay' },
+	{ backgroundColor: 'surface.field', borderColor: 'control', boxShadow: 'overlay' },
 	{ backgroundColor: 'warning.subtle', borderRadius: 'full', gap: 'space.96' },
 ];
+// @ts-expect-error — hover border treatments are derived by control styles, not public tokens
+export const removedControlHoverBorder = vars.color.border.controlHover;
+// @ts-expect-error — hover border treatments are not Box token values
+export const removedBoxControlHoverBorder: BoxProps['borderColor'] = 'controlHover';
 // @ts-expect-error — removed with color.surface.canvas
 export const removedBoxSurface: BoxProps['backgroundColor'] = 'surface.canvas';
 // @ts-expect-error — removed with color.surface.floating

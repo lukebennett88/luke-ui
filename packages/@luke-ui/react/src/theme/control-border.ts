@@ -1,11 +1,15 @@
 /**
- * Solves `color.border.control`, the contrast boundary for form controls, and derives
- * `color.border.controlHover` from it.
+ * Solves `color.border.control`, the contrast boundary for form controls.
  */
 
 import type { Oklch } from './color.js';
-import { clampUnit, contrastRatio, gamutMapOklch } from './color.js';
-import { RATIO_HEADROOM, UI_RATIO } from './contrast-policy.js';
+import { compositeEncodedSrgb, contrastRatio, formatOklch, gamutMapOklch } from './color.js';
+import {
+	CONTROL_BORDER_HOVER_STRENGTH,
+	CONTROL_BORDER_PRESSED_STRENGTH,
+	RATIO_HEADROOM,
+	UI_RATIO,
+} from './contrast-policy.js';
 import { lightnessCandidates } from './lightness-candidates.js';
 import type { ScaleFamily } from './scale.js';
 import { FAMILY_RUNG } from './scale.js';
@@ -57,17 +61,13 @@ export function solveControlBorder(params: SolveControlBorderRequest): Oklch {
 	);
 }
 
-// A fixed, tuned step further from the surfaces. Validation holds it to the same 3:1 as the resting
-// border; how distinct it looks is a visual decision, not a searched one.
-const CONTROL_HOVER_LIGHTNESS_OFFSET = {
-	dark: 0.12,
-	light: -0.12,
-} as const satisfies Record<ColorMode, number>;
-
-/** Derives `color.border.controlHover` from the resolved resting control border. */
-export function controlHoverBorder(controlBorder: Oklch, mode: ColorMode): Oklch {
-	return gamutMapOklch({
-		...controlBorder,
-		l: clampUnit(controlBorder.l + CONTROL_HOVER_LIGHTNESS_OFFSET[mode]),
-	});
+/** Mixes the resting control border toward its readable text colour for one interactive state. */
+export function controlBorderStateColor(
+	controlBorder: Oklch,
+	textPrimary: Oklch,
+	state: 'hover' | 'pressed',
+): string {
+	const strength =
+		state === 'hover' ? CONTROL_BORDER_HOVER_STRENGTH : CONTROL_BORDER_PRESSED_STRENGTH;
+	return formatOklch(compositeEncodedSrgb(textPrimary, controlBorder, strength));
 }

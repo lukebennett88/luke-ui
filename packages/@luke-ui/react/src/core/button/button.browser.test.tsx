@@ -564,8 +564,8 @@ for (const appearance of visualAppearances) {
 							: resolvedColor(vars.color.text.primary, button);
 					const chip =
 						tone === 'critical'
-							? pairedColors(button, `danger.subtle.${state}`)
-							: pairedColors(button, `neutral.subtle.${state}`);
+							? pairedColors(button, 'danger.subtle.rest')
+							: pairedColors(button, 'neutral.subtle.rest');
 					return {
 						state,
 						...chip,
@@ -929,7 +929,7 @@ test('adaptive Button layer transitions normally and changes immediately with re
 		const style = getComputedStyle(button);
 		expect(style.transitionProperty).not.toContain(layerProperty);
 		expect(style.getPropertyValue(layerProperty)).toBe(
-			resolvedColor('var(--luke-internal-interaction-tint-pressed)', button),
+			resolvedColor('var(--luke-interaction-tint-pressed)', button),
 		);
 		expect(layerTransitioning()).toBe(false);
 	} finally {

@@ -333,12 +333,12 @@ const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSel
 ```
 
 `composeInputStateSelectors` owns the shared attribute and pseudo-class matrix. Control-specific
-selectors stay in the owning recipe. The field model is the same in every field control: hover uses
-`border.controlHover` and never applies while read-only or disabled. Focus adds the ring and leaves
-the border alone. Invalid comes last, so its danger border survives hover, focus, and read-only.
-Read-only keeps the field surface and `border.control` and drops the inset depth. Pass `extraStates`
-when an element carries a state in a form the defaults do not cover, such as a bare `<input>` that
-is itself `:read-only`.
+selectors stay in the owning recipe. The field model is the same in every field control: hover mixes
+`border.control` toward `text.primary` and never applies while read-only or disabled. Focus adds the
+ring and leaves the border alone. Invalid comes last, so its danger border survives hover, focus,
+and read-only. Read-only keeps the field surface and `border.control` and drops the inset depth.
+Pass `extraStates` when an element carries a state in a form the defaults do not cover, such as a
+bare `<input>` that is itself `:read-only`.
 
 Do not widen a state with `:has()` when the group already exposes data attributes such as
 `data-disabled` and `data-invalid`. Probing descendants cannot tell a disabled control from one that

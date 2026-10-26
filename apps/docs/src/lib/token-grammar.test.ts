@@ -70,8 +70,6 @@ test('background tokens keep role, subtle/solid, then state order', () => {
 	for (const { role, tokens } of background?.roles ?? []) {
 		expect(tokens.map(({ path }) => path)).toEqual([
 			`color.background.${role}.subtle.rest`,
-			`color.background.${role}.subtle.hover`,
-			`color.background.${role}.subtle.pressed`,
 			`color.background.${role}.solid.rest`,
 			`color.background.${role}.solid.hover`,
 			`color.background.${role}.solid.pressed`,

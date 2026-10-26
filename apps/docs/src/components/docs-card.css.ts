@@ -1,5 +1,10 @@
 import { vars } from '@luke-ui/react/theme';
+import { interactionState } from '@luke-ui/react/utils';
 import { style } from '@vanilla-extract/css';
+import {
+	interactionStateBackgroundImage,
+	interactionStateTransitionProperty,
+} from './interaction-state';
 
 /**
  * Soft bordered surface link. Background states live here (not on Box sprinkles) so hover/pressed
@@ -9,16 +14,16 @@ export const cardLink = style({
 	'@layer': {
 		components: {
 			backgroundColor: vars.color.surface.base,
+			backgroundImage: interactionStateBackgroundImage,
 			color: vars.color.text.primary,
 			textDecoration: 'none',
-			transition: `background-color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
+			transition: `${interactionStateTransitionProperty} ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			selectors: {
 				'&:hover': {
-					// Soften the subtle hover ramp the way Fumadocs used accent/80.
-					backgroundColor: vars.color.background.neutral.subtle.hover,
+					...interactionState('hover'),
 				},
 				'&:active': {
-					backgroundColor: vars.color.background.neutral.subtle.pressed,
+					...interactionState('pressed'),
 				},
 				'&:focus-visible': {
 					outline: `2px solid ${vars.color.border.focus}`,

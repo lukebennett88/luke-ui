@@ -1,4 +1,5 @@
 import { vars } from '@luke-ui/react/theme';
+import { interactionState } from '@luke-ui/react/utils';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { createVar, globalStyle, style } from '@vanilla-extract/css';
 import { overlayMotion } from '../lib/overlay-motion.js';
@@ -79,7 +80,7 @@ export const trigger = style({
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"]), &[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])':
 					{
 						backgroundColor: vars.color.surface.field,
-						borderColor: vars.color.border.controlHover,
+						borderColor: `color-mix(in srgb, ${vars.color.border.control} 80%, ${vars.color.text.primary} 20%)`,
 						boxShadow: vars.depth.recessed,
 					},
 			},
@@ -338,7 +339,7 @@ export const result = style({
 	'@layer': {
 		components: {
 			':hover': {
-				backgroundColor: vars.color.background.neutral.subtle.hover,
+				...interactionState('hover'),
 			},
 			selectors: {
 				'&[data-focused]': {

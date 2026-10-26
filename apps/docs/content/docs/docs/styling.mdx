@@ -102,6 +102,12 @@ The public `vars` token contract lets an application-owned element follow the ac
 
 <SourceCodeBlock src="styling/semantic-variables" />
 
+Use `interactionState('hover')` or `interactionState('pressed')` from `@luke-ui/react/utils` in a
+state style. The utility paints the active theme's tint as a registered background layer over the
+element's resting fill. Keep the resting `backgroundColor` in the rule.
+
+<SourceCodeBlock src="styling/interaction-state" />
+
 A background you set with `vars` does not set the text colour for `Text` inside it, so set the
 colour in the same rule. Use a `Box` `backgroundColor` when the element should set it for you. Read
 [Colour](/docs/color#custom-surfaces) for the difference.

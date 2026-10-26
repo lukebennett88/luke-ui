@@ -154,7 +154,7 @@ test('backgroundColor rejects anything but a namespaced role or surface token', 
 	// @ts-expect-error — Box exposes the resting fill only
 	assertType<UtilityProps['backgroundColor']>('accent.solid.rest');
 	// @ts-expect-error — interaction states stay recipe tokens
-	assertType<UtilityProps['backgroundColor']>('accent.subtle.hover');
+	assertType<UtilityProps['backgroundColor']>('accent.subtle.rest');
 	// @ts-expect-error — interaction states stay recipe tokens
 	assertType<UtilityProps['backgroundColor']>('danger.solid.pressed');
 	// @ts-expect-error — a translucent scrim is not an opaque surface fill

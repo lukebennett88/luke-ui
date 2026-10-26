@@ -13,12 +13,15 @@ import { contrastRatio, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { SEMANTIC_ROLES, TEXT_RATIO, UI_RATIO } from './contrast-policy.js';
 import { validateContrast } from './contrast-validation.js';
+import { controlBorderStateColor } from './control-border.js';
 import { defineTheme, normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
+import { ThemeInteractionTintError } from './interaction-tints.js';
 import type { SemanticColorValues } from './semantic-map.js';
 
 const ROLE_FOREGROUND_PATTERN = /^color\.foreground\.\w+\.(rest|hover|pressed)$/;
-const PRESSED_SUBTLE_BACKGROUND_PATTERN = /^color\.background\.\w+\.subtle\.pressed$/;
+const TINT_CONTRAST_BACKGROUND_PATTERN =
+	/^color\.(surface\.(base|subdued|field|overlay)|background\.\w+\.subtle\.rest)$/;
 
 describe('buildTheme contrast failures', () => {
 	function buildFailures(foundation: ThemeFoundation): ThemeContrastError {
@@ -228,8 +231,8 @@ describe('contrast validation matrix', () => {
 	function expectedChecks() {
 		const hard: Array<{ background: string; foreground: string; required: number }> = [];
 		const advisory: Array<{ background: string; foreground: string; required: number }> = [];
-		const subtleBackgrounds = SEMANTIC_ROLES.flatMap((role) => {
-			return INTERACTION_STATES.map((state) => `color.background.${role}.subtle.${state}`);
+		const subtleBackgrounds = SEMANTIC_ROLES.map((role) => {
+			return `color.background.${role}.subtle.rest`;
 		});
 		for (const text of ['color.text.primary', 'color.text.secondary'] as const) {
 			for (const surface of [...SURFACES, ...subtleBackgrounds]) {
@@ -264,12 +267,18 @@ describe('contrast validation matrix', () => {
 		}
 		for (const background of SURFACES) {
 			hard.push({ background, foreground: 'color.border.control', required: UI_RATIO });
-			hard.push({ background, foreground: 'color.border.controlHover', required: UI_RATIO });
 			hard.push({
 				background,
 				foreground: 'color.background.danger.solid.rest',
 				required: UI_RATIO,
 			});
+			for (const state of ['hover', 'pressed'] as const) {
+				hard.push({
+					background,
+					foreground: `interaction.border.${state}`,
+					required: UI_RATIO,
+				});
+			}
 		}
 		for (const state of ['rest', 'pressed']) {
 			hard.push({
@@ -289,6 +298,9 @@ describe('contrast validation matrix', () => {
 			color: {
 				accent: '#7c3aed',
 				neutral: { light: 'oklch(0.985 0.01 70)', dark: 'oklch(0.2 0.01 70)' },
+				surface: {
+					base: { light: 'oklch(0.99 0.01 70)', dark: 'oklch(0.18 0.01 70)' },
+				},
 			},
 			typography: testTypography,
 		}),
@@ -305,7 +317,13 @@ describe('contrast validation matrix', () => {
 				const checks = diagnostics[mode].contrastChecks;
 				const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
 				for (const check of checks) {
-					const foreground = extractValue(block, variableNames.get(check.foreground)!);
+					const foreground = check.foreground.startsWith('interaction.border.')
+						? controlBorderStateColor(
+								parseColor(extractValue(block, variableNames.get('color.border.control')!)),
+								parseColor(extractValue(block, variableNames.get('color.text.primary')!)),
+								check.foreground.endsWith('.hover') ? 'hover' : 'pressed',
+							)
+						: extractValue(block, variableNames.get(check.foreground)!);
 					const background = extractValue(block, variableNames.get(check.background)!);
 					expect(check.ratio).toBe(contrastRatio(parseColor(foreground), parseColor(background)));
 				}
@@ -342,26 +360,12 @@ describe('contrast validation matrix', () => {
 	}
 });
 
-describe('custom-canvas cross-role contrast', () => {
-	for (const { mode, base, foreground, background, ratio } of [
-		{
-			mode: 'light',
-			base: 'oklch(0.94 0 30)',
-			foreground: 'color.foreground.success.rest',
-			background: 'color.background.danger.subtle.pressed',
-			ratio: 4.467,
-		},
-		{
-			// Dark step-11 text sits at 0.79, so this canvas fails a cross-role subtle pair rather
-			// than a base-canvas one.
-			mode: 'dark',
-			base: 'oklch(0.31 0 30)',
-			foreground: 'color.foreground.warning.rest',
-			background: 'color.background.success.subtle.pressed',
-			ratio: 4.491,
-		},
+describe('custom-canvas interaction tint contrast', () => {
+	for (const { mode, base } of [
+		{ mode: 'light', base: 'oklch(0.94 0 30)' },
+		{ mode: 'dark', base: 'oklch(0.31 0 30)' },
 	] as const) {
-		it(`rejects the Tactile ${mode} custom canvas for cross-role contrast`, () => {
+		it(`rejects the Tactile ${mode} custom canvas when interaction tints cannot preserve AA`, () => {
 			let caught: unknown;
 			try {
 				defineTheme({
@@ -372,26 +376,15 @@ describe('custom-canvas cross-role contrast', () => {
 			} catch (error) {
 				caught = error;
 			}
-			expect(caught).toBeInstanceOf(ThemeContrastError);
-			if (!(caught instanceof ThemeContrastError)) throw caught;
-			expect(caught.failures).toContainEqual({
-				mode,
-				foreground,
-				background,
-				ratio: expect.closeTo(ratio, 3),
-				required: TEXT_RATIO,
-			});
-			// These canvases passed all earlier gates; every failure must be cross-role subtle text.
-			for (const failure of caught.failures) {
-				expect(failure.mode).toBe(mode);
-				expect(failure.foreground).toMatch(ROLE_FOREGROUND_PATTERN);
-				expect(failure.background).toMatch(PRESSED_SUBTLE_BACKGROUND_PATTERN);
-				expect(failure.foreground.split('.')[2]).not.toBe(failure.background.split('.')[2]);
-				expect(caught.message).toContain(
-					`${mode}: ${failure.foreground} on ${failure.background} — ${failure.ratio.toFixed(3)}:1 < 4.5:1`,
-				);
-			}
-			expect(caught.inheritance?.chain).toEqual([`tactile-custom-${mode}`, 'tactile']);
+			expect(caught).toBeInstanceOf(ThemeInteractionTintError);
+			if (!(caught instanceof ThemeInteractionTintError)) throw caught;
+			expect(caught.mode).toBe(mode);
+			expect(caught.limitingMiss).not.toBeNull();
+			if (caught.limitingMiss === null) throw caught;
+			expect(caught.limitingMiss.background).toMatch(TINT_CONTRAST_BACKGROUND_PATTERN);
+			expect(caught.limitingMiss.foreground).toMatch(ROLE_FOREGROUND_PATTERN);
+			expect(caught.limitingMiss.ratio).toBeLessThan(TEXT_RATIO);
+			expect(caught.message).toContain('visibility floors');
 		});
 	}
 });

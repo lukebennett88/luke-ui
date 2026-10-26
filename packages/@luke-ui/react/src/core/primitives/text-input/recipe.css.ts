@@ -1,5 +1,6 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { controlBorderState } from '../../styles/control-border.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import { composeInputStateSelectors } from '../../styles/input-states.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
@@ -72,7 +73,7 @@ export const textInputRecipe = recipe({
 			},
 			[input.focusWithin]: focusRing(vars.color.border.focus),
 			[input.hover]: {
-				borderColor: vars.color.border.controlHover,
+				borderColor: controlBorderState('hover'),
 			},
 			// Read-only drops the inset depth. The hover selector already excludes it.
 			[input.readOnly]: {

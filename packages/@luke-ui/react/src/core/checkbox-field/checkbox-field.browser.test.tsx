@@ -6,6 +6,7 @@ import { CheckboxFieldContext } from 'react-aria-components';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { emulateReducedMotion } from '../test-utils/emulate-media.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
 import { getTextStart, measureFieldError } from '../test-utils/measure-field-error.js';
 import { flatAppearances, render, visualAppearances } from '../test-utils/render.js';
@@ -21,6 +22,14 @@ function CheckboxScene() {
 	return (
 		<Stack>
 			<CheckboxField label="Default" name="default" />
+			<CheckboxField label="Hover" name="hover" />
+			<CheckboxField label="Pressed" name="pressed" />
+			<CheckboxField errorMessage="Choose an option." label="Invalid hover" name="invalid-hover" />
+			<CheckboxField
+				errorMessage="Choose an option."
+				label="Invalid pressed"
+				name="invalid-pressed"
+			/>
 			<CheckboxField defaultSelected label="Selected" name="selected" />
 			<CheckboxField isIndeterminate label="Indeterminate" name="indeterminate" />
 			<CheckboxField defaultSelected isDisabled label="Disabled" name="disabled" />
@@ -413,6 +422,16 @@ test('the CheckboxField error text starts at the label text and its icon sits on
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(<CheckboxScene />, { appearance });
+		for (const [name, state] of [
+			['Hover', 'data-hovered'],
+			['Invalid hover', 'data-hovered'],
+			['Pressed', 'data-pressed'],
+			['Invalid pressed', 'data-pressed'],
+		] as const) {
+			const input = locator.getByRole('checkbox', { exact: true, name }).element();
+			if (!(input instanceof HTMLInputElement)) throw new Error('Expected the checkbox.');
+			labelFor(input).setAttribute(state, 'true');
+		}
 		await captureVisualAppearance(locator, 'checkbox-field/kitchen-sink', appearance);
 	}
 });
@@ -542,6 +561,48 @@ test('forced-colors resting', { tags: ['visual'] }, async () => {
 		await captureVisual(locator, 'checkbox-field/forced-colors-resting');
 	} finally {
 		await emulateForcedColors('none');
+	}
+});
+
+test('forced-colours interactions', { tags: ['visual'] }, async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const { locator } = render(<CheckboxScene />);
+		for (const [name, state] of [
+			['Hover', 'data-hovered'],
+			['Invalid hover', 'data-hovered'],
+			['Pressed', 'data-pressed'],
+			['Invalid pressed', 'data-pressed'],
+		] as const) {
+			const input = locator.getByRole('checkbox', { exact: true, name }).element();
+			if (!(input instanceof HTMLInputElement)) throw new Error('Expected the checkbox.');
+			labelFor(input).setAttribute(state, 'true');
+		}
+		await captureVisual(locator, 'checkbox-field/forced-colours-interactions');
+	} finally {
+		await emulateForcedColors('none');
+	}
+});
+
+test('reduced-motion interactions', { tags: ['visual'] }, async () => {
+	await emulateReducedMotion(true);
+
+	try {
+		const { locator } = render(<CheckboxScene />);
+		for (const [name, state] of [
+			['Hover', 'data-hovered'],
+			['Invalid hover', 'data-hovered'],
+			['Pressed', 'data-pressed'],
+			['Invalid pressed', 'data-pressed'],
+		] as const) {
+			const input = locator.getByRole('checkbox', { exact: true, name }).element();
+			if (!(input instanceof HTMLInputElement)) throw new Error('Expected the checkbox.');
+			labelFor(input).setAttribute(state, 'true');
+		}
+		await captureVisual(locator, 'checkbox-field/reduced-motion-interactions');
+	} finally {
+		await emulateReducedMotion(false);
 	}
 });
 

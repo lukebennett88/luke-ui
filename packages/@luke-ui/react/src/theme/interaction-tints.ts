@@ -14,12 +14,17 @@ import {
 	SEMANTIC_ROLES,
 	TEXT_RATIO,
 } from './contrast-policy.js';
-import { oklabDeltaE } from './scale.js';
+import {
+	INTERACTION_HOVER_STRENGTH,
+	INTERACTION_PRESSED_STRENGTH,
+	mixInteractionState,
+	oklabDeltaE,
+} from './scale.js';
 import type { SemanticColorValues } from './semantic-map.js';
 
 type ColorMode = 'light' | 'dark';
 
-/** The solved tint pair for one colour mode, ready to emit as private CSS variables. */
+/** The solved tint pair for one colour mode, ready to emit as theme values. */
 export interface InteractionTintPair {
 	/** CSS colour for hover, including alpha. */
 	hover: string;
@@ -108,9 +113,14 @@ export function solveInteractionTints(
 	const tint = mode === 'dark' ? WHITE : BLACK;
 	const parsed = parseColorValues(colorValues);
 	const base = colorAt(parsed, 'color.surface.base');
-	const targetHover = colorAt(parsed, 'color.background.neutral.subtle.hover');
-	const targetPressed = colorAt(parsed, 'color.background.neutral.subtle.pressed');
-
+	const neutralSubtle = colorAt(parsed, 'color.background.neutral.subtle.rest');
+	const textPrimary = colorAt(parsed, 'color.text.primary');
+	const targetHover = mixInteractionState(neutralSubtle, textPrimary, INTERACTION_HOVER_STRENGTH);
+	const targetPressed = mixInteractionState(
+		neutralSubtle,
+		textPrimary,
+		INTERACTION_PRESSED_STRENGTH,
+	);
 	const targetHoverAlpha = alphaMatchingTarget(tint, base, targetHover);
 	const targetPressedAlpha = alphaMatchingTarget(tint, base, targetPressed);
 	const contrastCap = contrastCapAlpha(mode, parsed, tint);

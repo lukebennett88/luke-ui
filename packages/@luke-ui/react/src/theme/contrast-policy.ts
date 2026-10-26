@@ -24,6 +24,12 @@ export const TEXT_RATIO = 4.5;
  */
 export const UI_RATIO = 3;
 
+/** The percentage of `text.primary` mixed into a control border for hover feedback. */
+export const CONTROL_BORDER_HOVER_STRENGTH = 0.2;
+
+/** The percentage of `text.primary` mixed into a control border for pressed feedback. */
+export const CONTROL_BORDER_PRESSED_STRENGTH = 0.4;
+
 /**
  * Headroom every contrast *search* solves past its nominal ratio, so 4-decimal OKLCH emission can
  * never round a passing pair back below the gate. Validation measures the emitted values against the

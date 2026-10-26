@@ -49,8 +49,6 @@ interface MapSemanticColorsRequest {
 	backdrop: string;
 	/** `color.border.control`, solved by `solveControlBorder` and passed through as is. */
 	controlBorder: Oklch;
-	/** `color.border.controlHover`, derived from `controlBorder` by `controlHoverBorder`. */
-	controlHoverBorder: Oklch;
 	/** The generated scale family for each role, already mode-resolved. */
 	families: Record<FamilyRole, ScaleFamily>;
 	/** The resolved keyboard-focus source colour. */
@@ -74,7 +72,7 @@ export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticCo
 }
 
 function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColorValues {
-	const { families, surfaces, backdrop, focus, controlBorder, controlHoverBorder } = request;
+	const { families, surfaces, backdrop, focus, controlBorder } = request;
 	const neutral = families.neutral;
 	return {
 		'color.surface.base': formatOklch(surfaces.base),
@@ -88,7 +86,6 @@ function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColor
 		'color.text.disabled': formatOklch(neutral[FAMILY_RUNG.muted]),
 		'color.border.decorative': formatOklch(neutral[FAMILY_RUNG.decorative]),
 		'color.border.control': formatOklch(controlBorder),
-		'color.border.controlHover': formatOklch(controlHoverBorder),
 		'color.border.focus': formatOklch(focus),
 	};
 }
@@ -100,13 +97,11 @@ function mapRoleColorValues(families: Record<FamilyRole, ScaleFamily>): {
 	return pathRecord(
 		SEMANTIC_ROLES.flatMap((role) => {
 			const family = families[role];
-			const subtle = interactionStates(family[FAMILY_RUNG.subtle], textPrimary);
+			const subtle = formatOklch(family[FAMILY_RUNG.subtle]);
 			const solid = interactionStates(family[FAMILY_RUNG.solid], textPrimary);
 			const foreground = interactionStates(family[FAMILY_RUNG.foreground], textPrimary);
 			return [
-				pathEntry(`color.background.${role}.subtle.rest`, subtle.rest),
-				pathEntry(`color.background.${role}.subtle.hover`, subtle.hover),
-				pathEntry(`color.background.${role}.subtle.pressed`, subtle.pressed),
+				pathEntry(`color.background.${role}.subtle.rest`, subtle),
 				pathEntry(`color.background.${role}.solid.rest`, solid.rest),
 				pathEntry(`color.background.${role}.solid.hover`, solid.hover),
 				pathEntry(`color.background.${role}.solid.pressed`, solid.pressed),

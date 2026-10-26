@@ -1,5 +1,6 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { controlBorderState } from '../../styles/control-border.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import { descendantDisabledSelector } from '../../styles/input-states.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
@@ -73,7 +74,7 @@ const selectConfig = {
 				},
 				// An open select keeps the hover border while its popover is showing.
 				[`&[data-hovered="true"]${notDisabled}, &[aria-expanded="true"]${notDisabled}`]: {
-					borderColor: vars.color.border.controlHover,
+					borderColor: controlBorderState('hover'),
 				},
 				// Focus only adds the ring, so it composes with every state.
 				[`&[data-focus-visible="true"]${notDisabled}`]: focusRing(vars.color.border.focus),

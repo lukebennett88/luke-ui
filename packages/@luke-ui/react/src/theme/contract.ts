@@ -35,8 +35,6 @@ const typeStyle = {
 const roleBackground = {
 	subtle: {
 		rest: null,
-		hover: null,
-		pressed: null,
 	},
 	solid: {
 		rest: null,
@@ -85,7 +83,7 @@ export const themeContractTree = {
 	 * (`neutral`, `accent`, `info`, `success`, `warning`, `danger`).
 	 *
 	 * Organised by the property a token styles, not by the component that happens to use it: the
-	 * functional leaves (`surface`, `overlay`, `loadingSkeleton`, `text`, and the first four `border`
+	 * functional leaves (`surface`, `overlay`, `loadingSkeleton`, `text`, and the first three `border`
 	 * leaves) come first, then `background` / `foreground` / the role leaves under `border` give all
 	 * six roles the same capabilities. A role's meaning never decides which visual slots it can fill,
 	 * so no role is a special case here. Hover and pressed leaves are generated, not authored.
@@ -122,8 +120,6 @@ export const themeContractTree = {
 			decorative: null,
 			/** The guaranteed 3:1 boundary of a control against every surface. */
 			control: null,
-			/** The hovered control boundary, with the same 3:1 guarantee as `control`. */
-			controlHover: null,
 			focus: null,
 			// The shared semantic borders. State-free on purpose: the token carries the meaning and the
 			// component decides when to apply it. Decorative tints: they carry no contrast guarantee.
@@ -183,6 +179,10 @@ export const themeContractTree = {
 	interaction: {
 		/** The fade applied to disabled and pending controls. */
 		disabledOpacity: null,
+		tint: {
+			hover: null,
+			pressed: null,
+		},
 	},
 	/**
 	 * Luke UI-owned motion treatments for interaction. Each treatment pairs a duration with its
@@ -212,9 +212,12 @@ export const themeContractTree = {
  * {@link themeContractTree}. This one list drives the mode-family type, {@link ModePath},
  * {@link IdentityPath}, and stylesheet partitioning.
  */
-export const modeFamilies = ['color', 'controlFinish', 'depth'] as const satisfies ReadonlyArray<
-	keyof typeof themeContractTree
->;
+export const modeFamilies = [
+	'color',
+	'controlFinish',
+	'depth',
+	'interaction',
+] as const satisfies ReadonlyArray<keyof typeof themeContractTree>;
 
 /** A top-level contract family that varies by colour mode. */
 type ModeFamily = (typeof modeFamilies)[number];

@@ -4,7 +4,7 @@ import { paperTheme } from './__fixtures__/paper.js';
 import { UNSATISFIABLE_ON_SOLID } from './__fixtures__/radix-scales.js';
 import { tactileTheme } from './__fixtures__/tactile.js';
 import { splitBlocks, testTypography } from './__fixtures__/theme-css.js';
-import { compileTheme, ThemeContrastError } from './build-theme.js';
+import { compileTheme } from './build-theme.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import type { ThemeInput } from './define-theme.js';
 import { defaultBackdrop, defaultDepth, normalizeTheme } from './define-theme.js';
@@ -348,29 +348,29 @@ describe('normalizeTheme carries authored surfaces', () => {
 		).toThrow(ThemeInteractionTintError);
 	});
 
-	it('lets an author replace a generated surface that fails a contrast gate', () => {
-		// A lighter dark base pushes the generated overlay, which sits above the base, under the text
-		// gate. The surface is reported rather than repaired, and authoring it clears its failures.
-		// 0.36 is past the point where step-11 secondary (0.79 L) still clears AA on the overlay.
-		const base = { dark: 'oklch(0.36 0 0)', light: 'oklch(0.985 0 0)' };
-		function overlayFailures(surface: NonNullable<ThemeInput['color']['surface']>) {
+	it('lets an author replace a generated surface that fails tint contrast validation', () => {
+		// The generated overlay on this dark base leaves no visible tint pair below the contrast cap.
+		// Replacing that surface with the base colour clears the tint gate.
+		const base = { dark: 'oklch(0.3 0 0)', light: 'oklch(0.985 0 0)' };
+		function themeError(surface: NonNullable<ThemeInput['color']['surface']>): unknown {
 			try {
 				defineTheme({
 					color: { accent: '#3b82f6', surface },
 					name: 'weak-overlay',
 					typography: testTypography,
 				});
-				return [];
+				return null;
 			} catch (error) {
-				if (!(error instanceof ThemeContrastError)) throw error;
-				return error.failures.filter((failure) => failure.background === 'color.surface.overlay');
+				return error;
 			}
 		}
 
-		expect(overlayFailures({ base })).toContainEqual(
-			expect.objectContaining({ foreground: 'color.text.secondary', mode: 'dark' }),
-		);
-		expect(overlayFailures({ base, overlay: { dark: base.dark } })).toEqual([]);
+		const generatedError = themeError({ base });
+		expect(generatedError).toBeInstanceOf(ThemeInteractionTintError);
+		if (!(generatedError instanceof ThemeInteractionTintError)) throw generatedError;
+		expect(generatedError.mode).toBe('dark');
+		expect(generatedError.limitingMiss?.background).toBe('color.surface.overlay');
+		expect(themeError({ base, overlay: { dark: base.dark } })).toBeNull();
 	});
 });
 
@@ -418,8 +418,6 @@ describe('defineTheme emits interactive semantic ramps for the bundled themes', 
 				for (const role of ['info', 'success', 'warning']) {
 					const ramp = [
 						`--luke-color-background-${role}-subtle-rest`,
-						`--luke-color-background-${role}-subtle-hover`,
-						`--luke-color-background-${role}-subtle-pressed`,
 						`--luke-color-background-${role}-solid-rest`,
 						`--luke-color-background-${role}-solid-hover`,
 						`--luke-color-background-${role}-solid-pressed`,

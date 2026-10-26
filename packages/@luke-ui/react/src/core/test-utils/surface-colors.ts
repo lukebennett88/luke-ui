@@ -55,12 +55,15 @@ export function pairedTokens(background: PairedBackground): Record<ForegroundSlo
 /** The colours `background` pairs with, resolved in `element`'s own colour mode. */
 export function pairedColors(element: Element, background: PairedBackground) {
 	const [group, level, state = 'rest'] = background.split('.') as [string, string, string?];
-	const fill =
-		group === 'surface'
-			? vars.color.surface[level as keyof typeof vars.color.surface]
-			: vars.color.background[group as SemanticRole][level as 'subtle' | 'solid'][
-					state as 'rest' | 'hover' | 'pressed'
-				];
+	let fill: string;
+	if (group === 'surface') {
+		fill = vars.color.surface[level as keyof typeof vars.color.surface];
+	} else if (level === 'subtle') {
+		fill = vars.color.background[group as SemanticRole].subtle.rest;
+	} else {
+		fill =
+			vars.color.background[group as SemanticRole].solid[state as 'rest' | 'hover' | 'pressed'];
+	}
 	const tokens = pairedTokens(background);
 
 	return {

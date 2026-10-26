@@ -219,7 +219,11 @@ function typographyPartOf(path: string): TypographyPart | undefined {
 
 function scaleOf(path: string): ScaleId | undefined {
 	for (const [prefix, scale] of SCALE_PREFIXES) {
-		if (path.startsWith(prefix) && !path.slice(prefix.length).includes('.')) return scale;
+		if (
+			path.startsWith(prefix) &&
+			(!path.slice(prefix.length).includes('.') || prefix === 'interaction.')
+		)
+			return scale;
 	}
 	return;
 }
