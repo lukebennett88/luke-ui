@@ -15,7 +15,7 @@ import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
-import { page, userEvent } from 'vite-plus/test/context';
+import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { DocsShell } from './docs-shell.js';
 import { DocsSearchProvider } from './search.js';
 import { DocsThemeRoot } from './theme-controls.js';
@@ -64,6 +64,7 @@ afterEach(async () => {
 	delete document.documentElement.dataset.docsSidebar;
 	container = undefined;
 	root = undefined;
+	await cdp().send('Emulation.setEmulatedMedia', { features: [] });
 	await page.viewport(1024, 800);
 });
 
@@ -172,6 +173,9 @@ test('keeps search and theme in the header while the sidebar shows', async () =>
 
 for (const direction of ['ltr', 'rtl']) {
 	test(`moves the sidebar toggle beside the wordmark when collapsed in ${direction}`, async () => {
+		await cdp().send('Emulation.setEmulatedMedia', {
+			features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
+		});
 		await page.viewport(1280, 800);
 		document.documentElement.dir = direction;
 		await renderShell('/docs/installation');
