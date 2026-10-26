@@ -178,7 +178,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 		it(`${foundation.name} generates subtle, distinct semantic borders`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
-				const surfaces = ['base', 'field', 'overlay'].map((surface) => {
+				const surfaces = ['base', 'field', 'raised'].map((surface) => {
 					return parseColor(extractValue(block, `--luke-color-surface-${surface}`));
 				});
 				// The functional borders are excluded: `border.control` is a solved contrast boundary,

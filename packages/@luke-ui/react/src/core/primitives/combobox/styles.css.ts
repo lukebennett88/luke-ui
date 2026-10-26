@@ -234,7 +234,7 @@ const comboboxConfig = {
 						forcedColorAdjust: 'auto',
 					},
 				},
-				...surfaceStyle('surface.overlay'),
+				...surfaceStyle('surface.raised'),
 				borderColor: vars.color.border.decorative,
 				borderRadius: vars.radius.surface,
 				borderStyle: 'solid',

@@ -15,7 +15,7 @@ describe('generateSurfaces', () => {
 
 	it('emits exactly the four surface roles', () => {
 		const surfaces = generateSurfaces({ mode: 'light', surface: { base: lightBase } });
-		expect(Object.keys(surfaces).toSorted()).toEqual(['base', 'field', 'overlay', 'subdued']);
+		expect(Object.keys(surfaces).toSorted()).toEqual(['base', 'field', 'raised', 'subdued']);
 	});
 
 	describe('dark mode', () => {
@@ -26,8 +26,8 @@ describe('generateSurfaces', () => {
 			expect(surfaces.field.l).toBeLessThan(darkBase.l);
 		});
 
-		it('lifts overlay above the base', () => {
-			expect(surfaces.overlay.l).toBeGreaterThan(darkBase.l);
+		it('lifts raised above the base', () => {
+			expect(surfaces.raised.l).toBeGreaterThan(darkBase.l);
 		});
 	});
 
@@ -39,15 +39,15 @@ describe('generateSurfaces', () => {
 			expect(surfaces.subdued.l).toBeLessThan(lightBase.l);
 		});
 
-		it('lifts overlay above the base only slightly', () => {
-			expect(surfaces.overlay.l).toBeGreaterThan(lightBase.l);
-			expect(surfaces.overlay.l - lightBase.l).toBeLessThan(0.05);
+		it('lifts raised above the base only slightly', () => {
+			expect(surfaces.raised.l).toBeGreaterThan(lightBase.l);
+			expect(surfaces.raised.l - lightBase.l).toBeLessThan(0.05);
 		});
 	});
 
 	it('derives each generated surface from the base, keeping its hue and chroma', () => {
 		const surfaces = generateSurfaces({ mode: 'dark', surface: { base: darkBase } });
-		for (const role of ['subdued', 'field', 'overlay'] as const) {
+		for (const role of ['subdued', 'field', 'raised'] as const) {
 			expect(surfaces[role].h).toBeCloseTo(darkBase.h, 5);
 			expect(surfaces[role].c).toBeCloseTo(darkBase.c, 5);
 		}
@@ -60,7 +60,7 @@ describe('generateSurfaces', () => {
 
 		expect(authored.field).toEqual(field);
 		expect(authored.subdued).toEqual(generated.subdued);
-		expect(authored.overlay).toEqual(generated.overlay);
+		expect(authored.raised).toEqual(generated.raised);
 	});
 
 	it('generates a surface from the base, not from an authored sibling', () => {

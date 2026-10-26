@@ -146,7 +146,7 @@ describe('theme contract', () => {
 	});
 
 	it('keeps the settled 1.0 surface, border, sizing, and type style leaves', () => {
-		expect(Object.keys(vars.color.surface)).toEqual(['base', 'subdued', 'field', 'overlay']);
+		expect(Object.keys(vars.color.surface)).toEqual(['base', 'subdued', 'field', 'raised']);
 		expect(Object.keys(vars.color.border).slice(0, 3)).toEqual(['decorative', 'control', 'focus']);
 		expect(Object.keys(vars.controlFinish)).toEqual(['recessed', 'resting', 'raised']);
 		expect(Object.keys(vars.controlSize)).toEqual(['px32', 'px40']);

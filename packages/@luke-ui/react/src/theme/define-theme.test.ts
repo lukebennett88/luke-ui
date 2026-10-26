@@ -308,7 +308,7 @@ describe('normalizeTheme carries authored surfaces', () => {
 		const foundation = normalizeTheme({
 			color: {
 				accent: '#3b82f6',
-				surface: { field: { light: 'oklch(0.97 0 0)' }, overlay: { dark: 'oklch(0.3 0 0)' } },
+				surface: { field: { light: 'oklch(0.97 0 0)' }, raised: { dark: 'oklch(0.3 0 0)' } },
 			},
 			name: 'authored-surfaces',
 			typography: testTypography,
@@ -316,9 +316,9 @@ describe('normalizeTheme carries authored surfaces', () => {
 		expect(foundation.light.color.surface.field).toEqual(
 			gamutMapOklch(parseColor('oklch(0.97 0 0)')),
 		);
-		expect(foundation.light.color.surface.overlay).toBeUndefined();
+		expect(foundation.light.color.surface.raised).toBeUndefined();
 		expect(foundation.dark.color.surface.field).toBeUndefined();
-		expect(foundation.dark.color.surface.overlay).toEqual(
+		expect(foundation.dark.color.surface.raised).toEqual(
 			gamutMapOklch(parseColor('oklch(0.3 0 0)')),
 		);
 		expect(foundation.light.color.surface.subdued).toBeUndefined();
@@ -349,7 +349,7 @@ describe('normalizeTheme carries authored surfaces', () => {
 	});
 
 	it('lets an author replace a generated surface that fails tint contrast validation', () => {
-		// The generated overlay on this dark base leaves no visible tint pair below the contrast cap.
+		// The generated raised surface on this dark base leaves no visible tint pair below the contrast cap.
 		// Replacing that surface with the base colour clears the tint gate.
 		const base = { dark: 'oklch(0.3 0 0)', light: 'oklch(0.985 0 0)' };
 		function themeError(surface: NonNullable<ThemeInput['color']['surface']>): unknown {
@@ -369,8 +369,8 @@ describe('normalizeTheme carries authored surfaces', () => {
 		expect(generatedError).toBeInstanceOf(ThemeInteractionTintError);
 		if (!(generatedError instanceof ThemeInteractionTintError)) throw generatedError;
 		expect(generatedError.mode).toBe('dark');
-		expect(generatedError.limitingMiss?.background).toBe('color.surface.overlay');
-		expect(themeError({ base, overlay: { dark: base.dark } })).toBeNull();
+		expect(generatedError.limitingMiss?.background).toBe('color.surface.raised');
+		expect(themeError({ base, raised: { dark: base.dark } })).toBeNull();
 	});
 });
 

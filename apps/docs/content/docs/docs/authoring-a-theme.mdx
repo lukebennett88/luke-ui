@@ -20,7 +20,7 @@ defaults. A `ThemeInput` includes:
 - `color.accent`, the required brand or interaction accent
 - `color.neutral` or `color.neutralStyle` (`'cool'`, `'neutral'`, or `'warm'`) for the neutral base
   anchor
-- optional `color.surface` colours for the `base`, `subdued`, `field`, and `overlay` surfaces
+- optional `color.surface` colours for the `base`, `subdued`, `field`, and `raised` surfaces
 - optional `color.info`, `color.success`, `color.warning`, `color.danger`, `color.focus`, and
   `color.backdrop`
 - optional `typography.fonts.display`, `typography.fontWeight`, `radius`, `depth`, and
@@ -34,7 +34,7 @@ be omitted. How each colour treats them differs:
   side you set.
 - `info`, `success`, `warning`, `danger`, `focus`, and `backdrop` use one string as written in both
   modes. A missing side uses Luke UI's default for that mode.
-- `surface.subdued`, `surface.field`, and `surface.overlay` take only the object, because one value
+- `surface.subdued`, `surface.field`, and `surface.raised` take only the object, because one value
   cannot suit both modes. A missing side is generated from `base`. See [Surfaces](#surfaces).
 
 `color.backdrop` is the one colour that may include alpha. Luke UI emits it as
@@ -86,9 +86,10 @@ than 100 above `body`, including a weight inherited from the theme you extend.
 it. When you omit it, it uses the neutral colour.
 
 Every other surface is a fixed lightness offset from `base` for the mode. Set `subdued`, `field`, or
-`overlay` when a default does not suit the theme. Luke UI maps an authored colour into the sRGB
-gamut but never changes its lightness to pass contrast. If a surface fails
-[contrast validation](#contrast-validation), set it explicitly or choose a different value.
+`raised` when a default does not suit the theme. Raised is shared by elevated inline and detached
+content. Choose borders and depth separately. A raised surface does not add either. Luke UI maps an
+authored colour into the sRGB gamut but never changes its lightness to pass contrast. If a surface
+fails [contrast validation](#contrast-validation), set it explicitly or choose a different value.
 
 ## Extend a theme
 

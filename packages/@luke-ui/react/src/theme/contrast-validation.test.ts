@@ -21,7 +21,7 @@ import type { SemanticColorValues } from './semantic-map.js';
 
 const ROLE_FOREGROUND_PATTERN = /^color\.foreground\.\w+\.(rest|hover|pressed)$/;
 const TINT_CONTRAST_BACKGROUND_PATTERN =
-	/^color\.(surface\.(base|subdued|field|overlay)|background\.\w+\.subtle\.rest)$/;
+	/^color\.(surface\.(base|subdued|field|raised)|background\.\w+\.subtle\.rest)$/;
 
 describe('buildTheme contrast failures', () => {
 	function buildFailures(foundation: ThemeFoundation): ThemeContrastError {
@@ -61,7 +61,7 @@ describe('buildTheme contrast failures', () => {
 		);
 	});
 
-	it('accepts pale and deep accents whose solids may fail 3:1 against the overlay', () => {
+	it('accepts pale and deep accents whose solids may fail 3:1 against raised', () => {
 		// The active option's focus chrome is an inset outline on the solid fill, gated against that
 		// fill (and already covered at 4.5:1 by the on-solid text gates), not against the list surface.
 		for (const [name, accent] of [
@@ -98,7 +98,7 @@ describe('buildTheme contrast failures', () => {
 				expect(
 					diagnostics[mode].contrastChecks.some(
 						(check) =>
-							check.background === 'color.surface.overlay' &&
+							check.background === 'color.surface.raised' &&
 							check.foreground.startsWith('color.background.accent.solid.'),
 					),
 				).toBe(false);
@@ -225,7 +225,7 @@ describe('contrast validation matrix', () => {
 		'color.surface.base',
 		'color.surface.subdued',
 		'color.surface.field',
-		'color.surface.overlay',
+		'color.surface.raised',
 	] as const;
 
 	function expectedChecks() {

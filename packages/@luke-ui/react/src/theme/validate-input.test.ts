@@ -345,8 +345,8 @@ describe('authored theme validation', () => {
 			'must be a light/dark object',
 		],
 		[
-			'color.surface.overlay',
-			{ color: { surface: { overlay: '#fff' } } },
+			'color.surface.raised',
+			{ color: { surface: { raised: '#fff' } } },
 			'must be a light/dark object',
 		],
 		['depth', { depth: [] }, 'must be an object'],

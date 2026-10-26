@@ -378,7 +378,7 @@ export const drawerModal = style({
 				hidden: { translate: `${drawerOffset} 0` },
 				properties: ['translate'],
 				rule: {
-					backgroundColor: vars.color.surface.overlay,
+					backgroundColor: vars.color.surface.raised,
 					blockSize: '100%',
 					boxShadow: vars.depth.overlay,
 					inlineSize: 'min(22rem, 90vw)',

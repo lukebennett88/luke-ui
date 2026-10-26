@@ -246,7 +246,7 @@ export const previewLoadingHidden = style({
 export const loadingPill = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.overlay,
+			backgroundColor: vars.color.surface.raised,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.full,
 			borderStyle: 'solid',

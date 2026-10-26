@@ -181,7 +181,7 @@ function inheritSurface(
 	return {
 		base: own.base ?? base.base,
 		field: own.field ?? base.field,
-		overlay: own.overlay ?? base.overlay,
+		raised: own.raised ?? base.raised,
 		subdued: own.subdued ?? base.subdued,
 	};
 }

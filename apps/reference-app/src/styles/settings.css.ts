@@ -24,7 +24,7 @@ export const sidebarScroll = style({
 });
 
 export const skipLink = style({
-	background: vars.color.surface.overlay,
+	background: vars.color.surface.raised,
 	blockSize: '1px',
 	clip: 'rect(1px, 1px, 1px, 1px)',
 	clipPath: 'inset(100%)',
@@ -250,7 +250,7 @@ export const avatarOverlay = style({
 });
 
 export const menuPopover = style({
-	background: vars.color.surface.overlay,
+	background: vars.color.surface.raised,
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.surface,
 	boxShadow: vars.depth.floating,
@@ -363,7 +363,7 @@ export const dialogOverlay = style({
 });
 
 export const dialogModal = style({
-	background: vars.color.surface.overlay,
+	background: vars.color.surface.raised,
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.surface,
 	boxShadow: vars.depth.overlay,

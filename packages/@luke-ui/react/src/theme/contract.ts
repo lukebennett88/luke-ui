@@ -97,8 +97,8 @@ export const themeContractTree = {
 			subdued: null,
 			/** Form-control surfaces. */
 			field: null,
-			/** Detached content, such as menus, popovers, and dialogs. */
-			overlay: null,
+			/** Elevated panels, cards, menus, popovers, and dialogs. */
+			raised: null,
 		},
 		/** Translucent layer painted over other interface content, such as a modal backdrop. */
 		overlay: {

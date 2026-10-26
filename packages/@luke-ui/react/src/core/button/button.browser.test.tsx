@@ -762,7 +762,7 @@ test('a low Button chip keeps nested contextual text at AA on a solid fill', asy
 });
 
 // Adaptive hover and pressed must stay visible on every standard surface, including overlays an
-// application paints with `surface.overlay` without going through `Box`.
+// application paints with `surface.raised` without going through `Box`.
 const adaptiveAppearances = [
 	...visualAppearances,
 	{ mode: 'light', theme: 'contrastEdge' },
@@ -770,7 +770,7 @@ const adaptiveAppearances = [
 ] as const;
 
 for (const appearance of adaptiveAppearances) {
-	const surfaces = ['surface.base', 'surface.subdued', 'surface.field', 'surface.overlay'] as const;
+	const surfaces = ['surface.base', 'surface.subdued', 'surface.field', 'surface.raised'] as const;
 
 	test(`low and standard Buttons keep 4.5:1 text over adaptive states on every surface in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { locator } = render(
@@ -942,7 +942,7 @@ for (const appearance of visualAppearances) {
 		const { locator, user } = render(
 			<div
 				style={{
-					backgroundColor: vars.color.surface.overlay,
+					backgroundColor: vars.color.surface.raised,
 					color: vars.color.text.primary,
 					padding: vars.space['16'],
 				}}
@@ -995,7 +995,7 @@ test('kitchen sink on overlay', { tags: ['visual'] }, async () => {
 		const { locator } = render(
 			<div
 				style={{
-					backgroundColor: vars.color.surface.overlay,
+					backgroundColor: vars.color.surface.raised,
 					color: vars.color.text.primary,
 					padding: vars.space['16'],
 				}}

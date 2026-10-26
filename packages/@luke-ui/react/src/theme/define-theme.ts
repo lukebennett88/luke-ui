@@ -145,8 +145,8 @@ export interface ThemeInput extends ThemeInputCommon {
 			subdued?: ModeColorInput;
 			/** Form-control surfaces. A missing side is a fixed offset from `base`. */
 			field?: ModeColorInput;
-			/** Menus, popovers, and dialogs. A missing side is a fixed offset from `base`. */
-			overlay?: ModeColorInput;
+			/** Elevated panels, cards, menus, popovers, and dialogs. A missing side is a fixed offset from `base`. */
+			raised?: ModeColorInput;
 		};
 		/**
 		 * Source colour for the `info` role. One string is used in both modes. A missing side uses an
@@ -389,7 +389,7 @@ function resolveSurfaces(
 	const resolved: ThemeSurfaceSources = {
 		base: resolveOptionalModeColour(surface?.base, mode, neutral),
 	};
-	for (const role of ['subdued', 'field', 'overlay'] as const) {
+	for (const role of ['subdued', 'field', 'raised'] as const) {
 		const side = surface?.[role]?.[mode];
 		if (side !== undefined) resolved[role] = gamutMapOklch(parseColor(side));
 	}

@@ -13,10 +13,13 @@ Surface roles describe where an element sits in the interface:
 - `color.surface.base`: the application background and primary content.
 - `color.surface.subdued`: secondary regions, such as a sidebar or a panel set apart from the page.
 - `color.surface.field`: form-control surfaces.
-- `color.surface.overlay`: detached content, such as menus, popovers, and dialogs. This is an opaque
-  colour.
+- `color.surface.raised`: elevated panels, cards, menus, popovers, and dialogs. This is an opaque
+  colour shared by inline and detached content.
 
 `color.overlay.backdrop` dims content behind a modal. It is not a surface colour.
+
+Choose borders and depth separately. A raised surface does not add either, and flat cards can use
+`base` with a border or `subdued`.
 
 Text uses `primary` and `secondary` roles. Borders distinguish decorative, control, and focus uses.
 Text, role foregrounds, `color.border.control`, and the focus ring are guaranteed to contrast with

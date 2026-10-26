@@ -179,7 +179,7 @@ export const panel = style({
 export const panelFieldShell = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.overlay,
+			backgroundColor: vars.color.surface.raised,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.surface,
 			borderStyle: 'solid',
@@ -267,7 +267,7 @@ export const inputRow = style({
 	'@layer': {
 		components: {
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.overlay,
+			backgroundColor: vars.color.surface.raised,
 			borderRadius: vars.radius.surface,
 			display: 'flex',
 			flexShrink: 0,

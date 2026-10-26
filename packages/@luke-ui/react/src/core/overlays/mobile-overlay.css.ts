@@ -42,7 +42,7 @@ export const mobileOverlay = style(
 	}),
 );
 
-const overlaySurface = surfaceStyle('surface.overlay');
+const overlaySurface = surfaceStyle('surface.raised');
 
 export const mobileModal = style(
 	overlayMotion({
