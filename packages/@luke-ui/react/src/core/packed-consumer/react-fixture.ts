@@ -369,7 +369,6 @@ export const retainedTokens: Array<string> = [
 	vars.color.surface.field,
 	vars.color.surface.overlay,
 	vars.color.border.control,
-	vars.color.border.controlHover,
 	vars.color.border.warning,
 	vars.interaction.tint.hover,
 	vars.interaction.tint.pressed,
@@ -434,9 +433,13 @@ export const textButtonWidth = <Button appearance="text" inlineSize="full">Conti
 
 // Box values follow the public token contract.
 export const retainedBoxValues: Array<BoxProps> = [
-	{ backgroundColor: 'surface.field', borderColor: 'controlHover', boxShadow: 'overlay' },
+	{ backgroundColor: 'surface.field', borderColor: 'control', boxShadow: 'overlay' },
 	{ backgroundColor: 'warning.subtle', borderRadius: 'full', gap: 'space.96' },
 ];
+// @ts-expect-error — hover border treatments are derived by control styles, not public tokens
+export const removedControlHoverBorder = vars.color.border.controlHover;
+// @ts-expect-error — hover border treatments are not Box token values
+export const removedBoxControlHoverBorder: BoxProps['borderColor'] = 'controlHover';
 // @ts-expect-error — removed with color.surface.canvas
 export const removedBoxSurface: BoxProps['backgroundColor'] = 'surface.canvas';
 // @ts-expect-error — removed with color.surface.floating

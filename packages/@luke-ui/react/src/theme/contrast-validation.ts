@@ -7,6 +7,7 @@
 import type { Oklch } from './color.js';
 import { contrastRatio, parseColor } from './color.js';
 import { SEMANTIC_ROLES, TEXT_RATIO, UI_RATIO } from './contrast-policy.js';
+import { controlBorderStateColor } from './control-border.js';
 import type { ContrastCheck } from './diagnostics.js';
 import type { SemanticColorValues } from './semantic-map.js';
 
@@ -41,8 +42,8 @@ type ColorPath = keyof SemanticColorValues;
  * Hard at 4.5:1: primary and secondary text and each role's rest, hover, and pressed foreground
  * against all four surfaces and every role's subtle rest fill. Both on-solid hierarchy leaves are gated
  * against their role's solid fills.
- * Hard at 3:1: the focus ring, the control border and its hover, and `danger.solid.rest`, the
- * invalid control boundary. Only danger is gated as a boundary: the other roles' solid fills are
+ * Hard at 3:1: the focus ring, the control border and its mixed hover and pressed treatments, and
+ * `danger.solid.rest`, the invalid control boundary. Only danger is gated as a boundary: the other roles' solid fills are
  * solved for on-solid text and `warning` lands well under 3:1 in light mode.
  * Also hard at 3:1: accent on-solid primary against `accent.solid.rest` and `accent.solid.pressed`.
  * The active dropdown option draws a 2px inset outline in that on-solid colour on those fills, so
@@ -63,11 +64,20 @@ export function validateContrast(
 		if (value === undefined) throw new Error(`buildTheme did not generate "${path}"`);
 		return parseColor(value);
 	};
-	function check(foreground: ColorPath, background: ColorPath, required: number, hard: boolean) {
-		const ratio = contrastRatio(colorAt(foreground), colorAt(background));
+	function checkValue(
+		foreground: string,
+		foregroundColor: Oklch,
+		background: ColorPath,
+		required: number,
+		hard: boolean,
+	) {
+		const ratio = contrastRatio(foregroundColor, colorAt(background));
 		const passes = ratio >= required;
 		checks.push({ background, foreground, hard, passes, ratio, required });
 		if (hard && !passes) failures.push({ background, foreground, mode, ratio, required });
+	}
+	function check(foreground: ColorPath, background: ColorPath, required: number, hard: boolean) {
+		checkValue(foreground, colorAt(foreground), background, required, hard);
 	}
 
 	const surfacePaths = [
@@ -102,11 +112,19 @@ export function validateContrast(
 	const boundaries = [
 		'color.border.focus',
 		'color.border.control',
-		'color.border.controlHover',
 		'color.background.danger.solid.rest',
 	] as const satisfies ReadonlyArray<ColorPath>;
 	for (const boundary of boundaries) {
 		for (const surface of surfacePaths) check(boundary, surface, UI_RATIO, true);
+	}
+	const controlBorder = colorAt('color.border.control');
+	const textPrimary = colorAt('color.text.primary');
+	for (const state of ['hover', 'pressed'] as const) {
+		const foreground = `interaction.border.${state}`;
+		const foregroundColor = parseColor(controlBorderStateColor(controlBorder, textPrimary, state));
+		for (const surface of surfacePaths) {
+			checkValue(foreground, foregroundColor, surface, UI_RATIO, true);
+		}
 	}
 	// The active dropdown option's inset outline uses accent on-solid primary against the solid fill.
 	for (const fill of [

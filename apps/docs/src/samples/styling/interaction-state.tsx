@@ -6,8 +6,8 @@ const interactionButton = style({
 	backgroundColor: vars.color.background.neutral.subtle.rest,
 	color: vars.color.text.primary,
 	selectors: {
-		'&:active': interactionState('pressed'),
 		'&:hover': interactionState('hover'),
+		'&:active': interactionState('pressed'),
 	},
 });
 

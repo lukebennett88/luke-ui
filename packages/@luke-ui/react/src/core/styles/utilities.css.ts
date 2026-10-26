@@ -113,7 +113,7 @@ const dynamicProperties = {
 		stretch: 'stretch',
 	},
 	blockSize: true,
-	// `control` and `controlHover` are guaranteed 3:1 boundaries; the role borders are decorative.
+	// `control` and its generated state mixes are guaranteed 3:1 boundaries; role borders are decorative.
 	borderColor: vars.color.border,
 	borderRadius: vars.radius,
 	borderStyle: { none: 'none', solid: 'solid', dashed: 'dashed', dotted: 'dotted' },

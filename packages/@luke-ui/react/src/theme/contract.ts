@@ -83,7 +83,7 @@ export const themeContractTree = {
 	 * (`neutral`, `accent`, `info`, `success`, `warning`, `danger`).
 	 *
 	 * Organised by the property a token styles, not by the component that happens to use it: the
-	 * functional leaves (`surface`, `overlay`, `loadingSkeleton`, `text`, and the first four `border`
+	 * functional leaves (`surface`, `overlay`, `loadingSkeleton`, `text`, and the first three `border`
 	 * leaves) come first, then `background` / `foreground` / the role leaves under `border` give all
 	 * six roles the same capabilities. A role's meaning never decides which visual slots it can fill,
 	 * so no role is a special case here. Hover and pressed leaves are generated, not authored.
@@ -120,8 +120,6 @@ export const themeContractTree = {
 			decorative: null,
 			/** The guaranteed 3:1 boundary of a control against every surface. */
 			control: null,
-			/** The hovered control boundary, with the same 3:1 guarantee as `control`. */
-			controlHover: null,
 			focus: null,
 			// The shared semantic borders. State-free on purpose: the token carries the meaning and the
 			// component decides when to apply it. Decorative tints: they carry no contrast guarantee.

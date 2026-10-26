@@ -3,7 +3,7 @@ import type { ModePath } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { ThemeContrastFailure } from './contrast-validation.js';
 import { validateContrast } from './contrast-validation.js';
-import { controlHoverBorder, solveControlBorder } from './control-border.js';
+import { solveControlBorder } from './control-border.js';
 import type {
 	FamilyDiagnostics,
 	ThemeDiagnostics,
@@ -256,7 +256,6 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 	});
 	const colorValues = mapSemanticColors({
 		controlBorder,
-		controlHoverBorder: controlHoverBorder(controlBorder, mode),
 		families,
 		focus: source.focus,
 		backdrop: modeFoundation.color.backdrop,

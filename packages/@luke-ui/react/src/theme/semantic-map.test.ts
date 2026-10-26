@@ -32,11 +32,6 @@ const CONTROL_BORDER: Record<ColorMode, Oklch> = {
 	dark: parseColor('oklch(0.62 0.006 250)'),
 	light: parseColor('oklch(0.38 0.006 250)'),
 };
-const CONTROL_HOVER_BORDER: Record<ColorMode, Oklch> = {
-	dark: parseColor('oklch(0.74 0.006 250)'),
-	light: parseColor('oklch(0.26 0.006 250)'),
-};
-
 const FOCUS = parseColor('oklch(0.6 0.2 260)');
 
 // A representative source per role and mode. `info`/`success`/`warning`/`danger` reuse Luke UI's
@@ -96,7 +91,6 @@ describe('mapSemanticColors', () => {
 				const result = mapSemanticColors({
 					backdrop,
 					controlBorder,
-					controlHoverBorder: CONTROL_HOVER_BORDER[mode],
 					families,
 					focus: FOCUS,
 					surfaces,
@@ -126,7 +120,6 @@ describe('mapSemanticColors', () => {
 					formatOklch(families.neutral[FAMILY_RUNG.decorative]),
 				);
 				expect(result['color.border.control']).toBe(formatOklch(controlBorder));
-				expect(result['color.border.controlHover']).toBe(formatOklch(CONTROL_HOVER_BORDER[mode]));
 				expect(result['color.border.focus']).toBe(formatOklch(FOCUS));
 
 				// The shared contract: identical rest / hover / pressed mapping for every semantic role.
@@ -179,7 +172,6 @@ describe('mapSemanticColors', () => {
 				const result = mapSemanticColors({
 					backdrop: 'oklch(0 0 0 / 0.45)',
 					controlBorder: CONTROL_BORDER[mode],
-					controlHoverBorder: CONTROL_HOVER_BORDER[mode],
 					families,
 					focus: FOCUS,
 					surfaces,
@@ -203,7 +195,6 @@ describe('mapSemanticColors', () => {
 			const result = mapSemanticColors({
 				backdrop,
 				controlBorder: CONTROL_BORDER.light,
-				controlHoverBorder: CONTROL_HOVER_BORDER.light,
 				families,
 				focus: FOCUS,
 				surfaces,

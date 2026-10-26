@@ -1,14 +1,15 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { interactionTintVarName } from '../../../theme/interaction-tint-vars.js';
 import { ICON_SIZES } from '../../sizing/icon-sizing.js';
+import { controlBorderState } from '../../styles/control-border.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import { INTERACTION_STATE_LAYER_PROPERTY } from '../../styles/interaction-state-layer.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { interactionStateLayer } from '../../styles/state-layer.css.js';
-import { adaptiveStateLayer } from '../../styles/state-layer.js';
 import { surfaceStyle } from '../../styles/surface.js';
 import { textLineHeight } from '../../text/recipe.css.js';
 import { inlineControlGap, inlineFieldIndent } from '../field/recipe.css.js';
@@ -28,6 +29,16 @@ function hovered(state = '') {
 /** Selects the box while the checkbox matches `state` and is pressed. */
 function pressed(state = '') {
 	return `${state}[data-pressed="true"]${interactive} &`;
+}
+
+/** Uses a restrained portion of the shared tint over the Checkbox's small field surface. */
+function checkboxStateLayer(state: 'hover' | 'pressed') {
+	const strength = state === 'hover' ? 60 : 80;
+	return {
+		vars: {
+			[interactionStateLayer]: `color-mix(in srgb, var(${interactionTintVarName(state)}) ${strength}%, transparent)`,
+		},
+	};
 }
 
 const checkboxConfig = {
@@ -125,12 +136,12 @@ const checkboxConfig = {
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
 				[hovered()]: {
-					...adaptiveStateLayer('hover'),
-					borderColor: vars.color.border.controlHover,
+					...checkboxStateLayer('hover'),
+					borderColor: controlBorderState('hover'),
 				},
 				[pressed()]: {
-					...adaptiveStateLayer('pressed'),
-					borderColor: vars.color.border.controlHover,
+					...checkboxStateLayer('pressed'),
+					borderColor: controlBorderState('pressed'),
 				},
 				'[data-indeterminate="true"] &': {
 					...surfaceStyle('accent.solid.rest'),
@@ -172,11 +183,11 @@ const checkboxConfig = {
 				// Only `danger.solid.rest` is a guaranteed 3:1 boundary, so an invalid box keeps it through
 				// hover and press. The fill carries the feedback instead.
 				[hovered('[data-invalid="true"]')]: {
-					...adaptiveStateLayer('hover'),
+					...checkboxStateLayer('hover'),
 					borderColor: vars.color.background.danger.solid.rest,
 				},
 				[pressed('[data-invalid="true"]')]: {
-					...adaptiveStateLayer('pressed'),
+					...checkboxStateLayer('pressed'),
 					borderColor: vars.color.background.danger.solid.rest,
 				},
 				[`${hovered('[data-invalid="true"][data-selected="true"]')}, ${hovered('[data-invalid="true"][data-indeterminate="true"]')}`]:

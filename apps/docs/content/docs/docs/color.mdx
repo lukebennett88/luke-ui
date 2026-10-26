@@ -19,9 +19,9 @@ Surface roles describe where an element sits in the interface:
 `color.overlay.backdrop` dims content behind a modal. It is not a surface colour.
 
 Text uses `primary` and `secondary` roles. Borders distinguish decorative, control, and focus uses.
-Text, role foregrounds, `color.border.control`, `color.border.controlHover`, and the focus ring are
-guaranteed to contrast with all four surfaces. `color.border.decorative` is a separator with no
-contrast guarantee.
+Text, role foregrounds, `color.border.control`, and the focus ring are guaranteed to contrast with
+all four surfaces. Control hover and pressed borders derive from `color.border.control` and keep the
+same contrast guarantee. `color.border.decorative` is a separator with no contrast guarantee.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';

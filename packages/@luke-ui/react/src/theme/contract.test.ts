@@ -46,18 +46,16 @@ describe('theme contract', () => {
 		expect(countLeaves(vars)).toBe(flattenThemeContract().length);
 	});
 
-	it('keeps the 25 non-rest interaction-state tokens and removes subtle state leaves', () => {
+	it('keeps the 24 non-rest interaction-state tokens and removes obsolete leaves', () => {
 		const paths = flattenThemeContract().map(([path]) => path);
 		const retained = paths.filter((path) => {
-			return (
-				/^color\.(background\.\w+\.solid|foreground\.\w+)\.(hover|pressed)$/.test(path) ||
-				path === 'color.border.controlHover'
-			);
+			return /^color\.(background\.\w+\.solid|foreground\.\w+)\.(hover|pressed)$/.test(path);
 		});
-		expect(retained).toHaveLength(25);
+		expect(retained).toHaveLength(24);
 		expect(
 			paths.some((path) => /color\.background\.\w+\.subtle\.(hover|pressed)$/.test(path)),
 		).toBe(false);
+		expect(paths).not.toContain('color.border.controlHover');
 	});
 
 	it('gives every semantic role the same background, foreground, and border leaves', () => {
@@ -149,12 +147,7 @@ describe('theme contract', () => {
 
 	it('keeps the settled 1.0 surface, border, sizing, and type style leaves', () => {
 		expect(Object.keys(vars.color.surface)).toEqual(['base', 'subdued', 'field', 'overlay']);
-		expect(Object.keys(vars.color.border).slice(0, 4)).toEqual([
-			'decorative',
-			'control',
-			'controlHover',
-			'focus',
-		]);
+		expect(Object.keys(vars.color.border).slice(0, 3)).toEqual(['decorative', 'control', 'focus']);
 		expect(Object.keys(vars.controlFinish)).toEqual(['recessed', 'resting', 'raised']);
 		expect(Object.keys(vars.controlSize)).toEqual(['px32', 'px40']);
 		for (const style of typeStyles) {

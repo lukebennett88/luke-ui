@@ -2,6 +2,7 @@ import type { StyleRule } from '@vanilla-extract/css';
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { controlBorderState } from '../../styles/control-border.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
@@ -154,7 +155,7 @@ export const textInputPartsRecipe = recipe({
 				},
 				[control.focusWithin]: focusRing(vars.color.border.focus),
 				[control.hover]: {
-					borderColor: vars.color.border.controlHover,
+					borderColor: controlBorderState('hover'),
 				},
 				// Read-only drops the inset depth. The hover selector already excludes it.
 				[control.readOnly]: {

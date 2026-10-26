@@ -49,8 +49,6 @@ interface MapSemanticColorsRequest {
 	backdrop: string;
 	/** `color.border.control`, solved by `solveControlBorder` and passed through as is. */
 	controlBorder: Oklch;
-	/** `color.border.controlHover`, derived from `controlBorder` by `controlHoverBorder`. */
-	controlHoverBorder: Oklch;
 	/** The generated scale family for each role, already mode-resolved. */
 	families: Record<FamilyRole, ScaleFamily>;
 	/** The resolved keyboard-focus source colour. */
@@ -74,7 +72,7 @@ export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticCo
 }
 
 function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColorValues {
-	const { families, surfaces, backdrop, focus, controlBorder, controlHoverBorder } = request;
+	const { families, surfaces, backdrop, focus, controlBorder } = request;
 	const neutral = families.neutral;
 	return {
 		'color.surface.base': formatOklch(surfaces.base),
@@ -88,7 +86,6 @@ function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColor
 		'color.text.disabled': formatOklch(neutral[FAMILY_RUNG.muted]),
 		'color.border.decorative': formatOklch(neutral[FAMILY_RUNG.decorative]),
 		'color.border.control': formatOklch(controlBorder),
-		'color.border.controlHover': formatOklch(controlHoverBorder),
 		'color.border.focus': formatOklch(focus),
 	};
 }

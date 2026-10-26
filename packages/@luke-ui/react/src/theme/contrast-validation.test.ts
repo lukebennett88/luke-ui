@@ -13,6 +13,7 @@ import { contrastRatio, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { SEMANTIC_ROLES, TEXT_RATIO, UI_RATIO } from './contrast-policy.js';
 import { validateContrast } from './contrast-validation.js';
+import { controlBorderStateColor } from './control-border.js';
 import { defineTheme, normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
 import { ThemeInteractionTintError } from './interaction-tints.js';
@@ -266,12 +267,18 @@ describe('contrast validation matrix', () => {
 		}
 		for (const background of SURFACES) {
 			hard.push({ background, foreground: 'color.border.control', required: UI_RATIO });
-			hard.push({ background, foreground: 'color.border.controlHover', required: UI_RATIO });
 			hard.push({
 				background,
 				foreground: 'color.background.danger.solid.rest',
 				required: UI_RATIO,
 			});
+			for (const state of ['hover', 'pressed'] as const) {
+				hard.push({
+					background,
+					foreground: `interaction.border.${state}`,
+					required: UI_RATIO,
+				});
+			}
 		}
 		for (const state of ['rest', 'pressed']) {
 			hard.push({
@@ -291,6 +298,9 @@ describe('contrast validation matrix', () => {
 			color: {
 				accent: '#7c3aed',
 				neutral: { light: 'oklch(0.985 0.01 70)', dark: 'oklch(0.2 0.01 70)' },
+				surface: {
+					base: { light: 'oklch(0.99 0.01 70)', dark: 'oklch(0.18 0.01 70)' },
+				},
 			},
 			typography: testTypography,
 		}),
@@ -307,7 +317,13 @@ describe('contrast validation matrix', () => {
 				const checks = diagnostics[mode].contrastChecks;
 				const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
 				for (const check of checks) {
-					const foreground = extractValue(block, variableNames.get(check.foreground)!);
+					const foreground = check.foreground.startsWith('interaction.border.')
+						? controlBorderStateColor(
+								parseColor(extractValue(block, variableNames.get('color.border.control')!)),
+								parseColor(extractValue(block, variableNames.get('color.text.primary')!)),
+								check.foreground.endsWith('.hover') ? 'hover' : 'pressed',
+							)
+						: extractValue(block, variableNames.get(check.foreground)!);
 					const background = extractValue(block, variableNames.get(check.background)!);
 					expect(check.ratio).toBe(contrastRatio(parseColor(foreground), parseColor(background)));
 				}

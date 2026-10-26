@@ -80,7 +80,7 @@ export const trigger = style({
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"]), &[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])':
 					{
 						backgroundColor: vars.color.surface.field,
-						borderColor: vars.color.border.controlHover,
+						borderColor: `color-mix(in srgb, ${vars.color.border.control} 80%, ${vars.color.text.primary} 20%)`,
 						boxShadow: vars.depth.recessed,
 					},
 			},

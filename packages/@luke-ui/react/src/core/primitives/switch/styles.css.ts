@@ -1,6 +1,7 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { ICON_SIZES } from '../../sizing/icon-sizing.js';
+import { controlBorderState } from '../../styles/control-border.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
@@ -104,8 +105,8 @@ const switchConfig = {
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
 				[`${hovered()}, ${pressed()}`]: {
-					backgroundColor: vars.color.border.controlHover,
-					borderColor: vars.color.border.controlHover,
+					backgroundColor: controlBorderState('hover'),
+					borderColor: controlBorderState('hover'),
 				},
 				'[data-invalid="true"] &': {
 					borderColor: vars.color.background.danger.solid.rest,
