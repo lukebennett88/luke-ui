@@ -414,12 +414,13 @@ for (const direction of ['ltr', 'rtl']) {
 		});
 
 		expect(sidebar.inert).toBe(true);
-		const motion = [
+		const getMotion = () => [
 			...sidebar.getAnimations(),
 			...toggleControl.getAnimations(),
 			...(search.parentElement?.getAnimations() ?? []),
 		];
-		expect(motion.length).toBeGreaterThan(0);
+		await expect.poll(() => getMotion().length).toBeGreaterThan(0);
+		const motion = getMotion();
 		for (const animation of motion) {
 			animation.pause();
 			animation.currentTime = Number(animation.effect?.getTiming().duration) / 2;
