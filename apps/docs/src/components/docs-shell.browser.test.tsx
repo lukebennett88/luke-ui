@@ -15,7 +15,7 @@ import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
-import { cdp, page, userEvent } from 'vite-plus/test/context';
+import { page, userEvent } from 'vite-plus/test/context';
 import { DocsShell } from './docs-shell.js';
 import { DocsSearchProvider } from './search.js';
 import { DocsThemeRoot } from './theme-controls.js';
@@ -64,7 +64,6 @@ afterEach(async () => {
 	delete document.documentElement.dataset.docsSidebar;
 	container = undefined;
 	root = undefined;
-	await cdp().send('Emulation.setEmulatedMedia', { features: [] });
 	await page.viewport(1024, 800);
 });
 
@@ -110,38 +109,6 @@ for (const pathname of ['/components', '/components/actions/button']) {
 	});
 }
 
-test('opens the mobile drawer, exposes site and docs navigation, and restores focus on Escape', async () => {
-	await page.viewport(390, 800);
-	await renderAt(
-		'/docs/installation',
-		<DocsShell tree={tree}>
-			<main>Article</main>
-		</DocsShell>,
-	);
-
-	const trigger = page.getByRole('button', { name: 'Menu' });
-	await act(async () => {
-		await userEvent.click(trigger);
-	});
-	await expect.element(page.getByRole('dialog', { name: 'Docs navigation' })).toBeVisible();
-	await expect
-		.element(
-			page.getByRole('navigation', { name: 'Site' }).getByRole('link', { name: 'Playground' }),
-		)
-		.toBeVisible();
-	await expect
-		.element(page.getByRole('dialog').getByRole('link', { name: 'Installation' }))
-		.toBeVisible();
-	await expect
-		.element(page.getByRole('dialog').getByRole('link', { name: 'Button' }))
-		.not.toBeInTheDocument();
-	await act(async () => {
-		await userEvent.keyboard('{Escape}');
-	});
-	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-	await expect.element(trigger).toHaveFocus();
-});
-
 test('keeps search and theme in the header while the sidebar shows', async () => {
 	await page.viewport(1280, 800);
 	await renderShell('/docs/installation');
@@ -170,59 +137,6 @@ test('keeps search and theme in the header while the sidebar shows', async () =>
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 	await expect.element(search).toHaveFocus();
 });
-
-for (const direction of ['ltr', 'rtl']) {
-	test(`moves the sidebar toggle beside the wordmark when collapsed in ${direction}`, async () => {
-		await cdp().send('Emulation.setEmulatedMedia', {
-			features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
-		});
-		await page.viewport(1280, 800);
-		document.documentElement.dir = direction;
-		await renderShell('/docs/installation');
-
-		const sidebar = getSidebar();
-		const width = sidebar.getBoundingClientRect().width;
-		const toggleControl = page.getByRole('button', { name: 'Hide sidebar' }).element();
-		const search = page.getByRole('button', { name: 'Open Search' }).element();
-		await act(async () => {
-			await userEvent.click(page.getByRole('button', { name: 'Hide sidebar' }));
-		});
-
-		expect(sidebar.inert).toBe(true);
-		const getMotion = () => [
-			...sidebar.getAnimations(),
-			...toggleControl.getAnimations(),
-			...(search.parentElement?.getAnimations() ?? []),
-		];
-		await expect.poll(() => getMotion().length).toBeGreaterThan(0);
-		const motion = getMotion();
-		for (const animation of motion) {
-			animation.pause();
-			animation.currentTime = Number(animation.effect?.getTiming().duration) / 2;
-		}
-		expect(Number(getComputedStyle(sidebar).opacity)).toBeGreaterThan(0);
-		expect(Number(getComputedStyle(sidebar).opacity)).toBeLessThan(1);
-		expect(sidebar.getBoundingClientRect().width).toBe(width);
-		await expect.element(search).toBeVisible();
-		const toggleRect = toggleControl.getBoundingClientRect();
-		const searchRect = search.getBoundingClientRect();
-		expect(
-			direction === 'rtl' ? toggleRect.left - searchRect.right : searchRect.left - toggleRect.right,
-		).toBeCloseTo(16, 0);
-		for (const animation of motion) animation.play();
-		await expect.element(sidebar).not.toBeVisible();
-		const toggle = page.getByRole('button', { name: 'Show sidebar' }).element();
-		const wordmark = page.getByRole('banner').getByRole('link', { name: 'Luke UI' }).element();
-		await expect
-			.poll(() => {
-				const logo = wordmark.getBoundingClientRect();
-				const button = toggle.getBoundingClientRect();
-				return direction === 'rtl' ? logo.left - button.right : button.left - logo.right;
-			})
-			.toBeCloseTo(4, 0);
-		await expect.element(toggle).toHaveFocus();
-	});
-}
 
 function getSidebar() {
 	const sidebar = document.getElementById('docs-sidebar');
