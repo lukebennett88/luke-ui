@@ -341,7 +341,7 @@ describe('normalizeTheme carries authored surfaces', () => {
 	it('rejects an authored surface that leaves the hover-to-pressed step below the visibility floor', () => {
 		expect(() =>
 			defineTheme({
-				color: { accent: '#3b82f6', surface: { subdued: { light: 'oklch(0.92 0 0)' } } },
+				color: { accent: '#3b82f6', surface: { subdued: { light: 'oklch(0.9 0 0)' } } },
 				name: 'invisible-subdued',
 				typography: testTypography,
 			}),
