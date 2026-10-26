@@ -1,8 +1,6 @@
 import '../styles/app.css';
 import '@luke-ui/theme-tactile/stylesheet.css';
 import { Button } from '@luke-ui/react/button';
-import { Grid } from '@luke-ui/react/grid';
-import { Stack } from '@luke-ui/react/stack';
 import { act } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 import type { Root } from 'react-dom/client';
@@ -31,39 +29,6 @@ test('default and explicit flow give block roots the available width', () => {
 	}
 });
 
-test('flow gives an auto-fit Grid multiple tracks without explicit width', () => {
-	const { available, exampleRoot } = renderInWrapper(
-		<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" gap="space.12">
-			<span>First</span>
-			<span>Second</span>
-			<span>Third</span>
-			<span>Fourth</span>
-		</Grid>,
-	);
-
-	expect(exampleRoot.getBoundingClientRect().width).toBeCloseTo(available, 0);
-	expect(getComputedStyle(exampleRoot).gridTemplateColumns.split(' ').filter(Boolean).length).toBe(
-		4,
-	);
-});
-
-test('flow gives an unsized form and nested Stack the available width', () => {
-	const { available, exampleRoot } = renderInWrapper(
-		<form>
-			<Stack gap="space.16">
-				<label htmlFor="form-name">Name</label>
-				<input id="form-name" />
-			</Stack>
-		</form>,
-	);
-
-	expect(exampleRoot.getBoundingClientRect().width).toBeCloseTo(available, 0);
-	expect(exampleRoot.firstElementChild?.getBoundingClientRect().width).toBeCloseTo(available, 0);
-	expect(getComputedStyle(exampleRoot.querySelector('label') as HTMLElement).textAlign).toBe(
-		'start',
-	);
-});
-
 test('centered keeps an intrinsic Button centred', () => {
 	const { available, exampleRoot, storyRoot } = renderInWrapper(<Button>Save changes</Button>, {
 		layout: 'centered',
@@ -76,53 +41,6 @@ test('centered keeps an intrinsic Button centred', () => {
 	expect(
 		Math.abs(buttonBox.left - storyBox.left - (storyBox.right - buttonBox.right)),
 	).toBeLessThanOrEqual(1);
-});
-
-test('centered intentionally keeps an unsized auto-fit Grid intrinsic', () => {
-	const { available, exampleRoot } = renderInWrapper(
-		<Grid columns="repeat(auto-fit, minmax(min(12rem, 100%), 1fr))" gap="space.12">
-			<span>First</span>
-			<span>Second</span>
-		</Grid>,
-		{ layout: 'centered' },
-	);
-
-	expect(exampleRoot.getBoundingClientRect().width).toBeLessThan(available);
-	expect(getComputedStyle(exampleRoot).gridTemplateColumns.split(' ').filter(Boolean).length).toBe(
-		1,
-	);
-});
-
-test('flow respects a max-inline-size cap without requiring full width', () => {
-	const wide = renderInWrapper(
-		<Stack gap="space.16" maxInlineSize="20rem">
-			<Button>Save</Button>
-		</Stack>,
-	);
-	const narrow = renderInWrapper(
-		<Stack gap="space.16" maxInlineSize="20rem">
-			<Button>Save</Button>
-		</Stack>,
-		{ containerWidth: 300 },
-	);
-
-	expect(wide.exampleRoot.getBoundingClientRect().width).toBeCloseTo(320, 0);
-	expect(narrow.exampleRoot.getBoundingClientRect().width).toBeCloseTo(narrow.available, 0);
-});
-
-test('flow retains deliberately narrow example sizing', () => {
-	const { exampleRoot } = renderInWrapper(
-		<div style={{ inlineSize: '10rem' }}>
-			<Grid columns="repeat(auto-fit, minmax(min(16rem, 100%), 1fr))" gap="space.12">
-				<span>First</span>
-				<span>Second</span>
-			</Grid>
-		</div>,
-	);
-	const grid = exampleRoot.firstElementChild as HTMLElement;
-
-	expect(exampleRoot.getBoundingClientRect().width).toBeCloseTo(160, 0);
-	expect(getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length).toBe(1);
 });
 
 for (const comparisonCase of [

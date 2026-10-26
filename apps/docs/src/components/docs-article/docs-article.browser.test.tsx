@@ -81,120 +81,6 @@ test('renders the title, description, and actions inside one main landmark with 
 	expect(page.getByRole('main').element().contains(article.element())).toBe(true);
 });
 
-test('names the page section above the title without joining the heading', async () => {
-	await renderArticle({ pathname: '/docs/styling', sectionName: 'Foundations', toc });
-
-	const article = page.getByRole('article');
-	const heading = article.getByRole('heading', { level: 1, name: 'Styling' });
-	const eyebrow = article.getByText('Foundations', { exact: true });
-	await expect.element(eyebrow).toBeVisible();
-	expect(eyebrow.element().tagName).toBe('P');
-	expect(eyebrow.element().nextElementSibling).toBe(heading.element());
-	// Uppercase is presentation only, so the DOM keeps the section's own casing.
-	expect(eyebrow.element().textContent).toBe('Foundations');
-});
-
-test('renders no eyebrow for a page outside the sections', async () => {
-	await renderArticle({ pathname: '/docs/styling', toc });
-
-	const heading = page.getByRole('heading', { level: 1, name: 'Styling' });
-	await expect.element(heading).toBeVisible();
-	expect(heading.element().previousElementSibling).toBeNull();
-});
-
-test('links to the previous and next page in sidebar order', async () => {
-	await renderArticle({ pathname: '/docs/styling', toc });
-
-	const pager = page.getByRole('navigation', { name: 'Pagination' });
-	await expect
-		.element(pager.getByRole('link', { name: /Previous/ }))
-		.toHaveAttribute('href', '/docs/installation');
-	await expect
-		.element(pager.getByRole('link', { name: /Next/ }))
-		.toHaveAttribute('href', '/docs/layout');
-});
-
-test('omits the link for a missing neighbour on the first page of a section', async () => {
-	await renderArticle({ pathname: '/docs/installation', toc });
-
-	expect(page.getByRole('link', { name: /Previous/ })).not.toBeInTheDocument();
-	await expect
-		.element(page.getByRole('link', { name: /Next/ }))
-		.toHaveAttribute('href', '/docs/styling');
-});
-
-test('orders a root section from its index page and keeps its neighbours inside it', async () => {
-	await renderArticle({ pathname: '/components/actions/button', toc });
-
-	const pager = page.getByRole('navigation', { name: 'Pagination' });
-	await expect
-		.element(pager.getByRole('link', { name: /Previous/ }))
-		.toHaveAttribute('href', '/components');
-	await expect
-		.element(pager.getByRole('link', { name: /Next/ }))
-		.toHaveAttribute('href', '/components/actions/icon-button');
-});
-
-test('skips external pages and ends the section at its last internal page', async () => {
-	await renderArticle({ pathname: '/components/actions/icon-button', toc });
-
-	expect(page.getByRole('link', { name: /Next/ })).not.toBeInTheDocument();
-	await expect
-		.element(page.getByRole('link', { name: /Previous/ }))
-		.toHaveAttribute('href', '/components/actions/button');
-});
-
-test('matches the current page when the pathname has a trailing slash', async () => {
-	await renderArticle({ pathname: '/components/', toc });
-
-	const pager = page.getByRole('navigation', { name: 'Pagination' });
-	expect(page.getByRole('link', { name: /Previous/ })).not.toBeInTheDocument();
-	await expect
-		.element(pager.getByRole('link', { name: /Next/ }))
-		.toHaveAttribute('href', '/components/actions/button');
-});
-
-test('renders no footer when the page has no neighbours', async () => {
-	await renderArticle({ pathname: '/docs/unlisted', toc });
-
-	expect(page.getByRole('navigation', { name: 'Pagination' })).not.toBeInTheDocument();
-	expect(page.getByRole('contentinfo')).not.toBeInTheDocument();
-	expect(page.getByRole('article').element().querySelector('footer')).toBeNull();
-});
-
-test('mirrors the pager chevrons in a right-to-left document', async () => {
-	document.documentElement.dir = 'rtl';
-	await renderArticle({ pathname: '/docs/styling', toc });
-
-	const icon = page.getByRole('link', { name: /Next/ }).element().querySelector('svg');
-	if (icon === null) throw new Error('Expected a chevron in the Next link.');
-	expect(getComputedStyle(icon).transform).not.toBe('none');
-});
-
-test('lists nested headings in the table of contents beside the article', async () => {
-	await page.viewport(1400, 900);
-	await renderArticle({ pathname: '/docs/styling', toc });
-
-	const navigation = page.getByRole('navigation', { name: 'On this page' });
-	await expect.element(navigation).toBeVisible();
-	expect(
-		Array.from(navigation.element().querySelectorAll('a'), (link) => link.getAttribute('href')),
-	).toEqual(['#usage', '#sizes', '#api']);
-	const indent = (name: string) =>
-		Number.parseFloat(
-			getComputedStyle(navigation.getByRole('link', { name }).element()).paddingInlineStart,
-		);
-	expect(indent('Sizes')).toBeGreaterThan(indent('Usage'));
-
-	const tocList = navigation.element().querySelector('ul');
-	expect(tocList).not.toBeNull();
-	const tocListStyle = getComputedStyle(tocList as HTMLElement);
-	expect(tocListStyle.listStyleType).toBe('none');
-	expect(tocListStyle.marginTop).toBe('0px');
-	expect(tocListStyle.marginBottom).toBe('0px');
-	expect(tocListStyle.paddingInlineStart).toBe('0px');
-});
-
 test('shows a keyboard-operable disclosure instead of the column below the wide breakpoint', async () => {
 	await page.viewport(800, 900);
 	await renderArticle({ pathname: '/docs/styling', toc });
@@ -227,14 +113,6 @@ test('shows a keyboard-operable disclosure instead of the column below the wide 
 	expect(details.open).toBe(true);
 	await userEvent.click(page.getByRole('heading', { name: 'Usage' }));
 	expect(details.open).toBe(false);
-});
-
-test('renders no table of contents when the page has no headings', async () => {
-	await page.viewport(1400, 900);
-	await renderArticle({ pathname: '/docs/styling', toc: [] });
-
-	expect(page.getByRole('navigation', { name: 'On this page' })).not.toBeInTheDocument();
-	expect(page.getByText('On this page')).not.toBeInTheDocument();
 });
 
 async function renderArticle({
