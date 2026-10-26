@@ -1,10 +1,21 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
+import { INTERACTION_STATE_LAYER_PROPERTY } from '../../styles/interaction-state-layer.js';
 import { style } from '../../styles/layered-style.css.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import { recipe } from '../../styles/recipe.js';
-import { contextualForeground, surfaceStyle } from '../../styles/surface.js';
+import {
+	adaptiveStateLayer,
+	interactionStateLayer,
+	transparentAdaptiveStateLayer,
+	transparentAdaptiveStateText,
+} from '../../styles/state-layer.css.js';
+import {
+	contextualForeground,
+	neutralForegroundContextVars,
+	surfaceStyle,
+} from '../../styles/surface.js';
 import { textRecipe } from '../../text/recipe.css.js';
 import { textActionAppearance, textLinkAppearance } from './text-action-appearance.js';
 
@@ -56,8 +67,7 @@ export const buttonRecipeInternal = recipe({
 			font: 'inherit',
 			...pressFeedback,
 			transitionDuration: vars.motion.feedback.duration,
-			transitionProperty:
-				'background-color, border-color, box-shadow, color, opacity, text-decoration-color',
+			transitionProperty: `background-color, border-color, box-shadow, color, opacity, text-decoration-color, ${INTERACTION_STATE_LAYER_PROPERTY}`,
 			transitionTimingFunction: vars.motion.feedback.easing,
 			selectors: {
 				'&[data-disabled="true"]': {
@@ -78,6 +88,10 @@ export const buttonRecipeInternal = recipe({
 		appearance: {
 			button: {
 				'@media': {
+					'(prefers-reduced-motion: reduce)': {
+						transitionProperty:
+							'background-color, border-color, box-shadow, color, opacity, text-decoration-color',
+					},
 					'(forced-colors: active)': {
 						backgroundColor: 'ButtonFace',
 						backgroundImage: 'none',
@@ -189,9 +203,12 @@ type ButtonSurface = 'transparent' | 'subtle' | 'solid';
 
 /**
  * A button's fill in each interaction state, paired with its foreground context through
- * `surfaceStyle`. A transparent button paints nothing at rest, so it reads the surrounding context,
- * and its hover and pressed fills establish a subtle one. A critical tone keeps the danger hue on a
- * subtle fill or a surrounding surface, and reads on-solid primary on a solid one.
+ * `surfaceStyle`. Low and standard Buttons use the adaptive state layer over a transparent or
+ * resting subtle fill so hover and pressed stay visible on every surface, including app-painted
+ * overlays. On a solid fill, a low Button falls back to an opaque subtle chip so on-solid text
+ * contrast stays at AA. Solid Buttons keep opaque state tokens and the control finish. A critical
+ * tone keeps the danger hue on a surrounding surface or subtle rest, and reads on-solid primary on
+ * a solid at rest.
  */
 function buttonAppearance(
 	tone: Tone,
@@ -200,61 +217,108 @@ function buttonAppearance(
 	backgroundTone: BackgroundTone = tone === 'critical' ? 'danger' : 'neutral',
 ) {
 	const toneColor = tone === 'critical' ? { color: contextualForeground('danger') } : ({} as const);
+	const variants = { appearance: 'button' as const, prominence, tone };
+	const chipTone = tone === 'critical' ? 'danger' : 'neutral';
+	const restColor =
+		'color' in toneColor && toneColor.color !== undefined
+			? toneColor.color
+			: contextualForeground('primary');
+	const layerGradient = `linear-gradient(${interactionStateLayer}, ${interactionStateLayer})`;
 
 	if (surface === 'transparent') {
+		const hoverLayer = transparentAdaptiveStateLayer('hover', chipTone);
+		const pressedLayer = transparentAdaptiveStateLayer('pressed', chipTone);
 		return [
 			{
 				style: {
+					'@media': {
+						'(forced-colors: active)': { backgroundImage: 'none' },
+					},
 					backgroundColor: 'transparent',
-					backgroundImage: 'none',
+					backgroundImage: layerGradient,
 					borderColor: 'transparent',
 					boxShadow: 'none',
-					color: contextualForeground('primary'),
-					...toneColor,
+					color: restColor,
+					vars: { [interactionStateLayer]: 'transparent' },
 					selectors: {
 						[hovered]: {
-							...surfaceStyle(`${backgroundTone}.subtle.hover`),
-							...toneColor,
+							...hoverLayer,
+							color: transparentAdaptiveStateText(chipTone, restColor),
+							vars: { ...hoverLayer.vars, ...neutralForegroundContextVars() },
 							boxShadow: vars.depth.raised,
 						},
 						[pressed]: {
-							...surfaceStyle(`${backgroundTone}.subtle.pressed`),
-							...toneColor,
+							...pressedLayer,
+							color: transparentAdaptiveStateText(chipTone, restColor),
+							vars: { ...pressedLayer.vars, ...neutralForegroundContextVars() },
 							boxShadow: vars.depth.recessed,
 						},
 					},
 				},
-				variants: { appearance: 'button' as const, prominence, tone },
+				variants,
 			},
 		];
 	}
 
 	// A subtle button always uses the neutral fill; only its text takes the tone.
 	const fill = surface === 'subtle' ? 'neutral' : backgroundTone;
-	const isSolid = surface === 'solid';
+	if (surface === 'solid') {
+		return [
+			{
+				style: {
+					'@media': {
+						'(forced-colors: active)': { backgroundImage: 'none' },
+					},
+					...surfaceStyle(`${fill}.solid.rest`),
+					...toneColor,
+					backgroundImage: vars.controlFinish.resting,
+					selectors: {
+						[hovered]: {
+							...surfaceStyle(`${fill}.solid.hover`),
+							...toneColor,
+							backgroundImage: vars.controlFinish.raised,
+						},
+						[pressed]: {
+							...surfaceStyle(`${fill}.solid.pressed`),
+							...toneColor,
+							backgroundImage: vars.controlFinish.recessed,
+						},
+					},
+				},
+				variants,
+			},
+		];
+	}
+
+	// Merge the adaptive layer's vars into the resting subtle pairing. A later `vars` object would
+	// replace the pairing's foreground and solid-state resets, so a critical standard Button on a
+	// solid would keep inherited on-solid text over its light subtle fill.
+	const subtleRest = surfaceStyle(`${fill}.subtle.rest`);
+	const hoverLayer = adaptiveStateLayer('hover');
+	const pressedLayer = adaptiveStateLayer('pressed');
 	return [
 		{
 			style: {
 				'@media': {
 					'(forced-colors: active)': { backgroundImage: 'none' },
 				},
-				...surfaceStyle(`${fill}.${surface}.rest`),
+				...subtleRest,
 				...toneColor,
-				backgroundImage: isSolid ? vars.controlFinish.resting : 'none',
+				backgroundImage: layerGradient,
+				vars: {
+					...subtleRest.vars,
+					[interactionStateLayer]: 'transparent',
+				},
 				selectors: {
 					[hovered]: {
-						...surfaceStyle(`${fill}.${surface}.hover`),
-						...toneColor,
-						backgroundImage: isSolid ? vars.controlFinish.raised : 'none',
+						...hoverLayer,
 					},
 					[pressed]: {
-						...surfaceStyle(`${fill}.${surface}.pressed`),
-						...toneColor,
-						backgroundImage: isSolid ? vars.controlFinish.recessed : 'none',
+						...pressedLayer,
 					},
 				},
 			},
-			variants: { appearance: 'button' as const, prominence, tone },
+			variants,
 		},
 	];
 }

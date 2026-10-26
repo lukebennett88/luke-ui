@@ -7,7 +7,7 @@
  */
 
 import { typedEntries, typedFromEntries } from '../shared/utils/utils.js';
-import { buildTheme, ThemeContrastError } from './build-theme.js';
+import { buildTheme, inheritanceLines, ThemeContrastError } from './build-theme.js';
 import type { Oklch } from './color.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import { TEXT_RATIO } from './contrast-policy.js';
@@ -20,6 +20,7 @@ import type {
 	ThemeSurfaceSources,
 } from './foundation.js';
 import { defaultSourceColors } from './foundation.js';
+import { ThemeInteractionTintError } from './interaction-tints.js';
 import { lightnessCandidates } from './lightness-candidates.js';
 import { highContrastText, passesOnSolidGate } from './scale.js';
 import { ThemeValidationError, validateThemeChain } from './validate-input.js';
@@ -293,6 +294,17 @@ export function defineTheme(input: ThemeInput | ExtendingThemeInput): string {
 	} catch (error) {
 		if (error instanceof ThemeContrastError && resolved.inheritance !== null) {
 			throw new ThemeContrastError(error.failures, resolved.inheritance);
+		}
+		if (error instanceof ThemeInteractionTintError && resolved.inheritance !== null) {
+			throw new ThemeInteractionTintError({
+				limitingMiss: error.limitingMiss,
+				maxAlpha: error.maxAlpha,
+				mode: error.mode,
+				provenance: inheritanceLines(resolved.inheritance),
+				reason: error.reason,
+				targetHoverAlpha: error.targetHoverAlpha,
+				targetPressedAlpha: error.targetPressedAlpha,
+			});
 		}
 		throw error;
 	}

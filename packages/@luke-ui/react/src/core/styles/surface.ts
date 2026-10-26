@@ -36,6 +36,35 @@ const foregroundOverride = {
 	tone: createGlobalVar('luke-internal-foreground-tone'),
 };
 
+export type SolidStateTone = 'neutral' | 'danger';
+
+/**
+ * Opaque subtle hover or pressed fill a transparent control paints over a solid. The
+ * hover-to-pressed step of a translucent tint over a solid fill falls below the visibility floor.
+ * Set to `initial` on standard surfaces and subtle fills.
+ */
+export function solidStateFillVarName(tone: SolidStateTone, state: 'hover' | 'pressed'): string {
+	return `--luke-internal-solid-state-fill-${tone}-${state}`;
+}
+
+/** Text colour that pairs with {@link solidStateFillVarName}'s chip, so on-solid text stays at AA. */
+export function solidStateTextVarName(tone: SolidStateTone): string {
+	return `--luke-internal-solid-state-text-${tone}`;
+}
+
+function solidStateVars(
+	value: (tone: SolidStateTone, slot: 'hover' | 'pressed' | 'text') => string,
+) {
+	return {
+		[solidStateFillVarName('neutral', 'hover')]: value('neutral', 'hover'),
+		[solidStateFillVarName('neutral', 'pressed')]: value('neutral', 'pressed'),
+		[solidStateTextVarName('neutral')]: value('neutral', 'text'),
+		[solidStateFillVarName('danger', 'hover')]: value('danger', 'hover'),
+		[solidStateFillVarName('danger', 'pressed')]: value('danger', 'pressed'),
+		[solidStateTextVarName('danger')]: value('danger', 'text'),
+	};
+}
+
 /**
  * The colour the nearest recognised surface establishes for `slot`. On a standard surface or any
  * subtle fill, the global neutral hierarchy and the role's hue in `state`. On a solid fill, that
@@ -104,10 +133,18 @@ function neutralContext(backgroundColor: string): SurfaceStyle {
 		backgroundColor,
 		color: vars.color.text.primary,
 		vars: {
-			[foregroundOverride.primary]: 'initial',
-			[foregroundOverride.secondary]: 'initial',
-			[foregroundOverride.tone]: 'initial',
+			...neutralForegroundContextVars(),
+			...solidStateVars(() => 'initial'),
 		},
+	};
+}
+
+/** Resets solid foreground overrides so descendants read the neutral text and role tokens. */
+export function neutralForegroundContextVars() {
+	return {
+		[foregroundOverride.primary]: 'initial',
+		[foregroundOverride.secondary]: 'initial',
+		[foregroundOverride.tone]: 'initial',
 	};
 }
 
@@ -120,6 +157,12 @@ function solidContext(role: SemanticRole, backgroundColor: string): SurfaceStyle
 			[foregroundOverride.primary]: onSolid.primary,
 			[foregroundOverride.secondary]: onSolid.secondary,
 			[foregroundOverride.tone]: onSolid.primary,
+			...solidStateVars((tone, slot) => {
+				if (slot === 'text') {
+					return tone === 'danger' ? vars.color.foreground.danger.rest : vars.color.text.primary;
+				}
+				return vars.color.background[tone].subtle[slot];
+			}),
 		},
 	};
 }

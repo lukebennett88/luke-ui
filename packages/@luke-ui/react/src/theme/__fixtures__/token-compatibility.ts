@@ -17,6 +17,7 @@ import type {
 import { transform } from 'lightningcss';
 import { capsizeTrimVarName } from '../capsize-trim-vars.js';
 import { flattenThemeContract, partitionContractPairs } from '../contract.js';
+import { interactionTintVarName } from '../interaction-tint-vars.js';
 import { getThemeClassName } from '../theme-class-name.js';
 import { typeStyles } from '../type-styles.js';
 
@@ -42,10 +43,12 @@ const expectedThemeWideProperties: ReadonlyArray<string> = [
 	]),
 ];
 
-/** Every mode token, plus the native `color-scheme` each mode rule sets. */
+/** Every mode token, plus `color-scheme` and the private adaptive interaction tint pair. */
 const expectedModeProperties: ReadonlyArray<string> = [
 	'color-scheme',
 	...modePairs.map(([, varName]) => varName),
+	interactionTintVarName('hover'),
+	interactionTintVarName('pressed'),
 ];
 
 const EXPECTED_PROPERTIES = {

@@ -52,10 +52,11 @@ ignore source order.
 `@luke-ui/react/theme/compiler` is the only theme-authoring entry. `defineTheme(input)` is pure and
 Node-compatible. It validates each input in an `extends` chain, throwing `ThemeValidationError` with
 every issue, then normalises the merged `ThemeInput` into static CSS and throws `ThemeContrastError`
-when a pair misses WCAG 2.2 AA contrast. The raw `ThemeFoundation` object and `buildTheme` are
-internal. `@luke-ui/react/theme` is the runtime entry. Keep it free of theme generation, colour
-solving, Capsize, and Node-only code. `package-exports.test.ts` and the packed-consumer harness
-check its import graph.
+when a pair misses WCAG 2.2 AA contrast, or `ThemeInteractionTintError` when adaptive hover and
+pressed tints cannot clear both the contrast cap and the visibility floors. The raw
+`ThemeFoundation` object and `buildTheme` are internal. `@luke-ui/react/theme` is the runtime entry.
+Keep it free of theme generation, colour solving, Capsize, and Node-only code.
+`package-exports.test.ts` and the packed-consumer harness check its import graph.
 
 Colour tokens come from private 12-step scales and elevation surfaces, then map onto the semantic
 contract. See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for that pipeline.
@@ -202,8 +203,9 @@ wrapped children use `!important` in `recipes` for that reason.
 Each component owns its reduced-motion behaviour. The stylesheet has no global motion rule, so it
 never disables an application's animations. Under `@media (prefers-reduced-motion: reduce)`:
 
-- Keep short non-spatial feedback: colour, border, shadow, and opacity transitions. Do not add a
-  reduced-motion query that only removes them.
+- Keep short non-spatial feedback: colour, border, shadow, and opacity transitions. Button
+  interaction states settle immediately so its registered state layer does not blend between hover
+  and pressed.
 - Remove spatial movement, scaling, pulsing, and looping, or replace it with a non-spatial change.
   An overlay keeps its fade and loses its movement. Build overlay motion with `overlayMotion` from
   `core/styles/overlay-motion.ts`, which generates those reduced-motion rules.
@@ -451,17 +453,23 @@ its role's on-solid leaves, and every role reads on-solid primary. An override r
 element that declares it, so the global styles reset the overrides in every colour-mode scope.
 
 Component recipes use the same mechanism. A control pairs its fill in every interaction state, so a
-solid Button keeps its on-solid context from rest to pressed. A fill that appears only on hover or
-press, such as a low-prominence Button's, establishes a subtle context while it shows. Text a
-component draws on whatever surface surrounds it, such as a field's label, description, and error, a
-text action, or a native link in Prose, reads `contextualForeground`. Its `state` argument gives a
-role's hover or pressed hue, which collapses to on-solid primary on a solid fill.
-`contextualDisabledForeground()` gives such text the disabled token on a standard surface or subtle
-fill, and on-solid secondary on a solid fill, which has no disabled leaf.
-`transparentSurfaceStyle()` hands an element that stops painting back to its parent's context, as
-inline `Code` does inside `pre`. The checkbox box pairs its fills so the check mark reads on-solid
-primary. The switch track and thumb and the loading skeleton paint fills that hold no text, so they
-keep their own compiler-gated or placeholder colours.
+solid Button keeps its on-solid context from rest to pressed. Low and standard Buttons use the
+adaptive state layer in `core/styles/state-layer.css.ts`: a registered `<color>` property painted as
+the first `background-image` layer over a transparent or resting subtle fill, so they keep the
+surrounding foreground context (or the resting subtle pairing) while hover and pressed stay visible
+on every surface, including app-painted overlays. On a solid fill, a low Button falls back to an
+opaque subtle chip the pairing sets, because the shared tint's hover-to-pressed step is too small on
+some solid fills. The paired chip keeps text contrast on solids. Forced colours clear the layer. See
+[THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md#interaction-states) for how the compiler
+solves the tint pair. Text a component draws on whatever surface surrounds it, such as a field's
+label, description, and error, a text action, or a native link in Prose, reads
+`contextualForeground`. Its `state` argument gives a role's hover or pressed hue, which collapses to
+on-solid primary on a solid fill. `contextualDisabledForeground()` gives such text the disabled
+token on a standard surface or subtle fill, and on-solid secondary on a solid fill, which has no
+disabled leaf. `transparentSurfaceStyle()` hands an element that stops painting back to its parent's
+context, as inline `Code` does inside `pre`. The checkbox box pairs its fills so the check mark
+reads on-solid primary. The switch track and thumb and the loading skeleton paint fills that hold no
+text, so they keep their own compiler-gated or placeholder colours.
 
 A role's colour can collapse to on-solid primary, so a state cue cannot be hue alone. Text Links use
 the label font weight and belong inline with lighter surrounding text. Low prominence adds an

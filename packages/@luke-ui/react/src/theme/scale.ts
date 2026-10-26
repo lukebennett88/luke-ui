@@ -207,8 +207,10 @@ const NEUTRAL_SOLID = {
 // Text lightness targets: step 11 (low contrast) and step 12 (high contrast). Step 12 is also
 // `text.primary`, the mix target for public hover and pressed colours. Light `low` sits below 0.5
 // so step 11 keeps AA over generated subtle hover and pressed fills (rest mixed toward text.primary).
+// Dark `low` sits at 0.79 so the white interaction tint's contrast cap stays above the
+// hover-to-pressed visibility floor.
 const TEXT_LIGHTNESS = {
-	dark: { high: 0.94, low: 0.76 },
+	dark: { high: 0.94, low: 0.79 },
 	light: { high: 0.3, low: 0.45 },
 } as const satisfies Record<ColorMode, { low: number; high: number }>;
 const TEXT_LOW_CHROMA_FRACTION = 0.55;

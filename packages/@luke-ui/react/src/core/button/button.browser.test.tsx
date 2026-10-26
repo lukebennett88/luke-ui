@@ -7,10 +7,15 @@ import { act } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { assert, expect, onTestFinished, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
+import { INTERACTION_HOVER_TO_PRESSED_VISIBILITY } from '../../theme/contrast-policy.js';
+import { oklabDeltaE } from '../../theme/scale.js';
+import { INTERACTION_STATE_LAYER_PROPERTY } from '../styles/interaction-state-layer.js';
 import { watchSpinner } from '../test-utils/action-spinner.js';
 import { expectAxeContrastPasses, expectNoAxeViolations } from '../test-utils/axe.js';
+import { emulateReducedMotion } from '../test-utils/emulate-media.js';
 import { flatAppearances, render, visualAppearances } from '../test-utils/render.js';
 import { lowestRenderedTextContrast } from '../test-utils/rendered-contrast.js';
+import { renderedFill } from '../test-utils/rendered-fill.js';
 import type { PairedBackground } from '../test-utils/surface-colors.js';
 import {
 	pairedColors,
@@ -24,6 +29,9 @@ import {
 	emulateForcedColors,
 	focusViaKeyboard,
 	Grid,
+	parkPointer,
+	pressPointer,
+	releasePointer,
 } from '../test-utils/visual.js';
 
 /** Intended Action spinner delay (~300ms). Kept in the test so production timing drifts fail. */
@@ -478,13 +486,16 @@ type InteractionState = (typeof INTERACTION_STATES)[number];
 
 const buttonFills = [
 	{
-		fill: (state: InteractionState) => (state === 'rest' ? null : `neutral.subtle.${state}`),
+		// Low Buttons stay transparent and keep the surrounding context; hover and pressed paint
+		// the adaptive state layer rather than an opaque subtle fill.
+		fill: (_state: InteractionState) => null,
 		label: 'Neutral low',
 		prominence: 'low',
 		tone: 'neutral',
 	},
 	{
-		fill: (state: InteractionState) => `neutral.subtle.${state}`,
+		// Standard Buttons keep the resting subtle fill; hover and pressed add the state layer.
+		fill: (_state: InteractionState) => 'neutral.subtle.rest',
 		label: 'Neutral standard',
 		prominence: 'standard',
 		tone: 'neutral',
@@ -496,13 +507,13 @@ const buttonFills = [
 		tone: 'neutral',
 	},
 	{
-		fill: (state: InteractionState) => (state === 'rest' ? null : `danger.subtle.${state}`),
+		fill: (_state: InteractionState) => null,
 		label: 'Critical low',
 		prominence: 'low',
 		tone: 'critical',
 	},
 	{
-		fill: (state: InteractionState) => `neutral.subtle.${state}`,
+		fill: (_state: InteractionState) => 'neutral.subtle.rest',
 		label: 'Critical standard',
 		prominence: 'standard',
 		tone: 'critical',
@@ -523,8 +534,9 @@ const buttonFills = [
 for (const appearance of visualAppearances) {
 	const name = `${appearance.theme} ${appearance.mode}`;
 
-	// The parent is another role's solid fill, so a resting low-prominence Button shows it reads the
-	// surrounding context and every other fill shows it establishes its own.
+	// The parent is another role's solid fill. Low Buttons keep that context at rest; hover and
+	// pressed paint an opaque subtle chip so on-solid text contrast stays at AA. Standard Buttons
+	// keep a resting subtle pairing. High Buttons establish their own solid context.
 	test(`Button fills pair with their foreground in every interaction state in ${name}`, () => {
 		const { locator } = render(
 			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
@@ -538,13 +550,29 @@ for (const appearance of visualAppearances) {
 		);
 		const parent = locator.getByTestId('parent').element();
 
-		for (const { fill, label, tone } of buttonFills) {
+		for (const { fill, label, prominence, tone } of buttonFills) {
 			const button = locator.getByRole('button', { name: label }).element();
 			const actual = INTERACTION_STATES.map((state) => {
 				setInteractionState(button, state);
 				return { state, ...settledSurfaceColors(button) };
 			});
 			const expected = INTERACTION_STATES.map((state) => {
+				if (prominence === 'low' && state !== 'rest') {
+					const chipText =
+						tone === 'critical'
+							? resolvedColor(vars.color.foreground.danger.rest, button)
+							: resolvedColor(vars.color.text.primary, button);
+					const chip =
+						tone === 'critical'
+							? pairedColors(button, `danger.subtle.${state}`)
+							: pairedColors(button, `neutral.subtle.${state}`);
+					return {
+						state,
+						...chip,
+						background: TRANSPARENT,
+						color: chipText,
+					};
+				}
 				const background = fill(state);
 				const paired =
 					background === null
@@ -556,6 +584,13 @@ for (const appearance of visualAppearances) {
 			});
 
 			expect(actual).toEqual(expected);
+			const layerUsed = INTERACTION_STATES.map((state) => {
+				setInteractionState(button, state);
+				settledSurfaceColors(button);
+				const layer = getComputedStyle(button).getPropertyValue(INTERACTION_STATE_LAYER_PROPERTY);
+				return layer.trim() !== TRANSPARENT;
+			});
+			expect(layerUsed).toEqual([false, prominence !== 'high', prominence !== 'high']);
 		}
 	});
 
@@ -599,12 +634,13 @@ for (const appearance of visualAppearances) {
 	});
 }
 
-// axe measures each Button's text against its rendered fill in every state. It cannot measure text
-// over the control finish's gradient, so it leaves solid Buttons to the rendered measurement below.
+// axe measures resting low and standard fills. Its gradient state layer reads as incomplete even
+// while transparent at rest, so the test clears it to expose the fill underneath. Hover and pressed
+// use `lowestRenderedTextContrast` below, as do solid Buttons and their control finish.
 for (const appearance of visualAppearances) {
 	const measured = buttonFills.filter(({ prominence }) => prominence !== 'high');
 
-	test(`Button text passes axe contrast on transparent and subtle fills in every state in ${appearance.theme} ${appearance.mode}`, async () => {
+	test(`Button text passes axe contrast on resting transparent and subtle fills in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { container, locator } = render(
 			<Box backgroundColor="success.solid" padding="space.8">
 				{measured.map(({ label, prominence, tone }) => (
@@ -615,17 +651,13 @@ for (const appearance of visualAppearances) {
 			</Box>,
 			{ appearance },
 		);
-		const buttons = measured.map(({ label }) =>
-			locator.getByRole('button', { name: label }).element(),
-		);
-
-		for (const state of INTERACTION_STATES) {
-			for (const button of buttons) {
-				setInteractionState(button, state);
-				settledSurfaceColors(button);
-			}
-			await expectAxeContrastPasses(container);
+		for (const { label } of measured) {
+			const button = locator.getByRole('button', { name: label }).element();
+			setInteractionState(button, 'rest');
+			settledSurfaceColors(button);
+			button.style.backgroundImage = 'none';
 		}
+		await expectAxeContrastPasses(container);
 	});
 }
 
@@ -705,5 +737,288 @@ test('a Button on a solid fill takes system colours in forced colours', async ()
 		});
 	} finally {
 		await emulateForcedColors('none');
+	}
+});
+
+test('a low Button chip keeps nested contextual text at AA on a solid fill', async () => {
+	const { locator } = render(
+		<Box backgroundColor="accent.solid" padding="space.8">
+			<Button prominence="low">
+				<Text color="primary" elementType="span">
+					Primary child
+				</Text>
+			</Button>
+		</Box>,
+		{ appearance: { mode: 'light', theme: 'paper' } },
+	);
+	const button = locator.getByRole('button', { name: 'Primary child' }).element();
+	assert(button instanceof HTMLElement);
+
+	for (const state of ['hover', 'pressed'] as const) {
+		setInteractionState(button, state);
+		settledSurfaceColors(button);
+		expect(await lowestRenderedTextContrast(button)).toBeGreaterThanOrEqual(4.5);
+	}
+});
+
+// Adaptive hover and pressed must stay visible on every standard surface, including overlays an
+// application paints with `surface.overlay` without going through `Box`.
+const adaptiveAppearances = [
+	...visualAppearances,
+	{ mode: 'light', theme: 'contrastEdge' },
+	{ mode: 'dark', theme: 'contrastEdge' },
+] as const;
+
+for (const appearance of adaptiveAppearances) {
+	const surfaces = ['surface.base', 'surface.subdued', 'surface.field', 'surface.overlay'] as const;
+
+	test(`low and standard Buttons keep 4.5:1 text over adaptive states on every surface in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { locator } = render(
+			<>
+				{surfaces.map((surface) => (
+					<Box key={surface} backgroundColor={surface} data-testid={surface} padding="space.8">
+						<Button prominence="low">Low on {surface}</Button>
+						<Button>Standard on {surface}</Button>
+						<Button prominence="low" tone="critical">
+							Critical low on {surface}
+						</Button>
+					</Box>
+				))}
+			</>,
+			{ appearance },
+		);
+
+		const lowContrast: Array<{
+			contrast: number;
+			label: string;
+			state: InteractionState;
+			surface: (typeof surfaces)[number];
+		}> = [];
+		const missingLayers: Array<{ label: string; state: InteractionState; surface: string }> = [];
+		for (const surface of surfaces) {
+			const region = locator.getByTestId(surface);
+			const buttons = [
+				region.getByRole('button', { name: `Low on ${surface}` }).element(),
+				region.getByRole('button', { name: `Standard on ${surface}` }).element(),
+				region.getByRole('button', { name: `Critical low on ${surface}` }).element(),
+			];
+			for (const state of INTERACTION_STATES) {
+				for (const button of buttons) {
+					setInteractionState(button, state);
+					if (state !== 'rest' && getComputedStyle(button).backgroundImage === 'none') {
+						missingLayers.push({
+							label: button.textContent ?? '',
+							state,
+							surface,
+						});
+					}
+				}
+				for (const button of buttons) settledSurfaceColors(button);
+				for (const button of buttons) {
+					assert(button instanceof HTMLElement);
+					const contrast = await lowestRenderedTextContrast(button);
+					if (contrast < 4.5) {
+						lowContrast.push({
+							contrast: Number(contrast.toFixed(2)),
+							label: button.textContent ?? '',
+							state,
+							surface,
+						});
+					}
+				}
+			}
+		}
+
+		expect(missingLayers).toEqual([]);
+		expect(lowContrast).toEqual([]);
+	});
+}
+
+const solidRoles = ['accent', 'info', 'success', 'warning', 'danger', 'neutral'] as const;
+
+for (const appearance of adaptiveAppearances) {
+	test(`low Buttons keep a visible pressed step and 4.5:1 text inside every role solid in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { locator } = render(
+			<>
+				{solidRoles.map((role) => (
+					<Box key={role} backgroundColor={`${role}.solid`} data-testid={role} padding="space.8">
+						<Button prominence="low">Neutral low in {role}</Button>
+						<Button prominence="low" tone="critical">
+							Critical low in {role}
+						</Button>
+					</Box>
+				))}
+			</>,
+			{ appearance },
+		);
+		const visibilityMisses: Array<{ role: string; tone: string; visibility: number }> = [];
+		const lowContrast: Array<{
+			contrast: number;
+			label: string;
+			role: (typeof solidRoles)[number];
+			state: InteractionState;
+		}> = [];
+		for (const role of solidRoles) {
+			const region = locator.getByTestId(role);
+			for (const tone of ['Neutral', 'Critical'] as const) {
+				const button = region.getByRole('button', { name: `${tone} low in ${role}` }).element();
+				assert(button instanceof HTMLElement);
+				for (const state of INTERACTION_STATES) {
+					setInteractionState(button, state);
+					settledSurfaceColors(button);
+					const contrast = await lowestRenderedTextContrast(button);
+					if (contrast < 4.5) {
+						lowContrast.push({
+							contrast: Number(contrast.toFixed(2)),
+							label: button.textContent ?? '',
+							role,
+							state,
+						});
+					}
+				}
+				setInteractionState(button, 'hover');
+				settledSurfaceColors(button);
+				const hover = await renderedFill(button);
+				setInteractionState(button, 'pressed');
+				settledSurfaceColors(button);
+				const pressed = await renderedFill(button);
+				const visibility = oklabDeltaE(hover, pressed);
+				if (visibility < INTERACTION_HOVER_TO_PRESSED_VISIBILITY) {
+					visibilityMisses.push({ role, tone, visibility: Number(visibility.toFixed(3)) });
+				}
+			}
+		}
+
+		expect(visibilityMisses).toEqual([]);
+		expect(lowContrast).toEqual([]);
+	});
+}
+
+test('forced colours clear the adaptive state layer on a low Button', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const { locator } = render(<Button prominence="low">Cancel</Button>);
+		const button = locator.getByRole('button', { name: 'Cancel' }).element();
+		setInteractionState(button, 'hover');
+		expect(getComputedStyle(button).backgroundImage).toBe('none');
+	} finally {
+		await emulateForcedColors('none');
+	}
+});
+
+test('adaptive Button layer transitions normally and changes immediately with reduced motion', async () => {
+	const { locator } = render(<Button prominence="low">Cancel</Button>);
+	const button = locator.getByRole('button', { name: 'Cancel' }).element();
+	const layerProperty = INTERACTION_STATE_LAYER_PROPERTY;
+	const layerTransitioning = () => {
+		return button.getAnimations().some((animation) => {
+			return animation instanceof CSSTransition && animation.transitionProperty === layerProperty;
+		});
+	};
+	getComputedStyle(button);
+	setInteractionState(button, 'hover');
+	await expect.poll(layerTransitioning).toBe(true);
+	settledSurfaceColors(button);
+	setInteractionState(button, 'rest');
+	await expect.poll(layerTransitioning).toBe(true);
+	settledSurfaceColors(button);
+	await emulateReducedMotion(true);
+	try {
+		setInteractionState(button, 'pressed');
+		const style = getComputedStyle(button);
+		expect(style.transitionProperty).not.toContain(layerProperty);
+		expect(style.getPropertyValue(layerProperty)).toBe(
+			resolvedColor('var(--luke-internal-interaction-tint-pressed)', button),
+		);
+		expect(layerTransitioning()).toBe(false);
+	} finally {
+		await emulateReducedMotion(false);
+	}
+});
+
+for (const appearance of visualAppearances) {
+	test(`pointer and keyboard input paint adaptive hover and pressed states in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { locator, user } = render(
+			<div
+				style={{
+					backgroundColor: vars.color.surface.overlay,
+					color: vars.color.text.primary,
+					padding: vars.space['16'],
+				}}
+			>
+				<Button prominence="low">Cancel</Button>
+			</div>,
+			{ appearance },
+		);
+		const target = locator.getByRole('button', { name: 'Cancel' });
+		const button = target.element();
+		assert(button instanceof HTMLElement);
+		await parkPointer();
+		settledSurfaceColors(button);
+		const rest = await renderedFill(button);
+		await user.hover(target);
+		await expect.poll(() => button.hasAttribute('data-hovered')).toBe(true);
+		settledSurfaceColors(button);
+		const hover = await renderedFill(button);
+		await pressPointer(button);
+		try {
+			await expect.poll(() => button.hasAttribute('data-pressed')).toBe(true);
+			settledSurfaceColors(button);
+			const pressed = await renderedFill(button);
+			expect(oklabDeltaE(rest, hover)).toBeGreaterThan(0);
+			expect(oklabDeltaE(hover, pressed)).toBeGreaterThanOrEqual(
+				INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
+			);
+		} finally {
+			await releasePointer();
+		}
+		await parkPointer();
+		button.blur();
+		await focusViaKeyboard(target);
+		await user.keyboard('[Space>]');
+		try {
+			await expect.poll(() => button.hasAttribute('data-pressed')).toBe(true);
+			settledSurfaceColors(button);
+			const keyboardPressed = await renderedFill(button);
+			expect(oklabDeltaE(hover, keyboardPressed)).toBeGreaterThanOrEqual(
+				INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
+			);
+		} finally {
+			await user.keyboard('[/Space]');
+		}
+	});
+}
+
+test('kitchen sink on overlay', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<div
+				style={{
+					backgroundColor: vars.color.surface.overlay,
+					color: vars.color.text.primary,
+					padding: vars.space['16'],
+				}}
+			>
+				<Grid columns={3}>
+					<Button prominence="low">Cancel</Button>
+					<Button>Standard</Button>
+					<Button prominence="high">Save</Button>
+					<Button prominence="low" tone="critical">
+						Delete
+					</Button>
+					<Button tone="critical">Critical standard</Button>
+					<Button prominence="high" tone="critical">
+						Critical high
+					</Button>
+				</Grid>
+			</div>,
+			{ appearance },
+		);
+		const cancel = locator.getByRole('button', { name: 'Cancel' }).element();
+		const standard = locator.getByRole('button', { name: 'Standard' }).element();
+		setInteractionState(cancel, 'hover');
+		setInteractionState(standard, 'pressed');
+		await captureVisualAppearance(locator, 'button/overlay-adaptive-states', appearance);
 	}
 });

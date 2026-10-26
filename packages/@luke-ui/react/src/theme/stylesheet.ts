@@ -13,6 +13,8 @@ import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import type { ThemeFont } from './font.js';
 import type { ThemeFoundation } from './foundation.js';
 import { codeFontFamilyStack, defaultFontWeights, defaultRadius } from './foundation.js';
+import { interactionTintVarName } from './interaction-tint-vars.js';
+import type { InteractionTintPair } from './interaction-tints.js';
 import { pathEntry, pathRecord } from './path-record.js';
 import { rem } from './rem.js';
 import { getThemeClassName } from './theme-class-name.js';
@@ -36,12 +38,14 @@ type ColorMode = 'light' | 'dark';
  * Emits the five rule blocks, all scoped to the identity class on `<html>`: the theme-wide rule, the
  * base light rule, the `prefers-color-scheme: dark` media rule, and the two explicit
  * `data-color-mode` rules. The theme-wide rule carries every non-mode contract leaf, then the
- * private Capsize trims `Text` reads. Throws when a contract leaf has no resolved value.
+ * private Capsize trims `Text` reads. Each mode rule also carries the adaptive interaction tint
+ * pair. Throws when a contract leaf has no resolved value.
  */
 export function assembleStylesheet(
 	foundation: ThemeFoundation,
 	lightValues: Record<ModePath, string>,
 	darkValues: Record<ModePath, string>,
+	modeTints: Record<ColorMode, InteractionTintPair>,
 ): string {
 	const { identityPairs, modePairs } = partitionContractPairs(flattenThemeContract());
 
@@ -49,8 +53,16 @@ export function assembleStylesheet(
 		...declarations(identityPairs, buildIdentityValues(foundation)),
 		...capsizeTrimDeclarations(foundation.typography.fonts),
 	];
-	const lightDeclarations = ['color-scheme: light;', ...declarations(modePairs, lightValues)];
-	const darkDeclarations = ['color-scheme: dark;', ...declarations(modePairs, darkValues)];
+	const lightDeclarations = [
+		'color-scheme: light;',
+		...declarations(modePairs, lightValues),
+		...interactionTintDeclarations(modeTints.light),
+	];
+	const darkDeclarations = [
+		'color-scheme: dark;',
+		...declarations(modePairs, darkValues),
+		...interactionTintDeclarations(modeTints.dark),
+	];
 
 	// The identity lives on `<html>` only. `:where(html)` keeps the base rules at (0,1,0), so the
 	// explicit attribute rules, (0,2,0) whether the attribute sits on `<html>` or below it, beat the
@@ -170,6 +182,13 @@ function capsizeTrims(font: ThemeFont, style: TypeStyle) {
 	const fontSize = typeStyleMetricStep[style];
 	const leading = Number.parseFloat(FONT_METRIC_SCALE[fontSize].lineHeight) * 16;
 	return precomputeValues({ fontMetrics: font.metrics, fontSize, leading });
+}
+
+function interactionTintDeclarations(tints: InteractionTintPair): Array<string> {
+	return [
+		`${interactionTintVarName('hover')}: ${tints.hover};`,
+		`${interactionTintVarName('pressed')}: ${tints.pressed};`,
+	];
 }
 
 function declarations<Path extends string>(

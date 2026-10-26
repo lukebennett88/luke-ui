@@ -132,9 +132,9 @@ generator's tone-faithful window. It can rescue accents, such as a mid-lightness
 generator alone would report as unsatisfiable. Both searches walk the same lightness candidate grid.
 
 `contrast-policy.ts` declares the shared thresholds: the 4.5 text ratio, the 3:1 non-text ratio, the
-search headroom, and the search step. `lightness-candidates.ts` is the one grid those searches walk.
-It also declares `SEMANTIC_ROLES`, the one canonical role list used by family generation, the
-semantic map, and the validation matrix.
+search headroom, the search step, and the adaptive interaction tint visibility floors.
+`lightness-candidates.ts` is the one grid those searches walk. It also declares `SEMANTIC_ROLES`,
+the one canonical role list used by family generation, the semantic map, and the validation matrix.
 
 ## `loadingSkeleton`
 
@@ -148,16 +148,35 @@ the resting colour 5% toward `text.primary` in OKLab. Pressed mixes it 10% towar
 Those strengths are fixed. If a solid cannot carry readable on-solid text across the three states,
 the solid-anchor search adapts the resting colour rather than changing the mix strengths.
 
-Recipes select those tokens. They do not emit `color-mix()` or call a runtime helper. Theme authors
-do not author hover or pressed colours. There is no public overlay hover, pressed, or tint API.
-`color.overlay.backdrop` is the authored modal dimming layer. `color.surface.overlay` is the opaque
-surface for detached content such as menus, popovers, and dialogs.
+Solid Buttons, Checkbox, Switch, field borders, focus rings, and text actions still select those
+opaque tokens. Low and standard Buttons use an adaptive treatment instead: one registered `<color>`
+state layer painted as the first `background-image` layer, fed by a private tint pair the compiler
+emits per mode (`--luke-internal-interaction-tint-hover` and `-pressed`). Light mode uses black.
+Dark mode uses white. Strengths target today's neutral subtle hover and pressed over `surface.base`.
+The solver chooses the nearest pair that clears the contrast cap and visibility floors, so every
+supported foreground stays at 4.5:1 over every surface and subtle rest with the tint on top.
+Visibility floors in `contrast-policy.ts` reject a theme that can only pass by making hover or
+pressed invisible: the hover floor applies on `surface.base`, and the hover-to-pressed floor applies
+on all four surfaces. Compositing for that solve uses encoded sRGB, matching CSS. Dark step-11 text
+moved from 0.76 to 0.79 so the tint cap stays above the visibility floor, which lightens dark-mode
+secondary and role foregrounds slightly.
 
-`validateContrast` measures the emitted token pairs. It does not catalogue first-party components.
+A translucent tint has too little visible difference between hover and pressed on some solid fills.
+Low Buttons therefore use an opaque subtle chip on solids (`solidStateFillVarName` /
+`solidStateTextVarName` from the surface pairing). Standard Buttons keep their resting subtle fill
+plus the tint.
+
+Theme authors do not author hover, pressed, or tint colours. `color.overlay.backdrop` is the
+authored modal dimming layer. `color.surface.overlay` is the opaque surface for detached content
+such as menus, popovers, and dialogs.
+
+`validateContrast` measures the emitted opaque token pairs. Tint contrast and visibility are gated
+separately by `solveInteractionTints` during `compileTheme`.
 
 ## Alpha is deferred
 
-The private scale intentionally has no alpha (transparent) track yet. Adding one later is
-structurally non-breaking (it does not require a contract shape change), but consuming it in any
-mapped leaf **will** be a visible change to that leaf's rendered colour — plan a review pass the
-same way as any other repaint, not as a silent patch.
+The private scale intentionally has no alpha (transparent) track. Adding one later is structurally
+non-breaking (it does not require a contract shape change), but consuming it in any mapped leaf
+**will** be a visible change to that leaf's rendered colour — plan a review pass the same way as any
+other repaint, not as a silent patch. The adaptive interaction tint pair is emitted as private CSS
+variables, not scale leaves, so it does not change this.

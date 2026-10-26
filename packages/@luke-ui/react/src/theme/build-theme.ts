@@ -11,6 +11,8 @@ import type {
 } from './diagnostics.js';
 import type { ThemeInheritance } from './extend-theme.js';
 import type { ThemeFoundation, ThemeModeFoundation } from './foundation.js';
+import { solveInteractionTints } from './interaction-tints.js';
+import type { InteractionTintPair } from './interaction-tints.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import { generateFamilyWithDiagnostics, highContrastText, ScaleGenerationError } from './scale.js';
 import type { SemanticColorValues } from './semantic-map.js';
@@ -43,8 +45,12 @@ export function compileTheme(foundation: ThemeFoundation): {
 	const dark = buildModeValues('dark', foundation.dark);
 	const failures = [...light.failures, ...dark.failures];
 	if (failures.length > 0) throw new ThemeContrastError(failures);
+	const tints: Record<ColorMode, InteractionTintPair> = {
+		light: solveInteractionTints('light', light.colorValues),
+		dark: solveInteractionTints('dark', dark.colorValues),
+	};
 	return {
-		css: assembleStylesheet(foundation, light.values, dark.values),
+		css: assembleStylesheet(foundation, light.values, dark.values, tints),
 		diagnostics: { dark: dark.diagnostics, light: light.diagnostics },
 	};
 }
@@ -92,7 +98,7 @@ export class ThemeContrastError extends Error {
 }
 
 /** The message lines that trace a failing theme back to the themes its colours came from. */
-function inheritanceLines(inheritance: ThemeInheritance | null): Array<string> {
+export function inheritanceLines(inheritance: ThemeInheritance | null): Array<string> {
 	if (inheritance === null) return [];
 	const provenance = [
 		inheritance.inheritedColors.length > 0
@@ -137,6 +143,7 @@ export class ThemeGenerationError extends Error {
 type ColorMode = 'light' | 'dark';
 
 interface ModeValues {
+	colorValues: SemanticColorValues;
 	diagnostics: ThemeModeDiagnostics;
 	failures: Array<ThemeContrastFailure>;
 	values: Record<ModePath, string>;
@@ -157,6 +164,7 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		'depth.resting': modeFoundation.depth.resting,
 	};
 	return {
+		colorValues,
 		diagnostics: { contrastChecks: checks, families: familyDiagnostics, mode, surfaces },
 		failures,
 		values,

@@ -3,4 +3,5 @@ export { ThemeContrastError, ThemeGenerationError } from '../../theme/build-them
 export type { ExtendingThemeInput, ThemeInput } from '../../theme/define-theme.js';
 export { defineTheme } from '../../theme/define-theme.js';
 export type { ThemeFont } from '../../theme/font.js';
+export { ThemeInteractionTintError } from '../../theme/interaction-tints.js';
 export { ThemeValidationError } from '../../theme/validate-input.js';

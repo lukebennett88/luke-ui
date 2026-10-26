@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { contrastRatio, formatOklch, gamutMapOklch, mixOklab, parseColor } from './color.js';
+import {
+	compositeEncodedSrgb,
+	contrastRatio,
+	formatOklch,
+	gamutMapOklch,
+	mixOklab,
+	parseColor,
+} from './color.js';
+import { oklabDeltaE } from './scale.js';
 
 describe('parseColor', () => {
 	it('round-trips a hex colour through OKLCH formatting', () => {
@@ -52,6 +60,31 @@ describe('contrastRatio', () => {
 		const blue = parseColor('#0160ae');
 		const white = parseColor('#ffffff');
 		expect(contrastRatio(blue, white)).toBeCloseTo(contrastRatio(white, blue), 10);
+	});
+});
+
+describe('compositeEncodedSrgb', () => {
+	it('composites white over black in encoded sRGB, not linear light', () => {
+		const black = parseColor('#000000');
+		const white = parseColor('#ffffff');
+		const encoded = compositeEncodedSrgb(white, black, 0.1);
+		// Linear-light source-over of white over black at 0.1 is channel 0.1 in linear space, which
+		// encodes near #595959 (OKLab L ≈ 0.46). Encoded sRGB source-over stays near L 0.22.
+		const linearLightComposite = parseColor('#595959');
+		expect(encoded.l).toBeLessThan(0.25);
+		expect(oklabDeltaE(encoded, black)).toBeLessThan(
+			oklabDeltaE(linearLightComposite, black) * 0.6,
+		);
+	});
+
+	it('returns the destination at alpha 0 and the source at alpha 1', () => {
+		const destination = parseColor('#0160ae');
+		const source = parseColor('#ffffff');
+		expect(oklabDeltaE(compositeEncodedSrgb(source, destination, 0), destination)).toBeCloseTo(
+			0,
+			5,
+		);
+		expect(oklabDeltaE(compositeEncodedSrgb(source, destination, 1), source)).toBeCloseTo(0, 5);
 	});
 });
 
