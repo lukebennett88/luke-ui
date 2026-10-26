@@ -46,13 +46,30 @@ describe('theme contract', () => {
 		expect(countLeaves(vars)).toBe(flattenThemeContract().length);
 	});
 
+	it('keeps the 25 non-rest interaction-state tokens and removes subtle state leaves', () => {
+		const paths = flattenThemeContract().map(([path]) => path);
+		const retained = paths.filter((path) => {
+			return (
+				/^color\.(background\.\w+\.solid|foreground\.\w+)\.(hover|pressed)$/.test(path) ||
+				path === 'color.border.controlHover'
+			);
+		});
+		expect(retained).toHaveLength(25);
+		expect(
+			paths.some((path) => /color\.background\.\w+\.subtle\.(hover|pressed)$/.test(path)),
+		).toBe(false);
+	});
+
 	it('gives every semantic role the same background, foreground, and border leaves', () => {
 		const leaf = (path: ModePath, varName: string): [ModePath, string] => [path, varName];
 		const expected = SEMANTIC_ROLES.flatMap((role) => {
 			const rows: Array<[ModePath, string]> = [
 				leaf(`color.border.${role}`, `--luke-color-border-${role}`),
 			];
-			for (const prominence of ['subtle', 'solid'] as const) {
+			rows.push(
+				leaf(`color.background.${role}.subtle.rest`, `--luke-color-background-${role}-subtle-rest`),
+			);
+			for (const prominence of ['solid'] as const) {
 				for (const state of ['rest', 'hover', 'pressed'] as const) {
 					rows.push(
 						leaf(
@@ -93,7 +110,7 @@ describe('theme contract', () => {
 	});
 
 	it('partitions identity and mode paths from the declared mode families', () => {
-		expect(modeFamilies).toEqual(['color', 'controlFinish', 'depth']);
+		expect(modeFamilies).toEqual(['color', 'controlFinish', 'depth', 'interaction']);
 		const pairs = flattenThemeContract();
 		const { identityPairs, modePairs } = partitionContractPairs(pairs);
 		expect(identityPairs.length + modePairs.length).toBe(pairs.length);

@@ -28,11 +28,12 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
 6. Runs the full WCAG 2.2 validation matrix (`validateContrast`), which stays authoritative and
    throws `ThemeContrastError` on a hard-gate miss. Validation measures semantic token relationships
    using final emitted, rounded, and gamut-mapped colours. Both global text hierarchy colours are
-   checked against every standard surface and all 18 subtle backgrounds. All six roles' three
-   foreground states are checked against every standard surface and all 18 subtle backgrounds (324
-   subtle pairs per mode). Both `onSolid.primary` and `onSolid.secondary` are checked against their
-   role's solid rest, hover, and pressed fills. The two on-solid leaves initially emit the same
-   literal resolved colour. New cross-role failures are rejected without automatic repair.
+   checked against every standard surface and the six subtle resting backgrounds. All six roles'
+   three foreground states are checked against every standard surface and the six subtle resting
+   backgrounds (180 subtle pairs per mode). Both `onSolid.primary` and `onSolid.secondary` are
+   checked against their role's solid rest, hover, and pressed fills. The two on-solid leaves
+   initially emit the same literal resolved colour. New cross-role failures are rejected without
+   automatic repair.
 
 `compileTheme` returns `{ css, diagnostics }`. `ThemeDiagnostics` records everything the pipeline
 resolved (both modes' families, surfaces, solid-anchor search, and contrast checks) for tooling.
@@ -148,18 +149,18 @@ the resting colour 5% toward `text.primary` in OKLab. Pressed mixes it 10% towar
 Those strengths are fixed. If a solid cannot carry readable on-solid text across the three states,
 the solid-anchor search adapts the resting colour rather than changing the mix strengths.
 
-Solid Buttons, Checkbox, Switch, field borders, focus rings, and text actions still select those
-opaque tokens. Low and standard Buttons use an adaptive treatment instead: one registered `<color>`
-state layer painted as the first `background-image` layer, fed by a private tint pair the compiler
-emits per mode (`--luke-internal-interaction-tint-hover` and `-pressed`). Light mode uses black.
-Dark mode uses white. Strengths target today's neutral subtle hover and pressed over `surface.base`.
-The solver chooses the nearest pair that clears the contrast cap and visibility floors, so every
-supported foreground stays at 4.5:1 over every surface and subtle rest with the tint on top.
-Visibility floors in `contrast-policy.ts` reject a theme that can only pass by making hover or
-pressed invisible: the hover floor applies on `surface.base`, and the hover-to-pressed floor applies
-on all four surfaces. Compositing for that solve uses encoded sRGB, matching CSS. Dark step-11 text
-moved from 0.76 to 0.79 so the tint cap stays above the visibility floor, which lightens dark-mode
-secondary and role foregrounds slightly.
+Checked Checkbox, Switch, field borders, focus rings, and text actions still select those opaque
+tokens. Buttons and unchecked or invalid Checkbox controls use an adaptive treatment: one registered
+`<color>` state layer painted as the first `background-image` layer, fed by a public tint pair the
+compiler emits per mode (`vars.interaction.tint.hover` and `vars.interaction.tint.pressed`). Light
+mode uses black. Dark mode uses white. Strengths target today's neutral subtle hover and pressed
+over `surface.base`. The solver chooses the nearest pair that clears the contrast cap and visibility
+floors, so every supported foreground stays at 4.5:1 over every surface and subtle rest with the
+tint on top. Visibility floors in `contrast-policy.ts` reject a theme that can only pass by making
+hover or pressed invisible: the hover floor applies on `surface.base`, and the hover-to-pressed
+floor applies on all four surfaces. Compositing for that solve uses encoded sRGB, matching CSS. Dark
+step-11 text moved from 0.76 to 0.79 so the tint cap stays above the visibility floor, which
+lightens dark-mode secondary and role foregrounds slightly.
 
 A translucent tint has too little visible difference between hover and pressed on some solid fills.
 Low Buttons therefore use an opaque subtle chip on solids (`solidStateFillVarName` /

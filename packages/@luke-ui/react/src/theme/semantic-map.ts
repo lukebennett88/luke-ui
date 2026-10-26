@@ -100,13 +100,11 @@ function mapRoleColorValues(families: Record<FamilyRole, ScaleFamily>): {
 	return pathRecord(
 		SEMANTIC_ROLES.flatMap((role) => {
 			const family = families[role];
-			const subtle = interactionStates(family[FAMILY_RUNG.subtle], textPrimary);
+			const subtle = formatOklch(family[FAMILY_RUNG.subtle]);
 			const solid = interactionStates(family[FAMILY_RUNG.solid], textPrimary);
 			const foreground = interactionStates(family[FAMILY_RUNG.foreground], textPrimary);
 			return [
-				pathEntry(`color.background.${role}.subtle.rest`, subtle.rest),
-				pathEntry(`color.background.${role}.subtle.hover`, subtle.hover),
-				pathEntry(`color.background.${role}.subtle.pressed`, subtle.pressed),
+				pathEntry(`color.background.${role}.subtle.rest`, subtle),
 				pathEntry(`color.background.${role}.solid.rest`, solid.rest),
 				pathEntry(`color.background.${role}.solid.hover`, solid.hover),
 				pathEntry(`color.background.${role}.solid.pressed`, solid.pressed),

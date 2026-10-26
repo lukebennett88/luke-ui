@@ -13,17 +13,10 @@ import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import type { ThemeFont } from './font.js';
 import type { ThemeFoundation } from './foundation.js';
 import { codeFontFamilyStack, defaultFontWeights, defaultRadius } from './foundation.js';
-import { interactionTintVarName } from './interaction-tint-vars.js';
-import type { InteractionTintPair } from './interaction-tints.js';
 import { pathEntry, pathRecord } from './path-record.js';
 import { rem } from './rem.js';
 import { getThemeClassName } from './theme-class-name.js';
-import {
-	CONTROL_SIZE_VALUES,
-	FONT_VALUES,
-	INTERACTION_VALUES,
-	MOTION_VALUES,
-} from './token-values.js';
+import { CONTROL_SIZE_VALUES, FONT_VALUES, MOTION_VALUES } from './token-values.js';
 import type { FontRole, TypeStyle } from './type-styles.js';
 import {
 	typeStyleFontRole,
@@ -45,7 +38,7 @@ export function assembleStylesheet(
 	foundation: ThemeFoundation,
 	lightValues: Record<ModePath, string>,
 	darkValues: Record<ModePath, string>,
-	modeTints: Record<ColorMode, InteractionTintPair>,
+	solidStateValues: { light: Record<string, string>; dark: Record<string, string> },
 ): string {
 	const { identityPairs, modePairs } = partitionContractPairs(flattenThemeContract());
 
@@ -56,12 +49,12 @@ export function assembleStylesheet(
 	const lightDeclarations = [
 		'color-scheme: light;',
 		...declarations(modePairs, lightValues),
-		...interactionTintDeclarations(modeTints.light),
+		...privateDeclarations(solidStateValues.light),
 	];
 	const darkDeclarations = [
 		'color-scheme: dark;',
 		...declarations(modePairs, darkValues),
-		...interactionTintDeclarations(modeTints.dark),
+		...privateDeclarations(solidStateValues.dark),
 	];
 
 	// The identity lives on `<html>` only. `:where(html)` keeps the base rules at (0,1,0), so the
@@ -115,7 +108,6 @@ function buildIdentityValues(foundation: ThemeFoundation): { [Path in IdentityPa
 	const fonts = resolveFontRoles(foundation.typography.fonts);
 	return {
 		...CONTROL_SIZE_VALUES,
-		...INTERACTION_VALUES,
 		...FONT_VALUES,
 		...typeStyleValues('fontFamily', (style) => fonts[typeStyleFontRole[style]].family),
 		...typeStyleValues('fontWeight', (style) => resolvedWeights[typeStyleWeightRole[style]]),
@@ -184,13 +176,6 @@ function capsizeTrims(font: ThemeFont, style: TypeStyle) {
 	return precomputeValues({ fontMetrics: font.metrics, fontSize, leading });
 }
 
-function interactionTintDeclarations(tints: InteractionTintPair): Array<string> {
-	return [
-		`${interactionTintVarName('hover')}: ${tints.hover};`,
-		`${interactionTintVarName('pressed')}: ${tints.pressed};`,
-	];
-}
-
 function declarations<Path extends string>(
 	pairs: Array<[Path, string]>,
 	values: Record<Path, string>,
@@ -200,6 +185,10 @@ function declarations<Path extends string>(
 		if (value === undefined) throw new Error(`buildTheme did not generate a value for "${path}"`);
 		return `${varName}: ${value};`;
 	});
+}
+
+function privateDeclarations(values: Record<string, string>): Array<string> {
+	return Object.entries(values).map(([property, value]) => `${property}: ${value};`);
 }
 
 function indent(line: string): string {

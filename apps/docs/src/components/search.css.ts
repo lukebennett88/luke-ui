@@ -1,4 +1,5 @@
 import { vars } from '@luke-ui/react/theme';
+import { interactionState } from '@luke-ui/react/utils';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { createVar, globalStyle, style } from '@vanilla-extract/css';
 import { overlayMotion } from '../lib/overlay-motion.js';
@@ -338,7 +339,7 @@ export const result = style({
 	'@layer': {
 		components: {
 			':hover': {
-				backgroundColor: vars.color.background.neutral.subtle.hover,
+				...interactionState('hover'),
 			},
 			selectors: {
 				'&[data-focused]': {

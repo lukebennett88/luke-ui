@@ -1,4 +1,5 @@
 import { vars } from '@luke-ui/react/theme';
+import { interactionState } from '@luke-ui/react/utils';
 import { style } from '@vanilla-extract/css';
 
 /**
@@ -14,11 +15,10 @@ export const cardLink = style({
 			transition: `background-color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			selectors: {
 				'&:hover': {
-					// Soften the subtle hover ramp the way Fumadocs used accent/80.
-					backgroundColor: vars.color.background.neutral.subtle.hover,
+					...interactionState('hover'),
 				},
 				'&:active': {
-					backgroundColor: vars.color.background.neutral.subtle.pressed,
+					...interactionState('pressed'),
 				},
 				'&:focus-visible': {
 					outline: `2px solid ${vars.color.border.focus}`,

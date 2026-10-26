@@ -2,6 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { expect, test } from 'vite-plus/test';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { pairedColors, surfaceColors } from '../test-utils/surface-colors.js';
+import { INTERACTION_STATE_LAYER_PROPERTY } from './interaction-state-layer.js';
 import {
 	solidStatesFixture,
 	subtleToSolidFixture,
@@ -43,7 +44,7 @@ for (const appearance of visualAppearances) {
 		expect(pressed.foreground).toEqual(rest.foreground);
 	});
 
-	test(`a transparent fill that turns subtle establishes the neutral context in ${name}`, () => {
+	test(`a transparent fill keeps its resting context under adaptive feedback in ${name}`, () => {
 		const { container } = render(
 			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
 				<div className={transparentToSubtleFixture} data-testid="control">
@@ -61,14 +62,18 @@ for (const appearance of visualAppearances) {
 			...pairedColors(parent, 'success.solid'),
 			background: TRANSPARENT,
 		});
+		const resting = surfaceColors(control);
 		control.toggleAttribute('data-hovered', true);
-		expect(surfaceColors(control)).toEqual(pairedColors(control, 'neutral.subtle.hover'));
+		const hoverLayer = getComputedStyle(control).getPropertyValue(INTERACTION_STATE_LAYER_PROPERTY);
+		expect(hoverLayer).not.toBe('transparent');
+		expect(surfaceColors(control)).toEqual(resting);
 		control.toggleAttribute('data-pressed', true);
-		expect(surfaceColors(control)).toEqual(pairedColors(control, 'neutral.subtle.pressed'));
-		expect(surfaceColors(label)).toEqual({
-			...pairedColors(label, 'neutral.subtle.pressed'),
-			background: TRANSPARENT,
-		});
+		const pressedLayer = getComputedStyle(control).getPropertyValue(
+			INTERACTION_STATE_LAYER_PROPERTY,
+		);
+		expect(pressedLayer).not.toBe(hoverLayer);
+		expect(surfaceColors(control)).toEqual(resting);
+		expect(surfaceColors(label)).toEqual(resting);
 	});
 
 	test(`switching between subtle and solid resets every foreground slot in ${name}`, () => {

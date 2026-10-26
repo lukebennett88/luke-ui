@@ -1,10 +1,8 @@
-import { defineTheme, ThemeContrastError } from '@luke-ui/react/theme/compiler';
+import { defineTheme, ThemeInteractionTintError } from '@luke-ui/react/theme/compiler';
 import { describe, expect, test } from 'vite-plus/test';
 import { theme } from './input.js';
 
 const ROLES = ['neutral', 'accent', 'info', 'success', 'warning', 'danger'] as const;
-const REST_FOREGROUND_PATTERN = /^color\.foreground\.\w+\.rest$/;
-const PRESSED_SUBTLE_BACKGROUND_PATTERN = /^color\.background\.\w+\.subtle\.pressed$/;
 
 /** Every value the stylesheet assigns to `variable`, in source order. */
 function declaredValues(css: string, variable: string): Array<string> {
@@ -29,20 +27,14 @@ for (const role of ROLES) {
 }
 
 describe('custom canvases that extend the published input', () => {
-	for (const { mode, base, foreground, background, ratio } of [
+	for (const { mode, base } of [
 		{
 			mode: 'light',
 			base: 'oklch(0.94 0 30)',
-			foreground: 'color.foreground.success.rest',
-			background: 'color.background.danger.subtle.pressed',
-			ratio: 4.467,
 		},
 		{
 			mode: 'dark',
 			base: 'oklch(0.28 0 30)',
-			foreground: 'color.foreground.danger.rest',
-			background: 'color.background.success.subtle.pressed',
-			ratio: 4.393,
 		},
 	] as const) {
 		test(`rejects the ${mode} canvas when it makes the theme unsatisfiable`, () => {
@@ -64,21 +56,7 @@ describe('custom canvases that extend the published input', () => {
 				return;
 			}
 
-			expect(caught).toBeInstanceOf(ThemeContrastError);
-			if (!(caught instanceof ThemeContrastError)) throw caught;
-			expect(caught.failures).toContainEqual({
-				mode,
-				foreground,
-				background,
-				ratio: expect.closeTo(ratio, 3),
-				required: 4.5,
-			});
-			for (const failure of caught.failures) {
-				expect(failure.mode).toBe(mode);
-				expect(failure.foreground).toMatch(REST_FOREGROUND_PATTERN);
-				expect(failure.background).toMatch(PRESSED_SUBTLE_BACKGROUND_PATTERN);
-				expect(failure.foreground.split('.')[2]).not.toBe(failure.background.split('.')[2]);
-			}
+			expect(caught).toBeInstanceOf(ThemeInteractionTintError);
 		});
 	}
 });

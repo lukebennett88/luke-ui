@@ -5,12 +5,12 @@ import { INTERACTION_STATE_LAYER_PROPERTY } from '../../styles/interaction-state
 import { style } from '../../styles/layered-style.css.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import { recipe } from '../../styles/recipe.js';
+import { interactionStateLayer } from '../../styles/state-layer.css.js';
 import {
 	adaptiveStateLayer,
-	interactionStateLayer,
 	transparentAdaptiveStateLayer,
 	transparentAdaptiveStateText,
-} from '../../styles/state-layer.css.js';
+} from '../../styles/state-layer.js';
 import {
 	contextualForeground,
 	neutralForegroundContextVars,

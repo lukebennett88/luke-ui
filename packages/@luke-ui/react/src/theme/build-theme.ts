@@ -1,3 +1,4 @@
+import { formatOklch } from './color.js';
 import type { ModePath } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { ThemeContrastFailure } from './contrast-validation.js';
@@ -11,15 +12,28 @@ import type {
 } from './diagnostics.js';
 import type { ThemeInheritance } from './extend-theme.js';
 import type { ThemeFoundation, ThemeModeFoundation } from './foundation.js';
+import {
+	solidStateGeneratedFillVarName,
+	solidStateGeneratedTextVarName,
+} from './interaction-tint-vars.js';
 import { solveInteractionTints } from './interaction-tints.js';
 import type { InteractionTintPair } from './interaction-tints.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
-import { generateFamilyWithDiagnostics, highContrastText, ScaleGenerationError } from './scale.js';
+import {
+	generateFamilyWithDiagnostics,
+	highContrastText,
+	INTERACTION_HOVER_STRENGTH,
+	INTERACTION_PRESSED_STRENGTH,
+	mixInteractionState,
+	FAMILY_RUNG,
+	ScaleGenerationError,
+} from './scale.js';
 import type { SemanticColorValues } from './semantic-map.js';
 import { mapSemanticColors } from './semantic-map.js';
 import { assembleStylesheet } from './stylesheet.js';
 import type { GeneratedSurfaces } from './surfaces.js';
 import { generateSurfaces } from './surfaces.js';
+import { INTERACTION_VALUES } from './token-values.js';
 import { validateFoundation } from './validate-foundation.js';
 
 /**
@@ -49,8 +63,16 @@ export function compileTheme(foundation: ThemeFoundation): {
 		light: solveInteractionTints('light', light.colorValues),
 		dark: solveInteractionTints('dark', dark.colorValues),
 	};
+	for (const mode of ['light', 'dark'] as const) {
+		const values = mode === 'light' ? light.values : dark.values;
+		values['interaction.tint.hover'] = tints[mode].hover;
+		values['interaction.tint.pressed'] = tints[mode].pressed;
+	}
 	return {
-		css: assembleStylesheet(foundation, light.values, dark.values, tints),
+		css: assembleStylesheet(foundation, light.values, dark.values, {
+			light: light.solidStateValues,
+			dark: dark.solidStateValues,
+		}),
 		diagnostics: { dark: dark.diagnostics, light: light.diagnostics },
 	};
 }
@@ -144,16 +166,23 @@ type ColorMode = 'light' | 'dark';
 
 interface ModeValues {
 	colorValues: SemanticColorValues;
+	solidStateValues: Record<string, string>;
 	diagnostics: ThemeModeDiagnostics;
 	failures: Array<ThemeContrastFailure>;
 	values: Record<ModePath, string>;
 }
 
 function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): ModeValues {
-	const { colorValues, familyDiagnostics, surfaces } = buildModeColors(mode, modeFoundation);
+	const { colorValues, familyDiagnostics, solidStateValues, surfaces } = buildModeColors(
+		mode,
+		modeFoundation,
+	);
 	const { checks, failures } = validateContrast(mode, colorValues);
 	const values: Record<ModePath, string> = {
 		...colorValues,
+		...INTERACTION_VALUES,
+		'interaction.tint.hover': 'transparent',
+		'interaction.tint.pressed': 'transparent',
 		'controlFinish.raised': modeFoundation.controlFinish.raised,
 		'controlFinish.recessed': modeFoundation.controlFinish.recessed,
 		'controlFinish.resting': modeFoundation.controlFinish.resting,
@@ -165,6 +194,7 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 	};
 	return {
 		colorValues,
+		solidStateValues,
 		diagnostics: { contrastChecks: checks, families: familyDiagnostics, mode, surfaces },
 		failures,
 		values,
@@ -173,6 +203,7 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 
 interface ModeColors {
 	colorValues: SemanticColorValues;
+	solidStateValues: Record<string, string>;
 	familyDiagnostics: Record<FamilyRole, FamilyDiagnostics>;
 	surfaces: GeneratedSurfaces;
 }
@@ -231,5 +262,19 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		backdrop: modeFoundation.color.backdrop,
 		surfaces,
 	});
-	return { colorValues, familyDiagnostics, surfaces };
+	const solidStateValues: Record<string, string> = {};
+	for (const tone of ['neutral', 'danger'] as const) {
+		const subtle = families[tone][FAMILY_RUNG.subtle];
+		solidStateValues[solidStateGeneratedFillVarName(tone, 'hover')] = formatOklch(
+			mixInteractionState(subtle, textPrimary, INTERACTION_HOVER_STRENGTH),
+		);
+		solidStateValues[solidStateGeneratedFillVarName(tone, 'pressed')] = formatOklch(
+			mixInteractionState(subtle, textPrimary, INTERACTION_PRESSED_STRENGTH),
+		);
+		solidStateValues[solidStateGeneratedTextVarName(tone)] =
+			tone === 'danger'
+				? colorValues['color.foreground.danger.rest']
+				: colorValues['color.text.primary'];
+	}
+	return { colorValues, familyDiagnostics, solidStateValues, surfaces };
 }

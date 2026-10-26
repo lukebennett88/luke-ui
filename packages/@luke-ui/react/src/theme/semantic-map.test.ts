@@ -137,12 +137,6 @@ describe('mapSemanticColors', () => {
 					const solid = family[FAMILY_RUNG.solid];
 					const foreground = family[FAMILY_RUNG.foreground];
 					expect(result[`color.background.${role}.subtle.rest`]).toBe(formatOklch(subtle));
-					expect(result[`color.background.${role}.subtle.hover`]).toBe(
-						formatOklch(mixInteractionState(subtle, textPrimary, INTERACTION_HOVER_STRENGTH)),
-					);
-					expect(result[`color.background.${role}.subtle.pressed`]).toBe(
-						formatOklch(mixInteractionState(subtle, textPrimary, INTERACTION_PRESSED_STRENGTH)),
-					);
 					expect(result[`color.background.${role}.solid.rest`]).toBe(formatOklch(solid));
 					expect(result[`color.background.${role}.solid.hover`]).toBe(
 						formatOklch(mixInteractionState(solid, textPrimary, INTERACTION_HOVER_STRENGTH)),

@@ -35,8 +35,6 @@ const typeStyle = {
 const roleBackground = {
 	subtle: {
 		rest: null,
-		hover: null,
-		pressed: null,
 	},
 	solid: {
 		rest: null,
@@ -183,6 +181,10 @@ export const themeContractTree = {
 	interaction: {
 		/** The fade applied to disabled and pending controls. */
 		disabledOpacity: null,
+		tint: {
+			hover: null,
+			pressed: null,
+		},
 	},
 	/**
 	 * Luke UI-owned motion treatments for interaction. Each treatment pairs a duration with its
@@ -212,9 +214,12 @@ export const themeContractTree = {
  * {@link themeContractTree}. This one list drives the mode-family type, {@link ModePath},
  * {@link IdentityPath}, and stylesheet partitioning.
  */
-export const modeFamilies = ['color', 'controlFinish', 'depth'] as const satisfies ReadonlyArray<
-	keyof typeof themeContractTree
->;
+export const modeFamilies = [
+	'color',
+	'controlFinish',
+	'depth',
+	'interaction',
+] as const satisfies ReadonlyArray<keyof typeof themeContractTree>;
 
 /** A top-level contract family that varies by colour mode. */
 type ModeFamily = (typeof modeFamilies)[number];

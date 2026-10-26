@@ -7,7 +7,7 @@
  * the source of the public `SpaceStep` type.
  */
 
-import type { IdentityPath } from './contract.js';
+import type { IdentityPath, ModePath } from './contract.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import { literalScale } from './literal-scale.js';
 import { MOTION_DURATION_SCALE } from './motion.js';
@@ -51,7 +51,7 @@ export const FONT_VALUES: { readonly [Key in FontValueKey]: string } = pathRecor
 
 /** The fade every control recipe applies to a disabled or pending control. */
 export const INTERACTION_VALUES: {
-	[Path in Extract<IdentityPath, `interaction.${string}`>]: string;
+	[Path in Extract<ModePath, 'interaction.disabledOpacity'>]: string;
 } = {
 	'interaction.disabledOpacity': '0.55',
 };

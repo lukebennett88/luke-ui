@@ -1,4 +1,5 @@
 import { vars } from '@luke-ui/react/theme';
+import { interactionState } from '@luke-ui/react/utils';
 import { style } from '@vanilla-extract/css';
 
 // DS gap: Luke `Button` always draws control chrome, so there is no plain, unstyled button. Docs
@@ -12,7 +13,7 @@ export const trigger = style({
 			color: 'inherit',
 			selectors: {
 				'&:hover': {
-					backgroundColor: vars.color.background.neutral.subtle.hover,
+					...interactionState('hover'),
 				},
 				'&:focus-visible': {
 					outline: `2px solid ${vars.color.border.focus}`,

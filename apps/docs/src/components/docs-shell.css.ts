@@ -1,4 +1,5 @@
 import { vars } from '@luke-ui/react/theme';
+import { interactionState } from '@luke-ui/react/utils';
 import { createVar, style } from '@vanilla-extract/css';
 import {
 	docsSidebarMaxInlineSize,
@@ -318,7 +319,7 @@ export const navLink = style({
 			textDecoration: 'none',
 			selectors: {
 				'&:hover': {
-					backgroundColor: vars.color.background.neutral.subtle.hover,
+					...interactionState('hover'),
 					color: vars.color.text.primary,
 				},
 				// Inset the global ring so the scrolling sidebar doesn't clip it.
@@ -328,7 +329,7 @@ export const navLink = style({
 				// The sidebar sits on the subdued chrome, where the resting accent fill barely differs
 				// from the surface in light mode. The pressed step stays one step past the hover fill.
 				'&[aria-current="page"]': {
-					backgroundColor: vars.color.background.accent.subtle.pressed,
+					...interactionState('pressed'),
 					color: vars.color.text.primary,
 				},
 			},

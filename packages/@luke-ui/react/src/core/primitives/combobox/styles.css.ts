@@ -10,11 +10,14 @@ import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
 } from '../../styles/input-states.js';
+import { INTERACTION_STATE_LAYER_PROPERTY } from '../../styles/interaction-state-layer.js';
 import { globalStyleInLayer, style } from '../../styles/layered-style.css.js';
 import { overlayMotion } from '../../styles/overlay-motion.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+import { interactionStateLayer } from '../../styles/state-layer.css.js';
+import { adaptiveStateLayer } from '../../styles/state-layer.js';
 import { surfaceStyle } from '../../styles/surface.js';
 import {
 	autofilledDisabledInputSelector,
@@ -64,6 +67,7 @@ const comboboxActionStyles = {
 	alignItems: 'center',
 	appearance: 'none',
 	backgroundColor: 'transparent',
+	backgroundImage: `linear-gradient(${interactionStateLayer}, ${interactionStateLayer})`,
 	border: 'none',
 	borderRadius: vars.radius.detail,
 	boxShadow: 'none',
@@ -80,13 +84,14 @@ const comboboxActionStyles = {
 	...pressFeedback,
 	transform: 'none',
 	transitionDuration: vars.motion.feedback.duration,
-	transitionProperty: 'background-color, color',
+	transitionProperty: `background-color, background-image, color, ${INTERACTION_STATE_LAYER_PROPERTY}`,
 	transitionTimingFunction: vars.motion.feedback.easing,
 
+	vars: { [interactionStateLayer]: 'transparent' },
 	selectors: {
 		'&[data-disabled="true"]': { cursor: 'not-allowed' },
-		'&[data-hovered="true"]:not([data-disabled="true"])': surfaceStyle('accent.subtle.hover'),
-		'&[data-pressed="true"]:not([data-disabled="true"])': surfaceStyle('accent.subtle.pressed'),
+		'&[data-hovered="true"]:not([data-disabled="true"])': adaptiveStateLayer('hover'),
+		'&[data-pressed="true"]:not([data-disabled="true"])': adaptiveStateLayer('pressed'),
 		[descendantDisabledSelector]: { color: vars.color.text.disabled },
 	},
 } satisfies StyleRule;

@@ -3,9 +3,12 @@ import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { ICON_SIZES } from '../../sizing/icon-sizing.js';
 import { focusRing } from '../../styles/focus-ring.js';
+import { INTERACTION_STATE_LAYER_PROPERTY } from '../../styles/interaction-state-layer.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+import { interactionStateLayer } from '../../styles/state-layer.css.js';
+import { adaptiveStateLayer } from '../../styles/state-layer.js';
 import { surfaceStyle } from '../../styles/surface.js';
 import { textLineHeight } from '../../text/recipe.css.js';
 import { inlineControlGap, inlineFieldIndent } from '../field/recipe.css.js';
@@ -92,7 +95,7 @@ const checkboxConfig = {
 			// its foreground context, so the glyph reads the fill's primary: on-solid primary once checked.
 			alignItems: 'center',
 			...surfaceStyle('surface.field'),
-			backgroundImage: 'none',
+			backgroundImage: `linear-gradient(${interactionStateLayer}, ${interactionStateLayer})`,
 			// The finish spans the border too. From the padding box it would tile into the border and
 			// repeat its lit top along the bottom edge.
 			backgroundOrigin: 'border-box',
@@ -110,7 +113,7 @@ const checkboxConfig = {
 			lineHeight: 1,
 			transitionDuration: vars.motion.feedback.duration,
 			// No `color`: the glyph appears with its fill's colour, not fading from the unchecked one.
-			transitionProperty: 'background-color, background-image, border-color, box-shadow, opacity',
+			transitionProperty: `background-color, background-image, border-color, box-shadow, opacity, ${INTERACTION_STATE_LAYER_PROPERTY}`,
 			transitionTimingFunction: vars.motion.feedback.easing,
 			selectors: {
 				'&::after': {
@@ -122,10 +125,11 @@ const checkboxConfig = {
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
 				[hovered()]: {
+					...adaptiveStateLayer('hover'),
 					borderColor: vars.color.border.controlHover,
 				},
 				[pressed()]: {
-					...surfaceStyle('neutral.subtle.pressed'),
+					...adaptiveStateLayer('pressed'),
 					borderColor: vars.color.border.controlHover,
 				},
 				'[data-indeterminate="true"] &': {
@@ -168,11 +172,11 @@ const checkboxConfig = {
 				// Only `danger.solid.rest` is a guaranteed 3:1 boundary, so an invalid box keeps it through
 				// hover and press. The fill carries the feedback instead.
 				[hovered('[data-invalid="true"]')]: {
-					...surfaceStyle('danger.subtle.hover'),
+					...adaptiveStateLayer('hover'),
 					borderColor: vars.color.background.danger.solid.rest,
 				},
 				[pressed('[data-invalid="true"]')]: {
-					...surfaceStyle('danger.subtle.pressed'),
+					...adaptiveStateLayer('pressed'),
 					borderColor: vars.color.background.danger.solid.rest,
 				},
 				[`${hovered('[data-invalid="true"][data-selected="true"]')}, ${hovered('[data-invalid="true"][data-indeterminate="true"]')}`]:

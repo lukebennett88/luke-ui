@@ -32,8 +32,8 @@ globalStyle('body', {
 });
 
 globalStyle('::selection', {
-	background: vars.color.background.accent.subtle.pressed,
-	color: vars.color.text.primary,
+	background: vars.color.background.accent.solid.rest,
+	color: vars.color.foreground.accent.onSolid.primary,
 });
 
 globalStyle(

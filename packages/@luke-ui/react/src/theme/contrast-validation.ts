@@ -39,7 +39,7 @@ type ColorPath = keyof SemanticColorValues;
  *
  * Content and controls can sit on any of the four surfaces, so every surface gate covers all four.
  * Hard at 4.5:1: primary and secondary text and each role's rest, hover, and pressed foreground
- * against all four surfaces and every role's subtle fills. Both on-solid hierarchy leaves are gated
+ * against all four surfaces and every role's subtle rest fill. Both on-solid hierarchy leaves are gated
  * against their role's solid fills.
  * Hard at 3:1: the focus ring, the control border and its hover, and `danger.solid.rest`, the
  * invalid control boundary. Only danger is gated as a boundary: the other roles' solid fills are
@@ -77,10 +77,8 @@ export function validateContrast(
 		'color.surface.overlay',
 	] as const satisfies ReadonlyArray<ColorPath>;
 
-	const subtleBackgrounds = SEMANTIC_ROLES.flatMap((role) => {
-		return (['rest', 'hover', 'pressed'] as const).map((state) => {
-			return `color.background.${role}.subtle.${state}` as const;
-		});
+	const subtleBackgrounds = SEMANTIC_ROLES.map((role) => {
+		return `color.background.${role}.subtle.rest` as const;
 	});
 	const textBackgrounds = [...surfacePaths, ...subtleBackgrounds];
 	for (const text of ['color.text.primary', 'color.text.secondary'] as const) {

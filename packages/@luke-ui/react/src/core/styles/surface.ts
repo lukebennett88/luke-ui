@@ -2,15 +2,22 @@ import { createGlobalVar, fallbackVar } from '@vanilla-extract/css';
 import { typedEntries } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
+import {
+	solidStateFillVarName,
+	solidStateGeneratedFillVarName,
+	solidStateGeneratedTextVarName,
+	solidStateTextVarName,
+} from '../../theme/interaction-tint-vars.js';
+import type { SolidStateTone } from '../../theme/interaction-tint-vars.js';
 
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
 
 /** The readable primary and secondary colours, and one readable colour per semantic role. */
 type ForegroundSlot = 'primary' | 'secondary' | SemanticRole;
 
-const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
-
-type InteractionState = (typeof INTERACTION_STATES)[number];
+const SOLID_STATES = ['rest', 'hover', 'pressed'] as const;
+type SolidInteractionState = (typeof SOLID_STATES)[number];
+type InteractionState = SolidInteractionState;
 
 /**
  * A recognised opaque background: a standard surface, or a role's subtle or solid fill in one of
@@ -18,7 +25,8 @@ type InteractionState = (typeof INTERACTION_STATES)[number];
  */
 export type SurfaceBackground =
 	| `surface.${keyof typeof vars.color.surface}`
-	| `${SemanticRole}.${'subtle' | 'solid'}.${InteractionState}`;
+	| `${SemanticRole}.subtle.rest`
+	| `${SemanticRole}.solid.${SolidInteractionState}`;
 
 type SurfaceStyle = {
 	backgroundColor: string;
@@ -35,22 +43,6 @@ const foregroundOverride = {
 	secondary: createGlobalVar('luke-internal-foreground-secondary'),
 	tone: createGlobalVar('luke-internal-foreground-tone'),
 };
-
-export type SolidStateTone = 'neutral' | 'danger';
-
-/**
- * Opaque subtle hover or pressed fill a transparent control paints over a solid. The
- * hover-to-pressed step of a translucent tint over a solid fill falls below the visibility floor.
- * Set to `initial` on standard surfaces and subtle fills.
- */
-export function solidStateFillVarName(tone: SolidStateTone, state: 'hover' | 'pressed'): string {
-	return `--luke-internal-solid-state-fill-${tone}-${state}`;
-}
-
-/** Text colour that pairs with {@link solidStateFillVarName}'s chip, so on-solid text stays at AA. */
-export function solidStateTextVarName(tone: SolidStateTone): string {
-	return `--luke-internal-solid-state-text-${tone}`;
-}
 
 function solidStateVars(
 	value: (tone: SolidStateTone, slot: 'hover' | 'pressed' | 'text') => string,
@@ -154,15 +146,13 @@ function solidContext(role: SemanticRole, backgroundColor: string): SurfaceStyle
 		backgroundColor,
 		color: onSolid.primary,
 		vars: {
+			...solidStateVars((tone, slot) => {
+				if (slot === 'text') return `var(${solidStateGeneratedTextVarName(tone)})`;
+				return `var(${solidStateGeneratedFillVarName(tone, slot)})`;
+			}),
 			[foregroundOverride.primary]: onSolid.primary,
 			[foregroundOverride.secondary]: onSolid.secondary,
 			[foregroundOverride.tone]: onSolid.primary,
-			...solidStateVars((tone, slot) => {
-				if (slot === 'text') {
-					return tone === 'danger' ? vars.color.foreground.danger.rest : vars.color.text.primary;
-				}
-				return vars.color.background[tone].subtle[slot];
-			}),
 		},
 	};
 }
@@ -173,8 +163,8 @@ for (const [surface, backgroundColor] of typedEntries(vars.color.surface)) {
 }
 for (const role of SEMANTIC_ROLES) {
 	const { subtle, solid } = vars.color.background[role];
-	for (const state of INTERACTION_STATES) {
-		surfaceStyles.set(`${role}.subtle.${state}`, neutralContext(subtle[state]));
+	surfaceStyles.set(`${role}.subtle.rest`, neutralContext(subtle.rest));
+	for (const state of SOLID_STATES) {
 		surfaceStyles.set(`${role}.solid.${state}`, solidContext(role, solid[state]));
 	}
 }

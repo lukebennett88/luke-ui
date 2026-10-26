@@ -1,4 +1,5 @@
 import { vars } from '@luke-ui/react/theme';
+import { interactionState } from '@luke-ui/react/utils';
 import { style } from '@vanilla-extract/css';
 
 /** Collapsed grid cell borders; Stack/Grid own the internal layout. */
@@ -42,7 +43,7 @@ export const copyButton = style({
 			whiteSpace: 'nowrap',
 			selectors: {
 				'&:hover, &:focus-visible': {
-					backgroundColor: vars.color.background.neutral.subtle.hover,
+					...interactionState('hover'),
 					color: vars.color.text.primary,
 				},
 				'&:focus-visible': {

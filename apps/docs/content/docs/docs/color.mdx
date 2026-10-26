@@ -58,15 +58,15 @@ stays constant, so only the role and mode change its colours.
 
 ### Background and foreground
 
-Each role has a `subtle` and a `solid` background ramp. Each ramp has `rest`, `hover`, and `pressed`
-states:
+Each role has a resting `subtle` background and a `solid` background with `rest`, `hover`, and
+`pressed` states. Adaptive hover and pressed feedback uses the shared interaction tint pair:
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
 
 vars.color.background.warning.subtle.rest;
-vars.color.background.warning.subtle.hover;
-vars.color.background.warning.subtle.pressed;
+vars.interaction.tint.hover;
+vars.interaction.tint.pressed;
 vars.color.background.warning.solid.rest;
 vars.color.background.warning.solid.hover;
 vars.color.background.warning.solid.pressed;

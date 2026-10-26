@@ -1,4 +1,5 @@
 import { vars } from '@luke-ui/react/theme';
+import { interactionState } from '@luke-ui/react/utils';
 import { style } from '@vanilla-extract/css';
 
 /**
@@ -13,10 +14,10 @@ export const card = style({
 			transition: `background-color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			selectors: {
 				'&:hover': {
-					backgroundColor: vars.color.background.neutral.subtle.hover,
+					...interactionState('hover'),
 				},
 				'&:active': {
-					backgroundColor: vars.color.background.neutral.subtle.pressed,
+					...interactionState('pressed'),
 				},
 			},
 		},

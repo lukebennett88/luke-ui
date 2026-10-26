@@ -8,7 +8,7 @@ import {
 } from './__fixtures__/theme-css.js';
 import { compileTheme } from './build-theme.js';
 import { compositeEncodedSrgb, contrastRatio, formatOklch, parseColor } from './color.js';
-import { flattenThemeContract, partitionContractPairs } from './contract.js';
+import { flattenThemeContract, partitionContractPairs, themeVarName } from './contract.js';
 import {
 	INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
 	INTERACTION_HOVER_VISIBILITY,
@@ -16,7 +16,6 @@ import {
 } from './contrast-policy.js';
 import { defineTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
-import { interactionTintVarName } from './interaction-tint-vars.js';
 import { solveInteractionTints, ThemeInteractionTintError } from './interaction-tints.js';
 import { oklabDeltaE } from './scale.js';
 import type { SemanticColorValues } from './semantic-map.js';
@@ -28,10 +27,18 @@ describe('solveInteractionTints', () => {
 	] as const) {
 		it(`emits a black light pair and a white dark pair for ${name}`, () => {
 			const blocks = splitBlocks(compileTheme(foundation).css);
-			expect(blocks.baseLight).toContain(`${interactionTintVarName('hover')}: oklch(0 0 0 /`);
-			expect(blocks.baseLight).toContain(`${interactionTintVarName('pressed')}: oklch(0 0 0 /`);
-			expect(blocks.mediaDark).toContain(`${interactionTintVarName('hover')}: oklch(1 0 0 /`);
-			expect(blocks.mediaDark).toContain(`${interactionTintVarName('pressed')}: oklch(1 0 0 /`);
+			expect(blocks.baseLight).toContain(
+				`${themeVarName(['interaction', 'tint', 'hover'])}: oklch(0 0 0 /`,
+			);
+			expect(blocks.baseLight).toContain(
+				`${themeVarName(['interaction', 'tint', 'pressed'])}: oklch(0 0 0 /`,
+			);
+			expect(blocks.mediaDark).toContain(
+				`${themeVarName(['interaction', 'tint', 'hover'])}: oklch(1 0 0 /`,
+			);
+			expect(blocks.mediaDark).toContain(
+				`${themeVarName(['interaction', 'tint', 'pressed'])}: oklch(1 0 0 /`,
+			);
 		});
 
 		it(`keeps ${name} tint visibility above the calibrated floors`, () => {
@@ -106,10 +113,6 @@ describe('solveInteractionTints', () => {
 
 	it('raises a target pressed tint that falls below the minimum visible pair', () => {
 		const colorValues = compiledColorValues(paperFoundation, 'dark');
-		const base = colorValues['color.surface.base'];
-		colorValues['color.background.neutral.subtle.hover'] = base;
-		colorValues['color.background.neutral.subtle.pressed'] = base;
-
 		const tints = solveInteractionTints('dark', colorValues);
 		expect(tints.pressedAlpha).toBeGreaterThan(0);
 		expect(tints.hoverToPressedVisibility).toBeGreaterThanOrEqual(
