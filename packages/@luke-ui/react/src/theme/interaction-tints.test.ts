@@ -1,30 +1,33 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { paperTheme } from './__fixtures__/paper.js';
-import { tactileTheme } from './__fixtures__/tactile.js';
-import { splitBlocks } from './__fixtures__/theme-css.js';
+import {
+	extractValue,
+	paperFoundation,
+	splitBlocks,
+	tactileFoundation,
+} from './__fixtures__/theme-css.js';
 import { compileTheme } from './build-theme.js';
 import { compositeEncodedSrgb, contrastRatio, formatOklch, parseColor } from './color.js';
+import { flattenThemeContract, partitionContractPairs } from './contract.js';
 import {
 	INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
 	INTERACTION_HOVER_VISIBILITY,
-	SEMANTIC_ROLES,
 	TEXT_RATIO,
 } from './contrast-policy.js';
-import { controlHoverBorder, solveControlBorder } from './control-border.js';
-import { defineTheme, normalizeTheme } from './define-theme.js';
+import { defineTheme } from './define-theme.js';
+import type { ThemeFoundation } from './foundation.js';
 import { interactionTintVarName } from './interaction-tint-vars.js';
 import { solveInteractionTints, ThemeInteractionTintError } from './interaction-tints.js';
-import { generateFamilyWithDiagnostics, highContrastText, oklabDeltaE } from './scale.js';
-import { mapSemanticColors } from './semantic-map.js';
-import { generateSurfaces } from './surfaces.js';
+import { oklabDeltaE } from './scale.js';
+import type { SemanticColorValues } from './semantic-map.js';
 
 describe('solveInteractionTints', () => {
-	for (const [name, input] of [
-		['Paper', paperTheme],
-		['Tactile', tactileTheme],
+	for (const [name, foundation] of [
+		['Paper', paperFoundation],
+		['Tactile', tactileFoundation],
 	] as const) {
 		it(`emits a black light pair and a white dark pair for ${name}`, () => {
-			const blocks = splitBlocks(compileTheme(normalizeTheme(input)).css);
+			const blocks = splitBlocks(compileTheme(foundation).css);
 			expect(blocks.baseLight).toContain(`${interactionTintVarName('hover')}: oklch(0 0 0 /`);
 			expect(blocks.baseLight).toContain(`${interactionTintVarName('pressed')}: oklch(0 0 0 /`);
 			expect(blocks.mediaDark).toContain(`${interactionTintVarName('hover')}: oklch(1 0 0 /`);
@@ -32,9 +35,8 @@ describe('solveInteractionTints', () => {
 		});
 
 		it(`keeps ${name} tint visibility above the calibrated floors`, () => {
-			const foundation = normalizeTheme(input);
 			for (const mode of ['light', 'dark'] as const) {
-				const values = modeColorValues(foundation, mode);
+				const values = compiledColorValues(foundation, mode);
 				const tints = solveInteractionTints(mode, values);
 				const tint = mode === 'dark' ? { l: 1, c: 0, h: 0 } : { l: 0, c: 0, h: 0 };
 				for (const surface of ['base', 'subdued', 'field', 'overlay'] as const) {
@@ -55,8 +57,7 @@ describe('solveInteractionTints', () => {
 		});
 
 		it(`keeps critical text at ${TEXT_RATIO}:1 over ${name} dark overlay with the pressed tint`, () => {
-			const foundation = normalizeTheme(input);
-			const colorValues = modeColorValues(foundation, 'dark');
+			const colorValues = compiledColorValues(foundation, 'dark');
 			const tints = solveInteractionTints('dark', colorValues);
 			const overlay = parseColor(colorValues['color.surface.overlay']);
 			const danger = parseColor(colorValues['color.foreground.danger.rest']);
@@ -66,7 +67,7 @@ describe('solveInteractionTints', () => {
 	}
 
 	it('rejects colour values whose contrast cap collapses hover below the visibility floor', () => {
-		const colorValues = { ...modeColorValues(normalizeTheme(paperTheme), 'dark') };
+		const colorValues = { ...compiledColorValues(paperFoundation, 'dark') };
 		const overlay = parseColor(colorValues['color.surface.overlay']);
 		// Darken danger foregrounds until they barely clear AA on the untinted overlay, so any
 		// useful white tint fails the contrast cap and the visibility floors reject the theme.
@@ -85,47 +86,61 @@ describe('solveInteractionTints', () => {
 		expect(() => solveInteractionTints('dark', colorValues)).toThrow(ThemeInteractionTintError);
 	});
 
-	it('rejects a custom theme whose dark overlay leaves no visible contrast-safe tint', () => {
+	it('finds a feasible tint pair when proportional scaling would miss the visibility floor', () => {
 		const theme = (lightness: number) => ({
 			color: { surface: { overlay: { dark: `oklch(${lightness} 0.01 250)` } } },
 			extends: paperTheme,
 			name: 'contrast-edge',
 		});
 		expect(() => defineTheme(theme(0.32))).not.toThrow();
-		expect(() => defineTheme(theme(0.33))).toThrow(ThemeInteractionTintError);
+		expect(() => defineTheme(theme(0.33))).not.toThrow();
+
+		const colorValues = compiledColorValues(paperFoundation, 'dark');
+		colorValues['color.surface.overlay'] = 'oklch(0.33 0.01 250)';
+		const tints = solveInteractionTints('dark', colorValues);
+		expect(tints.hoverAlpha).toBeLessThan(0.078);
+		expect(tints.hoverToPressedVisibility).toBeGreaterThanOrEqual(
+			INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
+		);
+	});
+
+	it('raises a target pressed tint that falls below the minimum visible pair', () => {
+		const colorValues = compiledColorValues(paperFoundation, 'dark');
+		const base = colorValues['color.surface.base'];
+		colorValues['color.background.neutral.subtle.hover'] = base;
+		colorValues['color.background.neutral.subtle.pressed'] = base;
+
+		const tints = solveInteractionTints('dark', colorValues);
+		expect(tints.pressedAlpha).toBeGreaterThan(0);
+		expect(tints.hoverToPressedVisibility).toBeGreaterThanOrEqual(
+			INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
+		);
+	});
+
+	it('rejects colour values whose resting text already fails contrast', () => {
+		const colorValues = compiledColorValues(paperFoundation, 'dark');
+		colorValues['color.surface.overlay'] = colorValues['color.text.primary'];
+		expect(() => solveInteractionTints('dark', colorValues)).toThrow(ThemeInteractionTintError);
 	});
 });
 
-function modeColorValues(foundation: ReturnType<typeof normalizeTheme>, mode: 'light' | 'dark') {
-	const modeFoundation = foundation[mode];
-	const source = modeFoundation.color;
-	const base = source.surface.base;
-	const textPrimary = highContrastText(source.neutral, mode);
-	const families = {} as Record<
-		(typeof SEMANTIC_ROLES)[number],
-		ReturnType<typeof generateFamilyWithDiagnostics>['family']
+function colorModePairs(): Array<[keyof SemanticColorValues, string]> {
+	const { modePairs } = partitionContractPairs(flattenThemeContract());
+	return modePairs.filter(([path]) => path.startsWith('color.')) as Array<
+		[keyof SemanticColorValues, string]
 	>;
-	for (const role of SEMANTIC_ROLES) {
-		families[role] = generateFamilyWithDiagnostics({
-			background: base,
-			interactionSource: textPrimary,
-			mode,
-			role,
-			source: source[role],
-		}).family;
+}
+
+/** The colour values `compileTheme` emits for `mode`, read back from its stylesheet. */
+function compiledColorValues(
+	foundation: ThemeFoundation,
+	mode: 'light' | 'dark',
+): SemanticColorValues {
+	const blocks = splitBlocks(compileTheme(foundation).css);
+	const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
+	const values = {} as SemanticColorValues;
+	for (const [path, varName] of colorModePairs()) {
+		values[path] = extractValue(block, varName);
 	}
-	const surfaces = generateSurfaces({ mode, surface: source.surface });
-	const controlBorder = solveControlBorder({
-		mode,
-		neutral: families.neutral,
-		surfaces: [surfaces.base, surfaces.subdued, surfaces.field, surfaces.overlay],
-	});
-	return mapSemanticColors({
-		backdrop: modeFoundation.color.backdrop,
-		controlBorder,
-		controlHoverBorder: controlHoverBorder(controlBorder, mode),
-		families,
-		focus: source.focus,
-		surfaces,
-	});
+	return values;
 }

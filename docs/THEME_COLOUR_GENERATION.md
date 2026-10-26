@@ -152,17 +152,19 @@ Solid Buttons, Checkbox, Switch, field borders, focus rings, and text actions st
 opaque tokens. Low and standard Buttons use an adaptive treatment instead: one registered `<color>`
 state layer painted as the first `background-image` layer, fed by a private tint pair the compiler
 emits per mode (`--luke-internal-interaction-tint-hover` and `-pressed`). Light mode uses black.
-Dark mode uses white. Strengths target today's neutral subtle hover and pressed over `surface.base`,
-then scale under a contrast cap so every supported foreground stays at 4.5:1 over every surface and
-subtle rest with the tint on top. Visibility floors in `contrast-policy.ts` reject a theme that can
-only pass by making hover or pressed invisible: the hover floor applies on `surface.base`, and the
-hover-to-pressed floor applies on all four surfaces. Compositing for that solve uses encoded sRGB,
-matching CSS.
+Dark mode uses white. Strengths target today's neutral subtle hover and pressed over `surface.base`.
+The solver chooses the nearest pair that clears the contrast cap and visibility floors, so every
+supported foreground stays at 4.5:1 over every surface and subtle rest with the tint on top.
+Visibility floors in `contrast-policy.ts` reject a theme that can only pass by making hover or
+pressed invisible: the hover floor applies on `surface.base`, and the hover-to-pressed floor applies
+on all four surfaces. Compositing for that solve uses encoded sRGB, matching CSS. Dark step-11 text
+moved from 0.76 to 0.79 so the tint cap stays above the visibility floor, which lightens dark-mode
+secondary and role foregrounds slightly.
 
 A translucent tint has too little visible difference between hover and pressed on some solid fills.
-Low Buttons therefore use an opaque subtle chip on solids (`solidStateFill` / `solidStateText` from
-the surface pairing). Standard Buttons keep their resting subtle fill plus the tint. The public
-replacement for consumers is tracked in #927.
+Low Buttons therefore use an opaque subtle chip on solids (`solidStateFillVarName` /
+`solidStateTextVarName` from the surface pairing). Standard Buttons keep their resting subtle fill
+plus the tint.
 
 Theme authors do not author hover, pressed, or tint colours. `color.overlay.backdrop` is the
 authored modal dimming layer. `color.surface.overlay` is the opaque surface for detached content
@@ -170,3 +172,11 @@ such as menus, popovers, and dialogs.
 
 `validateContrast` measures the emitted opaque token pairs. Tint contrast and visibility are gated
 separately by `solveInteractionTints` during `compileTheme`.
+
+## Alpha is deferred
+
+The private scale intentionally has no alpha (transparent) track. Adding one later is structurally
+non-breaking (it does not require a contract shape change), but consuming it in any mapped leaf
+**will** be a visible change to that leaf's rendered colour — plan a review pass the same way as any
+other repaint, not as a silent patch. The adaptive interaction tint pair is emitted as private CSS
+variables, not scale leaves, so it does not change this.

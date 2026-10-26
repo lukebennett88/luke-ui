@@ -11,7 +11,7 @@ import type {
 } from './diagnostics.js';
 import type { ThemeInheritance } from './extend-theme.js';
 import type { ThemeFoundation, ThemeModeFoundation } from './foundation.js';
-import { ThemeInteractionTintError, solveInteractionTints } from './interaction-tints.js';
+import { solveInteractionTints } from './interaction-tints.js';
 import type { InteractionTintPair } from './interaction-tints.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import { generateFamilyWithDiagnostics, highContrastText, ScaleGenerationError } from './scale.js';
@@ -45,13 +45,12 @@ export function compileTheme(foundation: ThemeFoundation): {
 	const dark = buildModeValues('dark', foundation.dark);
 	const failures = [...light.failures, ...dark.failures];
 	if (failures.length > 0) throw new ThemeContrastError(failures);
-	if (light.interactionTintError !== null) throw light.interactionTintError;
-	if (dark.interactionTintError !== null) throw dark.interactionTintError;
+	const tints: Record<ColorMode, InteractionTintPair> = {
+		light: solveInteractionTints('light', light.colorValues),
+		dark: solveInteractionTints('dark', dark.colorValues),
+	};
 	return {
-		css: assembleStylesheet(foundation, light.values, dark.values, {
-			dark: dark.interactionTints,
-			light: light.interactionTints,
-		}),
+		css: assembleStylesheet(foundation, light.values, dark.values, tints),
 		diagnostics: { dark: dark.diagnostics, light: light.diagnostics },
 	};
 }
@@ -99,7 +98,7 @@ export class ThemeContrastError extends Error {
 }
 
 /** The message lines that trace a failing theme back to the themes its colours came from. */
-function inheritanceLines(inheritance: ThemeInheritance | null): Array<string> {
+export function inheritanceLines(inheritance: ThemeInheritance | null): Array<string> {
 	if (inheritance === null) return [];
 	const provenance = [
 		inheritance.inheritedColors.length > 0
@@ -144,10 +143,9 @@ export class ThemeGenerationError extends Error {
 type ColorMode = 'light' | 'dark';
 
 interface ModeValues {
+	colorValues: SemanticColorValues;
 	diagnostics: ThemeModeDiagnostics;
 	failures: Array<ThemeContrastFailure>;
-	interactionTintError: ThemeInteractionTintError | null;
-	interactionTints: InteractionTintPair;
 	values: Record<ModePath, string>;
 }
 
@@ -165,36 +163,11 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		'depth.recessed': modeFoundation.depth.recessed,
 		'depth.resting': modeFoundation.depth.resting,
 	};
-	// Tint strengths assume every gated opaque pair already clears AA. Skip the solve when this
-	// mode already failed contrast so `ThemeContrastError` reports those pairs first.
-	let interactionTintError: ThemeInteractionTintError | null = null;
-	let interactionTints = placeholderInteractionTints();
-	if (failures.length === 0) {
-		try {
-			interactionTints = solveInteractionTints(mode, colorValues);
-		} catch (error) {
-			if (!(error instanceof ThemeInteractionTintError)) throw error;
-			interactionTintError = error;
-		}
-	}
 	return {
+		colorValues,
 		diagnostics: { contrastChecks: checks, families: familyDiagnostics, mode, surfaces },
 		failures,
-		interactionTintError,
-		interactionTints,
 		values,
-	};
-}
-
-/** Unused when contrast failures short-circuit `compileTheme` before stylesheet assembly. */
-function placeholderInteractionTints(): InteractionTintPair {
-	return {
-		hover: 'transparent',
-		pressed: 'transparent',
-		hoverAlpha: 0,
-		pressedAlpha: 0,
-		hoverVisibility: 0,
-		hoverToPressedVisibility: 0,
 	};
 }
 

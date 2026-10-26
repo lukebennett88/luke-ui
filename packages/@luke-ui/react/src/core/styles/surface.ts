@@ -36,34 +36,33 @@ const foregroundOverride = {
 	tone: createGlobalVar('luke-internal-foreground-tone'),
 };
 
-type SolidStateTone = 'neutral' | 'danger';
+export type SolidStateTone = 'neutral' | 'danger';
 
 /**
- * Opaque subtle hover or pressed fill a transparent control paints while it sits on a solid. A
- * translucent tint over a solid cuts on-solid text below AA when the solid carries dark on-solid
- * text in light mode (#925). Unset on standard surfaces and subtle fills.
+ * Opaque subtle hover or pressed fill a transparent control paints over a solid. The
+ * hover-to-pressed step of a translucent tint over a solid fill falls below the visibility floor.
+ * Set to `initial` on standard surfaces and subtle fills.
  */
-export function solidStateFill(tone: SolidStateTone, state: 'hover' | 'pressed'): string {
+export function solidStateFillVarName(tone: SolidStateTone, state: 'hover' | 'pressed'): string {
 	return `--luke-internal-solid-state-fill-${tone}-${state}`;
 }
 
-/** Text colour that pairs with {@link solidStateFill}'s chip. */
-export function solidStateText(tone: SolidStateTone): string {
+/** Text colour that pairs with {@link solidStateFillVarName}'s chip, so on-solid text stays at AA. */
+export function solidStateTextVarName(tone: SolidStateTone): string {
 	return `--luke-internal-solid-state-text-${tone}`;
 }
-
-const SOLID_STATE_TONES = ['neutral', 'danger'] as const;
 
 function solidStateVars(
 	value: (tone: SolidStateTone, slot: 'hover' | 'pressed' | 'text') => string,
 ) {
-	return Object.fromEntries(
-		SOLID_STATE_TONES.flatMap((tone) => [
-			[solidStateFill(tone, 'hover'), value(tone, 'hover')],
-			[solidStateFill(tone, 'pressed'), value(tone, 'pressed')],
-			[solidStateText(tone), value(tone, 'text')],
-		]),
-	);
+	return {
+		[solidStateFillVarName('neutral', 'hover')]: value('neutral', 'hover'),
+		[solidStateFillVarName('neutral', 'pressed')]: value('neutral', 'pressed'),
+		[solidStateTextVarName('neutral')]: value('neutral', 'text'),
+		[solidStateFillVarName('danger', 'hover')]: value('danger', 'hover'),
+		[solidStateFillVarName('danger', 'pressed')]: value('danger', 'pressed'),
+		[solidStateTextVarName('danger')]: value('danger', 'text'),
+	};
 }
 
 /**
@@ -134,11 +133,18 @@ function neutralContext(backgroundColor: string): SurfaceStyle {
 		backgroundColor,
 		color: vars.color.text.primary,
 		vars: {
-			[foregroundOverride.primary]: 'initial',
-			[foregroundOverride.secondary]: 'initial',
-			[foregroundOverride.tone]: 'initial',
+			...neutralForegroundContextVars(),
 			...solidStateVars(() => 'initial'),
 		},
+	};
+}
+
+/** Resets solid foreground overrides so descendants read the neutral text and role tokens. */
+export function neutralForegroundContextVars() {
+	return {
+		[foregroundOverride.primary]: 'initial',
+		[foregroundOverride.secondary]: 'initial',
+		[foregroundOverride.tone]: 'initial',
 	};
 }
 

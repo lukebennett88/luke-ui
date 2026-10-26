@@ -34,14 +34,15 @@ export const RATIO_HEADROOM = 0.05;
 /** The OKLCH lightness increment every contrast search steps by while walking its band. */
 export const CONTRAST_SEARCH_STEP = 0.0025;
 
-/**
- * Adaptive interaction tints (#925). One black (light) or white (dark) tint pair per theme mode is
+/*
+ * Adaptive interaction tints. One black (light) or white (dark) tint pair per theme mode is
  * painted as a registered state layer. Strengths are solved in `interaction-tints.ts` so the
  * composite over `surface.base` matches today's opaque subtle hover and pressed, then capped so
  * every gated foreground stays at {@link TEXT_RATIO} over every surface and subtle rest with the
  * tint on top. The hover floor applies over `surface.base`; the hover-to-pressed floor applies over
  * all four surfaces. A fixed tint can produce smaller differences on raised surfaces.
  */
+
 /** Minimum OKLab ΔE between `surface.base` and the hover tint composited over it. */
 export const INTERACTION_HOVER_VISIBILITY = 0.04;
 

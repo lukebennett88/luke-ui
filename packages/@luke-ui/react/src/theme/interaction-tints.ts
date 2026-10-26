@@ -7,20 +7,13 @@
  */
 
 import type { Oklch } from './color.js';
-import {
-	clampUnit,
-	compositeEncodedSrgb,
-	contrastRatio,
-	formatOklch,
-	parseColor,
-} from './color.js';
+import { compositeEncodedSrgb, contrastRatio, formatOklch, parseColor } from './color.js';
 import {
 	INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
 	INTERACTION_HOVER_VISIBILITY,
 	SEMANTIC_ROLES,
 	TEXT_RATIO,
 } from './contrast-policy.js';
-import { interactionTintVarName } from './interaction-tint-vars.js';
 import { oklabDeltaE } from './scale.js';
 import type { SemanticColorValues } from './semantic-map.js';
 
@@ -62,6 +55,7 @@ export class ThemeInteractionTintError extends Error {
 	readonly targetHoverAlpha: number;
 	readonly targetPressedAlpha: number;
 	readonly limitingMiss: InteractionTintContrastMiss | null;
+	readonly reason: string;
 
 	constructor(input: {
 		mode: ColorMode;
@@ -69,25 +63,27 @@ export class ThemeInteractionTintError extends Error {
 		targetHoverAlpha: number;
 		targetPressedAlpha: number;
 		limitingMiss: InteractionTintContrastMiss | null;
+		provenance?: ReadonlyArray<string>;
 		reason: string;
 	}) {
-		super(
-			[
-				`Theme interaction tints are unsatisfiable in ${input.mode}: ${input.reason}`,
-				`Target hover ${input.targetHoverAlpha.toFixed(3)}, pressed ${input.targetPressedAlpha.toFixed(3)}; contrast cap ${input.maxAlpha.toFixed(3)}.`,
-				input.limitingMiss === null
-					? null
-					: `Limiting pair: ${input.limitingMiss.foreground} on tinted ${input.limitingMiss.background} at ${input.limitingMiss.ratio.toFixed(3)}:1.`,
-			]
-				.filter((line) => line !== null)
-				.join(' '),
-		);
+		const message = [
+			`Theme interaction tints are unsatisfiable in ${input.mode}: ${input.reason}`,
+			`Target hover ${input.targetHoverAlpha.toFixed(3)}, pressed ${input.targetPressedAlpha.toFixed(3)}; contrast cap ${input.maxAlpha.toFixed(3)}.`,
+			input.limitingMiss === null
+				? null
+				: `Limiting pair: ${input.limitingMiss.foreground} on tinted ${input.limitingMiss.background} at ${input.limitingMiss.ratio.toFixed(3)}:1.`,
+		]
+			.filter((line) => line !== null)
+			.join(' ');
+		const provenance = input.provenance ?? [];
+		super(provenance.length > 0 ? `${message}\n${provenance.join(' ')}` : message);
 		this.name = 'ThemeInteractionTintError';
 		this.mode = input.mode;
 		this.maxAlpha = input.maxAlpha;
 		this.targetHoverAlpha = input.targetHoverAlpha;
 		this.targetPressedAlpha = input.targetPressedAlpha;
 		this.limitingMiss = input.limitingMiss;
+		this.reason = input.reason;
 	}
 }
 
@@ -110,30 +106,27 @@ export function solveInteractionTints(
 	colorValues: SemanticColorValues,
 ): InteractionTintPair {
 	const tint = mode === 'dark' ? WHITE : BLACK;
-	const base = colorAt(colorValues, 'color.surface.base');
-	const targetHover = colorAt(colorValues, 'color.background.neutral.subtle.hover');
-	const targetPressed = colorAt(colorValues, 'color.background.neutral.subtle.pressed');
+	const parsed = parseColorValues(colorValues);
+	const base = colorAt(parsed, 'color.surface.base');
+	const targetHover = colorAt(parsed, 'color.background.neutral.subtle.hover');
+	const targetPressed = colorAt(parsed, 'color.background.neutral.subtle.pressed');
 
 	const targetHoverAlpha = alphaMatchingTarget(tint, base, targetHover);
 	const targetPressedAlpha = alphaMatchingTarget(tint, base, targetPressed);
-	const contrastCap = contrastCapAlpha(mode, colorValues, tint);
+	const contrastCap = contrastCapAlpha(mode, parsed, tint);
 	const maxAlpha = contrastCap.maxAlpha;
-	let limitingMiss = contrastCap.limitingMiss;
-
-	// When the contrast cap binds the stronger (pressed) tint, scale both strengths by the same
-	// factor so the hover-to-pressed step stays proportional to today's states instead of
-	// collapsing hover against a clipped pressed alpha. Round to the three decimal places
-	// `formatOklch` emits, then walk pressed down if rounding nudged a pair under AA.
-	const scale = Math.min(1, maxAlpha / targetPressedAlpha);
-	let pressedAlpha = roundAlpha(targetPressedAlpha * scale);
-	let hoverAlpha = roundAlpha(targetHoverAlpha * scale);
-	while (pressedAlpha > 0) {
-		const miss = firstContrastMiss(colorValues, tint, pressedAlpha, tintContrastPairs());
-		if (miss === null) break;
-		limitingMiss = miss;
-		pressedAlpha = roundAlpha(pressedAlpha - 0.001);
-		hoverAlpha = roundAlpha(targetHoverAlpha * (pressedAlpha / targetPressedAlpha));
+	const pair = closestVisiblePair(parsed, tint, maxAlpha, targetHoverAlpha, targetPressedAlpha);
+	if (pair === null) {
+		throw new ThemeInteractionTintError({
+			mode,
+			maxAlpha,
+			targetHoverAlpha,
+			targetPressedAlpha,
+			limitingMiss: contrastCap.limitingMiss,
+			reason: 'no hover and pressed pair clears the visibility floors below the contrast cap',
+		});
 	}
+	const { hoverAlpha, pressedAlpha } = pair;
 
 	const hoverComposite = compositeEncodedSrgb(tint, base, hoverAlpha);
 	const pressedComposite = compositeEncodedSrgb(tint, base, pressedAlpha);
@@ -146,12 +139,12 @@ export function solveInteractionTints(
 			maxAlpha,
 			targetHoverAlpha,
 			targetPressedAlpha,
-			limitingMiss,
+			limitingMiss: contrastCap.limitingMiss,
 			reason: `hover visibility ${hoverVisibility.toFixed(3)} over surface.base is below the ${INTERACTION_HOVER_VISIBILITY} floor`,
 		});
 	}
 	for (const surface of TINT_SURFACES) {
-		const background = colorAt(colorValues, surface);
+		const background = colorAt(parsed, surface);
 		const hover = compositeEncodedSrgb(tint, background, hoverAlpha);
 		const pressed = compositeEncodedSrgb(tint, background, pressedAlpha);
 		const visibility = oklabDeltaE(hover, pressed);
@@ -161,7 +154,7 @@ export function solveInteractionTints(
 				maxAlpha,
 				targetHoverAlpha,
 				targetPressedAlpha,
-				limitingMiss,
+				limitingMiss: contrastCap.limitingMiss,
 				reason: `hover-to-pressed visibility ${visibility.toFixed(3)} over ${surface} is below the ${INTERACTION_HOVER_TO_PRESSED_VISIBILITY} floor`,
 			});
 		}
@@ -177,22 +170,145 @@ export function solveInteractionTints(
 	};
 }
 
-function roundAlpha(alpha: number): number {
-	return Math.round(clampUnit(alpha) * 1000) / 1000;
+function closestVisiblePair(
+	colorValues: ParsedSemanticColors,
+	tint: Oklch,
+	maxAlpha: number,
+	targetHoverAlpha: number,
+	targetPressedAlpha: number,
+): { hoverAlpha: number; pressedAlpha: number } | null {
+	const maxStep = Math.floor(maxAlpha * ALPHA_SEARCH_STEPS);
+	const contrastPairs = tintContrastPairs();
+	let closest: { hoverAlpha: number; pressedAlpha: number } | null = null;
+	let closestDistance = Number.POSITIVE_INFINITY;
+
+	for (let hoverStep = 0; hoverStep < maxStep; hoverStep++) {
+		const hoverAlpha = hoverStep / ALPHA_SEARCH_STEPS;
+		const hover = compositeEncodedSrgb(
+			tint,
+			colorAt(colorValues, 'color.surface.base'),
+			hoverAlpha,
+		);
+		if (
+			oklabDeltaE(colorAt(colorValues, 'color.surface.base'), hover) < INTERACTION_HOVER_VISIBILITY
+		) {
+			continue;
+		}
+
+		let lowStep = hoverStep + 1;
+		let highStep = maxStep;
+		while (lowStep < highStep) {
+			const midStep = Math.floor((lowStep + highStep) / 2);
+			if (meetsStateVisibilityFloors(colorValues, tint, hoverAlpha, midStep / ALPHA_SEARCH_STEPS)) {
+				highStep = midStep;
+			} else {
+				lowStep = midStep + 1;
+			}
+		}
+		const minimumPressedStep = lowStep;
+		const minimumPressed = minimumPressedStep / ALPHA_SEARCH_STEPS;
+		if (
+			!meetsStateVisibilityFloors(colorValues, tint, hoverAlpha, minimumPressed) ||
+			firstContrastMiss(colorValues, tint, hoverAlpha, contrastPairs) !== null
+		) {
+			continue;
+		}
+
+		const pressedAlpha = nearestContrastSafePressedAlpha({
+			colorValues,
+			contrastPairs,
+			hoverAlpha,
+			maxStep,
+			minimumPressedStep,
+			targetPressedAlpha,
+			tint,
+		});
+		if (pressedAlpha === null) continue;
+
+		const distance =
+			(hoverAlpha - targetHoverAlpha) ** 2 + (pressedAlpha - targetPressedAlpha) ** 2;
+		if (distance < closestDistance) {
+			closestDistance = distance;
+			closest = { hoverAlpha, pressedAlpha };
+		}
+	}
+
+	return closest;
 }
 
-/** Private CSS declarations for one mode's tint pair. */
-export function interactionTintDeclarations(tints: InteractionTintPair): Array<string> {
-	return [
-		`${interactionTintVarName('hover')}: ${tints.hover};`,
-		`${interactionTintVarName('pressed')}: ${tints.pressed};`,
-	];
+function nearestContrastSafePressedAlpha({
+	colorValues,
+	contrastPairs,
+	hoverAlpha,
+	maxStep,
+	minimumPressedStep,
+	targetPressedAlpha,
+	tint,
+}: {
+	colorValues: ParsedSemanticColors;
+	contrastPairs: Array<{
+		background: keyof SemanticColorValues;
+		foreground: keyof SemanticColorValues;
+	}>;
+	hoverAlpha: number;
+	maxStep: number;
+	minimumPressedStep: number;
+	targetPressedAlpha: number;
+	tint: Oklch;
+}): number | null {
+	const targetStep = Math.round(targetPressedAlpha * ALPHA_SEARCH_STEPS);
+	const preferredStep = Math.max(minimumPressedStep, Math.min(maxStep, targetStep));
+	const maxOffset = Math.max(preferredStep - minimumPressedStep, maxStep - preferredStep);
+
+	for (let offset = 0; offset <= maxOffset; offset++) {
+		const candidates =
+			offset === 0 ? [preferredStep] : [preferredStep - offset, preferredStep + offset];
+		for (const step of candidates) {
+			if (step < minimumPressedStep || step > maxStep) continue;
+			const pressedAlpha = step / ALPHA_SEARCH_STEPS;
+			if (!meetsStateVisibilityFloors(colorValues, tint, hoverAlpha, pressedAlpha)) continue;
+			if (firstContrastMiss(colorValues, tint, pressedAlpha, contrastPairs) !== null) continue;
+			return pressedAlpha;
+		}
+	}
+
+	return null;
 }
 
-function colorAt(colorValues: SemanticColorValues, path: keyof SemanticColorValues): Oklch {
+function meetsStateVisibilityFloors(
+	colorValues: ParsedSemanticColors,
+	tint: Oklch,
+	hoverAlpha: number,
+	pressedAlpha: number,
+): boolean {
+	for (const surface of TINT_SURFACES) {
+		const background = colorAt(colorValues, surface);
+		const hover = compositeEncodedSrgb(tint, background, hoverAlpha);
+		const pressed = compositeEncodedSrgb(tint, background, pressedAlpha);
+		if (oklabDeltaE(hover, pressed) < INTERACTION_HOVER_TO_PRESSED_VISIBILITY) return false;
+	}
+	return true;
+}
+
+type ParsedSemanticColors = { [Path in keyof SemanticColorValues]: Oklch };
+
+function parseColorValues(colorValues: SemanticColorValues): ParsedSemanticColors {
+	const parsed = {} as ParsedSemanticColors;
+	for (const path of Object.keys(colorValues) as Array<keyof SemanticColorValues>) {
+		const value = colorValues[path];
+		if (value === undefined) throw new Error(`buildTheme did not generate "${path}"`);
+		// The backdrop may carry alpha, which the colour parser does not accept, and the tint
+		// solver never reads it.
+		if (path === 'color.overlay.backdrop') continue;
+		parsed[path] = parseColor(value);
+	}
+	return parsed;
+}
+
+function colorAt(colorValues: ParsedSemanticColors, path: keyof SemanticColorValues): Oklch {
 	const value = colorValues[path];
 	if (value === undefined) throw new Error(`buildTheme did not generate "${path}"`);
-	return parseColor(value);
+	return value;
 }
 
 /** Alpha whose encoded-sRGB composite over `destination` is closest in OKLab to `target`. */
@@ -216,7 +332,7 @@ function alphaMatchingTarget(source: Oklch, destination: Oklch, target: Oklch): 
  */
 function contrastCapAlpha(
 	mode: ColorMode,
-	colorValues: SemanticColorValues,
+	colorValues: ParsedSemanticColors,
 	tint: Oklch,
 ): { maxAlpha: number; limitingMiss: InteractionTintContrastMiss | null } {
 	const pairs = tintContrastPairs();
@@ -252,7 +368,7 @@ function contrastCapAlpha(
 }
 
 function firstContrastMiss(
-	colorValues: SemanticColorValues,
+	colorValues: ParsedSemanticColors,
 	tint: Oklch,
 	alpha: number,
 	pairs: Array<{ background: keyof SemanticColorValues; foreground: keyof SemanticColorValues }>,

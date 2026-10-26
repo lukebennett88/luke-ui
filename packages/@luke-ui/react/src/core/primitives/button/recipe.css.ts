@@ -1,17 +1,21 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
+import { INTERACTION_STATE_LAYER_PROPERTY } from '../../styles/interaction-state-layer.js';
 import { style } from '../../styles/layered-style.css.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import { recipe } from '../../styles/recipe.js';
 import {
 	adaptiveStateLayer,
-	INTERACTION_STATE_LAYER_PROPERTY,
 	interactionStateLayer,
 	transparentAdaptiveStateLayer,
 	transparentAdaptiveStateText,
 } from '../../styles/state-layer.css.js';
-import { contextualForeground, surfaceStyle } from '../../styles/surface.js';
+import {
+	contextualForeground,
+	neutralForegroundContextVars,
+	surfaceStyle,
+} from '../../styles/surface.js';
 import { textRecipe } from '../../text/recipe.css.js';
 import { textActionAppearance, textLinkAppearance } from './text-action-appearance.js';
 
@@ -213,11 +217,17 @@ function buttonAppearance(
 	backgroundTone: BackgroundTone = tone === 'critical' ? 'danger' : 'neutral',
 ) {
 	const toneColor = tone === 'critical' ? { color: contextualForeground('danger') } : ({} as const);
-	const chipTone = backgroundTone === 'danger' ? 'danger' : 'neutral';
+	const variants = { appearance: 'button' as const, prominence, tone };
+	const chipTone = tone === 'critical' ? 'danger' : 'neutral';
+	const restColor =
+		'color' in toneColor && toneColor.color !== undefined
+			? toneColor.color
+			: contextualForeground('primary');
+	const layerGradient = `linear-gradient(${interactionStateLayer}, ${interactionStateLayer})`;
 
 	if (surface === 'transparent') {
-		const restColor =
-			tone === 'critical' ? contextualForeground('danger') : contextualForeground('primary');
+		const hoverLayer = transparentAdaptiveStateLayer('hover', chipTone);
+		const pressedLayer = transparentAdaptiveStateLayer('pressed', chipTone);
 		return [
 			{
 				style: {
@@ -225,25 +235,27 @@ function buttonAppearance(
 						'(forced-colors: active)': { backgroundImage: 'none' },
 					},
 					backgroundColor: 'transparent',
-					backgroundImage: 'none',
+					backgroundImage: layerGradient,
 					borderColor: 'transparent',
 					boxShadow: 'none',
 					color: restColor,
 					vars: { [interactionStateLayer]: 'transparent' },
 					selectors: {
 						[hovered]: {
-							...transparentAdaptiveStateLayer('hover', chipTone),
+							...hoverLayer,
 							color: transparentAdaptiveStateText(chipTone, restColor),
+							vars: { ...hoverLayer.vars, ...neutralForegroundContextVars() },
 							boxShadow: vars.depth.raised,
 						},
 						[pressed]: {
-							...transparentAdaptiveStateLayer('pressed', chipTone),
+							...pressedLayer,
 							color: transparentAdaptiveStateText(chipTone, restColor),
+							vars: { ...pressedLayer.vars, ...neutralForegroundContextVars() },
 							boxShadow: vars.depth.recessed,
 						},
 					},
 				},
-				variants: { appearance: 'button' as const, prominence, tone },
+				variants,
 			},
 		];
 	}
@@ -273,7 +285,7 @@ function buttonAppearance(
 						},
 					},
 				},
-				variants: { appearance: 'button' as const, prominence, tone },
+				variants,
 			},
 		];
 	}
@@ -292,33 +304,21 @@ function buttonAppearance(
 				},
 				...subtleRest,
 				...toneColor,
-				backgroundImage: 'none',
+				backgroundImage: layerGradient,
 				vars: {
 					...subtleRest.vars,
 					[interactionStateLayer]: 'transparent',
 				},
 				selectors: {
 					[hovered]: {
-						...subtleRest,
-						...toneColor,
 						...hoverLayer,
-						vars: {
-							...subtleRest.vars,
-							...hoverLayer.vars,
-						},
 					},
 					[pressed]: {
-						...subtleRest,
-						...toneColor,
 						...pressedLayer,
-						vars: {
-							...subtleRest.vars,
-							...pressedLayer.vars,
-						},
 					},
 				},
 			},
-			variants: { appearance: 'button' as const, prominence, tone },
+			variants,
 		},
 	];
 }
