@@ -11,7 +11,7 @@ import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
-import { page } from 'vite-plus/test/context';
+import { page, userEvent } from 'vite-plus/test/context';
 import { HOME_SECTIONS } from '../lib/home-content.js';
 import { HomeSectionLinks } from './home-section-links.js';
 
@@ -39,6 +39,22 @@ test('links each section card as one link named by its h2 title and description'
 		expect(link.element()).toBeVisible();
 		expect(link.getByRole('heading', { level: 2, name: section.title }).element()).toBeVisible();
 	}
+});
+
+test('transitions the home card interaction tint', async () => {
+	await renderLinks();
+
+	const card = page.getByRole('link').first().element();
+	const tintTransition = new Promise<TransitionEvent>((resolve) => {
+		card.addEventListener('transitionrun', (event) => {
+			const transition = event as TransitionEvent;
+			if (transition.propertyName.startsWith('--')) resolve(transition);
+		});
+	});
+
+	await userEvent.hover(page.getByRole('link').first());
+	const transition = await tintTransition;
+	expect(transition.propertyName.startsWith('--')).toBe(true);
 });
 
 for (const { columns, width } of [

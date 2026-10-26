@@ -1,6 +1,10 @@
 import { vars } from '@luke-ui/react/theme';
 import { interactionState } from '@luke-ui/react/utils';
 import { style } from '@vanilla-extract/css';
+import {
+	interactionStateBackgroundImage,
+	interactionStateTransitionProperty,
+} from './interaction-state';
 
 /** Collapsed grid cell borders; Stack/Grid own the internal layout. */
 export const cell = style({
@@ -37,9 +41,10 @@ export const copyButton = style({
 	'@layer': {
 		components: {
 			backgroundColor: 'transparent',
+			backgroundImage: interactionStateBackgroundImage,
 			borderStyle: 'none',
 			color: vars.color.text.secondary,
-			transition: `background-color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}, color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
+			transition: `${interactionStateTransitionProperty} ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}, color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			whiteSpace: 'nowrap',
 			selectors: {
 				'&:hover, &:focus-visible': {

@@ -1,6 +1,10 @@
 import { vars } from '@luke-ui/react/theme';
 import { interactionState } from '@luke-ui/react/utils';
 import { style } from '@vanilla-extract/css';
+import {
+	interactionStateBackgroundImage,
+	interactionStateTransitionProperty,
+} from './interaction-state';
 
 /**
  * Fill states for the home link cards. They live here rather than on Box because the components
@@ -10,8 +14,9 @@ export const card = style({
 	'@layer': {
 		components: {
 			color: vars.color.text.primary,
+			backgroundImage: interactionStateBackgroundImage,
 			textDecoration: 'none',
-			transition: `background-color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
+			transition: `${interactionStateTransitionProperty} ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			selectors: {
 				'&:hover': {
 					...interactionState('hover'),
