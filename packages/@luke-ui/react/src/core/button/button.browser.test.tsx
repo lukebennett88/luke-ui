@@ -562,9 +562,13 @@ for (const appearance of visualAppearances) {
 						tone === 'critical'
 							? resolvedColor(vars.color.foreground.danger.rest, button)
 							: resolvedColor(vars.color.text.primary, button);
+					const chip =
+						tone === 'critical'
+							? pairedColors(button, `danger.subtle.${state}`)
+							: pairedColors(button, `neutral.subtle.${state}`);
 					return {
 						state,
-						...pairedColors(parent, 'success.solid'),
+						...chip,
 						background: TRANSPARENT,
 						color: chipText,
 					};
