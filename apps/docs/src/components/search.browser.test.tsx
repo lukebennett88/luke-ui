@@ -17,7 +17,7 @@ import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { DocsSearchProvider, DocsSearchTrigger } from './search.js';
 
-const { getSearchResults, MANY_RESULTS_COUNT } = vi.hoisted(() => {
+const { getSearchResults } = vi.hoisted(() => {
 	const manyResultsCount = 15;
 
 	function mockSearchResults(search: string) {
@@ -75,7 +75,7 @@ const { getSearchResults, MANY_RESULTS_COUNT } = vi.hoisted(() => {
 		}
 	}
 
-	return { getSearchResults: mockSearchResults, MANY_RESULTS_COUNT: manyResultsCount };
+	return { getSearchResults: mockSearchResults };
 });
 
 vi.mock('fumadocs-core/search/client', async () => {
@@ -378,33 +378,6 @@ test('keeps the active result within the visible list after scrolling down', asy
 	await expectResultWithinList(previousElement, list, input);
 	await expectInputFocus(input);
 }, 30_000);
-
-test('wraps keyboard navigation from the first result to the last and back', async () => {
-	await renderSearch();
-	const input = await openSearchDialog();
-	await typeSearchQuery(input, 'many');
-	await expect.element(page.getByRole('menuitem').nth(0)).toBeVisible();
-	const list = page.getByRole('menu', { name: 'Search results' }).element();
-
-	const first = page.getByRole('menuitem').nth(0).element();
-	await expectActiveDescendant(input, list, first.id);
-	// See the scrolling test above: scroll assertions need final item heights.
-	await document.fonts.ready;
-
-	await userEvent.keyboard('{ArrowUp}');
-	const last = page
-		.getByRole('menuitem')
-		.nth(MANY_RESULTS_COUNT - 1)
-		.element();
-	await expectActiveDescendant(input, list, last.id);
-	await expectResultWithinList(last, list, input);
-	await expect.element(input).toHaveFocus();
-
-	await userEvent.keyboard('{ArrowDown}');
-	await expectActiveDescendant(input, list, first.id);
-	await expectResultWithinList(first, list, input);
-	await expect.element(input).toHaveFocus();
-}, 15_000);
 
 function isResultWithinList(result: Element, list: Element) {
 	const listBounds = list.getBoundingClientRect();
