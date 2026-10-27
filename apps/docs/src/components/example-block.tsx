@@ -28,10 +28,7 @@ export function ExampleBlock(props: ExampleBlockProps): JSX.Element {
 	);
 }
 
-export function ExampleLoadingState({
-	layout,
-	title,
-}: Pick<ExampleBlockProps, 'layout' | 'title'>) {
+function ExampleLoadingState({ layout, title }: Pick<ExampleBlockProps, 'layout' | 'title'>) {
 	const loadingLabel = `Loading ${title} example`;
 	const isFullBleed = layout === 'full-bleed';
 

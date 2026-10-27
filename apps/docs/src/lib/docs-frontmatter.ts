@@ -1,4 +1,4 @@
-export interface FrontmatterBlock {
+interface FrontmatterBlock {
 	key: string;
 	lines: ReadonlyArray<string>;
 }
@@ -13,7 +13,7 @@ const FRONTMATTER_PATTERN = /^---\n([\s\S]*?)\n---/;
 const FRONTMATTER_KEY_PATTERN = /^([A-Za-z]+):/;
 
 /** Splits a document's YAML fence into top-level `key:` blocks. */
-export function parseFrontmatterBlocks(contents: string): ReadonlyArray<FrontmatterBlock> | null {
+function parseFrontmatterBlocks(contents: string): ReadonlyArray<FrontmatterBlock> | null {
 	const match = contents.match(FRONTMATTER_PATTERN);
 	if (!match?.[1]) return null;
 

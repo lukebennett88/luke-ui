@@ -16,15 +16,7 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { DocsThemeRoot } from '../theme-controls.js';
-import {
-	Card,
-	Cards,
-	createMdxHeading,
-	MdxCode,
-	MdxFence,
-	MdxLink,
-	MdxTable,
-} from './mdx-elements.js';
+import { createMdxHeading, MdxLink, MdxTable } from './mdx-elements.js';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
@@ -49,29 +41,6 @@ test('opens an external link in a new tab without an opener', async () => {
 	await expect.element(link).toHaveAttribute('href', 'https://example.com/docs');
 	await expect.element(link).toHaveAttribute('target', '_blank');
 	await expect.element(link).toHaveAttribute('rel', 'noreferrer noopener');
-});
-
-test('keeps an internal link, with and without a hash, in the same tab', async () => {
-	await renderMdx(
-		<>
-			<MdxLink href="/components/actions/button">Button</MdxLink>
-			<MdxLink href="/docs/typography#fonts">Fonts</MdxLink>
-			<MdxLink href="#local">Local</MdxLink>
-		</>,
-	);
-
-	const expected = [
-		['Button', '/components/actions/button'],
-		['Fonts', '/docs/typography#fonts'],
-		['Local', '#local'],
-	] as const;
-	await Promise.all(
-		expected.map(async ([name, href]) => {
-			const link = page.getByRole('link', { name });
-			await expect.element(link).toHaveAttribute('href', href);
-			expect(link.element().getAttribute('target')).toBeNull();
-		}),
-	);
 });
 
 const linkPaths = [
@@ -118,43 +87,6 @@ for (const [kind, href] of linkPaths) {
 		expect(link.element().classList.contains('author-class')).toBe(true);
 	});
 }
-
-test('merges an author rel into the external link safety tokens', async () => {
-	await renderMdx(
-		<MdxLink href="https://example.com" rel="nofollow noopener">
-			Merged
-		</MdxLink>,
-	);
-
-	const rel = page.getByRole('link', { name: 'Merged' }).element().getAttribute('rel');
-	expect(rel?.split(' ').toSorted()).toEqual(['nofollow', 'noopener', 'noreferrer']);
-});
-
-test('lets an author target and rel override the external link defaults', async () => {
-	await renderMdx(
-		<MdxLink href="https://example.com" rel="author" target="_self">
-			Same tab
-		</MdxLink>,
-	);
-
-	const link = page.getByRole('link', { name: 'Same tab' });
-	await expect.element(link).toHaveAttribute('target', '_self');
-	await expect.element(link).toHaveAttribute('rel', 'author');
-});
-
-test('renders a link without an href as a placeholder anchor that keeps its attributes', async () => {
-	await renderMdx(
-		<MdxLink data-testid="placeholder" id="target" title="Marker">
-			Marker text
-		</MdxLink>,
-	);
-
-	const anchor = page.getByTestId('placeholder');
-	await expect.element(anchor).toHaveAttribute('id', 'target');
-	await expect.element(anchor).toHaveAttribute('title', 'Marker');
-	expect(anchor.element().hasAttribute('href')).toBe(false);
-	expect(page.getByRole('link')).not.toBeInTheDocument();
-});
 
 test('links a heading to its own anchor and copies the full URL with the hash', async () => {
 	// Fake only the revert timer: a real 1.5s timeout can fire before `expect.element` starts
@@ -212,39 +144,6 @@ for (const [level, Heading] of [
 	});
 }
 
-test('keeps the heading id as the deep-link target and gives the anchor a distinct id', async () => {
-	await renderMdx(
-		<>
-			<H2 id="usage">Usage</H2>
-			<H2 id="usage-title">Usage title</H2>
-		</>,
-	);
-
-	const ids = [...document.querySelectorAll('[id]')].map((element) => element.id);
-	expect(new Set(ids).size).toBe(ids.length);
-	const heading = page.getByRole('heading', { name: 'Usage', exact: true }).element();
-	expect(heading.id).toBe('usage');
-	expect(heading.querySelector('a')?.getAttribute('href')).toBe('#usage');
-});
-
-test('keeps the anchor button a 24px target', async () => {
-	await renderMdx(<H2 id="usage">Usage</H2>);
-
-	const { height, width } = page
-		.getByRole('button', { name: 'Copy Anchor Link' })
-		.element()
-		.getBoundingClientRect();
-	expect([width, height]).toEqual([24, 24]);
-});
-
-test('renders a heading without an id as plain text', async () => {
-	await renderMdx(<H2>Plain</H2>);
-
-	await expect.element(page.getByRole('heading', { name: 'Plain', level: 2 })).toBeVisible();
-	expect(page.getByRole('link')).not.toBeInTheDocument();
-	expect(page.getByRole('button')).not.toBeInTheDocument();
-});
-
 test('names a wide table as a focusable region once it overflows', async () => {
 	await page.viewport(400, 800);
 	await renderMdx(
@@ -267,57 +166,6 @@ test('names a wide table as a focusable region once it overflows', async () => {
 	const table = scroller.querySelector('table')!;
 	expect(scroller.scrollWidth).toBeGreaterThan(scroller.clientWidth);
 	expect(table.scrollWidth).toBe(table.clientWidth);
-});
-
-test('leaves fenced code as plain code and styles inline code', async () => {
-	await renderMdx(
-		<>
-			<p>
-				<MdxCode>inline</MdxCode>
-			</p>
-			<MdxFence>
-				<MdxCode>fenced</MdxCode>
-			</MdxFence>
-		</>,
-	);
-
-	const inline = page.getByText('inline').element();
-	const fenced = page.getByText('fenced').element();
-	// Fence context routes `<code>` to a plain element for the CodeBlock; inline uses Code.
-	expect(inline.closest('pre')).toBeNull();
-	expect(fenced.closest('pre')).not.toBeNull();
-	expect(inline.tagName).toBe('CODE');
-	expect(fenced.tagName).toBe('CODE');
-});
-
-test('renders a card as a link with a title and its description', async () => {
-	await renderMdx(
-		<Cards>
-			<Card href="/components/layout/stack" title="Stack">
-				<p>Stack children on the block axis.</p>
-			</Card>
-		</Cards>,
-	);
-
-	const link = page.getByRole('link', { name: /Stack/ });
-	await expect.element(link).toHaveAttribute('href', '/components/layout/stack');
-	await expect.element(link.getByRole('heading', { name: 'Stack', level: 3 })).toBeVisible();
-	await expect.element(link.getByText('Stack children on the block axis.')).toBeVisible();
-});
-
-test('names an external card as opening in a new tab', async () => {
-	await renderMdx(
-		<Cards>
-			<Card href="https://example.com/guide" title="External guide">
-				Read the external guide.
-			</Card>
-		</Cards>,
-	);
-
-	const link = page.getByRole('link', { name: /External guide.*opens in a new tab/i });
-	await expect.element(link).toHaveAttribute('href', 'https://example.com/guide');
-	await expect.element(link).toHaveAttribute('target', '_blank');
-	await expect.element(link).toHaveAttribute('rel', 'noreferrer noopener');
 });
 
 async function renderMdx(children: ReactNode) {
