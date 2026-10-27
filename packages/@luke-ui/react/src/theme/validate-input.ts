@@ -166,6 +166,9 @@ function validateColors(color: unknown, report: (path: string, message: string) 
 		report('color.surface', 'must be an object');
 		return;
 	}
+	if (Object.hasOwn(surface, 'field')) {
+		report('color.surface.field', 'is an unsupported surface; use color.surface.base');
+	}
 	for (const role of SURFACE_ROLES) {
 		validateColorRole(surface[role], `color.surface.${role}`, role === 'base', report);
 	}

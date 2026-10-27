@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 import { defineTheme, ThemeGenerationError } from '../exports/theme/compiler.js';
 import { paperTheme } from './__fixtures__/paper.js';
 import { UNSATISFIABLE_ON_SOLID } from './__fixtures__/radix-scales.js';
@@ -308,20 +308,19 @@ describe('normalizeTheme carries authored surfaces', () => {
 		const foundation = normalizeTheme({
 			color: {
 				accent: '#3b82f6',
-				surface: { field: { light: 'oklch(0.97 0 0)' }, raised: { dark: 'oklch(0.3 0 0)' } },
+				surface: { subdued: { light: 'oklch(0.97 0 0)' }, raised: { dark: 'oklch(0.3 0 0)' } },
 			},
 			name: 'authored-surfaces',
 			typography: testTypography,
 		});
-		expect(foundation.light.color.surface.field).toEqual(
+		expect(foundation.light.color.surface.subdued).toEqual(
 			gamutMapOklch(parseColor('oklch(0.97 0 0)')),
 		);
 		expect(foundation.light.color.surface.raised).toBeUndefined();
-		expect(foundation.dark.color.surface.field).toBeUndefined();
+		expect(foundation.dark.color.surface.subdued).toBeUndefined();
 		expect(foundation.dark.color.surface.raised).toEqual(
 			gamutMapOklch(parseColor('oklch(0.3 0 0)')),
 		);
-		expect(foundation.light.color.surface.subdued).toBeUndefined();
 	});
 
 	it('emits an authored surface exactly and generates the others from the base', () => {
@@ -333,9 +332,8 @@ describe('normalizeTheme carries authored surfaces', () => {
 			}),
 		);
 		expect(extractValue(blocks.baseLight, '--luke-color-surface-subdued')).toBe('oklch(0.94 0 0)');
-		expect(extractValue(blocks.baseLight, '--luke-color-surface-field')).toBe(
-			extractValue(blocks.baseLight, '--luke-color-surface-base'),
-		);
+		expect(extractValue(blocks.baseLight, '--luke-color-surface-raised')).toBe('oklch(1 0 0)');
+		expect(blocks.baseLight).not.toContain('--luke-color-surface-field');
 	});
 
 	it('rejects an authored surface that leaves the hover-to-pressed step below the visibility floor', () => {
@@ -433,4 +431,12 @@ describe('defineTheme emits interactive semantic ramps for the bundled themes', 
 			}
 		});
 	}
+});
+
+describe('surface input contract', () => {
+	it('accepts exactly the three surface roles', () => {
+		expectTypeOf<keyof NonNullable<ThemeInput['color']['surface']>>().toEqualTypeOf<
+			'base' | 'subdued' | 'raised'
+		>();
+	});
 });

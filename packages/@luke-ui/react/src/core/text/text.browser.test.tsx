@@ -656,11 +656,10 @@ test('line clamp and transforms', { tags: ['visual'] }, async () => {
 	await captureVisual(locator, 'text/line-clamp-transforms');
 });
 
-// Every background a Box can paint: the four surfaces and each role's resting fills.
+// Every background a Box can paint: the three surfaces and each role's resting fills.
 const EVERY_BACKGROUND = [
 	'surface.base',
 	'surface.subdued',
-	'surface.field',
 	'surface.raised',
 	...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid`] as const),
 ] as const satisfies ReadonlyArray<PairedBackground>;

@@ -89,7 +89,7 @@ export interface ThemeModeDiagnostics {
 	families: Record<FamilyRole, FamilyDiagnostics>;
 	/** The colour mode the diagnostics describe. */
 	mode: 'light' | 'dark';
-	/** The four surfaces the mode resolved from its base and any authored surfaces. */
+	/** The three surfaces the mode resolved from its base and any authored surfaces. */
 	surfaces: GeneratedSurfaces;
 }
 

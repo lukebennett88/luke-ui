@@ -38,9 +38,9 @@ type ColorPath = keyof SemanticColorValues;
  * Runs the validation matrix over the emitted (rounded) colour values. Every pair is recorded as a
  * {@link ContrastCheck}; failing hard pairs populate `failures`, which `compileTheme` throws.
  *
- * Content and controls can sit on any of the four surfaces, so every surface gate covers all four.
+ * Content and controls can sit on any of the three surfaces, so every surface gate covers all three.
  * Hard at 4.5:1: primary and secondary text and each role's rest, hover, and pressed foreground
- * against all four surfaces and every role's subtle rest fill. Both on-solid hierarchy leaves are gated
+ * against all three surfaces and every role's subtle rest fill. Both on-solid hierarchy leaves are gated
  * against their role's solid fills.
  * Hard at 3:1: the focus ring, the control border and its mixed hover and pressed treatments, and
  * `danger.solid.rest`, the invalid control boundary. Only danger is gated as a boundary: the other roles' solid fills are
@@ -83,7 +83,6 @@ export function validateContrast(
 	const surfacePaths = [
 		'color.surface.base',
 		'color.surface.subdued',
-		'color.surface.field',
 		'color.surface.raised',
 	] as const satisfies ReadonlyArray<ColorPath>;
 

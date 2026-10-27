@@ -53,7 +53,7 @@ interface MapSemanticColorsRequest {
 	families: Record<FamilyRole, ScaleFamily>;
 	/** The resolved keyboard-focus source colour. */
 	focus: Oklch;
-	/** The four surfaces, already mode-resolved. */
+	/** The three surfaces, already mode-resolved. */
 	surfaces: GeneratedSurfaces;
 }
 
@@ -77,7 +77,6 @@ function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColor
 	return {
 		'color.surface.base': formatOklch(surfaces.base),
 		'color.surface.subdued': formatOklch(surfaces.subdued),
-		'color.surface.field': formatOklch(surfaces.field),
 		'color.surface.raised': formatOklch(surfaces.raised),
 		'color.overlay.backdrop': backdrop,
 		'color.loadingSkeleton': formatOklch(neutral[FAMILY_RUNG.muted]),

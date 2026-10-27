@@ -770,7 +770,7 @@ const adaptiveAppearances = [
 ] as const;
 
 for (const appearance of adaptiveAppearances) {
-	const surfaces = ['surface.base', 'surface.subdued', 'surface.field', 'surface.raised'] as const;
+	const surfaces = ['surface.base', 'surface.subdued', 'surface.raised'] as const;
 
 	test(`low and standard Buttons keep 4.5:1 text over adaptive states on every surface in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { locator } = render(

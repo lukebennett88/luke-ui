@@ -13,17 +13,16 @@ describe('generateSurfaces', () => {
 		expect(generateSurfaces({ mode: 'dark', surface: { base: darkBase } }).base).toEqual(darkBase);
 	});
 
-	it('emits exactly the four surface roles', () => {
+	it('emits exactly the three surface roles', () => {
 		const surfaces = generateSurfaces({ mode: 'light', surface: { base: lightBase } });
-		expect(Object.keys(surfaces).toSorted()).toEqual(['base', 'field', 'raised', 'subdued']);
+		expect(Object.keys(surfaces).toSorted()).toEqual(['base', 'raised', 'subdued']);
 	});
 
 	describe('dark mode', () => {
 		const surfaces = generateSurfaces({ mode: 'dark', surface: { base: darkBase } });
 
-		it('sinks subdued and field below the base', () => {
+		it('sinks subdued below the base', () => {
 			expect(surfaces.subdued.l).toBeLessThan(darkBase.l);
-			expect(surfaces.field.l).toBeLessThan(darkBase.l);
 		});
 
 		it('lifts raised above the base', () => {
@@ -34,8 +33,7 @@ describe('generateSurfaces', () => {
 	describe('light mode', () => {
 		const surfaces = generateSurfaces({ mode: 'light', surface: { base: lightBase } });
 
-		it('keeps the field on the base and sinks subdued below it', () => {
-			expect(surfaces.field).toEqual(lightBase);
+		it('sinks subdued below the base', () => {
 			expect(surfaces.subdued.l).toBeLessThan(lightBase.l);
 		});
 
@@ -47,19 +45,19 @@ describe('generateSurfaces', () => {
 
 	it('derives each generated surface from the base, keeping its hue and chroma', () => {
 		const surfaces = generateSurfaces({ mode: 'dark', surface: { base: darkBase } });
-		for (const role of ['subdued', 'field', 'raised'] as const) {
+		for (const role of ['subdued', 'raised'] as const) {
 			expect(surfaces[role].h).toBeCloseTo(darkBase.h, 5);
 			expect(surfaces[role].c).toBeCloseTo(darkBase.c, 5);
 		}
 	});
 
 	it('uses an authored surface as written and generates only the missing ones', () => {
-		const field: Oklch = { l: 0.5, c: 0.02, h: 30 };
-		const authored = generateSurfaces({ mode: 'light', surface: { base: lightBase, field } });
+		const subdued: Oklch = { l: 0.5, c: 0.02, h: 30 };
+		const authored = generateSurfaces({ mode: 'light', surface: { base: lightBase, subdued } });
 		const generated = generateSurfaces({ mode: 'light', surface: { base: lightBase } });
 
-		expect(authored.field).toEqual(field);
-		expect(authored.subdued).toEqual(generated.subdued);
+		expect(authored.subdued).toEqual(subdued);
+		expect(authored.base).toEqual(generated.base);
 		expect(authored.raised).toEqual(generated.raised);
 	});
 
@@ -68,6 +66,6 @@ describe('generateSurfaces', () => {
 		const surfaces = generateSurfaces({ mode: 'dark', surface: { base: darkBase, subdued } });
 		const generated = generateSurfaces({ mode: 'dark', surface: { base: darkBase } });
 
-		expect(surfaces.field).toEqual(generated.field);
+		expect(surfaces.raised).toEqual(generated.raised);
 	});
 });

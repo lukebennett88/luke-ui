@@ -130,21 +130,19 @@ export interface ThemeInput extends ThemeInputCommon {
 		 */
 		neutralStyle?: 'cool' | 'neutral' | 'warm';
 		/**
-		 * The four surfaces. Each is optional. Set one when its generated default does not suit the
+		 * The three surfaces. Each is optional. Set one when its generated default does not suit the
 		 * theme or fails a contrast gate. An authored surface is mapped into the sRGB gamut, but its
 		 * lightness is never changed to pass contrast.
 		 */
 		surface?: {
 			/**
-			 * The application background and primary content. The neutral and role colours are generated
+			 * The default page and control background. The neutral and role colours are generated
 			 * from it. One string, or a missing side, is adapted to each mode like `neutral`. Defaults to
 			 * the neutral.
 			 */
 			base?: ColorInput;
 			/** Secondary regions, such as a sidebar. A missing side is a fixed offset from `base`. */
 			subdued?: ModeColorInput;
-			/** Form-control surfaces. A missing side is a fixed offset from `base`. */
-			field?: ModeColorInput;
 			/** Elevated panels, cards, menus, popovers, and dialogs. A missing side is a fixed offset from `base`. */
 			raised?: ModeColorInput;
 		};
@@ -389,7 +387,7 @@ function resolveSurfaces(
 	const resolved: ThemeSurfaceSources = {
 		base: resolveOptionalModeColour(surface?.base, mode, neutral),
 	};
-	for (const role of ['subdued', 'field', 'raised'] as const) {
+	for (const role of ['subdued', 'raised'] as const) {
 		const side = surface?.[role]?.[mode];
 		if (side !== undefined) resolved[role] = gamutMapOklch(parseColor(side));
 	}

@@ -180,7 +180,6 @@ function inheritSurface(
 	if (own === undefined) return base;
 	return {
 		base: own.base ?? base.base,
-		field: own.field ?? base.field,
 		raised: own.raised ?? base.raised,
 		subdued: own.subdued ?? base.subdued,
 	};

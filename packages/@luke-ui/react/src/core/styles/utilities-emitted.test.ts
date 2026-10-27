@@ -74,7 +74,7 @@ test('backgroundColor preserves its resting role and surface token vocabulary', 
 	const declaration = await readUtilitiesDeclaration();
 	const tokens = [
 		...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid`]),
-		...['base', 'subdued', 'field', 'raised'].map((surface) => `surface.${surface}`),
+		...['base', 'subdued', 'raised'].map((surface) => `surface.${surface}`),
 	];
 	const missingTokens = tokens.filter((token) => {
 		return !declaration.includes(`'${token}'`) && !declaration.includes(`"${token}"`);

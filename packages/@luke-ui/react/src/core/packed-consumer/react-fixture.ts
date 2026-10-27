@@ -348,7 +348,7 @@ const body: ThemeFont = { family: "'Inter', sans-serif", metrics };
 const typography = { fonts: { body } };
 const theme: ThemeInput = {
 	name: 'fixture',
-	color: { accent: '#3355ff', surface: { base: '#fafafa', field: { light: '#ffffff' } } },
+	color: { accent: '#3355ff', surface: { base: '#fafafa' } },
 	controlFinish: { light: { resting: 'none' } },
 	radius: { control: 6 },
 	typography,
@@ -366,7 +366,6 @@ export const interactionHoverStyle = interactionState('hover');
 export const retainedTokens: Array<string> = [
 	vars.color.surface.base,
 	vars.color.surface.subdued,
-	vars.color.surface.field,
 	vars.color.surface.raised,
 	vars.color.border.control,
 	vars.color.border.warning,
@@ -433,9 +432,15 @@ export const textButtonWidth = <Button appearance="text" inlineSize="full">Conti
 
 // Box values follow the public token contract.
 export const retainedBoxValues: Array<BoxProps> = [
-	{ backgroundColor: 'surface.field', borderColor: 'control', boxShadow: 'overlay' },
+	{ backgroundColor: 'surface.base', borderColor: 'control', boxShadow: 'overlay' },
 	{ backgroundColor: 'warning.subtle', borderRadius: 'full', gap: 'space.96' },
 ];
+// @ts-expect-error — controls use the base surface
+export const removedFieldToken = vars.color.surface.field;
+// @ts-expect-error — field is not a Box background value
+export const removedBoxField: BoxProps['backgroundColor'] = 'surface.field';
+// @ts-expect-error — a theme cannot author an independent field surface
+export const removedFieldInput: NonNullable<ThemeInput['color']['surface']> = { field: { light: '#fff' } };
 // @ts-expect-error — hover border treatments are derived by control styles, not public tokens
 export const removedControlHoverBorder = vars.color.border.controlHover;
 // @ts-expect-error — hover border treatments are not Box token values

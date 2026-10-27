@@ -332,14 +332,14 @@ for (const appearance of visualAppearances) {
 		);
 		const indicators = [...container.querySelectorAll('[aria-hidden="true"]')];
 		const backgrounds: ReadonlyArray<PairedBackground> = [
-			'surface.field',
+			'surface.base',
 			'accent.solid.rest',
 			'danger.solid.rest',
 		];
 
 		expect(indicators.map((indicator) => settledSurfaceColors(indicator))).toEqual(
 			indicators.map((indicator, index) =>
-				pairedColors(indicator, backgrounds[index] ?? 'surface.field'),
+				pairedColors(indicator, backgrounds[index] ?? 'surface.base'),
 			),
 		);
 		// The check mark is the indicator's text, so it shows the checked fills' on-solid primary.

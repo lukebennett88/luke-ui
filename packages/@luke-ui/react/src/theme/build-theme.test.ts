@@ -161,24 +161,24 @@ describe('compileTheme interaction source', () => {
 
 describe('bundled themes meet WCAG 2.2 AA', () => {
 	for (const foundation of [tactileFoundation, paperFoundation]) {
-		it(`${foundation.name} keeps the light base neutral, light fields on it, and dark fields sunk`, () => {
-			const blocks = splitBlocks(buildTheme(foundation));
-			const surface = (block: string, role: string) => {
-				return parseColor(extractValue(block, `--luke-color-surface-${role}`));
-			};
-			const lightBase = surface(blocks.baseLight, 'base');
-
-			expect(lightBase.c).toBe(0);
-			expect(surface(blocks.baseLight, 'field')).toEqual(lightBase);
-			expect(
-				surface(blocks.mediaDark, 'base').l - surface(blocks.mediaDark, 'field').l,
-			).toBeGreaterThanOrEqual(0.02);
+		it(`${foundation.name} keeps the light base neutral and emits exactly three surfaces`, () => {
+			const { css, diagnostics } = compileTheme(foundation);
+			const blocks = splitBlocks(css);
+			expect(parseColor(extractValue(blocks.baseLight, '--luke-color-surface-base')).c).toBe(0);
+			for (const mode of ['light', 'dark'] as const) {
+				expect(Object.keys(diagnostics[mode].surfaces).toSorted()).toEqual([
+					'base',
+					'raised',
+					'subdued',
+				]);
+			}
+			expect(css).not.toContain('--luke-color-surface-field');
 		});
 
 		it(`${foundation.name} generates subtle, distinct semantic borders`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
-				const surfaces = ['base', 'field', 'raised'].map((surface) => {
+				const surfaces = ['base', 'subdued', 'raised'].map((surface) => {
 					return parseColor(extractValue(block, `--luke-color-surface-${surface}`));
 				});
 				// The functional borders are excluded: `border.control` is a solved contrast boundary,

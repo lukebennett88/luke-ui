@@ -110,7 +110,7 @@ export interface ThemeSourceColors {
 }
 
 /** The surface roles a theme emits. */
-export const SURFACE_ROLES = ['base', 'subdued', 'field', 'raised'] as const;
+export const SURFACE_ROLES = ['base', 'subdued', 'raised'] as const;
 
 /** A surface role. */
 export type SurfaceRole = (typeof SURFACE_ROLES)[number];

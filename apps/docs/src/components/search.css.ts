@@ -62,7 +62,7 @@ export const trigger = style({
 					transition: 'none',
 				},
 			},
-			backgroundColor: vars.color.surface.field,
+			backgroundColor: vars.color.surface.base,
 			borderColor: vars.color.border.control,
 			// Button draws no border of its own, so the field look sets the width.
 			borderWidth: '1px',
@@ -79,7 +79,7 @@ export const trigger = style({
 			selectors: {
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"]), &[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])':
 					{
-						backgroundColor: vars.color.surface.field,
+						backgroundColor: vars.color.surface.base,
 						borderColor: `color-mix(in srgb, ${vars.color.border.control} 80%, ${vars.color.text.primary} 20%)`,
 						boxShadow: vars.depth.recessed,
 					},
