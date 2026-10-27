@@ -98,7 +98,6 @@ const ALPHA_SEARCH_STEPS = 1000;
 const TINT_SURFACES = [
 	'color.surface.base',
 	'color.surface.subdued',
-	'color.surface.field',
 	'color.surface.raised',
 ] as const satisfies ReadonlyArray<keyof SemanticColorValues>;
 

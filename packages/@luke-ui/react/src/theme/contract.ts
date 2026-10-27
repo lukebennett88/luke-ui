@@ -89,14 +89,12 @@ export const themeContractTree = {
 	 * so no role is a special case here. Hover and pressed leaves are generated, not authored.
 	 */
 	color: {
-		/** The four surfaces content sits on. */
+		/** The three surfaces content sits on. */
 		surface: {
-			/** The application background and primary content. */
+			/** The default page and control background. */
 			base: null,
 			/** Secondary regions, such as a sidebar or an inline code chip. */
 			subdued: null,
-			/** Form-control surfaces. */
-			field: null,
 			/** Elevated panels, cards, menus, popovers, and dialogs. */
 			raised: null,
 		},

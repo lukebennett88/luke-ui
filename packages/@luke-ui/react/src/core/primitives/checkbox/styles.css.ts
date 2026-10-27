@@ -31,7 +31,7 @@ function pressed(state = '') {
 	return `${state}[data-pressed="true"]${interactive} &`;
 }
 
-/** Uses a restrained portion of the shared tint over the Checkbox's small field surface. */
+/** Uses a restrained portion of the shared tint over the Checkbox's small base surface. */
 function checkboxStateLayer(state: 'hover' | 'pressed') {
 	const strength = state === 'hover' ? 60 : 80;
 	return {
@@ -105,7 +105,7 @@ const checkboxConfig = {
 			// and pressed change colour, so they stay distinct without materials. Every fill pairs with
 			// its foreground context, so the glyph reads the fill's primary: on-solid primary once checked.
 			alignItems: 'center',
-			...surfaceStyle('surface.field'),
+			...surfaceStyle('surface.base'),
 			backgroundImage: `linear-gradient(${interactionStateLayer}, ${interactionStateLayer})`,
 			// The finish spans the border too. From the padding box it would tile into the border and
 			// repeat its lit top along the bottom edge.

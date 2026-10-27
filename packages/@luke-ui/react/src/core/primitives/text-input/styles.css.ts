@@ -127,7 +127,7 @@ export const textInputPartsRecipe = recipe({
 				},
 			},
 			alignItems: 'center',
-			...surfaceStyle('surface.field'),
+			...surfaceStyle('surface.base'),
 			borderColor: vars.color.border.control,
 			borderRadius: vars.radius.control,
 			borderStyle: 'solid',

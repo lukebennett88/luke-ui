@@ -173,9 +173,9 @@ const switchConfig = {
 			},
 			alignItems: 'center',
 			// Thumb contrast comes from the fills, never the shadow. `compileTheme` hard-gates each pair at
-			// build time, so every shipped and extended theme clears it: the field thumb on the
+			// build time, so every shipped and extended theme clears it: the off-state thumb on the
 			// `border.control` track at 3:1, and each `onSolid` thumb on its solid track at 4.5:1.
-			backgroundColor: vars.color.surface.field,
+			backgroundColor: vars.color.surface.base,
 			blockSize: thumbSize,
 			boxShadow: vars.depth.resting,
 			borderRadius: vars.radius.full,

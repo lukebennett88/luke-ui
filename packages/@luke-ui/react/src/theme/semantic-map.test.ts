@@ -96,8 +96,8 @@ describe('mapSemanticColors', () => {
 					surfaces,
 				});
 
-				// Surfaces: the four resolved surfaces pass through.
-				for (const role of ['base', 'subdued', 'field', 'raised'] as const) {
+				// Surfaces: the three resolved surfaces pass through.
+				for (const role of ['base', 'subdued', 'raised'] as const) {
 					expect(result[`color.surface.${role}`]).toBe(formatOklch(surfaces[role]));
 				}
 				expect(result['color.overlay.backdrop']).toBe(backdrop);

@@ -21,7 +21,7 @@ import type { SemanticColorValues } from './semantic-map.js';
 
 const ROLE_FOREGROUND_PATTERN = /^color\.foreground\.\w+\.(rest|hover|pressed)$/;
 const TINT_CONTRAST_BACKGROUND_PATTERN =
-	/^color\.(surface\.(base|subdued|field|raised)|background\.\w+\.subtle\.rest)$/;
+	/^color\.(surface\.(base|subdued|raised)|background\.\w+\.subtle\.rest)$/;
 
 describe('buildTheme contrast failures', () => {
 	function buildFailures(foundation: ThemeFoundation): ThemeContrastError {
@@ -178,20 +178,20 @@ describe('buildTheme contrast failures', () => {
 	});
 
 	it('validates an authored surface as written instead of repairing it', () => {
-		const field = resolvedColor('oklch(0.6 0 0)');
+		const raised = resolvedColor('oklch(0.6 0 0)');
 		const error = buildFailures({
 			...tactileFoundation,
 			light: {
 				...tactileFoundation.light,
 				color: {
 					...tactileFoundation.light.color,
-					surface: { ...tactileFoundation.light.color.surface, field },
+					surface: { ...tactileFoundation.light.color.surface, raised },
 				},
 			},
-			name: 'bad-field',
+			name: 'bad-raised',
 		});
 		const failingSurfaces = new Set(error.failures.map((failure) => failure.background));
-		expect(failingSurfaces.has('color.surface.field')).toBe(true);
+		expect(failingSurfaces.has('color.surface.raised')).toBe(true);
 		expect(error.failures.every((failure) => failure.mode === 'light')).toBe(true);
 	});
 
@@ -221,12 +221,7 @@ describe('buildTheme contrast failures', () => {
 
 describe('contrast validation matrix', () => {
 	const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
-	const SURFACES = [
-		'color.surface.base',
-		'color.surface.subdued',
-		'color.surface.field',
-		'color.surface.raised',
-	] as const;
+	const SURFACES = ['color.surface.base', 'color.surface.subdued', 'color.surface.raised'] as const;
 
 	function expectedChecks() {
 		const hard: Array<{ background: string; foreground: string; required: number }> = [];

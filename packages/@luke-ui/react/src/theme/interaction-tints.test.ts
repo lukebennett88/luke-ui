@@ -46,7 +46,7 @@ describe('solveInteractionTints', () => {
 				const values = compiledColorValues(foundation, mode);
 				const tints = solveInteractionTints(mode, values);
 				const tint = mode === 'dark' ? { l: 1, c: 0, h: 0 } : { l: 0, c: 0, h: 0 };
-				for (const surface of ['base', 'subdued', 'field', 'raised'] as const) {
+				for (const surface of ['base', 'subdued', 'raised'] as const) {
 					const background = parseColor(values[`color.surface.${surface}`]);
 					const hover = compositeEncodedSrgb(tint, background, tints.hoverAlpha);
 					const pressed = compositeEncodedSrgb(tint, background, tints.pressedAlpha);

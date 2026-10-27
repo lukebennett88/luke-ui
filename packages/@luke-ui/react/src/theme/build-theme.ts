@@ -40,7 +40,7 @@ import { validateFoundation } from './validate-foundation.js';
  * Compiles a theme foundation into a complete static stylesheet plus its {@link ThemeDiagnostics}.
  *
  * Per mode: takes the already-resolved source colours and base surface, generates the six private
- * scale families (neutral / accent / info / success / warning / danger), resolves the four surfaces,
+ * scale families (neutral / accent / info / success / warning / danger), resolves the three surfaces,
  * applies the one default semantic mapping onto the colour contract, and runs the full WCAG 2.2
  * validation matrix — which stays authoritative for text, boundary, and on-solid pairs.
  *
@@ -210,7 +210,7 @@ interface ModeColors {
 
 /**
  * Runs the v2 colour pipeline for one mode: take the resolved source colours and base surface,
- * generate the six scale families, resolve the four surfaces, and apply the semantic map.
+ * generate the six scale families, resolve the three surfaces, and apply the semantic map.
  * Rethrows a scale-level {@link ScaleGenerationError} as a {@link ThemeGenerationError} carrying
  * the families it had already resolved.
  */
@@ -252,7 +252,7 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 	const controlBorder = solveControlBorder({
 		mode,
 		neutral: families.neutral,
-		surfaces: [surfaces.base, surfaces.subdued, surfaces.field, surfaces.raised],
+		surfaces: [surfaces.base, surfaces.subdued, surfaces.raised],
 	});
 	const colorValues = mapSemanticColors({
 		controlBorder,

@@ -220,9 +220,7 @@ function expectConsumerClassAfterUtilities(className: string, utilityClassName: 
 }
 
 const RESTING_BACKGROUNDS = [
-	...(['base', 'subdued', 'field', 'raised'] as const).map(
-		(surface) => `surface.${surface}` as const,
-	),
+	...(['base', 'subdued', 'raised'] as const).map((surface) => `surface.${surface}` as const),
 	...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid`] as const),
 ];
 

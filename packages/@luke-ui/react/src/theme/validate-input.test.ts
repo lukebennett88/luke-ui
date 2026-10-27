@@ -340,11 +340,6 @@ describe('authored theme validation', () => {
 			'must be a light/dark object',
 		],
 		[
-			'color.surface.field',
-			{ color: { surface: { field: '#fff' } } },
-			'must be a light/dark object',
-		],
-		[
 			'color.surface.raised',
 			{ color: { surface: { raised: '#fff' } } },
 			'must be a light/dark object',
@@ -386,8 +381,8 @@ describe('authored theme validation', () => {
 			'channels must be finite',
 		],
 		[
-			'color.surface.field.dark',
-			{ color: { surface: { field: { dark: 'red' } } } },
+			'color.surface.subdued.dark',
+			{ color: { surface: { subdued: { dark: 'red' } } } },
 			'cannot parse colour',
 		],
 		['color.info', { color: { info: 'oklch(0.5 -0.1 200)' } }, 'cannot parse colour'],
@@ -510,4 +505,25 @@ describe('authored theme validation', () => {
 		expect(css).toContain('--luke-control-finish-raised: linear-gradient(red, blue);');
 		expect(css).toContain('--luke-radius-detail: 0rem;');
 	});
+});
+
+describe('removed field surface', () => {
+	for (const value of [undefined, '#fff', { light: '#fff', dark: '#111' }]) {
+		for (const inherited of [false, true]) {
+			it(`rejects ${JSON.stringify(value)} on ${inherited ? 'an ancestor' : 'the authored theme'}`, () => {
+				const input = {
+					color: { accent: '#3b82f6', surface: { field: value } },
+					name: 'removed-field',
+					typography: testTypography,
+				} as unknown as ThemeInput;
+				expect(issuesOf(inherited ? { extends: input, name: 'child' } : input)).toEqual([
+					{
+						message: expect.stringContaining('unsupported surface'),
+						path: 'color.surface.field',
+						theme: 'removed-field',
+					},
+				]);
+			});
+		}
+	}
 });

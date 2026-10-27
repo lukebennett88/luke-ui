@@ -68,7 +68,6 @@ describe('theme inheritance', () => {
 				success: { dark: 'oklch(0.74 0.13 150)', light: 'oklch(0.5 0.13 150)' },
 				surface: {
 					base: 'oklch(0.6 0.02 260)',
-					field: { light: 'oklch(0.99 0.01 260)' },
 					raised: { dark: 'oklch(0.3 0.01 260)' },
 					subdued: { dark: 'oklch(0.18 0.01 260)', light: 'oklch(0.96 0.01 260)' },
 				},
@@ -113,7 +112,7 @@ describe('theme inheritance', () => {
 			color: {
 				accent: '#3b82f6',
 				surface: {
-					field: { dark: 'oklch(0.2 0 0)', light: 'oklch(0.97 0 0)' },
+					raised: { dark: 'oklch(0.2 0 0)', light: 'oklch(0.97 0 0)' },
 					subdued: { dark: 'oklch(0.18 0 0)', light: 'oklch(0.95 0 0)' },
 				},
 			},
@@ -121,16 +120,16 @@ describe('theme inheritance', () => {
 			typography: testTypography,
 		};
 		const foundation = foundationOf({
-			color: { surface: { field: { light: 'oklch(0.99 0 0)' } } },
+			color: { surface: { raised: { light: 'oklch(0.99 0 0)' } } },
 			extends: base,
 			name: 'surface-child',
 		});
 
-		// The child's field replaces the base's field whole, so the dark side falls back to generation.
-		expect(foundation.light.color.surface.field).toEqual(
+		// Replacing a surface whole leaves its omitted mode for generation.
+		expect(foundation.light.color.surface.raised).toEqual(
 			gamutMapOklch(parseColor('oklch(0.99 0 0)')),
 		);
-		expect(foundation.dark.color.surface.field).toBeUndefined();
+		expect(foundation.dark.color.surface.raised).toBeUndefined();
 		// A surface the child leaves out is inherited from the base.
 		expect(foundation.light.color.surface.subdued).toEqual(
 			gamutMapOklch(parseColor('oklch(0.95 0 0)')),
@@ -332,7 +331,7 @@ describe('theme inheritance', () => {
 		let thrown: unknown = null;
 		try {
 			defineTheme({
-				color: { surface: { field: { light: 'oklch(0.6 0 0)' } } },
+				color: { surface: { subdued: { light: 'oklch(0.6 0 0)' } } },
 				extends: base,
 				name: 'surface-provenance',
 			});
@@ -342,10 +341,10 @@ describe('theme inheritance', () => {
 
 		expect(thrown).toBeInstanceOf(ThemeContrastError);
 		if (!(thrown instanceof ThemeContrastError)) return;
-		expect(thrown.inheritance?.ownColors).toEqual(['color.surface.field']);
+		expect(thrown.inheritance?.ownColors).toEqual(['color.surface.subdued']);
 		expect(thrown.inheritance?.inheritedColors).toContain('color.surface.raised');
 		expect(thrown.inheritance?.inheritedColors).not.toContain('color.surface.base');
-		expect(thrown.message).toContain('Own colours: color.surface.field.');
+		expect(thrown.message).toContain('Own colours: color.surface.subdued.');
 	});
 
 	it('does not report a colour a later theme in the chain discarded', () => {

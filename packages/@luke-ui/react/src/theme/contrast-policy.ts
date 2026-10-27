@@ -46,7 +46,7 @@ export const CONTRAST_SEARCH_STEP = 0.0025;
  * composite over `surface.base` matches today's opaque subtle hover and pressed, then capped so
  * every gated foreground stays at {@link TEXT_RATIO} over every surface and subtle rest with the
  * tint on top. The hover floor applies over `surface.base`; the hover-to-pressed floor applies over
- * all four surfaces. A fixed tint can produce smaller differences on raised surfaces.
+ * all three surfaces. A fixed tint can produce smaller differences on raised surfaces.
  */
 
 /** Minimum OKLab ΔE between `surface.base` and the hover tint composited over it. */

@@ -897,7 +897,7 @@ async function waitForMobileTrayToSettle() {
 }
 
 for (const appearance of visualAppearances) {
-	test(`the combobox control keeps its field surface on a solid fill in ${appearance.theme} ${appearance.mode}`, () => {
+	test(`the combobox control keeps its base surface on a solid fill in ${appearance.theme} ${appearance.mode}`, () => {
 		render(
 			<Box backgroundColor="accent.solid" padding="space.8">
 				<ComboboxField defaultItems={countryItems} label="Country">
@@ -909,6 +909,6 @@ for (const appearance of visualAppearances) {
 		const control = combobox('Country').parentElement;
 		if (control === null) throw new Error('Expected the combobox control.');
 
-		expect(surfaceColors(control)).toEqual(pairedColors(control, 'surface.field'));
+		expect(surfaceColors(control)).toEqual(pairedColors(control, 'surface.base'));
 	});
 }

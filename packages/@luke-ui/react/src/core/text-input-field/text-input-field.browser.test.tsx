@@ -413,7 +413,7 @@ function fieldLabel(container: HTMLElement): HTMLElement {
 for (const appearance of visualAppearances) {
 	const name = `${appearance.theme} ${appearance.mode}`;
 
-	test(`field text reads a solid fill while the control keeps its field surface in ${name}`, async () => {
+	test(`field text reads a solid fill while the control keeps its base surface in ${name}`, async () => {
 		const { container } = render(
 			<Box backgroundColor="accent.solid" data-testid="parent" padding="space.8">
 				<TextInputField description="Used for receipts." label="Email" name="email" />
@@ -430,7 +430,7 @@ for (const appearance of visualAppearances) {
 		expect(getComputedStyle(page.getByText('Used for receipts.').element()).color).toBe(
 			foreground.secondary,
 		);
-		expect(surfaceColors(control)).toEqual(pairedColors(control, 'surface.field'));
+		expect(surfaceColors(control)).toEqual(pairedColors(control, 'surface.base'));
 		await expectAxeContrastPasses(container);
 	});
 
