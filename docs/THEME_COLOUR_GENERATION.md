@@ -81,12 +81,11 @@ advisory group. Every gate covers all three surfaces: forms, links, and semantic
 - Control hover and pressed border mixes are hard-gated at 3:1 against the same surfaces. They mix
   `border.control` toward `text.primary` at 20% and 40% in encoded sRGB, matching CSS `color-mix`.
   The compiler checks the rounded mixed values, including for custom themes.
-- `color.background.danger.solid.rest` is also a hard gate against every surface. It is the only
-  role fill that carries a required state's boundary (the invalid field boundary —
-  [#247](https://github.com/lukebennett88/luke-ui/issues/247)), so it needs the same guarantee as
-  `border.control`. This is deliberately not extended to the other five roles: a role's solid anchor
-  is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind it, and `warning` lands
-  well under 3:1 in light mode.
+- `color.border.danger` is a hard gate at ≥3:1 against every surface in both modes, including custom
+  themes. Invalid controls use it for their borders and outline edges. Their selected or checked
+  danger fills use `color.background.danger.solid.*`, with both on-solid foreground leaves gated at
+  4.5:1 across rest, hover, and pressed. Danger solid fills do not carry a 3:1 guarantee against the
+  surrounding surface.
 - `color.border.focus` is a hard gate against all three surfaces. The keyboard-focus ring stays
   build-time validated at ≥3:1.
 - `color.foreground.accent.onSolid.primary` is also a hard gate at 3:1 against
@@ -96,8 +95,8 @@ advisory group. Every gate covers all three surfaces: forms, links, and semantic
   text. The compiler never changes an authored accent to pass a gate.
 - `color.border.decorative` is not checked. It is a deliberately subtle, Radix-style separator below
   3:1.
-- Every semantic role border (`color.border.<role>`, all six roles) is a decorative tint with an
-  advisory 3:1 check. A miss does not gate the build.
+- The other five semantic role borders (`color.border.neutral`, `accent`, `info`, `success`, and
+  `warning`) are decorative tints with an advisory 3:1 check. A miss does not gate the build.
 
 Component invariant (tracked separately,
 [#247](https://github.com/lukebennett88/luke-ui/issues/247)): any component that uses an advisory

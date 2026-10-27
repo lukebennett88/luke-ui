@@ -149,6 +149,7 @@ describe('mapSemanticColors', () => {
 							formatOklch(family.contrast),
 						);
 					}
+					if (role === 'danger') continue;
 					expect(result[`color.border.${role}`]).toBe(formatOklch(family[FAMILY_RUNG.border]));
 				}
 			});

@@ -11,9 +11,9 @@
  */
 
 import type { Oklch } from './color.js';
-import { formatOklch } from './color.js';
+import { contrastRatio, formatOklch, parseColor } from './color.js';
 import type { ModePath } from './contract.js';
-import { SEMANTIC_ROLES } from './contrast-policy.js';
+import { RATIO_HEADROOM, SEMANTIC_ROLES, UI_RATIO } from './contrast-policy.js';
 import { pathEntry, pathRecord } from './path-record.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import {
@@ -67,7 +67,7 @@ interface MapSemanticColorsRequest {
 export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticColorValues {
 	return {
 		...mapFunctionalColors(request),
-		...mapRoleColorValues(request.families),
+		...mapRoleColorValues(request.families, request.surfaces),
 	};
 }
 
@@ -89,7 +89,10 @@ function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColor
 	};
 }
 
-function mapRoleColorValues(families: Record<FamilyRole, ScaleFamily>): {
+function mapRoleColorValues(
+	families: Record<FamilyRole, ScaleFamily>,
+	surfaces: GeneratedSurfaces,
+): {
 	[Path in RoleColorPath]: string;
 } {
 	const textPrimary = families.neutral[FAMILY_RUNG.textPrimary];
@@ -109,7 +112,12 @@ function mapRoleColorValues(families: Record<FamilyRole, ScaleFamily>): {
 				pathEntry(`color.foreground.${role}.pressed`, foreground.pressed),
 				pathEntry(`color.foreground.${role}.onSolid.primary`, formatOklch(family.contrast)),
 				pathEntry(`color.foreground.${role}.onSolid.secondary`, formatOklch(family.contrast)),
-				pathEntry(`color.border.${role}`, formatOklch(family[FAMILY_RUNG.border])),
+				pathEntry(
+					`color.border.${role}`,
+					role === 'danger'
+						? dangerBoundary(solid.rest, foreground.rest, surfaces)
+						: formatOklch(family[FAMILY_RUNG.border]),
+				),
 			];
 		}),
 	);
@@ -121,4 +129,13 @@ function interactionStates(rest: Oklch, toward: Oklch) {
 		hover: formatOklch(mixInteractionState(rest, toward, INTERACTION_HOVER_STRENGTH)),
 		pressed: formatOklch(mixInteractionState(rest, toward, INTERACTION_PRESSED_STRENGTH)),
 	};
+}
+
+function dangerBoundary(solid: string, foreground: string, surfaces: GeneratedSurfaces): string {
+	// Preserve the existing invalid edge where it has headroom; role text is the readable fallback.
+	const solidColor = parseColor(solid);
+	const passes = Object.values(surfaces).every((surface) => {
+		return contrastRatio(solidColor, parseColor(formatOklch(surface))) >= UI_RATIO + RATIO_HEADROOM;
+	});
+	return passes ? solid : foreground;
 }

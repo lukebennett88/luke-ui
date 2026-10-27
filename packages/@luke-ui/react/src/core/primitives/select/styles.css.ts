@@ -81,7 +81,7 @@ const selectConfig = {
 				// The field's error message carries the non-colour invalid cue, so the border keeps its
 				// resting width and only takes the danger colour. This comes after the states above so an
 				// invalid select keeps its danger border while hovered, open, or focused.
-				[rootInvalid]: { borderColor: vars.color.background.danger.solid.rest },
+				[rootInvalid]: { borderColor: vars.color.border.danger },
 			},
 		},
 		value: {

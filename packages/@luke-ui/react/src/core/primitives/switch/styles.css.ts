@@ -109,12 +109,12 @@ const switchConfig = {
 					borderColor: controlBorderState('hover'),
 				},
 				'[data-invalid="true"] &': {
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.border.danger,
 				},
-				// Only `danger.solid.rest` is a guaranteed 3:1 boundary, so an invalid track keeps it through
+				// `border.danger` is the guaranteed 3:1 boundary, so an invalid track keeps it through
 				// hover and press. The track fill and the thumb carry the feedback instead.
 				[`${hovered('[data-invalid="true"]')}, ${pressed('[data-invalid="true"]')}`]: {
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.border.danger,
 				},
 				'[data-selected="true"] &': {
 					backgroundColor: vars.color.background.accent.solid.rest,
@@ -134,15 +134,15 @@ const switchConfig = {
 				},
 				'[data-invalid="true"][data-selected="true"] &': {
 					backgroundColor: vars.color.background.danger.solid.rest,
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.border.danger,
 				},
 				[hovered('[data-invalid="true"][data-selected="true"]')]: {
 					backgroundColor: vars.color.background.danger.solid.hover,
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.border.danger,
 				},
 				[pressed('[data-invalid="true"][data-selected="true"]')]: {
 					backgroundColor: vars.color.background.danger.solid.pressed,
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.border.danger,
 				},
 			},
 		},

@@ -98,7 +98,8 @@ not help. Silence in this log is not evidence.
 ## Docs type-table watch tests cannot find source modules
 
 - Seen: 2026-10-27 (#928). The same two failures were reported during #827 and reproduce on
-  unchanged `origin/main` at `edbee8e7`.
+  unchanged `origin/main` at `edbee8e7`. Seen again: 2026-10-27 (#933). The full test run failed
+  both docs watcher cases, which reproduce on the unchanged base `871c5e2` in a separate worktree.
 - Where: `apps/docs/src/lib/remark-watch-type-table-sources.test.ts:444`. `pnpm run test` fails when
   `server.moduleGraph.getModulesByFile(sourcePath)` returns `undefined` for both watched source
   cases.
@@ -108,10 +109,13 @@ not help. Silence in this log is not evidence.
 ## Browser tests use DOM selectors for named controls
 
 - Seen: 2026-10-27 (#929). The newly authored `field-surfaces.browser.test.tsx` used
-  `querySelectorAll('input'/'button')` to locate controls.
-- Where: `packages/@luke-ui/react/src/core/styles/field-surfaces.browser.test.tsx`.
-  `docs/TESTING.md`, Component tests, prefers roles and accessible names; the write-tests workflow
-  requires reading that guide and its checklist requires role/name queries.
+  `querySelectorAll('input'/'button')` to locate controls. Seen again: 2026-10-27 (#933). The newly
+  authored `invalid-boundaries.browser.test.tsx` located the named Country Combobox with
+  `querySelector` before review corrected it to `getByRole('combobox', { name: 'Country' })`.
+- Where: `packages/@luke-ui/react/src/core/styles/field-surfaces.browser.test.tsx` and
+  `packages/@luke-ui/react/src/core/styles/invalid-boundaries.browser.test.tsx`. `docs/TESTING.md`,
+  Component tests, prefers roles and accessible names; the write-tests workflow requires reading
+  that guide and its checklist requires role/name queries.
 - Problem: Agent-authored browser tests used DOM selectors despite the required testing guidance.
   review-pr also calls out this rule, so another pointer does not address the workflow failure.
   Correcting the selectors does not establish that test authoring applies the rule.

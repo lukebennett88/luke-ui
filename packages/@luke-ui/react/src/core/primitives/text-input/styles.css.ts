@@ -164,7 +164,7 @@ export const textInputPartsRecipe = recipe({
 				// The field's error message carries the non-colour invalid cue, so the border keeps
 				// its resting width and only takes the danger colour.
 				[control.invalid]: {
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.border.danger,
 				},
 			},
 		},

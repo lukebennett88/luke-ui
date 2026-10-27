@@ -81,8 +81,8 @@ export const textInputRecipe = recipe({
 			},
 			// After `readOnly`, so a read-only invalid input keeps its cue.
 			[input.invalid]: {
-				borderColor: vars.color.background.danger.solid.rest,
-				boxShadow: `inset 0 0 0 1px ${vars.color.background.danger.solid.rest}`,
+				borderColor: vars.color.border.danger,
+				boxShadow: `inset 0 0 0 1px ${vars.color.border.danger}`,
 			},
 		},
 	},
