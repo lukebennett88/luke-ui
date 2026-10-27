@@ -104,3 +104,14 @@ not help. Silence in this log is not evidence.
   cases.
 - Problem: The docs test suite fails on the base revision while checking that Vite recompiles MDX
   after a type-table source change.
+
+## Browser tests use DOM selectors for named controls
+
+- Seen: 2026-10-27 (#929). The newly authored `field-surfaces.browser.test.tsx` used
+  `querySelectorAll('input'/'button')` to locate controls.
+- Where: `packages/@luke-ui/react/src/core/styles/field-surfaces.browser.test.tsx`.
+  `docs/TESTING.md`, Component tests, prefers roles and accessible names; the write-tests workflow
+  requires reading that guide and its checklist requires role/name queries.
+- Problem: Agent-authored browser tests used DOM selectors despite the required testing guidance.
+  review-pr also calls out this rule, so another pointer does not address the workflow failure.
+  Correcting the selectors does not establish that test authoring applies the rule.
