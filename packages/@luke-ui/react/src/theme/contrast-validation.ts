@@ -15,7 +15,7 @@ type ColorMode = 'light' | 'dark';
 
 /** One WCAG contrast failure recorded while generating a theme. */
 export interface ThemeContrastFailure {
-	/** Token path of the background colour, for example `color.surface.overlay`. */
+	/** Token path of the background colour, for example `color.surface.raised`. */
 	background: string;
 	/** Token path of the foreground colour, for example `color.text.primary`. */
 	foreground: string;
@@ -84,7 +84,7 @@ export function validateContrast(
 		'color.surface.base',
 		'color.surface.subdued',
 		'color.surface.field',
-		'color.surface.overlay',
+		'color.surface.raised',
 	] as const satisfies ReadonlyArray<ColorPath>;
 
 	const subtleBackgrounds = SEMANTIC_ROLES.map((role) => {

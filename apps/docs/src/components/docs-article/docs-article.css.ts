@@ -126,7 +126,7 @@ globalStyle(`${tocBar}[open] ${tocSummaryIcon}`, {
 export const tocBarPanel = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.overlay,
+			backgroundColor: vars.color.surface.raised,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 			boxShadow: vars.depth.floating,
 			insetBlockStart: '100%',

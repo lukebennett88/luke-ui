@@ -661,7 +661,7 @@ const EVERY_BACKGROUND = [
 	'surface.base',
 	'surface.subdued',
 	'surface.field',
-	'surface.overlay',
+	'surface.raised',
 	...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid`] as const),
 ] as const satisfies ReadonlyArray<PairedBackground>;
 

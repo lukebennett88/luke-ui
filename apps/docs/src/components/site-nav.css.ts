@@ -161,7 +161,7 @@ export const appearancePopover = style({
 				hidden: { opacity: 0, translate: '0 -4px' },
 				properties: ['opacity', 'translate'],
 				rule: {
-					backgroundColor: vars.color.surface.overlay,
+					backgroundColor: vars.color.surface.raised,
 					border: `1px solid ${vars.color.border.decorative}`,
 					borderRadius: vars.radius.surface,
 					boxShadow: vars.depth.floating,

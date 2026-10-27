@@ -69,7 +69,7 @@ describe('theme inheritance', () => {
 				surface: {
 					base: 'oklch(0.6 0.02 260)',
 					field: { light: 'oklch(0.99 0.01 260)' },
-					overlay: { dark: 'oklch(0.3 0.01 260)' },
+					raised: { dark: 'oklch(0.3 0.01 260)' },
 					subdued: { dark: 'oklch(0.18 0.01 260)', light: 'oklch(0.96 0.01 260)' },
 				},
 				warning: { dark: 'oklch(0.78 0.13 80)', light: 'oklch(0.72 0.14 75)' },
@@ -325,7 +325,7 @@ describe('theme inheritance', () => {
 
 	it('names surface provenance role by role on a contrast failure', () => {
 		const base: ThemeInput = {
-			color: { accent: '#3b82f6', surface: { overlay: { light: 'oklch(1 0 0)' } } },
+			color: { accent: '#3b82f6', surface: { raised: { light: 'oklch(1 0 0)' } } },
 			name: 'surface-provenance-base',
 			typography: testTypography,
 		};
@@ -343,7 +343,7 @@ describe('theme inheritance', () => {
 		expect(thrown).toBeInstanceOf(ThemeContrastError);
 		if (!(thrown instanceof ThemeContrastError)) return;
 		expect(thrown.inheritance?.ownColors).toEqual(['color.surface.field']);
-		expect(thrown.inheritance?.inheritedColors).toContain('color.surface.overlay');
+		expect(thrown.inheritance?.inheritedColors).toContain('color.surface.raised');
 		expect(thrown.inheritance?.inheritedColors).not.toContain('color.surface.base');
 		expect(thrown.message).toContain('Own colours: color.surface.field.');
 	});

@@ -19,8 +19,8 @@ export interface GenerateSurfacesRequest {
 // Offsets from `base`, never from a sibling surface. Generated surfaces are never adjusted for
 // contrast: validation throws instead, and the author sets the surface explicitly.
 const SURFACE_LIGHTNESS_OFFSETS = {
-	dark: { field: -0.025, overlay: 0.07, subdued: -0.03 },
-	light: { field: 0, overlay: 0.015, subdued: -0.02 },
+	dark: { field: -0.025, raised: 0.07, subdued: -0.03 },
+	light: { field: 0, raised: 0.015, subdued: -0.02 },
 } as const satisfies Record<SurfaceMode, Record<Exclude<SurfaceRole, 'base'>, number>>;
 
 /**
@@ -37,7 +37,7 @@ export function generateSurfaces(request: GenerateSurfacesRequest): GeneratedSur
 	return {
 		base,
 		field: resolve('field'),
-		overlay: resolve('overlay'),
+		raised: resolve('raised'),
 		subdued: resolve('subdued'),
 	};
 }

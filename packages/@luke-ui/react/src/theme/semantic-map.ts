@@ -78,7 +78,7 @@ function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColor
 		'color.surface.base': formatOklch(surfaces.base),
 		'color.surface.subdued': formatOklch(surfaces.subdued),
 		'color.surface.field': formatOklch(surfaces.field),
-		'color.surface.overlay': formatOklch(surfaces.overlay),
+		'color.surface.raised': formatOklch(surfaces.raised),
 		'color.overlay.backdrop': backdrop,
 		'color.loadingSkeleton': formatOklch(neutral[FAMILY_RUNG.muted]),
 		'color.text.primary': formatOklch(neutral[FAMILY_RUNG.textPrimary]),

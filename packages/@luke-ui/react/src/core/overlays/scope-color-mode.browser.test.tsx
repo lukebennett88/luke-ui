@@ -220,13 +220,13 @@ test('a programmatic open copies the scope mode', async () => {
 	expect(findOverlay('select popover')).toHaveAttribute('data-color-mode', 'dark');
 });
 
-test('overlay surfaces keep their own background inside a repainted scope', async () => {
+test('raised surfaces keep their own background inside a repainted scope', async () => {
 	renderOverlay('select popover', (overlay) => <div data-color-mode="dark">{overlay}</div>);
 
 	const overlay = await openOverlay('select popover');
 	const probe = document.body.appendChild(document.createElement('div'));
 	probe.style.backgroundColor = getComputedStyle(overlay).getPropertyValue(
-		'--luke-color-surface-overlay',
+		'--luke-color-surface-raised',
 	);
 	const expected = getComputedStyle(probe).backgroundColor;
 	probe.remove();
@@ -263,13 +263,11 @@ for (const appearance of visualAppearances) {
 			const surface = overlaySurface(kind, await openOverlay(kind));
 			const option = page.getByRole('option', { name: 'Option one' }).element();
 
-			expect(settledSurfaceColors(surface)).toEqual(pairedColors(surface, 'surface.overlay'));
+			expect(settledSurfaceColors(surface)).toEqual(pairedColors(surface, 'surface.raised'));
 			// Hover alone has no style, so the item keeps the overlay's foreground.
 			option.removeAttribute('data-focused');
 			setInteractionState(option, 'hover');
-			expect(settledSurfaceColors(option).color).toBe(
-				pairedColors(option, 'surface.overlay').color,
-			);
+			expect(settledSurfaceColors(option).color).toBe(pairedColors(option, 'surface.raised').color);
 			const itemStates = [
 				{ background: 'accent.solid.rest', state: 'rest' },
 				{ background: 'accent.solid.pressed', state: 'pressed' },
@@ -307,6 +305,6 @@ for (const kind of overlayKinds) {
 		const surface = overlaySurface(kind, await openOverlay(kind));
 
 		expect(surface).not.toHaveAttribute('data-color-mode');
-		expect(settledSurfaceColors(surface)).toEqual(pairedColors(surface, 'surface.overlay'));
+		expect(settledSurfaceColors(surface)).toEqual(pairedColors(surface, 'surface.raised'));
 	});
 }

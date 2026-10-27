@@ -30,7 +30,7 @@ test('resolves borderColor tokens to their theme variables', () => {
 test('gives every resting background its own class and no inline value', () => {
 	const tokens = [
 		...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid`] as const),
-		...(['base', 'subdued', 'field', 'overlay'] as const).map((surface) => {
+		...(['base', 'subdued', 'field', 'raised'] as const).map((surface) => {
 			return `surface.${surface}` as const;
 		}),
 	];

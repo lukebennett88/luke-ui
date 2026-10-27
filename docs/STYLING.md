@@ -368,7 +368,7 @@ option with `aria-activedescendant`. Under forced colours the active option uses
 
 The inset outline sits on the solid fill, so the compiler gates that on-solid colour at 3:1 against
 `accent.solid.rest` and `accent.solid.pressed` (already covered at 4.5:1 by the on-solid text
-gates). It does not require the fill to contrast against `surface.overlay`. See
+gates). It does not require the fill to contrast against `surface.raised`. See
 [Border contrast policy](THEME_COLOUR_GENERATION.md#border-contrast-policy).
 
 ## Styling utilities

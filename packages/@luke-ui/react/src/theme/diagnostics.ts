@@ -63,7 +63,7 @@ export interface FamilyDiagnostics {
  * gate. Tooling reads that classification instead of inferring it from token paths.
  */
 export interface ContrastCheck {
-	/** Token path of the background colour, for example `color.surface.overlay`. */
+	/** Token path of the background colour, for example `color.surface.raised`. */
 	background: string;
 	/** Token path of the foreground colour, for example `color.text.primary`. */
 	foreground: string;

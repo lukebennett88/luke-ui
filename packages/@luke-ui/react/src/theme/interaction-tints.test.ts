@@ -46,7 +46,7 @@ describe('solveInteractionTints', () => {
 				const values = compiledColorValues(foundation, mode);
 				const tints = solveInteractionTints(mode, values);
 				const tint = mode === 'dark' ? { l: 1, c: 0, h: 0 } : { l: 0, c: 0, h: 0 };
-				for (const surface of ['base', 'subdued', 'field', 'overlay'] as const) {
+				for (const surface of ['base', 'subdued', 'field', 'raised'] as const) {
 					const background = parseColor(values[`color.surface.${surface}`]);
 					const hover = compositeEncodedSrgb(tint, background, tints.hoverAlpha);
 					const pressed = compositeEncodedSrgb(tint, background, tints.pressedAlpha);
@@ -63,20 +63,20 @@ describe('solveInteractionTints', () => {
 			}
 		});
 
-		it(`keeps critical text at ${TEXT_RATIO}:1 over ${name} dark overlay with the pressed tint`, () => {
+		it(`keeps critical text at ${TEXT_RATIO}:1 over ${name} dark raised with the pressed tint`, () => {
 			const colorValues = compiledColorValues(foundation, 'dark');
 			const tints = solveInteractionTints('dark', colorValues);
-			const overlay = parseColor(colorValues['color.surface.overlay']);
+			const raised = parseColor(colorValues['color.surface.raised']);
 			const danger = parseColor(colorValues['color.foreground.danger.rest']);
-			const tinted = compositeEncodedSrgb({ l: 1, c: 0, h: 0 }, overlay, tints.pressedAlpha);
+			const tinted = compositeEncodedSrgb({ l: 1, c: 0, h: 0 }, raised, tints.pressedAlpha);
 			expect(contrastRatio(danger, tinted)).toBeGreaterThanOrEqual(TEXT_RATIO);
 		});
 	}
 
 	it('rejects colour values whose contrast cap collapses hover below the visibility floor', () => {
 		const colorValues = { ...compiledColorValues(paperFoundation, 'dark') };
-		const overlay = parseColor(colorValues['color.surface.overlay']);
-		// Darken danger foregrounds until they barely clear AA on the untinted overlay, so any
+		const raised = parseColor(colorValues['color.surface.raised']);
+		// Darken danger foregrounds until they barely clear AA on the untinted raised surface, so any
 		// useful white tint fails the contrast cap and the visibility floors reject the theme.
 		for (const state of ['rest', 'hover', 'pressed'] as const) {
 			const path = `color.foreground.danger.${state}` as const;
@@ -84,7 +84,7 @@ describe('solveInteractionTints', () => {
 			let lightness = current.l;
 			for (let step = 0; step < 200; step++) {
 				const candidate = { ...current, l: lightness };
-				if (contrastRatio(candidate, overlay) <= 4.55) break;
+				if (contrastRatio(candidate, raised) <= 4.55) break;
 				lightness -= 0.001;
 			}
 			colorValues[path] = formatOklch({ ...current, l: lightness });
@@ -95,7 +95,7 @@ describe('solveInteractionTints', () => {
 
 	it('finds a feasible tint pair when proportional scaling would miss the visibility floor', () => {
 		const theme = (lightness: number) => ({
-			color: { surface: { overlay: { dark: `oklch(${lightness} 0.01 250)` } } },
+			color: { surface: { raised: { dark: `oklch(${lightness} 0.01 250)` } } },
 			extends: paperTheme,
 			name: 'contrast-edge',
 		});
@@ -103,7 +103,7 @@ describe('solveInteractionTints', () => {
 		expect(() => defineTheme(theme(0.33))).not.toThrow();
 
 		const colorValues = compiledColorValues(paperFoundation, 'dark');
-		colorValues['color.surface.overlay'] = 'oklch(0.33 0.01 250)';
+		colorValues['color.surface.raised'] = 'oklch(0.33 0.01 250)';
 		const tints = solveInteractionTints('dark', colorValues);
 		expect(tints.hoverAlpha).toBeLessThan(0.078);
 		expect(tints.hoverToPressedVisibility).toBeGreaterThanOrEqual(
@@ -122,7 +122,7 @@ describe('solveInteractionTints', () => {
 
 	it('rejects colour values whose resting text already fails contrast', () => {
 		const colorValues = compiledColorValues(paperFoundation, 'dark');
-		colorValues['color.surface.overlay'] = colorValues['color.text.primary'];
+		colorValues['color.surface.raised'] = colorValues['color.text.primary'];
 		expect(() => solveInteractionTints('dark', colorValues)).toThrow(ThemeInteractionTintError);
 	});
 });

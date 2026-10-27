@@ -9,7 +9,7 @@ import { flatTheme } from './flat-theme.js';
 const contrastEdgeTheme: ExtendingThemeInput = {
 	color: {
 		accent: { light: '#fde68a' },
-		surface: { overlay: { dark: 'oklch(0.30 0.01 250)' } },
+		surface: { raised: { dark: 'oklch(0.30 0.01 250)' } },
 	},
 	extends: paperTheme,
 	name: 'contrast-edge-fixture',
