@@ -257,7 +257,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
-// Only `danger.solid.rest` carries the 3:1 control-boundary guarantee. Off invalid hover/pressed
+// `border.danger` carries the 3:1 control-boundary guarantee. Off invalid hover/pressed
 // share one rule, but on invalid keeps separate hover and pressed selectors — cover each path.
 for (const isSelected of [false, true]) {
 	for (const state of ['data-hovered', 'data-pressed'] as const) {
@@ -270,7 +270,7 @@ for (const isSelected of [false, true]) {
 			label.setAttribute(state, 'true');
 
 			expect(getComputedStyle(track).borderTopColor).toBe(
-				resolvedBorderColor(label, 'var(--luke-color-background-danger-solid-rest)'),
+				resolvedBorderColor(label, 'var(--luke-color-border-danger)'),
 			);
 		});
 	}

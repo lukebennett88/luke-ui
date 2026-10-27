@@ -154,7 +154,7 @@ const checkboxConfig = {
 					opacity: 1,
 				},
 				'[data-invalid="true"] &': {
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.border.danger,
 				},
 				'[data-selected="true"] &': {
 					...surfaceStyle('accent.solid.rest'),
@@ -178,27 +178,27 @@ const checkboxConfig = {
 				'[data-invalid="true"][data-selected="true"] &, [data-invalid="true"][data-indeterminate="true"] &':
 					{
 						...surfaceStyle('danger.solid.rest'),
-						borderColor: vars.color.background.danger.solid.rest,
+						borderColor: vars.color.border.danger,
 					},
-				// Only `danger.solid.rest` is a guaranteed 3:1 boundary, so an invalid box keeps it through
+				// `border.danger` is the guaranteed 3:1 boundary, so an invalid box keeps it through
 				// hover and press. The fill carries the feedback instead.
 				[hovered('[data-invalid="true"]')]: {
 					...checkboxStateLayer('hover'),
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.border.danger,
 				},
 				[pressed('[data-invalid="true"]')]: {
 					...checkboxStateLayer('pressed'),
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.border.danger,
 				},
 				[`${hovered('[data-invalid="true"][data-selected="true"]')}, ${hovered('[data-invalid="true"][data-indeterminate="true"]')}`]:
 					{
 						...surfaceStyle('danger.solid.hover'),
-						borderColor: vars.color.background.danger.solid.rest,
+						borderColor: vars.color.border.danger,
 					},
 				[`${pressed('[data-invalid="true"][data-selected="true"]')}, ${pressed('[data-invalid="true"][data-indeterminate="true"]')}`]:
 					{
 						...surfaceStyle('danger.solid.pressed'),
-						borderColor: vars.color.background.danger.solid.rest,
+						borderColor: vars.color.border.danger,
 					},
 			},
 		},

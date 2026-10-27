@@ -194,7 +194,7 @@ export const defaultSourceColors: Record<
 	Record<'info' | 'success' | 'warning' | 'danger' | 'focus', string>
 > = {
 	dark: {
-		danger: 'oklch(0.72 0.16 25)',
+		danger: 'oklch(0.48 0.16 25)',
 		focus: 'oklch(0.72 0.13 255)',
 		info: 'oklch(0.72 0.13 255)',
 		success: 'oklch(0.74 0.13 150)',

@@ -254,7 +254,9 @@ describe('contrast validation matrix', () => {
 				}
 			}
 			for (const background of SURFACES) {
-				advisory.push({ background, foreground: `color.border.${role}`, required: UI_RATIO });
+				if (role !== 'danger') {
+					advisory.push({ background, foreground: `color.border.${role}`, required: UI_RATIO });
+				}
 			}
 		}
 		for (const background of SURFACES) {
@@ -264,7 +266,7 @@ describe('contrast validation matrix', () => {
 			hard.push({ background, foreground: 'color.border.control', required: UI_RATIO });
 			hard.push({
 				background,
-				foreground: 'color.background.danger.solid.rest',
+				foreground: 'color.border.danger',
 				required: UI_RATIO,
 			});
 			for (const state of ['hover', 'pressed'] as const) {
@@ -380,6 +382,89 @@ describe('custom-canvas interaction tint contrast', () => {
 			expect(caught.limitingMiss.foreground).toMatch(ROLE_FOREGROUND_PATTERN);
 			expect(caught.limitingMiss.ratio).toBeLessThan(TEXT_RATIO);
 			expect(caught.message).toContain('visibility floors');
+		});
+	}
+});
+
+describe('functional danger boundary', () => {
+	for (const foundation of [tactileFoundation, paperFoundation]) {
+		it(`separates deep custom danger fills from the boundary for ${foundation.name}`, () => {
+			const custom = normalizeTheme({
+				name: `custom-${foundation.name}`,
+				color: {
+					accent: '#7c3aed',
+					danger: { light: 'oklch(0.52 0.16 25)', dark: 'oklch(0.48 0.16 25)' },
+				},
+				typography: testTypography,
+			});
+			const { css, diagnostics } = compileTheme({
+				...foundation,
+				light: {
+					...foundation.light,
+					color: { ...foundation.light.color, danger: custom.light.color.danger },
+				},
+				dark: {
+					...foundation.dark,
+					color: { ...foundation.dark.color, danger: custom.dark.color.danger },
+				},
+			});
+			const blocks = splitBlocks(css);
+			expect(
+				contrastRatio(
+					parseColor(extractValue(blocks.mediaDark, '--luke-color-background-danger-solid-rest')),
+					parseColor(extractValue(blocks.mediaDark, '--luke-color-surface-raised')),
+				),
+			).toBeLessThan(UI_RATIO);
+			for (const mode of ['light', 'dark'] as const) {
+				const checks = diagnostics[mode].contrastChecks.filter(
+					(check) => check.foreground === 'color.border.danger',
+				);
+				expect(checks).toHaveLength(3);
+				for (const check of checks) {
+					expect(check.hard).toBe(true);
+					expect(check.ratio).toBeGreaterThanOrEqual(UI_RATIO + 0.04);
+				}
+				const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
+
+				const colors = Object.fromEntries(
+					flattenThemeContract()
+						.filter(([path]) => path.startsWith('color.'))
+						.map(([path, variable]) => [path, extractValue(block, variable)]),
+				) as SemanticColorValues;
+				colors['color.border.danger'] = colors['color.surface.base'];
+				const { failures } = validateContrast(mode, colors);
+				expect(failures).toContainEqual(
+					expect.objectContaining({
+						foreground: 'color.border.danger',
+						background: 'color.surface.base',
+						mode,
+						required: UI_RATIO,
+					}),
+				);
+				expect(new ThemeContrastError(failures).message).toContain(
+					`${mode}: color.border.danger on color.surface.base`,
+				);
+			}
+		});
+
+		it(`keeps light danger boundaries and chooses near-white dark on-solid text for ${foundation.name}`, () => {
+			const blocks = splitBlocks(buildTheme(foundation));
+			expect(extractValue(blocks.baseLight, '--luke-color-border-danger')).toBe(
+				extractValue(blocks.baseLight, '--luke-color-background-danger-solid-rest'),
+			);
+			for (const hierarchy of ['primary', 'secondary']) {
+				const text = parseColor(
+					extractValue(blocks.mediaDark, `--luke-color-foreground-danger-on-solid-${hierarchy}`),
+				);
+				expect(text.l).toBeGreaterThan(0.9);
+				for (const state of ['rest', 'hover', 'pressed']) {
+					const fill = parseColor(
+						extractValue(blocks.mediaDark, `--luke-color-background-danger-solid-${state}`),
+					);
+					expect(fill.l).toBeLessThan(0.6);
+					expect(contrastRatio(text, fill)).toBeGreaterThanOrEqual(TEXT_RATIO);
+				}
+			}
 		});
 	}
 });

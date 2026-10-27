@@ -43,14 +43,14 @@ type ColorPath = keyof SemanticColorValues;
  * against all three surfaces and every role's subtle rest fill. Both on-solid hierarchy leaves are gated
  * against their role's solid fills.
  * Hard at 3:1: the focus ring, the control border and its mixed hover and pressed treatments, and
- * `danger.solid.rest`, the invalid control boundary. Only danger is gated as a boundary: the other roles' solid fills are
- * solved for on-solid text and `warning` lands well under 3:1 in light mode.
+ * `border.danger`, the invalid control boundary. Solid fills are solved for on-solid text,
+ * independently of their contrast against surfaces.
  * Also hard at 3:1: accent on-solid primary against `accent.solid.rest` and `accent.solid.pressed`.
  * The active dropdown option draws a 2px inset outline in that on-solid colour on those fills, so
  * the outline's adjacent colour is the solid, not the list surface. The existing 4.5:1 on-solid
  * text gates already cover the same pairs; these 3:1 checks name the outline contract explicitly.
  *
- * Role borders are decorative tints, measured but not gated, so a component must never rely on one
+ * Other role borders are decorative tints, measured but not gated, so a component must never rely on one
  * alone for a required state.
  */
 export function validateContrast(
@@ -111,7 +111,7 @@ export function validateContrast(
 	const boundaries = [
 		'color.border.focus',
 		'color.border.control',
-		'color.background.danger.solid.rest',
+		'color.border.danger',
 	] as const satisfies ReadonlyArray<ColorPath>;
 	for (const boundary of boundaries) {
 		for (const surface of surfacePaths) check(boundary, surface, UI_RATIO, true);
@@ -133,6 +133,7 @@ export function validateContrast(
 		check('color.foreground.accent.onSolid.primary', fill, UI_RATIO, true);
 	}
 	for (const role of SEMANTIC_ROLES) {
+		if (role === 'danger') continue;
 		for (const surface of surfacePaths) check(`color.border.${role}`, surface, UI_RATIO, false);
 	}
 
