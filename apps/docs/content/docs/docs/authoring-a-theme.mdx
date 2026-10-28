@@ -33,7 +33,8 @@ be omitted. How each colour treats them differs:
   to each mode: they keep its hue, choose a lightness for the mode, and may reduce its chroma to fit
   sRGB. A missing side is adapted from the side you set. Omitted optional chromatic roles use
   curated defaults for both modes. A status role with one authored side previously used a default
-  for the other mode. Set both sides explicitly to preserve that appearance.
+  for the other mode, while a single string was used unchanged in both modes. To preserve either
+  behaviour, set explicit `light` and `dark` values. For a single string, use that value for both.
 - `focus` and `backdrop` use one string as written in both modes. A missing side uses Luke UI's
   default for that mode.
 - `surface.subdued` and `surface.raised` take only the object, because one value cannot suit both
