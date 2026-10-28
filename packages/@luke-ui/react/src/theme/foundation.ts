@@ -49,8 +49,8 @@ export interface ThemeFoundation {
 	};
 	/** Fonts and weights shared by both modes. */
 	typography: {
-		/** The body font, and the display font when the theme has one. */
-		fonts: { body: ThemeFont; display?: ThemeFont };
+		/** Body and optional display fonts, plus an optional code family stack. */
+		fonts: { body: ThemeFont; code?: string; display?: ThemeFont };
 		fontWeight?: ThemeFontWeights;
 	};
 }

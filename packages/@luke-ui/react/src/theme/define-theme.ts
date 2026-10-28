@@ -169,6 +169,8 @@ export interface ThemeInput extends ThemeInputCommon {
 		fonts: {
 			/** Font for `caption`, `label`, `body`, and `lead` text. */
 			body: ThemeFont;
+			/** CSS font-family stack for code. Defaults to the system monospace stack. */
+			code?: string;
 			/**
 			 * Font for `heading4` through `heading1` and `display` text. Omitted or `null`, those styles
 			 * use the body font.
@@ -249,12 +251,14 @@ export function defineTheme(input: ThemeInput): string {
 
 /** Resolves an authored input into the internal per-mode foundation. */
 export function normalizeTheme(input: ThemeInput): ThemeFoundation {
-	const { display, body } = input.typography.fonts;
+	const { display, body, code } = input.typography.fonts;
 	const foundation: ThemeFoundation = {
 		dark: buildModeFoundation(input, 'dark'),
 		light: buildModeFoundation(input, 'light'),
 		name: input.name,
-		typography: { fonts: display ? { body, display } : { body } },
+		typography: {
+			fonts: { body, ...(display ? { display } : {}), ...(code !== undefined ? { code } : {}) },
+		},
 	};
 	if (input.typography.fontWeight !== undefined) {
 		foundation.typography.fontWeight = input.typography.fontWeight;

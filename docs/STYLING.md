@@ -64,8 +64,8 @@ contract. See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for that 
 Type styles are grouped from `font.caption` through `font.display`. Each has five public leaves:
 family, size, weight, line height, and letter spacing. `typeStyleFontRole` in `theme/type-styles.ts`
 maps each style to the body or display font. `font.family.display` is always a literal copy of a
-family, never a `var()`: no generated value references another token. `font.family.code` is a fixed
-monospace stack.
+family, never a `var()`: no generated value references another token. `font.family.code` uses the
+authored code font stack or the default system monospace stack.
 
 The Capsize trims are private `--luke-internal-font-<style>-*` variables. The theme stylesheet
 writes them from each style's own font metrics, `Text` reads them, and `theme/capsize-trim-vars.ts`

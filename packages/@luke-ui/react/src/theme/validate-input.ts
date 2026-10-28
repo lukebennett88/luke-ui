@@ -92,6 +92,7 @@ export function validateThemeInput(input: ThemeInput): Array<ThemeValidationIssu
 		if (isRecord(fonts)) {
 			if (fonts.body === null) report('typography.fonts.body', 'cannot be null');
 			else if (fonts.body !== undefined) validateFont(fonts.body, 'typography.fonts.body', report);
+			if (fonts.code !== undefined) validateFontFamily(fonts.code, 'typography.fonts.code', report);
 			if (fonts.display !== undefined && fonts.display !== null) {
 				validateFont(fonts.display, 'typography.fonts.display', report);
 			}
@@ -310,19 +311,7 @@ function validateFont(
 		return;
 	}
 	const { family, metrics } = font;
-	if (typeof family !== 'string' || family.trim() === '') {
-		report(`${path}.family`, 'must be a non-empty CSS font-family stack');
-	} else if (UNSAFE_FAMILY_PATTERN.test(family)) {
-		report(
-			`${path}.family`,
-			'must not contain `;`, `{`, `}`, `<`, `\\`, `/*`, `*/`, or control characters',
-		);
-	} else if (!isFontFamilyList(family)) {
-		report(
-			`${path}.family`,
-			'must be a comma-separated list of family names and generic families. Quote a name that is not plain words',
-		);
-	}
+	validateFontFamily(family, `${path}.family`, report);
 
 	if (!isRecord(metrics)) {
 		report(`${path}.metrics`, 'must be a Capsize font-metrics object');
@@ -359,6 +348,23 @@ function validateFont(
 	}
 	if (isFiniteNumber(lineGap) && lineGap < 0) {
 		report(`${path}.metrics.lineGap`, 'must be 0 or greater');
+	}
+}
+
+function validateFontFamily(
+	family: unknown,
+	path: string,
+	report: (path: string, message: string) => void,
+): void {
+	if (typeof family !== 'string' || family.trim() === '') {
+		report(path, 'must be a non-empty CSS font-family stack');
+	} else if (UNSAFE_FAMILY_PATTERN.test(family)) {
+		report(path, 'must not contain `;`, `{`, `}`, `<`, `\\`, `/*`, `*/`, or control characters');
+	} else if (!isFontFamilyList(family)) {
+		report(
+			path,
+			'must be a comma-separated list of family names and generic families. Quote a name that is not plain words',
+		);
 	}
 }
 

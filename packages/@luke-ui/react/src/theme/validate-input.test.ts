@@ -335,3 +335,11 @@ describe('neutral input validation', () => {
 		});
 	}
 });
+
+for (const family of ['', 'Inter, , monospace', 'Inter; color: red', 'inherit', null]) {
+	it(`rejects invalid code family ${JSON.stringify(family)}`, () => {
+		expect(issuesOf(themeWithTypography({ fonts: { body: interFont, code: family } }))).toEqual([
+			expect.objectContaining({ path: 'typography.fonts.code', theme: 'invalid-fonts' }),
+		]);
+	});
+}

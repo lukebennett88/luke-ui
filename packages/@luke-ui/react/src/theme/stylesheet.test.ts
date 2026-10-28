@@ -191,6 +191,21 @@ describe('theme fonts', () => {
 		expect(compile(null)).toBe(compile());
 	});
 
+	it('changes only the code family declaration when a code stack is authored', () => {
+		const input = {
+			color: { accent: '#3b82f6' },
+			name: 'font-check',
+			typography: { fonts: { body: interFont } },
+		};
+		const baseline = defineTheme(input);
+		const custom = defineTheme({
+			...input,
+			typography: { fonts: { ...input.typography.fonts, code: "'Fira Code', monospace" } },
+		});
+		const defaultFamily = extractValue(splitBlocks(baseline).themeWide, '--luke-font-family-code');
+		expect(custom).toBe(baseline.replace(defaultFamily, "'Fira Code', monospace"));
+	});
+
 	it('keeps the code family on the system monospace stack', () => {
 		const themeWide = themeWideOf({ fonts: { body: interFont, display: loraFont } });
 		expect(extractValue(themeWide, '--luke-font-family-code')).toContain('monospace');

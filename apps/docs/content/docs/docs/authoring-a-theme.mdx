@@ -55,9 +55,9 @@ This minimal theme, saved as `theme.ts`, authors one colour, a neutral character
 
 ### Fonts
 
-Each font is a `ThemeFont`: a CSS `family` stack, and Capsize `metrics` for the stack's first font.
-Luke UI trims each typography style with its font's metrics. The metrics need `familyName`,
-`ascent`, `capHeight`, `descent`, `lineGap`, and `unitsPerEm`. Import them from
+Each body or display font is a `ThemeFont`: a CSS `family` stack, and Capsize `metrics` for the
+stack's first font. Luke UI trims each typography style with its font's metrics. The metrics need
+`familyName`, `ascent`, `capHeight`, `descent`, `lineGap`, and `unitsPerEm`. Import them from
 `@capsizecss/metrics`, which you install as a development dependency, or read them from a font file
 with `@capsizecss/unpack`.
 
@@ -66,6 +66,11 @@ with `@capsizecss/unpack`.
 those styles use the body font.
 
 <SourceCodeBlock src="theming/display-font.ts" />
+
+Set `typography.fonts.code` to a CSS font-family stack for code. It needs no Capsize metrics. When
+omitted, Luke UI uses its system monospace stack. This theme composes Paper and sets a code font:
+
+<SourceCodeBlock src="theming/code-font.ts" />
 
 A theme only names its fonts. The generated stylesheet sets each style's `font-family`, but it has
 no `@font-face` rule, so the browser does not download the font. Load every font and weight the
