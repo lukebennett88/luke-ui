@@ -22,7 +22,7 @@ Choose borders and shadow separately. A raised surface does not add either, and 
 `base` with a border or `subdued`.
 
 Text uses `primary` and `secondary` roles. Borders distinguish decorative, control, and focus uses.
-Text, role foregrounds, `color.border.control`, `color.border.danger`, and the focus ring are
+Text, role foregrounds, `color.border.control`, `color.border.<role>.strong`, and the focus ring are
 guaranteed to contrast with all three surfaces. Control hover and pressed borders derive from
 `color.border.control` and keep the same contrast guarantee. `color.border.decorative` is a
 separator with no contrast guarantee.
@@ -93,20 +93,22 @@ the same.
 
 ### Borders
 
-Each role also has one state-free border, for example `vars.color.border.warning`. The token
-describes meaning. The component decides when to apply it, such as only while invalid or as a
-permanent outline.
+Each role has two state-free borders, for example `vars.color.border.warning.subtle` and
+`vars.color.border.warning.strong`. The token describes meaning. The component decides when to apply
+it, such as only while invalid or as a permanent outline.
 
-`color.border.danger` marks an invalid control's boundary and reaches at least 3:1 against all three
-standard surfaces in both modes. Use it for invalid borders and outline edges. Danger solid
-backgrounds carry the on-solid text guarantee, but have no 3:1 guarantee against those surfaces.
+`strong` is the functional border. It reaches at least 3:1 against all three standard surfaces and
+that role's own subtle background in both modes. `color.border.danger.strong` marks an invalid
+control's boundary. Use `strong` for borders and outline edges that identify a component or state.
+Danger solid backgrounds carry the on-solid text guarantee, but have no 3:1 guarantee against those
+surfaces.
 
-The other five role borders are decorative tints, for example on an application notice. Luke UI
-measures their contrast, but does not guarantee they reach 3:1. See
+`subtle` is decorative, for example on an application notice. Luke UI measures its contrast, but
+does not guarantee it reaches 3:1. See
 [contrast validation](/docs/authoring-a-theme#contrast-validation). Never rely on one alone to
 communicate a required state such as selected, invalid, or checked. Pair it with text, an icon, or
-another cue that is separately contrast-gated. Use `color.border.control` when a custom element
-needs a guaranteed boundary.
+another cue that is separately contrast-gated, or use `strong`. Use `color.border.control` when a
+custom element needs a guaranteed boundary.
 
 ### The numeric scale is private
 

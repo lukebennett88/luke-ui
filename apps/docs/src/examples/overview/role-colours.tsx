@@ -62,7 +62,7 @@ export default () => {
 						>
 							<Box
 								backgroundColor={`${role}.subtle`}
-								borderColor={role}
+								borderColor={`${role}.subtle`}
 								borderRadius="control"
 								borderStyle="solid"
 								borderWidth="thin"

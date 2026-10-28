@@ -436,7 +436,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
-// `border.danger` carries the 3:1 control-boundary guarantee. Off and on invalid boxes use
+// `border.danger.strong` carries the 3:1 control-boundary guarantee. Off and on invalid boxes use
 // different selector branches (subtle vs solid fill), and hover/pressed are separate rules, so each
 // combination must keep the border.
 for (const isSelected of [false, true]) {
@@ -451,7 +451,7 @@ for (const isSelected of [false, true]) {
 			label.setAttribute(state, 'true');
 
 			expect(getComputedStyle(indicator).borderTopColor).toBe(
-				resolvedBorderColor(label, 'var(--luke-color-border-danger)'),
+				resolvedBorderColor(label, 'var(--luke-color-border-danger-strong)'),
 			);
 		});
 	}
