@@ -63,7 +63,7 @@ describe('solveInteractionTints', () => {
 			}
 		});
 
-		it(`keeps critical text at ${TEXT_RATIO}:1 over ${name} dark raised with the pressed tint`, () => {
+		it(`keeps danger text at ${TEXT_RATIO}:1 over ${name} dark raised with the pressed tint`, () => {
 			const colorValues = compiledColorValues(foundation, 'dark');
 			const tints = solveInteractionTints('dark', colorValues);
 			const raised = parseColor(colorValues['color.surface.raised']);

@@ -23,7 +23,7 @@ for (const appearance of visualAppearances) {
 				.getByRole('button', { name: 'Pressed' })
 				.element()
 				.setAttribute('data-pressed', 'true');
-			await captureVisualAppearance(locator, 'button/critical-interaction-states', appearance);
+			await captureVisualAppearance(locator, 'button/danger-interaction-states', appearance);
 		},
 	);
 }

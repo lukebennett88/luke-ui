@@ -10,7 +10,7 @@ const SOURCE = `
 	import type { External } from '../../../../node_modules/external/index';
 
 	export type Prominence = 'low' | 'standard' | 'high';
-	export type Tone = 'neutral' | 'critical';
+	export type Tone = 'neutral' | 'danger';
 	export type Callback = (value: string) => void;
 	export type Wrapped<Value> = Value | { initial: Value };
 

@@ -44,11 +44,11 @@ function ButtonScene() {
 			<Button>Neutral standard button</Button>
 			<Button prominence="high">Neutral high button</Button>
 			<Button prominence="low" tone="danger">
-				Critical low button
+				Danger low button
 			</Button>
-			<Button tone="danger">Critical standard button</Button>
+			<Button tone="danger">Danger standard button</Button>
 			<Button prominence="high" tone="danger">
-				Critical high button
+				Danger high button
 			</Button>
 			<Button appearance="text" prominence="low">
 				Neutral low text Button
@@ -58,10 +58,10 @@ function ButtonScene() {
 				Neutral high text Button
 			</Button>
 			<Button appearance="text" prominence="low" tone="danger">
-				Critical low text Button
+				Danger low text Button
 			</Button>
 			<Button appearance="text" tone="danger">
-				Critical standard text Button
+				Danger standard text Button
 			</Button>
 			<Button isDisabled>Disabled</Button>
 			<Button isPending>Standard pending</Button>
@@ -1020,9 +1020,9 @@ test('kitchen sink on overlay', { tags: ['visual'] }, async () => {
 					<Button prominence="low" tone="danger">
 						Delete
 					</Button>
-					<Button tone="danger">Critical standard</Button>
+					<Button tone="danger">Danger standard</Button>
 					<Button prominence="high" tone="danger">
-						Critical high
+						Danger high
 					</Button>
 				</Grid>
 			</div>,

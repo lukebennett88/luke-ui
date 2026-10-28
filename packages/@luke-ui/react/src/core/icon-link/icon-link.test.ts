@@ -15,7 +15,7 @@ test('IconLink supports ref and rejects unsupported props', () => {
 		href: '/settings',
 		icon: 'delete',
 		// @ts-expect-error — IconLink has no tone prop
-		tone: 'critical',
+		tone: 'danger',
 	});
 	assertType<IconLinkProps>({
 		// @ts-expect-error — IconLink has no appearance prop
