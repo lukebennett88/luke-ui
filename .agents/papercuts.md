@@ -121,3 +121,20 @@ not help. Silence in this log is not evidence.
 - Problem: Agent-authored browser tests used DOM selectors despite the required testing guidance.
   review-pr also calls out this rule, so another pointer does not address the workflow failure.
   Correcting the selectors does not establish that test authoring applies the rule.
+
+## Pure validation cases added to a browser test
+
+- Seen: 2026-10-28 (#962). Review moved invalid code-font input cases from
+  `font-family.browser.test.ts` to `validate-input.test.ts`.
+- Where: `packages/@luke-ui/react/src/theme/`. `docs/TESTING.md`, Test types, places pure logic in
+  Node unit tests; the write-tests workflow requires reading that guide.
+- Problem: Agent-authored pure validation cases initially used the browser suite despite the
+  required test-type guidance. Correcting the tests does not establish that the workflow applies it.
+
+## Authored documentation uses a prose semicolon
+
+- Seen: 2026-10-28 (#962). `pnpm run check` rejected a semicolon in the new code-font guidance.
+- Where: `apps/docs/content/docs/docs/authoring-a-theme.mdx`. `docs/DOCUMENTATION.md`, Writing
+  style, forbids prose semicolons; the write-docs workflow requires consulting the guide.
+- Problem: Agent-authored prose breached the required writing rule before the check caught it.
+  Correcting the prose does not establish that the workflow applies the rule.
