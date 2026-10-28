@@ -157,3 +157,20 @@ describe('a rejected family', () => {
 		});
 	}
 });
+
+it('switches the code family with the theme identity', () => {
+	const family = "'Fira Code', ui-monospace, monospace";
+	const custom = defineTheme({
+		color: { accent: '#3b82f6' },
+		name: 'custom-code',
+		typography: { fonts: { body: interFont, code: family } },
+	});
+	const fallback = compile(interFont.family);
+	style.textContent = `${custom}\n${fallback}\nspan { font-family: var(--luke-font-family-code); }`;
+	document.head.append(style);
+	document.body.append(probe);
+	document.documentElement.className = getThemeClassName('custom-code');
+	expect(getComputedStyle(probe).fontFamily).toBe(browserComputedFamily(family));
+	document.documentElement.className = getThemeClassName(name);
+	expect(getComputedStyle(probe).fontFamily).toBe(browserComputedFamily(codeFontFamilyStack));
+});

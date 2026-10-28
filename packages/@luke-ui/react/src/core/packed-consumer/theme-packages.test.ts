@@ -152,6 +152,9 @@ describe.skipIf(themes.length === 0)('the packed theme packages', () => {
 				}
 				// The product theme is composed from Paper and stands alone: it never names Paper's identity.
 				expect(readFileSync(stylesheets.product!, 'utf8')).not.toContain('luke-ui-theme-paper');
+				expect(readFileSync(stylesheets.product!, 'utf8')).toContain(
+					"--luke-font-family-code: 'Fira Code', monospace;",
+				);
 			});
 
 			test('runs the documented `node compile-theme.ts` with Node 24 and writes a complete theme', () => {

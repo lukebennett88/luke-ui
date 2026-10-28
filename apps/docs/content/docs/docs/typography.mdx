@@ -79,8 +79,11 @@ while that font renders:
 
 ### Code font
 
-`Code` uses `vars.font.family.code`, a system monospace stack that every theme declares. To use
-another font, override the variable on `:root` in an unlayered rule after the theme stylesheet:
+`Code` and Prose code blocks use `vars.font.family.code`, which defaults to a system monospace
+stack. Set `typography.fonts.code` in your theme to use another font. See
+[Authoring a theme](/docs/authoring-a-theme#fonts).
+
+You can also override the variable on `:root` in an unlayered rule after the theme stylesheet:
 
 ```css
 :root {

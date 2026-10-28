@@ -111,6 +111,7 @@ export const productTheme: ThemeInput = {
 	color: { ...paperTheme.color, accent: '#3b82f6' },
 	radius: { ...paperTheme.radius, control: 8 },
 	name: 'product',
+	typography: { ...paperTheme.typography, fonts: { ...paperTheme.typography.fonts, code: "'Fira Code', monospace" } },
 };
 `;
 

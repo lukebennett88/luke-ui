@@ -115,7 +115,7 @@ function buildIdentityValues(foundation: ThemeFoundation): { [Path in IdentityPa
 		// A literal copy of the body family when there is no display font. A generated value never
 		// references another token, so overriding one token never moves another.
 		'font.family.display': fonts.display.family,
-		'font.family.code': codeFontFamilyStack,
+		'font.family.code': foundation.typography.fonts.code ?? codeFontFamilyStack,
 		'font.weight.body': resolvedWeights.body,
 		'font.weight.emphasis': resolvedWeights.emphasis,
 		'font.weight.heading': resolvedWeights.heading,
