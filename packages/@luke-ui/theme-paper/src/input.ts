@@ -4,7 +4,7 @@ import { THEME_NAME } from './name.js';
 
 /**
  * Paper is a flat, hairline-bordered theme with a blue accent. It authors light status colours
- * and derives their dark counterparts from the same hues. Compose this input with ordinary
+ * and derives dark info, success, and warning from the same hues. Compose this input with ordinary
  * TypeScript to start from Paper.
  */
 export const theme: ThemeInput = {
@@ -30,8 +30,8 @@ export const theme: ThemeInput = {
 	},
 	color: {
 		accent: { dark: 'oklch(0.48 0.11 250)', light: '#185281' },
-		// Derive dark feedback colours from the authored light sources.
-		danger: { light: '#c0262e' },
+		// Preserve the dark danger treatment; derive other dark feedback colours from their light sources.
+		danger: { light: '#c0262e', dark: 'oklch(0.48 0.16 25)' },
 		info: { light: '#1d39c4' },
 		neutral: { dark: 'oklch(0.22 0.01 250)', light: '#ffffff' },
 		success: { light: '#306317' },

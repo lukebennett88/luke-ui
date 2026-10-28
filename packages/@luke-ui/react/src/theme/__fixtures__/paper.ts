@@ -4,7 +4,7 @@ import type { ThemeInput } from '../define-theme.js';
 /**
  * The visual-test copy of Paper. It may differ from the published input except for solid fills,
  * on-solid text, and control finish, which the packed-consumer harness checks. Its light status
- * sources supply the hues for the generated dark counterparts.
+ * sources supply the hues for the generated dark info, success, and warning counterparts.
  */
 export const paperTheme: ThemeInput = {
 	controlFinish: {
@@ -29,8 +29,8 @@ export const paperTheme: ThemeInput = {
 	},
 	color: {
 		accent: { dark: 'oklch(0.48 0.11 250)', light: '#185281' },
-		// Derive dark feedback colours from the authored light sources.
-		danger: { light: '#c0262e' },
+		// Preserve the dark danger treatment; derive other dark feedback colours from their light sources.
+		danger: { light: '#c0262e', dark: 'oklch(0.48 0.16 25)' },
 		info: { light: '#1d39c4' },
 		neutral: { dark: 'oklch(0.22 0.01 250)', light: '#ffffff' },
 		success: { light: '#306317' },
