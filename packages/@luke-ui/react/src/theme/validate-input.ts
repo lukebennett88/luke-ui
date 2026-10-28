@@ -124,15 +124,11 @@ function validateColors(color: unknown, report: (path: string, message: string) 
 		return;
 	}
 	for (const role of SOURCE_COLOR_FIELDS) {
-		validateColorRole(color[role], `color.${role}`, true, report);
+		if (role !== 'neutral') validateColorRole(color[role], `color.${role}`, true, report);
 	}
-	if (
-		color.neutralStyle !== undefined &&
-		color.neutralStyle !== 'cool' &&
-		color.neutralStyle !== 'neutral' &&
-		color.neutralStyle !== 'warm'
-	) {
-		report('color.neutralStyle', 'must be cool, neutral, or warm');
+	validateNeutral(color.neutral, report);
+	if (Object.hasOwn(color, 'neutralStyle')) {
+		report('color.neutralStyle', 'is unsupported; use color.neutral with a style');
 	}
 	validateColorRole(color.backdrop, 'color.backdrop', true, report);
 	const surface = color.surface;
@@ -147,6 +143,35 @@ function validateColors(color: unknown, report: (path: string, message: string) 
 	for (const role of SURFACE_ROLES) {
 		validateColorRole(surface[role], `color.surface.${role}`, role === 'base', report);
 	}
+}
+
+function validateNeutral(value: unknown, report: (path: string, message: string) => void): void {
+	if (value === undefined || typeof value === 'string') {
+		validateColorRole(value, 'color.neutral', true, report);
+		return;
+	}
+	if (!isRecord(value)) {
+		report(
+			'color.neutral',
+			'must be a colour string or a light/dark object, or a curated style object',
+		);
+		return;
+	}
+	for (const key of Object.keys(value)) {
+		if (key !== 'style' && key !== 'light' && key !== 'dark') {
+			report(`color.neutral.${key}`, 'is unsupported');
+		}
+	}
+	if (Object.hasOwn(value, 'style')) {
+		if (Object.hasOwn(value, 'light') || Object.hasOwn(value, 'dark')) {
+			report('color.neutral', 'choose either a style or light/dark colours, not both');
+		}
+		if (value.style !== 'neutral' && value.style !== 'warm' && value.style !== 'cool') {
+			report('color.neutral.style', 'must be neutral, warm, or cool');
+		}
+		return;
+	}
+	validateColorRole(value, 'color.neutral', true, report);
 }
 
 function validateColorRole(

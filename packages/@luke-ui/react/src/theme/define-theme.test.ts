@@ -232,9 +232,9 @@ describe('normalizeTheme resolves `surface.base` split from `neutral`', () => {
 		expect(foundation.dark.color.surface.base).toBe(foundation.dark.color.neutral);
 	});
 
-	it('omitted base also coincides with a curated neutralStyle', () => {
+	it('omitted base also coincides with a curated neutral style', () => {
 		const foundation = normalizeTheme({
-			color: { accent: '#3b82f6', neutralStyle: 'warm' },
+			color: { accent: '#3b82f6', neutral: { style: 'warm' } },
 			name: 'base-omitted-style',
 			typography: testTypography,
 		});
@@ -471,5 +471,76 @@ describe('TypeScript theme composition', () => {
 			normalizeTheme(tactileTheme).light.controlFinish,
 		);
 		expect(() => defineTheme(input)).not.toThrow();
+	});
+});
+
+describe('neutral composition and independent surfaces', () => {
+	for (const [style, chroma, hue] of [
+		['neutral', 0, 0],
+		['warm', 0.01, 70],
+		['cool', 0.01, 250],
+	] as const) {
+		it(`preserves the ${style} preset in both modes`, () => {
+			const foundation = normalizeTheme({
+				name: 'preset',
+				color: { accent: '#3b82f6', neutral: { style } },
+				typography: testTypography,
+			});
+			for (const [mode, lightness] of [
+				['light', 0.985],
+				['dark', 0.22],
+			] as const) {
+				expect(foundation[mode].color.neutral).toEqual(
+					gamutMapOklch({ l: lightness, c: chroma, h: hue }),
+				);
+			}
+		});
+	}
+
+	it('replaces the entire neutral choice through ordinary composition', () => {
+		const original: ThemeInput = {
+			name: 'composed',
+			color: { accent: '#3b82f6', neutral: { style: 'warm' } },
+			typography: testTypography,
+		};
+		const composed: ThemeInput = {
+			...original,
+			color: { ...original.color, neutral: { light: '#ffffff', dark: '#222222' } },
+		};
+		expect(normalizeTheme(composed).light.color.neutral).toEqual(
+			gamutMapOklch(parseColor('#ffffff')),
+		);
+		// @ts-expect-error A style and mode colours cannot be combined.
+		const mixed: ThemeInput['color']['neutral'] = { style: 'warm', light: '#fff' };
+		expect(mixed).toBeDefined();
+	});
+
+	it('derives missing sides from their own base even when the other surfaces are authored', () => {
+		const input: ThemeInput = {
+			name: 'independent',
+			color: {
+				accent: '#3b82f6',
+				neutral: { style: 'warm' },
+				surface: {
+					base: { light: 'oklch(0.98 0.01 250)', dark: 'oklch(0.22 0.01 250)' },
+					subdued: { light: 'oklch(0.96 0.01 120)' },
+					raised: { dark: 'oklch(0.29 0.01 120)' },
+				},
+			},
+			typography: testTypography,
+		};
+		const foundation = normalizeTheme(input);
+		const { diagnostics } = compileTheme(foundation);
+		expect(foundation.light.color.neutral.h).toBe(70);
+		expect(diagnostics.light.surfaces.subdued).toEqual(
+			gamutMapOklch(parseColor('oklch(0.96 0.01 120)')),
+		);
+		expect(diagnostics.dark.surfaces.raised).toEqual(
+			gamutMapOklch(parseColor('oklch(0.29 0.01 120)')),
+		);
+		expect(diagnostics.light.surfaces.raised.h).toBeCloseTo(250);
+		expect(diagnostics.dark.surfaces.subdued.h).toBeCloseTo(250);
+		expect(diagnostics.light.surfaces.raised.l).toBeCloseTo(0.995);
+		expect(diagnostics.dark.surfaces.subdued.l).toBeCloseTo(0.19);
 	});
 });

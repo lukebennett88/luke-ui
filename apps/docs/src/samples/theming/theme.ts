@@ -2,7 +2,7 @@ import interMetrics from '@capsizecss/metrics/inter';
 import type { ThemeInput } from '@luke-ui/react/theme/compiler';
 
 export const theme: ThemeInput = {
-	color: { accent: '#3b82f6', neutralStyle: 'cool' },
+	color: { accent: '#3b82f6', neutral: { style: 'cool' } },
 	name: 'product',
 	typography: {
 		fonts: {

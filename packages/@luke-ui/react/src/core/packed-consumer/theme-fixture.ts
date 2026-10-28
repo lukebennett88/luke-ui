@@ -145,7 +145,10 @@ import { theme as tactileTheme } from '@luke-ui/theme-tactile/input';
 
 export const classNames: Array<string> = [paperClassName, tactileClassName];
 export const inputs: Array<ThemeInput> = [paperTheme, tactileTheme];
-const product: ThemeInput = { ...paperTheme, name: 'product' };
+const product: ThemeInput = { ...paperTheme, name: 'product', color: { ...paperTheme.color, neutral: { style: 'warm' } } };
+// @ts-expect-error A curated style cannot be combined with a colour.
+const invalidNeutral: ThemeInput['color']['neutral'] = { style: 'cool', light: '#fff' };
+void invalidNeutral;
 export const css: string = defineTheme(product);
 `;
 
