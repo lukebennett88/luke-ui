@@ -218,7 +218,7 @@ for (const appearance of visualAppearances) {
 		);
 		const onSolid = locator.getByRole('link', { name: 'On solid' }).element();
 		const onSubtle = locator.getByRole('link', { name: 'On subtle' }).element();
-		const solidForeground = pairedColors(onSolid, 'danger.solid').foreground;
+		const solidForeground = pairedColors(onSolid, 'danger.solid.rest').foreground;
 		await expectAxeContrastPasses(container);
 
 		const actual = INTERACTION_STATES.map((state) => {

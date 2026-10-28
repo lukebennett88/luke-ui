@@ -6,7 +6,7 @@ import { contextualForeground } from '../styles/surface.js';
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
 
 /** A Box background value, or any recognised fill with its interaction state. */
-export type PairedBackground = SurfaceBackground | `${SemanticRole}.${'subtle' | 'solid'}`;
+export type PairedBackground = SurfaceBackground | `${SemanticRole}.solid`;
 
 /** Every contextual foreground slot, in a stable order. */
 const FOREGROUND_SLOTS = ['primary', 'secondary', ...SEMANTIC_ROLES] as const;
@@ -40,14 +40,14 @@ export function pairedTokens(background: PairedBackground): Record<ForegroundSlo
 	if (level === 'solid') {
 		const { onSolid } = vars.color.foreground[group as SemanticRole];
 		return {
-			primary: onSolid.primary,
-			secondary: onSolid.secondary,
-			...Object.fromEntries(SEMANTIC_ROLES.map((role) => [role, onSolid.primary])),
+			primary: onSolid,
+			secondary: onSolid,
+			...Object.fromEntries(SEMANTIC_ROLES.map((role) => [role, onSolid])),
 		} as Record<ForegroundSlot, string>;
 	}
 	return {
-		primary: vars.color.text.primary,
-		secondary: vars.color.text.secondary,
+		primary: vars.color.foreground.primary,
+		secondary: vars.color.foreground.secondary,
 		...Object.fromEntries(SEMANTIC_ROLES.map((role) => [role, vars.color.foreground[role].rest])),
 	} as Record<ForegroundSlot, string>;
 }
@@ -57,9 +57,9 @@ export function pairedColors(element: Element, background: PairedBackground) {
 	const [group, level, state = 'rest'] = background.split('.') as [string, string, string?];
 	let fill: string;
 	if (group === 'surface') {
-		fill = vars.color.surface[level as keyof typeof vars.color.surface];
+		fill = vars.color.background.surface[level as keyof typeof vars.color.background.surface];
 	} else if (level === 'subtle') {
-		fill = vars.color.background[group as SemanticRole].subtle.rest;
+		fill = vars.color.background[group as SemanticRole].subtle;
 	} else {
 		fill =
 			vars.color.background[group as SemanticRole].solid[state as 'rest' | 'hover' | 'pressed'];

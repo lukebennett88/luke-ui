@@ -15,7 +15,7 @@ import { themeTokens } from '../generated/token-reference.generated.js';
 type AssertExhaustive<Key extends string, List extends ReadonlyArray<Key>> =
 	Exclude<Key, List[number]> extends never ? true : Exclude<Key, List[number]>;
 
-export type Role = keyof typeof vars.color.background;
+export type Role = Exclude<keyof typeof vars.color.background, 'surface' | 'backdrop' | 'skeleton'>;
 
 /** Semantic roles under `vars.color.background` / `foreground`, in contract order. */
 export const ROLES = [
@@ -38,10 +38,6 @@ export const COLOR_FAMILIES = [
 	'background',
 	'foreground',
 	'border',
-	'surface',
-	'text',
-	'overlay',
-	'loadingSkeleton',
 ] as const satisfies ReadonlyArray<ColorFamilyId>;
 true satisfies AssertExhaustive<ColorFamilyId, typeof COLOR_FAMILIES>;
 
@@ -251,7 +247,9 @@ function buildColorFamilies(tokens: ReadonlyArray<ThemeToken>): ReadonlyArray<Co
 					role,
 					tokens: familyTokens.filter((token) => token.path.split('.')[2] === role),
 				})),
-				tokens: [],
+				tokens: familyTokens.filter(
+					(token) => !ROLES.some((role) => token.path.split('.')[2] === role),
+				),
 			};
 		}
 		return { id, roles: null, tokens: familyTokens };

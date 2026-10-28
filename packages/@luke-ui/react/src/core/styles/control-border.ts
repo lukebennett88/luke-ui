@@ -8,5 +8,5 @@ import {
 export function controlBorderState(state: 'hover' | 'pressed'): string {
 	const strength =
 		state === 'hover' ? CONTROL_BORDER_HOVER_STRENGTH : CONTROL_BORDER_PRESSED_STRENGTH;
-	return `color-mix(in srgb, ${vars.color.border.control} ${100 - strength * 100}%, ${vars.color.text.primary} ${strength * 100}%)`;
+	return `color-mix(in srgb, ${vars.color.border.control} ${100 - strength * 100}%, ${vars.color.foreground.primary} ${strength * 100}%)`;
 }

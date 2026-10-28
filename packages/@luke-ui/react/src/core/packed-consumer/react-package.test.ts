@@ -237,7 +237,7 @@ for (const consumer of consumers) {
 								if (fill == null || text == null) return null;
 								const probe = fill.appendChild(document.createElement('span'));
 								probe.style.backgroundColor = 'var(--luke-color-background-accent-solid-rest)';
-								probe.style.color = 'var(--luke-color-foreground-accent-on-solid-primary)';
+								probe.style.color = 'var(--luke-color-foreground-accent-on-solid)';
 								const expected = getComputedStyle(probe);
 								const colors = {
 									expectedBackground: expected.backgroundColor,
@@ -265,7 +265,7 @@ for (const consumer of consumers) {
 					expect(result.keptServerElements).toBe(true);
 					expect(result.textAfterHydration).toBe(result.serverText);
 					// The theme package and the React stylesheet pair a solid fill with its text after
-					// hydration: a danger Text reads the fill's on-solid primary, not the danger hue.
+					// hydration: a danger Text reads the fill's on-solid colour, not the danger hue.
 					expect(result.contextualColors?.text).not.toBe(result.contextualColors?.dangerHue);
 					expect(result.contextualColors?.fillBackground).toBe(
 						result.contextualColors?.expectedBackground,

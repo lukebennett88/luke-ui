@@ -5,10 +5,10 @@ export function FloatingPanel({ children }: PropsWithChildren) {
 	return (
 		<aside
 			style={{
-				backgroundColor: vars.color.surface.subdued,
+				backgroundColor: vars.color.background.surface.subdued,
 				borderRadius: vars.radius.surface,
 				boxShadow: vars.shadow.floating,
-				color: vars.color.text.primary,
+				color: vars.color.foreground.primary,
 			}}
 		>
 			{children}

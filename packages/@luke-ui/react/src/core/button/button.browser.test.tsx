@@ -495,7 +495,7 @@ const buttonFills = [
 	},
 	{
 		// Standard Buttons keep the resting subtle fill; hover and pressed add the state layer.
-		fill: (_state: InteractionState) => 'neutral.subtle.rest',
+		fill: (_state: InteractionState) => 'neutral.subtle',
 		label: 'Neutral standard',
 		prominence: 'standard',
 		tone: 'neutral',
@@ -513,7 +513,7 @@ const buttonFills = [
 		tone: 'danger',
 	},
 	{
-		fill: (_state: InteractionState) => 'neutral.subtle.rest',
+		fill: (_state: InteractionState) => 'neutral.subtle',
 		label: 'Danger standard',
 		prominence: 'standard',
 		tone: 'danger',
@@ -561,11 +561,11 @@ for (const appearance of visualAppearances) {
 					const chipText =
 						tone === 'danger'
 							? resolvedColor(vars.color.foreground.danger.rest, button)
-							: resolvedColor(vars.color.text.primary, button);
+							: resolvedColor(vars.color.foreground.primary, button);
 					const chip =
 						tone === 'danger'
-							? pairedColors(button, 'danger.subtle.rest')
-							: pairedColors(button, 'neutral.subtle.rest');
+							? pairedColors(button, 'danger.subtle')
+							: pairedColors(button, 'neutral.subtle');
 					return {
 						state,
 						...chip,
@@ -576,7 +576,7 @@ for (const appearance of visualAppearances) {
 				const background = fill(state);
 				const paired =
 					background === null
-						? { ...pairedColors(parent, 'success.solid'), background: TRANSPARENT }
+						? { ...pairedColors(parent, 'success.solid.rest'), background: TRANSPARENT }
 						: pairedColors(button, background);
 				// A danger tone reads the context's danger colour instead of its primary.
 				const color = tone === 'danger' ? paired.foreground.danger : paired.color;
@@ -612,7 +612,7 @@ for (const appearance of visualAppearances) {
 		);
 		const onSolid = locator.getByRole('button', { name: 'On solid' }).element();
 		const onSubtle = locator.getByRole('button', { name: 'On subtle' }).element();
-		const solidForeground = pairedColors(onSolid, 'accent.solid').foreground;
+		const solidForeground = pairedColors(onSolid, 'accent.solid.rest').foreground;
 
 		const actual = INTERACTION_STATES.map((state) => {
 			setInteractionState(onSolid, state);
@@ -960,8 +960,8 @@ for (const appearance of visualAppearances) {
 		const { locator, user } = render(
 			<div
 				style={{
-					backgroundColor: vars.color.surface.raised,
-					color: vars.color.text.primary,
+					backgroundColor: vars.color.background.surface.raised,
+					color: vars.color.foreground.primary,
 					padding: vars.space['16'],
 				}}
 			>
@@ -1013,8 +1013,8 @@ test('kitchen sink on overlay', { tags: ['visual'] }, async () => {
 		const { locator } = render(
 			<div
 				style={{
-					backgroundColor: vars.color.surface.raised,
-					color: vars.color.text.primary,
+					backgroundColor: vars.color.background.surface.raised,
+					color: vars.color.foreground.primary,
 					padding: vars.space['16'],
 				}}
 			>

@@ -13,7 +13,7 @@ import {
 export const card = style({
 	'@layer': {
 		components: {
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			backgroundImage: interactionStateBackgroundImage,
 			textDecoration: 'none',
 			transition: `${interactionStateTransitionProperty} ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,

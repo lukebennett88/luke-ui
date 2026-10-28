@@ -421,7 +421,7 @@ for (const appearance of visualAppearances) {
 			{ appearance },
 		);
 		const parent = page.getByTestId('parent').element();
-		const { foreground } = pairedColors(parent, 'accent.solid');
+		const { foreground } = pairedColors(parent, 'accent.solid.rest');
 		const input = page.getByRole('textbox', { name: 'Email' }).element();
 		const control = input.parentElement;
 		if (control === null) throw new Error('Expected the input control.');
@@ -434,7 +434,7 @@ for (const appearance of visualAppearances) {
 		await expectAxeContrastPasses(container);
 	});
 
-	// On a solid fill the danger hue collapses to on-solid primary, so the icon shape, the message,
+	// On a solid fill the danger hue collapses to on-solid colour, so the icon shape, the message,
 	// and the field's invalid state and description carry the error rather than the colour.
 	test(`an error keeps its meaning when its hue collapses on a solid fill in ${name}`, async () => {
 		const { container } = render(
@@ -448,7 +448,7 @@ for (const appearance of visualAppearances) {
 		const { icon, message } = fieldErrorParts('Enter a valid email.');
 		const messageColor = getComputedStyle(message).color;
 
-		expect(messageColor).toBe(pairedColors(parent, 'danger.solid').foreground.primary);
+		expect(messageColor).toBe(pairedColors(parent, 'danger.solid.rest').foreground.primary);
 		expect(getComputedStyle(icon).backgroundColor).toBe(messageColor);
 		expect(getComputedStyle(icon).maskImage).not.toBe('none');
 		expect(input).toHaveAttribute('aria-invalid', 'true');
@@ -486,10 +486,10 @@ for (const appearance of visualAppearances) {
 		if (onSolid === undefined || onSurface === undefined) throw new Error('Expected two labels.');
 
 		expect(getComputedStyle(onSolid).color).toBe(
-			pairedColors(page.getByTestId('solid').element(), 'accent.solid').foreground.secondary,
+			pairedColors(page.getByTestId('solid').element(), 'accent.solid.rest').foreground.secondary,
 		);
 		expect(getComputedStyle(onSurface).color).toBe(
-			resolvedColor(vars.color.text.disabled, onSurface),
+			resolvedColor(vars.color.foreground.disabled, onSurface),
 		);
 	});
 }

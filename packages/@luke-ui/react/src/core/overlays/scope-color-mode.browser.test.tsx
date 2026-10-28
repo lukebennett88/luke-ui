@@ -103,7 +103,7 @@ async function openOverlay(kind: OverlayKind): Promise<HTMLElement> {
 }
 
 function surfaceBase(element: Element): string {
-	return getComputedStyle(element).getPropertyValue('--luke-color-surface-base');
+	return getComputedStyle(element).getPropertyValue('--luke-color-background-surface-base');
 }
 
 /**
@@ -226,7 +226,7 @@ test('raised surfaces keep their own background inside a repainted scope', async
 	const overlay = await openOverlay('select popover');
 	const probe = document.body.appendChild(document.createElement('div'));
 	probe.style.backgroundColor = getComputedStyle(overlay).getPropertyValue(
-		'--luke-color-surface-raised',
+		'--luke-color-background-surface-raised',
 	);
 	const expected = getComputedStyle(probe).backgroundColor;
 	probe.remove();

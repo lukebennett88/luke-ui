@@ -94,9 +94,9 @@ const WHITE: Oklch = { l: 1, c: 0, h: 0 };
 const BLACK: Oklch = { l: 0, c: 0, h: 0 };
 const ALPHA_SEARCH_STEPS = 1000;
 const TINT_SURFACES = [
-	'color.surface.base',
-	'color.surface.subdued',
-	'color.surface.raised',
+	'color.background.surface.base',
+	'color.background.surface.subdued',
+	'color.background.surface.raised',
 ] as const satisfies ReadonlyArray<keyof SemanticColorValues>;
 
 /**
@@ -109,9 +109,9 @@ export function solveInteractionTints(
 ): InteractionTintPair {
 	const tint = mode === 'dark' ? WHITE : BLACK;
 	const parsed = parseColorValues(colorValues);
-	const base = colorAt(parsed, 'color.surface.base');
-	const neutralSubtle = colorAt(parsed, 'color.background.neutral.subtle.rest');
-	const textPrimary = colorAt(parsed, 'color.text.primary');
+	const base = colorAt(parsed, 'color.background.surface.base');
+	const neutralSubtle = colorAt(parsed, 'color.background.neutral.subtle');
+	const textPrimary = colorAt(parsed, 'color.foreground.primary');
 	const targetHover = mixInteractionState(neutralSubtle, textPrimary, INTERACTION_HOVER_STRENGTH);
 	const targetPressed = mixInteractionState(
 		neutralSubtle,
@@ -193,11 +193,12 @@ function closestVisiblePair(
 		const hoverAlpha = hoverStep / ALPHA_SEARCH_STEPS;
 		const hover = compositeEncodedSrgb(
 			tint,
-			colorAt(colorValues, 'color.surface.base'),
+			colorAt(colorValues, 'color.background.surface.base'),
 			hoverAlpha,
 		);
 		if (
-			oklabDeltaE(colorAt(colorValues, 'color.surface.base'), hover) < INTERACTION_HOVER_VISIBILITY
+			oklabDeltaE(colorAt(colorValues, 'color.background.surface.base'), hover) <
+			INTERACTION_HOVER_VISIBILITY
 		) {
 			continue;
 		}
@@ -306,7 +307,7 @@ function parseColorValues(colorValues: SemanticColorValues): ParsedSemanticColor
 		if (value === undefined) throw new Error(`buildTheme did not generate "${path}"`);
 		// The backdrop may carry alpha, which the colour parser does not accept, and the tint
 		// solver never reads it.
-		if (path === 'color.overlay.backdrop') continue;
+		if (path === 'color.background.backdrop') continue;
 		parsed[path] = parseColor(value);
 	}
 	return parsed;
@@ -395,12 +396,12 @@ function tintContrastPairs(): Array<{
 	foreground: keyof SemanticColorValues;
 }> {
 	const subtleRests = SEMANTIC_ROLES.map((role) => {
-		return `color.background.${role}.subtle.rest` as const;
+		return `color.background.${role}.subtle` as const;
 	});
 	const surfaceBackgrounds = [...TINT_SURFACES, ...subtleRests];
 	const surfaceForegrounds = [
-		'color.text.primary',
-		'color.text.secondary',
+		'color.foreground.primary',
+		'color.foreground.secondary',
 		...SEMANTIC_ROLES.flatMap((role) => {
 			return (['rest', 'hover', 'pressed'] as const).map((state) => {
 				return `color.foreground.${role}.${state}` as const;

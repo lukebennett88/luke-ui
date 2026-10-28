@@ -24,8 +24,8 @@ type InteractionState = SolidInteractionState;
  * its interaction states.
  */
 export type SurfaceBackground =
-	| `surface.${keyof typeof vars.color.surface}`
-	| `${SemanticRole}.subtle.rest`
+	| `surface.${keyof typeof vars.color.background.surface}`
+	| `${SemanticRole}.subtle`
 	| `${SemanticRole}.solid.${SolidInteractionState}`;
 
 type SurfaceStyle = {
@@ -60,7 +60,7 @@ function solidStateVars(
 /**
  * The colour the nearest recognised surface establishes for `slot`. On a standard surface or any
  * subtle fill, the global neutral hierarchy and the role's hue in `state`. On a solid fill, that
- * role's on-solid leaves, with every semantic role in every state resolving to on-solid primary.
+ * role's on-solid colour, with every semantic role in every state resolving to on-solid.
  *
  * `state` applies to the semantic roles, for an interactive foreground such as a text action's
  * hover colour. The compiler gates every role's states against every subtle fill, so each stays
@@ -70,9 +70,10 @@ export function contextualForeground(
 	slot: ForegroundSlot,
 	state: InteractionState = 'rest',
 ): string {
-	if (slot === 'primary') return fallbackVar(foregroundOverride.primary, vars.color.text.primary);
+	if (slot === 'primary')
+		return fallbackVar(foregroundOverride.primary, vars.color.foreground.primary);
 	if (slot === 'secondary') {
-		return fallbackVar(foregroundOverride.secondary, vars.color.text.secondary);
+		return fallbackVar(foregroundOverride.secondary, vars.color.foreground.secondary);
 	}
 	return fallbackVar(foregroundOverride.tone, vars.color.foreground[slot][state]);
 }
@@ -80,11 +81,11 @@ export function contextualForeground(
 /**
  * The colour of disabled text that sits on whatever surface surrounds it, such as a field label.
  * On a standard surface or any subtle fill, the theme's disabled token. On a solid fill, which has
- * no disabled leaf, the fill's on-solid secondary, so the text stays readable and the control's own
+ * no disabled leaf, the fill's on-solid, so the text stays readable and the control's own
  * disabled treatment carries the state.
  */
 export function contextualDisabledForeground(): string {
-	return fallbackVar(foregroundOverride.secondary, vars.color.text.disabled);
+	return fallbackVar(foregroundOverride.secondary, vars.color.foreground.disabled);
 }
 
 /**
@@ -123,7 +124,7 @@ export function transparentSurfaceStyle(): SurfaceStyle {
 function neutralContext(backgroundColor: string): SurfaceStyle {
 	return {
 		backgroundColor,
-		color: vars.color.text.primary,
+		color: vars.color.foreground.primary,
 		vars: {
 			...neutralForegroundContextVars(),
 			...solidStateVars(() => 'initial'),
@@ -144,26 +145,26 @@ function solidContext(role: SemanticRole, backgroundColor: string): SurfaceStyle
 	const { onSolid } = vars.color.foreground[role];
 	return {
 		backgroundColor,
-		color: onSolid.primary,
+		color: onSolid,
 		vars: {
 			...solidStateVars((tone, slot) => {
 				if (slot === 'text') return `var(${solidStateGeneratedTextVarName(tone)})`;
 				return `var(${solidStateGeneratedFillVarName(tone, slot)})`;
 			}),
-			[foregroundOverride.primary]: onSolid.primary,
-			[foregroundOverride.secondary]: onSolid.secondary,
-			[foregroundOverride.tone]: onSolid.primary,
+			[foregroundOverride.primary]: onSolid,
+			[foregroundOverride.secondary]: onSolid,
+			[foregroundOverride.tone]: onSolid,
 		},
 	};
 }
 
 const surfaceStyles = new Map<SurfaceBackground, SurfaceStyle>();
-for (const [surface, backgroundColor] of typedEntries(vars.color.surface)) {
+for (const [surface, backgroundColor] of typedEntries(vars.color.background.surface)) {
 	surfaceStyles.set(`surface.${surface}`, neutralContext(backgroundColor));
 }
 for (const role of SEMANTIC_ROLES) {
 	const { subtle, solid } = vars.color.background[role];
-	surfaceStyles.set(`${role}.subtle.rest`, neutralContext(subtle.rest));
+	surfaceStyles.set(`${role}.subtle`, neutralContext(subtle));
 	for (const state of SOLID_STATES) {
 		surfaceStyles.set(`${role}.solid.${state}`, solidContext(role, solid[state]));
 	}

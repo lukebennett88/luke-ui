@@ -3,8 +3,8 @@ import { interactionState } from '@luke-ui/react/utils';
 import { style } from '@vanilla-extract/css';
 
 const interactionButton = style({
-	backgroundColor: vars.color.background.neutral.subtle.rest,
-	color: vars.color.text.primary,
+	backgroundColor: vars.color.background.neutral.subtle,
+	color: vars.color.foreground.primary,
 	selectors: {
 		'&:hover': interactionState('hover'),
 		'&:active': interactionState('pressed'),

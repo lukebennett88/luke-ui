@@ -249,7 +249,7 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		solidStateValues[solidStateGeneratedTextVarName(tone)] =
 			tone === 'danger'
 				? colorValues['color.foreground.danger.rest']
-				: colorValues['color.text.primary'];
+				: colorValues['color.foreground.primary'];
 	}
 	return { colorValues, familyDiagnostics, solidStateValues, surfaces };
 }

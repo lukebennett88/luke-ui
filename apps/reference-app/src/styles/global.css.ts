@@ -25,15 +25,15 @@ globalStyle('html, body', {
 });
 
 globalStyle('body', {
-	background: vars.color.surface.subdued,
+	background: vars.color.background.surface.subdued,
 	caretColor: vars.color.background.accent.solid.rest,
-	color: vars.color.text.primary,
+	color: vars.color.foreground.primary,
 	margin: 0,
 });
 
 globalStyle('::selection', {
 	background: vars.color.background.accent.solid.rest,
-	color: vars.color.foreground.accent.onSolid.primary,
+	color: vars.color.foreground.accent.onSolid,
 });
 
 globalStyle(

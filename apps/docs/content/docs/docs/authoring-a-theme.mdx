@@ -41,8 +41,8 @@ be omitted. How each colour treats them differs:
   modes. A missing side is generated from `base`. See [Surfaces](#surfaces).
 
 `color.backdrop` is the one colour that may include alpha. Luke UI emits it as
-`color.overlay.backdrop`. Hover and pressed colours are generated from the resting semantic colours.
-Do not author them.
+`color.background.backdrop`. Hover and pressed colours are generated from the resting semantic
+colours. Do not author them.
 
 `radius` overrides the `detail`, `control`, `surface`, and `overlay` corners, which default to 4, 8,
 12, and 16px. Radius inputs are pixels at a 16px root and emit as `rem`. `shadow` and
@@ -182,12 +182,11 @@ sit on any surface, so every surface check covers all three: `base`, `subdued`, 
 
 At 4.5:1:
 
-- `color.text.primary` and `color.text.secondary` against every standard surface and all six roles'
-  subtle resting backgrounds.
+- `color.foreground.primary` and `color.foreground.secondary` against every standard surface and all
+  six roles' subtle resting backgrounds.
 - Each role's rest, hover, and pressed foreground against every standard surface and every role's
   subtle resting backgrounds, including cross-role combinations.
-- Each role's `onSolid.primary` and `onSolid.secondary` against its solid rest, hover, and pressed
-  backgrounds.
+- Each role's `onSolid` against its solid rest, hover, and pressed backgrounds.
 
 At 3:1, against every surface:
 
@@ -197,7 +196,7 @@ At 3:1, against every surface:
 
 At 3:1, for the active Select or Combobox option's inset outline:
 
-- `color.foreground.accent.onSolid.primary` against `color.background.accent.solid.rest` and
+- `color.foreground.accent.onSolid` against `color.background.accent.solid.rest` and
   `color.background.accent.solid.pressed`. The same pairs already clear 4.5:1 as on-solid text.
 
 If any pair fails, `defineTheme` throws `ThemeContrastError` instead of returning CSS. Its

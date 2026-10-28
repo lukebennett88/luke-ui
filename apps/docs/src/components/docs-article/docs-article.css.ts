@@ -64,7 +64,7 @@ export const pagerIcon = style({
 export const tocBar = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.base,
+			backgroundColor: vars.color.background.surface.base,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 			insetBlockStart: SITE_HEADER_BLOCK_SIZE,
 			position: 'sticky',
@@ -84,7 +84,7 @@ export const tocSummary = style({
 			...contentInlinePadding,
 			alignItems: 'center',
 			blockSize: TOC_BAR_BLOCK_SIZE,
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			columnGap: vars.space['8'],
 			cursor: 'pointer',
 			display: 'flex',
@@ -126,7 +126,7 @@ globalStyle(`${tocBar}[open] ${tocSummaryIcon}`, {
 export const tocBarPanel = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.raised,
+			backgroundColor: vars.color.background.surface.raised,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 			boxShadow: vars.shadow.floating,
 			insetBlockStart: '100%',
@@ -169,14 +169,14 @@ export const tocLink = style({
 	'@layer': {
 		components: {
 			borderInlineStart: '2px solid transparent',
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			fontSize: vars.font.label.fontSize,
 			lineHeight: vars.font.label.lineHeight,
 			marginInlineStart: '-1px',
 			textDecoration: 'none',
 			selectors: {
 				'&:hover': {
-					color: vars.color.text.primary,
+					color: vars.color.foreground.primary,
 				},
 				'&[aria-current="location"]': {
 					borderInlineStartColor: vars.color.border.accent,

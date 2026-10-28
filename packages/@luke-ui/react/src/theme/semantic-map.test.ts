@@ -98,22 +98,22 @@ describe('mapSemanticColors', () => {
 
 				// Surfaces: the three resolved surfaces pass through.
 				for (const role of ['base', 'subdued', 'raised'] as const) {
-					expect(result[`color.surface.${role}`]).toBe(formatOklch(surfaces[role]));
+					expect(result[`color.background.surface.${role}`]).toBe(formatOklch(surfaces[role]));
 				}
-				expect(result['color.overlay.backdrop']).toBe(backdrop);
-				expect(result['color.loadingSkeleton']).toBe(
+				expect(result['color.background.backdrop']).toBe(backdrop);
+				expect(result['color.background.skeleton']).toBe(
 					formatOklch(families.neutral[FAMILY_RUNG.muted]),
 				);
 
 				// Global text and borders use the neutral family. `border.control` is a solved
 				// contrast boundary, not a scale-step alias, so it aliases the passed-through value.
-				expect(result['color.text.primary']).toBe(
+				expect(result['color.foreground.primary']).toBe(
 					formatOklch(families.neutral[FAMILY_RUNG.textPrimary]),
 				);
-				expect(result['color.text.secondary']).toBe(
+				expect(result['color.foreground.secondary']).toBe(
 					formatOklch(families.neutral[FAMILY_RUNG.foreground]),
 				);
-				expect(result['color.text.disabled']).toBe(
+				expect(result['color.foreground.disabled']).toBe(
 					formatOklch(families.neutral[FAMILY_RUNG.muted]),
 				);
 				expect(result['color.border.decorative']).toBe(
@@ -129,7 +129,7 @@ describe('mapSemanticColors', () => {
 					const subtle = family[FAMILY_RUNG.subtle];
 					const solid = family[FAMILY_RUNG.solid];
 					const foreground = family[FAMILY_RUNG.foreground];
-					expect(result[`color.background.${role}.subtle.rest`]).toBe(formatOklch(subtle));
+					expect(result[`color.background.${role}.subtle`]).toBe(formatOklch(subtle));
 					expect(result[`color.background.${role}.solid.rest`]).toBe(formatOklch(solid));
 					expect(result[`color.background.${role}.solid.hover`]).toBe(
 						formatOklch(mixInteractionState(solid, textPrimary, INTERACTION_HOVER_STRENGTH)),
@@ -144,11 +144,7 @@ describe('mapSemanticColors', () => {
 					expect(result[`color.foreground.${role}.pressed`]).toBe(
 						formatOklch(mixInteractionState(foreground, textPrimary, INTERACTION_PRESSED_STRENGTH)),
 					);
-					for (const hierarchy of ['primary', 'secondary'] as const) {
-						expect(result[`color.foreground.${role}.onSolid.${hierarchy}`]).toBe(
-							formatOklch(family.contrast),
-						);
-					}
+					expect(result[`color.foreground.${role}.onSolid`]).toBe(formatOklch(family.contrast));
 					if (role === 'danger') continue;
 					expect(result[`color.border.${role}`]).toBe(formatOklch(family[FAMILY_RUNG.border]));
 				}
@@ -157,7 +153,7 @@ describe('mapSemanticColors', () => {
 	});
 
 	describe('completeness', () => {
-		// Every `color.*` leaf, including the passed-through `color.overlay.backdrop`.
+		// Every `color.*` leaf, including the passed-through `color.background.backdrop`.
 		const colourPaths = flattenThemeContract().flatMap(([path]) => {
 			if (!path.startsWith('color.')) return [];
 
@@ -201,7 +197,7 @@ describe('mapSemanticColors', () => {
 				surfaces,
 			});
 
-			expect(result['color.overlay.backdrop']).toBe(backdrop);
+			expect(result['color.background.backdrop']).toBe(backdrop);
 		});
 	});
 });

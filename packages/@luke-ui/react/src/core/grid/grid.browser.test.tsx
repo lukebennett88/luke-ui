@@ -383,17 +383,17 @@ test('does not let long unbreakable content expand equal grid tracks', () => {
 });
 
 const itemStyle = {
-	backgroundColor: vars.color.surface.base,
+	backgroundColor: vars.color.background.surface.base,
 	borderRadius: vars.radius.detail,
-	color: vars.color.text.primary,
+	color: vars.color.foreground.primary,
 	paddingBlock: vars.space['8'],
 	paddingInline: vars.space['12'],
 } as const;
 
 const sceneStyle = {
-	backgroundColor: vars.color.surface.subdued,
+	backgroundColor: vars.color.background.surface.subdued,
 	borderRadius: vars.radius.surface,
-	color: vars.color.text.primary,
+	color: vars.color.foreground.primary,
 	padding: vars.space['16'],
 } as const;
 

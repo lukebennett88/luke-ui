@@ -129,7 +129,7 @@ for (const appearance of visualAppearances) {
 		);
 		const code = getCodeElement(container);
 
-		expect(surfaceColors(code)).toEqual(pairedColors(code, 'neutral.subtle.rest'));
+		expect(surfaceColors(code)).toEqual(pairedColors(code, 'neutral.subtle'));
 		await expectAxeContrastPasses(container);
 	});
 

@@ -43,7 +43,7 @@ type FunctionalColorValues = {
 /** The inputs to {@link mapSemanticColors}. */
 interface MapSemanticColorsRequest {
 	/**
-	 * `color.overlay.backdrop`'s authored value, passed through verbatim (it may carry an alpha
+	 * `color.background.backdrop`'s authored value, passed through verbatim (it may carry an alpha
 	 * channel).
 	 */
 	backdrop: string;
@@ -75,14 +75,14 @@ function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColor
 	const { families, surfaces, backdrop, focus, controlBorder } = request;
 	const neutral = families.neutral;
 	return {
-		'color.surface.base': formatOklch(surfaces.base),
-		'color.surface.subdued': formatOklch(surfaces.subdued),
-		'color.surface.raised': formatOklch(surfaces.raised),
-		'color.overlay.backdrop': backdrop,
-		'color.loadingSkeleton': formatOklch(neutral[FAMILY_RUNG.muted]),
-		'color.text.primary': formatOklch(neutral[FAMILY_RUNG.textPrimary]),
-		'color.text.secondary': formatOklch(neutral[FAMILY_RUNG.foreground]),
-		'color.text.disabled': formatOklch(neutral[FAMILY_RUNG.muted]),
+		'color.background.surface.base': formatOklch(surfaces.base),
+		'color.background.surface.subdued': formatOklch(surfaces.subdued),
+		'color.background.surface.raised': formatOklch(surfaces.raised),
+		'color.background.backdrop': backdrop,
+		'color.background.skeleton': formatOklch(neutral[FAMILY_RUNG.muted]),
+		'color.foreground.primary': formatOklch(neutral[FAMILY_RUNG.textPrimary]),
+		'color.foreground.secondary': formatOklch(neutral[FAMILY_RUNG.foreground]),
+		'color.foreground.disabled': formatOklch(neutral[FAMILY_RUNG.muted]),
 		'color.border.decorative': formatOklch(neutral[FAMILY_RUNG.decorative]),
 		'color.border.control': formatOklch(controlBorder),
 		'color.border.focus': formatOklch(focus),
@@ -103,15 +103,14 @@ function mapRoleColorValues(
 			const solid = interactionStates(family[FAMILY_RUNG.solid], textPrimary);
 			const foreground = interactionStates(family[FAMILY_RUNG.foreground], textPrimary);
 			return [
-				pathEntry(`color.background.${role}.subtle.rest`, subtle),
+				pathEntry(`color.background.${role}.subtle`, subtle),
 				pathEntry(`color.background.${role}.solid.rest`, solid.rest),
 				pathEntry(`color.background.${role}.solid.hover`, solid.hover),
 				pathEntry(`color.background.${role}.solid.pressed`, solid.pressed),
 				pathEntry(`color.foreground.${role}.rest`, foreground.rest),
 				pathEntry(`color.foreground.${role}.hover`, foreground.hover),
 				pathEntry(`color.foreground.${role}.pressed`, foreground.pressed),
-				pathEntry(`color.foreground.${role}.onSolid.primary`, formatOklch(family.contrast)),
-				pathEntry(`color.foreground.${role}.onSolid.secondary`, formatOklch(family.contrast)),
+				pathEntry(`color.foreground.${role}.onSolid`, formatOklch(family.contrast)),
 				pathEntry(
 					`color.border.${role}`,
 					role === 'danger'

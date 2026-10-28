@@ -24,11 +24,11 @@ export const sidebarScroll = style({
 });
 
 export const skipLink = style({
-	background: vars.color.surface.raised,
+	background: vars.color.background.surface.raised,
 	blockSize: '1px',
 	clip: 'rect(1px, 1px, 1px, 1px)',
 	clipPath: 'inset(100%)',
-	color: vars.color.text.primary,
+	color: vars.color.foreground.primary,
 	inlineSize: '1px',
 	overflow: 'hidden',
 	paddingBlock: vars.space['8'],
@@ -55,7 +55,7 @@ export const skipLink = style({
 export const navLink = style({
 	alignItems: 'center',
 	borderRadius: vars.radius.control,
-	color: vars.color.text.secondary,
+	color: vars.color.foreground.secondary,
 	display: 'flex',
 	gap: vars.space['8'],
 	lineHeight: 1.35,
@@ -67,12 +67,12 @@ export const navLink = style({
 			outlineOffset: '2px',
 		},
 		'&:hover': {
-			background: `color-mix(in oklab, ${vars.color.text.primary} 6%, transparent)`,
-			color: vars.color.text.primary,
+			background: `color-mix(in oklab, ${vars.color.foreground.primary} 6%, transparent)`,
+			color: vars.color.foreground.primary,
 		},
 		'&[aria-current="page"]': {
-			background: `color-mix(in oklab, ${vars.color.text.primary} 8%, transparent)`,
-			color: vars.color.text.primary,
+			background: `color-mix(in oklab, ${vars.color.foreground.primary} 8%, transparent)`,
+			color: vars.color.foreground.primary,
 			fontWeight: vars.font.weight.label,
 		},
 	},
@@ -83,16 +83,16 @@ export const menuNavLink = style([
 	navLink,
 	{
 		borderRadius: vars.radius.control,
-		color: vars.color.text.primary,
+		color: vars.color.foreground.primary,
 		minBlockSize: '44px',
 		paddingBlock: vars.space['8'],
 		paddingInline: vars.space['8'],
 		selectors: {
 			'&:hover': {
-				background: `color-mix(in oklab, ${vars.color.text.primary} 5%, transparent)`,
+				background: `color-mix(in oklab, ${vars.color.foreground.primary} 5%, transparent)`,
 			},
 			'&[aria-current="page"]': {
-				background: `color-mix(in oklab, ${vars.color.text.primary} 8%, transparent)`,
+				background: `color-mix(in oklab, ${vars.color.foreground.primary} 8%, transparent)`,
 				fontWeight: vars.font.weight.label,
 			},
 		},
@@ -113,7 +113,7 @@ export const mainScroll = style({
 
 export const mobileHeaderLink = style({
 	alignItems: 'center',
-	color: vars.color.text.secondary,
+	color: vars.color.foreground.secondary,
 	display: 'inline-flex',
 	gap: vars.space['4'],
 	minBlockSize: '44px',
@@ -123,14 +123,14 @@ export const mobileHeaderLink = style({
 			outlineOffset: '2px',
 		},
 		'&:hover': {
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 		},
 	},
 	textDecoration: 'none',
 });
 
 export const panel = style({
-	background: vars.color.surface.base,
+	background: vars.color.background.surface.base,
 	border: `1px solid color-mix(in oklab, ${vars.color.border.decorative} 85%, transparent)`,
 	borderRadius: vars.radius.surface,
 	overflow: 'hidden',
@@ -168,7 +168,7 @@ export const rowControl = style({
 
 export const avatar = style({
 	alignItems: 'center',
-	background: `color-mix(in oklab, ${vars.color.text.primary} 10%, transparent)`,
+	background: `color-mix(in oklab, ${vars.color.foreground.primary} 10%, transparent)`,
 	blockSize: avatarSize,
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.full,
@@ -220,7 +220,7 @@ export const avatarOverlay = style({
 	alignItems: 'center',
 	background: 'color-mix(in oklab, black 45%, transparent)',
 	borderRadius: vars.radius.full,
-	color: vars.color.foreground.neutral.onSolid.primary,
+	color: vars.color.foreground.neutral.onSolid,
 	display: 'flex',
 	inset: 0,
 	justifyContent: 'center',
@@ -250,7 +250,7 @@ export const avatarOverlay = style({
 });
 
 export const menuPopover = style({
-	background: vars.color.surface.raised,
+	background: vars.color.background.surface.raised,
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.surface,
 	boxShadow: vars.shadow.floating,
@@ -268,7 +268,7 @@ export const menu = style({
 
 export const menuItem = style({
 	alignItems: 'center',
-	color: vars.color.text.primary,
+	color: vars.color.foreground.primary,
 	cursor: 'default',
 	display: 'flex',
 	gap: vars.space['8'],
@@ -280,7 +280,7 @@ export const menuItem = style({
 			opacity: vars.interaction.disabledOpacity,
 		},
 		'&[data-focused]': {
-			background: `color-mix(in oklab, ${vars.color.text.primary} 8%, transparent)`,
+			background: `color-mix(in oklab, ${vars.color.foreground.primary} 8%, transparent)`,
 		},
 	},
 });
@@ -288,11 +288,11 @@ export const menuItem = style({
 export const emailEditButton = style({
 	alignItems: 'center',
 	appearance: 'none',
-	background: vars.color.surface.base,
+	background: vars.color.background.surface.base,
 	blockSize: '1.75rem',
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.full,
-	color: vars.color.text.secondary,
+	color: vars.color.foreground.secondary,
 	display: 'inline-flex',
 	flexShrink: 0,
 	inlineSize: '1.75rem',
@@ -300,7 +300,7 @@ export const emailEditButton = style({
 	padding: 0,
 	selectors: {
 		'&:hover': {
-			borderColor: `color-mix(in oklab, ${vars.color.border.decorative} 70%, ${vars.color.text.primary})`,
+			borderColor: `color-mix(in oklab, ${vars.color.border.decorative} 70%, ${vars.color.foreground.primary})`,
 			boxShadow: 'none',
 			transform: 'none',
 		},
@@ -312,7 +312,7 @@ export const emailEditButton = style({
 			outlineOffset: '2px',
 		},
 		'&[data-hovered]': {
-			borderColor: `color-mix(in oklab, ${vars.color.border.decorative} 70%, ${vars.color.text.primary})`,
+			borderColor: `color-mix(in oklab, ${vars.color.border.decorative} 70%, ${vars.color.foreground.primary})`,
 			boxShadow: 'none',
 			transform: 'none',
 		},
@@ -352,7 +352,7 @@ export const profileTextFieldControl = style({
 
 export const dialogOverlay = style({
 	alignItems: 'center',
-	background: vars.color.overlay.backdrop,
+	background: vars.color.background.backdrop,
 	display: 'flex',
 	inset: 0,
 	justifyContent: 'center',
@@ -363,7 +363,7 @@ export const dialogOverlay = style({
 });
 
 export const dialogModal = style({
-	background: vars.color.surface.raised,
+	background: vars.color.background.surface.raised,
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.surface,
 	boxShadow: vars.shadow.overlay,

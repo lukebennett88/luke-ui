@@ -30,10 +30,8 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    using final emitted, rounded, and gamut-mapped colours. Both global text hierarchy colours are
    checked against every standard surface and the six subtle resting backgrounds. All six roles'
    three foreground states are checked against every standard surface and the six subtle resting
-   backgrounds (162 subtle pairs per mode). Both `onSolid.primary` and `onSolid.secondary` are
-   checked against their role's solid rest, hover, and pressed fills. The two on-solid leaves
-   initially emit the same literal resolved colour. New cross-role failures are rejected without
-   automatic repair.
+   backgrounds (162 subtle pairs per mode). Each `onSolid` is checked against its role's solid rest,
+   hover, and pressed fills. New cross-role failures are rejected without automatic repair.
 
 `compileTheme` returns `{ css, diagnostics }`. `ThemeDiagnostics` records everything the pipeline
 resolved (both modes' families, surfaces, solid-anchor search, and contrast checks) for tooling.
@@ -88,7 +86,7 @@ advisory group. Every gate covers all three surfaces: forms, links, and semantic
   surrounding surface.
 - `color.border.focus` is a hard gate against all three surfaces. The keyboard-focus ring stays
   build-time validated at ≥3:1.
-- `color.foreground.accent.onSolid.primary` is also a hard gate at 3:1 against
+- `color.foreground.accent.onSolid` is also a hard gate at 3:1 against
   `color.background.accent.solid.rest` and `color.background.accent.solid.pressed`. The active
   Select or Combobox option draws a 2px inset outline in that on-solid colour on those fills, so the
   adjacent colour is the solid, not the list surface. The same pairs already clear 4.5:1 as on-solid
@@ -136,9 +134,9 @@ search headroom, the search step, and the adaptive interaction tint visibility f
 `lightness-candidates.ts` is the one grid those searches walk. It also declares `SEMANTIC_ROLES`,
 the one canonical role list used by family generation, the semantic map, and the validation matrix.
 
-## `loadingSkeleton`
+## Skeleton background
 
-`color.loadingSkeleton` maps to the neutral family's step 8, for better perceptibility of the
+`color.background.skeleton` maps to the neutral family's step 8, for better perceptibility of the
 loading state against typical surfaces.
 
 ## Interaction states
@@ -168,10 +166,10 @@ Low Buttons therefore use an opaque subtle chip on solids (`solidStateFillVarNam
 `solidStateTextVarName` from the surface pairing). Standard Buttons keep their resting subtle fill
 plus the tint.
 
-Theme authors do not author hover, pressed, or tint colours. `color.overlay.backdrop` is the
-authored modal dimming layer. `color.surface.raised` is the opaque surface for elevated panels,
-cards, menus, popovers, and dialogs. Surface colour and shadow stay separate: a raised surface does
-not add a border or shadow.
+Theme authors do not author hover, pressed, or tint colours. `color.background.backdrop` is the
+authored modal dimming layer. `color.background.surface.raised` is the opaque surface for elevated
+panels, cards, menus, popovers, and dialogs. Surface colour and shadow stay separate: a raised
+surface does not add a border or shadow.
 
 `validateContrast` measures the emitted opaque token pairs. Tint contrast and visibility are gated
 separately by `solveInteractionTints` during `compileTheme`.

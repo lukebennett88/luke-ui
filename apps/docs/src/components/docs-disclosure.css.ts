@@ -29,7 +29,7 @@ export const trigger = style({
 export const chevronEnd = style({
 	'@layer': {
 		components: {
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			flexShrink: 0,
 			transition: `transform ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			selectors: {

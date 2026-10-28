@@ -468,13 +468,13 @@ for (const appearance of visualAppearances) {
 
 		// Explicit primary ignores the custom colour between it and the background.
 		expect(colorOf(resetPrimary)).toBe(
-			resolvedColor(pairedTokens('success.solid').primary, resetPrimary),
+			resolvedColor(pairedTokens('success.solid.rest').primary, resetPrimary),
 		);
 		expect(colorOf(subtleDanger)).toBe(
 			resolvedColor(pairedTokens('info.subtle').danger, subtleDanger),
 		);
 		expect(colorOf(innerSecondary)).toBe(
-			resolvedColor(pairedTokens('danger.solid').secondary, innerSecondary),
+			resolvedColor(pairedTokens('danger.solid.rest').secondary, innerSecondary),
 		);
 		expect(colorOf(scopeSecondary)).toBe(
 			resolvedColor(pairedTokens('surface.base').secondary, scopeSecondary),
@@ -514,7 +514,7 @@ for (const appearance of visualAppearances) {
 		expect(colorOf(byTestId(container, 'inherit-font'))).toBe(colorOf(solid));
 		expect(colorOf(byTestId(container, 'styled'))).toBe(colorOf(solid));
 		expect(colorOf(inheritFontSecondary)).toBe(
-			resolvedColor(pairedTokens('accent.solid').secondary, inheritFontSecondary),
+			resolvedColor(pairedTokens('accent.solid.rest').secondary, inheritFontSecondary),
 		);
 		expect(colorOf(byTestId(container, 'inline-style'))).toBe('rgb(1, 2, 3)');
 	});

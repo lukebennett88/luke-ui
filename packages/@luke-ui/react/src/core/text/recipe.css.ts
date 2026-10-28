@@ -48,7 +48,7 @@ const lineClampVariants = {
 } as const;
 
 // Each colour reads the nearest recognised surface, so `primary` resets to that surface's primary
-// and a semantic role keeps its hue on a standard surface or subtle fill but reads on-solid primary
+// and a semantic role keeps its hue on a standard surface or subtle fill but reads on-solid colour
 // on a solid fill. With no `color`, Text sets none and inherits.
 const colorVariants = {
 	accent: { color: contextualForeground('accent') },

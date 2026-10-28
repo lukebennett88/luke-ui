@@ -199,8 +199,8 @@ test('paints <body> with the theme baseline, and the canvas follows it', () => {
 	const body = getComputedStyle(document.body);
 
 	expect(body.margin).toBe('0px');
-	expect(body.backgroundColor).toBe(resolvedColor(vars.color.surface.base));
-	expect(body.color).toBe(resolvedColor(vars.color.text.primary));
+	expect(body.backgroundColor).toBe(resolvedColor(vars.color.background.surface.base));
+	expect(body.color).toBe(resolvedColor(vars.color.foreground.primary));
 	expect(body.accentColor).toBe(resolvedColor(vars.color.background.accent.solid.rest));
 	const fontProbe = document.body.appendChild(document.createElement('span'));
 	fontProbe.style.fontFamily = vars.font.body.fontFamily;
@@ -233,7 +233,7 @@ test('repaints <body> when the system colour mode changes', async () => {
 	const dark = getComputedStyle(document.body).backgroundColor;
 
 	expect(dark).not.toBe(light);
-	expect(dark).toBe(resolvedColor(vars.color.surface.base));
+	expect(dark).toBe(resolvedColor(vars.color.background.surface.base));
 });
 
 test('lets application CSS override the document baseline', () => {

@@ -141,7 +141,7 @@ describe('compileTheme interaction source', () => {
 			expect(textPrimary).toEqual(
 				highContrastText(chromaticNeutralFoundation[mode].color.neutral, mode),
 			);
-			expect(extractValue(block, '--luke-color-text-primary')).toBe(formatOklch(textPrimary));
+			expect(extractValue(block, '--luke-color-foreground-primary')).toBe(formatOklch(textPrimary));
 
 			for (const role of SEMANTIC_ROLES) {
 				const familyDiagnostics = diagnostics[mode].families[role];
@@ -164,7 +164,9 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 		it(`${foundation.name} keeps the light base neutral and emits exactly three surfaces`, () => {
 			const { css, diagnostics } = compileTheme(foundation);
 			const blocks = splitBlocks(css);
-			expect(parseColor(extractValue(blocks.baseLight, '--luke-color-surface-base')).c).toBe(0);
+			expect(
+				parseColor(extractValue(blocks.baseLight, '--luke-color-background-surface-base')).c,
+			).toBe(0);
 			for (const mode of ['light', 'dark'] as const) {
 				expect(Object.keys(diagnostics[mode].surfaces).toSorted()).toEqual([
 					'base',
@@ -172,14 +174,14 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 					'subdued',
 				]);
 			}
-			expect(css).not.toContain('--luke-color-surface-field');
+			expect(css).not.toContain('--luke-color-background-surface-field');
 		});
 
 		it(`${foundation.name} generates subtle advisory borders and a functional danger boundary`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				const surfaces = ['base', 'subdued', 'raised'].map((surface) => {
-					return parseColor(extractValue(block, `--luke-color-surface-${surface}`));
+					return parseColor(extractValue(block, `--luke-color-background-surface-${surface}`));
 				});
 				// The functional borders are excluded: `border.control` and `border.danger` are boundaries,
 				// hard-gated at >=3:1 by `contrast-validation.ts`, and `border.decorative` keeps its own

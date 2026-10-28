@@ -251,7 +251,9 @@ for (const appearance of visualAppearances) {
 		}
 		// On-solid text differs from the neutral hierarchy, so the solid checks are not vacuous.
 		const solid = byTestId(container, 'accent.solid');
-		expect(getComputedStyle(solid).color).not.toBe(resolvedColor(vars.color.text.primary, solid));
+		expect(getComputedStyle(solid).color).not.toBe(
+			resolvedColor(vars.color.foreground.primary, solid),
+		);
 	});
 }
 
@@ -393,8 +395,8 @@ for (const appearance of visualAppearances) {
 		const ownScope = byTestId(container, 'own-scope');
 
 		// The scope's tokens differ from the outer mode's, so inherited values would fail below.
-		expect(resolvedColor(vars.color.text.primary, scope)).not.toBe(
-			resolvedColor(vars.color.text.primary, solid),
+		expect(resolvedColor(vars.color.foreground.primary, scope)).not.toBe(
+			resolvedColor(vars.color.foreground.primary, solid),
 		);
 		expect(surfaceColors(solid)).toEqual(pairedColors(solid, 'accent.solid'));
 		expect(surfaceColors(scope)).toEqual(pairedColors(scope, 'surface.base'));
@@ -437,10 +439,10 @@ test('layout', { tags: ['visual'] }, async () => {
 				gap="space.8"
 				padding="space.16"
 				style={{
-					backgroundColor: vars.color.surface.subdued,
+					backgroundColor: vars.color.background.surface.subdued,
 					borderRadius: vars.radius.surface,
 					boxShadow: vars.shadow.inset,
-					color: vars.color.text.primary,
+					color: vars.color.foreground.primary,
 				}}
 			>
 				<Box>Account</Box>

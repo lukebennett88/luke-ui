@@ -313,14 +313,14 @@ export const sidebarNav = style({
 export const navLink = style({
 	'@layer': {
 		components: {
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			fontSize: vars.font.label.fontSize,
 			lineHeight: vars.font.label.lineHeight,
 			textDecoration: 'none',
 			selectors: {
 				'&:hover': {
 					...interactionState('hover'),
-					color: vars.color.text.primary,
+					color: vars.color.foreground.primary,
 				},
 				// Inset the global ring so the scrolling sidebar doesn't clip it.
 				'&:focus-visible': {
@@ -330,7 +330,7 @@ export const navLink = style({
 				// from the surface in light mode. The pressed step stays one step past the hover fill.
 				'&[aria-current="page"]': {
 					...interactionState('pressed'),
-					color: vars.color.text.primary,
+					color: vars.color.foreground.primary,
 				},
 			},
 		},
@@ -359,7 +359,7 @@ export const drawerOverlay = style({
 					selectors: {
 						'&[data-exiting]': { pointerEvents: 'none' },
 						'&::before': {
-							backgroundColor: vars.color.overlay.backdrop,
+							backgroundColor: vars.color.background.backdrop,
 							content: '""',
 							inset: 0,
 							position: 'absolute',
@@ -378,7 +378,7 @@ export const drawerModal = style({
 				hidden: { translate: `${drawerOffset} 0` },
 				properties: ['translate'],
 				rule: {
-					backgroundColor: vars.color.surface.raised,
+					backgroundColor: vars.color.background.surface.raised,
 					blockSize: '100%',
 					boxShadow: vars.shadow.overlay,
 					inlineSize: 'min(22rem, 90vw)',

@@ -27,7 +27,7 @@ export const tokenIdentification = style({
 export const columnHeaderShell = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.subdued,
+			backgroundColor: vars.color.background.surface.subdued,
 			borderBlockStart: PANEL_BORDER,
 			borderInlineEnd: PANEL_BORDER,
 			borderInlineStart: PANEL_BORDER,

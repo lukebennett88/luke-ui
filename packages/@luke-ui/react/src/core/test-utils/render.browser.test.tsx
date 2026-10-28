@@ -14,7 +14,7 @@ test('renders every fixture identity and explicit colour mode independently', ()
 		expect(styles.colorScheme).toBe(appearance.mode);
 		// The shared stylesheet paints <body>, so the render needs no background of its own.
 		expect(getComputedStyle(document.body).backgroundColor).toBe(
-			styles.getPropertyValue('--luke-color-surface-base'),
+			styles.getPropertyValue('--luke-color-background-surface-base'),
 		);
 	}
 });

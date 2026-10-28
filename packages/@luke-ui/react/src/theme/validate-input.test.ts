@@ -289,7 +289,7 @@ describe('authored theme validation', () => {
 			controlFinish: { dark: { raised: 'linear-gradient(red, blue)' } },
 			radius: { detail: 0 },
 		});
-		expect(css).toContain('--luke-color-overlay-backdrop: rgb(0 0 0 / 20%);');
+		expect(css).toContain('--luke-color-background-backdrop: rgb(0 0 0 / 20%);');
 		expect(css).toContain('--luke-control-finish-raised: linear-gradient(red, blue);');
 		expect(css).toContain('--luke-radius-detail: 0rem;');
 	});

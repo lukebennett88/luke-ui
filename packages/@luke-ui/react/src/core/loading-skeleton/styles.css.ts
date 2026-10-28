@@ -24,7 +24,7 @@ export const skeletonAnimationName = keyframes({
 /** @internal */
 export const skeletonRadiusVar = createVar();
 
-const skeletonBase = vars.color.loadingSkeleton;
+const skeletonBase = vars.color.background.skeleton;
 const skeletonHighlight = `color-mix(in oklab, ${skeletonBase}, white 35%)`;
 
 const sheenBackgroundSize = '200% 100%';

@@ -103,7 +103,7 @@ const checkboxConfig = {
 			},
 			// Unchecked, the box is a field part; checked, a solid fill with the control finish. Hover
 			// and pressed change colour, so they stay distinct without materials. Every fill pairs with
-			// its foreground context, so the glyph reads the fill's primary: on-solid primary once checked.
+			// its foreground context, so the glyph reads the fill's primary: on-solid colour once checked.
 			alignItems: 'center',
 			...surfaceStyle('surface.base'),
 			backgroundImage: `linear-gradient(${interactionStateLayer}, ${interactionStateLayer})`,

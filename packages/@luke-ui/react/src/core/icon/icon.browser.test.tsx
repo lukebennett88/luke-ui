@@ -93,7 +93,7 @@ for (const appearance of visualAppearances) {
 		}
 
 		expect(getComputedStyle(onSolid).fill).toBe(
-			resolvedColor(pairedTokens('accent.solid').primary, onSolid.parentElement!),
+			resolvedColor(pairedTokens('accent.solid.rest').primary, onSolid.parentElement!),
 		);
 		expect(getComputedStyle(dangerIcon).fill).toBe(
 			resolvedColor(pairedTokens('warning.subtle').danger, dangerText!),

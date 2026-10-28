@@ -81,7 +81,7 @@ test('backgroundColor preserves its resting role and surface token vocabulary', 
 	});
 
 	expect(missingTokens).toEqual([]);
-	// Box takes resting fills only. Interaction states stay recipe tokens.
+	// Box takes state-free resting fills only. Every state suffix stays a `vars` token.
 	expect(declaration).not.toMatch(BACKGROUND_INTERACTION_STATE_PATTERN);
 	// A translucent scrim is not an opaque fill.
 	expect(declaration).not.toContain('overlay.backdrop');

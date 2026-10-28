@@ -17,6 +17,16 @@ export function ColorFamily({ family }: { family: ColorFamilyId }) {
 	if (section.roles !== null) {
 		return (
 			<TokenPanel sampleInlineSize={SAMPLE_INLINE_SIZE}>
+				<TokenList>
+					{section.tokens.map((token) => (
+						<TokenRow
+							key={token.path}
+							sample={<ColorSample family={family} token={token} />}
+							sampleInlineSize={SAMPLE_INLINE_SIZE}
+							token={token}
+						/>
+					))}
+				</TokenList>
 				{section.roles.map(({ role, tokens }) => (
 					<TokenGroup key={role} label={roleLabel(role)}>
 						{tokens.map((token) => (
@@ -62,7 +72,7 @@ function ColorSample({
 
 	switch (family) {
 		case 'background':
-		case 'surface':
+			if (token.path === 'color.background.backdrop') return <BackdropSample value={value} />;
 			return (
 				<Box
 					blockSize={SAMPLE_BLOCK_SIZE}
@@ -79,9 +89,7 @@ function ColorSample({
 				<Box
 					alignItems="center"
 					backgroundColor={
-						token.path.includes('.onSolid.') && role !== undefined
-							? `${role}.solid`
-							: 'surface.base'
+						token.path.endsWith('.onSolid') && role !== undefined ? `${role}.solid` : 'surface.base'
 					}
 					borderRadius="detail"
 					display="flex"
@@ -94,17 +102,6 @@ function ColorSample({
 					</Text>
 				</Box>
 			);
-		case 'text':
-			return (
-				<Text
-					fontWeight="emphasis"
-					shouldDisableTrim
-					style={{ color: value }}
-					typography="heading4"
-				>
-					Aa
-				</Text>
-			);
 		case 'border':
 			return (
 				<Box
@@ -114,17 +111,6 @@ function ColorSample({
 					borderWidth="thick"
 					inlineSize={SAMPLE_INLINE_SIZE}
 					style={{ borderColor: value }}
-				/>
-			);
-		case 'overlay':
-			return <BackdropSample value={value} />;
-		case 'loadingSkeleton':
-			return (
-				<Box
-					blockSize={vars.space['12']}
-					borderRadius="detail"
-					inlineSize="100%"
-					style={{ backgroundColor: value }}
 				/>
 			);
 	}

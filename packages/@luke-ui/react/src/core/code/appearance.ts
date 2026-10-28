@@ -6,7 +6,7 @@ export const codeAppearance = {
 	// A neutral subtle fill with a hairline separates from every surface in every theme identity
 	// and colour mode, which a surface tint alone does not. The fill sets its own foreground context,
 	// so code on a solid fill reads the neutral hierarchy rather than the solid's on-solid colour.
-	...surfaceStyle('neutral.subtle.rest'),
+	...surfaceStyle('neutral.subtle'),
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.control,
 	fontFamily: vars.font.family.code,

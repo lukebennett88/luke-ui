@@ -4,12 +4,12 @@ import { globalStyle, style } from '@vanilla-extract/css';
 export const root = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.subdued,
+			backgroundColor: vars.color.background.surface.subdued,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.surface,
 			borderStyle: 'solid',
 			borderWidth: '1px',
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			display: 'flex',
 			flexDirection: 'column',
 			fontFamily: vars.font.family.code,
@@ -33,7 +33,7 @@ export const root = style({
 export const titled = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.base,
+			backgroundColor: vars.color.background.surface.base,
 		},
 	},
 });
@@ -72,7 +72,7 @@ export const header = style({
 	'@layer': {
 		components: {
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.subdued,
+			backgroundColor: vars.color.background.surface.subdued,
 			borderBlockEndColor: vars.color.border.decorative,
 			borderBlockEndStyle: 'solid',
 			borderBlockEndWidth: '1px',
@@ -97,7 +97,7 @@ export const headerWithActions = style({
 export const title = style({
 	'@layer': {
 		components: {
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			flex: '1 1 auto',
 			fontFamily: vars.font.family.body,
 			fontSize: vars.font.label.fontSize,
@@ -129,7 +129,7 @@ export const actions = style({
 export const overlayActions = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.subdued,
+			backgroundColor: vars.color.background.surface.subdued,
 			insetBlockStart: `calc(${vars.space['12']} + (${vars.font.label.lineHeight} / 2) - (${vars.controlSize.px32} / 2))`,
 			insetInlineEnd: vars.space['8'],
 			position: 'absolute',

@@ -411,9 +411,13 @@ describe('normalizeTheme carries authored surfaces', () => {
 				typography: testTypography,
 			}),
 		);
-		expect(extractValue(blocks.baseLight, '--luke-color-surface-subdued')).toBe('oklch(0.94 0 0)');
-		expect(extractValue(blocks.baseLight, '--luke-color-surface-raised')).toBe('oklch(1 0 0)');
-		expect(blocks.baseLight).not.toContain('--luke-color-surface-field');
+		expect(extractValue(blocks.baseLight, '--luke-color-background-surface-subdued')).toBe(
+			'oklch(0.94 0 0)',
+		);
+		expect(extractValue(blocks.baseLight, '--luke-color-background-surface-raised')).toBe(
+			'oklch(1 0 0)',
+		);
+		expect(blocks.baseLight).not.toContain('--luke-color-background-surface-field');
 	});
 
 	it('rejects an authored surface that leaves the hover-to-pressed step below the visibility floor', () => {
@@ -447,7 +451,7 @@ describe('normalizeTheme carries authored surfaces', () => {
 		expect(generatedError).toBeInstanceOf(ThemeInteractionTintError);
 		if (!(generatedError instanceof ThemeInteractionTintError)) throw generatedError;
 		expect(generatedError.mode).toBe('dark');
-		expect(generatedError.limitingMiss?.background).toBe('color.surface.raised');
+		expect(generatedError.limitingMiss?.background).toBe('color.background.surface.raised');
 		expect(themeError({ base, raised: { dark: base.dark } })).toBeNull();
 	});
 });
@@ -495,7 +499,7 @@ describe('defineTheme emits interactive semantic ramps for the bundled themes', 
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				for (const role of ['info', 'success', 'warning']) {
 					const ramp = [
-						`--luke-color-background-${role}-subtle-rest`,
+						`--luke-color-background-${role}-subtle`,
 						`--luke-color-background-${role}-solid-rest`,
 						`--luke-color-background-${role}-solid-hover`,
 						`--luke-color-background-${role}-solid-pressed`,

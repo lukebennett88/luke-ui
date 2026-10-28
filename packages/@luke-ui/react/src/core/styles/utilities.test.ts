@@ -151,12 +151,21 @@ test('backgroundColor rejects anything but a namespaced role or surface token', 
 	assertType<UtilityProps['backgroundColor']>('rebeccapurple');
 	// @ts-expect-error — unknown role
 	assertType<UtilityProps['backgroundColor']>('magenta.solid');
-	// @ts-expect-error — Box exposes the resting fill only
+	// Box values are state-free: `accent.solid` paints `vars.color.background.accent.solid.rest`.
+	assertType<UtilityProps['backgroundColor']>('accent.solid');
+	assertType<UtilityProps['backgroundColor']>('accent.subtle');
+	// @ts-expect-error — `.rest` is not a Box alias for the resting solid fill
 	assertType<UtilityProps['backgroundColor']>('accent.solid.rest');
-	// @ts-expect-error — interaction states stay recipe tokens
+	// @ts-expect-error — subtle has no state leaves
 	assertType<UtilityProps['backgroundColor']>('accent.subtle.rest');
 	// @ts-expect-error — interaction states stay recipe tokens
+	assertType<UtilityProps['backgroundColor']>('danger.solid.hover');
+	// @ts-expect-error — interaction states stay recipe tokens
 	assertType<UtilityProps['backgroundColor']>('danger.solid.pressed');
+	// @ts-expect-error — backdrop is not an opaque surface fill
+	assertType<UtilityProps['backgroundColor']>('backdrop');
+	// @ts-expect-error — skeleton is not a Box value
+	assertType<UtilityProps['backgroundColor']>('skeleton');
 	// @ts-expect-error — a translucent scrim is not an opaque surface fill
 	assertType<UtilityProps['backgroundColor']>('overlay.backdrop');
 	// @ts-expect-error — surfaces are namespaced, so the bare name must not assign

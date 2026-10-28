@@ -259,7 +259,7 @@ for (const appearance of visualAppearances) {
 			{ appearance },
 		);
 		const byTestId = (id: string) => container.querySelector(`[data-testid="${id}"]`)!;
-		const tokens = pairedTokens('danger.solid');
+		const tokens = pairedTokens('danger.solid.rest');
 
 		expect(getComputedStyle(byTestId('inherited')).color).toBe(
 			getComputedStyle(byTestId('solid')).color,
@@ -268,7 +268,7 @@ for (const appearance of visualAppearances) {
 			resolvedColor(tokens.secondary, byTestId('secondary')),
 		);
 		expect(byTestId('render-root').tagName).toBe('H4');
-		// A semantic role on a solid background reads as its on-solid primary.
+		// A semantic role on a solid background reads as its on-solid colour.
 		expect(getComputedStyle(byTestId('render-root')).color).toBe(
 			resolvedColor(tokens.success, byTestId('render-root')),
 		);

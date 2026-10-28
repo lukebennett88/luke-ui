@@ -72,7 +72,10 @@ component API for interaction states and typography. `boxShadow` accepts `inset`
 `raised`, `floating`, and `overlay`, matching the `vars.shadow` leaves.
 
 `backgroundColor` takes a standard surface, such as `surface.base`, or a role's resting fill, such
-as `accent.subtle` or `accent.solid`. The background also sets the text colour that content inside
+as `accent.subtle` or `accent.solid`. A solid value paints the role's resting fill, so
+`accent.solid` is `vars.color.background.accent.solid.rest`. Box values never carry a state suffix,
+so `accent.solid.rest`, `accent.solid.hover`, and `accent.solid.pressed` are not accepted. Use
+`vars` for the hover and pressed fills. The background also sets the text colour that content inside
 the Box inherits. Without `backgroundColor`, a Box keeps the colour it inherits. Read
 [Colour](/docs/color#text-on-a-background) for the colours text reads on each background, and for
 custom surfaces.
