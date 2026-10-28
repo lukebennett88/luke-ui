@@ -5,6 +5,14 @@ import { paperTheme } from './paper.js';
 export const chromaticTheme: ThemeInput = {
 	...paperTheme,
 	name: 'chromatic-fixture',
+	controlFinish: {
+		...paperTheme.controlFinish,
+		light: {
+			raised: 'linear-gradient(rgb(255 255 255 / 0.03), rgb(255 255 255 / 0.03))',
+			recessed: 'linear-gradient(rgb(255 255 255 / 0.03), rgb(255 255 255 / 0.03))',
+			resting: 'linear-gradient(rgb(255 255 255 / 0.03), rgb(255 255 255 / 0.03))',
+		},
+	},
 	color: {
 		accent: '#facc15',
 		info: { dark: '#2563eb' },
