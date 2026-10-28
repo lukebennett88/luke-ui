@@ -18,7 +18,7 @@ defaults. A `ThemeInput` includes:
 - a kebab-case `name`
 - `typography.fonts.body`, the required body font
 - `color.accent`, the required brand or interaction accent
-- `color.neutral` or `color.neutralStyle` (`'cool'`, `'neutral'`, or `'warm'`) for the neutral base
+- `color.neutral` as a colour or `{ style: 'cool' | 'neutral' | 'warm' }` for the neutral base
   anchor
 - optional `color.surface` colours for the `base`, `subdued`, and `raised` surfaces
 - optional `color.info`, `color.success`, `color.warning`, `color.danger`, `color.focus`, and
@@ -82,8 +82,9 @@ than 100 above `body`.
 
 ### Surfaces
 
-`color.surface.base` is the default page and control background. The neutral and role colours are
-generated from it. When you omit it, it uses the neutral colour.
+`color.surface.base` is the default page and control background. It is independent of
+`color.neutral`, which sets the neutral family character. When you omit `base`, it uses the resolved
+neutral colour.
 
 Every other surface is a fixed lightness offset from `base` for the mode. Set `subdued` or `raised`
 when a default does not suit the theme. Raised is shared by elevated inline and detached content.
@@ -147,7 +148,7 @@ The rules for colours and materials:
   OKLCH channels must be finite, with lightness from 0 to 1 (or 0% to 100%) and chroma 0 or greater.
 - Colour roles accept the shapes described in [Define the input](#define-the-input). An accent
   object must set at least one side.
-- `neutralStyle` must be `'cool'`, `'neutral'`, or `'warm'`, even when a neutral colour is set.
+- `neutral` accepts either a colour or a curated style, not both.
 - `depth`, `controlFinish`, and `backdrop` values must be non-empty strings without `;`, `{`, or
   `}`. Backdrop values are emitted verbatim and may include alpha.
 - Radii must be finite numbers, 0 or greater.

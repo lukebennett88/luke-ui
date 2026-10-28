@@ -313,3 +313,25 @@ describe('removed field surface', () => {
 		});
 	}
 });
+
+describe('neutral input validation', () => {
+	for (const [neutral, path, message] of [
+		[{ style: 'warm', light: '#fff' }, 'color.neutral', 'choose either'],
+		[{ style: 'other' }, 'color.neutral.style', 'must be neutral'],
+		[{ light: 'invalid' }, 'color.neutral.light', 'colour'],
+		[{ bogus: 'warm' }, 'color.neutral.bogus', 'unsupported'],
+	] as const) {
+		it(`rejects ${JSON.stringify(neutral)}`, () => {
+			const input = {
+				name: 'invalid-neutral',
+				color: { accent: '#3b82f6', neutral },
+				typography: testTypography,
+			} as unknown as ThemeInput;
+			expect(issuesOf(input)).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({ path, message: expect.stringContaining(message) }),
+				]),
+			);
+		});
+	}
+});

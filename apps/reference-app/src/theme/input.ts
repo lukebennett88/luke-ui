@@ -5,7 +5,7 @@ import type { ThemeInput } from '@luke-ui/react/theme/compiler';
 export const referenceThemeInput = {
 	color: {
 		accent: { dark: 'oklch(0.72 0.12 275)', light: 'oklch(0.55 0.14 275)' },
-		neutralStyle: 'neutral',
+		neutral: { style: 'neutral' },
 	},
 	depth: {
 		dark: {

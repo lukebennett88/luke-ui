@@ -33,6 +33,11 @@ type ColorInput = string | ModeColorInput;
 /** A colour for each mode. Either side may be omitted. */
 type ModeColorInput = { light?: string; dark?: string };
 
+type NeutralInput =
+	| string
+	| (ModeColorInput & { style?: never })
+	| { style: 'neutral' | 'warm' | 'cool'; light?: never; dark?: never };
+
 /** A composite `box-shadow` ladder for one colour mode, rung by rung. */
 export interface DepthLadder {
 	/** Treatment for a floating surface such as a menu. */
@@ -114,16 +119,10 @@ export interface ThemeInput extends ThemeInputCommon {
 		 */
 		accent: ColorInput;
 		/**
-		 * Neutral base anchor. Give a colour, or set `neutralStyle` for a curated neutral. One string, or
-		 * a missing side, keeps its hue and chroma at the mode's base lightness.
+		 * Neutral character as a colour or curated style. A single colour or missing side is
+		 * adapted to the mode's base lightness. Defaults to `{ style: 'neutral' }`.
 		 */
-		neutral?: ColorInput;
-		/**
-		 * Curated neutral character when `neutral` is omitted; sets the neutral hue and tint while the
-		 * mode sets its lightness.
-		 * @default 'neutral'
-		 */
-		neutralStyle?: 'cool' | 'neutral' | 'warm';
+		neutral?: NeutralInput;
 		/**
 		 * The three surfaces. Each is optional. Set one when its generated default does not suit the
 		 * theme or fails a contrast gate. An authored surface is mapped into the sRGB gamut, but its
@@ -131,9 +130,8 @@ export interface ThemeInput extends ThemeInputCommon {
 		 */
 		surface?: {
 			/**
-			 * The default page and control background. The neutral and role colours are generated
-			 * from it. One string, or a missing side, is adapted to each mode like `neutral`. Defaults to
-			 * the neutral.
+			 * The default page and control background. Role colours are generated from it. One string,
+			 * or a missing side, is adapted to each mode like `neutral`. Defaults to the neutral.
 			 */
 			base?: ColorInput;
 			/** Secondary regions, such as a sidebar. A missing side is a fixed offset from `base`. */
@@ -185,7 +183,7 @@ export interface ThemeInput extends ThemeInputCommon {
 type ColorMode = 'light' | 'dark';
 
 /**
- * `neutralStyle` → the source neutral's hue and small chroma; the mode supplies the lightness.
+ * `neutral.style` → the source neutral's hue and small chroma; the mode supplies the lightness.
  * Light `'cool'` ≈ `oklch(0.985 0.01 250)`; dark `'cool'` ≈ `oklch(0.22 0.01 250)`.
  */
 const NEUTRAL_STYLE = {
@@ -349,9 +347,12 @@ function resolveAdaptedRole(
 	return adapt(gamutMapOklch(parseColor(other)), mode, other);
 }
 
-/** Resolves the neutral role, honouring `neutral` then `neutralStyle` (default `'neutral'`). */
+/** Resolves the neutral role from a colour or curated style. */
 function resolveNeutral(color: ThemeInput['color'], mode: ColorMode): Oklch {
-	if (color.neutral !== undefined) {
+	if (
+		color.neutral !== undefined &&
+		(typeof color.neutral === 'string' || color.neutral.style === undefined)
+	) {
 		const side = sideOf(color.neutral, mode);
 		if (side !== undefined) return gamutMapOklch(parseColor(side));
 		if (typeof color.neutral === 'string') {
@@ -360,7 +361,10 @@ function resolveNeutral(color: ThemeInput['color'], mode: ColorMode): Oklch {
 		const other = sideOf(color.neutral, mode === 'light' ? 'dark' : 'light');
 		if (other !== undefined) return adaptNeutral(gamutMapOklch(parseColor(other)), mode);
 	}
-	const style = NEUTRAL_STYLE[color.neutralStyle ?? 'neutral'];
+	const style =
+		NEUTRAL_STYLE[
+			typeof color.neutral === 'object' ? (color.neutral.style ?? 'neutral') : 'neutral'
+		];
 	return gamutMapOklch({
 		l: NEUTRAL_LIGHTNESS[mode],
 		c: style.chroma,
