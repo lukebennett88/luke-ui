@@ -114,13 +114,13 @@ export const buttonRecipeInternal = recipe({
 				},
 				alignItems: 'center',
 				appearance: 'none',
-				// No border outside forced colours: inset depth and the face finish would leave an
+				// No border outside forced colours: inset shadow and the face finish would leave an
 				// unshaded rim inside even a transparent one. The size padding makes up its width.
 				borderColor: 'transparent',
 				borderRadius: vars.radius.control,
 				borderStyle: 'solid',
 				borderWidth: 0,
-				boxShadow: vars.depth.resting,
+				boxShadow: vars.shadow.resting,
 				display: 'inline-flex',
 				fontFamily: vars.font.family.body,
 				fontWeight: vars.font.weight.label,
@@ -135,16 +135,16 @@ export const buttonRecipeInternal = recipe({
 				position: 'relative',
 				textDecoration: 'none',
 				whiteSpace: 'nowrap',
-				// Hover and pressed change colour, depth, and finish, never position or scale.
+				// Hover and pressed change colour, shadow, and finish, never position or scale.
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						boxShadow: vars.depth.raised,
+						boxShadow: vars.shadow.raised,
 					},
 					'&[data-pending="true"]': {
 						cursor: 'wait',
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						boxShadow: vars.depth.recessed,
+						boxShadow: vars.shadow.inset,
 					},
 				},
 			},
@@ -245,13 +245,13 @@ function buttonAppearance(
 							...hoverLayer,
 							color: transparentAdaptiveStateText(chipTone, restColor),
 							vars: { ...hoverLayer.vars, ...neutralForegroundContextVars() },
-							boxShadow: vars.depth.raised,
+							boxShadow: vars.shadow.raised,
 						},
 						[pressed]: {
 							...pressedLayer,
 							color: transparentAdaptiveStateText(chipTone, restColor),
 							vars: { ...pressedLayer.vars, ...neutralForegroundContextVars() },
-							boxShadow: vars.depth.recessed,
+							boxShadow: vars.shadow.inset,
 						},
 					},
 				},

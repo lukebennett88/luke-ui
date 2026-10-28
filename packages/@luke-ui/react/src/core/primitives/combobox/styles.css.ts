@@ -156,7 +156,7 @@ const comboboxConfig = {
 			borderRadius: vars.radius.control,
 			borderStyle: 'solid',
 			borderWidth: '1px',
-			boxShadow: vars.depth.recessed,
+			boxShadow: vars.shadow.inset,
 			cursor: 'text',
 			display: 'inline-flex',
 			fontFamily: vars.font.family.body,
@@ -176,7 +176,7 @@ const comboboxConfig = {
 				[disabled]: { cursor: 'not-allowed', opacity: vars.interaction.disabledOpacity },
 				[inputFocus]: focusRing(vars.color.border.focus),
 				[hover]: { borderColor: controlBorderState('hover') },
-				// Read-only drops the inset depth. The hover selector already excludes it.
+				// Read-only drops the inset shadow. The hover selector already excludes it.
 				[readOnly]: { boxShadow: 'none' },
 				// The field's error message carries the non-colour invalid cue, so the border keeps
 				// its resting width and only takes the danger colour.
@@ -239,7 +239,7 @@ const comboboxConfig = {
 				borderRadius: vars.radius.surface,
 				borderStyle: 'solid',
 				borderWidth: '1px',
-				boxShadow: vars.depth.floating,
+				boxShadow: vars.shadow.floating,
 				display: 'flex',
 				flexDirection: 'column',
 				inlineSize: 'var(--trigger-width)',

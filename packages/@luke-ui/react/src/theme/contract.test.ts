@@ -108,7 +108,7 @@ describe('theme contract', () => {
 	});
 
 	it('partitions identity and mode paths from the declared mode families', () => {
-		expect(modeFamilies).toEqual(['color', 'controlFinish', 'depth', 'interaction']);
+		expect(modeFamilies).toEqual(['color', 'controlFinish', 'shadow', 'interaction']);
 		const pairs = flattenThemeContract();
 		const { identityPairs, modePairs } = partitionContractPairs(pairs);
 		expect(identityPairs.length + modePairs.length).toBe(pairs.length);
@@ -148,6 +148,8 @@ describe('theme contract', () => {
 	it('keeps the settled 1.0 surface, border, sizing, and type style leaves', () => {
 		expect(Object.keys(vars.color.surface)).toEqual(['base', 'subdued', 'raised']);
 		expect(Object.keys(vars.color.border).slice(0, 3)).toEqual(['decorative', 'control', 'focus']);
+		expect(Object.keys(vars.shadow)).toEqual(['inset', 'resting', 'raised', 'floating', 'overlay']);
+		expect(Object.hasOwn(vars, 'depth')).toBe(false);
 		expect(Object.keys(vars.controlFinish)).toEqual(['recessed', 'resting', 'raised']);
 		expect(Object.keys(vars.controlSize)).toEqual(['px32', 'px40']);
 		for (const style of typeStyles) {

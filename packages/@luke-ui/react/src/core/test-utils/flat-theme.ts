@@ -1,19 +1,19 @@
 import type { ThemeInput } from '@luke-ui/react/theme/compiler';
 import { tactileTheme } from '../../theme/__fixtures__/tactile.js';
 
-const NO_DEPTH = {
+const NO_SHADOW = {
 	floating: 'none',
 	overlay: 'none',
 	raised: 'none',
-	recessed: 'none',
+	inset: 'none',
 	resting: 'none',
 };
 const NO_FINISH = { raised: 'none', recessed: 'none', resting: 'none' };
 
-/** The flat fixture: Tactile's colours with every `depth` and `controlFinish` value `none`. */
+/** The flat fixture: Tactile's colours with every `shadow` and `controlFinish` value `none`. */
 export const flatTheme: ThemeInput = {
 	...tactileTheme,
 	controlFinish: { dark: NO_FINISH, light: NO_FINISH },
-	depth: { dark: NO_DEPTH, light: NO_DEPTH },
+	shadow: { dark: NO_SHADOW, light: NO_SHADOW },
 	name: 'flat-fixture',
 };

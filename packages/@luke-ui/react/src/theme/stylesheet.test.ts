@@ -88,13 +88,20 @@ describe('buildTheme output', () => {
 		}
 	});
 
-	it('emits authored depth as written', () => {
-		expect(extractValue(blocks.baseLight, '--luke-depth-resting')).toBe(
-			tactileFoundation.light.depth.resting,
-		);
-		expect(extractValue(blocks.mediaDark, '--luke-depth-raised')).toBe(
-			tactileFoundation.dark.depth.raised,
-		);
+	it('emits every authored shadow unchanged in both modes', () => {
+		for (const foundation of [tactileFoundation, paperFoundation]) {
+			const themeCss = buildTheme(foundation);
+			const { baseLight, mediaDark } = splitBlocks(themeCss);
+			for (const [mode, block] of [
+				['light', baseLight],
+				['dark', mediaDark],
+			] as const) {
+				for (const [name, value] of Object.entries(foundation[mode].shadow)) {
+					expect(extractValue(block, `--luke-shadow-${name}`)).toBe(value);
+				}
+			}
+			expect(themeCss).not.toContain('--luke-depth-');
+		}
 	});
 
 	it('compiles the same input to identical bytes', () => {

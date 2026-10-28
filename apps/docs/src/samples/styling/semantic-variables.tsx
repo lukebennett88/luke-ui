@@ -7,7 +7,7 @@ export function FloatingPanel({ children }: PropsWithChildren) {
 			style={{
 				backgroundColor: vars.color.surface.subdued,
 				borderRadius: vars.radius.surface,
-				boxShadow: vars.depth.floating,
+				boxShadow: vars.shadow.floating,
 				color: vars.color.text.primary,
 			}}
 		>

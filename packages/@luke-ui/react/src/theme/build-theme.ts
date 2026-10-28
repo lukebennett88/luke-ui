@@ -163,11 +163,11 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		'controlFinish.raised': modeFoundation.controlFinish.raised,
 		'controlFinish.recessed': modeFoundation.controlFinish.recessed,
 		'controlFinish.resting': modeFoundation.controlFinish.resting,
-		'depth.floating': modeFoundation.depth.floating,
-		'depth.overlay': modeFoundation.depth.overlay,
-		'depth.raised': modeFoundation.depth.raised,
-		'depth.recessed': modeFoundation.depth.recessed,
-		'depth.resting': modeFoundation.depth.resting,
+		'shadow.floating': modeFoundation.shadow.floating,
+		'shadow.inset': modeFoundation.shadow.inset,
+		'shadow.overlay': modeFoundation.shadow.overlay,
+		'shadow.raised': modeFoundation.shadow.raised,
+		'shadow.resting': modeFoundation.shadow.resting,
 	};
 	return {
 		colorValues,

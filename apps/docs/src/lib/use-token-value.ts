@@ -101,7 +101,7 @@ function valueKindOf(token: ThemeToken): ValueKind {
 	switch (token.family) {
 		case 'color':
 			return 'color';
-		case 'depth':
+		case 'shadow':
 			return 'shadow';
 		case 'controlFinish':
 			return 'finish';

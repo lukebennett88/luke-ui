@@ -23,7 +23,7 @@ defaults. A `ThemeInput` includes:
 - optional `color.surface` colours for the `base`, `subdued`, and `raised` surfaces
 - optional `color.info`, `color.success`, `color.warning`, `color.danger`, `color.focus`, and
   `color.backdrop`
-- optional `typography.fonts.display`, `typography.fontWeight`, `radius`, `depth`, and
+- optional `typography.fonts.display`, `typography.fontWeight`, `radius`, `shadow`, and
   `controlFinish`
 
 Most source colours accept one string or a `{ light, dark }` object. Either side of the object may
@@ -42,10 +42,10 @@ be omitted. How each colour treats them differs:
 Do not author them.
 
 `radius` overrides the `detail`, `control`, `surface`, and `overlay` corners, which default to 4, 8,
-12, and 16px. Radius inputs are pixels at a 16px root and emit as `rem`. `depth` and `controlFinish`
-can be set per mode and per rung. An omitted `depth` rung uses a subtle default shadow, and an
-omitted `controlFinish` rung is `none`. Typography sizes, line heights, letter spacing, and motion
-are not authored. Read [Fonts](#fonts) for the font input.
+12, and 16px. Radius inputs are pixels at a 16px root and emit as `rem`. `shadow` and
+`controlFinish` can be set per mode and per rung. An omitted `shadow` rung uses a subtle default
+shadow, and an omitted `controlFinish` rung is `none`. Typography sizes, line heights, letter
+spacing, and motion are not authored. Read [Fonts](#fonts) for the font input.
 
 <auto-type-table path="packages/@luke-ui/react/src/theme/define-theme.ts" name="ThemeInput" />
 
@@ -88,7 +88,7 @@ neutral colour.
 
 Every other surface is a fixed lightness offset from `base` for the mode. Set `subdued` or `raised`
 when a default does not suit the theme. Raised is shared by elevated inline and detached content.
-Choose borders and depth separately. A raised surface does not add either. Luke UI maps an authored
+Choose borders and shadow separately. A raised surface does not add either. Luke UI maps an authored
 colour into the sRGB gamut but never changes its lightness to pass contrast. If a surface fails
 [contrast validation](#contrast-validation), set it explicitly or choose a different value.
 
@@ -149,7 +149,7 @@ The rules for colours and materials:
 - Colour roles accept the shapes described in [Define the input](#define-the-input). An accent
   object must set at least one side.
 - `neutral` accepts either a colour or a curated style, not both.
-- `depth`, `controlFinish`, and `backdrop` values must be non-empty strings without `;`, `{`, or
+- `shadow`, `controlFinish`, and `backdrop` values must be non-empty strings without `;`, `{`, or
   `}`. Backdrop values are emitted verbatim and may include alpha.
 - Radii must be finite numbers, 0 or greater.
 

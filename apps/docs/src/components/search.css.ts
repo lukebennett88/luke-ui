@@ -66,7 +66,7 @@ export const trigger = style({
 			borderColor: vars.color.border.control,
 			// Button draws no border of its own, so the field look sets the width.
 			borderWidth: '1px',
-			boxShadow: vars.depth.recessed,
+			boxShadow: vars.shadow.inset,
 			cursor: 'text',
 			fontWeight: vars.font.weight.body,
 			justifyContent: 'flex-start',
@@ -81,7 +81,7 @@ export const trigger = style({
 					{
 						backgroundColor: vars.color.surface.base,
 						borderColor: `color-mix(in srgb, ${vars.color.border.control} 80%, ${vars.color.text.primary} 20%)`,
-						boxShadow: vars.depth.recessed,
+						boxShadow: vars.shadow.inset,
 					},
 			},
 		},
@@ -184,7 +184,7 @@ export const panelFieldShell = style({
 			borderRadius: vars.radius.surface,
 			borderStyle: 'solid',
 			borderWidth: '1px',
-			boxShadow: vars.depth.floating,
+			boxShadow: vars.shadow.floating,
 			display: 'flex',
 			flexDirection: 'column',
 			inlineSize: '100%',

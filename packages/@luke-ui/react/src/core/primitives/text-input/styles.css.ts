@@ -132,7 +132,7 @@ export const textInputPartsRecipe = recipe({
 			borderRadius: vars.radius.control,
 			borderStyle: 'solid',
 			borderWidth: '1px',
-			boxShadow: vars.depth.recessed,
+			boxShadow: vars.shadow.inset,
 			cursor: 'text',
 			display: 'inline-flex',
 			fontFamily: vars.font.family.body,
@@ -157,7 +157,7 @@ export const textInputPartsRecipe = recipe({
 				[control.hover]: {
 					borderColor: controlBorderState('hover'),
 				},
-				// Read-only drops the inset depth. The hover selector already excludes it.
+				// Read-only drops the inset shadow. The hover selector already excludes it.
 				[control.readOnly]: {
 					boxShadow: 'none',
 				},

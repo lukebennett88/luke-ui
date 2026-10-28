@@ -7,7 +7,7 @@ import { loraFont, splitBlocks, testTypography } from './__fixtures__/theme-css.
 import { compileTheme } from './build-theme.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import type { ThemeInput } from './define-theme.js';
-import { defaultBackdrop, defaultDepth, normalizeTheme } from './define-theme.js';
+import { defaultBackdrop, defaultShadow, normalizeTheme } from './define-theme.js';
 import { defaultSourceColors } from './foundation.js';
 import { ThemeInteractionTintError } from './interaction-tints.js';
 import { FAMILY_RUNG } from './scale.js';
@@ -136,22 +136,33 @@ describe('defineTheme accent pre-conditioning shares the generator gate', () => 
 });
 
 describe('defineTheme partial per-mode merges', () => {
-	it('merges a partial depth ladder per mode without cross-mode bleed', () => {
+	it('merges a partial shadow ladder per mode without cross-mode bleed', () => {
 		const overlay = 'X';
 		const blocks = splitBlocks(
 			defineTheme({
 				color: { accent: '#3b82f6' },
-				depth: { light: { overlay } },
-				name: 'partial-depth',
+				shadow: {
+					light: { overlay, inset: 'inset 0 1px red' },
+					dark: { inset: 'inset 0 2px blue' },
+				},
+				name: 'partial-shadow',
 				typography: testTypography,
 			}),
 		);
-		// The authored light rung wins; the other light rungs keep the light default.
-		expect(extractValue(blocks.baseLight, '--luke-depth-overlay')).toBe(overlay);
-		expect(extractValue(blocks.baseLight, '--luke-depth-resting')).toBe(defaultDepth.light.resting);
-		// Dark is untouched: every dark rung, including overlay, keeps the dark default.
-		expect(extractValue(blocks.mediaDark, '--luke-depth-overlay')).toBe(defaultDepth.dark.overlay);
-		expect(extractValue(blocks.mediaDark, '--luke-depth-resting')).toBe(defaultDepth.dark.resting);
+		// Authored rungs win in their respective modes; omitted rungs keep each mode's default.
+		expect(extractValue(blocks.baseLight, '--luke-shadow-inset')).toBe('inset 0 1px red');
+		expect(extractValue(blocks.mediaDark, '--luke-shadow-inset')).toBe('inset 0 2px blue');
+		expect(extractValue(blocks.baseLight, '--luke-shadow-overlay')).toBe(overlay);
+		expect(extractValue(blocks.baseLight, '--luke-shadow-resting')).toBe(
+			defaultShadow.light.resting,
+		);
+		// Omitted dark rungs keep the dark default.
+		expect(extractValue(blocks.mediaDark, '--luke-shadow-overlay')).toBe(
+			defaultShadow.dark.overlay,
+		);
+		expect(extractValue(blocks.mediaDark, '--luke-shadow-resting')).toBe(
+			defaultShadow.dark.resting,
+		);
 	});
 
 	it('falls back to the curated default for a rung explicitly authored as undefined', () => {
@@ -161,12 +172,14 @@ describe('defineTheme partial per-mode merges', () => {
 		const blocks = splitBlocks(
 			defineTheme({
 				color: { accent: '#3b82f6' },
-				depth: { light: { resting: undefined } },
-				name: 'undefined-depth-rung',
+				shadow: { light: { resting: undefined } },
+				name: 'undefined-shadow-rung',
 				typography: testTypography,
 			}),
 		);
-		expect(extractValue(blocks.baseLight, '--luke-depth-resting')).toBe(defaultDepth.light.resting);
+		expect(extractValue(blocks.baseLight, '--luke-shadow-resting')).toBe(
+			defaultShadow.light.resting,
+		);
 	});
 
 	it('defaults the omitted dark side of a partial colour without bleeding the light override', () => {

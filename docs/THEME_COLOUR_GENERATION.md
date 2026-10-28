@@ -65,8 +65,8 @@ no public semantic meaning. v2 drops it: colours are validated only against surf
 actually reference (`base`, `subdued`, `raised`), which changes the contrast matrix from the pre-v2
 solver's.
 
-`depth.resting` is unrelated and unaffected — it is a **material** (box-shadow) concept in the depth
-ladder, not a colour surface, and the depth ladder did not change.
+`shadow.resting` is unrelated and unaffected — it is a **material** (box-shadow) concept in the
+shadow ladder, not a colour surface, and the shadow ladder did not change.
 
 ## Border contrast policy
 
@@ -170,7 +170,7 @@ plus the tint.
 
 Theme authors do not author hover, pressed, or tint colours. `color.overlay.backdrop` is the
 authored modal dimming layer. `color.surface.raised` is the opaque surface for elevated panels,
-cards, menus, popovers, and dialogs. Surface colour and depth stay separate: a raised surface does
+cards, menus, popovers, and dialogs. Surface colour and shadow stay separate: a raised surface does
 not add a border or shadow.
 
 `validateContrast` measures the emitted opaque token pairs. Tint contrast and visibility are gated

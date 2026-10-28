@@ -65,7 +65,7 @@ export function validateThemeInput(input: ThemeInput): Array<ThemeValidationIssu
 		report('typography.fonts.body', 'is required');
 	}
 	validateColors(input.color, report);
-	validateMaterials(input.depth, 'depth', 'box-shadow', report);
+	validateMaterials(input.shadow, 'shadow', 'box-shadow', report);
 	validateMaterials(input.controlFinish, 'controlFinish', 'background-image', report);
 	const radius: unknown = input.radius;
 	if (radius !== undefined) {

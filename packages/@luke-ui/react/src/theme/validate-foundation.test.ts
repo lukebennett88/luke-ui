@@ -4,29 +4,29 @@ import { buildTheme } from './build-theme.js';
 import type { ThemeFoundation } from './foundation.js';
 
 describe('buildTheme foundation validation', () => {
-	it('rejects empty or stylesheet-breaking depth values', () => {
-		const emptyDepth: ThemeFoundation = {
+	it('rejects empty or stylesheet-breaking shadow values', () => {
+		const emptyShadow: ThemeFoundation = {
 			...tactileFoundation,
 			light: {
 				...tactileFoundation.light,
-				depth: { ...tactileFoundation.light.depth, resting: ' ' },
+				shadow: { ...tactileFoundation.light.shadow, resting: ' ' },
 			},
-			name: 'empty-depth',
+			name: 'empty-shadow',
 		};
-		const unsafeDepth: ThemeFoundation = {
+		const unsafeShadow: ThemeFoundation = {
 			...tactileFoundation,
 			dark: {
 				...tactileFoundation.dark,
-				depth: { ...tactileFoundation.dark.depth, overlay: 'none; color: red' },
+				shadow: { ...tactileFoundation.dark.shadow, overlay: 'none; color: red' },
 			},
-			name: 'unsafe-depth',
+			name: 'unsafe-shadow',
 		};
 
-		expect(() => buildTheme(emptyDepth)).toThrow(
-			'light.depth.resting: must be a non-empty CSS box-shadow value',
+		expect(() => buildTheme(emptyShadow)).toThrow(
+			'light.shadow.resting: must be a non-empty CSS box-shadow value',
 		);
-		expect(() => buildTheme(unsafeDepth)).toThrow(
-			'dark.depth.overlay: must be a non-empty CSS box-shadow value',
+		expect(() => buildTheme(unsafeShadow)).toThrow(
+			'dark.shadow.overlay: must be a non-empty CSS box-shadow value',
 		);
 	});
 
@@ -68,17 +68,17 @@ describe('buildTheme foundation validation', () => {
 		// fallback), but `buildTheme` is also called directly with a raw foundation (tests, tooling,
 		// or any future composition that does not go through `defineTheme`). The validator's guard must
 		// stay robust to that shape regardless of caller, rather than crash inside `.trim()`.
-		const undefinedDepthRung = {
+		const undefinedShadowRung = {
 			...tactileFoundation,
 			dark: {
 				...tactileFoundation.dark,
-				depth: { ...tactileFoundation.dark.depth, resting: undefined },
+				shadow: { ...tactileFoundation.dark.shadow, resting: undefined },
 			},
-			name: 'undefined-depth-rung',
+			name: 'undefined-shadow-rung',
 		} as unknown as ThemeFoundation;
 
-		expect(() => buildTheme(undefinedDepthRung)).toThrow(
-			'dark.depth.resting: must be a non-empty CSS box-shadow value',
+		expect(() => buildTheme(undefinedShadowRung)).toThrow(
+			'dark.shadow.resting: must be a non-empty CSS box-shadow value',
 		);
 	});
 

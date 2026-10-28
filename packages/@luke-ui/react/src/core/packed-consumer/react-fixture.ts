@@ -350,6 +350,7 @@ const theme: ThemeInput = {
 	name: 'fixture',
 	color: { accent: '#3355ff', surface: { base: '#fafafa' } },
 	controlFinish: { light: { resting: 'none' } },
+	shadow: { dark: { inset: 'none' } },
 	radius: { control: 6 },
 	typography,
 };
@@ -374,7 +375,8 @@ export const retainedTokens: Array<string> = [
 	vars.color.text.disabled,
 	vars.color.loadingSkeleton,
 	vars.controlFinish.raised,
-	vars.depth.overlay,
+	vars.shadow.inset,
+	vars.shadow.overlay,
 	vars.font.body.lineHeight,
 	vars.controlSize.px32,
 	vars.controlSize.px40,
@@ -382,6 +384,10 @@ export const retainedTokens: Array<string> = [
 	vars.space['16'],
 	vars.interaction.disabledOpacity,
 ];
+// @ts-expect-error — shadow is the material family
+export const removedDepth = vars.depth;
+// @ts-expect-error — inset is the inset shadow rung
+export const removedShadowRecessed = vars.shadow.recessed;
 // @ts-expect-error — adaptive subtle states use vars.interaction.tint
 export const removedSubtleHover = vars.color.background.neutral.subtle.hover;
 // @ts-expect-error — replaced by color.surface.base
@@ -403,6 +409,10 @@ export const removedBaselineTrim = vars.font.body.baselineTrim;
 // @ts-expect-error — Capsize trims are private
 export const removedCapHeightTrim = vars.font.body.capHeightTrim;
 export const removedThemeInputs: Array<ThemeInput> = [
+	// @ts-expect-error — shadow is the material family
+	{ name: 'old-shadow', color: { accent: '#3355ff' }, depth: {}, typography },
+	// @ts-expect-error — inset is the inset shadow rung
+	{ name: 'old-rung', color: { accent: '#3355ff' }, shadow: { light: { recessed: 'none' } }, typography },
 	// @ts-expect-error — replaced by color.surface.base
 	{ name: 'a', color: { accent: '#3355ff', background: '#ffffff' }, typography },
 	// @ts-expect-error — radius takes explicit roles only
@@ -433,10 +443,13 @@ export const textButtonWidth = <Button appearance="text" inlineSize="full">Conti
 // Box values follow the public token contract.
 export const retainedBoxValues: Array<BoxProps> = [
 	{ backgroundColor: 'surface.base', borderColor: 'control', boxShadow: 'overlay' },
+	{ boxShadow: 'inset' },
 	{ backgroundColor: 'warning.subtle', borderRadius: 'full', gap: 'space.96' },
 ];
 // @ts-expect-error — controls use the base surface
 export const removedFieldToken = vars.color.surface.field;
+// @ts-expect-error — inset is the inset shadow rung
+export const removedBoxShadow: BoxProps['boxShadow'] = 'recessed';
 // @ts-expect-error — field is not a Box background value
 export const removedBoxField: BoxProps['backgroundColor'] = 'surface.field';
 // @ts-expect-error — a theme cannot author an independent field surface

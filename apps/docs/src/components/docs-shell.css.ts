@@ -380,7 +380,7 @@ export const drawerModal = style({
 				rule: {
 					backgroundColor: vars.color.surface.raised,
 					blockSize: '100%',
-					boxShadow: vars.depth.overlay,
+					boxShadow: vars.shadow.overlay,
 					inlineSize: 'min(22rem, 90vw)',
 					marginInlineStart: 'auto',
 					position: 'relative',

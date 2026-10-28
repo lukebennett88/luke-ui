@@ -16,7 +16,7 @@ export default () => {
 			padding="space.16"
 		>
 			<Text fontWeight="label">Card heading</Text>
-			<Text>Background, border, radius, and depth values applied together.</Text>
+			<Text>Background, border, radius, and shadow values applied together.</Text>
 		</Box>
 	);
 };

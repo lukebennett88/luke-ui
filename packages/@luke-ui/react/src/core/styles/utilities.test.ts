@@ -67,7 +67,7 @@ test('an omitted background adds no class', () => {
 test('derives token-backed Box values from the public contract', () => {
 	const cases = [
 		...Object.entries(vars.radius).map(([key, value]) => ['borderRadius', key, value] as const),
-		...Object.entries(vars.depth).map(([key, value]) => ['boxShadow', key, value] as const),
+		...Object.entries(vars.shadow).map(([key, value]) => ['boxShadow', key, value] as const),
 		...Object.entries(vars.color.border).map(
 			([key, value]) => ['borderColor', key, value] as const,
 		),

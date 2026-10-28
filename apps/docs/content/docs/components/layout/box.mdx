@@ -66,9 +66,10 @@ and `renderRoot` rule.
 
 ## Visual styles
 
-Box accepts theme-backed background, border colour, radius, and depth values, plus fixed border
+Box accepts theme-backed background, border colour, radius, and shadow values, plus fixed border
 width and style values. The values follow the [token reference](/docs/token-reference). Use a
-component API for interaction states and typography.
+component API for interaction states and typography. `boxShadow` accepts `inset`, `resting`,
+`raised`, `floating`, and `overlay`, matching the `vars.shadow` leaves.
 
 `backgroundColor` takes a standard surface, such as `surface.base`, or a role's resting fill, such
 as `accent.subtle` or `accent.solid`. The background also sets the text colour that content inside
@@ -79,7 +80,7 @@ custom surfaces.
 `borderColor="control"` is a guaranteed control boundary that reaches 3:1 against every surface. The
 role colours, such as `borderColor="warning"`, are decorative tints. Do not rely on one alone to
 show a required state. `borderColor="decorative"` is a separator. When a custom element that is not
-a Box needs a colour, radius, or depth value, use `vars` from `@luke-ui/react/theme`. Read
+a Box needs a colour, radius, or shadow value, use `vars` from `@luke-ui/react/theme`. Read
 [Styling](/docs/styling#use-semantic-variables-for-custom-ui) for when to reach for `vars`, and the
 [token reference](/docs/token-reference) for the contract.
 

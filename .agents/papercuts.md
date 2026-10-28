@@ -75,11 +75,13 @@ not help. Silence in this log is not evidence.
 - Seen: 2026-10-21 (PR #903, #880). Review of `748dc121` found a keyboard-navigation comment
   describing prior browser round trips and a 15.7-second investigation timing. Seen again:
   2026-10-22 (PR #911, #899 Part 5). Review of `ecf1ea9` found a Link test comment opening "#899
-  asks text Links to stay underlined", citing the issue to justify the rule.
-- Where: `apps/docs/src/components/search.browser.test.tsx` and
-  `packages/@luke-ui/react/src/core/link/link.browser.test.tsx`. `docs/DOCUMENTATION.md`, Comments
-  and JSDoc, requires comments to explain code without its history. The review-pr workflow requires
-  consulting the applicable repository guides.
+  asks text Links to stay underlined", citing the issue to justify the rule. Seen again: 2026-10-28
+  (#965). Review found new packed-consumer type-test comments describing renamed token paths.
+- Where: `apps/docs/src/components/search.browser.test.tsx`,
+  `packages/@luke-ui/react/src/core/link/link.browser.test.tsx`, and
+  `packages/@luke-ui/react/src/core/packed-consumer/react-fixture.ts`. `docs/DOCUMENTATION.md`,
+  Comments and JSDoc, requires comments to explain code without its history. The review-pr workflow
+  requires consulting the applicable repository guides.
 - Problem: Agent-authored comments narrated history despite the required guidance. review-pr's
   easy-to-miss list and work-on-issue's pre-commit step already name the rule, so pointing to it
   again is not a remedy. Correcting the comments does not establish that comment authoring applies

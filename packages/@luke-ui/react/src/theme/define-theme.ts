@@ -39,7 +39,7 @@ type NeutralInput =
 	| { style: 'neutral' | 'warm' | 'cool'; light?: never; dark?: never };
 
 /** A composite `box-shadow` ladder for one colour mode, rung by rung. */
-export interface DepthLadder {
+export interface ShadowLadder {
 	/** Treatment for a floating surface such as a menu. */
 	floating: string;
 	/** Treatment for a high-elevation surface such as a dialog. */
@@ -47,7 +47,7 @@ export interface DepthLadder {
 	/** Treatment for a hovered control or elevated surface. */
 	raised: string;
 	/** Inset treatment for a pressed control or sunken surface. */
-	recessed: string;
+	inset: string;
 	/** Resting treatment for an interactive control or surface. */
 	resting: string;
 }
@@ -72,10 +72,10 @@ interface ThemeInputCommon {
 	 */
 	controlFinish?: { light?: Partial<ControlFinish>; dark?: Partial<ControlFinish> };
 	/**
-	 * Composite `box-shadow` depth ladder, per mode. Optional and deep-partial: an omitted rung
+	 * Composite `box-shadow` ladder, per mode. Optional and deep-partial: an omitted rung
 	 * falls back to the curated extremely-subtle default for that mode.
 	 */
-	depth?: { light?: Partial<DepthLadder>; dark?: Partial<DepthLadder> };
+	shadow?: { light?: Partial<ShadowLadder>; dark?: Partial<ShadowLadder> };
 	/**
 	 * Kebab-case theme identity, for example `'tactile'`. The theme's identity class is
 	 * `luke-ui-theme-${name}`.
@@ -209,20 +209,20 @@ const ACCENT_BAND = {
 	light: [0.4, 0.62],
 } as const satisfies Record<ColorMode, [number, number]>;
 
-/** Curated extremely-subtle, hue-neutral shadow ladder applied when a `depth` rung is omitted. */
-export const defaultDepth: Record<ColorMode, DepthLadder> = {
+/** Curated extremely-subtle, hue-neutral shadow ladder applied when a `shadow` rung is omitted. */
+export const defaultShadow: Record<ColorMode, ShadowLadder> = {
 	dark: {
 		floating: '0 4px 12px oklch(0 0 0 / 0.45), 0 2px 4px oklch(0 0 0 / 0.3)',
 		overlay: '0 12px 32px oklch(0 0 0 / 0.55), 0 4px 12px oklch(0 0 0 / 0.35)',
 		raised: '0 2px 4px oklch(0 0 0 / 0.35), 0 1px 2px oklch(0 0 0 / 0.25)',
-		recessed: 'inset 0 1px 2px oklch(0 0 0 / 0.3)',
+		inset: 'inset 0 1px 2px oklch(0 0 0 / 0.3)',
 		resting: '0 1px 2px oklch(0 0 0 / 0.3)',
 	},
 	light: {
 		floating: '0 4px 12px oklch(0 0 0 / 0.08), 0 2px 4px oklch(0 0 0 / 0.05)',
 		overlay: '0 12px 32px oklch(0 0 0 / 0.12), 0 4px 12px oklch(0 0 0 / 0.07)',
 		raised: '0 2px 4px oklch(0 0 0 / 0.06), 0 1px 2px oklch(0 0 0 / 0.04)',
-		recessed: 'inset 0 1px 2px oklch(0 0 0 / 0.06)',
+		inset: 'inset 0 1px 2px oklch(0 0 0 / 0.06)',
 		resting: '0 1px 2px oklch(0 0 0 / 0.05)',
 	},
 };
@@ -271,7 +271,7 @@ function buildModeFoundation(input: ThemeInput, mode: ColorMode): ThemeModeFound
 			...defaultControlFinish,
 			...omitUndefined(input.controlFinish?.[mode] ?? {}),
 		},
-		depth: { ...defaultDepth[mode], ...omitUndefined(input.depth?.[mode] ?? {}) },
+		shadow: { ...defaultShadow[mode], ...omitUndefined(input.shadow?.[mode] ?? {}) },
 	};
 }
 

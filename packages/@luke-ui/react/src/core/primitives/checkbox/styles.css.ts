@@ -115,7 +115,7 @@ const checkboxConfig = {
 			borderRadius: vars.radius.detail,
 			borderStyle: 'solid',
 			borderWidth: '1px',
-			boxShadow: vars.depth.recessed,
+			boxShadow: vars.shadow.inset,
 			display: 'inline-flex',
 			fontSize: checkboxGlyphSize,
 			fontWeight: vars.font.weight.heading,
