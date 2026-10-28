@@ -203,7 +203,7 @@ for (const appearance of visualAppearances) {
 	test(`a text Link reads the surrounding surface in every state in ${name}`, async () => {
 		const { container, locator } = render(
 			<>
-				<Box backgroundColor="danger.solid.rest" padding="space.8">
+				<Box backgroundColor="danger.solid" padding="space.8">
 					<Link href="#" prominence="high">
 						On solid
 					</Link>
@@ -248,7 +248,7 @@ test('a low text Link uses LinkText and underlines active states in forced colou
 
 	try {
 		const { locator } = render(
-			<Box backgroundColor="accent.solid.rest" padding="space.8">
+			<Box backgroundColor="accent.solid" padding="space.8">
 				<Link href="#" prominence="low">
 					Destination
 				</Link>
@@ -275,7 +275,7 @@ test('a low text Link uses LinkText and underlines active states in forced colou
 // Text Links stay underlined at rest, except at low prominence: at rest it has no underline and
 // stands out from the body text around it by weight instead. On a solid fill
 // its colour matches that text, so weight is the only resting cue there.
-const LOW_LINK_BACKGROUNDS = ['surface.base', 'accent.subtle', 'accent.solid.rest'] as const;
+const LOW_LINK_BACKGROUNDS = ['surface.base', 'accent.subtle', 'accent.solid'] as const;
 
 /** The resting cues that separate a low Link from the body text around it. */
 function lowLinkCues(paragraph: Element, link: Element) {
@@ -337,7 +337,7 @@ for (const appearance of visualAppearances) {
 				background,
 				heavier: true,
 				line: 'none',
-				sameColourAsText: background === 'accent.solid.rest',
+				sameColourAsText: background === 'accent.solid',
 			})),
 		);
 	});
@@ -348,7 +348,7 @@ test('a low Link on a solid fill keeps its weight and system link colour in forc
 
 	try {
 		const { locator } = render(
-			<Box backgroundColor="accent.solid.rest" padding="space.8">
+			<Box backgroundColor="accent.solid" padding="space.8">
 				<Text data-testid="paragraph" elementType="p">
 					Read the{' '}
 					<Link href="#" prominence="low">

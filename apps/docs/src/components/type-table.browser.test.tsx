@@ -661,9 +661,7 @@ test('keeps the Box guide token unions on separate lines without widening a mobi
 	await expect.element(row).toBeVisible();
 	const typeCell = row.element().nextElementSibling;
 	assert(typeCell instanceof HTMLElement, 'expected the type cell');
-	expect(visibleText(typeCell)).toContain(
-		'ResponsiveValue<"accent.solid.rest"\n  | "accent.subtle"',
-	);
+	expect(visibleText(typeCell)).toContain('ResponsiveValue<"accent.solid"\n  | "accent.subtle"');
 	assert(container, 'expected a container');
 	expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
 });

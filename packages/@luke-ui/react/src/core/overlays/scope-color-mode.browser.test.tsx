@@ -253,7 +253,7 @@ for (const appearance of visualAppearances) {
 			if (kind === 'combobox tray') mockScreenWidth(MOBILE_SCREEN_WIDTH);
 			render(
 				<div data-color-mode={otherMode}>
-					<Box backgroundColor="accent.solid.rest" padding="space.8">
+					<Box backgroundColor="accent.solid" padding="space.8">
 						<Overlay kind={kind} />
 					</Box>
 				</div>,

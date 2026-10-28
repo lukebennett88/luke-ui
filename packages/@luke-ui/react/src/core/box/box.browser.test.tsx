@@ -221,7 +221,7 @@ function expectConsumerClassAfterUtilities(className: string, utilityClassName: 
 
 const RESTING_BACKGROUNDS = [
 	...(['base', 'subdued', 'raised'] as const).map((surface) => `surface.${surface}` as const),
-	...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid.rest`] as const),
+	...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid`] as const),
 ];
 
 type RestingBackground = (typeof RESTING_BACKGROUNDS)[number];
@@ -250,7 +250,7 @@ for (const appearance of visualAppearances) {
 			expect(surfaceColors(element)).toEqual(pairedColors(element, background));
 		}
 		// On-solid text differs from the neutral hierarchy, so the solid checks are not vacuous.
-		const solid = byTestId(container, 'accent.solid.rest');
+		const solid = byTestId(container, 'accent.solid');
 		expect(getComputedStyle(solid).color).not.toBe(
 			resolvedColor(vars.color.foreground.primary, solid),
 		);
@@ -259,7 +259,7 @@ for (const appearance of visualAppearances) {
 
 test('a Box without a background keeps the inherited colour and context', () => {
 	const { container } = render(
-		<Box backgroundColor="danger.solid.rest" padding="space.8">
+		<Box backgroundColor="danger.solid" padding="space.8">
 			<Box data-testid="transparent" padding="space.8">
 				<span data-testid="inline">Inherited</span>
 			</Box>
@@ -269,25 +269,25 @@ test('a Box without a background keeps the inherited colour and context', () => 
 	const inline = byTestId(container, 'inline');
 
 	expect(surfaceColors(transparent)).toEqual({
-		...pairedColors(transparent, 'danger.solid.rest'),
+		...pairedColors(transparent, 'danger.solid'),
 		background: 'rgba(0, 0, 0, 0)',
 	});
 	expect(surfaceColors(inline)).toEqual({
-		...pairedColors(inline, 'danger.solid.rest'),
+		...pairedColors(inline, 'danger.solid'),
 		background: 'rgba(0, 0, 0, 0)',
 	});
 });
 
 test('a nested background establishes a new context on the same element', () => {
 	const { container } = render(
-		<Box backgroundColor="accent.solid.rest" data-testid="outer" padding="space.8">
+		<Box backgroundColor="accent.solid" data-testid="outer" padding="space.8">
 			<Box
 				backgroundColor="warning.subtle"
 				className="consumer-card"
 				data-testid="subtle"
 				padding="space.8"
 			>
-				<Box backgroundColor="success.solid.rest" data-testid="inner" padding="space.8">
+				<Box backgroundColor="success.solid" data-testid="inner" padding="space.8">
 					Nested
 				</Box>
 			</Box>
@@ -298,9 +298,9 @@ test('a nested background establishes a new context on the same element', () => 
 	const inner = byTestId(container, 'inner');
 
 	expect(subtle.classList).toContain('consumer-card');
-	expect(surfaceColors(outer)).toEqual(pairedColors(outer, 'accent.solid.rest'));
+	expect(surfaceColors(outer)).toEqual(pairedColors(outer, 'accent.solid'));
 	expect(surfaceColors(subtle)).toEqual(pairedColors(subtle, 'warning.subtle'));
-	expect(surfaceColors(inner)).toEqual(pairedColors(inner, 'success.solid.rest'));
+	expect(surfaceColors(inner)).toEqual(pairedColors(inner, 'success.solid'));
 });
 
 const responsiveCases: ReadonlyArray<{
@@ -308,27 +308,27 @@ const responsiveCases: ReadonlyArray<{
 	steps: ReadonlyArray<{ width: number; background: RestingBackground }>;
 }> = [
 	{
-		backgroundColor: { initial: 'surface.base', bp768: 'accent.solid.rest' },
+		backgroundColor: { initial: 'surface.base', bp768: 'accent.solid' },
 		steps: [
 			{ width: breakpoints.bp768 - 1, background: 'surface.base' },
-			{ width: breakpoints.bp768, background: 'accent.solid.rest' },
+			{ width: breakpoints.bp768, background: 'accent.solid' },
 		],
 	},
 	{
-		backgroundColor: { initial: 'danger.solid.rest', bp768: 'info.subtle' },
+		backgroundColor: { initial: 'danger.solid', bp768: 'info.subtle' },
 		steps: [
-			{ width: breakpoints.bp768 - 1, background: 'danger.solid.rest' },
+			{ width: breakpoints.bp768 - 1, background: 'danger.solid' },
 			{ width: breakpoints.bp768, background: 'info.subtle' },
 		],
 	},
 	{
 		backgroundColor: {
 			initial: 'surface.subdued',
-			bp768: 'warning.solid.rest',
+			bp768: 'warning.solid',
 			bp1024: 'accent.subtle',
 		},
 		steps: [
-			{ width: breakpoints.bp768, background: 'warning.solid.rest' },
+			{ width: breakpoints.bp768, background: 'warning.solid' },
 			{ width: breakpoints.bp1024, background: 'accent.subtle' },
 		],
 	},
@@ -358,7 +358,7 @@ test('resolves a responsive background against the nearest container', () => {
 	const { container } = render(
 		<div style={{ containerType: 'inline-size', inlineSize: `${breakpoints.bp768 - 1}px` }}>
 			<Box
-				backgroundColor={{ initial: 'neutral.subtle', bp768: 'neutral.solid.rest' }}
+				backgroundColor={{ initial: 'neutral.subtle', bp768: 'neutral.solid' }}
 				data-testid="narrow"
 			>
 				Narrow container
@@ -375,18 +375,14 @@ for (const appearance of visualAppearances) {
 
 	test(`a ${scopeMode} scope inside a ${appearance.theme} ${appearance.mode} solid re-establishes its own context`, () => {
 		const { container } = render(
-			<Box backgroundColor="accent.solid.rest" data-testid="solid" padding="space.8">
+			<Box backgroundColor="accent.solid" data-testid="solid" padding="space.8">
 				<div data-color-mode={scopeMode} data-testid="scope">
 					<span data-testid="scoped-text">Scoped</span>
-					<Box backgroundColor="danger.solid.rest" data-testid="scoped-solid">
+					<Box backgroundColor="danger.solid" data-testid="scoped-solid">
 						Scoped solid
 					</Box>
 				</div>
-				<Box
-					backgroundColor="success.solid.rest"
-					data-color-mode={scopeMode}
-					data-testid="own-scope"
-				>
+				<Box backgroundColor="success.solid" data-color-mode={scopeMode} data-testid="own-scope">
 					Own scope
 				</Box>
 			</Box>,
@@ -402,14 +398,14 @@ for (const appearance of visualAppearances) {
 		expect(resolvedColor(vars.color.foreground.primary, scope)).not.toBe(
 			resolvedColor(vars.color.foreground.primary, solid),
 		);
-		expect(surfaceColors(solid)).toEqual(pairedColors(solid, 'accent.solid.rest'));
+		expect(surfaceColors(solid)).toEqual(pairedColors(solid, 'accent.solid'));
 		expect(surfaceColors(scope)).toEqual(pairedColors(scope, 'surface.base'));
 		expect(surfaceColors(scopedText)).toEqual({
 			...pairedColors(scopedText, 'surface.base'),
 			background: 'rgba(0, 0, 0, 0)',
 		});
-		expect(surfaceColors(scopedSolid)).toEqual(pairedColors(scopedSolid, 'danger.solid.rest'));
-		expect(surfaceColors(ownScope)).toEqual(pairedColors(ownScope, 'success.solid.rest'));
+		expect(surfaceColors(scopedSolid)).toEqual(pairedColors(scopedSolid, 'danger.solid'));
+		expect(surfaceColors(ownScope)).toEqual(pairedColors(ownScope, 'success.solid'));
 	});
 }
 
@@ -472,7 +468,7 @@ for (const appearance of visualAppearances) {
 						style={{ containerType: 'inline-size', inlineSize: `${inlineSize}px` }}
 					>
 						<Box
-							backgroundColor={{ initial: 'danger.subtle', bp768: 'accent.solid.rest' }}
+							backgroundColor={{ initial: 'danger.subtle', bp768: 'accent.solid' }}
 							data-testid={`fill-${inlineSize}`}
 						>
 							<Text color="danger" data-testid={`text-${inlineSize}`}>
@@ -495,8 +491,8 @@ for (const appearance of visualAppearances) {
 		}).toEqual({
 			narrow: pairedColors(narrow, 'danger.subtle'),
 			narrowText: pairedColors(narrow, 'danger.subtle').foreground.danger,
-			wide: pairedColors(wide, 'accent.solid.rest'),
-			wideText: pairedColors(wide, 'accent.solid.rest').foreground.danger,
+			wide: pairedColors(wide, 'accent.solid'),
+			wideText: pairedColors(wide, 'accent.solid').foreground.danger,
 		});
 	});
 }

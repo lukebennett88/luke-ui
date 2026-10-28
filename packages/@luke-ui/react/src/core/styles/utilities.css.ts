@@ -28,19 +28,20 @@ const borderWidthScale = { none: '0', thin: '1px', thick: '2px' } as const;
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
 
 /**
- * Resting role fills and the standard surfaces, excluding the translucent backdrop. Hover and
- * pressed fills stay theme tokens for recipes.
+ * Resting role fills and the standard surfaces, excluding the translucent backdrop. Box values are
+ * state-free: `accent.solid` paints `vars.color.background.accent.solid.rest`. Hover and pressed
+ * fills stay theme tokens for recipes.
  */
 type BackgroundColorToken =
 	| `${SemanticRole}.subtle`
-	| `${SemanticRole}.solid.rest`
+	| `${SemanticRole}.solid`
 	| `surface.${keyof typeof vars.color.background.surface}`;
 
 const backgroundColors = [
 	...SEMANTIC_ROLES.flatMap((role) => {
 		return [
 			[`${role}.subtle`, `${role}.subtle`],
-			[`${role}.solid.rest`, `${role}.solid.rest`],
+			[`${role}.solid`, `${role}.solid.rest`],
 		] as const;
 	}),
 	...typedEntries(vars.color.background.surface).map(([surface]) => {

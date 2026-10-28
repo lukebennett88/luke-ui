@@ -79,7 +79,7 @@ test('Kbd uses the body font family, not the code font used by Code', async () =
 for (const appearance of visualAppearances) {
 	test(`Kbd establishes its own key-chip context on a solid fill in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { container } = render(
-			<Box backgroundColor="danger.solid.rest" padding="space.8">
+			<Box backgroundColor="danger.solid" padding="space.8">
 				<Text>
 					Press <Kbd>Enter</Kbd>
 				</Text>

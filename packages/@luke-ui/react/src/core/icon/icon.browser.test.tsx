@@ -74,7 +74,7 @@ for (const appearance of visualAppearances) {
 	test(`Icon paints in the surrounding contextual colour in ${appearance.theme} ${appearance.mode}`, () => {
 		const { container } = render(
 			<>
-				<Box backgroundColor="accent.solid.rest">
+				<Box backgroundColor="accent.solid">
 					<Icon id="on-solid-icon" name="add" />
 				</Box>
 				<Box backgroundColor="warning.subtle">

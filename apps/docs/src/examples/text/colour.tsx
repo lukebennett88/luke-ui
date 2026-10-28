@@ -34,7 +34,7 @@ export default () => {
 			</ComparisonItem>
 			<ComparisonItem label="Solid fill">
 				<Box
-					backgroundColor="accent.solid.rest"
+					backgroundColor="accent.solid"
 					borderRadius="surface"
 					columnGap="space.24"
 					display="flex"

@@ -771,7 +771,7 @@ for (const appearance of visualAppearances) {
 
 	test(`raw code, kbd, and pre establish their own context on a solid fill in ${name}`, () => {
 		const { container } = render(
-			<Box backgroundColor="accent.solid.rest" padding="space.8">
+			<Box backgroundColor="accent.solid" padding="space.8">
 				<Prose>
 					<p>
 						Run <code data-testid="code">pnpm install</code> or press{' '}
@@ -822,7 +822,7 @@ for (const appearance of visualAppearances) {
 
 	test(`a native link stays underlined in the solid fill's colour in every state in ${name}`, async () => {
 		const { locator, user } = render(
-			<Box backgroundColor="success.solid.rest" data-testid="parent" padding="space.8">
+			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
 				<Prose>
 					<p>
 						<a href="#guide">Read the guide</a>

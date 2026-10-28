@@ -415,7 +415,7 @@ for (const appearance of visualAppearances) {
 
 	test(`field text reads a solid fill while the control keeps its base surface in ${name}`, async () => {
 		const { container } = render(
-			<Box backgroundColor="accent.solid.rest" data-testid="parent" padding="space.8">
+			<Box backgroundColor="accent.solid" data-testid="parent" padding="space.8">
 				<TextInputField description="Used for receipts." label="Email" name="email" />
 			</Box>,
 			{ appearance },
@@ -438,7 +438,7 @@ for (const appearance of visualAppearances) {
 	// and the field's invalid state and description carry the error rather than the colour.
 	test(`an error keeps its meaning when its hue collapses on a solid fill in ${name}`, async () => {
 		const { container } = render(
-			<Box backgroundColor="danger.solid.rest" data-testid="parent" padding="space.8">
+			<Box backgroundColor="danger.solid" data-testid="parent" padding="space.8">
 				<TextInputField errorMessage="Enter a valid email." label="Email" name="email" />
 			</Box>,
 			{ appearance },
@@ -473,7 +473,7 @@ for (const appearance of visualAppearances) {
 	test(`a disabled label stays readable on a solid fill in ${name}`, () => {
 		const { container } = render(
 			<>
-				<Box backgroundColor="accent.solid.rest" data-testid="solid" padding="space.8">
+				<Box backgroundColor="accent.solid" data-testid="solid" padding="space.8">
 					<TextInputField isDisabled label="On solid" name="solid" />
 				</Box>
 				<Box backgroundColor="surface.subdued" data-testid="surface" padding="space.8">
@@ -499,7 +499,7 @@ test('an error keeps a solid icon and system text in forced colours', async () =
 
 	try {
 		render(
-			<Box backgroundColor="danger.solid.rest" padding="space.8">
+			<Box backgroundColor="danger.solid" padding="space.8">
 				<TextInputField errorMessage="Enter a valid email." label="Email" name="email" />
 			</Box>,
 		);

@@ -133,8 +133,10 @@ the table are not checked, such as disabled text and text on a background from y
 nested background sets a new context. A `Box` without `backgroundColor` keeps the surrounding one.
 An element with `data-color-mode` sets the context again in its own mode.
 
-`Box` takes each role's resting `subtle` and `solid` fill. Interactive components own the hover and
-pressed fills and pair them for you.
+`Box` takes each role's resting `subtle` and `solid` fill. `backgroundColor="accent.solid"` paints
+`vars.color.background.accent.solid.rest`, and Box values never carry a state suffix. Interactive
+components own the hover and pressed fills and pair them for you. Use
+`vars.color.background.accent.solid.hover` and `.pressed` in your own CSS.
 
 ### Custom surfaces
 
@@ -142,7 +144,7 @@ To make a custom element a Luke UI background, set `backgroundColor` on a `Box` 
 your class. Put both on the same element rather than wrapping one in the other.
 
 ```tsx
-<Box backgroundColor="accent.solid.rest" className={styles.card}>
+<Box backgroundColor="accent.solid" className={styles.card}>
 	<Heading>Example heading</Heading>
 	<Text>Inherits the fill's readable colour.</Text>
 </Box>

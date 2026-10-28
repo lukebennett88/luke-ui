@@ -6,7 +6,7 @@ import { contextualForeground } from '../styles/surface.js';
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
 
 /** A Box background value, or any recognised fill with its interaction state. */
-export type PairedBackground = SurfaceBackground;
+export type PairedBackground = SurfaceBackground | `${SemanticRole}.solid`;
 
 /** Every contextual foreground slot, in a stable order. */
 const FOREGROUND_SLOTS = ['primary', 'secondary', ...SEMANTIC_ROLES] as const;

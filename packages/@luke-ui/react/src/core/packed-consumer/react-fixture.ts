@@ -125,7 +125,7 @@ export function App({ onHydrated }) {
 			// A solid fill must hand its readable colours to Text across the published entrypoints.
 			h(
 				Box,
-				{ backgroundColor: 'accent.solid.rest', 'data-testid': 'solid-fill' },
+				{ backgroundColor: 'accent.solid', 'data-testid': 'solid-fill' },
 				h(Text, { color: 'danger', 'data-testid': 'contextual-text' }, 'Contextual text'),
 			),
 		),
@@ -440,17 +440,21 @@ export const fullButton = <Button inlineSize="full">Continue</Button>;
 // @ts-expect-error — text actions do not accept inline sizing
 export const textButtonWidth = <Button appearance="text" inlineSize="full">Continue</Button>;
 
-// Box values follow the public token contract.
+// Box values are state-free; warning.solid paints the resting solid fill.
 export const retainedBoxValues: Array<BoxProps> = [
 	{ backgroundColor: 'surface.base', borderColor: 'control', boxShadow: 'overlay' },
 	{ boxShadow: 'inset' },
 	{ backgroundColor: 'warning.subtle', borderRadius: 'full', gap: 'space.96' },
-	{ backgroundColor: 'warning.solid.rest' },
+	{ backgroundColor: 'warning.solid' },
 ];
-// @ts-expect-error — the solid shorthand is not a public token path
-export const removedBoxSolid: BoxProps['backgroundColor'] = 'warning.solid';
+// @ts-expect-error — Box solid values are state-free, so .rest is not an alias
+export const removedBoxSolidRest: BoxProps['backgroundColor'] = 'warning.solid.rest';
 // @ts-expect-error — solid interaction states are not Box values
 export const removedBoxSolidHover: BoxProps['backgroundColor'] = 'warning.solid.hover';
+// @ts-expect-error — solid interaction states are not Box values
+export const removedBoxSolidPressed: BoxProps['backgroundColor'] = 'warning.solid.pressed';
+// @ts-expect-error — subtle fills have no state leaves
+export const removedBoxSubtleRest: BoxProps['backgroundColor'] = 'warning.subtle.rest';
 // @ts-expect-error — the old public namespace has been removed
 export const removedTextNamespace = vars.color.text;
 // @ts-expect-error — the old public namespace has been removed

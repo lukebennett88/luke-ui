@@ -239,7 +239,7 @@ test('truncated heading', { tags: ['visual'] }, async () => {
 for (const appearance of visualAppearances) {
 	test(`Heading colour follows the nearest background in ${appearance.theme} ${appearance.mode}`, () => {
 		const { container } = render(
-			<Box backgroundColor="danger.solid.rest" data-testid="solid">
+			<Box backgroundColor="danger.solid" data-testid="solid">
 				<Heading data-testid="inherited" level={2}>
 					Account settings
 				</Heading>

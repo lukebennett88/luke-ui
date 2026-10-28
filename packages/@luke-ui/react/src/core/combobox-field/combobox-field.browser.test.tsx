@@ -899,7 +899,7 @@ async function waitForMobileTrayToSettle() {
 for (const appearance of visualAppearances) {
 	test(`the combobox control keeps its base surface on a solid fill in ${appearance.theme} ${appearance.mode}`, () => {
 		render(
-			<Box backgroundColor="accent.solid.rest" padding="space.8">
+			<Box backgroundColor="accent.solid" padding="space.8">
 				<ComboboxField defaultItems={countryItems} label="Country">
 					{renderCountryItem}
 				</ComboboxField>

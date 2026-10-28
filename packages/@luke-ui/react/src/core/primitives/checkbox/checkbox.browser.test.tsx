@@ -317,7 +317,7 @@ for (const appearance of visualAppearances) {
 	// checked, whatever surface the checkbox sits on.
 	test(`the checkbox box pairs each fill with its glyph colour in ${appearance.theme} ${appearance.mode}`, () => {
 		const { container } = render(
-			<Box backgroundColor="success.solid.rest" padding="space.8">
+			<Box backgroundColor="success.solid" padding="space.8">
 				<CheckboxRoot>
 					<Parts label="Plain" />
 				</CheckboxRoot>

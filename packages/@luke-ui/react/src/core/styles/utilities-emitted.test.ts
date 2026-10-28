@@ -6,7 +6,7 @@ import { breakpoints } from '../../theme/breakpoints.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 
 const UTILITIES_CSS_PATTERN = /utilities\.css-[A-Za-z0-9_-]+/;
-const BACKGROUND_INTERACTION_STATE_PATTERN = /\.(hover|pressed)["']/;
+const BACKGROUND_INTERACTION_STATE_PATTERN = /\.(rest|hover|pressed)["']/;
 const NUMERIC_ZERO_PATTERN = /(^|[{;\s])0:/;
 const READONLY_PROPERTY_PATTERN_CACHE = new Map<string, RegExp>();
 
@@ -73,7 +73,7 @@ test('the zero space key stays a quoted string in declaration emit', async () =>
 test('backgroundColor preserves its resting role and surface token vocabulary', async () => {
 	const declaration = await readUtilitiesDeclaration();
 	const tokens = [
-		...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid.rest`]),
+		...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid`]),
 		...['base', 'subdued', 'raised'].map((surface) => `surface.${surface}`),
 	];
 	const missingTokens = tokens.filter((token) => {
@@ -81,7 +81,7 @@ test('backgroundColor preserves its resting role and surface token vocabulary', 
 	});
 
 	expect(missingTokens).toEqual([]);
-	// Box takes resting fills only. Interaction states stay recipe tokens.
+	// Box takes state-free resting fills only. Every state suffix stays a `vars` token.
 	expect(declaration).not.toMatch(BACKGROUND_INTERACTION_STATE_PATTERN);
 	// A translucent scrim is not an opaque fill.
 	expect(declaration).not.toContain('overlay.backdrop');

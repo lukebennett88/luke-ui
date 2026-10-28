@@ -185,7 +185,7 @@ function MotionSample({ dotClassName, style }: { dotClassName: string; style: CS
 				inlineSize="100%"
 			/>
 			<Box
-				backgroundColor="accent.solid.rest"
+				backgroundColor="accent.solid"
 				blockSize={styles.MOTION_DOT_SIZE}
 				borderRadius="full"
 				className={dotClassName}

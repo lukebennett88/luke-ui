@@ -89,9 +89,7 @@ function ColorSample({
 				<Box
 					alignItems="center"
 					backgroundColor={
-						token.path.endsWith('.onSolid') && role !== undefined
-							? `${role}.solid.rest`
-							: 'surface.base'
+						token.path.endsWith('.onSolid') && role !== undefined ? `${role}.solid` : 'surface.base'
 					}
 					borderRadius="detail"
 					display="flex"
@@ -136,7 +134,7 @@ function BackdropSample({ value }: { value: string }) {
 			position="relative"
 		>
 			<Box backgroundColor="surface.base" flexGrow="1" />
-			<Box backgroundColor="neutral.solid.rest" flexGrow="1" />
+			<Box backgroundColor="neutral.solid" flexGrow="1" />
 			<Box inset="0" position="absolute" style={{ backgroundColor: value }} />
 		</Box>
 	);

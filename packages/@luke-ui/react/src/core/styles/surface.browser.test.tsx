@@ -46,7 +46,7 @@ for (const appearance of visualAppearances) {
 
 	test(`a transparent fill keeps its resting context under adaptive feedback in ${name}`, () => {
 		const { container } = render(
-			<Box backgroundColor="success.solid.rest" data-testid="parent" padding="space.8">
+			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
 				<div className={transparentToSubtleFixture} data-testid="control">
 					<span data-testid="label">Cancel</span>
 				</div>
@@ -78,7 +78,7 @@ for (const appearance of visualAppearances) {
 
 	test(`switching between subtle and solid resets every foreground slot in ${name}`, () => {
 		const { container } = render(
-			<Box backgroundColor="accent.solid.rest" padding="space.8">
+			<Box backgroundColor="accent.solid" padding="space.8">
 				<div className={subtleToSolidFixture} data-testid="toggle">
 					<span data-testid="label">Delete</span>
 				</div>

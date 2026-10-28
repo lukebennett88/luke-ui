@@ -75,7 +75,7 @@ export default () => {
 										Account status
 									</Text>
 									<Box
-										backgroundColor={`${role}.solid.rest`}
+										backgroundColor={`${role}.solid`}
 										borderRadius="full"
 										elementType="span"
 										paddingBlock="space.4"

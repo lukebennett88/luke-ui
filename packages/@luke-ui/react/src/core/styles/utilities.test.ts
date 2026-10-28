@@ -29,7 +29,7 @@ test('resolves borderColor tokens to their theme variables', () => {
 // The fill and its foreground context come from one class, never an inline value.
 test('gives every resting background its own class and no inline value', () => {
 	const tokens = [
-		...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid.rest`] as const),
+		...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid`] as const),
 		...(['base', 'subdued', 'raised'] as const).map((surface) => {
 			return `surface.${surface}` as const;
 		}),
@@ -47,9 +47,9 @@ test('gives every resting background its own class and no inline value', () => {
 });
 
 test('gives each responsive background condition its own class', () => {
-	const initial = createSprinkles({ backgroundColor: 'accent.solid.rest' }).className;
+	const initial = createSprinkles({ backgroundColor: 'accent.solid' }).className;
 	const responsive = createSprinkles({
-		backgroundColor: { initial: 'accent.solid.rest', bp768: 'surface.base', bp1024: null },
+		backgroundColor: { initial: 'accent.solid', bp768: 'surface.base', bp1024: null },
 	}).className.split(' ');
 
 	expect(responsive).toHaveLength(2);
@@ -84,7 +84,7 @@ test('derives token-backed Box values from the public contract', () => {
 test('passes through own enumerable string-keyed non-utility props', () => {
 	const result = createSprinkles({
 		'data-testid': 'box',
-		backgroundColor: 'accent.solid.rest',
+		backgroundColor: 'accent.solid',
 		display: 'flex',
 		id: 'layout-root',
 		role: 'group',
@@ -98,7 +98,7 @@ test('passes through own enumerable string-keyed non-utility props', () => {
 	expect(result.className.split(' ')).toEqual(
 		expect.arrayContaining([
 			createSprinkles({ display: 'flex' }).className,
-			createSprinkles({ backgroundColor: 'accent.solid.rest' }).className,
+			createSprinkles({ backgroundColor: 'accent.solid' }).className,
 		]),
 	);
 	expect('display' in result).toBe(false);
@@ -151,15 +151,21 @@ test('backgroundColor rejects anything but a namespaced role or surface token', 
 	assertType<UtilityProps['backgroundColor']>('rebeccapurple');
 	// @ts-expect-error — unknown role
 	assertType<UtilityProps['backgroundColor']>('magenta.solid');
-	// Box exposes the resting fill and subtle fill under their public paths.
-	assertType<UtilityProps['backgroundColor']>('accent.solid.rest');
-	assertType<UtilityProps['backgroundColor']>('accent.subtle');
-	// @ts-expect-error — the old shorthand is not a public token path
+	// Box values are state-free: `accent.solid` paints `vars.color.background.accent.solid.rest`.
 	assertType<UtilityProps['backgroundColor']>('accent.solid');
+	assertType<UtilityProps['backgroundColor']>('accent.subtle');
+	// @ts-expect-error — `.rest` is not a Box alias for the resting solid fill
+	assertType<UtilityProps['backgroundColor']>('accent.solid.rest');
 	// @ts-expect-error — subtle has no state leaves
 	assertType<UtilityProps['backgroundColor']>('accent.subtle.rest');
 	// @ts-expect-error — interaction states stay recipe tokens
+	assertType<UtilityProps['backgroundColor']>('danger.solid.hover');
+	// @ts-expect-error — interaction states stay recipe tokens
 	assertType<UtilityProps['backgroundColor']>('danger.solid.pressed');
+	// @ts-expect-error — backdrop is not an opaque surface fill
+	assertType<UtilityProps['backgroundColor']>('backdrop');
+	// @ts-expect-error — skeleton is not a Box value
+	assertType<UtilityProps['backgroundColor']>('skeleton');
 	// @ts-expect-error — a translucent scrim is not an opaque surface fill
 	assertType<UtilityProps['backgroundColor']>('overlay.backdrop');
 	// @ts-expect-error — surfaces are namespaced, so the bare name must not assign
