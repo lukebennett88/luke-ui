@@ -10,11 +10,11 @@ room for additive extension after 1.0. Prefer extensibility over configurability
 
 ## Packages and entry points
 
-| Package or entry                   | Contents                                                                                                                                                                         |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@luke-ui/react/theme`             | Runtime only: `vars`, `breakpoints`, and `getThemeClassName`. #717 removed `rootClassName`.                                                                                      |
-| `@luke-ui/react/theme/compiler`    | Build time only, Node 24+: `defineTheme`, `ThemeInput`, `ExtendingThemeInput`, `ThemeFont`, `FontMetrics`, `ThemeValidationError`, `ThemeContrastError`, `ThemeGenerationError`. |
-| `@luke-ui/theme-paper`, `-tactile` | `.` exports `themeClassName`; `./input` exports `theme`; `./stylesheet.css`; `./fonts.css`.                                                                                      |
+| Package or entry                   | Contents                                                                                                                                                  |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@luke-ui/react/theme`             | Runtime only: `vars`, `breakpoints`, and `getThemeClassName`. #717 removed `rootClassName`.                                                               |
+| `@luke-ui/react/theme/compiler`    | Build time only, Node 24+: `defineTheme`, `ThemeInput`, `ThemeFont`, `FontMetrics`, `ThemeValidationError`, `ThemeContrastError`, `ThemeGenerationError`. |
+| `@luke-ui/theme-paper`, `-tactile` | `.` exports `themeClassName`; `./input` exports `theme`; `./stylesheet.css`; `./fonts.css`.                                                               |
 
 - **D1. Compiler and identity stay separate.** `defineTheme(input)` returns a CSS string.
   `getThemeClassName(name)` becomes public on the runtime entry. Returning both from `defineTheme`
@@ -51,8 +51,8 @@ room for additive extension after 1.0. Prefer extensibility over configurability
   is, because tokens name fonts without loading them.
 - **D30. Compiler cleanup removes only demonstrably obsolete code:** the curated font enum and
   stacks, the copied-in `@capsizecss/metrics`, `:root` fallbacks, nested-identity selectors, bundled
-  theme modules and exports, and their tests. Colour adaptation, materials, inheritance, and
-  contrast checks stay. Anything uncertain becomes a focused issue rather than a deletion.
+  theme modules and exports, and their tests. Colour adaptation, materials, and contrast checks
+  stay. Anything uncertain becomes a focused issue rather than a deletion.
 
 ## Typography
 
@@ -62,9 +62,8 @@ room for additive extension after 1.0. Prefer extensibility over configurability
   no `code` role: `Code` isn't trimmed, and an optional `fonts.code` can be added later without
   breaking anything. `vars.font.family.code` keeps the system monospace stack and can be overridden
   in CSS.
-- **D25. Inheritance replaces each role as a whole.** Omitting a role inherits it. `display: null`
-  removes an inherited display font. `body` is never nullable. `null` survives multi-level merges
-  and is resolved after the chain is merged.
+- **D25 (superseded by #955).** Themes are standalone inputs; compose fonts with TypeScript.
+  `display: null` uses the body font, and `body` is never nullable.
 - **D59. `vars.font.family.display` is always emitted.** Without a display font it is a literal copy
   of the body family, never `var(--luke-font-family-body)`. No token value references another token.
 - **D13. The four semantic weights stay optional,** defaulting to 400/500/600/700.
@@ -96,11 +95,8 @@ room for additive extension after 1.0. Prefer extensibility over configurability
   present. Weights must be finite numbers from 1 to 1000. Don't compare `metrics.familyName` with
   the stack. The earlier `capHeight ≤ unitsPerEm` rule is withdrawn because fonts don't guarantee
   it.
-- **D43, D54 (revised by #768). Validate each input in an `extends` chain on its own,** against
-  every field it authors, before merging. A parent with invalid data fails even if a child replaces
-  it. The chain must provide an accent and a body font. `ThemeValidationError.issues` remains
-  `ReadonlyArray<{ theme; path; message }>`, with input-relative paths and no merge tracking or
-  `inheritance` field. A cycle is reported at `extends`, independently of other input issues. The
+- **D43, D54 (revised by #955).** Validate the standalone input and report all field issues in
+  `ThemeValidationError.issues` with theme name, path, and message. The
   [authoring validation section](../apps/docs/content/docs/docs/authoring-a-theme.mdx#validation)
   owns the field rules. `validateFoundation` stays an internal guard for direct `buildTheme`
   callers.
@@ -194,7 +190,6 @@ room for additive extension after 1.0. Prefer extensibility over configurability
 | -------------------------------------------------------------------- | ------------------------------------------------- |
 | CLI (`luke-ui theme build`, `--check`, exit codes)                   | Withdrawn; possible additive minor release.       |
 | `typography.fonts.code`                                              | Deferred until `Code` gains trimming.             |
-| Field-level provenance through inheritance merges                    | Withdrawn; per-input validation replaces it.      |
 | Private integration workspace package                                | Withdrawn.                                        |
 | Permanent fixture and package parity test                            | Withdrawn; one-time migration comparison instead. |
 | Tests for multiple identities, reopening during exit, font checksums | Withdrawn.                                        |

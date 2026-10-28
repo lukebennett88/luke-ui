@@ -26,7 +26,7 @@ for (const role of ROLES) {
 	});
 }
 
-describe('custom canvases that extend the published input', () => {
+describe('custom canvases composed from the published input', () => {
 	for (const { mode, base } of [
 		{
 			mode: 'light',
@@ -41,9 +41,9 @@ describe('custom canvases that extend the published input', () => {
 			let caught: unknown;
 			try {
 				defineTheme({
-					extends: theme,
+					...theme,
 					name: `tactile-custom-${mode}`,
-					color: { surface: { base: { [mode]: base } } },
+					color: { ...theme.color, surface: { ...theme.color.surface, base: { [mode]: base } } },
 				});
 			} catch (error) {
 				caught = error;

@@ -190,9 +190,9 @@ describe('theme fonts', () => {
 	});
 });
 
-describe('extending themes', () => {
-	it('compiles an extending theme to a standalone stylesheet with every token', () => {
-		const css = defineTheme({ extends: tactileTheme, name: 'product' });
+describe('composed themes', () => {
+	it('compiles a composed theme to a standalone stylesheet with every token', () => {
+		const css = defineTheme({ ...tactileTheme, name: 'product' });
 
 		expect(findTokenCompatibilityProblems(css, 'product')).toEqual([]);
 		expect(css).not.toContain('luke-ui-theme-tactile');

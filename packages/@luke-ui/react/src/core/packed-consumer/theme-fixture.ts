@@ -103,26 +103,29 @@ await writeFile('${COMPILED_THEMES.reference}', defineTheme(referenceThemeInput)
 
 /** A product theme that starts from Paper. It loads Paper's fonts but not Paper's stylesheet. */
 const PRODUCT_THEME = `
-import type { ExtendingThemeInput } from '@luke-ui/react/theme/compiler';
+import type { ThemeInput } from '@luke-ui/react/theme/compiler';
 import { theme as paperTheme } from '@luke-ui/theme-paper/input';
 
-export const productTheme: ExtendingThemeInput = {
-	color: { accent: '#3b82f6' },
-	extends: paperTheme,
+export const productTheme: ThemeInput = {
+	...paperTheme,
+	color: { ...paperTheme.color, accent: '#3b82f6' },
+	radius: { ...paperTheme.radius, control: 8 },
 	name: 'product',
 };
 `;
 
 /** Tactile with Lora, a 1000-units-per-em serif, as its display font. */
 const DISPLAY_THEME = `
-import type { ExtendingThemeInput } from '@luke-ui/react/theme/compiler';
+import type { ThemeInput } from '@luke-ui/react/theme/compiler';
 import { theme as tactileTheme } from '@luke-ui/theme-tactile/input';
 
-export const displayTheme: ExtendingThemeInput = {
-	extends: tactileTheme,
+export const displayTheme: ThemeInput = {
+	...tactileTheme,
 	name: 'display-fixture',
 	typography: {
+		...tactileTheme.typography,
 		fonts: {
+			...tactileTheme.typography.fonts,
 			display: {
 				family: "'Lora', serif",
 				metrics: { ...${JSON.stringify(LORA_METRICS)}, familyName: 'Lora' },
@@ -134,7 +137,7 @@ export const displayTheme: ExtendingThemeInput = {
 
 /** Typed usage of the theme packages through their published declarations. */
 const THEME_APP = `
-import { defineTheme, type ExtendingThemeInput, type ThemeInput } from '@luke-ui/react/theme/compiler';
+import { defineTheme, type ThemeInput } from '@luke-ui/react/theme/compiler';
 import { themeClassName as paperClassName } from '@luke-ui/theme-paper';
 import { theme as paperTheme } from '@luke-ui/theme-paper/input';
 import { themeClassName as tactileClassName } from '@luke-ui/theme-tactile';
@@ -142,7 +145,7 @@ import { theme as tactileTheme } from '@luke-ui/theme-tactile/input';
 
 export const classNames: Array<string> = [paperClassName, tactileClassName];
 export const inputs: Array<ThemeInput> = [paperTheme, tactileTheme];
-const product: ExtendingThemeInput = { extends: paperTheme, name: 'product' };
+const product: ThemeInput = { ...paperTheme, name: 'product' };
 export const css: string = defineTheme(product);
 `;
 

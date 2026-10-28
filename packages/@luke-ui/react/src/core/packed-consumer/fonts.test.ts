@@ -29,7 +29,7 @@ describe.skipIf(themes.length === 0)('fonts in a production build', () => {
 		await server.close();
 	});
 
-	// Tactile loads its own stylesheet. The product theme extends Paper and loads only Paper's fonts.
+	// Tactile loads its own stylesheet. The product theme is composed from Paper and loads only Paper's fonts.
 	for (const file of ['tactile.html', 'product.html']) {
 		test(`renders the Inter a theme package ships on ${file}`, async () => {
 			const { fontResponses, page } = await openFontPage(browser, `${server.url}${file}`);

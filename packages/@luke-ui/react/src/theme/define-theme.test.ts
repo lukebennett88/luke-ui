@@ -3,7 +3,7 @@ import { defineTheme, ThemeGenerationError } from '../exports/theme/compiler.js'
 import { paperTheme } from './__fixtures__/paper.js';
 import { UNSATISFIABLE_ON_SOLID } from './__fixtures__/radix-scales.js';
 import { tactileTheme } from './__fixtures__/tactile.js';
-import { splitBlocks, testTypography } from './__fixtures__/theme-css.js';
+import { loraFont, splitBlocks, testTypography } from './__fixtures__/theme-css.js';
 import { compileTheme } from './build-theme.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import type { ThemeInput } from './define-theme.js';
@@ -438,5 +438,38 @@ describe('surface input contract', () => {
 		expectTypeOf<keyof NonNullable<ThemeInput['color']['surface']>>().toEqualTypeOf<
 			'base' | 'subdued' | 'raised'
 		>();
+	});
+});
+
+describe('standalone input contract', () => {
+	it('does not accept an extends field', () => {
+		expectTypeOf<Extract<keyof ThemeInput, 'extends'>>().toEqualTypeOf<never>();
+	});
+});
+
+describe('TypeScript theme composition', () => {
+	it('replaces a neutral and composes fonts and one material mode', () => {
+		const input: ThemeInput = {
+			...tactileTheme,
+			name: 'composed',
+			color: { ...tactileTheme.color, neutral: paperTheme.color.neutral },
+			typography: {
+				...tactileTheme.typography,
+				fonts: { ...tactileTheme.typography.fonts, display: loraFont },
+			},
+			controlFinish: {
+				...tactileTheme.controlFinish,
+				dark: { ...tactileTheme.controlFinish?.dark, resting: 'none' },
+			},
+		};
+		const foundation = normalizeTheme(input);
+		expect(foundation.dark.color.neutral).toEqual(normalizeTheme(paperTheme).dark.color.neutral);
+		expect(foundation.typography.fonts.display).toEqual(loraFont);
+		expect(foundation.dark.controlFinish.resting).toBe('none');
+		expect(foundation.dark.controlFinish.raised).toBe(tactileTheme.controlFinish?.dark?.raised);
+		expect(foundation.light.controlFinish).toEqual(
+			normalizeTheme(tactileTheme).light.controlFinish,
+		);
+		expect(() => defineTheme(input)).not.toThrow();
 	});
 });

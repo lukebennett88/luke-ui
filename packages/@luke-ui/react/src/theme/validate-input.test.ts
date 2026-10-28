@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { interFont, loraFont, testTypography } from './__fixtures__/theme-css.js';
-import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
+import type { ThemeInput } from './define-theme.js';
 import { defineTheme } from './define-theme.js';
 import { ThemeValidationError } from './validate-input.js';
 
-function issuesOf(input: ThemeInput | ExtendingThemeInput) {
+function issuesOf(input: ThemeInput) {
 	try {
 		defineTheme(input);
 	} catch (error) {
@@ -151,114 +151,6 @@ describe('font weight validation', () => {
 	});
 });
 
-describe('validation across an extends chain', () => {
-	it('validates each input on its own and reports every issue at once', () => {
-		const base: ThemeInput = {
-			color: { accent: '#3b82f6' },
-			name: 'base',
-			typography: {
-				fonts: { body: { ...interFont, metrics: { ...interFont.metrics, unitsPerEm: -1 } } },
-			},
-		};
-		const child: ExtendingThemeInput = {
-			extends: base,
-			name: 'child',
-			// The child replaces the base's invalid body font, and the base still fails on its own.
-			typography: { fonts: { body: interFont }, fontWeight: { body: 2000 } },
-		};
-
-		let thrown: unknown = null;
-		try {
-			defineTheme(child);
-		} catch (error) {
-			thrown = error;
-		}
-
-		expect(thrown).toBeInstanceOf(ThemeValidationError);
-		const error = thrown as ThemeValidationError;
-		expect(error.issues).toEqual([
-			{
-				message: 'must be a number from 1 to 1000',
-				path: 'typography.fontWeight.body',
-				theme: 'child',
-			},
-			{
-				message: 'must be greater than 0',
-				path: 'typography.fonts.body.metrics.unitsPerEm',
-				theme: 'base',
-			},
-		]);
-		expect(error.message).toBe(
-			[
-				'Invalid theme input:',
-				'Theme "child", typography.fontWeight.body: must be a number from 1 to 1000',
-				'Theme "base", typography.fonts.body.metrics.unitsPerEm: must be greater than 0',
-			].join('\n'),
-		);
-	});
-
-	it('reports a missing body font against the outermost theme', () => {
-		const base = { color: { accent: '#3b82f6' }, name: 'no-fonts' } as unknown as ThemeInput;
-		const issues = issuesOf({ extends: base, name: 'outer' });
-
-		expect(issues).toEqual([
-			{
-				message: 'is required. Set it on this theme or on a theme it extends.',
-				path: 'typography.fonts.body',
-				theme: 'outer',
-			},
-		]);
-	});
-
-	it('reports a base without typography instead of failing the merge', () => {
-		// A base from an older theme package can lack a field a newer compiler requires.
-		const base = { color: { accent: '#3b82f6' }, name: 'older-base' } as unknown as ThemeInput;
-		const issues = issuesOf({
-			extends: base,
-			name: 'outer',
-			typography: { fonts: { display: loraFont }, fontWeight: { heading: 700 } },
-		});
-
-		expect(issues).toEqual([
-			{
-				message: 'is required. Set it on this theme or on a theme it extends.',
-				path: 'typography.fonts.body',
-				theme: 'outer',
-			},
-		]);
-	});
-
-	it('reports malformed typography instead of failing the merge', () => {
-		const base: ThemeInput = {
-			color: { accent: '#3b82f6' },
-			name: 'base',
-			typography: testTypography,
-		};
-		const child = {
-			extends: base,
-			name: 'child',
-			typography: { fonts: null },
-		} as unknown as ExtendingThemeInput;
-
-		expect(issuesOf(child)).toEqual([
-			{ message: 'must be an object', path: 'typography.fonts', theme: 'child' },
-		]);
-	});
-
-	it('keeps detecting a cyclic chain before validating it', () => {
-		const first: ThemeInput = {
-			color: { accent: '#3b82f6' },
-			name: 'first',
-			typography: testTypography,
-		};
-		first.extends = { extends: first, name: 'second' };
-
-		expect(issuesOf(first)).toEqual([
-			{ theme: 'first', path: 'extends', message: expect.stringContaining('cyclic extends chain') },
-		]);
-	});
-});
-
 describe('authored theme validation', () => {
 	const base: ThemeInput = {
 		color: { accent: '#3b82f6' },
@@ -266,57 +158,16 @@ describe('authored theme validation', () => {
 		typography: testTypography,
 	};
 
-	it('aggregates child errors and overridden base errors with input-relative paths', () => {
-		const invalidBase = {
-			...base,
-			color: { accent: { light: 'not-a-colour' }, neutralStyle: 'hot' },
-			depth: { dark: { overlay: 'none; color: red' } },
-			name: 'Invalid Base',
-			radius: { control: -1 },
-		} as unknown as ThemeInput;
-		const child: ExtendingThemeInput = {
-			color: { accent: '#3b82f6', neutralStyle: 'warm', backdrop: { dark: ' ' } },
-			controlFinish: { light: { raised: 'none}' } },
-			depth: { dark: { overlay: 'none' } },
-			extends: invalidBase,
-			name: 'child',
-			radius: { control: 8, detail: Number.NaN },
-		};
-
-		expect(issuesOf(child)).toEqual([
+	it('aggregates actionable issues from one input', () => {
+		const input = { ...base, color: { accent: 'bad' }, radius: { control: -1 } } as ThemeInput;
+		expect(issuesOf(input)).toEqual([
 			{
-				theme: 'child',
-				path: 'color.backdrop.dark',
-				message: expect.stringContaining('non-empty CSS colour'),
-			},
-			{
-				theme: 'child',
-				path: 'controlFinish.light.raised',
-				message: expect.stringContaining('background-image value without'),
-			},
-			{
-				theme: 'child',
-				path: 'radius.detail',
-				message: expect.stringContaining('pixels, 0 or greater'),
-			},
-			{ theme: 'Invalid Base', path: 'name', message: expect.stringContaining('kebab-case') },
-			{
-				theme: 'Invalid Base',
-				path: 'color.accent.light',
+				theme: 'base',
+				path: 'color.accent',
 				message: expect.stringContaining('cannot parse colour'),
 			},
 			{
-				theme: 'Invalid Base',
-				path: 'color.neutralStyle',
-				message: expect.stringContaining('cool, neutral, or warm'),
-			},
-			{
-				theme: 'Invalid Base',
-				path: 'depth.dark.overlay',
-				message: expect.stringContaining('box-shadow value without'),
-			},
-			{
-				theme: 'Invalid Base',
+				theme: 'base',
 				path: 'radius.control',
 				message: expect.stringContaining('pixels, 0 or greater'),
 			},
@@ -353,11 +204,13 @@ describe('authored theme validation', () => {
 
 	for (const [path, overrides, message] of malformed) {
 		it(`rejects the malformed shape at ${path}`, () => {
+			const color = 'color' in overrides ? overrides.color : {};
 			const input = {
-				extends: base,
+				...base,
 				name: 'child',
 				...overrides,
-			} as unknown as ExtendingThemeInput;
+				color: color === null ? null : { ...base.color, ...color },
+			} as unknown as ThemeInput;
 			expect(issuesOf(input)).toEqual([
 				{ theme: 'child', path, message: expect.stringContaining(message) },
 			]);
@@ -399,33 +252,25 @@ describe('authored theme validation', () => {
 
 	for (const [path, overrides, message] of invalidValues) {
 		it(`rejects an invalid authored value at ${path} before foundation generation`, () => {
+			const color = 'color' in overrides ? overrides.color : {};
 			const input = {
-				extends: base,
+				...base,
 				name: 'child',
 				...overrides,
-			} as unknown as ExtendingThemeInput;
+				color: color === null ? null : { ...base.color, ...color },
+			} as unknown as ThemeInput;
 			expect(issuesOf(input)).toEqual([
 				{ theme: 'child', path, message: expect.stringContaining(message) },
 			]);
 		});
 	}
 
-	it('reports a missing accent against the outermost input', () => {
-		const noAccent = { ...base, color: undefined } as unknown as ThemeInput;
-		expect(issuesOf({ extends: noAccent, name: 'child', color: { accent: undefined } })).toEqual([
-			{
-				theme: 'child',
-				path: 'color.accent',
-				message: 'is required. Set it on this theme or on a theme it extends.',
-			},
+	it('reports missing required fields', () => {
+		const input = { name: 'missing' } as ThemeInput;
+		expect(issuesOf(input)).toEqual([
+			{ theme: 'missing', path: 'color.accent', message: 'is required' },
+			{ theme: 'missing', path: 'typography.fonts.body', message: 'is required' },
 		]);
-	});
-
-	it('accepts an accent supplied by a child when the base has no color section', () => {
-		const noColor = { ...base, color: undefined } as unknown as ThemeInput;
-		expect(defineTheme({ extends: noColor, name: 'child', color: { accent: '#3b82f6' } })).toBe(
-			defineTheme({ ...base, name: 'child' }),
-		);
 	});
 
 	for (const name of [undefined, null, 42]) {
@@ -435,63 +280,6 @@ describe('authored theme validation', () => {
 			]);
 		});
 	}
-
-	it('treats undefined sections, roles, modes, and rungs as omitted across a chain', () => {
-		const authoredBase: ThemeInput = {
-			...base,
-			color: {
-				...base.color,
-				neutralStyle: 'warm',
-				backdrop: 'rgb(0 0 0 / 20%)',
-				info: { light: 'oklch(0.5 0.13 150)', dark: 'oklch(0.74 0.13 150)' },
-			},
-			depth: { light: { overlay: 'none' } },
-			controlFinish: { dark: { resting: 'linear-gradient(red, blue)' } },
-			radius: { control: 10 },
-		};
-		const undefinedOverrides: ExtendingThemeInput = {
-			color: {
-				accent: undefined,
-				neutral: undefined,
-				neutralStyle: undefined,
-				backdrop: undefined,
-				info: undefined,
-			},
-			controlFinish: { light: undefined, dark: { resting: undefined } },
-			depth: { dark: undefined, light: { overlay: undefined } },
-			extends: {
-				extends: authoredBase,
-				name: 'middle',
-				color: undefined,
-				depth: undefined,
-				controlFinish: undefined,
-				radius: undefined,
-				typography: undefined,
-			},
-			name: 'child',
-			radius: { control: undefined },
-		};
-		expect(defineTheme(undefinedOverrides)).toBe(defineTheme({ ...authoredBase, name: 'child' }));
-	});
-
-	it('replaces an inherited colour role with defaults when both authored sides are undefined', () => {
-		const authoredBase: ThemeInput = {
-			...base,
-			color: {
-				...base.color,
-				info: { light: 'oklch(0.5 0.13 150)', dark: 'oklch(0.74 0.13 150)' },
-			},
-		};
-		const defaultCss = defineTheme({ ...base, name: 'child' });
-		expect(defineTheme({ ...authoredBase, name: 'child' })).not.toBe(defaultCss);
-		expect(
-			defineTheme({
-				extends: authoredBase,
-				name: 'child',
-				color: { info: { light: undefined, dark: undefined } },
-			}),
-		).toBe(defaultCss);
-	});
 
 	it('emits an alpha backdrop verbatim and accepts safe material CSS and zero radii', () => {
 		const css = defineTheme({
@@ -509,21 +297,19 @@ describe('authored theme validation', () => {
 
 describe('removed field surface', () => {
 	for (const value of [undefined, '#fff', { light: '#fff', dark: '#111' }]) {
-		for (const inherited of [false, true]) {
-			it(`rejects ${JSON.stringify(value)} on ${inherited ? 'an ancestor' : 'the authored theme'}`, () => {
-				const input = {
-					color: { accent: '#3b82f6', surface: { field: value } },
-					name: 'removed-field',
-					typography: testTypography,
-				} as unknown as ThemeInput;
-				expect(issuesOf(inherited ? { extends: input, name: 'child' } : input)).toEqual([
-					{
-						message: expect.stringContaining('unsupported surface'),
-						path: 'color.surface.field',
-						theme: 'removed-field',
-					},
-				]);
-			});
-		}
+		it(`rejects ${JSON.stringify(value)} on the authored theme`, () => {
+			const input = {
+				color: { accent: '#3b82f6', surface: { field: value } },
+				name: 'removed-field',
+				typography: testTypography,
+			} as unknown as ThemeInput;
+			expect(issuesOf(input)).toEqual([
+				{
+					message: expect.stringContaining('unsupported surface'),
+					path: 'color.surface.field',
+					theme: 'removed-field',
+				},
+			]);
+		});
 	}
 });

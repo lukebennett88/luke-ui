@@ -78,7 +78,7 @@ declares `'Inter Variable'`. Until a font loads, text renders in the next font o
 to 400, 500, 600, and 700. Keep `label` at least 100 heavier than `body`. A low-prominence text Link
 has no underline at rest, and on a solid fill its colour matches the text around it, so the label
 weight is what shows it is a link. `defineTheme` throws when the resolved `label` weight is less
-than 100 above `body`, including a weight inherited from the theme you extend.
+than 100 above `body`.
 
 ### Surfaces
 
@@ -91,39 +91,17 @@ Choose borders and depth separately. A raised surface does not add either. Luke 
 colour into the sRGB gamut but never changes its lightness to pass contrast. If a surface fails
 [contrast validation](#contrast-validation), set it explicitly or choose a different value.
 
-## Extend a theme
+## Compose a theme
 
-Set `extends` to another theme's input. Your theme inherits every value it does not set. Each theme
-package exports its input as `theme` from `./input`, such as `@luke-ui/theme-paper/input`.
+Paper and Tactile export their inputs as `theme` from `./input`. Use ordinary TypeScript to build a
+standalone input from one of them:
 
-<SourceCodeBlock src="theming/extend-bundled-theme.ts" />
+<SourceCodeBlock src="theming/compose-bundled-theme.ts" />
 
-Your theme always declares its own `name`. Two themes with one name emit a colliding identity class.
-
-What each section inherits:
-
-- `color` merges role by role. A role replaces the base's role whole.
-- `color.neutral` and `color.neutralStyle` are one decision. Setting either replaces the base's
-  neutral decision.
-- `radius` and `typography.fontWeight` merge key by key.
-- `typography.fonts` merges font by font. A font replaces the base's font whole, so a family never
-  pairs with another font's metrics. Set `display: null` to remove an inherited display font.
-- `color.surface` merges surface by surface. A surface replaces the base's surface whole.
-- `depth` and `controlFinish` merge per mode, then per rung.
-
-A section, role, or material rung set to `undefined` counts as omitted and inherits. An authored
-colour object replaces its whole role. Undefined sides follow that role's
-[adaptation or default rules](#define-the-input), rather than inheriting the base's sides.
-
-A theme may extend a theme that extends another. A cycle throws `ThemeValidationError` at path
-`extends`.
-
-An extending theme compiles to a complete stylesheet of its own, so load it instead of the base
-theme's stylesheet. It still names the base's fonts. When you extend Tactile or Paper, keep
-importing the package's `fonts.css`.
-
-Contrast validation runs on the merged theme. `ThemeContrastError` carries `inheritance`, naming the
-chain of themes and which colours came from a base.
+Give the new theme its own `name`: two themes with one name emit a colliding identity class. Spreads
+are shallow, so spread each nested object whose other values you want to keep. A replaced property
+uses its own values and defaults. The compiled stylesheet stands alone. Load it instead of the
+bundled stylesheet. If it still names the bundled fonts, keep importing the package's `fonts.css`.
 
 ## Generate a stylesheet
 
@@ -157,11 +135,10 @@ as a virtual module. Import `virtual:theme.css` from the application entry.
 
 ## Validation
 
-`defineTheme` validates every authored field in each input of an `extends` chain before merging. It
-throws `ThemeValidationError` with all input problems together. Each entry in `issues` names the
-`theme` that contains it, its input-relative `path`, and a `message`. For example, an invalid accent
-side has path `color.accent.light`. An invalid base fails even when your theme overrides its value.
-The chain must provide both an accent and a body font.
+`defineTheme` validates the authored fields in its input before compiling. It throws
+`ThemeValidationError` with all input problems together. Each entry in `issues` names the `theme`
+that contains it, its input-relative `path`, and a `message`. For example, an invalid accent side
+has path `color.accent.light`. The input must provide both an accent and a body font.
 
 The rules for colours and materials:
 
@@ -187,7 +164,7 @@ The rules for fonts:
   positive, `descent` 0 or less, and `lineGap` 0 or more.
 - Font weights must be numbers from 1 to 1000.
 - The resolved `label` weight must be at least 100 heavier than `body`. An omitted weight uses the
-  inherited value, then the default.
+  default.
 
 ## Contrast validation
 

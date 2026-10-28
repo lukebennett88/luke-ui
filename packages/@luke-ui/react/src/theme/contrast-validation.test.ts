@@ -366,9 +366,12 @@ describe('custom-canvas interaction tint contrast', () => {
 			let caught: unknown;
 			try {
 				defineTheme({
-					extends: tactileTheme,
+					...tactileTheme,
 					name: `tactile-custom-${mode}`,
-					color: { surface: { base: { [mode]: base } } },
+					color: {
+						...tactileTheme.color,
+						surface: { ...tactileTheme.color.surface, base: { [mode]: base } },
+					},
 				});
 			} catch (error) {
 				caught = error;

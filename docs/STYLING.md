@@ -50,13 +50,13 @@ ignore source order.
 ## Themes
 
 `@luke-ui/react/theme/compiler` is the only theme-authoring entry. `defineTheme(input)` is pure and
-Node-compatible. It validates each input in an `extends` chain, throwing `ThemeValidationError` with
-every issue, then normalises the merged `ThemeInput` into static CSS and throws `ThemeContrastError`
-when a pair misses WCAG 2.2 AA contrast, or `ThemeInteractionTintError` when adaptive hover and
-pressed tints cannot clear both the contrast cap and the visibility floors. The raw
-`ThemeFoundation` object and `buildTheme` are internal. `@luke-ui/react/theme` is the runtime entry.
-Keep it free of theme generation, colour solving, Capsize, and Node-only code.
-`package-exports.test.ts` and the packed-consumer harness check its import graph.
+Node-compatible. It validates the input, throwing `ThemeValidationError` with every issue, then
+normalises the `ThemeInput` into static CSS and throws `ThemeContrastError` when a pair misses WCAG
+2.2 AA contrast, or `ThemeInteractionTintError` when adaptive hover and pressed tints cannot clear
+both the contrast cap and the visibility floors. The raw `ThemeFoundation` object and `buildTheme`
+are internal. `@luke-ui/react/theme` is the runtime entry. Keep it free of theme generation, colour
+solving, Capsize, and Node-only code. `package-exports.test.ts` and the packed-consumer harness
+check its import graph.
 
 Colour tokens come from private 12-step scales and elevation surfaces, then map onto the semantic
 contract. See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for that pipeline.

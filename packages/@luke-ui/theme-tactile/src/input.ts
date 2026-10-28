@@ -4,8 +4,8 @@ import { THEME_NAME } from './name.js';
 
 /**
  * Tactile's `defineTheme` input: a teal accent, a neutral near-white light canvas, lighter chromatic
- * dark surfaces, and a restrained material lit from above. Set it as `extends` on your own input to
- * start from Tactile.
+ * dark surfaces, and a restrained material lit from above. Compose it with ordinary TypeScript
+ * to start from Tactile.
  */
 export const theme: ThemeInput = {
 	// A solid face is lighter at the top and slightly darker at the bottom. Pressed reverses it. The

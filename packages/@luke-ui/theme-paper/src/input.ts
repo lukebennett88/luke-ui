@@ -5,8 +5,8 @@ import { THEME_NAME } from './name.js';
 /**
  * Paper's `defineTheme` input: a materially minimal theme with flat, hairline-bordered surfaces and
  * a blue `#185281`-family accent. Its light mode authors the status colours, and its dark mode lets
- * `info`, `success`, and `warning` fall back to the curated mode defaults. Set it as `extends` on
- * your own input to start from Paper.
+ * `info`, `success`, and `warning` fall back to the curated mode defaults. Compose it with ordinary TypeScript
+ * to start from Paper.
  */
 export const theme: ThemeInput = {
 	controlFinish: {
