@@ -49,8 +49,8 @@ export const autofilledInputStyle = {
 			caretColor: 'currentColor',
 		},
 	},
-	WebkitTextFillColor: vars.color.text.primary,
-	caretColor: vars.color.text.primary,
+	WebkitTextFillColor: vars.color.foreground.primary,
+	caretColor: vars.color.foreground.primary,
 } as const satisfies StyleRule;
 
 /** A disabled autofilled input keeps its disabled text. */
@@ -60,7 +60,7 @@ export const autofilledDisabledInputStyle = {
 	'@media': {
 		'(forced-colors: active)': { WebkitTextFillColor: 'GrayText' },
 	},
-	WebkitTextFillColor: vars.color.text.disabled,
+	WebkitTextFillColor: vars.color.foreground.disabled,
 } as const satisfies StyleRule;
 
 /** Styles every text input shares, whether it draws its own chrome or sits inside a control. */
@@ -70,7 +70,7 @@ export const textInputInputBase = {
 	borderColor: 'transparent',
 	borderStyle: 'none',
 	borderWidth: 0,
-	color: vars.color.text.primary,
+	color: vars.color.foreground.primary,
 	cursor: 'text',
 	fontFamily: 'inherit',
 	fontWeight: 'inherit',
@@ -84,11 +84,11 @@ export const textInputInputBase = {
 
 	selectors: {
 		'&::placeholder': {
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			opacity: 1,
 		},
 		'&:where([data-disabled="true"], :disabled)': {
-			color: vars.color.text.disabled,
+			color: vars.color.foreground.disabled,
 			cursor: 'not-allowed',
 		},
 	},
@@ -173,13 +173,13 @@ export const textInputPartsRecipe = recipe({
 			borderInlineEndColor: vars.color.border.control,
 			borderInlineEndStyle: 'solid',
 			borderInlineEndWidth: '1px',
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			display: 'inline-flex',
 			flexShrink: 0,
 
 			selectors: {
 				[descendantDisabledSelector]: {
-					color: vars.color.text.disabled,
+					color: vars.color.foreground.disabled,
 				},
 			},
 		},
@@ -188,13 +188,13 @@ export const textInputPartsRecipe = recipe({
 			borderInlineStartColor: vars.color.border.control,
 			borderInlineStartStyle: 'solid',
 			borderInlineStartWidth: '1px',
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			display: 'inline-flex',
 			flexShrink: 0,
 
 			selectors: {
 				[descendantDisabledSelector]: {
-					color: vars.color.text.disabled,
+					color: vars.color.foreground.disabled,
 				},
 			},
 		},

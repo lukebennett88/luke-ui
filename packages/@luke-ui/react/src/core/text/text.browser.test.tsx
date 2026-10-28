@@ -362,8 +362,8 @@ const CONTEXT_BACKGROUNDS = [
 	'surface.subdued',
 	'neutral.subtle',
 	'danger.subtle',
-	'accent.solid',
-	'warning.solid',
+	'accent.solid.rest',
+	'warning.solid.rest',
 ] as const satisfies ReadonlyArray<PairedBackground>;
 
 function byTestId(container: HTMLElement, id: string): HTMLElement {
@@ -382,7 +382,7 @@ for (const appearance of visualAppearances) {
 	test(`Text without a colour inherits the surrounding colour in ${name}`, () => {
 		const { container } = render(
 			<>
-				<Box backgroundColor="accent.solid" data-testid="solid">
+				<Box backgroundColor="accent.solid.rest" data-testid="solid">
 					<Text data-testid="on-solid">On solid</Text>
 				</Box>
 				<Box backgroundColor="warning.subtle" data-testid="subtle">
@@ -429,15 +429,15 @@ for (const appearance of visualAppearances) {
 		}
 		// A semantic role keeps its hue on a subtle fill but collapses on a solid one.
 		const subtleDanger = byTestId(container, 'neutral.subtle danger');
-		const solidDanger = byTestId(container, 'accent.solid danger');
+		const solidDanger = byTestId(container, 'accent.solid.rest danger');
 		expect(colorOf(subtleDanger)).not.toBe(colorOf(byTestId(container, 'neutral.subtle primary')));
-		expect(colorOf(solidDanger)).toBe(colorOf(byTestId(container, 'accent.solid primary')));
+		expect(colorOf(solidDanger)).toBe(colorOf(byTestId(container, 'accent.solid.rest primary')));
 	});
 
 	test(`Text colours follow nested backgrounds and colour-mode scopes in ${name}`, () => {
 		const scopeMode = appearance.mode === 'light' ? 'dark' : 'light';
 		const { container } = render(
-			<Box backgroundColor="success.solid" padding="space.8">
+			<Box backgroundColor="success.solid.rest" padding="space.8">
 				<span style={{ color: 'rgb(1, 2, 3)' }}>
 					<Text color="primary" data-testid="reset-primary">
 						Primary
@@ -447,7 +447,7 @@ for (const appearance of visualAppearances) {
 					<Text color="danger" data-testid="subtle-danger">
 						Danger
 					</Text>
-					<Box backgroundColor="danger.solid" data-testid="inner-solid" padding="space.8">
+					<Box backgroundColor="danger.solid.rest" data-testid="inner-solid" padding="space.8">
 						<Text color="secondary" data-testid="inner-secondary">
 							Secondary
 						</Text>
@@ -468,13 +468,13 @@ for (const appearance of visualAppearances) {
 
 		// Explicit primary ignores the custom colour between it and the background.
 		expect(colorOf(resetPrimary)).toBe(
-			resolvedColor(pairedTokens('success.solid').primary, resetPrimary),
+			resolvedColor(pairedTokens('success.solid.rest').primary, resetPrimary),
 		);
 		expect(colorOf(subtleDanger)).toBe(
 			resolvedColor(pairedTokens('info.subtle').danger, subtleDanger),
 		);
 		expect(colorOf(innerSecondary)).toBe(
-			resolvedColor(pairedTokens('danger.solid').secondary, innerSecondary),
+			resolvedColor(pairedTokens('danger.solid.rest').secondary, innerSecondary),
 		);
 		expect(colorOf(scopeSecondary)).toBe(
 			resolvedColor(pairedTokens('surface.base').secondary, scopeSecondary),
@@ -486,7 +486,7 @@ for (const appearance of visualAppearances) {
 
 	test(`font and style overrides never reset colour in ${name}`, () => {
 		const { container } = render(
-			<Box backgroundColor="accent.solid" data-testid="solid">
+			<Box backgroundColor="accent.solid.rest" data-testid="solid">
 				<Text data-testid="inherit-font" shouldInheritFont>
 					Inherited font
 				</Text>
@@ -514,7 +514,7 @@ for (const appearance of visualAppearances) {
 		expect(colorOf(byTestId(container, 'inherit-font'))).toBe(colorOf(solid));
 		expect(colorOf(byTestId(container, 'styled'))).toBe(colorOf(solid));
 		expect(colorOf(inheritFontSecondary)).toBe(
-			resolvedColor(pairedTokens('accent.solid').secondary, inheritFontSecondary),
+			resolvedColor(pairedTokens('accent.solid.rest').secondary, inheritFontSecondary),
 		);
 		expect(colorOf(byTestId(container, 'inline-style'))).toBe('rgb(1, 2, 3)');
 	});
@@ -661,7 +661,7 @@ const EVERY_BACKGROUND = [
 	'surface.base',
 	'surface.subdued',
 	'surface.raised',
-	...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid`] as const),
+	...SEMANTIC_ROLES.flatMap((role) => [`${role}.subtle`, `${role}.solid.rest`] as const),
 ] as const satisfies ReadonlyArray<PairedBackground>;
 
 for (const appearance of visualAppearances) {
@@ -697,7 +697,7 @@ test('Text on a solid fill takes the system colours in forced colours', async ()
 
 	try {
 		const { container } = render(
-			<Box backgroundColor="accent.solid" data-testid="fill" padding="space.8">
+			<Box backgroundColor="accent.solid.rest" data-testid="fill" padding="space.8">
 				<Text color="danger" data-testid="text">
 					Danger
 				</Text>

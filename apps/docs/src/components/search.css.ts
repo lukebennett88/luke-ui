@@ -62,7 +62,7 @@ export const trigger = style({
 					transition: 'none',
 				},
 			},
-			backgroundColor: vars.color.surface.base,
+			backgroundColor: vars.color.background.surface.base,
 			borderColor: vars.color.border.control,
 			// Button draws no border of its own, so the field look sets the width.
 			borderWidth: '1px',
@@ -79,8 +79,8 @@ export const trigger = style({
 			selectors: {
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"]), &[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])':
 					{
-						backgroundColor: vars.color.surface.base,
-						borderColor: `color-mix(in srgb, ${vars.color.border.control} 80%, ${vars.color.text.primary} 20%)`,
+						backgroundColor: vars.color.background.surface.base,
+						borderColor: `color-mix(in srgb, ${vars.color.border.control} 80%, ${vars.color.foreground.primary} 20%)`,
 						boxShadow: vars.shadow.inset,
 					},
 			},
@@ -91,7 +91,7 @@ export const trigger = style({
 export const triggerPlaceholder = style({
 	'@layer': {
 		components: {
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			fontWeight: vars.font.weight.body,
 		},
 	},
@@ -134,7 +134,7 @@ export const overlay = style({
 				hidden: { opacity: 0 },
 				properties: ['opacity'],
 				rule: {
-					backgroundColor: vars.color.overlay.backdrop,
+					backgroundColor: vars.color.background.backdrop,
 					inset: 0,
 					position: 'fixed',
 					zIndex: 100,
@@ -162,7 +162,7 @@ export const modalPassThrough = style({
 export const panel = style({
 	'@layer': {
 		components: {
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			display: 'flex',
 			flexDirection: 'column',
 			maxBlockSize: 'none',
@@ -179,7 +179,7 @@ export const panel = style({
 export const panelFieldShell = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.raised,
+			backgroundColor: vars.color.background.surface.raised,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.surface,
 			borderStyle: 'solid',
@@ -267,7 +267,7 @@ export const inputRow = style({
 	'@layer': {
 		components: {
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.raised,
+			backgroundColor: vars.color.background.surface.raised,
 			borderRadius: vars.radius.surface,
 			display: 'flex',
 			flexShrink: 0,
@@ -343,7 +343,7 @@ export const result = style({
 			},
 			selectors: {
 				'&[data-focused]': {
-					backgroundColor: vars.color.background.accent.subtle.rest,
+					backgroundColor: vars.color.background.accent.subtle,
 				},
 				'&[data-focus-visible]': {
 					outlineColor: vars.color.border.focus,
@@ -353,7 +353,7 @@ export const result = style({
 				},
 			},
 			borderRadius: vars.radius.control,
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			display: 'flex',
 			flexDirection: 'column',
 			fontSize: vars.font.label.fontSize,
@@ -387,7 +387,7 @@ export const breadcrumbs = style({
 	'@layer': {
 		components: {
 			alignItems: 'center',
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			display: 'inline-flex',
 			gap: vars.space['4'],
 		},
@@ -397,7 +397,7 @@ export const breadcrumbs = style({
 export const breadcrumbChevron = style({
 	'@layer': {
 		components: {
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			flexShrink: 0,
 		},
 	},
@@ -417,7 +417,7 @@ export const nestedResult = style({
 export const headingHash = style({
 	'@layer': {
 		components: {
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			fontWeight: vars.font.weight.emphasis,
 		},
 	},
@@ -434,7 +434,7 @@ export const headingContent = style({
 export const textContent = style({
 	'@layer': {
 		components: {
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 		},
 	},
 });
@@ -443,7 +443,7 @@ export const highlight = style({
 	'@layer': {
 		components: {
 			backgroundColor: 'transparent',
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			textDecoration: 'underline',
 			textUnderlineOffset: '0.15em',
 		},

@@ -13,9 +13,9 @@ import {
 export const cardLink = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.base,
+			backgroundColor: vars.color.background.surface.base,
 			backgroundImage: interactionStateBackgroundImage,
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			textDecoration: 'none',
 			transition: `${interactionStateTransitionProperty} ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			selectors: {

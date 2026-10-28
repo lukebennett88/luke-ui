@@ -74,7 +74,7 @@ for (const appearance of visualAppearances) {
 	test(`Icon paints in the surrounding contextual colour in ${appearance.theme} ${appearance.mode}`, () => {
 		const { container } = render(
 			<>
-				<Box backgroundColor="accent.solid">
+				<Box backgroundColor="accent.solid.rest">
 					<Icon id="on-solid-icon" name="add" />
 				</Box>
 				<Box backgroundColor="warning.subtle">
@@ -93,7 +93,7 @@ for (const appearance of visualAppearances) {
 		}
 
 		expect(getComputedStyle(onSolid).fill).toBe(
-			resolvedColor(pairedTokens('accent.solid').primary, onSolid.parentElement!),
+			resolvedColor(pairedTokens('accent.solid.rest').primary, onSolid.parentElement!),
 		);
 		expect(getComputedStyle(dangerIcon).fill).toBe(
 			resolvedColor(pairedTokens('warning.subtle').danger, dangerText!),

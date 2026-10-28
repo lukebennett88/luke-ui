@@ -21,7 +21,7 @@ import type { SemanticColorValues } from './semantic-map.js';
 
 const ROLE_FOREGROUND_PATTERN = /^color\.foreground\.\w+\.(rest|hover|pressed)$/;
 const TINT_CONTRAST_BACKGROUND_PATTERN =
-	/^color\.(surface\.(base|subdued|raised)|background\.\w+\.subtle\.rest)$/;
+	/^color\.background\.(surface\.(base|subdued|raised)|\w+\.subtle)$/;
 
 describe('buildTheme contrast failures', () => {
 	function buildFailures(foundation: ThemeFoundation): ThemeContrastError {
@@ -49,7 +49,7 @@ describe('buildTheme contrast failures', () => {
 		const failure = error.failures.find((candidate) => {
 			return (
 				candidate.foreground === 'color.border.focus' &&
-				candidate.background === 'color.surface.base'
+				candidate.background === 'color.background.surface.base'
 			);
 		});
 		expect(failure).toBeDefined();
@@ -57,7 +57,7 @@ describe('buildTheme contrast failures', () => {
 		expect(failure?.required).toBe(3);
 		expect(failure?.ratio).toBeLessThan(3);
 		expect(error.message).toMatch(
-			/light: color\.border\.focus on color\.surface\.base — \d+\.\d{3}:1 < 3:1/,
+			/light: color\.border\.focus on color\.background\.surface\.base — \d+\.\d{3}:1 < 3:1/,
 		);
 	});
 
@@ -83,7 +83,7 @@ describe('buildTheme contrast failures', () => {
 			for (const mode of ['light', 'dark'] as const) {
 				const outlineChecks = diagnostics[mode].contrastChecks.filter((check) => {
 					return (
-						check.foreground === 'color.foreground.accent.onSolid.primary' &&
+						check.foreground === 'color.foreground.accent.onSolid' &&
 						(check.background === 'color.background.accent.solid.rest' ||
 							check.background === 'color.background.accent.solid.pressed') &&
 						check.required === UI_RATIO
@@ -98,7 +98,7 @@ describe('buildTheme contrast failures', () => {
 				expect(
 					diagnostics[mode].contrastChecks.some(
 						(check) =>
-							check.background === 'color.surface.raised' &&
+							check.background === 'color.background.surface.raised' &&
 							check.foreground.startsWith('color.background.accent.solid.'),
 					),
 				).toBe(false);
@@ -122,7 +122,7 @@ describe('buildTheme contrast failures', () => {
 		expect(error.failures).toContainEqual({
 			mode: 'light',
 			foreground: 'color.border.focus',
-			background: 'color.surface.base',
+			background: 'color.background.surface.base',
 			ratio,
 			required: UI_RATIO,
 		});
@@ -143,13 +143,15 @@ describe('buildTheme contrast failures', () => {
 		const failure = error.failures.find((candidate) => {
 			return (
 				candidate.mode === 'dark' &&
-				candidate.foreground === 'color.text.primary' &&
-				candidate.background.startsWith('color.surface.')
+				candidate.foreground === 'color.foreground.primary' &&
+				candidate.background.startsWith('color.background.surface.')
 			);
 		});
 		expect(failure).toBeDefined();
 		expect(failure?.required).toBe(4.5);
-		expect(error.message).toContain('dark: color.text.primary on color.surface.base');
+		expect(error.message).toContain(
+			'dark: color.foreground.primary on color.background.surface.base',
+		);
 	});
 
 	it('aggregates every failing pair into one error', () => {
@@ -172,7 +174,7 @@ describe('buildTheme contrast failures', () => {
 		// A low-contrast light focus ring and a pathological dark base fail different pairs across both
 		// modes; the error collects them all.
 		expect(foregrounds.has('color.border.focus')).toBe(true);
-		expect(foregrounds.has('color.text.primary')).toBe(true);
+		expect(foregrounds.has('color.foreground.primary')).toBe(true);
 		expect(error.failures.length).toBeGreaterThan(2);
 		expect(error.message.split('\n').length).toBe(error.failures.length + 1);
 	});
@@ -191,7 +193,7 @@ describe('buildTheme contrast failures', () => {
 			name: 'bad-raised',
 		});
 		const failingSurfaces = new Set(error.failures.map((failure) => failure.background));
-		expect(failingSurfaces.has('color.surface.raised')).toBe(true);
+		expect(failingSurfaces.has('color.background.surface.raised')).toBe(true);
 		expect(error.failures.every((failure) => failure.mode === 'light')).toBe(true);
 	});
 
@@ -211,7 +213,7 @@ describe('buildTheme contrast failures', () => {
 		});
 		expect(error.failures).toContainEqual(
 			expect.objectContaining({
-				background: 'color.surface.subdued',
+				background: 'color.background.surface.subdued',
 				foreground: 'color.foreground.danger.rest',
 				mode: 'light',
 			}),
@@ -221,15 +223,19 @@ describe('buildTheme contrast failures', () => {
 
 describe('contrast validation matrix', () => {
 	const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
-	const SURFACES = ['color.surface.base', 'color.surface.subdued', 'color.surface.raised'] as const;
+	const SURFACES = [
+		'color.background.surface.base',
+		'color.background.surface.subdued',
+		'color.background.surface.raised',
+	] as const;
 
 	function expectedChecks() {
 		const hard: Array<{ background: string; foreground: string; required: number }> = [];
 		const advisory: Array<{ background: string; foreground: string; required: number }> = [];
 		const subtleBackgrounds = SEMANTIC_ROLES.map((role) => {
-			return `color.background.${role}.subtle.rest`;
+			return `color.background.${role}.subtle`;
 		});
-		for (const text of ['color.text.primary', 'color.text.secondary'] as const) {
+		for (const text of ['color.foreground.primary', 'color.foreground.secondary'] as const) {
 			for (const surface of [...SURFACES, ...subtleBackgrounds]) {
 				hard.push({ background: surface, foreground: text, required: TEXT_RATIO });
 			}
@@ -244,14 +250,12 @@ describe('contrast validation matrix', () => {
 					});
 				}
 			}
-			for (const hierarchy of ['primary', 'secondary']) {
-				for (const state of INTERACTION_STATES) {
-					hard.push({
-						background: `color.background.${role}.solid.${state}`,
-						foreground: `color.foreground.${role}.onSolid.${hierarchy}`,
-						required: TEXT_RATIO,
-					});
-				}
+			for (const state of INTERACTION_STATES) {
+				hard.push({
+					background: `color.background.${role}.solid.${state}`,
+					foreground: `color.foreground.${role}.onSolid`,
+					required: TEXT_RATIO,
+				});
 			}
 			for (const background of SURFACES) {
 				if (role !== 'danger') {
@@ -280,7 +284,7 @@ describe('contrast validation matrix', () => {
 		for (const state of ['rest', 'pressed']) {
 			hard.push({
 				background: `color.background.accent.solid.${state}`,
-				foreground: 'color.foreground.accent.onSolid.primary',
+				foreground: 'color.foreground.accent.onSolid',
 				required: UI_RATIO,
 			});
 		}
@@ -317,7 +321,7 @@ describe('contrast validation matrix', () => {
 					const foreground = check.foreground.startsWith('interaction.border.')
 						? controlBorderStateColor(
 								parseColor(extractValue(block, variableNames.get('color.border.control')!)),
-								parseColor(extractValue(block, variableNames.get('color.text.primary')!)),
+								parseColor(extractValue(block, variableNames.get('color.foreground.primary')!)),
 								check.foreground.endsWith('.hover') ? 'hover' : 'pressed',
 							)
 						: extractValue(block, variableNames.get(check.foreground)!);
@@ -415,7 +419,7 @@ describe('functional danger boundary', () => {
 			expect(
 				contrastRatio(
 					parseColor(extractValue(blocks.mediaDark, '--luke-color-background-danger-solid-rest')),
-					parseColor(extractValue(blocks.mediaDark, '--luke-color-surface-raised')),
+					parseColor(extractValue(blocks.mediaDark, '--luke-color-background-surface-raised')),
 				),
 			).toBeLessThan(UI_RATIO);
 			for (const mode of ['light', 'dark'] as const) {
@@ -434,18 +438,18 @@ describe('functional danger boundary', () => {
 						.filter(([path]) => path.startsWith('color.'))
 						.map(([path, variable]) => [path, extractValue(block, variable)]),
 				) as SemanticColorValues;
-				colors['color.border.danger'] = colors['color.surface.base'];
+				colors['color.border.danger'] = colors['color.background.surface.base'];
 				const { failures } = validateContrast(mode, colors);
 				expect(failures).toContainEqual(
 					expect.objectContaining({
 						foreground: 'color.border.danger',
-						background: 'color.surface.base',
+						background: 'color.background.surface.base',
 						mode,
 						required: UI_RATIO,
 					}),
 				);
 				expect(new ThemeContrastError(failures).message).toContain(
-					`${mode}: color.border.danger on color.surface.base`,
+					`${mode}: color.border.danger on color.background.surface.base`,
 				);
 			}
 		});
@@ -455,9 +459,9 @@ describe('functional danger boundary', () => {
 			expect(extractValue(blocks.baseLight, '--luke-color-border-danger')).toBe(
 				extractValue(blocks.baseLight, '--luke-color-background-danger-solid-rest'),
 			);
-			for (const hierarchy of ['primary', 'secondary']) {
+			{
 				const text = parseColor(
-					extractValue(blocks.mediaDark, `--luke-color-foreground-danger-on-solid-${hierarchy}`),
+					extractValue(blocks.mediaDark, '--luke-color-foreground-danger-on-solid'),
 				);
 				expect(text.l).toBeGreaterThan(0.9);
 				for (const state of ['rest', 'hover', 'pressed']) {
@@ -472,7 +476,7 @@ describe('functional danger boundary', () => {
 	}
 });
 
-describe('independent on-solid hierarchy gates', () => {
+describe('on-solid contrast gates', () => {
 	const blocks = splitBlocks(buildTheme(tactileFoundation));
 	const solidStates = ['rest', 'hover', 'pressed'] as const;
 
@@ -486,20 +490,19 @@ describe('independent on-solid hierarchy gates', () => {
 	}
 
 	for (const mode of ['light', 'dark'] as const) {
-		it(`rejects only the failing primary leaf across every role and state in ${mode}`, () => {
+		it(`rejects a failing on-solid colour across every role and state in ${mode}`, () => {
 			const colors = modeColors(mode);
 			for (const role of SEMANTIC_ROLES) {
-				colors[`color.foreground.${role}.onSolid.primary`] =
-					colors[`color.background.${role}.solid.rest`];
+				colors[`color.foreground.${role}.onSolid`] = colors[`color.background.${role}.solid.rest`];
 			}
 			const { failures } = validateContrast(mode, colors);
-			// Accent on-solid primary is also gated at 3:1 for the dropdown inset outline.
+			// Accent on-solid is also gated at 3:1 for the dropdown inset outline.
 			expect(failures).toHaveLength(SEMANTIC_ROLES.length * solidStates.length + 2);
 			for (const role of SEMANTIC_ROLES) {
 				for (const state of solidStates) {
 					expect(failures).toContainEqual({
 						mode,
-						foreground: `color.foreground.${role}.onSolid.primary`,
+						foreground: `color.foreground.${role}.onSolid`,
 						background: `color.background.${role}.solid.${state}`,
 						ratio: expect.any(Number),
 						required: TEXT_RATIO,
@@ -509,32 +512,11 @@ describe('independent on-solid hierarchy gates', () => {
 			for (const state of ['rest', 'pressed'] as const) {
 				expect(failures).toContainEqual({
 					mode,
-					foreground: 'color.foreground.accent.onSolid.primary',
+					foreground: 'color.foreground.accent.onSolid',
 					background: `color.background.accent.solid.${state}`,
 					ratio: expect.any(Number),
 					required: UI_RATIO,
 				});
-			}
-		});
-
-		it(`rejects only the failing secondary leaf across every role and state in ${mode}`, () => {
-			const colors = modeColors(mode);
-			for (const role of SEMANTIC_ROLES) {
-				colors[`color.foreground.${role}.onSolid.secondary`] =
-					colors[`color.background.${role}.solid.rest`];
-			}
-			const { failures } = validateContrast(mode, colors);
-			expect(failures).toHaveLength(SEMANTIC_ROLES.length * solidStates.length);
-			for (const role of SEMANTIC_ROLES) {
-				for (const state of solidStates) {
-					expect(failures).toContainEqual({
-						mode,
-						foreground: `color.foreground.${role}.onSolid.secondary`,
-						background: `color.background.${role}.solid.${state}`,
-						ratio: expect.any(Number),
-						required: TEXT_RATIO,
-					});
-				}
 			}
 		});
 	}

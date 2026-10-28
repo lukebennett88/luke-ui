@@ -64,9 +64,7 @@ describe('theme contract', () => {
 			const rows: Array<[ModePath, string]> = [
 				leaf(`color.border.${role}`, `--luke-color-border-${role}`),
 			];
-			rows.push(
-				leaf(`color.background.${role}.subtle.rest`, `--luke-color-background-${role}-subtle-rest`),
-			);
+			rows.push(leaf(`color.background.${role}.subtle`, `--luke-color-background-${role}-subtle`));
 			for (const prominence of ['solid'] as const) {
 				for (const state of ['rest', 'hover', 'pressed'] as const) {
 					rows.push(
@@ -81,23 +79,16 @@ describe('theme contract', () => {
 				leaf(`color.foreground.${role}.rest`, `--luke-color-foreground-${role}-rest`),
 				leaf(`color.foreground.${role}.hover`, `--luke-color-foreground-${role}-hover`),
 				leaf(`color.foreground.${role}.pressed`, `--luke-color-foreground-${role}-pressed`),
-				leaf(
-					`color.foreground.${role}.onSolid.primary`,
-					`--luke-color-foreground-${role}-on-solid-primary`,
-				),
-				leaf(
-					`color.foreground.${role}.onSolid.secondary`,
-					`--luke-color-foreground-${role}-on-solid-secondary`,
-				),
+				leaf(`color.foreground.${role}.onSolid`, `--luke-color-foreground-${role}-on-solid`),
 			);
 			return rows;
 		});
-		const rolePaths = new Set<string>(expected.map(([path]) => path));
 		const emitted = flattenThemeContract().filter(([path]) => {
+			const [root, family, role] = path.split('.');
 			return (
-				path.startsWith('color.background.') ||
-				path.startsWith('color.foreground.') ||
-				rolePaths.has(path)
+				root === 'color' &&
+				['background', 'foreground', 'border'].includes(family ?? '') &&
+				SEMANTIC_ROLES.some((candidate) => candidate === role)
 			);
 		});
 
@@ -139,14 +130,16 @@ describe('theme contract', () => {
 		}
 	});
 
-	it('exposes overlay backdrop as the only overlay leaf', () => {
-		expect(vars.color.overlay).toEqual({
-			backdrop: 'var(--luke-color-overlay-backdrop)',
-		});
+	it('exposes backdrop and skeleton as background leaves', () => {
+		expect(vars.color.background.backdrop).toBe('var(--luke-color-background-backdrop)');
+		expect(vars.color.background.skeleton).toBe('var(--luke-color-background-skeleton)');
+		for (const removed of ['surface', 'overlay', 'loadingSkeleton', 'text']) {
+			expect(Object.hasOwn(vars.color, removed)).toBe(false);
+		}
 	});
 
 	it('keeps the settled 1.0 surface, border, sizing, and type style leaves', () => {
-		expect(Object.keys(vars.color.surface)).toEqual(['base', 'subdued', 'raised']);
+		expect(Object.keys(vars.color.background.surface)).toEqual(['base', 'subdued', 'raised']);
 		expect(Object.keys(vars.color.border).slice(0, 3)).toEqual(['decorative', 'control', 'focus']);
 		expect(Object.keys(vars.shadow)).toEqual(['inset', 'resting', 'raised', 'floating', 'overlay']);
 		expect(Object.hasOwn(vars, 'depth')).toBe(false);

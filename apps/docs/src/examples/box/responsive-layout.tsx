@@ -14,7 +14,7 @@ function Item() {
 	return (
 		<Box
 			alignItems="center"
-			backgroundColor="neutral.solid"
+			backgroundColor="neutral.solid.rest"
 			display="flex"
 			flex={1}
 			justifyContent="center"

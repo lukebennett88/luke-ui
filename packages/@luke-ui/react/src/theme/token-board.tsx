@@ -100,7 +100,7 @@ const swatchLabelStyle = {
 } as const satisfies CSSProperties;
 
 const swatchVarStyle = {
-	color: vars.color.text.secondary,
+	color: vars.color.foreground.secondary,
 	fontFamily: vars.font.family.code,
 	fontSize: vars.font.caption.fontSize,
 	overflowWrap: 'anywhere',
@@ -243,14 +243,14 @@ interface LeafPreviewProps {
 type PreviewRenderer = (props: LeafPreviewProps) => ReactNode;
 
 function ColorPreview({ path, varName }: LeafPreviewProps) {
-	if (path === 'color.overlay.backdrop') {
+	if (path === 'color.background.backdrop') {
 		return (
 			<span
 				aria-label={`${path} sample`}
 				role="img"
 				style={{
 					...swatchBoxStyle,
-					backgroundColor: vars.color.surface.base,
+					backgroundColor: vars.color.background.surface.base,
 					backgroundImage: `linear-gradient(var(${varName}), var(${varName}))`,
 				}}
 			/>
@@ -273,7 +273,7 @@ function ShadowPreview({ path, varName }: LeafPreviewProps) {
 			role="img"
 			style={{
 				...swatchBoxStyle,
-				backgroundColor: vars.color.surface.subdued,
+				backgroundColor: vars.color.background.surface.subdued,
 				boxShadow: `var(${varName})`,
 			}}
 		/>
@@ -301,7 +301,7 @@ function RadiusPreview({ path, varName }: LeafPreviewProps) {
 			role="img"
 			style={{
 				...swatchBoxStyle,
-				backgroundColor: vars.color.surface.subdued,
+				backgroundColor: vars.color.background.surface.subdued,
 				borderRadius: `var(${varName})`,
 			}}
 		/>

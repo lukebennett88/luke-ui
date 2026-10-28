@@ -43,13 +43,13 @@ export const copyButton = style({
 			backgroundColor: 'transparent',
 			backgroundImage: interactionStateBackgroundImage,
 			borderStyle: 'none',
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			transition: `${interactionStateTransitionProperty} ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}, color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			whiteSpace: 'nowrap',
 			selectors: {
 				'&:hover, &:focus-visible': {
 					...interactionState('hover'),
-					color: vars.color.text.primary,
+					color: vars.color.foreground.primary,
 				},
 				'&:focus-visible': {
 					outline: `2px solid ${vars.color.border.focus}`,

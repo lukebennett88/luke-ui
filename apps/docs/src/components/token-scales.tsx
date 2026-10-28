@@ -23,7 +23,7 @@ export function SpaceTokens() {
 						key={token.path}
 						sample={
 							<Box
-								backgroundColor="accent.solid"
+								backgroundColor="accent.solid.rest"
 								blockSize={vars.space['12']}
 								borderRadius="detail"
 								style={{ inlineSize: `var(${token.variable})` }}
@@ -118,7 +118,7 @@ export function ShadowAndFinishTokens() {
 						key={token.path}
 						sample={
 							<Box
-								backgroundColor="neutral.solid"
+								backgroundColor="neutral.solid.rest"
 								blockSize={vars.controlSize.px40}
 								borderRadius="control"
 								inlineSize={SHADOW_FINISH_SAMPLE_SIZE}

@@ -59,7 +59,7 @@ export const previewCanvas = style({
 export const previewOutside = style({
 	'@layer': {
 		components: {
-			backgroundColor: `color-mix(in oklab, ${vars.color.surface.subdued} 50%, transparent)`,
+			backgroundColor: `color-mix(in oklab, ${vars.color.background.surface.subdued} 50%, transparent)`,
 		},
 	},
 });
@@ -92,7 +92,7 @@ export const previewGripState = style({
 		components: {
 			borderColor: vars.color.border.decorative,
 			boxShadow: vars.shadow.resting,
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			pointerEvents: 'none',
 			transform: 'translate(-50%, -50%)',
 			transitionDuration: vars.motion.feedback.duration,
@@ -100,10 +100,10 @@ export const previewGripState = style({
 			transitionTimingFunction: vars.motion.feedback.easing,
 			selectors: {
 				[`${previewSeparator}[data-separator=hover] &`]: {
-					borderColor: `color-mix(in oklab, ${vars.color.text.secondary} 80%, transparent)`,
+					borderColor: `color-mix(in oklab, ${vars.color.foreground.secondary} 80%, transparent)`,
 				},
 				[`${previewSeparator}[data-separator=active] &`]: {
-					borderColor: vars.color.text.secondary,
+					borderColor: vars.color.foreground.secondary,
 				},
 				[`${previewSeparator}[data-separator=focus] &`]: {
 					boxShadow: `0 0 0 2px ${vars.color.border.focus}`,

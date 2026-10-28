@@ -29,7 +29,7 @@ export const transparentToSubtleFixture = style({
 
 /** Subtle at rest and solid when selected, so the fill changes category with its state. */
 export const subtleToSolidFixture = style({
-	...surfaceStyle('danger.subtle.rest'),
+	...surfaceStyle('danger.subtle'),
 	selectors: {
 		'&[data-selected]': surfaceStyle('danger.solid.rest'),
 	},

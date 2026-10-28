@@ -128,7 +128,7 @@ proseStyle(
 // A code block is a neutral subtle fill with its own foreground context, like inline `Code`. Code
 // inside it takes the block's colours and draws no chip of its own.
 proseStyle('pre', {
-	...surfaceStyle('neutral.subtle.rest'),
+	...surfaceStyle('neutral.subtle'),
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.control,
 	fontFamily: vars.font.family.code,

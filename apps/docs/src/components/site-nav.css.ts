@@ -38,7 +38,7 @@ export const wordmark = style({
 	'@layer': {
 		components: {
 			alignItems: 'center',
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			display: 'flex',
 			fontSize: vars.font.label.fontSize,
 			fontWeight: vars.font.weight.emphasis,
@@ -86,14 +86,14 @@ export const destination = style({
 	'@layer': {
 		components: {
 			alignItems: 'center',
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			display: 'inline-grid',
 			fontSize: vars.font.label.fontSize,
 			textDecoration: 'none',
 			transition: `color ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			selectors: {
 				'&:hover': {
-					color: vars.color.text.primary,
+					color: vars.color.foreground.primary,
 				},
 			},
 			'@media': {
@@ -108,7 +108,7 @@ export const destination = style({
 export const activeDestination = style({
 	'@layer': {
 		components: {
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			fontWeight: vars.font.weight.emphasis,
 		},
 	},
@@ -161,7 +161,7 @@ export const appearancePopover = style({
 				hidden: { opacity: 0, translate: '0 -4px' },
 				properties: ['opacity', 'translate'],
 				rule: {
-					backgroundColor: vars.color.surface.raised,
+					backgroundColor: vars.color.background.surface.raised,
 					border: `1px solid ${vars.color.border.decorative}`,
 					borderRadius: vars.radius.surface,
 					boxShadow: vars.shadow.floating,

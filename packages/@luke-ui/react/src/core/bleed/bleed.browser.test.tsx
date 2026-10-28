@@ -418,7 +418,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 		const { locator: scene } = render(
 			<div
 				style={{
-					backgroundColor: vars.color.surface.subdued,
+					backgroundColor: vars.color.background.surface.subdued,
 					borderRadius: vars.radius.surface,
 					display: 'flex',
 					flexDirection: 'column',

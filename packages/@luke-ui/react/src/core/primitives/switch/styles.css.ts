@@ -175,7 +175,7 @@ const switchConfig = {
 			// Thumb contrast comes from the fills, never the shadow. `compileTheme` hard-gates each pair at
 			// build time, so every shipped and extended theme clears it: the off-state thumb on the
 			// `border.control` track at 3:1, and each `onSolid` thumb on its solid track at 4.5:1.
-			backgroundColor: vars.color.surface.base,
+			backgroundColor: vars.color.background.surface.base,
 			blockSize: thumbSize,
 			boxShadow: vars.shadow.resting,
 			borderRadius: vars.radius.full,
@@ -194,14 +194,14 @@ const switchConfig = {
 					inlineSize: `calc(${thumbSize} + ${thumbStretch})`,
 				},
 				'[data-selected="true"] &': {
-					backgroundColor: vars.color.foreground.accent.onSolid.primary,
+					backgroundColor: vars.color.foreground.accent.onSolid,
 					marginInlineStart: thumbTravel,
 				},
 				[pressed('[data-selected="true"]')]: {
 					marginInlineStart: `calc(${thumbTravel} - ${thumbStretch})`,
 				},
 				'[data-invalid="true"][data-selected="true"] &': {
-					backgroundColor: vars.color.foreground.danger.onSolid.primary,
+					backgroundColor: vars.color.foreground.danger.onSolid,
 				},
 			},
 		},

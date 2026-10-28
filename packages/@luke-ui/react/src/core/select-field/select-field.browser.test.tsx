@@ -848,7 +848,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 for (const appearance of visualAppearances) {
 	test(`the Select trigger keeps its control surface on a solid fill in ${appearance.theme} ${appearance.mode}`, () => {
 		render(
-			<Box backgroundColor="accent.solid" padding="space.8">
+			<Box backgroundColor="accent.solid.rest" padding="space.8">
 				<SelectField items={themeItems} label="Theme">
 					{renderThemeItem}
 				</SelectField>

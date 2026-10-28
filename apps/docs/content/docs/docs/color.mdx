@@ -10,12 +10,13 @@ mode. A component then stays consistent, because it does not need to know the un
 
 Surface roles describe where an element sits in the interface:
 
-- `color.surface.base`: the default page and control background.
-- `color.surface.subdued`: secondary regions, such as a sidebar or a panel set apart from the page.
-- `color.surface.raised`: elevated panels, cards, menus, popovers, and dialogs. This is an opaque
-  colour shared by inline and detached content.
+- `color.background.surface.base`: the default page and control background.
+- `color.background.surface.subdued`: secondary regions, such as a sidebar or a panel set apart from
+  the page.
+- `color.background.surface.raised`: elevated panels, cards, menus, popovers, and dialogs. This is
+  an opaque colour shared by inline and detached content.
 
-`color.overlay.backdrop` dims content behind a modal. It is not a surface colour.
+`color.background.backdrop` dims content behind a modal. It is not a surface colour.
 
 Choose borders and shadow separately. A raised surface does not add either, and flat cards can use
 `base` with a border or `subdued`.
@@ -31,9 +32,9 @@ import { vars } from '@luke-ui/react/theme';
 
 <section
 	style={{
-		backgroundColor: vars.color.surface.subdued,
+		backgroundColor: vars.color.background.surface.subdued,
 		borderColor: vars.color.border.decorative,
-		color: vars.color.text.primary,
+		color: vars.color.foreground.primary,
 	}}
 />;
 ```
@@ -67,7 +68,7 @@ Each role has a resting `subtle` background and a `solid` background with `rest`
 ```tsx
 import { vars } from '@luke-ui/react/theme';
 
-vars.color.background.warning.subtle.rest;
+vars.color.background.warning.subtle;
 vars.interaction.tint.hover;
 vars.interaction.tint.pressed;
 vars.color.background.warning.solid.rest;
@@ -76,19 +77,16 @@ vars.color.background.warning.solid.pressed;
 ```
 
 Use a role's `rest`, `hover`, and `pressed` foreground on any standard surface or any role's subtle
-background. Use `onSolid.primary` or `onSolid.secondary` on that role's solid backgrounds:
+background. Use `onSolid` on that role's solid backgrounds:
 
 ```tsx
 vars.color.foreground.warning.rest;
 vars.color.foreground.warning.hover;
 vars.color.foreground.warning.pressed;
-vars.color.foreground.warning.onSolid.primary;
-vars.color.foreground.warning.onSolid.secondary;
+vars.color.foreground.warning.onSolid;
 ```
 
-`onSolid.primary` and `onSolid.secondary` each reach at least 4.5:1 against `solid.rest`,
-`solid.hover`, and `solid.pressed`. Both currently resolve to the same literal colour. Secondary
-guarantees an accessible selection on the solid background, not visible de-emphasis.
+`onSolid` reaches at least 4.5:1 against `solid.rest`, `solid.hover`, and `solid.pressed`.
 
 Built-in controls select these tokens for hover and pressed. Custom interactive elements should do
 the same.
@@ -123,11 +121,11 @@ is one. So are the surfaces components paint, such as a Button fill, a field, a 
 chip. Each sets the text colour to its readable primary, which an `Icon` inside inherits, and tells
 `Text` and `Heading` inside it which colours are readable:
 
-| Background               | `primary` and `secondary`                     | A role, such as `color="danger"` |
-| ------------------------ | --------------------------------------------- | -------------------------------- |
-| A surface, `surface.*`   | `text.primary` and `text.secondary`           | The role's foreground            |
-| Any role's `subtle` fill | `text.primary` and `text.secondary`           | The role's foreground            |
-| A role's `solid` fill    | That role's `onSolid.primary` and `secondary` | That role's `onSolid.primary`    |
+| Background               | `primary` and `secondary`                       | A role, such as `color="danger"` |
+| ------------------------ | ----------------------------------------------- | -------------------------------- |
+| A surface, `surface.*`   | `foreground.primary` and `foreground.secondary` | The role's foreground            |
+| Any role's `subtle` fill | `foreground.primary` and `foreground.secondary` | The role's foreground            |
+| A role's `solid` fill    | That role's `onSolid`                           | That role's `onSolid`            |
 
 A role keeps its hue on another role's subtle fill. The theme compiler checks every pairing in the
 table at 4.5:1 in both colour modes, and a theme that misses one does not compile. Pairings outside
@@ -144,7 +142,7 @@ To make a custom element a Luke UI background, set `backgroundColor` on a `Box` 
 your class. Put both on the same element rather than wrapping one in the other.
 
 ```tsx
-<Box backgroundColor="accent.solid" className={styles.card}>
+<Box backgroundColor="accent.solid.rest" className={styles.card}>
 	<Heading>Example heading</Heading>
 	<Text>Inherits the fill's readable colour.</Text>
 </Box>
@@ -159,9 +157,9 @@ dark. Set the text colour in the same CSS and check its contrast yourself.
 
 Use the component's disabled or loading API when it has one. Those states account for interaction
 and accessibility as well as colour. Disabled is a state, not a palette: interactive controls fade
-with reduced opacity, and only field text recolours, through the public `text.disabled` role. On a
-solid fill, disabled field text uses the fill's `onSolid.secondary` instead. The public
-`loadingSkeleton` role is available when you build an equivalent custom element.
+with reduced opacity, and only field text recolours, through the public `foreground.disabled` role.
+On a solid fill, disabled field text uses the fill's `onSolid` instead. The public
+`background.skeleton` role is available when you build an equivalent custom element.
 
 ## Continue learning
 

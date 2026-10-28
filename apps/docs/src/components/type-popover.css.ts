@@ -63,7 +63,7 @@ export const popover = style({
 				hidden: { opacity: 0, translate: '0 -4px' },
 				properties: ['opacity', 'translate'],
 				rule: {
-					backgroundColor: vars.color.surface.raised,
+					backgroundColor: vars.color.background.surface.raised,
 					border: `1px solid ${vars.color.border.decorative}`,
 					borderRadius: vars.radius.surface,
 					boxShadow: vars.shadow.floating,
@@ -127,7 +127,7 @@ export const breadcrumb = style({
 			gap: vars.space['4'],
 			selectors: {
 				'&:not(:last-child)::after': {
-					color: vars.color.text.secondary,
+					color: vars.color.foreground.secondary,
 					content: "'/'",
 				},
 			},

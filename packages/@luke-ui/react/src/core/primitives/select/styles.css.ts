@@ -85,7 +85,7 @@ const selectConfig = {
 			},
 		},
 		value: {
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			flex: 1,
 			minInlineSize: 0,
 			overflow: 'hidden',
@@ -93,18 +93,18 @@ const selectConfig = {
 			whiteSpace: 'nowrap',
 
 			selectors: {
-				'&[data-placeholder="true"]': { color: vars.color.text.secondary },
-				[descendantDisabledSelector]: { color: vars.color.text.disabled },
+				'&[data-placeholder="true"]': { color: vars.color.foreground.secondary },
+				[descendantDisabledSelector]: { color: vars.color.foreground.disabled },
 			},
 		},
 		indicator: {
 			alignItems: 'center',
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			display: 'inline-flex',
 			flexShrink: 0,
 
 			selectors: {
-				[descendantDisabledSelector]: { color: vars.color.text.disabled },
+				[descendantDisabledSelector]: { color: vars.color.foreground.disabled },
 			},
 		},
 	},

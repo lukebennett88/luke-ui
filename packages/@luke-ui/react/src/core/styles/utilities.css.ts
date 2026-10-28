@@ -25,26 +25,25 @@ const marginScale = { ...spaceScale, auto: 'auto' } as const;
 /** Border widths offered by the design system. */
 const borderWidthScale = { none: '0', thin: '1px', thick: '2px' } as const;
 
-const PROMINENCE_LEVELS = ['subtle', 'solid'] as const;
-
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
-type ProminenceLevel = (typeof PROMINENCE_LEVELS)[number];
 
 /**
  * Resting role fills and the standard surfaces, excluding the translucent backdrop. Hover and
  * pressed fills stay theme tokens for recipes.
  */
 type BackgroundColorToken =
-	| `${SemanticRole}.${ProminenceLevel}`
-	| `surface.${keyof typeof vars.color.surface}`;
+	| `${SemanticRole}.subtle`
+	| `${SemanticRole}.solid.rest`
+	| `surface.${keyof typeof vars.color.background.surface}`;
 
 const backgroundColors = [
 	...SEMANTIC_ROLES.flatMap((role) => {
-		return PROMINENCE_LEVELS.map((prominence) => {
-			return [`${role}.${prominence}`, `${role}.${prominence}.rest`] as const;
-		});
+		return [
+			[`${role}.subtle`, `${role}.subtle`],
+			[`${role}.solid.rest`, `${role}.solid.rest`],
+		] as const;
 	}),
-	...typedEntries(vars.color.surface).map(([surface]) => {
+	...typedEntries(vars.color.background.surface).map(([surface]) => {
 		return [`surface.${surface}`, `surface.${surface}`] as const;
 	}),
 ] satisfies ReadonlyArray<readonly [BackgroundColorToken, SurfaceBackground]>;

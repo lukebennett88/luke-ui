@@ -8,7 +8,7 @@ export const groupButtonExpanded = style({
 		components: {
 			selectors: {
 				'&[aria-expanded="true"]:not(:hover)': {
-					backgroundColor: vars.color.surface.subdued,
+					backgroundColor: vars.color.background.surface.subdued,
 				},
 			},
 		},

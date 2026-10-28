@@ -455,17 +455,17 @@ const squareImage =
 	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect width='1' height='1'/%3E%3C/svg%3E";
 
 const itemStyle = {
-	backgroundColor: vars.color.surface.base,
+	backgroundColor: vars.color.background.surface.base,
 	borderRadius: vars.radius.detail,
-	color: vars.color.text.primary,
+	color: vars.color.foreground.primary,
 	paddingBlock: vars.space['8'],
 	paddingInline: vars.space['12'],
 } as const;
 
 const rowStyle = {
-	backgroundColor: vars.color.surface.subdued,
+	backgroundColor: vars.color.background.surface.subdued,
 	borderRadius: vars.radius.surface,
-	color: vars.color.text.primary,
+	color: vars.color.foreground.primary,
 	padding: vars.space['16'],
 } as const;
 

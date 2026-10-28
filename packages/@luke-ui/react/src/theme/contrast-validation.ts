@@ -15,9 +15,9 @@ type ColorMode = 'light' | 'dark';
 
 /** One WCAG contrast failure recorded while generating a theme. */
 export interface ThemeContrastFailure {
-	/** Token path of the background colour, for example `color.surface.raised`. */
+	/** Token path of the background colour, for example `color.background.surface.raised`. */
 	background: string;
-	/** Token path of the foreground colour, for example `color.text.primary`. */
+	/** Token path of the foreground colour, for example `color.foreground.primary`. */
 	foreground: string;
 	/** The colour mode the pair was generated for. */
 	mode: 'light' | 'dark';
@@ -40,12 +40,12 @@ type ColorPath = keyof SemanticColorValues;
  *
  * Content and controls can sit on any of the three surfaces, so every surface gate covers all three.
  * Hard at 4.5:1: primary and secondary text and each role's rest, hover, and pressed foreground
- * against all three surfaces and every role's subtle rest fill. Both on-solid hierarchy leaves are gated
- * against their role's solid fills.
+ * against all three surfaces and every role's subtle rest fill. The on-solid colour is gated
+ * against its role's solid fills.
  * Hard at 3:1: the focus ring, the control border and its mixed hover and pressed treatments, and
  * `border.danger`, the invalid control boundary. Solid fills are solved for on-solid text,
  * independently of their contrast against surfaces.
- * Also hard at 3:1: accent on-solid primary against `accent.solid.rest` and `accent.solid.pressed`.
+ * Also hard at 3:1: accent on-solid against `accent.solid.rest` and `accent.solid.pressed`.
  * The active dropdown option draws a 2px inset outline in that on-solid colour on those fills, so
  * the outline's adjacent colour is the solid, not the list surface. The existing 4.5:1 on-solid
  * text gates already cover the same pairs; these 3:1 checks name the outline contract explicitly.
@@ -81,16 +81,16 @@ export function validateContrast(
 	}
 
 	const surfacePaths = [
-		'color.surface.base',
-		'color.surface.subdued',
-		'color.surface.raised',
+		'color.background.surface.base',
+		'color.background.surface.subdued',
+		'color.background.surface.raised',
 	] as const satisfies ReadonlyArray<ColorPath>;
 
 	const subtleBackgrounds = SEMANTIC_ROLES.map((role) => {
-		return `color.background.${role}.subtle.rest` as const;
+		return `color.background.${role}.subtle` as const;
 	});
 	const textBackgrounds = [...surfacePaths, ...subtleBackgrounds];
-	for (const text of ['color.text.primary', 'color.text.secondary'] as const) {
+	for (const text of ['color.foreground.primary', 'color.foreground.secondary'] as const) {
 		for (const background of textBackgrounds) check(text, background, TEXT_RATIO, true);
 	}
 	for (const role of SEMANTIC_ROLES) {
@@ -98,14 +98,12 @@ export function validateContrast(
 			for (const background of textBackgrounds) {
 				check(`color.foreground.${role}.${state}`, background, TEXT_RATIO, true);
 			}
-			for (const hierarchy of ['primary', 'secondary'] as const) {
-				check(
-					`color.foreground.${role}.onSolid.${hierarchy}`,
-					`color.background.${role}.solid.${state}`,
-					TEXT_RATIO,
-					true,
-				);
-			}
+			check(
+				`color.foreground.${role}.onSolid`,
+				`color.background.${role}.solid.${state}`,
+				TEXT_RATIO,
+				true,
+			);
 		}
 	}
 	const boundaries = [
@@ -117,7 +115,7 @@ export function validateContrast(
 		for (const surface of surfacePaths) check(boundary, surface, UI_RATIO, true);
 	}
 	const controlBorder = colorAt('color.border.control');
-	const textPrimary = colorAt('color.text.primary');
+	const textPrimary = colorAt('color.foreground.primary');
 	for (const state of ['hover', 'pressed'] as const) {
 		const foreground = `interaction.border.${state}`;
 		const foregroundColor = parseColor(controlBorderStateColor(controlBorder, textPrimary, state));
@@ -125,12 +123,12 @@ export function validateContrast(
 			checkValue(foreground, foregroundColor, surface, UI_RATIO, true);
 		}
 	}
-	// The active dropdown option's inset outline uses accent on-solid primary against the solid fill.
+	// The active dropdown option's inset outline uses accent on-solid against the solid fill.
 	for (const fill of [
 		'color.background.accent.solid.rest',
 		'color.background.accent.solid.pressed',
 	] as const) {
-		check('color.foreground.accent.onSolid.primary', fill, UI_RATIO, true);
+		check('color.foreground.accent.onSolid', fill, UI_RATIO, true);
 	}
 	for (const role of SEMANTIC_ROLES) {
 		if (role === 'danger') continue;

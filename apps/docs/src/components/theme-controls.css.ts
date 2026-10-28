@@ -4,7 +4,7 @@ import { style } from '@vanilla-extract/css';
 export const root = style({
 	'@layer': {
 		components: {
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			display: 'flex',
 			flex: '1 1 auto',
 			flexDirection: 'column',

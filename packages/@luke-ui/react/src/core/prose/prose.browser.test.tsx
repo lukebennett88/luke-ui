@@ -771,7 +771,7 @@ for (const appearance of visualAppearances) {
 
 	test(`raw code, kbd, and pre establish their own context on a solid fill in ${name}`, () => {
 		const { container } = render(
-			<Box backgroundColor="accent.solid" padding="space.8">
+			<Box backgroundColor="accent.solid.rest" padding="space.8">
 				<Prose>
 					<p>
 						Run <code data-testid="code">pnpm install</code> or press{' '}
@@ -789,9 +789,9 @@ for (const appearance of visualAppearances) {
 		const pre = query(container, '[data-testid="pre"]');
 		const preCode = query(container, '[data-testid="pre-code"]');
 
-		expect(surfaceColors(code)).toEqual(pairedColors(code, 'neutral.subtle.rest'));
+		expect(surfaceColors(code)).toEqual(pairedColors(code, 'neutral.subtle'));
 		expect(surfaceColors(kbd)).toEqual(pairedColors(kbd, 'surface.subdued'));
-		expect(surfaceColors(pre)).toEqual(pairedColors(pre, 'neutral.subtle.rest'));
+		expect(surfaceColors(pre)).toEqual(pairedColors(pre, 'neutral.subtle'));
 		// Code inside the block takes the block's colours and draws no chip of its own.
 		expect(surfaceColors(preCode)).toEqual({
 			...surfaceColors(pre),
@@ -822,7 +822,7 @@ for (const appearance of visualAppearances) {
 
 	test(`a native link stays underlined in the solid fill's colour in every state in ${name}`, async () => {
 		const { locator, user } = render(
-			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
+			<Box backgroundColor="success.solid.rest" data-testid="parent" padding="space.8">
 				<Prose>
 					<p>
 						<a href="#guide">Read the guide</a>
@@ -834,7 +834,7 @@ for (const appearance of visualAppearances) {
 		const link = locator.getByRole('link', { name: 'Read the guide' });
 		const { primary } = pairedColors(
 			locator.getByTestId('parent').element(),
-			'success.solid',
+			'success.solid.rest',
 		).foreground;
 
 		const states = await inEveryLinkState(link, user, () => {

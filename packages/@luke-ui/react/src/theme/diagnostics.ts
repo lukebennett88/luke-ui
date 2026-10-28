@@ -63,9 +63,9 @@ export interface FamilyDiagnostics {
  * gate. Tooling reads that classification instead of inferring it from token paths.
  */
 export interface ContrastCheck {
-	/** Token path of the background colour, for example `color.surface.raised`. */
+	/** Token path of the background colour, for example `color.background.surface.raised`. */
 	background: string;
-	/** Token path of the foreground colour, for example `color.text.primary`. */
+	/** Token path of the foreground colour, for example `color.foreground.primary`. */
 	foreground: string;
 	/**
 	 * Whether missing `required` fails the build: `true` for a hard gate that contributes to a thrown

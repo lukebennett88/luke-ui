@@ -360,11 +360,11 @@ box and other collections need their own decision.
 
 React Aria moves the one active option with the pointer and the keyboard. It moves with the pointer
 only while focus is not visible, so a stationary pointer does not take the active option back during
-keyboard navigation. The solid fill plus the inset outline in `foreground.accent.onSolid.primary`
-mark focus. Options do not use the global focus ring. Select moves real DOM focus onto the active
-option. Combobox keeps real focus in its input, which keeps its own ring, and names the active
-option with `aria-activedescendant`. Under forced colours the active option uses `Highlight` and
-`HighlightText` for the fill, text, and inset outline, and selection stays the check.
+keyboard navigation. The solid fill plus the inset outline in `foreground.accent.onSolid` mark
+focus. Options do not use the global focus ring. Select moves real DOM focus onto the active option.
+Combobox keeps real focus in its input, which keeps its own ring, and names the active option with
+`aria-activedescendant`. Under forced colours the active option uses `Highlight` and `HighlightText`
+for the fill, text, and inset outline, and selection stays the check.
 
 The inset outline sits on the solid fill, so the compiler gates that on-solid colour at 3:1 against
 `accent.solid.rest` and `accent.solid.pressed` (already covered at 4.5:1 by the on-solid text
@@ -449,7 +449,7 @@ as `Strong`, set no colour and inherit.
 Standard surfaces and subtle fills reset the overrides, so a read falls back to the global neutral
 hierarchy, or to the role's resting hue, on the reading element. The theme compiler gates those
 pairs against every subtle fill, including other roles' fills. A solid fill sets the overrides to
-its role's on-solid leaves, and every role reads on-solid primary. An override resolves on the
+its role's on-solid colour, and every role reads on-solid colour. An override resolves on the
 element that declares it, so the global styles reset the overrides in every colour-mode scope.
 
 Component recipes use the same mechanism. A control pairs its fill in every interaction state, so a
@@ -464,14 +464,14 @@ some solid fills. The paired chip keeps text contrast on solids. Forced colours 
 solves the tint pair. Text a component draws on whatever surface surrounds it, such as a field's
 label, description, and error, a text action, or a native link in Prose, reads
 `contextualForeground`. Its `state` argument gives a role's hover or pressed hue, which collapses to
-on-solid primary on a solid fill. `contextualDisabledForeground()` gives such text the disabled
-token on a standard surface or subtle fill, and on-solid secondary on a solid fill, which has no
-disabled leaf. `transparentSurfaceStyle()` hands an element that stops painting back to its parent's
-context, as inline `Code` does inside `pre`. The checkbox box pairs its fills so the check mark
-reads on-solid primary. The switch track and thumb and the loading skeleton paint fills that hold no
-text, so they keep their own compiler-gated or placeholder colours.
+on-solid colour on a solid fill. `contextualDisabledForeground()` gives such text the disabled token
+on a standard surface or subtle fill, and on-solid colour on a solid fill, which has no disabled
+leaf. `transparentSurfaceStyle()` hands an element that stops painting back to its parent's context,
+as inline `Code` does inside `pre`. The checkbox box pairs its fills so the check mark reads
+on-solid colour. The switch track and thumb and the loading skeleton paint fills that hold no text,
+so they keep their own compiler-gated or placeholder colours.
 
-A role's colour can collapse to on-solid primary, so a state cue cannot be hue alone. Text Links use
+A role's colour can collapse to on-solid colour, so a state cue cannot be hue alone. Text Links use
 the label font weight and belong inline with lighter surrounding text. Low prominence adds an
 underline on hover, focus, and press. Standard and high prominence stay underlined. Hover and press
 thicken the underline, so the state change shows without colour. A field error pairs its message
@@ -512,8 +512,8 @@ import { vars } from '@luke-ui/react/theme';
 return (
 	<div
 		style={{
-			backgroundColor: vars.color.surface.subdued,
-			color: vars.color.text.primary,
+			backgroundColor: vars.color.background.surface.subdued,
+			color: vars.color.foreground.primary,
 		}}
 	>
 		Custom content

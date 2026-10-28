@@ -207,7 +207,7 @@ type ButtonSurface = 'transparent' | 'subtle' | 'solid';
  * resting subtle fill so hover and pressed stay visible on every surface, including app-painted
  * overlays. On a solid fill, a low Button falls back to an opaque subtle chip so on-solid text
  * contrast stays at AA. Solid Buttons keep opaque state tokens and the control finish. A danger
- * tone keeps the danger hue on a surrounding surface or subtle rest, and reads on-solid primary on
+ * tone keeps the danger hue on a surrounding surface or subtle rest, and reads on-solid colour on
  * a solid at rest.
  */
 function buttonAppearance(
@@ -293,7 +293,7 @@ function buttonAppearance(
 	// Merge the adaptive layer's vars into the resting subtle pairing. A later `vars` object would
 	// replace the pairing's foreground and solid-state resets, so a danger standard Button on a
 	// solid would keep inherited on-solid text over its light subtle fill.
-	const subtleRest = surfaceStyle(`${fill}.subtle.rest`);
+	const subtleRest = surfaceStyle(`${fill}.subtle`);
 	const hoverLayer = adaptiveStateLayer('hover');
 	const pressedLayer = adaptiveStateLayer('pressed');
 	return [

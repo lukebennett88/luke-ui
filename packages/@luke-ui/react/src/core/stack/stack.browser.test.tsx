@@ -77,9 +77,9 @@ test('applies a responsive gap from its required initial value', async () => {
 });
 
 const itemStyle = {
-	backgroundColor: vars.color.surface.base,
+	backgroundColor: vars.color.background.surface.base,
 	borderRadius: vars.radius.detail,
-	color: vars.color.text.primary,
+	color: vars.color.foreground.primary,
 	paddingBlock: vars.space['8'],
 	paddingInline: vars.space['12'],
 } as const;
@@ -91,9 +91,9 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 				<Stack
 					gap="space.12"
 					style={{
-						backgroundColor: vars.color.surface.subdued,
+						backgroundColor: vars.color.background.surface.subdued,
 						borderRadius: vars.radius.surface,
-						color: vars.color.text.primary,
+						color: vars.color.foreground.primary,
 						padding: vars.space['16'],
 					}}
 				>
@@ -104,9 +104,9 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					alignItems="center"
 					gap="space.8"
 					style={{
-						backgroundColor: vars.color.surface.subdued,
+						backgroundColor: vars.color.background.surface.subdued,
 						borderRadius: vars.radius.surface,
-						color: vars.color.text.primary,
+						color: vars.color.foreground.primary,
 						padding: vars.space['16'],
 					}}
 				>
@@ -117,9 +117,9 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					elementType="section"
 					gap="0"
 					style={{
-						backgroundColor: vars.color.surface.subdued,
+						backgroundColor: vars.color.background.surface.subdued,
 						borderRadius: vars.radius.surface,
-						color: vars.color.text.primary,
+						color: vars.color.foreground.primary,
 						padding: vars.space['16'],
 					}}
 				>
@@ -130,9 +130,9 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					<Stack
 						gap="space.8"
 						style={{
-							backgroundColor: vars.color.surface.subdued,
+							backgroundColor: vars.color.background.surface.subdued,
 							borderRadius: vars.radius.surface,
-							color: vars.color.text.primary,
+							color: vars.color.foreground.primary,
 							padding: vars.space['16'],
 						}}
 					>

@@ -14,14 +14,14 @@ test('the published input passes every hard contrast gate in both modes', () => 
 });
 
 for (const role of ROLES) {
-	test(`emits identical literal ${role} on-solid hierarchy colours in every mode block`, () => {
+	test(`emits a literal ${role} on-solid colour in every mode block`, () => {
 		const css = defineTheme(theme);
-		const primary = declaredValues(css, `--luke-color-foreground-${role}-on-solid-primary`);
-		const secondary = declaredValues(css, `--luke-color-foreground-${role}-on-solid-secondary`);
+		const values = declaredValues(css, `--luke-color-foreground-${role}-on-solid`);
 
-		// Light, the dark media query, and the explicit dark mode each declare both leaves.
-		expect(primary.length).toBeGreaterThanOrEqual(3);
-		expect(secondary).toEqual(primary);
-		for (const value of primary) expect(value).not.toContain('var(');
+		// Light, the dark media query, and the explicit dark mode each declare the colour.
+		expect(values.length).toBeGreaterThanOrEqual(3);
+		expect(css).not.toContain(`--luke-color-foreground-${role}-on-solid-primary`);
+		expect(css).not.toContain(`--luke-color-foreground-${role}-on-solid-secondary`);
+		for (const value of values) expect(value).not.toContain('var(');
 	});
 }

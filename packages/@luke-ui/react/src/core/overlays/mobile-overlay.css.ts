@@ -31,7 +31,7 @@ export const mobileOverlay = style(
 		hidden: { opacity: 0 },
 		properties: ['opacity'],
 		rule: {
-			backgroundColor: vars.color.overlay.backdrop,
+			backgroundColor: vars.color.background.backdrop,
 			blockSize: '100dvh',
 			insetInline: 0,
 			position: 'absolute',

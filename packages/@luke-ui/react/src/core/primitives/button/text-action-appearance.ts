@@ -4,7 +4,7 @@ import { contextualForeground } from '../../styles/surface.js';
 /**
  * Colours and decoration for a text action, such as a text Button. Each colour reads the nearest
  * recognised surface, so it keeps its hue on a standard surface or subtle fill and collapses to the
- * fill's on-solid primary on a solid fill.
+ * fill's on-solid colour on a solid fill.
  */
 export function textActionAppearance(
 	tone: 'neutral' | 'danger',

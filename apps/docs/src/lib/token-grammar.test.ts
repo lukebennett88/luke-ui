@@ -4,15 +4,7 @@ import { themeTokens } from '../generated/token-reference.generated.js';
 import { buildTokenSections, COLOR_FAMILIES, ROLES } from './token-grammar.js';
 
 /** Title-case MDX headings for each colour family, in page order. */
-const COLOR_HEADINGS = [
-	'Background',
-	'Foreground',
-	'Border',
-	'Surface',
-	'Text',
-	'Overlay',
-	'Loading skeleton',
-] as const;
+const COLOR_HEADINGS = ['Background', 'Foreground', 'Border'] as const;
 
 const COLOR_HEADING_PATTERN = new RegExp(
 	`^### (${COLOR_HEADINGS.map((heading) => heading.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})$`,
@@ -23,10 +15,6 @@ const COLOR_HEADING_TO_FAMILY = {
 	Background: 'background',
 	Foreground: 'foreground',
 	Border: 'border',
-	Surface: 'surface',
-	Text: 'text',
-	Overlay: 'overlay',
-	'Loading skeleton': 'loadingSkeleton',
 } as const satisfies Record<(typeof COLOR_HEADINGS)[number], (typeof COLOR_FAMILIES)[number]>;
 
 test('the catalogue covers every public token exactly once', () => {
@@ -46,7 +34,7 @@ for (const familyId of ['background', 'foreground'] as const) {
 	test(`${familyId} groups tokens by role in contract order`, () => {
 		const family = buildTokenSections().colors.find(({ id }) => id === familyId);
 		expect(family?.roles?.map(({ role }) => role)).toEqual([...ROLES]);
-		expect(family?.tokens).toEqual([]);
+		expect(family?.tokens.length).toBeGreaterThan(0);
 		for (const { role, tokens } of family?.roles ?? []) {
 			expect(tokens.length).toBeGreaterThan(0);
 			expect(tokens.every((token) => token.path.startsWith(`color.${familyId}.${role}.`))).toBe(
@@ -56,7 +44,7 @@ for (const familyId of ['background', 'foreground'] as const) {
 	});
 }
 
-for (const familyId of ['border', 'surface', 'text', 'overlay', 'loadingSkeleton'] as const) {
+for (const familyId of ['border'] as const) {
 	test(`${familyId} is a flat list under color.${familyId}`, () => {
 		const family = buildTokenSections().colors.find(({ id }) => id === familyId);
 		expect(family?.roles).toBeNull();
@@ -69,7 +57,7 @@ test('background tokens keep role, subtle/solid, then state order', () => {
 	expect(background?.roles).toBeDefined();
 	for (const { role, tokens } of background?.roles ?? []) {
 		expect(tokens.map(({ path }) => path)).toEqual([
-			`color.background.${role}.subtle.rest`,
+			`color.background.${role}.subtle`,
 			`color.background.${role}.solid.rest`,
 			`color.background.${role}.solid.hover`,
 			`color.background.${role}.solid.pressed`,

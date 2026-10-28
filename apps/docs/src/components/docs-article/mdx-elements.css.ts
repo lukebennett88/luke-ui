@@ -62,7 +62,7 @@ export const headingCopyButton = style({
 	'@layer': {
 		components: {
 			blockSize: MIN_TARGET_SIZE,
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			fontSize: 'inherit',
 			inlineSize: MIN_TARGET_SIZE,
 			insetBlockStart: 0,
@@ -74,7 +74,7 @@ export const headingCopyButton = style({
 			transition: `opacity ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
 			selectors: {
 				'&:hover': {
-					color: vars.color.text.primary,
+					color: vars.color.foreground.primary,
 				},
 				[`${heading}:hover &, ${heading}:has(:focus-visible) &`]: {
 					opacity: 1,
@@ -138,7 +138,7 @@ globalStyle(`${table} th, ${table} td`, {
 globalStyle(`${table} th`, {
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.subdued,
+			backgroundColor: vars.color.background.surface.subdued,
 			fontWeight: vars.font.weight.label,
 		},
 	},

@@ -125,7 +125,7 @@ export function App({ onHydrated }) {
 			// A solid fill must hand its readable colours to Text across the published entrypoints.
 			h(
 				Box,
-				{ backgroundColor: 'accent.solid', 'data-testid': 'solid-fill' },
+				{ backgroundColor: 'accent.solid.rest', 'data-testid': 'solid-fill' },
 				h(Text, { color: 'danger', 'data-testid': 'contextual-text' }, 'Contextual text'),
 			),
 		),
@@ -359,21 +359,21 @@ export const identityClassName: string = getThemeClassName(theme.name);
 export const validationIssues: ReadonlyArray<{ message: string; path: string; theme: string }> =
 	new ThemeValidationError([]).issues;
 export const fullMetrics: Partial<FontMetrics> = metrics;
-export const textColor: string = vars.color.text.primary;
+export const textColor: string = vars.color.foreground.primary;
 export const mobileBreakpoint: number = breakpoints.bp640;
 export const interactionHoverStyle = interactionState('hover');
 
 // The 1.0 token contract: retained paths compile, and removed pre-1.0 paths do not.
 export const retainedTokens: Array<string> = [
-	vars.color.surface.base,
-	vars.color.surface.subdued,
-	vars.color.surface.raised,
+	vars.color.background.surface.base,
+	vars.color.background.surface.subdued,
+	vars.color.background.surface.raised,
 	vars.color.border.control,
 	vars.color.border.warning,
 	vars.interaction.tint.hover,
 	vars.interaction.tint.pressed,
-	vars.color.text.disabled,
-	vars.color.loadingSkeleton,
+	vars.color.foreground.disabled,
+	vars.color.background.skeleton,
 	vars.controlFinish.raised,
 	vars.shadow.inset,
 	vars.shadow.overlay,
@@ -391,11 +391,11 @@ export const removedShadowRecessed = vars.shadow.recessed;
 // @ts-expect-error — adaptive subtle states use vars.interaction.tint
 export const removedSubtleHover = vars.color.background.neutral.subtle.hover;
 // @ts-expect-error — replaced by color.surface.base
-export const removedCanvas = vars.color.surface.canvas;
+export const removedCanvas = vars.color.background.surface.canvas;
 // @ts-expect-error — removed surface
-export const removedRecessed = vars.color.surface.recessed;
+export const removedRecessed = vars.color.background.surface.recessed;
 // @ts-expect-error — removed surface
-export const removedFloating = vars.color.surface.floating;
+export const removedFloating = vars.color.background.surface.floating;
 // @ts-expect-error — renamed to controlFinish
 export const removedFinish = vars.actionControlFinish;
 // @ts-expect-error — icon sizes are private
@@ -445,9 +445,18 @@ export const retainedBoxValues: Array<BoxProps> = [
 	{ backgroundColor: 'surface.base', borderColor: 'control', boxShadow: 'overlay' },
 	{ boxShadow: 'inset' },
 	{ backgroundColor: 'warning.subtle', borderRadius: 'full', gap: 'space.96' },
+	{ backgroundColor: 'warning.solid.rest' },
 ];
+// @ts-expect-error — the solid shorthand is not a public token path
+export const removedBoxSolid: BoxProps['backgroundColor'] = 'warning.solid';
+// @ts-expect-error — solid interaction states are not Box values
+export const removedBoxSolidHover: BoxProps['backgroundColor'] = 'warning.solid.hover';
+// @ts-expect-error — the old public namespace has been removed
+export const removedTextNamespace = vars.color.text;
+// @ts-expect-error — the old public namespace has been removed
+export const removedSurfaceNamespace = vars.color.surface;
 // @ts-expect-error — controls use the base surface
-export const removedFieldToken = vars.color.surface.field;
+export const removedFieldToken = vars.color.background.surface.field;
 // @ts-expect-error — inset is the inset shadow rung
 export const removedBoxShadow: BoxProps['boxShadow'] = 'recessed';
 // @ts-expect-error — field is not a Box background value

@@ -72,7 +72,7 @@ const comboboxActionStyles = {
 	border: 'none',
 	borderRadius: vars.radius.detail,
 	boxShadow: 'none',
-	color: vars.color.text.secondary,
+	color: vars.color.foreground.secondary,
 	display: 'inline-flex',
 	flexShrink: 0,
 	fontFamily: 'inherit',
@@ -93,7 +93,7 @@ const comboboxActionStyles = {
 		'&[data-disabled="true"]': { cursor: 'not-allowed' },
 		'&[data-hovered="true"]:not([data-disabled="true"])': adaptiveStateLayer('hover'),
 		'&[data-pressed="true"]:not([data-disabled="true"])': adaptiveStateLayer('pressed'),
-		[descendantDisabledSelector]: { color: vars.color.text.disabled },
+		[descendantDisabledSelector]: { color: vars.color.foreground.disabled },
 	},
 } satisfies StyleRule;
 
@@ -189,7 +189,7 @@ const comboboxConfig = {
 			appearance: 'none',
 			backgroundColor: 'transparent',
 			border: 'none',
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			cursor: 'text',
 			flex: 1,
 			fontFamily: 'inherit',
@@ -203,13 +203,13 @@ const comboboxConfig = {
 			paddingBlock: 0,
 
 			selectors: {
-				'&::placeholder': { color: vars.color.text.secondary, opacity: 1 },
+				'&::placeholder': { color: vars.color.foreground.secondary, opacity: 1 },
 				// Same contract as a text input: an external fill must not paint over the control.
 				[`&:where(${filledInputSelectors})`]: filledInputStyle,
 				[`&${autofilledInputSelector}`]: autofilledInputStyle,
 				[`&${autofilledDisabledInputSelector}`]: autofilledDisabledInputStyle,
 				'&:where([data-disabled="true"], :disabled)': {
-					color: vars.color.text.disabled,
+					color: vars.color.foreground.disabled,
 					cursor: 'not-allowed',
 				},
 			},
@@ -269,7 +269,7 @@ const comboboxConfig = {
 		},
 		loadMoreItem: {
 			alignItems: 'center',
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			display: 'flex',
 			inlineSize: '100%',
 			justifyContent: 'center',
@@ -282,7 +282,7 @@ const comboboxConfig = {
 			paddingBlock: vars.space['8'],
 		},
 		sectionHeading: {
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			...vars.font.label,
 			paddingBlockEnd: vars.space['4'],
 			paddingBlockStart: 0,
@@ -290,7 +290,7 @@ const comboboxConfig = {
 		},
 		emptyState: {
 			alignItems: 'center',
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			display: 'flex',
 			...vars.font.label,
 			justifyContent: 'center',
@@ -324,7 +324,7 @@ const comboboxConfig = {
 			alignItems: 'center',
 			backgroundColor: 'transparent',
 			borderRadius: vars.radius.control,
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			cursor: 'default',
 			display: 'flex',
 			gap: vars.space['8'],
@@ -343,18 +343,18 @@ const comboboxConfig = {
 			// shows only the check, and hover alone has no style.
 			selectors: {
 				'&[data-disabled="true"]': {
-					color: vars.color.text.disabled,
+					color: vars.color.foreground.disabled,
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
 				'&[data-focused="true"]:not([data-disabled="true"])': {
 					...surfaceStyle('accent.solid.rest'),
-					outline: `2px solid ${vars.color.foreground.accent.onSolid.primary}`,
+					outline: `2px solid ${vars.color.foreground.accent.onSolid}`,
 					outlineOffset: '-2px',
 				},
 				'&[data-focused="true"][data-pressed="true"]:not([data-disabled="true"])': {
 					...surfaceStyle('accent.solid.pressed'),
-					outline: `2px solid ${vars.color.foreground.accent.onSolid.primary}`,
+					outline: `2px solid ${vars.color.foreground.accent.onSolid}`,
 					outlineOffset: '-2px',
 				},
 			},
@@ -365,7 +365,7 @@ const comboboxConfig = {
 			backgroundColor: 'transparent',
 			blockSize: '100%',
 			border: 'none',
-			color: vars.color.text.primary,
+			color: vars.color.foreground.primary,
 			display: 'flex',
 			inlineSize: '100%',
 			justifyContent: 'space-between',

@@ -239,7 +239,7 @@ test('truncated heading', { tags: ['visual'] }, async () => {
 for (const appearance of visualAppearances) {
 	test(`Heading colour follows the nearest background in ${appearance.theme} ${appearance.mode}`, () => {
 		const { container } = render(
-			<Box backgroundColor="danger.solid" data-testid="solid">
+			<Box backgroundColor="danger.solid.rest" data-testid="solid">
 				<Heading data-testid="inherited" level={2}>
 					Account settings
 				</Heading>
@@ -259,7 +259,7 @@ for (const appearance of visualAppearances) {
 			{ appearance },
 		);
 		const byTestId = (id: string) => container.querySelector(`[data-testid="${id}"]`)!;
-		const tokens = pairedTokens('danger.solid');
+		const tokens = pairedTokens('danger.solid.rest');
 
 		expect(getComputedStyle(byTestId('inherited')).color).toBe(
 			getComputedStyle(byTestId('solid')).color,
@@ -268,7 +268,7 @@ for (const appearance of visualAppearances) {
 			resolvedColor(tokens.secondary, byTestId('secondary')),
 		);
 		expect(byTestId('render-root').tagName).toBe('H4');
-		// A semantic role on a solid background reads as its on-solid primary.
+		// A semantic role on a solid background reads as its on-solid colour.
 		expect(getComputedStyle(byTestId('render-root')).color).toBe(
 			resolvedColor(tokens.success, byTestId('render-root')),
 		);

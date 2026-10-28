@@ -120,7 +120,7 @@ for (const appearance of visualAppearances) {
 	// solid fill's on-solid colour onto a neutral background.
 	test(`Code establishes its own chip context on a solid fill in ${name}`, async () => {
 		const { container } = render(
-			<Box backgroundColor="accent.solid" padding="space.8">
+			<Box backgroundColor="accent.solid.rest" padding="space.8">
 				<Text>
 					Run <Code>pnpm install</Code>
 				</Text>
@@ -129,13 +129,13 @@ for (const appearance of visualAppearances) {
 		);
 		const code = getCodeElement(container);
 
-		expect(surfaceColors(code)).toEqual(pairedColors(code, 'neutral.subtle.rest'));
+		expect(surfaceColors(code)).toEqual(pairedColors(code, 'neutral.subtle'));
 		await expectAxeContrastPasses(container);
 	});
 
 	test(`Code inside a code block draws no second chip in ${name}`, () => {
 		const { container } = render(
-			<Box backgroundColor="accent.solid" padding="space.8">
+			<Box backgroundColor="accent.solid.rest" padding="space.8">
 				<pre data-testid="block">
 					<Code>{'const a = 1;\nconst b = 2;'}</Code>
 				</pre>

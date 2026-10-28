@@ -20,10 +20,10 @@ const paperClassName = getThemeClassName(paperTheme.name);
 
 const tactileRadius = extractValue(tactileBlocks.themeWide, '--luke-radius-control');
 const paperRadius = extractValue(paperBlocks.themeWide, '--luke-radius-control');
-const lightBase = extractValue(tactileBlocks.baseLight, '--luke-color-surface-base');
-const darkBase = extractValue(tactileBlocks.mediaDark, '--luke-color-surface-base');
-const lightText = extractValue(tactileBlocks.baseLight, '--luke-color-text-primary');
-const darkText = extractValue(tactileBlocks.mediaDark, '--luke-color-text-primary');
+const lightBase = extractValue(tactileBlocks.baseLight, '--luke-color-background-surface-base');
+const darkBase = extractValue(tactileBlocks.mediaDark, '--luke-color-background-surface-base');
+const lightText = extractValue(tactileBlocks.baseLight, '--luke-color-foreground-primary');
+const darkText = extractValue(tactileBlocks.mediaDark, '--luke-color-foreground-primary');
 
 it('keeps the values below distinct, so a resolved match cannot pass by luck', () => {
 	expect(new Set([lightBase, darkBase]).size).toBe(2);
@@ -88,23 +88,27 @@ describe('document colour mode', () => {
 		const target = createDiv(document.body);
 
 		await emulateColorScheme('light');
-		expect(readVar(target, '--luke-color-surface-base')).toBe(lightBase);
+		expect(readVar(target, '--luke-color-background-surface-base')).toBe(lightBase);
 		expect(getComputedStyle(document.documentElement).colorScheme).toBe('light');
 
 		await emulateColorScheme('dark');
-		expect(readVar(target, '--luke-color-surface-base')).toBe(darkBase);
+		expect(readVar(target, '--luke-color-background-surface-base')).toBe(darkBase);
 		expect(getComputedStyle(document.documentElement).colorScheme).toBe('dark');
 	});
 
 	it('lets an explicit mode on <html> override the system preference', async () => {
 		await emulateColorScheme('dark');
 		document.documentElement.dataset.colorMode = 'light';
-		expect(readVar(createDiv(document.body), '--luke-color-surface-base')).toBe(lightBase);
+		expect(readVar(createDiv(document.body), '--luke-color-background-surface-base')).toBe(
+			lightBase,
+		);
 		expect(getComputedStyle(document.documentElement).colorScheme).toBe('light');
 
 		await emulateColorScheme('light');
 		document.documentElement.dataset.colorMode = 'dark';
-		expect(readVar(createDiv(document.body), '--luke-color-surface-base')).toBe(darkBase);
+		expect(readVar(createDiv(document.body), '--luke-color-background-surface-base')).toBe(
+			darkBase,
+		);
 		expect(getComputedStyle(document.documentElement).colorScheme).toBe('dark');
 	});
 });
@@ -124,7 +128,7 @@ describe('nested colour-mode scopes', () => {
 			[plainInInner, lightBase, 'light'],
 		] as const;
 		for (const [element, base, scheme] of expected) {
-			expect(readVar(element, '--luke-color-surface-base')).toBe(base);
+			expect(readVar(element, '--luke-color-background-surface-base')).toBe(base);
 			expect(getComputedStyle(element).colorScheme).toBe(scheme);
 		}
 	});
@@ -161,7 +165,9 @@ describe('nested colour-mode scopes', () => {
 		expect(styles.colorScheme).toBe('dark');
 		expect(styles.color).toBe(computedColor(darkText));
 		expect(styles.backgroundColor).toBe(computedColor(darkBase));
-		expect(readVar(createDiv(document.body), '--luke-color-surface-base')).toBe(darkBase);
+		expect(readVar(createDiv(document.body), '--luke-color-background-surface-base')).toBe(
+			darkBase,
+		);
 	});
 });
 

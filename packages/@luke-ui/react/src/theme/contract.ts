@@ -33,9 +33,7 @@ const typeStyle = {
  * and the parent of `hover` and `pressed`.
  */
 const roleBackground = {
-	subtle: {
-		rest: null,
-	},
+	subtle: null,
 	solid: {
 		rest: null,
 		hover: null,
@@ -44,17 +42,14 @@ const roleBackground = {
 };
 
 /**
- * The content capabilities every semantic role gets. Both on-solid hierarchy leaves are
- * contrast-solved for that role's solid rest, hover, and pressed fills. They may share a colour.
+ * The content capabilities every semantic role gets. The on-solid colour is contrast-solved for
+ * that role's solid rest, hover, and pressed fills.
  */
 const roleForeground = {
 	rest: null,
 	hover: null,
 	pressed: null,
-	onSolid: {
-		primary: null,
-		secondary: null,
-	},
+	onSolid: null,
 };
 
 const fontStyleContract = Object.fromEntries(
@@ -83,36 +78,33 @@ export const themeContractTree = {
 	 * (`neutral`, `accent`, `info`, `success`, `warning`, `danger`).
 	 *
 	 * Organised by the property a token styles, not by the component that happens to use it: the
-	 * functional leaves (`surface`, `overlay`, `loadingSkeleton`, `text`, and the first three `border`
-	 * leaves) come first, then `background` / `foreground` / the role leaves under `border` give all
-	 * six roles the same capabilities. A role's meaning never decides which visual slots it can fill,
+	 * background, foreground, and border families give all six roles the same capabilities.
+	 * A role's meaning never decides which visual slots it can fill,
 	 * so no role is a special case here. Hover and pressed leaves are generated, not authored.
 	 */
 	color: {
-		/** The three surfaces content sits on. */
-		surface: {
-			/** The default page and control background. */
-			base: null,
-			/** Secondary regions, such as a sidebar or an inline code chip. */
-			subdued: null,
-			/** Elevated panels, cards, menus, popovers, and dialogs. */
-			raised: null,
-		},
-		/** Translucent layer painted over other interface content, such as a modal backdrop. */
-		overlay: {
+		background: {
+			/** The three surfaces content sits on. */
+			surface: {
+				/** The default page and control background. */
+				base: null,
+				/** Secondary regions, such as a sidebar or an inline code chip. */
+				subdued: null,
+				/** Elevated panels, cards, menus, popovers, and dialogs. */
+				raised: null,
+			},
+			/** Translucent layer painted over other interface content, such as a modal backdrop. */
 			backdrop: null,
+			skeleton: null,
+			...perRole(() => ({ ...roleBackground, solid: { ...roleBackground.solid } })),
 		},
-		loadingSkeleton: null,
-		text: {
+		foreground: {
 			primary: null,
 			secondary: null,
-			/** Dedicated muted text (form fields), not opacity. Emits `--luke-color-text-disabled`. */
+			/** Dedicated muted text (form fields), not opacity. Emits `--luke-color-foreground-disabled`. */
 			disabled: null,
+			...perRole(() => ({ ...roleForeground })),
 		},
-		/** Subtle and solid background ramps, each with generated rest / hover / pressed states. */
-		background: perRole(() => ({ ...roleBackground })),
-		/** Resting, hover, and pressed content colours, plus the guaranteed on-solid pairing. */
-		foreground: perRole(() => ({ ...roleForeground })),
 		border: {
 			/** A subtle separator. Not contrast-checked. */
 			decorative: null,
@@ -235,7 +227,7 @@ type ContractPaths<T, Prefix extends string = ''> = {
 		: ContractPaths<T[K], JoinPath<Prefix, K>>;
 }[keyof T & string];
 
-/** Dotted path of a mode-owned contract leaf, for example `'color.text.primary'`. */
+/** Dotted path of a mode-owned contract leaf, for example `'color.foreground.primary'`. */
 export type ModePath = {
 	[Family in ModeFamily]: ContractPaths<(typeof themeContractTree)[Family], Family>;
 }[ModeFamily];
@@ -317,8 +309,8 @@ function isContractNode(value: unknown): value is Record<string, unknown> {
 
 /**
  * Builds the stable `--luke-*` CSS variable name for a contract path's segments, for example
- * `['color', 'foreground', 'danger', 'onSolid', 'primary']` becomes
- * `--luke-color-foreground-danger-on-solid-primary`.
+ * `['color', 'foreground', 'danger', 'onSolid']` becomes
+ * `--luke-color-foreground-danger-on-solid`.
  */
 export function themeVarName(segments: Array<string>): string {
 	return `--luke-${segments.map(kebabCaseSegment).join('-')}`;

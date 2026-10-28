@@ -148,7 +148,7 @@ const fieldConfig = {
 						// `CanvasText` keeps the icon solid when author colours are ignored.
 						'(forced-colors: active)': { backgroundColor: 'CanvasText' },
 					},
-					// The icon follows the message colour, which collapses to on-solid primary on a solid
+					// The icon follows the message colour, which collapses to on-solid colour on a solid
 					// fill. The icon's shape and the message text carry the error, never the hue alone.
 					backgroundColor: 'currentColor',
 					// The rail has no content to size it, and the mask paints only inside its box.

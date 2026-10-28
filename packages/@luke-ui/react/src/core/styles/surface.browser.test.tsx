@@ -46,7 +46,7 @@ for (const appearance of visualAppearances) {
 
 	test(`a transparent fill keeps its resting context under adaptive feedback in ${name}`, () => {
 		const { container } = render(
-			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
+			<Box backgroundColor="success.solid.rest" data-testid="parent" padding="space.8">
 				<div className={transparentToSubtleFixture} data-testid="control">
 					<span data-testid="label">Cancel</span>
 				</div>
@@ -59,7 +59,7 @@ for (const appearance of visualAppearances) {
 
 		// At rest the control paints nothing, so it keeps the solid parent's context.
 		expect(surfaceColors(control)).toEqual({
-			...pairedColors(parent, 'success.solid'),
+			...pairedColors(parent, 'success.solid.rest'),
 			background: TRANSPARENT,
 		});
 		const resting = surfaceColors(control);
@@ -78,7 +78,7 @@ for (const appearance of visualAppearances) {
 
 	test(`switching between subtle and solid resets every foreground slot in ${name}`, () => {
 		const { container } = render(
-			<Box backgroundColor="accent.solid" padding="space.8">
+			<Box backgroundColor="accent.solid.rest" padding="space.8">
 				<div className={subtleToSolidFixture} data-testid="toggle">
 					<span data-testid="label">Delete</span>
 				</div>
@@ -89,9 +89,9 @@ for (const appearance of visualAppearances) {
 		const label = byTestId(container, 'label');
 
 		for (const [isSelected, background] of [
-			[false, 'danger.subtle.rest'],
+			[false, 'danger.subtle'],
 			[true, 'danger.solid.rest'],
-			[false, 'danger.subtle.rest'],
+			[false, 'danger.subtle'],
 		] as const) {
 			toggle.toggleAttribute('data-selected', isSelected);
 			expect(surfaceColors(toggle)).toEqual(pairedColors(toggle, background));

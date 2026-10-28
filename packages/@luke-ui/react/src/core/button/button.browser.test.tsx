@@ -495,7 +495,7 @@ const buttonFills = [
 	},
 	{
 		// Standard Buttons keep the resting subtle fill; hover and pressed add the state layer.
-		fill: (_state: InteractionState) => 'neutral.subtle.rest',
+		fill: (_state: InteractionState) => 'neutral.subtle',
 		label: 'Neutral standard',
 		prominence: 'standard',
 		tone: 'neutral',
@@ -513,7 +513,7 @@ const buttonFills = [
 		tone: 'danger',
 	},
 	{
-		fill: (_state: InteractionState) => 'neutral.subtle.rest',
+		fill: (_state: InteractionState) => 'neutral.subtle',
 		label: 'Danger standard',
 		prominence: 'standard',
 		tone: 'danger',
@@ -539,7 +539,7 @@ for (const appearance of visualAppearances) {
 	// keep a resting subtle pairing. High Buttons establish their own solid context.
 	test(`Button fills pair with their foreground in every interaction state in ${name}`, () => {
 		const { locator } = render(
-			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
+			<Box backgroundColor="success.solid.rest" data-testid="parent" padding="space.8">
 				{buttonFills.map(({ label, prominence, tone }) => (
 					<Button key={label} prominence={prominence} tone={tone}>
 						{label}
@@ -561,11 +561,11 @@ for (const appearance of visualAppearances) {
 					const chipText =
 						tone === 'danger'
 							? resolvedColor(vars.color.foreground.danger.rest, button)
-							: resolvedColor(vars.color.text.primary, button);
+							: resolvedColor(vars.color.foreground.primary, button);
 					const chip =
 						tone === 'danger'
-							? pairedColors(button, 'danger.subtle.rest')
-							: pairedColors(button, 'neutral.subtle.rest');
+							? pairedColors(button, 'danger.subtle')
+							: pairedColors(button, 'neutral.subtle');
 					return {
 						state,
 						...chip,
@@ -576,7 +576,7 @@ for (const appearance of visualAppearances) {
 				const background = fill(state);
 				const paired =
 					background === null
-						? { ...pairedColors(parent, 'success.solid'), background: TRANSPARENT }
+						? { ...pairedColors(parent, 'success.solid.rest'), background: TRANSPARENT }
 						: pairedColors(button, background);
 				// A danger tone reads the context's danger colour instead of its primary.
 				const color = tone === 'danger' ? paired.foreground.danger : paired.color;
@@ -597,7 +597,7 @@ for (const appearance of visualAppearances) {
 	test(`text Button colours read the surrounding surface in every state in ${name}`, () => {
 		const { locator } = render(
 			<>
-				<Box backgroundColor="accent.solid" padding="space.8">
+				<Box backgroundColor="accent.solid.rest" padding="space.8">
 					<Button appearance="text" prominence="high">
 						On solid
 					</Button>
@@ -612,7 +612,7 @@ for (const appearance of visualAppearances) {
 		);
 		const onSolid = locator.getByRole('button', { name: 'On solid' }).element();
 		const onSubtle = locator.getByRole('button', { name: 'On subtle' }).element();
-		const solidForeground = pairedColors(onSolid, 'accent.solid').foreground;
+		const solidForeground = pairedColors(onSolid, 'accent.solid.rest').foreground;
 
 		const actual = INTERACTION_STATES.map((state) => {
 			setInteractionState(onSolid, state);
@@ -642,7 +642,7 @@ for (const appearance of visualAppearances) {
 
 	test(`Button text passes axe contrast on resting transparent and subtle fills in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { container, locator } = render(
-			<Box backgroundColor="success.solid" padding="space.8">
+			<Box backgroundColor="success.solid.rest" padding="space.8">
 				{measured.map(({ label, prominence, tone }) => (
 					<Button key={label} prominence={prominence} tone={tone}>
 						{label}
@@ -671,7 +671,7 @@ for (const appearance of [
 ] as const) {
 	test(`Button text keeps 4.5:1 contrast over its painted fill in every state in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { locator } = render(
-			<Box backgroundColor="success.solid" padding="space.8">
+			<Box backgroundColor="success.solid.rest" padding="space.8">
 				{buttonFills.map(({ label, prominence, tone }) => (
 					<Button key={label} prominence={prominence} tone={tone}>
 						{label}
@@ -730,7 +730,7 @@ for (const appearance of visualAppearances) {
 		await emulateForcedColors('active');
 		try {
 			const { locator } = render(
-				<Box backgroundColor="accent.solid" padding="space.8">
+				<Box backgroundColor="accent.solid.rest" padding="space.8">
 					{buttonFills.map(({ label, prominence, tone }) => (
 						<Button key={label} prominence={prominence} tone={tone}>
 							{label}
@@ -760,7 +760,7 @@ for (const appearance of visualAppearances) {
 
 test('a low Button chip keeps nested contextual text at AA on a solid fill', async () => {
 	const { locator } = render(
-		<Box backgroundColor="accent.solid" padding="space.8">
+		<Box backgroundColor="accent.solid.rest" padding="space.8">
 			<Button prominence="low">
 				<Text color="primary" elementType="span">
 					Primary child
@@ -859,7 +859,12 @@ for (const appearance of adaptiveAppearances) {
 		const { locator } = render(
 			<>
 				{solidRoles.map((role) => (
-					<Box key={role} backgroundColor={`${role}.solid`} data-testid={role} padding="space.8">
+					<Box
+						key={role}
+						backgroundColor={`${role}.solid.rest`}
+						data-testid={role}
+						padding="space.8"
+					>
 						<Button prominence="low">Neutral low in {role}</Button>
 						<Button prominence="low" tone="danger">
 							Danger low in {role}
@@ -960,8 +965,8 @@ for (const appearance of visualAppearances) {
 		const { locator, user } = render(
 			<div
 				style={{
-					backgroundColor: vars.color.surface.raised,
-					color: vars.color.text.primary,
+					backgroundColor: vars.color.background.surface.raised,
+					color: vars.color.foreground.primary,
 					padding: vars.space['16'],
 				}}
 			>
@@ -1013,8 +1018,8 @@ test('kitchen sink on overlay', { tags: ['visual'] }, async () => {
 		const { locator } = render(
 			<div
 				style={{
-					backgroundColor: vars.color.surface.raised,
-					color: vars.color.text.primary,
+					backgroundColor: vars.color.background.surface.raised,
+					color: vars.color.foreground.primary,
 					padding: vars.space['16'],
 				}}
 			>

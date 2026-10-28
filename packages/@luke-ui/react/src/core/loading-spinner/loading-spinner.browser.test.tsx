@@ -104,7 +104,7 @@ test('sizes and colors', { tags: ['visual'] }, async () => {
 });
 
 const themeMatrixStyle = {
-	backgroundColor: vars.color.surface.base,
+	backgroundColor: vars.color.background.surface.base,
 	display: 'flex',
 	gap: '1rem',
 	padding: '1rem',
@@ -128,9 +128,9 @@ function ThemeMatrixScope({
 			data-color-mode={mode}
 			style={{
 				alignItems: 'center',
-				backgroundColor: vars.color.surface.subdued,
+				backgroundColor: vars.color.background.surface.subdued,
 				border: `1px solid ${vars.color.border.decorative}`,
-				color: vars.color.text.primary,
+				color: vars.color.foreground.primary,
 				display: 'flex',
 				gap: '0.5rem',
 				padding: '1rem',
@@ -165,7 +165,7 @@ for (const appearance of visualAppearances) {
 	test(`a coloured spinner reads the surrounding surface in ${appearance.theme} ${appearance.mode}`, () => {
 		const { container } = render(
 			<>
-				<Box backgroundColor="accent.solid" data-testid="solid" padding="space.8">
+				<Box backgroundColor="accent.solid.rest" data-testid="solid" padding="space.8">
 					<LoadingSpinner aria-label="On solid" color="danger" />
 				</Box>
 				<Box backgroundColor="success.subtle" padding="space.8">
@@ -181,7 +181,7 @@ for (const appearance of visualAppearances) {
 		}
 
 		expect(getComputedStyle(onSolid).color).toBe(
-			pairedColors(solid, 'accent.solid').foreground.danger,
+			pairedColors(solid, 'accent.solid.rest').foreground.danger,
 		);
 		expect(getComputedStyle(onSubtle).color).toBe(
 			resolvedColor(vars.color.foreground.danger.rest, onSubtle),

@@ -313,11 +313,11 @@ test('CheckboxRoot keeps aria-labelledby and aria-describedby from the layout', 
 });
 
 for (const appearance of visualAppearances) {
-	// The box's fill establishes the glyph's colour, so the check mark reads on-solid primary once
+	// The box's fill establishes the glyph's colour, so the check mark reads on-solid colour once
 	// checked, whatever surface the checkbox sits on.
 	test(`the checkbox box pairs each fill with its glyph colour in ${appearance.theme} ${appearance.mode}`, () => {
 		const { container } = render(
-			<Box backgroundColor="success.solid" padding="space.8">
+			<Box backgroundColor="success.solid.rest" padding="space.8">
 				<CheckboxRoot>
 					<Parts label="Plain" />
 				</CheckboxRoot>
@@ -342,14 +342,13 @@ for (const appearance of visualAppearances) {
 				pairedColors(indicator, backgrounds[index] ?? 'surface.base'),
 			),
 		);
-		// The check mark is the indicator's text, so it shows the checked fills' on-solid primary.
+		// The check mark is the indicator's text, so it shows the checked fills' on-solid colour.
 		expect(
 			indicators.slice(1).map((indicator) => getComputedStyle(indicator, '::after').color),
 		).toEqual(
-			[
-				vars.color.foreground.accent.onSolid.primary,
-				vars.color.foreground.danger.onSolid.primary,
-			].map((token) => resolvedColor(token, container)),
+			[vars.color.foreground.accent.onSolid, vars.color.foreground.danger.onSolid].map((token) =>
+				resolvedColor(token, container),
+			),
 		);
 	});
 }

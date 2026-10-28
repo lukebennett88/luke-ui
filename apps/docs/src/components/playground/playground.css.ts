@@ -60,7 +60,7 @@ export const separator = style({
 			position: 'relative',
 			zIndex: 10,
 			'::after': {
-				backgroundColor: `color-mix(in srgb, ${vars.color.text.secondary} 50%, transparent)`,
+				backgroundColor: `color-mix(in srgb, ${vars.color.foreground.secondary} 50%, transparent)`,
 				blockSize: SEPARATOR_THUMB_THICKNESS,
 				borderRadius: vars.radius.full,
 				content: "''",
@@ -73,13 +73,13 @@ export const separator = style({
 			},
 			selectors: {
 				'&[data-separator=active]::after': {
-					backgroundColor: `color-mix(in srgb, ${vars.color.text.secondary} 80%, transparent)`,
+					backgroundColor: `color-mix(in srgb, ${vars.color.foreground.secondary} 80%, transparent)`,
 				},
 				'&[data-separator=focus]::after': {
-					backgroundColor: `color-mix(in srgb, ${vars.color.text.secondary} 80%, transparent)`,
+					backgroundColor: `color-mix(in srgb, ${vars.color.foreground.secondary} 80%, transparent)`,
 				},
 				'&[data-separator=hover]::after': {
-					backgroundColor: `color-mix(in srgb, ${vars.color.text.secondary} 65%, transparent)`,
+					backgroundColor: `color-mix(in srgb, ${vars.color.foreground.secondary} 65%, transparent)`,
 				},
 			},
 			'@media': {
@@ -115,7 +115,7 @@ export const previewPanel = style({
 export const previewPanelFullscreen = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.subdued,
+			backgroundColor: vars.color.background.surface.subdued,
 			blockSize: 'auto',
 			inlineSize: 'auto',
 			inset: 0,
@@ -129,7 +129,7 @@ export const previewPanelFullscreen = style({
 export const paneToolbar = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.base,
+			backgroundColor: vars.color.background.surface.base,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 			minBlockSize: `calc(${vars.controlSize.px32} + ${vars.space['8']} * 2 + 1px)`,
 			paddingBlock: vars.space['8'],
@@ -146,7 +146,7 @@ export const paneToolbar = style({
 export const compileError = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.base,
+			backgroundColor: vars.color.background.surface.base,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 			color: vars.color.foreground.danger.rest,
 			fontFamily: vars.font.family.code,
@@ -161,7 +161,7 @@ export const compileError = style({
 export const previewCanvas = style({
 	'@layer': {
 		components: {
-			backgroundColor: `color-mix(in srgb, ${vars.color.surface.subdued} 50%, transparent)`,
+			backgroundColor: `color-mix(in srgb, ${vars.color.background.surface.subdued} 50%, transparent)`,
 			overflow: 'auto',
 			padding: vars.space['8'],
 			'@container': {
@@ -176,7 +176,7 @@ export const previewCanvas = style({
 export const previewFrame = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.base,
+			backgroundColor: vars.color.background.surface.base,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.surface,
 			borderStyle: 'solid',
@@ -221,7 +221,7 @@ export const previewIframe = style({
 export const previewLoading = style({
 	'@layer': {
 		components: {
-			backgroundColor: `color-mix(in srgb, ${vars.color.surface.base} 90%, transparent)`,
+			backgroundColor: `color-mix(in srgb, ${vars.color.background.surface.base} 90%, transparent)`,
 			inset: 0,
 			position: 'absolute',
 			transition: `opacity ${vars.motion.enter.duration} ${vars.motion.enter.easing}, visibility ${vars.motion.enter.duration} ${vars.motion.enter.easing}`,
@@ -246,12 +246,12 @@ export const previewLoadingHidden = style({
 export const loadingPill = style({
 	'@layer': {
 		components: {
-			backgroundColor: vars.color.surface.raised,
+			backgroundColor: vars.color.background.surface.raised,
 			borderColor: vars.color.border.decorative,
 			borderRadius: vars.radius.full,
 			borderStyle: 'solid',
 			borderWidth: '1px',
-			color: vars.color.text.secondary,
+			color: vars.color.foreground.secondary,
 			fontSize: vars.font.caption.fontSize,
 			lineHeight: vars.font.caption.lineHeight,
 			paddingBlock: vars.space['4'],
