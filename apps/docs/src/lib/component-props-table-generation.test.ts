@@ -245,7 +245,7 @@ test('shows the resolved type when Button presentation branches declare differen
 
 	// The checker orders union members by type id, so compare the members.
 	expect(entriesByName.get('tone')?.simplifiedType.split(' | ').toSorted()).toEqual([
-		'"critical"',
+		'"danger"',
 		'"neutral"',
 	]);
 	// `'low' | 'standard'` is a subset of `Prominence`, so the resolved union is the alias.

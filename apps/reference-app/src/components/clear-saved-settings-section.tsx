@@ -69,7 +69,7 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 					label="Saved settings"
 				>
 					<DialogTrigger isOpen={isOpen} onOpenChange={changeOpen}>
-						<Button isDisabled={isOtherMutationPending} tone="critical">
+						<Button isDisabled={isOtherMutationPending} tone="danger">
 							Clear saved settings
 						</Button>
 						<ModalOverlay
@@ -115,7 +115,7 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 													isPending={isPending}
 													onPress={() => void clearSettings()}
 													prominence="high"
-													tone="critical"
+													tone="danger"
 												>
 													Clear settings
 												</Button>

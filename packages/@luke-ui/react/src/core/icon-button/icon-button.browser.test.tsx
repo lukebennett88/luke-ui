@@ -1,9 +1,15 @@
 import { IconButton } from '@luke-ui/react/icon-button';
+import { Fragment } from 'react';
 import type { JSX } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
+import {
+	resolvedColor,
+	setInteractionState,
+	settledSurfaceColors,
+} from '../test-utils/surface-colors.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -11,6 +17,8 @@ import {
 	focusViaKeyboard,
 	Grid,
 } from '../test-utils/visual.js';
+
+const dangerProminences = ['low', 'standard', 'high'] as const;
 
 /** A custom SVG that deliberately omits its own `aria-hidden` and any `<title>`. */
 function UnlabelledCustomIcon(): JSX.Element {
@@ -31,7 +39,7 @@ function IconButtonScene() {
 			<IconButton aria-label="Standard" icon="add" />
 			<IconButton aria-label="Low" icon="add" prominence="low" />
 			<IconButton aria-label="High" icon="add" prominence="high" />
-			<IconButton aria-label="Critical high" icon="delete" tone="critical" prominence="high" />
+			<IconButton aria-label="Danger high" icon="delete" tone="danger" prominence="high" />
 		</Grid>
 	);
 }
@@ -65,6 +73,49 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
+for (const appearance of visualAppearances) {
+	test(
+		`danger IconButton interaction and disabled states in ${appearance.theme} ${appearance.mode}`,
+		{ tags: ['visual'] },
+		async () => {
+			const { locator } = render(
+				<Grid columns={4}>
+					{dangerProminences.map((prominence) => (
+						<Fragment key={prominence}>
+							{['rest', 'hover', 'pressed'].map((state) => (
+								<IconButton
+									key={state}
+									aria-label={`Danger ${prominence} ${state}`}
+									icon="delete"
+									prominence={prominence}
+									tone="danger"
+								/>
+							))}
+							<IconButton
+								aria-label={`Danger ${prominence} disabled`}
+								icon="delete"
+								isDisabled
+								prominence={prominence}
+								tone="danger"
+							/>
+						</Fragment>
+					))}
+				</Grid>,
+				{ appearance },
+			);
+			for (const prominence of dangerProminences) {
+				for (const state of ['hover', 'pressed'] as const) {
+					setInteractionState(
+						locator.getByRole('button', { name: `Danger ${prominence} ${state}` }).element(),
+						state,
+					);
+				}
+			}
+			await captureVisualAppearance(locator, 'icon-button/danger-states', appearance);
+		},
+	);
+}
+
 test('focus-visible state', { tags: ['visual'] }, async () => {
 	const { locator } = render(<IconButton aria-label="Action" icon="add" />);
 
@@ -88,3 +139,55 @@ test('forced-colors resting', { tags: ['visual'] }, async () => {
 		await emulateForcedColors('none');
 	}
 });
+
+for (const appearance of visualAppearances) {
+	test(
+		`danger IconButtons take system colours in forced colours in ${appearance.theme} ${appearance.mode}`,
+		{ tags: ['visual'] },
+		async () => {
+			await emulateForcedColors('active');
+
+			try {
+				const { locator } = render(
+					<Grid columns={4}>
+						{dangerProminences.map((prominence) => (
+							<Fragment key={prominence}>
+								<IconButton
+									aria-label={`Danger ${prominence}`}
+									icon="delete"
+									prominence={prominence}
+									tone="danger"
+								/>
+								<IconButton
+									aria-label={`Danger ${prominence} disabled`}
+									icon="delete"
+									isDisabled
+									prominence={prominence}
+									tone="danger"
+								/>
+							</Fragment>
+						))}
+					</Grid>,
+					{ appearance },
+				);
+				for (const prominence of dangerProminences) {
+					const button = locator
+						.getByRole('button', { exact: true, name: `Danger ${prominence}` })
+						.element();
+					expect(settledSurfaceColors(button)).toMatchObject({
+						background: resolvedColor('ButtonFace', button),
+						color: resolvedColor('ButtonText', button),
+					});
+					const disabled = locator
+						.getByRole('button', { exact: true, name: `Danger ${prominence} disabled` })
+						.element();
+					expect(disabled).toBeDisabled();
+					expect(settledSurfaceColors(disabled).color).toBe(resolvedColor('GrayText', disabled));
+				}
+				await captureVisualAppearance(locator, 'icon-button/danger-forced-colours', appearance);
+			} finally {
+				await emulateForcedColors('none');
+			}
+		},
+	);
+}

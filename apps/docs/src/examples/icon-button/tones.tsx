@@ -7,8 +7,8 @@ export default () => {
 			<ComparisonItem label="Neutral">
 				<IconButton aria-label="Search" icon="search" tone="neutral" />
 			</ComparisonItem>
-			<ComparisonItem label="Critical">
-				<IconButton aria-label="Delete" icon="delete" tone="critical" />
+			<ComparisonItem label="Danger">
+				<IconButton aria-label="Delete" icon="delete" tone="danger" />
 			</ComparisonItem>
 		</Comparison>
 	);

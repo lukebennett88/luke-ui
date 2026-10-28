@@ -166,7 +166,7 @@ export const buttonRecipeInternal = recipe({
 			small: {},
 		},
 		tone: {
-			critical: {},
+			danger: {},
 			neutral: {},
 		},
 	},
@@ -183,21 +183,21 @@ export const buttonRecipeInternal = recipe({
 		...buttonAppearance('neutral', 'low', 'transparent'),
 		...buttonAppearance('neutral', 'standard', 'subtle'),
 		...buttonAppearance('neutral', 'high', 'solid', 'accent'),
-		...buttonAppearance('critical', 'low', 'transparent'),
-		...buttonAppearance('critical', 'standard', 'subtle'),
-		...buttonAppearance('critical', 'high', 'solid'),
+		...buttonAppearance('danger', 'low', 'transparent'),
+		...buttonAppearance('danger', 'standard', 'subtle'),
+		...buttonAppearance('danger', 'high', 'solid'),
 		...textAppearance('text', 'neutral', 'low'),
 		...textAppearance('text', 'neutral', 'standard'),
 		...textAppearance('text', 'neutral', 'high'),
-		...textAppearance('text', 'critical', 'low'),
-		...textAppearance('text', 'critical', 'standard'),
+		...textAppearance('text', 'danger', 'low'),
+		...textAppearance('text', 'danger', 'standard'),
 		...textAppearance('link', 'neutral', 'low'),
 		...textAppearance('link', 'neutral', 'standard'),
 		...textAppearance('link', 'neutral', 'high'),
 	],
 });
 
-type Tone = 'neutral' | 'critical';
+type Tone = 'neutral' | 'danger';
 type BackgroundTone = 'neutral' | 'danger' | 'accent';
 type ButtonSurface = 'transparent' | 'subtle' | 'solid';
 
@@ -206,7 +206,7 @@ type ButtonSurface = 'transparent' | 'subtle' | 'solid';
  * `surfaceStyle`. Low and standard Buttons use the adaptive state layer over a transparent or
  * resting subtle fill so hover and pressed stay visible on every surface, including app-painted
  * overlays. On a solid fill, a low Button falls back to an opaque subtle chip so on-solid text
- * contrast stays at AA. Solid Buttons keep opaque state tokens and the control finish. A critical
+ * contrast stays at AA. Solid Buttons keep opaque state tokens and the control finish. A danger
  * tone keeps the danger hue on a surrounding surface or subtle rest, and reads on-solid primary on
  * a solid at rest.
  */
@@ -214,11 +214,11 @@ function buttonAppearance(
 	tone: Tone,
 	prominence: 'low' | 'standard' | 'high',
 	surface: ButtonSurface,
-	backgroundTone: BackgroundTone = tone === 'critical' ? 'danger' : 'neutral',
+	backgroundTone: BackgroundTone = tone === 'danger' ? 'danger' : 'neutral',
 ) {
-	const toneColor = tone === 'critical' ? { color: contextualForeground('danger') } : ({} as const);
+	const toneColor = tone === 'danger' ? { color: contextualForeground('danger') } : ({} as const);
 	const variants = { appearance: 'button' as const, prominence, tone };
-	const chipTone = tone === 'critical' ? 'danger' : 'neutral';
+	const chipTone = tone === 'danger' ? 'danger' : 'neutral';
 	const restColor =
 		'color' in toneColor && toneColor.color !== undefined
 			? toneColor.color
@@ -291,7 +291,7 @@ function buttonAppearance(
 	}
 
 	// Merge the adaptive layer's vars into the resting subtle pairing. A later `vars` object would
-	// replace the pairing's foreground and solid-state resets, so a critical standard Button on a
+	// replace the pairing's foreground and solid-state resets, so a danger standard Button on a
 	// solid would keep inherited on-solid text over its light subtle fill.
 	const subtleRest = surfaceStyle(`${fill}.subtle.rest`);
 	const hoverLayer = adaptiveStateLayer('hover');

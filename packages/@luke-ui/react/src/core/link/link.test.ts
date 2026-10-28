@@ -8,7 +8,7 @@ test('Link supports ref and rejects unsupported props', () => {
 	// @ts-expect-error — text Links do not use button content slots
 	assertType<LinkProps>({ endContent: 'next', href: '/settings' });
 	// @ts-expect-error — Link has no tone prop
-	assertType<LinkProps>({ href: '/settings', tone: 'critical' });
+	assertType<LinkProps>({ href: '/settings', tone: 'danger' });
 	// @ts-expect-error — text Links do not use control sizing
 	assertType<LinkProps>({ href: '/settings', size: 'small' });
 });

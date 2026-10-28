@@ -7,8 +7,8 @@ export default () => {
 			<ComparisonItem label="Neutral">
 				<Button tone="neutral">Save changes</Button>
 			</ComparisonItem>
-			<ComparisonItem label="Critical">
-				<Button tone="critical">Delete draft</Button>
+			<ComparisonItem label="Danger">
+				<Button tone="danger">Delete draft</Button>
 			</ComparisonItem>
 		</Comparison>
 	);

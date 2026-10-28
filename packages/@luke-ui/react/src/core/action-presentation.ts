@@ -25,10 +25,10 @@ export type ButtonPresentationProps =
 			 */
 			size?: 'small' | 'medium';
 			/**
-			 * Sets the visual tone. Use `critical` for destructive actions.
+			 * Sets the visual tone. Use `danger` for destructive actions.
 			 * @default neutral
 			 */
-			tone?: 'neutral' | 'critical';
+			tone?: 'neutral' | 'danger';
 	  }
 	| {
 			/**
@@ -44,7 +44,7 @@ export type ButtonPresentationProps =
 			prominence?: Prominence;
 			size?: never;
 			/**
-			 * Sets the visual tone. Use `critical` for destructive actions.
+			 * Sets the visual tone. Use `danger` for destructive actions.
 			 * @default neutral
 			 */
 			tone?: 'neutral';
@@ -63,10 +63,10 @@ export type ButtonPresentationProps =
 			prominence?: 'low' | 'standard';
 			size?: never;
 			/**
-			 * Sets the visual tone. Use `critical` for destructive actions.
+			 * Sets the visual tone. Use `danger` for destructive actions.
 			 * @default neutral
 			 */
-			tone: 'critical';
+			tone: 'danger';
 	  };
 
 /** Visual presentation props accepted by Link and its public recipe. */
@@ -121,10 +121,10 @@ export interface IconButtonPresentationProps {
 	 */
 	size?: 'small' | 'medium';
 	/**
-	 * Sets the visual tone. Use `critical` for destructive actions.
+	 * Sets the visual tone. Use `danger` for destructive actions.
 	 * @default neutral
 	 */
-	tone?: 'neutral' | 'critical';
+	tone?: 'neutral' | 'danger';
 }
 
 /** Visual presentation props accepted by IconLink. */

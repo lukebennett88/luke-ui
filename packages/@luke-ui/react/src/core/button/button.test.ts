@@ -13,11 +13,14 @@ test('Button supports ref and rejects unsupported prop combinations', () => {
 	assertType<ButtonProps>({ appearance: 'text', size: 'small' });
 	// @ts-expect-error — accent is not a consumer-selectable tone
 	assertType<ButtonProps>({ prominence: 'low', tone: 'accent' });
-	// @ts-expect-error — critical text Buttons do not have high prominence
+	assertType<ButtonProps>({ tone: 'danger' });
+	// @ts-expect-error — destructive actions use danger
+	assertType<ButtonProps>({ tone: 'critical' });
+	// @ts-expect-error — danger text Buttons do not have high prominence
 	assertType<ButtonProps>({
 		appearance: 'text',
 		prominence: 'high',
-		tone: 'critical',
+		tone: 'danger',
 	});
 });
 
