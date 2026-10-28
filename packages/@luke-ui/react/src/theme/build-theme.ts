@@ -113,9 +113,8 @@ export class ThemeContrastError extends Error {
 /**
  * Thrown by {@link compileTheme} when a role that must guarantee on-solid contrast cannot reach an
  * accessible solid — for example an explicit per-mode accent whose whole tone band is an on-solid
- * dead zone. Single-value accents are pre-conditioned into an accessible band by `defineTheme`, so
- * this surfaces for verbatim sources the author asked to use exactly: a per-mode accent, or any status
- * source, which `defineTheme` passes through unadapted. Re-raises the scale generator's
+ * dead zone. Single-value chromatic sources are pre-conditioned into an accessible band by `defineTheme`, so
+ * this surfaces for explicit mode sources. Re-raises the scale generator's
  * {@link ScaleGenerationError} with the failing `role`/`mode`, the closest `bestAttempt`, and the
  * partial {@link ThemeGenerationDiagnostics} resolved before the failure.
  */

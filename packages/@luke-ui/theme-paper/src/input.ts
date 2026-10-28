@@ -3,10 +3,9 @@ import type { ThemeInput } from '@luke-ui/react/theme/compiler';
 import { THEME_NAME } from './name.js';
 
 /**
- * Paper's `defineTheme` input: a materially minimal theme with flat, hairline-bordered surfaces and
- * a blue `#185281`-family accent. Its light mode authors the status colours, and its dark mode lets
- * `info`, `success`, and `warning` fall back to the curated mode defaults. Compose it with ordinary TypeScript
- * to start from Paper.
+ * Paper is a flat, hairline-bordered theme with a blue accent. It authors light status colours
+ * and derives their dark counterparts from the same hues. Compose this input with ordinary
+ * TypeScript to start from Paper.
  */
 export const theme: ThemeInput = {
 	controlFinish: {
@@ -31,7 +30,7 @@ export const theme: ThemeInput = {
 	},
 	color: {
 		accent: { dark: 'oklch(0.48 0.11 250)', light: '#185281' },
-		// Feedback colours are authored for light only; the omitted dark sides default per mode.
+		// Derive dark feedback colours from the authored light sources.
 		danger: { light: '#c0262e' },
 		info: { light: '#1d39c4' },
 		neutral: { dark: 'oklch(0.22 0.01 250)', light: '#ffffff' },

@@ -2,12 +2,9 @@ import interMetrics from '@capsizecss/metrics/inter';
 import type { ThemeInput } from '../define-theme.js';
 
 /**
- * The visual-test copy of Paper, the materially minimal theme `@luke-ui/theme-paper` publishes. The
- * two inputs are independent and may diverge, except that the packed-consumer harness requires
- * matching solid fills, on-solid text, and control finish. Its light mode approximates the flat,
- * hairline-bordered Luke UI look with the blue `#185281`-family accent and explicitly authored status
- * colours; its dark mode is net-new and lets the `info`, `success`, and `warning` roles fall back to
- * the curated mode defaults (their dark sides are omitted).
+ * The visual-test copy of Paper. It may differ from the published input except for solid fills,
+ * on-solid text, and control finish, which the packed-consumer harness checks. Its light status
+ * sources supply the hues for the generated dark counterparts.
  */
 export const paperTheme: ThemeInput = {
 	controlFinish: {
@@ -32,7 +29,7 @@ export const paperTheme: ThemeInput = {
 	},
 	color: {
 		accent: { dark: 'oklch(0.48 0.11 250)', light: '#185281' },
-		// Feedback colours are authored for light only; the omitted dark sides default per mode.
+		// Derive dark feedback colours from the authored light sources.
 		danger: { light: '#c0262e' },
 		info: { light: '#1d39c4' },
 		neutral: { dark: 'oklch(0.22 0.01 250)', light: '#ffffff' },
