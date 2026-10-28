@@ -41,3 +41,16 @@ test('token board', { tags: ['visual'] }, async () => {
 		unmount();
 	}
 });
+
+// The custom fixture makes difficult yellow, green, and red source colours visible in both modes.
+for (const mode of ['light', 'dark'] as const) {
+	test(`chromatic source colours: ${mode}`, { tags: ['visual'] }, async () => {
+		const appearance = { mode, theme: 'chromatic' } as const;
+		const { locator } = render(<TokenBoard />, { appearance });
+		await expect.element(locator).toBeVisible();
+		await expect
+			.poll(() => locator.element().textContent?.includes('Resolving…') ?? true)
+			.toBe(false);
+		await captureVisualAppearance(locator, 'theme/chromatic-source-colours', appearance);
+	});
+}

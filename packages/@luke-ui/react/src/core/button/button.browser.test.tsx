@@ -663,7 +663,12 @@ for (const appearance of visualAppearances) {
 
 // Measures each label against the pixels painted behind it, including the control finish, which the
 // theme compiler's contrast gates do not see.
-for (const appearance of [...visualAppearances, ...flatAppearances]) {
+for (const appearance of [
+	...visualAppearances,
+	...flatAppearances,
+	{ mode: 'light', theme: 'chromatic' },
+	{ mode: 'dark', theme: 'chromatic' },
+] as const) {
 	test(`Button text keeps 4.5:1 contrast over its painted fill in every state in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { locator } = render(
 			<Box backgroundColor="success.solid" padding="space.8">

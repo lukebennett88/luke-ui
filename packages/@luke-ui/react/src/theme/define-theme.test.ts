@@ -1,5 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 import { defineTheme, ThemeGenerationError } from '../exports/theme/compiler.js';
+import { chromaticTheme } from './__fixtures__/chromatic.js';
 import { paperTheme } from './__fixtures__/paper.js';
 import { UNSATISFIABLE_ON_SOLID } from './__fixtures__/radix-scales.js';
 import { tactileTheme } from './__fixtures__/tactile.js';
@@ -182,39 +183,105 @@ describe('defineTheme partial per-mode merges', () => {
 		);
 	});
 
-	it('defaults the omitted dark side of a partial colour without bleeding the light override', () => {
-		const infoVarNames = [
-			'--luke-color-foreground-info-rest',
-			'--luke-color-border-info',
-			'--luke-color-background-info-subtle-rest',
-		];
-		const overridden = splitBlocks(
-			defineTheme({
-				color: { accent: '#fff', info: { light: '#1d39c4' } },
-				name: 'partial-color',
-				typography: testTypography,
-			}),
-		);
-		const allDefault = splitBlocks(
-			defineTheme({
-				color: { accent: '#fff' },
-				name: 'partial-color-default',
-				typography: testTypography,
-			}),
-		);
-		// The omitted dark info side falls back to the curated default: identical to the all-default build.
-		for (const varName of infoVarNames) {
-			expect(extractValue(overridden.mediaDark, varName)).toBe(
-				extractValue(allDefault.mediaDark, varName),
-			);
-		}
-		// The explicit light info override changed the light info kit and did not bleed into dark.
-		const overriddenLight = infoVarNames.map((varName) => {
-			return extractValue(overridden.baseLight, varName);
+	it('keeps curated defaults for omitted optional roles', () => {
+		const foundation = normalizeTheme({
+			color: { accent: '#3b82f6', info: {}, success: {} },
+			name: 'defaults',
+			typography: testTypography,
 		});
-		const defaultLight = infoVarNames.map((varName) => extractValue(allDefault.baseLight, varName));
-		expect(overriddenLight).not.toEqual(defaultLight);
+		for (const mode of ['light', 'dark'] as const) {
+			for (const role of ['info', 'success', 'warning', 'danger'] as const) {
+				expect(foundation[mode].color[role]).toEqual(
+					gamutMapOklch(parseColor(defaultSourceColors[mode][role])),
+				);
+			}
+		}
 	});
+
+	for (const role of ['accent', 'info', 'success', 'warning', 'danger'] as const) {
+		it(`adapts a missing ${role} side from the authored side`, () => {
+			const input = (value: string | { light: string } | { dark: string }) => ({
+				color: { accent: '#3b82f6', [role]: value },
+				name: 'chromatic',
+				typography: testTypography,
+			});
+			const seed = '#d89614';
+			const single = normalizeTheme(input(seed));
+			const light = normalizeTheme(input({ light: seed }));
+			const dark = normalizeTheme(input({ dark: seed }));
+			const explicit = normalizeTheme({
+				...input(seed),
+				color: { accent: '#3b82f6', [role]: { light: seed, dark: '#22c55e' } },
+			});
+			expect(explicit.light.color[role]).toEqual(gamutMapOklch(parseColor(seed)));
+			expect(explicit.dark.color[role]).toEqual(gamutMapOklch(parseColor('#22c55e')));
+			expect(light.light.color[role]).toEqual(gamutMapOklch(parseColor(seed)));
+			expect(dark.dark.color[role]).toEqual(gamutMapOklch(parseColor(seed)));
+			expect(light.dark.color[role]).toEqual(single.dark.color[role]);
+			expect(dark.light.color[role]).toEqual(single.light.color[role]);
+			for (const mode of ['light', 'dark'] as const) {
+				expect(single[mode].color[role].h).toBeCloseTo(parseColor(seed).h, 5);
+			}
+			expect(() => defineTheme(input(seed))).not.toThrow();
+		});
+	}
+});
+
+describe('chromatic role source fidelity and explicit modes', () => {
+	it('keeps a yellow warning recognisably chromatic on the light canvas', () => {
+		const { diagnostics } = compileTheme(normalizeTheme(chromaticTheme));
+		const source = gamutMapOklch(parseColor('#facc15'));
+		const warning = diagnostics.light.families.warning.family[FAMILY_RUNG.solid];
+		const accent = diagnostics.light.families.accent.family[FAMILY_RUNG.solid];
+		expect(warning.c).toBeGreaterThan(source.c * 0.8);
+		expect(warning.c).toBeGreaterThan(accent.c);
+	});
+
+	it('compiles a theme with distinct yellow, blue, green and red sources', () => {
+		expect(() => defineTheme(chromaticTheme)).not.toThrow();
+	});
+
+	for (const role of ['accent', 'info', 'success', 'warning', 'danger'] as const) {
+		for (const seed of ['#facc15', '#22c55e', '#ef4444']) {
+			it(`keeps the hue of ${seed} for ${role} in both modes`, () => {
+				const input = {
+					color: { accent: '#3b82f6', [role]: seed },
+					name: 'hue',
+					typography: testTypography,
+				};
+				const foundation = normalizeTheme(input);
+				const { diagnostics } = compileTheme(foundation);
+				const source = gamutMapOklch(parseColor(seed));
+				for (const mode of ['light', 'dark'] as const) {
+					const solid = diagnostics[mode].families[role].family[FAMILY_RUNG.solid];
+					expect(solid.h).toBeCloseTo(source.h, 2);
+					expect(solid.c).toBeGreaterThan(source.c * 0.5);
+				}
+			});
+		}
+		it(`reports an inaccessible explicit dark ${role}`, () => {
+			const input = {
+				color: {
+					accent: '#3b82f6',
+					[role]: { light: '#3b82f6', dark: UNSATISFIABLE_ON_SOLID.source },
+				},
+				name: 'invalid',
+				typography: testTypography,
+			};
+			const error = (() => {
+				try {
+					defineTheme(input);
+					return null;
+				} catch (caught) {
+					return caught;
+				}
+			})();
+			expect(error).toBeInstanceOf(ThemeGenerationError);
+			if (!(error instanceof ThemeGenerationError)) throw error;
+			expect(error.role).toBe(role);
+			expect(error.mode).toBe('dark');
+		});
+	}
 });
 
 describe('defineTheme backdrop validation', () => {

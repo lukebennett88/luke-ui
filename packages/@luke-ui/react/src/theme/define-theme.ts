@@ -1,7 +1,7 @@
 /**
  * The `defineTheme` authoring util: the sole public theme-authoring surface. It normalises a small,
  * curated-default {@link ThemeInput} into the internal per-mode {@link ThemeFoundation} and hands it
- * to the internal {@link buildTheme} value pipeline. It owns the single-value accent/neutral
+ * to the internal {@link buildTheme} value pipeline. It owns the chromatic and neutral
  * adaptation and the one resolution of curated defaults (source colours, surfaces, materials,
  * backdrop) into {@link Oklch} values the foundation carries.
  */
@@ -140,23 +140,23 @@ export interface ThemeInput extends ThemeInputCommon {
 			raised?: ModeColorInput;
 		};
 		/**
-		 * Source colour for the `info` role. One string is used in both modes. A missing side uses an
-		 * accessible Luke UI blue for that mode.
+		 * Source colour for the `info` role. A single colour or missing side is adapted per mode.
+		 * When omitted, uses the curated blue defaults.
 		 */
 		info?: ColorInput;
 		/**
-		 * Source colour for the `success` role. One string is used in both modes. A missing side uses an
-		 * accessible Luke UI green for that mode.
+		 * Source colour for the `success` role. A single colour or missing side is adapted per mode.
+		 * When omitted, uses the curated green defaults.
 		 */
 		success?: ColorInput;
 		/**
-		 * Source colour for the `warning` role. One string is used in both modes. A missing side uses an
-		 * accessible Luke UI amber for that mode.
+		 * Source colour for the `warning` role. A single colour or missing side is adapted per mode.
+		 * When omitted, uses the curated amber defaults.
 		 */
 		warning?: ColorInput;
 		/**
-		 * Source colour for the `danger` role. One string is used in both modes. A missing side uses an
-		 * accessible Luke UI red for that mode.
+		 * Source colour for the `danger` role. A single colour or missing side is adapted per mode.
+		 * When omitted, uses the curated red defaults.
 		 */
 		danger?: ColorInput;
 		/** Keyboard-focus ring colour. One string is used in both modes. Defaults per mode. */
@@ -199,7 +199,7 @@ const NEUTRAL_STYLE = {
 // not on this anchor, so the neutral never has the accent's mid-lightness dead zone.
 const NEUTRAL_LIGHTNESS = { dark: 0.22, light: 0.985 } as const satisfies Record<ColorMode, number>;
 
-// The vibrant band a single-value accent is adapted into, and the lightness the search starts from.
+// The vibrant band a chromatic source is adapted into, and the lightness the search starts from.
 // Contrast for the on-solid text lives at the band edges (dark solids take near-white text, light
 // solids take near-black); the middle is a dead zone, so the search targets a vibrant lightness and
 // walks outward to the nearest lightness whose solid rest, hover, and pressed clear the on-solid
@@ -298,19 +298,17 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 	const neutral = resolveNeutral(color, mode);
 	const textPrimary = highContrastText(neutral, mode);
 	const colors: ThemeSourceColors = {
-		accent: resolveAdaptedRole(color.accent, mode, (source, accentMode, raw) => {
-			return adaptAccent(source, accentMode, raw, textPrimary);
-		}),
+		accent: resolveAdaptedRole(color.accent, mode, 'accent', textPrimary),
 		neutral,
 		// Emitted verbatim; a single string applies to both modes, an omitted side falls back to the
 		// curated mode-aware default.
 		backdrop: resolveVerbatimRole(color.backdrop, mode, defaultBackdrop[mode]),
-		danger: resolveSourceRole(color.danger, mode, defaults.danger),
+		danger: resolveChromaticRole(color.danger, mode, 'danger', defaults.danger, textPrimary),
 		focus: resolveSourceRole(color.focus, mode, defaults.focus),
-		info: resolveSourceRole(color.info, mode, defaults.info),
-		success: resolveSourceRole(color.success, mode, defaults.success),
+		info: resolveChromaticRole(color.info, mode, 'info', defaults.info, textPrimary),
+		success: resolveChromaticRole(color.success, mode, 'success', defaults.success, textPrimary),
 		surface: resolveSurfaces(color.surface, mode, neutral),
-		warning: resolveSourceRole(color.warning, mode, defaults.warning),
+		warning: resolveChromaticRole(color.warning, mode, 'warning', defaults.warning, textPrimary),
 	};
 	return colors;
 }
@@ -331,24 +329,42 @@ function resolveSurfaces(
 	return resolved;
 }
 
-/**
- * Resolves an accent-style role that adapts a single value per mode. An explicit side is used
- * verbatim; a single string or an omitted side is adapted through `adapt` for the mode.
- */
+type ChromaticRole = 'accent' | 'info' | 'success' | 'warning' | 'danger';
+
+/** Optional chromatic inputs use curated defaults when omitted. */
+function resolveChromaticRole(
+	input: ColorInput | undefined,
+	mode: ColorMode,
+	role: ChromaticRole,
+	fallback: string,
+	interactionSource: Oklch,
+): Oklch {
+	if (
+		input === undefined ||
+		(typeof input !== 'string' && input.light === undefined && input.dark === undefined)
+	) {
+		return gamutMapOklch(parseColor(fallback));
+	}
+	return resolveAdaptedRole(input, mode, role, interactionSource);
+}
+
 function resolveAdaptedRole(
 	input: ColorInput,
 	mode: ColorMode,
-	adapt: (source: Oklch, mode: ColorMode, raw: string) => Oklch,
+	role: ChromaticRole,
+	interactionSource: Oklch,
 ): Oklch {
-	if (typeof input === 'string') return adapt(gamutMapOklch(parseColor(input)), mode, input);
+	const adapt = (source: Oklch, raw: string) =>
+		adaptChromatic(source, mode, raw, role, interactionSource);
+	if (typeof input === 'string') return adapt(gamutMapOklch(parseColor(input)), input);
 	const side = sideOf(input, mode);
 	if (side !== undefined) return gamutMapOklch(parseColor(side));
 	// The other side is present (a partial `{ light }` or `{ dark }`); generate this side from it.
 	const other = sideOf(input, mode === 'light' ? 'dark' : 'light');
 	if (other === undefined) {
-		throw new Error(`Theme "accent": provide a colour for at least one of light or dark.`);
+		throw new Error(`Theme "${role}": provide a colour for at least one of light or dark.`);
 	}
-	return adapt(gamutMapOklch(parseColor(other)), mode, other);
+	return adapt(gamutMapOklch(parseColor(other)), other);
 }
 
 /** Resolves the neutral role from a colour or curated style. */
@@ -406,7 +422,7 @@ function resolveOptionalModeColour(
 }
 
 /**
- * Resolves a feedback/focus role used as a generator colour. A single string is used for both modes;
+ * Resolves the focus role used as a generator colour. A single string is used for both modes;
  * an explicit side is used directly; an omitted side or role falls back to the curated mode default.
  */
 function resolveSourceRole(
@@ -439,15 +455,23 @@ function sideOf(input: ColorInput, mode: ColorMode): string | undefined {
 }
 
 /**
- * Adapts a single-value accent for one mode: preserve hue and chroma, then search the vibrant band
+ * Adapts a chromatic source for one mode: preserve hue and chroma, then search the vibrant band
  * for a lightness that clears {@link passesOnSolidGate} against the same `text.primary` production
  * generation uses. Returns the lightness nearest the mode target. Throws when none in the band is
  * accessible. The band is wider than the generator's tone-faithful window, which is what lets it
- * rescue accents that window cannot reach.
+ * rescue sources that window cannot reach.
  */
-function adaptAccent(source: Oklch, mode: ColorMode, raw: string, interactionSource: Oklch): Oklch {
-	const target = ACCENT_TARGET[mode];
-	const [low, high] = ACCENT_BAND[mode];
+function adaptChromatic(
+	source: Oklch,
+	mode: ColorMode,
+	raw: string,
+	role: ChromaticRole,
+	interactionSource: Oklch,
+): Oklch {
+	// A brighter light-mode warning retains more of a yellow source's sRGB chroma.
+	const brightWarning = role === 'warning' && mode === 'light';
+	const target = brightWarning ? ACCENT_TARGET.dark : ACCENT_TARGET[mode];
+	const [low, high] = brightWarning ? ACCENT_BAND.dark : ACCENT_BAND[mode];
 	function makeSolid(l: number) {
 		return gamutMapOklch({
 			l,
@@ -479,9 +503,9 @@ function adaptAccent(source: Oklch, mode: ColorMode, raw: string, interactionSou
 	})();
 	if (best === null) {
 		throw new Error(
-			`Theme accent "${raw}" has no accessible ${mode} lightness: no vibrant lightness lets ` +
+			`Theme ${role} "${raw}" has no accessible ${mode} lightness: no vibrant lightness lets ` +
 				`near-white or near-black on-solid text clear ${TEXT_RATIO}:1 across the solid and its ` +
-				'generated hover and pressed states. Author an explicit { light, dark } accent instead.',
+				`generated hover and pressed states. Author an explicit { light, dark } ${role} instead.`,
 		);
 	}
 	return makeSolid(best);

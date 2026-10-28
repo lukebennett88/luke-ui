@@ -108,7 +108,7 @@ import { theme as paperTheme } from '@luke-ui/theme-paper/input';
 
 export const productTheme: ThemeInput = {
 	...paperTheme,
-	color: { ...paperTheme.color, accent: '#3b82f6' },
+	color: { ...paperTheme.color, accent: '#3b82f6', warning: '#facc15', danger: { light: '#ef4444' } },
 	radius: { ...paperTheme.radius, control: 8 },
 	name: 'product',
 	typography: { ...paperTheme.typography, fonts: { ...paperTheme.typography.fonts, code: "'Fira Code', monospace" } },

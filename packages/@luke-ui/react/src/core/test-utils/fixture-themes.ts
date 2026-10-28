@@ -1,6 +1,7 @@
 import { getThemeClassName } from '@luke-ui/react/theme';
 import type { ThemeInput } from '@luke-ui/react/theme/compiler';
 import { defineTheme } from '@luke-ui/react/theme/compiler';
+import { chromaticTheme } from '../../theme/__fixtures__/chromatic.js';
 import { paperTheme } from '../../theme/__fixtures__/paper.js';
 import { tactileTheme } from '../../theme/__fixtures__/tactile.js';
 import { flatTheme } from './flat-theme.js';
@@ -17,6 +18,7 @@ const contrastEdgeTheme: ThemeInput = {
 };
 
 const fixtureThemes = {
+	chromatic: chromaticTheme,
 	contrastEdge: contrastEdgeTheme,
 	flat: flatTheme,
 	paper: paperTheme,
