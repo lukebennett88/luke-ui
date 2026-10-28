@@ -105,6 +105,22 @@
 			automerge: false,
 		},
 		{
+			// setup-node uses a major-only version; don't expand it to a full minor or patch release.
+			matchManagers: ['github-actions'],
+			matchDepTypes: ['uses-with'],
+			matchPackageNames: ['node'],
+			matchUpdateTypes: ['minor', 'patch'],
+			enabled: false,
+		},
+		{
+			// Preserve major-only precision for reviewable major upgrades.
+			matchManagers: ['github-actions'],
+			matchDepTypes: ['uses-with'],
+			matchPackageNames: ['node'],
+			rangeStrategy: 'replace',
+			automerge: false,
+		},
+		{
 			// Native npm support for `devEngines.runtime` (Renovate 44.128.0+). The repo-wide `bump`
 			// strategy would raise `^24.0.0` to `^24.x.y` on every patch. Without a traditional
 			// lockedVersion for this field, `update-lockfile` also falls back to `bump`, so disable
