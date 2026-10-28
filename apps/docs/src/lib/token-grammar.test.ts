@@ -95,7 +95,7 @@ for (const [prefix, scaleId] of [
 	['controlFinish.', 'controlFinish'],
 	['controlSize.', 'controlSize'],
 	['interaction.', 'interaction'],
-	['depth.', 'depth'],
+	['shadow.', 'shadow'],
 	['radius.', 'radius'],
 	['space.', 'space'],
 ] as const) {

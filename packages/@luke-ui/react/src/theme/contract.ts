@@ -124,9 +124,9 @@ export const themeContractTree = {
 			...perRole(() => null),
 		},
 	},
-	/** Composite box-shadow values for the shared depth ladder. */
-	depth: {
-		recessed: null,
+	/** Composite box-shadow values for the shared shadow ladder. */
+	shadow: {
+		inset: null,
 		resting: null,
 		raised: null,
 		floating: null,
@@ -213,7 +213,7 @@ export const themeContractTree = {
 export const modeFamilies = [
 	'color',
 	'controlFinish',
-	'depth',
+	'shadow',
 	'interaction',
 ] as const satisfies ReadonlyArray<keyof typeof themeContractTree>;
 

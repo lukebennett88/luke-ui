@@ -141,7 +141,7 @@ const SCALE_PREFIXES = [
 	['controlFinish.', 'controlFinish'],
 	['controlSize.', 'controlSize'],
 	['interaction.', 'interaction'],
-	['depth.', 'depth'],
+	['shadow.', 'shadow'],
 	['radius.', 'radius'],
 	['space.', 'space'],
 ] as const satisfies ReadonlyArray<ScalePrefixEntry>;
@@ -299,7 +299,7 @@ function buildScales(tokens: ReadonlyArray<ThemeToken>): Readonly<Record<ScaleId
 	return {
 		controlFinish: scaleFor('controlFinish'),
 		controlSize: scaleFor('controlSize'),
-		depth: scaleFor('depth'),
+		shadow: scaleFor('shadow'),
 		interaction: scaleFor('interaction'),
 		motionEnter: scaleFor('motionEnter'),
 		motionExit: scaleFor('motionExit'),

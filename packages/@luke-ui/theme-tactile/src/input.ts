@@ -35,15 +35,15 @@ export const theme: ThemeInput = {
 		neutral: { dark: 'oklch(0.25 0.015 210)', light: 'oklch(0.985 0 0)' },
 	},
 	// Raised rungs: a faint top highlight and blurred shadows; a zero-blur offset would read as a
-	// second edge. Recessed: one soft inset shadow from above.
-	depth: {
+	// second edge. Inset: one soft shadow from above.
+	shadow: {
 		dark: {
 			floating: '0 4px 12px oklch(0.05 0.01 220 / 0.38), 0 2px 4px oklch(0.05 0.01 220 / 0.22)',
 			overlay: '0 12px 32px oklch(0.05 0.01 220 / 0.5), 0 4px 12px oklch(0.05 0.01 220 / 0.28)',
 			raised:
 				'inset 0 1px 0 rgb(255 255 255 / 0.1), 0 2px 4px oklch(0.05 0.01 220 / 0.5), ' +
 				'0 4px 10px -2px oklch(0.05 0.01 220 / 0.36)',
-			recessed: 'inset 0 1px 3px oklch(0.05 0.01 220 / 0.45)',
+			inset: 'inset 0 1px 3px oklch(0.05 0.01 220 / 0.45)',
 			resting:
 				'inset 0 1px 0 rgb(255 255 255 / 0.07), 0 1px 2px oklch(0.05 0.01 220 / 0.45), ' +
 				'0 2px 5px -1px oklch(0.05 0.01 220 / 0.3)',
@@ -54,7 +54,7 @@ export const theme: ThemeInput = {
 			raised:
 				'inset 0 1px 0 rgb(255 255 255 / 0.28), 0 2px 4px oklch(0.3 0.03 220 / 0.16), ' +
 				'0 4px 10px -2px oklch(0.3 0.03 220 / 0.14)',
-			recessed: 'inset 0 1px 3px oklch(0.3 0.03 220 / 0.18)',
+			inset: 'inset 0 1px 3px oklch(0.3 0.03 220 / 0.18)',
 			resting:
 				'inset 0 1px 0 rgb(255 255 255 / 0.2), 0 1px 2px oklch(0.3 0.03 220 / 0.18), ' +
 				'0 2px 5px -1px oklch(0.3 0.03 220 / 0.1)',

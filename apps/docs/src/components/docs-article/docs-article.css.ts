@@ -128,7 +128,7 @@ export const tocBarPanel = style({
 		components: {
 			backgroundColor: vars.color.surface.raised,
 			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
-			boxShadow: vars.depth.floating,
+			boxShadow: vars.shadow.floating,
 			insetBlockStart: '100%',
 			insetInline: 0,
 			maxBlockSize: `min(24rem, calc(100dvh - ${SITE_HEADER_BLOCK_SIZE} - ${TOC_BAR_BLOCK_SIZE}))`,

@@ -195,8 +195,8 @@ describe('authored theme validation', () => {
 			{ color: { surface: { raised: '#fff' } } },
 			'must be a light/dark object',
 		],
-		['depth', { depth: [] }, 'must be an object'],
-		['depth.dark', { depth: { dark: 'none' } }, 'must be an object'],
+		['shadow', { shadow: [] }, 'must be an object'],
+		['shadow.dark', { shadow: { dark: 'none' } }, 'must be an object'],
 		['controlFinish', { controlFinish: false }, 'must be an object'],
 		['controlFinish.light', { controlFinish: { light: null } }, 'must be an object'],
 		['radius', { radius: 4 }, 'must be an object'],
@@ -240,7 +240,7 @@ describe('authored theme validation', () => {
 		],
 		['color.info', { color: { info: 'oklch(0.5 -0.1 200)' } }, 'cannot parse colour'],
 		['color.backdrop', { color: { backdrop: 'none{' } }, 'CSS colour value without'],
-		['depth.light.resting', { depth: { light: { resting: '' } } }, 'non-empty CSS box-shadow'],
+		['shadow.light.resting', { shadow: { light: { resting: '' } } }, 'non-empty CSS box-shadow'],
 		[
 			'controlFinish.dark.recessed',
 			{ controlFinish: { dark: { recessed: 42 } } },
@@ -285,7 +285,7 @@ describe('authored theme validation', () => {
 		const css = defineTheme({
 			...base,
 			color: { ...base.color, backdrop: 'rgb(0 0 0 / 20%)' },
-			depth: { light: { resting: 'none' } },
+			shadow: { light: { resting: 'none' } },
 			controlFinish: { dark: { raised: 'linear-gradient(red, blue)' } },
 			radius: { detail: 0 },
 		});

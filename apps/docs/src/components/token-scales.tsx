@@ -11,7 +11,7 @@ import { TokenGroup, TokenList, TokenPanel, TokenRow } from './token-reference-p
 const { scales } = tokenSections;
 
 const RADIUS_SAMPLE_SIZE = '4.5rem';
-const DEPTH_FINISH_SAMPLE_SIZE = '5rem';
+const SHADOW_FINISH_SAMPLE_SIZE = '5rem';
 
 /** The space scale, each step as a bar at its true width. */
 export function SpaceTokens() {
@@ -77,14 +77,14 @@ export function RadiusTokens() {
 }
 
 /**
- * The depth ladder, each shadow on a card over a subdued surface, then the control finishes, each
+ * The shadow ladder, each shadow on a card over a subdued surface, then the control finishes, each
  * on a solid fill the size of a control.
  */
-export function DepthAndFinishTokens() {
+export function ShadowAndFinishTokens() {
 	return (
-		<TokenPanel sampleInlineSize={DEPTH_FINISH_SAMPLE_SIZE}>
-			<TokenGroup label="Depth">
-				{scales.depth.tokens.map((token) => (
+		<TokenPanel sampleInlineSize={SHADOW_FINISH_SAMPLE_SIZE}>
+			<TokenGroup label="Shadow">
+				{scales.shadow.tokens.map((token) => (
 					<TokenRow
 						key={token.path}
 						sample={
@@ -94,7 +94,7 @@ export function DepthAndFinishTokens() {
 								blockSize="4rem"
 								borderRadius="detail"
 								display="flex"
-								inlineSize={DEPTH_FINISH_SAMPLE_SIZE}
+								inlineSize={SHADOW_FINISH_SAMPLE_SIZE}
 								justifyContent="center"
 								padding="space.8"
 							>
@@ -107,7 +107,7 @@ export function DepthAndFinishTokens() {
 								/>
 							</Box>
 						}
-						sampleInlineSize={DEPTH_FINISH_SAMPLE_SIZE}
+						sampleInlineSize={SHADOW_FINISH_SAMPLE_SIZE}
 						token={token}
 					/>
 				))}
@@ -121,11 +121,11 @@ export function DepthAndFinishTokens() {
 								backgroundColor="neutral.solid"
 								blockSize={vars.controlSize.px40}
 								borderRadius="control"
-								inlineSize={DEPTH_FINISH_SAMPLE_SIZE}
+								inlineSize={SHADOW_FINISH_SAMPLE_SIZE}
 								style={{ backgroundImage: `var(${token.variable})` }}
 							/>
 						}
-						sampleInlineSize={DEPTH_FINISH_SAMPLE_SIZE}
+						sampleInlineSize={SHADOW_FINISH_SAMPLE_SIZE}
 						token={token}
 					/>
 				))}

@@ -38,9 +38,9 @@ export function validateFoundation(foundation: ThemeFoundation): void {
 		if (isUnsafeCssValue(modeFoundation.color.backdrop)) {
 			issues.push(`${mode}.color.backdrop: must be a non-empty CSS colour value`);
 		}
-		for (const [name, value] of Object.entries(modeFoundation.depth)) {
+		for (const [name, value] of Object.entries(modeFoundation.shadow)) {
 			if (isUnsafeCssValue(value)) {
-				issues.push(`${mode}.depth.${name}: must be a non-empty CSS box-shadow value`);
+				issues.push(`${mode}.shadow.${name}: must be a non-empty CSS box-shadow value`);
 			}
 		}
 		for (const [name, value] of Object.entries(modeFoundation.controlFinish)) {

@@ -7,7 +7,7 @@ description:
 
 import { ColorFamily } from '../../../src/components/color-tokens';
 import { MotionTokens } from '../../../src/components/motion-tokens';
-import { DepthAndFinishTokens } from '../../../src/components/token-scales';
+import { ShadowAndFinishTokens } from '../../../src/components/token-scales';
 import { InteractionTokens } from '../../../src/components/token-scales';
 import { RadiusTokens } from '../../../src/components/token-scales';
 import { SizingTokens } from '../../../src/components/token-scales';
@@ -76,16 +76,16 @@ input or `surface` for a card.
 
 <RadiusTokens />
 
-## Depth and finish
+## Shadow and finish
 
-Depth places a surface above or within the interface. Elevated inline content, menus, and dialogs
-use `surface.raised`. A menu adds `depth.floating`, and a dialog adds `depth.overlay`. A control
+Shadow places a surface above or within the interface. Elevated inline content, menus, and dialogs
+use `surface.raised`. A menu adds `shadow.floating`, and a dialog adds `shadow.overlay`. A control
 finish is the face of a solid control fill, such as a solid button.
 
-Luke UI components already apply depth and finish for their own states. Use these tokens only for
+Luke UI components already apply shadow and finish for their own states. Use these tokens only for
 custom surfaces you own.
 
-<DepthAndFinishTokens />
+<ShadowAndFinishTokens />
 
 ## Sizing
 

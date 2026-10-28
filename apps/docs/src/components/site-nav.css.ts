@@ -164,7 +164,7 @@ export const appearancePopover = style({
 					backgroundColor: vars.color.surface.raised,
 					border: `1px solid ${vars.color.border.decorative}`,
 					borderRadius: vars.radius.surface,
-					boxShadow: vars.depth.floating,
+					boxShadow: vars.shadow.floating,
 					maxInlineSize: 'calc(100vw - 2rem)',
 					padding: vars.space['8'],
 					translate: 'none',

@@ -77,9 +77,9 @@ demonstrably align with. Component-specific geometry is a private TypeScript con
 token-backed values derive from `vars`, so removing a token removes its `Box` value. The decision
 record is [research/716-token-contract.md](../research/716-token-contract.md).
 
-Author `depth.*` and `controlFinish.*` per mode as final CSS values. Components pick semantic
+Author `shadow.*` and `controlFinish.*` per mode as final CSS values. Components pick semantic
 tokens. They do not branch on theme identity. A component must keep its essential state distinctions
-when every depth and control finish is `none`. The `flat` test appearance checks that.
+when every shadow and control finish is `none`. The `flat` test appearance checks that.
 
 Tactile and Paper live in `packages/@luke-ui/theme-tactile` and `packages/@luke-ui/theme-paper`.
 Each build compiles its built `./input` into `dist/stylesheet.css`. React's visual suite compiles
@@ -336,9 +336,9 @@ const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSel
 selectors stay in the owning recipe. The field model is the same in every field control: hover mixes
 `border.control` toward `text.primary` and never applies while read-only or disabled. Focus adds the
 ring and leaves the border alone. Invalid comes last, so its danger border survives hover, focus,
-and read-only. Read-only keeps the base surface and `border.control` and drops the inset depth. Pass
-`extraStates` when an element carries a state in a form the defaults do not cover, such as a bare
-`<input>` that is itself `:read-only`.
+and read-only. Read-only keeps the base surface and `border.control` and drops the inset shadow.
+Pass `extraStates` when an element carries a state in a form the defaults do not cover, such as a
+bare `<input>` that is itself `:read-only`.
 
 Do not widen a state with `:has()` when the group already exposes data attributes such as
 `data-disabled` and `data-invalid`. Probing descendants cannot tell a disabled control from one that

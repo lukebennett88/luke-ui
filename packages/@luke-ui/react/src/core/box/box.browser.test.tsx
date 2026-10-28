@@ -439,7 +439,7 @@ test('layout', { tags: ['visual'] }, async () => {
 				style={{
 					backgroundColor: vars.color.surface.subdued,
 					borderRadius: vars.radius.surface,
-					boxShadow: vars.depth.recessed,
+					boxShadow: vars.shadow.inset,
 					color: vars.color.text.primary,
 				}}
 			>

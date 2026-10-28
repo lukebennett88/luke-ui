@@ -91,7 +91,7 @@ export const previewGripState = style({
 	'@layer': {
 		components: {
 			borderColor: vars.color.border.decorative,
-			boxShadow: vars.depth.resting,
+			boxShadow: vars.shadow.resting,
 			color: vars.color.text.secondary,
 			pointerEvents: 'none',
 			transform: 'translate(-50%, -50%)',

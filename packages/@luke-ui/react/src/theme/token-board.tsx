@@ -1,6 +1,6 @@
 /**
  * Renders every contract leaf as a labelled sample, grouped by the contract's own tree shape,
- * including the top-level family it belongs to (`color`, `depth`, `font`, and so on). Driven
+ * including the top-level family it belongs to (`color`, `shadow`, `font`, and so on). Driven
  * entirely by `flattenThemeContract()`: add, rename, or remove a leaf in `contract.ts` and this
  * board follows automatically, so token coverage cannot silently drift out of sync with the
  * contract (theme-v2 #249, generalised past colour in #257). Read-only and diagnostic — it
@@ -266,7 +266,7 @@ function ColorPreview({ path, varName }: LeafPreviewProps) {
 	);
 }
 
-function DepthPreview({ path, varName }: LeafPreviewProps) {
+function ShadowPreview({ path, varName }: LeafPreviewProps) {
 	return (
 		<span
 			aria-label={`${path} sample`}
@@ -475,7 +475,7 @@ function FontPreview({ path, segments, varName }: LeafPreviewProps) {
 }
 
 /**
- * Previews a plain colour swatch cannot express — motion, spacing, radius, depth, and control-finish
+ * Previews a plain colour swatch cannot express — motion, spacing, radius, shadow, and control-finish
  * tokens each need a family-specific visual — keyed by the contract's own top-level family names.
  * Typed as `Record<Family, …>` rather than `Partial`, so a new top-level family added to
  * `contract.ts` is a type error here until this board grows a renderer for it too.
@@ -484,7 +484,7 @@ const familyPreviews: Record<Family, PreviewRenderer> = {
 	color: ColorPreview,
 	controlFinish: FinishPreview,
 	controlSize: SizePreview,
-	depth: DepthPreview,
+	shadow: ShadowPreview,
 	font: FontPreview,
 	interaction: InteractionPreview,
 	motion: MotionPreview,

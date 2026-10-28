@@ -47,7 +47,7 @@ const selectConfig = {
 			borderRadius: vars.radius.control,
 			borderStyle: 'solid',
 			borderWidth: '1px',
-			boxShadow: vars.depth.recessed,
+			boxShadow: vars.shadow.inset,
 			display: 'inline-flex',
 			fontFamily: vars.font.family.body,
 			gap: vars.space['8'],

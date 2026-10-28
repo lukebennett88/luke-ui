@@ -55,14 +55,14 @@ export interface ThemeFoundation {
 	};
 }
 
-/** The per-mode authored inputs: source colours, control finish, and depth treatments. */
+/** The per-mode authored inputs: source colours, control finish, and shadow treatments. */
 export interface ThemeModeFoundation {
 	/** Source colours the semantic colour contract is generated from. */
 	color: ThemeSourceColors;
 	/** Final `background-image` values for the face of a solid control fill. */
 	controlFinish: ControlFinishFoundation;
-	/** Final composite `box-shadow` values for the semantic depth ladder. */
-	depth: ThemeDepthFoundation;
+	/** Final composite `box-shadow` values for the semantic shadow ladder. */
+	shadow: ThemeShadowFoundation;
 }
 
 /** Authored control face lighting for one colour mode. */
@@ -137,7 +137,7 @@ export const SOURCE_COLOR_FIELDS = [
 ] as const;
 
 /** Authored composite `box-shadow` values for one colour mode. */
-interface ThemeDepthFoundation {
+interface ThemeShadowFoundation {
 	/** Treatment for a floating surface such as a menu. */
 	floating: string;
 	/** Treatment for a high-elevation surface such as a dialog. */
@@ -145,7 +145,7 @@ interface ThemeDepthFoundation {
 	/** Treatment for a hovered control or elevated surface. */
 	raised: string;
 	/** Inset treatment for a pressed control or sunken surface. */
-	recessed: string;
+	inset: string;
 	/** Resting treatment for an interactive control or surface. */
 	resting: string;
 }

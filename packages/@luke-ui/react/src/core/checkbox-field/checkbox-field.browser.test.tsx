@@ -458,7 +458,7 @@ for (const isSelected of [false, true]) {
 }
 
 // Regression: hover and pressed must look different from each other, and from rest, by colour
-// alone. The flat fixture has no depth or control finish to tell them apart.
+// alone. The flat fixture has no shadow or control finish to tell them apart.
 test('rest, hover, and pressed stay distinct without materials', { tags: ['visual'] }, async () => {
 	for (const appearance of flatAppearances) {
 		const { locator } = render(

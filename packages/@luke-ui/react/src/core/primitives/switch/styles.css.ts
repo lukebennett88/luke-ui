@@ -88,7 +88,7 @@ const switchConfig = {
 			borderRadius: vars.radius.full,
 			borderStyle: 'solid',
 			borderWidth: trackBorderWidth,
-			boxShadow: vars.depth.recessed,
+			boxShadow: vars.shadow.inset,
 			boxSizing: 'border-box',
 			display: 'inline-flex',
 			flexShrink: 0,
@@ -177,7 +177,7 @@ const switchConfig = {
 			// `border.control` track at 3:1, and each `onSolid` thumb on its solid track at 4.5:1.
 			backgroundColor: vars.color.surface.base,
 			blockSize: thumbSize,
-			boxShadow: vars.depth.resting,
+			boxShadow: vars.shadow.resting,
 			borderRadius: vars.radius.full,
 			display: 'inline-flex',
 			flexShrink: 0,

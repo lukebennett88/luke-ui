@@ -119,7 +119,7 @@ const dynamicProperties = {
 	borderRadius: vars.radius,
 	borderStyle: { none: 'none', solid: 'solid', dashed: 'dashed', dotted: 'dotted' },
 	borderWidth: borderWidthScale,
-	boxShadow: vars.depth,
+	boxShadow: vars.shadow,
 	columnGap: spaceScale,
 	display: {
 		block: 'block',

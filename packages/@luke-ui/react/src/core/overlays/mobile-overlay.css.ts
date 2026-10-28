@@ -61,7 +61,7 @@ export const mobileModal = style(
 			// Physical on purpose, paired with `top` below. The two preserve an intended over-constraint
 			// that logical block insets would resolve from the wrong edge on a content-box element.
 			bottom: '-100vh',
-			boxShadow: vars.depth.floating,
+			boxShadow: vars.shadow.floating,
 			boxSizing: 'content-box',
 			display: 'flex',
 			flexDirection: 'column',
