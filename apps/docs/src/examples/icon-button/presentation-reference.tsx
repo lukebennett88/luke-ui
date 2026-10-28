@@ -13,14 +13,14 @@ export default () => {
 			<ComparisonItem label="Neutral · High">
 				<IconButton aria-label="Add" icon="add" prominence="high" tone="neutral" />
 			</ComparisonItem>
-			<ComparisonItem label="Critical · Low">
-				<IconButton aria-label="Delete" icon="delete" prominence="low" tone="critical" />
+			<ComparisonItem label="Danger · Low">
+				<IconButton aria-label="Delete" icon="delete" prominence="low" tone="danger" />
 			</ComparisonItem>
-			<ComparisonItem label="Critical · Standard">
-				<IconButton aria-label="Delete" icon="delete" tone="critical" />
+			<ComparisonItem label="Danger · Standard">
+				<IconButton aria-label="Delete" icon="delete" tone="danger" />
 			</ComparisonItem>
-			<ComparisonItem label="Critical · High">
-				<IconButton aria-label="Delete" icon="delete" prominence="high" tone="critical" />
+			<ComparisonItem label="Danger · High">
+				<IconButton aria-label="Delete" icon="delete" prominence="high" tone="danger" />
 			</ComparisonItem>
 		</Comparison>
 	);

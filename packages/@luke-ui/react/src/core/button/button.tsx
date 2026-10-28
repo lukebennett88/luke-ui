@@ -139,11 +139,11 @@ export function Button(props: ButtonProps): JSX.Element {
 
 function getPrimitivePresentationProps(props: ButtonPresentationProps): ButtonPresentationProps {
 	if (props.appearance === 'text') {
-		if (props.tone === 'critical') {
+		if (props.tone === 'danger') {
 			return {
 				appearance: 'text',
 				prominence: props.prominence,
-				tone: 'critical',
+				tone: 'danger',
 			};
 		}
 

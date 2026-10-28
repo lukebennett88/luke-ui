@@ -31,7 +31,7 @@ function IconButtonScene() {
 			<IconButton aria-label="Standard" icon="add" />
 			<IconButton aria-label="Low" icon="add" prominence="low" />
 			<IconButton aria-label="High" icon="add" prominence="high" />
-			<IconButton aria-label="Critical high" icon="delete" tone="critical" prominence="high" />
+			<IconButton aria-label="Critical high" icon="delete" tone="danger" prominence="high" />
 		</Grid>
 	);
 }

@@ -7,11 +7,11 @@ import { contextualForeground } from '../../styles/surface.js';
  * fill's on-solid primary on a solid fill.
  */
 export function textActionAppearance(
-	tone: 'neutral' | 'critical',
+	tone: 'neutral' | 'danger',
 	prominence: 'low' | 'standard' | 'high',
 ) {
 	const role = textActionRole(tone, prominence);
-	// Critical and accent keep the role's pressed hue even though it is barely perceptible: the role
+	// Danger and accent keep the role's pressed hue even though it is barely perceptible: the role
 	// contract has no stronger rung, and `onSolid` is contrast-solved for solid fills.
 	const pressedColor =
 		role === 'neutral' ? contextualForeground('primary') : contextualForeground(role, 'pressed');
@@ -32,7 +32,7 @@ export function textActionAppearance(
  * without colour.
  */
 export function textLinkAppearance(
-	tone: 'neutral' | 'critical',
+	tone: 'neutral' | 'danger',
 	prominence: 'low' | 'standard' | 'high',
 ) {
 	const { hover, pressed, rest } = textActionAppearance(tone, prominence);
@@ -58,8 +58,8 @@ export function textLinkAppearance(
 
 const activeUnderlineThickness = 'max(2px, 0.125em)';
 
-function textActionRole(tone: 'neutral' | 'critical', prominence: 'low' | 'standard' | 'high') {
-	if (tone === 'critical') return 'danger';
+function textActionRole(tone: 'neutral' | 'danger', prominence: 'low' | 'standard' | 'high') {
+	if (tone === 'danger') return 'danger';
 	if (prominence === 'high') return 'accent';
 	return 'neutral';
 }

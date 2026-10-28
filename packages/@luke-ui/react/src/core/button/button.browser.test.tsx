@@ -43,11 +43,11 @@ function ButtonScene() {
 			<Button prominence="low">Neutral low button</Button>
 			<Button>Neutral standard button</Button>
 			<Button prominence="high">Neutral high button</Button>
-			<Button prominence="low" tone="critical">
+			<Button prominence="low" tone="danger">
 				Critical low button
 			</Button>
-			<Button tone="critical">Critical standard button</Button>
-			<Button prominence="high" tone="critical">
+			<Button tone="danger">Critical standard button</Button>
+			<Button prominence="high" tone="danger">
 				Critical high button
 			</Button>
 			<Button appearance="text" prominence="low">
@@ -57,10 +57,10 @@ function ButtonScene() {
 			<Button appearance="text" prominence="high">
 				Neutral high text Button
 			</Button>
-			<Button appearance="text" prominence="low" tone="critical">
+			<Button appearance="text" prominence="low" tone="danger">
 				Critical low text Button
 			</Button>
-			<Button appearance="text" tone="critical">
+			<Button appearance="text" tone="danger">
 				Critical standard text Button
 			</Button>
 			<Button isDisabled>Disabled</Button>
@@ -508,27 +508,27 @@ const buttonFills = [
 	},
 	{
 		fill: (_state: InteractionState) => null,
-		label: 'Critical low',
+		label: 'Danger low',
 		prominence: 'low',
-		tone: 'critical',
+		tone: 'danger',
 	},
 	{
 		fill: (_state: InteractionState) => 'neutral.subtle.rest',
-		label: 'Critical standard',
+		label: 'Danger standard',
 		prominence: 'standard',
-		tone: 'critical',
+		tone: 'danger',
 	},
 	{
 		fill: (state: InteractionState) => `danger.solid.${state}`,
-		label: 'Critical high',
+		label: 'Danger high',
 		prominence: 'high',
-		tone: 'critical',
+		tone: 'danger',
 	},
 ] as const satisfies ReadonlyArray<{
 	fill: (state: InteractionState) => PairedBackground | null;
 	label: string;
 	prominence: 'low' | 'standard' | 'high';
-	tone: 'neutral' | 'critical';
+	tone: 'neutral' | 'danger';
 }>;
 
 for (const appearance of visualAppearances) {
@@ -559,11 +559,11 @@ for (const appearance of visualAppearances) {
 			const expected = INTERACTION_STATES.map((state) => {
 				if (prominence === 'low' && state !== 'rest') {
 					const chipText =
-						tone === 'critical'
+						tone === 'danger'
 							? resolvedColor(vars.color.foreground.danger.rest, button)
 							: resolvedColor(vars.color.text.primary, button);
 					const chip =
-						tone === 'critical'
+						tone === 'danger'
 							? pairedColors(button, 'danger.subtle.rest')
 							: pairedColors(button, 'neutral.subtle.rest');
 					return {
@@ -578,8 +578,8 @@ for (const appearance of visualAppearances) {
 					background === null
 						? { ...pairedColors(parent, 'success.solid'), background: TRANSPARENT }
 						: pairedColors(button, background);
-				// A critical tone reads the context's danger colour instead of its primary.
-				const color = tone === 'critical' ? paired.foreground.danger : paired.color;
+				// A danger tone reads the context's danger colour instead of its primary.
+				const color = tone === 'danger' ? paired.foreground.danger : paired.color;
 				return { state, ...paired, color };
 			});
 
@@ -603,7 +603,7 @@ for (const appearance of visualAppearances) {
 					</Button>
 				</Box>
 				<Box backgroundColor="success.subtle" padding="space.8">
-					<Button appearance="text" prominence="low" tone="critical">
+					<Button appearance="text" prominence="low" tone="danger">
 						On subtle
 					</Button>
 				</Box>
@@ -720,25 +720,38 @@ for (const { prominence, rest, active } of [
 	});
 }
 
-test('a Button on a solid fill takes system colours in forced colours', async () => {
-	await emulateForcedColors('active');
-
-	try {
-		const { locator } = render(
-			<Box backgroundColor="accent.solid" padding="space.8">
-				<Button prominence="high">Save</Button>
-			</Box>,
-		);
-		const button = locator.getByRole('button', { name: 'Save' }).element();
-
-		expect(settledSurfaceColors(button)).toMatchObject({
-			background: resolvedColor('ButtonFace', button),
-			color: resolvedColor('ButtonText', button),
-		});
-	} finally {
-		await emulateForcedColors('none');
-	}
-});
+for (const appearance of visualAppearances) {
+	test(`Buttons on a solid fill take system colours in forced colours in ${appearance.theme} ${appearance.mode}`, async () => {
+		await emulateForcedColors('active');
+		try {
+			const { locator } = render(
+				<Box backgroundColor="accent.solid" padding="space.8">
+					{buttonFills.map(({ label, prominence, tone }) => (
+						<Button key={label} prominence={prominence} tone={tone}>
+							{label}
+						</Button>
+					))}
+					<Button isDisabled prominence="high" tone="danger">
+						Disabled delete
+					</Button>
+				</Box>,
+				{ appearance },
+			);
+			for (const { label } of buttonFills) {
+				const button = locator.getByRole('button', { name: label }).element();
+				expect(settledSurfaceColors(button)).toMatchObject({
+					background: resolvedColor('ButtonFace', button),
+					color: resolvedColor('ButtonText', button),
+				});
+			}
+			const disabled = locator.getByRole('button', { name: 'Disabled delete' }).element();
+			expect(disabled).toBeDisabled();
+			expect(settledSurfaceColors(disabled).color).toBe(resolvedColor('GrayText', disabled));
+		} finally {
+			await emulateForcedColors('none');
+		}
+	});
+}
 
 test('a low Button chip keeps nested contextual text at AA on a solid fill', async () => {
 	const { locator } = render(
@@ -779,8 +792,8 @@ for (const appearance of adaptiveAppearances) {
 					<Box key={surface} backgroundColor={surface} data-testid={surface} padding="space.8">
 						<Button prominence="low">Low on {surface}</Button>
 						<Button>Standard on {surface}</Button>
-						<Button prominence="low" tone="critical">
-							Critical low on {surface}
+						<Button prominence="low" tone="danger">
+							Danger low on {surface}
 						</Button>
 					</Box>
 				))}
@@ -800,7 +813,7 @@ for (const appearance of adaptiveAppearances) {
 			const buttons = [
 				region.getByRole('button', { name: `Low on ${surface}` }).element(),
 				region.getByRole('button', { name: `Standard on ${surface}` }).element(),
-				region.getByRole('button', { name: `Critical low on ${surface}` }).element(),
+				region.getByRole('button', { name: `Danger low on ${surface}` }).element(),
 			];
 			for (const state of INTERACTION_STATES) {
 				for (const button of buttons) {
@@ -843,8 +856,8 @@ for (const appearance of adaptiveAppearances) {
 				{solidRoles.map((role) => (
 					<Box key={role} backgroundColor={`${role}.solid`} data-testid={role} padding="space.8">
 						<Button prominence="low">Neutral low in {role}</Button>
-						<Button prominence="low" tone="critical">
-							Critical low in {role}
+						<Button prominence="low" tone="danger">
+							Danger low in {role}
 						</Button>
 					</Box>
 				))}
@@ -860,7 +873,7 @@ for (const appearance of adaptiveAppearances) {
 		}> = [];
 		for (const role of solidRoles) {
 			const region = locator.getByTestId(role);
-			for (const tone of ['Neutral', 'Critical'] as const) {
+			for (const tone of ['Neutral', 'Danger'] as const) {
 				const button = region.getByRole('button', { name: `${tone} low in ${role}` }).element();
 				assert(button instanceof HTMLElement);
 				for (const state of INTERACTION_STATES) {
@@ -1004,11 +1017,11 @@ test('kitchen sink on overlay', { tags: ['visual'] }, async () => {
 					<Button prominence="low">Cancel</Button>
 					<Button>Standard</Button>
 					<Button prominence="high">Save</Button>
-					<Button prominence="low" tone="critical">
+					<Button prominence="low" tone="danger">
 						Delete
 					</Button>
-					<Button tone="critical">Critical standard</Button>
-					<Button prominence="high" tone="critical">
+					<Button tone="danger">Critical standard</Button>
+					<Button prominence="high" tone="danger">
 						Critical high
 					</Button>
 				</Grid>

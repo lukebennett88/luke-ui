@@ -17,6 +17,9 @@ test('IconButton supports ref and rejects unsupported props', () => {
 	});
 	// @ts-expect-error — accent is not a consumer-selectable tone
 	assertType<IconButtonProps>({ 'aria-label': 'Add', icon: 'add', tone: 'accent' });
+	assertType<IconButtonProps>({ 'aria-label': 'Delete', icon: 'delete', tone: 'danger' });
+	// @ts-expect-error — destructive actions use danger
+	assertType<IconButtonProps>({ 'aria-label': 'Delete', icon: 'delete', tone: 'critical' });
 	// @ts-expect-error — an icon-only button requires an accessible name
 	assertType<IconButtonProps>({ icon: 'add' });
 	assertType<IconButtonProps>({

@@ -18,16 +18,16 @@ export default () => {
 					<ComparisonItem label="Neutral · High">
 						<Button prominence="high">Button</Button>
 					</ComparisonItem>
-					<ComparisonItem label="Critical · Low">
-						<Button prominence="low" tone="critical">
+					<ComparisonItem label="Danger · Low">
+						<Button prominence="low" tone="danger">
 							Button
 						</Button>
 					</ComparisonItem>
-					<ComparisonItem label="Critical · Standard">
-						<Button tone="critical">Button</Button>
+					<ComparisonItem label="Danger · Standard">
+						<Button tone="danger">Button</Button>
 					</ComparisonItem>
-					<ComparisonItem label="Critical · High">
-						<Button prominence="high" tone="critical">
+					<ComparisonItem label="Danger · High">
+						<Button prominence="high" tone="danger">
 							Button
 						</Button>
 					</ComparisonItem>
@@ -49,13 +49,13 @@ export default () => {
 							Button
 						</Button>
 					</ComparisonItem>
-					<ComparisonItem label="Critical · Low">
-						<Button appearance="text" prominence="low" tone="critical">
+					<ComparisonItem label="Danger · Low">
+						<Button appearance="text" prominence="low" tone="danger">
 							Button
 						</Button>
 					</ComparisonItem>
-					<ComparisonItem label="Critical · Standard">
-						<Button appearance="text" tone="critical">
+					<ComparisonItem label="Danger · Standard">
+						<Button appearance="text" tone="danger">
 							Button
 						</Button>
 					</ComparisonItem>

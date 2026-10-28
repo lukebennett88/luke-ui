@@ -5,13 +5,13 @@ import { captureVisualAppearance, Grid } from '../test-utils/visual.js';
 
 for (const appearance of visualAppearances) {
 	test(
-		`critical high Button interaction states in ${appearance.theme} ${appearance.mode}`,
+		`danger high Button interaction states in ${appearance.theme} ${appearance.mode}`,
 		{ tags: ['visual'] },
 		async () => {
 			const { locator } = render(
 				<Grid columns={3}>
 					{['Rest', 'Hover', 'Pressed'].map((state) => (
-						<Button key={state} prominence="high" tone="critical">
+						<Button key={state} prominence="high" tone="danger">
 							{state}
 						</Button>
 					))}
