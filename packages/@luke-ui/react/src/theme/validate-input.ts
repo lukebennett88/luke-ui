@@ -1,7 +1,7 @@
-/** Validates authored theme fields before an `extends` chain is merged. */
+/** Validates authored theme fields before compilation. */
 
 import { parseColor } from './color.js';
-import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
+import type { ThemeInput } from './define-theme.js';
 import { SOURCE_COLOR_FIELDS, SURFACE_ROLES } from './foundation.js';
 import { getThemeClassName } from './theme-class-name.js';
 import { fontWeightRoles } from './type-styles.js';
@@ -18,11 +18,10 @@ interface ThemeValidationIssue {
 }
 
 /**
- * Thrown by `defineTheme` when a theme input, or an input it extends, is invalid. It reports every
- * issue in the chain at once, one per message line.
+ * Thrown by `defineTheme` when a theme input is invalid. Reports every issue at once.
  */
 export class ThemeValidationError extends Error {
-	/** Every issue found, in chain order from the outermost input. */
+	/** Every issue found in the input. */
 	readonly issues: ReadonlyArray<ThemeValidationIssue>;
 
 	constructor(issues: ReadonlyArray<ThemeValidationIssue>) {
@@ -37,44 +36,8 @@ export class ThemeValidationError extends Error {
 	}
 }
 
-/**
- * Checks authored fields and the required body font and accent across the chain.
- */
-export function validateThemeChain(
-	inputs: ReadonlyArray<ThemeInput | ExtendingThemeInput>,
-): Array<ThemeValidationIssue> {
-	const issues = inputs.flatMap(validateThemeInput);
-	const [outermost] = inputs;
-	if (outermost !== undefined && !inputs.some(setsBodyFont)) {
-		issues.push({
-			message: 'is required. Set it on this theme or on a theme it extends.',
-			path: 'typography.fonts.body',
-			theme: String(outermost.name),
-		});
-	}
-	if (outermost !== undefined && !inputs.some(setsAccent)) {
-		issues.push({
-			message: 'is required. Set it on this theme or on a theme it extends.',
-			path: 'color.accent',
-			theme: String(outermost.name),
-		});
-	}
-	return issues;
-}
-
-function setsAccent(input: ThemeInput | ExtendingThemeInput): boolean {
-	const color: unknown = input.color;
-	return isRecord(color) && color.accent !== undefined;
-}
-
-/** Whether an input sets a body font, whatever its shape. `validateThemeInput` reports the shape. */
-function setsBodyFont(input: ThemeInput | ExtendingThemeInput): boolean {
-	const typography: unknown = input.typography;
-	return isRecord(typography) && isRecord(typography.fonts) && typography.fonts.body !== undefined;
-}
-
-/** Checks the fields one input sets. Returns every issue found, or an empty array. */
-function validateThemeInput(input: ThemeInput | ExtendingThemeInput): Array<ThemeValidationIssue> {
+/** Checks authored fields and required values. */
+export function validateThemeInput(input: ThemeInput): Array<ThemeValidationIssue> {
 	const issues: Array<ThemeValidationIssue> = [];
 	function report(path: string, message: string) {
 		issues.push({ message, path, theme: String(input.name) });
@@ -88,6 +51,18 @@ function validateThemeInput(input: ThemeInput | ExtendingThemeInput): Array<Them
 		} catch (error) {
 			report('name', error instanceof Error ? error.message : String(error));
 		}
+	}
+	const color: unknown = input.color;
+	if (color === undefined || (isRecord(color) && color.accent === undefined))
+		report('color.accent', 'is required');
+	const authoredTypography: unknown = input.typography;
+	if (
+		authoredTypography === undefined ||
+		(isRecord(authoredTypography) &&
+			(authoredTypography.fonts === undefined ||
+				(isRecord(authoredTypography.fonts) && authoredTypography.fonts.body === undefined)))
+	) {
+		report('typography.fonts.body', 'is required');
 	}
 	validateColors(input.color, report);
 	validateMaterials(input.depth, 'depth', 'box-shadow', report);

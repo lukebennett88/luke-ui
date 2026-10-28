@@ -150,7 +150,7 @@ describe.skipIf(themes.length === 0)('the packed theme packages', () => {
 					const problems = findTokenCompatibilityProblems(readFileSync(file, 'utf8'), name);
 					expect({ name, problems }).toEqual({ name, problems: [] });
 				}
-				// The product theme extends Paper and stands alone: it never names Paper's identity.
+				// The product theme is composed from Paper and stands alone: it never names Paper's identity.
 				expect(readFileSync(stylesheets.product!, 'utf8')).not.toContain('luke-ui-theme-paper');
 			});
 

@@ -27,10 +27,10 @@ Set the identity class on `<html>`. It is `luke-ui-theme-paper`, and the root en
 import { themeClassName } from '@luke-ui/theme-paper';
 ```
 
-## Extend
+## Compose
 
-`@luke-ui/theme-paper/input` exports `theme`, the input the stylesheet was compiled from. Set it as
-`extends` on your own input and compile that with `defineTheme` from
+`@luke-ui/theme-paper/input` exports `theme`, the input the stylesheet was compiled from. Compose it
+with ordinary TypeScript and compile the result with `defineTheme` from
 `@luke-ui/react/theme/compiler`. Your compiled stylesheet replaces this package's `stylesheet.css`,
 but it still names Inter, so keep importing `fonts.css`.
 

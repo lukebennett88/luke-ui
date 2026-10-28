@@ -7,7 +7,6 @@
 
 import interMetrics from '@capsizecss/metrics/inter';
 import loraMetrics from '@capsizecss/metrics/lora';
-import playfairDisplayMetrics from '@capsizecss/metrics/playfairDisplay';
 import type { Oklch } from '../color.js';
 import { gamutMapOklch, parseColor } from '../color.js';
 import { normalizeTheme } from '../define-theme.js';
@@ -78,12 +77,6 @@ export const interFont: ThemeFont = {
 export const loraFont: ThemeFont = {
 	family: "'Lora', serif",
 	metrics: loraMetrics,
-};
-
-/** Playfair Display, a third font for whole-object replacement checks. */
-export const playfairFont: ThemeFont = {
-	family: "'Playfair Display', serif",
-	metrics: playfairDisplayMetrics,
 };
 
 /** A complete `typography` section for test inputs that do not exercise fonts. */

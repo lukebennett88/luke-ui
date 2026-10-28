@@ -595,7 +595,6 @@ Entrypoint: **retain**, build time only (Node 24 or later). Added by #715.
 | ---------------------- | -------- | ------------------------------------------------------------------------------- |
 | `defineTheme`          | retain   | Compile an app-authored theme to static CSS with validation.                    |
 | `ThemeInput`           | retain   | Type a fresh theme definition before compiling it.                              |
-| `ExtendingThemeInput`  | retain   | Type a theme that extends another theme's input.                                |
 | `ThemeFont`            | retain   | Type a font role: a family stack and its Capsize metrics.                       |
 | `FontMetrics`          | retain   | Type full Capsize metrics without installing `@capsizecss/core`.                |
 | `ThemeValidationError` | retain   | Catch and report every invalid or missing input field at once.                  |
@@ -1027,9 +1026,9 @@ earlier notes. In summary:
   Nested explicit colour-mode scopes are supported. Nested identities are not.
 - Tactile and Paper are separate packages that use only these public entries.
 
-`ThemeContrastError` exposes failures and optional inheritance on the class instance.
-`ThemeContrastFailure` and `ThemeInheritance` are not named public exports. `ThemeGenerationError`
-exposes role, mode, bestAttempt and partial diagnostics when a family cannot satisfy generation.
+`ThemeContrastError` exposes failures on the class instance. `ThemeContrastFailure` is not a named
+public export. `ThemeGenerationError` exposes role, mode, bestAttempt and partial diagnostics when a
+family cannot satisfy generation.
 
 `rootClassName` applies `luke-ui-theme luke-ui-reset`, a scoped reset plus base typography with no
 theme identity. Retain these concrete class names as the root contract until #717.
@@ -1113,8 +1112,8 @@ export names internally; that does not publish them through the package map.
 | `spaceScale` / `SpaceStep` / `typeStyles` / `TypeStyle`                | private              | No concrete 1.0 consumer use beyond Box/Text internals.                                                                                      |
 | `fontWeightRoles` / `FontWeightRole`                                   | private              | No concrete 1.0 consumer use.                                                                                                                |
 | `deriveConcentricRadius` / `deriveNestedRadius`                        | private              | No public consumer surface; helpers stay package-internal.                                                                                   |
-| `ThemeContrastFailure` / `ThemeInheritance`                            | private              | Readable on ThemeContrastError properties without named exports.                                                                             |
-| `ColorInput` / `ControlFinish` / `DepthLadder`                         | private              | Nested under ThemeInput / defineTheme without named exports. `ExtendingThemeInput` is public on the compiler entry since #715.               |
+| `ThemeContrastFailure`                                                 | private              | Readable on ThemeContrastError properties without named exports.                                                                             |
+| `ColorInput` / `ControlFinish` / `DepthLadder`                         | private              | Nested under ThemeInput / defineTheme without named exports.                                                                                 |
 | `gridRecipe`                                                           | private              | Only establishes Grid's own display treatment; app markup can use display:grid.                                                              |
 | `GridRecipeVariants`                                                   | private              | Follows the private display-only recipe; use GridProps.                                                                                      |
 | `aspectRatioRecipe`                                                    | private              | Depends on direct media-child rules. Use AspectRatio.                                                                                        |

@@ -1,17 +1,18 @@
 import { getThemeClassName } from '@luke-ui/react/theme';
-import type { ExtendingThemeInput } from '@luke-ui/react/theme/compiler';
+import type { ThemeInput } from '@luke-ui/react/theme/compiler';
 import { defineTheme } from '@luke-ui/react/theme/compiler';
 import { paperTheme } from '../../theme/__fixtures__/paper.js';
 import { tactileTheme } from '../../theme/__fixtures__/tactile.js';
 import { flatTheme } from './flat-theme.js';
 
 /** The themes the visual suite renders, keyed by the name screenshot IDs use. */
-const contrastEdgeTheme: ExtendingThemeInput = {
+const contrastEdgeTheme: ThemeInput = {
+	...paperTheme,
 	color: {
+		...paperTheme.color,
 		accent: { light: '#fde68a' },
 		surface: { raised: { dark: 'oklch(0.30 0.01 250)' } },
 	},
-	extends: paperTheme,
 	name: 'contrast-edge-fixture',
 };
 

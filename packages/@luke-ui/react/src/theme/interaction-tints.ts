@@ -68,7 +68,6 @@ export class ThemeInteractionTintError extends Error {
 		targetHoverAlpha: number;
 		targetPressedAlpha: number;
 		limitingMiss: InteractionTintContrastMiss | null;
-		provenance?: ReadonlyArray<string>;
 		reason: string;
 	}) {
 		const message = [
@@ -80,8 +79,7 @@ export class ThemeInteractionTintError extends Error {
 		]
 			.filter((line) => line !== null)
 			.join(' ');
-		const provenance = input.provenance ?? [];
-		super(provenance.length > 0 ? `${message}\n${provenance.join(' ')}` : message);
+		super(message);
 		this.name = 'ThemeInteractionTintError';
 		this.mode = input.mode;
 		this.maxAlpha = input.maxAlpha;

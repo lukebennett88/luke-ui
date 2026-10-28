@@ -95,8 +95,11 @@ describe('solveInteractionTints', () => {
 
 	it('finds a feasible tint pair when proportional scaling would miss the visibility floor', () => {
 		const theme = (lightness: number) => ({
-			color: { surface: { raised: { dark: `oklch(${lightness} 0.01 250)` } } },
-			extends: paperTheme,
+			...paperTheme,
+			color: {
+				...paperTheme.color,
+				surface: { ...paperTheme.color.surface, raised: { dark: `oklch(${lightness} 0.01 250)` } },
+			},
 			name: 'contrast-edge',
 		});
 		expect(() => defineTheme(theme(0.32))).not.toThrow();
