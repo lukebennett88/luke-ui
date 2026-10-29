@@ -21,6 +21,7 @@ The app development commands prepare them automatically.
 | `pnpm check:lint:types`                    | Scoped type-aware lint                                                                                                             |
 | `pnpm check:types`                         | Workspace TypeScript projects                                                                                                      |
 | `pnpm check:cycles` / `pnpm check:unused`  | Repository-wide graph checks                                                                                                       |
+| `pnpm lint:changed`                        | Lint changed JS/TS files with `--deny no-nested-ternary`, including uncommitted and untracked ones                                 |
 | `pnpm dev:docs` / `pnpm dev:reference-app` | App development with workspace changes                                                                                             |
 
 The comprehensive check runs `vp check` once for repository formatting and ordinary lint, then runs
