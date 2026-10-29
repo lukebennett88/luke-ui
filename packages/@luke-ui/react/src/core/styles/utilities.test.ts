@@ -23,7 +23,20 @@ test('exposes the responsive layout and appearance property surface', () => {
 test('resolves borderColor tokens to their theme variables', () => {
 	const { style } = createSprinkles({ borderColor: 'control' });
 
-	expect(Object.values(style ?? {})).toEqual(['var(--luke-color-border-control)']);
+	expect(Object.values(style ?? {})).toEqual(['var(--luke-color-border-control-rest)']);
+});
+
+test('rejects state-specific control borders and the removed string leaf', () => {
+	// @ts-expect-error — borderColor values are state-free, so control.hover is not accepted
+	createSprinkles({ borderColor: 'control.hover' });
+	// @ts-expect-error — borderColor values are state-free, so control.rest is not an alias
+	createSprinkles({ borderColor: 'control.rest' });
+	// @ts-expect-error — borderColor values are state-free, so control.pressed is not accepted
+	createSprinkles({ borderColor: 'control.pressed' });
+	// @ts-expect-error — border.control is a group of state leaves, not a string
+	const removedLeaf: string = vars.color.border.control;
+
+	expect(removedLeaf).toBeDefined();
 });
 
 test('rejects the standalone focus colour as a borderColor', () => {
@@ -75,9 +88,8 @@ test('derives token-backed Box values from the public contract', () => {
 	const cases = [
 		...Object.entries(vars.radius).map(([key, value]) => ['borderRadius', key, value] as const),
 		...Object.entries(vars.shadow).map(([key, value]) => ['boxShadow', key, value] as const),
-		...['control', 'decorative'].map((key) => {
-			return ['borderColor', key, vars.color.border[key as 'control']] as const;
-		}),
+		['borderColor', 'control', vars.color.border.control.rest] as const,
+		['borderColor', 'decorative', vars.color.border.decorative] as const,
 		...SEMANTIC_ROLES.flatMap((role) => {
 			return [['borderColor', `${role}.strong`, vars.color.border[role].strong]] as const;
 		}),

@@ -3,6 +3,7 @@ import type { Oklch } from './color.js';
 import { formatOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
+import type { ControlBorderStates } from './control-border.js';
 import { defaultSourceColors } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import {
@@ -28,9 +29,17 @@ const MODES: ReadonlyArray<ColorMode> = ['light', 'dark'];
 // A stand-in for `control-border.ts`'s `solveControlBorder` output: mapSemanticColors only
 // aliases this through, so any distinct Oklch value proves the passthrough without re-testing
 // the solver itself.
-const CONTROL_BORDER: Record<ColorMode, Oklch> = {
-	dark: parseColor('oklch(0.62 0.006 250)'),
-	light: parseColor('oklch(0.38 0.006 250)'),
+const CONTROL_BORDER: Record<ColorMode, ControlBorderStates> = {
+	dark: {
+		hover: parseColor('oklch(0.7 0.006 250)'),
+		pressed: parseColor('oklch(0.78 0.006 250)'),
+		rest: parseColor('oklch(0.62 0.006 250)'),
+	},
+	light: {
+		hover: parseColor('oklch(0.3 0.006 250)'),
+		pressed: parseColor('oklch(0.22 0.006 250)'),
+		rest: parseColor('oklch(0.38 0.006 250)'),
+	},
 };
 // A stand-in for `semantic-border.ts`'s `solveStrongBorder` output, per role, for the same reason.
 const STRONG_BORDER: Record<ColorMode, Oklch> = {
@@ -117,8 +126,8 @@ describe('mapSemanticColors', () => {
 					formatOklch(families.neutral[FAMILY_RUNG.muted]),
 				);
 
-				// Global text and borders use the neutral family. `border.control` is a solved
-				// contrast boundary, not a scale-step alias, so it aliases the passed-through value.
+				// Global text and borders use the neutral family. `border.control.*` are solved
+				// contrast boundaries, not a scale-step alias, so it aliases the passed-through value.
 				expect(result['color.foreground.primary']).toBe(
 					formatOklch(families.neutral[FAMILY_RUNG.textPrimary]),
 				);
@@ -131,7 +140,9 @@ describe('mapSemanticColors', () => {
 				expect(result['color.border.decorative']).toBe(
 					formatOklch(families.neutral[FAMILY_RUNG.decorative]),
 				);
-				expect(result['color.border.control']).toBe(formatOklch(controlBorder));
+				for (const state of ['rest', 'hover', 'pressed'] as const) {
+					expect(result[`color.border.control.${state}`]).toBe(formatOklch(controlBorder[state]));
+				}
 				expect(result['color.focus']).toBe(formatOklch(FOCUS));
 
 				// The shared contract: identical rest / hover / pressed mapping for every semantic role.

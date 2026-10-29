@@ -63,7 +63,7 @@ export const trigger = style({
 				},
 			},
 			backgroundColor: vars.color.background.surface.base,
-			borderColor: vars.color.border.control,
+			borderColor: vars.color.border.control.rest,
 			// Button draws no border of its own, so the field look sets the width.
 			borderWidth: '1px',
 			boxShadow: vars.shadow.inset,
@@ -80,7 +80,7 @@ export const trigger = style({
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"]), &[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])':
 					{
 						backgroundColor: vars.color.background.surface.base,
-						borderColor: `color-mix(in srgb, ${vars.color.border.control} 80%, ${vars.color.foreground.primary} 20%)`,
+						borderColor: vars.color.border.control.hover,
 						boxShadow: vars.shadow.inset,
 					},
 			},

@@ -113,8 +113,11 @@ export const themeContractTree = {
 		border: {
 			/** A subtle separator. Not contrast-checked. */
 			decorative: null,
-			/** The guaranteed 3:1 boundary of a control against every surface. */
-			control: null,
+			/**
+			 * The guaranteed 3:1 boundary of a control against the three surfaces and every role's subtle
+			 * background, in its resting, hover, and pressed states.
+			 */
+			control: { rest: null, hover: null, pressed: null },
 			// The shared semantic borders. State-free on purpose: the token carries the meaning and the
 			// component decides when to apply it.
 			...perRole(() => ({

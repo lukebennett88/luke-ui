@@ -228,9 +228,15 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 
 	const surfaces = generateSurfaces({ mode, surface: source.surface });
 	const controlBorder = solveControlBorder({
+		backgrounds: [
+			surfaces.base,
+			surfaces.subdued,
+			surfaces.raised,
+			...SEMANTIC_ROLES.map((role) => families[role][FAMILY_RUNG.subtle]),
+		],
+		foreground: families.neutral[FAMILY_RUNG.textPrimary],
 		mode,
 		neutral: families.neutral,
-		surfaces: [surfaces.base, surfaces.subdued, surfaces.raised],
 	});
 	const strongBorders = {} as Record<FamilyRole, Oklch>;
 	for (const role of SEMANTIC_ROLES) {

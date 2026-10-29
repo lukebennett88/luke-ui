@@ -368,7 +368,9 @@ export const retainedTokens: Array<string> = [
 	vars.color.background.surface.base,
 	vars.color.background.surface.subdued,
 	vars.color.background.surface.raised,
-	vars.color.border.control,
+	vars.color.border.control.rest,
+	vars.color.border.control.hover,
+	vars.color.border.control.pressed,
 	vars.color.border.warning.strong,
 	vars.interaction.tint.hover,
 	vars.interaction.tint.pressed,
@@ -471,6 +473,10 @@ export const removedFieldInput: NonNullable<ThemeInput['color']['surface']> = { 
 export const removedControlHoverBorder = vars.color.border.controlHover;
 // @ts-expect-error — hover border treatments are not Box token values
 export const removedBoxControlHoverBorder: BoxProps['borderColor'] = 'controlHover';
+// @ts-expect-error — border.control is a group of state leaves, not a string
+export const removedControlBorderString: string = vars.color.border.control;
+// @ts-expect-error — Box control borders are state-free, so control.hover is not a Box value
+export const removedBoxControlHover: BoxProps['borderColor'] = 'control.hover';
 // @ts-expect-error — focus is a standalone colour, not a border colour
 export const removedBorderFocus = vars.color.border.focus;
 // @ts-expect-error — focus is not a Box border colour

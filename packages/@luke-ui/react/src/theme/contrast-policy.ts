@@ -2,7 +2,7 @@
  * The accessibility policy the theme layer is built to guarantee, declared once. Every module that
  * solves for or validates contrast reads its thresholds from here rather than restating them: the
  * scale generator's on-solid gate (`scale.ts`), the accent pre-conditioner (`define-theme.ts`), and
- * the build-time validation matrix (`contrast-validation.ts`) and `border.control` solver
+ * the build-time validation matrix (`contrast-validation.ts`) and `border.control.*` solver
  * (`control-border.ts`). The lightness grid those searches walk lives in `lightness-candidates.ts`.
  *
  * The one semantic role list lives here too, because it decides both which contract leaves the
@@ -20,14 +20,14 @@ export const TEXT_RATIO = 4.5;
 
 /**
  * The WCAG 2.2 SC 1.4.11 contrast ratio a non-text UI boundary must clear when it is required to
- * identify a component or state (`color.focus` and `border.control`).
+ * identify a component or state (`color.focus` and `border.control.*`).
  */
 export const UI_RATIO = 3;
 
-/** The percentage of `text.primary` mixed into a control border for hover feedback. */
+/** The percentage of `foreground.primary` mixed into a control border for hover feedback. */
 export const CONTROL_BORDER_HOVER_STRENGTH = 0.2;
 
-/** The percentage of `text.primary` mixed into a control border for pressed feedback. */
+/** The percentage of `foreground.primary` mixed into a control border for pressed feedback. */
 export const CONTROL_BORDER_PRESSED_STRENGTH = 0.4;
 
 /**
