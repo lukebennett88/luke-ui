@@ -18,7 +18,7 @@ import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { interactionStateLayer } from '../../styles/state-layer.css.js';
 import { adaptiveStateLayer } from '../../styles/state-layer.js';
-import { contextualFocus, surfaceStyle } from '../../styles/surface.js';
+import { surfaceStyle } from '../../styles/surface.js';
 import {
 	autofilledDisabledInputSelector,
 	autofilledDisabledInputStyle,
@@ -173,7 +173,7 @@ const comboboxConfig = {
 			// with every state. Opening the popover adds no border state of its own.
 			selectors: {
 				[disabled]: { cursor: 'not-allowed', opacity: vars.interaction.disabledOpacity },
-				[inputFocus]: focusRing(contextualFocus()),
+				[inputFocus]: focusRing(),
 				[hover]: { borderColor: vars.color.border.control.hover },
 				// Read-only drops the inset shadow. The hover selector already excludes it.
 				[readOnly]: { boxShadow: 'none' },

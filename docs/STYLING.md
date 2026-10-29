@@ -458,8 +458,8 @@ on-solid colour and everywhere else it keeps the literal focus colour. Container
 the page, colour-mode scopes, and overlay panels, use `containerSurfaceStyle()`, which sets the
 override. A control that paints its own fill uses `surfaceStyle()`, which leaves it alone: the
 control's ring sits next to the container around it, so its own fill must not change the ring
-colour. First-party focus rings call `focusRing(contextualFocus())`, never `vars.color.focus`
-directly, or they will not adapt inside a solid fill.
+colour. `focusRing()` takes no colour and always reads `contextualFocus()`, so a first-party ring
+cannot bypass the context.
 
 Component recipes use the same mechanism. A control pairs its fill in every interaction state, so a
 solid Button keeps its on-solid context from rest to pressed. Low and standard Buttons use the

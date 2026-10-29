@@ -1,7 +1,7 @@
 import { vars } from '../../theme/contract.css.js';
 import { focusRing } from './focus-ring.js';
 import { globalStyleInLayer } from './layered-style.css.js';
-import { containerSurfaceStyle, contextualFocus } from './surface.js';
+import { containerSurfaceStyle } from './surface.js';
 
 // The global stylesheet: every rule here applies to the whole document. Keep it to rules that
 // correct a cross-browser difference or replace a default almost every application overrides,
@@ -62,7 +62,7 @@ globalStyleInLayer('reset', ':where(button, input, select, textarea)', {
 // Only the native pseudo-class: React Aria also sets `data-focus-visible` on wrappers such as
 // labels and groups, so each recipe decides where that attribute draws a ring.
 globalStyleInLayer('reset', ':where(:focus-visible)', {
-	...focusRing(contextualFocus()),
+	...focusRing(),
 
 	'@media': {
 		'(forced-colors: active)': {
