@@ -97,17 +97,6 @@ not help. Silence in this log is not evidence.
 - Problem: Updating suppression comments makes the required lint check report an existing nested
   ternary outside the change's scope.
 
-## Docs type-table watch tests cannot find source modules
-
-- Seen: 2026-10-27 (#928). The same two failures were reported during #827 and reproduce on
-  unchanged `origin/main` at `edbee8e7`. Seen again: 2026-10-27 (#933). The full test run failed
-  both docs watcher cases, which reproduce on the unchanged base `871c5e2` in a separate worktree.
-- Where: `apps/docs/src/lib/remark-watch-type-table-sources.test.ts:444`. `pnpm run test` fails when
-  `server.moduleGraph.getModulesByFile(sourcePath)` returns `undefined` for both watched source
-  cases.
-- Problem: The docs test suite fails on the base revision while checking that Vite recompiles MDX
-  after a type-table source change.
-
 ## Browser tests use DOM selectors for named controls
 
 - Seen: 2026-10-27 (#929). The newly authored `field-surfaces.browser.test.tsx` used
