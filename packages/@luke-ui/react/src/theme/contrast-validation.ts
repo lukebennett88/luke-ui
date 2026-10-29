@@ -47,16 +47,15 @@ type ColorPath = keyof SemanticColorValues;
  * Hard at 4.5:1: primary and secondary text and each role's rest, hover, and pressed foreground
  * against all three surfaces and every role's subtle rest fill. The on-solid colour is gated
  * against its role's solid fills.
- * Hard at 3:1: the focus ring against all three surfaces and every role's subtle fill, `border.control.{rest,hover,pressed}`
+ * Hard at 3:1: the focus ring against all three surfaces and every role's subtle fill. Solid fills
+ * are not a supported focus background. `border.control.{rest,hover,pressed}`
  * against all three surfaces and every role's subtle fill, and every role's `border.<role>.strong`
  * against all three surfaces and that role's subtle fill. Solid fills are solved for on-solid text,
  * independently of their contrast against surfaces.
- * Also hard at 3:1: every role's on-solid against its resting solid, because the focus ring inside a
- * painted solid uses that role's on-solid colour, and accent on-solid against `accent.solid.pressed`.
- * The active dropdown option draws a 2px inset outline in the accent on-solid colour on those fills,
- * so the outline's adjacent colour is the solid, not the list surface. The existing 4.5:1 on-solid
- * text gates already cover the same pairs; these 3:1 checks name the ring and outline contracts
- * explicitly.
+ * Also hard at 3:1: accent on-solid against `accent.solid.rest` and `accent.solid.pressed`.
+ * The active dropdown option draws a 2px inset outline in that on-solid colour on those fills, so
+ * the outline's adjacent colour is the solid, not the list surface. The existing 4.5:1 on-solid
+ * text gates already cover the same pairs; these 3:1 checks name the outline contract explicitly.
  *
  * A `color.focus` failure records whether the colour was authored or the curated default, so the
  * diagnostic can say whether to change the authored value or set `ThemeInput.color.focus`. The
@@ -142,19 +141,13 @@ export function validateContrast(
 			check(`color.border.${role}.strong`, background, UI_RATIO, true);
 		}
 	}
-	// The focus ring inside a painted solid uses that role's on-solid colour, so it must read on the
-	// role's resting solid. The ring against the solid is a separate pair from the 4.5:1 text gate,
-	// and the failure names the role.
-	for (const role of SEMANTIC_ROLES) {
-		check(
-			`color.foreground.${role}.onSolid`,
-			`color.background.${role}.solid.rest`,
-			UI_RATIO,
-			true,
-		);
+	// The active dropdown option's inset outline uses accent on-solid against the solid fill.
+	for (const fill of [
+		'color.background.accent.solid.rest',
+		'color.background.accent.solid.pressed',
+	] as const) {
+		check('color.foreground.accent.onSolid', fill, UI_RATIO, true);
 	}
-	// The active dropdown option's inset outline uses accent on-solid against the pressed solid too.
-	check('color.foreground.accent.onSolid', 'color.background.accent.solid.pressed', UI_RATIO, true);
 
 	return { checks, failures };
 }

@@ -133,7 +133,7 @@ const checkboxConfig = {
 				'[data-disabled="true"] &': {
 					opacity: vars.interaction.disabledOpacity,
 				},
-				'[data-focus-visible="true"] &': focusRing(),
+				'[data-focus-visible="true"] &': focusRing(vars.color.focus),
 				[hovered()]: {
 					...checkboxStateLayer('hover'),
 					borderColor: vars.color.border.control.hover,

@@ -28,11 +28,9 @@ shadow. Text, role foregrounds, `color.border.control.{rest,hover,pressed}`,
 The control borders and `color.focus` also clear every role's subtle background.
 `color.border.decorative` is a separator with no contrast guarantee.
 
-Inside a painted solid, such as `Box backgroundColor="accent.solid"`, a focus ring uses that role's
-`onSolid` colour instead of `color.focus`, because no single focus colour clears both the page and
-every solid. A focus ring in your own component that reads `vars.color.focus` directly does not
-adapt inside a solid fill. Every role's `onSolid` is guaranteed 3:1 against its resting solid.
-Forced colours use `Highlight` everywhere.
+The focus ring always paints `color.focus`. Its 3:1 guarantee covers the three surfaces and the six
+subtle backgrounds only. A focusable control placed directly on a solid fill, such as inside
+`Box backgroundColor="accent.solid"`, may have a ring below 3:1. Forced colours use `Highlight`.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';

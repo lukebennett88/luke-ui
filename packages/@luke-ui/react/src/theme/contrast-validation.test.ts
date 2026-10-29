@@ -355,19 +355,13 @@ describe('contrast validation matrix', () => {
 				});
 			}
 		}
-		// The focus ring inside a solid uses the role's on-solid, so it must read on the resting solid.
-		for (const role of SEMANTIC_ROLES) {
+		for (const state of ['rest', 'pressed']) {
 			hard.push({
-				background: `color.background.${role}.solid.rest`,
-				foreground: `color.foreground.${role}.onSolid`,
+				background: `color.background.accent.solid.${state}`,
+				foreground: 'color.foreground.accent.onSolid',
 				required: UI_RATIO,
 			});
 		}
-		hard.push({
-			background: 'color.background.accent.solid.pressed',
-			foreground: 'color.foreground.accent.onSolid',
-			required: UI_RATIO,
-		});
 		return { advisory, hard };
 	}
 
@@ -596,11 +590,8 @@ describe('on-solid contrast gates', () => {
 				colors[`color.foreground.${role}.onSolid`] = colors[`color.background.${role}.solid.rest`];
 			}
 			const { failures } = validateContrast(mode, colors);
-			// Every role's on-solid is also gated at 3:1 for the focus ring inside a solid, and accent
-			// on-solid against its pressed solid for the dropdown inset outline.
-			expect(failures).toHaveLength(
-				SEMANTIC_ROLES.length * solidStates.length + SEMANTIC_ROLES.length + 1,
-			);
+			// Accent on-solid is also gated at 3:1 for the dropdown inset outline.
+			expect(failures).toHaveLength(SEMANTIC_ROLES.length * solidStates.length + 2);
 			for (const role of SEMANTIC_ROLES) {
 				for (const state of solidStates) {
 					expect(failures).toContainEqual({
@@ -612,22 +603,15 @@ describe('on-solid contrast gates', () => {
 					});
 				}
 			}
-			for (const role of SEMANTIC_ROLES) {
+			for (const state of ['rest', 'pressed'] as const) {
 				expect(failures).toContainEqual({
 					mode,
-					foreground: `color.foreground.${role}.onSolid`,
-					background: `color.background.${role}.solid.rest`,
+					foreground: 'color.foreground.accent.onSolid',
+					background: `color.background.accent.solid.${state}`,
 					ratio: expect.any(Number),
 					required: UI_RATIO,
 				});
 			}
-			expect(failures).toContainEqual({
-				mode,
-				foreground: 'color.foreground.accent.onSolid',
-				background: 'color.background.accent.solid.pressed',
-				ratio: expect.any(Number),
-				required: UI_RATIO,
-			});
 		});
 	}
 });

@@ -9,7 +9,6 @@ import { vars } from '@luke-ui/react/theme';
 import type { ReactNode } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import { renderedPixels } from '../test-utils/autofill.js';
 import { emulateForcedColors } from '../test-utils/emulate-media.js';
 import type { VisualAppearance } from '../test-utils/render.js';
@@ -32,10 +31,7 @@ const supportedBackgrounds = [
 	'danger.subtle',
 ] as const;
 
-// Solid fills are not a gated focus background. They are measured for paint only.
-const solidBackgrounds = SEMANTIC_ROLES.map((role) => `${role}.solid` as const);
-
-type TileBackground = (typeof supportedBackgrounds)[number] | (typeof solidBackgrounds)[number];
+type TileBackground = (typeof supportedBackgrounds)[number];
 
 // Bundled themes plus the two fixtures that stress the gates: the chromatic brief and a pale
 // accent beside a custom raised surface.
@@ -140,13 +136,6 @@ async function tabInto(tile: Element) {
 		await userEvent.tab();
 	}
 	expect(tile.contains(document.activeElement), 'focus reached the tile').toBe(true);
-}
-
-/** The colour a ring paints on `background`: the role's on-solid inside a solid, else the focus colour. */
-function ringToken(background: TileBackground): string {
-	const [group, level] = background.split('.') as [string, string];
-	if (level !== 'solid') return vars.color.focus;
-	return vars.color.foreground[group as (typeof SEMANTIC_ROLES)[number]].onSolid;
 }
 
 /** The sRGB bytes the browser paints for a CSS colour. */
@@ -341,7 +330,7 @@ async function measureTiles(
 		}
 		expect(singleRing(tile), 'the ring survives the state').toBe(ringElement);
 
-		const expected = paintedColor(resolvedColor(ringToken(background), ringElement));
+		const expected = paintedColor(resolvedColor(vars.color.focus, ringElement));
 		// oxlint-disable-next-line no-await-in-loop
 		const probes = await edgeProbes(tile, ringElement);
 		const where = state === undefined ? background : `${background} ${state}`;
@@ -370,204 +359,6 @@ for (const appearance of visualAppearances) {
 				expect(await measureTiles(supportedBackgrounds, ['inner', 'outer'], state)).toEqual([]);
 			});
 		}
-	}
-}
-
-// Inside a painted solid the ring paints that role's on-solid colour, which is gated at 3:1
-// against the role's resting solid. The ring must reach 3:1 against both neighbours. The page
-// around the solid is never next to the ring, because the ring sits inside the solid's box.
-for (const appearance of visualAppearances) {
-	for (const name of [
-		'Button',
-		'selected CheckboxField',
-		'TextInputField',
-		'selected SwitchField',
-	]) {
-		const { control } = controls.find((candidate) => candidate.name === name)!;
-		test(`keeps the ${name} focus ring visible on each solid fill in ${appearance.theme} ${appearance.mode}`, async () => {
-			render(tilesFor(solidBackgrounds, control), { appearance });
-
-			expect(await measureTiles(solidBackgrounds, ['inner', 'outer'])).toEqual([]);
-		});
-	}
-}
-
-// A focusable solid Box draws its own ring against the surface around it, not against its own fill,
-// so it keeps the literal focus colour on the page and takes the outer role's on-solid colour
-// inside another solid. The controls inside it draw theirs against its fill, in its on-solid colour.
-type SolidBoxVariant = 'tabIndex' | 'renderRoot';
-type SemanticRole = (typeof SEMANTIC_ROLES)[number];
-
-function onSolidToken(role: SemanticRole): string {
-	return vars.color.foreground[role].onSolid;
-}
-
-function solidBoxScenes(variant: SolidBoxVariant, nested: boolean) {
-	const innerFor = (role: SemanticRole) => (nested ? 'accent' : role);
-	const box = (role: SemanticRole, children: ReactNode) => {
-		const props = { backgroundColor: `${role}.solid`, padding: 'space.16' } as const;
-		if (variant === 'tabIndex') {
-			return (
-				<Box {...props} aria-label={`${role} box`} role="group" tabIndex={0}>
-					{children}
-				</Box>
-			);
-		}
-		return (
-			<Box
-				{...props}
-				display="inline-block"
-				renderRoot={(domProps) => (
-					<a {...domProps} href="#solid">
-						{`${role} link`}
-					</a>
-				)}
-			/>
-		);
-	};
-	return (
-		<Box display="grid" gap="space.16">
-			{SEMANTIC_ROLES.map((role) => (
-				<Box aria-label={`${role} scene`} key={role} padding="space.16" role="group">
-					{nested ? (
-						<Box backgroundColor={`${role}.solid`} padding="space.16">
-							{box(innerFor(role), <Button>Inside</Button>)}
-						</Box>
-					) : (
-						box(role, <Button>Inside</Button>)
-					)}
-				</Box>
-			))}
-		</Box>
-	);
-}
-
-async function measureSolidBoxes(variant: SolidBoxVariant, nested: boolean) {
-	const failures: Array<string> = [];
-	const scenes = SEMANTIC_ROLES.map((role) => {
-		return page.getByRole('group', { name: `${role} scene` }).element() as HTMLElement;
-	});
-	for (const [index, role] of SEMANTIC_ROLES.entries()) {
-		const scene = scenes[index]!;
-		const stops = [
-			{ label: 'own ring', token: nested ? onSolidToken(role) : vars.color.focus },
-			...(variant === 'tabIndex'
-				? [{ label: 'child ring', token: onSolidToken(nested ? 'accent' : role) }]
-				: []),
-		];
-		for (const stop of stops) {
-			// Each tab stop and screenshot must finish before focus moves on.
-			// oxlint-disable-next-line no-await-in-loop
-			await tabInto(scene);
-			const ringElement = singleRing(scene);
-			const geometry = geometryOf(ringElement);
-			expect([geometry.width, geometry.offset]).toEqual([2, 2]);
-			const expected = paintedColor(resolvedColor(stop.token, ringElement));
-			// oxlint-disable-next-line no-await-in-loop
-			const probes = await edgeProbes(scene, ringElement);
-			checkRing(probes, geometry, expected, ['inner', 'outer'], `${role} ${stop.label}`, failures);
-			// A second tab stop in the same scene moves on from the first.
-			// oxlint-disable-next-line no-await-in-loop
-			if (stop !== stops.at(-1)) await userEvent.tab();
-		}
-	}
-	return failures;
-}
-
-for (const appearance of visualAppearances) {
-	for (const variant of ['tabIndex', 'renderRoot'] as const) {
-		for (const nested of [false, true]) {
-			test(`keeps a focusable ${variant} solid Box and its controls visible ${nested ? 'inside another solid' : 'on the page'} in ${appearance.theme} ${appearance.mode}`, async () => {
-				render(solidBoxScenes(variant, nested), { appearance });
-
-				expect(await measureSolidBoxes(variant, nested)).toEqual([]);
-			});
-		}
-	}
-}
-
-// The Combobox paints its own base-surface fill, so its Clear and Toggle buttons sit on that fill
-// and keep the literal focus colour even when the control itself sits inside a solid.
-for (const appearance of visualAppearances) {
-	test(`keeps the Combobox Clear and Toggle button rings on the base fill inside a solid in ${appearance.theme} ${appearance.mode}`, async () => {
-		render(
-			<Box aria-label="solid scene" backgroundColor="danger.solid" padding="space.16" role="group">
-				<ComboboxField defaultItems={items} defaultValue="light" label="Theme">
-					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-				</ComboboxField>
-			</Box>,
-			{ appearance },
-		);
-		const scene = page.getByRole('group', { name: 'solid scene' }).element() as HTMLElement;
-		const failures: Array<string> = [];
-
-		for (const name of [/^Clear selection/, /^Toggle options/]) {
-			const button = page.getByRole('button', { name }).element() as HTMLElement;
-			// Keyboard modality is already set by Tab, so a programmatic focus shows the ring.
-			// oxlint-disable-next-line no-await-in-loop
-			await userEvent.tab();
-			button.focus();
-			expect(document.activeElement, `${String(name)} has focus`).toBe(button);
-			expect(getComputedStyle(button).outlineColor).toBe(resolvedColor(vars.color.focus, button));
-			const geometry = geometryOf(button);
-			const expected = paintedColor(resolvedColor(vars.color.focus, button));
-			// oxlint-disable-next-line no-await-in-loop
-			const probes = await edgeProbes(scene, button);
-			// The small buttons' rings reach the control's edge, so only the fill inside is a neighbour.
-			checkRing(probes, geometry, expected, ['inner'], String(name), failures);
-		}
-
-		expect(failures).toEqual([]);
-	});
-}
-
-// A responsive fill and its children's ring context must follow one container. A narrow query
-// container inside a wider one resolves the fill against the wider parent, so the ring context
-// has to follow that parent too, not the Box's own width.
-for (const appearance of visualAppearances) {
-	for (const [parentWidth, boxWidth, filled] of [
-		[800, 300, false],
-		[300, 800, true],
-	] as const) {
-		test(`keeps a responsive solid Box's ring context on the fill its parent query resolves, ${parentWidth}px parent and ${boxWidth}px Box, in ${appearance.theme} ${appearance.mode}`, async () => {
-			render(
-				<div style={{ containerType: 'inline-size', inlineSize: parentWidth }}>
-					<Box
-						aria-label="responsive scene"
-						backgroundColor={{ initial: 'danger.solid', bp640: 'surface.base' }}
-						padding="space.16"
-						role="group"
-						style={{ containerType: 'inline-size', inlineSize: boxWidth }}
-					>
-						<Button>Inside</Button>
-					</Box>
-				</div>,
-				{ appearance },
-			);
-			const scene = page.getByRole('group', { name: 'responsive scene' }).element() as HTMLElement;
-			expect(getComputedStyle(scene).backgroundColor).toBe(
-				resolvedColor(
-					filled ? vars.color.background.danger.solid.rest : vars.color.background.surface.base,
-					scene,
-				),
-			);
-
-			await userEvent.tab();
-			const button = page.getByRole('button', { name: 'Inside' }).element() as HTMLElement;
-			expect(document.activeElement).toBe(button);
-			const token = filled ? onSolidToken('danger') : vars.color.focus;
-			expect(getComputedStyle(button).outlineColor).toBe(resolvedColor(token, button));
-			const failures: Array<string> = [];
-			checkRing(
-				await edgeProbes(scene, button),
-				geometryOf(button),
-				paintedColor(resolvedColor(token, button)),
-				['inner', 'outer'],
-				'Inside',
-				failures,
-			);
-			expect(failures).toEqual([]);
-		});
 	}
 }
 
@@ -619,45 +410,6 @@ for (const { control, name } of controls) {
 		expect(style.outlineColor).toBe(resolvedColor('Highlight', ringElement));
 	});
 }
-
-test('paints the ring in the role on-solid inside a solid and in the focus colour inside a nested surface', async () => {
-	render(
-		<Box backgroundColor="danger.solid" padding="space.16">
-			<Button>On solid</Button>
-			<Box backgroundColor="surface.raised" padding="space.16">
-				<Button>On surface</Button>
-			</Box>
-		</Box>,
-	);
-	const onSolid = page.getByRole('button', { name: 'On solid' });
-	const onSurface = page.getByRole('button', { name: 'On surface' });
-
-	await userEvent.tab();
-	await expect.element(onSolid).toHaveFocus();
-	expect(getComputedStyle(onSolid.element()).outlineColor).toBe(
-		resolvedColor(vars.color.foreground.danger.onSolid, onSolid.element()),
-	);
-
-	await userEvent.tab();
-	await expect.element(onSurface).toHaveFocus();
-	expect(getComputedStyle(onSurface.element()).outlineColor).toBe(
-		resolvedColor(vars.color.focus, onSurface.element()),
-	);
-});
-
-test('keeps the system highlight for the ring inside a solid under forced colours', async () => {
-	render(
-		<Box backgroundColor="accent.solid" padding="space.16">
-			<Button>Forced</Button>
-		</Box>,
-	);
-	await emulateForcedColors('active');
-
-	await userEvent.tab();
-
-	const button = page.getByRole('button', { name: 'Forced' }).element();
-	expect(getComputedStyle(button).outlineColor).toBe(resolvedColor('Highlight', button));
-});
 
 test('shows the Button focus ring for keyboard focus and not for a pointer press', async () => {
 	render(

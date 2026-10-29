@@ -30,14 +30,10 @@ const globalRules = [
 		':where(body [data-color-mode="light"], body [data-color-mode="dark"])',
 		'--luke-internal-foreground-primary: initial; --luke-internal-foreground-secondary: initial; --luke-internal-foreground-tone: initial; --luke-internal-solid-state-fill-neutral-hover: initial; --luke-internal-solid-state-fill-neutral-pressed: initial; --luke-internal-solid-state-text-neutral: initial; --luke-internal-solid-state-fill-danger-hover: initial; --luke-internal-solid-state-fill-danger-pressed: initial; --luke-internal-solid-state-text-danger: initial; accent-color: var(--luke-color-background-accent-solid-rest); background-color: var(--luke-color-background-surface-base); color: var(--luke-color-foreground-primary);',
 	],
-	[
-		':where(body [data-color-mode="light"], body [data-color-mode="dark"]) > *',
-		'--luke-internal-focus: initial;',
-	],
 	[':where(button, input, select, textarea)', 'font: inherit; margin: 0px;'],
 	[
 		':where(:focus-visible)',
-		'outline-color: var(--luke-internal-focus, var(--luke-color-focus)); outline-offset: 2px; outline-style: solid; outline-width: 2px;',
+		'outline-color: var(--luke-color-focus); outline-offset: 2px; outline-style: solid; outline-width: 2px;',
 	],
 	['@media (forced-colors: active) :where(:focus-visible)', 'outline-color: highlight;'],
 ];

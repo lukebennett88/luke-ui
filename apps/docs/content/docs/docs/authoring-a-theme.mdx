@@ -202,17 +202,13 @@ At 3:1, against every surface and all six roles' subtle backgrounds:
   default for that mode. To fix a default, set `color.focus`. Luke UI never changes an authored
   focus colour.
 
-At 3:1, for the focus ring inside a painted solid and the active Select or Combobox option's inset
-outline:
+At 3:1, for the active Select or Combobox option's inset outline:
 
-- Each role's `onSolid` against its `solid.rest`. A focus ring inside a solid, such as a button in
-  `Box backgroundColor="warning.solid"`, uses that role's `onSolid` instead of `color.focus`. The
-  failure names the role.
-- `color.foreground.accent.onSolid` against `color.background.accent.solid.pressed`. The active
-  option's outline uses it on the solid fill.
+- `color.foreground.accent.onSolid` against `color.background.accent.solid.rest` and
+  `color.background.accent.solid.pressed`. The same pairs already clear 4.5:1 as on-solid text.
 
-The same pairs already clear 4.5:1 as on-solid text. A focus ring in your own component that reads
-`vars.color.focus` directly does not adapt inside a solid fill.
+The focus ring is not checked against solid fills. A focusable control placed directly on a solid
+fill, such as inside `Box backgroundColor="warning.solid"`, may have a ring below 3:1.
 
 If any pair fails, `defineTheme` throws `ThemeContrastError` instead of returning CSS. Its
 `failures` array names the colour mode, foreground and background tokens with their states, achieved

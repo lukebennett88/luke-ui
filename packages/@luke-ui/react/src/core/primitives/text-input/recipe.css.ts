@@ -70,7 +70,7 @@ export const textInputRecipe = recipe({
 			[input.disabled]: {
 				opacity: vars.interaction.disabledOpacity,
 			},
-			[input.focusWithin]: focusRing(),
+			[input.focusWithin]: focusRing(vars.color.focus),
 			[input.hover]: {
 				borderColor: vars.color.border.control.hover,
 			},
