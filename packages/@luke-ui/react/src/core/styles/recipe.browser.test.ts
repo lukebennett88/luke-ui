@@ -2,10 +2,6 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { fieldRecipe } from '../primitives/field/recipe.css.js';
 import { textInputRecipe } from '../primitives/text-input/recipe.css.js';
 import {
-	compoundSlotsOrderRecipe,
-	compoundSlotsPrecedenceRecipe,
-	compoundSlotsRecipe,
-	conditionalSlotsBaseRecipe,
 	defaultedVariantsRecipe,
 	nestedArrayFixtureClassA,
 	nestedArrayFixtureClassB,
@@ -14,8 +10,7 @@ import {
 	prebuiltClassSinglePartRecipe,
 	prebuiltVariantClass,
 	realVariantsRecipe,
-	slotVariantPrecedenceRecipe,
-	untargetedSlotPrecedenceRecipe,
+	slottedPrecedenceRecipe,
 } from './recipe.fixtures.css.js';
 
 // Field and text input recipes export from their primitive entrypoints.
@@ -32,13 +27,6 @@ function mountProbe(className: string): HTMLDivElement {
 	mounted.push(element);
 	element.className = className;
 	return element;
-}
-
-/** All CSS text currently injected into the document, across every `<style>` tag. */
-function injectedCss(): string {
-	return Array.from(document.querySelectorAll('style'))
-		.map((styleElement) => styleElement.textContent ?? '')
-		.join('\n');
 }
 
 test('base composes a nested class array alongside a style object', () => {
@@ -93,147 +81,35 @@ test('textInputRecipe styles a standalone input and appends a consumer className
 	expect(textInputRecipe({ className: 'mine', size: 'medium' })).toBe(`${medium} mine`);
 });
 
-test('an unconditional compoundSlots entry applies to every listed slot and not to unlisted ones', () => {
-	const recipeSlots = compoundSlotsRecipe({ tone: 'neutral' });
-	const a = mountProbe(recipeSlots.a());
-	const b = mountProbe(recipeSlots.b());
-	const c = mountProbe(recipeSlots.c());
+test('a slot variant overrides its slot base', () => {
+	const base = mountProbe(slottedPrecedenceRecipe().first());
+	const strong = mountProbe(slottedPrecedenceRecipe({ emphasis: 'strong' }).first());
 
-	expect(getComputedStyle(a).color).toBe('rgb(110, 110, 110)');
-	expect(getComputedStyle(b).color).toBe('rgb(100, 100, 100)');
-	expect(getComputedStyle(c).color).toBe('rgb(30, 30, 30)');
+	expect(getComputedStyle(base).color).toBe('rgb(10, 10, 10)');
+	expect(getComputedStyle(strong).color).toBe('rgb(11, 11, 11)');
 });
 
-test('a conditional compoundSlots entry applies only for the matching variant selection', () => {
-	const accentSlots = compoundSlotsRecipe({ tone: 'accent' });
-	const neutralSlots = compoundSlotsRecipe({ tone: 'neutral' });
+test('every slot base is emitted before any slot variant', () => {
+	const plain = slottedPrecedenceRecipe();
+	const strong = slottedPrecedenceRecipe({ emphasis: 'strong' });
 
-	const accentA = mountProbe(accentSlots.a());
-	const neutralA = mountProbe(neutralSlots.a());
-
-	expect(getComputedStyle(accentA).backgroundColor).toBe('rgb(200, 200, 200)');
-	expect(getComputedStyle(neutralA).backgroundColor).not.toBe('rgb(200, 200, 200)');
-});
-
-test('a conditional compoundSlots entry can name a variant group the slot does not otherwise use', () => {
-	const medium = compoundSlotsRecipe({ size: 'medium', tone: 'neutral' });
-	const small = compoundSlotsRecipe({ size: 'small', tone: 'neutral' });
-
-	const mediumB = mountProbe(medium.b());
-	const mediumC = mountProbe(medium.c());
-	const smallB = mountProbe(small.b());
-	const smallC = mountProbe(small.c());
-
-	expect(getComputedStyle(mediumB).fontWeight).toBe('700');
-	expect(getComputedStyle(mediumC).fontWeight).toBe('700');
-	expect(getComputedStyle(smallB).fontWeight).not.toBe('700');
-	expect(getComputedStyle(smallC).fontWeight).not.toBe('700');
-});
-
-test('a compoundSlots style overrides the slot base, and a conditional one overrides the slot variant', () => {
-	const element = mountProbe(compoundSlotsRecipe({ size: 'medium', tone: 'neutral' }).a());
-
-	expect(getComputedStyle(element).color).toBe('rgb(110, 110, 110)');
-	expect(getComputedStyle(element).fontWeight).toBe('700');
-});
-
-test('declaration order between two compoundSlots entries targeting one slot', () => {
-	const element = mountProbe(compoundSlotsRecipe({ tone: 'neutral' }).a());
-
-	expect(getComputedStyle(element).color).toBe('rgb(110, 110, 110)');
-});
-
-test('an unconditional compoundSlots style shared by two slots is emitted only once', () => {
-	const recipeSlots = compoundSlotsRecipe({ tone: 'neutral' });
-
-	const aClassName = recipeSlots.a();
-	const bClassName = recipeSlots.b();
-
-	const declarationOccurrences = (injectedCss().match(/color: rgb\(100, 100, 100\);/g) ?? [])
-		.length;
-	expect(declarationOccurrences).toBe(1);
-
-	const sharedClassName = aClassName
+	// The variant classes are whatever `first` gains from selecting `emphasis: 'strong'`.
+	const firstBase = plain.first().split(' ');
+	const firstVariantClasses = strong
+		.first()
 		.split(' ')
-		.find((name) => bClassName.split(' ').includes(name));
-	expect(sharedClassName).toBeDefined();
-});
+		.filter((name) => !firstBase.includes(name));
+	expect(firstVariantClasses.length).toBeGreaterThan(0);
 
-test('an unconditional compoundSlots entry does not add its shared class to an untargeted slot', () => {
-	const recipeSlots = compoundSlotsRecipe({ tone: 'neutral' });
+	// Compose another slot's base with those classes, so the resolved colour reports which of the two
+	// was emitted last. Emitting slot by slot would let `second`'s base win.
+	const probe = mountProbe([plain.second(), ...firstVariantClasses].join(' '));
 
-	const aClasses = recipeSlots.a().split(' ');
-	const cClasses = recipeSlots.c().split(' ');
-
-	const leaked = aClasses.filter((name) => cClasses.includes(name));
-	expect(leaked).toEqual([]);
-});
-
-test('conditional shared styles override the base without an unconditional entry', () => {
-	const element = mountProbe(conditionalSlotsBaseRecipe({ tone: 'accent' }).root());
-
-	expect(getComputedStyle(element).color).toBe('rgb(2, 2, 2)');
-});
-
-test('variants override unconditional shared styles and conditional shared styles override both', () => {
-	const neutral = mountProbe(
-		compoundSlotsPrecedenceRecipe({ appearance: 'solid', size: 'medium', tone: 'neutral' }).root(),
-	);
-	const accent = mountProbe(
-		compoundSlotsPrecedenceRecipe({ appearance: 'solid', size: 'medium', tone: 'accent' }).root(),
-	);
-
-	expect(getComputedStyle(neutral).fontWeight).toBe('400');
-	expect(getComputedStyle(accent).fontWeight).toBe('500');
-	expect(getComputedStyle(accent).color).toBe('rgb(3, 3, 3)');
-});
-
-test('a slot variant style outranks an unconditional shared style and loses to a conditional one', () => {
-	const neutral = mountProbe(
-		slotVariantPrecedenceRecipe({ emphasis: 'strong', tone: 'neutral' }).root(),
-	);
-	const accent = mountProbe(
-		slotVariantPrecedenceRecipe({ emphasis: 'strong', tone: 'accent' }).root(),
-	);
-
-	expect(getComputedStyle(neutral).color).toBe('rgb(41, 41, 41)');
-	expect(getComputedStyle(accent).color).toBe('rgb(43, 43, 43)');
+	expect(getComputedStyle(probe).color).toBe('rgb(11, 11, 11)');
 });
 
 test('a single-part recipe still composes a pre-built class as a variant style', () => {
 	const className = prebuiltClassSinglePartRecipe({ emphasis: 'strong' });
 
 	expect(className.split(' ')).toContain(prebuiltVariantClass);
-});
-
-test('a slot no compoundSlots entry names keeps the documented precedence', () => {
-	const accent = untargetedSlotPrecedenceRecipe({ emphasis: 'strong', tone: 'accent' });
-	const neutral = untargetedSlotPrecedenceRecipe({ emphasis: 'strong', tone: 'neutral' });
-
-	// The conditional shared class is whatever `targeted` gains from selecting `tone: 'accent'`.
-	const neutralTargeted = neutral.targeted().split(' ');
-	const sharedConditionalClass = accent
-		.targeted()
-		.split(' ')
-		.find((name) => !neutralTargeted.includes(name));
-	expect(sharedConditionalClass).toBeDefined();
-
-	const targeted = mountProbe(accent.targeted());
-	// Compose the untargeted slot's own classes with the conditional shared class, so the resolved
-	// colour reports which of the two was emitted last.
-	const untargeted = mountProbe(`${neutral.untargeted()} ${sharedConditionalClass}`);
-
-	expect(getComputedStyle(targeted).color).toBe('rgb(52, 52, 52)');
-	expect(getComputedStyle(untargeted).color).toBe('rgb(52, 52, 52)');
-});
-
-test('shared styles follow entry order regardless of slot declaration order', () => {
-	const slots = compoundSlotsOrderRecipe({ tone: 'accent' });
-	const first = mountProbe(slots.first());
-	const second = mountProbe(slots.second());
-
-	for (const element of [first, second]) {
-		expect(getComputedStyle(element).fontWeight).toBe('500');
-		expect(getComputedStyle(element).color).toBe('rgb(2, 2, 2)');
-	}
 });

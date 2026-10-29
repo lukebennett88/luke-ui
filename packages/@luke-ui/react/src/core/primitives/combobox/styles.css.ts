@@ -96,6 +96,13 @@ const comboboxActionStyles = {
 	},
 } satisfies StyleRule;
 
+// The trigger and clear button share these dimensions. The medium size gives a 20px icon an 8px
+// inset from the control edge: (28px − 20px) ÷ 2 + the 4px trigger gap.
+const comboboxActionSizes = {
+	medium: { blockSize: COMBOBOX_ACTION_SIZE, inlineSize: COMBOBOX_ACTION_SIZE, paddingInline: 0 },
+	small: { blockSize: MIN_TARGET_SIZE, inlineSize: MIN_TARGET_SIZE, paddingInline: 0 },
+} satisfies Record<string, StyleRule>;
+
 /** Marker class on every combobox and select item, for rules that reach into its content. */
 export const comboboxItemClassName = style({}, 'combobox-item');
 
@@ -125,7 +132,8 @@ globalStyleInLayer(
  * `section`, `sectionHeading`, `emptyState`, `item`, then the tray-only parts.
  *
  * `control` and `listBox` use a `presentation` variant for tray styles. `trayTrigger` and
- * `trayValue` are tray-only slots.
+ * `trayValue` are tray-only slots. `trigger` and `clearButton` share `comboboxActionStyles` and
+ * `comboboxActionSizes`.
  */
 const comboboxConfig = {
 	slots: {
@@ -213,8 +221,12 @@ const comboboxConfig = {
 				},
 			},
 		},
-		trigger: { marginInlineEnd: vars.space['4'], marginInlineStart: vars.space['4'] },
-		clearButton: {},
+		trigger: {
+			marginInlineEnd: vars.space['4'],
+			marginInlineStart: vars.space['4'],
+			...comboboxActionStyles,
+		},
+		clearButton: comboboxActionStyles,
 		itemCheck: {
 			flexShrink: 0,
 			marginInlineStart: 'auto',
@@ -417,6 +429,8 @@ const comboboxConfig = {
 					paddingInlineEnd: vars.space['12'],
 					paddingInlineStart: vars.space['12'],
 				},
+				trigger: comboboxActionSizes.medium,
+				clearButton: comboboxActionSizes.medium,
 				loadMoreItem: {
 					minBlockSize: vars.controlSize.px40,
 					paddingBlock: vars.space['8'],
@@ -446,6 +460,8 @@ const comboboxConfig = {
 					paddingInlineEnd: vars.space['8'],
 					paddingInlineStart: vars.space['8'],
 				},
+				trigger: comboboxActionSizes.small,
+				clearButton: comboboxActionSizes.small,
 				loadMoreItem: {
 					minBlockSize: vars.controlSize.px32,
 					paddingBlock: vars.space['4'],
@@ -465,30 +481,6 @@ const comboboxConfig = {
 			},
 		},
 	},
-	compoundSlots: [
-		// The trigger and clear button share their action styles and sizes.
-		{ slots: ['trigger', 'clearButton'], style: comboboxActionStyles },
-		// The medium action size gives a 20px icon an 8px inset from the control edge:
-		// (28px − 20px) ÷ 2 + the 4px trigger gap.
-		{
-			slots: ['trigger', 'clearButton'],
-			style: {
-				blockSize: COMBOBOX_ACTION_SIZE,
-				inlineSize: COMBOBOX_ACTION_SIZE,
-				paddingInline: 0,
-			},
-			variants: { size: 'medium' },
-		},
-		{
-			slots: ['trigger', 'clearButton'],
-			style: {
-				blockSize: MIN_TARGET_SIZE,
-				inlineSize: MIN_TARGET_SIZE,
-				paddingInline: 0,
-			},
-			variants: { size: 'small' },
-		},
-	],
 } as const satisfies SlottedConfigInput;
 
 /**
