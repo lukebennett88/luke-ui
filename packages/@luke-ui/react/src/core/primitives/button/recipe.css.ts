@@ -20,9 +20,10 @@ import { textRecipe } from '../../text/recipe.css.js';
 import { textActionAppearance, textLinkAppearance } from './text-action-appearance.js';
 
 export const actionElementClassName = style({}, 'action');
+export const expandedButtonClassName = style({}, 'expanded-button');
 
 const enabled = ':not([data-disabled="true"]):not([data-pending="true"])';
-const hovered = `&[data-hovered="true"]${enabled}`;
+const hovered = `&[data-hovered="true"]${enabled}, &.${expandedButtonClassName}[aria-expanded="true"]${enabled}`;
 const pressed = `&[data-pressed="true"]${enabled}`;
 
 const textBase = [
@@ -137,7 +138,7 @@ export const buttonRecipeInternal = recipe({
 				whiteSpace: 'nowrap',
 				// Hover and pressed change colour, shadow, and finish, never position or scale.
 				selectors: {
-					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					[hovered]: {
 						boxShadow: vars.shadow.raised,
 					},
 					'&[data-pending="true"]': {

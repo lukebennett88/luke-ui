@@ -2,10 +2,8 @@ import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import { descendantDisabledSelector } from '../../styles/input-states.js';
-import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
-import { surfaceStyle } from '../../styles/surface.js';
 
 const notDisabled = ':not([data-disabled="true"])';
 const rootInvalid = `[data-invalid="true"] &${notDisabled}`;
@@ -17,8 +15,7 @@ const rootInvalid = `[data-invalid="true"] &${notDisabled}`;
  * `value` (the selected value or placeholder), and `indicator` (the chevron). The listbox, item,
  * and popover surfaces come from the combobox recipe.
  *
- * The trigger draws the same well chrome as `comboboxRecipe`'s `control` slot and
- * `textInputPartsRecipe`'s `control` slot. Change the three together until they share one source.
+ * The trigger uses the standard button appearance; these styles supply Select's layout and states.
  */
 const selectConfig = {
 	slots: {
@@ -28,27 +25,16 @@ const selectConfig = {
 		trigger: {
 			'@media': {
 				'(forced-colors: active)': {
-					backgroundColor: 'Field',
-					borderColor: 'FieldText',
-					boxShadow: 'none',
-					color: 'FieldText',
-					forcedColorAdjust: 'auto',
 					selectors: {
-						'&[data-disabled="true"]': { borderColor: 'GrayText', color: 'GrayText', opacity: 1 },
 						'&[data-focus-visible="true"]': { outlineColor: 'Highlight' },
+						[`${rootInvalid}::after`]: { boxShadow: 'none', outline: '1px solid Mark' },
 					},
 				},
 			},
 			alignItems: 'center',
-			appearance: 'none',
-			...surfaceStyle('surface.base'),
-			borderColor: vars.color.border.control.rest,
-			borderRadius: vars.radius.control,
-			borderStyle: 'solid',
-			borderWidth: '1px',
-			boxShadow: vars.shadow.inset,
 			display: 'inline-flex',
 			fontFamily: vars.font.family.body,
+			fontWeight: vars.font.weight.body,
 			gap: vars.space['8'],
 			inlineSize: '100%',
 			isolation: 'isolate',
@@ -60,27 +46,24 @@ const selectConfig = {
 			// a second one where the two disagree.
 			outline: 'none',
 			paddingBlock: 0,
-			...pressFeedback,
 			textAlign: 'start',
-			transitionDuration: vars.motion.feedback.duration,
-			transitionProperty: 'background-color, border-color, box-shadow, color',
-			transitionTimingFunction: vars.motion.feedback.easing,
 
 			selectors: {
 				'&[data-disabled="true"]': {
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
-				// An open select keeps the hover border while its popover is showing.
-				[`&[data-hovered="true"]${notDisabled}, &[aria-expanded="true"]${notDisabled}`]: {
-					borderColor: vars.color.border.control.hover,
-				},
 				// Focus only adds the ring, so it composes with every state.
 				[`&[data-focus-visible="true"]${notDisabled}`]: focusRing(vars.color.focus),
-				// The field's error message carries the non-colour invalid cue, so the border keeps its
-				// resting width and only takes the danger colour. This comes after the states above so an
-				// invalid select keeps its danger border while hovered, open, or focused.
-				[rootInvalid]: { borderColor: vars.color.border.danger.strong },
+				// FieldError carries the non-colour cue. Keep the ring over every button finish.
+				[`${rootInvalid}::after`]: {
+					borderRadius: 'inherit',
+					boxShadow: `inset 0 0 0 2px ${vars.color.border.danger.strong}`,
+					content: '""',
+					inset: 0,
+					pointerEvents: 'none',
+					position: 'absolute',
+				},
 			},
 		},
 		value: {
@@ -101,8 +84,11 @@ const selectConfig = {
 			color: vars.color.foreground.secondary,
 			display: 'inline-flex',
 			flexShrink: 0,
+			transition: `rotate ${vars.motion.feedback.duration} ${vars.motion.feedback.easing}`,
+			'@media': { '(prefers-reduced-motion: reduce)': { transition: 'none' } },
 
 			selectors: {
+				'&[data-open="true"][data-default="true"]': { rotate: '180deg' },
 				[descendantDisabledSelector]: { color: vars.color.foreground.disabled },
 			},
 		},
