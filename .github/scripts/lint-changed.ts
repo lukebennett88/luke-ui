@@ -6,7 +6,7 @@ function git(...args: Array<string>) {
 	return execFileSync('git', args, { encoding: 'utf8' }).split('\n').filter(Boolean);
 }
 
-const mergeBase = git('merge-base', 'origin/main', 'HEAD')[0];
+const mergeBase = git('merge-base', 'origin/main', 'HEAD').join('');
 const files = new Set([
 	...git('diff', '--name-only', '--diff-filter=d', mergeBase, '--', ...globs),
 	...git('ls-files', '--others', '--exclude-standard', '--', ...globs),
