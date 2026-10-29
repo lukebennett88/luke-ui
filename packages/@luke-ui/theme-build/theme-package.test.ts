@@ -98,10 +98,18 @@ export const themeClassName: string = getThemeClassName(THEME_NAME);
 			'"include": ["*.ts"]',
 			'"include": ["src/**/*.ts", "vite.config.ts"]',
 		),
-		'vite.config.ts': `import { defineConfig } from 'vite-plus';
+		// `build:done` runs after the build has written the exports and run publint, so each line
+		// in `build-done.log` is one finished build.
+		'vite.config.ts': `import { appendFileSync } from 'node:fs';
+import { defineConfig } from 'vite-plus';
 import { themePackage } from './theme-package.js';
 
-export default defineConfig(themePackage);
+export default defineConfig({
+	pack: {
+		...themePackage.pack,
+		hooks: { 'build:done': () => appendFileSync('build-done.log', 'done\\n') },
+	},
+});
 `,
 	};
 	await Promise.all(
@@ -138,6 +146,15 @@ function stylesheetRadius(): string | undefined {
 	}
 }
 
+/** How many builds have finished, including the exports write, since the watcher started. */
+function finishedBuilds(): number {
+	try {
+		return readFileSync(path.join(fixture, 'build-done.log'), 'utf8').split('\n').length - 1;
+	} catch {
+		return 0;
+	}
+}
+
 /** Each wait covers one rebuild, which takes a few seconds even on a slow runner. */
 const REBUILD = { interval: 100, timeout: 60_000 };
 
@@ -150,6 +167,13 @@ test(
 		});
 
 		await expect.poll(stylesheetRadius, { ...REBUILD, message: 'initial build' }).toBe('0.25rem');
+		// `@voidzero-dev/vite-plus-core` 1.4.0 writes the exports and runs publint 100ms after the
+		// first build. An edit before then empties its chunk list, so it writes `package.json`
+		// without the entry exports, which restarts the watcher and drops the edit. Remove this wait
+		// once Vite+ fixes that.
+		await expect
+			.poll(finishedBuilds, { ...REBUILD, message: 'first build to finish' })
+			.toBeGreaterThanOrEqual(1);
 		await expect
 			.poll(
 				() => JSON.parse(readFileSync(path.join(fixture, 'package.json'), 'utf8')).exports,
