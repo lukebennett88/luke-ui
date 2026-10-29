@@ -68,12 +68,18 @@ not open new issues for the parts you leave.
 1. Run tasks through Turbo from the repository root so their generate and build dependencies run.
    Before changing Turbo configuration or commands, read the installed package's bundled `docs/`,
    found with `node -p "require.resolve('turbo/package.json')"`.
-2. When the diff adds or modifies JS/TS files, run
-   `pnpm exec vp lint --deny no-nested-ternary <changed-files>` from the repository root before
-   committing, passing every such file. This enforces
-   [Code style](../../../docs/CONVENTIONS.md#code-style) on the change without requiring unrelated
-   cleanup. Run `pnpm run check` for every change. It covers barrels, format (including root
-   Markdown), lint, types, docs, cycles, and unused code. For formatting failures, use
+2. When the diff adds or modifies JS/TS files, run this from the repository root before committing:
+
+   ```sh
+   { git diff --name-only --diff-filter=d "$(git merge-base origin/main HEAD)" -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs'; git ls-files --others --exclude-standard -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs'; } | xargs -r pnpm exec vp lint --deny no-nested-ternary
+   ```
+
+   It lints every changed file, including staged, unstaged, and new files. It exits non-zero on lint
+   errors and does nothing when no file changed. Pipe the list into `xargs`: a zsh variable passes
+   the paths as one argument, and the lint then reports "No files found to lint" with exit 0. This
+   enforces [Code style](../../../docs/CONVENTIONS.md#code-style) on the change without requiring
+   unrelated cleanup. Run `pnpm run check` for every change. It covers barrels, format (including
+   root Markdown), lint, types, docs, cycles, and unused code. For formatting failures, use
    `pnpm run fix:format` rather than re-wrapping Markdown by hand. Before opening the PR, run
    `pnpm run test` separately; Turbo test tasks are configured not to cache results. Run the
    separate suites in [TESTING.md](../../../docs/TESTING.md) that cover the change, including
@@ -81,6 +87,7 @@ not open new issues for the parts you leave.
    affects generated documentation behaviour, such as props tables or type-definition assets, also
    run `pnpm run build:docs` so the production docs output is checked, including
    `check:type-definition-links`.
+
 3. Before you call a failure unrelated, show that it also happens on the base revision under
    comparable conditions, and note the revision. Rerun only what you need. Existing evidence, such
    as a papercut entry or a failed CI run on the base, can be enough. A failure your change causes
