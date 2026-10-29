@@ -1,5 +1,5 @@
 import { defineProperties, defineSprinkles } from '@luke-ui/rainbow-sprinkles';
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 import type { Properties as CSSProperties } from 'csstype';
 import { typedEntries } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
@@ -9,7 +9,7 @@ import { layers } from './layers.css.js';
 import { responsiveConditions } from './responsive-conditions.js';
 import { spaceTokens } from './space-tokens.js';
 import type { SurfaceBackground } from './surface.js';
-import { containerSurfaceStyle } from './surface.js';
+import { containerFocusContextVars, surfaceStyle } from './surface.js';
 
 // Every token-backed scale below derives from the public `vars` contract, so a token removed from
 // the contract removes its Box value too.
@@ -69,13 +69,19 @@ const backgroundColorValues: Partial<
 > = {};
 for (const [condition, query] of typedEntries(responsiveConditions)) {
 	for (const [token, background] of backgroundColors) {
-		const rule = containerSurfaceStyle(background);
-		const conditionalRule =
-			'@container' in query ? { '@container': { [query['@container']]: rule } } : rule;
+		const rule = surfaceStyle(background);
+		const focusRule = { vars: containerFocusContextVars(background) };
+		const wrap = (styleRule: object) => {
+			return '@container' in query
+				? { '@container': { [query['@container']]: styleRule } }
+				: styleRule;
+		};
 		const className = style(
-			{ '@layer': { [layers.utilities]: conditionalRule } },
+			{ '@layer': { [layers.utilities]: wrap(rule) } },
 			`backgroundColor-${token.replace('.', '-')}-${condition}`,
 		);
+		// The children's ring context sits on the children, so the Box's own ring reads its parent's.
+		globalStyle(`.${className} > *`, { '@layer': { [layers.utilities]: wrap(focusRule) } });
 		const value = (backgroundColorValues[token] ??= { default: className, conditions: {} });
 		value.conditions[condition] = className;
 	}

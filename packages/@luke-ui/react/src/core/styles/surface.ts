@@ -93,20 +93,19 @@ export function contextualFocus(): string {
 }
 
 /**
- * `surfaceStyle` for an element that is a container, such as `Box`, the page, or an overlay panel.
- * It also sets the focus ring context for the controls inside it. A control that paints its own
- * fill uses `surfaceStyle`, so its ring keeps the container's context.
+ * The focus ring context a container hands to its children. Their ring is adjacent to the
+ * container's fill, so inside a solid it paints that role's on-solid colour. Apply it to the
+ * container's children, such as through a `> *` global selector, and never to the container itself,
+ * whose own ring is adjacent to the surface around it. A control that paints its own fill sets none.
  */
-export function containerSurfaceStyle(background: SurfaceBackground): SurfaceStyle {
-	const pairing = surfaceStyle(background);
+export function containerFocusContextVars(background: SurfaceBackground) {
 	const role = SEMANTIC_ROLES.find((candidate) => background.startsWith(`${candidate}.solid`));
-	return {
-		...pairing,
-		vars: {
-			...pairing.vars,
-			[focusOverride]: role === undefined ? 'initial' : vars.color.foreground[role].onSolid,
-		},
-	};
+	return { [focusOverride]: role === undefined ? 'initial' : vars.color.foreground[role].onSolid };
+}
+
+/** Resets the focus ring context for the children of a neutral container. */
+export function neutralFocusContextVars() {
+	return { [focusOverride]: 'initial' };
 }
 
 /**
@@ -148,7 +147,6 @@ export function transparentSurfaceStyle(): SurfaceStyle {
 			[foregroundOverride.primary]: 'inherit',
 			[foregroundOverride.secondary]: 'inherit',
 			[foregroundOverride.tone]: 'inherit',
-			[focusOverride]: 'inherit',
 		},
 	};
 }

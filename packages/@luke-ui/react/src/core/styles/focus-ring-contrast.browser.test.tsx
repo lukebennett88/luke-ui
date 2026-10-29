@@ -392,6 +392,100 @@ for (const appearance of visualAppearances) {
 	}
 }
 
+// A focusable solid Box draws its own ring against the surface around it, not against its own fill,
+// so it keeps the literal focus colour on the page and takes the outer role's on-solid colour
+// inside another solid. The controls inside it draw theirs against its fill, in its on-solid colour.
+type SolidBoxVariant = 'tabIndex' | 'renderRoot';
+type SemanticRole = (typeof SEMANTIC_ROLES)[number];
+
+function onSolidToken(role: SemanticRole): string {
+	return vars.color.foreground[role].onSolid;
+}
+
+function solidBoxScenes(variant: SolidBoxVariant, nested: boolean) {
+	const innerFor = (role: SemanticRole) => (nested ? 'accent' : role);
+	const box = (role: SemanticRole, children: ReactNode) => {
+		const props = { backgroundColor: `${role}.solid`, padding: 'space.16' } as const;
+		if (variant === 'tabIndex') {
+			return (
+				<Box {...props} aria-label={`${role} box`} role="group" tabIndex={0}>
+					{children}
+				</Box>
+			);
+		}
+		return (
+			<Box
+				{...props}
+				display="inline-block"
+				renderRoot={(domProps) => (
+					<a {...domProps} href="#solid">
+						{`${role} link`}
+					</a>
+				)}
+			/>
+		);
+	};
+	return (
+		<Box display="grid" gap="space.16">
+			{SEMANTIC_ROLES.map((role) => (
+				<Box aria-label={`${role} scene`} key={role} padding="space.16" role="group">
+					{nested ? (
+						<Box backgroundColor={`${role}.solid`} padding="space.16">
+							{box(innerFor(role), <Button>Inside</Button>)}
+						</Box>
+					) : (
+						box(role, <Button>Inside</Button>)
+					)}
+				</Box>
+			))}
+		</Box>
+	);
+}
+
+async function measureSolidBoxes(variant: SolidBoxVariant, nested: boolean) {
+	const failures: Array<string> = [];
+	const scenes = SEMANTIC_ROLES.map((role) => {
+		return page.getByRole('group', { name: `${role} scene` }).element() as HTMLElement;
+	});
+	for (const [index, role] of SEMANTIC_ROLES.entries()) {
+		const scene = scenes[index]!;
+		const stops = [
+			{ label: 'own ring', token: nested ? onSolidToken(role) : vars.color.focus },
+			...(variant === 'tabIndex'
+				? [{ label: 'child ring', token: onSolidToken(nested ? 'accent' : role) }]
+				: []),
+		];
+		for (const stop of stops) {
+			// Each tab stop and screenshot must finish before focus moves on.
+			// oxlint-disable-next-line no-await-in-loop
+			await tabInto(scene);
+			const ringElement = singleRing(scene);
+			const geometry = geometryOf(ringElement);
+			expect([geometry.width, geometry.offset]).toEqual([2, 2]);
+			const expected = paintedColor(resolvedColor(stop.token, ringElement));
+			// oxlint-disable-next-line no-await-in-loop
+			const probes = await edgeProbes(scene, ringElement);
+			checkRing(probes, geometry, expected, ['inner', 'outer'], `${role} ${stop.label}`, failures);
+			// A second tab stop in the same scene moves on from the first.
+			// oxlint-disable-next-line no-await-in-loop
+			if (stop !== stops.at(-1)) await userEvent.tab();
+		}
+	}
+	return failures;
+}
+
+for (const appearance of visualAppearances) {
+	for (const variant of ['tabIndex', 'renderRoot'] as const) {
+		for (const nested of [false, true]) {
+			test(`keeps a focusable ${variant} solid Box and its controls visible ${nested ? 'inside another solid' : 'on the page'} in ${appearance.theme} ${appearance.mode}`, async () => {
+				render(solidBoxScenes(variant, nested), { appearance });
+
+				expect(await measureSolidBoxes(variant, nested)).toEqual([]);
+			});
+		}
+	}
+}
+
 // The active option draws a 2px inset outline in the accent on-solid colour on the solid fill.
 // `color.foreground.accent.onSolid` is gated at 3:1 against `accent.solid.rest` and
 // `accent.solid.pressed`, so the outline against that fill is a supported pair. The list surface

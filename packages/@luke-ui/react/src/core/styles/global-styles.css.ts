@@ -1,7 +1,7 @@
 import { vars } from '../../theme/contract.css.js';
 import { focusRing } from './focus-ring.js';
 import { globalStyleInLayer } from './layered-style.css.js';
-import { containerSurfaceStyle } from './surface.js';
+import { neutralFocusContextVars, surfaceStyle } from './surface.js';
 
 // The global stylesheet: every rule here applies to the whole document. Keep it to rules that
 // correct a cross-browser difference or replace a default almost every application overrides,
@@ -30,7 +30,7 @@ globalStyleInLayer('reset', ':where(:root)', {
  */
 const documentColors = {
 	accentColor: vars.color.background.accent.solid.rest,
-	...containerSurfaceStyle('surface.base'),
+	...surfaceStyle('surface.base'),
 };
 
 // `<body>` carries the inherited baseline, so portals rendered into it need nothing extra. Its
@@ -52,6 +52,14 @@ globalStyleInLayer(
 	'reset',
 	":where(body [data-color-mode='light'], body [data-color-mode='dark'])",
 	documentColors,
+);
+
+// A colour-mode scope inside a solid fill hands its controls the neutral focus context again. Each
+// control reads the context from its parent, so the reset sits on the scope's children.
+globalStyleInLayer(
+	'reset',
+	":where(body [data-color-mode='light'], body [data-color-mode='dark']) > *",
+	{ vars: neutralFocusContextVars() },
 );
 
 globalStyleInLayer('reset', ':where(button, input, select, textarea)', {

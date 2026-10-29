@@ -16,7 +16,7 @@ import { actionElementClassName } from '../primitives/button/recipe.css.js';
 import { textLinkAppearance } from '../primitives/button/text-action-appearance.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import { recipe } from '../styles/recipe.js';
-import { containerSurfaceStyle } from '../styles/surface.js';
+import { surfaceStyle } from '../styles/surface.js';
 import { textElementClassName } from '../text/recipe.css.js';
 import { typeStyleFontDeclarations, typeStyleTrimVars } from '../text/type-style-declarations.js';
 
@@ -128,7 +128,7 @@ proseStyle(
 // A code block is a neutral subtle fill with its own foreground context, like inline `Code`. Code
 // inside it takes the block's colours and draws no chip of its own.
 proseStyle('pre', {
-	...containerSurfaceStyle('neutral.subtle'),
+	...surfaceStyle('neutral.subtle'),
 	border: `1px solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.control,
 	fontFamily: vars.font.family.code,

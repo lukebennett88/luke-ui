@@ -454,12 +454,12 @@ element that declares it, so the global styles reset the overrides in every colo
 
 The focus ring follows the same idea through `--luke-internal-focus`. `contextualFocus()` reads it
 with `vars.color.focus` as the fallback, so inside a painted solid the ring uses that role's
-on-solid colour and everywhere else it keeps the literal focus colour. Containers, such as `Box`,
-the page, colour-mode scopes, and overlay panels, use `containerSurfaceStyle()`, which sets the
-override. A control that paints its own fill uses `surfaceStyle()`, which leaves it alone: the
-control's ring sits next to the container around it, so its own fill must not change the ring
-colour. `focusRing()` takes no colour and always reads `contextualFocus()`, so a first-party ring
-cannot bypass the context.
+on-solid colour and everywhere else it keeps the literal focus colour. A container sets the override
+on its children, never on itself: `Box` does it with a `> *` rule beside its background class, and a
+colour-mode scope resets it the same way. A container's own ring sits next to the surface around it,
+so it reads its parent's context. A control that paints its own fill uses `surfaceStyle()`, which
+sets no focus context. `focusRing()` takes no colour and always reads `contextualFocus()`, so a
+first-party ring cannot bypass the context.
 
 Component recipes use the same mechanism. A control pairs its fill in every interaction state, so a
 solid Button keeps its on-solid context from rest to pressed. Low and standard Buttons use the

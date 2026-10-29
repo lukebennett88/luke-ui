@@ -94,12 +94,13 @@ advisory group. Every gate covers all three surfaces: forms, links, and semantic
   because the keyboard-focus ring can sit beside any of them. A failure carries a `source` of
   `authored` or `default`, and the message points a failing default to `ThemeInput.color.focus`. The
   compiler never repairs the colour, and it is not an alias for `border.accent.strong`. Inside a
-  painted solid, a container such as `Box` sets an internal `--luke-internal-focus` override to that
-  role's `onSolid`, and the focus ring helper reads it through `contextualFocus()` with
-  `vars.color.focus` as the fallback. Controls that paint their own fill never set it, because their
-  ring sits next to the container around them. Each role's `onSolid` is a hard 3:1 gate against its
-  `solid.rest`, and forced colours stay on `Highlight`. `focus-ring-contrast.browser.test.tsx`
-  measures the painted ring against the pixels beside it for representative controls.
+  painted solid, a container such as `Box` sets an internal `--luke-internal-focus` override on its
+  children to that role's `onSolid`, so the container's own ring still reads its parent's context,
+  and the focus ring helper reads it through `contextualFocus()` with `vars.color.focus` as the
+  fallback. Controls that paint their own fill never set it, because their ring sits next to the
+  container around them. Each role's `onSolid` is a hard 3:1 gate against its `solid.rest`, and
+  forced colours stay on `Highlight`. `focus-ring-contrast.browser.test.tsx` measures the painted
+  ring against the pixels beside it for representative controls.
 - Every role's `color.foreground.<role>.onSolid` is also a hard gate at 3:1 against
   `color.background.<role>.solid.rest`, and accent's against
   `color.background.accent.solid.pressed`. The active Select or Combobox option draws a 2px inset
