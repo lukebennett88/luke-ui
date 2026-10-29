@@ -9,7 +9,7 @@ import {
 	testTypography,
 } from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeGenerationError } from './build-theme.js';
-import { contrastRatio, formatOklch, parseColor } from './color.js';
+import { formatOklch, parseColor } from './color.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
@@ -175,34 +175,6 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 				]);
 			}
 			expect(css).not.toContain('--luke-color-background-surface-field');
-		});
-
-		it(`${foundation.name} generates subtle advisory borders and a functional danger boundary`, () => {
-			const blocks = splitBlocks(buildTheme(foundation));
-			for (const block of [blocks.baseLight, blocks.mediaDark]) {
-				const surfaces = ['base', 'subdued', 'raised'].map((surface) => {
-					return parseColor(extractValue(block, `--luke-color-background-surface-${surface}`));
-				});
-				// The functional borders are excluded: `border.control` and `border.danger` are boundaries,
-				// hard-gated at >=3:1 by `contrast-validation.ts`, and `border.decorative` keeps its own
-				// policy. Driven off `SEMANTIC_ROLES` so a role added there is covered here without a
-				// second list.
-				const borderVarNames = SEMANTIC_ROLES.filter((role) => role !== 'danger').map(
-					(role) => `--luke-color-border-${role}`,
-				);
-
-				for (const varName of borderVarNames) {
-					const border = parseColor(extractValue(block, varName));
-					const minimumContrast = Math.min(
-						...surfaces.map((surface) => contrastRatio(border, surface)),
-					);
-					// The semantic borders alias the scale's step 7 (subtle UI border). They stay visibly
-					// distinct from the control surfaces but sit below the 3:1 non-text gate by design: these
-					// are decorative tints, not solved-contrast boundaries like `border.control`.
-					expect(minimumContrast).toBeGreaterThan(1.2);
-					expect(minimumContrast).toBeLessThan(3);
-				}
-			}
 		});
 	}
 });

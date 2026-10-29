@@ -60,7 +60,7 @@ export function RadiusTokens() {
 							<Box
 								backgroundColor="accent.subtle"
 								blockSize={RADIUS_SAMPLE_SIZE}
-								borderColor="accent"
+								borderColor="decorative"
 								borderStyle="solid"
 								borderWidth="thin"
 								inlineSize={RADIUS_SAMPLE_SIZE}
@@ -145,7 +145,7 @@ export function SizingTokens() {
 						sample={
 							<Box
 								backgroundColor="accent.subtle"
-								borderColor="accent"
+								borderColor="decorative"
 								borderRadius="control"
 								borderStyle="solid"
 								borderWidth="thin"

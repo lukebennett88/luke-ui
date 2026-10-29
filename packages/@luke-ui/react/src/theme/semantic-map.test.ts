@@ -32,6 +32,17 @@ const CONTROL_BORDER: Record<ColorMode, Oklch> = {
 	dark: parseColor('oklch(0.62 0.006 250)'),
 	light: parseColor('oklch(0.38 0.006 250)'),
 };
+// A stand-in for `semantic-border.ts`'s `solveStrongBorder` output, per role, for the same reason.
+const STRONG_BORDER: Record<ColorMode, Oklch> = {
+	dark: parseColor('oklch(0.7 0.01 250)'),
+	light: parseColor('oklch(0.4 0.01 250)'),
+};
+function strongBorders(mode: ColorMode): Record<FamilyRole, Oklch> {
+	return Object.fromEntries(SEMANTIC_ROLES.map((role) => [role, STRONG_BORDER[mode]])) as Record<
+		FamilyRole,
+		Oklch
+	>;
+}
 const FOCUS = parseColor('oklch(0.6 0.2 260)');
 
 // A representative source per role and mode. `info`/`success`/`warning`/`danger` reuse Luke UI's
@@ -93,6 +104,7 @@ describe('mapSemanticColors', () => {
 					controlBorder,
 					families,
 					focus: FOCUS,
+					strongBorders: strongBorders(mode),
 					surfaces,
 				});
 
@@ -145,8 +157,7 @@ describe('mapSemanticColors', () => {
 						formatOklch(mixInteractionState(foreground, textPrimary, INTERACTION_PRESSED_STRENGTH)),
 					);
 					expect(result[`color.foreground.${role}.onSolid`]).toBe(formatOklch(family.contrast));
-					if (role === 'danger') continue;
-					expect(result[`color.border.${role}`]).toBe(formatOklch(family[FAMILY_RUNG.border]));
+					expect(result[`color.border.${role}.strong`]).toBe(formatOklch(STRONG_BORDER[mode]));
 				}
 			});
 		}
@@ -169,6 +180,7 @@ describe('mapSemanticColors', () => {
 				const result = mapSemanticColors({
 					backdrop: 'oklch(0 0 0 / 0.45)',
 					controlBorder: CONTROL_BORDER[mode],
+					strongBorders: strongBorders(mode),
 					families,
 					focus: FOCUS,
 					surfaces,
@@ -192,6 +204,7 @@ describe('mapSemanticColors', () => {
 			const result = mapSemanticColors({
 				backdrop,
 				controlBorder: CONTROL_BORDER.light,
+				strongBorders: strongBorders('light'),
 				families,
 				focus: FOCUS,
 				surfaces,

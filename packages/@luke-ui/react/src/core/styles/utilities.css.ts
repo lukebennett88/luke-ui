@@ -37,6 +37,8 @@ type BackgroundColorToken =
 	| `${SemanticRole}.solid`
 	| `surface.${keyof typeof vars.color.background.surface}`;
 
+type BorderColorToken = `${SemanticRole}.strong` | 'control' | 'decorative' | 'focus';
+
 const backgroundColors = [
 	...SEMANTIC_ROLES.flatMap((role) => {
 		return [
@@ -79,6 +81,22 @@ for (const [condition, query] of typedEntries(responsiveConditions)) {
 	}
 }
 
+/**
+ * Border colours: the structural borders plus each role's `strong` border, keyed as `<role>.strong`
+ * like the role backgrounds. `*.strong` and `control` are guaranteed 3:1 boundaries. `decorative`
+ * is a separator.
+ */
+const borderColorScale = {
+	control: vars.color.border.control,
+	decorative: vars.color.border.decorative,
+	focus: vars.color.border.focus,
+	...Object.fromEntries(
+		SEMANTIC_ROLES.flatMap((role) => {
+			return [[`${role}.strong`, vars.color.border[role].strong]] as const;
+		}),
+	),
+} as { [Token in BorderColorToken]: string };
+
 /** Property scales shared by the runtime config and the public prop types. */
 const dynamicProperties = {
 	alignContent: {
@@ -113,9 +131,8 @@ const dynamicProperties = {
 		stretch: 'stretch',
 	},
 	blockSize: true,
-	// `control`, its generated state mixes, and `danger` are guaranteed 3:1 boundaries.
-	// Other role borders are decorative.
-	borderColor: vars.color.border,
+	// `control` and every `<role>.strong` are guaranteed 3:1 boundaries. `decorative` is not.
+	borderColor: borderColorScale,
 	borderRadius: vars.radius,
 	borderStyle: { none: 'none', solid: 'solid', dashed: 'dashed', dotted: 'dotted' },
 	borderWidth: borderWidthScale,

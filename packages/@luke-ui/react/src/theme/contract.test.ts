@@ -62,7 +62,7 @@ describe('theme contract', () => {
 		const leaf = (path: ModePath, varName: string): [ModePath, string] => [path, varName];
 		const expected = SEMANTIC_ROLES.flatMap((role) => {
 			const rows: Array<[ModePath, string]> = [
-				leaf(`color.border.${role}`, `--luke-color-border-${role}`),
+				leaf(`color.border.${role}.strong`, `--luke-color-border-${role}-strong`),
 			];
 			rows.push(leaf(`color.background.${role}.subtle`, `--luke-color-background-${role}-subtle`));
 			for (const prominence of ['solid'] as const) {

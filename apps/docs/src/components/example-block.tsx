@@ -57,7 +57,7 @@ function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element 
 	if (!result.ok) {
 		return (
 			<Box
-				borderColor="danger"
+				borderColor="danger.strong"
 				borderRadius="control"
 				borderStyle="solid"
 				borderWidth="thin"

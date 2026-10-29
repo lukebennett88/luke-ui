@@ -43,15 +43,15 @@ type ColorPath = keyof SemanticColorValues;
  * against all three surfaces and every role's subtle rest fill. The on-solid colour is gated
  * against its role's solid fills.
  * Hard at 3:1: the focus ring, the control border and its mixed hover and pressed treatments, and
- * `border.danger`, the invalid control boundary. Solid fills are solved for on-solid text,
+ * every role's `border.<role>.strong` against all three surfaces and that role's subtle fill. Solid fills are solved for on-solid text,
  * independently of their contrast against surfaces.
  * Also hard at 3:1: accent on-solid against `accent.solid.rest` and `accent.solid.pressed`.
  * The active dropdown option draws a 2px inset outline in that on-solid colour on those fills, so
  * the outline's adjacent colour is the solid, not the list surface. The existing 4.5:1 on-solid
  * text gates already cover the same pairs; these 3:1 checks name the outline contract explicitly.
  *
- * Other role borders are decorative tints, measured but not gated, so a component must never rely on one
- * alone for a required state.
+ * `border.decorative` is a separator, not checked, so a component must never rely on it alone for a
+ * required state.
  */
 export function validateContrast(
 	mode: ColorMode,
@@ -109,10 +109,15 @@ export function validateContrast(
 	const boundaries = [
 		'color.border.focus',
 		'color.border.control',
-		'color.border.danger',
 	] as const satisfies ReadonlyArray<ColorPath>;
 	for (const boundary of boundaries) {
 		for (const surface of surfacePaths) check(boundary, surface, UI_RATIO, true);
+	}
+	// Each role's strong border must also read on that role's own subtle fill.
+	for (const role of SEMANTIC_ROLES) {
+		for (const background of [...surfacePaths, `color.background.${role}.subtle` as const]) {
+			check(`color.border.${role}.strong`, background, UI_RATIO, true);
+		}
 	}
 	const controlBorder = colorAt('color.border.control');
 	const textPrimary = colorAt('color.foreground.primary');
@@ -129,10 +134,6 @@ export function validateContrast(
 		'color.background.accent.solid.pressed',
 	] as const) {
 		check('color.foreground.accent.onSolid', fill, UI_RATIO, true);
-	}
-	for (const role of SEMANTIC_ROLES) {
-		if (role === 'danger') continue;
-		for (const surface of surfacePaths) check(`color.border.${role}`, surface, UI_RATIO, false);
 	}
 
 	return { checks, failures };

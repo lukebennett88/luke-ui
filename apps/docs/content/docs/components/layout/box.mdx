@@ -80,10 +80,11 @@ the Box inherits. Without `backgroundColor`, a Box keeps the colour it inherits.
 [Colour](/docs/color#text-on-a-background) for the colours text reads on each background, and for
 custom surfaces.
 
-`borderColor="control"` is a guaranteed control boundary that reaches 3:1 against every surface. The
-role colours, such as `borderColor="warning"`, are decorative tints. Do not rely on one alone to
-show a required state. `borderColor="decorative"` is a separator. When a custom element that is not
-a Box needs a colour, radius, or shadow value, use `vars` from `@luke-ui/react/theme`. Read
+`borderColor="control"` is a guaranteed control boundary that reaches 3:1 against every surface.
+Each role has a `strong` border, such as `borderColor="warning.strong"`. It reaches 3:1 against the
+three surfaces and that role's subtle background, not against arbitrary backgrounds.
+`borderColor="decorative"` is a separator. When a custom element that is not a Box needs a colour,
+radius, or shadow value, use `vars` from `@luke-ui/react/theme`. Read
 [Styling](/docs/styling#use-semantic-variables-for-custom-ui) for when to reach for `vars`, and the
 [token reference](/docs/token-reference) for the contract.
 

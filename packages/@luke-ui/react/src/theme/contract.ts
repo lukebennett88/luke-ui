@@ -112,8 +112,14 @@ export const themeContractTree = {
 			control: null,
 			focus: null,
 			// The shared semantic borders. State-free on purpose: the token carries the meaning and the
-			// component decides when to apply it. Decorative tints: they carry no contrast guarantee.
-			...perRole(() => null),
+			// component decides when to apply it.
+			...perRole(() => ({
+				/**
+				 * A functional boundary: at least 3:1 against the three surfaces and the role's own subtle
+				 * background. Not guaranteed against arbitrary backgrounds.
+				 */
+				strong: null,
+			})),
 		},
 	},
 	/** Composite box-shadow values for the shared shadow ladder. */

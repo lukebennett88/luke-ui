@@ -1,3 +1,4 @@
+import type { Oklch } from './color.js';
 import { formatOklch } from './color.js';
 import type { ModePath } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
@@ -27,6 +28,7 @@ import {
 	FAMILY_RUNG,
 	ScaleGenerationError,
 } from './scale.js';
+import { solveStrongBorder } from './semantic-border.js';
 import type { SemanticColorValues } from './semantic-map.js';
 import { mapSemanticColors } from './semantic-map.js';
 import { assembleStylesheet } from './stylesheet.js';
@@ -230,11 +232,25 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		neutral: families.neutral,
 		surfaces: [surfaces.base, surfaces.subdued, surfaces.raised],
 	});
+	const strongBorders = {} as Record<FamilyRole, Oklch>;
+	for (const role of SEMANTIC_ROLES) {
+		strongBorders[role] = solveStrongBorder({
+			backgrounds: [
+				surfaces.base,
+				surfaces.subdued,
+				surfaces.raised,
+				families[role][FAMILY_RUNG.subtle],
+			],
+			family: families[role],
+			mode,
+		});
+	}
 	const colorValues = mapSemanticColors({
 		controlBorder,
 		families,
 		focus: source.focus,
 		backdrop: modeFoundation.color.backdrop,
+		strongBorders,
 		surfaces,
 	});
 	const solidStateValues: Record<string, string> = {};

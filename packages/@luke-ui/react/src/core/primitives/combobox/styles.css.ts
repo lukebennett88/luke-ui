@@ -181,7 +181,7 @@ const comboboxConfig = {
 				// The field's error message carries the non-colour invalid cue, so the border keeps
 				// its resting width and only takes the danger colour.
 				[invalid]: {
-					borderColor: vars.color.border.danger,
+					borderColor: vars.color.border.danger.strong,
 				},
 			},
 		},
