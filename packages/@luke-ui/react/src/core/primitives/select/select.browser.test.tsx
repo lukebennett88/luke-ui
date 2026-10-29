@@ -230,6 +230,35 @@ test('SelectValue shows the root placeholder, then the selected value', async ()
 });
 
 for (const appearance of visualAppearances) {
+	test(`an open Select trigger shows the hover finish, and pressed still wins, in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { unmount } = render(<ExampleSelect label="Delivery" />, { appearance });
+		const element = trigger(/Delivery/);
+		setInteractionState(element, 'hover');
+		const hover = settledFinish(element);
+		setInteractionState(element, 'pressed');
+		const pressed = settledFinish(element);
+		expect(pressed).not.toEqual(hover);
+
+		await userEvent.click(element);
+		await expect.element(page.getByRole('listbox')).toBeVisible();
+		setInteractionState(element, 'rest');
+		expect(settledFinish(element)).toEqual(hover);
+		setInteractionState(element, 'pressed');
+		expect(settledFinish(element)).toEqual(pressed);
+
+		await userEvent.keyboard('{Escape}');
+		unmount();
+	});
+}
+
+/** The trigger's painted finish once its state transitions finish. */
+function settledFinish(element: HTMLElement) {
+	settledSurfaceColors(element);
+	const { backgroundColor, backgroundImage, boxShadow } = getComputedStyle(element);
+	return { backgroundColor, backgroundImage, boxShadow };
+}
+
+for (const appearance of visualAppearances) {
 	test(`Select chevron contrasts with its painted fill in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { unmount } = render(<ExampleSelect label="Delivery" />, { appearance });
 		const element = trigger(/Delivery/);

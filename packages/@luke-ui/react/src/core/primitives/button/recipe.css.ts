@@ -23,7 +23,9 @@ export const actionElementClassName = style({}, 'action');
 export const expandedButtonClassName = style({}, 'expanded-button');
 
 const enabled = ':not([data-disabled="true"]):not([data-pending="true"])';
-const hovered = `&[data-hovered="true"]${enabled}, &.${expandedButtonClassName}[aria-expanded="true"]${enabled}`;
+// The open branch sits in `:where()` so its extra class doesn't outrank `pressed`, which would keep
+// the hover finish on a pressed, open trigger.
+const hovered = `&[data-hovered="true"]${enabled}, &:where(.${expandedButtonClassName}[aria-expanded="true"])${enabled}`;
 const pressed = `&[data-pressed="true"]${enabled}`;
 
 const textBase = [
