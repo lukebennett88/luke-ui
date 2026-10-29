@@ -296,14 +296,13 @@ const { label, message, root } = fieldRecipe({ tone: 'description' });
 Apply `as const satisfies SlottedConfigInput` at the definition site. `as const` preserves literal
 slot names and variant values. `satisfies` type-checks every style against `StyleRule`.
 
-`compoundVariants` is single-part only. Slotted recipes use `compoundSlots` to share a style across
-named slots. A `compoundSlots` entry may include a variant condition.
+`compoundVariants` is single-part only. Slotted recipes have no compound mechanism: a style that two
+slots share goes in a plain object that each slot spreads or references.
 
-For overlapping properties, precedence runs from the slot base to unconditional `compoundSlots`,
-then slot variants, then conditional `compoundSlots`. Within each compound category, a later array
-entry wins. This order holds only for style objects `recipe()` emits. A pre-built class string keeps
-the source position where it was first emitted. Single-part recipes reorder nothing and still accept
-a pre-built class or an array.
+For overlapping properties in a slotted recipe, precedence runs from every slot's base to every
+slot's variants. This order holds only for style objects `recipe()` emits. A pre-built class string
+keeps the source position where it was first emitted. Single-part recipes reorder nothing and still
+accept a pre-built class or an array.
 
 ### Deriving variant types
 
@@ -317,9 +316,9 @@ export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;
 `RecipeSelection` contains only variant keys. `className` is composition input, not a variant.
 
 The variant groups in `variants` are the only groups a recipe accepts. A group name that `variants`
-does not declare is a type error in `defaultVariants`, `compoundVariants`, `compoundSlots`, and
-`withDefaultVariants` defaults, including in a config declared before the `recipe()` call and in a
-compound entry a helper function returns.
+does not declare is a type error in `defaultVariants`, `compoundVariants`, and `withDefaultVariants`
+defaults, including in a config declared before the `recipe()` call and in a compound entry a helper
+function returns.
 
 ### Shared input-state selectors
 

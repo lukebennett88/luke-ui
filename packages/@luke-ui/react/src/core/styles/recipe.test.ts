@@ -18,7 +18,6 @@ const singlePart = {
 };
 
 const slotted = {
-	compoundSlots: [{ slots: ['root'], style: {}, variants: { size: 'small' } }],
 	defaultVariants: { size: 'medium' },
 	slots: { label: {}, root: {} },
 	variants: { size: { medium: { root: {} }, small: { label: {} } } },
@@ -79,19 +78,10 @@ describe('recipe variant keys', () => {
 			slots: { root: {} },
 			variants: { size: { small: { root: {} } } },
 		} as const satisfies SlottedConfigInput;
-		const unknownCompound = {
-			compoundSlots: [{ slots: ['root'], style: {}, variants: { bogus: 'x', size: 'small' } }],
-			slots: { root: {} },
-			variants: { size: { small: { root: {} } } },
-		} as const satisfies SlottedConfigInput;
 
 		assertType(() =>
 			// @ts-expect-error — `bogus` is not a variant group
 			recipe(unknownDefault),
-		);
-		assertType(() =>
-			// @ts-expect-error — `bogus` is not a variant group
-			recipe(unknownCompound),
 		);
 	});
 
@@ -139,4 +129,14 @@ describe('recipe variant keys', () => {
 			withDefaultVariants(recipe(singlePart), defaults),
 		);
 	});
+});
+
+test('rejects the removed compoundSlots option', () => {
+	assertType(() =>
+		recipe({
+			// @ts-expect-error — slotted recipes no longer take `compoundSlots`
+			compoundSlots: [{ slots: ['root'], style: {} }],
+			slots: { root: {} },
+		}),
+	);
 });

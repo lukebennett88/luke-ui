@@ -34,63 +34,14 @@ export const defaultedVariantsRecipe = withDefaultVariants(realVariantsRecipe, {
 	size: 'medium',
 });
 
-/** Covers shared, conditional, and ordered `compoundSlots` entries. */
-export const compoundSlotsRecipe = recipe({
-	slots: {
-		a: { color: 'rgb(10, 10, 10)' },
-		b: { color: 'rgb(20, 20, 20)' },
-		c: { color: 'rgb(30, 30, 30)' },
-	},
+/** Two slots with a variant each, to pin the order slotted CSS is emitted in. */
+export const slottedPrecedenceRecipe = recipe({
+	slots: { first: { color: 'rgb(10, 10, 10)' }, second: { color: 'rgb(20, 20, 20)' } },
 	variants: {
-		size: {
-			medium: { a: { fontWeight: 500 } },
-			small: { a: { fontWeight: 400 } },
-		},
-		tone: {
-			accent: {},
-			neutral: {},
+		emphasis: {
+			strong: { first: { color: 'rgb(11, 11, 11)' }, second: { color: 'rgb(21, 21, 21)' } },
 		},
 	},
-	compoundSlots: [
-		// Unconditional: overrides the base colour on `a` and `b`, and leaves `c` alone.
-		{ slots: ['a', 'b'], style: { color: 'rgb(100, 100, 100)' } },
-		// Second unconditional entry on `a` only, to prove declaration order.
-		{ slots: ['a'], style: { color: 'rgb(110, 110, 110)' } },
-		// Conditional on a group (`tone`) that none of these slots otherwise use.
-		{
-			slots: ['a', 'b'],
-			style: { backgroundColor: 'rgb(200, 200, 200)' },
-			variants: { tone: 'accent' },
-		},
-		// `b` and `c` use `size` only through this compound entry.
-		{
-			slots: ['a', 'b', 'c'],
-			style: { fontWeight: 700 },
-			variants: { size: 'medium' },
-		},
-	],
-});
-
-export const compoundSlotsPrecedenceRecipe = recipe({
-	slots: { root: { color: 'rgb(1, 1, 1)', fontWeight: 300 } },
-	variants: {
-		appearance: { solid: { root: { color: 'rgb(2, 2, 2)' } } },
-		size: { medium: { root: { fontWeight: 400 } } },
-		tone: { accent: {}, neutral: {} },
-	},
-	compoundSlots: [
-		{ slots: ['root'], style: { fontWeight: 500 }, variants: { size: 'medium', tone: 'accent' } },
-		{ slots: ['root'], style: { fontWeight: 350 } },
-		{ slots: ['root'], style: { color: 'rgb(3, 3, 3)' }, variants: { tone: 'accent' } },
-	],
-});
-
-export const conditionalSlotsBaseRecipe = recipe({
-	slots: { root: { color: 'rgb(1, 1, 1)' } },
-	variants: { tone: { accent: {} } },
-	compoundSlots: [
-		{ slots: ['root'], style: { color: 'rgb(2, 2, 2)' }, variants: { tone: 'accent' } },
-	],
 });
 
 /** A pre-built class. Slotted recipes cannot reorder it; a single-part recipe can still use it. */
@@ -102,49 +53,4 @@ export const prebuiltClassSinglePartRecipe = recipe({
 	variants: {
 		emphasis: { strong: prebuiltVariantClass },
 	},
-});
-
-/** A slot variant beats unconditional `compoundSlots` and loses to conditional ones. */
-export const slotVariantPrecedenceRecipe = recipe({
-	slots: { root: { color: 'rgb(40, 40, 40)' } },
-	variants: {
-		emphasis: { strong: { root: { color: 'rgb(41, 41, 41)' } } },
-		tone: { accent: {}, neutral: {} },
-	},
-	compoundSlots: [
-		{ slots: ['root'], style: { color: 'rgb(42, 42, 42)' } },
-		{ slots: ['root'], style: { color: 'rgb(43, 43, 43)' }, variants: { tone: 'accent' } },
-	],
-});
-
-/** Untargeted slots keep the same precedence as targeted ones. */
-export const untargetedSlotPrecedenceRecipe = recipe({
-	slots: {
-		targeted: { color: 'rgb(50, 50, 50)' },
-		untargeted: { color: 'rgb(50, 50, 50)' },
-	},
-	variants: {
-		emphasis: {
-			strong: {
-				targeted: { color: 'rgb(51, 51, 51)' },
-				untargeted: { color: 'rgb(51, 51, 51)' },
-			},
-		},
-		tone: { accent: {}, neutral: {} },
-	},
-	compoundSlots: [
-		{ slots: ['targeted'], style: { fontWeight: 600 } },
-		{ slots: ['targeted'], style: { color: 'rgb(52, 52, 52)' }, variants: { tone: 'accent' } },
-	],
-});
-
-export const compoundSlotsOrderRecipe = recipe({
-	slots: { first: {}, second: {} },
-	variants: { tone: { accent: {} } },
-	compoundSlots: [
-		{ slots: ['second'], style: { fontWeight: 400 } },
-		{ slots: ['first', 'second'], style: { fontWeight: 500 }, variants: {} },
-		{ slots: ['second'], style: { color: 'rgb(1, 1, 1)' }, variants: { tone: 'accent' } },
-		{ slots: ['first', 'second'], style: { color: 'rgb(2, 2, 2)' }, variants: { tone: 'accent' } },
-	],
 });

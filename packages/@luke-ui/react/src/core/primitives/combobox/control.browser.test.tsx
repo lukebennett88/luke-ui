@@ -1,5 +1,6 @@
 import type { ComboboxControlProps } from '@luke-ui/react/primitives/combobox';
 import {
+	ComboboxClearButton,
 	ComboboxControl,
 	ComboboxInput,
 	ComboboxItem,
@@ -220,4 +221,121 @@ test('ComboboxControl runs the cleanup a callback ref returns', () => {
 	expect(cleanup).toHaveBeenCalled();
 	// React calls a callback ref that returns a cleanup with `null` only if it returns nothing.
 	expect(ref).not.toHaveBeenCalledWith(null);
+});
+
+function ActionScene({ size }: { size: 'medium' | 'small' }) {
+	return (
+		<ComboboxRoot defaultItems={items} defaultValue="au" size={size}>
+			<Field label={`${size} country`}>
+				<ComboboxControl>
+					<ComboboxInput />
+					<ComboboxClearButton aria-label={`Clear ${size}`} />
+					<ComboboxTrigger aria-label={`Toggle ${size}`} />
+				</ComboboxControl>
+			</Field>
+		</ComboboxRoot>
+	);
+}
+
+function actionButtons(size: 'medium' | 'small') {
+	return {
+		clearButton: page.getByRole('button', { name: new RegExp(`Clear ${size}`) }).element(),
+		trigger: page.getByRole('button', { name: new RegExp(`Toggle ${size}`) }).element(),
+	};
+}
+
+/** Position of the first rule that targets `className`, in stylesheet source order. */
+function ruleIndex(className: string): number {
+	let index = 0;
+	let found = -1;
+	const visit = (rules: CSSRuleList) => {
+		for (const rule of Array.from(rules)) {
+			if (found !== -1) return;
+			if (rule instanceof CSSStyleRule && rule.selectorText.includes(`.${className}`)) {
+				found = index;
+				return;
+			}
+			index += 1;
+			if ('cssRules' in rule) visit(rule.cssRules as CSSRuleList);
+		}
+	};
+	for (const sheet of Array.from(document.styleSheets)) visit(sheet.cssRules);
+	return found;
+}
+
+const actionSizes = { medium: '28px', small: '24px' } as const;
+
+for (const size of ['medium', 'small'] as const) {
+	test(`the ComboboxTrigger and ComboboxClearButton are ${actionSizes[size]} square with no inline padding at ${size} size`, () => {
+		render(<ActionScene size={size} />);
+		const { clearButton, trigger } = actionButtons(size);
+
+		for (const button of [clearButton, trigger]) {
+			const style = getComputedStyle(button);
+			expect(style.blockSize).toBe(actionSizes[size]);
+			expect(style.inlineSize).toBe(actionSizes[size]);
+			expect(style.paddingInlineStart).toBe('0px');
+			expect(style.paddingInlineEnd).toBe('0px');
+		}
+	});
+
+	test(`only the ComboboxTrigger has inline margins at ${size} size`, () => {
+		render(<ActionScene size={size} />);
+		const { clearButton, trigger } = actionButtons(size);
+
+		expect(getComputedStyle(trigger).marginInlineStart).toBe('4px');
+		expect(getComputedStyle(trigger).marginInlineEnd).toBe('4px');
+		expect(getComputedStyle(clearButton).marginInlineStart).toBe('0px');
+		expect(getComputedStyle(clearButton).marginInlineEnd).toBe('0px');
+	});
+
+	test(`the ComboboxTrigger and ComboboxClearButton share their action styles at ${size} size`, () => {
+		render(<ActionScene size={size} />);
+		const { clearButton, trigger } = actionButtons(size);
+		const clearStyle = getComputedStyle(clearButton);
+		const triggerStyle = getComputedStyle(trigger);
+
+		for (const property of [
+			'alignItems',
+			'borderRadius',
+			'borderStyle',
+			'color',
+			'display',
+			'flexShrink',
+			'justifyContent',
+			'minBlockSize',
+			'minInlineSize',
+			'paddingBlockStart',
+			'transitionProperty',
+		] as const) {
+			expect([property, clearStyle[property]]).toEqual([property, triggerStyle[property]]);
+		}
+	});
+}
+
+test('ComboboxTrigger and ComboboxClearButton base styles are emitted before their size styles', () => {
+	render(
+		<>
+			<ActionScene size="medium" />
+			<ActionScene size="small" />
+		</>,
+	);
+	const medium = actionButtons('medium');
+	const small = actionButtons('small');
+
+	for (const slot of ['trigger', 'clearButton'] as const) {
+		const mediumList = Array.from(medium[slot].classList);
+		const smallList = new Set(small[slot].classList);
+		const baseClasses = mediumList.filter((name) => smallList.has(name));
+		// The classes only the medium button has are its size classes.
+		const sizeClasses = mediumList.filter((name) => !smallList.has(name));
+		const baseIndexes = baseClasses.map(ruleIndex).filter((index) => index !== -1);
+		const sizeIndexes = sizeClasses.map(ruleIndex).filter((index) => index !== -1);
+
+		expect(baseIndexes.length, `${slot} has a base rule`).toBeGreaterThan(0);
+		expect(sizeIndexes.length, `${slot} has a size rule`).toBeGreaterThan(0);
+		expect(Math.max(...baseIndexes), `${slot} base precedes size`).toBeLessThan(
+			Math.min(...sizeIndexes),
+		);
+	}
 });
