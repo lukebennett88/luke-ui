@@ -42,8 +42,9 @@ Package scripts contain discrete operations. Use Turbo when an operation needs g
 dependency builds. A direct `pnpm --filter … run …` invokes only that package script.
 
 `pnpm test` runs every suite, including packed consumers, theme integration, and the Docker visual
-comparison. It runs one workspace test task at a time because Vitest already parallelises within
-each suite. CI splits the suites across isolated jobs.
+comparison. `pnpm test:code` runs the same suites without the visual comparison, so it needs no
+Docker. Both run one workspace test task at a time because Vitest already parallelises within each
+suite. CI splits the suites across isolated jobs.
 
 See [Testing](TESTING.md) for test contracts, [Visual testing](VISUAL_TESTING.md) for Docker and
 baseline requirements, and [Components](COMPONENTS.md) for scaffolding arguments.

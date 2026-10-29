@@ -38,10 +38,10 @@ does not switch to an older green run.
 pnpm test:visual
 ```
 
-This authoritative comparison also runs as part of `pnpm test`. It requires Docker with
-`linux/amd64` support and an authenticated `gh` CLI with access to repository Actions artefacts.
-Apple Silicon uses emulation. Missing Docker, an unavailable baseline, failed captures, and visual
-differences all fail the command. There is no host fallback.
+This authoritative comparison also runs as part of `pnpm test`. `pnpm test:code` skips it. It
+requires Docker with `linux/amd64` support and an authenticated `gh` CLI with access to repository
+Actions artefacts. Apple Silicon uses emulation. Missing Docker, an unavailable baseline, failed
+captures, and visual differences all fail the command. There is no host fallback.
 
 The CLI checks the newest `main` baseline workflow run on every comparison. It reuses a cached
 baseline only when its run ID and attempt match that successful run and the cache contains PNGs.

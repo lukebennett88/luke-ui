@@ -75,12 +75,14 @@ not open new issues for the parts you leave.
    cleanup. It skips untracked files, so run `git add` on new files first. Run `pnpm run check` for
    every change. It covers barrels, format (including root Markdown), lint, types, docs, cycles, and
    unused code. For formatting failures, use `pnpm run fix:format` rather than re-wrapping Markdown
-   by hand. Before opening the PR, run `pnpm run test` separately; Turbo test tasks are configured
-   not to cache results. Run the separate suites in [TESTING.md](../../../docs/TESTING.md) that
-   cover the change, including `pnpm run test:consumer` for published package code, dependencies, or
-   exports. When the change affects generated documentation behaviour, such as props tables or
-   type-definition assets, also run `pnpm run build:docs` so the production docs output is checked,
-   including `check:type-definition-links`.
+   by hand. Before opening the PR, run `pnpm run test:code` separately; Turbo test tasks are
+   configured not to cache results. Run `pnpm run test:visual` when Docker is available. Otherwise
+   report it as **not run** and rely on the CI `compare` job. Run the separate suites in
+   [TESTING.md](../../../docs/TESTING.md) that cover the change, including `pnpm run test:consumer`
+   for published package code, dependencies, or exports. When the change affects generated
+   documentation behaviour, such as props tables or type-definition assets, also run
+   `pnpm run build:docs` so the production docs output is checked, including
+   `check:type-definition-links`.
 3. Before you call a failure unrelated, show that it also happens on the base revision under
    comparable conditions, and note the revision. Rerun only what you need. Existing evidence, such
    as a papercut entry or a failed CI run on the base, can be enough. A failure your change causes
