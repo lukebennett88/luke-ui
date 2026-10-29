@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
 import { mergeProps } from '../../shared/utils/merge-props.js';
-import { createSprinkles } from '../styles/utilities.css.js';
+import { backgroundColorContainerClassName, createSprinkles } from '../styles/utilities.css.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -22,11 +22,15 @@ export function Box(props: BoxProps): JSX.Element {
 
 	const sprinklesProps = renderRoot ? retainSprinklesProps(restProps) : restProps;
 
-	const resolvedProps = mergeProps(createSprinkles(sprinklesProps), {
-		children,
-		className,
-		style,
-	});
+	const resolvedProps = mergeProps(
+		createSprinkles(sprinklesProps),
+		{
+			className: setsBackground(sprinklesProps.backgroundColor)
+				? backgroundColorContainerClassName
+				: undefined,
+		},
+		{ children, className, style },
+	);
 
 	return useRender({
 		defaultElementType: 'div',
@@ -36,6 +40,13 @@ export function Box(props: BoxProps): JSX.Element {
 		renderRoot,
 		state: {},
 	});
+}
+
+/** Whether a `backgroundColor` value paints a fill under at least one condition. */
+function setsBackground(value: SprinklesProps['backgroundColor']): boolean {
+	if (value == null) return false;
+	if (typeof value === 'string') return true;
+	return Object.values(value).some((conditionValue) => conditionValue != null);
 }
 
 const sprinklesProperties: ReadonlySet<PropertyKey> = createSprinkles.properties;

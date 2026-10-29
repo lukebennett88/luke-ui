@@ -49,6 +49,12 @@ const foregroundOverride = {
 // adjacent to the surface around it, not to its own fill.
 const focusOverride = createGlobalVar('luke-internal-focus');
 
+// What a container's own rule offers its children as their ring context. The container sets it in
+// the same rule, and so under the same responsive condition, as its fill. A `> *` rule copies it
+// onto the children without a condition of its own, because a container query on a child resolves
+// against a different ancestor than the one on the container.
+const focusChildren = createGlobalVar('luke-internal-focus-children');
+
 function solidStateVars(
 	value: (tone: SolidStateTone, slot: 'hover' | 'pressed' | 'text') => string,
 ) {
@@ -92,18 +98,40 @@ export function contextualFocus(): string {
 	return fallbackVar(focusOverride, vars.color.focus);
 }
 
-/**
- * The focus ring context a container hands to its children. Their ring is adjacent to the
- * container's fill, so inside a solid it paints that role's on-solid colour. Apply it to the
- * container's children, such as through a `> *` global selector, and never to the container itself,
- * whose own ring is adjacent to the surface around it. A control that paints its own fill sets none.
- */
-export function containerFocusContextVars(background: SurfaceBackground) {
+function focusContextValue(background: SurfaceBackground): string {
 	const role = SEMANTIC_ROLES.find((candidate) => background.startsWith(`${candidate}.solid`));
-	return { [focusOverride]: role === undefined ? 'initial' : vars.color.foreground[role].onSolid };
+	return role === undefined ? 'initial' : vars.color.foreground[role].onSolid;
 }
 
-/** Resets the focus ring context for the children of a neutral container. */
+/**
+ * The ring colour a container's fill offers its children: inside a solid, that role's on-solid
+ * colour. Declare it in the same rule as the fill, so both follow the same responsive condition,
+ * and pair it with `childFocusContextVars()` on the container's children. Never apply the context
+ * to the container itself, whose own ring is adjacent to the surface around it. A control that
+ * paints its own fill offers none.
+ */
+export function containerFocusContextVars(background: SurfaceBackground) {
+	return { [focusChildren]: focusContextValue(background) };
+}
+
+/** Takes the ring context the parent container offers. Apply it to a container's children. */
+export function childFocusContextVars() {
+	return { [focusOverride]: focusChildren };
+}
+
+/**
+ * The ring context for a child that is itself a container. It declares its own offer, which hides
+ * its parent's from `childFocusContextVars()`, so it takes the parent's colour directly. Apply it
+ * under the parent's fill condition.
+ */
+export function nestedContainerFocusContextVars(background: SurfaceBackground) {
+	return { [focusOverride]: focusContextValue(background) };
+}
+
+/**
+ * Resets the focus ring context on an element whose ring sits on a neutral fill: the children of a
+ * colour-mode scope, or a button inside a control that paints its own base fill.
+ */
 export function neutralFocusContextVars() {
 	return { [focusOverride]: 'initial' };
 }

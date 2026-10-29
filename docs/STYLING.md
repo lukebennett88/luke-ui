@@ -455,11 +455,18 @@ element that declares it, so the global styles reset the overrides in every colo
 The focus ring follows the same idea through `--luke-internal-focus`. `contextualFocus()` reads it
 with `vars.color.focus` as the fallback, so inside a painted solid the ring uses that role's
 on-solid colour and everywhere else it keeps the literal focus colour. A container sets the override
-on its children, never on itself: `Box` does it with a `> *` rule beside its background class, and a
-colour-mode scope resets it the same way. A container's own ring sits next to the surface around it,
-so it reads its parent's context. A control that paints its own fill uses `surfaceStyle()`, which
-sets no focus context. `focusRing()` takes no colour and always reads `contextualFocus()`, so a
-first-party ring cannot bypass the context.
+on its children, never on itself: `Box` offers the value under its own responsive condition, in the
+same rule as its fill, and an unconditional `> *` rule copies it onto the children. A container
+query on the child would resolve against the Box when the Box is a query container, not against the
+ancestor its fill resolves against. A child Box with a background declares its own offer, which
+hides its parent's, so it takes its parent's colour under the parent's condition instead. That child
+form can still disagree with the parent's fill when the parent is a query container. A colour-mode
+scope resets the override on its children. A container's own ring sits next to the surface around
+it, so it reads its parent's context. A control that paints its own fill uses `surfaceStyle()`,
+which sets no focus context, so a button nested inside such a control sets
+`neutralFocusContextVars()` on itself, as the Combobox Clear and Toggle buttons do. `focusRing()`
+takes no colour and always reads `contextualFocus()`, so a first-party ring cannot bypass the
+context.
 
 Component recipes use the same mechanism. A control pairs its fill in every interaction state, so a
 solid Button keeps its on-solid context from rest to pressed. Low and standard Buttons use the

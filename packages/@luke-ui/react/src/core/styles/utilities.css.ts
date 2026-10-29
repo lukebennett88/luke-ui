@@ -9,7 +9,12 @@ import { layers } from './layers.css.js';
 import { responsiveConditions } from './responsive-conditions.js';
 import { spaceTokens } from './space-tokens.js';
 import type { SurfaceBackground } from './surface.js';
-import { containerFocusContextVars, surfaceStyle } from './surface.js';
+import {
+	childFocusContextVars,
+	containerFocusContextVars,
+	nestedContainerFocusContextVars,
+	surfaceStyle,
+} from './surface.js';
 
 // Every token-backed scale below derives from the public `vars` contract, so a token removed from
 // the contract removes its Box value too.
@@ -56,6 +61,12 @@ const backgroundColorTokens = backgroundColors.map(([token]) => token);
 type BreakpointName = keyof typeof responsiveConditions;
 
 /**
+ * Marks a Box that sets a background, so a parent's focus ring rules can tell its container
+ * children from its other children. `Box` adds it once, beside the per-condition classes.
+ */
+export const backgroundColorContainerClassName = style({}, 'backgroundColor');
+
+/**
  * One utilities-layer class per background and condition. Each pairs the fill with its text colour
  * and foreground context. Conditions are the outer loop, so each breakpoint's rules follow the
  * narrower breakpoints' rules and win when both match. `initial` comes first, so its class is each
@@ -67,10 +78,17 @@ const backgroundColorValues: Partial<
 		{ default: string; conditions: Partial<Record<BreakpointName, string>> }
 	>
 > = {};
+/** Selectors for container children, by condition and by the ring context they take. */
+const nestedFocusSelectors: Partial<
+	Record<BreakpointName, Map<string, { selectors: Array<string>; vars: Record<string, string> }>>
+> = {};
 for (const [condition, query] of typedEntries(responsiveConditions)) {
 	for (const [token, background] of backgroundColors) {
-		const rule = surfaceStyle(background);
-		const focusRule = { vars: containerFocusContextVars(background) };
+		const surface = surfaceStyle(background);
+		const rule = {
+			...surface,
+			vars: { ...surface.vars, ...containerFocusContextVars(background) },
+		};
 		const wrap = (styleRule: object) => {
 			return '@container' in query
 				? { '@container': { [query['@container']]: styleRule } }
@@ -80,10 +98,34 @@ for (const [condition, query] of typedEntries(responsiveConditions)) {
 			{ '@layer': { [layers.utilities]: wrap(rule) } },
 			`backgroundColor-${token.replace('.', '-')}-${condition}`,
 		);
-		// The children's ring context sits on the children, so the Box's own ring reads its parent's.
-		globalStyle(`.${className} > *`, { '@layer': { [layers.utilities]: wrap(focusRule) } });
+		const nestedFocus = nestedContainerFocusContextVars(background);
+		const nested = (nestedFocusSelectors[condition] ??= new Map());
+		const key = JSON.stringify(nestedFocus);
+		const group = nested.get(key) ?? { selectors: [], vars: nestedFocus };
+		group.selectors.push(`.${className} > .${backgroundColorContainerClassName}`);
+		nested.set(key, group);
 		const value = (backgroundColorValues[token] ??= { default: className, conditions: {} });
 		value.conditions[condition] = className;
+	}
+}
+
+// A Box offers its children's ring context under its own condition, in the rule that paints its
+// fill. Its children take that offer without a condition of their own, because a container query on
+// a child resolves against the Box when the Box is a query container, not against the Box's own
+// ancestor. A child that sets a background hides the offer behind its own, so it takes its parent's
+// colour under the parent's condition instead. Either way a Box's own ring reads its parent's context.
+globalStyle(`.${backgroundColorContainerClassName} > *`, {
+	'@layer': { [layers.utilities]: { vars: childFocusContextVars() } },
+});
+for (const [condition, query] of typedEntries(responsiveConditions)) {
+	for (const { selectors, vars: nestedFocus } of nestedFocusSelectors[condition]?.values() ?? []) {
+		const rule = { vars: nestedFocus };
+		globalStyle(selectors.join(', '), {
+			'@layer': {
+				[layers.utilities]:
+					'@container' in query ? { '@container': { [query['@container']]: rule } } : rule,
+			},
+		});
 	}
 }
 

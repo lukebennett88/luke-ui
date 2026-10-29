@@ -486,6 +486,91 @@ for (const appearance of visualAppearances) {
 	}
 }
 
+// The Combobox paints its own base-surface fill, so its Clear and Toggle buttons sit on that fill
+// and keep the literal focus colour even when the control itself sits inside a solid.
+for (const appearance of visualAppearances) {
+	test(`keeps the Combobox Clear and Toggle button rings on the base fill inside a solid in ${appearance.theme} ${appearance.mode}`, async () => {
+		render(
+			<Box aria-label="solid scene" backgroundColor="danger.solid" padding="space.16" role="group">
+				<ComboboxField defaultItems={items} defaultValue="light" label="Theme">
+					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+				</ComboboxField>
+			</Box>,
+			{ appearance },
+		);
+		const scene = page.getByRole('group', { name: 'solid scene' }).element() as HTMLElement;
+		const failures: Array<string> = [];
+
+		for (const name of [/^Clear selection/, /^Toggle options/]) {
+			const button = page.getByRole('button', { name }).element() as HTMLElement;
+			// Keyboard modality is already set by Tab, so a programmatic focus shows the ring.
+			// oxlint-disable-next-line no-await-in-loop
+			await userEvent.tab();
+			button.focus();
+			expect(document.activeElement, `${String(name)} has focus`).toBe(button);
+			expect(getComputedStyle(button).outlineColor).toBe(resolvedColor(vars.color.focus, button));
+			const geometry = geometryOf(button);
+			const expected = paintedColor(resolvedColor(vars.color.focus, button));
+			// oxlint-disable-next-line no-await-in-loop
+			const probes = await edgeProbes(scene, button);
+			// The small buttons' rings reach the control's edge, so only the fill inside is a neighbour.
+			checkRing(probes, geometry, expected, ['inner'], String(name), failures);
+		}
+
+		expect(failures).toEqual([]);
+	});
+}
+
+// A responsive fill and its children's ring context must follow one container. A narrow query
+// container inside a wider one resolves the fill against the wider parent, so the ring context
+// has to follow that parent too, not the Box's own width.
+for (const appearance of visualAppearances) {
+	for (const [parentWidth, boxWidth, filled] of [
+		[800, 300, false],
+		[300, 800, true],
+	] as const) {
+		test(`keeps a responsive solid Box's ring context on the fill its parent query resolves, ${parentWidth}px parent and ${boxWidth}px Box, in ${appearance.theme} ${appearance.mode}`, async () => {
+			render(
+				<div style={{ containerType: 'inline-size', inlineSize: parentWidth }}>
+					<Box
+						aria-label="responsive scene"
+						backgroundColor={{ initial: 'danger.solid', bp640: 'surface.base' }}
+						padding="space.16"
+						role="group"
+						style={{ containerType: 'inline-size', inlineSize: boxWidth }}
+					>
+						<Button>Inside</Button>
+					</Box>
+				</div>,
+				{ appearance },
+			);
+			const scene = page.getByRole('group', { name: 'responsive scene' }).element() as HTMLElement;
+			expect(getComputedStyle(scene).backgroundColor).toBe(
+				resolvedColor(
+					filled ? vars.color.background.danger.solid.rest : vars.color.background.surface.base,
+					scene,
+				),
+			);
+
+			await userEvent.tab();
+			const button = page.getByRole('button', { name: 'Inside' }).element() as HTMLElement;
+			expect(document.activeElement).toBe(button);
+			const token = filled ? onSolidToken('danger') : vars.color.focus;
+			expect(getComputedStyle(button).outlineColor).toBe(resolvedColor(token, button));
+			const failures: Array<string> = [];
+			checkRing(
+				await edgeProbes(scene, button),
+				geometryOf(button),
+				paintedColor(resolvedColor(token, button)),
+				['inner', 'outer'],
+				'Inside',
+				failures,
+			);
+			expect(failures).toEqual([]);
+		});
+	}
+}
+
 // The active option draws a 2px inset outline in the accent on-solid colour on the solid fill.
 // `color.foreground.accent.onSolid` is gated at 3:1 against `accent.solid.rest` and
 // `accent.solid.pressed`, so the outline against that fill is a supported pair. The list surface
