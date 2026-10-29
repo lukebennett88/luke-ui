@@ -83,7 +83,8 @@ custom surfaces.
 `borderColor="control"` is a guaranteed control boundary that reaches 3:1 against every surface.
 Each role has a `strong` border, such as `borderColor="warning.strong"`. It reaches 3:1 against the
 three surfaces and that role's subtle background, not against arbitrary backgrounds.
-`borderColor="decorative"` is a separator. When a custom element that is not a Box needs a colour,
+`borderColor="decorative"` is a separator. Focus is not a border colour, so `borderColor` has no
+`focus` value. Box does not style focus. When a custom element that is not a Box needs a colour,
 radius, or shadow value, use `vars` from `@luke-ui/react/theme`. Read
 [Styling](/docs/styling#use-semantic-variables-for-custom-ui) for when to reach for `vars`, and the
 [token reference](/docs/token-reference) for the contract.

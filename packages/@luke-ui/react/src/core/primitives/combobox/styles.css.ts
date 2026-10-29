@@ -174,7 +174,7 @@ const comboboxConfig = {
 			// with every state. Opening the popover adds no border state of its own.
 			selectors: {
 				[disabled]: { cursor: 'not-allowed', opacity: vars.interaction.disabledOpacity },
-				[inputFocus]: focusRing(vars.color.border.focus),
+				[inputFocus]: focusRing(vars.color.focus),
 				[hover]: { borderColor: controlBorderState('hover') },
 				// Read-only drops the inset shadow. The hover selector already excludes it.
 				[readOnly]: { boxShadow: 'none' },

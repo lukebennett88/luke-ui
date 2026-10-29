@@ -38,6 +38,7 @@ export const COLOR_FAMILIES = [
 	'background',
 	'foreground',
 	'border',
+	'focus',
 ] as const satisfies ReadonlyArray<ColorFamilyId>;
 true satisfies AssertExhaustive<ColorFamilyId, typeof COLOR_FAMILIES>;
 

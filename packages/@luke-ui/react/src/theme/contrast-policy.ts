@@ -20,7 +20,7 @@ export const TEXT_RATIO = 4.5;
 
 /**
  * The WCAG 2.2 SC 1.4.11 contrast ratio a non-text UI boundary must clear when it is required to
- * identify a component or state (`border.focus` and `border.control`).
+ * identify a component or state (`color.focus` and `border.control`).
  */
 export const UI_RATIO = 3;
 

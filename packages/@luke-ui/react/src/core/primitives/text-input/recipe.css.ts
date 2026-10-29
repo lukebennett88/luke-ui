@@ -71,7 +71,7 @@ export const textInputRecipe = recipe({
 			[input.disabled]: {
 				opacity: vars.interaction.disabledOpacity,
 			},
-			[input.focusWithin]: focusRing(vars.color.border.focus),
+			[input.focusWithin]: focusRing(vars.color.focus),
 			[input.hover]: {
 				borderColor: controlBorderState('hover'),
 			},

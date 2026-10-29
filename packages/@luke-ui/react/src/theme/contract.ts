@@ -105,12 +105,16 @@ export const themeContractTree = {
 			disabled: null,
 			...perRole(() => ({ ...roleForeground })),
 		},
+		/**
+		 * The keyboard-focus colour. Standalone rather than a border: it paints an outline or a ring
+		 * shadow.
+		 */
+		focus: null,
 		border: {
 			/** A subtle separator. Not contrast-checked. */
 			decorative: null,
 			/** The guaranteed 3:1 boundary of a control against every surface. */
 			control: null,
-			focus: null,
 			// The shared semantic borders. State-free on purpose: the token carries the meaning and the
 			// component decides when to apply it.
 			...perRole(() => ({

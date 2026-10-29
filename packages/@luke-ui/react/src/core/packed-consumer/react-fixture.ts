@@ -471,6 +471,10 @@ export const removedFieldInput: NonNullable<ThemeInput['color']['surface']> = { 
 export const removedControlHoverBorder = vars.color.border.controlHover;
 // @ts-expect-error — hover border treatments are not Box token values
 export const removedBoxControlHoverBorder: BoxProps['borderColor'] = 'controlHover';
+// @ts-expect-error — focus is a standalone colour, not a border colour
+export const removedBorderFocus = vars.color.border.focus;
+// @ts-expect-error — focus is not a Box border colour
+export const removedBoxBorderFocus: BoxProps['borderColor'] = 'focus';
 // @ts-expect-error — removed with color.surface.canvas
 export const removedBoxSurface: BoxProps['backgroundColor'] = 'surface.canvas';
 // @ts-expect-error — removed with color.surface.floating

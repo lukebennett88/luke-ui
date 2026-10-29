@@ -102,6 +102,15 @@ function ColorSample({
 					</Text>
 				</Box>
 			);
+		case 'focus':
+			return (
+				<Box
+					blockSize={SAMPLE_BLOCK_SIZE}
+					borderRadius="detail"
+					inlineSize={SAMPLE_INLINE_SIZE}
+					style={{ outline: `2px solid ${value}`, outlineOffset: '-2px' }}
+				/>
+			);
 		case 'border':
 			return (
 				<Box

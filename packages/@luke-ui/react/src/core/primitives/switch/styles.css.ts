@@ -103,7 +103,7 @@ const switchConfig = {
 				'[data-disabled="true"] &': {
 					opacity: vars.interaction.disabledOpacity,
 				},
-				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
+				'[data-focus-visible="true"] &': focusRing(vars.color.focus),
 				[`${hovered()}, ${pressed()}`]: {
 					backgroundColor: controlBorderState('hover'),
 					borderColor: controlBorderState('hover'),

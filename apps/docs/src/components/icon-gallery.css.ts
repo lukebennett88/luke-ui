@@ -52,7 +52,7 @@ export const copyButton = style({
 					color: vars.color.foreground.primary,
 				},
 				'&:focus-visible': {
-					outline: `2px solid ${vars.color.border.focus}`,
+					outline: `2px solid ${vars.color.focus}`,
 					outlineOffset: '-2px',
 				},
 			},

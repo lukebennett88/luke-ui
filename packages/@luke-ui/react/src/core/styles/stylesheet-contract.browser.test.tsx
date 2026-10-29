@@ -33,7 +33,7 @@ const globalRules = [
 	[':where(button, input, select, textarea)', 'font: inherit; margin: 0px;'],
 	[
 		':where(:focus-visible)',
-		'outline-color: var(--luke-color-border-focus); outline-offset: 2px; outline-style: solid; outline-width: 2px;',
+		'outline-color: var(--luke-color-focus); outline-offset: 2px; outline-style: solid; outline-width: 2px;',
 	],
 	['@media (forced-colors: active) :where(:focus-visible)', 'outline-color: highlight;'],
 ];

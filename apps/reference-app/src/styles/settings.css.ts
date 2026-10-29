@@ -42,7 +42,7 @@ export const skipLink = style({
 			inlineSize: 'auto',
 			insetBlockStart: vars.space['8'],
 			insetInlineStart: vars.space['8'],
-			outline: `2px solid ${vars.color.border.focus}`,
+			outline: `2px solid ${vars.color.focus}`,
 			outlineOffset: '2px',
 			overflow: 'visible',
 		},
@@ -63,7 +63,7 @@ export const navLink = style({
 	paddingInline: vars.space['8'],
 	selectors: {
 		'&:focus-visible': {
-			outline: `2px solid ${vars.color.border.focus}`,
+			outline: `2px solid ${vars.color.focus}`,
 			outlineOffset: '2px',
 		},
 		'&:hover': {
@@ -119,7 +119,7 @@ export const mobileHeaderLink = style({
 	minBlockSize: '44px',
 	selectors: {
 		'&:focus-visible': {
-			outline: `2px solid ${vars.color.border.focus}`,
+			outline: `2px solid ${vars.color.focus}`,
 			outlineOffset: '2px',
 		},
 		'&:hover': {
@@ -206,7 +206,7 @@ export const avatarButton = style({
 			transform: 'none',
 		},
 		'&[data-focus-visible]': {
-			outline: `2px solid ${vars.color.border.focus}`,
+			outline: `2px solid ${vars.color.focus}`,
 			outlineOffset: '2px',
 		},
 		'&[data-pressed]': {
@@ -308,7 +308,7 @@ export const emailEditButton = style({
 			opacity: vars.interaction.disabledOpacity,
 		},
 		'&[data-focus-visible]': {
-			outline: `2px solid ${vars.color.border.focus}`,
+			outline: `2px solid ${vars.color.focus}`,
 			outlineOffset: '2px',
 		},
 		'&[data-hovered]': {

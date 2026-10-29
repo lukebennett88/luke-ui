@@ -4,7 +4,7 @@ import { themeTokens } from '../generated/token-reference.generated.js';
 import { buildTokenSections, COLOR_FAMILIES, ROLES } from './token-grammar.js';
 
 /** Title-case MDX headings for each colour family, in page order. */
-const COLOR_HEADINGS = ['Background', 'Foreground', 'Border'] as const;
+const COLOR_HEADINGS = ['Background', 'Foreground', 'Border', 'Focus'] as const;
 
 const COLOR_HEADING_PATTERN = new RegExp(
 	`^### (${COLOR_HEADINGS.map((heading) => heading.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})$`,
@@ -15,6 +15,7 @@ const COLOR_HEADING_TO_FAMILY = {
 	Background: 'background',
 	Foreground: 'foreground',
 	Border: 'border',
+	Focus: 'focus',
 } as const satisfies Record<(typeof COLOR_HEADINGS)[number], (typeof COLOR_FAMILIES)[number]>;
 
 test('the catalogue covers every public token exactly once', () => {
@@ -44,7 +45,7 @@ for (const familyId of ['background', 'foreground'] as const) {
 	});
 }
 
-for (const familyId of ['border'] as const) {
+for (const familyId of ['border', 'focus'] as const) {
 	test(`${familyId} is a flat list under color.${familyId}`, () => {
 		const family = buildTokenSections().colors.find(({ id }) => id === familyId);
 		expect(family?.roles).toBeNull();

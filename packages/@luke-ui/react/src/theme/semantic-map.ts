@@ -90,7 +90,7 @@ function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColor
 		'color.foreground.disabled': formatOklch(neutral[FAMILY_RUNG.muted]),
 		'color.border.decorative': formatOklch(neutral[FAMILY_RUNG.decorative]),
 		'color.border.control': formatOklch(controlBorder),
-		'color.border.focus': formatOklch(focus),
+		'color.focus': formatOklch(focus),
 	};
 }
 

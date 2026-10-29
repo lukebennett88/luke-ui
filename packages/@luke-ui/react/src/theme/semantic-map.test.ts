@@ -132,7 +132,7 @@ describe('mapSemanticColors', () => {
 					formatOklch(families.neutral[FAMILY_RUNG.decorative]),
 				);
 				expect(result['color.border.control']).toBe(formatOklch(controlBorder));
-				expect(result['color.border.focus']).toBe(formatOklch(FOCUS));
+				expect(result['color.focus']).toBe(formatOklch(FOCUS));
 
 				// The shared contract: identical rest / hover / pressed mapping for every semantic role.
 				for (const role of SEMANTIC_ROLES) {

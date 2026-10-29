@@ -37,7 +37,7 @@ type BackgroundColorToken =
 	| `${SemanticRole}.solid`
 	| `surface.${keyof typeof vars.color.background.surface}`;
 
-type BorderColorToken = `${SemanticRole}.strong` | 'control' | 'decorative' | 'focus';
+type BorderColorToken = `${SemanticRole}.strong` | 'control' | 'decorative';
 
 const backgroundColors = [
 	...SEMANTIC_ROLES.flatMap((role) => {
@@ -89,7 +89,6 @@ for (const [condition, query] of typedEntries(responsiveConditions)) {
 const borderColorScale = {
 	control: vars.color.border.control,
 	decorative: vars.color.border.decorative,
-	focus: vars.color.border.focus,
 	...Object.fromEntries(
 		SEMANTIC_ROLES.flatMap((role) => {
 			return [[`${role}.strong`, vars.color.border[role].strong]] as const;

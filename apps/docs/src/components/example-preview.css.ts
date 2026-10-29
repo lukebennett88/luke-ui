@@ -106,7 +106,7 @@ export const previewGripState = style({
 					borderColor: vars.color.foreground.secondary,
 				},
 				[`${previewSeparator}[data-separator=focus] &`]: {
-					boxShadow: `0 0 0 2px ${vars.color.border.focus}`,
+					boxShadow: `0 0 0 2px ${vars.color.focus}`,
 				},
 			},
 			'@media': {
