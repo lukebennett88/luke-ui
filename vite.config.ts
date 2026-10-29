@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite-plus';
 
 export default defineConfig({
+	staged: {
+		'*.{ts,tsx,js,jsx,mjs}': 'vp lint --deny no-nested-ternary',
+	},
 	fmt: {
 		arrowParens: 'always',
 		bracketSameLine: false,
