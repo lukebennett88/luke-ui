@@ -30,6 +30,7 @@
 		"fix:unused": "turbo run //#fix:unused:run",
 		"fix:unused:run": "knip --fix",
 		"generate": "turbo run generate",
+		"lint:changed": "vp staged --no-stash --diff=\"$(git merge-base origin/main HEAD)\"",
 		"release": "turbo run build --filter=docs^... && changeset publish",
 		"scaffold:component": "pnpm --filter=@luke-ui/scaffolding run scaffold:component",
 		"scaffold:primitive": "pnpm --filter=@luke-ui/scaffolding run scaffold:primitive",
