@@ -30,7 +30,8 @@ Useful repo commands:
 
 - `pnpm run check`: barrels, format, lint, types, docs, cycles, and unused code.
 - `pnpm run build`: build all packages and apps.
-- `pnpm run test`: run the repository test suites.
+- `pnpm run test`: run every test suite, including the Docker visual comparison.
+- `pnpm run test:code`: run every suite except the visual comparison. It needs no Docker.
 - `pnpm run dev:reference-app`: develop the consumer reference app.
 
 See [Workflows](docs/WORKFLOWS.md) for focused commands, generation, fixing, cleaning, and task
