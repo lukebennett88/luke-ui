@@ -93,6 +93,12 @@ export interface ThemeSourceColors {
 	danger: Oklch;
 	/** Keyboard-focus ring colour, used verbatim after gamut mapping. */
 	focus: Oklch;
+	/**
+	 * Whether `focus` was authored or is the curated mode default. Contrast diagnostics report it.
+	 * `defineTheme` always sets it. A foundation passed straight to `buildTheme` is treated as
+	 * authored when it is omitted.
+	 */
+	focusOrigin?: FocusOrigin;
 	/** Source colour for the `info` role. */
 	info: Oklch;
 	/**
@@ -108,6 +114,9 @@ export interface ThemeSourceColors {
 	/** Source colour for the `warning` role. */
 	warning: Oklch;
 }
+
+/** Whether a source colour came from the theme author or from Luke UI's curated defaults. */
+export type FocusOrigin = 'authored' | 'default';
 
 /** The surface roles a theme emits. */
 export const SURFACE_ROLES = ['base', 'subdued', 'raised'] as const;

@@ -90,8 +90,14 @@ advisory group. Every gate covers all three surfaces: forms, links, and semantic
   fills use `color.background.danger.solid.*`, with both on-solid foreground leaves gated at 4.5:1
   across rest, hover, and pressed. Danger solid fills do not carry a 3:1 guarantee against the
   surrounding surface.
-- `color.focus` is a hard gate against all three surfaces. The keyboard-focus ring stays build-time
-  validated at ≥3:1.
+- `color.focus` is a hard gate at ≥3:1 against all three surfaces and every role's subtle fill,
+  because the keyboard-focus ring can sit beside any of them. A failure carries a `source` of
+  `authored` or `default`, and the message points a failing default to `ThemeInput.color.focus`. The
+  compiler never repairs the colour, and it is not an alias for `border.accent.strong`. Every focus
+  ring paints `vars.color.focus` as a 2px outline with a 2px offset, and forced colours use
+  `Highlight`. Solid fills are not a supported focus background: a ring beside one has no contrast
+  guarantee. `focus-ring-contrast.browser.test.tsx` measures the painted ring against the pixels
+  beside it for representative controls on the nine supported backgrounds.
 - `color.foreground.accent.onSolid` is also a hard gate at 3:1 against
   `color.background.accent.solid.rest` and `color.background.accent.solid.pressed`. The active
   Select or Combobox option draws a 2px inset outline in that on-solid colour on those fills, so the

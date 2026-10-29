@@ -60,6 +60,85 @@ describe('buildTheme contrast failures', () => {
 		);
 	});
 
+	it('rejects a focus colour that clears the three surfaces but misses every role subtle fill', () => {
+		const focus = resolvedColor('oklch(0.64 0 0)');
+		const { surface } = tactileFoundation.light.color;
+		expect(contrastRatio(focus, surface.base)).toBeGreaterThanOrEqual(UI_RATIO);
+		const error = buildFailures({
+			...tactileFoundation,
+			light: {
+				...tactileFoundation.light,
+				color: { ...tactileFoundation.light.color, focus },
+			},
+			name: 'focus-misses-subtle',
+		});
+		expect(error.failures.map((failure) => failure.background).toSorted()).toEqual(
+			SEMANTIC_ROLES.map((role) => `color.background.${role}.subtle`).toSorted(),
+		);
+		for (const failure of error.failures) {
+			expect(failure.foreground).toBe('color.focus');
+			expect(failure.mode).toBe('light');
+			expect(failure.required).toBe(UI_RATIO);
+			expect(failure.ratio).toBeLessThan(UI_RATIO);
+		}
+		expect(error.message).toContain('light: color.focus on color.background.danger.subtle — ');
+	});
+
+	it('reports an authored focus colour as authored', () => {
+		const error = buildFailures({
+			...tactileFoundation,
+			light: {
+				...tactileFoundation.light,
+				color: {
+					...tactileFoundation.light.color,
+					focus: resolvedColor('#c5d9ff'),
+					focusOrigin: 'authored',
+				},
+			},
+		});
+		const failures = error.failures.filter((failure) => failure.foreground === 'color.focus');
+		expect(failures.length).toBeGreaterThan(0);
+		for (const failure of failures) expect(failure.source).toBe('authored');
+		expect(error.message).toContain('(authored ThemeInput.color.focus)');
+		expect(error.message).not.toContain('curated default');
+	});
+
+	it('reports a failing curated default and points to ThemeInput.color.focus', () => {
+		const error = buildFailures({
+			...tactileFoundation,
+			light: {
+				...tactileFoundation.light,
+				color: {
+					...tactileFoundation.light.color,
+					focus: resolvedColor('#c5d9ff'),
+					focusOrigin: 'default',
+				},
+			},
+		});
+		const failures = error.failures.filter((failure) => failure.foreground === 'color.focus');
+		expect(failures.length).toBeGreaterThan(0);
+		for (const failure of failures) expect(failure.source).toBe('default');
+		expect(error.message).toContain(
+			'(curated default focus colour; set ThemeInput.color.focus to override)',
+		);
+	});
+
+	it('leaves failures for other tokens without a focus source', () => {
+		const error = buildFailures({
+			...tactileFoundation,
+			dark: {
+				...tactileFoundation.dark,
+				color: {
+					...tactileFoundation.dark.color,
+					surface: { base: resolvedColor('oklch(0.9 0 0)') },
+				},
+			},
+		});
+		const others = error.failures.filter((failure) => failure.foreground !== 'color.focus');
+		expect(others.length).toBeGreaterThan(0);
+		expect(others.every((failure) => !('source' in failure))).toBe(true);
+	});
+
 	it('accepts pale and deep accents whose solids may fail 3:1 against raised', () => {
 		// The active option's focus chrome is an inset outline on the solid fill, gated against that
 		// fill (and already covered at 4.5:1 by the on-solid text gates), not against the list surface.
@@ -113,7 +192,7 @@ describe('buildTheme contrast failures', () => {
 			...tactileFoundation,
 			light: {
 				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, focus },
+				color: { ...tactileFoundation.light.color, focus, focusOrigin: 'authored' },
 			},
 		});
 		const ratio = contrastRatio(parseColor('oklch(0.6583 0 0)'), base);
@@ -124,6 +203,7 @@ describe('buildTheme contrast failures', () => {
 			background: 'color.background.surface.base',
 			ratio,
 			required: UI_RATIO,
+			source: 'authored',
 		});
 	});
 
@@ -260,7 +340,7 @@ describe('contrast validation matrix', () => {
 				hard.push({ background, foreground: `color.border.${role}.strong`, required: UI_RATIO });
 			}
 		}
-		for (const background of SURFACES) {
+		for (const background of [...SURFACES, ...subtleBackgrounds]) {
 			hard.push({ background, foreground: 'color.focus', required: UI_RATIO });
 		}
 		for (const state of INTERACTION_STATES) {
@@ -534,4 +614,100 @@ describe('on-solid contrast gates', () => {
 			}
 		});
 	}
+});
+
+describe('focus colour contrast gates', () => {
+	const FOCUS_BACKGROUNDS = [
+		'color.background.surface.base',
+		'color.background.surface.subdued',
+		'color.background.surface.raised',
+		...SEMANTIC_ROLES.map((role) => `color.background.${role}.subtle`),
+	];
+
+	function defineFailure(input: Parameters<typeof defineTheme>[0]): ThemeContrastError {
+		try {
+			defineTheme(input);
+		} catch (error) {
+			if (error instanceof ThemeContrastError) return error;
+			throw error;
+		}
+		throw new Error('expected defineTheme to throw ThemeContrastError');
+	}
+
+	// A mid-light base canvas that no curated light default can read against.
+	const unreadableLightBase = { light: 'oklch(0.6 0 0)' };
+
+	for (const foundation of [tactileFoundation, paperFoundation]) {
+		it(`clears all nine focus gates in light and dark for the ${foundation.name} defaults`, () => {
+			const { diagnostics } = compileTheme(foundation);
+			for (const mode of ['light', 'dark'] as const) {
+				const checks = diagnostics[mode].contrastChecks.filter((check) => {
+					return check.foreground === 'color.focus';
+				});
+				expect(checks.map((check) => check.background).toSorted()).toEqual(
+					FOCUS_BACKGROUNDS.toSorted(),
+				);
+				for (const check of checks) {
+					expect(check.hard).toBe(true);
+					expect(check.required).toBe(UI_RATIO);
+					expect(check.ratio).toBeGreaterThanOrEqual(UI_RATIO);
+				}
+				expect(foundation[mode].color.focusOrigin).toBe('default');
+			}
+		});
+	}
+
+	it('names a failing curated default and points to ThemeInput.color.focus', () => {
+		const error = defineFailure({
+			color: { accent: '#3b82f6', surface: { base: unreadableLightBase } },
+			name: 'default-focus-fails',
+			typography: testTypography,
+		});
+		const focus = error.failures.filter((failure) => failure.foreground === 'color.focus');
+		expect(focus.length).toBeGreaterThan(0);
+		for (const failure of focus) {
+			expect(failure.mode).toBe('light');
+			expect(failure.source).toBe('default');
+		}
+		expect(error.message).toContain('light: color.focus on color.background.surface.base — ');
+		expect(error.message).toContain('curated default focus colour; set ThemeInput.color.focus');
+	});
+
+	it('names a failing authored focus colour as authored, even when the canvas is at fault', () => {
+		const error = defineFailure({
+			color: {
+				accent: '#3b82f6',
+				focus: '#c5d9ff',
+				surface: { base: unreadableLightBase },
+			},
+			name: 'authored-focus-fails',
+			typography: testTypography,
+		});
+		const focus = error.failures.filter((failure) => failure.foreground === 'color.focus');
+		expect(focus.map((failure) => failure.mode)).toContain('light');
+		for (const failure of focus) expect(failure.source).toBe('authored');
+		expect(error.message).toContain('authored ThemeInput.color.focus');
+		expect(error.message).not.toContain('curated default');
+	});
+
+	it('treats a missing mode side as the curated default', () => {
+		const foundation = normalizeTheme({
+			color: { accent: '#3b82f6', focus: { light: '#c5d9ff' } },
+			name: 'one-sided-focus',
+			typography: testTypography,
+		});
+		expect(foundation.light.color.focusOrigin).toBe('authored');
+		expect(foundation.dark.color.focusOrigin).toBe('default');
+	});
+
+	it('does not repair an authored focus colour', () => {
+		const authored = resolvedColor('#c5d9ff');
+		const foundation = normalizeTheme({
+			color: { accent: '#3b82f6', focus: '#c5d9ff' },
+			name: 'authored-focus',
+			typography: testTypography,
+		});
+		expect(foundation.light.color.focus).toEqual(authored);
+		expect(foundation.dark.color.focus).toEqual(authored);
+	});
 });

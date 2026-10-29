@@ -305,6 +305,8 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 		backdrop: resolveVerbatimRole(color.backdrop, mode, defaultBackdrop[mode]),
 		danger: resolveChromaticRole(color.danger, mode, 'danger', defaults.danger, textPrimary),
 		focus: resolveSourceRole(color.focus, mode, defaults.focus),
+		focusOrigin:
+			color.focus !== undefined && authorsMode(color.focus, mode) ? 'authored' : 'default',
 		info: resolveChromaticRole(color.info, mode, 'info', defaults.info, textPrimary),
 		success: resolveChromaticRole(color.success, mode, 'success', defaults.success, textPrimary),
 		surface: resolveSurfaces(color.surface, mode, neutral),
@@ -433,6 +435,11 @@ function resolveSourceRole(
 	if (input === undefined) return gamutMapOklch(parseColor(fallback));
 	if (typeof input === 'string') return gamutMapOklch(parseColor(input));
 	return gamutMapOklch(parseColor(sideOf(input, mode) ?? fallback));
+}
+
+/** Whether an authored `ColorInput` supplies a value for this mode. */
+function authorsMode(input: ColorInput, mode: ColorMode): boolean {
+	return typeof input === 'string' || input[mode] !== undefined;
 }
 
 /**
