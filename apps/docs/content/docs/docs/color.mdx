@@ -93,22 +93,18 @@ the same.
 
 ### Borders
 
-Each role has two state-free borders, for example `vars.color.border.warning.subtle` and
-`vars.color.border.warning.strong`. The token describes meaning. The component decides when to apply
-it, such as only while invalid or as a permanent outline.
+Each role has one state-free border, for example `vars.color.border.warning.strong`. The token
+describes meaning. The component decides when to apply it, such as only while invalid or as a
+permanent outline.
 
-`strong` is the functional border. It reaches at least 3:1 against all three standard surfaces and
-that role's own subtle background in both modes. `color.border.danger.strong` marks an invalid
-control's boundary. Use `strong` for borders and outline edges that identify a component or state.
-Danger solid backgrounds carry the on-solid text guarantee, but have no 3:1 guarantee against those
-surfaces.
+`strong` is the functional border. It reaches at least 3:1 against the three standard surfaces and
+that role's own subtle background in both modes. It carries no guarantee against other backgrounds.
+`color.border.danger.strong` marks an invalid control's boundary. Danger solid backgrounds carry the
+on-solid text guarantee, but have no 3:1 guarantee against those surfaces.
 
-`subtle` is decorative, for example on an application notice. Luke UI measures its contrast, but
-does not guarantee it reaches 3:1. See
-[contrast validation](/docs/authoring-a-theme#contrast-validation). Never rely on one alone to
-communicate a required state such as selected, invalid, or checked. Pair it with text, an icon, or
-another cue that is separately contrast-gated, or use `strong`. Use `color.border.control` when a
-custom element needs a guaranteed boundary.
+Roles have no decorative border. Use `color.border.decorative` for a separator or other decorative
+boundary. See [contrast validation](/docs/authoring-a-theme#contrast-validation). Use
+`color.border.control` when a custom element needs a guaranteed boundary.
 
 ### The numeric scale is private
 

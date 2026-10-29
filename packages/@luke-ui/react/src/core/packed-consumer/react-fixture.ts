@@ -369,7 +369,6 @@ export const retainedTokens: Array<string> = [
 	vars.color.background.surface.subdued,
 	vars.color.background.surface.raised,
 	vars.color.border.control,
-	vars.color.border.warning.subtle,
 	vars.color.border.warning.strong,
 	vars.interaction.tint.hover,
 	vars.interaction.tint.pressed,

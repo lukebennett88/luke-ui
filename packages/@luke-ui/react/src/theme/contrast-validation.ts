@@ -50,8 +50,8 @@ type ColorPath = keyof SemanticColorValues;
  * the outline's adjacent colour is the solid, not the list surface. The existing 4.5:1 on-solid
  * text gates already cover the same pairs; these 3:1 checks name the outline contract explicitly.
  *
- * Each role's `border.<role>.subtle` is decorative, measured but not gated, so a component must never
- * rely on one alone for a required state.
+ * `border.decorative` is a separator, not checked, so a component must never rely on it alone for a
+ * required state.
  */
 export function validateContrast(
 	mode: ColorMode,
@@ -134,11 +134,6 @@ export function validateContrast(
 		'color.background.accent.solid.pressed',
 	] as const) {
 		check('color.foreground.accent.onSolid', fill, UI_RATIO, true);
-	}
-	for (const role of SEMANTIC_ROLES) {
-		for (const surface of surfacePaths) {
-			check(`color.border.${role}.subtle`, surface, UI_RATIO, false);
-		}
 	}
 
 	return { checks, failures };

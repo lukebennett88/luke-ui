@@ -1,6 +1,5 @@
 /**
- * Solves `color.border.<role>.strong`, the functional semantic boundary every role publishes beside
- * its decorative `subtle` border.
+ * Solves `color.border.<role>.strong`, the functional semantic boundary every role publishes.
  */
 
 import type { Oklch } from './color.js';

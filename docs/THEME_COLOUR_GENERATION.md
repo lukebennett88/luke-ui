@@ -80,13 +80,14 @@ advisory group. Every gate covers all three surfaces: forms, links, and semantic
   `border.control` toward `text.primary` at 20% and 40% in encoded sRGB, matching CSS `color-mix`.
   The compiler checks the rounded mixed values, including for custom themes.
 - `color.border.<role>.strong` is a hard gate for all six roles at ≥3:1 against every surface and
-  that role's own subtle fill in both modes, including custom themes. The solver starts at the
-  role's step-7 border, walks lightness away from the backgrounds, keeps hue and chroma, and checks
-  the emitted (rounded, gamut-mapped) colour. A failure names the role's strong border, the
-  background, and the ratio. Invalid controls use `color.border.danger.strong` for their borders and
-  outline edges. Their selected or checked danger fills use `color.background.danger.solid.*`, with
-  both on-solid foreground leaves gated at 4.5:1 across rest, hover, and pressed. Danger solid fills
-  do not carry a 3:1 guarantee against the surrounding surface.
+  that role's own subtle fill in both modes, including custom themes. It carries no guarantee
+  against other backgrounds. The solver starts at the role's step-7 border, walks lightness away
+  from the backgrounds, keeps hue and chroma, and checks the emitted (rounded, gamut-mapped) colour.
+  A failure names the role's strong border, the background, and the ratio. Invalid controls use
+  `color.border.danger.strong` for their borders and outline edges. Their selected or checked danger
+  fills use `color.background.danger.solid.*`, with both on-solid foreground leaves gated at 4.5:1
+  across rest, hover, and pressed. Danger solid fills do not carry a 3:1 guarantee against the
+  surrounding surface.
 - `color.border.focus` is a hard gate against all three surfaces. The keyboard-focus ring stays
   build-time validated at ≥3:1.
 - `color.foreground.accent.onSolid` is also a hard gate at 3:1 against
@@ -96,8 +97,7 @@ advisory group. Every gate covers all three surfaces: forms, links, and semantic
   text. The compiler never changes an authored accent to pass a gate.
 - `color.border.decorative` is not checked. It is a deliberately subtle, Radix-style separator below
   3:1.
-- `color.border.<role>.subtle` is the step-7 decorative tint for each of the six roles, with an
-  advisory 3:1 check against the surfaces. A miss does not gate the build.
+- Roles have no decorative border. Decorative boundaries use `color.border.decorative`.
 
 Component invariant (tracked separately,
 [#247](https://github.com/lukebennett88/luke-ui/issues/247)): any component that uses an advisory

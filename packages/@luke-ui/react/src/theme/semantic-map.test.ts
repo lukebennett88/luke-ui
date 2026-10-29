@@ -157,9 +157,6 @@ describe('mapSemanticColors', () => {
 						formatOklch(mixInteractionState(foreground, textPrimary, INTERACTION_PRESSED_STRENGTH)),
 					);
 					expect(result[`color.foreground.${role}.onSolid`]).toBe(formatOklch(family.contrast));
-					expect(result[`color.border.${role}.subtle`]).toBe(
-						formatOklch(family[FAMILY_RUNG.border]),
-					);
 					expect(result[`color.border.${role}.strong`]).toBe(formatOklch(STRONG_BORDER[mode]));
 				}
 			});

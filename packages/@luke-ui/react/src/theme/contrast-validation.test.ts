@@ -257,13 +257,6 @@ describe('contrast validation matrix', () => {
 					required: TEXT_RATIO,
 				});
 			}
-			for (const background of SURFACES) {
-				advisory.push({
-					background,
-					foreground: `color.border.${role}.subtle`,
-					required: UI_RATIO,
-				});
-			}
 			for (const background of [...SURFACES, `color.background.${role}.subtle`]) {
 				hard.push({ background, foreground: `color.border.${role}.strong`, required: UI_RATIO });
 			}

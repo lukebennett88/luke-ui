@@ -37,12 +37,7 @@ type BackgroundColorToken =
 	| `${SemanticRole}.solid`
 	| `surface.${keyof typeof vars.color.background.surface}`;
 
-type BorderColorToken =
-	| `${SemanticRole}.subtle`
-	| `${SemanticRole}.strong`
-	| 'control'
-	| 'decorative'
-	| 'focus';
+type BorderColorToken = `${SemanticRole}.strong` | 'control' | 'decorative' | 'focus';
 
 const backgroundColors = [
 	...SEMANTIC_ROLES.flatMap((role) => {
@@ -87,9 +82,9 @@ for (const [condition, query] of typedEntries(responsiveConditions)) {
 }
 
 /**
- * Border colours: the structural borders plus each role's `subtle` and `strong` border, keyed as
- * `<role>.subtle` and `<role>.strong` like the role backgrounds. `*.strong` and `control` are
- * guaranteed 3:1 boundaries. `*.subtle` and `decorative` are decorative.
+ * Border colours: the structural borders plus each role's `strong` border, keyed as `<role>.strong`
+ * like the role backgrounds. `*.strong` and `control` are guaranteed 3:1 boundaries. `decorative`
+ * is a separator.
  */
 const borderColorScale = {
 	control: vars.color.border.control,
@@ -97,10 +92,7 @@ const borderColorScale = {
 	focus: vars.color.border.focus,
 	...Object.fromEntries(
 		SEMANTIC_ROLES.flatMap((role) => {
-			return [
-				[`${role}.subtle`, vars.color.border[role].subtle],
-				[`${role}.strong`, vars.color.border[role].strong],
-			] as const;
+			return [[`${role}.strong`, vars.color.border[role].strong]] as const;
 		}),
 	),
 } as { [Token in BorderColorToken]: string };
@@ -139,8 +131,7 @@ const dynamicProperties = {
 		stretch: 'stretch',
 	},
 	blockSize: true,
-	// `control` and every `<role>.strong` are guaranteed 3:1 boundaries. `<role>.subtle` and
-	// `decorative` are not.
+	// `control` and every `<role>.strong` are guaranteed 3:1 boundaries. `decorative` is not.
 	borderColor: borderColorScale,
 	borderRadius: vars.radius,
 	borderStyle: { none: 'none', solid: 'solid', dashed: 'dashed', dotted: 'dotted' },

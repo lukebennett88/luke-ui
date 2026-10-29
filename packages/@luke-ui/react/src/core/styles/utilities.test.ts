@@ -72,10 +72,7 @@ test('derives token-backed Box values from the public contract', () => {
 			return ['borderColor', key, vars.color.border[key as 'focus']] as const;
 		}),
 		...SEMANTIC_ROLES.flatMap((role) => {
-			return [
-				['borderColor', `${role}.subtle`, vars.color.border[role].subtle],
-				['borderColor', `${role}.strong`, vars.color.border[role].strong],
-			] as const;
+			return [['borderColor', `${role}.strong`, vars.color.border[role].strong]] as const;
 		}),
 		...Object.entries(vars.space).map(([key, value]) => ['gap', `space.${key}`, value] as const),
 	];

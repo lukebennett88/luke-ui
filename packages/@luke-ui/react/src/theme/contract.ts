@@ -114,9 +114,10 @@ export const themeContractTree = {
 			// The shared semantic borders. State-free on purpose: the token carries the meaning and the
 			// component decides when to apply it.
 			...perRole(() => ({
-				/** A decorative boundary. Carries no contrast guarantee. */
-				subtle: null,
-				/** A functional boundary: at least 3:1 against every surface and the role's subtle fill. */
+				/**
+				 * A functional boundary: at least 3:1 against the three surfaces and the role's own subtle
+				 * background. Not guaranteed against arbitrary backgrounds.
+				 */
 				strong: null,
 			})),
 		},

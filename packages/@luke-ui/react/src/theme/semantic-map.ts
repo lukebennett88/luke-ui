@@ -116,7 +116,6 @@ function mapRoleColorValues(
 				pathEntry(`color.foreground.${role}.hover`, foreground.hover),
 				pathEntry(`color.foreground.${role}.pressed`, foreground.pressed),
 				pathEntry(`color.foreground.${role}.onSolid`, formatOklch(family.contrast)),
-				pathEntry(`color.border.${role}.subtle`, formatOklch(family[FAMILY_RUNG.border])),
 				pathEntry(`color.border.${role}.strong`, formatOklch(strongBorders[role])),
 			];
 		}),

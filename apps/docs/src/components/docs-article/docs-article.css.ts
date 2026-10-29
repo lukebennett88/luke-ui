@@ -179,7 +179,7 @@ export const tocLink = style({
 					color: vars.color.foreground.primary,
 				},
 				'&[aria-current="location"]': {
-					borderInlineStartColor: vars.color.border.accent.subtle,
+					borderInlineStartColor: vars.color.border.accent.strong,
 					color: vars.color.foreground.accent.rest,
 				},
 			},
