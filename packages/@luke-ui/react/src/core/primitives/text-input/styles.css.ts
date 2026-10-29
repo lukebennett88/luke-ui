@@ -10,7 +10,7 @@ import {
 import { style } from '../../styles/layered-style.css.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
-import { surfaceStyle } from '../../styles/surface.js';
+import { contextualFocus, surfaceStyle } from '../../styles/surface.js';
 
 /**
  * Resting inline padding of the input, set per `size`. A standalone input sets it on itself, and
@@ -152,7 +152,7 @@ export const textInputPartsRecipe = recipe({
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
-				[control.focusWithin]: focusRing(vars.color.focus),
+				[control.focusWithin]: focusRing(contextualFocus()),
 				[control.hover]: {
 					borderColor: vars.color.border.control.hover,
 				},

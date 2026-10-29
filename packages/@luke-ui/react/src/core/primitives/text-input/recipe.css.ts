@@ -4,7 +4,7 @@ import { focusRing } from '../../styles/focus-ring.js';
 import { composeInputStateSelectors } from '../../styles/input-states.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import { recipe } from '../../styles/recipe.js';
-import { surfaceStyle } from '../../styles/surface.js';
+import { contextualFocus, surfaceStyle } from '../../styles/surface.js';
 import {
 	textInputInlinePadding,
 	textInputInputBase,
@@ -70,7 +70,7 @@ export const textInputRecipe = recipe({
 			[input.disabled]: {
 				opacity: vars.interaction.disabledOpacity,
 			},
-			[input.focusWithin]: focusRing(vars.color.focus),
+			[input.focusWithin]: focusRing(contextualFocus()),
 			[input.hover]: {
 				borderColor: vars.color.border.control.hover,
 			},

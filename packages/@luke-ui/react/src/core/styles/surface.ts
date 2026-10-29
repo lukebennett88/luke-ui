@@ -44,6 +44,11 @@ const foregroundOverride = {
 	tone: createGlobalVar('luke-internal-foreground-tone'),
 };
 
+// The ring colour a container's fill establishes for the focusable controls inside it. Only
+// containers declare it, never a control that paints its own fill, because a control's ring is
+// adjacent to the surface around it, not to its own fill.
+const focusOverride = createGlobalVar('luke-internal-focus');
+
 function solidStateVars(
 	value: (tone: SolidStateTone, slot: 'hover' | 'pressed' | 'text') => string,
 ) {
@@ -76,6 +81,32 @@ export function contextualForeground(
 		return fallbackVar(foregroundOverride.secondary, vars.color.foreground.secondary);
 	}
 	return fallbackVar(foregroundOverride.tone, vars.color.foreground[slot][state]);
+}
+
+/**
+ * The focus ring colour for the nearest container. On a standard surface or any subtle fill, the
+ * literal `vars.color.focus`, which is gated against those backgrounds. On a solid fill, that role's
+ * on-solid colour, because no single focus colour can clear both the page and every solid.
+ */
+export function contextualFocus(): string {
+	return fallbackVar(focusOverride, vars.color.focus);
+}
+
+/**
+ * `surfaceStyle` for an element that is a container, such as `Box`, the page, or an overlay panel.
+ * It also sets the focus ring context for the controls inside it. A control that paints its own
+ * fill uses `surfaceStyle`, so its ring keeps the container's context.
+ */
+export function containerSurfaceStyle(background: SurfaceBackground): SurfaceStyle {
+	const pairing = surfaceStyle(background);
+	const role = SEMANTIC_ROLES.find((candidate) => background.startsWith(`${candidate}.solid`));
+	return {
+		...pairing,
+		vars: {
+			...pairing.vars,
+			[focusOverride]: role === undefined ? 'initial' : vars.color.foreground[role].onSolid,
+		},
+	};
 }
 
 /**
@@ -117,6 +148,7 @@ export function transparentSurfaceStyle(): SurfaceStyle {
 			[foregroundOverride.primary]: 'inherit',
 			[foregroundOverride.secondary]: 'inherit',
 			[foregroundOverride.tone]: 'inherit',
+			[focusOverride]: 'inherit',
 		},
 	};
 }

@@ -9,7 +9,7 @@ import { layers } from './layers.css.js';
 import { responsiveConditions } from './responsive-conditions.js';
 import { spaceTokens } from './space-tokens.js';
 import type { SurfaceBackground } from './surface.js';
-import { surfaceStyle } from './surface.js';
+import { containerSurfaceStyle } from './surface.js';
 
 // Every token-backed scale below derives from the public `vars` contract, so a token removed from
 // the contract removes its Box value too.
@@ -69,7 +69,7 @@ const backgroundColorValues: Partial<
 > = {};
 for (const [condition, query] of typedEntries(responsiveConditions)) {
 	for (const [token, background] of backgroundColors) {
-		const rule = surfaceStyle(background);
+		const rule = containerSurfaceStyle(background);
 		const conditionalRule =
 			'@container' in query ? { '@container': { [query['@container']]: rule } } : rule;
 		const className = style(

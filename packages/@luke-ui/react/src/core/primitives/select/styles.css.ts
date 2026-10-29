@@ -5,7 +5,7 @@ import { descendantDisabledSelector } from '../../styles/input-states.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
-import { surfaceStyle } from '../../styles/surface.js';
+import { contextualFocus, surfaceStyle } from '../../styles/surface.js';
 
 const notDisabled = ':not([data-disabled="true"])';
 const rootInvalid = `[data-invalid="true"] &${notDisabled}`;
@@ -76,7 +76,7 @@ const selectConfig = {
 					borderColor: vars.color.border.control.hover,
 				},
 				// Focus only adds the ring, so it composes with every state.
-				[`&[data-focus-visible="true"]${notDisabled}`]: focusRing(vars.color.focus),
+				[`&[data-focus-visible="true"]${notDisabled}`]: focusRing(contextualFocus()),
 				// The field's error message carries the non-colour invalid cue, so the border keeps its
 				// resting width and only takes the danger colour. This comes after the states above so an
 				// invalid select keeps its danger border while hovered, open, or focused.

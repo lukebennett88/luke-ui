@@ -5,6 +5,7 @@ import { focusRing } from '../../styles/focus-ring.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+import { contextualFocus } from '../../styles/surface.js';
 import { textLineHeight } from '../../text/recipe.css.js';
 import { inlineControlGap, inlineFieldIndent } from '../field/recipe.css.js';
 
@@ -102,7 +103,7 @@ const switchConfig = {
 				'[data-disabled="true"] &': {
 					opacity: vars.interaction.disabledOpacity,
 				},
-				'[data-focus-visible="true"] &': focusRing(vars.color.focus),
+				'[data-focus-visible="true"] &': focusRing(contextualFocus()),
 				[`${hovered()}, ${pressed()}`]: {
 					backgroundColor: vars.color.border.control.hover,
 					borderColor: vars.color.border.control.hover,

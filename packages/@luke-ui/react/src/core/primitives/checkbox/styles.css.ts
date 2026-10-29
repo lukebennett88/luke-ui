@@ -9,7 +9,7 @@ import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { interactionStateLayer } from '../../styles/state-layer.css.js';
-import { surfaceStyle } from '../../styles/surface.js';
+import { contextualFocus, surfaceStyle } from '../../styles/surface.js';
 import { textLineHeight } from '../../text/recipe.css.js';
 import { inlineControlGap, inlineFieldIndent } from '../field/recipe.css.js';
 
@@ -133,7 +133,7 @@ const checkboxConfig = {
 				'[data-disabled="true"] &': {
 					opacity: vars.interaction.disabledOpacity,
 				},
-				'[data-focus-visible="true"] &': focusRing(vars.color.focus),
+				'[data-focus-visible="true"] &': focusRing(contextualFocus()),
 				[hovered()]: {
 					...checkboxStateLayer('hover'),
 					borderColor: vars.color.border.control.hover,

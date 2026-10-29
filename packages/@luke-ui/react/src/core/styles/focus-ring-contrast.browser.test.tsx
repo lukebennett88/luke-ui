@@ -142,6 +142,13 @@ async function tabInto(tile: Element) {
 	expect(tile.contains(document.activeElement), 'focus reached the tile').toBe(true);
 }
 
+/** The colour a ring paints on `background`: the role's on-solid inside a solid, else the focus colour. */
+function ringToken(background: TileBackground): string {
+	const [group, level] = background.split('.') as [string, string];
+	if (level !== 'solid') return vars.color.focus;
+	return vars.color.foreground[group as (typeof SEMANTIC_ROLES)[number]].onSolid;
+}
+
 /** The sRGB bytes the browser paints for a CSS colour. */
 function paintedColor(color: string): Rgb {
 	const context = new OffscreenCanvas(1, 1).getContext('2d');
@@ -334,7 +341,7 @@ async function measureTiles(
 		}
 		expect(singleRing(tile), 'the ring survives the state').toBe(ringElement);
 
-		const expected = paintedColor(resolvedColor(vars.color.focus, ringElement));
+		const expected = paintedColor(resolvedColor(ringToken(background), ringElement));
 		// oxlint-disable-next-line no-await-in-loop
 		const probes = await edgeProbes(tile, ringElement);
 		const where = state === undefined ? background : `${background} ${state}`;
@@ -366,18 +373,21 @@ for (const appearance of visualAppearances) {
 	}
 }
 
-// Unsupported: #955 gates the focus colour against surfaces and subtle fills only, so a ring
-// beside a solid fill has no contrast guarantee. These tests assert what is promised there, that
-// the ring paints the focus colour at full width and is not clipped, and leave contrast unchecked.
-// Measured when this was written: against neutral, success, warning and danger solids the ring
-// falls to about 1.0 to 2.9:1 on one side or the other, so asserting 3:1 would fail by design.
+// Inside a painted solid the ring paints that role's on-solid colour, which is gated at 3:1
+// against the role's resting solid. The ring must reach 3:1 against both neighbours. The page
+// around the solid is never next to the ring, because the ring sits inside the solid's box.
 for (const appearance of visualAppearances) {
-	for (const name of ['Button', 'selected CheckboxField']) {
+	for (const name of [
+		'Button',
+		'selected CheckboxField',
+		'TextInputField',
+		'selected SwitchField',
+	]) {
 		const { control } = controls.find((candidate) => candidate.name === name)!;
-		test(`paints the ${name} focus ring beside solid fills in ${appearance.theme} ${appearance.mode}`, async () => {
+		test(`keeps the ${name} focus ring visible on each solid fill in ${appearance.theme} ${appearance.mode}`, async () => {
 			render(tilesFor(solidBackgrounds, control), { appearance });
 
-			expect(await measureTiles(solidBackgrounds, [])).toEqual([]);
+			expect(await measureTiles(solidBackgrounds, ['inner', 'outer'])).toEqual([]);
 		});
 	}
 }
@@ -430,6 +440,45 @@ for (const { control, name } of controls) {
 		expect(style.outlineColor).toBe(resolvedColor('Highlight', ringElement));
 	});
 }
+
+test('paints the ring in the role on-solid inside a solid and in the focus colour inside a nested surface', async () => {
+	render(
+		<Box backgroundColor="danger.solid" padding="space.16">
+			<Button>On solid</Button>
+			<Box backgroundColor="surface.raised" padding="space.16">
+				<Button>On surface</Button>
+			</Box>
+		</Box>,
+	);
+	const onSolid = page.getByRole('button', { name: 'On solid' });
+	const onSurface = page.getByRole('button', { name: 'On surface' });
+
+	await userEvent.tab();
+	await expect.element(onSolid).toHaveFocus();
+	expect(getComputedStyle(onSolid.element()).outlineColor).toBe(
+		resolvedColor(vars.color.foreground.danger.onSolid, onSolid.element()),
+	);
+
+	await userEvent.tab();
+	await expect.element(onSurface).toHaveFocus();
+	expect(getComputedStyle(onSurface.element()).outlineColor).toBe(
+		resolvedColor(vars.color.focus, onSurface.element()),
+	);
+});
+
+test('keeps the system highlight for the ring inside a solid under forced colours', async () => {
+	render(
+		<Box backgroundColor="accent.solid" padding="space.16">
+			<Button>Forced</Button>
+		</Box>,
+	);
+	await emulateForcedColors('active');
+
+	await userEvent.tab();
+
+	const button = page.getByRole('button', { name: 'Forced' }).element();
+	expect(getComputedStyle(button).outlineColor).toBe(resolvedColor('Highlight', button));
+});
 
 test('shows the Button focus ring for keyboard focus and not for a pointer press', async () => {
 	render(

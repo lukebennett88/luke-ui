@@ -2,7 +2,7 @@ import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import { style } from '../styles/layered-style.css.js';
 import { overlayMotion } from '../styles/overlay-motion.js';
-import { surfaceStyle } from '../styles/surface.js';
+import { containerSurfaceStyle } from '../styles/surface.js';
 
 const trayPaddingBlockEnd = createVar();
 
@@ -42,7 +42,7 @@ export const mobileOverlay = style(
 	}),
 );
 
-const overlaySurface = surfaceStyle('surface.raised');
+const overlaySurface = containerSurfaceStyle('surface.raised');
 
 export const mobileModal = style(
 	overlayMotion({
