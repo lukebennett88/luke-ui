@@ -211,7 +211,8 @@ outline:
 - `color.foreground.accent.onSolid` against `color.background.accent.solid.pressed`. The active
   option's outline uses it on the solid fill.
 
-The same pairs already clear 4.5:1 as on-solid text.
+The same pairs already clear 4.5:1 as on-solid text. A focus ring in your own component that reads
+`vars.color.focus` directly does not adapt inside a solid fill.
 
 If any pair fails, `defineTheme` throws `ThemeContrastError` instead of returning CSS. Its
 `failures` array names the colour mode, foreground and background tokens with their states, achieved

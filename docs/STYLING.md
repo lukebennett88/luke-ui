@@ -452,6 +452,15 @@ pairs against every subtle fill, including other roles' fills. A solid fill sets
 its role's on-solid colour, and every role reads on-solid colour. An override resolves on the
 element that declares it, so the global styles reset the overrides in every colour-mode scope.
 
+The focus ring follows the same idea through `--luke-internal-focus`. `contextualFocus()` reads it
+with `vars.color.focus` as the fallback, so inside a painted solid the ring uses that role's
+on-solid colour and everywhere else it keeps the literal focus colour. Containers, such as `Box`,
+the page, colour-mode scopes, and overlay panels, use `containerSurfaceStyle()`, which sets the
+override. A control that paints its own fill uses `surfaceStyle()`, which leaves it alone: the
+control's ring sits next to the container around it, so its own fill must not change the ring
+colour. First-party focus rings call `focusRing(contextualFocus())`, never `vars.color.focus`
+directly, or they will not adapt inside a solid fill.
+
 Component recipes use the same mechanism. A control pairs its fill in every interaction state, so a
 solid Button keeps its on-solid context from rest to pressed. Low and standard Buttons use the
 adaptive state layer in `core/styles/state-layer.css.ts`: a registered `<color>` property painted as

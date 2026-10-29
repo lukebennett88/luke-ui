@@ -30,8 +30,9 @@ The control borders and `color.focus` also clear every role's subtle background.
 
 Inside a painted solid, such as `Box backgroundColor="accent.solid"`, a focus ring uses that role's
 `onSolid` colour instead of `color.focus`, because no single focus colour clears both the page and
-every solid. Every role's `onSolid` is guaranteed 3:1 against its resting solid. Forced colours use
-`Highlight` everywhere.
+every solid. A focus ring in your own component that reads `vars.color.focus` directly does not
+adapt inside a solid fill. Every role's `onSolid` is guaranteed 3:1 against its resting solid.
+Forced colours use `Highlight` everywhere.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
