@@ -26,6 +26,13 @@ test('resolves borderColor tokens to their theme variables', () => {
 	expect(Object.values(style ?? {})).toEqual(['var(--luke-color-border-control)']);
 });
 
+test('rejects the standalone focus colour as a borderColor', () => {
+	// @ts-expect-error — focus is a standalone colour, not a border colour
+	const { style } = createSprinkles({ borderColor: 'focus' });
+
+	expect(style).not.toHaveProperty('borderColor', 'var(--luke-color-focus)');
+});
+
 // The fill and its foreground context come from one class, never an inline value.
 test('gives every resting background its own class and no inline value', () => {
 	const tokens = [
