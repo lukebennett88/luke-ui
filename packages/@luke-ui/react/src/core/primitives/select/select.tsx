@@ -36,6 +36,7 @@ import { useControlSize } from '../../sizing/control-size-context.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import { buttonRecipeInternal, expandedButtonClassName } from '../button/recipe.css.js';
 import type { ComboboxItemProps } from '../combobox/item.js';
 import { ComboboxItem } from '../combobox/item.js';
 import { comboboxRecipe, popoverAvailableInlineSizeVar } from '../combobox/styles.css.js';
@@ -190,9 +191,21 @@ export type SelectItemProps<T extends object> = Prettify<
  * `id`, `className`, and `ref` target the root element. `triggerId` targets the trigger.
  */
 export function SelectRoot(props: SelectRootProps): JSX.Element {
-	const { className, id, isRequired, size: sizeProp, triggerId, ...selectProps } = props;
+	const {
+		className,
+		id,
+		isRequired,
+		placeholder,
+		size: sizeProp,
+		triggerId,
+		...selectProps
+	} = props;
 	const size = useControlSize(sizeProp);
 	const selectContext = useSlottedContext(SelectContext, props.slot);
+	const effectivePlaceholder = placeholder ?? selectContext?.placeholder;
+	// RAC's merge keeps a context value when the local prop is undefined. Null overrides it and
+	// RAC's nullish fallback still supplies the localised placeholder, although its type omits null.
+	const resolvedPlaceholder = effectivePlaceholder?.trim() ? effectivePlaceholder : null;
 	const resolvedIsRequired = isRequired ?? selectContext?.isRequired ?? false;
 	const fieldState = { isRequired: resolvedIsRequired };
 
@@ -206,6 +219,7 @@ export function SelectRoot(props: SelectRootProps): JSX.Element {
 						return selectRecipe().root({ className: renderedClassName });
 					})}
 					isRequired={isRequired}
+					placeholder={resolvedPlaceholder as string | undefined}
 				/>
 			</FieldStateContext.Provider>
 		</SelectSizeContext.Provider>
@@ -213,8 +227,8 @@ export function SelectRoot(props: SelectRootProps): JSX.Element {
 }
 
 /**
- * The button that opens the select and draws its control chrome. While the root is invalid it takes
- * the danger border. `FieldError` carries the error icon.
+ * The button that opens the select and draws its control chrome. While the root is invalid it shows
+ * a danger ring. `FieldError` carries the error icon.
  *
  * When the root is required, it adds hidden `(required)` text to the trigger's accessible name.
  */
@@ -248,7 +262,12 @@ export function SelectTrigger(props: SelectTriggerProps): JSX.Element {
 				{...buttonProps}
 				{...requiredWiring}
 				className={composeRenderProps(className, (renderedClassName) => {
-					return selectRecipe({ size }).trigger({ className: renderedClassName });
+					return selectRecipe({ size }).trigger({
+						className: cx(
+							buttonRecipeInternal({ className: renderedClassName, size }),
+							expandedButtonClassName,
+						),
+					});
 				})}
 			>
 				{triggerChildren}
@@ -288,6 +307,7 @@ export function SelectIndicator(props: SelectIndicatorProps): JSX.Element {
 			{...spanProps}
 			aria-hidden
 			className={selectRecipe().indicator({ className })}
+			data-default={children == null ? true : undefined}
 			data-open={state?.isOpen ? true : undefined}
 		>
 			{children ?? <Icon name="chevronDown" />}

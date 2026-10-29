@@ -846,7 +846,7 @@ test('forced-colors states', { tags: ['visual'] }, async () => {
 });
 
 for (const appearance of visualAppearances) {
-	test(`the Select trigger keeps its control surface on a solid fill in ${appearance.theme} ${appearance.mode}`, () => {
+	test(`the Select trigger pairs its Button surface on a solid fill in ${appearance.theme} ${appearance.mode}`, () => {
 		render(
 			<Box backgroundColor="accent.solid" padding="space.8">
 				<SelectField items={themeItems} label="Theme">
@@ -857,6 +857,6 @@ for (const appearance of visualAppearances) {
 		);
 		const button = trigger(/Theme/);
 
-		expect(surfaceColors(button)).toEqual(pairedColors(button, 'surface.base'));
+		expect(surfaceColors(button)).toEqual(pairedColors(button, 'neutral.subtle'));
 	});
 }
