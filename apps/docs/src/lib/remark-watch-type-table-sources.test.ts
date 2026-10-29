@@ -1,4 +1,12 @@
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+	mkdirSync,
+	mkdtempSync,
+	readFileSync,
+	readdirSync,
+	realpathSync,
+	rmSync,
+	writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -45,7 +53,7 @@ interface WatchFixture {
 }
 
 function createWatchFixture(): WatchFixture {
-	const root = mkdtempSync(join(tmpdir(), 'luke-type-table-watch-'));
+	const root = realpathSync(mkdtempSync(join(tmpdir(), 'luke-type-table-watch-')));
 	const viteRoot = join(root, 'apps', 'docs');
 	const fixtureDir = join(root, 'packages', '@luke-ui', 'react', 'src', 'core', 'fixture');
 	const pressDir = join(fixtureDir, 'press-action');
