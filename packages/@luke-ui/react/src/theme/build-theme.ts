@@ -102,13 +102,26 @@ export class ThemeContrastError extends Error {
 				...failures.map((failure) => {
 					return (
 						`${failure.mode}: ${failure.foreground} on ${failure.background} — ` +
-						`${failure.ratio.toFixed(3)}:1 < ${failure.required}:1`
+						`${failure.ratio.toFixed(3)}:1 < ${failure.required}:1` +
+						describeFocusSource(failure)
 					);
 				}),
 			].join('\n'),
 		);
 		this.failures = failures;
 		this.name = 'ThemeContrastError';
+	}
+}
+
+/** Names where a failing `color.focus` came from, and where to change it. Empty for other pairs. */
+function describeFocusSource(failure: ThemeContrastFailure): string {
+	switch (failure.source) {
+		case 'authored':
+			return ' (authored ThemeInput.color.focus)';
+		case 'default':
+			return ' (curated default focus colour; set ThemeInput.color.focus to override)';
+		case undefined:
+			return '';
 	}
 }
 
@@ -155,7 +168,11 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		mode,
 		modeFoundation,
 	);
-	const { checks, failures } = validateContrast(mode, colorValues);
+	const { checks, failures } = validateContrast(
+		mode,
+		colorValues,
+		modeFoundation.color.focusOrigin,
+	);
 	const values: Record<ModePath, string> = {
 		...colorValues,
 		...INTERACTION_VALUES,
