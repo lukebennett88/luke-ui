@@ -2,7 +2,6 @@ import type { StyleRule } from '@vanilla-extract/css';
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
-import { controlBorderState } from '../../styles/control-border.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
@@ -128,7 +127,7 @@ export const textInputPartsRecipe = recipe({
 			},
 			alignItems: 'center',
 			...surfaceStyle('surface.base'),
-			borderColor: vars.color.border.control,
+			borderColor: vars.color.border.control.rest,
 			borderRadius: vars.radius.control,
 			borderStyle: 'solid',
 			borderWidth: '1px',
@@ -155,7 +154,7 @@ export const textInputPartsRecipe = recipe({
 				},
 				[control.focusWithin]: focusRing(vars.color.focus),
 				[control.hover]: {
-					borderColor: controlBorderState('hover'),
+					borderColor: vars.color.border.control.hover,
 				},
 				// Read-only drops the inset shadow. The hover selector already excludes it.
 				[control.readOnly]: {
@@ -170,7 +169,7 @@ export const textInputPartsRecipe = recipe({
 		},
 		prefix: {
 			alignItems: 'center',
-			borderInlineEndColor: vars.color.border.control,
+			borderInlineEndColor: vars.color.border.control.rest,
 			borderInlineEndStyle: 'solid',
 			borderInlineEndWidth: '1px',
 			color: vars.color.foreground.secondary,
@@ -185,7 +184,7 @@ export const textInputPartsRecipe = recipe({
 		},
 		suffix: {
 			alignItems: 'center',
-			borderInlineStartColor: vars.color.border.control,
+			borderInlineStartColor: vars.color.border.control.rest,
 			borderInlineStartStyle: 'solid',
 			borderInlineStartWidth: '1px',
 			color: vars.color.foreground.secondary,

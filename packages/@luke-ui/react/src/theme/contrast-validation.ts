@@ -7,7 +7,6 @@
 import type { Oklch } from './color.js';
 import { contrastRatio, parseColor } from './color.js';
 import { SEMANTIC_ROLES, TEXT_RATIO, UI_RATIO } from './contrast-policy.js';
-import { controlBorderStateColor } from './control-border.js';
 import type { ContrastCheck } from './diagnostics.js';
 import type { SemanticColorValues } from './semantic-map.js';
 
@@ -42,8 +41,9 @@ type ColorPath = keyof SemanticColorValues;
  * Hard at 4.5:1: primary and secondary text and each role's rest, hover, and pressed foreground
  * against all three surfaces and every role's subtle rest fill. The on-solid colour is gated
  * against its role's solid fills.
- * Hard at 3:1: the focus ring, the control border and its mixed hover and pressed treatments, and
- * every role's `border.<role>.strong` against all three surfaces and that role's subtle fill. Solid fills are solved for on-solid text,
+ * Hard at 3:1: the focus ring against all three surfaces, `border.control.{rest,hover,pressed}`
+ * against all three surfaces and every role's subtle fill, and every role's `border.<role>.strong`
+ * against all three surfaces and that role's subtle fill. Solid fills are solved for on-solid text,
  * independently of their contrast against surfaces.
  * Also hard at 3:1: accent on-solid against `accent.solid.rest` and `accent.solid.pressed`.
  * The active dropdown option draws a 2px inset outline in that on-solid colour on those fills, so
@@ -106,26 +106,17 @@ export function validateContrast(
 			);
 		}
 	}
-	const boundaries = [
-		'color.focus',
-		'color.border.control',
-	] as const satisfies ReadonlyArray<ColorPath>;
-	for (const boundary of boundaries) {
-		for (const surface of surfacePaths) check(boundary, surface, UI_RATIO, true);
+	for (const surface of surfacePaths) check('color.focus', surface, UI_RATIO, true);
+	// Every control border state must read on the three surfaces and every role's subtle fill.
+	for (const state of ['rest', 'hover', 'pressed'] as const) {
+		for (const background of textBackgrounds) {
+			check(`color.border.control.${state}`, background, UI_RATIO, true);
+		}
 	}
 	// Each role's strong border must also read on that role's own subtle fill.
 	for (const role of SEMANTIC_ROLES) {
 		for (const background of [...surfacePaths, `color.background.${role}.subtle` as const]) {
 			check(`color.border.${role}.strong`, background, UI_RATIO, true);
-		}
-	}
-	const controlBorder = colorAt('color.border.control');
-	const textPrimary = colorAt('color.foreground.primary');
-	for (const state of ['hover', 'pressed'] as const) {
-		const foreground = `interaction.border.${state}`;
-		const foregroundColor = parseColor(controlBorderStateColor(controlBorder, textPrimary, state));
-		for (const surface of surfacePaths) {
-			checkValue(foreground, foregroundColor, surface, UI_RATIO, true);
 		}
 	}
 	// The active dropdown option's inset outline uses accent on-solid against the solid fill.

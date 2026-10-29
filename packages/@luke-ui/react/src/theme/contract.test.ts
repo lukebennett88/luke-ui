@@ -56,6 +56,14 @@ describe('theme contract', () => {
 			paths.some((path) => /color\.background\.\w+\.subtle\.(hover|pressed)$/.test(path)),
 		).toBe(false);
 		expect(paths).not.toContain('color.border.controlHover');
+		expect(paths).not.toContain('color.border.control');
+		expect(paths).toEqual(
+			expect.arrayContaining([
+				'color.border.control.rest',
+				'color.border.control.hover',
+				'color.border.control.pressed',
+			]),
+		);
 	});
 
 	it('gives every semantic role the same background, foreground, and border leaves', () => {

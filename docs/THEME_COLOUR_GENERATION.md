@@ -20,8 +20,9 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    `base` and any authored surface pass through as written. Each missing surface is a fixed,
    mode-specific lightness offset from `base`, never from a sibling. Surfaces are never adjusted for
    contrast. Validation throws instead, and the author can set the surface.
-4. Solves `border.control` against all three surfaces (`control-border.ts`). Control hover and
-   pressed borders mix it toward `text.primary` in encoded sRGB.
+4. Solves `border.control.rest` against all three surfaces and all six role subtle fills
+   (`control-border.ts`). Hover and pressed mix the emitted rest toward `foreground.primary` in
+   encoded sRGB, and the same search checks all three emitted states.
 5. Applies the one default semantic mapping (`semantic-map.ts`'s `mapSemanticColors`) that aliases
    every colour contract leaf onto a family step, a generated surface, or a generated interaction
    state, and passes the authored backdrop through. Neutral step 12 becomes `text.primary`.
@@ -73,12 +74,13 @@ component or state, not every authored border, so v2 splits border tokens into h
 advisory group. Every gate covers all three surfaces: forms, links, and semantic text appear on
 `subdued` regions as well as on `base` and `raised`.
 
-- `color.border.control` is a hard gate. It is a dedicated contrast boundary, not a scale-step
-  alias, and must reach ≥3:1 against every surface in both modes. It is frequently the sole resting
-  boundary of a form control, so it cannot use the softer step-7 aesthetic.
-- Control hover and pressed border mixes are hard-gated at 3:1 against the same surfaces. They mix
-  `border.control` toward `text.primary` at 20% and 40% in encoded sRGB, matching CSS `color-mix`.
-  The compiler checks the rounded mixed values, including for custom themes.
+- `color.border.control.{rest,hover,pressed}` are hard gates. They are dedicated contrast
+  boundaries, not scale-step aliases, and each must reach ≥3:1 against the three surfaces and all
+  six role subtle fills in both modes. The border is frequently the sole resting boundary of a form
+  control, so it cannot use the softer step-7 aesthetic.
+- Hover and pressed mix the emitted rest toward `foreground.primary` at 20% and 40% in encoded sRGB.
+  They are published as their own tokens, so no CSS mixes at paint time. The compiler checks the
+  rounded values, including for custom themes.
 - `color.border.<role>.strong` is a hard gate for all six roles at ≥3:1 against every surface and
   that role's own subtle fill in both modes, including custom themes. It carries no guarantee
   against other backgrounds. The solver starts at the role's step-7 border, walks lightness away
@@ -150,19 +152,19 @@ Those strengths are fixed. If a solid cannot carry readable on-solid text across
 the solid-anchor search adapts the resting colour rather than changing the mix strengths.
 
 Checked Checkbox, Switch fills, focus rings, and text actions still select the opaque semantic
-tokens. Field-control borders mix `border.control` toward `text.primary` for hover and pressed, with
-the same compiler contrast checks in every mode. Buttons and unchecked or invalid Checkbox controls
-use an adaptive treatment: one registered `<color>` state layer painted as the first
-`background-image` layer, fed by a public tint pair the compiler emits per mode
-(`vars.interaction.tint.hover` and `vars.interaction.tint.pressed`). Light mode uses black. Dark
-mode uses white. Strengths target today's neutral subtle hover and pressed over `surface.base`. The
-solver chooses the nearest pair that clears the contrast cap and visibility floors, so every
-supported foreground stays at 4.5:1 over every surface and subtle rest with the tint on top.
-Visibility floors in `contrast-policy.ts` reject a theme that can only pass by making hover or
-pressed invisible: the hover floor applies on `surface.base`, and the hover-to-pressed floor applies
-on all three surfaces. Compositing for that solve uses encoded sRGB, matching CSS. Dark step-11 text
-moved from 0.76 to 0.79 so the tint cap stays above the visibility floor, which lightens dark-mode
-secondary and role foregrounds slightly.
+tokens. Field-control borders paint `border.control.hover` and `border.control.pressed`, which mix
+`border.control.rest` toward `foreground.primary`, with the same compiler contrast checks in every
+mode. Buttons and unchecked or invalid Checkbox controls use an adaptive treatment: one registered
+`<color>` state layer painted as the first `background-image` layer, fed by a public tint pair the
+compiler emits per mode (`vars.interaction.tint.hover` and `vars.interaction.tint.pressed`). Light
+mode uses black. Dark mode uses white. Strengths target today's neutral subtle hover and pressed
+over `surface.base`. The solver chooses the nearest pair that clears the contrast cap and visibility
+floors, so every supported foreground stays at 4.5:1 over every surface and subtle rest with the
+tint on top. Visibility floors in `contrast-policy.ts` reject a theme that can only pass by making
+hover or pressed invisible: the hover floor applies on `surface.base`, and the hover-to-pressed
+floor applies on all three surfaces. Compositing for that solve uses encoded sRGB, matching CSS.
+Dark step-11 text moved from 0.76 to 0.79 so the tint cap stays above the visibility floor, which
+lightens dark-mode secondary and role foregrounds slightly.
 
 A translucent tint has too little visible difference between hover and pressed on some solid fills.
 Low Buttons therefore use an opaque subtle chip on solids (`solidStateFillVarName` /

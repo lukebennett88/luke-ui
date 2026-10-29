@@ -5,7 +5,6 @@ import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { COMBOBOX_ACTION_SIZE } from '../../sizing/combobox-sizing.js';
 import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
 import { classSelector } from '../../styles/class-selector.js';
-import { controlBorderState } from '../../styles/control-border.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
@@ -152,7 +151,7 @@ const comboboxConfig = {
 			},
 			alignItems: 'center',
 			...surfaceStyle('surface.base'),
-			borderColor: vars.color.border.control,
+			borderColor: vars.color.border.control.rest,
 			borderRadius: vars.radius.control,
 			borderStyle: 'solid',
 			borderWidth: '1px',
@@ -175,7 +174,7 @@ const comboboxConfig = {
 			selectors: {
 				[disabled]: { cursor: 'not-allowed', opacity: vars.interaction.disabledOpacity },
 				[inputFocus]: focusRing(vars.color.focus),
-				[hover]: { borderColor: controlBorderState('hover') },
+				[hover]: { borderColor: vars.color.border.control.hover },
 				// Read-only drops the inset shadow. The hover selector already excludes it.
 				[readOnly]: { boxShadow: 'none' },
 				// The field's error message carries the non-colour invalid cue, so the border keeps

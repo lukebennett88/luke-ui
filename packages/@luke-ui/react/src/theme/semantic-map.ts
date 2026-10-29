@@ -14,6 +14,7 @@ import type { Oklch } from './color.js';
 import { formatOklch } from './color.js';
 import type { ModePath } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
+import type { ControlBorderStates } from './control-border.js';
 import { pathEntry, pathRecord } from './path-record.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import {
@@ -47,8 +48,11 @@ interface MapSemanticColorsRequest {
 	 * channel).
 	 */
 	backdrop: string;
-	/** `color.border.control`, solved by `solveControlBorder` and passed through as is. */
-	controlBorder: Oklch;
+	/**
+	 * `color.border.control.{rest,hover,pressed}`, solved by `solveControlBorder` and passed through
+	 * as is.
+	 */
+	controlBorder: ControlBorderStates;
 	/**
 	 * Each role's `color.border.<role>.strong`, solved by `solveStrongBorder` and passed through as
 	 * is.
@@ -89,7 +93,9 @@ function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColor
 		'color.foreground.secondary': formatOklch(neutral[FAMILY_RUNG.foreground]),
 		'color.foreground.disabled': formatOklch(neutral[FAMILY_RUNG.muted]),
 		'color.border.decorative': formatOklch(neutral[FAMILY_RUNG.decorative]),
-		'color.border.control': formatOklch(controlBorder),
+		'color.border.control.rest': formatOklch(controlBorder.rest),
+		'color.border.control.hover': formatOklch(controlBorder.hover),
+		'color.border.control.pressed': formatOklch(controlBorder.pressed),
 		'color.focus': formatOklch(focus),
 	};
 }

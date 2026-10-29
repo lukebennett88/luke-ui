@@ -3,7 +3,6 @@ import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { interactionTintVarName } from '../../../theme/interaction-tint-vars.js';
 import { ICON_SIZES } from '../../sizing/icon-sizing.js';
-import { controlBorderState } from '../../styles/control-border.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import { INTERACTION_STATE_LAYER_PROPERTY } from '../../styles/interaction-state-layer.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
@@ -111,7 +110,7 @@ const checkboxConfig = {
 			// repeat its lit top along the bottom edge.
 			backgroundOrigin: 'border-box',
 			blockSize: checkboxIndicatorSize,
-			borderColor: vars.color.border.control,
+			borderColor: vars.color.border.control.rest,
 			borderRadius: vars.radius.detail,
 			borderStyle: 'solid',
 			borderWidth: '1px',
@@ -137,11 +136,11 @@ const checkboxConfig = {
 				'[data-focus-visible="true"] &': focusRing(vars.color.focus),
 				[hovered()]: {
 					...checkboxStateLayer('hover'),
-					borderColor: controlBorderState('hover'),
+					borderColor: vars.color.border.control.hover,
 				},
 				[pressed()]: {
 					...checkboxStateLayer('pressed'),
-					borderColor: controlBorderState('pressed'),
+					borderColor: vars.color.border.control.pressed,
 				},
 				'[data-indeterminate="true"] &': {
 					...surfaceStyle('accent.solid.rest'),

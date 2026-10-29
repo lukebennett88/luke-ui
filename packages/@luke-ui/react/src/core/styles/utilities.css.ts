@@ -87,7 +87,7 @@ for (const [condition, query] of typedEntries(responsiveConditions)) {
  * is a separator.
  */
 const borderColorScale = {
-	control: vars.color.border.control,
+	control: vars.color.border.control.rest,
 	decorative: vars.color.border.decorative,
 	...Object.fromEntries(
 		SEMANTIC_ROLES.flatMap((role) => {

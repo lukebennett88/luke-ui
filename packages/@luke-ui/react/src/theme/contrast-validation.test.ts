@@ -13,7 +13,6 @@ import { contrastRatio, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { SEMANTIC_ROLES, TEXT_RATIO, UI_RATIO } from './contrast-policy.js';
 import { validateContrast } from './contrast-validation.js';
-import { controlBorderStateColor } from './control-border.js';
 import { defineTheme, normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
 import { ThemeInteractionTintError } from './interaction-tints.js';
@@ -264,12 +263,14 @@ describe('contrast validation matrix', () => {
 		for (const background of SURFACES) {
 			hard.push({ background, foreground: 'color.focus', required: UI_RATIO });
 		}
-		for (const background of SURFACES) {
-			hard.push({ background, foreground: 'color.border.control', required: UI_RATIO });
-			for (const state of ['hover', 'pressed'] as const) {
+		for (const state of INTERACTION_STATES) {
+			for (const background of [
+				...SURFACES,
+				...SEMANTIC_ROLES.map((role) => `color.background.${role}.subtle`),
+			]) {
 				hard.push({
 					background,
-					foreground: `interaction.border.${state}`,
+					foreground: `color.border.control.${state}`,
 					required: UI_RATIO,
 				});
 			}
@@ -311,13 +312,7 @@ describe('contrast validation matrix', () => {
 				const checks = diagnostics[mode].contrastChecks;
 				const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
 				for (const check of checks) {
-					const foreground = check.foreground.startsWith('interaction.border.')
-						? controlBorderStateColor(
-								parseColor(extractValue(block, variableNames.get('color.border.control')!)),
-								parseColor(extractValue(block, variableNames.get('color.foreground.primary')!)),
-								check.foreground.endsWith('.hover') ? 'hover' : 'pressed',
-							)
-						: extractValue(block, variableNames.get(check.foreground)!);
+					const foreground = extractValue(block, variableNames.get(check.foreground)!);
 					const background = extractValue(block, variableNames.get(check.background)!);
 					expect(check.ratio).toBe(contrastRatio(parseColor(foreground), parseColor(background)));
 				}

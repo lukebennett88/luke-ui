@@ -1,7 +1,6 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { ICON_SIZES } from '../../sizing/icon-sizing.js';
-import { controlBorderState } from '../../styles/control-border.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
@@ -78,13 +77,13 @@ const switchConfig = {
 			// Off, the track is filled with the control border colour; on, it is a solid fill with the
 			// control finish. Hover and pressed change colour, so they stay distinct without materials.
 			alignItems: 'center',
-			backgroundColor: vars.color.border.control,
+			backgroundColor: vars.color.border.control.rest,
 			backgroundImage: 'none',
 			// The finish spans the border too. From the padding box it would tile into the border and
 			// repeat its lit top along the bottom edge.
 			backgroundOrigin: 'border-box',
 			blockSize: trackBlockSize,
-			borderColor: vars.color.border.control,
+			borderColor: vars.color.border.control.rest,
 			borderRadius: vars.radius.full,
 			borderStyle: 'solid',
 			borderWidth: trackBorderWidth,
@@ -105,8 +104,8 @@ const switchConfig = {
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.focus),
 				[`${hovered()}, ${pressed()}`]: {
-					backgroundColor: controlBorderState('hover'),
-					borderColor: controlBorderState('hover'),
+					backgroundColor: vars.color.border.control.hover,
+					borderColor: vars.color.border.control.hover,
 				},
 				'[data-invalid="true"] &': {
 					borderColor: vars.color.border.danger.strong,
@@ -174,7 +173,7 @@ const switchConfig = {
 			alignItems: 'center',
 			// Thumb contrast comes from the fills, never the shadow. `compileTheme` hard-gates each pair at
 			// build time, so every shipped and extended theme clears it: the off-state thumb on the
-			// `border.control` track at 3:1, and each `onSolid` thumb on its solid track at 4.5:1.
+			// `border.control.rest` track at 3:1, and each `onSolid` thumb on its solid track at 4.5:1.
 			backgroundColor: vars.color.background.surface.base,
 			blockSize: thumbSize,
 			boxShadow: vars.shadow.resting,
