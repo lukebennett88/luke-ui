@@ -68,20 +68,19 @@ not open new issues for the parts you leave.
 1. Run tasks through Turbo from the repository root so their generate and build dependencies run.
    Before changing Turbo configuration or commands, read the installed package's bundled `docs/`,
    found with `node -p "require.resolve('turbo/package.json')"`.
-2. When the diff adds or modifies JS/TS files, run `git add` on any new files, then
-   `pnpm run lint:changed` from the repository root before committing. It lints every JS/TS file
-   that differs from the merge base with `origin/main` under `--deny no-nested-ternary`, which
-   enforces [Code style](../../../docs/CONVENTIONS.md#code-style) on the change without requiring
-   unrelated cleanup. It skips untracked files, so a new file needs `git add` first. Run
-   `pnpm run check` for every change. It covers barrels, format (including root Markdown), lint,
-   types, docs, cycles, and unused code. For formatting failures, use `pnpm run fix:format` rather
-   than re-wrapping Markdown by hand. Before opening the PR, run `pnpm run test` separately; Turbo
-   test tasks are configured not to cache results. Run the separate suites in
-   [TESTING.md](../../../docs/TESTING.md) that cover the change, including `pnpm run test:consumer`
-   for published package code, dependencies, or exports. When the change affects generated
-   documentation behaviour, such as props tables or type-definition assets, also run
-   `pnpm run build:docs` so the production docs output is checked, including
-   `check:type-definition-links`.
+2. When the diff adds or modifies JS/TS files, run `pnpm run lint:changed` from the repository root
+   before committing. It lints every JS/TS file that differs from the merge base with `origin/main`
+   under `--deny no-nested-ternary`, which enforces
+   [Code style](../../../docs/CONVENTIONS.md#code-style) on the change without requiring unrelated
+   cleanup. It skips untracked files, so run `git add` on new files first. Run `pnpm run check` for
+   every change. It covers barrels, format (including root Markdown), lint, types, docs, cycles, and
+   unused code. For formatting failures, use `pnpm run fix:format` rather than re-wrapping Markdown
+   by hand. Before opening the PR, run `pnpm run test` separately; Turbo test tasks are configured
+   not to cache results. Run the separate suites in [TESTING.md](../../../docs/TESTING.md) that
+   cover the change, including `pnpm run test:consumer` for published package code, dependencies, or
+   exports. When the change affects generated documentation behaviour, such as props tables or
+   type-definition assets, also run `pnpm run build:docs` so the production docs output is checked,
+   including `check:type-definition-links`.
 3. Before you call a failure unrelated, show that it also happens on the base revision under
    comparable conditions, and note the revision. Rerun only what you need. Existing evidence, such
    as a papercut entry or a failed CI run on the base, can be enough. A failure your change causes
