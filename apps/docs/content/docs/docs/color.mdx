@@ -22,11 +22,11 @@ Choose borders and shadow separately. A raised surface does not add either, and 
 `base` with a border or `subdued`.
 
 Text uses `primary` and `secondary` roles. Borders distinguish decorative, control, and role uses.
-`color.focus` is a standalone colour, not a border, because it paints a focus outline or a ring
-shadow. Text, role foregrounds, `color.border.control.{rest,hover,pressed}`,
-`color.border.<role>.strong`, and `color.focus` are guaranteed to contrast with all three surfaces.
-The control borders and `color.focus` also clear every role's subtle background.
-`color.border.decorative` is a separator with no contrast guarantee.
+`color.focus` is a standalone colour, not a border, because it paints the focus outline. Text, role
+foregrounds, `color.border.control.{rest,hover,pressed}`, `color.border.<role>.strong`, and
+`color.focus` are guaranteed to contrast with all three surfaces. The control borders and
+`color.focus` also clear every role's subtle background. `color.border.decorative` is a separator
+with no contrast guarantee.
 
 The focus ring always paints `color.focus`. Its 3:1 guarantee covers the three surfaces and the six
 subtle backgrounds only. A focusable control placed directly on a solid fill, such as inside
