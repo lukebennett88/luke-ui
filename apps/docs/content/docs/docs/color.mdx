@@ -25,8 +25,8 @@ Text uses `primary` and `secondary` roles. Borders distinguish decorative, contr
 `color.focus` is a standalone colour, not a border, because it paints a focus outline or a ring
 shadow. Text, role foregrounds, `color.border.control.{rest,hover,pressed}`,
 `color.border.<role>.strong`, and `color.focus` are guaranteed to contrast with all three surfaces.
-The control borders also clear every role's subtle background. `color.border.decorative` is a
-separator with no contrast guarantee.
+The control borders and `color.focus` also clear every role's subtle background.
+`color.border.decorative` is a separator with no contrast guarantee.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';

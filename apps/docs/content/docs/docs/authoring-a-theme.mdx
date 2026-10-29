@@ -190,12 +190,17 @@ At 4.5:1:
 
 At 3:1, against every surface:
 
-- `color.focus`, the focus ring.
 - `color.border.control.rest`, `color.border.control.hover`, and `color.border.control.pressed`,
   also against every role's subtle background. A failure names the token, the background, and the
   ratio.
 - `color.border.<role>.strong` for all six roles, also against that role's own subtle background.
   `color.border.danger.strong` is the boundary of an invalid control.
+
+At 3:1, against every surface and all six roles' subtle backgrounds:
+
+- `color.focus`, the focus ring. A failure says whether the colour was authored or is Luke UI's
+  default for that mode. To fix a default, set `color.focus`. Luke UI never changes an authored
+  focus colour.
 
 At 3:1, for the active Select or Combobox option's inset outline:
 
