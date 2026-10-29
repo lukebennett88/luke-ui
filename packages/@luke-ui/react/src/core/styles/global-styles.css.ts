@@ -62,7 +62,7 @@ globalStyleInLayer('reset', ':where(button, input, select, textarea)', {
 // Only the native pseudo-class: React Aria also sets `data-focus-visible` on wrappers such as
 // labels and groups, so each recipe decides where that attribute draws a ring.
 globalStyleInLayer('reset', ':where(:focus-visible)', {
-	...focusRing(vars.color.border.focus),
+	...focusRing(vars.color.focus),
 
 	'@media': {
 		'(forced-colors: active)': {

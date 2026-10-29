@@ -263,8 +263,8 @@ test('draws the native focus ring in the scope colour', async () => {
 	expect(ring.outlineStyle).toBe('solid');
 	expect(ring.outlineWidth).toBe('2px');
 	expect(ring.outlineOffset).toBe('2px');
-	expect(ring.outlineColor).toBe(resolvedColor(vars.color.border.focus, scope));
-	expect(ring.outlineColor).not.toBe(resolvedColor(vars.color.border.focus));
+	expect(ring.outlineColor).toBe(resolvedColor(vars.color.focus, scope));
+	expect(ring.outlineColor).not.toBe(resolvedColor(vars.color.focus));
 });
 
 test('uses the system highlight for the ring in forced colours', async () => {

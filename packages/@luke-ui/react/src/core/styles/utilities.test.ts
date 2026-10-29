@@ -21,9 +21,16 @@ test('exposes the responsive layout and appearance property surface', () => {
 });
 
 test('resolves borderColor tokens to their theme variables', () => {
+	const { style } = createSprinkles({ borderColor: 'control' });
+
+	expect(Object.values(style ?? {})).toEqual(['var(--luke-color-border-control)']);
+});
+
+test('rejects the standalone focus colour as a borderColor', () => {
+	// @ts-expect-error — focus is a standalone colour, not a border colour
 	const { style } = createSprinkles({ borderColor: 'focus' });
 
-	expect(Object.values(style ?? {})).toEqual(['var(--luke-color-border-focus)']);
+	expect(style).not.toHaveProperty('borderColor', 'var(--luke-color-focus)');
 });
 
 // The fill and its foreground context come from one class, never an inline value.
@@ -68,8 +75,8 @@ test('derives token-backed Box values from the public contract', () => {
 	const cases = [
 		...Object.entries(vars.radius).map(([key, value]) => ['borderRadius', key, value] as const),
 		...Object.entries(vars.shadow).map(([key, value]) => ['boxShadow', key, value] as const),
-		...['control', 'decorative', 'focus'].map((key) => {
-			return ['borderColor', key, vars.color.border[key as 'focus']] as const;
+		...['control', 'decorative'].map((key) => {
+			return ['borderColor', key, vars.color.border[key as 'control']] as const;
 		}),
 		...SEMANTIC_ROLES.flatMap((role) => {
 			return [['borderColor', `${role}.strong`, vars.color.border[role].strong]] as const;

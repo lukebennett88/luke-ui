@@ -88,8 +88,8 @@ advisory group. Every gate covers all three surfaces: forms, links, and semantic
   fills use `color.background.danger.solid.*`, with both on-solid foreground leaves gated at 4.5:1
   across rest, hover, and pressed. Danger solid fills do not carry a 3:1 guarantee against the
   surrounding surface.
-- `color.border.focus` is a hard gate against all three surfaces. The keyboard-focus ring stays
-  build-time validated at ≥3:1.
+- `color.focus` is a hard gate against all three surfaces. The keyboard-focus ring stays build-time
+  validated at ≥3:1.
 - `color.foreground.accent.onSolid` is also a hard gate at 3:1 against
   `color.background.accent.solid.rest` and `color.background.accent.solid.pressed`. The active
   Select or Combobox option draws a 2px inset outline in that on-solid colour on those fills, so the

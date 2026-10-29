@@ -48,7 +48,7 @@ describe('buildTheme contrast failures', () => {
 		});
 		const failure = error.failures.find((candidate) => {
 			return (
-				candidate.foreground === 'color.border.focus' &&
+				candidate.foreground === 'color.focus' &&
 				candidate.background === 'color.background.surface.base'
 			);
 		});
@@ -57,7 +57,7 @@ describe('buildTheme contrast failures', () => {
 		expect(failure?.required).toBe(3);
 		expect(failure?.ratio).toBeLessThan(3);
 		expect(error.message).toMatch(
-			/light: color\.border\.focus on color\.background\.surface\.base — \d+\.\d{3}:1 < 3:1/,
+			/light: color\.focus on color\.background\.surface\.base — \d+\.\d{3}:1 < 3:1/,
 		);
 	});
 
@@ -121,7 +121,7 @@ describe('buildTheme contrast failures', () => {
 		expect(ratio).toBeLessThan(UI_RATIO);
 		expect(error.failures).toContainEqual({
 			mode: 'light',
-			foreground: 'color.border.focus',
+			foreground: 'color.focus',
 			background: 'color.background.surface.base',
 			ratio,
 			required: UI_RATIO,
@@ -173,7 +173,7 @@ describe('buildTheme contrast failures', () => {
 		const foregrounds = new Set(error.failures.map((failure) => failure.foreground));
 		// A low-contrast light focus ring and a pathological dark base fail different pairs across both
 		// modes; the error collects them all.
-		expect(foregrounds.has('color.border.focus')).toBe(true);
+		expect(foregrounds.has('color.focus')).toBe(true);
 		expect(foregrounds.has('color.foreground.primary')).toBe(true);
 		expect(error.failures.length).toBeGreaterThan(2);
 		expect(error.message.split('\n').length).toBe(error.failures.length + 1);
@@ -262,7 +262,7 @@ describe('contrast validation matrix', () => {
 			}
 		}
 		for (const background of SURFACES) {
-			hard.push({ background, foreground: 'color.border.focus', required: UI_RATIO });
+			hard.push({ background, foreground: 'color.focus', required: UI_RATIO });
 		}
 		for (const background of SURFACES) {
 			hard.push({ background, foreground: 'color.border.control', required: UI_RATIO });

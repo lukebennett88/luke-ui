@@ -107,7 +107,7 @@ export function validateContrast(
 		}
 	}
 	const boundaries = [
-		'color.border.focus',
+		'color.focus',
 		'color.border.control',
 	] as const satisfies ReadonlyArray<ColorPath>;
 	for (const boundary of boundaries) {

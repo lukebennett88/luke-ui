@@ -346,7 +346,7 @@ export const result = style({
 					backgroundColor: vars.color.background.accent.subtle,
 				},
 				'&[data-focus-visible]': {
-					outlineColor: vars.color.border.focus,
+					outlineColor: vars.color.focus,
 					outlineOffset: '-2px',
 					outlineStyle: 'solid',
 					outlineWidth: '2px',

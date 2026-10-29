@@ -45,10 +45,10 @@ scopes repaint with their own token values.
 
 ### D3. Focus
 
-The stylesheet provides the themed focus ring: a 2px solid `vars.color.border.focus` outline with a
-2px offset, and a `Highlight` outline under `forced-colors: active`. Only the native
-`:focus-visible` pseudo-class is global. Component recipes handle React Aria's
-`[data-focus-visible='true']` where they need it.
+The stylesheet provides the themed focus ring: a 2px solid `vars.color.focus` outline with a 2px
+offset, and a `Highlight` outline under `forced-colors: active`. Only the native `:focus-visible`
+pseudo-class is global. Component recipes handle React Aria's `[data-focus-visible='true']` where
+they need it.
 
 - **Rationale.** React Aria sets `data-focus-visible` on wrappers as well as on focused elements:
   the Select root, the Combobox group, and the Checkbox and Switch labels. A global attribute rule
@@ -108,7 +108,7 @@ The stylesheet has six global rules, plus the layer order statement, all in `luk
 | G3  | `:where(body)`                                                          | `margin: 0`, `background-color`, `color`, `accent-color`, body font family, size, weight, letter spacing, `line-height: 1.5` |
 | G4  | `:where(body [data-color-mode='light'], body [data-color-mode='dark'])` | `background-color`, `color`, `accent-color`                                                                                  |
 | G5  | `:where(button, input, select, textarea)`                               | `font: inherit`, `margin: 0`                                                                                                 |
-| G6  | `:where(:focus-visible)`                                                | 2px solid `border.focus` outline, 2px offset; `outline-color: Highlight` under `forced-colors: active`                       |
+| G6  | `:where(:focus-visible)`                                                | 2px solid `color.focus` outline, 2px offset; `outline-color: Highlight` under `forced-colors: active`                        |
 
 G4 does not match `<body>` itself: G3 paints `<body>` from the custom properties computed on it, so
 an explicit mode on `<body>` repaints through G3. The module is `core/styles/global-styles.css.ts`.

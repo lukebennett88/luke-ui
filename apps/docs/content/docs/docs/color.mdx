@@ -21,11 +21,12 @@ Surface roles describe where an element sits in the interface:
 Choose borders and shadow separately. A raised surface does not add either, and flat cards can use
 `base` with a border or `subdued`.
 
-Text uses `primary` and `secondary` roles. Borders distinguish decorative, control, and focus uses.
-Text, role foregrounds, `color.border.control`, `color.border.<role>.strong`, and the focus ring are
-guaranteed to contrast with all three surfaces. Control hover and pressed borders derive from
-`color.border.control` and keep the same contrast guarantee. `color.border.decorative` is a
-separator with no contrast guarantee.
+Text uses `primary` and `secondary` roles. Borders distinguish decorative, control, and role uses.
+`color.focus` is a standalone colour, not a border, because it paints a focus outline or a ring
+shadow. Text, role foregrounds, `color.border.control`, `color.border.<role>.strong`, and
+`color.focus` are guaranteed to contrast with all three surfaces. Control hover and pressed borders
+derive from `color.border.control` and keep the same contrast guarantee. `color.border.decorative`
+is a separator with no contrast guarantee.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
