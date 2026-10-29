@@ -27,7 +27,9 @@ const selectConfig = {
 				'(forced-colors: active)': {
 					selectors: {
 						'&[data-focus-visible="true"]': { outlineColor: 'Highlight' },
-						[`${rootInvalid}::after`]: { boxShadow: 'none', outline: '1px solid Mark' },
+						// System colours have no danger hue, so the ring would only repeat the border. Like the
+						// fields, the trigger leaves the invalid cue to FieldError here.
+						[`${rootInvalid}::after`]: { display: 'none' },
 					},
 				},
 			},
