@@ -377,6 +377,76 @@ test('keeps overlay fades without movement under reduced motion', async () => {
 	expect(getComputedStyle(popover).translate).toBe('none');
 });
 
+async function openSelectPopover() {
+	render(
+		<SelectField items={items} label="Select">
+			{(item) => <SelectItem>{item.label}</SelectItem>}
+		</SelectField>,
+	);
+	await userEvent.click(page.getByRole('button', { name: /Select/ }));
+	await expect.poll(() => document.querySelector('[data-trigger="Select"]')).not.toBeNull();
+	return document.querySelector<HTMLElement>('[data-trigger="Select"]')!;
+}
+
+/** Reads a state's resolved values without waiting for the transition to run. */
+function resolveState(popover: HTMLElement, attributes: Record<string, string>) {
+	const previous = popover.style.transition;
+	popover.style.transition = 'none';
+	for (const [name, value] of Object.entries(attributes)) popover.setAttribute(name, value);
+	const { opacity, translate } = getComputedStyle(popover);
+	for (const name of Object.keys(attributes)) popover.removeAttribute(name);
+	popover.style.transition = previous;
+	return { opacity, translate };
+}
+
+test('slides a dropdown popover in from the side facing its trigger', async () => {
+	const popover = await openSelectPopover();
+	await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
+	const placement = popover.dataset.placement;
+	expect(placement).toBeDefined();
+
+	const entering = (side: string) =>
+		resolveState(popover, { 'data-entering': 'true', 'data-placement': side });
+	expect(entering('bottom')).toEqual({ opacity: '0', translate: '0px -4px' });
+	expect(entering('top')).toEqual({ opacity: '0', translate: '0px 4px' });
+	expect(entering('left')).toEqual({ opacity: '0', translate: '4px' });
+	expect(entering('right')).toEqual({ opacity: '0', translate: '-4px' });
+	expect(resolveState(popover, { 'data-exiting': 'true', 'data-placement': 'top' }).translate).toBe(
+		'0px 4px',
+	);
+});
+
+test('leaves a dropdown popover faster than it enters', async () => {
+	const popover = await openSelectPopover();
+	await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
+	const seconds = (value: string) => Number.parseFloat(value);
+	const rest = getComputedStyle(popover);
+	expect(rest.transitionProperty).toBe('opacity, translate');
+	const enter = seconds(rest.transitionDuration.split(',')[0]!);
+	popover.setAttribute('data-exiting', 'true');
+	const exit = seconds(getComputedStyle(popover).transitionDuration.split(',')[0]!);
+	popover.removeAttribute('data-exiting');
+	expect(enter).toBeGreaterThan(0);
+	expect(exit).toBeGreaterThan(0);
+	expect(exit).toBeLessThan(enter);
+});
+
+test('drops dropdown popover movement under reduced motion', async () => {
+	await emulateReducedMotion(true);
+	const popover = await openSelectPopover();
+	await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
+	const states: Array<Record<string, string>> = [
+		{ 'data-entering': 'true' },
+		{ 'data-exiting': 'true' },
+	];
+	for (const attributes of states) {
+		expect(resolveState(popover, { ...attributes, 'data-placement': 'top' })).toEqual({
+			opacity: '0',
+			translate: 'none',
+		});
+	}
+});
+
 for (const appearance of visualAppearances) {
 	test(`mixed host: ${appearance.theme} ${appearance.mode}`, { tags: ['visual'] }, async () => {
 		const { locator } = render(<MixedHost />, { appearance });
