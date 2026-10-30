@@ -21,12 +21,15 @@ Link remains a link and keeps its native navigation behaviour.
 
 ## Prominence
 
-`standard` is the default. Choose `low` for a secondary destination and `high` for a primary
-destination. Text Links use the accent text colour at every prominence, so prominence changes the
-underline and not the hue. Hover and press toggle the underline. Low text Links have no underline at
-rest and gain one, and standard and high text Links are underlined at rest and lose it. Keyboard
-focus shows the focus ring, and low text Links also underline. Press also shifts the text colour. On
-a solid background, every prominence takes the background's readable text colour.
+`standard` is the default. Choose `low` for a secondary destination. Text Links have `low` and
+`standard` prominence only, because `high` would look the same as `standard`. Text Links use the
+accent text colour at both, so prominence changes the underline and not the hue. Hover and press
+toggle the underline. Low text Links have no underline at rest and gain one, and standard text Links
+are underlined at rest and lose it. Keyboard focus shows the focus ring, and low text Links also
+underline. Press also shifts the text colour. On a solid background, both take the background's
+readable text colour.
+
+Button-shaped Links keep `high`, which uses the theme's primary accent treatment.
 
 <ExampleBlock src="link/prominence" title="Link: Prominence" />
 

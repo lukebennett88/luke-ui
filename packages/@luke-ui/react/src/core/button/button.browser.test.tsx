@@ -764,9 +764,10 @@ for (const state of ['hover', 'pressed'] as const) {
 
 for (const appearance of visualAppearances) {
 	test(`text Button and text Link colours differ at low and standard prominence in ${appearance.theme} ${appearance.mode}`, () => {
+		const prominences = ['low', 'standard'] as const;
 		const { locator } = render(
 			<>
-				{(['low', 'standard', 'high'] as const).map((prominence) => (
+				{prominences.map((prominence) => (
 					<Box key={prominence}>
 						<Button appearance="text" prominence={prominence}>
 							{`Button ${prominence}`}
@@ -776,26 +777,30 @@ for (const appearance of visualAppearances) {
 						</Link>
 					</Box>
 				))}
+				<Button appearance="text" prominence="high">
+					Button high
+				</Button>
 			</>,
 			{ appearance },
 		);
-		const colours = (['low', 'standard', 'high'] as const).map((prominence) => {
-			const button = locator.getByRole('button', { name: `Button ${prominence}` }).element();
-			const link = locator.getByRole('link', { name: `Link ${prominence}` }).element();
-			return {
-				button: getComputedStyle(button).color,
-				link: getComputedStyle(link).color,
-				prominence,
-			};
-		});
+		const colours = prominences.map((prominence) => ({
+			button: getComputedStyle(
+				locator.getByRole('button', { name: `Button ${prominence}` }).element(),
+			).color,
+			link: getComputedStyle(locator.getByRole('link', { name: `Link ${prominence}` }).element())
+				.color,
+			prominence,
+		}));
 		const neutral = resolvedColor(vars.color.foreground.neutral.rest, locator.element());
 		const accent = resolvedColor(vars.color.foreground.accent.rest, locator.element());
 
 		expect(colours).toEqual([
 			{ button: neutral, link: accent, prominence: 'low' },
 			{ button: neutral, link: accent, prominence: 'standard' },
-			{ button: accent, link: accent, prominence: 'high' },
 		]);
+		expect(
+			getComputedStyle(locator.getByRole('button', { name: 'Button high' }).element()).color,
+		).toBe(accent);
 	});
 }
 

@@ -473,9 +473,10 @@ so they keep their own compiler-gated or placeholder colours.
 A role's colour can collapse to on-solid colour, so a state cue cannot be hue alone. Text Links use
 the label font weight and belong inline with lighter surrounding text. Hover and press toggle the
 underline, so the state change shows without colour. Low prominence has no resting underline and
-gains one on hover, focus, and press. Standard and high prominence are underlined at rest and lose
-it on hover and press. A field error pairs its message text with a leading icon that is hidden from
-assistive technology, so the error does not rely on the danger colour.
+gains one on hover, focus, and press. Standard prominence, and high on a text Button, is underlined
+at rest and loses it on hover and press. Text Links have no high prominence. A field error pairs its
+message text with a leading icon that is hidden from assistive technology, so the error does not
+rely on the danger colour.
 
 `Box` applies the pairing from one utilities-layer class per resting background and responsive
 condition. Its values are the standard surfaces and each role's resting `subtle` and `solid` fill.

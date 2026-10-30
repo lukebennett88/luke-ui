@@ -32,13 +32,6 @@ export default () => {
 			</ComparisonItem>
 			<ComparisonItem label="High">
 				<Cluster gap="space.24">
-					<Text>
-						Open the{' '}
-						<Link href="#example-destination" prominence="high">
-							example destination
-						</Link>
-						.
-					</Text>
 					<Link appearance="button" href="#example-destination" prominence="high">
 						Example destination
 					</Link>

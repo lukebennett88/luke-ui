@@ -196,7 +196,6 @@ export const buttonRecipeInternal = recipe({
 		...textAppearance('text', 'danger', 'standard'),
 		...textAppearance('link', 'neutral', 'low'),
 		...textAppearance('link', 'neutral', 'standard'),
-		...textAppearance('link', 'neutral', 'high'),
 	],
 });
 

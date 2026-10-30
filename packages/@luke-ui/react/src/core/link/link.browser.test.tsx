@@ -28,9 +28,6 @@ function LinkScene() {
 				Text low
 			</Link>
 			<Link href="#">Text standard</Link>
-			<Link href="#" prominence="high">
-				Text high
-			</Link>
 			<Grid columns={4}>
 				<Link appearance="button" href="#" prominence="low">
 					Button low
@@ -104,11 +101,7 @@ test('text Link prominences side by side', { tags: ['visual'] }, async () => {
 					<Link href="#" prominence="low">
 						low destination
 					</Link>{' '}
-					or the <Link href="#">standard destination</Link> or the{' '}
-					<Link href="#" prominence="high">
-						high destination
-					</Link>
-					.
+					or the <Link href="#">standard destination</Link>.
 				</Text>
 			</Stack>,
 			{ appearance },
@@ -172,7 +165,7 @@ test('Link preserves intrinsic and full inline sizing', () => {
 
 const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
 
-for (const prominence of ['low', 'standard', 'high'] as const) {
+for (const prominence of ['low', 'standard'] as const) {
 	test(`a ${prominence} text Link has weight 500 and toggles its underline on hover and press`, async () => {
 		const { locator } = render(
 			<Link href="#" prominence={prominence}>
@@ -191,7 +184,7 @@ for (const prominence of ['low', 'standard', 'high'] as const) {
 				thickness: styles.textDecorationThickness,
 			};
 		});
-		// Low gains the underline and standard and high lose it, without a change in thickness.
+		// Low gains the underline and standard loses it, without a change in thickness.
 		const restLine = prominence === 'low' ? 'none' : 'underline';
 		const activeLine = prominence === 'low' ? 'underline' : 'none';
 
@@ -200,7 +193,7 @@ for (const prominence of ['low', 'standard', 'high'] as const) {
 		expect(pressed).toEqual(hover);
 		expect(hover?.thickness).toBe(rest?.thickness);
 
-		// Keyboard focus keeps the resting underline of standard and high, and a hover still toggles it.
+		// Keyboard focus keeps the resting underline of standard, and a hover still toggles it.
 		setInteractionState(link, 'rest');
 		await focusViaKeyboard(locator.getByRole('link', { name: 'Destination' }));
 		const focused = getComputedStyle(link);
@@ -218,14 +211,10 @@ for (const appearance of visualAppearances) {
 		const { container, locator } = render(
 			<>
 				<Box backgroundColor="danger.solid" padding="space.8">
-					<Link href="#" prominence="high">
-						On solid
-					</Link>
+					<Link href="#">On solid</Link>
 				</Box>
 				<Box backgroundColor="warning.subtle" padding="space.8">
-					<Link href="#" prominence="high">
-						On subtle
-					</Link>
+					<Link href="#">On subtle</Link>
 				</Box>
 			</>,
 			{ appearance },
@@ -259,7 +248,7 @@ for (const appearance of visualAppearances) {
 
 for (const appearance of visualAppearances) {
 	test(`a text Link takes the accent foreground at every prominence in ${appearance.theme} ${appearance.mode}`, () => {
-		const prominences = ['low', 'standard', 'high'] as const;
+		const prominences = ['low', 'standard'] as const;
 		const { locator } = render(
 			<Box backgroundColor="surface.base" padding="space.8">
 				{prominences.map((prominence) => (

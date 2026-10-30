@@ -19,15 +19,6 @@ export default () => {
 					Open the <Link href="#example-destination">example destination</Link>.
 				</Text>
 			</ComparisonItem>
-			<ComparisonItem label="High">
-				<Text>
-					Open the{' '}
-					<Link href="#example-destination" prominence="high">
-						example destination
-					</Link>
-					.
-				</Text>
-			</ComparisonItem>
 		</Comparison>
 	);
 };
