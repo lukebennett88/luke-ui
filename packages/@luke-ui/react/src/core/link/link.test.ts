@@ -20,3 +20,12 @@ test('Link accepts only automatic or full inline sizing for button appearances',
 	// @ts-expect-error — text appearances do not expose inline sizing
 	assertType<LinkProps>({ appearance: 'text', inlineSize: 'full', href: '#' });
 });
+
+test('Link keeps high prominence for button appearances only', () => {
+	assertType<LinkProps>({ appearance: 'button', href: '#', prominence: 'high' });
+	assertType<LinkProps>({ href: '#', prominence: 'low' });
+	// @ts-expect-error — text Links have low and standard prominence only
+	assertType<LinkProps>({ href: '#', prominence: 'high' });
+	// @ts-expect-error — text Links have low and standard prominence only
+	assertType<LinkProps>({ appearance: 'text', href: '#', prominence: 'high' });
+});

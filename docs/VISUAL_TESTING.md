@@ -110,7 +110,7 @@ motion freeze cleanup in nested finally blocks, skips no-op viewport resizes (Re
 popovers on document scroll), re-binds body/html locators immediately before the screenshot so
 live-region text changes cannot invalidate the locator, and parks the pointer outside the viewport
 after each capture. Browser tests also park the pointer in `afterEach` so a leftover cursor cannot
-leave text Links hovered (hover thickens their underline).
+leave text Links hovered (hover toggles their underline).
 
 ## Tall scenes
 

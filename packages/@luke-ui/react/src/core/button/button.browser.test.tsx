@@ -1,6 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
+import { Link } from '@luke-ui/react/link';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { act } from 'react';
@@ -32,6 +33,7 @@ import {
 	parkPointer,
 	pressPointer,
 	releasePointer,
+	Stack,
 } from '../test-utils/visual.js';
 
 /** Intended Action spinner delay (~300ms). Kept in the test so production timing drifts fail. */
@@ -703,25 +705,102 @@ for (const appearance of [
 	});
 }
 
-// A text Button is not a link, so it keeps its own decoration rather than a link's underline.
+// A text Button is not a link, so it has no label weight. Hover and press toggle the underline: low
+// gains it, and standard and high lose it.
 for (const { prominence, rest, active } of [
 	{ prominence: 'low', rest: 'none', active: 'underline' },
 	{ prominence: 'standard', rest: 'underline', active: 'none' },
 	{ prominence: 'high', rest: 'underline', active: 'none' },
 ] as const) {
-	test(`a ${prominence} text Button keeps its own underline toggle`, () => {
+	test(`a ${prominence} text Button toggles its underline on hover and press`, async () => {
 		const { locator } = render(
 			<Button appearance="text" prominence={prominence}>
 				Save
 			</Button>,
 		);
 		const button = locator.getByRole('button', { name: 'Save' }).element();
-		const decorations = INTERACTION_STATES.map((state) => {
+		const states = INTERACTION_STATES.map((state) => {
 			setInteractionState(button, state);
-			return getComputedStyle(button).textDecorationLine;
+			const styles = getComputedStyle(button);
+			return { line: styles.textDecorationLine, thickness: styles.textDecorationThickness };
 		});
 
-		expect(decorations).toEqual([rest, active, active]);
+		expect(states.map(({ line }) => line)).toEqual([rest, active, active]);
+		expect(new Set(states.map(({ thickness }) => thickness)).size).toBe(1);
+
+		// Keyboard focus keeps the resting underline of standard and high, and a hover still toggles it.
+		setInteractionState(button, 'rest');
+		await focusViaKeyboard(locator.getByRole('button', { name: 'Save' }));
+		expect(getComputedStyle(button).textDecorationLine).toBe('underline');
+		setInteractionState(button, 'hover');
+		expect(getComputedStyle(button).textDecorationLine).toBe(active);
+	});
+}
+
+for (const state of ['hover', 'pressed'] as const) {
+	test(`text Button ${state}`, { tags: ['visual'] }, async () => {
+		for (const appearance of visualAppearances) {
+			const { locator, unmount } = render(
+				<Stack align="flex-start">
+					{(['low', 'standard', 'high'] as const).map((prominence) => (
+						<Button appearance="text" key={prominence} prominence={prominence}>
+							{`Text ${prominence}`}
+						</Button>
+					))}
+				</Stack>,
+				{ appearance },
+			);
+			for (const button of locator.getByRole('button').elements()) {
+				setInteractionState(button, state);
+			}
+			try {
+				await captureVisualAppearance(locator, `button/text-${state}`, appearance);
+			} finally {
+				unmount();
+			}
+		}
+	});
+}
+
+for (const appearance of visualAppearances) {
+	test(`text Button and text Link colours differ at low and standard prominence in ${appearance.theme} ${appearance.mode}`, () => {
+		const prominences = ['low', 'standard'] as const;
+		const { locator } = render(
+			<>
+				{prominences.map((prominence) => (
+					<Box key={prominence}>
+						<Button appearance="text" prominence={prominence}>
+							{`Button ${prominence}`}
+						</Button>
+						<Link href="#" prominence={prominence}>
+							{`Link ${prominence}`}
+						</Link>
+					</Box>
+				))}
+				<Button appearance="text" prominence="high">
+					Button high
+				</Button>
+			</>,
+			{ appearance },
+		);
+		const colours = prominences.map((prominence) => ({
+			button: getComputedStyle(
+				locator.getByRole('button', { name: `Button ${prominence}` }).element(),
+			).color,
+			link: getComputedStyle(locator.getByRole('link', { name: `Link ${prominence}` }).element())
+				.color,
+			prominence,
+		}));
+		const neutral = resolvedColor(vars.color.foreground.neutral.rest, locator.element());
+		const accent = resolvedColor(vars.color.foreground.accent.rest, locator.element());
+
+		expect(colours).toEqual([
+			{ button: neutral, link: accent, prominence: 'low' },
+			{ button: neutral, link: accent, prominence: 'standard' },
+		]);
+		expect(
+			getComputedStyle(locator.getByRole('button', { name: 'Button high' }).element()).color,
+		).toBe(accent);
 	});
 }
 

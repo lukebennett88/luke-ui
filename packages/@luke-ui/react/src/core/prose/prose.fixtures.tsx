@@ -180,7 +180,7 @@ export function NativeElementsScene() {
 						Read more
 					</Link>
 					,{' '}
-					<a className={linkRecipe({ prominence: 'high' })} href="#recipe">
+					<a className={linkRecipe({ prominence: 'standard' })} href="#recipe">
 						Recipe link
 					</a>
 					, <code className={codeRecipe()}>one line</code>, <kbd className={kbdRecipe()}>Esc</kbd>.

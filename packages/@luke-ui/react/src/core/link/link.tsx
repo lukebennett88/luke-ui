@@ -95,7 +95,8 @@ export function Link(props: LinkProps): JSX.Element {
 				return linkRecipe({
 					appearance: 'text',
 					className: cx(linkCursor, className),
-					prominence,
+					// A text Link has no high prominence. Untyped callers get standard, which looks the same.
+					prominence: prominence === 'low' ? 'low' : 'standard',
 				});
 			})}
 		>

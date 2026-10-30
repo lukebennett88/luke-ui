@@ -29,7 +29,10 @@ Keep related controls at the same size.
 
 `button` is the default appearance. It has control sizing, truncates its label, and supports content
 slots. Set `appearance="text"` when an action should use text-link presentation. Text Buttons wrap
-and do not support a size, block layout, or content slots.
+and do not support a size, block layout, or content slots. Text Buttons are neutral at low and
+standard prominence and use the accent colour at high prominence. Low prominence has no underline at
+rest and gains one on hover and press. Standard and high prominence are underlined at rest and lose
+the underline on hover and press. Keyboard focus shows the focus ring.
 
 <ExampleBlock src="button/appearance" title="Button: Appearance" />
 

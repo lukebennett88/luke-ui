@@ -79,10 +79,10 @@ export type LinkPresentationProps =
 			appearance?: 'text';
 			inlineSize?: never;
 			/**
-			 * Controls the strength of the control's visual treatment, from low to high.
+			 * Controls the strength of the control's visual treatment, from low to standard.
 			 * @default standard
 			 */
-			prominence?: Prominence;
+			prominence?: 'low' | 'standard';
 			size?: never;
 	  }
 	| {

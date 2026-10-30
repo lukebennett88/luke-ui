@@ -88,8 +88,8 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 });
 
 // Exclude recipe-owned elements: scope proximity otherwise beats equal-specificity recipes. A plain
-// link looks like a standard text `Link`: underlined in every state, in the surrounding context's
-// colours.
+// link looks like a standard text `Link`: accent, underlined at rest, and without the underline on
+// hover and press.
 const plainLink = `a[href]:not(.${actionElementClassName}):not(.${textElementClassName})`;
 const linkAppearance = textLinkAppearance('neutral', 'standard');
 proseStyle(plainLink, {

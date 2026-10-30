@@ -362,7 +362,7 @@ export async function captureVisual(locator: Locator, id: string) {
 					await page.viewport(originalViewportWidth, originalViewportHeight);
 				}
 				// Park outside the viewport so the next capture does not inherit an accidental hover
-				// (text Links thicken their underline under `:hover` / `data-hovered`).
+				// (text Links toggle their underline under `:hover` / `data-hovered`).
 				await parkPointer();
 			}
 		}
