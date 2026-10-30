@@ -7,10 +7,6 @@ import type { ThemeInput } from '../define-theme.js';
  * sources supply the hues for the generated dark info, success, and warning counterparts.
  */
 export const paperTheme: ThemeInput = {
-	controlFinish: {
-		dark: { raised: 'none', recessed: 'none', resting: 'none' },
-		light: { raised: 'none', recessed: 'none', resting: 'none' },
-	},
 	color: {
 		accent: { dark: 'oklch(0.48 0.11 250)', light: '#185281' },
 		// Preserve the dark danger treatment; derive other dark feedback colours from their light sources.

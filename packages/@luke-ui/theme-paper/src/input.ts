@@ -8,10 +8,6 @@ import { THEME_NAME } from './name.js';
  * TypeScript to start from Paper.
  */
 export const theme: ThemeInput = {
-	controlFinish: {
-		dark: { raised: 'none', recessed: 'none', resting: 'none' },
-		light: { raised: 'none', recessed: 'none', resting: 'none' },
-	},
 	color: {
 		accent: { dark: 'oklch(0.48 0.11 250)', light: '#185281' },
 		// Preserve the dark danger treatment; derive other dark feedback colours from their light sources.
