@@ -120,7 +120,8 @@ and position. The specimens never use a Button tone, so the suite adds no compon
 
 The suite covers Tactile, Paper and the `layeredFinish` fixture, whose finish stacks overlapping
 layers. Two `midBandFailure` tests prove the gate catches a finish that fails only in the middle of
-its gradient. It does not parse gradients, so these limits apply:
+its gradient, and one `washFailure` test proves it catches a flat wash that lightens every dark fill.
+It does not parse gradients, so these limits apply:
 
 - It measures one specimen size and one label. A finish whose layers scale with a much larger
   control can paint differently there.

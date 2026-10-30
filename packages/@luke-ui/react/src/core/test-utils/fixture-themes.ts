@@ -57,11 +57,25 @@ const midBandFailureTheme: ThemeInput = {
 	name: 'mid-band-failure-fixture',
 };
 
+/**
+ * A flat white wash over every dark finish rung, with Paper's colours otherwise. It lightens each
+ * solid fill under its `onSolid` text and nothing else, so a failure here comes from the finish
+ * alone. It exists to prove the material contrast gate catches that, so no passing suite renders it.
+ */
+const washFinish = 'linear-gradient(rgb(255 255 255 / 0.25), rgb(255 255 255 / 0.25))';
+
+const washFailureTheme: ThemeInput = {
+	...paperTheme,
+	controlFinish: { dark: { raised: washFinish, recessed: washFinish, resting: washFinish } },
+	name: 'wash-failure-fixture',
+};
+
 const fixtureThemes = {
 	chromatic: chromaticTheme,
 	contrastEdge: contrastEdgeTheme,
 	layeredFinish: layeredFinishTheme,
 	midBandFailure: midBandFailureTheme,
+	washFailure: washFailureTheme,
 	flat: flatTheme,
 	paper: paperTheme,
 	tactile: tactileTheme,
