@@ -46,7 +46,7 @@ These are easy to miss in this repository:
 - Shared code reaches further than the diff shows. `Link` and `Button` share one recipe, so a change
   to the text appearance changes every plain `Link`. Check every consumer of changed shared code.
 - A suggested fix must follow the guides too. For example, TESTING.md allows a computed-style
-  assertion only when layout is the contract.
+  assertion only when layout, a semantic colour, or an interaction state is the contract.
 - Browser and visual tests load Luke UI's stylesheet but no application CSS, so a green run says
   nothing about conflicts with an application's styles.
 - Inspect added and changed comments for history or issue-number narration against
