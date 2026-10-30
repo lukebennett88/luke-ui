@@ -198,7 +198,7 @@ for (const prominence of ['low', 'standard', 'high'] as const) {
 		expect(rest).toEqual({ ...rest, followsText: true, fontWeight: '500', line: restLine });
 		expect(hover).toEqual({ ...hover, followsText: true, fontWeight: '500', line: activeLine });
 		expect(pressed).toEqual(hover);
-		expect(hover.thickness).toBe(rest.thickness);
+		expect(hover?.thickness).toBe(rest?.thickness);
 
 		// Keyboard focus keeps the resting underline of standard and high, and a hover still toggles it.
 		setInteractionState(link, 'rest');
