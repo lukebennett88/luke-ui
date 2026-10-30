@@ -467,10 +467,15 @@ test('the mark stays visible in forced colours', async () => {
 				<CheckboxRoot defaultSelected isDisabled>
 					<Parts label="Disabled" />
 				</CheckboxRoot>
+				<CheckboxRoot defaultSelected isInvalid>
+					<Parts label="Invalid" />
+				</CheckboxRoot>
 			</>,
 		);
-		const [checked, mixed, disabled] = [...container.querySelectorAll('[aria-hidden="true"]')];
-		if (!checked || !mixed || !disabled) throw new Error('Expected three indicators.');
+		const [checked, mixed, disabled, invalid] = [
+			...container.querySelectorAll('[aria-hidden="true"]'),
+		];
+		if (!checked || !mixed || !disabled || !invalid) throw new Error('Expected four indicators.');
 		const colorOf = (color: string): string => {
 			const probe = container.appendChild(document.createElement('span'));
 			probe.style.color = color;
@@ -479,12 +484,25 @@ test('the mark stays visible in forced colours', async () => {
 			return resolved;
 		};
 		const highlight = colorOf('Highlight');
+		const highlightText = colorOf('HighlightText');
+		const labelOf = (indicator: Element) => indicator.closest('label') as HTMLElement;
 
 		await expect.poll(() => dashOffset(markPaths(checked).check)).toBe(0);
-		expect(getComputedStyle(checked).backgroundColor).toBe(highlight);
-		expect(getComputedStyle(markPaths(checked).check).stroke).toBe(colorOf('HighlightText'));
+		// Rest, hovered, and pressed, for a plain and an invalid checked box, keep the Highlight fill.
+		for (const indicator of [checked, invalid]) {
+			for (const state of [null, 'data-hovered', 'data-pressed'] as const) {
+				if (state) labelOf(indicator).setAttribute(state, 'true');
+				const style = getComputedStyle(indicator);
+				expect(style.backgroundColor).toBe(highlight);
+				expect(style.borderTopColor).toBe(highlight);
+				expect(getComputedStyle(markPaths(indicator).check).stroke).toBe(highlightText);
+				if (state) labelOf(indicator).removeAttribute(state);
+			}
+		}
+		for (const state of ['data-hovered', 'data-pressed'])
+			labelOf(mixed).setAttribute(state, 'true');
 		expect(getComputedStyle(mixed).backgroundColor).toBe(highlight);
-		expect(getComputedStyle(markPaths(mixed).dash).stroke).toBe(colorOf('HighlightText'));
+		expect(getComputedStyle(markPaths(mixed).dash).stroke).toBe(highlightText);
 		expect(dashOffset(markPaths(mixed).dash)).toBe(0);
 		// A disabled box reads as disabled, not as a Highlight fill.
 		expect(getComputedStyle(disabled).backgroundColor).toBe(colorOf('Canvas'));

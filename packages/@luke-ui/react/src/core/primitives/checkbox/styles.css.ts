@@ -67,6 +67,12 @@ function markPath(drawn: string) {
 	} as const;
 }
 
+/** Every checked or indeterminate selector that sets an author colour on the box, with its hover and press forms. */
+const checkedForcedSelectors = ['[data-selected="true"]', '[data-indeterminate="true"]']
+	.flatMap((state) => [state, `[data-invalid="true"]${state}`])
+	.flatMap((state) => [`${state} &`, hovered(state), pressed(state)])
+	.join(', ');
+
 const checkboxConfig = {
 	slots: {
 		root: {
@@ -93,20 +99,21 @@ const checkboxConfig = {
 							outlineColor: 'Highlight',
 						},
 						// The mark is an SVG stroked with `currentColor`, so it paints no text backplate and
-						// follows `color`. Hover, press, and invalid rules out-rank these on specificity, so
-						// the system colours are `!important`: no theme fill or finish shows through. Disabled
-						// comes last so a disabled box reads as disabled whether it is checked or not.
-						'[data-indeterminate="true"] &, [data-selected="true"] &': {
-							backgroundColor: 'Highlight !important',
-							backgroundImage: 'none !important',
-							borderColor: 'Highlight !important',
-							color: 'HighlightText !important',
+						// follows `color`. The fill rule repeats every checked state selector that sets an
+						// author colour, at the same specificity, so hover, press, and invalid colours cannot
+						// show through. Disabled comes last so a disabled box reads as disabled whether it is
+						// checked or not.
+						[checkedForcedSelectors]: {
+							backgroundColor: 'Highlight',
+							backgroundImage: 'none',
+							borderColor: 'Highlight',
+							color: 'HighlightText',
 						},
 						'[data-disabled="true"] &, [data-disabled="true"][data-invalid="true"] &': {
-							backgroundColor: 'Canvas !important',
-							backgroundImage: 'none !important',
-							borderColor: 'GrayText !important',
-							color: 'GrayText !important',
+							backgroundColor: 'Canvas',
+							backgroundImage: 'none',
+							borderColor: 'GrayText',
+							color: 'GrayText',
 							opacity: 1,
 						},
 					},

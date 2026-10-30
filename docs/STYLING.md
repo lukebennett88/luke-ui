@@ -222,11 +222,12 @@ rule, so restate its reduced-motion value on that selector too.
 Under `@media (forced-colors: active)`, set system colours such as `Canvas`, `CanvasText`,
 `Highlight`, and `GrayText`. Chromium paints a `Canvas` backplate behind text, so text on a
 `Highlight` fill disappears. An element that draws text on `Highlight`, such as a selected list box
-item or a checked Checkbox's glyph, sets `forced-color-adjust: none` and both colours. Its forced
-rule must match every state selector that sets an author colour on it, or that colour shows through.
-`forced-color-adjust` inherits, so an element that holds arbitrary content, such as a list box item,
-also resets that content's colour, background, and border colour with `!important`. Otherwise a
-nested `Text` keeps its theme colour on the fill.
+item, sets `forced-color-adjust: none` and both colours. A checked Checkbox's mark is an SVG stroked
+with `currentColor`, which paints no backplate, so it needs no opt-out: the box sets `Highlight` and
+`HighlightText`. Its forced rule must match every state selector that sets an author colour on it,
+or that colour shows through. `forced-color-adjust` inherits, so an element that holds arbitrary
+content, such as a list box item, also resets that content's colour, background, and border colour
+with `!important`. Otherwise a nested `Text` keeps its theme colour on the fill.
 
 ## Recipes
 
