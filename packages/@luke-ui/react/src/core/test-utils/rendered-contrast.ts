@@ -1,5 +1,6 @@
 import { page } from 'vite-plus/test/context';
 import { visibleTextElements } from './axe.js';
+import { contrastRatio, paintedColor, relativeLuminance } from './painted-color.js';
 
 /**
  * The lowest WCAG contrast ratio between a visible text element's colour inside `element` and any
@@ -7,10 +8,26 @@ import { visibleTextElements } from './axe.js';
  * what axe cannot: text over a gradient or a translucent layer, such as the control finish.
  *
  * Hiding a text element also hides its own fill, so the text must sit inside the element that
- * paints the fill, as a Button's label does.
+ * paints the fill, as a Button's label does. It throws when `element` has no descendant that holds
+ * visible text, because a ratio over no pixels would pass vacuously.
  */
 export async function lowestRenderedTextContrast(element: HTMLElement): Promise<number> {
+	return (await lowestRenderedTextContrastAt(element)).contrast;
+}
+
+/** Where the lowest contrast was measured, in CSS pixels from `element`'s top-left corner. */
+export interface LowestTextContrast {
+	contrast: number;
+	x: number;
+	y: number;
+}
+
+/** `lowestRenderedTextContrast`, with the pixel where the lowest ratio occurred. */
+export async function lowestRenderedTextContrastAt(
+	element: HTMLElement,
+): Promise<LowestTextContrast> {
 	const texts = visibleTextElements(element).filter((text) => text instanceof HTMLElement);
+	if (texts.length === 0) throw new Error('No descendant of the element holds visible text.');
 	const visibilities = texts.map((text) => text.style.visibility);
 	for (const text of texts) text.style.visibility = 'hidden';
 	let screenshot: string;
@@ -23,7 +40,7 @@ export async function lowestRenderedTextContrast(element: HTMLElement): Promise<
 	const pixels = await decodePng(screenshot);
 	const bounds = element.getBoundingClientRect();
 	const scale = pixels.width / bounds.width;
-	let lowest = Number.POSITIVE_INFINITY;
+	const lowest: LowestTextContrast = { contrast: Number.POSITIVE_INFINITY, x: 0, y: 0 };
 	for (const text of texts) {
 		const foreground = relativeLuminance(paintedColor(getComputedStyle(text).color));
 		const rect = text.getBoundingClientRect();
@@ -39,14 +56,17 @@ export async function lowestRenderedTextContrast(element: HTMLElement): Promise<
 					pixels.data[offset + 1] ?? 0,
 					pixels.data[offset + 2] ?? 0,
 				]);
-				lowest = Math.min(lowest, contrastRatio(foreground, background));
+				const ratio = contrastRatio(foreground, background);
+				if (ratio < lowest.contrast) {
+					lowest.contrast = ratio;
+					lowest.x = (x + 0.5) / scale;
+					lowest.y = (y + 0.5) / scale;
+				}
 			}
 		}
 	}
 	return lowest;
 }
-
-type Rgb = [number, number, number];
 
 async function decodePng(base64: string): Promise<ImageData> {
 	const blob = await (await fetch(`data:image/png;base64,${base64}`)).blob();
@@ -55,26 +75,4 @@ async function decodePng(base64: string): Promise<ImageData> {
 	if (!context) throw new Error('No 2D canvas context to decode the screenshot.');
 	context.drawImage(bitmap, 0, 0);
 	return context.getImageData(0, 0, bitmap.width, bitmap.height);
-}
-
-/** The sRGB bytes the browser paints for a CSS colour, such as an `oklch()` computed value. */
-function paintedColor(color: string): Rgb {
-	const context = new OffscreenCanvas(1, 1).getContext('2d');
-	if (!context) throw new Error('No 2D canvas context to resolve a colour.');
-	context.fillStyle = color;
-	context.fillRect(0, 0, 1, 1);
-	const [red = 0, green = 0, blue = 0] = context.getImageData(0, 0, 1, 1).data;
-	return [red, green, blue];
-}
-
-function relativeLuminance(rgb: Rgb): number {
-	const [red, green, blue] = rgb.map((byte) => {
-		const channel = byte / 255;
-		return channel <= 0.040_45 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
-	});
-	return 0.2126 * (red ?? 0) + 0.7152 * (green ?? 0) + 0.0722 * (blue ?? 0);
-}
-
-function contrastRatio(first: number, second: number): number {
-	return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
 }
