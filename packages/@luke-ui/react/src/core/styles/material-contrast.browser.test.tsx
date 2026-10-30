@@ -107,12 +107,13 @@ test('throws when no pixels are sampled behind the text', async () => {
 	).rejects.toThrow('No pixels were sampled');
 });
 
-// Paper's dark finish takes the chromatic fixture's dark info hover and pressed fills under 4.5:1.
-// It stays out of the passing set above, so this proves the gate reports the failure.
-test('detects the chromatic fixture failing info contrast in dark mode', async () => {
-	const failures = await materialContrastFailures({ mode: 'dark', theme: 'chromatic' });
+// A flat wash lightens every solid fill under its text. Paper's dark appearance has the same colours
+// and passes above, so only the finish can be the cause of these failures.
+test('detects a flat finish wash failing text contrast in dark mode', async () => {
+	const failures = await materialContrastFailures({ mode: 'dark', theme: 'washFailure' });
 
-	expect(failures.some((failure) => /^chromatic info dark (hover|pressed): /.test(failure))).toBe(
-		true,
-	);
+	expect(failures.length, 'failing specimens').toBeGreaterThan(0);
+	for (const failure of failures) {
+		expect(failure).toMatch(/^washFailure \w+ dark (rest|hover|pressed): /);
+	}
 });
