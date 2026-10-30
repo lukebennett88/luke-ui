@@ -95,6 +95,29 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
+test('text Link prominences side by side', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator, unmount } = render(
+			<Stack align="flex-start">
+				<Text elementType="p">
+					Read the{' '}
+					<Link href="#" prominence="low">
+						low destination
+					</Link>{' '}
+					or the <Link href="#">standard destination</Link> or the{' '}
+					<Link href="#" prominence="high">
+						high destination
+					</Link>
+					.
+				</Text>
+			</Stack>,
+			{ appearance },
+		);
+		await captureVisualAppearance(locator, 'link/prominence-side-by-side', appearance);
+		unmount();
+	}
+});
+
 test('focus-visible state', { tags: ['visual'] }, async () => {
 	const { locator } = render(
 		<Stack align="flex-start">
@@ -240,6 +263,30 @@ for (const appearance of visualAppearances) {
 				state,
 			})),
 		);
+	});
+}
+
+for (const appearance of visualAppearances) {
+	test(`a text Link takes the accent foreground at every prominence in ${appearance.theme} ${appearance.mode}`, () => {
+		const prominences = ['low', 'standard', 'high'] as const;
+		const { locator } = render(
+			<Box backgroundColor="surface.base" padding="space.8">
+				{prominences.map((prominence) => (
+					<Text elementType="p" key={prominence}>
+						<Link href="#" prominence={prominence}>
+							{`Destination ${prominence}`}
+						</Link>
+					</Text>
+				))}
+			</Box>,
+			{ appearance },
+		);
+		const links = prominences.map((prominence) =>
+			locator.getByRole('link', { name: `Destination ${prominence}` }).element(),
+		);
+		const accent = resolvedColor(vars.color.foreground.accent.rest, links[0]!);
+
+		expect(links.map((link) => getComputedStyle(link).color)).toEqual(links.map(() => accent));
 	});
 }
 
