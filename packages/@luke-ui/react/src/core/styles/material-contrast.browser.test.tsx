@@ -107,7 +107,7 @@ test('throws when no pixels are sampled behind the text', async () => {
 	).rejects.toThrow('No pixels were sampled');
 });
 
-// Paper's dark finish takes the chromatic fixture's dark info hover and pressed fills under 4.5:1.
+// The chromatic fixture's dark finish takes its dark info hover and pressed fills under 4.5:1.
 // It stays out of the passing set above, so this proves the gate reports the failure.
 test('detects the chromatic fixture failing info contrast in dark mode', async () => {
 	const failures = await materialContrastFailures({ mode: 'dark', theme: 'chromatic' });

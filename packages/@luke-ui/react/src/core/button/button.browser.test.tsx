@@ -1012,8 +1012,8 @@ for (const appearance of visualAppearances) {
 			setInteractionState(button, state);
 			return getComputedStyle(button).backgroundImage;
 		});
-		// Guards the assertion below: outside forced colours the finish is painted.
-		expect(finishes).not.toContain('none');
+		// Guards the assertion below: outside forced colours Tactile paints its finish and Paper has none.
+		expect(finishes.includes('none')).toBe(appearance.theme === 'paper');
 
 		await emulateForcedColors('active');
 		try {

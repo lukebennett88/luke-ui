@@ -8,24 +8,8 @@ import type { ThemeInput } from '../define-theme.js';
  */
 export const paperTheme: ThemeInput = {
 	controlFinish: {
-		dark: {
-			raised:
-				'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.1) 0%, transparent 100%), ' +
-				'radial-gradient(80% 50% at 50% 110%, rgb(255 255 255 / 0.05) 0%, transparent 70%)',
-			recessed: 'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.04) 0%, transparent 100%)',
-			resting:
-				'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.07) 0%, transparent 100%), ' +
-				'radial-gradient(80% 50% at 50% 110%, rgb(255 255 255 / 0.03) 0%, transparent 70%)',
-		},
-		light: {
-			raised:
-				'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.2) 0%, transparent 100%), ' +
-				'radial-gradient(80% 50% at 50% 110%, rgb(255 255 255 / 0.1) 0%, transparent 70%)',
-			recessed: 'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.08) 0%, transparent 100%)',
-			resting:
-				'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.16) 0%, transparent 100%), ' +
-				'radial-gradient(80% 50% at 50% 110%, rgb(255 255 255 / 0.07) 0%, transparent 70%)',
-		},
+		dark: { raised: 'none', recessed: 'none', resting: 'none' },
+		light: { raised: 'none', recessed: 'none', resting: 'none' },
 	},
 	color: {
 		accent: { dark: 'oklch(0.48 0.11 250)', light: '#185281' },
@@ -40,16 +24,16 @@ export const paperTheme: ThemeInput = {
 		dark: {
 			floating: '0 4px 14px oklch(0.12 0.01 250 / 0.25)',
 			overlay: '0 12px 36px oklch(0.12 0.01 250 / 0.32)',
-			raised: '0 2px 6px oklch(0.12 0.01 250 / 0.18), 0 1px 3px oklch(0.12 0.01 250 / 0.12)',
-			inset: 'inset 0 1px 2px oklch(0.12 0.01 250 / 0.22)',
-			resting: '0 1px 3px oklch(0.12 0.01 250 / 0.12), 0 1px 2px oklch(0.12 0.01 250 / 0.06)',
+			raised: 'inset 0 0 0 1px oklch(1 0 0 / 0.1)',
+			inset: 'inset 0 0 0 1px oklch(1 0 0 / 0.14)',
+			resting: 'inset 0 0 0 1px oklch(1 0 0 / 0.06)',
 		},
 		light: {
 			floating: '0 4px 14px oklch(0.2 0.01 250 / 0.12)',
 			overlay: '0 12px 36px oklch(0.2 0.01 250 / 0.16)',
-			raised: '0 2px 6px oklch(0.2 0.01 250 / 0.05), 0 1px 3px oklch(0.2 0.01 250 / 0.035)',
-			inset: 'none',
-			resting: '0 1px 3px oklch(0.2 0.01 250 / 0.04), 0 1px 2px oklch(0.2 0.01 250 / 0.02)',
+			raised: 'inset 0 0 0 1px oklch(0 0 0 / 0.1)',
+			inset: 'inset 0 0 0 1px oklch(0 0 0 / 0.14)',
+			resting: 'inset 0 0 0 1px oklch(0 0 0 / 0.06)',
 		},
 	},
 	name: 'paper',
