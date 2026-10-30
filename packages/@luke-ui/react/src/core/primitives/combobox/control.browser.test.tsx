@@ -263,6 +263,19 @@ function ruleIndex(className: string): number {
 	return found;
 }
 
+/** Every stylesheet rule whose whole selector is `.className`, including rules inside layers and media. */
+function classRules(className: string): Array<CSSStyleRule> {
+	const found: Array<CSSStyleRule> = [];
+	const visit = (rules: CSSRuleList) => {
+		for (const rule of Array.from(rules)) {
+			if (rule instanceof CSSStyleRule && rule.selectorText === `.${className}`) found.push(rule);
+			if ('cssRules' in rule) visit(rule.cssRules as CSSRuleList);
+		}
+	};
+	for (const sheet of Array.from(document.styleSheets)) visit(sheet.cssRules);
+	return found;
+}
+
 const actionSizes = { medium: '28px', small: '24px' } as const;
 
 for (const size of ['medium', 'small'] as const) {
@@ -310,6 +323,20 @@ for (const size of ['medium', 'small'] as const) {
 		] as const) {
 			expect([property, clearStyle[property]]).toEqual([property, triggerStyle[property]]);
 		}
+	});
+
+	test(`the ComboboxTrigger and ComboboxClearButton share one emitted action rule at ${size} size`, () => {
+		render(<ActionScene size={size} />);
+		const { clearButton, trigger } = actionButtons(size);
+		const classNames = new Set([...trigger.classList, ...clearButton.classList]);
+		// Only the action base paints the state layer. A copy per slot would put it on two classes.
+		const actionClassNames = Array.from(classNames).filter((name) => {
+			return classRules(name).some((rule) => rule.style.backgroundImage !== '');
+		});
+
+		expect(actionClassNames).toHaveLength(1);
+		expect(Array.from(trigger.classList)).toContain(actionClassNames[0]);
+		expect(Array.from(clearButton.classList)).toContain(actionClassNames[0]);
 	});
 }
 
