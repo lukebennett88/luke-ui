@@ -11,6 +11,8 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { renderedPixels } from '../test-utils/autofill.js';
 import { emulateForcedColors } from '../test-utils/emulate-media.js';
+import type { Rgb } from '../test-utils/painted-color.js';
+import { contrast, paintedColor } from '../test-utils/painted-color.js';
 import type { VisualAppearance } from '../test-utils/render.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { resolvedColor } from '../test-utils/surface-colors.js';
@@ -82,7 +84,6 @@ const FOCUS_RATIO = 3;
 // Rounding the painted ring to 8-bit sRGB moves it by a level or two.
 const PAINT_TOLERANCE = 4;
 
-type Rgb = [number, number, number];
 type Edge = 'top' | 'bottom' | 'left' | 'right';
 type Neighbour = 'inner' | 'outer';
 
@@ -136,29 +137,6 @@ async function tabInto(tile: Element) {
 		await userEvent.tab();
 	}
 	expect(tile.contains(document.activeElement), 'focus reached the tile').toBe(true);
-}
-
-/** The sRGB bytes the browser paints for a CSS colour. */
-function paintedColor(color: string): Rgb {
-	const context = new OffscreenCanvas(1, 1).getContext('2d');
-	if (context === null) throw new Error('Expected a 2D canvas context.');
-	context.fillStyle = color;
-	context.fillRect(0, 0, 1, 1);
-	const [red = 0, green = 0, blue = 0] = context.getImageData(0, 0, 1, 1).data;
-	return [red, green, blue];
-}
-
-function luminance(rgb: Rgb): number {
-	const [red = 0, green = 0, blue = 0] = rgb.map((byte) => {
-		const channel = byte / 255;
-		return channel <= 0.040_45 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
-	});
-	return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
-}
-
-function contrast(first: Rgb, second: Rgb): number {
-	const [lighter, darker] = [luminance(first), luminance(second)].toSorted((a, b) => b - a);
-	return (lighter! + 0.05) / (darker! + 0.05);
 }
 
 function drift(actual: Rgb, expected: Rgb): number {

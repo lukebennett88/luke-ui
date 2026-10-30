@@ -107,6 +107,41 @@ for accessibility contracts it cannot express. Gradients can produce an `incompl
 result. To check text over a gradient or a translucent layer, such as the control finish, measure
 the screenshot pixels behind it with `lowestRenderedTextContrast`.
 
+## Material contrast
+
+`defineTheme` validates token colours and never sees `controlFinish`.
+`core/styles/material-contrast.browser.test.tsx` measures the rendered result instead. For every
+role it paints a test-only specimen with the solid `rest`, `hover` and `pressed` fill, the finish
+rung a solid Button paints in that state (`resting`, `raised`, `recessed`), and the role's `onSolid`
+text, in light and dark mode. `lowestRenderedTextContrastAt` hides the text, screenshots the
+specimen, and returns the lowest contrast between the text colour and any pixel across the text's
+whole box, with where it occurred. A ratio under 4.5:1 reports the theme, role, mode, state, ratio
+and position. The specimens never use a Button tone, so the suite adds no component API.
+
+The suite covers Tactile, Paper and the `layeredFinish` fixture, whose finish stacks overlapping
+layers. Two `midBandFailure` tests prove the gate catches a finish that fails only in the middle of
+its gradient. It does not parse gradients, so these limits apply:
+
+- It measures one specimen size and one label. A finish whose layers scale with a much larger
+  control can paint differently there.
+- Pixels are 8-bit sRGB from a Chromium screenshot, so it reads the finish as Chromium paints it.
+- It measures normal text on solid fills only. Disabled and inactive UI, forced colours (a finish is
+  not painted), and other layering are out of scope.
+- The React fixtures of Paper and Tactile are the subject. The packed-consumer harness requires
+  their solid fills, on-solid text and finish to match the published packages.
+
+To check a custom theme, add its `ThemeInput` to `fixtureThemes` in `test-utils/fixture-themes.ts`,
+add its name to `appearances` in the test, then run:
+
+```sh
+pnpm run build
+pnpm --filter @luke-ui/react exec vp test run --project=browser --tagsFilter='!visual' \
+  src/core/styles/material-contrast.browser.test.tsx
+```
+
+A pass is a guarantee for the finishes and specimens measured, not for arbitrary composition. CI
+runs the suite in the browser job with the rest of `pnpm test:code`.
+
 ## Visual regression
 
 Visual cases are `visual`-tagged browser tests. `render()` compiles React-owned copies of the

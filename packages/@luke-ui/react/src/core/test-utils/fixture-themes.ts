@@ -17,9 +17,51 @@ const contrastEdgeTheme: ThemeInput = {
 	name: 'contrast-edge-fixture',
 };
 
+/** A faint highlight, shade and sheen that overlap near the middle of a control. */
+const layeredFinish = {
+	raised:
+		'linear-gradient(to bottom, rgb(255 255 255 / 0.1), transparent 60%), ' +
+		'radial-gradient(70% 60% at 50% 55%, rgb(0 0 0 / 0.06), transparent), ' +
+		'linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.05) 50%, transparent 70%)',
+	recessed:
+		'linear-gradient(to bottom, rgb(0 0 0 / 0.1), transparent 55%), ' +
+		'radial-gradient(70% 60% at 50% 55%, rgb(255 255 255 / 0.04), transparent)',
+	resting:
+		'linear-gradient(to bottom, rgb(255 255 255 / 0.08), transparent 60%, rgb(0 0 0 / 0.06)), ' +
+		'linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.05) 50%, transparent 70%)',
+};
+
+const layeredFinishTheme: ThemeInput = {
+	...paperTheme,
+	controlFinish: { dark: layeredFinish, light: layeredFinish },
+	name: 'layered-finish-fixture',
+};
+
+/**
+ * A finish whose two ends are transparent and whose middle band is a heavy mid-tone. Every declared
+ * endpoint passes, and only the intermediate pixels pull text below 4.5:1. The band is dark in
+ * light mode, where the text is dark, and light in dark mode, where the text is light. It exists
+ * to prove the material contrast gate catches that, so no passing suite renders it.
+ */
+function midBandFinish(band: string) {
+	const finish = `linear-gradient(to bottom, transparent 20%, ${band} 50%, transparent 80%)`;
+	return { raised: finish, recessed: finish, resting: finish };
+}
+
+const midBandFailureTheme: ThemeInput = {
+	...paperTheme,
+	controlFinish: {
+		dark: midBandFinish('rgb(150 150 150 / 0.7)'),
+		light: midBandFinish('rgb(70 70 70 / 0.7)'),
+	},
+	name: 'mid-band-failure-fixture',
+};
+
 const fixtureThemes = {
 	chromatic: chromaticTheme,
 	contrastEdge: contrastEdgeTheme,
+	layeredFinish: layeredFinishTheme,
+	midBandFailure: midBandFailureTheme,
 	flat: flatTheme,
 	paper: paperTheme,
 	tactile: tactileTheme,
