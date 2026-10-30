@@ -247,12 +247,14 @@ function buttonAppearance(
 							...hoverLayer,
 							color: transparentAdaptiveStateText(chipTone, restColor),
 							vars: { ...hoverLayer.vars, ...neutralForegroundContextVars() },
+							backgroundImage: `${layerGradient}, ${vars.controlFinish.raised}`,
 							boxShadow: vars.shadow.raised,
 						},
 						[pressed]: {
 							...pressedLayer,
 							color: transparentAdaptiveStateText(chipTone, restColor),
 							vars: { ...pressedLayer.vars, ...neutralForegroundContextVars() },
+							backgroundImage: `${layerGradient}, ${vars.controlFinish.recessed}`,
 							boxShadow: vars.shadow.inset,
 						},
 					},
@@ -306,7 +308,7 @@ function buttonAppearance(
 				},
 				...subtleRest,
 				...toneColor,
-				backgroundImage: layerGradient,
+				backgroundImage: `${layerGradient}, ${vars.controlFinish.resting}`,
 				vars: {
 					...subtleRest.vars,
 					[interactionStateLayer]: 'transparent',
@@ -314,9 +316,11 @@ function buttonAppearance(
 				selectors: {
 					[hovered]: {
 						...hoverLayer,
+						backgroundImage: `${layerGradient}, ${vars.controlFinish.raised}`,
 					},
 					[pressed]: {
 						...pressedLayer,
+						backgroundImage: `${layerGradient}, ${vars.controlFinish.recessed}`,
 					},
 				},
 			},

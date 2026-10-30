@@ -9,26 +9,28 @@ import type { ThemeInput } from '../define-theme.js';
  * authored explicitly, so `defineTheme` uses each side as written.
  */
 export const tactileTheme: ThemeInput = {
-	// A solid face is lighter at the top and slightly darker at the bottom. Pressed reverses it. The
-	// light highlights stay faint enough to keep on-solid text above 4.5:1 where they overlap it.
+	// A convex face: a highlight band at the top and a shade band at the bottom, with a flat middle
+	// where a label sits, so the finish never changes a label's contrast. Solid, standard, and hovered
+	// or pressed low Buttons share it. Pressed reverses it. Light fills are near white, so the shade
+	// carries the light-mode curve and the highlight is mostly for solid faces.
 	controlFinish: {
 		dark: {
 			raised:
-				'linear-gradient(to bottom, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0) 60%, ' +
-				'rgb(0 0 0 / 0.06))',
-			recessed: 'linear-gradient(to bottom, rgb(0 0 0 / 0.14), rgb(0 0 0 / 0) 55%)',
+				'linear-gradient(to bottom, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0) 30%, ' +
+				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.1))',
+			recessed: 'linear-gradient(to bottom, rgb(0 0 0 / 0.14), rgb(0 0 0 / 0) 45%)',
 			resting:
-				'linear-gradient(to bottom, rgb(255 255 255 / 0.11), rgb(255 255 255 / 0) 60%, ' +
-				'rgb(0 0 0 / 0.08))',
+				'linear-gradient(to bottom, rgb(255 255 255 / 0.11), rgb(255 255 255 / 0) 30%, ' +
+				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.12))',
 		},
 		light: {
 			raised:
-				'linear-gradient(to bottom, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0) 60%, ' +
-				'rgb(0 0 0 / 0.03))',
-			recessed: 'linear-gradient(to bottom, rgb(0 0 0 / 0.07), rgb(0 0 0 / 0) 55%)',
+				'linear-gradient(to bottom, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0) 30%, ' +
+				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.07))',
+			recessed: 'linear-gradient(to bottom, rgb(0 0 0 / 0.07), rgb(0 0 0 / 0) 45%)',
 			resting:
-				'linear-gradient(to bottom, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0) 60%, ' +
-				'rgb(0 0 0 / 0.05))',
+				'linear-gradient(to bottom, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0) 30%, ' +
+				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.08))',
 		},
 	},
 	color: {

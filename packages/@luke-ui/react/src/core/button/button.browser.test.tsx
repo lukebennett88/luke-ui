@@ -998,7 +998,7 @@ test('forced colours clear the adaptive state layer on a low Button', async () =
 		const { locator } = render(<Button prominence="low">Cancel</Button>);
 		const button = locator.getByRole('button', { name: 'Cancel' }).element();
 		setInteractionState(button, 'hover');
-		expect(getComputedStyle(button).backgroundImage).toBe('none');
+		expect(getComputedStyle(button).backgroundImage).toMatch(/^none(, none)*$/);
 	} finally {
 		await emulateForcedColors('none');
 	}
