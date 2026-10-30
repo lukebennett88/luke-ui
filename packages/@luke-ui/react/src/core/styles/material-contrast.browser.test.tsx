@@ -4,7 +4,6 @@ import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import type { VisualAppearance } from '../test-utils/render.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { lowestRenderedTextContrastAt } from '../test-utils/rendered-contrast.js';
-import { setInteractionState } from '../test-utils/surface-colors.js';
 
 // #955 decisions 16 and 17: `defineTheme` checks token colours, and this suite measures the paint a
 // solid fill and its `controlFinish` produce behind `onSolid` text. To gate a custom theme, add its
@@ -60,8 +59,7 @@ async function materialContrastFailures(appearance: VisualAppearance) {
 	const failures: Array<string> = [];
 	for (const specimen of container.querySelectorAll<HTMLElement>('[data-specimen]')) {
 		const role = specimen.dataset.role;
-		const state = specimen.dataset.specimen as (typeof states)[number]['name'];
-		setInteractionState(specimen, state);
+		const state = specimen.dataset.specimen;
 		// oxlint-disable-next-line no-await-in-loop
 		const lowest = await lowestRenderedTextContrastAt(specimen);
 		if (lowest.contrast >= NORMAL_TEXT_RATIO) continue;
@@ -95,3 +93,26 @@ for (const mode of ['light', 'dark'] as const) {
 		}
 	});
 }
+
+// The gate must fail closed: a measurement over no pixels is not a pass.
+test('throws when no pixels are sampled behind the text', async () => {
+	const { container } = render(
+		<div style={{ height: 40, position: 'relative', width: 100 }}>
+			<span style={{ left: -200, position: 'absolute' }}>Save changes</span>
+		</div>,
+	);
+
+	await expect(
+		lowestRenderedTextContrastAt(container.firstElementChild as HTMLElement),
+	).rejects.toThrow('No pixels were sampled');
+});
+
+// Paper's dark finish takes the chromatic fixture's dark info hover and pressed fills under 4.5:1.
+// It stays out of the passing set above, so this proves the gate reports the failure.
+test('detects the chromatic fixture failing info contrast in dark mode', async () => {
+	const failures = await materialContrastFailures({ mode: 'dark', theme: 'chromatic' });
+
+	expect(failures.some((failure) => /^chromatic info dark (hover|pressed): /.test(failure))).toBe(
+		true,
+	);
+});

@@ -925,6 +925,50 @@ test('forced colours clear the adaptive state layer on a low Button', async () =
 	}
 });
 
+for (const appearance of visualAppearances) {
+	test(`forced colours remove the control finish from a solid Button in every state in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { locator } = render(<Button prominence="high">Save</Button>, { appearance });
+		const button = locator.getByRole('button', { name: 'Save' }).element();
+		const finishes = INTERACTION_STATES.map((state) => {
+			setInteractionState(button, state);
+			return getComputedStyle(button).backgroundImage;
+		});
+		// Guards the assertion below: outside forced colours the finish is painted.
+		expect(finishes).not.toContain('none');
+
+		await emulateForcedColors('active');
+		try {
+			for (const state of INTERACTION_STATES) {
+				setInteractionState(button, state);
+				// A list of `none` layers paints nothing.
+				expect(getComputedStyle(button).backgroundImage).toMatch(/^none(, none)*$/);
+			}
+		} finally {
+			await emulateForcedColors('none');
+		}
+	});
+
+	test(`reduced motion keeps the solid Button hover and pressed states visible in ${appearance.theme} ${appearance.mode}`, async () => {
+		const { locator } = render(<Button prominence="high">Save</Button>, { appearance });
+		const button = locator.getByRole('button', { name: 'Save' }).element();
+		await emulateReducedMotion(true);
+		try {
+			const painted = INTERACTION_STATES.map((state) => {
+				setInteractionState(button, state);
+				// Reduced motion keeps colour changes. Settle them to read the painted state.
+				const { background } = settledSurfaceColors(button);
+				return `${background} ${getComputedStyle(button).backgroundImage}`;
+			});
+			const [rest, hover, pressed] = painted;
+
+			expect(hover).not.toBe(rest);
+			expect(pressed).not.toBe(hover);
+		} finally {
+			await emulateReducedMotion(false);
+		}
+	});
+}
+
 test('adaptive Button layer transitions normally and changes immediately with reduced motion', async () => {
 	const { locator } = render(<Button prominence="low">Cancel</Button>);
 	const button = locator.getByRole('button', { name: 'Cancel' }).element();

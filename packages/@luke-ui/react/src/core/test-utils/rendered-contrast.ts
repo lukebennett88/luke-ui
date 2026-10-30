@@ -9,7 +9,8 @@ import { contrastRatio, paintedColor, relativeLuminance } from './painted-color.
  *
  * Hiding a text element also hides its own fill, so the text must sit inside the element that
  * paints the fill, as a Button's label does. It throws when `element` has no descendant that holds
- * visible text, because a ratio over no pixels would pass vacuously.
+ * visible text, or when none of the text's box falls inside `element`'s screenshot, because a ratio
+ * over no pixels would pass vacuously.
  */
 export async function lowestRenderedTextContrast(element: HTMLElement): Promise<number> {
 	return (await lowestRenderedTextContrastAt(element)).contrast;
@@ -64,6 +65,9 @@ export async function lowestRenderedTextContrastAt(
 				}
 			}
 		}
+	}
+	if (!Number.isFinite(lowest.contrast)) {
+		throw new Error('No pixels were sampled behind the text, so no contrast was measured.');
 	}
 	return lowest;
 }
