@@ -1014,11 +1014,10 @@ for (const appearance of visualAppearances) {
 		});
 		// Guards the assertion below: outside forced colours Tactile paints its finish in every state
 		// and Paper paints none in any of them.
-		expect(finishes).toHaveLength(INTERACTION_STATES.length);
-		for (const finish of finishes) {
-			if (appearance.theme === 'paper') expect(finish).toBe('none');
-			else expect(finish).not.toBe('none');
-		}
+		const paintsNoFinish = appearance.theme === 'paper';
+		expect(finishes.map((finish) => finish === 'none')).toEqual(
+			INTERACTION_STATES.map(() => paintsNoFinish),
+		);
 
 		await emulateForcedColors('active');
 		try {
