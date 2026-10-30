@@ -377,15 +377,31 @@ test('keeps overlay fades without movement under reduced motion', async () => {
 	expect(getComputedStyle(popover).translate).toBe('none');
 });
 
+const selectField = (
+	<SelectField items={items} label="Select">
+		{(item) => <SelectItem>{item.label}</SelectItem>}
+	</SelectField>
+);
+
+const comboboxField = (
+	<ComboboxField defaultItems={items} label="Combobox">
+		{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+	</ComboboxField>
+);
+
+/** The open dropdown popover, once it has finished entering. */
+async function findRestingPopover() {
+	await expect.poll(() => document.querySelector('[data-placement]')).not.toBeNull();
+	const popover = document.querySelector<HTMLElement>('[data-placement]')!;
+	await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
+	await expect.poll(() => popover.getAnimations().length).toBe(0);
+	return popover;
+}
+
 async function openSelectPopover() {
-	render(
-		<SelectField items={items} label="Select">
-			{(item) => <SelectItem>{item.label}</SelectItem>}
-		</SelectField>,
-	);
+	render(selectField);
 	await userEvent.click(page.getByRole('button', { name: /Select/ }));
-	await expect.poll(() => document.querySelector('[data-trigger="Select"]')).not.toBeNull();
-	return document.querySelector<HTMLElement>('[data-trigger="Select"]')!;
+	return findRestingPopover();
 }
 
 /** Reads a state's resolved values without waiting for the transition to run. */
@@ -399,18 +415,20 @@ function resolveState(popover: HTMLElement, attributes: Record<string, string>) 
 	return { opacity, translate };
 }
 
-test('slides a dropdown popover in from the side facing its trigger', async () => {
-	const popover = await openSelectPopover();
-	await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
-	const placement = popover.dataset.placement;
-	expect(placement).toBeDefined();
-
+/** The hidden values each placement enters from, and the motion a popover opened any way shares. */
+function expectEntryStyles(popover: HTMLElement) {
 	const entering = (side: string) =>
 		resolveState(popover, { 'data-entering': 'true', 'data-placement': side });
 	expect(entering('bottom')).toEqual({ opacity: '0', translate: '0px -4px' });
 	expect(entering('top')).toEqual({ opacity: '0', translate: '0px 4px' });
 	expect(entering('left')).toEqual({ opacity: '0', translate: '4px' });
 	expect(entering('right')).toEqual({ opacity: '0', translate: '-4px' });
+	expect(getComputedStyle(popover).transitionProperty).toBe('opacity, translate');
+}
+
+test('slides a dropdown popover in from the side facing its trigger', async () => {
+	const popover = await openSelectPopover();
+	expectEntryStyles(popover);
 	expect(resolveState(popover, { 'data-exiting': 'true', 'data-placement': 'top' }).translate).toBe(
 		'0px 4px',
 	);
@@ -418,13 +436,10 @@ test('slides a dropdown popover in from the side facing its trigger', async () =
 
 test('leaves a dropdown popover faster than it enters', async () => {
 	const popover = await openSelectPopover();
-	await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
-	const seconds = (value: string) => Number.parseFloat(value);
-	const rest = getComputedStyle(popover);
-	expect(rest.transitionProperty).toBe('opacity, translate');
-	const enter = seconds(rest.transitionDuration.split(',')[0]!);
+	const seconds = (value: string) => Number.parseFloat(value.split(',')[0]!);
+	const enter = seconds(getComputedStyle(popover).transitionDuration);
 	popover.setAttribute('data-exiting', 'true');
-	const exit = seconds(getComputedStyle(popover).transitionDuration.split(',')[0]!);
+	const exit = seconds(getComputedStyle(popover).transitionDuration);
 	popover.removeAttribute('data-exiting');
 	expect(enter).toBeGreaterThan(0);
 	expect(exit).toBeGreaterThan(0);
@@ -434,7 +449,6 @@ test('leaves a dropdown popover faster than it enters', async () => {
 test('drops dropdown popover movement under reduced motion', async () => {
 	await emulateReducedMotion(true);
 	const popover = await openSelectPopover();
-	await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
 	const states: Array<Record<string, string>> = [
 		{ 'data-entering': 'true' },
 		{ 'data-exiting': 'true' },
@@ -445,6 +459,38 @@ test('drops dropdown popover movement under reduced motion', async () => {
 			translate: 'none',
 		});
 	}
+});
+
+test('shows a dropdown popover fully when it reopens during its exit', async () => {
+	await openSelectPopover();
+	const trigger = page.getByRole('button', { name: /Select/ });
+	await userEvent.keyboard('{Escape}');
+	await expect.poll(() => document.querySelector('[data-exiting]')).not.toBeNull();
+	await userEvent.click(trigger);
+
+	const popover = await findRestingPopover();
+	expect(document.querySelectorAll('[data-placement]')).toHaveLength(1);
+	expect(popover.hasAttribute('data-exiting')).toBe(false);
+	expect(getComputedStyle(popover).opacity).toBe('1');
+	expect(['none', '0px']).toContain(getComputedStyle(popover).translate);
+});
+
+for (const key of ['{ArrowDown}', '{Enter}']) {
+	test(`gives a Select opened with ${key} the same entry styles`, async () => {
+		render(selectField);
+		await userEvent.tab();
+		await expect.element(page.getByRole('button', { name: /Select/ })).toHaveFocus();
+		await userEvent.keyboard(key);
+		expectEntryStyles(await findRestingPopover());
+	});
+}
+
+test('gives a Combobox opened by typing the same entry styles', async () => {
+	render(comboboxField);
+	await userEvent.tab();
+	await expect.element(page.getByRole('combobox')).toHaveFocus();
+	await userEvent.keyboard('o');
+	expectEntryStyles(await findRestingPopover());
 });
 
 for (const appearance of visualAppearances) {
