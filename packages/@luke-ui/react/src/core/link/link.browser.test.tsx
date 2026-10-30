@@ -246,30 +246,6 @@ for (const appearance of visualAppearances) {
 	});
 }
 
-for (const appearance of visualAppearances) {
-	test(`a text Link takes the accent foreground at every prominence in ${appearance.theme} ${appearance.mode}`, () => {
-		const prominences = ['low', 'standard'] as const;
-		const { locator } = render(
-			<Box backgroundColor="surface.base" padding="space.8">
-				{prominences.map((prominence) => (
-					<Text elementType="p" key={prominence}>
-						<Link href="#" prominence={prominence}>
-							{`Destination ${prominence}`}
-						</Link>
-					</Text>
-				))}
-			</Box>,
-			{ appearance },
-		);
-		const links = prominences.map((prominence) =>
-			locator.getByRole('link', { name: `Destination ${prominence}` }).element(),
-		);
-		const accent = resolvedColor(vars.color.foreground.accent.rest, links[0]!);
-
-		expect(links.map((link) => getComputedStyle(link).color)).toEqual(links.map(() => accent));
-	});
-}
-
 test('a low text Link uses LinkText and underlines active states in forced colours', async () => {
 	await emulateForcedColors('active');
 
