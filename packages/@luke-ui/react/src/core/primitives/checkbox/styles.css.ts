@@ -55,7 +55,8 @@ function markPath(drawn: string) {
 		strokeDashoffset: 1,
 		strokeLinecap: 'butt',
 		strokeLinejoin: 'round',
-		strokeWidth: 2,
+		// 3 of 24 units keeps the stroke as heavy as the old 2 of 16.
+		strokeWidth: 3,
 		transitionDuration: vars.motion.feedback.duration,
 		transitionProperty: 'stroke-dashoffset',
 		transitionTimingFunction: vars.motion.feedback.easing,

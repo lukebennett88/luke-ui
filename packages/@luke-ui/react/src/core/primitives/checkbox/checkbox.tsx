@@ -178,9 +178,10 @@ export function CheckboxIndicator(props: CheckboxIndicatorProps): JSX.Element {
 	return (
 		<span {...restProps} aria-hidden className={slots.indicator({ className })}>
 			{children}
-			<svg className={slots.mark()} focusable="false" viewBox="0 0 16 16">
-				<path className={slots.markCheck()} d="M3.5 8.5 6.5 11.5 12.5 4.5" pathLength={1} />
-				<path className={slots.markDash()} d="M4 8H12" pathLength={1} />
+			{/* The check follows the `check` icon's shape, so the two read as the same mark. */}
+			<svg className={slots.mark()} focusable="false" viewBox="0 0 24 24">
+				<path className={slots.markCheck()} d="M4.5 12.75 10.5 18.75 19.5 5.25" pathLength={1} />
+				<path className={slots.markDash()} d="M6 12H18" pathLength={1} />
 			</svg>
 		</span>
 	);
