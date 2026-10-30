@@ -33,6 +33,7 @@ import {
 	parkPointer,
 	pressPointer,
 	releasePointer,
+	Stack,
 } from '../test-utils/visual.js';
 
 /** Intended Action spinner delay (~300ms). Kept in the test so production timing drifts fail. */
@@ -735,6 +736,31 @@ for (const { prominence, rest } of [
 		setInteractionState(button, 'rest');
 		await focusViaKeyboard(locator.getByRole('button', { name: 'Save' }));
 		expect(getComputedStyle(button).textDecorationLine).toBe('underline');
+	});
+}
+
+for (const state of ['hover', 'pressed'] as const) {
+	test(`text Button ${state}`, { tags: ['visual'] }, async () => {
+		for (const appearance of visualAppearances) {
+			const { locator, unmount } = render(
+				<Stack align="flex-start">
+					{(['low', 'standard', 'high'] as const).map((prominence) => (
+						<Button appearance="text" key={prominence} prominence={prominence}>
+							{`Text ${prominence}`}
+						</Button>
+					))}
+				</Stack>,
+				{ appearance },
+			);
+			for (const button of locator.getByRole('button').elements()) {
+				setInteractionState(button, state);
+			}
+			try {
+				await captureVisualAppearance(locator, `button/text-${state}`, appearance);
+			} finally {
+				unmount();
+			}
+		}
 	});
 }
 
