@@ -96,6 +96,12 @@ const comboboxActionStyles = {
 	},
 } satisfies StyleRule;
 
+/**
+ * Shared base class for the trigger and clear button. Spreading the styles into both slots would emit
+ * a copy per slot. Defined before the recipe, so slot and size rules follow it.
+ */
+export const comboboxActionClassName = style(comboboxActionStyles, 'combobox-action');
+
 // The trigger and clear button share these dimensions. The medium size gives a 20px icon an 8px
 // inset from the control edge: (28px − 20px) ÷ 2 + the 4px trigger gap.
 const comboboxActionSizes = {
@@ -132,8 +138,8 @@ globalStyleInLayer(
  * `section`, `sectionHeading`, `emptyState`, `item`, then the tray-only parts.
  *
  * `control` and `listBox` use a `presentation` variant for tray styles. `trayTrigger` and
- * `trayValue` are tray-only slots. `trigger` and `clearButton` share `comboboxActionStyles` and
- * `comboboxActionSizes`.
+ * `trayValue` are tray-only slots. `trigger` and `clearButton` compose `comboboxActionClassName`
+ * and share `comboboxActionSizes`.
  */
 const comboboxConfig = {
 	slots: {
@@ -224,9 +230,8 @@ const comboboxConfig = {
 		trigger: {
 			marginInlineEnd: vars.space['4'],
 			marginInlineStart: vars.space['4'],
-			...comboboxActionStyles,
 		},
-		clearButton: comboboxActionStyles,
+		clearButton: {},
 		itemCheck: {
 			flexShrink: 0,
 			marginInlineStart: 'auto',

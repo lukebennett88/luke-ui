@@ -297,7 +297,10 @@ Apply `as const satisfies SlottedConfigInput` at the definition site. `as const`
 slot names and variant values. `satisfies` type-checks every style against `StyleRule`.
 
 `compoundVariants` is single-part only. Slotted recipes have no compound mechanism: a style that two
-slots share goes in a plain object that each slot spreads or references.
+slots share goes in a plain object that each slot spreads or references. Each slot then emits its
+own copy of the rules. When the copy is large, put the shared styles in a `style()` class defined
+before the recipe, and compose it with `cx()` in each part, as the Combobox trigger and clear button
+do. Defining it first keeps its rules ahead of the slot and variant rules.
 
 For overlapping properties in a slotted recipe, precedence runs from every slot's base to every
 slot's variants. This order holds only for style objects `recipe()` emits. A pre-built class string

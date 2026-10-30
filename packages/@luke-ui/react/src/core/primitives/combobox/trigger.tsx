@@ -2,13 +2,14 @@ import type { JSX } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/ComboBox';
 import { Button as RacButton } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { cx } from '../../../shared/utils/utils.js';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
-import { comboboxRecipe } from './styles.css.js';
+import { comboboxActionClassName, comboboxRecipe } from './styles.css.js';
 
 type _ComboboxTriggerOmit = DistributiveOmit<RacButtonProps, 'className' | 'render'>;
 interface _ComboboxTriggerProps extends _ComboboxTriggerOmit {
@@ -30,7 +31,7 @@ export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {
 			<RacButton
 				{...buttonProps}
 				className={composeRenderProps(buttonProps.className, (className) => {
-					return comboboxRecipe({ size }).trigger({ className });
+					return cx(comboboxActionClassName, comboboxRecipe({ size }).trigger({ className }));
 				})}
 			/>
 		</IconSizeProvider>
