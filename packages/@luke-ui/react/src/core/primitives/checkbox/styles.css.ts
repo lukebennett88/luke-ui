@@ -40,6 +40,33 @@ function checkboxStateLayer(state: 'hover' | 'pressed') {
 	};
 }
 
+/** Strokes a mark path that draws while `drawn` matches and is otherwise fully undrawn. */
+function markPath(drawn: string) {
+	return {
+		'@media': {
+			// The mark appears with no draw. Colour feedback elsewhere on the box still transitions.
+			'(prefers-reduced-motion: reduce)': {
+				transitionDuration: '0s',
+			},
+		},
+		fill: 'none',
+		stroke: 'currentColor',
+		strokeDasharray: '1 2',
+		strokeDashoffset: 1,
+		strokeLinecap: 'butt',
+		strokeLinejoin: 'round',
+		strokeWidth: 2,
+		transitionDuration: vars.motion.feedback.duration,
+		transitionProperty: 'stroke-dashoffset',
+		transitionTimingFunction: vars.motion.feedback.easing,
+		selectors: {
+			[drawn]: {
+				strokeDashoffset: 0,
+			},
+		},
+	} as const;
+}
+
 const checkboxConfig = {
 	slots: {
 		root: {
@@ -61,48 +88,33 @@ const checkboxConfig = {
 					borderColor: 'CanvasText',
 					color: 'CanvasText',
 					forcedColorAdjust: 'auto',
-					position: 'relative',
-					// Disabled comes last so a disabled box reads as disabled whether it is checked or not.
 					selectors: {
 						'[data-focus-visible="true"] &': {
 							outlineColor: 'Highlight',
 						},
+						// The mark is an SVG stroked with `currentColor`, so it paints no text backplate and
+						// follows `color`. Hover, press, and invalid rules out-rank these on specificity, so
+						// the system colours are `!important`: no theme fill or finish shows through. Disabled
+						// comes last so a disabled box reads as disabled whether it is checked or not.
 						'[data-indeterminate="true"] &, [data-selected="true"] &': {
-							backgroundColor: 'Highlight',
-							borderColor: 'Highlight',
-							color: 'HighlightText',
+							backgroundColor: 'Highlight !important',
+							backgroundImage: 'none !important',
+							borderColor: 'Highlight !important',
+							color: 'HighlightText !important',
 						},
-						// The glyph is text, so a forced-colours backplate would paint `Canvas` over the
-						// fill and hide the mark. It opts out and draws the fill itself, so hover, press,
-						// and invalid colours on the box cannot show through either.
-						'[data-indeterminate="true"] &::after, [data-selected="true"] &::after': {
-							alignItems: 'center',
-							backgroundColor: 'Highlight',
-							borderRadius: 'inherit',
-							color: 'HighlightText',
-							display: 'flex',
-							forcedColorAdjust: 'none',
-							inset: 0,
-							justifyContent: 'center',
-							position: 'absolute',
-						},
-						// The invalid form matches the invalid checked rule's specificity, so that rule's
-						// border cannot outrank this one. Forced colours come later in the stylesheet.
 						'[data-disabled="true"] &, [data-disabled="true"][data-invalid="true"] &': {
-							borderColor: 'GrayText',
-							color: 'GrayText',
+							backgroundColor: 'Canvas !important',
+							backgroundImage: 'none !important',
+							borderColor: 'GrayText !important',
+							color: 'GrayText !important',
 							opacity: 1,
-						},
-						'[data-disabled="true"] &::after': {
-							backgroundColor: 'Canvas',
-							color: 'GrayText',
 						},
 					},
 				},
 			},
 			// Unchecked, the box is a field part; checked, a solid fill with the control finish. Hover
 			// and pressed change colour, so they stay distinct without materials. Every fill pairs with
-			// its foreground context, so the glyph reads the fill's primary: on-solid colour once checked.
+			// its foreground context, so the mark reads the fill's primary: on-solid colour once checked.
 			alignItems: 'center',
 			...surfaceStyle('surface.base'),
 			backgroundImage: `linear-gradient(${interactionStateLayer}, ${interactionStateLayer})`,
@@ -114,22 +126,14 @@ const checkboxConfig = {
 			borderRadius: vars.radius.detail,
 			borderStyle: 'solid',
 			borderWidth: '1px',
-			boxShadow: vars.shadow.inset,
 			display: 'inline-flex',
-			fontSize: checkboxGlyphSize,
-			fontWeight: vars.font.weight.heading,
 			inlineSize: checkboxIndicatorSize,
 			justifyContent: 'center',
-			lineHeight: 1,
 			transitionDuration: vars.motion.feedback.duration,
-			// No `color`: the glyph appears with its fill's colour, not fading from the unchecked one.
-			transitionProperty: `background-color, background-image, border-color, box-shadow, opacity, ${INTERACTION_STATE_LAYER_PROPERTY}`,
+			// No `color`: the mark appears with its fill's colour, not fading from the unchecked one.
+			transitionProperty: `background-color, background-image, border-color, opacity, ${INTERACTION_STATE_LAYER_PROPERTY}`,
 			transitionTimingFunction: vars.motion.feedback.easing,
 			selectors: {
-				'&::after': {
-					content: '"✓"',
-					opacity: 0,
-				},
 				'[data-disabled="true"] &': {
 					opacity: vars.interaction.disabledOpacity,
 				},
@@ -146,11 +150,6 @@ const checkboxConfig = {
 					...surfaceStyle('accent.solid.rest'),
 					backgroundImage: vars.controlFinish.resting,
 					borderColor: vars.color.background.accent.solid.rest,
-					boxShadow: 'none',
-				},
-				'[data-indeterminate="true"] &::after': {
-					content: '"−"',
-					opacity: 1,
 				},
 				'[data-invalid="true"] &': {
 					borderColor: vars.color.border.danger.strong,
@@ -159,10 +158,6 @@ const checkboxConfig = {
 					...surfaceStyle('accent.solid.rest'),
 					backgroundImage: vars.controlFinish.resting,
 					borderColor: vars.color.background.accent.solid.rest,
-					boxShadow: 'none',
-				},
-				'[data-selected="true"] &::after': {
-					opacity: 1,
 				},
 				[`${hovered('[data-selected="true"]')}, ${hovered('[data-indeterminate="true"]')}`]: {
 					...surfaceStyle('accent.solid.hover'),
@@ -201,6 +196,18 @@ const checkboxConfig = {
 					},
 			},
 		},
+		// The mark is an SVG drawn by `stroke-dashoffset`. Each path has `pathLength="1"`, so a dash
+		// of 1 with an offset of 1 is fully undrawn and 0 is fully drawn. A butt cap leaves nothing
+		// visible at zero length. A CSS transition, unlike keyframes, reverses from wherever it is
+		// when the state flips, so rapid toggles stay interruptible.
+		mark: {
+			blockSize: checkboxGlyphSize,
+			flexShrink: 0,
+			inlineSize: checkboxGlyphSize,
+			overflow: 'visible',
+		},
+		markCheck: markPath('[data-selected="true"]:not([data-indeterminate="true"]) &'),
+		markDash: markPath('[data-indeterminate="true"] &'),
 	},
 	defaultVariants: {
 		size: 'medium',

@@ -16,6 +16,7 @@ import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../../test-utils/axe.js';
+import { emulateForcedColors, emulateReducedMotion } from '../../test-utils/emulate-media.js';
 import { getDescribedText } from '../../test-utils/get-described-text.js';
 import { render, visualAppearances } from '../../test-utils/render.js';
 import type { PairedBackground } from '../../test-utils/surface-colors.js';
@@ -313,9 +314,9 @@ test('CheckboxRoot keeps aria-labelledby and aria-describedby from the layout', 
 });
 
 for (const appearance of visualAppearances) {
-	// The box's fill establishes the glyph's colour, so the check mark reads on-solid colour once
+	// The box's fill establishes the mark's colour, so the check mark reads on-solid colour once
 	// checked, whatever surface the checkbox sits on.
-	test(`the checkbox box pairs each fill with its glyph colour in ${appearance.theme} ${appearance.mode}`, () => {
+	test(`the checkbox box pairs each fill with its mark colour in ${appearance.theme} ${appearance.mode}`, () => {
 		const { container } = render(
 			<Box backgroundColor="success.solid" padding="space.8">
 				<CheckboxRoot>
@@ -342,9 +343,11 @@ for (const appearance of visualAppearances) {
 				pairedColors(indicator, backgrounds[index] ?? 'surface.base'),
 			),
 		);
-		// The check mark is the indicator's text, so it shows the checked fills' on-solid colour.
+		// The mark is an SVG stroked with `currentColor`, so it shows the checked fills' on-solid colour.
 		expect(
-			indicators.slice(1).map((indicator) => getComputedStyle(indicator, '::after').color),
+			indicators
+				.slice(1)
+				.map((indicator) => getComputedStyle(indicator.querySelector('path') as Element).stroke),
 		).toEqual(
 			[vars.color.foreground.accent.onSolid, vars.color.foreground.danger.onSolid].map((token) =>
 				resolvedColor(token, container),
@@ -352,3 +355,141 @@ for (const appearance of visualAppearances) {
 		);
 	});
 }
+
+/** The path a state draws, and the other path that stays undrawn. */
+function markPaths(indicator: Element): { check: SVGPathElement; dash: SVGPathElement } {
+	const [check, dash] = indicator.querySelectorAll('svg path');
+	if (!(check instanceof SVGPathElement) || !(dash instanceof SVGPathElement)) {
+		throw new Error('Expected the check and dash paths.');
+	}
+	return { check, dash };
+}
+
+function dashOffset(path: SVGPathElement): number {
+	return Number.parseFloat(getComputedStyle(path).strokeDashoffset);
+}
+
+test('the indicator draws an SVG check when selected and an SVG dash when indeterminate', async () => {
+	const { container } = render(
+		<>
+			<CheckboxRoot>
+				<Parts label="Plain" />
+			</CheckboxRoot>
+			<CheckboxRoot defaultSelected>
+				<Parts label="Checked" />
+			</CheckboxRoot>
+			<CheckboxRoot isIndeterminate>
+				<Parts label="Mixed" />
+			</CheckboxRoot>
+		</>,
+	);
+	const [plain, checked, mixed] = [...container.querySelectorAll('[aria-hidden="true"]')].map(
+		(indicator) => {
+			expect(indicator.querySelector('svg')).not.toBe(null);
+			expect(getComputedStyle(indicator, '::after').content).toBe('none');
+			return markPaths(indicator);
+		},
+	);
+	if (!plain || !checked || !mixed) throw new Error('Expected three indicators.');
+
+	await expect.poll(() => dashOffset(plain.check)).toBe(1);
+	expect(dashOffset(plain.dash)).toBe(1);
+	await expect.poll(() => dashOffset(checked.check)).toBe(0);
+	expect(dashOffset(checked.dash)).toBe(1);
+	await expect.poll(() => dashOffset(mixed.dash)).toBe(0);
+	expect(dashOffset(mixed.check)).toBe(1);
+	// The box keeps no inset shadow.
+	expect(
+		getComputedStyle(container.querySelector('[aria-hidden="true"]') as Element).boxShadow,
+	).toBe('none');
+});
+
+test('the check draws with a transition on stroke-dashoffset, not an animation', () => {
+	const { container } = render(
+		<CheckboxRoot defaultSelected>
+			<Parts label="Checked" />
+		</CheckboxRoot>,
+	);
+	const { check } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
+	const style = getComputedStyle(check);
+
+	expect(style.transitionProperty).toBe('stroke-dashoffset');
+	expect(style.transitionDuration).not.toBe('0s');
+	expect(style.animationName).toBe('none');
+});
+
+test('toggling mid-draw reverses the same transition', async () => {
+	const { container } = render(
+		<CheckboxRoot>
+			<Parts label="Toggle" />
+		</CheckboxRoot>,
+	);
+	const { check } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
+
+	await userEvent.click(page.getByText('Toggle'));
+	await userEvent.click(page.getByText('Toggle'));
+
+	await expect.poll(() => dashOffset(check)).toBe(1);
+	expect(checkbox('Toggle')).not.toBeChecked();
+});
+
+test('reduced motion removes the draw transition', async () => {
+	await emulateReducedMotion(true);
+
+	try {
+		const { container } = render(
+			<CheckboxRoot defaultSelected>
+				<Parts label="Checked" />
+			</CheckboxRoot>,
+		);
+		const { check, dash } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
+
+		expect(getComputedStyle(check).transitionDuration).toBe('0s');
+		expect(getComputedStyle(dash).transitionDuration).toBe('0s');
+		expect(dashOffset(check)).toBe(0);
+	} finally {
+		await emulateReducedMotion(false);
+	}
+});
+
+test('the mark stays visible in forced colours', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const { container } = render(
+			<>
+				<CheckboxRoot defaultSelected>
+					<Parts label="Checked" />
+				</CheckboxRoot>
+				<CheckboxRoot isIndeterminate>
+					<Parts label="Mixed" />
+				</CheckboxRoot>
+				<CheckboxRoot defaultSelected isDisabled>
+					<Parts label="Disabled" />
+				</CheckboxRoot>
+			</>,
+		);
+		const [checked, mixed, disabled] = [...container.querySelectorAll('[aria-hidden="true"]')];
+		if (!checked || !mixed || !disabled) throw new Error('Expected three indicators.');
+		const colorOf = (color: string): string => {
+			const probe = container.appendChild(document.createElement('span'));
+			probe.style.color = color;
+			const resolved = getComputedStyle(probe).color;
+			probe.remove();
+			return resolved;
+		};
+		const highlight = colorOf('Highlight');
+
+		await expect.poll(() => dashOffset(markPaths(checked).check)).toBe(0);
+		expect(getComputedStyle(checked).backgroundColor).toBe(highlight);
+		expect(getComputedStyle(markPaths(checked).check).stroke).toBe(colorOf('HighlightText'));
+		expect(getComputedStyle(mixed).backgroundColor).toBe(highlight);
+		expect(getComputedStyle(markPaths(mixed).dash).stroke).toBe(colorOf('HighlightText'));
+		expect(dashOffset(markPaths(mixed).dash)).toBe(0);
+		// A disabled box reads as disabled, not as a Highlight fill.
+		expect(getComputedStyle(disabled).backgroundColor).toBe(colorOf('Canvas'));
+		expect(getComputedStyle(markPaths(disabled).check).stroke).toBe(colorOf('GrayText'));
+	} finally {
+		await emulateForcedColors('none');
+	}
+});
