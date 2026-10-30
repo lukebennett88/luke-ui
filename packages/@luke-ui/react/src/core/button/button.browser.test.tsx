@@ -705,37 +705,35 @@ for (const appearance of [
 	});
 }
 
-// A text Button is not a link, so it has no label weight. Low prominence underlines on interaction.
-// Standard and high prominence stay underlined and thicken the line on hover and press.
-for (const { prominence, rest } of [
-	{ prominence: 'low', rest: 'none' },
-	{ prominence: 'standard', rest: 'underline' },
-	{ prominence: 'high', rest: 'underline' },
+// A text Button is not a link, so it has no label weight. Hover and press toggle the underline: low
+// gains it, and standard and high lose it.
+for (const { prominence, rest, active } of [
+	{ prominence: 'low', rest: 'none', active: 'underline' },
+	{ prominence: 'standard', rest: 'underline', active: 'none' },
+	{ prominence: 'high', rest: 'underline', active: 'none' },
 ] as const) {
-	test(`a ${prominence} text Button underlines interaction states and focus`, async () => {
+	test(`a ${prominence} text Button toggles its underline on hover and press`, async () => {
 		const { locator } = render(
 			<Button appearance="text" prominence={prominence}>
 				Save
 			</Button>,
 		);
 		const button = locator.getByRole('button', { name: 'Save' }).element();
-		const [restStyles, hoverStyles, pressedStyles] = INTERACTION_STATES.map((state) => {
+		const states = INTERACTION_STATES.map((state) => {
 			setInteractionState(button, state);
 			const styles = getComputedStyle(button);
 			return { line: styles.textDecorationLine, thickness: styles.textDecorationThickness };
 		});
 
-		expect([restStyles?.line, hoverStyles?.line, pressedStyles?.line]).toEqual([
-			rest,
-			'underline',
-			'underline',
-		]);
-		expect(hoverStyles?.thickness).not.toBe(restStyles?.thickness);
-		expect(pressedStyles).toEqual(hoverStyles);
+		expect(states.map(({ line }) => line)).toEqual([rest, active, active]);
+		expect(new Set(states.map(({ thickness }) => thickness)).size).toBe(1);
 
+		// Keyboard focus keeps the resting underline of standard and high, and a hover still toggles it.
 		setInteractionState(button, 'rest');
 		await focusViaKeyboard(locator.getByRole('button', { name: 'Save' }));
 		expect(getComputedStyle(button).textDecorationLine).toBe('underline');
+		setInteractionState(button, 'hover');
+		expect(getComputedStyle(button).textDecorationLine).toBe(active);
 	});
 }
 

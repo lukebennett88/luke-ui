@@ -9,8 +9,9 @@ type Role = 'neutral' | 'accent' | 'danger';
  * Colours and decoration for a text action, such as a text Button. Each colour reads the nearest
  * recognised surface, so it keeps its hue on a standard surface or subtle fill and collapses to the
  * fill's on-solid colour on a solid fill. A neutral Button is neutral at low and standard
- * prominence and accent at high. Low prominence has no resting underline and gains one on hover,
- * focus, and press. Standard and high prominence stay underlined and thicken it on hover and press.
+ * prominence and accent at high. Hover and press toggle the underline. Low prominence has none at
+ * rest and gains one, and standard and high prominence lose theirs. Low prominence also underlines on
+ * keyboard focus.
  */
 export function textActionAppearance(tone: Tone, prominence: Prominence) {
 	return textActionStates(textActionRole(tone, prominence), prominence);
@@ -18,10 +19,8 @@ export function textActionAppearance(tone: Tone, prominence: Prominence) {
 
 /**
  * Colours, weight, and decoration for a text link. A neutral Link takes the accent foreground at
- * every prominence, and a danger Link keeps danger. The weight is the theme's label weight. Low
- * prominence adds a solid underline on hover, focus, and press. Standard and high prominence stay
- * underlined in every state. Hover and press thicken the underline, so the state change shows
- * without colour.
+ * every prominence, and a danger Link keeps danger. The weight is the theme's label weight. Hover
+ * and press toggle the underline as for a text Button, so the state change shows without colour.
  */
 export function textLinkAppearance(tone: Tone, prominence: Prominence) {
 	const states = textActionStates(tone === 'danger' ? 'danger' : 'accent', prominence);
@@ -38,26 +37,25 @@ function textActionStates(role: Role, prominence: Prominence) {
 	// contract has no stronger rung, and `onSolid` is contrast-solved for solid fills.
 	const pressedColor =
 		role === 'neutral' ? contextualForeground('primary') : contextualForeground(role, 'pressed');
+	// Hover and press toggle the underline, which shows without colour. A low action gains it, and a
+	// standard or high action loses it.
 	const active = {
-		textDecorationLine: 'underline',
+		textDecorationLine: prominence === 'low' ? 'underline' : 'none',
 		textDecorationStyle: 'solid',
-		textDecorationThickness: activeUnderlineThickness,
 	} as const;
 	return {
 		rest: {
 			color: contextualForeground(role),
 			textDecorationLine: prominence === 'low' ? 'none' : 'underline',
 			textDecorationStyle: 'solid',
-			textDecorationThickness: 'auto',
 		},
 		hover: { color: contextualForeground(role, 'hover'), ...active },
 		pressed: { color: pressedColor, ...active },
-		// The longhand keeps the state's underline style and thickness.
-		focus: { textDecorationLine: 'underline' },
+		// Keyboard focus shows the focus ring. A low action also underlines. Declared last, a focus
+		// rule beats hover, so a standard or high action sets none and hover can still remove its line.
+		focus: prominence === 'low' ? { textDecorationLine: 'underline' } : {},
 	} as const;
 }
-
-const activeUnderlineThickness = 'max(2px, 0.125em)';
 
 function textActionRole(tone: Tone, prominence: Prominence): Role {
 	if (tone === 'danger') return 'danger';

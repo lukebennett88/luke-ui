@@ -820,7 +820,7 @@ for (const appearance of visualAppearances) {
 		expect(getComputedStyle(code).paddingInlineStart).toBe('0px');
 	});
 
-	test(`a native link stays underlined in the solid fill's colour in every state in ${name}`, async () => {
+	test(`a native link keeps the solid fill's colour and toggles its underline on hover and press in ${name}`, async () => {
 		const { locator, user } = render(
 			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
 				<Prose>
@@ -849,11 +849,11 @@ for (const appearance of visualAppearances) {
 		});
 
 		expect(states).toEqual(
-			['rest', 'hover', 'pressed'].map(() => ({
+			['rest', 'hover', 'pressed'].map((state) => ({
 				color: primary,
 				decoration: primary,
 				fontWeight: '500',
-				line: 'underline',
+				line: state === 'rest' ? 'underline' : 'none',
 			})),
 		);
 	});
@@ -885,7 +885,7 @@ test('a native link in heavier text keeps that weight', () => {
 	expect(weights.map(({ text }) => Number(text))).toEqual([600, 700]);
 });
 
-test('a native link stays underlined in LinkText in forced colours', async () => {
+test('a native link takes LinkText and toggles its underline in forced colours', async () => {
 	await emulateForcedColors('active');
 
 	try {
@@ -904,9 +904,9 @@ test('a native link stays underlined in LinkText in forced colours', async () =>
 		});
 
 		expect(states).toEqual(
-			['rest', 'hover', 'pressed'].map(() => ({
+			['rest', 'hover', 'pressed'].map((state) => ({
 				color: resolvedColor('LinkText', link.element()),
-				line: 'underline',
+				line: state === 'rest' ? 'underline' : 'none',
 			})),
 		);
 	} finally {

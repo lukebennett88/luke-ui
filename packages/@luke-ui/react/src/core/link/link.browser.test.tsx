@@ -173,7 +173,7 @@ test('Link preserves intrinsic and full inline sizing', () => {
 const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
 
 for (const prominence of ['low', 'standard', 'high'] as const) {
-	test(`a ${prominence} text Link has weight 500 and solid underlines in its active states`, async () => {
+	test(`a ${prominence} text Link has weight 500 and toggles its underline on hover and press`, async () => {
 		const { locator } = render(
 			<Link href="#" prominence={prominence}>
 				Destination
@@ -191,32 +191,23 @@ for (const prominence of ['low', 'standard', 'high'] as const) {
 				thickness: styles.textDecorationThickness,
 			};
 		});
+		// Low gains the underline and standard and high lose it, without a change in thickness.
 		const restLine = prominence === 'low' ? 'none' : 'underline';
+		const activeLine = prominence === 'low' ? 'underline' : 'none';
 
-		expect(rest).toEqual({
-			...rest,
-			followsText: true,
-			fontWeight: '500',
-			line: restLine,
-			style: 'solid',
-		});
-		// Hover and press show without colour: a thicker, solid underline.
-		expect(hover).toEqual({
-			...hover,
-			followsText: true,
-			fontWeight: '500',
-			line: 'underline',
-			style: 'solid',
-		});
+		expect(rest).toEqual({ ...rest, followsText: true, fontWeight: '500', line: restLine });
+		expect(hover).toEqual({ ...hover, followsText: true, fontWeight: '500', line: activeLine });
 		expect(pressed).toEqual(hover);
-		expect(hover?.thickness).not.toBe(rest?.thickness);
+		expect(hover.thickness).toBe(rest.thickness);
 
+		// Keyboard focus keeps the resting underline of standard and high, and a hover still toggles it.
 		setInteractionState(link, 'rest');
 		await focusViaKeyboard(locator.getByRole('link', { name: 'Destination' }));
 		const focused = getComputedStyle(link);
 		expect(focused.fontWeight).toBe('500');
 		expect(focused.textDecorationLine).toBe('underline');
-		expect(focused.textDecorationStyle).toBe('solid');
+		setInteractionState(link, 'hover');
+		expect(getComputedStyle(link).textDecorationLine).toBe(activeLine);
 	});
 }
 
@@ -258,7 +249,7 @@ for (const appearance of visualAppearances) {
 		expect(actual).toEqual(
 			INTERACTION_STATES.map((state) => ({
 				onSolid: solidForeground.accent,
-				onSolidLine: 'underline',
+				onSolidLine: state === 'rest' ? 'underline' : 'none',
 				onSubtle: resolvedColor(vars.color.foreground.accent[state], onSubtle),
 				state,
 			})),
