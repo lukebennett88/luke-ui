@@ -497,22 +497,123 @@ test('shows a dropdown popover fully when it reopens during its exit', async () 
 	expect(['none', '0px']).toContain(getComputedStyle(popover).translate);
 });
 
-for (const key of ['{ArrowDown}', '{Enter}']) {
-	test(`gives a Select opened with ${key} the same entry styles`, async () => {
-		render(selectField);
-		await userEvent.tab();
-		await expect.element(page.getByRole('button', { name: /Select/ })).toHaveFocus();
-		await userEvent.keyboard(key);
-		expectEntryStyles(await findRestingPopover());
+/** Records the entry transitions that start on any dropdown popover until `stop` is called. */
+function recordPopoverTransitions() {
+	const started: Array<string> = [];
+	const listener = (event: TransitionEvent) => {
+		const target = event.target as Element;
+		if (target.hasAttribute('data-placement')) started.push(event.propertyName);
+	};
+	document.addEventListener('transitionrun', listener, true);
+	return {
+		started,
+		stop: () => document.removeEventListener('transitionrun', listener, true),
+	};
+}
+
+/** The popover as soon as it exists, without waiting for any entry motion. */
+async function findOpenedPopover() {
+	await expect.poll(() => document.querySelector('[data-placement]')).not.toBeNull();
+	return document.querySelector<HTMLElement>('[data-placement]')!;
+}
+
+function expectAppearsAtOnce(popover: HTMLElement) {
+	expect(popover.dataset.openedBy).toBe('keyboard');
+	expect(getComputedStyle(popover).opacity).toBe('1');
+	expect(getComputedStyle(popover).translate).toBe('none');
+	expect(popover.getAnimations()).toHaveLength(0);
+	expect(getComputedStyle(popover).transitionDuration).toBe('0s');
+	expect(resolveState(popover, { 'data-entering': 'true', 'data-placement': 'top' })).toEqual({
+		opacity: '1',
+		translate: 'none',
 	});
 }
 
-test('gives a Combobox opened by typing the same entry styles', async () => {
+test('animates a dropdown popover opened by pointer', async () => {
+	const popover = await openSelectPopover();
+	expect(popover.dataset.openedBy).toBe('pointer');
+	expect(getComputedStyle(popover).transitionDuration).toBe('0.15s, 0.15s');
+	expectEntryStyles(popover);
+});
+
+const keyboardOpenings = [
+	{ key: '{Enter}', name: 'Enter' },
+	{ key: ' ', name: 'Space' },
+	{ key: '{ArrowDown}', name: 'ArrowDown' },
+];
+
+for (const { key, name } of keyboardOpenings) {
+	test(`shows a Select opened with ${name} at once`, async () => {
+		render(selectField);
+		await userEvent.tab();
+		await expect.element(page.getByRole('button', { name: /Select/ })).toHaveFocus();
+		const recorder = recordPopoverTransitions();
+		await userEvent.keyboard(key);
+		const popover = await findOpenedPopover();
+		expectAppearsAtOnce(popover);
+		await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
+		recorder.stop();
+		expect(recorder.started).toEqual([]);
+	});
+}
+
+test('shows a Combobox opened by typing at once', async () => {
 	render(comboboxField);
 	await userEvent.tab();
 	await expect.element(page.getByRole('combobox')).toHaveFocus();
+	const recorder = recordPopoverTransitions();
 	await userEvent.keyboard('o');
-	expectEntryStyles(await findRestingPopover());
+	const popover = await findOpenedPopover();
+	expectAppearsAtOnce(popover);
+	await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
+	recorder.stop();
+	expect(recorder.started).toEqual([]);
+});
+
+test('shows a Combobox opened with ArrowDown at once', async () => {
+	render(comboboxField);
+	await userEvent.tab();
+	await expect.element(page.getByRole('combobox')).toHaveFocus();
+	await userEvent.keyboard('{ArrowDown}');
+	expectAppearsAtOnce(await findOpenedPopover());
+});
+
+test('keeps a keyboard-opened dropdown popover instant and movement-free under reduced motion', async () => {
+	await emulateReducedMotion(true);
+	render(selectField);
+	await userEvent.tab();
+	await userEvent.keyboard('{Enter}');
+	expect(matchMedia('(prefers-reduced-motion: reduce)').matches).toBe(true);
+	expectAppearsAtOnce(await findOpenedPopover());
+});
+
+test('shows a dropdown popover at once when a keyboard reopen interrupts its exit', async () => {
+	const popover = await openSelectPopover();
+	expect(popover.dataset.openedBy).toBe('pointer');
+	await userEvent.keyboard('{Escape}');
+	await expect.poll(() => document.querySelector('[data-exiting]')).not.toBeNull();
+	await expect.element(page.getByRole('button', { name: /Select/ })).toHaveFocus();
+	await userEvent.keyboard('{Enter}');
+
+	const reopened = await findOpenedPopover();
+	await expect.poll(() => reopened.hasAttribute('data-exiting')).toBe(false);
+	expect(document.querySelectorAll('[data-placement]')).toHaveLength(1);
+	expectAppearsAtOnce(reopened);
+});
+
+test('animates a dropdown popover that a pointer reopens after a keyboard open', async () => {
+	render(selectField);
+	await userEvent.tab();
+	await userEvent.keyboard('{Enter}');
+	expectAppearsAtOnce(await findOpenedPopover());
+	await userEvent.keyboard('{Escape}');
+	await expect.poll(() => document.querySelector('[data-placement]')).toBeNull();
+
+	await userEvent.click(page.getByRole('button', { name: /Select/ }));
+	const popover = await findRestingPopover();
+	expect(popover.dataset.openedBy).toBe('pointer');
+	expect(getComputedStyle(popover).transitionDuration).toBe('0.15s, 0.15s');
+	expectEntryStyles(popover);
 });
 
 for (const appearance of visualAppearances) {

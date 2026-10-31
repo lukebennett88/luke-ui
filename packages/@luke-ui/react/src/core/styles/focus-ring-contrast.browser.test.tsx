@@ -268,6 +268,16 @@ async function applyState(element: HTMLElement, state: State | undefined) {
 }
 
 /**
+ * Closes the list a focused combobox opens. The list appears at once when the keyboard opens it,
+ * and only once it is positioned, so wait for it to open and for its exit to end.
+ */
+async function closeOpenedList() {
+	await expect.poll(() => document.querySelector('[data-placement]')).not.toBeNull();
+	await userEvent.keyboard('{Escape}');
+	await expect.poll(() => document.querySelector('[data-placement]')).toBeNull();
+}
+
+/**
  * Focuses each tile's control in turn with the keyboard, optionally hovers or presses it, and
  * measures the ring. `neighbours` names what the ring must contrast with; an empty list checks the
  * paint only.
@@ -290,9 +300,9 @@ async function measureTiles(
 		// oxlint-disable-next-line no-await-in-loop
 		await tabInto(tile);
 		// A combobox opens its list on focus. Close it so only the input ring is measured.
-		if (document.activeElement?.getAttribute('aria-expanded') === 'true') {
+		if (document.activeElement?.getAttribute('role') === 'combobox') {
 			// oxlint-disable-next-line no-await-in-loop
-			await userEvent.keyboard('{Escape}');
+			await closeOpenedList();
 		}
 		const ringElement = singleRing(tile);
 		const geometry = geometryOf(ringElement);
