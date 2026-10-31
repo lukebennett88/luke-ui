@@ -137,7 +137,7 @@ export const themeContractTree = {
 		floating: null,
 		overlay: null,
 	},
-	/** Final background images for the face of a solid control fill, such as a solid Button. */
+	/** Final background images for the face of solid Buttons, standard Buttons, hovered or pressed low Buttons, the checked or indeterminate Checkbox, and the selected Switch track. */
 	controlFinish: {
 		recessed: null,
 		resting: null,

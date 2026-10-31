@@ -117,9 +117,12 @@ text, in light and dark mode. `lowestRenderedTextContrastAt` hides the text, scr
 specimen, and returns the lowest contrast between the text colour and any pixel across the text's
 whole box, with where it occurred. A ratio under 4.5:1 reports the theme, role, mode, state, ratio
 and position. Those specimens never use a Button tone, so they add no component API. A second test
-per appearance renders real standard and low Buttons of both tones over every role's solid fill and
-measures their label in rest, hover and pressed, so the finish, fill and adaptive state layer are
-covered where a Button paints them.
+per appearance renders real standard and low Buttons of both tones over `surface.base`,
+`surface.subdued`, `surface.raised`, and every role's solid fill and measures their label in rest,
+hover and pressed, so the finish, fill and adaptive state layer are covered where a Button paints
+them. Tactile, Paper and `contrastEdge` run all nine surfaces. `layeredFinish` runs the six solids
+only, until its dark `low danger` Button on `surface.raised` (4.19:1 hover, 4.39:1 pressed) is
+resolved.
 
 The suite covers Tactile, Paper and the `layeredFinish` fixture, whose finish stacks overlapping
 layers. Two `midBandFailure` tests prove the gate catches a finish that fails only in the middle of

@@ -230,9 +230,9 @@ against every pixel behind the text, so a gradient that fails only in the middle
 That check is a guarantee for the bundled themes, and the repository's
 [test guide](https://github.com/lukebennett88/luke-ui/blob/main/docs/TESTING.md#material-contrast)
 shows how to run it on yours from a Luke UI checkout. It also measures standard and low Buttons over
-every role's solid fill. It covers those Button labels only. It does not cover other layering you
-apply to a finish, text sizes with different thresholds, disabled controls, or forced colours, and a
-pass does not make any other composition accessible.
+the page surfaces and every role's solid fill. It covers those Button labels only. It does not cover
+other layering you apply to a finish, text sizes with different thresholds, disabled controls, or
+forced colours, and a pass does not make any other composition accessible.
 
 Role borders, such as `color.border.accent`, and `color.border.decorative` never fail validation.
 Never rely on one alone to show a required state such as selected, invalid, or checked. Pair it with
