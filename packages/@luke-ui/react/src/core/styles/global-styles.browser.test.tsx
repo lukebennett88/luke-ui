@@ -5,7 +5,16 @@ import { Heading } from '@luke-ui/react/heading';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Link } from '@luke-ui/react/link';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
-import { SelectItem } from '@luke-ui/react/primitives/select';
+import type { SelectRootProps } from '@luke-ui/react/primitives/select';
+import {
+	SelectIndicator,
+	SelectItem,
+	SelectListBox,
+	SelectPopover,
+	SelectRoot,
+	SelectTrigger,
+	SelectValue,
+} from '@luke-ui/react/primitives/select';
 import { SelectField } from '@luke-ui/react/select-field';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -517,8 +526,12 @@ async function findOpenedPopover() {
 	return document.querySelector<HTMLElement>('[data-placement]')!;
 }
 
-function expectAppearsAtOnce(popover: HTMLElement) {
-	expect(popover.dataset.openedBy).toBe('keyboard');
+/**
+ * Asserts the popover shows fully with no entry motion. `null` means it mounted open, with no
+ * opening interaction to record.
+ */
+function expectAppearsAtOnce(popover: HTMLElement, openedBy: 'keyboard' | null = 'keyboard') {
+	expect(popover.dataset.openedBy ?? null).toBe(openedBy);
 	expect(getComputedStyle(popover).opacity).toBe('1');
 	expect(getComputedStyle(popover).translate).toBe('none');
 	expect(popover.getAnimations()).toHaveLength(0);
@@ -576,6 +589,52 @@ test('shows a Combobox opened with ArrowDown at once', async () => {
 	await expect.element(page.getByRole('combobox')).toHaveFocus();
 	await userEvent.keyboard('{ArrowDown}');
 	expectAppearsAtOnce(await findOpenedPopover());
+});
+
+/** A Select composed from the public primitives, which can mount open. `SelectField` can't. */
+function OpenableSelect(props: Pick<SelectRootProps, 'defaultOpen' | 'isOpen'>) {
+	return (
+		<SelectRoot aria-label="Select" {...props}>
+			<SelectTrigger>
+				<SelectValue />
+				<SelectIndicator />
+			</SelectTrigger>
+			<SelectPopover>
+				<SelectListBox items={items}>
+					{(item) => <SelectItem>{item.label}</SelectItem>}
+				</SelectListBox>
+			</SelectPopover>
+		</SelectRoot>
+	);
+}
+
+// No interaction opens these, so there is no modality to read: they appear at once.
+const initiallyOpenSelects = [
+	{ name: 'controlled `isOpen`', props: { isOpen: true } },
+	{ name: '`defaultOpen`', props: { defaultOpen: true } },
+];
+
+for (const { name, props } of initiallyOpenSelects) {
+	test(`shows a Select that mounts open with ${name} at once`, async () => {
+		const recorder = recordPopoverTransitions();
+		render(<OpenableSelect {...props} />);
+		const popover = await findOpenedPopover();
+		expectAppearsAtOnce(popover, null);
+		await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
+		recorder.stop();
+		expect(recorder.started).toEqual([]);
+	});
+}
+
+test('animates a Select that mounted open once a pointer reopens it', async () => {
+	render(<OpenableSelect defaultOpen />);
+	await findOpenedPopover();
+	await userEvent.keyboard('{Escape}');
+	await expect.poll(() => document.querySelector('[data-placement]')).toBeNull();
+	await userEvent.click(page.getByRole('button', { name: /Select/ }));
+	const popover = await findOpenedPopover();
+	expect(popover.dataset.openedBy).toBe('pointer');
+	expectEntryStyles(popover);
 });
 
 test('keeps a keyboard-opened dropdown popover instant and movement-free under reduced motion', async () => {
