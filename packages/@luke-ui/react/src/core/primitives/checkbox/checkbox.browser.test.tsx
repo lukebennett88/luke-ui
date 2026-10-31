@@ -18,7 +18,6 @@ import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../../test-utils/axe.js';
 import { emulateForcedColors, emulateReducedMotion } from '../../test-utils/emulate-media.js';
 import { getDescribedText } from '../../test-utils/get-described-text.js';
-import { contrast, paintedColor } from '../../test-utils/painted-color.js';
 import { render, visualAppearances } from '../../test-utils/render.js';
 import type { PairedBackground } from '../../test-utils/surface-colors.js';
 import {
@@ -414,7 +413,7 @@ test('the check draws with a transition on stroke-dashoffset, not an animation',
 	const { check } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
 	const style = getComputedStyle(check);
 
-	expect(style.transitionProperty).toContain('stroke-dashoffset');
+	expect(style.transitionProperty).toBe('stroke-dashoffset');
 	expect(style.transitionDuration).not.toBe('0s');
 	expect(style.animationName).toBe('none');
 });
@@ -463,21 +462,27 @@ function expectMonotonic(values: ReadonlyArray<number>, direction: 'up' | 'down'
 	}
 }
 
-function Switching({ initial, next }: { initial: 'checked' | 'mixed'; next: 'checked' | 'mixed' }) {
-	const [state, setState] = useState(initial);
+type Mark = 'checked' | 'mixed' | 'none';
+
+/** A checkbox driven from outside, so a test can jump between marks without clicking its label. */
+function Cycle({ initial }: { initial: Mark }) {
+	const [current, setCurrent] = useState(initial);
 	return (
 		<>
-			<CheckboxRoot isIndeterminate={state === 'mixed'} isSelected>
-				<Parts label="Switching" />
+			<CheckboxRoot isIndeterminate={current === 'mixed'} isSelected={current === 'checked'}>
+				<Parts label="Cycle" />
 			</CheckboxRoot>
-			<button
-				onClick={() => setState((current) => (current === initial ? next : initial))}
-				type="button"
-			>
-				Switch
-			</button>
+			{(['checked', 'mixed', 'none'] as const).map((next) => (
+				<button key={next} onClick={() => setCurrent(next)} type="button">
+					{`Set ${next}`}
+				</button>
+			))}
 		</>
 	);
+}
+
+function setMark(mark: Mark) {
+	return userEvent.click(page.getByRole('button', { name: `Set ${mark}` }));
 }
 
 test('unchecking mid-draw reverses from the current offset instead of restarting', async () => {
@@ -543,149 +548,112 @@ function seekAll(animations: ReadonlyArray<Animation>, time: number): void {
 	}
 }
 
-type Pair = { check: number; dash: number };
+/** The paths a viewer can see: shown, and drawn past the slightest start. */
+function visiblePaths(paths: { check: SVGPathElement; dash: SVGPathElement }): Array<string> {
+	return Object.entries(paths)
+		.filter(([, path]) => Number(getComputedStyle(path).opacity) > 0 && dashOffset(path) < 0.9)
+		.map(([name]) => name);
+}
 
-/** Steps every transition in the scene from 0 to `end` ms and reads both marks' offsets. */
-function sampleSequence(
+/** Steps the scene's transitions across `end` ms, failing if more than one mark is ever visible. */
+function expectOneVisibleMark(
 	scene: Element,
 	paths: { check: SVGPathElement; dash: SVGPathElement },
 	end: number,
-): Array<Pair> {
+): void {
 	const animations = sceneTransitions(scene);
-	const samples: Array<Pair> = [];
 	for (let time = 0; time <= end; time += 50) {
 		seekAll(animations, time);
-		samples.push({ check: dashOffset(paths.check), dash: dashOffset(paths.dash) });
+		expect(visiblePaths(paths).length).toBeLessThanOrEqual(1);
 	}
-	return samples;
 }
 
-/** Fails when both marks are more than slightly drawn at one sampled point. */
-function expectNeverBothDrawn(samples: ReadonlyArray<Pair>): void {
-	for (const { check, dash } of samples) expect(Math.max(check, dash)).toBeGreaterThanOrEqual(0.9);
-}
-
-const [checkedToMixed, mixedToChecked] = [
-	{ initial: 'checked', next: 'mixed', outgoing: 'check', incoming: 'dash' },
-	{ initial: 'mixed', next: 'checked', outgoing: 'dash', incoming: 'check' },
-] as const;
-
-test.each([checkedToMixed, mixedToChecked])(
-	'$initial to $next undraws the $outgoing before the $incoming draws, never showing both',
-	async ({ incoming, initial, next, outgoing }) => {
-		const { container } = render(<Switching initial={initial} next={next} />);
+test.each([
+	['checked', ['none', 'mixed']],
+	['mixed', ['none', 'checked']],
+	['checked', ['mixed', 'checked', 'none', 'mixed']],
+	['none', ['mixed', 'checked', 'none', 'checked']],
+] as const)(
+	'rapid %s then %j, interrupted midway at each step, never shows two marks',
+	async (initial, steps) => {
+		const { container } = render(<Cycle initial={initial} />);
 		const paths = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
-		await expect.poll(() => dashOffset(paths[outgoing])).toBe(0);
 		slowDraw(container);
 
-		await userEvent.click(page.getByRole('button', { name: 'Switch' }));
-		const samples = sampleSequence(container, paths, 2000);
-
-		expectNeverBothDrawn(samples);
-		const outgoingOffsets = samples.map((sample) => sample[outgoing]);
-		const incomingOffsets = samples.map((sample) => sample[incoming]);
-		expectMonotonic(outgoingOffsets, 'up');
-		expectMonotonic(incomingOffsets, 'down');
-		// The incoming mark waits out the whole undraw (the first 1s, sampled to index 20), then draws.
-		expect(incomingOffsets.slice(0, 20).every((offset) => offset === 1)).toBe(true);
-		expect(incomingOffsets[30]).toBeGreaterThan(0.05);
-		expect(incomingOffsets[30]).toBeLessThan(0.95);
-		expect(outgoingOffsets[10]).toBeGreaterThan(0.05);
-		expect(outgoingOffsets[10]).toBeLessThan(0.95);
-		expect(samples.at(-1)?.[outgoing]).toBe(1);
-		expect(samples.at(-1)?.[incoming]).toBe(0);
-	},
-);
-
-test.each([checkedToMixed, mixedToChecked])(
-	'interrupting $initial to $next keeps the offsets continuous and never shows both marks',
-	async ({ incoming, initial, next, outgoing }) => {
-		for (const interruptAt of [500, 1500]) {
-			const { container, unmount } = render(<Switching initial={initial} next={next} />);
-			const paths = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
-			await expect.poll(() => dashOffset(paths[outgoing])).toBe(0);
-			slowDraw(container);
-
-			await userEvent.click(page.getByRole('button', { name: 'Switch' }));
-			seekAll(sceneTransitions(container), interruptAt);
-			const before = { check: dashOffset(paths.check), dash: dashOffset(paths.dash) };
-
-			await userEvent.click(page.getByRole('button', { name: 'Switch' }));
-			const samples = sampleSequence(container, paths, 2000);
-
-			// The reversal picks up from where the sequence stopped, with no jump on either mark.
-			expect(samples[0]?.check).toBeCloseTo(before.check, 1);
-			expect(samples[0]?.dash).toBeCloseTo(before.dash, 1);
-			expectNeverBothDrawn(samples);
-			expectMonotonic(
-				samples.map((sample) => sample[outgoing]),
-				'down',
-			);
-			expectMonotonic(
-				samples.map((sample) => sample[incoming]),
-				'up',
-			);
-			expect(samples.at(-1)?.[outgoing]).toBe(0);
-			expect(samples.at(-1)?.[incoming]).toBe(1);
-			unmount();
+		for (const step of steps) {
+			await setMark(step);
+			expectOneVisibleMark(container, paths, 500);
 		}
+		await setMark(steps.at(-1) === 'none' ? 'checked' : 'none');
+		expectOneVisibleMark(container, paths, 1500);
+
+		const final = steps.at(-1) === 'none' ? 'checked' : 'none';
+		expect(visiblePaths(paths)).toEqual(final === 'checked' ? ['check'] : []);
 	},
 );
 
-test('a draw from unchecked starts at once and a switch between marks waits for the undraw', async () => {
-	const { container } = render(
-		<>
-			<CheckboxRoot>
-				<Parts label="Plain" />
-			</CheckboxRoot>
-			<Switching initial="checked" next="mixed" />
-		</>,
-	);
-	const [plain, switching] = [...container.querySelectorAll('[aria-hidden="true"]')].map(markPaths);
-	if (!plain || !switching) throw new Error('Expected two indicators.');
-	const drawDelay = (path: SVGPathElement) => getComputedStyle(path).transitionDelay.split(', ')[0];
-
-	await userEvent.click(page.getByText('Plain'));
-	expect(drawDelay(plain.check)).toBe('0s');
-
-	await userEvent.click(page.getByRole('button', { name: 'Switch' }));
-	// The default feedback duration is 100ms, so the dash waits for the check's undraw.
-	expect(drawDelay(switching.dash)).toBe(
-		getComputedStyle(switching.check).transitionDuration.split(', ')[0],
-	);
-	expect(drawDelay(switching.dash)).not.toBe('0s');
-});
-
-test('unchecking keeps the mark legible on the fill until it has undrawn', async () => {
-	const { container } = render(
-		<CheckboxRoot defaultSelected>
-			<Parts label="Toggle" />
-		</CheckboxRoot>,
-	);
-	const indicator = container.querySelector('[aria-hidden="true"]') as Element;
-	const { check } = markPaths(indicator);
+test('a mark that stops being the target hides on the same frame, with no fade', async () => {
+	const { container } = render(<Cycle initial="checked" />);
+	const { check, dash } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
 	await expect.poll(() => dashOffset(check)).toBe(0);
-	const checkedStroke = getComputedStyle(check).stroke;
 	slowDraw(container);
 
-	await userEvent.click(page.getByText('Toggle'));
+	await setMark('none');
 	const animations = sceneTransitions(container);
-	let visibleSamples = 0;
-	for (let time = 0; time <= 2000; time += 50) {
-		seekAll(animations, time);
-		if (dashOffset(check) >= 0.95) continue;
-		visibleSamples++;
-		const ratio = contrast(
-			paintedColor(getComputedStyle(check).stroke),
-			paintedColor(getComputedStyle(indicator).backgroundColor),
-		);
-		// A non-text graphic needs 3:1 against what it sits on.
-		expect(ratio).toBeGreaterThanOrEqual(3);
-		// It keeps the checked foreground, not the unchecked one, for as long as it shows.
-		expect(paintedColor(getComputedStyle(check).stroke)).toEqual(paintedColor(checkedStroke));
-	}
+	seekAll(animations, 0);
 
-	expect(visibleSamples).toBeGreaterThan(5);
+	expect(getComputedStyle(check).opacity).toBe('0');
+	expect(getComputedStyle(check).transitionProperty).not.toContain('opacity');
+	expect(getComputedStyle(dash).opacity).toBe('0');
+	// It eases back to undrawn while hidden, from where it was.
+	expect(dashOffset(check)).toBeLessThan(0.1);
+});
+
+test('the returning mark of a checked and mixed reversal draws at once from where it is', async () => {
+	const { container } = render(<Cycle initial="checked" />);
+	const { check, dash } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
+	await expect.poll(() => dashOffset(check)).toBe(0);
+	slowDraw(container);
+
+	await setMark('mixed');
+	seekAll(sceneTransitions(container), 400);
+	const hiddenOffset = dashOffset(check);
+	expect(hiddenOffset).toBeGreaterThan(0.05);
+	expect(Number(getComputedStyle(check).opacity)).toBe(0);
+
+	await setMark('checked');
+	const animations = sceneTransitions(container);
+	const delay = getComputedStyle(check).transitionDelay;
+	seekAll(animations, 0);
+	const start = dashOffset(check);
+	seekAll(animations, 50);
+	const afterOneStep = dashOffset(check);
+
+	// No wait, no jump, and it is moving on the first step.
+	expect(delay.split(', ').every((value) => value === '0s')).toBe(true);
+	expect(Number(getComputedStyle(check).opacity)).toBe(1);
+	expect(Number(getComputedStyle(dash).opacity)).toBe(0);
+	expect(start).toBeCloseTo(hiddenOffset, 1);
+	expect(afterOneStep).toBeLessThan(start);
+});
+
+test('re-checking mid-uncheck draws from the current offset', async () => {
+	const { container } = render(<Cycle initial="checked" />);
+	const { check } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
+	await expect.poll(() => dashOffset(check)).toBe(0);
+	slowDraw(container);
+
+	await setMark('none');
+	seekAll(sceneTransitions(container), 300);
+	const hiddenOffset = dashOffset(check);
+	await setMark('checked');
+	const animations = sceneTransitions(container);
+	seekAll(animations, 0);
+
+	expect(dashOffset(check)).toBeCloseTo(hiddenOffset, 1);
+	expect(Number(getComputedStyle(check).opacity)).toBe(1);
+	seekAll(animations, 1000);
+	expect(dashOffset(check)).toBe(0);
 });
 
 test('checking shows the mark in the fill colour from the first frame, with no fade', async () => {
@@ -727,36 +695,27 @@ test('reduced motion removes the draw transition', async () => {
 	}
 });
 
-test('reduced motion shows a switch between marks and an uncheck at once, with no waits', async () => {
+test('reduced motion shows every mark at once, with no draw', async () => {
 	await emulateReducedMotion(true);
 
 	try {
-		const { container } = render(
-			<>
-				<Switching initial="checked" next="mixed" />
-				<CheckboxRoot defaultSelected>
-					<Parts label="Toggle" />
-				</CheckboxRoot>
-			</>,
-		);
-		const [switching, toggle] = [...container.querySelectorAll('[aria-hidden="true"]')];
-		if (!switching || !toggle) throw new Error('Expected two indicators.');
-		const delays = (element: Element) => getComputedStyle(element).transitionDelay.split(', ');
-		const durations = (element: Element) =>
-			getComputedStyle(element).transitionDuration.split(', ');
-		const allZero = (values: ReadonlyArray<string>) => values.every((value) => value === '0s');
+		const { container } = render(<Cycle initial="checked" />);
+		const { check, dash } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
 
-		await userEvent.click(page.getByRole('button', { name: 'Switch' }));
-		await userEvent.click(page.getByText('Toggle'));
+		await setMark('mixed');
 
-		for (const path of Object.values(markPaths(switching))) {
-			expect(allZero(delays(path))).toBe(true);
-			expect(allZero(durations(path))).toBe(true);
-		}
-		expect(allZero(delays(toggle))).toBe(true);
-		expect(allZero(delays(markPaths(toggle).check))).toBe(true);
-		expect(dashOffset(markPaths(switching).dash)).toBe(0);
-		expect(dashOffset(markPaths(switching).check)).toBe(1);
+		expect(getComputedStyle(dash).transitionDuration).toBe('0s');
+		expect(getComputedStyle(dash).transitionDelay).toBe('0s');
+		expect(dashOffset(dash)).toBe(0);
+		expect(Number(getComputedStyle(dash).opacity)).toBe(1);
+		expect(Number(getComputedStyle(check).opacity)).toBe(0);
+		expect(dashOffset(check)).toBe(1);
+
+		await setMark('checked');
+
+		expect(dashOffset(check)).toBe(0);
+		expect(Number(getComputedStyle(check).opacity)).toBe(1);
+		expect(Number(getComputedStyle(dash).opacity)).toBe(0);
 	} finally {
 		await emulateReducedMotion(false);
 	}
