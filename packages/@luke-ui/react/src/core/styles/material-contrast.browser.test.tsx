@@ -1,9 +1,12 @@
+import { Box } from '@luke-ui/react/box';
+import { Button } from '@luke-ui/react/button';
 import { vars } from '@luke-ui/react/theme';
 import { expect, test } from 'vite-plus/test';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import type { VisualAppearance } from '../test-utils/render.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { lowestRenderedTextContrastAt } from '../test-utils/rendered-contrast.js';
+import { setInteractionState, settledSurfaceColors } from '../test-utils/surface-colors.js';
 
 // #955 decisions 16 and 17: `defineTheme` checks token colours, and this suite measures the paint a
 // solid fill and its `controlFinish` produce behind `onSolid` text. To gate a custom theme, add its
@@ -76,6 +79,66 @@ for (const appearance of appearances) {
 	test(`keeps 4.5:1 onSolid text over every solid fill and finish in ${appearance.theme} ${appearance.mode}`, async () => {
 		expect(await materialContrastFailures(appearance)).toEqual([]);
 	});
+}
+
+const pageSurfaces = ['surface.base', 'surface.subdued', 'surface.raised'] as const;
+const solidSurfaces = SEMANTIC_ROLES.map((role) => `${role}.solid` as const);
+
+/** The appearances the Button gate covers: the onSolid set plus the `contrastEdge` fixture. */
+const buttonAppearances: Array<VisualAppearance> = [
+	...appearances,
+	{ mode: 'light', theme: 'contrastEdge' },
+	{ mode: 'dark', theme: 'contrastEdge' },
+];
+
+/**
+ * Real standard and low Buttons of both tones over each page surface and every role's solid fill,
+ * in each state: their fill, finish, and adaptive state layer behind their actual text colour.
+ */
+async function buttonFinishFailures(appearance: VisualAppearance) {
+	const { container } = render(
+		<>
+			{[...pageSurfaces, ...solidSurfaces].map((surface) => (
+				<Box backgroundColor={surface} data-surface={surface} key={surface} padding="space.8">
+					{(['standard', 'low'] as const).flatMap((prominence) =>
+						(['neutral', 'danger'] as const).map((tone) => (
+							<Button key={`${prominence}-${tone}`} prominence={prominence} tone={tone}>
+								{prominence} {tone} in {surface}
+							</Button>
+						)),
+					)}
+				</Box>
+			))}
+		</>,
+		{ appearance },
+	);
+	const failures: Array<string> = [];
+	for (const button of container.querySelectorAll<HTMLElement>('button')) {
+		const surface = button.closest<HTMLElement>('[data-surface]')?.dataset.surface;
+		for (const state of ['rest', 'hover', 'pressed'] as const) {
+			setInteractionState(button, state);
+			settledSurfaceColors(button);
+			// oxlint-disable-next-line no-await-in-loop
+			const { contrast } = await lowestRenderedTextContrastAt(button);
+			if (contrast < NORMAL_TEXT_RATIO) {
+				failures.push(
+					`${appearance.theme} ${surface} ${appearance.mode} ${state} "${button.textContent}": ` +
+						`${contrast.toFixed(2)}:1`,
+				);
+			}
+		}
+	}
+	return failures;
+}
+
+for (const appearance of buttonAppearances) {
+	test(
+		`keeps 4.5:1 text on standard and low Buttons over every surface and role solid in ${appearance.theme} ${appearance.mode}`,
+		{ timeout: 60_000 },
+		async () => {
+			expect(await buttonFinishFailures(appearance)).toEqual([]);
+		},
+	);
 }
 
 // The failing finish is transparent at both ends, so only sampling the whole painted area finds it.

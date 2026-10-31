@@ -47,7 +47,9 @@ colours. Do not author them.
 `radius` overrides the `detail`, `control`, `surface`, and `overlay` corners, which default to 4, 8,
 12, and 16px. Radius inputs are pixels at a 16px root and emit as `rem`. `shadow` and
 `controlFinish` can be set per mode and per rung. An omitted `shadow` rung uses a subtle default
-shadow, and an omitted `controlFinish` rung is `none`. Typography sizes, line heights, letter
+shadow, and an omitted `controlFinish` rung is `none`. Solid and standard Buttons paint the finish
+at rest, hover, and pressed. Low Buttons paint it on hover and pressed only over a solid fill, and
+paint just the interaction state layer over a page surface. Typography sizes, line heights, letter
 spacing, and motion are not authored. Read [Fonts](#fonts) for the font input.
 
 <auto-type-table path="packages/@luke-ui/react/src/theme/define-theme.ts" name="ThemeInput" />
@@ -217,10 +219,10 @@ into the sRGB gamut. Custom themes that previously compiled may fail the cross-r
 Adjust the authored sources or surfaces to satisfy every pairing. The compiler does not repair
 cross-role failures.
 
-Validation guarantees the token colours above. It does not see `controlFinish`. A solid control
-paints its finish over the solid fill and under its `onSolid` text, so a highlight on a dark fill,
-or a shade on a light one, lowers the text's contrast. Keep each finish faint enough that the text
-still reaches 4.5:1 over it.
+Validation guarantees the token colours above. It does not see `controlFinish`. A solid or standard
+control paints its finish over its fill and under its text (a hovered or pressed low Button over a
+solid fill does too), so a highlight on a dark fill, or a shade on a light one, lowers the text's
+contrast. Keep each finish faint enough that the text still reaches 4.5:1 over it.
 
 Luke UI checks the rendered result for Paper and Tactile in a separate test that runs in Chromium.
 For all six roles, in light and dark mode, it paints the solid fill, its `controlFinish` rung, and
@@ -228,9 +230,10 @@ the `onSolid` text for rest, hover, and pressed. It then measures the contrast o
 against every pixel behind the text, so a gradient that fails only in the middle fails the test.
 That check is a guarantee for the bundled themes, and the repository's
 [test guide](https://github.com/lukebennett88/luke-ui/blob/main/docs/TESTING.md#material-contrast)
-shows how to run it on yours from a Luke UI checkout. It covers text on solid fills only. It does
-not cover other layering you apply to a finish, text sizes with different thresholds, disabled
-controls, or forced colours, and a pass does not make any other composition accessible.
+shows how to run it on yours from a Luke UI checkout. It also measures standard and low Buttons over
+the page surfaces and every role's solid fill. It covers those Button labels only. It does not cover
+other layering you apply to a finish, text sizes with different thresholds, disabled controls, or
+forced colours, and a pass does not make any other composition accessible.
 
 Role borders, such as `color.border.accent`, and `color.border.decorative` never fail validation.
 Never rely on one alone to show a required state such as selected, invalid, or checked. Pair it with
