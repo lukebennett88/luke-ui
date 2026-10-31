@@ -991,6 +991,88 @@ for (const appearance of adaptiveAppearances) {
 	});
 }
 
+const finishRungs = { hover: 'raised', pressed: 'recessed', rest: 'resting' } as const;
+const finishSurfaces = ['surface.base', 'surface.raised', 'accent.solid'] as const;
+
+function gradientCount(backgroundImage: string) {
+	return backgroundImage.split('linear-gradient(').length - 1;
+}
+
+for (const appearance of visualAppearances) {
+	test(`standard and low Buttons paint the control finish rung for each state in ${appearance.theme} ${appearance.mode}`, () => {
+		const { locator } = render(
+			<>
+				<div data-testid="probe" />
+				{finishSurfaces.map((surface) => (
+					<Box backgroundColor={surface} data-testid={surface} key={surface} padding="space.8">
+						<Button prominence="standard">Standard on {surface}</Button>
+						<Button prominence="low">Low on {surface}</Button>
+					</Box>
+				))}
+			</>,
+			{ appearance },
+		);
+		const probe = locator.getByTestId('probe').element() as HTMLElement;
+		const rung = (finish: (typeof finishRungs)[InteractionState]) => {
+			probe.style.backgroundImage = vars.controlFinish[finish];
+			return getComputedStyle(probe).backgroundImage;
+		};
+		const paintsFinish = appearance.theme !== 'paper';
+		const fills = INTERACTION_STATES.map((state) => rung(finishRungs[state]));
+		// Guards the assertions below: Tactile's three rungs differ, and Paper's are all `none`.
+		expect(new Set(fills).size).toBe(paintsFinish ? 3 : 1);
+
+		// Rows that break the expectation, so the check needs no conditional `expect`.
+		const misses: Array<string> = [];
+		for (const surface of finishSurfaces) {
+			const region = locator.getByTestId(surface);
+			const standard = region.getByRole('button', { name: `Standard on ${surface}` }).element();
+			const low = region.getByRole('button', { name: `Low on ${surface}` }).element();
+			for (const [index, state] of INTERACTION_STATES.entries()) {
+				const expected = fills[index]!;
+				setInteractionState(standard, state);
+				setInteractionState(low, state);
+				const standardImage = getComputedStyle(standard).backgroundImage;
+				const lowImage = getComputedStyle(low).backgroundImage;
+				// Paper's finish is `none`, so it never adds a gradient beyond the one state layer. A
+				// Tactile low Button paints only that layer at rest, and the finish once hovered.
+				const standardOk = paintsFinish
+					? standardImage.includes(expected)
+					: gradientCount(standardImage) <= 1;
+				const lowRestOk = !lowImage.includes(expected) && gradientCount(lowImage) === 1;
+				const lowFinishOk = state === 'rest' ? lowRestOk : lowImage.includes(expected);
+				const lowOk = paintsFinish ? lowFinishOk : gradientCount(lowImage) <= 1;
+				if (!standardOk) misses.push(`standard ${surface} ${state}: ${standardImage}`);
+				if (!lowOk) misses.push(`low ${surface} ${state}: ${lowImage}`);
+			}
+		}
+		expect(misses).toEqual([]);
+	});
+}
+
+test('forced colours remove the control finish from standard and low Buttons', async () => {
+	const { locator } = render(
+		<>
+			<Button prominence="standard">Standard</Button>
+			<Button prominence="low">Low</Button>
+		</>,
+	);
+	await emulateForcedColors('active');
+	try {
+		for (const name of ['Standard', 'Low']) {
+			const button = locator.getByRole('button', { name }).element();
+			for (const state of INTERACTION_STATES) {
+				setInteractionState(button, state);
+				expect(getComputedStyle(button).backgroundImage, `${name} ${state}`).toMatch(
+					/^none(, none)*$/,
+				);
+			}
+		}
+	} finally {
+		await emulateForcedColors('none');
+	}
+});
+
 test('forced colours clear the adaptive state layer on a low Button', async () => {
 	await emulateForcedColors('active');
 

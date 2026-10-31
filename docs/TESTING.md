@@ -116,7 +116,10 @@ rung a solid Button paints in that state (`resting`, `raised`, `recessed`), and 
 text, in light and dark mode. `lowestRenderedTextContrastAt` hides the text, screenshots the
 specimen, and returns the lowest contrast between the text colour and any pixel across the text's
 whole box, with where it occurred. A ratio under 4.5:1 reports the theme, role, mode, state, ratio
-and position. The specimens never use a Button tone, so the suite adds no component API.
+and position. Those specimens never use a Button tone, so they add no component API. A second test
+per appearance renders real standard and low Buttons of both tones over every role's solid fill and
+measures their label in rest, hover and pressed, so the finish, fill and adaptive state layer are
+covered where a Button paints them.
 
 The suite covers Tactile, Paper and the `layeredFinish` fixture, whose finish stacks overlapping
 layers. Two `midBandFailure` tests prove the gate catches a finish that fails only in the middle of

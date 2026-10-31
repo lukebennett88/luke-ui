@@ -1,9 +1,12 @@
+import { Box } from '@luke-ui/react/box';
+import { Button } from '@luke-ui/react/button';
 import { vars } from '@luke-ui/react/theme';
 import { expect, test } from 'vite-plus/test';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import type { VisualAppearance } from '../test-utils/render.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { lowestRenderedTextContrastAt } from '../test-utils/rendered-contrast.js';
+import { setInteractionState, settledSurfaceColors } from '../test-utils/surface-colors.js';
 
 // #955 decisions 16 and 17: `defineTheme` checks token colours, and this suite measures the paint a
 // solid fill and its `controlFinish` produce behind `onSolid` text. To gate a custom theme, add its
@@ -76,6 +79,57 @@ for (const appearance of appearances) {
 	test(`keeps 4.5:1 onSolid text over every solid fill and finish in ${appearance.theme} ${appearance.mode}`, async () => {
 		expect(await materialContrastFailures(appearance)).toEqual([]);
 	});
+}
+
+/**
+ * Real standard and low Buttons of both tones over every role's solid fill, in each state: their
+ * fill, finish, and adaptive state layer behind their actual text colour. The page surface is
+ * covered by the `onSolid` specimens above and by the Button suite's surface checks.
+ */
+async function buttonFinishFailures(appearance: VisualAppearance) {
+	const { container } = render(
+		<>
+			{SEMANTIC_ROLES.map((role) => (
+				<Box backgroundColor={`${role}.solid`} data-role={role} key={role} padding="space.8">
+					{(['standard', 'low'] as const).flatMap((prominence) =>
+						(['neutral', 'danger'] as const).map((tone) => (
+							<Button key={`${prominence}-${tone}`} prominence={prominence} tone={tone}>
+								{prominence} {tone} in {role}
+							</Button>
+						)),
+					)}
+				</Box>
+			))}
+		</>,
+		{ appearance },
+	);
+	const failures: Array<string> = [];
+	for (const button of container.querySelectorAll<HTMLElement>('button')) {
+		const role = button.closest<HTMLElement>('[data-role]')?.dataset.role;
+		for (const state of ['rest', 'hover', 'pressed'] as const) {
+			setInteractionState(button, state);
+			settledSurfaceColors(button);
+			// oxlint-disable-next-line no-await-in-loop
+			const { contrast } = await lowestRenderedTextContrastAt(button);
+			if (contrast < NORMAL_TEXT_RATIO) {
+				failures.push(
+					`${appearance.theme} ${role} ${appearance.mode} ${state} "${button.textContent}": ` +
+						`${contrast.toFixed(2)}:1`,
+				);
+			}
+		}
+	}
+	return failures;
+}
+
+for (const appearance of appearances) {
+	test(
+		`keeps 4.5:1 text on standard and low Buttons over every role solid in ${appearance.theme} ${appearance.mode}`,
+		{ timeout: 60_000 },
+		async () => {
+			expect(await buttonFinishFailures(appearance)).toEqual([]);
+		},
+	);
 }
 
 // The failing finish is transparent at both ends, so only sampling the whole painted area finds it.

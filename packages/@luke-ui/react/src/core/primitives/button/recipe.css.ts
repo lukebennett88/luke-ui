@@ -247,14 +247,15 @@ function buttonAppearance(
 							...hoverLayer,
 							color: transparentAdaptiveStateText(chipTone, restColor),
 							vars: { ...hoverLayer.vars, ...neutralForegroundContextVars() },
-							backgroundImage: `${layerGradient}, ${vars.controlFinish.raised}`,
+							// The finish sits above the layer: on a solid, the layer is an opaque chip that would hide it.
+							backgroundImage: `${vars.controlFinish.raised}, ${layerGradient}`,
 							boxShadow: vars.shadow.raised,
 						},
 						[pressed]: {
 							...pressedLayer,
 							color: transparentAdaptiveStateText(chipTone, restColor),
 							vars: { ...pressedLayer.vars, ...neutralForegroundContextVars() },
-							backgroundImage: `${layerGradient}, ${vars.controlFinish.recessed}`,
+							backgroundImage: `${vars.controlFinish.recessed}, ${layerGradient}`,
 							boxShadow: vars.shadow.inset,
 						},
 					},
