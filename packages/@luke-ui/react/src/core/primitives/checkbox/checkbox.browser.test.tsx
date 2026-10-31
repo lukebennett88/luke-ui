@@ -12,7 +12,7 @@ import {
 	InlineField,
 } from '@luke-ui/react/primitives/field';
 import { vars } from '@luke-ui/react/theme';
-import { createRef } from 'react';
+import { createRef, useState } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../../test-utils/axe.js';
@@ -418,20 +418,178 @@ test('the check draws with a transition on stroke-dashoffset, not an animation',
 	expect(style.animationName).toBe('none');
 });
 
-test('toggling mid-draw reverses the same transition', async () => {
+/** The running `stroke-dashoffset` transition on a path, or an error when none is running. */
+function drawTransition(path: SVGPathElement): CSSTransition {
+	const transition = path
+		.getAnimations()
+		.find(
+			(animation): animation is CSSTransition =>
+				animation instanceof CSSTransition && animation.transitionProperty === 'stroke-dashoffset',
+		);
+	if (!transition) throw new Error('Expected a running stroke-dashoffset transition.');
+	return transition;
+}
+
+/** Slows a path's draw to 1s so a test can step through it deterministically. */
+function slowDraw(...paths: ReadonlyArray<SVGPathElement>): void {
+	for (const path of paths) path.style.transitionDuration = '1000ms';
+}
+
+/** Pauses the path's transition at `fraction` of its duration and reads the resulting offset. */
+function offsetAt(path: SVGPathElement, fraction: number): number {
+	const transition = drawTransition(path);
+	transition.pause();
+	transition.currentTime = fraction * 1000;
+	return dashOffset(path);
+}
+
+const fractions = [0, 0.25, 0.5, 0.75, 1] as const;
+
+function sampleOffsets(path: SVGPathElement): Array<number> {
+	return fractions.map((fraction) => offsetAt(path, fraction));
+}
+
+function expectMonotonic(values: ReadonlyArray<number>, direction: 'up' | 'down'): void {
+	for (let index = 1; index < values.length; index++) {
+		const previous = values[index - 1] as number;
+		const current = values[index] as number;
+		expect(direction === 'up' ? current >= previous : current <= previous).toBe(true);
+	}
+}
+
+function Switching({ initial, next }: { initial: 'checked' | 'mixed'; next: 'checked' | 'mixed' }) {
+	const [state, setState] = useState(initial);
+	return (
+		<>
+			<CheckboxRoot isIndeterminate={state === 'mixed'} isSelected>
+				<Parts label="Switching" />
+			</CheckboxRoot>
+			<button
+				onClick={() => setState((current) => (current === initial ? next : initial))}
+				type="button"
+			>
+				Switch
+			</button>
+		</>
+	);
+}
+
+test('unchecking mid-draw reverses from the current offset instead of restarting', async () => {
 	const { container } = render(
 		<CheckboxRoot>
 			<Parts label="Toggle" />
 		</CheckboxRoot>,
 	);
 	const { check } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
+	slowDraw(check);
 
 	await userEvent.click(page.getByText('Toggle'));
-	await userEvent.click(page.getByText('Toggle'));
+	const midway = offsetAt(check, 0.5);
+	expect(midway).toBeGreaterThan(0.05);
+	expect(midway).toBeLessThan(0.95);
 
-	await expect.poll(() => dashOffset(check)).toBe(1);
+	await userEvent.click(page.getByText('Toggle'));
 	expect(checkbox('Toggle')).not.toBeChecked();
+	const reversal = sampleOffsets(check);
+
+	// It starts from where the draw was interrupted, not from drawn (0) or undrawn (1).
+	expect(reversal[0]).toBeCloseTo(midway, 1);
+	expectMonotonic(reversal, 'up');
+	expect(reversal.at(-1)).toBeCloseTo(1, 5);
+	await expect.poll(() => dashOffset(check)).toBe(1);
 });
+
+test('re-checking mid-undraw turns back from the current offset', async () => {
+	const { container } = render(
+		<CheckboxRoot defaultSelected>
+			<Parts label="Toggle" />
+		</CheckboxRoot>,
+	);
+	const { check } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
+	await expect.poll(() => dashOffset(check)).toBe(0);
+	slowDraw(check);
+
+	await userEvent.click(page.getByText('Toggle'));
+	const midway = offsetAt(check, 0.5);
+	expect(midway).toBeGreaterThan(0.05);
+	expect(midway).toBeLessThan(0.95);
+
+	await userEvent.click(page.getByText('Toggle'));
+	const redraw = sampleOffsets(check);
+
+	expect(redraw[0]).toBeCloseTo(midway, 1);
+	expectMonotonic(redraw, 'down');
+	expect(redraw.at(-1)).toBeCloseTo(0, 5);
+	await expect.poll(() => dashOffset(check)).toBe(0);
+});
+
+test('checked to indeterminate draws the dash while the check undraws', async () => {
+	const { container } = render(<Switching initial="checked" next="mixed" />);
+	const { check, dash } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
+	await expect.poll(() => dashOffset(check)).toBe(0);
+	expect(dashOffset(dash)).toBe(1);
+	slowDraw(check, dash);
+
+	await userEvent.click(page.getByRole('button', { name: 'Switch' }));
+	const undrawing = sampleOffsets(check);
+	const drawing = sampleOffsets(dash);
+
+	expectMonotonic(undrawing, 'up');
+	expectMonotonic(drawing, 'down');
+	expect(undrawing[2]).toBeGreaterThan(0.05);
+	expect(undrawing[2]).toBeLessThan(0.95);
+	expect(drawing[2]).toBeGreaterThan(0.05);
+	expect(drawing[2]).toBeLessThan(0.95);
+	await expect.poll(() => [dashOffset(check), dashOffset(dash)]).toEqual([1, 0]);
+});
+
+test('indeterminate to checked draws the check while the dash undraws', async () => {
+	const { container } = render(<Switching initial="mixed" next="checked" />);
+	const { check, dash } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
+	await expect.poll(() => dashOffset(dash)).toBe(0);
+	expect(dashOffset(check)).toBe(1);
+	slowDraw(check, dash);
+
+	await userEvent.click(page.getByRole('button', { name: 'Switch' }));
+	const drawing = sampleOffsets(check);
+	const undrawing = sampleOffsets(dash);
+
+	expectMonotonic(drawing, 'down');
+	expectMonotonic(undrawing, 'up');
+	expect(drawing[2]).toBeGreaterThan(0.05);
+	expect(drawing[2]).toBeLessThan(0.95);
+	await expect.poll(() => [dashOffset(check), dashOffset(dash)]).toEqual([0, 1]);
+});
+
+test.each([
+	['checked', 'mixed'],
+	['mixed', 'checked'],
+] as const)(
+	'interrupting %s to %s midway turns both paths back from their current offsets',
+	async (initial, next) => {
+		const { container } = render(<Switching initial={initial} next={next} />);
+		const { check, dash } = markPaths(container.querySelector('[aria-hidden="true"]') as Element);
+		const [drawn, undrawn] = initial === 'checked' ? [check, dash] : [dash, check];
+		await expect.poll(() => dashOffset(drawn)).toBe(0);
+		slowDraw(check, dash);
+
+		await userEvent.click(page.getByRole('button', { name: 'Switch' }));
+		const midDrawn = offsetAt(drawn, 0.5);
+		const midUndrawn = offsetAt(undrawn, 0.5);
+		expect(midDrawn).toBeGreaterThan(0.05);
+		expect(midUndrawn).toBeLessThan(0.95);
+
+		await userEvent.click(page.getByRole('button', { name: 'Switch' }));
+		const back = sampleOffsets(drawn);
+		const backOut = sampleOffsets(undrawn);
+
+		expect(back[0]).toBeCloseTo(midDrawn, 1);
+		expect(backOut[0]).toBeCloseTo(midUndrawn, 1);
+		expectMonotonic(back, 'down');
+		expectMonotonic(backOut, 'up');
+		await expect.poll(() => [dashOffset(drawn), dashOffset(undrawn)]).toEqual([0, 1]);
+	},
+);
 
 test('reduced motion removes the draw transition', async () => {
 	await emulateReducedMotion(true);
