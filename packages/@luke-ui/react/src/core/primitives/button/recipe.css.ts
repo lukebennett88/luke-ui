@@ -27,6 +27,8 @@ const enabled = ':not([data-disabled="true"]):not([data-pending="true"])';
 // the hover finish on a pressed, open trigger.
 const hovered = `&[data-hovered="true"]${enabled}, &:where(.${expandedButtonClassName}[aria-expanded="true"])${enabled}`;
 const pressed = `&[data-pressed="true"]${enabled}`;
+const hoveredFinish = `&[data-hovered="true"]${enabled}::before, &:where(.${expandedButtonClassName}[aria-expanded="true"])${enabled}::before`;
+const pressedFinish = `&[data-pressed="true"]${enabled}::before`;
 
 const textBase = [
 	textRecipe({ shouldDisableTrim: true, shouldInheritFont: true }),
@@ -133,13 +135,27 @@ export const buttonRecipeInternal = recipe({
 				lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 				minBlockSize: MIN_TARGET_SIZE,
 				minInlineSize: MIN_TARGET_SIZE,
-				// `buttonSize()` sets the inline padding. A native `<button>` has block padding too.
-				paddingBlock: 0,
+				// `buttonSize()` sets the padding. A native `<button>` has block padding too.
 				position: 'relative',
 				textDecoration: 'none',
 				whiteSpace: 'nowrap',
 				// Hover and pressed change colour, shadow, and finish, never position or scale.
 				selectors: {
+					// A standard or low Button paints its finish here, in the padding ring only: the mask
+					// cuts out the content box, so the finish never sits behind the label whatever its
+					// size, icon or wrapping. `z-index: -1` keeps it over the fill and state layer and
+					// under the label. Forced colours remove it.
+					'&::before': {
+						'@media': { '(forced-colors: active)': { display: 'none' } },
+						borderRadius: 'inherit',
+						content: '""',
+						inset: 0,
+						mask: 'linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)',
+						padding: 'inherit',
+						pointerEvents: 'none',
+						position: 'absolute',
+						zIndex: -1,
+					},
 					[hovered]: {
 						boxShadow: vars.shadow.raised,
 					},
@@ -247,15 +263,14 @@ function buttonAppearance(
 							...hoverLayer,
 							color: transparentAdaptiveStateText(chipTone, restColor),
 							vars: { ...hoverLayer.vars, ...neutralForegroundContextVars() },
-							// The finish sits above the layer: on a solid, the layer is an opaque chip that would hide it.
-							backgroundImage: `${vars.controlFinish.raised}, ${layerGradient}`,
 							boxShadow: vars.shadow.raised,
 						},
+						[hoveredFinish]: { backgroundImage: vars.controlFinish.raised },
+						[pressedFinish]: { backgroundImage: vars.controlFinish.recessed },
 						[pressed]: {
 							...pressedLayer,
 							color: transparentAdaptiveStateText(chipTone, restColor),
 							vars: { ...pressedLayer.vars, ...neutralForegroundContextVars() },
-							backgroundImage: `${vars.controlFinish.recessed}, ${layerGradient}`,
 							boxShadow: vars.shadow.inset,
 						},
 					},
@@ -309,20 +324,17 @@ function buttonAppearance(
 				},
 				...subtleRest,
 				...toneColor,
-				backgroundImage: `${layerGradient}, ${vars.controlFinish.resting}`,
+				backgroundImage: layerGradient,
 				vars: {
 					...subtleRest.vars,
 					[interactionStateLayer]: 'transparent',
 				},
 				selectors: {
-					[hovered]: {
-						...hoverLayer,
-						backgroundImage: `${layerGradient}, ${vars.controlFinish.raised}`,
-					},
-					[pressed]: {
-						...pressedLayer,
-						backgroundImage: `${layerGradient}, ${vars.controlFinish.recessed}`,
-					},
+					'&::before': { backgroundImage: vars.controlFinish.resting },
+					[hovered]: hoverLayer,
+					[hoveredFinish]: { backgroundImage: vars.controlFinish.raised },
+					[pressed]: pressedLayer,
+					[pressedFinish]: { backgroundImage: vars.controlFinish.recessed },
 				},
 			},
 			variants,
@@ -339,17 +351,24 @@ function buttonSize(size: 'medium' | 'small') {
 		},
 		paddingInline: `calc(${paddingInline} + 1px)`,
 	};
+	const blockSize = size === 'medium' ? vars.controlSize.px40 : vars.controlSize.px32;
+	// Block padding that leaves exactly one line box for the content, so the finish ring that
+	// surrounds the content box frames the label's own height, and a label that wraps grows the
+	// Button without the finish reaching behind it.
+	const paddingBlock = `calc((${blockSize} - 1lh) / 2)`;
 	return {
 		style:
 			size === 'medium'
 				? {
 						...inset,
+						paddingBlock,
 						blockSize: vars.controlSize.px40,
 						fontSize: FONT_METRIC_SCALE[14].fontSize,
 						gap: vars.space['8'],
 					}
 				: {
 						...inset,
+						paddingBlock,
 						blockSize: vars.controlSize.px32,
 						fontSize: FONT_METRIC_SCALE[12].fontSize,
 						gap: vars.space['4'],

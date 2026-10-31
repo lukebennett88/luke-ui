@@ -218,10 +218,11 @@ into the sRGB gamut. Custom themes that previously compiled may fail the cross-r
 Adjust the authored sources or surfaces to satisfy every pairing. The compiler does not repair
 cross-role failures.
 
-Validation guarantees the token colours above. It does not see `controlFinish`. A solid or standard
-control paints its finish over its fill and under its text (a hovered or pressed low Button does
-too), so a highlight on a dark fill, or a shade on a light one, lowers the text's contrast. Keep
-each finish faint enough that the text still reaches 4.5:1 over it.
+Validation guarantees the token colours above. It does not see `controlFinish`. A solid control
+paints its finish over its fill and under its text, so a highlight on a dark fill, or a shade on a
+light one, lowers the text's contrast. Keep each finish faint enough that the text still reaches
+4.5:1 over it. Standard Buttons, and hovered or pressed low Buttons, paint the finish only in the
+padding around their label.
 
 Luke UI checks the rendered result for Paper and Tactile in a separate test that runs in Chromium.
 For all six roles, in light and dark mode, it paints the solid fill, its `controlFinish` rung, and

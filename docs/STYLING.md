@@ -80,8 +80,10 @@ record is [research/716-token-contract.md](../research/716-token-contract.md).
 Author `shadow.*` and `controlFinish.*` per mode as final CSS values. Components pick semantic
 tokens. They do not branch on theme identity. A component must keep its essential state distinctions
 when every shadow and control finish is `none`. The `flat` test appearance checks that. The control
-finish paints on solid, standard, and hovered or pressed low Buttons, over the fill and under the
-label. A low Button has no finish at rest.
+finish paints over the fill and under the label of a solid Button. On standard Buttons and hovered
+or pressed low Buttons it paints on the Button's `::before`, masked to the padding ring, so it never
+sits behind the label whatever its size, icon or wrapping. The Button's block padding leaves one
+line box for its content, so the ring frames the label's height. A low Button has no finish at rest.
 
 Tactile and Paper live in `packages/@luke-ui/theme-tactile` and `packages/@luke-ui/theme-paper`.
 Each build compiles its built `./input` into `dist/stylesheet.css`. React's visual suite compiles

@@ -186,7 +186,9 @@ for (const size of ['medium', 'small'] as const) {
 		const link = locator.getByRole('link', { name: 'Save' }).element();
 
 		for (const element of [button, iconButton, link]) {
-			expect(getComputedStyle(element).paddingBlock).toBe('0px');
+			// Block padding leaves one line box for the content, not the user agent's 1px.
+			expect(getComputedStyle(element).paddingBlock).toBe(getComputedStyle(link).paddingBlock);
+			expect(getComputedStyle(element).paddingBlock).not.toBe('1px');
 			expect(element.getBoundingClientRect().height).toBe(link.getBoundingClientRect().height);
 		}
 		expect(getComputedStyle(button).paddingInline).toBe(getComputedStyle(link).paddingInline);
