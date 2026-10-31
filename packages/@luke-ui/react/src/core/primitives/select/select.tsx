@@ -32,6 +32,7 @@ import {
 	useAvailableOverlayInlineSize,
 } from '../../overlays/available-overlay-inline-size.js';
 import { copyScopeColorMode } from '../../overlays/scope-color-mode.js';
+import { useOpenedBy } from '../../overlays/use-opened-by.js';
 import { useControlSize } from '../../sizing/control-size-context.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
@@ -328,10 +329,12 @@ export function SelectPopover(props: SelectPopoverProps): JSX.Element {
 		containerPadding,
 		selectState?.isOpen === true,
 	);
+	const openedBy = useOpenedBy(selectState?.isOpen === true);
 
 	return (
 		<RacPopover
 			{...popoverProps}
+			data-opened-by={openedBy}
 			className={composeRenderProps(popoverProps.className, (className) => {
 				return comboboxRecipe().popover({ className });
 			})}

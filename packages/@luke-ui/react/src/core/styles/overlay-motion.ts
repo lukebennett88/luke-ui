@@ -37,6 +37,12 @@ type OverlayHiddenValues = {
  */
 type KnownKeysOnly<Rule> = Record<Exclude<keyof Rule, keyof OverlayRule>, never>;
 
+/** A transition's duration and easing, as CSS values. */
+type OverlayTiming = {
+	duration: string;
+	easing: string;
+};
+
 interface OverlayMotionOptions<Rule extends OverlayRule> {
 	/**
 	 * The values the overlay holds while hidden. Reduced motion keeps `opacity` and replaces
@@ -51,6 +57,11 @@ interface OverlayMotionOptions<Rule extends OverlayRule> {
 	 * media query throws instead of overwriting it.
 	 */
 	rule: Rule & KnownKeysOnly<Rule>;
+	/**
+	 * Overrides the shared enter or exit treatment for an overlay that moves a short distance and
+	 * needs a briefer one. Omitted sides use `vars.motion`. Reduced motion follows the same timing.
+	 */
+	timing?: { enter?: OverlayTiming; exit?: OverlayTiming };
 }
 
 function transitionFor(
@@ -97,27 +108,22 @@ export function overlayMotion<const Rule extends OverlayRule>({
 	hidden,
 	properties,
 	rule,
+	timing,
 }: OverlayMotionOptions<Rule>) {
-	const enterTransition = transitionFor(
-		properties,
-		vars.motion.enter.duration,
-		vars.motion.enter.easing,
-	);
-	const exitTransition = transitionFor(
-		properties,
-		vars.motion.exit.duration,
-		vars.motion.exit.easing,
-	);
+	const enter = timing?.enter ?? vars.motion.enter;
+	const exit = timing?.exit ?? vars.motion.exit;
+	const enterTransition = transitionFor(properties, enter.duration, enter.easing);
+	const exitTransition = transitionFor(properties, exit.duration, exit.easing);
 	const generatedSelectors = {
 		'&[data-entering]': hidden,
 		'&[data-exiting]': { ...hidden, transition: exitTransition },
 	} satisfies Selectors;
 	const fades = hidden.opacity !== undefined;
 	const reducedEnterTransition = fades
-		? transitionFor(['opacity'], vars.motion.enter.duration, vars.motion.enter.easing)
+		? transitionFor(['opacity'], enter.duration, enter.easing)
 		: 'none';
 	const reducedExitTransition = fades
-		? transitionFor(['opacity'], vars.motion.exit.duration, vars.motion.exit.easing)
+		? transitionFor(['opacity'], exit.duration, exit.easing)
 		: 'none';
 	const generatedMedia = {
 		'(prefers-reduced-motion: reduce)': {

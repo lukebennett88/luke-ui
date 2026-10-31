@@ -2,6 +2,7 @@ import type { StyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { MOTION_DURATION_SCALE } from '../../../theme/motion.js';
 import { COMBOBOX_ACTION_SIZE } from '../../sizing/combobox-sizing.js';
 import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
 import { classSelector } from '../../styles/class-selector.js';
@@ -27,6 +28,12 @@ import {
 	filledInputSelectors,
 	filledInputStyle,
 } from '../text-input/styles.css.js';
+
+// The popover starts this far from its resting place, on the side facing the trigger. React Aria
+// publishes the resolved placement, so a flipped popover slides in from the flipped side.
+const POPOVER_SLIDE_DISTANCE = '4px';
+const popoverSlideVar = createVar();
+const raisedSurface = surfaceStyle('surface.raised');
 
 /** Set by Select/Combobox popovers to the usable overlay inline size. */
 export const popoverAvailableInlineSizeVar = createVar();
@@ -233,9 +240,15 @@ const comboboxConfig = {
 		},
 		// The popover is an overlay, so it takes the shared overlay motion roles. See
 		// `styles/overlay-motion.ts` for the roles and the reduced-motion rule that follows from them.
+		// A 4px slide is too short to carry the shared 250ms entry, so the popover enters in 150ms and
+		// leaves in 100ms. Both ease out, so the exit starts moving at once.
 		popover: overlayMotion({
-			hidden: { opacity: 0 },
-			properties: ['opacity', 'translate', 'box-shadow'],
+			hidden: { opacity: 0, translate: popoverSlideVar },
+			properties: ['opacity', 'translate'],
+			timing: {
+				enter: { duration: MOTION_DURATION_SCALE[300], easing: vars.motion.enter.easing },
+				exit: { duration: MOTION_DURATION_SCALE[200], easing: vars.motion.enter.easing },
+			},
 			rule: {
 				'@media': {
 					'(forced-colors: active)': {
@@ -245,7 +258,7 @@ const comboboxConfig = {
 						forcedColorAdjust: 'auto',
 					},
 				},
-				...surfaceStyle('surface.raised'),
+				...raisedSurface,
 				borderColor: vars.color.border.decorative,
 				borderRadius: vars.radius.surface,
 				borderStyle: 'solid',
@@ -259,6 +272,29 @@ const comboboxConfig = {
 				// CSS min wins over max when they conflict, so the floor needs the same cap.
 				minInlineSize: `min(var(--trigger-width), ${popoverAvailableInlineSizeVar})`,
 				overflow: 'hidden',
+				// Merged, not replaced, so the raised surface keeps its foreground resets.
+				vars: { ...raisedSurface.vars, [popoverSlideVar]: `0 -${POPOVER_SLIDE_DISTANCE}` },
+
+				selectors: {
+					// Only a pointer-opened popover animates in. One opened by keyboard, or already open when
+					// it mounts, appears at once: no hidden values, no entry transition. The exit keeps its
+					// own transition, and a reopen during the exit snaps back to visible.
+					'&:not([data-opened-by="pointer"])[data-entering]': {
+						opacity: 1,
+						transition: 'none',
+						translate: 'none',
+					},
+					'&:not([data-opened-by="pointer"]):not([data-exiting])': { transition: 'none' },
+					'&[data-placement="top"]': {
+						vars: { [popoverSlideVar]: `0 ${POPOVER_SLIDE_DISTANCE}` },
+					},
+					'&[data-placement="left"]': {
+						vars: { [popoverSlideVar]: `${POPOVER_SLIDE_DISTANCE} 0` },
+					},
+					'&[data-placement="right"]': {
+						vars: { [popoverSlideVar]: `-${POPOVER_SLIDE_DISTANCE} 0` },
+					},
+				},
 
 				'@supports': {
 					'(min-block-size: calc-size(fit-content, size))': {

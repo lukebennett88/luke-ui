@@ -5,7 +5,16 @@ import { Heading } from '@luke-ui/react/heading';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Link } from '@luke-ui/react/link';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
-import { SelectItem } from '@luke-ui/react/primitives/select';
+import type { SelectRootProps } from '@luke-ui/react/primitives/select';
+import {
+	SelectIndicator,
+	SelectItem,
+	SelectListBox,
+	SelectPopover,
+	SelectRoot,
+	SelectTrigger,
+	SelectValue,
+} from '@luke-ui/react/primitives/select';
 import { SelectField } from '@luke-ui/react/select-field';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -375,6 +384,295 @@ test('keeps overlay fades without movement under reduced motion', async () => {
 
 	expect(getComputedStyle(popover).transitionProperty).toBe('opacity');
 	expect(getComputedStyle(popover).translate).toBe('none');
+});
+
+const selectField = (
+	<SelectField items={items} label="Select">
+		{(item) => <SelectItem>{item.label}</SelectItem>}
+	</SelectField>
+);
+
+const comboboxField = (
+	<ComboboxField defaultItems={items} label="Combobox">
+		{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+	</ComboboxField>
+);
+
+/** The open dropdown popover, once it has finished entering. */
+async function findRestingPopover() {
+	await expect.poll(() => document.querySelector('[data-placement]')).not.toBeNull();
+	const popover = document.querySelector<HTMLElement>('[data-placement]')!;
+	await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
+	await expect.poll(() => popover.getAnimations().length).toBe(0);
+	return popover;
+}
+
+async function openSelectPopover() {
+	render(selectField);
+	await userEvent.click(page.getByRole('button', { name: /Select/ }));
+	return findRestingPopover();
+}
+
+/** Reads a state's resolved values without waiting for the transition to run. */
+function resolveState(popover: HTMLElement, attributes: Record<string, string>) {
+	const previous = popover.style.transition;
+	popover.style.transition = 'none';
+	// React Aria owns `data-placement`, so put back whatever it had set rather than removing it.
+	const original = Object.keys(attributes).map(
+		(name) => [name, popover.getAttribute(name)] as const,
+	);
+	for (const [name, value] of Object.entries(attributes)) popover.setAttribute(name, value);
+	const { opacity, translate } = getComputedStyle(popover);
+	for (const [name, value] of original) {
+		if (value === null) popover.removeAttribute(name);
+		else popover.setAttribute(name, value);
+	}
+	popover.style.transition = previous;
+	return { opacity, translate };
+}
+
+/** The hidden values each placement enters from, and the motion a popover opened any way shares. */
+function expectEntryStyles(popover: HTMLElement) {
+	const entering = (side: string) =>
+		resolveState(popover, { 'data-entering': 'true', 'data-placement': side });
+	expect(entering('bottom')).toEqual({ opacity: '0', translate: '0px -4px' });
+	expect(entering('top')).toEqual({ opacity: '0', translate: '0px 4px' });
+	expect(entering('left')).toEqual({ opacity: '0', translate: '4px' });
+	expect(entering('right')).toEqual({ opacity: '0', translate: '-4px' });
+	expect(getComputedStyle(popover).transitionProperty).toBe('opacity, translate');
+}
+
+test('slides a dropdown popover in from the side facing its trigger', async () => {
+	const popover = await openSelectPopover();
+	expectEntryStyles(popover);
+	expect(resolveState(popover, { 'data-exiting': 'true', 'data-placement': 'top' }).translate).toBe(
+		'0px 4px',
+	);
+});
+
+test('slides a flipped dropdown popover in from below', async () => {
+	// No room under the trigger, so React Aria flips the popover above it.
+	render(<div style={{ paddingBlockStart: 'calc(100vh - 64px)' }}>{selectField}</div>);
+	await userEvent.click(page.getByRole('button', { name: /Select/ }));
+	const popover = await findRestingPopover();
+	expect(popover.dataset.placement).toBe('top');
+
+	expect(resolveState(popover, { 'data-entering': 'true' })).toEqual({
+		opacity: '0',
+		translate: '0px 4px',
+	});
+	expect(popover.dataset.placement).toBe('top');
+	expect(popover.hasAttribute('data-entering')).toBe(false);
+});
+
+test('leaves a dropdown popover faster than it enters', async () => {
+	const popover = await openSelectPopover();
+	const seconds = (value: string) => Number.parseFloat(value.split(',')[0]!);
+	const enter = seconds(getComputedStyle(popover).transitionDuration);
+	popover.setAttribute('data-exiting', 'true');
+	const exit = seconds(getComputedStyle(popover).transitionDuration);
+	popover.removeAttribute('data-exiting');
+	expect(enter).toBeGreaterThan(0);
+	expect(exit).toBeGreaterThan(0);
+	expect(exit).toBeLessThan(enter);
+});
+
+test('drops dropdown popover movement under reduced motion', async () => {
+	await emulateReducedMotion(true);
+	const popover = await openSelectPopover();
+	const states: Array<Record<string, string>> = [
+		{ 'data-entering': 'true' },
+		{ 'data-exiting': 'true' },
+	];
+	for (const attributes of states) {
+		expect(resolveState(popover, { ...attributes, 'data-placement': 'top' })).toEqual({
+			opacity: '0',
+			translate: 'none',
+		});
+	}
+});
+
+test('shows a dropdown popover fully when it reopens during its exit', async () => {
+	await openSelectPopover();
+	const trigger = page.getByRole('button', { name: /Select/ });
+	await userEvent.keyboard('{Escape}');
+	await expect.poll(() => document.querySelector('[data-exiting]')).not.toBeNull();
+	await userEvent.click(trigger);
+
+	const popover = await findRestingPopover();
+	expect(document.querySelectorAll('[data-placement]')).toHaveLength(1);
+	expect(popover.hasAttribute('data-exiting')).toBe(false);
+	expect(getComputedStyle(popover).opacity).toBe('1');
+	expect(['none', '0px']).toContain(getComputedStyle(popover).translate);
+});
+
+/** Records the entry transitions that start on any dropdown popover until `stop` is called. */
+function recordPopoverTransitions() {
+	const started: Array<string> = [];
+	const listener = (event: TransitionEvent) => {
+		const target = event.target as Element;
+		if (target.hasAttribute('data-placement')) started.push(event.propertyName);
+	};
+	document.addEventListener('transitionrun', listener, true);
+	return {
+		started,
+		stop: () => document.removeEventListener('transitionrun', listener, true),
+	};
+}
+
+/** The popover as soon as it exists, without waiting for any entry motion. */
+async function findOpenedPopover() {
+	await expect.poll(() => document.querySelector('[data-placement]')).not.toBeNull();
+	return document.querySelector<HTMLElement>('[data-placement]')!;
+}
+
+/**
+ * Asserts the popover shows fully with no entry motion. `null` means it mounted open, with no
+ * opening interaction to record.
+ */
+function expectAppearsAtOnce(popover: HTMLElement, openedBy: 'keyboard' | null = 'keyboard') {
+	expect(popover.dataset.openedBy ?? null).toBe(openedBy);
+	expect(getComputedStyle(popover).opacity).toBe('1');
+	expect(getComputedStyle(popover).translate).toBe('none');
+	expect(popover.getAnimations()).toHaveLength(0);
+	expect(getComputedStyle(popover).transitionDuration).toBe('0s');
+	expect(resolveState(popover, { 'data-entering': 'true', 'data-placement': 'top' })).toEqual({
+		opacity: '1',
+		translate: 'none',
+	});
+}
+
+test('animates a dropdown popover opened by pointer', async () => {
+	const popover = await openSelectPopover();
+	expect(popover.dataset.openedBy).toBe('pointer');
+	expect(getComputedStyle(popover).transitionDuration).toBe('0.15s, 0.15s');
+	expectEntryStyles(popover);
+});
+
+const keyboardOpenings = [
+	{ key: '{Enter}', name: 'Enter' },
+	{ key: ' ', name: 'Space' },
+	{ key: '{ArrowDown}', name: 'ArrowDown' },
+];
+
+for (const { key, name } of keyboardOpenings) {
+	test(`shows a Select opened with ${name} at once`, async () => {
+		render(selectField);
+		await userEvent.tab();
+		await expect.element(page.getByRole('button', { name: /Select/ })).toHaveFocus();
+		const recorder = recordPopoverTransitions();
+		await userEvent.keyboard(key);
+		const popover = await findOpenedPopover();
+		expectAppearsAtOnce(popover);
+		await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
+		recorder.stop();
+		expect(recorder.started).toEqual([]);
+	});
+}
+
+test('shows a Combobox opened by typing at once', async () => {
+	render(comboboxField);
+	await userEvent.tab();
+	await expect.element(page.getByRole('combobox')).toHaveFocus();
+	const recorder = recordPopoverTransitions();
+	await userEvent.keyboard('o');
+	const popover = await findOpenedPopover();
+	expectAppearsAtOnce(popover);
+	await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
+	recorder.stop();
+	expect(recorder.started).toEqual([]);
+});
+
+test('shows a Combobox opened with ArrowDown at once', async () => {
+	render(comboboxField);
+	await userEvent.tab();
+	await expect.element(page.getByRole('combobox')).toHaveFocus();
+	await userEvent.keyboard('{ArrowDown}');
+	expectAppearsAtOnce(await findOpenedPopover());
+});
+
+/** A Select composed from the public primitives, which can mount open. `SelectField` can't. */
+function OpenableSelect(props: Pick<SelectRootProps, 'defaultOpen' | 'isOpen'>) {
+	return (
+		<SelectRoot aria-label="Select" {...props}>
+			<SelectTrigger>
+				<SelectValue />
+				<SelectIndicator />
+			</SelectTrigger>
+			<SelectPopover>
+				<SelectListBox items={items}>
+					{(item) => <SelectItem>{item.label}</SelectItem>}
+				</SelectListBox>
+			</SelectPopover>
+		</SelectRoot>
+	);
+}
+
+// No interaction opens these, so there is no modality to read: they appear at once.
+const initiallyOpenSelects = [
+	{ name: 'controlled `isOpen`', props: { isOpen: true } },
+	{ name: '`defaultOpen`', props: { defaultOpen: true } },
+];
+
+for (const { name, props } of initiallyOpenSelects) {
+	test(`shows a Select that mounts open with ${name} at once`, async () => {
+		const recorder = recordPopoverTransitions();
+		render(<OpenableSelect {...props} />);
+		const popover = await findOpenedPopover();
+		expectAppearsAtOnce(popover, null);
+		await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
+		recorder.stop();
+		expect(recorder.started).toEqual([]);
+	});
+}
+
+test('animates a Select that mounted open once a pointer reopens it', async () => {
+	render(<OpenableSelect defaultOpen />);
+	await findOpenedPopover();
+	await userEvent.keyboard('{Escape}');
+	await expect.poll(() => document.querySelector('[data-placement]')).toBeNull();
+	await userEvent.click(page.getByRole('button', { name: /Select/ }));
+	const popover = await findOpenedPopover();
+	expect(popover.dataset.openedBy).toBe('pointer');
+	expectEntryStyles(popover);
+});
+
+test('keeps a keyboard-opened dropdown popover instant and movement-free under reduced motion', async () => {
+	await emulateReducedMotion(true);
+	render(selectField);
+	await userEvent.tab();
+	await userEvent.keyboard('{Enter}');
+	expect(matchMedia('(prefers-reduced-motion: reduce)').matches).toBe(true);
+	expectAppearsAtOnce(await findOpenedPopover());
+});
+
+test('shows a dropdown popover at once when a keyboard reopen interrupts its exit', async () => {
+	const popover = await openSelectPopover();
+	expect(popover.dataset.openedBy).toBe('pointer');
+	await userEvent.keyboard('{Escape}');
+	await expect.poll(() => document.querySelector('[data-exiting]')).not.toBeNull();
+	await expect.element(page.getByRole('button', { name: /Select/ })).toHaveFocus();
+	await userEvent.keyboard('{Enter}');
+
+	const reopened = await findOpenedPopover();
+	await expect.poll(() => reopened.hasAttribute('data-exiting')).toBe(false);
+	expect(document.querySelectorAll('[data-placement]')).toHaveLength(1);
+	expectAppearsAtOnce(reopened);
+});
+
+test('animates a dropdown popover that a pointer reopens after a keyboard open', async () => {
+	render(selectField);
+	await userEvent.tab();
+	await userEvent.keyboard('{Enter}');
+	expectAppearsAtOnce(await findOpenedPopover());
+	await userEvent.keyboard('{Escape}');
+	await expect.poll(() => document.querySelector('[data-placement]')).toBeNull();
+
+	await userEvent.click(page.getByRole('button', { name: /Select/ }));
+	const popover = await findRestingPopover();
+	expect(popover.dataset.openedBy).toBe('pointer');
+	expect(getComputedStyle(popover).transitionDuration).toBe('0.15s, 0.15s');
+	expectEntryStyles(popover);
 });
 
 for (const appearance of visualAppearances) {
