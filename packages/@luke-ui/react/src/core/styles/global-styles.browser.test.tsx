@@ -408,9 +408,16 @@ async function openSelectPopover() {
 function resolveState(popover: HTMLElement, attributes: Record<string, string>) {
 	const previous = popover.style.transition;
 	popover.style.transition = 'none';
+	// React Aria owns `data-placement`, so put back whatever it had set rather than removing it.
+	const original = Object.keys(attributes).map(
+		(name) => [name, popover.getAttribute(name)] as const,
+	);
 	for (const [name, value] of Object.entries(attributes)) popover.setAttribute(name, value);
 	const { opacity, translate } = getComputedStyle(popover);
-	for (const name of Object.keys(attributes)) popover.removeAttribute(name);
+	for (const [name, value] of original) {
+		if (value === null) popover.removeAttribute(name);
+		else popover.setAttribute(name, value);
+	}
 	popover.style.transition = previous;
 	return { opacity, translate };
 }
@@ -432,6 +439,21 @@ test('slides a dropdown popover in from the side facing its trigger', async () =
 	expect(resolveState(popover, { 'data-exiting': 'true', 'data-placement': 'top' }).translate).toBe(
 		'0px 4px',
 	);
+});
+
+test('slides a flipped dropdown popover in from below', async () => {
+	// No room under the trigger, so React Aria flips the popover above it.
+	render(<div style={{ paddingBlockStart: 'calc(100vh - 64px)' }}>{selectField}</div>);
+	await userEvent.click(page.getByRole('button', { name: /Select/ }));
+	const popover = await findRestingPopover();
+	expect(popover.dataset.placement).toBe('top');
+
+	expect(resolveState(popover, { 'data-entering': 'true' })).toEqual({
+		opacity: '0',
+		translate: '0px 4px',
+	});
+	expect(popover.dataset.placement).toBe('top');
+	expect(popover.hasAttribute('data-entering')).toBe(false);
 });
 
 test('leaves a dropdown popover faster than it enters', async () => {

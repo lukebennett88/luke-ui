@@ -33,6 +33,7 @@ import {
 // publishes the resolved placement, so a flipped popover slides in from the flipped side.
 const POPOVER_SLIDE_DISTANCE = '4px';
 const popoverSlideVar = createVar();
+const raisedSurface = surfaceStyle('surface.raised');
 
 /** Set by Select/Combobox popovers to the usable overlay inline size. */
 export const popoverAvailableInlineSizeVar = createVar();
@@ -257,7 +258,7 @@ const comboboxConfig = {
 						forcedColorAdjust: 'auto',
 					},
 				},
-				...surfaceStyle('surface.raised'),
+				...raisedSurface,
 				borderColor: vars.color.border.decorative,
 				borderRadius: vars.radius.surface,
 				borderStyle: 'solid',
@@ -271,7 +272,8 @@ const comboboxConfig = {
 				// CSS min wins over max when they conflict, so the floor needs the same cap.
 				minInlineSize: `min(var(--trigger-width), ${popoverAvailableInlineSizeVar})`,
 				overflow: 'hidden',
-				vars: { [popoverSlideVar]: `0 -${POPOVER_SLIDE_DISTANCE}` },
+				// Merged, not replaced, so the raised surface keeps its foreground resets.
+				vars: { ...raisedSurface.vars, [popoverSlideVar]: `0 -${POPOVER_SLIDE_DISTANCE}` },
 
 				selectors: {
 					'&[data-placement="top"]': {
