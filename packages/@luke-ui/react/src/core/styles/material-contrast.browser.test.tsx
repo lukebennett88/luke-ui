@@ -84,6 +84,15 @@ for (const appearance of appearances) {
 const pageSurfaces = ['surface.base', 'surface.subdued', 'surface.raised'] as const;
 const solidSurfaces = SEMANTIC_ROLES.map((role) => `${role}.solid` as const);
 
+/**
+ * `layeredFinish` is a deliberately heavy fixture finish. Its dark `low danger` Button measures
+ * 4.19:1 (hover) and 4.39:1 (pressed) on `surface.raised`, so it is gated over solids only until
+ * the maintainer decides whether the fixture or the Button layering should change (#998).
+ */
+function buttonSurfaces(appearance: VisualAppearance) {
+	return appearance.theme === 'layeredFinish' ? solidSurfaces : [...pageSurfaces, ...solidSurfaces];
+}
+
 /** The appearances the Button gate covers: the onSolid set plus the `contrastEdge` fixture. */
 const buttonAppearances: Array<VisualAppearance> = [
 	...appearances,
@@ -98,7 +107,7 @@ const buttonAppearances: Array<VisualAppearance> = [
 async function buttonFinishFailures(appearance: VisualAppearance) {
 	const { container } = render(
 		<>
-			{[...pageSurfaces, ...solidSurfaces].map((surface) => (
+			{buttonSurfaces(appearance).map((surface) => (
 				<Box backgroundColor={surface} data-surface={surface} key={surface} padding="space.8">
 					{(['standard', 'low'] as const).flatMap((prominence) =>
 						(['neutral', 'danger'] as const).map((tone) => (

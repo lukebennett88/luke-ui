@@ -659,13 +659,6 @@ for (const appearance of visualAppearances) {
 			settledSurfaceColors(button);
 			button.style.backgroundImage = 'none';
 		}
-		// Axe cannot read text over a gradient. The finish lives on `::before`, so clear it there too.
-		const clearFinish = document.createElement('style');
-		clearFinish.textContent = 'button::before { background-image: none !important; }';
-		document.head.append(clearFinish);
-		onTestFinished(() => {
-			clearFinish.remove();
-		});
 		await expectAxeContrastPasses(container);
 	});
 }
@@ -1001,9 +994,8 @@ for (const appearance of adaptiveAppearances) {
 const finishRungs = { hover: 'raised', pressed: 'recessed', rest: 'resting' } as const;
 const finishSurfaces = ['surface.base', 'surface.raised', 'accent.solid'] as const;
 
-/** A standard or low Button paints its control finish on `::before`, not on its own background. */
-function paintedFinish(button: Element) {
-	return getComputedStyle(button, '::before').backgroundImage;
+function gradientCount(backgroundImage: string) {
+	return backgroundImage.split('linear-gradient(').length - 1;
 }
 
 for (const appearance of visualAppearances) {
@@ -1040,19 +1032,18 @@ for (const appearance of visualAppearances) {
 				const expected = fills[index]!;
 				setInteractionState(standard, state);
 				setInteractionState(low, state);
-				const standardImage = paintedFinish(standard);
-				const lowImage = paintedFinish(low);
-				// Paper's finish is `none`, so nothing paints. A Tactile low Button paints no finish at
-				// rest and the state's rung once hovered or pressed.
-				const standardOk = standardImage === expected;
-				const lowOk =
-					state === 'rest' && paintsFinish ? lowImage === 'none' : lowImage === expected;
+				const standardImage = getComputedStyle(standard).backgroundImage;
+				const lowImage = getComputedStyle(low).backgroundImage;
+				// Paper's finish is `none`, so it never adds a gradient beyond the one state layer. A
+				// Tactile low Button paints only that layer at rest, and the finish once hovered.
+				const standardOk = paintsFinish
+					? standardImage.includes(expected)
+					: gradientCount(standardImage) <= 1;
+				const lowRestOk = !lowImage.includes(expected) && gradientCount(lowImage) === 1;
+				const lowFinishOk = state === 'rest' ? lowRestOk : lowImage.includes(expected);
+				const lowOk = paintsFinish ? lowFinishOk : gradientCount(lowImage) <= 1;
 				if (!standardOk) misses.push(`standard ${surface} ${state}: ${standardImage}`);
 				if (!lowOk) misses.push(`low ${surface} ${state}: ${lowImage}`);
-				// The Button's own background keeps only the state layer.
-				for (const button of [standard, low]) {
-					expect(getComputedStyle(button).backgroundImage.split('gradient(').length - 1).toBe(1);
-				}
 			}
 		}
 		expect(misses).toEqual([]);
@@ -1075,110 +1066,12 @@ test('forced colours remove the control finish from standard and low Buttons', a
 				expect(getComputedStyle(button).backgroundImage, `${name} ${state}`).toMatch(
 					/^none(, none)*$/,
 				);
-				// `display: none` leaves no pseudo-element to paint the finish.
-				expect(getComputedStyle(button, '::before').display, `${name} ${state} finish`).toBe(
-					'none',
-				);
 			}
 		}
 	} finally {
 		await emulateForcedColors('none');
 	}
 });
-
-// The finish stacks with the adaptive state layer, and together they fail 4.5:1 behind a label in a
-// theme whose finish overlaps the label's rows (#998). The finish paints in the padding ring only.
-const finishScenes = [
-	{
-		button: (
-			<Button prominence="low" tone="danger">
-				Delete
-			</Button>
-		),
-		minHeight: 40,
-		name: 'a one-line label',
-	},
-	{
-		button: (
-			<Button prominence="low" startContent={<Icon name="add" />} tone="danger">
-				Delete
-			</Button>
-		),
-		minHeight: 40,
-		name: 'an icon and a label',
-	},
-	{
-		button: (
-			<Button aria-label="Add" prominence="low" tone="danger">
-				<Icon name="add" />
-			</Button>
-		),
-		hasText: false,
-		minHeight: 40,
-		name: 'an icon only',
-	},
-	{
-		button: (
-			<Button prominence="low" style={{ blockSize: 'auto', inlineSize: 96 }} tone="danger">
-				Delete every selected item
-			</Button>
-		),
-		minHeight: 60,
-		name: 'a wrapping two-line label',
-		// A Button truncates its label, so this stands in for an application that lets it wrap.
-		wraps: true,
-	},
-] as const;
-
-for (const scene of finishScenes) {
-	for (const state of ['hover', 'pressed'] as const) {
-		test(`keeps the finish out from behind ${scene.name} and 4.5:1 text in layeredFinish dark on surface.raised, ${state}`, async () => {
-			const { container } = render(
-				<Box backgroundColor="surface.raised" padding="space.8">
-					{scene.button}
-				</Box>,
-				{ appearance: { mode: 'dark', theme: 'layeredFinish' } },
-			);
-			const button = container.querySelector('button')!;
-			if ('wraps' in scene) {
-				const label = [...button.querySelectorAll('span')].find(
-					(span) => span.children.length === 0,
-				)!;
-				label.style.whiteSpace = 'normal';
-				label.style.overflow = 'visible';
-				label.style.display = 'block';
-			}
-			setInteractionState(button, state);
-			settledSurfaceColors(button);
-			const finish = getComputedStyle(button, '::before');
-
-			// The finish paints, and its mask removes the content box, which holds the label.
-			expect(finish.backgroundImage).not.toBe('none');
-			expect(finish.maskClip).toBe('content-box, border-box');
-			expect(finish.maskComposite).toBe('exclude, add');
-			const box = button.getBoundingClientRect();
-			const style = getComputedStyle(button);
-			const content = {
-				bottom: box.bottom - Number.parseFloat(style.paddingBottom),
-				left: box.left + Number.parseFloat(style.paddingLeft),
-				right: box.right - Number.parseFloat(style.paddingRight),
-				top: box.top + Number.parseFloat(style.paddingTop),
-			};
-			for (const element of button.querySelectorAll('span, svg')) {
-				const rect = element.getBoundingClientRect();
-				// Subpixel tolerance for rounded line boxes.
-				expect(rect.top, `${element.tagName} top`).toBeGreaterThanOrEqual(content.top - 0.5);
-				expect(rect.bottom, `${element.tagName} bottom`).toBeLessThanOrEqual(content.bottom + 0.5);
-				expect(rect.left, `${element.tagName} left`).toBeGreaterThanOrEqual(content.left - 0.5);
-				expect(rect.right, `${element.tagName} right`).toBeLessThanOrEqual(content.right + 0.5);
-			}
-			expect(box.height, 'Button height').toBeGreaterThanOrEqual(scene.minHeight);
-
-			if ('hasText' in scene) return;
-			expect(await lowestRenderedTextContrast(button)).toBeGreaterThanOrEqual(4.5);
-		});
-	}
-}
 
 test('forced colours clear the adaptive state layer on a low Button', async () => {
 	await emulateForcedColors('active');

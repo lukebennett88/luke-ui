@@ -120,9 +120,9 @@ and position. Those specimens never use a Button tone, so they add no component 
 per appearance renders real standard and low Buttons of both tones over `surface.base`,
 `surface.subdued`, `surface.raised`, and every role's solid fill and measures their label in rest,
 hover and pressed, so the finish, fill and adaptive state layer are covered where a Button paints
-them. Every appearance runs all nine surfaces. A standard or low Button paints its finish in the
-padding ring around the label, so a finish that overlaps the label's rows, as `layeredFinish`'s
-does, never stacks with the adaptive state layer behind it.
+them. Tactile, Paper and `contrastEdge` run all nine surfaces. `layeredFinish` runs the six solids
+only, until its dark `low danger` Button on `surface.raised` (4.19:1 hover, 4.39:1 pressed) is
+resolved.
 
 The suite covers Tactile, Paper and the `layeredFinish` fixture, whose finish stacks overlapping
 layers. Two `midBandFailure` tests prove the gate catches a finish that fails only in the middle of
