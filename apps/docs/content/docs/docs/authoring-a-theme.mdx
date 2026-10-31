@@ -48,8 +48,9 @@ colours. Do not author them.
 12, and 16px. Radius inputs are pixels at a 16px root and emit as `rem`. `shadow` and
 `controlFinish` can be set per mode and per rung. An omitted `shadow` rung uses a subtle default
 shadow, and an omitted `controlFinish` rung is `none`. Solid and standard Buttons paint the finish
-at rest, hover, and pressed, and low Buttons paint it on hover and pressed. Typography sizes, line
-heights, letter spacing, and motion are not authored. Read [Fonts](#fonts) for the font input.
+at rest, hover, and pressed. Low Buttons paint it on hover and pressed only over a solid fill, and
+paint just the interaction state layer over a page surface. Typography sizes, line heights, letter
+spacing, and motion are not authored. Read [Fonts](#fonts) for the font input.
 
 <auto-type-table path="packages/@luke-ui/react/src/theme/define-theme.ts" name="ThemeInput" />
 
@@ -219,9 +220,9 @@ Adjust the authored sources or surfaces to satisfy every pairing. The compiler d
 cross-role failures.
 
 Validation guarantees the token colours above. It does not see `controlFinish`. A solid or standard
-control paints its finish over its fill and under its text (a hovered or pressed low Button does
-too), so a highlight on a dark fill, or a shade on a light one, lowers the text's contrast. Keep
-each finish faint enough that the text still reaches 4.5:1 over it.
+control paints its finish over its fill and under its text (a hovered or pressed low Button over a
+solid fill does too), so a highlight on a dark fill, or a shade on a light one, lowers the text's
+contrast. Keep each finish faint enough that the text still reaches 4.5:1 over it.
 
 Luke UI checks the rendered result for Paper and Tactile in a separate test that runs in Chromium.
 For all six roles, in light and dark mode, it paints the solid fill, its `controlFinish` rung, and

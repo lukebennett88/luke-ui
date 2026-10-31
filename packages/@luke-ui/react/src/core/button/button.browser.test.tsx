@@ -931,6 +931,45 @@ for (const appearance of adaptiveAppearances) {
 	});
 }
 
+for (const appearance of adaptiveAppearances) {
+	test(`low Buttons keep a visible pressed step on every page surface in ${appearance.theme} ${appearance.mode}`, async () => {
+		const surfaces = ['surface.base', 'surface.subdued', 'surface.raised'] as const;
+		const { locator } = render(
+			<>
+				{surfaces.map((surface) => (
+					<Box key={surface} backgroundColor={surface} data-testid={surface} padding="space.8">
+						<Button prominence="low">Neutral low on {surface}</Button>
+						<Button prominence="low" tone="danger">
+							Danger low on {surface}
+						</Button>
+					</Box>
+				))}
+			</>,
+			{ appearance },
+		);
+		const misses: Array<{ label: string; visibility: number }> = [];
+		for (const surface of surfaces) {
+			for (const button of locator.getByTestId(surface).getByRole('button').elements()) {
+				assert(button instanceof HTMLElement);
+				setInteractionState(button, 'hover');
+				settledSurfaceColors(button);
+				const hover = await renderedFill(button);
+				setInteractionState(button, 'pressed');
+				settledSurfaceColors(button);
+				const pressed = await renderedFill(button);
+				const visibility = oklabDeltaE(hover, pressed);
+				if (visibility < INTERACTION_HOVER_TO_PRESSED_VISIBILITY) {
+					misses.push({
+						label: button.textContent ?? '',
+						visibility: Number(visibility.toFixed(3)),
+					});
+				}
+			}
+		}
+		expect(misses).toEqual([]);
+	});
+}
+
 const solidRoles = ['accent', 'info', 'success', 'warning', 'danger', 'neutral'] as const;
 
 for (const appearance of adaptiveAppearances) {
@@ -992,7 +1031,8 @@ for (const appearance of adaptiveAppearances) {
 }
 
 const finishRungs = { hover: 'raised', pressed: 'recessed', rest: 'resting' } as const;
-const finishSurfaces = ['surface.base', 'surface.raised', 'accent.solid'] as const;
+const pageFinishSurfaces = ['surface.base', 'surface.subdued', 'surface.raised'] as const;
+const finishSurfaces = [...pageFinishSurfaces, 'accent.solid'] as const;
 
 function gradientCount(backgroundImage: string) {
 	return backgroundImage.split('linear-gradient(').length - 1;
@@ -1035,13 +1075,15 @@ for (const appearance of visualAppearances) {
 				const standardImage = getComputedStyle(standard).backgroundImage;
 				const lowImage = getComputedStyle(low).backgroundImage;
 				// Paper's finish is `none`, so it never adds a gradient beyond the one state layer. A
-				// Tactile low Button paints only that layer at rest, and the finish once hovered.
+				// Tactile low Button paints only that layer at rest and over a page surface, and the
+				// finish above the opaque chip once hovered or pressed on a solid.
 				const standardOk = paintsFinish
 					? standardImage.includes(expected)
 					: gradientCount(standardImage) <= 1;
-				const lowRestOk = !lowImage.includes(expected) && gradientCount(lowImage) === 1;
-				const lowFinishOk = state === 'rest' ? lowRestOk : lowImage.includes(expected);
-				const lowOk = paintsFinish ? lowFinishOk : gradientCount(lowImage) <= 1;
+				const lowLayerOnly = !lowImage.includes(expected) && gradientCount(lowImage) === 1;
+				const lowPaintsFinish = state !== 'rest' && surface === 'accent.solid';
+				const lowTactileOk = lowPaintsFinish ? lowImage.includes(expected) : lowLayerOnly;
+				const lowOk = paintsFinish ? lowTactileOk : gradientCount(lowImage) <= 1;
 				if (!standardOk) misses.push(`standard ${surface} ${state}: ${standardImage}`);
 				if (!lowOk) misses.push(`low ${surface} ${state}: ${lowImage}`);
 			}
@@ -1055,11 +1097,14 @@ test('forced colours remove the control finish from standard and low Buttons', a
 		<>
 			<Button prominence="standard">Standard</Button>
 			<Button prominence="low">Low</Button>
+			<Box backgroundColor="accent.solid" padding="space.8">
+				<Button prominence="low">Low on solid</Button>
+			</Box>
 		</>,
 	);
 	await emulateForcedColors('active');
 	try {
-		for (const name of ['Standard', 'Low']) {
+		for (const name of ['Standard', 'Low', 'Low on solid']) {
 			const button = locator.getByRole('button', { name }).element();
 			for (const state of INTERACTION_STATES) {
 				setInteractionState(button, state);
