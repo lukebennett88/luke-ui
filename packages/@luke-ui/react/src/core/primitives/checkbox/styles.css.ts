@@ -40,12 +40,24 @@ function checkboxStateLayer(state: 'hover' | 'pressed') {
 	};
 }
 
-/** Strokes a mark path that draws while `drawn` matches and is otherwise fully undrawn. */
-function markPath(drawn: string) {
+/**
+ * Strokes a mark path that draws while `drawn` matches and is otherwise fully undrawn.
+ *
+ * Switching between the check and the dash runs in sequence: the outgoing path undraws, then the
+ * incoming path draws, so no frame shows both marks. `from` names the other mark. The delay on the
+ * incoming path follows the previous mark, so a draw from unchecked still starts at once.
+ *
+ * The mark keeps the checked foreground until it has undrawn: its `color` change waits for the
+ * undraw, then lands on an empty path. On check the colour arrives with the fill, with no fade.
+ */
+function markPath(drawn: string, from: string) {
+	const duration = vars.motion.feedback.duration;
 	return {
 		'@media': {
-			// The mark appears with no draw. Colour feedback elsewhere on the box still transitions.
+			// The mark appears with no draw and no wait. Colour feedback elsewhere on the box still
+			// transitions.
 			'(prefers-reduced-motion: reduce)': {
+				transitionDelay: '0s',
 				transitionDuration: '0s',
 			},
 		},
@@ -57,12 +69,22 @@ function markPath(drawn: string) {
 		strokeLinejoin: 'round',
 		// 3 of 24 units keeps the stroke as heavy as the old 2 of 16.
 		strokeWidth: 3,
-		transitionDuration: vars.motion.feedback.duration,
-		transitionProperty: 'stroke-dashoffset',
-		transitionTimingFunction: vars.motion.feedback.easing,
+		transitionDelay: `0s, ${duration}`,
+		transitionDuration: `${duration}, 0s`,
+		transitionProperty: 'stroke-dashoffset, color',
+		transitionTimingFunction: `${vars.motion.feedback.easing}, linear`,
 		selectors: {
-			[drawn]: {
+			[`${drawn} &`]: {
 				strokeDashoffset: 0,
+				transitionDelay: '0s, 0s',
+			},
+			[`${drawn} [data-mark-from="${from}"] &`]: {
+				'@media': {
+					'(prefers-reduced-motion: reduce)': {
+						transitionDelay: '0s',
+					},
+				},
+				transitionDelay: `${duration}, 0s`,
 			},
 		},
 	} as const;
@@ -89,6 +111,10 @@ const checkboxConfig = {
 		},
 		indicator: {
 			'@media': {
+				// Keep the colour feedback, but do not hold the fill while a mark undraws: none draws.
+				'(prefers-reduced-motion: reduce)': {
+					transitionDelay: '0s',
+				},
 				'(forced-colors: active)': {
 					backgroundColor: 'Canvas',
 					backgroundImage: 'none',
@@ -137,6 +163,10 @@ const checkboxConfig = {
 			display: 'inline-flex',
 			inlineSize: checkboxIndicatorSize,
 			justifyContent: 'center',
+			// Unchecking holds the solid fill while the mark undraws, so the mark stays legible on it,
+			// and then fades it. Only `background-color` waits: no hover or press change on an unchecked
+			// box moves it, and every checked state sets the delay back to zero.
+			transitionDelay: `${vars.motion.feedback.duration}, 0s, 0s, 0s, 0s`,
 			transitionDuration: vars.motion.feedback.duration,
 			// No `color`: the mark appears with its fill's colour, not fading from the unchecked one.
 			transitionProperty: `background-color, background-image, border-color, opacity, ${INTERACTION_STATE_LAYER_PROPERTY}`,
@@ -158,6 +188,7 @@ const checkboxConfig = {
 					...surfaceStyle('accent.solid.rest'),
 					backgroundImage: vars.controlFinish.resting,
 					borderColor: vars.color.background.accent.solid.rest,
+					transitionDelay: '0s',
 				},
 				'[data-invalid="true"] &': {
 					borderColor: vars.color.border.danger.strong,
@@ -166,6 +197,7 @@ const checkboxConfig = {
 					...surfaceStyle('accent.solid.rest'),
 					backgroundImage: vars.controlFinish.resting,
 					borderColor: vars.color.background.accent.solid.rest,
+					transitionDelay: '0s',
 				},
 				[`${hovered('[data-selected="true"]')}, ${hovered('[data-indeterminate="true"]')}`]: {
 					...surfaceStyle('accent.solid.hover'),
@@ -214,8 +246,8 @@ const checkboxConfig = {
 			inlineSize: checkboxGlyphSize,
 			overflow: 'visible',
 		},
-		markCheck: markPath('[data-selected="true"]:not([data-indeterminate="true"]) &'),
-		markDash: markPath('[data-indeterminate="true"] &'),
+		markCheck: markPath('[data-selected="true"]:not([data-indeterminate="true"])', 'mixed'),
+		markDash: markPath('[data-indeterminate="true"]', 'checked'),
 	},
 	defaultVariants: {
 		size: 'medium',

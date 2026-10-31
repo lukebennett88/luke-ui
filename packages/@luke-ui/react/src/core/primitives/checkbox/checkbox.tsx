@@ -1,5 +1,5 @@
 import type { ComponentProps, JSX, Ref } from 'react';
-import { useId } from 'react';
+import { createContext, useContext, useId, useState } from 'react';
 import { CheckboxFieldContext } from 'react-aria-components';
 import type {
 	CheckboxButtonProps as RacCheckboxButtonProps,
@@ -105,6 +105,11 @@ interface _CheckboxIndicatorProps extends ComponentProps<'span'> {}
 /** Props for `CheckboxIndicator`. */
 export type CheckboxIndicatorProps = Prettify<_CheckboxIndicatorProps>;
 
+type CheckboxMark = 'checked' | 'mixed' | 'none';
+
+/** The mark the checkbox shows, from the label's render state. Private to the indicator. */
+const CheckboxMarkContext = createContext<CheckboxMark>('none');
+
 /**
  * Semantic root for a checkbox. It owns the selection, state, validation, and size.
  *
@@ -150,7 +155,7 @@ export function CheckboxRoot(props: CheckboxRootProps): JSX.Element {
  * buttons outside it.
  */
 export function CheckboxLabel(props: CheckboxLabelProps): JSX.Element {
-	const { className, ...restProps } = props;
+	const { children, className, ...restProps } = props;
 
 	return (
 		<RacCheckboxButton
@@ -158,7 +163,18 @@ export function CheckboxLabel(props: CheckboxLabelProps): JSX.Element {
 			className={composeRenderProps(className, (renderedClassName) => {
 				return fieldRecipe().inlineLabel({ className: renderedClassName });
 			})}
-		/>
+		>
+			{composeRenderProps(children, (renderedChildren, { isIndeterminate, isSelected }) => {
+				let mark: CheckboxMark = 'none';
+				if (isIndeterminate) mark = 'mixed';
+				else if (isSelected) mark = 'checked';
+				return (
+					<CheckboxMarkContext.Provider value={mark}>
+						{renderedChildren}
+					</CheckboxMarkContext.Provider>
+				);
+			})}
+		</RacCheckboxButton>
 	);
 }
 
@@ -175,8 +191,18 @@ export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
 export function CheckboxIndicator(props: CheckboxIndicatorProps): JSX.Element {
 	const { children, className, ...restProps } = props;
 	const slots = checkboxRecipe();
+	const mark = useContext(CheckboxMarkContext);
+	// The mark before this one decides whether a draw waits for the other mark to undraw. State
+	// derived while rendering re-renders at once, so the attribute and the new mark commit together.
+	const [tracked, setTracked] = useState({ mark, previous: mark });
+	if (tracked.mark !== mark) setTracked({ mark, previous: tracked.mark });
 	return (
-		<span {...restProps} aria-hidden className={slots.indicator({ className })}>
+		<span
+			{...restProps}
+			aria-hidden
+			className={slots.indicator({ className })}
+			data-mark-from={tracked.previous}
+		>
 			{children}
 			{/* The check follows the `check` icon's shape, so the two read as the same mark. */}
 			<svg className={slots.mark()} focusable="false" viewBox="0 0 24 24">
