@@ -540,3 +540,59 @@ test('a disabled text-mode tray combobox does not contribute values to FormData'
 
 	expect(new FormData(form).getAll('country')).toEqual([]);
 });
+
+test('ComboboxTray keeps the sheet motion the shared overlay timings define', async () => {
+	render(<TrayCombobox />);
+	await openTray();
+
+	const dialog = page.getByRole('dialog').element();
+	const modal = dialog.parentElement!;
+	const overlay = modal.parentElement!;
+	const resolve = (element: HTMLElement, attributes: Record<string, string>) => {
+		const previous = element.style.transition;
+		element.style.transition = 'none';
+		for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
+		const { opacity, translate } = getComputedStyle(element);
+		for (const name of Object.keys(attributes)) element.removeAttribute(name);
+		element.style.transition = previous;
+		return { opacity, translate };
+	};
+	const motion = (element: HTMLElement, exiting: boolean) => {
+		if (exiting) element.setAttribute('data-exiting', 'true');
+		const { transitionDuration, transitionProperty, transitionTimingFunction } =
+			getComputedStyle(element);
+		element.removeAttribute('data-exiting');
+		return { transitionDuration, transitionProperty, transitionTimingFunction };
+	};
+	const decelerate = 'cubic-bezier(0, 0, 0.4, 1)';
+	const accelerate = 'cubic-bezier(0.3, 0, 1, 1)';
+
+	// The values below are what origin/main computed before the dropdown popover got its own timing.
+	expect(motion(overlay, false)).toEqual({
+		transitionDuration: '0.25s',
+		transitionProperty: 'opacity',
+		transitionTimingFunction: decelerate,
+	});
+	expect(motion(overlay, true)).toEqual({
+		transitionDuration: '0.15s',
+		transitionProperty: 'opacity',
+		transitionTimingFunction: accelerate,
+	});
+	expect(motion(modal, false)).toEqual({
+		transitionDuration: '0.25s, 0.25s',
+		transitionProperty: 'opacity, translate',
+		transitionTimingFunction: `${decelerate}, ${decelerate}`,
+	});
+	expect(motion(modal, true)).toEqual({
+		transitionDuration: '0.15s, 0.15s',
+		transitionProperty: 'opacity, translate',
+		transitionTimingFunction: `${accelerate}, ${accelerate}`,
+	});
+	expect(resolve(overlay, { 'data-entering': 'true' })).toEqual({
+		opacity: '0',
+		translate: 'none',
+	});
+	const hidden = resolve(modal, { 'data-entering': 'true' });
+	expect(hidden.opacity).toBe('0');
+	expect(hidden.translate).toBe(`0px calc(100% - ${window.innerHeight}px)`);
+});
