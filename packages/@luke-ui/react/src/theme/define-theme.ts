@@ -52,7 +52,12 @@ export interface ShadowLadder {
 	resting: string;
 }
 
-/** A `background-image` face-finish ladder for solid control fills, for one colour mode. */
+/**
+ * A `background-image` face-finish ladder for one colour mode. It paints over the fill and under the
+ * label of solid Buttons, standard Buttons, hovered or pressed low Buttons over a solid fill, the
+ * checked or indeterminate Checkbox, and the selected Switch track. A low Button has no finish at
+ * rest or over a page surface.
+ */
 interface ControlFinish {
 	/** Face lighting for a hovered control. */
 	raised: string;
@@ -67,7 +72,8 @@ interface ControlFinish {
  */
 interface ThemeInputCommon {
 	/**
-	 * Face finish for solid control fills, such as a solid Button or a checked Checkbox, per mode.
+	 * Face finish per mode, painted on solid Buttons, standard Buttons, hovered or pressed low Buttons
+	 * over a solid fill, the checked or indeterminate Checkbox, and the selected Switch track.
 	 * Optional and deep-partial: an omitted rung falls back to `'none'` (a flat control).
 	 */
 	controlFinish?: { light?: Partial<ControlFinish>; dark?: Partial<ControlFinish> };

@@ -1,5 +1,6 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import * as interactionTints from '../../../theme/interaction-tint-vars.js';
 import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
 import { INTERACTION_STATE_LAYER_PROPERTY } from '../../styles/interaction-state-layer.js';
 import { style } from '../../styles/layered-style.css.js';
@@ -256,6 +257,22 @@ function buttonAppearance(
 							boxShadow: vars.shadow.inset,
 						},
 					},
+					// A surface that paints a solid fill sets the opaque chip, and the adaptive layer then
+					// paints it. The finish goes above the chip, which would hide it. On a page surface
+					// the chip is unset, the layer is a translucent tint, and a finish behind the label
+					// would stack with it, so only the layer and shadow paint.
+					'@container': {
+						[`style(${interactionTints.solidStateFillVarName(chipTone, 'hover')})`]: {
+							selectors: {
+								[hovered]: {
+									backgroundImage: `${vars.controlFinish.raised}, ${layerGradient}`,
+								},
+								[pressed]: {
+									backgroundImage: `${vars.controlFinish.recessed}, ${layerGradient}`,
+								},
+							},
+						},
+					},
 				},
 				variants,
 			},
@@ -306,7 +323,7 @@ function buttonAppearance(
 				},
 				...subtleRest,
 				...toneColor,
-				backgroundImage: layerGradient,
+				backgroundImage: `${layerGradient}, ${vars.controlFinish.resting}`,
 				vars: {
 					...subtleRest.vars,
 					[interactionStateLayer]: 'transparent',
@@ -314,9 +331,11 @@ function buttonAppearance(
 				selectors: {
 					[hovered]: {
 						...hoverLayer,
+						backgroundImage: `${layerGradient}, ${vars.controlFinish.raised}`,
 					},
 					[pressed]: {
 						...pressedLayer,
+						backgroundImage: `${layerGradient}, ${vars.controlFinish.recessed}`,
 					},
 				},
 			},

@@ -59,7 +59,7 @@ export interface ThemeFoundation {
 export interface ThemeModeFoundation {
 	/** Source colours the semantic colour contract is generated from. */
 	color: ThemeSourceColors;
-	/** Final `background-image` values for the face of a solid control fill. */
+	/** Final `background-image` values for the face of solid Buttons, standard Buttons, hovered or pressed low Buttons, the checked or indeterminate Checkbox, and the selected Switch track. */
 	controlFinish: ControlFinishFoundation;
 	/** Final composite `box-shadow` values for the semantic shadow ladder. */
 	shadow: ThemeShadowFoundation;

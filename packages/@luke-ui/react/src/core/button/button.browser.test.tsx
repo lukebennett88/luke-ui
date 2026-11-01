@@ -931,6 +931,45 @@ for (const appearance of adaptiveAppearances) {
 	});
 }
 
+for (const appearance of adaptiveAppearances) {
+	test(`low Buttons keep a visible pressed step on every page surface in ${appearance.theme} ${appearance.mode}`, async () => {
+		const surfaces = ['surface.base', 'surface.subdued', 'surface.raised'] as const;
+		const { locator } = render(
+			<>
+				{surfaces.map((surface) => (
+					<Box key={surface} backgroundColor={surface} data-testid={surface} padding="space.8">
+						<Button prominence="low">Neutral low on {surface}</Button>
+						<Button prominence="low" tone="danger">
+							Danger low on {surface}
+						</Button>
+					</Box>
+				))}
+			</>,
+			{ appearance },
+		);
+		const misses: Array<{ label: string; visibility: number }> = [];
+		for (const surface of surfaces) {
+			for (const button of locator.getByTestId(surface).getByRole('button').elements()) {
+				assert(button instanceof HTMLElement);
+				setInteractionState(button, 'hover');
+				settledSurfaceColors(button);
+				const hover = await renderedFill(button);
+				setInteractionState(button, 'pressed');
+				settledSurfaceColors(button);
+				const pressed = await renderedFill(button);
+				const visibility = oklabDeltaE(hover, pressed);
+				if (visibility < INTERACTION_HOVER_TO_PRESSED_VISIBILITY) {
+					misses.push({
+						label: button.textContent ?? '',
+						visibility: Number(visibility.toFixed(3)),
+					});
+				}
+			}
+		}
+		expect(misses).toEqual([]);
+	});
+}
+
 const solidRoles = ['accent', 'info', 'success', 'warning', 'danger', 'neutral'] as const;
 
 for (const appearance of adaptiveAppearances) {
@@ -991,6 +1030,94 @@ for (const appearance of adaptiveAppearances) {
 	});
 }
 
+const finishRungs = { hover: 'raised', pressed: 'recessed', rest: 'resting' } as const;
+const pageFinishSurfaces = ['surface.base', 'surface.subdued', 'surface.raised'] as const;
+const finishSurfaces = [...pageFinishSurfaces, 'accent.solid'] as const;
+
+function gradientCount(backgroundImage: string) {
+	return backgroundImage.split('linear-gradient(').length - 1;
+}
+
+for (const appearance of visualAppearances) {
+	test(`standard and low Buttons paint the control finish rung for each state in ${appearance.theme} ${appearance.mode}`, () => {
+		const { locator } = render(
+			<>
+				<div data-testid="probe" />
+				{finishSurfaces.map((surface) => (
+					<Box backgroundColor={surface} data-testid={surface} key={surface} padding="space.8">
+						<Button prominence="standard">Standard on {surface}</Button>
+						<Button prominence="low">Low on {surface}</Button>
+					</Box>
+				))}
+			</>,
+			{ appearance },
+		);
+		const probe = locator.getByTestId('probe').element() as HTMLElement;
+		const rung = (finish: (typeof finishRungs)[InteractionState]) => {
+			probe.style.backgroundImage = vars.controlFinish[finish];
+			return getComputedStyle(probe).backgroundImage;
+		};
+		const paintsFinish = appearance.theme !== 'paper';
+		const fills = INTERACTION_STATES.map((state) => rung(finishRungs[state]));
+		// Guards the assertions below: Tactile's three rungs differ, and Paper's are all `none`.
+		expect(new Set(fills).size).toBe(paintsFinish ? 3 : 1);
+
+		// Rows that break the expectation, so the check needs no conditional `expect`.
+		const misses: Array<string> = [];
+		for (const surface of finishSurfaces) {
+			const region = locator.getByTestId(surface);
+			const standard = region.getByRole('button', { name: `Standard on ${surface}` }).element();
+			const low = region.getByRole('button', { name: `Low on ${surface}` }).element();
+			for (const [index, state] of INTERACTION_STATES.entries()) {
+				const expected = fills[index]!;
+				setInteractionState(standard, state);
+				setInteractionState(low, state);
+				const standardImage = getComputedStyle(standard).backgroundImage;
+				const lowImage = getComputedStyle(low).backgroundImage;
+				// Paper's finish is `none`, so it never adds a gradient beyond the one state layer. A
+				// Tactile low Button paints only that layer at rest and over a page surface, and the
+				// finish above the opaque chip once hovered or pressed on a solid.
+				const standardOk = paintsFinish
+					? standardImage.includes(expected)
+					: gradientCount(standardImage) <= 1;
+				const lowLayerOnly = !lowImage.includes(expected) && gradientCount(lowImage) === 1;
+				const lowPaintsFinish = state !== 'rest' && surface === 'accent.solid';
+				const lowTactileOk = lowPaintsFinish ? lowImage.includes(expected) : lowLayerOnly;
+				const lowOk = paintsFinish ? lowTactileOk : gradientCount(lowImage) <= 1;
+				if (!standardOk) misses.push(`standard ${surface} ${state}: ${standardImage}`);
+				if (!lowOk) misses.push(`low ${surface} ${state}: ${lowImage}`);
+			}
+		}
+		expect(misses).toEqual([]);
+	});
+}
+
+test('forced colours remove the control finish from standard and low Buttons', async () => {
+	const { locator } = render(
+		<>
+			<Button prominence="standard">Standard</Button>
+			<Button prominence="low">Low</Button>
+			<Box backgroundColor="accent.solid" padding="space.8">
+				<Button prominence="low">Low on solid</Button>
+			</Box>
+		</>,
+	);
+	await emulateForcedColors('active');
+	try {
+		for (const name of ['Standard', 'Low', 'Low on solid']) {
+			const button = locator.getByRole('button', { name }).element();
+			for (const state of INTERACTION_STATES) {
+				setInteractionState(button, state);
+				expect(getComputedStyle(button).backgroundImage, `${name} ${state}`).toMatch(
+					/^none(, none)*$/,
+				);
+			}
+		}
+	} finally {
+		await emulateForcedColors('none');
+	}
+});
+
 test('forced colours clear the adaptive state layer on a low Button', async () => {
 	await emulateForcedColors('active');
 
@@ -998,7 +1125,7 @@ test('forced colours clear the adaptive state layer on a low Button', async () =
 		const { locator } = render(<Button prominence="low">Cancel</Button>);
 		const button = locator.getByRole('button', { name: 'Cancel' }).element();
 		setInteractionState(button, 'hover');
-		expect(getComputedStyle(button).backgroundImage).toBe('none');
+		expect(getComputedStyle(button).backgroundImage).toMatch(/^none(, none)*$/);
 	} finally {
 		await emulateForcedColors('none');
 	}
