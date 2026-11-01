@@ -9,27 +9,29 @@ import { THEME_NAME } from './name.js';
  */
 export const theme: ThemeInput = {
 	// A convex face: a highlight band at the top and a shade band at the bottom, with a flat middle
-	// where a label sits, so the finish never changes a label's contrast. Solid, standard, and hovered
-	// or pressed low Buttons share it. Pressed reverses it. Light fills are near white, so the shade
-	// carries the light-mode curve and the highlight is mostly for solid faces.
+	// where a label mostly sits. Solid, standard, and hovered or pressed low Buttons share it, and
+	// pressed reverses it. White and black layers move a pale fill further than a dark one, so the
+	// light shade is faint to keep a standard Button no heavier than a solid one, and the dark
+	// highlight is faint for the same reason. The finish can still reach a label, so the rendered
+	// contrast gate checks text over it at 4.5:1.
 	controlFinish: {
 		dark: {
 			raised:
-				'linear-gradient(to bottom, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0) 30%, ' +
-				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.1))',
+				'linear-gradient(to bottom, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0) 30%, ' +
+				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.14))',
 			recessed: 'linear-gradient(to bottom, rgb(0 0 0 / 0.14), rgb(0 0 0 / 0) 45%)',
 			resting:
-				'linear-gradient(to bottom, rgb(255 255 255 / 0.11), rgb(255 255 255 / 0) 30%, ' +
-				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.12))',
+				'linear-gradient(to bottom, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0) 30%, ' +
+				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.16))',
 		},
 		light: {
 			raised:
-				'linear-gradient(to bottom, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0) 30%, ' +
-				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.07))',
-			recessed: 'linear-gradient(to bottom, rgb(0 0 0 / 0.07), rgb(0 0 0 / 0) 45%)',
+				'linear-gradient(to bottom, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0) 30%, ' +
+				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.025))',
+			recessed: 'linear-gradient(to bottom, rgb(0 0 0 / 0.03), rgb(0 0 0 / 0) 45%)',
 			resting:
-				'linear-gradient(to bottom, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0) 30%, ' +
-				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.08))',
+				'linear-gradient(to bottom, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0) 30%, ' +
+				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.03))',
 		},
 	},
 	color: {

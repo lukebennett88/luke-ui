@@ -91,21 +91,33 @@ const buttonAppearances: Array<VisualAppearance> = [
 	{ mode: 'dark', theme: 'contrastEdge' },
 ];
 
+const buttonSizes = ['medium', 'small'] as const;
+const buttonProminences = ['high', 'standard', 'low'] as const;
+
 /**
- * Real standard and low Buttons of both tones over each page surface and every role's solid fill,
- * in each state: their fill, finish, and adaptive state layer behind their actual text colour.
+ * Real high, standard and low Buttons of both tones and both sizes over each page surface and every
+ * role's solid fill, in each state: their fill, finish, and adaptive state layer behind their
+ * actual text colour. A small Button's 32px block size puts its label closer to the finish's
+ * highlight and shade bands than a medium one's 40px does.
  */
 async function buttonFinishFailures(appearance: VisualAppearance) {
 	const { container } = render(
 		<>
 			{[...pageSurfaces, ...solidSurfaces].map((surface) => (
 				<Box backgroundColor={surface} data-surface={surface} key={surface} padding="space.8">
-					{(['standard', 'low'] as const).flatMap((prominence) =>
-						(['neutral', 'danger'] as const).map((tone) => (
-							<Button key={`${prominence}-${tone}`} prominence={prominence} tone={tone}>
-								{prominence} {tone} in {surface}
-							</Button>
-						)),
+					{buttonSizes.flatMap((size) =>
+						buttonProminences.flatMap((prominence) =>
+							(['neutral', 'danger'] as const).map((tone) => (
+								<Button
+									key={`${size}-${prominence}-${tone}`}
+									prominence={prominence}
+									size={size}
+									tone={tone}
+								>
+									{size} {prominence} {tone} in {surface}
+								</Button>
+							)),
+						),
 					)}
 				</Box>
 			))}
@@ -133,8 +145,8 @@ async function buttonFinishFailures(appearance: VisualAppearance) {
 
 for (const appearance of buttonAppearances) {
 	test(
-		`keeps 4.5:1 text on standard and low Buttons over every surface and role solid in ${appearance.theme} ${appearance.mode}`,
-		{ timeout: 60_000 },
+		`keeps 4.5:1 text on medium and small Buttons over every surface and role solid in ${appearance.theme} ${appearance.mode}`,
+		{ timeout: 180_000 },
 		async () => {
 			expect(await buttonFinishFailures(appearance)).toEqual([]);
 		},
