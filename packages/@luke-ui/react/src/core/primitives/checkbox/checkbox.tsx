@@ -168,8 +168,21 @@ export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
 	return <span {...restProps} className={checkboxRecipe().control({ className })} />;
 }
 
-/** Visual square that reflects selected, indeterminate, disabled, and invalid states. */
+/**
+ * Visual square that reflects selected, indeterminate, disabled, and invalid states. It draws the
+ * check or dash as an inline SVG that its state reveals.
+ */
 export function CheckboxIndicator(props: CheckboxIndicatorProps): JSX.Element {
-	const { className, ...restProps } = props;
-	return <span {...restProps} aria-hidden className={checkboxRecipe().indicator({ className })} />;
+	const { children, className, ...restProps } = props;
+	const slots = checkboxRecipe();
+	return (
+		<span {...restProps} aria-hidden className={slots.indicator({ className })}>
+			{children}
+			{/* The check follows the `check` icon's shape, so the two read as the same mark. */}
+			<svg className={slots.mark()} focusable="false" viewBox="0 0 24 24">
+				<path className={slots.markCheck()} d="M4.5 12.75 10.5 18.75 19.5 5.25" pathLength={1} />
+				<path className={slots.markDash()} d="M6 12H18" pathLength={1} />
+			</svg>
+		</span>
+	);
 }
