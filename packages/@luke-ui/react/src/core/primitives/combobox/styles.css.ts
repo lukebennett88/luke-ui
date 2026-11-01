@@ -276,15 +276,14 @@ const comboboxConfig = {
 				vars: { ...raisedSurface.vars, [popoverSlideVar]: `0 -${POPOVER_SLIDE_DISTANCE}` },
 
 				selectors: {
-					// Only a pointer-opened popover animates in. One opened by keyboard, or already open when
-					// it mounts, appears at once: no hidden values, no entry transition. The exit keeps its
-					// own transition, and a reopen during the exit snaps back to visible.
-					'&:not([data-opened-by="pointer"])[data-entering]': {
+					// A keyboard-opened popover appears at once: no hidden values, no entry transition. The
+					// exit keeps its own transition, and a reopen during the exit snaps back to visible.
+					'&[data-opened-by="keyboard"][data-entering]': {
 						opacity: 1,
 						transition: 'none',
 						translate: 'none',
 					},
-					'&:not([data-opened-by="pointer"]):not([data-exiting])': { transition: 'none' },
+					'&[data-opened-by="keyboard"]:not([data-exiting])': { transition: 'none' },
 					'&[data-placement="top"]': {
 						vars: { [popoverSlideVar]: `0 ${POPOVER_SLIDE_DISTANCE}` },
 					},
