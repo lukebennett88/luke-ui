@@ -283,6 +283,8 @@ for (const consumer of consumers) {
 					).toEqual([
 						'Name (optional)',
 						'Example checkbox',
+						'Packed email',
+						'Packed updates',
 						'Example switch',
 						'Basic plan',
 						'Pro plan',
@@ -296,6 +298,10 @@ for (const consumer of consumers) {
 					// Clicking the label text proves hydration attached each field's handlers.
 					await page.getByText('Example checkbox').click();
 					expect(await page.getByRole('checkbox', { name: 'Example checkbox' }).isChecked()).toBe(
+						true,
+					);
+					await page.getByText('Packed updates').click();
+					expect(await page.getByRole('checkbox', { name: 'Packed updates' }).isChecked()).toBe(
 						true,
 					);
 					await page.getByText('Example switch').click();

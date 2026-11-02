@@ -73,17 +73,19 @@ the field semantics that tie them together. The suffix follows that ownership, n
 the inline `CheckboxField` and `SwitchField` share it with the stacked `TextInputField`,
 `ComboboxField`, and `SelectField`. `RadioGroup` owns the complete field experience for a set of
 radio options, and each `RadioField` names one option within the group. Primitives keep their part
-names, such as `CheckboxRoot` and `SwitchControl`.
+names, such as `CheckboxRoot` and `SwitchControl`. `CheckboxGroup` owns the shared label,
+validation, and error presentation for a set of existing `CheckboxField` options.
 
 ### Accessible names
 
-`TextInputField`, `ComboboxField`, `SelectField`, and `RadioGroup` take a visible `label`, or
-`aria-label` or `aria-labelledby` instead, because a label-less field such as a search input is a
-normal use. `CheckboxField`, `SwitchField`, and `RadioField` always take a visible `label` and
-accept neither `aria-label` nor `aria-labelledby`. When another component owns the label, the
-consumer composes the control's primitives. `CheckboxRoot` and `SwitchRoot` give a `FieldLabel`
-inside them a `for` that points at the input, using `inputId` or a generated id, so the layout
-passes no ids. [#714](https://github.com/lukebennett88/luke-ui/issues/714) owns both decisions.
+`TextInputField`, `ComboboxField`, `SelectField`, `RadioGroup`, and `CheckboxGroup` take a visible
+`label`, or `aria-label` or `aria-labelledby` instead, because a label-less field such as a search
+input is a normal use. `CheckboxField`, `SwitchField`, and `RadioField` always take a visible
+`label` and accept neither `aria-label` nor `aria-labelledby`. When another component owns the
+label, the consumer composes the control's primitives. `CheckboxRoot` and `SwitchRoot` give a
+`FieldLabel` inside them a `for` that points at the input, using `inputId` or a generated id, so the
+layout passes no ids. [#714](https://github.com/lukebennett88/luke-ui/issues/714) owns both
+decisions.
 
 ### Primitives and composed components
 

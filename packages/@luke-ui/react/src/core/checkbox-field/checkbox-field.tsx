@@ -1,4 +1,6 @@
 import type { JSX, ReactNode } from 'react';
+import { use, useEffect, useId } from 'react';
+import { CheckboxGroupErrorMessagesContext } from '../checkbox-group/error-message-context.js';
 import type { CheckboxRootProps } from '../primitives/checkbox/checkbox.js';
 import {
 	CheckboxControl,
@@ -49,6 +51,42 @@ export type CheckboxFieldProps = Prettify<_CheckboxFieldProps>;
 export function CheckboxField(props: CheckboxFieldProps): JSX.Element {
 	const { description, errorMessage, label, necessityIndicator, ...rootProps } = props;
 	const normalizedErrorMessage = normalizeErrorMessage(errorMessage);
+	const setGroupErrorMessages = use(CheckboxGroupErrorMessagesContext);
+	const messageId = useId();
+
+	useEffect(() => {
+		if (setGroupErrorMessages === null) return;
+
+		return () => {
+			setGroupErrorMessages((previous) => {
+				if (!previous.has(messageId)) return previous;
+
+				const next = new Map(previous);
+				next.delete(messageId);
+				return next;
+			});
+		};
+	}, [messageId, setGroupErrorMessages]);
+
+	useEffect(() => {
+		if (setGroupErrorMessages === null) return;
+
+		setGroupErrorMessages((previous) => {
+			if (normalizedErrorMessage === undefined) {
+				if (!previous.has(messageId)) return previous;
+
+				const next = new Map(previous);
+				next.delete(messageId);
+				return next;
+			}
+
+			if (Object.is(previous.get(messageId), normalizedErrorMessage)) return previous;
+
+			const next = new Map(previous);
+			next.set(messageId, normalizedErrorMessage);
+			return next;
+		});
+	}, [messageId, normalizedErrorMessage, setGroupErrorMessages]);
 
 	return (
 		<CheckboxRoot {...rootProps} isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}>

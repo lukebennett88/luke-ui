@@ -24,6 +24,11 @@ export const bundleBoundaries: Array<BundleBoundary> = [
 		entry: 'button',
 		exportName: 'Button',
 	},
+	{
+		composes: ['checkbox-field', 'primitives/field'],
+		entry: 'checkbox-group',
+		exportName: 'CheckboxGroup',
+	},
 	{ composes: [], entry: 'box', exportName: 'Box' },
 	{ composes: [], entry: 'form', exportName: 'Form' },
 	{ composes: [], entry: 'theme', exportName: 'vars' },
@@ -84,6 +89,7 @@ import { Blockquote } from '@luke-ui/react/blockquote';
 import { Box } from '@luke-ui/react/box';
 import { Button, buttonRecipe } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
+import { CheckboxGroup } from '@luke-ui/react/checkbox-group';
 import { Form } from '@luke-ui/react/form';
 import { Icon } from '@luke-ui/react/icon';
 import { Provider } from '@luke-ui/react/provider';
@@ -116,6 +122,12 @@ export function App({ onHydrated }) {
 				h(Button, { 'data-size-classes': buttonRecipe({ size: 'small' }) }, 'Save'),
 			),
 			h(CheckboxField, { label: 'Example checkbox' }),
+			h(
+				CheckboxGroup,
+				{ label: 'Packed choices', name: 'packedChoices' },
+				h(CheckboxField, { label: 'Packed email', value: 'email' }),
+				h(CheckboxField, { label: 'Packed updates', value: 'updates' }),
+			),
 			h(SwitchField, { label: 'Example switch' }),
 			h(
 				RadioGroup,
@@ -327,6 +339,8 @@ const TYPED_APP = `
 import { Blockquote } from '@luke-ui/react/blockquote';
 import { Box, type BoxProps } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { CheckboxField } from '@luke-ui/react/checkbox-field';
+import { CheckboxGroup, type CheckboxGroupProps } from '@luke-ui/react/checkbox-group';
 import { Container } from '@luke-ui/react/container';
 import { Heading, type HeadingProps } from '@luke-ui/react/heading';
 import { Provider } from '@luke-ui/react/provider';
@@ -369,6 +383,19 @@ export const fullMetrics: Partial<FontMetrics> = metrics;
 export const textColor: string = vars.color.foreground.primary;
 export const mobileBreakpoint: number = breakpoints.bp640;
 export const interactionHoverStyle = interactionState('hover');
+
+export const packedCheckboxGroup: CheckboxGroupProps = {
+	label: 'Topics',
+	value: ['design'],
+	onChange: (value) => value.map((item) => item.toUpperCase()),
+};
+export const packedCheckboxChildren = [
+	<CheckboxField key="design" label="Design" value="design" />,
+	<CheckboxField key="engineering" label="Engineering" value="engineering" />,
+];
+export const packedCheckboxGroupElement = <CheckboxGroup {...packedCheckboxGroup}>
+	{packedCheckboxChildren}
+</CheckboxGroup>;
 
 // The 1.0 token contract: retained paths compile, and removed pre-1.0 paths do not.
 export const retainedTokens: Array<string> = [

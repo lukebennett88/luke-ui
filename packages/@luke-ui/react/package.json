@@ -25,6 +25,7 @@
 		"./box": "./dist/box.js",
 		"./button": "./dist/button.js",
 		"./checkbox-field": "./dist/checkbox-field.js",
+		"./checkbox-group": "./dist/checkbox-group.js",
 		"./cluster": "./dist/cluster.js",
 		"./code": "./dist/code.js",
 		"./combobox-field": "./dist/combobox-field.js",

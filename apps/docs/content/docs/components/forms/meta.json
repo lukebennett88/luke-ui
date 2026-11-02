@@ -2,6 +2,7 @@
 	"title": "Forms",
 	"pages": [
 		"checkbox-field",
+		"checkbox-group",
 		"combobox-field",
 		"form",
 		"radio-group",
