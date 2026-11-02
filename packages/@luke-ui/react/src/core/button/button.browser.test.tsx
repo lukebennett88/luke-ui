@@ -479,10 +479,10 @@ for (const appearance of [...visualAppearances, ...flatAppearances]) {
 						width: 'max-content',
 					}}
 				>
-					<Box backgroundColor="surface.base" padding="space.8">
+					<Box backgroundColor="surface.base" padding="space.24">
 						<InteractionStateCells prominences={interactionProminences} suffix="" />
 					</Box>
-					<Box backgroundColor="accent.solid" padding="space.8">
+					<Box backgroundColor="accent.solid" padding="space.24">
 						<InteractionStateCells prominences={['low']} suffix={onSolidSuffix} />
 					</Box>
 				</div>,
