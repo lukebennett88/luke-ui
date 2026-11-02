@@ -71,9 +71,9 @@ Name a composed component `<Control>Field` when it owns the complete form-field 
 control, its visible label, description, error message, validation and necessity presentation, and
 the field semantics that tie them together. The suffix follows that ownership, not the layout, so
 the inline `CheckboxField` and `SwitchField` share it with the stacked `TextInputField`,
-`ComboboxField`, and `SelectField`. A future radio group is `RadioGroupField`. An individual radio
-is an option within that field, not a field itself. Primitives keep their part names, such as
-`CheckboxRoot` and `SwitchControl`.
+`ComboboxField`, and `SelectField`. `RadioGroup` owns the complete field experience for a set of
+radio options, and each `RadioField` names one option within the group. Primitives keep their part
+names, such as `CheckboxRoot` and `SwitchControl`.
 
 ### Accessible names
 
