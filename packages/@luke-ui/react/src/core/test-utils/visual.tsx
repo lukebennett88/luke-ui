@@ -265,9 +265,6 @@ export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 	transition-delay: 0s !important;
 	transition-duration: 0s !important;
 	caret-color: transparent !important;
-	/* Forced colours override caret-color with a system colour, so hiding it is not enough. Stop the
-	   blink so the caret is always drawn, or never, instead of depending on the capture's phase. */
-	caret-animation: manual !important;
 	/* Pin decoration colour so a cancelled text-decoration-color transition cannot hide underlines. */
 	text-decoration-color: currentColor !important;
 }

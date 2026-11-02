@@ -4,6 +4,7 @@
 		"checkbox-field",
 		"combobox-field",
 		"form",
+		"radio-group",
 		"select-field",
 		"switch-field",
 		"text-input-field"

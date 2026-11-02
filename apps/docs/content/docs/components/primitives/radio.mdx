@@ -1,0 +1,65 @@
+---
+title: Radio primitive
+description: Lower-level radio anatomy for custom group and option layouts.
+source: packages/@luke-ui/react/src/exports/primitives/radio.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/RadioGroup.html
+---
+
+Use the Radio primitive when a layout needs custom placement for a radio group or its options. For
+the standard labelled group, use [`RadioGroup`](/components/forms/radio-group).
+
+<ExampleBlock src="radio-primitive/basic" title="Radio primitive: Basic" />
+
+## Anatomy
+
+`RadioGroupRoot` owns the selection, accessible group name, validation, form value, and size.
+`RadioRoot` represents one option and takes its `value`. `RadioLabel` provides the clickable option
+label. Place `RadioControl` inside it, with `RadioIndicator` inside the control.
+
+Use `FieldLabel`, `FieldDescription`, and `FieldError` inside `RadioGroupRoot` when the group label,
+description, or error needs a custom position. The group root connects those parts to the group.
+Place a `FieldDescription` inside `RadioRoot` to describe one option. Each option still needs a
+`RadioLabel`.
+
+## Accessibility
+
+Name `RadioGroupRoot` with `FieldLabel`, `aria-label`, or `aria-labelledby`. Put textual,
+non-interactive option text inside each `RadioLabel`, and place links and buttons outside it. The
+group supports arrow-key navigation between its options.
+
+## API
+
+### RadioGroupRootProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/radio/radio.tsx"
+	name="RadioGroupRootProps"
+/>
+
+### RadioRootProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/radio/radio.tsx"
+	name="RadioRootProps"
+/>
+
+### RadioLabelProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/radio/radio.tsx"
+	name="RadioLabelProps"
+/>
+
+### RadioControlProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/radio/radio.tsx"
+	name="RadioControlProps"
+/>
+
+### RadioIndicatorProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/radio/radio.tsx"
+	name="RadioIndicatorProps"
+/>
