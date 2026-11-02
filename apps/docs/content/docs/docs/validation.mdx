@@ -8,17 +8,15 @@ renders a message beneath the control.
 
 <ExampleBlock src="forms/validation" title="Validation: Invalid fields" />
 
-`errorMessage` means one thing: this field currently has a controlled error. Pass it when you
-already have a message from a form library, your server, or your own state. The field is invalid as
-soon as you pass a non-empty message. When the field should generate its own message instead, from a
-constraint or a `validate` rule, leave `errorMessage` out entirely.
+Pass `errorMessage` for a controlled error from a form library, your server, or your own state. The
+field is invalid as soon as you pass a non-empty message. When the field should generate its own
+message instead, from a constraint or a `validate` rule, leave `errorMessage` out entirely.
 
 ## Let the browser validate
 
-Set `isRequired` on `TextInputField`, `ComboboxField`, `SelectField`, `CheckboxField`,
-`SwitchField`, or `RadioGroup` to require a value before the form submits. Pass `minLength`,
-`maxLength`, or `pattern` on `TextInputField` to state a rule for the text. Pass `type="email"` or
-`type="url"` to check the value's format.
+Set `isRequired` on a field or radio group to require a value before the form submits. Pass
+`minLength`, `maxLength`, or `pattern` on `TextInputField` to state a rule for the text. Pass
+`type="email"` or `type="url"` to check the value's format.
 
 Leave out `errorMessage`. The field renders the message the constraint produces. Constraint errors
 normally appear after someone blurs a field or submits the form.
@@ -56,10 +54,8 @@ appear after blur or submit, not between keystrokes.
 <ExampleBlock src="forms/custom-validation" title="Validation: Custom rule" />
 
 Return one actionable message, even when several conditions could fail. Check the most important
-condition first so the next message appears once that one is fixed. You can return an array of
-messages, but the field does not render them as a list. It joins them with a space, so they read as
-a single run-on sentence, and even two short messages can fill two lines in a 288px-wide form
-column.
+condition first so the next message appears once that one is fixed. The field joins multiple
+messages with spaces rather than rendering a list.
 
 ## Realtime validation
 
@@ -129,9 +125,8 @@ validation.
 
 ## Always pair an invalid field with a message
 
-Colour alone cannot report a problem. Someone who cannot separate the danger border from the resting
-one gets no signal at all. The error message is the cue that does not rely on colour. It shows an
-error icon before its text and says what is wrong.
+An error message reports the problem when someone cannot distinguish the danger border from the
+resting border. It shows an error icon before its text.
 
 Give every invalid field a message, as WCAG 1.4.1 Use of Colour requires. Let a constraint or
 `validate` generate the message, or pass your own through `errorMessage`. The primitive roots take
