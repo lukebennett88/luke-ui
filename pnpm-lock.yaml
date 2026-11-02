@@ -207,7 +207,7 @@ catalogs:
       specifier: ^1.33.5
       version: 1.33.5
     '@tanstack/react-query':
-      specifier: ^5.104.5
+      specifier: ^5.105.0
       version: 5.105.0
     '@tanstack/react-router':
       specifier: ^1.170.46
