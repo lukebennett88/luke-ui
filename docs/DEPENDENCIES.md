@@ -144,6 +144,19 @@ field from the update set).
 an `overrides` entry forces every copy onto the catalog so optional peers cannot drift. When the
 Node major PR lands, update `allowedVersions` and the catalog entry in the same change.
 
-The workflows in `.github/workflows` pin actions at the major tag, so the only update Renovate can
-offer is a major tag move. They group into one `github actions` pull request and are never
-automerged.
+The `actions/setup-node` workflow input also uses the Node major, currently `24`. Renovate extracts
+it as `actions/node-versions` with the dependency name `node`. Its non-major updates are disabled,
+and `replace` preserves major-only precision on a major upgrade. The workflow input and the root
+runtime use the `node` group and are never automerged. Their sources can publish at different times,
+so review the resulting PR for both declarations before merging.
+
+When upgrading Node, update `@types/node` in the catalog and raise its `allowedVersions` bound in
+`.github/renovate.json5`. Update every workflow Node input to the same major, and change the
+Cloudflare Pages `NODE_VERSION` setting for each deployment environment. Check the lockfile and the
+Cloudflare preview before merging. The type bound and Cloudflare settings require maintainer
+changes; Renovate cannot coordinate them automatically.
+
+The Renovate Node configuration check exercises extraction, rules, and updates with the pinned
+Renovate version in `.github/workflows/renovate-node.yml`. Update that pin when validating against a
+newer Renovate release. Other workflow actions use major tags, group into one `github actions` pull
+request, and are never automerged.

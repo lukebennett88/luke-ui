@@ -108,15 +108,16 @@
 			// setup-node uses a major-only version; don't expand it to a full minor or patch release.
 			matchManagers: ['github-actions'],
 			matchDepTypes: ['uses-with'],
-			matchPackageNames: ['node'],
+			matchPackageNames: ['actions/node-versions'],
 			matchUpdateTypes: ['minor', 'patch'],
 			enabled: false,
 		},
 		{
-			// Preserve major-only precision for reviewable major upgrades.
+			// Group the workflow input with the runtime, keeping its major-only precision.
 			matchManagers: ['github-actions'],
 			matchDepTypes: ['uses-with'],
-			matchPackageNames: ['node'],
+			matchPackageNames: ['actions/node-versions'],
+			groupName: 'node',
 			rangeStrategy: 'replace',
 			automerge: false,
 		},
