@@ -153,8 +153,8 @@ so review the resulting PR for both declarations before merging.
 When upgrading Node, update `@types/node` in the catalog and raise its `allowedVersions` bound in
 `.github/renovate.json5`. Update every workflow Node input to the same major, and change the
 Cloudflare Pages `NODE_VERSION` setting for each deployment environment. Check the lockfile and the
-Cloudflare preview before merging. The type bound and Cloudflare settings require maintainer
-changes; Renovate cannot coordinate them automatically.
+Cloudflare preview before merging. Renovate cannot coordinate the type bound or Cloudflare settings
+automatically, so a maintainer must update them.
 
 The Renovate Node configuration check exercises extraction, rules, and updates with the pinned
 Renovate version in `.github/workflows/renovate-node.yml`. Update that pin when validating against a
