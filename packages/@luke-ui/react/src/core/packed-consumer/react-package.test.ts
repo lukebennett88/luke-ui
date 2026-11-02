@@ -260,7 +260,7 @@ for (const consumer of consumers) {
 
 					expect(result.recoverableErrors).toEqual([]);
 					expect(consoleErrors).toEqual([]);
-					expect(result.controls).toEqual({ buttons: 2, inputs: 5 });
+					expect(result.controls).toEqual({ buttons: 2, inputs: 7 });
 					expect(result.expectedActionClasses).toBeTruthy();
 					expect(result.inheritedActionClasses).toBe(result.expectedActionClasses);
 					// React Aria effects adjust attributes after hydration, so compare nodes, not markup.

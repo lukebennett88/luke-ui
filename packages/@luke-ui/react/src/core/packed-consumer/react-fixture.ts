@@ -384,18 +384,17 @@ export const textColor: string = vars.color.foreground.primary;
 export const mobileBreakpoint: number = breakpoints.bp640;
 export const interactionHoverStyle = interactionState('hover');
 
-export const packedCheckboxGroup: CheckboxGroupProps = {
-	label: 'Topics',
-	value: ['design'],
-	onChange: (value) => value.map((item) => item.toUpperCase()),
-};
 export const packedCheckboxChildren = [
 	<CheckboxField key="design" label="Design" value="design" />,
 	<CheckboxField key="engineering" label="Engineering" value="engineering" />,
 ];
-export const packedCheckboxGroupElement = <CheckboxGroup {...packedCheckboxGroup}>
-	{packedCheckboxChildren}
-</CheckboxGroup>;
+export const packedCheckboxGroup: CheckboxGroupProps = {
+	children: packedCheckboxChildren,
+	label: 'Topics',
+	value: ['design'],
+	onChange: (value) => value.map((item) => item.toUpperCase()),
+};
+export const packedCheckboxGroupElement = <CheckboxGroup {...packedCheckboxGroup} />;
 
 // The 1.0 token contract: retained paths compile, and removed pre-1.0 paths do not.
 export const retainedTokens: Array<string> = [
