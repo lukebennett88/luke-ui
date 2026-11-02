@@ -282,9 +282,7 @@ export interface CorpusEntry {
 /**
  * The hue stress-corpus: source colours that push the generator's solid-anchor search, gamut
  * mapping, and on-solid choice. Used as `source` (and, for neutrals, `background`) inputs — not as
- * scales to reproduce. Every entry generates cleanly for a vibrant role (their tone sits clear of
- * the on-solid dead zone); the genuinely-unsatisfiable dead-zone cases live in
- * {@link UNSATISFIABLE_ON_SOLID}.
+ * scales to reproduce. Every entry generates cleanly for a vibrant role.
  */
 export const HUE_STRESS_CORPUS: ReadonlyArray<CorpusEntry> = [
 	{
@@ -338,20 +336,11 @@ export const HUE_STRESS_CORPUS: ReadonlyArray<CorpusEntry> = [
 ];
 
 /**
- * Dead-zone source: a mid-lightness colour whose whole tone-faithful window fails the on-solid gate
- * for a source-toned role.
- */
-export const UNSATISFIABLE_ON_SOLID: CorpusEntry = {
-	name: 'dead-zone-red-dark',
-	note: 'mid lightness and high chroma; whole tone window is a dead zone',
-	source: 'oklch(0.58 0.28 0)',
-};
-
-/**
- * Light-mode mid-tone the solid-anchor search adapts into its tone-faithful window.
+ * A mid-tone red whose lightness sits in the on-solid dead zone: neither near-white nor near-black
+ * text reads over it. The solid-anchor search adapts it into its tone-faithful window.
  */
 export const ADAPTABLE_MID_TONE: CorpusEntry = {
-	name: 'mid-tone-red-light',
-	note: 'light-mode mid lightness the solid-anchor search adapts',
-	source: 'oklch(0.62 0.19 27)',
+	name: 'mid-tone-red',
+	note: 'mid lightness the solid-anchor search adapts',
+	source: 'oklch(0.595 0.19 27)',
 };

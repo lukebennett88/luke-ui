@@ -41,19 +41,31 @@ export const RATIO_HEADROOM = 0.05;
 export const CONTRAST_SEARCH_STEP = 0.0025;
 
 /*
- * Adaptive interaction tints. One black (light) or white (dark) tint pair per theme mode is
- * painted as a registered state layer. Strengths are solved in `interaction-tints.ts` so the
- * composite over `surface.base` matches today's opaque subtle hover and pressed, then capped so
- * every gated foreground stays at {@link TEXT_RATIO} over every surface and subtle rest with the
- * tint on top. The hover floor applies over `surface.base`; the hover-to-pressed floor applies over
- * all three surfaces. A fixed tint can produce smaller differences on raised surfaces.
+ * Interaction-state visibility. Two floors apply to every state pair the compiler generates, and
+ * both measure fills alone: a `controlFinish` or `shadow` never counts toward them.
+ *
+ * - Solid fills: every role's `solid.rest`, `solid.hover`, and `solid.pressed` step apart by at
+ *   least the floors below (`scale.ts` generates them).
+ * - Adaptive interaction tints. One black (light) or white (dark) tint pair per theme mode is
+ *   painted as a registered state layer. `interaction-tints.ts` solves its strengths, capped so
+ *   every gated foreground stays at {@link TEXT_RATIO} over every surface and subtle rest with the
+ *   tint on top. Both floors hold over the three structural surfaces and all six subtle fills.
  */
 
-/** Minimum OKLab ΔE between `surface.base` and the hover tint composited over it. */
+/** Minimum OKLab ΔE between a resting fill and its hover state. */
 export const INTERACTION_HOVER_VISIBILITY = 0.04;
 
-/** Minimum OKLab ΔE between the hover and pressed tints composited over `surface.base`. */
+/** Minimum OKLab ΔE between a hover fill and its pressed state. */
 export const INTERACTION_HOVER_TO_PRESSED_VISIBILITY = 0.025;
+
+/**
+ * The private margin every visibility solver targets above its floor, in OKLab ΔE. It covers the
+ * 4-decimal OKLCH rounding the compiler emits and the 8-bit channels a browser paints, so a state
+ * pair that clears the nominal floor when solved still clears it on screen. Solvers aim for floor
+ * plus this margin. Validation measures emitted values against the nominal floors, so the public
+ * thresholds do not change.
+ */
+export const VISIBILITY_MARGIN = 0.003;
 
 /**
  * The canonical semantic roles, in contract order. Every role publishes the same visual slots —

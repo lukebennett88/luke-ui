@@ -119,17 +119,19 @@ Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
 
 - A single-value accent (`accent: '#...'`) is pre-adapted by `defineTheme`'s `adaptAccent` into an
   accessible vibrant band before the scale generator sees it. The pre-conditioner calls the same
-  `passesOnSolidGate` function the generator uses, with the same `text.primary`.
+  `passesOnSolidGate` function the generator uses.
 - An explicit per-mode accent (`accent: { light, dark }`) is used verbatim because the author has
   chosen its lightness. If its whole tone band has no lightness where near-white or near-black
   on-solid text clears AA, `compileTheme` throws `ThemeGenerationError` naming the failing role and
-  mode.
+  mode. Hover and pressed step away from the on-solid text, so only the resting solid has to carry
+  text. The dead zone, where neither near-white nor near-black text reads, is narrower than the
+  ±0.035 window, so a source in it moves within its window instead of failing.
 
 ## One gate for on-solid contrast
 
 `scale.ts`'s `passesOnSolidGate` is the only function that decides whether a solid can carry
 readable text. It asks whether the near-white or near-black on-solid colour the generator would
-choose clears the AA text ratio plus the search headroom across the public solid rest, hover, and
+choose clears the AA text ratio plus the search headroom across the emitted solid rest, hover, and
 pressed colours.
 
 `defineTheme`'s `adaptAccent` pre-conditioner calls that same function rather than keeping its own
@@ -152,10 +154,27 @@ loading state against typical surfaces.
 
 ## Interaction states
 
-Hover and pressed colours are public semantic tokens, generated at theme compile time. Hover mixes
-the resting colour 5% toward `text.primary` in OKLab. Pressed mixes it 10% toward the same target.
-Those strengths are fixed. If a solid cannot carry readable on-solid text across the three states,
-the solid-anchor search adapts the resting colour rather than changing the mix strengths.
+Hover and pressed colours are public semantic tokens, generated at theme compile time. Foreground
+hover mixes the resting colour 5% toward `text.primary` in OKLab, and foreground pressed mixes it
+10%. Those strengths are fixed.
+
+Solid fills do not mix. Each role's `solid.hover` and `solid.pressed` step OKLCH lightness away from
+the on-solid text, keeping the rest's hue and chroma subject to gamut mapping. Dark on-solid text
+gets lighter states, and light on-solid text gets darker ones. The compiler decides this once, with
+no loop. It picks the on-solid text from the resting solid, steps away from that text, and measures
+the same text over all three states. Stepping away from text only raises its contrast, so the text
+that reads at rest is the final `onSolid` and the direction cannot disagree with it. A solid that
+sits on the opposite side of its mode's usual direction, such as a dark-mode accent with light text,
+gets darker states in dark mode.
+
+Both steps are the smallest lightness change whose emitted colour clears a visibility floor plus a
+private margin (`VISIBILITY_MARGIN`): 0.04 OKLab ΔE from rest to hover, and 0.025 from hover to
+pressed. The floors are measured on fills alone, so a `controlFinish` or `shadow` never counts
+toward them. The compiler then checks the emitted, rounded, gamut-mapped colours against the nominal
+floors and against 4.5:1 for the text over all three states. The solid-anchor search can still move
+the resting solid within ±0.035 L of the source to make the text read. Diagnostics report each
+role's `distanceToEdge`, how far the resolved lightness sits from the nearest edge of that window.
+Surfaces are never adapted.
 
 Checked Checkbox, Switch fills, focus rings, and text actions still select the opaque semantic
 tokens. Field-control borders paint `border.control.hover` and `border.control.pressed`, which mix
@@ -167,10 +186,13 @@ mode uses black. Dark mode uses white. Strengths target today's neutral subtle h
 over `surface.base`. The solver chooses the nearest pair that clears the contrast cap and visibility
 floors, so every supported foreground stays at 4.5:1 over every surface and subtle rest with the
 tint on top. Visibility floors in `contrast-policy.ts` reject a theme that can only pass by making
-hover or pressed invisible: the hover floor applies on `surface.base`, and the hover-to-pressed
-floor applies on all three surfaces. Compositing for that solve uses encoded sRGB, matching CSS.
-Dark step-11 text moved from 0.76 to 0.79 so the tint cap stays above the visibility floor, which
-lightens dark-mode secondary and role foregrounds slightly.
+hover or pressed invisible: both the rest-to-hover and hover-to-pressed floors apply over the three
+surfaces and all six subtle fills, and the solver aims for a private margin above each. It makes
+room for that margin by lowering the hover alpha, and the pressed alpha stays within its contrast
+cap. When no lower hover can clear both floors everywhere, `ThemeInteractionTintError` names the
+mode and the limiting pair. Compositing for that solve uses encoded sRGB, matching CSS. Dark step-11
+text moved from 0.76 to 0.79 so the tint cap stays above the visibility floor, which lightens
+dark-mode secondary and role foregrounds slightly.
 
 A translucent tint has too little visible difference between hover and pressed on some solid fills.
 Low Buttons therefore use an opaque subtle chip on solids (`solidStateFillVarName` /
@@ -181,6 +203,9 @@ Theme authors do not author hover, pressed, or tint colours. `color.background.b
 authored modal dimming layer. `color.background.surface.raised` is the opaque surface for elevated
 panels, cards, menus, popovers, and dialogs. Surface colour and shadow stay separate: a raised
 surface does not add a border or shadow.
+
+The compiler guarantees that colour states are distinguishable. Whether a state looks raised or
+recessed is a material concern: the theme's `shadow` and `controlFinish` decide it, as Tactile's do.
 
 `validateContrast` measures the emitted opaque token pairs. Tint contrast and visibility are gated
 separately by `solveInteractionTints` during `compileTheme`.

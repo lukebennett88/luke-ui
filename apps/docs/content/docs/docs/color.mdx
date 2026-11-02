@@ -91,7 +91,10 @@ vars.color.foreground.warning.pressed;
 vars.color.foreground.warning.onSolid;
 ```
 
-`onSolid` reaches at least 4.5:1 against `solid.rest`, `solid.hover`, and `solid.pressed`.
+`onSolid` reaches at least 4.5:1 against `solid.rest`, `solid.hover`, and `solid.pressed`. Hover and
+pressed step away from the `onSolid` text, lighter under dark text and darker under light text, and
+each step is clearly visible: at least 0.04 OKLab ΔE from rest to hover and 0.025 from hover to
+pressed, measured on the fills alone. A theme's shadows and finishes never count toward that.
 
 Built-in controls select these tokens for hover and pressed. Custom interactive elements should do
 the same.

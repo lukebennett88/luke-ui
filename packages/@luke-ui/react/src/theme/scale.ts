@@ -1,16 +1,28 @@
 /**
  * The private 12-step colour scale generator. `generateFamily` produces a Radix-shaped OKLCH family
- * (steps 1-12 plus a `contrast` on-solid colour) from a family character `source`, the canvas
- * `background`, a colour `mode`, a semantic `role`, and the `text.primary` colour that public hover
- * and pressed mix toward. It owns the constrained solid-anchor (step-9) search and
- * {@link passesOnSolidGate}, which `defineTheme`'s accent pre-conditioner calls rather than
- * reimplementing.
+ * (steps 1-12 plus a `contrast` on-solid colour and the public solid hover and pressed colours)
+ * from a family character `source`, the canvas `background`, a colour `mode`, and a semantic
+ * `role`. It owns the constrained solid-anchor (step-9) search and {@link passesOnSolidGate}, which
+ * `defineTheme`'s accent pre-conditioner calls rather than reimplementing.
  */
 
 import type { Oklch } from './color.js';
-import { clampUnit, contrastRatio, gamutMapOklch, mixOklab } from './color.js';
+import {
+	clampUnit,
+	contrastRatio,
+	formatOklch,
+	gamutMapOklch,
+	mixOklab,
+	parseColor,
+} from './color.js';
 import type { SEMANTIC_ROLES } from './contrast-policy.js';
-import { RATIO_HEADROOM, TEXT_RATIO } from './contrast-policy.js';
+import {
+	INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
+	INTERACTION_HOVER_VISIBILITY,
+	RATIO_HEADROOM,
+	TEXT_RATIO,
+	VISIBILITY_MARGIN,
+} from './contrast-policy.js';
 import type { FamilyDiagnostics, GamutReduction, SolidAnchorDiagnostics } from './diagnostics.js';
 import { lightnessCandidates } from './lightness-candidates.js';
 
@@ -30,7 +42,9 @@ type ColorMode = 'light' | 'dark';
  * named rungs via {@link FAMILY_RUNG}: step 3 is the public subtle rest, step 7 the semantic
  * border, step 9 the public solid rest, step 11 the resting foreground, and neutral step 12 is
  * `text.primary`. Unnamed steps are private scale geometry, not public hover or pressed colours.
- * `contrast` is on-solid text that must read over solid rest, hover, and pressed.
+ * `solidHover` and `solidPressed` are the public solid states: the solid's lightness stepped away
+ * from step 9, never mixed toward text. `contrast` is on-solid text that must read over solid rest,
+ * hover, and pressed.
  */
 export interface ScaleFamily {
 	1: Oklch;
@@ -45,6 +59,10 @@ export interface ScaleFamily {
 	10: Oklch;
 	11: Oklch;
 	12: Oklch;
+	/** The public `solid.hover`: step 9 stepped lightness away from the on-solid text. */
+	solidHover: Oklch;
+	/** The public `solid.pressed`: one further step in the same direction. */
+	solidPressed: Oklch;
 	/** On-solid text: reads over the solid rest, hover, and pressed colours, guaranteed WCAG AA. */
 	contrast: Oklch;
 }
@@ -64,10 +82,14 @@ export const FAMILY_RUNG = {
 	textPrimary: 12,
 } as const satisfies Record<string, ScaleStep>;
 
-/** Share of `text.primary` mixed into a resting colour to produce the public hover state. */
+/**
+ * Share of `text.primary` mixed into a resting foreground to produce its public hover state. Solid
+ * fills do not use it: their states step OKLCH lightness away from the on-solid text. The private
+ * Low-on-solid chip and the interaction-tint targets share it.
+ */
 export const INTERACTION_HOVER_STRENGTH = 0.05;
 
-/** Share of `text.primary` mixed into a resting colour to produce the public pressed state. */
+/** Share of `text.primary` mixed into a resting foreground to produce its public pressed state. */
 export const INTERACTION_PRESSED_STRENGTH = 0.1;
 
 /** Mixes a resting colour toward `toward` at `strength`, then maps the result into sRGB. */
@@ -87,8 +109,6 @@ export function highContrastText(source: Oklch, mode: ColorMode): Oklch {
 export interface GenerateFamilyRequest {
 	/** The resolved canvas anchor. Steps 1-8 ramp away from it toward the solid. */
 	background: Oklch;
-	/** The colour public hover and pressed mix toward. Production passes emitted `text.primary`. */
-	interactionSource: Oklch;
 	/** The colour mode the family is generated for. */
 	mode: ColorMode;
 	/** The semantic role. Neutral uses a curated solid band; other roles keep the source tone. */
@@ -232,8 +252,6 @@ const ON_SOLID_BLACK_CHROMA = 0.01;
 
 /** A candidate solid the on-solid gate is asked about. */
 export interface OnSolidGateRequest {
-	/** The colour public hover and pressed mix toward. Must match the colour `generateFamily` will use. */
-	interactionSource: Oklch;
 	/** The candidate step-9 solid lightness. */
 	lightness: number;
 	/** The family character. Only its hue and chroma are read; `lightness` supplies the tone. */
@@ -252,13 +270,14 @@ export function passesOnSolidGate(request: OnSolidGateRequest): boolean {
 
 /** The minimum on-solid ratio {@link passesOnSolidGate} compares to the AA target plus headroom. */
 export function onSolidGateRatio(request: OnSolidGateRequest): number {
-	const { interactionSource, lightness, source } = request;
+	const { lightness, source } = request;
 	const solid = gamutMapOklch({
 		l: clampUnit(lightness),
 		c: source.c,
 		h: source.h,
 	});
-	return chooseOnSolid(source.h, publicSolidStates(solid, interactionSource)).minRatio;
+	// A candidate whose states cannot step apart inside the gamut cannot be a solid.
+	return planSolid(solid)?.minRatio ?? 0;
 }
 
 /**
@@ -293,7 +312,7 @@ function buildFamily(request: GenerateFamilyRequest): {
 	family: ScaleFamily;
 	diagnostics: FamilyDiagnostics;
 } {
-	const { background, interactionSource, mode, role, source } = request;
+	const { background, mode, role, source } = request;
 	const hue = source.h;
 	const direction = mode === 'light' ? -1 : 1;
 	const backgroundLightness = clampUnit(background.l);
@@ -335,9 +354,16 @@ function buildFamily(request: GenerateFamilyRequest): {
 	const anchor = resolveSolidAnchor(request);
 	const solid = rung(9, anchor.lightness, source.c);
 	const step10 = rung(10, anchor.lightness + direction * SOLID_STEP_10_DELTA, source.c);
-	const [solidRest, publicHover, publicPressed] = publicSolidStates(solid, interactionSource);
-
-	const onSolid = chooseOnSolid(hue, [solidRest, publicHover, publicPressed]);
+	const plan = planSolid(solid);
+	if (plan === null) {
+		// The anchor search only returns a lightness whose states step apart, so this is unreachable.
+		throw new Error(
+			`The ${mode} "${role}" solid has no room to step its hover and pressed states.`,
+		);
+	}
+	const { hover: publicHover, pressed: publicPressed } = plan.states;
+	const onSolid = { color: plan.text, minRatio: plan.minRatio };
+	assertSolidStatesVisible(role, mode, plan.states);
 
 	const text = TEXT_LIGHTNESS[mode];
 	const lowText = rung(
@@ -361,12 +387,15 @@ function buildFamily(request: GenerateFamilyRequest): {
 		10: step10,
 		11: lowText,
 		12: highText,
+		solidHover: publicHover,
+		solidPressed: publicPressed,
 		contrast: onSolid.color,
 	};
 
 	const solidAnchor: SolidAnchorDiagnostics = {
 		adaptedForOnSolid: anchor.adapted,
 		band: anchor.band,
+		distanceToEdge: Math.min(anchor.lightness - anchor.band[0], anchor.band[1] - anchor.lightness),
 		resolvedLightness: anchor.lightness,
 		satisfied: onSolid.minRatio >= TEXT_RATIO,
 		targetLightness: anchor.target,
@@ -385,6 +414,14 @@ function buildFamily(request: GenerateFamilyRequest): {
 		},
 		role,
 		solidAnchor,
+		solidStates: {
+			direction: plan.direction,
+			hover: publicHover,
+			hoverToPressedVisibility: oklabDeltaE(emittedColor(publicHover), emittedColor(publicPressed)),
+			pressed: publicPressed,
+			rest: solid,
+			restToHoverVisibility: oklabDeltaE(emittedColor(solid), emittedColor(publicHover)),
+		},
 		source,
 	};
 
@@ -420,10 +457,7 @@ function resolveSolidAnchor(request: GenerateFamilyRequest): ResolvedAnchor {
 	const [low, high] = band;
 
 	const preferred = clamp(target, low, high);
-	const gateRequest = {
-		interactionSource: request.interactionSource,
-		source,
-	};
+	const gateRequest = { source };
 	const gateRatio = (lightness: number): number => onSolidGateRatio({ ...gateRequest, lightness });
 
 	if (passesOnSolidGate({ ...gateRequest, lightness: preferred })) {
@@ -470,11 +504,17 @@ function resolveSolidAnchor(request: GenerateFamilyRequest): ResolvedAnchor {
 	return { adapted: true, band, lightness: best, target };
 }
 
+/** Whether on-solid text is light (near-white) or dark (near-black). */
+type TextPolarity = 'light' | 'dark';
+
 /**
  * Chooses the on-solid text colour: the near-white or near-black candidate at the hue with the
  * higher minimum contrast across the given solids.
  */
-function chooseOnSolid(hue: number, solids: Array<Oklch>): { color: Oklch; minRatio: number } {
+function chooseOnSolid(
+	hue: number,
+	solids: Array<Oklch>,
+): { color: Oklch; minRatio: number; polarity: TextPolarity } {
 	const nearWhite = gamutMapOklch({
 		l: ON_SOLID_WHITE_LIGHTNESS,
 		c: 0,
@@ -487,23 +527,120 @@ function chooseOnSolid(hue: number, solids: Array<Oklch>): { color: Oklch; minRa
 	});
 	const whiteMinimum = minimumRatio(nearWhite, solids);
 	const blackMinimum = minimumRatio(nearBlack, solids);
-	if (whiteMinimum >= ON_SOLID_TARGET) return { color: nearWhite, minRatio: whiteMinimum };
-	if (blackMinimum >= ON_SOLID_TARGET) return { color: nearBlack, minRatio: blackMinimum };
-	return whiteMinimum >= blackMinimum
-		? { color: nearWhite, minRatio: whiteMinimum }
-		: { color: nearBlack, minRatio: blackMinimum };
+	const white = { color: nearWhite, minRatio: whiteMinimum, polarity: 'light' } as const;
+	const black = { color: nearBlack, minRatio: blackMinimum, polarity: 'dark' } as const;
+	if (whiteMinimum >= ON_SOLID_TARGET) return white;
+	if (blackMinimum >= ON_SOLID_TARGET) return black;
+	return whiteMinimum >= blackMinimum ? white : black;
 }
 
 function minimumRatio(foreground: Oklch, backgrounds: Array<Oklch>): number {
 	return Math.min(...backgrounds.map((background) => contrastRatio(foreground, background)));
 }
 
-function publicSolidStates(solid: Oklch, toward: Oklch): [Oklch, Oklch, Oklch] {
-	return [
-		solid,
-		mixInteractionState(solid, toward, INTERACTION_HOVER_STRENGTH),
-		mixInteractionState(solid, toward, INTERACTION_PRESSED_STRENGTH),
-	];
+/** The public solid fills for one role. */
+interface SolidStates {
+	/** The resting solid. */
+	rest: Oklch;
+	/** Rest stepped away from the on-solid text. */
+	hover: Oklch;
+	/** Hover stepped once more in the same direction. */
+	pressed: Oklch;
+}
+
+/** The direction the hover and pressed states step: lighter from dark text, darker from light text. */
+type SolidStateDirection = 'lighter' | 'darker';
+
+/** A solid's on-solid text and states, resolved together. */
+interface SolidPlan {
+	direction: SolidStateDirection;
+	/** The smallest contrast of `text` over the emitted rest, hover, and pressed colours. */
+	minRatio: number;
+	states: SolidStates;
+	text: Oklch;
+}
+
+// Hover and pressed lightness is searched on this grid, from the smallest step upward. ΔE over fills
+// can exceed the lightness step when chroma shifts, so the search cannot start at the target.
+const SOLID_STATE_LIGHTNESS_STEP = 0.0005;
+
+/**
+ * Resolves a solid's on-solid text and its hover and pressed states in one forward pass, so the
+ * text and the step direction cannot disagree:
+ *
+ * 1. Pick the text from the resting solid alone.
+ * 2. Step hover and pressed away from that text: lighter from dark text, darker from light text.
+ * 3. Measure that same text over the emitted rest, hover, and pressed colours.
+ *
+ * Stepping away from the text only raises its contrast, so a text that reads at rest reads over all
+ * three states, and the text is the final on-solid colour. Each step is the smallest on the search
+ * grid whose emitted (rounded, gamut-mapped) colour clears its visibility floor plus
+ * {@link VISIBILITY_MARGIN}, measured on fills alone, keeping `rest`'s hue and chroma. Returns
+ * `null` when a state would leave the lightness range.
+ */
+function planSolid(rest: Oklch): SolidPlan | null {
+	const { color: text, polarity } = chooseOnSolid(rest.h, [rest]);
+	const direction = polarity === 'dark' ? 1 : -1;
+	const hover = stepSolidState(
+		emittedColor(rest),
+		rest,
+		direction,
+		INTERACTION_HOVER_VISIBILITY + VISIBILITY_MARGIN,
+	);
+	if (hover === null) return null;
+	const pressed = stepSolidState(
+		emittedColor(hover),
+		rest,
+		direction,
+		INTERACTION_HOVER_TO_PRESSED_VISIBILITY + VISIBILITY_MARGIN,
+	);
+	if (pressed === null) return null;
+	const emittedText = emittedColor(text);
+	return {
+		direction: direction === 1 ? 'lighter' : 'darker',
+		minRatio: minimumRatio(
+			emittedText,
+			[rest, hover, pressed].map((state) => emittedColor(state)),
+		),
+		states: { rest, hover, pressed },
+		text,
+	};
+}
+
+/**
+ * Throws when the emitted solid states miss a visibility floor, measured on fills alone against the
+ * nominal floors without the solver's margin. The step search guarantees this, so it guards the
+ * invariant rather than reporting a theme problem.
+ */
+function assertSolidStatesVisible(role: FamilyRole, mode: ColorMode, states: SolidStates): void {
+	const rest = emittedColor(states.rest);
+	const hover = emittedColor(states.hover);
+	const pressed = emittedColor(states.pressed);
+	if (
+		oklabDeltaE(rest, hover) < INTERACTION_HOVER_VISIBILITY ||
+		oklabDeltaE(hover, pressed) < INTERACTION_HOVER_TO_PRESSED_VISIBILITY
+	) {
+		throw new Error(`The ${mode} "${role}" solid states are not visibly distinct once emitted.`);
+	}
+}
+
+function stepSolidState(
+	from: Oklch,
+	character: Oklch,
+	direction: -1 | 1,
+	target: number,
+): Oklch | null {
+	for (let index = 0; ; index++) {
+		const lightness = from.l + direction * (index + 1) * SOLID_STATE_LIGHTNESS_STEP;
+		if (lightness <= 0 || lightness >= 1) return null;
+		const candidate = gamutMapOklch({ l: lightness, c: character.c, h: character.h });
+		if (oklabDeltaE(from, emittedColor(candidate)) >= target) return candidate;
+	}
+}
+
+/** The colour as the stylesheet emits it: rounded to the precision `formatOklch` writes. */
+function emittedColor(color: Oklch): Oklch {
+	return parseColor(formatOklch(color));
 }
 
 function oklabAxes(color: Oklch): [number, number] {

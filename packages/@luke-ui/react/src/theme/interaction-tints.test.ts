@@ -12,7 +12,9 @@ import { flattenThemeContract, partitionContractPairs, themeVarName } from './co
 import {
 	INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
 	INTERACTION_HOVER_VISIBILITY,
+	SEMANTIC_ROLES,
 	TEXT_RATIO,
+	VISIBILITY_MARGIN,
 } from './contrast-policy.js';
 import { defineTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
@@ -60,6 +62,34 @@ describe('solveInteractionTints', () => {
 					INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
 				);
 				expect(tints.pressedAlpha).toBeGreaterThan(tints.hoverAlpha);
+			}
+		});
+
+		it(`clears both floors, and their margin, over every surface and subtle fill for ${name}`, () => {
+			for (const mode of ['light', 'dark'] as const) {
+				const values = compiledColorValues(foundation, mode);
+				const tints = solveInteractionTints(mode, values);
+				const tint = mode === 'dark' ? { l: 1, c: 0, h: 0 } : { l: 0, c: 0, h: 0 };
+				const backgrounds = [
+					'color.background.surface.base',
+					'color.background.surface.subdued',
+					'color.background.surface.raised',
+					...SEMANTIC_ROLES.map((role) => `color.background.${role}.subtle`),
+				] as const;
+				for (const path of backgrounds) {
+					const background = parseColor(values[path as keyof SemanticColorValues]);
+					const hover = compositeEncodedSrgb(tint, background, tints.hoverAlpha);
+					const pressed = compositeEncodedSrgb(tint, background, tints.pressedAlpha);
+					expect(
+						oklabDeltaE(background, hover),
+						`${mode} ${path} rest to hover`,
+					).toBeGreaterThanOrEqual(INTERACTION_HOVER_VISIBILITY + VISIBILITY_MARGIN);
+					expect(
+						oklabDeltaE(hover, pressed),
+						`${mode} ${path} hover to pressed`,
+					).toBeGreaterThanOrEqual(INTERACTION_HOVER_TO_PRESSED_VISIBILITY + VISIBILITY_MARGIN);
+				}
+				expect(tints.hoverVisibility).toBeGreaterThanOrEqual(INTERACTION_HOVER_VISIBILITY);
 			}
 		});
 
@@ -112,6 +142,18 @@ describe('solveInteractionTints', () => {
 		expect(tints.hoverToPressedVisibility).toBeGreaterThanOrEqual(
 			INTERACTION_HOVER_TO_PRESSED_VISIBILITY,
 		);
+	});
+
+	it('makes room for the margin by lowering hover, and keeps pressed under its contrast cap', () => {
+		const colorValues = compiledColorValues(tactileFoundation, 'dark');
+		const tints = solveInteractionTints('dark', colorValues);
+		// Tactile dark's hover target is 0.074. The margin over the raised surface needs less.
+		expect(tints.hoverAlpha).toBeLessThan(0.074);
+		expect(tints.pressedAlpha).toBeGreaterThan(tints.hoverAlpha);
+		const raised = parseColor(colorValues['color.background.surface.raised']);
+		const danger = parseColor(colorValues['color.foreground.danger.rest']);
+		const tinted = compositeEncodedSrgb({ l: 1, c: 0, h: 0 }, raised, tints.pressedAlpha);
+		expect(contrastRatio(danger, tinted)).toBeGreaterThanOrEqual(TEXT_RATIO);
 	});
 
 	it('raises a target pressed tint that falls below the minimum visible pair', () => {
