@@ -616,16 +616,39 @@ test('forced-colours options remain visible and operable', { tags: ['visual'] },
 	await emulateForcedColors('active');
 	try {
 		const { container, locator } = render(
-			<RadioGroup defaultValue="starter" label="Plan" name="plan">
-				<RadioField label="Starter" value="starter" />
-				<RadioField label="Pro" value="pro" />
-				<RadioField isDisabled label="Unavailable" value="unavailable" />
-			</RadioGroup>,
+			<Stack>
+				<RadioGroup defaultValue="starter" label="Plan" name="plan">
+					<RadioField label="Starter" value="starter" />
+					<RadioField label="Pro" value="pro" />
+					<RadioField isDisabled label="Unavailable" value="unavailable" />
+				</RadioGroup>
+				<RadioGroup defaultValue="legacy" isDisabled label="Legacy plan" name="legacy">
+					<RadioField label="Legacy" value="legacy" />
+				</RadioGroup>
+			</Stack>,
 		);
 		await userEvent.click(page.getByText('Pro'));
 		expect(locator.getByRole('radio', { name: 'Pro' })).toBeChecked();
 		await expectNoAxeViolations(container);
 		await captureVisual(locator, 'radio-group/forced-colours');
+	} finally {
+		await emulateForcedColors('none');
+	}
+});
+
+test('a disabled selected radio keeps its dot visible in forced colours', async () => {
+	await emulateForcedColors('active');
+	try {
+		const { locator } = render(
+			<RadioGroup defaultValue="legacy" isDisabled label="Legacy plan" name="legacy">
+				<RadioField label="Legacy" value="legacy" />
+			</RadioGroup>,
+		);
+		const { indicator, mark } = radioParts(locator, 'Legacy');
+		const dot = getComputedStyle(mark).backgroundColor;
+
+		expect(dot).not.toBe(getComputedStyle(indicator).backgroundColor);
+		expect(dot).toBe(resolvedBorderColor(indicator, 'GrayText'));
 	} finally {
 		await emulateForcedColors('none');
 	}

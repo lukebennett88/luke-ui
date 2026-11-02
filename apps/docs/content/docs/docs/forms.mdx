@@ -12,16 +12,17 @@ wrapper.
 
 ## Visible labels
 
-Pass a visible `label` to each field or radio group. Luke UI associates the label with its control
-or group. A label takes textual content only. Place a link or button next to the field instead.
+Pass a visible `label` to `TextInputField`, `ComboboxField`, `SelectField`, `CheckboxField`,
+`SwitchField`, `RadioGroup`, and each `RadioField`. Luke UI associates the label with its control or
+group. A label takes textual content only. Place a link or button next to the field instead.
 
-When a component supports a name without a visible `label`, pass `aria-labelledby` when content
-already on the page supplies the name, or `aria-label` to supply the name directly. Check the
-component's API for the names it accepts. Checkbox, switch, and radio options always take a visible
-`label`. When your layout draws an option's label separately, compose the
-[Checkbox primitive](/components/primitives/checkbox) or
-[Switch primitive](/components/primitives/switch), or the
-[Radio primitive](/components/primitives/radio).
+To name a `TextInputField`, `ComboboxField`, `SelectField`, or `RadioGroup` without a visible
+`label`, pass `aria-labelledby` when content already on the page supplies the name, or `aria-label`
+to supply the name directly. `CheckboxField`, `SwitchField`, and `RadioField` always take a visible
+`label`. When your layout draws the label for a checkbox, switch, or radio option, compose the
+[Checkbox primitive](/components/primitives/checkbox),
+[Switch primitive](/components/primitives/switch), or
+[Radio primitive](/components/primitives/radio) instead.
 
 A placeholder disappears after someone enters a value. Do not use a placeholder as the only label.
 
@@ -102,9 +103,9 @@ Give the submit button `type="submit"`.
 
 Avoid a `type="reset"` button in ordinary forms. Someone can clear completed work by accident.
 
-When a form needs to restore defaults, a reset control can be appropriate. The browser restores
-uncontrolled fields to their starting values. Controlled fields keep the state React owns, so an
-`onReset` handler must reset that state too.
+When a form genuinely needs to restore defaults, a reset control can be appropriate. The browser
+restores uncontrolled fields to their starting values. Controlled fields keep the state React owns,
+so an `onReset` handler must reset that state too.
 
 That is separate from the automatic reset after a successful Action, which restores uncontrolled
 fields without a reset button.
@@ -119,10 +120,19 @@ errors through its `errorMessage`.
 
 ## Validation
 
-Start with native form validation. Read [Validation](/docs/validation) for browser constraints,
-custom rules, server errors, and focus after an unsuccessful submission. When a form library owns
-the form state, read [React Hook Form](/docs/react-hook-form) or
-[TanStack Form](/docs/tanstack-form).
+Luke UI supports browser validation, custom validation, and server validation. The
+[Validation guide](/docs/validation) explains each approach, including focus after an unsuccessful
+submission.
+
+- Set native constraints such as `isRequired`, `minLength`, `pattern`, or `type="email"` for browser
+  validation.
+- Pass `validate` for a custom rule. Pass a controlled `errorMessage` for feedback that must update
+  on every keystroke.
+- Pass `validationErrors` to [`Form`](/components/forms/form) for server errors. Key each error by
+  the field `name`.
+
+Start with native form behaviour. When a form library owns the form state, read
+[React Hook Form](/docs/react-hook-form) or [TanStack Form](/docs/tanstack-form).
 
 ## Continue learning
 

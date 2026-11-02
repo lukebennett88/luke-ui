@@ -68,14 +68,15 @@ function focusFirstInvalidField(form: HTMLFormElement | null) {
 }
 ```
 
-The first branch focuses an invalid control directly. The second branch finds a control inside an
-invalid group or wrapper.
+`TextInputField`, `CheckboxField`, `SwitchField`, and `ComboboxField` each mark the control itself,
+so the first branch matches. The second branch covers a grouped control that marks a wrapping
+element instead. One ref on the form covers every field, whatever the form grows to hold.
 
-Check the component's API when you need a ref to one specific control. `ref` reaches the component's
-root. A prop such as `inputRef` or `triggerRef` reaches the named descendant. For example,
-[`TextInputField.inputRef`](/components/forms/text-input-field#api) reaches the input, and
-[`SelectField.triggerRef`](/components/forms/select-field#api) reaches the trigger button. A
-primitive that renders the control itself takes a plain `ref`.
+Reach for `inputRef` when you need a ref to one specific control. `TextInputField`, `CheckboxField`,
+and `SwitchField` render a label, description, and error message around the control, so `inputRef`
+is what reaches the input underneath. For `SelectField`, pass the library's ref through `triggerRef`
+to reach the trigger button. A primitive that renders the control itself, such as `ComboboxInput`,
+takes a plain `ref`.
 
 ## Submitting data
 

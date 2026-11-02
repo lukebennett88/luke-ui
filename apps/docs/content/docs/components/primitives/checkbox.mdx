@@ -49,8 +49,9 @@ content when you use `CheckboxLabel` for the text.
 
 ## Text in the label
 
-Set `slot={null}` on each `Text` you place in `CheckboxLabel`, so it renders as label content rather
-than a description or error.
+The root provides React Aria's slotted text context for its description and error. Set `slot={null}`
+on each `Text` you place in `CheckboxLabel`, so it renders as label content rather than a
+description or error.
 
 <ExampleBlock
 	src="checkbox-primitive/text-label"

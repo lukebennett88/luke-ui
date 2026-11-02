@@ -102,6 +102,15 @@ resumes only the exit animations the freeze paused. CSS exit transitions are sty
 reduced-motion recipe resets (`transition: none`) cannot cancel them mid-capture. Already-paused
 exit animations stay paused after restore.
 
+The freeze also hides the caret with `caret-color: transparent` and sets `caret-animation: manual`.
+Forced colours replace `caret-color` with a system colour, so the hidden caret returns there and
+Chromium blinks it. A capture of a focused text field then showed the caret or not depending on the
+blink phase. `caret-animation: manual` is not a colour, so forced colours leave it alone. It stops
+the blink, so a focused field in a forced-colours capture always shows a solid caret, and every
+other capture shows none. Playwright's `caret: 'hide'`, which Vitest enables by default, sets the
+same `caret-color`, so it does not cover forced colours. Inputs keep their system colours, borders
+and backgrounds. Do not add `forced-color-adjust: none` to a capture to fix a caret.
+
 Browser setup loads the theme Inter file before each test mounts so fixtures measure against that
 face from the first paint. Code surfaces keep the production monospace stack — the harness does not
 override component font styles. `freezeMotionForCapture` restores reduced-motion, the freeze
