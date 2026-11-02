@@ -1,4 +1,3 @@
-import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -9,15 +8,20 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 const root = process.env.RENOVATE_DIR;
 assert.ok(root, 'Set RENOVATE_DIR to the Renovate package directory');
 const load = (path) => import(pathToFileURL(`${root}/dist/${path}.js`).href);
-const require = createRequire(`${root}/package.json`);
 const { GlobalConfig } = await load('config/global');
+const { parseFileConfig } = await load('config/parse');
 const { extractPackageFile } = await load('modules/manager/github-actions/extract');
 const { extractPackageJson } = await load('modules/manager/npm/extract/common/package-file');
 const { applyPackageRules } = await load('util/package-rules/index');
 const { api } = await load('modules/versioning/node/index');
 const { updateDependency } = await load('modules/manager/npm/update/dependency/index');
 const { doAutoReplace } = await load('workers/repository/update/branch/auto-replace');
-const config = require('json5').parse(await readFile('.github/renovate.json5', 'utf8'));
+const parsedConfig = parseFileConfig(
+	'.github/renovate.json5',
+	await readFile('.github/renovate.json5', 'utf8'),
+);
+assert.equal(parsedConfig.success, true);
+const config = parsedConfig.parsedContents;
 GlobalConfig.set({ localDir: process.cwd() });
 
 const workflowPath = '.github/workflows/visual-regression.yml';
