@@ -45,7 +45,7 @@ catalog:
   '@fontsource-variable/inter': 5.3.0
   '@fontsource/lora': 5.3.0
   '@changesets/cli': ^3.0.3
-  '@hookform/resolvers': ^6.0.0
+  '@hookform/resolvers': ^6.0.2
   '@monaco-editor/react': ^4.7.0
   '@react-aria/utils': ^3.34.1
   '@shikijs/monaco': ^4.5.0
@@ -79,12 +79,12 @@ catalog:
   fumadocs-mdx: ^15.4.10
   fumadocs-typescript: ^5.6.0
   fumadocs-ui: ^16.17.9
-  knip: ^6.42.1
+  knip: ^6.44.0
   lz-string: ^1.5.0
   monaco-editor: ^0.57.0
   node-html-parser: ^9.0.5
-  oxc-parser: ^0.155.0
-  oxc-transform-react: ^0.155.0
+  oxc-parser: ^0.156.0
+  oxc-transform-react: ^0.156.0
   pixelmatch: ^8.0.0
   playwright: '^1.64.1'
   prettier: ^3.9.10
@@ -96,9 +96,9 @@ catalog:
   react-aria-components: ^1.22.1
   react-dom: ^19.3.0
   react-error-boundary: ^6.1.6
-  react-hook-form: ^7.90.0
-  react-resizable-panels: ^4.14.8
-  react-router: ^8.5.0
+  react-hook-form: ^7.91.0
+  react-resizable-panels: ^4.15.2
+  react-router: ^8.5.1
   schema-dts: 2.1.0
   serve: ^14.2.6
   shiki: ^4.5.0
@@ -110,7 +110,7 @@ catalog:
   turbo: ^2.11.10
   typescript: ^7.0.2
   unbarrelify: ^1.1.4
-  unist-util-visit: ^5.1.0
+  unist-util-visit: ^5.2.0
   vite: npm:@voidzero-dev/vite-plus-core@1.4.0
   vite-plus: 1.4.0
   vitest: 5.0.5
