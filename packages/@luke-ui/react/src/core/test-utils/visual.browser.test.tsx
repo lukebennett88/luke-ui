@@ -250,6 +250,48 @@ test('the colour-scheme and reduced-motion helpers each keep forced-colors', asy
 	await emulateForcedColors('none');
 });
 
+// Forced colours replace `caret-color` with a system colour, so hiding the caret never applies there.
+// Chromium blinks it, which made the focused Combobox in `invalid-boundaries/forced-colours-*`
+// capture with and without a caret. `caret-animation: manual` stops the blink, so the caret is drawn
+// in one state. Without forced colours the caret stays hidden.
+test('freezing motion stops the caret blinking under forced colours', async () => {
+	await emulateForcedColors('active');
+	const input = document.body.appendChild(document.createElement('input'));
+	try {
+		input.focus();
+		expect(document.activeElement).toBe(input);
+		expect(getComputedStyle(input).getPropertyValue('caret-animation')).toBe('auto');
+
+		const restore = await freezeMotionForCapture();
+		try {
+			expect(document.activeElement).toBe(input);
+			expect(getComputedStyle(input).getPropertyValue('caret-animation')).toBe('manual');
+		} finally {
+			await restore();
+		}
+		expect(getComputedStyle(input).getPropertyValue('caret-animation')).toBe('auto');
+	} finally {
+		input.remove();
+		await emulateForcedColors('none');
+	}
+});
+
+test('freezing motion hides the caret and stops it blinking without forced colours', async () => {
+	const input = document.body.appendChild(document.createElement('input'));
+	input.focus();
+	expect(document.activeElement).toBe(input);
+
+	const restore = await freezeMotionForCapture();
+	try {
+		expect(window.matchMedia('(forced-colors: active)').matches).toBe(false);
+		expect(getComputedStyle(input).caretColor).toBe('rgba(0, 0, 0, 0)');
+		expect(getComputedStyle(input).getPropertyValue('caret-animation')).toBe('manual');
+	} finally {
+		await restore();
+		input.remove();
+	}
+});
+
 // A capture restores whatever reduced-motion value was in force before it, not a hardcoded default.
 test('a capture restores an explicitly set reduced-motion preference', async () => {
 	await emulateReducedMotion(true);
