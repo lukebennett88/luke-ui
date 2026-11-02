@@ -21,6 +21,12 @@ description, or error needs a custom position. The group root connects those par
 Place a `FieldDescription` inside `RadioRoot` to describe one option. Each option still needs a
 `RadioLabel`.
 
+## Accessibility
+
+Name `RadioGroupRoot` with `FieldLabel`, `aria-label`, or `aria-labelledby`. Put textual,
+non-interactive option text inside each `RadioLabel`, and place links and buttons outside it. The
+group supports arrow-key navigation between its options.
+
 ## API
 
 ### RadioGroupRootProps

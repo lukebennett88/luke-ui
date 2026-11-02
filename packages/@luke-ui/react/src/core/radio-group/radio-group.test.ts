@@ -25,8 +25,8 @@ test('RadioField requires a visible label and a value', () => {
 	assertType<RadioFieldProps>({ label: 'Starter', value: 'starter' });
 	// @ts-expect-error — group validation is not a radio option prop
 	assertType<RadioFieldProps>({ label: 'Starter', validate: () => null, value: 'starter' });
-	// @ts-expect-error — group errors are not option errors
 	assertType<RadioFieldProps>({
+		// @ts-expect-error — group errors are not option errors
 		errorMessage: 'Choose a plan.',
 		label: 'Starter',
 		value: 'starter',

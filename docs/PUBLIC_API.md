@@ -77,13 +77,13 @@ names, such as `CheckboxRoot` and `SwitchControl`.
 
 ### Accessible names
 
-`TextInputField`, `ComboboxField`, and `SelectField` take a visible `label`, or `aria-label` or
-`aria-labelledby` instead, because a label-less field such as a search input is a normal use.
-`CheckboxField` and `SwitchField` always take a visible `label` and accept neither `aria-label` nor
-`aria-labelledby`. When another component owns the label, the consumer composes the control's
-primitives. `CheckboxRoot` and `SwitchRoot` give a `FieldLabel` inside them a `for` that points at
-the input, using `inputId` or a generated id, so the layout passes no ids.
-[#714](https://github.com/lukebennett88/luke-ui/issues/714) owns both decisions.
+`TextInputField`, `ComboboxField`, `SelectField`, and `RadioGroup` take a visible `label`, or
+`aria-label` or `aria-labelledby` instead, because a label-less field such as a search input is a
+normal use. `CheckboxField`, `SwitchField`, and `RadioField` always take a visible `label` and
+accept neither `aria-label` nor `aria-labelledby`. When another component owns the label, the
+consumer composes the control's primitives. `CheckboxRoot` and `SwitchRoot` give a `FieldLabel`
+inside them a `for` that points at the input, using `inputId` or a generated id, so the layout
+passes no ids. [#714](https://github.com/lukebennett88/luke-ui/issues/714) owns both decisions.
 
 ### Primitives and composed components
 

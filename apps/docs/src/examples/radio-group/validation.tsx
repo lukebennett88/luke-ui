@@ -5,7 +5,6 @@ export default () => {
 		<RadioGroup
 			description="Choose one option to continue."
 			errorMessage="Choose an option."
-			isInvalid
 			label="Choose a size"
 		>
 			<RadioField label="Small" value="small" />

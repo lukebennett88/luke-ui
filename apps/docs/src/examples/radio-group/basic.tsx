@@ -4,7 +4,7 @@ export default () => {
 	return (
 		<RadioGroup label="Choose a size" name="size">
 			<RadioField label="Small" value="small" />
-			<RadioField label="Medium" value="medium" />
+			<RadioField description="The default option." label="Medium" value="medium" />
 			<RadioField label="Large" value="large" />
 		</RadioGroup>
 	);
