@@ -10,6 +10,7 @@ assert.ok(root, 'Set RENOVATE_DIR to the Renovate package directory');
 const load = (path) => import(pathToFileURL(`${root}/dist/${path}.js`).href);
 const { GlobalConfig } = await load('config/global');
 const { getConfig } = await load('config/defaults');
+const { resolveConfigPresets } = await load('config/presets/index');
 const { generateBranchName } = await load('workers/repository/updates/branch-name');
 const { parseFileConfig } = await load('config/parse');
 const { parseSingleYaml } = await load('util/yaml');
@@ -25,7 +26,7 @@ const parsedConfig = parseFileConfig(
 	await readFile('.github/renovate.json5', 'utf8'),
 );
 assert.equal(parsedConfig.success, true);
-const config = parsedConfig.parsedContents;
+const { config } = await resolveConfigPresets(parsedConfig.parsedContents);
 GlobalConfig.set({ localDir: process.cwd() });
 
 const workflowPath = '.github/workflows/visual-regression.yml';
