@@ -182,7 +182,8 @@ for (const consumer of consumers) {
 				expect(markup).toContain('<input');
 				expect(markup).toContain('role="switch"');
 				expect(markup).toContain('role="radiogroup"');
-				expect(markup).toContain('role="radio"');
+				expect(markup).toContain('type="radio"');
+				expect(markup).toContain('name="plan"');
 				expect(markup).toContain('(required)');
 				// Form necessity context must cross published entrypoints so the marker is SSR'd.
 				expect(markup).toContain('(optional)');

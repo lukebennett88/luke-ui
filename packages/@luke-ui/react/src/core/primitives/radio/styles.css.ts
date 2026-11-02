@@ -4,7 +4,6 @@ import { focusRing } from '../../styles/focus-ring.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
-import { surfaceStyle } from '../../styles/surface.js';
 
 const radioSize = {
 	medium: ICON_SIZES.px20,
@@ -58,7 +57,7 @@ const radioConfig = {
 					transitionDuration: '0s',
 				},
 			},
-			...surfaceStyle('surface.base'),
+			backgroundColor: vars.color.background.surface.base,
 			blockSize: radioSize.medium,
 			borderColor: vars.color.border.control.rest,
 			borderRadius: vars.radius.full,
@@ -83,21 +82,25 @@ const radioConfig = {
 					borderColor: vars.color.border.danger.strong,
 				},
 				'[data-selected="true"] &': {
-					...surfaceStyle('accent.solid.rest'),
+					backgroundColor: vars.color.background.accent.solid.rest,
+					color: vars.color.foreground.accent.onSolid,
 					borderColor: vars.color.background.accent.solid.rest,
 				},
 				'[data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
 					{
-						...surfaceStyle('accent.solid.hover'),
+						backgroundColor: vars.color.background.accent.solid.hover,
+						color: vars.color.foreground.accent.onSolid,
 						borderColor: vars.color.background.accent.solid.hover,
 					},
 				'[data-invalid="true"][data-selected="true"] &': {
-					...surfaceStyle('danger.solid.rest'),
+					backgroundColor: vars.color.background.danger.solid.rest,
+					color: vars.color.foreground.danger.onSolid,
 					borderColor: vars.color.border.danger.strong,
 				},
 				'[data-invalid="true"][data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
 					{
-						...surfaceStyle('danger.solid.hover'),
+						backgroundColor: vars.color.background.danger.solid.hover,
+						color: vars.color.foreground.danger.onSolid,
 						borderColor: vars.color.border.danger.strong,
 					},
 			},

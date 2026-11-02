@@ -36,6 +36,8 @@ interface _RadioGroupRootProps extends _RadioGroupRootOmit {
 	children: RacRadioGroupProps['children'];
 	/** Class name for the group root. */
 	className?: RacRadioGroupProps['className'];
+	/** Selected option value when the group is controlled. */
+	value?: RacRadioGroupProps['value'];
 	/**
 	 * Visual size supplied to options that do not set their own size.
 	 *
@@ -86,6 +88,8 @@ interface _RadioRootProps extends _RadioRootOmit {
 	children: RacRadioFieldProps['children'];
 	/** Class name for the option root. */
 	className?: RacRadioFieldProps['className'];
+	/** Value submitted when this option is selected. */
+	value: RacRadioFieldProps['value'];
 	/** Element id for the option root. Use `inputId` for the radio input. */
 	id?: string;
 	/** Element id for the input. */
