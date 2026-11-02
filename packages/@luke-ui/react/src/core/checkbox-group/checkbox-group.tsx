@@ -38,12 +38,16 @@ interface _CheckboxGroupBaseProps extends _CheckboxGroupOmit {
 	description?: ReactNode;
 	/** Validation message for a controlled error. A non-empty message marks the group invalid. */
 	errorMessage?: ReactNode;
+	/** The form element to associate the group's checkboxes with, by id. */
+	form?: RacCheckboxGroupProps['form'];
 	/** Element id for the group element. */
 	id?: string;
 	/** Whether the entire group is disabled. */
 	isDisabled?: RacCheckboxGroupProps['isDisabled'];
 	/** Whether at least one option must be selected. */
 	isRequired?: RacCheckboxGroupProps['isRequired'];
+	/** Name submitted with the selected checkbox values. */
+	name?: RacCheckboxGroupProps['name'];
 	/** Called when the selected options change. */
 	onChange?: RacCheckboxGroupProps['onChange'];
 	/** Controls whether options stack or wrap in rows. @default 'vertical' */
@@ -54,6 +58,8 @@ interface _CheckboxGroupBaseProps extends _CheckboxGroupOmit {
 	size?: ControlSize;
 	/** Controls how the group label identifies required or optional values. */
 	necessityIndicator?: NecessityIndicator;
+	/** Selected options (controlled). */
+	value?: RacCheckboxGroupProps['value'];
 }
 
 type _CheckboxGroupProps = _CheckboxGroupBaseProps & FieldAccessibleNameProps;
