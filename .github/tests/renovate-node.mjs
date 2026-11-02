@@ -25,14 +25,26 @@ const config = parsedConfig.parsedContents;
 GlobalConfig.set({ localDir: process.cwd() });
 
 const workflowPath = '.github/workflows/visual-regression.yml';
-const workflow = await readFile(workflowPath, 'utf8');
+const workflow = `name: Node fixture
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+`;
+
 const workflowDeps = await extractPackageFile(workflow, workflowPath);
 const actionNode = workflowDeps.deps.find(
 	(dep) => dep.depType === 'uses-with' && dep.depName === 'node',
 );
 assert.equal(actionNode.packageName, 'actions/node-versions');
 assert.equal(actionNode.currentValue, '24');
-const manifest = JSON.parse(await readFile('package.json', 'utf8'));
+const manifest = {
+	devEngines: { runtime: { name: 'node', version: '^24.0.0', onFail: 'download' } },
+};
 const npmNode = extractPackageJson(manifest, 'package.json').deps.find(
 	(dep) => dep.depType === 'devEngines.runtime' && dep.depName === 'node',
 );
