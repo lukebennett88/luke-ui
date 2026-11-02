@@ -417,6 +417,97 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	}
 });
 
+/** Fixed track size. Each Button fills its track, so a label's length can't move a neighbour. */
+const INTERACTION_CELL_SIZE = '16rem';
+/** Wider than Tactile's `shadow.raised` spread (about 16px), so a state never paints a neighbour. */
+const INTERACTION_CELL_GAP = '1.5rem';
+
+const interactionProminences = ['low', 'standard', 'high'] as const;
+const interactionStates = ['rest', 'hover', 'pressed'] as const;
+const interactionTones = ['neutral', 'danger'] as const;
+
+function interactionCellName(prominence: string, tone: string, state: string, suffix: string) {
+	return `${prominence.charAt(0).toUpperCase()}${prominence.slice(1)} ${tone} ${state}${suffix}`;
+}
+
+function InteractionStateCells({
+	prominences,
+	suffix,
+}: {
+	prominences: ReadonlyArray<(typeof interactionProminences)[number]>;
+	suffix: string;
+}) {
+	return (
+		<div
+			style={{
+				display: 'grid',
+				gap: INTERACTION_CELL_GAP,
+				gridTemplateColumns: `repeat(${interactionStates.length}, ${INTERACTION_CELL_SIZE})`,
+			}}
+		>
+			{prominences.flatMap((prominence) =>
+				interactionTones.flatMap((tone) =>
+					interactionStates.map((state) => (
+						<Button
+							inlineSize="full"
+							key={`${prominence}-${tone}-${state}`}
+							prominence={prominence}
+							tone={tone}
+						>
+							{interactionCellName(prominence, tone, state, suffix)}
+						</Button>
+					)),
+				),
+			)}
+		</div>
+	);
+}
+
+const onSolidSuffix = ' on solid';
+
+for (const appearance of [...visualAppearances, ...flatAppearances]) {
+	test(
+		`interaction states in ${appearance.theme} ${appearance.mode}`,
+		{ tags: ['visual'] },
+		async () => {
+			const { locator } = render(
+				<div
+					style={{
+						display: 'grid',
+						gap: INTERACTION_CELL_GAP,
+						padding: INTERACTION_CELL_GAP,
+						width: 'max-content',
+					}}
+				>
+					<Box backgroundColor="surface.base" padding="space.24">
+						<InteractionStateCells prominences={interactionProminences} suffix="" />
+					</Box>
+					<Box backgroundColor="accent.solid" padding="space.24">
+						<InteractionStateCells prominences={['low']} suffix={onSolidSuffix} />
+					</Box>
+				</div>,
+				{ appearance },
+			);
+			const cells = [
+				...interactionProminences.map((prominence) => ({ prominence, suffix: '' })),
+				{ prominence: 'low', suffix: onSolidSuffix },
+			];
+			for (const { prominence, suffix } of cells) {
+				for (const tone of interactionTones) {
+					for (const state of interactionStates) {
+						const name = interactionCellName(prominence, tone, state, suffix);
+						setInteractionState(
+							locator.getByRole('button', { name, exact: true }).element(),
+							state,
+						);
+					}
+				}
+			}
+			await captureVisualAppearance(locator, 'button/interaction-states', appearance);
+		},
+	);
+}
+
 test('focus-visible state', { tags: ['visual'] }, async () => {
 	const { locator } = render(<Button>Action</Button>);
 	const button = page.getByRole('button', { name: 'Action' });
