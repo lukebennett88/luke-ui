@@ -13,6 +13,7 @@ import {
 	contextualForeground,
 	surfaceFill,
 	surfaceFinish,
+	surfaceShadow,
 	surfaceStyle,
 } from '../../styles/surface.js';
 import { textRecipe } from '../../text/recipe.css.js';
@@ -257,7 +258,7 @@ function buttonAppearance(
 								),
 							},
 							backgroundImage: `${fallbackVar(surfaceFinish.pressed, 'none')}, ${layerGradient}`,
-							boxShadow: vars.shadow.inset,
+							boxShadow: fallbackVar(surfaceShadow.pressed, vars.shadow.inset),
 						},
 					},
 				},
