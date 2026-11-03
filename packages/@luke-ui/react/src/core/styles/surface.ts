@@ -147,7 +147,7 @@ function solidContext(role: SemanticRole, backgroundColor: string): SurfaceStyle
 		color: onSolid,
 		vars: {
 			[surfaceFinish.hover]: vars.controlFinish.raised,
-			[surfaceFinish.pressed]: vars.controlFinish.recessed,
+			[surfaceFinish.pressed]: `${vars.controlFinish.recessed}, ${vars.controlFinish.recessed}, ${vars.controlFinish.recessed}`,
 			[surfaceFill.rest]: backgroundColor,
 			[surfaceFill.hover]: vars.color.background[role].solid.hover,
 			[surfaceFill.pressed]: vars.color.background[role].solid.pressed,
