@@ -95,11 +95,11 @@ small refinement. Changes confined to private code with no published impact need
 
 For stable (1.x+) packages, classify changes by consumer impact:
 
-- **Major:** Remove or rename a public token, prop, or theme option; break a documented behaviour or
-  guarantee; or make a previously compiling, supported theme fail compilation. Stricter validation
+- **Major:** Remove or rename a public token, prop, or theme option. Break a documented behaviour or
+  guarantee, or make a previously compiling supported theme fail compilation. Stricter validation
   is breaking even when motivated by accessibility, unless it only fixes acceptance of inputs that
   already violated an explicit documented guarantee.
-- **Minor:** Add a compatible public token, prop, or optional theme authoring capability; or make a
+- **Minor:** Add a compatible public token, prop, or optional theme authoring capability, or make a
   broad, intentional visual change to a theme or multiple component families without breaking a
   documented contract.
 - **Patch:** Correct a defect to restore documented behaviour (even if consumers relied on the
@@ -107,7 +107,7 @@ For stable (1.x+) packages, classify changes by consumer impact:
   refinement.
 
 Semantic tokens guarantee their public names, meanings, documented behaviours, and supported theme
-compatibility—not exact generated colour values. Classify token-value and generated-colour changes
+compatibility — not exact generated colour values. Classify token-value and generated-colour changes
 by the visible outcome: narrow corrections are patches, broad compatible repaints are minors, and
 changes breaking a contract are majors. **Changing private code can still be breaking.**
 
