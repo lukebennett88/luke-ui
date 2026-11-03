@@ -379,14 +379,16 @@ describe('dead-zone and adaptable sources', () => {
 		// tone-faithful window, so every source has an accessible solid inside it.
 		// The solid is geometric, not semantic, so one source-toned role stands for them all.
 		for (const mode of MODES) {
-			for (const hue of [0, 120, 240]) {
-				for (let lightness = 0.3; lightness <= 0.92 + 1e-9; lightness += 0.04) {
-					const source = { l: lightness, c: 0.2, h: hue };
-					const { diagnostics } = familyDiagnostics(source, mode, 'accent');
-					expect(
-						diagnostics.solidAnchor.satisfied,
-						`${mode} oklch(${lightness.toFixed(2)} 0.2 ${hue})`,
-					).toBe(true);
+			for (const hue of [0, 60, 120, 180, 240, 300]) {
+				for (const chroma of [0.05, 0.2]) {
+					for (let lightness = 0.3; lightness <= 0.92 + 1e-9; lightness += 0.02) {
+						const source = { l: lightness, c: chroma, h: hue };
+						const { diagnostics } = familyDiagnostics(source, mode, 'accent');
+						expect(
+							diagnostics.solidAnchor.satisfied,
+							`${mode} oklch(${lightness.toFixed(2)} ${chroma} ${hue})`,
+						).toBe(true);
+					}
 				}
 			}
 		}
