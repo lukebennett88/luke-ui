@@ -27,9 +27,11 @@ export interface SolidAnchorDiagnostics {
 	/** The lightness range the solid-anchor search was allowed to explore. */
 	band: [number, number];
 	/**
-	 * How far the resolved lightness sits from the nearest edge of `band`, in OKLCH lightness. For a
-	 * vibrant role the band is the ±0.035 window around the source lightness. A value near zero means
-	 * the on-solid search had almost no room left.
+	 * How much of the search window is left, in OKLCH lightness. For a vibrant role it is measured
+	 * against the full ±0.035 window around the source lightness, `0.035 - |resolved - source|`, even
+	 * where `band` is clamped to the 0.3 to 0.92 range. For the neutral role it is the distance from
+	 * the resolved lightness to the nearest edge of its curated `band`. A value near zero means the
+	 * on-solid search had almost no room left.
 	 */
 	distanceToEdge: number;
 	/** The lightness the solid anchor resolved to. */

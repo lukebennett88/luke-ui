@@ -120,12 +120,10 @@ Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
 - A single-value accent (`accent: '#...'`) is pre-adapted by `defineTheme`'s `adaptAccent` into an
   accessible vibrant band before the scale generator sees it. The pre-conditioner calls the same
   `passesOnSolidGate` function the generator uses.
-- An explicit per-mode accent (`accent: { light, dark }`) is used verbatim because the author has
-  chosen its lightness. If its whole tone band has no lightness where near-white or near-black
-  on-solid text clears AA, `compileTheme` throws `ThemeGenerationError` naming the failing role and
-  mode. Hover and pressed step away from the on-solid text, so only the resting solid has to carry
-  text. The dead zone, where neither near-white nor near-black text reads, is narrower than the
-  ±0.035 window, so a source in it moves within its window instead of failing.
+- An explicit per-mode accent (`accent: { light, dark }`) skips that pre-conditioning, so the
+  author's lightness is the source. The generator then moves the resting solid within ±0.035 L of
+  it, only as far as the on-solid text needs. See [Interaction states](#interaction-states) for that
+  guarantee.
 
 ## One gate for on-solid contrast
 
@@ -161,20 +159,22 @@ hover mixes the resting colour 5% toward `text.primary` in OKLab, and foreground
 Solid fills do not mix. Each role's `solid.hover` and `solid.pressed` step OKLCH lightness away from
 the on-solid text, keeping the rest's hue and chroma subject to gamut mapping. Dark on-solid text
 gets lighter states, and light on-solid text gets darker ones. The compiler decides this once, with
-no loop. It picks the on-solid text from the resting solid, steps away from that text, and measures
-the same text over all three states. Stepping away from text only raises its contrast, so the text
-that reads at rest is the final `onSolid` and the direction cannot disagree with it. A solid that
-sits on the opposite side of its mode's usual direction, such as a dark-mode accent with light text,
-gets darker states in dark mode.
+no circular solve. It picks the on-solid text from the resting solid, steps away from that text, and
+measures the same text over all three states. Stepping away from text only raises its contrast, so
+the text that reads at rest is the final `onSolid` and the direction cannot disagree with it. The
+direction follows the text, not the mode, so a dark-mode accent with light text gets darker states.
 
 Both steps are the smallest lightness change whose emitted colour clears a visibility floor plus a
 private margin (`VISIBILITY_MARGIN`): 0.04 OKLab ΔE from rest to hover, and 0.025 from hover to
 pressed. The floors are measured on fills alone, so a `controlFinish` or `shadow` never counts
 toward them. The compiler then checks the emitted, rounded, gamut-mapped colours against the nominal
-floors and against 4.5:1 for the text over all three states. The solid-anchor search can still move
-the resting solid within ±0.035 L of the source to make the text read. Diagnostics report each
-role's `distanceToEdge`, how far the resolved lightness sits from the nearest edge of that window.
-Surfaces are never adapted.
+floors and against 4.5:1 for the text over all three states. The solid-anchor search moves the
+resting solid within ±0.035 L of its source until the text clears 4.5:1 across rest, hover and
+pressed. The on-solid dead zone, where neither near-white nor near-black text reads, is narrower
+than that window, so the search never fails inside it. `ThemeGenerationError` stays exported as a
+guard for a band with no passing lightness, and authors are not expected to hit it. Diagnostics
+report each role's `distanceToEdge`: for a vibrant role, how much of the ±0.035 window is left, and
+for neutral, the distance to the edge of its curated band. Surfaces are never adapted.
 
 Checked Checkbox, Switch fills, focus rings, and text actions still select the opaque semantic
 tokens. Field-control borders paint `border.control.hover` and `border.control.pressed`, which mix

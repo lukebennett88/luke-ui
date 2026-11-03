@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { chromaticTheme } from './__fixtures__/chromatic.js';
+import { contrastEdgeTheme } from './__fixtures__/contrast-edge.js';
 import { paperTheme } from './__fixtures__/paper.js';
 import { tactileTheme } from './__fixtures__/tactile.js';
 import { splitBlocks } from './__fixtures__/theme-css.js';
@@ -11,19 +12,8 @@ import {
 	SEMANTIC_ROLES,
 	TEXT_RATIO,
 } from './contrast-policy.js';
-import type { ThemeInput } from './define-theme.js';
 import { normalizeTheme } from './define-theme.js';
 import { oklabDeltaE } from './scale.js';
-
-const contrastEdgeTheme: ThemeInput = {
-	...paperTheme,
-	color: {
-		...paperTheme.color,
-		accent: { light: '#fde68a' },
-		surface: { raised: { dark: 'oklch(0.30 0.01 250)' } },
-	},
-	name: 'contrast-edge-fixture',
-};
 
 const FIXTURES = {
 	chromatic: chromaticTheme,

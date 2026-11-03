@@ -119,9 +119,11 @@ export interface GenerateFamilyRequest {
 
 /**
  * Thrown when a family has no lightness in its solid band where a near-white or near-black
- * on-solid text clears WCAG AA across the solid and its generated hover and pressed states. Carries
- * the `role` and `mode` so the caller can name the failing family, plus the best attempt for
- * diagnostics.
+ * on-solid text clears WCAG AA over the resting solid. The text is chosen from the resting solid, and
+ * the generated hover and pressed states step away from it, so their contrast is checked too. The
+ * solid band is wider than the on-solid dead zone, so a vibrant family does not reach this. It
+ * guards a band that could lack a passing lightness. Carries the `role` and `mode` so the caller can
+ * name the failing family, plus the best attempt for diagnostics.
  */
 export class ScaleGenerationError extends Error {
 	/** The role whose family could not be generated. */
@@ -143,8 +145,7 @@ export class ScaleGenerationError extends Error {
 	constructor(role: FamilyRole, mode: ColorMode, bestAttempt: ScaleGenerationError['bestAttempt']) {
 		super(
 			`Cannot generate the ${mode} "${role}" family: no solid lightness in the search band lets ` +
-				'near-white or near-black on-solid text clear 4.5:1 across the solid and its generated ' +
-				'hover and pressed states ' +
+				'near-white or near-black on-solid text clear 4.5:1 over the resting solid ' +
 				`(best attempt reached ${bestAttempt.onSolidRatio.toFixed(2)}:1 at lightness ` +
 				`${bestAttempt.lightness.toFixed(3)}). Author an explicit, more accessible source colour.`,
 		);
@@ -199,8 +200,8 @@ const RAMP_SPEC = {
 	],
 } as const satisfies Record<ColorMode, ReadonlyArray<RampRungSpec>>;
 
-// Private step-10 lightness offset from the solid rest. Public hover and pressed mix step 9 toward
-// `text.primary`.
+// Private step-10 lightness offset from the solid rest. The public hover and pressed colours are
+// stepped by `stepSolidState`, not derived from this offset.
 const SOLID_STEP_10_DELTA = 0.05;
 
 interface SolidBand {
@@ -212,9 +213,9 @@ interface SolidBand {
 
 // A vibrant solid (accent / danger) stays faithful to its authored lightness: the search explores a
 // narrow window centred on the source lightness, so the solid keeps the family's tone rather than
-// being repainted to a fixed vibrant target. The window is narrower than the on-solid "dead zone"
-// (the band of solid lightnesses where neither near-white nor near-black text clears AA), so a
-// source whose whole window falls inside that dead zone is honestly unsatisfiable and throws.
+// being repainted to a fixed vibrant target. The on-solid "dead zone" (the band of solid
+// lightnesses where neither near-white nor near-black text clears AA) is narrower than this window,
+// so every source has a passing lightness inside it and the search does not fail there.
 const VIBRANT_SOLID_MAX_DEVIATION = 0.035;
 const VIBRANT_SOLID_RANGE: [number, number] = [0.3, 0.92];
 // The neutral solid is a strong chip, not derived from the neutral's canvas lightness: light mode
@@ -225,7 +226,7 @@ const NEUTRAL_SOLID = {
 } as const satisfies Record<ColorMode, SolidBand>;
 
 // Text lightness targets: step 11 (low contrast) and step 12 (high contrast). Step 12 is also
-// `text.primary`, the mix target for public solid and foreground states. Light `low` sits below 0.5
+// `text.primary`, the mix target for public foreground states. Light `low` sits below 0.5
 // so step 11 keeps AA over the visible black tint. Dark `low` sits at 0.79 so the white tint's
 // contrast cap stays above the hover-to-pressed visibility floor.
 const TEXT_LIGHTNESS = {
@@ -395,7 +396,10 @@ function buildFamily(request: GenerateFamilyRequest): {
 	const solidAnchor: SolidAnchorDiagnostics = {
 		adaptedForOnSolid: anchor.adapted,
 		band: anchor.band,
-		distanceToEdge: Math.min(anchor.lightness - anchor.band[0], anchor.band[1] - anchor.lightness),
+		distanceToEdge:
+			role === 'neutral'
+				? Math.min(anchor.lightness - anchor.band[0], anchor.band[1] - anchor.lightness)
+				: VIBRANT_SOLID_MAX_DEVIATION - Math.abs(anchor.lightness - source.l),
 		resolvedLightness: anchor.lightness,
 		satisfied: onSolid.minRatio >= TEXT_RATIO,
 		targetLightness: anchor.target,

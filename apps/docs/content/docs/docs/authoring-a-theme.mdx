@@ -43,8 +43,9 @@ be omitted. How each colour treats them differs:
 `color.backdrop` is the one colour that may include alpha. Luke UI emits it as
 `color.background.backdrop`. Hover and pressed colours are generated from the resting semantic
 colours. Do not author them. Each role's solid hover and pressed colours step lightness away from
-the `onSolid` text, so they get lighter under dark text and darker under light text. Whichever way a
-mode usually steps, a dark-mode solid with light text gets darker states.
+the `onSolid` text, as
+[the generation guide](https://github.com/lukebennett88/luke-ui/blob/main/docs/THEME_COLOUR_GENERATION.md#interaction-states)
+describes.
 
 `radius` overrides the `detail`, `control`, `surface`, and `overlay` corners, which default to 4, 8,
 12, and 16px. Radius inputs are pixels at a 16px root and emit as `rem`. `shadow` and
@@ -255,15 +256,17 @@ text, an icon, or one of the colours above.
 A narrow band of lightnesses has no near-white or near-black text that reaches 4.5:1. When you
 author one chromatic role as one string, `defineTheme` keeps its hue, searches for a lightness that
 works, and may reduce its chroma to fit sRGB. It also adapts a missing mode from the side you set.
-An explicit side bypasses that search, but the compiler still moves its resting solid up to 0.035 in
-OKLCH lightness to make the text read. Hover and pressed step away from the text, so only the
-resting solid has to read. Each role's `solidAnchor.distanceToEdge` diagnostic reports how much of
-that window is left.
 
-A solid that cannot carry 4.5:1 `onSolid` text throws `ThemeGenerationError`. The error names the
-failing `role` and `mode`. `bestAttempt` records the closest solid colour and the contrast it
-reached. `diagnostics` contains the families completed in that mode before the failure. These
-generation failures and `ThemeContrastError` are separate from input validation.
+An explicit side skips that search, but you still get readable text. The compiler moves the resting
+solid up to 0.035 in OKLCH lightness until `onSolid` reaches 4.5:1 across rest, hover, and pressed,
+and it never fails inside that window. Each role's `solidAnchor.distanceToEdge` diagnostic reports
+how much of the window is left.
+
+`ThemeGenerationError` stays exported as a guard for a solid that no lightness in its band can make
+readable, and you are not expected to hit it. It names the failing `role` and `mode`. `bestAttempt`
+records the closest solid colour and the contrast it reached. `diagnostics` contains the families
+completed in that mode before the failure. These generation failures and `ThemeContrastError` are
+separate from input validation.
 
 ## Continue learning
 

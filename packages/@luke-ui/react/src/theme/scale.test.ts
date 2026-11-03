@@ -394,20 +394,6 @@ describe('dead-zone and adaptable sources', () => {
 		}
 	});
 
-	it('names the role, mode, and best attempt in a ScaleGenerationError', () => {
-		const solid = { l: 0.6, c: 0.1, h: 20 };
-		const error = new ScaleGenerationError('danger', 'dark', {
-			lightness: 0.6,
-			onSolidRatio: 4.23,
-			solid,
-			step: 9,
-		});
-		expect(error.role).toBe('danger');
-		expect(error.mode).toBe('dark');
-		expect(error.message).toContain('Cannot generate the dark "danger" family');
-		expect(error.message).toContain('4.23:1');
-	});
-
 	it('adapts a mid-tone in the on-solid dead zone into the tone-faithful window', () => {
 		const { diagnostics } = familyDiagnostics(ADAPTABLE_MID_TONE.source, 'light', 'accent');
 		expect(diagnostics.solidAnchor.adaptedForOnSolid).toBe(true);
@@ -430,6 +416,15 @@ describe('dead-zone and adaptable sources', () => {
 		// A source that already reads sits at the centre, with the whole window left.
 		const unadapted = familyDiagnostics('oklch(0.5 0.15 250)', 'light', 'accent').diagnostics;
 		expect(unadapted.solidAnchor.distanceToEdge).toBeCloseTo(0.035, 9);
+	});
+
+	it('measures a clamped vibrant window against the full ±0.035 window, not the clamped band', () => {
+		// Source 0.924 clamps the band to 0.889 to 0.92, so the resolved 0.92 sits on the band's edge.
+		const source = { l: 0.924, c: 0.1, h: 90 };
+		const { solidAnchor } = familyDiagnostics(source, 'light', 'accent').diagnostics;
+		expect(solidAnchor.band[1]).toBeCloseTo(0.92, 9);
+		expect(solidAnchor.resolvedLightness).toBeCloseTo(0.92, 9);
+		expect(solidAnchor.distanceToEdge).toBeCloseTo(0.035 - 0.004, 9);
 	});
 
 	it('does not throw for neutral, whose solid comes from a curated band rather than the source tone', () => {
@@ -538,14 +533,21 @@ describe('solid hover and pressed states', () => {
 		}
 	});
 
-	it('steps no further than it must: the margin is private and small', () => {
-		expect(VISIBILITY_MARGIN).toBeGreaterThan(0);
-		expect(VISIBILITY_MARGIN).toBeLessThanOrEqual(0.004);
+	it('steps no further than it must: each state lands just above its floor plus the margin', () => {
+		// Within one search step of the target, plus rounding and gamut mapping.
+		const tolerance = 0.002;
 		for (const entry of everyFamily()) {
-			// Within one search step of the target, plus rounding, and never a runaway step.
-			expect(entry.solidStates.restToHoverVisibility).toBeLessThan(
-				INTERACTION_HOVER_VISIBILITY + VISIBILITY_MARGIN + 0.002,
-			);
+			const label = `${entry.mode} ${entry.role} ${entry.input}`;
+			const { hoverToPressedVisibility, restToHoverVisibility } = entry.solidStates;
+			const hoverTarget = INTERACTION_HOVER_VISIBILITY + VISIBILITY_MARGIN;
+			const pressedTarget = INTERACTION_HOVER_TO_PRESSED_VISIBILITY + VISIBILITY_MARGIN;
+			for (const [name, visibility, target] of [
+				['rest to hover', restToHoverVisibility, hoverTarget],
+				['hover to pressed', hoverToPressedVisibility, pressedTarget],
+			] as const) {
+				expect(visibility, `${label} ${name}`).toBeGreaterThanOrEqual(target);
+				expect(visibility, `${label} ${name}`).toBeLessThan(target + tolerance);
+			}
 		}
 	});
 

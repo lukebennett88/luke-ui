@@ -7,12 +7,12 @@ import {
 	tactileFoundation,
 	testTypography,
 } from './__fixtures__/theme-css.js';
-import { buildTheme, compileTheme, ThemeGenerationError } from './build-theme.js';
+import { buildTheme, compileTheme } from './build-theme.js';
 import { formatOklch, parseColor } from './color.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
-import { FAMILY_RUNG, highContrastText, ScaleGenerationError } from './scale.js';
+import { FAMILY_RUNG, highContrastText } from './scale.js';
 
 describe('buildTheme independent modes', () => {
 	it('derives each mode from its own sources rather than inverting light', () => {
@@ -37,26 +37,6 @@ describe('buildTheme independent modes', () => {
 		expect(extractValue(blocks.baseLight, solidVar)).not.toBe(
 			extractValue(blocks.mediaDark, solidVar),
 		);
-	});
-});
-
-describe('ThemeGenerationError', () => {
-	it('re-raises the scale error with its role, mode, best attempt, and the families already resolved', () => {
-		const solid = { l: 0.6, c: 0.1, h: 20 };
-		const cause = new ScaleGenerationError('warning', 'dark', {
-			lightness: 0.6,
-			onSolidRatio: 4.23,
-			solid,
-			step: 9,
-		});
-		const diagnostics = { completedFamilies: {}, mode: 'dark', role: 'warning' } as const;
-		const error = new ThemeGenerationError(cause, diagnostics);
-		expect(error.name).toBe('ThemeGenerationError');
-		expect(error.role).toBe('warning');
-		expect(error.mode).toBe('dark');
-		expect(error.bestAttempt.onSolidRatio).toBe(4.23);
-		expect(error.message).toBe(cause.message);
-		expect(error.diagnostics).toBe(diagnostics);
 	});
 });
 

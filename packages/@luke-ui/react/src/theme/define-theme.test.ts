@@ -65,17 +65,18 @@ describe('defineTheme single-value accent adaptation', () => {
 });
 
 describe('defineTheme explicit per-mode accent generation', () => {
-	it('uses a mid-lightness explicit dark accent verbatim, because states step away from its text', () => {
-		// Hover and pressed step away from the on-solid text, so only the resting solid has to read.
-		// A source in the narrow on-solid dead zone moves within its window instead of failing.
+	it('moves a mid-lightness explicit dark accent within the ±0.035 window until its text reads', () => {
+		// An explicit side bypasses the pre-conditioner, so the compiler's own solid-anchor search
+		// is the only thing that makes this source's on-solid text clear 4.5:1.
+		const source = parseColor('oklch(0.58 0.28 0)');
 		const foundation = normalizeTheme({
 			color: { accent: { light: '#3b82f6', dark: 'oklch(0.58 0.28 0)' } },
 			name: 'mid-accent',
 			typography: testTypography,
 		});
-		const { diagnostics } = compileTheme(foundation);
-		const { solidAnchor } = diagnostics.dark.families.accent;
+		const { solidAnchor } = compileTheme(foundation).diagnostics.dark.families.accent;
 		expect(solidAnchor.satisfied).toBe(true);
+		expect(Math.abs(solidAnchor.resolvedLightness - source.l)).toBeLessThanOrEqual(0.035 + 1e-9);
 		expect(solidAnchor.distanceToEdge).toBeGreaterThanOrEqual(0);
 	});
 });

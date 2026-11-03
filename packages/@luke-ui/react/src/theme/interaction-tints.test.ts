@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
+import { chromaticTheme } from './__fixtures__/chromatic.js';
+import { contrastEdgeTheme } from './__fixtures__/contrast-edge.js';
 import { paperTheme } from './__fixtures__/paper.js';
+import { tactileTheme } from './__fixtures__/tactile.js';
 import {
 	extractValue,
 	paperFoundation,
@@ -16,16 +19,23 @@ import {
 	TEXT_RATIO,
 	VISIBILITY_MARGIN,
 } from './contrast-policy.js';
-import { defineTheme } from './define-theme.js';
+import { defineTheme, normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
 import { solveInteractionTints, ThemeInteractionTintError } from './interaction-tints.js';
-import { oklabDeltaE } from './scale.js';
+import { INTERACTION_HOVER_STRENGTH, mixInteractionState, oklabDeltaE } from './scale.js';
 import type { SemanticColorValues } from './semantic-map.js';
+
+// Tactile with the default flat finish and shadow ladder, as the flat theme is authored.
+const { controlFinish: _controlFinish, shadow: _shadow, ...tactileColours } = tactileTheme;
+const flatFoundation = normalizeTheme({ ...tactileColours, name: 'flat-fixture' });
 
 describe('solveInteractionTints', () => {
 	for (const [name, foundation] of [
 		['Paper', paperFoundation],
 		['Tactile', tactileFoundation],
+		['flat', flatFoundation],
+		['chromatic', normalizeTheme(chromaticTheme)],
+		['contrastEdge', normalizeTheme(contrastEdgeTheme)],
 	] as const) {
 		it(`emits a black light pair and a white dark pair for ${name}`, () => {
 			const blocks = splitBlocks(compileTheme(foundation).css);
@@ -147,12 +157,29 @@ describe('solveInteractionTints', () => {
 	it('makes room for the margin by lowering hover, and keeps pressed under its contrast cap', () => {
 		const colorValues = compiledColorValues(tactileFoundation, 'dark');
 		const tints = solveInteractionTints('dark', colorValues);
-		// Tactile dark's hover target is 0.074. The margin over the raised surface needs less.
-		expect(tints.hoverAlpha).toBeLessThan(0.074);
+		// The target is the alpha that matches the neutral subtle fill's hover mix over the base.
+		const white = { l: 1, c: 0, h: 0 };
+		const base = parseColor(colorValues['color.background.surface.base']);
+		const targetHover = mixInteractionState(
+			parseColor(colorValues['color.background.neutral.subtle']),
+			parseColor(colorValues['color.foreground.primary']),
+			INTERACTION_HOVER_STRENGTH,
+		);
+		let targetHoverAlpha = 0;
+		let bestDistance = Number.POSITIVE_INFINITY;
+		for (let step = 0; step <= 1000; step++) {
+			const distance = oklabDeltaE(compositeEncodedSrgb(white, base, step / 1000), targetHover);
+			if (distance < bestDistance) {
+				bestDistance = distance;
+				targetHoverAlpha = step / 1000;
+			}
+		}
+		// The margin over the raised surface needs less than the target.
+		expect(tints.hoverAlpha).toBeLessThan(targetHoverAlpha);
 		expect(tints.pressedAlpha).toBeGreaterThan(tints.hoverAlpha);
 		const raised = parseColor(colorValues['color.background.surface.raised']);
 		const danger = parseColor(colorValues['color.foreground.danger.rest']);
-		const tinted = compositeEncodedSrgb({ l: 1, c: 0, h: 0 }, raised, tints.pressedAlpha);
+		const tinted = compositeEncodedSrgb(white, raised, tints.pressedAlpha);
 		expect(contrastRatio(danger, tinted)).toBeGreaterThanOrEqual(TEXT_RATIO);
 	});
 
