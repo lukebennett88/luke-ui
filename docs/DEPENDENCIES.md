@@ -86,6 +86,36 @@ list against `dependencies`, `peerDependencies`, and `inlinedDependencies` in
 widens when the caret stops covering the new version. The catalog range is what gets published as
 the peer range, and bumping it on every minor would narrow what consumers can satisfy.
 
+### Published-change versioning
+
+Before the initial `@luke-ui/react` 1.0 release, no pull request needs a changeset. Afterwards,
+include a Changeset for each release-worthy change to any published package, including 0.x theme and
+support packages. Describe every intentional change to published visuals in release notes, even a
+small refinement. Changes confined to private code with no published impact need no release.
+
+For stable (1.x+) packages, classify changes by consumer impact:
+
+- **Major:** Remove or rename a public token, prop, or theme option; break a documented behaviour or
+  guarantee; or make a previously compiling, supported theme fail compilation. Stricter validation
+  is breaking even when motivated by accessibility, unless it only fixes acceptance of inputs that
+  already violated an explicit documented guarantee.
+- **Minor:** Add a compatible public token, prop, or optional theme authoring capability; or make a
+  broad, intentional visual change to a theme or multiple component families without breaking a
+  documented contract.
+- **Patch:** Correct a defect to restore documented behaviour (even if consumers relied on the
+  defect), fix other non-breaking defects or accessibility issues, or make a narrowly scoped visual
+  refinement.
+
+Semantic tokens guarantee their public names, meanings, documented behaviours, and supported theme
+compatibility—not exact generated colour values. Classify token-value and generated-colour changes
+by the visible outcome: narrow corrections are patches, broad compatible repaints are minors, and
+changes breaking a contract are majors. **Changing private code can still be breaking.**
+
+For 0.x packages, use **minor** for breaking changes and new public capabilities, and **patch** for
+fixes and narrow visual refinements. Version only the published packages whose contract or output
+changes, including compiled theme CSS. Dependency/peer compatibility and publication mechanics are
+owned by [#721](https://github.com/lukebennett88/luke-ui/issues/721).
+
 ## Grouping and schedule
 
 Renovate runs weekly before 6am on Monday. It groups non-major updates by release train and splits
