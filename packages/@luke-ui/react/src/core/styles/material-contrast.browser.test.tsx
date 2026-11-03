@@ -106,9 +106,9 @@ const buttonProminences = ['high', 'standard', 'low'] as const;
 
 /**
  * Real high, standard and low Buttons of both tones and both sizes over each page surface, a subtle
- * fill and every role's solid fill, in each state: their fill, finish, and adaptive state layer behind their
- * actual text colour. A small Button's 32px block size puts its label closer to the finish's
- * highlight and shade bands than a medium one's 40px does.
+ * fill and every role's solid fill, in each state: their fill, finish, and adaptive state layer
+ * behind their actual text colour. A small Button's 32px block size puts its label closer to the
+ * finish's highlight and shade bands than a medium one's 40px does.
  */
 async function buttonFinishFailures(appearance: VisualAppearance) {
 	const { container } = render(

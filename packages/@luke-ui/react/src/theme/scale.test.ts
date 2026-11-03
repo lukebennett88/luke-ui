@@ -21,7 +21,6 @@ import {
 	FAMILY_RUNG,
 	generateFamily,
 	generateFamilyWithDiagnostics,
-	highContrastText,
 	MIN_STATE_DELTA,
 	oklabDeltaE,
 	onSolidGateRatio,
@@ -216,18 +215,6 @@ describe('high-contrast text rung', () => {
 					? scale[FAMILY_RUNG.foreground].l - scale[FAMILY_RUNG.textPrimary].l
 					: scale[FAMILY_RUNG.textPrimary].l - scale[FAMILY_RUNG.foreground].l;
 			expect(extension).toBeGreaterThan(0);
-		}
-	});
-
-	it('matches highContrastText(source)', () => {
-		// Production computes `text.primary` from the resolved neutral source, so the high-contrast
-		// rung must equal it.
-		const source = parseColor('oklch(0.5 0.08 40)');
-		for (const mode of MODES) {
-			const expected = highContrastText(source, mode);
-			expect(family('oklch(0.5 0.08 40)', mode, 'neutral')[FAMILY_RUNG.textPrimary]).toEqual(
-				expected,
-			);
 		}
 	});
 });

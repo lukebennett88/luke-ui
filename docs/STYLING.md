@@ -82,10 +82,8 @@ tokens. They do not branch on theme identity. A component must keep its essentia
 when every shadow and control finish is `none`. The `flat` test appearance checks that. The control
 finish paints on solid and standard Buttons, over the fill and under the label, and a Button that
 paints a finish always paints it above its fill layer. A low Button has no finish at rest. On hover
-and pressed it paints a finish only over a role solid, from the private finish properties that the
-solid's `surfaceStyle` sets. Over a page surface or a subtle fill, a low Button paints only the
-state layer and shadow, because a finish stacked with the translucent tint behind the label can
-break text contrast. See [Surface pairing](#surface-pairing).
+and pressed it paints one only over a role solid, because a finish stacked with the translucent tint
+behind the label can break text contrast. See [Surface pairing](#surface-pairing).
 
 The theme compiler keeps colour states distinguishable without a shadow or finish. See
 [Interaction states](THEME_COLOUR_GENERATION.md#interaction-states).
@@ -470,8 +468,8 @@ solid sets its own `solid.rest`, `solid.hover`, and `solid.pressed` fills. It se
 to `controlFinish.raised`, and the pressed finish to `controlFinish.recessed` twice. It sets the
 pressed shadow to `shadow.inset` three times, which strengthens the recess on a dark solid. A page
 surface or a subtle fill sets its resting fill and the shared tint for hover and pressed. It sets
-the finishes and the pressed shadow to `initial`, so a low Button there paints no finish and
-`shadow.inset`.
+the finishes and the pressed shadow to `initial`, so a low Button there paints only the state layer
+and `shadow.inset`.
 
 A low Button paints the nearest managed surface's resting fill, opaque and without a finish or
 shadow. Hover and pressed paint that surface's fill in the adaptive state layer, a registered

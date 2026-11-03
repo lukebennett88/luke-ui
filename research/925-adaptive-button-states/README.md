@@ -36,7 +36,7 @@ black tint.
 
 A translucent tint has almost no hover-to-pressed step over a role's solid fill: 0.006 to 0.024
 across every role and bundled theme, against a 0.025 floor. A low Button inside a solid fill
-therefore paid for an opaque `background.<tone>.subtle.hover|pressed` chip and switched to that
+therefore painted an opaque `background.<tone>.subtle.hover|pressed` chip and switched to that
 chip's paired text (`text.primary`, or `foreground.danger.rest` for a critical tone), so hover and
 pressed kept the opaque token step and the text stayed at AA. This is a visibility fix, not a
 contrast fix: the tint's contrast cap already keeps every gated foreground at 4.5:1.

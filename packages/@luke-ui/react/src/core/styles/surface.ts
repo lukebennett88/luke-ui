@@ -38,8 +38,9 @@ const foregroundOverride = {
 	tone: createGlobalVar('luke-internal-foreground-tone'),
 };
 
-// The surface's own fill in each interaction state, read by a low Button. A solid sets its own
-// hover and pressed fills, and every other surface sets its resting fill and the shared tint.
+// The surface's own fill in each interaction state, read by a low Button. Every surface sets its
+// resting fill. A solid sets its own hover and pressed fills, and every other surface sets the
+// shared tint.
 export const surfaceFill = {
 	rest: createGlobalVar('luke-internal-surface-fill-rest'),
 	hover: createGlobalVar('luke-internal-surface-fill-hover'),

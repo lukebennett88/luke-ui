@@ -4,7 +4,7 @@ import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@luke-ui/react/link';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
-import { act } from 'react';
+import { act, Fragment } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { assert, expect, onTestFinished, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
@@ -978,39 +978,73 @@ for (const appearance of adaptiveAppearances) {
 }
 
 const finishRungs = { hover: 'raised', pressed: 'recessed', rest: 'resting' } as const;
-const pageFinishSurfaces = ['surface.base', 'surface.subdued', 'surface.raised'] as const;
-const finishSurfaces = [...pageFinishSurfaces, 'accent.solid'] as const;
 
 type FinishLayer = keyof typeof vars.controlFinish | 'none';
+type ShadowLayer = keyof typeof vars.shadow;
+
+// A page surface here is a standard surface. A role solid is a surface whose pairing sets a finish.
+// The nested surface sits inside a role solid, and must not inherit the solid's finish or shadow.
+const finishSurfaces = [
+	{ kind: 'page', name: 'surface.base', outer: null },
+	{ kind: 'page', name: 'surface.subdued', outer: null },
+	{ kind: 'page', name: 'surface.raised', outer: null },
+	{ kind: 'solid', name: 'accent.solid', outer: null },
+	{ kind: 'page', name: 'surface.raised', outer: 'accent.solid' },
+] as const;
+
+type SurfaceKind = (typeof finishSurfaces)[number]['kind'];
+type Paint = { finish: Array<FinishLayer>; shadow: Array<ShadowLayer> };
+
+const standardPaint: Record<InteractionState, Paint> = {
+	hover: { finish: ['raised'], shadow: ['raised'] },
+	pressed: { finish: ['recessed'], shadow: ['inset'] },
+	rest: { finish: ['resting'], shadow: ['resting'] },
+};
 
 /**
- * The finish rungs each prominence layers above its fill layer in a state. Standard and high paint
- * their state's rung on every surface. A low Button paints none at rest and none over a page surface
- * ('none' stands in for the unset finish). On a role solid it paints its hover rung once and its
- * pressed rung twice.
+ * The finish rungs a Button layers above its fill layer, and its shadow rungs, in each state. A
+ * standard Button paints the same on every surface. A low Button paints neither at rest, and
+ * 'none' stands in for an unset finish. Over a page surface it paints only the raised or inset
+ * shadow. On a role solid it paints the raised finish on hover, and on press the recessed finish
+ * twice with the inset shadow three times.
  */
-function finishLayers(
-	prominence: 'low' | 'standard',
-	state: InteractionState,
-	surface: (typeof finishSurfaces)[number],
-): Array<FinishLayer> {
-	if (prominence === 'standard') return [finishRungs[state]];
-	if (state === 'rest') return [];
-	if (surface !== 'accent.solid') return ['none'];
-	return state === 'hover' ? ['raised'] : ['recessed', 'recessed'];
-}
+const paints: Record<'low' | 'standard', Record<SurfaceKind, Record<InteractionState, Paint>>> = {
+	low: {
+		page: {
+			hover: { finish: ['none'], shadow: ['raised'] },
+			pressed: { finish: ['none'], shadow: ['inset'] },
+			rest: { finish: [], shadow: [] },
+		},
+		solid: {
+			hover: { finish: ['raised'], shadow: ['raised'] },
+			pressed: { finish: ['recessed', 'recessed'], shadow: ['inset', 'inset', 'inset'] },
+			rest: { finish: [], shadow: [] },
+		},
+	},
+	standard: { page: standardPaint, solid: standardPaint },
+};
 
 for (const appearance of visualAppearances) {
 	test(`standard and low Buttons paint the control finish above their fill layer in ${appearance.theme} ${appearance.mode}`, () => {
 		const { locator } = render(
 			<>
 				<div data-testid="probe" />
-				{finishSurfaces.map((surface) => (
-					<Box backgroundColor={surface} data-testid={surface} key={surface} padding="space.8">
-						<Button prominence="standard">Standard on {surface}</Button>
-						<Button prominence="low">Low on {surface}</Button>
-					</Box>
-				))}
+				{finishSurfaces.map(({ name, outer }) => {
+					const label = outer === null ? name : `${name} in ${outer}`;
+					const region = (
+						<Box backgroundColor={name} data-testid={label} padding="space.8">
+							<Button prominence="standard">Standard on {label}</Button>
+							<Button prominence="low">Low on {label}</Button>
+						</Box>
+					);
+					return outer === null ? (
+						<Fragment key={label}>{region}</Fragment>
+					) : (
+						<Box backgroundColor={outer} key={label} padding="space.8">
+							{region}
+						</Box>
+					);
+				})}
 			</>,
 			{ appearance },
 		);
@@ -1018,6 +1052,12 @@ for (const appearance of visualAppearances) {
 		const rung = (finish: FinishLayer) => {
 			probe.style.backgroundImage = finish === 'none' ? 'none' : vars.controlFinish[finish];
 			return getComputedStyle(probe).backgroundImage;
+		};
+		const shadow = (layers: Array<ShadowLayer>) => {
+			probe.style.boxShadow = layers.map((layer) => vars.shadow[layer]).join(', ');
+			const computed = getComputedStyle(probe).boxShadow;
+			probe.style.boxShadow = '';
+			return layers.length === 0 ? 'none' : computed;
 		};
 		// Guards the assertions below: Tactile's three rungs differ, and Paper's are all `none`.
 		const paintsFinish = appearance.theme !== 'paper';
@@ -1027,25 +1067,35 @@ for (const appearance of visualAppearances) {
 
 		// Rows that break the expectation, so the check needs no conditional `expect`.
 		const misses: Array<string> = [];
-		for (const surface of finishSurfaces) {
-			const region = locator.getByTestId(surface);
+		for (const { kind, name, outer } of finishSurfaces) {
+			const label = outer === null ? name : `${name} in ${outer}`;
+			const region = locator.getByTestId(label);
 			for (const prominence of ['standard', 'low'] as const) {
 				const button = region
 					.getByRole('button', {
-						name: `${prominence === 'low' ? 'Low' : 'Standard'} on ${surface}`,
+						name: `${prominence === 'low' ? 'Low' : 'Standard'} on ${label}`,
 					})
 					.element();
 				for (const state of INTERACTION_STATES) {
 					setInteractionState(button, state);
-					const image = getComputedStyle(button).backgroundImage;
-					const finish = finishLayers(prominence, state, surface).map(rung).join(', ');
+					// The shadow transitions, so read it once the transition ends.
+					settledSurfaceColors(button);
+					const styles = getComputedStyle(button);
+					const image = styles.backgroundImage;
+					const expected = paints[prominence][kind][state];
+					const finish = expected.finish.map(rung).join(', ');
 					// Whatever follows the finish is the one state layer.
 					const layer = finish === '' ? image : image.slice(finish.length + 2);
 					const ok =
 						image.startsWith(finish) &&
 						layer.startsWith('linear-gradient(') &&
 						(layer.match(/linear-gradient\(/g) ?? []).length === 1;
-					if (!ok) misses.push(`${prominence} ${surface} ${state}: ${image}`);
+					if (!ok) misses.push(`${prominence} ${label} ${state}: ${image}`);
+					// A Button that paints a shadow paints exactly this stack, so a solid's stack never
+					// leaks into a page surface nested inside it.
+					if (styles.boxShadow !== shadow(expected.shadow)) {
+						misses.push(`${prominence} ${label} ${state}: ${styles.boxShadow}`);
+					}
 				}
 			}
 		}
@@ -1085,6 +1135,15 @@ test('forced colours remove the control finish and state layer from every Button
 				setInteractionState(button, state);
 				// A list of `none` layers paints nothing.
 				expect(getComputedStyle(button).backgroundImage, `${name} ${state}`).toMatch(isNone);
+			}
+		}
+		// Forced colours paint `ButtonFace` behind every Button, including a low Button's opaque fill.
+		for (const { button, name } of buttons) {
+			for (const state of INTERACTION_STATES) {
+				setInteractionState(button, state);
+				expect(settledSurfaceColors(button).background, `${name} ${state}`).toBe(
+					resolvedColor('ButtonFace', button),
+				);
 			}
 		}
 	} finally {

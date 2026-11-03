@@ -97,14 +97,6 @@ export function mixInteractionState(rest: Oklch, toward: Oklch, strength: number
 	return gamutMapOklch(mixOklab(rest, toward, strength));
 }
 
-/**
- * The high-contrast text rung (step 12) a family emits for `source` in `mode`. Neutral's rung is
- * `text.primary`, computed before any solid-anchor search so every family can gate against it.
- */
-export function highContrastText(source: Oklch, mode: ColorMode): Oklch {
-	return gamutMapOklch(highContrastTextRequest(source, mode));
-}
-
 /** The inputs to {@link generateFamily}. */
 export interface GenerateFamilyRequest {
 	/** The resolved canvas anchor. Steps 1-8 ramp away from it toward the solid. */
