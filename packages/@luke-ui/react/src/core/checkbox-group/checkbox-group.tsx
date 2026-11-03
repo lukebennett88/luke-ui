@@ -12,7 +12,6 @@ import { ControlSizeContext, useControlSize } from '../sizing/control-size-conte
 import type { ControlSize } from '../sizing/control-size.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { CheckboxGroupContext } from './group-context.js';
 
 type _CheckboxGroupOmit = DistributiveOmit<
 	RacCheckboxGroupProps,
@@ -51,7 +50,7 @@ interface _CheckboxGroupBaseProps extends _CheckboxGroupOmit {
 	orientation?: 'vertical' | 'horizontal';
 	/** Ref forwarded to the group element. */
 	ref?: Ref<HTMLDivElement>;
-	/** Default recipe size for its options. An option's explicit size takes precedence. */
+	/** Default control size for its options. An option's explicit size takes precedence. */
 	size?: ControlSize;
 	/** Controls how the group label identifies required or optional values. */
 	necessityIndicator?: NecessityIndicator;
@@ -97,18 +96,16 @@ export function CheckboxGroup(props: CheckboxGroupProps): JSX.Element {
 				onChange={onChange}
 				ref={ref}
 			>
-				<CheckboxGroupContext value>
-					<FieldGroupLayout
-						description={description}
-						errorMessage={normalizedErrorMessage}
-						isRequired={isRequired ?? false}
-						label={label}
-						necessityIndicator={necessityIndicator}
-						orientation={orientation}
-					>
-						{children}
-					</FieldGroupLayout>
-				</CheckboxGroupContext>
+				<FieldGroupLayout
+					description={description}
+					errorMessage={normalizedErrorMessage}
+					isRequired={isRequired ?? false}
+					label={label}
+					necessityIndicator={necessityIndicator}
+					orientation={orientation}
+				>
+					{children}
+				</FieldGroupLayout>
 			</RacCheckboxGroup>
 		</ControlSizeContext>
 	);

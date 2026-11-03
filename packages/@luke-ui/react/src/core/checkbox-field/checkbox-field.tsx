@@ -1,6 +1,4 @@
 import type { JSX, ReactNode } from 'react';
-import { use, useEffect } from 'react';
-import { CheckboxGroupContext } from '../checkbox-group/group-context.js';
 import type { CheckboxRootProps } from '../primitives/checkbox/checkbox.js';
 import {
 	CheckboxControl,
@@ -26,7 +24,7 @@ type _CheckboxFieldOmit = DistributiveOmit<
 interface _CheckboxFieldProps extends _CheckboxFieldOmit {
 	/** Supporting text shown beneath the checkbox label. */
 	description?: ReactNode;
-	/** Validation message for a controlled error. Inside a CheckboxGroup, pass the message to the group instead. */
+	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
 	errorMessage?: ReactNode;
 	/**
 	 * Visible label. Pass non-empty, textual, non-interactive content. Place links and buttons
@@ -51,27 +49,10 @@ export type CheckboxFieldProps = Prettify<_CheckboxFieldProps>;
 export function CheckboxField(props: CheckboxFieldProps): JSX.Element {
 	const { description, errorMessage, label, necessityIndicator, ...rootProps } = props;
 	const normalizedErrorMessage = normalizeErrorMessage(errorMessage);
-	const isInGroup = use(CheckboxGroupContext);
-
-	useEffect(() => {
-		if (!isInGroup || normalizedErrorMessage === undefined || !isDevelopment()) return;
-
-		// Warn when the group cannot present a child-controlled error.
-		// oxlint-disable-next-line eslint/no-console
-		console.warn(
-			'CheckboxField errorMessage is not supported inside CheckboxGroup. Use CheckboxGroup errorMessage instead.',
-		);
-	}, [isInGroup, normalizedErrorMessage]);
 
 	return (
-		<CheckboxRoot
-			{...rootProps}
-			isInvalid={isInGroup ? undefined : isInvalidFromErrorMessage(normalizedErrorMessage)}
-		>
-			<InlineField
-				description={description}
-				errorMessage={isInGroup ? undefined : normalizedErrorMessage}
-			>
+		<CheckboxRoot {...rootProps} isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}>
+			<InlineField description={description} errorMessage={normalizedErrorMessage}>
 				<CheckboxLabel>
 					<CheckboxControl>
 						<CheckboxIndicator />
@@ -81,13 +62,4 @@ export function CheckboxField(props: CheckboxFieldProps): JSX.Element {
 			</InlineField>
 		</CheckboxRoot>
 	);
-}
-
-function isDevelopment(): boolean {
-	try {
-		return process.env.NODE_ENV !== 'production';
-	} catch {
-		// Unbundled browsers have no process global.
-		return false;
-	}
 }

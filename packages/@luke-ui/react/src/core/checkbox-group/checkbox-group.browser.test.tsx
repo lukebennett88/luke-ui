@@ -1,7 +1,7 @@
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { CheckboxGroup } from '@luke-ui/react/checkbox-group';
 import { Form } from '@luke-ui/react/form';
-import { expect, test, vi } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
@@ -128,9 +128,15 @@ test('group required validation shows one shared group error and keeps the descr
 	expect(first).toHaveAccessibleDescription(/Choose at least one\./);
 	expect(occurrenceCount(getDescribedText(first), sharedError)).toBe(1);
 	expect(first.getAttribute('aria-describedby')).toBe(second.getAttribute('aria-describedby'));
+	await userEvent.click(page.getByText('Engineering', { exact: true }));
+
+	await expect.poll(() => getDescribedText(first)).not.toContain(sharedError);
+	expect(first).not.toHaveAttribute('aria-invalid', 'true');
+	expect(second).not.toHaveAttribute('aria-invalid', 'true');
+	expect(first).toHaveAccessibleDescription('Choose at least one.');
 });
 
-test('child validate presents its error at group level', async () => {
+test('child validate presents and clears its error at group level', async () => {
 	render(
 		<form>
 			<CheckboxGroup label="Topics">
@@ -153,48 +159,12 @@ test('child validate presents its error at group level', async () => {
 	expect(design.getAttribute('aria-describedby')).toBe(
 		engineering.getAttribute('aria-describedby'),
 	);
-});
-
-test('warns when a grouped child supplies an errorMessage in development', () => {
-	const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-	try {
-		render(
-			<CheckboxGroup label="Topics">
-				<CheckboxField errorMessage="Child error." label="Design" value="design" />
-			</CheckboxGroup>,
-		);
-		expect(warn).toHaveBeenCalledWith(
-			'CheckboxField errorMessage is not supported inside CheckboxGroup. Use CheckboxGroup errorMessage instead.',
-		);
-	} finally {
-		warn.mockRestore();
-	}
-});
-
-test('child validation errors clear when selection changes', async () => {
-	render(
-		<form>
-			<CheckboxGroup label="Topics">
-				<CheckboxField
-					label="Design"
-					validate={(isSelected) => (isSelected ? null : 'Select Design to continue.')}
-					value="design"
-				/>
-				<CheckboxField label="Engineering" value="engineering" />
-			</CheckboxGroup>
-			<button type="submit">Submit</button>
-		</form>,
-	);
-	const design = checkbox('Design');
-
-	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
-	await expect.poll(() => getDescribedText(design)).toContain('Select Design to continue.');
 	await userEvent.click(page.getByText('Design', { exact: true }));
 
 	await expect.poll(() => getDescribedText(design)).not.toContain('Select Design to continue.');
 });
 
-test('child required validation contributes to group validity', async () => {
+test('an optional selection does not satisfy an individually required checkbox', async () => {
 	render(
 		<form>
 			<CheckboxGroup label="Topics">
@@ -205,6 +175,10 @@ test('child required validation contributes to group validity', async () => {
 		</form>,
 	);
 	const terms = checkbox('Terms');
+	const news = checkbox('News');
+
+	await userEvent.click(page.getByText('News', { exact: true }));
+	expect(news).toBeChecked();
 
 	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
 
@@ -212,7 +186,13 @@ test('child required validation contributes to group validity', async () => {
 	expect(terms).toHaveAttribute('aria-invalid', 'true');
 	const message = 'Please check this box if you want to proceed.';
 	expect(occurrenceCount(getDescribedText(terms), message)).toBe(1);
-	expect(getDescribedText(checkbox('News'))).toBe(getDescribedText(terms));
+	expect(getDescribedText(news)).toBe(getDescribedText(terms));
+	expect(terms).toHaveFocus();
+	await userEvent.keyboard(' ');
+
+	await expect.poll(() => getDescribedText(terms)).not.toContain(message);
+	expect(terms).not.toHaveAttribute('aria-invalid', 'true');
+	expect(news).not.toHaveAttribute('aria-invalid', 'true');
 });
 
 test('Form controlSize supplies the group size while individual child size can override it', () => {
@@ -266,7 +246,7 @@ test('a mixed state remains native indeterminate within the group', () => {
 	expect(checkbox('Partially selected').indeterminate).toBe(true);
 });
 
-test('group orientation preserves child order and wraps horizontal choices', () => {
+test('horizontal layout preserves child order', () => {
 	render(
 		<CheckboxGroup label="Topics" orientation="horizontal">
 			<CheckboxField label="Design" value="design" />
@@ -365,5 +345,7 @@ test('standalone CheckboxField errors stay outside the group', async () => {
 	const standalone = checkbox('Standalone');
 	await expect.poll(() => getDescribedText(groupChild)).toContain('Group error.');
 	await expect.poll(() => getDescribedText(standalone)).toContain('Standalone error.');
+	expect(standalone).toHaveAttribute('aria-invalid', 'true');
 	expect(getDescribedText(standalone)).not.toContain('Group error.');
+	expect(getDescribedText(groupChild)).not.toContain('Standalone error.');
 });

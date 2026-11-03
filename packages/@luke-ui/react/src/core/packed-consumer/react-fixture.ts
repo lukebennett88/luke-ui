@@ -25,7 +25,7 @@ export const bundleBoundaries: Array<BundleBoundary> = [
 		exportName: 'Button',
 	},
 	{
-		composes: ['checkbox-field', 'primitives/field'],
+		composes: ['primitives/field'],
 		entry: 'checkbox-group',
 		exportName: 'CheckboxGroup',
 	},

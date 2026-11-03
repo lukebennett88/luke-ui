@@ -35,12 +35,11 @@ The size changes the control without changing the label typography.
 ## Validation
 
 Set `isRequired` to require at least one selection, or pass `validate` to check the selected values.
-Set `isRequired` or pass `validate` on a `CheckboxField` when that option needs its own rule. React
-Aria shows these native validation messages in the group's shared error area.
+Set `isRequired` or pass `validate` on a `CheckboxField` when that option needs its own rule. The
+group shows these native validation messages below its options.
 
 Pass `errorMessage` to `CheckboxGroup` for a controlled error from a form library or server. A
-non-empty message marks the group invalid and takes precedence over native validation messages.
-`CheckboxField.errorMessage` is unsupported inside the group and warns in development. The
+non-empty message marks the group invalid and takes precedence over native validation messages. The
 description stays visible while the group is invalid. Read [Validation](/docs/validation) for where
 messages come from and how to write them.
 
@@ -50,6 +49,11 @@ By default, a required group shows a marker after its label. Read
 Submit without selecting a day to see the validation message.
 
 <ExampleBlock src="checkbox-group/validation" title="Checkbox Group: Validation" />
+
+Select email updates and submit without accepting the terms to see the group error for the required
+option.
+
+<ExampleBlock src="checkbox-group/required-option" title="Checkbox Group: Required option" />
 
 ## Form values
 
