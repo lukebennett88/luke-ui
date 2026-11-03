@@ -3,7 +3,7 @@ import { contrastRatio, parseColor } from './color.js';
 import type { Oklch } from './color.js';
 import { UI_RATIO } from './contrast-policy.js';
 import { solveControlBorder } from './control-border.js';
-import { FAMILY_RUNG, generateFamily, highContrastText } from './scale.js';
+import { FAMILY_RUNG, generateFamily } from './scale.js';
 
 type ColorMode = 'light' | 'dark';
 
@@ -13,10 +13,8 @@ const BASE: Record<ColorMode, Oklch> = {
 };
 
 function solve(mode: ColorMode, extraBackgrounds: ReadonlyArray<Oklch>) {
-	const foreground = highContrastText(BASE[mode], mode);
 	const neutral = generateFamily({
 		background: BASE[mode],
-		interactionSource: foreground,
 		mode,
 		role: 'neutral',
 		source: BASE[mode],

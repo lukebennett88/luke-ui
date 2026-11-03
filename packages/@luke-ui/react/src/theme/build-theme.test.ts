@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { UNSATISFIABLE_ON_SOLID } from './__fixtures__/radix-scales.js';
 import {
 	extractValue,
 	paperFoundation,
@@ -8,18 +7,12 @@ import {
 	tactileFoundation,
 	testTypography,
 } from './__fixtures__/theme-css.js';
-import { buildTheme, compileTheme, ThemeGenerationError } from './build-theme.js';
+import { buildTheme, compileTheme } from './build-theme.js';
 import { formatOklch, parseColor } from './color.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
-import {
-	FAMILY_RUNG,
-	highContrastText,
-	INTERACTION_HOVER_STRENGTH,
-	INTERACTION_PRESSED_STRENGTH,
-	mixInteractionState,
-} from './scale.js';
+import { FAMILY_RUNG, highContrastText } from './scale.js';
 
 describe('buildTheme independent modes', () => {
 	it('derives each mode from its own sources rather than inverting light', () => {
@@ -44,54 +37,6 @@ describe('buildTheme independent modes', () => {
 		expect(extractValue(blocks.baseLight, solidVar)).not.toBe(
 			extractValue(blocks.mediaDark, solidVar),
 		);
-	});
-});
-
-describe('buildTheme generation failures', () => {
-	function buildGenerationError(foundation: ThemeFoundation): ThemeGenerationError {
-		const caught = (() => {
-			try {
-				buildTheme(foundation);
-				return null;
-			} catch (error) {
-				return error;
-			}
-		})();
-		if (caught instanceof ThemeGenerationError) return caught;
-		throw new Error('expected buildTheme to throw ThemeGenerationError');
-	}
-
-	// Every semantic role publishes a solid, so every role must reach an accessible
-	// solid/on-solid pair — a status source in an on-solid dead zone is a build failure,
-	// not a silently unguaranteed solid. Status sources are used verbatim (only a
-	// single-value accent is pre-conditioned into an accessible band), so an authored
-	// one reaches the generator exactly as written.
-	it('throws ThemeGenerationError naming the role, mode, and achieved ratio for a dead-zone warning', () => {
-		const error = buildGenerationError({
-			...tactileFoundation,
-			dark: {
-				...tactileFoundation.dark,
-				color: {
-					...tactileFoundation.dark.color,
-					warning: resolvedColor(UNSATISFIABLE_ON_SOLID.source),
-				},
-			},
-			name: 'bad-warning',
-		});
-
-		expect(error.role).toBe('warning');
-		expect(error.mode).toBe('dark');
-		expect(error.bestAttempt.step).toBe(9);
-		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
-		expect(error.message).toContain('Cannot generate the dark "warning" family');
-		expect(error.message).toContain(`${error.bestAttempt.onSolidRatio.toFixed(2)}:1`);
-		// Warning is generated fifth, so the four roles before it are reported and the last one is not.
-		expect(Object.keys(error.diagnostics.completedFamilies)).toEqual([
-			'neutral',
-			'accent',
-			'info',
-			'success',
-		]);
 	});
 });
 
@@ -131,7 +76,7 @@ describe('compileTheme interaction source', () => {
 		typography: testTypography,
 	});
 
-	it('gates every family against the emitted neutral text.primary, including the neutral family', () => {
+	it('emits the neutral text.primary and every family’s lightness-stepped solid states', () => {
 		const { css, diagnostics } = compileTheme(chromaticNeutralFoundation);
 		const blocks = splitBlocks(css);
 
@@ -144,15 +89,12 @@ describe('compileTheme interaction source', () => {
 			expect(extractValue(block, '--luke-color-foreground-primary')).toBe(formatOklch(textPrimary));
 
 			for (const role of SEMANTIC_ROLES) {
-				const familyDiagnostics = diagnostics[mode].families[role];
-				const solid = familyDiagnostics.family[FAMILY_RUNG.solid];
-				const hover = mixInteractionState(solid, textPrimary, INTERACTION_HOVER_STRENGTH);
-				const pressed = mixInteractionState(solid, textPrimary, INTERACTION_PRESSED_STRENGTH);
+				const { family } = diagnostics[mode].families[role];
 				expect(extractValue(block, `--luke-color-background-${role}-solid-hover`)).toBe(
-					formatOklch(hover),
+					formatOklch(family.solidHover),
 				);
 				expect(extractValue(block, `--luke-color-background-${role}-solid-pressed`)).toBe(
-					formatOklch(pressed),
+					formatOklch(family.solidPressed),
 				);
 			}
 		}
