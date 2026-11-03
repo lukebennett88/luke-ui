@@ -1,0 +1,74 @@
+---
+title: Radio Group
+description: Lets someone choose one option from a labelled group.
+source: packages/@luke-ui/react/src/exports/radio-group.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/RadioGroup.html
+---
+
+Use `RadioGroup` when someone must choose one value from a set of options. Pass a `label` to name
+the group, then add a `RadioField` for each option.
+
+<ExampleBlock src="radio-group/basic" title="Radio Group: Basic" />
+
+## Options
+
+Pass a `value` to each `RadioField`. Each option can have a `description` beneath its label. Use
+`orientation="horizontal"` for a short set of options that fits in a row. The default orientation is
+vertical, and a horizontal group wraps when it runs out of space.
+
+<ExampleBlock src="radio-group/orientations" title="Radio Group: Orientations" />
+
+## Selection
+
+Use `defaultValue` for an uncontrolled initial choice. Pair `value` with `onChange` when application
+state owns the choice. The selected option's `value` is submitted with the group's `name`.
+
+<ExampleBlock src="radio-group/controlled" title="Radio Group: Controlled" />
+
+## Size
+
+Set `size` on the group to size every option. Set it on a `RadioField` to override the group size.
+The size does not change option label typography. When neither sets a size, the group inherits
+`Form.controlSize` or uses `medium`.
+
+<ExampleBlock src="radio-group/sizes" title="Radio Group: Sizes" />
+
+## Validation
+
+Set `isRequired` when the group needs a choice before the form submits. Pass `validate` for a custom
+rule. Pass `errorMessage` for an error from a form library or server. A non-empty message marks the
+group invalid and shows one message beneath its options. The group description remains visible when
+the group is invalid. Read [Validation](/docs/validation) for where messages come from and how to
+write them.
+
+By default, a required group shows a marker after its label. Read
+[Required fields](/docs/forms#required-fields) for the `necessityIndicator` values.
+
+Submit without choosing an option to see the validation message.
+
+<ExampleBlock src="radio-group/validation" title="Radio Group: Validation" />
+
+## Accessibility
+
+Give the group a visible `label`, or use `aria-label` or `aria-labelledby` when another part of the
+layout already names it. Use `RadioField` for each option so its visible label and optional
+description stay connected to its radio control. The group supports arrow-key navigation. Disabled
+groups keep their options disabled even if an individual option sets `isDisabled={false}`.
+
+For a custom layout, compose the [Radio primitive](/components/primitives/radio).
+
+## API
+
+### RadioGroupProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/radio-group/radio-group.tsx"
+	name="RadioGroupProps"
+/>
+
+### RadioFieldProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/radio-group/radio-group.tsx"
+	name="RadioFieldProps"
+/>
