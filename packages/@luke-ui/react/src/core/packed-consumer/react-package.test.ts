@@ -188,6 +188,7 @@ for (const consumer of consumers) {
 				// Form necessity context must cross published entrypoints so the marker is SSR'd.
 				expect(markup).toContain('(optional)');
 				expect(markup).toContain('Contextual text');
+				expect(markup.split('Choose a subscription option.')).toHaveLength(2);
 
 				const server = await serveBuild(dir);
 				const browser = await chromium.launch();
@@ -198,6 +199,13 @@ for (const consumer of consumers) {
 						if (message.type() === 'error') consoleErrors.push(message.text());
 					});
 					page.on('pageerror', (error) => consoleErrors.push(String(error)));
+
+					const ssrPage = await browser.newPage({ javaScriptEnabled: false });
+					await ssrPage.goto(`${server.url}ssr.html`);
+					const group = ssrPage.getByRole('group', { name: 'Packed choices' });
+					const email = group.getByRole('checkbox', { name: 'Packed email' });
+					expect(await email.getAttribute('aria-invalid')).toBe('true');
+					await ssrPage.close();
 
 					await page.goto(`${server.url}ssr.html`);
 					await page.waitForFunction(

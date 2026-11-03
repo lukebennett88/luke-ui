@@ -3,7 +3,10 @@
  * Alphas target today's opaque subtle hover and pressed over `surface.base`, then cap so every
  * gated foreground stays at AA over every surface and subtle rest with the tint on
  * top. Visibility floors in `contrast-policy.ts` reject a theme that can only pass by making the
- * states invisible. Compositing uses encoded sRGB, matching CSS.
+ * states invisible: both floors hold over the three surfaces and the six subtle fills, and the
+ * solver aims for a private margin above each. It creates that margin by lowering the hover alpha,
+ * and never raises the pressed alpha past its contrast cap. Compositing uses encoded sRGB, matching
+ * CSS.
  */
 
 import type { Oklch } from './color.js';
@@ -13,6 +16,7 @@ import {
 	INTERACTION_HOVER_VISIBILITY,
 	SEMANTIC_ROLES,
 	TEXT_RATIO,
+	VISIBILITY_MARGIN,
 } from './contrast-policy.js';
 import {
 	INTERACTION_HOVER_STRENGTH,
@@ -34,9 +38,9 @@ export interface InteractionTintPair {
 	hoverAlpha: number;
 	/** Pressed alpha before CSS formatting. */
 	pressedAlpha: number;
-	/** OKLab ΔE from `surface.base` to the hover composite over it. */
+	/** The smallest OKLab ΔE from a background to the hover composite over it, across every background. */
 	hoverVisibility: number;
-	/** OKLab ΔE from the hover composite to the pressed composite over `surface.base`. */
+	/** The smallest OKLab ΔE from the hover to the pressed composite, across every background. */
 	hoverToPressedVisibility: number;
 }
 
@@ -98,6 +102,13 @@ const TINT_SURFACES = [
 	'color.background.surface.subdued',
 	'color.background.surface.raised',
 ] as const satisfies ReadonlyArray<keyof SemanticColorValues>;
+const TINT_SUBTLE_FILLS = SEMANTIC_ROLES.map((role) => {
+	return `color.background.${role}.subtle` as const;
+});
+// Everything a state layer can sit on: the three structural surfaces and the six subtle fills.
+const TINT_BACKGROUNDS = [...TINT_SURFACES, ...TINT_SUBTLE_FILLS] as const satisfies ReadonlyArray<
+	keyof SemanticColorValues
+>;
 
 /**
  * Solves hover and pressed tint strengths for one mode from its emitted colour values. Throws
@@ -130,39 +141,41 @@ export function solveInteractionTints(
 			targetHoverAlpha,
 			targetPressedAlpha,
 			limitingMiss: contrastCap.limitingMiss,
-			reason: 'no hover and pressed pair clears the visibility floors below the contrast cap',
+			reason:
+				'no hover and pressed pair clears both visibility floors, and their margin, over every surface and subtle fill below the contrast cap by lowering the hover alone',
 		});
 	}
 	const { hoverAlpha, pressedAlpha } = pair;
 
-	const hoverComposite = compositeEncodedSrgb(tint, base, hoverAlpha);
-	const pressedComposite = compositeEncodedSrgb(tint, base, pressedAlpha);
-	const hoverVisibility = oklabDeltaE(base, hoverComposite);
-	const hoverToPressedVisibility = oklabDeltaE(hoverComposite, pressedComposite);
-
-	if (hoverVisibility < INTERACTION_HOVER_VISIBILITY) {
-		throw new ThemeInteractionTintError({
-			mode,
-			maxAlpha,
-			targetHoverAlpha,
-			targetPressedAlpha,
-			limitingMiss: contrastCap.limitingMiss,
-			reason: `hover visibility ${hoverVisibility.toFixed(3)} over surface.base is below the ${INTERACTION_HOVER_VISIBILITY} floor`,
-		});
-	}
-	for (const surface of TINT_SURFACES) {
-		const background = colorAt(parsed, surface);
+	// Validate the emitted pair against the nominal floors, without the solver's margin.
+	let hoverVisibility = Number.POSITIVE_INFINITY;
+	let hoverToPressedVisibility = Number.POSITIVE_INFINITY;
+	for (const path of TINT_BACKGROUNDS) {
+		const background = colorAt(parsed, path);
 		const hover = compositeEncodedSrgb(tint, background, hoverAlpha);
 		const pressed = compositeEncodedSrgb(tint, background, pressedAlpha);
-		const visibility = oklabDeltaE(hover, pressed);
-		if (visibility < INTERACTION_HOVER_TO_PRESSED_VISIBILITY) {
+		const restToHover = oklabDeltaE(background, hover);
+		const hoverToPressed = oklabDeltaE(hover, pressed);
+		hoverVisibility = Math.min(hoverVisibility, restToHover);
+		hoverToPressedVisibility = Math.min(hoverToPressedVisibility, hoverToPressed);
+		if (restToHover < INTERACTION_HOVER_VISIBILITY) {
 			throw new ThemeInteractionTintError({
 				mode,
 				maxAlpha,
 				targetHoverAlpha,
 				targetPressedAlpha,
 				limitingMiss: contrastCap.limitingMiss,
-				reason: `hover-to-pressed visibility ${visibility.toFixed(3)} over ${surface} is below the ${INTERACTION_HOVER_TO_PRESSED_VISIBILITY} floor`,
+				reason: `hover visibility ${restToHover.toFixed(3)} over ${path} is below the ${INTERACTION_HOVER_VISIBILITY} floor`,
+			});
+		}
+		if (hoverToPressed < INTERACTION_HOVER_TO_PRESSED_VISIBILITY) {
+			throw new ThemeInteractionTintError({
+				mode,
+				maxAlpha,
+				targetHoverAlpha,
+				targetPressedAlpha,
+				limitingMiss: contrastCap.limitingMiss,
+				reason: `hover-to-pressed visibility ${hoverToPressed.toFixed(3)} over ${path} is below the ${INTERACTION_HOVER_TO_PRESSED_VISIBILITY} floor`,
 			});
 		}
 	}
@@ -188,20 +201,19 @@ function closestVisiblePair(
 	const contrastPairs = tintContrastPairs();
 	let closest: { hoverAlpha: number; pressedAlpha: number } | null = null;
 	let closestDistance = Number.POSITIVE_INFINITY;
+	// Hover only ever drops below its target to make room for the pressed state. It rises past the
+	// target only when the target itself is too faint to clear the rest-to-hover floor.
+	let hoverLimitStep = Math.round(targetHoverAlpha * ALPHA_SEARCH_STEPS);
+	let seenVisibleHover = false;
 
 	for (let hoverStep = 0; hoverStep < maxStep; hoverStep++) {
 		const hoverAlpha = hoverStep / ALPHA_SEARCH_STEPS;
-		const hover = compositeEncodedSrgb(
-			tint,
-			colorAt(colorValues, 'color.background.surface.base'),
-			hoverAlpha,
-		);
-		if (
-			oklabDeltaE(colorAt(colorValues, 'color.background.surface.base'), hover) <
-			INTERACTION_HOVER_VISIBILITY
-		) {
-			continue;
+		if (!meetsHoverVisibility(colorValues, tint, hoverAlpha)) continue;
+		if (!seenVisibleHover) {
+			seenVisibleHover = true;
+			hoverLimitStep = Math.max(hoverLimitStep, hoverStep);
 		}
+		if (hoverStep > hoverLimitStep) break;
 
 		let lowStep = hoverStep + 1;
 		let highStep = maxStep;
@@ -283,17 +295,36 @@ function nearestContrastSafePressedAlpha({
 	return null;
 }
 
+/** Whether the hover composite clears the rest-to-hover floor, and its margin, over every background. */
+function meetsHoverVisibility(
+	colorValues: ParsedSemanticColors,
+	tint: Oklch,
+	hoverAlpha: number,
+): boolean {
+	for (const path of TINT_BACKGROUNDS) {
+		const background = colorAt(colorValues, path);
+		const hover = compositeEncodedSrgb(tint, background, hoverAlpha);
+		if (oklabDeltaE(background, hover) < INTERACTION_HOVER_VISIBILITY + VISIBILITY_MARGIN) {
+			return false;
+		}
+	}
+	return true;
+}
+
+/** Whether hover and pressed clear the hover-to-pressed floor, and its margin, over every background. */
 function meetsStateVisibilityFloors(
 	colorValues: ParsedSemanticColors,
 	tint: Oklch,
 	hoverAlpha: number,
 	pressedAlpha: number,
 ): boolean {
-	for (const surface of TINT_SURFACES) {
-		const background = colorAt(colorValues, surface);
+	for (const path of TINT_BACKGROUNDS) {
+		const background = colorAt(colorValues, path);
 		const hover = compositeEncodedSrgb(tint, background, hoverAlpha);
 		const pressed = compositeEncodedSrgb(tint, background, pressedAlpha);
-		if (oklabDeltaE(hover, pressed) < INTERACTION_HOVER_TO_PRESSED_VISIBILITY) return false;
+		if (oklabDeltaE(hover, pressed) < INTERACTION_HOVER_TO_PRESSED_VISIBILITY + VISIBILITY_MARGIN) {
+			return false;
+		}
 	}
 	return true;
 }

@@ -1,14 +1,22 @@
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { CheckboxGroup } from '@luke-ui/react/checkbox-group';
+import { Stack } from '@luke-ui/react/stack';
+import { Text } from '@luke-ui/react/text';
 import { useState } from 'react';
 
 export default () => {
-	const [value, setValue] = useState(['first']);
+	const [days, setDays] = useState(['monday']);
 
 	return (
-		<CheckboxGroup label="Example options" onChange={setValue} value={value}>
-			<CheckboxField label="First option" value="first" />
-			<CheckboxField label="Second option" value="second" />
-		</CheckboxGroup>
+		<Stack gap="space.16" maxInlineSize="20rem">
+			<CheckboxGroup label="Days available" onChange={setDays} value={days}>
+				<CheckboxField label="Monday" value="monday" />
+				<CheckboxField label="Tuesday" value="tuesday" />
+				<CheckboxField label="Wednesday" value="wednesday" />
+			</CheckboxGroup>
+			<Text color="secondary" elementType="p" role="status">
+				{`Days selected: ${days.length}`}
+			</Text>
+		</Stack>
 	);
 };

@@ -15,7 +15,6 @@ import {
 	RadioLabel,
 	RadioRoot,
 } from '../primitives/radio/radio.js';
-import { radioRecipe } from '../primitives/radio/styles.css.js';
 import type { ControlSize } from '../sizing/control-size.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -27,6 +26,7 @@ type _RadioGroupOmit = DistributiveOmit<
 	| 'children'
 	| 'className'
 	| 'isInvalid'
+	| 'isReadOnly'
 	| 'orientation'
 	| 'size'
 	| 'slot'
@@ -123,13 +123,7 @@ export function RadioField(props: RadioFieldProps): JSX.Element {
 				</RadioControl>
 				<span className={fieldRecipe().inlineLabelText()}>{label}</span>
 			</RadioLabel>
-			{description != null ? (
-				<FieldDescription
-					className={radioRecipe().description({ className: fieldRecipe().message() })}
-				>
-					{description}
-				</FieldDescription>
-			) : null}
+			{description != null ? <FieldDescription>{description}</FieldDescription> : null}
 		</RadioRoot>
 	);
 }

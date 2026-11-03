@@ -105,23 +105,6 @@
 			automerge: false,
 		},
 		{
-			// setup-node uses a major-only version; don't expand it to a full minor or patch release.
-			matchManagers: ['github-actions'],
-			matchDepTypes: ['uses-with'],
-			matchPackageNames: ['actions/node-versions'],
-			matchUpdateTypes: ['minor', 'patch'],
-			enabled: false,
-		},
-		{
-			// Group the workflow input with the runtime, keeping its major-only precision.
-			matchManagers: ['github-actions'],
-			matchDepTypes: ['uses-with'],
-			matchPackageNames: ['actions/node-versions'],
-			groupName: 'node',
-			rangeStrategy: 'replace',
-			automerge: false,
-		},
-		{
 			// Native npm support for `devEngines.runtime` (Renovate 44.128.0+). The repo-wide `bump`
 			// strategy would raise `^24.0.0` to `^24.x.y` on every patch. Without a traditional
 			// lockedVersion for this field, `update-lockfile` also falls back to `bump`, so disable
@@ -143,10 +126,11 @@
 			automerge: false,
 		},
 		{
-			// Keep `@types/node` on the Node major in root `devEngines.runtime` (`^24`). Raise this bound
-			// and the catalog entry when that major moves.
+			// Major type updates belong with the runtime. CI checks that their majors agree.
 			matchPackageNames: ['@types/node'],
-			allowedVersions: '<25',
+			matchUpdateTypes: ['major'],
+			groupName: 'node',
+			automerge: false,
 		},
 		{
 			// pnpm is declared only in the root `packageManager` field. Keep it with the regenerated

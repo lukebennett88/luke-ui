@@ -1,8 +1,6 @@
 import type { JSX, ReactNode, Ref } from 'react';
-import { Fragment, useState } from 'react';
 import type { CheckboxGroupProps as RacCheckboxGroupProps } from 'react-aria-components/CheckboxGroup';
 import { CheckboxGroup as RacCheckboxGroup } from 'react-aria-components/CheckboxGroup';
-import type { FieldErrorProps } from '../primitives/field/error.js';
 import type { FieldAccessibleNameProps } from '../primitives/field/field.js';
 import { FieldGroupLayout } from '../primitives/field/group.js';
 import {
@@ -14,8 +12,7 @@ import { ControlSizeContext, useControlSize } from '../sizing/control-size-conte
 import type { ControlSize } from '../sizing/control-size.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import type { CheckboxGroupErrorMessages } from './error-message-context.js';
-import { CheckboxGroupErrorMessagesContext } from './error-message-context.js';
+import { CheckboxGroupContext } from './group-context.js';
 
 type _CheckboxGroupOmit = DistributiveOmit<
 	RacCheckboxGroupProps,
@@ -86,18 +83,7 @@ export function CheckboxGroup(props: CheckboxGroupProps): JSX.Element {
 		...groupProps
 	} = props;
 	const size = useControlSize(sizeProp);
-	const [childErrorMessages, setChildErrorMessages] = useState<CheckboxGroupErrorMessages>(
-		() => new Map(),
-	);
 	const normalizedErrorMessage = normalizeErrorMessage(errorMessage);
-	const authoredMessages = [
-		...(normalizedErrorMessage === undefined ? [] : [normalizedErrorMessage]),
-		...childErrorMessages.values(),
-	];
-	const isInvalid =
-		isInvalidFromErrorMessage(normalizedErrorMessage) ??
-		(childErrorMessages.size > 0 ? true : undefined);
-	const renderErrorMessage = createErrorMessage(authoredMessages);
 
 	return (
 		<ControlSizeContext value={size}>
@@ -106,15 +92,15 @@ export function CheckboxGroup(props: CheckboxGroupProps): JSX.Element {
 				className={className}
 				id={id}
 				isDisabled={isDisabled}
-				isInvalid={isInvalid}
+				isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
 				isRequired={isRequired}
 				onChange={onChange}
 				ref={ref}
 			>
-				<CheckboxGroupErrorMessagesContext value={setChildErrorMessages}>
+				<CheckboxGroupContext value>
 					<FieldGroupLayout
 						description={description}
-						errorMessage={renderErrorMessage}
+						errorMessage={normalizedErrorMessage}
 						isRequired={isRequired ?? false}
 						label={label}
 						necessityIndicator={necessityIndicator}
@@ -122,34 +108,8 @@ export function CheckboxGroup(props: CheckboxGroupProps): JSX.Element {
 					>
 						{children}
 					</FieldGroupLayout>
-				</CheckboxGroupErrorMessagesContext>
+				</CheckboxGroupContext>
 			</RacCheckboxGroup>
 		</ControlSizeContext>
 	);
-}
-
-function createErrorMessage(messages: Array<ReactNode>): FieldErrorProps['children'] {
-	return ({ defaultChildren, validationErrors }) => {
-		const validationMessages = new Set(validationErrors);
-		const authoredMessages = messages.filter((message) => {
-			return typeof message !== 'string' || !validationMessages.has(message);
-		});
-		const renderedMessages = authoredMessages.map((message, index) => (
-			<Fragment key={index}>
-				{index > 0 ? <br /> : null}
-				{message}
-			</Fragment>
-		));
-
-		if (defaultChildren == null) return renderedMessages;
-		if (renderedMessages.length === 0) return defaultChildren;
-
-		return (
-			<>
-				{renderedMessages}
-				<br />
-				{defaultChildren}
-			</>
-		);
-	};
 }

@@ -1,4 +1,12 @@
+import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Form } from '@luke-ui/react/form';
+import {
+	RadioControl,
+	RadioGroupRoot,
+	RadioIndicator,
+	RadioLabel,
+	RadioRoot,
+} from '@luke-ui/react/primitives/radio';
 import { RadioField, RadioGroup } from '@luke-ui/react/radio-group';
 import { Stack } from '@luke-ui/react/stack';
 import { expect, test } from 'vite-plus/test';
@@ -7,6 +15,7 @@ import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { emulateReducedMotion } from '../test-utils/emulate-media.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
 import { render, visualAppearances, flatAppearances } from '../test-utils/render.js';
+import { setInteractionState } from '../test-utils/surface-colors.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -292,6 +301,154 @@ test('size resolves from option to group to Form to medium', () => {
 	expect(indicatorSize('Default medium')).toBe(20);
 });
 
+/** The visual circle, its dot, and the control wrapper for the radio with this accessible name. */
+function radioParts(locator: { getByRole: typeof page.getByRole }, name: string) {
+	const radio = locator.getByRole('radio', { name }).element();
+	const label = radio.closest('label');
+	const indicator = label?.querySelector<HTMLElement>('[aria-hidden="true"]');
+	const mark = indicator?.firstElementChild;
+	if (label == null || indicator == null || !(mark instanceof HTMLElement)) {
+		throw new Error(`Expected the radio parts for ${name}.`);
+	}
+	return { indicator, label, mark };
+}
+
+/** The vertical centre of the label text's first line. */
+function firstLineCentre(label: HTMLElement, text: string): number {
+	const textNode = [...label.querySelectorAll('span')]
+		.map((span) => span.firstChild)
+		.find((node) => node instanceof window.Text && node.data.startsWith(text));
+	if (!(textNode instanceof window.Text)) throw new Error(`Expected the ${text} label text.`);
+	const range = document.createRange();
+	range.selectNodeContents(textNode);
+	const firstLine = range.getClientRects()[0];
+	if (firstLine == null) throw new Error('Expected the label text to render.');
+	return firstLine.top + firstLine.height / 2;
+}
+
+for (const size of ['small', 'medium'] as const) {
+	test(`the ${size} indicator is centred on the first line of a wrapping label, with its dot centred`, () => {
+		const { locator } = render(
+			<div style={{ maxWidth: 200 }}>
+				<RadioGroup defaultValue="plan" label="Plan" name="plan" size={size}>
+					<RadioField label="Wrapping label that needs more than one line to fit" value="plan" />
+				</RadioGroup>
+			</div>,
+		);
+		const { indicator, label, mark } = radioParts(
+			locator,
+			'Wrapping label that needs more than one line to fit',
+		);
+		const indicatorBox = indicator.getBoundingClientRect();
+		const markBox = mark.getBoundingClientRect();
+		const textBox = label.lastElementChild?.getBoundingClientRect();
+
+		expect(textBox?.height).toBeGreaterThan(indicatorBox.height * 1.5);
+		expect(indicatorBox.top + indicatorBox.height / 2).toBeCloseTo(
+			firstLineCentre(label, 'Wrapping'),
+			0,
+		);
+		expect(markBox.left + markBox.width / 2).toBeCloseTo(
+			indicatorBox.left + indicatorBox.width / 2,
+			1,
+		);
+		expect(markBox.top + markBox.height / 2).toBeCloseTo(
+			indicatorBox.top + indicatorBox.height / 2,
+			1,
+		);
+	});
+}
+
+test('the label gap and control width follow Checkbox at each size', () => {
+	const { locator } = render(
+		<>
+			<RadioGroup label="Plan" name="plan">
+				<RadioField label="Radio medium" value="medium" />
+				<RadioField label="Radio small" size="small" value="small" />
+			</RadioGroup>
+			<CheckboxField label="Checkbox medium" />
+			<CheckboxField label="Checkbox small" size="small" />
+		</>,
+	);
+	const textStart = (label: HTMLElement) =>
+		label.lastElementChild?.getBoundingClientRect().left ?? 0;
+	const offset = (label: HTMLElement) => textStart(label) - label.getBoundingClientRect().left;
+
+	for (const size of ['medium', 'small']) {
+		const radioLabel = radioParts(locator, `Radio ${size}`).label;
+		const checkboxLabel = locator
+			.getByRole('checkbox', { name: `Checkbox ${size}` })
+			.element()
+			.closest('label');
+		if (checkboxLabel == null) throw new Error('Expected the checkbox label.');
+		expect(offset(radioLabel)).toBe(offset(checkboxLabel));
+	}
+});
+
+test('the selected radio uses the control finish and shows its dot; the unselected one does not', () => {
+	const { locator } = render(
+		<RadioGroup defaultValue="on" label="Plan" name="plan">
+			<RadioField label="On" value="on" />
+			<RadioField label="Off" value="off" />
+		</RadioGroup>,
+	);
+	const on = radioParts(locator, 'On');
+	const off = radioParts(locator, 'Off');
+	const probe = on.label.appendChild(document.createElement('span'));
+	probe.style.backgroundImage = 'var(--luke-control-finish-resting)';
+	const finish = getComputedStyle(probe).backgroundImage;
+	probe.remove();
+
+	expect(finish).not.toBe('none');
+	expect(getComputedStyle(on.indicator).backgroundImage).toBe(finish);
+	expect(getComputedStyle(off.indicator).backgroundImage).not.toBe(finish);
+	expect(getComputedStyle(on.mark).opacity).toBe('1');
+	expect(getComputedStyle(off.mark).opacity).toBe('0');
+	// Hidden by opacity, not removed: the dot keeps its place so selecting does not shift layout.
+	expect(off.mark.getBoundingClientRect().width).toBeGreaterThan(0);
+});
+
+test('the dot grows in with a transition on selection and hides at once on deselection', async () => {
+	const { locator } = render(
+		<RadioGroup defaultValue="on" label="Plan" name="plan">
+			<RadioField label="On" value="on" />
+			<RadioField label="Off" value="off" />
+		</RadioGroup>,
+	);
+	const on = radioParts(locator, 'On');
+	const off = radioParts(locator, 'Off');
+	const selected = getComputedStyle(on.mark);
+
+	expect(selected.transitionProperty).toBe('opacity, transform');
+	expect(selected.transitionDuration).not.toBe('0s');
+	expect(selected.animationName).toBe('none');
+	expect(getComputedStyle(off.mark).transitionDuration).toBe('0s');
+	expect(getComputedStyle(off.mark).transform).not.toBe('none');
+
+	await userEvent.click(page.getByText('Off'));
+
+	expect(getComputedStyle(on.mark).opacity).toBe('0');
+	expect(getComputedStyle(on.mark).transitionDuration).toBe('0s');
+});
+
+test('reduced motion shows the dot at once, with no growth transition', async () => {
+	await emulateReducedMotion(true);
+	try {
+		const { locator } = render(
+			<RadioGroup defaultValue="on" label="Plan" name="plan">
+				<RadioField label="On" value="on" />
+			</RadioGroup>,
+		);
+		const { indicator, mark } = radioParts(locator, 'On');
+
+		expect(getComputedStyle(mark).transitionDuration).toBe('0s');
+		expect(getComputedStyle(indicator).transitionDuration).toBe('0s');
+		expect(getComputedStyle(mark).opacity).toBe('1');
+	} finally {
+		await emulateReducedMotion(false);
+	}
+});
+
 test('a horizontal group keeps options in DOM order and wraps at the available width', () => {
 	const { locator } = render(
 		<div style={{ maxWidth: 220 }}>
@@ -350,6 +507,87 @@ test('horizontal and invalid groups', { tags: ['visual'] }, async () => {
 	}
 });
 
+const STATE_TRACK_SIZE = '16rem';
+/** Wider than Tactile's `shadow.raised` spread (about 16px), so a state never paints a neighbour. */
+const STATE_GAP = '1.5rem';
+
+const radioStates = ['rest', 'hover', 'pressed'] as const;
+
+type StateCell = {
+	isDisabled?: boolean;
+	isInvalid?: boolean;
+	isSelected: boolean;
+	name: string;
+	size?: 'small';
+	startsRow?: boolean;
+	state: (typeof radioStates)[number];
+};
+
+const stateCells: Array<StateCell> = [
+	...[
+		{ isInvalid: false, isSelected: false, label: 'Unselected' },
+		{ isInvalid: false, isSelected: true, label: 'Selected' },
+		{ isInvalid: true, isSelected: false, label: 'Invalid unselected' },
+		{ isInvalid: true, isSelected: true, label: 'Invalid selected' },
+	].flatMap(({ isInvalid, isSelected, label }) =>
+		radioStates.map((state) => ({ isInvalid, isSelected, name: `${label} ${state}`, state })),
+	),
+	{ isDisabled: true, isSelected: false, name: 'Disabled unselected', state: 'rest' },
+	{ isDisabled: true, isSelected: true, name: 'Disabled selected', state: 'rest' },
+	{ isSelected: true, name: 'Small selected rest', size: 'small', startsRow: true, state: 'rest' },
+	{ isSelected: false, name: 'Small unselected rest', size: 'small', state: 'rest' },
+];
+
+function RadioStateCell({ isDisabled, isInvalid, isSelected, name, size }: StateCell) {
+	return (
+		<RadioGroupRoot
+			aria-label={name}
+			defaultValue={isSelected ? 'option' : undefined}
+			isDisabled={isDisabled}
+			isInvalid={isInvalid}
+			size={size}
+		>
+			<RadioRoot value="option">
+				<RadioLabel>
+					<RadioControl>
+						<RadioIndicator />
+					</RadioControl>
+					{name}
+				</RadioLabel>
+			</RadioRoot>
+		</RadioGroupRoot>
+	);
+}
+
+for (const appearance of [...visualAppearances, ...flatAppearances]) {
+	test(`states in ${appearance.theme} ${appearance.mode}`, { tags: ['visual'] }, async () => {
+		const { locator } = render(
+			<div
+				style={{
+					display: 'grid',
+					gap: STATE_GAP,
+					gridTemplateColumns: `repeat(3, ${STATE_TRACK_SIZE})`,
+					padding: STATE_GAP,
+					width: 'max-content',
+				}}
+			>
+				{stateCells.map((cell) => (
+					<div key={cell.name} style={cell.startsRow ? { gridColumnStart: 1 } : undefined}>
+						<RadioStateCell {...cell} />
+					</div>
+				))}
+			</div>,
+			{ appearance },
+		);
+		for (const { name, state } of stateCells) {
+			const label = locator.getByRole('radio', { exact: true, name }).element().closest('label');
+			if (label == null) throw new Error(`Expected the label for ${name}.`);
+			setInteractionState(label, state);
+		}
+		await captureVisualAppearance(locator, 'radio-group/states', appearance);
+	});
+}
+
 test('keyboard focus ring', { tags: ['visual'] }, async () => {
 	const { locator } = render(
 		<RadioGroup defaultValue="starter" label="Plan" name="plan">
@@ -378,16 +616,39 @@ test('forced-colours options remain visible and operable', { tags: ['visual'] },
 	await emulateForcedColors('active');
 	try {
 		const { container, locator } = render(
-			<RadioGroup defaultValue="starter" label="Plan" name="plan">
-				<RadioField label="Starter" value="starter" />
-				<RadioField label="Pro" value="pro" />
-				<RadioField isDisabled label="Unavailable" value="unavailable" />
-			</RadioGroup>,
+			<Stack>
+				<RadioGroup defaultValue="starter" label="Plan" name="plan">
+					<RadioField label="Starter" value="starter" />
+					<RadioField label="Pro" value="pro" />
+					<RadioField isDisabled label="Unavailable" value="unavailable" />
+				</RadioGroup>
+				<RadioGroup defaultValue="legacy" isDisabled label="Legacy plan" name="legacy">
+					<RadioField label="Legacy" value="legacy" />
+				</RadioGroup>
+			</Stack>,
 		);
 		await userEvent.click(page.getByText('Pro'));
 		expect(locator.getByRole('radio', { name: 'Pro' })).toBeChecked();
 		await expectNoAxeViolations(container);
 		await captureVisual(locator, 'radio-group/forced-colours');
+	} finally {
+		await emulateForcedColors('none');
+	}
+});
+
+test('a disabled selected radio keeps its dot visible in forced colours', async () => {
+	await emulateForcedColors('active');
+	try {
+		const { locator } = render(
+			<RadioGroup defaultValue="legacy" isDisabled label="Legacy plan" name="legacy">
+				<RadioField label="Legacy" value="legacy" />
+			</RadioGroup>,
+		);
+		const { indicator, mark } = radioParts(locator, 'Legacy');
+		const dot = getComputedStyle(mark).backgroundColor;
+
+		expect(dot).not.toBe(getComputedStyle(indicator).backgroundColor);
+		expect(dot).toBe(resolvedBorderColor(indicator, 'GrayText'));
 	} finally {
 		await emulateForcedColors('none');
 	}

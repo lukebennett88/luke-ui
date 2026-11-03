@@ -1,14 +1,26 @@
 import { vars } from '../../../theme/contract.css.js';
-import { ICON_SIZES } from '../../sizing/icon-sizing.js';
-import { focusRing } from '../../styles/focus-ring.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
+import {
+	choiceControl,
+	choiceForcedColors,
+	choiceIndicator,
+	choiceIndicatorStates,
+	choiceSizeVars,
+	chosenForcedSelectors,
+	hovered,
+	pressed,
+} from '../field/choice-control.css.js';
 
-const radioSize = {
-	medium: ICON_SIZES.px20,
-	small: ICON_SIZES.px16,
-} as const;
+/**
+ * The selected mark grows in from this scale. The mark is 8 to 10px across, so a start near 1
+ * changes it by about a pixel and the selection reads as a fade. Half size is a clear grow that
+ * still starts from a visible dot, not from nothing.
+ */
+const markEnterScale = 0.5;
+
+const selectedForcedSelectors = chosenForcedSelectors('[data-selected="true"]');
 
 const radioConfig = {
 	slots: {
@@ -16,114 +28,89 @@ const radioConfig = {
 			minInlineSize: 0,
 		},
 		root: {
-			display: 'grid',
-			gridTemplateColumns: 'max-content minmax(0, 1fr)',
+			display: 'flex',
+			flexDirection: 'column',
+			gap: vars.space['4'],
 			minInlineSize: 0,
-			rowGap: vars.space['4'],
 		},
-		label: { gridColumn: '1 / -1' },
-		control: {
-			alignItems: 'center',
-			blockSize: `max(1lh, ${radioSize.medium})`,
-			display: 'inline-flex',
-			flexShrink: 0,
-			inlineSize: radioSize.medium,
-			justifyContent: 'center',
-			marginBlock: `calc((1lh - ${radioSize.medium}) / 2)`,
-		},
+		control: choiceControl,
 		indicator: {
 			'@media': {
 				'(forced-colors: active)': {
-					backgroundColor: 'Canvas',
-					borderColor: 'CanvasText',
-					forcedColorAdjust: 'auto',
+					...choiceForcedColors.indicator,
 					selectors: {
-						'[data-focus-visible="true"] &': {
-							outlineColor: 'Highlight',
-						},
-						'[data-selected="true"] &, [data-invalid="true"][data-selected="true"] &': {
-							backgroundColor: 'Highlight',
-							borderColor: 'Highlight',
-							color: 'HighlightText',
-						},
-						'[data-disabled="true"] &': {
-							backgroundColor: 'Canvas',
-							borderColor: 'GrayText',
-							color: 'GrayText',
-						},
+						'[data-focus-visible="true"] &': choiceForcedColors.focusVisible,
+						// The fill rule repeats every selected state selector that sets an author colour, at
+						// the same specificity, so hover, press, and invalid colours cannot show through.
+						// Disabled comes last so a disabled radio reads as disabled whether it is selected or
+						// not.
+						[selectedForcedSelectors]: choiceForcedColors.chosen,
+						[choiceForcedColors.disabledSelector]: choiceForcedColors.disabled,
 					},
 				},
 				'(prefers-reduced-motion: reduce)': {
 					transitionDuration: '0s',
 				},
 			},
-			backgroundColor: vars.color.background.surface.base,
-			blockSize: radioSize.medium,
-			borderColor: vars.color.border.control.rest,
+			...choiceIndicator,
 			borderRadius: vars.radius.full,
-			borderStyle: 'solid',
-			borderWidth: '1px',
 			boxSizing: 'border-box',
-			display: 'inline-flex',
-			inlineSize: radioSize.medium,
-			justifyContent: 'center',
-			transitionDuration: vars.motion.feedback.duration,
-			transitionProperty: 'background-color, border-color, opacity',
-			transitionTimingFunction: vars.motion.feedback.easing,
 			selectors: {
-				'[data-disabled="true"] &': {
-					opacity: vars.interaction.disabledOpacity,
-				},
-				'[data-focus-visible="true"] &': focusRing(vars.color.focus),
-				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
-					borderColor: vars.color.border.control.hover,
-				},
-				'[data-invalid="true"] &': {
-					borderColor: vars.color.border.danger.strong,
-				},
-				'[data-selected="true"] &': {
-					backgroundColor: vars.color.background.accent.solid.rest,
-					color: vars.color.foreground.accent.onSolid,
-					borderColor: vars.color.background.accent.solid.rest,
-				},
-				'[data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.accent.solid.hover,
-						color: vars.color.foreground.accent.onSolid,
-						borderColor: vars.color.background.accent.solid.hover,
-					},
-				'[data-invalid="true"][data-selected="true"] &': {
-					backgroundColor: vars.color.background.danger.solid.rest,
-					color: vars.color.foreground.danger.onSolid,
-					borderColor: vars.color.border.danger.strong,
-				},
-				'[data-invalid="true"][data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.danger.solid.hover,
-						color: vars.color.foreground.danger.onSolid,
-						borderColor: vars.color.border.danger.strong,
-					},
+				'[data-disabled="true"] &': choiceIndicatorStates.disabled,
+				'[data-focus-visible="true"] &': choiceIndicatorStates.focusVisible,
+				[hovered()]: choiceIndicatorStates.hover,
+				[pressed()]: choiceIndicatorStates.pressed,
+				'[data-invalid="true"] &': choiceIndicatorStates.invalid,
+				'[data-selected="true"] &': choiceIndicatorStates.chosen,
+				[hovered('[data-selected="true"]')]: choiceIndicatorStates.chosenHover,
+				[pressed('[data-selected="true"]')]: choiceIndicatorStates.chosenPressed,
+				'[data-invalid="true"][data-selected="true"] &': choiceIndicatorStates.invalidChosen,
+				[hovered('[data-invalid="true"]')]: choiceIndicatorStates.invalidHover,
+				[pressed('[data-invalid="true"]')]: choiceIndicatorStates.invalidPressed,
+				[hovered('[data-invalid="true"][data-selected="true"]')]:
+					choiceIndicatorStates.invalidChosenHover,
+				[pressed('[data-invalid="true"][data-selected="true"]')]:
+					choiceIndicatorStates.invalidChosenPressed,
 			},
 		},
+		// The mark is always laid out and centred. Unselected it is transparent and slightly small;
+		// selected it grows in. Only the selected state carries a transition, and a transition runs
+		// with the destination state's properties, so selecting animates while deselecting hides at
+		// once. That leaves one visible mark at a time, as Checkbox does. A transition, unlike
+		// keyframes, retargets from wherever it is, so rapid changes stay interruptible.
 		mark: {
+			'@media': {
+				'(forced-colors: active)': {
+					// Disabled comes last, as it does on the indicator, so a disabled dot is not
+					// `HighlightText` on the indicator's `Canvas`.
+					selectors: {
+						'[data-selected="true"] &': { backgroundColor: 'HighlightText' },
+						'[data-disabled="true"] &': { backgroundColor: 'GrayText' },
+					},
+				},
+				// The mark appears with no growth. Colour feedback on the circle still transitions.
+				'(prefers-reduced-motion: reduce)': {
+					selectors: {
+						'[data-selected="true"] &': { transitionDuration: '0s' },
+					},
+				},
+			},
 			backgroundColor: 'currentColor',
 			blockSize: '50%',
 			borderRadius: vars.radius.full,
-			display: 'none',
+			flexShrink: 0,
 			inlineSize: '50%',
-			'@media': {
-				'(forced-colors: active)': {
-					selectors: {
-						'[data-selected="true"] &': { backgroundColor: 'HighlightText' },
-					},
+			opacity: 0,
+			transform: `scale(${markEnterScale})`,
+			selectors: {
+				'[data-selected="true"] &': {
+					opacity: 1,
+					transform: 'scale(1)',
+					transitionDuration: vars.motion.feedback.duration,
+					transitionProperty: 'opacity, transform',
+					transitionTimingFunction: vars.motion.feedback.easing,
 				},
 			},
-			selectors: {
-				'[data-selected="true"] &': { display: 'block' },
-			},
-		},
-		description: {
-			gridColumn: '2',
 		},
 	},
 	defaultVariants: {
@@ -131,22 +118,8 @@ const radioConfig = {
 	},
 	variants: {
 		size: {
-			medium: {
-				control: {
-					blockSize: `max(1lh, ${radioSize.medium})`,
-					inlineSize: radioSize.medium,
-					marginBlock: `calc((1lh - ${radioSize.medium}) / 2)`,
-				},
-				indicator: { blockSize: radioSize.medium, inlineSize: radioSize.medium },
-			},
-			small: {
-				control: {
-					blockSize: `max(1lh, ${radioSize.small})`,
-					inlineSize: radioSize.small,
-					marginBlock: `calc((1lh - ${radioSize.small}) / 2)`,
-				},
-				indicator: { blockSize: radioSize.small, inlineSize: radioSize.small },
-			},
+			medium: { root: { vars: choiceSizeVars.medium } },
+			small: { root: { vars: choiceSizeVars.small } },
 		},
 	},
 } as const satisfies SlottedConfigInput;

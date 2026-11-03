@@ -190,6 +190,16 @@ At 4.5:1:
   subtle resting backgrounds, including cross-role combinations.
 - Each role's `onSolid` against its solid rest, hover, and pressed backgrounds.
 
+Separately, the compiler guarantees that interaction states are visibly different. Every role's
+solid hover and pressed colours differ from the state before them, and the shared interaction tint
+does the same over the surfaces and subtle backgrounds. A `shadow` or `controlFinish` never counts
+toward that, so a flat theme still shows every state. Whether a state looks raised or recessed is up
+to your materials. If your surfaces leave no tint that is both visibly different and readable,
+`defineTheme` throws `ThemeInteractionTintError`, naming the mode and the limiting pair. Move the
+surface or subtle background it names. The
+[generation guide](https://github.com/lukebennett88/luke-ui/blob/main/docs/THEME_COLOUR_GENERATION.md#interaction-states)
+describes how the states are generated.
+
 At 3:1, against every surface:
 
 - `color.border.control.rest`, `color.border.control.hover`, and `color.border.control.pressed`,
@@ -242,17 +252,13 @@ text, an icon, or one of the colours above.
 
 ### When a source colour cannot be used
 
-Some lightnesses have no near-white or near-black text that reaches 4.5:1. When you author one
-chromatic role as one string, `defineTheme` keeps its hue, searches for a lightness that works, and
-may reduce its chroma to fit sRGB. It also adapts a missing mode from the side you set. An explicit
-side bypasses this adaptation, so choose a lightness that works, or author one string and let
-`defineTheme` adapt it.
+A narrow band of lightnesses has no near-white or near-black text that reaches 4.5:1. When you
+author one chromatic role as one string, `defineTheme` keeps its hue, searches for a lightness that
+works, and may reduce its chroma to fit sRGB. It also adapts a missing mode from the side you set.
 
-An explicit per-mode chromatic source can throw `ThemeGenerationError` when its solid colour cannot
-carry 4.5:1 `onSolid` text. The error names the failing `role` and `mode`. `bestAttempt` records the
-closest solid colour and the contrast it reached. `diagnostics` contains the families completed in
-that mode before the failure. These generation failures and `ThemeContrastError` are separate from
-input validation.
+When you set a mode explicitly, `defineTheme` uses that colour for the mode instead of adapting it.
+Its solid can still come out lighter or darker than you authored, because the compiler adjusts a
+solid's lightness until `onSolid` text reaches 4.5:1.
 
 ## Continue learning
 

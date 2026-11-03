@@ -5,15 +5,17 @@ export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="Vertical">
-				<RadioGroup label="Example options">
-					<RadioField label="First option" value="first" />
-					<RadioField label="Second option" value="second" />
+				<RadioGroup label="Text alignment">
+					<RadioField label="Left" value="left" />
+					<RadioField label="Centre" value="centre" />
+					<RadioField label="Right" value="right" />
 				</RadioGroup>
 			</ComparisonItem>
 			<ComparisonItem label="Horizontal">
-				<RadioGroup label="Example options" orientation="horizontal">
-					<RadioField label="First option" value="first" />
-					<RadioField label="Second option" value="second" />
+				<RadioGroup label="Text alignment" orientation="horizontal">
+					<RadioField label="Left" value="left" />
+					<RadioField label="Centre" value="centre" />
+					<RadioField label="Right" value="right" />
 				</RadioGroup>
 			</ComparisonItem>
 		</Comparison>

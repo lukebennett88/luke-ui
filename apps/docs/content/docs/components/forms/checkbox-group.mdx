@@ -35,12 +35,19 @@ The size changes the control without changing the label typography.
 ## Validation
 
 Set `isRequired` to require at least one selection, or pass `validate` to check the selected values.
-Pass `errorMessage` for an error from a form library or server. A non-empty message marks the group
-invalid. The description stays visible while the group is invalid. Read
-[Validation](/docs/validation) for where messages come from and how to write them.
+Set `isRequired` or pass `validate` on a `CheckboxField` when that option needs its own rule. React
+Aria shows these native validation messages in the group's shared error area.
+
+Pass `errorMessage` to `CheckboxGroup` for a controlled error from a form library or server. A
+non-empty message marks the group invalid and takes precedence over native validation messages.
+`CheckboxField.errorMessage` is unsupported inside the group and warns in development. The
+description stays visible while the group is invalid. Read [Validation](/docs/validation) for where
+messages come from and how to write them.
 
 By default, a required group shows a marker after its label. Read
 [Required fields](/docs/forms#required-fields) for the `necessityIndicator` values.
+
+Submit without selecting a day to see the validation message.
 
 <ExampleBlock src="checkbox-group/validation" title="Checkbox Group: Validation" />
 

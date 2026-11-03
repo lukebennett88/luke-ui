@@ -58,7 +58,7 @@ catalog:
   '@tanstack/router-cli': ^1.167.46
   '@tanstack/start-static-server-functions': ^1.167.44
   '@types/mdx': ^2.0.14
-  '@types/node': ^24.19.2
+  '@types/node': ^26.6.6
   '@types/pngjs': ^6.0.5
   '@types/react': ^19.3.0
   '@types/react-dom': ^19.3.0

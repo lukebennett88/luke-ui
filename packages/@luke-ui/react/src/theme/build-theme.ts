@@ -224,7 +224,6 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		try {
 			const generated = generateFamilyWithDiagnostics({
 				background: base,
-				interactionSource: textPrimary,
 				mode,
 				role,
 				source: source[role],

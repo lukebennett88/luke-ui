@@ -1,7 +1,7 @@
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { CheckboxGroup } from '@luke-ui/react/checkbox-group';
 import { Form } from '@luke-ui/react/form';
-import { expect, test } from 'vite-plus/test';
+import { expect, test, vi } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
@@ -130,12 +130,11 @@ test('group required validation shows one shared group error and keeps the descr
 	expect(first.getAttribute('aria-describedby')).toBe(second.getAttribute('aria-describedby'));
 });
 
-test('child validation errors and controlled errorMessage are retained once at group level', async () => {
+test('child validate presents its error at group level', async () => {
 	render(
 		<form>
-			<CheckboxGroup errorMessage="Choose a supported topic." label="Topics">
+			<CheckboxGroup label="Topics">
 				<CheckboxField
-					errorMessage="Design is unavailable."
 					label="Design"
 					validate={(isSelected) => (isSelected ? null : 'Select Design to continue.')}
 					value="design"
@@ -148,37 +147,31 @@ test('child validation errors and controlled errorMessage are retained once at g
 	const design = checkbox('Design');
 	const engineering = checkbox('Engineering');
 
-	expect(design).toHaveAttribute('aria-invalid', 'true');
-	await expect.poll(() => getDescribedText(design)).toContain('Choose a supported topic.');
-	const controlledDescription = getDescribedText(design);
-	expect(controlledDescription).toContain('Choose a supported topic.');
-	expect(controlledDescription).toContain('Design is unavailable.');
-	expect(occurrenceCount(controlledDescription, 'Choose a supported topic.')).toBe(1);
-	expect(occurrenceCount(controlledDescription, 'Design is unavailable.')).toBe(1);
-	expect(design.getAttribute('aria-describedby')).toBe(
-		engineering.getAttribute('aria-describedby'),
-	);
-
 	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
-
 	await expect.poll(() => getDescribedText(design)).toContain('Select Design to continue.');
-	const validationDescription = getDescribedText(design);
-	expect(validationDescription).toContain('Choose a supported topic.');
-	expect(validationDescription).toContain('Design is unavailable.');
-	expect(validationDescription).toContain('Select Design to continue.');
-	for (const message of [
-		'Choose a supported topic.',
-		'Design is unavailable.',
-		'Select Design to continue.',
-	]) {
-		expect(occurrenceCount(validationDescription, message)).toBe(1);
-	}
+	expect(occurrenceCount(getDescribedText(design), 'Select Design to continue.')).toBe(1);
 	expect(design.getAttribute('aria-describedby')).toBe(
 		engineering.getAttribute('aria-describedby'),
 	);
 });
 
-test('child validation messages follow their mounted fields and clear when selection changes', async () => {
+test('warns when a grouped child supplies an errorMessage in development', () => {
+	const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+	try {
+		render(
+			<CheckboxGroup label="Topics">
+				<CheckboxField errorMessage="Child error." label="Design" value="design" />
+			</CheckboxGroup>,
+		);
+		expect(warn).toHaveBeenCalledWith(
+			'CheckboxField errorMessage is not supported inside CheckboxGroup. Use CheckboxGroup errorMessage instead.',
+		);
+	} finally {
+		warn.mockRestore();
+	}
+});
+
+test('child validation errors clear when selection changes', async () => {
 	render(
 		<form>
 			<CheckboxGroup label="Topics">
@@ -199,35 +192,6 @@ test('child validation messages follow their mounted fields and clear when selec
 	await userEvent.click(page.getByText('Design', { exact: true }));
 
 	await expect.poll(() => getDescribedText(design)).not.toContain('Select Design to continue.');
-	expect(getDescribedText(design)).not.toContain('Select Design to continue.');
-});
-
-test('changing and unmounting a child removes its obsolete error while the group message updates', async () => {
-	const { rerender } = render(
-		<CheckboxGroup errorMessage="Choose a topic." label="Topics">
-			<CheckboxField errorMessage="Design is unavailable." label="Design" value="design" />
-			<CheckboxField label="Engineering" value="engineering" />
-		</CheckboxGroup>,
-	);
-	const design = checkbox('Design');
-	const engineering = checkbox('Engineering');
-
-	await expect.poll(() => getDescribedText(design)).toContain('Choose a topic.');
-	const initialDescription = getDescribedText(design);
-	expect(initialDescription).toContain('Choose a topic.');
-	expect(initialDescription).toContain('Design is unavailable.');
-	expect(occurrenceCount(initialDescription, 'Choose a topic.')).toBe(1);
-	expect(occurrenceCount(initialDescription, 'Design is unavailable.')).toBe(1);
-
-	rerender(
-		<CheckboxGroup errorMessage="Choose a supported topic." label="Topics">
-			<CheckboxField label="Engineering" value="engineering" />
-		</CheckboxGroup>,
-	);
-
-	await expect.poll(() => getDescribedText(engineering)).toContain('Choose a supported topic.');
-	expect(getDescribedText(engineering)).not.toContain('Choose a topic.');
-	expect(getDescribedText(engineering)).not.toContain('Design is unavailable.');
 });
 
 test('child required validation contributes to group validity', async () => {
@@ -248,6 +212,7 @@ test('child required validation contributes to group validity', async () => {
 	expect(terms).toHaveAttribute('aria-invalid', 'true');
 	const message = 'Please check this box if you want to proceed.';
 	expect(occurrenceCount(getDescribedText(terms), message)).toBe(1);
+	expect(getDescribedText(checkbox('News'))).toBe(getDescribedText(terms));
 });
 
 test('Form controlSize supplies the group size while individual child size can override it', () => {
@@ -340,18 +305,23 @@ test('visual states across themes', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(
 			<Stack>
-				<CheckboxGroup description="Choose any that apply." label="Vertical choices">
-					<CheckboxField defaultSelected label="Selected" value="selected" />
+				<CheckboxGroup
+					defaultValue={['selected']}
+					description="Choose any that apply."
+					label="Vertical choices"
+				>
+					<CheckboxField label="Selected" value="selected" />
 					<CheckboxField isIndeterminate label="Mixed" value="mixed" />
 				</CheckboxGroup>
 				<CheckboxGroup
+					defaultValue={['engineering']}
 					errorMessage="Select at least one topic."
 					isDisabled
 					label="Horizontal choices"
 					orientation="horizontal"
 				>
 					<CheckboxField label="Design" value="design" />
-					<CheckboxField defaultSelected label="Engineering" value="engineering" />
+					<CheckboxField label="Engineering" value="engineering" />
 				</CheckboxGroup>
 			</Stack>,
 			{ appearance },
@@ -367,9 +337,9 @@ test(
 		for (const appearance of flatAppearances) {
 			const { locator } = render(
 				<Stack>
-					<CheckboxGroup errorMessage="Choose one." label="States">
+					<CheckboxGroup defaultValue={['checked']} errorMessage="Choose one." label="States">
 						<CheckboxField label="Unchecked" value="unchecked" />
-						<CheckboxField defaultSelected label="Checked" value="checked" />
+						<CheckboxField label="Checked" value="checked" />
 						<CheckboxField isIndeterminate label="Indeterminate" value="indeterminate" />
 						<CheckboxField isDisabled label="Disabled" value="disabled" />
 					</CheckboxGroup>
@@ -381,11 +351,11 @@ test(
 	},
 );
 
-test('standalone CheckboxField errors stay outside the group message context', async () => {
+test('standalone CheckboxField errors stay outside the group', async () => {
 	render(
 		<>
 			<CheckboxGroup errorMessage="Group error." label="Topics">
-				<CheckboxField errorMessage="Group child error." label="Grouped choice" value="grouped" />
+				<CheckboxField label="Grouped choice" value="grouped" />
 			</CheckboxGroup>
 			<CheckboxField errorMessage="Standalone error." label="Standalone" />
 		</>,
@@ -394,11 +364,6 @@ test('standalone CheckboxField errors stay outside the group message context', a
 	const groupChild = checkbox('Grouped choice');
 	const standalone = checkbox('Standalone');
 	await expect.poll(() => getDescribedText(groupChild)).toContain('Group error.');
-	const groupDescription = getDescribedText(groupChild);
-	expect(groupDescription).toContain('Group child error.');
-	expect(occurrenceCount(groupDescription, 'Group error.')).toBe(1);
-	expect(occurrenceCount(groupDescription, 'Group child error.')).toBe(1);
 	await expect.poll(() => getDescribedText(standalone)).toContain('Standalone error.');
 	expect(getDescribedText(standalone)).not.toContain('Group error.');
-	expect(getDescribedText(standalone)).not.toContain('Group child error.');
 });

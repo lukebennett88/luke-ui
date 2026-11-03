@@ -9,7 +9,6 @@ import type { FamilyRole, ScaleFamily } from './scale.js';
 import {
 	FAMILY_RUNG,
 	generateFamily,
-	highContrastText,
 	INTERACTION_HOVER_STRENGTH,
 	INTERACTION_PRESSED_STRENGTH,
 	mixInteractionState,
@@ -78,11 +77,9 @@ const SOURCE: Record<ColorMode, Record<FamilyRole, string>> = {
 };
 
 function buildFamilies(mode: ColorMode, background: Oklch): Record<FamilyRole, ScaleFamily> {
-	const textPrimary = highContrastText(parseColor(SOURCE[mode].neutral), mode);
 	const family = (role: FamilyRole) => {
 		return generateFamily({
 			background,
-			interactionSource: textPrimary,
 			mode,
 			role,
 			source: parseColor(SOURCE[mode][role]),
@@ -154,11 +151,12 @@ describe('mapSemanticColors', () => {
 					const foreground = family[FAMILY_RUNG.foreground];
 					expect(result[`color.background.${role}.subtle`]).toBe(formatOklch(subtle));
 					expect(result[`color.background.${role}.solid.rest`]).toBe(formatOklch(solid));
+					// Solid states are the family's own lightness-stepped colours, never a mix toward text.
 					expect(result[`color.background.${role}.solid.hover`]).toBe(
-						formatOklch(mixInteractionState(solid, textPrimary, INTERACTION_HOVER_STRENGTH)),
+						formatOklch(family.solidHover),
 					);
 					expect(result[`color.background.${role}.solid.pressed`]).toBe(
-						formatOklch(mixInteractionState(solid, textPrimary, INTERACTION_PRESSED_STRENGTH)),
+						formatOklch(family.solidPressed),
 					);
 					expect(result[`color.foreground.${role}.rest`]).toBe(formatOklch(foreground));
 					expect(result[`color.foreground.${role}.hover`]).toBe(

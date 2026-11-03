@@ -1,4 +1,4 @@
-import { FieldDescription } from '@luke-ui/react/primitives/field';
+import { FieldLabel } from '@luke-ui/react/primitives/field';
 import {
 	RadioControl,
 	RadioGroupRoot,
@@ -6,25 +6,30 @@ import {
 	RadioLabel,
 	RadioRoot,
 } from '@luke-ui/react/primitives/radio';
+import { Stack } from '@luke-ui/react/stack';
 
 export default () => {
 	return (
-		<RadioGroupRoot aria-label="Choose a size" defaultValue="medium">
-			{[
-				{ label: 'Small', value: 'small' },
-				{ description: 'Example description.', label: 'Medium', value: 'medium' },
-				{ label: 'Large', value: 'large' },
-			].map(({ description, label, value }) => (
-				<RadioRoot key={value} value={value}>
+		<RadioGroupRoot name="alignment">
+			<Stack gap="space.8">
+				<FieldLabel slot="label">Text alignment</FieldLabel>
+				<RadioRoot value="left">
 					<RadioLabel>
 						<RadioControl>
 							<RadioIndicator />
 						</RadioControl>
-						{label}
+						Left
 					</RadioLabel>
-					{description != null ? <FieldDescription>{description}</FieldDescription> : null}
 				</RadioRoot>
-			))}
+				<RadioRoot value="right">
+					<RadioLabel>
+						<RadioControl>
+							<RadioIndicator />
+						</RadioControl>
+						Right
+					</RadioLabel>
+				</RadioRoot>
+			</Stack>
 		</RadioGroupRoot>
 	);
 };

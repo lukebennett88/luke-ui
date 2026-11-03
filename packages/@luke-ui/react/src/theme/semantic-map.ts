@@ -1,7 +1,8 @@
 /**
  * The one default semantic colour mapping. `mapSemanticColors` aliases every generated colour
  * contract leaf onto a private scale family's step, a generated surface, or a generated interaction
- * state. Resting role colours are a lookup. Hover and pressed colours mix that rest colour toward
+ * state. Resting role colours are a lookup. Solid hover and pressed colours are the family's
+ * lightness-stepped states. Foreground hover and pressed colours mix their rest colour toward
  * `text.primary` at fixed strengths. The map never distorts a family or surface to make a leaf fit.
  *
  * The role list it keys off comes from `contrast-policy.ts`, which `build-theme.ts`'s validation
@@ -111,7 +112,11 @@ function mapRoleColorValues(
 		SEMANTIC_ROLES.flatMap((role) => {
 			const family = families[role];
 			const subtle = formatOklch(family[FAMILY_RUNG.subtle]);
-			const solid = interactionStates(family[FAMILY_RUNG.solid], textPrimary);
+			const solid = {
+				rest: formatOklch(family[FAMILY_RUNG.solid]),
+				hover: formatOklch(family.solidHover),
+				pressed: formatOklch(family.solidPressed),
+			};
 			const foreground = interactionStates(family[FAMILY_RUNG.foreground], textPrimary);
 			return [
 				pathEntry(`color.background.${role}.subtle`, subtle),

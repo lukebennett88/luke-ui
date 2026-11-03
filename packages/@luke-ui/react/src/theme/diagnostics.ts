@@ -26,6 +26,14 @@ export interface SolidAnchorDiagnostics {
 	adaptedForOnSolid: boolean;
 	/** The lightness range the solid-anchor search was allowed to explore. */
 	band: [number, number];
+	/**
+	 * How much of the search window is left, in OKLCH lightness. For a vibrant role it is measured
+	 * against the full ±0.035 window around the source lightness clamped to the 0.3 to 0.92 range,
+	 * `0.035 - |resolved - clamped source|`, even where `band` is cut off by that range. For the neutral role it is the distance from
+	 * the resolved lightness to the nearest edge of its curated `band`. A value near zero means the
+	 * on-solid search had almost no room left.
+	 */
+	distanceToEdge: number;
 	/** The lightness the solid anchor resolved to. */
 	resolvedLightness: number;
 	/** Whether on-solid text clears WCAG AA across the public solid rest, hover, and pressed colours. */
@@ -53,6 +61,21 @@ export interface FamilyDiagnostics {
 	role: FamilyRole;
 	/** How the step-9 solid anchor was resolved. */
 	solidAnchor: SolidAnchorDiagnostics;
+	/** The public solid fills and how far apart they step, as emitted. */
+	solidStates: {
+		/** The step direction: `lighter` from dark on-solid text, `darker` from light text. */
+		direction: 'lighter' | 'darker';
+		/** The hover fill. */
+		hover: Oklch;
+		/** OKLab ΔE from the hover fill to the pressed fill. */
+		hoverToPressedVisibility: number;
+		/** The pressed fill. */
+		pressed: Oklch;
+		/** The resting fill. */
+		rest: Oklch;
+		/** OKLab ΔE from the resting fill to the hover fill. */
+		restToHoverVisibility: number;
+	};
 	/** The family character the generator was given. */
 	source: Oklch;
 }

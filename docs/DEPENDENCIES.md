@@ -123,40 +123,37 @@ A local developer bootstraps by installing pnpm itself. `pnpm install` then down
 Node runtime and links it as `node_modules/.bin/node`, so `pnpm exec node` and pnpm scripts run it.
 Bare `node` is project-aware only when pnpm's global Node shim is the `node` found first on `PATH`.
 
-Cloudflare Pages keeps its host-level `NODE_VERSION=24` setting on the Pages project. Its build
-image does not document `devEngines.runtime` as a Node version selector.
+Cloudflare Pages documents `NODE_VERSION`, `.nvmrc`, and `.node-version` as host Node selectors, but
+does not list `devEngines.runtime`. Its current Pages project setting is `NODE_VERSION=24`. The host
+must be able to bootstrap pnpm before pnpm installs the runtime from the manifest. Test a preview
+with that setting removed before relying on the build image default, and check the pnpm and Node
+versions used during install and build. Until that works, update the Pages setting when the Node
+major changes. No extra version file is needed in the repository.
 
-Renovate's npm manager reads `devEngines.runtime` natively (from Renovate 44.128.0). The repository
-does not add a custom manager for that field. The repo-wide `rangeStrategy: 'bump'` would raise
-`^24.0.0` on every in-range patch, so `.github/renovate.json5` disables non-major updates of the
-Node runtime range and only proposes major Node upgrades, grouped as `node` and never automerged.
-The major rule uses `rangeStrategy: 'replace'` on its own `packageRules` entry: Renovate rejects
-combining `matchUpdateTypes` with `rangeStrategy` in the same rule. Monthly `lockFileMaintenance`
-can still refresh the resolved lockfile runtime. Renovate follows Node's release schedule and only
-proposes stable LTS lines for majors.
+Renovate's npm manager reads `devEngines.runtime` natively (from Renovate 44.128.0). The repo-wide
+`rangeStrategy: 'bump'` would raise `^24.0.0` on every in-range patch, so the Node runtime rule
+suppresses non-major manifest updates. The separate major rule uses `replace` to retain the caret
+range, groups the update as `node`, and disables automerge. Renovate does not allow `rangeStrategy`
+and `matchUpdateTypes` in the same rule. Monthly lockfile maintenance can refresh the resolved
+runtime. Renovate follows Node's release schedule and proposes stable LTS lines for majors.
 
 Other tools, including Taze, may update the lower bound of a caret range when they bump Node. That
 is legitimate for those tools. When a routine dependency sweep should not change the Node minimum,
 exclude Node from that command (for example `taze major -w` with an ignore, or omit the runtime
 field from the update set).
 
-`@types/node` tracks that Node major. Renovate's `allowedVersions: '<25'` blocks newer majors, and
-an `overrides` entry forces every copy onto the catalog so optional peers cannot drift. When the
-Node major PR lands, update `allowedVersions` and the catalog entry in the same change.
+`@types/node` tracks the Node major, and an `overrides` entry forces every copy onto the catalog.
+Renovate groups its major updates with the Node runtime and never automerges them. The Renovate Node
+configuration check compares the manifest and catalog majors, so an incomplete group fails CI. The
+two releases can arrive at different times, and a maintainer may need to complete the group by hand.
+Non-major type updates stay in the automerged `type definitions` group.
 
-The `actions/setup-node` workflow input also uses the Node major, currently `24`. Renovate extracts
-it as `actions/node-versions` with the dependency name `node`. Its non-major updates are disabled,
-and `replace` preserves major-only precision on a major upgrade. The workflow input and the root
-runtime use the `node` group and are never automerged. Their sources can publish at different times,
-so review the resulting PR for both declarations before merging.
+GitHub Actions uses `node-version-file: package.json` for `actions/setup-node`. The action reads
+`devEngines.runtime`, so its Node version follows the manifest without a separate workflow pin.
+Other workflow actions use major tags, group into one `github actions` pull request, and are never
+automerged.
 
-When upgrading Node, update `@types/node` in the catalog and raise its `allowedVersions` bound in
-`.github/renovate.json5`. Update every workflow Node input to the same major, and change the
-Cloudflare Pages `NODE_VERSION` setting for each deployment environment. Check the lockfile and the
-Cloudflare preview before merging. Renovate cannot coordinate the type bound or Cloudflare settings
-automatically, so a maintainer must update them.
-
-The Renovate Node configuration check exercises extraction, rules, and updates with the pinned
-Renovate version in `.github/workflows/renovate-node.yml`. Update that pin when validating against a
-newer Renovate release. Other workflow actions use major tags, group into one `github actions` pull
-request, and are never automerged.
+The Renovate Node configuration check exercises extraction and updates against isolated fixtures and
+checks the actual workflow inputs and Node and type ranges. It runs with the pinned Renovate version
+in `.github/workflows/renovate-node.yml`. Update that pin when validating a newer Renovate release.
+For a Node major upgrade, review the type update, lockfile, and Cloudflare preview and host setting.

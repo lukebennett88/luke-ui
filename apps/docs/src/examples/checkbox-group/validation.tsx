@@ -12,9 +12,15 @@ export default () => {
 	return (
 		<form onSubmit={handleSubmit}>
 			<Stack gap="space.16" maxInlineSize="20rem">
-				<CheckboxGroup description="Choose at least one option." isRequired label="Example options">
-					<CheckboxField label="First option" value="first" />
-					<CheckboxField label="Second option" value="second" />
+				<CheckboxGroup
+					description="Choose at least one day."
+					isRequired
+					label="Days available"
+					name="days"
+				>
+					<CheckboxField label="Monday" value="monday" />
+					<CheckboxField label="Tuesday" value="tuesday" />
+					<CheckboxField label="Wednesday" value="wednesday" />
 				</CheckboxGroup>
 				<Button type="submit">Submit</Button>
 			</Stack>

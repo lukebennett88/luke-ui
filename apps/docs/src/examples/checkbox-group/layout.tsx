@@ -6,15 +6,17 @@ export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="Vertical">
-				<CheckboxGroup label="Example options">
-					<CheckboxField label="First option" value="first" />
-					<CheckboxField label="Second option" value="second" />
+				<CheckboxGroup label="Days available">
+					<CheckboxField label="Monday" value="monday" />
+					<CheckboxField label="Tuesday" value="tuesday" />
+					<CheckboxField label="Wednesday" value="wednesday" />
 				</CheckboxGroup>
 			</ComparisonItem>
 			<ComparisonItem label="Horizontal">
-				<CheckboxGroup label="Example options" orientation="horizontal">
-					<CheckboxField label="First option" value="first" />
-					<CheckboxField label="Second option" value="second" />
+				<CheckboxGroup label="Days available" orientation="horizontal">
+					<CheckboxField label="Monday" value="monday" />
+					<CheckboxField label="Tuesday" value="tuesday" />
+					<CheckboxField label="Wednesday" value="wednesday" />
 				</CheckboxGroup>
 			</ComparisonItem>
 		</Comparison>

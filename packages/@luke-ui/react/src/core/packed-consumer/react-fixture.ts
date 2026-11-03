@@ -124,7 +124,7 @@ export function App({ onHydrated }) {
 			h(CheckboxField, { label: 'Example checkbox' }),
 			h(
 				CheckboxGroup,
-				{ label: 'Packed choices', name: 'packedChoices' },
+				{ errorMessage: 'Choose a subscription option.', label: 'Packed choices', name: 'packedChoices' },
 				h(CheckboxField, { label: 'Packed email', value: 'email' }),
 				h(CheckboxField, { label: 'Packed updates', value: 'updates' }),
 			),

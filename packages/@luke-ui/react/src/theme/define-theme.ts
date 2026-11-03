@@ -20,7 +20,7 @@ import type {
 } from './foundation.js';
 import { defaultSourceColors } from './foundation.js';
 import { lightnessCandidates } from './lightness-candidates.js';
-import { highContrastText, passesOnSolidGate } from './scale.js';
+import { passesOnSolidGate } from './scale.js';
 import { ThemeValidationError, validateThemeInput } from './validate-input.js';
 
 /**
@@ -302,21 +302,20 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 	const { color } = input;
 	const defaults = defaultSourceColors[mode];
 	const neutral = resolveNeutral(color, mode);
-	const textPrimary = highContrastText(neutral, mode);
 	const colors: ThemeSourceColors = {
-		accent: resolveAdaptedRole(color.accent, mode, 'accent', textPrimary),
+		accent: resolveAdaptedRole(color.accent, mode, 'accent'),
 		neutral,
 		// Emitted verbatim; a single string applies to both modes, an omitted side falls back to the
 		// curated mode-aware default.
 		backdrop: resolveVerbatimRole(color.backdrop, mode, defaultBackdrop[mode]),
-		danger: resolveChromaticRole(color.danger, mode, 'danger', defaults.danger, textPrimary),
+		danger: resolveChromaticRole(color.danger, mode, 'danger', defaults.danger),
 		focus: resolveSourceRole(color.focus, mode, defaults.focus),
 		focusOrigin:
 			color.focus !== undefined && authorsMode(color.focus, mode) ? 'authored' : 'default',
-		info: resolveChromaticRole(color.info, mode, 'info', defaults.info, textPrimary),
-		success: resolveChromaticRole(color.success, mode, 'success', defaults.success, textPrimary),
+		info: resolveChromaticRole(color.info, mode, 'info', defaults.info),
+		success: resolveChromaticRole(color.success, mode, 'success', defaults.success),
 		surface: resolveSurfaces(color.surface, mode, neutral),
-		warning: resolveChromaticRole(color.warning, mode, 'warning', defaults.warning, textPrimary),
+		warning: resolveChromaticRole(color.warning, mode, 'warning', defaults.warning),
 	};
 	return colors;
 }
@@ -345,7 +344,6 @@ function resolveChromaticRole(
 	mode: ColorMode,
 	role: ChromaticRole,
 	fallback: string,
-	interactionSource: Oklch,
 ): Oklch {
 	if (
 		input === undefined ||
@@ -353,17 +351,11 @@ function resolveChromaticRole(
 	) {
 		return gamutMapOklch(parseColor(fallback));
 	}
-	return resolveAdaptedRole(input, mode, role, interactionSource);
+	return resolveAdaptedRole(input, mode, role);
 }
 
-function resolveAdaptedRole(
-	input: ColorInput,
-	mode: ColorMode,
-	role: ChromaticRole,
-	interactionSource: Oklch,
-): Oklch {
-	const adapt = (source: Oklch, raw: string) =>
-		adaptChromatic(source, mode, raw, role, interactionSource);
+function resolveAdaptedRole(input: ColorInput, mode: ColorMode, role: ChromaticRole): Oklch {
+	const adapt = (source: Oklch, raw: string) => adaptChromatic(source, mode, raw, role);
 	if (typeof input === 'string') return adapt(gamutMapOklch(parseColor(input)), input);
 	const side = sideOf(input, mode);
 	if (side !== undefined) return gamutMapOklch(parseColor(side));
@@ -469,18 +461,12 @@ function sideOf(input: ColorInput, mode: ColorMode): string | undefined {
 
 /**
  * Adapts a chromatic source for one mode: preserve hue and chroma, then search the vibrant band
- * for a lightness that clears {@link passesOnSolidGate} against the same `text.primary` production
- * generation uses. Returns the lightness nearest the mode target. Throws when none in the band is
+ * for a lightness that clears {@link passesOnSolidGate}, the gate production generation uses.
+ * Returns the lightness nearest the mode target. Throws when none in the band is
  * accessible. The band is wider than the generator's tone-faithful window, which is what lets it
  * rescue sources that window cannot reach.
  */
-function adaptChromatic(
-	source: Oklch,
-	mode: ColorMode,
-	raw: string,
-	role: ChromaticRole,
-	interactionSource: Oklch,
-): Oklch {
+function adaptChromatic(source: Oklch, mode: ColorMode, raw: string, role: ChromaticRole): Oklch {
 	// A brighter light-mode warning retains more of a yellow source's sRGB chroma.
 	const brightWarning = role === 'warning' && mode === 'light';
 	const target = brightWarning ? ACCENT_TARGET.dark : ACCENT_TARGET[mode];
@@ -493,7 +479,7 @@ function adaptChromatic(
 		});
 	}
 	function passes(l: number) {
-		return passesOnSolidGate({ interactionSource, lightness: l, source });
+		return passesOnSolidGate({ lightness: l, source });
 	}
 
 	if (passes(target)) return makeSolid(target);

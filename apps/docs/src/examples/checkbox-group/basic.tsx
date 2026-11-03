@@ -5,9 +5,10 @@ import { Stack } from '@luke-ui/react/stack';
 export default () => {
 	return (
 		<Stack maxInlineSize="20rem">
-			<CheckboxGroup description="Choose any options that apply." label="Example options">
-				<CheckboxField label="First option" value="first" />
-				<CheckboxField label="Second option" value="second" />
+			<CheckboxGroup description="Choose any days that apply." label="Days available">
+				<CheckboxField label="Monday" value="monday" />
+				<CheckboxField label="Tuesday" value="tuesday" />
+				<CheckboxField label="Wednesday" value="wednesday" />
 			</CheckboxGroup>
 		</Stack>
 	);

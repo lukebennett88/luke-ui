@@ -1,8 +1,7 @@
 import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
-import { defineTheme, ThemeGenerationError } from '../exports/theme/compiler.js';
+import { defineTheme } from '../exports/theme/compiler.js';
 import { chromaticTheme } from './__fixtures__/chromatic.js';
 import { paperTheme } from './__fixtures__/paper.js';
-import { UNSATISFIABLE_ON_SOLID } from './__fixtures__/radix-scales.js';
 import { tactileTheme } from './__fixtures__/tactile.js';
 import { loraFont, splitBlocks, testTypography } from './__fixtures__/theme-css.js';
 import { compileTheme } from './build-theme.js';
@@ -33,7 +32,7 @@ function extractValue(block: string, varName: string): string {
 const ACCENT_SOLID = '--luke-color-background-accent-solid-rest';
 
 describe('defineTheme single-value accent adaptation', () => {
-	const accents = ['#3b82f6', 'oklch(0.7 0.15 320)', UNSATISFIABLE_ON_SOLID.source];
+	const accents = ['#3b82f6', 'oklch(0.7 0.15 320)', 'oklch(0.58 0.28 0)'];
 
 	for (const accent of accents) {
 		it(`adapts ${accent} to an accessible light and dark accent via a per-mode search`, () => {
@@ -66,37 +65,19 @@ describe('defineTheme single-value accent adaptation', () => {
 });
 
 describe('defineTheme explicit per-mode accent generation', () => {
-	it('reports the failed accent search and completed families through the public compiler error', () => {
-		const error = (() => {
-			try {
-				defineTheme({
-					color: { accent: { light: '#3b82f6', dark: UNSATISFIABLE_ON_SOLID.source } },
-					name: 'inaccessible-accent',
-					typography: testTypography,
-				});
-				return null;
-			} catch (caught) {
-				return caught;
-			}
-		})();
-		expect(error).toBeInstanceOf(ThemeGenerationError);
-		if (!(error instanceof ThemeGenerationError)) throw error;
-		expect(error.name).toBe('ThemeGenerationError');
-		expect(error.role).toBe('accent');
-		expect(error.mode).toBe('dark');
-		expect(error.bestAttempt.step).toBe(9);
-		expect(error.bestAttempt.onSolidRatio).toBeGreaterThan(1);
-		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
-		expect(error.bestAttempt.solid.l).toBe(error.bestAttempt.lightness);
-		expect(error.message).toContain(`${error.bestAttempt.onSolidRatio.toFixed(2)}:1`);
-		expect(error.diagnostics.role).toBe(error.role);
-		expect(error.diagnostics.mode).toBe(error.mode);
-		expect(Object.keys(error.diagnostics.completedFamilies)).toEqual(['neutral']);
-		expect(error.diagnostics.completedFamilies.neutral).toMatchObject({
-			mode: 'dark',
-			role: 'neutral',
-			solidAnchor: { satisfied: true },
+	it('moves a mid-lightness explicit dark accent within the ±0.035 window until its text reads', () => {
+		// An explicit side bypasses the pre-conditioner, so the compiler's own solid-anchor search
+		// is the only thing that makes this source's on-solid text clear 4.5:1.
+		const source = parseColor('oklch(0.58 0.28 0)');
+		const foundation = normalizeTheme({
+			color: { accent: { light: '#3b82f6', dark: 'oklch(0.58 0.28 0)' } },
+			name: 'mid-accent',
+			typography: testTypography,
 		});
+		const { solidAnchor } = compileTheme(foundation).diagnostics.dark.families.accent;
+		expect(solidAnchor.satisfied).toBe(true);
+		expect(Math.abs(solidAnchor.resolvedLightness - source.l)).toBeLessThanOrEqual(0.035 + 1e-9);
+		expect(solidAnchor.distanceToEdge).toBeGreaterThanOrEqual(0);
 	});
 });
 
@@ -259,27 +240,17 @@ describe('chromatic role source fidelity and explicit modes', () => {
 				}
 			});
 		}
-		it(`reports an inaccessible explicit dark ${role}`, () => {
-			const input = {
+		it(`generates a mid-lightness explicit dark ${role} instead of rejecting it`, () => {
+			const foundation = normalizeTheme({
 				color: {
 					accent: '#3b82f6',
-					[role]: { light: '#3b82f6', dark: UNSATISFIABLE_ON_SOLID.source },
+					[role]: { light: '#3b82f6', dark: 'oklch(0.58 0.28 0)' },
 				},
-				name: 'invalid',
+				name: 'mid-role',
 				typography: testTypography,
-			};
-			const error = (() => {
-				try {
-					defineTheme(input);
-					return null;
-				} catch (caught) {
-					return caught;
-				}
-			})();
-			expect(error).toBeInstanceOf(ThemeGenerationError);
-			if (!(error instanceof ThemeGenerationError)) throw error;
-			expect(error.role).toBe(role);
-			expect(error.mode).toBe('dark');
+			});
+			const { diagnostics } = compileTheme(foundation);
+			expect(diagnostics.dark.families[role].solidAnchor.satisfied).toBe(true);
 		});
 	}
 });
@@ -430,9 +401,10 @@ describe('normalizeTheme carries authored surfaces', () => {
 		).toThrow(ThemeInteractionTintError);
 	});
 
-	it('lets an author replace a generated surface that fails tint contrast validation', () => {
-		// The generated raised surface on this dark base leaves no visible tint pair below the contrast cap.
-		// Replacing that surface with the base colour clears the tint gate.
+	it('lets an author replace a surface, or darken the base, that leaves no visible tint pair', () => {
+		// The generated raised surface on this dark base leaves no visible tint pair below the
+		// contrast cap. Replacing it with the base moves the limit to a subtle fill, which the tint
+		// floors now cover. A darker base clears every surface and subtle fill.
 		const base = { dark: 'oklch(0.3 0 0)', light: 'oklch(0.985 0 0)' };
 		function themeError(surface: NonNullable<ThemeInput['color']['surface']>): unknown {
 			try {
@@ -452,7 +424,13 @@ describe('normalizeTheme carries authored surfaces', () => {
 		if (!(generatedError instanceof ThemeInteractionTintError)) throw generatedError;
 		expect(generatedError.mode).toBe('dark');
 		expect(generatedError.limitingMiss?.background).toBe('color.background.surface.raised');
-		expect(themeError({ base, raised: { dark: base.dark } })).toBeNull();
+
+		const replacedError = themeError({ base, raised: { dark: base.dark } });
+		expect(replacedError).toBeInstanceOf(ThemeInteractionTintError);
+		if (!(replacedError instanceof ThemeInteractionTintError)) throw replacedError;
+		expect(replacedError.limitingMiss?.background).toMatch(/^color\.background\.\w+\.subtle$/);
+
+		expect(themeError({ base: { dark: 'oklch(0.25 0 0)', light: base.light } })).toBeNull();
 	});
 });
 

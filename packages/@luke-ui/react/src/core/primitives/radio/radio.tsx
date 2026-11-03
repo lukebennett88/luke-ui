@@ -13,7 +13,6 @@ import {
 } from 'react-aria-components/RadioGroup';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
-import { cx } from '../../../shared/utils/utils.js';
 import { useControlSize } from '../../sizing/control-size-context.js';
 import type { ControlSize } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
@@ -146,13 +145,12 @@ export type RadioLabelProps = Prettify<_RadioLabelProps>;
 /** The clickable label that contains `RadioControl` and the option text. */
 export function RadioLabel(props: RadioLabelProps): JSX.Element {
 	const { className, ...labelProps } = props;
-	const slots = radioRecipe();
 
 	return (
 		<RacRadioButton
 			{...labelProps}
 			className={composeRenderProps(className, (renderedClassName) => {
-				return cx(slots.label(), fieldRecipe().inlineLabel({ className: renderedClassName }));
+				return fieldRecipe().inlineLabel({ className: renderedClassName });
 			})}
 		/>
 	);
@@ -166,14 +164,11 @@ export type RadioControlProps = Prettify<_RadioControlProps>;
 /** Line-height-sized wrapper that centres the visual radio indicator. */
 export function RadioControl(props: RadioControlProps): JSX.Element {
 	const { className, ...restProps } = props;
-	const groupSize = use(RadioSizeContext);
-	const inheritedSize = useControlSize();
-	const size = groupSize ?? inheritedSize;
 
-	return <span {...restProps} className={radioRecipe({ size }).control({ className })} />;
+	return <span {...restProps} className={radioRecipe().control({ className })} />;
 }
 
-interface _RadioIndicatorProps extends ComponentProps<'span'> {}
+interface _RadioIndicatorProps extends DistributiveOmit<ComponentProps<'span'>, 'children'> {}
 
 /** Props for `RadioIndicator`. */
 export type RadioIndicatorProps = Prettify<_RadioIndicatorProps>;
@@ -181,13 +176,11 @@ export type RadioIndicatorProps = Prettify<_RadioIndicatorProps>;
 /** Circular visual that shows whether its radio option is selected. */
 export function RadioIndicator(props: RadioIndicatorProps): JSX.Element {
 	const { className, ...restProps } = props;
-	const groupSize = use(RadioSizeContext);
-	const inheritedSize = useControlSize();
-	const size = groupSize ?? inheritedSize;
+	const slots = radioRecipe();
 
 	return (
-		<span {...restProps} aria-hidden className={radioRecipe({ size }).indicator({ className })}>
-			<span className={radioRecipe().mark()} />
+		<span {...restProps} aria-hidden className={slots.indicator({ className })}>
+			<span className={slots.mark()} />
 		</span>
 	);
 }
