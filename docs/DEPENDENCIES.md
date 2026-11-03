@@ -86,6 +86,46 @@ list against `dependencies`, `peerDependencies`, and `inlinedDependencies` in
 widens when the caret stops covering the new version. The catalog range is what gets published as
 the peer range, and bumping it on every minor would narrow what consumers can satisfy.
 
+### Published-change versioning
+
+Before `@luke-ui/react` 1.0, no pull request needs a changeset.
+
+After React 1.0:
+
+- Every release-worthy change to a published package needs a Changeset, including 0.x packages.
+- Describe every intentional change to published visuals in release notes, even a small refinement.
+- Private-only changes with no published impact need no release.
+
+For stable (1.x+) packages, classify changes by consumer impact:
+
+- **Major:** Remove or rename a public token, prop, or theme option.
+- **Major:** Break documented behaviour or a documented guarantee.
+- **Major:** Make a previously compiling, supported theme fail compilation.
+- **Minor:** Add a compatible public token, prop, or optional theme authoring option.
+- **Minor:** Deliberately change a theme's overall look or multiple component families.
+- **Patch:** Correct an implementation that contradicts its documented contract.
+- **Patch:** Fix other non-breaking defects, including accessibility bugs.
+- **Patch:** Make a narrow visual refinement, including a small generated-colour change.
+
+Rejecting a supported theme through stricter validation is breaking, even for accessibility.
+
+Enforcing an existing, explicit guarantee can instead be a patch if acceptance was a defect.
+
+Semantic tokens guarantee public names, meanings, documented behaviour and theme compatibility.
+
+Exact generated colour values are not guaranteed. Classify repaints by their published impact.
+
+Changes to private code can still be breaking if they violate a public contract.
+
+For 0.x packages:
+
+- **Minor:** Breaking changes, new public capabilities and broad visual redesigns.
+- **Patch:** Fixes and narrow visual refinements.
+
+Version only affected published packages, including those with changed compiled theme CSS.
+
+Issue #721 owns release mechanics and dependency/peer compatibility.
+
 ## Grouping and schedule
 
 Renovate runs weekly before 6am on Monday. It groups non-major updates by release train and splits
