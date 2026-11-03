@@ -367,7 +367,7 @@ function alphaMatchingTarget(source: Oklch, destination: Oklch, target: Oklch): 
 
 /**
  * Largest alpha where every supported pair still clears {@link TEXT_RATIO}: surface and subtle-rest
- * text with the tint on top. Low Buttons use the paired opaque chip inside a solid fill.
+ * text with the tint on top. A low Button on a solid paints that solid's own states instead.
  */
 function contrastCapAlpha(
 	mode: ColorMode,

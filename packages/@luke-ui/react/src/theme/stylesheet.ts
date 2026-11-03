@@ -38,7 +38,6 @@ export function assembleStylesheet(
 	foundation: ThemeFoundation,
 	lightValues: Record<ModePath, string>,
 	darkValues: Record<ModePath, string>,
-	solidStateValues: { light: Record<string, string>; dark: Record<string, string> },
 ): string {
 	const { identityPairs, modePairs } = partitionContractPairs(flattenThemeContract());
 
@@ -46,16 +45,8 @@ export function assembleStylesheet(
 		...declarations(identityPairs, buildIdentityValues(foundation)),
 		...capsizeTrimDeclarations(foundation.typography.fonts),
 	];
-	const lightDeclarations = [
-		'color-scheme: light;',
-		...declarations(modePairs, lightValues),
-		...privateDeclarations(solidStateValues.light),
-	];
-	const darkDeclarations = [
-		'color-scheme: dark;',
-		...declarations(modePairs, darkValues),
-		...privateDeclarations(solidStateValues.dark),
-	];
+	const lightDeclarations = ['color-scheme: light;', ...declarations(modePairs, lightValues)];
+	const darkDeclarations = ['color-scheme: dark;', ...declarations(modePairs, darkValues)];
 
 	// The identity lives on `<html>` only. `:where(html)` keeps the base rules at (0,1,0), so the
 	// explicit attribute rules, (0,2,0) whether the attribute sits on `<html>` or below it, beat the
@@ -185,10 +176,6 @@ function declarations<Path extends string>(
 		if (value === undefined) throw new Error(`buildTheme did not generate a value for "${path}"`);
 		return `${varName}: ${value};`;
 	});
-}
-
-function privateDeclarations(values: Record<string, string>): Array<string> {
-	return Object.entries(values).map(([property, value]) => `${property}: ${value};`);
 }
 
 function indent(line: string): string {

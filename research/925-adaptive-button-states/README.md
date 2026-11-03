@@ -36,16 +36,23 @@ black tint.
 
 A translucent tint has almost no hover-to-pressed step over a role's solid fill: 0.006 to 0.024
 across every role and bundled theme, against a 0.025 floor. A low Button inside a solid fill
-therefore paints an opaque `background.<tone>.subtle.hover|pressed` chip and switches to that chip's
-paired text (`text.primary`, or `foreground.danger.rest` for a critical tone), so hover and pressed
-keep the opaque token step and the text stays at AA. This is a visibility fix, not a contrast fix:
-the tint's contrast cap already keeps every gated foreground at 4.5:1.
+therefore paid for an opaque `background.<tone>.subtle.hover|pressed` chip and switched to that
+chip's paired text (`text.primary`, or `foreground.danger.rest` for a critical tone), so hover and
+pressed kept the opaque token step and the text stayed at AA. This is a visibility fix, not a
+contrast fix: the tint's contrast cap already keeps every gated foreground at 4.5:1.
+
+[#1009](https://github.com/lukebennett88/luke-ui/issues/1009) supersedes the chip. Once
+[#1008](https://github.com/lukebennett88/luke-ui/issues/1008) stepped each role's `solid.hover` and
+`solid.pressed` away from the on-solid text, a low Button on a solid paints those states instead,
+and its text stays on-solid. The chip variables, their generated values, and the `@container` query
+that added the finish over a chip are gone. See
+[Surface pairing](../../docs/STYLING.md#surface-pairing).
 
 ## Size
 
 The stylesheet grew 1,181 bytes gzip at level 9, from 15,081 to 16,262: the registered `@property`,
 two tint declarations per mode root, and the solid-chip pairing variables. The budget in
-`stylesheet-size.test.ts` is 16,480.
+`stylesheet-size.test.ts` was 16,480. #1009 removed the chip variables.
 
 ## Rejected
 

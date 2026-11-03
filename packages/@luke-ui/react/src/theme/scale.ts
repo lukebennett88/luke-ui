@@ -84,8 +84,8 @@ export const FAMILY_RUNG = {
 
 /**
  * Share of `text.primary` mixed into a resting foreground to produce its public hover state. Solid
- * fills do not use it: their states step OKLCH lightness away from the on-solid text. The private
- * Low-on-solid chip and the interaction-tint targets share it.
+ * fills do not use it: their states step OKLCH lightness away from the on-solid text. The
+ * interaction-tint targets share it.
  */
 export const INTERACTION_HOVER_STRENGTH = 0.05;
 

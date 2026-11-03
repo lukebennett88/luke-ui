@@ -579,8 +579,8 @@ type InteractionState = (typeof INTERACTION_STATES)[number];
 
 const buttonFills = [
 	{
-		// Low Buttons stay transparent and keep the surrounding context; hover and pressed paint
-		// the adaptive state layer rather than an opaque subtle fill.
+		// Low Buttons paint the surrounding surface's fill and keep its context; hover and pressed
+		// paint that surface's own state fill above it.
 		fill: (_state: InteractionState) => null,
 		label: 'Neutral low',
 		prominence: 'low',
@@ -627,9 +627,9 @@ const buttonFills = [
 for (const appearance of visualAppearances) {
 	const name = `${appearance.theme} ${appearance.mode}`;
 
-	// The parent is another role's solid fill. Low Buttons keep that context at rest; hover and
-	// pressed paint an opaque subtle chip so on-solid text contrast stays at AA. Standard Buttons
-	// keep a resting subtle pairing. High Buttons establish their own solid context.
+	// The parent is another role's solid fill. Low Buttons keep its fill and context in every
+	// state. Standard Buttons keep a resting subtle pairing. High Buttons establish their own solid
+	// context.
 	test(`Button fills pair with their foreground in every interaction state in ${name}`, () => {
 		const { locator } = render(
 			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
@@ -650,26 +650,10 @@ for (const appearance of visualAppearances) {
 				return { state, ...settledSurfaceColors(button) };
 			});
 			const expected = INTERACTION_STATES.map((state) => {
-				if (prominence === 'low' && state !== 'rest') {
-					const chipText =
-						tone === 'danger'
-							? resolvedColor(vars.color.foreground.danger.rest, button)
-							: resolvedColor(vars.color.foreground.primary, button);
-					const chip =
-						tone === 'danger'
-							? pairedColors(button, 'danger.subtle')
-							: pairedColors(button, 'neutral.subtle');
-					return {
-						state,
-						...chip,
-						background: TRANSPARENT,
-						color: chipText,
-					};
-				}
 				const background = fill(state);
 				const paired =
 					background === null
-						? { ...pairedColors(parent, 'success.solid.rest'), background: TRANSPARENT }
+						? pairedColors(parent, 'success.solid.rest')
 						: pairedColors(button, background);
 				// A danger tone reads the context's danger colour instead of its primary.
 				const color = tone === 'danger' ? paired.foreground.danger : paired.color;
@@ -751,48 +735,6 @@ for (const appearance of visualAppearances) {
 			button.style.backgroundImage = 'none';
 		}
 		await expectAxeContrastPasses(container);
-	});
-}
-
-// Measures each label against the pixels painted behind it, including the control finish, which the
-// theme compiler's contrast gates do not see.
-for (const appearance of [
-	...visualAppearances,
-	...flatAppearances,
-	{ mode: 'light', theme: 'chromatic' },
-	{ mode: 'dark', theme: 'chromatic' },
-] as const) {
-	test(`Button text keeps 4.5:1 contrast over its painted fill in every state in ${appearance.theme} ${appearance.mode}`, async () => {
-		const { locator } = render(
-			<Box backgroundColor="success.solid" padding="space.8">
-				{buttonFills.map(({ label, prominence, tone }) => (
-					<Button key={label} prominence={prominence} tone={tone}>
-						{label}
-					</Button>
-				))}
-			</Box>,
-			{ appearance },
-		);
-		const buttons = buttonFills.map(({ label }) => ({
-			button: locator.getByRole('button', { name: label }).element(),
-			label,
-		}));
-
-		const lowContrast: Array<{ contrast: number; label: string; state: InteractionState }> = [];
-		for (const state of INTERACTION_STATES) {
-			for (const { button } of buttons) {
-				setInteractionState(button, state);
-				settledSurfaceColors(button);
-			}
-			for (const { button, label } of buttons) {
-				assert(button instanceof HTMLElement);
-				const contrast = await lowestRenderedTextContrast(button);
-				if (contrast < 4.5)
-					lowContrast.push({ contrast: Number(contrast.toFixed(2)), label, state });
-			}
-		}
-
-		expect(lowContrast).toEqual([]);
 	});
 }
 
@@ -928,99 +870,13 @@ for (const appearance of visualAppearances) {
 	});
 }
 
-test('a low Button chip keeps nested contextual text at AA on a solid fill', async () => {
-	const { locator } = render(
-		<Box backgroundColor="accent.solid" padding="space.8">
-			<Button prominence="low">
-				<Text color="primary" elementType="span">
-					Primary child
-				</Text>
-			</Button>
-		</Box>,
-		{ appearance: { mode: 'light', theme: 'paper' } },
-	);
-	const button = locator.getByRole('button', { name: 'Primary child' }).element();
-	assert(button instanceof HTMLElement);
-
-	for (const state of ['hover', 'pressed'] as const) {
-		setInteractionState(button, state);
-		settledSurfaceColors(button);
-		expect(await lowestRenderedTextContrast(button)).toBeGreaterThanOrEqual(4.5);
-	}
-});
-
-// Adaptive hover and pressed must stay visible on every standard surface, including overlays an
-// application paints with `surface.raised` without going through `Box`.
+// Adaptive hover and pressed must stay visible on every standard surface. `material-contrast`
+// gates the label's contrast over each of them.
 const adaptiveAppearances = [
 	...visualAppearances,
 	{ mode: 'light', theme: 'contrastEdge' },
 	{ mode: 'dark', theme: 'contrastEdge' },
 ] as const;
-
-for (const appearance of adaptiveAppearances) {
-	const surfaces = ['surface.base', 'surface.subdued', 'surface.raised'] as const;
-
-	test(`low and standard Buttons keep 4.5:1 text over adaptive states on every surface in ${appearance.theme} ${appearance.mode}`, async () => {
-		const { locator } = render(
-			<>
-				{surfaces.map((surface) => (
-					<Box key={surface} backgroundColor={surface} data-testid={surface} padding="space.8">
-						<Button prominence="low">Low on {surface}</Button>
-						<Button>Standard on {surface}</Button>
-						<Button prominence="low" tone="danger">
-							Danger low on {surface}
-						</Button>
-					</Box>
-				))}
-			</>,
-			{ appearance },
-		);
-
-		const lowContrast: Array<{
-			contrast: number;
-			label: string;
-			state: InteractionState;
-			surface: (typeof surfaces)[number];
-		}> = [];
-		const missingLayers: Array<{ label: string; state: InteractionState; surface: string }> = [];
-		for (const surface of surfaces) {
-			const region = locator.getByTestId(surface);
-			const buttons = [
-				region.getByRole('button', { name: `Low on ${surface}` }).element(),
-				region.getByRole('button', { name: `Standard on ${surface}` }).element(),
-				region.getByRole('button', { name: `Danger low on ${surface}` }).element(),
-			];
-			for (const state of INTERACTION_STATES) {
-				for (const button of buttons) {
-					setInteractionState(button, state);
-					if (state !== 'rest' && getComputedStyle(button).backgroundImage === 'none') {
-						missingLayers.push({
-							label: button.textContent ?? '',
-							state,
-							surface,
-						});
-					}
-				}
-				for (const button of buttons) settledSurfaceColors(button);
-				for (const button of buttons) {
-					assert(button instanceof HTMLElement);
-					const contrast = await lowestRenderedTextContrast(button);
-					if (contrast < 4.5) {
-						lowContrast.push({
-							contrast: Number(contrast.toFixed(2)),
-							label: button.textContent ?? '',
-							state,
-							surface,
-						});
-					}
-				}
-			}
-		}
-
-		expect(missingLayers).toEqual([]);
-		expect(lowContrast).toEqual([]);
-	});
-}
 
 for (const appearance of adaptiveAppearances) {
 	test(`low Buttons keep a visible pressed step on every page surface in ${appearance.theme} ${appearance.mode}`, async () => {
@@ -1125,12 +981,27 @@ const finishRungs = { hover: 'raised', pressed: 'recessed', rest: 'resting' } as
 const pageFinishSurfaces = ['surface.base', 'surface.subdued', 'surface.raised'] as const;
 const finishSurfaces = [...pageFinishSurfaces, 'accent.solid'] as const;
 
-function gradientCount(backgroundImage: string) {
-	return backgroundImage.split('linear-gradient(').length - 1;
+type FinishLayer = keyof typeof vars.controlFinish | 'none';
+
+/**
+ * The finish rungs each prominence layers above its fill layer in a state. Standard and high paint
+ * their state's rung on every surface. A low Button paints none at rest and none over a page surface
+ * ('none' stands in for the unset finish). On a role solid it paints its hover rung once and its
+ * pressed rung twice.
+ */
+function finishLayers(
+	prominence: 'low' | 'standard',
+	state: InteractionState,
+	surface: (typeof finishSurfaces)[number],
+): Array<FinishLayer> {
+	if (prominence === 'standard') return [finishRungs[state]];
+	if (state === 'rest') return [];
+	if (surface !== 'accent.solid') return ['none'];
+	return state === 'hover' ? ['raised'] : ['recessed', 'recessed'];
 }
 
 for (const appearance of visualAppearances) {
-	test(`standard and low Buttons paint the control finish rung for each state in ${appearance.theme} ${appearance.mode}`, () => {
+	test(`standard and low Buttons paint the control finish above their fill layer in ${appearance.theme} ${appearance.mode}`, () => {
 		const { locator } = render(
 			<>
 				<div data-testid="probe" />
@@ -1144,48 +1015,48 @@ for (const appearance of visualAppearances) {
 			{ appearance },
 		);
 		const probe = locator.getByTestId('probe').element() as HTMLElement;
-		const rung = (finish: (typeof finishRungs)[InteractionState]) => {
-			probe.style.backgroundImage = vars.controlFinish[finish];
+		const rung = (finish: FinishLayer) => {
+			probe.style.backgroundImage = finish === 'none' ? 'none' : vars.controlFinish[finish];
 			return getComputedStyle(probe).backgroundImage;
 		};
-		const paintsFinish = appearance.theme !== 'paper';
-		const fills = INTERACTION_STATES.map((state) => rung(finishRungs[state]));
 		// Guards the assertions below: Tactile's three rungs differ, and Paper's are all `none`.
-		expect(new Set(fills).size).toBe(paintsFinish ? 3 : 1);
+		const paintsFinish = appearance.theme !== 'paper';
+		expect(new Set(INTERACTION_STATES.map((state) => rung(finishRungs[state]))).size).toBe(
+			paintsFinish ? 3 : 1,
+		);
 
 		// Rows that break the expectation, so the check needs no conditional `expect`.
 		const misses: Array<string> = [];
 		for (const surface of finishSurfaces) {
 			const region = locator.getByTestId(surface);
-			const standard = region.getByRole('button', { name: `Standard on ${surface}` }).element();
-			const low = region.getByRole('button', { name: `Low on ${surface}` }).element();
-			for (const [index, state] of INTERACTION_STATES.entries()) {
-				const expected = fills[index]!;
-				setInteractionState(standard, state);
-				setInteractionState(low, state);
-				const standardImage = getComputedStyle(standard).backgroundImage;
-				const lowImage = getComputedStyle(low).backgroundImage;
-				// Paper's finish is `none`, so it never adds a gradient beyond the one state layer. A
-				// Tactile low Button paints only that layer at rest and over a page surface, and the
-				// finish above the opaque chip once hovered or pressed on a solid.
-				const standardOk = paintsFinish
-					? standardImage.includes(expected)
-					: gradientCount(standardImage) <= 1;
-				const lowLayerOnly = !lowImage.includes(expected) && gradientCount(lowImage) === 1;
-				const lowPaintsFinish = state !== 'rest' && surface === 'accent.solid';
-				const lowTactileOk = lowPaintsFinish ? lowImage.includes(expected) : lowLayerOnly;
-				const lowOk = paintsFinish ? lowTactileOk : gradientCount(lowImage) <= 1;
-				if (!standardOk) misses.push(`standard ${surface} ${state}: ${standardImage}`);
-				if (!lowOk) misses.push(`low ${surface} ${state}: ${lowImage}`);
+			for (const prominence of ['standard', 'low'] as const) {
+				const button = region
+					.getByRole('button', {
+						name: `${prominence === 'low' ? 'Low' : 'Standard'} on ${surface}`,
+					})
+					.element();
+				for (const state of INTERACTION_STATES) {
+					setInteractionState(button, state);
+					const image = getComputedStyle(button).backgroundImage;
+					const finish = finishLayers(prominence, state, surface).map(rung).join(', ');
+					// Whatever follows the finish is the one state layer.
+					const layer = finish === '' ? image : image.slice(finish.length + 2);
+					const ok =
+						image.startsWith(finish) &&
+						layer.startsWith('linear-gradient(') &&
+						(layer.match(/linear-gradient\(/g) ?? []).length === 1;
+					if (!ok) misses.push(`${prominence} ${surface} ${state}: ${image}`);
+				}
 			}
 		}
 		expect(misses).toEqual([]);
 	});
 }
 
-test('forced colours remove the control finish from standard and low Buttons', async () => {
+test('forced colours remove the control finish and state layer from every Button prominence', async () => {
 	const { locator } = render(
 		<>
+			<Button prominence="high">High</Button>
 			<Button prominence="standard">Standard</Button>
 			<Button prominence="low">Low</Button>
 			<Box backgroundColor="accent.solid" padding="space.8">
@@ -1193,62 +1064,35 @@ test('forced colours remove the control finish from standard and low Buttons', a
 			</Box>
 		</>,
 	);
+	const buttons = ['High', 'Standard', 'Low', 'Low on solid'].map((name) => ({
+		button: locator.getByRole('button', { name }).element(),
+		name,
+	}));
+	const isNone = /^none(, none)*$/;
+	// Guards the assertion below: outside forced colours each paints a finish or state layer in every
+	// state.
+	for (const { button, name } of buttons) {
+		for (const state of INTERACTION_STATES) {
+			setInteractionState(button, state);
+			expect(getComputedStyle(button).backgroundImage, `${name} ${state}`).not.toMatch(isNone);
+		}
+	}
+
 	await emulateForcedColors('active');
 	try {
-		for (const name of ['Standard', 'Low', 'Low on solid']) {
-			const button = locator.getByRole('button', { name }).element();
+		for (const { button, name } of buttons) {
 			for (const state of INTERACTION_STATES) {
 				setInteractionState(button, state);
-				expect(getComputedStyle(button).backgroundImage, `${name} ${state}`).toMatch(
-					/^none(, none)*$/,
-				);
+				// A list of `none` layers paints nothing.
+				expect(getComputedStyle(button).backgroundImage, `${name} ${state}`).toMatch(isNone);
 			}
 		}
-	} finally {
-		await emulateForcedColors('none');
-	}
-});
-
-test('forced colours clear the adaptive state layer on a low Button', async () => {
-	await emulateForcedColors('active');
-
-	try {
-		const { locator } = render(<Button prominence="low">Cancel</Button>);
-		const button = locator.getByRole('button', { name: 'Cancel' }).element();
-		setInteractionState(button, 'hover');
-		expect(getComputedStyle(button).backgroundImage).toMatch(/^none(, none)*$/);
 	} finally {
 		await emulateForcedColors('none');
 	}
 });
 
 for (const appearance of visualAppearances) {
-	test(`forced colours remove the control finish from a solid Button in every state in ${appearance.theme} ${appearance.mode}`, async () => {
-		const { locator } = render(<Button prominence="high">Save</Button>, { appearance });
-		const button = locator.getByRole('button', { name: 'Save' }).element();
-		const finishes = INTERACTION_STATES.map((state) => {
-			setInteractionState(button, state);
-			return getComputedStyle(button).backgroundImage;
-		});
-		// Guards the assertion below: outside forced colours Tactile paints its finish in every state
-		// and Paper paints none in any of them.
-		const paintsNoFinish = appearance.theme === 'paper';
-		expect(finishes.map((finish) => finish === 'none')).toEqual(
-			INTERACTION_STATES.map(() => paintsNoFinish),
-		);
-
-		await emulateForcedColors('active');
-		try {
-			for (const state of INTERACTION_STATES) {
-				setInteractionState(button, state);
-				// A list of `none` layers paints nothing.
-				expect(getComputedStyle(button).backgroundImage).toMatch(/^none(, none)*$/);
-			}
-		} finally {
-			await emulateForcedColors('none');
-		}
-	});
-
 	test(`reduced motion keeps the solid Button hover and pressed states visible in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { locator } = render(<Button prominence="high">Save</Button>, { appearance });
 		const button = locator.getByRole('button', { name: 'Save' }).element();
@@ -1303,15 +1147,9 @@ test('adaptive Button layer transitions normally and changes immediately with re
 for (const appearance of visualAppearances) {
 	test(`pointer and keyboard input paint adaptive hover and pressed states in ${appearance.theme} ${appearance.mode}`, async () => {
 		const { locator, user } = render(
-			<div
-				style={{
-					backgroundColor: vars.color.background.surface.raised,
-					color: vars.color.foreground.primary,
-					padding: vars.space['16'],
-				}}
-			>
+			<Box backgroundColor="surface.raised" padding="space.16">
 				<Button prominence="low">Cancel</Button>
-			</div>,
+			</Box>,
 			{ appearance },
 		);
 		const target = locator.getByRole('button', { name: 'Cancel' });
@@ -1353,16 +1191,69 @@ for (const appearance of visualAppearances) {
 	});
 }
 
+for (const appearance of visualAppearances) {
+	const scopeMode = appearance.mode === 'light' ? 'dark' : 'light';
+
+	test(`low and standard Buttons in a ${scopeMode} scope take its tint and context in ${appearance.theme} ${appearance.mode}`, () => {
+		const { locator } = render(
+			<Box backgroundColor="accent.solid" data-testid="outer" padding="space.8">
+				<div data-color-mode={scopeMode}>
+					<Button prominence="low">Scoped low</Button>
+					<Button>Scoped standard</Button>
+				</div>
+			</Box>,
+			{ appearance },
+		);
+		const outer = locator.getByTestId('outer').element();
+		const scoped = [
+			{ fill: vars.color.background.surface.base, name: 'Scoped low' },
+			{ fill: vars.color.background.neutral.subtle, name: 'Scoped standard' },
+		];
+		const layerOf = (button: Element) => {
+			return getComputedStyle(button).getPropertyValue(INTERACTION_STATE_LAYER_PROPERTY);
+		};
+
+		for (const { fill, name } of scoped) {
+			const button = locator.getByRole('button', { name }).element();
+			// The scope's tint differs from the outer mode's, so an inherited one would fail below.
+			expect(resolvedColor('var(--luke-interaction-tint-hover)', button), `${name} tint`).not.toBe(
+				resolvedColor('var(--luke-interaction-tint-hover)', outer),
+			);
+			for (const state of INTERACTION_STATES) {
+				setInteractionState(button, state);
+				const { background, color } = settledSurfaceColors(button);
+				expect({ background, color, layer: layerOf(button) }, `${name} ${state}`).toEqual({
+					background: resolvedColor(fill, button),
+					color: resolvedColor(vars.color.foreground.primary, button),
+					layer:
+						state === 'rest'
+							? TRANSPARENT
+							: resolvedColor(`var(--luke-interaction-tint-${state})`, button),
+				});
+			}
+		}
+	});
+}
+
+// A surface an app paints with raw `vars` establishes no pairing, so a low Button inside it paints
+// the nearest managed surface's colour. The guarantee covers `Box` and `surfaceStyle()` only.
+test('a low Button inside a surface painted with raw vars paints the nearest managed surface', () => {
+	const { locator } = render(
+		<div style={{ backgroundColor: vars.color.background.surface.raised }}>
+			<Button prominence="low">Cancel</Button>
+		</div>,
+	);
+	const button = locator.getByRole('button', { name: 'Cancel' }).element();
+	const { background } = settledSurfaceColors(button);
+
+	expect(background).toBe(resolvedColor(vars.color.background.surface.base, button));
+	expect(background).not.toBe(resolvedColor(vars.color.background.surface.raised, button));
+});
+
 test('kitchen sink on overlay', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(
-			<div
-				style={{
-					backgroundColor: vars.color.background.surface.raised,
-					color: vars.color.foreground.primary,
-					padding: vars.space['16'],
-				}}
-			>
+			<Box backgroundColor="surface.raised" padding="space.16">
 				<Grid columns={3}>
 					<Button prominence="low">Cancel</Button>
 					<Button>Standard</Button>
@@ -1375,7 +1266,7 @@ test('kitchen sink on overlay', { tags: ['visual'] }, async () => {
 						Danger high
 					</Button>
 				</Grid>
-			</div>,
+			</Box>,
 			{ appearance },
 		);
 		const cancel = locator.getByRole('button', { name: 'Cancel' }).element();

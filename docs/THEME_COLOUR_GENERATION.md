@@ -197,10 +197,11 @@ mode and the limiting pair. Compositing for that solve uses encoded sRGB, matchi
 text moved from 0.76 to 0.79 so the tint cap stays above the visibility floor, which lightens
 dark-mode secondary and role foregrounds slightly.
 
-A translucent tint has too little visible difference between hover and pressed on some solid fills.
-Low Buttons therefore use an opaque subtle chip on solids (`solidStateFillVarName` /
-`solidStateTextVarName` from the surface pairing). Standard Buttons keep their resting subtle fill
-plus the tint.
+A translucent tint has too little visible difference between hover and pressed on some solid fills,
+so a low Button on a role solid does not paint the tint. It paints that solid's own `solid.hover`
+and `solid.pressed` fills, which the solid-state steps above keep visibly distinct, and its text
+stays on-solid. On a surface or a subtle fill, it paints the tint. Standard Buttons keep their
+resting subtle fill plus the tint. See [Surface pairing](STYLING.md#surface-pairing).
 
 Theme authors do not author hover, pressed, or tint colours. `color.background.backdrop` is the
 authored modal dimming layer. `color.background.surface.raised` is the opaque surface for elevated

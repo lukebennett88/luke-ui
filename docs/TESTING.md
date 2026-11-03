@@ -118,17 +118,19 @@ specimen, and returns the lowest contrast between the text colour and any pixel 
 whole box, with where it occurred. A ratio under 4.5:1 reports the theme, role, mode, state, ratio
 and position. Those specimens never use a Button tone, so they add no component API. A second test
 per appearance renders real high, standard and low Buttons of both tones at the medium (40px) and
-small (32px) sizes over `surface.base`, `surface.subdued`, `surface.raised`, and every role's solid
-fill, and measures their label in rest, hover and pressed, so the finish, fill and adaptive state
-layer are covered where a Button paints them. Every appearance runs all nine surfaces. A low Button
-over a page surface paints no finish, so the finish never stacks with its translucent adaptive state
-layer behind the label.
+small (32px) sizes over `surface.base`, `surface.subdued`, `surface.raised`, `danger.subtle`, and
+every role's solid fill, and measures their label in rest, hover and pressed, so the finish, fill
+and adaptive state layer are covered where a Button paints them. Every appearance runs all ten
+surfaces. A low Button over a page surface or a subtle fill paints no finish, so the finish never
+stacks with its translucent adaptive state layer behind the label. On a role solid it paints the
+solid's own states and finish.
 
 The suite covers Tactile, Paper and the `layeredFinish` fixture, whose finish stacks overlapping
-layers, in light and dark mode. The Button matrix also runs the `contrastEdge` fixture. Every
-measurement must reach 4.5:1. Two `midBandFailure` tests prove the gate catches a finish that fails
-only in the middle of its gradient, and one `washFailure` test proves it catches a flat wash that
-lightens every dark fill. It does not parse gradients, so these limits apply:
+layers, in light and dark mode. The Button matrix also runs the `contrastEdge`, `flat` and
+`chromatic` fixtures. Every measurement must reach 4.5:1. Two `midBandFailure` tests prove the gate
+catches a finish that fails only in the middle of its gradient, and one `washFailure` test proves it
+catches a flat wash that lightens every dark fill. It does not parse gradients, so these limits
+apply:
 
 - The role specimens use one size and one label. The Button matrix adds the 40px and 32px Button
   sizes. A finish whose layers scale with a much larger control, or a text size or line height the

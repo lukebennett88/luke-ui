@@ -1,3 +1,4 @@
+import { fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import * as interactionTints from '../../../theme/interaction-tint-vars.js';
@@ -7,14 +8,12 @@ import { style } from '../../styles/layered-style.css.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import { recipe } from '../../styles/recipe.js';
 import { interactionStateLayer } from '../../styles/state-layer.css.js';
-import {
-	adaptiveStateLayer,
-	transparentAdaptiveStateLayer,
-	transparentAdaptiveStateText,
-} from '../../styles/state-layer.js';
+import { adaptiveStateLayer } from '../../styles/state-layer.js';
 import {
 	contextualForeground,
-	neutralForegroundContextVars,
+	surfaceFill,
+	surfaceFinish,
+	surfaceShadow,
 	surfaceStyle,
 } from '../../styles/surface.js';
 import { textRecipe } from '../../text/recipe.css.js';
@@ -206,12 +205,13 @@ type ButtonSurface = 'transparent' | 'subtle' | 'solid';
 
 /**
  * A button's fill in each interaction state, paired with its foreground context through
- * `surfaceStyle`. Low and standard Buttons use the adaptive state layer over a transparent or
- * resting subtle fill so hover and pressed stay visible on every surface, including app-painted
- * overlays. On a solid fill, a low Button falls back to an opaque subtle chip so on-solid text
- * contrast stays at AA. Solid Buttons keep opaque state tokens and the control finish. A danger
- * tone keeps the danger hue on a surrounding surface or subtle rest, and reads on-solid colour on
- * a solid at rest.
+ * `surfaceStyle`. A low Button paints the nearest managed surface's resting fill, with that
+ * surface's hover or pressed fill as the state layer above it. A standard Button paints the adaptive
+ * state layer over its resting subtle fill. Both keep their surrounding foreground context, and a
+ * low Button on a solid keeps on-solid text in every state. Wherever a Button paints a finish, the
+ * finish sits above its fill layer. Solid Buttons keep opaque state tokens and the control finish. A
+ * danger tone keeps the danger hue on a surrounding surface or subtle rest, and reads on-solid
+ * colour on a solid.
  */
 function buttonAppearance(
 	tone: Tone,
@@ -221,7 +221,6 @@ function buttonAppearance(
 ) {
 	const toneColor = tone === 'danger' ? { color: contextualForeground('danger') } : ({} as const);
 	const variants = { appearance: 'button' as const, prominence, tone };
-	const chipTone = tone === 'danger' ? 'danger' : 'neutral';
 	const restColor =
 		'color' in toneColor && toneColor.color !== undefined
 			? toneColor.color
@@ -229,15 +228,13 @@ function buttonAppearance(
 	const layerGradient = `linear-gradient(${interactionStateLayer}, ${interactionStateLayer})`;
 
 	if (surface === 'transparent') {
-		const hoverLayer = transparentAdaptiveStateLayer('hover', chipTone);
-		const pressedLayer = transparentAdaptiveStateLayer('pressed', chipTone);
 		return [
 			{
 				style: {
 					'@media': {
 						'(forced-colors: active)': { backgroundImage: 'none' },
 					},
-					backgroundColor: 'transparent',
+					backgroundColor: fallbackVar(surfaceFill.rest, 'transparent'),
 					backgroundImage: layerGradient,
 					borderColor: 'transparent',
 					boxShadow: 'none',
@@ -245,32 +242,24 @@ function buttonAppearance(
 					vars: { [interactionStateLayer]: 'transparent' },
 					selectors: {
 						[hovered]: {
-							...hoverLayer,
-							color: transparentAdaptiveStateText(chipTone, restColor),
-							vars: { ...hoverLayer.vars, ...neutralForegroundContextVars() },
+							vars: {
+								[interactionStateLayer]: fallbackVar(
+									surfaceFill.hover,
+									`var(${interactionTints.interactionTintVarName('hover')})`,
+								),
+							},
+							backgroundImage: `${fallbackVar(surfaceFinish.hover, 'none')}, ${layerGradient}`,
 							boxShadow: vars.shadow.raised,
 						},
 						[pressed]: {
-							...pressedLayer,
-							color: transparentAdaptiveStateText(chipTone, restColor),
-							vars: { ...pressedLayer.vars, ...neutralForegroundContextVars() },
-							boxShadow: vars.shadow.inset,
-						},
-					},
-					// A surface that paints a solid fill sets the opaque chip, and the adaptive layer then
-					// paints it. The finish goes above the chip, which would hide it. On a page surface
-					// the chip is unset, the layer is a translucent tint, and a finish behind the label
-					// would stack with it, so only the layer and shadow paint.
-					'@container': {
-						[`style(${interactionTints.solidStateFillVarName(chipTone, 'hover')})`]: {
-							selectors: {
-								[hovered]: {
-									backgroundImage: `${vars.controlFinish.raised}, ${layerGradient}`,
-								},
-								[pressed]: {
-									backgroundImage: `${vars.controlFinish.recessed}, ${layerGradient}`,
-								},
+							vars: {
+								[interactionStateLayer]: fallbackVar(
+									surfaceFill.pressed,
+									`var(${interactionTints.interactionTintVarName('pressed')})`,
+								),
 							},
+							backgroundImage: `${fallbackVar(surfaceFinish.pressed, 'none')}, ${layerGradient}`,
+							boxShadow: fallbackVar(surfaceShadow.pressed, vars.shadow.inset),
 						},
 					},
 				},
@@ -310,8 +299,8 @@ function buttonAppearance(
 	}
 
 	// Merge the adaptive layer's vars into the resting subtle pairing. A later `vars` object would
-	// replace the pairing's foreground and solid-state resets, so a danger standard Button on a
-	// solid would keep inherited on-solid text over its light subtle fill.
+	// replace the pairing's foreground resets, so a danger standard Button on a solid would keep
+	// inherited on-solid text over its light subtle fill.
 	const subtleRest = surfaceStyle(`${fill}.subtle`);
 	const hoverLayer = adaptiveStateLayer('hover');
 	const pressedLayer = adaptiveStateLayer('pressed');
@@ -323,7 +312,7 @@ function buttonAppearance(
 				},
 				...subtleRest,
 				...toneColor,
-				backgroundImage: `${layerGradient}, ${vars.controlFinish.resting}`,
+				backgroundImage: `${vars.controlFinish.resting}, ${layerGradient}`,
 				vars: {
 					...subtleRest.vars,
 					[interactionStateLayer]: 'transparent',
@@ -331,11 +320,11 @@ function buttonAppearance(
 				selectors: {
 					[hovered]: {
 						...hoverLayer,
-						backgroundImage: `${layerGradient}, ${vars.controlFinish.raised}`,
+						backgroundImage: `${vars.controlFinish.raised}, ${layerGradient}`,
 					},
 					[pressed]: {
 						...pressedLayer,
-						backgroundImage: `${layerGradient}, ${vars.controlFinish.recessed}`,
+						backgroundImage: `${vars.controlFinish.recessed}, ${layerGradient}`,
 					},
 				},
 			},

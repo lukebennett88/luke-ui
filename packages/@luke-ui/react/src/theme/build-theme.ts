@@ -1,5 +1,4 @@
 import type { Oklch } from './color.js';
-import { formatOklch } from './color.js';
 import type { ModePath } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { ThemeContrastFailure } from './contrast-validation.js';
@@ -12,22 +11,10 @@ import type {
 	ThemeModeDiagnostics,
 } from './diagnostics.js';
 import type { ThemeFoundation, ThemeModeFoundation } from './foundation.js';
-import {
-	solidStateGeneratedFillVarName,
-	solidStateGeneratedTextVarName,
-} from './interaction-tint-vars.js';
 import { solveInteractionTints } from './interaction-tints.js';
 import type { InteractionTintPair } from './interaction-tints.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
-import {
-	generateFamilyWithDiagnostics,
-	highContrastText,
-	INTERACTION_HOVER_STRENGTH,
-	INTERACTION_PRESSED_STRENGTH,
-	mixInteractionState,
-	FAMILY_RUNG,
-	ScaleGenerationError,
-} from './scale.js';
+import { generateFamilyWithDiagnostics, FAMILY_RUNG, ScaleGenerationError } from './scale.js';
 import { solveStrongBorder } from './semantic-border.js';
 import type { SemanticColorValues } from './semantic-map.js';
 import { mapSemanticColors } from './semantic-map.js';
@@ -70,10 +57,7 @@ export function compileTheme(foundation: ThemeFoundation): {
 		values['interaction.tint.pressed'] = tints[mode].pressed;
 	}
 	return {
-		css: assembleStylesheet(foundation, light.values, dark.values, {
-			light: light.solidStateValues,
-			dark: dark.solidStateValues,
-		}),
+		css: assembleStylesheet(foundation, light.values, dark.values),
 		diagnostics: { dark: dark.diagnostics, light: light.diagnostics },
 	};
 }
@@ -157,17 +141,13 @@ type ColorMode = 'light' | 'dark';
 
 interface ModeValues {
 	colorValues: SemanticColorValues;
-	solidStateValues: Record<string, string>;
 	diagnostics: ThemeModeDiagnostics;
 	failures: Array<ThemeContrastFailure>;
 	values: Record<ModePath, string>;
 }
 
 function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): ModeValues {
-	const { colorValues, familyDiagnostics, solidStateValues, surfaces } = buildModeColors(
-		mode,
-		modeFoundation,
-	);
+	const { colorValues, familyDiagnostics, surfaces } = buildModeColors(mode, modeFoundation);
 	const { checks, failures } = validateContrast(
 		mode,
 		colorValues,
@@ -189,7 +169,6 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 	};
 	return {
 		colorValues,
-		solidStateValues,
 		diagnostics: { contrastChecks: checks, families: familyDiagnostics, mode, surfaces },
 		failures,
 		values,
@@ -198,7 +177,6 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 
 interface ModeColors {
 	colorValues: SemanticColorValues;
-	solidStateValues: Record<string, string>;
 	familyDiagnostics: Record<FamilyRole, FamilyDiagnostics>;
 	surfaces: GeneratedSurfaces;
 }
@@ -217,7 +195,6 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 
 	const families = {} as Record<FamilyRole, ScaleFamily>;
 	const familyDiagnostics = {} as Record<FamilyRole, FamilyDiagnostics>;
-	const textPrimary = highContrastText(source.neutral, mode);
 	// Generated in canonical role order, so a build that fails part-way reports the families it had
 	// already resolved. Every role publishes a solid, so any of them can be the one that throws.
 	for (const role of SEMANTIC_ROLES) {
@@ -275,19 +252,5 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		strongBorders,
 		surfaces,
 	});
-	const solidStateValues: Record<string, string> = {};
-	for (const tone of ['neutral', 'danger'] as const) {
-		const subtle = families[tone][FAMILY_RUNG.subtle];
-		solidStateValues[solidStateGeneratedFillVarName(tone, 'hover')] = formatOklch(
-			mixInteractionState(subtle, textPrimary, INTERACTION_HOVER_STRENGTH),
-		);
-		solidStateValues[solidStateGeneratedFillVarName(tone, 'pressed')] = formatOklch(
-			mixInteractionState(subtle, textPrimary, INTERACTION_PRESSED_STRENGTH),
-		);
-		solidStateValues[solidStateGeneratedTextVarName(tone)] =
-			tone === 'danger'
-				? colorValues['color.foreground.danger.rest']
-				: colorValues['color.foreground.primary'];
-	}
-	return { colorValues, familyDiagnostics, solidStateValues, surfaces };
+	return { colorValues, familyDiagnostics, surfaces };
 }

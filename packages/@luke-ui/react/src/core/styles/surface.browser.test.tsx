@@ -1,13 +1,14 @@
 import { Box } from '@luke-ui/react/box';
+import { Button } from '@luke-ui/react/button';
 import { expect, test } from 'vite-plus/test';
 import { render, visualAppearances } from '../test-utils/render.js';
-import { pairedColors, surfaceColors } from '../test-utils/surface-colors.js';
-import { INTERACTION_STATE_LAYER_PROPERTY } from './interaction-state-layer.js';
 import {
-	solidStatesFixture,
-	subtleToSolidFixture,
-	transparentToSubtleFixture,
-} from './surface.fixtures.css.js';
+	pairedColors,
+	setInteractionState,
+	settledSurfaceColors,
+	surfaceColors,
+} from '../test-utils/surface-colors.js';
+import { solidStatesFixture, subtleToSolidFixture } from './surface.fixtures.css.js';
 
 const TRANSPARENT = 'rgba(0, 0, 0, 0)';
 
@@ -44,36 +45,30 @@ for (const appearance of visualAppearances) {
 		expect(pressed.foreground).toEqual(rest.foreground);
 	});
 
-	test(`a transparent fill keeps its resting context under adaptive feedback in ${name}`, () => {
+	test(`a low Button keeps its parent's context in every state in ${name}`, () => {
 		const { container } = render(
 			<Box backgroundColor="success.solid" data-testid="parent" padding="space.8">
-				<div className={transparentToSubtleFixture} data-testid="control">
+				<Button prominence="low" tone="danger">
 					<span data-testid="label">Cancel</span>
-				</div>
+				</Button>
 			</Box>,
 			{ appearance },
 		);
 		const parent = byTestId(container, 'parent');
-		const control = byTestId(container, 'control');
+		const button = container.querySelector('button');
+		if (button === null) throw new Error('Expected a button.');
 		const label = byTestId(container, 'label');
+		const context = pairedColors(parent, 'success.solid.rest');
 
-		// At rest the control paints nothing, so it keeps the solid parent's context.
-		expect(surfaceColors(control)).toEqual({
-			...pairedColors(parent, 'success.solid.rest'),
-			background: TRANSPARENT,
-		});
-		const resting = surfaceColors(control);
-		control.toggleAttribute('data-hovered', true);
-		const hoverLayer = getComputedStyle(control).getPropertyValue(INTERACTION_STATE_LAYER_PROPERTY);
-		expect(hoverLayer).not.toBe('transparent');
-		expect(surfaceColors(control)).toEqual(resting);
-		control.toggleAttribute('data-pressed', true);
-		const pressedLayer = getComputedStyle(control).getPropertyValue(
-			INTERACTION_STATE_LAYER_PROPERTY,
-		);
-		expect(pressedLayer).not.toBe(hoverLayer);
-		expect(surfaceColors(control)).toEqual(resting);
-		expect(surfaceColors(label)).toEqual(resting);
+		for (const state of ['rest', 'hover', 'pressed'] as const) {
+			setInteractionState(button, state);
+			// The Button paints its parent's fill, and its state fill sits above that in the layer.
+			expect(settledSurfaceColors(button), `${state} button`).toEqual({
+				...context,
+				color: context.foreground.danger,
+			});
+			expect(settledSurfaceColors(label).foreground, `${state} label`).toEqual(context.foreground);
+		}
 	});
 
 	test(`switching between subtle and solid resets every foreground slot in ${name}`, () => {
