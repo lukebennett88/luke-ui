@@ -169,12 +169,13 @@ private margin (`VISIBILITY_MARGIN`): 0.04 OKLab ΔE from rest to hover, and 0.0
 pressed. The floors are measured on fills alone, so a `controlFinish` or `shadow` never counts
 toward them. The compiler then checks the emitted, rounded, gamut-mapped colours against the nominal
 floors and against 4.5:1 for the text over all three states. The solid-anchor search moves the
-resting solid within ±0.035 L of its source until the text clears 4.5:1 across rest, hover and
-pressed. The on-solid dead zone, where neither near-white nor near-black text reads, is narrower
-than that window, so the search never fails inside it. `ThemeGenerationError` stays exported as a
-guard for a band with no passing lightness, and authors are not expected to hit it. Diagnostics
-report each role's `distanceToEdge`: for a vibrant role, how much of the ±0.035 window is left, and
-for neutral, the distance to the edge of its curated band. Surfaces are never adapted.
+resting solid within ±0.035 L of its source lightness, clamped to the 0.30 to 0.92 range the vibrant
+solid can take, until the text clears 4.5:1 across rest, hover and pressed. The on-solid dead zone,
+where neither near-white nor near-black text reads, is narrower than that window, so the search
+never fails inside it. `ThemeGenerationError` stays exported as a guard for a band with no passing
+lightness, and authors are not expected to hit it. Diagnostics report each role's `distanceToEdge`:
+for a vibrant role, how much of the ±0.035 window is left, and for neutral, the distance to the edge
+of its curated band. Surfaces are never adapted.
 
 Checked Checkbox, Switch fills, focus rings, and text actions still select the opaque semantic
 tokens. Field-control borders paint `border.control.hover` and `border.control.pressed`, which mix

@@ -204,11 +204,15 @@ function closestVisiblePair(
 	// Hover only ever drops below its target to make room for the pressed state. It rises past the
 	// target only when the target itself is too faint to clear the rest-to-hover floor.
 	let hoverLimitStep = Math.round(targetHoverAlpha * ALPHA_SEARCH_STEPS);
+	let seenVisibleHover = false;
 
 	for (let hoverStep = 0; hoverStep < maxStep; hoverStep++) {
 		const hoverAlpha = hoverStep / ALPHA_SEARCH_STEPS;
 		if (!meetsHoverVisibility(colorValues, tint, hoverAlpha)) continue;
-		hoverLimitStep = Math.max(hoverLimitStep, hoverStep);
+		if (!seenVisibleHover) {
+			seenVisibleHover = true;
+			hoverLimitStep = Math.max(hoverLimitStep, hoverStep);
+		}
 		if (hoverStep > hoverLimitStep) break;
 
 		let lowStep = hoverStep + 1;

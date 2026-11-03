@@ -399,7 +399,10 @@ function buildFamily(request: GenerateFamilyRequest): {
 		distanceToEdge:
 			role === 'neutral'
 				? Math.min(anchor.lightness - anchor.band[0], anchor.band[1] - anchor.lightness)
-				: VIBRANT_SOLID_MAX_DEVIATION - Math.abs(anchor.lightness - source.l),
+				: VIBRANT_SOLID_MAX_DEVIATION -
+					Math.abs(
+						anchor.lightness - clamp(source.l, VIBRANT_SOLID_RANGE[0], VIBRANT_SOLID_RANGE[1]),
+					),
 		resolvedLightness: anchor.lightness,
 		satisfied: onSolid.minRatio >= TEXT_RATIO,
 		targetLightness: anchor.target,
@@ -451,12 +454,13 @@ function resolveSolidAnchor(request: GenerateFamilyRequest): ResolvedAnchor {
 	const [rangeLow, rangeHigh] = VIBRANT_SOLID_RANGE;
 	// Neutral takes a curated dark/light chip; a vibrant role keeps its authored tone within a narrow
 	// window around the source lightness.
+	const anchorLightness = clamp(source.l, rangeLow, rangeHigh);
 	const target = isNeutral ? NEUTRAL_SOLID[mode].target : source.l;
 	const band: [number, number] = isNeutral
 		? NEUTRAL_SOLID[mode].band
 		: [
-				clamp(source.l - VIBRANT_SOLID_MAX_DEVIATION, rangeLow, rangeHigh),
-				clamp(source.l + VIBRANT_SOLID_MAX_DEVIATION, rangeLow, rangeHigh),
+				Math.max(rangeLow, anchorLightness - VIBRANT_SOLID_MAX_DEVIATION),
+				Math.min(rangeHigh, anchorLightness + VIBRANT_SOLID_MAX_DEVIATION),
 			];
 	const [low, high] = band;
 

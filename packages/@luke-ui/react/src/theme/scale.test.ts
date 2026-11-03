@@ -418,14 +418,35 @@ describe('dead-zone and adaptable sources', () => {
 		expect(unadapted.solidAnchor.distanceToEdge).toBeCloseTo(0.035, 9);
 	});
 
-	it('measures a clamped vibrant window against the full ±0.035 window, not the clamped band', () => {
-		// Source 0.924 clamps the band to 0.889 to 0.92, so the resolved 0.92 sits on the band's edge.
+	it('centres the window on the source lightness clamped into the vibrant range', () => {
+		// Source 0.924 clamps to 0.92, so the window is 0.885 to 0.92 and the unadapted solid sits at
+		// the anchor with the whole window left.
 		const source = { l: 0.924, c: 0.1, h: 90 };
 		const { solidAnchor } = familyDiagnostics(source, 'light', 'accent').diagnostics;
+		expect(solidAnchor.band[0]).toBeCloseTo(0.885, 9);
 		expect(solidAnchor.band[1]).toBeCloseTo(0.92, 9);
 		expect(solidAnchor.resolvedLightness).toBeCloseTo(0.92, 9);
-		expect(solidAnchor.distanceToEdge).toBeCloseTo(0.035 - 0.004, 9);
+		expect(solidAnchor.adaptedForOnSolid).toBe(false);
+		expect(solidAnchor.distanceToEdge).toBeCloseTo(0.035, 9);
 	});
+
+	for (const mode of MODES) {
+		for (const lightness of [0.2, 0.98]) {
+			it(`keeps the ${mode} window and distanceToEdge sane for a source at ${lightness}, outside the vibrant range`, () => {
+				const { solidAnchor } = familyDiagnostics(
+					{ l: lightness, c: 0.1, h: 250 },
+					mode,
+					'accent',
+				).diagnostics;
+				const anchor = Math.min(Math.max(lightness, 0.3), 0.92);
+				expect(solidAnchor.band[0]).toBeCloseTo(Math.max(0.3, anchor - 0.035), 9);
+				expect(solidAnchor.band[1]).toBeCloseTo(Math.min(0.92, anchor + 0.035), 9);
+				expect(solidAnchor.distanceToEdge).toBeGreaterThanOrEqual(0);
+				expect(solidAnchor.distanceToEdge).toBeLessThanOrEqual(0.035 + 1e-9);
+				expect(solidAnchor.satisfied).toBe(true);
+			});
+		}
+	}
 
 	it('does not throw for neutral, whose solid comes from a curated band rather than the source tone', () => {
 		expect(() => {

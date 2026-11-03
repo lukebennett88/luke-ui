@@ -29,14 +29,45 @@ import type { SemanticColorValues } from './semantic-map.js';
 const { controlFinish: _controlFinish, shadow: _shadow, ...tactileColours } = tactileTheme;
 const flatFoundation = normalizeTheme({ ...tactileColours, name: 'flat-fixture' });
 
+const FOUNDATIONS = [
+	['Paper', paperFoundation],
+	['Tactile', tactileFoundation],
+	['flat', flatFoundation],
+	['chromatic', normalizeTheme(chromaticTheme)],
+	['contrastEdge', normalizeTheme(contrastEdgeTheme)],
+] as const;
+
+// Everything a state layer can sit on: the three surfaces and the six subtle fills.
+const TINT_BACKGROUNDS = [
+	'color.background.surface.base',
+	'color.background.surface.subdued',
+	'color.background.surface.raised',
+	...SEMANTIC_ROLES.map((role) => `color.background.${role}.subtle` as const),
+] as const;
+
+/** The alpha at which the tint over the base surface best matches the neutral hover mix. */
+function hoverTargetAlpha(colorValues: SemanticColorValues, mode: 'light' | 'dark'): number {
+	const tint = mode === 'dark' ? { l: 1, c: 0, h: 0 } : { l: 0, c: 0, h: 0 };
+	const base = parseColor(colorValues['color.background.surface.base']);
+	const target = mixInteractionState(
+		parseColor(colorValues['color.background.neutral.subtle']),
+		parseColor(colorValues['color.foreground.primary']),
+		INTERACTION_HOVER_STRENGTH,
+	);
+	let best = 0;
+	let bestDistance = Number.POSITIVE_INFINITY;
+	for (let step = 0; step <= 1000; step++) {
+		const distance = oklabDeltaE(compositeEncodedSrgb(tint, base, step / 1000), target);
+		if (distance < bestDistance) {
+			bestDistance = distance;
+			best = step / 1000;
+		}
+	}
+	return best;
+}
+
 describe('solveInteractionTints', () => {
-	for (const [name, foundation] of [
-		['Paper', paperFoundation],
-		['Tactile', tactileFoundation],
-		['flat', flatFoundation],
-		['chromatic', normalizeTheme(chromaticTheme)],
-		['contrastEdge', normalizeTheme(contrastEdgeTheme)],
-	] as const) {
+	for (const [name, foundation] of FOUNDATIONS) {
 		it(`emits a black light pair and a white dark pair for ${name}`, () => {
 			const blocks = splitBlocks(compileTheme(foundation).css);
 			expect(blocks.baseLight).toContain(
@@ -80,12 +111,7 @@ describe('solveInteractionTints', () => {
 				const values = compiledColorValues(foundation, mode);
 				const tints = solveInteractionTints(mode, values);
 				const tint = mode === 'dark' ? { l: 1, c: 0, h: 0 } : { l: 0, c: 0, h: 0 };
-				const backgrounds = [
-					'color.background.surface.base',
-					'color.background.surface.subdued',
-					'color.background.surface.raised',
-					...SEMANTIC_ROLES.map((role) => `color.background.${role}.subtle`),
-				] as const;
+				const backgrounds = TINT_BACKGROUNDS;
 				for (const path of backgrounds) {
 					const background = parseColor(values[path as keyof SemanticColorValues]);
 					const hover = compositeEncodedSrgb(tint, background, tints.hoverAlpha);
@@ -157,23 +183,8 @@ describe('solveInteractionTints', () => {
 	it('makes room for the margin by lowering hover, and keeps pressed under its contrast cap', () => {
 		const colorValues = compiledColorValues(tactileFoundation, 'dark');
 		const tints = solveInteractionTints('dark', colorValues);
-		// The target is the alpha that matches the neutral subtle fill's hover mix over the base.
 		const white = { l: 1, c: 0, h: 0 };
-		const base = parseColor(colorValues['color.background.surface.base']);
-		const targetHover = mixInteractionState(
-			parseColor(colorValues['color.background.neutral.subtle']),
-			parseColor(colorValues['color.foreground.primary']),
-			INTERACTION_HOVER_STRENGTH,
-		);
-		let targetHoverAlpha = 0;
-		let bestDistance = Number.POSITIVE_INFINITY;
-		for (let step = 0; step <= 1000; step++) {
-			const distance = oklabDeltaE(compositeEncodedSrgb(white, base, step / 1000), targetHover);
-			if (distance < bestDistance) {
-				bestDistance = distance;
-				targetHoverAlpha = step / 1000;
-			}
-		}
+		const targetHoverAlpha = hoverTargetAlpha(colorValues, 'dark');
 		// The margin over the raised surface needs less than the target.
 		expect(tints.hoverAlpha).toBeLessThan(targetHoverAlpha);
 		expect(tints.pressedAlpha).toBeGreaterThan(tints.hoverAlpha);
@@ -182,6 +193,32 @@ describe('solveInteractionTints', () => {
 		const tinted = compositeEncodedSrgb(white, raised, tints.pressedAlpha);
 		expect(contrastRatio(danger, tinted)).toBeGreaterThanOrEqual(TEXT_RATIO);
 	});
+
+	for (const [name, foundation] of FOUNDATIONS) {
+		it(`never picks a ${name} hover above the larger of its target and the first visible alpha`, () => {
+			for (const mode of ['light', 'dark'] as const) {
+				const colorValues = compiledColorValues(foundation, mode);
+				const tints = solveInteractionTints(mode, colorValues);
+				const tint = mode === 'dark' ? { l: 1, c: 0, h: 0 } : { l: 0, c: 0, h: 0 };
+				const backgrounds = TINT_BACKGROUNDS.map((path) => {
+					return parseColor(colorValues[path]);
+				});
+				let firstVisible = 0;
+				while (
+					backgrounds.some((background) => {
+						return (
+							oklabDeltaE(background, compositeEncodedSrgb(tint, background, firstVisible)) <
+							INTERACTION_HOVER_VISIBILITY + VISIBILITY_MARGIN
+						);
+					})
+				) {
+					firstVisible += 0.001;
+				}
+				const limit = Math.max(hoverTargetAlpha(colorValues, mode), firstVisible);
+				expect(tints.hoverAlpha, `${mode} hover`).toBeLessThanOrEqual(limit + 1e-9);
+			}
+		});
+	}
 
 	it('raises a target pressed tint that falls below the minimum visible pair', () => {
 		const colorValues = compiledColorValues(paperFoundation, 'dark');

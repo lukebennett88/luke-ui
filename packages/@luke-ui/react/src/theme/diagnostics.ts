@@ -28,8 +28,8 @@ export interface SolidAnchorDiagnostics {
 	band: [number, number];
 	/**
 	 * How much of the search window is left, in OKLCH lightness. For a vibrant role it is measured
-	 * against the full ±0.035 window around the source lightness, `0.035 - |resolved - source|`, even
-	 * where `band` is clamped to the 0.3 to 0.92 range. For the neutral role it is the distance from
+	 * against the full ±0.035 window around the source lightness clamped to the 0.3 to 0.92 range,
+	 * `0.035 - |resolved - clamped source|`, even where `band` is cut off by that range. For the neutral role it is the distance from
 	 * the resolved lightness to the nearest edge of its curated `band`. A value near zero means the
 	 * on-solid search had almost no room left.
 	 */
