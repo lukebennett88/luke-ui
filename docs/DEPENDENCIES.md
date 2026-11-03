@@ -88,33 +88,43 @@ the peer range, and bumping it on every minor would narrow what consumers can sa
 
 ### Published-change versioning
 
-Before the initial `@luke-ui/react` 1.0 release, no pull request needs a changeset. Afterwards,
-include a Changeset for each release-worthy change to any published package, including 0.x theme and
-support packages. Describe every intentional change to published visuals in release notes, even a
-small refinement. Changes confined to private code with no published impact need no release.
+Before `@luke-ui/react` 1.0, no pull request needs a changeset.
+
+After React 1.0:
+
+- Every release-worthy change to a published package needs a Changeset, including 0.x packages.
+- Describe every intentional change to published visuals in release notes, even a small refinement.
+- Private-only changes with no published impact need no release.
 
 For stable (1.x+) packages, classify changes by consumer impact:
 
-- **Major:** Remove or rename a public token, prop, or theme option. Break a documented behaviour or
-  guarantee, or make a previously compiling supported theme fail compilation. Stricter validation
-  is breaking even when motivated by accessibility, unless it only fixes acceptance of inputs that
-  already violated an explicit documented guarantee.
-- **Minor:** Add a compatible public token, prop, or optional theme authoring capability, or make a
-  broad, intentional visual change to a theme or multiple component families without breaking a
-  documented contract.
-- **Patch:** Correct a defect to restore documented behaviour (even if consumers relied on the
-  defect), fix other non-breaking defects or accessibility issues, or make a narrowly scoped visual
-  refinement.
+- **Major:** Remove or rename a public token, prop, or theme option.
+- **Major:** Break documented behaviour or a documented guarantee.
+- **Major:** Make a previously compiling, supported theme fail compilation.
+- **Minor:** Add a compatible public token, prop, or optional theme authoring option.
+- **Minor:** Deliberately change a theme's overall look or multiple component families.
+- **Patch:** Correct an implementation that contradicts its documented contract.
+- **Patch:** Fix other non-breaking defects, including accessibility bugs.
+- **Patch:** Make a narrow visual refinement, including a small generated-colour change.
 
-Semantic tokens guarantee their public names, meanings, documented behaviours, and supported theme
-compatibility — not exact generated colour values. Classify token-value and generated-colour changes
-by the visible outcome: narrow corrections are patches, broad compatible repaints are minors, and
-changes breaking a contract are majors. **Changing private code can still be breaking.**
+Rejecting a supported theme through stricter validation is breaking, even for accessibility.
 
-For 0.x packages, use **minor** for breaking changes and new public capabilities, and **patch** for
-fixes and narrow visual refinements. Version only the published packages whose contract or output
-changes, including compiled theme CSS. Dependency/peer compatibility and publication mechanics are
-owned by [#721](https://github.com/lukebennett88/luke-ui/issues/721).
+Enforcing an existing, explicit guarantee can instead be a patch if acceptance was a defect.
+
+Semantic tokens guarantee public names, meanings, documented behaviour and theme compatibility.
+
+Exact generated colour values are not guaranteed. Classify repaints by their published impact.
+
+Changes to private code can still be breaking if they violate a public contract.
+
+For 0.x packages:
+
+- **Minor:** Breaking changes, new public capabilities and broad visual redesigns.
+- **Patch:** Fixes and narrow visual refinements.
+
+Version only affected published packages, including those with changed compiled theme CSS.
+
+Issue #721 owns release mechanics and dependency/peer compatibility.
 
 ## Grouping and schedule
 
