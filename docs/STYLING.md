@@ -87,10 +87,8 @@ layer and shadow, because a finish stacked with the translucent tint behind the 
 contrast. The recipe tells the two apart with a `@container style()` query on the chip's custom
 property, which a solid's `surfaceStyle` sets and a page surface leaves unset.
 
-The compiler keeps colour states distinguishable when every shadow and control finish is `none`:
-solid hover and pressed, and the interaction tint over every surface and subtle fill, clear fixed
-visibility floors on fills alone. A theme's materials decide whether a state looks raised or
-recessed. See [Interaction states](THEME_COLOUR_GENERATION.md#interaction-states).
+The theme compiler keeps colour states distinguishable without a shadow or finish. See
+[Interaction states](THEME_COLOUR_GENERATION.md#interaction-states).
 
 Tactile and Paper live in `packages/@luke-ui/theme-tactile` and `packages/@luke-ui/theme-paper`.
 Each build compiles its built `./input` into `dist/stylesheet.css`. React's visual suite compiles
