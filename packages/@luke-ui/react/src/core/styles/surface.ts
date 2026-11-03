@@ -52,6 +52,12 @@ export const surfaceFinish = {
 	pressed: createGlobalVar('luke-internal-surface-finish-pressed'),
 };
 
+// The shadow a low Button paints when pressed. Only a role solid sets it, so a low Button over any
+// other surface paints the plain inset rung.
+export const surfaceShadow = {
+	pressed: createGlobalVar('luke-internal-surface-shadow-pressed'),
+};
+
 /**
  * The colour the nearest recognised surface establishes for `slot`. On a standard surface or any
  * subtle fill, the global neutral hierarchy and the role's hue in `state`. On a solid fill, that
@@ -124,6 +130,7 @@ function neutralContext(backgroundColor: string): SurfaceStyle {
 			...neutralForegroundContextVars(),
 			[surfaceFinish.hover]: 'initial',
 			[surfaceFinish.pressed]: 'initial',
+			[surfaceShadow.pressed]: 'initial',
 			[surfaceFill.rest]: backgroundColor,
 			[surfaceFill.hover]: 'var(--luke-interaction-tint-hover)',
 			[surfaceFill.pressed]: 'var(--luke-interaction-tint-pressed)',
@@ -148,6 +155,7 @@ function solidContext(role: SemanticRole, backgroundColor: string): SurfaceStyle
 		vars: {
 			[surfaceFinish.hover]: vars.controlFinish.raised,
 			[surfaceFinish.pressed]: vars.controlFinish.recessed,
+			[surfaceShadow.pressed]: `${vars.shadow.inset}, ${vars.shadow.inset}, ${vars.shadow.inset}`,
 			[surfaceFill.rest]: backgroundColor,
 			[surfaceFill.hover]: vars.color.background[role].solid.hover,
 			[surfaceFill.pressed]: vars.color.background[role].solid.pressed,
