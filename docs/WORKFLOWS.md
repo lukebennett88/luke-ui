@@ -79,20 +79,9 @@ Each companion watches the inputs for its generated output. Turbo's `with` relat
 stops these package watchers with the app. Existing Vite/Rolldown plugins also watch the built theme
 compiler and reload it for stylesheet regeneration, without another companion process.
 
-Vite+ remains the compiler, formatter, linter, packer, and test tool. Its task runner was evaluated
-against the installed version rather than selected from script counts. The
-[Vite+ run documentation](https://viteplus.dev/guide/run) supports script execution, explicit task
-dependencies, automatic cache tracking, and workspace ordering. The
-[Void configuration](https://github.com/voidzero-dev/void/blob/main/vite.config.ts) provides a
-useful hybrid pattern: discrete scripts remain in package manifests, with task definitions for
-dependencies and caching.
-
-The migration blocker is persistent companion tasks. A representative two-package workspace with a
-long-running library `dev` dependency never starts the app under `vp run -r dev`: topological
-execution waits for the dependency to exit. `--parallel` starts both processes but discards the
-prerequisite ordering. The installed Vite+ task schema provides no persistent companion relationship
-equivalent to [Turbo's `with`](https://turborepo.dev/docs/reference/configuration#with). Retaining
-Turbo avoids a custom process supervisor and preserves the development and watch-test lifecycle.
+Vite+ supplies the compiler, formatter, linter, packer, and test tool. Turbo's
+[`with` relationship](https://turborepo.dev/docs/reference/configuration#with) manages persistent
+companion tasks for development and watch tests while preserving prerequisite ordering.
 
 No remote task cache is required. Runner caching is separate from Vitest, lint, package-manager, and
 Docker dependency caches. An internal tool cache must never substitute for required test execution.

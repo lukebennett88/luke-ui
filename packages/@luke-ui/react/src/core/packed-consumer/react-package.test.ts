@@ -181,6 +181,9 @@ for (const consumer of consumers) {
 				expect(markup).toContain('<button');
 				expect(markup).toContain('<input');
 				expect(markup).toContain('role="switch"');
+				expect(markup).toContain('role="radiogroup"');
+				expect(markup).toContain('type="radio"');
+				expect(markup).toContain('name="plan"');
 				expect(markup).toContain('(required)');
 				// Form necessity context must cross published entrypoints so the marker is SSR'd.
 				expect(markup).toContain('(optional)');
@@ -257,7 +260,7 @@ for (const consumer of consumers) {
 
 					expect(result.recoverableErrors).toEqual([]);
 					expect(consoleErrors).toEqual([]);
-					expect(result.controls).toEqual({ buttons: 2, inputs: 3 });
+					expect(result.controls).toEqual({ buttons: 2, inputs: 5 });
 					expect(result.expectedActionClasses).toBeTruthy();
 					expect(result.inheritedActionClasses).toBe(result.expectedActionClasses);
 					// React Aria effects adjust attributes after hydration, so compare nodes, not markup.
@@ -277,7 +280,13 @@ for (const consumer of consumers) {
 						result.inputLabels.map((label) => {
 							return label?.replaceAll(WHITESPACE_PATTERN, ' ').trim();
 						}),
-					).toEqual(['Name (optional)', 'Example checkbox', 'Example switch']);
+					).toEqual([
+						'Name (optional)',
+						'Example checkbox',
+						'Example switch',
+						'Basic plan',
+						'Pro plan',
+					]);
 					// The Select's required cue is hidden text the trigger references by a server-generated id.
 					expect(result.serverText).toContain('(required)');
 					expect(result.serverText).toContain('(optional)');
@@ -291,6 +300,8 @@ for (const consumer of consumers) {
 					);
 					await page.getByText('Example switch').click();
 					expect(await page.getByRole('switch', { name: 'Example switch' }).isChecked()).toBe(true);
+					await page.getByText('Pro plan').click();
+					expect(await page.getByRole('radio', { name: 'Pro plan' }).isChecked()).toBe(true);
 				} finally {
 					await browser.close();
 					await server.close();

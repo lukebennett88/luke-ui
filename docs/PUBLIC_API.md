@@ -71,19 +71,20 @@ Name a composed component `<Control>Field` when it owns the complete form-field 
 control, its visible label, description, error message, validation and necessity presentation, and
 the field semantics that tie them together. The suffix follows that ownership, not the layout, so
 the inline `CheckboxField` and `SwitchField` share it with the stacked `TextInputField`,
-`ComboboxField`, and `SelectField`. A future radio group is `RadioGroupField`. An individual radio
-is an option within that field, not a field itself. Primitives keep their part names, such as
-`CheckboxRoot` and `SwitchControl`.
+`ComboboxField`, and `SelectField`. `RadioGroup` owns the complete field experience for a set of
+radio options, and each `RadioField` names one option within the group. Primitives keep their part
+names, such as `CheckboxRoot` and `SwitchControl`.
 
 ### Accessible names
 
-`TextInputField`, `ComboboxField`, and `SelectField` take a visible `label`, or `aria-label` or
-`aria-labelledby` instead, because a label-less field such as a search input is a normal use.
-`CheckboxField` and `SwitchField` always take a visible `label` and accept neither `aria-label` nor
-`aria-labelledby`. When another component owns the label, the consumer composes the control's
-primitives. `CheckboxRoot` and `SwitchRoot` give a `FieldLabel` inside them a `for` that points at
-the input, using `inputId` or a generated id, so the layout passes no ids.
-[#714](https://github.com/lukebennett88/luke-ui/issues/714) owns both decisions.
+Support `aria-label` and `aria-labelledby` instead of a visible `label` when an invisible label is a
+normal use, such as a search input. Require a visible `label` when that text forms the control's
+click target, as it does for a checkbox, switch, or radio option. When another component owns the
+label, the consumer composes the control's primitives. Each component's public props document the
+names it accepts. See [Forms](../apps/docs/content/docs/docs/forms.mdx#visible-labels) for usage.
+
+`CheckboxRoot` and `SwitchRoot` give a `FieldLabel` inside them a `for` that points at the input,
+using `inputId` or a generated id, so the layout passes no ids.
 
 ### Primitives and composed components
 

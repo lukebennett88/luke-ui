@@ -87,6 +87,7 @@ import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Form } from '@luke-ui/react/form';
 import { Icon } from '@luke-ui/react/icon';
 import { Provider } from '@luke-ui/react/provider';
+import { RadioField, RadioGroup } from '@luke-ui/react/radio-group';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
 import spritesheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { SwitchField } from '@luke-ui/react/switch-field';
@@ -116,6 +117,12 @@ export function App({ onHydrated }) {
 			),
 			h(CheckboxField, { label: 'Example checkbox' }),
 			h(SwitchField, { label: 'Example switch' }),
+			h(
+				RadioGroup,
+				{ defaultValue: 'basic', label: 'Plan', name: 'plan' },
+				h(RadioField, { label: 'Basic plan', value: 'basic' }),
+				h(RadioField, { label: 'Pro plan', value: 'pro' }),
+			),
 			h(
 				SelectField,
 				{ isRequired: true, label: 'Country' },

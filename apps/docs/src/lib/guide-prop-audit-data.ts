@@ -100,6 +100,26 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		[],
 	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/primitives/combobox/section.tsx::ComboboxSectionProps':
 		[],
+	'forms/radio-group.mdx::packages/@luke-ui/react/src/core/radio-group/radio-group.tsx::RadioGroupProps':
+		[
+			'aria-label',
+			'aria-labelledby',
+			'defaultValue',
+			'description',
+			'errorMessage',
+			'isDisabled',
+			'isRequired',
+			'label',
+			'name',
+			'necessityIndicator',
+			'onChange',
+			'orientation',
+			'size',
+			'validate',
+			'value',
+		],
+	'forms/radio-group.mdx::packages/@luke-ui/react/src/core/radio-group/radio-group.tsx::RadioFieldProps':
+		['description', 'isDisabled', 'label', 'size', 'value'],
 	'forms/select-field.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectItemProps':
 		[],
 	'forms/select-field.mdx::packages/@luke-ui/react/src/core/select-field/select-field.tsx::SelectFieldProps':
@@ -283,6 +303,16 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		['isRequired', 'necessityIndicator'],
 	'primitives/field.mdx::packages/@luke-ui/react/src/core/primitives/field/label.tsx::FieldLabelProps':
 		['htmlFor', 'isRequired', 'necessityIndicator'],
+	'primitives/radio.mdx::packages/@luke-ui/react/src/core/primitives/radio/radio.tsx::RadioGroupRootProps':
+		['aria-label', 'aria-labelledby', 'defaultValue', 'size'],
+	'primitives/radio.mdx::packages/@luke-ui/react/src/core/primitives/radio/radio.tsx::RadioRootProps':
+		['value'],
+	'primitives/radio.mdx::packages/@luke-ui/react/src/core/primitives/radio/radio.tsx::RadioLabelProps':
+		['children'],
+	'primitives/radio.mdx::packages/@luke-ui/react/src/core/primitives/radio/radio.tsx::RadioControlProps':
+		[],
+	'primitives/radio.mdx::packages/@luke-ui/react/src/core/primitives/radio/radio.tsx::RadioIndicatorProps':
+		[],
 	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectIndicatorProps':
 		['children'],
 	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectItemProps':
