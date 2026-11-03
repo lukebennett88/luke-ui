@@ -73,7 +73,8 @@ the field semantics that tie them together. The suffix follows that ownership, n
 the inline `CheckboxField` and `SwitchField` share it with the stacked `TextInputField`,
 `ComboboxField`, and `SelectField`. `RadioGroup` owns the complete field experience for a set of
 radio options, and each `RadioField` names one option within the group. Primitives keep their part
-names, such as `CheckboxRoot` and `SwitchControl`.
+names, such as `CheckboxRoot` and `SwitchControl`. `CheckboxGroup` owns the shared label,
+validation, and error presentation for a set of existing `CheckboxField` options.
 
 ### Accessible names
 

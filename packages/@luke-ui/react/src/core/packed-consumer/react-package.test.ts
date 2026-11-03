@@ -188,6 +188,7 @@ for (const consumer of consumers) {
 				// Form necessity context must cross published entrypoints so the marker is SSR'd.
 				expect(markup).toContain('(optional)');
 				expect(markup).toContain('Contextual text');
+				expect(markup.split('Choose a subscription option.')).toHaveLength(2);
 
 				const server = await serveBuild(dir);
 				const browser = await chromium.launch();
@@ -198,6 +199,13 @@ for (const consumer of consumers) {
 						if (message.type() === 'error') consoleErrors.push(message.text());
 					});
 					page.on('pageerror', (error) => consoleErrors.push(String(error)));
+
+					const ssrPage = await browser.newPage({ javaScriptEnabled: false });
+					await ssrPage.goto(`${server.url}ssr.html`);
+					const group = ssrPage.getByRole('group', { name: 'Packed choices' });
+					const email = group.getByRole('checkbox', { name: 'Packed email' });
+					expect(await email.getAttribute('aria-invalid')).toBe('true');
+					await ssrPage.close();
 
 					await page.goto(`${server.url}ssr.html`);
 					await page.waitForFunction(
@@ -260,7 +268,7 @@ for (const consumer of consumers) {
 
 					expect(result.recoverableErrors).toEqual([]);
 					expect(consoleErrors).toEqual([]);
-					expect(result.controls).toEqual({ buttons: 2, inputs: 5 });
+					expect(result.controls).toEqual({ buttons: 2, inputs: 7 });
 					expect(result.expectedActionClasses).toBeTruthy();
 					expect(result.inheritedActionClasses).toBe(result.expectedActionClasses);
 					// React Aria effects adjust attributes after hydration, so compare nodes, not markup.
@@ -283,6 +291,8 @@ for (const consumer of consumers) {
 					).toEqual([
 						'Name (optional)',
 						'Example checkbox',
+						'Packed email',
+						'Packed updates',
 						'Example switch',
 						'Basic plan',
 						'Pro plan',
@@ -296,6 +306,10 @@ for (const consumer of consumers) {
 					// Clicking the label text proves hydration attached each field's handlers.
 					await page.getByText('Example checkbox').click();
 					expect(await page.getByRole('checkbox', { name: 'Example checkbox' }).isChecked()).toBe(
+						true,
+					);
+					await page.getByText('Packed updates').click();
+					expect(await page.getByRole('checkbox', { name: 'Packed updates' }).isChecked()).toBe(
 						true,
 					);
 					await page.getByText('Example switch').click();

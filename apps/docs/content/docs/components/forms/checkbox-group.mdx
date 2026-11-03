@@ -1,0 +1,77 @@
+---
+title: Checkbox Group
+description: A labelled group of checkboxes for choosing multiple options.
+source: packages/@luke-ui/react/src/exports/checkbox-group.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/CheckboxGroup.html
+---
+
+Use `CheckboxGroup` when someone can choose more than one option from a related set. It provides a
+shared label, description, and validation message for its `CheckboxField` children.
+
+<ExampleBlock src="checkbox-group/basic" title="Checkbox Group: Basic" />
+
+## Selection
+
+Pass `defaultValue` to set the initial selection, or pass `value` with `onChange` to control it.
+Pass a unique `value` to each `CheckboxField`. The group value is an array of the selected values.
+
+<ExampleBlock src="checkbox-group/controlled" title="Checkbox Group: Controlled" />
+
+## Layout
+
+The group is vertical by default. Set `orientation="horizontal"` to arrange options in a row that
+wraps when it runs out of space.
+
+<ExampleBlock src="checkbox-group/layout" title="Checkbox Group: Layout" />
+
+## Size
+
+Set `size` to provide a default size for its checkbox fields. A child's `size` takes precedence over
+the group size. When neither sets a size, the group inherits `Form.controlSize` or uses `medium`.
+The size changes the control without changing the label typography.
+
+<ExampleBlock src="checkbox-group/sizes" title="Checkbox Group: Size" />
+
+## Validation
+
+Set `isRequired` to require at least one selection, or pass `validate` to check the selected values.
+Set `isRequired` or pass `validate` on a `CheckboxField` when that option needs its own rule. The
+group shows these native validation messages below its options.
+
+Pass `errorMessage` to `CheckboxGroup` for a controlled error from a form library or server. A
+non-empty message marks the group invalid and takes precedence over native validation messages. The
+description stays visible while the group is invalid. Read [Validation](/docs/validation) for where
+messages come from and how to write them.
+
+By default, a required group shows a marker after its label. Read
+[Required fields](/docs/forms#required-fields) for the `necessityIndicator` values.
+
+Submit without selecting a day to see the validation message.
+
+<ExampleBlock src="checkbox-group/validation" title="Checkbox Group: Validation" />
+
+Select email updates and submit without accepting the terms to see the group error for the required
+option.
+
+<ExampleBlock src="checkbox-group/required-option" title="Checkbox Group: Required option" />
+
+## Form values
+
+Pass `name` to include the selected values in form submission. Pass `form` to associate the group
+with a `<form>` it does not sit inside.
+
+## Accessibility
+
+Use a visible `label` to name the group. When another part of the layout names it, pass
+`aria-labelledby`. Pass `aria-label` when there is no visible group label. Each `CheckboxField`
+keeps its own visible label and optional description.
+
+Set `isDisabled` on the group to disable every option. An individual option cannot override a
+disabled group with `isDisabled={false}`.
+
+## API
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/checkbox-group/checkbox-group.tsx"
+	name="CheckboxGroupProps"
+/>
