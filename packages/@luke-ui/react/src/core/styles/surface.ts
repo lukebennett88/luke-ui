@@ -2,13 +2,6 @@ import { createGlobalVar, fallbackVar } from '@vanilla-extract/css';
 import { typedEntries } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
-import {
-	solidStateFillVarName,
-	solidStateGeneratedFillVarName,
-	solidStateGeneratedTextVarName,
-	solidStateTextVarName,
-} from '../../theme/interaction-tint-vars.js';
-import type { SolidStateTone } from '../../theme/interaction-tint-vars.js';
 
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
 
@@ -44,18 +37,20 @@ const foregroundOverride = {
 	tone: createGlobalVar('luke-internal-foreground-tone'),
 };
 
-function solidStateVars(
-	value: (tone: SolidStateTone, slot: 'hover' | 'pressed' | 'text') => string,
-) {
-	return {
-		[solidStateFillVarName('neutral', 'hover')]: value('neutral', 'hover'),
-		[solidStateFillVarName('neutral', 'pressed')]: value('neutral', 'pressed'),
-		[solidStateTextVarName('neutral')]: value('neutral', 'text'),
-		[solidStateFillVarName('danger', 'hover')]: value('danger', 'hover'),
-		[solidStateFillVarName('danger', 'pressed')]: value('danger', 'pressed'),
-		[solidStateTextVarName('danger')]: value('danger', 'text'),
-	};
-}
+// The surface's own fill in each interaction state, read by a low Button. A solid sets its own
+// hover and pressed fills, and every other surface sets the shared tint.
+export const surfaceFill = {
+	rest: createGlobalVar('luke-internal-surface-fill-rest'),
+	hover: createGlobalVar('luke-internal-surface-fill-hover'),
+	pressed: createGlobalVar('luke-internal-surface-fill-pressed'),
+};
+
+// The control finish a low Button paints in a state. Only a role solid sets these, so a low Button
+// over any other surface paints no finish.
+export const surfaceFinish = {
+	hover: createGlobalVar('luke-internal-surface-finish-hover'),
+	pressed: createGlobalVar('luke-internal-surface-finish-pressed'),
+};
 
 /**
  * The colour the nearest recognised surface establishes for `slot`. On a standard surface or any
@@ -127,13 +122,17 @@ function neutralContext(backgroundColor: string): SurfaceStyle {
 		color: vars.color.foreground.primary,
 		vars: {
 			...neutralForegroundContextVars(),
-			...solidStateVars(() => 'initial'),
+			[surfaceFinish.hover]: 'initial',
+			[surfaceFinish.pressed]: 'initial',
+			[surfaceFill.rest]: backgroundColor,
+			[surfaceFill.hover]: 'var(--luke-interaction-tint-hover)',
+			[surfaceFill.pressed]: 'var(--luke-interaction-tint-pressed)',
 		},
 	};
 }
 
 /** Resets solid foreground overrides so descendants read the neutral text and role tokens. */
-export function neutralForegroundContextVars() {
+function neutralForegroundContextVars() {
 	return {
 		[foregroundOverride.primary]: 'initial',
 		[foregroundOverride.secondary]: 'initial',
@@ -147,10 +146,11 @@ function solidContext(role: SemanticRole, backgroundColor: string): SurfaceStyle
 		backgroundColor,
 		color: onSolid,
 		vars: {
-			...solidStateVars((tone, slot) => {
-				if (slot === 'text') return `var(${solidStateGeneratedTextVarName(tone)})`;
-				return `var(${solidStateGeneratedFillVarName(tone, slot)})`;
-			}),
+			[surfaceFinish.hover]: vars.controlFinish.raised,
+			[surfaceFinish.pressed]: vars.controlFinish.recessed,
+			[surfaceFill.rest]: backgroundColor,
+			[surfaceFill.hover]: vars.color.background[role].solid.hover,
+			[surfaceFill.pressed]: vars.color.background[role].solid.pressed,
 			[foregroundOverride.primary]: onSolid,
 			[foregroundOverride.secondary]: onSolid,
 			[foregroundOverride.tone]: onSolid,

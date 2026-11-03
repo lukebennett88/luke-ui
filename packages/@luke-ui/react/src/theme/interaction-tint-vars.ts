@@ -11,16 +11,6 @@ export function interactionTintVarName(state: InteractionTintState): string {
 /** Semantic tones whose on-solid text needs an opaque adaptive fallback chip. */
 export type SolidStateTone = 'neutral' | 'danger';
 
-/** Names the private opaque chip values used by low Buttons on solid fills. */
-export function solidStateFillVarName(tone: SolidStateTone, state: InteractionTintState): string {
-	return `--luke-internal-solid-state-fill-${tone}-${state}`;
-}
-
-/** Names the foreground paired with a private opaque chip. */
-export function solidStateTextVarName(tone: SolidStateTone): string {
-	return `--luke-internal-solid-state-text-${tone}`;
-}
-
 /** Theme-generated opaque fill used only when adaptive feedback sits over a solid surface. */
 export function solidStateGeneratedFillVarName(
 	tone: SolidStateTone,

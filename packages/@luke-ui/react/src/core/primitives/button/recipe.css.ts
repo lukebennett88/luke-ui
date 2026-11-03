@@ -1,3 +1,4 @@
+import { fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import * as interactionTints from '../../../theme/interaction-tint-vars.js';
@@ -7,14 +8,11 @@ import { style } from '../../styles/layered-style.css.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import { recipe } from '../../styles/recipe.js';
 import { interactionStateLayer } from '../../styles/state-layer.css.js';
-import {
-	adaptiveStateLayer,
-	transparentAdaptiveStateLayer,
-	transparentAdaptiveStateText,
-} from '../../styles/state-layer.js';
+import { adaptiveStateLayer } from '../../styles/state-layer.js';
 import {
 	contextualForeground,
-	neutralForegroundContextVars,
+	surfaceFill,
+	surfaceFinish,
 	surfaceStyle,
 } from '../../styles/surface.js';
 import { textRecipe } from '../../text/recipe.css.js';
@@ -221,7 +219,6 @@ function buttonAppearance(
 ) {
 	const toneColor = tone === 'danger' ? { color: contextualForeground('danger') } : ({} as const);
 	const variants = { appearance: 'button' as const, prominence, tone };
-	const chipTone = tone === 'danger' ? 'danger' : 'neutral';
 	const restColor =
 		'color' in toneColor && toneColor.color !== undefined
 			? toneColor.color
@@ -229,15 +226,13 @@ function buttonAppearance(
 	const layerGradient = `linear-gradient(${interactionStateLayer}, ${interactionStateLayer})`;
 
 	if (surface === 'transparent') {
-		const hoverLayer = transparentAdaptiveStateLayer('hover', chipTone);
-		const pressedLayer = transparentAdaptiveStateLayer('pressed', chipTone);
 		return [
 			{
 				style: {
 					'@media': {
 						'(forced-colors: active)': { backgroundImage: 'none' },
 					},
-					backgroundColor: 'transparent',
+					backgroundColor: fallbackVar(surfaceFill.rest, 'transparent'),
 					backgroundImage: layerGradient,
 					borderColor: 'transparent',
 					boxShadow: 'none',
@@ -245,32 +240,24 @@ function buttonAppearance(
 					vars: { [interactionStateLayer]: 'transparent' },
 					selectors: {
 						[hovered]: {
-							...hoverLayer,
-							color: transparentAdaptiveStateText(chipTone, restColor),
-							vars: { ...hoverLayer.vars, ...neutralForegroundContextVars() },
+							vars: {
+								[interactionStateLayer]: fallbackVar(
+									surfaceFill.hover,
+									`var(${interactionTints.interactionTintVarName('hover')})`,
+								),
+							},
+							backgroundImage: `${fallbackVar(surfaceFinish.hover, 'none')}, ${layerGradient}`,
 							boxShadow: vars.shadow.raised,
 						},
 						[pressed]: {
-							...pressedLayer,
-							color: transparentAdaptiveStateText(chipTone, restColor),
-							vars: { ...pressedLayer.vars, ...neutralForegroundContextVars() },
-							boxShadow: vars.shadow.inset,
-						},
-					},
-					// A surface that paints a solid fill sets the opaque chip, and the adaptive layer then
-					// paints it. The finish goes above the chip, which would hide it. On a page surface
-					// the chip is unset, the layer is a translucent tint, and a finish behind the label
-					// would stack with it, so only the layer and shadow paint.
-					'@container': {
-						[`style(${interactionTints.solidStateFillVarName(chipTone, 'hover')})`]: {
-							selectors: {
-								[hovered]: {
-									backgroundImage: `${vars.controlFinish.raised}, ${layerGradient}`,
-								},
-								[pressed]: {
-									backgroundImage: `${vars.controlFinish.recessed}, ${layerGradient}`,
-								},
+							vars: {
+								[interactionStateLayer]: fallbackVar(
+									surfaceFill.pressed,
+									`var(${interactionTints.interactionTintVarName('pressed')})`,
+								),
 							},
+							backgroundImage: `${fallbackVar(surfaceFinish.pressed, 'none')}, ${layerGradient}`,
+							boxShadow: vars.shadow.inset,
 						},
 					},
 				},
@@ -323,7 +310,7 @@ function buttonAppearance(
 				},
 				...subtleRest,
 				...toneColor,
-				backgroundImage: `${layerGradient}, ${vars.controlFinish.resting}`,
+				backgroundImage: `${vars.controlFinish.resting}, ${layerGradient}`,
 				vars: {
 					...subtleRest.vars,
 					[interactionStateLayer]: 'transparent',
@@ -331,11 +318,11 @@ function buttonAppearance(
 				selectors: {
 					[hovered]: {
 						...hoverLayer,
-						backgroundImage: `${layerGradient}, ${vars.controlFinish.raised}`,
+						backgroundImage: `${vars.controlFinish.raised}, ${layerGradient}`,
 					},
 					[pressed]: {
 						...pressedLayer,
-						backgroundImage: `${layerGradient}, ${vars.controlFinish.recessed}`,
+						backgroundImage: `${vars.controlFinish.recessed}, ${layerGradient}`,
 					},
 				},
 			},
