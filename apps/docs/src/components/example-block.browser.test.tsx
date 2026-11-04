@@ -133,9 +133,7 @@ test('opt-in editing keeps the preview until reset on the controlled CheckboxFie
 			await new Promise((resolve) => setTimeout(resolve, 10));
 		});
 	}
-	expect(container.querySelector('iframe')?.title).toBe(
-		'Editable example preview',
-	);
+	expect(container.querySelector('iframe')?.title).toBe('Editable example preview');
 
 	await act(async () => {
 		await userEvent.click(page.getByRole('button', { name: 'Done editing' }));
