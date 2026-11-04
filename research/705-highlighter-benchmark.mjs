@@ -45,8 +45,7 @@ fixtures.push({
 		'  const Tag = props.as;',
 		'  return <Tag aria-label="A & B" data-n={1 < 2 ? "yes" : "no"}>{`hi`}</Tag>;',
 		'};',
-	].join('
-'),
+	].join('\n'),
 });
 fixtures.push({
 	name: 'synthetic/escaping.tsx',
@@ -55,8 +54,7 @@ fixtures.push({
 		'const str = "<script>alert(\"x\")</script> & \"quoted\"";',
 		'// <button title="&<>&">literal</button>',
 		'export const element = <span title={str}>{str}</span>;',
-	].join('
-'),
+	].join('\n'),
 });
 
 if (arm === 'all') {
@@ -69,8 +67,7 @@ if (arm === 'all') {
 			library,
 		], { encoding: 'utf8', maxBuffer: 6 * 1024 * 1024, timeout: 240_000 });
 		if (child.status !== 0) {
-			throw new Error(library + ' process failed: ' + child.stderr + '
-' + child.stdout);
+			throw new Error(library + ' process failed: ' + child.stderr + '\n' + child.stdout);
 		}
 		results.push(JSON.parse(child.stdout));
 	}
@@ -190,8 +187,7 @@ for (let trial = 0; trial < 7; trial += 1) {
 	trialsMs.push(performance.now() - t0);
 }
 const medianMs = [...trialsMs].sort((a, b) => a - b)[3];
-const totalHtml = html.join('
-');
+const totalHtml = html.join('\n');
 console.log(JSON.stringify({
 	library: arm,
 	importMs: Number(importedMs.toFixed(2)),
@@ -201,7 +197,7 @@ console.log(JSON.stringify({
 	trialsMs: trialsMs.map((n) => Number(n.toFixed(2))),
 	htmlBytes: Buffer.byteLength(totalHtml),
 	htmlGzipBytes: gzipSync(totalHtml).length,
-	spanCount: (totalHtml.match(/<span/g) ?? []).length,
+	spanCount: (totalHtml.match(/<span\b/g) ?? []).length,
 	reconstructionMismatches: mismatchCount,
 	firstMismatches: mismatches,
 	exampleHtmlBytes: {
