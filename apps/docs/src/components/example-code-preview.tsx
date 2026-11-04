@@ -10,7 +10,7 @@ export function ExampleCodePreview({
 	source,
 	title,
 }: {
-	html: string;
+	html?: string;
 	source: string;
 	title: string;
 }) {
@@ -28,6 +28,7 @@ export function ExampleCodePreview({
 			{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
 			<CodeBlock
 				className={canExpand ? cx(styles.collapsible, isExpanded && styles.expanded) : undefined}
+				code={html == null ? source : undefined}
 				copyText={source}
 				flush
 				html={html}
