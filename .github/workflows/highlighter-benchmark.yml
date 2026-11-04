@@ -1,0 +1,36 @@
+name: Highlighter benchmark (705)
+
+on:
+  push:
+    branches:
+      - spike/705-highlighter-benchmark
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install and benchmark three highlighters on Luke UI TSX examples
+        run: |
+          mkdir -p "$RUNNER_TEMP/highlighter-bench"
+          cp research/705-highlighter-benchmark.mjs "$RUNNER_TEMP/highlighter-bench/benchmark.mjs"
+          cd "$RUNNER_TEMP/highlighter-bench"
+          printf '%s\n' '{"private":true,"type":"module"}' > package.json
+          npm install --no-audit --no-fund --no-save \
+            shiki@4.5.0 @tanstack/highlight@1.2.11 @twinkleplop/tsx@0.1.7
+          npm ls --depth=0
+          node --expose-gc benchmark.mjs "$GITHUB_WORKSPACE" | tee "$GITHUB_WORKSPACE/research/benchmark-results.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue-705-highlighter-benchmark
+          path: research/benchmark-results.json
+          if-no-files-found: ignore
