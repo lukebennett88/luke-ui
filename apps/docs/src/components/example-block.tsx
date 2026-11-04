@@ -6,13 +6,17 @@ import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, ComponentType, JSX, ReactNode } from 'react';
-import { Suspense, use, useId } from 'react';
+import { lazy, Suspense, use, useId, useRef, useState } from 'react';
+import { encodeDocsPlaygroundHash } from '../lib/docs-playground-hash.js';
 import type { HighlightedSource } from '../lib/highlighted-source.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
 import { DocsLink } from './docs-link.js';
 import * as styles from './example-block.css.js';
 import { ExampleCodePreview } from './example-code-preview.js';
 import { ExamplePreview } from './example-preview.js';
+
+const PlaygroundEditor = lazy(() => import('./playground/editor.js'));
+const InlineExamplePreview = lazy(() => import('./inline-example-preview.js'));
 
 type ExampleBlockProps = {
 	src: string;
@@ -71,6 +75,16 @@ function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element 
 	}
 
 	const [PreviewComponent, highlightedSource] = result.data;
+	if (src === 'checkbox-field/controlled') {
+		return (
+			<InlineExamplePrototype
+				PreviewComponent={PreviewComponent}
+				highlightedSource={highlightedSource}
+				layout={layout}
+				title={title}
+			/>
+		);
+	}
 
 	return (
 		<ExampleFrame
@@ -91,6 +105,116 @@ function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element 
 				source={highlightedSource.source}
 				title={title}
 			/>
+		</ExampleFrame>
+	);
+}
+
+
+/**
+ * Single-example experiment for #705. Keep this out of the shared ExampleBlock contract until
+ * the editor's loading, usability, and accessibility justify a production feature.
+ */
+function InlineExamplePrototype({
+	PreviewComponent,
+	highlightedSource,
+	layout,
+	title,
+}: {
+	PreviewComponent: ComponentType;
+	highlightedSource: HighlightedSource;
+	layout: ExampleBlockProps['layout'];
+	title: string;
+}) {
+	const originalSource = highlightedSource.source;
+	const [code, setCode] = useState(originalSource);
+	const [isEditing, setIsEditing] = useState(false);
+	const [hasActivated, setHasActivated] = useState(false);
+	const [html, setHtml] = useState<string | undefined>(highlightedSource.html);
+	const highlightRequest = useRef(0);
+	const isModified = code !== originalSource;
+	const playgroundHash = isModified
+		? encodeDocsPlaygroundHash(code)
+		: highlightedSource.playgroundHash;
+
+	const startEditing = () => {
+		highlightRequest.current += 1;
+		setHasActivated(true);
+		setIsEditing(true);
+	};
+
+	const finishEditing = async () => {
+		setIsEditing(false);
+		if (!isModified) {
+			setHtml(highlightedSource.html);
+			return;
+		}
+
+		const request = ++highlightRequest.current;
+		setHtml(undefined);
+		try {
+			const { highlightEditedSource } = await import('../lib/highlight-edited-source.js');
+			const highlighted = await highlightEditedSource(code);
+			if (request === highlightRequest.current) setHtml(highlighted);
+		} catch {
+			// Plain code stays accessible and copyable if highlighting is unavailable.
+		}
+	};
+
+	const reset = () => {
+		highlightRequest.current += 1;
+		setCode(originalSource);
+		setHtml(highlightedSource.html);
+		setIsEditing(false);
+		setHasActivated(false);
+	};
+
+	return (
+		<ExampleFrame
+			actions={playgroundHash == null ? null : <OpenInPlayground hash={playgroundHash} />}
+			title={title}
+		>
+			<ExamplePreview layout={hasActivated ? 'full-bleed' : layout} title={title}>
+				{hasActivated ? (
+					<Suspense fallback={<LoadingSpinner aria-label="Loading editable preview" />}>
+						<InlineExamplePreview code={code} title={title} />
+					</Suspense>
+				) : (
+					<PreviewComponent />
+				)}
+			</ExamplePreview>
+			{isEditing ? (
+				<Box blockSize="20rem" minBlockSize="20rem" overflow="hidden">
+					<Suspense fallback={<LoadingSpinner aria-label="Loading code editor" />}>
+						<PlaygroundEditor
+							defaultValue={code}
+							onChange={setCode}
+							showLoadingPill={false}
+						/>
+					</Suspense>
+				</Box>
+			) : (
+				<ExampleCodePreview html={html} key={code} source={code} title={title} />
+			)}
+			<Box
+				alignItems="center"
+				backgroundColor="surface.subdued"
+				display="flex"
+				gap="space.8"
+				paddingBlock="space.8"
+				paddingInline="space.16"
+			>
+				<Button
+					onPress={isEditing ? () => void finishEditing() : startEditing}
+					size="small"
+				>
+					{isEditing ? 'Done editing' : 'Edit code'}
+				</Button>
+				{hasActivated ? (
+					<Button onPress={reset} prominence="low" size="small">
+						Reset
+					</Button>
+				) : null}
+			</Box>
 		</ExampleFrame>
 	);
 }
