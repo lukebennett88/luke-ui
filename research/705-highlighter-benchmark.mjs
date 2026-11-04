@@ -82,6 +82,13 @@ if (arm === 'all') {
 	process.exit(0);
 }
 
+function unwrapPre(html) {
+	const start = html.indexOf('>');
+	const end = html.lastIndexOf('</pre>');
+	if (start < 0 || end < start) throw new Error('Unexpected code block HTML');
+	return html.slice(start + 1, end);
+}
+
 const moduleStart = performance.now();
 let htmlFor;
 let importedMs;
@@ -127,15 +134,13 @@ if (arm === 'shiki') {
 	importedMs = performance.now() - moduleStart;
 	const highlighter = createHighlighter({ languages: [tsx] });
 	initializedMs = performance.now() - moduleStart;
-	htmlFor = (source) => highlighter.highlightToHtml(source, { lang: 'tsx' })
-		.replace(/^<pre[^>]*>/, '').replace(new RegExp('</pre>;
+	htmlFor = (source) => unwrapPre(highlighter.highlightToHtml(source, { lang: 'tsx' }));
 } else if (arm === 'twinkleplop') {
 	const { language } = await import('@twinkleplop/tsx');
 	importedMs = performance.now() - moduleStart;
 	const highlighter = language();
 	initializedMs = performance.now() - moduleStart;
-	htmlFor = (source) => highlighter(source)
-		.replace(/^<pre[^>]*>/, '').replace(/</pre>$/, '');
+	htmlFor = (source) => unwrapPre(highlighter(source));
 } else {
 	throw new Error('Unknown library: ' + arm);
 }
