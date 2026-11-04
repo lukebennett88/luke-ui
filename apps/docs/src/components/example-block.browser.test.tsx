@@ -111,6 +111,36 @@ test('expands and collapses source by keyboard, reporting its state and keeping 
 		.toBeCloseTo(collapsedHeight, 0);
 });
 
+test('opt-in editing keeps the preview until reset on the controlled CheckboxField', async () => {
+	await page.viewport(1000, 800);
+	await renderExampleBlock({
+		src: 'checkbox-field/controlled',
+		title: 'Checkbox Field: Controlled',
+	});
+
+	expect(container?.querySelector('iframe')).toBeNull();
+	const edit = page.getByRole('button', { name: 'Edit code' });
+	await expect.element(edit).toBeVisible();
+	await act(async () => {
+		await userEvent.click(edit);
+	});
+	await expect
+		.poll(() => container?.querySelector('iframe')?.title)
+		.toBe('Checkbox Field: Controlled editable preview');
+
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Done editing' }));
+	});
+	await expect.element(page.getByRole('button', { name: 'Edit code' })).toBeVisible();
+	expect(container?.querySelector('iframe')).not.toBeNull();
+
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Reset' }));
+	});
+	expect(container?.querySelector('iframe')).toBeNull();
+	await expect.element(page.getByRole('button', { name: 'Edit code' })).toBeVisible();
+});
+
 test('copies the complete source from both collapsed and expanded previews', async () => {
 	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 	await page.viewport(1000, 800);
