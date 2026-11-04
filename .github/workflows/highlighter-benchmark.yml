@@ -28,6 +28,9 @@ jobs:
           npm install --no-audit --no-fund --no-save \
             shiki@4.5.0 @tanstack/highlight@1.2.11 @twinkleplop/tsx@0.1.7
           npm ls --depth=0
+          cd "$GITHUB_WORKSPACE"
+          node research/705-mdx-inventory.mjs
+          cd "$RUNNER_TEMP/highlighter-bench"
           node --expose-gc benchmark.mjs "$GITHUB_WORKSPACE" | tee "$GITHUB_WORKSPACE/research/benchmark-results.json"
       - uses: actions/upload-artifact@v4
         if: always()
