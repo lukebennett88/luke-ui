@@ -17,10 +17,6 @@ import type {
 import { transform } from 'lightningcss';
 import { capsizeTrimVarName } from '../capsize-trim-vars.js';
 import { flattenThemeContract, partitionContractPairs } from '../contract.js';
-import {
-	solidStateGeneratedFillVarName,
-	solidStateGeneratedTextVarName,
-} from '../interaction-tint-vars.js';
 import { getThemeClassName } from '../theme-class-name.js';
 import { typeStyles } from '../type-styles.js';
 
@@ -50,11 +46,6 @@ const expectedThemeWideProperties: ReadonlyArray<string> = [
 const expectedModeProperties: ReadonlyArray<string> = [
 	'color-scheme',
 	...modePairs.map(([, varName]) => varName),
-	...(['neutral', 'danger'] as const).flatMap((tone) => [
-		solidStateGeneratedFillVarName(tone, 'hover'),
-		solidStateGeneratedFillVarName(tone, 'pressed'),
-		solidStateGeneratedTextVarName(tone),
-	]),
 ];
 
 const EXPECTED_PROPERTIES = {

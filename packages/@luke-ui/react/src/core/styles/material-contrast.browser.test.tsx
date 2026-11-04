@@ -4,7 +4,7 @@ import { vars } from '@luke-ui/react/theme';
 import { expect, test } from 'vite-plus/test';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import type { VisualAppearance } from '../test-utils/render.js';
-import { render, visualAppearances } from '../test-utils/render.js';
+import { flatAppearances, render, visualAppearances } from '../test-utils/render.js';
 import { lowestRenderedTextContrastAt } from '../test-utils/rendered-contrast.js';
 import { setInteractionState, settledSurfaceColors } from '../test-utils/surface-colors.js';
 
@@ -83,27 +83,37 @@ for (const appearance of appearances) {
 
 const pageSurfaces = ['surface.base', 'surface.subdued', 'surface.raised'] as const;
 const solidSurfaces = SEMANTIC_ROLES.map((role) => `${role}.solid` as const);
+// A subtle fill pairs its context like a page surface, so its text colours stay on the neutral
+// hierarchy while a low Button paints that fill under its state layer.
+const subtleSurfaces = ['danger.subtle'] as const;
 
-/** The appearances the Button gate covers: the onSolid set plus the `contrastEdge` fixture. */
+/**
+ * The appearances the Button gate covers: the onSolid set, the `contrastEdge` fixture, and the flat
+ * and chromatic fixtures, which prove the states stay readable without materials and over saturated
+ * fills.
+ */
 const buttonAppearances: Array<VisualAppearance> = [
 	...appearances,
+	...flatAppearances,
 	{ mode: 'light', theme: 'contrastEdge' },
 	{ mode: 'dark', theme: 'contrastEdge' },
+	{ mode: 'light', theme: 'chromatic' },
+	{ mode: 'dark', theme: 'chromatic' },
 ];
 
 const buttonSizes = ['medium', 'small'] as const;
 const buttonProminences = ['high', 'standard', 'low'] as const;
 
 /**
- * Real high, standard and low Buttons of both tones and both sizes over each page surface and every
- * role's solid fill, in each state: their fill, finish, and adaptive state layer behind their
- * actual text colour. A small Button's 32px block size puts its label closer to the finish's
- * highlight and shade bands than a medium one's 40px does.
+ * Real high, standard and low Buttons of both tones and both sizes over each page surface, a subtle
+ * fill and every role's solid fill, in each state: their fill, finish, and adaptive state layer
+ * behind their actual text colour. A small Button's 32px block size puts its label closer to the
+ * finish's highlight and shade bands than a medium one's 40px does.
  */
 async function buttonFinishFailures(appearance: VisualAppearance) {
 	const { container } = render(
 		<>
-			{[...pageSurfaces, ...solidSurfaces].map((surface) => (
+			{[...pageSurfaces, ...subtleSurfaces, ...solidSurfaces].map((surface) => (
 				<Box backgroundColor={surface} data-surface={surface} key={surface} padding="space.8">
 					{buttonSizes.flatMap((size) =>
 						buttonProminences.flatMap((prominence) =>
@@ -145,7 +155,7 @@ async function buttonFinishFailures(appearance: VisualAppearance) {
 
 for (const appearance of buttonAppearances) {
 	test(
-		`keeps 4.5:1 text on medium and small Buttons over every surface and role solid in ${appearance.theme} ${appearance.mode}`,
+		`keeps 4.5:1 text on medium and small Buttons over every surface, subtle fill and role solid in ${appearance.theme} ${appearance.mode}`,
 		{ timeout: 180_000 },
 		async () => {
 			expect(await buttonFinishFailures(appearance)).toEqual([]);

@@ -80,12 +80,10 @@ record is [research/716-token-contract.md](../research/716-token-contract.md).
 Author `shadow.*` and `controlFinish.*` per mode as final CSS values. Components pick semantic
 tokens. They do not branch on theme identity. A component must keep its essential state distinctions
 when every shadow and control finish is `none`. The `flat` test appearance checks that. The control
-finish paints on solid and standard Buttons, over the fill and under the label. A low Button has no
-finish at rest. On hover and pressed it paints the finish only over a solid fill, above the opaque
-chip the adaptive state layer paints there. Over a page surface, a low Button paints only the state
-layer and shadow, because a finish stacked with the translucent tint behind the label can break text
-contrast. The recipe tells the two apart with a `@container style()` query on the chip's custom
-property, which a solid's `surfaceStyle` sets and a page surface leaves unset.
+finish paints on solid and standard Buttons, over the fill and under the label, and a Button that
+paints a finish always paints it above its fill layer. A low Button has no finish at rest. On hover
+and pressed it paints one only over a role solid, because a finish stacked with the translucent tint
+behind the label can break text contrast. See [Surface pairing](#surface-pairing).
 
 The theme compiler keeps colour states distinguishable without a shadow or finish. See
 [Interaction states](THEME_COLOUR_GENERATION.md#interaction-states).
@@ -462,23 +460,40 @@ its role's on-solid colour, and every role reads on-solid colour. An override re
 element that declares it, so the global styles reset the overrides in every colour-mode scope.
 
 Component recipes use the same mechanism. A control pairs its fill in every interaction state, so a
-solid Button keeps its on-solid context from rest to pressed. Low and standard Buttons use the
-adaptive state layer in `core/styles/state-layer.css.ts`: a registered `<color>` property painted as
-the first `background-image` layer over a transparent or resting subtle fill, so they keep the
-surrounding foreground context (or the resting subtle pairing) while hover and pressed stay visible
-on every surface, including app-painted overlays. On a solid fill, a low Button falls back to an
-opaque subtle chip the pairing sets, because the shared tint's hover-to-pressed step is too small on
-some solid fills. The paired chip keeps text contrast on solids. Forced colours clear the layer. See
-[THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md#interaction-states) for how the compiler
-solves the tint pair. Text a component draws on whatever surface surrounds it, such as a field's
-label, description, and error, a text action, or a native link in Prose, reads
-`contextualForeground`. Its `state` argument gives a role's hover or pressed hue, which collapses to
-on-solid colour on a solid fill. `contextualDisabledForeground()` gives such text the disabled token
-on a standard surface or subtle fill, and on-solid colour on a solid fill, which has no disabled
-leaf. `transparentSurfaceStyle()` hands an element that stops painting back to its parent's context,
-as inline `Code` does inside `pre`. The checkbox box pairs its fills so the check mark reads
-on-solid colour. The switch track and thumb and the loading skeleton paint fills that hold no text,
-so they keep their own compiler-gated or placeholder colours.
+solid Button keeps its on-solid context from rest to pressed.
+
+Every pairing also sets private inherited properties that a low Button reads: the surface's resting,
+hover, and pressed fills, the hover and pressed control finishes, and the pressed shadow. A role
+solid sets its own `solid.rest`, `solid.hover`, and `solid.pressed` fills. It sets the hover finish
+to `controlFinish.raised`, and the pressed finish to `controlFinish.recessed` twice. It sets the
+pressed shadow to `shadow.inset` three times, which strengthens the recess on a dark solid. A page
+surface or a subtle fill sets its resting fill and the shared tint for hover and pressed. It sets
+the finishes and the pressed shadow to `initial`, so a low Button there paints only the state layer
+and `shadow.inset`.
+
+A low Button paints the nearest managed surface's resting fill, opaque and without a finish or
+shadow. Hover and pressed paint that surface's fill in the adaptive state layer, a registered
+`<color>` property in `core/styles/state-layer.css.ts` painted as a `background-image` layer, with
+the finish above it. A low Button therefore keeps the surrounding foreground context in every state,
+and on a solid it keeps on-solid text. A standard Button paints the same layer over its resting
+subtle fill, with its finish above the layer. The solid's states step lightness away from the text,
+so the compiler already gates them. See
+[Interaction states](THEME_COLOUR_GENERATION.md#interaction-states) for those states and for how it
+solves the tint pair. Forced colours clear the layer.
+
+The guarantee covers surfaces painted through `Box` or `surfaceStyle()`. A surface an app paints
+with raw `vars` sets no private properties, so a low Button inside it paints the nearest managed
+surface's colour, not the raw one.
+
+Text a component draws on whatever surface surrounds it, such as a field's label, description, and
+error, a text action, or a native link in Prose, reads `contextualForeground`. Its `state` argument
+gives a role's hover or pressed hue, which collapses to on-solid colour on a solid fill.
+`contextualDisabledForeground()` gives such text the disabled token on a standard surface or subtle
+fill, and on-solid colour on a solid fill, which has no disabled leaf. `transparentSurfaceStyle()`
+hands an element that stops painting back to its parent's context, as inline `Code` does inside
+`pre`. The checkbox box pairs its fills so the check mark reads on-solid colour. The switch track
+and thumb and the loading skeleton paint fills that hold no text, so they keep their own
+compiler-gated or placeholder colours.
 
 A role's colour can collapse to on-solid colour, so a state cue cannot be hue alone. Text Links use
 the label font weight and belong inline with lighter surrounding text. Hover and press toggle the

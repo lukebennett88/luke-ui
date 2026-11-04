@@ -84,8 +84,8 @@ export const FAMILY_RUNG = {
 
 /**
  * Share of `text.primary` mixed into a resting foreground to produce its public hover state. Solid
- * fills do not use it: their states step OKLCH lightness away from the on-solid text. The private
- * Low-on-solid chip and the interaction-tint targets share it.
+ * fills do not use it: their states step OKLCH lightness away from the on-solid text. The
+ * interaction-tint targets share it.
  */
 export const INTERACTION_HOVER_STRENGTH = 0.05;
 
@@ -95,14 +95,6 @@ export const INTERACTION_PRESSED_STRENGTH = 0.1;
 /** Mixes a resting colour toward `toward` at `strength`, then maps the result into sRGB. */
 export function mixInteractionState(rest: Oklch, toward: Oklch, strength: number): Oklch {
 	return gamutMapOklch(mixOklab(rest, toward, strength));
-}
-
-/**
- * The high-contrast text rung (step 12) a family emits for `source` in `mode`. Neutral's rung is
- * `text.primary`, computed before any solid-anchor search so every family can gate against it.
- */
-export function highContrastText(source: Oklch, mode: ColorMode): Oklch {
-	return gamutMapOklch(highContrastTextRequest(source, mode));
 }
 
 /** The inputs to {@link generateFamily}. */

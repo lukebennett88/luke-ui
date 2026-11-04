@@ -12,7 +12,7 @@ import { formatOklch, parseColor } from './color.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
-import { FAMILY_RUNG, highContrastText } from './scale.js';
+import { FAMILY_RUNG } from './scale.js';
 
 describe('buildTheme independent modes', () => {
 	it('derives each mode from its own sources rather than inverting light', () => {
@@ -83,9 +83,6 @@ describe('compileTheme interaction source', () => {
 		for (const mode of ['light', 'dark'] as const) {
 			const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
 			const textPrimary = diagnostics[mode].families.neutral.family[FAMILY_RUNG.textPrimary];
-			expect(textPrimary).toEqual(
-				highContrastText(chromaticNeutralFoundation[mode].color.neutral, mode),
-			);
 			expect(extractValue(block, '--luke-color-foreground-primary')).toBe(formatOklch(textPrimary));
 
 			for (const role of SEMANTIC_ROLES) {
