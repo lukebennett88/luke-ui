@@ -20,6 +20,7 @@ jobs:
           node-version: '24'
       - name: Install and benchmark three highlighters on Luke UI TSX examples
         run: |
+          set -euo pipefail
           mkdir -p "$RUNNER_TEMP/highlighter-bench"
           cp research/705-highlighter-benchmark.mjs "$RUNNER_TEMP/highlighter-bench/benchmark.mjs"
           cd "$RUNNER_TEMP/highlighter-bench"
