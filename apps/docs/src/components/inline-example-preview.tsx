@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { withBasePath } from '../lib/base-path.js';
 import type { PlaygroundAppearance } from '../lib/playground-appearance-message.js';
 import { postPlaygroundAppearance } from '../lib/playground-appearance-message.js';
-import { useDocsTheme } from './theme-controls.js';
 import * as styles from './inline-example-preview.css.js';
+import { useDocsTheme } from './theme-controls.js';
 
 const CODE_DEBOUNCE_MS = 300;
 
 /** Reuses the full Playground's isolated compiler and preview route. */
-export default function InlineExamplePreview({ code, title }: { code: string; title: string }) {
+export default function InlineExamplePreview({ code }: { code: string }) {
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const sessionRef = useRef<PlaygroundPageSession | null>(null);
 	const codeRef = useRef(code);
@@ -20,7 +20,9 @@ export default function InlineExamplePreview({ code, title }: { code: string; ti
 		themeIdentity,
 	});
 	const [error, setError] = useState<string | null>(null);
-	codeRef.current = code;
+	useEffect(() => {
+		codeRef.current = code;
+	}, [code]);
 
 	useEffect(() => {
 		const session = createPlaygroundPageSession({
@@ -68,7 +70,7 @@ export default function InlineExamplePreview({ code, title }: { code: string; ti
 				className={styles.iframe}
 				ref={iframeRef}
 				src={withBasePath('/playground/preview', import.meta.env.BASE_URL)}
-				title={title + ' editable preview'}
+				title="Editable example preview"
 			/>
 			{error == null ? null : (
 				<div className={styles.error} role="alert">

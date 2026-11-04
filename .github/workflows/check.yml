@@ -36,11 +36,6 @@ jobs:
       - name: Build all packages and applications
         run: pnpm build
 
-      - name: Show temporary formatter changes for #705
-        run: |
-          pnpm exec vp fmt apps/docs/src/components/example-block.tsx apps/docs/src/components/inline-example-preview.tsx --write
-          git diff -- apps/docs/src/components/example-block.tsx apps/docs/src/components/inline-example-preview.tsx
-
       - name: Run complete checks
         run: pnpm check
 

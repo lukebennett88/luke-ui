@@ -109,7 +109,6 @@ function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element 
 	);
 }
 
-
 /**
  * Single-example experiment for #705. Keep this out of the shared ExampleBlock contract until
  * the editor's loading, usability, and accessibility justify a production feature.
@@ -176,7 +175,7 @@ function InlineExamplePrototype({
 			<ExamplePreview layout={hasActivated ? 'full-bleed' : layout} title={title}>
 				{hasActivated ? (
 					<Suspense fallback={<LoadingSpinner aria-label="Loading editable preview" />}>
-						<InlineExamplePreview code={code} title={title} />
+						<InlineExamplePreview code={code} />
 					</Suspense>
 				) : (
 					<PreviewComponent />
@@ -185,11 +184,7 @@ function InlineExamplePrototype({
 			{isEditing ? (
 				<Box blockSize="20rem" minBlockSize="20rem" overflow="hidden">
 					<Suspense fallback={<LoadingSpinner aria-label="Loading code editor" />}>
-						<PlaygroundEditor
-							defaultValue={code}
-							onChange={setCode}
-							showLoadingPill={false}
-						/>
+						<PlaygroundEditor defaultValue={code} onChange={setCode} showLoadingPill={false} />
 					</Suspense>
 				</Box>
 			) : (
@@ -203,10 +198,7 @@ function InlineExamplePrototype({
 				paddingBlock="space.8"
 				paddingInline="space.16"
 			>
-				<Button
-					onPress={isEditing ? () => void finishEditing() : startEditing}
-					size="small"
-				>
+				<Button onPress={isEditing ? () => void finishEditing() : startEditing} size="small">
 					{isEditing ? 'Done editing' : 'Edit code'}
 				</Button>
 				{hasActivated ? (
