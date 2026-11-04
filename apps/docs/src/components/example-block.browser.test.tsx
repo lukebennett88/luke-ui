@@ -124,9 +124,18 @@ test('opt-in editing keeps the preview until reset on the controlled CheckboxFie
 	await act(async () => {
 		await userEvent.click(edit);
 	});
-	await expect
-		.poll(() => container?.querySelector('iframe')?.title)
-		.toBe('Checkbox Field: Controlled editable preview');
+	// The preview component loads behind Suspense. Flush its async resolution in act.
+	const deadline = Date.now() + 10_000;
+	while (!container?.querySelector('iframe')) {
+		if (Date.now() > deadline) throw new Error('Inline editor preview failed to mount');
+		// oxlint-disable-next-line no-await-in-loop
+		await act(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 10));
+		});
+	}
+	expect(container.querySelector('iframe')?.title).toBe(
+		'Checkbox Field: Controlled editable preview',
+	);
 
 	await act(async () => {
 		await userEvent.click(page.getByRole('button', { name: 'Done editing' }));
