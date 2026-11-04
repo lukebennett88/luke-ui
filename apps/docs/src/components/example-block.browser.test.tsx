@@ -134,7 +134,7 @@ test('opt-in editing keeps the preview until reset on the controlled CheckboxFie
 		});
 	}
 	expect(container.querySelector('iframe')?.title).toBe(
-		'Checkbox Field: Controlled editable preview',
+		'Editable example preview',
 	);
 
 	await act(async () => {
