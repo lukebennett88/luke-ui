@@ -78,7 +78,7 @@ export const header = style({
 			borderBlockEndWidth: '1px',
 			display: 'flex',
 			gap: vars.space['8'],
-			minBlockSize: vars.controlSize.px40,
+			minBlockSize: vars.controlSize['40'],
 			paddingBlock: vars.space['4'],
 			paddingInline: vars.space['16'],
 		},
@@ -130,7 +130,7 @@ export const overlayActions = style({
 	'@layer': {
 		components: {
 			backgroundColor: vars.color.background.surface.subdued,
-			insetBlockStart: `calc(${vars.space['12']} + (${vars.font.label.lineHeight} / 2) - (${vars.controlSize.px32} / 2))`,
+			insetBlockStart: `calc(${vars.space['12']} + (${vars.font.label.lineHeight} / 2) - (${vars.controlSize['32']} / 2))`,
 			insetInlineEnd: vars.space['8'],
 			position: 'absolute',
 			zIndex: 1,

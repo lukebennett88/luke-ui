@@ -62,7 +62,7 @@ export function RadiusTokens() {
 								blockSize={RADIUS_SAMPLE_SIZE}
 								borderColor="decorative"
 								borderStyle="solid"
-								borderWidth="thin"
+								borderWidth="border.1"
 								inlineSize={RADIUS_SAMPLE_SIZE}
 								style={{ borderRadius: `var(${token.variable})` }}
 							/>
@@ -119,7 +119,7 @@ export function ShadowAndFinishTokens() {
 						sample={
 							<Box
 								backgroundColor="neutral.solid"
-								blockSize={vars.controlSize.px40}
+								blockSize={vars.controlSize['40']}
 								borderRadius="control"
 								inlineSize={SHADOW_FINISH_SAMPLE_SIZE}
 								style={{ backgroundImage: `var(${token.variable})` }}
@@ -148,7 +148,7 @@ export function SizingTokens() {
 								borderColor="decorative"
 								borderRadius="control"
 								borderStyle="solid"
-								borderWidth="thin"
+								borderWidth="border.1"
 								inlineSize="4rem"
 								style={{ blockSize: `var(${token.variable})` }}
 							/>
@@ -191,11 +191,11 @@ function SampleControl({ label, opacity }: { label: string; opacity?: string }) 
 		<Box
 			alignItems="center"
 			backgroundColor="neutral.subtle"
-			blockSize={vars.controlSize.px32}
+			blockSize={vars.controlSize['32']}
 			borderColor="control"
 			borderRadius="control"
 			borderStyle="solid"
-			borderWidth="thin"
+			borderWidth="border.1"
 			display="flex"
 			paddingInline="space.8"
 			style={opacity === undefined ? undefined : { opacity }}

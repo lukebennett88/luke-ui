@@ -11,10 +11,10 @@ export const iconButtonRecipe = recipe({
 	variants: {
 		size: {
 			medium: {
-				inlineSize: vars.controlSize.px40,
+				inlineSize: vars.controlSize['40'],
 			},
 			small: {
-				inlineSize: vars.controlSize.px32,
+				inlineSize: vars.controlSize['32'],
 			},
 		},
 	},

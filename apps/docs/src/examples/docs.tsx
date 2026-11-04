@@ -63,7 +63,7 @@ export function ExampleItem(props: BoxProps) {
 			borderColor="decorative"
 			borderRadius="detail"
 			borderStyle="solid"
-			borderWidth="thin"
+			borderWidth="border.1"
 			padding="space.12"
 			{...props}
 		/>

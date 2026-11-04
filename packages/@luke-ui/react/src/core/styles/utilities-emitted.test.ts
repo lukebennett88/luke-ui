@@ -97,7 +97,7 @@ test('constrained appearance props do not accept arbitrary CSS values', async ()
 
 	// Named widths, not raw lengths: the emitted keys must be the token names the scale declares.
 	const emittedBorderWidth = propertyType(declaration, 'borderWidth');
-	const missingWidths = ['none', 'thin', 'thick'].filter((width) => {
+	const missingWidths = ['none', "'border.1'", "'border.2'"].filter((width) => {
 		return !emittedBorderWidth.includes(`${width}:`);
 	});
 	expect(missingWidths).toEqual([]);

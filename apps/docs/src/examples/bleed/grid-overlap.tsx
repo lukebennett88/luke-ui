@@ -9,7 +9,7 @@ export default () => {
 			backgroundColor="surface.subdued"
 			borderColor="decorative"
 			borderStyle="solid"
-			borderWidth="thin"
+			borderWidth="border.1"
 			padding="space.24"
 		>
 			<Grid columns={3} gap="space.8">

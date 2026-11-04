@@ -436,12 +436,12 @@ Independent Dialog surfaces must establish their own default, normally `medium`,
 [#799](https://github.com/lukebennett88/luke-ui/issues/799). They must not inherit a trigger's
 control-size default accidentally.
 
-Icon and LoadingSpinner keep literal `px*` square sizes. Physical `vars.controlSize` tokens also
-keep their literal names. Build literal scales with `literalScale` in `theme/literal-scale.ts` so
-numeric keys and `rem` values cannot drift. Responsive conditions keep `bp*` names.
+Physical `vars.controlSize` tokens use numeric keys. Build literal scales with `literalScale` in
+`theme/literal-scale.ts` so numeric keys and `rem` values cannot drift. Responsive conditions keep
+`bp*` names.
 
-Buttons provide `px16` icons and spinners at both recipe sizes. Field controls provide `px16` icons
-at `small` and `px20` icons at `medium`. Explicit `Icon.size` overrides win over context.
+Buttons provide `size.16` icons and spinners at both recipe sizes. Field controls provide `size.16`
+icons at `small` and `size.20` icons at `medium`. Explicit `Icon.size` overrides win over context.
 
 ### Surface pairing
 

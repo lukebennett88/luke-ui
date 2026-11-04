@@ -1,5 +1,6 @@
 import { Box } from '@luke-ui/react/box';
-import { Icon } from '@luke-ui/react/icon';
+import { createIcon, Icon, IconSizeProvider } from '@luke-ui/react/icon';
+import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
@@ -20,7 +21,7 @@ const rowStyle = {
 	gap: '1rem',
 } satisfies CSSProperties;
 
-const sizes = variantValuesFor<typeof Icon, 'size'>()(['px16', 'px20', 'px24', 'px32']);
+const sizes = variantValuesFor<typeof Icon, 'size'>()(['size.16', 'size.20', 'size.24', 'size.32']);
 const names = variantValuesFor<typeof Icon, 'name'>()([
 	'add',
 	'checkCircle',
@@ -28,6 +29,36 @@ const names = variantValuesFor<typeof Icon, 'name'>()([
 	'externalLink',
 	'search',
 ]);
+
+const CustomIcon = createIcon({ path: <path d="M0 0h1v1H0z" /> });
+
+test('icon and spinner sizes use the explicit size, then context, then the default', () => {
+	const { locator } = render(
+		<>
+			<Icon name="add" title="Default icon" />
+			<LoadingSpinner aria-label="Default spinner" />
+			<IconSizeProvider size="size.20">
+				<CustomIcon title="Context icon" />
+				<LoadingSpinner aria-label="Context spinner" />
+				<Icon name="add" size="size.16" title="Explicit icon" />
+				<LoadingSpinner aria-label="Explicit spinner" size="size.32" />
+			</IconSizeProvider>
+		</>,
+	);
+
+	for (const [role, name, size] of [
+		['img', 'Default icon', 24],
+		['status', 'Default spinner', 24],
+		['img', 'Context icon', 20],
+		['status', 'Context spinner', 20],
+		['img', 'Explicit icon', 16],
+		['status', 'Explicit spinner', 32],
+	] as const) {
+		const element = locator.getByRole(role, { name }).element();
+		expect(getComputedStyle(element).inlineSize).toBe(`${size}px`);
+		expect(getComputedStyle(element).blockSize).toBe(`${size}px`);
+	}
+});
 
 function IconScene() {
 	return (

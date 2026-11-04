@@ -65,7 +65,7 @@ export function IconToggleButtonGroup<Value extends string>({
 					key={optionValue}
 					render={renderToggleButton}
 				>
-					<Icon name={icon} size="px16" />
+					<Icon name={icon} size="size.16" />
 				</ToggleButton>
 			))}
 		</Cluster>

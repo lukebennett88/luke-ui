@@ -124,7 +124,7 @@ const checkboxConfig = {
 	variants: {
 		size: {
 			medium: {
-				root: { vars: { ...choiceSizeVars.medium, [checkboxGlyphSize]: ICON_SIZES.px16 } },
+				root: { vars: { ...choiceSizeVars.medium, [checkboxGlyphSize]: ICON_SIZES['size.16'] } },
 			},
 			small: {
 				root: {

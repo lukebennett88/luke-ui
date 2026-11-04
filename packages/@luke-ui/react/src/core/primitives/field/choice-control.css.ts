@@ -53,12 +53,12 @@ export const choiceControl = {
 export const choiceSizeVars = {
 	medium: {
 		[controlSize]: FONT_METRIC_SCALE[16].lineHeight,
-		[indicatorSize]: ICON_SIZES.px20,
+		[indicatorSize]: ICON_SIZES['size.20'],
 		[inlineFieldIndent]: `calc(${controlSize} + ${inlineControlGap})`,
 	},
 	small: {
-		[controlSize]: ICON_SIZES.px20,
-		[indicatorSize]: ICON_SIZES.px16,
+		[controlSize]: ICON_SIZES['size.20'],
+		[indicatorSize]: ICON_SIZES['size.16'],
 		[inlineFieldIndent]: `calc(${controlSize} + ${inlineControlGap})`,
 	},
 } as const;

@@ -60,7 +60,7 @@ function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element 
 				borderColor="danger.strong"
 				borderRadius="control"
 				borderStyle="solid"
-				borderWidth="thin"
+				borderWidth="border.1"
 				padding="space.16"
 			>
 				<Text color="danger" elementType="p">
@@ -112,7 +112,7 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 			borderColor="decorative"
 			borderRadius="control"
 			borderStyle="solid"
-			borderWidth="thin"
+			borderWidth="border.1"
 			className={cx(styles.frame, 'not-prose')}
 			data-example-frame
 			marginBlock="space.16"

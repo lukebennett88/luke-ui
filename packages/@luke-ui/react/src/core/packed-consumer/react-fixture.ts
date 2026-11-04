@@ -413,8 +413,8 @@ export const retainedTokens: Array<string> = [
 	vars.shadow.inset,
 	vars.shadow.overlay,
 	vars.font.body.lineHeight,
-	vars.controlSize.px32,
-	vars.controlSize.px40,
+	vars.controlSize['32'],
+	vars.controlSize['40'],
 	vars.radius.full,
 	vars.space['16'],
 	vars.interaction.disabledOpacity,
@@ -435,6 +435,10 @@ export const removedFloating = vars.color.background.surface.floating;
 export const removedFinish = vars.actionControlFinish;
 // @ts-expect-error — icon sizes are private
 export const removedIconSize = vars.iconSize;
+// @ts-expect-error — control size keys are numeric strings
+export const removedControlSizePx32 = vars.controlSize.px32;
+// @ts-expect-error — control size keys are numeric strings
+export const removedControlSizePx40 = vars.controlSize.px40;
 // @ts-expect-error — the minimum target is private
 export const removedMinTarget = vars.controlSize.minTarget;
 // @ts-expect-error — the Combobox action size is private

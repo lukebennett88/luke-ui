@@ -9,7 +9,7 @@ export default () => {
 			backgroundColor="surface.subdued"
 			borderColor="decorative"
 			borderStyle="solid"
-			borderWidth="thin"
+			borderWidth="border.1"
 			paddingBlock="space.16"
 			paddingInline="space.16"
 		>

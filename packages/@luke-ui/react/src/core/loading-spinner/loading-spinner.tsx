@@ -21,7 +21,7 @@ interface LoadingSpinnerStyleProps {
 	color?: LoadingSpinnerVariantProps['color'];
 	/**
 	 * Sets the spinner size.
-	 * @default 'px24'
+	 * @default 'size.24'
 	 */
 	size?: LoadingSpinnerVariantProps['size'];
 }
@@ -60,7 +60,7 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 	} = props;
 
 	const contextSize = useIconSizeContext();
-	const resolvedSize = size ?? contextSize ?? 'px24';
+	const resolvedSize = size ?? contextSize ?? 'size.24';
 
 	if (!isLoading) return children;
 

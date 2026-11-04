@@ -4,12 +4,12 @@ import type { IconSize } from '../types/icon-size.js';
 export type ControlSize = 'small' | 'medium';
 
 /**
- * Maps field control size to the icon size those controls provide: `px16` icons at `small`, and
- * `px20` icons at `medium`.
+ * Maps field control size to the icon size those controls provide: `size.16` icons at `small`, and
+ * `size.20` icons at `medium`.
  */
 export const FIELD_CONTROL_ICON_SIZE: Record<ControlSize, IconSize> = {
-	small: 'px16',
-	medium: 'px20',
+	small: 'size.16',
+	medium: 'size.20',
 };
 
 /**

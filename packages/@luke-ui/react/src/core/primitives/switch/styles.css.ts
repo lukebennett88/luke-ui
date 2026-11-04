@@ -210,8 +210,8 @@ const switchConfig = {
 	},
 	variants: {
 		size: {
-			medium: { root: sizeVars(ICON_SIZES.px20) },
-			small: { root: sizeVars(ICON_SIZES.px16) },
+			medium: { root: sizeVars(ICON_SIZES['size.20']) },
+			small: { root: sizeVars(ICON_SIZES['size.16']) },
 		},
 	},
 } as const satisfies SlottedConfigInput;

@@ -24,7 +24,7 @@ export const SPINNER_CIRCLE_RADIUS = (ICON_CONTENT_SIZE - SPINNER_STROKE_WIDTH) 
  * numbers at a 16px root: 16, 20, 24, and 32px. Private geometry: components size their own icon
  * slots from it.
  */
-export const ICON_SIZES = literalScale('px', [16, 20, 24, 32] as const) satisfies Record<
+export const ICON_SIZES = literalScale('size.', [16, 20, 24, 32] as const) satisfies Record<
 	IconSize,
 	string
 >;

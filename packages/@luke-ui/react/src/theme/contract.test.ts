@@ -154,7 +154,7 @@ describe('theme contract', () => {
 		expect(Object.keys(vars.shadow)).toEqual(['inset', 'resting', 'raised', 'floating', 'overlay']);
 		expect(Object.hasOwn(vars, 'depth')).toBe(false);
 		expect(Object.keys(vars.controlFinish)).toEqual(['recessed', 'resting', 'raised']);
-		expect(Object.keys(vars.controlSize)).toEqual(['px32', 'px40']);
+		expect(Object.keys(vars.controlSize)).toEqual(['32', '40']);
 		for (const style of typeStyles) {
 			expect(Object.keys(vars.font[style]).toSorted()).toEqual([
 				'fontFamily',

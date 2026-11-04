@@ -7,5 +7,5 @@ const HeartIcon = createIcon({
 });
 
 export default () => {
-	return <HeartIcon size="px20" title="Add to favourites" />;
+	return <HeartIcon size="size.20" title="Add to favourites" />;
 };

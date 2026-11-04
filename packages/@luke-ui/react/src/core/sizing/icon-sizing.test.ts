@@ -4,6 +4,6 @@ import { ICON_SIZES } from './icon-sizing.js';
 
 describe('ICON_SIZES', () => {
 	it('matches literalScale so keys cannot drift from rem values', () => {
-		expect(ICON_SIZES).toEqual(literalScale('px', [16, 20, 24, 32] as const));
+		expect(ICON_SIZES).toEqual(literalScale('size.', [16, 20, 24, 32] as const));
 	});
 });

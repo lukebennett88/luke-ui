@@ -15,9 +15,9 @@ import { pathEntry, pathRecord } from './path-record.js';
 import type { TypeStyle } from './type-styles.js';
 import { typeStyleMetricStep, typeStyles } from './type-styles.js';
 
-const controlSizeScale = literalScale('px', [32, 40] as const);
+const controlSizeScale = literalScale('', [32, 40] as const);
 
-/** Structural block sizes for the `px32` and `px40` controls. */
+/** Structural block sizes for the 32px and 40px controls. */
 export const CONTROL_SIZE_VALUES: {
 	[Path in Extract<IdentityPath, `controlSize.${string}`>]: string;
 } = pathRecord(

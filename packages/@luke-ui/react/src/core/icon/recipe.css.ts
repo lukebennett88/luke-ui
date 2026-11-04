@@ -4,21 +4,21 @@ import { recipe } from '../styles/recipe.js';
 
 /** Shared size dimensions for Icon and LoadingSpinner (icon-aligned sizing). */
 export const iconSizeVariants = {
-	px32: {
-		blockSize: ICON_SIZES.px32,
-		inlineSize: ICON_SIZES.px32,
+	'size.32': {
+		blockSize: ICON_SIZES['size.32'],
+		inlineSize: ICON_SIZES['size.32'],
 	},
-	px24: {
-		blockSize: ICON_SIZES.px24,
-		inlineSize: ICON_SIZES.px24,
+	'size.24': {
+		blockSize: ICON_SIZES['size.24'],
+		inlineSize: ICON_SIZES['size.24'],
 	},
-	px20: {
-		blockSize: ICON_SIZES.px20,
-		inlineSize: ICON_SIZES.px20,
+	'size.20': {
+		blockSize: ICON_SIZES['size.20'],
+		inlineSize: ICON_SIZES['size.20'],
 	},
-	px16: {
-		blockSize: ICON_SIZES.px16,
-		inlineSize: ICON_SIZES.px16,
+	'size.16': {
+		blockSize: ICON_SIZES['size.16'],
+		inlineSize: ICON_SIZES['size.16'],
 	},
 } as const;
 
@@ -28,7 +28,7 @@ export const iconRecipe = recipe({
 		flexShrink: 0,
 	},
 	defaultVariants: {
-		size: 'px24',
+		size: 'size.24',
 	},
 	variants: {
 		size: iconSizeVariants,

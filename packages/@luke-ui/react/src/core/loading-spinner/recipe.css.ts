@@ -38,7 +38,7 @@ export const rubberBandAnimationName = keyframes({
  */
 const loadingSpinnerConfig = {
 	defaultVariants: {
-		size: 'px24',
+		size: 'size.24',
 	},
 	slots: {
 		childrenWrapper: {
@@ -103,10 +103,10 @@ const loadingSpinnerConfig = {
 			warning: { root: { color: contextualForeground('warning') } },
 		},
 		size: {
-			px32: { root: iconSizeVariants.px32 },
-			px24: { root: iconSizeVariants.px24 },
-			px20: { root: iconSizeVariants.px20 },
-			px16: { root: iconSizeVariants.px16 },
+			'size.32': { root: iconSizeVariants['size.32'] },
+			'size.24': { root: iconSizeVariants['size.24'] },
+			'size.20': { root: iconSizeVariants['size.20'] },
+			'size.16': { root: iconSizeVariants['size.16'] },
 		},
 	},
 } as const satisfies SlottedConfigInput;

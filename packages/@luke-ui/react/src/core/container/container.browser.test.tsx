@@ -145,7 +145,7 @@ test('fixed maximum inline sizes', { tags: ['visual'] }, async () => {
 							borderColor="decorative"
 							borderRadius="detail"
 							borderStyle="solid"
-							borderWidth="thin"
+							borderWidth="border.1"
 							padding="space.12"
 						>
 							<Text>{maxInlineSize}</Text>

@@ -173,10 +173,10 @@ export const themeContractTree = {
 	},
 	/** The fixed spacing scale used by components and layout utilities. */
 	space: spaceContract as { readonly [Step in SpaceStep]: null },
-	/** Structural block sizes for `px32` and `px40` controls. */
+	/** Structural block sizes for 32px and 40px controls. */
 	controlSize: {
-		px32: null,
-		px40: null,
+		'32': null,
+		'40': null,
 	},
 	/** Interaction treatment shared by every control recipe. */
 	interaction: {

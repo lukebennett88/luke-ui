@@ -238,7 +238,7 @@ function ResultBody({ result }: { result: SortedResult }) {
 						{result.breadcrumbs.map((part, index) => (
 							<span key={index}>
 								{index > 0 ? (
-									<Icon className={styles.breadcrumbChevron} name="chevronRight" size="px16" />
+									<Icon className={styles.breadcrumbChevron} name="chevronRight" size="size.16" />
 								) : null}
 								{plainText(part)}
 							</span>

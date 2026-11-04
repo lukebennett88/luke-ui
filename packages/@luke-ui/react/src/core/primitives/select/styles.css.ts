@@ -100,14 +100,14 @@ const selectConfig = {
 		size: {
 			medium: {
 				trigger: {
-					blockSize: vars.controlSize.px40,
+					blockSize: vars.controlSize['40'],
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
 					paddingInline: vars.space['12'],
 				},
 			},
 			small: {
 				trigger: {
-					blockSize: vars.controlSize.px32,
+					blockSize: vars.controlSize['32'],
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,

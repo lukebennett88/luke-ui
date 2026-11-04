@@ -431,7 +431,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					borderColor="decorative"
 					borderRadius="detail"
 					borderStyle="solid"
-					borderWidth="thin"
+					borderWidth="border.1"
 					padding="space.16"
 				>
 					<Text>Inset</Text>
@@ -446,7 +446,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 					borderColor="decorative"
 					borderRadius="detail"
 					borderStyle="solid"
-					borderWidth="thin"
+					borderWidth="border.1"
 					padding="space.16"
 				>
 					<Bleed all="space.8" inlineStart="space.16">

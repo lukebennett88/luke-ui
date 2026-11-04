@@ -13,7 +13,7 @@ export default () => {
 					borderColor="decorative"
 					borderRadius="full"
 					borderStyle="solid"
-					borderWidth="thin"
+					borderWidth="border.1"
 					inlineSize="3rem"
 				/>
 			</LockupRail>

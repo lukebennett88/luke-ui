@@ -29,7 +29,7 @@ export function HomeShowcase() {
 			borderColor="decorative"
 			borderRadius="surface"
 			borderStyle="solid"
-			borderWidth="thin"
+			borderWidth="border.1"
 			boxShadow="floating"
 			display="grid"
 			elementType="section"
