@@ -128,7 +128,7 @@ if (arm === 'shiki') {
 	const highlighter = createHighlighter({ languages: [tsx] });
 	initializedMs = performance.now() - moduleStart;
 	htmlFor = (source) => highlighter.highlightToHtml(source, { lang: 'tsx' })
-		.replace(/^<pre[^>]*>/, '').replace(/</pre>$/, '');
+		.replace(/^<pre[^>]*>/, '').replace(new RegExp('</pre>;
 } else if (arm === 'twinkleplop') {
 	const { language } = await import('@twinkleplop/tsx');
 	importedMs = performance.now() - moduleStart;
@@ -136,6 +136,157 @@ if (arm === 'shiki') {
 	initializedMs = performance.now() - moduleStart;
 	htmlFor = (source) => highlighter(source)
 		.replace(/^<pre[^>]*>/, '').replace(/</pre>$/, '');
+} else {
+	throw new Error('Unknown library: ' + arm);
+}
+
+function unescapeText(escaped) {
+	return escaped.replace(/&(amp|lt|gt|quot|apos|#(?:x[0-9a-fA-F]+|[0-9]+));/g, (full, entity) => {
+		if (entity === 'amp') return '&';
+		if (entity === 'lt') return '<';
+		if (entity === 'gt') return '>';
+		if (entity === 'quot') return '"';
+		if (entity === 'apos') return "'";
+		if (entity.startsWith('#x')) return String.fromCodePoint(parseInt(entity.slice(2), 16));
+		if (entity.startsWith('#')) return String.fromCodePoint(Number(entity.slice(1)));
+		return full;
+	});
+}
+
+const html = fixtures.map((fixture) => htmlFor(fixture.source));
+let mismatchCount = 0;
+const mismatches = [];
+for (let i = 0; i < fixtures.length; i += 1) {
+	const restored = unescapeText(html[i].replace(/<[^>]*>/g, ''));
+	if (restored !== fixtures[i].source) {
+		mismatchCount += 1;
+		if (mismatches.length < 5) {
+			let offset = 0;
+			while (offset < restored.length &&
+				restored[offset] === fixtures[i].source[offset]) offset += 1;
+			mismatches.push({
+				file: fixtures[i].name,
+				offset,
+				expected: fixtures[i].source.slice(offset, offset + 70),
+				actual: restored.slice(offset, offset + 70),
+			});
+		}
+	}
+}
+
+// Warm each arm using the full corpus, then record seven trials of equal work.
+for (let n = 0; n < 2; n += 1) for (const fixture of fixtures) htmlFor(fixture.source);
+const trialsMs = [];
+const repetitions = 4;
+for (let trial = 0; trial < 7; trial += 1) {
+	global.gc?.();
+	const t0 = performance.now();
+	for (let r = 0; r < repetitions; r += 1) {
+		for (const fixture of fixtures) htmlFor(fixture.source);
+	}
+	trialsMs.push(performance.now() - t0);
+}
+const medianMs = [...trialsMs].sort((a, b) => a - b)[3];
+const totalHtml = html.join('\n');
+console.log(JSON.stringify({
+	library: arm,
+	importMs: Number(importedMs.toFixed(2)),
+	initMsIncludingImport: Number(initializedMs.toFixed(2)),
+	medianMsPerCorpus: Number((medianMs / repetitions).toFixed(3)),
+	highlightsPerSecond: Math.round(fixtures.length * repetitions * 1000 / medianMs),
+	trialsMs: trialsMs.map((n) => Number(n.toFixed(2))),
+	htmlBytes: Buffer.byteLength(totalHtml),
+	htmlGzipBytes: gzipSync(totalHtml).length,
+	spanCount: (totalHtml.match(/<span\b/g) ?? []).length,
+	reconstructionMismatches: mismatchCount,
+	firstMismatches: mismatches,
+	exampleHtmlBytes: {
+		checkboxControlled: (() => {
+			const i = fixtures.findIndex((f) => f.name.endsWith('checkbox-field/controlled.tsx'));
+			return i < 0 ? null : Buffer.byteLength(html[i]);
+		})(),
+	},
+}));
+), '');
+} else if (arm === 'twinkleplop') {
+	const { language } = await import('@twinkleplop/tsx');
+	importedMs = performance.now() - moduleStart;
+	const highlighter = language();
+	initializedMs = performance.now() - moduleStart;
+	htmlFor = (source) => highlighter(source)
+		.replace(/^<pre[^>]*>/, '').replace(new RegExp('</pre>;
+} else {
+	throw new Error('Unknown library: ' + arm);
+}
+
+function unescapeText(escaped) {
+	return escaped.replace(/&(amp|lt|gt|quot|apos|#(?:x[0-9a-fA-F]+|[0-9]+));/g, (full, entity) => {
+		if (entity === 'amp') return '&';
+		if (entity === 'lt') return '<';
+		if (entity === 'gt') return '>';
+		if (entity === 'quot') return '"';
+		if (entity === 'apos') return "'";
+		if (entity.startsWith('#x')) return String.fromCodePoint(parseInt(entity.slice(2), 16));
+		if (entity.startsWith('#')) return String.fromCodePoint(Number(entity.slice(1)));
+		return full;
+	});
+}
+
+const html = fixtures.map((fixture) => htmlFor(fixture.source));
+let mismatchCount = 0;
+const mismatches = [];
+for (let i = 0; i < fixtures.length; i += 1) {
+	const restored = unescapeText(html[i].replace(/<[^>]*>/g, ''));
+	if (restored !== fixtures[i].source) {
+		mismatchCount += 1;
+		if (mismatches.length < 5) {
+			let offset = 0;
+			while (offset < restored.length &&
+				restored[offset] === fixtures[i].source[offset]) offset += 1;
+			mismatches.push({
+				file: fixtures[i].name,
+				offset,
+				expected: fixtures[i].source.slice(offset, offset + 70),
+				actual: restored.slice(offset, offset + 70),
+			});
+		}
+	}
+}
+
+// Warm each arm using the full corpus, then record seven trials of equal work.
+for (let n = 0; n < 2; n += 1) for (const fixture of fixtures) htmlFor(fixture.source);
+const trialsMs = [];
+const repetitions = 4;
+for (let trial = 0; trial < 7; trial += 1) {
+	global.gc?.();
+	const t0 = performance.now();
+	for (let r = 0; r < repetitions; r += 1) {
+		for (const fixture of fixtures) htmlFor(fixture.source);
+	}
+	trialsMs.push(performance.now() - t0);
+}
+const medianMs = [...trialsMs].sort((a, b) => a - b)[3];
+const totalHtml = html.join('\n');
+console.log(JSON.stringify({
+	library: arm,
+	importMs: Number(importedMs.toFixed(2)),
+	initMsIncludingImport: Number(initializedMs.toFixed(2)),
+	medianMsPerCorpus: Number((medianMs / repetitions).toFixed(3)),
+	highlightsPerSecond: Math.round(fixtures.length * repetitions * 1000 / medianMs),
+	trialsMs: trialsMs.map((n) => Number(n.toFixed(2))),
+	htmlBytes: Buffer.byteLength(totalHtml),
+	htmlGzipBytes: gzipSync(totalHtml).length,
+	spanCount: (totalHtml.match(/<span\b/g) ?? []).length,
+	reconstructionMismatches: mismatchCount,
+	firstMismatches: mismatches,
+	exampleHtmlBytes: {
+		checkboxControlled: (() => {
+			const i = fixtures.findIndex((f) => f.name.endsWith('checkbox-field/controlled.tsx'));
+			return i < 0 ? null : Buffer.byteLength(html[i]);
+		})(),
+	},
+}));
+), '');
 } else {
 	throw new Error('Unknown library: ' + arm);
 }
