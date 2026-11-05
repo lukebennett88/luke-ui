@@ -1,16 +1,17 @@
 # #1023 same-role high Buttons
 
 Decision record for [#1023](https://github.com/lukebennett88/luke-ui/issues/1023): a high Button
-loses its filled shape on a role solid that uses the same fill. Luke UI documents the limitation and
-does not change the Button.
+loses its filled shape on a role solid that uses the same fill. Luke UI documents this as a known
+visual limitation and does not change the Button.
 
 ## Problem
 
 A neutral high Button paints `accent.solid`, and a danger high Button paints `danger.solid`. Inside
 a managed surface painted with the same solid, the Button paints its parent's colour in every state.
-Its rest, hover, and pressed fills are then the same as a low Button's on that surface. A standard
-Button's light or dark subtle face stands out more, so the prominence order looks reversed. Labels
-keep on-solid contrast. The problem is shape and hierarchy, not text contrast.
+Its rest, hover, and pressed fills are then the same as a low Button's on that surface, although
+Tactile's control finish and shadows can still differ between the two. A standard Button's light or
+dark subtle face stands out more, so the prominence order looks reversed. Labels keep on-solid
+contrast. The problem is shape and hierarchy, not text contrast.
 
 Only these two pairs collide. Every other role solid differs from both high fills.
 
@@ -30,19 +31,18 @@ The flat fixture measures the same as Tactile.
 | Tactile | Dark  | `accent` | 0.000          | 0.073                   | 0.176    | 0.239           |
 | Tactile | Dark  | `danger` | 0.000          | 0.070                   | 0.251    | 0.239           |
 
-"Rung furthest from rest" is the parent's `solid.pressed`. It is the most distinct face the role's
-existing tokens can give without changing hue. It is also exactly the face of a low Button pressed
-on that surface.
+"Rung furthest from rest" is the parent's `solid.pressed`. It is the most distinct same-hue face
+among the role's solid states. It is also exactly the face of a low Button pressed on that surface.
 
 ## Decision
 
-Document the collision. Do not change the Button.
+Document the collision as a known visual limitation. Do not change the Button.
 
-- **Benefit of a fix.** Two Button and surface pairs, which a layout can avoid by choosing standard
-  prominence for the main action on that solid.
+- **Benefit of a fix.** Two Button and surface pairs, which a layout can avoid by placing the action
+  on a contrasting surface.
 - **Cost of a fix.** The fix needs a private inherited variable per role, set by every surface
-  pairing, and a face treatment that fixes the collision. Prototyping found no treatment that does,
-  so the variable has nothing worth carrying.
+  pairing, and a face treatment for the collision. The treatments explored below were not worth that
+  complexity.
 
 ## Rejected
 
