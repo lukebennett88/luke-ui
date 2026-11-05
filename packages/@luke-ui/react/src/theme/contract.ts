@@ -173,7 +173,7 @@ export const themeContractTree = {
 	},
 	/** Spacing in rem that scales with the root font size. */
 	space: spaceContract as { readonly [Step in SpaceStep]: null },
-	/** Structural block sizes in rem, equivalent to 32px and 40px at a 16px root. */
+	/** Shared control reference dimensions in rem, equivalent to 32px and 40px at a 16px root font size. */
 	controlSize: {
 		'32': null,
 		'40': null,
