@@ -16,12 +16,18 @@ import { contrast, paintedColor } from '../test-utils/painted-color.js';
 import type { VisualAppearance } from '../test-utils/render.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { resolvedColor } from '../test-utils/surface-colors.js';
-import { parkPointer, pressPointer, releasePointer } from '../test-utils/visual.js';
+import {
+	captureVisualAppearance,
+	focusViaKeyboard,
+	parkPointer,
+	pressPointer,
+	releasePointer,
+} from '../test-utils/visual.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 
 // #955 decision 8 gates `ThemeInput.color.focus` at 3:1 against the three structural surfaces and
-// the six role subtle fills. Those nine backgrounds are the supported places for a focus ring.
-const supportedBackgrounds = [
+// the six role subtle fills, so a ring there paints `color.focus`.
+const focusTokenBackgrounds = [
 	'surface.base',
 	'surface.subdued',
 	'surface.raised',
@@ -33,7 +39,31 @@ const supportedBackgrounds = [
 	'danger.subtle',
 ] as const;
 
-type TileBackground = (typeof supportedBackgrounds)[number];
+// A ring on a role solid paints that role's on-solid colour, which the compiler gates at 4.5:1
+// against the solid's rest, hover and pressed fills.
+const solidRingColors = {
+	'neutral.solid': vars.color.foreground.neutral.onSolid,
+	'accent.solid': vars.color.foreground.accent.onSolid,
+	'info.solid': vars.color.foreground.info.onSolid,
+	'success.solid': vars.color.foreground.success.onSolid,
+	'warning.solid': vars.color.foreground.warning.onSolid,
+	'danger.solid': vars.color.foreground.danger.onSolid,
+} as const;
+
+type SolidBackground = keyof typeof solidRingColors;
+type TileBackground = (typeof focusTokenBackgrounds)[number] | SolidBackground;
+
+const supportedBackgrounds: ReadonlyArray<TileBackground> = [
+	...focusTokenBackgrounds,
+	...(Object.keys(solidRingColors) as Array<SolidBackground>),
+];
+
+/** The colour a ring on `background` must paint. */
+function ringColor(background: TileBackground): string {
+	return background in solidRingColors
+		? solidRingColors[background as SolidBackground]
+		: vars.color.focus;
+}
 
 // Bundled themes plus the two fixtures that stress the gates: the chromatic brief and a pale
 // accent beside a custom raised surface.
@@ -258,6 +288,21 @@ function checkRing(
 }
 
 /**
+ * The sides of the ring to measure. A hovered control paints its raised shadow below it, into the
+ * offset gap. On a role solid whose on-solid colour is dark, such as Tactile dark `info.solid`, that
+ * shadow brings the gap below the control to 2.86:1 against the ring. The panel outside the ring
+ * still clears 3:1, so a hovered control on a solid is measured against that side only.
+ */
+function sidesFor(
+	background: TileBackground,
+	state: State | undefined,
+	neighbours: ReadonlyArray<Neighbour>,
+): ReadonlyArray<Neighbour> {
+	if (state !== 'hover' || !(background in solidRingColors)) return neighbours;
+	return neighbours.filter((side) => side === 'outer');
+}
+
+/**
  * Hovers the control, and for `pressed` holds Space down. A pointer press would end keyboard focus
  * visibility, so the keyboard press is the pressed state a focus ring can coexist with.
  */
@@ -308,11 +353,11 @@ async function measureTiles(
 		}
 		expect(singleRing(tile), 'the ring survives the state').toBe(ringElement);
 
-		const expected = paintedColor(resolvedColor(vars.color.focus, ringElement));
+		const expected = paintedColor(resolvedColor(ringColor(background), ringElement));
 		// oxlint-disable-next-line no-await-in-loop
 		const probes = await edgeProbes(tile, ringElement);
 		const where = state === undefined ? background : `${background} ${state}`;
-		checkRing(probes, geometry, expected, neighbours, where, failures);
+		checkRing(probes, geometry, expected, sidesFor(background, state, neighbours), where, failures);
 	}
 	await userEvent.keyboard('{/Space}');
 	return failures;
@@ -337,6 +382,95 @@ for (const appearance of visualAppearances) {
 				expect(await measureTiles(supportedBackgrounds, ['inner', 'outer'], state)).toEqual([]);
 			});
 		}
+	}
+}
+
+// A structural surface or subtle fill inside a solid sets the ring back to `color.focus`, and a
+// control's own fill leaves the ring to the surface around it.
+for (const appearance of visualAppearances) {
+	for (const [outer, inner] of [
+		['info.solid', 'surface.raised'],
+		['warning.solid', 'danger.subtle'],
+	] as const) {
+		test(`returns the Button focus ring to color.focus on ${inner} inside ${outer} in ${appearance.theme} ${appearance.mode}`, async () => {
+			render(
+				<Box backgroundColor={outer} padding="space.16">
+					<Box aria-label={inner} backgroundColor={inner} padding="space.16" role="group">
+						<Button prominence="high">Save</Button>
+					</Box>
+				</Box>,
+				{ appearance },
+			);
+			const tile = page.getByRole('group', { name: inner }).element() as HTMLElement;
+			await tabInto(tile);
+
+			const ringElement = singleRing(tile);
+			const geometry = geometryOf(ringElement);
+			const expected = paintedColor(resolvedColor(vars.color.focus, ringElement));
+			const failures: Array<string> = [];
+			checkRing(
+				await edgeProbes(tile, ringElement),
+				geometry,
+				expected,
+				['inner', 'outer'],
+				inner,
+				failures,
+			);
+
+			expect(failures).toEqual([]);
+		});
+	}
+}
+
+// A focusable element inside a control's fill, and a focusable solid `Box`, take the ring colour of
+// the fill around them, not the solid around the control or the Box's own fill.
+for (const appearance of visualAppearances) {
+	for (const [name, background, scene, target] of [
+		[
+			'ComboboxField clear button',
+			'info.solid',
+			<ComboboxField defaultItems={items} defaultValue="light" key="combobox" label="Theme">
+				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+			</ComboboxField>,
+			{ role: 'button', name: /^Clear selection/ },
+		],
+		[
+			'focusable solid Box',
+			'surface.base',
+			<Box
+				aria-label="Card"
+				backgroundColor="accent.solid"
+				key="box"
+				padding="space.16"
+				role="region"
+				tabIndex={0}
+			/>,
+			{ role: 'region', name: 'Card' },
+		],
+	] as const) {
+		test(`paints the ${name} focus ring in color.focus on ${background} in ${appearance.theme} ${appearance.mode}`, async () => {
+			render(
+				<Box aria-label="tile" backgroundColor={background} padding="space.16" role="group">
+					{scene}
+				</Box>,
+				{ appearance },
+			);
+			const tile = page.getByRole('group', { name: 'tile' }).element() as HTMLElement;
+			const element = page.getByRole(target.role, { name: target.name }).element() as HTMLElement;
+			while (document.activeElement !== element) {
+				// oxlint-disable-next-line no-await-in-loop
+				await userEvent.tab();
+				expect(tile.contains(document.activeElement), 'focus stayed in the tile').toBe(true);
+			}
+
+			expect(singleRing(tile)).toBe(element);
+			const geometry = geometryOf(element);
+			const expected = paintedColor(resolvedColor(vars.color.focus, element));
+			const failures: Array<string> = [];
+			checkRing(await edgeProbes(tile, element), geometry, expected, ['inner'], name, failures);
+
+			expect(failures).toEqual([]);
+		});
 	}
 }
 
@@ -387,6 +521,41 @@ for (const { control, name } of controls) {
 		expect(style.outlineWidth).toBe('2px');
 		expect(style.outlineColor).toBe(resolvedColor('Highlight', ringElement));
 	});
+}
+
+test('draws the Button focus ring in the system highlight on a solid fill under forced colours', async () => {
+	render(
+		<Box backgroundColor="info.solid" padding="space.16">
+			<Button>Save</Button>
+		</Box>,
+	);
+	await emulateForcedColors('active');
+
+	await userEvent.tab();
+
+	const ringElement = singleRing(document.body);
+	expect(getComputedStyle(ringElement).outlineColor).toBe(resolvedColor('Highlight', ringElement));
+});
+
+// In Tactile dark, `color.focus` and `info.solid` paint the same colour, so this capture shows the
+// on-solid ring where `color.focus` would vanish.
+for (const appearance of visualAppearances) {
+	test(
+		`theme matrix: focus ring on a role solid in ${appearance.theme} ${appearance.mode}`,
+		{ tags: ['visual'] },
+		async () => {
+			const { locator } = render(
+				<Box backgroundColor="info.solid" display="flex" gap="space.16" padding="space.16">
+					<Button>Save</Button>
+					<Button prominence="low">Cancel</Button>
+				</Box>,
+				{ appearance },
+			);
+
+			await focusViaKeyboard(page.getByRole('button', { name: 'Save' }));
+			await captureVisualAppearance(locator, 'focus-ring/role-solid', appearance);
+		},
+	);
 }
 
 test('shows the Button focus ring for keyboard focus and not for a pointer press', async () => {

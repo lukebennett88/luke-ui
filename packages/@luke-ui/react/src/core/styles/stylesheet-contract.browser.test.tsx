@@ -24,16 +24,16 @@ const globalRules = [
 	[':where(:root)', 'container-type: inline-size; text-size-adjust: 100%;'],
 	[
 		':where(body)',
-		'--luke-internal-foreground-primary: initial; --luke-internal-foreground-secondary: initial; --luke-internal-foreground-tone: initial; --luke-internal-surface-finish-hover: initial; --luke-internal-surface-finish-pressed: initial; --luke-internal-surface-shadow-pressed: initial; --luke-internal-surface-fill-rest: var(--luke-color-background-surface-base); --luke-internal-surface-fill-hover: var(--luke-interaction-tint-hover); --luke-internal-surface-fill-pressed: var(--luke-interaction-tint-pressed); accent-color: var(--luke-color-background-accent-solid-rest); background-color: var(--luke-color-background-surface-base); color: var(--luke-color-foreground-primary); font-family: var(--luke-font-body-font-family); font-size: var(--luke-font-body-font-size); font-weight: var(--luke-font-body-font-weight); letter-spacing: var(--luke-font-body-letter-spacing); line-height: 1.5; margin: 0px;',
+		'--luke-internal-foreground-primary: initial; --luke-internal-foreground-secondary: initial; --luke-internal-foreground-tone: initial; --luke-internal-focus: initial; --luke-internal-surface-finish-hover: initial; --luke-internal-surface-finish-pressed: initial; --luke-internal-surface-shadow-pressed: initial; --luke-internal-surface-fill-rest: var(--luke-color-background-surface-base); --luke-internal-surface-fill-hover: var(--luke-interaction-tint-hover); --luke-internal-surface-fill-pressed: var(--luke-interaction-tint-pressed); accent-color: var(--luke-color-background-accent-solid-rest); background-color: var(--luke-color-background-surface-base); color: var(--luke-color-foreground-primary); font-family: var(--luke-font-body-font-family); font-size: var(--luke-font-body-font-size); font-weight: var(--luke-font-body-font-weight); letter-spacing: var(--luke-font-body-letter-spacing); line-height: 1.5; margin: 0px;',
 	],
 	[
 		':where(body [data-color-mode="light"], body [data-color-mode="dark"])',
-		'--luke-internal-foreground-primary: initial; --luke-internal-foreground-secondary: initial; --luke-internal-foreground-tone: initial; --luke-internal-surface-finish-hover: initial; --luke-internal-surface-finish-pressed: initial; --luke-internal-surface-shadow-pressed: initial; --luke-internal-surface-fill-rest: var(--luke-color-background-surface-base); --luke-internal-surface-fill-hover: var(--luke-interaction-tint-hover); --luke-internal-surface-fill-pressed: var(--luke-interaction-tint-pressed); accent-color: var(--luke-color-background-accent-solid-rest); background-color: var(--luke-color-background-surface-base); color: var(--luke-color-foreground-primary);',
+		'--luke-internal-foreground-primary: initial; --luke-internal-foreground-secondary: initial; --luke-internal-foreground-tone: initial; --luke-internal-focus: initial; --luke-internal-surface-finish-hover: initial; --luke-internal-surface-finish-pressed: initial; --luke-internal-surface-shadow-pressed: initial; --luke-internal-surface-fill-rest: var(--luke-color-background-surface-base); --luke-internal-surface-fill-hover: var(--luke-interaction-tint-hover); --luke-internal-surface-fill-pressed: var(--luke-interaction-tint-pressed); accent-color: var(--luke-color-background-accent-solid-rest); background-color: var(--luke-color-background-surface-base); color: var(--luke-color-foreground-primary);',
 	],
 	[':where(button, input, select, textarea)', 'font: inherit; margin: 0px;'],
 	[
 		':where(:focus-visible)',
-		'outline-color: var(--luke-color-focus); outline-offset: 2px; outline-style: solid; outline-width: 2px;',
+		'outline-color: var(--luke-internal-focus, var(--luke-color-focus)); outline-offset: 2px; outline-style: solid; outline-width: 2px; --luke-internal-focus: inherit !important;',
 	],
 	['@media (forced-colors: active) :where(:focus-visible)', 'outline-color: highlight;'],
 ];
