@@ -6,8 +6,8 @@ description: Install Luke UI and a theme, and render a component.
 ## Install Luke UI
 
 Install Luke UI, React Aria Components, and a theme. Luke UI uses the application's React Aria
-Components instance so shared contexts remain compatible. Luke UI's type declarations need
-TypeScript 5.8 or later. This guide uses the Tactile theme.
+Components instance so shared contexts remain compatible. Luke UI needs React and React DOM 19.3 or
+later, and its type declarations need TypeScript 5.8 or later. This guide uses the Tactile theme.
 
 ```bash
 pnpm add @luke-ui/react @luke-ui/theme-tactile react-aria-components
@@ -60,9 +60,10 @@ Import each component from its package path.
 
 <SourceCodeBlock src="overview/welcome" />
 
-Components that use icons need `Provider` at the application root. Pass it the URL for
-`@luke-ui/react/spritesheet.svg`. See [Iconography](/docs/iconography#set-up-the-spritesheet) for
-bundler setup.
+Components that render an icon, such as `Icon`, `IconButton`, `SelectField`, and `ComboboxField`,
+throw an error until `Provider` wraps them at the application root. Pass it the URL for
+`@luke-ui/react/spritesheet.svg`. The sample above renders without it. See
+[Iconography](/docs/iconography#set-up-the-spritesheet) for bundler setup.
 
 ## Change the theme
 

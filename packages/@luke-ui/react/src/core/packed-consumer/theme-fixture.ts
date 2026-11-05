@@ -39,14 +39,21 @@ export function themeFixture(themes: Array<PackedPackage>): ConsumerFixture {
 		'compile-themes.ts': COMPILE_THEMES,
 		'display-theme.ts': DISPLAY_THEME,
 		'display.html': themePage('display-fixture', 'display', DISPLAY_PAGE_BODY),
+		// The Installation guide's page and modules, verbatim, so its steps run exactly as written.
+		'installation.html': installationPage(),
 		'product-theme.ts': PRODUCT_THEME,
 		'product.html': themePage('product', 'product', PRODUCT_PAGE_BODY),
 		'reference-theme.ts': readRepoFile('apps/reference-app/src/theme/input.ts'),
 		'src/display.js': DISPLAY_ENTRY,
+		'src/main.tsx': readRepoFile('apps/docs/src/samples/overview/main.tsx'),
 		'src/product.js': PRODUCT_ENTRY,
+		'src/root-layout.tsx': readRepoFile('apps/docs/src/samples/overview/root-layout.tsx'),
 		'src/tactile.js': TACTILE_ENTRY,
+		'src/welcome.tsx': readRepoFile('apps/docs/src/samples/overview/welcome.tsx'),
 		'tactile.html': themePage('tactile', 'tactile', TACTILE_PAGE_BODY),
 		'theme-app.ts': THEME_APP,
+		// Every Vite scaffold ships this file. It types the guide's stylesheet imports.
+		'vite-env.d.ts': '/// <reference types="vite/client" />\n',
 		'theme.ts': readRepoFile('apps/docs/src/samples/theming/theme.ts'),
 	};
 	for (const { manifest } of themes) {
@@ -63,8 +70,16 @@ export function themeFixture(themes: Array<PackedPackage>): ConsumerFixture {
 		},
 		files,
 		prepare: [['node', 'compile-themes.ts']],
-		typeChecked: ['theme-app.ts'],
+		typeChecked: ['theme-app.ts', 'vite-env.d.ts', 'src/main.tsx', 'src/root-layout.tsx'],
 	};
+}
+
+/** The `html` code block of the Installation guide: the `index.html` a single-page app starts from. */
+function installationPage(): string {
+	const guide = readRepoFile('apps/docs/content/docs/docs/installation.mdx');
+	const block = /```html\n([\s\S]*?)```/.exec(guide)?.[1];
+	if (block === undefined) throw new Error('The Installation guide has no html code block.');
+	return block;
 }
 
 function readRepoFile(file: string): string {

@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { fromFile } from '@capsizecss/unpack/fs';
+import { chromium } from 'playwright';
 import { describe, expect, inject, test } from 'vite-plus/test';
 import { paperTheme } from '../../theme/__fixtures__/paper.js';
 import { tactileTheme } from '../../theme/__fixtures__/tactile.js';
@@ -15,6 +16,7 @@ import {
 	measureBundle,
 	packageContentProblems,
 	run,
+	serveBuild,
 	themeGenerationIn,
 	tryRun,
 } from './environment.js';
@@ -164,6 +166,46 @@ describe.skipIf(themes.length === 0)('the packed theme packages', () => {
 				const css = readFileSync(path.join(dir, 'src', 'theme.css'), 'utf8');
 				expect(findTokenCompatibilityProblems(css, 'product')).toEqual([]);
 			});
+
+			test(
+				"renders the Installation guide's first-run app with the theme on the page",
+				{ timeout: 60_000 },
+				async () => {
+					const server = await serveBuild(dir);
+					const browser = await chromium.launch();
+					try {
+						const page = await browser.newPage();
+						const problems: Array<string> = [];
+						page.on('console', (message) => {
+							if (['error', 'warning'].includes(message.type())) problems.push(message.text());
+						});
+						page.on('pageerror', (error) => problems.push(String(error)));
+						await page.goto(`${server.url}installation.html`);
+						const button = page.getByRole('button', { name: 'Continue' });
+						await button.waitFor();
+
+						const rendered = await page.evaluate(() => {
+							const probe = document.body.appendChild(document.createElement('span'));
+							probe.style.backgroundColor = 'var(--luke-color-background-surface-base)';
+							const surface = getComputedStyle(probe).backgroundColor;
+							probe.remove();
+							return {
+								bodyBackground: getComputedStyle(document.body).backgroundColor,
+								bodyFont: getComputedStyle(document.body).fontFamily,
+								surface,
+								text: document.getElementById('root')?.textContent,
+							};
+						});
+						expect(problems).toEqual([]);
+						expect(rendered.text).toContain('Welcome to Luke UI.');
+						expect(rendered.bodyBackground).toBe(rendered.surface);
+						expect(rendered.bodyFont).toContain('Inter');
+					} finally {
+						await browser.close();
+						await server.close();
+					}
+				},
+			);
 
 			test('keeps theme stylesheets and their fonts in a Vite build', () => {
 				const assets = builtAssets(dir);
