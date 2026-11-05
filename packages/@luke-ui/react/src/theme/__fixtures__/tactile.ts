@@ -13,7 +13,8 @@ export const tactileTheme: ThemeInput = {
 	// where a label mostly sits. Solid, standard, and hovered or pressed low Buttons share it, and
 	// pressed reverses it. White and black layers move a pale fill further than a dark one, so the
 	// light shade is faint to keep a standard Button no heavier than a solid one, and the dark
-	// highlight is faint for the same reason. The finish can still reach a label, so the rendered
+	// highlight is faint for the same reason. Light recessed adds a lit lip at the bottom, because
+	// its faint top shade barely darkens a pressed solid, while the lip barely shows on a pale face. The finish can still reach a label, so the rendered
 	// contrast gate checks text over it at 4.5:1.
 	controlFinish: {
 		dark: {
@@ -29,7 +30,9 @@ export const tactileTheme: ThemeInput = {
 			raised:
 				'linear-gradient(to bottom, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0) 30%, ' +
 				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.025))',
-			recessed: 'linear-gradient(to bottom, rgb(0 0 0 / 0.03), rgb(0 0 0 / 0) 45%)',
+			recessed:
+				'linear-gradient(to bottom, rgb(0 0 0 / 0.03), rgb(0 0 0 / 0) 45%, ' +
+				'rgb(255 255 255 / 0) 72%, rgb(255 255 255 / 0.12))',
 			resting:
 				'linear-gradient(to bottom, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0) 30%, ' +
 				'rgb(0 0 0 / 0) 66%, rgb(0 0 0 / 0.03))',
