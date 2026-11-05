@@ -34,7 +34,7 @@ export function SettingsNavSearch({
 			aria-label="Search settings"
 			onChange={onChange}
 			placeholder="Search…"
-			prefix={<Icon name="search" size="px20" />}
+			prefix={<Icon name="search" size="small" />}
 			size="small"
 			type="search"
 			value={value}
@@ -96,7 +96,7 @@ function SettingsNavList({
 function SettingsNavLink({ className, item }: { className: string; item: SettingsNavItem }) {
 	return (
 		<NavLink className={className} end to={item.to}>
-			<Icon name={item.icon} size="px16" />
+			<Icon name={item.icon} size="xsmall" />
 			{item.label}
 		</NavLink>
 	);

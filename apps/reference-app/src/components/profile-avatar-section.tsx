@@ -138,7 +138,7 @@ export function ProfileAvatarSection({
 								</Text>
 							)}
 							<span aria-hidden="true" className={styles.avatarOverlay}>
-								<Icon name="edit" size="px16" />
+								<Icon name="edit" size="xsmall" />
 							</span>
 						</RacButton>
 						<Popover className={styles.menuPopover} placement="bottom end">
@@ -155,7 +155,7 @@ export function ProfileAvatarSection({
 								}}
 							>
 								<MenuItem className={styles.menuItem} id="change" textValue="Change picture">
-									<Icon name="edit" size="px20" />
+									<Icon name="edit" size="small" />
 									<Text>Change picture</Text>
 								</MenuItem>
 								<MenuItem
@@ -164,7 +164,7 @@ export function ProfileAvatarSection({
 									isDisabled={!profile.avatarDataUrl}
 									textValue="Remove picture"
 								>
-									<Icon name="close" size="px20" />
+									<Icon name="close" size="small" />
 									<Text>Remove picture</Text>
 								</MenuItem>
 							</Menu>

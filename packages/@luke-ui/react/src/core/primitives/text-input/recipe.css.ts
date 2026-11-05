@@ -91,7 +91,7 @@ export const textInputRecipe = recipe({
 	variants: {
 		size: {
 			medium: {
-				blockSize: vars.controlSize.px40,
+				blockSize: vars.controlSize['40'],
 				fontSize: FONT_METRIC_SCALE[16].fontSize,
 				letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
 				lineHeight: FONT_METRIC_SCALE[16].lineHeight,
@@ -100,7 +100,7 @@ export const textInputRecipe = recipe({
 				vars: { [textInputInlinePadding]: vars.space['12'] },
 			},
 			small: {
-				blockSize: vars.controlSize.px32,
+				blockSize: vars.controlSize['32'],
 				fontSize: FONT_METRIC_SCALE[14].fontSize,
 				letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 				lineHeight: FONT_METRIC_SCALE[14].lineHeight,

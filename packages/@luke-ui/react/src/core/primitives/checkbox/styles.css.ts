@@ -1,7 +1,7 @@
 import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
-import { ICON_SIZES } from '../../sizing/icon-sizing.js';
+import { CHECKBOX_GLYPH_SIZE } from '../../sizing/choice-sizing.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
@@ -124,7 +124,7 @@ const checkboxConfig = {
 	variants: {
 		size: {
 			medium: {
-				root: { vars: { ...choiceSizeVars.medium, [checkboxGlyphSize]: ICON_SIZES.px16 } },
+				root: { vars: { ...choiceSizeVars.medium, [checkboxGlyphSize]: CHECKBOX_GLYPH_SIZE } },
 			},
 			small: {
 				root: {

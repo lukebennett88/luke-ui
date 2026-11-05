@@ -1,5 +1,6 @@
 import { keyframes } from '@vanilla-extract/css';
 import { iconSizeVariants } from '../icon/recipe.css.js';
+import { DEFAULT_ICON_SIZE } from '../sizing/icon-sizing.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
@@ -38,7 +39,7 @@ export const rubberBandAnimationName = keyframes({
  */
 const loadingSpinnerConfig = {
 	defaultVariants: {
-		size: 'px24',
+		size: DEFAULT_ICON_SIZE,
 	},
 	slots: {
 		childrenWrapper: {
@@ -103,10 +104,10 @@ const loadingSpinnerConfig = {
 			warning: { root: { color: contextualForeground('warning') } },
 		},
 		size: {
-			px32: { root: iconSizeVariants.px32 },
-			px24: { root: iconSizeVariants.px24 },
-			px20: { root: iconSizeVariants.px20 },
-			px16: { root: iconSizeVariants.px16 },
+			large: { root: iconSizeVariants.large },
+			medium: { root: iconSizeVariants.medium },
+			small: { root: iconSizeVariants.small },
+			xsmall: { root: iconSizeVariants.xsmall },
 		},
 	},
 } as const satisfies SlottedConfigInput;

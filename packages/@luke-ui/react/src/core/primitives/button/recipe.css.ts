@@ -347,13 +347,13 @@ function buttonSize(size: 'medium' | 'small') {
 			size === 'medium'
 				? {
 						...inset,
-						blockSize: vars.controlSize.px40,
+						blockSize: vars.controlSize['40'],
 						fontSize: FONT_METRIC_SCALE[14].fontSize,
 						gap: vars.space['8'],
 					}
 				: {
 						...inset,
-						blockSize: vars.controlSize.px32,
+						blockSize: vars.controlSize['32'],
 						fontSize: FONT_METRIC_SCALE[12].fontSize,
 						gap: vars.space['4'],
 						letterSpacing: FONT_METRIC_SCALE[12].letterSpacing,

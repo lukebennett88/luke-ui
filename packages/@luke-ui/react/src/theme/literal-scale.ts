@@ -4,9 +4,8 @@ type LiteralKey<Prefix extends string, Step extends number> = `${Prefix}${Step}`
 
 /**
  * Builds a curated literal size scale from numeric steps. Each step becomes both the key and the
- * `rem` value at a 16px root (`16` → `px16: rem(16)`), so names cannot drift from values.
- *
- * The prefix names the kind of value, such as `px` for squares or `container.` for presets.
+ * reference measurement in CSS pixels at a 16px root. Values use `rem` and scale with the root
+ * font size. For example, `literalScale('container.', [448])` produces `container.448: '28rem'`.
  */
 export function literalScale<
 	const Prefix extends string,

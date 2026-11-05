@@ -145,7 +145,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 
 		return (
 			<ComboboxLoadMoreItem isLoading={loadingState === 'loadingMore'} onLoadMore={onLoadMore}>
-				<LoadingSpinner aria-label="Loading more options..." size="px20" />
+				<LoadingSpinner aria-label="Loading more options..." size="small" />
 			</ComboboxLoadMoreItem>
 		);
 	})();
@@ -241,7 +241,7 @@ function ComboboxEmptyStateContent({
 	if (loadingState === 'loading' || loadingState === 'filtering') {
 		return (
 			<ComboboxEmptyState>
-				<LoadingSpinner aria-label="Loading options..." size="px24" />
+				<LoadingSpinner aria-label="Loading options..." size="medium" />
 			</ComboboxEmptyState>
 		);
 	}

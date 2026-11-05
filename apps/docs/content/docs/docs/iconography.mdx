@@ -19,12 +19,12 @@ API.
 
 ## Size
 
-Set `size` to a curated literal key: `px16`, `px20`, `px24`, or `px32`. Each key is that many CSS
-pixels at a 16px root, emitted as `rem`.
+Set `size` to `xsmall`, `small`, `medium`, or `large`. These sizes currently map to 16, 20, 24, and
+32 CSS pixels at a 16px root. They use `rem` and scale with the root font size.
 
 <ExampleBlock src="icon/sizes" title="Icon: Sizes" />
 
-The default size is `px24`.
+The default size is `medium`.
 
 To give a group of icons the same size, put an `IconSizeProvider` around them. An icon that has its
 own `size` prop keeps that size.

@@ -448,18 +448,18 @@ const comboboxConfig = {
 		size: {
 			medium: {
 				control: {
-					blockSize: vars.controlSize.px40,
+					blockSize: vars.controlSize['40'],
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
 				},
 				textInput: {
-					blockSize: vars.controlSize.px40,
+					blockSize: vars.controlSize['40'],
 					paddingInlineEnd: vars.space['12'],
 					paddingInlineStart: vars.space['12'],
 				},
 				trigger: comboboxActionSizes.medium,
 				clearButton: comboboxActionSizes.medium,
 				loadMoreItem: {
-					minBlockSize: vars.controlSize.px40,
+					minBlockSize: vars.controlSize['40'],
 					paddingBlock: vars.space['8'],
 					paddingInline: vars.space['12'],
 				},
@@ -470,27 +470,27 @@ const comboboxConfig = {
 				item: {
 					...vars.font.label,
 					fontWeight: vars.font.weight.body,
-					minBlockSize: vars.controlSize.px40,
+					minBlockSize: vars.controlSize['40'],
 					paddingBlock: vars.space['8'],
 					paddingInline: vars.space['12'],
 				},
 			},
 			small: {
 				control: {
-					blockSize: vars.controlSize.px32,
+					blockSize: vars.controlSize['32'],
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 				},
 				textInput: {
-					blockSize: vars.controlSize.px32,
+					blockSize: vars.controlSize['32'],
 					paddingInlineEnd: vars.space['8'],
 					paddingInlineStart: vars.space['8'],
 				},
 				trigger: comboboxActionSizes.small,
 				clearButton: comboboxActionSizes.small,
 				loadMoreItem: {
-					minBlockSize: vars.controlSize.px32,
+					minBlockSize: vars.controlSize['32'],
 					paddingBlock: vars.space['4'],
 					paddingInline: vars.space['8'],
 				},
@@ -501,7 +501,7 @@ const comboboxConfig = {
 				item: {
 					...vars.font.label,
 					fontWeight: vars.font.weight.body,
-					minBlockSize: vars.controlSize.px32,
+					minBlockSize: vars.controlSize['32'],
 					paddingBlock: vars.space['4'],
 					paddingInline: vars.space['12'],
 				},

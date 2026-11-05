@@ -119,7 +119,7 @@ export function ShadowAndFinishTokens() {
 						sample={
 							<Box
 								backgroundColor="neutral.solid"
-								blockSize={vars.controlSize.px40}
+								blockSize={vars.controlSize['40']}
 								borderRadius="control"
 								inlineSize={SHADOW_FINISH_SAMPLE_SIZE}
 								style={{ backgroundImage: `var(${token.variable})` }}
@@ -191,7 +191,7 @@ function SampleControl({ label, opacity }: { label: string; opacity?: string }) 
 		<Box
 			alignItems="center"
 			backgroundColor="neutral.subtle"
-			blockSize={vars.controlSize.px32}
+			blockSize={vars.controlSize['32']}
 			borderColor="control"
 			borderRadius="control"
 			borderStyle="solid"

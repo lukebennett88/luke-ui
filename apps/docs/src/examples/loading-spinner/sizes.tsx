@@ -4,17 +4,17 @@ import { Comparison, ComparisonItem } from '#docs';
 export default () => {
 	return (
 		<Comparison align="center">
-			<ComparisonItem label="px16">
-				<LoadingSpinner aria-label="Loading" size="px16" />
+			<ComparisonItem label="xsmall">
+				<LoadingSpinner aria-label="Loading" size="xsmall" />
 			</ComparisonItem>
-			<ComparisonItem label="px20">
-				<LoadingSpinner aria-label="Loading" size="px20" />
+			<ComparisonItem label="small">
+				<LoadingSpinner aria-label="Loading" size="small" />
 			</ComparisonItem>
-			<ComparisonItem label="px24">
-				<LoadingSpinner aria-label="Loading" size="px24" />
+			<ComparisonItem label="medium">
+				<LoadingSpinner aria-label="Loading" size="medium" />
 			</ComparisonItem>
-			<ComparisonItem label="px32">
-				<LoadingSpinner aria-label="Loading" size="px32" />
+			<ComparisonItem label="large">
+				<LoadingSpinner aria-label="Loading" size="large" />
 			</ComparisonItem>
 		</Comparison>
 	);

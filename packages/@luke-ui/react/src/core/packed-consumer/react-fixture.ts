@@ -413,8 +413,8 @@ export const retainedTokens: Array<string> = [
 	vars.shadow.inset,
 	vars.shadow.overlay,
 	vars.font.body.lineHeight,
-	vars.controlSize.px32,
-	vars.controlSize.px40,
+	vars.controlSize['32'],
+	vars.controlSize['40'],
 	vars.radius.full,
 	vars.space['16'],
 	vars.interaction.disabledOpacity,
@@ -435,6 +435,10 @@ export const removedFloating = vars.color.background.surface.floating;
 export const removedFinish = vars.actionControlFinish;
 // @ts-expect-error — icon sizes are private
 export const removedIconSize = vars.iconSize;
+// @ts-expect-error — control size keys are numeric strings
+export const removedControlSizePx32 = vars.controlSize.px32;
+// @ts-expect-error — control size keys are numeric strings
+export const removedControlSizePx40 = vars.controlSize.px40;
 // @ts-expect-error — the minimum target is private
 export const removedMinTarget = vars.controlSize.minTarget;
 // @ts-expect-error — the Combobox action size is private
@@ -519,12 +523,22 @@ export const removedBoxSurface: BoxProps['backgroundColor'] = 'surface.canvas';
 // @ts-expect-error — removed with color.surface.floating
 export const removedBoxFloating: BoxProps['backgroundColor'] = 'surface.floating';
 
+// @ts-expect-error — pixel icon size aliases were removed
+export const removedIconPxSize = h(Icon, { name: 'add', size: 'px24' });
+// @ts-expect-error — numeric icon size aliases were removed
+export const removedIconNumericSize = h(Icon, { name: 'add', size: 'size.24' });
+// @ts-expect-error — border widths use semantic names
+export const removedBoxNumericBorder: BoxProps['borderWidth'] = 'border.1';
+
 // No public entrypoint exports a private structural constant or the Capsize name helper.
 type ExportNames<Entry> = Entry extends unknown ? keyof Entry : never;
 type PublicExportName = ExportNames<(typeof entries)[number]>;
 type LeakedName = Extract<
 	PublicExportName,
 	| 'ICON_SIZES'
+	| 'DEFAULT_ICON_SIZE'
+	| 'CHOICE_SIZES'
+	| 'CHECKBOX_GLYPH_SIZE'
 	| 'MIN_TARGET_SIZE'
 	| 'COMBOBOX_ACTION_SIZE'
 	| 'CONTROL_SIZE_VALUES'
