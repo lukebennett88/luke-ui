@@ -172,36 +172,39 @@ describe.skipIf(themes.length === 0)('the packed theme packages', () => {
 				{ timeout: 60_000 },
 				async () => {
 					const server = await serveBuild(dir);
-					const browser = await chromium.launch();
 					try {
-						const page = await browser.newPage();
-						const problems: Array<string> = [];
-						page.on('console', (message) => {
-							if (['error', 'warning'].includes(message.type())) problems.push(message.text());
-						});
-						page.on('pageerror', (error) => problems.push(String(error)));
-						await page.goto(`${server.url}installation.html`);
-						const button = page.getByRole('button', { name: 'Continue' });
-						await button.waitFor();
+						const browser = await chromium.launch();
+						try {
+							const page = await browser.newPage();
+							const problems: Array<string> = [];
+							page.on('console', (message) => {
+								if (['error', 'warning'].includes(message.type())) problems.push(message.text());
+							});
+							page.on('pageerror', (error) => problems.push(String(error)));
+							await page.goto(`${server.url}installation.html`);
+							const button = page.getByRole('button', { name: 'Continue' });
+							await button.waitFor();
 
-						const rendered = await page.evaluate(() => {
-							const probe = document.body.appendChild(document.createElement('span'));
-							probe.style.backgroundColor = 'var(--luke-color-background-surface-base)';
-							const surface = getComputedStyle(probe).backgroundColor;
-							probe.remove();
-							return {
-								bodyBackground: getComputedStyle(document.body).backgroundColor,
-								bodyFont: getComputedStyle(document.body).fontFamily,
-								surface,
-								text: document.getElementById('root')?.textContent,
-							};
-						});
-						expect(problems).toEqual([]);
-						expect(rendered.text).toContain('Welcome to Luke UI.');
-						expect(rendered.bodyBackground).toBe(rendered.surface);
-						expect(rendered.bodyFont).toContain('Inter');
+							const rendered = await page.evaluate(() => {
+								const probe = document.body.appendChild(document.createElement('span'));
+								probe.style.backgroundColor = 'var(--luke-color-background-surface-base)';
+								const surface = getComputedStyle(probe).backgroundColor;
+								probe.remove();
+								return {
+									bodyBackground: getComputedStyle(document.body).backgroundColor,
+									bodyFont: getComputedStyle(document.body).fontFamily,
+									surface,
+									text: document.getElementById('root')?.textContent,
+								};
+							});
+							expect(problems).toEqual([]);
+							expect(rendered.text).toContain('Welcome to Luke UI.');
+							expect(rendered.bodyBackground).toBe(rendered.surface);
+							expect(rendered.bodyFont).toContain('Inter');
+						} finally {
+							await browser.close();
+						}
 					} finally {
-						await browser.close();
 						await server.close();
 					}
 				},
