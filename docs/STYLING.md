@@ -489,6 +489,13 @@ The guarantee covers surfaces painted through `Box` or `surfaceStyle()`. A surfa
 with raw `vars` sets no private properties, so a low Button inside it paints the nearest managed
 surface's colour, not the raw one.
 
+A high Button keeps its own solid pairing on every surface. A neutral high Button on `accent.solid`,
+or a danger high Button on `danger.solid`, therefore paints its parent's fill, the same fill a low
+Button paints there. Tactile's control finish and shadows can still set the two apart. This is a
+known visual limitation that Luke UI deliberately leaves unaddressed, because the explored
+treatments were not worth their complexity. The decision record is
+[research/1023-same-role-high-buttons.md](../research/1023-same-role-high-buttons.md).
+
 Text a component draws on whatever surface surrounds it, such as a field's label, description, and
 error, a text action, or a native link in Prose, reads `contextualForeground`. Its `state` argument
 gives a role's hover or pressed hue, which collapses to on-solid colour on a solid fill.
