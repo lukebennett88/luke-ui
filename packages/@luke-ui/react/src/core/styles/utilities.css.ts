@@ -23,7 +23,7 @@ const spaceScale = {
 const marginScale = { ...spaceScale, auto: 'auto' } as const;
 
 /** Border widths offered by the design system. */
-const borderWidthScale = { none: '0', 'border.1': '1px', 'border.2': '2px' } as const;
+const borderWidthScale = { none: '0', thin: '1px', thick: '2px' } as const;
 
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
 

@@ -1,6 +1,3 @@
-import { literalScale } from '../../theme/literal-scale.js';
-import type { IconSize } from '../types/icon-size.js';
-
 /** Shared viewBox size for icon SVGs. */
 export const ICON_VIEWBOX_SIZE = 24;
 
@@ -19,12 +16,13 @@ export const SPINNER_STROKE_WIDTH = 2;
 /** Radius inset by half stroke so the stroke's outer edge aligns with icon content (19px). */
 export const SPINNER_CIRCLE_RADIUS = (ICON_CONTENT_SIZE - SPINNER_STROKE_WIDTH) / 2;
 
-/**
- * Inline and block size for each `Icon` size step. Keys and `rem` values come from the same
- * numbers at a 16px root: 16, 20, 24, and 32px. Private geometry: components size their own icon
- * slots from it.
- */
-export const ICON_SIZES = literalScale('size.', [16, 20, 24, 32] as const) satisfies Record<
-	IconSize,
-	string
->;
+/** Inline and block sizes for icons and spinners. */
+export const ICON_SIZES = {
+	xsmall: '1rem',
+	small: '1.25rem',
+	medium: '1.5rem',
+	large: '2rem',
+} as const;
+
+export type IconSize = keyof typeof ICON_SIZES;
+export const DEFAULT_ICON_SIZE: IconSize = 'medium';

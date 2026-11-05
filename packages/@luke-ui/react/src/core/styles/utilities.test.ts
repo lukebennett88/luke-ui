@@ -196,12 +196,12 @@ test('backgroundColor rejects anything but a namespaced role or surface token', 
 
 test('border props reject CSS values outside the design system vocabulary', () => {
 	assertType<UtilityProps['borderWidth']>('none');
-	assertType<UtilityProps['borderWidth']>('border.1');
-	assertType<UtilityProps['borderWidth']>('border.2');
-	// @ts-expect-error — replaced by border.1
 	assertType<UtilityProps['borderWidth']>('thin');
-	// @ts-expect-error — replaced by border.2
 	assertType<UtilityProps['borderWidth']>('thick');
+	// @ts-expect-error — numeric border tokens are not supported
+	assertType<UtilityProps['borderWidth']>('border.1');
+	// @ts-expect-error — numeric border tokens are not supported
+	assertType<UtilityProps['borderWidth']>('border.2');
 	// @ts-expect-error — CSS-wide keyword
 	assertType<UtilityProps['borderWidth']>('revert-layer');
 	// @ts-expect-error — a raw length, not one of the named widths

@@ -5,7 +5,7 @@ import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { interactionTintVarName } from '../../../theme/interaction-tint-vars.js';
-import { ICON_SIZES } from '../../sizing/icon-sizing.js';
+import { CHOICE_SIZES } from '../../sizing/choice-sizing.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import { INTERACTION_STATE_LAYER_PROPERTY } from '../../styles/interaction-state-layer.js';
 import { interactionStateLayer } from '../../styles/state-layer.css.js';
@@ -53,12 +53,12 @@ export const choiceControl = {
 export const choiceSizeVars = {
 	medium: {
 		[controlSize]: FONT_METRIC_SCALE[16].lineHeight,
-		[indicatorSize]: ICON_SIZES['size.20'],
+		[indicatorSize]: CHOICE_SIZES.medium,
 		[inlineFieldIndent]: `calc(${controlSize} + ${inlineControlGap})`,
 	},
 	small: {
-		[controlSize]: ICON_SIZES['size.20'],
-		[indicatorSize]: ICON_SIZES['size.16'],
+		[controlSize]: CHOICE_SIZES.medium,
+		[indicatorSize]: CHOICE_SIZES.small,
 		[inlineFieldIndent]: `calc(${controlSize} + ${inlineControlGap})`,
 	},
 } as const;

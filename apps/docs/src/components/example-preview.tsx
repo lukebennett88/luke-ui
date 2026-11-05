@@ -118,7 +118,7 @@ function ExamplePreviewResizeGrip() {
 			blockSize={GRIP_BLOCK_SIZE}
 			borderRadius="full"
 			borderStyle="solid"
-			borderWidth="border.1"
+			borderWidth="thin"
 			className={styles.previewGripState}
 			data-example-preview-grip
 			display="flex"

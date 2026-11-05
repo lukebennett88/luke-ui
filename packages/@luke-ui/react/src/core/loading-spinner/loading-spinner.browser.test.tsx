@@ -24,7 +24,7 @@ const rowStyle = {
 	gap: '1rem',
 } satisfies CSSProperties;
 
-const sizes = variantValuesFor<typeof LoadingSpinner, 'size'>()(['size.20', 'size.24', 'size.32']);
+const sizes = variantValuesFor<typeof LoadingSpinner, 'size'>()(['small', 'medium', 'large']);
 const colors = variantValuesFor<typeof LoadingSpinner, 'color'>()(['primary', 'info', 'danger']);
 
 const fixedChildStyle = {

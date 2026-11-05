@@ -21,10 +21,10 @@ import * as referenceStyles from './reference-table.css.js';
 type GalleryIconSize = NonNullable<IconProps['size']>;
 
 const SIZE_OPTIONS = [
-	{ label: 'size.16', value: 'size.16' },
-	{ label: 'size.20', value: 'size.20' },
-	{ label: 'size.24', value: 'size.24' },
-	{ label: 'size.32', value: 'size.32' },
+	{ label: 'xsmall', value: 'xsmall' },
+	{ label: 'small', value: 'small' },
+	{ label: 'medium', value: 'medium' },
+	{ label: 'large', value: 'large' },
 ] as const satisfies ReadonlyArray<{ label: string; value: GalleryIconSize }>;
 
 /** How long a copy button shows its "Copied"/error feedback before reverting. */
@@ -42,7 +42,7 @@ interface CopyStatus {
 /** Searchable index of the first-party icon set, sized at the token you'll ship it at. */
 export function IconGallery(): JSX.Element {
 	const [filter, setFilter] = useState('');
-	const [previewSize, setPreviewSize] = useState<GalleryIconSize>('size.24');
+	const [previewSize, setPreviewSize] = useState<GalleryIconSize>('medium');
 	const [copyState, dispatchCopy] = useReducer(copyReducer, {
 		announcement: '',
 		status: null,
@@ -119,7 +119,7 @@ export function IconGallery(): JSX.Element {
 								inputRef={inputRef}
 								onChange={setFilter}
 								placeholder="Filter by name"
-								prefix={<Icon name="search" size="size.20" />}
+								prefix={<Icon name="search" size="small" />}
 								size="small"
 								value={filter}
 							/>
@@ -149,7 +149,7 @@ export function IconGallery(): JSX.Element {
 					borderColor="decorative"
 					borderRadius="surface"
 					borderStyle="solid"
-					borderWidth="border.1"
+					borderWidth="thin"
 					overflow="hidden"
 				>
 					<Grid columns="repeat(auto-fit, minmax(min(8rem, 100%), 1fr))">

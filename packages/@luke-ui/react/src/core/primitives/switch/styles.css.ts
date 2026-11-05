@@ -1,6 +1,6 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
-import { ICON_SIZES } from '../../sizing/icon-sizing.js';
+import { CHOICE_SIZES } from '../../sizing/choice-sizing.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
@@ -210,8 +210,8 @@ const switchConfig = {
 	},
 	variants: {
 		size: {
-			medium: { root: sizeVars(ICON_SIZES['size.20']) },
-			small: { root: sizeVars(ICON_SIZES['size.16']) },
+			medium: { root: sizeVars(CHOICE_SIZES.medium) },
+			small: { root: sizeVars(CHOICE_SIZES.small) },
 		},
 	},
 } as const satisfies SlottedConfigInput;

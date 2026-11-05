@@ -10,7 +10,7 @@ export default () => {
 				borderColor="decorative"
 				borderRadius="detail"
 				borderStyle="solid"
-				borderWidth="border.1"
+				borderWidth="thin"
 				padding="space.16"
 			>
 				Content stays centred with a maximum inline size of <Code>42rem</Code>.

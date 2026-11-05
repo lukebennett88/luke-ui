@@ -9,7 +9,7 @@ export default () => {
 			backgroundColor="surface.subdued"
 			borderColor="decorative"
 			borderStyle="solid"
-			borderWidth="border.1"
+			borderWidth="thin"
 			padding="space.24"
 		>
 			<Stack gap="space.16">

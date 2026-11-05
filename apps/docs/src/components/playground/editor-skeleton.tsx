@@ -91,7 +91,7 @@ export function LoadingPill({ label }: { label: string }) {
 	return (
 		<Lockup className={styles.loadingPill} gap="space.8">
 			<LockupRail>
-				<LoadingSpinner aria-hidden size="size.20" />
+				<LoadingSpinner aria-hidden size="small" />
 			</LockupRail>
 			<LockupBody>{label}</LockupBody>
 		</Lockup>

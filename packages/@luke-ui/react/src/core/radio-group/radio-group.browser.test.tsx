@@ -381,6 +381,9 @@ test('the label gap and control width follow Checkbox at each size', () => {
 			.element()
 			.closest('label');
 		if (checkboxLabel == null) throw new Error('Expected the checkbox label.');
+		const indicator = checkboxLabel.querySelector<HTMLElement>('[aria-hidden="true"]');
+		if (indicator == null) throw new Error('Expected the checkbox indicator.');
+		expect(indicator.getBoundingClientRect().width).toBe(size === 'small' ? 16 : 20);
 		expect(offset(radioLabel)).toBe(offset(checkboxLabel));
 	}
 });

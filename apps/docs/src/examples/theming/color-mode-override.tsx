@@ -34,7 +34,7 @@ export default () => {
 					borderColor="decorative"
 					borderRadius="surface"
 					borderStyle="solid"
-					borderWidth="border.1"
+					borderWidth="thin"
 					padding="space.16"
 				>
 					<Text>This panel follows the parent mode.</Text>
@@ -44,7 +44,7 @@ export default () => {
 					borderColor="decorative"
 					borderRadius="surface"
 					borderStyle="solid"
-					borderWidth="border.1"
+					borderWidth="thin"
 					data-color-mode="dark"
 					padding="space.16"
 				>

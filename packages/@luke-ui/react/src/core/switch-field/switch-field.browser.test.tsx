@@ -77,6 +77,21 @@ function controlFor(input: HTMLInputElement): HTMLElement {
 	return control;
 }
 
+for (const [size, height] of [
+	['small', 16],
+	['medium', 20],
+] as const) {
+	test(`the ${size} switch retains its track dimensions`, () => {
+		const { locator } = render(<SwitchField label="Notifications" size={size} />);
+		const input = locator
+			.getByRole('switch', { name: 'Notifications' })
+			.element() as HTMLInputElement;
+		const track = controlFor(input).getBoundingClientRect();
+		expect(track.height).toBe(height);
+		expect(track.width).toBe(height * 1.75);
+	});
+}
+
 test('SwitchField resolves ref to the root, inputRef to the input, and joins a form', async () => {
 	const ref = createRef<HTMLDivElement>();
 	const inputRef = createRef<HTMLInputElement>();

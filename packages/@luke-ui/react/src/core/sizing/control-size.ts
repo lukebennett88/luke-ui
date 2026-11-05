@@ -1,15 +1,15 @@
-import type { IconSize } from '../types/icon-size.js';
+import type { IconSize } from './icon-sizing.js';
 
 /** Complete recipe sizes shared by compatible controls and actions. */
 export type ControlSize = 'small' | 'medium';
 
 /**
- * Maps field control size to the icon size those controls provide: `size.16` icons at `small`, and
- * `size.20` icons at `medium`.
+ * Maps field control size to the icon size those controls provide: `xsmall` icons at `small`, and
+ * `small` icons at `medium`.
  */
 export const FIELD_CONTROL_ICON_SIZE: Record<ControlSize, IconSize> = {
-	small: 'size.16',
-	medium: 'size.20',
+	small: 'xsmall',
+	medium: 'small',
 };
 
 /**

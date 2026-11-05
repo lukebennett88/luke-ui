@@ -2,6 +2,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { useId } from 'react';
 import { useIconSizeContext } from '../icon/icon-size-context.js';
 import {
+	DEFAULT_ICON_SIZE,
 	ICON_VIEWBOX,
 	ICON_VIEWBOX_SIZE,
 	SPINNER_CIRCLE_RADIUS,
@@ -21,7 +22,7 @@ interface LoadingSpinnerStyleProps {
 	color?: LoadingSpinnerVariantProps['color'];
 	/**
 	 * Sets the spinner size.
-	 * @default 'size.24'
+	 * @default 'medium'
 	 */
 	size?: LoadingSpinnerVariantProps['size'];
 }
@@ -60,7 +61,7 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 	} = props;
 
 	const contextSize = useIconSizeContext();
-	const resolvedSize = size ?? contextSize ?? 'size.24';
+	const resolvedSize = size ?? contextSize ?? DEFAULT_ICON_SIZE;
 
 	if (!isLoading) return children;
 

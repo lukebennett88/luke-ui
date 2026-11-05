@@ -79,7 +79,7 @@ function ColorSample({
 					borderColor="control"
 					borderRadius="detail"
 					borderStyle="solid"
-					borderWidth="border.1"
+					borderWidth="thin"
 					inlineSize={SAMPLE_INLINE_SIZE}
 					style={{ backgroundColor: value }}
 				/>
@@ -117,7 +117,7 @@ function ColorSample({
 					blockSize={SAMPLE_BLOCK_SIZE}
 					borderRadius="detail"
 					borderStyle="solid"
-					borderWidth="border.2"
+					borderWidth="thick"
 					inlineSize={SAMPLE_INLINE_SIZE}
 					style={{ borderColor: value }}
 				/>
@@ -136,7 +136,7 @@ function BackdropSample({ value }: { value: string }) {
 			borderColor="decorative"
 			borderRadius="detail"
 			borderStyle="solid"
-			borderWidth="border.1"
+			borderWidth="thin"
 			display="flex"
 			inlineSize={SAMPLE_INLINE_SIZE}
 			overflow="hidden"

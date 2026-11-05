@@ -152,7 +152,7 @@ function PropGroup({
 							aria-hidden
 							className={disclosureStyles.chevronEnd}
 							name="chevronRight"
-							size="size.16"
+							size="xsmall"
 						/>
 						<CellText fontWeight="emphasis">{group.name}</CellText>
 					</Cluster>

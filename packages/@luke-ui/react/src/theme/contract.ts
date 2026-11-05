@@ -56,7 +56,7 @@ const fontStyleContract = Object.fromEntries(
 	typeStyles.map((style) => [style, { ...typeStyle }]),
 ) as { readonly [Style in TypeStyle]: typeof typeStyle };
 
-/** Fixed spacing measurements. Numeric keys and rem values derive from the same steps. */
+/** Spacing in rem. Numeric keys reference CSS pixels at a 16px root. */
 export const spaceScale = literalScale('', [4, 8, 12, 16, 24, 32, 40, 48, 64, 96] as const);
 
 /** Numeric key in the spacing variable contract. */
@@ -171,9 +171,9 @@ export const themeContractTree = {
 		overlay: null,
 		full: null,
 	},
-	/** The fixed spacing scale used by components and layout utilities. */
+	/** Spacing in rem that scales with the root font size. */
 	space: spaceContract as { readonly [Step in SpaceStep]: null },
-	/** Structural block sizes for 32px and 40px controls. */
+	/** Structural block sizes in rem, equivalent to 32px and 40px at a 16px root. */
 	controlSize: {
 		'32': null,
 		'40': null,

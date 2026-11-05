@@ -21,7 +21,7 @@ const rowStyle = {
 	gap: '1rem',
 } satisfies CSSProperties;
 
-const sizes = variantValuesFor<typeof Icon, 'size'>()(['size.16', 'size.20', 'size.24', 'size.32']);
+const sizes = variantValuesFor<typeof Icon, 'size'>()(['xsmall', 'small', 'medium', 'large']);
 const names = variantValuesFor<typeof Icon, 'name'>()([
 	'add',
 	'checkCircle',
@@ -37,11 +37,15 @@ test('icon and spinner sizes use the explicit size, then context, then the defau
 		<>
 			<Icon name="add" title="Default icon" />
 			<LoadingSpinner aria-label="Default spinner" />
-			<IconSizeProvider size="size.20">
+			<IconSizeProvider size="small">
 				<CustomIcon title="Context icon" />
 				<LoadingSpinner aria-label="Context spinner" />
-				<Icon name="add" size="size.16" title="Explicit icon" />
-				<LoadingSpinner aria-label="Explicit spinner" size="size.32" />
+				<Icon name="add" size="xsmall" title="Explicit icon" />
+				<LoadingSpinner aria-label="Explicit spinner" size="large" />
+				<IconSizeProvider size="large">
+					<Icon name="add" title="Nested icon" />
+					<LoadingSpinner aria-label="Nested spinner" />
+				</IconSizeProvider>
 			</IconSizeProvider>
 		</>,
 	);
@@ -53,12 +57,38 @@ test('icon and spinner sizes use the explicit size, then context, then the defau
 		['status', 'Context spinner', 20],
 		['img', 'Explicit icon', 16],
 		['status', 'Explicit spinner', 32],
+		['img', 'Nested icon', 32],
+		['status', 'Nested spinner', 32],
 	] as const) {
 		const element = locator.getByRole(role, { name }).element();
 		expect(getComputedStyle(element).inlineSize).toBe(`${size}px`);
 		expect(getComputedStyle(element).blockSize).toBe(`${size}px`);
 	}
 });
+
+for (const [size, pixels] of [
+	['xsmall', 16],
+	['small', 20],
+	['medium', 24],
+	['large', 32],
+] as const) {
+	test(`Icon and LoadingSpinner share the ${size} dimensions`, () => {
+		const { locator } = render(
+			<>
+				<Icon name="add" size={size} title="Icon" />
+				<LoadingSpinner aria-label="Spinner" size={size} />
+			</>,
+		);
+		for (const [role, name] of [
+			['img', 'Icon'],
+			['status', 'Spinner'],
+		] as const) {
+			const style = getComputedStyle(locator.getByRole(role, { name }).element());
+			expect(style.inlineSize).toBe(`${pixels}px`);
+			expect(style.blockSize).toBe(`${pixels}px`);
+		}
+	});
+}
 
 function IconScene() {
 	return (

@@ -8,7 +8,7 @@ export default () => {
 			backgroundColor="surface.subdued"
 			borderColor="decorative"
 			borderStyle="solid"
-			borderWidth="border.1"
+			borderWidth="thin"
 			padding="space.16"
 		>
 			<Bleed inlineStart="space.16">

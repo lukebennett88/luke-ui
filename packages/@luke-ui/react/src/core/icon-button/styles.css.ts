@@ -1,3 +1,4 @@
+import { BUTTON_ICON_SIZE } from '../sizing/button-sizing.js';
 import { ICON_SIZES } from '../sizing/icon-sizing.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 
@@ -14,6 +15,6 @@ export const iconOnlyIconWrapper = style({
  * graphic box directly for a hand-authored custom icon such as a brand mark.
  */
 globalStyleInLayer('recipes', `${iconOnlyIconWrapper} > svg`, {
-	blockSize: ICON_SIZES['size.16'],
-	inlineSize: ICON_SIZES['size.16'],
+	blockSize: ICON_SIZES[BUTTON_ICON_SIZE],
+	inlineSize: ICON_SIZES[BUTTON_ICON_SIZE],
 });

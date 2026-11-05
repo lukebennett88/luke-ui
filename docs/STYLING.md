@@ -408,15 +408,16 @@ Spacing and gap properties accept `"0"` or namespaced tokens such as `space.16`.
 
 `vars.space['16']` is a fixed reference measurement: 1rem, or 16px at a 16px root. Generate the
 numeric keys and values together with `literalScale('', steps)`. Utilities add the `space.`
-namespace to those keys. Zero stays outside `vars.space`. Themes cannot redefine the numeric steps.
-This supersedes the spacing naming policy in
+namespace to those keys. These measurements scale with the root font size. Zero stays outside
+`vars.space`. Themes cannot redefine the numeric steps. This supersedes the spacing naming policy in
 [#761](https://github.com/lukebennett88/luke-ui/issues/761). Keep logical properties and `bp*`
 responsive conditions. Do not add `px`/`py` padding shorthands.
 
 Container accepts only `container.448`, `container.672`, `container.896`, `container.1152`, and
 `container.1280` presets. They select fixed `rem` maximum inline sizes and establish a local
-container-query boundary. Use Box for arbitrary widths. Container presets do not need a separate
-theme variable family.
+container-query boundary. Their numeric suffixes reference CSS pixels at a 16px root, and their
+maximum inline sizes scale with the root font size. Use Box for arbitrary widths. Container presets
+do not need a separate theme variable family.
 
 ### Control recipe sizes
 
@@ -436,12 +437,15 @@ Independent Dialog surfaces must establish their own default, normally `medium`,
 [#799](https://github.com/lukebennett88/luke-ui/issues/799). They must not inherit a trigger's
 control-size default accidentally.
 
-Physical `vars.controlSize` tokens use numeric keys. Build literal scales with `literalScale` in
+`vars.controlSize` tokens use numeric keys that reference CSS pixels at a 16px root. Their `rem`
+values scale with the root font size. Build literal scales with `literalScale` in
 `theme/literal-scale.ts` so numeric keys and `rem` values cannot drift. Responsive conditions keep
 `bp*` names.
 
-Buttons provide `size.16` icons and spinners at both recipe sizes. Field controls provide `size.16`
-icons at `small` and `size.20` icons at `medium`. Explicit `Icon.size` overrides win over context.
+Buttons provide `xsmall` icons and spinners at both recipe sizes. Field controls provide `xsmall`
+icons at `small` and `small` icons at `medium`. Explicit `Icon.size` overrides win over context.
+Icon and spinner sizes are semantic: `xsmall`, `small`, `medium`, and `large` currently map to 16,
+20, 24, and 32 CSS pixels at a 16px root. They use `rem` and scale with the root font size.
 
 ### Surface pairing
 

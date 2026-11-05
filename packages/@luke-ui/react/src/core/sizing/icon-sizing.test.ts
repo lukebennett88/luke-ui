@@ -1,9 +1,6 @@
-import { describe, expect, it } from 'vite-plus/test';
-import { literalScale } from '../../theme/literal-scale.js';
+import { expect, test } from 'vite-plus/test';
 import { ICON_SIZES } from './icon-sizing.js';
 
-describe('ICON_SIZES', () => {
-	it('matches literalScale so keys cannot drift from rem values', () => {
-		expect(ICON_SIZES).toEqual(literalScale('size.', [16, 20, 24, 32] as const));
-	});
+test('icon sizes keep their current rem dimensions', () => {
+	expect(ICON_SIZES).toEqual({ xsmall: '1rem', small: '1.25rem', medium: '1.5rem', large: '2rem' });
 });

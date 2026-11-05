@@ -142,7 +142,7 @@ export function SettingsLayout() {
 								marginBlockEnd="space.16"
 							>
 								<RouterLink className={styles.mobileHeaderLink} to="/settings/menu">
-									<Icon name="chevronLeft" size="size.16" />
+									<Icon name="chevronLeft" size="xsmall" />
 									Settings
 								</RouterLink>
 							</Box>

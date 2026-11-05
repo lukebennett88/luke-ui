@@ -70,7 +70,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 	return (
 		<DialogTrigger isOpen={isOpen} onOpenChange={handleOpenChange}>
 			<RacButton aria-label="Change email" className={styles.emailEditButton}>
-				<Icon aria-hidden="true" name="edit" size="size.16" />
+				<Icon aria-hidden="true" name="edit" size="xsmall" />
 			</RacButton>
 			<ModalOverlay
 				className={styles.dialogOverlay}

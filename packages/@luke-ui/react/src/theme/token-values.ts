@@ -17,7 +17,7 @@ import { typeStyleMetricStep, typeStyles } from './type-styles.js';
 
 const controlSizeScale = literalScale('', [32, 40] as const);
 
-/** Structural block sizes for the 32px and 40px controls. */
+/** Structural block sizes in rem, equivalent to 32px and 40px at a 16px root. */
 export const CONTROL_SIZE_VALUES: {
 	[Path in Extract<IdentityPath, `controlSize.${string}`>]: string;
 } = pathRecord(

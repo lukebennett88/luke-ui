@@ -62,7 +62,7 @@ export function RadiusTokens() {
 								blockSize={RADIUS_SAMPLE_SIZE}
 								borderColor="decorative"
 								borderStyle="solid"
-								borderWidth="border.1"
+								borderWidth="thin"
 								inlineSize={RADIUS_SAMPLE_SIZE}
 								style={{ borderRadius: `var(${token.variable})` }}
 							/>
@@ -148,7 +148,7 @@ export function SizingTokens() {
 								borderColor="decorative"
 								borderRadius="control"
 								borderStyle="solid"
-								borderWidth="border.1"
+								borderWidth="thin"
 								inlineSize="4rem"
 								style={{ blockSize: `var(${token.variable})` }}
 							/>
@@ -195,7 +195,7 @@ function SampleControl({ label, opacity }: { label: string; opacity?: string }) 
 			borderColor="control"
 			borderRadius="control"
 			borderStyle="solid"
-			borderWidth="border.1"
+			borderWidth="thin"
 			display="flex"
 			paddingInline="space.8"
 			style={opacity === undefined ? undefined : { opacity }}

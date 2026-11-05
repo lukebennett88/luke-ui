@@ -1,24 +1,24 @@
-import { ICON_SIZES } from '../sizing/icon-sizing.js';
+import { DEFAULT_ICON_SIZE, ICON_SIZES } from '../sizing/icon-sizing.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /** Shared size dimensions for Icon and LoadingSpinner (icon-aligned sizing). */
 export const iconSizeVariants = {
-	'size.32': {
-		blockSize: ICON_SIZES['size.32'],
-		inlineSize: ICON_SIZES['size.32'],
+	large: {
+		blockSize: ICON_SIZES.large,
+		inlineSize: ICON_SIZES.large,
 	},
-	'size.24': {
-		blockSize: ICON_SIZES['size.24'],
-		inlineSize: ICON_SIZES['size.24'],
+	medium: {
+		blockSize: ICON_SIZES.medium,
+		inlineSize: ICON_SIZES.medium,
 	},
-	'size.20': {
-		blockSize: ICON_SIZES['size.20'],
-		inlineSize: ICON_SIZES['size.20'],
+	small: {
+		blockSize: ICON_SIZES.small,
+		inlineSize: ICON_SIZES.small,
 	},
-	'size.16': {
-		blockSize: ICON_SIZES['size.16'],
-		inlineSize: ICON_SIZES['size.16'],
+	xsmall: {
+		blockSize: ICON_SIZES.xsmall,
+		inlineSize: ICON_SIZES.xsmall,
 	},
 } as const;
 
@@ -28,7 +28,7 @@ export const iconRecipe = recipe({
 		flexShrink: 0,
 	},
 	defaultVariants: {
-		size: 'size.24',
+		size: DEFAULT_ICON_SIZE,
 	},
 	variants: {
 		size: iconSizeVariants,

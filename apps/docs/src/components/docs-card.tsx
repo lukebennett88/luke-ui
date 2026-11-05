@@ -27,7 +27,7 @@ export function DocsCardLink({ align = 'start', children, href }: DocsCardLinkPr
 			borderColor="decorative"
 			borderRadius="surface"
 			borderStyle="solid"
-			borderWidth="border.1"
+			borderWidth="thin"
 			className={cx(styles.cardLink, align === 'end' && styles.cardLinkAlignEnd)}
 			minInlineSize="0"
 			padding="space.16"

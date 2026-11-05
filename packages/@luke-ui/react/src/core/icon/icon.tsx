@@ -1,7 +1,7 @@
 import type { JSX, ReactNode, SVGAttributes } from 'react';
 import { createContext, useContext } from 'react';
 import { iconNames, iconViewBoxes } from '../../../.generated/icon-data.js';
-import { ICON_VIEWBOX } from '../sizing/icon-sizing.js';
+import { DEFAULT_ICON_SIZE, ICON_VIEWBOX } from '../sizing/icon-sizing.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { useIconSizeContext } from './icon-size-context.js';
@@ -19,7 +19,7 @@ interface IconVariantProps extends NonNullable<IconRecipeVariants> {}
 interface IconStyleProps {
 	/**
 	 * Sets the icon size.
-	 * @default 'size.24'
+	 * @default 'medium'
 	 */
 	size?: IconVariantProps['size'];
 }
@@ -80,7 +80,7 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 			viewBox ?? (typeof defaultViewBox === 'function' ? defaultViewBox(props) : defaultViewBox);
 		const resolvedPath = typeof path === 'function' ? path(props) : path;
 		const contextSize = useIconSizeContext();
-		const resolvedSize = size ?? contextSize ?? 'size.24';
+		const resolvedSize = size ?? contextSize ?? DEFAULT_ICON_SIZE;
 
 		const svgProps: React.SVGProps<SVGSVGElement> = {
 			'aria-hidden': ariaHidden,

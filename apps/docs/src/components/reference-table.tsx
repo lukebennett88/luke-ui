@@ -38,7 +38,7 @@ export function ReferenceTableFrame({
 				borderColor="decorative"
 				borderRadius="surface"
 				borderStyle="solid"
-				borderWidth="border.1"
+				borderWidth="thin"
 				className={styles.table}
 				inlineSize="100%"
 				overflow="hidden"

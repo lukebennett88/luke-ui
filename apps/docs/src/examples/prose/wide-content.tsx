@@ -9,7 +9,7 @@ export default () => {
 			borderColor="decorative"
 			borderRadius="detail"
 			borderStyle="solid"
-			borderWidth="border.1"
+			borderWidth="thin"
 			maxInlineSize="18rem"
 			padding="space.12"
 		>

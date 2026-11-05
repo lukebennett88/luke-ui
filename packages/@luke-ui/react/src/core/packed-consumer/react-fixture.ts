@@ -523,12 +523,22 @@ export const removedBoxSurface: BoxProps['backgroundColor'] = 'surface.canvas';
 // @ts-expect-error — removed with color.surface.floating
 export const removedBoxFloating: BoxProps['backgroundColor'] = 'surface.floating';
 
+// @ts-expect-error — pixel icon size aliases were removed
+export const removedIconPxSize = h(Icon, { name: 'add', size: 'px24' });
+// @ts-expect-error — numeric icon size aliases were removed
+export const removedIconNumericSize = h(Icon, { name: 'add', size: 'size.24' });
+// @ts-expect-error — border widths use semantic names
+export const removedBoxNumericBorder: BoxProps['borderWidth'] = 'border.1';
+
 // No public entrypoint exports a private structural constant or the Capsize name helper.
 type ExportNames<Entry> = Entry extends unknown ? keyof Entry : never;
 type PublicExportName = ExportNames<(typeof entries)[number]>;
 type LeakedName = Extract<
 	PublicExportName,
 	| 'ICON_SIZES'
+	| 'DEFAULT_ICON_SIZE'
+	| 'CHOICE_SIZES'
+	| 'CHECKBOX_GLYPH_SIZE'
 	| 'MIN_TARGET_SIZE'
 	| 'COMBOBOX_ACTION_SIZE'
 	| 'CONTROL_SIZE_VALUES'
