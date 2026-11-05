@@ -182,6 +182,7 @@ function tsconfig(module: string, moduleResolution: string, files: Array<string>
 	return JSON.stringify(
 		{
 			compilerOptions: {
+				allowImportingTsExtensions: true,
 				jsx: 'react-jsx',
 				lib: ['es2022', 'dom', 'dom.iterable'],
 				module,

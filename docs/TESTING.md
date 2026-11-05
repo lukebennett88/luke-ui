@@ -188,9 +188,10 @@ Tactile, installs the tarballs with npm in directories outside the repository, s
 can satisfy an import, and builds each consumer once. The scenarios read those consumers and never
 install or build. `react-package.test.ts` covers React, `theme-packages.test.ts` the theme packages,
 and `fonts.test.ts` font loading and Capsize trims. The consumer files they need live in
-`react-fixture.ts` and `theme-fixture.ts`. The comprehensive `pnpm test` includes the harness and
-requires network access. Run it separately with `pnpm test:consumer`. The `consumer-tests` CI job
-runs it on every pull request and on `main`.
+`react-fixture.ts` and `theme-fixture.ts`. The theme consumer also builds the Installation guide's
+page and modules verbatim, and the theme tests render that app in Chromium. The comprehensive
+`pnpm test` includes the harness and requires network access. Run it separately with
+`pnpm test:consumer`. The `consumer-tests` CI job runs it on every pull request and on `main`.
 
 Keep it to the package boundary: tarball contents, dependencies, peers, assets, server rendering, a
 client build, hydration in Chromium, type checking, and what small imports bundle. Check installed
