@@ -61,10 +61,10 @@ border tokens. Choose a role for what the colour communicates:
 - `warning`: needs attention but has not failed and is not dangerous.
 - `danger`: harm, failure, invalidity, or a critical condition.
 
-Select a role to compare the same semantic token pairs in light and dark mode. The notice content
-stays constant, so only the role and mode change its colours.
+Select a role to compare the same semantic token pairs. Change the document's colour mode to see the
+pairs in light and dark mode.
 
-<ExampleBlock src="overview/role-colours" title="Colour: Roles and modes" />
+<ExampleBlock src="overview/role-colours" title="Colour: Roles" />
 
 ### Background and foreground
 
@@ -137,7 +137,6 @@ A role keeps its hue on another role's subtle fill. The theme compiler checks ev
 table at 4.5:1 in both colour modes, and a theme that misses one does not compile. Pairings outside
 the table are not checked, such as disabled text and text on a background from your own CSS. A
 nested background sets a new context. A `Box` without `backgroundColor` keeps the surrounding one.
-An element with `data-color-mode` sets the context again in its own mode.
 
 `Box` takes each role's resting `subtle` and `solid` fill. `backgroundColor="accent.solid"` paints
 `vars.color.background.accent.solid.rest`, and Box values never carry a state suffix. Interactive

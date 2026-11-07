@@ -1,38 +1,46 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-/**
- * Local copy-feedback hook for docs chrome —
- * the hook is 24 lines and has no dependencies of its own.
- *
- * Tracks a transient "copied" state that flips back to `false` after 1.5s.
- * Deliberately has no `onRejected` handler: if `onCopy` rejects, `checked`
- * stays `false` instead of claiming success. Do not add a `.catch()` here —
- * see `page-actions.tsx` for why callers rely on this to surface failures.
- */
-export function useCopyButton(onCopy: () => unknown): readonly [boolean, () => void] {
-	const [checked, setChecked] = useState(false);
+/** Tracks temporary feedback for a copy action. */
+export function useCopyButton(
+	onCopy: () => unknown,
+): readonly ['idle' | 'copied' | 'error', () => void] {
+	const [status, setStatus] = useState<'idle' | 'copied' | 'error'>('idle');
 	const callbackRef = useRef(onCopy);
 	const timeoutRef = useRef<number | null>(null);
+	const attemptRef = useRef(0);
 
 	useEffect(() => {
 		callbackRef.current = onCopy;
 	}, [onCopy]);
 
 	const onClick = useCallback(() => {
+		const attempt = ++attemptRef.current;
 		if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-		void Promise.resolve(callbackRef.current()).then(() => {
-			setChecked(true);
+		setStatus('idle');
+		const finish = (result: 'copied' | 'error') => {
+			if (attempt !== attemptRef.current) return;
+			setStatus(result);
 			timeoutRef.current = window.setTimeout(() => {
-				setChecked(false);
+				if (attempt === attemptRef.current) setStatus('idle');
 			}, 1500);
-		});
+		};
+		try {
+			void Promise.resolve(callbackRef.current()).then(
+				() => finish('copied'),
+				() => finish('error'),
+			);
+		} catch {
+			finish('error');
+		}
 	}, []);
 
 	useEffect(() => {
+		const attempts = attemptRef;
 		return () => {
+			attempts.current++;
 			if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
 		};
 	}, []);
 
-	return [checked, onClick];
+	return [status, onClick];
 }

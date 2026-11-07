@@ -51,10 +51,8 @@ navigation, prefer [`Link`](/components/actions/link) with `appearance="button"`
 Each recipe lives on the component or primitive entrypoint that owns it. Import `buttonRecipe` from
 `@luke-ui/react/button`. There is no `@luke-ui/react/recipes` barrel.
 
-Recipes follow a fixed name. The function is the component in camel case plus `Recipe`. The variants
-type is the component in Pascal case plus `RecipeVariants`.
-
-<ExampleBlock src="styling/button-recipe" title="Styling: Apply a component recipe" />
+Recipes follow a fixed name. The function is the component in camel case plus `Recipe`. Recipes with
+variants also export a type named after the component in Pascal case plus `RecipeVariants`.
 
 A single-part recipe such as `buttonRecipe` returns the finished class string. Pass the same variant
 names the component accepts, plus an optional `className` of your own. The recipe appends your class
@@ -71,10 +69,8 @@ const variants: ButtonRecipeVariants = {
 const className = buttonRecipe({ ...variants, className: 'my-class' });
 ```
 
-A slotted recipe returns one function per part. Choose variants once at the outer call, then call
-the part you are styling with an optional `{ className }`. Recipes that style a component's private
-multi-part anatomy stay package-private. Compose the public primitives instead of importing those
-recipes.
+Recipes that style a component's private multi-part anatomy stay package-private. Compose the public
+primitives instead of importing those recipes.
 
 A primitive's recipe imports from the primitive's entrypoint. `textInputRecipe` styles an input you
 own:
@@ -122,16 +118,14 @@ from a curated accent and neutral character. It is not a per-component override 
 
 ## Set up static styles
 
-Read [Applying a theme](/docs/applying-a-theme) for stylesheet imports, the identity class, colour
-modes, and overlays.
+Read [Applying a theme](/docs/applying-a-theme) for stylesheet imports, the identity class, and
+colour modes.
 
 The shared stylesheet gives the whole document a small baseline:
 
 - **Document.** `<body>` gets the theme's base surface, text colour, accent colour, and body font, a
   unitless `1.5` line height, and no margin. Its background fills the page, including short pages
   and overscroll.
-- **Colour-mode scopes.** An element with `data-color-mode` is repainted with its mode's surface,
-  text colour, and accent colour.
 - **Box sizing.** Every element and pseudo-element uses `border-box`.
 - **Form controls.** Buttons, inputs, selects, and text areas inherit the surrounding font and have
   no margin. They keep their native appearance otherwise.

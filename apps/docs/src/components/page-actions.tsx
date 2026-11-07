@@ -5,6 +5,7 @@ import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@luke-ui/react/link';
 import { vars } from '@luke-ui/react/theme';
+import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import type { ReactNode } from 'react';
 import { useCopyButton } from '../lib/use-copy-button.js';
 import { GithubMark } from './github-mark.js';
@@ -87,29 +88,31 @@ function PageActionLink({
 }
 
 function CopyMarkdownButton({ markdownUrl }: { markdownUrl: string }) {
-	// `useCopyButton` only flips to its "Copied" state once this callback's
-	// promise resolves, and it has no `onRejected` handler, so a rejection
-	// leaves `copied` at `false` instead of claiming success. `fetch` does not
-	// reject on an HTTP error (a 404 resolves with `res.ok === false`), so a
-	// non-ok response is thrown here to turn it into one. Without the throw, a
-	// stale route or a missing generated `.md` file would copy an error page's
-	// HTML to the clipboard while the button reported success.
-	const [copied, onCopy] = useCopyButton(async () => {
+	const [status, onCopy] = useCopyButton(async () => {
 		const res = await fetch(markdownUrl);
 		if (!res.ok) throw new Error(`Failed to fetch ${markdownUrl}: ${res.status}`);
 		const text = await res.text();
 		await navigator.clipboard.writeText(text);
 	});
 
+	const label = { idle: 'Copy Markdown', copied: 'Copied', error: 'Could not copy Markdown' }[
+		status
+	];
+
 	return (
-		<Button
-			onPress={onCopy}
-			prominence="low"
-			size="small"
-			startContent={<Icon name={copied ? 'check' : 'copy'} />}
-			tone="neutral"
-		>
-			{copied ? 'Copied' : 'Copy Markdown'}
-		</Button>
+		<>
+			<Button
+				onPress={onCopy}
+				prominence="low"
+				size="small"
+				startContent={<Icon name={status === 'copied' ? 'check' : 'copy'} />}
+				tone="neutral"
+			>
+				{label}
+			</Button>
+			<VisuallyHidden aria-live="polite" role="status">
+				{status === 'idle' ? '' : label}
+			</VisuallyHidden>
+		</>
 	);
 }

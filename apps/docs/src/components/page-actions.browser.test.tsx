@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import { afterEach, assert, expect, test, vi } from 'vite-plus/test';
+import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { StoryWrapper } from '../lib/story-wrapper';
 import { PageActions } from './page-actions';
@@ -90,49 +90,28 @@ test('reports the copied state after Copy Markdown succeeds', async () => {
 	await expect.element(page.getByRole('button', { name: 'Copy Markdown' })).toBeVisible();
 });
 
-test('does not claim success when the markdown fetch 404s', async () => {
-	// `fetch` resolves normally on an HTTP error response, it does not
-	// reject — this stub reproduces a stale route or a missing generated
-	// `.md` file so the "Copied" state must not fire on a non-ok response.
-	vi.stubGlobal(
-		'fetch',
-		vi.fn(async () => new Response('Not found', { status: 404 })),
-	);
+for (const failure of ['fetch', 'clipboard'] as const) {
+	test(`reports failure when the markdown ${failure} fails`, async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn(
+				async () =>
+					new Response(failure === 'fetch' ? 'Not found' : '# Example', {
+						status: failure === 'fetch' ? 404 : 200,
+					}),
+			),
+		);
+		const writeText = vi.spyOn(navigator.clipboard, 'writeText');
+		if (failure === 'clipboard') writeText.mockRejectedValue(new Error('denied'));
 
-	// `useCopyButton` has no `onRejected` handler, so the rejection this
-	// throw produces surfaces as an unhandled rejection rather than being
-	// caught anywhere — that is the exact behaviour under test, not a bug in
-	// the test. Await that rejection as the explicit failure outcome: only
-	// once it has fired is the operation complete, so the label's final
-	// state (not its state after an arbitrary delay) proves it never flips.
-	let onUnhandledRejection: ((event: PromiseRejectionEvent) => void) | undefined;
-	const rejection = new Promise<PromiseRejectionEvent>((resolve) => {
-		onUnhandledRejection = (event: PromiseRejectionEvent) => {
-			event.preventDefault();
-			resolve(event);
-		};
-	});
-	assert(onUnhandledRejection, 'expected the rejection handler to be set');
-	window.addEventListener('unhandledrejection', onUnhandledRejection);
-
-	try {
-		renderActions({
-			githubUrl,
-			markdownUrl,
-			reactAriaUrl: null,
-			sourceUrl: null,
-		});
+		renderActions({ githubUrl, markdownUrl, reactAriaUrl: null, sourceUrl: null });
 		await userEvent.click(page.getByRole('button', { name: 'Copy Markdown' }));
 
-		const event = await rejection;
-		assert(event.reason instanceof Error, 'expected the rejection reason to be an Error');
-		expect(event.reason.message).toContain('404');
+		await expect.element(page.getByRole('status')).toMatchTextContent('Could not copy Markdown');
 		expect(page.getByRole('button', { name: 'Copied' })).not.toBeInTheDocument();
-		await expect.element(page.getByRole('button', { name: 'Copy Markdown' })).toBeVisible();
-	} finally {
-		window.removeEventListener('unhandledrejection', onUnhandledRejection);
-	}
-});
+		expect(writeText).toHaveBeenCalledTimes(failure === 'fetch' ? 0 : 1);
+	});
+}
 
 test('shows only Edit on GitHub when mode is edit', async () => {
 	renderActions({
