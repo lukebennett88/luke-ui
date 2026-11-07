@@ -113,6 +113,18 @@ test('links a heading to its own anchor and copies the full URL with the hash', 
 	await expect.element(page.getByRole('button', { name: 'Copy Anchor Link' })).toBeVisible();
 });
 
+test('announces when copying an anchor link fails', async () => {
+	vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('denied'));
+	await renderMdx(<H2 id="usage">Usage</H2>);
+
+	await userEvent.click(page.getByRole('button', { name: 'Copy Anchor Link' }));
+
+	await expect.element(page.getByRole('status')).toHaveTextContent('Could not copy anchor link');
+	await expect
+		.element(page.getByRole('button', { name: 'Could not copy anchor link' }))
+		.toBeVisible();
+});
+
 for (const [level, Heading] of [
 	[2, H2],
 	[3, H3],

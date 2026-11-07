@@ -44,60 +44,6 @@ In a single-page app, put the same script in a `<script>` element in the `<head>
 In a framework that renders `<html>`, set `suppressHydrationWarning` on it, because the script
 changes `<html>` before React hydrates it.
 
-## Nest colour-mode scopes
-
-Set `data-color-mode` on any element below `<html>` to fix the mode for that subtree. Scopes nest to
-any depth, and the nearest explicit scope wins.
-
-<ExampleBlock
-	src="theming/color-mode-override"
-	title="Applying a theme: Colour-mode override"
-	layout="full-bleed"
-/>
-
-<SourceCodeBlock src="theming/nested-color-mode" />
-
-The shared stylesheet repaints each scope with its mode's text colour, accent colour, and base
-surface. Your own CSS and Luke UI components outrank that repaint, so a scope element can still set
-its own background.
-
-`<body>` can be a scope too. Its background paints the whole page canvas, but page scrollbars follow
-`<html>`. Set a mode for the whole document on `<html>` instead.
-
-### Override a token on a scope
-
-The theme sets every mode token on an element that carries `data-color-mode`. Its rule has a
-specificity of (0,2,0) and sits in no cascade layer. To override a token on that same element, your
-rule has to beat it:
-
-- A rule in no cascade layer wins if it is more specific, such as `.app .sidebar[data-color-mode]`,
-  or equally specific and later.
-- A rule in a cascade layer never wins, however specific it is. Styles in no layer beat every
-  layered style.
-
-To avoid the conflict, set the token on a child of the scope instead. The theme's rule doesn't match
-the child, so the child's value applies from any layer, and the child's descendants inherit it.
-
-## Overlays in a scope
-
-An overlay renders into `document.body`, outside the scope around its trigger. Luke UI's own
-overlays handle this. The `Select` popover, the `Combobox` popover, and the `Combobox` tray copy the
-trigger's mode from the nearest scope below `<html>` onto the overlay. Without such a scope, the
-overlay follows the document.
-
-Luke UI copies the trigger's colour mode onto the overlay when the overlay element is created. It
-doesn't update while the overlay stays mounted.
-
-To give one of these overlays its own mode, pass `data-color-mode` to the overlay primitive, such as
-`ComboboxPopover` or `SelectPopover`. Your value wins, even when it matches the document mode.
-
-### React Aria overlays
-
-A React Aria overlay that you render yourself does not copy the mode. When one can open inside a
-scope, set the scope's mode on the overlay too.
-
-<SourceCodeBlock src="theming/scoped-overlay" />
-
 ## Continue learning
 
 <Cards>

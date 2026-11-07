@@ -125,7 +125,7 @@ export function createMdxHeading(level: HeadingLevel) {
 }
 
 function CopyAnchorButton({ id }: { id: string }) {
-	const [copied, onCopy] = useCopyButton(() => {
+	const [status, onCopy] = useCopyButton(() => {
 		const url = new URL(window.location.href);
 		url.hash = id;
 		return navigator.clipboard.writeText(url.toString());
@@ -134,15 +134,21 @@ function CopyAnchorButton({ id }: { id: string }) {
 	return (
 		<span className={styles.headingCopyWrapper}>
 			<IconButton
-				aria-label={copied ? 'Copied Anchor Link' : 'Copy Anchor Link'}
+				aria-label={
+					{
+						idle: 'Copy Anchor Link',
+						copied: 'Copied Anchor Link',
+						error: 'Could not copy anchor link',
+					}[status]
+				}
 				className={styles.headingCopyButton}
-				icon={copied ? 'check' : <LinkIcon />}
+				icon={({ idle: <LinkIcon />, copied: 'check', error: 'close' } as const)[status]}
 				onPress={onCopy}
 				prominence="low"
 				size="small"
 			/>
 			<VisuallyHidden aria-live="polite" role="status">
-				{copied ? 'Copied' : ''}
+				{{ idle: '', copied: 'Copied', error: 'Could not copy anchor link' }[status]}
 			</VisuallyHidden>
 		</span>
 	);
