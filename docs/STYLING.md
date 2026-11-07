@@ -429,6 +429,10 @@ Typography, icons, and alignment belong to each recipe. `medium` is the fallback
 supersedes the component naming policy in
 [#761](https://github.com/lukebennett88/luke-ui/issues/761).
 
+A `small` text-entry control (TextInput and Combobox) uses the 16px type metrics under
+`@media (pointer: coarse)`, because iOS Safari zooms into a focused input under 16px. Block size and
+padding do not change. `touchInputTypography` in `text-input/styles.css.ts` holds the rule.
+
 `size` and `Form.controlSize` accept fixed scalar values. The internal `ControlSizeContext` carries
 semantic defaults for compatible fields and actions. Resolve an explicit component size first, then
 the nearest inherited default, then `medium`. Composed components must pass an omitted size through

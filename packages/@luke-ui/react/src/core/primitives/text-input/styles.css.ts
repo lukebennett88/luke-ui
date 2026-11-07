@@ -96,6 +96,20 @@ export const textInputInputBase = {
 const control = composeInputStateSelectors();
 
 /**
+ * Typography for a small text-entry control on a coarse pointer. iOS Safari zooms into a focused
+ * input under 16px, so touch devices get the 16px metrics. Block size and padding stay as they are.
+ */
+export const touchInputTypography = {
+	'@media': {
+		'(pointer: coarse)': {
+			fontSize: FONT_METRIC_SCALE[16].fontSize,
+			letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
+			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
+		},
+	},
+} as const satisfies StyleRule;
+
+/**
  * Slotted recipe for the parts around a `TextInput`: `root` (the `TextInputRoot` element),
  * `control` (the `TextInputControl` well chrome), and `prefix` / `suffix` (the leading and
  * trailing parts). It is private. The public `textInputRecipe` styles a standalone input.
@@ -222,6 +236,7 @@ export const textInputPartsRecipe = recipe({
 			},
 			small: {
 				control: {
+					...touchInputTypography,
 					blockSize: vars.controlSize['32'],
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
@@ -229,11 +244,17 @@ export const textInputPartsRecipe = recipe({
 					vars: { [textInputInlinePadding]: vars.space['8'] },
 				},
 				prefix: {
+					'@media': {
+						'(pointer: coarse)': { lineHeight: FONT_METRIC_SCALE[16].lineHeight },
+					},
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 					paddingInlineEnd: vars.space['8'],
 					paddingInlineStart: vars.space['8'],
 				},
 				suffix: {
+					'@media': {
+						'(pointer: coarse)': { lineHeight: FONT_METRIC_SCALE[16].lineHeight },
+					},
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 					paddingInlineEnd: vars.space['8'],
 					paddingInlineStart: vars.space['8'],

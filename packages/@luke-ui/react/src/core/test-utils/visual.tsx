@@ -380,7 +380,7 @@ export async function captureVisualAppearance(
 	await captureVisual(locator, `${id}-${appearance.theme}-${appearance.mode}`);
 }
 
-export { emulateForcedColors } from './emulate-media.js';
+export { emulateForcedColors, emulatePointer } from './emulate-media.js';
 
 export type PropOptions<
 	Component extends ComponentType<any>,

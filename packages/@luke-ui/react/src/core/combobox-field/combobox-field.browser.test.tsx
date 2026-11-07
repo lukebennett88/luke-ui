@@ -26,6 +26,7 @@ import { pairedColors, surfaceColors } from '../test-utils/surface-colors.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
+	emulatePointer,
 	focusViaKeyboard,
 	parkPointer,
 	pressPointer,
@@ -441,6 +442,25 @@ for (const size of ['small', 'medium'] as const) {
 		}
 	});
 }
+
+// iOS Safari zooms into a focused input under 16px, so a coarse pointer gets the 16px metrics.
+test('a small ComboboxField input computes a 16px font size with a coarse pointer', async () => {
+	await emulatePointer('coarse');
+
+	try {
+		render(
+			<ComboboxField defaultItems={countryItems} label="Country" size="small">
+				{renderCountryItem}
+			</ComboboxField>,
+		);
+
+		const input = page.getByRole('combobox', { name: 'Country' }).element();
+
+		expect(getComputedStyle(input).fontSize).toBe('16px');
+	} finally {
+		await emulatePointer('fine');
+	}
+});
 
 test('ComboboxField clearing the tray search clears the selection', async () => {
 	mockScreenWidth(MOBILE_SCREEN_WIDTH);

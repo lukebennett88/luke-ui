@@ -27,6 +27,7 @@ import {
 	autofilledInputStyle,
 	filledInputSelectors,
 	filledInputStyle,
+	touchInputTypography,
 } from '../text-input/styles.css.js';
 
 // The popover starts this far from its resting place, on the side facing the trigger. React Aria
@@ -477,6 +478,7 @@ const comboboxConfig = {
 			},
 			small: {
 				control: {
+					...touchInputTypography,
 					blockSize: vars.controlSize['32'],
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
