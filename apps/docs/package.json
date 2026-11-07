@@ -41,7 +41,8 @@
 		"generate:token-reference": "tsx scripts/generate-token-reference.ts",
 		"preview": "vp preview",
 		"start": "serve .output/public",
-		"test": "vp test run --config vitest.config.ts"
+		"test": "vp test run --config vitest.config.ts",
+		"test:copy:webkit": "LUKE_UI_DOCS_WEBKIT=1 vp test run --config vitest.config.ts --project=browser src/lib/use-copy-button.browser.test.tsx"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "catalog:",

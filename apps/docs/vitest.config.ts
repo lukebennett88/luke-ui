@@ -48,7 +48,9 @@ export default defineConfig({
 						},
 						enabled: true,
 						headless: true,
-						instances: [{ browser: 'chromium' }],
+						instances: [
+							{ browser: process.env.LUKE_UI_DOCS_WEBKIT === '1' ? 'webkit' : 'chromium' },
+						],
 						provider: playwright({}),
 					},
 					include: ['src/**/*.browser.test.{ts,tsx}'],
