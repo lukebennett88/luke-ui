@@ -174,6 +174,7 @@ function drift(actual: Rgb, expected: Rgb): number {
 }
 
 interface Probe {
+	edge: Edge;
 	/** Which edge and how far along it this probe sits, for failure messages. */
 	label: string;
 	/** Reads the pixel `outward` CSS pixels beyond the border box, negative for inside it. */
@@ -208,6 +209,7 @@ async function edgeProbes(tile: HTMLElement, element: HTMLElement): Promise<Arra
 		for (const fraction of [0.25, 0.5, 0.75]) {
 			const along = start + run * fraction;
 			probes.push({
+				edge,
 				label: `${edge} ${Math.round(fraction * 100)}%`,
 				pixel: (outward) => {
 					switch (edge) {
@@ -256,6 +258,9 @@ function ringDistances({ offset, width }: RingGeometry): Array<number> {
  * Records a failure when any probe's ring pixels, across the ring's width, differ from `expected`,
  * and when the ring does not reach 3:1 against the neighbours the caller names. `inner` is the side
  * towards the control, `outer` the side away from it.
+ *
+ * On `innerExemptEdge`, the inner side only has to reach `EXEMPT_INNER_FLOOR`. A failure is also
+ * recorded when that edge clears 3:1 everywhere, so a stale exemption does not linger.
  */
 function checkRing(
 	probes: Array<Probe>,
@@ -264,7 +269,9 @@ function checkRing(
 	neighbours: ReadonlyArray<Neighbour>,
 	where: string,
 	failures: Array<string>,
+	innerExemptEdge?: Edge,
 ) {
+	const exemptRatios: Array<number> = [];
 	const { offset, width } = geometry;
 	const innerAt = offset > 0 ? offset / 2 : offset - 1.5;
 	const outerAt = offset + width + 1.5;
@@ -280,26 +287,65 @@ function checkRing(
 		}
 		for (const side of neighbours) {
 			const ratio = contrast(expected, probe.pixel(side === 'inner' ? innerAt : outerAt));
-			if (ratio < FOCUS_RATIO) {
+			const exempt = side === 'inner' && probe.edge === innerExemptEdge;
+			if (exempt) exemptRatios.push(ratio);
+			if (ratio < (exempt ? EXEMPT_INNER_FLOOR : FOCUS_RATIO)) {
 				failures.push(`${where} ${probe.label}: ring against ${side} is ${ratio.toFixed(2)}:1`);
 			}
 		}
 	}
+	if (exemptRatios.length > 0 && Math.min(...exemptRatios) >= FOCUS_RATIO) {
+		failures.push(`${where}: the ${innerExemptEdge} inner exemption is no longer needed`);
+	}
 }
 
 /**
- * The sides of the ring to measure. A hovered control paints its raised shadow below it, into the
- * offset gap. On a role solid whose on-solid colour is dark, such as Tactile dark `info.solid`, that
- * shadow brings the gap below the control to 2.86:1 against the ring. The panel outside the ring
- * still clears 3:1, so a hovered control on a solid is measured against that side only.
+ * Where a hovered control's own raised shadow paints into the offset gap below it and takes the
+ * ring under 3:1 on that inner side. In Tactile dark, `info.solid`'s on-solid colour is dark, and
+ * the shadow under a hovered Button or Select trigger measures 2.86:1 against it. The panel outside
+ * the ring still clears 3:1. Every other combination keeps the 3:1 check on both sides.
  */
-function sidesFor(
-	background: TileBackground,
-	state: State | undefined,
-	neighbours: ReadonlyArray<Neighbour>,
-): ReadonlyArray<Neighbour> {
-	if (state !== 'hover' || !(background in solidRingColors)) return neighbours;
-	return neighbours.filter((side) => side === 'outer');
+const hoverShadowExemptions: ReadonlyArray<{
+	appearance: VisualAppearance;
+	control: string;
+	background: TileBackground;
+	edge: Edge;
+}> = [
+	{
+		appearance: { mode: 'dark', theme: 'tactile' },
+		control: 'Button',
+		background: 'info.solid',
+		edge: 'bottom',
+	},
+	{
+		appearance: { mode: 'dark', theme: 'tactile' },
+		control: 'SelectField',
+		background: 'info.solid',
+		edge: 'bottom',
+	},
+];
+
+// Low enough to allow the measured 2.86:1, high enough to catch a darker shadow or a fainter ring.
+const EXEMPT_INNER_FLOOR = 2.5;
+
+/** `control`'s exempt edge on each background in `appearance` while `state` applies. */
+function exemptEdges(
+	appearance: VisualAppearance,
+	control: string,
+	state: State,
+): ReadonlyMap<TileBackground, Edge> {
+	const edges = new Map<TileBackground, Edge>();
+	if (state !== 'hover') return edges;
+	for (const exemption of hoverShadowExemptions) {
+		if (
+			exemption.appearance.theme === appearance.theme &&
+			exemption.appearance.mode === appearance.mode &&
+			exemption.control === control
+		) {
+			edges.set(exemption.background, exemption.edge);
+		}
+	}
+	return edges;
 }
 
 /**
@@ -321,6 +367,7 @@ async function measureTiles(
 	backgrounds: ReadonlyArray<TileBackground>,
 	neighbours: ReadonlyArray<Neighbour>,
 	state?: State,
+	innerExemptEdges: ReadonlyMap<TileBackground, Edge> = new Map(),
 ) {
 	const failures: Array<string> = [];
 	// Open popovers hide the rest of the page from role queries, so find every tile first.
@@ -357,7 +404,15 @@ async function measureTiles(
 		// oxlint-disable-next-line no-await-in-loop
 		const probes = await edgeProbes(tile, ringElement);
 		const where = state === undefined ? background : `${background} ${state}`;
-		checkRing(probes, geometry, expected, sidesFor(background, state, neighbours), where, failures);
+		checkRing(
+			probes,
+			geometry,
+			expected,
+			neighbours,
+			where,
+			failures,
+			innerExemptEdges.get(background),
+		);
 	}
 	await userEvent.keyboard('{/Space}');
 	return failures;
@@ -379,7 +434,10 @@ for (const appearance of visualAppearances) {
 			test(`keeps the ${name} focus ring visible while ${state} on every supported background in ${appearance.theme} ${appearance.mode}`, async () => {
 				render(tilesFor(supportedBackgrounds, control), { appearance });
 
-				expect(await measureTiles(supportedBackgrounds, ['inner', 'outer'], state)).toEqual([]);
+				const exempt = exemptEdges(appearance, name, state);
+				expect(await measureTiles(supportedBackgrounds, ['inner', 'outer'], state, exempt)).toEqual(
+					[],
+				);
 			});
 		}
 	}
@@ -425,7 +483,7 @@ for (const appearance of visualAppearances) {
 // A focusable element inside a control's fill, and a focusable solid `Box`, take the ring colour of
 // the fill around them, not the solid around the control or the Box's own fill.
 for (const appearance of visualAppearances) {
-	for (const [name, background, scene, target] of [
+	for (const [name, background, scene, target, neighbours] of [
 		[
 			'ComboboxField clear button',
 			'info.solid',
@@ -433,6 +491,9 @@ for (const appearance of visualAppearances) {
 				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 			</ComboboxField>,
 			{ role: 'button', name: /^Clear selection/ },
+			// The ring sits 1px inside the field's border, so a probe 1.5px beyond the ring reads the
+			// border, not the fill the ring sits on. Only the inner side is measured.
+			['inner'],
 		],
 		[
 			'focusable solid Box',
@@ -446,6 +507,7 @@ for (const appearance of visualAppearances) {
 				tabIndex={0}
 			/>,
 			{ role: 'region', name: 'Card' },
+			['inner', 'outer'],
 		],
 	] as const) {
 		test(`paints the ${name} focus ring in color.focus on ${background} in ${appearance.theme} ${appearance.mode}`, async () => {
@@ -467,7 +529,7 @@ for (const appearance of visualAppearances) {
 			const geometry = geometryOf(element);
 			const expected = paintedColor(resolvedColor(vars.color.focus, element));
 			const failures: Array<string> = [];
-			checkRing(await edgeProbes(tile, element), geometry, expected, ['inner'], name, failures);
+			checkRing(await edgeProbes(tile, element), geometry, expected, neighbours, name, failures);
 
 			expect(failures).toEqual([]);
 		});
