@@ -16,6 +16,10 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import {
+	getDocsSidebarMinPixels,
+	getSiteHeaderDesktopMinPixels,
+} from '../lib/docs-container-queries.js';
 import { DocsShell } from './docs-shell.js';
 import { DocsSearchProvider } from './search.js';
 import { DocsThemeRoot } from './theme-controls.js';
@@ -77,7 +81,7 @@ for (const pathname of ['/components', '/components/actions/button']) {
 			</DocsShell>,
 		);
 
-		const navigation = page.getByRole('navigation', { name: 'Docs' });
+		const navigation = page.getByRole('navigation', { name: 'Components' });
 		const actions = navigation.getByRole('heading', { name: 'Actions', level: 2 });
 		await expect.element(actions).toBeVisible();
 		await expect
@@ -137,6 +141,54 @@ test('keeps search and theme in the header while the sidebar shows', async () =>
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 	await expect.element(search).toHaveFocus();
 });
+
+test('the header desktop threshold clears the widest desktop row', async () => {
+	await page.viewport(1280, 800);
+	await renderShell('/docs/installation');
+
+	// The widest row has the sidebar toggle, so check that it is there.
+	await expect
+		.element(page.getByRole('banner').getByRole('button', { name: 'Hide sidebar' }))
+		.toBeVisible();
+	const row = document.querySelector<HTMLElement>('[data-site-header-row]');
+	if (!row) throw new Error('Expected the header row.');
+	row.style.inlineSize = 'max-content';
+	const rowWidth = row.getBoundingClientRect().width;
+	row.style.inlineSize = '';
+
+	const threshold = getSiteHeaderDesktopMinPixels();
+	// The threshold follows the content, so it must not drop below the row, and it must stay close
+	// enough that the compact row is not used while the desktop row has plenty of room.
+	expect(threshold).toBeGreaterThanOrEqual(rowWidth);
+	expect(threshold - rowWidth).toBeLessThanOrEqual(96);
+	// The sidebar toggle and Menu rules rely on a visible sidebar implying the desktop row.
+	expect(getDocsSidebarMinPixels()).toBeGreaterThanOrEqual(threshold);
+});
+
+for (const isCollapsed of [false, true]) {
+	test(`keeps the sidebar toggle at least 16px from the wordmark when the sidebar is ${isCollapsed ? 'collapsed' : 'expanded'}`, async () => {
+		await page.viewport(1280, 800);
+		await renderShell('/docs/installation');
+
+		const header = page.getByRole('banner');
+		if (isCollapsed) {
+			await act(async () => {
+				await userEvent.click(header.getByRole('button', { name: 'Hide sidebar' }));
+			});
+		}
+		const toggle = header.getByRole('button', {
+			name: isCollapsed ? 'Show sidebar' : 'Hide sidebar',
+		});
+		await expect.element(toggle).toBeVisible();
+		const wordmark = header
+			.getByRole('link', { name: 'Luke UI' })
+			.element()
+			.getBoundingClientRect();
+		const gap = toggle.element().getBoundingClientRect().left - wordmark.right;
+
+		expect(gap).toBeGreaterThanOrEqual(16);
+	});
+}
 
 function getSidebar() {
 	const sidebar = document.getElementById('docs-sidebar');

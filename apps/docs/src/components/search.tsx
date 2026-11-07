@@ -17,6 +17,7 @@ import {
 	useSyncExternalStore,
 	ViewTransition,
 } from 'react';
+import { flushSync } from 'react-dom';
 import type { SearchAnchorRect } from './search-anchor.js';
 import {
 	fitSearchAnchorToViewport,
@@ -85,6 +86,13 @@ export function DocsSearchProvider({ children }: { children: ReactNode }) {
 	const openSearch = useCallback(
 		(source?: 'compact' | 'wide') => {
 			updateAnchor(source);
+			// iOS raises the keyboard only when `focus()` runs inside the tap. A transition commits
+			// later, so the dialog's `autoFocus` would miss the gesture. Touch skips the share morph
+			// and commits synchronously, which focuses the input inside the press handler.
+			if (source === 'compact' || window.matchMedia('(pointer: coarse)').matches) {
+				flushSync(() => setIsOpen(true));
+				return;
+			}
 			setSearchOpen(true);
 		},
 		[setSearchOpen, updateAnchor],
@@ -172,7 +180,14 @@ function SearchShortcutLabel() {
 	return <Kbd>{isMac ? '⌘K' : 'Ctrl K'}</Kbd>;
 }
 
-export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }) {
+export function DocsSearchTrigger({
+	className,
+	isCompact = false,
+}: {
+	/** Applied to the compact icon button. */
+	className?: string;
+	isCompact?: boolean;
+}) {
 	const context = use(SearchContext);
 	if (!context) throw new Error('DocsSearchTrigger must be inside DocsSearchProvider');
 	if (isCompact) {
@@ -180,12 +195,14 @@ export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }
 		return (
 			<IconButton
 				aria-label="Open Search"
+				className={className}
 				icon="search"
 				onPress={() => openSearch('compact')}
+				prominence="low"
 				ref={(node) => {
 					compactTriggerRef.current = node;
 				}}
-				size="small"
+				size="medium"
 			/>
 		);
 	}

@@ -7,9 +7,11 @@ import { Stack } from '@luke-ui/react/stack';
 import { vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import { useRouterState } from '@tanstack/react-router';
+import { fallbackVar } from '@vanilla-extract/css';
 import type { Folder, Node, Root, Separator } from 'fumadocs-core/page-tree';
 import type { CSSProperties, ReactNode } from 'react';
 import { useId } from 'react';
+import { getActiveSiteDestination } from '../lib/site-destinations.js';
 import { plainList } from '../styles/plain-list.css.js';
 import { DocsLink } from './docs-link.js';
 import * as styles from './docs-shell.css.js';
@@ -48,6 +50,8 @@ interface DocsNavProps {
 export function DocsNav({ onNavigate, tree }: DocsNavProps) {
 	const pathname = useRouterState({ select: (state) => state.location.pathname });
 	const labelIdPrefix = useId();
+	// The section names the landmark, so the Components tree is not announced as "Docs".
+	const label = getActiveSiteDestination(pathname)?.label ?? 'Docs';
 	const roots = collectRootFolders(tree);
 	const activeRoot = findActiveRoot(roots, pathname);
 	const nodes = (() => {
@@ -57,7 +61,7 @@ export function DocsNav({ onNavigate, tree }: DocsNavProps) {
 	})();
 
 	return (
-		<Box aria-label="Docs" elementType="nav">
+		<Box aria-label={label} elementType="nav">
 			<NavList isTopLevel labelIdPrefix={labelIdPrefix} nodes={nodes} onNavigate={onNavigate} />
 		</Box>
 	);
@@ -284,6 +288,7 @@ export function DocsNavLink({
 		<Box
 			{...navRowProps}
 			inlineSize="100%"
+			minBlockSize={fallbackVar(styles.navLinkMinBlockSize, navRowProps.minBlockSize)}
 			renderRoot={(domProps) => {
 				const className = cx(domProps.className, styles.navLink);
 				if (isExternal) {

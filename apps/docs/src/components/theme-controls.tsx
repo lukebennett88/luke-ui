@@ -1,3 +1,4 @@
+import type { IconName } from '@luke-ui/react/icon';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, PropsWithChildren } from 'react';
 import { useSyncExternalStore } from 'react';
@@ -9,7 +10,7 @@ import {
 	writeThemePrefs,
 } from '../lib/theme-prefs.js';
 import {
-	IconToggleButtonGroup,
+	OptionalIconToggleButtonGroup,
 	TextToggleButtonGroup,
 } from './playground/icon-toggle-button-group.js';
 import * as styles from './theme-controls.css.js';
@@ -40,11 +41,13 @@ export function ThemeControls({ className, style, ...props }: ComponentProps<'di
 				options={THEME_IDENTITIES}
 				value={themeIdentity}
 			/>
-			<IconToggleButtonGroup
+			{/* Neither pressed means system: the site follows `prefers-color-scheme`. */}
+			<OptionalIconToggleButtonGroup
+				description="With neither on, the site follows your system setting."
 				label="Colour mode"
-				onChange={setColorModePreference}
+				onChange={(mode) => setColorModePreference(mode ?? 'system')}
 				options={COLOR_MODES}
-				value={colorModePreference}
+				value={colorModePreference === 'system' ? null : colorModePreference}
 			/>
 		</div>
 	);
@@ -70,10 +73,9 @@ const THEME_IDENTITIES = [
 ] as const satisfies ReadonlyArray<{ label: string; value: ThemeIdentity }>;
 
 const COLOR_MODES = [
-	{ icon: 'sun', label: 'Light theme', value: 'light' },
-	{ icon: 'moon', label: 'Dark theme', value: 'dark' },
-	{ icon: 'circleHalf', label: 'System theme', value: 'system' },
-] as const;
+	{ icon: 'sun', label: 'Light', value: 'light' },
+	{ icon: 'moon', label: 'Dark', value: 'dark' },
+] as const satisfies ReadonlyArray<{ icon: IconName; label: string; value: 'light' | 'dark' }>;
 
 function persistThemeIdentity(themeIdentity: ThemeIdentity) {
 	writeThemePrefs({ themeIdentity });

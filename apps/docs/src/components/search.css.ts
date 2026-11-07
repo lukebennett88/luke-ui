@@ -291,6 +291,12 @@ export const field = style({
 export const input = style({
 	'@layer': {
 		components: {
+			'@media': {
+				// iOS Safari zooms the page when a focused input is under 16px. Raise it on touch only.
+				'(pointer: coarse)': {
+					fontSize: vars.font.body.fontSize,
+				},
+			},
 			// Hide the native WebKit clear button so the ESC keycap is the only close control.
 			selectors: {
 				'&::-webkit-search-cancel-button': {
