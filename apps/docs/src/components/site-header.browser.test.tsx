@@ -120,6 +120,56 @@ test('opening search does not also open the docs navigation drawer, and vice ver
 		.not.toBeInTheDocument();
 });
 
+test('names each visible desktop header item once during a route transition, and none outside one', async () => {
+	await page.viewport(1280, 800);
+	// The sidebar toggle shows only inside the docs shell's container, so this page has none.
+	await renderAt('/playground', <SiteHeader />);
+
+	// An element with `display: none` holds no name in the transition, so only rendered ones count.
+	const transitionNames = () =>
+		Array.from(document.querySelectorAll('header *'))
+			.filter((element) => element.getClientRects().length > 0)
+			.map((element) => getComputedStyle(element).viewTransitionName)
+			.filter((name) => name !== 'none');
+	expect(transitionNames()).toEqual([]);
+
+	const transition = document.startViewTransition({ types: ['route'], update: () => {} });
+	await transition.ready;
+	const names = transitionNames();
+	await transition.finished;
+
+	expect(new Set(names).size).toBe(names.length);
+	expect([...names].toSorted()).toEqual([
+		'site-header-github',
+		'site-header-link-components',
+		'site-header-link-docs',
+		'site-header-link-playground',
+		'site-header-search',
+		'site-header-theme',
+		'site-header-wordmark',
+	]);
+});
+
+test('names Menu, not the destinations, GitHub or the toggle, in the compact header', async () => {
+	await page.viewport(390, 800);
+	await renderAt('/docs/installation', <SiteHeader tree={tree} />);
+
+	const transition = document.startViewTransition({ types: ['route'], update: () => {} });
+	await transition.ready;
+	const names = Array.from(document.querySelectorAll('header *'))
+		.filter((element) => element.getClientRects().length > 0)
+		.map((element) => getComputedStyle(element).viewTransitionName)
+		.filter((name) => name !== 'none');
+	await transition.finished;
+
+	expect([...names].toSorted()).toEqual([
+		'site-header-menu',
+		'site-header-search',
+		'site-header-theme',
+		'site-header-wordmark',
+	]);
+});
+
 async function renderAt(pathname: string, children: ReactNode) {
 	const rootRoute = createRootRoute({
 		component: () => (

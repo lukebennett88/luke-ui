@@ -60,11 +60,11 @@ export function SiteHeader({ className, hideActiveDestination = false, tree }: S
 					<SiteDestinations hideActiveDestination={hideActiveDestination} />
 				</div>
 				<div className={styles.actions}>
-					<DocsSearchTrigger isCompact />
+					<DocsSearchTrigger className={styles.transitionItem.search} isCompact />
 					<AppearancePopover />
 					<IconLink
 						aria-label="GitHub repository"
-						className={styles.desktopOnly}
+						className={cx(styles.desktopOnly, styles.transitionItem.github)}
 						href={GITHUB_REPO_URL}
 						icon={<GithubMark />}
 						prominence="low"
@@ -73,7 +73,10 @@ export function SiteHeader({ className, hideActiveDestination = false, tree }: S
 						target="_blank"
 					/>
 					<SiteDrawer
-						className={tree ? styles.menuTriggerWithSidebar : styles.menuTrigger}
+						className={cx(
+							tree ? styles.menuTriggerWithSidebar : styles.menuTrigger,
+							styles.transitionItem.menu,
+						)}
 						tree={tree}
 					/>
 				</div>
@@ -112,7 +115,11 @@ function DestinationLink({
 		<DocsLink
 			activeOptions={{ exact: true }}
 			aria-current={isActive ? 'page' : undefined}
-			className={cx(styles.destination, isActive && styles.activeDestination)}
+			className={cx(
+				styles.destination,
+				styles.transitionItem[destination.label],
+				isActive && styles.activeDestination,
+			)}
 			to={destination.url}
 		>
 			<span aria-hidden="true" className={styles.destinationWidth}>
@@ -129,7 +136,12 @@ function DestinationLink({
 function SiteWordmark() {
 	const linkProps = useLinkProps({ to: '/' });
 	return (
-		<a {...linkProps} aria-current={undefined} className={styles.wordmark} data-status={undefined}>
+		<a
+			{...linkProps}
+			aria-current={undefined}
+			className={cx(styles.wordmark, styles.transitionItem.wordmark)}
+			data-status={undefined}
+		>
 			Luke UI
 		</a>
 	);
@@ -147,7 +159,7 @@ function SidebarToggle() {
 			aria-controls={DOCS_SIDEBAR_ID}
 			aria-expanded={!isCollapsed}
 			aria-label={isCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-			className={styles.sidebarToggle}
+			className={cx(styles.sidebarToggle, styles.transitionItem.sidebarToggle)}
 			icon={<SidebarIcon className={styles.sidebarIcon} />}
 			onPress={() => writeIsSidebarCollapsed(!isCollapsed)}
 			prominence="low"
@@ -160,7 +172,7 @@ function SidebarToggle() {
 function AppearancePopover() {
 	return (
 		<DialogTrigger>
-			<Button prominence="low" size="medium">
+			<Button className={styles.transitionItem.theme} prominence="low" size="medium">
 				Theme
 			</Button>
 			<Popover className={styles.appearancePopover} placement="bottom end">

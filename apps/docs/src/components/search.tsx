@@ -180,7 +180,14 @@ function SearchShortcutLabel() {
 	return <Kbd>{isMac ? '⌘K' : 'Ctrl K'}</Kbd>;
 }
 
-export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }) {
+export function DocsSearchTrigger({
+	className,
+	isCompact = false,
+}: {
+	/** Applied to the compact icon button. */
+	className?: string;
+	isCompact?: boolean;
+}) {
 	const context = use(SearchContext);
 	if (!context) throw new Error('DocsSearchTrigger must be inside DocsSearchProvider');
 	if (isCompact) {
@@ -188,6 +195,7 @@ export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }
 		return (
 			<IconButton
 				aria-label="Open Search"
+				className={className}
 				icon="search"
 				onPress={() => openSearch('compact')}
 				prominence="low"

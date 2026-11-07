@@ -1,11 +1,13 @@
 import { vars } from '@luke-ui/react/theme';
-import { style } from '@vanilla-extract/css';
+import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import {
 	docsSidebarMinInlineSize,
 	SITE_HEADER_CONTAINER,
 	siteHeaderDesktopMinInlineSize,
 } from '../lib/docs-container-queries.js';
 import { overlayMotion } from '../lib/overlay-motion.js';
+import { ROUTE_VIEW_TRANSITION_TYPE } from '../lib/route-view-transition.js';
+import { siteDestinations } from '../lib/site-destinations.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
 /** Inline padding of the header row. Panels that sit beside the header edge reuse it. */
@@ -251,4 +253,79 @@ export const appearancePopover = style({
 			}),
 		},
 	},
+});
+
+/*
+ * Route-change motion. The router runs each navigation in a View Transition of type `route` (see
+ * `lib/route-view-transition.ts`). Home and the docs render separate headers, so each item gets a
+ * stable `view-transition-name` for the length of that transition only. The browser pairs the old
+ * and new item, then moves it between its two positions. Names live under the type selector, so
+ * the search morph and every other transition see no header names. Only header items are named,
+ * and each name is unique: a header renders once, and the compact and desktop layouts hide the
+ * other layout's items with `display: none`, which holds no name.
+ *
+ * An item moves on the enter treatment (250ms). The sidebar toggle has no twin on the other page,
+ * so it scales and fades in on the enter treatment and out on the faster exit one. Reduced motion
+ * never starts the transition (the router option reads it), so those pages swap instantly.
+ */
+const ROUTE_TRANSITION = `:root:active-view-transition-type(${ROUTE_VIEW_TRANSITION_TYPE})`;
+const MOVE_CLASS = 'site-header-move';
+const TOGGLE_CLASS = 'site-header-toggle';
+
+function transitionName(name: string, viewTransitionClass = MOVE_CLASS) {
+	return style({
+		'@layer': {
+			components: {
+				selectors: {
+					[`${ROUTE_TRANSITION} &`]: {
+						viewTransitionClass,
+						viewTransitionName: `site-header-${name}`,
+					},
+				},
+			},
+		},
+	});
+}
+
+/** Combine with an item's own class. Destinations are keyed by label. */
+export const transitionItem: Record<string, string> = {
+	github: transitionName('github'),
+	menu: transitionName('menu'),
+	search: transitionName('search'),
+	sidebarToggle: transitionName('sidebar-toggle', TOGGLE_CLASS),
+	theme: transitionName('theme'),
+	wordmark: transitionName('wordmark'),
+	...Object.fromEntries(
+		siteDestinations.map(({ label }) => [label, transitionName(`link-${label.toLowerCase()}`)]),
+	),
+};
+
+const toggleEnter = keyframes({ from: { opacity: 0, transform: 'scale(0.8)' } });
+const toggleExit = keyframes({ to: { opacity: 0, transform: 'scale(0.8)' } });
+
+// The page content swaps at once: the old root snapshot is hidden and the new one is not faded in,
+// so there is no cross-fade over the page. Without root animations the transition lasts exactly as
+// long as the header items' motion.
+globalStyle(`${ROUTE_TRANSITION}::view-transition-old(root)`, { display: 'none' });
+globalStyle(`${ROUTE_TRANSITION}::view-transition-new(root)`, { animation: 'none' });
+globalStyle(`${ROUTE_TRANSITION}::view-transition-group(root)`, { animation: 'none' });
+
+globalStyle(
+	`::view-transition-group(.${MOVE_CLASS}), ::view-transition-old(.${MOVE_CLASS}), ::view-transition-new(.${MOVE_CLASS})`,
+	{
+		animationDuration: vars.motion.enter.duration,
+		animationTimingFunction: vars.motion.enter.easing,
+	},
+);
+
+globalStyle(`::view-transition-new(.${TOGGLE_CLASS})`, {
+	animationDuration: vars.motion.enter.duration,
+	animationName: toggleEnter,
+	animationTimingFunction: vars.motion.enter.easing,
+});
+
+globalStyle(`::view-transition-old(.${TOGGLE_CLASS})`, {
+	animationDuration: vars.motion.exit.duration,
+	animationName: toggleExit,
+	animationTimingFunction: vars.motion.exit.easing,
 });
