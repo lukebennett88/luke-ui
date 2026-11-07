@@ -2,10 +2,12 @@ import { buttonRecipe } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
 import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
+import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps } from 'react';
 import type { Selection } from 'react-aria-components/GridList';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
 import { ToggleButtonGroup } from 'react-aria-components/ToggleButtonGroup';
+import * as styles from './icon-toggle-button-group.css.js';
 
 type IconToggleItem<Value extends string> = {
 	icon: IconName;
@@ -113,11 +115,14 @@ export function TextToggleButtonGroup<Value extends string>({
 }
 
 function toggleButtonClassName() {
-	return buttonRecipe({
-		prominence: 'low',
-		size: 'small',
-		tone: 'neutral',
-	});
+	return cx(
+		buttonRecipe({
+			prominence: 'low',
+			size: 'small',
+			tone: 'neutral',
+		}),
+		styles.selectedToggle,
+	);
 }
 
 type RenderToggleButton = ComponentProps<typeof ToggleButton>['render'];

@@ -16,10 +16,9 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { DocsSiteNav } from './docs-site-nav.js';
 import { NotFound } from './not-found.js';
 import { DocsSearchProvider } from './search.js';
-import { SiteNav } from './site-nav.js';
+import { SiteHeader } from './site-header.js';
 import { DocsThemeRoot } from './theme-controls.js';
 
 const tree: PageTree = {
@@ -49,7 +48,7 @@ afterEach(async () => {
 
 test('marks only the current destination on desktop and keeps search available', async () => {
 	await page.viewport(1024, 800);
-	await renderAt('/playground', <SiteNav />);
+	await renderAt('/playground', <SiteHeader />);
 
 	await expect
 		.element(page.getByRole('link', { name: 'Playground' }))
@@ -60,7 +59,7 @@ test('marks only the current destination on desktop and keeps search available',
 
 test('keeps the theme controls in a popover instead of the header row', async () => {
 	await page.viewport(1280, 800);
-	await renderAt('/', <SiteNav />);
+	await renderAt('/', <SiteHeader />);
 
 	await expect
 		.element(page.getByRole('radiogroup', { name: 'Theme profile' }))
@@ -79,7 +78,7 @@ test('keeps the theme controls in a popover instead of the header row', async ()
 
 test('offers search and theme controls from the mobile bar with no destination active on the landing page', async () => {
 	await page.viewport(390, 800);
-	await renderAt('/', <SiteNav />);
+	await renderAt('/', <SiteHeader />);
 
 	expect(getCurrentLinks()).toHaveLength(0);
 	await expect.element(page.getByRole('button', { name: 'Open Search' })).toBeVisible();
@@ -100,15 +99,13 @@ test('leaves every destination inactive on the 404 page', async () => {
 
 test('opening search does not also open the docs navigation drawer, and vice versa', async () => {
 	await page.viewport(390, 800);
-	await renderAt('/docs/installation', <DocsSiteNav tree={tree} />);
+	await renderAt('/docs/installation', <SiteHeader tree={tree} />);
 
 	await act(async () => {
 		await userEvent.click(page.getByRole('button', { name: 'Open Search' }));
 	});
 	await expect.element(page.getByRole('dialog', { name: 'Search documentation' })).toBeVisible();
-	await expect
-		.element(page.getByRole('dialog', { name: 'Docs navigation' }))
-		.not.toBeInTheDocument();
+	await expect.element(page.getByRole('dialog', { name: 'Menu' })).not.toBeInTheDocument();
 	await act(async () => {
 		await userEvent.keyboard('{Escape}');
 	});
@@ -117,7 +114,7 @@ test('opening search does not also open the docs navigation drawer, and vice ver
 	await act(async () => {
 		await userEvent.click(page.getByRole('button', { name: 'Menu' }));
 	});
-	await expect.element(page.getByRole('dialog', { name: 'Docs navigation' })).toBeVisible();
+	await expect.element(page.getByRole('dialog', { name: 'Menu' })).toBeVisible();
 	await expect
 		.element(page.getByRole('dialog', { name: 'Search documentation' }))
 		.not.toBeInTheDocument();
