@@ -97,7 +97,7 @@ export const choiceIndicator = {
  */
 export const choiceIndicatorStates = {
 	disabled: { opacity: vars.interaction.disabledOpacity },
-	focusVisible: focusRing(vars.color.focus),
+	focusVisible: focusRing(),
 	hover: { ...stateLayer('hover'), borderColor: vars.color.border.control.hover },
 	pressed: { ...stateLayer('pressed'), borderColor: vars.color.border.control.pressed },
 	invalid: { borderColor: vars.color.border.danger.strong },

@@ -47,8 +47,9 @@ type ColorPath = keyof SemanticColorValues;
  * Hard at 4.5:1: primary and secondary text and each role's rest, hover, and pressed foreground
  * against all three surfaces and every role's subtle rest fill. The on-solid colour is gated
  * against its role's solid fills.
- * Hard at 3:1: the focus ring against all three surfaces and every role's subtle fill. Solid fills
- * are not a supported focus background. `border.control.{rest,hover,pressed}`
+ * Hard at 3:1: the focus ring against all three surfaces and every role's subtle fill. On a role
+ * solid the ring paints that role's on-solid colour, which the 4.5:1 on-solid gates already cover.
+ * `border.control.{rest,hover,pressed}`
  * against all three surfaces and every role's subtle fill, and every role's `border.<role>.strong`
  * against all three surfaces and that role's subtle fill. Solid fills are solved for on-solid text,
  * independently of their contrast against surfaces.

@@ -152,7 +152,7 @@ export const textInputPartsRecipe = recipe({
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
-				[control.focusWithin]: focusRing(vars.color.focus),
+				[control.focusWithin]: focusRing(),
 				[control.hover]: {
 					borderColor: vars.color.border.control.hover,
 				},

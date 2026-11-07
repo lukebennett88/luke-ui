@@ -3,6 +3,7 @@ import { typedEntries } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import { interactionTintVarName } from '../../theme/interaction-tint-vars.js';
+import { focusContext } from './focus-ring.js';
 
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
 
@@ -121,6 +122,7 @@ export function transparentSurfaceStyle(): SurfaceStyle {
 			[foregroundOverride.primary]: 'inherit',
 			[foregroundOverride.secondary]: 'inherit',
 			[foregroundOverride.tone]: 'inherit',
+			[focusContext]: 'inherit',
 		},
 	};
 }
@@ -141,12 +143,16 @@ function neutralContext(backgroundColor: string): SurfaceStyle {
 	};
 }
 
-/** Resets solid foreground overrides so descendants read the neutral text and role tokens. */
+/**
+ * Resets solid foreground overrides so descendants read the neutral text and role tokens, and focus
+ * rings inside read `color.focus`.
+ */
 function neutralForegroundContextVars() {
 	return {
 		[foregroundOverride.primary]: 'initial',
 		[foregroundOverride.secondary]: 'initial',
 		[foregroundOverride.tone]: 'initial',
+		[focusContext]: 'initial',
 	};
 }
 
@@ -165,6 +171,7 @@ function solidContext(role: SemanticRole, backgroundColor: string): SurfaceStyle
 			[foregroundOverride.primary]: onSolid,
 			[foregroundOverride.secondary]: onSolid,
 			[foregroundOverride.tone]: onSolid,
+			[focusContext]: onSolid,
 		},
 	};
 }

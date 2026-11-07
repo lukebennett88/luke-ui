@@ -94,10 +94,12 @@ advisory group. Every gate covers all three surfaces: forms, links, and semantic
   because the keyboard-focus ring can sit beside any of them. A failure carries a `source` of
   `authored` or `default`, and the message points a failing default to `ThemeInput.color.focus`. The
   compiler never repairs the colour, and it is not an alias for `border.accent.strong`. Every focus
-  ring paints `vars.color.focus` as a 2px outline with a 2px offset, and forced colours use
-  `Highlight`. Solid fills are not a supported focus background: a ring beside one has no contrast
-  guarantee. `focus-ring-contrast.browser.test.tsx` measures the painted ring against the pixels
-  beside it for representative controls on the nine supported backgrounds.
+  ring is a 2px outline with a 2px offset, and forced colours use `Highlight`. Inside a role solid
+  fill the ring paints that role's `onSolid` instead, which the on-solid text gates already hold at
+  4.5:1 against the solid's rest, hover, and pressed fills, so solids need no extra focus gate. See
+  [Focus ring context](STYLING.md#focus-ring-context). `focus-ring-contrast.browser.test.tsx`
+  measures the painted ring against the pixels beside it for representative controls on the nine
+  structural and subtle backgrounds and the six role solids.
 - `color.foreground.accent.onSolid` is also a hard gate at 3:1 against
   `color.background.accent.solid.rest` and `color.background.accent.solid.pressed`. The active
   Select or Combobox option draws a 2px inset outline in that on-solid colour on those fills, so the

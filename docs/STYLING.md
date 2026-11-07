@@ -125,7 +125,7 @@ outside it and each adds (0,0,1):
 | `body`                            | `margin: 0`, paired base surface, accent colour, body font, and unitless `line-height: 1.5` |
 | `body [data-color-mode]`          | Paired base surface and accent colour, so a scope repaints with its own mode                |
 | `button, input, select, textarea` | `font: inherit`, `margin: 0`                                                                |
-| `:focus-visible`                  | The themed focus ring, with `Highlight` under forced colours                                |
+| `:focus-visible`                  | The contextual focus ring, with `Highlight` under forced colours                            |
 
 A global rule must correct a cross-browser difference or replace a default almost every application
 overrides, without erasing native structure such as heading sizes, list markers, table spacing, or
@@ -201,9 +201,11 @@ Authors never name the `recipes` layer. Only `globalStyleInLayer()` takes a laye
 target `base`.
 
 Put overrides that must beat recipes in the `utilities` layer. Use `!important` only to beat
-un-layered or inline styles. Under `!important` the layer order reverses: earlier layers win over
-later ones, and unlayered CSS ranks below every layer. Loading skeleton masks that must stick on
-wrapped children use `!important` in `recipes` for that reason.
+un-layered or inline styles. The one exception is `focusRing()`'s private ring-colour reset, which
+must win over the ringed element's own fill in any layer. See
+[Focus ring context](#focus-ring-context). Under `!important` the layer order reverses: earlier
+layers win over later ones, and unlayered CSS ranks below every layer. Loading skeleton masks that
+must stick on wrapped children use `!important` in `recipes` for that reason.
 
 ## Motion
 
@@ -519,6 +521,23 @@ condition. Its values are the standard surfaces and each role's resting `subtle`
 Hover and pressed fills stay theme tokens for recipes. A background that does not come from the
 pairing, such as `backgroundColor: vars.…` in custom CSS, an image, or a gradient, establishes no
 foreground context.
+
+#### Focus ring context
+
+`focusRing()` in `core/styles/focus-ring.ts` paints every focus ring, including the global
+`:focus-visible` rule. It reads the private `--luke-internal-focus` property and falls back to
+`color.focus`. Every `surfaceStyle` pairing sets that property for the rings inside it. A role solid
+sets the role's on-solid colour, which the compiler gates at 4.5:1 against the solid's rest, hover,
+and pressed fills. A page surface or a subtle fill sets `initial`, so a ring there paints
+`color.focus`.
+
+A ring sits outside the element that draws it, on its parent's fill. `focusRing()` therefore sets
+the property to `inherit !important` on that element, so the ring takes its parent's colour even
+when the element paints a fill of its own. A solid Button or a focusable solid `Box` on a page
+surface keeps a `color.focus` ring. A standard Button or a text field on a solid `Box` gets the
+solid's on-solid ring, and a Combobox clear button inside that field gets the field's `color.focus`
+ring. A surface painted with raw `vars` sets no ring context, so a ring inside it keeps the nearest
+managed surface's colour.
 
 ### Responsive values
 

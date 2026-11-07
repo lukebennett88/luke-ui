@@ -56,7 +56,7 @@ const selectConfig = {
 					opacity: vars.interaction.disabledOpacity,
 				},
 				// Focus only adds the ring, so it composes with every state.
-				[`&[data-focus-visible="true"]${notDisabled}`]: focusRing(vars.color.focus),
+				[`&[data-focus-visible="true"]${notDisabled}`]: focusRing(),
 				// FieldError carries the non-colour cue. Keep the ring over every button finish.
 				[`${rootInvalid}::after`]: {
 					borderRadius: 'inherit',
