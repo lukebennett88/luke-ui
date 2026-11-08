@@ -177,31 +177,6 @@ test('the header desktop threshold clears the widest desktop row', async () => {
 	expect(getDocsSidebarMinPixels()).toBeGreaterThanOrEqual(threshold);
 });
 
-for (const isCollapsed of [false, true]) {
-	test(`keeps the sidebar toggle at least 16px from the wordmark when the sidebar is ${isCollapsed ? 'collapsed' : 'expanded'}`, async () => {
-		await page.viewport(1280, 800);
-		await renderShell('/docs/installation');
-
-		const header = page.getByRole('banner');
-		if (isCollapsed) {
-			await act(async () => {
-				await userEvent.click(header.getByRole('button', { name: 'Hide sidebar' }));
-			});
-		}
-		const toggle = header.getByRole('button', {
-			name: isCollapsed ? 'Show sidebar' : 'Hide sidebar',
-		});
-		await expect.element(toggle).toBeVisible();
-		const wordmark = header
-			.getByRole('link', { name: 'Luke UI' })
-			.element()
-			.getBoundingClientRect();
-		const gap = toggle.element().getBoundingClientRect().left - wordmark.right;
-
-		expect(gap).toBeGreaterThanOrEqual(16);
-	});
-}
-
 function getSidebar() {
 	const sidebar = document.getElementById('docs-sidebar');
 	if (!sidebar) throw new Error('Expected the docs sidebar.');

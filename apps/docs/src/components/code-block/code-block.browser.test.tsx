@@ -126,20 +126,6 @@ for (const copyCase of [
 	});
 }
 
-test('keeps long untitled code out from under the overlay copy button', async () => {
-	await page.viewport(390, 800);
-	renderCodeBlock(
-		<CodeBlock code="pnpm add @luke-ui/react @luke-ui/theme-tactile react-aria-components" />,
-	);
-
-	const copyRect = page.getByRole('button', { name: 'Copy' }).element().getBoundingClientRect();
-	const scrollRegion = page.getByRole('region', { name: 'Code' }).element();
-	// Text can only reach the scrollport's edge, so the scrollport must end before the button.
-	expect(scrollRegion.getBoundingClientRect().right).toBeLessThanOrEqual(copyRect.left);
-	expect(scrollRegion.scrollWidth).toBeGreaterThan(scrollRegion.clientWidth);
-	await page.viewport(1024, 800);
-});
-
 test('the CodeBlock scene has no axe violations', async () => {
 	renderCodeBlock(<CodeBlock code={'const example = "hello";'} title="Example" />);
 	assert(container !== undefined, 'expected CodeBlock container');

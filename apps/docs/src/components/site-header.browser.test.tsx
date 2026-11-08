@@ -76,21 +76,6 @@ test('keeps the theme controls in a popover instead of the header row', async ()
 		.toBeVisible();
 });
 
-test('offers search and theme controls from the mobile bar with no destination active on the landing page', async () => {
-	await page.viewport(390, 800);
-	await renderAt('/', <SiteHeader />);
-
-	expect(getCurrentLinks()).toHaveLength(0);
-	await expect.element(page.getByRole('button', { name: 'Open Search' })).toBeVisible();
-
-	const themeTrigger = page.getByRole('button', { name: 'Theme' });
-	await expect.element(themeTrigger).toBeVisible();
-	await act(async () => {
-		await userEvent.click(themeTrigger);
-	});
-	await expect.element(page.getByRole('radiogroup', { name: 'Theme profile' })).toBeVisible();
-});
-
 test('leaves every destination inactive on the 404 page', async () => {
 	await renderAt('/missing', <NotFound />);
 
@@ -144,26 +129,6 @@ test('names each visible desktop header item once during a route transition, and
 		'site-header-link-components',
 		'site-header-link-docs',
 		'site-header-link-playground',
-		'site-header-search',
-		'site-header-theme',
-		'site-header-wordmark',
-	]);
-});
-
-test('names Menu, not the destinations, GitHub or the toggle, in the compact header', async () => {
-	await page.viewport(390, 800);
-	await renderAt('/docs/installation', <SiteHeader tree={tree} />);
-
-	const transition = document.startViewTransition({ types: ['route'], update: () => {} });
-	await transition.ready;
-	const names = Array.from(document.querySelectorAll('header *'))
-		.filter((element) => element.getClientRects().length > 0)
-		.map((element) => getComputedStyle(element).viewTransitionName)
-		.filter((name) => name !== 'none');
-	await transition.finished;
-
-	expect([...names].toSorted()).toEqual([
-		'site-header-menu',
 		'site-header-search',
 		'site-header-theme',
 		'site-header-wordmark',

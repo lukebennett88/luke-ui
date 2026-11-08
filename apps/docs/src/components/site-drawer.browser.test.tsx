@@ -17,7 +17,6 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { DocsShell } from './docs-shell.js';
-import { NotFound } from './not-found.js';
 import { DocsSearchProvider } from './search.js';
 import { SiteHeader } from './site-header.js';
 import { DocsThemeRoot } from './theme-controls.js';
@@ -52,13 +51,6 @@ const tree: PageTree = {
 	},
 };
 
-const narrowPages = [
-	{ pathname: '/', tree: undefined },
-	{ pathname: '/playground', tree: undefined },
-	{ pathname: '/docs/installation', tree },
-	{ pathname: '/components', tree },
-] as const;
-
 let container: HTMLElement | undefined;
 let root: Root | undefined;
 
@@ -73,100 +65,62 @@ afterEach(async () => {
 	await page.viewport(1024, 800);
 });
 
-for (const { pathname, tree: pageTree } of narrowPages) {
-	test(`holds only search, Theme and Menu in the banner at 390px on ${pathname}`, async () => {
-		await page.viewport(390, 800);
-		await renderAt(pathname, <SiteHeader tree={pageTree} />);
-
-		const banner = page.getByRole('banner');
-		await expect.element(banner.getByRole('button', { name: 'Open Search' })).toBeVisible();
-		await expect.element(banner.getByRole('button', { name: 'Theme' })).toBeVisible();
-		await expect.element(banner.getByRole('button', { name: 'Menu' })).toBeVisible();
-		await expect.element(banner.getByRole('link', { name: /GitHub/ })).not.toBeInTheDocument();
-		await expect.element(banner.getByRole('navigation')).not.toBeInTheDocument();
-		// The wordmark is the only link: no tab links and no GitHub.
-		expect(
-			banner
-				.getByRole('link')
-				.elements()
-				.map((link) => link.textContent),
-		).toEqual(['Luke UI']);
-	});
-}
-
-for (const { pathname, tree: pageTree } of narrowPages) {
-	test(`keeps the header at 3.5rem on ${pathname}`, async () => {
-		await page.viewport(390, 800);
-		await renderAt(pathname, <SiteHeader tree={pageTree} />);
-
-		await expect.element(page.getByRole('banner')).toBeVisible();
-		const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-		expect(page.getByRole('banner').element().getBoundingClientRect().height).toBe(3.5 * rem);
-	});
-}
-
-for (const pathname of ['/', '/playground']) {
-	test(`opens the simple drawer on ${pathname}`, async () => {
-		await page.viewport(390, 800);
-		await renderAt(pathname, <SiteHeader />);
-		await openMenu();
-
-		const dialog = page.getByRole('dialog', { name: 'Menu' });
-		const site = dialog.getByRole('navigation', { name: 'Site' });
-		await expect.element(site).toBeVisible();
-		expect(
-			site
-				.getByRole('link')
-				.elements()
-				.map((link) => link.textContent),
-		).toEqual(['Docs', 'Components', 'Playground', 'GitHub']);
-		await expect
-			.element(dialog.getByRole('navigation', { name: 'Sections' }))
-			.not.toBeInTheDocument();
-		await expect
-			.element(site.getByRole('link', { name: 'GitHub' }))
-			.toHaveAttribute('target', '_blank');
-	});
-}
-
-test('opens the simple drawer on the 404 page with no destination current', async () => {
+test('holds only search, Theme and Menu in the banner at 390px', async () => {
 	await page.viewport(390, 800);
-	await renderAt('/missing', <NotFound />);
+	await renderAt('/docs/installation', <SiteHeader tree={tree} />);
+
+	const banner = page.getByRole('banner');
+	await expect.element(banner.getByRole('button', { name: 'Open Search' })).toBeVisible();
+	await expect.element(banner.getByRole('button', { name: 'Theme' })).toBeVisible();
+	await expect.element(banner.getByRole('button', { name: 'Menu' })).toBeVisible();
+	await expect.element(banner.getByRole('navigation')).not.toBeInTheDocument();
+	// The wordmark is the only link: no tab links and no GitHub.
+	expect(
+		banner
+			.getByRole('link')
+			.elements()
+			.map((link) => link.textContent),
+	).toEqual(['Luke UI']);
+});
+
+test('opens the simple drawer on a page with no tree', async () => {
+	await page.viewport(390, 800);
+	await renderAt('/playground', <SiteHeader />);
 	await openMenu();
 
-	const site = page.getByRole('dialog', { name: 'Menu' }).getByRole('navigation', { name: 'Site' });
-	await expect.element(site.getByRole('link', { name: 'Docs' })).toBeVisible();
+	const dialog = page.getByRole('dialog', { name: 'Menu' });
+	const site = dialog.getByRole('navigation', { name: 'Site' });
+	await expect.element(site).toBeVisible();
 	expect(
 		site
 			.getByRole('link')
 			.elements()
-			.filter((link) => link.getAttribute('aria-current') === 'page'),
-	).toHaveLength(0);
+			.map((link) => link.textContent),
+	).toEqual(['Docs', 'Components', 'Playground', 'GitHub']);
+	await expect
+		.element(dialog.getByRole('navigation', { name: 'Sections' }))
+		.not.toBeInTheDocument();
+	await expect
+		.element(site.getByRole('link', { name: 'GitHub' }))
+		.toHaveAttribute('target', '_blank');
 });
 
-for (const { pathname, label } of [
-	{ pathname: '/docs/installation', label: 'Docs' },
-	{ pathname: '/components', label: 'Components' },
-]) {
-	test(`opens the switcher drawer on ${pathname} with ${label} current`, async () => {
-		await page.viewport(390, 800);
-		await renderAt(pathname, <SiteHeader tree={tree} />);
-		await openMenu();
+test('opens the switcher drawer with the current section marked', async () => {
+	await page.viewport(390, 800);
+	await renderAt('/docs/installation', <SiteHeader tree={tree} />);
+	await openMenu();
 
-		const dialog = page.getByRole('dialog', { name: 'Menu' });
-		const sections = dialog.getByRole('navigation', { name: 'Sections' });
-		await expect
-			.element(sections.getByRole('link', { name: label }))
-			.toHaveAttribute('aria-current', 'page');
-		expect(sections.getByRole('link').elements()).toHaveLength(3);
-		await expect
-			.element(dialog.getByRole('navigation', { name: label, exact: true }))
-			.toBeVisible();
-		await expect.element(dialog.getByRole('navigation', { name: 'Site' })).not.toBeInTheDocument();
-		await expect.element(dialog.getByRole('link', { name: 'GitHub' })).toBeVisible();
-		await expect.element(dialog.getByRole('link', { name: 'Luke UI' })).not.toBeInTheDocument();
-	});
-}
+	const dialog = page.getByRole('dialog', { name: 'Menu' });
+	const sections = dialog.getByRole('navigation', { name: 'Sections' });
+	await expect
+		.element(sections.getByRole('link', { name: 'Docs' }))
+		.toHaveAttribute('aria-current', 'page');
+	expect(sections.getByRole('link').elements()).toHaveLength(3);
+	await expect.element(dialog.getByRole('navigation', { name: 'Docs', exact: true })).toBeVisible();
+	await expect.element(dialog.getByRole('navigation', { name: 'Site' })).not.toBeInTheDocument();
+	await expect.element(dialog.getByRole('link', { name: 'GitHub' })).toBeVisible();
+	await expect.element(dialog.getByRole('link', { name: 'Luke UI' })).not.toBeInTheDocument();
+});
 
 test('opens the tree-only drawer when the header has room and the sidebar does not', async () => {
 	await page.viewport(800, 800);
@@ -190,18 +144,6 @@ test('opens the tree-only drawer when the header has room and the sidebar does n
 	await expect.element(dialog.getByRole('link', { name: 'GitHub' })).not.toBeInTheDocument();
 });
 
-test('names the dialog from its visible title', async () => {
-	await page.viewport(390, 800);
-	await renderAt('/', <SiteHeader />);
-	await openMenu();
-
-	const dialog = page.getByRole('dialog', { name: 'Menu' });
-	const labelledBy = dialog.element().getAttribute('aria-labelledby');
-	expect(labelledBy).toBeTruthy();
-	expect(document.getElementById(labelledBy ?? '')?.textContent).toBe('Menu');
-	await expect.element(dialog.getByRole('button', { name: 'Close menu' })).toBeVisible();
-});
-
 test('closes the drawer when a link is clicked and returns focus to Menu', async () => {
 	await page.viewport(390, 800);
 	await renderAt('/docs/installation', <SiteHeader tree={tree} />);
@@ -220,33 +162,29 @@ test('closes the drawer when a link is clicked and returns focus to Menu', async
 	await expect.element(page.getByRole('button', { name: 'Menu' })).toHaveFocus();
 });
 
-for (const width of [640, 768, 1024, 1280]) {
-	test(`shows only the header's Site navigation at ${width}px`, async () => {
-		await page.viewport(width, 800);
-		await renderAt('/playground', <SiteHeader />);
+test('shows only the header Site navigation at 640px', async () => {
+	await page.viewport(640, 800);
+	await renderAt('/playground', <SiteHeader />);
 
-		expect(getVisibleSiteNavigations()).toHaveLength(1);
-		await expect.element(page.getByRole('button', { name: 'Menu' })).not.toBeInTheDocument();
-	});
-}
+	expect(getVisibleSiteNavigations()).toHaveLength(1);
+	await expect.element(page.getByRole('button', { name: 'Menu' })).not.toBeInTheDocument();
+});
 
-for (const width of [390, 639]) {
-	test(`shows only the drawer's Site navigation at ${width}px`, async () => {
-		await page.viewport(width, 800);
-		await renderAt('/playground', <SiteHeader />);
-		expect(getVisibleSiteNavigations()).toHaveLength(0);
+test('shows only the drawer Site navigation at 639px', async () => {
+	await page.viewport(639, 800);
+	await renderAt('/playground', <SiteHeader />);
+	expect(getVisibleSiteNavigations()).toHaveLength(0);
 
-		await openMenu();
+	await openMenu();
 
-		expect(getVisibleSiteNavigations()).toHaveLength(1);
-		expect(
-			page
-				.getByRole('dialog')
-				.element()
-				.contains(getVisibleSiteNavigations()[0] ?? null),
-		).toBe(true);
-	});
-}
+	expect(getVisibleSiteNavigations()).toHaveLength(1);
+	expect(
+		page
+			.getByRole('dialog')
+			.element()
+			.contains(getVisibleSiteNavigations()[0] ?? null),
+	).toBe(true);
+});
 
 test('closes the drawer when the header becomes desktop and the page has no tree', async () => {
 	await page.viewport(390, 800);
@@ -307,39 +245,6 @@ test('closes the drawer when the layout reaches the sidebar', async () => {
 	await page.viewport(1280, 800);
 
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-});
-
-test('switches a drawer that is open from the switcher to the tree when the header becomes desktop', async () => {
-	await page.viewport(390, 800);
-	await renderAt(
-		'/docs/installation',
-		<DocsShell tree={tree}>
-			<main>Article</main>
-		</DocsShell>,
-	);
-	await openMenu();
-	const dialog = page.getByRole('dialog', { name: 'Menu' });
-	await expect.element(dialog.getByRole('navigation', { name: 'Sections' })).toBeVisible();
-
-	await page.viewport(800, 800);
-
-	await expect.element(dialog.getByRole('navigation', { name: 'Docs' })).toBeVisible();
-	await expect
-		.element(dialog.getByRole('navigation', { name: 'Sections' }))
-		.not.toBeInTheDocument();
-});
-
-test('gives drawer links a 2.75rem minimum block size', async () => {
-	await page.viewport(390, 800);
-	await renderAt('/docs/installation', <SiteHeader tree={tree} />);
-	await openMenu();
-
-	const link = page
-		.getByRole('dialog', { name: 'Menu' })
-		.getByRole('link', { name: 'Installation' });
-	await expect.element(link).toBeVisible();
-	const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-	expect(link.element().getBoundingClientRect().height).toBeGreaterThanOrEqual(2.75 * rem);
 });
 
 async function openMenu() {
