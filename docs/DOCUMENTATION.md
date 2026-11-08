@@ -504,34 +504,48 @@ page.
 
 ## Site chrome
 
-Every surface shares one top nav, `SiteNav` in `apps/docs/src/components/site-nav.tsx`. It carries
-the wordmark, the primary destinations, search, and the appearance controls. The wordmark links to
-`/`, the landing page. Docs opens `/docs/installation`. Components opens `/components`. The
-destination list and its active-route matching live in `apps/docs/src/lib/site-destinations.ts`, so
-the nav and the docs shell navigate to the same places. Appearance controls belong to the nav on
-every surface, not to the docs sidebar footer. They use flush ghost toggles on the header's canvas
-background.
+Every surface shares one header, `SiteHeader` in `apps/docs/src/components/site-header.tsx`. It is
+one `3.5rem` row (`SITE_HEADER_BLOCK_SIZE`). On desktop it holds the wordmark, the sidebar toggle
+when the page has a docs sidebar, and the Docs, Components and Playground links, then search, Theme
+and GitHub. The compact row holds the wordmark, search, Theme and Menu. The wordmark links to `/`,
+the landing page. Docs opens `/docs/installation`. Components opens `/components`. The destination
+list and its active-route matching live in `apps/docs/src/lib/site-destinations.ts`. Appearance
+controls belong to the header on every surface, not to the docs sidebar footer.
 
-The landing page at `/` renders `SiteNav` with no docs sidebar. It has no active destination.
+Pass `tree` to `SiteHeader` on a page with a sidebar. Home, the playground and the 404 page pass
+nothing. Menu opens `SiteDrawer` (`site-drawer.tsx`), a React Aria `Modal` that slides in from the
+inline end and is named by its visible "Menu" title. It has three variants, chosen from the tree and
+the header row:
 
-The docs routes render `DocsShell`, a docs-local grid with the desktop navigation, mobile drawer,
-and `DocsSiteNav` header. `DocsArticle` in `apps/docs/src/components/docs-article/` renders each
-page into the shell: title block, MDX body, previous and next links, and the table of contents. The
-playground and the 404 render `SiteNav` directly.
+- Simple: a page with no tree. A `Site` navigation of Docs, Components, Playground and GitHub.
+- Switcher: a page with a tree, under the compact header. A `Sections` navigation of segmented
+  links, then the current section's tree, then GitHub. There is no Home entry, because the wordmark
+  links home.
+- Tree only: a page with a tree, under the desktop header but with no sidebar. Only the tree,
+  because the header already links to the sections.
 
-`DocsSiteNav` passes `hasSidebarNavigation`, which hides the bar's destinations below `lg`. That is
-the breakpoint where the local sidebar and mobile drawer provide those links instead, so they never
-appear twice. The bar stays on one `3.5rem` row (`SITE_HEADER_BLOCK_SIZE`). The shell's sticky
-sidebar offset, the table of contents offset, and the heading scroll margin depend on that height.
-Surfaces with no sidebar keep the destinations at every width, moving them to a second nav row below
-`md`.
+The drawer closes when a link is chosen and when it is no longer needed: the header becomes desktop
+on a page with no tree, or the sidebar layout is reached. `DocsNav` names its landmark after the
+active section, so the Components tree is announced as "Components". Drawer rows are at least
+`2.75rem` tall, and the sidebar keeps its own row size. The landing page has no active destination.
 
-The docs app's own size queries are unnamed `@container` queries against the root container, built
-from the conditions in `apps/docs/src/lib/docs-container-queries.ts`. Environmental queries such as
-`prefers-reduced-motion` and `hover: none` stay `@media`. No element below the root is a container,
-so the sidebar, table of contents, header, and heading scroll margin all switch at the same root
-width. If a docs component later needs its own container, name it and keep the shell-synchronised
-queries on the root.
+The docs routes render `DocsShell`, a docs-local grid with the desktop navigation and the header.
+`DocsArticle` in `apps/docs/src/components/docs-article/` renders each page into the shell: title
+block, MDX body, previous and next links, and the table of contents. The playground and the 404
+render the header directly.
+
+The header and the docs shell are named containers, built from
+`apps/docs/src/lib/docs-container-queries.ts`. The header (`site-header`) switches between the
+compact and desktop rows at `SITE_HEADER_DESKTOP_MIN`, which sits just above the desktop row's
+measured width. `docs-shell.browser.test.tsx` fails if it drops below that width. The shell
+(`docs-shell`) shows the sidebar from `DOCS_SIDEBAR_MIN`. Both are in `rem`, so a larger text size
+switches layouts sooner. Between the two, on a docs page, the header keeps its links and Menu opens
+a drawer with the tree. The sidebar threshold must stay at or above the header threshold.
+Environmental queries such as `prefers-reduced-motion` and `hover: none` stay `@media`. The article,
+table of contents, playground and example gutters are still unnamed `@container` queries, which
+resolve against the nearest container: `docs-shell` in the docs, and `:root` elsewhere. A query
+measures its container's content box, so the header and the shell keep their padding on an inner
+element.
 
 The docs article and each example frame use `isolation: isolate` so in-flow stacking, such as
 example resize grips, cannot paint over the sticky header. Do not raise the header `z-index` to

@@ -8,12 +8,11 @@ import { TextInputField } from '@luke-ui/react/text-input-field';
 import { cx } from '@luke-ui/react/utils';
 import type { NavigateOptions } from '@tanstack/react-router';
 import { useRouter } from '@tanstack/react-router';
-import { assignInlineVars } from '@vanilla-extract/dynamic';
 import type { SortedResult } from 'fumadocs-core/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
 import { staticClient } from 'fumadocs-core/search/client/orama-static';
 import type { ReactNode } from 'react';
-import { useCallback, useEffect, ViewTransition } from 'react';
+import { useCallback, useEffect } from 'react';
 import { RouterProvider } from 'react-aria-components';
 import { Autocomplete } from 'react-aria-components/Autocomplete';
 import { Dialog } from 'react-aria-components/Dialog';
@@ -21,9 +20,7 @@ import { Menu, MenuItem } from 'react-aria-components/Menu';
 import { Modal, ModalOverlay } from 'react-aria-components/Modal';
 import { TextContext } from 'react-aria-components/Text';
 import { create } from 'zbsearch';
-import type { SearchAnchorRect } from './search-anchor.js';
 import { plainText } from './search-content.js';
-import { searchFieldViewTransition } from './search-view-transition.js';
 import * as styles from './search.css.js';
 
 const client = staticClient({
@@ -31,10 +28,7 @@ const client = staticClient({
 });
 
 interface DocsSearchDialogProps {
-	anchor: SearchAnchorRect | null;
 	isOpen: boolean;
-	/** Called after the dialog has unmounted. */
-	onExited?: () => void;
 	onOpenChange: (isOpen: boolean) => void;
 }
 
@@ -43,12 +37,7 @@ const MARK_PATTERN = /^<mark>(.*)<\/mark>$/i;
 const CODE_SPAN_PATTERN = /^`([^`]*)`$/;
 const EXTERNAL_URL_PATTERN = /^https?:\/\//;
 
-export function DocsSearchDialog({
-	anchor,
-	isOpen,
-	onExited,
-	onOpenChange,
-}: DocsSearchDialogProps) {
+export function DocsSearchDialog({ isOpen, onOpenChange }: DocsSearchDialogProps) {
 	const { search, setSearch, query } = useDocsSearch({ client });
 	const router = useRouter();
 	const results: Array<SortedResult> = (() => {
@@ -63,9 +52,6 @@ export function DocsSearchDialog({
 		if (!hasResults) return 'No results found.';
 		return `${results.length} ${results.length === 1 ? 'result' : 'results'}`;
 	})();
-
-	// React runs the returned cleanup when the panel unmounts, after the exit animation.
-	const panelRef = useCallback(() => onExited, [onExited]);
 
 	const close = useCallback(() => {
 		onOpenChange(false);
@@ -86,87 +72,71 @@ export function DocsSearchDialog({
 		return () => document.removeEventListener('keydown', onKeyDown, { capture: true });
 	}, [isOpen, close]);
 
-	const panelPositionStyle =
-		anchor === null
-			? undefined
-			: {
-					...assignInlineVars({
-						[styles.searchAnchorHeightVar]: `${anchor.height}px`,
-					}),
-					left: `${anchor.left}px`,
-					top: `${anchor.top}px`,
-					width: `${anchor.width}px`,
-				};
-
-	// Only the open dialog owns the shared name. While the overlay is still exiting, the trigger
-	// remounts its boundary with the same name, and React forbids two at once.
 	const field = (
-		<div className={styles.fieldMorphHost}>
-			<div className={styles.panelFieldShell}>
-				<div className={styles.autocomplete}>
-					<Autocomplete inputValue={search} onInputChange={setSearch}>
-						<Lockup className={styles.inputRow} gap="space.12" railAlignment="center">
-							<LockupBody>
-								<TextInputField
-									aria-label="Search documentation"
-									autoComplete="off"
-									// Focus the search field when the modal opens.
-									// oxlint-disable-next-line jsx-a11y/no-autofocus
-									autoFocus
-									className={styles.field}
-									inputClassName={styles.input}
-									placeholder="Search documentation"
-									prefix={<Icon name="search" />}
-									size="small"
-									type="search"
-								/>
-							</LockupBody>
-							<LockupRail>
-								<Button
-									aria-label="Close search"
-									className={styles.close}
-									onPress={close}
-									prominence="low"
-									size="small"
-								>
-									<Kbd>Esc</Kbd>
-								</Button>
-							</LockupRail>
-						</Lockup>
-						<div className={styles.panelResultsRegion}>
-							{/* Static empty copy: embedding the query would re-announce on every keystroke. */}
-							<Text
-								className={hasResults ? styles.resultSummary : styles.empty}
-								color="secondary"
-								elementType="p"
-								role="status"
-								typography="caption"
+		<div className={styles.panelFieldShell}>
+			<div className={styles.autocomplete}>
+				<Autocomplete inputValue={search} onInputChange={setSearch}>
+					<Lockup className={styles.inputRow} gap="space.12" railAlignment="center">
+						<LockupBody>
+							<TextInputField
+								aria-label="Search documentation"
+								autoComplete="off"
+								// Focus the search field when the modal opens.
+								// oxlint-disable-next-line jsx-a11y/no-autofocus
+								autoFocus
+								className={styles.field}
+								inputClassName={styles.input}
+								placeholder="Search documentation"
+								prefix={<Icon name="search" />}
+								size="small"
+								type="search"
+							/>
+						</LockupBody>
+						<LockupRail>
+							<Button
+								aria-label="Close search"
+								className={styles.close}
+								onPress={close}
+								prominence="low"
+								size="small"
 							>
-								{statusMessage}
-							</Text>
-							<Menu aria-label="Search results" className={styles.results} onAction={close}>
-								{results.map((result) => (
-									<MenuItem
-										className={
-											result.type === 'page' ? styles.result : cx(styles.result, styles.nestedItem)
-										}
-										href={result.url}
-										id={result.id}
-										key={result.id}
-										rel={isExternalUrl(result.url) ? 'noopener noreferrer' : undefined}
-										target={isExternalUrl(result.url) ? '_blank' : undefined}
-										textValue={plainText(result.content)}
-									>
-										{/* Luke UI `Code` renders `Text`, which would claim MenuItem's label slot. */}
-										<TextContext value={null}>
-											<ResultBody result={result} />
-										</TextContext>
-									</MenuItem>
-								))}
-							</Menu>
-						</div>
-					</Autocomplete>
-				</div>
+								<Kbd>Esc</Kbd>
+							</Button>
+						</LockupRail>
+					</Lockup>
+					<div className={styles.panelResultsRegion}>
+						{/* Static empty copy: embedding the query would re-announce on every keystroke. */}
+						<Text
+							className={hasResults ? styles.resultSummary : styles.empty}
+							color="secondary"
+							elementType="p"
+							role="status"
+							typography="caption"
+						>
+							{statusMessage}
+						</Text>
+						<Menu aria-label="Search results" className={styles.results} onAction={close}>
+							{results.map((result) => (
+								<MenuItem
+									className={
+										result.type === 'page' ? styles.result : cx(styles.result, styles.nestedItem)
+									}
+									href={result.url}
+									id={result.id}
+									key={result.id}
+									rel={isExternalUrl(result.url) ? 'noopener noreferrer' : undefined}
+									target={isExternalUrl(result.url) ? '_blank' : undefined}
+									textValue={plainText(result.content)}
+								>
+									{/* Luke UI `Code` renders `Text`, which would claim MenuItem's label slot. */}
+									<TextContext value={null}>
+										<ResultBody result={result} />
+									</TextContext>
+								</MenuItem>
+							))}
+						</Menu>
+					</div>
+				</Autocomplete>
 			</div>
 		</div>
 	);
@@ -179,7 +149,7 @@ export function DocsSearchDialog({
 			onOpenChange={(nextOpen) => (nextOpen ? onOpenChange(true) : close())}
 		>
 			<Modal className={styles.modalPassThrough}>
-				<div className={styles.panel} ref={panelRef} style={panelPositionStyle}>
+				<div className={styles.panel}>
 					<Dialog aria-label="Search documentation" className={styles.dialog}>
 						<RouterProvider
 							navigate={(href) => void router.navigate({ href })}
@@ -190,11 +160,7 @@ export function DocsSearchDialog({
 								return router.history.createHref(location.publicHref);
 							}}
 						>
-							{isOpen ? (
-								<ViewTransition {...searchFieldViewTransition}>{field}</ViewTransition>
-							) : (
-								field
-							)}
+							{field}
 						</RouterProvider>
 					</Dialog>
 				</div>

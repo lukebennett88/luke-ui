@@ -42,7 +42,9 @@ export default defineConfig({
 								const y = box.y + box.height / 2;
 								await page.mouse.move(x, y);
 								await page.mouse.down();
-								await page.mouse.move(x + dragBy, y, { steps: 10 });
+								// Each mouse event is a round trip to the page, and under load each one costs
+								// hundreds of milliseconds. One move past the threshold is all the panels need.
+								await page.mouse.move(x + dragBy, y);
 								await page.mouse.up();
 							},
 						},

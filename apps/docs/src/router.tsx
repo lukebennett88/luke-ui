@@ -1,5 +1,6 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router';
 import { NotFound } from './components/not-found';
+import { getRouteViewTransition } from './lib/route-view-transition';
 import { routeTree } from './routeTree.gen';
 
 export function getRouter() {
@@ -11,6 +12,7 @@ export function getRouter() {
 		basepath: basePath,
 		defaultNotFoundComponent: NotFound,
 		defaultPreload: 'intent',
+		defaultViewTransition: getRouteViewTransition(),
 		routeTree,
 		scrollRestoration: true,
 	});

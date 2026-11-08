@@ -71,9 +71,24 @@ test('copies copyText instead of rendered highlighted text', async () => {
 });
 
 for (const copyCase of [
-	{ name: 'untitled overlay copy', title: undefined as string | undefined },
-	{ name: 'titled header copy', title: 'Source' },
-]) {
+	{
+		isOverlay: true,
+		minWidthShare: 0.7,
+		name: 'untitled overlay copy',
+		title: undefined,
+	},
+	{
+		isOverlay: false,
+		minWidthShare: 0.9,
+		name: 'titled header copy',
+		title: 'Source',
+	},
+] satisfies Array<{
+	isOverlay: boolean;
+	minWidthShare: number;
+	name: string;
+	title: string | undefined;
+}>) {
 	test(`scrolls horizontally and keeps ${copyCase.name} on the physical right in RTL docs`, async () => {
 		await page.viewport(320, 720);
 		document.documentElement.dir = 'rtl';
@@ -100,8 +115,11 @@ for (const copyCase of [
 			const figureMidX = (figureBox.left + figureBox.right) / 2;
 			expect(buttonMidX).toBeGreaterThan(figureMidX);
 
-			// Full-width scrollport — not a side column beside the button.
-			expect(viewport.getBoundingClientRect().width).toBeGreaterThan(figure.clientWidth * 0.9);
+			// A titled block keeps its copy in the header above a full-width scrollport. An untitled one
+			// ends the scrollport before the overlay button so text never sits beneath it.
+			const viewportBox = viewport.getBoundingClientRect();
+			expect(viewportBox.right).toBeLessThanOrEqual(copyCase.isOverlay ? buttonBox.left : Infinity);
+			expect(viewportBox.width).toBeGreaterThan(figure.clientWidth * copyCase.minWidthShare);
 		} finally {
 			document.documentElement.dir = 'ltr';
 		}

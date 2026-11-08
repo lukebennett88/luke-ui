@@ -4,12 +4,13 @@ import { Heading } from '@luke-ui/react/heading';
 import { Link } from '@luke-ui/react/link';
 import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 import { Stack } from '@luke-ui/react/stack';
-import { vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import { useRouterState } from '@tanstack/react-router';
+import { fallbackVar } from '@vanilla-extract/css';
 import type { Folder, Node, Root, Separator } from 'fumadocs-core/page-tree';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useId } from 'react';
+import { getActiveSiteDestination } from '../lib/site-destinations.js';
 import { plainList } from '../styles/plain-list.css.js';
 import { DocsLink } from './docs-link.js';
 import * as styles from './docs-shell.css.js';
@@ -28,6 +29,8 @@ const navRowProps = {
 	minBlockSize: '2rem',
 	paddingInline: 'space.8',
 } as const;
+
+const navLinkRestMinBlockSize = '2.25rem';
 
 /** Top inset shared by the article and desktop TOC so the two columns line up. */
 export const docsContentPaddingBlockStart =
@@ -48,6 +51,8 @@ interface DocsNavProps {
 export function DocsNav({ onNavigate, tree }: DocsNavProps) {
 	const pathname = useRouterState({ select: (state) => state.location.pathname });
 	const labelIdPrefix = useId();
+	// The section names the landmark, so the Components tree is not announced as "Docs".
+	const label = getActiveSiteDestination(pathname)?.label ?? 'Docs';
 	const roots = collectRootFolders(tree);
 	const activeRoot = findActiveRoot(roots, pathname);
 	const nodes = (() => {
@@ -57,20 +62,18 @@ export function DocsNav({ onNavigate, tree }: DocsNavProps) {
 	})();
 
 	return (
-		<Box aria-label="Docs" elementType="nav">
-			<NavList isTopLevel labelIdPrefix={labelIdPrefix} nodes={nodes} onNavigate={onNavigate} />
+		<Box aria-label={label} elementType="nav" paddingBlockStart="space.16">
+			<NavList labelIdPrefix={labelIdPrefix} nodes={nodes} onNavigate={onNavigate} />
 		</Box>
 	);
 }
 
 function NavList({
-	isTopLevel = false,
 	labelIdPrefix,
 	labelledBy,
 	nodes,
 	onNavigate,
 }: {
-	isTopLevel?: boolean;
 	labelIdPrefix: string;
 	labelledBy?: string;
 	nodes: Array<Node>;
@@ -88,11 +91,9 @@ function NavList({
 			padding="0"
 		>
 			{entries.map((entry, index) => {
-				const isFirst = isTopLevel && index === 0;
 				if (entry.type === 'section') {
 					return (
 						<NavSection
-							isFirst={isFirst}
 							items={entry.items}
 							key={`section-${index}`}
 							labelId={`${labelIdPrefix}-section-${index}`}
@@ -104,7 +105,6 @@ function NavList({
 				}
 				return (
 					<NavItemNode
-						isFirst={isFirst}
 						key={entry.node.$id ?? `item-${index}`}
 						labelId={`${labelIdPrefix}-item-${index}`}
 						labelIdPrefix={labelIdPrefix}
@@ -118,14 +118,12 @@ function NavList({
 }
 
 function NavSection({
-	isFirst,
 	items,
 	labelId,
 	labelIdPrefix,
 	name,
 	onNavigate,
 }: {
-	isFirst: boolean;
 	items: Array<NavItem>;
 	labelId: string;
 	labelIdPrefix: string;
@@ -133,7 +131,7 @@ function NavSection({
 	onNavigate?: () => void;
 }) {
 	return (
-		<SectionFrame isFirst={isFirst}>
+		<SectionFrame>
 			<SectionHeading id={labelId}>{name}</SectionHeading>
 			<NavList
 				labelIdPrefix={labelIdPrefix}
@@ -146,13 +144,11 @@ function NavSection({
 }
 
 function NavItemNode({
-	isFirst = false,
 	labelId,
 	labelIdPrefix,
 	node,
 	onNavigate,
 }: {
-	isFirst?: boolean;
 	labelId: string;
 	labelIdPrefix: string;
 	node: NavItem;
@@ -162,7 +158,6 @@ function NavItemNode({
 		return (
 			<NavFolder
 				folder={node}
-				isFirst={isFirst}
 				labelId={labelId}
 				labelIdPrefix={labelIdPrefix}
 				onNavigate={onNavigate}
@@ -186,13 +181,11 @@ function NavItemNode({
 
 function NavFolder({
 	folder,
-	isFirst,
 	labelId,
 	labelIdPrefix,
 	onNavigate,
 }: {
 	folder: Folder;
-	isFirst: boolean;
 	labelId: string;
 	labelIdPrefix: string;
 	onNavigate?: () => void;
@@ -200,7 +193,7 @@ function NavFolder({
 	const childNodes = folder.index ? [folder.index, ...folder.children] : folder.children;
 
 	return (
-		<SectionFrame isFirst={isFirst}>
+		<SectionFrame>
 			<SectionHeading icon={folder.icon} id={labelId}>
 				{folder.name}
 			</SectionHeading>
@@ -214,18 +207,9 @@ function NavFolder({
 	);
 }
 
-const sectionBorder = {
-	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
-} as const satisfies CSSProperties;
-
-function SectionFrame({ children, isFirst }: { children: ReactNode; isFirst: boolean }) {
+function SectionFrame({ children }: { children: ReactNode }) {
 	return (
-		<Stack
-			elementType="li"
-			gap="space.4"
-			paddingBlock="space.16"
-			style={isFirst ? undefined : sectionBorder}
-		>
+		<Stack elementType="li" gap="space.4" paddingBlockEnd="space.8" paddingBlockStart="space.24">
 			{children}
 		</Stack>
 	);
@@ -284,6 +268,7 @@ export function DocsNavLink({
 		<Box
 			{...navRowProps}
 			inlineSize="100%"
+			minBlockSize={fallbackVar(styles.navLinkMinBlockSize, navLinkRestMinBlockSize)}
 			renderRoot={(domProps) => {
 				const className = cx(domProps.className, styles.navLink);
 				if (isExternal) {
@@ -292,6 +277,7 @@ export function DocsNavLink({
 							{...domProps}
 							className={className}
 							href={href}
+							onPress={onNavigate}
 							rel="noopener noreferrer"
 							target="_blank"
 						/>
@@ -323,7 +309,10 @@ export function DocsNavLink({
 	);
 }
 
-/** Groups separator markers into sections that own the following pages and folders. */
+/**
+ * Groups separator markers into sections that own the following pages and folders. A section
+ * holding a single page drops its heading, which would add a row and no information.
+ */
 function groupNavEntries(nodes: Array<Node>): Array<NavEntry> {
 	const entries: Array<NavEntry> = [];
 	let openSection: Extract<NavEntry, { type: 'section' }> | undefined;
@@ -341,7 +330,14 @@ function groupNavEntries(nodes: Array<Node>): Array<NavEntry> {
 		entries.push({ type: 'item', node });
 	}
 
-	return entries.filter((entry) => entry.type === 'item' || entry.items.length > 0);
+	return entries.flatMap((entry): Array<NavEntry> => {
+		if (entry.type === 'item') return [entry];
+		const [onlyItem] = entry.items;
+		if (entry.items.length === 1 && onlyItem?.type === 'page') {
+			return [{ type: 'item', node: onlyItem }];
+		}
+		return entry.items.length > 0 ? [entry] : [];
+	});
 }
 
 function collectRootFolders(tree: Root): Array<Folder> {

@@ -186,11 +186,39 @@ function boundaryFixture() {
 	);
 }
 
+const rhythm = [
+	['p + p', '24px'],
+	['p + h2', '48px'],
+	['h2 + p', '24px'],
+	['p + h3', '32px'],
+	['h3 + p', '16px'],
+	['p + blockquote', '24px'],
+] as const;
+
+test('sets the vertical rhythm between blocks', () => {
+	const { locator } = render(
+		<Prose>
+			<p>First.</p>
+			<p>Second.</p>
+			<h2>Two</h2>
+			<p>Third.</p>
+			<h3>Three</h3>
+			<p>Fourth.</p>
+			<blockquote>Quote.</blockquote>
+		</Prose>,
+	);
+	const root = locator.element();
+
+	for (const [selector, gap] of rhythm) {
+		expect(margin(query(root, selector))).toBe(gap);
+	}
+});
+
 test('applies Prose rhythm to elements outside a not-prose boundary', () => {
 	const { locator } = render(boundaryFixture());
 	const root = locator.element();
 
-	expect(margin(query(root, '[data-testid="outside"]'))).toBe('32px');
+	expect(margin(query(root, '[data-testid="outside"]'))).toBe('24px');
 });
 
 test('leaves browser defaults inside a not-prose boundary', () => {
@@ -260,7 +288,7 @@ test('keeps the gap after a heading for a not-prose element but not for its desc
 	);
 	const root = locator.element();
 
-	expect(margin(query(root, '[data-testid="widget"]'))).toBe('32px');
+	expect(margin(query(root, '[data-testid="widget"]'))).toBe('24px');
 	expect(margin(query(root, '[data-testid="inner-widget"]'))).toBe('0px');
 });
 
@@ -268,7 +296,7 @@ test('restores Prose rhythm for a Prose nested inside a not-prose boundary', () 
 	const { locator } = render(boundaryFixture());
 	const nested = query(locator.element(), '[data-testid="nested"]');
 
-	expect(margin(query(nested, '[data-testid="nested-second"]'))).toBe('32px');
+	expect(margin(query(nested, '[data-testid="nested-second"]'))).toBe('24px');
 	expect(getComputedStyle(query(nested, 'ul')).listStyleType).toBe('disc');
 	expect(getComputedStyle(query(nested, 'ul')).paddingInlineStart).toBe('24px');
 });

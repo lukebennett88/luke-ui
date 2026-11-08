@@ -24,7 +24,7 @@ import { PreviewToolbar } from '../../components/playground/preview-toolbar';
 import { RESIZE_TARGET_MINIMUM_SIZE } from '../../components/playground/resize-target';
 import { useIsDesktop } from '../../components/playground/use-is-desktop';
 import type { ViewportWidth } from '../../components/playground/viewport-toggle';
-import { SiteNav } from '../../components/site-nav.js';
+import { SiteHeader } from '../../components/site-header.js';
 import { useDocsTheme } from '../../components/theme-controls';
 import { withBasePath } from '../../lib/base-path.js';
 import { encodeDocsPlaygroundHash } from '../../lib/docs-playground-hash.js';
@@ -130,7 +130,7 @@ function Playground() {
 
 	return (
 		<Stack blockSize="100dvh">
-			<SiteNav />
+			<SiteHeader />
 			<Group
 				className={styles.panelGroup}
 				orientation={isDesktop ? 'horizontal' : 'vertical'}

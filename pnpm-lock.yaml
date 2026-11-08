@@ -483,9 +483,6 @@ importers:
       '@vanilla-extract/css':
         specifier: 'catalog:'
         version: 1.21.3
-      '@vanilla-extract/dynamic':
-        specifier: 'catalog:'
-        version: 2.1.5
       '@vanilla-extract/recipes':
         specifier: 'catalog:'
         version: 0.5.7(@vanilla-extract/css@1.21.3)
