@@ -87,7 +87,7 @@ function SiteLinks({ onNavigate }: { onNavigate: () => void }) {
 					{destination.label}
 				</DocsNavLink>
 			))}
-			<GithubFooter />
+			<GithubFooter onNavigate={onNavigate} />
 		</nav>
 	);
 }
@@ -115,7 +115,7 @@ function TreeDrawerContent({
 			<div ref={treeRef}>
 				<DocsNav onNavigate={onNavigate} tree={tree} />
 			</div>
-			{isHeaderDesktop ? null : <GithubFooter />}
+			{isHeaderDesktop ? null : <GithubFooter onNavigate={onNavigate} />}
 		</>
 	);
 }
@@ -140,10 +140,10 @@ function SectionSwitcher({ onNavigate }: { onNavigate: () => void }) {
 	);
 }
 
-function GithubFooter() {
+function GithubFooter({ onNavigate }: { onNavigate: () => void }) {
 	return (
 		<div className={styles.footer}>
-			<DocsNavLink href={GITHUB_REPO_URL} icon={<GithubMark />} isExternal>
+			<DocsNavLink href={GITHUB_REPO_URL} icon={<GithubMark />} isExternal onNavigate={onNavigate}>
 				GitHub
 			</DocsNavLink>
 		</div>

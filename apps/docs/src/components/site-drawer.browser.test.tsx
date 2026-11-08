@@ -67,6 +67,7 @@ afterEach(async () => {
 	container?.remove();
 	localStorage.clear();
 	delete document.documentElement.dataset.docsSidebar;
+	document.documentElement.style.removeProperty('font-size');
 	container = undefined;
 	root = undefined;
 	await page.viewport(1024, 800);
@@ -255,6 +256,42 @@ test('closes the drawer when the header becomes desktop and the page has no tree
 	await page.viewport(1024, 800);
 
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+});
+
+test('closes the drawer when an external link is clicked', async () => {
+	await page.viewport(390, 800);
+	await renderAt('/', <SiteHeader />);
+	await openMenu();
+	// The link opens a new tab; stop that after React has handled the click.
+	const preventNavigation = (event: Event) => event.preventDefault();
+	document.addEventListener('click', preventNavigation);
+
+	try {
+		await act(async () => {
+			await userEvent.click(
+				page.getByRole('dialog', { name: 'Menu' }).getByRole('link', { name: 'GitHub' }),
+			);
+		});
+	} finally {
+		document.removeEventListener('click', preventNavigation);
+	}
+
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+});
+
+test('follows a root font size change that resizes no container', async () => {
+	await page.viewport(700, 800);
+	await renderAt('/playground', <SiteHeader />);
+	await expect.element(page.getByRole('button', { name: 'Menu' })).not.toBeInTheDocument();
+
+	// 40rem is now 960px, wider than the viewport, so the header turns compact with no resize.
+	document.documentElement.style.fontSize = '24px';
+
+	await expect.element(page.getByRole('button', { name: 'Menu' })).toBeVisible();
+	await openMenu();
+	await expect
+		.element(page.getByRole('dialog').getByRole('navigation', { name: 'Site' }))
+		.toBeVisible();
 });
 
 test('closes the drawer when the layout reaches the sidebar', async () => {

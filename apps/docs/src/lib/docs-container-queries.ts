@@ -73,6 +73,9 @@ export const docsTocMinInlineSize = atLeast(breakpoints.bp1280);
  * closing a drawer whose trigger became hidden. It measures the element the way the query does;
  * `matchMedia` would count a classic scrollbar and disagree. `false` on the server and while the
  * element is missing. Call it at module scope so the subscription stays stable.
+ *
+ * A `rem` threshold also changes when the root font size does, which resizes no container. So the
+ * subscription observes a hidden element one threshold wide, which resizes with `rem`.
  */
 export function createInlineSizeAtLeastHook(
 	getElement: () => HTMLElement | null,
@@ -83,8 +86,11 @@ export function createInlineSizeAtLeastHook(
 		if (!element) return () => {};
 		const observer = new ResizeObserver(onStoreChange);
 		observer.observe(element);
+		const sentinel = threshold.unit === 'rem' ? createThresholdSentinel(threshold) : null;
+		if (sentinel) observer.observe(sentinel);
 		return () => {
 			observer.disconnect();
+			sentinel?.remove();
 		};
 	}
 
@@ -97,6 +103,13 @@ export function createInlineSizeAtLeastHook(
 	return function useInlineSizeAtLeast() {
 		return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 	};
+}
+
+function createThresholdSentinel({ unit, value }: InlineSizeThreshold) {
+	const sentinel = document.createElement('div');
+	sentinel.setAttribute('aria-hidden', 'true');
+	sentinel.style.cssText = `block-size:0;inline-size:${value}${unit};overflow:hidden;pointer-events:none;position:absolute;visibility:hidden`;
+	return document.documentElement.appendChild(sentinel);
 }
 
 function getServerSnapshot() {

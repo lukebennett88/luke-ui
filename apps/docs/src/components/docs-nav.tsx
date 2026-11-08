@@ -277,6 +277,7 @@ export function DocsNavLink({
 							{...domProps}
 							className={className}
 							href={href}
+							onPress={onNavigate}
 							rel="noopener noreferrer"
 							target="_blank"
 						/>
