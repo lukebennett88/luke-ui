@@ -55,14 +55,18 @@ try {
 		);
 	}
 } catch (error) {
-	const message =
-		error instanceof z.ZodError
-			? readableZodError(error)
-			: error instanceof Error
-				? error.message
-				: String(error);
-	process.stderr.write(`${message}\n`);
+	process.stderr.write(`${errorMessage(error)}\n`);
 	process.exitCode = 1;
+}
+
+function errorMessage(error: unknown): string {
+	if (error instanceof z.ZodError) {
+		return readableZodError(error);
+	}
+	if (error instanceof Error) {
+		return error.message;
+	}
+	return String(error);
 }
 
 function inputClosedError(): Error {
