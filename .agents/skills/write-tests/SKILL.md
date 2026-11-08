@@ -37,7 +37,8 @@ Authors use this before finishing. Reviewers use it on the diff.
       does not re-prove behaviour another component owns.
       ([Component tests](../../../docs/TESTING.md#component-tests))
 - [ ] The test type is the smallest that proves the contract, in the place TESTING.md gives.
-- [ ] Browser component tests prefer roles and accessible names over text queries or DOM selectors.
+- [ ] Browser component tests prefer roles and accessible names over text queries, and locate
+      interactive controls without DOM selectors.
       ([Component tests](../../../docs/TESTING.md#component-tests))
 - [ ] Tests assert computed styles only when layout, a semantic colour, or an interaction state is
       the contract. ([Component tests](../../../docs/TESTING.md#component-tests))

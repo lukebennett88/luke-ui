@@ -114,7 +114,9 @@ Expose an internal architectural distinction only when it reaches the public API
 choice. Primitives do, because they use `@luke-ui/react/primitives/*` entrypoints when the normal
 component API does not fit. See [COMPONENTS.md](COMPONENTS.md).
 
-Do not document an export that is not public API.
+Do not document an export that is not public API. The same applies to every docs page, including the
+home page. Show the public tokens a theme produces, not the private 12-step colour scales behind
+them.
 
 ## Internal documentation scope
 

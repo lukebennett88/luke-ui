@@ -21,8 +21,17 @@ Import components from public package exports. Import test utilities relatively.
 not mount React yourself.
 
 Assert observable public behaviour. Prefer roles and accessible names, `userEvent`, and local setup.
-Do not test private functions, implementation details, or incidental styling. Use computed styles
-only when layout, a semantic colour, or an interaction state is the contract.
+Locate an interactive control by its role and accessible name, not with `querySelector`. A DOM
+selector is fine for structural inspection, such as a wrapper, a decorative node, or a
+pseudo-element that has no role. Do not test private functions, implementation details, or
+incidental styling. Use computed styles only when layout, a semantic colour, or an interaction state
+is the contract.
+
+Controls transition their colours, so a computed colour read straight after a state change is an
+interpolated value. Read a surface's settled colours with `settledSurfaceColors` from
+`test-utils/surface-colors.ts`, and set a hover or pressed state with `setInteractionState`. Emulate
+media features through `test-utils/emulate-media.ts`. Chromium ignores `pointer` in emulated media,
+so call `emulatePointer('coarse')` for a coarse pointer.
 
 Do not add production props, context defaults, or code paths that exist only to make tests easier.
 Exercise the real loading and rendering path, and supply fixtures through the same seams the product
