@@ -70,26 +70,6 @@ not help. Silence in this log is not evidence.
   the rule, so pointing to it again is not a remedy. Correcting the implementation does not
   establish that test authoring applies that rule.
 
-## Agent-authored comments narrate history
-
-- Seen: 2026-10-21 (PR #903, #880). Review of `748dc121` found a keyboard-navigation comment
-  describing prior browser round trips and a 15.7-second investigation timing. Seen again:
-  2026-10-22 (PR #911, #899 Part 5). Review of `ecf1ea9` found a Link test comment opening "#899
-  asks text Links to stay underlined", citing the issue to justify the rule. Seen again: 2026-10-28
-  (#965). Review found new packed-consumer type-test comments describing renamed token paths. Seen
-  again: 2026-11-05 (#1022). Self-review before commit found a new focus-ring visual test comment
-  opening "Tactile dark on `info.solid` is where #1022 found the ring matching the panel".
-- Where: `apps/docs/src/components/search.browser.test.tsx`,
-  `packages/@luke-ui/react/src/core/link/link.browser.test.tsx`, and
-  `packages/@luke-ui/react/src/core/packed-consumer/react-fixture.ts`, and
-  `packages/@luke-ui/react/src/core/styles/focus-ring-contrast.browser.test.tsx`.
-  `docs/DOCUMENTATION.md`, Comments and JSDoc, requires comments to explain code without its
-  history. The review-pr workflow requires consulting the applicable repository guides.
-- Problem: Agent-authored comments narrated history despite the required guidance. review-pr's
-  easy-to-miss list and work-on-issue's pre-commit step already name the rule, so pointing to it
-  again is not a remedy. Correcting the comments does not establish that comment authoring applies
-  the rule.
-
 ## Existing nested ternary blocks changed-file lint
 
 - Seen: 2026-10-23 (#912, PR #913). The changed-file lint check reported nested ternaries at

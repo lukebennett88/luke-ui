@@ -216,7 +216,8 @@ A code comment explains the code, not its history. Luke UI is pre-1.0, so no com
 state.
 
 - Do not write "previously", "used to", "no longer", "an earlier pass", or "the old X".
-- Do not use an issue number to narrate why a change happened.
+- Do not use an issue number to narrate why a change happened. The
+  `luke-ui/no-leading-issue-reference` lint rule rejects a comment that opens with one.
 - Do not name another design system to justify a decision. A design system may appear as test
   reference data, as `theme/__fixtures__/radix-scales.ts` does.
 - Do not narrate what the next line does.

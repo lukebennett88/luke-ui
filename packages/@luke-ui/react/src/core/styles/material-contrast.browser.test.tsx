@@ -8,7 +8,7 @@ import { flatAppearances, render, visualAppearances } from '../test-utils/render
 import { lowestRenderedTextContrastAt } from '../test-utils/rendered-contrast.js';
 import { setInteractionState, settledSurfaceColors } from '../test-utils/surface-colors.js';
 
-// #955 decisions 16 and 17: `defineTheme` checks token colours, and this suite measures the paint a
+// `defineTheme` checks token colours, and this suite measures the paint a
 // solid fill and its `controlFinish` produce behind `onSolid` text. To gate a custom theme, add its
 // `ThemeInput` to `fixtureThemes` in `test-utils/fixture-themes.ts`, add its name to `appearances`
 // below, and run the suite with the command in TESTING.md.

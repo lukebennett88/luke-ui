@@ -71,6 +71,10 @@ export default defineConfig({
 				name: 'vite-plus',
 				specifier: 'vite-plus/oxlint-plugin',
 			},
+			{
+				name: 'luke-ui',
+				specifier: './.github/scripts/lint-plugin.ts',
+			},
 		],
 		options: {
 			// Type-only passes do not see the syntax diagnostics suppressed by inline directives.
@@ -243,6 +247,7 @@ export default defineConfig({
 			'jsdoc/empty-tags': 'error',
 			'jsdoc/require-yields': 'off',
 			'jsx-a11y/prefer-tag-over-role': 'off',
+			'luke-ui/no-leading-issue-reference': 'error',
 			'no-console': 'error',
 			// Internal `_Prop` aliases, `__dirname`, and event-name prefixes are intentional.
 			'no-underscore-dangle': 'off',

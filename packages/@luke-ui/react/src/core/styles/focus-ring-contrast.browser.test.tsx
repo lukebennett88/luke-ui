@@ -25,8 +25,8 @@ import {
 } from '../test-utils/visual.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 
-// #955 decision 8 gates `ThemeInput.color.focus` at 3:1 against the three structural surfaces and
-// the six role subtle fills, so a ring there paints `color.focus`.
+// `defineTheme` gates `ThemeInput.color.focus` at 3:1 against the three structural surfaces and the
+// six role subtle fills, so a ring there paints `color.focus`.
 const focusTokenBackgrounds = [
 	'surface.base',
 	'surface.subdued',
