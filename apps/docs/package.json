@@ -41,7 +41,7 @@
 		"generate:token-reference": "tsx scripts/generate-token-reference.ts",
 		"preview": "vp preview",
 		"start": "serve .output/public",
-		"test": "vp test run --config vitest.config.ts"
+		"test": "vp test run --config vitest.config.ts --project unit && vp test run --config vitest.config.ts --project browser"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "catalog:",
