@@ -488,17 +488,8 @@ type alias also keeps its declaration. When a Luke UI declaration hides its valu
 `keyof typeof responsiveConditions` does, the list adds the type TypeScript resolves it to. Do not
 write type definitions by hand.
 
-The build formats each row type and each definition once, following React Aria's type layout. A
-union or intersection of more than two members, and a parameter list of more than two parameters,
-puts each item on its own indented line. An object type puts each member on its own line. Named
-types stay named. Markdown table cells show the same type on one line, and Markdown code blocks keep
-the line breaks.
-
-In the HTML table, each Luke UI type name in a row type opens that type's declaration, and the type
-it resolves to, in a popover. Luke UI names inside the popover open their own definitions in the
-same popover, and breadcrumbs go back. The build validates the definitions and writes each table's
-Luke UI definitions to a separate JSON file, which the browser fetches when someone first reaches a
-linked type. Page JavaScript carries neither those definitions nor the processed Markdown.
+The HTML table links Luke UI types to declarations in popovers. Definitions load from separate JSON
+files when first needed. The build validates them.
 
 `check:docs` requires `## API` to be the last heading on a guide that declares `source:`, requires
 at least one `component-props-table` tag inside it, and rejects a tag placed anywhere else on the
@@ -597,18 +588,6 @@ built-ins. Lint rules in the root `vite.config.ts` stop the other subpaths from 
 built-ins or anything under `src/node/`, and their type check runs without Node types. The compiler
 does not import React at runtime or in its types, so the package has no `react` peer dependency. A
 host renders the compiled result with its own React.
-
-Each subpath exports only what a host needs to call it:
-
-- `compiler`: `createPlaygroundCompiler(scope)` and the `PlaygroundScope` type.
-- `protocol`: `createPlaygroundPageSession(options)`, `isPlaygroundCodeMessage`,
-  `isPlaygroundPreviewMessage`, `isTrustedMessageSource`, and the session, message, port, and result
-  types. The session takes `getPorts`, `getCode`, `onResult`, and an optional `onPreviewReady`, and
-  returns `handleMessage`, `postCode`, and `resync`.
-- `specifiers`: `packageExportSpecifiers`, `PLAYGROUND_BASE_SPECIFIERS`, `canRunInPlayground`, and
-  the `PackageExportTarget`/`PackageExportsMap` types.
-- `generate`: `createPlaygroundTypeMap`, `renderPlaygroundScopeModule`, `playgroundVirtualPath`, and
-  `resolvePackageDir`.
 
 Docs supplies everything specific to Luke UI:
 

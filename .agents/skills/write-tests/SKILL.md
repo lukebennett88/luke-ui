@@ -33,22 +33,14 @@ skill and the guide disagree, the guide wins.
 
 Authors use this before finishing. Reviewers use it on the diff.
 
-- [ ] Each test proves a contract that Luke UI adds or composes and that no other test proves. It
-      does not re-prove behaviour another component owns.
-      ([Component tests](../../../docs/TESTING.md#component-tests))
-- [ ] The test type is the smallest that proves the contract, in the place TESTING.md gives.
-- [ ] Browser component tests prefer roles and accessible names over text queries, and locate
-      interactive controls without DOM selectors.
-      ([Component tests](../../../docs/TESTING.md#component-tests))
-- [ ] Tests assert computed styles only when layout, a semantic colour, or an interaction state is
-      the contract. ([Component tests](../../../docs/TESTING.md#component-tests))
-- [ ] In component tests, use `for…of` with the distinguishing value in the test title. Do not use
-      `test.each`, `it.each`, or `describe.each`.
-      ([Component tests](../../../docs/TESTING.md#component-tests))
-- [ ] No result depends on timing, test order, or leftover state. No guessed sleeps; synchronise on
-      an observable state, a controlled completion, or a fake clock, per
+- [ ] Check each test's contract and test type against
+      [Test types](../../../docs/TESTING.md#test-types) and
+      [Component tests](../../../docs/TESTING.md#component-tests).
+- [ ] Check component test queries, assertions, and cases against
+      [Component tests](../../../docs/TESTING.md#component-tests).
+- [ ] Check timing and state isolation against
       [Timing and synchronisation](../../../docs/TESTING.md#timing-and-synchronisation).
-- [ ] The tests ran for real, or the report says why they did not.
+- [ ] Run the relevant checks above, or report why they did not run.
 
 ## Reviewing
 
