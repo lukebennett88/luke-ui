@@ -30,6 +30,16 @@ export const article = style({
 	'@layer': {
 		components: {
 			isolation: 'isolate',
+			// Centres the article when there is no table of contents.
+			marginInline: 'auto',
+		},
+	},
+});
+
+export const header = style({
+	'@layer': {
+		components: {
+			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
 		},
 	},
 });

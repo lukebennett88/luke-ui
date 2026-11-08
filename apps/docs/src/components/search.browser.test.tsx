@@ -141,7 +141,7 @@ async function renderSearch() {
 }
 
 async function openSearchDialog() {
-	await userEvent.click(page.getByRole('button', { name: /Search documentation/ }));
+	await userEvent.click(page.getByRole('button', { name: 'Open Search' }));
 	const input = page.getByRole('searchbox', { name: 'Search documentation' });
 	await expect.element(input).toBeVisible();
 	await expect.element(input).toHaveFocus();
@@ -153,13 +153,49 @@ async function typeSearchQuery(input: ReturnType<typeof page.getByRole>, query: 
 	await expect.element(input).toHaveValue(query);
 }
 
-test('shows a platform-appropriate keyboard shortcut hint on the search trigger', async () => {
+const searchbox = () => page.getByRole('searchbox', { name: 'Search documentation' });
+
+/** Fires the pointer sequence React Aria turns into a press, so the press reports its pointer type. */
+function pressWith(pointerType: 'mouse' | 'touch', target: Element) {
+	const { left, top, width, height } = target.getBoundingClientRect();
+	const init = {
+		bubbles: true,
+		button: 0,
+		cancelable: true,
+		clientX: left + width / 2,
+		clientY: top + height / 2,
+		isPrimary: true,
+		pointerId: pointerType === 'touch' ? 2 : 1,
+		pointerType,
+	};
+	target.dispatchEvent(new PointerEvent('pointerdown', { ...init, buttons: 1 }));
+	target.dispatchEvent(new PointerEvent('pointerup', { ...init, buttons: 0 }));
+	target.dispatchEvent(new MouseEvent('click', { ...init, detail: 1 }));
+}
+
+test('opens synchronously with the input focused when the trigger is touched', async () => {
 	await renderSearch();
-	const trigger = page.getByRole('button', { name: /Search documentation/ });
-	const shortcut = trigger.element().querySelector('kbd');
-	if (!shortcut) throw new Error('Search shortcut label was not rendered.');
-	const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
-	expect(shortcut.textContent).toBe(isMac ? '⌘K' : 'Ctrl K');
+	pressWith('touch', page.getByRole('button', { name: 'Open Search' }).element());
+	// No await: iOS raises the keyboard only when focus lands inside the tap, so the dialog must
+	// already be committed and focused here.
+	const input = document.querySelector('input[type="search"]');
+	expect(input).not.toBeNull();
+	expect(document.activeElement).toBe(input);
+});
+
+test('opens through a transition, not synchronously, when the trigger is clicked with a mouse', async () => {
+	await renderSearch();
+	pressWith('mouse', page.getByRole('button', { name: 'Open Search' }).element());
+	// A transition commits after the press handler returns.
+	expect(document.querySelector('input[type="search"]')).toBeNull();
+	await expect.element(searchbox()).toHaveFocus();
+});
+
+test('opens through a transition, not synchronously, with the keyboard shortcut', async () => {
+	await renderSearch();
+	window.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k' }));
+	expect(document.querySelector('input[type="search"]')).toBeNull();
+	await expect.element(searchbox()).toHaveFocus();
 });
 
 test('opens the panel centred in the viewport', async () => {
@@ -190,7 +226,7 @@ test('shows a visible focus ring around the focused search input', async () => {
 
 test('opens from the trigger and restores focus after closing', async () => {
 	await renderSearch();
-	const trigger = page.getByRole('button', { name: /Search documentation/ });
+	const trigger = page.getByRole('button', { name: 'Open Search' });
 	await openSearchDialog();
 	await userEvent.click(page.getByRole('button', { name: 'Close search' }));
 	await expect.element(trigger).toHaveFocus();
@@ -201,14 +237,11 @@ test('opens from the trigger and restores focus after closing', async () => {
 
 test('opens with the keyboard shortcut outside editable controls', async () => {
 	await renderSearch();
-	page
-		.getByRole('button', { name: /Search documentation/ })
-		.element()
-		.focus();
+	page.getByRole('button', { name: 'Open Search' }).element().focus();
 	await userEvent.keyboard('{Control>}k{/Control}');
 	await expect.element(page.getByRole('searchbox', { name: 'Search documentation' })).toBeVisible();
 	await userEvent.keyboard('{Escape}');
-	await expect.element(page.getByRole('button', { name: /Search documentation/ })).toHaveFocus();
+	await expect.element(page.getByRole('button', { name: 'Open Search' })).toHaveFocus();
 	await userEvent.click(page.getByRole('textbox', { name: 'Editor' }));
 	await userEvent.keyboard('{Control>}k{/Control}');
 	await expect
@@ -218,7 +251,7 @@ test('opens with the keyboard shortcut outside editable controls', async () => {
 
 test('dismisses on backdrop press and restores focus', async () => {
 	await renderSearch();
-	const trigger = page.getByRole('button', { name: /Search documentation/ });
+	const trigger = page.getByRole('button', { name: 'Open Search' });
 	await openSearchDialog();
 	const dialog = page.getByRole('dialog', { name: 'Search documentation' });
 	const overlay = dialog.element().parentElement?.parentElement?.parentElement;
@@ -300,7 +333,7 @@ function activeDescendantId(input: ReturnType<typeof page.getByRole>) {
 
 test('navigates the selected result with ArrowDown and Enter, closing on activation', async () => {
 	const router = await renderSearch();
-	const trigger = page.getByRole('button', { name: /Search documentation/ });
+	const trigger = page.getByRole('button', { name: 'Open Search' });
 	const input = await openSearchDialog();
 	await typeSearchQuery(input, 'button');
 	const first = page.getByRole('menuitem').nth(0).element();
@@ -335,7 +368,7 @@ test('clicking a result navigates and closes the dialog', async () => {
 
 test('closes in one Escape press with text typed, and restores focus', async () => {
 	await renderSearch();
-	const trigger = page.getByRole('button', { name: /Search documentation/ });
+	const trigger = page.getByRole('button', { name: 'Open Search' });
 	const input = await openSearchDialog();
 	await typeSearchQuery(input, 'button');
 	await userEvent.keyboard('{Escape}');

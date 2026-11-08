@@ -60,25 +60,27 @@ proseStyle(
 	'p, h1, h2, h3, h4, h5, h6, ul, ol, li, dl, dt, dd, blockquote, pre, hr, figure, figcaption, table, img, picture, video',
 	{ margin: 0 },
 );
-proseStyle('* + p, * + ul, * + ol, * + dl, * + h1', { marginBlockStart: vars.space['32'] });
-proseStyle('* + h2, * + hr', { marginBlockStart: vars.space['64'] });
-proseStyle('* + h3, * + blockquote, * + table, * + figure, * + img, * + picture, * + video', {
-	marginBlockStart: vars.space['40'],
+proseStyle('* + p, * + ul, * + ol, * + dl', { marginBlockStart: vars.space['24'] });
+proseStyle('* + h1', { marginBlockStart: vars.space['32'] });
+proseStyle('* + h2, * + hr', { marginBlockStart: vars.space['48'] });
+proseStyle('* + h3', { marginBlockStart: vars.space['32'] });
+proseStyle('* + blockquote, * + table, * + figure, * + img, * + picture, * + video', {
+	marginBlockStart: vars.space['24'],
 });
-proseStyle('* + h4, * + h5, * + h6, * + pre', { marginBlockStart: vars.space['32'] });
+proseStyle('* + h4, * + h5, * + h6, * + pre', { marginBlockStart: vars.space['24'] });
 proseStyle('* + li, * + dd', { marginBlockStart: vars.space['12'] });
-proseStyle('* + dt', { marginBlockStart: vars.space['32'] });
+proseStyle('* + dt', { marginBlockStart: vars.space['24'] });
 proseStyle('* + figcaption, li > ul, li > ol, li > p + p', {
 	marginBlockStart: vars.space['16'],
 });
 
-proseStyle('h1 + *', { marginBlockStart: vars.space['40'] });
-proseStyle('h1 + h2, h1 + hr', { marginBlockStart: vars.space['64'] });
-proseStyle('h2 + *', { marginBlockStart: vars.space['32'] });
-proseStyle('h3 + *', { marginBlockStart: vars.space['24'] });
-proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space['16'] });
+proseStyle('h1 + *', { marginBlockStart: vars.space['32'] });
+proseStyle('h1 + h2, h1 + hr', { marginBlockStart: vars.space['48'] });
+proseStyle('h2 + *', { marginBlockStart: vars.space['24'] });
+proseStyle('h3 + *', { marginBlockStart: vars.space['16'] });
+proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space['12'] });
 // A rule is a section break on both sides.
-proseStyle('hr + *', { marginBlockStart: vars.space['64'] });
+proseStyle('hr + *', { marginBlockStart: vars.space['48'] });
 
 proseStyle('img, picture, video', { display: 'block' });
 proseStyle('img, video', { blockSize: 'auto', maxInlineSize: '100%' });
@@ -258,8 +260,8 @@ proseStyle(
 	'::after',
 );
 
-proseBoundaryGapStyle(['h1'], vars.space['40']);
-proseBoundaryGapStyle(['h2'], vars.space['32']);
-proseBoundaryGapStyle(['h3'], vars.space['24']);
-proseBoundaryGapStyle(['h4', 'h5', 'h6'], vars.space['16']);
-proseBoundaryGapStyle(['hr'], vars.space['64']);
+proseBoundaryGapStyle(['h1'], vars.space['32']);
+proseBoundaryGapStyle(['h2'], vars.space['24']);
+proseBoundaryGapStyle(['h3'], vars.space['16']);
+proseBoundaryGapStyle(['h4', 'h5', 'h6'], vars.space['12']);
+proseBoundaryGapStyle(['hr'], vars.space['48']);

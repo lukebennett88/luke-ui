@@ -1,4 +1,4 @@
-/** Shared element name for the wide header search field morph. Must be unique app-wide. */
+/** Shared element name for the search field morph. Must be unique app-wide. */
 const DOCS_SEARCH_FIELD_VT_NAME = 'luke-docs-search-field';
 
 /** View Transition Class applied during the shared-element morph. */

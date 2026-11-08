@@ -71,9 +71,24 @@ test('copies copyText instead of rendered highlighted text', async () => {
 });
 
 for (const copyCase of [
-	{ name: 'untitled overlay copy', title: undefined as string | undefined },
-	{ name: 'titled header copy', title: 'Source' },
-]) {
+	{
+		isOverlay: true,
+		minWidthShare: 0.7,
+		name: 'untitled overlay copy',
+		title: undefined,
+	},
+	{
+		isOverlay: false,
+		minWidthShare: 0.9,
+		name: 'titled header copy',
+		title: 'Source',
+	},
+] satisfies Array<{
+	isOverlay: boolean;
+	minWidthShare: number;
+	name: string;
+	title: string | undefined;
+}>) {
 	test(`scrolls horizontally and keeps ${copyCase.name} on the physical right in RTL docs`, async () => {
 		await page.viewport(320, 720);
 		document.documentElement.dir = 'rtl';
@@ -100,13 +115,30 @@ for (const copyCase of [
 			const figureMidX = (figureBox.left + figureBox.right) / 2;
 			expect(buttonMidX).toBeGreaterThan(figureMidX);
 
-			// Full-width scrollport — not a side column beside the button.
-			expect(viewport.getBoundingClientRect().width).toBeGreaterThan(figure.clientWidth * 0.9);
+			// A titled block keeps its copy in the header above a full-width scrollport. An untitled one
+			// ends the scrollport before the overlay button so text never sits beneath it.
+			const viewportBox = viewport.getBoundingClientRect();
+			expect(viewportBox.right).toBeLessThanOrEqual(copyCase.isOverlay ? buttonBox.left : Infinity);
+			expect(viewportBox.width).toBeGreaterThan(figure.clientWidth * copyCase.minWidthShare);
 		} finally {
 			document.documentElement.dir = 'ltr';
 		}
 	});
 }
+
+test('keeps long untitled code out from under the overlay copy button', async () => {
+	await page.viewport(390, 800);
+	renderCodeBlock(
+		<CodeBlock code="pnpm add @luke-ui/react @luke-ui/theme-tactile react-aria-components" />,
+	);
+
+	const copyRect = page.getByRole('button', { name: 'Copy' }).element().getBoundingClientRect();
+	const scrollRegion = page.getByRole('region', { name: 'Code' }).element();
+	// Text can only reach the scrollport's edge, so the scrollport must end before the button.
+	expect(scrollRegion.getBoundingClientRect().right).toBeLessThanOrEqual(copyRect.left);
+	expect(scrollRegion.scrollWidth).toBeGreaterThan(scrollRegion.clientWidth);
+	await page.viewport(1024, 800);
+});
 
 test('the CodeBlock scene has no axe violations', async () => {
 	renderCodeBlock(<CodeBlock code={'const example = "hello";'} title="Example" />);

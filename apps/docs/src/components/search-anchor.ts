@@ -7,22 +7,13 @@ export interface SearchAnchorRect {
 
 export function measureSearchAnchor(element: HTMLElement | null): SearchAnchorRect | null {
 	if (!element) return null;
-	let rect = element.getBoundingClientRect();
-	// The open-state slot reserve is visibility:hidden and can measure as zero width.
-	if (rect.width === 0 && element.parentElement) {
-		rect = element.parentElement.getBoundingClientRect();
-	}
+	const rect = element.getBoundingClientRect();
 	return {
 		height: rect.height,
 		left: rect.left,
 		top: rect.top,
 		width: rect.width,
 	};
-}
-
-export function isSearchTriggerVisible(element: HTMLElement | null) {
-	if (!element) return false;
-	return element.getClientRects().length > 0;
 }
 
 const SEARCH_PANEL_MAX_WIDTH = 608;

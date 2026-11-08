@@ -1,8 +1,4 @@
-import { Icon } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
-import { Kbd } from '@luke-ui/react/kbd';
-import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
-import { Button } from '@luke-ui/react/primitives/button';
 import type { ReactNode, RefObject } from 'react';
 import {
 	createContext,
@@ -14,25 +10,19 @@ import {
 	useMemo,
 	useRef,
 	useState,
-	useSyncExternalStore,
-	ViewTransition,
 } from 'react';
+import type { PressEvent } from 'react-aria-components/Button';
+import { flushSync } from 'react-dom';
 import type { SearchAnchorRect } from './search-anchor.js';
-import {
-	fitSearchAnchorToViewport,
-	isSearchTriggerVisible,
-	measureSearchAnchor,
-} from './search-anchor.js';
+import { fitSearchAnchorToViewport, measureSearchAnchor } from './search-anchor.js';
 import { DocsSearchDialog } from './search-dialog.js';
-import { searchFieldViewTransition } from './search-view-transition.js';
-import * as styles from './search.css.js';
 
 interface SearchContextValue {
-	compactTriggerRef: RefObject<HTMLElement | null>;
 	isOpen: boolean;
-	openSearch: (source?: 'compact' | 'wide') => void;
+	/** Pass the opening press's `pointerType`, so a touch open can commit inside the tap. */
+	openSearch: (pointerType?: PressEvent['pointerType']) => void;
 	setSearchOpen: (isOpen: boolean) => void;
-	wideTriggerRef: RefObject<HTMLElement | null>;
+	triggerRef: RefObject<HTMLElement | null>;
 }
 
 const SearchContext = createContext<SearchContextValue | null>(null);
@@ -46,26 +36,13 @@ function isEditable(target: EventTarget | null) {
 	);
 }
 
-function resolveSearchTrigger(
-	wideTriggerRef: RefObject<HTMLElement | null>,
-	compactTriggerRef: RefObject<HTMLElement | null>,
-	source?: 'compact' | 'wide',
-) {
-	if (source === 'compact') return compactTriggerRef.current;
-	if (source === 'wide') return wideTriggerRef.current;
-	if (isSearchTriggerVisible(wideTriggerRef.current)) return wideTriggerRef.current;
-	return compactTriggerRef.current;
-}
-
 export function DocsSearchProvider({ children }: { children: ReactNode }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [anchor, setAnchor] = useState<SearchAnchorRect | null>(null);
-	const wideTriggerRef = useRef<HTMLElement | null>(null);
-	const compactTriggerRef = useRef<HTMLElement | null>(null);
+	const triggerRef = useRef<HTMLElement | null>(null);
 
-	const updateAnchor = useCallback((source?: 'compact' | 'wide') => {
-		const trigger = resolveSearchTrigger(wideTriggerRef, compactTriggerRef, source);
-		const measured = measureSearchAnchor(trigger);
+	const updateAnchor = useCallback(() => {
+		const measured = measureSearchAnchor(triggerRef.current);
 		setAnchor(measured ? fitSearchAnchorToViewport(measured) : null);
 	}, []);
 
@@ -74,17 +51,18 @@ export function DocsSearchProvider({ children }: { children: ReactNode }) {
 		startTransition(() => setIsOpen(nextOpen));
 	}, []);
 
-	// The wide trigger button remounts on close, so React Aria has no node to restore focus to.
-	// Wait until the dialog has exited: its focus trap pulls focus back while it is still mounted.
-	const restoreWideTriggerFocus = useCallback(() => {
-		const host = wideTriggerRef.current;
-		if (!isSearchTriggerVisible(host)) return;
-		requestAnimationFrame(() => host?.querySelector('button')?.focus());
-	}, []);
-
 	const openSearch = useCallback(
-		(source?: 'compact' | 'wide') => {
-			updateAnchor(source);
+		(pointerType?: PressEvent['pointerType']) => {
+			updateAnchor();
+			// iOS raises the keyboard only when `focus()` runs inside the tap, and a transition commits
+			// too late. So a touch (or pen) press commits synchronously and skips the morph. Keyboard,
+			// mouse, and virtual presses keep the animated path. A press always reports its pointer
+			// type, so no `(pointer: coarse)` check is needed, which would also catch a mouse on a
+			// hybrid device.
+			if (pointerType === 'touch' || pointerType === 'pen') {
+				flushSync(() => setIsOpen(true));
+				return;
+			}
 			setSearchOpen(true);
 		},
 		[setSearchOpen, updateAnchor],
@@ -125,11 +103,10 @@ export function DocsSearchProvider({ children }: { children: ReactNode }) {
 
 	const contextValue = useMemo<SearchContextValue>(
 		() => ({
-			compactTriggerRef,
 			isOpen,
 			openSearch,
 			setSearchOpen,
-			wideTriggerRef,
+			triggerRef,
 		}),
 		[isOpen, openSearch, setSearchOpen],
 	);
@@ -137,107 +114,30 @@ export function DocsSearchProvider({ children }: { children: ReactNode }) {
 	return (
 		<SearchContext value={contextValue}>
 			{children}
-			<DocsSearchDialog
-				anchor={anchor}
-				isOpen={isOpen}
-				onExited={restoreWideTriggerFocus}
-				onOpenChange={setSearchOpen}
-			/>
+			<DocsSearchDialog anchor={anchor} isOpen={isOpen} onOpenChange={setSearchOpen} />
 		</SearchContext>
 	);
-}
-
-function useIsMacKeyboardPlatform() {
-	return useSyncExternalStore(
-		subscribeToMacKeyboardPlatform,
-		getIsMacKeyboardPlatformSnapshot,
-		getIsMacKeyboardPlatformServerSnapshot,
-	);
-}
-
-function subscribeToMacKeyboardPlatform() {
-	return () => {};
 }
 
 export function getIsMacKeyboardPlatformSnapshot() {
 	return /Mac|iPhone|iPad|iPod/.test(navigator.platform);
 }
 
-function getIsMacKeyboardPlatformServerSnapshot() {
-	return true;
-}
-
-function SearchShortcutLabel() {
-	const isMac = useIsMacKeyboardPlatform();
-	return <Kbd>{isMac ? '⌘K' : 'Ctrl K'}</Kbd>;
-}
-
-export function DocsSearchTrigger({ isCompact = false }: { isCompact?: boolean }) {
+export function DocsSearchTrigger({ className }: { className?: string }) {
 	const context = use(SearchContext);
 	if (!context) throw new Error('DocsSearchTrigger must be inside DocsSearchProvider');
-	if (isCompact) {
-		const { compactTriggerRef, openSearch } = context;
-		return (
-			<IconButton
-				aria-label="Open Search"
-				icon="search"
-				onPress={() => openSearch('compact')}
-				ref={(node) => {
-					compactTriggerRef.current = node;
-				}}
-				size="small"
-			/>
-		);
-	}
-
-	return <WideSearchTrigger context={context} />;
-}
-
-function WideSearchTrigger({ context }: { context: SearchContextValue }) {
-	const { isOpen, openSearch, wideTriggerRef } = context;
-
-	// The share morph needs one named boundary to unmount while another with the same name mounts.
-	// In React 19.3, changing `name` on a mounted boundary does nothing. So unmount the trigger
-	// boundary while open and keep a hidden placeholder to hold the layout.
+	const { openSearch, triggerRef } = context;
 	return (
-		<div
-			className={styles.fieldMorphHost}
-			inert={isOpen || undefined}
+		<IconButton
+			aria-label="Open Search"
+			className={className}
+			icon="search"
+			onPress={(event) => openSearch(event.pointerType)}
+			prominence="low"
 			ref={(node) => {
-				wideTriggerRef.current = node;
+				triggerRef.current = node;
 			}}
-		>
-			{isOpen ? (
-				<div aria-hidden className={styles.triggerSlotReserve} />
-			) : (
-				<ViewTransition {...searchFieldViewTransition}>
-					<Button
-						aria-label="Search documentation"
-						className={styles.trigger}
-						inlineSize="full"
-						onPress={() => openSearch('wide')}
-						prominence="low"
-						size="small"
-					>
-						<Lockup
-							className={styles.triggerLockup}
-							elementType="span"
-							gap="space.8"
-							railAlignment="center"
-						>
-							<LockupRail>
-								<Icon name="search" />
-							</LockupRail>
-							<LockupBody>
-								<span className={styles.triggerPlaceholder}>Search</span>
-							</LockupBody>
-							<LockupRail>
-								<SearchShortcutLabel />
-							</LockupRail>
-						</Lockup>
-					</Button>
-				</ViewTransition>
-			)}
-		</div>
+			size="medium"
+		/>
 	);
 }

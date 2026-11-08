@@ -33,8 +33,6 @@ const client = staticClient({
 interface DocsSearchDialogProps {
 	anchor: SearchAnchorRect | null;
 	isOpen: boolean;
-	/** Called after the dialog has unmounted. */
-	onExited?: () => void;
 	onOpenChange: (isOpen: boolean) => void;
 }
 
@@ -43,12 +41,7 @@ const MARK_PATTERN = /^<mark>(.*)<\/mark>$/i;
 const CODE_SPAN_PATTERN = /^`([^`]*)`$/;
 const EXTERNAL_URL_PATTERN = /^https?:\/\//;
 
-export function DocsSearchDialog({
-	anchor,
-	isOpen,
-	onExited,
-	onOpenChange,
-}: DocsSearchDialogProps) {
+export function DocsSearchDialog({ anchor, isOpen, onOpenChange }: DocsSearchDialogProps) {
 	const { search, setSearch, query } = useDocsSearch({ client });
 	const router = useRouter();
 	const results: Array<SortedResult> = (() => {
@@ -63,9 +56,6 @@ export function DocsSearchDialog({
 		if (!hasResults) return 'No results found.';
 		return `${results.length} ${results.length === 1 ? 'result' : 'results'}`;
 	})();
-
-	// React runs the returned cleanup when the panel unmounts, after the exit animation.
-	const panelRef = useCallback(() => onExited, [onExited]);
 
 	const close = useCallback(() => {
 		onOpenChange(false);
@@ -98,8 +88,6 @@ export function DocsSearchDialog({
 					width: `${anchor.width}px`,
 				};
 
-	// Only the open dialog owns the shared name. While the overlay is still exiting, the trigger
-	// remounts its boundary with the same name, and React forbids two at once.
 	const field = (
 		<div className={styles.fieldMorphHost}>
 			<div className={styles.panelFieldShell}>
@@ -179,7 +167,7 @@ export function DocsSearchDialog({
 			onOpenChange={(nextOpen) => (nextOpen ? onOpenChange(true) : close())}
 		>
 			<Modal className={styles.modalPassThrough}>
-				<div className={styles.panel} ref={panelRef} style={panelPositionStyle}>
+				<div className={styles.panel} style={panelPositionStyle}>
 					<Dialog aria-label="Search documentation" className={styles.dialog}>
 						<RouterProvider
 							navigate={(href) => void router.navigate({ href })}

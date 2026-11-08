@@ -47,82 +47,10 @@ const reducedMotionNoTransition = {
 	},
 } as const satisfies ComplexStyleRule;
 
-export const trigger = style({
-	'@layer': {
-		components: {
-			'@media': {
-				'(forced-colors: active)': {
-					backgroundColor: 'Field',
-					borderColor: 'FieldText',
-					boxShadow: 'none',
-					color: 'FieldText',
-					forcedColorAdjust: 'auto',
-				},
-				'(prefers-reduced-motion: reduce)': {
-					transition: 'none',
-				},
-			},
-			backgroundColor: vars.color.background.surface.base,
-			borderColor: vars.color.border.control.rest,
-			// Button draws no border of its own, so the field look sets the width.
-			borderWidth: '1px',
-			boxShadow: vars.shadow.inset,
-			cursor: 'text',
-			fontWeight: vars.font.weight.body,
-			justifyContent: 'flex-start',
-			textAlign: 'start',
-			transitionDuration: vars.motion.feedback.duration,
-			transitionProperty: 'background-color, border-color, box-shadow, color',
-			transitionTimingFunction: vars.motion.feedback.easing,
-			// The trigger reads as a search field, so it follows the field model: the hover border, and
-			// no button depth or fill changes. Focus keeps the Button's ring.
-			selectors: {
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"]), &[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])':
-					{
-						backgroundColor: vars.color.background.surface.base,
-						borderColor: vars.color.border.control.hover,
-						boxShadow: vars.shadow.inset,
-					},
-			},
-		},
-	},
-});
-
-export const triggerPlaceholder = style({
-	'@layer': {
-		components: {
-			color: vars.color.foreground.secondary,
-			fontWeight: vars.font.weight.body,
-		},
-	},
-});
-
-export const triggerSlotReserve = style({
-	'@layer': {
-		components: {
-			blockSize: '100%',
-			inlineSize: '100%',
-			minBlockSize: '2.25rem',
-			pointerEvents: 'none',
-			visibility: 'hidden',
-		},
-	},
-});
-
 export const fieldMorphHost = style({
 	'@layer': {
 		components: {
 			inlineSize: '100%',
-		},
-	},
-});
-
-export const triggerLockup = style({
-	'@layer': {
-		components: {
-			inlineSize: '100%',
-			minInlineSize: 0,
-			textAlign: 'start',
 		},
 	},
 });
@@ -291,6 +219,12 @@ export const field = style({
 export const input = style({
 	'@layer': {
 		components: {
+			'@media': {
+				// iOS Safari zooms the page when a focused input is under 16px. Raise it on touch only.
+				'(pointer: coarse)': {
+					fontSize: vars.font.body.fontSize,
+				},
+			},
 			// Hide the native WebKit clear button so the ESC keycap is the only close control.
 			selectors: {
 				'&::-webkit-search-cancel-button': {

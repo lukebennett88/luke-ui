@@ -155,13 +155,13 @@ export const viewport = style({
 });
 
 /**
- * Clear the overlay copy without a side column. Padding stays on the full-width
- * scrollport so the recessed surface continues under the button.
+ * Clear the overlay copy without a side column. A margin, not padding, so scrolled text never sits
+ * beneath the button. The root's recessed surface continues behind it.
  */
 export const viewportWithOverlayCopy = style({
 	'@layer': {
 		components: {
-			paddingInlineEnd: vars.space['48'],
+			marginInlineEnd: vars.space['48'],
 		},
 	},
 });

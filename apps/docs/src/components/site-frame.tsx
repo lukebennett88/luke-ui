@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import type { ReactNode } from 'react';
 import * as styles from './site-frame.css.js';
-import { SiteNav } from './site-nav.js';
+import { SiteHeader } from './site-header.js';
 
 /**
  * The frame for pages without the docs sidebar: the header on the page chrome, and the page in one
@@ -16,17 +16,19 @@ export function SiteFrame({
 	hideActiveDestination?: boolean;
 }) {
 	return (
-		<Box backgroundColor="surface.subdued" display="flex" flexDirection="column" flexGrow="1">
-			<SiteNav hideActiveDestination={hideActiveDestination} />
+		<Box
+			backgroundColor="surface.subdued"
+			className={styles.frame}
+			display="flex"
+			flexDirection="column"
+			flexGrow="1"
+		>
+			<SiteHeader hideActiveDestination={hideActiveDestination} />
 			<Box
 				backgroundColor="surface.base"
 				className={styles.insetPanel}
 				elementType="main"
 				flexGrow="1"
-				marginInlineStart={{
-					initial: 'space.16',
-					bp768: 'space.24',
-				}}
 			>
 				{children}
 			</Box>

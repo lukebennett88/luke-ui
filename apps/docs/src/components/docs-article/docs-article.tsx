@@ -8,12 +8,10 @@ import type { TOCItemType } from 'fumadocs-core/toc';
 import { AnchorProvider } from 'fumadocs-core/toc';
 import type { ReactNode } from 'react';
 import { docsContentPaddingBlockStart } from '../docs-nav.js';
+import { ARTICLE_MAX_INLINE_SIZE } from './article-size.js';
 import * as styles from './docs-article.css.js';
 import { DocsPager } from './docs-pager.js';
 import { DocsTocBar, DocsTocColumn } from './docs-toc.js';
-
-/** Roughly 75 characters of body text; still leaves room for example frames. */
-const ARTICLE_MAX_INLINE_SIZE = '52rem';
 
 interface DocsArticleProps {
 	/** Rendered MDX body. */
@@ -65,9 +63,15 @@ export function DocsArticle({
 						elementType="article"
 						maxInlineSize={ARTICLE_MAX_INLINE_SIZE}
 					>
-						<Stack elementType="header" gap="space.24" marginBlockEnd="space.48">
-							<Stack gap="space.24">
-								<Stack gap="space.16">
+						<Stack
+							className={styles.header}
+							elementType="header"
+							gap="space.24"
+							marginBlockEnd="space.32"
+							paddingBlockEnd="space.24"
+						>
+							<Stack gap="space.16">
+								<Stack gap="space.12">
 									{sectionName == null ? null : (
 										<Text
 											className={styles.eyebrow}
