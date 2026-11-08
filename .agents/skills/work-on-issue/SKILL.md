@@ -65,9 +65,10 @@ not open new issues for the parts you leave.
 
 ## Verify
 
-1. Run tasks through Turbo from the repository root so their generate and build dependencies run.
-   Before changing Turbo configuration or commands, read the installed package's bundled `docs/`,
-   found with `node -p "require.resolve('turbo/package.json')"`.
+1. Run tasks through Turbo from the repository root so their generate and build dependencies run,
+   including focused runs of one test file. [WORKFLOWS.md](../../../docs/WORKFLOWS.md#commands)
+   shows the form. Before changing Turbo configuration or commands, read the installed package's
+   bundled `docs/`, found with `node -p "require.resolve('turbo/package.json')"`.
 2. When the diff adds or modifies JS/TS files, run `pnpm run lint:changed` from the repository root
    before committing. It lints every JS/TS file that differs from the merge base with `origin/main`
    under `--deny no-nested-ternary`, which enforces
@@ -80,8 +81,9 @@ not open new issues for the parts you leave.
    report it as **not run** and rely on the CI `compare` job. A passing `compare` job does not mean
    the screenshots match, because it reports differences without failing. Read its "N changed, N
    added, N removed, N unchanged" summary line and any listed diffs before you call visual
-   verification done, as [VISUAL_TESTING.md](../../../docs/VISUAL_TESTING.md#review) describes. Run
-   the separate suites in [TESTING.md](../../../docs/TESTING.md) that cover the change, including
+   verification done, as [VISUAL_TESTING.md](../../../docs/VISUAL_TESTING.md#review) describes.
+   [Reading CI](../../../docs/WORKFLOWS.md#reading-ci) shows how to read job logs. Run the separate
+   suites in [TESTING.md](../../../docs/TESTING.md) that cover the change, including
    `pnpm run test:consumer` for published package code, dependencies, or exports. When the change
    affects generated documentation behaviour, such as props tables or type-definition assets, also
    run `pnpm run build:docs` so the production docs output is checked, including
