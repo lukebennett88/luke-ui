@@ -111,26 +111,6 @@ test('the selected toggle carries the pressed attribute the Button recipe styles
 	await expect.element(tactile).not.toHaveAttribute('data-pressed');
 });
 
-test('pressing the active mode again returns to the system setting', async () => {
-	await emulateColorScheme('dark');
-	renderTheme(<ThemeControls />);
-	const light = page.getByRole('radio', { name: 'Light' });
-
-	await userEvent.click(light, { force: true });
-	await expect.element(light).toHaveAttribute('aria-checked', 'true');
-	expect(document.documentElement).toHaveAttribute('data-color-mode', 'light');
-
-	await userEvent.click(light, { force: true });
-
-	await expect.element(light).toHaveAttribute('aria-checked', 'false');
-	await expect
-		.element(page.getByRole('radio', { name: 'Dark' }))
-		.toHaveAttribute('aria-checked', 'false');
-	expect(localStorage.getItem(COLOR_MODE_STORAGE_KEY)).toBe('system');
-	expect(document.documentElement).not.toHaveAttribute('data-color-mode');
-	expect(document.documentElement).toHaveClass('dark');
-});
-
 test('a stored dark mode survives a reload, and a reset to system does too', async () => {
 	renderTheme(<ThemeControls />);
 	await userEvent.click(page.getByRole('radio', { name: 'Dark' }), { force: true });
@@ -166,6 +146,13 @@ test('system colour mode leaves the mode to the theme CSS and follows the platfo
 	await userEvent.click(page.getByRole('radio', { name: 'Dark' }), { force: true });
 
 	await expect.poll(() => document.documentElement.hasAttribute('data-color-mode')).toBe(false);
+	await expect
+		.element(page.getByRole('radio', { name: 'Dark' }))
+		.toHaveAttribute('aria-checked', 'false');
+	await expect
+		.element(page.getByRole('radio', { name: 'Light' }))
+		.toHaveAttribute('aria-checked', 'false');
+	expect(localStorage.getItem(COLOR_MODE_STORAGE_KEY)).toBe('system');
 	expect(document.documentElement).toHaveClass('dark');
 	expect(document.documentElement.style.colorScheme).toBe('');
 	expect(getComputedStyle(document.documentElement).colorScheme).toBe('dark');
