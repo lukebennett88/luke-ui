@@ -27,6 +27,7 @@ import {
 	captureVisual,
 	captureVisualAppearance,
 	emulateForcedColors,
+	emulatePointer,
 	focusViaKeyboard,
 	freezeMotionForCapture,
 	Stack,
@@ -793,6 +794,31 @@ test('a part size overrides the root size, and a control sizes its input', () =>
 	expect(input('Input medium').getBoundingClientRect().height).toBe(medium);
 	expect(controlFor('Control medium').getBoundingClientRect().height).toBe(medium);
 });
+
+// iOS Safari zooms into a focused input under 16px, so a coarse pointer gets the 16px metrics.
+for (const pointer of ['coarse', 'fine'] as const) {
+	const fontSize = pointer === 'coarse' ? '16px' : '14px';
+
+	test(`a small TextInput computes a ${fontSize} font size with a ${pointer} pointer`, async () => {
+		await emulatePointer(pointer);
+
+		try {
+			render(
+				<>
+					<TextInput aria-label="Standalone" size="small" />
+					<TextInputControl size="small">
+						<TextInput aria-label="In a control" />
+					</TextInputControl>
+				</>,
+			);
+
+			expect(getComputedStyle(input('Standalone')).fontSize).toBe(fontSize);
+			expect(getComputedStyle(input('In a control')).fontSize).toBe(fontSize);
+		} finally {
+			await emulatePointer('fine');
+		}
+	});
+}
 
 test('the TextInput scene has no axe violations', async () => {
 	const { container } = render(<TextInputScene />);

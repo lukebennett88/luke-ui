@@ -10,6 +10,7 @@ import {
 	textInputInputBase,
 	textInputInputPaddingInline,
 	textInputInvalidPaddingAdjust,
+	touchInputTypography,
 } from './styles.css.js';
 
 // A bare `<input>` carries its own state: `:disabled` and `:read-only` match the element itself,
@@ -100,6 +101,7 @@ export const textInputRecipe = recipe({
 				vars: { [textInputInlinePadding]: vars.space['12'] },
 			},
 			small: {
+				...touchInputTypography,
 				blockSize: vars.controlSize['32'],
 				fontSize: FONT_METRIC_SCALE[14].fontSize,
 				letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,

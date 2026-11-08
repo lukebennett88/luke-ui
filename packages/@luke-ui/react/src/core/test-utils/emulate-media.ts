@@ -36,3 +36,14 @@ export async function emulateColorScheme(mode: 'light' | 'dark'): Promise<void> 
 export async function emulateReducedMotion(reduce: boolean): Promise<void> {
 	await setEmulatedMediaFeature('prefers-reduced-motion', reduce ? 'reduce' : 'no-preference');
 }
+
+/**
+ * Chromium ignores `pointer` in `Emulation.setEmulatedMedia`, so a coarse pointer comes from touch
+ * emulation instead, which also reports `hover: none`. Call it with `fine` to restore the default.
+ */
+export async function emulatePointer(value: 'coarse' | 'fine'): Promise<void> {
+	await cdp().send('Emulation.setTouchEmulationEnabled', {
+		enabled: value === 'coarse',
+		maxTouchPoints: 1,
+	});
+}

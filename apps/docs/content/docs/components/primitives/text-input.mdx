@@ -89,6 +89,9 @@ receives the change event, while the root's `onChange` receives the value.
 for the parts inside it. A `TextInput` or `TextInputControl` with its own `size` overrides the
 root's. Inside a control, the control sets the size, and the input, prefix, and suffix follow it.
 
+On touch devices, `small` uses the body text size so iOS Safari doesn't zoom into the field on
+focus.
+
 The control also sets the icon size for everything inside it, so an `Icon` in a prefix or suffix
 scales with the control without a `size` of its own.
 
