@@ -1,22 +1,12 @@
 import { IconButton } from '@luke-ui/react/icon-button';
 import type { ReactNode } from 'react';
-import {
-	createContext,
-	startTransition,
-	use,
-	useCallback,
-	useEffect,
-	useMemo,
-	useState,
-} from 'react';
-import type { PressEvent } from 'react-aria-components/Button';
+import { createContext, use, useCallback, useEffect, useMemo, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { DocsSearchDialog } from './search-dialog.js';
 
 interface SearchContextValue {
 	isOpen: boolean;
-	/** Pass the opening press's `pointerType`, so a touch open can commit inside the tap. */
-	openSearch: (pointerType?: PressEvent['pointerType']) => void;
+	openSearch: () => void;
 	setSearchOpen: (isOpen: boolean) => void;
 }
 
@@ -32,25 +22,13 @@ function isEditable(target: EventTarget | null) {
 }
 
 export function DocsSearchProvider({ children }: { children: ReactNode }) {
-	const [isOpen, setIsOpen] = useState(false);
-	const setSearchOpen = useCallback((nextOpen: boolean) => {
-		startTransition(() => setIsOpen(nextOpen));
-	}, []);
+	const [isOpen, setSearchOpen] = useState(false);
 
-	const openSearch = useCallback(
-		(pointerType?: PressEvent['pointerType']) => {
-			// iOS raises the keyboard only when `focus()` runs inside the tap, and a transition commits
-			// too late. So a touch (or pen) press commits synchronously. Keyboard, mouse, and virtual
-			// presses open in a transition. A press always reports its pointer type, so no
-			// `(pointer: coarse)` check is needed, which would also catch a mouse on a hybrid device.
-			if (pointerType === 'touch' || pointerType === 'pen') {
-				flushSync(() => setIsOpen(true));
-				return;
-			}
-			setSearchOpen(true);
-		},
-		[setSearchOpen],
-	);
+	const openSearch = useCallback(() => {
+		// iOS raises the keyboard only when `focus()` runs inside the gesture, so every open commits
+		// synchronously rather than in a transition, which would commit too late.
+		flushSync(() => setSearchOpen(true));
+	}, []);
 
 	useEffect(() => {
 		function onKeyDown(event: KeyboardEvent) {
@@ -97,7 +75,7 @@ export function DocsSearchTrigger({ className }: { className?: string }) {
 			aria-label="Open Search"
 			className={className}
 			icon="search"
-			onPress={(event) => openSearch(event.pointerType)}
+			onPress={openSearch}
 			prominence="low"
 			size="medium"
 		/>

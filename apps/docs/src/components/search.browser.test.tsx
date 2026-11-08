@@ -153,49 +153,14 @@ async function typeSearchQuery(input: ReturnType<typeof page.getByRole>, query: 
 	await expect.element(input).toHaveValue(query);
 }
 
-const searchbox = () => page.getByRole('searchbox', { name: 'Search documentation' });
-
-/** Fires the pointer sequence React Aria turns into a press, so the press reports its pointer type. */
-function pressWith(pointerType: 'mouse' | 'touch', target: Element) {
-	const { left, top, width, height } = target.getBoundingClientRect();
-	const init = {
-		bubbles: true,
-		button: 0,
-		cancelable: true,
-		clientX: left + width / 2,
-		clientY: top + height / 2,
-		isPrimary: true,
-		pointerId: pointerType === 'touch' ? 2 : 1,
-		pointerType,
-	};
-	target.dispatchEvent(new PointerEvent('pointerdown', { ...init, buttons: 1 }));
-	target.dispatchEvent(new PointerEvent('pointerup', { ...init, buttons: 0 }));
-	target.dispatchEvent(new MouseEvent('click', { ...init, detail: 1 }));
-}
-
-test('opens synchronously with the input focused when the trigger is touched', async () => {
+test('opens synchronously with the input focused, so iOS can raise the keyboard', async () => {
 	await renderSearch();
-	pressWith('touch', page.getByRole('button', { name: 'Open Search' }).element());
-	// No await: iOS raises the keyboard only when focus lands inside the tap, so the dialog must
-	// already be committed and focused here.
+	// Dispatch natively and do not await: focus must land inside the gesture, so the dialog has to
+	// be committed and focused as soon as the handler returns.
+	window.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k' }));
 	const input = document.querySelector('input[type="search"]');
 	expect(input).not.toBeNull();
 	expect(document.activeElement).toBe(input);
-});
-
-test('opens through a transition, not synchronously, when the trigger is clicked with a mouse', async () => {
-	await renderSearch();
-	pressWith('mouse', page.getByRole('button', { name: 'Open Search' }).element());
-	// A transition commits after the press handler returns.
-	expect(document.querySelector('input[type="search"]')).toBeNull();
-	await expect.element(searchbox()).toHaveFocus();
-});
-
-test('opens through a transition, not synchronously, with the keyboard shortcut', async () => {
-	await renderSearch();
-	window.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k' }));
-	expect(document.querySelector('input[type="search"]')).toBeNull();
-	await expect.element(searchbox()).toHaveFocus();
 });
 
 test('opens the panel centred in the viewport', async () => {
