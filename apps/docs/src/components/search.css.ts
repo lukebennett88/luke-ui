@@ -1,43 +1,11 @@
 import { vars } from '@luke-ui/react/theme';
 import { interactionState } from '@luke-ui/react/utils';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
-import { createVar, globalStyle, style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 import { overlayMotion } from '../lib/overlay-motion.js';
-import { DOCS_SEARCH_FIELD_VT_SHARE_CLASS } from './search-view-transition.js';
-
-export const searchAnchorHeightVar = createVar();
 
 const panelResultsEnter = `max-block-size ${vars.motion.enter.duration} ${vars.motion.enter.easing}, opacity ${vars.motion.enter.duration} ${vars.motion.enter.easing}`;
 const panelResultsExit = `max-block-size ${vars.motion.exit.duration} ${vars.motion.exit.easing}, opacity ${vars.motion.exit.duration} ${vars.motion.exit.easing}`;
-
-const vtShareDuration = vars.motion.enter.duration;
-const vtShareEasing = vars.motion.enter.easing;
-
-const vtShareReducedMotion = {
-	'@media': {
-		'(prefers-reduced-motion: reduce)': {
-			animationDuration: '0.01ms',
-		},
-	},
-} as const satisfies ComplexStyleRule;
-
-globalStyle(`::view-transition-group(.${DOCS_SEARCH_FIELD_VT_SHARE_CLASS})`, {
-	animationDuration: vtShareDuration,
-	animationTimingFunction: vtShareEasing,
-	...vtShareReducedMotion,
-});
-
-globalStyle(`::view-transition-old(.${DOCS_SEARCH_FIELD_VT_SHARE_CLASS})`, {
-	animationDuration: vtShareDuration,
-	animationTimingFunction: vtShareEasing,
-	...vtShareReducedMotion,
-});
-
-globalStyle(`::view-transition-new(.${DOCS_SEARCH_FIELD_VT_SHARE_CLASS})`, {
-	animationDuration: vtShareDuration,
-	animationTimingFunction: vtShareEasing,
-	...vtShareReducedMotion,
-});
 
 const reducedMotionNoTransition = {
 	'@media': {
@@ -46,14 +14,6 @@ const reducedMotionNoTransition = {
 		},
 	},
 } as const satisfies ComplexStyleRule;
-
-export const fieldMorphHost = style({
-	'@layer': {
-		components: {
-			inlineSize: '100%',
-		},
-	},
-});
 
 export const overlay = style({
 	'@layer': {
@@ -93,12 +53,13 @@ export const panel = style({
 			color: vars.color.foreground.primary,
 			display: 'flex',
 			flexDirection: 'column',
+			inlineSize: `min(38rem, 100% - 2 * ${vars.space['16']})`,
+			insetBlockStart: 'min(15dvh, 8rem)',
+			insetInline: 0,
+			marginInline: 'auto',
 			maxBlockSize: 'none',
 			overflow: 'visible',
 			position: 'fixed',
-			vars: {
-				[searchAnchorHeightVar]: '2.5rem',
-			},
 			zIndex: 101,
 		},
 	},
@@ -199,7 +160,6 @@ export const inputRow = style({
 			borderRadius: vars.radius.surface,
 			display: 'flex',
 			flexShrink: 0,
-			minBlockSize: searchAnchorHeightVar,
 			// Leaves room for the field's outset focus ring inside the panel's `overflow: hidden`.
 			paddingBlock: vars.space['12'],
 			paddingInline: vars.space['12'],
