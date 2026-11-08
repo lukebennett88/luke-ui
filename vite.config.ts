@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite-plus';
 
 export default defineConfig({
@@ -73,7 +74,8 @@ export default defineConfig({
 			},
 			{
 				name: 'luke-ui',
-				specifier: './.github/scripts/lint-plugin.ts',
+				// Resolve from this file, so a config that re-exports this one still finds the plugin.
+				specifier: fileURLToPath(new URL('./.github/scripts/lint-plugin.ts', import.meta.url)),
 			},
 		],
 		options: {
