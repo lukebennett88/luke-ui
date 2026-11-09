@@ -54,7 +54,10 @@ Expected, actual, and diff PNGs plus `summary.json` are written to `.artifacts/v
 `pnpm test:visual:capture` explicitly captures a local baseline in Docker. An authoritative compare
 still selects the newest successful `main` workflow artefact rather than accepting that local
 replacement. Renovate updates the image in `.github/visual-playwright/Dockerfile`, so CI and local
-captures move together.
+captures move together. Renovate raises the image and the `playwright` catalog entry in
+`pnpm-workspace.yaml` in one `playwright` PR, and a test in `.github/scripts/visual-local.test.ts`
+fails if their versions differ. The image stays in the Dockerfile because its digest pin cannot be
+derived from `package.json`.
 
 For quick, non-authoritative iteration with host Chromium:
 
