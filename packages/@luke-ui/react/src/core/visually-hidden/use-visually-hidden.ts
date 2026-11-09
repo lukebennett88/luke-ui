@@ -32,12 +32,8 @@ export function useVisuallyHidden(props: UseVisuallyHiddenProps = {}): UseVisual
 		onFocusWithinChange: setFocusWithin,
 	});
 
-	const resolvedStyle =
-		isFocusable && isFocusWithin
-			? style
-			: style
-				? { ...visuallyHiddenStyle, ...style }
-				: visuallyHiddenStyle;
+	const hiddenStyle = style ? { ...visuallyHiddenStyle, ...style } : visuallyHiddenStyle;
+	const resolvedStyle = isFocusable && isFocusWithin ? style : hiddenStyle;
 
 	return {
 		visuallyHiddenProps: {
