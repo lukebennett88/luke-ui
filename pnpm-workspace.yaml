@@ -84,7 +84,7 @@ catalog:
   monaco-editor: ^0.57.0
   node-html-parser: ^9.0.7
   oxc-parser: ^0.157.0
-  oxc-transform-react: ^0.157.0
+  oxc-transform-react: 0.156.0
   pixelmatch: ^8.0.0
   playwright: '^1.65.0'
   prettier: ^3.9.10

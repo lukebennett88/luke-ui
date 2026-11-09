@@ -290,15 +290,18 @@ test('the shared image workflow reads the contract Playwright image', async () =
 	expect(workflow).toContain('.github/visual-playwright/Dockerfile');
 });
 
-test('the Playwright image tag matches the catalog playwright version', async () => {
-	const workspace = await readFile(path.join(repoRoot, 'pnpm-workspace.yaml'), 'utf8');
-	const catalogVersion = /^\s+playwright: '?\^?(\d+\.\d+\.\d+)'?\s*$/m.exec(workspace)?.[1];
+test('the Playwright image tag matches the resolved playwright version', async () => {
+	const lockfile = await readFile(path.join(repoRoot, 'pnpm-lock.yaml'), 'utf8');
+	const resolvedVersion =
+		/^    playwright:\n      specifier: [^\n]+\n      version: (\d+\.\d+\.\d+)$/m.exec(
+			lockfile,
+		)?.[1];
 	const imageVersion = /\/playwright:v(\d+\.\d+\.\d+)-/.exec(PLAYWRIGHT_VISUAL_IMAGE)?.[1];
 
-	expect(catalogVersion).toBeDefined();
+	expect(resolvedVersion).toBeDefined();
 	// Renovate moves both in one PR. This fails if either is edited alone, because the library would
 	// then drive browsers from a different Playwright release.
-	expect(imageVersion).toBe(catalogVersion);
+	expect(imageVersion).toBe(resolvedVersion);
 });
 
 test('baseline upload replaces the artifact when a workflow run is re-run', async () => {
