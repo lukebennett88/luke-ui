@@ -74,7 +74,7 @@ export function SearchShortcut() {
 			style={modifier ? undefined : { visibility: 'hidden' }}
 			typography="label"
 		>
-			Press <Kbd>{modifier ?? '⌘'}</Kbd> <Kbd>K</Kbd> to search the docs.
+			Press <Kbd>{modifier ?? '⌘'}K</Kbd> to search the docs.
 		</Text>
 	);
 }

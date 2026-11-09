@@ -67,6 +67,7 @@ export default () => {
 							<Box
 								backgroundColor={`${role}.solid`}
 								borderRadius="full"
+								display="inline-flex"
 								elementType="span"
 								paddingBlock="space.4"
 								paddingInline="space.8"

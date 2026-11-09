@@ -30,8 +30,8 @@ export function HomeSectionLinks() {
 					}}
 					renderRoot={(domProps) => <DocsLink {...domProps} appearance="text" to={section.href} />}
 				>
-					<Stack gap="space.12">
-						<Heading typography="heading4">{section.title}</Heading>
+					<Stack gap="space.16">
+						<Heading typography="lead">{section.title}</Heading>
 						<Text color="secondary" elementType="p" fontWeight="body">
 							{section.description}
 						</Text>

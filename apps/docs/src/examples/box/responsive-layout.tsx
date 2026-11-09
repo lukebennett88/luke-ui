@@ -3,7 +3,7 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection={{ initial: 'column', bp768: 'row' }} gap="space.12">
+		<Box display="flex" flexDirection={{ initial: 'column', bp640: 'row' }} gap="space.12">
 			<Item />
 			<Item />
 		</Box>

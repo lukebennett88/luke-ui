@@ -106,7 +106,6 @@ export function CodeBlock({
 			aria-label={copyStatus === 'copied' ? 'Copied' : 'Copy'}
 			icon={copyStatus === 'copied' ? 'check' : 'copy'}
 			onPress={handleCopy}
-			prominence="low"
 			size="small"
 			tone="neutral"
 		/>

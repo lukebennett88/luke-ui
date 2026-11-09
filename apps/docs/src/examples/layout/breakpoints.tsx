@@ -13,7 +13,7 @@ export default () => {
 					gap: ${vars.space['12']};
 				}
 
-				@container (inline-size >= ${breakpoints.bp768}px) {
+				@container (inline-size >= ${breakpoints.bp640}px) {
 					.layout-breakpoints {
 						flex-direction: row;
 					}
