@@ -59,9 +59,10 @@ not open new issues for the parts you leave.
 
 ## Verify
 
-1. Run tasks through Turbo from the repository root so their generate and build dependencies run.
-   Before changing Turbo configuration or commands, read the installed package's bundled `docs/`,
-   found with `node -p "require.resolve('turbo/package.json')"`.
+1. Run tasks through Turbo from the repository root so their generate and build dependencies run,
+   including focused runs of one test file. [WORKFLOWS.md](../../../docs/WORKFLOWS.md#commands)
+   shows the form. Before changing Turbo configuration or commands, read the installed package's
+   bundled `docs/`, found with `node -p "require.resolve('turbo/package.json')"`.
 2. When the diff adds or modifies JS/TS files, run `pnpm run lint:changed` from the repository root
    before committing. It lints every JS/TS file that differs from the merge base with `origin/main`
    under `--deny no-nested-ternary`. It skips untracked files, so stage new files first when staging
@@ -69,11 +70,11 @@ not open new issues for the parts you leave.
    PR. For formatting failures, use `pnpm run fix:format` rather than re-wrapping Markdown by hand.
    Run `pnpm run test:visual` when Docker is available; otherwise report it as **not run** and
    inspect CI's `compare` job. A passing job can still report visual differences: read its summary
-   and listed diffs as [VISUAL_TESTING.md](../../../docs/VISUAL_TESTING.md#review) describes. Run
-   the relevant separate suites in [TESTING.md](../../../docs/TESTING.md), including
-   `pnpm run test:consumer` for published package code, dependencies, or exports. Run
-   `pnpm run build:docs` for changes to generated documentation behaviour, such as props tables or
-   type-definition assets.
+   and listed diffs as [VISUAL_TESTING.md](../../../docs/VISUAL_TESTING.md#review) describes.
+   [Reading CI](../../../docs/WORKFLOWS.md#reading-ci) shows how to read job logs. Run the relevant
+   separate suites in [TESTING.md](../../../docs/TESTING.md), including `pnpm run test:consumer` for
+   published package code, dependencies, or exports. Run `pnpm run build:docs` for changes to
+   generated documentation behaviour, such as props tables or type-definition assets.
 3. Before you call a failure unrelated, show that it also happens on the base revision under
    comparable conditions, and note the revision. Existing evidence, such as a papercut entry or a
    failed CI run on the base, can be enough. A failure your change causes blocks the pull request.

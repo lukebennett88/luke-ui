@@ -41,6 +41,16 @@ pnpm exec turbo run test --filter=reference-app
 Package scripts contain discrete operations. Use Turbo when an operation needs generated files or
 dependency builds. A direct `pnpm --filter … run …` invokes only that package script.
 
+Run tests, type checks, and dev servers through Turbo from the repository root. A package-local
+`vp test`, `vp dev`, or `tsc` reads whatever `dist` and generated files already exist. After a
+source edit, browser tests and the docs app then run against a stale build, and a fresh worktree has
+no generated files at all. To run one file or directory, pass it after `--`:
+
+```sh
+pnpm exec turbo run test:browser:run --filter=@luke-ui/react -- src/core/visually-hidden
+pnpm exec turbo run test --filter=docs -- src/components/search.browser.test.tsx
+```
+
 `pnpm test` runs every suite, including packed consumers, theme integration, and the Docker visual
 comparison. `pnpm test:code` runs the same suites without the visual comparison, so it needs no
 Docker. Both run one workspace test task at a time because Vitest already parallelises within each
@@ -94,3 +104,46 @@ companion tasks for development and watch tests while preserving prerequisite or
 
 No remote task cache is required. Runner caching is separate from Vitest, lint, package-manager, and
 Docker dependency caches. An internal tool cache must never substitute for required test execution.
+
+## Reading CI
+
+`gh pr checks <number> --json name,state,link` lists each job. The job ID is the number after
+`/job/` in its link. `gh run view --log-failed` refuses to print anything until the whole run
+completes, so read a finished job inside a running workflow through the API:
+
+```sh
+log=$(mktemp)
+gh api --allow-escape-sequences "repos/{owner}/{repo}/actions/jobs/<job-id>/logs" \
+  | perl -CS -pe 's/\e\[[0-9;]*m//g; s/(?![\t\n])\p{Cc}//g' > "$log"
+grep -nE 'FAIL|×|Error' "$log"
+```
+
+Run it inside the checkout so `gh` fills in `{owner}/{repo}`. Without `--allow-escape-sequences`,
+`gh api` prints only a warning, because the log contains colour codes. The flag also lets through
+escape sequences that could control your terminal, so the `perl` step strips colour codes and other
+control characters before anything prints. The log is available once that job finishes, even while
+other jobs still run.
+
+The visual `compare` job passes when captures differ. Read its summary before you call visual
+verification done:
+
+```sh
+grep -E ' unchanged$|^[^ ]+ +(changed|added|removed)[[:space:]]' "$log"
+```
+
+The summary has the form `N changed, N added, N removed, N unchanged`. Each differing capture
+follows on its own line. See [Review](VISUAL_TESTING.md#review) for the diff artefact.
+
+## Shell commands
+
+Agents and contributors run commands in bash or zsh. Write shared commands that behave the same in
+both:
+
+- Quote globs and query expressions, as in `--include='*.ts'` and `-q '.sha[0:8]'`. zsh stops with
+  "no matches found" when an unquoted glob matches no file. `git grep` avoids the glob entirely.
+- Quote variables. bash splits an unquoted variable into words and zsh does not. Pass file lists
+  NUL-delimited, as in `git diff -z --name-only | xargs -0 -r pnpm exec vp fmt`, so a filename with
+  a space stays one argument. `-r` skips the command when the list is empty. Without it, GNU `xargs`
+  runs `vp fmt` with no files, which formats the whole repository.
+- Use `perl -pi -e` or a Node script for in-place edits. BSD `sed -i` on macOS requires an argument
+  that GNU `sed` rejects.

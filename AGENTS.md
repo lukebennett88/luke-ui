@@ -33,8 +33,13 @@ documentation, tests, or both.
 - Follow the request's scope and stopping point. Authority comes from the user's explicit request,
   not skill discovery. See [work-on-issue](.agents/skills/work-on-issue/SKILL.md#authority) for
   implementation permissions.
-- Report checks as **passed**, **failed**, **pending**, or **not run**, with the verified revision.
-  Distinguish local runs from CI inspected and explain skipped or unavailable checks.
+- Report checks as **passed**, **failed**, **pending**, or **not run**, with the commit SHA each run
+  verified. Only a passing root `pnpm run check` counts as a passed check. A narrower run, such as
+  one package's `check:types`, can pass while the root check fails, so report the root check as
+  **not run** and name the narrower run that passed. Distinguish local runs from CI inspected and
+  explain skipped or unavailable checks.
+- Write shell commands that run in both bash and zsh. See
+  [Shell commands](docs/WORKFLOWS.md#shell-commands).
 - When a task encounters evidenced repository friction or a guidance violation, follow
   [.agents/papercuts.md](.agents/papercuts.md). Read-only review, including self-review, hands off
   candidates without writing the log.
