@@ -1234,7 +1234,11 @@ for (const appearance of visualAppearances) {
 			await releasePointer();
 		}
 		await parkPointer();
-		button.blur();
+		// blur() leaves Chromium's sequential focus starting point after the button, so move it
+		// back to the document to make Tab start from the beginning again.
+		document.body.tabIndex = -1;
+		document.body.focus();
+		document.body.removeAttribute('tabindex');
 		await focusViaKeyboard(target);
 		await user.keyboard('[Space>]');
 		try {

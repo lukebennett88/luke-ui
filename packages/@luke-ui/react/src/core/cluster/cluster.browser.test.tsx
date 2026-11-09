@@ -24,7 +24,8 @@ test('flows children on the inline axis and wraps by default', () => {
 	expect(getComputedStyle(element).display).toBe('flex');
 	expect(getComputedStyle(element).flexDirection).toBe('row');
 	expect(getComputedStyle(element).flexWrap).toBe('wrap');
-	expect(getComputedStyle(element).justifyContent).toBe('flex-start');
+	// Chromium 158 serializes flex-start as its flow-start alias.
+	expect(getComputedStyle(element).justifyContent).toMatch(/^(?:flex|flow)-start$/);
 	expect(getComputedStyle(element).alignItems).toBe('center');
 });
 
@@ -138,7 +139,8 @@ test('keeps Cluster defaults below sparse responsive alignment overrides', async
 	}
 
 	expect(getComputedStyle(element).alignItems).toBe('center');
-	expect(getComputedStyle(element).justifyContent).toBe('flex-start');
+	// Chromium 158 serializes flex-start as its flow-start alias.
+	expect(getComputedStyle(element).justifyContent).toMatch(/^(?:flex|flow)-start$/);
 	expect(getComputedStyle(element).flexWrap).toBe('wrap');
 	expect(second.getBoundingClientRect().left - first.getBoundingClientRect().right).toBe(0);
 

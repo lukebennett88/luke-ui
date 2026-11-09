@@ -39,7 +39,7 @@ jobs:
     # Digest-pinned Playwright image (keep tag+digest in sync with PLAYWRIGHT_VISUAL_IMAGE in
     # packages/@luke-ui/react/scripts/visual-regression-contract.ts and visual-baseline.yml).
     container:
-      image: mcr.microsoft.com/playwright:v1.64.0-jammy@sha256:c064e7f355d2dda32f669801a1b09e86a1e9252395c844d2cfbbe5c44acb9b79
+      image: mcr.microsoft.com/playwright:v1.65.0-jammy@sha256:5a8620d70618963ec6628dd77cc25ec6a4b232e26c4a41241a8c1def04e2dc04
       options: --ipc=host
     permissions:
       actions: read

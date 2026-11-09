@@ -16,7 +16,7 @@ export const VISUAL_CAPTURE_FALLBACK_DIR = '.visual-captures';
  * pin the same string. Bump the tag and digest together when Playwright moves.
  */
 export const PLAYWRIGHT_VISUAL_IMAGE =
-	'mcr.microsoft.com/playwright:v1.64.0-jammy@sha256:c064e7f355d2dda32f669801a1b09e86a1e9252395c844d2cfbbe5c44acb9b79';
+	'mcr.microsoft.com/playwright:v1.65.0-jammy@sha256:5a8620d70618963ec6628dd77cc25ec6a4b232e26c4a41241a8c1def04e2dc04';
 
 /** Matches GitHub Actions’ architecture so local Docker captures match CI. */
 export const PLAYWRIGHT_VISUAL_PLATFORM = 'linux/amd64';
