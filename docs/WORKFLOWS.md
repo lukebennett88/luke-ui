@@ -104,13 +104,16 @@ completes, so read a finished job inside a running workflow through the API:
 
 ```sh
 log=$(mktemp)
-gh api --allow-escape-sequences "repos/{owner}/{repo}/actions/jobs/<job-id>/logs" > "$log"
+gh api --allow-escape-sequences "repos/{owner}/{repo}/actions/jobs/<job-id>/logs" \
+  | perl -CS -pe 's/\e\[[0-9;]*m//g; s/(?![\t\n])\p{Cc}//g' > "$log"
 grep -nE 'FAIL|×|Error' "$log"
 ```
 
 Run it inside the checkout so `gh` fills in `{owner}/{repo}`. Without `--allow-escape-sequences`,
-`gh api` prints only a warning, because the log contains colour codes. The log is available once
-that job finishes, even while other jobs still run.
+`gh api` prints only a warning, because the log contains colour codes. The flag also lets through
+escape sequences that could control your terminal, so the `perl` step strips colour codes and other
+control characters before anything prints. The log is available once that job finishes, even while
+other jobs still run.
 
 The visual `compare` job passes when captures differ. Read its summary before you call visual
 verification done:
@@ -130,7 +133,8 @@ both:
 - Quote globs and query expressions, as in `--include='*.ts'` and `-q '.sha[0:8]'`. zsh stops with
   "no matches found" when an unquoted glob matches no file. `git grep` avoids the glob entirely.
 - Quote variables. bash splits an unquoted variable into words and zsh does not. Pass file lists
-  NUL-delimited, as in `git diff -z --name-only | xargs -0 pnpm exec vp fmt`, so a filename with a
-  space stays one argument.
+  NUL-delimited, as in `git diff -z --name-only | xargs -0 -r pnpm exec vp fmt`, so a filename with
+  a space stays one argument. `-r` skips the command when the list is empty. Without it, GNU `xargs`
+  runs `vp fmt` with no files, which formats the whole repository.
 - Use `perl -pi -e` or a Node script for in-place edits. BSD `sed -i` on macOS requires an argument
   that GNU `sed` rejects.
