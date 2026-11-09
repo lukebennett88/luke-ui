@@ -40,13 +40,15 @@ env:
   PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
 
 jobs:
+  image:
+    uses: ./.github/workflows/visual-image.yml
+
   baseline:
     name: baseline
+    needs: image
     runs-on: ubuntu-latest
-    # Digest-pinned Playwright image (keep tag+digest in sync with PLAYWRIGHT_VISUAL_IMAGE in
-    # packages/@luke-ui/react/scripts/visual-regression-contract.ts and visual-regression.yml).
     container:
-      image: mcr.microsoft.com/playwright:v1.65.0-jammy@sha256:5a8620d70618963ec6628dd77cc25ec6a4b232e26c4a41241a8c1def04e2dc04
+      image: ${{ needs.image.outputs.image }}
       options: --ipc=host
     permissions:
       contents: read

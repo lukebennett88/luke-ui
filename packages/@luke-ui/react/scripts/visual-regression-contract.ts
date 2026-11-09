@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -10,13 +11,20 @@ export const VISUAL_SUMMARY_FILE = `${VISUAL_ARTIFACTS_DIR}/summary.json`;
 export const VISUAL_CAPTURE_DIR_ENV = 'VISUAL_CAPTURE_DIR';
 export const VISUAL_CAPTURE_FALLBACK_DIR = '.visual-captures';
 
+function readPlaywrightVisualImage(): string {
+	const dockerfile = fileURLToPath(
+		new URL('../../../../.github/visual-playwright/Dockerfile', import.meta.url),
+	);
+	const image = /^FROM\s+(\S+)$/m.exec(readFileSync(dockerfile, 'utf8'))?.[1];
+	if (!image) throw new Error(`No FROM image found in ${dockerfile}.`);
+	return image;
+}
+
 /**
- * Digest-pinned Playwright image used by Visual baseline, Visual regression, and
- * `visual-local`. Workflows cannot import this module, so a test asserts they still
- * pin the same string. Bump the tag and digest together when Playwright moves.
+ * Digest-pinned Playwright image declared in `.github/visual-playwright/Dockerfile`. Renovate
+ * updates that file, so the visual workflows and local captures share one source.
  */
-export const PLAYWRIGHT_VISUAL_IMAGE =
-	'mcr.microsoft.com/playwright:v1.65.0-jammy@sha256:5a8620d70618963ec6628dd77cc25ec6a4b232e26c4a41241a8c1def04e2dc04';
+export const PLAYWRIGHT_VISUAL_IMAGE = readPlaywrightVisualImage();
 
 /** Matches GitHub Actions’ architecture so local Docker captures match CI. */
 export const PLAYWRIGHT_VISUAL_PLATFORM = 'linux/amd64';

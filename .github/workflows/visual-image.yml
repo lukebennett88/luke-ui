@@ -1,0 +1,25 @@
+name: Visual image
+
+on:
+  workflow_call:
+    outputs:
+      image:
+        description: Digest-pinned Playwright image for visual regression tests.
+        value: ${{ jobs.image.outputs.image }}
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Read the Playwright image
+        id: image
+        run: |
+          image="$(sed -n 's/^FROM //p' .github/visual-playwright/Dockerfile)"
+          echo "image=${image}" >> "$GITHUB_OUTPUT"
