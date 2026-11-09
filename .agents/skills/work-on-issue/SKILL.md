@@ -44,15 +44,9 @@ not open new issues for the parts you leave.
 
 ## Build
 
-- Consult the guides for the surfaces you touch before implementing:
-  - JS/TS/React: [CONVENTIONS.md](../../../docs/CONVENTIONS.md), including incidental
-    [comments and JSDoc](../../../docs/DOCUMENTATION.md#comments-and-jsdoc).
-  - Components, primitives, and icons: [COMPONENTS.md](../../../docs/COMPONENTS.md).
-  - Public exports, props, and types: [PUBLIC_API.md](../../../docs/PUBLIC_API.md).
-  - CSS, recipes, and themes: [STYLING.md](../../../docs/STYLING.md).
-  - Dependencies and release metadata: [DEPENDENCIES.md](../../../docs/DEPENDENCIES.md).
-  - Tests: [write-tests](../write-tests/SKILL.md). Documentation:
-    [write-docs](../write-docs/SKILL.md).
+- Consult the applicable [repository guides](../../../README.md#repository-guides) and skills before
+  implementing. Follow [write-tests](../write-tests/SKILL.md) and
+  [write-docs](../write-docs/SKILL.md) when the change touches tests or documentation.
 - Keep [docs and skills current](../../../docs/DOCUMENTATION.md#keeping-docs-current) in the same
   change as the code.
 - Stop and ask when a decision affects public API, accessibility, significant architecture,
@@ -71,32 +65,23 @@ not open new issues for the parts you leave.
    bundled `docs/`, found with `node -p "require.resolve('turbo/package.json')"`.
 2. When the diff adds or modifies JS/TS files, run `pnpm run lint:changed` from the repository root
    before committing. It lints every JS/TS file that differs from the merge base with `origin/main`
-   under `--deny no-nested-ternary`, which enforces
-   [Code style](../../../docs/CONVENTIONS.md#code-style) on the change without requiring unrelated
-   cleanup. It skips untracked files, so run `git add` on new files first. Run `pnpm run check` for
-   every change. It covers barrels, format (including root Markdown), lint, types, docs, cycles, and
-   unused code. For formatting failures, use `pnpm run fix:format` rather than re-wrapping Markdown
-   by hand. Before opening the PR, run `pnpm run test:code` separately; Turbo test tasks are
-   configured not to cache results. Run `pnpm run test:visual` when Docker is available. Otherwise
-   report it as **not run** and rely on the CI `compare` job. A passing `compare` job does not mean
-   the screenshots match, because it reports differences without failing. Read its "N changed, N
-   added, N removed, N unchanged" summary line and any listed diffs before you call visual
-   verification done, as [VISUAL_TESTING.md](../../../docs/VISUAL_TESTING.md#review) describes.
-   [Reading CI](../../../docs/WORKFLOWS.md#reading-ci) shows how to read job logs. Run the separate
-   suites in [TESTING.md](../../../docs/TESTING.md) that cover the change, including
-   `pnpm run test:consumer` for published package code, dependencies, or exports. When the change
-   affects generated documentation behaviour, such as props tables or type-definition assets, also
-   run `pnpm run build:docs` so the production docs output is checked, including
-   `check:type-definition-links`.
+   under `--deny no-nested-ternary`. It skips untracked files, so stage new files first when staging
+   is authorised. Run `pnpm run check` for every change and `pnpm run test:code` before opening the
+   PR. For formatting failures, use `pnpm run fix:format` rather than re-wrapping Markdown by hand.
+   Run `pnpm run test:visual` when Docker is available; otherwise report it as **not run** and
+   inspect CI's `compare` job. A passing job can still report visual differences: read its summary
+   and listed diffs as [VISUAL_TESTING.md](../../../docs/VISUAL_TESTING.md#review) describes.
+   [Reading CI](../../../docs/WORKFLOWS.md#reading-ci) shows how to read job logs. Run the relevant
+   separate suites in [TESTING.md](../../../docs/TESTING.md), including `pnpm run test:consumer` for
+   published package code, dependencies, or exports. Run `pnpm run build:docs` for changes to
+   generated documentation behaviour, such as props tables or type-definition assets.
 3. Before you call a failure unrelated, show that it also happens on the base revision under
-   comparable conditions, and note the revision. Rerun only what you need. Existing evidence, such
-   as a papercut entry or a failed CI run on the base, can be enough. A failure your change causes
-   blocks the pull request. An unrelated failure does not, as long as the rest of the change is
-   verified and the pull request says so. Compare in a separate worktree: stashing does not isolate
-   generated build outputs or their cache. To undo your own edit or remove a probe file, edit or
-   delete that file by path. Do not run `git stash`, `git checkout -- <path>`, `git restore`,
-   `git reset`, or `git clean` in a task checkout, even on your own uncommitted changes: each can
-   discard other work in progress.
+   comparable conditions, and note the revision. Existing evidence, such as a papercut entry or a
+   failed CI run on the base, can be enough. A failure your change causes blocks the pull request.
+   Report unrelated failures and verify the rest. Compare in a separate worktree: stashing does not
+   isolate generated build outputs or their cache. To undo your own edit or remove a probe file,
+   edit or delete that file by path. Do not use `git stash`, `git checkout -- <path>`,
+   `git restore`, `git reset`, or `git clean` in a task checkout; they can discard work in progress.
 4. Read the whole diff. Apply the easy-to-miss checks in [review-pr](../review-pr/SKILL.md#review)
    before committing. Review it with [review-pr](../review-pr/SKILL.md) when the risk warrants it,
    for example a change to public API, accessibility behaviour, shared infrastructure, or complex

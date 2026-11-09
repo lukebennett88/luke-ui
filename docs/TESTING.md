@@ -21,8 +21,18 @@ Import components from public package exports. Import test utilities relatively.
 not mount React yourself.
 
 Assert observable public behaviour. Prefer roles and accessible names, `userEvent`, and local setup.
-Do not test private functions, implementation details, or incidental styling. Use computed styles
-only when layout, a semantic colour, or an interaction state is the contract.
+Locate an interactive control by its role and accessible name, not with `querySelector`. A DOM
+selector is fine for structural inspection, such as a wrapper, a decorative node, or a
+pseudo-element that has no role. Do not test private functions, implementation details, or
+incidental styling. Use computed styles only when layout, a semantic colour, or an interaction state
+is the contract.
+
+Controls transition their colours, so a computed colour read straight after a state change is an
+interpolated value. Read a surface's settled colours with `settledSurfaceColors` from
+`test-utils/surface-colors.ts`, and set a hover or pressed state with `setInteractionState`. Emulate
+media features through `test-utils/emulate-media.ts`. Chromium ignores `pointer` in emulated media,
+so call `emulatePointer('coarse')` for a coarse pointer and restore `emulatePointer('fine')` after
+the test. The helper enables touch emulation, which also reports `hover: none`.
 
 Do not add production props, context defaults, or code paths that exist only to make tests easier.
 Exercise the real loading and rendering path, and supply fixtures through the same seams the product
@@ -109,37 +119,19 @@ the screenshot pixels behind it with `lowestRenderedTextContrast`.
 
 ## Material contrast
 
-`defineTheme` validates token colours and never sees `controlFinish`.
-`core/styles/material-contrast.browser.test.tsx` measures the rendered result instead. For every
-role it paints a test-only specimen with the solid `rest`, `hover` and `pressed` fill, the finish
-rung a solid Button paints in that state (`resting`, `raised`, `recessed`), and the role's `onSolid`
-text, in light and dark mode. `lowestRenderedTextContrastAt` hides the text, screenshots the
-specimen, and returns the lowest contrast between the text colour and any pixel across the text's
-whole box, with where it occurred. A ratio under 4.5:1 reports the theme, role, mode, state, ratio
-and position. Those specimens never use a Button tone, so they add no component API. A second test
-per appearance renders real high, standard and low Buttons of both tones at the medium (40px) and
-small (32px) sizes over `surface.base`, `surface.subdued`, `surface.raised`, `danger.subtle`, and
-every role's solid fill, and measures their label in rest, hover and pressed, so the finish, fill
-and adaptive state layer are covered where a Button paints them. Every appearance runs all ten
-surfaces. A low Button over a page surface or a subtle fill paints no finish, so the finish never
-stacks with its translucent adaptive state layer behind the label. On a role solid it paints the
-solid's own states and finish.
+`defineTheme` validates token colours but does not see `controlFinish`.
+`core/styles/material-contrast.browser.test.tsx` measures rendered text contrast in Chromium. Solid
+role specimens cover all six semantic roles in rest, hover, and pressed states. The Button matrix
+covers high, standard, and low prominence, neutral and danger tones, medium and small sizes, and
+rest, hover, and pressed states across ten surfaces: three page surfaces, `danger.subtle`, and the
+six role solid fills. Each combination runs in Tactile, Paper, layered-finish, flat, contrast-edge,
+and chromatic appearances in light and dark modes. Every measurement must reach 4.5:1. Fixture
+themes also verify that the gate catches gradient and flat-wash failures.
 
-The suite covers Tactile, Paper and the `layeredFinish` fixture, whose finish stacks overlapping
-layers, in light and dark mode. The Button matrix also runs the `contrastEdge`, `flat` and
-`chromatic` fixtures. Every measurement must reach 4.5:1. Two `midBandFailure` tests prove the gate
-catches a finish that fails only in the middle of its gradient, and one `washFailure` test proves it
-catches a flat wash that lightens every dark fill. It does not parse gradients, so these limits
-apply:
-
-- The role specimens use one size and one label. The Button matrix adds the 40px and 32px Button
-  sizes. A finish whose layers scale with a much larger control, or a text size or line height the
-  matrix does not render, can paint differently there.
-- Pixels are 8-bit sRGB from a Chromium screenshot, so it reads the finish as Chromium paints it.
-- It measures normal text on solid fills only. Disabled and inactive UI, forced colours (a finish is
-  not painted), and other layering are out of scope.
-- The React fixtures of Paper and Tactile are the subject. The packed-consumer harness requires
-  their solid fills, on-solid text and finish to match the published packages.
+The test measures normal text using 8-bit sRGB pixels from Chromium screenshots. Its coverage is
+limited to the rendered sizes, text, fills, and layers. It excludes disabled and inactive UI and
+forced colours. The React theme fixtures are the subject. The packed-consumer harness checks their
+solid fills, on-solid text, and finish against the published packages.
 
 To check a custom theme, add its `ThemeInput` to `fixtureThemes` in `test-utils/fixture-themes.ts`,
 add its name to `appearances` in the test, then run:
@@ -182,14 +174,9 @@ just to create an assertion or keep consts referenced.
 
 ## Package consumption
 
-`packages/@luke-ui/react/src/core/packed-consumer/` tests the packages the way an application
-installs them. Its global setup, `setup.ts`, packs the workspace builds of React, Paper, and
-Tactile, installs the tarballs with npm in directories outside the repository, so no workspace link
-can satisfy an import, and builds each consumer once. The scenarios read those consumers and never
-install or build. `react-package.test.ts` covers React, `theme-packages.test.ts` the theme packages,
-and `fonts.test.ts` font loading and Capsize trims. The consumer files they need live in
-`react-fixture.ts` and `theme-fixture.ts`. The theme consumer also builds the Installation guide's
-page and modules verbatim, and the theme tests render that app in Chromium. The comprehensive
+`packages/@luke-ui/react/src/core/packed-consumer/` tests packed React, Paper, and Tactile packages
+in consumers installed outside the repository, so workspace links cannot satisfy imports. The theme
+consumer also builds the Installation guide and renders it in Chromium. The comprehensive
 `pnpm test` includes the harness and requires network access. Run it separately with
 `pnpm test:consumer`. The `consumer-tests` CI job runs it on every pull request and on `main`.
 

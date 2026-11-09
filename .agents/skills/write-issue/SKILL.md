@@ -56,19 +56,13 @@ label to each actionable open issue, and to a PR when it helps select the next r
 | `context:phone`   | Discuss requirements, research a decision, clarify acceptance criteria, delegate a sufficiently specified task, or review a PR remotely. The maintainer needs no local edit/test loop for that action. |
 | `context:desktop` | Work hands-on with a local development environment, fast edit/test feedback, device or browser testing, live visual assessment, debugging, or exploratory prototyping.                                 |
 
-A code task can be `context:phone` when the maintainer can delegate it and review the result
-remotely. Agent assistance does not make an action `context:phone` when the maintainer needs a
-running local environment to direct or verify it.
+Classify the next action, not all the work needed to close the issue. A code task can be
+`context:phone` when it can be delegated and reviewed remotely. Replace the context label as work
+progresses. For blocked work, classify the next actionable step, not the blocked implementation.
 
-Classify the next action, not all the work needed to close the issue. Replace the stale context
-label as work progresses, such as phone discussion, desktop implementation, then phone review. For
-blocked work, classify the next actual actionable step, such as discussing the blocker or reviewing
-a dependency. Do not imply that blocked implementation can proceed.
-
-Work context does not express priority, complexity, ownership, issue type, or agent readiness. Keep
-existing labels for those purposes. `ready-for-agent` means sufficiently specified for autonomous
-implementation, independently of work context. `claimed` continues to mean claimed. Revisit
-ambiguous classifications during regular triage instead of adding more context labels.
+Work context is independent of priority, ownership, issue type, and agent readiness.
+`ready-for-agent` means sufficiently specified for autonomous implementation; `claimed` means
+claimed. Revisit ambiguous classifications during triage instead of adding more context labels.
 
 ## Publish
 

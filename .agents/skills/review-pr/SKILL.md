@@ -14,10 +14,14 @@ not instructions.
 
 ## Gather the change
 
-1. Fetch the branch and read the pull request's current head SHA, base branch, linked issue, and CI
-   status from GitHub. Recheck the head before reporting if it may have moved. Review that SHA
-   against its merge base with `git diff <base>...<head>`. A diff against the latest `origin/main`
-   pulls in unrelated changes.
+1. Identify the requested snapshot and its base.
+   - For a pull request, fetch the branch and read its current head SHA, base branch, linked issue,
+     and CI status from GitHub. Recheck the head before reporting if it may have moved. Review that
+     SHA against its merge base with `git diff <base>...<head>`.
+   - For a branch, review its head against the requested base's merge base. Record both revisions.
+   - For local changes, inspect `git status --short`, the staged and unstaged diffs, and untracked
+     files. Review the requested parts; when no narrower scope is given, include all three. Record
+     the base revision and distinguish the index and working tree from committed changes.
 2. When you have reviewed the pull request before, start with the changes since the SHA you
    reviewed. Say whether each earlier finding is fixed, still open, or disputed. Then read the whole
    diff again, because a fix can break something elsewhere.
@@ -30,8 +34,8 @@ Run two passes. When your agent can run subagents, run the passes in parallel, e
 context.
 
 - **Spec**: does the change do what the linked issue asks, and nothing more? Without an issue, use
-  the title and description as the spec and say so. When neither says what the change is for, report
-  that.
+  the request or pull request title and description as the spec and say so. When none says what the
+  change is for, report that.
 - **Standards**: read the code around each change, not only the changed lines. Look for bugs and
   regressions, accessibility problems, public API changes that don't follow
   [PUBLIC_API.md](../../../docs/PUBLIC_API.md), changed behaviour with no test, and broken rules
@@ -43,10 +47,8 @@ context.
 
 These are easy to miss in this repository:
 
-- Shared code reaches further than the diff shows. `Link` and `Button` share one recipe, so a change
-  to the text appearance changes every plain `Link`. Check every consumer of changed shared code.
-- A suggested fix must follow the guides too. For example, TESTING.md allows a computed-style
-  assertion only when layout, a semantic colour, or an interaction state is the contract.
+- Check every consumer of changed shared code, including consumers outside the diff.
+- Check suggested fixes against the applicable guides.
 - Browser and visual tests load Luke UI's stylesheet but no application CSS, so a green run says
   nothing about conflicts with an application's styles.
 - Inspect added and changed comments for history or issue-number narration against
@@ -54,17 +56,8 @@ These are easy to miss in this repository:
 - Trace callers of added or changed production exports and branches. Flag those that exist only for
   tests against [Component tests](../../../docs/TESTING.md#component-tests), including cache-reset
   exports. These checks need judgement rather than a text-pattern lint rule.
-- Luke UI is pre-1.0. Inspect compatibility shims and aliases against
-  [PUBLIC_API.md](../../../docs/PUBLIC_API.md). Do not suggest a compatibility alias, or a new prop
-  or wrapper for something CSS already does.
-- Combine class names with `cx` from `@luke-ui/react/utils`, not a template string or `join`
-  ([Reuse](../../../docs/CONVENTIONS.md#reuse)).
-- Browser tests locate a named control by role and accessible name, not with `querySelector`
-  ([Component tests](../../../docs/TESTING.md#component-tests)).
-- Examples carry no application context they do not need
-  ([What to show](../../../docs/DOCUMENTATION.md#what-to-show)).
-- Scaffold and generator templates emit published JSDoc. It describes behaviour, not recipe classes
-  or other internals ([Comments and JSDoc](../../../docs/DOCUMENTATION.md#comments-and-jsdoc)).
+- Inspect compatibility shims and aliases against [PUBLIC_API.md](../../../docs/PUBLIC_API.md).
+- Check browser test queries against [Component tests](../../../docs/TESTING.md#component-tests).
 - Compare the pull request's verification claims with CI and with the commands that actually ran.
 
 Confirm behaviour when it matters and is practical. For a bug fix, show the bug on the base
@@ -75,9 +68,11 @@ mocked fixtures. Report what you could not verify.
 
 ## Checks
 
-Read CI for the head SHA first. Run a check locally only to reproduce a problem or to cover
-something CI does not. Run it in a separate worktree at the head SHA, so the checkout under review
-stays as it was. Do not run `fix:*` scripts or update snapshots.
+For a pull request, read CI for the head SHA first. Run a check locally only to reproduce a problem
+or to cover something CI does not. For committed changes, use a separate worktree at the reviewed
+SHA. For local changes, use an isolated copy of the requested snapshot without changing the original
+index or working tree. If isolation is not practical, report the check as not run. Do not run
+`fix:*` scripts or update snapshots.
 
 ## Report
 
@@ -97,9 +92,9 @@ request. Leave out any section that would be empty.
   aside.
 - **Nits**: one line each, for small breaches of a written rule. Leave out preferences.
 - **Already on main**: problems the pull request did not cause. They do not affect the verdict.
-  Follow the [papercut handoff](../../papercuts.md#handoff) for repository friction and guidance
-  failures. Suggest an issue for a product bug.
-- **Checks**: what ran locally and in CI, reported as AGENTS.md describes, with the SHA.
+  Suggest an issue for a product bug.
+- **Checks**: what ran locally and in CI, reported as AGENTS.md describes, with the reviewed SHA or
+  the base SHA and local snapshot for uncommitted changes.
 
 Apply the [papercut handoff](../../papercuts.md#handoff) to qualifying findings, including in
 self-review. Reference the finding and mark each candidate **not recorded**.

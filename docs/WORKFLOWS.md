@@ -59,6 +59,15 @@ suite. CI splits the suites across isolated jobs.
 See [Testing](TESTING.md) for test contracts, [Visual testing](VISUAL_TESTING.md) for Docker and
 baseline requirements, and [Components](COMPONENTS.md) for scaffolding arguments.
 
+## Commit hook
+
+`pnpm install` runs `vp config`, which installs the Vite+ Git hook dispatcher in `.vite-hooks/_`.
+The committed `.vite-hooks/pre-commit` runs `vp staged --no-stash`, which applies the `staged` rules
+in `vite.config.ts` to staged files. Those rules only lint, so the hook needs no backup stash.
+`--no-stash` keeps it from touching the stash that every Git worktree shares. `vp config` leaves
+`core.hooksPath` alone when it already points somewhere else. Run `pnpm exec vp hooks status` to see
+which hooks are active, and `pnpm exec vp hooks enable` to install the dispatcher in that case.
+
 ## Fixing and cleaning
 
 `pnpm fix` applies repository lint fixes, then scoped type-aware fixes, then repository formatting.

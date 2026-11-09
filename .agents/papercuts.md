@@ -90,16 +90,6 @@ not help. Silence in this log is not evidence.
   again is not a remedy. Correcting the comments does not establish that comment authoring applies
   the rule.
 
-## Existing nested ternary blocks changed-file lint
-
-- Seen: 2026-10-23 (#912, PR #913). The changed-file lint check reported nested ternaries at
-  `generate.ts:59` and `generate.ts:61`. The same check failed on the unchanged file at `402309a2`.
-- Where: `packages/scaffolding/scripts/generate.ts`. `docs/CONVENTIONS.md`, Code style, forbids
-  nested ternaries. The work-on-issue workflow requires `vp lint --deny no-nested-ternary` for
-  changed JavaScript and TypeScript files.
-- Problem: Updating suppression comments makes the required lint check report an existing nested
-  ternary outside the change's scope.
-
 ## Browser tests use DOM selectors for named controls
 
 - Seen: 2026-10-27 (#929). The newly authored `field-surfaces.browser.test.tsx` used

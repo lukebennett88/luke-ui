@@ -18,31 +18,9 @@ you apply them. When this skill and the guide disagree, the guide wins.
 3. Find an existing file of the same kind and match it: the component guide exemplar in the
    [Authoring checklist](../../../docs/DOCUMENTATION.md#authoring-checklist), or a comparable
    authored guide, internal guide, README, or public declaration.
-4. Read the guide sections that the checklist below links to for your change.
-5. Write the change, run `pnpm run check` from the repo root, and work through the checklist.
-
-## Quality checklist
-
-Authors use this before finishing. Reviewers use it on the diff.
-
-- [ ] Does each section belong on this page and help its reader?
-      [What documentation is for](../../../docs/DOCUMENTATION.md#what-documentation-is-for),
-      [Public documentation scope](../../../docs/DOCUMENTATION.md#public-documentation-scope),
-      [Internal documentation scope](../../../docs/DOCUMENTATION.md#internal-documentation-scope)
-- [ ] Say it once. Put guidance on the page that owns the topic, and link to it from other pages.
-      ([Writing style](../../../docs/DOCUMENTATION.md#writing-style))
-- [ ] Does the prose meet the writing rules?
-      [Writing style](../../../docs/DOCUMENTATION.md#writing-style),
-      [Instructions](../../../docs/DOCUMENTATION.md#instructions)
-- [ ] Do examples, page structure, and JSDoc follow their rules?
-      [Examples](../../../docs/DOCUMENTATION.md#examples),
-      [MDX page structure](../../../docs/DOCUMENTATION.md#mdx-page-structure),
-      [API reference](../../../docs/DOCUMENTATION.md#api-reference),
-      [Comments and JSDoc](../../../docs/DOCUMENTATION.md#comments-and-jsdoc)
-- [ ] Does the whole page survive the page-level questions?
-      [Review](../../../docs/DOCUMENTATION.md#review)
-- [ ] Do the docs match the code after the change?
-      [Keeping docs current](../../../docs/DOCUMENTATION.md#keeping-docs-current)
+4. Read the guide sections relevant to the change. Check the whole page using
+   [Review](../../../docs/DOCUMENTATION.md#review), including whether the docs match the code.
+5. Run `pnpm run check` from the repo root.
 
 ## Reviewing
 
