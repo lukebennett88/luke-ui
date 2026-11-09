@@ -51,7 +51,7 @@ catalog:
   '@shikijs/monaco': ^4.5.0
   '@tanstack/react-query': ^5.105.0
   '@rolldown/pluginutils': ^1.0.1
-  '@tailwindcss/vite': ^4.3.3
+  '@tailwindcss/vite': ^4.3.4
   '@tanstack/react-form': ^1.33.5
   '@tanstack/react-router': ^1.170.46
   '@tanstack/react-start': ^1.169.4
@@ -104,7 +104,7 @@ catalog:
   shiki: ^4.5.0
   spin-doctor: ^0.0.1
   sucrase: ^3.35.1
-  tailwindcss: ^4.3.3
+  tailwindcss: ^4.3.4
   ts-morph: ^28.0.0
   tsx: ^4.23.15
   turbo: ^2.11.10
