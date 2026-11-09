@@ -49,7 +49,7 @@ catalog:
   '@monaco-editor/react': ^4.7.0
   '@react-aria/utils': ^3.34.1
   '@shikijs/monaco': ^4.5.0
-  '@tanstack/react-query': ^5.105.0
+  '@tanstack/react-query': ^5.106.1
   '@rolldown/pluginutils': ^1.0.1
   '@tailwindcss/vite': ^4.3.3
   '@tanstack/react-form': ^1.33.5
