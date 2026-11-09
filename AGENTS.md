@@ -35,8 +35,8 @@ documentation, tests, or both.
   implementation permissions.
 - Report checks as **passed**, **failed**, **pending**, or **not run**, with the commit SHA each run
   verified. Only a passing root `pnpm run check` counts as a passed check. Report a narrower run,
-  such as one package's `check:types`, as partial. Distinguish local runs from CI inspected and
-  explain skipped or unavailable checks.
+  such as one package's `check:types`, as partial: it can pass while the root check fails.
+  Distinguish local runs from CI inspected and explain skipped or unavailable checks.
 - Write shell commands that run in both bash and zsh. See
   [Shell commands](docs/WORKFLOWS.md#shell-commands).
 - When a task encounters evidenced repository friction or a guidance violation, follow

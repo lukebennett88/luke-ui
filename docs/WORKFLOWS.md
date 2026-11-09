@@ -103,8 +103,9 @@ Docker dependency caches. An internal tool cache must never substitute for requi
 completes, so read a finished job inside a running workflow through the API:
 
 ```sh
-gh api --allow-escape-sequences "repos/{owner}/{repo}/actions/jobs/<job-id>/logs" > job.log
-grep -nE 'FAIL|×|Error' job.log
+log=$(mktemp)
+gh api --allow-escape-sequences "repos/{owner}/{repo}/actions/jobs/<job-id>/logs" > "$log"
+grep -nE 'FAIL|×|Error' "$log"
 ```
 
 Run it inside the checkout so `gh` fills in `{owner}/{repo}`. Without `--allow-escape-sequences`,
@@ -115,7 +116,7 @@ The visual `compare` job passes when captures differ. Read its summary before yo
 verification done:
 
 ```sh
-grep -E ' unchanged$|^[^ ]+ +(changed|added|removed)[[:space:]]' job.log
+grep -E ' unchanged$|^[^ ]+ +(changed|added|removed)[[:space:]]' "$log"
 ```
 
 The summary has the form `N changed, N added, N removed, N unchanged`. Each differing capture
@@ -128,7 +129,8 @@ both:
 
 - Quote globs and query expressions, as in `--include='*.ts'` and `-q '.sha[0:8]'`. zsh stops with
   "no matches found" when an unquoted glob matches no file. `git grep` avoids the glob entirely.
-- Quote variables, and pass file lists with `xargs` rather than an unquoted `$files`. bash splits an
-  unquoted variable into words and zsh does not.
+- Quote variables. bash splits an unquoted variable into words and zsh does not. Pass file lists
+  NUL-delimited, as in `git diff -z --name-only | xargs -0 pnpm exec vp fmt`, so a filename with a
+  space stays one argument.
 - Use `perl -pi -e` or a Node script for in-place edits. BSD `sed -i` on macOS requires an argument
   that GNU `sed` rejects.
