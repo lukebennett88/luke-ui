@@ -488,8 +488,12 @@ type alias also keeps its declaration. When a Luke UI declaration hides its valu
 `keyof typeof responsiveConditions` does, the list adds the type TypeScript resolves it to. Do not
 write type definitions by hand.
 
-The HTML table links Luke UI types to declarations in popovers. Definitions load from separate JSON
-files when first needed. The build validates them.
+The build formats object members, unions or intersections with more than two members, and parameter
+lists with more than two parameters on separate indented lines. Named types stay named, Markdown
+table cells show types on one line, and code blocks preserve line breaks. In the HTML table, Luke UI
+type links open their declaration and resolved type in a popover, where linked names navigate to
+nested definitions and breadcrumbs return to earlier types. Definitions load from separate JSON
+files on first use, and the build validates them.
 
 `check:docs` requires `## API` to be the last heading on a guide that declares `source:`, requires
 at least one `component-props-table` tag inside it, and rejects a tag placed anywhere else on the

@@ -29,19 +29,6 @@ skill and the guide disagree, the guide wins.
    - For a test that `pnpm run test:code` leaves out, run the command TESTING.md gives for it.
    - Report a run that could not start as not run, not as passing.
 
-## Quality checklist
-
-Authors use this before finishing. Reviewers use it on the diff.
-
-- [ ] Check each test's contract and test type against
-      [Test types](../../../docs/TESTING.md#test-types) and
-      [Component tests](../../../docs/TESTING.md#component-tests).
-- [ ] Check component test queries, assertions, and cases against
-      [Component tests](../../../docs/TESTING.md#component-tests).
-- [ ] Check timing and state isolation against
-      [Timing and synchronisation](../../../docs/TESTING.md#timing-and-synchronisation).
-- [ ] Run the relevant checks above, or report why they did not run.
-
 ## Reviewing
 
 - Follow [review-pr's check boundaries](../review-pr/SKILL.md#checks), including when this skill is

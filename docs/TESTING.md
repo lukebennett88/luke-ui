@@ -120,10 +120,13 @@ the screenshot pixels behind it with `lowestRenderedTextContrast`.
 ## Material contrast
 
 `defineTheme` validates token colours but does not see `controlFinish`.
-`core/styles/material-contrast.browser.test.tsx` measures the rendered contrast of solid role
-specimens on solid fills and real Buttons across appearances, modes, states, sizes, and surfaces.
-The suite tests Tactile, Paper, and fixture themes, including fixtures that prove the gate catches
-gradient and wash failures. Every measurement must reach 4.5:1.
+`core/styles/material-contrast.browser.test.tsx` measures rendered text contrast in Chromium. Solid
+role specimens cover all six semantic roles in rest, hover, and pressed states. The Button matrix
+covers high, standard, and low prominence, neutral and danger tones, medium and small sizes, and
+rest, hover, and pressed states across ten surfaces: three page surfaces, `danger.subtle`, and the
+six role solid fills. Each combination runs in Tactile, Paper, layered-finish, flat, contrast-edge,
+and chromatic appearances in light and dark modes. Every measurement must reach 4.5:1. Fixture
+themes also verify that the gate catches gradient and flat-wash failures.
 
 The test measures normal text using 8-bit sRGB pixels from Chromium screenshots. Its coverage is
 limited to the rendered sizes, text, fills, and layers. It excludes disabled and inactive UI and
