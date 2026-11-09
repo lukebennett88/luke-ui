@@ -70,16 +70,6 @@ not help. Silence in this log is not evidence.
   the rule, so pointing to it again is not a remedy. Correcting the implementation does not
   establish that test authoring applies that rule.
 
-## Existing nested ternary blocks changed-file lint
-
-- Seen: 2026-10-23 (#912, PR #913). The changed-file lint check reported nested ternaries at
-  `generate.ts:59` and `generate.ts:61`. The same check failed on the unchanged file at `402309a2`.
-- Where: `packages/scaffolding/scripts/generate.ts`. `docs/CONVENTIONS.md`, Code style, forbids
-  nested ternaries. The work-on-issue workflow requires `vp lint --deny no-nested-ternary` for
-  changed JavaScript and TypeScript files.
-- Problem: Updating suppression comments makes the required lint check report an existing nested
-  ternary outside the change's scope.
-
 ## Browser tests use DOM selectors for named controls
 
 - Seen: 2026-10-27 (#929). The newly authored `field-surfaces.browser.test.tsx` used

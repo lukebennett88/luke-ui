@@ -17,10 +17,8 @@ the image.
 The `Visual baseline` workflow renders `main` and uploads the `visual-baseline` artefact. Pull
 requests download the newest `main` run, render their branch, and compare it.
 
-After a rendering-environment change (for example moving baseline and compare into this container),
-the first compare against the previous host baseline can show large intentional diffs. Once that
-change merges, push or re-run `Visual baseline` on `main` so the next PRs compare against captures
-from the pinned container.
+After a rendering-environment change, the first comparison can show large intentional diffs. Once
+the change merges, re-run `Visual baseline` on `main`.
 
 The newest run must have succeeded and retain its artefact. Never fall back to an older successful
 run: a stale baseline can pass an unchecked change. Re-run `Visual baseline` on `main` when the
@@ -49,11 +47,8 @@ Otherwise, it downloads and validates that run's artefact before replacing the l
 never falls back to an older run. Explicit local captures stay separate from the authoritative
 cache.
 
-The container receives current source without host dependencies or build outputs. A Docker volume
-stores dependency installs keyed by the pinned image, platform, lockfile, workspace and install
-configuration, package manifests, hooks, and patches. A warm run restores that install and skips
-dependency installation, then builds packages and captures fresh screenshots inside the container.
-It never reuses host builds or task-result caches.
+The container builds current source and captures fresh screenshots without host dependencies, build
+outputs, or task-result caches. A Docker volume caches dependency installs.
 
 Expected, actual, and diff PNGs plus `summary.json` are written to `.artifacts/visual-regression`.
 `pnpm test:visual:capture` explicitly captures a local baseline in Docker. An authoritative compare
@@ -92,34 +87,21 @@ after merge.
 
 ## Capture freeze
 
-`freezeMotionForCapture` waits a couple of animation frames, finishes in-flight CSS transitions and
-animations, then applies reduced-motion and zero-duration overrides. Cancelling a transition
-mid-flight (for example `text-decoration-color` on text Links) otherwise freezes an interpolated
-value and flakes the capture. During the freeze, `text-decoration-color` is pinned to `currentColor`
-so underlines cannot disappear from a cancelled colour transition. Exit animations are paused rather
-than finished so finishing them cannot unmount an open overlay before the screenshot. Restore
-resumes only the exit animations the freeze paused. CSS exit transitions are style-locked so
-reduced-motion recipe resets (`transition: none`) cannot cancel them mid-capture. Already-paused
-exit animations stay paused after restore.
+`freezeMotionForCapture` finishes transitions and animations before applying reduced-motion and
+zero-duration overrides. It pins underline colour to `currentColor` and pauses exit animations to
+keep overlays mounted. It resumes only the exit animations it paused, leaving previously paused
+animations paused, and removes its overrides after capture.
 
-The freeze also hides the caret with `caret-color: transparent` and sets `caret-animation: manual`.
-Forced colours replace `caret-color` with a system colour, so the hidden caret returns there and
-Chromium blinks it. A capture of a focused text field then showed the caret or not depending on the
-blink phase. `caret-animation: manual` is not a colour, so forced colours leave it alone. It stops
-the blink, so a focused field in a forced-colours capture always shows a solid caret, and every
-other capture shows none. Playwright's `caret: 'hide'`, which Vitest enables by default, sets the
-same `caret-color`, so it does not cover forced colours. Inputs keep their system colours, borders
-and backgrounds. Do not add `forced-color-adjust: none` to a capture to fix a caret.
+Exit transitions are style-locked during capture so reduced-motion rules cannot cancel them and
+unmount an overlay before the screenshot.
 
-Browser setup loads the theme Inter file before each test mounts so fixtures measure against that
-face from the first paint. Code surfaces keep the production monospace stack — the harness does not
-override component font styles. `freezeMotionForCapture` restores reduced-motion, the freeze
-stylesheet, and exit locks if setup fails after installing them. `captureVisual` awaits Inter, owns
-motion freeze cleanup in nested finally blocks, skips no-op viewport resizes (React Aria closes
-popovers on document scroll), re-binds body/html locators immediately before the screenshot so
-live-region text changes cannot invalidate the locator, and parks the pointer outside the viewport
-after each capture. Browser tests also park the pointer in `afterEach` so a leftover cursor cannot
-leave text Links hovered (hover toggles their underline).
+The freeze hides the caret with `caret-color` and disables blinking with `caret-animation`. Forced
+colours override the caret colour but not the animation setting, so a focused field shows a solid
+caret in forced-colours captures. Do not use `forced-color-adjust: none` to hide it.
+
+Browser setup loads Inter before rendering. `captureVisual` waits for the font, cleans up the motion
+freeze, and parks the pointer outside the viewport. It avoids unnecessary viewport resizes, which
+can close React Aria popovers, and refreshes body and HTML locators before capture.
 
 ## Tall scenes
 

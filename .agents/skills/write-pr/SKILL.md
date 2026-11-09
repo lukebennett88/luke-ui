@@ -15,9 +15,11 @@ works. Keep it short. Most pull requests need one paragraph and a verification s
 2. Write the title as a plain imperative sentence, like a commit subject. Do not add a prefix such
    as `feat:`.
 3. Open with a short paragraph on the problem and the change. Add a `## Changes` list only when a
-   paragraph can't carry it.
+   paragraph can't carry it. When it clarifies the change, add a small diagram, diff sketch, or tree
+   showing the relevant flow or structure.
 4. Describe public API changes, breaking changes, and what a consumer must change, when there are
-   any.
+   any. Call out material merge risks, who or what they affect, and whether the change is hard to
+   reverse when that helps the reviewer assess it.
 5. When the rendered UI changes and a comparison helps the reviewer, add before and after
    screenshots side by side in a table. Upload them with `--attach` on `gh pr create` or
    `gh pr edit`, and reference each file from the table, as in `![Before](./before.png)`. Do not
@@ -25,8 +27,9 @@ works. Keep it short. Most pull requests need one paragraph and a verification s
    recording or a test often shows more than a screenshot.
 6. End with `## Verification`. Give the checks that ran locally and their results, and the CI checks
    that are pending or failed. Name the checks you did not run and why. Give the SHA the results
-   apply to, and the base revision for a failure that also happens on the base. Summarise output
-   instead of pasting it.
+   apply to, and the base revision for a failure that also happens on the base. When useful and
+   available, include concrete before-and-after evidence, such as a failing and passing test or
+   command output. Summarise output instead of pasting it.
 7. Write `Closes #n` only when the pull request completes the issue. Otherwise write `Refs #n`.
 
 Leave out process notes, history, and lines such as "Do not merge until review is complete".

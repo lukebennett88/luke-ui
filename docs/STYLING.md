@@ -71,6 +71,12 @@ The Capsize trims are private `--luke-internal-font-<style>-*` variables. The th
 writes them from each style's own font metrics, `Text` reads them, and `theme/capsize-trim-vars.ts`
 names them for both.
 
+When `Text` is trimmed, the margin or gap between two text boxes is the visible space between their
+cap heights and baselines. To match a site that does not trim text, compare rendered gaps rather
+than CSS values. See
+[Text trimming](../apps/docs/content/docs/components/typography/text.mdx#trimming) for defaults and
+overrides.
+
 Public tokens are theme-dependent semantic values and shared fixed measurements that applications
 demonstrably align with. Component-specific geometry is a private TypeScript constant in
 `core/sizing/`: the minimum target, the Combobox action size, and the icon sizes. `Box`'s

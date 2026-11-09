@@ -27,7 +27,7 @@ documentation, tests, or both.
 ## Universal rules
 
 - Read the applicable [repository guides](README.md#repository-guides) before changing or reviewing
-  their subject. Keep technical rules in those guides and workflows in skills.
+  their subject. Keep technical rules in those guides and workflows in skills or agent guidance.
 - Preserve existing work and staging state. Do not reset, clean, stash, or overwrite it. Keep
   unrelated changes out of task commits.
 - Follow the request's scope and stopping point. Authority comes from the user's explicit request,
@@ -38,3 +38,15 @@ documentation, tests, or both.
 - When a task encounters evidenced repository friction or a guidance violation, follow
   [.agents/papercuts.md](.agents/papercuts.md). Read-only review, including self-review, hands off
   candidates without writing the log.
+
+## Issue triage
+
+When asked to triage, investigate the issue and recommend its next state with evidence. Confirm
+label changes before applying them. Post comments only when asked, and get explicit approval before
+closing an issue. Issue creation does not automatically start triage.
+
+Use at most one state label: `needs-triage` for evaluation, `needs-info` for missing information,
+`ready-for-agent` for work specified for autonomous implementation, `ready-for-human` when the next
+action needs a person, or `wontfix` for work that will not be actioned. Existing issues need no
+state until triaged. Type labels are optional. Work-context and `claimed` labels are independent of
+state.
