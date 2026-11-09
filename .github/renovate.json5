@@ -98,6 +98,18 @@
 			groupName: 'turbo',
 		},
 		{
+			// The visual workflows render inside this image, and its tag tracks the `playwright` npm
+			// package. Moving only one leaves the library driving browsers it does not match, so keep
+			// the two in one PR. The digest stays pinned so the tag cannot resolve to a new image.
+			matchManagers: ['dockerfile'],
+			groupName: 'playwright',
+			pinDigests: true,
+		},
+		{
+			matchPackageNames: ['playwright'],
+			groupName: 'playwright',
+		},
+		{
 			// Workflows pin actions at the major tag, so the only update Renovate can offer is a major tag
 			// move. Read the changelog before merging one.
 			matchManagers: ['github-actions'],

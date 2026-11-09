@@ -6,13 +6,13 @@ and comparison policy.
 ## Baseline
 
 The `Visual baseline` and `Visual regression` workflows render inside the same digest-pinned
-Playwright container. The image string lives in `PLAYWRIGHT_VISUAL_IMAGE`
-(`packages/@luke-ui/react/scripts/visual-regression-contract.ts`). Both workflows pin that value,
-and a script test fails if they drift. That pins Chromium, OS libraries, and system fonts so
-baseline and compare share one rendering environment. GitHub-hosted `ubuntu-latest` alone is not
-stable enough for pixel screenshots. Both workflows set `PLAYWRIGHT_BROWSERS_PATH=/ms-playwright`,
-and Turbo’s visual tasks pass that variable through so the test process uses the browsers baked into
-the image.
+Playwright container. The image is declared once in `.github/visual-playwright/Dockerfile`, which
+Renovate updates. The `visual-image` reusable workflow reads its `FROM` line, both workflows use
+that output, and `PLAYWRIGHT_VISUAL_IMAGE` reads the same file for local captures. That pins
+Chromium, OS libraries, and system fonts so baseline and compare share one rendering environment.
+GitHub-hosted `ubuntu-latest` alone is not stable enough for pixel screenshots. Both workflows set
+`PLAYWRIGHT_BROWSERS_PATH=/ms-playwright`, and Turbo’s visual tasks pass that variable through so
+the test process uses the browsers baked into the image.
 
 The `Visual baseline` workflow renders `main` and uploads the `visual-baseline` artefact. Pull
 requests download the newest `main` run, render their branch, and compare it.
@@ -53,8 +53,11 @@ outputs, or task-result caches. A Docker volume caches dependency installs.
 Expected, actual, and diff PNGs plus `summary.json` are written to `.artifacts/visual-regression`.
 `pnpm test:visual:capture` explicitly captures a local baseline in Docker. An authoritative compare
 still selects the newest successful `main` workflow artefact rather than accepting that local
-replacement. Bump `PLAYWRIGHT_VISUAL_IMAGE` and both workflow `image:` lines together when
-Playwright moves.
+replacement. Renovate updates the image in `.github/visual-playwright/Dockerfile`, so CI and local
+captures move together. Renovate raises the image and the `playwright` catalog entry in
+`pnpm-workspace.yaml` in one `playwright` PR, and a test in `.github/scripts/visual-local.test.ts`
+fails if their versions differ. The image stays in the Dockerfile because its digest pin cannot be
+derived from `package.json`.
 
 For quick, non-authoritative iteration with host Chromium:
 

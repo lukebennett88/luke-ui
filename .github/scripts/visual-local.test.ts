@@ -267,7 +267,7 @@ test('classifies a missing docker binary and preserves non-zero exit statuses', 
 	expect(dockerExitStatus('fail')).toBeUndefined();
 });
 
-test('both visual workflows pin the contract Playwright image', async () => {
+test('both visual workflows take the Playwright image from the shared image workflow', async () => {
 	const workflows = await Promise.all(
 		['visual-baseline.yml', 'visual-regression.yml'].map((file) =>
 			readFile(path.join(repoRoot, '.github/workflows', file), 'utf8'),
@@ -275,9 +275,33 @@ test('both visual workflows pin the contract Playwright image', async () => {
 	);
 
 	for (const text of workflows) {
-		expect(text).toContain(PLAYWRIGHT_VISUAL_IMAGE);
+		expect(text).toContain('uses: ./.github/workflows/visual-image.yml');
+		expect(text).toContain('image: ${{ needs.image.outputs.image }}');
 		expect(text).toContain(`PLAYWRIGHT_BROWSERS_PATH: ${PLAYWRIGHT_BROWSERS_PATH}`);
 	}
+});
+
+test('the shared image workflow reads the contract Playwright image', async () => {
+	const workflow = await readFile(
+		path.join(repoRoot, '.github/workflows/visual-image.yml'),
+		'utf8',
+	);
+
+	expect(workflow).toContain('.github/visual-playwright/Dockerfile');
+});
+
+test('the Playwright image tag matches the resolved playwright version', async () => {
+	const lockfile = await readFile(path.join(repoRoot, 'pnpm-lock.yaml'), 'utf8');
+	const resolvedVersion =
+		/^    playwright:\n      specifier: [^\n]+\n      version: (\d+\.\d+\.\d+)$/m.exec(
+			lockfile,
+		)?.[1];
+	const imageVersion = /\/playwright:v(\d+\.\d+\.\d+)-/.exec(PLAYWRIGHT_VISUAL_IMAGE)?.[1];
+
+	expect(resolvedVersion).toBeDefined();
+	// Renovate moves both in one PR. This fails if either is edited alone, because the library would
+	// then drive browsers from a different Playwright release.
+	expect(imageVersion).toBe(resolvedVersion);
 });
 
 test('baseline upload replaces the artifact when a workflow run is re-run', async () => {
