@@ -11,11 +11,13 @@ export const VISUAL_SUMMARY_FILE = `${VISUAL_ARTIFACTS_DIR}/summary.json`;
 export const VISUAL_CAPTURE_DIR_ENV = 'VISUAL_CAPTURE_DIR';
 export const VISUAL_CAPTURE_FALLBACK_DIR = '.visual-captures';
 
+const PLAYWRIGHT_IMAGE_PATTERN = /^FROM\s+(\S+)$/m;
+
 function readPlaywrightVisualImage(): string {
 	const dockerfile = fileURLToPath(
 		new URL('../../../../.github/visual-playwright/Dockerfile', import.meta.url),
 	);
-	const image = /^FROM\s+(\S+)$/m.exec(readFileSync(dockerfile, 'utf8'))?.[1];
+	const image = PLAYWRIGHT_IMAGE_PATTERN.exec(readFileSync(dockerfile, 'utf8'))?.[1];
 	if (!image) throw new Error(`No FROM image found in ${dockerfile}.`);
 	return image;
 }
