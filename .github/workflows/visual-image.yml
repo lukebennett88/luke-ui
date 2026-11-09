@@ -21,5 +21,9 @@ jobs:
       - name: Read the Playwright image
         id: image
         run: |
-          image="$(sed -n 's/^FROM //p' .github/visual-playwright/Dockerfile)"
+          image="$(sed -n 's/^FROM //p' .github/visual-playwright/Dockerfile | head -n 1)"
+          if [ -z "${image}" ]; then
+            echo "No FROM image found in .github/visual-playwright/Dockerfile" >&2
+            exit 1
+          fi
           echo "image=${image}" >> "$GITHUB_OUTPUT"
