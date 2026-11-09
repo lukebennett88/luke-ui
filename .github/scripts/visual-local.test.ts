@@ -33,7 +33,10 @@ async function runCaptureScript(options: {
 }): Promise<number> {
 	const stubBodies: Record<string, string> = {
 		chown: '#!/bin/sh\nexit 0\n',
-		corepack: '#!/bin/sh\nexit 0\n',
+		corepack: '#!/bin/sh\nexit 127\n',
+		npm: `#!/bin/sh
+[ "$1" = install ] && [ "$2" = --global ] && [ "$3" = pnpm@99.0.0 ] || exit 19
+`,
 		find: `#!/bin/sh
 # Enough of find for: find DIR -type f -name '*.png' -print -quit
 dir="$1"
@@ -74,6 +77,15 @@ exit 0
 			writeFile(path.join(options.bin, command), body, { mode: 0o755 }),
 		),
 	);
+
+	const manifestDir = path.join(options.root, options.realArchive ? 'src' : 'work');
+	await mkdir(manifestDir, { recursive: true });
+	const manifest = path.join(manifestDir, 'package.json');
+	const content = JSON.parse(await readFile(manifest, 'utf8').catch(() => '{}')) as Record<
+		string,
+		unknown
+	>;
+	await writeFile(manifest, JSON.stringify({ ...content, packageManager: 'pnpm@99.0.0' }));
 
 	await mkdir(path.join(options.root, 'cache'), { recursive: true });
 	const script = containerCommand(options.command ?? 'capture')
@@ -527,7 +539,12 @@ for (const input of [
 			expect(await run()).toBe(0);
 			if (input !== 'image' && input !== 'platform') {
 				await mkdir(path.dirname(path.join(source, input)), { recursive: true });
-				await writeFile(path.join(source, input), 'changed install input');
+				await writeFile(
+					path.join(source, input),
+					input === 'package.json'
+						? JSON.stringify({ name: 'changed install input' })
+						: 'changed install input',
+				);
 			}
 			const overrides: Parameters<typeof run>[0] = (() => {
 				if (input === 'image') return { image: 'new-image@sha256:digest' };

@@ -96,7 +96,7 @@ export function containerCommand(command: VisualLocalCommand): string {
 		'cd /work',
 		'mkdir -p /work/.artifacts',
 		'ln -sfn /artifacts /work/.artifacts/visual-regression',
-		'corepack enable',
+		'npm install --global "$(node -p \'require("./package.json").packageManager\')"',
 		dependencyInstallCommand(),
 		'pnpm build:packages',
 		captureOrCompare,
