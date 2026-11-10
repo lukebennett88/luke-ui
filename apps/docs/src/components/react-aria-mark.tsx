@@ -2,7 +2,7 @@ import type { ComponentProps, JSX } from 'react';
 
 /**
  * The React Aria Components mark. Kept local to the docs app rather than
- * added to `@luke-ui/react`'s icon spritesheet, which ships to every consumer
+ * added to `@luke-ui/react`'s icon set, which ships to every consumer
  * of the library and holds generic UI glyphs rather than third-party
  * trademarks.
  */

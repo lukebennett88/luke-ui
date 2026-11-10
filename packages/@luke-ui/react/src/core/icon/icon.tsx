@@ -1,50 +1,26 @@
-import type { JSX, ReactNode, SVGAttributes } from 'react';
-import { createContext, useContext } from 'react';
-import { iconNames, iconViewBoxes } from '../../../.generated/icon-data.js';
-import { DEFAULT_ICON_SIZE, ICON_VIEWBOX } from '../sizing/icon-sizing.js';
-import type { DistributiveOmit } from '../types/distributive-omit.js';
+import type { HTMLAttributes, JSX } from 'react';
+import { iconNames } from '../../../.generated/icon-data.js';
+import type { IconName } from '../../../.generated/icon-data.js';
+import { cx } from '../../shared/utils/utils.js';
 import type { Prettify } from '../types/prettify.js';
-import { useIconSizeContext } from './icon-size-context.js';
 import type { IconRecipeVariants } from './recipe.css.js';
 import { iconRecipe } from './recipe.css.js';
+import { iconMask } from './styles.css.js';
 
-export type { IconName } from '../../../.generated/icon-data.js';
-export { IconSizeProvider } from './icon-size-context.js';
+export type { IconName };
 export { iconNames };
 
-const IconSpritesheetContext = createContext<string | null>(null);
-
-interface IconVariantProps extends NonNullable<IconRecipeVariants> {}
-
-interface IconStyleProps {
+interface _IconProps extends Pick<
+	HTMLAttributes<HTMLSpanElement>,
+	'aria-hidden' | 'className' | 'id' | 'style'
+> {
+	/** Icon name from the built-in icon set. */
+	name: IconName;
 	/**
-	 * Sets the icon size.
-	 * @default 'medium'
+	 * Sets the icon size. Without it, the icon takes the size its container sets, such as `xsmall`
+	 * inside a Button, or `medium` elsewhere.
 	 */
-	size?: IconVariantProps['size'];
-}
-
-/** Package-internal props for `IconSpritesheetProvider`. */
-export interface IconSpritesheetProviderProps {
-	children: ReactNode;
-	/** URL to the generated sprite sheet file. */
-	href: string;
-}
-
-/** Package-internal spritesheet context. Apps use `Provider` from `@luke-ui/react/provider`. */
-export function IconSpritesheetProvider({
-	children,
-	href,
-}: IconSpritesheetProviderProps): JSX.Element {
-	return <IconSpritesheetContext.Provider value={href}>{children}</IconSpritesheetContext.Provider>;
-}
-
-interface _IconProps
-	extends
-		Pick<SVGAttributes<SVGSVGElement>, 'aria-hidden' | 'className' | 'id' | 'style' | 'viewBox'>,
-		IconStyleProps {
-	/** Icon name from the generated icon set. */
-	name: (typeof iconNames)[number];
+	size?: NonNullable<IconRecipeVariants>['size'];
 	/** Accessible label. When set, the icon is announced as an image. */
 	title?: string;
 }
@@ -52,78 +28,22 @@ interface _IconProps
 /** Props for the built-in `Icon` component. */
 export type IconProps = Prettify<_IconProps>;
 
-/** Props used by `createIcon` for custom icon components. */
-export type CustomIconProps = DistributiveOmit<IconProps, 'name'>;
-
-/** Options for `createIcon`. */
-export interface CreateIconOptions<TProps extends CustomIconProps = CustomIconProps> {
-	/** SVG path content or a render function that returns path content. */
-	path: ReactNode | ((props: TProps) => ReactNode);
-	/** Static or dynamic viewBox value. */
-	viewBox?: string | ((props: TProps) => string | undefined);
-}
-
-/** Creates a custom icon component with Luke UI icon styling. */
-export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
-	path,
-	viewBox: defaultViewBox = ICON_VIEWBOX,
-}: CreateIconOptions<TProps>): (props: TProps) => JSX.Element {
-	return function CreatedIcon(props: TProps): JSX.Element {
-		const { 'aria-hidden': ariaHiddenProp, className, id, size, style, title, viewBox } = props;
-		// `aria-hidden={false}` and `aria-hidden="false"` are accepted by the prop
-		// type but must never reach the DOM, so any non-`true` value is treated as
-		// unset.
-		const isExplicitlyHidden = ariaHiddenProp === true || ariaHiddenProp === 'true';
-		const ariaHidden = isExplicitlyHidden || !title ? true : undefined;
-		const role = ariaHidden ? undefined : 'img';
-		const resolvedViewBox =
-			viewBox ?? (typeof defaultViewBox === 'function' ? defaultViewBox(props) : defaultViewBox);
-		const resolvedPath = typeof path === 'function' ? path(props) : path;
-		const contextSize = useIconSizeContext();
-		const resolvedSize = size ?? contextSize ?? DEFAULT_ICON_SIZE;
-
-		const svgProps: React.SVGProps<SVGSVGElement> = {
-			'aria-hidden': ariaHidden,
-			className: iconRecipe({ className, size: resolvedSize }),
-			fill: 'currentColor',
-			focusable: false,
-			id,
-			role,
-			style,
-			viewBox: resolvedViewBox,
-		};
-
-		return (
-			<svg {...svgProps}>
-				{title && <title>{title}</title>}
-				{resolvedPath}
-			</svg>
-		);
-	};
-}
-
-/** Renders an icon from the shared sprite sheet. */
+/** Renders a built-in icon. The stylesheet paints it, so it needs no provider or extra asset. */
 export function Icon(props: IconProps): JSX.Element {
-	const spritesheetHref = useIconSpritesheetHref();
-	return <SpritesheetIcon {...props} spritesheetHref={spritesheetHref} />;
-}
+	const { 'aria-hidden': ariaHiddenProp, className, id, name, size, style, title } = props;
+	// `aria-hidden={false}` and `aria-hidden="false"` are accepted by the prop type but must never
+	// reach the DOM, so any non-`true` value is treated as unset.
+	const isHidden = ariaHiddenProp === true || ariaHiddenProp === 'true' || !title;
 
-function useIconSpritesheetHref(): string {
-	const href = useContext(IconSpritesheetContext);
-	if (!href) {
-		throw new Error(
-			'Icon requires Provider from @luke-ui/react/provider. Wrap your app with <Provider spritesheetHref="...">.',
-		);
-	}
-	return href;
+	return (
+		<span
+			aria-hidden={isHidden ? true : undefined}
+			aria-label={isHidden ? undefined : title}
+			className={cx(iconMask, iconRecipe({ className, size }))}
+			data-icon={name}
+			id={id}
+			role={isHidden ? undefined : 'img'}
+			style={style}
+		/>
+	);
 }
-
-interface SpritesheetIconProps extends IconProps {
-	name: (typeof iconNames)[number];
-	spritesheetHref: string;
-}
-
-const SpritesheetIcon = createIcon<SpritesheetIconProps>({
-	path: ({ name, spritesheetHref }) => <use href={`${spritesheetHref}#${name}`} />,
-	viewBox: ({ name }) => iconViewBoxes[name],
-});

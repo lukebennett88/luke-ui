@@ -196,11 +196,11 @@ test('SelectIndicator shows a chevron and sets data-open while open, and childre
 		throw new Error('Expected both indicators.');
 	}
 
-	expect(chevron.querySelector('svg')).not.toBeNull();
+	expect(chevron.querySelector('[data-icon="chevronDown"]')).not.toBeNull();
 	expect(chevron).toHaveAttribute('data-default', 'true');
 	expect(chevron).not.toHaveAttribute('data-open');
-	expect(custom.querySelector('use')?.getAttribute('href')).toContain('add');
-	expect(custom.querySelectorAll('svg')).toHaveLength(1);
+	expect(custom.querySelectorAll('[data-icon]')).toHaveLength(1);
+	expect(custom.querySelector('[data-icon="add"]')).not.toBeNull();
 	expect(custom).not.toHaveAttribute('data-default');
 
 	await userEvent.click(trigger(/Default indicator/));
@@ -282,15 +282,15 @@ for (const appearance of visualAppearances) {
 }
 
 async function indicatorContrast(element: HTMLElement, indicator: HTMLElement): Promise<number> {
-	const svg = indicator.querySelector('svg');
-	if (!svg) throw new Error('Expected a Select chevron.');
+	const chevron = indicator.querySelector<HTMLElement>('[data-icon]');
+	if (!chevron) throw new Error('Expected a Select chevron.');
 	const color = getComputedStyle(indicator).color;
-	svg.style.visibility = 'hidden';
+	chevron.style.visibility = 'hidden';
 	let screenshot: string;
 	try {
 		screenshot = await page.screenshot({ element, save: false });
 	} finally {
-		svg.style.visibility = '';
+		chevron.style.visibility = '';
 	}
 	const image = await createImageBitmap(
 		await (await fetch(`data:image/png;base64,${screenshot}`)).blob(),

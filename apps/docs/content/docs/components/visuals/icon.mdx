@@ -1,19 +1,21 @@
 ---
 title: Icon
-description: SVG icon component backed by the generated spritesheet.
+description: Show an icon from the Luke UI icon set.
 source: packages/@luke-ui/react/src/exports/icon.ts
 ---
 
-`Icon` renders a symbol from the Luke UI spritesheet. `Provider` supplies its URL.
+`Icon` shows an icon from the Luke UI set. It takes the colour of the text around it.
 
 See [Iconography](/docs/iconography) for available icons, sizing, colour, and setup.
 
 <ExampleBlock src="icon/basic" layout="centered" title="Icon: Basic" />
 
-## Create a custom icon
+## Custom icons
 
-Use `createIcon` for a one-off icon that is not in the generated spritesheet. It returns a component
-with the same sizing and accessibility behaviour as `Icon`.
+For an icon that is not in the set, such as a brand mark, render an ordinary `<svg>`. Pass
+`iconRecipe()` as its `className` to give it the sizes `Icon` uses. Paint it with `currentColor` to
+follow the text colour. Hide a decorative SVG with `aria-hidden`. Name an informative one with
+`role="img"` and `aria-label`.
 
 <ExampleBlock src="icon/custom" layout="centered" title="Icon: Custom" />
 
@@ -30,17 +32,3 @@ Read [Iconography](/docs/iconography#accessibility) for decorative and informati
 ### IconProps
 
 <component-props-table path="packages/@luke-ui/react/src/core/icon/icon.tsx" name="IconProps" />
-
-### CreateIconOptions
-
-<component-props-table
-	path="packages/@luke-ui/react/src/core/icon/icon.tsx"
-	name="CreateIconOptions"
-/>
-
-### CustomIconProps
-
-<component-props-table
-	path="packages/@luke-ui/react/src/core/icon/icon.tsx"
-	name="CustomIconProps"
-/>

@@ -30,7 +30,9 @@ const { consumers, react, registrySpec } = inject('packedConsumer');
 const WORKSPACE_PROTOCOL_PATTERN = /^(?:catalog|file|link|portal|workspace):/;
 const ASSET_EXPORT_PATTERN = /\.(?:css|svg)$/;
 const CUSTOM_PROPERTY_PATTERN = /--luke-[a-z-]+:/;
-const SYMBOL_PATTERN = /<symbol\b[^>]*\bid="/;
+const ICON_MASK_PATTERN = /^url\("data:image\/svg\+xml,/;
+const ICON_RULE_PATTERN =
+	/\[data-icon=["']?chevronDown["']?\]\{[^}]*mask-image:url\(["']?data:image\/svg\+xml,/;
 const WHITESPACE_PATTERN = /\s+/g;
 /** Every cascade layer the shared stylesheet uses, in precedence order. */
 const LAYER_ORDER = ['base', 'luke-ui', 'luke-ui.reset', 'luke-ui.recipes', 'luke-ui.utilities'];
@@ -177,7 +179,8 @@ for (const consumer of consumers) {
 				const markup = run('node', ['render.mjs'], dir);
 				expect(markup).toContain('<blockquote');
 				expect(markup).toContain('Hello world');
-				expect(markup).toContain('<svg');
+				expect(markup).toContain('data-icon="chevronDown"');
+				expect(markup).toContain('aria-label="Expand"');
 				expect(markup).toContain('<button');
 				expect(markup).toContain('<input');
 				expect(markup).toContain('role="switch"');
@@ -261,6 +264,11 @@ for (const consumer of consumers) {
 								probe.remove();
 								return { ...colors, dangerHue };
 							})(),
+							// The stylesheet alone paints a built-in icon: no provider, spritesheet, or request.
+							iconMaskImage: (() => {
+								const icon = root?.querySelector('[data-icon="chevronDown"]');
+								return icon == null ? null : getComputedStyle(icon).maskImage;
+							})(),
 							textAfterHydration: root?.textContent,
 							serverText: serverSnapshot?.text,
 						};
@@ -269,6 +277,7 @@ for (const consumer of consumers) {
 					expect(result.recoverableErrors).toEqual([]);
 					expect(consoleErrors).toEqual([]);
 					expect(result.controls).toEqual({ buttons: 2, inputs: 7 });
+					expect(result.iconMaskImage).toMatch(ICON_MASK_PATTERN);
 					expect(result.expectedActionClasses).toBeTruthy();
 					expect(result.inheritedActionClasses).toBe(result.expectedActionClasses);
 					// React Aria effects adjust attributes after hydration, so compare nodes, not markup.
@@ -323,14 +332,12 @@ for (const consumer of consumers) {
 			},
 		);
 
-		test('resolves CSS and SVG assets through package exports', () => {
+		test('resolves the stylesheet through package exports', () => {
 			const require = createRequire(path.join(dir, 'package.json'));
 			const assetExports = Object.keys(react.manifest.exports).filter((subpath) =>
 				ASSET_EXPORT_PATTERN.test(subpath),
 			);
-			expect(assetExports).toEqual(
-				expect.arrayContaining(['./stylesheet.css', './spritesheet.svg']),
-			);
+			expect(assetExports).toEqual(['./stylesheet.css']);
 
 			const assets = assetExports.map((subpath) => {
 				const resolved = realpathSync(require.resolve(`@luke-ui/react/${subpath.slice(2)}`));
@@ -351,11 +358,9 @@ for (const consumer of consumers) {
 			expect(layerOrder(css)).toEqual(LAYER_ORDER);
 			expect(css).toMatch(CUSTOM_PROPERTY_PATTERN);
 
-			const spritesheet = assets.names.find((name) => name.endsWith('.svg'));
-			expect(spritesheet).toBeDefined();
-			expect(assets.read('.svg')).toMatch(SYMBOL_PATTERN);
-			// The spritesheet must ship as a URL. `<use>` does not support `data:` URLs consistently.
-			expect(assets.read('.js')).toContain(spritesheet);
+			// Built-in icons ship inside the stylesheet, so the build emits no separate icon asset.
+			expect(css).toMatch(ICON_RULE_PATTERN);
+			expect(assets.names.filter((name) => name.endsWith('.svg'))).toEqual([]);
 
 			const html = readFileSync(path.join(dir, 'dist', 'index.html'), 'utf8');
 			expect(html).toMatch(MODULE_SCRIPT_PATTERN);
@@ -431,8 +436,7 @@ function isReleasable(name: string, range: string): boolean {
 
 /** Whether an asset export holds what its path promises. */
 function isValidAsset(subpath: string, source: string): boolean {
-	if (subpath === './stylesheet.css') return source.startsWith(cascadeLayerOrder);
-	return SYMBOL_PATTERN.test(source);
+	return subpath === './stylesheet.css' && source.startsWith(cascadeLayerOrder);
 }
 
 /** Each JS entrypoint paired with the source file its component would live in. */

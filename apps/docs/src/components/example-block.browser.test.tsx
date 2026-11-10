@@ -1,7 +1,5 @@
 import '../styles/app.css';
 import '@luke-ui/theme-tactile/stylesheet.css';
-import { Provider } from '@luke-ui/react/provider';
-import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import {
 	createMemoryHistory,
 	createRootRoute,
@@ -175,14 +173,14 @@ async function renderLongSourcePreview() {
 	root = createRoot(container);
 	act(() => {
 		root?.render(
-			<Provider spritesheetHref={spriteSheetHref}>
+			<>
 				<header style={{ blockSize: '3.5rem', insetBlockStart: 0, position: 'sticky' }}>
 					Sticky header
 				</header>
 				<p style={{ blockSize: '50vh' }}>Before</p>
 				<ExampleCodePreview html={`<code>${source}</code>`} source={source} title="Long source" />
 				<p style={{ blockSize: '100vh' }}>After</p>
-			</Provider>,
+			</>,
 		);
 	});
 }
@@ -240,11 +238,9 @@ async function renderExampleBlock({
 } = {}) {
 	const rootRoute = createRootRoute({
 		component: () => (
-			<Provider spritesheetHref={spriteSheetHref}>
-				<DocsThemeRoot>
-					<ExampleBlock src={src} title={title} />
-				</DocsThemeRoot>
-			</Provider>
+			<DocsThemeRoot>
+				<ExampleBlock src={src} title={title} />
+			</DocsThemeRoot>
 		),
 	});
 	const router = createRouter({

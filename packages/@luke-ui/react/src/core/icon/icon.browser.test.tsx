@@ -1,11 +1,13 @@
 import { Box } from '@luke-ui/react/box';
-import { createIcon, Icon, IconSizeProvider } from '@luke-ui/react/icon';
+import { Button } from '@luke-ui/react/button';
+import { Icon, iconRecipe } from '@luke-ui/react/icon';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { emulateForcedColors } from '../test-utils/emulate-media.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { pairedTokens, resolvedColor } from '../test-utils/surface-colors.js';
 import {
@@ -14,6 +16,8 @@ import {
 	Stack,
 	variantValuesFor,
 } from '../test-utils/visual.js';
+
+const ICON_MASK_PATTERN = /^url\("data:image\/svg\+xml,/;
 
 const rowStyle = {
 	alignItems: 'center',
@@ -30,39 +34,110 @@ const names = variantValuesFor<typeof Icon, 'name'>()([
 	'search',
 ]);
 
-const CustomIcon = createIcon({ path: <path d="M0 0h1v1H0z" /> });
-
-test('icon and spinner sizes use the explicit size, then context, then the default', () => {
+test('icon and spinner sizes use the explicit size, then the container, then the default', () => {
 	const { locator } = render(
 		<>
 			<Icon name="add" title="Default icon" />
 			<LoadingSpinner aria-label="Default spinner" />
-			<IconSizeProvider size="small">
-				<CustomIcon title="Context icon" />
-				<LoadingSpinner aria-label="Context spinner" />
-				<Icon name="add" size="xsmall" title="Explicit icon" />
-				<LoadingSpinner aria-label="Explicit spinner" size="large" />
-				<IconSizeProvider size="large">
-					<Icon name="add" title="Nested icon" />
-					<LoadingSpinner aria-label="Nested spinner" />
-				</IconSizeProvider>
-			</IconSizeProvider>
+			<Button>
+				<svg aria-label="Container icon" className={iconRecipe()} role="img" viewBox="0 0 24 24">
+					<path d="M0 0h1v1H0z" />
+				</svg>
+				<LoadingSpinner aria-label="Container spinner" />
+				<Icon name="add" size="large" title="Explicit icon" />
+				<LoadingSpinner aria-label="Explicit spinner" size="small" />
+			</Button>
 		</>,
 	);
 
 	for (const [role, name, size] of [
 		['img', 'Default icon', 24],
 		['status', 'Default spinner', 24],
-		['img', 'Context icon', 20],
-		['status', 'Context spinner', 20],
-		['img', 'Explicit icon', 16],
-		['status', 'Explicit spinner', 32],
-		['img', 'Nested icon', 32],
-		['status', 'Nested spinner', 32],
+		['img', 'Container icon', 16],
+		['status', 'Container spinner', 16],
+		['img', 'Explicit icon', 32],
+		['status', 'Explicit spinner', 20],
 	] as const) {
 		const element = locator.getByRole(role, { name }).element();
 		expect(getComputedStyle(element).inlineSize).toBe(`${size}px`);
 		expect(getComputedStyle(element).blockSize).toBe(`${size}px`);
+	}
+});
+
+test('names an icon with a title and hides it otherwise', () => {
+	const { container, locator } = render(
+		<>
+			<Icon name="search" title="Search" />
+			<Icon name="search" />
+			<Icon aria-hidden name="search" title="Hidden despite title" />
+		</>,
+	);
+
+	expect(locator.getByRole('img', { name: 'Search' }).element().tagName).toBe('SPAN');
+	const hidden = [...container.querySelectorAll('[data-icon="search"][aria-hidden="true"]')];
+	expect(hidden).toHaveLength(2);
+	for (const icon of hidden) {
+		expect(icon.getAttribute('role')).toBeNull();
+		expect(icon.getAttribute('aria-label')).toBeNull();
+	}
+});
+
+test('the stylesheet paints each built-in icon from its own mask', () => {
+	const { container } = render(
+		<>
+			<Icon name="add" />
+			<Icon name="search" />
+		</>,
+	);
+	const [add, search] = [...container.querySelectorAll('[data-icon]')].map((icon) => {
+		return getComputedStyle(icon).maskImage;
+	});
+
+	expect(add).toMatch(ICON_MASK_PATTERN);
+	expect(search).toMatch(ICON_MASK_PATTERN);
+	expect(add).not.toBe(search);
+});
+
+test('an icon keeps its mask and size in a right-to-left context', () => {
+	const { container } = render(
+		<div dir="rtl">
+			<Icon name="arrowRight" />
+		</div>,
+	);
+	const style = getComputedStyle(container.querySelector('[data-icon]')!);
+
+	// The mask does not mirror a directional glyph. Mirroring stays a per-icon decision.
+	expect(style.maskImage).toMatch(ICON_MASK_PATTERN);
+	expect(style.maskPosition).toBe('50% 50%');
+	expect(style.inlineSize).toBe('24px');
+});
+
+test('under forced colours an icon paints the forced colour around it, not the author colour', async () => {
+	await emulateForcedColors('active');
+	try {
+		const { locator } = render(
+			<>
+				<Button>
+					<Icon name="add" title="In button" />
+					Add item
+				</Button>
+				<Box backgroundColor="danger.solid">
+					<Text color="danger">
+						<Icon name="closeCircle" title="In text" />
+					</Text>
+				</Box>
+			</>,
+		);
+		const button = locator.getByRole('button').element();
+		const inButton = locator.getByRole('img', { name: 'In button' }).element();
+		const inText = locator.getByRole('img', { name: 'In text' }).element();
+
+		expect(getComputedStyle(inButton).backgroundColor).toBe(resolvedColor('ButtonText', button));
+		expect(getComputedStyle(inText).backgroundColor).toBe(
+			resolvedColor('CanvasText', inText.parentElement!),
+		);
+	} finally {
+		await emulateForcedColors('none');
 	}
 });
 
@@ -148,15 +223,15 @@ for (const appearance of visualAppearances) {
 		);
 		const onSolid = container.querySelector('#on-solid-icon');
 		const dangerText = container.querySelector('[data-testid="danger-text"]');
-		const dangerIcon = dangerText?.querySelector('svg');
-		if (!(onSolid instanceof SVGElement) || !(dangerIcon instanceof SVGElement)) {
+		const dangerIcon = dangerText?.querySelector('[data-icon]');
+		if (!(onSolid instanceof HTMLElement) || !(dangerIcon instanceof HTMLElement)) {
 			throw new Error('Expected both icons.');
 		}
 
-		expect(getComputedStyle(onSolid).fill).toBe(
+		expect(getComputedStyle(onSolid).backgroundColor).toBe(
 			resolvedColor(pairedTokens('accent.solid.rest').primary, onSolid.parentElement!),
 		);
-		expect(getComputedStyle(dangerIcon).fill).toBe(
+		expect(getComputedStyle(dangerIcon).backgroundColor).toBe(
 			resolvedColor(pairedTokens('warning.subtle').danger, dangerText!),
 		);
 	});

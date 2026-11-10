@@ -244,6 +244,19 @@ or that colour shows through. `forced-color-adjust` inherits, so an element that
 content, such as a list box item, also resets that content's colour, background, and border colour
 with `!important`. Otherwise a nested `Text` keeps its theme colour on the fill.
 
+### Icons
+
+The stylesheet paints each built-in icon. `Icon` renders a `<span data-icon>`, and
+`core/icon/styles.css.ts` emits one rule per icon that sets its `mask-image` from the generated
+`iconMaskUrls`. The span fills `currentColor` behind the mask. A component that owns a decorative
+icon, such as the field error or the selected list box item's check, spreads `iconMaskStyle()` from
+`core/icon/mask-style.ts` into its own part with the icon's URL, and renders no `Icon`.
+
+A masked icon paints with `background-color`, so a rule that clears descendant backgrounds must
+leave `Icon` out. Under forced colours the icon sets `forced-color-adjust: preserve-parent-color`,
+as the UA style does for `<svg>`, so `currentColor` resolves to the forced colour it inherits.
+`none` would paint the unforced author colour.
+
 ## Recipes
 
 Public recipes export from the owning component or primitive entrypoint. Keep them separate from
@@ -455,9 +468,13 @@ values scale with the root font size. Build literal scales with `literalScale` i
 `bp*` names.
 
 Buttons provide `xsmall` icons and spinners at both recipe sizes. Field controls provide `xsmall`
-icons at `small` and `small` icons at `medium`. Explicit `Icon.size` overrides win over context.
-Icon and spinner sizes are semantic: `xsmall`, `small`, `medium`, and `large` currently map to 16,
-20, 24, and 32 CSS pixels at a 16px root. They use `rem` and scale with the root font size.
+icons at `small` and `small` icons at `medium`. Explicit `Icon.size` overrides win over context. The
+context is CSS: a recipe spreads `iconSizeVars(size)` from `core/sizing/icon-sizing.ts` into its
+`vars`, which sets the private inherited `--luke-internal-icon-size`. `iconRecipe` and the spinner
+read it when they have no `size` variant. Inheritance follows the DOM, so a portalled part such as a
+list box item sets its own. Icon and spinner sizes are semantic: `xsmall`, `small`, `medium`, and
+`large` currently map to 16, 20, 24, and 32 CSS pixels at a 16px root. They use `rem` and scale with
+the root font size.
 
 ### Surface pairing
 

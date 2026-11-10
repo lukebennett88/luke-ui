@@ -20,6 +20,7 @@ import '../code/recipe.css.js';
 import '../icon-button/recipe.css.js';
 import '../icon-button/styles.css.js';
 import '../icon/recipe.css.js';
+import '../icon/styles.css.js';
 import '../kbd/recipe.css.js';
 import '../link/styles.css.js';
 import '../loading-skeleton/styles.css.js';

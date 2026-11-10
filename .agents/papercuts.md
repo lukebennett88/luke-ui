@@ -78,11 +78,14 @@ not help. Silence in this log is not evidence.
   asks text Links to stay underlined", citing the issue to justify the rule. Seen again: 2026-10-28
   (#965). Review found new packed-consumer type-test comments describing renamed token paths. Seen
   again: 2026-11-05 (#1022). Self-review before commit found a new focus-ring visual test comment
-  opening "Tactile dark on `info.solid` is where #1022 found the ring matching the panel".
+  opening "Tactile dark on `info.solid` is where #1022 found the ring matching the panel". Seen
+  again: 2026-11-10 (#817). A draft Icon RTL test comment read "Neither the mask nor the old `<use>`
+  mirrors a glyph", describing the replaced implementation, until the author's pre-commit check.
 - Where: `apps/docs/src/components/search.browser.test.tsx`,
   `packages/@luke-ui/react/src/core/link/link.browser.test.tsx`, and
   `packages/@luke-ui/react/src/core/packed-consumer/react-fixture.ts`, and
-  `packages/@luke-ui/react/src/core/styles/focus-ring-contrast.browser.test.tsx`.
+  `packages/@luke-ui/react/src/core/styles/focus-ring-contrast.browser.test.tsx`, and
+  `packages/@luke-ui/react/src/core/icon/icon.browser.test.tsx`.
   `docs/DOCUMENTATION.md`, Comments and JSDoc, requires comments to explain code without its
   history. The review-pr workflow requires consulting the applicable repository guides.
 - Problem: Agent-authored comments narrated history despite the required guidance. review-pr's

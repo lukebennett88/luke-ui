@@ -1,6 +1,7 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { iconMaskUrls } from '../../../../.generated/icon-mask-data.js';
 import { vars } from '../../../theme/contract.css.js';
+import { iconMaskStyle } from '../../icon/mask-style.js';
 import { ICON_SIZES } from '../../sizing/icon-sizing.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
@@ -144,19 +145,12 @@ const fieldConfig = {
 			},
 			error: {
 				icon: {
-					'@media': {
-						// `CanvasText` keeps the icon solid when author colours are ignored.
-						'(forced-colors: active)': { backgroundColor: 'CanvasText' },
-					},
 					// The icon follows the message colour, which collapses to on-solid colour on a solid
 					// fill. The icon's shape and the message text carry the error, never the hue alone.
-					backgroundColor: 'currentColor',
+					...iconMaskStyle(iconMaskUrls.exclamationTriangle),
 					// The rail has no content to size it, and the mask paints only inside its box.
 					blockSize: ICON_SIZES.xsmall,
 					inlineSize: errorIconRailInlineSize,
-					maskImage: iconMaskUrls.exclamationTriangle,
-					maskPosition: 'center',
-					maskRepeat: 'no-repeat',
 					maskSize: ICON_SIZES.xsmall,
 				},
 				message: {

@@ -1,10 +1,15 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
+import { iconMaskUrls } from '../../../../.generated/icon-mask-data.js';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { MOTION_DURATION_SCALE } from '../../../theme/motion.js';
-import { COMBOBOX_ACTION_SIZE } from '../../sizing/combobox-sizing.js';
-import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
+import { iconMaskStyle } from '../../icon/mask-style.js';
+import { iconSizeVariants } from '../../icon/recipe.css.js';
+import { iconMask } from '../../icon/styles.css.js';
+import { COMBOBOX_ACTION_SIZE, COMBOBOX_CHECK_ICON_SIZE } from '../../sizing/combobox-sizing.js';
+import { FIELD_CONTROL_ICON_SIZE, MIN_TARGET_SIZE } from '../../sizing/control-size.js';
+import { iconSizeVars } from '../../sizing/icon-sizing.js';
 import { classSelector } from '../../styles/class-selector.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import {
@@ -117,10 +122,10 @@ export const comboboxItemClassName = style({}, 'combobox-item');
 // The active item's `forced-color-adjust: none` inherits, so its content would keep author colours on
 // the `Highlight` fill: a `Text` keeps its theme colour and a `Kbd` its surface. Do for that content
 // what forced colours would have done. `!important` beats application and utility CSS, which ranks
-// below every Luke UI layer under `!important`.
+// below every Luke UI layer under `!important`. An `Icon` paints with its background, so it is left out.
 globalStyleInLayer(
 	'recipes',
-	`${classSelector(comboboxItemClassName)}[data-focused="true"]:not([data-disabled="true"]) *`,
+	`${classSelector(comboboxItemClassName)}[data-focused="true"]:not([data-disabled="true"]) *:not(${classSelector(iconMask)})`,
 	{
 		'@media': {
 			'(forced-colors: active)': {
@@ -136,7 +141,7 @@ globalStyleInLayer(
  * Raw slotted config for the combobox anatomy.
  *
  * Slots follow the anatomy top to bottom: `root`, `control`, `textInput`,
- * `trigger`, `clearButton`, `itemCheck`, `popover`, `listBox`, `loadMoreItem`,
+ * `trigger`, `clearButton`, `popover`, `listBox`, `loadMoreItem`,
  * `section`, `sectionHeading`, `emptyState`, `item`, then the tray-only parts.
  *
  * `control` and `listBox` use a `presentation` variant for tray styles. `trayTrigger` and
@@ -235,10 +240,6 @@ const comboboxConfig = {
 			...comboboxActionStyles,
 		},
 		clearButton: comboboxActionStyles,
-		itemCheck: {
-			flexShrink: 0,
-			marginInlineStart: 'auto',
-		},
 		// The popover is an overlay, so it takes the shared overlay motion roles. See
 		// `styles/overlay-motion.ts` for the roles and the reduced-motion rule that follows from them.
 		// A 4px slide is too short to carry the shared 250ms entry, so the popover enters in 150ms and
@@ -386,6 +387,14 @@ const comboboxConfig = {
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
+				// The selected item's check. CSS owns it, so the item renders no element or state for it.
+				'&[data-selected="true"]::after': {
+					...iconMaskStyle(iconMaskUrls.check),
+					...iconSizeVariants[COMBOBOX_CHECK_ICON_SIZE],
+					content: '""',
+					flexShrink: 0,
+					marginInlineStart: 'auto',
+				},
 				'&[data-focused="true"]:not([data-disabled="true"])': {
 					...surfaceStyle('accent.solid.rest'),
 					outline: `2px solid ${vars.color.foreground.accent.onSolid}`,
@@ -449,6 +458,7 @@ const comboboxConfig = {
 		size: {
 			medium: {
 				control: {
+					vars: iconSizeVars(FIELD_CONTROL_ICON_SIZE.medium),
 					blockSize: vars.controlSize['40'],
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
 				},
@@ -457,14 +467,21 @@ const comboboxConfig = {
 					paddingInlineEnd: vars.space['12'],
 					paddingInlineStart: vars.space['12'],
 				},
-				trigger: comboboxActionSizes.medium,
-				clearButton: comboboxActionSizes.medium,
+				trigger: {
+					...comboboxActionSizes.medium,
+					vars: iconSizeVars(FIELD_CONTROL_ICON_SIZE.medium),
+				},
+				clearButton: {
+					...comboboxActionSizes.medium,
+					vars: iconSizeVars(FIELD_CONTROL_ICON_SIZE.medium),
+				},
 				loadMoreItem: {
 					minBlockSize: vars.controlSize['40'],
 					paddingBlock: vars.space['8'],
 					paddingInline: vars.space['12'],
 				},
 				trayTrigger: {
+					vars: iconSizeVars(FIELD_CONTROL_ICON_SIZE.medium),
 					paddingInlineEnd: vars.space['12'],
 					paddingInlineStart: vars.space['12'],
 				},
@@ -472,6 +489,7 @@ const comboboxConfig = {
 					...vars.font.label,
 					fontWeight: vars.font.weight.body,
 					minBlockSize: vars.controlSize['40'],
+					vars: iconSizeVars(FIELD_CONTROL_ICON_SIZE.medium),
 					paddingBlock: vars.space['8'],
 					paddingInline: vars.space['12'],
 				},
@@ -479,6 +497,7 @@ const comboboxConfig = {
 			small: {
 				control: {
 					...touchInputTypography,
+					vars: iconSizeVars(FIELD_CONTROL_ICON_SIZE.small),
 					blockSize: vars.controlSize['32'],
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
@@ -489,14 +508,21 @@ const comboboxConfig = {
 					paddingInlineEnd: vars.space['8'],
 					paddingInlineStart: vars.space['8'],
 				},
-				trigger: comboboxActionSizes.small,
-				clearButton: comboboxActionSizes.small,
+				trigger: {
+					...comboboxActionSizes.small,
+					vars: iconSizeVars(FIELD_CONTROL_ICON_SIZE.small),
+				},
+				clearButton: {
+					...comboboxActionSizes.small,
+					vars: iconSizeVars(FIELD_CONTROL_ICON_SIZE.small),
+				},
 				loadMoreItem: {
 					minBlockSize: vars.controlSize['32'],
 					paddingBlock: vars.space['4'],
 					paddingInline: vars.space['8'],
 				},
 				trayTrigger: {
+					vars: iconSizeVars(FIELD_CONTROL_ICON_SIZE.small),
 					paddingInlineEnd: vars.space['8'],
 					paddingInlineStart: vars.space['8'],
 				},
@@ -504,6 +530,7 @@ const comboboxConfig = {
 					...vars.font.label,
 					fontWeight: vars.font.weight.body,
 					minBlockSize: vars.controlSize['32'],
+					vars: iconSizeVars(FIELD_CONTROL_ICON_SIZE.small),
 					paddingBlock: vars.space['4'],
 					paddingInline: vars.space['12'],
 				},

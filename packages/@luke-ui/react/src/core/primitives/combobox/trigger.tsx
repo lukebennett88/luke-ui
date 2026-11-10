@@ -2,8 +2,6 @@ import type { JSX } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/ComboBox';
 import { Button as RacButton } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import { IconSizeProvider } from '../../icon/icon-size-context.js';
-import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
@@ -26,13 +24,11 @@ export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {
 
 	// Nested icons follow this part's resolved size, including a local `size` override.
 	return (
-		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
-			<RacButton
-				{...buttonProps}
-				className={composeRenderProps(buttonProps.className, (className) => {
-					return comboboxRecipe({ size }).trigger({ className });
-				})}
-			/>
-		</IconSizeProvider>
+		<RacButton
+			{...buttonProps}
+			className={composeRenderProps(buttonProps.className, (className) => {
+				return comboboxRecipe({ size }).trigger({ className });
+			})}
+		/>
 	);
 }

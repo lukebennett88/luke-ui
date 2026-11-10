@@ -1,8 +1,6 @@
 /// <reference types="mdx" />
 import '../styles/app.css';
 import '@luke-ui/theme-tactile/stylesheet.css';
-import { Provider } from '@luke-ui/react/provider';
-import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import {
 	createMemoryHistory,
 	createRootRoute,
@@ -1080,11 +1078,7 @@ async function renderWidget(
 ) {
 	const { hash, inlineSize = ARTICLE_INLINE_SIZE } = options;
 	const rootRoute = createRootRoute({
-		component: () => (
-			<Provider spritesheetHref={spriteSheetHref}>
-				<DocsThemeRoot>{children}</DocsThemeRoot>
-			</Provider>
-		),
+		component: () => <DocsThemeRoot>{children}</DocsThemeRoot>,
 	});
 	const initialEntry = hash === undefined ? '/' : `/#${hash}`;
 	// DocsLink targets `/$` for internal typeDescriptionLink paths.

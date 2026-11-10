@@ -14,7 +14,8 @@ final content to replace it in place.
 `medium` is the default. Set `size` to match the surrounding control or content. The sizes match
 [Icon sizes](/docs/iconography#size) and scale with the root font size.
 
-An omitted `size` inherits the nearest `IconSizeProvider` size before falling back to `medium`.
+An omitted `size` takes the icon size of the control around it, such as a Button, before falling
+back to `medium`.
 
 <ExampleBlock src="loading-spinner/sizes" title="Loading Spinner: Sizes" />
 

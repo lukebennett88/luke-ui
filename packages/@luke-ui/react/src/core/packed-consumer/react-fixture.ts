@@ -92,10 +92,8 @@ import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { CheckboxGroup } from '@luke-ui/react/checkbox-group';
 import { Form } from '@luke-ui/react/form';
 import { Icon } from '@luke-ui/react/icon';
-import { Provider } from '@luke-ui/react/provider';
 import { RadioField, RadioGroup } from '@luke-ui/react/radio-group';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
-import spritesheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { SwitchField } from '@luke-ui/react/switch-field';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
@@ -107,46 +105,42 @@ export function App({ onHydrated }) {
 		onHydrated?.();
 	}, [onHydrated]);
 	return h(
-		Provider,
-		{ spritesheetHref },
+		Box,
+		{ display: 'flex', gap: 'space.8' },
+		h(Blockquote, null, 'Hello world'),
+		h(Icon, { name: 'chevronDown', title: 'Expand' }),
+		// Separate published entrypoints must share Form defaults for both fields and actions.
+		h(
+			Form,
+			{ controlSize: 'small', necessityIndicator: 'optional-label' },
+			h(TextInputField, { label: 'Name' }),
+			h(Button, { 'data-size-classes': buttonRecipe({ size: 'small' }) }, 'Save'),
+		),
+		h(CheckboxField, { label: 'Example checkbox' }),
+		h(
+			CheckboxGroup,
+			{ errorMessage: 'Choose a subscription option.', label: 'Packed choices', name: 'packedChoices' },
+			h(CheckboxField, { label: 'Packed email', value: 'email' }),
+			h(CheckboxField, { label: 'Packed updates', value: 'updates' }),
+		),
+		h(SwitchField, { label: 'Example switch' }),
+		h(
+			RadioGroup,
+			{ defaultValue: 'basic', label: 'Plan', name: 'plan' },
+			h(RadioField, { label: 'Basic plan', value: 'basic' }),
+			h(RadioField, { label: 'Pro plan', value: 'pro' }),
+		),
+		h(
+			SelectField,
+			{ isRequired: true, label: 'Country' },
+			h(SelectItem, { id: 'au' }, 'Australia'),
+			h(SelectItem, { id: 'nz' }, 'New Zealand'),
+		),
+		// A solid fill must hand its readable colours to Text across the published entrypoints.
 		h(
 			Box,
-			{ display: 'flex', gap: 'space.8' },
-			h(Blockquote, null, 'Hello world'),
-			h(Icon, { name: 'chevronDown', 'aria-label': 'Expand' }),
-			// Separate published entrypoints must share Form defaults for both fields and actions.
-			h(
-				Form,
-				{ controlSize: 'small', necessityIndicator: 'optional-label' },
-				h(TextInputField, { label: 'Name' }),
-				h(Button, { 'data-size-classes': buttonRecipe({ size: 'small' }) }, 'Save'),
-			),
-			h(CheckboxField, { label: 'Example checkbox' }),
-			h(
-				CheckboxGroup,
-				{ errorMessage: 'Choose a subscription option.', label: 'Packed choices', name: 'packedChoices' },
-				h(CheckboxField, { label: 'Packed email', value: 'email' }),
-				h(CheckboxField, { label: 'Packed updates', value: 'updates' }),
-			),
-			h(SwitchField, { label: 'Example switch' }),
-			h(
-				RadioGroup,
-				{ defaultValue: 'basic', label: 'Plan', name: 'plan' },
-				h(RadioField, { label: 'Basic plan', value: 'basic' }),
-				h(RadioField, { label: 'Pro plan', value: 'pro' }),
-			),
-			h(
-				SelectField,
-				{ isRequired: true, label: 'Country' },
-				h(SelectItem, { id: 'au' }, 'Australia'),
-				h(SelectItem, { id: 'nz' }, 'New Zealand'),
-			),
-			// A solid fill must hand its readable colours to Text across the published entrypoints.
-			h(
-				Box,
-				{ backgroundColor: 'accent.solid', 'data-testid': 'solid-fill' },
-				h(Text, { color: 'danger', 'data-testid': 'contextual-text' }, 'Contextual text'),
-			),
+			{ backgroundColor: 'accent.solid', 'data-testid': 'solid-fill' },
+			h(Text, { color: 'danger', 'data-testid': 'contextual-text' }, 'Contextual text'),
 		),
 	);
 }
@@ -343,7 +337,6 @@ import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { CheckboxGroup, type CheckboxGroupProps } from '@luke-ui/react/checkbox-group';
 import { Container } from '@luke-ui/react/container';
 import { Heading, type HeadingProps } from '@luke-ui/react/heading';
-import { Provider } from '@luke-ui/react/provider';
 import { Text, type TextProps } from '@luke-ui/react/text';
 import { interactionState } from '@luke-ui/react/utils';
 import { TextInputField } from '@luke-ui/react/text-input-field';
@@ -564,18 +557,16 @@ export const invalidRenderState: Parameters<typeof renderRoot>[1] = { isHovered:
 export const conflictingTextRoot: TextProps = { elementType: 'p', renderRoot: textRenderRoot };
 export const headingDefaults: HeadingProps = { level: 1, children: 'Title' };
 
-export function App({ spritesheetHref }: { spritesheetHref: string }) {
+export function App() {
 	return (
-		<Provider spritesheetHref={spritesheetHref}>
-			<Box display="flex" gap="space.8">
-				<Blockquote>Hello</Blockquote>
-				<Box padding="space.16" renderRoot={renderRoot}>Owned root</Box>
-				<Heading level={2}>Heading</Heading>
-				<Text color="secondary" renderRoot={textRenderRoot}>Owned text</Text>
-				<TextInputField label="Name" />
-				<Button onPress={() => {}}>Save</Button>
-			</Box>
-		</Provider>
+		<Box display="flex" gap="space.8">
+			<Blockquote>Hello</Blockquote>
+			<Box padding="space.16" renderRoot={renderRoot}>Owned root</Box>
+			<Heading level={2}>Heading</Heading>
+			<Text color="secondary" renderRoot={textRenderRoot}>Owned text</Text>
+			<TextInputField label="Name" />
+			<Button onPress={() => {}}>Save</Button>
+		</Box>
 	);
 }
 `;

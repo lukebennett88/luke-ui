@@ -1,5 +1,4 @@
 import { Box } from '@luke-ui/react/box';
-import { createIcon } from '@luke-ui/react/icon';
 import type { ComponentProps, ReactNode } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { GroupImperativeHandle } from 'react-resizable-panels';
@@ -93,19 +92,6 @@ const OUTSIDE_STRIP_WIDTH = 12;
 
 const EXAMPLE_RESIZE_TARGET_MINIMUM_SIZE = { coarse: 32, fine: 32 };
 
-const GripIcon = createIcon({
-	path: (
-		<>
-			<path d="M8 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-			<path d="M8 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-			<path d="M8 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-			<path d="M14 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-			<path d="M14 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-			<path d="M14 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-		</>
-	),
-});
-
 const GRIP_BLOCK_SIZE = '3.75rem';
 const GRIP_INLINE_SIZE = '0.75rem';
 
@@ -130,7 +116,19 @@ function ExamplePreviewResizeGrip() {
 			overflow="hidden"
 			position="absolute"
 		>
-			<GripIcon style={{ blockSize: '100%', inlineSize: '100%' }} />
+			<svg
+				aria-hidden
+				fill="currentColor"
+				style={{ blockSize: '100%', inlineSize: '100%' }}
+				viewBox="0 0 24 24"
+			>
+				<path d="M8 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+				<path d="M8 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+				<path d="M8 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+				<path d="M14 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+				<path d="M14 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+				<path d="M14 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+			</svg>
 		</Box>
 	);
 }

@@ -87,7 +87,7 @@ Vanilla Extract serialises recipes to `#recipe-engine`. Pack, Vitest, and the do
 ## Icons
 
 Icon SVGs live in `packages/@luke-ui/react/icons`. After adding, renaming, or removing one,
-regenerate the spritesheet and the `iconNames` union:
+regenerate the icon masks and the `iconNames` union:
 
 ```bash
 pnpm --dir packages/@luke-ui/react run generate:icons

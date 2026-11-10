@@ -9,9 +9,7 @@ import { TextFieldContext, TextField as RacTextField } from 'react-aria-componen
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import { cx } from '../../../shared/utils/utils.js';
-import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { useControlSize } from '../../sizing/control-size-context.js';
-import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { FieldStateContext } from '../field/label.js';
@@ -318,19 +316,12 @@ export function TextInputControl(props: TextInputControlProps): JSX.Element {
 	return (
 		<TextInputControlContext.Provider value>
 			<TextInputSizeContext.Provider value={size}>
-				{/*
-				 * The provider covers the whole control, so an icon in a prefix or suffix stays
-				 * proportioned to the control without a `size` of its own. Same precedent as `Button`
-				 * (`BUTTON_ICON_SIZE`) and the combobox control.
-				 */}
-				<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
-					<RacGroup
-						{...groupProps}
-						className={composeRenderProps(className, (value) => {
-							return textInputPartsRecipe({ size }).control({ className: value });
-						})}
-					/>
-				</IconSizeProvider>
+				<RacGroup
+					{...groupProps}
+					className={composeRenderProps(className, (value) => {
+						return textInputPartsRecipe({ size }).control({ className: value });
+					})}
+				/>
 			</TextInputSizeContext.Provider>
 		</TextInputControlContext.Provider>
 	);

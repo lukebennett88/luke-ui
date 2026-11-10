@@ -1,5 +1,4 @@
-import { BUTTON_ICON_SIZE } from '../sizing/button-sizing.js';
-import { ICON_SIZES } from '../sizing/icon-sizing.js';
+import { contextualIconSize } from '../sizing/icon-sizing.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 
 /** Centers the icon graphic inside an icon-only control. */
@@ -10,11 +9,10 @@ export const iconOnlyIconWrapper = style({
 });
 
 /**
- * Sizes a direct `svg` child to the button icon size. `IconSizeProvider` covers a
- * `createIcon`-based custom icon, but a plain `<svg>` reads no context, so this rule constrains the
- * graphic box directly for a hand-authored custom icon such as a brand mark.
+ * Sizes a direct `svg` child, such as a brand mark, to the icon size the button sets, so a custom
+ * icon needs no sizing of its own.
  */
 globalStyleInLayer('recipes', `${iconOnlyIconWrapper} > svg`, {
-	blockSize: ICON_SIZES[BUTTON_ICON_SIZE],
-	inlineSize: ICON_SIZES[BUTTON_ICON_SIZE],
+	blockSize: contextualIconSize,
+	inlineSize: contextualIconSize,
 });

@@ -1,8 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { useId } from 'react';
-import { useIconSizeContext } from '../icon/icon-size-context.js';
 import {
-	DEFAULT_ICON_SIZE,
 	ICON_VIEWBOX,
 	ICON_VIEWBOX_SIZE,
 	SPINNER_CIRCLE_RADIUS,
@@ -21,8 +19,8 @@ interface LoadingSpinnerStyleProps {
 	/** Sets a semantic content color. Omit to inherit the surrounding content color. */
 	color?: LoadingSpinnerVariantProps['color'];
 	/**
-	 * Sets the spinner size.
-	 * @default 'medium'
+	 * Sets the spinner size. Without it, the spinner takes the size its container sets, such as
+	 * `xsmall` inside a Button, or `medium` elsewhere.
 	 */
 	size?: LoadingSpinnerVariantProps['size'];
 }
@@ -60,14 +58,9 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 		...spanProps
 	} = props;
 
-	const contextSize = useIconSizeContext();
-	const resolvedSize = size ?? contextSize ?? DEFAULT_ICON_SIZE;
-
 	if (!isLoading) return children;
 
-	const spinnerElement = (
-		<SpinnerElement {...spanProps} aria-label={ariaLabel} size={resolvedSize} />
-	);
+	const spinnerElement = <SpinnerElement {...spanProps} aria-label={ariaLabel} size={size} />;
 
 	if (!children) return spinnerElement;
 

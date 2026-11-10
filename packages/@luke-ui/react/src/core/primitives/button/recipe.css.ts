@@ -2,7 +2,9 @@ import { fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import * as interactionTints from '../../../theme/interaction-tint-vars.js';
+import { BUTTON_ICON_SIZE } from '../../sizing/button-sizing.js';
 import { MIN_TARGET_SIZE } from '../../sizing/control-size.js';
+import { iconSizeVars } from '../../sizing/icon-sizing.js';
 import { INTERACTION_STATE_LAYER_PROPERTY } from '../../styles/interaction-state-layer.js';
 import { style } from '../../styles/layered-style.css.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
@@ -137,6 +139,7 @@ export const buttonRecipeInternal = recipe({
 				paddingBlock: 0,
 				position: 'relative',
 				textDecoration: 'none',
+				vars: iconSizeVars(BUTTON_ICON_SIZE),
 				whiteSpace: 'nowrap',
 				// Hover and pressed change colour, shadow, and finish, never position or scale.
 				selectors: {
@@ -152,8 +155,9 @@ export const buttonRecipeInternal = recipe({
 				},
 			},
 			// A text Button and a text Link share this base. Each takes its own colour and decoration below.
+			// A text Link's icons keep their own size. A text Button's match the button appearance.
 			link: textBase,
-			text: textBase,
+			text: [...textBase, { vars: iconSizeVars(BUTTON_ICON_SIZE) }],
 		},
 		inlineSize: {
 			auto: {},

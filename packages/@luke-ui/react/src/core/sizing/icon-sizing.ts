@@ -25,4 +25,19 @@ export const ICON_SIZES = {
 } as const;
 
 export type IconSize = keyof typeof ICON_SIZES;
-export const DEFAULT_ICON_SIZE: IconSize = 'medium';
+const DEFAULT_ICON_SIZE: IconSize = 'medium';
+
+/**
+ * Private inherited property that sizes nested icons and spinners. A container sets it with
+ * `iconSizeVars`, and an explicit `size` on the icon wins over it. The name is global rather than
+ * hashed, like the surface overrides.
+ */
+const ICON_SIZE_PROPERTY = '--luke-internal-icon-size';
+
+/** The inline and block size an icon takes from its nearest scope, or the default size. */
+export const contextualIconSize = `var(${ICON_SIZE_PROPERTY}, ${ICON_SIZES[DEFAULT_ICON_SIZE]})`;
+
+/** Style `vars` that make `size` the default for icons and spinners inside an element. */
+export function iconSizeVars(size: IconSize): Record<string, string> {
+	return { [ICON_SIZE_PROPERTY]: ICON_SIZES[size] };
+}

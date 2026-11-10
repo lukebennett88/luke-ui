@@ -1,8 +1,6 @@
 import '../styles/global.css';
 import '@luke-ui/react/stylesheet.css';
 import 'virtual:reference-theme.css';
-import { Provider } from '@luke-ui/react/provider';
-import spritesheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { useMutationState, useQuery } from '@tanstack/react-query';
 import { useLayoutEffect, useMemo } from 'react';
 import { RouterProvider } from 'react-aria-components';
@@ -30,9 +28,7 @@ export function RootLayout() {
 
 	return (
 		<RouterProvider navigate={navigate} useHref={useHref}>
-			<Provider spritesheetHref={spritesheetHref}>
-				<Outlet />
-			</Provider>
+			<Outlet />
 		</RouterProvider>
 	);
 }
