@@ -1,0 +1,26 @@
+{
+	"name": "@spike/consumer-stylex-source",
+	"version": "0.0.0",
+	"private": true,
+	"description": "StyleX distribution 2: untransformed StyleX source, compiled by the consumer with @stylexjs/unplugin.",
+	"type": "module",
+	"scripts": {
+		"build": "node ../build-app.mjs",
+		"dev": "vite"
+	},
+	"dependencies": {
+		"@spike/app": "workspace:*",
+		"@spike/stylex-ui": "workspace:*",
+		"@stylexjs/stylex": "0.19.1",
+		"react": "19.3.1",
+		"react-aria-components": "1.22.1",
+		"react-dom": "19.3.1"
+	},
+	"devDependencies": {
+		"@stylexjs/unplugin": "0.19.1",
+		"@tailwindcss/vite": "^4.3.4",
+		"@vitejs/plugin-react": "^6.2.1",
+		"tailwindcss": "^4.3.4",
+		"vite": "^8.3.0"
+	}
+}

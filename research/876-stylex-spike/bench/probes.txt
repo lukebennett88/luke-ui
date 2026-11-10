@@ -1,0 +1,26 @@
+REPRODUCED: Same-priority states are ordered by value, not authoring order
+    pressed is authored last but emitted first, so hover wins when both match
+REPRODUCED: A selector shared through defineConsts emits malformed CSS
+    :is([data-hovered="true"]){.xktdifm.xktdifm{color:y}}
+REPRODUCED (compile error): A selector string imported from a plain module is rejected
+    import.tsx: Could not resolve the path to the imported file.
+REPRODUCED (compile error): A style helper imported from another module is rejected
+    helper.tsx: Could not resolve the path to the imported file.
+REPRODUCED (compile error): A local helper with a block body is rejected
+    block.tsx: Unsupported expression: ArrowFunctionExpression
+REPRODUCED (compile error): Indexing an imported token group by a parameter is rejected
+    index.tsx: A style value can only contain an array, string or number.
+REPRODUCED (compile error): A dynamic style built by a factory function is rejected
+    factory.tsx: A StyleX namespace must be an object.
+REPRODUCED: stylex.when.ancestor() stored in a constant is left as a runtime call
+    throws "Unexpected 'stylex.when.ancestor' call at runtime" when the module loads
+REPRODUCED: Logical block properties are rewritten to physical properties
+    {margin-bottom: {padding-top:
+REPRODUCED: Container queries are not ordered by width; ties fall back to the declaration value
+    later rules win, so a 1600px container resolves to the 640px value
+REPRODUCED: A null dynamic condition concatenates "null" into the class string
+    (a != null ? "x1goy6gf " : a) + (b != null ? "xq6bt9r" : b)
+REPRODUCED: Typed custom properties always register with inherits: true
+    @property --layer { syntax: "<color>"; inherits: true; initial-value: transparent }
+REPRODUCED: In the built library stylesheet, custom property atoms sit outside every cascade layer
+    104 unlayered atoms, for example .x1rfrohm{--luke-interaction-state-layer:transparent}

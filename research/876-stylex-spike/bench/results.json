@@ -1,0 +1,365 @@
+{
+	"runs": 3,
+	"results": [
+		{
+			"app": "minimal",
+			"buildMs": 521,
+			"css": {
+				"gzip": 19165,
+				"raw": 260440
+			},
+			"hasComboboxCss": true,
+			"js": {
+				"gzip": 87945,
+				"raw": 281233
+			},
+			"libraryCss": {
+				"gzip": 15647,
+				"raw": 213861
+			},
+			"total": {
+				"gzip": 107110,
+				"raw": 541673
+			},
+			"variant": "ve"
+		},
+		{
+			"app": "minimal-barrel",
+			"buildMs": 517,
+			"css": {
+				"gzip": 19165,
+				"raw": 260440
+			},
+			"hasComboboxCss": true,
+			"js": {
+				"gzip": 87936,
+				"raw": 281212
+			},
+			"libraryCss": {
+				"gzip": 15647,
+				"raw": 213861
+			},
+			"total": {
+				"gzip": 107101,
+				"raw": 541652
+			},
+			"variant": "ve"
+		},
+		{
+			"app": "realistic",
+			"buildMs": 699,
+			"css": {
+				"gzip": 19165,
+				"raw": 260440
+			},
+			"hasComboboxCss": true,
+			"js": {
+				"gzip": 154484,
+				"raw": 518571
+			},
+			"libraryCss": {
+				"gzip": 15647,
+				"raw": 213861
+			},
+			"total": {
+				"gzip": 173649,
+				"raw": 779011
+			},
+			"variant": "ve",
+			"ssrRenderMs": 9.809,
+			"html": {
+				"gzip": 2224,
+				"raw": 15705
+			},
+			"classAttributeBytes": 5790
+		},
+		{
+			"app": "minimal",
+			"buildMs": 424,
+			"css": {
+				"gzip": 7478,
+				"raw": 82727
+			},
+			"hasComboboxCss": false,
+			"js": {
+				"gzip": 87945,
+				"raw": 281233
+			},
+			"libraryCss": {
+				"gzip": 4066,
+				"raw": 36148
+			},
+			"total": {
+				"gzip": 95423,
+				"raw": 363960
+			},
+			"variant": "ve-optimised"
+		},
+		{
+			"app": "minimal-barrel",
+			"buildMs": 481,
+			"css": {
+				"gzip": 7478,
+				"raw": 82727
+			},
+			"hasComboboxCss": false,
+			"js": {
+				"gzip": 87936,
+				"raw": 281212
+			},
+			"libraryCss": {
+				"gzip": 4066,
+				"raw": 36148
+			},
+			"total": {
+				"gzip": 95414,
+				"raw": 363939
+			},
+			"variant": "ve-optimised"
+		},
+		{
+			"app": "realistic",
+			"buildMs": 539,
+			"css": {
+				"gzip": 14777,
+				"raw": 196254
+			},
+			"hasComboboxCss": true,
+			"js": {
+				"gzip": 154484,
+				"raw": 518571
+			},
+			"libraryCss": {
+				"gzip": 11297,
+				"raw": 149675
+			},
+			"total": {
+				"gzip": 169261,
+				"raw": 714825
+			},
+			"variant": "ve-optimised",
+			"ssrRenderMs": 9.602,
+			"html": {
+				"gzip": 2224,
+				"raw": 15705
+			},
+			"classAttributeBytes": 5790
+		},
+		{
+			"app": "minimal",
+			"buildMs": 426,
+			"css": {
+				"gzip": 12468,
+				"raw": 100293
+			},
+			"hasComboboxCss": true,
+			"js": {
+				"gzip": 87710,
+				"raw": 283310
+			},
+			"libraryCss": {
+				"gzip": 8908,
+				"raw": 53714
+			},
+			"total": {
+				"gzip": 100178,
+				"raw": 383603
+			},
+			"variant": "stylex-precompiled"
+		},
+		{
+			"app": "minimal-barrel",
+			"buildMs": 484,
+			"css": {
+				"gzip": 12468,
+				"raw": 100293
+			},
+			"hasComboboxCss": true,
+			"js": {
+				"gzip": 87711,
+				"raw": 283332
+			},
+			"libraryCss": {
+				"gzip": 8908,
+				"raw": 53714
+			},
+			"total": {
+				"gzip": 100179,
+				"raw": 383625
+			},
+			"variant": "stylex-precompiled"
+		},
+		{
+			"app": "realistic",
+			"buildMs": 496,
+			"css": {
+				"gzip": 12468,
+				"raw": 100293
+			},
+			"hasComboboxCss": true,
+			"js": {
+				"gzip": 143424,
+				"raw": 476835
+			},
+			"libraryCss": {
+				"gzip": 8908,
+				"raw": 53714
+			},
+			"total": {
+				"gzip": 155892,
+				"raw": 577128
+			},
+			"variant": "stylex-precompiled",
+			"ssrRenderMs": 8.687,
+			"html": {
+				"gzip": 4594,
+				"raw": 32147
+			},
+			"classAttributeBytes": 19572
+		},
+		{
+			"app": "minimal",
+			"buildMs": 502,
+			"css": {
+				"gzip": 8451,
+				"raw": 73431
+			},
+			"hasComboboxCss": false,
+			"js": {
+				"gzip": 87710,
+				"raw": 283310
+			},
+			"libraryCss": {
+				"gzip": 4844,
+				"raw": 26852
+			},
+			"total": {
+				"gzip": 96161,
+				"raw": 356741
+			},
+			"variant": "stylex-split"
+		},
+		{
+			"app": "minimal-barrel",
+			"buildMs": 484,
+			"css": {
+				"gzip": 8451,
+				"raw": 73431
+			},
+			"hasComboboxCss": false,
+			"js": {
+				"gzip": 87711,
+				"raw": 283332
+			},
+			"libraryCss": {
+				"gzip": 4844,
+				"raw": 26852
+			},
+			"total": {
+				"gzip": 96162,
+				"raw": 356763
+			},
+			"variant": "stylex-split"
+		},
+		{
+			"app": "realistic",
+			"buildMs": 511,
+			"css": {
+				"gzip": 12899,
+				"raw": 102080
+			},
+			"hasComboboxCss": true,
+			"js": {
+				"gzip": 143424,
+				"raw": 476835
+			},
+			"libraryCss": {
+				"gzip": 9078,
+				"raw": 55501
+			},
+			"total": {
+				"gzip": 156323,
+				"raw": 578915
+			},
+			"variant": "stylex-split",
+			"ssrRenderMs": 7.743,
+			"html": {
+				"gzip": 4594,
+				"raw": 32147
+			},
+			"classAttributeBytes": 19572
+		},
+		{
+			"app": "minimal",
+			"buildMs": 999,
+			"css": {
+				"gzip": 7938,
+				"raw": 71484
+			},
+			"hasComboboxCss": false,
+			"js": {
+				"gzip": 87225,
+				"raw": 281860
+			},
+			"libraryCss": {
+				"gzip": 4369,
+				"raw": 24905
+			},
+			"total": {
+				"gzip": 95163,
+				"raw": 353344
+			},
+			"variant": "stylex-source"
+		},
+		{
+			"app": "minimal-barrel",
+			"buildMs": 1381,
+			"css": {
+				"gzip": 13093,
+				"raw": 110775
+			},
+			"hasComboboxCss": true,
+			"js": {
+				"gzip": 87225,
+				"raw": 281882
+			},
+			"libraryCss": {
+				"gzip": 9501,
+				"raw": 64196
+			},
+			"total": {
+				"gzip": 100318,
+				"raw": 392657
+			},
+			"variant": "stylex-source"
+		},
+		{
+			"app": "realistic",
+			"buildMs": 1534,
+			"css": {
+				"gzip": 13093,
+				"raw": 110775
+			},
+			"hasComboboxCss": true,
+			"js": {
+				"gzip": 142520,
+				"raw": 474289
+			},
+			"libraryCss": {
+				"gzip": 9501,
+				"raw": 64196
+			},
+			"total": {
+				"gzip": 155613,
+				"raw": 585064
+			},
+			"variant": "stylex-source",
+			"ssrRenderMs": 9.004,
+			"html": {
+				"gzip": 4597,
+				"raw": 32033
+			},
+			"classAttributeBytes": 19458
+		}
+	]
+}

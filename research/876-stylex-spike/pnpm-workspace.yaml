@@ -1,0 +1,16 @@
+# Isolated research workspace for #876. It is not part of the production workspace, so its
+# dependencies never reach the root lockfile or the published packages.
+packages:
+  - lib
+  - consumers/*
+
+allowBuilds:
+  esbuild: true
+  '@parcel/watcher': true
+  '@tailwindcss/oxide': true
+  lightningcss: true
+
+# The packed Luke UI packages depend on unpublished workspace siblings. Resolve them to the
+# tarballs `scripts/pack-luke-ui.mjs` writes.
+overrides:
+  '@luke-ui/rainbow-sprinkles': 'file:./vendor/luke-ui-rainbow-sprinkles.tgz'

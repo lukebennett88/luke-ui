@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"jsx": "react-jsx",
+		"lib": ["DOM", "ES2023"],
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"noEmit": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "ES2022"
+	},
+	"include": ["src"]
+}

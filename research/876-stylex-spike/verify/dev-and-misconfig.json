@@ -1,0 +1,18 @@
+{
+	"dev ve": {
+		"consoleErrors": [],
+		"firstLoadMs": 1260,
+		"saveBackground": "oklch(0.52 0.0884 200)",
+		"saveBlockSize": "40px"
+	},
+	"dev stylex-source": {
+		"consoleErrors": [],
+		"firstLoadMs": 2001,
+		"saveBackground": "oklch(0.52 0.0884 200)",
+		"saveBlockSize": "40px"
+	},
+	"build without plugin": "build succeeded",
+	"page without plugin": [
+		"Error: Unexpected 'stylex.unstable_defineConstsNested' call at runtime. Styles must be compiled by '@stylexjs/babel-plugin'."
+	]
+}

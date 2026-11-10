@@ -1,0 +1,14 @@
+{
+	"name": "@spike/app",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./client": "./src/client.tsx",
+		"./server": "./src/server.tsx"
+	},
+	"peerDependencies": {
+		"react": "^19",
+		"react-dom": "^19"
+	}
+}

@@ -1,0 +1,13 @@
+  80.1 KiB raw   3.8 KiB gzip  src/core/styles/utilities.css.ts
+  18.5 KiB raw   1.7 KiB gzip  src/core/primitives/button/recipe.css.ts
+  17.1 KiB raw   2.4 KiB gzip  src/core/primitives/combobox/styles.css.ts
+  10.1 KiB raw   1.9 KiB gzip  src/core/overlays/mobile-overlay.css.ts
+   8.2 KiB raw   1.3 KiB gzip  src/core/text/recipe.css.ts
+   3.5 KiB raw   1.0 KiB gzip  src/core/loading-spinner/recipe.css.ts
+   3.1 KiB raw   0.8 KiB gzip  src/core/primitives/field/recipe.css.ts
+   1.2 KiB raw   0.4 KiB gzip  src/core/icon/recipe.css.ts
+   0.8 KiB raw   0.3 KiB gzip  src/core/button/styles.css.ts
+   0.5 KiB raw   0.2 KiB gzip  src/core/lockup/recipe.css.ts
+   0.3 KiB raw   0.2 KiB gzip  src/core/pending-spinner/styles.css.ts
+
+Comparable VE modules together, minified: 127.5 KiB raw, 8.5 KiB gzip

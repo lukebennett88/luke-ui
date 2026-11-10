@@ -1,0 +1,10 @@
+{
+	"stylex runtime": {
+		"gzip": 1369,
+		"raw": 3176
+	},
+	"vanilla-extract runtime": {
+		"gzip": 2932,
+		"raw": 9269
+	}
+}

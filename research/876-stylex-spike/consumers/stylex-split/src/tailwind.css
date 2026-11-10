@@ -1,0 +1,6 @@
+@layer theme, base, luke-ui, components, utilities;
+@import 'tailwindcss';
+@source '../../shared/src';
+@import '@spike/stylex-ui/precompiled-split/global.css';
+@import '../../../vendor/themes/tactile.css';
+@import '../../../vendor/themes/paper.css';

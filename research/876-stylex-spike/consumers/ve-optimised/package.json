@@ -1,0 +1,27 @@
+{
+	"name": "@spike/consumer-ve-optimised",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Vanilla Extract with bounded build optimisations: per-module CSS split from the packed stylesheet (see scripts/optimise-ve.mjs).",
+	"type": "module",
+	"scripts": {
+		"build": "node ../build-app.mjs",
+		"dev": "vite"
+	},
+	"dependencies": {
+		"@luke-ui/rainbow-sprinkles": "file:../../vendor/luke-ui-rainbow-sprinkles.tgz",
+		"@luke-ui/react": "file:../../vendor/optimised/luke-ui-react.tgz",
+		"@luke-ui/theme-paper": "file:../../vendor/luke-ui-theme-paper.tgz",
+		"@luke-ui/theme-tactile": "file:../../vendor/luke-ui-theme-tactile.tgz",
+		"@spike/app": "workspace:*",
+		"react": "19.3.1",
+		"react-aria-components": "1.22.1",
+		"react-dom": "19.3.1"
+	},
+	"devDependencies": {
+		"@tailwindcss/vite": "^4.3.4",
+		"@vitejs/plugin-react": "^6.2.1",
+		"tailwindcss": "^4.3.4",
+		"vite": "^8.3.0"
+	}
+}
