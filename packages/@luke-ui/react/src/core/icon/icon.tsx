@@ -11,7 +11,7 @@ import { iconMask } from './styles.css.js';
 export type { IconName };
 export { iconNames };
 
-interface IconStyleProps {
+interface SharedIconProps {
 	/**
 	 * Sets the icon size. Without it, the icon takes the size its container sets through
 	 * `--luke-icon-size`, such as `xsmall` inside a Button, or `medium` elsewhere.
@@ -24,7 +24,7 @@ interface IconStyleProps {
 interface _IconProps
 	extends
 		Pick<HTMLAttributes<HTMLSpanElement>, 'aria-hidden' | 'className' | 'id' | 'style'>,
-		IconStyleProps {
+		SharedIconProps {
 	/** Icon name from the built-in icon set. */
 	name: IconName;
 }
@@ -35,7 +35,7 @@ export type IconProps = Prettify<_IconProps>;
 interface _CustomIconProps
 	extends
 		Pick<SVGAttributes<SVGSVGElement>, 'aria-hidden' | 'className' | 'id' | 'style' | 'viewBox'>,
-		IconStyleProps {}
+		SharedIconProps {}
 
 /** Props used by `createIcon` for custom icon components. */
 export type CustomIconProps = Prettify<_CustomIconProps>;
@@ -48,7 +48,7 @@ export interface CreateIconOptions<TProps extends CustomIconProps = CustomIconPr
 	viewBox?: string | ((props: TProps) => string | undefined);
 }
 
-/** Renders a built-in icon. The stylesheet paints it, so it needs no provider or extra asset. */
+/** Renders a built-in icon in the colour of the surrounding text. */
 export function Icon(props: IconProps): JSX.Element {
 	const { 'aria-hidden': ariaHiddenProp, className, id, name, size, style, title } = props;
 	const isHidden = isIconHidden(ariaHiddenProp, title);

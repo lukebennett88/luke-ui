@@ -266,7 +266,7 @@ for (const consumer of consumers) {
 								probe.remove();
 								return { ...colors, dangerHue };
 							})(),
-							// The stylesheet alone paints a built-in icon: no provider, spritesheet, or request.
+							// The shared stylesheet alone paints a built-in icon.
 							iconMaskImage: (() => {
 								const icon = root?.querySelector('[data-icon="chevronDown"]');
 								return icon == null ? null : getComputedStyle(icon).maskImage;

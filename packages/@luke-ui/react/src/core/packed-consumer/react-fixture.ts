@@ -575,8 +575,6 @@ export const customIcon = <DirectionIcon direction="up" size="small" title="Up" 
 // @ts-expect-error — custom icons take the Luke UI icon sizes only
 export const invalidCustomIconSize = <DirectionIcon direction="up" size="px24" />;
 export const iconSizeScope = <div style={iconSizeVars('small')} />;
-// @ts-expect-error — icons need no provider, so the provider entrypoint does not exist
-export { Provider } from '@luke-ui/react/provider';
 
 export function App() {
 	return (

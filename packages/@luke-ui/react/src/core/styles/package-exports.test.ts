@@ -5,6 +5,8 @@ import { expect, test } from 'vite-plus/test';
 import packageJson from '../../../package.json' with { type: 'json' };
 
 const absentExportPaths = [
+	'./provider',
+	'./spritesheet.svg',
 	'./button/primitive',
 	'./checkbox',
 	'./checkbox/primitive',

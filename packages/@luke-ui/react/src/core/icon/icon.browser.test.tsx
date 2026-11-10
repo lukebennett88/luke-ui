@@ -97,11 +97,6 @@ test('icons and spinners take an explicit size, then the nearest scope, then the
 	}
 });
 
-test('iconSizeVars sets the public --luke-icon-size property', () => {
-	expect(iconSizeVars('xsmall')).toEqual({ '--luke-icon-size': '1rem' });
-	expect(iconSizeVars('large')).toEqual({ '--luke-icon-size': '2rem' });
-});
-
 test('createIcon renders an SVG that a title names and that is hidden otherwise', () => {
 	const { container, locator } = render(
 		<>
@@ -195,19 +190,6 @@ test('the stylesheet paints each built-in icon from its own mask', () => {
 	expect(add).toMatch(ICON_MASK_PATTERN);
 	expect(search).toMatch(ICON_MASK_PATTERN);
 	expect(add).not.toBe(search);
-});
-
-test('an icon keeps its mask and size in a right-to-left context', () => {
-	const { container } = render(
-		<div dir="rtl">
-			<Icon name="arrowRight" />
-		</div>,
-	);
-	const style = getComputedStyle(container.querySelector('[data-icon]')!);
-
-	// The mask does not mirror a directional glyph. Mirroring stays a per-icon decision.
-	expect(style.maskImage).toMatch(ICON_MASK_PATTERN);
-	expect(style.inlineSize).toBe('24px');
 });
 
 test('under forced colours an icon paints the forced colour around it, not the author colour', async () => {

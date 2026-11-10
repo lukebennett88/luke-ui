@@ -9,7 +9,8 @@ const TAG_GAP_PATTERN = />\s+</g;
 const SPACE_BEFORE_TAG_END_PATTERN = /\s+(\/?>)/g;
 const UNSAFE_URL_CHARACTER_PATTERN = /[%#<>{}\\]/g;
 const INPUT_DIR = path.resolve(process.cwd(), 'icons');
-// See `vite.config.ts`'s `copy` config for why this writes to `.generated/` instead of `dist/`.
+// Generated sources live in `.generated/`, outside `dist/`, so restoring one Turbo task's cached
+// outputs cannot overwrite another's.
 const GENERATED_DIR = path.resolve(process.cwd(), '.generated');
 const ICON_DATA_TS_PATH = path.resolve(GENERATED_DIR, 'icon-data.ts');
 const ICON_MASK_DATA_TS_PATH = path.resolve(GENERATED_DIR, 'icon-mask-data.ts');
