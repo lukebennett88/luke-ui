@@ -255,7 +255,8 @@ icon, such as the field error or the selected list box item's check, spreads `ic
 A masked icon paints with `background-color`, so a rule that clears descendant backgrounds must
 leave `Icon` out. Under forced colours the icon sets `forced-color-adjust: preserve-parent-color`,
 as the UA style does for `<svg>`, so `currentColor` resolves to the forced colour it inherits.
-`none` would paint the unforced author colour.
+`none` would paint the unforced author colour. Print drops background colours by default, so the
+icon also sets `print-color-adjust: exact`.
 
 ## Recipes
 

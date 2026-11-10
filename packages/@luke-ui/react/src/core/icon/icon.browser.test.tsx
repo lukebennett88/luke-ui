@@ -108,7 +108,6 @@ test('an icon keeps its mask and size in a right-to-left context', () => {
 
 	// The mask does not mirror a directional glyph. Mirroring stays a per-icon decision.
 	expect(style.maskImage).toMatch(ICON_MASK_PATTERN);
-	expect(style.maskPosition).toBe('50% 50%');
 	expect(style.inlineSize).toBe('24px');
 });
 

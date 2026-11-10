@@ -14,5 +14,8 @@ export function iconMaskStyle(maskImage?: string) {
 		maskPosition: 'center',
 		maskRepeat: 'no-repeat',
 		maskSize: 'contain',
+		// Print drops background colours by default, which would erase the icon. An SVG fill prints.
+		printColorAdjust: 'exact',
+		WebkitPrintColorAdjust: 'exact',
 	} as const;
 }

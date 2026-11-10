@@ -85,9 +85,9 @@ not help. Silence in this log is not evidence.
   `packages/@luke-ui/react/src/core/link/link.browser.test.tsx`, and
   `packages/@luke-ui/react/src/core/packed-consumer/react-fixture.ts`, and
   `packages/@luke-ui/react/src/core/styles/focus-ring-contrast.browser.test.tsx`, and
-  `packages/@luke-ui/react/src/core/icon/icon.browser.test.tsx`.
-  `docs/DOCUMENTATION.md`, Comments and JSDoc, requires comments to explain code without its
-  history. The review-pr workflow requires consulting the applicable repository guides.
+  `packages/@luke-ui/react/src/core/icon/icon.browser.test.tsx`. `docs/DOCUMENTATION.md`, Comments
+  and JSDoc, requires comments to explain code without its history. The review-pr workflow requires
+  consulting the applicable repository guides.
 - Problem: Agent-authored comments narrated history despite the required guidance. review-pr's
   easy-to-miss list and work-on-issue's pre-commit step already name the rule, so pointing to it
   again is not a remedy. Correcting the comments does not establish that comment authoring applies
