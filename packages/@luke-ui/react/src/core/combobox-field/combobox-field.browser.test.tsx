@@ -566,6 +566,42 @@ test('an edge-to-edge ComboboxField popover stays open without horizontal scroll
 	await expect.element(page.getByRole('combobox', { name: 'Country' })).toHaveValue('Canada');
 });
 
+// The popover shares its exit with SelectField. React Aria unmounts it once the transitions that
+// exist when `data-exiting` is set have finished, so a 100ms exit was too brief to read.
+test('a ComboboxField popover stays mounted for a perceptible exit transition, then unmounts', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} label="Country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+
+	await userEvent.tab();
+	await userEvent.keyboard('{ArrowDown}');
+	const listbox = page.getByRole('listbox');
+	await expect.element(listbox).toBeVisible();
+	const popover = listbox.element().closest('[data-trigger="ComboBox"]');
+	if (!(popover instanceof HTMLElement)) throw new Error('Expected the Combobox popover.');
+	await waitForOverlayEnter(popover);
+
+	await userEvent.keyboard('{Escape}');
+	expect(popover).toHaveAttribute('data-exiting');
+	const transitions = popover.getAnimations().filter((animation) => {
+		return animation instanceof CSSTransition;
+	});
+
+	expect(transitions.map((transition) => transition.transitionProperty).toSorted()).toEqual([
+		'opacity',
+		'translate',
+	]);
+	for (const transition of transitions) {
+		expect(transition.effect?.getComputedTiming().duration).toBeGreaterThanOrEqual(150);
+	}
+	expect(popover.isConnected).toBe(true);
+
+	await Promise.all(transitions.map((transition) => transition.finished));
+	await expect.poll(() => popover.isConnected).toBe(false);
+});
+
 test('a ComboboxField popover matches the trigger width when the viewport has room', async () => {
 	render(
 		<div style={{ padding: '1rem' }}>

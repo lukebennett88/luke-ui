@@ -241,14 +241,15 @@ const comboboxConfig = {
 		},
 		// The popover is an overlay, so it takes the shared overlay motion roles. See
 		// `styles/overlay-motion.ts` for the roles and the reduced-motion rule that follows from them.
-		// A 4px slide is too short to carry the shared 250ms entry, so the popover enters in 150ms and
-		// leaves in 100ms. Both ease out, so the exit starts moving at once.
+		// A 4px slide is too short to carry the shared 250ms entry, so the popover enters in 200ms and
+		// leaves in 150ms. A 100ms exit was too brief to read, on iOS Safari and elsewhere. Both ease
+		// out, so the exit starts moving at once.
 		popover: overlayMotion({
 			hidden: { opacity: 0, translate: popoverSlideVar },
 			properties: ['opacity', 'translate'],
 			timing: {
-				enter: { duration: MOTION_DURATION_SCALE[300], easing: vars.motion.enter.easing },
-				exit: { duration: MOTION_DURATION_SCALE[200], easing: vars.motion.enter.easing },
+				enter: { duration: MOTION_DURATION_SCALE[400], easing: vars.motion.enter.easing },
+				exit: { duration: MOTION_DURATION_SCALE[300], easing: vars.motion.enter.easing },
 			},
 			rule: {
 				'@media': {

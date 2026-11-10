@@ -20,6 +20,7 @@ import { SelectContext } from 'react-aria-components/Select';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../../test-utils/axe.js';
+import { emulateReducedMotion } from '../../test-utils/emulate-media.js';
 import { getDescribedText } from '../../test-utils/get-described-text.js';
 import { render, visualAppearances } from '../../test-utils/render.js';
 import { setInteractionState, settledSurfaceColors } from '../../test-utils/surface-colors.js';
@@ -486,6 +487,56 @@ test('an open select has no axe violations', async () => {
 
 	await expectNoAxeViolations(container);
 	await expectNoAxeViolations(document.body);
+});
+
+// React Aria unmounts the popover once the exit transitions that exist when `data-exiting` is set
+// have finished. A transition of 100ms or less is too brief to read on a phone, so the exit has to
+// stay long enough to see while still ending in an unmount.
+async function closeAndCollectExit() {
+	await userEvent.click(trigger(/Example field/));
+	const popover = page.getByRole('listbox').element().closest('[data-trigger]');
+	if (!(popover instanceof HTMLElement)) throw new Error('Expected the select popover.');
+	await waitForOverlayEnter(popover);
+
+	await userEvent.keyboard('{Escape}');
+	expect(popover).toHaveAttribute('data-exiting');
+	const transitions = popover.getAnimations().filter((animation) => {
+		return animation instanceof CSSTransition;
+	});
+	return { popover, transitions };
+}
+
+test('the Select popover stays mounted for a perceptible exit transition, then unmounts', async () => {
+	render(<ExampleSelect label="Example field" />);
+	const { popover, transitions } = await closeAndCollectExit();
+
+	expect(transitions.map((transition) => transition.transitionProperty).toSorted()).toEqual([
+		'opacity',
+		'translate',
+	]);
+	for (const transition of transitions) {
+		expect(transition.effect?.getComputedTiming().duration).toBeGreaterThanOrEqual(150);
+	}
+	expect(popover.isConnected).toBe(true);
+
+	await Promise.all(transitions.map((transition) => transition.finished));
+	await expect.poll(() => popover.isConnected).toBe(false);
+});
+
+test('the Select popover exit keeps its fade and drops its movement under reduced motion', async () => {
+	await emulateReducedMotion(true);
+	try {
+		render(<ExampleSelect label="Example field" />);
+		const { popover, transitions } = await closeAndCollectExit();
+
+		expect(transitions.map((transition) => transition.transitionProperty)).toEqual(['opacity']);
+		expect(transitions[0]?.effect?.getComputedTiming().duration).toBeGreaterThanOrEqual(150);
+
+		await Promise.all(transitions.map((transition) => transition.finished));
+		await expect.poll(() => popover.isConnected).toBe(false);
+	} finally {
+		await emulateReducedMotion(false);
+	}
 });
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
