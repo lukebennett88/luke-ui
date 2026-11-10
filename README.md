@@ -12,7 +12,8 @@ packages (Tactile and Paper), and layout utilities that share a semantic token s
 - Browser, custom, server, and form-library validation
 - Text trimming and automatic heading levels
 - Opt-in root composition with `elementType`, `renderRoot`, and named render callbacks
-- Built-in icons drawn by the stylesheet, with type-safe icon names and no setup
+- Built-in icons drawn by the stylesheet, with type-safe icon names, no setup, and `createIcon` for
+  custom icons
 
 ## Documentation
 

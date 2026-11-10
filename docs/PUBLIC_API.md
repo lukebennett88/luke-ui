@@ -16,6 +16,10 @@ whatever the source module happens to export.
 Generated class names, Vanilla Extract types, and any DOM structure or state attribute that a guide
 does not document are private.
 
+The theme token custom properties and `--luke-icon-size` are public CSS. Other custom properties,
+including every `--luke-internal-*` name, are private. The `data-icon` attribute an `Icon` renders
+is private too. The stylesheet's built-in icons need `img-src data:` in a Content Security Policy.
+
 | Subpath                            | Holds                                                                                          |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `@luke-ui/react/<component>`       | A high-level component, its props type, and the companion exports it needs                     |

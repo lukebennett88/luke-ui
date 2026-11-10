@@ -61,6 +61,17 @@ Import each component from its package path.
 
 <SourceCodeBlock src="overview/welcome" />
 
+## Content Security Policy
+
+The stylesheet draws the built-in icons from `data:` image URLs. If your application sets a Content
+Security Policy, allow them in `img-src`:
+
+```text
+Content-Security-Policy: img-src 'self' data:
+```
+
+Without `data:`, the browser blocks the icons and they do not appear.
+
 ## Change the theme
 
 Paper uses the same component APIs with a flatter visual treatment. To use it, install

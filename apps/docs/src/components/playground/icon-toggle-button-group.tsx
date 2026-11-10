@@ -1,15 +1,14 @@
 import { buttonRecipe } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
-import type { IconName } from '@luke-ui/react/icon';
-import { Icon } from '@luke-ui/react/icon';
-import type { ComponentProps, PropsWithChildren, ReactNode } from 'react';
+import type { CustomIconProps } from '@luke-ui/react/icon';
+import type { ComponentProps, ComponentType, PropsWithChildren, ReactNode } from 'react';
 import { useId } from 'react';
 import type { Selection } from 'react-aria-components/GridList';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
 import { ToggleButtonGroup } from 'react-aria-components/ToggleButtonGroup';
 
 type IconToggleItem<Value extends string> = {
-	icon: IconName;
+	icon: ComponentType<CustomIconProps>;
 	label: string;
 	value: Value;
 };
@@ -76,9 +75,9 @@ export function IconToggleButtonGroup<Value extends string>(
 			options={options}
 			value={props.value}
 		>
-			{options.map(({ icon, label: optionLabel, value: optionValue }) => (
+			{options.map(({ icon: OptionIcon, label: optionLabel, value: optionValue }) => (
 				<PillToggle ariaLabel={optionLabel} key={optionValue} value={optionValue}>
-					<Icon name={icon} size="xsmall" />
+					<OptionIcon size="xsmall" />
 				</PillToggle>
 			))}
 		</ToggleGroup>

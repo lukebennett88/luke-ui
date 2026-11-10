@@ -465,5 +465,10 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'textWrap',
 		'typography',
 	],
+	'visuals/icon.mdx::packages/@luke-ui/react/src/core/icon/icon.tsx::CreateIconOptions': [
+		'path',
+		'viewBox',
+	],
+	'visuals/icon.mdx::packages/@luke-ui/react/src/core/icon/icon.tsx::CustomIconProps': ['title'],
 	'visuals/icon.mdx::packages/@luke-ui/react/src/core/icon/icon.tsx::IconProps': ['title'],
 };

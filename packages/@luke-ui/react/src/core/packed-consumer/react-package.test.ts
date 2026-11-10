@@ -181,6 +181,8 @@ for (const consumer of consumers) {
 				expect(markup).toContain('Hello world');
 				expect(markup).toContain('data-icon="chevronDown"');
 				expect(markup).toContain('aria-label="Expand"');
+				expect(markup).toContain('<title>Packed glyph</title>');
+				expect(markup).toContain('--luke-icon-size:1.25rem');
 				expect(markup).toContain('<button');
 				expect(markup).toContain('<input');
 				expect(markup).toContain('role="switch"');
@@ -269,6 +271,9 @@ for (const consumer of consumers) {
 								const icon = root?.querySelector('[data-icon="chevronDown"]');
 								return icon == null ? null : getComputedStyle(icon).maskImage;
 							})(),
+							scopedSizes: [
+								...(root?.querySelector('[data-testid="icon-size-scope"]')?.children ?? []),
+							].map((icon) => getComputedStyle(icon).inlineSize),
 							textAfterHydration: root?.textContent,
 							serverText: serverSnapshot?.text,
 						};
@@ -278,6 +283,7 @@ for (const consumer of consumers) {
 					expect(consoleErrors).toEqual([]);
 					expect(result.controls).toEqual({ buttons: 2, inputs: 7 });
 					expect(result.iconMaskImage).toMatch(ICON_MASK_PATTERN);
+					expect(result.scopedSizes).toEqual(['20px', '20px']);
 					expect(result.expectedActionClasses).toBeTruthy();
 					expect(result.inheritedActionClasses).toBe(result.expectedActionClasses);
 					// React Aria effects adjust attributes after hydration, so compare nodes, not markup.

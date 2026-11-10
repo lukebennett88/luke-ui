@@ -91,13 +91,15 @@ import { Button, buttonRecipe } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { CheckboxGroup } from '@luke-ui/react/checkbox-group';
 import { Form } from '@luke-ui/react/form';
-import { Icon } from '@luke-ui/react/icon';
+import { createIcon, Icon, iconSizeVars } from '@luke-ui/react/icon';
 import { RadioField, RadioGroup } from '@luke-ui/react/radio-group';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
 import { SwitchField } from '@luke-ui/react/switch-field';
 import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { createElement as h, useEffect } from 'react';
+
+const PackedGlyph = createIcon({ path: h('path', { d: 'M4 4h16v16H4z' }) });
 
 /** Calls \`onHydrated\` after the first client commit. The server never runs effects. */
 export function App({ onHydrated }) {
@@ -109,6 +111,13 @@ export function App({ onHydrated }) {
 		{ display: 'flex', gap: 'space.8' },
 		h(Blockquote, null, 'Hello world'),
 		h(Icon, { name: 'chevronDown', title: 'Expand' }),
+		// A public size scope and a custom icon must size and render across published entrypoints.
+		h(
+			'span',
+			{ 'data-testid': 'icon-size-scope', style: iconSizeVars('small') },
+			h(Icon, { name: 'add', title: 'Scoped icon' }),
+			h(PackedGlyph, { title: 'Packed glyph' }),
+		),
 		// Separate published entrypoints must share Form defaults for both fields and actions.
 		h(
 			Form,
@@ -337,6 +346,7 @@ import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { CheckboxGroup, type CheckboxGroupProps } from '@luke-ui/react/checkbox-group';
 import { Container } from '@luke-ui/react/container';
 import { Heading, type HeadingProps } from '@luke-ui/react/heading';
+import { createIcon, type CustomIconProps, iconSizeVars } from '@luke-ui/react/icon';
 import { Text, type TextProps } from '@luke-ui/react/text';
 import { interactionState } from '@luke-ui/react/utils';
 import { TextInputField } from '@luke-ui/react/text-input-field';
@@ -556,6 +566,17 @@ export const invalidRenderState: Parameters<typeof renderRoot>[1] = { isHovered:
 // @ts-expect-error — Text renderRoot excludes elementType
 export const conflictingTextRoot: TextProps = { elementType: 'p', renderRoot: textRenderRoot };
 export const headingDefaults: HeadingProps = { level: 1, children: 'Title' };
+
+const DirectionIcon = createIcon<CustomIconProps & { direction: 'down' | 'up' }>({
+	path: ({ direction }) => <path d={direction === 'up' ? 'M0 1h1' : 'M0 0h1'} />,
+	viewBox: ({ direction }) => (direction === 'up' ? '0 0 16 16' : undefined),
+});
+export const customIcon = <DirectionIcon direction="up" size="small" title="Up" />;
+// @ts-expect-error — custom icons take the Luke UI icon sizes only
+export const invalidCustomIconSize = <DirectionIcon direction="up" size="px24" />;
+export const iconSizeScope = <div style={iconSizeVars('small')} />;
+// @ts-expect-error — icons need no provider, so the provider entrypoint does not exist
+export { Provider } from '@luke-ui/react/provider';
 
 export function App() {
 	return (

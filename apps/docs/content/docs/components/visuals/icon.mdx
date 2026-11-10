@@ -12,12 +12,15 @@ See [Iconography](/docs/iconography) for available icons, sizing, colour, and se
 
 ## Custom icons
 
-For an icon that is not in the set, such as a brand mark, render an ordinary `<svg>`. Pass
-`iconRecipe()` as its `className` to give it the sizes `Icon` uses. Paint it with `currentColor` to
-follow the text colour. Hide a decorative SVG with `aria-hidden`. Name an informative one with
-`role="img"` and `aria-label`.
+Use `createIcon` for a one-off icon that is not in the set, such as a brand mark. It returns an SVG
+component with the same sizing and accessibility behaviour as `Icon`, including the size a control
+or `--luke-icon-size` sets.
 
 <ExampleBlock src="icon/custom" layout="centered" title="Icon: Custom" />
+
+To size an `<svg>` you render yourself, such as one from another icon library, pass `iconRecipe()`
+as its `className`. Then hide it with `aria-hidden` or name it with `role="img"` and `aria-label`
+yourself.
 
 ## Accessibility
 
@@ -32,3 +35,17 @@ Read [Iconography](/docs/iconography#accessibility) for decorative and informati
 ### IconProps
 
 <component-props-table path="packages/@luke-ui/react/src/core/icon/icon.tsx" name="IconProps" />
+
+### CreateIconOptions
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/icon/icon.tsx"
+	name="CreateIconOptions"
+/>
+
+### CustomIconProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/icon/icon.tsx"
+	name="CustomIconProps"
+/>

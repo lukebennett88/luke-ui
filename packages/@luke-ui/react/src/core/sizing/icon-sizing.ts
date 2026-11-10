@@ -28,16 +28,21 @@ export type IconSize = keyof typeof ICON_SIZES;
 const DEFAULT_ICON_SIZE: IconSize = 'medium';
 
 /**
- * Private inherited property that sizes nested icons and spinners. A container sets it with
- * `iconSizeVars`, and an explicit `size` on the icon wins over it. The name is global rather than
- * hashed, like the surface overrides.
+ * Public inherited property that sizes nested icons and spinners. A container sets it, and an
+ * explicit `size` on an icon or spinner wins over it.
  */
-const ICON_SIZE_PROPERTY = '--luke-internal-icon-size';
+const ICON_SIZE_PROPERTY = '--luke-icon-size';
 
 /** The inline and block size an icon takes from its nearest scope, or the default size. */
 export const contextualIconSize = `var(${ICON_SIZE_PROPERTY}, ${ICON_SIZES[DEFAULT_ICON_SIZE]})`;
 
-/** Style `vars` that make `size` the default for icons and spinners inside an element. */
+/**
+ * Sets the default size for icons and spinners inside an element. Returns `--luke-icon-size` set to
+ * that size. Pass the result to the element's `style`, or to a Vanilla Extract style's `vars`. An
+ * icon or spinner with its own `size` keeps that size.
+ */
+// The index signature keeps the result assignable to React's `style`, which rejects an object whose
+// only key is a custom property.
 export function iconSizeVars(size: IconSize): Record<string, string> {
 	return { [ICON_SIZE_PROPERTY]: ICON_SIZES[size] };
 }

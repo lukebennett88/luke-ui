@@ -1,6 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
-import { Icon, iconRecipe } from '@luke-ui/react/icon';
+import type { CustomIconProps, IconRecipeVariants } from '@luke-ui/react/icon';
+import { createIcon, Icon, iconRecipe, iconSizeVars } from '@luke-ui/react/icon';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
@@ -25,6 +26,8 @@ const rowStyle = {
 	gap: '1rem',
 } satisfies CSSProperties;
 
+type IconSize = NonNullable<IconRecipeVariants>['size'];
+
 const sizes = variantValuesFor<typeof Icon, 'size'>()(['xsmall', 'small', 'medium', 'large']);
 const names = variantValuesFor<typeof Icon, 'name'>()([
 	'add',
@@ -34,34 +37,130 @@ const names = variantValuesFor<typeof Icon, 'name'>()([
 	'search',
 ]);
 
-test('icon and spinner sizes use the explicit size, then the container, then the default', () => {
+const SquareIcon = createIcon({ path: <path d="M0 0h1v1H0z" /> });
+
+/** One of each sizable kind, named so each scope's members can be found by role. */
+function SizedSet({ label, size }: { label: string; size?: IconSize }) {
+	return (
+		<>
+			<Icon name="add" size={size} title={`${label} icon`} />
+			<SquareIcon size={size} title={`${label} custom icon`} />
+			<LoadingSpinner aria-label={`${label} spinner`} size={size} />
+			<svg
+				aria-label={`${label} recipe svg`}
+				className={iconRecipe({ size })}
+				role="img"
+				viewBox="0 0 24 24"
+			/>
+		</>
+	);
+}
+
+test('icons and spinners take an explicit size, then the nearest scope, then the default', () => {
 	const { locator } = render(
 		<>
-			<Icon name="add" title="Default icon" />
-			<LoadingSpinner aria-label="Default spinner" />
+			<SizedSet label="Default" />
 			<Button>
-				<svg aria-label="Container icon" className={iconRecipe()} role="img" viewBox="0 0 24 24">
-					<path d="M0 0h1v1H0z" />
-				</svg>
-				<LoadingSpinner aria-label="Container spinner" />
-				<Icon name="add" size="large" title="Explicit icon" />
-				<LoadingSpinner aria-label="Explicit spinner" size="small" />
+				<SizedSet label="Button" />
 			</Button>
+			<div style={iconSizeVars('large')}>
+				<SizedSet label="Outer" />
+				<div style={iconSizeVars('small')}>
+					<SizedSet label="Nested" />
+					<SizedSet label="Explicit" size="xsmall" />
+				</div>
+			</div>
+			<div style={{ '--luke-icon-size': '40px' } as CSSProperties}>
+				<SizedSet label="Length" />
+			</div>
 		</>,
 	);
 
-	for (const [role, name, size] of [
-		['img', 'Default icon', 24],
-		['status', 'Default spinner', 24],
-		['img', 'Container icon', 16],
-		['status', 'Container spinner', 16],
-		['img', 'Explicit icon', 32],
-		['status', 'Explicit spinner', 20],
+	for (const [label, pixels] of [
+		['Default', 24],
+		['Button', 16],
+		['Outer', 32],
+		['Nested', 20],
+		['Explicit', 16],
+		['Length', 40],
 	] as const) {
-		const element = locator.getByRole(role, { name }).element();
-		expect(getComputedStyle(element).inlineSize).toBe(`${size}px`);
-		expect(getComputedStyle(element).blockSize).toBe(`${size}px`);
+		for (const [role, name] of [
+			['img', `${label} icon`],
+			['img', `${label} custom icon`],
+			['status', `${label} spinner`],
+			['img', `${label} recipe svg`],
+		] as const) {
+			const style = getComputedStyle(locator.getByRole(role, { name }).element());
+			expect({ name, size: style.inlineSize }).toEqual({ name, size: `${pixels}px` });
+			expect({ name, size: style.blockSize }).toEqual({ name, size: `${pixels}px` });
+		}
 	}
+});
+
+test('iconSizeVars sets the public --luke-icon-size property', () => {
+	expect(iconSizeVars('xsmall')).toEqual({ '--luke-icon-size': '1rem' });
+	expect(iconSizeVars('large')).toEqual({ '--luke-icon-size': '2rem' });
+});
+
+test('createIcon renders an SVG that a title names and that is hidden otherwise', () => {
+	const { container, locator } = render(
+		<>
+			<SquareIcon title="Square" />
+			<SquareIcon />
+			<SquareIcon aria-hidden title="Hidden square" />
+			<SquareIcon aria-hidden={false} />
+		</>,
+	);
+	const named = locator.getByRole('img', { name: 'Square' }).element();
+	const svgs = [...container.querySelectorAll('svg')];
+
+	expect(named.tagName).toBe('svg');
+	expect(named.querySelector('title')?.textContent).toBe('Square');
+	expect(named.getAttribute('aria-hidden')).toBeNull();
+	expect(named.getAttribute('fill')).toBe('currentColor');
+	expect(named.getAttribute('focusable')).toBe('false');
+	for (const svg of svgs.slice(1)) {
+		expect(svg.getAttribute('aria-hidden')).toBe('true');
+		expect(svg.getAttribute('role')).toBeNull();
+	}
+});
+
+test('createIcon resolves the viewBox from the prop, then the option, then the icon grid', () => {
+	const GridIcon = createIcon({ path: <path d="M0 0h1v1H0z" /> });
+	const WideIcon = createIcon({ path: <path d="M0 0h1v1H0z" />, viewBox: '0 0 48 24' });
+	const { container } = render(
+		<>
+			<GridIcon id="grid" />
+			<WideIcon id="wide" />
+			<WideIcon id="override" viewBox="0 0 12 12" />
+		</>,
+	);
+
+	expect(container.querySelector('#grid')?.getAttribute('viewBox')).toBe('0 0 24 24');
+	expect(container.querySelector('#wide')?.getAttribute('viewBox')).toBe('0 0 48 24');
+	expect(container.querySelector('#override')?.getAttribute('viewBox')).toBe('0 0 12 12');
+});
+
+test('createIcon passes custom props to path and viewBox functions', () => {
+	const ArrowIcon = createIcon<CustomIconProps & { direction: 'down' | 'up' }>({
+		path: ({ direction }) => <path d={direction === 'up' ? 'M0 1h1' : 'M0 0h1'} />,
+		viewBox: ({ direction }) => (direction === 'up' ? '0 0 16 16' : undefined),
+	});
+	const { container } = render(
+		<>
+			<ArrowIcon className="custom" direction="up" id="up" style={{ opacity: 0.5 }} />
+			<ArrowIcon direction="down" id="down" />
+		</>,
+	);
+	const up = container.querySelector('#up')!;
+
+	expect(up.querySelector('path')?.getAttribute('d')).toBe('M0 1h1');
+	expect(up.getAttribute('viewBox')).toBe('0 0 16 16');
+	expect(up.classList.contains('custom')).toBe(true);
+	expect(getComputedStyle(up).opacity).toBe('0.5');
+	expect(container.querySelector('#down path')?.getAttribute('d')).toBe('M0 0h1');
+	// A viewBox function that returns nothing leaves the SVG without one.
+	expect(container.querySelector('#down')?.getAttribute('viewBox')).toBeNull();
 });
 
 test('names an icon with a title and hides it otherwise', () => {
