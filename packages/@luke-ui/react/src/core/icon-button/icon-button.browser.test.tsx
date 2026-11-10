@@ -1,3 +1,4 @@
+import { createIcon, iconRecipe } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Fragment } from 'react';
 import type { JSX } from 'react';
@@ -28,6 +29,37 @@ function UnlabelledCustomIcon(): JSX.Element {
 		</svg>
 	);
 }
+
+const CreatedIcon = createIcon({ path: <circle cx="12" cy="12" r="8" /> });
+
+test('custom SVGs inherit the control size unless given an explicit icon size', () => {
+	const { locator } = render(
+		<>
+			<IconButton aria-label="Plain" icon={<UnlabelledCustomIcon />} />
+			<IconButton aria-label="Inherited" icon={<CreatedIcon />} />
+			<IconButton aria-label="Created" icon={<CreatedIcon size="large" />} />
+			<IconButton
+				aria-label="Recipe"
+				icon={<svg className={iconRecipe({ size: 'large' })} viewBox="0 0 24 24" />}
+			/>
+		</>,
+	);
+
+	for (const [name, pixels] of [
+		['Plain', 16],
+		['Inherited', 16],
+		['Created', 32],
+		['Recipe', 32],
+	] as const) {
+		const svg = locator.getByRole('button', { name }).element().querySelector('svg')!;
+		const style = getComputedStyle(svg);
+		expect({ name, inline: style.inlineSize, block: style.blockSize }).toEqual({
+			name,
+			inline: `${pixels}px`,
+			block: `${pixels}px`,
+		});
+	}
+});
 
 function IconButtonScene() {
 	return (

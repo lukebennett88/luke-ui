@@ -12,7 +12,7 @@ export const iconOnlyIconWrapper = style({
  * Sizes a direct `svg` child, such as a brand mark, to the icon size the button sets, so a custom
  * icon needs no sizing of its own.
  */
-globalStyleInLayer('recipes', `${iconOnlyIconWrapper} > svg`, {
+globalStyleInLayer('recipes', `:where(${iconOnlyIconWrapper} > svg)`, {
 	blockSize: contextualIconSize,
 	inlineSize: contextualIconSize,
 });

@@ -210,6 +210,17 @@ for (const consumer of consumers) {
 					const group = ssrPage.getByRole('group', { name: 'Packed choices' });
 					const email = group.getByRole('checkbox', { name: 'Packed email' });
 					expect(await email.getAttribute('aria-invalid')).toBe('true');
+					const ssrIcon = ssrPage.locator('[data-icon="chevronDown"]').first();
+					expect(await ssrIcon.evaluate((element) => getComputedStyle(element).maskImage)).toMatch(
+						ICON_MASK_PATTERN,
+					);
+					await ssrPage.emulateMedia({ media: 'print' });
+					expect(await ssrIcon.evaluate((element) => getComputedStyle(element).maskImage)).toMatch(
+						ICON_MASK_PATTERN,
+					);
+					expect(
+						await ssrIcon.evaluate((element) => getComputedStyle(element).printColorAdjust),
+					).toBe('exact');
 					await ssrPage.close();
 
 					await page.goto(`${server.url}ssr.html`);
