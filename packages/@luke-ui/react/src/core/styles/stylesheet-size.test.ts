@@ -7,9 +7,9 @@ import { expect, test } from 'vite-plus/test';
 // The measured size is 17,146 bytes. It includes the registered state-layer @property, the adaptive
 // tint declarations, the radio-group indicator states, the private fills, finishes, and pressed
 // shadow each surface pairing sets for a low Button, and the private ring colour each pairing sets
-// for the focus rings inside it, which adds 315 bytes. The built-in icon masks add 2,203 bytes: the
+// for the focus rings inside it, which adds 315 bytes. The built-in icon masks add 2,217 bytes: the
 // stylesheet carries every icon's SVG source, since no separate icon asset ships. The measured size
-// with them is 19,349 bytes.
+// with them is 19,363 bytes.
 const maximumGzipBytes = 19_549;
 
 test('keeps the public stylesheet within its size budget', async () => {
