@@ -2,8 +2,8 @@ import type { HTMLAttributes, JSX, ReactNode, SVGAttributes, SVGProps } from 're
 import { iconNames } from '../../../.generated/icon-data.js';
 import type { IconName } from '../../../.generated/icon-data.js';
 import { cx } from '../../shared/utils/utils.js';
-import { ICON_VIEWBOX } from '../sizing/icon-sizing.js';
 import type { Prettify } from '../types/prettify.js';
+import { ICON_VIEWBOX } from './icon-sizing.js';
 import type { IconRecipeVariants } from './recipe.css.js';
 import { iconRecipe } from './recipe.css.js';
 import { iconMask } from './styles.css.js';

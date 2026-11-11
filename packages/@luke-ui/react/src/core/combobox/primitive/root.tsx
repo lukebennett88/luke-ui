@@ -4,11 +4,11 @@ import type { Key, ComboBoxProps as RacComboBoxProps } from 'react-aria-componen
 import { ComboBoxContext, ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
+import { FieldStateContext } from '../../primitives/field/label.js';
+import { rootIdProps } from '../../primitives/root-id.js';
 import { useControlSize } from '../../sizing/control-size-context.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { FieldStateContext } from '../field/label.js';
-import { rootIdProps } from '../root-id.js';
 import { ComboboxInputGroupContext } from './input-group-context.js';
 import { ComboboxSizeProvider } from './size-context.js';
 import type { ComboboxSize } from './styles.css.js';

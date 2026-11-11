@@ -4,12 +4,20 @@ import { iconMaskUrls } from '../../../../.generated/icon-mask-data.js';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { MOTION_DURATION_SCALE } from '../../../theme/motion.js';
+import { iconSizeVars } from '../../icon/icon-sizing.js';
 import { iconMaskStyle } from '../../icon/mask-style.js';
 import { iconSizeVariants } from '../../icon/recipe.css.js';
 import { iconMask } from '../../icon/styles.css.js';
-import { COMBOBOX_ACTION_SIZE, COMBOBOX_CHECK_ICON_SIZE } from '../../sizing/combobox-sizing.js';
+import {
+	autofilledDisabledInputSelector,
+	autofilledDisabledInputStyle,
+	autofilledInputSelector,
+	autofilledInputStyle,
+	filledInputSelectors,
+	filledInputStyle,
+	touchInputTypography,
+} from '../../primitives/text-input/styles.css.js';
 import { FIELD_CONTROL_ICON_SIZE, MIN_TARGET_SIZE } from '../../sizing/control-size.js';
-import { iconSizeVars } from '../../sizing/icon-sizing.js';
 import { classSelector } from '../../styles/class-selector.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import {
@@ -25,15 +33,7 @@ import { recipe } from '../../styles/recipe.js';
 import { interactionStateLayer } from '../../styles/state-layer.css.js';
 import { adaptiveStateLayer } from '../../styles/state-layer.js';
 import { surfaceStyle } from '../../styles/surface.js';
-import {
-	autofilledDisabledInputSelector,
-	autofilledDisabledInputStyle,
-	autofilledInputSelector,
-	autofilledInputStyle,
-	filledInputSelectors,
-	filledInputStyle,
-	touchInputTypography,
-} from '../text-input/styles.css.js';
+import { COMBOBOX_ACTION_SIZE, COMBOBOX_CHECK_ICON_SIZE } from '../combobox-sizing.js';
 
 // The popover starts this far from its resting place, on the side facing the trigger. React Aria
 // publishes the resolved placement, so a flipped popover slides in from the flipped side.

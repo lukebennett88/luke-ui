@@ -1,6 +1,6 @@
-import { contextualIconSize, ICON_SIZES } from '../sizing/icon-sizing.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
+import { contextualIconSize, ICON_SIZES } from './icon-sizing.js';
 
 /** Shared size dimensions for Icon and LoadingSpinner (icon-aligned sizing). */
 export const iconSizeVariants = {

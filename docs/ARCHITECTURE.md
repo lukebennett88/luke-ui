@@ -89,12 +89,11 @@ Field owns common field anatomy, validation presentation, and necessity context.
 import those defining modules directly. Button and link variants may reuse button anatomy and
 recipes without treating every primitive as an independent vertical.
 
-`core/sizing/` currently mixes ownership. Combobox action/check sizes belong to Combobox, checkbox
-mark size belongs to Checkbox, button icon policy belongs to the button family, and spinner geometry
-belongs to LoadingSpinner. Icon sizes and viewBox geometry belong to Icon, including when a spinner
-uses them. The control-size context, shared size vocabulary, field icon mapping, minimum target, and
-choice-control dimensions have cross-control responsibilities. Retain those shared contracts and
-their consumers rather than splitting them solely to empty a directory.
+Combobox and Checkbox own their composed fields, primitive parts and family-specific sizes. The
+button family owns its icon policy, Icon owns icon dimensions and viewBox geometry, and
+LoadingSpinner owns its geometry while using Icon dimensions. `core/sizing/` retains the
+control-size context and vocabulary, field icon mapping, minimum target and cross-control choice
+dimensions.
 
 [Components](COMPONENTS.md) owns concrete file shapes and scaffolding commands.
 [Styling](STYLING.md) owns styling contracts. [Testing](TESTING.md) owns test placement and

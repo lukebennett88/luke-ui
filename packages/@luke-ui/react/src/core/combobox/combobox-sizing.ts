@@ -1,4 +1,4 @@
-import type { IconSize } from './icon-sizing.js';
+import type { IconSize } from '../icon/icon-sizing.js';
 
 /**
  * Size of the check icon on a selected Combobox item. Always 16px, even when the surrounding

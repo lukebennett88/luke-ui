@@ -12,12 +12,12 @@ import {
 import { LabelContext } from 'react-aria-components/Label';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
+import { FieldStateContext } from '../../primitives/field/label.js';
+import { fieldRecipe } from '../../primitives/field/recipe.css.js';
+import { rootIdProps } from '../../primitives/root-id.js';
 import { useControlSize } from '../../sizing/control-size-context.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { FieldStateContext } from '../field/label.js';
-import { fieldRecipe } from '../field/recipe.css.js';
-import { rootIdProps } from '../root-id.js';
 import type { CheckboxRecipeVariants } from './styles.css.js';
 import { checkboxRecipe } from './styles.css.js';
 

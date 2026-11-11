@@ -25,6 +25,12 @@ import { TextContext as RacTextContext } from 'react-aria-components/Text';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import { cx } from '../../../shared/utils/utils.js';
+import type { ComboboxItemProps } from '../../combobox/primitive/item.js';
+import { ComboboxItem } from '../../combobox/primitive/item.js';
+import {
+	comboboxRecipe,
+	popoverAvailableInlineSizeVar,
+} from '../../combobox/primitive/styles.css.js';
 import { Icon } from '../../icon/icon.js';
 import {
 	resolveOverlayContainerPadding,
@@ -35,9 +41,6 @@ import { useControlSize } from '../../sizing/control-size-context.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { buttonRecipeInternal, expandedButtonClassName } from '../button/recipe.css.js';
-import type { ComboboxItemProps } from '../combobox/item.js';
-import { ComboboxItem } from '../combobox/item.js';
-import { comboboxRecipe, popoverAvailableInlineSizeVar } from '../combobox/styles.css.js';
 import { FieldStateContext } from '../field/label.js';
 import { rootIdProps } from '../root-id.js';
 import type { SelectSize } from './styles.css.js';

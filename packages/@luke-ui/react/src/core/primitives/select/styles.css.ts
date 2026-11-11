@@ -1,7 +1,7 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { iconSizeVars } from '../../icon/icon-sizing.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
-import { iconSizeVars } from '../../sizing/icon-sizing.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import { descendantDisabledSelector } from '../../styles/input-states.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';

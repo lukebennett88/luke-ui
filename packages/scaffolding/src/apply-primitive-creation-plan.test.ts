@@ -35,13 +35,13 @@ describe('createPrimitive', () => {
 				'export {',
 				'\tStatusBadge,',
 				'\ttype StatusBadgeProps,',
-				"} from '../../core/primitives/status-badge/status-badge.js';",
+				"} from '../../core/status-badge/primitive/status-badge.js';",
 				'',
 			].join('\n'),
 		);
 		await expect(
 			readFile(
-				join(root, 'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.tsx'),
+				join(root, 'packages/@luke-ui/react/src/core/status-badge/primitive/status-badge.tsx'),
 				'utf8',
 			),
 		).resolves.toContain('export function StatusBadge');
@@ -49,7 +49,7 @@ describe('createPrimitive', () => {
 			readFile(
 				join(
 					root,
-					'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.browser.test.tsx',
+					'packages/@luke-ui/react/src/core/status-badge/primitive/status-badge.browser.test.tsx',
 				),
 				'utf8',
 			),
@@ -59,7 +59,7 @@ describe('createPrimitive', () => {
 				'// Style-producing modules in the shipped stylesheet.',
 				"import '../button/recipe.css.js';",
 				"import '../text/recipe.css.js';",
-				"import '../primitives/status-badge/recipe.css.js';",
+				"import '../status-badge/primitive/recipe.css.js';",
 				'',
 			].join('\n'),
 		);
@@ -89,7 +89,7 @@ describe('createPrimitive', () => {
 		).resolves.toContain('src="status-badge-primitive/basic"');
 
 		const primitiveSource = await readFile(
-			join(root, 'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.tsx'),
+			join(root, 'packages/@luke-ui/react/src/core/status-badge/primitive/status-badge.tsx'),
 			'utf8',
 		);
 		expect(primitiveSource).toBe(
@@ -134,7 +134,7 @@ describe('createPrimitive', () => {
 				"import '../button/recipe.css.js';",
 				"import '../primitives/field/recipe.css.js';",
 				"import '../text/recipe.css.js';",
-				"import '../primitives/input-addon/recipe.css.js';",
+				"import '../input-addon/primitive/recipe.css.js';",
 				'',
 			].join('\n'),
 		);
@@ -159,7 +159,7 @@ describe('createPrimitive', () => {
 				"import '../text/recipe.css.js';",
 				"import '../blockquote/recipe.css.js';",
 				"import '../button/recipe.css.js';",
-				"import '../primitives/input-addon/recipe.css.js';",
+				"import '../input-addon/primitive/recipe.css.js';",
 				'',
 			].join('\n'),
 		);
@@ -196,7 +196,7 @@ describe('createPrimitive', () => {
 		);
 		await expect(
 			readFile(
-				join(root, 'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.tsx'),
+				join(root, 'packages/@luke-ui/react/src/core/status-badge/primitive/status-badge.tsx'),
 				'utf8',
 			),
 		).rejects.toMatchObject({ code: 'ENOENT' });

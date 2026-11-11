@@ -1,11 +1,4 @@
 import type { JSX, ReactNode } from 'react';
-import type { CheckboxRootProps } from '../primitives/checkbox/checkbox.js';
-import {
-	CheckboxControl,
-	CheckboxIndicator,
-	CheckboxLabel,
-	CheckboxRoot,
-} from '../primitives/checkbox/checkbox.js';
 import { InlineField } from '../primitives/field/field.js';
 import { InlineLabelText } from '../primitives/field/inline-label-text.js';
 import {
@@ -15,6 +8,13 @@ import {
 import type { NecessityIndicator } from '../primitives/field/necessity-context.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
+import type { CheckboxRootProps } from './primitive/checkbox.js';
+import {
+	CheckboxControl,
+	CheckboxIndicator,
+	CheckboxLabel,
+	CheckboxRoot,
+} from './primitive/checkbox.js';
 
 type _CheckboxFieldOmit = DistributiveOmit<
 	CheckboxRootProps,

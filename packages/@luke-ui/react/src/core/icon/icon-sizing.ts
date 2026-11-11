@@ -5,16 +5,10 @@ export const ICON_VIEWBOX_SIZE = 24;
 const ICON_CONTENT_INSET = 2.5;
 
 /** Content area size (viewBox size minus insets). */
-const ICON_CONTENT_SIZE = ICON_VIEWBOX_SIZE - 2 * ICON_CONTENT_INSET;
+export const ICON_CONTENT_SIZE = ICON_VIEWBOX_SIZE - 2 * ICON_CONTENT_INSET;
 
 /** Default viewBox string for icon-aligned SVGs. */
 export const ICON_VIEWBOX = `0 0 ${ICON_VIEWBOX_SIZE} ${ICON_VIEWBOX_SIZE}`;
-
-/** Stroke width for loading spinner. */
-export const SPINNER_STROKE_WIDTH = 2;
-
-/** Radius inset by half stroke so the stroke's outer edge aligns with icon content (19px). */
-export const SPINNER_CIRCLE_RADIUS = (ICON_CONTENT_SIZE - SPINNER_STROKE_WIDTH) / 2;
 
 /** Inline and block sizes for icons and spinners. */
 export const ICON_SIZES = {
