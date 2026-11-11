@@ -1,7 +1,7 @@
 import { getThemeClassName } from '@luke-ui/react/theme';
 import { afterEach, beforeEach, vi } from 'vite-plus/test';
 import { cdp, page } from 'vite-plus/test/context';
-import { settingsApi } from '../api/settings-api.js';
+import { settingsApi } from '../settings/settings-api.js';
 import { referenceThemeInput } from '../theme/input.js';
 import { cleanupApps } from './render-app.js';
 

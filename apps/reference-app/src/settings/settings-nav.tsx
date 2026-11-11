@@ -5,7 +5,7 @@ import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { useState } from 'react';
 import { NavLink } from 'react-router';
-import * as styles from '../styles/settings.css.js';
+import * as styles from './settings.css.js';
 
 export const SETTINGS_NAV = [
 	{ icon: 'bookOpen', label: 'Preferences', to: '/settings/preferences' },

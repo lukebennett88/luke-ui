@@ -12,10 +12,10 @@ import { useId, useRef, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Modal, ModalOverlay } from 'react-aria-components/Modal';
-import { profileSchema } from '../api/schemas.js';
-import { settingsApi, settingsMutationErrorMessage } from '../api/settings-api.js';
-import { settingsQueryKey } from '../api/settings-query.js';
-import * as styles from '../styles/settings.css.js';
+import { settingsApi, settingsMutationErrorMessage } from '../settings-api.js';
+import { settingsQueryKey } from '../settings-query.js';
+import * as styles from '../settings.css.js';
+import { profileSchema } from './schema.js';
 
 const EMAIL_MUTATION_KEY = [...settingsQueryKey, 'profile-field', 'email'] as const;
 

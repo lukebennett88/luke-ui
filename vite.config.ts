@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite-plus';
+import { referenceAppLintOverrides } from './apps/reference-app/lint.config.js';
 
 export default defineConfig({
 	staged: {
@@ -211,6 +212,7 @@ export default defineConfig({
 					],
 				},
 			},
+			...referenceAppLintOverrides,
 			{
 				files: ['**/*.{test,browser.test}.{ts,tsx}'],
 				rules: {

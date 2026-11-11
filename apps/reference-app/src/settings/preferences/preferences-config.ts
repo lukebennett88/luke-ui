@@ -1,5 +1,5 @@
-import type { Preferences } from '../api/schemas.js';
-import { colorModeSchema, fontSizeSchema } from '../api/schemas.js';
+import type { Preferences } from './schema.js';
+import { colorModeSchema, fontSizeSchema } from './schema.js';
 
 type SelectOption = { label: string; value: string };
 
