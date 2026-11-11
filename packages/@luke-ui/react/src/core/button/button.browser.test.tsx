@@ -363,11 +363,13 @@ test('shows a delayed spinner for a slow Action', async () => {
 		</Button>,
 	);
 	const slow = locator.getByRole('button', { name: 'Slow' });
-	const spinner = watchSpinner(slow.element());
+	const slowButton = slow.element();
+	assert(slowButton instanceof HTMLButtonElement);
+	const spinner = watchSpinner(slowButton);
 
 	// A browser user click advances fake time before it returns.
 	act(() => {
-		slow.element().click();
+		slowButton.click();
 	});
 	expect(slow.element().getAttribute('data-pending')).toBe('true');
 	expect(spinner.appearedAt()).toBeUndefined();
