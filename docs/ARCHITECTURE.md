@@ -1,8 +1,7 @@
 # Architecture
 
 This guide owns functional ownership and dependency policy across the monorepo. Use it when placing
-code, choosing an import, or changing a package boundary. The ownership audit and migration history
-live in [#1053](https://github.com/lukebennett88/luke-ui/issues/1053).
+code, choosing an import, or changing a package boundary.
 
 ## Ownership and interfaces
 
@@ -97,7 +96,7 @@ dimensions.
 
 [Components](COMPONENTS.md) owns concrete file shapes and scaffolding commands.
 [Styling](STYLING.md) owns styling contracts. [Testing](TESTING.md) owns test placement and
-fixtures. Migrations must update creation plans and their tests with any source-layout change.
+fixtures. Update creation plans and their tests when changing source layouts.
 
 ## Docs ownership
 
@@ -129,10 +128,10 @@ loads `src/examples/*/*.tsx` through Vite globs. Remark validation, source inlin
 Knip entry configuration, and scaffolding also know that example root. Moving an MDX guide beside a
 TSX file under `src/` would not preserve discovery automatically.
 
-Keep those discovery roots for now. Guides and examples have the same docs owner despite separate
-physical roots. Physical colocation is not an actionable migration until the discovery and URL
-contract can be preserved through the existing pipeline. No generated library-source docs or new
-content-copying pipeline is needed to satisfy ownership.
+Keep both discovery roots. Guides and examples share a docs owner despite their separate physical
+roots. Moving them without preserving the existing discovery pipeline would change public URLs or
+break example loading, validation, and generation. Physical colocation is not required for shared
+ownership.
 
 ## Reference app ownership
 
@@ -153,10 +152,10 @@ consumer-level tests exercising persistence, validation, mutation ordering, and 
 ## Enforcement and reproduction
 
 Prefer package/module structure, then existing static analysis, then focused tests. Agent guidance
-covers ownership judgements that cannot be checked reliably. Add a restriction during a migration
-only for a specific independence or dependency-direction contract. Scope exceptions to the actual
-file/import. A new automated boundary must reject a forbidden fixture and run through the existing
-verification path. Do not ban a directory solely by name.
+covers ownership judgements that cannot be checked reliably. Add a restriction only for a specific
+independence or dependency-direction contract. Scope exceptions to the actual file/import. A new
+automated boundary must reject a forbidden fixture and run through the existing verification path.
+Do not ban a directory solely by name.
 
 From a worktree installed with `pnpm install`, use:
 
@@ -185,9 +184,12 @@ scanner or turn import counts into an architecture target.
 Oxlint and the React resolving test overlap on zone direction but do not enforce exactly the same
 cases. Keep both until a demonstrated consolidation preserves resolved-path coverage, static
 feedback, and rejection fixtures. Knip cycle detection and Unbarrelify enforce different invariants.
-The docs transitive value-import test is also distinct from zone lint. No additional architecture
-framework is needed. Future boundary restrictions belong in existing lint/check tasks, while
-behaviour remains covered by existing test tasks.
+The docs transitive value-import test is also distinct from zone lint. Scoped app lint prevents
+settings features from importing routes or sibling features, Playground and type-reference browser
+modules from importing generators, appearance from importing Playground, and browser search from
+importing the content source. No additional architecture framework is needed. Future boundary
+restrictions belong in existing lint/check tasks, while behaviour remains covered by existing test
+tasks.
 
 [Workflows](WORKFLOWS.md) owns Turbo ordering and verification commands. A green graph check proves
 its configured invariants, not that every module has the right functional owner.
