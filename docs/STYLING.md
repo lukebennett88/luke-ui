@@ -78,10 +78,11 @@ than CSS values. See
 overrides.
 
 Public tokens are theme-dependent semantic values and shared fixed measurements that applications
-demonstrably align with. Component-specific geometry is a private TypeScript constant in
-`core/sizing/`: the minimum target, the Combobox action size, and the icon sizes. `Box`'s
-token-backed values derive from `vars`, so removing a token removes its `Box` value. The decision
-record is [research/716-token-contract.md](../research/716-token-contract.md).
+demonstrably align with. Component-specific geometry is a private TypeScript constant owned by its
+component family, such as the Combobox action size and Icon sizes. Cross-control dimensions,
+including the minimum target, remain in `core/sizing/`. `Box`'s token-backed values derive from
+`vars`, so removing a token removes its `Box` value. The decision record is
+[research/716-token-contract.md](../research/716-token-contract.md).
 
 Author `shadow.*` and `controlFinish.*` per mode as final CSS values. Components pick semantic
 tokens. They do not branch on theme identity. A component must keep its essential state distinctions

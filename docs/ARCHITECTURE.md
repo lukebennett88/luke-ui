@@ -1,9 +1,8 @@
 # Architecture
 
 This guide owns functional ownership and dependency policy across the monorepo. Use it when placing
-code, choosing an import, or changing a package boundary. The migration backlog lives in
-[#1053](https://github.com/lukebennett88/luke-ui/issues/1053). Existing locations in the inventory
-below describe the baseline, not permission to spread an ownership gap.
+code, choosing an import, or changing a package boundary. The ownership audit and migration history
+live in [#1053](https://github.com/lukebennett88/luke-ui/issues/1053).
 
 ## Ownership and interfaces
 
@@ -84,10 +83,11 @@ Component and compiler logic must not migrate to `shared` to bypass the directio
 
 Within `core`, the component family owns its composed control, primitive parts, recipes, and local
 helpers. Separate public component and primitive subpaths do not require separate implementation
-owners. Current composed directories and `core/primitives/<name>/` can migrate together by family.
-Field owns common field anatomy, validation presentation, and necessity context. Composed fields may
-import those defining modules directly. Button and link variants may reuse button anatomy and
-recipes without treating every primitive as an independent vertical.
+owners. Combobox and Checkbox are colocated by family. Some existing primitives remain in
+`core/primitives/<name>/`. New primitive scaffolds use their family directory. Field owns common
+field anatomy, validation presentation, and necessity context. Composed fields may import those
+defining modules directly. Button and link variants may reuse button anatomy and recipes without
+treating every primitive as an independent vertical.
 
 Combobox and Checkbox own their composed fields, primitive parts and family-specific sizes. The
 button family owns its icon policy, Icon owns icon dimensions and viewBox geometry, and
@@ -101,21 +101,21 @@ fixtures. Migrations must update creation plans and their tests with any source-
 
 ## Docs ownership
 
-The app's target owners and their existing seams are:
+The app's owners and their dependency boundaries are:
 
 | Owner                    | Current responsibilities and intended boundary                                                                                                                                                                                                                                                                                                                     |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Playground               | `src/playground/` owns host UI, session, Monaco, skeleton, policy and generators. Routes retain registration and metadata. Host policy stays here, generic compilation/protocol stays in playground-core. Theme appearance is an explicit dependency on preferences.                                                                                               |
-| Type reference           | Prop analysis, type tokens/model, collection, enrichment, generated definition assets, loading state, tables, and popovers split between `lib/` and `components/`. Own browser and generator modules together, with separate runtime contracts. Preserve the client dependency test and asset/link validation.                                                     |
+| Type reference           | `src/type-reference/` owns tables, popovers, loading, contracts and generators. Browser modules consume runtime contracts and assets, not generator implementations. The client boundary test and asset/link validation protect this split.                                                                                                                        |
 | Site navigation          | `src/navigation/` owns the header, drawer, docs navigation/shell, site destinations, container queries, and sidebar preference persistence. Sidebar state belongs to navigation even though its pre-hydration setup shares the theme script entrypoint. Navigation consumes search and appearance controls.                                                        |
 | Appearance               | `src/appearance/` owns the theme preference model/store, theme controls, and pre-hydration theme contract. The shared `lib/theme-prefs-script.ts` entrypoint composes appearance and sidebar preferences before paint. Playground may consume this contract. Appearance must not depend on the playground. Keep the early inline script and browser store aligned. |
 | Search                   | Provider, dialog, result-text processing, and `/api/search` adapter. Server index creation consumes the content source. Browser UI must not import the server source loader.                                                                                                                                                                                       |
 | Content and examples     | MDX source/discovery, page metadata, Markdown/LLM/sitemap output, example rendering/source inlining and validation, code highlighting, guides, samples, and executable examples. Article presentation may consume type-reference and example UI. Source walkers and build plugins remain outside browser import graphs.                                            |
 | Reference and landing UI | Token reference views, icon gallery, component index, and home showcase own their presentation. Shared copy feedback, links, typography, table presentation, base-path and URL contracts may remain app infrastructure when their responsibility spans these surfaces.                                                                                             |
 
-The split between `components/` and `lib/` is an ownership gap where it separates one of these
-functions. It is not evidence of a forbidden dependency by itself. Shared reference-table styling,
-MDX typography, site URL resolution, and content discovery do not need separate copies per vertical.
+Shared reference-table styling, MDX typography, site URL resolution, copy feedback and content
+discovery remain app infrastructure. Search remains in its existing modules, with its browser UI
+separate from the server index and content source.
 
 ### Guides and executable examples
 
@@ -136,16 +136,15 @@ content-copying pipeline is needed to satisfy ownership.
 
 ## Reference app ownership
 
-Use `settings/` as the owner of the persisted settings aggregate, query contract, shared settings
-shell, navigation, and row presentation. Profile, preferences, and security belong under that owner,
-with their own UI, workflows, and feature-specific validation. The current `api/`, `components/`,
-`styles/`, `workflows/`, and substantial route implementations split these responsibilities.
+`src/settings/` owns the persisted settings aggregate, query contract, shared shell, navigation and
+row presentation. Profile, preferences and security live under that owner with their own UI,
+workflows and validation. Route registration and composition remain in `src/routes/`.
 
 Profile owns avatar upload state, profile fields, and email change. Preferences owns configuration,
 mutation state, and optimistic interface preview. Security owns clearing saved settings. Shared
 persistence and query invalidation remain settings infrastructure: they coordinate one stored
-aggregate and must not be copied into each child. Move the outlet contract out of routing so child
-screens do not import a route module for settings state.
+aggregate and must not be copied into each child. The settings outlet contract is defined in the
+settings owner, so child screens do not import a route module for settings state.
 
 The home summary and root provider may consume settings through defining contracts. Browser storage,
 router/query setup, global styling, and app theme input remain app infrastructure. Keep the existing
@@ -177,7 +176,7 @@ scanner or turn import counts into an architecture target.
 | Mechanism                                       | Invariant and limits                                                                                                                                                                                                                                                                                                           |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Knip (`knip.config.ts`)                         | Repository cycles, unused files/exports/dependencies and unresolved imports. Explicit entries cover routes, examples, MDX, generated-script inputs and path-loaded fixtures. It does not assign functional ownership or compile CSS. Stylesheet entries and the theme-build `publint` exception document known discovery gaps. |
-| Oxlint (`vite.config.ts`)                       | React zone direction and playground-core browser/Node restrictions, alongside ordinary code rules. Import patterns inspect specifier spelling. They do not prove transitive runtime isolation or resolve every differently spelled relative path.                                                                              |
+| Oxlint (`vite.config.ts`)                       | React zone direction, playground-core browser/Node restrictions, and scoped docs and reference-app boundaries, alongside ordinary code rules. Import patterns inspect specifier spelling. They do not prove transitive runtime isolation or resolve every differently spelled relative path.                                   |
 | Unbarrelify (`@luke-ui/react#check:barrels`)    | Internal React re-exports, exempting public `src/exports/`. It does not run across the apps. Existing app re-exports are not evidence that the whole repo has this check.                                                                                                                                                      |
 | React `module-boundaries.test.ts`               | Resolves relative static imports across the four zones, including type imports, with positive/negative scanner fixtures. Excludes tests, stories and fixtures. Does not follow aliases or dynamic imports. Runs in `test:code`, not root `check`.                                                                              |
 | Docs `type-definitions-client-boundary.test.ts` | Traverses static browser value imports from the API table and rejects generator dependencies. Type-only edges are deliberately erased. Does not cover every browser entry, dynamic import, or asset query. Runs in `test:code`.                                                                                                |
@@ -187,8 +186,8 @@ Oxlint and the React resolving test overlap on zone direction but do not enforce
 cases. Keep both until a demonstrated consolidation preserves resolved-path coverage, static
 feedback, and rejection fixtures. Knip cycle detection and Unbarrelify enforce different invariants.
 The docs transitive value-import test is also distinct from zone lint. No additional architecture
-framework is needed. Future per-vertical restrictions belong in existing lint/check tasks as each
-migration lands, while behaviour remains covered by existing test tasks.
+framework is needed. Future boundary restrictions belong in existing lint/check tasks, while
+behaviour remains covered by existing test tasks.
 
 [Workflows](WORKFLOWS.md) owns Turbo ordering and verification commands. A green graph check proves
 its configured invariants, not that every module has the right functional owner.
