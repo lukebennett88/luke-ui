@@ -8,8 +8,8 @@ description: >-
 
 # Write docs
 
-Consult [Architecture](../../../docs/ARCHITECTURE.md) for functional ownership and dependency
-boundaries.
+When the task concerns ownership or dependencies, consult
+[Architecture](../../../docs/ARCHITECTURE.md).
 
 [DOCUMENTATION.md](../../../docs/DOCUMENTATION.md) owns the documentation rules. This skill helps
 you apply them. When this skill and the guide disagree, the guide wins.

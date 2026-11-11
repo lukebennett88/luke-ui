@@ -7,8 +7,8 @@ description: >-
 
 # Work on an issue
 
-Consult [Architecture](../../../docs/ARCHITECTURE.md) for functional ownership and dependency
-boundaries.
+When the task concerns ownership or dependencies, consult
+[Architecture](../../../docs/ARCHITECTURE.md).
 
 Use `git` and `gh` when they are available. Equivalent tools and connectors are fine.
 

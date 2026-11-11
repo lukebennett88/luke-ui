@@ -8,8 +8,8 @@ description: >-
 
 # Write an issue
 
-Consult [Architecture](../../../docs/ARCHITECTURE.md) for functional ownership and dependency
-boundaries.
+When the task concerns ownership or dependencies, consult
+[Architecture](../../../docs/ARCHITECTURE.md).
 
 A good issue lets someone act on it without repeating your investigation or reopening decisions that
 are already made. It is not an implementation spec.
