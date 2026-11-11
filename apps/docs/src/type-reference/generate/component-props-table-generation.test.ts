@@ -3,10 +3,10 @@ import { fileURLToPath } from 'node:url';
 import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
 import { NATIVE_PROPS_FORWARDING_KEY } from '../component-prop-groups.js';
-import { createComponentPropsGenerator } from './create-component-props-generator.js';
 import type { EnrichedGeneratedDoc } from '../type-definition-model.js';
 import type { TypeTokens } from '../type-tokens.js';
 import { typeTokensToText } from '../type-tokens.js';
+import { createComponentPropsGenerator } from './create-component-props-generator.js';
 
 const repoRoot = fileURLToPath(new URL('../../../../..', import.meta.url));
 const generator = createGenerator({
