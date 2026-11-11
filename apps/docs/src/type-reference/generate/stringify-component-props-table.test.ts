@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { loader } from 'fumadocs-core/source';
 import { createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
-import { docs as docsCollection } from '../../.source/server.js';
+import { docs as docsCollection } from '../../../.source/server.js';
 import { NATIVE_PROPS_FORWARDING_KEY } from '../component-prop-groups.js';
 import type { TypeDefinitionsPayload } from '../type-definition-model.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
