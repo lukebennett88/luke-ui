@@ -212,6 +212,37 @@ export default defineConfig({
 					],
 				},
 			},
+			{
+				excludeFiles: [
+					'**/*.test.*',
+					'apps/docs/src/playground/generate/**',
+					'apps/docs/src/playground/docs-playground-specifiers.ts',
+				],
+				files: ['apps/docs/src/playground/**/*.{ts,tsx}'],
+				rules: {
+					'import/no-nodejs-modules': 'error',
+					'no-restricted-imports': [
+						'error',
+						{
+							patterns: [
+								{
+									group: [
+										'**/generate/**',
+										'**/docs-playground-specifiers*',
+										'@luke-ui/playground-core/generate',
+									],
+									message:
+										'Playground browser modules must not import generators or build-only host policy.',
+								},
+							],
+						},
+					],
+				},
+			},
+			{
+				files: ['apps/docs/src/playground/generate/**/*.ts'],
+				rules: { 'no-console': 'off' },
+			},
 			...referenceAppLintOverrides,
 			{
 				files: ['**/*.{test,browser.test}.{ts,tsx}'],

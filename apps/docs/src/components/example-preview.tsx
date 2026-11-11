@@ -5,8 +5,8 @@ import { useEffect, useId, useRef, useState } from 'react';
 import type { GroupImperativeHandle } from 'react-resizable-panels';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { StoryWrapper } from '../lib/story-wrapper.js';
+import { useIsDesktop } from '../playground/use-is-desktop.js';
 import * as styles from './example-preview.css.js';
-import { useIsDesktop } from './playground/use-is-desktop.js';
 
 export function ExamplePreview({
 	children,

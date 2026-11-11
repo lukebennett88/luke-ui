@@ -1,5 +1,5 @@
 import { breakpoints } from '@luke-ui/react/theme';
-import { createInlineSizeAtLeastHook } from '../../lib/docs-container-queries.js';
+import { createInlineSizeAtLeastHook } from '../lib/docs-container-queries.js';
 
 /** Same tablet threshold the playground panel CSS uses via `docsTabletMinInlineSize`. */
 export const PLAYGROUND_DESKTOP_BREAKPOINT = breakpoints.bp768;

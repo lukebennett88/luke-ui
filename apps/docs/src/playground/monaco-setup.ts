@@ -10,8 +10,8 @@ import * as monaco from 'monaco-editor';
 import { createHighlighterCore } from 'shiki/core';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import tsx from 'shiki/langs/tsx.mjs';
+import { SHIKI_THEME_REGISTRATIONS } from '../lib/shiki-theme.js';
 import { toHighContrastMonacoTheme } from './monaco-theme.js';
-import { SHIKI_THEME_REGISTRATIONS } from './shiki-theme.js';
 
 self.MonacoEnvironment = {
 	getWorker: (_workerId, label) => {

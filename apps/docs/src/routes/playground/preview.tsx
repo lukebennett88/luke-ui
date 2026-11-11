@@ -1,7 +1,7 @@
 import { ClientOnly, createFileRoute } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
 
-const PreviewRunner = lazy(() => import('../../components/playground/preview-runner'));
+const PreviewRunner = lazy(() => import('../../playground/preview-runner'));
 
 export const Route = createFileRoute('/playground/preview')({
 	component: PlaygroundPreview,

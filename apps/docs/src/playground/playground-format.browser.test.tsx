@@ -1,11 +1,11 @@
-import '../../styles/app.css';
+import '../styles/app.css';
 import { decodeCodeHash } from '@luke-ui/playground-core/hash';
 import { act, Suspense } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, assert, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { encodeDocsPlaygroundHash } from '../../lib/docs-playground-hash.js';
+import { encodeDocsPlaygroundHash } from './docs-playground-hash.js';
 
 const PlaygroundEditor = (await import('./editor.js')).default;
 

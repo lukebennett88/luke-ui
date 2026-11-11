@@ -1,4 +1,4 @@
-import { IconToggleButtonGroup } from './icon-toggle-button-group';
+import { IconToggleButtonGroup } from '../components/icon-toggle-button-group';
 
 const VIEWPORTS = [
 	{ icon: 'monitor', label: 'Desktop', value: '100%' },

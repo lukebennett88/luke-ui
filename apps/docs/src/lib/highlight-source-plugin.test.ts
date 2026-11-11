@@ -2,7 +2,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { describe, expect, test } from 'vite-plus/test';
-import { encodeDocsPlaygroundHash } from './docs-playground-hash.js';
+import { encodeDocsPlaygroundHash } from '../playground/docs-playground-hash.js';
 import { highlightSourcePlugin } from './highlight-source-plugin.js';
 import type { HighlightedSource } from './highlighted-source.js';
 

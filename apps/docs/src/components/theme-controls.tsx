@@ -9,10 +9,7 @@ import {
 	subscribeToThemePrefs,
 	writeThemePrefs,
 } from '../lib/theme-prefs.js';
-import {
-	IconToggleButtonGroup,
-	TextToggleButtonGroup,
-} from './playground/icon-toggle-button-group.js';
+import { IconToggleButtonGroup, TextToggleButtonGroup } from './icon-toggle-button-group.js';
 import * as styles from './theme-controls.css.js';
 
 /**

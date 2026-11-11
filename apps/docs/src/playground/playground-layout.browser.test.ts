@@ -1,4 +1,4 @@
-import '../../styles/app.css';
+import '../styles/app.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import * as styles from './playground.css.js';

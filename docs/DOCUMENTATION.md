@@ -394,8 +394,8 @@ A module imported by browser code must not import `node:fs` or `node:path`, incl
 `src/lib/`. These imports can leave an MDX body empty even when the page returns HTTP 200. Keep
 filesystem work in build-time or server modules.
 
-The playground host lives in `apps/docs/src/{routes,components}/playground/`. Compilation, hashing,
-formatting, and the iframe protocol live in the private `@luke-ui/playground-core` package.
+The playground host lives in `apps/docs/src/playground/`. Compilation, hashing, formatting, and the
+iframe protocol live in the private `@luke-ui/playground-core` package.
 
 The package README links to the hosted docs, which also serve agents:
 
@@ -555,9 +555,9 @@ for `@luke-ui/react`, a live preview iframe, and code shared through the `#code=
 (lz-string compressed, plus a `&shape=` param of per-line indent/length pairs so the pre-hydration
 loading skeleton can mirror the shared code before any JavaScript loads). `<ExampleBlock>` renders
 an "Open in playground" button when the example's imports are all in the docs playground specifier
-list in `apps/docs/src/lib/docs-playground-specifiers.ts`. The button opens that source pre-loaded.
-Examples that import a relative module, or anything else the preview cannot `require`, omit the
-button.
+list in `apps/docs/src/playground/docs-playground-specifiers.ts`. The button opens that source
+pre-loaded. Examples that import a relative module, or anything else the preview cannot `require`,
+omit the button.
 
 Each example shows a six-line source preview below its live preview. Longer snippets fade at the
 bottom and have an "Expand code" control to reveal the full source. Copy always copies the full
@@ -598,17 +598,17 @@ Docs supplies everything specific to Luke UI:
 - `docs-playground-specifiers.ts` names `@luke-ui/react`, reads its `exports`, and appends the
   third-party and `#docs` specifiers.
 - `docs-playground-hash.ts` adds the skeleton `shape` param from `playground-editor-shape.ts`.
-- `playground-format.ts` holds the Prettier style. `components/playground/monaco-format.ts`
-  registers it as Monaco's formatter and binds the save shortcut.
+- `playground-format.ts` holds the Prettier style. `playground/monaco-format.ts` registers it as
+  Monaco's formatter and binds the save shortcut.
 - `playground-appearance-message.ts` defines the `luke-ui-docs:appearance` theme message. The
-  playground route posts it on a theme change and from the session's `onPreviewReady` handler, so
-  the preview applies the theme before the replayed code renders.
-- `scripts/generate-playground-scope.ts` and `scripts/generate-playground-types.ts` pass Luke UI
-  paths, the type-package allowlist, and the output paths to `generate`.
+  playground page posts it on a theme change and from the session's `onPreviewReady` handler, so the
+  preview applies the theme before the replayed code renders.
+- `src/playground/generate/` modules pass Luke UI paths, the type-package allowlist, and the output
+  paths to `generate`.
 
-The docs route owns hash updates and debounce. It creates one page session when it mounts and calls
-`resync()` to cover a preview that announced ready before the message listener attached. The preview
-runner calls the compiler.
+The playground page owns hash updates and debounce. It creates one page session when it mounts and
+calls `resync()` to cover a preview that announced ready before the message listener attached. The
+preview runner calls the compiler.
 
 `@luke-ui/playground-core` builds like `@luke-ui/react`: `exports` points at `dist`, so run its
 `build` before consuming it and its `dev` script to watch it. Turbo orders this automatically for

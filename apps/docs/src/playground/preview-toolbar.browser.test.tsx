@@ -1,4 +1,4 @@
-import '../../styles/app.css';
+import '../styles/app.css';
 import '@luke-ui/theme-paper/stylesheet.css';
 import '@luke-ui/theme-tactile/stylesheet.css';
 import { act, useState } from 'react';
@@ -6,8 +6,8 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { StoryWrapper } from '../../lib/story-wrapper';
-import { DocsThemeRoot } from '../theme-controls';
+import { DocsThemeRoot } from '../components/theme-controls';
+import { StoryWrapper } from '../lib/story-wrapper';
 import { PreviewToolbar } from './preview-toolbar';
 import type { ViewportWidth } from './viewport-toggle';
 

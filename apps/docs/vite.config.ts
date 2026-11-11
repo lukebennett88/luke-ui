@@ -120,7 +120,7 @@ export default defineConfig(async ({ command }) => {
 				dts: false,
 				// Emitted as src/generated/editor-skeleton-script.iife.js — the `.iife`
 				// suffix is fixed by tsdown for this format.
-				entry: ['src/components/playground/editor-skeleton-script.ts'],
+				entry: ['src/playground/editor-skeleton-script.ts'],
 				format: 'iife' as const,
 				// The artifact is inlined into every playground HTML response, so
 				// strip the source's documentation comments.

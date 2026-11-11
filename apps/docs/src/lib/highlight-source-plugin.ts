@@ -6,8 +6,8 @@ import { createHighlighterCore } from 'shiki/core';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import tsx from 'shiki/langs/tsx.mjs';
 import type { Plugin } from 'vite-plus';
-import { encodeDocsPlaygroundHash } from './docs-playground-hash.js';
-import { docsPlaygroundSpecifiers } from './docs-playground-specifiers.js';
+import { encodeDocsPlaygroundHash } from '../playground/docs-playground-hash.js';
+import { docsPlaygroundSpecifiers } from '../playground/docs-playground-specifiers.js';
 import type { HighlightedSource } from './highlighted-source.js';
 import { SHIKI_THEME_REGISTRATIONS, SHIKI_THEMES } from './shiki-theme.js';
 

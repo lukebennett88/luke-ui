@@ -5,13 +5,13 @@ import type { OnMount } from '@monaco-editor/react';
 import { Editor } from '@monaco-editor/react';
 import type * as Monaco from 'monaco-editor';
 import { use, useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { ensurePlaygroundMonaco, loadPlaygroundTypes, monacoThemes } from '../../lib/monaco-setup';
 import { EditorSkeleton } from './editor-skeleton';
 import {
 	registerFormatDocumentKeybinding,
 	registerPlaygroundFormatter,
 	runFormatDocument,
 } from './monaco-format.js';
+import { ensurePlaygroundMonaco, loadPlaygroundTypes, monacoThemes } from './monaco-setup';
 import { PlaygroundPaneToolbar } from './pane-toolbar.js';
 
 type PlaygroundEditorProps = {
