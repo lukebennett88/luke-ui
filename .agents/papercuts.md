@@ -128,3 +128,26 @@ not help. Silence in this log is not evidence.
   style, forbids prose semicolons; the write-docs workflow requires consulting the guide.
 - Problem: Agent-authored prose breached the required writing rule before the check caught it.
   Correcting the prose does not establish that the workflow applies the rule.
+
+## Docs type tables keep a stale resolved type after a dependency's type changes
+
+- Seen: 2026-11-12 (#874). `TURBO_FORCE=true pnpm run test:docs` failed in
+  `stringify-component-props-table.test.ts` after `SprinklesPropsShape` in
+  `packages/@luke-ui/react/src/core/styles/utilities.css.ts` changed. Its expected `readonly`
+  modifiers were missing, from a type an earlier run had resolved. The same test passed after
+  `apps/docs/.source/fumadocs-typescript` and `.source/type-definitions` were deleted.
+- Where: `apps/docs/.source/fumadocs-typescript`, the filesystem generator cache the docs type
+  tables use. `TURBO_FORCE` does not clear it.
+- Problem: The cache does not follow changes to the types a documented component imports, so a
+  forced test run can compare against a resolved type from older source and report a failure the
+  code does not have.
+
+## Local visual comparison fails before rendering on the pinned image
+
+- Seen: 2026-11-12 (#874). `pnpm run test:visual` exited with `corepack: command not found` after
+  downloading the baseline. The pinned image reports Node v26.13.0 and has no `corepack`.
+- Where: `corepack enable` in the container script in `.github/scripts/visual-local.ts`, with the
+  image from `.github/visual-playwright/Dockerfile`. [VISUAL_TESTING.md](../docs/VISUAL_TESTING.md)
+  names `pnpm test:visual` as the authoritative local comparison.
+- Problem: The local comparison cannot run on the pinned image, so visual results come only from the
+  CI compare job.
