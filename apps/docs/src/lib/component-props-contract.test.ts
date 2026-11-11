@@ -395,7 +395,7 @@ function createFixture(input: {
 		join(reactPackageDir, 'package.json'),
 		'{"exports":{"./button":"./dist/button/index.js"}}',
 	);
-	writeFileSync(join(exportsDir, 'button.ts'), input.entry.replaceAll("'./", "'../core/button"));
+	writeFileSync(join(exportsDir, 'button.ts'), input.entry.replaceAll("'./", "'../core/button/"));
 
 	for (const [path, contents] of Object.entries(input.files)) {
 		const filePath = join(sourceDir, path);
