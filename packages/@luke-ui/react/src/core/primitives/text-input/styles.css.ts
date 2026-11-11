@@ -2,6 +2,8 @@ import type { StyleRule } from '@vanilla-extract/css';
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
+import { iconSizeVars } from '../../sizing/icon-sizing.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
@@ -221,7 +223,10 @@ export const textInputPartsRecipe = recipe({
 				control: {
 					blockSize: vars.controlSize['40'],
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
-					vars: { [textInputInlinePadding]: vars.space['12'] },
+					vars: {
+						[textInputInlinePadding]: vars.space['12'],
+						...iconSizeVars(FIELD_CONTROL_ICON_SIZE.medium),
+					},
 				},
 				prefix: {
 					lineHeight: FONT_METRIC_SCALE[16].lineHeight,
@@ -241,7 +246,10 @@ export const textInputPartsRecipe = recipe({
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
-					vars: { [textInputInlinePadding]: vars.space['8'] },
+					vars: {
+						[textInputInlinePadding]: vars.space['8'],
+						...iconSizeVars(FIELD_CONTROL_ICON_SIZE.small),
+					},
 				},
 				prefix: {
 					'@media': {

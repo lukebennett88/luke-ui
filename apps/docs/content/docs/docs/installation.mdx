@@ -61,10 +61,16 @@ Import each component from its package path.
 
 <SourceCodeBlock src="overview/welcome" />
 
-Components that render an icon, such as `Icon`, `IconButton`, `SelectField`, and `ComboboxField`,
-throw an error until `Provider` wraps them at the application root. Pass it the URL for
-`@luke-ui/react/spritesheet.svg`. The sample above renders without it. See
-[Iconography](/docs/iconography#set-up-the-spritesheet) for bundler setup.
+## Content Security Policy
+
+The stylesheet draws the built-in icons from `data:` image URLs. If your application sets a Content
+Security Policy, allow them in `img-src`:
+
+```text
+Content-Security-Policy: img-src 'self' data:
+```
+
+Without `data:`, the browser blocks the icons and they do not appear.
 
 ## Change the theme
 

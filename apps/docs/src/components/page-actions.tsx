@@ -1,13 +1,13 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
-import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@luke-ui/react/link';
 import { vars } from '@luke-ui/react/theme';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import type { ReactNode } from 'react';
 import { useCopyButton } from '../lib/use-copy-button.js';
+import { CodeBlockIcon } from './docs-icons.js';
 import { GithubMark } from './github-mark.js';
 import { ReactAriaMark } from './react-aria-mark.js';
 
@@ -54,31 +54,21 @@ export function PageActions({
 			) : null}
 			{showAllActions ? <CopyMarkdownButton markdownUrl={markdownUrl} /> : null}
 			{showAllActions ? (
-				<PageActionLink href={markdownUrl} iconName="codeBlock" label="View as Markdown" />
+				<PageActionLink href={markdownUrl} icon={<CodeBlockIcon />} label="View as Markdown" />
 			) : null}
 			<PageActionLink href={githubUrl} icon={<GithubMark />} label="Edit on GitHub" />
 		</Cluster>
 	);
 }
 
-function PageActionLink({
-	href,
-	icon,
-	iconName,
-	label,
-}: {
-	href: string;
-	icon?: ReactNode;
-	iconName?: IconName;
-	label: string;
-}) {
+function PageActionLink({ href, icon, label }: { href: string; icon: ReactNode; label: string }) {
 	return (
 		<Link
 			appearance="button"
 			href={href}
 			rel="noreferrer noopener"
 			size="small"
-			startContent={icon ?? (iconName ? <Icon name={iconName} /> : null)}
+			startContent={icon}
 			target="_blank"
 		>
 			{label}

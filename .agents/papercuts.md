@@ -78,13 +78,19 @@ not help. Silence in this log is not evidence.
   asks text Links to stay underlined", citing the issue to justify the rule. Seen again: 2026-10-28
   (#965). Review found new packed-consumer type-test comments describing renamed token paths. Seen
   again: 2026-11-05 (#1022). Self-review before commit found a new focus-ring visual test comment
-  opening "Tactile dark on `info.solid` is where #1022 found the ring matching the panel".
+  opening "Tactile dark on `info.solid` is where #1022 found the ring matching the panel". Seen
+  again: 2026-11-10 (#817). A draft Icon RTL test comment read "Neither the mask nor the old `<use>`
+  mirrors a glyph", describing the replaced implementation, until the author's pre-commit check.
+  Seen again: 2026-11-10 (PR #1049, #1051). Self-review found the public `Icon` JSDoc saying it
+  "needs no provider or extra asset", which describes the removed spritesheet design.
 - Where: `apps/docs/src/components/search.browser.test.tsx`,
   `packages/@luke-ui/react/src/core/link/link.browser.test.tsx`, and
   `packages/@luke-ui/react/src/core/packed-consumer/react-fixture.ts`, and
-  `packages/@luke-ui/react/src/core/styles/focus-ring-contrast.browser.test.tsx`.
-  `docs/DOCUMENTATION.md`, Comments and JSDoc, requires comments to explain code without its
-  history. The review-pr workflow requires consulting the applicable repository guides.
+  `packages/@luke-ui/react/src/core/styles/focus-ring-contrast.browser.test.tsx`, and
+  `packages/@luke-ui/react/src/core/icon/icon.browser.test.tsx`, and
+  `packages/@luke-ui/react/src/core/icon/icon.tsx`. `docs/DOCUMENTATION.md`, Comments and JSDoc,
+  requires comments to explain code without its history. The review-pr workflow requires consulting
+  the applicable repository guides.
 - Problem: Agent-authored comments narrated history despite the required guidance. review-pr's
   easy-to-miss list and work-on-issue's pre-commit step already name the rule, so pointing to it
   again is not a remedy. Correcting the comments does not establish that comment authoring applies
@@ -107,9 +113,11 @@ not help. Silence in this log is not evidence.
 ## Pure validation cases added to a browser test
 
 - Seen: 2026-10-28 (#962). Review moved invalid code-font input cases from
-  `font-family.browser.test.ts` to `validate-input.test.ts`.
-- Where: `packages/@luke-ui/react/src/theme/`. `docs/TESTING.md`, Test types, places pure logic in
-  Node unit tests; the write-tests workflow requires reading that guide.
+  `font-family.browser.test.ts` to `validate-input.test.ts`. Seen again: 2026-11-10 (PR #1049,
+  #1051). Self-review removed an `iconSizeVars` return-value check from `icon.browser.test.tsx`.
+- Where: `packages/@luke-ui/react/src/theme/` and `packages/@luke-ui/react/src/core/icon/`.
+  `docs/TESTING.md`, Test types, places pure logic in Node unit tests; the write-tests workflow
+  requires reading that guide.
 - Problem: Agent-authored pure validation cases initially used the browser suite despite the
   required test-type guidance. Correcting the tests does not establish that the workflow applies it.
 

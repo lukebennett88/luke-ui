@@ -2,7 +2,7 @@ import { createIcon } from '@luke-ui/react/icon';
 
 /**
  * GitHub's mark. Kept local to the docs app rather than added to
- * `@luke-ui/react`'s icon spritesheet, which ships to every consumer of the
+ * `@luke-ui/react`'s icon set, which ships to every consumer of the
  * library and holds generic UI glyphs rather than third-party trademarks.
  */
 export const GithubMark = createIcon({

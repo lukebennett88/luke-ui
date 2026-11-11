@@ -1,6 +1,5 @@
 import { keyframes } from '@vanilla-extract/css';
-import { iconSizeVariants } from '../icon/recipe.css.js';
-import { DEFAULT_ICON_SIZE } from '../sizing/icon-sizing.js';
+import { contextualIconBox, iconSizeVariants } from '../icon/recipe.css.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
@@ -38,9 +37,6 @@ export const rubberBandAnimationName = keyframes({
  * `hiddenChildren`, and `spinnerOverlay`.
  */
 const loadingSpinnerConfig = {
-	defaultVariants: {
-		size: DEFAULT_ICON_SIZE,
-	},
 	slots: {
 		childrenWrapper: {
 			alignItems: 'center',
@@ -72,6 +68,7 @@ const loadingSpinnerConfig = {
 			strokeDasharray: '100 100',
 		},
 		root: {
+			...contextualIconBox,
 			animationDuration: rotationDuration,
 			animationIterationCount: 'infinite',
 			animationName: spinAnimationName,

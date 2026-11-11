@@ -1,5 +1,7 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
+import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
+import { iconSizeVars } from '../../sizing/icon-sizing.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import { descendantDisabledSelector } from '../../styles/input-states.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
@@ -103,6 +105,7 @@ const selectConfig = {
 					blockSize: vars.controlSize['40'],
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
 					paddingInline: vars.space['12'],
+					vars: iconSizeVars(FIELD_CONTROL_ICON_SIZE.medium),
 				},
 			},
 			small: {
@@ -112,6 +115,7 @@ const selectConfig = {
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 					paddingInline: vars.space['8'],
+					vars: iconSizeVars(FIELD_CONTROL_ICON_SIZE.small),
 				},
 			},
 		},

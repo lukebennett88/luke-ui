@@ -3,7 +3,7 @@ import { createIcon } from '@luke-ui/react/icon';
 /**
  * A panel with a divider near its inline-start edge, for the docs sidebar toggle. Drawn on the Luke
  * UI icon grid (24 viewBox, 1.5 stroke, round caps and joins), but kept local to the docs app because
- * `@luke-ui/react`'s spritesheet holds glyphs its own components use.
+ * `@luke-ui/react`'s icon set holds glyphs its own components use.
  */
 export const SidebarIcon = createIcon({
 	path: (

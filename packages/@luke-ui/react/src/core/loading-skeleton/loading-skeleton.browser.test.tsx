@@ -1,4 +1,5 @@
 import { Button } from '@luke-ui/react/button';
+import { Icon } from '@luke-ui/react/icon';
 import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading-skeleton';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import type { CSSProperties } from 'react';
@@ -60,6 +61,19 @@ test('resolves local, provider, and default loading states', () => {
 	expect(local.closest('[aria-hidden]')).toBeNull();
 	expect(provider.closest('[aria-hidden]')).not.toBeNull();
 	expect(fallback.closest('[aria-hidden]')).not.toBeNull();
+});
+
+test('an Icon wrapped in a block skeleton is covered by a full placeholder, not its glyph shape', () => {
+	const { container } = render(
+		<LoadingSkeleton>
+			<Icon name="search" />
+		</LoadingSkeleton>,
+	);
+	const icon = container.querySelector('[data-icon]')!;
+
+	// A mask would clip the placeholder surface and its overlay to the glyph.
+	expect(getComputedStyle(icon).maskImage).toBe('none');
+	expect(getComputedStyle(icon, '::after').maskImage).toBe('none');
 });
 
 afterEach(async () => {

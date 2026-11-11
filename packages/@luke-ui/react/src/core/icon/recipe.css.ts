@@ -1,4 +1,4 @@
-import { DEFAULT_ICON_SIZE, ICON_SIZES } from '../sizing/icon-sizing.js';
+import { contextualIconSize, ICON_SIZES } from '../sizing/icon-sizing.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
@@ -22,13 +22,21 @@ export const iconSizeVariants = {
 	},
 } as const;
 
+/** Square box an icon or spinner takes when it has no explicit `size`. */
+export const contextualIconBox = {
+	blockSize: contextualIconSize,
+	inlineSize: contextualIconSize,
+} as const;
+
+/**
+ * Sizes an icon box. Without `size`, it takes the size its container sets, such as `xsmall` inside a
+ * Button, or `medium` outside any container. Apply it to a custom `<svg>` to size it like `Icon`.
+ */
 export const iconRecipe = recipe({
 	base: {
+		...contextualIconBox,
 		display: 'inline-flex',
 		flexShrink: 0,
-	},
-	defaultVariants: {
-		size: DEFAULT_ICON_SIZE,
 	},
 	variants: {
 		size: iconSizeVariants,

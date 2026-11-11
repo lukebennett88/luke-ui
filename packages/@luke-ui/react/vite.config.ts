@@ -13,7 +13,7 @@ const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
 );
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
-const assetExports = ['./stylesheet.css', './spritesheet.svg'];
+const assetExports = ['./stylesheet.css'];
 
 /**
  * Drops the `@layer name;` statement Vanilla Extract writes per layer and module. Each one creates
@@ -43,13 +43,10 @@ export default defineConfig({
 			'#recipe-engine': recipeEngineSource,
 		},
 		attw: {
-			// Exclude static asset exports. CSS/SVG files do not need type definitions.
+			// Exclude static asset exports. CSS files do not need type definitions.
 			excludeEntrypoints: assetExports,
 			profile: 'esm-only',
 		},
-		// `generate` writes these to `.generated/`, not `dist/`, so a cache replay of one Turbo task
-		// can't overwrite the other's outputs by restoring over a shared directory.
-		copy: [{ from: '.generated/spritesheet.svg', to: 'dist' }],
 		deps: {
 			// Vanilla Extract is build-time only. Keep any stray reference external rather than bundling
 			// it, so the packed-consumer harness reports it as an undeclared import.

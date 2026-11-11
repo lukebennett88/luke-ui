@@ -6,12 +6,10 @@ import { cx } from '../../shared/utils/utils.js';
 import type { IconLinkPresentationProps } from '../action-presentation.js';
 import { iconButtonRecipe, iconButtonReset } from '../icon-button/recipe.css.js';
 import { iconOnlyIconWrapper } from '../icon-button/styles.css.js';
-import { IconSizeProvider } from '../icon/icon-size-context.js';
 import type { IconName } from '../icon/icon.js';
 import { Icon } from '../icon/icon.js';
 import { linkCursor } from '../link/styles.css.js';
 import { buttonRecipeInternal } from '../primitives/button/recipe.css.js';
-import { BUTTON_ICON_SIZE } from '../sizing/button-sizing.js';
 import { useControlSize } from '../sizing/control-size-context.js';
 import type { RequiredAccessibleName } from '../types/accessible-name.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -54,26 +52,24 @@ export function IconLink(props: IconLinkProps): JSX.Element {
 	const size = useControlSize(sizeProp);
 
 	return (
-		<IconSizeProvider size={BUTTON_ICON_SIZE}>
-			<RacLink
-				{...restProps}
-				className={composeRenderProps(props.className, (className) => {
-					const base = buttonRecipeInternal({
-						appearance: 'button',
-						prominence,
-						size,
-						tone: 'neutral',
-					});
-					return iconButtonRecipe({
-						className: cx(iconButtonReset, base, linkCursor, className),
-						size,
-					});
-				})}
-			>
-				<span aria-hidden className={iconOnlyIconWrapper}>
-					{typeof icon === 'string' ? <Icon name={icon} /> : icon}
-				</span>
-			</RacLink>
-		</IconSizeProvider>
+		<RacLink
+			{...restProps}
+			className={composeRenderProps(props.className, (className) => {
+				const base = buttonRecipeInternal({
+					appearance: 'button',
+					prominence,
+					size,
+					tone: 'neutral',
+				});
+				return iconButtonRecipe({
+					className: cx(iconButtonReset, base, linkCursor, className),
+					size,
+				});
+			})}
+		>
+			<span aria-hidden className={iconOnlyIconWrapper}>
+				{typeof icon === 'string' ? <Icon name={icon} /> : icon}
+			</span>
+		</RacLink>
 	);
 }

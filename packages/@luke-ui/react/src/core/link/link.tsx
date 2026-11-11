@@ -5,8 +5,6 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { cx } from '../../shared/utils/utils.js';
 import type { LinkPresentationProps } from '../action-presentation.js';
 import { buttonContent, buttonLabel } from '../button/styles.css.js';
-import { IconSizeProvider } from '../icon/icon-size-context.js';
-import { BUTTON_ICON_SIZE } from '../sizing/button-sizing.js';
 import { useControlSize } from '../sizing/control-size-context.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -59,32 +57,30 @@ export function Link(props: LinkProps): JSX.Element {
 
 	if (appearance === 'button') {
 		return (
-			<IconSizeProvider size={BUTTON_ICON_SIZE}>
-				<RacLink
-					{...restProps}
-					className={composeRenderProps(props.className, (className) => {
-						return linkRecipe({
-							appearance: 'button',
-							className: cx(linkCursor, className),
-							inlineSize,
-							prominence,
-							size,
-						});
-					})}
-				>
-					{(renderProps) => (
-						<span className={buttonContent()}>
-							<span className={buttonLabel({ hasAdornments: true })}>
-								{startContent}
-								<Text elementType="span" lineClamp shouldInheritFont>
-									{typeof children === 'function' ? children(renderProps) : children}
-								</Text>
-								{endContent}
-							</span>
+			<RacLink
+				{...restProps}
+				className={composeRenderProps(props.className, (className) => {
+					return linkRecipe({
+						appearance: 'button',
+						className: cx(linkCursor, className),
+						inlineSize,
+						prominence,
+						size,
+					});
+				})}
+			>
+				{(renderProps) => (
+					<span className={buttonContent()}>
+						<span className={buttonLabel({ hasAdornments: true })}>
+							{startContent}
+							<Text elementType="span" lineClamp shouldInheritFont>
+								{typeof children === 'function' ? children(renderProps) : children}
+							</Text>
+							{endContent}
 						</span>
-					)}
-				</RacLink>
-			</IconSizeProvider>
+					</span>
+				)}
+			</RacLink>
 		);
 	}
 

@@ -38,7 +38,7 @@ function loadingSkeletonClassName(stylesheet: string): string {
 
 function iconBaseClassName(stylesheet: string): string {
 	const match = stylesheet.match(
-		/\.([a-z0-9]+) \{\n {4}display: inline-flex;\n {4}flex-shrink: 0;\n {2}\}/,
+		/\.([a-z0-9]+) \{\n(?: {4}(?:block|inline)-size: [^;]+;\n)* {4}display: inline-flex;\n {4}flex-shrink: 0;\n {2}\}/,
 	);
 	if (match == null || match[1] == null) {
 		throw new Error('Expected Icon base class in the built stylesheet.');

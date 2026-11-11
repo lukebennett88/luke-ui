@@ -5,7 +5,7 @@ export {
 	Icon,
 	type IconName,
 	type IconProps,
-	IconSizeProvider,
 	iconNames,
 } from '../core/icon/icon.js';
 export { type IconRecipeVariants, iconRecipe } from '../core/icon/recipe.css.js';
+export { iconSizeVars } from '../core/sizing/icon-sizing.js';

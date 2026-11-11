@@ -16,15 +16,18 @@ whatever the source module happens to export.
 Generated class names, Vanilla Extract types, and any DOM structure or state attribute that a guide
 does not document are private.
 
-| Subpath                             | Holds                                                                                          |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `@luke-ui/react/<component>`        | A high-level component, its props type, and the companion exports it needs                     |
-| `@luke-ui/react/primitives/<name>`  | Parts for composing a variant of a component                                                   |
-| `@luke-ui/react/theme`              | Runtime only: `breakpoints`, `getThemeClassName`, and `vars`                                   |
-| `@luke-ui/react/theme/compiler`     | Build time only: `defineTheme`, its input, font, and metrics types, and the three theme errors |
-| `@luke-ui/react/utils`              | Helpers for composing Luke UI output with other props                                          |
-| `@luke-ui/react/provider`           | The application `Provider`                                                                     |
-| `stylesheet.css`, `spritesheet.svg` | Static assets                                                                                  |
+The theme token custom properties and `--luke-icon-size` are public CSS. Other custom properties,
+including every `--luke-internal-*` name, are private. The `data-icon` attribute an `Icon` renders
+is private too. The stylesheet's built-in icons need `img-src data:` in a Content Security Policy.
+
+| Subpath                            | Holds                                                                                          |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `@luke-ui/react/<component>`       | A high-level component, its props type, and the companion exports it needs                     |
+| `@luke-ui/react/primitives/<name>` | Parts for composing a variant of a component                                                   |
+| `@luke-ui/react/theme`             | Runtime only: `breakpoints`, `getThemeClassName`, and `vars`                                   |
+| `@luke-ui/react/theme/compiler`    | Build time only: `defineTheme`, its input, font, and metrics types, and the three theme errors |
+| `@luke-ui/react/utils`             | Helpers for composing Luke UI output with other props                                          |
+| `stylesheet.css`                   | Static asset                                                                                   |
 
 There is no `@luke-ui/react/styles` subpath. Layout utilities stay package-internal. Consumers use
 `Box` and the other layout components.
@@ -158,7 +161,7 @@ a migration path.
 | Topic                                  | Owner                                                       |
 | -------------------------------------- | ----------------------------------------------------------- |
 | Form field names, parts, and semantics | [#714](https://github.com/lukebennett88/luke-ui/issues/714) |
-| Icons and `Provider`                   | [#712](https://github.com/lukebennett88/luke-ui/issues/712) |
+| Icons                                  | [#817](https://github.com/lukebennett88/luke-ui/issues/817) |
 | Theme authoring and theme packages     | [#715](https://github.com/lukebennett88/luke-ui/issues/715) |
 | Token taxonomy                         | [#716](https://github.com/lukebennett88/luke-ui/issues/716) |
 | Global stylesheet and cascade layers   | [#717](https://github.com/lukebennett88/luke-ui/issues/717) |

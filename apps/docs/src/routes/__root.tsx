@@ -1,5 +1,3 @@
-import { Provider } from '@luke-ui/react/provider';
-import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/theme-tactile';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
@@ -65,11 +63,9 @@ function RootDocument({ children }: { children: ReactNode }) {
 			</head>
 			<body className={docsRoot}>
 				<RootProvider search={{ enabled: false }} theme={{ enabled: false }}>
-					<Provider spritesheetHref={spriteSheetHref}>
-						<DocsThemeRoot>
-							<DocsSearchProvider>{children}</DocsSearchProvider>
-						</DocsThemeRoot>
-					</Provider>
+					<DocsThemeRoot>
+						<DocsSearchProvider>{children}</DocsSearchProvider>
+					</DocsThemeRoot>
 				</RootProvider>
 				<Scripts />
 			</body>

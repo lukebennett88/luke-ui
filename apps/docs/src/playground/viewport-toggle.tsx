@@ -1,8 +1,9 @@
+import { MobilePhoneIcon, MonitorIcon } from '../components/docs-icons.js';
 import { IconToggleButtonGroup } from '../components/icon-toggle-button-group';
 
 const VIEWPORTS = [
-	{ icon: 'monitor', label: 'Desktop', value: '100%' },
-	{ icon: 'mobilePhone', label: 'Mobile', value: '375px' },
+	{ icon: MonitorIcon, label: 'Desktop', value: '100%' },
+	{ icon: MobilePhoneIcon, label: 'Mobile', value: '375px' },
 ] as const;
 
 export type ViewportWidth = (typeof VIEWPORTS)[number]['value'];

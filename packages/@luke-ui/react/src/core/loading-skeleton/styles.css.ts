@@ -1,6 +1,7 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { createVar, fallbackVar, keyframes } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
+import { iconMask } from '../icon/styles.css.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 
 // Registered so the browser interpolates it smoothly (unregistered custom properties only snap at
@@ -159,6 +160,16 @@ globalStyleInLayer(
 	'recipes',
 	`${loadingSkeletonClassName}:not([data-skeleton-inline]) > * *:dir(rtl)`,
 	surfaceRtl,
+);
+
+// A masked `Icon` would clip the surface and the overlay below to its glyph, so a wrapped icon drops
+// its mask and reads as one placeholder block.
+globalStyleInLayer(
+	'recipes',
+	`${loadingSkeletonClassName}:not([data-skeleton-inline]) > ${iconMask}`,
+	{
+		maskImage: 'none !important',
+	},
 );
 
 // Overlay covers visuals forced styles can't reach (nested backgrounds, rounded corners).

@@ -23,7 +23,6 @@ packages/@luke-ui/react/.generated/
 packages/@luke-ui/react/docs/
 packages/@luke-ui/react/public/icons/
 packages/@luke-ui/react/screenshots/
-packages/@luke-ui/react/spritesheet.svg
 packages/@luke-ui/react/src/generated/color-tokens.generated.ts
 packages/@luke-ui/react/src/generated/icons.tsx
 public/dist/

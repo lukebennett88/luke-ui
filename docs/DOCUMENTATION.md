@@ -87,7 +87,7 @@ Keep the detail that changes the reader's code:
 
 Cut the detail that only explains the mechanism:
 
-- `Icon` renders an `<svg>` that references a symbol in the generated spritesheet.
+- `Icon` renders a `<span>` that the stylesheet paints with a CSS mask.
 - Which internal modules a component imports.
 
 ### Other technologies

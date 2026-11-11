@@ -3,8 +3,6 @@ import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button
 import { Button as RacButton } from 'react-aria-components/Button';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { ButtonPresentationProps } from '../../action-presentation.js';
-import { IconSizeProvider } from '../../icon/icon-size-context.js';
-import { BUTTON_ICON_SIZE } from '../../sizing/button-sizing.js';
 import { useControlSize } from '../../sizing/control-size-context.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../../types/documented-rac-props.js';
@@ -38,24 +36,22 @@ export function Button(props: ButtonProps): JSX.Element {
 	const size = useControlSize(sizeProp);
 
 	return (
-		<IconSizeProvider size={BUTTON_ICON_SIZE}>
-			<RacButton
-				{...restProps}
-				className={composeRenderProps(props.className, (className) => {
-					return buttonRecipeInternal({
-						appearance,
-						className,
-						inlineSize,
-						prominence,
-						size,
-						tone,
-					});
-				})}
-				isDisabled={isDisabled}
-				isPending={isPending}
-			>
-				{children}
-			</RacButton>
-		</IconSizeProvider>
+		<RacButton
+			{...restProps}
+			className={composeRenderProps(props.className, (className) => {
+				return buttonRecipeInternal({
+					appearance,
+					className,
+					inlineSize,
+					prominence,
+					size,
+					tone,
+				});
+			})}
+			isDisabled={isDisabled}
+			isPending={isPending}
+		>
+			{children}
+		</RacButton>
 	);
 }

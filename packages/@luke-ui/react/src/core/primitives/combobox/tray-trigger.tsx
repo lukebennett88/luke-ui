@@ -8,8 +8,6 @@ import { LabelContext } from 'react-aria-components/Label';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import { cx } from '../../../shared/utils/utils.js';
-import { IconSizeProvider } from '../../icon/icon-size-context.js';
-import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
@@ -70,35 +68,33 @@ export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Elemen
 
 	return (
 		<>
-			<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
-				<RacButton
-					{...buttonProps}
-					aria-expanded={state.isOpen}
-					aria-haspopup="dialog"
-					aria-label={ariaLabel}
-					aria-labelledby={ariaLabelledBy}
-					className={composeRenderProps(buttonProps.className, (className) => {
-						return comboboxRecipe({ size }).trayTrigger({ className });
-					})}
-					isDisabled={resolvedIsDisabled}
-					onPress={(event) => {
-						if (resolvedIsDisabled) return;
+			<RacButton
+				{...buttonProps}
+				aria-expanded={state.isOpen}
+				aria-haspopup="dialog"
+				aria-label={ariaLabel}
+				aria-labelledby={ariaLabelledBy}
+				className={composeRenderProps(buttonProps.className, (className) => {
+					return comboboxRecipe({ size }).trayTrigger({ className });
+				})}
+				isDisabled={resolvedIsDisabled}
+				onPress={(event) => {
+					if (resolvedIsDisabled) return;
 
-						state.open(null, 'manual');
-						buttonProps.onPress?.(event);
-					}}
-					ref={triggerRef}
-					// Opt out of the ComboBox button slot so this does not also toggle the popover.
-					slot={null}
-				>
-					<ComboBoxValue
-						className={comboboxRecipe().trayValue()}
-						id={valueId}
-						placeholder={placeholder}
-					/>
-					{children}
-				</RacButton>
-			</IconSizeProvider>
+					state.open(null, 'manual');
+					buttonProps.onPress?.(event);
+				}}
+				ref={triggerRef}
+				// Opt out of the ComboBox button slot so this does not also toggle the popover.
+				slot={null}
+			>
+				<ComboBoxValue
+					className={comboboxRecipe().trayValue()}
+					id={valueId}
+					placeholder={placeholder}
+				/>
+				{children}
+			</RacButton>
 			<ComboboxTraySubmission />
 			<ComboboxTrayValidation triggerRef={triggerRef} />
 		</>

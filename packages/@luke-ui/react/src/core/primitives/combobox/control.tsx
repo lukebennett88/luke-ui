@@ -3,8 +3,6 @@ import type { JSX, Ref } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
 import { Group as RacGroup } from 'react-aria-components/Group';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import { IconSizeProvider } from '../../icon/icon-size-context.js';
-import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { useComboboxInputGroupRef } from './input-group-context.js';
@@ -39,23 +37,21 @@ export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 	// (`primitives/text-input/recipe.css.ts`). Change the two together until they share one source.
 	// Same icon size as `TextInputControl`, including icons a caller puts in the control.
 	return (
-		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
-			<RacGroup
-				{...groupProps}
-				className={composeRenderProps(groupProps.className, (className) => {
-					return comboboxRecipe({ presentation, size }).control({ className });
-				})}
-				// The group inside a tray is not the input group: it sits in the tray's own portal. The
-				// merge runs inside the callback, because reading a ref object during render is not allowed.
-				ref={
-					presentation === 'tray'
-						? ref
-						: (element: HTMLDivElement | null) => {
-								const merged = mergeRefs(ref, inputGroupRef);
-								return typeof merged === 'function' ? merged(element) : undefined;
-							}
-				}
-			/>
-		</IconSizeProvider>
+		<RacGroup
+			{...groupProps}
+			className={composeRenderProps(groupProps.className, (className) => {
+				return comboboxRecipe({ presentation, size }).control({ className });
+			})}
+			// The group inside a tray is not the input group: it sits in the tray's own portal. The
+			// merge runs inside the callback, because reading a ref object during render is not allowed.
+			ref={
+				presentation === 'tray'
+					? ref
+					: (element: HTMLDivElement | null) => {
+							const merged = mergeRefs(ref, inputGroupRef);
+							return typeof merged === 'function' ? merged(element) : undefined;
+						}
+			}
+		/>
 	);
 }

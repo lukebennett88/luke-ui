@@ -22,6 +22,8 @@ import {
 } from '../test-utils/visual.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 
+const ICON_MASK_PATTERN = /^url\("data:image\/svg\+xml,/;
+
 type ThemeItem = {
 	id: string;
 	label: string;
@@ -479,6 +481,23 @@ test('an uncontrolled SelectField starts from defaultValue and reports Key | nul
 
 	expect(changes).toEqual(['dark']);
 	expect(trigger(/Theme/)).toHaveTextContent('Dark');
+});
+
+test('only the selected option shows the check, at the xsmall icon size', async () => {
+	render(
+		<SelectField defaultValue="light" items={themeItems} label="Theme">
+			{renderThemeItem}
+		</SelectField>,
+	);
+
+	await userEvent.click(trigger(/Theme/));
+	const check = (name: string) => {
+		return getComputedStyle(page.getByRole('option', { name }).element(), '::after');
+	};
+
+	expect(check('Light').maskImage).toMatch(ICON_MASK_PATTERN);
+	expect(check('Light').inlineSize).toBe('16px');
+	expect(check('Dark').content).toBe('none');
 });
 
 test('a controlled SelectField follows value and calls onChange without moving itself', async () => {

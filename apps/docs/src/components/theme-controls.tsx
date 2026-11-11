@@ -1,6 +1,6 @@
-import type { IconName } from '@luke-ui/react/icon';
+import type { CustomIconProps } from '@luke-ui/react/icon';
 import { cx } from '@luke-ui/react/utils';
-import type { ComponentProps, PropsWithChildren } from 'react';
+import type { ComponentProps, ComponentType, PropsWithChildren } from 'react';
 import { useSyncExternalStore } from 'react';
 import type { ColorModePreference, ThemeIdentity } from '../lib/theme-prefs.js';
 import {
@@ -9,6 +9,7 @@ import {
 	subscribeToThemePrefs,
 	writeThemePrefs,
 } from '../lib/theme-prefs.js';
+import { MoonIcon, SunIcon } from './docs-icons.js';
 import { IconToggleButtonGroup, TextToggleButtonGroup } from './icon-toggle-button-group.js';
 import * as styles from './theme-controls.css.js';
 
@@ -70,9 +71,13 @@ const THEME_IDENTITIES = [
 ] as const satisfies ReadonlyArray<{ label: string; value: ThemeIdentity }>;
 
 const COLOR_MODES = [
-	{ icon: 'sun', label: 'Light', value: 'light' },
-	{ icon: 'moon', label: 'Dark', value: 'dark' },
-] as const satisfies ReadonlyArray<{ icon: IconName; label: string; value: 'light' | 'dark' }>;
+	{ icon: SunIcon, label: 'Light', value: 'light' },
+	{ icon: MoonIcon, label: 'Dark', value: 'dark' },
+] as const satisfies ReadonlyArray<{
+	icon: ComponentType<CustomIconProps>;
+	label: string;
+	value: 'light' | 'dark';
+}>;
 
 function persistThemeIdentity(themeIdentity: ThemeIdentity) {
 	writeThemePrefs({ themeIdentity });

@@ -25,7 +25,6 @@ import { TextContext as RacTextContext } from 'react-aria-components/Text';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import { cx } from '../../../shared/utils/utils.js';
-import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import {
 	resolveOverlayContainerPadding,
@@ -33,7 +32,6 @@ import {
 } from '../../overlays/available-overlay-inline-size.js';
 import { copyScopeColorMode } from '../../overlays/scope-color-mode.js';
 import { useControlSize } from '../../sizing/control-size-context.js';
-import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { buttonRecipeInternal, expandedButtonClassName } from '../button/recipe.css.js';
@@ -257,7 +255,7 @@ export function SelectTrigger(props: SelectTriggerProps): JSX.Element {
 	));
 
 	return (
-		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
+		<>
 			<RacButton
 				{...buttonProps}
 				{...requiredWiring}
@@ -278,7 +276,7 @@ export function SelectTrigger(props: SelectTriggerProps): JSX.Element {
 					(required)
 				</span>
 			) : null}
-		</IconSizeProvider>
+		</>
 	);
 }
 

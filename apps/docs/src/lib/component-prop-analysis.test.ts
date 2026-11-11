@@ -339,12 +339,12 @@ const AUDITED_TYPES: ReadonlyArray<{
 		visible: ['elementType', 'isFocusable', 'ref', 'renderRoot'],
 	},
 	{
-		// Icon picks five SVG props by name and forwards nothing else, so its table is closed.
+		// Icon picks four span props by name and forwards nothing else, so its table is closed.
 		forwardsDomProps: false,
-		hidden: ['viewport', 'width'],
+		hidden: ['viewBox', 'width'],
 		name: 'IconProps',
 		path: 'packages/@luke-ui/react/src/core/icon/icon.tsx',
-		visible: ['aria-hidden', 'className', 'id', 'name', 'size', 'style', 'title', 'viewBox'],
+		visible: ['aria-hidden', 'className', 'id', 'name', 'size', 'style', 'title'],
 	},
 ];
 
