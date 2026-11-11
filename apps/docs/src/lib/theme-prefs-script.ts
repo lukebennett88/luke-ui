@@ -9,17 +9,17 @@
  */
 
 import {
-	applySidebarCollapsed,
-	parseIsSidebarCollapsed,
-	SIDEBAR_STORAGE_KEY,
-} from '../navigation/sidebar-prefs-shared.js';
-import {
 	applyThemePrefs,
 	COLOR_MODE_STORAGE_KEY,
 	parseThemePrefs,
 	THEME_IDENTITY_CLASS_NAMES,
 	THEME_IDENTITY_STORAGE_KEY,
-} from './theme-prefs-shared.js';
+} from '../appearance/theme-prefs-shared.js';
+import {
+	applySidebarCollapsed,
+	parseIsSidebarCollapsed,
+	SIDEBAR_STORAGE_KEY,
+} from '../navigation/sidebar-prefs-shared.js';
 
 let themeIdentity: string | null = null;
 let colorMode: string | null = null;

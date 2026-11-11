@@ -14,7 +14,7 @@ export default {
 				'scripts/**/*.ts',
 				// Compiled to an inline-able IIFE by the `pack` config in vite.config.ts.
 				'src/playground/editor-skeleton-script.ts',
-				'src/appearance/theme-prefs-script.ts',
+				'src/lib/theme-prefs-script.ts',
 				// Read by path, not imported: the prop analysis loads source files through ts-morph.
 				'src/type-reference/generate/__fixtures__/**/*.ts',
 				'src/routes/**/*.ts',
