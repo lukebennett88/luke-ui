@@ -31,10 +31,11 @@ substantial state transitions, UI, and workflows in the responsible vertical. Ro
 wire providers and app-wide services. It must not become the owner of a feature merely because the
 feature is mounted there.
 
-A vertical may contain browser, server, and generator modules. Colocation does not permit browser
-value imports of build-only modules, including transitive imports. Keep runtime-neutral contracts
-separate from filesystem access, TypeScript analysis, and asset generation. Type-only dependencies
-are allowed when erased from runtime output. Preserve lazy loading and pre-hydration entrypoints.
+A vertical may contain browser, server, and generator modules. Browser value imports must not reach
+build-only modules, including transitively, because filesystem access and generation tools cannot
+run in the browser. Keep runtime-neutral contracts separate from those implementations. Type-only
+dependencies are allowed when erased from runtime output. Preserve lazy loading and pre-hydration
+entrypoints.
 
 ## Lint configuration ownership
 
@@ -48,9 +49,9 @@ the root configuration.
 
 ## Workspace responsibilities
 
-Arrows in this inventory mean permitted dependency direction, not mandatory imports. Manifests,
-public export maps, and the source owners below are the reproducible inventory, rather than a second
-hand-maintained list of every component.
+The dependencies below describe permitted directions, not mandatory imports. Manifests, public
+export maps, and source owners are the reproducible inventory, rather than a second hand-maintained
+list of every component.
 
 | Workspace                                           | Owner and dependency direction                                                                                                                                                                                                                  |
 | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -80,19 +81,17 @@ allowed. Same-zone imports are allowed. `shared` has no upward dependencies. `co
 utilities, types, provider infrastructure, and test utilities have real cross-cutting contracts.
 Component and compiler logic must not migrate to `shared` to bypass the direction.
 
-Within `core`, the component family owns its composed control, primitive parts, recipes, and local
-helpers. Separate public component and primitive subpaths do not require separate implementation
-owners. Combobox and Checkbox are colocated by family. Some existing primitives remain in
-`core/primitives/<name>/`. New primitive scaffolds use their family directory. Field owns common
-field anatomy, validation presentation, and necessity context. Composed fields may import those
-defining modules directly. Button and link variants may reuse button anatomy and recipes without
-treating every primitive as an independent vertical.
+Within `core`, organise implementation by functional ownership. A family owns its composed
+components, primitive parts, recipes, styles, tests and family-specific utilities, including sizing.
+Public component and primitive entrypoints are independent of implementation layout. Related
+families may import defining modules directly when ownership and dependency direction justify it. Do
+not add re-export layers just to hide these dependencies. Family directories need not have an
+identical shape, and existing primitives do not need to move solely for uniformity.
 
-Combobox and Checkbox own their composed fields, primitive parts and family-specific sizes. The
-button family owns its icon policy, Icon owns icon dimensions and viewBox geometry, and
-LoadingSpinner owns its geometry while using Icon dimensions. `core/sizing/` retains the
-control-size context and vocabulary, field icon mapping, minimum target and cross-control choice
-dimensions.
+Keep genuinely cross-cutting utilities with their shared owner. For example, `core/sizing/` holds
+control-size vocabulary and dimensions used across controls, while Field owns common field anatomy
+and validation presentation. A family-specific utility stays with its family even when another
+family consumes it.
 
 [Components](COMPONENTS.md) owns concrete file shapes and scaffolding commands.
 [Styling](STYLING.md) owns styling contracts. [Testing](TESTING.md) owns test placement and
@@ -102,19 +101,21 @@ fixtures. Update creation plans and their tests when changing source layouts.
 
 The app's owners and their dependency boundaries are:
 
-| Owner                    | Current responsibilities and intended boundary                                                                                                                                                                                                                                                                                                                     |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Playground               | `src/playground/` owns host UI, session, Monaco, skeleton, policy and generators. Routes retain registration and metadata. Host policy stays here, generic compilation/protocol stays in playground-core. Theme appearance is an explicit dependency on preferences.                                                                                               |
-| Type reference           | `src/type-reference/` owns tables, popovers, loading, contracts and generators. Browser modules consume runtime contracts and assets, not generator implementations. The client boundary test and asset/link validation protect this split.                                                                                                                        |
-| Site navigation          | `src/navigation/` owns the header, drawer, docs navigation/shell, site destinations, container queries, and sidebar preference persistence. Sidebar state belongs to navigation even though its pre-hydration setup shares the theme script entrypoint. Navigation consumes search and appearance controls.                                                        |
-| Appearance               | `src/appearance/` owns the theme preference model/store, theme controls, and pre-hydration theme contract. The shared `lib/theme-prefs-script.ts` entrypoint composes appearance and sidebar preferences before paint. Playground may consume this contract. Appearance must not depend on the playground. Keep the early inline script and browser store aligned. |
-| Search                   | Provider, dialog, result-text processing, and `/api/search` adapter. Server index creation consumes the content source. Browser UI must not import the server source loader.                                                                                                                                                                                       |
-| Content and examples     | MDX source/discovery, page metadata, Markdown/LLM/sitemap output, example rendering/source inlining and validation, code highlighting, guides, samples, and executable examples. Article presentation may consume type-reference and example UI. Source walkers and build plugins remain outside browser import graphs.                                            |
-| Reference and landing UI | Token reference views, icon gallery, component index, and home showcase own their presentation. Shared copy feedback, links, typography, table presentation, base-path and URL contracts may remain app infrastructure when their responsibility spans these surfaces.                                                                                             |
+| Owner                    | Current responsibilities and intended boundary                                                                                                                                                                                                                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Playground               | `src/playground/` owns host UI, session, Monaco, skeleton, policy and generators. Routes retain registration and metadata. Host policy stays here, generic compilation/protocol stays in playground-core. Theme appearance is an explicit dependency on preferences.                                                    |
+| Type reference           | `src/type-reference/` owns tables, popovers, loading, contracts and generators. Browser modules consume runtime contracts and assets, not generator implementations. The client boundary test and asset/link validation protect this split.                                                                             |
+| Site navigation          | `src/navigation/` owns the header, drawer, docs navigation/shell, site destinations, container queries, and sidebar preference persistence. Sidebar state belongs to navigation even though its pre-hydration setup shares the theme script entrypoint. Navigation consumes search and appearance controls.             |
+| Appearance               | `src/appearance/` owns the theme preference model/store, theme controls, and pre-hydration theme contract. Playground may consume this contract. Appearance must not depend on the playground. Keep the early inline script and browser store aligned.                                                                  |
+| Search                   | Provider, dialog, result-text processing, and `/api/search` adapter. Server index creation consumes the content source. Browser UI must not import the server source loader.                                                                                                                                            |
+| Content and examples     | MDX source/discovery, page metadata, Markdown/LLM/sitemap output, example rendering/source inlining and validation, code highlighting, guides, samples, and executable examples. Article presentation may consume type-reference and example UI. Source walkers and build plugins remain outside browser import graphs. |
+| Reference and landing UI | Token reference views, icon gallery, component index, and home showcase own their presentation. Shared copy feedback, links, typography, table presentation, base-path and URL contracts may remain app infrastructure when their responsibility spans these surfaces.                                                  |
 
 Shared reference-table styling, MDX typography, site URL resolution, copy feedback and content
-discovery remain app infrastructure. Search remains in its existing modules, with its browser UI
-separate from the server index and content source.
+discovery remain app infrastructure because their responsibilities span multiple surfaces. The
+`src/lib/theme-prefs-script.ts` pre-hydration entrypoint composes appearance and sidebar preferences
+outside both owners so neither independent preference contract depends on the other. It runs inline
+before first paint and must stay aligned with the browser stores.
 
 ### Guides and executable examples
 
