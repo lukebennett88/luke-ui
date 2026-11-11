@@ -1,7 +1,7 @@
 import { vars } from '@luke-ui/react/theme';
 import { globalStyle, style } from '@vanilla-extract/css';
 import { NARROW } from '../components/reference-table.css.js';
-import { SITE_HEADER_BLOCK_SIZE } from '../components/site-header-size.js';
+import { SITE_HEADER_BLOCK_SIZE } from '../navigation/site-header-size.js';
 
 // Table styling shared with the token tables lives in `reference-table.css.ts`. These rules are
 // specific to the props tables, and each names the design system capability that is missing.

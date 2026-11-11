@@ -7,7 +7,7 @@ import type { Root } from 'fumadocs-core/page-tree';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { AnchorProvider } from 'fumadocs-core/toc';
 import type { ReactNode } from 'react';
-import { docsContentPaddingBlockStart } from '../docs-nav.js';
+import { docsContentPaddingBlockStart } from '../../navigation/docs-nav.js';
 import { ARTICLE_MAX_INLINE_SIZE } from './article-size.js';
 import * as styles from './docs-article.css.js';
 import { DocsPager } from './docs-pager.js';

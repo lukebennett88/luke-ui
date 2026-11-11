@@ -10,13 +10,10 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import themePrefsScript from '../generated/theme-prefs-script.iife.js?raw';
-import { SIDEBAR_STORAGE_KEY } from '../lib/sidebar-prefs-shared.js';
-import {
-	COLOR_MODE_STORAGE_KEY,
-	subscribeToThemePrefs,
-	THEME_IDENTITY_STORAGE_KEY,
-} from '../lib/theme-prefs.js';
-import { DocsThemeRoot, ThemeControls } from './theme-controls';
+import { SIDEBAR_STORAGE_KEY } from '../navigation/sidebar-prefs-shared.js';
+import { DocsThemeRoot, ThemeControls } from './theme-controls.js';
+import { COLOR_MODE_STORAGE_KEY, THEME_IDENTITY_STORAGE_KEY } from './theme-prefs-shared.js';
+import { subscribeToThemePrefs } from './theme-prefs.js';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;

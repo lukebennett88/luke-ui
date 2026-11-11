@@ -13,7 +13,7 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { DocsThemeRoot } from '../theme-controls.js';
+import { DocsThemeRoot } from '../../appearance/theme-controls.js';
 import { createMdxHeading, MdxLink, MdxTable } from './mdx-elements.js';
 
 let container: HTMLElement | undefined;

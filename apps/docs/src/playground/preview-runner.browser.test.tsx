@@ -8,9 +8,9 @@ import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
-import { DocsThemeRoot } from '../components/theme-controls.js';
+import { DocsThemeRoot } from '../appearance/theme-controls.js';
+import { THEME_IDENTITY_STORAGE_KEY } from '../appearance/theme-prefs-shared.js';
 import toneSource from '../examples/button/tones.tsx?raw';
-import { THEME_IDENTITY_STORAGE_KEY } from '../lib/theme-prefs.js';
 import PreviewRunner from './preview-runner.js';
 
 let container: HTMLElement | undefined;

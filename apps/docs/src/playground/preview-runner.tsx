@@ -6,9 +6,9 @@ import { Stack } from '@luke-ui/react/stack';
 import type { ComponentType } from 'react';
 import { useEffect, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import { previewThemePrefs } from '../appearance/theme-prefs.js';
 import { playgroundScope } from '../generated/playground-scope.generated';
 import { StoryWrapper } from '../lib/story-wrapper';
-import { previewThemePrefs } from '../lib/theme-prefs.js';
 import { isPlaygroundAppearanceMessage } from './playground-appearance-message.js';
 import * as styles from './playground.css.js';
 

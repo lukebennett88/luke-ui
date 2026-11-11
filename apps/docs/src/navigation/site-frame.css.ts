@@ -1,6 +1,6 @@
 import { vars } from '@luke-ui/react/theme';
 import { style } from '@vanilla-extract/css';
-import { atLeastSiteHeaderDesktop } from '../lib/docs-container-queries.js';
+import { atLeastSiteHeaderDesktop } from './docs-container-queries.js';
 import { siteGutter } from './site-header.css.js';
 
 const SITE_FRAME_CONTAINER = 'site-frame';

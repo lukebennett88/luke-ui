@@ -1,7 +1,7 @@
 import { vars } from '@luke-ui/react/theme';
 import { globalStyle, style } from '@vanilla-extract/css';
-import { docsTocMinInlineSize } from '../../lib/docs-container-queries.js';
-import { SITE_HEADER_BLOCK_SIZE } from '../site-header-size.js';
+import { docsTocMinInlineSize } from '../../navigation/docs-container-queries.js';
+import { SITE_HEADER_BLOCK_SIZE } from '../../navigation/site-header-size.js';
 import { TOC_BAR_BLOCK_SIZE } from './docs-article.css.js';
 
 // WCAG 2.5.8 minimum target size: 24 CSS pixels, whatever the root font size.

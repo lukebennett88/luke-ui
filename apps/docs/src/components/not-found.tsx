@@ -4,8 +4,8 @@ import { Container } from '@luke-ui/react/container';
 import { Heading } from '@luke-ui/react/heading';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
+import { SiteFrame } from '../navigation/site-frame.js';
 import { DocsLink } from './docs-link.js';
-import { SiteFrame } from './site-frame.js';
 
 /** 404 page shown for any unmatched route, in the home page's frame and spacing. */
 export function NotFound() {

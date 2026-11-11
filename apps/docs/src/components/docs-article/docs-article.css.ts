@@ -5,8 +5,8 @@ import {
 	docsSidebarMinInlineSize,
 	docsTabletMinInlineSize,
 	docsTocMinInlineSize,
-} from '../../lib/docs-container-queries.js';
-import { SITE_HEADER_BLOCK_SIZE } from '../site-header-size.js';
+} from '../../navigation/docs-container-queries.js';
+import { SITE_HEADER_BLOCK_SIZE } from '../../navigation/site-header-size.js';
 
 /** Block size of the sticky table of contents bar, which scroll margins must clear. */
 export const TOC_BAR_BLOCK_SIZE = '3rem';

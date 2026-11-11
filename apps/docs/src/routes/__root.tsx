@@ -2,8 +2,8 @@ import { themeClassName as tactileThemeClassName } from '@luke-ui/theme-tactile'
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 import type { ReactNode } from 'react';
+import { DocsThemeRoot } from '../appearance/theme-controls.js';
 import { DocsSearchProvider } from '../components/search.js';
-import { DocsThemeRoot } from '../components/theme-controls';
 import themePrefsScript from '../generated/theme-prefs-script.iife.js?raw';
 import { withBasePath } from '../lib/base-path.js';
 import appCss from '../styles/app.css?url';

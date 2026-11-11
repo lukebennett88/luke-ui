@@ -501,13 +501,13 @@ page.
 
 ## Site chrome
 
-Every surface shares one header, `SiteHeader` in `apps/docs/src/components/site-header.tsx`. It is
+Every surface shares one header, `SiteHeader` in `apps/docs/src/navigation/site-header.tsx`. It is
 one `3.5rem` row (`SITE_HEADER_BLOCK_SIZE`). On desktop it holds the wordmark, the sidebar toggle
 when the page has a docs sidebar, and the Docs, Components and Playground links, then search, Theme
 and GitHub. The compact row holds the wordmark, search, Theme and Menu. The wordmark links to `/`,
 the landing page. Docs opens `/docs/installation`. Components opens `/components`. The destination
-list and its active-route matching live in `apps/docs/src/lib/site-destinations.ts`. Appearance
-controls belong to the header on every surface, not to the docs sidebar footer.
+list and its active-route matching live in `apps/docs/src/navigation/site-destinations.ts`.
+Appearance controls belong to the header on every surface, not to the docs sidebar footer.
 
 Pass `tree` to `SiteHeader` on a page with a sidebar. Home, the playground and the 404 page pass
 nothing. Menu opens `SiteDrawer` (`site-drawer.tsx`), a React Aria `Modal` that slides in from the
@@ -532,8 +532,8 @@ block, MDX body, previous and next links, and the table of contents. The playgro
 render the header directly.
 
 The header and the docs shell are named containers, built from
-`apps/docs/src/lib/docs-container-queries.ts`. The header (`site-header`) switches between the
-compact and desktop rows at `SITE_HEADER_DESKTOP_MIN`, which sits just above the desktop row's
+`apps/docs/src/navigation/docs-container-queries.ts`. The header (`site-header`) switches between
+the compact and desktop rows at `SITE_HEADER_DESKTOP_MIN`, which sits just above the desktop row's
 measured width. `docs-shell.browser.test.tsx` fails if it drops below that width. The shell
 (`docs-shell`) shows the sidebar from `DOCS_SIDEBAR_MIN`. Both are in `rem`, so a larger text size
 switches layouts sooner. Between the two, on a docs page, the header keeps its links and Menu opens

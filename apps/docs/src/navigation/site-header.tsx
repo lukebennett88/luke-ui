@@ -8,22 +8,22 @@ import type { Root } from 'fumadocs-core/page-tree';
 import { useSyncExternalStore } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Popover } from 'react-aria-components/Popover';
-import { SITE_HEADER_ID } from '../lib/docs-container-queries.js';
+import { ThemeControls } from '../appearance/theme-controls.js';
+import { DocsLink } from '../components/docs-link.js';
+import { GithubMark } from '../components/github-mark.js';
+import { DocsSearchTrigger } from '../components/search.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
+import { SITE_HEADER_ID } from './docs-container-queries.js';
+import { SidebarIcon } from './sidebar-icon.js';
 import {
 	getIsSidebarCollapsedSnapshot,
 	getServerIsSidebarCollapsedSnapshot,
 	subscribeToSidebarPref,
 	writeIsSidebarCollapsed,
-} from '../lib/sidebar-prefs.js';
-import { getActiveSiteDestination, siteDestinations } from '../lib/site-destinations.js';
-import { DocsLink } from './docs-link.js';
-import { GithubMark } from './github-mark.js';
-import { DocsSearchTrigger } from './search.js';
-import { SidebarIcon } from './sidebar-icon.js';
+} from './sidebar-prefs.js';
+import { getActiveSiteDestination, siteDestinations } from './site-destinations.js';
 import { SiteDrawer } from './site-drawer.js';
 import * as styles from './site-header.css.js';
-import { ThemeControls } from './theme-controls.js';
 
 /** The `id` of the docs sidebar, which the sidebar toggle controls. */
 export const DOCS_SIDEBAR_ID = 'docs-sidebar';

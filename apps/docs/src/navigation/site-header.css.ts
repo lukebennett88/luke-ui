@@ -1,13 +1,13 @@
 import { vars } from '@luke-ui/react/theme';
 import { globalStyle, keyframes, style } from '@vanilla-extract/css';
+import { overlayMotion } from '../lib/overlay-motion.js';
+import { ROUTE_VIEW_TRANSITION_TYPE } from '../lib/route-view-transition.js';
 import {
 	docsSidebarMinInlineSize,
 	SITE_HEADER_CONTAINER,
 	siteHeaderDesktopMinInlineSize,
-} from '../lib/docs-container-queries.js';
-import { overlayMotion } from '../lib/overlay-motion.js';
-import { ROUTE_VIEW_TRANSITION_TYPE } from '../lib/route-view-transition.js';
-import { siteDestinations } from '../lib/site-destinations.js';
+} from './docs-container-queries.js';
+import { siteDestinations } from './site-destinations.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 
 /** The header row's inline padding. Panels below it align to the same gutter. */
