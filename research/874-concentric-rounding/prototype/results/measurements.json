@@ -1,0 +1,180 @@
+[
+	{
+		"css": {
+			"addedGzip": 913,
+			"addedRaw": 7792
+		},
+		"name": "Proposed: gated, 4 levels",
+		"perf": {
+			"chromium": {
+				"baseline": {
+					"inlineProperties": 20000,
+					"mountMs": 24.599999994039536,
+					"restyleMs": 5.399999991059303
+				},
+				"context": {
+					"inlineProperties": 20000,
+					"mountMs": 27.799999997019768,
+					"restyleMs": 5.4000000059604645
+				},
+				"unused": {
+					"inlineProperties": 20000,
+					"mountMs": 29.700000002980232,
+					"restyleMs": 9.099999994039536
+				},
+				"used": {
+					"inlineProperties": 14000,
+					"mountMs": 30.599999994039536,
+					"restyleMs": 13
+				}
+			},
+			"firefox": {
+				"baseline": {
+					"inlineProperties": 20000,
+					"mountMs": 46,
+					"restyleMs": 2
+				},
+				"context": {
+					"inlineProperties": 20000,
+					"mountMs": 50,
+					"restyleMs": 2
+				},
+				"unused": {
+					"inlineProperties": 20000,
+					"mountMs": 48,
+					"restyleMs": 2
+				},
+				"used": {
+					"inlineProperties": 14000,
+					"mountMs": 42,
+					"restyleMs": 2
+				}
+			},
+			"webkit": {
+				"baseline": {
+					"inlineProperties": 20000,
+					"mountMs": 69,
+					"restyleMs": 30
+				},
+				"context": {
+					"inlineProperties": 20000,
+					"mountMs": 70,
+					"restyleMs": 29
+				},
+				"unused": {
+					"inlineProperties": 20000,
+					"mountMs": 89,
+					"restyleMs": 49
+				},
+				"used": {
+					"inlineProperties": 14000,
+					"mountMs": 146,
+					"restyleMs": 102
+				}
+			}
+		}
+	},
+	{
+		"css": {
+			"addedGzip": 879,
+			"addedRaw": 7551
+		},
+		"name": "Ungated: every Box publishes",
+		"perf": {
+			"chromium": {
+				"baseline": {
+					"inlineProperties": 20000,
+					"mountMs": 24.5,
+					"restyleMs": 5.399999991059303
+				},
+				"context": {
+					"inlineProperties": 20000,
+					"mountMs": 27.599999994039536,
+					"restyleMs": 5.299999997019768
+				},
+				"unused": {
+					"inlineProperties": 20000,
+					"mountMs": 25,
+					"restyleMs": 6.0999999940395355
+				},
+				"used": {
+					"inlineProperties": 14000,
+					"mountMs": 24.299999997019768,
+					"restyleMs": 7.0999999940395355
+				}
+			},
+			"firefox": {
+				"baseline": {
+					"inlineProperties": 20000,
+					"mountMs": 45,
+					"restyleMs": 2
+				},
+				"context": {
+					"inlineProperties": 20000,
+					"mountMs": 51,
+					"restyleMs": 2
+				},
+				"unused": {
+					"inlineProperties": 20000,
+					"mountMs": 46,
+					"restyleMs": 3
+				},
+				"used": {
+					"inlineProperties": 14000,
+					"mountMs": 40,
+					"restyleMs": 3
+				}
+			},
+			"webkit": {
+				"baseline": {
+					"inlineProperties": 20000,
+					"mountMs": 69,
+					"restyleMs": 29
+				},
+				"context": {
+					"inlineProperties": 20000,
+					"mountMs": 69,
+					"restyleMs": 30
+				},
+				"unused": {
+					"inlineProperties": 20000,
+					"mountMs": 157,
+					"restyleMs": 114
+				},
+				"used": {
+					"inlineProperties": 14000,
+					"mountMs": 154,
+					"restyleMs": 111
+				}
+			}
+		}
+	},
+	{
+		"css": {
+			"addedGzip": 870,
+			"addedRaw": 6214
+		},
+		"name": "Gated, 2 levels"
+	},
+	{
+		"css": {
+			"addedGzip": 965,
+			"addedRaw": 11188
+		},
+		"name": "Gated, 8 levels"
+	},
+	{
+		"css": {
+			"addedGzip": 872,
+			"addedRaw": 7973
+		},
+		"name": "Gated, unregistered inputs"
+	},
+	{
+		"css": {
+			"addedGzip": 902,
+			"addedRaw": 6893
+		},
+		"name": "Style-query alternation only"
+	}
+]

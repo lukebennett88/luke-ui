@@ -1,0 +1,4 @@
+node_modules
+dist
+dist-measure
+results/*.png
