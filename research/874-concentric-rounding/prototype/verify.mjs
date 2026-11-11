@@ -94,7 +94,7 @@ for (const engine of process.argv.slice(2).length ? process.argv.slice(2) : ['ch
 				'sides-rtl',
 				'border-sides',
 				'wrapper-chain',
-				'wrapper-border',
+				'border-square',
 				'eight',
 			]) {
 				await page.evaluate(() => {

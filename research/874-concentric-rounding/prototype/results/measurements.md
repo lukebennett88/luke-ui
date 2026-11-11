@@ -1,113 +1,110 @@
-| Configuration                                       | Added CSS | Added CSS, gzip | Fixture cases that fail                                                                                                                                                                                                                                    |
-| --------------------------------------------------- | --------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Proposed: style query, wrappers accumulate          | 6858 B    | 897 B           | none                                                                                                                                                                                                                                                       |
-| Proposed, without the `:has()` gate                 | 6813 B    | 888 B           | none                                                                                                                                                                                                                                                       |
-| Proposed, in a browser without style queries        | 5516 B    | 801 B           | uniform#2, uniform#3, uniform#4, wrapper-concentric, separated#2, eight#2, eight#3, eight#4, eight#5, eight#6, eight#7, eight#8, separated-deep#5, wrapper-padded, wrapper-chain, wrapper-border, wrapper-responsive, wrapper-outside#1, wrapper-outside#2 |
-| Style query over 4 selector levels                  | 18978 B   | 1051 B          | none                                                                                                                                                                                                                                                       |
-| 4 selector levels, wrappers accumulate              | 16268 B   | 1001 B          | uniform#4, eight#4, eight#5, eight#6, eight#7, eight#8, separated-deep#5, wrapper-outside#1, wrapper-outside#2                                                                                                                                             |
-| 12 selector levels, wrappers accumulate             | 95188 B   | 1700 B          | none                                                                                                                                                                                                                                                       |
-| First round: 4 selector levels, wrappers are square | 7772 B    | 910 B           | eight#5, eight#6, eight#7, eight#8, separated-deep#5, wrapper-padded, wrapper-chain, wrapper-border, wrapper-responsive, wrapper-outside#1                                                                                                                 |
+| Configuration                                          | Added CSS | Added CSS, gzip | Fixture cases that fail                                                                                                                                                                                                                    |
+| ------------------------------------------------------ | --------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Decided design                                         | 9139 B    | 1002 B          | none                                                                                                                                                                                                                                       |
+| Without the `:has()` gate                              | 9064 B    | 994 B           | none                                                                                                                                                                                                                                       |
+| What a browser without container style queries applies | 5461 B    | 802 B           | uniform#2, uniform#3, uniform#4, wrapper-concentric, separated#2, eight#2, eight#3, eight#4, eight#5, eight#6, eight#7, eight#8, separated-deep#5, wrapper-padded, wrapper-chain, border-zero-width, wrapper-responsive, wrapper-outside#1 |
+| With unregistered inputs                               | 9310 B    | 960 B           | none                                                                                                                                                                                                                                       |
 
 Mount, ms:
 
-| Engine   | Page                   | Elements | Concentric when adopted | Today  | Proposed, unused | Proposed, adopted | Ungated, unused | Ungated, adopted | First round, adopted |
-| -------- | ---------------------- | -------- | ----------------------- | ------ | ---------------- | ----------------- | --------------- | ---------------- | -------------------- |
-| chromium | reference-security     | 45       | 2                       | 0.193  | 0.207            | 0.204             | 0.205           | 0.197            | 0.197                |
-| chromium | reference-profile      | 78       | 8                       | 0.232  | 0.302            | 0.287             | 0.278           | 0.283            | 0.270                |
-| chromium | reference-preferences  | 88       | 7                       | 0.261  | 0.323            | 0.329             | 0.310           | 0.313            | 0.294                |
-| chromium | reference-email-dialog | 105      | 11                      | 0.286  | 0.371            | 0.371             | 0.350           | 0.355            | 0.350                |
-| chromium | docs-home              | 102      | 17                      | 0.272  | 0.331            | 0.344             | 0.321           | 0.317            | 0.327                |
-| chromium | docs-button            | 2494     | 168                     | 4.855  | 6.591            | 6.704             | 6.342           | 6.433            | 6.088                |
-| chromium | stress                 | 8001     | 6000                    | 26.317 | 30.400           | 33.440            | 27.300          | 29.267           | 33.200               |
-| firefox  | reference-security     | 45       | 2                       | 0.323  | 0.383            | 0.434             | 0.420           | 0.445            | 0.395                |
-| firefox  | reference-profile      | 78       | 8                       | 0.475  | 0.575            | 0.688             | 0.610           | 0.680            | 0.584                |
-| firefox  | reference-preferences  | 88       | 7                       | 0.521  | 0.638            | 0.718             | 0.644           | 0.688            | 0.630                |
-| firefox  | reference-email-dialog | 105      | 11                      | 0.610  | 0.750            | 0.909             | 0.789           | 0.898            | 0.777                |
-| firefox  | docs-home              | 102      | 17                      | 0.542  | 0.661            | 0.765             | 0.685           | 0.732            | 0.667                |
-| firefox  | docs-button            | 2494     | 168                     | 9.688  | 10.200           | 10.786            | 10.267          | 10.133           | 9.813                |
-| firefox  | stress                 | 8001     | 6000                    | 55.667 | 54.667           | 52.333            | 52.667          | 47.250           | 51.000               |
-| webkit   | reference-security     | 45       | 2                       | 0.330  | 0.401            | 0.500             | 0.495           | 0.532            | 0.432                |
-| webkit   | reference-profile      | 78       | 8                       | 0.510  | 0.644            | 0.806             | 0.882           | 0.933            | 0.683                |
-| webkit   | reference-preferences  | 88       | 7                       | 0.644  | 0.708            | 0.962             | 0.932           | 1.034            | 0.829                |
-| webkit   | reference-email-dialog | 105      | 11                      | 0.673  | 0.847            | 1.119             | 1.071           | 1.144            | 0.980                |
-| webkit   | docs-home              | 102      | 17                      | 0.595  | 0.829            | 0.909             | 0.904           | 0.932            | 0.820                |
-| webkit   | docs-button            | 2494     | 168                     | 10.467 | 14.455           | 18.000            | 15.800          | 18.333           | 14.182               |
-| webkit   | stress                 | 8001     | 6000                    | 91.500 | 94.000           | 191.000           | 154.000         | 204.000          | 138.000              |
+| Engine   | Page                   | Elements | Concentric when adopted | Today  | Proposed, unused | Proposed, adopted | Ungated, unused | Ungated, adopted |
+| -------- | ---------------------- | -------- | ----------------------- | ------ | ---------------- | ----------------- | --------------- | ---------------- |
+| chromium | reference-security     | 45       | 2                       | 0.190  | 0.216            | 0.220             | 0.213           | 0.212            |
+| chromium | reference-profile      | 78       | 8                       | 0.235  | 0.308            | 0.321             | 0.316           | 0.312            |
+| chromium | reference-preferences  | 88       | 7                       | 0.264  | 0.350            | 0.357             | 0.348           | 0.341            |
+| chromium | reference-email-dialog | 105      | 11                      | 0.294  | 0.398            | 0.412             | 0.401           | 0.391            |
+| chromium | docs-home              | 102      | 17                      | 0.263  | 0.366            | 0.385             | 0.363           | 0.356            |
+| chromium | docs-button            | 2494     | 168                     | 5.027  | 7.257            | 7.690             | 7.176           | 7.095            |
+| chromium | stress                 | 8001     | 6000                    | 27.733 | 32.760           | 38.750            | 35.220          | 29.883           |
+| firefox  | reference-security     | 45       | 2                       | 0.325  | 0.396            | 0.450             | 0.498           | 3.925            |
+| firefox  | reference-profile      | 78       | 8                       | 0.490  | 0.572            | 0.750             | 2.603           | 0.773            |
+| firefox  | reference-preferences  | 88       | 7                       | 0.512  | 0.649            | 0.758             | 0.746           | 0.765            |
+| firefox  | reference-email-dialog | 105      | 11                      | 0.610  | 0.754            | 0.987             | 0.867           | 1.027            |
+| firefox  | docs-home              | 102      | 17                      | 0.534  | 0.673            | 0.794             | 0.758           | 0.873            |
+| firefox  | docs-button            | 2494     | 168                     | 9.813  | 10.200           | 11.143            | 11.000          | 10.857           |
+| firefox  | stress                 | 8001     | 6000                    | 53.000 | 59.333           | 56.333            | 54.667          | 50.667           |
+| webkit   | reference-security     | 45       | 2                       | 0.329  | 0.420            | 0.547             | 0.610           | 0.694            |
+| webkit   | reference-profile      | 78       | 8                       | 0.524  | 0.682            | 0.926             | 1.034           | 1.095            |
+| webkit   | reference-preferences  | 88       | 7                       | 0.575  | 0.746            | 0.968             | 1.172           | 1.210            |
+| webkit   | reference-email-dialog | 105      | 11                      | 0.673  | 0.867            | 1.190             | 1.282           | 1.364            |
+| webkit   | docs-home              | 102      | 17                      | 0.602  | 0.820            | 1.190             | 1.064           | 1.063            |
+| webkit   | docs-button            | 2494     | 168                     | 11.357 | 14.182           | 20.000            | 18.667          | 21.429           |
+| webkit   | stress                 | 8001     | 6000                    | 71.333 | 94.000           | 200.000           | 177.000         | 208.000          |
 
 Theme switch, ms:
 
-| Engine   | Page                   | Elements | Concentric when adopted | Today  | Proposed, unused | Proposed, adopted | Ungated, unused | Ungated, adopted | First round, adopted |
-| -------- | ---------------------- | -------- | ----------------------- | ------ | ---------------- | ----------------- | --------------- | ---------------- | -------------------- |
-| chromium | reference-security     | 45       | 2                       | 0.026  | 0.050            | 0.052             | 0.048           | 0.048            | 0.040                |
-| chromium | reference-profile      | 78       | 8                       | 0.041  | 0.083            | 0.086             | 0.078           | 0.077            | 0.075                |
-| chromium | reference-preferences  | 88       | 7                       | 0.046  | 0.091            | 0.098             | 0.087           | 0.088            | 0.081                |
-| chromium | reference-email-dialog | 105      | 11                      | 0.053  | 0.103            | 0.109             | 0.099           | 0.100            | 0.098                |
-| chromium | docs-home              | 102      | 17                      | 0.050  | 0.086            | 0.097             | 0.081           | 0.085            | 0.097                |
-| chromium | docs-button            | 2494     | 168                     | 0.936  | 1.478            | 1.583             | 1.391           | 1.422            | 1.496                |
-| chromium | stress                 | 8001     | 6000                    | 5.007  | 8.242            | 13.242            | 6.730           | 10.253           | 14.373               |
-| firefox  | reference-security     | 45       | 2                       | 0.071  | 0.090            | 0.152             | 0.165           | 0.194            | 0.126                |
-| firefox  | reference-profile      | 78       | 8                       | 0.096  | 0.124            | 0.329             | 0.245           | 0.395            | 0.186                |
-| firefox  | reference-preferences  | 88       | 7                       | 0.096  | 0.125            | 0.314             | 0.240           | 0.396            | 0.178                |
-| firefox  | reference-email-dialog | 105      | 11                      | 0.128  | 0.163            | 0.411             | 0.327           | 0.507            | 0.260                |
-| firefox  | docs-home              | 102      | 17                      | 0.107  | 0.131            | 0.300             | 0.224           | 0.337            | 0.216                |
-| firefox  | docs-button            | 2494     | 168                     | 0.893  | 0.987            | 1.987             | 1.716           | 2.273            | 1.261                |
-| firefox  | stress                 | 8001     | 6000                    | 1.852  | 2.027            | 43.000            | 2.338           | 44.750           | 2.273                |
-| webkit   | reference-security     | 45       | 2                       | 0.148  | 0.232            | 0.318             | 0.356           | 0.394            | 0.268                |
-| webkit   | reference-profile      | 78       | 8                       | 0.235  | 0.379            | 0.558             | 0.595           | 0.682            | 0.493                |
-| webkit   | reference-preferences  | 88       | 7                       | 0.257  | 0.412            | 0.602             | 0.649           | 0.746            | 0.556                |
-| webkit   | reference-email-dialog | 105      | 11                      | 0.417  | 0.487            | 0.694             | 0.758           | 0.872            | 0.682                |
-| webkit   | docs-home              | 102      | 17                      | 0.276  | 0.442            | 0.628             | 0.630           | 0.708            | 0.638                |
-| webkit   | docs-button            | 2494     | 168                     | 5.000  | 8.158            | 12.154            | 10.733          | 13.167           | 12.750               |
-| webkit   | stress                 | 8001     | 6000                    | 32.800 | 56.667           | 160.000           | 117.500         | 173.000          | 106.000              |
+| Engine   | Page                   | Elements | Concentric when adopted | Today  | Proposed, unused | Proposed, adopted | Ungated, unused | Ungated, adopted |
+| -------- | ---------------------- | -------- | ----------------------- | ------ | ---------------- | ----------------- | --------------- | ---------------- |
+| chromium | reference-security     | 45       | 2                       | 0.027  | 0.059            | 0.065             | 0.062           | 0.062            |
+| chromium | reference-profile      | 78       | 8                       | 0.042  | 0.097            | 0.108             | 0.102           | 0.099            |
+| chromium | reference-preferences  | 88       | 7                       | 0.047  | 0.109            | 0.117             | 0.111           | 0.107            |
+| chromium | reference-email-dialog | 105      | 11                      | 0.053  | 0.122            | 0.138             | 0.130           | 0.127            |
+| chromium | docs-home              | 102      | 17                      | 0.049  | 0.103            | 0.124             | 0.107           | 0.104            |
+| chromium | docs-button            | 2494     | 168                     | 0.947  | 1.676            | 1.910             | 1.750           | 1.718            |
+| chromium | stress                 | 8001     | 6000                    | 5.143  | 10.440           | 18.344            | 12.783          | 11.631           |
+| firefox  | reference-security     | 45       | 2                       | 0.070  | 0.093            | 0.189             | 0.272           | 1.226            |
+| firefox  | reference-profile      | 78       | 8                       | 0.097  | 0.120            | 0.421             | 0.993           | 0.528            |
+| firefox  | reference-preferences  | 88       | 7                       | 0.098  | 0.122            | 0.405             | 0.393           | 0.514            |
+| firefox  | reference-email-dialog | 105      | 11                      | 0.135  | 0.168            | 0.558             | 0.472           | 0.688            |
+| firefox  | docs-home              | 102      | 17                      | 0.107  | 0.134            | 0.386             | 0.326           | 0.444            |
+| firefox  | docs-button            | 2494     | 168                     | 0.926  | 1.103            | 3.512             | 3.102           | 3.020            |
+| firefox  | stress                 | 8001     | 6000                    | 1.887  | 2.055            | 6.333             | 3.000           | 2.885            |
+| webkit   | reference-security     | 45       | 2                       | 0.147  | 0.237            | 0.360             | 0.469           | 0.562            |
+| webkit   | reference-profile      | 78       | 8                       | 0.247  | 0.400            | 0.679             | 0.802           | 0.882            |
+| webkit   | reference-preferences  | 88       | 7                       | 0.255  | 0.426            | 0.701             | 0.893           | 1.014            |
+| webkit   | reference-email-dialog | 105      | 11                      | 0.298  | 0.514            | 0.862             | 1.042           | 1.111            |
+| webkit   | docs-home              | 102      | 17                      | 0.277  | 0.560            | 0.820             | 0.781           | 0.862            |
+| webkit   | docs-button            | 2494     | 168                     | 5.241  | 9.438            | 16.667            | 14.182          | 17.000           |
+| webkit   | stress                 | 8001     | 6000                    | 34.800 | 60.333           | 168.000           | 139.500         | 178.000          |
 
 Insert and remove a rounded subtree, ms:
 
-| Engine   | Page                   | Elements | Concentric when adopted | Today | Proposed, unused | Proposed, adopted | Ungated, unused | Ungated, adopted | First round, adopted |
-| -------- | ---------------------- | -------- | ----------------------- | ----- | ---------------- | ----------------- | --------------- | ---------------- | -------------------- |
-| chromium | reference-security     | 45       | 2                       | 0.017 | 0.021            | 0.021             | 0.020           | 0.020            | 0.019                |
-| chromium | reference-profile      | 78       | 8                       | 0.017 | 0.021            | 0.021             | 0.021           | 0.020            | 0.019                |
-| chromium | reference-preferences  | 88       | 7                       | 0.017 | 0.021            | 0.021             | 0.020           | 0.020            | 0.020                |
-| chromium | reference-email-dialog | 105      | 11                      | 0.017 | 0.021            | 0.021             | 0.021           | 0.020            | 0.020                |
-| chromium | docs-home              | 102      | 17                      | 0.015 | 0.017            | 0.018             | 0.017           | 0.017            | 0.017                |
-| chromium | docs-button            | 2494     | 168                     | 0.017 | 0.019            | 0.019             | 0.019           | 0.018            | 0.018                |
-| chromium | stress                 | 8001     | 6000                    | 0.579 | 0.577            | 0.578             | 0.565           | 0.572            | 0.594                |
-| firefox  | reference-security     | 45       | 2                       | 0.039 | 0.046            | 0.046             | 0.049           | 0.050            | 0.042                |
-| firefox  | reference-profile      | 78       | 8                       | 0.040 | 0.047            | 0.046             | 0.050           | 0.050            | 0.042                |
-| firefox  | reference-preferences  | 88       | 7                       | 0.039 | 0.046            | 0.046             | 0.051           | 0.050            | 0.043                |
-| firefox  | reference-email-dialog | 105      | 11                      | 0.040 | 0.047            | 0.047             | 0.050           | 0.051            | 0.043                |
-| firefox  | docs-home              | 102      | 17                      | 0.048 | 0.051            | 0.051             | 0.056           | 0.057            | 0.051                |
-| firefox  | docs-button            | 2494     | 168                     | 0.110 | 0.114            | 0.114             | 0.119           | 0.117            | 0.109                |
-| firefox  | stress                 | 8001     | 6000                    | 0.375 | 0.387            | 0.432             | 0.408           | 0.431            | 0.430                |
-| webkit   | reference-security     | 45       | 2                       | 0.075 | 0.083            | 0.084             | 0.089           | 0.087            | 0.083                |
-| webkit   | reference-profile      | 78       | 8                       | 0.074 | 0.085            | 0.086             | 0.093           | 0.091            | 0.080                |
-| webkit   | reference-preferences  | 88       | 7                       | 0.078 | 0.085            | 0.088             | 0.085           | 0.090            | 0.084                |
-| webkit   | reference-email-dialog | 105      | 11                      | 0.074 | 0.083            | 0.089             | 0.089           | 0.087            | 0.085                |
-| webkit   | docs-home              | 102      | 17                      | 0.076 | 0.083            | 0.085             | 0.086           | 0.086            | 0.077                |
-| webkit   | docs-button            | 2494     | 168                     | 0.081 | 0.084            | 0.087             | 0.090           | 0.093            | 0.081                |
-| webkit   | stress                 | 8001     | 6000                    | 0.872 | 0.898            | 1.027             | 0.932           | 0.962            | 1.049                |
+| Engine   | Page                   | Elements | Concentric when adopted | Today | Proposed, unused | Proposed, adopted | Ungated, unused | Ungated, adopted |
+| -------- | ---------------------- | -------- | ----------------------- | ----- | ---------------- | ----------------- | --------------- | ---------------- |
+| chromium | reference-security     | 45       | 2                       | 0.017 | 0.023            | 0.022             | 0.021           | 0.022            |
+| chromium | reference-profile      | 78       | 8                       | 0.017 | 0.023            | 0.023             | 0.022           | 0.022            |
+| chromium | reference-preferences  | 88       | 7                       | 0.017 | 0.023            | 0.022             | 0.022           | 0.022            |
+| chromium | reference-email-dialog | 105      | 11                      | 0.017 | 0.023            | 0.023             | 0.022           | 0.022            |
+| chromium | docs-home              | 102      | 17                      | 0.015 | 0.019            | 0.019             | 0.018           | 0.018            |
+| chromium | docs-button            | 2494     | 168                     | 0.017 | 0.020            | 0.020             | 0.019           | 0.019            |
+| chromium | stress                 | 8001     | 6000                    | 0.573 | 0.575            | 0.603             | 0.625           | 0.612            |
+| firefox  | reference-security     | 45       | 2                       | 0.039 | 0.054            | 0.045             | 0.066           | 0.134            |
+| firefox  | reference-profile      | 78       | 8                       | 0.040 | 0.045            | 0.045             | 0.056           | 0.051            |
+| firefox  | reference-preferences  | 88       | 7                       | 0.039 | 0.045            | 0.045             | 0.053           | 0.053            |
+| firefox  | reference-email-dialog | 105      | 11                      | 0.043 | 0.046            | 0.047             | 0.052           | 0.053            |
+| firefox  | docs-home              | 102      | 17                      | 0.047 | 0.052            | 0.052             | 0.058           | 0.058            |
+| firefox  | docs-button            | 2494     | 168                     | 0.109 | 0.113            | 0.125             | 0.119           | 0.137            |
+| firefox  | stress                 | 8001     | 6000                    | 0.375 | 0.388            | 0.481             | 0.410           | 0.439            |
+| webkit   | reference-security     | 45       | 2                       | 0.075 | 0.085            | 0.084             | 0.094           | 0.092            |
+| webkit   | reference-profile      | 78       | 8                       | 0.074 | 0.084            | 0.084             | 0.094           | 0.094            |
+| webkit   | reference-preferences  | 88       | 7                       | 0.073 | 0.086            | 0.085             | 0.096           | 0.096            |
+| webkit   | reference-email-dialog | 105      | 11                      | 0.075 | 0.087            | 0.087             | 0.096           | 0.098            |
+| webkit   | docs-home              | 102      | 17                      | 0.079 | 0.095            | 0.123             | 0.091           | 0.090            |
+| webkit   | docs-button            | 2494     | 168                     | 0.079 | 0.084            | 0.085             | 0.093           | 0.093            |
+| webkit   | stress                 | 8001     | 6000                    | 0.893 | 0.920            | 1.056             | 0.962           | 0.968            |
 
 Unrelated state change on one element, ms:
 
-| Engine   | Page                   | Elements | Concentric when adopted | Today | Proposed, unused | Proposed, adopted | Ungated, unused | Ungated, adopted | First round, adopted |
-| -------- | ---------------------- | -------- | ----------------------- | ----- | ---------------- | ----------------- | --------------- | ---------------- | -------------------- |
-| chromium | reference-security     | 45       | 2                       | 0.009 | 0.012            | 0.012             | 0.015           | 0.015            | 0.012                |
-| chromium | reference-profile      | 78       | 8                       | 0.009 | 0.012            | 0.012             | 0.015           | 0.015            | 0.012                |
-| chromium | reference-preferences  | 88       | 7                       | 0.009 | 0.012            | 0.012             | 0.015           | 0.015            | 0.012                |
-| chromium | reference-email-dialog | 105      | 11                      | 0.009 | 0.012            | 0.012             | 0.015           | 0.015            | 0.012                |
-| chromium | docs-home              | 102      | 17                      | 0.007 | 0.008            | 0.008             | 0.008           | 0.008            | 0.008                |
-| chromium | docs-button            | 2494     | 168                     | 0.013 | 0.014            | 0.014             | 0.013           | 0.014            | 0.013                |
-| chromium | stress                 | 8001     | 6000                    | 0.276 | 0.278            | 0.295             | 0.278           | 0.295            | 0.302                |
-| firefox  | reference-security     | 45       | 2                       | 0.006 | 0.008            | 0.008             | 0.011           | 0.011            | 0.008                |
-| firefox  | reference-profile      | 78       | 8                       | 0.006 | 0.008            | 0.008             | 0.011           | 0.011            | 0.008                |
-| firefox  | reference-preferences  | 88       | 7                       | 0.006 | 0.008            | 0.008             | 0.011           | 0.011            | 0.008                |
-| firefox  | reference-email-dialog | 105      | 11                      | 0.006 | 0.008            | 0.008             | 0.011           | 0.011            | 0.008                |
-| firefox  | docs-home              | 102      | 17                      | 0.003 | 0.003            | 0.003             | 0.003           | 0.003            | 0.003                |
-| firefox  | docs-button            | 2494     | 168                     | 0.003 | 0.003            | 0.003             | 0.003           | 0.003            | 0.003                |
-| firefox  | stress                 | 8001     | 6000                    | 0.006 | 0.008            | 0.022             | 0.014           | 0.025            | 0.022                |
-| webkit   | reference-security     | 45       | 2                       | 0.028 | 0.029            | 0.030             | 0.036           | 0.036            | 0.030                |
-| webkit   | reference-profile      | 78       | 8                       | 0.028 | 0.030            | 0.030             | 0.036           | 0.036            | 0.029                |
-| webkit   | reference-preferences  | 88       | 7                       | 0.027 | 0.030            | 0.030             | 0.037           | 0.035            | 0.029                |
-| webkit   | reference-email-dialog | 105      | 11                      | 0.028 | 0.029            | 0.030             | 0.036           | 0.036            | 0.030                |
-| webkit   | docs-home              | 102      | 17                      | 0.033 | 0.034            | 0.035             | 0.034           | 0.034            | 0.033                |
-| webkit   | docs-button            | 2494     | 168                     | 0.037 | 0.039            | 0.039             | 0.036           | 0.036            | 0.036                |
-| webkit   | stress                 | 8001     | 6000                    | 0.453 | 0.459            | 0.464             | 0.475           | 0.478            | 0.493                |
+| Engine   | Page                   | Elements | Concentric when adopted | Today | Proposed, unused | Proposed, adopted | Ungated, unused | Ungated, adopted |
+| -------- | ---------------------- | -------- | ----------------------- | ----- | ---------------- | ----------------- | --------------- | ---------------- |
+| chromium | reference-security     | 45       | 2                       | 0.009 | 0.012            | 0.012             | 0.017           | 0.017            |
+| chromium | reference-profile      | 78       | 8                       | 0.009 | 0.012            | 0.012             | 0.017           | 0.017            |
+| chromium | reference-preferences  | 88       | 7                       | 0.009 | 0.012            | 0.012             | 0.017           | 0.017            |
+| chromium | reference-email-dialog | 105      | 11                      | 0.009 | 0.012            | 0.012             | 0.017           | 0.017            |
+| chromium | docs-home              | 102      | 17                      | 0.007 | 0.008            | 0.008             | 0.008           | 0.008            |
+| chromium | docs-button            | 2494     | 168                     | 0.013 | 0.014            | 0.014             | 0.014           | 0.014            |
+| chromium | stress                 | 8001     | 6000                    | 0.281 | 0.281            | 0.304             | 0.313           | 0.311            |
+| firefox  | reference-security     | 45       | 2                       | 0.007 | 0.009            | 0.008             | 0.037           | 0.045            |
+| firefox  | reference-profile      | 78       | 8                       | 0.006 | 0.008            | 0.008             | 0.015           | 0.016            |
+| firefox  | reference-preferences  | 88       | 7                       | 0.006 | 0.008            | 0.008             | 0.015           | 0.014            |
+| firefox  | reference-email-dialog | 105      | 11                      | 0.006 | 0.008            | 0.008             | 0.014           | 0.014            |
+| firefox  | docs-home              | 102      | 17                      | 0.003 | 0.003            | 0.003             | 0.003           | 0.003            |
+| firefox  | docs-button            | 2494     | 168                     | 0.003 | 0.003            | 0.003             | 0.003           | 0.003            |
+| firefox  | stress                 | 8001     | 6000                    | 0.006 | 0.008            | 0.022             | 0.014           | 0.026            |
+| webkit   | reference-security     | 45       | 2                       | 0.028 | 0.030            | 0.030             | 0.039           | 0.040            |
+| webkit   | reference-profile      | 78       | 8                       | 0.026 | 0.030            | 0.030             | 0.039           | 0.040            |
+| webkit   | reference-preferences  | 88       | 7                       | 0.027 | 0.030            | 0.029             | 0.041           | 0.041            |
+| webkit   | reference-email-dialog | 105      | 11                      | 0.028 | 0.030            | 0.031             | 0.040           | 0.040            |
+| webkit   | docs-home              | 102      | 17                      | 0.032 | 0.037            | 0.051             | 0.034           | 0.034            |
+| webkit   | docs-button            | 2494     | 168                     | 0.035 | 0.036            | 0.037             | 0.037           | 0.036            |
+| webkit   | stress                 | 8001     | 6000                    | 0.464 | 0.473            | 0.478             | 0.489           | 0.482            |

@@ -227,17 +227,93 @@ export function createFixture(Box: BoxComponent) {
 						</Box>
 					</Surface>
 				</Case>
-				<Case id="wrapper-border" title="Bordered Box with no radius between">
+				<Case id="border-square" title="Bordered Box with no radius is a square surface">
 					<Surface padding="space.4">
-						<Box borderColor="#364fc7" borderStyle="solid" borderWidth="thin" padding="space.4">
+						<Box
+							borderColor="#364fc7"
+							borderStyle="solid"
+							borderWidth="thin"
+							data-parent=""
+							padding="space.4"
+						>
 							<Inner />
 						</Box>
+					</Surface>
+				</Case>
+				<Case id="border-square-from-breakpoint" title="Border that is drawn from bp768">
+					<Surface padding="space.4">
+						<Box
+							borderColor="#364fc7"
+							borderStyle={{ bp768: 'solid', initial: 'none' }}
+							borderWidth="thin"
+							data-parent=""
+							data-parent-from="768"
+							padding="space.4"
+						>
+							<Inner />
+						</Box>
+					</Surface>
+				</Case>
+				<Case id="border-zero-width" title="borderStyle with a zero width is spacing">
+					<Surface padding="space.4">
+						<Box borderStyle="solid" borderWidth="none" padding="space.4">
+							<Inner />
+						</Box>
+					</Surface>
+				</Case>
+				<Case id="border-rounded" title="Bordered surface inside a padded Box">
+					<Surface padding="space.4">
+						<Box padding="space.4">
+							<Box
+								borderColor="#364fc7"
+								borderRadius="control"
+								borderStyle="solid"
+								borderWidth="thick"
+								data-parent=""
+								padding="space.4"
+							>
+								<Inner />
+							</Box>
+						</Box>
+					</Surface>
+				</Case>
+				<Case id="override-class" title="Consumer class overrides the radius">
+					<Surface padding="space.4">
+						<Inner className="consumer-radius" data-check={undefined} data-expect-radius="2" />
+					</Surface>
+				</Case>
+				<Case id="override-style" title="Consumer style overrides the radius">
+					<Surface padding="space.4">
+						<Inner data-check={undefined} data-expect-radius="3" style={{ borderRadius: 3 }} />
+					</Surface>
+				</Case>
+				<Case id="override-layer" title="A later layer overrides the radius">
+					<Surface padding="space.4">
+						<Inner className="layered-radius" data-check={undefined} data-expect-radius="5" />
+					</Surface>
+				</Case>
+				<Case id="override-padding" title="Consumer class overrides a concentric Box's padding">
+					<Surface padding="space.4">
+						<Inner className="consumer-padding" />
 					</Surface>
 				</Case>
 				<Case id="wrapper-responsive" title="Wrapper padding changes at bp768">
 					<Surface padding="space.4">
 						<Box padding={{ bp768: 'space.8', initial: '0' }}>
 							<Inner />
+						</Box>
+					</Surface>
+				</Case>
+				<Case id="surface-from-breakpoint" title="Radius that starts at bp768">
+					<Surface padding="space.4">
+						<Box
+							backgroundColor={fills[1]}
+							borderRadius={{ bp768: 'control' }}
+							data-parent=""
+							data-parent-from="768"
+							padding="space.4"
+						>
+							<Inner level={2} />
 						</Box>
 					</Surface>
 				</Case>

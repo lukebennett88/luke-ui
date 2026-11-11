@@ -32,7 +32,11 @@ export function measure() {
 			checks.push({ actual, expected, id: id + level, kind: 'documented', pass });
 			continue;
 		}
-		const parent = child.parentElement.closest('[data-parent]');
+		// `data-parent-from` marks a surface that only exists from that viewport width.
+		let parent = child.parentElement.closest('[data-parent]');
+		while (Number(parent.dataset.parentFrom ?? 0) > innerWidth) {
+			parent = parent.parentElement.closest('[data-parent]');
+		}
 		const outer = radii(parent);
 		const a = parent.getBoundingClientRect();
 		const b = child.getBoundingClientRect();

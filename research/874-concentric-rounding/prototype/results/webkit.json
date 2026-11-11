@@ -2,21 +2,21 @@
 	"engine": "webkit",
 	"runs": [
 		{
-			"checks": 50,
+			"checks": 58,
 			"errors": [],
 			"failed": [],
 			"theme": "default",
 			"width": 600
 		},
 		{
-			"checks": 45,
+			"checks": 50,
 			"errors": [],
 			"failed": [],
 			"theme": "theme-round",
 			"width": 600
 		},
 		{
-			"checks": 45,
+			"checks": 50,
 			"errors": [],
 			"failed": [],
 			"theme": "theme-square",
@@ -24,25 +24,25 @@
 		},
 		{
 			"layoutDifferences": 0,
-			"layoutElements": 165,
+			"layoutElements": 202,
 			"width": 600
 		},
 		{
-			"checks": 50,
+			"checks": 58,
 			"errors": [],
 			"failed": [],
 			"theme": "default",
 			"width": 800
 		},
 		{
-			"checks": 45,
+			"checks": 50,
 			"errors": [],
 			"failed": [],
 			"theme": "theme-round",
 			"width": 800
 		},
 		{
-			"checks": 45,
+			"checks": 50,
 			"errors": [],
 			"failed": [],
 			"theme": "theme-square",
@@ -50,25 +50,25 @@
 		},
 		{
 			"layoutDifferences": 0,
-			"layoutElements": 165,
+			"layoutElements": 202,
 			"width": 800
 		},
 		{
-			"checks": 50,
+			"checks": 58,
 			"errors": [],
 			"failed": [],
 			"theme": "default",
 			"width": 1100
 		},
 		{
-			"checks": 45,
+			"checks": 50,
 			"errors": [],
 			"failed": [],
 			"theme": "theme-round",
 			"width": 1100
 		},
 		{
-			"checks": 45,
+			"checks": 50,
 			"errors": [],
 			"failed": [],
 			"theme": "theme-square",
@@ -76,13 +76,13 @@
 		},
 		{
 			"layoutDifferences": 0,
-			"layoutElements": 165,
+			"layoutElements": 202,
 			"width": 1100
 		}
 	],
 	"version": "27.2",
-	"inlineProperties": 251,
-	"baselineInlineProperties": 305,
+	"inlineProperties": 308,
+	"baselineInlineProperties": 374,
 	"cases": [
 		{
 			"actual": {
@@ -2752,46 +2752,378 @@
 		{
 			"actual": {
 				"bl": {
-					"h": 7,
-					"v": 7
+					"h": 0,
+					"v": 0
 				},
 				"br": {
-					"h": 7,
-					"v": 7
+					"h": 0,
+					"v": 0
 				},
 				"tl": {
-					"h": 7,
-					"v": 7
+					"h": 0,
+					"v": 0
 				},
 				"tr": {
-					"h": 7,
-					"v": 7
+					"h": 0,
+					"v": 0
 				}
 			},
 			"expected": {
 				"bl": {
-					"h": 7,
-					"v": 7
+					"h": 0,
+					"v": 0
 				},
 				"br": {
-					"h": 7,
-					"v": 7
+					"h": 0,
+					"v": 0
 				},
 				"tl": {
-					"h": 7,
-					"v": 7
+					"h": 0,
+					"v": 0
 				},
 				"tr": {
-					"h": 7,
-					"v": 7
+					"h": 0,
+					"v": 0
 				}
 			},
-			"id": "wrapper-border",
+			"id": "border-square",
 			"inset": {
-				"bottom": 9,
-				"left": 9,
-				"right": 9,
-				"top": 9
+				"bottom": 5,
+				"left": 5,
+				"right": 5,
+				"top": 5
+			},
+			"kind": "geometry",
+			"outer": {
+				"bl": {
+					"h": 0,
+					"v": 0
+				},
+				"br": {
+					"h": 0,
+					"v": 0
+				},
+				"tl": {
+					"h": 0,
+					"v": 0
+				},
+				"tr": {
+					"h": 0,
+					"v": 0
+				}
+			},
+			"pass": true
+		},
+		{
+			"actual": {
+				"bl": {
+					"h": 0,
+					"v": 0
+				},
+				"br": {
+					"h": 0,
+					"v": 0
+				},
+				"tl": {
+					"h": 0,
+					"v": 0
+				},
+				"tr": {
+					"h": 0,
+					"v": 0
+				}
+			},
+			"expected": {
+				"bl": {
+					"h": 0,
+					"v": 0
+				},
+				"br": {
+					"h": 0,
+					"v": 0
+				},
+				"tl": {
+					"h": 0,
+					"v": 0
+				},
+				"tr": {
+					"h": 0,
+					"v": 0
+				}
+			},
+			"id": "border-square-from-breakpoint",
+			"inset": {
+				"bottom": 5,
+				"left": 5,
+				"right": 5,
+				"top": 5
+			},
+			"kind": "geometry",
+			"outer": {
+				"bl": {
+					"h": 0,
+					"v": 0
+				},
+				"br": {
+					"h": 0,
+					"v": 0
+				},
+				"tl": {
+					"h": 0,
+					"v": 0
+				},
+				"tr": {
+					"h": 0,
+					"v": 0
+				}
+			},
+			"pass": true
+		},
+		{
+			"actual": {
+				"bl": {
+					"h": 8,
+					"v": 8
+				},
+				"br": {
+					"h": 8,
+					"v": 8
+				},
+				"tl": {
+					"h": 8,
+					"v": 8
+				},
+				"tr": {
+					"h": 8,
+					"v": 8
+				}
+			},
+			"expected": {
+				"bl": {
+					"h": 8,
+					"v": 8
+				},
+				"br": {
+					"h": 8,
+					"v": 8
+				},
+				"tl": {
+					"h": 8,
+					"v": 8
+				},
+				"tr": {
+					"h": 8,
+					"v": 8
+				}
+			},
+			"id": "border-zero-width",
+			"inset": {
+				"bottom": 8,
+				"left": 8,
+				"right": 8,
+				"top": 8
+			},
+			"kind": "geometry",
+			"outer": {
+				"bl": {
+					"h": 16,
+					"v": 16
+				},
+				"br": {
+					"h": 16,
+					"v": 16
+				},
+				"tl": {
+					"h": 16,
+					"v": 16
+				},
+				"tr": {
+					"h": 16,
+					"v": 16
+				}
+			},
+			"pass": true
+		},
+		{
+			"actual": {
+				"bl": {
+					"h": 2,
+					"v": 2
+				},
+				"br": {
+					"h": 2,
+					"v": 2
+				},
+				"tl": {
+					"h": 2,
+					"v": 2
+				},
+				"tr": {
+					"h": 2,
+					"v": 2
+				}
+			},
+			"expected": {
+				"bl": {
+					"h": 2,
+					"v": 2
+				},
+				"br": {
+					"h": 2,
+					"v": 2
+				},
+				"tl": {
+					"h": 2,
+					"v": 2
+				},
+				"tr": {
+					"h": 2,
+					"v": 2
+				}
+			},
+			"id": "border-rounded",
+			"inset": {
+				"bottom": 6,
+				"left": 6,
+				"right": 6,
+				"top": 6
+			},
+			"kind": "geometry",
+			"outer": {
+				"bl": {
+					"h": 8,
+					"v": 8
+				},
+				"br": {
+					"h": 8,
+					"v": 8
+				},
+				"tl": {
+					"h": 8,
+					"v": 8
+				},
+				"tr": {
+					"h": 8,
+					"v": 8
+				}
+			},
+			"pass": true
+		},
+		{
+			"actual": {
+				"bl": {
+					"h": 2,
+					"v": 2
+				},
+				"br": {
+					"h": 2,
+					"v": 2
+				},
+				"tl": {
+					"h": 2,
+					"v": 2
+				},
+				"tr": {
+					"h": 2,
+					"v": 2
+				}
+			},
+			"expected": 2,
+			"id": "override-class",
+			"kind": "documented",
+			"pass": true
+		},
+		{
+			"actual": {
+				"bl": {
+					"h": 3,
+					"v": 3
+				},
+				"br": {
+					"h": 3,
+					"v": 3
+				},
+				"tl": {
+					"h": 3,
+					"v": 3
+				},
+				"tr": {
+					"h": 3,
+					"v": 3
+				}
+			},
+			"expected": 3,
+			"id": "override-style",
+			"kind": "documented",
+			"pass": true
+		},
+		{
+			"actual": {
+				"bl": {
+					"h": 5,
+					"v": 5
+				},
+				"br": {
+					"h": 5,
+					"v": 5
+				},
+				"tl": {
+					"h": 5,
+					"v": 5
+				},
+				"tr": {
+					"h": 5,
+					"v": 5
+				}
+			},
+			"expected": 5,
+			"id": "override-layer",
+			"kind": "documented",
+			"pass": true
+		},
+		{
+			"actual": {
+				"bl": {
+					"h": 12,
+					"v": 12
+				},
+				"br": {
+					"h": 12,
+					"v": 12
+				},
+				"tl": {
+					"h": 12,
+					"v": 12
+				},
+				"tr": {
+					"h": 12,
+					"v": 12
+				}
+			},
+			"expected": {
+				"bl": {
+					"h": 12,
+					"v": 12
+				},
+				"br": {
+					"h": 12,
+					"v": 12
+				},
+				"tl": {
+					"h": 12,
+					"v": 12
+				},
+				"tr": {
+					"h": 12,
+					"v": 12
+				}
+			},
+			"id": "override-padding",
+			"inset": {
+				"bottom": 4,
+				"left": 4,
+				"right": 4,
+				"top": 4
 			},
 			"kind": "geometry",
 			"outer": {
@@ -2875,6 +3207,71 @@
 				"tr": {
 					"h": 16,
 					"v": 16
+				}
+			},
+			"pass": true
+		},
+		{
+			"actual": {
+				"bl": {
+					"h": 4,
+					"v": 4
+				},
+				"br": {
+					"h": 4,
+					"v": 4
+				},
+				"tl": {
+					"h": 4,
+					"v": 4
+				},
+				"tr": {
+					"h": 4,
+					"v": 4
+				}
+			},
+			"expected": {
+				"bl": {
+					"h": 4,
+					"v": 4
+				},
+				"br": {
+					"h": 4,
+					"v": 4
+				},
+				"tl": {
+					"h": 4,
+					"v": 4
+				},
+				"tr": {
+					"h": 4,
+					"v": 4
+				}
+			},
+			"id": "surface-from-breakpoint",
+			"inset": {
+				"bottom": 4,
+				"left": 4,
+				"right": 4,
+				"top": 4
+			},
+			"kind": "geometry",
+			"outer": {
+				"bl": {
+					"h": 8,
+					"v": 8
+				},
+				"br": {
+					"h": 8,
+					"v": 8
+				},
+				"tl": {
+					"h": 8,
+					"v": 8
+				},
+				"tr": {
+					"h": 8,
+					"v": 8
 				}
 			},
 			"pass": true
@@ -3133,7 +3530,7 @@
 	"ssr": {
 		"errors": [],
 		"sameMarkup": true,
-		"serverBytes": 18992,
+		"serverBytes": 23234,
 		"consoleErrors": [],
 		"failures": 0
 	}

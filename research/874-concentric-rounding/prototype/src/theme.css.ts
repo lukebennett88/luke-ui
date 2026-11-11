@@ -1,6 +1,6 @@
 // Stand-in themes: the public `--luke-space-*` and `--luke-radius-*` names with two radius scales,
 // so a theme switch can be asserted without the colour pipeline.
-import { globalStyle } from '@vanilla-extract/css';
+import { globalLayer, globalStyle } from '@vanilla-extract/css';
 import { vars } from '../../../../packages/@luke-ui/react/src/theme/contract.css.js';
 
 const space = Object.fromEntries(
@@ -19,3 +19,12 @@ globalStyle(':root.theme-round', { vars: radius(16, 8, 32, 24) });
 globalStyle(':root.theme-square', { vars: radius(0, 0, 0, 0) });
 globalStyle('*', { boxSizing: 'border-box' });
 globalStyle('body', { fontFamily: 'system-ui, sans-serif', fontSize: '13px', margin: 0 });
+
+// Consumer styles for the override cases: an unlayered class, a class in a layer declared after
+// Luke UI's, and a padding override. Each is a single class, like any consumer rule.
+globalStyle('.consumer-radius', { borderRadius: '2px' });
+// An application declares its own layers after Luke UI's, as `cascadeLayerOrder` documents.
+globalLayer('luke-ui');
+const consumer = globalLayer('consumer');
+globalStyle('.layered-radius', { '@layer': { [consumer]: { borderRadius: '5px' } } });
+globalStyle('.consumer-padding', { padding: '20px' });

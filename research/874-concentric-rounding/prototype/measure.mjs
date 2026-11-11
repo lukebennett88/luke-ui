@@ -22,24 +22,16 @@ const engines = process.argv.slice(2).length
 	? process.argv.slice(2)
 	: ['chromium', 'firefox', 'webkit'];
 
+// Selector-level alternation, the first round's design, was measured at 4e9eef1d. Its builder was
+// removed when the style query became the decision, so it is not rebuilt here.
 const configurations = [
-	{ env: {}, name: 'Proposed: style query, wrappers accumulate', perf: 'proposed' },
-	{ env: { CONCENTRIC_HAS: '0' }, name: 'Proposed, without the `:has()` gate', perf: 'ungated' },
+	{ env: {}, name: 'Decided design', perf: 'proposed' },
+	{ env: { CONCENTRIC_HAS: '0' }, name: 'Without the `:has()` gate', perf: 'ungated' },
 	{
-		env: { CONCENTRIC_ALTERNATION: 'none' },
-		name: 'Proposed, in a browser without style queries',
+		env: { CONCENTRIC_STYLE_QUERY: '0' },
+		name: 'What a browser without container style queries applies',
 	},
-	{ env: { CONCENTRIC_ALTERNATION: 'both' }, name: 'Style query over 4 selector levels' },
-	{ env: { CONCENTRIC_ALTERNATION: 'selectors' }, name: '4 selector levels, wrappers accumulate' },
-	{
-		env: { CONCENTRIC_ALTERNATION: 'selectors', CONCENTRIC_DEPTH: '12' },
-		name: '12 selector levels, wrappers accumulate',
-	},
-	{
-		env: { CONCENTRIC_ALTERNATION: 'selectors', CONCENTRIC_WRAPPERS: '0' },
-		name: 'First round: 4 selector levels, wrappers are square',
-		perf: 'first',
-	},
+	{ env: { CONCENTRIC_REGISTER_INPUTS: '0' }, name: 'With unregistered inputs' },
 ];
 const trees = [
 	'reference-security',
@@ -137,7 +129,6 @@ const columns = [
 	['proposedAdopted', 'Proposed, adopted'],
 	['ungatedUnused', 'Ungated, unused'],
 	['ungatedAdopted', 'Ungated, adopted'],
-	['firstAdopted', 'First round, adopted'],
 ];
 const operations = [
 	['mountMs', 'Mount'],
