@@ -4,14 +4,14 @@ import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 import { createFileSystemGeneratorCache, remarkAutoTypeTable } from 'fumadocs-typescript';
 import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import * as z from 'zod';
-import { createComponentPropsGenerator } from './src/lib/create-component-props-generator.js';
-import { createLiveTypescriptGenerator } from './src/lib/create-live-typescript-generator.js';
 import { rehypeServerOnlyMarkdown } from './src/lib/rehype-server-only-markdown.js';
-import { remarkAttachTypeDefinitions } from './src/lib/remark-attach-type-definitions.js';
 import { remarkInlineExampleSource } from './src/lib/remark-inline-example-source.js';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
-import { remarkWatchTypeTableSources } from './src/lib/remark-watch-type-table-sources.js';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
+import { createComponentPropsGenerator } from './src/type-reference/generate/create-component-props-generator.js';
+import { createLiveTypescriptGenerator } from './src/type-reference/generate/create-live-typescript-generator.js';
+import { remarkAttachTypeDefinitions } from './src/type-reference/generate/remark-attach-type-definitions.js';
+import { remarkWatchTypeTableSources } from './src/type-reference/generate/remark-watch-type-table-sources.js';
 
 /**
  * Unified merges plugins by function identity and deep-merges their options. Two

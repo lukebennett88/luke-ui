@@ -1,11 +1,11 @@
 import { dirname } from 'node:path';
 import type { DocEntry, GeneratedDoc } from 'fumadocs-typescript';
 import { ts } from 'ts-morph';
+import type { EnrichedGeneratedDoc } from '../type-definition-model.js';
+import type { TypeToken } from '../type-tokens.js';
+import { typeTokensToText } from '../type-tokens.js';
 import { createTypeDefinitionCollector } from './collect-type-definitions.js';
 import type { PropDeclaration, SyntaxNode } from './component-prop-analysis.js';
-import type { EnrichedGeneratedDoc } from './type-definition-model.js';
-import type { TypeToken } from './type-tokens.js';
-import { typeTokensToText } from './type-tokens.js';
 
 /**
  * Formats each prop's declared type, or its resolved type when no single annotation describes it,

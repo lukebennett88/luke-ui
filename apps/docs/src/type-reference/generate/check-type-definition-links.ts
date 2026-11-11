@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { basename, join } from 'node:path';
-import { TYPE_TOKEN_KINDS } from './type-tokens.js';
+import { TYPE_TOKEN_KINDS } from '../type-tokens.js';
 
 /** One ComponentPropsTable in a built page module and the asset it fetches. */
 export interface BuiltTypeDefinitionTable {

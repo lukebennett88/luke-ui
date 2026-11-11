@@ -1,4 +1,5 @@
 import type { GeneratedDoc, Generator } from 'fumadocs-typescript';
+import { NATIVE_PROPS_FORWARDING_KEY, renderNativePropsNote } from '../component-prop-groups.js';
 import {
 	filterGeneratedDoc,
 	getSharedPropProject,
@@ -6,7 +7,6 @@ import {
 	lukeUiReactSrcDir,
 	typeForwardsDomProps,
 } from './component-prop-analysis.js';
-import { NATIVE_PROPS_FORWARDING_KEY, renderNativePropsNote } from './component-prop-groups.js';
 import type { LiveTypescriptGeneratorOptions } from './create-live-typescript-generator.js';
 import { createLiveTypescriptGenerator } from './create-live-typescript-generator.js';
 import { enrichGeneratedDocTypes } from './enrich-generated-doc-types.js';

@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import {
 	findBuiltTypeDefinitionTables,
 	findTypeDefinitionLinkIssues,
-} from '../src/lib/check-type-definition-links.js';
+} from '../src/type-reference/generate/check-type-definition-links.js';
 
 const clientAssetsDir = fileURLToPath(new URL('../dist/client/assets/', import.meta.url));
 const issues = findTypeDefinitionLinkIssues(clientAssetsDir);

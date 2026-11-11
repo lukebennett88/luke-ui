@@ -1,7 +1,7 @@
 import { ts } from 'ts-morph';
 import { expect, test } from 'vite-plus/test';
+import { typeTokensToText } from '../type-tokens.js';
 import { createTypeTokenPrinter } from './print-type-tokens.js';
-import { typeTokensToText } from './type-tokens.js';
 
 const OPERATOR_GLUE_PATTERN = /[\u00a0\u2060]/;
 

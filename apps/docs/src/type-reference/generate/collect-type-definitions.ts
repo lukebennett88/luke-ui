@@ -1,9 +1,9 @@
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 import { ts } from 'ts-morph';
+import type { TypeDefinition, TypeDefinitionsPayload } from '../type-definition-model.js';
+import type { TypeToken } from '../type-tokens.js';
+import { typeTokensToText } from '../type-tokens.js';
 import { createTypeTokenPrinter } from './print-type-tokens.js';
-import type { TypeDefinition, TypeDefinitionsPayload } from './type-definition-model.js';
-import type { TypeToken } from './type-tokens.js';
-import { typeTokensToText } from './type-tokens.js';
 
 /**
  * The flags fumadocs prints prop types with, so a walked node names what the table shows.

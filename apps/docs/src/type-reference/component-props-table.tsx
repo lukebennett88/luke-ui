@@ -6,16 +6,16 @@ import { useRouterState } from '@tanstack/react-router';
 import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
-import { groupPropNames, NATIVE_PROPS_FORWARDING_KEY } from '../lib/component-prop-groups.js';
-import type { TypeTokens } from '../lib/type-tokens.js';
+import { InheritTypography } from '../components/docs-article/mdx-elements.js';
+import * as disclosureStyles from '../components/docs-disclosure.css.js';
+import * as tableStyles from '../components/reference-table.css.js';
+import { CellText, ReferenceTableFrame, TableCell } from '../components/reference-table.js';
+import { groupPropNames, NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
 import * as styles from './component-props-table.css.js';
-import { InheritTypography } from './docs-article/mdx-elements.js';
-import * as disclosureStyles from './docs-disclosure.css.js';
-import * as tableStyles from './reference-table.css.js';
-import { CellText, ReferenceTableFrame, TableCell } from './reference-table.js';
 import { TypeDefinitionsProvider } from './type-definitions-context.js';
 import type { PropTableLayout, TypeNode } from './type-table.js';
 import { getPropTableLayout, PropRows, PropTableHead } from './type-table.js';
+import type { TypeTokens } from './type-tokens.js';
 
 /** Grouped prop table for a component guide's `## API` section. */
 export function ComponentPropsTable({

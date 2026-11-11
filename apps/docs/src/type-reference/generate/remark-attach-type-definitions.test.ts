@@ -4,13 +4,13 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { afterEach, expect, test } from 'vite-plus/test';
+import type { EnrichedGeneratedDoc } from '../type-definition-model.js';
+import { typeTokensToText } from '../type-tokens.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
 import { remarkAttachTypeDefinitions } from './remark-attach-type-definitions.js';
 import { stringifyComponentPropsTable } from './stringify-component-props-table.js';
-import type { EnrichedGeneratedDoc } from './type-definition-model.js';
-import { typeTokensToText } from './type-tokens.js';
 
-const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../../../..', import.meta.url));
 const componentPropsGenerator = createComponentPropsGenerator({
 	cache: createFileSystemGeneratorCache(resolve(repoRoot, 'apps/docs/.source/fumadocs-typescript')),
 });

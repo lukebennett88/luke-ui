@@ -2,7 +2,7 @@ import { vars } from '@luke-ui/react/theme';
 import { style, styleVariants } from '@vanilla-extract/css';
 import { overlayMotion } from '../lib/overlay-motion.js';
 import { scopeColors } from '../lib/shiki-theme.js';
-import type { TypeTokenKind } from '../lib/type-tokens.js';
+import type { TypeTokenKind } from './type-tokens.js';
 
 /**
  * Formatted types keep the build's line breaks and indentation. Lines wrap at the break

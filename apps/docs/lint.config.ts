@@ -47,6 +47,26 @@ export const docsLintOverrides =
 					},
 				},
 				{
+					excludeFiles: ['**/*.test.*', 'apps/docs/src/type-reference/generate/**'],
+					files: ['apps/docs/src/type-reference/**/*.{ts,tsx}'],
+					rules: {
+						'import/no-nodejs-modules': 'error',
+						'no-restricted-imports': [
+							'error',
+							{
+								patterns: [
+									{
+										allowTypeImports: true,
+										group: ['**/generate/**'],
+										message:
+											'Type reference browser modules must not import generator implementations.',
+									},
+								],
+							},
+						],
+					},
+				},
+				{
 					files: ['apps/docs/src/playground/generate/**/*.ts'],
 					rules: { 'no-console': 'off' },
 				},

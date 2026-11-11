@@ -3,16 +3,16 @@ import { fileURLToPath } from 'node:url';
 import { createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
 import {
-	buildComponentGuideInventory,
-	findComponentGuideFiles,
-} from './component-guide-inventory.js';
-import {
 	filterGeneratedDoc,
 	getSharedPropProject,
 	loadExportedPropDeclaration,
 	lukeUiReactSrcDir,
-} from './component-prop-analysis.js';
-import { createComponentPropsGenerator } from './create-component-props-generator.js';
+} from '../type-reference/generate/component-prop-analysis.js';
+import { createComponentPropsGenerator } from '../type-reference/generate/create-component-props-generator.js';
+import {
+	buildComponentGuideInventory,
+	findComponentGuideFiles,
+} from './component-guide-inventory.js';
 import { GUIDE_TAUGHT_PROPS, guideTableKey } from './guide-prop-audit-data.js';
 
 const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
