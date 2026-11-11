@@ -1,9 +1,9 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, expect, test } from 'vite-plus/test';
-import shapeScript from '../../generated/editor-skeleton-script.iife.js?raw';
-import { encodeDocsPlaygroundHash } from '../../lib/docs-playground-hash.js';
-import { toSkeletonLines } from '../../lib/playground-editor-shape.js';
+import shapeScript from '../generated/editor-skeleton-script.iife.js?raw';
+import { encodeDocsPlaygroundHash } from './docs-playground-hash.js';
 import { EditorSkeleton } from './editor-skeleton';
+import { toSkeletonLines } from './playground-editor-shape.js';
 
 let container: HTMLElement | undefined;
 

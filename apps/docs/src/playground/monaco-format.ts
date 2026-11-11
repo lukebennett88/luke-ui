@@ -3,11 +3,11 @@
  *
  * Docs is the only Monaco host, so the provider registration, the save
  * keybinding, and the dedupe live here. The docs Prettier style lives in
- * `lib/playground-format.ts`, and `@luke-ui/playground-core/format` loads
+ * `playground-format.ts`, and `@luke-ui/playground-core/format` loads
  * Prettier and runs it.
  */
 import type * as Monaco from 'monaco-editor';
-import { formatDocsPlaygroundSource } from '../../lib/playground-format.js';
+import { formatDocsPlaygroundSource } from './playground-format.js';
 
 const FORMAT_DOCUMENT_ACTION_ID = 'editor.action.formatDocument';
 const FORMAT_SHORTCUT_ACTION_ID = 'luke-ui.playground.formatDocumentShortcut';

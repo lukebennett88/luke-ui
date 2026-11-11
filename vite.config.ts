@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite-plus';
+import { docsLintOverrides } from './apps/docs/lint.config.js';
 import { referenceAppLintOverrides } from './apps/reference-app/lint.config.js';
 
 export default defineConfig({
@@ -85,16 +86,6 @@ export default defineConfig({
 				files: ['**/scripts/**/*.ts'],
 				rules: {
 					'no-console': 'off',
-				},
-			},
-			{
-				// Docs examples are copyable source. Allow intentional `tabIndex={0}` on scrollable
-				// non-interactive elements, and demo iframes, without suppression comments in the
-				// published samples.
-				files: ['apps/docs/src/examples/**/*.{ts,tsx}'],
-				rules: {
-					'jsx-a11y/no-noninteractive-tabindex': 'off',
-					'react/iframe-missing-sandbox': 'off',
 				},
 			},
 			{
@@ -212,6 +203,7 @@ export default defineConfig({
 					],
 				},
 			},
+			...docsLintOverrides,
 			...referenceAppLintOverrides,
 			{
 				files: ['**/*.{test,browser.test}.{ts,tsx}'],

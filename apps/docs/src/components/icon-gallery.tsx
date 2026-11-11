@@ -15,7 +15,7 @@ import type { JSX, ReactNode } from 'react';
 import { useDeferredValue, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
 import * as styles from './icon-gallery.css.js';
-import { TextToggleButtonGroup } from './playground/icon-toggle-button-group.js';
+import { TextToggleButtonGroup } from './icon-toggle-button-group.js';
 import * as referenceStyles from './reference-table.css.js';
 
 type GalleryIconSize = NonNullable<IconProps['size']>;

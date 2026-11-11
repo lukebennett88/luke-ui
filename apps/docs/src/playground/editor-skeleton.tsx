@@ -4,8 +4,8 @@ import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
-import shapeScript from '../../generated/editor-skeleton-script.iife.js?raw';
-import { toSkeletonLines } from '../../lib/playground-editor-shape.js';
+import shapeScript from '../generated/editor-skeleton-script.iife.js?raw';
+import { toSkeletonLines } from './playground-editor-shape.js';
 import * as styles from './playground.css.js';
 
 /**

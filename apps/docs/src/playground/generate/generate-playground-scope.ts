@@ -1,0 +1,28 @@
+/**
+ * Generates src/generated/playground-scope.generated.ts — the module map the
+ * playground preview uses to resolve imports in user code at runtime.
+ *
+ * Reads the docs specifier list from `docs-playground-specifiers.ts`, so new
+ * `@luke-ui/react` subpaths and the shared third-party allowlist stay aligned,
+ * and renders it with `@luke-ui/playground-core/generate`. The `generate:playground:scope` script
+ * is a prerequisite of `docs#generate`, so dev and build prepare it automatically.
+ */
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { renderPlaygroundScopeModule } from '@luke-ui/playground-core/generate';
+import { docsPlaygroundRuntimeSpecifierList } from '../docs-playground-specifiers.ts';
+
+export function generatePlaygroundScope(): void {
+	const scriptDir = dirname(fileURLToPath(import.meta.url));
+	const outputPath = resolve(scriptDir, '../../generated/playground-scope.generated.ts');
+
+	const specifiers = docsPlaygroundRuntimeSpecifierList();
+	const output = renderPlaygroundScopeModule(specifiers);
+
+	mkdirSync(dirname(outputPath), { recursive: true });
+	writeFileSync(outputPath, output);
+	console.log(
+		`generate-playground-scope: wrote ${specifiers.length} modules to src/generated/playground-scope.generated.ts`,
+	);
+}

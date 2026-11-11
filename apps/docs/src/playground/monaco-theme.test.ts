@@ -1,8 +1,8 @@
 import { createHighlighterCore } from 'shiki/core';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import { expect, test } from 'vite-plus/test';
+import { SHIKI_THEME_REGISTRATIONS } from '../lib/shiki-theme.js';
 import { toHighContrastMonacoTheme } from './monaco-theme.js';
-import { SHIKI_THEME_REGISTRATIONS } from './shiki-theme.js';
 
 const highlighter = await createHighlighterCore({
 	engine: createJavaScriptRegexEngine(),

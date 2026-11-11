@@ -1,5 +1,5 @@
-import { MobilePhoneIcon, MonitorIcon } from '../docs-icons.js';
-import { IconToggleButtonGroup } from './icon-toggle-button-group';
+import { MobilePhoneIcon, MonitorIcon } from '../components/docs-icons.js';
+import { IconToggleButtonGroup } from '../components/icon-toggle-button-group';
 
 const VIEWPORTS = [
 	{ icon: MonitorIcon, label: 'Desktop', value: '100%' },

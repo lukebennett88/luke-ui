@@ -38,6 +38,16 @@ value imports of build-only modules, including transitive imports. Keep runtime-
 separate from filesystem access, TypeScript analysis, and asset generation. Type-only dependencies
 are allowed when erased from runtime output. Preserve lazy loading and pre-hydration entrypoints.
 
+## Lint configuration ownership
+
+Keep workspace-specific lint overrides in that workspace's `lint.config.ts`, as in
+`apps/docs/lint.config.ts` and `apps/reference-app/lint.config.ts`. Export the overrides and import
+and spread them into the root `vite.config.ts`. Use paths relative to the repository root.
+
+Vite+ runs repository lint from the root configuration. It does not merge workspace lint overrides
+automatically, so each workspace's overrides must be imported there. Keep repository-wide rules in
+the root configuration.
+
 ## Workspace responsibilities
 
 Arrows in this inventory mean permitted dependency direction, not mandatory imports. Manifests,
@@ -94,15 +104,15 @@ fixtures. Migrations must update creation plans and their tests with any source-
 
 The app's target owners and their existing seams are:
 
-| Owner                    | Current responsibilities and intended boundary                                                                                                                                                                                                                                                                                                                    |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Playground               | `routes/playground/`, `components/playground/`, `lib/docs-playground-*`, `lib/playground-*`, Monaco setup/theme, and playground generators. Move session, hash/debounce, preview status, and panel UI out of the route. Host policy stays here, generic compilation/protocol stays in playground-core. Theme appearance is an explicit dependency on preferences. |
-| Type reference           | Prop analysis, type tokens/model, collection, enrichment, generated definition assets, loading state, tables, and popovers split between `lib/` and `components/`. Own browser and generator modules together, with separate runtime contracts. Preserve the client dependency test and asset/link validation.                                                    |
-| Site navigation          | Header, drawer, docs navigation/shell, site destinations, container queries, and sidebar preference persistence. Sidebar state belongs to navigation even though its pre-hydration setup shares the theme script entrypoint. Navigation consumes search and appearance controls.                                                                                  |
-| Appearance               | Theme preference model/store, theme controls, and pre-hydration theme setup. Playground may consume this contract. Appearance must not depend on the playground. Keep the early inline script and browser store aligned.                                                                                                                                          |
-| Search                   | Provider, dialog, result-text processing, and `/api/search` adapter. Server index creation consumes the content source. Browser UI must not import the server source loader.                                                                                                                                                                                      |
-| Content and examples     | MDX source/discovery, page metadata, Markdown/LLM/sitemap output, example rendering/source inlining and validation, code highlighting, guides, samples, and executable examples. Article presentation may consume type-reference and example UI. Source walkers and build plugins remain outside browser import graphs.                                           |
-| Reference and landing UI | Token reference views, icon gallery, component index, and home showcase own their presentation. Shared copy feedback, links, typography, table presentation, base-path and URL contracts may remain app infrastructure when their responsibility spans these surfaces.                                                                                            |
+| Owner                    | Current responsibilities and intended boundary                                                                                                                                                                                                                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Playground               | `src/playground/` owns host UI, session, Monaco, skeleton, policy and generators. Routes retain registration and metadata. Host policy stays here, generic compilation/protocol stays in playground-core. Theme appearance is an explicit dependency on preferences.                                                    |
+| Type reference           | Prop analysis, type tokens/model, collection, enrichment, generated definition assets, loading state, tables, and popovers split between `lib/` and `components/`. Own browser and generator modules together, with separate runtime contracts. Preserve the client dependency test and asset/link validation.          |
+| Site navigation          | Header, drawer, docs navigation/shell, site destinations, container queries, and sidebar preference persistence. Sidebar state belongs to navigation even though its pre-hydration setup shares the theme script entrypoint. Navigation consumes search and appearance controls.                                        |
+| Appearance               | Theme preference model/store, theme controls, and pre-hydration theme setup. Playground may consume this contract. Appearance must not depend on the playground. Keep the early inline script and browser store aligned.                                                                                                |
+| Search                   | Provider, dialog, result-text processing, and `/api/search` adapter. Server index creation consumes the content source. Browser UI must not import the server source loader.                                                                                                                                            |
+| Content and examples     | MDX source/discovery, page metadata, Markdown/LLM/sitemap output, example rendering/source inlining and validation, code highlighting, guides, samples, and executable examples. Article presentation may consume type-reference and example UI. Source walkers and build plugins remain outside browser import graphs. |
+| Reference and landing UI | Token reference views, icon gallery, component index, and home showcase own their presentation. Shared copy feedback, links, typography, table presentation, base-path and URL contracts may remain app infrastructure when their responsibility spans these surfaces.                                                  |
 
 `lib/theme-prefs.ts` also re-exports preference definitions from `theme-prefs-shared.ts`, contrary
 to the defining-module import convention in [Conventions](CONVENTIONS.md#typescript). Remove this
