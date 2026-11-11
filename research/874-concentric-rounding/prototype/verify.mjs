@@ -1,4 +1,4 @@
-/* oxlint-disable no-await-in-loop, no-console, unicorn/consistent-function-scoping -- a sequential command-line script that reports to the terminal, and `measure` is serialised into the page */
+/* oxlint-disable no-await-in-loop, no-console -- a sequential command-line script that reports to the terminal */
 // Serves the built prototype and checks it in real browsers.
 //
 //   node verify.mjs                 # Chromium
@@ -10,6 +10,7 @@ import { createServer } from 'node:http';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import playwright from 'playwright';
+import { measure } from './checks.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const dist = join(root, 'dist');
@@ -29,89 +30,12 @@ const server = createServer((request, response) => {
 await new Promise((resolve) => server.listen(0, resolve));
 const origin = `http://localhost:${server.address().port}`;
 
-/** Runs in the page. Measures every Box and checks each marked child against its surface. */
-function measure() {
-	const px = (value) => Number.parseFloat(value);
-	const corner = (style, name) => {
-		const [h, v = h] = style[name].split(' ').map(px);
-		return { h, v };
-	};
-	const radii = (element) => {
-		const style = getComputedStyle(element);
-		return {
-			bl: corner(style, 'borderBottomLeftRadius'),
-			br: corner(style, 'borderBottomRightRadius'),
-			tl: corner(style, 'borderTopLeftRadius'),
-			tr: corner(style, 'borderTopRightRadius'),
-		};
-	};
-	const sideOf = {
-		bl: ['left', 'bottom'],
-		br: ['right', 'bottom'],
-		tl: ['left', 'top'],
-		tr: ['right', 'top'],
-	};
-	const checks = [];
-	for (const child of document.querySelectorAll('[data-check], [data-expect-radius]')) {
-		const id = child.closest('[data-case]').dataset.case;
-		const level = child.dataset.level ? `#${child.dataset.level}` : '';
-		const actual = radii(child);
-		if (child.dataset.expectRadius !== undefined) {
-			const expected = Number(child.dataset.expectRadius);
-			const pass = Object.values(actual).every(({ h, v }) => h === expected && v === expected);
-			checks.push({ actual, expected, id: id + level, kind: 'documented', pass });
-			continue;
-		}
-		const parent = child.parentElement.closest('[data-parent]');
-		const outer = radii(parent);
-		const a = parent.getBoundingClientRect();
-		const b = child.getBoundingClientRect();
-		// The inset is measured from layout, not read from the variables under test.
-		const inset = {
-			bottom: a.bottom - b.bottom,
-			left: b.left - a.left,
-			right: a.right - b.right,
-			top: b.top - a.top,
-		};
-		const expected = {};
-		let pass = true;
-		for (const [name, [horizontal, vertical]] of Object.entries(sideOf)) {
-			expected[name] = {
-				h: Math.max(0, outer[name].h - inset[horizontal]),
-				v: Math.max(0, outer[name].v - inset[vertical]),
-			};
-			// A corner with either radius at zero is square, so the other axis does not matter.
-			const square = expected[name].h === 0 || expected[name].v === 0;
-			const drawnSquare = actual[name].h === 0 || actual[name].v === 0;
-			const same =
-				Math.abs(expected[name].h - actual[name].h) < 0.01 &&
-				Math.abs(expected[name].v - actual[name].v) < 0.01;
-			if (!(same || (square && drawnSquare))) pass = false;
-		}
-		checks.push({ actual, expected, id: id + level, inset, kind: 'geometry', outer, pass });
-	}
-	const layout = [...document.querySelectorAll('#root div')].map((element) => {
-		const rect = element.getBoundingClientRect();
-		const style = getComputedStyle(element);
-		return [rect.x, rect.y, rect.width, rect.height, style.padding, style.borderWidth].join(',');
-	});
-	const styled = [...document.querySelectorAll('#root [class]')];
-	return {
-		checks,
-		inlineProperties: styled.map((element) => element.style.length),
-		layout,
-	};
-}
-
 const brief = ({ h, v }) => (h === v ? `${h}` : `${h}/${v}`);
 const corners = (value) =>
 	`${brief(value.tl)} ${brief(value.tr)} ${brief(value.br)} ${brief(value.bl)}`;
 
 const widths = [600, 800, 1100];
 const themes = ['', 'theme-round', 'theme-square'];
-// Past the supported depth the last rule keeps applying, so levels 5 and 6 read a stale set.
-const knownFailures = new Set(['deep#5', 'deep#6', 'separated-deep#5']);
-
 const summary = [];
 let failed = false;
 for (const engine of process.argv.slice(2).length ? process.argv.slice(2) : ['chromium']) {
@@ -139,10 +63,7 @@ for (const engine of process.argv.slice(2).length ? process.argv.slice(2) : ['ch
 			// Documented fallbacks are stated in px for the default theme only.
 			const checks = measured.checks.filter((check) => theme === '' || check.kind === 'geometry');
 			measured.checks = checks;
-			const unexpected = checks.filter((check) => {
-				// Known limits are recorded, not asserted: a square theme makes them pass by accident.
-				return !check.pass && !knownFailures.has(check.id);
-			});
+			const real = checks.filter((check) => !check.pass);
 			result.runs.push({
 				checks: checks.length,
 				errors,
@@ -151,13 +72,11 @@ for (const engine of process.argv.slice(2).length ? process.argv.slice(2) : ['ch
 				width,
 			});
 			if (theme === '' && width === 1100) result.cases = checks;
-			const queryFailures = unexpected.filter((check) => check.id.startsWith('query'));
-			const real = unexpected.filter((check) => !check.id.startsWith('query'));
 			if (real.length > 0 || errors.length > 0) failed = true;
 			summary.push(
 				`| ${engine} ${result.version} | ${width} | ${theme || 'default'} | ${measured.checks.length} | ${
 					real.length === 0 ? 'pass' : `FAIL: ${real.map((check) => check.id).join(', ')}`
-				} | ${queryFailures.length === 0 ? 'pass' : `fails (${queryFailures.length})`} |`,
+				} |`,
 			);
 			if (theme === '') {
 				await page.screenshot({ fullPage: true, path: join(out, `${engine}-${width}.png`) });
@@ -169,7 +88,15 @@ for (const engine of process.argv.slice(2).length ? process.argv.slice(2) : ['ch
 		}
 		if (width === 1100) {
 			// Zoomed evidence for the hardest geometry.
-			for (const id of ['uniform', 'sides', 'sides-rtl', 'border-sides']) {
+			for (const id of [
+				'uniform',
+				'sides',
+				'sides-rtl',
+				'border-sides',
+				'wrapper-chain',
+				'wrapper-border',
+				'eight',
+			]) {
 				await page.evaluate(() => {
 					document.documentElement.className = 'theme-round';
 					document.body.style.zoom = '4';
@@ -217,9 +144,7 @@ for (const engine of process.argv.slice(2).length ? process.argv.slice(2) : ['ch
 	result.ssr = {
 		...hydration,
 		consoleErrors: ssr.errors,
-		failures: afterHydration.checks.filter(
-			(check) => !check.pass && !knownFailures.has(check.id) && !check.id.startsWith('query'),
-		).length,
+		failures: afterHydration.checks.filter((check) => !check.pass).length,
 	};
 	if (result.ssr.failures > 0 || ssr.errors.length > 0 || !hydration.sameMarkup) failed = true;
 	await ssr.page.close();
@@ -246,14 +171,14 @@ for (const engine of process.argv.slice(2).length ? process.argv.slice(2) : ['ch
 		);
 	}
 	summary.push(
-		`| ${engine} ssr | 1100 | default | | ${result.ssr.failures === 0 && result.ssr.sameMarkup && result.ssr.errors.length === 0 ? 'pass' : 'FAIL'} | |`,
+		`| ${engine} ssr | 1100 | default | | ${result.ssr.failures === 0 && result.ssr.sameMarkup && result.ssr.errors.length === 0 ? 'pass' : 'FAIL'} |`,
 	);
 	console.log(engine, JSON.stringify(result.ssr));
 }
 
 const table = [
-	'| Engine | Width | Theme | Checks | Selector alternation | Style-query alternative |',
-	'| --- | --- | --- | --- | --- | --- |',
+	'| Engine | Width | Theme | Checks | Result |',
+	'| --- | --- | --- | --- | --- |',
 	...summary,
 ].join('\n');
 writeFileSync(join(out, 'summary.md'), `${table}\n`);

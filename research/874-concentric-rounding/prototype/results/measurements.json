@@ -1,180 +1,1437 @@
-[
-	{
-		"css": {
-			"addedGzip": 913,
-			"addedRaw": 7792
+{
+	"configurations": [
+		{
+			"css": {
+				"addedGzip": 897,
+				"addedRaw": 6858
+			},
+			"failing": {
+				"chromium": [],
+				"firefox": [],
+				"webkit": []
+			},
+			"name": "Proposed: style query, wrappers accumulate"
 		},
-		"name": "Proposed: gated, 4 levels",
-		"perf": {
-			"chromium": {
-				"baseline": {
-					"inlineProperties": 20000,
-					"mountMs": 24.599999994039536,
-					"restyleMs": 5.399999991059303
+		{
+			"css": {
+				"addedGzip": 888,
+				"addedRaw": 6813
+			},
+			"failing": {
+				"chromium": [],
+				"firefox": [],
+				"webkit": []
+			},
+			"name": "Proposed, without the `:has()` gate"
+		},
+		{
+			"css": {
+				"addedGzip": 801,
+				"addedRaw": 5516
+			},
+			"failing": {
+				"chromium": [
+					"uniform#2",
+					"uniform#3",
+					"uniform#4",
+					"wrapper-concentric",
+					"separated#2",
+					"eight#2",
+					"eight#3",
+					"eight#4",
+					"eight#5",
+					"eight#6",
+					"eight#7",
+					"eight#8",
+					"separated-deep#5",
+					"wrapper-padded",
+					"wrapper-chain",
+					"wrapper-border",
+					"wrapper-responsive",
+					"wrapper-outside#1",
+					"wrapper-outside#2"
+				],
+				"firefox": [
+					"uniform#2",
+					"uniform#3",
+					"uniform#4",
+					"wrapper-concentric",
+					"separated#2",
+					"eight#2",
+					"eight#3",
+					"eight#4",
+					"eight#5",
+					"eight#6",
+					"eight#7",
+					"eight#8",
+					"separated-deep#5",
+					"wrapper-padded",
+					"wrapper-chain",
+					"wrapper-border",
+					"wrapper-responsive",
+					"wrapper-outside#1",
+					"wrapper-outside#2"
+				],
+				"webkit": [
+					"uniform#2",
+					"uniform#3",
+					"uniform#4",
+					"wrapper-concentric",
+					"separated#2",
+					"eight#2",
+					"eight#3",
+					"eight#4",
+					"eight#5",
+					"eight#6",
+					"eight#7",
+					"eight#8",
+					"separated-deep#5",
+					"wrapper-padded",
+					"wrapper-chain",
+					"wrapper-border",
+					"wrapper-responsive",
+					"wrapper-outside#1",
+					"wrapper-outside#2"
+				]
+			},
+			"name": "Proposed, in a browser without style queries"
+		},
+		{
+			"css": {
+				"addedGzip": 1051,
+				"addedRaw": 18978
+			},
+			"failing": {
+				"chromium": [],
+				"firefox": [],
+				"webkit": []
+			},
+			"name": "Style query over 4 selector levels"
+		},
+		{
+			"css": {
+				"addedGzip": 1001,
+				"addedRaw": 16268
+			},
+			"failing": {
+				"chromium": [
+					"uniform#4",
+					"eight#4",
+					"eight#5",
+					"eight#6",
+					"eight#7",
+					"eight#8",
+					"separated-deep#5",
+					"wrapper-outside#1",
+					"wrapper-outside#2"
+				],
+				"firefox": [
+					"uniform#4",
+					"eight#4",
+					"eight#5",
+					"eight#6",
+					"eight#7",
+					"eight#8",
+					"separated-deep#5",
+					"wrapper-outside#1",
+					"wrapper-outside#2"
+				],
+				"webkit": [
+					"uniform#4",
+					"eight#4",
+					"eight#5",
+					"eight#6",
+					"eight#7",
+					"eight#8",
+					"separated-deep#5",
+					"wrapper-outside#1",
+					"wrapper-outside#2"
+				]
+			},
+			"name": "4 selector levels, wrappers accumulate"
+		},
+		{
+			"css": {
+				"addedGzip": 1700,
+				"addedRaw": 95188
+			},
+			"failing": {
+				"chromium": [],
+				"firefox": [],
+				"webkit": []
+			},
+			"name": "12 selector levels, wrappers accumulate"
+		},
+		{
+			"css": {
+				"addedGzip": 910,
+				"addedRaw": 7772
+			},
+			"failing": {
+				"chromium": [
+					"eight#5",
+					"eight#6",
+					"eight#7",
+					"eight#8",
+					"separated-deep#5",
+					"wrapper-padded",
+					"wrapper-chain",
+					"wrapper-border",
+					"wrapper-responsive",
+					"wrapper-outside#1"
+				],
+				"firefox": [
+					"eight#5",
+					"eight#6",
+					"eight#7",
+					"eight#8",
+					"separated-deep#5",
+					"wrapper-padded",
+					"wrapper-chain",
+					"wrapper-border",
+					"wrapper-responsive",
+					"wrapper-outside#1"
+				],
+				"webkit": [
+					"eight#5",
+					"eight#6",
+					"eight#7",
+					"eight#8",
+					"separated-deep#5",
+					"wrapper-padded",
+					"wrapper-chain",
+					"wrapper-border",
+					"wrapper-responsive",
+					"wrapper-outside#1"
+				]
+			},
+			"name": "First round: 4 selector levels, wrappers are square"
+		}
+	],
+	"perf": {
+		"chromium": {
+			"reference-security": {
+				"today": {
+					"concentric": 0,
+					"elements": 45,
+					"insertMs": 0.016799193638705343,
+					"mountMs": 0.19329896907216496,
+					"restyleMs": 0.025978524419812955,
+					"toggleMs": 0.008926977325477594
 				},
-				"context": {
-					"inlineProperties": 20000,
-					"mountMs": 27.799999997019768,
-					"restyleMs": 5.4000000059604645
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 45,
+					"insertMs": 0.02099370188943317,
+					"mountMs": 0.20718232044198895,
+					"restyleMs": 0.049554013875123884,
+					"toggleMs": 0.012028869286287089
 				},
-				"unused": {
-					"inlineProperties": 20000,
-					"mountMs": 29.700000002980232,
-					"restyleMs": 9.099999994039536
+				"proposedAdopted": {
+					"concentric": 2,
+					"elements": 45,
+					"insertMs": 0.02106149957877001,
+					"mountMs": 0.20435967302452315,
+					"restyleMs": 0.052011095700416086,
+					"toggleMs": 0.011989449284629526
 				},
-				"used": {
-					"inlineProperties": 14000,
-					"mountMs": 30.599999994039536,
-					"restyleMs": 13
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 45,
+					"insertMs": 0.02012612370857373,
+					"mountMs": 0.2054794520547945,
+					"restyleMs": 0.04767959313413859,
+					"toggleMs": 0.01452503147090152
+				},
+				"ungatedAdopted": {
+					"concentric": 2,
+					"elements": 45,
+					"insertMs": 0.02016671148158107,
+					"mountMs": 0.19685452162906977,
+					"restyleMs": 0.04755865567533291,
+					"toggleMs": 0.01497155404731011
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 45,
+					"insertMs": 0.01923323503013207,
+					"mountMs": 0.20107238605898123,
+					"restyleMs": 0.03671071953010279,
+					"toggleMs": 0.01154823312033259
+				},
+				"firstAdopted": {
+					"concentric": 2,
+					"elements": 45,
+					"insertMs": 0.01919631430765293,
+					"mountMs": 0.19698162728876578,
+					"restyleMs": 0.04043126684636118,
+					"toggleMs": 0.011763783232687633
 				}
 			},
-			"firefox": {
-				"baseline": {
-					"inlineProperties": 20000,
-					"mountMs": 46,
-					"restyleMs": 2
+			"reference-profile": {
+				"today": {
+					"concentric": 0,
+					"elements": 78,
+					"insertMs": 0.01710181279215597,
+					"mountMs": 0.23183925811437403,
+					"restyleMs": 0.04123144584936778,
+					"toggleMs": 0.009068923821039904
 				},
-				"context": {
-					"inlineProperties": 20000,
-					"mountMs": 50,
-					"restyleMs": 2
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 78,
+					"insertMs": 0.021312872975277068,
+					"mountMs": 0.3024193548387097,
+					"restyleMs": 0.08324084350721421,
+					"toggleMs": 0.012142799320003238
 				},
-				"unused": {
-					"inlineProperties": 20000,
-					"mountMs": 48,
-					"restyleMs": 2
+				"proposedAdopted": {
+					"concentric": 8,
+					"elements": 78,
+					"insertMs": 0.020853607674127625,
+					"mountMs": 0.28664122137973325,
+					"restyleMs": 0.08581235697940504,
+					"toggleMs": 0.012284006223896487
 				},
-				"used": {
-					"inlineProperties": 14000,
-					"mountMs": 42,
-					"restyleMs": 2
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 78,
+					"insertMs": 0.020621391256530106,
+					"mountMs": 0.2782931354359926,
+					"restyleMs": 0.0775995861355406,
+					"toggleMs": 0.01483386075949367
+				},
+				"ungatedAdopted": {
+					"concentric": 8,
+					"elements": 78,
+					"insertMs": 0.02030594287261405,
+					"mountMs": 0.2830188679245283,
+					"restyleMs": 0.07735946364105209,
+					"toggleMs": 0.014788524105294291
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 78,
+					"insertMs": 0.01974463604054232,
+					"mountMs": 0.25041736227045075,
+					"restyleMs": 0.05914826498422713,
+					"toggleMs": 0.011440774921821372
+				},
+				"firstAdopted": {
+					"concentric": 8,
+					"elements": 78,
+					"insertMs": 0.01876172607879925,
+					"mountMs": 0.2702702702702703,
+					"restyleMs": 0.07511266900350526,
+					"toggleMs": 0.011679514132212099
 				}
 			},
-			"webkit": {
-				"baseline": {
-					"inlineProperties": 20000,
-					"mountMs": 69,
-					"restyleMs": 30
+			"reference-preferences": {
+				"today": {
+					"concentric": 0,
+					"elements": 88,
+					"insertMs": 0.017205781142463867,
+					"mountMs": 0.2610434782764186,
+					"restyleMs": 0.04570383912248629,
+					"toggleMs": 0.009061254077564335
 				},
-				"context": {
-					"inlineProperties": 20000,
-					"mountMs": 70,
-					"restyleMs": 29
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 88,
+					"insertMs": 0.02101134612690853,
+					"mountMs": 0.3232758620689655,
+					"restyleMs": 0.09107468123861566,
+					"toggleMs": 0.012200081333875559
 				},
-				"unused": {
-					"inlineProperties": 20000,
-					"mountMs": 89,
-					"restyleMs": 49
+				"proposedAdopted": {
+					"concentric": 7,
+					"elements": 88,
+					"insertMs": 0.0210408191892271,
+					"mountMs": 0.32916666665359545,
+					"restyleMs": 0.09803921568627451,
+					"toggleMs": 0.01201249299271242
 				},
-				"used": {
-					"inlineProperties": 14000,
-					"mountMs": 146,
-					"restyleMs": 102
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 88,
+					"insertMs": 0.020388745412532282,
+					"mountMs": 0.3103305785185542,
+					"restyleMs": 0.08741258741258741,
+					"toggleMs": 0.015003000600120024
+				},
+				"ungatedAdopted": {
+					"concentric": 7,
+					"elements": 88,
+					"insertMs": 0.020397062822953494,
+					"mountMs": 0.3125,
+					"restyleMs": 0.08844339622641509,
+					"toggleMs": 0.01481042654028436
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 88,
+					"insertMs": 0.019211065573770492,
+					"mountMs": 0.29880478087649404,
+					"restyleMs": 0.06599208095028597,
+					"toggleMs": 0.011528706479133042
+				},
+				"firstAdopted": {
+					"concentric": 7,
+					"elements": 88,
+					"insertMs": 0.019997333688841486,
+					"mountMs": 0.29411764705882354,
+					"restyleMs": 0.08125677139761647,
+					"toggleMs": 0.01231324905598424
+				}
+			},
+			"reference-email-dialog": {
+				"today": {
+					"concentric": 0,
+					"elements": 105,
+					"insertMs": 0.017303033798592687,
+					"mountMs": 0.2864503816680144,
+					"restyleMs": 0.05309734513274336,
+					"toggleMs": 0.009180488401982986
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 105,
+					"insertMs": 0.02112973658261727,
+					"mountMs": 0.3708641975382228,
+					"restyleMs": 0.102880658436214,
+					"toggleMs": 0.012341615928912293
+				},
+				"proposedAdopted": {
+					"concentric": 11,
+					"elements": 105,
+					"insertMs": 0.02129471890971039,
+					"mountMs": 0.3712871287128713,
+					"restyleMs": 0.10893246187363835,
+					"toggleMs": 0.012084105373398856
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 105,
+					"insertMs": 0.020539504313295907,
+					"mountMs": 0.3502314814745828,
+					"restyleMs": 0.09887936717205009,
+					"toggleMs": 0.015090543259557344
+				},
+				"ungatedAdopted": {
+					"concentric": 11,
+					"elements": 105,
+					"insertMs": 0.020380434782608696,
+					"mountMs": 0.3548463356833086,
+					"restyleMs": 0.0998003992015968,
+					"toggleMs": 0.015104219111871917
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 105,
+					"insertMs": 0.01988862370723946,
+					"mountMs": 0.33207964600451223,
+					"restyleMs": 0.07614213197969544,
+					"toggleMs": 0.01245019920318725
+				},
+				"firstAdopted": {
+					"concentric": 11,
+					"elements": 105,
+					"insertMs": 0.020042757883484766,
+					"mountMs": 0.3501165501234971,
+					"restyleMs": 0.09836065573770492,
+					"toggleMs": 0.012170385395537525
+				}
+			},
+			"docs-home": {
+				"today": {
+					"concentric": 0,
+					"elements": 102,
+					"insertMs": 0.01514080952861613,
+					"mountMs": 0.27241379309263075,
+					"restyleMs": 0.05038629492777964,
+					"toggleMs": 0.006936416184971098
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 102,
+					"insertMs": 0.017456068893285232,
+					"mountMs": 0.33112582781456956,
+					"restyleMs": 0.08631397354458857,
+					"toggleMs": 0.007931052715063712
+				},
+				"proposedAdopted": {
+					"concentric": 17,
+					"elements": 102,
+					"insertMs": 0.017651212049894092,
+					"mountMs": 0.34393592676663565,
+					"restyleMs": 0.09671179883945841,
+					"toggleMs": 0.00782105427811669
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 102,
+					"insertMs": 0.01708233686368295,
+					"mountMs": 0.32051282051282054,
+					"restyleMs": 0.08051529790660225,
+					"toggleMs": 0.007638252367858234
+				},
+				"ungatedAdopted": {
+					"concentric": 17,
+					"elements": 102,
+					"insertMs": 0.017053206002728513,
+					"mountMs": 0.31733615220727174,
+					"restyleMs": 0.0847457627118644,
+					"toggleMs": 0.007680098305258307
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 102,
+					"insertMs": 0.016731734523145567,
+					"mountMs": 0.3084188911765508,
+					"restyleMs": 0.07009345794392523,
+					"toggleMs": 0.007814535035165408
+				},
+				"firstAdopted": {
+					"concentric": 17,
+					"elements": 102,
+					"insertMs": 0.016648168701442843,
+					"mountMs": 0.32652173913691357,
+					"restyleMs": 0.09683666881859264,
+					"toggleMs": 0.0076176933624498505
+				}
+			},
+			"docs-button": {
+				"today": {
+					"concentric": 0,
+					"elements": 2494,
+					"insertMs": 0.016884286357496624,
+					"mountMs": 4.854838709677419,
+					"restyleMs": 0.9360248447390076,
+					"toggleMs": 0.012635835228708618
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 2494,
+					"insertMs": 0.018808777429467086,
+					"mountMs": 6.591304348214813,
+					"restyleMs": 1.4784313725198017,
+					"toggleMs": 0.013569748507327664
+				},
+				"proposedAdopted": {
+					"concentric": 168,
+					"elements": 2494,
+					"insertMs": 0.01913997703202756,
+					"mountMs": 6.704347826216532,
+					"restyleMs": 1.5831578946427296,
+					"toggleMs": 0.013621503814021068
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 2494,
+					"insertMs": 0.018591968269707486,
+					"mountMs": 6.341666666790843,
+					"restyleMs": 1.3907407407683354,
+					"toggleMs": 0.013248542660307366
+				},
+				"ungatedAdopted": {
+					"concentric": 168,
+					"elements": 2494,
+					"insertMs": 0.01847290640394089,
+					"mountMs": 6.433333333581686,
+					"restyleMs": 1.4216981132356625,
+					"toggleMs": 0.013503781058696434
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 2494,
+					"insertMs": 0.01817520901490367,
+					"mountMs": 6.056000000238418,
+					"restyleMs": 1.2352459016637725,
+					"toggleMs": 0.013676148796498906
+				},
+				"firstAdopted": {
+					"concentric": 168,
+					"elements": 2494,
+					"insertMs": 0.018420729460886652,
+					"mountMs": 6.087999999523163,
+					"restyleMs": 1.496039604048918,
+					"toggleMs": 0.01348314606741573
+				}
+			},
+			"stress": {
+				"today": {
+					"concentric": 0,
+					"elements": 8001,
+					"insertMs": 0.5788461538461539,
+					"mountMs": 26.316666667660076,
+					"restyleMs": 5.006666666766008,
+					"toggleMs": 0.27642725597429013
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 8001,
+					"insertMs": 0.5769230769230769,
+					"mountMs": 30.4,
+					"restyleMs": 8.242105262844186,
+					"toggleMs": 0.27796296297951983
+				},
+				"proposedAdopted": {
+					"concentric": 6000,
+					"elements": 8001,
+					"insertMs": 0.5784615384844634,
+					"mountMs": 33.439999997615814,
+					"restyleMs": 13.241666665921608,
+					"toggleMs": 0.2954724409624817
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 8001,
+					"insertMs": 0.5650375939737585,
+					"mountMs": 27.299999999503296,
+					"restyleMs": 6.73043478247912,
+					"toggleMs": 0.2782931354359926
+				},
+				"ungatedAdopted": {
+					"concentric": 6000,
+					"elements": 8001,
+					"insertMs": 0.5718631178933858,
+					"mountMs": 29.266666665673256,
+					"restyleMs": 10.253333333134652,
+					"toggleMs": 0.2954724409624817
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 8001,
+					"insertMs": 0.5711026615516315,
+					"mountMs": 27.866666667163372,
+					"restyleMs": 6.872727272862738,
+					"toggleMs": 0.2742230347349177
+				},
+				"firstAdopted": {
+					"concentric": 6000,
+					"elements": 8001,
+					"insertMs": 0.5940711462332797,
+					"mountMs": 33.2,
+					"restyleMs": 14.372727272185413,
+					"toggleMs": 0.30160642570879564
 				}
 			}
-		}
-	},
-	{
-		"css": {
-			"addedGzip": 879,
-			"addedRaw": 7551
 		},
-		"name": "Ungated: every Box publishes",
-		"perf": {
-			"chromium": {
-				"baseline": {
-					"inlineProperties": 20000,
-					"mountMs": 24.5,
-					"restyleMs": 5.399999991059303
+		"firefox": {
+			"reference-security": {
+				"today": {
+					"concentric": 0,
+					"elements": 45,
+					"insertMs": 0.03854059609455293,
+					"mountMs": 0.3232758620689655,
+					"restyleMs": 0.07122507122507123,
+					"toggleMs": 0.006276150627615063
 				},
-				"context": {
-					"inlineProperties": 20000,
-					"mountMs": 27.599999994039536,
-					"restyleMs": 5.299999997019768
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 45,
+					"insertMs": 0.04592774035517452,
+					"mountMs": 0.3826530612244898,
+					"restyleMs": 0.09041591320072333,
+					"toggleMs": 0.008061049011177988
 				},
-				"unused": {
-					"inlineProperties": 20000,
-					"mountMs": 25,
-					"restyleMs": 6.0999999940395355
+				"proposedAdopted": {
+					"concentric": 2,
+					"elements": 45,
+					"insertMs": 0.046182266009852216,
+					"mountMs": 0.43352601156069365,
+					"restyleMs": 0.1519756838905775,
+					"toggleMs": 0.008186432352780658
 				},
-				"used": {
-					"inlineProperties": 14000,
-					"mountMs": 24.299999997019768,
-					"restyleMs": 7.0999999940395355
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 45,
+					"insertMs": 0.04876462938881664,
+					"mountMs": 0.42016806722689076,
+					"restyleMs": 0.16465422612513722,
+					"toggleMs": 0.010994649270688266
+				},
+				"ungatedAdopted": {
+					"concentric": 2,
+					"elements": 45,
+					"insertMs": 0.050200803212851405,
+					"mountMs": 0.44510385756676557,
+					"restyleMs": 0.1935483870967742,
+					"toggleMs": 0.011244377811094454
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 45,
+					"insertMs": 0.04254112308564946,
+					"mountMs": 0.36319612590799033,
+					"restyleMs": 0.09375,
+					"toggleMs": 0.008447848614552828
+				},
+				"firstAdopted": {
+					"concentric": 2,
+					"elements": 45,
+					"insertMs": 0.04215851602023609,
+					"mountMs": 0.39473684210526316,
+					"restyleMs": 0.12573344509639564,
+					"toggleMs": 0.008336575334852443
 				}
 			},
-			"firefox": {
-				"baseline": {
-					"inlineProperties": 20000,
-					"mountMs": 45,
-					"restyleMs": 2
+			"reference-profile": {
+				"today": {
+					"concentric": 0,
+					"elements": 78,
+					"insertMs": 0.0398936170212766,
+					"mountMs": 0.47468354430379744,
+					"restyleMs": 0.09584664536741214,
+					"toggleMs": 0.006355662895640015
 				},
-				"context": {
-					"inlineProperties": 20000,
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 78,
+					"insertMs": 0.04668534080298786,
+					"mountMs": 0.5747126436781609,
+					"restyleMs": 0.12396694214876033,
+					"toggleMs": 0.008052826542116283
+				},
+				"proposedAdopted": {
+					"concentric": 8,
+					"elements": 78,
+					"insertMs": 0.04643962848297214,
+					"mountMs": 0.6880733944954128,
+					"restyleMs": 0.32894736842105265,
+					"toggleMs": 0.00810679349294709
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 78,
+					"insertMs": 0.05004971826317534,
+					"mountMs": 0.6097560975609756,
+					"restyleMs": 0.24549918166939444,
+					"toggleMs": 0.011113580795732384
+				},
+				"ungatedAdopted": {
+					"concentric": 8,
+					"elements": 78,
+					"insertMs": 0.0495703899537343,
+					"mountMs": 0.6801801801801802,
+					"restyleMs": 0.39473684210526316,
+					"toggleMs": 0.010982574315419534
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 78,
+					"insertMs": 0.042796005706134094,
+					"mountMs": 0.5190311418685121,
+					"restyleMs": 0.12325390304026294,
+					"toggleMs": 0.008469312856416916
+				},
+				"firstAdopted": {
+					"concentric": 8,
+					"elements": 78,
+					"insertMs": 0.04208754208754209,
+					"mountMs": 0.5836575875486382,
+					"restyleMs": 0.18587360594795538,
+					"toggleMs": 0.008365867261572783
+				}
+			},
+			"reference-preferences": {
+				"today": {
+					"concentric": 0,
+					"elements": 88,
+					"insertMs": 0.03905233012236397,
+					"mountMs": 0.5208333333333334,
+					"restyleMs": 0.09646302250803858,
+					"toggleMs": 0.00617970584600173
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 88,
+					"insertMs": 0.04639653572533251,
+					"mountMs": 0.6382978723404256,
+					"restyleMs": 0.12489592006661115,
+					"toggleMs": 0.008142880408229738
+				},
+				"proposedAdopted": {
+					"concentric": 7,
+					"elements": 88,
+					"insertMs": 0.04643962848297214,
+					"mountMs": 0.7177033492822966,
+					"restyleMs": 0.31446540880503143,
+					"toggleMs": 0.00801881749171389
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 88,
+					"insertMs": 0.050590219224283306,
+					"mountMs": 0.6437768240343348,
+					"restyleMs": 0.23961661341853036,
+					"toggleMs": 0.011308805790108565
+				},
+				"ungatedAdopted": {
+					"concentric": 7,
+					"elements": 88,
+					"insertMs": 0.05023442732752847,
+					"mountMs": 0.6880733944954128,
+					"restyleMs": 0.39577836411609496,
+					"toggleMs": 0.011188185276348177
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 88,
+					"insertMs": 0.04374453193350831,
+					"mountMs": 0.5791505791505791,
+					"restyleMs": 0.12701100762066045,
+					"toggleMs": 0.008163709589637531
+				},
+				"firstAdopted": {
+					"concentric": 7,
+					"elements": 88,
+					"insertMs": 0.043215211754537596,
+					"mountMs": 0.6302521008403361,
+					"restyleMs": 0.17793594306049823,
+					"toggleMs": 0.008192244675040962
+				}
+			},
+			"reference-email-dialog": {
+				"today": {
+					"concentric": 0,
+					"elements": 105,
+					"insertMs": 0.040106951871657755,
+					"mountMs": 0.6097560975609756,
+					"restyleMs": 0.12809564474807855,
+					"toggleMs": 0.006390048564369089
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 105,
+					"insertMs": 0.04725897920604915,
+					"mountMs": 0.75,
+					"restyleMs": 0.16286644951140064,
+					"toggleMs": 0.008054556193953713
+				},
+				"proposedAdopted": {
+					"concentric": 11,
+					"elements": 105,
+					"insertMs": 0.0471253534401508,
+					"mountMs": 0.9090909090909091,
+					"restyleMs": 0.410958904109589,
+					"toggleMs": 0.00800597779675491
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 105,
+					"insertMs": 0.05008347245409015,
+					"mountMs": 0.7894736842105263,
+					"restyleMs": 0.32679738562091504,
+					"toggleMs": 0.011069293779056896
+				},
+				"ungatedAdopted": {
+					"concentric": 11,
+					"elements": 105,
+					"insertMs": 0.050933786078098474,
+					"mountMs": 0.8982035928143712,
+					"restyleMs": 0.5067567567567568,
+					"toggleMs": 0.011167361524717093
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 105,
+					"insertMs": 0.0430786904078116,
+					"mountMs": 0.684931506849315,
+					"restyleMs": 0.167973124300112,
+					"toggleMs": 0.008371470030137293
+				},
+				"firstAdopted": {
+					"concentric": 11,
+					"elements": 105,
+					"insertMs": 0.04316546762589928,
+					"mountMs": 0.7772020725388601,
+					"restyleMs": 0.2604166666666667,
+					"toggleMs": 0.008400537634408602
+				}
+			},
+			"docs-home": {
+				"today": {
+					"concentric": 0,
+					"elements": 102,
+					"insertMs": 0.04806151874399231,
+					"mountMs": 0.5415162454873647,
+					"restyleMs": 0.10721944245889921,
+					"toggleMs": 0.003256833923182144
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 102,
+					"insertMs": 0.05103776794828173,
+					"mountMs": 0.6607929515418502,
+					"restyleMs": 0.13146362839614373,
+					"toggleMs": 0.0031426117198466406
+				},
+				"proposedAdopted": {
+					"concentric": 17,
+					"elements": 102,
+					"insertMs": 0.0513347022587269,
+					"mountMs": 0.7653061224489796,
+					"restyleMs": 0.3,
+					"toggleMs": 0.0031229180546302466
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 102,
+					"insertMs": 0.056433408577878104,
+					"mountMs": 0.684931506849315,
+					"restyleMs": 0.22354694485842028,
+					"toggleMs": 0.0032157098143463536
+				},
+				"ungatedAdopted": {
+					"concentric": 17,
+					"elements": 102,
+					"insertMs": 0.05651846269781462,
+					"mountMs": 0.7317073170731707,
+					"restyleMs": 0.33707865168539325,
+					"toggleMs": 0.0031474254060178774
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 102,
+					"insertMs": 0.05060728744939271,
+					"mountMs": 0.5813953488372093,
+					"restyleMs": 0.13489208633093525,
+					"toggleMs": 0.003304692663582287
+				},
+				"firstAdopted": {
+					"concentric": 17,
+					"elements": 102,
+					"insertMs": 0.0509683995922528,
+					"mountMs": 0.6666666666666666,
+					"restyleMs": 0.2158273381294964,
+					"toggleMs": 0.003301637612255679
+				}
+			},
+			"docs-button": {
+				"today": {
+					"concentric": 0,
+					"elements": 2494,
+					"insertMs": 0.11013215859030837,
+					"mountMs": 9.6875,
+					"restyleMs": 0.8928571428571429,
+					"toggleMs": 0.0031879622545269064
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 2494,
+					"insertMs": 0.11380880121396054,
+					"mountMs": 10.2,
+					"restyleMs": 0.9868421052631579,
+					"toggleMs": 0.003176956475696283
+				},
+				"proposedAdopted": {
+					"concentric": 168,
+					"elements": 2494,
+					"insertMs": 0.11424219345011424,
+					"mountMs": 10.785714285714286,
+					"restyleMs": 1.986842105263158,
+					"toggleMs": 0.0031419534571961207
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 2494,
+					"insertMs": 0.11904761904761904,
+					"mountMs": 10.266666666666667,
+					"restyleMs": 1.7159090909090908,
+					"toggleMs": 0.0031733271277158393
+				},
+				"ungatedAdopted": {
+					"concentric": 168,
+					"elements": 2494,
+					"insertMs": 0.117096018735363,
+					"mountMs": 10.133333333333333,
+					"restyleMs": 2.272727272727273,
+					"toggleMs": 0.0030615368915195428
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 2494,
+					"insertMs": 0.11485451761102604,
+					"mountMs": 10.2,
+					"restyleMs": 1.0067114093959733,
+					"toggleMs": 0.0032520325203252032
+				},
+				"firstAdopted": {
+					"concentric": 168,
+					"elements": 2494,
+					"insertMs": 0.1091703056768559,
+					"mountMs": 9.8125,
+					"restyleMs": 1.2605042016806722,
+					"toggleMs": 0.0031257814453613405
+				}
+			},
+			"stress": {
+				"today": {
+					"concentric": 0,
+					"elements": 8001,
+					"insertMs": 0.375,
+					"mountMs": 55.666666666666664,
+					"restyleMs": 1.8518518518518519,
+					"toggleMs": 0.005641006355533827
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 8001,
+					"insertMs": 0.3865979381443299,
+					"mountMs": 54.666666666666664,
+					"restyleMs": 2.027027027027027,
+					"toggleMs": 0.0075041272699984994
+				},
+				"proposedAdopted": {
+					"concentric": 6000,
+					"elements": 8001,
+					"insertMs": 0.4322766570605187,
+					"mountMs": 52.333333333333336,
+					"restyleMs": 43,
+					"toggleMs": 0.021530070331563084
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 8001,
+					"insertMs": 0.4076086956521739,
+					"mountMs": 52.666666666666664,
+					"restyleMs": 2.3384615384615386,
+					"toggleMs": 0.013582035494386092
+				},
+				"ungatedAdopted": {
+					"concentric": 6000,
+					"elements": 8001,
+					"insertMs": 0.43103448275862066,
+					"mountMs": 47.25,
+					"restyleMs": 44.75,
+					"toggleMs": 0.02454188481675393
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 8001,
+					"insertMs": 0.38071065989847713,
+					"mountMs": 54,
+					"restyleMs": 1.986842105263158,
+					"toggleMs": 0.007512019230769231
+				},
+				"firstAdopted": {
+					"concentric": 6000,
+					"elements": 8001,
+					"insertMs": 0.4297994269340974,
 					"mountMs": 51,
-					"restyleMs": 2
+					"restyleMs": 2.272727272727273,
+					"toggleMs": 0.021511544528897173
+				}
+			}
+		},
+		"webkit": {
+			"reference-security": {
+				"today": {
+					"concentric": 0,
+					"elements": 45,
+					"insertMs": 0.075,
+					"mountMs": 0.32967032967032966,
+					"restyleMs": 0.1477832512315271,
+					"toggleMs": 0.027527986786566344
 				},
-				"unused": {
-					"inlineProperties": 20000,
-					"mountMs": 46,
-					"restyleMs": 3
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 45,
+					"insertMs": 0.08347245409015025,
+					"mountMs": 0.40106951871657753,
+					"restyleMs": 0.23183925811437403,
+					"toggleMs": 0.029486927462158443
 				},
-				"used": {
-					"inlineProperties": 14000,
-					"mountMs": 40,
-					"restyleMs": 3
+				"proposedAdopted": {
+					"concentric": 2,
+					"elements": 45,
+					"insertMs": 0.08417508417508418,
+					"mountMs": 0.5,
+					"restyleMs": 0.3184713375796178,
+					"toggleMs": 0.029934144881261227
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 45,
+					"insertMs": 0.08880994671403197,
+					"mountMs": 0.49504950495049505,
+					"restyleMs": 0.35629453681710216,
+					"toggleMs": 0.03639893229798592
+				},
+				"ungatedAdopted": {
+					"concentric": 2,
+					"elements": 45,
+					"insertMs": 0.08675534991324466,
+					"mountMs": 0.5319148936170213,
+					"restyleMs": 0.3937007874015748,
+					"toggleMs": 0.03613587087448807
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 45,
+					"insertMs": 0.07936507936507936,
+					"mountMs": 0.3778337531486146,
+					"restyleMs": 0.20463847203274216,
+					"toggleMs": 0.02923406743324888
+				},
+				"firstAdopted": {
+					"concentric": 2,
+					"elements": 45,
+					"insertMs": 0.08250825082508251,
+					"mountMs": 0.4322766570605187,
+					"restyleMs": 0.26833631484794274,
+					"toggleMs": 0.029982010793523885
 				}
 			},
-			"webkit": {
-				"baseline": {
-					"inlineProperties": 20000,
-					"mountMs": 69,
-					"restyleMs": 29
+			"reference-profile": {
+				"today": {
+					"concentric": 0,
+					"elements": 78,
+					"insertMs": 0.07436787307882994,
+					"mountMs": 0.5102040816326531,
+					"restyleMs": 0.2347417840375587,
+					"toggleMs": 0.027614138438880706
 				},
-				"context": {
-					"inlineProperties": 20000,
-					"mountMs": 69,
-					"restyleMs": 30
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 78,
+					"insertMs": 0.08527572484366117,
+					"mountMs": 0.6437768240343348,
+					"restyleMs": 0.3787878787878788,
+					"toggleMs": 0.029946097025354362
 				},
-				"unused": {
-					"inlineProperties": 20000,
-					"mountMs": 157,
-					"restyleMs": 114
+				"proposedAdopted": {
+					"concentric": 8,
+					"elements": 78,
+					"insertMs": 0.08576329331046312,
+					"mountMs": 0.8064516129032258,
+					"restyleMs": 0.5576208178438662,
+					"toggleMs": 0.029892387405340774
 				},
-				"used": {
-					"inlineProperties": 14000,
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 78,
+					"insertMs": 0.09339975093399751,
+					"mountMs": 0.8823529411764706,
+					"restyleMs": 0.5952380952380952,
+					"toggleMs": 0.03574833174451859
+				},
+				"ungatedAdopted": {
+					"concentric": 8,
+					"elements": 78,
+					"insertMs": 0.0911300121506683,
+					"mountMs": 0.9329268292682927,
+					"restyleMs": 0.6818181818181818,
+					"toggleMs": 0.035936751317680884
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 78,
+					"insertMs": 0.08068854222700376,
+					"mountMs": 0.5905511811023622,
+					"restyleMs": 0.32894736842105265,
+					"toggleMs": 0.028846153846153848
+				},
+				"firstAdopted": {
+					"concentric": 8,
+					"elements": 78,
+					"insertMs": 0.08034279592929834,
+					"mountMs": 0.6832579185520362,
+					"restyleMs": 0.4934210526315789,
+					"toggleMs": 0.02904162633107454
+				}
+			},
+			"reference-preferences": {
+				"today": {
+					"concentric": 0,
+					"elements": 88,
+					"insertMs": 0.0781657113079729,
+					"mountMs": 0.6437768240343348,
+					"restyleMs": 0.2568493150684932,
+					"toggleMs": 0.027462467960454047
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 88,
+					"insertMs": 0.08469791078486731,
+					"mountMs": 0.7075471698113207,
+					"restyleMs": 0.41208791208791207,
+					"toggleMs": 0.029803298231670973
+				},
+				"proposedAdopted": {
+					"concentric": 7,
+					"elements": 88,
+					"insertMs": 0.08797653958944282,
+					"mountMs": 0.9615384615384616,
+					"restyleMs": 0.6024096385542169,
+					"toggleMs": 0.029892387405340774
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 88,
+					"insertMs": 0.08527572484366117,
+					"mountMs": 0.9316770186335404,
+					"restyleMs": 0.6493506493506493,
+					"toggleMs": 0.03663003663003663
+				},
+				"ungatedAdopted": {
+					"concentric": 7,
+					"elements": 88,
+					"insertMs": 0.08982035928143713,
+					"mountMs": 1.0344827586206897,
+					"restyleMs": 0.746268656716418,
+					"toggleMs": 0.03536067892503536
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 88,
+					"insertMs": 0.07716049382716049,
+					"mountMs": 0.6607929515418502,
+					"restyleMs": 0.35714285714285715,
+					"toggleMs": 0.02927400468384075
+				},
+				"firstAdopted": {
+					"concentric": 7,
+					"elements": 88,
+					"insertMs": 0.08431703204047218,
+					"mountMs": 0.8287292817679558,
+					"restyleMs": 0.5555555555555556,
+					"toggleMs": 0.028857252789534438
+				}
+			},
+			"reference-email-dialog": {
+				"today": {
+					"concentric": 0,
+					"elements": 105,
+					"insertMs": 0.07363770250368189,
+					"mountMs": 0.672645739910314,
+					"restyleMs": 0.4166666666666667,
+					"toggleMs": 0.027583670467083488
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 105,
+					"insertMs": 0.08296460176991151,
+					"mountMs": 0.847457627118644,
+					"restyleMs": 0.487012987012987,
+					"toggleMs": 0.029498525073746312
+				},
+				"proposedAdopted": {
+					"concentric": 11,
+					"elements": 105,
+					"insertMs": 0.0885478158205431,
+					"mountMs": 1.1194029850746268,
+					"restyleMs": 0.6944444444444444,
+					"toggleMs": 0.029952076677316294
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 105,
+					"insertMs": 0.08939213349225268,
+					"mountMs": 1.0714285714285714,
+					"restyleMs": 0.7575757575757576,
+					"toggleMs": 0.036214389183969097
+				},
+				"ungatedAdopted": {
+					"concentric": 11,
+					"elements": 105,
+					"insertMs": 0.08741258741258741,
+					"mountMs": 1.143939393939394,
+					"restyleMs": 0.872093023255814,
+					"toggleMs": 0.03607503607503607
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 105,
+					"insertMs": 0.08347245409015025,
+					"mountMs": 0.8333333333333334,
+					"restyleMs": 0.42857142857142855,
+					"toggleMs": 0.02922837100545596
+				},
+				"firstAdopted": {
+					"concentric": 11,
+					"elements": 105,
+					"insertMs": 0.08542141230068337,
+					"mountMs": 0.9803921568627451,
+					"restyleMs": 0.6818181818181818,
+					"toggleMs": 0.029574132492113565
+				}
+			},
+			"docs-home": {
+				"today": {
+					"concentric": 0,
+					"elements": 102,
+					"insertMs": 0.0759493670886076,
+					"mountMs": 0.5952380952380952,
+					"restyleMs": 0.27624309392265195,
+					"toggleMs": 0.03303237172428981
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 102,
+					"insertMs": 0.08264462809917356,
+					"mountMs": 0.8287292817679558,
+					"restyleMs": 0.4424778761061947,
+					"toggleMs": 0.03416078342063311
+				},
+				"proposedAdopted": {
+					"concentric": 17,
+					"elements": 102,
+					"insertMs": 0.0847936687394008,
+					"mountMs": 0.9090909090909091,
+					"restyleMs": 0.6276150627615062,
+					"toggleMs": 0.034818941504178275
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 102,
+					"insertMs": 0.08635578583765112,
+					"mountMs": 0.9036144578313253,
+					"restyleMs": 0.6302521008403361,
+					"toggleMs": 0.03351206434316354
+				},
+				"ungatedAdopted": {
+					"concentric": 17,
+					"elements": 102,
+					"insertMs": 0.08620689655172414,
+					"mountMs": 0.9316770186335404,
+					"restyleMs": 0.7075471698113207,
+					"toggleMs": 0.03362474781439139
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 102,
+					"insertMs": 0.0767656090071648,
+					"mountMs": 0.7009345794392523,
+					"restyleMs": 0.38461538461538464,
+					"toggleMs": 0.0334075723830735
+				},
+				"firstAdopted": {
+					"concentric": 17,
+					"elements": 102,
+					"insertMs": 0.07708119218910586,
+					"mountMs": 0.819672131147541,
+					"restyleMs": 0.6382978723404256,
+					"toggleMs": 0.03343736067766384
+				}
+			},
+			"docs-button": {
+				"today": {
+					"concentric": 0,
+					"elements": 2494,
+					"insertMs": 0.08103727714748785,
+					"mountMs": 10.466666666666667,
+					"restyleMs": 5,
+					"toggleMs": 0.037350597609561755
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 2494,
+					"insertMs": 0.08445945945945946,
+					"mountMs": 14.454545454545455,
+					"restyleMs": 8.157894736842104,
+					"toggleMs": 0.038580246913580245
+				},
+				"proposedAdopted": {
+					"concentric": 168,
+					"elements": 2494,
+					"insertMs": 0.08700696055684455,
+					"mountMs": 18,
+					"restyleMs": 12.153846153846153,
+					"toggleMs": 0.03924646781789639
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 2494,
+					"insertMs": 0.08960573476702509,
+					"mountMs": 15.8,
+					"restyleMs": 10.733333333333333,
+					"toggleMs": 0.036196911196911194
+				},
+				"ungatedAdopted": {
+					"concentric": 168,
+					"elements": 2494,
+					"insertMs": 0.09253547193090685,
+					"mountMs": 18.333333333333332,
+					"restyleMs": 13.166666666666666,
+					"toggleMs": 0.0357824427480916
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 2494,
+					"insertMs": 0.08571428571428572,
+					"mountMs": 13.5,
+					"restyleMs": 6.6521739130434785,
+					"toggleMs": 0.039609189331925004
+				},
+				"firstAdopted": {
+					"concentric": 168,
+					"elements": 2494,
+					"insertMs": 0.08086253369272237,
+					"mountMs": 14.181818181818182,
+					"restyleMs": 12.75,
+					"toggleMs": 0.0357227911407478
+				}
+			},
+			"stress": {
+				"today": {
+					"concentric": 0,
+					"elements": 8001,
+					"insertMs": 0.872093023255814,
+					"mountMs": 91.5,
+					"restyleMs": 32.8,
+					"toggleMs": 0.45317220543806647
+				},
+				"proposedUnused": {
+					"concentric": 0,
+					"elements": 8001,
+					"insertMs": 0.8982035928143712,
+					"mountMs": 94,
+					"restyleMs": 56.666666666666664,
+					"toggleMs": 0.45871559633027525
+				},
+				"proposedAdopted": {
+					"concentric": 6000,
+					"elements": 8001,
+					"insertMs": 1.0273972602739727,
+					"mountMs": 191,
+					"restyleMs": 160,
+					"toggleMs": 0.46439628482972134
+				},
+				"ungatedUnused": {
+					"concentric": 0,
+					"elements": 8001,
+					"insertMs": 0.9316770186335404,
 					"mountMs": 154,
-					"restyleMs": 111
+					"restyleMs": 117.5,
+					"toggleMs": 0.47468354430379744
+				},
+				"ungatedAdopted": {
+					"concentric": 6000,
+					"elements": 8001,
+					"insertMs": 0.9615384615384616,
+					"mountMs": 204,
+					"restyleMs": 173,
+					"toggleMs": 0.47770700636942676
+				},
+				"firstUnused": {
+					"concentric": 0,
+					"elements": 8001,
+					"insertMs": 0.9146341463414634,
+					"mountMs": 88.5,
+					"restyleMs": 50.333333333333336,
+					"toggleMs": 0.47468354430379744
+				},
+				"firstAdopted": {
+					"concentric": 6000,
+					"elements": 8001,
+					"insertMs": 1.048951048951049,
+					"mountMs": 138,
+					"restyleMs": 106,
+					"toggleMs": 0.4934210526315789
 				}
 			}
 		}
-	},
-	{
-		"css": {
-			"addedGzip": 870,
-			"addedRaw": 6214
-		},
-		"name": "Gated, 2 levels"
-	},
-	{
-		"css": {
-			"addedGzip": 965,
-			"addedRaw": 11188
-		},
-		"name": "Gated, 8 levels"
-	},
-	{
-		"css": {
-			"addedGzip": 872,
-			"addedRaw": 7973
-		},
-		"name": "Gated, unregistered inputs"
-	},
-	{
-		"css": {
-			"addedGzip": 902,
-			"addedRaw": 6893
-		},
-		"name": "Style-query alternation only"
 	}
-]
+}

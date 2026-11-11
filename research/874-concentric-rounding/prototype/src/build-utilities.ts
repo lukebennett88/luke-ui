@@ -12,12 +12,20 @@ import { vars } from '../../../../packages/@luke-ui/react/src/theme/contract.css
 import { defineProperties } from './engine.js';
 import type { Mirror } from './engine.js';
 
-/** How many levels of directly nested concentric Boxes resolve exactly. */
-export const CONCENTRIC_DEPTH = Number(process.env.CONCENTRIC_DEPTH ?? 4);
-/** The style-query alternative is built only for comparison. */
+/**
+ * How a Box learns which set to read:
+ *
+ * - `query`: a container style query reads the parity its nearest participating ancestor set.
+ * - `selectors`: descendant selectors count participating ancestors, up to `CONCENTRIC_DEPTH`.
+ * - `both`: selectors first, overridden by the query where the browser supports it.
+ * - `none`: no alternation, which is what `query` degrades to in a browser without style queries.
+ */
+const ALTERNATION = process.env.CONCENTRIC_ALTERNATION ?? 'query';
+const CONCENTRIC_DEPTH = Number(process.env.CONCENTRIC_DEPTH ?? 4);
+/** A Box with padding or a border and no radius passes its surface's corners on, less its inset. */
+const WRAPPERS = process.env.CONCENTRIC_WRAPPERS !== '0';
 const GATE_WITH_HAS = process.env.CONCENTRIC_HAS !== '0';
 const REGISTER_INPUTS = process.env.CONCENTRIC_REGISTER_INPUTS !== '0';
-const WITH_QUERY = process.env.CONCENTRIC_QUERY !== '0';
 
 // Registered inputs compute production's unitless `0` to a length. Unregistered ones are
 // substituted as written, and `calc()` cannot subtract a unitless zero from a length.
@@ -139,12 +147,17 @@ export function buildConcentric() {
 		);
 
 	const concentric = style({}, 'concentric');
-	const queried = style({}, 'concentric-query');
-
-	// 1. Any Box with padding, a border, or a radius publishes both sets from its own radius.
-	//    `:where()` keeps the rule at zero specificity. A concentric Box is excluded, so the set it
-	//    reads still holds its parent's values.
-	const geometryClasses = [
+	const classesOf = (...properties: Array<string>) =>
+		properties
+			.flatMap((property) => {
+				const entry = config.config[property] as {
+					dynamic: { conditions: Record<string, string> };
+				};
+				return Object.values(entry.dynamic.conditions).map((className) => `.${className}`);
+			})
+			.join(',');
+	const radiusClasses = classesOf('borderRadius');
+	const spacingClasses = classesOf(
 		'padding',
 		'paddingBlock',
 		'paddingBlockEnd',
@@ -153,15 +166,12 @@ export function buildConcentric() {
 		'paddingInlineEnd',
 		'paddingInlineStart',
 		'borderWidth',
-		'borderRadius',
-	].flatMap((property) => {
-		const entry = config.config[property] as { dynamic: { conditions: Record<string, string> } };
-		return Object.values(entry.dynamic.conditions).map((className) => `.${className}`);
-	});
+	);
+
 	if (!REGISTER_INPUTS) {
 		// Unregistered inputs inherit, so every Box that reads them first resets the ones it does not
 		// set. Zero specificity keeps the reset below the mirrors in the property classes.
-		globalStyle(`:where(${geometryClasses.join(',')},.${concentric},.${queried})`, {
+		globalStyle(`:where(${radiusClasses},${spacingClasses},.${concentric})`, {
 			'@layer': {
 				[layer]: {
 					vars: {
@@ -174,61 +184,76 @@ export function buildConcentric() {
 			},
 		});
 	}
-	const opted = `.${concentric},.${queried}`;
-	const gate = GATE_WITH_HAS ? `:has(${opted})` : '';
-	globalStyle(`:where(:where(${geometryClasses.join(',')})${gate}:not(${opted}))`, {
+
+	// Three kinds of Box take part. Every publishing rule sits inside `:where()`, so the kinds
+	// never compete on specificity, and applies only to a Box that contains a concentric Box.
+	//
+	// - A surface has a radius. It publishes both sets from its own radius.
+	// - A concentric Box takes its corners from one set and publishes the other.
+	// - A wrapper has padding or a border and no radius. It publishes like a concentric Box and
+	//   keeps its own square corners. With `CONCENTRIC_WRAPPERS=0` it is a surface with no radius.
+	const gate = GATE_WITH_HAS ? `:has(.${concentric})` : '';
+	const surface = WRAPPERS
+		? `:where(${radiusClasses})`
+		: `:where(${radiusClasses},${spacingClasses})`;
+	const wrapper = `:where(${spacingClasses}):not(${radiusClasses})`;
+	const participant = WRAPPERS ? `:where(.${concentric},${wrapper})` : `.${concentric}`;
+
+	globalStyle(`:where(${surface}${gate}:not(.${concentric}))`, {
 		'@layer': {
 			[layer]: { vars: { ...publish(setA, () => radius), ...publish(setB, () => radius) } },
 		},
 	});
 
-	// 2. A concentric Box takes its corners from one set and publishes into the other. Which one
-	//    alternates with the number of concentric ancestors. Past `CONCENTRIC_DEPTH` the last rule
-	//    keeps applying.
+	const parity = createVar('concentric-parity');
 	const read = (set: Record<Side, string>, side: Side) => `var(${unwrap(set[side])}, 0px)`;
-	const rule = (reads: Record<Side, string>) =>
+	const cornersFrom = (reads: Record<Side, string>) =>
 		Object.fromEntries(
 			(Object.keys(corners) as Array<Corner>).map((corner) => [
 				corners[corner].property,
 				`${read(reads, corners[corner].inline)} ${read(reads, corners[corner].block)}`,
 			]),
 		);
-	// `inherit` undoes a shallower rule that published into the set this depth reads. Without it
-	// the two sets would be defined from each other, which makes both invalid.
-	const republish = (reads: Record<Side, string>, writes: Record<Side, string>) => ({
+	// `inherit` undoes an earlier rule that published into the set this one reads. Without it the
+	// two sets would be defined from each other, which makes both invalid.
+	const republish = (reads: Record<Side, string>, writes: Record<Side, string>, mark: string) => ({
 		vars: {
 			...Object.fromEntries(Object.values(reads).map((name) => [name, 'inherit'])),
 			...publish(writes, (side) => read(reads, side)),
+			...(ALTERNATION === 'query' || ALTERNATION === 'both' ? { [parity]: mark } : {}),
 		},
 	});
-	for (let depth = 1; depth <= CONCENTRIC_DEPTH; depth++) {
-		const ancestors = Array.from({ length: depth - 1 }, () => `.${concentric}`).join(' ');
-		const selector = ancestors ? `:where(${ancestors}) .${concentric}` : `.${concentric}`;
-		const [reads, writes] = depth % 2 === 1 ? [setA, setB] : [setB, setA];
-		globalStyle(selector, { '@layer': { [layer]: rule(reads) } });
-		// `:where()` around the gate keeps every concentric rule at one class of specificity.
-		globalStyle(`${selector}${GATE_WITH_HAS ? `:where(:has(.${concentric}))` : ''}`, {
-			'@layer': { [layer]: republish(reads, writes) },
+	/** Emits the rules for one parity, under optional ancestors and an optional style query. */
+	const emit = (odd: boolean, ancestors = '', query?: string) => {
+		const [reads, writes] = odd ? [setA, setB] : [setB, setA];
+		const under = ancestors ? `:where(${ancestors}) ` : '';
+		const wrap = (rule: Record<string, unknown>) => ({
+			'@layer': { [layer]: query ? { '@container': { [query]: rule } } : rule },
 		});
-	}
+		globalStyle(`${under}.${concentric}`, wrap(cornersFrom(reads)));
+		globalStyle(
+			`:where(${under}${participant}${gate})`,
+			wrap(republish(reads, writes, odd ? '1' : '2')),
+		);
+	};
 
-	// Alternative for comparison only: the same alternation from a container style query, which
-	// has no depth limit but only reached Firefox in version 151.
-	const parity = createVar('concentric-parity');
-	if (WITH_QUERY) {
-		const odd = { ...rule(setA), vars: { ...republish(setA, setB).vars, [parity]: '1' } };
-		const even = { ...rule(setB), vars: { ...republish(setB, setA).vars, [parity]: '2' } };
-		globalStyle(`.${queried}`, { '@layer': { [layer]: odd } });
-		globalStyle(`.${queried}`, {
-			'@layer': { [layer]: { '@container': { [`style(${unwrap(parity)}: 1)`]: even } } },
-		});
+	emit(true);
+	if (ALTERNATION === 'selectors' || ALTERNATION === 'both') {
+		// Past `CONCENTRIC_DEPTH` the last rule keeps applying.
+		for (let depth = 2; depth <= CONCENTRIC_DEPTH; depth++) {
+			emit(depth % 2 === 1, Array.from({ length: depth - 1 }, () => participant).join(' '));
+		}
+	}
+	if (ALTERNATION === 'both') emit(true, '', `style(${unwrap(parity)}: 2)`);
+	if (ALTERNATION === 'query' || ALTERNATION === 'both') {
+		emit(false, '', `style(${unwrap(parity)}: 1)`);
 	}
 
 	const borderRadius = config.config.borderRadius as Record<string, unknown>;
 	config.config.borderRadius = {
 		...borderRadius,
-		staticScale: ['concentric', 'concentric-query'],
-		values: { concentric: once(concentric), 'concentric-query': once(queried) },
+		staticScale: ['concentric'],
+		values: { concentric: once(concentric) },
 	};
 
 	return { createSprinkles: serialise(config), names: { setA, setB } };

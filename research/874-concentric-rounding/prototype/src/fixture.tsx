@@ -34,17 +34,11 @@ export function createFixture(Box: BoxComponent) {
 	}
 
 	/** Directly nested concentric Boxes, each measured against the one around it. */
-	function chain(depth: number, value = 'concentric', level = 1): ReactNode {
+	function chain(depth: number, level = 1): ReactNode {
 		if (level > depth) return null;
 		return (
-			<Inner
-				borderRadius={value}
-				data-level={level}
-				data-parent=""
-				level={Math.min(level, 6)}
-				padding="space.4"
-			>
-				{chain(depth, value, level + 1)}
+			<Inner data-level={level} data-parent="" level={Math.min(level, 6)} padding="space.4">
+				{chain(depth, level + 1)}
 			</Inner>
 		);
 	}
@@ -193,18 +187,12 @@ export function createFixture(Box: BoxComponent) {
 						</Inner>
 					</Surface>
 				</Case>
-				<Case id="query" title="Style-query alternation, eight levels">
+				<Case id="eight" title="Eight directly nested levels">
 					<Surface borderRadius="full" padding="space.4">
-						{chain(8, 'concentric-query')}
+						{chain(8)}
 					</Surface>
 				</Case>
-
-				<Case id="deep" title="Unsupported: six directly nested levels">
-					<Surface borderRadius="full" padding="space.4">
-						{chain(6)}
-					</Surface>
-				</Case>
-				<Case id="separated-deep" title="Unsupported: fifth concentric ancestor, directly nested">
+				<Case id="separated-deep" title="Fifth concentric ancestor, directly nested">
 					<Surface padding="space.4">
 						<Inner padding="space.4">
 							<Surface padding="space.4">
@@ -223,12 +211,50 @@ export function createFixture(Box: BoxComponent) {
 						</Inner>
 					</Surface>
 				</Case>
-				<Case id="wrapper-padded" title="Unsupported: padded wrapper that does not opt in">
+				<Case id="wrapper-padded" title="Padded Box with no radius between">
 					<Surface padding="space.4">
 						<Box padding="space.4">
-							<Inner data-check={undefined} data-expect-radius="0" />
+							<Inner />
 						</Box>
 					</Surface>
+				</Case>
+				<Case id="wrapper-chain" title="Two padded Boxes between, different sides">
+					<Surface padding="space.4">
+						<Box paddingBlock="space.4">
+							<Box display="flex" flexDirection="column" paddingInlineStart="space.8">
+								<Inner />
+							</Box>
+						</Box>
+					</Surface>
+				</Case>
+				<Case id="wrapper-border" title="Bordered Box with no radius between">
+					<Surface padding="space.4">
+						<Box borderColor="#364fc7" borderStyle="solid" borderWidth="thin" padding="space.4">
+							<Inner />
+						</Box>
+					</Surface>
+				</Case>
+				<Case id="wrapper-responsive" title="Wrapper padding changes at bp768">
+					<Surface padding="space.4">
+						<Box padding={{ bp768: 'space.8', initial: '0' }}>
+							<Inner />
+						</Box>
+					</Surface>
+				</Case>
+				<Case id="wrapper-outside" title="Padded Boxes around the surface are ignored">
+					<Box padding="space.8">
+						<Box padding="space.4">
+							<Surface padding="space.4">
+								<Box padding="space.4">
+									<Inner data-level={1} data-parent="">
+										<Box padding="space.4">
+											<Inner data-level={2} level={2} />
+										</Box>
+									</Inner>
+								</Box>
+							</Surface>
+						</Box>
+					</Box>
 				</Case>
 				<Case id="style-padding" title="Unsupported: padding from style">
 					<Surface padding="space.4" style={{ padding: 16 }}>
