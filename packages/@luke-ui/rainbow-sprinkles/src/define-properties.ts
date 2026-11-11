@@ -53,12 +53,29 @@ function wrapConditionStyle(
 	return styleValue;
 }
 
+/**
+ * Declarations a property's rule adds alongside the property itself, keyed by custom property name.
+ * It receives the value the rule sets the property to.
+ */
+export type Mirror = (value: string) => Record<string, string>;
+
+/** Adds a mirror's custom properties to a rule that sets one property. */
+function withMirror(
+	property: string,
+	value: string,
+	mirror: Mirror | undefined,
+): Record<string, unknown> {
+	const rule: Record<string, unknown> = { [property]: value };
+	if (mirror) rule.vars = mirror(value);
+	return rule;
+}
+
 function createStyles(
 	property: string,
 	scale: Record<string, string> | true,
 	conditions: ConfigConditions | undefined,
 	defaultCondition: string,
-	options: { '@layer'?: string } = {},
+	options: { '@layer'?: string; mirror?: Mirror } = {},
 ): {
 	vars: { default: string } | { conditions: Record<string, string>; default: string };
 	dynamic: { default: string } | { conditions: Record<string, string>; default: string };
@@ -67,7 +84,7 @@ function createStyles(
 } {
 	if (!conditions) {
 		const cssVar = createVar(property);
-		const styleValue = { [property]: cssVar };
+		const styleValue = withMirror(property, cssVar, options.mirror);
 		const className = style(
 			options['@layer'] ? { '@layer': { [options['@layer']]: styleValue } } : styleValue,
 			property,
@@ -83,7 +100,10 @@ function createStyles(
 		return createVar(`${property}-${conditionName}`);
 	});
 	const classes = mapValues(conditions, (conditionValue, conditionName) => {
-		const styleValue = wrapConditionStyle({ [property]: vars[conditionName] }, conditionValue);
+		const styleValue = wrapConditionStyle(
+			withMirror(property, vars[conditionName]!, options.mirror),
+			conditionValue,
+		);
 		return style(
 			options['@layer'] ? { '@layer': { [options['@layer']]: styleValue } } : styleValue,
 			`${property}-${conditionName}`,
@@ -102,7 +122,7 @@ function createStaticStyles(
 	scale: ReadonlyArray<string> | Record<string, string>,
 	conditions: ConfigConditions | undefined,
 	defaultCondition: string,
-	options: { '@layer'?: string } = {},
+	options: { '@layer'?: string; mirror?: Mirror } = {},
 ): {
 	values: Record<
 		string,
@@ -111,30 +131,39 @@ function createStaticStyles(
 	name: string;
 	staticScale: ReadonlyArray<string> | Record<string, string>;
 } {
-	const scaleObj = Array.isArray(scale)
+	const scaleObj: Record<string, string> = Array.isArray(scale)
 		? Object.assign({}, ...scale.map((s) => ({ [s]: s })))
 		: scale;
-	const values = mapValues(scaleObj, (scaleValue, scaleKey) => {
-		const styleValue = { [property]: scaleValue };
-		if (!conditions) {
-			return {
-				default: style(
-					options['@layer'] ? { '@layer': { [options['@layer']]: styleValue } } : styleValue,
-					`${property}-${scaleKey}`,
-				),
-			};
-		}
-		const classes = mapValues(conditions, (conditionValue, conditionName) => {
-			const conditionalStyleValue = wrapConditionStyle({ [property]: scaleValue }, conditionValue);
-			return style(
-				options['@layer']
-					? { '@layer': { [options['@layer']]: conditionalStyleValue } }
-					: conditionalStyleValue,
+	const layered = (styleValue: Record<string, unknown>) =>
+		options['@layer'] ? { '@layer': { [options['@layer']]: styleValue } } : styleValue;
+	if (!conditions) {
+		const values = mapValues(scaleObj, (scaleValue, scaleKey) => ({
+			default: style(
+				layered(withMirror(property, scaleValue, options.mirror)),
+				`${property}-${scaleKey}`,
+			),
+		}));
+		return { name: property, staticScale: scale, values };
+	}
+	// Conditions are the outer loop, so every value's rule for a wider condition follows every
+	// value's rule for the narrower ones. A responsive value then resolves in condition order.
+	const classes: Record<string, Record<string, string>> = {};
+	for (const [conditionName, conditionValue] of Object.entries(conditions)) {
+		for (const [scaleKey, scaleValue] of Object.entries(scaleObj)) {
+			const styleValue = wrapConditionStyle(
+				withMirror(property, scaleValue, options.mirror),
+				conditionValue,
+			);
+			(classes[scaleKey] ??= {})[conditionName] = style(
+				layered(styleValue),
 				`${property}-${scaleKey}-${conditionName}`,
 			);
-		});
-		return { conditions: classes, default: classes[defaultCondition] ?? '' };
-	});
+		}
+	}
+	const values = mapValues(classes, (conditionClasses) => ({
+		conditions: conditionClasses,
+		default: conditionClasses[defaultCondition] ?? '',
+	}));
 	return { name: property, staticScale: scale, values };
 }
 
@@ -142,6 +171,7 @@ type DefinePropertiesOptions = CommonOptions & {
 	conditions?: ConfigConditions;
 	defaultCondition?: string;
 	dynamicProperties?: ConfigDynamicProperties;
+	mirrors?: Record<string, Mirror>;
 	staticProperties?: ConfigStaticProperties;
 };
 
@@ -154,12 +184,15 @@ export function defineProperties<
 	conditions?: Cond;
 	defaultCondition?: string;
 	dynamicProperties?: Dyn;
+	/** Custom properties each property's rules also set. See `Mirror`. */
+	mirrors?: Record<string, Mirror>;
 	staticProperties?: Stat;
 }): DefinePropertiesReturn<MakeConfig<Dyn, Stat, Cond>>;
 export function defineProperties(options: DefinePropertiesOptions): DefinePropertiesReturn {
 	const { conditions, dynamicProperties, staticProperties, defaultCondition } = options;
 	const config: SprinkleProperties = {};
 	const layerOptions = { '@layer': options['@layer'] };
+	const mirrors = options.mirrors ?? {};
 	const dynamicByName = new Map(Object.entries(dynamicProperties ?? {}));
 	const staticByName = new Map(Object.entries(staticProperties ?? {}));
 	const propertyNames = orderPropertiesBySpecificity([
@@ -174,7 +207,7 @@ export function defineProperties(options: DefinePropertiesOptions): DefineProper
 				dynamicScale as Record<string, string> | true,
 				conditions,
 				defaultCondition ?? '',
-				layerOptions,
+				{ ...layerOptions, mirror: mirrors[propertyName] },
 			);
 		}
 
@@ -185,7 +218,7 @@ export function defineProperties(options: DefinePropertiesOptions): DefineProper
 				staticScale as ReadonlyArray<string> | Record<string, string>,
 				conditions,
 				defaultCondition ?? '',
-				layerOptions,
+				{ ...layerOptions, mirror: mirrors[propertyName] },
 			);
 			config[propertyName] = Object.assign({}, config[propertyName], staticStyle);
 		}

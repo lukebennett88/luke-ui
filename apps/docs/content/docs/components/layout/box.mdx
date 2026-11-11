@@ -67,9 +67,10 @@ and `renderRoot` rule.
 ## Visual styles
 
 Box accepts theme-backed background, border colour, radius, and shadow values, plus fixed border
-width and style values. The values follow the [token reference](/docs/token-reference). Use a
-component API for interaction states and typography. `boxShadow` accepts `inset`, `resting`,
-`raised`, `floating`, and `overlay`, matching the `vars.shadow` leaves.
+width and style values. See [Concentric corners](#concentric-corners) for nested radii. The values
+follow the [token reference](/docs/token-reference). Use a component API for interaction states and
+typography. `boxShadow` accepts `inset`, `resting`, `raised`, `floating`, and `overlay`, matching
+the `vars.shadow` leaves.
 
 `backgroundColor` takes a standard surface, such as `surface.base`, or a role's resting fill, such
 as `accent.subtle` or `accent.solid`. A solid value paints the role's resting fill, so
@@ -91,6 +92,43 @@ from `@luke-ui/react/theme`. Read [Styling](/docs/styling#use-semantic-variables
 when to reach for `vars`, and the [token reference](/docs/token-reference) for the contract.
 
 <ExampleBlock src="box/visual-styles" title="Box: Visual styles" />
+
+## Concentric corners
+
+Set `borderRadius="concentric"` on a Box inside a rounded Box. Its corners take the outer radius
+minus the space between the two edges, so nested rounded surfaces stay parallel. The outer Box needs
+no extra prop. When a theme changes the outer radius, or a responsive value changes the padding, the
+inner corners follow.
+
+<ExampleBlock src="box/concentric-corners" title="Box: Concentric corners" />
+
+Pass `concentric` as a direct value. A responsive object does not accept it. Make the outer radius
+or padding responsive instead.
+
+A Box with a radius starts the surface that its concentric descendants follow. So does a Box that
+draws a border with `borderWidth` and `borderStyle`. A bordered Box with no radius is a square
+surface, so a concentric Box inside it is square. Concentric Boxes can nest to any depth, and each
+level follows the one around it.
+
+A Box with padding and no radius or border, such as a `Stack`, does not start a surface. A
+concentric Box inside it follows the rounded surface further out, and the padding between them
+counts. A `div` or another element with no padding between the two has no effect.
+
+When the inset depends on spacing that Box props do not set, the corners cannot follow it. Pass an
+explicit radius when:
+
+- padding or a border comes from `className`, `style`, or an element that is not a Box,
+- the concentric Box has a margin, or does not sit against its parent's padding edge,
+- the concentric Box is portalled out of the surface, or no Box around it has a radius or border.
+
+When two unequal insets meet at a corner, the corner is elliptical, as the inside of an uneven
+border is. Every corner follows the surface, so in a stack of cards the corners between two cards
+match the surface's outer corners too.
+
+Nested levels and padded Boxes between levels need container style queries: Chrome 111, Safari 18,
+or Firefox 151. In an older browser, a concentric Box directly inside a surface is still exact. A
+deeper level, or one inside a padded Box, has corners too round by the space it does not account
+for.
 
 ## API
 

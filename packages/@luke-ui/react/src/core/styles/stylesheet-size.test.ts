@@ -9,8 +9,11 @@ import { expect, test } from 'vite-plus/test';
 // shadow each surface pairing sets for a low Button, and the private ring colour each pairing sets
 // for the focus rings inside it, which adds 315 bytes. The built-in icon masks add 1,728 bytes: the
 // stylesheet carries every icon's SVG source, since no separate icon asset ships. The measured size
-// with them is 18,874 bytes.
-const maximumGzipBytes = 19_074;
+// with them is 18,874 bytes. Concentric corners add 1,481 bytes: a mirror declaration in each
+// padding, border, and radius utility rule, keyword classes for every border style and condition,
+// seven registered properties, and the rules that turn mirrored values into corners. The measured
+// size with them is 20,355 bytes.
+const maximumGzipBytes = 20_555;
 
 test('keeps the public stylesheet within its size budget', async () => {
 	const stylesheet = await readFile(new URL('../../../dist/stylesheet.css', import.meta.url));

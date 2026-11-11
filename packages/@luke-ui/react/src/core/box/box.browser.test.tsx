@@ -11,6 +11,7 @@ import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
 import {
 	expectForwardsDomProps,
 	expectHtmlElement,
@@ -496,3 +497,410 @@ for (const appearance of visualAppearances) {
 		});
 	});
 }
+
+type Corner = { horizontal: number; vertical: number };
+type Corners = Record<'bottomLeft' | 'bottomRight' | 'topLeft' | 'topRight', Corner>;
+
+/** An element's four computed corner radii in pixels, rounded to hundredths. */
+function cornerRadii(element: HTMLElement): Corners {
+	const style = getComputedStyle(element);
+	const corner = (value: string): Corner => {
+		const [horizontal = 0, vertical = horizontal] = value
+			.split(' ')
+			.map((part) => Math.round(Number.parseFloat(part) * 100) / 100);
+		return { horizontal, vertical };
+	};
+	return {
+		bottomLeft: corner(style.borderBottomLeftRadius),
+		bottomRight: corner(style.borderBottomRightRadius),
+		topLeft: corner(style.borderTopLeftRadius),
+		topRight: corner(style.borderTopRightRadius),
+	};
+}
+
+/**
+ * The corners a child needs to be concentric with `surface`: each of the surface's corners, less
+ * the gap between the two border boxes on that corner's sides. The gap is measured from layout, not
+ * read from the custom properties the feature uses.
+ */
+function concentricCorners(child: HTMLElement, surface: HTMLElement): Corners {
+	const outer = cornerRadii(surface);
+	const a = surface.getBoundingClientRect();
+	const b = child.getBoundingClientRect();
+	const gap = {
+		bottom: a.bottom - b.bottom,
+		left: b.left - a.left,
+		right: a.right - b.right,
+		top: b.top - a.top,
+	};
+	const inner = (corner: Corner, horizontal: number, vertical: number): Corner => ({
+		horizontal: Math.max(0, Math.round((corner.horizontal - horizontal) * 100) / 100),
+		vertical: Math.max(0, Math.round((corner.vertical - vertical) * 100) / 100),
+	});
+	return {
+		bottomLeft: inner(outer.bottomLeft, gap.left, gap.bottom),
+		bottomRight: inner(outer.bottomRight, gap.right, gap.bottom),
+		topLeft: inner(outer.topLeft, gap.left, gap.top),
+		topRight: inner(outer.topRight, gap.right, gap.top),
+	};
+}
+
+function uniformCorners(radius: number): Corners {
+	const corner = { horizontal: radius, vertical: radius };
+	return { bottomLeft: corner, bottomRight: corner, topLeft: corner, topRight: corner };
+}
+
+for (const appearance of visualAppearances) {
+	test(`concentric corners follow each surface through nested levels in ${appearance.theme} ${appearance.mode}`, () => {
+		const { container } = render(
+			<Box borderRadius="overlay" data-testid="surface" padding="space.4">
+				<Box borderRadius="concentric" data-testid="level-1" padding="space.4">
+					<Box borderRadius="concentric" data-testid="level-2" padding="space.4">
+						<Box borderRadius="concentric" data-testid="level-3">
+							Content
+						</Box>
+					</Box>
+				</Box>
+			</Box>,
+			{ appearance },
+		);
+		const surface = byTestId(container, 'surface');
+		const levels = ['level-1', 'level-2', 'level-3'].map((id) => byTestId(container, id));
+
+		expect(cornerRadii(levels[0]!)).toEqual(concentricCorners(levels[0]!, surface));
+		expect(cornerRadii(levels[1]!)).toEqual(concentricCorners(levels[1]!, levels[0]!));
+		expect(cornerRadii(levels[2]!)).toEqual(concentricCorners(levels[2]!, levels[1]!));
+		// The theme's overlay radius is larger than one inset, so the first level is rounded.
+		expect(cornerRadii(levels[0]!).topLeft.horizontal).toBeGreaterThan(0);
+	});
+}
+
+test('concentric corners have no nesting limit', () => {
+	const levels = 8;
+	let node = <Box borderRadius="concentric" data-testid={`level-${levels}`} />;
+	for (let level = levels - 1; level >= 1; level--) {
+		node = (
+			<Box borderRadius="concentric" data-testid={`level-${level}`} padding="space.4">
+				{node}
+			</Box>
+		);
+	}
+	const { container } = render(
+		<Box borderRadius="full" data-testid="level-0" padding="space.4">
+			{node}
+		</Box>,
+	);
+
+	for (let level = 1; level <= levels; level++) {
+		const child = byTestId(container, `level-${level}`);
+		const parent = byTestId(container, `level-${level - 1}`);
+		expect(cornerRadii(child), `level ${level}`).toEqual(concentricCorners(child, parent));
+	}
+});
+
+for (const direction of ['ltr', 'rtl'] as const) {
+	test(`concentric corners take each axis from its own logical side in ${direction}`, () => {
+		const { container } = render(
+			<div dir={direction}>
+				<Box
+					borderRadius="overlay"
+					data-testid="surface"
+					paddingBlockEnd="space.8"
+					paddingBlockStart="space.4"
+					paddingInlineEnd="space.12"
+					paddingInlineStart="space.8"
+				>
+					<Box borderRadius="concentric" data-testid="child">
+						Content
+					</Box>
+				</Box>
+			</div>,
+		);
+		const child = byTestId(container, 'child');
+		const corners = cornerRadii(child);
+
+		expect(corners).toEqual(concentricCorners(child, byTestId(container, 'surface')));
+		// Unequal insets give elliptical corners.
+		expect(corners.topLeft.horizontal).not.toBe(corners.topLeft.vertical);
+	});
+}
+
+test('a drawn border counts toward the inset', () => {
+	const { container } = render(
+		<Box
+			borderColor="decorative"
+			borderRadius="overlay"
+			borderStyle="solid"
+			borderWidth="thick"
+			data-testid="surface"
+			padding="space.4"
+		>
+			<Box borderRadius="concentric" data-testid="child">
+				Content
+			</Box>
+		</Box>,
+	);
+	const child = byTestId(container, 'child');
+
+	expect(cornerRadii(child)).toEqual(concentricCorners(child, byTestId(container, 'surface')));
+});
+
+test('a border width with no border style adds no inset', () => {
+	const { container } = render(
+		<Box borderRadius="overlay" borderWidth="thick" data-testid="surface" padding="space.4">
+			<Box borderRadius="concentric" data-testid="child">
+				Content
+			</Box>
+		</Box>,
+	);
+	const surface = byTestId(container, 'surface');
+	const child = byTestId(container, 'child');
+
+	expect(getComputedStyle(surface).borderTopStyle).toBe('none');
+	expect(cornerRadii(child)).toEqual(concentricCorners(child, surface));
+});
+
+test('a padded Box with no radius passes the surface corners on, less its padding', () => {
+	const { container } = render(
+		<Box borderRadius="overlay" data-testid="surface" padding="space.4">
+			<Box paddingBlock="space.4">
+				<Box display="flex" flexDirection="column" paddingInlineStart="space.8">
+					<Box borderRadius="concentric" data-testid="child">
+						Content
+					</Box>
+				</Box>
+			</Box>
+		</Box>,
+	);
+	const child = byTestId(container, 'child');
+
+	expect(cornerRadii(child)).toEqual(concentricCorners(child, byTestId(container, 'surface')));
+});
+
+test('a Box with a drawn border and no radius is a square surface', () => {
+	const { container } = render(
+		<Box borderRadius="overlay" padding="space.4">
+			<Box
+				borderColor="decorative"
+				borderStyle="solid"
+				borderWidth="thin"
+				data-testid="square"
+				padding="space.4"
+			>
+				<Box borderRadius="concentric" data-testid="child">
+					Content
+				</Box>
+			</Box>
+		</Box>,
+	);
+
+	expect(cornerRadii(byTestId(container, 'child'))).toEqual(uniformCorners(0));
+});
+
+test('a plain element between keeps the corners of the surface around it', () => {
+	const { container } = render(
+		<Box borderRadius="overlay" data-testid="surface" padding="space.8">
+			<section>
+				<Box borderRadius="concentric" data-testid="child">
+					Content
+				</Box>
+			</section>
+		</Box>,
+	);
+	const child = byTestId(container, 'child');
+
+	expect(cornerRadii(child)).toEqual(concentricCorners(child, byTestId(container, 'surface')));
+});
+
+test('an explicit radius on a nested Box starts a new surface', () => {
+	const { container } = render(
+		<Box borderRadius="overlay" padding="space.4">
+			<Box borderRadius="detail" data-testid="surface" padding="space.4">
+				<Box borderRadius="concentric" data-testid="child">
+					Content
+				</Box>
+			</Box>
+		</Box>,
+	);
+	const child = byTestId(container, 'child');
+
+	expect(cornerRadii(child)).toEqual(concentricCorners(child, byTestId(container, 'surface')));
+});
+
+test('a concentric Box with no surface around it has square corners', () => {
+	const { container } = render(
+		<Box borderRadius="concentric" data-testid="child" padding="space.8">
+			Content
+		</Box>,
+	);
+
+	expect(cornerRadii(byTestId(container, 'child'))).toEqual(uniformCorners(0));
+});
+
+test('concentric corners follow responsive padding precedence', () => {
+	// `paddingInline` replaces the shorthand only from bp768, so below it every side keeps `space.12`.
+	const { container } = render(
+		<>
+			{[breakpoints.bp768 - 1, breakpoints.bp768].map((inlineSize) => (
+				<div
+					key={inlineSize}
+					style={{ containerType: 'inline-size', inlineSize: `${inlineSize}px` }}
+				>
+					<Box
+						borderRadius="overlay"
+						data-testid={`surface-${inlineSize}`}
+						padding="space.12"
+						paddingInline={{ bp768: 'space.4' }}
+					>
+						<Box borderRadius="concentric" data-testid={`child-${inlineSize}`}>
+							Content
+						</Box>
+					</Box>
+				</div>
+			))}
+		</>,
+	);
+
+	for (const inlineSize of [breakpoints.bp768 - 1, breakpoints.bp768]) {
+		const surface = byTestId(container, `surface-${inlineSize}`);
+		const child = byTestId(container, `child-${inlineSize}`);
+		expect(cornerRadii(child), `${inlineSize}px`).toEqual(concentricCorners(child, surface));
+	}
+	const narrow = getComputedStyle(byTestId(container, `surface-${breakpoints.bp768 - 1}`));
+	const wide = getComputedStyle(byTestId(container, `surface-${breakpoints.bp768}`));
+	expect(narrow.paddingLeft).toBe(narrow.paddingTop);
+	expect(wide.paddingLeft).not.toBe(wide.paddingTop);
+});
+
+test('a radius or border that starts at a breakpoint makes a surface from that breakpoint', () => {
+	const widths = [breakpoints.bp768 - 1, breakpoints.bp768] as const;
+	const { container } = render(
+		<>
+			{widths.map((inlineSize) => (
+				<div
+					key={inlineSize}
+					style={{ containerType: 'inline-size', inlineSize: `${inlineSize}px` }}
+				>
+					<Box borderRadius="overlay" data-testid={`radius-outer-${inlineSize}`} padding="space.4">
+						<Box
+							borderRadius={{ bp768: 'detail' }}
+							data-testid={`radius-${inlineSize}`}
+							padding="space.4"
+						>
+							<Box borderRadius="concentric" data-testid={`radius-child-${inlineSize}`}>
+								Content
+							</Box>
+						</Box>
+					</Box>
+					<Box borderRadius="overlay" data-testid={`border-outer-${inlineSize}`} padding="space.4">
+						<Box
+							borderColor="decorative"
+							borderStyle={{ bp768: 'solid', initial: 'none' }}
+							borderWidth="thin"
+							padding="space.4"
+						>
+							<Box borderRadius="concentric" data-testid={`border-child-${inlineSize}`}>
+								Content
+							</Box>
+						</Box>
+					</Box>
+				</div>
+			))}
+		</>,
+	);
+	const [below, above] = widths;
+
+	// Below the breakpoint both Boxes are spacing, so their children follow the outer surface.
+	for (const kind of ['radius', 'border']) {
+		const child = byTestId(container, `${kind}-child-${below}`);
+		const outer = byTestId(container, `${kind}-outer-${below}`);
+		expect({ [kind]: cornerRadii(child) }).toEqual({ [kind]: concentricCorners(child, outer) });
+	}
+	// From the breakpoint the radius makes a surface, and the border makes a square one.
+	const radiusChild = byTestId(container, `radius-child-${above}`);
+	expect(cornerRadii(radiusChild)).toEqual(
+		concentricCorners(radiusChild, byTestId(container, `radius-${above}`)),
+	);
+	expect(cornerRadii(byTestId(container, `border-child-${above}`))).toEqual(uniformCorners(0));
+});
+
+test('consumer className and style override concentric corners', () => {
+	const style = document.head.appendChild(document.createElement('style'));
+	style.textContent = '.consumer-radius { border-radius: 2px; }';
+	try {
+		const { container } = render(
+			<Box borderRadius="overlay" padding="space.4">
+				<Box borderRadius="concentric" className="consumer-radius" data-testid="class">
+					Class
+				</Box>
+				<Box borderRadius="concentric" data-testid="style" style={{ borderRadius: 3 }}>
+					Style
+				</Box>
+			</Box>,
+		);
+
+		expect(cornerRadii(byTestId(container, 'class'))).toEqual(uniformCorners(2));
+		expect(cornerRadii(byTestId(container, 'style'))).toEqual(uniformCorners(3));
+	} finally {
+		style.remove();
+	}
+});
+
+test('a nested concentric card has no axe violations', async () => {
+	const { container } = render(
+		<Box backgroundColor="surface.raised" borderRadius="overlay" padding="space.8">
+			<Box backgroundColor="surface.subdued" borderRadius="concentric" padding="space.12">
+				<Text>Card content</Text>
+			</Box>
+		</Box>,
+	);
+
+	await expectNoAxeViolations(container);
+});
+
+test('concentric corners', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator: scene } = render(
+			<Box display="flex" flexWrap="wrap" gap="space.16" padding="space.16">
+				<Box backgroundColor="surface.subdued" borderRadius="overlay" padding="space.8">
+					<Box
+						backgroundColor="surface.raised"
+						borderRadius="concentric"
+						boxShadow="resting"
+						padding="space.4"
+					>
+						<Box backgroundColor="accent.subtle" borderRadius="concentric" padding="space.8">
+							Uniform
+						</Box>
+					</Box>
+				</Box>
+				<Box
+					backgroundColor="surface.subdued"
+					borderRadius="overlay"
+					paddingBlock="space.4"
+					paddingInline="space.12"
+				>
+					<Box backgroundColor="accent.subtle" borderRadius="concentric" padding="space.8">
+						Elliptical
+					</Box>
+				</Box>
+				<Box
+					backgroundColor="surface.subdued"
+					borderColor="decorative"
+					borderRadius="overlay"
+					borderStyle="solid"
+					borderWidth="thick"
+					padding="space.4"
+				>
+					<Box paddingInline="space.4">
+						<Box backgroundColor="accent.subtle" borderRadius="concentric" padding="space.8">
+							Border and spacing
+						</Box>
+					</Box>
+				</Box>
+			</Box>,
+			{ appearance },
+		);
+		await captureVisualAppearance(scene, 'box/concentric', appearance);
+	}
+});

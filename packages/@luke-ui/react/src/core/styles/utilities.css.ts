@@ -5,6 +5,7 @@ import { typedEntries } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import type { Prettify } from '../types/prettify.js';
+import { defineConcentricRadius } from './concentric-radius.js';
 import { layers } from './layers.css.js';
 import { responsiveConditions } from './responsive-conditions.js';
 import { spaceTokens } from './space-tokens.js';
@@ -96,6 +97,14 @@ const borderColorScale = {
 	),
 } as { [Token in BorderColorToken]: string };
 
+/**
+ * Keyword properties: one class per value and condition, rather than a variable. A border style's
+ * rule also records whether it draws a border, which concentric corners read.
+ */
+const staticProperties = {
+	borderStyle: { none: 'none', solid: 'solid', dashed: 'dashed', dotted: 'dotted' },
+} as const;
+
 /** Property scales shared by the runtime config and the public prop types. */
 const dynamicProperties = {
 	alignContent: {
@@ -133,7 +142,6 @@ const dynamicProperties = {
 	// `control` and every `<role>.strong` are guaranteed 3:1 boundaries. `decorative` is not.
 	borderColor: borderColorScale,
 	borderRadius: vars.radius,
-	borderStyle: { none: 'none', solid: 'solid', dashed: 'dashed', dotted: 'dotted' },
 	borderWidth: borderWidthScale,
 	boxShadow: vars.shadow,
 	columnGap: spaceScale,
@@ -290,12 +298,17 @@ type ResponsiveValue<Value> =
  * so public declarations and docs do not depend on the styling engine's config.
  */
 type UtilityScales = typeof dynamicProperties &
-	Record<'backgroundColor', Record<(typeof backgroundColorTokens)[number], string>>;
+	Record<'backgroundColor', Record<(typeof backgroundColorTokens)[number], string>> &
+	typeof staticProperties;
 
+/**
+ * `borderRadius` also accepts `concentric`: the corners of the surface around the Box, less the
+ * inset between them. It is a direct value only, because it follows the responsive values around it.
+ */
 type SprinklesPropsShape = {
-	[Property in keyof UtilityScales]?: ResponsiveValue<
-		ScaleValue<Property, UtilityScales[Property]>
-	>;
+	[Property in keyof UtilityScales]?: Property extends 'borderRadius'
+		? ResponsiveValue<ScaleValue<Property, UtilityScales[Property]>> | 'concentric'
+		: ResponsiveValue<ScaleValue<Property, UtilityScales[Property]>>;
 };
 
 /**
@@ -320,21 +333,49 @@ type CreateSprinkles = {
 	readonly properties: ReadonlySet<keyof SprinklesProps>;
 };
 
+const concentricRadius = defineConcentricRadius();
+
+const properties = defineProperties({
+	'@layer': layers.utilities,
+	conditions: responsiveConditions,
+	defaultCondition: 'initial',
+	dynamicProperties,
+	mirrors: concentricRadius.mirrors,
+	staticProperties,
+});
+
+/** Every class a concentric mirror is attached to. */
+const geometryClasses = Object.keys(concentricRadius.mirrors).flatMap((property) => {
+	const entry = (properties.config as Record<string, unknown>)[property] as {
+		dynamic?: { conditions: Record<string, string> };
+		values?: Record<string, { conditions: Record<string, string> }>;
+	};
+	const classes = entry.dynamic
+		? [entry.dynamic.conditions]
+		: Object.values(entry.values ?? {}).map((value) => value.conditions);
+	return classes.flatMap((conditions) => Object.values(conditions));
+});
+
+const concentricClassName = concentricRadius.emitRules(layers.utilities, geometryClasses);
+
 /** Package-internal utilities, including paired background classes. */
-export const createSprinkles: CreateSprinkles = defineSprinkles(
-	defineProperties({
-		'@layer': layers.utilities,
-		conditions: responsiveConditions,
-		defaultCondition: 'initial',
-		dynamicProperties,
-	}),
-	{
-		config: {
-			backgroundColor: {
-				name: 'backgroundColor',
-				staticScale: backgroundColorTokens,
-				values: backgroundColorValues,
+export const createSprinkles: CreateSprinkles = defineSprinkles(properties, {
+	config: {
+		backgroundColor: {
+			name: 'backgroundColor',
+			staticScale: backgroundColorTokens,
+			values: backgroundColorValues,
+		},
+		// `concentric` is one class with no responsive conditions. Token radii stay dynamic.
+		borderRadius: {
+			...properties.config.borderRadius,
+			staticScale: ['concentric'],
+			values: {
+				concentric: {
+					conditions: { initial: concentricClassName },
+					default: concentricClassName,
+				},
 			},
 		},
 	},
-);
+});

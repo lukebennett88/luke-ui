@@ -1,4 +1,5 @@
 export type { SprinklesFn } from './create-runtime-fn.js';
+export type { Mirror } from './define-properties.js';
 export { defineProperties } from './define-properties.js';
 export { defineSprinkles } from './define-sprinkles.js';
 export type {

@@ -212,6 +212,27 @@ test('border props reject CSS values outside the design system vocabulary', () =
 	assertType<UtilityProps['borderStyle']>('groove');
 });
 
+test('concentric corners are one class with no inline value, and only a direct value', () => {
+	const { className, style } = createSprinkles({ borderRadius: 'concentric' });
+
+	expect(className).not.toBe('');
+	expect(style).toEqual({});
+	expect(className).not.toBe(createSprinkles({ borderRadius: 'overlay' }).className);
+	assertType<UtilityProps['borderRadius']>({ initial: 'detail', bp768: 'overlay' });
+	// @ts-expect-error — concentric follows responsive values around it, so it is never responsive
+	assertType<UtilityProps['borderRadius']>({ initial: 'concentric' });
+});
+
+test('border styles are classes per value and condition, with no inline value', () => {
+	const solid = createSprinkles({ borderStyle: 'solid' });
+	const responsive = createSprinkles({ borderStyle: { initial: 'none', bp768: 'solid' } });
+
+	expect(solid.style).toEqual({});
+	expect(responsive.style).toEqual({});
+	expect(responsive.className.split(' ')).toHaveLength(2);
+	expect(responsive.className.split(' ')).not.toContain(solid.className);
+});
+
 test('alignment props accept start and end, which grid alignment uses', () => {
 	expectTypeOf<'start'>().toExtend<UtilityProps['alignItems']>();
 	expectTypeOf<'end'>().toExtend<UtilityProps['alignItems']>();

@@ -583,6 +583,43 @@ A container query with no container never matches, so the style silently stays a
 not set `container-type` on an element below the root without naming the container: unnamed queries
 on its descendants would start measuring it.
 
+### Concentric corners
+
+`borderRadius="concentric"` gives a Box the corners of the surface around it, less the inset between
+them. `core/styles/concentric-radius.ts` owns it. It is static CSS: no React context, no layout
+measurement, and no inline custom property. The design record is
+[#874](https://github.com/lukebennett88/luke-ui/issues/874#issuecomment-6807981229), and the
+research harness and measurements are in the closed
+[#1060](https://github.com/lukebennett88/luke-ui/pull/1060).
+
+- **Mirrors.** Each padding, border width, border style, and radius utility rule also sets a private
+  registered custom property. The class that wins the cascade at a width also sets the value the
+  corners read, so shorthand, side, and breakpoint precedence need no separate resolution. Rainbow
+  Sprinkles' `mirrors` option adds them. `borderStyle` is a keyword property, one class per value
+  and condition, so its rule can record whether a border is drawn.
+- **Surfaces.** A Box with a radius, or with a drawn border, offers each side its own radius less
+  its padding and border. A drawn border with no radius offers zero: a square surface. Any other Box
+  with padding passes its parent's values on, less its padding. One `max()` expression decides
+  between them from the mirrored values, so the decision follows each breakpoint without a selector.
+- **Two sets.** A custom property cannot be defined from its own inherited value, so a Box that
+  passes values on reads one set and writes the other. A container style query on a parity property
+  chooses the set, which removes any depth limit.
+- **Gate.** Every rule that writes applies only to a Box that contains a concentric Box, through
+  `:has()`. A page that never uses the feature pays for the mirrors, and for testing these rules
+  against elements that have a padding, border, or radius class.
+
+Every concentric rule sits in `luke-ui.utilities` with the specificity of one class, like every
+other utility. Only `.concentric` sets a CSS property: the four corners. The other rules set private
+custom properties that no other rule sets, so they compete only with each other. Each selector leads
+with one plain class, and the rest sits inside `:where()`. Browsers index a rule by that leading
+class and skip it for elements without the class. A selector that is wholly inside `:where()` is
+tested against every element on each restyle. Do not raise a concentric rule's specificity to settle
+an ordering problem. Put the decision in the value instead.
+
+A browser without container style queries applies the base rules only: a concentric Box directly
+inside a surface is exact, and deeper levels or padded wrappers are too round by the inset they
+miss. The supported and unsupported layouts are public in the Box guide.
+
 ### Utility surface
 
 The supported properties live in `core/styles/utilities.css.ts`. Use CSS-native values throughout,
