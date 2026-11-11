@@ -3,12 +3,12 @@ import { TextInput, TextInputControl, TextInputRoot } from '@luke-ui/react/primi
 import { Stack } from '@luke-ui/react/stack';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import type { ProfileUpdate } from '../api/schemas.js';
-import { profileSchema } from '../api/schemas.js';
-import { settingsApi, settingsMutationErrorMessage } from '../api/settings-api.js';
-import { settingsQueryKey } from '../api/settings-query.js';
-import * as styles from '../styles/settings.css.js';
-import { SettingsRowControl, SettingsRowShell } from './settings-section.js';
+import { settingsApi, settingsMutationErrorMessage } from '../settings-api.js';
+import { settingsQueryKey } from '../settings-query.js';
+import { SettingsRowControl, SettingsRowShell } from '../settings-section.js';
+import * as styles from '../settings.css.js';
+import type { ProfileUpdate } from './schema.js';
+import { profileSchema } from './schema.js';
 
 type ProfileField = 'displayName' | 'title' | 'username';
 

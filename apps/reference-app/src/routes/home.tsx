@@ -5,8 +5,8 @@ import { Link } from '@luke-ui/react/link';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { useQuery } from '@tanstack/react-query';
-import { settingsQueryOptions } from '../api/settings-query.js';
-import * as styles from '../styles/settings.css.js';
+import { settingsQueryOptions } from '../settings/settings-query.js';
+import * as styles from '../settings/settings.css.js';
 
 const NAME_PARTS_PATTERN = /\s+/;
 

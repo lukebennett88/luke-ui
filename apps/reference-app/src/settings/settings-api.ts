@@ -1,10 +1,9 @@
-import type { Preferences, ProfileUpdate, Settings } from './schemas.js';
-import {
-	DEFAULT_SETTINGS,
-	preferenceUpdateSchema,
-	profileUpdateSchema,
-	settingsSchema,
-} from './schemas.js';
+import type { Preferences } from './preferences/schema.js';
+import { preferenceUpdateSchema } from './preferences/schema.js';
+import type { ProfileUpdate } from './profile/schema.js';
+import { profileUpdateSchema } from './profile/schema.js';
+import type { Settings } from './schemas.js';
+import { DEFAULT_SETTINGS, settingsSchema } from './schemas.js';
 
 const STORAGE_KEY = 'reference-app.settings';
 
@@ -95,18 +94,6 @@ export function settingsMutationErrorMessage(error: unknown, field?: string) {
 	}
 	if (error instanceof Error) return error.message;
 	return;
-}
-
-export function applyInterfaceSettings(settings: Preferences) {
-	const root = document.documentElement;
-	if (settings.colorMode === 'system') {
-		delete root.dataset.colorMode;
-	} else {
-		root.dataset.colorMode = settings.colorMode;
-	}
-	root.dataset.fontSize = settings.fontSize;
-	root.dataset.pointerCursor = settings.pointerCursor ? 'true' : 'false';
-	root.dataset.underlineLinks = settings.underlineLinks ? 'true' : 'false';
 }
 
 function readRaw(): Settings {

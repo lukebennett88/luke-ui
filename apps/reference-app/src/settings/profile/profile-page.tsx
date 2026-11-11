@@ -1,11 +1,11 @@
 import { Cluster } from '@luke-ui/react/cluster';
 import { Text } from '@luke-ui/react/text';
 import { useQuery } from '@tanstack/react-query';
-import { settingsQueryOptions } from '../api/settings-query.js';
-import { ChangeEmailDialog } from '../components/change-email-dialog.js';
-import { ProfileAvatarSection } from '../components/profile-avatar-section.js';
-import { ProfileTextField } from '../components/profile-text-field.js';
-import { SettingsPage, SettingsRow } from '../components/settings-section.js';
+import { settingsQueryOptions } from '../settings-query.js';
+import { SettingsPage, SettingsRow } from '../settings-section.js';
+import { ChangeEmailDialog } from './change-email-dialog.js';
+import { ProfileAvatarSection } from './profile-avatar-section.js';
+import { ProfileTextField } from './profile-text-field.js';
 
 export function ProfilePage() {
 	const profile = useQuery(settingsQueryOptions).data!.profile;
