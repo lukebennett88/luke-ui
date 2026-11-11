@@ -8,9 +8,6 @@ import {
 	THEME_IDENTITY_STORAGE_KEY,
 } from './theme-prefs-shared.js';
 
-export type { ColorModePreference, ThemeIdentity, ThemePrefs } from './theme-prefs-shared.js';
-export { COLOR_MODE_STORAGE_KEY, THEME_IDENTITY_STORAGE_KEY } from './theme-prefs-shared.js';
-
 type ColorMode = 'light' | 'dark';
 
 export interface ThemePrefsSnapshot extends ThemePrefs {

@@ -7,8 +7,8 @@ import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import type { SubmitEvent } from 'react';
 import { useSyncExternalStore, useTransition } from 'react';
+import { ThemeControls } from '../appearance/theme-controls.js';
 import { getIsMacKeyboardPlatformSnapshot } from './search.js';
-import { ThemeControls } from './theme-controls.js';
 
 /** A themed form demonstrating browser validation and a pending Button. */
 export function HomeShowcase() {

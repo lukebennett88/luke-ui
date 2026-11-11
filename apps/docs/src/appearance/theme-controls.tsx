@@ -2,16 +2,19 @@ import type { CustomIconProps } from '@luke-ui/react/icon';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, ComponentType, PropsWithChildren } from 'react';
 import { useSyncExternalStore } from 'react';
-import type { ColorModePreference, ThemeIdentity } from '../lib/theme-prefs.js';
+import { MoonIcon, SunIcon } from '../components/docs-icons.js';
+import {
+	IconToggleButtonGroup,
+	TextToggleButtonGroup,
+} from '../components/icon-toggle-button-group.js';
+import * as styles from './theme-controls.css.js';
+import type { ColorModePreference, ThemeIdentity } from './theme-prefs-shared.js';
 import {
 	getServerThemePrefsSnapshot,
 	getThemePrefsSnapshot,
 	subscribeToThemePrefs,
 	writeThemePrefs,
-} from '../lib/theme-prefs.js';
-import { MoonIcon, SunIcon } from './docs-icons.js';
-import { IconToggleButtonGroup, TextToggleButtonGroup } from './icon-toggle-button-group.js';
-import * as styles from './theme-controls.css.js';
+} from './theme-prefs.js';
 
 /**
  * The column that holds docs content. `<html>` carries the identity class, and `data-color-mode` for

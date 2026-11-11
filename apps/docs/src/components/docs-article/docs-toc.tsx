@@ -8,8 +8,8 @@ import { useActiveAnchor } from 'fumadocs-core/toc';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { CSSProperties, ReactNode } from 'react';
 import { useCallback, useEffect, useRef } from 'react';
+import { docsNavPaneProps } from '../../navigation/docs-nav.js';
 import { plainList } from '../../styles/plain-list.css.js';
-import { docsNavPaneProps } from '../docs-nav.js';
 import * as styles from './docs-article.css.js';
 
 const TOC_LABEL = 'On this page';

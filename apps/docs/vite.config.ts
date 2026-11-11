@@ -133,7 +133,7 @@ export default defineConfig(async ({ command }) => {
 				dts: false,
 				// Emitted as src/generated/theme-prefs-script.iife.js — the `.iife`
 				// suffix is fixed by tsdown for this format.
-				entry: ['src/lib/theme-prefs-script.ts'],
+				entry: ['src/appearance/theme-prefs-script.ts'],
 				format: 'iife' as const,
 				// The artifact is inlined into every page response, so strip the
 				// source's documentation comments.

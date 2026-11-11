@@ -2,14 +2,14 @@ import { Box } from '@luke-ui/react/box';
 import type { Root } from 'fumadocs-core/page-tree';
 import type { ReactNode } from 'react';
 import { useSyncExternalStore } from 'react';
-import { DOCS_SHELL_ID } from '../lib/docs-container-queries.js';
+import { DOCS_SHELL_ID } from './docs-container-queries.js';
+import { DocsNav } from './docs-nav.js';
+import * as styles from './docs-shell.css.js';
 import {
 	getIsSidebarCollapsedSnapshot,
 	getServerIsSidebarCollapsedSnapshot,
 	subscribeToSidebarPref,
-} from '../lib/sidebar-prefs.js';
-import { DocsNav } from './docs-nav.js';
-import * as styles from './docs-shell.css.js';
+} from './sidebar-prefs.js';
 import { DOCS_SIDEBAR_ID, SiteHeader } from './site-header.js';
 
 /**

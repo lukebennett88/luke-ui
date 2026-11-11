@@ -10,7 +10,7 @@ import { globalStyle, style } from '@vanilla-extract/css';
 /**
  * Named container, so the narrow layout follows the table's own column instead of the viewport.
  * It sits below `:root`, so it is named: the shell's unnamed queries keep resolving against the
- * root (see `lib/docs-container-queries.ts`).
+ * root (see `navigation/docs-container-queries.ts`).
  */
 const TABLE_CONTAINER = 'reference-table';
 /** Below this inline size the columns stack, as React Aria's API tables do below `sm`. */

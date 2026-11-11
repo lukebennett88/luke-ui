@@ -14,10 +14,10 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { NotFound } from './not-found.js';
-import { DocsSearchProvider } from './search.js';
+import { DocsThemeRoot } from '../appearance/theme-controls.js';
+import { NotFound } from '../components/not-found.js';
+import { DocsSearchProvider } from '../components/search.js';
 import { SiteHeader } from './site-header.js';
-import { DocsThemeRoot } from './theme-controls.js';
 
 const tree: PageTree = {
 	name: 'Docs',

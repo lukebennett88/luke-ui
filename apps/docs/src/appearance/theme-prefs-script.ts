@@ -12,7 +12,7 @@ import {
 	applySidebarCollapsed,
 	parseIsSidebarCollapsed,
 	SIDEBAR_STORAGE_KEY,
-} from './sidebar-prefs-shared.js';
+} from '../navigation/sidebar-prefs-shared.js';
 import {
 	applyThemePrefs,
 	COLOR_MODE_STORAGE_KEY,

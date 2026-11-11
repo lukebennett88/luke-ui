@@ -9,12 +9,12 @@ import { license } from '../../../../packages/@luke-ui/react/package.json';
 import { CodeBlock } from '../components/code-block/code-block.js';
 import { HomeSectionLinks } from '../components/home-section-links.js';
 import { HomeShowcase, SearchShortcut } from '../components/home-showcase.js';
-import { SiteFrame } from '../components/site-frame.js';
 import { withBasePath } from '../lib/base-path.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
 import { HOME_INTRO, INSTALL_COMMAND } from '../lib/home-content.js';
 import { resolvePageHeadMeta } from '../lib/page-head.js';
 import { siteUrl } from '../lib/site-url.js';
+import { SiteFrame } from '../navigation/site-frame.js';
 
 export const Route = createFileRoute('/')({
 	component: Home,

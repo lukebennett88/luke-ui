@@ -11,11 +11,11 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, assert, expect, test, vi } from 'vite-plus/test';
 import { cdp, commands, page, userEvent } from 'vite-plus/test/context';
+import { DocsThemeRoot } from '../appearance/theme-controls.js';
 import responsiveLayoutSource from '../examples/box/responsive-layout.tsx?raw';
 import { ExampleBlock } from './example-block.js';
 import { ExampleCodePreview } from './example-code-preview.js';
 import { ExamplePreview } from './example-preview.js';
-import { DocsThemeRoot } from './theme-controls.js';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;

@@ -1,7 +1,7 @@
 import { vars } from '@luke-ui/react/theme';
 import { globalStyle, style } from '@vanilla-extract/css';
-import { docsTabletMinInlineSize } from '../lib/docs-container-queries.js';
 import { monacoChromeColors } from '../lib/shiki-theme.js';
+import { docsTabletMinInlineSize } from '../navigation/docs-container-queries.js';
 
 const SEPARATOR_THUMB_THICKNESS = '0.375rem';
 const SEPARATOR_THUMB_LENGTH = '4rem';

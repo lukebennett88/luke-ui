@@ -1,13 +1,13 @@
 import { vars } from '@luke-ui/react/theme';
 import { interactionState } from '@luke-ui/react/utils';
 import { createVar, style } from '@vanilla-extract/css';
+import { ARTICLE_MAX_INLINE_SIZE } from '../components/docs-article/article-size.js';
 import {
 	DOCS_SHELL_CONTAINER,
 	docsSidebarMinInlineSize,
 	docsTocMinInlineSize,
-} from '../lib/docs-container-queries.js';
-import { SIDEBAR_COLLAPSED_SELECTOR } from '../lib/sidebar-prefs-shared.js';
-import { ARTICLE_MAX_INLINE_SIZE } from './docs-article/article-size.js';
+} from './docs-container-queries.js';
+import { SIDEBAR_COLLAPSED_SELECTOR } from './sidebar-prefs-shared.js';
 import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
 import { siteGutter } from './site-header.css.js';
 

@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
+import { subscribeToThemePrefs } from '../appearance/theme-prefs.js';
 import type { ThemeToken } from '../generated/token-reference.generated.js';
-import { subscribeToThemePrefs } from './theme-prefs.js';
 
 /**
  * A token's resolved value in the active theme, written for reading: colours as hex (or `rgba()`

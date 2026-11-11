@@ -1,7 +1,7 @@
 import { breakpoints, vars } from '@luke-ui/react/theme';
 import { visuallyHiddenStyle } from '@luke-ui/react/visually-hidden';
 import { globalStyle, keyframes, style } from '@vanilla-extract/css';
-import { SITE_HEADER_BLOCK_SIZE } from './site-header-size.js';
+import { SITE_HEADER_BLOCK_SIZE } from '../navigation/site-header-size.js';
 
 /** Sticky token panel headers sit below the site header. */
 const TOKEN_REFERENCE_PANEL_HEADER_INSET = SITE_HEADER_BLOCK_SIZE;

@@ -14,13 +14,13 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import { DocsThemeRoot } from '../appearance/theme-controls.js';
+import { DocsSearchProvider } from '../components/search.js';
 import {
 	getDocsSidebarMinPixels,
 	getSiteHeaderDesktopMinPixels,
-} from '../lib/docs-container-queries.js';
+} from './docs-container-queries.js';
 import { DocsShell } from './docs-shell.js';
-import { DocsSearchProvider } from './search.js';
-import { DocsThemeRoot } from './theme-controls.js';
 
 const tree: PageTree = {
 	name: 'Docs',

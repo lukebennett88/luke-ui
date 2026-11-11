@@ -21,7 +21,6 @@ import {
 	MdxParagraph,
 	MdxTable,
 } from '../components/docs-article/mdx-elements.js';
-import { DocsShell } from '../components/docs-shell.js';
 import { ExampleBlock } from '../components/example-block';
 import { IconGallery } from '../components/icon-gallery';
 import type { PageActionsMode } from '../components/page-actions';
@@ -34,6 +33,7 @@ import { resolvePageHeadMeta } from '../lib/page-head.js';
 import { findPageSectionName } from '../lib/page-section.js';
 import { siteUrl } from '../lib/site-url.js';
 import { source } from '../lib/source';
+import { DocsShell } from '../navigation/docs-shell.js';
 import { ComponentPropsTable } from '../type-reference/component-props-table.js';
 import { TypeTable } from '../type-reference/type-table.js';
 

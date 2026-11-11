@@ -67,6 +67,38 @@ export const docsLintOverrides =
 					},
 				},
 				{
+					files: ['apps/docs/src/components/search*.{ts,tsx}'],
+					rules: {
+						'no-restricted-imports': [
+							'error',
+							{
+								patterns: [
+									{
+										group: ['**/lib/source', '**/lib/source.js'],
+										message: 'Browser search must not import the server content source.',
+									},
+								],
+							},
+						],
+					},
+				},
+				{
+					files: ['apps/docs/src/appearance/**/*.{ts,tsx}'],
+					rules: {
+						'no-restricted-imports': [
+							'error',
+							{
+								patterns: [
+									{
+										group: ['**/playground/**'],
+										message: 'Appearance must not depend on Playground.',
+									},
+								],
+							},
+						],
+					},
+				},
+				{
 					files: ['apps/docs/src/playground/generate/**/*.ts'],
 					rules: { 'no-console': 'off' },
 				},

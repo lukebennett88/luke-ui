@@ -5,12 +5,12 @@ import type { Root } from 'fumadocs-core/page-tree';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Modal, ModalOverlay } from 'react-aria-components/Modal';
-import { useIsDocsSidebarLayout, useIsSiteHeaderDesktop } from '../lib/docs-container-queries.js';
+import { DocsLink } from '../components/docs-link.js';
+import { GithubMark } from '../components/github-mark.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
-import { getActiveSiteDestination, siteDestinations } from '../lib/site-destinations.js';
-import { DocsLink } from './docs-link.js';
+import { useIsDocsSidebarLayout, useIsSiteHeaderDesktop } from './docs-container-queries.js';
 import { DocsNav, DocsNavLink } from './docs-nav.js';
-import { GithubMark } from './github-mark.js';
+import { getActiveSiteDestination, siteDestinations } from './site-destinations.js';
 import * as styles from './site-drawer.css.js';
 
 /**

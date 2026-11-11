@@ -10,10 +10,10 @@ import { fallbackVar } from '@vanilla-extract/css';
 import type { Folder, Node, Root, Separator } from 'fumadocs-core/page-tree';
 import type { ReactNode } from 'react';
 import { useId } from 'react';
-import { getActiveSiteDestination } from '../lib/site-destinations.js';
+import { DocsLink } from '../components/docs-link.js';
 import { plainList } from '../styles/plain-list.css.js';
-import { DocsLink } from './docs-link.js';
 import * as styles from './docs-shell.css.js';
+import { getActiveSiteDestination } from './site-destinations.js';
 
 type NavItem = Exclude<Node, Separator>;
 
