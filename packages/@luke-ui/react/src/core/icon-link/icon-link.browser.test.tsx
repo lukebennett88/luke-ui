@@ -1,3 +1,4 @@
+import { createIcon } from '@luke-ui/react/icon';
 import { IconLink } from '@luke-ui/react/icon-link';
 import type { JSX } from 'react';
 import { expect, test } from 'vite-plus/test';
@@ -20,6 +21,30 @@ function UnlabelledCustomIcon(): JSX.Element {
 		</svg>
 	);
 }
+
+const CreatedIcon = createIcon({ path: <circle cx="12" cy="12" r="8" /> });
+
+test('custom SVGs inherit the control size unless given an explicit icon size', () => {
+	const { locator } = render(
+		<>
+			<IconLink aria-label="Plain" href="#" icon={<UnlabelledCustomIcon />} />
+			<IconLink aria-label="Created" href="#" icon={<CreatedIcon size="large" />} />
+		</>,
+	);
+
+	for (const [name, pixels] of [
+		['Plain', 16],
+		['Created', 32],
+	] as const) {
+		const svg = locator.getByRole('link', { name }).element().querySelector('svg')!;
+		const style = getComputedStyle(svg);
+		expect({ name, inline: style.inlineSize, block: style.blockSize }).toEqual({
+			name,
+			inline: `${pixels}px`,
+			block: `${pixels}px`,
+		});
+	}
+});
 
 function CustomStarIcon(): JSX.Element {
 	return (

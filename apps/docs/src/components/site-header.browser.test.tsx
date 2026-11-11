@@ -1,7 +1,5 @@
 import '../styles/app.css';
 import '@luke-ui/theme-tactile/stylesheet.css';
-import { Provider } from '@luke-ui/react/provider';
-import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import {
 	createMemoryHistory,
 	createRootRoute,
@@ -139,11 +137,9 @@ async function renderAt(pathname: string, children: ReactNode) {
 	const rootRoute = createRootRoute({
 		component: () => (
 			<RootProvider search={{ enabled: false }} theme={{ enabled: false }}>
-				<Provider spritesheetHref={spriteSheetHref}>
-					<DocsSearchProvider>
-						<DocsThemeRoot>{children}</DocsThemeRoot>
-					</DocsSearchProvider>
-				</Provider>
+				<DocsSearchProvider>
+					<DocsThemeRoot>{children}</DocsThemeRoot>
+				</DocsSearchProvider>
 			</RootProvider>
 		),
 	});

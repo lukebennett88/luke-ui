@@ -9,10 +9,6 @@ import {
 } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { cx } from '../../../shared/utils/utils.js';
-import { IconSizeProvider } from '../../icon/icon-size-context.js';
-import { Icon } from '../../icon/icon.js';
-import { COMBOBOX_CHECK_ICON_SIZE } from '../../sizing/combobox-sizing.js';
-import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
@@ -38,32 +34,11 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 
 	return (
 		<RacListBoxItem
-			// The children wrapper below is a render function, which disables RAC's
-			// own string-children textValue inference — so re-derive it here.
-			textValue={typeof itemProps.children === 'string' ? itemProps.children : undefined}
 			{...itemProps}
 			className={composeRenderProps(itemProps.className, (className) => {
 				return cx(comboboxItemClassName, comboboxRecipe({ size }).item({ className }));
 			})}
-		>
-			{composeRenderProps(itemProps.children, (children, { isSelected }) => {
-				// RAC renders item content outside this component's original tree.
-				// Put the provider inside the item render function so the content receives the context.
-				return (
-					<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
-						{children}
-						{isSelected ? (
-							<Icon
-								aria-hidden
-								className={comboboxRecipe().itemCheck()}
-								name="check"
-								size={COMBOBOX_CHECK_ICON_SIZE}
-							/>
-						) : null}
-					</IconSizeProvider>
-				);
-			})}
-		</RacListBoxItem>
+		/>
 	);
 }
 

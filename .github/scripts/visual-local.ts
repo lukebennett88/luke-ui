@@ -92,7 +92,7 @@ export function containerCommand(command: VisualLocalCommand): string {
 	return [
 		'set -euo pipefail',
 		'mkdir -p /work',
-		'tar -C /src --exclude=node_modules --exclude=.git --exclude=.artifacts --exclude=dist --exclude=.turbo --exclude=.source --exclude=.generated --exclude=.vite --exclude=.output --exclude=.cache --exclude=.vinxi --exclude=.tanstack --exclude=apps/docs/src/generated --exclude=apps/docs/src/routeTree.gen.ts --exclude=packages/@luke-ui/react/src/generated --exclude=packages/@luke-ui/react/public/icons --exclude=packages/@luke-ui/react/spritesheet.svg -cf - . | tar -C /work -xf -',
+		'tar -C /src --exclude=node_modules --exclude=.git --exclude=.artifacts --exclude=dist --exclude=.turbo --exclude=.source --exclude=.generated --exclude=.vite --exclude=.output --exclude=.cache --exclude=.vinxi --exclude=.tanstack --exclude=apps/docs/src/generated --exclude=apps/docs/src/routeTree.gen.ts --exclude=packages/@luke-ui/react/src/generated --exclude=packages/@luke-ui/react/public/icons -cf - . | tar -C /work -xf -',
 		'cd /work',
 		'mkdir -p /work/.artifacts',
 		'ln -sfn /artifacts /work/.artifacts/visual-regression',

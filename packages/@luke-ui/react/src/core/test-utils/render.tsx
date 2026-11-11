@@ -1,14 +1,12 @@
 /// <reference types="vite/client" />
 
 import '@luke-ui/react/stylesheet.css';
-import { Provider } from '@luke-ui/react/provider';
 import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
-import spritesheetHref from '../../../dist/spritesheet.svg?url';
 import type { FixtureThemeName } from './fixture-themes.js';
 import { fixtureThemeClassName } from './fixture-themes.js';
 import {
@@ -64,7 +62,7 @@ export function render(node: ReactNode, options?: { appearance?: VisualAppearanc
 
 	function rerender(next: ReactNode) {
 		act(() => {
-			root.render(<Provider spritesheetHref={spritesheetHref}>{next}</Provider>);
+			root.render(next);
 		});
 	}
 

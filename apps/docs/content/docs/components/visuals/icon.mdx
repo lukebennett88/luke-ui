@@ -1,21 +1,26 @@
 ---
 title: Icon
-description: SVG icon component backed by the generated spritesheet.
+description: Show an icon from the Luke UI icon set.
 source: packages/@luke-ui/react/src/exports/icon.ts
 ---
 
-`Icon` renders a symbol from the Luke UI spritesheet. `Provider` supplies its URL.
+`Icon` shows an icon from the Luke UI set. It takes the colour of the text around it.
 
 See [Iconography](/docs/iconography) for available icons, sizing, colour, and setup.
 
 <ExampleBlock src="icon/basic" layout="centered" title="Icon: Basic" />
 
-## Create a custom icon
+## Custom icons
 
-Use `createIcon` for a one-off icon that is not in the generated spritesheet. It returns a component
-with the same sizing and accessibility behaviour as `Icon`.
+Use `createIcon` for a one-off icon that is not in the set, such as a brand mark. It returns an SVG
+component with the same sizing and accessibility behaviour as `Icon`, including the size a control
+or `--luke-icon-size` sets.
 
 <ExampleBlock src="icon/custom" layout="centered" title="Icon: Custom" />
+
+To size an `<svg>` you render yourself, such as one from another icon library, pass `iconRecipe()`
+as its `className`. Then hide it with `aria-hidden` or name it with `role="img"` and `aria-label`
+yourself.
 
 ## Accessibility
 

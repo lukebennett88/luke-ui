@@ -1,8 +1,6 @@
 import '../styles/app.css';
 import '@luke-ui/theme-paper/stylesheet.css';
 import '@luke-ui/theme-tactile/stylesheet.css';
-import { Provider } from '@luke-ui/react/provider';
-import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { themeClassName as paperThemeClassName } from '@luke-ui/theme-paper';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/theme-tactile';
 import type { ReactNode } from 'react';
@@ -232,12 +230,7 @@ function renderTheme(children: ReactNode) {
 	root = createRoot(container);
 
 	act(() => {
-		root?.render(
-			// Mirrors `__root.tsx`: `ThemeControls` consumes the spritesheet through its icons.
-			<Provider spritesheetHref={spriteSheetHref}>
-				<DocsThemeRoot>{children}</DocsThemeRoot>
-			</Provider>,
-		);
+		root?.render(<DocsThemeRoot>{children}</DocsThemeRoot>);
 	});
 }
 

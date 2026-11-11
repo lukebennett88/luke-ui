@@ -1,6 +1,4 @@
 import { Box } from '@luke-ui/react/box';
-import { Provider } from '@luke-ui/react/provider';
-import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import type { ReactNode } from 'react';
 
 type Layout = 'flow' | 'centered' | 'full-bleed';
@@ -31,7 +29,7 @@ export function StoryWrapper({ children, layout = 'flow' }: StoryWrapperProps) {
 	const boxProps = layoutToBoxProps[layout];
 	return (
 		<Box overflow="auto" {...boxProps}>
-			<Provider spritesheetHref={spriteSheetHref}>{children}</Provider>
+			{children}
 		</Box>
 	);
 }

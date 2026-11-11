@@ -1,8 +1,6 @@
 import '../../styles/app.css';
 import '@luke-ui/theme-tactile/stylesheet.css';
 import { Prose } from '@luke-ui/react/prose';
-import { Provider } from '@luke-ui/react/provider';
-import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import {
 	createMemoryHistory,
 	createRootRoute,
@@ -182,11 +180,7 @@ test('names a wide table as a focusable region once it overflows', async () => {
 
 async function renderMdx(children: ReactNode) {
 	const rootRoute = createRootRoute({
-		component: () => (
-			<Provider spritesheetHref={spriteSheetHref}>
-				<DocsThemeRoot>{children}</DocsThemeRoot>
-			</Provider>
-		),
+		component: () => <DocsThemeRoot>{children}</DocsThemeRoot>,
 	});
 	const router = createRouter({
 		history: createMemoryHistory({ initialEntries: ['/docs/example'] }),

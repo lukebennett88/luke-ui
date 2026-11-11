@@ -102,7 +102,7 @@ source: packages/@luke-ui/react/src/exports/icon.ts
 
 ## Anatomy
 
-Icons reference the spritesheet.
+Icons follow the text colour.
 
 ## API
 
