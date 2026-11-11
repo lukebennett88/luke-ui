@@ -7,6 +7,9 @@ description: >-
 
 # Work on an issue
 
+When the task concerns ownership or dependencies, consult
+[Architecture](../../../docs/ARCHITECTURE.md).
+
 Use `git` and `gh` when they are available. Equivalent tools and connectors are fine.
 
 ## Authority

@@ -2,6 +2,7 @@
 
 Read the [root agent guide](../../../AGENTS.md) and the guides for the surface you change:
 
+- [Architecture](../../../docs/ARCHITECTURE.md): ownership and dependency boundaries.
 - [Conventions](../../../docs/CONVENTIONS.md): JS/TS/React, including exported prop types.
 - [Components](../../../docs/COMPONENTS.md): source structure, generators, and generated exports.
 - [Public API](../../../docs/PUBLIC_API.md): the consumer contract.
