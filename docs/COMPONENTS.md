@@ -64,8 +64,9 @@ dependency directions.
 
 A component directory contains `<component>.tsx`, `recipe.css.ts` for its public recipe,
 `styles.css.ts` when private styling is needed, and `<component>.browser.test.tsx` for behaviour,
-axe, and visual captures. Multi-part primitives keep a file per part. A primitive lives under its
-family directory in `primitive/`, alongside any composed control.
+axe, and visual captures. Multi-part primitives keep a file per part. New primitive scaffolds live
+under their family directory in `primitive/`, alongside any composed control. Existing families may
+still use `core/primitives/`.
 
 ### Generated exports
 
